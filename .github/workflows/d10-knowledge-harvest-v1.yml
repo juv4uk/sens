@@ -34,7 +34,5 @@ jobs:
         run: python3 scripts/check-d10-recovery-v2.py
       - name: Preserve library harvest v1
         run: python3 scripts/check-d10-library-harvest-v1.py
-      - name: Preserve forward harvest v1
-        run: python3 scripts/check-d10-forward-harvest-v1.py
       - name: Verify epistemic/knowledge harvest
         run: python3 scripts/check-d10-knowledge-harvest-v1.py

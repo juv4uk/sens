@@ -10,7 +10,7 @@
 //! the same packed payload; a grammar or explicit framing layer must supply
 //! widths when reconstruction requires them.
 
-use crate::{BinarySourceToken, BinarySourceWord, BitPacker, PackedBitstream};
+use crate::{domain_ladder::DomainCoordinate, BinarySourceToken, BinarySourceWord, BitPacker, PackedBitstream};
 
 /// Accounting for one canonical densely-packed semantic payload.
 ///
@@ -54,6 +54,52 @@ pub fn packed_transport_accounting(
         tail_unused_bits,
         total_wire_bits: physical_payload_bits + framing_bits,
     }
+}
+
+/// Pack exact D1–D10 coordinates with no interior byte padding.
+///
+/// Width is part of each validated coordinate. This operation does not infer
+/// a domain from a numeric byte, assign callable semantics, or define a
+/// standalone physical wire format; the decoder requires an external schedule.
+pub fn pack_domain_coordinates(coordinates: &[DomainCoordinate]) -> PackedBitstream {
+    let total_bits: usize = coordinates
+        .iter()
+        .map(|coordinate| usize::from(coordinate.width()))
+        .sum();
+    let mut packer = BitPacker::with_capacity_bits(total_bits);
+    for &coordinate in coordinates {
+        packer.push_coordinate(coordinate);
+    }
+    packer.finish()
+}
+
+/// Reconstruct exact D1–D10 coordinates using a caller-owned width schedule.
+///
+/// Reject invalid width, overflow, and incomplete or overlong schedules.
+/// W8 and D8 remain separate identity types; this function never interprets
+/// a byte as a historical function or a callable current resident.
+pub fn unpack_domain_coordinates(
+    packed: &PackedBitstream,
+    widths: &[u8],
+) -> Option<Vec<DomainCoordinate>> {
+    let expected_bits = widths.iter().try_fold(0usize, |total, &width| {
+        if !(1..=10).contains(&width) {
+            return None;
+        }
+        total.checked_add(usize::from(width))
+    })?;
+    if expected_bits != packed.bit_len() {
+        return None;
+    }
+
+    let mut coordinates = Vec::with_capacity(widths.len());
+    let mut offset = 0usize;
+    for &width in widths {
+        coordinates.push(packed.read_coordinate(offset, width)?);
+        offset += usize::from(width);
+    }
+    debug_assert_eq!(offset, packed.bit_len());
+    Some(coordinates)
 }
 
 /// Append one already-bounded source word to the current dense payload.
@@ -180,6 +226,85 @@ pub fn unpack_binary_source_words(
 mod tests {
     use super::*;
     use crate::parse_binary_source_words;
+
+    #[test]
+    fn domain_ladder_is_packed_at_exact_width_not_host_register_width() {
+        let coordinates: Vec<_> = (1..=10u8)
+            .map(|width| DomainCoordinate::new(width, (1u16 << width) - 1).unwrap())
+            .collect();
+        let packed = pack_domain_coordinates(&coordinates);
+        let widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
+        assert_eq!(packed.bit_len(), 55);
+        assert_eq!(packed.byte_len(), 7);
+        assert_eq!(packed.valid_bits_in_last_byte(), 7);
+        assert_eq!(packed.bytes()[6] & 1, 0);
+        assert_eq!(unpack_domain_coordinates(&packed, &widths), Some(coordinates));
+    }
+
+    #[test]
+    fn d1_d9_domain_coordinates_preserve_source_packer_bytes() {
+        let tokens = parse_binary_source_words(
+            "1 10 101 1010 10101 101010 1010101 10101010 100000001",
+        ).unwrap();
+        let coordinates: Vec<_> = tokens.iter().map(|token| {
+            DomainCoordinate::from_domain_identity(token.word.domain_identity())
+        }).collect();
+        let packed = pack_domain_coordinates(&coordinates);
+        assert!(packed == pack_binary_source_tokens(&tokens), "source and domain packers must emit identical physical bits");
+        assert_eq!(packed.bit_len(), 45);
+        assert_eq!(packed.byte_len(), 6);
+        let widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
+        assert_eq!(unpack_domain_coordinates(&packed, &widths), Some(coordinates));
+    }
+
+    #[test]
+    fn d10_high_bits_survive_cross_byte_without_aliasing_d8_d9() {
+        let coordinates = [
+            DomainCoordinate::new(7, 0b1010101).unwrap(),
+            DomainCoordinate::new(10, 0b11_1010_1000).unwrap(),
+            DomainCoordinate::new(8, 0b1010_1000).unwrap(),
+            DomainCoordinate::new(9, 0b1_1010_1000).unwrap(),
+        ];
+        let packed = pack_domain_coordinates(&coordinates);
+        assert_eq!(packed.bit_len(), 34);
+        assert_eq!(packed.byte_len(), 5);
+        assert_eq!(
+            unpack_domain_coordinates(&packed, &[7, 10, 8, 9]),
+            Some(coordinates.to_vec())
+        );
+        assert_ne!(coordinates[1], coordinates[2]);
+        assert_ne!(coordinates[1], coordinates[3]);
+    }
+
+    #[test]
+    fn exact_domain_decoder_rejects_invalid_or_incomplete_width_schedule() {
+        let coordinates = [
+            DomainCoordinate::new(3, 0b101).unwrap(),
+            DomainCoordinate::new(10, 0b11_0000_0001).unwrap(),
+        ];
+        let packed = pack_domain_coordinates(&coordinates);
+        assert_eq!(packed.bit_len(), 13);
+        assert!(unpack_domain_coordinates(&packed, &[0, 10, 3]).is_none());
+        assert!(unpack_domain_coordinates(&packed, &[3, 11]).is_none());
+        assert!(unpack_domain_coordinates(&packed, &[3]).is_none());
+        assert!(unpack_domain_coordinates(&packed, &[3, 9]).is_none());
+        assert!(unpack_domain_coordinates(&packed, &[3, 10, 1]).is_none());
+        assert_eq!(unpack_domain_coordinates(&packed, &[3, 10]), Some(coordinates.to_vec()));
+        let empty = pack_domain_coordinates(&[]);
+        assert_eq!(empty.bit_len(), 0);
+        assert_eq!(unpack_domain_coordinates(&empty, &[]), Some(vec![]));
+    }
+
+    #[test]
+    fn raw_payload_cannot_determine_domain_boundaries() {
+        let a = [DomainCoordinate::new(1, 0).unwrap(), DomainCoordinate::new(2, 0).unwrap()];
+        let b = [DomainCoordinate::new(3, 0).unwrap()];
+        let packed = pack_domain_coordinates(&a);
+        assert!(packed == pack_domain_coordinates(&b), "equal bits with distinct schedules share payload, not identity");
+        assert_eq!(unpack_domain_coordinates(&packed, &[1, 2]), Some(a.to_vec()));
+        assert_eq!(unpack_domain_coordinates(&packed, &[3]), Some(b.to_vec()));
+        assert_ne!(a[0], b[0]);
+    }
 
     #[test]
     fn semantic_source_measure_counts_d2_structure_and_d3_word() {

@@ -2,7 +2,7 @@
 """Generate and verify D7 display-only projection from ratified SENS tables.
 
 No D7 function names or executable dispatch are generated: these are
-human-readable UK/Sanskrit renderings for already-width-qualified D7 values.
+human-readable Ukrainian/Sanskrit/English views for already-width-qualified D7 values.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY = ROOT / "knowledge/d7-ratified.json"
@@ -42,18 +43,19 @@ def check_rows():
         and {row.bits for row in rows} == residents
     ):
         raise ValueError("D7 resident/reserved coordinates do not match owner authority")
+    codec = current_codec()
     for row in rows:
-        if not row.uk or not row.san:
-            raise ValueError(f"D7:{row.bits}: missing human display names")
         if row.lisp is not None:
             raise ValueError(f"D7:{row.bits}: sound/text must not become a Lisp function")
-        if row.en != authority["residents"][row.bits]:
-            raise ValueError(f"D7:{row.bits}: role label drift")
+        for name, field in (("ук", "uk"), ("укр", "ukr"),
+                            ("san", "san"), ("en", "en"), ("sym", "sym")):
+            if getattr(row, field) != codec.glyph(row.bits, name):
+                raise ValueError(f"D7:{row.bits}: {name} glyph differs from owner codec")
     return rows
 
 
-def rust_string(text: str) -> str:
-    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+def rust_string(text: str | None) -> str:
+    return "None" if text is None else f"Some({json.dumps(text, ensure_ascii=False)})"
 
 
 def generated_source(rows) -> str:
@@ -66,16 +68,25 @@ def generated_source(rows) -> str:
         "#[derive(Clone, Copy)]",
         "pub(super) struct D7DisplayRow {",
         "    pub(super) bits: u8,",
-        "    pub(super) uk: &'static str,",
-        "    pub(super) sa: &'static str,",
+        "    pub(super) uk: Option<&'static str>,",
+        "    pub(super) sa: Option<&'static str>,",
+        "    pub(super) deva: Option<&'static str>,",
+        "    pub(super) slp1: Option<&'static str>,",
+        "    pub(super) en: Option<&'static str>,",
+        "    pub(super) en_ipa: Option<&'static str>,",
         "}",
         "",
         "pub(super) const D7_DISPLAY_ROWS: &[D7DisplayRow] = &[",
     ]
+    codec = current_codec()
     for row in rows:
         lines.append(
             f"    D7DisplayRow {{ bits: 0b{row.bits}, "
-            f"uk: {rust_string(row.uk)}, sa: {rust_string(row.san)} }},"
+            f"uk: {rust_string(row.uk)}, sa: {rust_string(row.san)}, "
+            f"deva: {rust_string(codec.glyph(row.bits, 'sa-deva'))}, "
+            f"slp1: {rust_string(codec.glyph(row.bits, 'sa-slp1'))}, "
+            f"en: {rust_string(row.en)}, "
+            f"en_ipa: {rust_string(codec.glyph(row.bits, 'en-ipa'))} }},"
         )
     lines.append("];")
     return "\n".join(lines) + "\n"

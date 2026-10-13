@@ -14,10 +14,11 @@ import re
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import D7CodecError, current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY = ROOT / "knowledge/d7-ratified.json"
-NAMESPACES = ("ук", "укр", "san", "en", "sym")
+NAMESPACES = ("ук", "укр", "san", "en", "en-ipa", "sym", "slp1")
 EXACT_W7 = re.compile(r"[01]{7}\Z")
 
 
@@ -37,9 +38,14 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
         or pins != {"0100001", "0101010"}
         or pins.intersection(by_coordinate)):
         raise D7ProjectionError("D7 Lisp table and owner-ratified residency diverged")
+    codec = current_codec()
     for bits, row in by_coordinate.items():
-        if row.en != owner["residents"][bits] or row.lisp is not None:
-            raise D7ProjectionError(f"D7:{bits} changed or minted a Lisp callable")
+        if row.lisp is not None:
+            raise D7ProjectionError(f"D7:{bits} minted a Lisp callable")
+        for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
+                            ("en", "en"), ("sym", "sym")):
+            if getattr(row, field) != codec.glyph(bits, name):
+                raise D7ProjectionError(f"D7:{bits} {name} glyph differs from ratified projection")
     evidence = {item["coordinate"]: item for item in owner["rows"]}
     if len(evidence) != 128:
         raise D7ProjectionError("D7 owner evidence must cover all 128 coordinates")
@@ -83,17 +89,18 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
     if row is None:
         raise D7ProjectionError(f"D7:{bits} is reserved; owner admission required")
     owner = evidence[bits]
-    # Lisp columns use ук/укр; the structural table reader exposes uk/ukr.
-    # Namespaces are presentation only, never the coordinate authority.
-    field = {"ук": "uk", "укр": "ukr"}.get(namespace, namespace)
-    surface = getattr(row, field)
-    if surface is None:
-        raise D7ProjectionError(f"D7:{bits} has no {namespace} projection")
+    # Surface MUST be a real symbol chosen by surface (not a phonetic
+    # description, not a translated report name). Missing symbol stays None.
+    try:
+        glyph = current_codec().glyph(bits, namespace)
+    except D7CodecError as exc:
+        raise D7ProjectionError(str(exc)) from exc
     return {
         "domain": "D7", "coordinate": bits, "width": 7,
         "role": "sound-text", "semantic_role": owner["semantic_role"],
         "status": "OWNER-RATIFIED", "namespace": namespace,
-        "surface": surface, "callable": False, "arithmetic_number": False,
+        "surface": glyph, "symbol": glyph, "report_name": owner["report_name"],
+        "callable": False, "arithmetic_number": False,
     }
 
 

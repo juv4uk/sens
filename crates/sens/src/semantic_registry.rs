@@ -37,7 +37,7 @@ mod d9_definition_bindings_generated {
 
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
-use domain_surface_generated::DOMAIN_SURFACE_ROWS;
+use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
@@ -46,20 +46,10 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 /// and no W8 payload can be implicitly promoted to a current D8 resident.
 pub(crate) type LegacyRegistrySlot = Sens8;
 
-fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
-    // Канонічний маршрут: точне слово драбини → домен → допущений механізм.
-    // Ні ширина сама по собі, ні старий байт не створюють callable identity.
-    use crate::BinarySourceWord;
-    let source = match width {
-        3 => BinarySourceWord::W3(Bit3::new(bits)?),
-        4 => BinarySourceWord::W4(Bit4::new(bits)?),
-        5 => BinarySourceWord::W5(Bit5::new(bits)?),
-        6 => BinarySourceWord::W6(crate::Bit6::new(bits)?),
-        _ => return None,
-    };
-    CoreDomainIdentity::from_source_word(source)
-}
-
+/// Convert only explicit generated D3–D6 coordinates into resident identity.
+///
+/// No W8 slot, packed payload, or name may select the width. Higher domains
+/// require their own generated coordinate authority (never an implicit lift).
 fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
     use crate::BinarySourceWord;
     let source = match width {
@@ -72,24 +62,67 @@ fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainId
     Some(DomainIdentity::from_source_word(source))
 }
 
-/// Direct D3/D4/D5 human-surface projection.
-///
-/// This path consumes the exact-domain projection generated from
-/// lib/domains/d1.lisp ... lib/domains/d5.lisp. It never consults a historical
-/// packed byte to recover domain identity.
-fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
-        let matches_human_surface = row.source_routable
-            && row
-                .surfaces
-                .iter()
-                .any(|surface| matches!(surface.namespace, "uk" | "sa" | "en") && surface.name == name);
-        matches_human_surface
-            .then(|| exact_domain_identity_from_projection(row.width, row.bits))
-            .flatten()
-    })
+/// A stable source name has either exactly one domain-qualified coordinate or
+/// none. Conflicts are terminal: a third equal row must not re-admit a name
+/// that was already ambiguous between two widths or two bit patterns.
+#[derive(Default)]
+struct ExactDomainSourceIndex {
+    all: HashMap<&'static str, Option<DomainIdentity>>,
+    uk: HashMap<&'static str, Option<DomainIdentity>>,
 }
- 
+
+fn insert_exact_source(
+    index: &mut HashMap<&'static str, Option<DomainIdentity>>,
+    name: &'static str,
+    identity: Option<DomainIdentity>,
+) {
+    use std::collections::hash_map::Entry;
+    match index.entry(name) {
+        Entry::Vacant(slot) => {
+            slot.insert(identity);
+        }
+        Entry::Occupied(mut slot) => {
+            if *slot.get() != identity {
+                slot.insert(None);
+            }
+        }
+    }
+}
+
+/// Build from the Lisp-owned ratified generated table only.
+///
+/// A malformed generated coordinate is rejected just like a collision. The
+/// Ukrainian exact-source index stays separate from the language projections:
+/// historical W8 and the English compatibility registry cannot authorize a
+/// new executable source head.
+fn build_exact_source_index(rows: &[DomainSurfaceRow]) -> ExactDomainSourceIndex {
+    let mut index = ExactDomainSourceIndex::default();
+    for row in rows.iter().filter(|row| row.source_routable) {
+        let identity = exact_domain_resident_from_projection(row.width, row.bits);
+        for surface in row.surfaces.iter() {
+            if !matches!(surface.namespace, "uk" | "sa" | "en") {
+                continue;
+            }
+            insert_exact_source(&mut index.all, surface.name, identity);
+            if surface.namespace == "uk" {
+                insert_exact_source(&mut index.uk, surface.name, identity);
+            }
+        }
+    }
+    index
+}
+
+fn exact_source_index() -> &'static ExactDomainSourceIndex {
+    static INDEX: OnceLock<ExactDomainSourceIndex> = OnceLock::new();
+    INDEX.get_or_init(|| build_exact_source_index(DOMAIN_SURFACE_ROWS))
+}
+
+/// Source human names select only the exact D3/D4/D5/D6 projection.
+/// A name conflict cannot silently pick the first generated row.
+fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
+    exact_source_index().all.get(name).copied().flatten()?.core_operation()
+}
+
 /// Сумісний SID лише знаходить рядок surface-реєстру; координату D3
 /// встановлює виключно ратифікована доменна таблиця. Немає збігу або
 /// кілька різних координат — fail-closed, жодної таблиці SID→роль у Rust.
@@ -129,15 +162,7 @@ pub(crate) fn compatibility_d3_route_from_ratified_domains(
 /// unratified D7 binder can become a callable head via this API.
 /// The mixed reader applies it only to executable HEAD positions.
 pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
-    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
-        if !row.source_routable
-            || !row.surfaces.iter().any(|surface|
-                surface.namespace == "uk" && surface.name == name)
-        {
-            return None;
-        }
-        exact_domain_resident_from_projection(row.width, row.bits)
-    })
+    exact_source_index().uk.get(name).copied().flatten()
 }
 
 
@@ -176,6 +201,53 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     direct_domain_identity_for_surface(name)
 }
 
+/// D7 Ukrainian keyboard projection for the physical T5 text boundary.
+/// No semantic role is inferred from equal bits in D2/another width.
+pub(crate) fn d7_uk_keyboard_glyph(cell: u8) -> Option<&'static str> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .find(|row| row.bits == cell)
+        .and_then(|row| row.uk)
+}
+
+/// Text-only sound/symbol display; never a callable source-name lookup.
+/// Sanskrit IAST and English IPA are separate views of SAME ratified D7 bits.
+pub(crate) fn d7_text_surface_glyph(cell: u8, layout: &str) -> Option<&'static str> {
+    let row = D7_DISPLAY_ROWS.iter().find(|row| row.bits == cell)?;
+    match layout {
+        "iast" => row.sa,
+        "deva" => row.deva,
+        "slp1" => row.slp1,
+        "en" => row.en,
+        "en-ipa" => row.en_ipa,
+        _ => None,
+    }
+}
+
+pub(crate) fn d7_text_surface_longest_prefix(rest: &str, layout: &str) -> Option<(usize, u8)> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .filter_map(|row| {
+            let spelling = match layout {
+                "iast" => row.sa,
+                "deva" => row.deva,
+                "slp1" => row.slp1,
+                "en" => row.en,
+                "en-ipa" => row.en_ipa,
+                _ => None,
+            }?;
+            rest.starts_with(spelling).then_some((spelling.len(), row.bits))
+        })
+        .max_by_key(|(length, _)| *length)
+}
+
+pub(crate) fn d7_uk_keyboard_cell(glyph: &str) -> Option<u8> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .find(|row| row.uk == Some(glyph))
+        .map(|row| row.bits)
+}
+
 pub(crate) fn surface_for_domain_identity(
     identity: DomainIdentity,
     namespace: &str,
@@ -187,8 +259,10 @@ pub(crate) fn surface_for_domain_identity(
             u16::from(row.bits) == identity.packed_bits()
         )?;
         return match namespace {
-            "uk" => Some(row.uk),
-            "sa" => Some(row.sa),
+            "uk" => row.uk,
+            "sa" => row.sa,
+            "en" => row.en,
+            "en-ipa" => row.en_ipa,
             _ => None,
         };
     }
@@ -414,5 +488,101 @@ mod exact_d3_compatibility_migration_tests {
                 Sens8::from_packed_byte(byte)
             ).is_none());
         }
+    }
+}
+
+#[cfg(test)]
+mod domain_source_projection_anti_collision_tests {
+    use super::*;
+    use super::domain_surface_generated::DomainSurfaceName;
+
+    static SHARED_UK: [DomainSurfaceName; 1] = [DomainSurfaceName {
+        namespace: "uk",
+        name: "однакова-назва",
+    }];
+    static AMBIGUOUS_SANSKRIT: [DomainSurfaceName; 1] = [DomainSurfaceName {
+        namespace: "sa",
+        name: "eka",
+    }];
+
+    #[test]
+    fn different_d3_and_d4_coordinates_with_same_name_fail_closed_in_either_order() {
+        let d3 = DomainSurfaceRow {
+            width: 3, bits: 0b001, source_routable: true, surfaces: &SHARED_UK,
+        };
+        let d4 = DomainSurfaceRow {
+            width: 4, bits: 0b0001, source_routable: true, surfaces: &SHARED_UK,
+        };
+        // The low numeric payload is equal. The domain widths are not.
+        for rows in [[d3, d4, d3], [d4, d3, d4]] {
+            let index = build_exact_source_index(&rows);
+            assert_eq!(index.all.get("однакова-назва"), Some(&None));
+            assert_eq!(index.uk.get("однакова-назва"), Some(&None));
+        }
+    }
+
+    #[test]
+    fn invalid_width_or_payload_cannot_become_a_callable_d3_word() {
+        let invalid_width = DomainSurfaceRow {
+            width: 8, bits: 0b001, source_routable: true, surfaces: &SHARED_UK,
+        };
+        let invalid_payload = DomainSurfaceRow {
+            width: 3, bits: 0b1000, source_routable: true, surfaces: &AMBIGUOUS_SANSKRIT,
+        };
+        let index = build_exact_source_index(&[invalid_width, invalid_payload]);
+        assert_eq!(index.all.get("однакова-назва"), Some(&None));
+        assert_eq!(index.all.get("eka"), Some(&None));
+        assert_eq!(index.uk.get("однакова-назва"), Some(&None));
+        assert!(!index.uk.contains_key("eka"));
+    }
+
+    #[test]
+    fn every_ratified_source_row_keeps_exact_width_and_bit_identity() {
+        let index = build_exact_source_index(DOMAIN_SURFACE_ROWS);
+        let mut rows_checked = 0usize;
+        let mut surfaces_checked = 0usize;
+        for row in DOMAIN_SURFACE_ROWS.iter().filter(|row| row.source_routable) {
+            rows_checked += 1;
+            let expected = exact_domain_resident_from_projection(row.width, row.bits)
+                .expect("source-routable D3–D6 row must have a valid exact word");
+            assert_eq!(expected.width(), usize::from(row.width));
+            assert_eq!(expected.packed_bits(), u16::from(row.bits));
+            for surface in row.surfaces.iter() {
+                if !matches!(surface.namespace, "uk" | "sa" | "en") {
+                    continue;
+                }
+                surfaces_checked += 1;
+                assert_eq!(
+                    index.all.get(surface.name).copied().flatten(),
+                    Some(expected),
+                    "a generated surface lost its exact domain identity"
+                );
+                if surface.namespace == "uk" {
+                    assert_eq!(index.uk.get(surface.name).copied().flatten(), Some(expected));
+                } else {
+                    assert!(!index.uk.contains_key(surface.name));
+                }
+                assert_eq!(
+                    domain_identity_for_surface(surface.name),
+                    expected.core_operation(),
+                    "only admitted domain mechanisms may be callable"
+                );
+            }
+        }
+        assert_eq!(rows_checked, 119);
+        assert_eq!(surfaces_checked, 238);
+    }
+
+    #[test]
+    fn never_route_d1_d2_or_historical_w8_from_domain_surface_index() {
+        let index = exact_source_index();
+        for name in ["ні", "так", "відкрити", "закрити", "пропуск", "крапка"] {
+            assert!(!index.all.contains_key(name));
+            assert_eq!(direct_domain_identity_for_surface(name), None);
+        }
+        assert_eq!(direct_domain_identity_for_surface("def"), None);
+        assert_eq!(direct_domain_identity_for_surface("00000001"), None);
+        assert_eq!(direct_domain_identity_for_surface("атом?").map(|d| d.width()), Some(3));
+        assert_eq!(direct_domain_identity_for_surface("як-є").map(|d| d.packed_bits()), Some(0b001));
     }
 }

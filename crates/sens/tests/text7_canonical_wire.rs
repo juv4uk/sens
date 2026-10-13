@@ -14,11 +14,13 @@ use sens::{
     Text7, Text7Layout, Text7WireError, Value,
 };
 
-const LAYOUTS: [Text7Layout; 4] = [
+const LAYOUTS: [Text7Layout; 6] = [
     Text7Layout::Uk,
     Text7Layout::SaSlp1,
     Text7Layout::SaIast,
     Text7Layout::SaDeva,
+    Text7Layout::En,
+    Text7Layout::EnIpa,
 ];
 
 fn cells(values: &[u8]) -> Text7 {

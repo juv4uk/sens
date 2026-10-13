@@ -7,6 +7,7 @@ if not __debug__:
     raise SystemExit("D7-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import current_codec
 
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d7-ratified.json").read_text(encoding="utf-8"))
@@ -91,13 +92,15 @@ assert len(table_rows) == d["occupancy"] == 126
 assert projected_bits == sorted(ratified_bits), "D7 surface coordinate drift"
 assert not (set(projected_bits) & set(d["reserved_coordinates"]))
 assert len({row.bits for row in table_rows}) == len(table_rows)
+codec = current_codec()
 for row in table_rows:
     assert row.width == 7 and len(row.bits) == 7
-    assert row.en == d["residents"][row.bits], f"D7:{row.bits} owner map mismatch"
     assert row.lisp is None, f"D7:{row.bits} must not mint a Lisp callable"
-    assert all(getattr(row, key) for key in ("uk", "ukr", "san")), (
-        f"D7:{row.bits} missing human projection"
-    )
+    for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
+                        ("en", "en"), ("sym", "sym")):
+        assert getattr(row, field) == codec.glyph(row.bits, name), (
+            f"D7:{row.bits}: {name} is not its surface-specific glyph"
+        )
 
 # The row-wise evidence must stay a one-to-one projection of the ratified
 # coordinates, not an alternative Rust/reader-generated semantic registry.
@@ -106,7 +109,6 @@ assert len(authority_rows) == len(d["rows"]) == 128
 for row in table_rows:
     owner = authority_rows[row.bits]
     assert owner["status"] == "OWNER-RATIFIED"
-    assert owner["report_name"] == row.en
 for reserved in d["reserved_coordinates"]:
     assert authority_rows[reserved]["status"] != "OWNER-RATIFIED"
 
@@ -144,12 +146,11 @@ for bits,body in surface_rows:
         assert body.count(f"({name} ")==1, f"D7:{bits} missing or duplicated {name}"
     labels=re.findall(r"\((ук|укр|san|en|LISP|sym) ",body)
     assert tuple(labels)==expected_columns, f"D7:{bits} surface column order changed"
-    en=re.search(r"\(en ([^()]*)\)",body)
-    assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
     assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
-    if en.group(1).startswith("text.digit."):
-        glyph=re.search(r"\(sym ([0-9])\)$",body)
-        assert glyph is not None and glyph.group(1)==en.group(1).rsplit(".",1)[1], (
+    semantic_role = d["residents"][bits]
+    if semantic_role.startswith("text.digit."):
+        glyph = re.search(r'\(sym "?([0-9])"?\)$', body)
+        assert glyph is not None and glyph.group(1) == semantic_role.rsplit(".", 1)[1], (
             f"D7:{bits} text digit glyph drifted from ratified digit identity"
         )
 

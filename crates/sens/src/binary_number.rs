@@ -244,20 +244,19 @@ impl BinaryNumber {
     /// a new host semantic Rational, a language expression, binary opcode or
     /// evidence of callable signed/rational arithmetic. Caller must collapse
     /// p=0 to numeric zero and q=1 to an integer under the ratified law.
-    /// Input domain identities remain untouched (including mixed D24/D48).
+    /// Numerator and denominator MUST already have the exact same Dn.
+    /// A matching magnitude is not permission to bridge D24 and D48.
     pub fn reduce_numeric_domain_ratio_parts(
         numerator: &Self,
         denominator: &Self,
     ) -> Option<(Self, Self)> {
-        let n_width = numerator.numeric_domain_width?;
-        let d_width = denominator.numeric_domain_width?;
-        if denominator.is_zero() {
+        let width = numerator.numeric_domain_width?;
+        if denominator.numeric_domain_width != Some(width) || denominator.is_zero() {
             return None;
         }
 
-        // Existing bit algorithms compare unqualified magnitudes. Their
-        // temporary normalized carriers are strictly private mechanisms:
-        // comparing qualified D24 and D48 identities is not magnitude order.
+        // Exact gcd uses private unqualified magnitudes only AFTER same-Dn
+        // admission. The public result reattaches that very same domain.
         let n = Self::normalize(numerator.bits.clone());
         let d = Self::normalize(denominator.bits.clone());
         let divisor = n.gcd(&d);
@@ -271,7 +270,7 @@ impl BinaryNumber {
             exact.extend_from_slice(number.as_bits());
             Self::from_numeric_domain_bits(domain_width, &exact)
         };
-        Some((fill(n_reduced, n_width)?, fill(d_reduced, d_width)?))
+        Some((fill(n_reduced, width)?, fill(d_reduced, width)?))
     }
 
     /// Exact arbitrary-width binary addition. No host numeric value is used.
@@ -418,15 +417,16 @@ impl BinaryNumber {
     /// zero-filled to the selected domain's FULL width (not normalized).
     /// The (width, bits) pair is a mechanism boundary, not itself a SENS
     /// language value; generic mixed-domain coercion remains unratified.
+    /// Both arguments MUST already carry the same explicit Dn identity.
+    /// Passing a width alone must not promote an unqualified historical Number.
     pub fn add_in_numeric_domain(
         &self,
         other: &Self,
         input_domain_width: usize,
     ) -> Option<(usize, Vec<u8>)> {
-        if !self.fits_ratified_width(input_domain_width)
-            || !other.fits_ratified_width(input_domain_width)
-            || self.numeric_domain_width.is_some_and(|d| d != input_domain_width)
-            || other.numeric_domain_width.is_some_and(|d| d != input_domain_width)
+        if !Self::is_numeric_domain_width(input_domain_width)
+            || self.numeric_domain_width != Some(input_domain_width)
+            || other.numeric_domain_width != Some(input_domain_width)
         {
             return None;
         }
@@ -590,8 +590,9 @@ mod tests {
 
     #[test]
     fn numeric_domain_addition_carries_d24_into_d48_without_truncation() {
-        // Inputs are direct bits with explicit domain width, not literals.
-        let max = BinaryNumber::from_bits(vec![1; 24]).unwrap();
+        // The number must already carry D24 identity; a width parameter
+        // must never admit an old unqualified number after the fact.
+        let max = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
         let (width, exact_bits) = max.add_in_numeric_domain(&max, 24).unwrap();
         assert_eq!(width, 48);
         assert_eq!(exact_bits.len(), 48);
@@ -604,7 +605,9 @@ mod tests {
         assert_eq!(magnitude.to_decimal_string(), (2u64 * ((1u64 << 24) - 1)).to_string());
 
         // Carry must not trigger promotion when a same-domain sum still fits.
-        let one = BinaryNumber::one();
+        let mut one_word = vec![0; 24];
+        one_word[23] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(24, &one_word).unwrap();
         let (small_width, small_bits) = one.add_in_numeric_domain(&one, 24).unwrap();
         assert_eq!(small_width, 24);
         assert_eq!(small_bits.len(), 24);
@@ -615,7 +618,7 @@ mod tests {
     #[test]
     fn numeric_domain_addition_widens_unbounded_rungs_and_rejects_bad_domains() {
         for width in [24, 48, 96, 192, 384, 768] {
-            let max = BinaryNumber::from_bits(vec![1; width]).unwrap();
+            let max = BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap();
             let (target_width, result) = max.add_in_numeric_domain(&max, width).unwrap();
             assert_eq!(target_width, width * 2);
             assert_eq!(result.len(), target_width);
@@ -624,12 +627,44 @@ mod tests {
             assert_eq!(result[2 * width - 1], 0);
             assert!(max.fits_ratified_width(width));
         }
-        let one = BinaryNumber::one();
+        let mut one_word = vec![0; 24];
+        one_word[23] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(24, &one_word).unwrap();
         for invalid_width in [0, 1, 23, 25, 47, 72, 192 + 1] {
             assert_eq!(one.add_in_numeric_domain(&one, invalid_width), None);
         }
         let wide = BinaryNumber::from_bits(vec![1; 25]).unwrap();
         assert_eq!(wide.add_in_numeric_domain(&one, 24), None);
+    }
+
+    #[test]
+    fn width_argument_never_admits_historical_unqualified_numbers() {
+        for width in [24usize, 48, 96, 192] {
+            let unqualified = BinaryNumber::one();
+            let mut exact_one = vec![0; width];
+            exact_one[width - 1] = 1;
+            let qualified = BinaryNumber::from_numeric_domain_bits(width, &exact_one).unwrap();
+
+            assert_eq!(unqualified.add_in_numeric_domain(&unqualified, width), None);
+            assert_eq!(unqualified.add_in_numeric_domain(&qualified, width), None);
+            assert_eq!(qualified.add_in_numeric_domain(&unqualified, width), None);
+            let unqualified_zero = BinaryNumber::zero();
+            assert_eq!(unqualified_zero.add_in_numeric_domain(&qualified, width), None);
+            assert_eq!(qualified.add_in_numeric_domain(&unqualified_zero, width), None);
+            let (result_width, result_bits) =
+                qualified.add_in_numeric_domain(&qualified, width).unwrap();
+            assert_eq!(result_width, width);
+            assert_eq!(result_bits.len(), width);
+            assert!(result_bits[..width - 2].iter().all(|&bit| bit == 0));
+            assert_eq!(&result_bits[width - 2..], &[1, 0]);
+        }
+        let d24 = BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap();
+        let d48 = BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).unwrap();
+        assert_eq!(d24.add_in_numeric_domain(&d48, 24), None);
+        assert_eq!(d24.add_in_numeric_domain(&d48, 48), None);
+        assert_eq!(d48.add_in_numeric_domain(&d24, 24), None);
+        assert_eq!(d48.add_in_numeric_domain(&d24, 48), None);
+        assert_eq!(d24.add_in_numeric_domain(&d24, 48), None);
     }
 
     #[test]
@@ -782,32 +817,52 @@ mod tests {
             }
             BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
         };
-        let two = admitted(24, 2);
-        let four = admitted(48, 4);
-        let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &four).unwrap();
-        assert_eq!(n.to_decimal_string(), "1");
-        assert_eq!(d.to_decimal_string(), "2");
-        assert_eq!(n.numeric_domain_width(), Some(24));
-        assert_eq!(d.numeric_domain_width(), Some(48));
-        assert_eq!(n.exact_numeric_domain_bits().unwrap().len(), 24);
-        assert_eq!(d.exact_numeric_domain_bits().unwrap().len(), 48);
-        assert_eq!(n, admitted(24, 1));
-        assert_eq!(d, admitted(48, 2));
+        for width in [24usize, 48, 96, 192, 384] {
+            let two = admitted(width, 2);
+            let four = admitted(width, 4);
+            let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &four)
+                .expect("same-Dn reduced RATIO");
+            assert_eq!(n, admitted(width, 1));
+            assert_eq!(d, admitted(width, 2));
+            assert_eq!(n.numeric_domain_width(), Some(width));
+            assert_eq!(d.numeric_domain_width(), Some(width));
+            assert_eq!(n.exact_numeric_domain_bits().unwrap().len(), width);
+            assert_eq!(d.exact_numeric_domain_bits().unwrap().len(), width);
 
-        let zero = admitted(24, 0);
-        let five = admitted(48, 5);
-        let (zn, zd) = BinaryNumber::reduce_numeric_domain_ratio_parts(&zero, &five).unwrap();
-        assert!(zn.is_zero());
-        assert_eq!(zd, admitted(48, 1)); // zero ratio collapses to zn in D24.
-        let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &admitted(24, 15), &admitted(48, 3)).unwrap();
-        assert_eq!(an, admitted(24, 5));
-        assert_eq!(ad, admitted(48, 1)); // unit denominator collapses to integer.
-        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &admitted(24, 0)).is_none());
+            let zero = admitted(width, 0);
+            let five = admitted(width, 5);
+            let (zn, zd) = BinaryNumber::reduce_numeric_domain_ratio_parts(&zero, &five)
+                .expect("same-Dn zero numerator");
+            assert_eq!(zn, zero);
+            assert_eq!(zd, admitted(width, 1)); // Canonical Value collapses zero.
+            let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &admitted(width, 15), &admitted(width, 3))
+                .expect("same-Dn unit denominator");
+            assert_eq!(an, admitted(width, 5));
+            assert_eq!(ad, admitted(width, 1));
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &two, &zero).is_none(), "D{width}: division by zero must fail");
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &BinaryNumber::one(), &four).is_none());
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &two, &BinaryNumber::one()).is_none());
+        }
+        for (numerator, denominator) in [
+            (admitted(24, 2), admitted(48, 4)),
+            (admitted(48, 2), admitted(24, 4)),
+            (admitted(24, 0), admitted(48, 5)),
+            (admitted(48, 0), admitted(24, 5)),
+            (admitted(24, 15), admitted(48, 3)),
+            (admitted(48, 15), admitted(24, 3)),
+        ] {
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &numerator, &denominator).is_none(),
+                "mixed exact Dn identities are not a rational composition");
+        }
         assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &BinaryNumber::parse("10").unwrap(), &four).is_none());
-        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &two, &BinaryNumber::parse("100").unwrap()).is_none());
+            &BinaryNumber::parse("10").unwrap(),
+            &BinaryNumber::parse("100").unwrap(),
+        ).is_none(), "two unqualified Number values are not D24+");
     }
 
     #[test]

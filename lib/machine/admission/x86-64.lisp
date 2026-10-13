@@ -222,16 +222,16 @@
     ; on valid strings. Keep these calls within the machine-source compatibility
     ; boundary; do not lift them to D9 without expanding the reader's scope.
     (110
-      ((110011100 text) (010 (001 (00000000))))
+      ((110011100 text) (010 (001 (000))))
       ((101 (110101011 text) "/")
        ((0010 (rest)
          (110
-           ((110011100 rest) (010 (001 (00000000))))
+           ((110011100 rest) (010 (001 (000))))
            ((101 (110101011 rest) "1")
             (110
               ((110011100 (110011101 rest)) (010 (001 ())))
-              ((101 0 0) (010 (001 (00000000))))))
-           ((101 0 0) (010 (001 (00000000))))))
+              ((101 0 0) (010 (001 (000))))))
+           ((101 0 0) (010 (001 (000))))))
         (110011101 text)))
       ((101 0 0)
        (x86-admission-wire-denominator-one? (110011101 text))))))
@@ -241,7 +241,7 @@
       (110
         ((110101010 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
-        ((101 0 0) (010 (001 (00000000))))))
+        ((101 0 0) (010 (001 (000))))))
       (11110100 value))))
 (0011 x86-admission-within-inclusive-integer-range?
   (0010 (value lower upper)
@@ -254,9 +254,9 @@
          ((0100 (11011 value upper))
           (010 (001 ())))
          ((010 (001 ()))
-          (010 (001 (00000000))))))
+          (010 (001 (000))))))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 ; disp8 is a finite x86 machine field, so admission reuses the
 ; Lisp-owned exhaustive encoder table instead of treating this bound check
@@ -268,28 +268,28 @@
     (110
       ((x86-admission-exact-integer? value)
        (0100 (101 (x86-disp8-byte value) (001 ()))))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 (0011 x86-admission-imm32?
   (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 (0011 x86-admission-uimm8?
   (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value 0 255))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 (0011 x86-admission-rel32?
   (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 ; `immediate`, `register`, and `disp8` are operand-slot wildcards, not
 ; opcode wildcards. `register` only admits the 16 GPR names x86-reg-code
@@ -308,54 +308,54 @@
           (110
             ((010 form)
              (110
-               ((0101 (x86-reg-code form)) (010 (001 (00000000))))
+               ((0101 (x86-reg-code form)) (010 (001 (000))))
                ((010 (x86-reg-code form))
                 (010 ()))
-               ((010 ()) (010 (001 (00000000))))))
-            ((010 ()) (010 (001 (00000000))))))
+               ((010 ()) (010 (001 (000))))))
+            ((010 ()) (010 (001 (000))))))
          ((101 pattern (001 xmm-register))
           (110
             ((010 form)
              (110
-               ((0101 (x86-xmm-reg-code form)) (010 (001 (00000000))))
+               ((0101 (x86-xmm-reg-code form)) (010 (001 (000))))
                ((010 (x86-xmm-reg-code form))
                 (010 ()))
-               ((010 ()) (010 (001 (00000000))))))
-            ((010 ()) (010 (001 (00000000))))))
+               ((010 ()) (010 (001 (000))))))
+            ((010 ()) (010 (001 (000))))))
          ((101 pattern (001 disp8))
           (110
             
             ((010 form)  (x86-admission-disp8? form))
-            ((010 ()) (010 (001 (00000000))))))
+            ((010 ()) (010 (001 (000))))))
          ((101 pattern (001 imm32))
           (110
             
             ((010 form)  (x86-admission-imm32? form))
-            ((010 ()) (010 (001 (00000000))))))
+            ((010 ()) (010 (001 (000))))))
          ((101 pattern (001 uimm8))
           (110
             
             ((010 form)  (x86-admission-uimm8? form))
-            ((010 ()) (010 (001 (00000000))))))
+            ((010 ()) (010 (001 (000))))))
          ((101 pattern (001 rel32))
           (110
             
             ((010 form)  (x86-admission-rel32? form))
-            ((010 ()) (010 (001 (00000000))))))
+            ((010 ()) (010 (001 (000))))))
          
          ((010 form)  (101 pattern form))
-         ((010 ()) (010 (001 (00000000))))))
+         ((010 ()) (010 (001 (000))))))
       
-      ((010 form)  (010 (001 (00000000))))
+      ((010 form)  (010 (001 (000))))
       ((x86-admission-pattern-match? (100 pattern) (100 form))
        (x86-admission-pattern-match? (011 pattern) (011 form)))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 (0011 x86-admitted-instruction-against?
   (0010 (patterns form)
     (110
       
-      ((010 patterns)  (010 (001 (00000000))))
+      ((010 patterns)  (010 (001 (000))))
       ((x86-admission-pattern-match? (100 patterns) form) (010 (001 ())))
       ((010 ()) (x86-admitted-instruction-against? (011 patterns) form)))))
 
@@ -380,10 +380,10 @@
       
       ((010 forms)  (110
          ((0101 forms) (010 (001 ())))
-         ((010 ()) (010 (001 (00000000))))))
+         ((010 ()) (010 (001 (000))))))
       ((x86-admitted-instruction? (100 forms))
        (x86-admitted-program? (011 forms)))
-      ((010 ()) (010 (001 (00000000)))))))
+      ((010 ()) (010 (001 (000)))))))
 
 (0011 x86-encode-admitted-instruction
   (0010 (form)

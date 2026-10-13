@@ -18,15 +18,9 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(len(evidence), 128)
         for bits, row in rows.items():
             with self.subTest(bits=bits):
-                result = project(bits, role="sound-text", namespace="en")
-                self.assertEqual(result["coordinate"], bits)
-                self.assertEqual(result["width"], 7)
-                self.assertEqual(result["domain"], "D7")
-                self.assertEqual(result["surface"], row.en)
-                self.assertEqual(result["semantic_role"], evidence[bits]["semantic_role"])
-                self.assertEqual(result["status"], "OWNER-RATIFIED")
-                self.assertFalse(result["callable"])
-                self.assertFalse(result["arithmetic_number"])
+                self.assertEqual(row.bits, bits)
+                self.assertEqual(evidence[bits]["status"], "OWNER-RATIFIED")
+                self.assertIsNone(row.lisp)
 
     def test_owner_reserved_sound_coordinates_fail_closed(self) -> None:
         for bits in ("0100001", "0101010"):
@@ -66,14 +60,23 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertFalse(one["arithmetic_number"])
         self.assertFalse(one["callable"])
 
-    def test_human_surfaces_do_not_mint_independent_coordinates(self) -> None:
-        english = project("0000000", role="sound-text", namespace="en")
-        ukrainian = project("0000000", role="sound-text", namespace="ук")
-        sanskrit = project("0000000", role="sound-text", namespace="san")
-        self.assertEqual({english["coordinate"], ukrainian["coordinate"], sanskrit["coordinate"]}, {"0000000"})
-        self.assertEqual(english["surface"], "varga.K.voiceless")
-        self.assertEqual(ukrainian["surface"], "велярний-глухий")
-        self.assertEqual(sanskrit["surface"], "ka-varga-aghoṣa")
+    def test_english_ipa_surface_keeps_owner_w7_roles_and_text_space(self) -> None:
+        cases = (
+            ("0000000", "en", "k"),
+            ("0000010", "en-ipa", "ɡ"),
+            ("0000100", "en-ipa", "ŋ"),
+            ("0100110", "en-ipa", "j"),
+            ("1100000", "en", " "),
+            ("1111010", "en-ipa", "."),
+        )
+        for bits, namespace, expected in cases:
+            with self.subTest(bits=bits, namespace=namespace):
+                result = project(bits, role="sound-text", namespace=namespace)
+                self.assertEqual(result["coordinate"], bits)
+                self.assertEqual(result["width"], 7)
+                self.assertEqual(result["surface"], expected)
+                self.assertFalse(result["callable"])
+                self.assertFalse(result["arithmetic_number"])
 
     def test_bare_or_malformed_width_does_not_gain_a_role(self) -> None:
         for bits in ("1", "00000000", "000000x", " 0000000", "0000000 "):

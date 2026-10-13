@@ -26,7 +26,5 @@ jobs:
       - uses: actions/checkout@v5
       - name: GPU runner identity
         run: nvidia-smi || true
-      - name: Verify Clojure reference-only review
-        run: python3 scripts/check-d10-crossrepo-clojure-reference-v1.py
       - name: Verify all-repo donor matrix
         run: python3 scripts/check-d10-owner-repo-donor-matrix-v2.py

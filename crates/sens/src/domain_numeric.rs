@@ -63,15 +63,19 @@ fn canonical(
     if !nr.is_zero() || !dr.is_zero() {
         return None;
     }
+    // Recognize the reduced unit before constructing an explicit Dn word.
+    // BinaryNumber currently normalizes padded leading zeros, so checking
+    // after own_word() also recognizes 1; doing it here avoids allocating
+    // an entire temporary Dn denominator that integer/zero cases discard.
+    let denominator_is_one = d.as_bits() == [1];
 
     let mut width = minimum_width;
     while n.width().max(d.width()) > width {
         width = width.checked_mul(2)?;
     }
     let n = own_word(n, width)?;
-    let d = own_word(d, width)?;
     if n.is_zero() { return Some(Value::BinaryNumber(n)); }
-    if d.as_bits() == [1] {
+    if denominator_is_one {
         if negative {
             return Some(Value::NumericComposition(DomainNumericComposition {
                 negative: true, numerator: n, denominator: None,
@@ -79,6 +83,8 @@ fn canonical(
         }
         return Some(Value::BinaryNumber(n));
     }
+    // Only an actual fraction needs a fully qualified Dn denominator.
+    let d = own_word(d, width)?;
     Some(Value::NumericComposition(DomainNumericComposition {
         negative, numerator: n, denominator: Some(d),
     }))
@@ -121,6 +127,18 @@ pub fn is_domain_value(v: &Value) -> bool {
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
+    // Натуральні слова D24+ уже мають доведені власні бітові механізми.
+    // Не проводимо їх через зайві NEG/RATIO gcd та повторне означення Dn.
+    // Допуск SAME-Dn і перенесення Dn -> D(2n) перевіряє BinaryNumber.
+    // Некваліфіковані й змішані Dn мають відхилятися тут, без fallback.
+    if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+        match operator {
+            "+" => return left.add_admitted_numeric(right).map(Value::BinaryNumber),
+            "*" => return left.mul_admitted_numeric(right).map(Value::BinaryNumber),
+            _ => {}
+        }
+    }
+
     let (width, x_neg, x_num, x_den) = ingredients(lhs)?;
     let (other_width, y_neg, y_num, y_den) = ingredients(rhs)?;
     if width != other_width { return None; }
@@ -204,6 +222,75 @@ mod tests {
             unary("-", &Value::BinaryNumber(d(24, 5))));
         assert!(canonical_parts(false, &d(24, 1), &d(24, 0)).is_none());
         assert!(canonical_parts(false, &d(24, 1), &d(48, 2)).is_none());
+    }
+
+    #[test]
+    fn one_bit_denominator_mutation_keeps_d24_plus_integers_canonical() {
+        // Targeted witness: the one-bit change 000...001 -> 000...011
+        // is exactly what separates an integer from a rational.
+        // Every intermediate constituent still belongs to the same Dn.
+        for width in [24usize, 48, 96, 192] {
+            let one = d(width, 1);
+            let two = d(width, 2);
+            let three = d(width, 3);
+            let zero = d(width, 0);
+
+            // as_bits() returns a normalized magnitude. The *domain word*
+            // must be compared at its authoritative full Dn width.
+            let one_bits = one.exact_numeric_domain_bits().expect("exact Dn(1)");
+            let three_bits = three.exact_numeric_domain_bits().expect("exact Dn(3)");
+            assert_eq!(one_bits.len(), width);
+            assert_eq!(three_bits.len(), width);
+            let bit_distance: usize = one_bits.iter()
+                .zip(three_bits.iter())
+                .map(|(a, b)| usize::from(a != b))
+                .sum();
+            assert_eq!(bit_distance, 1, "D{width}: single-bit mutation");
+
+            let integer = canonical_parts(false, &two, &one)
+                .expect("unit denominator reduces to admitted natural Dn");
+            assert_eq!(integer, Value::BinaryNumber(two.clone()),
+                "D{width}: RATIO(2,1) must not survive as an extra tag");
+
+            let negative = canonical_parts(true, &two, &one)
+                .expect("negative integer still uses exact Dn");
+            let Value::NumericComposition(ref neg) = negative else {
+                panic!("D{width}: a negative integer has its own composition")
+            };
+            let (is_negative, numerator, denominator) = neg.as_parts();
+            assert!(is_negative);
+            assert_eq!(neg.domain_width(), width);
+            assert_eq!(numerator.numeric_domain_width(), Some(width));
+            assert!(denominator.is_none(),
+                "D{width}: no unneeded Dn denominator for integer -2");
+            assert_eq!(negative.to_string(), "-2");
+
+            let ratio = canonical_parts(false, &two, &three)
+                .expect("one-bit-mutated denominator is a valid fraction");
+            let Value::NumericComposition(ref fraction) = ratio else {
+                panic!("D{width}: the mutated denominator is not unity")
+            };
+            assert_eq!(ratio.to_string(), "2/3");
+            assert_eq!(fraction.domain_width(), width);
+            let (_, numerator, denominator) = fraction.as_parts();
+            assert_eq!(numerator.numeric_domain_width(), Some(width));
+            assert_eq!(denominator.expect("actual fraction").numeric_domain_width(), Some(width));
+
+            let divided = compute(
+                "/", &Value::BinaryNumber(d(width, 6)),
+                &Value::BinaryNumber(d(width, 3)),
+            ).expect("same domain 6/3");
+            assert_eq!(divided, Value::BinaryNumber(two),
+                "D{width}: reduced division becomes exactly Dn(2)");
+            assert_eq!(
+                canonical_parts(true, &zero, &one),
+                Some(Value::BinaryNumber(zero)),
+                "D{width}: negative zero must not allocate a sign or denominator"
+            );
+            assert!(canonical_parts(
+                false, &d(width, 2), &d(width * 2, 1)
+            ).is_none(), "D{width}: mixed Dn values are forbidden");
+        }
     }
 
     #[test]
@@ -308,6 +395,77 @@ mod tests {
         assert!(compute("+",&Value::NumericComposition(composition.clone()),&other).is_some());
         assert!(compute("+",&Value::NumericComposition(composition.clone()),&b).is_none());
         assert!(compare("=",&Value::NumericComposition(composition.clone()),&b).is_none());
+    }
+
+    #[test]
+    fn one_bit_boundary_diagnostic_preserves_every_domain_bit() {
+        // Незалежний оракул: (2^n - 2) + 1 вміщується в Dn;
+        // (2^n - 1) + 1 = 2^n мусить бути точним D(2n).
+        // Зміна ОДНОГО біта на вході змінює обраний домен результату.
+        for width in [24usize, 48, 96, 192] {
+            let mut nearly_full = vec![1u8; width];
+            nearly_full[width - 1] = 0;
+            let full = vec![1u8; width];
+            let mut one = vec![0u8; width];
+            one[width - 1] = 1;
+            let admitted = |word: &[u8]| {
+                Value::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(width, word)
+                        .expect("точна бітність D24+"),
+                )
+            };
+            let almost = admitted(&nearly_full);
+            let maximum = admitted(&full);
+            let unit = admitted(&one);
+
+            let fitting = compute("+", &almost, &unit).expect("вміщується в Dn");
+            let Value::BinaryNumber(fitted) = &fitting else {
+                panic!("ціле натуральне має залишитися доменним числом")
+            };
+            assert_eq!(fitted.numeric_domain_width(), Some(width), "D{width}: fit");
+            assert_eq!(fitted.exact_numeric_domain_bits(), Some(full.clone()),
+                "D{width}: усі n бітів суми повинні зберегтися");
+
+            let crossing = compute("+", &maximum, &unit).expect("точне перенесення");
+            let Value::BinaryNumber(carried) = &crossing else {
+                panic!("carry мусить залишитися натуральним числом")
+            };
+            let mut expected = vec![0u8; 2 * width];
+            expected[width - 1] = 1;
+            assert_eq!(carried.numeric_domain_width(), Some(2 * width),
+                "D{width}: не можна обрізати старший біт");
+            assert_eq!(carried.exact_numeric_domain_bits(), Some(expected),
+                "D{width}: єдиний біт перенесення на точній D(2n) позиції");
+
+            let unchanged = compute("*", &maximum, &unit)
+                .expect("множення на одиницю того самого домену");
+            assert_eq!(unchanged, maximum, "D{width}: natural MUL path");
+            let mut two = vec![0u8; width];
+            two[width - 2] = 1;
+            let doubled = compute("*", &maximum, &admitted(&two))
+                .expect("точне множення з перенесенням");
+            let Value::BinaryNumber(product) = &doubled else {
+                panic!("добуток має залишитися точним натуральним словом")
+            };
+            let mut product_bits = vec![0u8; 2 * width];
+            product_bits[(width - 1)..(2 * width - 1)].fill(1);
+            assert_eq!(product.numeric_domain_width(), Some(2 * width));
+            assert_eq!(product.exact_numeric_domain_bits(), Some(product_bits));
+
+            let legacy_one = Value::BinaryNumber(BinaryNumber::one());
+            for op in ["+", "*"] {
+                assert!(compute(op, &maximum, &legacy_one).is_none(),
+                    "D{width}: {op} must reject unqualified one");
+                assert!(compute(op, &legacy_one, &maximum).is_none(),
+                    "D{width}: {op} must reject unqualified first operand");
+                let other_domain = Value::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(2 * width, &vec![0; 2 * width])
+                        .unwrap(),
+                );
+                assert!(compute(op, &maximum, &other_domain).is_none(),
+                    "D{width}: {op} must reject mixed Dn/D(2n)");
+            }
+        }
     }
 
     #[test]

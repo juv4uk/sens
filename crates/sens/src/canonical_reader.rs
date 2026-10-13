@@ -17,6 +17,12 @@ const D2_CLOSE: u8 = 0b01;
 const D2_OPEN: u8 = 0b10;
 const D2_DOT: u8 = 0b11;
 
+/// Bound the RECURSIVE physical reader independently from the larger AST
+/// traversal allowance. The latter (768 nodes deep) is not a safe Rust
+/// call-stack budget: each D2 frame currently uses several parser frames.
+/// Until D2 parsing is converted to an explicit heap stack, cap it here.
+const MAX_D2_RECURSIVE_DEPTH: u32 = 128;
+
 /// Parse canonical visible-binary SENS source directly into AST.
 ///
 /// Human punctuation/names are not accepted by the underlying source-word
@@ -137,20 +143,27 @@ impl<'a> CanonicalReader<'a> {
             if self.cursor == self.tokens.len() {
                 break;
             }
-            expressions.push(self.parse_expr()?);
+            expressions.push(self.parse_expr(0)?);
         }
         Ok(expressions)
     }
 
-    fn parse_expr(&mut self) -> Result<Expr, LanguageError> {
+    fn parse_expr(&mut self, depth: u32) -> Result<Expr, LanguageError> {
         let token = *self
             .tokens
             .get(self.cursor)
             .ok_or_else(|| self.error_at_end("expected canonical binary expression"))?;
 
+        // The exact-domain reader has the same finite recursion contract as
+        // the source AST parser. Unbounded D2 OPEN words must fail closed
+        // instead of exhausting the evaluator's stack.
+        if depth > MAX_D2_RECURSIVE_DEPTH {
+            return Err(self.error("canonical D2 nesting exceeds AST depth limit", token.span));
+        }
+
         match token.word {
             BinarySourceWord::W2(word) => match word.packed_bits() {
-                D2_OPEN => self.parse_list(),
+                D2_OPEN => self.parse_list(depth),
                 D2_CLOSE => Err(self.error("unexpected D2 close word 01", token.span)),
                 D2_DOT => Err(self.error("misplaced D2 dot word 11", token.span)),
                 D2_SEPARATOR => Err(self.error(
@@ -189,7 +202,7 @@ impl<'a> CanonicalReader<'a> {
         })
     }
 
-    fn parse_list(&mut self) -> Result<Expr, LanguageError> {
+    fn parse_list(&mut self, depth: u32) -> Result<Expr, LanguageError> {
         let open = self.tokens[self.cursor];
         debug_assert!(matches!(open.word, BinarySourceWord::W2(_)));
         self.cursor += 1;
@@ -252,7 +265,7 @@ impl<'a> CanonicalReader<'a> {
                             ));
                         }
 
-                        let tail = self.parse_expr()?;
+                        let tail = self.parse_expr(depth + 1)?;
                         self.skip_separators();
 
                         let Some(close) = self.tokens.get(self.cursor).copied() else {
@@ -291,7 +304,7 @@ impl<'a> CanonicalReader<'a> {
                 }
             }
 
-            items.push(self.parse_expr()?);
+            items.push(self.parse_expr(depth + 1)?);
         }
     }
 
@@ -341,6 +354,100 @@ mod tests {
             ExprKind::DomainIdentity(identity) => identity,
             ref other => panic!("expected DomainIdentity, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn вичерпна_бітність_без_проміжного_доповнення_у_1018_доменних_словах() {
+        // D2 is syntax (four structural codes), so test every one of the
+        // remaining D1 + D3..D9 source cells as payload. 8186 semantic
+        // bits require exactly 1024 physical bytes, with only six final
+        // container-padding bits. No per-word byte alignment is allowed.
+        let mut sources = Vec::new();
+        let mut expected = Vec::new();
+        for width in (1usize..=9).filter(|&width| width != 2) {
+            for bits in 0..(1u16 << width) {
+                sources.push(format!("{bits:0width$b}"));
+                expected.push((width, bits));
+            }
+        }
+        assert_eq!(expected.len(), 1018);
+        let visible = sources.join(" ");
+        let tokens = crate::parse_binary_source_words(&visible).unwrap();
+        let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+        let packed = crate::pack_binary_source_tokens(&tokens);
+        assert_eq!(widths.iter().sum::<usize>(), 8186);
+        assert_eq!(packed.bit_len(), 8186);
+        assert_eq!(packed.byte_len(), 1024);
+        assert_eq!(packed.valid_bits_in_last_byte(), 2);
+        assert_eq!(packed.bytes().last().copied().unwrap() & 0b0011_1111, 0);
+
+        let physical = parse_canonical_packed_words(&packed, &widths).unwrap();
+        assert_eq!(physical.len(), expected.len());
+        for (expression, (width, bits)) in physical.iter().zip(expected) {
+            if width == 3 && bits == 0 {
+                // D3:000 is an empty list, never an automatic D1:NO.
+                assert!(matches!(&expression.kind, ExprKind::List(items) if items.is_empty()));
+            } else {
+                let id = domain(expression);
+                assert_eq!((id.width(), id.packed_bits()), (width, bits));
+            }
+        }
+        let collisions = parse_canonical_binary("10101000 010101000").unwrap();
+        assert_eq!(domain(&collisions[0]).packed_bits(), domain(&collisions[1]).packed_bits());
+        assert_ne!(domain(&collisions[0]), domain(&collisions[1]));
+    }
+
+    #[test]
+    fn незалежний_двадцятибітний_msbf_еталон_і_зайві_біти() {
+        // D2 OPEN | D3 QUOTE | D4:0001 | D9:100000001 | D2 CLOSE:
+        //   10 001 0001 100000001 01
+        // Independent MSB-first byte oracle: 88 C0 50 (20 bits).
+        let tokens = crate::parse_binary_source_words("10 001 0001 100000001 01").unwrap();
+        let packed = crate::pack_binary_source_tokens(&tokens);
+        assert_eq!(packed.bit_len(), 20);
+        assert_eq!(packed.bytes(), &[0x88, 0xC0, 0x50]);
+        let root = parse_canonical_packed_words(&packed, &[2, 3, 4, 9, 2]).unwrap();
+        let ExprKind::List(items) = &root[0].kind else { panic!("D2 opening structure"); };
+        assert_eq!(items.len(), 3);
+        for (node, (width, bits)) in items.iter().zip([(3, 1), (4, 1), (9, 257)]) {
+            assert_eq!((domain(node).width(), domain(node).packed_bits()), (width, bits));
+        }
+        assert!(crate::PackedBitstream::from_parts(vec![0x88, 0xC0, 0x51], 20).is_none(),
+            "nonzero trailing padding may not spell the same 20 bits");
+        // A dense payload has no self-describing word boundaries.
+        // Both schedules total 20 bits and are structurally valid, but
+        // different exact widths select different domain identities.
+        let alternate = parse_canonical_packed_words(&packed, &[2, 3, 5, 8, 2])
+            .expect("the second complete width schedule is mechanically valid");
+        let ExprKind::List(other) = &alternate[0].kind else { panic!("same D2 frame"); };
+        assert_eq!((domain(&other[1]).width(), domain(&other[2]).width()), (5, 8));
+        assert_ne!(domain(&items[1]), domain(&other[1]));
+        assert_ne!(domain(&items[2]), domain(&other[2]));
+    }
+
+    #[test]
+    fn надмірна_вкладеність_d2_повертає_помилку_замість_переповнення_стека() {
+        let depth = MAX_D2_RECURSIVE_DEPTH as usize + 2;
+        let mut source = "10 ".repeat(depth);
+        source.push_str("001");
+        source.push_str(&" 01".repeat(depth));
+
+        let moderate = 16usize;
+        let mut valid = "10 ".repeat(moderate);
+        valid.push_str("001");
+        valid.push_str(&" 01".repeat(moderate));
+        assert!(parse_canonical_binary(&valid).is_ok(), "звичайна вкладеність працює");
+
+        let err = parse_canonical_binary(&source).expect_err("надмірна глибина D2");
+        assert_eq!(err.kind, ErrorKind::Parse);
+        assert!(err.message.contains("nesting exceeds AST depth limit"));
+
+        let tokens = crate::parse_binary_source_words(&source).unwrap();
+        let packed = crate::pack_binary_source_tokens(&tokens);
+        let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+        let err = parse_canonical_packed_words(&packed, &widths)
+            .expect_err("packed D2 має ту саму межу рекурсії");
+        assert_eq!(err.kind, ErrorKind::Parse);
     }
 
     #[test]

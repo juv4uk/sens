@@ -243,6 +243,21 @@
 
 ; --- Narrow relations -------------------------------------------------
 
+; Точна структурна рівність посилань — похідна Lisp-функція.
+; EQ отримує лише атоми, CAR/CDR — лише пари, COND — тільки D1.
+; Тут немає припущення, що історичний W8:11110111 є чинним D8 EQUAL.
+(0011 епістеміка--рівні-посилання?
+  (0010 (a b)
+    (110
+      ((010 a)
+       (110
+         ((010 b) (101 a b))
+         ((010 ()) (010 (001 (0))))))
+      ((010 b) (010 (001 (0))))
+      ((епістеміка--рівні-посилання? (100 a) (100 b))
+       (епістеміка--рівні-посилання? (011 a) (011 b)))
+      ((010 ()) (010 (001 (0)))))))
+
 ; supporting-evidence — the spec leaves it open whether "supports" means
 ; only the outcome tag or also a specific claim match. Resolved here
 ; (architect decision, not spec-literal) as: both the outcome tag must
@@ -270,7 +285,7 @@
       ((0100 (101010110 evidence)) (001 ()))
       ((0100 (epistemic--claim-ref? claim-ref)) (001 ()))
       ((0100 (101 (101111111 evidence) (001 supports))) (001 ()))
-      ((0100 (11110111 (evidence-claim-ref evidence) claim-ref)) (001 ()))
+      ((0100 (епістеміка--рівні-посилання? (evidence-claim-ref evidence) claim-ref)) (001 ()))
       ((010 ()) evidence))))
 
 ; local helper for intent-capabilities-satisfied? — no every?/all? helper

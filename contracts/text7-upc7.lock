@@ -24,4 +24,4 @@
     ((upstream-role "UPC-7 code assignment and human layout projection")
      (sens-role "Text7 admission and language semantics")
      (copy-table-into-sens no)))
-  (status admitted-upstream-source))
+  (status historical-donor-only-not-current-d7))

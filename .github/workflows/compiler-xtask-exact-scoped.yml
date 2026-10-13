@@ -1,0 +1,27 @@
+name: SENS xtask — точний компілятор SW1 і T5
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/xtask/src/compiler_compile.rs"
+      - ".github/workflows/compiler-xtask-exact-scoped.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/xtask/src/compiler_compile.rs"
+      - ".github/workflows/compiler-xtask-exact-scoped.yml"
+
+jobs:
+  xtask-compiler-exact-domain:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Компіляція штатного компілятора без нових залежностей
+        run: cargo check --locked -p xtask
+      - name: Усі позитивні й негативні SW1/T5 тести цього файла
+        run: cargo test --locked -p xtask compiler_compile::tests -- --nocapture

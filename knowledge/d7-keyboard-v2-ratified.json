@@ -1,0 +1,795 @@
+{
+  "schema": "sens.d7.keyboard/v2",
+  "status": "owner-ratified",
+  "date": "2026-10-13",
+  "width": 7,
+  "capacity": 128,
+  "occupancy": 128,
+  "semantic_scope": "Text/Data W7 migration projection ONLY; not callable Core",
+  "rules": {
+    "coordinates": "ASCII numeric 0..127",
+    "english": "ASCII 7-bit identity",
+    "ukrainian": "keyboard-position bijection; 31 pairs + ґ,є pairs; apostrophe pinned to ASCII 39; all 128 coords bijective",
+    "sanskrit": "Devanagari INSCRIPT-inspired physical keyboard, one Unicode scalar per coordinate, no SLP1; remove duplicate and multi-key shortcut aliases to achieve bijection",
+    "mode": "Enclosing SENS text value selects mode; not embedded in each W7 cell",
+    "format": "MSB-first densely packed, exact externally known bit length; bad frames reject",
+    "unknown": "fail-closed; no lossy substitutes",
+    "legacy": "v1 D7 sound map is historical and must be explicitly version-migrated",
+    "limitation": "Unicode normalization, ligature shaping and additional Vedic glyphs outside profile may not be reversible; full Unicode not promised"
+  },
+  "sources": [
+    "https://www.kbdlayout.info/KBDUR1/",
+    "https://www.kbdlayout.info/KBDINDEV/",
+    "https://www.unicode.org/versions/Unicode18.0.0/core-spec/chapter-12/"
+  ],
+  "table": [
+    {
+      "bits": "0000000",
+      "ascii": "\u0000",
+      "uk": "\u0000",
+      "san": "\u0000"
+    },
+    {
+      "bits": "0000001",
+      "ascii": "\u0001",
+      "uk": "\u0001",
+      "san": "\u0001"
+    },
+    {
+      "bits": "0000010",
+      "ascii": "\u0002",
+      "uk": "\u0002",
+      "san": "\u0002"
+    },
+    {
+      "bits": "0000011",
+      "ascii": "\u0003",
+      "uk": "\u0003",
+      "san": "\u0003"
+    },
+    {
+      "bits": "0000100",
+      "ascii": "\u0004",
+      "uk": "\u0004",
+      "san": "\u0004"
+    },
+    {
+      "bits": "0000101",
+      "ascii": "\u0005",
+      "uk": "\u0005",
+      "san": "\u0005"
+    },
+    {
+      "bits": "0000110",
+      "ascii": "\u0006",
+      "uk": "\u0006",
+      "san": "\u0006"
+    },
+    {
+      "bits": "0000111",
+      "ascii": "\u0007",
+      "uk": "\u0007",
+      "san": "\u0007"
+    },
+    {
+      "bits": "0001000",
+      "ascii": "\b",
+      "uk": "\b",
+      "san": "\b"
+    },
+    {
+      "bits": "0001001",
+      "ascii": "\t",
+      "uk": "\t",
+      "san": "\t"
+    },
+    {
+      "bits": "0001010",
+      "ascii": "\n",
+      "uk": "\n",
+      "san": "\n"
+    },
+    {
+      "bits": "0001011",
+      "ascii": "\u000b",
+      "uk": "\u000b",
+      "san": "\u000b"
+    },
+    {
+      "bits": "0001100",
+      "ascii": "\f",
+      "uk": "\f",
+      "san": "\f"
+    },
+    {
+      "bits": "0001101",
+      "ascii": "\r",
+      "uk": "\r",
+      "san": "\r"
+    },
+    {
+      "bits": "0001110",
+      "ascii": "\u000e",
+      "uk": "\u000e",
+      "san": "\u000e"
+    },
+    {
+      "bits": "0001111",
+      "ascii": "\u000f",
+      "uk": "\u000f",
+      "san": "\u000f"
+    },
+    {
+      "bits": "0010000",
+      "ascii": "\u0010",
+      "uk": "\u0010",
+      "san": "\u0010"
+    },
+    {
+      "bits": "0010001",
+      "ascii": "\u0011",
+      "uk": "\u0011",
+      "san": "\u0011"
+    },
+    {
+      "bits": "0010010",
+      "ascii": "\u0012",
+      "uk": "\u0012",
+      "san": "\u0012"
+    },
+    {
+      "bits": "0010011",
+      "ascii": "\u0013",
+      "uk": "\u0013",
+      "san": "\u0013"
+    },
+    {
+      "bits": "0010100",
+      "ascii": "\u0014",
+      "uk": "\u0014",
+      "san": "\u0014"
+    },
+    {
+      "bits": "0010101",
+      "ascii": "\u0015",
+      "uk": "\u0015",
+      "san": "\u0015"
+    },
+    {
+      "bits": "0010110",
+      "ascii": "\u0016",
+      "uk": "\u0016",
+      "san": "\u0016"
+    },
+    {
+      "bits": "0010111",
+      "ascii": "\u0017",
+      "uk": "\u0017",
+      "san": "\u0017"
+    },
+    {
+      "bits": "0011000",
+      "ascii": "\u0018",
+      "uk": "\u0018",
+      "san": "\u0018"
+    },
+    {
+      "bits": "0011001",
+      "ascii": "\u0019",
+      "uk": "\u0019",
+      "san": "\u0019"
+    },
+    {
+      "bits": "0011010",
+      "ascii": "\u001a",
+      "uk": "\u001a",
+      "san": "\u001a"
+    },
+    {
+      "bits": "0011011",
+      "ascii": "\u001b",
+      "uk": "\u001b",
+      "san": "\u001b"
+    },
+    {
+      "bits": "0011100",
+      "ascii": "\u001c",
+      "uk": "\u001c",
+      "san": "\u001c"
+    },
+    {
+      "bits": "0011101",
+      "ascii": "\u001d",
+      "uk": "\u001d",
+      "san": "\u001d"
+    },
+    {
+      "bits": "0011110",
+      "ascii": "\u001e",
+      "uk": "\u001e",
+      "san": "\u001e"
+    },
+    {
+      "bits": "0011111",
+      "ascii": "\u001f",
+      "uk": "\u001f",
+      "san": "\u001f"
+    },
+    {
+      "bits": "0100000",
+      "ascii": " ",
+      "uk": " ",
+      "san": " "
+    },
+    {
+      "bits": "0100001",
+      "ascii": "!",
+      "uk": "!",
+      "san": "!"
+    },
+    {
+      "bits": "0100010",
+      "ascii": "\"",
+      "uk": "\"",
+      "san": "ठ"
+    },
+    {
+      "bits": "0100011",
+      "ascii": "#",
+      "uk": "№",
+      "san": "#"
+    },
+    {
+      "bits": "0100100",
+      "ascii": "$",
+      "uk": ";",
+      "san": "$"
+    },
+    {
+      "bits": "0100101",
+      "ascii": "%",
+      "uk": "%",
+      "san": "%"
+    },
+    {
+      "bits": "0100110",
+      "ascii": "&",
+      "uk": "?",
+      "san": "&"
+    },
+    {
+      "bits": "0100111",
+      "ascii": "'",
+      "uk": "'",
+      "san": "ट"
+    },
+    {
+      "bits": "0101000",
+      "ascii": "(",
+      "uk": "(",
+      "san": "("
+    },
+    {
+      "bits": "0101001",
+      "ascii": ")",
+      "uk": ")",
+      "san": ")"
+    },
+    {
+      "bits": "0101010",
+      "ascii": "*",
+      "uk": "*",
+      "san": "*"
+    },
+    {
+      "bits": "0101011",
+      "ascii": "+",
+      "uk": "+",
+      "san": "ऋ"
+    },
+    {
+      "bits": "0101100",
+      "ascii": ",",
+      "uk": "б",
+      "san": ","
+    },
+    {
+      "bits": "0101101",
+      "ascii": "-",
+      "uk": "-",
+      "san": "ः"
+    },
+    {
+      "bits": "0101110",
+      "ascii": ".",
+      "uk": "ю",
+      "san": "."
+    },
+    {
+      "bits": "0101111",
+      "ascii": "/",
+      "uk": ".",
+      "san": "य"
+    },
+    {
+      "bits": "0110000",
+      "ascii": "0",
+      "uk": "0",
+      "san": "0"
+    },
+    {
+      "bits": "0110001",
+      "ascii": "1",
+      "uk": "1",
+      "san": "1"
+    },
+    {
+      "bits": "0110010",
+      "ascii": "2",
+      "uk": "2",
+      "san": "2"
+    },
+    {
+      "bits": "0110011",
+      "ascii": "3",
+      "uk": "3",
+      "san": "3"
+    },
+    {
+      "bits": "0110100",
+      "ascii": "4",
+      "uk": "4",
+      "san": "4"
+    },
+    {
+      "bits": "0110101",
+      "ascii": "5",
+      "uk": "5",
+      "san": "5"
+    },
+    {
+      "bits": "0110110",
+      "ascii": "6",
+      "uk": "6",
+      "san": "6"
+    },
+    {
+      "bits": "0110111",
+      "ascii": "7",
+      "uk": "7",
+      "san": "7"
+    },
+    {
+      "bits": "0111000",
+      "ascii": "8",
+      "uk": "8",
+      "san": "8"
+    },
+    {
+      "bits": "0111001",
+      "ascii": "9",
+      "uk": "9",
+      "san": "9"
+    },
+    {
+      "bits": "0111010",
+      "ascii": ":",
+      "uk": "Ж",
+      "san": "छ"
+    },
+    {
+      "bits": "0111011",
+      "ascii": ";",
+      "uk": "ж",
+      "san": "च"
+    },
+    {
+      "bits": "0111100",
+      "ascii": "<",
+      "uk": "Б",
+      "san": "ष"
+    },
+    {
+      "bits": "0111101",
+      "ascii": "=",
+      "uk": "=",
+      "san": "ृ"
+    },
+    {
+      "bits": "0111110",
+      "ascii": ">",
+      "uk": "Ю",
+      "san": "।"
+    },
+    {
+      "bits": "0111111",
+      "ascii": "?",
+      "uk": ",",
+      "san": "य़"
+    },
+    {
+      "bits": "1000000",
+      "ascii": "@",
+      "uk": "₴",
+      "san": "@"
+    },
+    {
+      "bits": "1000001",
+      "ascii": "A",
+      "uk": "Ф",
+      "san": "ओ"
+    },
+    {
+      "bits": "1000010",
+      "ascii": "B",
+      "uk": "И",
+      "san": "ऴ"
+    },
+    {
+      "bits": "1000011",
+      "ascii": "C",
+      "uk": "С",
+      "san": "ण"
+    },
+    {
+      "bits": "1000100",
+      "ascii": "D",
+      "uk": "В",
+      "san": "अ"
+    },
+    {
+      "bits": "1000101",
+      "ascii": "E",
+      "uk": "У",
+      "san": "आ"
+    },
+    {
+      "bits": "1000110",
+      "ascii": "F",
+      "uk": "А",
+      "san": "इ"
+    },
+    {
+      "bits": "1000111",
+      "ascii": "G",
+      "uk": "П",
+      "san": "उ"
+    },
+    {
+      "bits": "1001000",
+      "ascii": "H",
+      "uk": "Р",
+      "san": "फ"
+    },
+    {
+      "bits": "1001001",
+      "ascii": "I",
+      "uk": "Ш",
+      "san": "घ"
+    },
+    {
+      "bits": "1001010",
+      "ascii": "J",
+      "uk": "О",
+      "san": "ऱ"
+    },
+    {
+      "bits": "1001011",
+      "ascii": "K",
+      "uk": "Л",
+      "san": "ख"
+    },
+    {
+      "bits": "1001100",
+      "ascii": "L",
+      "uk": "Д",
+      "san": "थ"
+    },
+    {
+      "bits": "1001101",
+      "ascii": "M",
+      "uk": "Ь",
+      "san": "श"
+    },
+    {
+      "bits": "1001110",
+      "ascii": "N",
+      "uk": "Т",
+      "san": "ळ"
+    },
+    {
+      "bits": "1001111",
+      "ascii": "O",
+      "uk": "Щ",
+      "san": "ध"
+    },
+    {
+      "bits": "1010000",
+      "ascii": "P",
+      "uk": "З",
+      "san": "झ"
+    },
+    {
+      "bits": "1010001",
+      "ascii": "Q",
+      "uk": "Й",
+      "san": "औ"
+    },
+    {
+      "bits": "1010010",
+      "ascii": "R",
+      "uk": "К",
+      "san": "ई"
+    },
+    {
+      "bits": "1010011",
+      "ascii": "S",
+      "uk": "І",
+      "san": "ए"
+    },
+    {
+      "bits": "1010100",
+      "ascii": "T",
+      "uk": "Е",
+      "san": "ऊ"
+    },
+    {
+      "bits": "1010101",
+      "ascii": "U",
+      "uk": "Г",
+      "san": "ङ"
+    },
+    {
+      "bits": "1010110",
+      "ascii": "V",
+      "uk": "М",
+      "san": "ऩ"
+    },
+    {
+      "bits": "1010111",
+      "ascii": "W",
+      "uk": "Ц",
+      "san": "ऐ"
+    },
+    {
+      "bits": "1011000",
+      "ascii": "X",
+      "uk": "Ч",
+      "san": "ँ"
+    },
+    {
+      "bits": "1011001",
+      "ascii": "Y",
+      "uk": "Н",
+      "san": "भ"
+    },
+    {
+      "bits": "1011010",
+      "ascii": "Z",
+      "uk": "Я",
+      "san": "ऑ"
+    },
+    {
+      "bits": "1011011",
+      "ascii": "[",
+      "uk": "х",
+      "san": "ड"
+    },
+    {
+      "bits": "1011100",
+      "ascii": "\\",
+      "uk": "ґ",
+      "san": "\\"
+    },
+    {
+      "bits": "1011101",
+      "ascii": "]",
+      "uk": "ї",
+      "san": "़"
+    },
+    {
+      "bits": "1011110",
+      "ascii": "^",
+      "uk": ":",
+      "san": "^"
+    },
+    {
+      "bits": "1011111",
+      "ascii": "_",
+      "uk": "_",
+      "san": "ॠ"
+    },
+    {
+      "bits": "1100000",
+      "ascii": "`",
+      "uk": "є",
+      "san": "`"
+    },
+    {
+      "bits": "1100001",
+      "ascii": "a",
+      "uk": "ф",
+      "san": "ो"
+    },
+    {
+      "bits": "1100010",
+      "ascii": "b",
+      "uk": "и",
+      "san": "व"
+    },
+    {
+      "bits": "1100011",
+      "ascii": "c",
+      "uk": "с",
+      "san": "म"
+    },
+    {
+      "bits": "1100100",
+      "ascii": "d",
+      "uk": "в",
+      "san": "्"
+    },
+    {
+      "bits": "1100101",
+      "ascii": "e",
+      "uk": "у",
+      "san": "ा"
+    },
+    {
+      "bits": "1100110",
+      "ascii": "f",
+      "uk": "а",
+      "san": "ि"
+    },
+    {
+      "bits": "1100111",
+      "ascii": "g",
+      "uk": "п",
+      "san": "ु"
+    },
+    {
+      "bits": "1101000",
+      "ascii": "h",
+      "uk": "р",
+      "san": "प"
+    },
+    {
+      "bits": "1101001",
+      "ascii": "i",
+      "uk": "ш",
+      "san": "ग"
+    },
+    {
+      "bits": "1101010",
+      "ascii": "j",
+      "uk": "о",
+      "san": "र"
+    },
+    {
+      "bits": "1101011",
+      "ascii": "k",
+      "uk": "л",
+      "san": "क"
+    },
+    {
+      "bits": "1101100",
+      "ascii": "l",
+      "uk": "д",
+      "san": "त"
+    },
+    {
+      "bits": "1101101",
+      "ascii": "m",
+      "uk": "ь",
+      "san": "स"
+    },
+    {
+      "bits": "1101110",
+      "ascii": "n",
+      "uk": "т",
+      "san": "ल"
+    },
+    {
+      "bits": "1101111",
+      "ascii": "o",
+      "uk": "щ",
+      "san": "द"
+    },
+    {
+      "bits": "1110000",
+      "ascii": "p",
+      "uk": "з",
+      "san": "ज"
+    },
+    {
+      "bits": "1110001",
+      "ascii": "q",
+      "uk": "й",
+      "san": "ौ"
+    },
+    {
+      "bits": "1110010",
+      "ascii": "r",
+      "uk": "к",
+      "san": "ी"
+    },
+    {
+      "bits": "1110011",
+      "ascii": "s",
+      "uk": "і",
+      "san": "े"
+    },
+    {
+      "bits": "1110100",
+      "ascii": "t",
+      "uk": "е",
+      "san": "ू"
+    },
+    {
+      "bits": "1110101",
+      "ascii": "u",
+      "uk": "г",
+      "san": "ह"
+    },
+    {
+      "bits": "1110110",
+      "ascii": "v",
+      "uk": "м",
+      "san": "न"
+    },
+    {
+      "bits": "1110111",
+      "ascii": "w",
+      "uk": "ц",
+      "san": "ै"
+    },
+    {
+      "bits": "1111000",
+      "ascii": "x",
+      "uk": "ч",
+      "san": "ं"
+    },
+    {
+      "bits": "1111001",
+      "ascii": "y",
+      "uk": "н",
+      "san": "ब"
+    },
+    {
+      "bits": "1111010",
+      "ascii": "z",
+      "uk": "я",
+      "san": "ॉ"
+    },
+    {
+      "bits": "1111011",
+      "ascii": "{",
+      "uk": "Х",
+      "san": "ढ"
+    },
+    {
+      "bits": "1111100",
+      "ascii": "|",
+      "uk": "Ґ",
+      "san": "|"
+    },
+    {
+      "bits": "1111101",
+      "ascii": "}",
+      "uk": "Ї",
+      "san": "ञ"
+    },
+    {
+      "bits": "1111110",
+      "ascii": "~",
+      "uk": "Є",
+      "san": "~"
+    },
+    {
+      "bits": "1111111",
+      "ascii": "",
+      "uk": "",
+      "san": ""
+    }
+  ]
+}

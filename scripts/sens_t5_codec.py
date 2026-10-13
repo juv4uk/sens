@@ -83,3 +83,41 @@ def typed_sha256(words: list[str]) -> str:
         digest.update(bytes([len(word)]))
         digest.update(int(word, 2).to_bytes((len(word) + 7) // 8, "big"))
     return digest.hexdigest()
+
+
+def encode_d7_uk_t5(text: str) -> bytes:
+    """Ukrainian keyboard glyphs -> owner D7:W7 -> existing physical T5.
+
+    D7:W7 space and period are text data inside this explicit record.
+    D2:W2 structural separator/dot never become text or Lisp execution.
+    Parentheses, tabs and newlines remain unsupported as text projections
+    pending a separate context decision.
+    """
+    from d7_symbol_codec import D7CodecError, current_codec
+
+    try:
+        cells = current_codec().encode_text(text, "ук")
+    except D7CodecError as exc:
+        raise SensT5Error(f"D7_UK_INPUT: {exc}") from exc
+    if not cells:
+        raise SensT5Error("empty D7 text record")
+    physical = encode_words(list(cells))
+    if decode_d7_t5(physical, "ук") != text:
+        raise SensT5Error("D7/T5 failed strict word-and-text roundtrip")
+    return physical
+
+
+def decode_d7_t5(data: bytes, surface: str = "ук") -> str:
+    """Unpack canonical T5 and require *every* word to be admitted D7 W7.
+
+    Never reinterpret any D2 word as D7 text. Surface translation is explicit.
+    """
+    from d7_symbol_codec import D7CodecError, current_codec
+
+    words = decode_bytes(data)
+    if any(len(word) != 7 for word in words):
+        raise SensT5Error("D7_T5_WIDTH: only exact W7 words are allowed")
+    try:
+        return current_codec().render_text(words, surface)
+    except D7CodecError as exc:
+        raise SensT5Error(f"D7_T5_PROJECTION: {exc}") from exc

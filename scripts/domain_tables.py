@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 
@@ -15,7 +16,7 @@ D9_TABLE = ROOT / "lib" / "domains" / "d9.lisp"
 D10_TABLE = ROOT / "lib" / "domains" / "d10.lisp"
 CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,)
 
-TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
+TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
     r'^\s*\(([01]{1,10})\s+'
     + r'\(ук\s+' + TOKEN + r'\)\s+'
@@ -48,11 +49,22 @@ class DomainTableRow:
         return "surface"
 
 
-def decode(token: str, *, literal_empty: bool = False) -> str | None:
+def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False) -> str | None:
     if token == "()":
         return "()" if literal_empty else None
+    if d7_surface:
+        if token.startswith('"') and token.endswith('"'):
+            glyph = json.loads(token)
+            if len(glyph) != 1 or glyph.isalpha():
+                raise ValueError(f"D7 quoted surface must be exactly one non-letter: {token!r}")
+            return glyph
+        if len(token) != 1 or not token.isalpha():
+            raise ValueError(f"invalid unquoted D7 letter: {token!r}")
+        return token
     if token.startswith('"') and token.endswith('"'):
-        return token[1:-1]
+        # Escaped punctuation, whitespace and quotes belong to the glyph,
+        # not to D7 binary identity.
+        return json.loads(token)
     return token
 
 
@@ -80,15 +92,15 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 domain=f"D{expected_width}",
                 width=expected_width,
                 bits=bits,
-                uk=decode(uk, literal_empty=literal_empty),
-                ukr=decode(ukr, literal_empty=literal_empty),
-                san=decode(san, literal_empty=literal_empty),
-                en=decode(en, literal_empty=literal_empty),
+                uk=decode(uk, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                ukr=decode(ukr, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                san=decode(san, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                en=decode(en, literal_empty=literal_empty, d7_surface=expected_width == 7),
                 lisp=decode(lisp, literal_empty=literal_empty),
-                sym=decode(sym, literal_empty=literal_empty),
+                sym=decode(sym, literal_empty=literal_empty, d7_surface=expected_width == 7),
             )
         )
-    expected = 126 if expected_width == 7 else 1 << expected_width
+    expected = 1 << expected_width
     if len(rows) != expected:
         raise ValueError(f"{path}: expected {expected} rows, found {len(rows)}")
     return rows

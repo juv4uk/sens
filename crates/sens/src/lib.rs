@@ -13,6 +13,7 @@ mod bit9;
 mod binary_number;
 mod domain_numeric;
 mod bits;
+pub mod d7_keyboard;
 mod canonical_reader;
 pub mod universal_frame3;
 pub mod frame3_domain;
@@ -249,11 +250,12 @@ pub use ternary_transport::{
     encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
     render_ternary_words_vertical, ternary_transport_accounting,
     TernaryTransportAccounting, TernaryTransportError,
+    encode_d7_uk_t5, decode_d7_uk_t5, D7T5Error,
 };
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
-    packed_transport_accounting, semantic_source_bits, unpack_binary_source_words,
-    PackedTransportAccounting,
+    pack_domain_coordinates, packed_transport_accounting, semantic_source_bits,
+    unpack_binary_source_words, unpack_domain_coordinates, PackedTransportAccounting,
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
