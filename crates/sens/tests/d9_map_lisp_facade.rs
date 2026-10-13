@@ -12,14 +12,14 @@ fn session() -> Session {
     ).expect("derived core bootstrap");
     eval_pinned_reasoning_source(
         "lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session
-    ).expect("Lisp-owned AVL map bootstrap");
+    ).expect("Lisp-owned persistent map bootstrap");
     session
 }
 
 #[test]
 fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
     for (path, source, expected_macro_count) in [
-        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), 2),
+        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), 0),
         ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), 0),
         ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), 13),
     ] {
@@ -59,12 +59,21 @@ fn collect_exact_head_identities(expr: &Expr, out: &mut Vec<(usize, u16)>) {
 }
 
 #[test]
-fn persistent_map_string_order_has_exact_width_qualified_heads() {
+fn persistent_map_core_uses_only_exact_d3_d4_heads_and_no_numeric_ordering() {
     let source = include_str!("../../../lib/persistent-map.lisp");
-    for obsolete in ["00111100", "00111111", "01000000", "01000101"] {
+
+    for forbidden in [
+        "01010",      // D5 PLUS / historical arithmetic path
+        "01011",      // D5 DIFFERENCE
+        "11010",      // D5 LESSP
+        "110011100",  // D9 STRING-EMPTY?
+        "110101011",  // D9 STRING-FIRST
+        "110011101",  // D9 STRING-REST
+        "11100000",   // D8 CHAR-CODE
+    ] {
         assert!(
-            !source.contains(&format!("({obsolete} ")),
-            "historical W8 executable head survived migration: {obsolete}"
+            !source.contains(&format!("({forbidden} ")),
+            "persistent map reintroduced arithmetic/text-order head {forbidden}"
         );
     }
 
@@ -72,31 +81,18 @@ fn persistent_map_string_order_has_exact_width_qualified_heads() {
         "lib/persistent-map.lisp",
         source,
     )
-    .expect("persistent-map exact-domain source must parse");
+    .expect("persistent map must parse as exact-domain source");
 
     let mut heads = Vec::new();
     for expr in &parsed {
         collect_exact_head_identities(expr, &mut heads);
     }
 
-    for (width, bits, expected, name) in [
-        (9usize, 0b110011100u16, 3usize, "STRING-EMPTY?"),
-        (9usize, 0b110101011u16, 4usize, "STRING-FIRST"),
-        (9usize, 0b110011101u16, 2usize, "STRING-REST"),
-        (8usize, 0b11100000u16, 4usize, "CHAR-CODE"),
-    ] {
-        let actual = heads
-            .iter()
-            .filter(|&&(actual_width, actual_bits)| {
-                actual_width == width && actual_bits == bits
-            })
-            .count();
-        assert_eq!(
-            actual, expected,
-            "{name} must retain exact D{width}:{bits:0width$b} identity; got {actual}",
-            width = width
-        );
-    }
+    assert!(!heads.is_empty(), "proof must inspect executable exact-domain heads");
+    assert!(
+        heads.iter().all(|(width, _)| matches!(width, 3 | 4)),
+        "persistent map execution must be D3/D4-only; got {heads:?}"
+    );
 }
 
 #[test]
@@ -118,39 +114,70 @@ fn internal_map_facade_is_not_d9_auto_dispatch() {
 }
 
 #[test]
-fn private_codepoint_order_returns_exact_d1_bits() {
+fn persistent_map_bounded_update_space_matches_independent_model() {
     let mut session = session();
-    for (left, right, expected) in [
-        ("a", "b", true),
-        ("b", "a", false),
-        ("a", "a", false),
-        ("", "a", true),
-        ("a", "", false),
-        ("", "", false),
-        ("а", "б", true),
-    ] {
-        let source = format!("(внутрішній-текст-передує? \"{left}\" \"{right}\")");
-        let actual = eval_program(&source, &mut session)
-            .unwrap_or_else(|e| panic!("strict D1 string order {source}: {e:?}"))
+    let keys = ["a", "b", "c"];
+
+    // 3^4 = 81 deterministic update traces. This is deliberately a small,
+    // exhaustive state-space witness rather than another single fixture.
+    for trace in 0usize..81 {
+        let mut n = trace;
+        let mut source = "map-empty".to_string();
+        let mut model = std::collections::BTreeMap::<&str, String>::new();
+
+        for step in 0..4 {
+            let key = keys[n % keys.len()];
+            n /= keys.len();
+            let value = format!("v{step}");
+            source = format!(
+                "(внутрішня-мапа-вставити \"{key}\" \"{value}\" {source})"
+            );
+            model.insert(key, value);
+        }
+
+        for key in keys {
+            let get = eval_program(
+                &format!("(внутрішня-мапа-отримати \"{key}\" {source})"),
+                &mut session,
+            )
+            .unwrap_or_else(|e| panic!("trace={trace} key={key} get: {e:?}"))
+            .value
+            .to_string();
+
+            let expected = model
+                .get(key)
+                .map(|value| format!("(\"{value}\")"))
+                .unwrap_or_else(|| "()".to_string());
+            assert_eq!(get, expected, "trace={trace} key={key}");
+
+            let contains = eval_program(
+                &format!("(внутрішня-мапа-містить \"{key}\" {source})"),
+                &mut session,
+            )
+            .unwrap_or_else(|e| panic!("trace={trace} key={key} contains: {e:?}"))
             .value;
-        assert_eq!(actual.as_predicate_bit(), Some(expected),
-            "string order must project only exact D1 YES/NO: {source}");
+            assert_eq!(
+                contains.as_predicate_bit(),
+                Some(model.contains_key(key)),
+                "membership must be exact D1 for trace={trace} key={key}"
+            );
+        }
     }
 }
 
 #[test]
-fn private_two_argument_string_order_preserves_distinct_avl_keys() {
+fn persistent_map_replaces_equal_key_without_growing_a_duplicate_entry() {
     let mut session = session();
-    let left_then_right = eval_program(
-        "(внутрішня-мапа-отримати \"b\" (внутрішня-мапа-вставити \"b\" 9 (внутрішня-мапа-вставити \"a\" 7 map-empty)))",
-        &mut session
-    ).expect("two string-key insertions must not call an unadmitted D8 byte head");
-    assert_eq!(left_then_right.value.to_string(), "(9)");
-    let reverse = eval_program(
-        "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 (внутрішня-мапа-вставити \"b\" 9 map-empty)))",
-        &mut session
-    ).expect("comparison must be stable regardless of insertion order");
-    assert_eq!(reverse.value.to_string(), "(7)");
+    let source =
+        "(внутрішня-мапа-список
+           (внутрішня-мапа-вставити \"a\" \"new\"
+             (внутрішня-мапа-вставити \"b\" \"bee\"
+               (внутрішня-мапа-вставити \"a\" \"old\" map-empty))))";
+    let listed = eval_program(source, &mut session)
+        .expect("persistent association map replacement")
+        .value
+        .to_string();
+    assert_eq!(listed, "((\"a\" . \"new\") (\"b\" . \"bee\"))");
 }
 
 #[test]
@@ -159,11 +186,11 @@ fn internal_map_facade_inserts_and_reads_one_element() {
     let inserted = eval_program(
         "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 map-empty))",
         &mut session
-    ).expect("one-key AVL insert and read use Lisp closures");
+    ).expect("one-key persistent map insert and read use Lisp closures");
     assert_eq!(inserted.value.to_string(), "(7)");
     let listed = eval_program(
         "(внутрішня-мапа-список (внутрішня-мапа-вставити \"a\" 7 map-empty))",
         &mut session
-    ).expect("one-key AVL map should traverse without D9 dispatch");
+    ).expect("one-key persistent map should traverse without D9 dispatch");
     assert_eq!(listed.value.to_string(), "((\"a\" . 7))");
 }

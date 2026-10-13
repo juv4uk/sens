@@ -1,214 +1,54 @@
-; A persistent (immutable, structural-sharing) key -> value map, backed by
-; an AVL-balanced binary search tree over string keys (PLAN.md item 15).
-; No mutation anywhere — `map-insert` returns a *new* tree, sharing every
-; subtree it didn't touch, the same discipline `*knowledge-journal*` in
-; lib/knowledge.lisp already uses for a different kind of growth. Ordering
-; needs `string<?` — the one primitive item 20's G5 audit found genuinely
-; missing (see its own comment in special_forms.rs); everything else here
-; — the tree, rotations, insert, lookup — is ordinary my-lisp, no Rust.
+; Персистентна map без прихованої арифметики.
 ;
-; Chosen over an unbalanced tree per explicit decision (2026-08-09):
-; stable O(log n), not "usually fine." Chosen over a mutable hash table
-; per the same day's finding in docs/mccarthy-vision.md: McCarthy's own
-; 1978 "History of Lisp" retrospective names rplaca/rplacd's cost plainly
-; — "programs that use them cannot be conveniently represented in logic
-; ... they don't permit replacement of equals by equals." A persistent
-; tree keeps that property; a mutable table would not.
+; Поточний числовий закон SENS допускає арифметику лише над явно
+; кваліфікованими D24+ значеннями. Попередня AVL-реалізація зберігала
+; host-подібні висоти 0/1/-1 і порівнювала codepoint через D5 LESSP.
+; Після ратифікації D24+ це правильно стало недопустимим.
 ;
-; A node is a 5-element list: (key value height left right). The empty
-; tree is '() (height 0). Keys are strings, compared with `eq` for
-; equality and `string<?` for ordering — a symbol key must go through
-; `symbol->string` first, the same conversion `describe` and friends in
-; lib/knowledge.lisp already require elsewhere.
+; Для семантики key->value балансування не є необхідним. Ця реалізація
+; зберігає незмінність і structural sharing як список dotted entries:
+;   (("a" . value-a) ("b" . value-b) ...)
+; Вставка замінює перший рівний ключ або додає новий у хвіст. Рівність
+; ключів належить D3 EQ; жоден порядок рядків, числова висота чи
+; арифметичний literal не потрібні.
 ;
-; Персистентна (незмінна, зі структурним sharing) мапа ключ -> значення,
-; на основі AVL-збалансованого бінарного дерева пошуку над рядковими
-; ключами (PLAN.md, пункт 15). Жодної мутації ніде — `map-insert` повертає
-; *нове* дерево, ділячи кожне не зачеплене піддерево, та сама дисципліна,
-; яку `*knowledge-journal*` в lib/knowledge.lisp вже застосовує для іншого
-; виду росту. Впорядкування потребує `string<?` — єдиного примітива, якого
-; аудит G5 з пункту 20 справді не знайшов серед наявних (див. власний
-; коментар у special_forms.rs); усе інше тут — саме дерево, ротації,
-; вставка, пошук — звичайна my-lisp, без Rust.
-;
-; Обрано збалансоване дерево замість незбалансованого свідомим рішенням
-; (2026-08-09): стабільний O(log n), не "зазвичай нормально". Обрано
-; персистентне дерево замість мутабельної хеш-таблиці за тією самою
-; знахідкою того дня в docs/mccarthy-vision.md: власна ретроспектива
-; МакКарті 1978 року "History of Lisp" прямо називає ціну rplaca/rplacd
-; — "programs that use them cannot be conveniently represented in logic
-; ... they don't permit replacement of equals by equals." Персистентне
-; дерево зберігає цю властивість; мутабельна таблиця — ні.
-;
-; Вузол — 5-елементний список: (key value height left right). Порожнє
-; дерево — '() (висота 0). Ключі — рядки, порівнюються через `eq` на
-; рівність і `string<?` на порядок — символьний ключ має спершу пройти
-; через `symbol->string`, ту саму конверсію, яку `describe` та інші вже
-; вимагають в lib/knowledge.lisp.
+; Виконавчі голови цього файла навмисно обмежені D3/D4. Бітність є
+; частиною identity: 0011/0010/0101/0100/1110 — D4; 110/101/111/100/011
+; — D3. D9 map-residents тут не отримують автоматичної callability:
+; нижні українські імена — Lisp-owned closures.
 
 (0011 map-empty (001 ()))
 
-(0011 node-key (0010 (n) (100 n)))
-(0011 node-value (0010 (n) (1001 n)))
-(0011 node-height (0010 (n) (10011 n)))
-; node-left/node-right kept as semantic names (readability inside the
-; AVL balance/rotate logic below) but aliased to fourth/fifth (same
-; closure objects, core.lisp, 2026-08-10) rather than re-spelling the
-; same primitive chains locally — they computed exactly what
-; fourth/fifth already do.
-; node-left/node-right лишено як семантичні назви (читабельність у
-; логіці балансування/ротації AVL нижче), але як псевдоніми fourth/
-; fifth (ті самі об'єкти-closure з core.lisp), не переписані вручну —
-; вони обчислювали точно те саме, що вже роблять fourth/fifth.
-(0011 node-left 00110001)
-(0011 node-right 00110010)
-
-; AVL height: only structural empty is the zero-height sentinel.
-; D4 NULL consumes () and returns exact D1; no unadmitted D8 EQUAL.
-(0011 height-of
-  (0010 (n)
-    (110
-      ((0101 n) 0)
-      ((010 ()) (node-height n)))))
-
-; Maximum of numeric heights; keep the D5 LESSP comparison and use exact
-; D1 YES as the unconditional fallback, not a fabricated EQUAL call.
-(0011 max2
-  (0010 (a b)
-    (110
-      ((11010 a b) b)
-      ((010 ()) a))))
-
-; Rebuilds a node with a recomputed height from its (possibly new)
-; children — every insert/rotation goes through this, never hand-tracks
-; a height number itself.
-; Перебудовує вузол із перерахованою висотою з його (можливо нових)
-; дітей — кожна вставка/ротація йде через це, ніколи не рахує висоту
-; вручну.
-(0011 make-balanced-node
-  (0010 (key value left right)
-    (1110 key value (01010 1 (max2 (height-of left) (height-of right))) left right)))
-
-(0011 balance-factor
-  (0010 (n) (01011 (height-of (node-left n)) (height-of (node-right n)))))
-
-(0011 rotate-left
-  (0010 (n)
-    (нехай-похідне ((r (node-right n)))
-      (make-balanced-node (node-key r) (node-value r)
-        (make-balanced-node (node-key n) (node-value n) (node-left n) (node-left r))
-        (node-right r)))))
-
-(0011 rotate-right
-  (0010 (n)
-    (нехай-похідне ((l (node-left n)))
-      (make-balanced-node (node-key l) (node-value l)
-        (node-left l)
-        (make-balanced-node (node-key n) (node-value n) (node-right l) (node-right n))))))
-
-; Standard AVL rebalance: at most one single or double rotation restores
-; |balance factor| <= 1 after a single insert, checked on the way back up
-; the recursive call stack in map-insert below.
-; Стандартна AVL-ребалансировка: щонайбільше одна проста чи подвійна
-; ротація відновлює |balance-factor| <= 1 після однієї вставки,
-; перевіряється на зворотному шляху рекурсії в map-insert нижче.
-(0011 balance
-  (0010 (n)
-    (110
-      
-      ((010 n)  n)
-      ((11011 (balance-factor n) 1) 
-       (110
-         ((11010 (balance-factor (node-left n)) 0) 
-          (rotate-right (make-balanced-node (node-key n) (node-value n)
-                          (rotate-left (node-left n)) (node-right n))))
-         ((010 ()) (rotate-right n))))
-      ((11010 (balance-factor n) -1) 
-       (110
-         ((11011 (balance-factor (node-right n)) 0) 
-          (rotate-left (make-balanced-node (node-key n) (node-value n)
-                         (node-left n) (rotate-right (node-right n)))))
-         ((010 ()) (rotate-left n))))
-      ((010 ()) n))))
-
-; Returns a new tree with `key`/`value` inserted (or `value` replacing an
-; existing entry at `key`) — the original tree is untouched, every
-; subtree not on the path to `key` is shared, not copied.
-; Повертає нове дерево зі вставленим `key`/`value` (або із заміненим
-; значенням на наявному `key`) — оригінальне дерево не чіпається, кожне
-; піддерево поза шляхом до `key` ділиться, не копіюється.
 (0011 map-insert
-  (0010 (key value tree)
+  (0010 (key value entries)
     (110
-      
-      ((010 tree)  (make-balanced-node key value (001 ()) (001 ())))
-      ((101 key (node-key tree))
-       (make-balanced-node key value (node-left tree) (node-right tree)))
-      ((внутрішній-текст-передує? key (node-key tree))
-       (balance (make-balanced-node (node-key tree) (node-value tree)
-                  (внутрішня-мапа-вставити key value (node-left tree))
-                  (node-right tree))))
+      ((0101 entries)
+       (1110 (111 key value)))
+      ((101 key (100 (100 entries)))
+       (111 (111 key value) (011 entries)))
       ((010 ())
-       (balance (make-balanced-node (node-key tree) (node-value tree)
-                  (node-left tree)
-                  (внутрішня-мапа-вставити key value (node-right tree))))))))
+       (111 (100 entries)
+            (map-insert key value (011 entries)))))))
 
-; Returns '() if `key` is absent, or a one-element list `(value)` if
-; present — the classic "maybe" shape (same idiom lib/reason.lisp's proof
-; lists use), chosen specifically so a legitimately-stored '() value at
-; some key is never confused with "not found."
-; Повертає '(), якщо `key` відсутній, або одноелементний список
-; `(value)`, якщо присутній — класична форма "maybe" (той самий ідіом,
-; що й списки доведень у lib/reason.lisp), обрана саме тому, щоб законно
-; збережене значення '() за якимось ключем ніколи не сплутати з
-; "не знайдено".
 (0011 map-get
-  (0010 (key tree)
+  (0010 (key entries)
     (110
-      
-      ((010 tree)  (001 ()))
-      ((101 key (node-key tree)) (1110 (node-value tree)))
-      ((внутрішній-текст-передує? key (node-key tree)) (внутрішня-мапа-отримати key (node-left tree)))
-      ((010 ()) (внутрішня-мапа-отримати key (node-right tree))))))
+      ((0101 entries) (001 ()))
+      ((101 key (100 (100 entries)))
+       (1110 (011 (100 entries))))
+      ((010 ())
+       (map-get key (011 entries))))))
 
 (0011 map-contains?
-  (0010 (key tree) (0100 (010 (внутрішня-мапа-отримати key tree)))))
+  (0010 (key entries)
+    (0100 (010 (map-get key entries)))))
 
-; In-order traversal — the keys come back sorted, a free side effect of
-; the tree being a BST, not something map->list computes separately.
-; Обхід in-order — ключі повертаються відсортованими, побічний ефект
-; того, що дерево — BST, а не щось, що map->list рахує окремо.
 (0011 map->list
-  (0010 (tree)
-    (110
-      
-      ((010 tree)  (001 ()))
-      ((010 ()) (1111 (внутрішня-мапа-список (node-left tree))
-                 (111 (111 (node-key tree) (node-value tree))
-                       (внутрішня-мапа-список (node-right tree))))))))
+  (0010 (entries) entries))
 
-; Derived callable closures for D9 map concepts (internal staging only).
-; The ratified D9 coordinates are NOT automatically assigned mechanisms.
-; Executable code here calls already-defined Lisp closures by non-registry
-; private Ukrainian names; external D9 identity stays fail-closed.
+; Приватні Lisp-owned механізми. Назви лишають зовнішній D9 resident
+; fail-closed: residency сама по собі не створює mechanism.
 (0011 внутрішня-мапа-вставити map-insert)
 (0011 внутрішня-мапа-отримати map-get)
 (0011 внутрішня-мапа-містить map-contains?)
-; Private compatibility surface to the existing Lisp-derived two-argument
-; string comparator. D8:10110001 does not become an admitted native call.
-; A strict D1 lexicographic order, derived from numeric LESSP and exact
-; domain mechanisms: D9:110011100 STRING-EMPTY?, D9:110101011 STRING-FIRST,
-; D9:110011101 STRING-REST, and D8:11100000 CHAR-CODE. Prefix-shorter is
-; less; equal heads recurse. No host T/NIL coercion and no D8 STRING<
-; admission. Width is part of every identity; none of these are W8 aliases.
-(0011 внутрішній-текст-передує?
-  (0010 (a b)
-    (110
-      ((110011100 a) (0100 (110011100 b)))
-      ((110011100 b) (0101 (001 (0))))
-      ((11010 (11100000 (110101011 a)) (11100000 (110101011 b)))
-       (0101 (001 ())))
-      ((11010 (11100000 (110101011 b)) (11100000 (110101011 a)))
-       (0101 (001 (0))))
-      ((010 ()) (внутрішній-текст-передує? (110011101 a) (110011101 b))))))
 (0011 внутрішня-мапа-список map->list)
