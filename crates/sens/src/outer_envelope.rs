@@ -21,7 +21,7 @@
 
 use crate::{
     BinaryNumber, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
-    DomainIdentity, PackedBitstream, Text7,
+    BitPacker, DomainIdentity, PackedBitstream, Text7,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -91,18 +91,16 @@ impl OuterEnvelope {
 }
 
 pub fn encode_outer_records(records: &[OuterRecord]) -> Result<OuterEnvelope, OuterEnvelopeError> {
-    let mut bits = Vec::new();
-
+    // Stream into the existing exact bit-packer: no temporary Vec<u8>
+    // carrying one host BYTE for every meaningful SENS bit.
+    let mut packed = BitPacker::new();
     for record in records {
-        encode_record(record, &mut bits)?;
+        encode_record(record, &mut packed)?;
     }
-
-    Ok(OuterEnvelope {
-        packed: pack_bits(&bits),
-    })
+    Ok(OuterEnvelope { packed: packed.finish() })
 }
 
-fn encode_record(record: &OuterRecord, out: &mut Vec<u8>) -> Result<(), OuterEnvelopeError> {
+fn encode_record(record: &OuterRecord, out: &mut BitPacker) -> Result<(), OuterEnvelopeError> {
     match record {
         OuterRecord::D(identity) => {
             let width = identity.width();
@@ -124,11 +122,13 @@ fn encode_record(record: &OuterRecord, out: &mut Vec<u8>) -> Result<(), OuterEnv
             // normalized magnitude bits. Explicit D24/D48/... identity
             // must never disappear during this legacy/candidate transport.
             if value.numeric_domain_width().is_some() {
-                return Err(OuterEnvelopeError::InvalidNumber { bit: out.len() });
+                return Err(OuterEnvelopeError::InvalidNumber { bit: out.bit_len() });
             }
             append_fixed(0b11110, 5, out);
             append_gamma0(value.width(), out)?;
-            out.extend_from_slice(value.as_bits());
+            for &bit in value.as_bits() {
+                out.push(Bit1::new(bit).expect("BinaryNumber stores only exact bits"));
+            }
         }
         OuterRecord::L { depth, index } => {
             append_fixed(0b111110, 6, out);
@@ -229,23 +229,28 @@ fn domain_from_parts(width: usize, payload: u8) -> Option<DomainIdentity> {
     Some(source.domain_identity())
 }
 
-fn append_gamma0(value: usize, out: &mut Vec<u8>) -> Result<(), OuterEnvelopeError> {
+fn append_gamma0(value: usize, out: &mut BitPacker) -> Result<(), OuterEnvelopeError> {
     let encoded = value
         .checked_add(1)
-        .ok_or(OuterEnvelopeError::LengthOverflow { bit: out.len() })?;
+        .ok_or(OuterEnvelopeError::LengthOverflow { bit: out.bit_len() })?;
     let width = usize::BITS as usize - encoded.leading_zeros() as usize;
 
-    out.extend(std::iter::repeat_n(0, width - 1));
+    for _ in 0..width - 1 {
+        out.push(Bit1::new(0).expect("literal bit"));
+    }
     append_fixed(encoded as u64, width, out);
     Ok(())
 }
 
-fn append_fixed(value: u64, width: usize, out: &mut Vec<u8>) {
+fn append_fixed(value: u64, width: usize, out: &mut BitPacker) {
     for shift in (0..width).rev() {
-        out.push(((value >> shift) & 1) as u8);
+        out.push(Bit1::new(((value >> shift) & 1) as u8).expect("masked bit"));
     }
 }
 
+// Independent old bit-for-bit oracle retained ONLY for negative/golden tests;
+// production never allocates one host byte per semantic bit.
+#[cfg(test)]
 fn pack_bits(bits: &[u8]) -> PackedBitstream {
     let mut bytes = vec![0u8; bits.len().div_ceil(8)];
 
@@ -388,6 +393,76 @@ mod tests {
             }
         }
         assert_eq!(count, 510);
+    }
+
+    #[test]
+    fn exact_2046_candidate_census_and_independent_byte_golden_vectors() {
+        // D1..D10 has 2046 possible *coordinates*, not 2046 callable functions.
+        // Candidate S is still only a D1..D8 transport proposal, not authority.
+        let mut candidates = 0usize;
+        let mut admitted = 0usize;
+        let mut rejected = 0usize;
+        let mut semantic_bits = 0usize;
+        let mut batch = Vec::new();
+        for width in 1u8..=10 {
+            for bits in 0u16..(1u16 << width) {
+                let c = crate::domain_ladder::DomainCoordinate::new(width, bits)
+                    .expect("coordinate width/payload");
+                candidates += 1;
+                semantic_bits += usize::from(width);
+                assert_eq!(c.width(), width, "first loss at D{width}:{bits:010b}");
+                assert_eq!(c.bits(), bits, "first bit loss at D{width}:{bits:010b}");
+
+                if width <= 8 {
+                    let record = d(width as usize, bits as u8);
+                    let packed = encode_outer_records(std::slice::from_ref(&record))
+                        .expect("D1..D8 candidate S");
+                    let header = if width <= 7 {
+                        format!("{:03b}", width - 1)
+                    } else {
+                        String::from("1110")
+                    };
+                    let visible = format!("{header}{bits:0w$b}", w = usize::from(width));
+                    let reference_bits = visible.bytes().map(|b| b - b'0').collect::<Vec<_>>();
+                    let independently_packed = pack_bits(&reference_bits);
+                    assert_eq!(packed.bytes(), independently_packed.bytes(),
+                        "first physical byte mismatch D{width} bits={bits}");
+                    assert_eq!(packed.meaningful_bit_len(), reference_bits.len(),
+                        "first exact-width mismatch D{width} bits={bits}");
+                    assert_eq!(packed.decode().unwrap(), vec![record.clone()],
+                        "first decode identity mismatch D{width} bits={bits}");
+                    batch.push(record);
+                    admitted += 1;
+                } else if width == 9 {
+                    // D9 is valid *mechanical* source data, but the #2189
+                    // prefix tree has no D9 record. Never narrow through u8.
+                    let identity = BinarySourceWord::W9(
+                        crate::Bit9::new(bits).expect("D9 carrier")
+                    ).domain_identity();
+                    let error = encode_outer_records(&[OuterRecord::D(identity)])
+                        .expect_err("no D9 extension ratified for candidate S");
+                    assert_eq!(error, OuterEnvelopeError::InvalidDomain {
+                        width: 9, payload: bits,
+                    }, "D9:{bits:09b} was narrowed or misreported");
+                    rejected += 1;
+                } else {
+                    // D10 exists as an owner-ratified coordinate, not as a
+                    // runtime DomainIdentity or an envelope record.
+                    assert_eq!(c.owner_residency(), Some(true));
+                    assert_eq!(c.width(), 10);
+                    assert_eq!(c.bits(), bits);
+                    rejected += 1;
+                }
+            }
+        }
+        assert_eq!((candidates, admitted, rejected), (2046, 510, 1536));
+        assert_eq!(semantic_bits, 18_434);
+        let stream = encode_outer_records(&batch).unwrap();
+        // Sum(width*2^width + prefix*2^width) for candidate S D1..D8.
+        assert_eq!(stream.meaningful_bit_len(), 5_372);
+        assert_eq!(stream.bytes().len(), 672);
+        assert_eq!(stream.decode().unwrap(), batch,
+            "cross-byte concatenation changed one of the 510 coordinates");
     }
 
     #[test]
