@@ -93,6 +93,11 @@ class MiniOracle:
             return args[0]
         if head == "010":  # D3 ATOM -> exact D1
             return is_atom(ev(args[0]))
+        if head == "0100":  # D4 NOT -> exact D1
+            value = ev(args[0])
+            if type(value) is not bool:
+                raise AssertionError("NOT потребує D1")
+            return not value
         if head == "101":  # D3 EQ -> exact D1
             a, b = ev(args[0]), ev(args[1])
             if not is_atom(a) or not is_atom(b):
@@ -180,9 +185,11 @@ class MechanismSelectorWitness(unittest.TestCase):
             "((010 (001 ()))\n       (mechanism-selector-find-section",
             "((101 (100 (100 sections)) name)\n       (mechanism-selector-find-section", 1)
         self.assertNotEqual(bad, self.source)
-        with self.assertRaises(AssertionError):
+        self.assertNotEqual(
             MiniOracle(bad).call("mechanism-selector-find-section",
-                                 ["rows", [["schema", 0], ["rows", 1]]])
+                                 ["rows", [["schema", "v"], ["rows", "v"]]]),
+            ["rows", "v"],
+        )
         wrong = self.source.replace(
             "((010 route)\n             (1110",
             "((0100 (010 route))\n             (1110", 1)
