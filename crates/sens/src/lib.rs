@@ -194,7 +194,6 @@ pub mod semantic_registry_export {
 pub mod syntax;
 mod text7;
 mod text7_projection;
-mod text7_projection_generated;
 mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
@@ -259,8 +258,7 @@ pub use source_packing::{
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
-    encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
-    TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
+    encode_text7, render_text7, Text7Layout, Text7ProjectionError,
 };
 
 pub use binary_execution::{eval_t5_program, PhysicalT5Program, T5ExecutionError};
