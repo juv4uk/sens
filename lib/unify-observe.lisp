@@ -1,6 +1,6 @@
 ; #219 — explicit observation boundary for historical unification.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Migrated: two-field COND; canonical exact D1:1 fallback (no computed truth).
 ; Duplicate arms removed. Failure is positively established data, not host
 ; truthiness. Width is identity; every bit of the domain address is valued.
 ;
@@ -28,5 +28,5 @@
            left
            right
            substitution))
-        ((010 (001 ()))
+        (#d1:1
          (1110 (001 unified) raw))))))
