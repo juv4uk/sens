@@ -135,6 +135,23 @@ class BatchSourceTests(unittest.TestCase):
             with self.subTest(path=row["path"]):
                 self.assertEqual(row["status"], "source-era-unproved")
 
+    def test_macro_and_machine_sources_are_assessed_not_name_blocked(self):
+        paths = {"lib/macro.lisp", "lib/machine/block.lisp"}
+        # A file-name list must never suppress source evidence. Genuine
+        # parser/semantic findings remain visible in each returned row.
+        self.assertFalse(hasattr(MOD, "HOLDS"))
+        census = MOD.run(ROOT, False, paths)
+        self.assertEqual(census["summary"]["scanned"], 2)
+        rows = {row["path"]: row for row in census["files"]}
+        self.assertEqual(set(rows), paths)
+        for path, row in rows.items():
+            with self.subTest(path=path):
+                self.assertNotEqual(row["status"], "skipped")
+                self.assertNotIn(
+                    "filename hold",
+                    " ".join(row.get("reasons", [])).lower(),
+                )
+
     def test_exact_sha_pinned_schema_metadata_is_not_executable_source(self):
         path = "lib/function-table-mechanisms.lisp"
         report = MOD.run(ROOT, False, {path})
