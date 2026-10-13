@@ -15,7 +15,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Підготувати незмінний журнал відмов
         shell: bash
-        run: : > "$RUNNER_TEMP/narrate-diagnostic.jsonl"
+        run: |
+          : > "$RUNNER_TEMP/narrate-diagnostic.jsonl"
       - name: Контракт діагностики має відкидати відсутні поля
         run: python3 scripts/ci_failure_contract.py self-test
       - name: Зібрати механізм виконання SENS і діагностувати збій
