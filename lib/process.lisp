@@ -27,11 +27,8 @@
       ((0100 (101 (100 raw) (001 process-result)))
        (1110 (001 rejected) (001 invalid-process-result)))
       ((101 (100 raw) (001 process-result))
-       (001001 ((stdout-result
-                (utf8-decode-string (process-raw-stdout-bytes raw)))
-              (stderr-result
-                (utf8-decode-string (process-raw-stderr-bytes raw))))
-         (110
+       ((0010 (stdout-result stderr-result)
+        (110
            ((0100 (101 (100 stdout-result) (001 decoded)))
             (1110 (001 rejected) (001 stdout-invalid-utf8)))
            ((101 (100 stdout-result) (001 decoded))
@@ -47,7 +44,9 @@
               (#d1:1
                (1110 (001 rejected) (001 stderr-invalid-utf8)))))
            (#d1:1
-            (1110 (001 rejected) (001 stdout-invalid-utf8))))))
+            (1110 (001 rejected) (001 stdout-invalid-utf8)))))
+       (utf8-decode-string (process-raw-stdout-bytes raw))
+       (utf8-decode-string (process-raw-stderr-bytes raw))))
       (#d1:1
        (1110 (001 rejected) (001 invalid-process-result))))))
 
@@ -66,8 +65,8 @@
 
 (0011 process-run
   (0010 (program args)
-    (001000 ((result (process-run-text program args)))
-      (110
+    ((0010 (result)
+        (110
         ((101 (100 result) (001 decoded-process))
          (1110
            (process-public-exit-code (1001 result))
@@ -75,7 +74,8 @@
            (100 (011 (011 (011 result))))))
         ((0100 (101 (100 result) (001 decoded-process)))
          result)
-        (#d1:1 result)))))
+        (#d1:1 result)))
+       (process-run-text program args))))
 
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
