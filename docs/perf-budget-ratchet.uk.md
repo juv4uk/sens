@@ -24,4 +24,4 @@
 
 Джерела: Valgrind 3.27.1 Cachegrind manual (https://valgrind.org/docs/manual/cg-manual.html); Kalibera–Jones (https://arxiv.org/abs/2007.10899). Наявні донори: `benchmarks/physical-sens-runtime/irefs.py`, `benchmarks/bench-methodology/paired_effect.py`, `benchmarks/domain12345678/run.py`.
 
-Контракт бюджетів — **метадані продуктивності**, не нова ратифікація доменів чи логіки двійкового SENS. Зміна лімітів — окремий коміт із причиною та review (#4134), не тихе збільшення.
+Контракт бюджетів — **метадані продуктивності**, не нова ратифікація доменів чи логіки двійкового SENS. Зміна лімітів — окремий коміт із причиною та review ([#5748](https://github.com/juv4uk/sens/issues/5748)), не тихе збільшення.

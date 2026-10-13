@@ -55,6 +55,12 @@ class RatchetEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(g.BudgetError, "PERF-EVIDENCE-INCOMPLETE"):
             self.check(row=dict(ROW, net_i_refs_per_iteration="-0.5"))
 
+    def test_missing_profiler_location_is_not_accepted(self):
+        spec = dict(POLICY["budgets"][0])
+        del spec["source_location"]
+        with self.assertRaisesRegex(g.BudgetError, "PERF-BUDGET-BAD-CONTRACT"):
+            self.check(policy=dict(POLICY, budgets=[spec]))
+
     def test_duplicate_budget(self):
         with self.assertRaisesRegex(g.BudgetError, "PERF-BUDGET-BAD-CONTRACT"):
             self.check(policy=dict(POLICY, budgets=POLICY["budgets"] * 2))
