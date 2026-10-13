@@ -364,8 +364,9 @@ mod tests {
     fn compiler_evidence_exhaustive_2046_coordinates_exact_width() {
         use crate::{
             BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
-            DomainCoordinate, DomainIdentity,
+            DomainIdentity,
         };
+        use crate::domain_ladder::DomainCoordinate;
 
         let mut checked = 0usize;
         for width in 1u8..=9 {
