@@ -207,6 +207,40 @@ def scan(args):
     return 0
 
 
+def audit(args):
+    """Audit named failures daily; a quarantine is not a silent skip."""
+    raw = json.loads(Path(args.manifest).read_text())
+    problematic = []
+    for item in raw.get("cases", []):
+        test_id = item.get("test_id", "UNNAMED")
+        owner = item.get("owner", "UNASSIGNED")
+        try:
+            seen = parse_time(item["first_seen_at"])
+        except (KeyError, ValueError, TypeError):
+            problematic.append(test_id + ":MISSING_FIRST_SEEN owner=" + owner)
+            continue
+        if now() - seen > dt.timedelta(hours=24) and (
+            item.get("stamp") not in STAMP or owner == "UNASSIGNED"
+        ):
+            problematic.append(test_id + ":ESCALATION-24H owner=" + owner)
+        if item.get("stamp") in {"TRANSITIONAL", "FLAKE"}:
+            try:
+                if parse_time(item["expires_at"]) <= now():
+                    problematic.append(test_id + ":EXPIRED_QUARANTINE owner=" + owner)
+            except (KeyError, ValueError, TypeError):
+                problematic.append(test_id + ":MISSING_QUARANTINE_EXPIRY owner=" + owner)
+    try:
+        validate_manifest(raw)
+    except (ValueError, TypeError) as exc:
+        problematic.append("INVALID_MANIFEST:" + str(exc))
+    for issue in problematic:
+        print("::error::" + issue)
+    if problematic:
+        return 1
+    print("PASS named red registry: count=" + str(len(raw["cases"])))
+    return 0
+
+
 def self_test():
     fixture = Path("tests/semantic/narrate-d3-atom-eq-law.bits")
     if not fixture.exists():
@@ -266,9 +300,11 @@ def main():
     c.add_argument("--report-file", required=True)
     c.add_argument("--allow-empty", action="store_true")
     sub.add_parser("self-test")
+    a = sub.add_parser("audit")
+    a.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
     args = parser.parse_args()
     try:
-        return {"run": run, "scan": scan, "self-test": lambda a: self_test()}[args.action](args)
+        return {"run": run, "scan": scan, "audit": audit, "self-test": lambda a: self_test()}[args.action](args)
     except (OSError, ValueError, RuntimeError) as exc:
         print("UNINFORMATIVE-OUTPUT diagnostic transport error: " + str(exc), file=sys.stderr)
         return 1
