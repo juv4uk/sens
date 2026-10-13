@@ -1,10 +1,9 @@
 name: CI — основні перевірки SENS
 
-# OWNER 2026-10-13: ONE automatic workflow per main commit.
-# All other topic workflows are manual; a single scoped check is chosen here.
+# OWNER 2026-10-13: QUARANTINE.
+# Automatic CI is paused because its current semantic tests are disputed.
+# Run manually only after the owner explicitly authorizes the corrected SENS tests.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
