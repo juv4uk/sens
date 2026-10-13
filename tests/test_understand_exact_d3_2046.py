@@ -12,10 +12,25 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/understand.lisp"
 TOKENS = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 GUARDED = {"strip-article", "understand", "understand-query"}
-LET_MIGRATED = {
-    "understand-is": ("subject", "after-is"),
-    "understand-universal": ("subject-class", "property"),
-    "understand-query-is": ("subject", "after"),
+LET_REDUCED = {"understand-is", "understand-universal", "understand-query-is"}
+# Frozen original D6 LET forms from main@c18ca3e2 (before any changes).
+FROZEN_LETS = {
+    "understand-is": """(0011 understand-is
+      (0010 (words)
+        (001000 ((subject (100 words))
+                  (after-is (strip-article (0111 words))))
+          (1110 (1110 (100 after-is) subject)))))""",
+    "understand-universal": """(0011 understand-universal
+      (0010 (words)
+        (001000 ((subject-class (1001 words))
+                  (property (100111 words)))
+          (1110 (1110 (001 has) (1110 (001 var) (001 w)) property)
+                (1110 subject-class (1110 (001 var) (001 w)))))))""",
+    "understand-query-is": """(0011 understand-query-is
+      (0010 (words)
+        (001000 ((subject (1001 words))
+                  (after (0111 words)))
+          (1110 (100 (strip-article after)) subject))))""",
 }
 FROZEN = {
     "strip-article": "db88279d0f09812f",
@@ -92,23 +107,31 @@ def verify_unchanged_laws(forms):
             if not clauses or clauses[0] != [["010", "words"], ["001", []]]:
                 raise AssertionError("непорожній CAR до точного D3 ATOM")
             lam[2].pop(1)
-        if name in LET_MIGRATED:
-            # Незалежно відновлюємо історичну LET форму з нової λ-аплікації.
-            # Доводимо незмінність AST тіла, параметрів і порядку аргументів.
-            application = original[2][2]
-            params = LET_MIGRATED[name]
-            if not (isinstance(application, list) and len(application) == 3
-                    and isinstance(application[0], list)
-                    and len(application[0]) == 3
-                    and application[0][0] == "0010"
-                    and tuple(application[0][1]) == params):
-                raise AssertionError("точна D4 LAMBDA замість невиконуваного D6 LET")
-            lam = application[0]
-            original[2][2] = ["001000",
-                              [[params[0], application[1]],
-                               [params[1], application[2]]],
-                              lam[2]]
-        if digest(original) != FROZEN[name]:
+        if name in LET_REDUCED:
+            # Незалежна beta-редукція історичного D6 LET з frozen main:
+            # обидва binding-вирази чисті та кожен параметр вжито лише раз.
+            frozen = read_forms(FROZEN_LETS[name])
+            if len(frozen) != 1 or digest(frozen[0]) != FROZEN[name]:
+                raise AssertionError("історичний контрольний AST/sha втрачено")
+            old_let = frozen[0][2][2]
+            if old_let[0] != "001000" or len(old_let[1]) != 2:
+                raise AssertionError("історичний D6 LET має два зв'язування")
+            binding = {item[0]: item[1] for item in old_let[1]}
+            params = set(binding)
+            def uses(node):
+                if isinstance(node, list):
+                    return sum(uses(child) for child in node)
+                return 1 if node in params else 0
+            if uses(old_let[2]) != 2:
+                raise AssertionError("beta-редукція змінила використання")
+            def substitute(node):
+                if isinstance(node, list):
+                    return [substitute(child) for child in node]
+                return deepcopy(binding[node]) if node in binding else node
+            expected = substitute(old_let[2])
+            if original[2][2] != expected:
+                raise AssertionError("неточна підстановка D6 LET у чисту D3/D4 композицію")
+        elif digest(original) != FROZEN[name]:
             raise AssertionError("історичне тіло змінено: " + name)
     if names != set(FROZEN):
         raise AssertionError("втрачено визначення")
@@ -173,10 +196,11 @@ class UnderstandExactD3Witness(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, "D3 ATOM"):
                 verify_unchanged_laws(mutated)
 
-    def test_three_d6_let_forms_migrate_to_d4_lambda(self):
+    def test_three_d6_let_forms_beta_reduce_to_existing_d3_d4(self):
         verify_unchanged_laws(self.forms)
-        self.assertEqual(3 * (6 - 4), 6)  # D6 LET → D4 LAMBDA
-        self.assertEqual(3 * (3 + 3) - 3 * (6 - 4), 12)  # total net
+        # 3× (ATOM + QUOTE) guards cost 18 bits; three D6 LET
+        # heads disappear entirely, saving 18 operator-head bits.
+        self.assertEqual(3 * (len("010") + len("001")) - 3 * len("001000"), 0)
 
     def test_negative_legacy_d6_let_reintroduction(self):
         mutated = deepcopy(self.forms)
@@ -184,7 +208,7 @@ class UnderstandExactD3Witness(unittest.TestCase):
         definition[2][2] = ["001000", [["subject", ["100", "words"]],
                                        ["after-is", ["strip-article", ["0111", "words"]]]],
                             ["1110", ["1110", ["100", "after-is"], "subject"]]]
-        with self.assertRaisesRegex(AssertionError, "D4 LAMBDA"):
+        with self.assertRaisesRegex(AssertionError, "неточна підстановка"):
             verify_unchanged_laws(mutated)
 
     def test_negative_mutated_original_function_body(self):
