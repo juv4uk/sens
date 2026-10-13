@@ -300,15 +300,44 @@ def scan_executors(args):
                 raise ValueError(tid + ": native binary absent")
             if not fixture.is_file() or not fixture.name.endswith(".sens"):
                 raise ValueError(tid + ": physical SENS input absent")
+            with binary.open("rb") as binary_file:
+                if binary_file.read(4) != bytes((127, 69, 76, 70)):
+                    raise ValueError(tid + ": native executable is not ELF")
+            vrun = subprocess.run([str(binary), "--version"],
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+            vtext = vrun.stdout.decode("utf-8", errors="replace").strip()
+            if vrun.returncode != 0 or not vtext.startswith("sens "):
+                raise ValueError(tid + ": ELF version process failed")
             if (record["executor"] != str(binary)
                     or record["executor_sha256"] != digest(binary.read_bytes())
                     or record["fixture_sha256"] != digest(fixture.read_bytes())
                     or not version or record["package_version"] != version.group(1)
+                    or vtext != "sens " + version.group(1)
+                    or record.get("binary_version") != vtext
                     or record["reproduce"] != shlex.join([str(binary), str(fixture)])):
                 raise ValueError(tid + ": binary/input/version/command proof mismatch")
             for key in ("expected_sha256", "actual_sha256", "stdout_sha256", "stderr_sha256"):
                 if not DIGEST.fullmatch(str(record.get(key, ""))):
                     raise ValueError(tid + ": missing " + key)
+            # Independently replay the actual ELF; hashes are witnesses,
+            # never Python-computed SENS semantics.
+            replay = subprocess.run([str(binary), str(fixture)],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+            observed = replay.stderr if record.get("mode") == "negative" else replay.stdout
+            if (replay.returncode != record["exit_code"]
+                    or digest(observed) != record["actual_sha256"]
+                    or digest(replay.stdout) != record["stdout_sha256"]
+                    or digest(replay.stderr) != record["stderr_sha256"]):
+                raise ValueError(tid + ": real ELF replay/hash mismatch")
+            if record.get("mode") == "positive" and record["expected_sha256"] != record["actual_sha256"]:
+                raise ValueError(tid + ": expected and actual positive digests differ")
+            if record.get("mode") == "negative":
+                needle = b"not callable"
+                if (tid != "sens-domain-logic-2040-mutant"
+                        or digest(b"stderr-contains:" + needle) != record["expected_sha256"]
+                        or needle not in replay.stderr.lower()
+                        or replay.stdout):
+                    raise ValueError(tid + ": rejected for wrong reason")
             if record.get("mode") == "positive" and record.get("exit_code") != 0:
                 raise ValueError(tid + ": positive process had nonzero exit")
             if record.get("mode") == "negative" and record.get("exit_code") == 0:
