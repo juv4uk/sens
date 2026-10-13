@@ -431,7 +431,7 @@ mod tests {
 
         for width in 1u8..=10 {
             for bits in 0u16..(1u16 << width) {
-                let coordinate = crate::DomainCoordinate::new(width, bits)
+                let coordinate = crate::domain_ladder::DomainCoordinate::new(width, bits)
                     .expect("точна D1–D10 координата");
                 assert_eq!((coordinate.width(), coordinate.bits()), (width, bits));
                 checked += 1;
