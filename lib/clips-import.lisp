@@ -263,8 +263,8 @@
     (110
       
       ((010 slot-forms)  (001 ()))
-      ((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))
       ((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))
+      ((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))
       ((101 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))
       ((010 ()) (clips-lookup-slot-value slot-name (011 slot-forms))))))
 
