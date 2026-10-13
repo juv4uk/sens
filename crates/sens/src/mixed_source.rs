@@ -63,10 +63,11 @@ pub fn parse_mixed_exact_domain_machine_source(
     }
 }
 
-/// The only approved D8 READ/WRITE head at this migration boundary is the
-/// ratified eight-bit WRITE-TO-STRING, never an inferred compatibility byte.
-/// It is lifted *only* for path-pinned, trusted Lisp library sources.
-/// Historical W8 QUOTE remains opaque, and binder names remain source data.
+/// Approved current D8 mechanism heads at this migration boundary are lifted
+/// only for path-pinned trusted Lisp sources. This includes CHAR-CODE plus the
+/// admitted reader/serializer identities; identical eight-bit payloads never
+/// become current D8 merely because of their width. Historical W8 QUOTE
+/// remains opaque, and binder names remain source data.
 fn lift_pinned_d8_io(
     source: &str,
     expression: Expr,
@@ -75,7 +76,7 @@ fn lift_pinned_d8_io(
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
-            "pinned D8 READ/WRITE source exceeds structure depth",
+            "pinned D8 mechanism source exceeds structure depth",
             expression.span,
         ));
     }
@@ -95,8 +96,13 @@ fn lift_pinned_d8_io(
         return Ok(Expr { kind: ExprKind::List(items), span });
     }
 
-    if matches!(head_spelling, Some("11110100" | "11101010" | "11101101")) {
-        let words = parse_binary_source_words(head_spelling.expect("known ratified D8 IO head"))?;
+    if matches!(
+        head_spelling,
+        Some("11100000" | "11110100" | "11101010" | "11101101")
+    ) {
+        let words = parse_binary_source_words(
+            head_spelling.expect("known ratified D8 mechanism head")
+        )?;
         let word = words.first().expect("one static ratified D8 source word").word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
@@ -247,7 +253,10 @@ pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Re
     if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
         return Err(LanguageError::new(ErrorKind::Parse, "reasoning-source exact-domain reader requires a pinned source path", Span::default()));
     }
-    let base = if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
+    let base = if matches!(
+        path,
+        "lib/world.lisp" | "lib/knowledge.lisp" | "lib/persistent-map.lisp" | "lib/lisp-fs.lisp"
+    ) {
         parse_mixed_pinned_d8_io(source)?
     } else {
         parse_mixed_source(source, true)?
