@@ -58,6 +58,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
+          python3 scripts/ci_executor_invariant.py
           python3 scripts/check-domain-ladder-identity.py --self-test --check
           # Instrumental migration proof, not an alternate semantic oracle.
           # Failures retain fixture, command and actual output via RED contract.
@@ -144,7 +145,7 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          echo "test_id=frame3-bcsw-five-bytes layer=transport semantic_authority=binary-SENS"
+          echo "test_id=frame3-bcsw-five-bytes layer=transport executor=rust-integration—not-native-cli semantic_authority=none"
           sha256sum crates/sens/src/frame3_micro_v5_lambda_app.rs
           python3 scripts/ci_failure_contract.py run \
             --test-id frame3-bcsw-five-bytes \
