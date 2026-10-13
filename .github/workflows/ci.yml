@@ -297,7 +297,7 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens tests/semantic/reason-direct-fallback-d1-law.sens
-          printf '()\\n' > "$RUNNER_TEMP/reason-d1-mutant.expected"
+          printf '()\n' > "$RUNNER_TEMP/reason-d1-mutant.expected"
           python3 scripts/ci_failure_contract.py run \
             --test-id reason-direct-fallback-d1-mutant \
             --layer eval \
