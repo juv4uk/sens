@@ -89,21 +89,23 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: ФС — одна реальна SENS-перевірка форми журналу та незмінного позитивного стану
+      - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
         run: |
           set -euo pipefail
-          # CI_GLUE_NO_SEMANTICS: Cargo лише виконує SENS-визначення й
-          # повідомляє фактичний вердикт. Нативний .sens оракул окремий.
-          sha256sum lib/lisp-fs.lisp tests/fixtures/lisp-fs-conformance.lisp
+          # CI_GLUE_NO_SEMANTICS: цей Cargo runner лише виконує чинні
+          # SENS-функції через pinned reader. Не називати це native .sens PASS.
+          # Окрема повна фікстура з fs-write залишається активною в Cargo,
+          # але її D6 ADD1(revision=unqualified) є TRANSITIONAL D24 blocker.
+          sha256sum lib/lisp-fs.lisp crates/sens/tests/content_store.rs
           python3 scripts/ci_failure_contract.py run \
-            --test-id fs-journal-structural-alist-integration \
+            --test-id fs-journal-reject-invalid-events-integration \
             --layer transport \
-            --fixture tests/fixtures/lisp-fs-conformance.lisp \
+            --fixture crates/sens/tests/content_store.rs \
             --report-file "$RUNNER_TEMP/sens-fs-journal-red.jsonl" \
             -- cargo test --locked -p sens --test content_store \
-                 lisp_fs_conformance_fixture_is_deterministic -- --exact --nocapture
+                 lisp_fs_journal_replay_rejects_ -- --nocapture
       - name: FULL_CARGO_WORKSPACE — одноразовий повний прогін на точному SHA
         if: contains(github.event.head_commit.message, '[full-cargo-once]') || github.event_name == 'workflow_dispatch'
         id: full-cargo
