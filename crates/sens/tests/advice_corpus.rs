@@ -2,22 +2,47 @@
 //! candidate knowledge -> advise/advise-all -> reason-in-observe -> narrate-outcome.
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_program,
+    parse_mixed_exact_domain_reasoning_source, Session,
+};
+
+fn load_reasoning(session: &mut Session, path: &str, source: &str) {
+    let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+        .unwrap_or_else(|e| panic!("pinned reasoning parse failed for {path}: {e}"));
+    eval_parsed_expressions(&parsed, session)
+        .unwrap_or_else(|e| panic!("pinned reasoning load failed for {path}: {e}"));
+}
 
 fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
-    for library in [
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
         include_str!("../../../lib/core.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
+        &mut session,
+    )
+    .expect("exact-domain core bootstrap");
+
+    for (path, library) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        (
+            "lib/result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
+    ] {
+        load_reasoning(&mut session, path, library);
+    }
+
+    for library in [
         include_str!("../../../lib/understand.lisp"),
-        include_str!("../../../lib/result-status.lisp"),
         include_str!("../../../lib/narrate.lisp"),
     ] {
         eval_program(library, &mut session).unwrap();
     }
+
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
