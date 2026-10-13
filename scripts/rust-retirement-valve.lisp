@@ -11,38 +11,38 @@
 ;
 ; Active #299 rule: Lisp may grow; Rust may only shrink.
 
-(def second (lambda (x) (car (cdr x))))
-(def third (lambda (x) (car (cdr (cdr x)))))
-(def fourth (lambda (x) (car (cdr (cdr (cdr x))))))
-(def fifth (lambda (x) (car (cdr (cdr (cdr (cdr x)))))))
+(0011 second (0010 (x) (100 (011 x))))
+(0011 third (0010 (x) (100 (011 (011 x)))))
+(0011 fourth (0010 (x) (100 (011 (011 (011 x))))))
+(0011 fifth (0010 (x) (100 (011 (011 (011 (011 x)))))))
 
-(def rust-changes (read-all (read-file "tests/rust-retirement-changes.lisp")))
+(0011 rust-changes (read-all (read-file "tests/rust-retirement-changes.lisp")))
 
-(def rust-retirement-verdict-for
-  (lambda (changes)
-    (cond
-      ((atom changes) (structural-kind empty-list)
-       (quote (rust-retirement-ok)))
-      ((atom changes) (structural-kind pair)
-       (let ((change (car changes)))
-         (let ((path (second change)))
-           (let ((additions (third change)))
-             (let ((status (fifth change)))
-               (cond
-                 ((eq status (quote new)) (identity-relation same)
-                  (list
-                    (quote rust-retirement-violation)
+(0011 rust-retirement-verdict-for
+  (0010 (changes)
+    (110
+      ((010 changes) (structural-kind empty-list)
+       (001 (rust-retirement-ok)))
+      ((010 changes) (structural-kind pair)
+       (001000 ((change (100 changes)))
+         (001000 ((path (second change)))
+           (001000 ((additions (third change)))
+             (001000 ((status (fifth change)))
+               (110
+                 ((101 status (001 new)) (identity-relation same)
+                  (1110
+                    (001 rust-retirement-violation)
                     path
                     additions
                     status
                     "New Rust paths are forbidden during retirement. See #299."))
-                 ((eq status (quote new)) (identity-relation distinct)
-                  (cond
+                 ((101 status (001 new)) (identity-relation distinct)
+                  (110
                     ((= additions 0) 1
-                     (rust-retirement-verdict-for (cdr changes)))
+                     (rust-retirement-verdict-for (011 changes)))
                     ((= additions 0) 0
-                     (list
-                       (quote rust-retirement-violation)
+                     (1110
+                       (001 rust-retirement-violation)
                        path
                        additions
                        status

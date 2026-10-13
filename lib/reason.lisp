@@ -10,7 +10,12 @@
 ; index construction into an unbounded O(N^2) walk.
 
 (0011 *reason-index-schema* (001 reason-index/1))
+; Human-readable projection of the bounded index limit. Runtime admission
+; uses structural slots below, never arithmetic on a D5 function identity.
 (0011 *reason-index-max-predicates* 64)
+; One structural slot per admitted distinct predicate. This keeps the cap
+; finite without numeric counter literals as D24+ operands.
+(0011 *reason-index-capacity-slots* (001 (slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot)))
 
 ; Shape: (reason-index/1 indexed|linear ORIGINAL-RULES BUCKETS)
 ; A bucket is (PREDICATE RULE...), with rules restored to original order.
@@ -24,8 +29,7 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ; A proper rule list can have a compound first rule. Verify CAR is
-      ; an atom before passing it to EQ (EQ accepts atoms only).
+      ; CAR may be a compound rule, so guard its atomhood before EQ.
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)
@@ -86,9 +90,8 @@
          (reason-index-normalize-buckets (011 buckets)))))))
 
 (0011 reason-index-build-scan
-  (0010 (remaining original buckets predicate-count)
+  (0010 (remaining original buckets capacity)
     (110
-      
       ((010 remaining)  (1110
          *reason-index-schema*
          (001 indexed)
@@ -103,30 +106,28 @@
            ((010 ())
             (001000 ((entry (11100 predicate buckets)))
               (110
-                
+                ; A new bucket consumes one structural capacity slot. If all
+                ; 64 slots are gone, retain correctness with the linear scan.
                 ((010 entry)  (110
-                   ((11010 predicate-count *reason-index-max-predicates*)
+                   ((010 capacity) (reason-index-linear original))
+                   ((010 ())
                     (reason-index-build-scan
                       (011 remaining)
                       original
                       (reason-index-add-reversed
                         predicate (100 remaining) buckets)
-                      (01010 predicate-count 1)))
-                   ((unify-equal?
-                      (11010 predicate-count *reason-index-max-predicates*)
-                      (010 (001 (x))))
-                    (reason-index-linear original))))
+                      (011 capacity)))))
                 ((010 ())
                  (reason-index-build-scan
                    (011 remaining)
                    original
                    (reason-index-add-reversed
                      predicate (100 remaining) buckets)
-                   predicate-count)))))))))))
+                   capacity)))))))))))
 
 (0011 reason-make-index
   (0010 (rules)
-    (reason-index-build-scan rules rules (001 ()) 0)))
+    (reason-index-build-scan rules rules (001 ()) *reason-index-capacity-slots*)))
 
 (0011 reason-ensure-index
   (0010 (rules-or-index)

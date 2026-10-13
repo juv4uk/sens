@@ -2,16 +2,16 @@
 ; The producer writes a complete named verdict first. This second Lisp process
 ; owns the non-zero failure for forbidden Rust growth.
 
-(def verdicts (read-all (read-file "tests/rust-retirement-verdict.lisp")))
-(def verdict (car verdicts))
-(def verdict-tag (car verdict))
+(0011 verdicts (read-all (read-file "tests/rust-retirement-verdict.lisp")))
+(0011 verdict (100 verdicts))
+(0011 verdict-tag (100 verdict))
 
-(cond
-  ((eq verdict-tag (quote rust-retirement-ok)) (identity-relation same)
-   (quote rust-retirement-ok))
-  ((eq verdict-tag (quote rust-retirement-ok)) (identity-relation distinct)
-   (cond
-     ((eq verdict-tag (quote rust-retirement-violation)) (identity-relation same)
-      (car ()))
-     ((eq verdict-tag (quote rust-retirement-violation)) (identity-relation distinct)
-      (car ())))))
+(110
+  ((101 verdict-tag (001 rust-retirement-ok)) (identity-relation same)
+   (001 rust-retirement-ok))
+  ((101 verdict-tag (001 rust-retirement-ok)) (identity-relation distinct)
+   (110
+     ((101 verdict-tag (001 rust-retirement-violation)) (identity-relation same)
+      (100 ()))
+     ((101 verdict-tag (001 rust-retirement-violation)) (identity-relation distinct)
+      (100 ())))))
