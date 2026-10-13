@@ -9,26 +9,26 @@
 ; semantically derived from Rust implementation artifacts.
 
 (0011 changed
-  (110101001 (110110111 "tests/semantic-authority-changes.lisp")))
+  (STRING-CONTAINS? (READ-FILE "tests/semantic-authority-changes.lisp")))
 
 (0011 exact-text?
   (0010 (left right)
     (110
-      ((11110111 left right) (1) t)
+      ((EQUAL left right) (1) t)
       (t t ()))))
 
 (0011 contains-any?
   (0010 (source needles)
     (110
       ((010 needles) () ())
-      ((110101000 (100 needles) source) t)
+      ((STRING-CONTAINS? (100 needles) source) t)
       (t (contains-any? source (011 needles))))))
 
 (0011 language-authority-source?
   (0010 (path)
-    (11111100
-      (110101010 "lib/" path)
-      (110101010 "contracts/" path)
+    (OR
+      (STRING-PREFIX? "lib/" path)
+      (STRING-PREFIX? "contracts/" path)
       (exact-text? path "language-contract.lisp")
       (exact-text? path "my-lisp-constitution.lisp")
       ; Synthetic protected path used only by the guard self-test.
@@ -72,7 +72,7 @@
       ; A protected Lisp-owned source may mention Rust as evidence/history.
       ; It becomes a violation only when host implementation is explicitly
       ; claimed as a semantic authority/source of truth.
-      ((11110101
+      ((AND
          (host-marker? source)
          (semantic-authority-claim? source))
        (001 host-to-language-authority-leak))
@@ -84,30 +84,30 @@
       ((010 rows) () (001 (semantic-authority-ok)))
       (t
        (001001 ((row (100 rows))
-              (path (1001 row)))
-         (110
-           ; Crucial asymmetry: do not even inspect host implementation text.
-           ((0100 (language-authority-source? path))
-            (scan (011 rows)))
-           (t
-            (001000 ((raw-source (110110111 path)))
-              (110
-                ((0100 (110100110 raw-source))
-                 (1110
-                   (001 semantic-authority-violation)
-                   path
-                   (001 unreadable-language-authority-source)
-                   "protected Lisp language source must be readable text"))
-                (t
-                 (001000 ((class (violation-class path raw-source)))
-                   (110
-                     ((101 class (001 host-to-language-authority-leak))
-                      (1110
-                        (001 semantic-authority-violation)
-                        path
-                        class
-                        "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
-                     (t
-                      (scan (011 rows)))))))))))))))
+               (path (1001 row)))
+          (110
+            ; Crucial asymmetry: do not even inspect host implementation text.
+            ((0100 (language-authority-source? path))
+             (scan (011 rows)))
+            (t
+             (001000 ((raw-source (READ-FILE path)))
+               (110
+                 ((0100 (STRINGP raw-source))
+                  (LIST
+                    (001 semantic-authority-violation)
+                    path
+                    (001 unreadable-language-authority-source)
+                    "protected Lisp language source must be readable text"))
+                 (t
+                  (001000 ((class (violation-class path raw-source)))
+                    (110
+                      ((101 class (001 host-to-language-authority-leak))
+                       (LIST
+                         (001 semantic-authority-violation)
+                         path
+                         class
+                         "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
+                      (t
+                       (scan (011 rows)))))))))))))))
 
-(11011011 (scan changed))
+(PRINT (scan changed))

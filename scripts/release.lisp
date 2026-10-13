@@ -15,26 +15,26 @@
       ((101 actual expected) actual)
       ((010 (001 ()))
        ((0010 ()
-          (11011011 label)
-          (11011011 actual)
+          (PRINT label)
+          (PRINT actual)
           (release-preflight-failed)))))))
 
 (0011 release-run
   (0010 (program arguments)
-    (001000 ((result (110101111 program arguments)))
+    (001000 ((result (PROCESS-RUN program arguments)))
       ((0010 ()
          (release-require program (100 result) 0)
          (1001 result))))))
 
-(release-require "Потрібна одна версія: 0.42.0" (0100 (110111011 (010 *argv*)))
+(release-require "Потрібна одна версія: 0.42.0" (0100 (ANSWER-NOT (010 *argv*)))
                  (001 (0)))
-(release-require "Потрібен рівно один аргумент" (0100 (110111011 (010 (011 *argv*))))
+(release-require "Потрібен рівно один аргумент" (0100 (ANSWER-NOT (010 (011 *argv*))))
                  (001 ()))
 (0011 release-version (100 *argv*))
-(0011 release-tag (110011110 "l" release-version))
-(0011 release-tag-ref (110011110 "refs/tags/" release-tag))
+(0011 release-tag (STRING-APPEND "l" release-version))
+(0011 release-tag-ref (STRING-APPEND "refs/tags/" release-tag))
 
-(release-run "git" (1110 "check-ref-format" release-tag-ref))
+(release-run "git" (LIST "check-ref-format" release-tag-ref))
 (release-require "Checkout має бути чистим"
   (release-run "git" (001 ("status" "--porcelain" "--untracked-files=normal"))) "")
 (release-require "Release запускається тільки з main"
@@ -47,7 +47,7 @@
   (001 ("run" "--release" "--locked" "-p" "sens-cli" "--bin" "gen-fasl"
           "--" "lib/core4.lisp" "lib/core4.lisp.fasl")))
 (0011 release-fasl-diff-status
-  (100 (110101111 "git" (001 ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
+  (100 (PROCESS-RUN "git" (001 ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (110
   ((101 release-fasl-diff-status 0) (001 ()))
   ((101 release-fasl-diff-status 1)
@@ -55,12 +55,12 @@
       ; Never create an implicit commit while preparing an exact-SHA release.
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
-      (11011011 "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
+      (PRINT "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
       (release-preflight-failed))))
   ((010 (001 ()))
    ((0010 ()
-      (11011011 "Не вдалося визначити стан regenerated FASL")
-      (11011011 release-fasl-diff-status)
+      (PRINT "Не вдалося визначити стан regenerated FASL")
+      (PRINT release-fasl-diff-status)
       (release-preflight-failed)))))
 (release-run "timeout" (001 ("60" "git" "fetch" "origin" "main")))
 (0011 release-head (release-run "git" (001 ("log" "-1" "--pretty=format:%H" "HEAD"))))
@@ -74,9 +74,9 @@
       ((010 (001 ()))
        ((0010 ()
           (release-require (100 paths)
-            (110101000
-              (110011110 "version = \"" (110011110 release-version "\""))
-              (110110111 (100 paths))) t)
+            (STRING-CONTAINS?
+              (STRING-APPEND "version = \"" (STRING-APPEND release-version "\""))
+              (READ-FILE (100 paths))) t)
           (release-check-manifests (011 paths))))))))
 
 (release-check-manifests
@@ -90,31 +90,31 @@
 ; separate strict Core/runtime witnesses. Do not rely on any older green run.
 (release-require "Hosted CI не зелений на точному SHA"
   (release-run "timeout"
-    (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+    (LIST "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
           "--workflow" "ci-hosted.yml" "--limit" "1" "--json" "conclusion,status"
           "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
 (release-require "Release Preflight не зелений на точному SHA"
   (release-run "timeout"
-    (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+    (LIST "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
           "--workflow" "release-preflight.yml" "--limit" "1" "--json" "conclusion,status"
           "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
 ; The owner must authorize the exact SHA and tag before this script creates a tag.
 (release-require "Немає явного дозволу власника для поточного SHA"
   (release-run "gh" (001 ("variable" "get" "SENS_RELEASE_GO_SHA" "--repo" "juv4uk/sens")))
-  (110011110 release-head "\n"))
+  (STRING-APPEND release-head "\n"))
 (release-require "Немає явного дозволу власника для поточного тегу"
   (release-run "gh" (001 ("variable" "get" "SENS_RELEASE_GO_TAG" "--repo" "juv4uk/sens")))
-  (110011110 release-tag "\n"))
+  (STRING-APPEND release-tag "\n"))
 ; main міг змінитися під час попередніх перевірок.
 (release-run "timeout" (001 ("60" "git" "fetch" "origin" "main")))
 (release-require "origin/main змінився; підготуй новий snapshot"
   release-head (release-run "git" (001 ("log" "-1" "--pretty=format:%H" "FETCH_HEAD"))))
 (release-require "Релізний тег уже існує"
-  (release-run "timeout" (1110 "60" "git" "ls-remote" "--tags" "origin" release-tag-ref)) "")
+  (release-run "timeout" (LIST "60" "git" "ls-remote" "--tags" "origin" release-tag-ref)) "")
 (release-require "Checkout змінився під час перевірок"
   (release-run "git" (001 ("status" "--porcelain" "--untracked-files=normal"))) "")
-(release-run "git" (1110 "tag" release-tag release-head))
-(release-run "timeout" (1110 "60" "git" "push" "origin" release-tag-ref))
-(11011011 (110011110 "Тег опубліковано; очікуй завершення workflow Release: " release-tag))
+(release-run "git" (LIST "tag" release-tag release-head))
+(release-run "timeout" (LIST "60" "git" "push" "origin" release-tag-ref))
+(PRINT (STRING-APPEND "Тег опубліковано; очікуй завершення workflow Release: " release-tag))
