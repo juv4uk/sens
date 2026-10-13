@@ -18,7 +18,7 @@
     },
     {
       "path": "tests/fixtures/conformance.lisp",
-      "git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a"
+      "git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1"
     },
     {
       "path": "tests/fixtures/exact-q-binary-v1.lisp",
@@ -75,6 +75,14 @@
       "current_git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd",
       "reviewed_commit": "309813e3ead48b616dd41ba776deb2c68fbd38e6",
       "reason": "Only appends two historical #216/#1827 exact-Q predicate record envelopes ((= 3 3) integer equality and (< 1 2 3 4) four-term less-than chain) as quoted (expr . source) data. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
+    }
+    ,
+    {
+      "path": "tests/fixtures/conformance.lisp",
+      "previous_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
+      "current_git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1",
+      "reviewed_commit": "41fe112b71b0e40f51907bf8467fcd163e10abce",
+      "reason": "Owner-requested explicit migration of 19 embedded quoted ATOM/EQ expressions to current exact D3, including a positive/one-bit-mutant binary-SENS pair. Top-level fixture remains a non-executable record envelope, never eligible for automatic physical .sens. Runtime semantic oracle and exact-SHA release CI are still unverified; this is a reviewed source-provenance update, not execution admission."
     }
   ]
 }
