@@ -157,15 +157,51 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 11110111 00 "),out)
         self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
-    def test_one_exact_identity_d4_d8_d9_from_audited_legacy(self):
+    def test_audited_legacy_successor_is_not_admitted_without_a_callable_mechanism(self):
+        # D4 selectors and the specifically admitted D8 identity retain their
+        # exact widths; D9 residents are blocked unless their exact mechanism
+        # is explicitly present in the migration allowlist.
         for code,bits in (("00100010","11110111"),
-                          ("00101111","1001"),
-                          ("00111010","110011110"),
-                          ("01001011","110101001")):
+                          ("00101111","1001")):
             with self.subTest(code=code):
                 out,resolver=self.migrate(f"({code} x)\n")
                 self.assertTrue(out.startswith(f"10 {bits} "),out)
                 self.assertEqual(resolver.counts["pass1-sens8"],1)
+        for code,bits in (("00111010","110011110"),
+                          ("01001011","110101001")):
+            with self.subTest(code=code,bits=bits):
+                with self.assertRaisesRegex(
+                    mod.MigrationError,
+                    f"D9:{bits} without an admitted callable mechanism",
+                ):
+                    self.migrate(f"({code} x)\n")
+
+    def test_d7_identity_is_blocked_as_executable_head_but_preserved_as_data(self):
+        with self.assertRaisesRegex(
+            mod.MigrationError,
+            "D7 word 1010101 is Text7/Sound7 data, not an admitted callable head",
+        ):
+            self.migrate("(1010101 x)\n")
+        projection,_=self.migrate("(CAR 1010101)\n")
+        self.assertEqual(projection,"10 100 00 1010101 01\n")
+
+    def test_only_explicitly_admitted_d9_mechanism_heads_migrate(self):
+        source="(110011100 text)\n"  # exact D9 STRING-EMPTY? resident with a mechanism
+        projection,resolver=self.migrate(source)
+        self.assertEqual(projection,"10 110011100 00 text 01\n")
+        self.assertEqual(resolver.counts["already-exact"],1)
+
+        for word in ("111111111","110011110","110101001"):
+            with self.subTest(word=word):
+                with self.assertRaisesRegex(
+                    mod.MigrationError,
+                    f"D9 executable head {word} has no admitted callable mechanism",
+                ):
+                    self.migrate(f"({word} x)\n")
+
+        # A D9 resident in an argument position is data here, not a call head.
+        data_projection,_=self.migrate("(CAR 111111111)\n")
+        self.assertEqual(data_projection,"10 100 00 111111111 01\n")
 
     def test_ambiguous_or_compound_audited_successors_fail_closed(self):
         data=mod.load_foundation(FOUNDATION)

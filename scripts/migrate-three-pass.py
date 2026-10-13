@@ -11,7 +11,8 @@ Pass 3 — historical LISP 1–1.5 uppercase names:
 Hard rules:
 - () serializes as D3 EMPTY = 000.
 - Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
-- Unknown executable heads PASS THROUGH unchanged after the three recognition passes.
+- Unknown symbolic/user heads remain visible in the staged projection but cannot produce valid physical T5 while unresolved.
+- Exact D7 heads are data/Text7 identities, never callable by width alone; exact D9 heads require an explicitly admitted mechanism.
 - D2 words are reserved exclusively for structural control and never pass as data/call heads.
 - Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
 - Comments disappear before migration.
@@ -49,6 +50,16 @@ D2_CLOSE="01"
 D2_OPEN="10"
 D2_DOT="11"
 D3_EMPTY="000"
+
+# Exact D9 callability is narrower than D9 residency. These four identities
+# have explicit value mechanisms in crates/sens/src/eval/canon.rs; all other
+# D9 call heads remain blocked here, even when owner-ratified as residents.
+ADMITTED_D9_CALL_HEADS = frozenset({
+    "110011100",  # STRING-EMPTY?
+    "110011101",  # STRING-REST
+    "110101010",  # STRING-PREFIX?
+    "110101011",  # STRING-FIRST
+})
 
 NUMERIC_RE = re.compile(
     r"""(?ix)
@@ -598,6 +609,23 @@ class Resolver:
                 f"D2 word {t} is structural control only; it cannot be an executable head",
                 tok,
             )
+        # Exact current D7 is a Text7/Sound7 identity, not a callable
+        # function head. A width match never creates a call mechanism.
+        if len(t)==7 and set(t)<=set("01"):
+            raise MigrationError(
+                f"D7 word {t} is Text7/Sound7 data, not an admitted callable head",
+                tok,
+            )
+        # D9 residency is not callability. Admit only identities backed by the
+        # current exact-domain mechanism router; all other D9 heads BLOCK.
+        if len(t)==9 and set(t)<=set("01"):
+            if t not in ADMITTED_D9_CALL_HEADS:
+                raise MigrationError(
+                    f"D9 executable head {t} has no admitted callable mechanism",
+                    tok,
+                )
+            self.counts["already-exact"]+=1
+            return [t],"already-exact"
         # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
@@ -631,6 +659,21 @@ class Resolver:
             if ident[1]=="D3" and ident[0]==D3_EMPTY:
                 raise MigrationError(
                     f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
+                    tok,
+                )
+            # A proven historical successor is still checked against current
+            # mechanism admission. D7 data and non-whitelisted D9 residents
+            # must not become executable merely because an old row points there.
+            if len(ident[0])==7:
+                raise MigrationError(
+                    f"legacy SID8/Sens8 {t} resolves to D7:{ident[0]}, "
+                    "which is Text7/Sound7 data, not callable",
+                    tok,
+                )
+            if len(ident[0])==9 and ident[0] not in ADMITTED_D9_CALL_HEADS:
+                raise MigrationError(
+                    f"legacy SID8/Sens8 {t} resolves to D9:{ident[0]} "
+                    "without an admitted callable mechanism",
                     tok,
                 )
             self.counts["pass1-sens8"]+=1
