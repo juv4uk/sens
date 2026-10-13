@@ -1,6 +1,11 @@
 name: Domain-ladder source-only bulk census
 
 on:
+  pull_request:
+    paths:
+      - scripts/migrate-domain-ladder-source-batch.py
+      - tests/test_domain_ladder_source_batch.py
+      - .github/workflows/domain-ladder-source-census.yml
   push:
     branches: [main]
     paths:
@@ -33,6 +38,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Regression tests for historical crosswalk to exact-domain words and D3 blockers
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
       - name: Inventory active Lisp sources for exact-domain conversion; never write in CI
         run: |
           python3 scripts/migrate-domain-ladder-source-batch.py --report "$RUNNER_TEMP/domain-ladder-source-batch-report.json"
@@ -56,8 +63,6 @@ jobs:
           retention-days: 7
           if-no-files-found: error
           path: ${{ runner.temp }}/domain-ladder-source-batch-report.json
-      - name: Regression tests for historical crosswalk to exact-domain words and D3 blockers
-        run: python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
       - name: Verify D3 two-field PredicateBit enforcement with negative controls
         run: python3 -m unittest discover -s tests -p test_domain_ladder_d3_enforcement.py -v
       - name: Validate five exact-domain source replacements against immutable Git blobs

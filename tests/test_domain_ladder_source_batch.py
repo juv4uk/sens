@@ -26,6 +26,76 @@ class BatchSourceTests(unittest.TestCase):
             self.assertNotIn(code, self.mapping)
             self.assertIn(code, self.blocked)
 
+    def test_d7_schema_sha_pin_tracks_owner_ratified_keyboard_v2(self):
+        import hashlib
+        import json
+        schema = json.loads((ROOT / "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json")
+                            .read_text(encoding="utf-8"))
+        owner = json.loads((ROOT / "knowledge/d7-keyboard-v2-ratified.json")
+                           .read_text(encoding="utf-8"))
+        entry = next(item for item in schema["entries"]
+                     if item["path"] == "contracts/d7-ratification.lisp")
+        payload = (ROOT / entry["path"]).read_bytes()
+        digest = hashlib.sha1(
+            b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload
+        ).hexdigest()
+        self.assertEqual(owner["schema"], "sens.d7.keyboard/v2")
+        self.assertEqual(owner["occupancy"], 128)
+        self.assertEqual(entry["git_blob_sha1"], digest)
+        self.assertEqual(entry["previous_pinned_git_blob_sha1"],
+                         "c51ec57ca40ddf585a22ca8cbddab5efb4f11028")
+        self.assertIn(b"(status . owner-ratified)", payload)
+        self.assertIn(b"knowledge/d7-keyboard-v2-ratified.json", payload)
+
+    def test_all_2046_exact_domain_coordinates_are_not_assumed_callable(self):
+        witness = MOD.verify_full_domain_bitspace(ROOT)
+        self.assertEqual(witness["typed_coordinates"], 2046)
+        self.assertEqual(witness["meaningful_bits"], 18434)
+        self.assertEqual(witness["runtime_admission_claims_added"], 0)
+        self.assertEqual(witness["counts_by_domain"], {
+            f"D{width}": 1 << width for width in range(1, 11)
+        })
+        self.assertEqual(
+            sum(width * count for width, count in enumerate(
+                [0] + [1 << w for w in range(1, 11)]
+            ) if width), 18434
+        )
+
+    def test_all_256_historical_donors_have_one_proved_or_held_disposition(self):
+        self.assertEqual(len(self.mapping), 171)
+        self.assertEqual(len(self.blocked), 85)
+        self.assertEqual(len(set(self.mapping) | set(self.blocked)), 256)
+        self.assertFalse(set(self.mapping) & set(self.blocked))
+        # Equal integer payload is NOT equal identity: W7 data vs W8.
+        self.assertNotEqual((7, "0000001"), (8, "00000001"))
+        self.assertNotEqual((3, "010"), (4, "0010"))
+        for old, word in self.mapping.items():
+            self.assertRegex(old, r"^[01]{8}$")
+            self.assertRegex(word, r"^[01]{3,9}$")
+            self.assertNotEqual(len(word), 2, "D2 structural words are not call-heads")
+            self.assertNotEqual(len(word), 10, "D10 has no admitted T5 mechanism")
+        for old in ("10101000", "01011010"):
+            self.assertIn(old, self.blocked)
+
+    def test_ladder_bitspace_mutations_are_rejected_before_sid8_rewrite(self):
+        self.assertEqual(MOD._exact_codebook(["00", "01", "10", "11"], 2, "D2"), 4)
+        for corrupted in (
+            ["00", "01", "10", "10"],  # duplicate
+            ["00", "01", "10", "100"],  # width overflow
+            ["00", "01", "10"],  # missing bit pattern
+        ):
+            with self.subTest(corrupted=corrupted), self.assertRaises(ValueError):
+                MOD._exact_codebook(corrupted, 2, "D2")
+
+    def test_quasiquote_never_silently_passes_as_admitted_sid8_program(self):
+        for source in (
+            "`(00001001 x (00001000 () x))",
+            "(00001001 x (00001000 () ,(00000101 x)))",
+        ):
+            rewritten, count, blockers = MOD.rewrite(source, self.mapping, self.blocked)
+            self.assertEqual(rewritten, source)
+            self.assertTrue(any("quasiquote/unquote" in blocker for blocker in blockers))
+
     def test_nested_quoted_data_and_comments_preserved(self):
         old = ";(00000100 ignored)\n(00001001 f (00001000 (x) (00000100 (00000001 00000011) x)))\n"
         new, n, blockers = MOD.rewrite(old, self.mapping, self.blocked)
