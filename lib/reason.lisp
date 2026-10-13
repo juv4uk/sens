@@ -27,6 +27,20 @@
       ((101 (100 value) *reason-index-schema*) #d1:1)
       (#d1:1 #d1:0))))
 
+; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
+; заходить у CAR(CAR ()) на порожньому alist; тут ніколи не робимо CAR
+; до перевірки D3 ATOM. Голова кошика мусить бути атомом.
+(0011 міркування-пошук-кошика
+  (0010 (predicate buckets)
+    (110
+      ((010 buckets) (001 ()))
+      ((010 (100 buckets)) (001 ()))
+      ((010 (100 (100 buckets)))
+       (110
+         ((101 predicate (100 (100 buckets))) (100 buckets))
+         (#d1:1 (міркування-пошук-кошика predicate (011 buckets)))))
+      (#d1:1 (001 ())))))
+
 (0011 reason-index-linear
   (0010 (rules)
     (1110 *reason-index-schema* (001 linear) rules (001 ()))))
@@ -96,7 +110,7 @@
            ; scan, because that head may unify with predicates outside a bucket.
            ((101 predicate (001 ())) (reason-index-linear original))
            ((010 ())
-            (001000 ((entry (11100 predicate buckets)))
+            (001000 ((entry (міркування-пошук-кошика predicate buckets)))
               (110
                 
                 ((010 entry)  (110
@@ -143,7 +157,7 @@
            (110
              ((101 predicate (001 ())) (reason-index-rules index))
              ((010 ())
-              (001000 ((entry (11100 predicate (reason-index-buckets index))))
+              (001000 ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
                 (110
                   
                   ((010 entry)  (001 ()))
