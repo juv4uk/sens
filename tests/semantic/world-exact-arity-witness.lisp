@@ -23,3 +23,36 @@
 (101 (внутрішня-рівність-версій
       (world-remove-first (001 x) (001 (a x b)))
       (001 (a b))) 1)
+
+; SENS verifies the actual aligned-ancestor law, not a Rust/Python truth table.
+(101
+  (внутрішня-рівність-версій
+    (world-common-ancestor-aligned (empty-world) (empty-world))
+    (empty-world))
+  1)
+
+; Two distinct children share their immutable parent.
+(101
+  (внутрішня-рівність-версій
+    (world-common-ancestor-aligned
+      (world-tell (empty-world) (001 astronomy) (001 (planet earth)))
+      (world-tell (empty-world) (001 physics) (001 (mass earth))))
+    (empty-world))
+  1)
+
+; Divergent roots must return the named negative result.
+(101
+  (world-common-ancestor-aligned
+    (make-world (001 ()) (001 (alpha)) (001 ()))
+    (make-world (001 ()) (001 (beta)) (001 ())))
+  (001 World-no-common-ancestor))
+
+; The recognition function returns exactly D1:YES or D1:NO.
+(101 (world-no-common-ancestor? (001 World-no-common-ancestor)) 1)
+(101 (world-no-common-ancestor? (empty-world)) 0)
+(101 (world-no-common-ancestor? (001 ())) 0)
+
+; NIL must not be dereferenced as an immutable world.
+(101
+  (world-common-ancestor-aligned (001 ()) (empty-world))
+  (001 World-no-common-ancestor))
