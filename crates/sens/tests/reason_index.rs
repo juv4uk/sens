@@ -66,12 +66,15 @@ fn variable_goal_falls_back_to_every_rule() {
     let mut s = session();
     let source = r#"
       (def rules (quote (((p one)) ((q two)) ((r three)))))
-      (length
-        (reason-index-candidates
-          (quote (var x))
-          (reason-make-index rules)))
+      (reason-index-candidates
+        (quote (var x))
+        (reason-make-index rules))
     "#;
-    assert_eq!(eval(&mut s, source), "3");
+    assert_eq!(
+        eval(&mut s, source),
+        "(((p one)) ((q two)) ((r three)))",
+        "variable goals must retain all rules without a numeric LENGTH projection"
+    );
 }
 
 #[test]
