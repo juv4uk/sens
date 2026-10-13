@@ -529,30 +529,12 @@ def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
 
 
 def build_text7(data, projection_path: Path):
-    if projection_path.suffix == ".json":
-        return _keyboard_v2(projection_path)
-    # Historical phonetic Text7 is supported only via an explicit old .rs path.
-    text=projection_path.read_text(encoding="utf-8")
-    slp=extract_projection(text,"SA_SLP1_ENCODE")
-    uk=extract_projection(text,"UK_ENCODE")
-    d7=data["domains"]["D7"]["residents"]
-    labels={label:bits for bits,label in d7.items()}
-    candidates={}
-    for source in (slp,uk):
-        for spelling,vals in source.items():
-            candidates.setdefault(spelling,tuple(f"{v:07b}" for v in vals))
-    for n in range(10):
-        candidates[str(n)]=(labels[f"text.digit.{n}"],)
+    # Retired phonetic D7 .rs projection is never a migration input.
+    # The only admitted route is the ratified 128/128 keyboard v2 JSON.
+    if projection_path.suffix != ".json":
+        raise MigrationError("HISTORICAL_D7_DISABLED: requires keyboard/v2 JSON")
+    return _keyboard_v2(projection_path)
 
-    # Longest-match projection, indexed by first source character. This keeps
-    # multi-character cells (e.g. Ukrainian дж/дз) deterministic without
-    # rescanning the full table for every character in large source trees.
-    buckets={}
-    for key,cells in candidates.items():
-        buckets.setdefault(key[0],[]).append((key,cells))
-    for rows in buckets.values():
-        rows.sort(key=lambda x:(-len(x[0]),x[0]))
-    return buckets
 
 def text7_encode(spelling: str,candidates,tok: Tok):
     if "keyboard-v2" in candidates:
