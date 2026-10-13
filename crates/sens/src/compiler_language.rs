@@ -822,6 +822,9 @@ pub fn verify_compiler_program_artifact_from_sens(
         "required-capabilities",
         "artifact-status",
     ];
+    // Exactly seven transport/schema slots: position is a local mask bit,
+    // never a numeric SENS-domain identity or a re-interpretation of W1–W10.
+    let mut seen_fields = 0u8;
     for row in &rows[1..] {
         let parts = compiler_artifact_list(row, "compiler artifact field")?;
         if parts.len() != 2 {
@@ -834,11 +837,21 @@ pub fn verify_compiler_program_artifact_from_sens(
                 "compiler artifact field name must be a symbol",
             ));
         };
-        if !ALLOWED_FIELDS.contains(&name.as_ref()) {
+        let Some(index) = ALLOWED_FIELDS
+            .iter()
+            .position(|&allowed| allowed == name.as_ref())
+        else {
             return Err(invalid_projection(format!(
                 "compiler artifact contains unsupported field {name}"
             )));
+        };
+        let bit = 1u8 << index;
+        if seen_fields & bit != 0 {
+            return Err(invalid_projection(format!(
+                "duplicate compiler artifact field {name}"
+            )));
         }
+        seen_fields |= bit;
     }
 
     let kind = compiler_artifact_field(&rows[1..], "artifact-kind")?;
@@ -1197,6 +1210,46 @@ mod tests {
             }
         }
         panic!("artifact field {field} not found: {artifact}");
+    }
+
+    #[test]
+    fn whole_program_artifact_verifier_rejects_duplicate_fields_before_execution() {
+        for field in [
+            "artifact-kind", "program-wire-sha256", "semantic-requests-sha256",
+            "authority-provenance", "semantic-requests", "required-capabilities",
+            "artifact-status",
+        ] {
+            let repeated = Value::Symbol(Rc::from(field));
+            let artifact = Value::list([
+                Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+                Value::list([repeated.clone(), Value::Nil]),
+                Value::list([repeated, Value::Nil]),
+            ]);
+            let error = verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &"00".repeat(32),
+                "0123456789abcdef0123456789abcdef01234567",
+            )
+            .expect_err("duplicate authority field must be rejected");
+            assert_eq!(error.kind, ErrorKind::InvalidForm);
+            assert!(
+                error.to_string().contains("duplicate compiler artifact field"),
+                "unexpected duplicate-field error for {field}: {error}"
+            );
+        }
+
+        let unknown = Value::list([
+            Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+            Value::list([Value::Symbol(Rc::from("unknown-backend")), Value::Nil]),
+        ]);
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &unknown,
+                &"00".repeat(32),
+                "0123456789abcdef0123456789abcdef01234567",
+            )
+            .unwrap_err().to_string().contains("unsupported field")
+        );
     }
 
     #[test]
