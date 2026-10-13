@@ -50,13 +50,13 @@
               name
               effect-class
               error-class))
-           ((0100 (11110111 native-outcome expected-native-outcome))
+           (#d1:1
             (native-first-parity-fail
               name
               (001 native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
-        ((0100 (11110111 evaluator-value expected))
+        (#d1:1
          (native-first-parity-fail
            name
            (001 evaluator-evidence-mismatch)
