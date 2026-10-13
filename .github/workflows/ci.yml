@@ -308,7 +308,7 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$fixture"
-      - name: Лінтер — негативний двійковий T5: D3 EQ відкидає пару
+      - name: Лінтер — негативний двійковий T5, D3 EQ відкидає пару
         id: linter-mutant
         shell: bash
         run: |
