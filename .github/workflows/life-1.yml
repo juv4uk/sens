@@ -49,3 +49,16 @@ jobs:
       - name: Prove the canonical real LIFE-1 spine
         run: |
           cargo test -p wsm-native-result-types --test prolog_datalog_bridge -- --nocapture
+
+  projection-exact:
+    name: LIFE-1 D3/D4 — 2046 exact identities and live projection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: life-1-exact-domain
+      - name: Real D3/D4 match and exhaustive D1-D10 witness
+        run: cargo test --locked -p sens --test life_1_scheduler projection_match_ -- --nocapture
