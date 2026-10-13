@@ -1,25 +1,32 @@
-name: SENS — єдиний автоматичний двійковий свідок
-# Лише один job для вже перевіреної фізичної SENS-програми й негативного мутанта.
-# Зовнішній Python тільки пакує докази, не визначає значення EQ/COND.
+name: SENS — один точковий автоматичний двійковий закон
+
+# Рівно один автоматичний job; лише SENS визначає семантичний результат.
+# Позитивний фізичний свідок та мутант вже пройшли оракул 2026-10-13.
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/ci.yml'
       - 'scripts/ci_one_focused_workflow.py'
-      - 'crates/sens/src/eval/**'
-      - 'crates/sens/src/domain_ladder.rs'
-      - 'crates/sens/src/domain_identity.rs'
-      - 'lib/domains/**'
+      - 'scripts/ci_failure_contract.py'
       - 'tests/semantic/domain-logic-2040/**'
+      - 'lib/domains/**'
+      - 'lib/domains/d4.lisp'
+      - 'lib/result-status.lisp'
+      - 'lib/narrate.lisp'
+      - 'lib/reason.lisp'
+      - 'crates/sens/src/eval/**'
+
 permissions:
   contents: read
+
 concurrency:
-  group: sens-one-automatic-${{ github.ref }}
+  group: sens-one-focussed-${{ github.ref }}
   cancel-in-progress: false
+
 jobs:
-  binary-self-verdict:
-    name: SENS сам перевіряє свої закони та мутант
+  binary-sens-law:
+    name: SENS власним D1-вердиктом доводить закон і відхиляє мутант
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -27,9 +34,85 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
+      - name: Не допустити жодного іншого автоматичного workflow
+        id: budget
+        run: python3 scripts/ci_one_focused_workflow.py
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Рівно один автоматичний точковий SENS-свідок
+      - name: Зібрати тільки механізм виконання SENS
+        id: build
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/ci_one_focused_workflow.py --execute
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          : > "$report"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id one-sens-transport-build \
+            --layer transport \
+            --fixture tests/semantic/domain-logic-2040/proof.sens \
+            --report-file "$report" \
+            -- cargo build --locked -p sens-cli --bin sens
+      - name: Єдиний фізичний SENS-закон — точний D1:YES
+        id: law
+        shell: bash
+        run: |
+          set -euo pipefail
+          program=tests/semantic/domain-logic-2040/proof.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-d1"
+          echo "test_id=sens-domain-logic-2040 layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-domain-logic-2040 \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-d1" \
+            --report-file "$report" \
+            -- target/debug/sens "$program"
+      - name: Негативний контроль — виключно SENS non-callable, не помилка парсера
+        id: mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          mutant=tests/semantic/domain-logic-2040/mutant.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=sens-domain-logic-2040-mutant layer=eval expected=SENS-non-callable"
+          sha256sum "$mutant"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-domain-logic-2040-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --report-file "$report" \
+            -- bash -c '
+              set +e
+              target/debug/sens tests/semantic/domain-logic-2040/mutant.sens > "$RUNNER_TEMP/mutant.stdout" 2> "$RUNNER_TEMP/mutant.stderr"
+              code=$?
+              if [ "$code" -eq 0 ]; then
+                echo "Mutant unexpectedly accepted by SENS" >&2
+                cat "$RUNNER_TEMP/mutant.stdout" >&2
+                exit 1
+              fi
+              if ! grep -qi "not callable" "$RUNNER_TEMP/mutant.stderr"; then
+                echo "Mutant rejected for an unrelated reason: not a proven SENS non-callable branch" >&2
+                cat "$RUNNER_TEMP/mutant.stderr" >&2
+                exit 1
+              fi
+              echo "SENS_MUTANT_REJECTED_BY_NONCALLABLE rc=$code"
+              exit 0
+            '
+      - name: Червоний має говорити — валідність діагностики
+        if: always()
+        shell: bash
+        env:
+          BUDGET_OUTCOME: ${{ steps.budget.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          LAW_OUTCOME: ${{ steps.law.outcome }}
+          MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
+          else
+            # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
+            python3 scripts/ci_failure_contract.py scan --report-file "$report"
+          fi

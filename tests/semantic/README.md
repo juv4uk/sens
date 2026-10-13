@@ -60,6 +60,11 @@ target/debug/sens tests/semantic/narrate-d3-atom-eq-law.sens
 не вважати доказом проходження семантичного тесту. Карантинний
 GitHub Actions workflow не активувати без явного дозволу власника.
 
-## One focused migration witness
+## Migration source guard
 
-`sens-semantic-migration-witness.yml` runs exactly one integration test. That runner executes the existing visible-binary D3 ATOM/EQ law in SENS itself, then mechanically checks production-source order and exact D1/D3/D4 AST widths. Rust contains no duplicate semantic truth table; no unratified library name is made callable merely to satisfy a test.
+The single automatic workflow remains `.github/workflows/ci.yml`. Its existing
+physical SENS proof and negative mutant own the semantic verdict. The same job's
+mechanical policy script additionally checks the production migration boundary:
+D4 NULL and D3 ATOM(CAR) precede D3 EQ in `lib/reason.lisp`, and narration arity
+uses exact raw D1 results with D3/D4 structure rather than D6 LENGTH or D8 EQUAL.
+These source-shape checks do not replace or duplicate SENS semantics.
