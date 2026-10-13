@@ -1,19 +1,6 @@
 name: Двійковий SENS — структурний закон відступу
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/dispatch/native-first-execute.lisp"
-      - "tests/semantic/native-first-execute-fallback-law.bits"
-      - "tests/semantic/native-first-execute-fallback-mutant.bits"
-      - ".github/workflows/native-first-execute-fallback-d1.yml"
-  pull_request:
-    paths:
-      - "lib/machine/dispatch/native-first-execute.lisp"
-      - "tests/semantic/native-first-execute-fallback-law.bits"
-      - "tests/semantic/native-first-execute-fallback-mutant.bits"
-      - ".github/workflows/native-first-execute-fallback-d1.yml"
   workflow_dispatch:
 
 permissions:
