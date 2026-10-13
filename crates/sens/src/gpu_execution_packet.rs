@@ -4,7 +4,7 @@
 //! by SENS. This module defines bytes, handles, dependencies and provenance.
 
 use crate::{
-    compiler_execution_role, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit8,
+    compiler_execution_role, BinarySourceWord, Bit3, Bit4, Bit5, Bit6, Bit8,
     CompilerExecutionRole, CoreDomainIdentity, DomainIdentity,
 };
 
@@ -192,13 +192,10 @@ fn decode_admitted_opcode(
     width: usize,
     payload: u8,
 ) -> Result<CoreDomainIdentity, GpuExecutionPacketError> {
+    // D1 — предикат, D2 — структура, D7 — текстові дані.
+    // Відмова до побудови callable identity: ширина не надає механізму.
     let source = match width {
-        1 => BinarySourceWord::W1(Bit1::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
-        2 => BinarySourceWord::W2(Bit2::new(payload).ok_or(
-            GpuExecutionPacketError::InvalidPayload { width, payload },
-        )?),
+        1 | 2 | 7 => return Err(GpuExecutionPacketError::UnsupportedWidth { width }),
         3 => BinarySourceWord::W3(Bit3::new(payload).ok_or(
             GpuExecutionPacketError::InvalidPayload { width, payload },
         )?),
@@ -211,7 +208,6 @@ fn decode_admitted_opcode(
         6 => BinarySourceWord::W6(Bit6::new(payload).ok_or(
             GpuExecutionPacketError::InvalidPayload { width, payload },
         )?),
-        7 => return Err(GpuExecutionPacketError::UnsupportedWidth { width }),
         8 => BinarySourceWord::W8(Bit8::new(payload).ok_or(
             GpuExecutionPacketError::InvalidPayload { width, payload },
         )?),
@@ -425,4 +421,85 @@ mod tests {
         assert_ne!(a.provenance, b.provenance);
         assert_eq!(a.admitted_role(), b.admitted_role());
     }
+
+    #[test]
+    fn усі_2046_координат_не_отримують_вигаданого_gpu_допуску() {
+        // 2046 координат — не 2046 доведених до виконання функцій.
+        let mut checked = 0usize;
+        let mut semantic_bits = 0usize;
+        let mut admitted = 0usize;
+
+        for width in 1u8..=10 {
+            for bits in 0u16..(1u16 << width) {
+                let coordinate = crate::DomainCoordinate::new(width, bits)
+                    .expect("точна D1–D10 координата");
+                assert_eq!((coordinate.width(), coordinate.bits()), (width, bits));
+                checked += 1;
+                semantic_bits += usize::from(width);
+
+                // Незалежне джерело рішення — чинний compiler role SENS.
+                // D9/D10 не можна звузити до u8 заради GPU packet V1.
+                let source = match width {
+                    3 => Some(BinarySourceWord::W3(Bit3::new(bits as u8).unwrap())),
+                    4 => Some(BinarySourceWord::W4(Bit4::new(bits as u8).unwrap())),
+                    5 => Some(BinarySourceWord::W5(Bit5::new(bits as u8).unwrap())),
+                    6 => Some(BinarySourceWord::W6(Bit6::new(bits as u8).unwrap())),
+                    8 => Some(BinarySourceWord::W8(Bit8::new(bits as u8).unwrap())),
+                    _ => None,
+                };
+                let expected_role = source
+                    .and_then(|word| DomainIdentity::from_source_word(word).core_operation())
+                    .and_then(compiler_execution_role);
+
+                // Навіть коли низькі 8 біт D9/D10 збігаються з D8,
+                // ширина wire-пакета лишається джерелом відмови.
+                let mut wire = MAGIC.to_vec();
+                wire.extend_from_slice(&[
+                    width,
+                    bits as u8,
+                    0, // нуль input handles — канонічний varint
+                    OUTPUT_MATERIALIZE,
+                    NO_DEPENDENCY,
+                ]);
+                wire.extend_from_slice(&[0; 32]);
+                match (expected_role, GpuExecutionPacketV1::decode(&wire)) {
+                    (Some(role), Ok(packet)) => {
+                        admitted += 1;
+                        assert_eq!(packet.admitted_role(), role);
+                        assert_eq!(packet.opcode.width(), usize::from(width));
+                        assert_eq!(u16::from(packet.opcode.packed_bits()), bits);
+                        assert_eq!(packet.encode().unwrap(), wire);
+                    }
+                    (None, Err(GpuExecutionPacketError::UnsupportedWidth { width: got }))
+                        if matches!(width, 1 | 2 | 7 | 3..=6 | 8) =>
+                    {
+                        assert_eq!(got, usize::from(width));
+                    }
+                    (None, Err(GpuExecutionPacketError::UnsupportedOpcode { .. }))
+                        if matches!(width, 3..=6 | 8) => {}
+                    (None, Err(GpuExecutionPacketError::InvalidWidth { width: got }))
+                        if width >= 9 =>
+                    {
+                        assert_eq!(got, usize::from(width));
+                    }
+                    (_, result) => panic!(
+                        "D{width}:{bits:0w$b}: неправильна GPU класифікація: {result:?}",
+                        w = usize::from(width),
+                    ),
+                }
+            }
+        }
+
+        assert_eq!(checked, 2046);
+        assert_eq!(semantic_bits, 18_434);
+        assert!(admitted > 0);
+        assert!(admitted < checked);
+
+        // Мутант: чотири payload-біти не вміщаються в D3.
+        assert!(matches!(
+            decode_admitted_opcode(3, 0b1000),
+            Err(GpuExecutionPacketError::InvalidPayload { width: 3, payload: 8 }),
+        ));
+    }
+
 }
