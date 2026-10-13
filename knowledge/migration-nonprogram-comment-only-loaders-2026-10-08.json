@@ -11,7 +11,7 @@
   "entries": [
     {
       "path": "lib/core2.lisp",
-      "git_blob_sha1": "fd85507242aba7482b09d69d86d672dfc2d4b12f"
+      "git_blob_sha1": "0f6fa3fe1d125a604e921cb04ec42e66b1b0519b"
     },
     {
       "path": "lib/surface/ukr.lisp",
