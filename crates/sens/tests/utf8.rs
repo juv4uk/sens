@@ -112,25 +112,6 @@ fn explicitly_typed_d8_equal_call(d3: &[sens::Expr]) -> Vec<sens::Expr> {
     }]
 }
 
-fn explicitly_typed_d8_equal_call(d3: &[sens::Expr]) -> Vec<sens::Expr> {
-    let sens::ExprKind::List(items) = &d3[0].kind else {
-        panic!("потрібна форма-виклик")
-    };
-    let mut parts = items.to_vec();
-    parts[0] = sens::Expr {
-        kind: sens::ExprKind::DomainIdentity(sens::DomainIdentity::D8(
-            sens::CoreD8::from_word(
-                sens::Bit8::new(0b11110111).expect("ратифікована D8-координата"),
-            ),
-        )),
-        span: parts[0].span,
-    };
-    vec![sens::Expr {
-        kind: sens::ExprKind::List(std::rc::Rc::from(parts.into_boxed_slice())),
-        span: d3[0].span,
-    }]
-}
-
 #[test]
 fn utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries() {
     // Збіг восьми бітів із ратифікованим D8 не дає права auto-lift.
