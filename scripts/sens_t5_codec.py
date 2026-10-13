@@ -64,7 +64,12 @@ def encode_typed_domain_words(words: list[tuple[str, str]]) -> bytes:
             raise SensT5Error(
                 f"word {index}: explicit current D1..D9 tag required; SID8 cannot be inferred"
             )
-        width = int(domain[1:])
+        # Domain tags are type addresses, never parse their suffix through
+        # a decimal intermediary. Values here are the already-known bit widths.
+        width = {
+            "D1": 1, "D2": 2, "D3": 3, "D4": 4, "D5": 5,
+            "D6": 6, "D7": 7, "D8": 8, "D9": 9,
+        }[domain]
         if not isinstance(bits, str) or len(bits) != width or re.fullmatch(r"[01]+", bits) is None:
             raise SensT5Error(
                 f"word {index}: {domain} requires exactly {width} binary digits"
