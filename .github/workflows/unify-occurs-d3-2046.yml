@@ -1,0 +1,31 @@
+name: Core unification — D4 occurs-check і 2046 адрес
+
+on:
+  pull_request:
+    paths:
+      - "lib/unify.lisp"
+      - "tests/test_unify_occurs_exact_domains_2046.py"
+      - "crates/sens/tests/unify_occurs_exact_d3.rs"
+      - ".github/workflows/unify-occurs-d3-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exhaustive-2046-and-ast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перебрати 2046 точних координат і відновити frozen D6-body
+        run: python3 -m unittest discover -s tests -p 'test_unify_occurs_exact_domains_2046.py' -v
+
+  live-unifier-rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Живий occurs-check — циклічні й ациклічні терми
+        run: cargo test --locked -p sens --test unify_occurs_exact_d3 -- --nocapture
