@@ -241,7 +241,7 @@ jobs:
             --test-id sens-reason-index-width-selectors-mutant \
             --layer eval \
             --fixture "$mutant" \
-            --expect-error-substring "car expects a non-empty list" \
+            --expect-error-substring "not callable" \
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$mutant"
