@@ -1,7 +1,7 @@
 name: SENS — один точковий автоматичний двійковий закон
 
 # Рівно один автоматичний job; лише SENS визначає семантичний результат.
-# Позитивний фізичний свідок та мутант вже пройшли оракул 2026-10-13.
+# Один центральний workflow: positive law + fail-closed guards.
 on:
   push:
     branches: [main]
@@ -9,7 +9,9 @@ on:
       - '.github/workflows/ci.yml'
       - 'scripts/ci_one_focused_workflow.py'
       - 'scripts/ci_failure_contract.py'
-      - 'tests/semantic/domain-logic-2040/**'
+      - 'tests/semantic/time-d1-predicate-law.sens'
+      - 'tests/semantic/domain-logic-2040/mutant.sens'
+      - 'lib/time.lisp'
       - 'tests/semantic/knowledge-exact-arity-structure.*'
       - 'lib/knowledge.lisp'
       - 'lib/domains/**'
@@ -24,7 +26,7 @@ concurrency:
 
 jobs:
   binary-sens-law:
-    name: SENS власним D1-вердиктом доводить закон і відхиляє мутант
+    name: Часові D1 предикати — один фізичний SENS-свідок і чинні негативні контроли
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -36,6 +38,24 @@ jobs:
         id: budget
         run: python3 scripts/ci_one_focused_workflow.py
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: D1 source census — direct predicate bits, no wrapper constructors
+        id: source-census
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(sed '/^[[:space:]]*;/d' lib/time.lisp)"
+          true_count="$(printf '%s\n' "$code" | grep -oF '#d1:1' | wc -l | tr -d ' ')"
+          false_count="$(printf '%s\n' "$code" | grep -oF '#d1:0' | wc -l | tr -d ' ')"
+          legacy_true=0
+          legacy_false=0
+          if printf '%s\n' "$code" | grep -Fq '(010 (001 ()))'; then legacy_true=1; fi
+          if printf '%s\n' "$code" | grep -Fq '(101 (001 (0)) (001 (1)))'; then legacy_false=1; fi
+          sha256sum lib/time.lisp
+          printf 'TIME_D1_SOURCE_BITS true=%s false=%s legacy_true=%s legacy_false=%s\n' "$true_count" "$false_count" "$legacy_true" "$legacy_false"
+          test "$true_count" -eq 20
+          test "$false_count" -eq 4
+          test "$legacy_true" -eq 0
+          test "$legacy_false" -eq 0
       - name: Зібрати тільки механізм виконання SENS
         id: build
         shell: bash
@@ -46,21 +66,21 @@ jobs:
           python3 scripts/ci_failure_contract.py run \
             --test-id one-sens-transport-build \
             --layer transport \
-            --fixture tests/semantic/domain-logic-2040/proof.sens \
+            --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
-      - name: Єдиний фізичний SENS-закон — точний D1:YES
+      - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
         run: |
           set -euo pipefail
-          program=tests/semantic/domain-logic-2040/proof.sens
+          program=tests/semantic/time-d1-predicate-law.sens
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           printf '1\n' > "$RUNNER_TEMP/expected-d1"
-          echo "test_id=sens-domain-logic-2040 layer=eval semantic_authority=binary-SENS"
+          echo "test_id=sens-time-d1-predicate-law layer=eval semantic_authority=binary-SENS"
           sha256sum "$program"
           python3 scripts/ci_failure_contract.py run \
-            --test-id sens-domain-logic-2040 \
+            --test-id sens-time-d1-predicate-law \
             --layer eval \
             --fixture "$program" \
             --expected-file "$RUNNER_TEMP/expected-d1" \
@@ -120,13 +140,14 @@ jobs:
         env:
           BUDGET_OUTCOME: ${{ steps.budget.outcome }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
+          SOURCE_OUTCOME: ${{ steps.source-census.outcome }}
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
           else
             # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
