@@ -116,9 +116,9 @@ fn x86_lowerer_seven_d4_local_apps_and_62_opaque_w8_rows() {
     assert_eq!(source.matches("((0010 (forms)").count(), 7);
     let history = source.split_once("; First executable semantic-lowering witness.").unwrap().0;
     let rows = history.lines().filter(|line| {
-        let b = line.trim().as_bytes();
-        b.len() > 10 && b[0] == b'(' && b[9] == b' '
-            && b[1..9].iter().all(|v| *v == b'0' || *v == b'1')
+        let b = line.trim().trim_start_matches('(').as_bytes();
+        b.len() > 9 && b[8] == b' '
+            && b[..8].iter().all(|v| *v == b'0' || *v == b'1')
     }).count();
     assert_eq!(rows, 62, "цитовані W8 не є D8-викликами");
 }
