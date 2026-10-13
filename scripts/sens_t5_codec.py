@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Фізичний T5-файл .sens для ТОЧНИХ двійкових слів SENS.
 
-Семантичний payload складається тільки з 0/1 слів D1..D9.
+Фізичний носій передає W1..W11; семантику та викличність встановлює тільки SENS.
 Трит 2 існує лише між словами (ніколи не всередині SENS слова).
 Один байт містить п'ять тритів (0..242), padding = 0..4 фінальних 2.
 Завершувача 22 немає: кінець файла визначається кількістю байтів.
@@ -14,6 +14,13 @@ import re
 
 MAX_FILE_BYTES = 4 * 1024 * 1024
 BITS = re.compile(r"[01]{1,11}\Z")
+
+# A physical T5 byte has exactly five base-3 symbols (0, 1, or delimiter 2).
+# The fixed 243-case transport lookup avoids text formatting per byte.
+TRITS_BY_BYTE = tuple(
+    bytes((byte // divisor) % 3 for divisor in (81, 27, 9, 3, 1))
+    for byte in range(243)
+)
 
 
 class SensT5Error(ValueError):
@@ -28,7 +35,7 @@ def parse_words(source: str) -> list[str]:
     for i, word in enumerate(words, 1):
         if not BITS.fullmatch(word) or not (1 <= len(word) <= 11):
             raise SensT5Error(
-                f"word {i}: requires exact D1..D11 0/1 word, got {word[:64]!r}"
+                f"word {i}: requires exact W1..W11 0/1 word, got {word[:64]!r}"
             )
     return words
 
@@ -47,22 +54,45 @@ def encode_words(words: list[str]) -> bytes:
 
 
 def decode_bytes(data: bytes) -> list[str]:
+    """Decode physical T5 once, preserving exact W1..W11 word boundaries.
+
+    Trit 2 separates two words exactly once. After the final word only
+    zero to four padding trits are legal. No full-file textual trit buffer,
+    re-encoding, decimal intermediary, or new domain/callability law.
+    """
     if not data:
         raise SensT5Error("empty physical .sens")
     if len(data) > MAX_FILE_BYTES:
         raise SensT5Error("physical file exceeds size limit")
-    if any(byte >= 243 for byte in data):
-        raise SensT5Error("invalid T5 byte outside 0..242")
-    trits = "".join(
-        "".join(str((byte // (3 ** exp)) % 3) for exp in (4, 3, 2, 1, 0))
-        for byte in data
-    )
-    padding = len(trits) - len(trits.rstrip("2"))
-    if padding >= 5:
-        raise SensT5Error("more than four terminal padding trits")
-    words = parse_words(trits[:len(trits) - padding].replace("2", " "))
-    if encode_words(words) != data:
-        raise SensT5Error("noncanonical byte representation")
+    words: list[str] = []
+    current: list[str] = []
+    padding = 0
+    for byte in data:
+        if byte >= 243:
+            raise SensT5Error("invalid T5 byte outside 0..242")
+        for trit in TRITS_BY_BYTE[byte]:
+            if trit == 2:
+                if current:
+                    words.append("".join(current))
+                    current.clear()
+                    padding = 1
+                else:
+                    padding += 1
+                if padding >= 5:
+                    raise SensT5Error("more than four terminal padding trits")
+            else:
+                if padding > 1:
+                    raise SensT5Error("noncanonical repeated separator")
+                if padding and not words:
+                    raise SensT5Error("noncanonical leading separator")
+                padding = 0
+                current.append("1" if trit else "0")
+                if len(current) > 11:
+                    raise SensT5Error("word exceeds exact W1..W11 width")
+    if current:
+        words.append("".join(current))
+    if not words:
+        raise SensT5Error("empty/unsupported binary program")
     return words
 
 

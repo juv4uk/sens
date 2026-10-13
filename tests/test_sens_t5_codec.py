@@ -37,6 +37,29 @@ class PhysicalT5CodecTests(unittest.TestCase):
                 encoded = encode_projection(word)
                 self.assertEqual(decode_bytes(encoded), [word])
 
+    def test_w10_w11_transport_preserves_exact_bits_not_semantic_admission(self):
+        for width in (10, 11):
+            for value in (0, 1, 1 << (width - 1), (1 << width) - 1):
+                word = f"{value:0{width}b}"
+                with self.subTest(width=width, word=word):
+                    packed = encode_words([word])
+                    self.assertEqual(decode_bytes(packed), [word])
+                    self.assertEqual(encode_words(decode_bytes(packed)), packed)
+
+    def test_malformed_separators_and_overwidth_word_have_exact_reason(self):
+        def physical(trits: str) -> bytes:
+            self.assertEqual(len(trits) % 5, 0)
+            return bytes(int(trits[i:i + 5], 3)
+                         for i in range(0, len(trits), 5))
+
+        for label, trits, reason in (
+            ("double-delimiter", "02212", "repeated separator"),
+            ("leading-delimiter", "20002", "leading separator"),
+            ("twelve-bits", "0" * 12 + "2" * 3, "exceeds exact W1..W11"),
+        ):
+            with self.subTest(label=label), self.assertRaisesRegex(SensT5Error, reason):
+                decode_bytes(physical(trits))
+
     def test_naked_collision_has_distinct_typed_digest(self):
         lhs = ["0", "00"]
         rhs = ["000"]
