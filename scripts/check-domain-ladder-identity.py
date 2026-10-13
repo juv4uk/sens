@@ -156,10 +156,19 @@ def _marked_human_projection(path: str, line: str) -> bool:
     return bool(re.search(r"\bprojection-human\b", comment))
 
 
-def _decimal_default_placeholder(template: str) -> bool:
-    # Default Display/f-string formatting loses leading zeroes. Explicit binary
-    # (:b / b) formatting is a source projection, not a decimal bridge.
+def _decimal_default_placeholder(template: str, arguments: str = "") -> bool:
+    # Inspect actual interpolation expressions/arguments, not ordinary prose in
+    # an error message (e.g. "packed binary reader rejected: {err}").
+    # Default formatting of an identity payload loses leading zeroes. Explicit
+    # binary (:b / b) formatting is a source projection, not a decimal bridge.
     for field in re.findall(r"\{([^{}]*)\}", template):
+        expression = field.split(":", 1)[0].split("!", 1)[0].strip()
+        is_identity = bool(
+            IDENTITY_NUMERIC_FIELD.search(expression)
+            or IDENTITY_NUMERIC_FIELD.search(arguments)
+        )
+        if not is_identity:
+            continue
         if ":" not in field:
             return True
         spec = field.split(":", 1)[1]
@@ -188,14 +197,14 @@ def inspect_decimal_identity_bridges(path: str, source: str) -> list[str]:
             continue
         if path.endswith(".rs"):
             for match in RUST_FORMAT_CALL.finditer(line):
-                if _decimal_default_placeholder(match.group(1)):
+                if _decimal_default_placeholder(match.group(1), match.group(2)):
                     findings.append(f"line {line_no}: default/decimal format of identity payload")
         elif path.endswith(".py"):
             for match in PYTHON_FSTRING.finditer(line):
                 if _decimal_default_placeholder(match.group("body")):
                     findings.append(f"line {line_no}: default/decimal f-string of identity payload")
             for match in PYTHON_FORMAT_CALL.finditer(line):
-                if _decimal_default_placeholder(match.group("body")):
+                if _decimal_default_placeholder(match.group("body"), match.group("args")):
                     findings.append(f"line {line_no}: default/decimal .format() of identity payload")
     return findings
 
