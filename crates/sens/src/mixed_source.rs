@@ -264,6 +264,25 @@ pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Re
     base.into_iter().map(|expr| lift_pinned_d9_language_calls(source, expr, 0)).collect()
 }
 
+/// Parse the curated Guard reference directory as data, not as a source file.
+/// The file's outer DEFINE still uses the pinned legacy W8 QUOTE carrier;
+/// this path-bound reader preserves that payload wholesale instead of
+/// interpreting binary-looking records inside the directory as executable
+/// call heads. It deliberately does not lift any D9 names from the data.
+pub fn parse_mixed_exact_domain_guard_reference_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "knowledge/guard-reference.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "Guard reference data reader is restricted to knowledge/guard-reference.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_pinned_d8_io(source)
+}
+
 /// Exact D3/D4 call heads are intentionally present in this single
 /// deterministic filesystem regression fixture. The fixture uses the
 /// Lisp-derived ЛІХТАР syntax for LET; it must not ask the runtime to

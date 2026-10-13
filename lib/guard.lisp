@@ -96,7 +96,9 @@
 (0011 guard-compare
   (0010 (subject expected observed evidence)
     (110
-      ((11110111 expected observed)
+      ; Reuse the existing reasoning-local D3 structural comparator.
+      ; It returns exact D1 PredicateBit, unlike the legacy Core EQUAL carrier.
+      ((unify-equal? expected observed)
        (make-guard-finding
          (001 allow) (001 confirmed) subject observed expected
          (001 ()) (001 invariant-preserved) (001 no-action) evidence))
@@ -155,9 +157,15 @@
 ; in knowledge/guard-reference.lisp; these accessors remain generic.
 ; Довідкові записи — звичайні дані. Змінний каталог екосистеми лежить у
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
+; Scan the already-loaded reference alist with existing D3 EQ/CAR/CDR and
+; the ratified D4 NULL selector. Do not route through legacy W8 EQUAL/ASSOC.
+(0011 guard-reference-field-onto
+  (0010 (field entries)
+    (110
+      ((0101 entries) (001 ()))
+      ((101 field (100 (100 entries))) (1001 (100 entries)))
+      ((010 ()) (guard-reference-field-onto field (011 entries))))))
+
 (0011 guard-reference-field
   (0010 (field reference)
-    (001000 ((entry (11100 field (011 reference))))
-      (110
-        ((010 entry) (001 ()))
-        ((010 (001 ())) (1001 entry))))))
+    (guard-reference-field-onto field (011 reference))))
