@@ -17,7 +17,7 @@ jobs:
         with:
           shared-key: verify-524-d295-cli
       - name: Build CLI
-        run: cargo build -p my-lisp-cli
+        run: cargo build -p sens-cli
       - name: Capture startup diagnostics
         shell: bash
         run: |
@@ -40,4 +40,4 @@ jobs:
           echo "--- tcp stdout ---"
           sed -n '1,20p' /tmp/tcp.out
       - name: Exact CLI smoke
-        run: cargo test -p my-lisp-cli --test cli -- --nocapture
+        run: cargo test -p sens-cli --test cli -- --nocapture

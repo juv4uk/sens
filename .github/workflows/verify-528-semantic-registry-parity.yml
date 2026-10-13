@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build my-lisp
-        run: cargo build --release -p my-lisp-cli --bin my-lisp
+        run: cargo build --release -p sens-cli --bin my-lisp
 
       - name: Require Lisp replacement
         shell: bash

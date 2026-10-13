@@ -13,7 +13,7 @@ jobs:
         with:
           shared-key: verify-333-proven-byte-readfile
       - name: Build my-lisp CLI
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin my-lisp
       - name: Measure proven-byte read-file candidate
         run: |
           /usr/bin/time -f 'proven_byte_profile_wall_seconds=%e' \

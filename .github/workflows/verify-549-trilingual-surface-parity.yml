@@ -10,7 +10,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Build release my-lisp
-        run: cargo build --release -p my-lisp-cli --bin my-lisp
+        run: cargo build --release -p sens-cli --bin my-lisp
 
       - name: Positive Python and Lisp reports
         shell: bash

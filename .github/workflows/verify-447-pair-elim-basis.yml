@@ -17,7 +17,7 @@ jobs:
         run: |
           printf '%s\n' '(car (quote ()))' > /tmp/car-nonpair.lisp
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/car-nonpair.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- /tmp/car-nonpair.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -29,7 +29,7 @@ jobs:
         run: |
           printf '%s\n' '(cdr (quote atom-value))' > /tmp/cdr-nonpair.lisp
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/cdr-nonpair.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- /tmp/cdr-nonpair.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"

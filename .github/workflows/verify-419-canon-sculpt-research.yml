@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
