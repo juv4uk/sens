@@ -2,7 +2,7 @@
 //! #d1:0/#d1:1 is only the temporary human-Lisp projection; the
 //! canonical SENS reader uses the bare exact W1 words 0 and 1.
 use sens::{
-    eval_program, eval_parsed_expressions, parse, parse_canonical_binary,
+    eval_program, eval_parsed_expressions, parse, parse_mixed_exact_domain, parse_canonical_binary,
     DomainIdentity, Exactness, ExprKind, Session, Value,
 };
 
@@ -33,7 +33,7 @@ fn bare_numerals_are_not_reinterpreted_in_historical_source() {
 
 #[test]
 fn structural_empty_is_never_boolean_false() {
-    let empty = eval_program("(001 ())", &mut Session::default())
+    let empty = eval_program("(quote ())", &mut Session::default())
         .expect("D3 quote structural empty").value;
     let zero = eval_program("#d1:0", &mut Session::default())
         .expect("direct D1 NO").value;
@@ -57,13 +57,9 @@ fn malformed_d1_projections_fail_closed() {
 #[test]
 fn cond_consumes_direct_d1_without_hidden_truthiness() {
     for (condition, expected) in [("#d1:1", "yes"), ("#d1:0", "no")] {
-        let source = format!(
-            "(110 (({condition} (001 yes))) ((#d1:1 (001 no))))"
-        );
-        // Extra clause parenthesization would change semantics: construct
-        // canonical two-field branches directly.
         let source = format!("(110 ({condition} (001 yes)) (#d1:1 (001 no)))");
-        let actual = eval_program(&source, &mut Session::default())
+        let parsed = parse_mixed_exact_domain(&source).expect("exact D3 COND with D1 branch tests");
+        let actual = eval_parsed_expressions(&parsed, &mut Session::default())
             .expect("exact D1 predicate must control COND").value;
         assert_eq!(actual.to_string(), expected);
     }
