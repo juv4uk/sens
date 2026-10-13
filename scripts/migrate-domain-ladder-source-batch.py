@@ -21,6 +21,7 @@ SCRIPT_DIR = ROOT / "scripts"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 from report_original_migration_candidates import load_nonprogram_classification
+from domain_tables import read_domain_table
 BITS = re.compile(r"[01]{8}\Z")
 TARGET = re.compile(r"D([1-9]):([01]{1,9})")
 ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
@@ -44,7 +45,69 @@ PARTIAL_D4_WITH_LEGACY_D3 = {
 }
 
 
+
+def exact_domain_catalog(root):
+    """Audit 2046 exact D1-D10 COORDINATES, not 2046 proven callables."""
+    f = json.loads((root / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8"))
+    d7 = json.loads((root / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))
+    d10 = json.loads((root / "knowledge/d10-owner-whole-domain-ratification-20261012.json").read_text(encoding="utf-8"))
+    if f.get("status") != "owner-ratified":
+        raise ValueError("unratified D1-D9")
+    if (d7.get("schema"), d7.get("status"), d7.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 128):
+        raise ValueError("D7 keyboard/v2 owner drift")
+    if (d10.get("decision"), d10.get("ratified"),
+            d10.get("inventory", {}).get("rows"),
+            d10.get("evidence_separation", {}).get("physical_runtime_t5_opcode_admission")) != (
+            "RATIFY_D10_AS_ONE_COMPLETE_DOMAIN", True, 1024, False):
+        raise ValueError("D10 codebook does not grant runtime admission")
+    owner_text = d7.get("table", [])
+    if len(owner_text) != 128 or any(
+        row.get("bits") != f"{i:07b}" or row.get("ascii") != chr(i)
+        for i, row in enumerate(owner_text)
+    ):
+        raise ValueError("D7 exact keyboard coordinate mismatch")
+    coords, counts, address_bits = set(), {}, 0
+    for width in range(1, 11):
+        name = f"D{width}"
+        rows = read_domain_table(root / "lib" / "domains" / f"d{width}.lisp")
+        if len(rows) != (1 << width):
+            raise ValueError(f"{name}: missing exact-width residents")
+        for i, row in enumerate(rows):
+            word = f"{i:0{width}b}"
+            if row.bits != word or row.width != width or row.domain != name:
+                raise ValueError(f"{name}: changed coordinate order or width at {i}")
+            if (width, word) in coords:
+                raise ValueError(f"{name}: duplicate typed coordinate")
+            coords.add((width, word))
+            if width == 7:
+                source = owner_text[i]
+                visible = (
+                    (source["uk"], source["uk"], source["san"],
+                     source["ascii"], source["uk"])
+                    if 32 <= i < 127 else (None,) * 5
+                )
+                if row.lisp is not None or (
+                    row.uk, row.ukr, row.san, row.en, row.sym
+                ) != visible:
+                    raise ValueError(f"D7:{word}: data/callability drift")
+        if width < 10 and width != 7:
+            owner = f["domains"].get(name, {})
+            if owner.get("width") != width or set(owner.get("residents", {})) != {
+                f"{i:0{width}b}" for i in range(1 << width)
+            }:
+                raise ValueError(f"{name}: ratified codebook drift")
+        counts[name] = len(rows)
+        address_bits += width * len(rows)
+    if len(coords) != 2046 or address_bits != 18434:
+        raise ValueError("D1-D10 exact-bit mass drift")
+    return {"identities": coords, "widths": counts, "count": len(coords),
+            "address_bits": address_bits, "min_packed_bytes": (address_bits + 7) // 8,
+            "callable_inferred": False}
+
+
 def authority(root):
+    catalog = exact_domain_catalog(root)
     a = json.loads((root / "knowledge/sens8-current-coverage-v1.json").read_text())
     f = json.loads((root / "knowledge/d1-d9-foundation.json").read_text())
     if a.get("status") != "AUDIT-COMPLETE" or len(a.get("rows", [])) != 256:
@@ -62,9 +125,13 @@ def authority(root):
             owner = f["domains"].get(domain, {})
             if owner.get("width") != len(word) or word not in owner.get("residents", {}):
                 raise ValueError("not a ratified current resident: " + old)
+            if (len(word), word) not in catalog["identities"]:
+                raise ValueError("legacy successor not an exact domain identity: " + old)
             mapping[old] = word
         else:
             blocked[old] = x["classification"]
+    if len(mapping) != 171 or len(blocked) != 85:
+        raise ValueError("legacy SID8 evidence disposition drift")
     return mapping, blocked
 
 def rewrite(src, mapping, blocked):
