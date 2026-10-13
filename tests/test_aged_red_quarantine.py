@@ -32,6 +32,29 @@ class AgedRedQuarantine(unittest.TestCase):
         self.assertIn("не FLAKE/TRANSITIONAL", body)
         self.assertEqual(body.count("| `.github/workflows/domain-ladder.yml`"), 1)
         self.assertIn("INCOMPLETE_API", q.render(got, ["over-cap"], 1, CLOCK, 7))
+        # A dense >1000-result UTC interval must be split, not silently capped.
+        original = q.api
+        calls = []
+        def fake(repo, token, verb, endpoint, data=None):
+            calls.append(endpoint)
+            params = __import__("urllib.parse", fromlist=["parse_qs"]).parse_qs(endpoint.split("?", 1)[1])
+            window = params["created"][0]
+            # Parent interval needs subdivision; child intervals are empty.
+            if window.startswith("2026-10-12T00:00:00Z..2026-10-13T00:00:00Z"):
+                return {"total_count": 1000, "workflow_runs": []}
+            return {"total_count": 0, "workflow_runs": []}
+        try:
+            q.api = fake
+            rows, gaps, windows = q.fetch_window(
+                "juv4uk/sens", "fake", q.utc("2026-10-12T00:00:00Z"),
+                q.utc("2026-10-13T00:00:00Z"))
+            self.assertEqual(rows, [])
+            self.assertEqual(gaps, [])
+            self.assertEqual(windows, 3)
+            self.assertEqual(len(calls), 3)
+        finally:
+            q.api = original
+
 
 
 if __name__ == "__main__":

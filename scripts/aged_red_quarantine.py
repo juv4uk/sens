@@ -66,8 +66,42 @@ def iso(t):
     return t.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def fetch_window(repo, token, start, end, depth=0):
+    """Time-shard dense GitHub searches; no successful audit on partial coverage."""
+    period = iso(start) + ".." + iso(end)
+    params = {"status": "failure", "created": period, "per_page": 100, "page": 1}
+    first = api(repo, token, "GET", "/actions/runs?" + urllib.parse.urlencode(params))
+    total = first.get("total_count")
+    rows = first.get("workflow_runs")
+    if type(total) is not int or not isinstance(rows, list):
+        raise ValueError("missing workflow API count/items for " + period)
+    # GitHub caps search results: split the interval instead of dropping anything.
+    if total >= 1000:
+        middle = start + (end - start) / 2
+        if depth >= 20 or (end - start) <= dt.timedelta(seconds=2):
+            return [], [period], 1
+        middle = middle.replace(microsecond=0)
+        if middle <= start or middle >= end:
+            return [], [period], 1
+        left, lg, lc = fetch_window(repo, token, start, middle, depth + 1)
+        right, rg, rc = fetch_window(repo, token, middle, end, depth + 1)
+        return left + right, lg + rg, 1 + lc + rc
+    batch = list(rows)
+    pages = (total + 99) // 100
+    for page in range(2, pages + 1):
+        params["page"] = page
+        more = api(repo, token, "GET", "/actions/runs?" + urllib.parse.urlencode(params))
+        items = more.get("workflow_runs", [])
+        if not isinstance(items, list):
+            raise ValueError("invalid API workflow_runs for " + period)
+        batch.extend(items)
+    if len(batch) < total:
+        return batch, [period], 1
+    return batch, [], 1
+
+
 def scan(repo, token, clock, days):
-    """Split by UTC day; never trust a capped 1000-result GitHub search as complete."""
+    """Collect 24h+ failures in the rolling lookback, splitting every API cap."""
     upper = clock - dt.timedelta(hours=24)
     lower = clock - dt.timedelta(days=days)
     found = {}
@@ -75,28 +109,11 @@ def scan(repo, token, clock, days):
     incomplete = []
     while lower < upper:
         end = min(upper, lower + dt.timedelta(days=1))
-        # API created range is inclusive. Deduplicate the boundary by run ID.
-        filter_value = iso(lower) + ".." + iso(end)
-        batch = []
-        for page in range(1, 11):
-            params = urllib.parse.urlencode({
-                "status": "failure", "created": filter_value,
-                "per_page": 100, "page": page,
-            })
-            response = api(repo, token, "GET", "/actions/runs?" + params)
-            rows = response.get("workflow_runs", [])
-            if not isinstance(rows, list):
-                raise ValueError("invalid workflow_runs payload")
-            batch.extend(rows)
-            if len(rows) < 100:
-                break
-        # The search API returns at most 1000 matching runs per query.
-        # If a UTC day is too large, its coverage is explicitly incomplete.
-        if len(batch) >= 1000 or response.get("total_count", 0) > len(batch):
-            incomplete.append(filter_value)
+        batch, gaps, calls = fetch_window(repo, token, lower, end)
         found.update(candidates(batch, clock))
+        incomplete.extend(gaps)
+        windows += calls
         lower = end
-        windows += 1
     return found, incomplete, windows
 
 
