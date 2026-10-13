@@ -76,7 +76,7 @@ class ExactDomainWitness(unittest.TestCase):
         self.assertEqual(witness["semantic_bits"], 13)
         for field, wrong in (
             ("bytes", len(payload)+1), ("semantic_word_count", len(words)+1),
-            ("semantic_bits", 13), ("transport_trits", 17),
+            ("semantic_bits", 14), ("transport_trits", 18),
             ("physical_sha256", "0"*64), ("typed_word_sha256", "0"*64),
             ("status", "would-write"), ("path", "wrong.lisp"),
             ("output", "wrong.sens"), ("passes", None),
