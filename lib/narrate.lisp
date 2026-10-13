@@ -15,21 +15,23 @@
 ; (lib/reason.lisp) into a word list joined by `because`/`and`. It narrates
 ; each node's `rule` field, not its `goal` field.
 
-; Міграція історичних викликів EQUAL: два предикати довжини
-; fact порівнюють лише атомарне значення LENGTH з атомами 2 або 3.
-; Їхні executable heads — тепер точний D3:101 EQ, а не W8:11110111.
-; У narrate-outcome-arity? D3:010 ATOM спершу перевіряє expected.
-; D3:101 EQ одержує лише атомарні операнди, бо D6:000000 LENGTH
-; коректного списку повертає атомарну довжину.
-; Некоректний список або парний expected повертають точний D1:NO.
-; Мовні закони D1/D3 і негативний однобітний мутант зберігаються
-; виключно в tests/semantic/narrate-d3-atom-eq-{law,mutant}.bits.
+; narrate-fact: структурна міграція без LENGTH і десяткових 2/3.
+; Чинний result-proper-list? відкидає неправильний хвіст (D1:0 не callable),
+; потім D3:010 ATOM + D3:011 CDR + D4:0111 CDDR + D5:01111 CDDDR
+; розрізняють рівно дві та рівно три комірки. Немає нового resident.
+; Сумнівний W8 EQUAL та арність з expected у narrate-outcome-arity?
+; залишаються ОКРЕМИМ недоведеним блокером, без хибної атестації.
+; Двійкова структурна передумова: tests/semantic/narrate-d3-atom-eq-
+; {law,mutant}.bits; це НЕ доказ допуску виклику D9 NARRATE-FACT.
 
 (0011 narrate-fact
   (0010 (fact)
     (110
-      ((101 (000000 fact) 2)  (1110 (1001 fact) (001 is) (001 a) (100 fact)))
-      ((101 (000000 fact) 3)  (1110 (1001 fact) (100 fact) (10011 fact)))
+      ((0100 (result-proper-list? fact)) (0))
+      ((010 fact) fact)
+      ((010 (011 fact)) fact)
+      ((010 (0111 fact)) (1110 (1001 fact) (001 is) (001 a) (100 fact)))
+      ((010 (01111 fact)) (1110 (1001 fact) (100 fact) (10011 fact)))
       ((010 (001 ())) fact))))
 
 (0011 provenance-goal (0010 (prov) (1001 prov)))
