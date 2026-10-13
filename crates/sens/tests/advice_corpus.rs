@@ -2,12 +2,22 @@
 //! candidate knowledge -> advise/advise-all -> reason-in-observe -> narrate-outcome.
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    eval_program, parse_exact_domain_source, parse_mixed_exact_domain, Session,
+};
 
 fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
+    // Legacy eval_program treats bare 0011 as an arithmetic literal. The
+    // repository-pinned Core reader keeps the original D4 DEFINE identity.
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("pinned exact-width SENS core bootstrap");
     for (library_path, library) in [
-        ("lib/core.lisp", include_str!("../../../lib/core.lisp")),
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
         ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
@@ -16,7 +26,24 @@ fn eval_advice_corpus(source: &str) -> String {
         ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
         ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
     ] {
-        eval_program(library, &mut session)
+        let result = match library_path {
+            "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp"
+            | "lib/knowledge.lisp" => {
+                eval_pinned_reasoning_source(library_path, library, &mut session)
+            }
+            "lib/understand.lisp" => {
+                let parsed = parse_mixed_exact_domain(library)
+                    .unwrap_or_else(|error| panic!("{library_path}: source reader: {error}"));
+                eval_parsed_expressions(&parsed, &mut session)
+            }
+            "lib/result-status.lisp" | "lib/narrate.lisp" => {
+                let parsed = parse_exact_domain_source(library)
+                    .unwrap_or_else(|error| panic!("{library_path}: exact reader: {error}"));
+                eval_parsed_expressions(&parsed, &mut session)
+            }
+            _ => unreachable!("only the pinned corpus libraries are admitted"),
+        };
+        result
             .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
     }
     eval_program(source, &mut session)
