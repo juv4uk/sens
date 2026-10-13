@@ -24,7 +24,7 @@ SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
 NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
 HISTORICAL=ROOT/"contracts"/"core1-historical-sid-map.lisp"
-TEXT7=ROOT/"crates"/"sens"/"src"/"text7_projection_generated.rs"
+TEXT7=ROOT/"knowledge"/"d7-keyboard-v2-ratified.json"
 
 class KeyboardV2Sid8MigrationTests(unittest.TestCase):
     """Fresh SID8 imports use the owner-ratified keyboard v2, not old SLP1."""
@@ -74,6 +74,75 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
         self.assertEqual(words[:3], ["10", "100", "00"])
         self.assertEqual(words[-1], "01")
         self.assertEqual(resolver.counts["pass1-sens8"], 1)
+
+
+class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
+    """All 2046 D1–D10 typed coordinates; no SID8-by-payload alias."""
+
+    def test_every_ratified_width_stays_exact_and_noncallable_domains_block(self):
+        from domain_tables import read_domain_table
+
+        current_d8 = {format(n, "08b") for n in range(256)}
+        resolver = mod.Resolver({}, {}, {}, source_era="current",
+                                admitted_d8=current_d8)
+        seen = set()
+        admitted = 0
+        rejected = 0
+        for width in range(1, 11):
+            path = ROOT / "lib" / "domains" / f"d{width}.lisp"
+            rows = read_domain_table(path)
+            self.assertEqual(len(rows), 1 << width)
+            for n, row in enumerate(rows):
+                bits = format(n, f"0{width}b")
+                self.assertEqual((row.width, row.bits), (width, bits))
+                ident = (width, bits)
+                self.assertNotIn(ident, seen)
+                seen.add(ident)
+                tok = mod.Tok("ATOM", bits, 0)
+                # Domain presence is NOT proof of callable admission.
+                blocked_width = width in (2, 7, 9, 10) or (width == 3 and n == 0)
+                if blocked_width:
+                    with self.subTest(width=width, index=n):
+                        with self.assertRaises(mod.MigrationError):
+                            resolver.head(tok)
+                    rejected += 1
+                else:
+                    out, origin = resolver.head(tok)
+                    self.assertEqual(out, [bits])
+                    self.assertEqual(len(out[0]), width)
+                    admitted += 1
+        self.assertEqual(len(seen), 2046)  # 2^1 + ... + 2^10
+        self.assertEqual(rejected, 1669)
+        self.assertEqual(admitted, 377)
+        # D7 and D10 are counted as coordinates, NOT 1152 callable functions.
+        self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
+
+    def test_all_256_w8_heads_are_era_ambiguous_without_provenance(self):
+        resolver = mod.Resolver({}, {}, {}, source_era="auto")
+        for n in range(256):
+            with self.assertRaisesRegex(mod.MigrationError, "ambiguous W8"):
+                resolver.head(mod.Tok("ATOM", format(n, "08b"), 0))
+
+    def test_pinned_legacy_w8_collision_never_becomes_current_d8(self):
+        resolver = mod.Resolver({"10101000": None,
+                                 "00000101": ("100", "D3", "audited")},
+                                {}, {}, source_era="legacy")
+        with self.assertRaisesRegex(mod.MigrationError, "legacy-unmapped"):
+            resolver.head(mod.Tok("ATOM", "10101000", 0))
+        out, evidence = resolver.head(mod.Tok("ATOM", "00000101", 0))
+        self.assertEqual((out, evidence), (["100"], "pass1-sens8"))
+        self.assertNotEqual(len(out[0]), 8)
+
+    def test_structural_empty_and_text_can_be_data_but_not_calls(self):
+        resolver = mod.Resolver({}, {}, {}, source_era="current",
+                                admitted_d8={"10101000"})
+        for code in ("000", "0000000", "1111111",
+                     "000000000", "111111111", "0000000000",
+                     "1111111111", "00000000000"):
+            with self.subTest(code=code), self.assertRaises(mod.MigrationError):
+                resolver.head(mod.Tok("ATOM", code, 0))
+        # The source D3 EMPTY value is still canonical data.
+        self.assertEqual(mod.migrate_file("()", resolver, {}), "000\n")
 
 
 class ThreePassMigrationTests(unittest.TestCase):
@@ -556,7 +625,13 @@ class ThreePassMigrationTests(unittest.TestCase):
             all(set(word) <= {"0","1"} for word in words),
             "the real machine-block source must reach an all-binary candidate",
         )
-        self.assertEqual(resolver.counts["pass1-sens8"],17)
+        # The original machine-block witness needed 17 historical W8 routes.
+        # That source has since been migrated to exact D3/D4 code; requiring
+        # 17 SID8 hits here would force a regression to retired semantics.
+        self.assertEqual(resolver.counts["pass1-sens8"], 0)
+        self.assertGreater(resolver.counts["already-exact"], 0)
+        self.assertEqual(source.count("(0011 "), 6)
+        self.assertNotIn("(00001001 ", source)
 
         for name in (
             "machine-block",
