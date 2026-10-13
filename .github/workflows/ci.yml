@@ -18,7 +18,7 @@ permissions:
 
 concurrency:
   group: sens-one-focussed-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   binary-sens-law:
@@ -31,9 +31,11 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
       - name: Не допустити жодного іншого автоматичного workflow
+        id: budget
         run: python3 scripts/ci_one_focused_workflow.py
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Зібрати тільки механізм виконання SENS
+        id: build
         shell: bash
         run: |
           set -euo pipefail
@@ -46,6 +48,7 @@ jobs:
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
       - name: Єдиний фізичний SENS-закон — точний D1:YES
+        id: law
         shell: bash
         run: |
           set -euo pipefail
@@ -62,6 +65,7 @@ jobs:
             --report-file "$report" \
             -- target/debug/sens "$program"
       - name: Негативний контроль — виключно SENS non-callable, не помилка парсера
+        id: mutant
         shell: bash
         run: |
           set -euo pipefail
@@ -94,7 +98,17 @@ jobs:
       - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
+        env:
+          BUDGET_OUTCOME: ${{ steps.budget.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          LAW_OUTCOME: ${{ steps.law.outcome }}
+          MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
         run: |
           set -euo pipefail
-          python3 scripts/ci_failure_contract.py scan \
-            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --allow-empty
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
+          else
+            # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
+            python3 scripts/ci_failure_contract.py scan --report-file "$report"
+          fi
