@@ -1,29 +1,28 @@
-; #177 — architecture-neutral machine block composition.
-; A machine block is deliberately only an ordered list of structured machine
-; forms. It owns no ISA facts, opcodes, bytes, feature tables, or semantics.
-; Target-specific atoms create the forms; admission decides whether a target
-; accepts them; the encoder materializes bytes only after admission.
+; Канонічний машинний блок: точні D3 QUOTE та D4 DEFINE/LAMBDA/LIST/APPEND.
+; Original witness: docs/archive/historical/machine-block-original-200201b7.source.txt; саме історичне джерело не є виконавчим.
+; Імена зв'язувань ще лишаються символами Lisp-проєкції, не D7 wire;
+; фізичного .sens тут немає й релізний admission не заявляється.
 
-(00001001 machine-block
-  (00001000 (forms)
+(0011 machine-block
+  (0010 (forms)
     forms))
 
-(00001001 machine-block-empty
-  (00001000 ()
-    (00000001 ())))
+(0011 machine-block-empty
+  (0010 ()
+    (001 ())))
 
-(00001001 machine-block-one
-  (00001000 (form)
-    (00100111 form)))
+(0011 machine-block-one
+  (0010 (form)
+    (1110 form)))
 
-(00001001 machine-block-append
-  (00001000 (block form)
-    (00101001 block (00100111 form))))
+(0011 machine-block-append
+  (0010 (block form)
+    (1111 block (1110 form))))
 
-(00001001 machine-block-concat
-  (00001000 (left right)
-    (00101001 left right)))
+(0011 machine-block-concat
+  (0010 (left right)
+    (1111 left right)))
 
-(00001001 machine-block-forms
-  (00001000 (block)
+(0011 machine-block-forms
+  (0010 (block)
     block))

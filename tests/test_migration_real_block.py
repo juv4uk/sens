@@ -18,6 +18,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 BATCH = ROOT / "scripts/migrate-t5-batch.py"
 SOURCE = ROOT / "lib/machine/block.lisp"
+HISTORICAL = ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt"
 NOT_ADMITTED = ROOT / "lib/machine/block.sens"
 SOURCE_GIT_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"
 
@@ -27,7 +28,7 @@ class RealBlockQuarantineTests(unittest.TestCase):
         self.assertTrue(SOURCE.is_file())
         self.assertFalse(NOT_ADMITTED.exists(), "invalid-D2 binary must not be published")
         source_blob = subprocess.run(
-            ["git", "hash-object", "lib/machine/block.lisp"],
+            ["git", "hash-object", str(HISTORICAL)],
             cwd=ROOT, capture_output=True, text=True, check=True,
         ).stdout.strip()
         self.assertEqual(source_blob, SOURCE_GIT_BLOB)

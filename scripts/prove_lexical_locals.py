@@ -260,7 +260,7 @@ def lower_definitions(source: str, *, expected_names: tuple[str, ...] | None = N
 def main(argv: list[str] | None = None) -> int:
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--source", type=Path,
-                     default=ROOT / "lib/machine/block.lisp")
+                     default=ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt")
     cli.add_argument("--require-machine-block-provenance", action="store_true")
     args = cli.parse_args(argv)
     try:
