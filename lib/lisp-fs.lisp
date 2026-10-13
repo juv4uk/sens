@@ -326,10 +326,24 @@
          ((010 ()) (0101 (001 (0))))))
       ((010 ()) (0101 (001 (0)))))))
 
+; Структурна форма alist перевіряється ДО селекторів полів.
+; Пара (ключ . дані), ключ — непорожній атом, значення може бути EMPTY.
+; D1-вердикт належить самому SENS; ратифікації нової координати немає.
+(0011 fs-journal-alist?
+  (0010 (entries)
+    (110
+      ((0101 entries) #d1:1)
+      ((010 entries) #d1:0)
+      ((010 (100 entries)) #d1:0)
+      ((0101 (100 (100 entries))) #d1:0)
+      ((0100 (010 (100 (100 entries)))) #d1:0)
+      (#d1:1 (fs-journal-alist? (011 entries))))))
+
 (0011 fs-journal-event-decision
   (0010 (event)
     (110
-      ((010 event) (1110 (001 rejected) (001 invalid-event)))
+      ((0100 (fs-journal-alist? event))
+       (1110 (001 rejected) (001 invalid-event)))
       ((0100 (101 (fs-package-field (001 format) event) (001 wsm-fs-event)))
        (1110 (001 rejected) (001 invalid-format)))
       ((0100 (fs-journal-version-current? (fs-package-field (001 version) event)))
