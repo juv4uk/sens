@@ -100,9 +100,14 @@ impl DomainCoordinate {
         if !(3..=7).contains(&self.width) {
             return None;
         }
+        // Generated D3..D7 bitmap positions follow exact widths (index=width-3).
+        // A mismatch must fail closed rather than reinterpret another domain.
+        // This removes the per-lookup linear scan over all bitmap descriptors.
         let mask = crate::domain_owner_generated::DOMAIN_OWNER_BITMAPS
-            .iter()
-            .find(|mask| mask.width == self.width)?;
+            .get(usize::from(self.width - 3))?;
+        if mask.width != self.width {
+            return None;
+        }
         let slot = usize::from(self.bits / 64);
         Some(((mask.slots[slot] >> (self.bits % 64)) & 1) != 0)
     }
@@ -140,6 +145,39 @@ mod tests {
         assert_eq!(DomainCoordinate::з_видимих_бітів("00010"), Some(d5));
         assert_eq!(DomainCoordinate::з_видимих_бітів("2"), None);
         assert_eq!(DomainCoordinate::з_видимих_бітів("10"), DomainCoordinate::new(2, 0b10));
+    }
+
+    /// Перевірка конкретних граничних координат на публічному механічному
+    /// API, а не Rust-таблиця значень функцій SENS.
+    #[test]
+    fn прямий_бітмап_не_плутає_прогалини_d3_d4_і_межу_слота_d7() {
+        for (ширина, біти, очікується) in [
+            (3, 0b000, false), // D3:000 — адреса, але не resident
+            (3, 0b001, true),
+            (4, 0b0100, true),
+            (4, 0b0101, false), // D4:0101 — нерезидентна координата
+            (4, 0b1001, false), // D4:1001 — друга прогалина
+            (4, 0b1010, true),
+            (7, 0b0111111, true), // останній біт першого u64
+            (7, 0b1000000, true), // перший біт другого u64
+            (7, 0b1111111, true),
+        ] {
+            let координата = DomainCoordinate::new(ширина, біти).unwrap();
+            assert_eq!(
+                координата.owner_residency(),
+                Some(очікується),
+                "mechanical occupancy drift: D{ширина}:{}",
+                координата.видимі_біти(),
+            );
+        }
+        // D1/D2 не стають residents через випадковий збіг бітів.
+        for ширина in 1..=2 {
+            assert_eq!(
+                DomainCoordinate::new(ширина, 0).unwrap().owner_residency(),
+                None,
+                "D{ширина} cannot inherit D3 bitmap",
+            );
+        }
     }
 
     /// Exhaustive W7 current keyboard occupancy is 128/128; no callable alias.
