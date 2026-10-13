@@ -1,0 +1,41 @@
+name: SENS RED cause routing (four classes)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/red_cause_router.py'
+      - 'tests/test_red_cause_router.py'
+      - 'knowledge/red-cause-ledger.json'
+      - 'docs/ci-red-cause-policy.uk.md'
+      - '.github/workflows/red-cause-router.yml'
+  pull_request:
+    paths:
+      - 'scripts/red_cause_router.py'
+      - 'tests/test_red_cause_router.py'
+      - 'knowledge/red-cause-ledger.json'
+      - 'docs/ci-red-cause-policy.uk.md'
+      - '.github/workflows/red-cause-router.yml'
+  schedule:
+    - cron: '47 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  red-cause-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Pure metadata mutants (no host-language semantic oracle)
+        run: python3 -m unittest discover -s tests -p 'test_red_cause_router.py' -v
+      - name: Audit existing cause ledger
+        run: python3 scripts/red_cause_router.py audit
+      - name: Inventory live workflow failures (no job logs required)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/red_cause_router.py live
