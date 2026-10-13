@@ -1,0 +1,42 @@
+name: META Canon — закон логіки тільки двійковим SENS
+
+on:
+  pull_request:
+    paths:
+      - "lib/meta-eval.lisp"
+      - "tests/semantic/meta-canon-exact-d3-*.bits"
+      - ".github/workflows/meta-canon-d3-sens-law.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/meta-eval.lisp"
+      - "tests/semantic/meta-canon-exact-d3-*.bits"
+      - ".github/workflows/meta-canon-d3-sens-law.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  binary-sens-semantic-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Виконати дві фізичні T5-програми з вердиктами самого SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          cargo build --locked -p sens-cli --bin sens-trit
+          for variant in law mutant; do
+            cp "tests/semantic/meta-canon-exact-d3-${variant}.bits" "$work/${variant}.lisp"
+            target/debug/sens-trit encode "$work/${variant}.lisp"
+            target/debug/sens-trit verify "$work/${variant}.lisp"
+            value="$(target/debug/sens-trit eval "$work/${variant}.sens" | tail -n 1)"
+            case "$variant:$value" in
+              law:1|mutant:0) printf 'SENS D1 verdict %s=%s\n' "$variant" "$value" ;;
+              *) printf 'Невірний D1 вердикт: %s=%s\n' "$variant" "$value" >&2; exit 1 ;;
+            esac
+          done

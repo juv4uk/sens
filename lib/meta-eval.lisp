@@ -79,13 +79,13 @@
                          ((11110111 name 110) 110)
                          ((010 ()) (my-semantic-id-for-surface name)))))
       (110
-        ((11110111 semantic-id 001) (001 quote))
-        ((11110111 semantic-id 010) (001 atom))
-        ((11110111 semantic-id 101) (001 eq))
-        ((11110111 semantic-id 111) (001 cons))
-        ((11110111 semantic-id 100) (001 car))
-        ((11110111 semantic-id 011) (001 cdr))
-        ((11110111 semantic-id 110) (001 cond))
+        ((101 semantic-id 001) (001 quote))
+        ((101 semantic-id 010) (001 atom))
+        ((101 semantic-id 101) (001 eq))
+        ((101 semantic-id 111) (001 cons))
+        ((101 semantic-id 100) (001 car))
+        ((101 semantic-id 011) (001 cdr))
+        ((101 semantic-id 110) (001 cond))
         ))))
 
 (0011 my-lambda-name?
@@ -467,7 +467,7 @@
            ((0100 (11010 received fixed)) t)))
         ((010 ())
          (110
-           ((11110111 received fixed)  t)
+           ((101 received fixed)  t)
            ))))))
 
 (0011 my-arity-detail
