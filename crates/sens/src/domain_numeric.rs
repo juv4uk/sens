@@ -135,6 +135,16 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
         match operator {
             "+" => return left.add_admitted_numeric(right).map(Value::BinaryNumber),
             "*" => return left.mul_admitted_numeric(right).map(Value::BinaryNumber),
+            // A nonnegative natural difference is already a Dn atom.
+            // Reuse the qualified bit mechanism instead of introducing
+            // two unit denominators, cross-products, gcd and a ratio wrapper.
+            // A negative difference still follows the original NEG path.
+            "-" if left.numeric_domain_width().is_some()
+                && left.numeric_domain_width() == right.numeric_domain_width()
+                && left >= right =>
+            {
+                return left.checked_sub_admitted_numeric(right).map(Value::BinaryNumber);
+            }
             _ => {}
         }
     }
