@@ -61,8 +61,45 @@ run_native_binary_semantics() {
     sha256sum "$selector_mutant" >&2
     return 1
   fi
+  # One SENS-authored binary program checks three facts together:
+  # D4:0011 = D4:0011; D4:0011 != D8:00001010; final predicate D1:1.
+  # Old SID8 DEFMACRO and current D8 REPEAT must NEVER alias.
+  local migration_fixture="tests/semantic/native-t5/core-d4-vs-d8-width-law.sens"
+  local migration_projection="tests/semantic/native-t5/core-d4-vs-d8-width-law.bits"
+  local migration_tmp
+  migration_tmp="$(mktemp -d)"
+  printf '1\n' > "$migration_tmp/expected"
+  printf 'SENS_NATIVE_WIDTH_PROOF id=core-d4-vs-d8-width-law executor=%s version=%s reproduce=%q\n' \
+    "$bindir/sens" "$("$bindir/sens" --version)" "$migration_fixture"
+  sha256sum "$bindir/sens" "$migration_fixture" "$migration_projection"
+  if ! "$bindir/sens" "$migration_fixture" > "$migration_tmp/actual" 2> "$migration_tmp/stderr"; then
+    printf 'REGRESSION id=core-d4-vs-d8-width-law layer=eval executor=%s fixture=%s expected=D1:1 actual=execution-error\n' \
+      "$bindir/sens" "$migration_fixture" >&2
+    cat "$migration_tmp/stderr" >&2
+    sha256sum "$migration_tmp/expected" "$migration_tmp/actual" >&2
+    rm -rf "$migration_tmp"
+    return 1
+  fi
+  printf 'SENS_NATIVE_WIDTH_DIGESTS id=core-d4-vs-d8-width-law expected='
+  sha256sum "$migration_tmp/expected"
+  printf 'SENS_NATIVE_WIDTH_DIGESTS id=core-d4-vs-d8-width-law actual='
+  sha256sum "$migration_tmp/actual"
+  if ! cmp -s "$migration_tmp/expected" "$migration_tmp/actual"; then
+    printf 'REGRESSION id=core-d4-vs-d8-width-law layer=eval expected=D1:1 actual=' >&2
+    cat "$migration_tmp/actual" >&2
+    rm -rf "$migration_tmp"
+    return 1
+  fi
+  local migration_peer
+  if ! migration_peer="$("$bindir/sens-trit" eval "$migration_fixture")" || [[ "$migration_peer" != "1" ]]; then
+    printf 'REGRESSION id=core-d4-vs-d8-width-law layer=eval authority=sens secondary=sens-trit result=%s\n' "$migration_peer" >&2
+    rm -rf "$migration_tmp"
+    return 1
+  fi
+  rm -rf "$migration_tmp"
+  printf 'SENS_NATIVE_WIDTH_PASS id=core-d4-vs-d8-width-law exact_domains=D4:0011,D8:00001010 verdict=D1:1\n'
   printf 'SENS_NATIVE_D4_D5_SELECTOR: PASS law=1 mutant=blocked\n'
-  printf 'SENS-NATIVE-SEMANTICS: PASS 9 SENS-owned positive verdicts, 4 fail-closed negatives\n'
+  printf 'SENS-NATIVE-SEMANTICS: PASS 10 SENS-owned positive verdicts, 4 fail-closed negatives\n'
 }
 
 case "${1:-}" in
