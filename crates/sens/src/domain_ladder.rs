@@ -66,8 +66,17 @@ impl DomainCoordinate {
     }
 
     /// Точна source-проєкція збереженої координати; без округлення до байта.
+    /// Canonical binary-source projection: emit each identity bit directly.
+    /// No decimal formatting/parsing step can erase the width or leading zeroes.
     pub fn видимі_біти(self) -> String {
-        format!("{:0width$b}", self.bits, width = usize::from(self.width))
+        let width = usize::from(self.width);
+        let mut source = String::with_capacity(width);
+        for offset in 0..width {
+            let shift = width - 1 - offset;
+            let bit = (self.bits >> shift) & 1;
+            source.push(if bit == 0 { '0' } else { '1' });
+        }
+        source
     }
 
     /// Pure occupancy projection from owner-ratified domain sources.
@@ -113,6 +122,24 @@ mod tests {
             }
             assert_eq!(DomainCoordinate::new(width, 1u16 << width), None);
         }
+    }
+
+    #[test]
+    fn decimal_text_cannot_stand_in_for_a_width_qualified_identity() {
+        let d3 = DomainCoordinate::new(3, 0b010).unwrap();
+        let d4 = DomainCoordinate::new(4, 0b0010).unwrap();
+        let d5 = DomainCoordinate::new(5, 0b00010).unwrap();
+
+        assert_eq!(d3.видимі_біти(), "010");
+        assert_eq!(d4.видимі_біти(), "0010");
+        assert_eq!(d5.видимі_біти(), "00010");
+        assert_ne!(d3, d4);
+        assert_ne!(d4, d5);
+        assert_eq!(DomainCoordinate::з_видимих_бітів("010"), Some(d3));
+        assert_eq!(DomainCoordinate::з_видимих_бітів("0010"), Some(d4));
+        assert_eq!(DomainCoordinate::з_видимих_бітів("00010"), Some(d5));
+        assert_eq!(DomainCoordinate::з_видимих_бітів("2"), None);
+        assert_eq!(DomainCoordinate::з_видимих_бітів("10"), DomainCoordinate::new(2, 0b10));
     }
 
     /// Exhaustive W7 current keyboard occupancy is 128/128; no callable alias.
