@@ -87,7 +87,7 @@ fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
         widths.push(identity.width());
     }
     if let ExprKind::List(items) = &expr.kind {
-        for item in items {
+        for item in items.iter() {
             gather_domain_widths(item, widths);
         }
     }
