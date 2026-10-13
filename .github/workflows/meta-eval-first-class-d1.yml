@@ -1,0 +1,47 @@
+name: Двійковий SENS — точна D1 істина метаобчислювача
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/meta-eval-first-class.lisp"
+      - "tests/semantic/meta-eval-first-class-d1-law.bits"
+      - "tests/semantic/meta-eval-first-class-d1-mutant.bits"
+      - ".github/workflows/meta-eval-first-class-d1.yml"
+  pull_request:
+    paths:
+      - "lib/meta-eval-first-class.lisp"
+      - "tests/semantic/meta-eval-first-class-d1-law.bits"
+      - "tests/semantic/meta-eval-first-class-d1-mutant.bits"
+      - ".github/workflows/meta-eval-first-class-d1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sens-owned-d1-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Зібрати чинний фізичний T5 інтерпретатор без нового оракула
+        run: cargo build --locked -p sens-cli --bin sens-trit
+      - name: SENS сам доводить істину і відкидає однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/meta-eval-first-class-d1-law.bits "$RUNNER_TEMP/sens-d1-law.lisp"
+          cp tests/semantic/meta-eval-first-class-d1-mutant.bits "$RUNNER_TEMP/sens-d1-mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/sens-d1-law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/sens-d1-mutant.lisp"
+          target/debug/sens-trit eval "$RUNNER_TEMP/sens-d1-law.sens" > "$RUNNER_TEMP/law.verdict"
+          test "$(cat "$RUNNER_TEMP/law.verdict")" = 1
+          if target/debug/sens-trit eval "$RUNNER_TEMP/sens-d1-mutant.sens" > "$RUNNER_TEMP/mutant.verdict" 2> "$RUNNER_TEMP/mutant.error"; then
+            echo "ПОМИЛКА: однобітний мутант не був відхилений самим SENS"
+            exit 1
+          fi
+          grep -Fq "not callable" "$RUNNER_TEMP/mutant.error"
+          test ! -s "$RUNNER_TEMP/mutant.verdict"
+          echo "SENS: D1 закон та негативний свідок підтверджені фізичним T5"
