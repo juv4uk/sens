@@ -52,7 +52,7 @@
        #d1:0)
       ((010 (011 value))
        #d1:0)
-      ((101 (011 (011 value)) ())
+      ((0101 (011 (011 value)))
        #d1:1)
       (#d1:1
        #d1:0))))
@@ -113,11 +113,21 @@
       ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 distinct))
        (110
          ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))
-          
+          (110
+            ((native-first-proper-list-length-2? plan)
+             (native-first-execution-completed
+               (001 evaluator)
+               (0001 (100 (011 plan)))))
+            (#d1:1
+             (native-first-execution-rejected
+               (001 invalid-plan)
+               (native-first-list-2
+                 (001 malformed-evaluator-fallback-plan)
+                 plan)))))
          ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))
           (native-first-execution-rejected
             (001 invalid-plan)
-            (native-first-list-2 (001 unknown-native-first-plan) plan))
+            (native-first-list-2 (001 unknown-native-first-plan) plan)))
          (#d1:1
           (native-first-execution-rejected
             (001 invalid-plan)
@@ -125,8 +135,7 @@
       (#d1:1
        (native-first-execution-rejected
          (001 invalid-plan)
-         (native-first-list-2 (001 unknown-native-first-plan) plan))))))))
-
+         (native-first-list-2 (001 unknown-native-first-plan) plan))))))
 (0011 native-first-execute-expression
   (0010 (expression)
     (native-first-execute-plan
