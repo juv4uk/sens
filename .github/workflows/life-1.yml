@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/life-1.yml"
-      - "tests/test_life1_exact_d3_2046.py"
+      - "tests/fixtures/life-1-exact-d3-semantic.lisp"
       - "contracts/life-1-contract.lisp"
       - "lib/bridge/prolog-to-datalog.lisp"
       - "lib/life-1-scheduler.lisp"
@@ -47,10 +47,7 @@ jobs:
           sudo apt-get install -y swi-prolog-nox
           swipl --version
 
-      - name: Всі 2046 точнодоменних координат і 6 W8 cutover
-        run: python3 -m unittest discover -s tests -p test_life1_exact_d3_2046.py -v
-
-      - name: Реальний Lisp-owned scheduler — порожні та вкладені значення
+      - name: Двійковий SENS сам визначає всі позитивні й негативні свідки
         run: cargo test --locked -p sens --test life_1_scheduler -- --nocapture
 
       - name: Prove the canonical real LIFE-1 spine
