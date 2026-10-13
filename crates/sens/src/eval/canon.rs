@@ -243,6 +243,7 @@ fn prim_01001101(
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
     StringToSymbol,
+    CharCode,
     Read,
     WriteToString,
     Equal,
@@ -269,6 +270,7 @@ pub(crate) fn domain_primitive_kind(
             _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
         },
         CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
+            0b11100000 => Some(DomainPrimitiveKind::CharCode),
             0b11101101 => Some(DomainPrimitiveKind::StringToSymbol),
             0b11101010 => Some(DomainPrimitiveKind::Read),
             0b11110100 => Some(DomainPrimitiveKind::WriteToString),
@@ -292,6 +294,7 @@ fn invoke_domain_primitive(
     Some((|| {
         let expected = match kind {
             DomainPrimitiveKind::StringToSymbol => 1,
+            DomainPrimitiveKind::CharCode => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
             DomainPrimitiveKind::AtomPredicate => 1,
@@ -330,6 +333,12 @@ fn invoke_domain_primitive(
             DomainPrimitiveKind::StringToSymbol => {
                 // D8:11101101, direct scalar/string mechanism, no byte fallback.
                 special_forms::string_to_symbol_values(args, span)
+            }
+            DomainPrimitiveKind::CharCode => {
+                // D8:11100000 CHAR-CODE reuses the already-tested scalar
+                // extraction implementation body. The historical W8 identity
+                // is not reconstructed or consulted.
+                builtins::prim_01000101(args, environment, span)
             }
             DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.

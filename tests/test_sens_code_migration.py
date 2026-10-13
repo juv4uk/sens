@@ -34,6 +34,22 @@ DOMAIN_SURFACES = [
 ]
 
 
+class KeyboardV2MigrationTests(unittest.TestCase):
+    def test_owner_v2_exact_ascii_uk_deva_and_fail_closed(self):
+        owner = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
+        table = mod.build_text7_encoder(None, owner)
+        for source, lang in (("identity", "en"), ("ім'я", "uk"), ("क", "san")):
+            encoded = mod.encode_text7_spelling(source, table)
+            mapping = table["d7-keyboard/v2"][lang]
+            self.assertEqual(encoded, [mapping[char] for char in source])
+            inverse = {bits: glyph for glyph, bits in mapping.items()}
+            self.assertEqual("".join(inverse[bits] for bits in encoded), source)
+        for spelling in ("🙂", "aб", "जa", "é"):
+            with self.subTest(spelling=spelling), self.assertRaises(mod.BinaryMigrationError):
+                mod.encode_text7_spelling(spelling, table)
+        self.assertEqual(mod.encode_text7_spelling("identity", table)[0], "1101001")
+
+
 class SensCodeMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

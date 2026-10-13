@@ -11,7 +11,7 @@ from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, read_doma
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
-D7_AUTHORITY = ROOT / "knowledge/d7-ratified.json"
+D7_AUTHORITY = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
 D9_AUTHORITY = ROOT / "knowledge/d9-ratified.json"
 
@@ -83,26 +83,32 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
 
 
 def validate_d7(authority: dict):
-    if authority.get("status") != "owner-ratified" or authority.get("authority") != "#3572":
-        fail("D7 authority is not owner-ratified #3572")
-
+    # Text-only D7 v2 owner authority, never the historical 126-cell sound map.
+    if (authority.get("schema"), authority.get("status"),
+            authority.get("width"), authority.get("capacity"),
+            authority.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
+        fail("D7 keyboard/v2 authority not ratified 128/128")
     rows = read_domain_table(D7_TABLE)
-    residents = authority["residents"]
-    if len(rows) != 126:
-        fail(f"D7: expected 126 rows, found {len(rows)}")
-
-    reserved = set(authority["reserved_coordinates"])
-    actual_bits = [row.bits for row in rows]
-    expected_bits = sorted(residents, key=lambda bits: int(bits, 2))
-
-    if actual_bits != expected_bits:
-        fail("D7: rows must match ratified resident coordinates exactly")
-    if any(bits in reserved for bits in actual_bits):
-        fail("D7: owner-reserved pinned coordinate appeared as a semantic row")
-
-    for row in rows:
+    ledger = authority.get("table", [])
+    if len(rows) != 128 or len(ledger) != 128:
+        fail("D7: exactly 128 rows required")
+    for number, (row, source) in enumerate(zip(rows, ledger)):
+        bits = f"{number:07b}"
+        if source.get("bits") != bits or row.bits != bits:
+            fail(f"D7:{bits}: coordinate/order drift")
         if row.lisp is not None:
-            fail(f"D7:{row.bits}: LISP must stay () because D7 is sound/text, not a Lisp operator")
+            fail(f"D7:{bits}: data glyph cannot mint a Lisp callable")
+        expected = (
+            (source["uk"], source["uk"], source["san"],
+             source["ascii"], source["uk"])
+            if 32 <= number < 127 else (None, None, None, None, None)
+        )
+        if (row.uk, row.ukr, row.san, row.en, row.sym) != expected:
+            fail(f"D7:{bits}: keyboard projection drift")
+    for column in ("ascii", "uk", "san"):
+        if len({source[column] for source in ledger}) != 128:
+            fail(f"D7: {column} glyph collision")
     return rows
 
 
@@ -172,7 +178,7 @@ def main() -> int:
     d7_authority = json.loads(D7_AUTHORITY.read_text(encoding="utf-8"))
     d7_rows = validate_d7(d7_authority)
     all_rows.extend(d7_rows)
-    total += 126
+    total += 128
 
     d8_authority = json.loads(D8_AUTHORITY.read_text(encoding="utf-8"))
     if d8_authority.get("status") != "owner-ratified" or d8_authority.get("authority") != "#3960":
@@ -215,13 +221,13 @@ def main() -> int:
                 )
             seen[value] = key
 
-    if total != 1020:
-        fail(f"expected D1-D9 current residents total 1020 rows, found {total}")
+    if total != 1022:
+        fail(f"expected D1-D9 current residents total 1022 rows, found {total}")
 
     print("DOMAIN-TABLES: PASS")
     print("files=9 layout=one-domain-per-file")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256,d9:512 total=1020")
-    print("d7-reserved=0100001,0101010")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:128,d8:256,d9:512 total=1022")
+    print("d7-v2=128/128 keyboard cells; legacy v1 reserved only in history")
     print("D7 symbol availability is independent of semantic residency")
     print("non-D7-surface-collisions=0 namespaces=uk,ukr,san")
     print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! in uk,ukr,en predicate=? in uk,ukr,en")

@@ -3,6 +3,15 @@
 //! Координата — рівно (ширина, біти). Значення, назви, закони,
 //! допуск до виконання та оракули належать доменним джерелам SENS.
 //! Це НЕ другий реєстр функцій і НЕ дозвіл на виконання D10.
+//!
+//! Аксіома бітності: ширина ключа = адреса домену. D*n* ніколи не
+//! приймає ключ іншої довжини. Рівний packed payload у різних ширинах
+//! — різні координати.
+//!
+//! D7 dual authority (не змішувати):
+//! - exact-width / keyboard surface: `lib/domains/d7.lisp` — 128 рядків W7;
+//! - owner occupancy: `knowledge/d7-ratified.json` (#3572) — 126 admitted,
+//!   reserved `0100001` і `0101010`. Surface row ≠ automatic occupancy.
 
 /// A width-qualified, meaning-free code word in the D1–D10 ladder.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -45,6 +54,9 @@ impl DomainCoordinate {
     /// D10 as one complete 1024/1024 domain, without runtime admission.
     /// D1/D2 structural/predicate roles stay unprojected.
     /// Some(true) proves occupancy, never a callable mechanism or human name.
+    ///
+    /// D7: returns false for the two #3572 pinned reservations even though
+    /// the keyboard surface table lists all 128 exact-width rows.
     pub fn owner_residency(self) -> Option<bool> {
         if self.width == 10 {
             // Whole-domain ratification; NOT physical T5 or callability.
@@ -80,16 +92,21 @@ mod tests {
         }
     }
 
+    /// Exact W7 is always representable (128 coordinates).
+    /// Owner occupancy (#3572) admits 126; two cells stay reserved.
+    /// Keyboard surface may still print those cells — that is not occupancy.
     #[test]
-    fn d7_is_admitted_from_owner_rows_only_and_never_from_width_alone() {
+    fn d7_exact_width_is_full_while_owner_occupancy_keeps_two_reservations() {
         let mut admitted = 0usize;
         for bits in 0..128u16 {
             let coordinate = DomainCoordinate::new(7, bits).expect("exact W7");
+            assert_eq!(coordinate.width(), 7);
+            assert_eq!(coordinate.bits(), bits);
             let admission = coordinate.owner_residency().expect("D7 has owner rows");
             assert_eq!(
                 admission,
                 bits != 0b0100001 && bits != 0b0101010,
-                "owner-reserved D7 words must stay unassigned"
+                "owner-reserved D7 words must stay unassigned in occupancy"
             );
             admitted += usize::from(admission);
             let typed = crate::DomainIdentity::from_source_word(
@@ -148,6 +165,7 @@ mod tests {
         assert_eq!(DomainCoordinate::new(0, 0), None);
         assert_eq!(DomainCoordinate::new(11, 0), None);
     }
+
     #[test]
     fn every_d7_source_word_has_a_width_preserving_coordinate() {
         use crate::{BinarySourceWord, Bit7, DomainIdentity};
@@ -162,5 +180,4 @@ mod tests {
             assert_ne!(coordinate, DomainCoordinate::new(8, u16::from(bits)).unwrap());
         }
     }
-
 }

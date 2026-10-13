@@ -1,10 +1,21 @@
-//! D7 v2 keyboard projection: ratified migration DATA profile.
-//! Machine identity is the exact W7 coordinate, never a glyph.
-//! The enclosing SENS value provides the projection and exact bit length.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Mode { En, Uk, San }
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Error { Unmapped(char), OutOfRange(u8), BadBitLength(usize), BadByteLength, NonzeroPadding, Overflow }
+//! SENS D7 keyboard projection v2 (migration transport profile).
+//! Seven-bit coordinates are data, never D2 syntax or callable functions.
+//! This is a type-independent projection table; the enclosing value supplies
+//! projection mode and the exact bit length. The UTF-8 display length is irrelevant.
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum D7Mode { En, Uk, San }
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum D7CodecError {
+    CharacterNotAdmitted(char),
+    CoordinateOutOfRange(u8),
+    WrongBitLength(usize),
+    WrongByteLength { got: usize, expected: usize },
+    NonzeroPadding,
+    Overflow,
+}
+
 pub const UK: [char; 128] = [
     '\u{0}', '\u{1}', '\u{2}', '\u{3}', '\u{4}', '\u{5}', '\u{6}', '\u{7}',
     '\u{8}', '\u{9}', '\u{a}', '\u{b}', '\u{c}', '\u{d}', '\u{e}', '\u{f}',
@@ -41,92 +52,112 @@ pub const SAN: [char; 128] = [
     '\u{91c}', '\u{94c}', '\u{940}', '\u{947}', '\u{942}', '\u{939}', '\u{928}', '\u{948}',
     '\u{902}', '\u{92c}', '\u{949}', '\u{922}', '\u{7c}', '\u{91e}', '\u{7e}', '\u{7f}',
 ];
-pub fn decode(codes: &[u8], mode: Mode) -> Result<String, Error> {
-    let mut result = String::new();
-    for &code in codes {
-        if code > 127 { return Err(Error::OutOfRange(code)); }
-        result.push(match mode {
-            Mode::En => char::from(code),
-            Mode::Uk => UK[code as usize],
-            Mode::San => SAN[code as usize],
-        });
-    }
-    Ok(result)
+
+pub fn project(code: u8, mode: D7Mode) -> Result<char, D7CodecError> {
+    if code > 127 { return Err(D7CodecError::CoordinateOutOfRange(code)); }
+    Ok(match mode {
+        D7Mode::En => char::from(code),
+        D7Mode::Uk => UK[code as usize],
+        D7Mode::San => SAN[code as usize],
+    })
 }
-pub fn encode(src: &str, mode: Mode) -> Result<Vec<u8>, Error> {
-    src.chars().map(|ch| {
+
+pub fn decode(codes: &[u8], mode: D7Mode) -> Result<String, D7CodecError> {
+    let mut out = String::with_capacity(codes.len());
+    for &code in codes { out.push(project(code, mode)?); }
+    Ok(out)
+}
+
+pub fn encode(input: &str, mode: D7Mode) -> Result<Vec<u8>, D7CodecError> {
+    input.chars().map(|ch| {
         match mode {
-            Mode::En => if ch.is_ascii() { Ok(ch as u8) } else { Err(Error::Unmapped(ch)) },
-            Mode::Uk | Mode::San => {
-                let table = if mode == Mode::Uk { &UK } else { &SAN };
-                table.iter().position(|&g| g == ch).map(|n| n as u8).ok_or(Error::Unmapped(ch))
+            D7Mode::En => {
+                if ch.is_ascii() { Ok(ch as u8) }
+                else { Err(D7CodecError::CharacterNotAdmitted(ch)) }
+            }
+            D7Mode::Uk | D7Mode::San => {
+                let table = if mode == D7Mode::Uk { &UK } else { &SAN };
+                table.iter().position(|&c| c == ch)
+                    .map(|i| i as u8)
+                    .ok_or(D7CodecError::CharacterNotAdmitted(ch))
             }
         }
     }).collect()
 }
-/// Pack exact W7 cells MSB-first; no interior byte padding.
-pub fn pack7(codes: &[u8]) -> Result<Vec<u8>, Error> {
-    let nbits = codes.len().checked_mul(7).ok_or(Error::Overflow)?;
-    let byte_len = nbits.checked_add(7).ok_or(Error::Overflow)? / 8;
-    let mut out = vec![0u8; byte_len];
+
+/// MSB-first packed W7 data, no per-cell byte padding.
+/// Framing (value length / selected projection) belongs to SENS, not this codec.
+pub fn pack7(codes: &[u8]) -> Result<Vec<u8>, D7CodecError> {
+    let bit_len = codes.len().checked_mul(7).ok_or(D7CodecError::Overflow)?;
+    let byte_len = bit_len.checked_add(7).ok_or(D7CodecError::Overflow)? / 8;
+    let mut bytes = vec![0_u8; byte_len];
     for (i, &code) in codes.iter().enumerate() {
-        if code > 127 { return Err(Error::OutOfRange(code)); }
-        for j in 0..7 {
-            let pos = i * 7 + j;
-            out[pos / 8] |= ((code >> (6-j)) & 1) << (7-(pos%8));
+        if code > 127 { return Err(D7CodecError::CoordinateOutOfRange(code)); }
+        for bit in 0..7 {
+            let pos = i * 7 + bit;
+            bytes[pos / 8] |= ((code >> (6 - bit)) & 1) << (7 - (pos % 8));
         }
+    }
+    Ok(bytes)
+}
+
+pub fn unpack7(bytes: &[u8], bit_len: usize) -> Result<Vec<u8>, D7CodecError> {
+    if bit_len % 7 != 0 { return Err(D7CodecError::WrongBitLength(bit_len)); }
+    let expected = bit_len.checked_add(7).ok_or(D7CodecError::Overflow)? / 8;
+    if bytes.len() != expected { return Err(D7CodecError::WrongByteLength { got: bytes.len(), expected }); }
+    if bit_len % 8 != 0 && !bytes.is_empty() {
+        let pad = 8 - bit_len % 8;
+        if bytes[bytes.len()-1] & ((1_u8 << pad) - 1) != 0 { return Err(D7CodecError::NonzeroPadding); }
+    }
+    let mut out = Vec::with_capacity(bit_len / 7);
+    for i in 0..bit_len / 7 {
+        let mut code = 0_u8;
+        for bit in 0..7 {
+            let pos = i * 7 + bit;
+            code = (code << 1) | ((bytes[pos / 8] >> (7 - pos % 8)) & 1);
+        }
+        out.push(code);
     }
     Ok(out)
 }
-pub fn unpack7(bytes: &[u8], nbits: usize) -> Result<Vec<u8>, Error> {
-    if nbits % 7 != 0 { return Err(Error::BadBitLength(nbits)); }
-    let needed = nbits.checked_add(7).ok_or(Error::Overflow)? / 8;
-    if bytes.len() != needed { return Err(Error::BadByteLength); }
-    if nbits % 8 != 0 && !bytes.is_empty() {
-        let pad = 8-nbits%8;
-        if bytes[bytes.len()-1] & ((1u8 << pad)-1) != 0 { return Err(Error::NonzeroPadding); }
-    }
-    let mut out = Vec::with_capacity(nbits/7);
-    for i in 0..nbits/7 {
-        let mut x = 0u8;
-        for j in 0..7 {
-            let pos=i*7+j;
-            x = (x << 1) | ((bytes[pos/8] >> (7-pos%8)) & 1);
-        }
-        out.push(x);
-    }
-    Ok(out)
-}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashSet;
-    #[test] fn all_128_coordinates_roundtrip() {
-        let codes: Vec<u8> = (0u8..=127).collect();
-        for mode in [Mode::En, Mode::Uk, Mode::San] {
-            let text=decode(&codes,mode).unwrap();
-            assert_eq!(encode(&text,mode).unwrap(),codes);
-            assert_eq!(text.chars().collect::<HashSet<_>>().len(),128);
+
+    #[test]
+    fn all_128_coordinates_are_reversible_in_all_modes() {
+        let codes: Vec<u8> = (0_u8..=127).collect();
+        for mode in [D7Mode::En, D7Mode::Uk, D7Mode::San] {
+            let text = decode(&codes, mode).unwrap();
+            assert_eq!(encode(&text, mode).unwrap(), codes);
+            assert_eq!(text.chars().collect::<HashSet<_>>().len(), 128);
         }
     }
-    #[test] fn multilingual_examples() {
-        for (text,mode) in [
-            ("Привіт, друже! ім'я ґанок Європа №1 ₴.",Mode::Uk),
-            ("संस्कृतम्",Mode::San),
-            ("(quote data)",Mode::En),
+
+    #[test]
+    fn real_ukrainian_and_sanskrit_round_trip() {
+        for (src, mode) in [
+            ("Привіт, друже! ім'я ґанок Європа №1 ₴.", D7Mode::Uk),
+            ("संस्कृतम्", D7Mode::San),
+            ("(quote \"text\")", D7Mode::En),
         ] {
-            let data=encode(text,mode).unwrap();
-            let packed=pack7(&data).unwrap();
-            assert_eq!(decode(&unpack7(&packed,data.len()*7).unwrap(),mode).unwrap(),text);
+            let words = encode(src, mode).unwrap();
+            let bytes = pack7(&words).unwrap();
+            let got = unpack7(&bytes, words.len() * 7).unwrap();
+            assert_eq!(decode(&got, mode).unwrap(), src);
         }
-        assert_eq!(encode("'",Mode::Uk).unwrap(),vec![39]);
-        assert_eq!(decode(&encode("Привіт",Mode::Uk).unwrap(),Mode::En).unwrap(),"Ghbdsn");
+        assert_eq!(encode("'", D7Mode::Uk).unwrap(), vec![39]);
+        assert_eq!(decode(&encode("Привіт", D7Mode::Uk).unwrap(), D7Mode::En).unwrap(), "Ghbdsn");
     }
-    #[test] fn malformed_values_fail_closed() {
-        assert_eq!(encode("🙂",Mode::Uk),Err(Error::Unmapped('🙂')));
-        assert_eq!(pack7(&[128]),Err(Error::OutOfRange(128)));
-        assert_eq!(unpack7(&[0],8),Err(Error::BadBitLength(8)));
-        assert_eq!(unpack7(&[1],7),Err(Error::NonzeroPadding));
-        assert_eq!(unpack7(&[],7),Err(Error::BadByteLength));
+
+    #[test]
+    fn rejects_bad_inputs_and_malformed_frames() {
+        assert!(matches!(encode("🙂", D7Mode::Uk), Err(D7CodecError::CharacterNotAdmitted(_))));
+        assert!(matches!(pack7(&[128]), Err(D7CodecError::CoordinateOutOfRange(128))));
+        assert!(matches!(unpack7(&[0], 8), Err(D7CodecError::WrongBitLength(8))));
+        assert!(matches!(unpack7(&[1], 7), Err(D7CodecError::NonzeroPadding)));
+        assert!(matches!(unpack7(&[], 7), Err(D7CodecError::WrongByteLength{..})));
     }
 }

@@ -26,6 +26,56 @@ NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
 HISTORICAL=ROOT/"contracts"/"core1-historical-sid-map.lisp"
 TEXT7=ROOT/"crates"/"sens"/"src"/"text7_projection_generated.rs"
 
+class KeyboardV2Sid8MigrationTests(unittest.TestCase):
+    """Fresh SID8 imports use the owner-ratified keyboard v2, not old SLP1."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.keyboard = mod.build_text7(
+            mod.load_foundation(FOUNDATION),
+            ROOT / "knowledge/d7-keyboard-v2-ratified.json",
+        )
+        cls.table = json.loads((ROOT / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))["table"]
+
+    def test_all_128_coordinates_in_each_projection(self):
+        for view, field in (("en", "ascii"), ("uk", "uk"), ("san", "san")):
+            for number in range(128):
+                glyph = self.table[number][field]
+                if glyph.isalpha():
+                    # A single glyph must restore its exact W7 coordinate.
+                    self.assertEqual(
+                        mod.text7_encode(glyph, self.keyboard, mod.Tok("ATOM", glyph, 0)),
+                        [f"{number:07b}"],
+                    ) if mod._keyboard_v2_mode(glyph, mod.Tok("ATOM", glyph, 0)) == view else None
+
+    def test_ascii_d7_and_ukrainian_keyboard_roundtrip(self):
+        for word, view in (("identity", "en"), ("value", "en"),
+                           ("ім'я", "uk"), ("Привіт", "uk"), ("क", "san")):
+            cells = mod.text7_encode(word, self.keyboard, mod.Tok("ATOM", word, 0))
+            indexes = self.keyboard["keyboard-v2"][view]
+            self.assertEqual(cells, [indexes[ch] for ch in word])
+            glyphs = {coord: char for char, coord in indexes.items()}
+            self.assertEqual("".join(glyphs[cell] for cell in cells), word)
+
+    def test_mixed_scripts_and_unmappable_fail_closed(self):
+        for word in ("aб", "кa", "🙂", "é"):
+            with self.subTest(word=word), self.assertRaises(mod.MigrationError):
+                mod.text7_encode(word, self.keyboard, mod.Tok("ATOM", word, 0))
+
+    def test_historical_sid8_car_with_d7_name(self):
+        foundation = mod.load_foundation(FOUNDATION)
+        legacy, my, upper = mod.build_three_pass_maps(
+            foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
+            SEMANTIC_REGISTRY, NECESSARY, HISTORICAL, COVERAGE,
+        )
+        resolver = mod.Resolver(legacy, my, upper, source_era="legacy")
+        original = "(00000101 value)"
+        words = mod.migrate_file(original, resolver, self.keyboard).split()
+        self.assertEqual(words[:3], ["10", "100", "00"])
+        self.assertEqual(words[-1], "01")
+        self.assertEqual(resolver.counts["pass1-sens8"], 1)
+
+
 class ThreePassMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

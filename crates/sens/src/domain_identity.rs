@@ -103,9 +103,13 @@ impl DomainIdentity {
             {
                 Some(CoreDomainIdentity::D6(value))
             }
-            Self::D8(value) if matches!(value.word().packed_bits(), 0b11101010 | 0b11101101 | 0b11110100) => {
-                // Only D8 READ, STRING-TO-SYMBOL and WRITE-TO-STRING have mechanisms.
-                // No other ratified D8 coordinate is made callable here.
+            Self::D8(value) if matches!(
+                value.word().packed_bits(),
+                0b11100000 | 0b11101010 | 0b11101101 | 0b11110100
+            ) => {
+                // Only D8 CHAR-CODE, READ, STRING-TO-SYMBOL and
+                // WRITE-TO-STRING have exact mechanisms here. Residency alone
+                // never grants callability to any other D8 coordinate.
                 Some(CoreDomainIdentity::D8(value))
             }
             Self::D9(_) => None,

@@ -519,6 +519,28 @@ def build_registry_surface_sid_map(registry_path: Path):
 
 
 def build_text7_encoder(foundation, generated_projection: Path):
+    # New D7 v2: exact ASCII-indexed W7 keyboard projections, not phonetic SLP1.
+    if generated_projection.suffix == ".json":
+        authority = json.loads(generated_projection.read_text(encoding="utf-8"))
+        if (authority.get("schema"), authority.get("status"),
+                authority.get("width"), authority.get("occupancy")) != (
+                "sens.d7.keyboard/v2", "owner-ratified", 7, 128):
+            raise BinaryMigrationError("D7 keyboard/v2 owner authority invalid")
+        rows = authority.get("table", [])
+        if len(rows) != 128:
+            raise BinaryMigrationError("D7 keyboard/v2 requires 128 W7 cells")
+        maps = {mode: {} for mode in ("en", "uk", "san")}
+        for number, item in enumerate(rows):
+            bits = f"{number:07b}"
+            if item.get("bits") != bits or item.get("ascii") != chr(number):
+                raise BinaryMigrationError(f"D7 keyboard/v2 coordinate drift: {bits}")
+            for mode, field in (("en","ascii"), ("uk","uk"), ("san","san")):
+                glyph = item.get(field)
+                if not isinstance(glyph, str) or len(glyph) != 1 or glyph in maps[mode]:
+                    raise BinaryMigrationError(f"D7 keyboard/v2 ambiguous {mode} glyph: {bits}")
+                maps[mode][glyph] = bits
+        return {"d7-keyboard/v2": maps}
+    # Historical generated phonetic Text7 is legacy input only, never a v2 output.
     generated = generated_projection.read_text(encoding="utf-8")
     slp = _extract_projection(generated, "SA_SLP1_ENCODE")
     iast = _extract_projection(generated, "SA_IAST_ENCODE")
@@ -606,6 +628,33 @@ def build_text7_encoder(foundation, generated_projection: Path):
 
 
 def encode_text7_spelling(text: str, candidates):
+    if isinstance(candidates, dict) and "d7-keyboard/v2" in candidates:
+        if not text:
+            raise BinaryMigrationError("D7 keyboard/v2 empty identifier")
+        modes = set()
+        for ch in text:
+            number = ord(ch)
+            if ("a" <= ch <= "z") or ("A" <= ch <= "Z"):
+                modes.add("en")
+            elif 0x0400 <= number <= 0x052F:
+                modes.add("uk")
+            elif 0x0900 <= number <= 0x097F:
+                modes.add("san")
+            elif ch.isalpha():
+                raise BinaryMigrationError(f"D7 keyboard/v2 unsupported script {ch!r}")
+        if len(modes) > 1:
+            raise BinaryMigrationError("D7 keyboard/v2 mixed-script identifier")
+        view = next(iter(modes), "en")
+        index = candidates["d7-keyboard/v2"][view]
+        cells = []
+        for glyph in text:
+            word = index.get(glyph)
+            if word is None:
+                raise BinaryMigrationError(
+                    f"D7 keyboard/v2 cannot encode {glyph!r} U+{ord(glyph):04X} in {view}"
+                )
+            cells.append(word)
+        return cells
     words = []
     i = 0
     while i < len(text):
@@ -999,8 +1048,8 @@ def main():
     parser.add_argument(
         "--text7-projection",
         type=Path,
-        default=Path("crates/sens/src/text7_projection_generated.rs"),
-        help="generated pinned Text7 projection used by --binary-mirror",
+        default=Path("knowledge/d7-keyboard-v2-ratified.json"),
+        help="owner-ratified D7 v2 keyboard table (old .rs only for explicit historical replay)",
     )
     parser.add_argument(
         "--historical-map",

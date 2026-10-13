@@ -44,7 +44,7 @@ class DomainTableNotExecutableTest(unittest.TestCase):
             with self.subTest(path=entry["path"]):
                 self.assertEqual(entry["domain"], f"D{n}")
                 self.assertEqual(entry["bit_width"], n)
-                self.assertEqual(entry["expected_rows"], 126 if n == 7 else 2**n)
+                self.assertEqual(entry["expected_rows"], 2**n)
                 self.assertFalse(path.is_symlink())
                 raw = path.read_bytes()
                 self.assertEqual(git_blob_sha(raw), entry["git_blob_sha1"])
@@ -63,11 +63,13 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                 self.assertEqual(len(set(codes)), len(codes))
                 self.assertTrue(all(len(code) == n for code in codes))
                 if n == 7:
-                    self.assertNotIn("0100001", codes)
-                    self.assertNotIn("0101010", codes)
+                    self.assertIn("0100001", codes)
+                    self.assertIn("0101010", codes)
+                    self.assertEqual(entry["projection"], "sens.d7.keyboard/v2")
+                    self.assertEqual(entry["historical_v1_git_blob_sha1"], "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726")
                 total += len(codes)
         self.assertEqual(total, m["total_rows"])
-        self.assertEqual(total, 1020)
+        self.assertEqual(total, 1022)
 
     def test_no_executable_or_research_paths_are_exempted(self):
         paths = {r["path"] for r in json.loads(MANIFEST.read_text())["entries"]}

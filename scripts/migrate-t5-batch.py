@@ -32,7 +32,7 @@ INPUTS = {
     "necessary_forms": ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
     "historical_map": ROOT / "contracts/core1-historical-sid-map.lisp",
     "legacy_coverage": ROOT / "knowledge/sens8-current-coverage-v1.json",
-    "text7": ROOT / "crates/sens/src/text7_projection_generated.rs",
+    "text7": ROOT / "knowledge/d7-keyboard-v2-ratified.json",
 }
 EXCLUDE = set(mig.SKIP_DIRS)
 SCHEMA = "sens-t5-safe-batch/v1"

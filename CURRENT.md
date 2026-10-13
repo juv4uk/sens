@@ -8,10 +8,10 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 
 1. **Machine-readable language authority**
    - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.9, preserving the Contract 11.8 D1–D9 foundation contract and adding separately ratified D10.
-   - [`lib/domains/d1.lisp`](lib/domains/d1.lisp) … [`lib/domains/d9.lisp`](lib/domains/d9.lisp) — canonical human-readable domain tables, **one domain per file**, columns `ук → укр → san → en → LISP → sym`, where `ук` is the compact coding surface and `укр` is the expanded Ukrainian explanation. Surface markers are synchronized across programming surfaces: predicates use `?` in `ук/укр/en`, destructive operations use `!` in `ук/укр/en`; `san` does not use these punctuation markers. D7 has 126 semantic rows and omits owner-reserved `0100001` / `0101010`; no aggregate cross-domain table is authoritative.
+   - [`lib/domains/d1.lisp`](lib/domains/d1.lisp) … [`lib/domains/d10.lisp`](lib/domains/d10.lisp) — canonical human-readable domain tables, **one domain per file**, columns `ук → укр → san → en → LISP → sym`, where `ук` is the compact coding surface and `укр` is the expanded Ukrainian explanation. Surface markers are synchronized across programming surfaces: predicates use `?` in `ук/укр/en`, destructive operations use `!` in `ук/укр/en`; `san` does not use these punctuation markers. **Every key is an exact-width binary word equal to the domain address** (D*n* keys are exactly *n* bits). D7 human table is **v2 keyboard 128/128** (`lib/domains/d7.lisp`, authority `knowledge/d7-keyboard-v2-ratified.json`); historical v1 126/128 sound/Text map remains provenance only and must not be silently reread as v2. No aggregate cross-domain table is authoritative.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — migration input only. Existing exact-eight-bit rows are historical crosswalk evidence, not an executable registry or a source of current identity. All live consumers are to move to generated exact-domain ownership; spelling never owns meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W9 are mechanically representable by the domain ladder; D9 uses a distinct non-truncating carrier. Generic callability remains fail-closed and requires an explicit mechanism. Current ratified semantic Core domains are D1–D9 under foundation #4008; D10 is a separately governed research/placement domain, not an implicit extension of Core. D7 is owner-ratified 126/128; D8 is owner-ratified 256/256; D9 is owner-ratified 512/512. `Sens8`/SID8/Function8 is retired as semantic or runtime authority and may exist only as migration evidence until each active consumer is converted.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1–W10 are mechanically representable by the domain ladder; D9 uses a distinct non-truncating carrier. Generic callability remains fail-closed and requires an explicit mechanism. Current ratified semantic Core domains are D1–D9 under foundation #4008; D10 is a separately governed whole-domain catalogue, not an implicit Core extension. D7 table occupancy is 128/128 (v2); D8 256/256; D9 512/512; D10 1024/1024 domain-level. `Sens8`/SID8/Function8 is retired as semantic or runtime authority and may exist only as migration evidence until each active consumer is converted.
    - Current generation boundary: Contract 11.9 preserves D1–D9 and recognizes owner-ratified D10 as a WHOLE 1024/1024 domain (2026-10-12), not a per-resident or physical T5 admission. D10 F1/F2/F3/T5 evidence gates are pending; numeric D24+ remains separately owner-ratified.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
@@ -36,28 +36,32 @@ exact binary word (0/1 digits)
 Current Core examples:
 
 ```text
-D1  PredicateBit
-D2  racana2 structure
-D3  bīja3 foundation — 000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS
-D4  full compact bootstrap — 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 0100 NOT, 0101 NULL, 0110 CDAR, 0111 CDDR, 1000 CAAR, 1001 CADR, 1010 LOOKUP, 1011 BIND, 1100 EVCON, 1101 EVLIS, 1110 LIST, 1111 APPEND
-D5  full compact 32/32 — owner-ratified #3331 via #3305/#3330; canonical map in knowledge/d5-ratified.json
-D6  full compact 64/64 — owner-ratified #3393; canonical map in knowledge/d6-ratified.json
-D7  owner-ratified 126/128 — #3572; canonical map in knowledge/d7-ratified.json; 0100001 and 0101010 owner-reserved/pinned
-D8  full compact 256/256 — owner-ratified #3960; canonical map in knowledge/d8-ratified.json — clean-room rebuild #3281
-D9  full compact 512/512 — owner-ratified #4008; canonical map in knowledge/d9-ratified.json
-D10  whole-domain owner-ratified 1024/1024 (2026-10-12), per-row F1/F2/F3 and T5 execution pending
-D24+  owner-ratified numeric domain ladder D24/D48/D96/D192/..., separate from function domains
+D1  PredicateBit — exact 1-bit keys (2/2)
+D2  racana2 structure — exact 2-bit keys (4/4)
+D3  bīja3 foundation — exact 3-bit keys (8/8): 000 () … 111 CONS
+D4  full compact bootstrap — exact 4-bit keys (16/16)
+D5  full compact — exact 5-bit keys (32/32)
+D6  full compact — exact 6-bit keys (64/64)
+D7  v2 keyboard text/data — exact 7-bit keys (128/128); historical v1 126/128 is provenance only
+D8  full compact — exact 8-bit keys (256/256)
+D9  full compact — exact 9-bit keys (512/512)
+D10 whole-domain catalogue — exact 10-bit keys (1024/1024 domain-level); per-row F1/F2/F3 and T5 pending
+D24+ owner-ratified numeric ladder D24/D48/D96/D192/… — separate from function domains
 ```
+
+**Bit axiom:** the binary key width *is* the domain address. A row whose bitstring length ≠ *n* is not a D*n* resident. Equal packed payloads across different widths are different coordinates.
 
 **Mathematical operand boundary (owner clarification 2026-10-12):** D1–D10 are domain-qualified binary words, not arithmetic operands. Only explicitly qualified D24/D48/D96/... values and lawful numeric compositions admit `+ - * /` and numeric `< > =`. An operator may have a D5/D6 function identity without making that function identity a number. D3 EQ and D1 predicates are separate non-mathematical laws; old unqualified Number/Rational/BinaryNumber no longer grants arithmetic admission.
 
 **Migration evidence, not a green release claim:** Core checks now include `crates/sens/tests/math_domain_exclusivity.rs` and static admission checks in `scripts/check-numeric-domain-ratification.py`. Local Cargo execution has not yet been verified for these changes because the linked desktop runner is offline. Frozen Core4 still contains old numeric literals and arithmetic, e.g. `lib/core4.lisp:188,193` computes LENGTH by adding `1` to `acc` initialized as `0`; this is incompatible with D24+-only operands until an explicitly admitted domain-preserving migration is available. Do not silently re-enable legacy-number arithmetic to make the test green, and do not claim release pass before exact-SHA CI and Core4 evidence.
 
-Owner foundation ratification #4008 extends the current chain through D9: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572, D8 #3960, D9 #4008. #3960 remains the historical D1–D8 foundation cut; D9 is owner-ratified 512/512 under #4008. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
+**Known partial cutover (do not erase):** `crates/sens/src/domain_ladder.rs` occupancy helpers may still encode historical D7 v1 assumptions (126 admitted / two reserved). Human table and Contract 11.9 D7 v2 are 128/128. Treat any 126-based occupancy as migration debt, not alternate law. Align generated bitmaps and unit tests in a dedicated CLAIM, not by silent reinterpretation.
+
+Owner foundation ratification #4008 extends the current chain through D9: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 historical v1 #3572 / current table v2 keyboard, D8 #3960, D9 #4008. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
 D10 ratification source: `knowledge/d10-owner-whole-domain-ratification-20261012.json`; current codebook pointer: `knowledge/d10-current-inventory.json`. Domain ratification does not fabricate resident-level proofs. Numeric acts: `contracts/numeric-domains-ratification.lisp` and `knowledge/number-width-ratified.json`.
 
-Equal packed bits in two domains do not imply equal identity. In particular owner-ratified Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 Sound/Text residency is ratified under #3572, while LocalOrdinal remains a separate W7 role; neither inherits selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
+Equal packed bits in two domains do not imply equal identity. In particular owner-ratified Core.D8 is not historical Sens8 merely because both occupy eight physical bits. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
 Owner direction (2026-10-12): remove active Sens8/SID8/Function8 runtime semantics across Rust, Lisp, scripts, tests, CLI and workflows; replace each call/data position with a width-qualified domain identity and explicit admitted mechanism. No new consumer may be added to the legacy carrier. Historical manifests and archived experiments remain provenance-only and must never be loaded as executable input.
 

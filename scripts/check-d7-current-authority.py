@@ -1,160 +1,17 @@
 #!/usr/bin/env python3
-import json
+"""Current D7 owner gate; historical phonetic 126-cell profile is archived, not authority.
+
+Keep the stable script entrypoint used by active CI, but make its checks
+delegate to the fail-closed, ratified D7 keyboard/v2 witness.  No assertions
+and no automatic reinterpretation of historical D7 bitstreams.
+"""
+from __future__ import annotations
 from pathlib import Path
+import runpy
 
-# Python -O прибирає assert: забороняємо удаваний PASS D7.
-if not __debug__:
-    raise SystemExit("D7-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
-
-from domain_tables import D7_TABLE, read_domain_table
-from d7_symbol_codec import current_codec
-
-root=Path(__file__).resolve().parents[1]
-d=json.loads((root/"knowledge/d7-ratified.json").read_text(encoding="utf-8"))
-ledger=json.loads((root/"knowledge/d7-v2-evidence-ledger.json").read_text(encoding="utf-8"))
-contract=(root/"contracts/d7-ratification.lisp").read_text(encoding="utf-8")
-lang=(root/"language-contract.lisp").read_text(encoding="utf-8")
-current=(root/"CURRENT.md").read_text(encoding="utf-8")
-
-assert d["status"]=="owner-ratified"
-assert d["authority"]=="#3572"
-assert d["domain"]=="D7" and d["width"]==7
-assert d["capacity"]==128 and d["occupancy"]==126
-assert d["owner_reserved_pinned"]==2
-assert d["reserved_coordinates"]==["0100001","0101010"]
-assert len(d["residents"])==126
-assert set(d["residents"]).isdisjoint(d["reserved_coordinates"])
-assert set(d["residents"]) | set(d["reserved_coordinates"]) == {f"{i:07b}" for i in range(128)}
-
-assert d["occupancy_basis"]=={
-    "baseline_recovered":107,
-    "owner_admitted_same_coordinate_shiva_overlays":19,
-    "total_owner_ratified_residents":126,
-    "owner_reserved_pinned":2,
-}
-assert d["role_counts"]=={
-    "phonology_eligible_recovered":75,
-    "baseline_non_phonological_recovered":32,
-    "admitted_text_digits":10,
-    "admitted_text_modifiers":2,
-    "admitted_text_punctuation":7,
-}
-
-
-# Each ledger row independently agrees with the ratified occupancy map.
-# In particular, unresolved pinned coordinates cannot become residents
-# through a second copy of the table.
-ledger_rows=d["rows"]
-assert len(ledger_rows)==d["capacity"]==128, "incomplete D7 ledger"
-ledger_coords=[row["coordinate"] for row in ledger_rows]
-assert ledger_coords==[f"{i:07b}" for i in range(128)], "D7 ledger coordinate order/coverage drift"
-for row in ledger_rows:
-    bits=row["coordinate"]
-    if bits in d["residents"]:
-        assert row["status"]=="OWNER-RATIFIED", f"D7:{bits} lost owner admission"
-        assert row["report_name"]==d["residents"][bits], f"D7:{bits} ratified role mismatch"
-    else:
-        assert bits in d["reserved_coordinates"], f"D7:{bits} unexpectedly unallocated"
-        assert row["status"]=="OWNER-RESERVED-PINNED", f"D7:{bits} pinned reservation lost"
-        assert row["report_name"] is None, f"D7:{bits} reserved role was minted"
-
-overlay_rows=[r for r in d["rows"] if r.get("baseline_residency")=="reserved" and r["status"]=="OWNER-RATIFIED"]
-assert len(overlay_rows)==19
-assert sum(r["semantic_role"]=="text-digit" for r in overlay_rows)==10
-assert sum(r["semantic_role"]=="text-modifier" for r in overlay_rows)==2
-assert sum(r["semantic_role"]=="text-punctuation" for r in overlay_rows)==7
-assert all(r["coordinate"] not in d["reserved_coordinates"] for r in overlay_rows)
-
-assert d["laws"]["text_digits_are_not_number"] is True
-assert d["laws"]["local_ordinal_is_separate_role"] is True
-assert d["laws"]["automatic_d6_prefix_inheritance"] is False
-assert d["laws"]["candidate_d_migration_ratified"] is False
-assert d["laws"]["d14_pratyahara_boundary"]=={
-    "d7_coordinate_effect":"NONE",
-    "unique_sound_ceiling":"39/43",
-    "dual_h_grammar_path":"43/43",
-    "dual_h_not_two_phonemes":True,
-}
-
-assert ledger["baseline_missing_without_same_coordinate_overlay"]==["0100001","0101010"]
-assert ledger["migration_candidate"]["post_migration_candidate"]["occupancy"]==124
-assert d["future_migration_boundary"]["status"]=="NOT-RATIFIED"
-assert d["future_migration_boundary"]["candidate_occupancy"]==124
-
-# The owner-ratified JSON owns coordinates and roles; lib/domains/d7.lisp is
-# ONLY a human-readable projection. Every projected D7 row must be a real
-# ratified resident at the same exact seven-bit coordinate. Reserved pins are
-# neither empty allocation slots nor callable operations.
-table_rows = read_domain_table(D7_TABLE)
-ratified_bits = set(d["residents"])
-projected_bits = [row.bits for row in table_rows]
-assert len(table_rows) == d["occupancy"] == 126
-assert projected_bits == sorted(ratified_bits), "D7 surface coordinate drift"
-assert not (set(projected_bits) & set(d["reserved_coordinates"]))
-assert len({row.bits for row in table_rows}) == len(table_rows)
-codec = current_codec()
-for row in table_rows:
-    assert row.width == 7 and len(row.bits) == 7
-    assert row.lisp is None, f"D7:{row.bits} must not mint a Lisp callable"
-    for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
-                        ("en", "en"), ("sym", "sym")):
-        assert getattr(row, field) == codec.glyph(row.bits, name), (
-            f"D7:{row.bits}: {name} is not its surface-specific glyph"
-        )
-
-# The row-wise evidence must stay a one-to-one projection of the ratified
-# coordinates, not an alternative Rust/reader-generated semantic registry.
-authority_rows = {row["coordinate"]: row for row in d["rows"]}
-assert len(authority_rows) == len(d["rows"]) == 128
-for row in table_rows:
-    owner = authority_rows[row.bits]
-    assert owner["status"] == "OWNER-RATIFIED"
-for reserved in d["reserved_coordinates"]:
-    assert authority_rows[reserved]["status"] != "OWNER-RATIFIED"
-
-
-assert "(owner-ratification . #3572)" in contract
-assert "(width . #d7)" in contract
-assert "(capacity . #d128)" in contract
-assert "(occupancy . #d126)" in contract
-assert "(d7-coordinate-law . " in contract
-assert "(identity . " not in contract
-assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
-assert '(candidate-occupancy . #d124)' in contract
-assert "(minor . 9)" in lang
-assert "Contract 11.8" in lang
-assert "Core.D7 is OWNER-RATIFIED 126/128 under #3572" in lang
-assert "D7  owner-ratified 126/128" in current
-assert "D8  full compact 256/256" in current
-assert "D9  full compact 512/512" in current
-
-# The human-readable D7 table must be a lossless projection of the
-# Lisp-ratified coordinate ledger, never a second independently invented map.
-# No Rust table of phonemes/roles/callability is introduced here.
-import re
-
-surface=(root/"lib/domains/d7.lisp").read_text(encoding="utf-8")
-surface_rows=re.findall(r"^  \(([01]{7}) (.+)\)$",surface,flags=re.MULTILINE)
-assert len(surface_rows)==d["occupancy"]==126, "D7 projection row count drift"
-coordinates=[bits for bits,_ in surface_rows]
-assert coordinates==sorted(set(coordinates)), "D7 surface coordinates must be unique and sorted"
-assert set(coordinates)==set(d["residents"]), "D7 surface/resident map drift"
-assert set(coordinates).isdisjoint(d["reserved_coordinates"]), "reserved D7 coordinates were allocated"
-expected_columns=("ук","укр","san","en","LISP","sym")
-for bits,body in surface_rows:
-    for name in expected_columns:
-        assert body.count(f"({name} ")==1, f"D7:{bits} missing or duplicated {name}"
-    labels=re.findall(r"\((ук|укр|san|en|LISP|sym) ",body)
-    assert tuple(labels)==expected_columns, f"D7:{bits} surface column order changed"
-    assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
-    semantic_role = d["residents"][bits]
-    if semantic_role.startswith("text.digit."):
-        glyph = re.search(r'\(sym "?([0-9])"?\)$', body)
-        assert glyph is not None and glyph.group(1) == semantic_role.rsplit(".", 1)[1], (
-            f"D7:{bits} text digit glyph drifted from ratified digit identity"
-        )
-
-print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
-
-print("D7-CURRENT-AUTHORITY: PASS")
-print("occupancy=126/128 baseline=107 shiva-overlays=19 reserved-pinned=2 candidate-D=NOT-RATIFIED")
+ROOT = Path(__file__).resolve().parents[1]
+CURRENT = ROOT / "scripts/check-d7-keyboard-v2-table.py"
+if not CURRENT.is_file():
+    raise SystemExit("D7-CURRENT-AUTHORITY: BLOCKED missing keyboard/v2 gate")
+runpy.run_path(str(CURRENT), run_name="__main__")
+print("D7-CURRENT-AUTHORITY: PASS keyboard/v2 128/128, legacy v1 not authoritative")
