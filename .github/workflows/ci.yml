@@ -1,69 +1,87 @@
-name: SENS — один точковий двійковий закон
+name: SENS — один точковий автоматичний двійковий закон
 
-# Єдиний автоматичний workflow. Лише зміни, пов'язані з законом або CI.
-# Жодного Rust/Python-оракула: SENS сам обчислює D1:1 або D1:0.
+# Рівно один автоматичний job; лише SENS визначає семантичний результат.
+# Позитивний фізичний свідок та мутант вже пройшли оракул 2026-10-13.
 on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/ci.yml'
       - 'scripts/ci_one_focused_workflow.py'
       - 'scripts/ci_failure_contract.py'
-      - 'tests/semantic/ci-d3-eq-self-verdict.sens'
-      - 'lib/domains/d3.lisp'
+      - 'tests/semantic/domain-logic-2040/**'
+      - 'lib/domains/**'
       - 'crates/sens/src/eval/**'
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focused-main
+  group: sens-one-focussed-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   binary-sens-law:
-    name: D3 EQ — точний D1-самовердикт
+    name: SENS власним D1-вердиктом доводить закон і відхиляє мутант
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - name: Перевірити, що автоматичний workflow лише один
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Не допустити жодного іншого автоматичного workflow
         run: python3 scripts/ci_one_focused_workflow.py
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Скласти тільки фізичний виконавець SENS
+      - name: Зібрати тільки механізм виконання SENS
         shell: bash
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/sens-one-red.jsonl"
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
           : > "$report"
           python3 scripts/ci_failure_contract.py run \
             --test-id one-sens-transport-build \
             --layer transport \
-            --fixture tests/semantic/ci-d3-eq-self-verdict.sens \
+            --fixture tests/semantic/domain-logic-2040/proof.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
-      - name: Єдиний точковий семантичний закон виконує фізичний SENS
+      - name: Єдиний фізичний SENS-закон — точний D1:YES
         shell: bash
         run: |
           set -euo pipefail
-          fixture=tests/semantic/ci-d3-eq-self-verdict.sens
-          report="$RUNNER_TEMP/sens-one-red.jsonl"
+          program=tests/semantic/domain-logic-2040/proof.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
           printf '1\n' > "$RUNNER_TEMP/expected-d1"
-          echo "test_id=ci-d3-eq-self-verdict layer=eval domain_widths=D1:1,D2:2,D3:3"
-          echo "program_path=$fixture"
-          sha256sum "$fixture"
+          echo "test_id=sens-domain-logic-2040 layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
           python3 scripts/ci_failure_contract.py run \
-            --test-id ci-d3-eq-self-verdict \
+            --test-id sens-domain-logic-2040 \
             --layer eval \
-            --fixture "$fixture" \
+            --fixture "$program" \
             --expected-file "$RUNNER_TEMP/expected-d1" \
             --report-file "$report" \
-            -- target/debug/sens "$fixture"
-      - name: Червоний має говорити — заборонити неінформативну відмову
+            -- target/debug/sens "$program"
+      - name: Негативний контроль — SENS мусить відхилити мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          mutant=tests/semantic/domain-logic-2040/mutant.sens
+          echo "test_id=sens-domain-logic-2040-mutant layer=eval expected=nonzero"
+          sha256sum "$mutant"
+          set +e
+          target/debug/sens "$mutant" > "$RUNNER_TEMP/mutant.stdout" 2> "$RUNNER_TEMP/mutant.stderr"
+          rc=$?
+          set -e
+          sha256sum "$RUNNER_TEMP/mutant.stdout" "$RUNNER_TEMP/mutant.stderr"
+          if [[ "$rc" == 0 ]]; then
+            echo "::error title=SENS_MISSED_MUTANT::test_id=sens-domain-logic-2040-mutant layer=eval actual=exit-0 expected=reject; reproduce: target/debug/sens $mutant"
+            exit 1
+          fi
+          echo "SENS_MUTANT_REJECTED rc=$rc"
+      - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/ci_failure_contract.py scan \
-            --report-file "$RUNNER_TEMP/sens-one-red.jsonl" --allow-empty
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --allow-empty
