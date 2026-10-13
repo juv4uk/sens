@@ -3,17 +3,19 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, read_domain_table
+from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE, read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 D7_AUTHORITY = ROOT / "knowledge/d7-ratified.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
 D9_AUTHORITY = ROOT / "knowledge/d9-ratified.json"
+D10_POINTER = ROOT / "knowledge/d10-current-inventory.json"
 
 
 def fail(message: str) -> None:
@@ -103,6 +105,124 @@ def validate_d7(authority: dict):
     for row in rows:
         if row.lisp is not None:
             fail(f"D7:{row.bits}: LISP must stay () because D7 is sound/text, not a Lisp operator")
+    return rows
+
+
+def git_blob_sha(payload: bytes) -> str:
+    """Return Git's SHA-1 blob object ID for pinned source verification."""
+    header = b"blob " + str(len(payload)).encode("ascii") + b"\0"
+    return hashlib.sha1(header + payload).hexdigest()
+
+
+def coordinate_sequence_error(actual_bits: list[str], width: int) -> str | None:
+    """Return why a coordinate list is not the complete ordered exact-width grid."""
+    expected_bits = [f"{value:0{width}b}" for value in range(1 << width)]
+    if len(actual_bits) != len(expected_bits):
+        return f"expected {len(expected_bits)} rows, found {len(actual_bits)}"
+    for index, bits in enumerate(actual_bits):
+        if not isinstance(bits, str) or re.fullmatch(rf"[01]{{{width}}}", bits) is None:
+            return f"row {index} is not exactly {width} binary digits"
+    if actual_bits != expected_bits:
+        return f"coordinates must be ordered complete {width}-bit range"
+    return None
+
+
+def validate_d10_grid_guard_self_test() -> None:
+    """Prove that a one-bit change, a duplicate and a missing slot are rejected."""
+    expected = [f"{value:010b}" for value in range(1024)]
+    one_bit_mutant = expected.copy()
+    one_bit_mutant[512] = f"{int(one_bit_mutant[512], 2) ^ 1:010b}"
+    duplicate_mutant = expected.copy()
+    duplicate_mutant[512] = duplicate_mutant[511]
+    missing_mutant = expected[:-1]
+    for label, mutant in (
+        ("one-bit mutation", one_bit_mutant),
+        ("duplicate coordinate", duplicate_mutant),
+        ("missing coordinate", missing_mutant),
+    ):
+        if coordinate_sequence_error(mutant, 10) is None:
+            fail(f"D10 guard self-test did not reject {label}")
+
+
+def validate_d10_catalogue():
+    """Check the 10-bit D10 codebook without promoting research rows to residents."""
+    pointer = json.loads(D10_POINTER.read_text(encoding="utf-8"))
+    if pointer.get("schema") != "d10-current-inventory-pointer/v1":
+        fail("D10 pointer schema is not current")
+    status = str(pointer.get("status", ""))
+    if not status.startswith("OWNER-RATIFIED-WHOLE-D10-DOMAIN-1024"):
+        fail("D10 whole-domain owner ratification is not recorded")
+
+    current = pointer.get("canonical_current")
+    if not isinstance(current, dict):
+        fail("D10 pointer has no canonical_current")
+    source_path = current.get("path")
+    if not isinstance(source_path, str) or re.fullmatch(
+        r"knowledge/d10-v[0-9]+-semantic-inventory\\.json", source_path
+    ) is None:
+        fail(f"D10 canonical source path is invalid: {source_path!r}")
+    source_bytes = (ROOT / source_path).read_bytes()
+    source_sha = git_blob_sha(source_bytes)
+    if current.get("git_blob") != source_sha:
+        fail("D10 pointer Git blob SHA does not match canonical inventory")
+
+    table_text = D10_TABLE.read_text(encoding="utf-8")
+    first_row_marker = "  (0000000000 "
+    if first_row_marker not in table_text:
+        fail("D10 table has no first canonical coordinate")
+    table_header = table_text.split(first_row_marker, 1)[0]
+    if f"Canonical mapping: {source_path}" not in table_header:
+        fail("D10 table points at a different canonical inventory")
+    if f"Pinned input Git blob: {source_sha}" not in table_header:
+        fail("D10 table's canonical inventory pin is stale")
+
+    inventory = json.loads(source_bytes)
+    source_rows = inventory.get("rows")
+    if not isinstance(source_rows, list) or len(source_rows) != 1024:
+        found = len(source_rows) if isinstance(source_rows, list) else "non-list"
+        fail(f"D10 inventory must contain 1024 rows, found {found}")
+
+    expected_bits = [f"{value:010b}" for value in range(1024)]
+    source_bits = [row.get("coordinate") if isinstance(row, dict) else None for row in source_rows]
+    if any(
+        not isinstance(bits, str) or re.fullmatch(r"[01]{10}", bits) is None
+        for bits in source_bits
+    ):
+        fail("D10 inventory contains a coordinate that is not exactly 10 bits")
+    if len(set(source_bits)) != 1024 or set(source_bits) != set(expected_bits):
+        fail("D10 inventory coordinates must cover all 1024 unique 10-bit words")
+
+    metrics = tuple(current.get(key) for key in ("selected", "placed", "unplaced", "ratified"))
+    if metrics != (1024, 1024, 0, 0):
+        fail(f"D10 accounting must stay selected/placed/unplaced/ratified=1024/1024/0/0, found {metrics}")
+    if any(not isinstance(row.get("ratified_resident"), bool) for row in source_rows):
+        fail("D10 rows must explicitly state ratified_resident")
+    if sum(row["ratified_resident"] is True for row in source_rows) != 0:
+        fail("D10 has resident-level ratification despite pointer count ratified=0")
+    if any(not isinstance(row.get("physical_t5_authorized"), bool) for row in source_rows):
+        fail("D10 rows must explicitly state physical_t5_authorized")
+    if any(row["physical_t5_authorized"] is True for row in source_rows):
+        fail("D10 research catalogue must not authorize physical T5 execution")
+
+    rows = read_domain_table(D10_TABLE)
+    actual_bits = [row.bits for row in rows]
+    error = coordinate_sequence_error(actual_bits, 10)
+    if error is not None:
+        fail(f"D10 table: {error}")
+
+    source_by_coordinate = {row["coordinate"]: row for row in source_rows}
+    semantic_names = [
+        row.get("semantic_name") if isinstance(row, dict) else None
+        for row in source_rows
+    ]
+    if any(not isinstance(name, str) or not name for name in semantic_names):
+        fail("D10 inventory rows must carry explicit semantic_name")
+    if len({name.casefold() for name in semantic_names}) != 1024:
+        fail("D10 inventory contains duplicate semantic names")
+    for row in rows:
+        resident = source_by_coordinate[row.bits].get("semantic_name")
+        if not isinstance(resident, str) or row.en is None or not en_matches_resident(row.en, resident):
+            fail(f"D10:{row.bits}: en {row.en!r} does not match canonical resident {resident!r}")
     return rows
 
 
@@ -198,6 +318,13 @@ def main() -> int:
     all_rows.extend(d9_rows)
     total += 512
 
+    validate_d10_grid_guard_self_test()
+    d10_rows = validate_d10_catalogue()
+    # D10 is owner-ratified as a whole 10-bit domain, while its 1024 rows are
+    # not individually ratified residents and have no physical T5 authorization.
+    # Keep them out of the D1-D9 "current resident" total and cross-domain
+    # spelling census: equal payloads/surfaces are not cross-domain identity.
+
     validate_compact_uk(all_rows)
 
     for attr in ("uk", "ukr", "san"):
@@ -219,8 +346,10 @@ def main() -> int:
         fail(f"expected D1-D9 current residents total 1020 rows, found {total}")
 
     print("DOMAIN-TABLES: PASS")
-    print("files=9 layout=one-domain-per-file")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256,d9:512 total=1020")
+    print("files=10 layout=one-domain-per-file; D1-D9 ratified/current tables plus separately gated D10 codebook")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256,d9:512 current-residents=1020")
+    print("D10=1024/1024 exact-width unique coordinates; resident-ratification=0; physical-T5-authorized=0")
+    print("D10-negative-self-test=one-bit-mutation,duplicate,missing-row rejected")
     print("d7-reserved=0100001,0101010")
     print("D7 symbol availability is independent of semantic residency")
     print("non-D7-surface-collisions=0 namespaces=uk,ukr,san")
