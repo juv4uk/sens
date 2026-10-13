@@ -180,6 +180,25 @@ pub fn unary(operator: &str, value: &Value) -> Option<Value> {
 /// Exact mathematical signed-rational compare under one explicit Dn.
 /// The semantic identity in Value::eq remains domain-qualified and structural.
 pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
+    // Admitted natural values already carry their exact D24/D48/... identity.
+    // Compare their normalized binary magnitudes directly: the generic
+    // rational path below allocates four clones and two products needlessly.
+    // Domain width is checked BEFORE comparing; equal naked bits in
+    // different domains must never become comparable through this shortcut.
+    if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+        let width = left.numeric_domain_width()?;
+        if right.numeric_domain_width() != Some(width) {
+            return None;
+        }
+        let order = left.cmp(right);
+        return Some(match operator {
+            "=" => order == Ordering::Equal,
+            "<" => order == Ordering::Less,
+            ">" => order == Ordering::Greater,
+            _ => return None,
+        });
+    }
+
     let (width, x_neg, xn, xd) = ingredients(lhs)?;
     let (other_width, y_neg, yn, yd) = ingredients(rhs)?;
     if width != other_width { return None; }
@@ -207,6 +226,52 @@ mod tests {
         let mut bits = vec![0; width];
         for i in 0..width.min(64) { bits[width - 1 - i] = ((u >> i) & 1) as u8; }
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+    }
+
+    /// Mechanism regression: no numeric-domain widening, textual decimal
+    /// intermediary or rational cross-products for two admitted naturals.
+    #[test]
+    fn natural_dn_comparison_retains_width_and_order_with_no_rational_bridge() {
+        for width in [24usize, 48, 96, 192] {
+            let zero = Value::BinaryNumber(d(width, 0));
+            let two = Value::BinaryNumber(d(width, 2));
+            let three = Value::BinaryNumber(d(width, 3));
+
+            for (left, right, equal, less, greater) in [
+                (&zero, &zero, true, false, false),
+                (&two, &three, false, true, false),
+                (&three, &two, false, false, true),
+                (&three, &three, true, false, false),
+            ] {
+                for (operator, expected) in [
+                    ("=", equal), ("<", less), (">", greater),
+                ] {
+                    let actual = compare(operator, left, right);
+                    assert_eq!(
+                        actual, Some(expected),
+                        "test_id=natural-dn-compare layer=eval domain=D{width} op={operator} expected={expected} actual={actual:?}; reproduce=cargo test -p sens natural_dn_comparison_retains_width_and_order_with_no_rational_bridge"
+                    );
+                }
+            }
+            assert_eq!(compare("+", &two, &three), None);
+            assert_eq!(
+                compare("=", &two, &Value::BinaryNumber(d(width * 2, 2))),
+                None,
+                "D{width} and D{} cannot share a numeric identity",
+                width * 2,
+            );
+
+            // Signed compositions must continue through the existing
+            // rational/signed comparison mechanism, not this shortcut.
+            let neg_two = canonical_parts(true, &d(width, 2), &d(width, 1))
+                .expect("admitted signed Dn");
+            assert_eq!(compare("<", &neg_two, &zero), Some(true));
+            assert_eq!(compare("=", &neg_two, &two), Some(false));
+        }
+        let legacy = Value::BinaryNumber(BinaryNumber::one());
+        let d24 = Value::BinaryNumber(d(24, 1));
+        assert_eq!(compare("=", &legacy, &d24), None);
+        assert_eq!(compare("=", &d24, &legacy), None);
     }
 
     #[test]
