@@ -19,11 +19,13 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-FIXTURE = ROOT / "benchmarks" / "current-en-vs-d1d8" / "fixtures" / "d3-smoke.json"
+FIXTURE = ROOT / "benchmarks" / "store-air-load" / "fixtures.json"
 CONTROL_RS = Path(__file__).with_name("rust_control.rs")
 RSS_PY = Path(__file__).resolve().parents[1] / "rss.py"
 SENS_EXAMPLE = "current_en_vs_d1d8_cpu"
 CASES = ("d3-quote-empty", "d3-car-empty")
+# These two binary programs come from the current owner paired fixture;
+# old English-source smoke stays historical evidence, never a fallback.
 
 
 def run_text(args: list[str], *, cwd: Path | None = None) -> str:
@@ -105,20 +107,20 @@ def load_cases() -> dict[str, dict[str, object]]:
     ready = {
         row["id"]: row
         for row in payload["workloads"]
-        if row.get("status") == "ready" and row.get("id") in CASES
+        if row.get("kind") == "paired-program" and row.get("id") in CASES
     }
     missing = sorted(set(CASES) - set(ready))
     if missing:
-        raise RuntimeError(f"missing ready fixtures: {missing}")
+        raise RuntimeError(f"missing current Ukrainian/canonical paired-program fixtures: {missing}")
     return ready
 
 
 def write_sources(tmp: Path, row: dict[str, object]) -> tuple[Path, Path]:
-    english = tmp / f"{row['id']}.english.lisp"
+    ukrainian = tmp / f"{row['id']}.ukrainian.lisp"
     canonical = tmp / f"{row['id']}.canonical.lisp"
-    english.write_text(str(row["english_source"]), encoding="utf-8")
+    ukrainian.write_text(str(row["ukrainian_source"]), encoding="utf-8")
     canonical.write_text(str(row["canonical_source"]), encoding="utf-8")
-    return english, canonical
+    return ukrainian, canonical
 
 
 def sens_preflight(helper: Path, candidate: str, source: Path) -> dict[str, str]:
@@ -196,12 +198,12 @@ def main() -> int:
         tmp = Path(tmp_name)
         for case in CASES:
             row = fixtures[case]
-            english, canonical = write_sources(tmp, row)
+            ukrainian, canonical = write_sources(tmp, row)
 
-            left = sens_preflight(sens, "english-surface", english)
+            left = sens_preflight(sens, "ukrainian-surface", ukrainian)
             right = sens_preflight(sens, "canonical-d1d8", canonical)
             if left != right:
-                raise RuntimeError(f"{case}: English/canonical SENS preflight mismatch")
+                raise RuntimeError(f"{case}: Ukrainian/canonical SENS preflight mismatch")
             if left["value"] != row["expected_value"] or left["output"] != row["expected_output"]:
                 raise RuntimeError(f"{case}: SENS oracle mismatch: {left!r}")
             rust_value = rust_preflight(rust, case)
