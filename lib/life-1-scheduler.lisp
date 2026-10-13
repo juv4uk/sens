@@ -83,18 +83,21 @@
   (0010 (pending)
     (life-scheduler-dedup-pending pending (001 ()))))
 
+; Приватний D4 носій одного вже обчисленого CAR. Старий COND не змінено.
+(0011 життя-проєкція-порівняти
+  (0010 (expected projections projection)
+    (110
+      ((11110111 expected projection)
+       (001 present))
+      ((0100 (11110111 expected projection))
+       (life-scheduler-projection-match? expected (011 projections))))))
+
 (0011 life-scheduler-projection-match?
   (0010 (expected projections)
     (110
       ((0100 (010 projections)) (001 absent))
       ((0100 (010 projections))
-       (001000 ((projection (100 projections)))
-         (110
-           ((11110111 expected projection)
-            
-            (001 present))
-           ((0100 (11110111 expected projection))
-            (life-scheduler-projection-match? expected (011 projections)))))))))
+       (життя-проєкція-порівняти expected projections (100 projections))))))
 
 (0011 life-scheduler-projection-ready?
   (0010 (invocation projections)
