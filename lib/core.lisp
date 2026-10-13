@@ -272,11 +272,14 @@
   (0010 (predicate values)
     (filter-onto predicate values (001 ()))))
 
+; REDUCE: D4:0101 NULL terminates only the empty list.
+; Previous NOT(ATOM(values)) returned acc on nonempty pairs and CAR'd NIL.
+; For any improper nonempty atom the ordinary D3 CAR rejects the data.
 (0011 reduce
   (0010 (f acc values)
     (110
-      ((0100 (010 values)) acc)
-      ((010 values) 
+      ((0101 values) acc)
+      (#d1:1
        (reduce f (f acc (100 values)) (011 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
