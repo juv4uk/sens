@@ -101,25 +101,52 @@ def run(command: list[str], timeout: int) -> tuple[int, bytes, bytes]:
 
 def failure(layer: str, path: str, command: list[str], rc: int, out: bytes,
             stderr: bytes, wanted: str) -> int:
+    """Тільки діагностика фактичних байтів; очікуване D1 визначає SENS-закон."""
+    from datetime import datetime, timezone
+
     raw = (ROOT / path).read_bytes() if (ROOT / path).is_file() else b""
+    if wanted == "D1:YES":
+        expected, actual = b"1\\n", out
+    elif wanted == "noncallable":
+        expected, actual = b"not callable", stderr
+    else:
+        expected, actual = b"exit=0", f"exit={rc}".encode("ascii") + b"\\n" + out
+
+    offset = next(
+        (i for i in range(max(len(expected), len(actual)))
+         if expected[i:i + 1] != actual[i:i + 1]), None
+    )
+    if offset is None:
+        first = {"exit_expected": 0, "exit_actual": rc}
+    else:
+        x = expected[offset] if offset < len(expected) else 0
+        y = actual[offset] if offset < len(actual) else 0
+        xor = x ^ y
+        first = {
+            "byte_offset": offset,
+            "bit_offset": next((i for i in range(8) if xor & (1 << (7 - i))), 0),
+            "expected_byte": x if offset < len(expected) else None,
+            "actual_byte": y if offset < len(actual) else None,
+        }
     record = {
         "test_id": TEST_ID, "layer": layer, "fixture": path,
         "fixture_sha256": sha256(raw),
-        "expected_sha256": sha256(wanted.encode("ascii")),
-        "actual_sha256": sha256(f"exit={rc}".encode("ascii")),
+        "expected_sha256": sha256(expected),
+        "actual_sha256": sha256(actual),
         "stdout_sha256": sha256(out), "stderr_sha256": sha256(stderr),
-        "first_difference": {"exit_expected": wanted.removeprefix("exit="),
-                             "exit_actual": rc},
+        "first_difference": first,
         "first_bad_sha": "UNRESOLVED",
         "first_observed_bad_sha": os.getenv("GITHUB_SHA", "UNRESOLVED"),
-        "classification": "UNRESOLVED",
+        "observed_at": datetime.now(timezone.utc).isoformat(),
+        "stamp": "UNCLASSIFIED",
         "reproduce": "python3 scripts/ci_one_focused_workflow.py --execute",
         "failed_command": shlex.join(command),
+        "exit_code": rc,
         "stderr_tail": stderr.decode(errors="replace")[-1500:],
     }
     print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True), flush=True)
     print("::error title=UNINFORMATIVE-OUTPUT::First-bad SHA not proven; "
-          "fail closed, do not guess or silently quarantine.", flush=True)
+          "failure is blocking. Do not guess or silently quarantine.", flush=True)
     return 1
 
 
@@ -142,12 +169,13 @@ def execute() -> int:
         return failure("transport", PROOF, build, rc, out, err, "exit=0")
     positive = ["target/debug/sens", PROOF]
     rc, out, err = run(positive, 90)
-    if rc:
-        return failure("eval", PROOF, positive, rc, out, err, "exit=0")
+    if rc or out != b"1\\n":
+        return failure("eval", PROOF, positive, rc, out, err, "D1:YES")
     negative = ["target/debug/sens", MUTANT]
     bad_rc, bad_out, bad_err = run(negative, 90)
-    if bad_rc in (0, 124):
-        return failure("eval", MUTANT, negative, bad_rc, bad_out, bad_err, "exit=nonzero")
+    if (bad_rc in (0, 124) or bad_out
+            or not re.search(rb"not callable|not a function|non.callable", bad_err, re.I)):
+        return failure("eval", MUTANT, negative, bad_rc, bad_out, bad_err, "noncallable")
     print("SENS_CI_ONE_TEST_PASS " + json.dumps({
         "test_id": TEST_ID, "layer": "eval",
         "proof_sha256": sha256((ROOT / PROOF).read_bytes()),
