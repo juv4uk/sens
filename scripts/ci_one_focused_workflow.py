@@ -145,6 +145,16 @@ def verify():
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
     if ci_text.count("--executor-report-file") != 3:
         errors.append("UNINFORMATIVE-EXECUTOR: 3 direct SENS receipts required")
+    for step in ci_text.split("      - name: ")[1:]:
+        if "--layer eval" in step:
+            if ("--executor-report-file" not in step
+                    or "target/debug/sens" not in step
+                    or "scripts/ci_failure_contract.py run" not in step):
+                errors.append("UNINFORMATIVE-EXECUTOR: eval-labeled step has no real native SENS runner")
+        if "semantic_authority=binary-SENS" in step:
+            if "target/debug/sens" not in step or "--executor-report-file" not in step:
+                errors.append("UNINFORMATIVE-EXECUTOR: semantic label without native executor")
+
     if ci_text.count("scripts/ci_failure_contract.py scan-executors") != 1:
         errors.append("UNINFORMATIVE-EXECUTOR: missing native receipts scanner")
     for test_id in ("sens-time-d1-predicate-law",
