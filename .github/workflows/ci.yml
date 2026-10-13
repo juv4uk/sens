@@ -204,9 +204,31 @@ jobs:
           law=tests/semantic/reason-index-width-selectors-law.sens
           mutant=tests/semantic/reason-index-width-selectors-mutant.sens
           printf '1\n' > "$RUNNER_TEMP/reason-selectors-law.expected"
-          # D4 CADR -> CAAR changes exactly one bit; the first field is a pair.
-          # SENS must take the intentional noncallable D1 branch, not a CAR type error.
+          # Exact D4 one-bit mutation: CADR 1001 -> CAAR 1000.
+          # CAAR then applies CAR to a non-pair: native SENS must reject,
+          # not silently produce the unmutated law's D1:YES verdict.
           sha256sum "$law" "$mutant"
+          for kind in law mutant; do
+            source="tests/semantic/reason-index-width-selectors-${kind}.bits"
+            physical="tests/semantic/reason-index-width-selectors-${kind}.sens"
+            tr -s '[:space:]' '\n' < "$source" | sed '/^$/d' > "$RUNNER_TEMP/reason-${kind}-source.words"
+            target/debug/sens-trit open "$physical" | tr -s '[:space:]' '\n' | sed '/^$/d' > "$RUNNER_TEMP/reason-${kind}-physical.words"
+            cmp "$RUNNER_TEMP/reason-${kind}-source.words" "$RUNNER_TEMP/reason-${kind}-physical.words"
+          done
+          mapfile -t original < "$RUNNER_TEMP/reason-law-source.words"
+          mapfile -t changed < "$RUNNER_TEMP/reason-mutant-source.words"
+          test "${#original[@]}" -eq "${#changed[@]}"
+          flips=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${changed[i]}" ]]; then
+              [[ "${original[i]}" == 1001 && "${changed[i]}" == 1000 ]] || {
+                echo "::error::REASON_SELECTOR_MUTANT_NOT_EXACT_D4_CADR_CAAR word=$i"; exit 1;
+              }
+              flips=$((flips + 1))
+            fi
+          done
+          test "$flips" -eq 1 || { echo "::error::REASON_SELECTOR_MUTANT_NOT_ONE_BIT flips=$flips"; exit 1; }
+          echo "REASON_SELECTOR_ONE_BIT_PASS D4:1001->D4:1000 native_T5_words_verified=1"
           python3 scripts/ci_failure_contract.py run \
             --test-id sens-reason-index-width-selectors-law \
             --layer eval \
@@ -219,7 +241,7 @@ jobs:
             --test-id sens-reason-index-width-selectors-mutant \
             --layer eval \
             --fixture "$mutant" \
-            --expect-error-substring "not callable" \
+            --expect-error-substring "car expects a non-empty list" \
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$mutant"
