@@ -36,9 +36,15 @@ jobs:
 
           marker = "PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки"
           source = Path(".github/workflows/physical-binary-sens-cli.yml").read_text(encoding="utf-8")
-          pieces = source.split("<<'PY'\n")[1:]
+          scripts = source.split("<<'PY'\n")[1:]
+          if len(scripts) != 11:
+              raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — очікувано 11 Python-блоків, знайдено {len(scripts)}")
+          # Перший блок лише кодує фікстуру; це не assert-свідок.
+          transport, *pieces = scripts
+          if "          assert " in transport or "          if not __debug__:" in transport:
+              raise SystemExit("PHYSICAL-T5-WITNESS: BLOCKED — змінено контракт транспортного блоку")
           if len(pieces) != 10:
-              raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — очікувано 10 свідків, знайдено {len(pieces)}")
+              raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — очікувано 10 захищених свідків, знайдено {len(pieces)}")
 
           for index, piece in enumerate(pieces, 1):
               body, sep, _ = piece.partition("\n          PY")
