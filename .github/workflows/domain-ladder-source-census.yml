@@ -1,6 +1,11 @@
 name: Domain-ladder source-only bulk census
 
 on:
+  pull_request:
+    paths:
+      - scripts/migrate-domain-ladder-source-batch.py
+      - tests/test_domain_ladder_2046_exact.py
+      - .github/workflows/domain-ladder-source-census.yml
   push:
     branches: [main]
     paths:
@@ -58,6 +63,8 @@ jobs:
           path: ${{ runner.temp }}/domain-ladder-source-batch-report.json
       - name: Regression tests for historical crosswalk to exact-domain words and D3 blockers
         run: python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
+      - name: Перевірити 2046 точних координат, 171 SID8-наступник і негативні мутації
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_2046_exact.py -v
       - name: Verify D3 two-field PredicateBit enforcement with negative controls
         run: python3 -m unittest discover -s tests -p test_domain_ladder_d3_enforcement.py -v
       - name: Validate five exact-domain source replacements against immutable Git blobs
