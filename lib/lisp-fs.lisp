@@ -342,6 +342,8 @@
 (0011 fs-journal-event-decision
   (0010 (event)
     (110
+      ; Загальний порожній alist коректний як структура, але не як подія.
+      ((0101 event) (1110 (001 rejected) (001 invalid-event)))
       ((0100 (fs-journal-alist? event))
        (1110 (001 rejected) (001 invalid-event)))
       ((0100 (101 (fs-package-field (001 format) event) (001 wsm-fs-event)))
