@@ -2,7 +2,7 @@
 //! Rust loads the executable WSM policy and validates the returned value's
 //! outer protocol shape. Meaning and policy remain in lib/guard.lisp.
 
-use sens::{eval_pinned_reasoning_source, eval_program, Session, Value};
+use sens::{eval_pinned_legacy_core_source, eval_pinned_reasoning_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session, Value};
 
 pub const CORE: &str = include_str!("../../../lib/core.lisp");
 pub const UNIFY: &str = include_str!("../../../lib/unify.lisp");
@@ -10,13 +10,17 @@ pub const GUARD: &str = include_str!("../../../lib/guard.lisp");
 
 pub fn load_session() -> Result<Session, String> {
     let mut session = Session::default();
-    eval_program(CORE, &mut session).map_err(|error| format!("core: {error}"))?;
+    eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
+        .map_err(|error| format!("core: {error}"))?;
     // Guard reuses the existing exact-D1 structural comparator. Load the
     // domain-aware reasoning source through its pinned reader; do not flatten
     // its D3-D9 heads back into the legacy reader.
     eval_pinned_reasoning_source("lib/unify.lisp", UNIFY, &mut session)
         .map_err(|error| format!("unify: {error}"))?;
-    eval_program(GUARD, &mut session).map_err(|error| format!("guard: {error}"))?;
+    let guard_forms =
+        parse_mixed_exact_domain(GUARD).map_err(|error| format!("guard-parse: {error}"))?;
+    eval_parsed_expressions(&guard_forms, &mut session)
+        .map_err(|error| format!("guard: {error}"))?;
     Ok(session)
 }
 
