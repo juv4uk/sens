@@ -162,4 +162,4 @@
    (001 ()))
   ((010 (001 ())) (domain-bitness-negative-fail)))
 
-(11011011 "DOMAIN-BITNESS-LAWS: PASS D1..D10 = 2^n, D11 sparse=43; SENS negative witness")
+(11011011 "DOMAIN-BITNESS-LAWS: PASS D1..D10 capacity; D11 sparse=43; D3 unique exact-width addresses; fixed-capacity interior-duplicate mutant rejected by SENS")
