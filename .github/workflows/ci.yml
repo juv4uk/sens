@@ -7,6 +7,7 @@ name: SENS — один точковий автоматичний двійков
 on:
   push:
     branches: ['**']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,7 +20,7 @@ jobs:
   binary-sens-law:
     name: Часові D1 предикати — один фізичний SENS-свідок і чинні негативні контроли
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -27,7 +28,11 @@ jobs:
           fetch-depth: 1
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
-        run: python3 scripts/ci_one_focused_workflow.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci_one_focused_workflow.py
+          python3 scripts/check-domain-ladder-identity.py --self-test --check
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
@@ -60,6 +65,18 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
+      - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
+        id: packed
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id packed-bits-d1-d10 \
+            --layer transport \
+            --fixture tests/semantic/time-d1-predicate-law.sens \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
@@ -131,6 +148,7 @@ jobs:
         env:
           BUDGET_OUTCOME: ${{ steps.budget.outcome }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
+          PACKED_OUTCOME: ${{ steps.packed.outcome }}
           SOURCE_OUTCOME: ${{ steps.source-census.outcome }}
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
@@ -138,7 +156,7 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
           else
             # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
