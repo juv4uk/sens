@@ -322,6 +322,13 @@
 ;; Ein geschützter Kompatibilitätsübergang wird genau einmal ausgewertet. `let`
 ;; eignet sich nicht, da `def` sonst einen temporären Lambda-Frame ändert; diese
 ;; Expansion nutzt daher eine ausdrückliche Top-Level-Zwischenbindung.
+; Чинне похідне SENS-правило: теги рішення порівнюються тільки
+; точним D3:101 EQ після D4:1000 CAAR. Макрос генерує виклик за назвою,
+; а не цитує двійкові коди як десяткові числа і не змінює граматику.
+(0011 внутрішній-прийнято-перехід?
+  (0010 (transition)
+    (101 (1000 transition) (001 accepted))))
+
 (0011 legacy-world-transition-expansion
   (0010 (transition)
     (1110 (001 second)
@@ -329,13 +336,11 @@
                 (1110 (001 def) (001 *legacy-knowledge-transition*) transition)
                 (1110 (001 cond)
                       (1110
-                        ; Quote exact domain identities into the generated AST:
-                        ; bare '101' and '1000' would become numeric literals,
-                        ; not callable D3:101 EQ and D4:1000 CAAR.
-                        ; Only atoms are compared; structural (1) is not truth.
-                        (1110 (001 #d3:101)
-                              (1110 (001 #d4:1000) (001 *legacy-knowledge-transition*))
-                              (1110 (001 quote) (001 accepted)))
+                        ; Generate a SENS-defined D1 predicate call. Its body
+                        ; performs exact D3 EQ / D4 CAAR, not a legacy W8
+                        ; equality producing a structural list (1).
+                        (1110 (001 внутрішній-прийнято-перехід?)
+                              (001 *legacy-knowledge-transition*))
                         (1110 (001 second)
                               (1110 (001 list)
                                     (1110 (001 def) (001 *knowledge-journal*)
