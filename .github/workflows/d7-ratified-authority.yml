@@ -40,20 +40,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
           for witness in tests/semantic/d1-d3-control-law.bits tests/semantic/d4-d6-selector-chain.bits tests/semantic/compiler-nucleus-l1-l5-selectors.bits; do
             filename="$(basename "$witness" .bits)"
-            python3 - "$witness" "$RUNNER_TEMP/$filename.sens" <<'PY'
-          import sys
-          from pathlib import Path
-          sys.path.insert(0, "scripts")
-          from sens_t5_codec import encode_projection
-
-          # Byte transport only. Every semantic assertion is encoded by SENS.
-          source = Path(sys.argv[1]).read_text(encoding="ascii")
-          Path(sys.argv[2]).write_bytes(encode_projection(source))
-          PY
-            # Failure returns D1:0 inside SENS; the host checks only its final D1 word.
-            verdict="$(target/debug/sens "$RUNNER_TEMP/$filename.sens")"
-            test "$verdict" = "1"
+            cp "$witness" "$RUNNER_TEMP/$filename.lisp"
+            target/debug/sens-trit encode "$RUNNER_TEMP/$filename.lisp"
+            target/debug/sens-trit open "$RUNNER_TEMP/$filename.sens" > "$RUNNER_TEMP/$filename.open.bits"
+            cmp "$witness" "$RUNNER_TEMP/$filename.open.bits"
+            target/debug/sens "$RUNNER_TEMP/$filename.sens" > "$RUNNER_TEMP/$filename.sens.out"
+            target/debug/sens-trit eval "$RUNNER_TEMP/$filename.sens" > "$RUNNER_TEMP/$filename.trit.out"
+            cmp "$RUNNER_TEMP/$filename.sens.out" "$RUNNER_TEMP/$filename.trit.out"
+            printf '1\n' | cmp - "$RUNNER_TEMP/$filename.sens.out"
           done

@@ -97,8 +97,13 @@ fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
     );
     let expressions =
         parse_canonical_binary(source).expect("canonical D2-framed binary SENS must parse");
-    eval_parsed_expressions(&expressions, &mut s)
-        .expect("SENS self-verdict rejected the CAR/ATOM/EQ positive-negative law");
+    let result = eval_parsed_expressions(&expressions, &mut s)
+        .expect("binary SENS self-verdict rejected the production reason-index? laws");
+    assert_eq!(
+        result.value.as_predicate_bit(),
+        Some(true),
+        "the final positive reason-index/1 control must return exact D1:YES"
+    );
 }
 
 #[test]
