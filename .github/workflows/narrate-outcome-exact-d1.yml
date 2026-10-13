@@ -7,6 +7,8 @@ on:
       - "crates/sens/tests/narrate_outcomes.rs"
       - "scripts/test-narrate-d1-bitness.py"
       - ".github/workflows/narrate-outcome-exact-d1.yml"
+      - "tests/fixtures/narrate-status-tag-witness.lisp"
+      - "tests/fixtures/narrate-arity-d1-witness.lisp"
   push:
     branches: [main]
     paths:

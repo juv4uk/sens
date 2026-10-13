@@ -121,6 +121,8 @@ fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
         .join("\n");
     assert!(!executable_source.contains("000000"), "D6 LENGTH must not reappear in arity helpers");
     assert!(!executable_source.contains("11110111"), "D8 EQUAL must not reappear in arity helpers");
+    assert!(!executable_source.contains("(001 0)"), "quoted host zero must not stand in for D1:0");
+    assert!(!executable_source.contains("(001 1)"), "quoted host one must not stand in for D1:1");
 }
 
 #[test]

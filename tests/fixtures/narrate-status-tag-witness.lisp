@@ -14,8 +14,8 @@
         (001 (unknown because no-proof-found-for subject)))
       (1110
         (001 partial-status-kept)
-        (narrate-outcome (make-partial (001 ()) (001 (depth . twelve))))
-        (001 (partial value () bound (depth . twelve))))
+        (narrate-outcome (make-partial (001 ()) (001 (depth . 12))))
+        (001 (partial value () bound (depth . 12))))
       (1110
         (001 blocked-status-kept)
         (narrate-outcome (make-blocked (001 (depends-on corpus))))
