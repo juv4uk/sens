@@ -507,3 +507,34 @@ fn reconstructed_equal_worlds_deduplicate_in_the_store() {
         "1"
     );
 }
+
+#[test]
+fn lisp_fs_journal_replay_rejects_malformed_field_entries_sens_owned() {
+    // Semantic cases/branches are SENS code in the fixture, not Rust logic.
+    // Rust only runs the pre-existing pinned library chain and observes output.
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    ).expect("ratified core loader");
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp")),
+        ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
+        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
+        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
+    ] {
+        sens::eval_pinned_reasoning_source(path, source, &mut session)
+            .unwrap_or_else(|error| panic!("pinned SENS library {path}: {error}"));
+    }
+    let fixture = include_str!("../../../tests/fixtures/fs-alist-structural-law.lisp");
+    let parsed = sens::parse_mixed_exact_domain(fixture)
+        .expect("structural alist SENS witness: exact D3/D4 reader");
+    let result = sens::eval_parsed_expressions(&parsed, &mut session)
+        .expect("SENS self-check must not reach CAR() falsifier");
+    assert_eq!(result.value.to_string(), "structural-law-pass");
+}

@@ -110,13 +110,19 @@
 ; D5 ASSOC is not the authority for event-envelope field extraction.
 ; Keys are atoms; the returned tail is the original value, not an evaluated
 ; source form. Unknown and malformed keys have no invented value.
+; Селектори застосовуються лише до перевіреного alist-entry.
+; Некоректні записи ніколи не стають читабельними полями, навіть поза
+; fs-journal-event-decision. Немає host truth і немає нового D24 механізму.
 (0011 fs-package-field
   (0010 (name package)
     (110
       ((0101 package) (001 ()))
       ((010 package) (001 ()))
+      ((010 (100 package)) (001 ()))
+      ((0101 (100 (100 package))) (001 ()))
+      ((0100 (010 (100 (100 package)))) (001 ()))
       ((101 name (100 (100 package))) (011 (100 package)))
-      ((010 ()) (fs-package-field name (011 package))))))
+      (#d1:1 (fs-package-field name (011 package))))))
 (0011 fs-object-package-decision
   (0010 (package)
     (110
@@ -304,13 +310,17 @@
 ; Journal validation is a D1-controlled Lisp derivation, not borrowed D8
 ; EQUAL/AND/OR. Field existence is checked separately from field value so
 ; storing literal EMPTY does not turn a valid WRITE into a missing field.
+; Exact D1:1/0. Не довіряємо nested CAR без перевірки форми.
 (0011 fs-package-has-field?
   (0010 (name package)
     (110
-      ((0101 package) (0101 (001 (0))))
-      ((010 package) (0101 (001 (0))))
-      ((101 name (100 (100 package))) (0101 (001 ())))
-      ((010 ()) (fs-package-has-field? name (011 package))))))
+      ((0101 package) #d1:0)
+      ((010 package) #d1:0)
+      ((010 (100 package)) #d1:0)
+      ((0101 (100 (100 package))) #d1:0)
+      ((0100 (010 (100 (100 package)))) #d1:0)
+      ((101 name (100 (100 package))) #d1:1)
+      (#d1:1 (fs-package-has-field? name (011 package))))))
 
 ; F3 uses exactly the two-element atomic version (0 1). The tests are
 ; shape-bounded before CAR/CDR and every branch returns an exact D1 bit.
