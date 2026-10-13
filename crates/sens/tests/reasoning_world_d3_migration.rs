@@ -62,7 +62,7 @@ fn world_d3_current_semantics_replay_the_frozen_behavioral_witnesses() {
 fn world_recognizer_requires_exact_four_element_proper_list() {
     for (program, expected) in [
         ("(world? (empty-world))", "1"),
-        ("(world? (quote (world () () ()))", "1"),
+        ("(world? (quote (world () () ())))", "1"),
         ("(world? (quote (world)))", "()"),
         ("(world? (quote (world parent)))", "()"),
         ("(world? (quote (world parent journal)))", "()"),
