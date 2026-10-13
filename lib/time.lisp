@@ -99,14 +99,15 @@
 ;   (accepted host unix-seconds nanosecond)
 ; Current control law: numeric comparisons produce exact D1 PredicateBit;
 ; AND/OR consume only that typed answer. All COND clauses are two-field
-; (test expression). Explicit (ATOM ()) is the D1:1 fallback expression;
-; neither Number 1/0, T/NIL, structural () nor rich classifiers act as tests.
+; (test expression). Explicit (ATOM ()) is the D1:1 result; D1:0 is EQ of
+; distinct quoted atoms — not bare Number 1/0 as predicate carriers.
+; neither T/NIL, structural () nor rich classifiers act as tests.
 (0011 internet-time-mode-valid?
   (0010 (mode)
     (110
-      ((101 mode 4) (101 1 1))
-      ((101 mode 5) (101 1 1))
-      ((010 (001 ())) (101 1 0))))
+      ((101 mode 4) (010 (001 ())))
+      ((101 mode 5) (010 (001 ())))
+      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
 )
 
 (0011 internet-time-stratum-valid?
@@ -114,9 +115,9 @@
     (110
       ((11011 stratum 0)
        (110
-         ((11010 stratum 16) (101 1 1))
-         ((010 (001 ())) (101 1 0))))
-      ((010 (001 ())) (101 1 0))))
+         ((11010 stratum 16) (010 (001 ())))
+         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
 )
 
 (0011 internet-time-fields->observation
@@ -199,9 +200,9 @@
 (0011 deadline-reached-at?
   (0010 (now-ns deadline-ns)
     (110
-      ((11011 now-ns deadline-ns) (101 1 1))
-      ((101 now-ns deadline-ns) (101 1 1))
-      ((010 (001 ())) (101 1 0))))
+      ((11011 now-ns deadline-ns) (010 (001 ())))
+      ((101 now-ns deadline-ns) (010 (001 ())))
+      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
 )
 
 (0011 deadline-after-ns
