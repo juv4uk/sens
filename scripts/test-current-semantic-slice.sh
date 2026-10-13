@@ -1,6 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Основний семантичний контроль виконується САМОЮ двійковою мовою SENS.
+# Rust/Python тут не визначають логіку; лише зібрані binary SENS-програми.
+run_native_binary_semantics() {
+  local bindir="${CARGO_TARGET_DIR:-target}/debug"
+  if [[ "${SENS_BINARY_BUILT:-0}" != "1" ]]; then
+    cargo build --locked -p sens-cli --bin sens --bin sens-trit
+  fi
+  local file output peer
+  for case_name in atom-empty atom-pair eq-reflexive eq-distinct car-cons cdr-cons cond-short-circuit nested-cons-atom; do
+    file="tests/semantic/native-t5/${case_name}.sens"
+    if ! output="$("$bindir/sens" "$file")"; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED execution %s\n' "$file" >&2
+      return 1
+    fi
+    # The SENS program performs all logic and returns its own exact D1 verdict.
+    if [[ "$output" != "1" ]]; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED D1 verdict %s=%s\n' "$file" "$output" >&2
+      return 1
+    fi
+    if ! peer="$("$bindir/sens-trit" eval "$file")"; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED independent entrypoint %s\n' "$file" >&2
+      return 1
+    fi
+    if [[ "$peer" != "$output" ]]; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED oracle/entrypoint mismatch %s\n' "$file" >&2
+      return 1
+    fi
+  done
+  for case_name in reject-cond-three-fields reject-cond-non-d1 reject-eq-pair; do
+    file="tests/semantic/native-t5/${case_name}.sens"
+    if "$bindir/sens" "$file" >/dev/null 2>&1; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED invalid binary program admitted %s\n' "$file" >&2
+      return 1
+    fi
+  done
+  printf 'SENS-NATIVE-SEMANTICS: PASS 8 SENS-owned positive verdicts, 3 fail-closed negatives\n'
+}
+
+case "${1:-}" in
+  --native-binary-only)
+    [[ $# -eq 1 ]] || { echo "SENS-NATIVE-SEMANTICS: unexpected arguments" >&2; exit 2; }
+    run_native_binary_semantics
+    exit $?
+    ;;
+  "")
+    [[ $# -eq 0 ]] || exit 2
+    run_native_binary_semantics
+    ;;
+  *)
+    echo "SENS-NATIVE-SEMANTICS: use --native-binary-only" >&2
+    exit 2
+    ;;
+esac
+
+
 # #231 / #112-#114: the fast semantic lane executes current Lisp-owned
 # expectations through host observers. It deliberately does not run legacy
 # host-authored Canon truth assertions; deep/current-contract lanes retain
