@@ -272,11 +272,15 @@ W8_COLLISION = {
     "01001011": ("read-all", "DIRECT-CURRENT-IDENTITY", "D9:110101001", "abs∘recip"),
     "10100110": ("read-file", "DIRECT-CURRENT-IDENTITY", "D9:110110111", "1/"),
 }
+# The two historical domain-specific workflows were retired during the
+# one-automatic-workflow migration. Keep the existing full binary pipeline as
+# this check's local/explicit admission gate. CI trigger ownership is checked
+# separately against the current, sole automatic .github/workflows/ci.yml.
 ACTIVE_GATES = (
     "scripts/test-binary-language-pipeline.sh",
-    ".github/workflows/domain-bitness-laws.yml",
-    ".github/workflows/domain-logic-laws.yml",
 )
+AUTO_GATE = ".github/workflows/ci.yml"
+AUTO_GUARD = "scripts/ci_one_focused_workflow.py"
 
 
 def inspect_w8_d8_collision(coverage: dict, d8_source: str) -> None:
@@ -324,6 +328,16 @@ def inspect_active_gates(root: Path) -> None:
         for mode in ("--check", "--self-test"):
             if "scripts/check-domain-ladder-identity.py " + mode not in data:
                 raise ValueError(f"domain-ladder {mode} gate missing: {rel}")
+    # Do not resurrect retired workflow files to satisfy a stale guard.
+    # Only the current ci.yml owns the automatic trigger budget.
+    current_ci = root / AUTO_GATE
+    current_guard = root / AUTO_GUARD
+    if not current_ci.is_file() or current_ci.is_symlink():
+        raise ValueError(f"single automatic workflow missing: {AUTO_GATE}")
+    if not current_guard.is_file() or current_guard.is_symlink():
+        raise ValueError(f"single workflow trigger guard missing: {AUTO_GUARD}")
+    if f"python3 {AUTO_GUARD}" not in current_ci.read_text(encoding="utf-8"):
+        raise ValueError(f"automatic workflow does not run trigger guard: {AUTO_GATE}")
     if (root / "scripts/sid-binary-identity-guard.sh").exists():
         raise ValueError("retired eight-bit guard reintroduced in active tree")
 
