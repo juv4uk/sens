@@ -4,7 +4,7 @@
 
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
-use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+use crate::{Bit4, CoreD4, CoreDomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
 use std::rc::Rc;
 
@@ -80,7 +80,11 @@ pub(crate) fn evaluate_definition(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
+    // DEFINE — точна D4:0011, а не історична W8:00001011.
+    let identity = CoreDomainIdentity::D4(
+        CoreD4::from_word(Bit4::new(0b0011).expect("ратифікована координата D4 DEFINE")),
+    );
+    exact_domain_arity(identity, arguments, 2, span)?;
 
     // A D2-framed W7 sequence is a Text7 identifier only in this explicit
     // DEFINE target role. The canonical reader remains structural and makes
@@ -179,6 +183,30 @@ pub fn exact_arity(
         ErrorKind::Arity,
         format!(
             "{operator}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            arguments.len()
+        ),
+        span,
+    ))
+}
+
+/// Перевірка арності лише за точною доменною координатою.
+///
+/// Вона не конструює SID8, не відкидає біти і не дозволяє однаковому
+/// числовому payload у D3/D4/D5 бути однією функцією.
+pub(crate) fn exact_domain_arity(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    expected: usize,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if arguments.len() == expected {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "D{}:{identity}: очікувано {expected} аргументів; отримано {}",
+            identity.width(),
             arguments.len()
         ),
         span,
@@ -317,4 +345,44 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
         ));
     }
     Ok(Value::predicate_bit(left == right))
+}
+
+#[cfg(test)]
+mod exact_d4_define_arity_tests {
+    use super::*;
+
+    fn expression() -> Expr {
+        Expr {
+            kind: ExprKind::Symbol(Rc::from("ім'я")),
+            span: Span::default(),
+        }
+    }
+
+    #[test]
+    fn визначення_діагностує_тільки_точну_d4_координату() {
+        let environment = Environment::root();
+        for count in [0usize, 1, 3] {
+            let arguments = vec![expression(); count];
+            let error = evaluate_definition(&arguments, &environment, Span::default())
+                .expect_err("хибна арність має бути відхилена раніше за виконання");
+            assert_eq!(error.kind, ErrorKind::Arity);
+            assert!(error.message.contains("D4:0011"), "{error:?}");
+            assert!(!error.message.contains("00001011"), "{error:?}");
+        }
+    }
+
+    #[test]
+    fn правильна_арність_і_неоднакові_ширини_доменів() {
+        let d4 = CoreDomainIdentity::D4(
+            CoreD4::from_word(Bit4::new(0b0011).unwrap()),
+        );
+        let two = vec![expression(), expression()];
+        assert!(exact_domain_arity(d4, &two, 2, Span::default()).is_ok());
+        let wrong = CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b011).unwrap()),
+        );
+        let error = exact_domain_arity(wrong, &[], 1, Span::default()).unwrap_err();
+        assert!(error.message.contains("D3:011"), "{error:?}");
+        assert!(!error.message.contains("D4:0011"), "{error:?}");
+    }
 }
