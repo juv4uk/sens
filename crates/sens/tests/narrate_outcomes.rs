@@ -3,7 +3,7 @@
 
 use sens::{eval_program, Session};
 
-fn eval_outcome_narration(source: &str) -> String {
+fn eval_outcome_value(source: &str) -> sens::Value {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
@@ -13,9 +13,32 @@ fn eval_outcome_narration(source: &str) -> String {
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
-        .to_string()
 }
 
+fn eval_outcome_narration(source: &str) -> String {
+    eval_outcome_value(source).to_string()
+}
+
+#[test]
+fn arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes() {
+    // COND consumes exact D1 only: host truthiness and structural Nil are not predicates.
+    let cases = [
+        ("(narrate-outcome-arity? (quote (unknown subject)) 2)", true),
+        ("(narrate-outcome-arity? (quote (proved statement results)) 3)", true),
+        ("(narrate-outcome-arity? (quote (unknown)) 2)", false),
+        ("(narrate-outcome-arity? (quote (partial value bound extra)) 3)", false),
+        ("(narrate-outcome-arity? 42 2)", false),
+    ];
+
+    for (source, expected) in cases {
+        let actual = eval_outcome_value(source).as_predicate_bit();
+        assert_eq!(
+            actual,
+            Some(expected),
+            "{source}: expected an exact D1 PredicateBit, not host truthiness"
+        );
+    }
+}
 #[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"
