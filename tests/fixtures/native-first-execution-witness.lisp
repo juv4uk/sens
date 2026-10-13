@@ -15,15 +15,15 @@
   (0010 (actual expected)
     (110
       ((11110111 actual expected)
-       (1)
        (001 pass))
-      ((11110111 actual expected)
-       (0)
-       (1110 (001 fail) actual expected)))))
+      (#d1:1
+       (111 (001 fail)
+         (111 actual
+           (111 expected (001 ()))))))))
 
 (0011 native-first-execution-witness
   (0010 ()
-    (1110
+    (111
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
@@ -32,6 +32,7 @@
           (execution-route native
             (status completed)
             (value 2))))
+        (111
 
       ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
       (native-first-execution-witness-check
@@ -41,6 +42,7 @@
           (execution-route evaluator
             (status completed)
             (value 5))))
+        (111
 
       ; Source text is parsed, then every top-level form is routed separately.
       (native-first-execution-witness-check
@@ -55,6 +57,7 @@
              (execution-route native
                (status completed)
                (value 7))))))
+        (111
 
       ; Once a native plan exists, admission rejection stays visibly native.
       ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
@@ -71,6 +74,7 @@
               (rejected
                 unadmitted-machine-form
                 (definitely-not-an-admitted-machine-form))))))
+        (111
 
       ; Malformed native plans also fail closed on the native route.
       (native-first-execution-witness-check
@@ -81,6 +85,7 @@
             (status rejected)
             (detail
               (malformed-native-plan
-                (native-plan ((ret)))))))))))
+                (native-plan ((ret))))))))
+        (001 ()))))))))
 
 (native-first-execution-witness)
