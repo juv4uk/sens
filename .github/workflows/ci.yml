@@ -311,6 +311,34 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
+      - name: REASON-INDEX — двійковий D4 селектор та однобітний негатив
+        id: reason-index-width
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          law=tests/semantic/reason-index-width-selectors-law.sens
+          mutant=tests/semantic/reason-index-width-selectors-mutant.sens
+          sha256sum lib/reason.lisp "$law" "$mutant"
+          printf '1\n' > "$RUNNER_TEMP/expected-reason-width"
+          echo 'test_id=sens-reason-index-width-selectors-law layer=eval semantic_authority=binary-SENS'
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-reason-index-width-selectors-law \
+            --layer eval \
+            --fixture "$law" \
+            --expected-file "$RUNNER_TEMP/expected-reason-width" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$law"
+          echo 'test_id=sens-reason-index-width-selectors-mutant layer=eval executor=target/debug/sens'
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-reason-index-width-selectors-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$mutant"
       - name: Core1 — дев'ять селекторних законів перевіряє двійковий SENS і D1-мутант
         id: core1-selectors
         shell: bash
@@ -464,6 +492,8 @@ jobs:
             --require sens-domain-logic-2040-mutant \
             --require knowledge-exact-arity-structure \
             --require knowledge-cons-exact-width-law \
+            --require sens-reason-index-width-selectors-law \
+            --require sens-reason-index-width-selectors-mutant \
             --require core1-selector-9-laws \
             --require core1-selector-1bit-falsifier \
             --require sens-core2-d3-domain-law \
