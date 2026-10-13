@@ -135,6 +135,31 @@ fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
 }
 
 #[test]
+fn known_status_tags_survive_symbol_tag_guard() {
+    let cases = [
+        (
+            r#"(narrate-outcome (make-invalid (quote invalid-goal) 42))"#,
+            "(invalid because invalid-goal payload 42)",
+        ),
+        (
+            r#"(narrate-outcome (make-unknown (quote subject)) )"#,
+            "(unknown because no-proof-found-for subject)",
+        ),
+        (
+            r#"(narrate-outcome (make-partial (quote ()) (quote (depth . 12))))"#,
+            "(partial value () bound (depth . 12))",
+        ),
+        (
+            r#"(narrate-outcome (make-blocked (quote (depends-on corpus))) )"#,
+            "(blocked because (depends-on corpus))",
+        ),
+    ];
+    for (source, expected) in cases {
+        assert_eq!(eval_outcome_narration(source), expected, "source: {source}");
+    }
+}
+
+#[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"
         (let* ((rules (quote (((has (var x) mass) (planet (var x)))
