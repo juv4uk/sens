@@ -178,8 +178,8 @@ jobs:
           law=tests/semantic/reason-index-width-selectors-law.sens
           mutant=tests/semantic/reason-index-width-selectors-mutant.sens
           printf '1\n' > "$RUNNER_TEMP/reason-selectors-law.expected"
-          # The one-bit mutation replaces D4 CADR with invalid selector D4 LAMBDA.
-          # Current binary SENS must reject it; no fabricated D1:0 verdict.
+          # D4 CADR -> CAAR changes exactly one bit; the first field is a pair.
+          # SENS must take the intentional noncallable D1 branch, not a CAR type error.
           sha256sum "$law" "$mutant"
           python3 scripts/ci_failure_contract.py run \
             --test-id sens-reason-index-width-selectors-law \
@@ -193,7 +193,7 @@ jobs:
             --test-id sens-reason-index-width-selectors-mutant \
             --layer eval \
             --fixture "$mutant" \
-            --expect-error-substring "car expects a non-empty list" \
+            --expect-error-substring "not callable" \
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$mutant"
