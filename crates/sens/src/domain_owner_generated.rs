@@ -258,7 +258,9 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 7, bits: 0b1111111, source: 3 },
 ];
 
-/// Bitset derived mechanically from exactly the above D3-D7 owner rows.
+/// Bitset derived mechanically from exactly the above D3-D7 occupancy rows.
+/// D7 is historical #3572 Sound7 v1 occupancy (126/128), NOT the separate
+/// current keyboard/text-data v2 surface (128/128); the two are not conflated.
 /// No language names, callable laws, or backend/SID8 lookup are encoded.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct DomainOwnerBitmap {
