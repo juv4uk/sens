@@ -1,144 +1,118 @@
 #!/usr/bin/env python3
-"""D7 owner-ratified projection — never a host-created semantic identity.
+"""D7 v2 text/data projection: 128 ASCII-indexed W7 keyboard cells.
 
-Sound/Text residency comes exclusively from knowledge/d7-ratified.json (#3572),
-with human surfaces read from lib/domains/d7.lisp. LocalOrdinal is a distinct
-explicitly selected W7 role; it never borrows Sound/Text residency or Number
-semantics. This script is a read-only projection, not a runtime Lisp callable.
+The historical D7 v1 phonemic/sound authority is research provenance only.
+No phonemic or SID8 identity can be inferred from this text projection.
 """
 from __future__ import annotations
-
 import argparse
 import json
 import re
 from pathlib import Path
-
 from domain_tables import D7_TABLE, read_domain_table
-from d7_symbol_codec import D7CodecError, current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
-AUTHORITY = ROOT / "knowledge/d7-ratified.json"
-NAMESPACES = ("ук", "укр", "san", "en", "en-ipa", "sym", "slp1")
+AUTHORITY = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
+NAMESPACES = ("ук", "укр", "uk", "san", "en", "sym")
 EXACT_W7 = re.compile(r"[01]{7}\Z")
 
 
 class D7ProjectionError(ValueError):
-    """Wrong width, absent residency or ambiguous role; no best-effort alias."""
+    """Missing width, unsupported role/surface or noncanonical authority."""
 
 
 def load_current_d7() -> tuple[dict, dict[str, object]]:
     owner = json.loads(AUTHORITY.read_text(encoding="utf-8"))
-    if (owner["status"], owner["authority"], owner["width"],
-        owner["capacity"], owner["occupancy"]) != ("owner-ratified", "#3572", 7, 128, 126):
-        raise D7ProjectionError("D7 authority changed; explicit review required")
-    pins = set(owner["reserved_coordinates"])
+    if (owner.get("schema"), owner.get("status"), owner.get("width"),
+            owner.get("capacity"), owner.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
+        raise D7ProjectionError("D7 v2 owner authority mismatch")
+    evidence = {item["bits"]: item for item in owner["table"]}
     rows = read_domain_table(D7_TABLE)
     by_coordinate = {row.bits: row for row in rows}
-    if (len(by_coordinate) != 126 or set(by_coordinate) != set(owner["residents"])
-        or pins != {"0100001", "0101010"}
-        or pins.intersection(by_coordinate)):
-        raise D7ProjectionError("D7 Lisp table and owner-ratified residency diverged")
-    codec = current_codec()
+    expected = {f"{n:07b}" for n in range(128)}
+    if len(rows) != 128 or set(by_coordinate) != expected or set(evidence) != expected:
+        raise D7ProjectionError("D7 v2 coverage must be 128/128")
     for bits, row in by_coordinate.items():
-        if row.lisp is not None:
-            raise D7ProjectionError(f"D7:{bits} minted a Lisp callable")
-        for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
-                            ("en", "en"), ("sym", "sym")):
-            if getattr(row, field) != codec.glyph(bits, name):
-                raise D7ProjectionError(f"D7:{bits} {name} glyph differs from ratified projection")
-    evidence = {item["coordinate"]: item for item in owner["rows"]}
-    if len(evidence) != 128:
-        raise D7ProjectionError("D7 owner evidence must cover all 128 coordinates")
-    for bits in by_coordinate:
-        if evidence[bits]["status"] != "OWNER-RATIFIED":
-            raise D7ProjectionError(f"D7:{bits} lacks owner admission")
-    for bits in pins:
-        if evidence[bits]["status"] != "OWNER-RESERVED-PINNED":
-            raise D7ProjectionError(f"D7:{bits} lost owner reservation")
+        glyphs = evidence[bits]
+        if row.lisp is not None or glyphs["ascii"] != chr(int(bits, 2)):
+            raise D7ProjectionError(f"D7:{bits} callable/coordinate drift")
+        n = int(bits, 2)
+        expected_glyphs = (
+            (glyphs["uk"], glyphs["uk"], glyphs["san"],
+             glyphs["ascii"], glyphs["uk"])
+            if 32 <= n < 127 else (None, None, None, None, None)
+        )
+        if (row.uk, row.ukr, row.san, row.en, row.sym) != expected_glyphs:
+            raise D7ProjectionError(f"D7:{bits} glyph drift")
+    for field in ("ascii", "uk", "san"):
+        if len({item[field] for item in evidence.values()}) != 128:
+            raise D7ProjectionError(f"D7:{field} ambiguous glyph")
     return evidence, by_coordinate
 
 
 def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
-    """Project one explicitly role-qualified W7 word; no inferred meaning."""
+    """Return display-only text, or separately sourced Shiva LocalOrdinal provenance."""
     if not EXACT_W7.fullmatch(bits):
         raise D7ProjectionError("D7 requires exactly seven binary digits")
+    if role not in ("text", "local-ordinal"):
+        raise D7ProjectionError("role must be explicit: text or local-ordinal")
     if namespace not in NAMESPACES:
         raise D7ProjectionError(f"unsupported D7 human namespace: {namespace}")
-    if role not in ("sound-text", "local-ordinal"):
-        raise D7ProjectionError("D7 role must be explicit: sound-text or local-ordinal")
-
-    evidence, table = load_current_d7()
+    owner, surface = load_current_d7()
     if role == "local-ordinal":
-        # LocalOrdinal uses ONLY the 14 donor-locked Shiva-sutra ordinals.
-        # Equal W7 bits do not mint Sound/Text residency or arithmetic Number.
-        corpus = json.loads((ROOT / "benchmarks/d7-local-ordinal-corpus/fixtures/projection.json").read_text(encoding="utf-8"))
+        corpus = json.loads(
+            (ROOT / "benchmarks/d7-local-ordinal-corpus/fixtures/projection.json")
+            .read_text(encoding="utf-8")
+        )
         ordinals = {row["bits"]: row for row in corpus["rows"]}
-        if len(ordinals) != 14 or set(ordinals) != {f"{i:07b}" for i in range(1, 15)}:
-            raise D7ProjectionError("D7 LocalOrdinal donor-locked corpus drift")
+        if len(ordinals) != 14 or set(ordinals) != {f"{n:07b}" for n in range(1, 15)}:
+            raise D7ProjectionError("D7 historical local-ordinal witness drift")
         if bits not in ordinals:
             raise D7ProjectionError(f"D7:{bits} has no donor-ratified LocalOrdinal provenance")
-        ordinal = ordinals[bits]
+        item = ordinals[bits]
         return {
             "domain": "D7", "coordinate": bits, "width": 7,
             "role": "local-ordinal", "status": "D7-VALID-PROVENANCE",
-            "donor_ref": ordinal["donor_ref"], "source_order": ordinal["source_order"],
+            "donor_ref": item["donor_ref"], "source_order": item["source_order"],
             "surface": None, "callable": False, "arithmetic_number": False,
         }
-
-    row = table.get(bits)
-    if row is None:
-        raise D7ProjectionError(f"D7:{bits} is reserved; owner admission required")
-    owner = evidence[bits]
-    # Surface MUST be a real symbol chosen by surface (not a phonetic
-    # description, not a translated report name). Missing symbol stays None.
-    try:
-        glyph = current_codec().glyph(bits, namespace)
-    except D7CodecError as exc:
-        raise D7ProjectionError(str(exc)) from exc
+    row = surface[bits]
+    label = "uk" if namespace == "uk" else {
+        "ук": "uk", "укр": "ukr", "san": "san", "en": "en", "sym": "sym",
+    }[namespace]
+    glyph = getattr(row, label)
     return {
         "domain": "D7", "coordinate": bits, "width": 7,
-        "role": "sound-text", "semantic_role": owner["semantic_role"],
+        "role": "text", "semantic_role": "text-data",
         "status": "OWNER-RATIFIED", "namespace": namespace,
-        "surface": glyph, "symbol": glyph, "report_name": owner["report_name"],
-        "callable": False, "arithmetic_number": False,
+        "surface": glyph, "symbol": glyph,
+        "report_name": None, "callable": False, "arithmetic_number": False,
     }
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--check", action="store_true", help="validate owner map and D7 surface projection")
-    ap.add_argument("--coordinate", help="exact seven-bit D7 word")
-    ap.add_argument("--role", choices=["sound-text", "local-ordinal"])
-    ap.add_argument("--namespace", choices=NAMESPACES, default="ук")
-    opts = ap.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--coordinate")
+    parser.add_argument("--role", choices=["text", "local-ordinal"])
+    parser.add_argument("--namespace", choices=NAMESPACES, default="ук")
+    args = parser.parse_args()
     try:
-        if opts.check:
-            load_current_d7()
-            for bits in ("0000001", "0001110"):
-                project(bits, role="local-ordinal")
-            for bits in ("0000000", "0001111", "0100001", "0101010"):
-                try:
-                    project(bits, role="local-ordinal")
-                except D7ProjectionError:
-                    pass
-                else:
-                    raise D7ProjectionError(f"unowned LocalOrdinal admitted: {bits}")
-            for pin in ("0100001", "0101010"):
-                try:
-                    project(pin, role="sound-text")
-                except D7ProjectionError:
-                    pass
-                else:
-                    raise D7ProjectionError(f"reserved Sound/Text pin admitted: {pin}")
-            print("D7-PROJECTION=PASS; owner-residents=126/128; reserved=2; local-ordinals=14; no-Rust-law")
+        if args.check:
+            owner, cells = load_current_d7()
+            for bits in (f"{n:07b}" for n in range(1, 15)):
+                assert project(bits, role="local-ordinal")["callable"] is False
+            print("D7-PROJECTION: PASS keyboard/v2 128/128 no-callable, local-ordinal separate")
             return 0
-        if opts.coordinate is None or opts.role is None:
-            ap.error("--coordinate and --role are both required without --check")
-        result = project(opts.coordinate, role=opts.role, namespace=opts.namespace)
-    except D7ProjectionError as exc:
-        ap.exit(2, f"BLOCKED: {exc}\n")
-    print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-    return 0
+        if args.coordinate is None or args.role is None:
+            parser.error("--coordinate and --role are required")
+        print(json.dumps(project(args.coordinate, role=args.role,
+                                 namespace=args.namespace), ensure_ascii=False))
+        return 0
+    except (D7ProjectionError, ValueError, OSError) as exc:
+        print("D7-PROJECTION: BLOCKED: " + str(exc))
+        return 2
 
 
 if __name__ == "__main__":
