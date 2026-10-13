@@ -85,7 +85,7 @@ fn collect_call_head_widths(expr: &Expr, widths: &mut Vec<usize>) {
     if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = items.first() {
         widths.push(identity.width());
     }
-    for item in items {
+    for item in items.iter() {
         collect_call_head_widths(item, widths);
     }
 }
@@ -102,7 +102,7 @@ fn world_shape_validator_uses_only_exact_d3_and_d4_call_heads() {
             };
             matches!(
                 items.get(1).map(|item| &item.kind),
-                Some(ExprKind::Symbol(name)) if name == "world?"
+                Some(ExprKind::Symbol(name)) if name.as_ref() == "world?"
             )
         })
         .expect("the source must define world?");
