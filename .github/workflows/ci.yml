@@ -138,6 +138,20 @@ jobs:
           echo "test_id=presentation-exact-domain-width semantic_authority=domain-ladder"
           sha256sum crates/sens/src/presentation.rs
           cargo test --locked -p sens --lib presentation::tests::equal_payload_d3_d4_identities_remain_visibly_distinct -- --exact --nocapture
+      - name: Рамка-3 — один точковий 5-байтовий B/C/S/W proof на реальному SENS
+        id: frame3-bcsw
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=frame3-bcsw-five-bytes layer=transport semantic_authority=binary-SENS"
+          sha256sum crates/sens/src/frame3_micro_v5_lambda_app.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id frame3-bcsw-five-bytes \
+            --layer transport \
+            --fixture crates/sens/src/frame3_micro_v5_lambda_app.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
@@ -257,11 +271,12 @@ jobs:
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
           QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
           TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
+          FRAME3_OUTCOME: ${{ steps.frame3-bcsw.outcome }}
           MIGRATOR_OUTCOME: ${{ steps.migrator-optimized.outcome }}
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
           else
             # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
