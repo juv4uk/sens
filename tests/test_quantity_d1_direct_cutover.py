@@ -75,7 +75,7 @@ class QuantityDirectD1(unittest.TestCase):
         old = restore(self.source)
         self.assertEqual(len(expressions(self.source)), 43)
         self.assertEqual(self.source.count(NEW), 14)
-        self.assertEqual(self.source.count(OLD), 1)  # documentary historical example only
+        self.assertEqual(self.source.count(OLD), 0)  # no obsolete constructor in live text
         print(f"QUANTITY-D1: UTF8 source {len(old)} -> "
               f"{len(self.source.encode('utf-8'))} bytes; 13 direct D1 results")
 

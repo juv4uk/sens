@@ -10,11 +10,9 @@
 ; index construction into an unbounded O(N^2) walk.
 
 (0011 *reason-index-schema* (001 reason-index/1))
-; Human-readable projection of the bounded index limit. Runtime admission
-; uses structural slots below, never arithmetic on a D5 function identity.
 (0011 *reason-index-max-predicates* 64)
-; One structural slot per admitted distinct predicate. This keeps the cap
-; finite without numeric counter literals as D24+ operands.
+; Runtime capacity is a structural token list: arithmetic on legacy
+; numbers is not a valid way to count distinct index keys under D24+ law.
 (0011 *reason-index-capacity-slots* (001 (slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot slot)))
 
 ; Shape: (reason-index/1 indexed|linear ORIGINAL-RULES BUCKETS)
@@ -35,6 +33,20 @@
          ((101 (100 value) *reason-index-schema*) #d1:1)
          (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
+
+; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
+; заходить у CAR(CAR ()) на порожньому alist; тут ніколи не робимо CAR
+; до перевірки D3 ATOM. Голова кошика мусить бути атомом.
+(0011 міркування-пошук-кошика
+  (0010 (predicate buckets)
+    (110
+      ((010 buckets) (001 ()))
+      ((010 (100 buckets)) (001 ()))
+      ((010 (100 (100 buckets)))
+       (110
+         ((101 predicate (100 (100 buckets))) (100 buckets))
+         (#d1:1 (міркування-пошук-кошика predicate (011 buckets)))))
+      (#d1:1 (001 ())))))
 
 (0011 reason-index-linear
   (0010 (rules)
@@ -104,10 +116,10 @@
            ; scan, because that head may unify with predicates outside a bucket.
            ((101 predicate (001 ())) (reason-index-linear original))
            ((010 ())
-            (001000 ((entry (11100 predicate buckets)))
+            (001000 ((entry (міркування-пошук-кошика predicate buckets)))
               (110
-                ; A new bucket consumes one structural capacity slot. If all
-                ; 64 slots are gone, retain correctness with the linear scan.
+                ; A new bucket consumes one structural capacity slot. On
+                ; exhaustion, preserve semantics by returning the linear scan.
                 ((010 entry)  (110
                    ((010 capacity) (reason-index-linear original))
                    ((010 ())
@@ -149,7 +161,7 @@
            (110
              ((101 predicate (001 ())) (reason-index-rules index))
              ((010 ())
-              (001000 ((entry (11100 predicate (reason-index-buckets index))))
+              (001000 ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
                 (110
                   
                   ((010 entry)  (001 ()))
