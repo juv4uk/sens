@@ -22,13 +22,16 @@ fn eval_advice_corpus(source: &str) -> String {
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
         ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
         ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        // Admission and package-import policies now belong to immutable World.
+        // The host only loads the exact-domain SENS source; it defines no law.
+        ("lib/world.lisp", include_str!("../../../lib/world.lisp")),
         ("lib/understand.lisp", include_str!("../../../lib/understand.lisp")),
         ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
         ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
     ] {
         let result = match library_path {
             "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp"
-            | "lib/knowledge.lisp" => {
+            | "lib/knowledge.lisp" | "lib/world.lisp" => {
                 eval_pinned_reasoning_source(library_path, library, &mut session)
             }
             "lib/understand.lisp" => {
