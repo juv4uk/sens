@@ -6,6 +6,7 @@
       "id": "d3-quote-empty",
       "status": "ready",
       "english_source": "(quote ())",
+      "ukrainian_source": "(як-є ())",
       "canonical_source": "10 001 00 10 01 01",
       "expected_value": "()",
       "expected_output": ""
@@ -14,6 +15,7 @@
       "id": "d3-car-empty",
       "status": "ready",
       "english_source": "(car (quote (())))",
+      "ukrainian_source": "(перше (як-є (())))",
       "canonical_source": "10 100 00 10 001 00 10 10 01 01 01 01",
       "expected_value": "()",
       "expected_output": ""
@@ -21,7 +23,9 @@
     {
       "id": "d3-eq-empty",
       "status": "blocked",
-      "blockers": ["#2184"],
+      "blockers": [
+        "#2184"
+      ],
       "reason": "Current execution still does not expose EQ result as exact D1 PredicateBit: as_predicate_bit() is None while display is (1). Lowered trace parity alone is insufficient."
     }
   ]
