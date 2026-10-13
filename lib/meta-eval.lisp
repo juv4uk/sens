@@ -67,17 +67,24 @@
       ((11110111 name semantic-id) t)
       ((010 ()) (11110111 (my-semantic-id-for-surface name) semantic-id)))))
 
+; The D6 LET binding list is data for the pinned mixed reader.
+; Evaluate D3:110 outside that binding position so its head retains 3 bits.
+; This SENS function owns the existing seven semantic-ID branches.
+(0011 my-canon-semantic-id
+  (0010 (name)
+    (110
+      ((11110111 name 001) 001)
+      ((11110111 name 010) 010)
+      ((11110111 name 101) 101)
+      ((11110111 name 111) 111)
+      ((11110111 name 100) 100)
+      ((11110111 name 011) 011)
+      ((11110111 name 110) 110)
+      (#d1:1 (my-semantic-id-for-surface name)))))
+
 (0011 my-canon-identity
   (0010 (name)
-    (001000 ((semantic-id (110
-                         ((11110111 name 001) 001)
-                         ((11110111 name 010) 010)
-                         ((11110111 name 101) 101)
-                         ((11110111 name 111) 111)
-                         ((11110111 name 100) 100)
-                         ((11110111 name 011) 011)
-                         ((11110111 name 110) 110)
-                         ((010 ()) (my-semantic-id-for-surface name)))))
+    (001000 ((semantic-id (my-canon-semantic-id name)))
       (110
         ((101 semantic-id 001) (001 quote))
         ((101 semantic-id 010) (001 atom))
