@@ -27,7 +27,7 @@ fn core_macros_work_after_canonical_macro_first_bootstrap() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("macro.my then core.my should bootstrap cleanly");
 
-    let value = eval_program("(and t 42)", &mut session)
+    let value = eval_program("(and #d1:1 42)", &mut session)
         .expect("core.my macros should be available after canonical bootstrap")
         .value;
     assert_eq!(value.to_string(), "42");
