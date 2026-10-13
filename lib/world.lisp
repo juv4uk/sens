@@ -566,12 +566,13 @@
   (0010 (left right)
     (110
       ((внутрішня-рівність-версій left right) left)
-      
-      (#d1:1 (001 World-no-common-ancestor))
-      
-      ((010 (world-parent right))  (001 World-no-common-ancestor))
-      (#d1:1 (world-common-ancestor-aligned (world-parent left)
-                                        (world-parent right))))))
+      ((010 left) (001 World-no-common-ancestor))
+      ((010 right) (001 World-no-common-ancestor))
+      ((010 (world-parent left)) (001 World-no-common-ancestor))
+      ((010 (world-parent right)) (001 World-no-common-ancestor))
+      (#d1:1
+       (world-common-ancestor-aligned (world-parent left)
+                                      (world-parent right))))))
 
 (0011 world-common-ancestor
   (0010 (left right)
@@ -587,9 +588,8 @@
 (0011 world-no-common-ancestor?
   (0010 (value)
     (110
-      
-      ((010 value)  (101 value (001 World-no-common-ancestor)))
-      )))
+      ((010 value) (101 value (001 World-no-common-ancestor)))
+      (#d1:1 #d1:0))))
 
 (0011 world-branch-diff
   (0010 (left right)
