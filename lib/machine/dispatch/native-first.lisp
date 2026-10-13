@@ -45,7 +45,7 @@
 (0011 native-first-plan-car-cons-u64-rest-right
   (0010 (expression cons-arguments rest-after-left)
     (110
-      ((101 (011 rest-after-left) (001 ()))
+      ((0101 (011 rest-after-left))
        (110
          ((101 (100 (x86-as-u64-imm (100 cons-arguments))) (001 u64-imm))
           (110
