@@ -32,7 +32,7 @@ fn core_macros_work_after_canonical_macro_first_bootstrap() {
         .value;
     assert_eq!(value.to_string(), "42");
 
-    let value = eval_program("(or () (quote fallback))", &mut session)
+    // D3 empty list is data, not D1:NO. Explicit false must carry one bit.\n    let value = eval_program("(or #d1:0 (quote fallback))", &mut session)
         .expect("core.my OR macro should be available after canonical bootstrap")
         .value;
     assert_eq!(value.to_string(), "fallback");
