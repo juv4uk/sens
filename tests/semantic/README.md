@@ -13,3 +13,10 @@ words.
 
 Rust, Python and shell are allowed to transport bytes, invoke SENS, and retain
 evidence. They do not define the expected logic of this witness.
+
+`result-status-d1-law.bits` extends the same rule into the reasoning outcome
+layer. Its executable heads include exact D9 `RESULT-TAGGED?` and
+`MAKE-PROVED`, while D3 `COND/EQ/QUOTE` and D1 `0/1` carry the verdict.
+If either the true or false result law is wrong, SENS takes an intentionally
+non-callable D1 branch and rejects its own witness. The host runner therefore
+does not need an expected semantic value.
