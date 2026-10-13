@@ -118,7 +118,7 @@ jobs:
             --layer transport \
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
-            -- cargo build --locked -p sens-cli --bin sens
+            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
       - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
         if: github.event_name == 'workflow_dispatch'
@@ -222,6 +222,49 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
+      - name: Core1 — дев'ять селекторних законів перевіряє двійковий SENS і D1-мутант
+        id: core1-selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=tests/fixtures/core1-selectors-semantic
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=core1-selector-9-laws layer=eval semantic_authority=binary-SENS"
+          sha256sum lib/core1.lisp "$base.bits" "$base.sens" "$base-mutant.bits" "$base-mutant.sens"
+          # Лише механічний транспорт: збіг усіх точних бітових слів із T5.
+          target/debug/sens-trit open "$base.sens" > "$RUNNER_TEMP/core1-positive.bits"
+          target/debug/sens-trit open "$base-mutant.sens" > "$RUNNER_TEMP/core1-mutant.bits"
+          cmp "$base.bits" "$RUNNER_TEMP/core1-positive.bits"
+          cmp "$base-mutant.bits" "$RUNNER_TEMP/core1-mutant.bits"
+          mapfile -t original < <(tr '[:space:]' '\n' < "$base.bits" | sed '/^$/d')
+          mapfile -t mutated < <(tr '[:space:]' '\n' < "$base-mutant.bits" | sed '/^$/d')
+          test "${#original[@]}" -eq "${#mutated[@]}"
+          changes=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${mutated[i]}" ]]; then
+              [[ "${original[i]}" == 0 && "${mutated[i]}" == 1 ]] || { echo "::error::CORE1_MUTANT_WIDTH_OR_BIT_VIOLATION word=$i"; exit 1; }
+              changes=$((changes + 1))
+            fi
+          done
+          test "$changes" -eq 1 || { echo "::error::CORE1_MUTANT_NOT_ONE_BIT changed_words=$changes"; exit 1; }
+          printf '1\n' > "$RUNNER_TEMP/core1-expected-yes"
+          printf '0\n' > "$RUNNER_TEMP/core1-expected-no"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core1-selector-9-laws \
+            --layer eval \
+            --fixture "$base.sens" \
+            --expected-file "$RUNNER_TEMP/core1-expected-yes" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$base.sens"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core1-selector-1bit-falsifier \
+            --layer eval \
+            --fixture "$base-mutant.sens" \
+            --expected-file "$RUNNER_TEMP/core1-expected-no" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$base-mutant.sens"
       - name: CI-клей Python — механічні межі кодування QUOTE/D7 та SLP1 (не semantic oracle)
         id: quoted-d7
         shell: bash
@@ -279,6 +322,7 @@ jobs:
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
+          CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
           QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
           TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
           FRAME3_OUTCOME: ${{ steps.frame3-bcsw.outcome }}
@@ -294,9 +338,11 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             --require sens-time-d1-predicate-law \
             --require sens-domain-logic-2040-mutant \
-            --require knowledge-exact-arity-structure || native_rc=$?
+            --require knowledge-exact-arity-structure \
+            --require core1-selector-9-laws \
+            --require core1-selector-1bit-falsifier || native_rc=$?
           diagnostic_rc=0
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
             python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?

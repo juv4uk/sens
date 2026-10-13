@@ -35,6 +35,13 @@
 ; Quoted record tags remain blocked pending a real atomic D7 datum law;
 ; no fake D7 representation may be EQ-comparable to an atom.
 
+; 2026-10-14: дев'ять внутрішніх викликів Core1 більше не проходять через
+; текстові C1-SECOND/C1-THIRD: п'ять D4:1001 і чотири D5:10011.
+; Старі визначення поки збережені для зовнішніх викликачів; тут не
+; створено нового способу виконання чи другої семантики.
+; Семантику селекторів доводить виконавчий SENS-свідок
+; tests/fixtures/core1-selectors-semantic.{bits,sens} і його D1-мутант.
+;
 ; Exact selector cutover: D4:1001 CADR and D5:10011 CADDR.
 ; Fourth = admitted D5 CADDR after D3:011 CDR.
 ; D6 CADDDR is a ratified identity, not an admitted physical call.
@@ -268,7 +275,7 @@
                (C1-EVCON (011 CLAUSES) ENV GLOBAL))
               ((010 (001 ()))
                (C1-EVAL
-                 (C1-SECOND (100 CLAUSES))
+                 (1001 (100 CLAUSES))
                  ENV
                  GLOBAL))))
           (C1-EVAL
@@ -340,11 +347,11 @@
            ((C1-ADMITTED-SID-VALUEP EXPR) EXPR)
            ((010 (001 ())) (C1-LOOKUP EXPR ENV GLOBAL))))
         ((C1-QUOTE-NAMEP (100 EXPR))
-         (C1-SECOND EXPR))
+         (1001 EXPR))
         ((C1-COND-NAMEP (100 EXPR))
          (C1-EVCON (011 EXPR) ENV GLOBAL))
         ((C1-LABEL-NAMEP (100 EXPR))
-         (C1-EVAL (C1-THIRD EXPR) ENV GLOBAL))
+         (C1-EVAL (10011 EXPR) ENV GLOBAL))
         ((C1-LAMBDA-NAMEP (100 EXPR))
          (00001
            (0010 (ARGS GLOBAL-AT-CALL)
@@ -353,11 +360,11 @@
                   ((C1-ERRORP BOUND) BOUND)
                   ((010 (001 ()))
                    (C1-EVAL
-                     (C1-THIRD EXPR)
+                     (10011 EXPR)
                      BOUND
                      GLOBAL-AT-CALL))))
               (C1-BIND
-                (C1-SECOND EXPR)
+                (1001 EXPR)
                 ARGS
                 ENV)))))
         ((C1-DEFINE-NAMEP (100 EXPR))
@@ -384,11 +391,11 @@
 
 (0011 C1-WORLD-VALUE
   (0010 (WORLD)
-    (C1-SECOND WORLD)))
+    (1001 WORLD)))
 
 (0011 C1-WORLD-GLOBAL
   (0010 (WORLD)
-    (C1-THIRD WORLD)))
+    (10011 WORLD)))
 
 (0011 C1-DEFINITIONP
   (0010 (FORM)
@@ -413,9 +420,9 @@
                   (C1-EVAL-PROGRAM
                     (011 FORMS)
                     (111
-                      (111 (C1-SECOND FORM) VALUE)
+                      (111 (1001 FORM) VALUE)
                       GLOBAL)))))
-             (C1-EVAL (C1-THIRD FORM) (001 ()) GLOBAL)))
+             (C1-EVAL (10011 FORM) (001 ()) GLOBAL)))
           (100 FORMS)))
         ((101 (011 FORMS) (001 ()))
          (C1-MAKE-WORLD
