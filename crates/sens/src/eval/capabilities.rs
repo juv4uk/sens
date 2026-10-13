@@ -13,7 +13,7 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, ErrorKind, Expr, LanguageError, Sens8, Span, Value};
+use crate::{DomainIdentity, Environment, ErrorKind, Expr, LanguageError, Sens8, Span, Value};
 use std::collections::{BTreeMap, HashMap};
 use std::sync::{OnceLock, RwLock};
 
@@ -37,6 +37,13 @@ enum HostHandler {
 
 /// Host mechanism for one already-existing exact SENS function.
 /// The key is the eight-bit function itself; this registry owns no function meaning.
+/// Точнодоменний механізм хоста. Ключем є вся (ширина, біти) тотожність,
+/// а не історичний байт. Реєстрація механізму сама не надає викликаності:
+/// виконавець має спершу перевірити чинний закон і допуск координати.
+pub(crate) type DomainHostFn =
+    fn(DomainIdentity, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
+
+/// Історичний W8-адаптер залишається окремим від доменного реєстру.
 pub type SensHostFn =
     fn(Sens8, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
@@ -63,6 +70,11 @@ fn lookup_capability(
 fn registry() -> &'static RwLock<BTreeMap<String, HostHandler>> {
     static REGISTRY: OnceLock<RwLock<BTreeMap<String, HostHandler>>> = OnceLock::new();
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
+}
+
+fn domain_registry() -> &'static RwLock<HashMap<DomainIdentity, DomainHostFn>> {
+    static REGISTRY: OnceLock<RwLock<HashMap<DomainIdentity, DomainHostFn>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
 }
 
 fn sens_registry() -> &'static RwLock<HashMap<Sens8, SensHostFn>> {
@@ -99,8 +111,26 @@ pub fn unregister_capability(name: &str) {
     }
 }
 
-/// Attach a host mechanism to one exact SENS function.
-/// Re-registering replaces only the mechanism; it cannot mint or reinterpret SENS.
+/// Встановити механізм для перевіреної доменної координати. Цей запис —
+/// лише доступність механізму; семантичний допуск належить оракулу/виконавцю.
+pub(crate) fn register_domain_capability(identity: DomainIdentity, handler: DomainHostFn) {
+    domain_registry()
+        .write()
+        .expect("domain host registry poisoned")
+        .insert(identity, handler);
+    super::closures::bump_resolution_epoch();
+}
+
+pub(crate) fn unregister_domain_capability(identity: DomainIdentity) {
+    if let Ok(mut map) = domain_registry().write() {
+        map.remove(&identity);
+    }
+}
+
+/// Compatibility only: the historical W8 registry is never indexed by a
+/// current D8 payload, even when the eight bits are visually identical.
+/// Attach a host mechanism to one historical W8 function.
+/// Re-registering replaces only the mechanism; it cannot mint current SENS.
 pub fn register_sens_capability(sens: Sens8, handler: SensHostFn) {
     sens_registry()
         .write()
@@ -190,7 +220,41 @@ pub(crate) fn dispatch_capability(
     dispatch_capability_from(registry(), name, arguments, environment, span)
 }
 
-/// Mechanical lookup/execution seam for one already-registered exact SENS function.
+/// Точнодоменна межа виклику: тільки після окремої перевірки викликаності
+/// координати. Відсутність запису не означає відсутності семантичного закону.
+fn dispatch_domain_capability_from(
+    source: &RwLock<HashMap<DomainIdentity, DomainHostFn>>,
+    identity: DomainIdentity,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    match source.read() {
+        Ok(map) => map
+            .get(&identity)
+            .copied()
+            .map(|handler| handler(identity, arguments, environment, span)),
+        Err(_) => Some(Err(LanguageError::new(
+            ErrorKind::MechanismUnavailable,
+            format!(
+                "доменний механізм хоста недоступний: D{} {}",
+                identity.width(), identity
+            ),
+            span,
+        ))),
+    }
+}
+
+pub(crate) fn dispatch_domain_capability(
+    identity: DomainIdentity,
+    arguments: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    dispatch_domain_capability_from(domain_registry(), identity, arguments, environment, span)
+}
+
+/// Історична W8-межа, відокремлена від поточного доменного механізму.
 ///
 /// #1422: production may call this seam only downstream of the generated
 /// SENS-owned profile-mechanism admission gate. Registration/storage remain
@@ -294,6 +358,90 @@ mod honesty_tests {
 
         assert_eq!(error.kind, ErrorKind::Arity);
         assert_eq!(error.span, span);
+    }
+
+    fn d3_nil(
+        _identity: DomainIdentity,
+        _arguments: &[Value],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Nil)
+    }
+
+    fn d4_marker(
+        _identity: DomainIdentity,
+        _arguments: &[Value],
+        _environment: &Environment,
+        _span: Span,
+    ) -> Result<Value, LanguageError> {
+        Ok(Value::Symbol(std::rc::Rc::from("д4")))
+    }
+
+    #[test]
+    fn domain_host_registry_distinguishes_same_payload_and_legacy_w8() {
+        use crate::{Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8};
+        let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).unwrap()));
+        let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0101).unwrap()));
+        let d8 = DomainIdentity::D8(CoreD8::from_word(Bit8::new(0b10101000).unwrap()));
+        let old = crate::sens!(10101000);
+        assert_eq!(d3.packed_bits(), d4.packed_bits());
+        assert_eq!(d8.packed_bits(), old.packed_byte() as u16);
+
+        let routes = RwLock::new(HashMap::from([
+            (d3, d3_nil as DomainHostFn),
+            (d4, d4_marker as DomainHostFn),
+        ]));
+        let environment = Environment::root();
+        let span = Span::default();
+        assert_eq!(
+            dispatch_domain_capability_from(&routes, d3, &[], &environment, span)
+                .expect("D3 installed").expect("D3 mechanism"),
+            Value::Nil
+        );
+        assert_eq!(
+            dispatch_domain_capability_from(&routes, d4, &[], &environment, span)
+                .expect("D4 installed").expect("D4 mechanism"),
+            Value::Symbol(std::rc::Rc::from("д4"))
+        );
+        assert!(dispatch_domain_capability_from(&routes, d8, &[], &environment, span).is_none());
+        // Old W8 INVOKE cannot silently become current D8 ROUND.
+        let legacy = HashMap::from([(old, sens_handler as SensHostFn)]);
+        assert!(legacy.contains_key(&old));
+        assert!(routes.read().unwrap().get(&d8).is_none());
+    }
+
+    #[test]
+    fn domain_host_registration_does_not_make_missing_domain_callable() {
+        use crate::{Bija3, Bit3, Bit4, CoreD4};
+        let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).unwrap()));
+        let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0101).unwrap()));
+        unregister_domain_capability(d3);
+        unregister_domain_capability(d4);
+        register_domain_capability(d3, d3_nil);
+        let environment = Environment::root();
+        let span = Span::default();
+        assert!(dispatch_domain_capability(d4, &[], &environment, span).is_none());
+        assert!(dispatch_domain_capability(d3, &[], &environment, span).is_some());
+        unregister_domain_capability(d3);
+        assert!(dispatch_domain_capability(d3, &[], &environment, span).is_none());
+    }
+
+    #[test]
+    fn poisoned_domain_host_registry_fails_closed() {
+        use crate::{Bija3, Bit3};
+        let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).unwrap()));
+        let lock = RwLock::new(HashMap::from([(d3, d3_nil as DomainHostFn)]));
+        assert!(std::panic::catch_unwind(|| {
+            let _guard = lock.write().unwrap();
+            panic!("poison local domain registry");
+        }).is_err());
+        let error = dispatch_domain_capability_from(
+            &lock, d3, &[], &Environment::root(), Span::default()
+        ).expect("poisoned registry cannot count as absent")
+         .expect_err("poisoned registry must fail");
+        assert_eq!(error.kind, ErrorKind::MechanismUnavailable);
+        assert!(error.message.contains("D3 101"), "{}", error.message);
     }
 
     fn sens_handler(
