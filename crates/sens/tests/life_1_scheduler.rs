@@ -151,3 +151,32 @@ fn malformed_trigger_is_absent_not_cdr_failure() {
         "malformed pending entry must be skipped: {selection}"
     );
 }
+
+
+#[test]
+fn life_scheduler_exact_d3_structural_equality() {
+    let scheduler = fs::read_to_string(repo_file("lib/life-1-scheduler.lisp"))
+        .expect("основний LIFE-1 файл має читатися");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("основний Core4");
+    eval_program(&scheduler, &mut session).expect("LIFE-1 точний D3 source");
+
+    let examples = [
+        ("()", "()", "збігається"),
+        ("а", "а", "збігається"),
+        ("а", "б", "різне"),
+        ("а", "(а)", "різне"),
+        ("(а)", "а", "різне"),
+        ("(а (б в))", "(а (б в))", "збігається"),
+        ("(а (б в))", "(а (б г))", "різне"),
+        ("(готово (джерело радіо))", "(готово (джерело радіо))", "збігається"),
+        ("(готово (джерело радіо))", "(готово (джерело інше))", "різне"),
+    ];
+    for (left, right, expected) in examples {
+        let source = format!(
+            "(110 \\n              ((життя--рівні? (001 {left}) (001 {right})) (001 збігається)) \\n              ((010 (001 ())) (001 різне)))"
+        );
+        let actual = eval_text(&source, &mut session);
+        assert_eq!(actual, expected, "відмінність у {left} та {right}");
+    }
+}
