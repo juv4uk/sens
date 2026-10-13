@@ -574,20 +574,7 @@ def encode_text7_spelling(text: str, candidates):
                 )
             cells.append(word)
         return cells
-    words = []
-    i = 0
-    while i < len(text):
-        for spelling, cells in candidates:
-            if text.startswith(spelling, i):
-                words.extend(cells)
-                i += len(spelling)
-                break
-        else:
-            ch = text[i]
-            raise BinaryMigrationError(
-                f"Text7 has no admitted spelling for {ch!r} U+{ord(ch):04X}"
-            )
-    return words
+    raise BinaryMigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection")
 
 
 def _emit_item(out, words, need_separator):
