@@ -6,6 +6,9 @@ on:
     paths:
       - "crates/sens/tests/current_binary_preflight.rs"
       - "lib/process.lisp"
+      - "lib/tcp.lisp"
+      - "crates/sens/tests/tcp_d1_fallback.rs"
+      - "tests/test_tcp_d1_fallback.py"
       - "crates/sens/tests/process_d1_reflection.rs"
       - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
@@ -15,6 +18,9 @@ on:
     paths:
       - "crates/sens/tests/current_binary_preflight.rs"
       - "lib/process.lisp"
+      - "lib/tcp.lisp"
+      - "crates/sens/tests/tcp_d1_fallback.rs"
+      - "tests/test_tcp_d1_fallback.py"
       - "crates/sens/tests/process_d1_reflection.rs"
       - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
@@ -31,6 +37,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: TCP точковий свідок: 7 бітів і всі 2046 координат D1-D10
+        run: python3 -m unittest discover -s tests -p test_tcp_d1_fallback.py -v
+      - name: TCP виконуваний двостановий D1 і відхилення Number 1
+        run: cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
       - name: Незалежний AST-тест п'яти заперечень D1
         run: python3 -m unittest discover -s tests -p test_process_d1_predicate_cutover.py -v
       - name: Незалежний Rust-тест D4 NOT та D3 EQ без D24+

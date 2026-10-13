@@ -25,7 +25,7 @@
         ((101 (100 decoded) (001 decoded))
          
          (1001 decoded))
-        ((0100 (101 (100 decoded) (001 decoded)))
+        ((010 (001 ()))
          decoded)))))
 
 (0011 tcp-read
