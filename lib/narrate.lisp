@@ -72,7 +72,7 @@
        (1110 (1001 fact) (001 is) (001 a) (100 fact)))
       ((narrate-list-exact-three? fact)
        (1110 (1001 fact) (100 fact) (10011 fact)))
-      ((010 (001 ())) fact))))
+      (1 fact))))
 
 (0011 provenance-goal (0010 (prov) (1001 prov)))
 (0011 provenance-source (0010 (prov) (1001 (10011 prov))))
@@ -84,7 +84,7 @@
     (110
       ((010 derivations) (001 ()))
       ((010 (011 derivations)) (narrate-provenance (100 derivations)))
-      ((010 (001 ()))
+      (1
        (1111 (narrate-provenance (100 derivations))
          (111 (001 and) (narrate-derivation (011 derivations))))))))
 
@@ -92,7 +92,7 @@
   (0010 (prov)
     (110
       ((101 (provenance-source prov) (001 fact)) (narrate-fact (provenance-rule prov)))
-      ((010 (001 ()))
+      (1
        (1111 (narrate-fact (provenance-rule prov))
          (111 (001 because) (narrate-derivation (provenance-derived-from prov))))))))
 
@@ -103,13 +103,14 @@
     (001000 ((derivations (provenance-derived-from (101101111 proof))))
       (110
         ((010 derivations) (narrate-fact goal))
-        ((010 (001 ()))
+        (1
          (1111 (narrate-fact goal)
            (111 (001 because) (narrate-derivation derivations))))))))
 
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
 ; ----------------------------------------------------------------------
+; Exact reader: unconditional COND guards are the one-bit D1:YES (1).
 ; Semantic meaning stays in lib/result-status.lisp. These functions only turn a
 ; canonical outcome into a controlled word/data list for presentation. They
 ; deliberately keep the status word visible so `unknown`, `disputed`,
@@ -122,7 +123,7 @@
           (results (10011 outcome)))
       (110
         ((010 results) (1110 (001 proved) statement (001 without-proof-result)))
-        ((010 (001 ()))
+        (1
          (1111
            (1110 (001 proved))
            (narrate-answer statement (1001 (100 results)))))))))
@@ -146,7 +147,7 @@
       ((101 (100 outcome) (001 proved))
        (110
          ((narrate-list-exact-three? outcome) (narrate-proved-outcome outcome))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
+         (1 (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 unknown))
        (110
          ((narrate-list-exact-two? outcome)
@@ -155,7 +156,7 @@
             (001 because)
             (001 no-proof-found-for)
             (1001 outcome)))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
+         (1 (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 partial))
        (110
          ((narrate-list-exact-three? outcome)
@@ -165,7 +166,7 @@
             (1001 outcome)
             (001 bound)
             (10011 outcome)))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
+         (1 (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 blocked))
        (110
          ((narrate-list-exact-two? outcome)
@@ -173,7 +174,7 @@
             (001 blocked)
             (001 because)
             (1001 outcome)))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
+         (1 (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 disputed))
        (110
          ((narrate-list-exact-two? outcome)
@@ -182,7 +183,7 @@
             (001 because)
             (001 both-sides-have-evidence)
             (1001 outcome)))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
+         (1 (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 invalid))
        (110
          ((narrate-list-exact-three? outcome)
@@ -192,6 +193,6 @@
             (1001 outcome)
             (001 payload)
             (10011 outcome)))
-         ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
-      ((010 (001 ()))
+         (1 (narrate-invalid-outcome-shape outcome))))
+      (1
        (1110 (001 invalid) (001 outcome-tag) (100 outcome))))))
