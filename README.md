@@ -284,7 +284,7 @@ Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/se
 дослідному тесті `five_byte_bcsw_exact_sens_reduction`; він перевіряє
 зворотний ранг, точні 5 фізичних байтів і виконання `B I I x`, `C K 0 x`,
 `S K K x`, `W K x` для обох значень D1 справжнім evaluator SENS.
-**До нового успішного прогону це додані перевірки, а не окремо підтверджений CI proof.**
+**PASS:** [автоматичний proof run 38471870869](https://github.com/juv4uk/sens/actions/runs/38471870869), test_id `frame3-bcsw-five-bytes` (реальний SENS evaluator, точні 5-байтові коди та зворотне ранжування); тест виконується в **одному наявному push workflow**, без нового автоматичного workflow.
 П'ятибайтовим є **сам комбінатор**, не весь тестовий вираз із зовнішніми аргументами.
 Для цілеспрямованого відтворення без запуску всіх тестів: `cargo test --locked -p sens frame3_micro_v5_lambda_app::tests -- --nocapture`. Визначення семантики залишається за канонічним SENS, а Rust тут перевіряє носій і parity.
 

@@ -158,6 +158,30 @@ semantic sweep і не production admission.
 
 Proof run **38263454497 — SUCCESS**.
 
+#### B/C/S/W — чотири нові п'ятибайтові замкнені комбінатори
+
+Це **дослідний** ранкер F3M-5λA; жодна з наведених байтових послідовностей
+не змінює production F3M-5 і не створює нових канонічних резидентів.
+
+| Комбінатор | Payload, рівно 5 байтів | Закон (зовнішні тестові аргументи) | Micro-nodes |
+|---|---|---|---:|
+| B: композиція | `00 00 3F EA 96` | `B I I x = x` | 8 |
+| C: перестановка | `00 00 3F F9 F2` | `C K 0 x = x` | 8 |
+| S: підстановка | `00 27 73 55 DA` | `S K K x = x` | 10 |
+| W: дублювання | `00 00 05 24 5D` | `W K x = x` | 7 |
+
+Закони перевірено для **обох точних D1-значень** засобами наявного SENS
+evaluator; Rust у цьому тесті відповідає за механічні rank/unrank і
+передачу AST, а **не встановлює нову семантику**. Самі B/C/S/W займають
+по 40 біт; тестове `S K K x` **не заявляється** однією 5-байтовою програмою.
+
+- [Автоматичний proof run 38471870869 — SUCCESS](https://github.com/juv4uk/sens/actions/runs/38471870869):
+  один існуючий `ci.yml`, `test_id=frame3-bcsw-five-bytes`, точковий тест PASS.
+- Реалізація та перевірка:
+  [`frame3_micro_v5_lambda_app.rs`](../crates/sens/src/frame3_micro_v5_lambda_app.rs),
+  `five_byte_bcsw_exact_sens_reduction`.
+- Відтворення: `cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture`.
+
 
 Межа: de-Bruijn `BOUND(n)` поки research-semantic constructor і ще не має
 окремо ратифікованої exact SENS-domain identity. Тому кандидат не може
