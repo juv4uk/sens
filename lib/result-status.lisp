@@ -129,6 +129,11 @@
       ((000111010 goal) (1001 goal))
       ((010 (001 ())) (1110 (001 not?) goal)))))
 
+; Both positive and opposite queries use the already-ratified exact D9:101001110
+; REASON entry, sharing one immutable reason-index. This removes two legacy
+; unqualified depth=0 intermediates and a duplicated proof-engine call.
+; Depth initialization remains owned by lib/reason.lisp and must be migrated
+; separately under D24+ numeric law; do not rebrand host 0 as D1:NO.
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
 ; - only explicit opposite proof(s) => proved(opposite, all-results)
@@ -150,20 +155,8 @@
       ((010 (001 ()))
        (001001 ((opposite (000111110 goal))
               (index (reason-ensure-index rules-or-index))
-              (positive-results
-                (101011011
-                  goal
-                  (reason-index-candidates goal index)
-                  (001 ())
-                  index
-                  0))
-              (opposite-results
-                (101011011
-                  opposite
-                  (reason-index-candidates opposite index)
-                  (001 ())
-                  index
-                  0)))
+              (positive-results (101001110 goal index))
+              (opposite-results (101001110 opposite index)))
          (110
            ((110
               ((0100 (010 positive-results))
