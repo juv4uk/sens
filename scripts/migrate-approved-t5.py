@@ -109,7 +109,7 @@ def load_engine_maps(root: Path):
         root / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = engine.build_text7(
-        data, root / "crates/sens/src/text7_projection_generated.rs"
+        data, root / "knowledge/d7-keyboard-v2-ratified.json"
     )
     return legacy, my, upper, text7
 
