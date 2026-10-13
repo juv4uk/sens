@@ -29,7 +29,7 @@ jobs:
       - name: "Канонічні ширини доменів D1–D10 і форма оповіді"
         run: python3 scripts/test-narrate-d1-bitness.py
       - name: "AST арності використовує рівно D3/D4"
-        run: cargo test --locked -p sens --test narrate_outcomes arity_helpers_use_only_exact_d3_d4_domain_identities -- --exact --nocapture
+        run: cargo test --locked -p sens --test narrate_outcomes arity_helpers_use_exact_d1_predicates_with_d3_d4_structure -- --exact --nocapture
       - name: "Позитивний і негативний свідки точного D1"
         run: cargo test --locked -p sens --test narrate_outcomes arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes -- --exact --nocapture
       - name: "Уся наявна регресія оповіді"
