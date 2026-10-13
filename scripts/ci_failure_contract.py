@@ -457,7 +457,32 @@ def self_test():
             pass
         else:
             raise RuntimeError("unnamed quarantine was accepted")
+    # Reject Python-only "semantic PASS" even if the reporter writes green.
+    import contextlib
+    import io
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="sens-executor-ratchet-") as tmp:
+        report = Path(tmp) / "executor.jsonl"
+        fake = {
+            "test_id": "fake-native-law", "layer": "eval",
+            "kind": "CI_GLUE_NO_SEMANTICS", "verdict": "PASS",
+        }
+        report.write_text(json.dumps(fake) + "\n", encoding="utf-8")
+        arguments = argparse.Namespace(report_file=str(report), require=["fake-native-law"])
+        observed = io.StringIO()
+        with contextlib.redirect_stdout(observed):
+            rc = scan_executors(arguments)
+        if rc != 1 or "UNINFORMATIVE-EXECUTOR" not in observed.getvalue():
+            raise RuntimeError("Python-only fake semantic PASS escaped executor ratchet")
+        report.write_text("", encoding="utf-8")
+        with contextlib.redirect_stdout(observed):
+            rc = scan_executors(arguments)
+        if rc != 1:
+            raise RuntimeError("missing native SENS process escaped executor ratchet")
+
     print("PASS diagnostic contract + missing-field mutants + quarantine guards")
+    print("ANTI_THEATER_NEGATIVE_RATCHET_PASS python-only + missing-native blocked")
     return 0
 
 
