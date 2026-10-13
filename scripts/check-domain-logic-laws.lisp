@@ -52,6 +52,12 @@
 ; D5 — членство у списку
 (law-check (001 member-found) (11101 (001 a) (1110 (001 a) (001 b))))
 
+; D6 — відображення й згортання
+(law-check (001 map-head-not-less)    (0100 (11010 (100 (101000 (0010 (x) (01010 x 1)) (1110 2 3))) 3)))
+(law-check (001 map-head-not-greater) (0100 (11011 (100 (101000 (0010 (x) (01010 x 1)) (1110 2 3))) 3)))
+(law-check (001 reduce-sum-not-less)    (0100 (11010 (101110 01010 0 (1110 2 3)) 5)))
+(law-check (001 reduce-sum-not-greater) (0100 (11011 (101110 01010 0 (1110 2 3)) 5)))
+
 ; D6 — зв'язування й довжина
 (law-check (001 let-sum-not-less)    (0100 (11010 (001000 ((x 2) (y 3)) (01010 x y)) 5)))
 (law-check (001 let-sum-not-greater) (0100 (11011 (001000 ((x 2) (y 3)) (01010 x y)) 5)))
@@ -67,4 +73,4 @@
 ; define + посилання на змінну
 (law-check (001 define-then-use) (11010 law-two 3))
 
-(11011011 "DOMAIN-LOGIC-LAWS: PASS d3=8 d5=7 d6=3 d8=1 define=1")
+(11011011 "DOMAIN-LOGIC-LAWS: PASS d3=8 d5=7 d6=7 d8=1 define=1")

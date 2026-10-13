@@ -18,6 +18,8 @@ import argparse
 import json
 from pathlib import Path
 
+from domain_tables import machine_word
+
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "knowledge" / "exact-width-admitted-corpus.json"
 D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
@@ -70,7 +72,7 @@ def owner_rows():
         raise SystemExit("D7 current keyboard owner authority drift")
     d7_words = []
     for index, entry in enumerate(d7["table"]):
-        word = f"{index:07b}"
+        word = machine_word(index, 7)
         if not isinstance(entry, dict) or entry.get("bits") != word:
             raise SystemExit(f"D7 coordinate/order drift at {word}")
         d7_words.append(word)
