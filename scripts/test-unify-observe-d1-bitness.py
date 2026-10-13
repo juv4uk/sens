@@ -43,7 +43,7 @@ def check_uo() -> list[str]:
             continue
         errs.append(f"unify-observe: host truthiness {m.group()!r} at offset {m.start()}")
     executable = text[text.find("(0011 "):]
-    if re.search(r"\\((?:001000|101010000)(?=\\s|\\()", executable):
+    if re.search(r"\((?:001000|101010000)(?=\s|\()", executable):
         errs.append("unify-observe: historical D6/D9 executable head present")
     for fn in REQUIRED:
         if fn not in text:
