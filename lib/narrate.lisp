@@ -67,6 +67,8 @@
       ((010 (001 ()))
        (narrate-proper-list? (011 value))))))
 
+; Each rejecting branch is selected only by a YES test and then returns exact D1:NO.
+; ATOM examines structure; EQ is never applied to a pair.
 (0011 narrate-list-exact-two?
   (0010 (value)
     (110
@@ -76,7 +78,7 @@
        (101 (001 (0)) (001 (1))))
       ((010 (011 value))
        (101 (001 (0)) (001 (1))))
-      ((101 (011 (011 value)) (001 ()))
+      ((010 (011 (011 value)))
        (010 (001 ())))
       ((010 (001 ()))
        (101 (001 (0)) (001 (1)))))))
@@ -92,7 +94,7 @@
        (101 (001 (0)) (001 (1))))
       ((010 (011 (011 value)))
        (101 (001 (0)) (001 (1))))
-      ((101 (011 (011 (011 value))) (001 ()))
+      ((010 (011 (011 (011 value))))
        (010 (001 ())))
       ((010 (001 ()))
        (101 (001 (0)) (001 (1)))))))
