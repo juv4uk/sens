@@ -89,6 +89,23 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
         self.assertEqual([sum(w == i for w, _ in cells) for i in range(1, 11)],
                          [1 << i for i in range(1, 11)])
 
+    def test_all_2046_functions_have_six_ordered_projections(self):
+        # Test actual catalog *records*, not only numeric keys:
+        # Ukrainian short, Ukrainian full, Sanskrit, English, LISP, symbols.
+        labels = ["(ук ", "(укр ", "(san ", "(en ", "(LISP ", "(sym "]
+        total = 0
+        for width in range(1, 11):
+            data = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
+            rows = re.findall(r"(?m)^  \(([01]+) (.*)$", data)
+            self.assertEqual(len(rows), 1 << width)
+            for bits, rest in rows:
+                with self.subTest(domain=f"D{width}", code=bits):
+                    positions = [rest.find(label) for label in labels]
+                    self.assertTrue(all(p >= 0 for p in positions))
+                    self.assertEqual(positions, sorted(positions))
+                    total += 1
+        self.assertEqual(total, 2046)
+
     def test_negative_w10_truncated_to_w9(self):
         cells = validate_all_cells(domain_keys())
         modified = list(cells)
