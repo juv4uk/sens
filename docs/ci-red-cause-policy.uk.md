@@ -27,6 +27,6 @@
 
 Обмеження пілота: live-інвентар перевіряє **workflow conclusion=failure** і обмежене вікно, не всі види `cancelled`/`timed_out`; після межі сторінок виводить INCOMPLETE_INVENTORY і завершується червоним. Він не збирає приватні job logs, не створює GitHub issues і не привласнює причину на підставі назви тесту. Автоматичне створення задач/assignments та історичне покриття всіх 600 workflow — окремий етап із доказом, не заявлена готовність.
 
-Метрика: verified_swarm / verified_total по унікальних записах `state=resolved` із `proof_sha` та `proof_run_url`. Це міра документованих доказів, не автоматичний висновок про справність SENS.
+Метрика: verified_swarm / verified_total. Offline-аудит перевіряє лише повноту метаданих, live-аудит додатково звіряє GitHub API: завершений успішний CI-run, точний commit SHA та URL. Непідтверджений доказ дає `UNVERIFIED_PROOF_RUN` і блокувальне RED. Це не доказ семантичної справності SENS.
 
 Першоджерела: GitHub Actions workflow commands (офіційна документація); CI-договір #5741; координація #5029. TECH-SCAN проведений 2026-10-13.

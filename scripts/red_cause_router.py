@@ -127,6 +127,20 @@ def api_get(url, token):
         return json.load(response)
 
 
+def verify_proof(case, repo, token):
+    """Only an actual completed green run at the stated SHA counts as proof."""
+    m = RUN.fullmatch(case["proof_run_url"])
+    if not m or m.group(1) + "/" + m.group(2) != repo:
+        return False
+    proof = api_get(
+        f"https://api.github.com/repos/{repo}/actions/runs/{m.group(3)}", token
+    )
+    return (proof.get("status") == "completed" and
+            proof.get("conclusion") == "success" and
+            proof.get("head_sha") == case["proof_sha"] and
+            proof.get("html_url") == case["proof_run_url"])
+
+
 def failure_inventory(repo, token, clock, hours, max_pages):
     # APIs report workflow-level failures even when jobs API returns [].
     oldest = clock - dt.timedelta(hours=hours)
@@ -197,6 +211,15 @@ def main():
             if not token:
                 raise ValueError("missing GITHUB_TOKEN: cannot claim live coverage")
             inventory = failure_inventory(args.repo, token, clock, args.hours, args.max_pages)
+            verified = []
+            for record in data["cases"]:
+                if record.get("state") != "resolved" or validate_case(record, clock):
+                    continue
+                if verify_proof(record, args.repo, token):
+                    verified.append(record)
+                else:
+                    findings.append((record["run_id"], "UNVERIFIED_PROOF_RUN"))
+            stats = (sum(r.get("resolved_by") == "swarm" for r in verified), len(verified))
             live = len(inventory)
             registered = {r.get("run_id") for r in data["cases"]}
             for ident, failed in sorted(inventory.items()):

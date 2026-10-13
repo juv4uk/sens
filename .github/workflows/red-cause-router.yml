@@ -38,4 +38,4 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 scripts/red_cause_router.py live
+        run: python3 scripts/red_cause_router.py live --max-pages 50

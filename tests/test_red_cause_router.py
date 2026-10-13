@@ -61,6 +61,26 @@ class CauseRouterTests(unittest.TestCase):
     def test_duplicates_fail_closed(self):
         self.assertIn((123, 'DUPLICATE_RUN'), m.audit([base(), base()], NOW)[0])
 
+    def test_ci_proof_requires_exact_sha_and_green_conclusion(self):
+        case = base(state='resolved', resolved_by='swarm',
+                    proof_sha='a'*40,
+                    proof_run_url='https://github.com/juv4uk/sens/actions/runs/124')
+        old = m.api_get
+        try:
+            m.api_get = lambda url, token: {
+                'status':'completed', 'conclusion':'success',
+                'head_sha':'a'*40, 'html_url':case['proof_run_url'],
+            }
+            self.assertTrue(m.verify_proof(case,'juv4uk/sens','fake'))
+            self.assertFalse(m.verify_proof(case,'other/sens','fake'))
+            m.api_get = lambda url, token: {
+                'status':'completed', 'conclusion':'failure',
+                'head_sha':'a'*40, 'html_url':case['proof_run_url'],
+            }
+            self.assertFalse(m.verify_proof(case,'juv4uk/sens','fake'))
+        finally:
+            m.api_get = old
+
     def test_live_inventory_includes_workflows_without_jobs(self):
         old = m.api_get
         def fake(url, token):
