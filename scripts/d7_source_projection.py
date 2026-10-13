@@ -52,31 +52,14 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
 
 
 def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
-    """Return display-only text, or separately sourced Shiva LocalOrdinal provenance."""
+    """Return only the active keyboard/v2 W7 text/data surface."""
     if not EXACT_W7.fullmatch(bits):
         raise D7ProjectionError("D7 requires exactly seven binary digits")
-    if role not in ("text", "local-ordinal"):
-        raise D7ProjectionError("role must be explicit: text or local-ordinal")
+    if role != "text":
+        raise D7ProjectionError("only current D7 text projection is supported")
     if namespace not in NAMESPACES:
         raise D7ProjectionError(f"unsupported D7 human namespace: {namespace}")
     owner, surface = load_current_d7()
-    if role == "local-ordinal":
-        corpus = json.loads(
-            (ROOT / "benchmarks/d7-local-ordinal-corpus/fixtures/projection.json")
-            .read_text(encoding="utf-8")
-        )
-        ordinals = {row["bits"]: row for row in corpus["rows"]}
-        if len(ordinals) != 14 or set(ordinals) != {f"{n:07b}" for n in range(1, 15)}:
-            raise D7ProjectionError("D7 historical local-ordinal witness drift")
-        if bits not in ordinals:
-            raise D7ProjectionError(f"D7:{bits} has no donor-ratified LocalOrdinal provenance")
-        item = ordinals[bits]
-        return {
-            "domain": "D7", "coordinate": bits, "width": 7,
-            "role": "local-ordinal", "status": "D7-VALID-PROVENANCE",
-            "donor_ref": item["donor_ref"], "source_order": item["source_order"],
-            "surface": None, "callable": False, "arithmetic_number": False,
-        }
     row = surface[bits]
     label = "uk" if namespace == "uk" else {
         "ук": "uk", "укр": "ukr", "san": "san", "en": "en", "sym": "sym",
@@ -95,15 +78,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--coordinate")
-    parser.add_argument("--role", choices=["text", "local-ordinal"])
+    parser.add_argument("--role", choices=["text"])
     parser.add_argument("--namespace", choices=NAMESPACES, default="ук")
     args = parser.parse_args()
     try:
         if args.check:
             owner, cells = load_current_d7()
-            for bits in (f"{n:07b}" for n in range(1, 15)):
-                assert project(bits, role="local-ordinal")["callable"] is False
-            print("D7-PROJECTION: PASS keyboard/v2 128/128 no-callable, local-ordinal separate")
+            for bits in (f"{n:07b}" for n in range(128)):
+                if project(bits, role="text")["callable"]:
+                    raise D7ProjectionError("current D7 text coordinate became callable")
+            print("D7-PROJECTION: PASS keyboard/v2 128/128, no v1 ordinal fallback")
             return 0
         if args.coordinate is None or args.role is None:
             parser.error("--coordinate and --role are required")
