@@ -177,15 +177,17 @@ class SensCodeMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_TEXT7_CONTEXT"):
             self.binary("(CONS a ())\n")
 
-    def test_quoted_symbol_blocker_reports_source_location(self):
-        # This is the exact unsupported source-value class reached in the
-        # assembled file-authority bundle, not an executable Text7 binder.
-        # Better diagnostics must NOT cause a fake physical .sens admission.
-        with self.assertRaisesRegex(
-            mod.BinaryMigrationError,
-            r"UNADMITTED_TEXT7_CONTEXT 'binary' at 2:3 \(quoted-data\)",
-        ):
-            self.binary("(QUOTE\n  binary)\n")
+    def test_quoted_symbol_is_admitted_as_quoted_datum(self):
+        # Ratified owner law 2026-10-13: quoted data with no place in the
+        # function ladder ("binary") is D2-framed D7 spelling, not a blocker.
+        # Every source bit is preserved; the head stays the exact D3 QUOTE.
+        converted, _, _ = self.binary("(QUOTE\n  binary)\n")
+        cells = mod.encode_text7_spelling("binary", self.text7)
+        frame = ["10"] + [
+            word for idx, cell in enumerate(cells)
+            for word in ((["00"] if idx else []) + [cell])
+        ] + ["01"]
+        self.assertEqual(converted.split(), ["10", "001", "00"] + frame + ["01"])
 
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
         converted, hits, shadowed = self.binary("(CONS (CAR ()) (CDR ()))\n")
@@ -298,7 +300,6 @@ class SensCodeMigrationTests(unittest.TestCase):
             ('(CONS "привіт" x)\n', "UNADMITTED_STRING_VALUE"),
             ('(CONS test-name x)\n', "UNADMITTED_TEXT7_CONTEXT"),
             ('(CONS ім’я x)\n', "UNADMITTED_TEXT7_CONTEXT"),
-            ('(QUOTE binary)\n', "UNADMITTED_TEXT7_CONTEXT"),
         )
         for source, reason in sources:
             with self.subTest(source=source):
@@ -347,7 +348,7 @@ class SensCodeMigrationTests(unittest.TestCase):
                 root = Path(td) / "source"
                 root.mkdir()
                 (root / "a-good.lisp").write_text("()\n", encoding="utf-8")
-                (root / "z-blocked.lisp").write_text("(QUOTE binary)\n", encoding="utf-8")
+                (root / "z-blocked.lisp").write_text('(CONS "x" ())\n', encoding="utf-8")
                 out = Path(td) / "out"
                 report = Path(td) / "report.json"
                 command = [
