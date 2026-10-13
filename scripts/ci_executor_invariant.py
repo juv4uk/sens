@@ -9,6 +9,7 @@ EXPECTED = (
     "sens-time-d1-predicate-law",
     "sens-domain-logic-2040-mutant",
     "knowledge-exact-arity-structure",
+    "knowledge-cons-exact-width-law",
     "sens-reason-index-width-selectors-law",
     "sens-reason-index-width-selectors-mutant",
 )
