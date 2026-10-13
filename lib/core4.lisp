@@ -103,9 +103,10 @@
     (111 left (111 right (001 ())))))
 
 ; D4:1000 CAAR | D4:1001 CADR | D4:0111 CDDR
-; D5:10011 CADDR | D6:100111 CADDDR — exact selector identities.
-; D6:011111 CDDDDR composes with D3:100 CAR for fifth.
-; D7 is data: no fifth-selector is inferred from W7.
+; D5:10011 CADDR is executable; D6 selector coordinates are ratified,
+; but not physically admitted as call heads. Never manufacture D6 dispatch.
+; fourth = D5 CADDR ∘ D3 CDR; fifth = D5 CADDR ∘ D4 CDDR.
+; D7 is text data, not an escape hatch for deeper selectors.
 
 (0011 second
   (0010 (values)
@@ -117,7 +118,7 @@
 
 (0011 fourth
   (0010 (values)
-    (100111 values)))
+    (10011 (011 values))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -143,7 +144,7 @@
 ; сама операція, виписана вручну замість названа.
 (0011 fifth
   (0010 (values)
-    (100 (011111 values))))
+    (10011 (0111 values))))
 
 (0011 caar
   (0010 (values)
