@@ -15,11 +15,19 @@
 ; (lib/reason.lisp) into a word list joined by `because`/`and`. It narrates
 ; each node's `rule` field, not its `goal` field.
 
+; Міграція історичних викликів EQUAL: два предикати довжини
+; fact порівнюють лише атомарне значення LENGTH з атомами 2 або 3.
+; Їхні executable heads — тепер точний D3:101 EQ, а не W8:11110111.
+; Третій випадок у narrate-outcome-arity? має змінний expected,
+; тому залишений BLOCKED до незалежного доведення його атомності.
+; Мовні закони D1/D3 і негативний однобітний мутант зберігаються
+; виключно в tests/semantic/narrate-d3-atom-eq-{law,mutant}.bits.
+
 (0011 narrate-fact
   (0010 (fact)
     (110
-      ((11110111 (000000 fact) 2)  (1110 (1001 fact) (001 is) (001 a) (100 fact)))
-      ((11110111 (000000 fact) 3)  (1110 (1001 fact) (100 fact) (10011 fact)))
+      ((101 (000000 fact) 2)  (1110 (1001 fact) (001 is) (001 a) (100 fact)))
+      ((101 (000000 fact) 3)  (1110 (1001 fact) (100 fact) (10011 fact)))
       ((010 (001 ())) fact))))
 
 (0011 provenance-goal (0010 (prov) (1001 prov)))

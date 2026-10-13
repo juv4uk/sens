@@ -20,9 +20,9 @@
                       ((0010 (year)
                         (111 year (111 month (111 day (001 ()))))
                       )
-                        (01010 y (110 ((11010 month 3) 1) ((010 (001 ())) 0))))
+                        (01010 y (110 ((11010 month 3) 1) (#d1:1 0))))
                     )
-                      (01010 mp (110 ((11010 mp #d10) 3) ((010 (001 ())) -9))))
+                      (01010 mp (110 ((11010 mp #d10) 3) (#d1:1 -9))))
                   )
                     (01010 (01011 doy (quotient (01010 (10110 153 mp) 2) 5)) 1))
                 )
@@ -77,7 +77,7 @@
     (110
       ((101 (100 observation) (001 unix-time))
        (utc-from-unix (100 (011 observation)) (100 (011 (011 observation)))))
-      ((010 (001 ()))
+      (#d1:1
        (111 (001 rejected) (111 (001 invalid-unix-time-observation) (001 ()))))))
 )
 
@@ -105,9 +105,9 @@
 (0011 internet-time-mode-valid?
   (0010 (mode)
     (110
-      ((101 mode 4) (010 (001 ())))
-      ((101 mode 5) (010 (001 ())))
-      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+      ((101 mode 4) #d1:1)
+      ((101 mode 5) #d1:1)
+      (#d1:1 (101 (001 (0)) (001 (1))))))
 )
 
 (0011 internet-time-stratum-valid?
@@ -115,9 +115,9 @@
     (110
       ((11011 stratum 0)
        (110
-         ((11010 stratum 16) (010 (001 ())))
-         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
-      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+         ((11010 stratum 16) #d1:1)
+         (#d1:1 (101 (001 (0)) (001 (1))))))
+      (#d1:1 (101 (001 (0)) (001 (1))))))
 )
 
 (0011 internet-time-fields->observation
@@ -129,11 +129,11 @@
           (110
             ((11010 ntp-seconds 2208988800)
              (111 (001 rejected) (111 (001 invalid-epoch) (001 ()))))
-            ((010 (001 ()))
+            (#d1:1
              (111 (001 accepted) (111 host (111 (01011 ntp-seconds 2208988800) (111 (quotient (10110 fraction #d1000000000) 4294967296) (001 ()))))))))
-         ((010 (001 ()))
+         (#d1:1
           (111 (001 rejected) (111 (001 invalid-response) (001 ()))))))
-      ((010 (001 ()))
+      (#d1:1
        (111 (001 rejected) (111 (001 invalid-response) (001 ())))))))
 
 
@@ -151,7 +151,7 @@
          (100 (011 (011 (011 raw))))
          (100 (011 (011 (011 (011 raw)))))
          (100 (011 (011 (011 (011 (011 raw))))))))
-      ((010 (001 ())) raw)))
+      (#d1:1 raw)))
 )
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
@@ -173,7 +173,7 @@
                   (100 (011 (011 observation)))
                   (100 (011 (011 (011 observation)))))
              (001 ())))))
-      ((010 (001 ())) observation))))
+      (#d1:1 observation))))
 
 
 
@@ -200,9 +200,9 @@
 (0011 deadline-reached-at?
   (0010 (now-ns deadline-ns)
     (110
-      ((11011 now-ns deadline-ns) (010 (001 ())))
-      ((101 now-ns deadline-ns) (010 (001 ())))
-      ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+      ((11011 now-ns deadline-ns) #d1:1)
+      ((101 now-ns deadline-ns) #d1:1)
+      (#d1:1 (101 (001 (0)) (001 (1))))))
 )
 
 (0011 deadline-after-ns
@@ -283,7 +283,7 @@
        (timezone-declarations->observation
          (100 (011 raw))
          (100 (011 (011 raw)))))
-      ((010 (001 ()))
+      (#d1:1
        (111 (001 rejected) (111 (001 invalid-timezone-observation) (001 ()))))))
 )
 
@@ -302,9 +302,9 @@
           (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
          ((11011 offset-seconds 86400)
           (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
-         ((010 (001 ()))
+         (#d1:1
           (111 (001 accepted) (111 (111 (001 timezone) (111 name (111 offset-seconds (001 ())))) (001 ()))))))
-      ((010 (001 ()))
+      (#d1:1
        (111 (001 rejected) (111 (001 invalid-name) (001 ())))))))
 
 

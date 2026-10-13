@@ -49,6 +49,9 @@
 (law-check (001 times-2-3-not-greater) (0100 (11011 (10110 2 3) 6)))
 (law-check (001 quotient-6-2-not-less) (0100 (11010 (10111 6 2) 3)))
 
+; D5 — членство у списку
+(law-check (001 member-found) (11101 (001 a) (1110 (001 a) (001 b))))
+
 ; D6 — зв'язування й довжина
 (law-check (001 let-sum-not-less)    (0100 (11010 (001000 ((x 2) (y 3)) (01010 x y)) 5)))
 (law-check (001 let-sum-not-greater) (0100 (11011 (001000 ((x 2) (y 3)) (01010 x y)) 5)))

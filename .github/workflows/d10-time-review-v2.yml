@@ -20,13 +20,27 @@ on:
       - "tests/test_d10_time_law_review_v2.py"
       - ".github/workflows/d10-time-review-v2.yml"
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   pinned-sources-dedup-and-falsifiers:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Require exact source Git blob, definitions and full registries
-        run: python3 scripts/check_d10_time_law_review_v2.py --require-checkout
+      - name: Fetch immutable historical source by Git blob SHA (not main)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pin="$(jq -r '.source_git_blob_sha' knowledge/d10-time-law-review-v2.json)"
+          [[ "$pin" =~ ^[0-9a-f]{40}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/git/blobs/$pin" --jq '.content' |
+            base64 --decode > "$RUNNER_TEMP/time-source-frozen.lisp"
+          test -s "$RUNNER_TEMP/time-source-frozen.lisp"
+      - name: Verify archival source and live D4 separately; keep D10 pending
+        run: python3 scripts/check_d10_time_law_review_v2.py --require-checkout --pinned-source "$RUNNER_TEMP/time-source-frozen.lisp"
       - name: Independent reference models and negative guards
         run: python3 -m unittest discover -s tests -p 'test_d10_time_law_review_v2.py' -v
