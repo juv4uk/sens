@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/red_cause_router.py'
+      - 'scripts/aged_red_quarantine.py'
+      - 'tests/test_aged_red_quarantine.py'
       - 'tests/test_red_cause_router.py'
       - 'knowledge/red-cause-ledger.json'
       - 'docs/ci-red-cause-policy.uk.md'
@@ -12,6 +14,8 @@ on:
   pull_request:
     paths:
       - 'scripts/red_cause_router.py'
+      - 'scripts/aged_red_quarantine.py'
+      - 'tests/test_aged_red_quarantine.py'
       - 'tests/test_red_cause_router.py'
       - 'knowledge/red-cause-ledger.json'
       - 'docs/ci-red-cause-policy.uk.md'
@@ -23,6 +27,7 @@ on:
 permissions:
   contents: read
   actions: read
+  issues: write
 
 jobs:
   red-cause-contract:
@@ -32,8 +37,15 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - name: Pure metadata mutants (no host-language semantic oracle)
         run: python3 -m unittest discover -s tests -p 'test_red_cause_router.py' -v
+      - name: Focused test — aged RED routing
+        run: python3 -m unittest discover -s tests -p 'test_aged_red_quarantine.py' -v
       - name: Audit existing cause ledger
         run: python3 scripts/red_cause_router.py audit
+      - name: Quarantine aged failed runs in issue #5741 (without changing checks)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/aged_red_quarantine.py --days 7 --issue 5741
       - name: Inventory live workflow failures (no job logs required)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
