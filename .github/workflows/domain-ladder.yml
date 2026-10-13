@@ -128,3 +128,12 @@ jobs:
         run: cargo test --locked -p sens-host --test native_lisp_bytes
       - name: Перевірити, що ролі SoundCell і LocalOrdinal у D7 не перетворюються на Number
         run: python3 benchmarks/d7-ratification-conformance/validate.py
+
+  utf8-d1-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Незалежний Rust-свідок D1 для 16 UTF-8 граничних випадків
+        run: cargo test --locked -p sens --test utf8 utf8_helper_returns_exact_d1_predicate_on_boundaries -- --exact --nocapture
