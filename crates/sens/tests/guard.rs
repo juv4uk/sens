@@ -1,7 +1,7 @@
 //! Лише transport свідка. Семантика та очікування — у двійковому SENS.
 //! Жодна Rust-умова не визначає значення Guard-статусів або структурної рівності.
 
-use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, parse_mixed_exact_domain, Session};
 
 fn load_sens(session: &mut Session, path: &str, source: &str) {
     let forms = parse_mixed_exact_domain(source)
@@ -13,10 +13,6 @@ fn load_sens(session: &mut Session, path: &str, source: &str) {
 #[test]
 fn guard_semantics_are_owned_by_binary_sens() {
     let mut session = Session::default();
-
-    // Bootstrap є тільки механізмом; жодних host-authored expected-cases.
-    load_core_library(&mut session)
-        .expect("SENS core bootstrap transport");
 
     load_sens(&mut session, "lib/guard.lisp", include_str!("../../../lib/guard.lisp"));
 
