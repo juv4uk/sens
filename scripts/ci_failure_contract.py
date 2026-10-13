@@ -225,6 +225,7 @@ def run(args):
         "stderr_sha256": digest(completed.stderr),
         "exit_code": completed.returncode, "verdict": "PASS" if passed else "FAIL",
         "reproduce": reproduce, "mode": "negative" if negative else "positive",
+        "expected_error_substring": args.expect_error_substring if negative else None,
         "observed_sha": os.environ.get("GITHUB_SHA", "LOCAL"),
     }
     print("TEST_EXECUTOR_ACTUAL_OUTPUT=" + repr(actual.decode("utf-8", errors="replace")[-2048:]), flush=True)
@@ -349,12 +350,15 @@ def scan_executors(args):
             if record.get("mode") == "positive" and record["expected_sha256"] != record["actual_sha256"]:
                 raise ValueError(tid + ": expected and actual positive digests differ")
             if record.get("mode") == "negative":
-                needle = b"not callable"
-                if (tid != "sens-domain-logic-2040-mutant"
-                        or digest(b"stderr-contains:" + needle) != record["expected_sha256"]
-                        or needle not in replay.stderr.lower()
-                        or replay.stdout):
-                    raise ValueError(tid + ": rejected for wrong reason")
+                phrase = record.get("expected_error_substring")
+                if not isinstance(phrase, str) or not phrase or len(phrase) > 256:
+                    raise ValueError(tid + ": negative witness has no bounded expected error")
+                needle = phrase.encode("utf-8")
+                if (digest(b"stderr-contains:" + needle) != record["expected_sha256"]
+                        or needle.lower() not in replay.stderr.lower()
+                        or replay.stdout
+                        or replay.returncode == 0):
+                    raise ValueError(tid + ": native rejection disagrees with pinned error evidence")
             if record.get("mode") == "positive" and record.get("exit_code") != 0:
                 raise ValueError(tid + ": positive process had nonzero exit")
             if record.get("mode") == "negative" and record.get("exit_code") == 0:
