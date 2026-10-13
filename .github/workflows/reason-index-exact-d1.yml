@@ -24,5 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Профільні 6 свідків і повний набір 2046 координат
+      - name: "Exact D1: coordinate and non-atom negatives"
+        run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
+      - name: "64 unique predicates stay indexed"
+        run: cargo test --locked -p sens --test reason_index exactly_sixty_four_distinct_predicates_remain_indexed -- --exact --nocapture
+      - name: "65 unique predicates fall back without numeric arithmetic"
+        run: cargo test --locked -p sens --test reason_index too_many_distinct_predicates_fall_back_to_linear_mode -- --exact --nocapture
+      - name: "Full index regression and all 2046 exact-width coordinates"
         run: cargo test --locked -p sens --test reason_index -- --nocapture
