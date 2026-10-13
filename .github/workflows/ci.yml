@@ -258,6 +258,32 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
+      - name: KNOWLEDGE-CONS — D3:111 відмінний від D4:1110 і D8:00000100
+        id: knowledge-cons-width
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Source policy is mechanical only. SENS executes and decides the law.
+          grep -Fq '(1110 (001 111)' lib/knowledge.lisp
+          if grep -Fq '(001 00000100)' lib/knowledge.lisp; then
+            echo "::error::LEGACY_BINDING: SID8 CONS is D8 PROG1, not ratified D3 CONS"
+            exit 1
+          fi
+          source=tests/semantic/knowledge-cons-exact-width-law.lisp
+          program=tests/semantic/knowledge-cons-exact-width-law.sens
+          target/debug/sens-trit encode "$source"
+          target/debug/sens-trit verify "$source"
+          sha256sum lib/knowledge.lisp "$source" "$program"
+          printf '1\n' > "$RUNNER_TEMP/expected-knowledge-width-d1"
+          echo 'test_id=knowledge-cons-exact-width-law layer=eval semantic_authority=binary-SENS'
+          python3 scripts/ci_failure_contract.py run \
+            --test-id knowledge-cons-exact-width-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-knowledge-width-d1" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
       - name: Core1 — дев'ять селекторних законів перевіряє двійковий SENS і D1-мутант
         id: core1-selectors
         shell: bash
@@ -406,6 +432,7 @@ jobs:
             --require sens-time-d1-predicate-law \
             --require sens-domain-logic-2040-mutant \
             --require knowledge-exact-arity-structure \
+            --require knowledge-cons-exact-width-law \
             --require core1-selector-9-laws \
             --require core1-selector-1bit-falsifier \
             --require sens-core2-d3-domain-law \
