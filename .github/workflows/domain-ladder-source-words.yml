@@ -26,6 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: "Вичерпний unit-тест parser-а: 2 046 координат D1–D10"
+        run: cargo test --locked -p sens --lib source_words::tests::domain_ladder_source_words_round_trip_all_2046_coordinates -- --exact
       - name: "Зовнішній Rust-тест на незмінній канонічній бібліотеці"
         run: cargo test --locked -p sens --test domain_ladder_source_words -- --nocapture
       - name: "Відсутність мутацій джерел"
