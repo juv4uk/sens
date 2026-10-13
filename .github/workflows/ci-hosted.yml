@@ -76,6 +76,9 @@ jobs:
         run: |
           cargo test --locked -p sens --lib d1_human_projection_keeps_machine_bits_separate_from_words -- --nocapture
           cargo test --locked -p sens-cli classic_repl_reply_ -- --nocapture
+      - name: Macro bootstrap D3/D4 migration witness
+        if: always()
+        run: cargo test --locked -p sens --test macro_derivation migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda -- --exact --nocapture
       - name: D8 exact writer admission witnesses
         if: always()
         run: cargo test --locked -p sens --test d8_writer_admission
