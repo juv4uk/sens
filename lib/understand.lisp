@@ -30,10 +30,7 @@
 
 (0011 understand-is
   (0010 (words)
-    ((0010 (subject after-is)
-       (1110 (1110 (100 after-is) subject)))
-     (100 words)
-     (strip-article (0111 words)))))
+    (1110 (1110 (100 (strip-article (0111 words))) (100 words)))))
 
 (0011 understand-relation
   (0010 (words)
@@ -41,11 +38,8 @@
 
 (0011 understand-universal
   (0010 (words)
-    ((0010 (subject-class property)
-       (1110 (1110 (001 has) (1110 (001 var) (001 w)) property)
-             (1110 subject-class (1110 (001 var) (001 w)))))
-     (1001 words)
-     (100111 words))))
+    (1110 (1110 (001 has) (1110 (001 var) (001 w)) (100111 words))
+          (1110 (1001 words) (1110 (001 var) (001 w))))))
 
 (0011 understand
   (0010 (words)
@@ -62,10 +56,7 @@
 ; Controlled, structural, deterministic: no morphology, no network, no LLM.
 (0011 understand-query-is
   (0010 (words)
-    ((0010 (subject after)
-       (1110 (100 (strip-article after)) subject))
-     (1001 words)
-     (0111 words))))
+    (1110 (100 (strip-article (0111 words))) (1001 words))))
 
 (0011 understand-query-relation
   (0010 (words)
