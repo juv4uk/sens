@@ -169,6 +169,42 @@ jobs:
             --fixture crates/sens/src/frame3_micro_v5_lambda_app.rs \
             --report-file "$report" \
             -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
+      - name: Core2 — SENS-only D3/D8 law and single-bit falsifier
+        id: core2
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          for kind in law mutant; do
+            program="tests/semantic/core2-d3-domain-${kind}.sens"
+            source="tests/semantic/core2-d3-domain-${kind}.bits"
+            expected="$RUNNER_TEMP/core2-d3-${kind}.expected"
+            test_id="sens-core2-d3-domain-${kind}"
+            # Transport integrity only; Python has no semantic expectations.
+            PYTHONPATH=scripts python3 - "$source" "$program" <<'PY'
+          from pathlib import Path
+          import sys
+          from sens_t5_codec import decode_bytes, parse_words
+          source = parse_words(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          physical = decode_bytes(Path(sys.argv[2]).read_bytes())
+          if physical != source:
+              raise SystemExit("CORE2_T5_SOURCE_IDENTITY_BLOCKED")
+          PY
+            sha256sum "$source" "$program"
+            case "$kind" in
+              law) printf '1\n' > "$expected" ;;
+              mutant) printf '0\n' > "$expected" ;;
+              *) exit 2 ;;
+            esac
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "$test_id" \
+              --layer eval \
+              --fixture "$program" \
+              --expected-file "$expected" \
+              --report-file "$report" \
+              --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+              -- target/debug/sens "$program"
+          done
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
@@ -351,6 +387,7 @@ jobs:
           SOURCE_OUTCOME: ${{ steps.source-census.outcome }}
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
+          CORE2_OUTCOME: ${{ steps.core2.outcome }}
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
           CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
           QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
@@ -361,7 +398,7 @@ jobs:
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           # Ratchet first: even a green Python runner cannot impersonate SENS.
-          # The scanner validates three receipts against the actual executable,
+          # The scanner validates all required receipts against the actual executable,
           # physical fixture hashes, binary package version and exact commands.
           native_rc=0
           python3 scripts/ci_failure_contract.py scan-executors \
@@ -370,9 +407,11 @@ jobs:
             --require sens-domain-logic-2040-mutant \
             --require knowledge-exact-arity-structure \
             --require core1-selector-9-laws \
-            --require core1-selector-1bit-falsifier || native_rc=$?
+            --require core1-selector-1bit-falsifier \
+            --require sens-core2-d3-domain-law \
+            --require sens-core2-d3-domain-mutant || native_rc=$?
           diagnostic_rc=0
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
             python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
