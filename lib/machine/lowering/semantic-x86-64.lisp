@@ -337,7 +337,7 @@
                 ; Inclusive order is derived from admitted D5 LESSP + D4 NOT.
                 ; Exact D1 controls stay distinct from numeric 0/1 and host truth.
                 (110
-                  ((0100 (11010 left right)) (010 (001 ())))
+                  ((0100 (11010 left right)) #d1:1)
                   ((010 ()) (001 ()))))
                ((010 ()) (001 ()))))
             ((010 ()) (001 ()))))
