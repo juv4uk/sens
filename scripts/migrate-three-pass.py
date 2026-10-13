@@ -591,14 +591,36 @@ class Resolver:
 
     def head(self,tok: Tok):
         t=tok.text
-        # D2 is structural control only. A two-bit word in executable-head
-        # position is ambiguous/corrupt source, never a callable identity.
-        if len(t)==2 and set(t)<=set("01"):
-            raise MigrationError(
-                f"D2 word {t} is structural control only; it cannot be an executable head",
-                tok,
-            )
-        # Exact current function words are already migrated.
+        # Domain identity is (exact width, exact bits), never a flat SID8
+        # number. A *resident* D7 or D10 coordinate is not automatically
+        # an executable function. Do not emit it as a call-head passthrough:
+        # a binary-only output could then look valid yet lack a mechanism.
+        if t and set(t) <= {"0", "1"}:
+            width = len(t)
+            if width == 2:
+                raise MigrationError(
+                    f"D2 word {t} is structural control only; it cannot be an executable head",
+                    tok,
+                )
+            if width == 3 and t == D3_EMPTY:
+                raise MigrationError(
+                    "D3:000 is EMPTY data, never an executable call head", tok,
+                )
+            if width in (7, 9, 10):
+                role = {7: "D7 keyboard text/data",
+                        9: "D9 owner residency without a verified callable route",
+                        10: "D10 owner codebook without runtime admission"}[width]
+                raise MigrationError(
+                    f"exact D{width}:{t} is {role}; executable mechanism required",
+                    tok,
+                )
+            if width > 10:
+                raise MigrationError(
+                    f"unqualified {width}-bit call head has no admitted domain mechanism",
+                    tok,
+                )
+        # Existing D3–D6 exact call-head candidates remain untouched.
+        # This classifier does not assert their runtime executability.
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
