@@ -340,9 +340,16 @@ pub fn parse_domain_ladder_source_words(
                     bits = (bits << 1) | u16::from(bit - b'0');
                 }
                 let coordinate = crate::domain_ladder::DomainCoordinate::new(
-                    token.len() as u8, bits,
+                    token.len() as u8,
+                    bits,
                 )
-                .expect("перевірені 1–10 бітів утворюють механічну координату");
+                .ok_or_else(|| {
+                    LanguageError::new(
+                        ErrorKind::Parse,
+                        "бінарне слово не утворює припустимої координати D1–D10",
+                        Span { start, end: cursor },
+                    )
+                })?;
                 result.push(DomainLadderSourceToken {
                     coordinate,
                     span: Span { start, end: cursor },
@@ -576,6 +583,77 @@ mod tests {
         assert_eq!(error.kind, ErrorKind::Parse);
         assert!(error.message.contains("exceeds current 9-bit carrier"));
         assert_eq!(error.span, Span { start: 0, end: 10 });
+    }
+
+    #[test]
+    fn domain_ladder_source_words_round_trip_all_2046_coordinates() {
+        let expected_count: usize = (1..=10).map(|width| 1usize << width).sum();
+        assert_eq!(expected_count, 2046);
+
+        let mut source = String::new();
+        let mut expected = Vec::with_capacity(expected_count);
+        for width in 1u8..=10 {
+            for bits in 0..(1u16 << width) {
+                if !source.is_empty() {
+                    source.push(' ');
+                }
+                let start = source.len();
+                let spelling = format!("{:0width$b}", bits, width = usize::from(width));
+                source.push_str(&spelling);
+                expected.push((
+                    width,
+                    bits,
+                    Span {
+                        start,
+                        end: source.len(),
+                    },
+                ));
+            }
+        }
+
+        let parsed = parse_domain_ladder_source_words(&source)
+            .expect("усі координати D1–D10 мають читатися механічно");
+        assert_eq!(parsed.len(), expected_count);
+
+        for (index, (actual, (width, bits, span))) in
+            parsed.iter().zip(expected.iter()).enumerate()
+        {
+            assert_eq!(actual.coordinate.width(), *width, "ширина #{index}");
+            assert_eq!(actual.coordinate.bits(), *bits, "payload #{index}");
+            assert_eq!(actual.span, *span, "байтовий span #{index}");
+            assert_eq!(
+                &source[span.start..span.end],
+                format!("{:0width$b}", bits, width = usize::from(*width)),
+                "точне написання #{index}"
+            );
+            assert_eq!(
+                span.end - span.start,
+                usize::from(*width),
+                "кількість бітів у source #{index}"
+            );
+        }
+
+        // Negative control: the compatibility W1–W9 parser must not absorb D10.
+        assert!(parse_binary_source_words("0000000001").is_err());
+
+        // Same payload is not the same coordinate when its domain width differs.
+        let same_payload = parse_domain_ladder_source_words(
+            "1 01 001 0001 00000001 000000001 0000000001",
+        )
+        .expect("слово з одиничним payload у кожній ширині");
+        assert_eq!(
+            same_payload
+                .iter()
+                .map(|token| token.coordinate.width())
+                .collect::<Vec<_>>(),
+            [1, 2, 3, 4, 8, 9, 10]
+        );
+        assert!(same_payload
+            .iter()
+            .all(|token| token.coordinate.bits() == 1));
+        for pair in same_payload.windows(2) {
+            assert_ne!(pair[0].coordinate, pair[1].coordinate);
+        }
     }
 
     #[test]
