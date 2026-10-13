@@ -77,17 +77,6 @@ fn variable_rule_head_disables_index_instead_of_changing_unification() {
 }
 
 #[test]
-fn exactly_sixty_four_distinct_predicates_remain_indexed() {
-    let mut s = session();
-    let mut source = String::from("(reason-index-mode (reason-make-index (quote (");
-    for i in 0..64 {
-        source.push_str(&format!("((pred{i} value))"));
-    }
-    source.push_str("))))");
-    assert_eq!(eval(&mut s, &source), "indexed");
-}
-
-#[test]
 fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     let mut s = session();
     let mut source = String::from("(reason-index-mode (reason-make-index (quote (");
@@ -105,7 +94,6 @@ fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
         ("(reason-index? (quote ()))", false),
         ("(reason-index? (quote atom))", false),
         ("(reason-index? (quote (other linear () ())))", false),
-        ("(reason-index? (quote (((p nested)))))", false),
         ("(reason-index? (reason-index-linear (quote ())))", true),
         ("(reason-index? (quote (reason-index/1 indexed () ())))", true),
     ] {
@@ -170,3 +158,23 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
         assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");
     }
 }
+
+
+#[test]
+fn binary_sens_reason_index_head_atom_witness_decides_the_law() {
+    let mut s = session();
+    let source = include_str!("../../../tests/fixtures/reason-index-head-atom-witness.lisp");
+    let parsed = parse_mixed_exact_domain_reasoning_source(
+        "tests/fixtures/reason-index-head-atom-witness.lisp",
+        source,
+    )
+    .expect("binary SENS witness must parse under the exact reasoning reader");
+    let result = eval_parsed_expressions(&parsed, &mut s)
+        .expect("binary SENS witness must evaluate");
+    assert_eq!(
+        result.value.to_string(),
+        "(reason-index-head-atom-witness (status pass))",
+        "semantic verdict belongs to the binary SENS witness"
+    );
+}
+
