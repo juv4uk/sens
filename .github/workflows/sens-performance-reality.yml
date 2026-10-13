@@ -1,11 +1,10 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: SENS performance reality — T5 and paired CPU
 
 # Actual measurements, independent of the existing conformance CI.
 # No cancel-in-progress: evidence remains attributable to an immutable SHA.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 3 * * *"
 permissions:
   contents: read
 

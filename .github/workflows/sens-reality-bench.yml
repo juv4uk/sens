@@ -1,11 +1,10 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: SENS reality benchmarks — binary release
 
 # Benchmarks are primary performance evidence; parity is checked before timing.
 # Avoid launching a new expensive run for every unrelated swarm commit.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "19 3 * * *"
 permissions:
   contents: read
 

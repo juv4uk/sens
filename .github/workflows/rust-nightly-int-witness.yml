@@ -1,9 +1,8 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: Rust nightly arbitrary-width integer witness
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "23 3 * * *"
 
 permissions:
   contents: read

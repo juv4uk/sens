@@ -1,10 +1,8 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: SENS performance scoreboard
 
 on:
   workflow_dispatch:
-  schedule:
-    # Нічний фіксований контроль у період нижчого CI-навантаження (UTC).
-    - cron: "17 02 * * *"
 
 permissions:
   contents: read

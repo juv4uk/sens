@@ -1,10 +1,9 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: Current physical SENS performance benchmarks
 
 # Longitudinal numerical evidence, not a semantics authority or unit-test clone.
 # No global cancel-in-progress: every selected SHA can finish its measurement.
 on:
-  schedule:
-    - cron: "30 1 * * *"
   workflow_dispatch:
 
 permissions:

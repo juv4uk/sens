@@ -1,9 +1,8 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: Task phase guard
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "20 4 * * *"
 
 permissions:
   contents: read

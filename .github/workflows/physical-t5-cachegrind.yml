@@ -1,10 +1,9 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: Physical T5 Cachegrind instruction benchmarks
 
 # Measure instruction references, not only pass/fail, on immutable release SHA.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "15 3 * * 0"
 permissions:
   contents: read
 
