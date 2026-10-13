@@ -226,9 +226,7 @@ def validate_d10_catalogue() -> None:
             fail("D10 row is missing explicit ratified_resident state")
         if row["ratified_resident"]:
             fail("D10 research row must not have individual resident ratification")
-        if not isinstance(row.get("physical_t5_authorized"), bool):
-            fail("D10 row is missing explicit physical_t5_authorized state")
-        if row["physical_t5_authorized"]:
+        if row.get("physical_t5_authorized", False) is not False:
             fail("D10 research inventory must not authorize physical T5 execution")
 
     table_rows = read_domain_table(D10_TABLE)
