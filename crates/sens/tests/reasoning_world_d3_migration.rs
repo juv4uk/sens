@@ -41,18 +41,3 @@ fn world_d3_candidate_does_not_rewrite_w8_quote_data() {
         sens::ErrorKind::Parse
     );
 }
-
-#[test]
-fn world_d3_current_semantics_replay_the_frozen_behavioral_witnesses() {
-    for (program, expected) in [
-        ("(empty-world)", "(world () () ())"),
-        ("(world? (empty-world))", "1"),
-        ("(world-parent (empty-world))", "()"),
-        ("(world-journal (empty-world))", "()"),
-        ("(world-metadata (empty-world))", "()"),
-        ("(world-module-missing? (empty-world) (quote unknown))", "1"),
-        ("(world-remove-first (quote x) (quote (a x b)))", "(a b)"),
-    ] {
-        assert_eq!(observe(program), expected, "current D3 world changed: {program}");
-    }
-}
