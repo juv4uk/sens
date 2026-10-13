@@ -15,6 +15,7 @@ SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 LAYER = {"parse", "eval", "encode", "transport"}
 STAMP = {"REGRESSION", "TRANSITIONAL", "FLAKE"}
+UNSERVICEABLE_HOURS = 24  # a named quarantine older than this is неприцездатний (unfit for service)
 FIELDS = (
     "test_id", "layer", "fixture", "fixture_sha256", "expected_sha256",
     "actual_sha256", "first_difference", "first_bad_sha", "reproduce",
@@ -174,8 +175,8 @@ def run(args):
     if errors:
         print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
         return 1
-    if item and now() - parse_time(item["first_seen_at"]) > dt.timedelta(hours=24):
-        print("::warning::ESCALATION-24H " + args.test_id + " owner=" + item["owner"])
+    if item and now() - parse_time(item["first_seen_at"]) > dt.timedelta(hours=UNSERVICEABLE_HOURS):
+        print("::warning::UNSERVICEABLE " + args.test_id + " owner=" + item["owner"])
     if stamp == "REGRESSION":
         print("::error::REGRESSION " + args.test_id + " — semantic/release blocker")
         return 1
@@ -208,7 +209,7 @@ def scan(args):
 
 
 def audit(args):
-    """Audit named failures daily; a quarantine is not a silent skip."""
+    """Audit named failures daily; a quarantine older than 24h is неприцездатний (unserviceable)."""
     raw = json.loads(Path(args.manifest).read_text())
     problematic = []
     for item in raw.get("cases", []):
@@ -219,8 +220,8 @@ def audit(args):
         except (KeyError, ValueError, TypeError):
             problematic.append(test_id + ":MISSING_FIRST_SEEN owner=" + owner)
             continue
-        if now() - seen > dt.timedelta(hours=24):
-            problematic.append(test_id + ":ESCALATION-24H owner=" + owner)
+        if now() - seen > dt.timedelta(hours=UNSERVICEABLE_HOURS):
+            problematic.append(test_id + ":UNSERVICEABLE owner=" + owner)
         if item.get("stamp") in {"TRANSITIONAL", "FLAKE"}:
             try:
                 if parse_time(item["expires_at"]) <= now():

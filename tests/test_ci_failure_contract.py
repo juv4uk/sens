@@ -36,7 +36,7 @@ class Escalation24h(unittest.TestCase):
     def test_named_quarantine_escalates_after_24h(self):
         result = self.audit(30)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("::error::named-red:ESCALATION-24H", result.stdout)
+        self.assertIn("::error::named-red:UNSERVICEABLE", result.stdout)
 
     def test_fresh_named_quarantine_passes(self):
         result = self.audit(2)
