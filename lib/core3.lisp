@@ -11,8 +11,14 @@
 ;
 ; Core3 does not turn native kernel observations into global language truth.
 
+; D3 owns the four-item proper list; no host QUOTE-list constructor.
+; The order and empty tail are checked by binary SENS, not Python/Rust laws.
 (0011 core3-executors
-  (001 (common-lisp prolog clips datalog)))
+  (111 (001 common-lisp)
+    (111 (001 prolog)
+      (111 (001 clips)
+        (111 (001 datalog)
+          (001 ()))))))
 
 (0011 core3-route
   (0010 (sid executor)
