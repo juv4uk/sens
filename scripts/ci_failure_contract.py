@@ -132,6 +132,7 @@ def difference(expected, actual, status):
 
 
 def run(args):
+    """Execute the named process; Python only reports mechanics, never truth."""
     manifest = validate_manifest(json.loads(Path(args.manifest).read_text()))
     fixture = Path(args.fixture)
     if not fixture.is_file() or not args.command:
@@ -141,25 +142,97 @@ def run(args):
         cmd = cmd[1:]
     if not cmd:
         raise ValueError("missing subprocess command")
+
+    native = args.layer == "eval"
+    executor = Path("target/debug/sens")
+    if native:
+        if (len(cmd) != 2 or Path(cmd[0]).resolve() != executor.resolve()
+                or cmd[1] != args.fixture or not args.fixture.endswith(".sens")
+                or not executor.is_file() or not os.access(executor, os.X_OK)):
+            print("::error::UNINFORMATIVE-EXECUTOR semantic test must execute "
+                  "target/debug/sens <same-physical-fixture.sens> directly")
+            return 1
+        if (bool(args.expected_file) == bool(args.expect_error_substring)
+                or not args.executor_report_file):
+            print("::error::UNINFORMATIVE-EXECUTOR require exactly one positive expected-file "
+                  "or negative stderr matcher, and executor receipt output")
+            return 1
+    elif args.expect_error_substring or args.executor_report_file:
+        print("::error::UNINFORMATIVE-EXECUTOR native receipts are for eval only")
+        return 1
+
     expected = Path(args.expected_file).read_bytes() if args.expected_file else b""
+    negative = bool(args.expect_error_substring)
+    expected_evidence = (b"stderr-contains:" + args.expect_error_substring.encode("utf-8")
+                         if negative else expected)
+    binary_sha = digest(executor.read_bytes()) if native else None
+    version = None
+    if native:
+        manifest_text = Path("crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
+        match = re.search(r'^version\\s*=\\s*"([^"]+)"', manifest_text, re.M)
+        if not match:
+            print("::error::UNINFORMATIVE-EXECUTOR missing executable package version")
+            return 1
+        version = match.group(1)
+
+    reproduce = shlex.join(cmd)
+    kind = "NATIVE_SENS_ORACLE" if native else "CI_GLUE_NO_SEMANTICS"
+    print("TEST_EXECUTOR_START kind=" + kind + " test_id=" + args.test_id
+          + " command=" + reproduce, flush=True)
     completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    actual = completed.stdout
-    if args.output_file:
-        Path(args.output_file).write_bytes(actual)
-    if completed.returncode == 0 and (not args.expected_file or actual == expected):
-        print("PASS test_id=" + args.test_id + " layer=" + args.layer)
+    actual = completed.stderr if negative else completed.stdout
+    passed = ((completed.returncode != 0
+               and args.expect_error_substring.encode("utf-8").lower() in completed.stderr.lower()
+               and not completed.stdout)
+              if negative else
+              (completed.returncode == 0 and
+               (bool(args.expected_file) and completed.stdout == expected if native
+                else not args.expected_file or completed.stdout == expected)))
+    fixture_sha = digest(fixture.read_bytes())
+    receipt = {
+        "test_id": args.test_id, "layer": args.layer, "kind": kind,
+        "executor": str(executor) if native else cmd[0],
+        "executor_sha256": binary_sha, "package_version": version,
+        "fixture": str(fixture), "fixture_sha256": fixture_sha,
+        "expected_sha256": digest(expected_evidence),
+        "actual_sha256": digest(actual),
+        "stdout_sha256": digest(completed.stdout),
+        "stderr_sha256": digest(completed.stderr),
+        "exit_code": completed.returncode, "verdict": "PASS" if passed else "FAIL",
+        "reproduce": reproduce, "mode": "negative" if negative else "positive",
+        "observed_sha": os.environ.get("GITHUB_SHA", "LOCAL"),
+    }
+    print("TEST_EXECUTOR_RECEIPT=" + json.dumps(receipt, ensure_ascii=False, sort_keys=True),
+          flush=True)
+    if native:
+        print("NATIVE_EXECUTOR_END test_id=" + args.test_id +
+              " binary=" + str(executor) + " package_version=" + version +
+              " binary_sha256=" + binary_sha +
+              " exit=" + str(completed.returncode), flush=True)
+        if args.executor_report_file:
+            with open(args.executor_report_file, "a", encoding="utf-8") as stream:
+                stream.write(json.dumps(receipt, ensure_ascii=False, sort_keys=True) + "\\n")
+    if passed:
+        print("PASS test_id=" + args.test_id + " layer=" + args.layer +
+              " executor=" + kind, flush=True)
         return 0
+
+    if completed.stderr:
+        print("TEST_EXECUTOR_STDERR_TAIL=" +
+              completed.stderr.decode("utf-8", errors="replace")[-1500:],
+              flush=True)
     item = next((x for x in manifest["cases"] if x["test_id"] == args.test_id), None)
     stamp = item["stamp"] if item else "UNCLASSIFIED"
     observed = os.environ.get("GITHUB_SHA", "")
     record = {
         "test_id": args.test_id, "layer": args.layer,
-        "fixture": args.fixture, "fixture_sha256": digest(fixture.read_bytes()),
-        "expected_sha256": digest(expected), "actual_sha256": digest(actual),
-        "first_difference": difference(expected, actual, completed.returncode),
-        "first_bad_sha": (item or {}).get("first_bad_sha") or os.environ.get("SENS_FIRST_BAD_SHA", "UNRESOLVED"),
+        "fixture": args.fixture, "fixture_sha256": fixture_sha,
+        "expected_sha256": digest(expected_evidence), "actual_sha256": digest(actual),
+        "first_difference": difference(expected_evidence, actual, completed.returncode),
+        "first_bad_sha": (item or {}).get("first_bad_sha") or
+                         os.environ.get("SENS_FIRST_BAD_SHA", "UNRESOLVED"),
         "first_observed_bad_sha": observed if SHA.fullmatch(observed) else "UNRESOLVED",
-        "observed_at": now().isoformat(), "reproduce": shlex.join(cmd),
+        "observed_at": now().isoformat(), "reproduce": reproduce,
         "stamp": stamp, "stderr_tail": completed.stderr.decode("utf-8", errors="replace")[-1500:],
         "exit_code": completed.returncode,
     }
@@ -171,7 +244,7 @@ def run(args):
     print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True))
     if args.report_file:
         with open(args.report_file, "a", encoding="utf-8") as stream:
-            stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+            stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\\n")
     if errors:
         print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
         return 1
@@ -180,6 +253,64 @@ def run(args):
         return 1
     print("::warning::NAMED-QUARANTINE " + stamp + " " + args.test_id
           + " ticket=" + item["ticket"] + " expires=" + item["expires_at"])
+    return 0
+
+
+def scan_executors(args):
+    """Fail closed if any claimed SENS law lacks a real, hash-bound native receipt."""
+    path = Path(args.report_file)
+    if not path.is_file():
+        print("::error::UNINFORMATIVE-EXECUTOR missing native process evidence log")
+        return 1
+    seen = {}
+    problems = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            record = json.loads(line)
+            tid = record["test_id"]
+            if tid in seen:
+                raise ValueError("duplicate test receipt: " + tid)
+            seen[tid] = record
+            if record.get("kind") != "NATIVE_SENS_ORACLE" or record.get("layer") != "eval":
+                raise ValueError(tid + ": Python/mechanical executor mislabelled semantic")
+            if record.get("verdict") != "PASS":
+                raise ValueError(tid + ": actual SENS verdict not PASS")
+            binary = Path("target/debug/sens")
+            fixture = Path(record["fixture"])
+            version = re.search(
+                r'^version\\s*=\\s*"([^"]+)"',
+                Path("crates/sens-cli/Cargo.toml").read_text(encoding="utf-8"), re.M
+            )
+            if not binary.is_file() or not os.access(binary, os.X_OK):
+                raise ValueError(tid + ": native binary absent")
+            if not fixture.is_file() or not fixture.name.endswith(".sens"):
+                raise ValueError(tid + ": physical SENS input absent")
+            if (record["executor"] != str(binary)
+                    or record["executor_sha256"] != digest(binary.read_bytes())
+                    or record["fixture_sha256"] != digest(fixture.read_bytes())
+                    or not version or record["package_version"] != version.group(1)
+                    or record["reproduce"] != shlex.join([str(binary), str(fixture)])):
+                raise ValueError(tid + ": binary/input/version/command proof mismatch")
+            for key in ("expected_sha256", "actual_sha256", "stdout_sha256", "stderr_sha256"):
+                if not DIGEST.fullmatch(str(record.get(key, ""))):
+                    raise ValueError(tid + ": missing " + key)
+            if record.get("mode") == "positive" and record.get("exit_code") != 0:
+                raise ValueError(tid + ": positive process had nonzero exit")
+            if record.get("mode") == "negative" and record.get("exit_code") == 0:
+                raise ValueError(tid + ": negative process was admitted")
+            if record.get("mode") not in ("positive", "negative"):
+                raise ValueError(tid + ": unknown verdict mode")
+        except (KeyError, ValueError, TypeError, OSError) as exc:
+            problems.append(str(exc))
+    for required in args.require:
+        if required not in seen:
+            problems.append("missing native SENS process for " + required)
+    if problems:
+        for problem in problems:
+            print("::error::UNINFORMATIVE-EXECUTOR " + problem)
+        return 1
+    print("NATIVE_EXECUTOR_RATCHET_PASS verified=" + str(len(seen)) +
+          " required=" + ",".join(args.require))
     return 0
 
 
@@ -297,7 +428,12 @@ def main():
     p.add_argument("--report-file")
     p.add_argument("--expected-file")
     p.add_argument("--output-file")
+    p.add_argument("--expect-error-substring")
+    p.add_argument("--executor-report-file")
     p.add_argument("command", nargs=argparse.REMAINDER)
+    e = sub.add_parser("scan-executors")
+    e.add_argument("--report-file", required=True)
+    e.add_argument("--require", action="append", required=True)
     c = sub.add_parser("scan")
     c.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
     c.add_argument("--report-file", required=True)
@@ -307,7 +443,7 @@ def main():
     a.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
     args = parser.parse_args()
     try:
-        return {"run": run, "scan": scan, "audit": audit, "self-test": lambda a: self_test()}[args.action](args)
+        return {"run": run, "scan": scan, "scan-executors": scan_executors, "audit": audit, "self-test": lambda a: self_test()}[args.action](args)
     except (OSError, ValueError, RuntimeError) as exc:
         print("UNINFORMATIVE-OUTPUT diagnostic transport error: " + str(exc), file=sys.stderr)
         return 1
