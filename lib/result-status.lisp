@@ -161,16 +161,16 @@
                   0)))
          (110
            ((110
-              ((110111011 (010 positive-results))
-               (110111011 (010 opposite-results)))
+              ((0100 (010 positive-results))
+               (0100 (010 opposite-results)))
               ((010 (001 ())) (101 (001 (0)) (001 (1)))))
             (make-disputed
               (1110
                 (make-proved goal positive-results)
                 (make-proved opposite opposite-results))))
-           ((110111011 (010 positive-results))
+           ((0100 (010 positive-results))
             (make-proved goal positive-results))
-           ((110111011 (010 opposite-results))
+           ((0100 (010 opposite-results))
             (make-proved opposite opposite-results))
            ((010 (001 ())) (001 ())))))))))
 
