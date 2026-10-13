@@ -139,7 +139,7 @@ jobs:
           echo "test_id=presentation-exact-domain-width semantic_authority=domain-ladder"
           sha256sum crates/sens/src/presentation.rs
           cargo test --locked -p sens --lib presentation::tests::equal_payload_d3_d4_identities_remain_visibly_distinct -- --exact --nocapture
-      - name: Рамка-3 — один точковий 5-байтовий B/C/S/W proof на реальному SENS
+      - name: Рамка-3 — Rust-тест точного 5-байтового B/C/S/W механізму (не SENS-оракул)
         id: frame3-bcsw
         shell: bash
         run: |
