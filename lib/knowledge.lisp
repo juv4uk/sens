@@ -69,11 +69,14 @@
       (1110 (001 clauses->tell-events) (1110 (001 quote) name) rules)
       (001 *knowledge-journal*))))))
 
+; Вилучено спадкову SID8-ідентичність 00000100: це НЕ D3 CONS.
+; За ратифікованою таблицею D8:00000100 = PROG1, D3:111 = CONS.
+; У цитованому AST макросу зберігаємо саме точний D3:111 (3 біти).
 (0011 retract-knowledge
   (make-macro
     (0010 (module-name clause)
       (1110 (001 def) (001 *knowledge-journal*)
-      (1110 (001 00000100)
+      (1110 (001 111)
       (1110 (001 list) (1110 (001 quote) (001 retract)) (1110 (001 quote) module-name) clause)
       (001 *knowledge-journal*))))))
 
