@@ -1,0 +1,194 @@
+; Власник логічних законів Guard — виключно двійковий SENS.
+; Host лише завантажує цей файл і перевіряє фінальний D1-біт.
+; Примітиви: D3:001/010/011/100/101/110/111, D4:0010/0011/1110.
+; Локальні імена — зв'язування функцій, а не самовільні коди домену.
+
+(0011 сторожа--ні?
+  (0010 (біт)
+    (110
+      (біт #d1:0)
+      (#d1:1 #d1:1))))
+
+(0011 сторожа--усі?
+  (0010 (свідки)
+    (110
+      ((010 свідки) #d1:1)
+      ((100 свідки) (сторожа--усі? (011 свідки)))
+      (#d1:1 #d1:0))))
+
+(0011 сторожа--поле
+  (0010 (ключ рядки)
+    (110
+      ((010 рядки) (001 ()))
+      ((101 ключ (100 (100 рядки))) (100 (011 (100 рядки))))
+      (#d1:1 (сторожа--поле ключ (011 рядки))))))
+
+(0011 сторожа--рішення
+  (0010 (знахідка)
+    (сторожа--поле (001 decision) (011 знахідка))))
+
+(0011 сторожа--статус
+  (0010 (знахідка)
+    (сторожа--поле (001 evidence-status) (011 знахідка))))
+
+(0011 сторожа--містить?
+  (0010 (значення дерево)
+    (110
+      ((сторожа--рівні? значення дерево) #d1:1)
+      ((010 дерево) #d1:0)
+      ((сторожа--містить? значення (100 дерево)) #d1:1)
+      (#d1:1 (сторожа--містить? значення (011 дерево))))))
+
+(0011 сторожа--дві?
+  (0010 (список)
+    (110
+      ((010 список) #d1:0)
+      ((010 (011 список)) #d1:0)
+      ((010 (011 (011 список))) #d1:1)
+      (#d1:1 #d1:0))))
+
+(0011 сторожа--закон
+  (0010 ()
+    (сторожа--усі?
+      (1110
+        ; D3 структурна рівність: позитивні й негативні мутації.
+        (сторожа--рівні? (001 ()) (001 ()))
+        (сторожа--рівні? (001 сигнал) (001 сигнал))
+        (сторожа--ні? (сторожа--рівні? (001 сигнал) (001 шум)))
+        (сторожа--ні? (сторожа--рівні? (001 сигнал) (001 (сигнал))))
+        (сторожа--ні? (сторожа--рівні? (001 (сигнал)) (001 сигнал)))
+        (сторожа--рівні? (001 (a (b c))) (001 (a (b c))))
+        (сторожа--ні? (сторожа--рівні? (001 (a (b c))) (001 (a (b d)))))
+        (сторожа--ні? (сторожа--рівні? (001 (a b)) (001 (a b c))))
+        ; D1 відповіді валідаторів — не T/NIL і не число.
+        (guard-decision? (001 allow))
+        (guard-decision? (001 warn))
+        (guard-decision? (001 reject))
+        (guard-decision? (001 unknown))
+        (сторожа--ні? (guard-decision? (001 unauthorized)))
+        (guard-evidence-status? (001 confirmed))
+        (guard-evidence-status? (001 partial))
+        (guard-evidence-status? (001 unresolved))
+        (guard-evidence-status? (001 broken))
+        (сторожа--ні? (guard-evidence-status? (001 invented)))
+        ; Guard формує власний запис, а не приймає host-oracle.
+        (101
+          (сторожа--рішення
+            (make-guard-finding
+              (001 warn) (001 confirmed) (001 task)
+              (001 old) (001 target) (001 delta)
+              (001 impact) (001 reconcile) (001 evidence)))
+          (001 warn))
+        (101
+          (сторожа--статус
+            (make-guard-finding
+              (001 warn) (001 confirmed) (001 task)
+              (001 old) (001 target) (001 delta)
+              (001 impact) (001 reconcile) (001 evidence)))
+          (001 confirmed))
+        ; Відсутність спостереження: UNKNOWN, не автоматичний REJECT.
+        (101
+          (сторожа--рішення
+            (guard-unknown (001 source) (001 missing) (001 inspect)))
+          (001 unknown))
+        (101
+          (сторожа--статус
+            (guard-unknown (001 source) (001 missing) (001 inspect)))
+          (001 unresolved))
+        ; Одне бітове розходження у вкладеному спостереженні дає WARN.
+        (101
+          (сторожа--рішення
+            (guard-compare
+              (001 logic) (001 (one (zero)))
+              (001 (one (zero))) (001 (proof))))
+          (001 allow))
+        (101
+          (сторожа--рішення
+            (guard-compare
+              (001 logic) (001 (one (zero)))
+              (001 (one (one))) (001 (proof))))
+          (001 warn))
+        (101
+          (сторожа--рішення
+            (guard-compare
+              (001 logic) (001 (one (zero)))
+              (001 one) (001 (proof))))
+          (001 warn))
+        ; Синхронізація: freeze → sync → recorded → allow.
+        (101
+          (сторожа--рішення
+            (guard-sync-window
+              (001 open) (001 completed) (001 recorded) (001 proof)))
+          (001 reject))
+        (101
+          (сторожа--рішення
+            (guard-sync-window
+              (001 frozen) (001 pending) (001 recorded) (001 proof)))
+          (001 warn))
+        (101
+          (сторожа--рішення
+            (guard-sync-window
+              (001 frozen) (001 completed) (001 absent) (001 proof)))
+          (001 warn))
+        (101
+          (сторожа--рішення
+            (guard-sync-window
+              (001 frozen) (001 completed) (001 recorded) (001 proof)))
+          (001 allow))
+        ; Довідник повертає стабільні маршрути; host не обирає значення.
+        (сторожа--містить?
+          (001 ask-owner)
+          (guard-unknown-routes))
+        (сторожа--містить?
+          (001 ask-agent)
+          (guard-unknown-routes))
+        (сторожа--містить?
+          (001 research-web)
+          (guard-unknown-routes))
+        (сторожа--містить?
+          (001 language-semantics)
+          (guard-topics *guard-reference-directory*))
+        (сторожа--містить?
+          (001 oracle-check)
+          (guard-scripts *guard-script-directory*))
+        (сторожа--ні?
+          (сторожа--містить?
+            (001 registry-audit)
+            (guard-scripts *guard-script-directory*)))
+        (101
+          (guard-reference-evidence-status
+            (001 (reference (topic demo))))
+          (001 unresolved))
+        (сторожа--містить?
+          (001 reference-missing)
+          (guard-reference (001 no-such-topic)))
+        (сторожа--містить?
+          (001 tool-missing)
+          (guard-script (001 no-such-tool)))
+        ; Вибір сильнішого доказу не залежить від порядку записів.
+        (сторожа--рівні?
+          (guard-reference-field
+            (001 summary)
+            (guard-reference-find
+              (001 demo)
+              (001
+                ((reference (topic demo) (evidence-status unresolved) (summary "old"))
+                 (reference (topic demo) (evidence-status confirmed) (summary "new"))))))
+          (001 "new"))
+        (сторожа--рівні?
+          (guard-reference-field
+            (001 summary)
+            (guard-reference-find
+              (001 demo)
+              (001
+                ((reference (topic demo) (evidence-status confirmed) (summary "new"))
+                 (reference (topic demo) (evidence-status unresolved) (summary "old"))))))
+          (001 "new"))
+        (сторожа--дві?
+          (guard-reference-all
+            (001 demo)
+            (001
+              ((reference (topic demo) (evidence-status unresolved) (summary "old"))
+               (reference (topic demo) (evidence-status confirmed) (summary "new"))))))))))
+
+(сторожа--закон)
