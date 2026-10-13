@@ -43,6 +43,14 @@ def check_status() -> list[str]:
         errs.append("result-status: exact D1:1 form (010 (001 ())) missing")
     if D1_FALSE not in text:
         errs.append("result-status: exact D1:0 form (101 (001 (0)) (001 (1))) missing")
+    for line_no, line in enumerate(text.splitlines(), 1):
+        if line.lstrip().startswith(";"):
+            continue
+        match = W8.search(line)
+        if match:
+            errs.append(
+                f"result-status: retired 8-bit executable token {match.group()!r} on line {line_no}"
+            )
     return errs
 
 
@@ -75,7 +83,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("RESULT-STATUS: PASS — no host truthiness, exact D1:0/D1:1 forms")
+    print("RESULT-STATUS: PASS — exact D1:0/D1:1, no host truthiness, no W8 heads")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
