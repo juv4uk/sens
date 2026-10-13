@@ -1,0 +1,31 @@
+name: Guard exact-D1 invalid-status contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/guard.lisp"
+      - "tests/test_guard_d1_invalid_status.py"
+      - "crates/sens/tests/guard_d1_invalid_status.rs"
+      - ".github/workflows/guard-d1-invalid-status.yml"
+  pull_request:
+    paths:
+      - "lib/guard.lisp"
+      - "tests/test_guard_d1_invalid_status.py"
+      - "crates/sens/tests/guard_d1_invalid_status.rs"
+      - ".github/workflows/guard-d1-invalid-status.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  d1-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: "D1-D10: prove 2046 exact resident coordinates and full-source provenance"
+        run: python3 -m unittest discover -s tests -p 'test_guard_d1_invalid_status.py' -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Guard: execute eight accepted and four invalid states with strict D1"
+        run: cargo test --locked -p sens --test guard_d1_invalid_status -- --nocapture

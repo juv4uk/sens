@@ -17,7 +17,7 @@
       ((101 decision (001 warn)) (010 (001 ())))
       ((101 decision (001 reject)) (010 (001 ())))
       ((101 decision (001 unknown)) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+      ((010 (001 ())) (0100 (010 (001 ())))))))
 
 (0011 guard-evidence-status?
   (0010 (status)
@@ -26,7 +26,7 @@
       ((101 status (001 partial)) (010 (001 ())))
       ((101 status (001 unresolved)) (010 (001 ())))
       ((101 status (001 broken)) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+      ((010 (001 ())) (0100 (010 (001 ())))))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
