@@ -67,3 +67,18 @@ and negative mutant own the semantic verdict. The same job's mechanical policy
 script also checks the source boundary: D4 NULL and D3 ATOM(CAR) precede D3 EQ in
 `lib/reason.lisp`; narration arity uses raw D1 results with D3/D4 structure,
 without D6 LENGTH or D8 EQUAL. Manual benchmark workflows remain manual.
+
+## Автоматичний SENS-закон трьох селекторів індексу міркувань
+
+`reason-index-width-selectors-law.bits` є виконуваним джерелом **суто
+двійкового SENS**; однойменний `.sens` — фізичне T5-пакування без втрати ширин.
+У самому SENS через D3 EQ/COND перевіряються D4:1001 CADR, D5:10011 CADDR,
+D5:10011(D3:011 CDR) на чотирипольному записі й відмінність D4:1001 від
+D5:01001. D6:100111 у записі лише цитовані дані; це не допуск виклику D6.
+Позитивна програма доходить до D1:1; за хибного закону викликає невикличний
+D1:0. `reason-index-width-selectors-mutant.sens` відрізняється рівно одним
+бітом D4:1001→D4:1000 і мусить бути відкинутий самим виконавцем SENS.
+Наявний єдиний автоматичний `ci.yml` викликає `target/debug/sens` безпосередньо
+для обох свідків, фіксує фізичні SHA, робить перевірку дійсних executor receipts
+і блокує відсутні докази. Rust/Python можуть перевіряти лише транспорт і текст
+джерела, ніколи не визначати EQ, COND або семантичний вердикт.

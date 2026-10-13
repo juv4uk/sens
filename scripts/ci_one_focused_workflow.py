@@ -45,6 +45,19 @@ def verify_migration_source_shapes():
     errors = []
     try:
         reason = (ROOT / "lib/reason.lisp").read_text(encoding="utf-8")
+        selectors = (
+            "(0011 reason-index-mode\n  (0010 (index)\n    (1001 index)))",
+            "(0011 reason-index-rules\n  (0010 (index)\n    (10011 index)))",
+            "(0011 reason-index-buckets\n  (0010 (index)\n    (10011 (011 index))))",
+        )
+        for selector in selectors:
+            if selector not in reason:
+                errors.append("reason.lisp: exact-domain index selector migration missing")
+        for old_alias in ("(0011 reason-index-mode second)",
+                          "(0011 reason-index-rules third)",
+                          "(0011 reason-index-buckets fourth)"):
+            if old_alias in reason:
+                errors.append("reason.lisp: host selector alias returned")
         start = reason.find("(0011 reason-index?")
         end = reason.find("(0011 міркування-пошук-кошика", start)
         if end < 0:
@@ -143,8 +156,8 @@ def verify():
     # Mechanical ratchet: one existing workflow must prove native SENS exec,
     # not merely green Python unittest dots. The dynamic scan validates receipts.
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
-    if ci_text.count("--executor-report-file") != 3:
-        errors.append("UNINFORMATIVE-EXECUTOR: 3 direct SENS receipts required")
+    if ci_text.count("--executor-report-file") != 5:
+        errors.append("UNINFORMATIVE-EXECUTOR: 5 direct SENS receipts required")
     for step in ci_text.split("      - name: ")[1:]:
         if "--layer eval" in step:
             if ("--executor-report-file" not in step
@@ -159,11 +172,13 @@ def verify():
         errors.append("UNINFORMATIVE-EXECUTOR: missing native receipts scanner")
     for test_id in ("sens-time-d1-predicate-law",
                     "knowledge-exact-arity-structure",
-                    "sens-domain-logic-2040-mutant"):
+                    "sens-domain-logic-2040-mutant",
+                    "sens-reason-index-width-selectors-law",
+                    "sens-reason-index-width-selectors-mutant"):
         if ("--require " + test_id) not in ci_text:
             errors.append("UNINFORMATIVE-EXECUTOR: missing required " + test_id)
-    if ci_text.count("semantic_authority=binary-SENS") != 2:
-        errors.append("UNINFORMATIVE-EXECUTOR: only two positive CLI laws may claim binary SENS")
+    if ci_text.count("semantic_authority=binary-SENS") != 3:
+        errors.append("UNINFORMATIVE-EXECUTOR: only three positive CLI laws may claim binary SENS")
     if "executor=CI_GLUE_NO_SEMANTICS" not in ci_text:
         errors.append("UNINFORMATIVE-EXECUTOR: Python migration tests lack honest executor label")
 
