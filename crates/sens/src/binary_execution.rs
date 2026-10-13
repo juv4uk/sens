@@ -161,7 +161,7 @@ mod exact_t5_cutover_tests {
                 include_str!("../../../tests/fixtures/semantic/exact-d3-logic-mutant").trim_end(), false),
         ] {
             assert_eq!(crate::render_ternary_words_spaced(words), visible);
-            assert_eq!(encode_ternary_words(words).unwrap(), physical);
+            assert_eq!(encode_ternary_words(words).unwrap().as_slice(), physical);
             let value = eval_t5_program(physical, &mut Session::default())
                 .expect("the binary SENS oracle runs").value;
             // The entire semantic assertion lives in the executed .sens
