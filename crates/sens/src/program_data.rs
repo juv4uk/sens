@@ -13,67 +13,142 @@ fn invalid_program_data(message: impl Into<String>) -> LanguageError {
 }
 
 /// Convert one already-lowered expression into source-shaped exact program-data.
+///
+/// The old recursive visitor exhausted a host thread's stack on deeply nested
+/// (but otherwise source-shaped) data. Work is now explicit, retaining each
+/// domain-qualified head as data, not treating its payload as a legacy opcode.
+/// The parser's existing structural depth limit remains the single safety
+/// contract, also for ASTs built directly by an embedding host.
 pub fn expr_to_exact_program_data(expr: &Expr) -> Result<Value, LanguageError> {
-    Ok(match &expr.kind {
-        // Тут формується КАНОНІЧНА програма для компілятора, а не
-        // історичне Lisp-значення. Числова семантика належить лише D24+.
-        // Не допускаємо неявного виведення домену з десяткового тексту,
-        // раціонального літерала чи голих бітів.
-        ExprKind::Number(_, _) | ExprKind::Rational(_) | ExprKind::NumericBuffer(_) => {
-            return Err(invalid_program_data(
-                "точнодоменна програма: історичні числові літерали не мають D24+",
-            ));
-        }
-        ExprKind::BinaryNumber(value) if value.numeric_domain_width().is_some() => {
-            Value::BinaryNumber(value.clone())
-        }
-        ExprKind::BinaryNumber(_) => {
-            return Err(invalid_program_data(
-                "точнодоменна програма: двійкове число потребує явного домену D24+",
-            ));
-        }
-        ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
-        ExprKind::String(value) => Value::String(value.clone()),
-        ExprKind::Symbol(value) => Value::Symbol(value.clone()),
-        ExprKind::List(items) => Value::list(
-            items
-                .iter()
-                .map(expr_to_exact_program_data)
-                .collect::<Result<Vec<_>, _>>()?,
-        ),
-        ExprKind::Pair(head, tail) => Value::Pair(
-            Rc::new(expr_to_exact_program_data(head)?),
-            Rc::new(expr_to_exact_program_data(tail)?),
-        ),
-        ExprKind::DomainCall(identity, arguments) => {
-            let mut items = Vec::with_capacity(arguments.len() + 1);
-            items.push(Value::DomainIdentity(DomainIdentity::from(*identity)));
-            for argument in arguments.iter() {
-                items.push(expr_to_exact_program_data(argument)?);
+    use crate::syntax::MAX_STRUCTURE_DEPTH;
+
+    enum Step<'a> {
+        Visit(&'a Expr, u32),
+        List(usize),
+        Pair,
+        DomainCall(crate::CoreDomainIdentity, usize),
+    }
+
+    let mut pending = vec![Step::Visit(expr, 0)];
+    let mut finished = Vec::new();
+
+    while let Some(task) = pending.pop() {
+        match task {
+            Step::Visit(node, depth) => {
+                let next_depth = || {
+                    if depth >= MAX_STRUCTURE_DEPTH {
+                        Err(invalid_program_data(
+                            "точнодоменна програма: перевищено глибину структури",
+                        ))
+                    } else {
+                        Ok(depth + 1)
+                    }
+                };
+                match &node.kind {
+                    ExprKind::Number(_, _) | ExprKind::Rational(_) | ExprKind::NumericBuffer(_) => {
+                        return Err(invalid_program_data(
+                            "точнодоменна програма: історичні числові літерали не мають D24+",
+                        ));
+                    }
+                    ExprKind::BinaryNumber(number) if number.numeric_domain_width().is_some() => {
+                        finished.push(Value::BinaryNumber(number.clone()));
+                    }
+                    ExprKind::BinaryNumber(_) => {
+                        return Err(invalid_program_data(
+                            "точнодоменна програма: двійкове число потребує явного домену D24+",
+                        ));
+                    }
+                    ExprKind::DomainIdentity(identity) => {
+                        finished.push(Value::DomainIdentity(*identity));
+                    }
+                    ExprKind::String(value) => finished.push(Value::String(value.clone())),
+                    ExprKind::Symbol(value) => finished.push(Value::Symbol(value.clone())),
+                    ExprKind::List(items) => {
+                        let child_depth = next_depth()?;
+                        pending.try_reserve(items.len().saturating_add(1)).map_err(|_| {
+                            invalid_program_data("точнодоменна програма: немає місткості стеку")
+                        })?;
+                        pending.push(Step::List(items.len()));
+                        for child in items.iter().rev() {
+                            pending.push(Step::Visit(child, child_depth));
+                        }
+                    }
+                    ExprKind::Pair(head, tail) => {
+                        let child_depth = next_depth()?;
+                        pending.try_reserve(3).map_err(|_| {
+                            invalid_program_data("точнодоменна програма: немає місткості стеку")
+                        })?;
+                        pending.push(Step::Pair);
+                        pending.push(Step::Visit(tail, child_depth));
+                        pending.push(Step::Visit(head, child_depth));
+                    }
+                    ExprKind::DomainCall(identity, arguments) => {
+                        let child_depth = next_depth()?;
+                        pending.try_reserve(arguments.len().saturating_add(1)).map_err(|_| {
+                            invalid_program_data("точнодоменна програма: немає місткості стеку")
+                        })?;
+                        pending.push(Step::DomainCall(*identity, arguments.len()));
+                        for argument in arguments.iter().rev() {
+                            pending.push(Step::Visit(argument, child_depth));
+                        }
+                    }
+                    ExprKind::Sid(_) | ExprKind::Call(_, _) => {
+                        return Err(invalid_program_data(
+                            "exact program-data must not contain legacy Sid/Call nodes",
+                        ));
+                    }
+                    ExprKind::Local { .. } => {
+                        return Err(invalid_program_data(
+                            "source-shaped exact program-data must not contain resolved Local nodes",
+                        ));
+                    }
+                }
             }
-            Value::list(items)
+            Step::List(len) => {
+                let begin = finished.len().checked_sub(len).ok_or_else(|| {
+                    invalid_program_data("точнодоменна програма: пошкоджена структура списку")
+                })?;
+                finished.push(Value::list(finished.split_off(begin)));
+            }
+            Step::Pair => {
+                let tail = finished.pop().ok_or_else(|| {
+                    invalid_program_data("точнодоменна програма: немає хвоста пари")
+                })?;
+                let head = finished.pop().ok_or_else(|| {
+                    invalid_program_data("точнодоменна програма: немає голови пари")
+                })?;
+                finished.push(Value::Pair(Rc::new(head), Rc::new(tail)));
+            }
+            Step::DomainCall(identity, len) => {
+                let begin = finished.len().checked_sub(len).ok_or_else(|| {
+                    invalid_program_data("точнодоменна програма: пошкоджений доменний виклик")
+                })?;
+                let mut args = finished.split_off(begin);
+                args.try_reserve_exact(1).map_err(|_| {
+                    invalid_program_data("точнодоменна програма: немає місткості виклику")
+                })?;
+                args.insert(0, Value::DomainIdentity(DomainIdentity::from(identity)));
+                finished.push(Value::list(args));
+            }
         }
-        ExprKind::Sid(_) | ExprKind::Call(_, _) => {
-            return Err(invalid_program_data(
-                "exact program-data must not contain legacy Sid/Call nodes",
-            ));
-        }
-        ExprKind::Local { .. } => {
-            return Err(invalid_program_data(
-                "source-shaped exact program-data must not contain resolved Local nodes",
-            ));
-        }
-    })
+    }
+    let result = finished.pop().ok_or_else(|| {
+        invalid_program_data("точнодоменна програма: порожній результат")
+    })?;
+    debug_assert!(finished.is_empty());
+    Ok(result)
 }
 
 /// Convert an already-lowered top-level program into a proper data list.
 pub fn lowered_program_to_exact_data(program: &[Expr]) -> Result<Value, LanguageError> {
-    Ok(Value::list(
-        program
-            .iter()
-            .map(expr_to_exact_program_data)
-            .collect::<Result<Vec<_>, _>>()?,
-    ))
+    let mut converted = Vec::new();
+    converted.try_reserve_exact(program.len()).map_err(|_| {
+        invalid_program_data("точнодоменна програма: немає місткості для форм")
+    })?;
+    for expr in program {
+        converted.push(expr_to_exact_program_data(expr)?);
+    }
+    Ok(Value::list(converted))
 }
 
 #[cfg(test)]
