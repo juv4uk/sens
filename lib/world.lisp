@@ -329,11 +329,12 @@
                 (1110 (001 def) (001 *legacy-knowledge-transition*) transition)
                 (1110 (001 cond)
                       (1110
-                        ; Decision status is an atom: exact D3 EQ, not legacy
-                        ; EQUAL? returning the structural list (1).
-                        ; D4:1000 CAAR projects the tag without W8 CAR chains.
-                        (1110 (001 101)
-                              (1110 (001 1000) (001 *legacy-knowledge-transition*))
+                        ; Quote exact domain identities into the generated AST:
+                        ; bare '101' and '1000' would become numeric literals,
+                        ; not callable D3:101 EQ and D4:1000 CAAR.
+                        ; Only atoms are compared; structural (1) is not truth.
+                        (1110 (001 #d3:101)
+                              (1110 (001 #d4:1000) (001 *legacy-knowledge-transition*))
                               (1110 (001 quote) (001 accepted)))
                         (1110 (001 second)
                               (1110 (001 list)
