@@ -1,0 +1,33 @@
+name: "Точнодоменний мігратор CLI — позитивні та негативні тести"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
+      - ".github/workflows/cli-exact-domain-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
+      - ".github/workflows/cli-exact-domain-migration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  parser-aware-exact-domain:
+    name: "CLI: точні D3–D6, цитування, затінення, W8-блокування"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Перевірка саме мігратора, не загального Cargo workspace"
+        run: cargo test --locked --package sens-cli --bin sens-to-sens -- --nocapture
+      - name: "Не дозволяти тестам змінювати репозиторій"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }

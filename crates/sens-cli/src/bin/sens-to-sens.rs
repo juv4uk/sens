@@ -1,7 +1,8 @@
 use sens::{
-    installed_capabilities, parse, semantic_registry_export, Expr, ExprKind, Sens8,
+    installed_capabilities, parse, semantic_registry_export, CoreDomainIdentity, Expr, ExprKind, Sens8,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
 use std::env;
 use std::fs;
 use std::process;
@@ -17,9 +18,13 @@ struct Edit {
 struct Analysis {
     /// `--language`: this file defines the language's own table functions.
     language: bool,
+    exact_domain: bool,
+    source: String,
     edits: Vec<Edit>,
     named_calls: usize,
     blocked_host_capabilities: usize,
+    blocked_legacy_heads: usize,
+    blocked_unmapped_surfaces: Vec<String>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -54,6 +59,39 @@ fn head_kind(sens: Sens8) -> HeadKind {
     }
 }
 
+/// Історичну ідентичність не використовуємо для нового доменного запису.
+#[derive(Clone, Copy)]
+enum HeadRoute {
+    Legacy(Sens8),
+    Exact(CoreDomainIdentity),
+}
+
+impl HeadRoute {
+    fn kind(self) -> HeadKind {
+        match self {
+            Self::Legacy(sens) => head_kind(sens),
+            Self::Exact(CoreDomainIdentity::D3(word)) => match word.word().packed_bits() {
+                0b001 => HeadKind::Quote,
+                0b110 => HeadKind::Cond,
+                _ => HeadKind::Other,
+            },
+            Self::Exact(CoreDomainIdentity::D4(word)) => match word.word().packed_bits() {
+                0b0010 => HeadKind::Lambda,
+                0b0011 => HeadKind::Define,
+                _ => HeadKind::Other,
+            },
+            Self::Exact(_) => HeadKind::Other,
+        }
+    }
+
+    fn source_word(self) -> String {
+        match self {
+            Self::Legacy(sens) => target_sens(sens).to_string(),
+            Self::Exact(identity) => identity.to_string(),
+        }
+    }
+}
+
 fn target_sens(sens: Sens8) -> Sens8 {
     if sens == sens::sens!(00001011) {
         sens::sens!(00001001)
@@ -67,33 +105,130 @@ fn host_capability_names() -> HashSet<String> {
     installed_capabilities().into_iter().collect()
 }
 
-fn resolve_head<'a>(
-    head: &'a Expr,
+/// Англійські поверхні — тільки вхідні дані мігратора, а не семантичний
+/// реєстр. Зчитуємо фактичні D3–D6 таблиці; жоден старий SID8-байт
+/// не визначає наступника. Неоднозначне ім'я має результат None.
+fn ratified_english_identity(name: &str) -> Option<CoreDomainIdentity> {
+    static ROWS: OnceLock<Option<HashMap<String, Option<CoreDomainIdentity>>>> = OnceLock::new();
+    fn load() -> Option<HashMap<String, Option<CoreDomainIdentity>>> {
+        let sources = [
+            (3, include_str!("../../../../lib/domains/d3.lisp")),
+            (4, include_str!("../../../../lib/domains/d4.lisp")),
+            (5, include_str!("../../../../lib/domains/d5.lisp")),
+            (6, include_str!("../../../../lib/domains/d6.lisp")),
+        ];
+        let mut rows = HashMap::<String, Option<CoreDomainIdentity>>::new();
+        for (width, source) in sources {
+            let forms = parse(source).ok()?;
+            if forms.len() != 1 {
+                return None;
+            }
+            let ExprKind::List(table) = &forms[0].kind else { return None };
+            for entry in table.iter().skip(1) {
+                let ExprKind::List(columns) = &entry.kind else { return None };
+                let key = columns.first()?;
+                let bits = source.get(key.span.start..key.span.end)?;
+                if bits.len() != width || !bits.bytes().all(|b| b == b'0' || b == b'1') {
+                    return None;
+                }
+                let parsed = sens::parse_binary_source_words(bits).ok()?;
+                if parsed.len() != 1 {
+                    return None;
+                }
+                // Таблиця містить і ратифіковані, але ще невиконувані
+                // клітинки D6. Вони не повинні обнулити весь індекс;
+                // просто не допускаємо їх як викличні голови.
+                let Some(identity) = CoreDomainIdentity::from_source_word(parsed[0].word) else {
+                    continue;
+                };
+                for column in columns.iter().skip(1) {
+                    let ExprKind::List(parts) = &column.kind else { continue };
+                    if parts.len() != 2 {
+                        continue;
+                    }
+                    let (ExprKind::Symbol(namespace), ExprKind::Symbol(surface)) =
+                        (&parts[0].kind, &parts[1].kind)
+                    else { continue };
+                    if namespace.as_ref() != "en" {
+                        continue;
+                    }
+                    rows.entry(surface.to_string())
+                        .and_modify(|prior| {
+                            if *prior != Some(identity) {
+                                *prior = None;
+                            }
+                        })
+                        .or_insert(Some(identity));
+                }
+            }
+        }
+        Some(rows)
+    }
+    ROWS.get_or_init(load).as_ref()?.get(name).copied().flatten()
+}
+
+/// У точнодоменному режимі старий восьмибітний реєстр не надає семантики.
+/// Колізія старого W8 та чинного D8 завжди блокує неявне перетворення.
+fn resolve_head(
+    head: &Expr,
     bound: &HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-) -> Option<(Option<&'a str>, Sens8)> {
+) -> Option<(Option<String>, HeadRoute)> {
     match &head.kind {
-        ExprKind::Sid(sens) => Some((None, *sens)),
+        ExprKind::Sid(_) if analysis.exact_domain => {
+            analysis.blocked_legacy_heads += 1;
+            None
+        }
+        ExprKind::Sid(sens) => Some((None, HeadRoute::Legacy(*sens))),
+        ExprKind::DomainIdentity(identity) if analysis.exact_domain => {
+            // Змішаний читач зберігає оригінальні span; уже двійкову
+            // голову не переписуємо, а українське ім'я можна проектувати.
+            let original = analysis.source.get(head.span.start..head.span.end);
+            let human_surface = original.filter(|spelling| {
+                !spelling.is_empty()
+                    && *spelling != "'"
+                    && !spelling.bytes().all(|b| b == b'0' || b == b'1')
+            });
+            identity.core_operation().map(|id| (human_surface.map(str::to_owned), HeadRoute::Exact(id)))
+        }
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
+            let current = semantic_registry_export::admitted_core_domain_for_surface(name)
+                .or_else(|| analysis.exact_domain.then(|| ratified_english_identity(name)).flatten());
+            let legacy = semantic_registry_export::semantic_id_for_admitted_surface(name);
             if host_capabilities.contains(name.as_ref()) {
-                if semantic_registry_export::semantic_id_for_admitted_surface(name).is_some() {
+                if current.is_some() || legacy.is_some() {
                     analysis.blocked_host_capabilities += 1;
                 }
                 return None;
             }
-            semantic_registry_export::semantic_id_for_admitted_surface(name)
-                .map(|sens| (Some(name.as_ref()), sens))
+            if analysis.exact_domain {
+                if let Some(identity) = current {
+                    // Без доведеного source-era W8 неможливо відрізнити
+                    // вихідний D8 від однойменної історичної восьмибітної голови.
+                    if identity.width() < 8 {
+                        return Some((Some(name.to_string()), HeadRoute::Exact(identity)));
+                    }
+                }
+                // У режимі повної двійкової міграції невідоме
+                // виконуване ім'я також є блокером, а не успіхом.
+                // Локально зв'язані функції і окремі host-capabilities
+                // відфільтровано вище.
+                analysis.blocked_unmapped_surfaces.push(name.to_string());
+                None
+            } else {
+                legacy.map(|sens| (Some(name.to_string()), HeadRoute::Legacy(sens)))
+            }
         }
         _ => None,
     }
 }
 
-fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+fn push_head_edit(head: &Expr, route: HeadRoute, analysis: &mut Analysis) {
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: target_sens(sens).to_string(),
+        replacement: route.source_word(),
     });
 }
 
@@ -228,22 +363,19 @@ fn walk_expr(
     let arguments = &items[1..];
     let resolved = resolve_head(head, bound, host_capabilities, analysis);
 
-    if let Some((surface, sens)) = resolved {
+    if let Some((surface, route)) = resolved {
         if surface.is_some() {
             analysis.named_calls += 1;
         }
 
-        let kind = head_kind(sens);
+        let kind = route.kind();
         if let Some(spelling) = surface {
-            // Current owner-ratified Ukrainian .lisp source heads ALREADY
-            // lower to exact-width DomainIdentity in the mixed reader.
-            // The historical Sens8 compatibility registry must not convert
-            // that primary source back to old 8-bit tokens. Keep counting
-            // the call as observed; only the legacy rewrite is suppressed.
-            if sens::semantic_registry_export::exact_uk_callable_for_source_head(spelling)
-                .is_none()
+            // Точний домен береться лише з ратифікованої проєкції. Сумісний
+            // режим не повинен зворотно псувати вже доменні українські голови.
+            if analysis.exact_domain
+                || semantic_registry_export::exact_uk_callable_for_source_head(&spelling).is_none()
             {
-                push_head_edit(head, sens, analysis);
+                push_head_edit(head, route, analysis);
             }
         }
 
@@ -275,7 +407,7 @@ fn walk_expr(
                     // redefinition must NOT be rewritten to that old slot.
                     // With `--language` the file *is* that first definition:
                     // its calls reach the same function through the code.
-                    if !(analysis.language && top_level && is_language_definition(name)) {
+                    if !(analysis.language && !analysis.exact_domain && top_level && is_language_definition(name)) {
                         bound.insert(name.to_string());
                     }
                 }
@@ -384,8 +516,29 @@ fn analyze_with(
     host_capabilities: &HashSet<String>,
     language: bool,
 ) -> Result<Analysis, String> {
-    let expressions = parse(source).map_err(|error| error.render(source))?;
-    let mut analysis = Analysis { language, ..Analysis::default() };
+    analyze_with_mode(source, host_capabilities, language, false)
+}
+
+fn analyze_with_mode(
+    source: &str,
+    host_capabilities: &HashSet<String>,
+    language: bool,
+    exact_domain: bool,
+) -> Result<Analysis, String> {
+    // Повторний прохід уже переписаного джерела повинен розпізнати
+    // 001/110 як точні D3 QUOTE/COND, а не як числа. Інакше в наступному
+    // проході зміняться цитовані дані.
+    let expressions = if exact_domain {
+        sens::parse_mixed_exact_domain(source)
+    } else {
+        parse(source)
+    }.map_err(|error| error.render(source))?;
+    let mut analysis = Analysis {
+        language,
+        exact_domain,
+        source: source.to_owned(),
+        ..Analysis::default()
+    };
     let mut bound = HashSet::new();
     walk_sequence(
         &expressions,
@@ -420,12 +573,13 @@ fn apply_edits(source: &str, edits: &[Edit]) -> Result<String, String> {
 }
 
 fn usage() {
-    eprintln!("Usage: sens-to-sens [--check] [--language] <file>...");
+    eprintln!("Використання: sens-to-sens [--check] [--language] [--exact-domain] <файл>...");
 }
 
 fn main() {
     let mut check = false;
     let mut language = false;
+    let mut exact_domain = false;
     let mut files = Vec::new();
 
     for argument in env::args().skip(1) {
@@ -433,12 +587,14 @@ fn main() {
             check = true;
         } else if argument == "--language" {
             language = true;
+        } else if argument == "--exact-domain" {
+            exact_domain = true;
         } else if argument == "-h" || argument == "--help" {
-            println!("Usage: sens-to-sens [--check] [--language] <file>...");
-            println!("Parser-aware repository migration from admitted surfaces to exact SENS functions.");
-            println!("--check reports candidates without writing and exits 1 when changes are available.");
-            println!("--language: the files are the language's own first definitions of table");
-            println!("  functions (code slots, #1468); calls to them become codes too.");
+            println!("Використання: sens-to-sens [--check] [--language] [--exact-domain] <файл>...");
+            println!("Розбір викликів зі збереженням цитат, затінень і точних меж токенів.");
+            println!("--exact-domain: тільки доведені D3–D6; старі W8 та неоднозначні D8 — блок.");
+            println!("--check: перевірити наявність замін без запису.");
+            println!("--language: правила первинних визначень для режиму сумісності.");
             return;
         } else if argument.starts_with('-') {
             eprintln!("sens-to-sens: unknown option: {argument}");
@@ -457,6 +613,9 @@ fn main() {
     let host_capabilities = host_capability_names();
     let mut failed = false;
     let mut changes_available = false;
+    // Точнодоменний пакет спочатку перевіряємо цілком: пізніший BLOCK
+    // не може залишити раніші файли вже переписаними.
+    let mut staged_exact_writes = Vec::<(String, String)>::new();
 
     for filename in files {
         let source = match fs::read_to_string(&filename) {
@@ -468,7 +627,7 @@ fn main() {
             }
         };
 
-        let analysis = match analyze_with(&source, &host_capabilities, language) {
+        let analysis = match analyze_with_mode(&source, &host_capabilities, language, exact_domain) {
             Ok(analysis) => analysis,
             Err(error) => {
                 eprintln!("sens-to-sens: {filename}: {error}");
@@ -476,6 +635,18 @@ fn main() {
                 continue;
             }
         };
+
+        if exact_domain && (analysis.blocked_legacy_heads != 0
+            || !analysis.blocked_unmapped_surfaces.is_empty())
+        {
+            eprintln!(
+                "{filename}: BLOCK: {} старих W8-голів, непідтверджені surfaces: {:?}",
+                analysis.blocked_legacy_heads,
+                analysis.blocked_unmapped_surfaces
+            );
+            failed = true;
+            continue;
+        }
 
         if check {
             println!(
@@ -504,15 +675,17 @@ fn main() {
         }
 
         if output != source {
-            if let Err(error) = fs::write(&filename, &output) {
+            if exact_domain {
+                staged_exact_writes.push((filename.clone(), output.clone()));
+            } else if let Err(error) = fs::write(&filename, &output) {
                 eprintln!("sens-to-sens: {filename}: {error}");
                 failed = true;
                 continue;
             }
         }
 
-        let remaining =
-            analyze(&output, &host_capabilities).expect("rewritten source was just validated");
+        let remaining = analyze_with_mode(&output, &host_capabilities, language, exact_domain)
+            .expect("переписане джерело щойно перевірено");
         println!(
             "{filename}: replaced={} named-calls-remaining={} blocked-host={}",
             analysis.edits.len(),
@@ -524,6 +697,16 @@ fn main() {
     if failed {
         process::exit(2);
     }
+    // Не обіцяємо транзакційність файлової системи; це суворий
+    // семантичний preflight без жодного запису при BLOCK у пакеті.
+    if exact_domain && !check {
+        for (filename, output) in staged_exact_writes {
+            if let Err(error) = fs::write(&filename, &output) {
+                eprintln!("sens-to-sens: {filename}: помилка запису: {error}");
+                process::exit(2);
+            }
+        }
+    }
     if check && changes_available {
         process::exit(1);
     }
@@ -532,6 +715,80 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Окремий доменний режим не використовує семантику старих SID8-кодів.
+    fn rewrite_exact(source: &str) -> Result<String, String> {
+        let analysis = analyze_with_mode(source, &HashSet::new(), false, true)?;
+        if analysis.blocked_legacy_heads != 0 || !analysis.blocked_unmapped_surfaces.is_empty() {
+            return Err(format!(
+                "непідтверджені голови: {} {:?}",
+                analysis.blocked_legacy_heads, analysis.blocked_unmapped_surfaces
+            ));
+        }
+        apply_edits(source, &analysis.edits)
+    }
+
+    #[test]
+    fn exact_domain_mode_emits_d3_d4_and_preserves_quoted_data_and_shadowing() {
+        let source = "(quote (car x)) (atom? x) (car (cdr x)) (lambda (car) (car x)) (define car (lambda (x) x)) (car x)";
+        let expected = "(001 (car x)) (010 x) (100 (011 x)) (0010 (car) (car x)) (0011 car (0010 (x) x)) (car x)";
+        assert_eq!(rewrite_exact(source).expect("доведені D3/D4"), expected);
+    }
+
+    #[test]
+    fn english_donor_projection_is_derived_from_ratified_ladder_not_sid8() {
+        for (name, expected) in [
+            ("quote", "001"),
+            ("atom?", "010"),
+            ("cdr", "011"),
+            ("car", "100"),
+            ("eq?", "101"),
+            ("cond", "110"),
+            ("cons", "111"),
+            ("lambda", "0010"),
+            ("define", "0011"),
+        ] {
+            assert_eq!(
+                ratified_english_identity(name).map(|id| id.to_string()),
+                Some(expected.to_string()),
+                "таблиця доменів мусить бути єдиним донором для {name}"
+            );
+        }
+        assert!(ratified_english_identity("defmacro").is_none());
+        assert!(ratified_english_identity("length").is_none(),
+            "сам факт D6 residency не засвідчує callable механізм");
+    }
+
+    #[test]
+    fn apostrophe_reader_sugar_is_not_rewritten_as_a_binary_token() {
+        let source = "'(car x) (atom? x)";
+        let result = rewrite_exact(source).expect("цитата й точний ATOM");
+        assert_eq!(result, "'(car x) (010 x)");
+        assert_eq!(rewrite_exact(&result).expect("повторний прохід"), result);
+    }
+
+    #[test]
+    fn exact_domain_mode_is_idempotent_even_with_quoted_binary_heads() {
+        let original = "(quote (car x)) (atom? x) (lambda (x) (quote (cdr x)))";
+        let once = rewrite_exact(original).expect("перший прохід");
+        let twice = rewrite_exact(&once).expect("другий прохід");
+        assert_eq!(once, twice, "повторний прохід не переписує цитовані дані");
+        assert!(once.contains("(001 (car x))"), "цитований CAR лишається даними");
+        assert!(once.contains("(001 (cdr x))"), "цитований CDR лишається даними");
+    }
+
+    #[test]
+    fn exact_domain_mode_never_guesses_legacy_w8_or_unplaced_forms() {
+        assert!(rewrite_exact("(10101000 x)").is_err(), "старий INVOKE не є D8 ROUND");
+        assert!(rewrite_exact("(quote (10101000 x)) (atom? x)").is_ok(),
+            "цитовані біти не можуть створювати виконувані W8-голови");
+        assert!(rewrite_exact("(defmacro m (x) x)").is_err(),
+            "DEFMACRO не має доведеного однослівного наступника");
+        assert!(rewrite_exact("(unmapped-operation x)").is_err(),
+            "невідома глобальна голова не може мовчки лишитися в exact-only результаті");
+        assert!(rewrite_exact("(lambda (local) (local x))").is_ok(),
+            "локально зв'язану функцію не можна помилково визнати глобальним викликом");
+    }
 
     fn no_host() -> HashSet<String> {
         HashSet::new()
