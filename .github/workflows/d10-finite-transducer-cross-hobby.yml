@@ -1,5 +1,6 @@
 name: D10 finite transducer witness
-on: [pull_request, push]
+on:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
