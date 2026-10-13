@@ -1,0 +1,41 @@
+name: Knowledge exact arity
+
+on:
+  pull_request:
+    paths:
+      - "lib/knowledge.lisp"
+      - "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs"
+      - ".github/workflows/knowledge-exact-arity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/knowledge.lisp"
+      - "crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs"
+      - ".github/workflows/knowledge-exact-arity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  knowledge-arity:
+    name: Exact knowledge term and negation arity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: knowledge-exact-arity
+      - name: Targeted zero/one/many arity witnesses
+        run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration knowledge_var_and_negation_require_exactly_one_argument -- --exact --nocapture
+      - name: Enforce exact D3/D4 call-head widths
+        run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration knowledge_unary_validators_use_only_exact_d3_d4_structure -- --exact --nocapture
+      - name: Full forward/knowledge migration suite
+        run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
+      - name: Check Lisp source balance
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib/knowledge.lisp
+      - name: Diff hygiene (only this PR's files)
+        run: git diff --check HEAD^1 HEAD -- lib/knowledge.lisp crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs .github/workflows/knowledge-exact-arity.yml
