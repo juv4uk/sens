@@ -948,7 +948,7 @@
 ;    for an ordinary numeric answer, collapsing them and always taking
 ;    the base-case branch. `items` itself is safe to test with `atom`
 ;    (it's always a list or (), never itself a bare number), but the
-;    accumulator must use structural `equal?` against `(quote ())`.
+;    accumulator tests exact structural EMPTY with D4:0101 NULL.
 (0011 min-list
   (0010 (items)
     (110
@@ -956,9 +956,9 @@
       ((010 items) 
        (let ((rest-min (000010 (011 items))))
          (110
-           ((11110111 rest-min (001 ())) 
+           ((0101 rest-min) 
             (100 items))
-           ((0100 (11110111 rest-min (001 ())))
+           ((0100 (0101 rest-min))
             (110
               ((11010 (100 items) rest-min)  (100 items))
               ((0100 (11010 (100 items) rest-min)) rest-min)))))))))
@@ -970,9 +970,9 @@
       ((010 items) 
        (let ((rest-max (000011 (011 items))))
          (110
-           ((11110111 rest-max (001 ())) 
+           ((0101 rest-max) 
             (100 items))
-           ((0100 (11110111 rest-max (001 ())))
+           ((0100 (0101 rest-max))
             (110
               ((11011 (100 items) rest-max)  (100 items))
               ((0100 (11011 (100 items) rest-max)) rest-max)))))))))
