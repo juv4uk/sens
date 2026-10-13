@@ -2,24 +2,63 @@
 //! `reason` / `reason-in` keep their historical compatibility results while
 //! result-status.my provides explicit observations without information collapse.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_program,
+    parse_mixed_exact_domain_reasoning_source, Session, Value,
+};
 
-fn eval_result_status(source: &str) -> String {
+fn load_reasoning(session: &mut Session, path: &str, source: &str) {
+    let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+        .unwrap_or_else(|e| panic!("pinned reasoning parse failed for {path}: {e}"));
+    eval_parsed_expressions(&parsed, session)
+        .unwrap_or_else(|e| panic!("pinned reasoning load failed for {path}: {e}"));
+}
+
+fn result_status_session() -> Session {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/result-status.lisp"), &mut session).unwrap();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("exact-domain core bootstrap");
+    load_reasoning(
+        &mut session,
+        "lib/result-status.lisp",
+        include_str!("../../../lib/result-status.lisp"),
+    );
+    session
+}
+
+fn eval_result_status_value(source: &str) -> Value {
+    let mut session = result_status_session();
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
-        .to_string()
+}
+
+fn eval_result_status(source: &str) -> String {
+    eval_result_status_value(source).to_string()
 }
 
 fn eval_reason_observation(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/result-status.lisp"), &mut session).unwrap();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("exact-domain core bootstrap");
+    for (path, source_text) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        (
+            "lib/result-status.lisp",
+            include_str!("../../../lib/result-status.lisp"),
+        ),
+    ] {
+        load_reasoning(&mut session, path, source_text);
+    }
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
@@ -102,11 +141,30 @@ fn result_payload_extracts_everything_after_the_tag() {
 
 #[test]
 fn an_ordinary_value_is_not_a_tagged_result() {
-    assert_eq!(eval_result_status(r#"(result-tagged? 42)"#), "()");
+    assert_eq!(eval_result_status(r#"(result-tagged? 42)"#), "0");
     assert_eq!(
         eval_result_status(r#"(result-tagged? (quote (a b c)))"#),
-        "()"
+        "0"
     );
+}
+
+#[test]
+fn result_status_predicates_are_exact_d1_bits() {
+    for (source, expected) in [
+        ("(result-tagged? (make-unknown (quote x)))", true),
+        ("(result-tagged? 42)", false),
+        ("(result-proper-list? (quote (a b)))", true),
+        ("(result-proper-list? (quote (a . b)))", false),
+        ("(result-not-head? (quote not?))", true),
+        ("(result-not-head? (quote other))", false),
+    ] {
+        let value = eval_result_status_value(source);
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "{source} must return exact D1 PredicateBit, got {value}"
+        );
+    }
 }
 
 #[test]
