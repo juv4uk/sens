@@ -1,15 +1,18 @@
 ; TCP text interpretation and public listen policy owned by Lisp.
 ; Інтерпретація TCP-тексту й публічна політика listen, якими володіє Lisp.
 ;
-; Host capabilities `tcp-listen-raw`, `tcp-read-raw`, and `tcp-write-raw`
-; expose mechanism only. This layer owns the historical default bind address,
-; UTF-8 decoding/encoding, and the public meanings of `tcp-listen`, `tcp-read`,
-; and `tcp-write`.
+; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Reuses utf8-decode-string / utf8-encode-string from lib/utf8.lisp and
+; tcp-listen-raw / tcp-read-raw / tcp-write-raw host mechanism.
+; Width is identity; every bit of the domain address is valued.
+;
+; Host capabilities expose mechanism only. This layer owns the historical
+; default bind address, UTF-8 decoding/encoding, and public meanings of
+; tcp-listen, tcp-read, and tcp-write.
 ; Load `lib/utf8.lisp` before this file.
 
-; Preserve the historical public behavior explicitly in Lisp: listen on all
-; IPv4 interfaces. Callers that need an explicit address can bypass that policy
-; through tcp-listen-on without changing the host substrate.
+; Preserve historical public behavior: listen on all IPv4 interfaces.
+; Callers that need an explicit address use tcp-listen-on.
 (0011 tcp-listen-on
   (0010 (address port)
     (tcp-listen-raw address port)))
@@ -23,7 +26,6 @@
     (001000 ((decoded (utf8-decode-string bytes)))
       (110
         ((101 (100 decoded) (001 decoded))
-         
          (1001 decoded))
         ((010 (001 ()))
          decoded)))))
@@ -48,6 +50,5 @@
   (0010 (connection text)
     (tcp-write-via-raw connection text)))
 
-
-; Stable surface peers are projected by load_process_library/load_tcp_library
-; after the TCP closures exist. Avoid the retired per-file post-core materializer.
+; Stable surface peers are projected by load_tcp_library after the TCP
+; closures exist. Avoid the retired per-file post-core materializer.
