@@ -73,6 +73,51 @@ def audit(source):
     return findings
 
 
+# Лише ці 10 вузьких числових порівнянь можна перевести з D8 EQUAL
+# на D3 EQ: обидва операнди — атоми, а не структурні списки.
+ATOMIC_EQ_EXPECTED = {
+    "utf8-byte?": {"mod-0": 2},
+    "utf8-three-byte-second-ok?": {"b1-224": 2, "b1-237": 2},
+    "utf8-four-byte-second-ok?": {"b1-240": 2, "b1-244": 2},
+}
+
+
+def audit_atomic_eq_cutover(source):
+    forms = parse_forms(source)
+    functions = {
+        form[1]: form for form in forms
+        if isinstance(form, list) and len(form) >= 3 and form[0] == "0011"
+    }
+    observed = {}
+    for name, expected in ATOMIC_EQ_EXPECTED.items():
+        if name not in functions:
+            raise ValueError(f"missing {name}")
+        counts = {}
+
+        def walk(node):
+            if not isinstance(node, list):
+                return
+            if node and node[0] == "11110111":
+                raise ValueError(f"{name}: D8 EQUAL survived the atomic D3 cutover")
+            if len(node) == 3 and node[0] == "101" and node[2] in (
+                    "0", "224", "237", "240", "244"):
+                if node[1] == ["00101100", "b", "1"] and node[2] == "0":
+                    key = "mod-0"
+                elif node[1] == "b1" and node[2] != "0":
+                    key = f"b1-{node[2]}"
+                else:
+                    raise ValueError(f"{name}: non-atomic or unsupported EQ operand")
+                counts[key] = counts.get(key, 0) + 1
+            for child in node:
+                walk(child)
+
+        walk(functions[name])
+        if counts != expected:
+            raise ValueError(f"{name}: D3 atomic EQ inventory drift: {counts}")
+        observed[name] = counts
+    return observed
+
+
 class Utf8PredicateD1Cutover(unittest.TestCase):
     def test_14_precise_arity_checked_control_results(self):
         result = audit(SOURCE.read_text(encoding="utf-8"))
@@ -93,10 +138,28 @@ class Utf8PredicateD1Cutover(unittest.TestCase):
 
     def test_numeric_operands_and_domain_codes_remain_data(self):
         source = SOURCE.read_text(encoding="utf-8")
-        self.assertIn("(11110111 (00101100 b 1) 0)", source)
+        self.assertIn("(101 (00101100 b 1) 0)", source)
         self.assertIn("(utf8-in-range? b 0 255)", source)
         self.assertIn("(utf8-in-range? b 128 191)", source)
         self.assertIn("(110011100 text)", source)
+
+    def test_ten_atomic_d8_equal_calls_migrate_to_exact_d3_eq(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        observed = audit_atomic_eq_cutover(source)
+        self.assertEqual(sum(sum(row.values()) for row in observed.values()), 10)
+        self.assertEqual(source.count("(11110111 "), 0)
+        self.assertEqual(source.count("(101 (00101100 b 1) 0)"), 2)
+
+    def test_atomic_eq_cutover_fails_on_nonatom_or_reintroduced_d8(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "D8 EQUAL survived"):
+            audit_atomic_eq_cutover(
+                source.replace("(101 b1 224)", "(11110111 b1 224)", 1)
+            )
+        with self.assertRaisesRegex(ValueError, "non-atomic"):
+            audit_atomic_eq_cutover(
+                source.replace("(101 b1 224)", "(101 (001 (bad)) 224)", 1)
+            )
 
     def test_exact_domain_authority_not_flat_byte(self):
         d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
