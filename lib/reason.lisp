@@ -199,6 +199,9 @@
                   ((010 entry)  (001 ()))
                   (#d1:1 (011 entry))))))))))))
 
+; Окремий структурний лічильник перейменування: початкова цитована
+; одноелементна структура, потім D3:111 CONS(QUOTE (), depth) на кожен рівень.
+; Глибина не є D1 числом або арифметикою D24+, а лише тегом змінної.
 ; Public `reason` accepts either the historical rule list or an already-built
 ; finite `reason-index/1`. Plain callers are unchanged; repeated-query callers
 ; may explicitly retain an immutable index snapshot and avoid rebuilding it.
@@ -212,7 +215,7 @@
         (reason-index-candidates goal index)
         (001 ())
         index
-        0))))
+        (001 (()))))))
 
 ; Accumulate one rule's result list onto a reversed global accumulator.
 ; Walking `results` left-to-right and consing each item means `acc` is always
@@ -285,7 +288,7 @@
                      (011 renamed-rule)
                      new-subst
                      all-rules
-                     (01010 depth 1))))
+                     (111 (001 ()) depth))))
              (map-proofs
                (0010 (res)
                  (1110
