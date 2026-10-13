@@ -153,7 +153,7 @@
                ((010 proofs) (010 (001 (0))))
                ((010 (001 ())) (010 ()))))
            (101111010 module-name (opposite-knowledge-head head))))
-        (100 (100 rules))))
+        (1000 rules)))
       ((010 (001 ())) (010 (001 (0)))))))
 
 (0011 check-conflict check-conflict?)
@@ -217,9 +217,11 @@
        (knowledge-clauses-valid? (011 clauses)))
       (#d1:1 #d1:0))))
 
+; Ратифікований D4:1000 = CAR(CAR), D4:0110 = CDR(CAR).
+; Точна бітність та однобітний негатив: tests/semantic/knowledge-d4-selectors-*.bits.
 (0011 knowledge-package-field
   (0010 (name package)
     (110
       ((010 package) (001 ()))
-      ((101 name (100 (100 package))) (011 (100 package)))
+      ((101 name (1000 package)) (0110 package))
       (#d1:1 (knowledge-package-field name (011 package))))))
