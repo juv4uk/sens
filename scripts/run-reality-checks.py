@@ -91,6 +91,17 @@ def main() -> int:
                 f"output_sha256={digest} tail={tail!r}",
                 flush=True,
             )
+            # A digest plus the last line (often just "}") is not evidence.
+            # Preserve the actual diagnostic payload and a one-command replay.
+            print(f"REPRODUCE: {sys.executable} {rel}", flush=True)
+            rendered = blob.decode("utf-8", "replace")
+            if len(rendered) > 12000:
+                print(f"OUTPUT_TRUNCATED original_chars={len(rendered)} "
+                      f"showing_last=12000 output_sha256={digest}", flush=True)
+                rendered = rendered[-12000:]
+            print("FAILED_CHECK_OUTPUT_BEGIN", flush=True)
+            print(rendered, flush=True)
+            print("FAILED_CHECK_OUTPUT_END", flush=True)
             failures.append(rel)
     if failures:
         print(f"REALITY-CHECKS-FAIL {len(failures)}/{len(CHECKS)}", flush=True)
