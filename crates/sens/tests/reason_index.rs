@@ -91,7 +91,7 @@ fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
         ("(reason-index? (quote atom))", false),
         ("(reason-index? (quote (other linear () ())))", false),
         ("(reason-index? (reason-index-linear (quote ())))", true),
-        ("(reason-index? (reason-make-index (quote (((p a))))))", true),
+        ("(reason-index? (quote (reason-index/1 indexed () ())))", true),
     ] {
         let value = eval_program(source, &mut session)
             .unwrap_or_else(|err| panic!("{source}: {err}")).value;
