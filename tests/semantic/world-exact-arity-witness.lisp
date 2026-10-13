@@ -87,3 +87,8 @@
     (make-world (001 ()) (001 (alpha)) (001 ()))
     (make-world (001 ()) (001 (beta)) (001 ())))
   (001 World-no-common-ancestor))
+
+; Empty non-world input must stop without invoking a parent selector.
+(101
+  (world-common-ancestor (001 ()) (empty-world))
+  (001 World-no-common-ancestor))
