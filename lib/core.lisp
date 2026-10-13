@@ -30,11 +30,16 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (0011 list (0010 args args))
 
+; Exact D4:0011 DEFINE + D4:0010 LAMBDA: macro laws from lib/core4.lisp.
+; D8:00001010 is ratified REPEAT, not legacy SID8 DEFMACRO.
+; No widening, implicit byte alias or new macro mechanism.
 ; and/or are Lisp-owned short-circuit macros. A tested operand must return
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
 ; operand is still returned as a value without being reinterpreted as a test.
-(00001010 and rest
+(0011 and
+  (make-macro
+    (0010 rest
   (110
     ((010 rest) (010 ()))
     ((010 (011 rest)) (100 rest))
@@ -56,9 +61,11 @@
                    (111 (001 ())
                      (111 (001 ()) (001 ()))))
                  (001 ())))
-           (001 ()))))))))
+           (001 ()))))))))))
 
-(00001010 or rest
+(0011 or
+  (make-macro
+    (0010 rest
   (110
     ((010 rest) (010 (111 () ())))
     ((010 (011 rest)) (100 rest))
@@ -77,7 +84,7 @@
              (111
                (111 (001 or) (011 rest))
                (001 ())))
-           (001 ())))))))
+           (001 ())))))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
