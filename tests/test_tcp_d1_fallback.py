@@ -6,6 +6,7 @@ the fallback test after the first successful decoder-tag branch. Do NOT
 assert whole-source byte equality across later, independently reviewed changes.
 """
 from pathlib import Path
+import copy
 import re
 import unittest
 
@@ -57,9 +58,11 @@ def tcp_text_policy(source):
     if method != expected:
         raise ValueError("TCP dispatcher changed: expected two-branch exact D3/D1 policy")
     # Rebuild the sole historical branch and compare all remaining AST nodes.
-    before = parse(source.replace(NEW, OLD, 1))
-    prior = next(x for x in before if isinstance(x,list) and len(x)>1
-                 and x[1] == "tcp-read-bytes->text")
+    # Replace the executable AST node, not a textual comment that mentions
+    # the same D3 expression. This migration guard is intentionally AST-aware.
+    prior = copy.deepcopy(method)
+    prior[2][2][2][2][0] = [
+        "0100", ["101", ["100", "decoded"], ["001", "decoded"]]]
     old_method = [
         "0011", "tcp-read-bytes->text",
         ["0010", ["bytes"],
@@ -116,10 +119,10 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
     def test_mutations_are_rejected(self):
         tcp_text_policy(self.source)
         for altered in (
-            self.source.replace(NEW, "(1)", 1),
-            self.source.replace(NEW, "(0100 (001 ()))", 1),
-            self.source.replace(NEW, "(010 (001 (0)))", 1),
-            self.source.replace(NEW, "(001 ())", 1),
+            self.source.replace("("+NEW, "((1)", 1),
+            self.source.replace("("+NEW, "((0100 (001 ()))", 1),
+            self.source.replace("("+NEW, "((010 (001 (0)))", 1),
+            self.source.replace("("+NEW, "((001 ())", 1),
             self.source.replace("(1001 decoded)", "decoded", 1),
         ):
             with self.assertRaises(ValueError):
