@@ -11,6 +11,7 @@ on:
       - "lib/tcp.lisp"
       - "crates/sens/tests/tcp_d1_fallback.rs"
       - "tests/test_tcp_d1_fallback.py"
+      - "tests/fixtures/semantic/tcp-exact-selftest.bits"
       - "crates/sens/tests/process_d1_reflection.rs"
       - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
@@ -25,6 +26,7 @@ on:
       - "lib/tcp.lisp"
       - "crates/sens/tests/tcp_d1_fallback.rs"
       - "tests/test_tcp_d1_fallback.py"
+      - "tests/fixtures/semantic/tcp-exact-selftest.bits"
       - "crates/sens/tests/process_d1_reflection.rs"
       - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
@@ -41,9 +43,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "TCP точковий свідок: 7 бітів і всі 2046 координат D1-D10"
+      - name: "TCP механіка: 2046 точних координат D1–D10 без Python-семантики"
         run: python3 -m unittest discover -s tests -p test_tcp_d1_fallback.py -v
-      - name: TCP виконуваний двостановий D1 і відхилення Number 1
+      - name: TCP: двійкова програма SENS вирішує D1, Rust лише запускає
         run: cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
       - name: "Process direct W1 D1: full source provenance, all domains and negative mutations"
         run: python3 -m unittest discover -s tests -p test_process_d1_direct.py -v
