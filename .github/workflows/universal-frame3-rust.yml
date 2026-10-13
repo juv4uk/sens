@@ -18,6 +18,7 @@ jobs:
           rustfmt --edition 2021 crates/sens/src/universal_frame3.rs crates/sens/src/frame3_v2.rs
           cargo test -p sens universal_frame3 -- --nocapture
           cargo test -p sens --test frame3_grammar_rank -- --nocapture
+          cargo test --locked -p sens --lib exact_d3_frame3_admission_tests -- --nocapture
           cargo clippy -p sens --lib -- -D warnings
       - name: Frame3 v2 full physical benchmark against T5 and v1
         shell: bash
