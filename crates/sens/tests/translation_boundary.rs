@@ -2,7 +2,7 @@
 //! The translator may propose versioned Lisp data; only Lisp validation and
 //! the existing advice boundary decide whether knowledge is admissible.
 
-use sens::{eval_program, eval_parsed_expressions, parse, parse_mixed_exact_domain, Session};
+use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Session};
 
 fn eval_translation(source: &str) -> String {
     let mut session = Session::default();
@@ -21,8 +21,10 @@ fn eval_translation(source: &str) -> String {
         let forms = parse_mixed_exact_domain(library).expect("точний змішаний читач бібліотеки");
         eval_parsed_expressions(&forms, &mut session).expect("завантаження бібліотеки SENS");
     }
-    eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\nsource: {source}"))
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|e| panic!("розбір точного джерела перекладу: {e}\\nsource: {source}"));
+    eval_parsed_expressions(&expressions, &mut session)
+        .unwrap_or_else(|e| panic!("translation evaluation failed: {e}\\nsource: {source}"))
         .value
         .to_string()
 }
