@@ -296,7 +296,10 @@
        (110
          ((101 (100 term) (001 var))
           (110
-            ((unify-equal? (000000 term) 2) (knowledge-symbol? (1001 term)))
+            ; Конструктор змінної має точну форму (var ім'я): перевіряємо
+            ; cdr/cddr через D3 ATOM, без D6 LENGTH і некваліфікованого числа 2.
+            ((010 (011 term)) (010 (001 (0))))
+            ((010 (011 (011 term))) (knowledge-symbol? (1001 term)))
             ((010 ()) (010 (001 (0))))))
          ((010 ()) (knowledge-terms-valid? term))))
       ((010 ()) (knowledge-terms-valid? term)))))
@@ -316,7 +319,10 @@
       ((0100 (knowledge-symbol? (100 goal))) (010 (001 (0))))
       ((knowledge-not-head? (100 goal))
        (110
-         ((unify-equal? (000000 goal) 2) (knowledge-goal-valid? (1001 goal)))
+         ; not/not? приймають рівно один аргумент. Порожній cdr означає нуль;
+         ; атомарний cddr — рівно один, а пара в cddr — надлишкові аргументи.
+         ((010 (011 goal)) (010 (001 (0))))
+         ((010 (011 (011 goal))) (knowledge-goal-valid? (1001 goal)))
          ((010 ()) (010 (001 (0))))))
       ((010 ()) (knowledge-terms-valid? (011 goal))))))
 
