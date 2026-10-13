@@ -8,35 +8,35 @@
 ; numbers 0..255, so this candidate deliberately skips only the redundant
 ; generic byte-domain pass. UTF-8 sequence interpretation remains in Lisp.
 
-(def proven-byte-profile-path "lib/surface/semantic-registry.lisp")
+(0011 proven-byte-profile-path "lib/surface/semantic-registry.lisp")
 
-(def proven-byte-profile-start (mono-ns))
-(def proven-byte-profile-bytes (read-file-bytes proven-byte-profile-path))
-(def proven-byte-profile-after-bytes (mono-ns))
+(0011 proven-byte-profile-start (mono-ns))
+(0011 proven-byte-profile-bytes (read-file-bytes proven-byte-profile-path))
+(0011 proven-byte-profile-after-bytes (mono-ns))
 
-(def proven-byte-profile-decoded
-  (utf8-decode-onto proven-byte-profile-bytes (quote ())))
-(def proven-byte-profile-after-decode (mono-ns))
+(0011 proven-byte-profile-decoded
+  (utf8-decode-onto proven-byte-profile-bytes (001 ())))
+(0011 proven-byte-profile-after-decode (mono-ns))
 
-(def proven-byte-profile-text
+(0011 proven-byte-profile-text
   (unicode-scalars->string (second proven-byte-profile-decoded)))
-(def proven-byte-profile-after-string (mono-ns))
+(0011 proven-byte-profile-after-string (mono-ns))
 
-(def proven-byte-profile-root (car (read-all proven-byte-profile-text)))
-(def proven-byte-profile-after-read-all (mono-ns))
+(0011 proven-byte-profile-root (100 (read-all proven-byte-profile-text)))
+(0011 proven-byte-profile-after-read-all (mono-ns))
 
 (print
-  (list
-    (quote eco-lisp-script-perf/proven-byte-readfile-candidate)
-    (list (quote read-file-bytes-ns)
-          (- proven-byte-profile-after-bytes proven-byte-profile-start))
-    (list (quote decode-plus-reverse-ns)
-          (- proven-byte-profile-after-decode proven-byte-profile-after-bytes))
-    (list (quote string-assembly-ns)
-          (- proven-byte-profile-after-string proven-byte-profile-after-decode))
-    (list (quote read-all-ns)
-          (- proven-byte-profile-after-read-all proven-byte-profile-after-string))
-    (list (quote total-ns)
-          (- proven-byte-profile-after-read-all proven-byte-profile-start))
-    (list (quote decode-tag) (car proven-byte-profile-decoded))
-    (list (quote root) proven-byte-profile-root)))
+  (1110
+    (001 eco-lisp-script-perf/proven-byte-readfile-candidate)
+    (1110 (001 read-file-bytes-ns)
+          (01011 proven-byte-profile-after-bytes proven-byte-profile-start))
+    (1110 (001 decode-plus-reverse-ns)
+          (01011 proven-byte-profile-after-decode proven-byte-profile-after-bytes))
+    (1110 (001 string-assembly-ns)
+          (01011 proven-byte-profile-after-string proven-byte-profile-after-decode))
+    (1110 (001 read-all-ns)
+          (01011 proven-byte-profile-after-read-all proven-byte-profile-after-string))
+    (1110 (001 total-ns)
+          (01011 proven-byte-profile-after-read-all proven-byte-profile-start))
+    (1110 (001 decode-tag) (100 proven-byte-profile-decoded))
+    (1110 (001 root) proven-byte-profile-root)))
