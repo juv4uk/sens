@@ -12,6 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/understand.lisp"
 TOKENS = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 GUARDED = {"strip-article", "understand", "understand-query"}
+LET_MIGRATED = {
+    "understand-is": ("subject", "after-is"),
+    "understand-universal": ("subject-class", "property"),
+    "understand-query-is": ("subject", "after"),
+}
 FROZEN = {
     "strip-article": "db88279d0f09812f",
     "understand-is": "c496864af8ccff2c",
@@ -87,6 +92,22 @@ def verify_unchanged_laws(forms):
             if not clauses or clauses[0] != [["010", "words"], ["001", []]]:
                 raise AssertionError("непорожній CAR до точного D3 ATOM")
             lam[2].pop(1)
+        if name in LET_MIGRATED:
+            # Незалежно відновлюємо історичну LET форму з нової λ-аплікації.
+            # Доводимо незмінність AST тіла, параметрів і порядку аргументів.
+            application = original[2][2]
+            params = LET_MIGRATED[name]
+            if not (isinstance(application, list) and len(application) == 3
+                    and isinstance(application[0], list)
+                    and len(application[0]) == 3
+                    and application[0][0] == "0010"
+                    and tuple(application[0][1]) == params):
+                raise AssertionError("точна D4 LAMBDA замість невиконуваного D6 LET")
+            lam = application[0]
+            original[2][2] = ["001000",
+                              [[params[0], application[1]],
+                               [params[1], application[2]]],
+                              lam[2]]
         if digest(original) != FROZEN[name]:
             raise AssertionError("історичне тіло змінено: " + name)
     if names != set(FROZEN):
@@ -151,6 +172,20 @@ class UnderstandExactD3Witness(unittest.TestCase):
             mutated[0][2][2][1][0][0] = bad
             with self.assertRaisesRegex(AssertionError, "D3 ATOM"):
                 verify_unchanged_laws(mutated)
+
+    def test_three_d6_let_forms_migrate_to_d4_lambda(self):
+        verify_unchanged_laws(self.forms)
+        self.assertEqual(3 * (6 - 4), 6)  # D6 LET → D4 LAMBDA
+        self.assertEqual(3 * (3 + 3) - 3 * (6 - 4), 12)  # total net
+
+    def test_negative_legacy_d6_let_reintroduction(self):
+        mutated = deepcopy(self.forms)
+        definition = next(form for form in mutated if form[1] == "understand-is")
+        definition[2][2] = ["001000", [["subject", ["100", "words"]],
+                                       ["after-is", ["strip-article", ["0111", "words"]]]],
+                            ["1110", ["1110", ["100", "after-is"], "subject"]]]
+        with self.assertRaisesRegex(AssertionError, "D4 LAMBDA"):
+            verify_unchanged_laws(mutated)
 
     def test_negative_mutated_original_function_body(self):
         mutated = deepcopy(self.forms)
