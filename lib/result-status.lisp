@@ -95,8 +95,11 @@
       ((0100 (result-proper-list? goal)) (001 ()))
       ((0100 (110101100 (100 goal))) (001 ()))
       ((result-not-head? (100 goal))
+       ; A proper (not? goal) has a non-empty cdr and an empty cdr-of-cdr.
+       ; Check that arity structurally: no W8 EQUAL, D6 LENGTH or numeric 2.
        (110
-         ((11110111 (000000 goal) 2)  (result-goal? (1001 goal)))
+         ((010 (011 goal)) (001 ()))
+         ((010 (011 (011 goal))) (result-goal? (1001 goal)))
          ))
       ((010 ()) t))))
 
