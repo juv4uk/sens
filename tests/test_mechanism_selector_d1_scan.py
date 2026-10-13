@@ -200,6 +200,35 @@ class MechanismSelectorWitness(unittest.TestCase):
             self.assertEqual(m.call("mechanism-select", ["00001100", "prolog"]),
                              ["mechanism-selected", "00001100", "prolog", "add"])
 
+    def test_domain_tables_are_exact_width_without_invented_residency(self):
+        # D7 v2 keyboard exposes 128 coordinates; historical owner
+        # occupancy 126/128 is a DIFFERENT admission question.
+        expected = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+        root = SOURCE.parents[1]
+        for width, population in enumerate(expected, 1):
+            with self.subTest(domain=f"D{width}"):
+                table = (root / f"lib/domains/d{width}.lisp").read_text(
+                    encoding="utf-8"
+                )
+                words = re.findall(r"(?m)^  \\(([01]+)\\s", table)
+                self.assertEqual(len(words), population)
+                self.assertEqual(
+                    words,
+                    [format(i, f"0{width}b") for i in range(population)],
+                )
+
+    def test_negative_nine_bit_read_truncation(self):
+        # Викидання старшого біта неприпустиме, навіть якщо W8 має той
+        # самий числовий payload. Це доказ синтаксису, не callability.
+        mutation = self.source.replace("(110101001 ", "(10101001 ", 1)
+        self.assertNotEqual(mutation, self.source)
+        before = re.findall(r"\\(([01]{8,10})(?=[\\s(])", self.source)
+        after = re.findall(r"\\(([01]{8,10})(?=[\\s(])", mutation)
+        self.assertEqual(before.count("110101001"), 2)
+        self.assertEqual(after.count("110101001"), 1)
+        self.assertIn("10101001", after)
+        self.assertNotIn("10101001", before)
+
     def test_d3_d4_d5_d9_operator_widths(self):
         source = self.source
         heads = re.findall(r"\(([01]{3,10})(?=[\s(])", source)
