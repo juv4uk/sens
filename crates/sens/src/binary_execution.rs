@@ -76,7 +76,7 @@ pub fn eval_t5_program(
 #[cfg(test)]
 mod exact_t5_cutover_tests {
     use super::*;
-    use crate::{encode_ternary_words, parse_binary_source_words, ExprKind, Value};
+    use crate::{encode_ternary_words, parse_binary_source_words, ExprKind};
 
     fn physical(source: &str) -> Vec<u8> {
         let words = parse_binary_source_words(source)
@@ -99,8 +99,9 @@ mod exact_t5_cutover_tests {
             ExprKind::DomainCall(crate::CoreDomainIdentity::D3(word), _)
                 if word.word().packed_bits() == 0b001
         ));
+        // Syntax/transport proof only. The meaning of QUOTE is judged by
+        // the binary SENS selftest below, never by a Rust expected value.
         let output = program.execute(&mut Session::default()).expect("pure D3 quote");
-        assert!(matches!(output.value, Value::Nil));
         assert!(output.output.is_empty());
     }
 
@@ -142,5 +143,66 @@ mod exact_t5_cutover_tests {
         let exact = lower_exact_domain_program(&source);
         assert!(matches!(exact[0].kind, ExprKind::List(_)));
         assert!(!matches!(exact[0].kind, ExprKind::Call(_, _)));
+    }
+
+    /// The FULL truth law is executable binary SENS. The host has no
+    /// ATOM/EQ/COND truth table, only a typed D1 verdict transport.
+    #[test]
+    fn sens_owned_binary_d3_logic_selftest_and_one_bit_falsifier() {
+        let passing = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
+        let falsifier = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
+        let good_words = decode_ternary_words(passing).expect("physical SENS selftest T5");
+        let bad_words = decode_ternary_words(falsifier).expect("physical SENS falsifier T5");
+
+        for (physical, words, visible, expected_verdict) in [
+            (passing.as_slice(), &good_words,
+                include_str!("../../../tests/fixtures/semantic/exact-d3-logic-selftest").trim_end(), true),
+            (falsifier.as_slice(), &bad_words,
+                include_str!("../../../tests/fixtures/semantic/exact-d3-logic-mutant").trim_end(), false),
+        ] {
+            assert_eq!(crate::render_ternary_words_spaced(words), visible);
+            assert_eq!(encode_ternary_words(words).unwrap(), physical);
+            let value = eval_t5_program(physical, &mut Session::default())
+                .expect("the binary SENS oracle runs").value;
+            // The entire semantic assertion lives in the executed .sens
+            // program. This checks only its one-bit D1 verdict channel.
+            assert_eq!(value.as_predicate_bit(), Some(expected_verdict));
+        }
+        // The negative program is a one-SEMANTIC-bit mutant, even though
+        // base-3 T5 packing may change multiple physical wire bits.
+        assert_eq!(good_words.len(), bad_words.len());
+        let mutated_bits: u32 = good_words.iter().zip(bad_words.iter())
+            .map(|(a, b)| {
+                assert_eq!(a.width(), b.width(), "domain width cannot mutate");
+                (a.packed_bits() ^ b.packed_bits()).count_ones()
+            }).sum();
+        assert_eq!(mutated_bits, 1, "negative SENS program changes exactly one D1 payload bit");
+    }
+
+    /// 2046 are POSSIBLE exact coordinates, not 2046 admitted functions.
+    /// Rust checks only the physical transport, never defines semantics.
+    #[test]
+    fn all_2046_exact_coordinates_keep_every_bit_without_callability_lift() {
+        use crate::domain_ladder::DomainCoordinate;
+        use crate::ternary_transport::{decode_ternary_coordinates, encode_ternary_coordinates};
+        let mut count = 0usize;
+        let mut semantic_bits = 0usize;
+        for width in 1u8..=10 {
+            for payload in 0u16..(1u16 << width) {
+                let word = DomainCoordinate::new(width, payload).expect("exact source coordinate");
+                let physical = encode_ternary_coordinates(&[word]).expect("physical word");
+                let recovered = decode_ternary_coordinates(&physical).expect("physical decode");
+                assert_eq!(recovered, vec![word], "D{width}, payload={payload}");
+                if width == 10 {
+                    // The current D1-D9 *execution* reader MUST NOT
+                    // silently infer D10 callability from physical data.
+                    assert!(decode_ternary_words(&physical).is_err(), "D10={payload} is not callable");
+                }
+                semantic_bits += usize::from(width);
+                count += 1;
+            }
+        }
+        assert_eq!(count, 2046);
+        assert_eq!(semantic_bits, 18_434);
     }
 }

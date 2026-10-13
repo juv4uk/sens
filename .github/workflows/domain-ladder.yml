@@ -124,6 +124,10 @@ jobs:
         run: python3 scripts/check-d7-current-authority.py
       - name: Перевірити відповідність таблиць D7 ратифікованим координатам
         run: python3 scripts/check-domain-tables.py
+      - name: Нормативна D3-логіка — тільки виконуваний двійковий SENS
+        run: cargo test --locked -p sens --lib binary_execution::exact_t5_cutover_tests::sens_owned_binary_d3_logic_selftest_and_one_bit_falsifier -- --exact --nocapture
+      - name: 2046 координат D1–D10 — виключно механічний перенос бітів
+        run: cargo test --locked -p sens --lib binary_execution::exact_t5_cutover_tests::all_2046_exact_coordinates_keep_every_bit_without_callability_lift -- --exact --nocapture
       - name: Перевірити весь Rust runtime після змін драбини доменів
         run: cargo test --locked -p sens --lib
       - name: Перевірити фізичний native pair execution і fail-closed barrier
