@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from sens_t5_codec import (
     SensT5Error, decode_bytes, encode_projection, encode_words,
-    parse_words, typed_sha256,
+    parse_words, typed_sha256, encode_typed_domain_words,
 )
 
 
@@ -36,6 +36,62 @@ class PhysicalT5CodecTests(unittest.TestCase):
                 word = f"{value:0{width}b}"
                 encoded = encode_projection(word)
                 self.assertEqual(decode_bytes(encoded), [word])
+
+    def test_2046_exact_domain_coordinates_and_256_legacy_sid8_holds(self):
+        # Total capacity D1–D10 is 2046 exact addresses, not 2046
+        # executable functions. D2 is syntax, D7 text; D10 runtime pending.
+        admitted = [
+            (f"D{width}", f"{value:0{width}b}")
+            for width in range(1, 10)
+            for value in range(1 << width)
+        ]
+        self.assertEqual(len(admitted), 1022)
+        self.assertEqual(sum(len(bits) for _domain, bits in admitted), 8194)
+        self.assertEqual(sum(domain == "D7" for domain, _bits in admitted), 128)
+        payload = encode_typed_domain_words(admitted)
+        self.assertEqual(len(payload), 1843)  # 8194 bits + 1021 trit separators
+        self.assertEqual(decode_bytes(payload), [bits for _domain, bits in admitted])
+        self.assertEqual(encode_words(decode_bytes(payload)), payload)
+
+        ten_bit_holds = 0
+        for value in range(1024):
+            word = f"{value:010b}"
+            with self.subTest(domain="D10", word=word):
+                with self.assertRaisesRegex(SensT5Error, "D10_RUNTIME_HOLD"):
+                    encode_typed_domain_words([("D10", word)])
+            ten_bit_holds += 1
+        self.assertEqual(len(admitted) + ten_bit_holds, 2046)
+
+        # Every historical SID8 spelling is source evidence only, not a D8
+        # identity. An explicit SOURCE ERA must precede migration.
+        for old in range(256):
+            with self.subTest(legacy=old):
+                with self.assertRaisesRegex(SensT5Error, "SID8 cannot be inferred"):
+                    encode_typed_domain_words([("SID8", f"{old:08b}")])
+
+    def test_explicit_width_collision_and_corrupt_tag_fail_closed(self):
+        # The same numerical value 65 in D7 text and D8 code is NOT the
+        # same typed machine identity, even though both fit in a host byte.
+        d7 = ("D7", "1000001")
+        d8 = ("D8", "01000001")
+        self.assertEqual(int(d7[1], 2), int(d8[1], 2))
+        self.assertNotEqual(typed_sha256([d7[1]]), typed_sha256([d8[1]]))
+        self.assertNotEqual(encode_typed_domain_words([d7]),
+                            encode_typed_domain_words([d8]))
+        self.assertEqual(decode_bytes(encode_typed_domain_words([d7])), [d7[1]])
+        for case in (
+            [("D7", "01000001")],  # forbidden implicit W8 -> W7
+            [("D8", "1000001")],   # forbidden implicit W7 -> W8
+            [("D7", "1")],
+            [("D3", "012")],
+            [("D11", "00000000000")],
+            [("SID8", "00000001")],
+            [("D10", "0000000000")],
+        ):
+            with self.subTest(case=case), self.assertRaises(SensT5Error):
+                encode_typed_domain_words(case)
+        with self.assertRaises(SensT5Error):
+            encode_typed_domain_words([])
 
     def test_naked_collision_has_distinct_typed_digest(self):
         lhs = ["0", "00"]
