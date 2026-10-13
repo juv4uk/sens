@@ -15,6 +15,36 @@
       "proof_sha": "1513f94f84beb35c63d93b856166ed665f7d9e5a",
       "description": "Escaping in the transported Python regex incorrectly rejected valid GitHub workflow run URLs; first red had four matching metadata test failures.",
       "remediation": "Restored single-backslash regex escapes; same scoped CI ran all tests successfully at proof_sha."
+    },
+    {
+      "run_id": 38459322202,
+      "run_url": "https://github.com/juv4uk/sens/actions/runs/38459322202",
+      "first_seen_at": "2026-10-13T20:00:14Z",
+      "cause": "LEGACY_BINDING",
+      "stamp": "REGRESSION",
+      "owner": "swarm",
+      "state": "open",
+      "legacy_marker": "english-surface",
+      "provenance": "benchmarks/cross-language/reality-matrix/rust/run.py at failed head 45fdf58c72ae1143eec6b85a9159edf97065d0cb; D3 English surface is not callable under current ratified source law",
+      "description": "Rust smoke blocked before timing in current_en_vs_d1d8_cpu english-surface preflight; exit=2. Neither performance regression nor evidence of incorrect SENS evaluation.",
+      "fix_candidate_sha": "116a9459e2010cd181c79cf2897449f86958bef1",
+      "reproduce": "python3 benchmarks/cross-language/reality-matrix/rust/run.py --out-dir /tmp/sens-rust-reality --outer-reps 1 --inner-repeats 1",
+      "verification_needed": "Manually execute current Ubuntu hosted workflow_dispatch rust smoke and confirm SENS Ukrainian/canonical trace, value and output parity. Do not mark resolved from central CI alone."
+    },
+    {
+      "run_id": 38459343086,
+      "run_url": "https://github.com/juv4uk/sens/actions/runs/38459343086",
+      "first_seen_at": "2026-10-13T20:00:22Z",
+      "cause": "LEGACY_BINDING",
+      "stamp": "REGRESSION",
+      "owner": "swarm",
+      "state": "open",
+      "legacy_marker": "english-surface",
+      "provenance": "benchmarks/cross-language/reality-matrix/wasm/run.py at failed head 45fdf58c72ae1143eec6b85a9159edf97065d0cb; D3 English surface is not callable under current ratified source law",
+      "description": "WebAssembly smoke blocked before timing in current_en_vs_d1d8_cpu english-surface preflight; exit=2. No Wasm benchmark comparison took place.",
+      "fix_candidate_sha": "116a9459e2010cd181c79cf2897449f86958bef1",
+      "reproduce": "python3 benchmarks/cross-language/reality-matrix/wasm/run.py --out-dir /tmp/sens-wasm-reality --outer-reps 1 --inner-repeats 1",
+      "verification_needed": "Manually execute current Ubuntu hosted workflow_dispatch wasm smoke and confirm Ukrainian/canonical SENS parity with Wasm control; record exact proof run SHA before declaring resolved."
     }
   ]
 }
