@@ -5,12 +5,18 @@ on:
     branches: [main]
     paths:
       - "crates/sens/tests/current_binary_preflight.rs"
+      - "lib/process.lisp"
+      - "crates/sens/tests/process_d1_reflection.rs"
+      - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
       - ".github/workflows/preflight-process-reader.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/tests/current_binary_preflight.rs"
+      - "lib/process.lisp"
+      - "crates/sens/tests/process_d1_reflection.rs"
+      - "tests/test_process_d1_predicate_cutover.py"
       - "crates/sens/src/mixed_source.rs"
       - ".github/workflows/preflight-process-reader.yml"
   workflow_dispatch:
@@ -25,5 +31,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Незалежний AST-тест п'яти заперечень D1
+        run: python3 -m unittest discover -s tests -p test_process_d1_predicate_cutover.py -v
+      - name: Незалежний Rust-тест D4 NOT та D3 EQ без D24+
+        run: cargo test --locked -p sens --test process_d1_reflection -- --nocapture
       - name: Позитивний і негативний exact-domain process reader preflight
         run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture

@@ -20,7 +20,7 @@
 (0011 process-result->text
   (0010 (raw)
     (110
-      ((тотожне? (101 (100 raw) (001 process-result)) ні)
+      ((0100 (101 (100 raw) (001 process-result)))
        (1110 (001 rejected) (001 invalid-process-result)))
       ((101 (100 raw) (001 process-result))
        
@@ -29,12 +29,12 @@
               (stderr-result
                 (utf8-decode-string (process-raw-stderr-bytes raw))))
          (110
-           ((тотожне? (101 (100 stdout-result) (001 decoded)) ні)
+           ((0100 (101 (100 stdout-result) (001 decoded)))
             (1110 (001 rejected) (001 stdout-invalid-utf8)))
            ((101 (100 stdout-result) (001 decoded))
             
             (110
-              ((тотожне? (101 (100 stderr-result) (001 decoded)) ні)
+              ((0100 (101 (100 stderr-result) (001 decoded)))
                (1110 (001 rejected) (001 stderr-invalid-utf8)))
               ((101 (100 stderr-result) (001 decoded))
                
@@ -60,7 +60,7 @@
   (0010 (code)
     (110
       ((101 code (001 ()))  -1)
-      ((тотожне? (101 code (001 ())) ні) code))))
+      ((0100 (101 code (001 ()))) code))))
 
 (0011 process-run
   (0010 (program args)
@@ -72,7 +72,7 @@
            (process-public-exit-code (1001 result))
            (10011 result)
            (100 (011 (011 (011 result))))))
-        ((тотожне? (101 (100 result) (001 decoded-process)) ні)
+        ((0100 (101 (100 result) (001 decoded-process)))
          result)))))
 
 
