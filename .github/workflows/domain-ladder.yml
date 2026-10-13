@@ -113,6 +113,8 @@ jobs:
         run: cargo test --locked -p sens --test physical_t5_execution
       - name: Перевірити, що заповнення D3–D10 походить лише з ратифікованих карт
         run: python3 scripts/generate-domain-owner-registry.py --check
+      - name: Вичерпний свідок D7 v2 — ширина, заповнення та відмова на мутаціях
+        run: python3 -m unittest discover -s tests -p 'test_d7_owner_generator_v2.py' -v
       - name: Перевірити фізичне заповнення D8/D9 без допуску до семантичного виконання
         run: >-
           cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
