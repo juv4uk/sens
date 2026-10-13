@@ -31,7 +31,7 @@ use crate::Bit9;
 ///
 /// Unused low bits in the final byte, when any, are always zero and are not
 /// part of the payload. No padding exists between words.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PackedBitstream {
     bytes: Vec<u8>,
     bit_len: usize,
@@ -178,6 +178,33 @@ impl PackedBitstream {
         DomainCoordinate::new(width, self.read_bounded_window(bit_offset, usize::from(width))?)
     }
 
+    /// Read a bounded MSB-first chunk without interpreting its semantic role.
+    ///
+    /// This is a private transport helper for stream concatenation. The caller
+    /// supplies the exact chunk width; the byte payload never determines it.
+    fn read_chunk(&self, bit_offset: usize, width: usize) -> Option<u8> {
+        if width == 0 || width > 8 {
+            return None;
+        }
+        let end = bit_offset.checked_add(width)?;
+        if end > self.bit_len {
+            return None;
+        }
+
+        let byte_index = bit_offset / 8;
+        let bit_in_byte = bit_offset % 8;
+        let first = u16::from(*self.bytes.get(byte_index)?);
+        let second = if bit_in_byte + width > 8 {
+            u16::from(*self.bytes.get(byte_index + 1)?)
+        } else {
+            0
+        };
+        let window = (first << 8) | second;
+        let shift = 16 - bit_in_byte - width;
+        let mask = (1u16 << width) - 1;
+        Some(((window >> shift) & mask) as u8)
+    }
+
     /// Split the mechanical container into its physical payload and exact bit
     /// count. The returned byte vector alone is not a complete identity.
     pub fn into_parts(self) -> (Vec<u8>, usize) {
@@ -269,6 +296,79 @@ impl BitPacker {
     /// This mechanism never infers domain identity from the numeric payload.
     pub fn push_coordinate(&mut self, coordinate: DomainCoordinate) -> usize {
         self.append_exact_window(usize::from(coordinate.width()), coordinate.bits())
+    }
+
+    /// Append an already-canonical bitstream without inserting alignment.
+    ///
+    /// The exact source bit length is authoritative: low tail bits in the
+    /// source's final byte are not copied as payload. Full bytes are copied
+    /// directly when both streams are aligned; all other cases copy bounded
+    /// chunks while preserving MSB-first order. The caller retains the domain
+    /// width schedule separately; this operation invents no word boundaries.
+    ///
+    /// Returns the starting bit offset, or `None` before modifying the
+    /// destination if the resulting length or allocation reservation fails.
+    pub fn push_stream(&mut self, source: &PackedBitstream) -> Option<usize> {
+        let start = self.bit_len;
+        let end = start.checked_add(source.bit_len)?;
+        let final_byte_len = byte_len_for_bits(end);
+        let additional_bytes = final_byte_len.checked_sub(self.bytes.len())?;
+        self.bytes.try_reserve(additional_bytes).ok()?;
+
+        if source.bit_len == 0 {
+            return Some(start);
+        }
+
+        // The common aligned case needs no per-bit or per-chunk operations.
+        if start % 8 == 0 && source.bit_len % 8 == 0 {
+            self.bytes.extend_from_slice(&source.bytes);
+            self.bit_len = end;
+            return Some(start);
+        }
+
+        // If the destination starts aligned, complete source bytes can be
+        // copied as-is even when the source has a final partial byte.
+        let whole_bytes = if start % 8 == 0 {
+            source.bit_len / 8
+        } else {
+            0
+        };
+        if whole_bytes != 0 {
+            self.bytes.extend_from_slice(&source.bytes[..whole_bytes]);
+            self.bit_len += whole_bytes * 8;
+        }
+
+        let mut source_offset = whole_bytes * 8;
+        while source_offset < source.bit_len {
+            let width = (source.bit_len - source_offset).min(8);
+            let chunk = source
+                .read_chunk(source_offset, width)
+                .expect("a validated stream contains every bounded chunk in its exact bit length");
+            self.push_chunk(chunk, width);
+            source_offset += width;
+        }
+
+        debug_assert_eq!(self.bit_len, end);
+        Some(start)
+    }
+
+    /// Append one bounded MSB-first chunk. `width` is checked by the caller.
+    fn push_chunk(&mut self, chunk: u8, width: usize) {
+        debug_assert!((1..=8).contains(&width));
+        let end = self.bit_len + width;
+        self.bytes.resize(byte_len_for_bits(end), 0);
+
+        let bit_in_byte = self.bit_len % 8;
+        let first_byte = self.bit_len / 8;
+        if bit_in_byte + width <= 8 {
+            self.bytes[first_byte] |= chunk << (8 - bit_in_byte - width);
+        } else {
+            let fits = 8 - bit_in_byte;
+            self.bytes[first_byte] |= chunk >> (width - fits);
+            let remaining = width - fits;
+            self.bytes[first_byte + 1] |= chunk << (8 - remaining);
+        }
+        self.bit_len = end;
     }
 
     /// Finish packing without adding any semantic padding or delimiter.
@@ -708,42 +808,67 @@ mod tests {
     }
 
     #[test]
-    fn three_byte_window_preserves_d10_and_reports_every_bit_of_cost() {
-        // 7 + 10 + 3 = 20 біт, рівно три байти і лише 4 кінцеві
-        // невикористані біти. Жодного вирівнювання між координатами.
-        let d10 = DomainCoordinate::new(10, 0b10_1010_0101).unwrap();
-        let d3 = DomainCoordinate::new(3, 0b111).unwrap();
+    fn stream_concatenation_preserves_all_domain_bits_at_every_byte_offset() {
+        // Include every D1-D10 coordinate, including all 1024 D10 payloads.
+        // The width schedule stays here as grammar/test data, not in the stream.
+        let mut source_packer = BitPacker::new();
+        for width in 1u8..=10 {
+            for bits in 0u16..(1u16 << width) {
+                source_packer.push_coordinate(
+                    DomainCoordinate::new(width, bits).expect("coordinate fits its width"),
+                );
+            }
+        }
+        let source = source_packer.finish();
+
+        for prefix in 0..8usize {
+            let mut destination = BitPacker::new();
+            for index in 0..prefix {
+                destination.push(crate::Bit1::new((index % 2) as u8).unwrap());
+            }
+
+            let start = destination
+                .push_stream(&source)
+                .expect("the finite bitstream length must fit");
+            assert_eq!(start, prefix);
+            let joined = destination.finish();
+            assert_eq!(joined.bit_len(), prefix + source.bit_len());
+            assert_eq!(joined.byte_len(), (joined.bit_len() + 7) / 8);
+            assert!(PackedBitstream::from_parts(
+                joined.bytes().to_vec(),
+                joined.bit_len()
+            ).is_some(), "joined tail must be canonical");
+
+            for index in 0..source.bit_len() {
+                assert!(
+                    joined.read::<1>(start + index) == source.read::<1>(index),
+                    "bit {index} changed when concatenated after prefix length {prefix}",
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn stream_concatenation_handles_empty_aligned_and_partial_tail_inputs() {
+        let empty = PackedBitstream::from_parts(Vec::new(), 0).unwrap();
+        let aligned = PackedBitstream::from_parts(
+            vec![0b1010_1100, 0b0111_0001],
+            16,
+        ).unwrap();
+        let partial = PackedBitstream::from_parts(vec![0b1010_1000], 5).unwrap();
+
         let mut packer = BitPacker::new();
-        let prefix = packer.push(crate::Bit7::new(0b1010101).unwrap());
-        let middle = packer.push_coordinate(d10);
-        let suffix = packer.push_coordinate(d3);
-        let packed = packer.finish();
+        assert_eq!(packer.push_stream(&empty), Some(0));
+        assert_eq!(packer.push_stream(&aligned), Some(0));
+        assert_eq!(packer.push_stream(&partial), Some(16));
 
-        assert_eq!((prefix, middle, suffix), (0, 7, 17));
-        assert_eq!(packed.bit_len(), 20, "семантичні біти: 7+10+3");
-        assert_eq!(packed.byte_len(), 3, "не три байти на слово");
-        assert_eq!(packed.valid_bits_in_last_byte(), 4);
-        assert_eq!(packed.read_coordinate(middle, 10), Some(d10));
-        assert_eq!(packed.read_coordinate(suffix, 3), Some(d3));
-        assert_eq!(packed.read_coordinate(middle, 9).unwrap().width(), 9,
-                   "ширину задає граматика, не випадковий payload");
-
-        // Пошкодження сусіднього D3 змінює лише D3, а не десять бітів D10.
-        let (bytes, bit_len) = packed.into_parts();
-        let mut neighbor_changed = bytes.clone();
-        neighbor_changed[2] ^= 0b0100_0000;
-        let neighbor = PackedBitstream::from_parts(neighbor_changed, bit_len).unwrap();
-        assert_eq!(neighbor.read_coordinate(middle, 10), Some(d10));
-        assert_ne!(neighbor.read_coordinate(suffix, 3), Some(d3));
-
-        // Невикористаний четвертий молодший біт не стає ще одним словом.
-        let mut bad_padding = bytes;
-        bad_padding[2] |= 1;
-        assert!(PackedBitstream::from_parts(bad_padding, bit_len).is_none());
-        assert!(neighbor.read_coordinate(middle + 1, 10).is_some(),
-                "читач голих бітів не знає меж: лише явний розклад ширин");
-        assert!(neighbor.read_coordinate(suffix + 1, 3).is_none(),
-                "за межами двадцяти змістових бітів читання заборонене");
+        let joined = packer.finish();
+        assert_eq!(joined.bit_len(), 21);
+        assert_eq!(joined.read::<8>(0).unwrap().packed_bits(), 0b1010_1100);
+        assert_eq!(joined.read::<8>(8).unwrap().packed_bits(), 0b0111_0001);
+        assert_eq!(joined.read::<5>(16).unwrap().packed_bits(), 0b10101);
+        assert!(joined.read::<1>(21).is_none());
+        assert!(PackedBitstream::from_parts(joined.bytes().to_vec(), joined.bit_len()).is_some());
     }
 
     #[test]
