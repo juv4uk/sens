@@ -37,8 +37,8 @@
          ((010 (011 (011 value))) (010 (001 (0))))
          ((010 (011 (011 (011 value)))) (010 (001 (0))))
          ((0101 (011 (011 (011 (011 value))))) (010 ()))
-         ((010 ()) (010 (001 (0))))))
-      ((010 ()) (010 (001 (0)))))))
+         (#d1:1 (010 (001 (0))))))
+      (#d1:1 (010 (001 (0)))))))
 
 (0011 world-parent (0010 (world) (1001 world)))
 (0011 world-journal (0010 (world) (10011 world)))
@@ -74,7 +74,7 @@
       ((010 events) (001 ()))
       ((101 (1001 (100 events)) module-name)
        (111 (100 events) (внутрішні-події-модуля module-name (011 events))))
-      ((010 ()) (внутрішні-події-модуля module-name (011 events))))))
+      (#d1:1 (внутрішні-події-модуля module-name (011 events))))))
 
 (0011 world-module-events
   (0010 (world module-name)
@@ -88,7 +88,7 @@
       ((0101 values) (001 ()))
       ((010 values) (001 ()))
       ((внутрішня-рівність-версій value (100 values)) (011 values))
-      ((010 ()) (111 (100 values) (world-remove-first value (011 values)))))))
+      (#d1:1 (111 (100 values) (world-remove-first value (011 values)))))))
 
 (0011 world-apply-event
   (0010 (clauses event)
@@ -96,7 +96,7 @@
       ((101 (100 event) (001 tell)) (111 (10011 event) clauses))
       ((101 (100 event) (001 retract))
        (world-remove-first (10011 event) clauses))
-      ((010 ()) clauses))))
+      (#d1:1 clauses))))
 
 ; D4 NOT of the D3 ATOM predicate: a module is known only when its
 ; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
@@ -115,14 +115,14 @@
     (110
       ((0101 events) acc)
       ((010 events) acc)
-      ((010 ()) (внутрішній-зворот-подій (011 events) (111 (100 events) acc))))))
+      (#d1:1 (внутрішній-зворот-подій (011 events) (111 (100 events) acc))))))
 
 (0011 внутрішнє-згортання-подій
   (0010 (events clauses)
     (110
       ((0101 events) clauses)
       ((010 events) clauses)
-      ((010 ()) (внутрішнє-згортання-подій
+      (#d1:1 (внутрішнє-згортання-подій
                   (011 events)
                   (world-apply-event clauses (100 events)))))))
 
@@ -163,7 +163,7 @@
       ((0101 value) (0101 (001 (0))))
       ((0100 (010 value)) (0101 (001 (0))))
       ((101 value (11101101 (11110100 value))) (0101 (001 ())))
-      ((010 ()) (0101 (001 (0)))))))
+      (#d1:1 (0101 (001 (0)))))))
 
 (0011 advice-decision-in-world
   (0010 (world module-name clause)
@@ -172,7 +172,7 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clause)))
       ((101 (knowledge-clause-valid? clause) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
-      ((010 ())
+      (#d1:1
        (нехай-похідне ((opposite (opposite-knowledge-head (100 clause))))
          (нехай-похідне ((proofs (110
                          ((world-module-known? world module-name)
@@ -183,7 +183,7 @@
              ((010 proofs)  (1110 (001 accepted)
                     (1110 (001 module) module-name)
                     (1110 (001 knowledge) clause)))
-             ((010 ())
+             (#d1:1
               (1110 (001 conflict)
                     (1110 (001 new) clause)
                     (1110 (001 existing) opposite)
@@ -195,7 +195,7 @@
       (110
         ((101 (100 decision) (001 accepted))
          (1110 decision (world-tell world module-name clause)))
-        ((010 ()) (1110 decision world))))))
+        (#d1:1 (1110 decision world))))))
 
 ;; The batch form creates exactly one child world after the whole proposed
 ;; knowledge set validates and proves conflict-free. Proposed rules can support
@@ -215,7 +215,7 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
-      ((010 ())
+      (#d1:1
        (нехай-похідне ((existing (110
                          ((world-module-known? world module-name)
                           (world-clauses world module-name))
@@ -227,7 +227,7 @@
              ((010 conflict)  (1110 (001 accepted)
                     (1110 (001 module) module-name)
                     (1110 (001 knowledge) clauses)))
-             ((010 ())
+             (#d1:1
               (1110 (001 conflict)
                     (1110 (001 new) (100 conflict))
                     (1110 (001 existing) (1001 conflict))
@@ -310,7 +310,7 @@
       (110
         ((101 (100 decision) (001 accepted))
          (1110 decision (world-tell-all world module-name clauses)))
-        ((010 ()) (1110 decision world))))))
+        (#d1:1 (1110 decision world))))))
 
 ;; A guarded compatibility transition must be evaluated exactly once. `let`
 ;; cannot hold it because `def` would then update a disposable lambda frame, so
@@ -379,7 +379,7 @@
          (110
            
            ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-           ((010 ()) (make-knowledge-package module-name clauses))))))))
+           (#d1:1 (make-knowledge-package module-name clauses))))))))
 
 ; The knowledge package version is structured data (0 1), not an
 ; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
@@ -391,11 +391,11 @@
       ((010 left)
        (110
          ((010 right) (101 left right))
-         ((010 ()) (0101 (001 (0))))))
+         (#d1:1 (0101 (001 (0))))))
       ((010 right) (0101 (001 (0))))
       ((внутрішня-рівність-версій (100 left) (100 right))
        (внутрішня-рівність-версій (011 left) (011 right)))
-      ((010 ()) (0101 (001 (0)))))))
+      (#d1:1 (0101 (001 (0)))))))
 
 (0011 import-knowledge-package-world
   (0010 (world package)
@@ -422,13 +422,13 @@
           (advise-all-world world
                             (knowledge-package-field (001 module) package)
                             (knowledge-package-field (001 clauses) package)))
-         ((010 ())
+         (#d1:1
           (1110 (1110 (001 rejected)
                       (1110 (001 reason) (001 unsupported-version))
                       (1110 (001 version)
                             (knowledge-package-field (001 version) package)))
                 world))))
-      ((010 ())
+      (#d1:1
        (1110 (1110 (001 rejected)
                    (1110 (001 reason) (001 invalid-package))
                    (1110 (001 input) package))
@@ -468,16 +468,16 @@
     (110
       
       ((010 (world-parent world))  0)
-      ((010 ()) (01010 1 (world-depth (world-parent world)))))))
+      (#d1:1 (01010 1 (world-depth (world-parent world)))))))
 
 (0011 world-at-depth-from
   (0010 (world current-depth target-depth)
     (110
       ((101 current-depth target-depth)  world)
-      ((010 ()) (001 World-not-found))
+      (#d1:1 (001 World-not-found))
       
       ((010 (world-parent world))  (001 World-not-found))
-      ((010 ()) (world-at-depth-from (world-parent world)
+      (#d1:1 (world-at-depth-from (world-parent world)
                               (01011 current-depth 1)
                               target-depth)))))
 
@@ -485,7 +485,7 @@
   (0010 (world target-depth)
     (110
       ((11010 target-depth 0)  (001 World-not-found))
-      ((010 ()) (world-at-depth-from world (world-depth world) target-depth)))))
+      (#d1:1 (world-at-depth-from world (world-depth world) target-depth)))))
 
 (0011 world-journal-prefix
   (0010 (journal old-journal)
@@ -493,11 +493,11 @@
       ((внутрішня-рівність-версій journal old-journal) (001 ()))
       
       ((010 journal)  (001 World-not-ancestor))
-      ((010 ())
+      (#d1:1
        (нехай-похідне ((rest (world-journal-prefix (011 journal) old-journal)))
          (110
            ((world-not-ancestor? rest) rest)
-           ((010 ()) (111 (100 journal) rest))))))))
+           (#d1:1 (111 (100 journal) rest))))))))
 
 (0011 world-not-ancestor?
   (0010 (value)
@@ -512,18 +512,18 @@
       ((внутрішня-рівність-версій from to) (001 ()))
       
       ((010 (world-parent to))  (001 World-not-ancestor))
-      ((010 ())
+      (#d1:1
        (нехай-похідне ((earlier (world-diff from (world-parent to))))
          (110
            ((world-not-ancestor? earlier) earlier)
-           ((010 ())
+           (#d1:1
             (нехай-похідне ((transition
                     (world-journal-prefix
                       (world-journal to)
                       (world-journal (world-parent to)))))
               (110
                 ((world-not-ancestor? transition) transition)
-                ((010 ()) (1111 earlier transition)))))))))))
+                (#d1:1 (1111 earlier transition)))))))))))
 
 ;; Branch comparison stops before merge policy. First align both histories to
 ;; the same absolute depth, then walk parents together until their values are
@@ -544,7 +544,7 @@
   (0010 (world current-depth target-depth)
     (110
       ((101 current-depth target-depth)  world)
-      ((010 ()) (world-climb-to-depth (world-parent world)
+      (#d1:1 (world-climb-to-depth (world-parent world)
                                (01011 current-depth 1)
                                target-depth)))))
 
@@ -553,10 +553,10 @@
     (110
       ((внутрішня-рівність-версій left right) left)
       
-      ((010 ()) (001 World-no-common-ancestor))
+      (#d1:1 (001 World-no-common-ancestor))
       
       ((010 (world-parent right))  (001 World-no-common-ancestor))
-      ((010 ()) (world-common-ancestor-aligned (world-parent left)
+      (#d1:1 (world-common-ancestor-aligned (world-parent left)
                                         (world-parent right))))))
 
 (0011 world-common-ancestor
@@ -565,7 +565,7 @@
           (right-depth (world-depth right)))
       (нехай-похідне ((target-depth (110
                             ((11010 left-depth right-depth)  left-depth)
-                            ((010 ()) right-depth))))
+                            (#d1:1 right-depth))))
         (world-common-ancestor-aligned
           (world-climb-to-depth left left-depth target-depth)
           (world-climb-to-depth right right-depth target-depth))))))
@@ -582,7 +582,7 @@
     (нехай-похідне ((base (world-common-ancestor left right)))
       (110
         ((world-no-common-ancestor? base) base)
-        ((010 ())
+        (#d1:1
          (1110 (1110 (001 base) base)
                (1110 (001 left) (world-diff base left))
                (1110 (001 right) (world-diff base right))))))))
