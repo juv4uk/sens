@@ -26,18 +26,3 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
       - name: UTF-8 semantic regression
         run: cargo test --locked -p sens --test utf8 --test utf8_stack --no-fail-fast -- --nocapture
-
-  atomic-domain-equality:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      CARGO_BUILD_JOBS: "1"
-      RUST_TEST_THREADS: "1"
-      RUST_MIN_STACK: "33554432"
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - name: 256 байтів × 5 границь × точний D3 та D1
-        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries -- --exact --nocapture
-      - name: D3 відхиляє списки, D8 лишається без механізму
-        run: cargo test --locked -p sens --test utf8 utf8_d3_eq_rejects_nonatoms_and_d8_equal_remains_unadmitted -- --exact --nocapture
