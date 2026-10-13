@@ -106,11 +106,11 @@ def failure(layer: str, path: str, command: list[str], rc: int, out: bytes,
 
     raw = (ROOT / path).read_bytes() if (ROOT / path).is_file() else b""
     if wanted == "D1:YES":
-        expected, actual = b"1\\n", out
+        expected, actual = b"1\n", out
     elif wanted == "noncallable":
         expected, actual = b"not callable", stderr
     else:
-        expected, actual = b"exit=0", f"exit={rc}".encode("ascii") + b"\\n" + out
+        expected, actual = b"exit=0", f"exit={rc}".encode("ascii") + b"\n" + out
 
     offset = next(
         (i for i in range(max(len(expected), len(actual)))
@@ -169,7 +169,7 @@ def execute() -> int:
         return failure("transport", PROOF, build, rc, out, err, "exit=0")
     positive = ["target/debug/sens", PROOF]
     rc, out, err = run(positive, 90)
-    if rc or out != b"1\\n":
+    if rc or out != b"1\n":
         return failure("eval", PROOF, positive, rc, out, err, "D1:YES")
     negative = ["target/debug/sens", MUTANT]
     bad_rc, bad_out, bad_err = run(negative, 90)
