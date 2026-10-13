@@ -1,4 +1,7 @@
-name: Двійковий SENS визначає точну D3 EQ у narrate
+# КАРАНТИН 2026-10-13: тестові очікування D3 EQ не підтверджені канонічним SENS.
+# Причина: некоректний тестовий контракт. Відновлення — лише після явної перевірки.
+# Доказ: https://github.com/juv4uk/sens/actions/runs/38451690826
+name: КАРАНТИН — D3 EQ narrate (недовірені тести)
 
 on:
   workflow_dispatch:
@@ -8,6 +11,8 @@ permissions:
 
 jobs:
   narrate-d3-exact:
+    # Карантин без виділення runner: тестові очікування потребують перевірки SENS-оракулом.
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
