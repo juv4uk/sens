@@ -137,8 +137,11 @@ def verify():
                 raise ValueError("порожні тригери")
             automatic = set(found) - {"workflow_dispatch", "workflow_call"}
             if path.name == "ci.yml":
-                if automatic != {"push"}:
-                    raise ValueError(f"очікується єдиний push для всіх гілок: {sorted(automatic)}")
+                if automatic != {"push", "pull_request"}:
+                    raise ValueError(
+                        "очікується один централізований автоматичний workflow "
+                        "для push усіх гілок і pull_request: " + str(sorted(automatic))
+                    )
                 block = found["push"]
                 if not re.search(r"^\s+branches:\s*\['\*\*'\]\s*$", block, re.M):
                     raise ValueError("push мусить охоплювати всі гілки без винятків")
