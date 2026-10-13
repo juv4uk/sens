@@ -79,6 +79,7 @@ def machine_word(number: int, width: int) -> str:
     return word.zfill(width)
 
 
+# projection-human: explicit D24+ numeric/UI boundary; never a D1-D10 identity.
 def human_number(word: str, *, domain_width: int) -> int:
     """Decimal UI output only for an explicitly typed exact D24+ natural.
 

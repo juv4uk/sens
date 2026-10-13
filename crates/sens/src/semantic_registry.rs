@@ -302,7 +302,8 @@ pub(crate) fn surface_for_domain_identity(
         .find_map(|surface| (surface.namespace == namespace).then_some(surface.name))
 }
 pub(crate) fn semantic_id_bits(semantic_id: LegacyRegistrySlot) -> String {
-    semantic_id.to_string()
+    // Pin visible serialization to eight binary digits instead of generic Display.
+    format!("{:08b}", semantic_id.packed_byte())
 }
 
 fn live_rows() -> &'static [SemanticRow] {

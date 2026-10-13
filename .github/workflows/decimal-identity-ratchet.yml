@@ -1,0 +1,21 @@
+name: Decimal identity bridge ratchet
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-width-ratchet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Static policy witness for identity paths
+        run: cargo test --locked -p sens --test identity_decimal_ratchet -- --nocapture
+      - name: Compiler export retains exact typed D3/D4 words
+        run: cargo test --locked -p xtask -- --nocapture
+      - name: Existing exact-width canaries remain in force
+        run: cargo test --locked -p sens --test domain_ladder_source_words --test domain_width_authority_test -- --nocapture

@@ -5,8 +5,8 @@
 //! raw coordinates itself.
 
 use sens::{
-    compiler_semantic_input_from_sens, sha256_source, Bija3, Bit3, Bit4, CompilerLoweringRole,
-    CompilerSemanticInput, CoreD4, CoreDomainIdentity,
+    compiler_semantic_input_from_sens, parse_binary_source_words, sha256_source, Bija3,
+    BinarySourceWord, CompilerLoweringRole, CompilerSemanticInput, CoreD4, CoreDomainIdentity,
 };
 use std::path::Path;
 
@@ -66,30 +66,29 @@ fn parse_identity(domain: &str, bits: &str) -> Result<CoreDomainIdentity, String
         return Err(format!("invalid compiler identity bits {bits:?}"));
     }
 
-    match domain {
-        "D3" => {
-            if bits.len() != 3 {
-                return Err(format!("D3 compiler identity requires 3 bits, got {bits:?}"));
-            }
-            let raw = u8::from_str_radix(bits, 2)
-                .map_err(|_| format!("invalid D3 compiler identity {bits:?}"))?;
-            Ok(CoreDomainIdentity::D3(Bija3::from_word(
-                Bit3::new(raw).ok_or_else(|| format!("invalid D3 value {raw}"))?,
-            )))
-        }
-        "D4" => {
-            if bits.len() != 4 {
-                return Err(format!("D4 compiler identity requires 4 bits, got {bits:?}"));
-            }
-            let raw = u8::from_str_radix(bits, 2)
-                .map_err(|_| format!("invalid D4 compiler identity {bits:?}"))?;
-            Ok(CoreDomainIdentity::D4(CoreD4::from_word(
-                Bit4::new(raw).ok_or_else(|| format!("invalid D4 value {raw}"))?,
-            )))
-        }
-        other => Err(format!(
+    // Validate width before parsing and retain it in BinarySourceWord.
+    // No untyped integer sits between the visible bits and the D3/D4 carrier.
+    match (domain, bits.len()) {
+        ("D3", 3) | ("D4", 4) => {}
+        ("D3", _) => return Err(format!("D3 compiler identity requires 3 bits, got {bits:?}")),
+        ("D4", _) => return Err(format!("D4 compiler identity requires 4 bits, got {bits:?}")),
+        (other, _) => return Err(format!(
             "unsupported compiler export domain {other:?}; only current D3/D4 are admitted"
         )),
+    }
+
+    let tokens = parse_binary_source_words(bits)
+        .map_err(|_| format!("invalid compiler identity bits {bits:?}"))?;
+    if tokens.len() != 1 {
+        return Err(format!("compiler identity must be one exact binary word: {bits:?}"));
+    }
+
+    match (domain, tokens[0].word) {
+        ("D3", BinarySourceWord::W3(word)) => Ok(CoreDomainIdentity::D3(Bija3::from_word(word))),
+        ("D4", BinarySourceWord::W4(word)) => Ok(CoreDomainIdentity::D4(CoreD4::from_word(word))),
+        ("D3", _) => Err(format!("D3 source reader lost exact width: {bits:?}")),
+        ("D4", _) => Err(format!("D4 source reader lost exact width: {bits:?}")),
+        (other, _) => Err(format!("unsupported compiler export domain {other:?}")),
     }
 }
 
