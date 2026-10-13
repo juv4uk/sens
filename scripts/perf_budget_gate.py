@@ -14,6 +14,7 @@ SCHEMA = "sens-perf-budget-ratchet/v1"
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 CASE = re.compile(r"^[a-z][a-z0-9-]*$")
+LOCATION = re.compile(r"^[A-Za-z0-9_./-]+:[1-9][0-9]*$")
 LAYERS = {"parse", "eval", "encode", "transport"}
 EVIDENCE_FIELDS = {
     "git_sha", "rustc", "valgrind", "machine",
@@ -103,8 +104,11 @@ def evaluate(policy: dict, env: dict, rows: dict[str, dict],
     for row in budgets:
         require(isinstance(row, dict), "PERF-BUDGET-BAD-CONTRACT", "invalid row")
         case, layer = row.get("case"), row.get("layer")
+        location = row.get("source_location")
         require(isinstance(case, str) and CASE.fullmatch(case) is not None
-                and case not in named and layer in LAYERS,
+                and case not in named and layer in LAYERS
+                and isinstance(location, str) and LOCATION.fullmatch(location) is not None
+                and ".." not in location.split(":", 1)[0].split("/"),
                 "PERF-BUDGET-BAD-CONTRACT", f"duplicate/invalid case={case}")
         named.add(case)
         limit = row.get("max_net_irefs_per_iteration")
@@ -120,14 +124,14 @@ def evaluate(policy: dict, env: dict, rows: dict[str, dict],
         total_observed += actual
         total_excess += excess
         state = "PERF-BUDGET-EXCEEDED" if excess else "PASS"
-        record = (f"{state} case={case} layer={layer} observed_ir_per_op={actual:.6f} "
+        record = (f"{state} case={case} layer={layer} source_location={location} observed_ir_per_op={actual:.6f} "
                   f"budget_ir_per_op={limit:.6f} delta_ir_per_op={delta:+.6f} "
                   f"source_sha={env['git_sha']} results_sha256={result_sha}")
         if excess:
             failures.append(record)
         else:
             print(record)
-        details.append({"case": case, "layer": layer, "state": state,
+        details.append({"case": case, "layer": layer, "source_location": location, "state": state,
                         "observed_ir_per_op": actual, "budget_ir_per_op": limit,
                         "excess_ir_per_op": excess})
     require(named == set(rows), "PERF-EVIDENCE-INCOMPLETE",

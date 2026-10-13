@@ -18,7 +18,9 @@ POLICY = {"schema": g.SCHEMA,
           "environment": {k: ENV[k] for k in
                           ("rustc", "valgrind", "machine", "iterations", "reps",
                            "contract_version", "semantic_generation")},
-          "budgets": [{"case": "d5", "layer": "transport", "max_net_irefs_per_iteration": 115.0}]}
+          "budgets": [{"case": "d5", "layer": "transport",
+                       "source_location": "crates/sens/examples/domain12345678_bench.rs:123",
+                       "max_net_irefs_per_iteration": 115.0}]}
 
 class RatchetEvidenceTests(unittest.TestCase):
     def check(self, policy=None, env=None, row=None):
