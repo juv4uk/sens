@@ -6,6 +6,10 @@ on:
     paths:
       - 'lib/canon.lisp'
       - 'lib/core1.lisp'
+      - 'lib/core1-found.bits'
+      - 'lib/core1-found.sens'
+      - 'tests/fixtures/core1-found-semantic.bits'
+      - 'tests/fixtures/core1-found-semantic.sens'
       - 'lib/reason.lisp'
       - 'tests/semantic/reason-d4-pair-selectors.bits'
       - 'lib/core1-arity.bits'
@@ -139,3 +143,17 @@ jobs:
           target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-arity-trit.out"
           cmp "$RUNNER_TEMP/core1-arity-sens.out" "$RUNNER_TEMP/core1-arity-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/core1-arity-sens.out"
+
+      - name: Core1 FOUND projection executes in binary SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit open lib/core1-found.sens > "$RUNNER_TEMP/core1-found-src.bits"
+          cmp lib/core1-found.bits "$RUNNER_TEMP/core1-found-src.bits"
+          test_file='tests/fixtures/core1-found-semantic.sens'
+          target/debug/sens-trit open "$test_file" > "$RUNNER_TEMP/core1-found-test.bits"
+          cmp tests/fixtures/core1-found-semantic.bits "$RUNNER_TEMP/core1-found-test.bits"
+          target/debug/sens "$test_file" > "$RUNNER_TEMP/core1-found-sens.out"
+          target/debug/sens-trit eval "$test_file" > "$RUNNER_TEMP/core1-found-trit.out"
+          cmp "$RUNNER_TEMP/core1-found-sens.out" "$RUNNER_TEMP/core1-found-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/core1-found-sens.out"

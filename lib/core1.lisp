@@ -25,6 +25,13 @@
 ; and short-circuit COND. This historical Core1 predicate returns structural
 ; () for a negative answer; it is NOT the canonical D1:0. The test preserves
 ; that observable mismatch; it does not assert modern D1 predicate admission.
+; Exact physical FOUND constructors/projector:
+; C1-MAKE-FOUND and C1-FOUND-VALUE -> lib/core1-found.{bits,sens}.
+; Direct D4:1001 CADR replaces the duplicate D7 name C1-SECOND;
+; the output behavior of the selector is unchanged.
+; SENS-only semantics: tests/fixtures/core1-found-semantic.{bits,sens}.
+; Tag C1-FOUND has no ratified function code; its D7 datum is non-atomic
+; and must not be compared with an atom by EQ. No tag coercion is added.
 ; Quoted record tags remain blocked pending a real atomic D7 datum law;
 ; no fake D7 representation may be EQ-comparable to an atom.
 
@@ -72,7 +79,7 @@
 
 (0011 C1-FOUND-VALUE
   (0010 (VALUE)
-    (C1-SECOND VALUE)))
+    (1001 VALUE)))
 
 (0011 C1-LOOKUP-IN
   (00100 C1-LOOKUP-IN
