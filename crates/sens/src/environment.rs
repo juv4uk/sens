@@ -1,5 +1,5 @@
 use crate::{DomainIdentity, Value};
-use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, collections::{hash_map::Entry, HashMap}, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
 /// levels) would otherwise recurse through `Rc<RefCell<Frame>>`'s default
@@ -238,11 +238,15 @@ impl Environment {
     ) -> bool {
         let identity = identity.into();
         let mut limits = self.2.borrow_mut();
-        if limits.domain_code_slots.contains_key(&identity) {
-            return false;
+        // Exact domain identity (width AND payload) is the whole key.
+        // Vacant/Occupied prevents a second lookup and forbids overwrites.
+        match limits.domain_code_slots.entry(identity) {
+            Entry::Vacant(slot) => {
+                slot.insert(value);
+                true
+            }
+            Entry::Occupied(_) => false,
         }
-        limits.domain_code_slots.insert(identity, value);
-        true
     }
 
     /// Transitional historical exact-eight compatibility lookup.
@@ -262,11 +266,14 @@ impl Environment {
     /// New canonical code uses bind_domain_code_slot_once.
     pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.legacy_code_slots.contains_key(&sid) {
-            return false;
+        // Historical W8 never shares a keyspace with exact D8.
+        match limits.legacy_code_slots.entry(sid) {
+            Entry::Vacant(slot) => {
+                slot.insert(value);
+                true
+            }
+            Entry::Occupied(_) => false,
         }
-        limits.legacy_code_slots.insert(sid, value);
-        true
     }
 
     /// A child frame is the future lexical boundary captured by a closure. It
@@ -588,6 +595,97 @@ mod tests {
         assert_eq!(environment.code_slot(legacy), Some(old_value));
         assert!(!environment.bind_code_slot_once(legacy, Value::Nil));
         assert!(!environment.bind_domain_code_slot_once(current, Value::Nil));
+    }
+
+    /// Exhaustive mechanical stress witness, not 2046 callable functions.
+    /// Every (width,payload) is distinct. Current semantic DomainIdentity
+    /// covers D1–D9 (1022 keys); D10's 1024 slots remain carrier-only.
+    #[test]
+    fn all_2046_coordinates_preserve_width_and_both_bind_once_keyspaces() {
+        use crate::{
+            domain_ladder::DomainCoordinate, BinarySourceWord, Bit1, Bit2, Bit3,
+            Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, Sens8,
+        };
+        use std::collections::HashSet;
+
+        let environment = Environment::root();
+        let mut coordinates = HashSet::new();
+        let mut examined = 0usize;
+        let mut significant_bits = 0usize;
+        let mut current_slots = 0usize;
+
+        for width in 1u8..=10 {
+            for bits in 0..(1u16 << width) {
+                let coordinate = DomainCoordinate::new(width, bits)
+                    .expect("in-range exact coordinate");
+                assert!(coordinates.insert(coordinate),
+                    "coordinate collision at D{width}:{bits:010b}");
+                assert_eq!(coordinate.width(), width);
+                assert_eq!(coordinate.bits(), bits);
+                examined += 1;
+                significant_bits += usize::from(width);
+
+                // The W1–W9 carrier is exact and typed; there is
+                // deliberately NO lossy D10 → W8/W9 coercion.
+                let source = match width {
+                    1 => Some(BinarySourceWord::W1(Bit1::new(bits as u8).unwrap())),
+                    2 => Some(BinarySourceWord::W2(Bit2::new(bits as u8).unwrap())),
+                    3 => Some(BinarySourceWord::W3(Bit3::new(bits as u8).unwrap())),
+                    4 => Some(BinarySourceWord::W4(Bit4::new(bits as u8).unwrap())),
+                    5 => Some(BinarySourceWord::W5(Bit5::new(bits as u8).unwrap())),
+                    6 => Some(BinarySourceWord::W6(Bit6::new(bits as u8).unwrap())),
+                    7 => Some(BinarySourceWord::W7(Bit7::new(bits as u8).unwrap())),
+                    8 => Some(BinarySourceWord::W8(Bit8::new(bits as u8).unwrap())),
+                    9 => Some(BinarySourceWord::W9(Bit9::new(bits).unwrap())),
+                    10 => None,
+                    _ => unreachable!(),
+                };
+                let Some(source) = source else {
+                    assert_eq!(width, 10);
+                    // Owner residency is not DomainIdentity callability.
+                    assert_eq!(coordinate.owner_residency(), Some(true));
+                    continue;
+                };
+                let identity = DomainIdentity::from_source_word(source);
+                assert_eq!(
+                    DomainCoordinate::from_domain_identity(identity), coordinate,
+                    "lost width on D{width}:{bits:010b}"
+                );
+                let marker = Value::Symbol(Rc::from(format!("D{width}:{bits}")));
+                assert!(environment.bind_domain_code_slot_once(identity, marker.clone()),
+                    "unexpected prebound coordinate D{width}:{bits:010b}");
+                assert!(!environment.bind_domain_code_slot_once(identity, Value::Nil),
+                    "overwrote exact identity D{width}:{bits:010b}");
+                assert_eq!(environment.domain_code_slot(identity), Some(marker),
+                    "key or payload collision D{width}:{bits:010b}");
+                current_slots += 1;
+            }
+        }
+        assert_eq!(examined, 2046);
+        assert_eq!(significant_bits, 18_434);
+        assert_eq!(coordinates.len(), 2046);
+        assert_eq!(current_slots, 1022);
+
+        // Every historical W8 byte has a current D8 coordinate with the
+        // same low eight payload bits, but MUST NOT alias the current slot.
+        for bits in 0u16..256 {
+            let sid = Sens8::from_packed_byte(bits as u8);
+            let identity = DomainIdentity::from_source_word(
+                BinarySourceWord::W8(Bit8::new(bits as u8).unwrap()));
+            let current = environment.domain_code_slot(identity);
+            assert_eq!(environment.code_slot(sid), None,
+                "historical W8 silently lifted to D8 at {bits:08b}");
+            let historical = Value::Symbol(Rc::from(format!("legacy-W8:{bits}")));
+            assert!(environment.bind_code_slot_once(sid, historical.clone()));
+            assert!(!environment.bind_code_slot_once(sid, Value::Nil));
+            assert_eq!(environment.code_slot(sid), Some(historical));
+            assert_eq!(environment.domain_code_slot(identity), current,
+                "historical W8 overwrote current D8 at {bits:08b}");
+        }
+        assert_eq!(environment.2.borrow().domain_code_slots.len(), 1022);
+        assert_eq!(environment.2.borrow().legacy_code_slots.len(), 256);
+        assert!(DomainCoordinate::new(10, 1024).is_none());
+        assert!(DomainCoordinate::new(11, 0).is_none());
     }
 
     #[test]
