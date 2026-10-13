@@ -1,0 +1,31 @@
+name: Доказ атомарного D3 EQ для UTF-8
+
+on:
+  pull_request:
+    paths:
+      - "lib/utf8.lisp"
+      - "crates/sens/tests/utf8.rs"
+      - "tests/test_utf8_d1_predicate_migration.py"
+      - ".github/workflows/utf8-atomic-d3-eq-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-exact-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+      RUST_MIN_STACK: "33554432"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Структурний свідок 10 D3 і негативні мутації
+        run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
+      - name: 256 байтів × 5 меж × два точні домени
+        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_matches_d8_equal_for_all_256_bytes_at_five_boundaries -- --exact --nocapture
+      - name: D3 не підміняє структурну D8 рівність
+        run: cargo test --locked -p sens --test utf8 utf8_d3_atom_eq_must_not_replace_structural_d8_equal -- --exact --nocapture
