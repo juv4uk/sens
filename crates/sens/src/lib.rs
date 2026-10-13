@@ -210,7 +210,7 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source};
+pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source, parse_mixed_exact_domain_macro_source};
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
@@ -361,7 +361,11 @@ pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 /// surface. `Environment::root()` therefore remains the minimal kernel.
 pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval::install_macro_substrate(&session.environment);
-    let result = eval_program(MACRO_LIBRARY_SOURCE, session)?;
+    let expressions = parse_mixed_exact_domain_macro_source(
+        "lib/macro.lisp",
+        MACRO_LIBRARY_SOURCE,
+    )?;
+    let result = eval_parsed_expressions(&expressions, session)?;
 
     if !matches!(&result.value, Value::Macro(_)) {
         return Err(LanguageError::new(
@@ -390,8 +394,9 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     for name in admitted {
         session.environment.define(name, result.value.clone());
     }
-    // #1460: сам `defmacro` теж прив'язаний до свого коду СЕНС (00001010),
-    // тож `(00001010 назва параметри тіло)` працює так само, як назва.
+    // Історичний W8 defmacro-slot лишається лише сумісним входом для старих
+    // клієнтів. lib/macro.lisp більше не використовує його як semantic authority:
+    // bootstrap виконується через точні D3/D4 identities.
     session
         .environment
         .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
