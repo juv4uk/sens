@@ -1,0 +1,22 @@
+name: "LIFE-1 projection D3/D4 — all 2046 widths"
+
+on:
+  pull_request:
+    paths:
+      - "lib/life-1-scheduler.lisp"
+      - "crates/sens/tests/life_1_scheduler.rs"
+      - ".github/workflows/life1-projection-d3-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  projection-d3-d4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Live production projection match and exhaustive D1–D10"
+        run: cargo test --locked -p sens --test life_1_scheduler projection_match_ -- --nocapture
