@@ -1,23 +1,16 @@
 name: domain-logic-laws
 
-# Тест семанти й логіки двійковим сенсом. Семантику визначає сам SENS:
-# scripts/check-domain-logic-laws.lisp перевіряє закони D3/D4/D5 у точних
-# доменних адресах, а не зовнішній інструмент. Раннер збирає my-lisp і
-# запускає файл; очікується друк PASS і нульовий код виходу.
-
+# Binary SENS is the ONLY logic-semantic authority for this gate.
+# Shell runs existing physical SENS interpreters; it has no truth table.
 on:
   push:
     branches: [main]
     paths:
-      - "scripts/check-domain-logic-laws.lisp"
-      - "lib/domains/*.lisp"
-      - "lib/core4.lisp"
+      - "tests/semantic/domain-logic-2040/**"
       - ".github/workflows/domain-logic-laws.yml"
   pull_request:
     paths:
-      - "scripts/check-domain-logic-laws.lisp"
-      - "lib/domains/*.lisp"
-      - "lib/core4.lisp"
+      - "tests/semantic/domain-logic-2040/**"
       - ".github/workflows/domain-logic-laws.yml"
   workflow_dispatch:
 
@@ -25,18 +18,33 @@ permissions:
   contents: read
 
 jobs:
-  laws:
-    name: D3/D4/D5 laws in binary SENS
+  native-sens-law:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - name: Build my-lisp
-        run: cargo build --release -p my-lisp-cli --bin my-lisp
-      - name: Run domain logic laws
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build physical SENS mechanism
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Execute all 2040 SENS-owned semantic checks
         shell: bash
         run: |
           set -euo pipefail
-          out="$(./target/release/my-lisp scripts/check-domain-logic-laws.lisp)"
-          printf '%s\n' "$out"
-          printf '%s\n' "$out" | grep -q 'DOMAIN-LOGIC-LAWS: PASS'
+          file=tests/semantic/domain-logic-2040/proof.sens
+          target/debug/sens "$file" > "$RUNNER_TEMP/sens-law.out"
+          test "$(cat "$RUNNER_TEMP/sens-law.out")" = "1"
+          target/debug/sens-trit eval "$file" > "$RUNNER_TEMP/trit-law.out"
+          cmp "$RUNNER_TEMP/sens-law.out" "$RUNNER_TEMP/trit-law.out"
+      - name: One false SENS EQ law must enter noncallable D1 failure branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mutant=tests/semantic/domain-logic-2040/mutant.sens
+          if target/debug/sens "$mutant" > "$RUNNER_TEMP/bad-sens.out" 2>&1; then
+            echo "BLOCK: invalid SENS law was accepted"
+            exit 1
+          fi
+          if target/debug/sens-trit eval "$mutant" > "$RUNNER_TEMP/bad-trit.out" 2>&1; then
+            echo "BLOCK: invalid SENS law was accepted by second entrypoint"
+            exit 1
+          fi
