@@ -397,8 +397,11 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     // D7 v2 assigns each Ukrainian keyboard character one exact W7 cell.
     // The old D7 uppercase modifier must not add a phantom word.
     source.char_indices().map(|(offset, ch)| {
-        let glyph = ch.to_string();
-        let cell = crate::semantic_registry::d7_uk_keyboard_cell(&glyph)
+        // Four stack bytes fit every Unicode scalar: no heap String per D7 glyph.
+        // The existing canonical D7 table still determines the exact W7 cell.
+        let mut utf8 = [0u8; 4];
+        let glyph = ch.encode_utf8(&mut utf8);
+        let cell = crate::semantic_registry::d7_uk_keyboard_cell(glyph)
             .ok_or(D7T5Error::UnassignedKeyboardGlyph { byte_offset: offset })?;
         Ok(BinarySourceWord::W7(Bit7::new(cell).expect("D7 table is exactly W7")))
     }).collect()

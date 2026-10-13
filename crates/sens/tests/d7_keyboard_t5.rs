@@ -52,6 +52,27 @@ fn d2_grammar_words_do_not_become_d7_text_even_for_same_characters() {
     }
 }
 
+/// Вузький transport-witness: два UTF-8 байти на кириличний символ,
+/// рівно сім змістових бітів на D7 слово й точна адреса першої відмови.
+/// Тест не визначає значення символів поза ратифікованою D7-таблицею.
+#[test]
+fn d7_stack_glyph_projection_preserves_t5_and_multibyte_error_offset() {
+    let source = "Кіт! (.)\n";
+    let physical = encode_d7_uk_t5(source).expect("admitted Ukrainian D7");
+    let words = decode_ternary_words(&physical).expect("canonical T5");
+    assert_eq!(words.len(), source.chars().count(), "one D7 word per Unicode scalar");
+    assert!(words.iter().all(|word| word.width() == 7), "no D2/D8 alias");
+    assert_eq!(decode_d7_uk_t5(&physical), Ok(source.to_string()),
+               "same exact W7 identities after physical roundtrip");
+    assert_eq!(encode_ternary_words(&words).unwrap(), physical,
+               "stack projection must not modify packed T5 bytes");
+
+    // 'К' and 'і' occupy two UTF-8 bytes each. The third scalar is not D7;
+    // offset reports the first byte, not a character ordinal or host number.
+    assert_eq!(encode_d7_uk_t5("Кі🙂"),
+               Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 }));
+}
+
 #[test]
 fn invalid_unicode_or_bad_physical_byte_fails_closed() {
     assert!(matches!(encode_d7_uk_t5("🙂"), Err(D7T5Error::UnassignedKeyboardGlyph { .. })));
