@@ -72,22 +72,22 @@
 ;; call; now it *accumulates* both calls' clauses, which is the more
 ;; honest reading of "append-only" — nothing an earlier call told the
 ;; journal is ever quietly discarded by a later one.
-(00001010 defmodule (name rules)
+(0011 defmodule (make-macro (0010 (name rules)
   (1110 (001 def) (001 *knowledge-journal*)
         (1110 (001 append)
               (1110 (001 clauses->tell-events) (1110 (001 quote) name) rules)
-              (001 *knowledge-journal*))))
+              (001 *knowledge-journal*))))))
 
 ;; retract-knowledge is the capability the journal actually earns that the
 ;; old snapshot model never had at all: taking one clause back out of a
 ;; module. `clause` is left unquoted, the same convention `defmodule`'s
 ;; `rules` follows, so the caller decides whether to pass a literal or a
 ;; variable holding the clause to remove.
-(00001010 retract-knowledge (module-name clause)
+(0011 retract-knowledge (make-macro (0010 (module-name clause)
   (1110 (001 def) (001 *knowledge-journal*)
         (1110 (001 00000100)
               (1110 (001 list) (1110 (001 quote) (001 retract)) (1110 (001 quote) module-name) clause)
-              (001 *knowledge-journal*))))
+              (001 *knowledge-journal*))))))
 
 ;; module-journal-events used to cons after its recursive call returned.
 ;; That preserved order, but consumed one host stack frame per journal event
@@ -159,8 +159,8 @@
             (10100 (module-journal-events module-name *knowledge-journal*)))))
 
 ;; load-knowledge reads a file and loads its module definition
-(00001010 load-knowledge (module-name)
-  (1110 (001 load) module-name))
+(0011 load-knowledge (make-macro (0010 (module-name)
+  (1110 (001 load) module-name))))
 
 ;; reason-in queries a specific module by name
 (0011 reason-in
@@ -236,7 +236,7 @@
 ;; `tell` events onto `*knowledge-journal*` instead of rebuilding a
 ;; snapshot; `module-clauses-now` picks up every clause any `tell-knowledge`
 ;; or `defmodule` call for this module ever contributed, in order.
-(00001010 tell-knowledge (module-name rules)
+(0011 tell-knowledge (make-macro (0010 (module-name rules)
   (1110 (001 cond)
         (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
               (1110 (001 quote) (001 Conflict-detected)))
@@ -244,7 +244,7 @@
               (1110 (001 def) (001 *knowledge-journal*)
                     (1110 (001 append)
                           (1110 (001 clauses->tell-events) (1110 (001 quote) module-name) rules)
-                          (001 *knowledge-journal*))))))
+                          (001 *knowledge-journal*))))))))
 
 ;; --- Advice ingestion boundary -----------------------------------------
 ;; `advise` is the guarded write path for knowledge from outside the trusted
@@ -391,7 +391,7 @@
 ;; Der akzeptierte Zweig führt `def` im Frame des Aufrufers aus und gibt die
 ;; strukturierte Entscheidung zurück. Eine Hilfs-Lambda würde in einen
 ;; kurzlebigen Kind-Frame schreiben; daher liegt die Sequenz im Makro selbst.
-(00001010 advise (module-name clause)
+(0011 advise (make-macro (0010 (module-name clause)
   (1110 (001 cond)
         (1110
           (1110 (001 equal?)
@@ -411,7 +411,7 @@
                                   (1110 (001 quote) (001 module))
                                   (1110 (001 quote) module-name))
                             (1110 (001 list) (1110 (001 quote) (001 knowledge)) clause)))))
-        (1110 (001 t) (1110 (001 advice-decision) (1110 (001 quote) module-name) clause))))
+        (1110 (001 t) (1110 (001 advice-decision) (1110 (001 quote) module-name) clause))))))
 
 ;; `advise-all` is the transactional companion to `advise`. Translators often
 ;; produce several mutually dependent clauses, so validating and writing them
@@ -506,7 +506,7 @@
 ;; сталий фрейм викликача, а не тимчасовий фрейм допоміжної lambda.
 ;; Wie bei `advise` bleibt die Sequenz im Makro, damit `def` den dauerhaften
 ;; Aufrufer-Frame statt des temporären Frames einer Hilfs-Lambda aktualisiert.
-(00001010 advise-all (module-name clauses)
+(0011 advise-all (make-macro (0010 (module-name clauses)
   (1110 (001 cond)
         (1110
           (1110 (001 equal?)
@@ -529,7 +529,7 @@
                             (1110 (001 list) (1110 (001 quote) (001 knowledge)) clauses)))))
         (1110 (001 t)
               (1110 (001 advice-all-decision)
-                    (1110 (001 quote) module-name) clauses))))
+                    (1110 (001 quote) module-name) clauses))))))
 
 ;; --- Versioned knowledge-package interchange ---------------------------
 ;; A package is data, never executable code:
@@ -602,7 +602,7 @@
 ;; модуля читається з даних під час виконання, тому це окремий макрос.
 ;; Der Import nutzt dasselbe atomare Journal-Update wie `advise-all`; der
 ;; Modulname kommt zur Laufzeit aus Daten, daher ist dies ein eigenes Makro.
-(00001010 import-knowledge-package (package)
+(0011 import-knowledge-package (make-macro (0010 (package)
   (1110 (001 cond)
         (1110
           (1110 (001 equal?)
@@ -619,11 +619,11 @@
                                               (1110 (001 quote) (001 clauses)) package))
                                   (001 *knowledge-journal*)))
                       (1110 (001 knowledge-package-decision) package))))
-        (1110 (001 t) (1110 (001 knowledge-package-decision) package))))
+        (1110 (001 t) (1110 (001 knowledge-package-decision) package))))))
 
-(00001010 import-knowledge-file (path)
+(0011 import-knowledge-file (make-macro (0010 (path)
   (1110 (001 import-knowledge-package)
-        (1110 (001 01001010) (1110 (001 read-file) path))))
+        (1110 (001 01001010) (1110 (001 read-file) path))))))
 
 ;; Export is deliberately a plain function: unlike import it does not mutate
 ;; the knowledge journal. It validates the module and clauses, serializes the
@@ -673,12 +673,12 @@
                       (tcp-close connection)
                       package))) (make-knowledge-package module-name clauses))))))
 
-(00001010 receive-knowledge-package (connection)
+(0011 receive-knowledge-package (make-macro (0010 (connection)
   (1110 (001 second)
         (1110 (001 list)
               (1110 (001 def) (001 *received-knowledge-package*)
                     (1110 (001 01001010) (1110 (001 tcp-read-to-eof) connection "")))
-              (1110 (001 import-knowledge-package) (001 *received-knowledge-package*)))))
+              (1110 (001 import-knowledge-package) (001 *received-knowledge-package*)))))))
 
 ;; A newline-framed request/receipt protocol keeps the connection open long
 ;; enough for the receiver to answer with the structured import decision.
@@ -726,7 +726,7 @@
              (0011 *knowledge-receipt-text* (tcp-read-frame connection ""))
              ((0010 (receipt) (1001 (1110 (tcp-close connection) receipt))) (11101010 *knowledge-receipt-text*))))) (make-knowledge-package module-name clauses))))))
 
-(00001010 accept-knowledge-exchange (connection)
+(0011 accept-knowledge-exchange (make-macro (0010 (connection)
   (1110 (001 second)
         (1110 (001 list)
               (1110 (001 def) (001 *received-knowledge-package*)
@@ -744,7 +744,7 @@
                                 (1110 (001 second)
                                       (1110 (001 list)
                                             (1110 (001 tcp-close) connection)
-                                            (001 decision)))))))))
+                                            (001 decision)))))))))))
 
 ;; --- "atom as concept entry point" ------------------------------------
 ;; A bare symbol like `earth` doesn't mean anything by itself — its meaning
@@ -837,9 +837,9 @@
 ;; Aufrufers, derselbe Trick wie bei `tell-knowledge`.
 (0011 *usage-counts* (001 ()))
 
-(00001010 record-usage! (proof)
+(0011 record-usage! (make-macro (0010 (proof)
   (1110 (001 def) (001 *usage-counts*)
-        (1110 (001 merge-usage) (1110 (001 count-usage) proof) (001 *usage-counts*))))
+        (1110 (001 merge-usage) (1110 (001 count-usage) proof) (001 *usage-counts*))))))
 
 (0011 usage-of
   (0010 (rule-head)
