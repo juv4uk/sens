@@ -71,6 +71,7 @@ def main() -> int:
     ap.add_argument("--out-dir", required=True, type=Path)
     ap.add_argument("--iterations", type=int, default=200_000)
     ap.add_argument("--reps", type=int, default=3)
+    ap.add_argument("--budget-file", type=Path, help="reviewed performance ratchet (explicit opt-in)")
     args = ap.parse_args()
 
     if args.iterations <= 0 or args.reps <= 0:
@@ -83,7 +84,7 @@ def main() -> int:
     rows = []
     for case in CASES:
         raw = [irefs(args.binary, case, args.iterations) for _ in range(args.reps)]
-        net = [max(0, value - base) for value, base in zip(raw, baselines)]
+        net = [value - base for value, base in zip(raw, baselines)]
         median_raw = statistics.median(raw)
         median_net = statistics.median(net)
         rows.append(
@@ -181,6 +182,17 @@ def main() -> int:
         with open(summary, "a", encoding="utf-8") as fh:
             fh.write(report)
 
+    if args.budget_file is not None:
+        # Metadata-only budget check; SENS semantics remain independent.
+        import sys
+        gate = Path(__file__).resolve().parents[2] / "scripts/perf_budget_gate.py"
+        checked = subprocess.run(
+            [sys.executable, str(gate), "--budgets", str(args.budget_file),
+             "--evidence-dir", str(args.out_dir),
+             "--json-report", str(args.out_dir / "perf-verdict.json")],
+            check=False,
+        )
+        return checked.returncode
     return 0
 
 

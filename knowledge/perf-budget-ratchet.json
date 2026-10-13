@@ -1,0 +1,6 @@
+{
+  "schema": "sens-perf-budget-ratchet/v1",
+  "baseline": null,
+  "environment": null,
+  "budgets": []
+}
