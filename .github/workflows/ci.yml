@@ -4,8 +4,7 @@ name: CI — основні перевірки SENS
 # research/paused-actions/20261011/ci-pre-freeze.yml.
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
