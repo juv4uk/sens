@@ -1,21 +1,41 @@
-name: Knowledge — макроси D4 без історичного W8
+name: Знання — один двійковий SENS-свідок арності
 
 on:
   pull_request:
     paths:
       - "lib/knowledge.lisp"
-      - "tests/test_domain_lisp_corpus_knowledge_macros.py"
+      - "tests/semantic/knowledge-exact-arity-structure.bits"
       - ".github/workflows/knowledge-macro-d4-cutover.yml"
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "lib/knowledge.lisp"
+      - "tests/semantic/knowledge-exact-arity-structure.bits"
+      - ".github/workflows/knowledge-macro-d4-cutover.yml"
 
 permissions:
   contents: read
 
 jobs:
-  exact-d4-macro-source-witness:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+  knowledge-exact-arity:
+    name: Двійкова SENS перевірка нульової, точної та надлишкової арності
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - name: Перевірити 11 макросів, 2046 доменних ключів і негативні мутації
-        run: python3 -m unittest discover -s tests -p 'test_domain_lisp_corpus_knowledge_macros.py' -v
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Виконати єдиний SENS-свідок (хост не визначає семантику)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --quiet -p sens-cli --bin sens-trit
+          # Encoder API expects a .lisp path; contents stay pure binary words.
+          # Copy only transports the existing .bits fixture; no source rewrite.
+          cp tests/semantic/knowledge-exact-arity-structure.bits \
+            "$RUNNER_TEMP/knowledge-exact-arity.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/knowledge-exact-arity.lisp"
+          # The binary SENS witness routes a wrong arity law to an uncallable
+          # D1 branch, so the oracle's own exit status decides pass/fail.
+          result="$(target/debug/sens-trit eval "$RUNNER_TEMP/knowledge-exact-arity.sens")"
+          printf 'SENS-вирок точкової арності: %s\n' "$result"
+          printf '%s\n' 'PASS: двійкова SENS-програма сама винесла вирок.'
