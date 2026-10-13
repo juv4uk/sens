@@ -17,8 +17,7 @@ EXPECTED = {
     5: {"01010", "01011"},
 }
 DOMAIN_COUNTS = {1: 2, 2: 4, 3: 8, 4: 16, 5: 32,
-                 6: 64, 7: 126, 8: 256, 9: 512, 10: 1024}
-D7_RESERVED = {"0100001", "0101010"}
+                 6: 64, 7: 128, 8: 256, 9: 512, 10: 1024}
 
 
 def core1_admission_source():
@@ -68,13 +67,13 @@ class Core1ExactDomainAdmission(unittest.TestCase):
                 self.assertEqual(len(set(words)), count)
                 self.assertTrue(all(len(word) == width for word in words))
                 self.assertEqual(words, sorted(words))
-                if width != 7:
-                    self.assertEqual(
-                        words, [format(i, f"0{width}b") for i in range(count)]
-                    )
-                else:
-                    all_words = {format(i, "07b") for i in range(128)}
-                    self.assertEqual(all_words - set(words), D7_RESERVED)
+                self.assertEqual(
+                    words, [format(i, f"0{width}b") for i in range(count)]
+                )
+                if width == 7:
+                    # D7 v2 займає всі 128 координат; LISP не callable.
+                    table = (ROOT / "lib/domains/d7.lisp").read_text(encoding="utf-8")
+                    self.assertEqual(table.count("(LISP ())"), 128)
 
     def test_negative_duplicate_d4_coordinate(self):
         section = core1_admission_source()
