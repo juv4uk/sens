@@ -1,7 +1,6 @@
 name: Verify 536 runtime peer topology GREEN
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:

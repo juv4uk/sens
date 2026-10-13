@@ -1,26 +1,7 @@
 name: Migration legacy top4 successor audit
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-legacy-top4-successor-audit-2026-10-08.json"
-      - "tests/test_migration_legacy_top4_successors.py"
-      - "contracts/d4-bootstrap-ratification.lisp"
-      - "contracts/d8-ratification.lisp"
-      - "contracts/d9-ratification.lisp"
-      - "knowledge/d9-registry-tail-v1.json"
-      - ".github/workflows/migration-legacy-top4-audit.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-legacy-top4-successor-audit-2026-10-08.json"
-      - "tests/test_migration_legacy_top4_successors.py"
-      - "contracts/d4-bootstrap-ratification.lisp"
-      - "contracts/d8-ratification.lisp"
-      - "contracts/d9-ratification.lisp"
-      - "knowledge/d9-registry-tail-v1.json"
-      - ".github/workflows/migration-legacy-top4-audit.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

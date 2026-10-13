@@ -1,15 +1,6 @@
 name: Independent reconstruction benchmark
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/independent-reconstruction/**"
-      - ".github/workflows/independent-reconstruction-bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/independent-reconstruction/**"
-      - ".github/workflows/independent-reconstruction-bench.yml"
   workflow_dispatch:
 
 jobs:

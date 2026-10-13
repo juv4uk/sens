@@ -1,20 +1,6 @@
 name: D10 symbolic AI one-sided subsumption SWI oracle
 on:
-  push:
-    paths:
-      - 'knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json'
-      - 'tests/d10_finite_subsumes_swi.pl'
-      - 'tests/test_d10_finite_subsumes.py'
-      - 'scripts/check_d10_finite_subsumes.py'
-      - '.github/workflows/d10-symbolic-ai-one-sided-subsumption.yml'
-  pull_request:
-    paths:
-      - 'knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json'
-      - 'tests/d10_finite_subsumes_swi.pl'
-      - 'tests/test_d10_finite_subsumes.py'
-      - 'scripts/check_d10_finite_subsumes.py'
-      - '.github/workflows/d10-symbolic-ai-one-sided-subsumption.yml'
-      - 'knowledge/d10-v1-semantic-inventory.json'
+  workflow_dispatch:
 jobs:
   independent-one-sided-oracle:
     runs-on: ubuntu-latest

@@ -1,10 +1,7 @@
 name: Verify 507 compiled encoder current
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-507-compiled-encoder-current.yml'
-
+  workflow_dispatch:
 jobs:
   compiled-encoder:
     runs-on: ubuntu-24.04

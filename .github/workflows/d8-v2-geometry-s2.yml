@@ -1,23 +1,6 @@
 name: D8 geometry S2
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d8-v2-geometry-state.json"
-      - "knowledge/d8-v2-semantic-inventory.json"
-      - "knowledge/d8-recovery-candidate-map.json"
-      - "scripts/check-d8-v2-geometry-s2.py"
-      - "scripts/check-d8-v2-semantic-inventory.py"
-      - ".github/workflows/d8-v2-geometry-s2.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d8-v2-geometry-state.json"
-      - "knowledge/d8-v2-semantic-inventory.json"
-      - "knowledge/d8-recovery-candidate-map.json"
-      - "scripts/check-d8-v2-geometry-s2.py"
-      - "scripts/check-d8-v2-semantic-inventory.py"
-      - ".github/workflows/d8-v2-geometry-s2.yml"
   workflow_dispatch:
 
 jobs:

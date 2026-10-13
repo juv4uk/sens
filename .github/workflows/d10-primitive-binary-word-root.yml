@@ -1,22 +1,6 @@
 name: D10 primitive binary word source and oracle
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-primitive-binary-word-root-v1.json'
-      - 'knowledge/d10-selection-transition-history.json'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - 'scripts/check_d10_primitive_binary_word_root.py'
-      - 'tests/test_d10_primitive_binary_word_root.py'
-      - 'tests/d10_primitive_binary_root_chez.ss'
-      - '.github/workflows/d10-primitive-binary-word-root.yml'
-  push:
-    paths:
-      - 'knowledge/d10-primitive-binary-word-root-v1.json'
-      - 'scripts/check_d10_primitive_binary_word_root.py'
-      - 'tests/test_d10_primitive_binary_word_root.py'
-      - 'tests/d10_primitive_binary_root_chez.ss'
-      - '.github/workflows/d10-primitive-binary-word-root.yml'
+  workflow_dispatch:
 jobs:
   exact-word-law:
     runs-on: ubuntu-latest

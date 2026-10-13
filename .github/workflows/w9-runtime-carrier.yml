@@ -1,39 +1,6 @@
 name: W9 runtime carrier
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/bit9.rs"
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - "crates/sens/src/source_packing.rs"
-      - "crates/sens/src/binary_framing.rs"
-      - "crates/sens/src/syntax.rs"
-      - "crates/sens/src/compiler_bootstrap.rs"
-      - "crates/sens/src/value.rs"
-      - "crates/sens/src/presentation.rs"
-      - "scripts/check-d9-current-authority.py"
-      - "scripts/check-d1-d5-foundation.py"
-      - "crates/sens/tests/machine_exact_d3_structural.rs"
-      - ".github/workflows/w9-runtime-carrier.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/bit9.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - "crates/sens/src/source_packing.rs"
-      - "crates/sens/src/binary_framing.rs"
-      - "crates/sens/src/syntax.rs"
-      - "scripts/check-d9-current-authority.py"
-      - ".github/workflows/w9-runtime-carrier.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,18 +1,7 @@
 name: D10 1958 perceptron exact AI research
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json
-      - tests/test_d10_rosenblatt_perceptron_exact.py
-      - .github/workflows/d10-perceptron-exact-ai.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json
-      - tests/test_d10_rosenblatt_perceptron_exact.py
-      - .github/workflows/d10-perceptron-exact-ai.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,15 +1,6 @@
 name: Foundation orientation closeout research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/foundation-orientation/**"
-      - ".github/workflows/foundation-orientation.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/foundation-orientation/**"
-      - ".github/workflows/foundation-orientation.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,23 +1,6 @@
 name: Подання SENS — точні домени без підміни W8
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/presentation.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/tests/presentation_exact_domain_cutover.rs"
-      - "crates/sens/tests/runtime_peer_operators.rs"
-      - "crates/sens/tests/d7_runtime_presentation.rs"
-      - ".github/workflows/presentation-domain-cutover.yml"
-  pull_request:
-    paths:
-      - "crates/sens/src/presentation.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/tests/presentation_exact_domain_cutover.rs"
-      - "crates/sens/tests/runtime_peer_operators.rs"
-      - "crates/sens/tests/d7_runtime_presentation.rs"
-      - ".github/workflows/presentation-domain-cutover.yml"
   workflow_dispatch:
 
 permissions:

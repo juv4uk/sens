@@ -1,22 +1,6 @@
 name: D10 de Bruijn cyclic binary-word donor oracle
 on:
-  push:
-    paths:
-      - 'knowledge/d10-debruijn-binary-cycle-research-v1.json'
-      - 'scripts/check_d10_debruijn_binary_cycle.py'
-      - 'tests/test_d10_debruijn_binary_cycle.py'
-      - 'tests/d10_debruijn_binary_cycle_chez.ss'
-      - 'docs/research/d10-debruijn-binary-cycle.uk.md'
-      - '.github/workflows/d10-debruijn-binary-cycle.yml'
-  pull_request:
-    paths:
-      - 'knowledge/d10-debruijn-binary-cycle-research-v1.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'scripts/check_d10_debruijn_binary_cycle.py'
-      - 'tests/test_d10_debruijn_binary_cycle.py'
-      - 'tests/d10_debruijn_binary_cycle_chez.ss'
-      - 'docs/research/d10-debruijn-binary-cycle.uk.md'
-      - '.github/workflows/d10-debruijn-binary-cycle.yml'
+  workflow_dispatch:
 jobs:
   exact-cyclic-coverage:
     runs-on: ubuntu-latest

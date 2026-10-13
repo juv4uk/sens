@@ -1,23 +1,6 @@
 name: D9 fill v1 seed
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d9-selector-seed.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "knowledge/d8-ratified.json"
-      - "knowledge/d1-d8-foundation.json"
-      - "scripts/check-d9-fill-v1-seed.py"
-      - ".github/workflows/d9-fill-v1-seed.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-selector-seed.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "knowledge/d8-ratified.json"
-      - "knowledge/d1-d8-foundation.json"
-      - "scripts/check-d9-fill-v1-seed.py"
-      - ".github/workflows/d9-fill-v1-seed.yml"
   workflow_dispatch:
 
 jobs:

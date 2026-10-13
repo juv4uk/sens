@@ -1,12 +1,5 @@
 name: D10 historical STRIPS symbolic planning oracle
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-strips-goal-regression-research-v1.json'
-      - 'tests/oracles/d10_strips_regression_swi.pl'
-      - 'scripts/check_d10_strips_historical_source.py'
-      - 'docs/research/d10-strips-goal-regression-20261009.uk.md'
-      - '.github/workflows/d10-strips-regression-oracle.yml'
   workflow_dispatch:
 jobs:
   real-strips-goal-regression:

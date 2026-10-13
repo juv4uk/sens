@@ -1,13 +1,5 @@
 name: D10 whole-domain owner ratification integrity
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-owner-whole-domain-ratification-20261012.json'
-      - 'knowledge/d10-current-inventory.json'
-      - 'knowledge/d10-v18-semantic-inventory.json'
-      - 'scripts/check_d10_owner_whole_domain_ratification.py'
-      - '.github/workflows/d10-owner-whole-domain-ratification.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,20 +1,6 @@
 name: Semantic fact ledger research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
-      - "scripts/research-2304-semantic-fact-ledger.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/semantic-fact-ledger.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
-      - "scripts/research-2304-semantic-fact-ledger.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/semantic-fact-ledger.yml"
   workflow_dispatch:
 
 permissions:

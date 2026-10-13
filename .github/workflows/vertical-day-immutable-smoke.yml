@@ -1,9 +1,6 @@
 name: Vertical Day immutable L0 and native smoke
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

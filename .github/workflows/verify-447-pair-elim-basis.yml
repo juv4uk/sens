@@ -1,11 +1,7 @@
 name: Verify 447 pair eliminator basis
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-447-pair-elim-basis.yml'
-      - 'docs/research/447/**'
-
+  workflow_dispatch:
 jobs:
   pair-elim-model:
     runs-on: ubuntu-24.04

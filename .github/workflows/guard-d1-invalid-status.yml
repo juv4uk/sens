@@ -1,20 +1,7 @@
 name: Guard exact-D1 direct-status migration
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/guard.lisp"
-      - "tests/test_guard_d1_invalid_status.py"
-      - "crates/sens/tests/guard_d1_invalid_status.rs"
-      - ".github/workflows/guard-d1-invalid-status.yml"
-  pull_request:
-    paths:
-      - "lib/guard.lisp"
-      - "tests/test_guard_d1_invalid_status.py"
-      - "crates/sens/tests/guard_d1_invalid_status.rs"
-      - ".github/workflows/guard-d1-invalid-status.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

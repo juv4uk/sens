@@ -1,17 +1,7 @@
 name: Міграція ядра — числові дані компілятора лише D24+
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/program_data.rs"
-      - "crates/sens/tests/program_data_d24.rs"
-      - ".github/workflows/program-data-d24-cutover.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/program_data.rs"
-      - ".github/workflows/program-data-d24-cutover.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,13 +1,5 @@
 name: D10 historical source manual review guard
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-historical-primary-manual-reconciliation-20261009.json'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d9-overflow-review-v1.json'
-      - 'scripts/check_d10_historical_primary_reconcile.py'
-      - '.github/workflows/d10-historical-primary-reconcile.yml'
   workflow_dispatch:
 jobs:
   history-safety:

@@ -1,11 +1,7 @@
 name: Verify 452 pair-elim effects
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-452-pair-elim-effects.yml'
-      - 'docs/research/452/**'
-
+  workflow_dispatch:
 jobs:
   selector-order:
     runs-on: ubuntu-24.04

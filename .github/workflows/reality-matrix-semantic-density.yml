@@ -1,15 +1,6 @@
 name: Reality Matrix semantic density
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/cross-language/reality-matrix/semantic-density/**"
-      - "knowledge/d1-d7-foundation.json"
-      - "knowledge/d4-cleanroom.json"
-      - "knowledge/d5-ratified.json"
-      - "knowledge/d6-ratified.json"
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - ".github/workflows/reality-matrix-semantic-density.yml"
   workflow_dispatch:
 
 permissions:

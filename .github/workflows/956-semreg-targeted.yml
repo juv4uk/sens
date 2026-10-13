@@ -1,19 +1,6 @@
 name: "SENS registry — двійкова перевірка COND"
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/surface/semantic-registry-api.lisp"
-      - "tests/semantic/registry-find-row-cond-law.bits"
-      - "tests/semantic/registry-find-row-cond-mutant.bits"
-      - ".github/workflows/956-semreg-targeted.yml"
-  pull_request:
-    paths:
-      - "lib/surface/semantic-registry-api.lisp"
-      - "tests/semantic/registry-find-row-cond-law.bits"
-      - "tests/semantic/registry-find-row-cond-mutant.bits"
-      - ".github/workflows/956-semreg-targeted.yml"
   workflow_dispatch:
 
 permissions:

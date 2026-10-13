@@ -1,25 +1,7 @@
 name: D5 semantic lower bound
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "crates/sens/tests/macro_derivation.rs"
-      - "scripts/research-2193-d5-lower-bound.py"
-      - "docs/research/2193-d5-lower-bound*.md"
-      - ".github/workflows/d5-semantic-lower-bound.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "crates/sens/tests/macro_derivation.rs"
-      - "scripts/research-2193-d5-lower-bound.py"
-      - "docs/research/2193-d5-lower-bound*.md"
-      - ".github/workflows/d5-semantic-lower-bound.yml"
-
+  workflow_dispatch:
 jobs:
   d5-lower-bound:
     name: D5 ordinary-vs-transformer lower bound

@@ -3,20 +3,6 @@
 name: D10 — фізична точність десяти бітів
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - ".github/workflows/d10-exact-bitness-carrier.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - ".github/workflows/d10-exact-bitness-carrier.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,11 +1,6 @@
 name: M8 meta-eval env collision
 
 on:
-  pull_request:
-    paths:
-      - "lib/meta-eval.lisp"
-      - "crates/sens/tests/data/english-names-baseline.tsv"
-      - ".github/workflows/m8-meta-eval-env.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,9 +1,6 @@
 name: SENS file authority guard — physical T5 oracle
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       base_sha:

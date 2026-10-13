@@ -1,22 +1,6 @@
 name: Authority Guard Self-Test
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/authority-guard-self-test.yml"
-      - "tests/fixtures/semantic-authority-guard/**"
-      - "scripts/test-semantic-authority-guard.sh"
-      - "scripts/semantic-authority-guard-enforce.lisp"
-      - "scripts/semantic-authority-guard.lisp"
-      - "tests/authority-inventory.lisp"
-      - "lib/life-1-scheduler.lisp"
-      - "tests/fixtures/life-1-scheduler-witness.lisp"
-      - "crates/sens/tests/life_1_scheduler.rs"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/authority-guard-self-test.yml"
-      - "tests/authority-inventory.lisp"
   workflow_dispatch:
 
 jobs:

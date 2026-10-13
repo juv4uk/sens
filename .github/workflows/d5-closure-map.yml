@@ -1,11 +1,6 @@
 name: Historical D5 OD-005 closure provenance
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d5-closure-map/**"
-      - ".github/workflows/d5-closure-map.yml"
-      - "scripts/research-2322-generative-domain-forecast.py"
   workflow_dispatch:
 
 permissions:

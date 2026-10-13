@@ -1,20 +1,7 @@
 name: Native-first execute exact D1 cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/dispatch/native-first-execute.lisp"
-      - "tests/test_native_first_execute_d1_cutover.py"
-      - "crates/sens/tests/native_first_execute_d1_cutover.rs"
-      - ".github/workflows/native-first-execute-d1-cutover.yml"
-  pull_request:
-    paths:
-      - "lib/machine/dispatch/native-first-execute.lisp"
-      - "tests/test_native_first_execute_d1_cutover.py"
-      - "crates/sens/tests/native_first_execute_d1_cutover.rs"
-      - ".github/workflows/native-first-execute-d1-cutover.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

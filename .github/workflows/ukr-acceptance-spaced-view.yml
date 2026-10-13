@@ -1,24 +1,5 @@
 name: Ukrainian acceptance physical T5 spaced-view integrity
 on:
-  pull_request:
-    paths:
-      - "lib/surface/ukr-acceptance"
-      - "lib/surface/ukr-acceptance.lisp"
-      - "lib/surface/ukr-acceptance.sens"
-      - "tests/test_ukr_acceptance_spaced_view.py"
-      - ".github/workflows/ukr-acceptance-spaced-view.yml"
-      - "scripts/sens_spaced_view.py"
-      - "scripts/sens_t5_codec.py"
-  push:
-    branches: [main]
-    paths:
-      - "lib/surface/ukr-acceptance"
-      - "lib/surface/ukr-acceptance.lisp"
-      - "lib/surface/ukr-acceptance.sens"
-      - "tests/test_ukr_acceptance_spaced_view.py"
-      - ".github/workflows/ukr-acceptance-spaced-view.yml"
-      - "scripts/sens_spaced_view.py"
-      - "scripts/sens_t5_codec.py"
   workflow_dispatch:
 
 permissions:

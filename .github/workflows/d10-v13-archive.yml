@@ -1,12 +1,5 @@
 name: D10 v13 70-source integrity check
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-current-inventory.json'
-      - 'knowledge/d10-v13-semantic-inventory.json'
-      - 'knowledge/d10-v13-standards-provisional-intake-20261011.json'
-      - 'scripts/check_d10_v13_archive_intake.py'
   workflow_dispatch:
 permissions:
   contents: read

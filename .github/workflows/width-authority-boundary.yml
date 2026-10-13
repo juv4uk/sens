@@ -1,20 +1,7 @@
 name: width-authority-boundary
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "scripts/check-width-authority-boundary.py"
-      - ".github/workflows/width-authority-boundary.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "scripts/check-width-authority-boundary.py"
-      - ".github/workflows/width-authority-boundary.yml"
-
+  workflow_dispatch:
 jobs:
   no-host-width-authority:
     runs-on: ubuntu-latest

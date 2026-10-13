@@ -1,15 +1,6 @@
 name: Foundation cost ladder
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/foundation-cost-ladder/**"
-      - ".github/workflows/foundation-cost-ladder.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/foundation-cost-ladder/**"
-      - ".github/workflows/foundation-cost-ladder.yml"
   workflow_dispatch:
 
 jobs:

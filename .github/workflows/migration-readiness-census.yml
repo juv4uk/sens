@@ -1,49 +1,6 @@
 name: T5 migration readiness census
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/migration-readiness-census.py"
-      - "scripts/migration_source_scope.py"
-      - "scripts/report_original_migration_candidates.py"
-      - "knowledge/migration-nonprogram-*-manifest-2026-10-08.json"
-      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
-      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
-      - "tests/test_migration_readiness_contract.py"
-      - "scripts/migrate-t5-batch.py"
-      - "lib/**/*.lisp"
-      - "knowledge/d1-d9-foundation.json"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "crates/sens/src/semantic_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/eval/necessary_forms_generated.rs"
-      - "crates/sens/src/text7_projection_generated.rs"
-      - "contracts/core1-historical-sid-map.lisp"
-      - ".github/workflows/migration-readiness-census.yml"
-  pull_request:
-    paths:
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/migration-readiness-census.py"
-      - "scripts/migration_source_scope.py"
-      - "scripts/report_original_migration_candidates.py"
-      - "knowledge/migration-nonprogram-*-manifest-2026-10-08.json"
-      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
-      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
-      - "tests/test_migration_readiness_contract.py"
-      - "scripts/migrate-t5-batch.py"
-      - "lib/**/*.lisp"
-      - "knowledge/d1-d9-foundation.json"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "crates/sens/src/semantic_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/eval/necessary_forms_generated.rs"
-      - "crates/sens/src/text7_projection_generated.rs"
-      - "contracts/core1-historical-sid-map.lisp"
-      - ".github/workflows/migration-readiness-census.yml"
   workflow_dispatch:
 
 permissions:

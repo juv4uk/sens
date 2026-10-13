@@ -1,12 +1,6 @@
 name: Verify #528 semantic registry parity
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/check_semantic_registry.py'
-      - 'scripts/check-semantic-registry.lisp'
-      - '.github/workflows/verify-528-semantic-registry-parity.yml'
-      - 'lib/surface/semantic-registry.lisp'
   workflow_dispatch:
 
 jobs:

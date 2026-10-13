@@ -1,19 +1,6 @@
 name: SENS two-codec explicit tiny F3 CLI, T5 remains default
 on:
-  push:
-    paths:
-      - "crates/sens/src/frame3_small.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "research/framed3/rust_codec/senc.rs"
-      - ".github/workflows/two-codec-explicit-cli.yml"
-  pull_request:
-    paths:
-      - "crates/sens/src/frame3_small.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "research/framed3/rust_codec/senc.rs"
-      - ".github/workflows/two-codec-explicit-cli.yml"
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

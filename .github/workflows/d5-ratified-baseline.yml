@@ -1,30 +1,7 @@
 name: D5 current authority
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-ratified.json"
-      - "contracts/d5-ratification.lisp"
-      - "language-contract.lisp"
-      - "CURRENT.md"
-      - "docs/language-core.md"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "scripts/check-d5-current-authority.py"
-      - ".github/workflows/d5-ratified-baseline.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d5-ratified.json"
-      - "contracts/d5-ratification.lisp"
-      - "language-contract.lisp"
-      - "CURRENT.md"
-      - "docs/language-core.md"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "scripts/check-d5-current-authority.py"
-      - ".github/workflows/d5-ratified-baseline.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

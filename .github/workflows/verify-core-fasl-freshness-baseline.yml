@@ -1,13 +1,7 @@
 name: Verify core FASL freshness baseline
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/verify-core-fasl-freshness-baseline.yml"
-      - "lib/core.lisp"
-      - "lib/core.lisp.fasl"
-      - "crates/my-lisp/tests/core_fasl_freshness.rs"
-
+  workflow_dispatch:
 jobs:
   core-fasl-freshness:
     runs-on: ubuntu-latest

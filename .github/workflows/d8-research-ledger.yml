@@ -1,22 +1,6 @@
 name: D8 consolidated research ledger
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-research-ledger/**"
-      - "docs/research/3673-d8-research-ledger.md"
-      - "docs/research/3673-d8-research-ledger.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-research-ledger.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-research-ledger/**"
-      - "docs/research/3673-d8-research-ledger.md"
-      - "docs/research/3673-d8-research-ledger.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-research-ledger.yml"
   workflow_dispatch:
 
 jobs:

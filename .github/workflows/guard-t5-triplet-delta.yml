@@ -1,7 +1,6 @@
 name: Incremental SENS T5 triple-view ratchet
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       base_sha:

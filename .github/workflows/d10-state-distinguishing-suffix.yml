@@ -1,19 +1,5 @@
 name: D10 finite-state shortest distinguishing suffix research
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-finite-state-distinguishing-suffix-research-v1.json'
-      - 'scripts/check_d10_state_distinguishing_suffix.py'
-      - 'tests/test_d10_state_distinguishing_suffix.py'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - '.github/workflows/d10-state-distinguishing-suffix.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-finite-state-distinguishing-suffix-research-v1.json'
-      - 'scripts/check_d10_state_distinguishing_suffix.py'
-      - 'tests/test_d10_state_distinguishing_suffix.py'
-      - '.github/workflows/d10-state-distinguishing-suffix.yml'
   workflow_dispatch:
 permissions:
   contents: read

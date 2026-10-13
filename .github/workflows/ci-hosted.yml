@@ -3,9 +3,6 @@ name: Hosted CI
 # Owner freeze 2026-10-11: Core-only required-check surface.
 # Prior hosted CI is archived, not deleted.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

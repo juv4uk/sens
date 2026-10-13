@@ -1,12 +1,6 @@
 name: Foundation ladder benchmark
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/foundation-ladder/**"
-      - ".github/workflows/foundation-ladder-bench.yml"
-      - "manifest.scm"
-      - "channels.scm"
   workflow_dispatch:
 
 jobs:

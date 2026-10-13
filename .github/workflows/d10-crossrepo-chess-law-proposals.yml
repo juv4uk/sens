@@ -1,18 +1,7 @@
 name: D10 chess crossrepo research laws
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-crossrepo-chess-law-proposals-20261009.json
-      - tests/test_d10_crossrepo_chess_semantic_donors.py
-      - .github/workflows/d10-crossrepo-chess-law-proposals.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-crossrepo-chess-law-proposals-20261009.json
-      - tests/test_d10_crossrepo_chess_semantic_donors.py
-      - .github/workflows/d10-crossrepo-chess-law-proposals.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

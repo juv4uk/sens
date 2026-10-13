@@ -1,20 +1,7 @@
 name: migration-pair-cohort
 
 on:
-  pull_request:
-    paths:
-      - 'tests/fixtures/migration-pair-cohort/**'
-      - 'tests/test_migration_pair_cohort.py'
-      - 'crates/sens/tests/migration_pair_cohort.rs'
-      - '.github/workflows/migration-pair-cohort.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/fixtures/migration-pair-cohort/**'
-      - 'tests/test_migration_pair_cohort.py'
-      - 'crates/sens/tests/migration_pair_cohort.rs'
-      - '.github/workflows/migration-pair-cohort.yml'
-
+  workflow_dispatch:
 permissions:
   contents: read
 

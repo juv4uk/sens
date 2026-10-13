@@ -1,10 +1,7 @@
 name: migration-provenance-era-sweep
 
 on:
-  push:
-    branches:
-      - migration-provenance-era-sweep
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,23 +1,6 @@
 name: Historical pre-cleanroom exact-width function census
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2351-exact-width-function-census.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/function-status-census.tsv"
-      - "knowledge/exact-width-admitted-corpus.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/exact-width-function-census.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2351-exact-width-function-census.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/function-status-census.tsv"
-      - "knowledge/exact-width-admitted-corpus.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/exact-width-function-census.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,33 +1,7 @@
 name: Macro expansion timing research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_macro_timing.rs"
-      - "crates/sens/tests/post_d4_macro_call_form.rs"
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "scripts/research-2568-macro-timing.py"
-      - "scripts/research-2580-macro-call-form.py"
-      - "docs/research/2568-macro-timing*.md"
-      - "docs/research/2580-macro-call-form*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/macro-expansion-timing.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "crates/sens/tests/post_d4_macro_timing.rs"
-      - "crates/sens/tests/post_d4_macro_call_form.rs"
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "scripts/research-2568-macro-timing.py"
-      - "scripts/research-2580-macro-call-form.py"
-      - "docs/research/2568-macro-timing*.md"
-      - "docs/research/2580-macro-call-form*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/macro-expansion-timing.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

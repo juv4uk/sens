@@ -2,15 +2,6 @@ name: Paired wall evidence methodology (A/A negative control)
 
 # This does not gate latency, and does not interfere with critical smoke lanes.
 on:
-  pull_request:
-    paths:
-      - "benchmarks/methodology/**"
-      - ".github/workflows/paired-wall-methodology.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/methodology/**"
-      - ".github/workflows/paired-wall-methodology.yml"
   workflow_dispatch:
 
 permissions:

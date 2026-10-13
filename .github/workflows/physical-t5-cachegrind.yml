@@ -5,26 +5,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "15 3 * * 0"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/physical-t5-cachegrind.yml"
-      - "benchmarks/physical-sens-runtime/irefs.py"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
-  pull_request:
-    paths:
-      - ".github/workflows/physical-t5-cachegrind.yml"
-      - "benchmarks/physical-sens-runtime/irefs.py"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-
 permissions:
   contents: read
 

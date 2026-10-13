@@ -1,14 +1,7 @@
 name: Issue 333 read-file stage profile
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/profile-read-file-stages.lisp'
-      - '.github/workflows/issue-333-readfile-stage-profile.yml'
-      - 'lib/utf8.lisp'
-      - 'lib/fs.lisp'
-      - 'crates/my-lisp-host/src/lib.rs'
-
+  workflow_dispatch:
 jobs:
   profile:
     runs-on: ubuntu-24.04

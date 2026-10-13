@@ -1,20 +1,7 @@
 name: Migration non-program ISA manifest
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_isa_manifest.py"
-      - "lib/machine/isa/*.lisp"
-      - ".github/workflows/migration-nonprogram-isa.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_isa_manifest.py"
-      - "lib/machine/isa/*.lisp"
-      - ".github/workflows/migration-nonprogram-isa.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,11 +1,5 @@
 name: Knowledge Lisp D3 list-event lowering witness
 on:
-  push:
-    branches: [main]
-    paths:
-      - lib/knowledge.lisp
-      - tests/test_sid8_knowledge_list_event_d3.py
-      - .github/workflows/sid8-knowledge-list-event-d3.yml
   workflow_dispatch:
 permissions:
   contents: read

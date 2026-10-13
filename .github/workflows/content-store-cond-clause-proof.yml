@@ -1,13 +1,6 @@
 name: Verify content-store D1 clause nesting
 
 on:
-  push:
-    branches:
-      - fix/content-store-canonical-cond-results-20261009
-  pull_request:
-    paths:
-      - "tests/fixtures/content-store-authority-witness.lisp"
-      - ".github/workflows/content-store-cond-clause-proof.yml"
   workflow_dispatch:
 
 permissions:

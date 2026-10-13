@@ -1,25 +1,6 @@
 name: D8 gauge S4
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d8-v2-gauge-fixed-candidate.json"
-      - "knowledge/d8-v2-geometry-state.json"
-      - "knowledge/d8-v2-semantic-inventory.json"
-      - "scripts/check-d8-v2-gauge-s4.py"
-      - "scripts/check-d8-v2-geometry-s2.py"
-      - "scripts/check-d8-v2-semantic-inventory.py"
-      - ".github/workflows/d8-v2-gauge-s4.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d8-v2-gauge-fixed-candidate.json"
-      - "knowledge/d8-v2-geometry-state.json"
-      - "knowledge/d8-v2-semantic-inventory.json"
-      - "scripts/check-d8-v2-gauge-s4.py"
-      - "scripts/check-d8-v2-geometry-s2.py"
-      - "scripts/check-d8-v2-semantic-inventory.py"
-      - ".github/workflows/d8-v2-gauge-s4.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,18 +1,6 @@
 name: Exact source migration Git delta
 
 on:
-  pull_request:
-    paths:
-      - "scripts/report_migration_git_delta.py"
-      - "tests/test_report_migration_git_delta.py"
-      - ".github/workflows/migration-git-delta.yml"
-      - "docs/MIGRATION-GIT-DELTA.uk.md"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/report_migration_git_delta.py"
-      - "tests/test_report_migration_git_delta.py"
-      - ".github/workflows/migration-git-delta.yml"
   workflow_dispatch:
 
 permissions:

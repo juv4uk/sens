@@ -1,44 +1,6 @@
 name: Canon laws executed by binary SENS
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/canon.lisp'
-      - 'lib/core1.lisp'
-      - 'lib/core1-found.bits'
-      - 'lib/core1-found.sens'
-      - 'tests/fixtures/core1-found-semantic.bits'
-      - 'tests/fixtures/core1-found-semantic.sens'
-      - 'lib/reason.lisp'
-      - 'lib/time.lisp'
-      - 'tests/semantic/time-d1-fallback-law.bits'
-      - 'tests/semantic/time-d1-fallback-mutant.bits'
-      - 'lib/unify.lisp'
-      - 'tests/semantic/unify-substitution-d4.bits'
-      - 'tests/semantic/reason-d4-pair-selectors.bits'
-      - 'lib/core1-arity.bits'
-      - 'lib/core1-arity.sens'
-      - 'tests/fixtures/core1-arity-semantic.bits'
-      - 'tests/fixtures/core1-arity-semantic.sens'
-      - 'lib/core1-admission.bits'
-      - 'lib/core1-admission.sens'
-      - 'tests/fixtures/core1-admission-semantic.bits'
-      - 'tests/fixtures/core1-admission-semantic.sens'
-      - 'lib/core1-selectors.bits'
-      - 'lib/core1-selectors.sens'
-      - 'tests/fixtures/core1-selectors-semantic.bits'
-      - 'tests/semantic/core1-admitted-selectors.bits'
-      - 'tests/fixtures/core1-selectors-semantic.sens'
-      - 'lib/machine/block.lisp'
-      - 'lib/machine/block.bits'
-      - 'lib/machine/block.sens'
-      - 'tests/fixtures/machine-block-semantic.bits'
-      - 'tests/fixtures/machine-block-semantic.sens'
-      - 'tests/fixtures/canon-ladder-logic.bits'
-      - 'tests/semantic/canon-d1-fallback-law.bits'
-      - 'tests/fixtures/canon-ladder-logic.sens'
-      - '.github/workflows/canon-binary-law.yml'
   workflow_dispatch:
 
 permissions:

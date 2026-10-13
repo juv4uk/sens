@@ -1,10 +1,7 @@
 name: Verify 425 full package
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-425-full-package.yml'
-
+  workflow_dispatch:
 jobs:
   full-package:
     runs-on: ubuntu-24.04

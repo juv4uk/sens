@@ -1,11 +1,6 @@
 name: COND legacy rewrite fail-closed
 
 on:
-  pull_request:
-    paths:
-      - "scripts/cond-modernize.py"
-      - "tests/test_cond_modernize_guard.py"
-      - ".github/workflows/cond-modernize-guard.yml"
   workflow_dispatch:
 
 jobs:

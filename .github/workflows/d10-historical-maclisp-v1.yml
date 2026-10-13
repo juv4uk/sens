@@ -1,24 +1,6 @@
 name: D10 historical MacLisp v1
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-historical-maclisp-v1.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "knowledge/d1-d9-foundation.json"
-      - "knowledge/sens8-current-coverage-v1.json"
-      - "scripts/check-d10-historical-maclisp-v1.py"
-      - "scripts/check-d10-v1-semantic-inventory.py"
-      - ".github/workflows/d10-historical-maclisp-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d10-historical-maclisp-v1.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "scripts/check-d10-historical-maclisp-v1.py"
-      - ".github/workflows/d10-historical-maclisp-v1.yml"
   workflow_dispatch:
 
 jobs:

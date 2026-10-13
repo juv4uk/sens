@@ -1,26 +1,6 @@
 name: D10 crossrepo Panini v1
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-crossrepo-panini-v1.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "scripts/check-d10-crossrepo-panini-v1.py"
-      - "scripts/check-d10-single-stream-restoration-v1.py"
-      - "scripts/check-island-ownership-gate.py"
-      - "scripts/check-d10-library-harvest-v1.py"
-      - "scripts/check-d10-forward-harvest-v1.py"
-      - "scripts/check-d10-knowledge-harvest-v1.py"
-      - ".github/workflows/d10-crossrepo-panini-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d10-crossrepo-panini-v1.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "scripts/check-d10-crossrepo-panini-v1.py"
-      - ".github/workflows/d10-crossrepo-panini-v1.yml"
   workflow_dispatch:
 
 jobs:

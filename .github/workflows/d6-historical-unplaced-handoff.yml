@@ -1,15 +1,6 @@
 name: D6 historical-unplaced handoff
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-historical-unplaced-handoff/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-pure-unknown-parent-tournament/**"
-      - "benchmarks/d6-pure-unknown-domain-firewall/**"
-      - "benchmarks/nonlocal-exit-domain/**"
-      - ".github/workflows/d6-historical-unplaced-handoff.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,17 +1,6 @@
 name: Точний D1 для індексу міркування
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/reason.lisp"
-      - "crates/sens/tests/reason_index.rs"
-      - ".github/workflows/reason-index-exact-d1.yml"
-  pull_request:
-    paths:
-      - "lib/reason.lisp"
-      - "crates/sens/tests/reason_index.rs"
-      - ".github/workflows/reason-index-exact-d1.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,15 +1,6 @@
 name: Human-wire block framing ARQ
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/human-wire-arq/**"
-      - ".github/workflows/human-wire-arq.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/human-wire-arq/**"
-      - ".github/workflows/human-wire-arq.yml"
   workflow_dispatch:
 
 jobs:

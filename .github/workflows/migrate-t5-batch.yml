@@ -4,40 +4,6 @@ name: safe-batch-t5-migration
 # somebody edits the migrator. This is an audit, never an automatic publisher.
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'lib/**/*.lisp'
-      - 'lib/**/*.sens'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'scripts/migrate-t5-batch.py'
-      - 'tests/test_migrate_t5_batch.py'
-      - 'contracts/core1-historical-sid-map.lisp'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'crates/sens/src/domain_surface_registry_generated.rs'
-      - 'crates/sens/src/semantic_registry_generated.rs'
-      - 'crates/sens/src/semantic_registry.rs'
-      - 'crates/sens/src/eval/necessary_forms_generated.rs'
-      - 'crates/sens/src/text7_projection_generated.rs'
-      - '.github/workflows/migrate-t5-batch.yml'
-      - 'docs/MIGRATE-T5-BATCH.uk.md'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/**/*.lisp'
-      - 'lib/**/*.sens'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'scripts/migrate-t5-batch.py'
-      - 'tests/test_migrate_t5_batch.py'
-      - 'contracts/core1-historical-sid-map.lisp'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'crates/sens/src/domain_surface_registry_generated.rs'
-      - 'crates/sens/src/semantic_registry_generated.rs'
-      - 'crates/sens/src/semantic_registry.rs'
-      - 'crates/sens/src/eval/necessary_forms_generated.rs'
-      - 'crates/sens/src/text7_projection_generated.rs'
-      - '.github/workflows/migrate-t5-batch.yml'
 permissions:
   contents: read
 jobs:

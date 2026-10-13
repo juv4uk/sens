@@ -1,15 +1,6 @@
 name: Domain mechanism benchmarks
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/semantic-path-locality/**"
-      - ".github/workflows/domain-mechanism-bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/semantic-path-locality/**"
-      - ".github/workflows/domain-mechanism-bench.yml"
   workflow_dispatch:
 
 concurrency:

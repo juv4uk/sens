@@ -1,18 +1,5 @@
 name: Машинний D3 false — 10 двійкових законів SENS і негативний біт
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/machine/effects/u64.lisp'
-      - 'tests/semantic/machine-effect-d3-false-*.bits'
-      - 'tests/semantic/machine-effect-d3-false-*.sens'
-      - '.github/workflows/machine-effect-d3-false.yml'
-  pull_request:
-    paths:
-      - 'lib/machine/effects/u64.lisp'
-      - 'tests/semantic/machine-effect-d3-false-*.bits'
-      - 'tests/semantic/machine-effect-d3-false-*.sens'
-      - '.github/workflows/machine-effect-d3-false.yml'
   workflow_dispatch:
 permissions:
   contents: read

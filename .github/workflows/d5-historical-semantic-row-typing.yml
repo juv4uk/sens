@@ -1,14 +1,6 @@
 name: D5 historical semantic row typing
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d5-historical-semantic-status.json"
-      - "benchmarks/post-d4-semantic-placement/placement.json"
-      - "benchmarks/d5-closure-map/**"
-      - "scripts/research-2758-d5-row-typing.py"
-      - ".github/workflows/d5-historical-semantic-row-typing.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,18 +1,5 @@
 name: D10 candidate triage preserves source identities
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-filter/all-candidates.tsv'
-      - 'knowledge/d10-filter/all-source-occurrences.tsv'
-      - 'knowledge/d10-filter/source-occurrence-manifest.json'
-      - 'knowledge/d10-filter/candidate-review-queue.tsv'
-      - 'knowledge/d10-filter/review-triage-manifest.json'
-      - 'knowledge/d10-current-inventory.json'
-      - 'knowledge/d10-v9-semantic-inventory.json'
-      - 'scripts/d10_sort_review_queue.py'
-      - 'tests/test_d10_review_queue.py'
-      - '.github/workflows/d10-review-triage.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,13 +1,5 @@
 name: LISP 1.5 Appendix A archival provenance guard
 on:
-  pull_request:
-    paths:
-      - 'knowledge/lisp15-appendix-a-provenance-v1.json'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'knowledge/d8-ratified.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'scripts/check-lisp15-appendix-provenance.py'
-      - '.github/workflows/lisp15-appendix-provenance.yml'
   workflow_dispatch:
 jobs:
   archival-provenance-only:

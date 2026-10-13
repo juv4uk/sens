@@ -1,19 +1,6 @@
 name: Residue root domain law
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/residue-domain-law/**"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "benchmarks/d5-structural-discovery/factor-graph.json"
-      - "benchmarks/d6-closure-map/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/residue-domain-law.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/residue-domain-law/**"
-      - ".github/workflows/residue-domain-law.yml"
   workflow_dispatch:
 
 jobs:

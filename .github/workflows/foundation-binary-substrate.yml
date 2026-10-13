@@ -1,17 +1,6 @@
 name: Foundation binary substrate shadow
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2106-binary-substrate.py"
-      - "docs/research/2106-binary-substrate*.md"
-      - ".github/workflows/foundation-binary-substrate.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2106-binary-substrate.py"
-      - "docs/research/2106-binary-substrate*.md"
-      - ".github/workflows/foundation-binary-substrate.yml"
   workflow_dispatch:
 
 jobs:

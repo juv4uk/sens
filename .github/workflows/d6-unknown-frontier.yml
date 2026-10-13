@@ -1,25 +1,6 @@
 name: D6 UNKNOWN frontier research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-closure-map/**"
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - "scripts/research-2619-d6-residency-readiness.py"
-      - "scripts/research-2624-d6-middle-corners.py"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-unknown-frontier.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-closure-map/**"
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - "scripts/research-2619-d6-residency-readiness.py"
-      - "scripts/research-2624-d6-middle-corners.py"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-unknown-frontier.yml"
   workflow_dispatch:
 
 jobs:

@@ -2,13 +2,6 @@ name: SENS main-only branch history census
 
 on:
   create:
-  push:
-    branches: [main]
-    paths:
-      - 'research/branch-history/20261011/index.json'
-      - 'research/branch-history/20261011/live-heads-pages-*.json'
-      - 'scripts/check_main_only_branch_history.py'
-      - '.github/workflows/main-only-branch-history.yml'
   workflow_dispatch:
 
 permissions:

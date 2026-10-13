@@ -1,31 +1,6 @@
 name: Frame3-Micro dense 1-5 byte proof and real file corpus
 on:
-  push:
-    paths:
-      - 'crates/sens/examples/frame3_one_byte_research.rs'
-      - 'crates/sens/src/frame3_micro.rs'
-      - 'crates/sens/src/frame3_micro_enumerator.rs'
-      - 'crates/sens/src/frame3_micro_v5.rs'
-      - 'crates/sens/src/frame3_micro_v5_lambda.rs'
-      - 'crates/sens/src/frame3_micro_v5_lambda_app.rs'
-      - 'knowledge/f3m5-lambda-lexical-reference-candidate-v1.json'
-      - 'scripts/check_f3m5_lambda_lexical_reference.py'
-      - 'research/framed3/fixtures/*.f3m'
-      - 'crates/sens/examples/frame3_real_files_bench.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - '.github/workflows/frame3-one-byte-real-file.yml'
-  pull_request:
-    paths:
-      - 'crates/sens/examples/frame3_one_byte_research.rs'
-      - 'crates/sens/src/frame3_micro.rs'
-      - 'crates/sens/src/frame3_micro_enumerator.rs'
-      - 'crates/sens/src/frame3_micro_v5.rs'
-      - 'crates/sens/src/frame3_micro_v5_lambda.rs'
-      - 'crates/sens/src/frame3_micro_v5_lambda_app.rs'
-      - 'research/framed3/fixtures/*.f3m'
-      - 'crates/sens/examples/frame3_real_files_bench.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - '.github/workflows/frame3-one-byte-real-file.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

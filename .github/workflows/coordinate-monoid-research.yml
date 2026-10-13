@@ -1,10 +1,6 @@
 name: Coordinate monoid research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2324-coordinate-monoid-checker.py"
-      - ".github/workflows/coordinate-monoid-research.yml"
   workflow_dispatch:
 
 permissions:

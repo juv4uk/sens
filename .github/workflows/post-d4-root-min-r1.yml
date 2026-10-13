@@ -1,17 +1,6 @@
 name: Post-D4 root minimization R1
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/post-d4-root-min-r1/**"
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - ".github/workflows/post-d4-root-min-r1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/post-d4-root-min-r1/**"
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - ".github/workflows/post-d4-root-min-r1.yml"
   workflow_dispatch:
 
 jobs:

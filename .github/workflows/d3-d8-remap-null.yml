@@ -1,17 +1,6 @@
 name: D3-D8 remap null research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d3-d8-remap-null/**"
-      - "benchmarks/d3-d8-remap-solver/**"
-      - ".github/workflows/d3-d8-remap-null.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d3-d8-remap-null/**"
-      - "benchmarks/d3-d8-remap-solver/**"
-      - ".github/workflows/d3-d8-remap-null.yml"
   workflow_dispatch:
 
 jobs:

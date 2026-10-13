@@ -1,18 +1,6 @@
 name: Audit SID8 broad in-place Lisp source cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/build-dependency-classification.lisp
-      - scripts/check-core4-predicate-answer-scale.lisp
-      - scripts/check-core4-predicate-answer-boundary.lisp
-      - experiments/probabilistic-decision-jev-like.lisp
-      - scripts/generate-function-table.lisp
-      - scripts/generate-uk-surface-audit.lisp
-      - scripts/verify-repo.lisp
-      - tests/test_sid8_broad_source_cutover.py
-      - .github/workflows/audit-sid8-broad-source.yml
   workflow_dispatch:
 
 permissions:

@@ -1,21 +1,6 @@
 name: D10 finite temporal difference-constraint research
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-finite-temporal-constraint-closure-v1.json'
-      - 'scripts/research_d10_finite_temporal_closure.py'
-      - 'tests/test_research_d10_finite_temporal_closure.py'
-      - 'docs/research/d10-finite-temporal-closure.uk.md'
-      - '.github/workflows/d10-finite-temporal-closure.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-finite-temporal-constraint-closure-v1.json'
-      - 'scripts/research_d10_finite_temporal_closure.py'
-      - 'tests/test_research_d10_finite_temporal_closure.py'
-      - 'docs/research/d10-finite-temporal-closure.uk.md'
-      - '.github/workflows/d10-finite-temporal-closure.yml'
   workflow_dispatch:
 
 permissions:

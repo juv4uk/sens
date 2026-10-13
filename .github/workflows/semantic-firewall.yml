@@ -1,19 +1,6 @@
 name: Semantic firewall tournament
 
 on:
-  pull_request:
-    paths:
-      - 'lib/surface/semantic-registry.lisp'
-      - 'scripts/check_semantic_registry.py'
-      - 'benchmarks/semantic-firewall/**'
-      - '.github/workflows/semantic-firewall.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/surface/semantic-registry.lisp'
-      - 'scripts/check_semantic_registry.py'
-      - 'benchmarks/semantic-firewall/**'
-      - '.github/workflows/semantic-firewall.yml'
   workflow_dispatch:
 
 permissions:

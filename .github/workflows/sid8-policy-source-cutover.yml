@@ -1,19 +1,5 @@
 name: SID8 policy source domain cutover
 on:
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/foreign-tools-census.lisp"
-      - "knowledge/language-policy.lisp"
-      - "knowledge/swarm-legacy-deprecation.lisp"
-      - "knowledge/swarm-no-live-callers-audit.lisp"
-      - "knowledge/file-authority-policy.lisp"
-      - "knowledge/guard-runtime-policy.lisp"
-      - "lib/machine/lowering/semantic-effects.lisp"
-      - "examples/ukrainian-greeting.lisp"
-      - "tests/test_sid8_policy_source_cutover.py"
-      - "scripts/check_d3_legacy_logic.py"
-      - ".github/workflows/sid8-policy-source-cutover.yml"
   workflow_dispatch:
 
 permissions:

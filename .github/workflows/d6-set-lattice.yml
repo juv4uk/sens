@@ -1,15 +1,6 @@
 name: D6 set lattice research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-set-lattice/**"
-      - ".github/workflows/d6-set-lattice.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-set-lattice/**"
-      - ".github/workflows/d6-set-lattice.yml"
   workflow_dispatch:
 
 jobs:

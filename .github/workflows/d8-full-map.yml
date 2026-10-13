@@ -1,26 +1,7 @@
 name: D8 admitted-cells and candidates guard
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d6-historical-full-map.json"
-      - "knowledge/d7-full-map.json"
-      - "knowledge/d8-historical-full-map.json"
-      - "scripts/build-d8-historical-full-map.py"
-      - "scripts/check-d8-full-map.py"
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - ".github/workflows/d8-full-map.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d6-historical-full-map.json"
-      - "knowledge/d7-full-map.json"
-      - "knowledge/d8-historical-full-map.json"
-      - "scripts/build-d8-historical-full-map.py"
-      - "scripts/check-d8-full-map.py"
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - ".github/workflows/d8-full-map.yml"
-
+  workflow_dispatch:
 jobs:
   historical-map:
     name: D8 admission constitution

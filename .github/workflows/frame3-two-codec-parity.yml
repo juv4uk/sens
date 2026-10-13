@@ -1,25 +1,6 @@
 name: Original Frame3 - independent physical vs D3 admission parity
 on:
-  push:
-    paths:
-      - "research/framed3/rust_codec/parity.rs"
-      - "research/framed3/rust_codec/gen_vectors.py"
-      - "research/framed3/rust_codec/senc.rs"
-      - "research/framed3/rust_codec/gen_negatives.py"
-      - "research/framed3/rust_codec/run_parity.sh"
-      - "research/framed3/research_codec.py"
-      - "research/framed3/test_canonical_capacity_research.py"
-      - ".github/workflows/frame3-two-codec-parity.yml"
-  pull_request:
-    paths:
-      - "research/framed3/rust_codec/parity.rs"
-      - "research/framed3/rust_codec/gen_vectors.py"
-      - "research/framed3/rust_codec/senc.rs"
-      - "research/framed3/rust_codec/gen_negatives.py"
-      - "research/framed3/rust_codec/run_parity.sh"
-      - "research/framed3/research_codec.py"
-      - "research/framed3/test_canonical_capacity_research.py"
-      - ".github/workflows/frame3-two-codec-parity.yml"
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

@@ -1,22 +1,6 @@
 name: D8 NEG-ABS reciprocal research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-neg-abs-recip/**"
-      - "docs/research/3729-d8-neg-abs-recip.md"
-      - "docs/research/3729-d8-neg-abs-recip.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-neg-abs-recip.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-neg-abs-recip/**"
-      - "docs/research/3729-d8-neg-abs-recip.md"
-      - "docs/research/3729-d8-neg-abs-recip.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-neg-abs-recip.yml"
   workflow_dispatch:
 
 jobs:

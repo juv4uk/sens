@@ -1,25 +1,6 @@
 name: Точнодоменна міграція x86 D4 і D1
 
 on:
-  pull_request:
-    paths:
-      - "lib/machine/atoms/x86-64.lisp"
-      - "lib/machine/operands/x86-64.lisp"
-      - "lib/machine/lowering/semantic-x86-64.lisp"
-      - "tests/semantic/x86-lowering-d1-law.lisp"
-      - "tests/semantic/x86-lowering-d1-mutant.lisp"
-      - "crates/sens/tests/x86_domain_cutover.rs"
-      - ".github/workflows/x86-domain-cutover.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/atoms/x86-64.lisp"
-      - "lib/machine/operands/x86-64.lisp"
-      - "lib/machine/lowering/semantic-x86-64.lisp"
-      - "tests/semantic/x86-lowering-d1-law.lisp"
-      - "tests/semantic/x86-lowering-d1-mutant.lisp"
-      - "crates/sens/tests/x86_domain_cutover.rs"
-      - ".github/workflows/x86-domain-cutover.yml"
   workflow_dispatch:
 
 permissions:

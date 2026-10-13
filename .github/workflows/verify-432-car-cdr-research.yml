@@ -2,12 +2,7 @@
 name: Verify 432 CAR CDR research
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-432-car-cdr-research.yml'
-      - 'docs/research/432/**'
-      - 'docs/superpowers/plans/2026-09-18-car-cdr-bounded-search.md'
-
+  workflow_dispatch:
 jobs:
   research-probes:
     runs-on: ubuntu-24.04

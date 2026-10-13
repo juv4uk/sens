@@ -1,20 +1,6 @@
 name: D5 internal-law ratchet
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-internal-law-atlas.json"
-      - "scripts/check-d5-internal-law-atlas.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d5-internal-law-ratchet.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "knowledge/d5-internal-law-atlas.json"
-      - "scripts/check-d5-internal-law-atlas.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d5-internal-law-ratchet.yml"
   workflow_dispatch:
 
 permissions:

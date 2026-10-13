@@ -1,22 +1,6 @@
 name: D8 ZIP-UNZIP orientation research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-zip-unzip-orientation/**"
-      - "docs/research/3710-d8-zip-unzip-orientation.md"
-      - "docs/research/3710-d8-zip-unzip-orientation.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-zip-unzip-orientation.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-zip-unzip-orientation/**"
-      - "docs/research/3710-d8-zip-unzip-orientation.md"
-      - "docs/research/3710-d8-zip-unzip-orientation.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-zip-unzip-orientation.yml"
   workflow_dispatch:
 
 jobs:

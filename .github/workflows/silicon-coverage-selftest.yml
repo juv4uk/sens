@@ -1,15 +1,6 @@
 name: Silicon coverage self-test
 
 on:
-  pull_request:
-    paths:
-      - "scripts/silicon-coverage.py"
-      - ".github/workflows/silicon-coverage-selftest.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/silicon-coverage.py"
-      - ".github/workflows/silicon-coverage-selftest.yml"
   workflow_dispatch:
 
 permissions:

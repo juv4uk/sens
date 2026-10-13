@@ -1,11 +1,6 @@
 name: Witness presentation vs numeric wire
 
 on:
-  pull_request:
-    paths:
-      - "tests/fixtures/witness-runner.lisp"
-      - "crates/sens/tests/witness_authority.rs"
-      - ".github/workflows/witness-presentation-wire.yml"
   workflow_dispatch:
 
 jobs:

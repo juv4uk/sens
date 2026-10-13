@@ -1,22 +1,6 @@
 name: D9 overflow review v1
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d9-overflow-review-v1.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "knowledge/d8-v2-overflow-ledger.json"
-      - "knowledge/d1-d8-foundation.json"
-      - "scripts/check-d9-overflow-review-v1.py"
-      - "scripts/check-d9-fill-v1-seed.py"
-      - ".github/workflows/d9-overflow-review-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-overflow-review-v1.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-overflow-review-v1.py"
-      - ".github/workflows/d9-overflow-review-v1.yml"
   workflow_dispatch:
 
 jobs:

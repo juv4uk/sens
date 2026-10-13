@@ -5,14 +5,6 @@ name: Silent fallback classes
 # the live tree and fails only when a NEW one appears that the baseline does not
 # name. It is not a blanket gate: existing sites pass.
 on:
-  pull_request:
-    paths:
-      - "crates/**"
-      - "scripts/**"
-      - "lib/generated/**"
-      - ".github/workflows/**"
-      - "knowledge/silent-fallback-inventory.lisp"
-      - "scripts/check-silent-fallback-classes.py"
   workflow_dispatch:
   schedule:
     - cron: "0 3 * * *"

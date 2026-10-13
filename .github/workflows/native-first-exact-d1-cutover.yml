@@ -1,22 +1,7 @@
 name: Native-first exact-D1 source migration
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/dispatch/native-first.lisp"
-      - "crates/sens/src/parser.rs"
-      - "crates/sens/tests/d1_direct_projection.rs"
-      - "tests/test_native_first_exact_d1_cutover.py"
-      - "crates/sens/tests/native_first_d1_cutover.rs"
-      - ".github/workflows/native-first-exact-d1-cutover.yml"
-  pull_request:
-    paths:
-      - "lib/machine/dispatch/native-first.lisp"
-      - "tests/test_native_first_exact_d1_cutover.py"
-      - "crates/sens/tests/native_first_d1_cutover.rs"
-      - ".github/workflows/native-first-exact-d1-cutover.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

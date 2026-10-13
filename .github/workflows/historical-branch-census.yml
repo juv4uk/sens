@@ -1,11 +1,6 @@
 name: Historical branch merge census (read-only)
 
 on:
-  pull_request:
-    paths:
-      - "scripts/audit_branch_merges.py"
-      - "tests/test_audit_branch_merges.py"
-      - ".github/workflows/historical-branch-census.yml"
   workflow_dispatch:
 
 permissions:

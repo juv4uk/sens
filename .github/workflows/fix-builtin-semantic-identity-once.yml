@@ -1,14 +1,7 @@
 name: Verify builtin semantic identity once
 
 on:
-  push:
-    branches:
-      - fix/canon-builtin-semantic-identity
-    paths:
-      - .github/workflows/fix-builtin-semantic-identity-once.yml
-      - .github/scripts/fix-builtin-semantic-identity.py
-      - .github/scripts/fix-builtin-semantic-identity-clippy.py
-
+  workflow_dispatch:
 permissions:
   contents: write
 

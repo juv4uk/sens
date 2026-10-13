@@ -1,20 +1,7 @@
 name: Migration non-program expr fixture records
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
-      - "tests/test_migration_nonprogram_expr_records.py"
-      - "tests/fixtures/*.lisp"
-      - ".github/workflows/migration-nonprogram-expr-records.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
-      - "tests/test_migration_nonprogram_expr_records.py"
-      - "tests/fixtures/*.lisp"
-      - ".github/workflows/migration-nonprogram-expr-records.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

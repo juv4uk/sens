@@ -1,13 +1,6 @@
 name: D5 FEXPR MACRO residual law
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "benchmarks/d5-structural-discovery/special-call-factor.json"
-      - "knowledge/d5-fexpr-macro-pair.json"
-      - "scripts/research-3025-d5-fexpr-macro-pair.py"
-      - ".github/workflows/d5-fexpr-macro-pair.yml"
   workflow_dispatch:
 
 permissions:

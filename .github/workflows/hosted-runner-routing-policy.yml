@@ -1,8 +1,6 @@
 name: Hosted runner routing policy
 
 on:
-  pull_request:
-  push:
   workflow_dispatch:
 
 permissions:

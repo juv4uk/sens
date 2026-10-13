@@ -1,18 +1,6 @@
 name: D10 R6RS independent hashtable copy/mutability oracle
 on:
-  push:
-    paths:
-      - 'knowledge/d10-r6rs-copy-mutable-oracle-v1.json'
-      - 'tests/d10_r6rs_hashtable_copy_mutable.ss'
-      - 'scripts/check_d10_r6rs_copy_mutable_oracle.py'
-      - '.github/workflows/d10-r6rs-copy-mutable-oracle.yml'
-  pull_request:
-    paths:
-      - 'knowledge/d10-r6rs-copy-mutable-oracle-v1.json'
-      - 'tests/d10_r6rs_hashtable_copy_mutable.ss'
-      - 'scripts/check_d10_r6rs_copy_mutable_oracle.py'
-      - '.github/workflows/d10-r6rs-copy-mutable-oracle.yml'
-      - 'knowledge/d10-v1-semantic-inventory.json'
+  workflow_dispatch:
 jobs:
   source-and-oracle:
     runs-on: ubuntu-latest

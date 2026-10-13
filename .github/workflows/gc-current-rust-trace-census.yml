@@ -1,23 +1,6 @@
 name: GC current Rust trace census
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/gc-current-rust-trace-census/**"
-      - "crates/sens/src/value.rs"
-      - "crates/sens/src/environment.rs"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/bignum.rs"
-      - ".github/workflows/gc-current-rust-trace-census.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/gc-current-rust-trace-census/**"
-      - "crates/sens/src/value.rs"
-      - "crates/sens/src/environment.rs"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/bignum.rs"
-      - ".github/workflows/gc-current-rust-trace-census.yml"
   workflow_dispatch:
 
 permissions:

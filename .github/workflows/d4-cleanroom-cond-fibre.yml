@@ -1,15 +1,6 @@
 name: D4 clean-room COND fibre research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-cond-fibre/**"
-      - ".github/workflows/d4-cleanroom-cond-fibre.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-cond-fibre/**"
-      - ".github/workflows/d4-cleanroom-cond-fibre.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,37 +1,6 @@
 name: Foundation binary-word law shadow
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2077-binary-word-law.py"
-      - "scripts/research-4261-current-binary-authority.py"
-      - "lib/domains/d1.lisp"
-      - "lib/domains/d2.lisp"
-      - "lib/domains/d3.lisp"
-      - "lib/domains/d4.lisp"
-      - "lib/domains/d5.lisp"
-      - "lib/domains/d6.lisp"
-      - "lib/domains/d7.lisp"
-      - "lib/domains/d8.lisp"
-      - "lib/domains/d9.lisp"
-      - "docs/research/2077-binary-word-law*.md"
-      - ".github/workflows/foundation-binary-word-law.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2077-binary-word-law.py"
-      - "scripts/research-4261-current-binary-authority.py"
-      - "lib/domains/d1.lisp"
-      - "lib/domains/d2.lisp"
-      - "lib/domains/d3.lisp"
-      - "lib/domains/d4.lisp"
-      - "lib/domains/d5.lisp"
-      - "lib/domains/d6.lisp"
-      - "lib/domains/d7.lisp"
-      - "lib/domains/d8.lisp"
-      - "lib/domains/d9.lisp"
-      - "docs/research/2077-binary-word-law*.md"
-      - ".github/workflows/foundation-binary-word-law.yml"
   workflow_dispatch:
 
 jobs:

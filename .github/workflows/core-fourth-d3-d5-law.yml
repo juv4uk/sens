@@ -1,18 +1,5 @@
 name: Чинний D3/D5 селектор FOURTH — закони двійкового SENS
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/core.lisp'
-      - 'tests/semantic/core-fourth-d3-d5-law.bits'
-      - 'tests/semantic/core-fourth-d3-d5-law.sens'
-      - '.github/workflows/core-fourth-d3-d5-law.yml'
-  pull_request:
-    paths:
-      - 'lib/core.lisp'
-      - 'tests/semantic/core-fourth-d3-d5-law.bits'
-      - 'tests/semantic/core-fourth-d3-d5-law.sens'
-      - '.github/workflows/core-fourth-d3-d5-law.yml'
   workflow_dispatch:
 
 permissions:

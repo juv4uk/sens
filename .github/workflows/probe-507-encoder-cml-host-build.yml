@@ -1,11 +1,7 @@
 name: Probe 507 whole encoder CML host build
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/probe-507-encoder-cml-host-build.yml'
-      - 'docs/superpowers/plans/2026-09-18-compiled-encoder-bootstrap*'
-
+  workflow_dispatch:
 jobs:
   encoder-cml-host-build:
     runs-on: ubuntu-24.04

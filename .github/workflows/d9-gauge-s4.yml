@@ -1,20 +1,6 @@
 name: D9 gauge S4
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d9-v1-gauge-fixed-candidate.json"
-      - "knowledge/d9-v1-geometry-state.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-geometry-laws-s3.json"
-      - "scripts/check-d9-gauge-s4.py"
-      - ".github/workflows/d9-gauge-s4.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-v1-gauge-fixed-candidate.json"
-      - "scripts/check-d9-gauge-s4.py"
-      - ".github/workflows/d9-gauge-s4.yml"
   workflow_dispatch:
 
 jobs:

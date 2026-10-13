@@ -3,29 +3,6 @@ name: Current physical SENS performance benchmarks
 # Longitudinal numerical evidence, not a semantics authority or unit-test clone.
 # No global cancel-in-progress: every selected SHA can finish its measurement.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/physical-sens-runtime/**"
-      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
-      - "examples/binary/d5-label-*.bits"
-      - "crates/sens/examples/physical_sens_hot_bench.rs"
-      - "crates/sens/examples/physical_sens_d5_hot_bench.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/source_words.rs"
-      - ".github/workflows/physical-sens-benchmark.yml"
-  pull_request:
-    paths:
-      - "benchmarks/physical-sens-runtime/**"
-      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
-      - "examples/binary/d5-label-*.bits"
-      - "crates/sens-cli/src/**"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - ".github/workflows/physical-sens-benchmark.yml"
   schedule:
     - cron: "30 1 * * *"
   workflow_dispatch:

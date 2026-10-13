@@ -1,25 +1,6 @@
 name: D6 PURE-UNKNOWN parent tournament
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-pure-unknown-parent-tournament/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d5-structural-discovery/special-call-factor.json"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
-      - ".github/workflows/d6-pure-unknown-parent-tournament.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-pure-unknown-parent-tournament/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d5-structural-discovery/special-call-factor.json"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
-      - ".github/workflows/d6-pure-unknown-parent-tournament.yml"
   workflow_dispatch:
 
 permissions:

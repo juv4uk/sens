@@ -1,23 +1,7 @@
 name: Core4 — точна міграція внутрішніх викликів
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "lib/core4.lisp"
-      - "tests/test_core4_internal_sid8_migration.py"
-      - "crates/sens/tests/core4_migration_point.rs"
-      - "crates/sens/src/mixed_source.rs"
-      - ".github/workflows/core4-internal-cutover.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/core4.lisp"
-      - "tests/test_core4_internal_sid8_migration.py"
-      - "crates/sens/tests/core4_migration_point.rs"
-      - "crates/sens/src/mixed_source.rs"
-      - ".github/workflows/core4-internal-cutover.yml"
-
+  workflow_dispatch:
 jobs:
   current-core4-internal-calls:
     runs-on: ubuntu-latest

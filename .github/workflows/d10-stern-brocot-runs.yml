@@ -1,17 +1,6 @@
 name: D10 formal Stern Brocot run path donor proof
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-stern-brocot-run-path-20261009.json'
-      - 'scripts/check_d10_stern_brocot_runs.py'
-      - 'tests/oracles/d10_stern_brocot_runs_sbcl.lisp'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - 'docs/research/d10-stern-brocot-runs.uk.md'
-      - '.github/workflows/d10-stern-brocot-runs.yml'
-  push:
-    branches:
-      - research/d10-stern-brocot-runs-20261009
   workflow_dispatch:
 
 permissions:

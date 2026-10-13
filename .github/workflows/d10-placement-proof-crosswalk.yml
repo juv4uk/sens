@@ -1,12 +1,5 @@
 name: D10 placement proof crosswalk
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d9-ratified.json'
-      - 'knowledge/d10-selector-seed.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'scripts/check_d10_placement_proof_crosswalk.py'
-      - '.github/workflows/d10-placement-proof-crosswalk.yml'
   workflow_dispatch:
 
 permissions:

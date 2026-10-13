@@ -1,16 +1,5 @@
 name: D10 selector constructive semantics witness
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d9-ratified.json'
-      - 'knowledge/d10-selector-seed.json'
-      - 'knowledge/d10-v17-complete-research-gauge-20261012.json'
-      - 'knowledge/d10-v18-semantic-inventory.json'
-      - 'knowledge/d10-owner-whole-domain-ratification-20261012.json'
-      - 'knowledge/d10-current-inventory.json'
-      - 'scripts/check_d10_selector_semantics_20261012.py'
-      - '.github/workflows/d10-selector-semantics-20261012.yml'
   workflow_dispatch:
 permissions:
   contents: read

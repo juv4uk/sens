@@ -1,19 +1,6 @@
 name: COND modernizer safety
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/cond-modernize.py'
-      - 'scripts/test_cond_modernize.py'
-      - 'lib/**/*.lisp'
-      - '.github/workflows/cond-modernize-safety.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/cond-modernize.py'
-      - 'scripts/test_cond_modernize.py'
-      - 'lib/**/*.lisp'
-      - '.github/workflows/cond-modernize-safety.yml'
   workflow_dispatch:
 
 jobs:

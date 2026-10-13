@@ -6,17 +6,6 @@ name: domain-bitness-laws
 # Раннер збирає my-lisp і запускає файл; очікується друк PASS.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "scripts/check-domain-bitness-laws.lisp"
-      - "lib/domains/*.lisp"
-      - ".github/workflows/domain-bitness-laws.yml"
-  pull_request:
-    paths:
-      - "scripts/check-domain-bitness-laws.lisp"
-      - "lib/domains/*.lisp"
-      - ".github/workflows/domain-bitness-laws.yml"
   workflow_dispatch:
 
 permissions:

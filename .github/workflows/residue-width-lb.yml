@@ -1,17 +1,6 @@
 name: Residue semantic width lower bound
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/residue-width-lb/**"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "benchmarks/d6-nonprefix-falsifier/**"
-      - ".github/workflows/residue-width-lb.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/residue-width-lb/**"
-      - ".github/workflows/residue-width-lb.yml"
   workflow_dispatch:
 
 jobs:

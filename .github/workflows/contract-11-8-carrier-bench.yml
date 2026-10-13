@@ -6,28 +6,6 @@ name: Contract 11.8 carrier replay
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/contract-11-8-carrier-bench.yml"
-      - ".github/workflows/sens-bench.yml"
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/examples/domain12345678_bench.rs"
-      - "benchmarks/domain12345678/**"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/contract-11-8-carrier-bench.yml"
-      - ".github/workflows/sens-bench.yml"
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/examples/domain12345678_bench.rs"
-      - "benchmarks/domain12345678/**"
-
 concurrency:
   group: contract-11-8-carrier-${{ github.ref }}
   cancel-in-progress: true

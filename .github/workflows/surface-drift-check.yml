@@ -1,37 +1,7 @@
 name: Surface Drift Check
 
 on:
-  push:
-    paths:
-      - 'lib/core.lisp'   # canonical (sens#81); legacy: lib/core.my
-      - 'lib/surface/**'
-      - 'crates/sens/src/eval/builtins.rs'
-      - 'crates/sens/src/language_items.rs'
-      - 'crates/sens-cli/src/repl.rs'
-      - 'crates/sens-cli/src/repl/surface_catalog.rs'
-      - 'scripts/check_surface_coverage.py'
-      - 'scripts/check_trilingual_surface.py'
-      - 'scripts/check_semantic_registry.py'
-      - 'scripts/translate-program.py'
-      - 'docs/adr/ADR-005-TRILINGUAL-SURFACE-PARITY.md'
-      - 'docs/adr/ADR-007-MEANING-FIRST-SURFACES.md'
-      - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
-  pull_request:
-    paths:
-      - 'lib/core.lisp'   # canonical (sens#81); legacy: lib/core.my
-      - 'lib/surface/**'
-      - 'crates/sens/src/eval/builtins.rs'
-      - 'crates/sens/src/language_items.rs'
-      - 'crates/sens-cli/src/repl.rs'
-      - 'crates/sens-cli/src/repl/surface_catalog.rs'
-      - 'scripts/check_surface_coverage.py'
-      - 'scripts/check_trilingual_surface.py'
-      - 'scripts/check_semantic_registry.py'
-      - 'scripts/translate-program.py'
-      - 'docs/adr/ADR-005-TRILINGUAL-SURFACE-PARITY.md'
-      - 'docs/adr/ADR-007-MEANING-FIRST-SURFACES.md'
-      - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
-
+  workflow_dispatch:
 jobs:
   drift-check:
     runs-on: ubuntu-latest

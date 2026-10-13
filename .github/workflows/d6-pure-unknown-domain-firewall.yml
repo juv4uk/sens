@@ -1,19 +1,6 @@
 name: D6 PURE-UNKNOWN domain firewall
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-pure-unknown-domain-firewall/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/binary-domain-separation/**"
-      - ".github/workflows/d6-pure-unknown-domain-firewall.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-pure-unknown-domain-firewall/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/binary-domain-separation/**"
-      - ".github/workflows/d6-pure-unknown-domain-firewall.yml"
   workflow_dispatch:
 
 permissions:

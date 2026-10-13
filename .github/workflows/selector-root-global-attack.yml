@@ -1,17 +1,6 @@
 name: Selector root global attack research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2409-selector-root-global-attack.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/selector-root-global-attack.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2409-selector-root-global-attack.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/selector-root-global-attack.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,15 +1,6 @@
 name: D4 cleanroom QUOTE fibre research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-quote-fibre/**"
-      - ".github/workflows/d4-cleanroom-quote-fibre.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-quote-fibre/**"
-      - ".github/workflows/d4-cleanroom-quote-fibre.yml"
   workflow_dispatch:
 
 jobs:

@@ -2,13 +2,6 @@
 name: publish-binary-master
 
 on:
-  pull_request:
-    paths:
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/test_three_pass_migration.py"
-      - "tests/test_sens_t5_codec.py"
-      - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
 permissions:

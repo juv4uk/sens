@@ -1,11 +1,7 @@
 name: Verify 452 exact pair-elim order
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-452-pair-elim-exact-order.yml'
-      - 'docs/research/452/**'
-
+  workflow_dispatch:
 jobs:
   exact-order:
     runs-on: ubuntu-24.04

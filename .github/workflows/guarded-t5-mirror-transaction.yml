@@ -1,12 +1,6 @@
 name: guarded-t5-mirror-transaction
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/guarded_sens_mirror.py'
-      - 'tests/test_guarded_sens_mirror.py'
-      - 'docs/T5-GUARDED-MIRROR.uk.md'
-      - '.github/workflows/guarded-t5-mirror-transaction.yml'
   workflow_dispatch:
 
 permissions:

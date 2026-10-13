@@ -1,10 +1,7 @@
 name: Verify Canon semantic-ref slice
 
 on:
-  push:
-    branches:
-      - fix/canon-semantic-ref-slice
-
+  workflow_dispatch:
 permissions:
   contents: write
 

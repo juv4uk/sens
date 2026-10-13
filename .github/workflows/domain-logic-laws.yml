@@ -3,15 +3,6 @@ name: domain-logic-laws
 # Binary SENS is the ONLY logic-semantic authority for this gate.
 # Shell runs existing physical SENS interpreters; it has no truth table.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "tests/semantic/domain-logic-2040/**"
-      - ".github/workflows/domain-logic-laws.yml"
-  pull_request:
-    paths:
-      - "tests/semantic/domain-logic-2040/**"
-      - ".github/workflows/domain-logic-laws.yml"
   workflow_dispatch:
 
 permissions:

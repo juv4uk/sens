@@ -1,20 +1,6 @@
 name: Anti-numerology research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2241-anti-numerology.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/anti-numerology.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2241-anti-numerology.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/anti-numerology.yml"
   workflow_dispatch:
 
 jobs:

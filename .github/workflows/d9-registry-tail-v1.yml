@@ -1,29 +1,6 @@
 name: D9 registry tail v1
 
 on:
-  pull_request:
-    paths:
-      - "lib/surface/semantic-registry.lisp"
-      - "lib/surface/uk-inventory.lisp"
-      - "lib/core.lisp"
-      - "lib/process.lisp"
-      - "lib/tcp.lisp"
-      - "lib/fs.lisp"
-      - "knowledge/d9-registry-tail-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-registry-tail-v1.py"
-      - "scripts/check-d9-v1-semantic-inventory.py"
-      - "scripts/check-d9-library-harvest-v1.py"
-      - ".github/workflows/d9-registry-tail-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-registry-tail-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-registry-tail-v1.py"
-      - ".github/workflows/d9-registry-tail-v1.yml"
   workflow_dispatch:
 
 jobs:

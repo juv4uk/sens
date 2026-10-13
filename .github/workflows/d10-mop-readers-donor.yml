@@ -1,12 +1,5 @@
 name: D10 CLOS MOP 17 reader donor census
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-mop-metaobject-reader-census-20261009.json'
-      - 'scripts/check_d10_mop_reader_census.py'
-      - 'tests/oracles/d10_mop_readers_sbcl.lisp'
-      - 'docs/research/d10-mop-readers-20261009.uk.md'
-      - '.github/workflows/d10-mop-readers-donor.yml'
   workflow_dispatch:
 jobs:
   mop-reader-oracle:

@@ -1,13 +1,5 @@
 name: D10 1024-code research-only gauge
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-v17-complete-research-gauge-20261012.json'
-      - 'knowledge/d10-v17-semantic-inventory.json'
-      - 'knowledge/d10-current-inventory.json'
-      - 'scripts/check_d10_v17_complete_research_gauge.py'
-      - '.github/workflows/d10-complete-research-gauge.yml'
   workflow_dispatch:
 permissions:
   contents: read

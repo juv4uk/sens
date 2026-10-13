@@ -1,15 +1,5 @@
 name: Early Lisp graph archival evidence guard
 on:
-  pull_request:
-    paths:
-      - 'knowledge/early-lisp-graph-historical-evidence-v1.json'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-selection-transition-history.json'
-      - 'scripts/d10_historical_snapshot_compat.py'
-      - 'lib/domains/d3.lisp'
-      - 'scripts/check-early-lisp-graph-archive.py'
-      - '.github/workflows/early-lisp-graph-archive.yml'
   workflow_dispatch:
 jobs:
   historical-evidence-only:

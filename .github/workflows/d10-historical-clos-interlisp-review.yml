@@ -1,13 +1,5 @@
 name: D10 historical CLOS Interlisp research gate
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
-      - "knowledge/d1-d9-foundation.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "scripts/check_d10_historical_clos_interlisp_review.py"
-      - "tests/test_d10_historical_clos_interlisp_review.py"
-      - ".github/workflows/d10-historical-clos-interlisp-review.yml"
   workflow_dispatch:
 jobs:
   review-only:

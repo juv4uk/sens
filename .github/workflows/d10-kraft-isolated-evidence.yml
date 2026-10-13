@@ -1,20 +1,6 @@
 name: D10 точний префіксний код і сума Крафта
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
-      - 'scripts/check_d10_prefix_free_kraft_certificate.py'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-selection-transition-history.json'
-      - '.github/workflows/d10-kraft-isolated-evidence.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
-      - 'scripts/check_d10_prefix_free_kraft_certificate.py'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-selection-transition-history.json'
-      - '.github/workflows/d10-kraft-isolated-evidence.yml'
+  workflow_dispatch:
 jobs:
   independent-exact-oracles:
     runs-on: ubuntu-24.04

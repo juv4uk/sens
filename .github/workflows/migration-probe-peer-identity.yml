@@ -1,10 +1,7 @@
 name: migration-probe-peer-identity
 
 on:
-  push:
-    branches:
-      - migration-probe-peer-identity
-
+  workflow_dispatch:
 permissions:
   contents: read
 

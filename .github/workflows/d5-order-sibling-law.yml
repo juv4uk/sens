@@ -1,10 +1,6 @@
 name: D5 order sibling law research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d5-order-sibling-law/**"
-      - ".github/workflows/d5-order-sibling-law.yml"
   workflow_dispatch:
 
 permissions:

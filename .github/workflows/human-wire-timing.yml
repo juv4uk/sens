@@ -1,19 +1,6 @@
 name: Human wire timing research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/human-wire/**"
-      - "benchmarks/agent-messages/run.py"
-      - "crates/sens/examples/agent_bench.rs"
-      - ".github/workflows/human-wire-timing.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/human-wire/**"
-      - "benchmarks/agent-messages/run.py"
-      - "crates/sens/examples/agent_bench.rs"
-      - ".github/workflows/human-wire-timing.yml"
   workflow_dispatch:
 
 permissions:

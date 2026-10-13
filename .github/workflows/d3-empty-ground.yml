@@ -1,15 +1,6 @@
 name: D3 EMPTY ground law research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d3-empty-ground/**"
-      - ".github/workflows/d3-empty-ground.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d3-empty-ground/**"
-      - ".github/workflows/d3-empty-ground.yml"
   workflow_dispatch:
 
 jobs:

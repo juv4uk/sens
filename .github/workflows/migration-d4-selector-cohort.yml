@@ -1,21 +1,6 @@
 name: Migration D4 CAAR physical T5 cohort
 
 on:
-  pull_request:
-    paths:
-      - "tests/fixtures/migration-d4-selector-cohort/**"
-      - "tests/test_migration_d4_selector_cohort.py"
-      - "crates/sens/tests/migration_d4_selector_cohort.rs"
-      - ".github/workflows/migration-d4-selector-cohort.yml"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-  push:
-    branches: [main]
-    paths:
-      - "tests/fixtures/migration-d4-selector-cohort/**"
-      - "tests/test_migration_d4_selector_cohort.py"
-      - "crates/sens/tests/migration_d4_selector_cohort.rs"
-      - ".github/workflows/migration-d4-selector-cohort.yml"
   workflow_dispatch:
 
 permissions:

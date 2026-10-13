@@ -1,15 +1,5 @@
 name: D10 finite abductive explanations research
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-abductive-minimal-explanations-v1.json'
-      - 'tests/oracles/d10_abductive_minimal_explanations.pl'
-      - 'tests/test_d10_abductive_atms_reduction.py'
-      - 'scripts/check_d10_abductive_minimal_explanations.py'
-      - 'docs/research/d10-abductive-minimal-explanations.uk.md'
-      - '.github/workflows/d10-abductive-minimal-explanations.yml'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d1-d9-foundation.json'
   workflow_dispatch:
 jobs:
   finite-abductive-research:

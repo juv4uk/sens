@@ -1,25 +1,6 @@
 name: D9 world quantity harvest v1
 
 on:
-  pull_request:
-    paths:
-      - "lib/world.lisp"
-      - "lib/quantity.lisp"
-      - "knowledge/d9-world-quantity-harvest-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-world-quantity-harvest-v1.py"
-      - "scripts/check-d9-v1-semantic-inventory.py"
-      - "scripts/check-d9-semantic-layer-harvest-v1.py"
-      - ".github/workflows/d9-world-quantity-harvest-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-world-quantity-harvest-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-world-quantity-harvest-v1.py"
-      - ".github/workflows/d9-world-quantity-harvest-v1.yml"
   workflow_dispatch:
 
 jobs:

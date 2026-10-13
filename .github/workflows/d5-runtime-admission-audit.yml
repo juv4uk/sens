@@ -1,19 +1,6 @@
 name: D5 runtime admission audit
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/parser.rs"
-      - "crates/sens/src/sens.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/eval/lower.rs"
-      - "crates/sens/tests/d5_source_boundary.rs"
-      - "scripts/research-2766-d5-runtime-admission.py"
-      - ".github/workflows/d5-runtime-admission-audit.yml"
-      - "knowledge/repo-tooling-inventory.lisp"
   workflow_dispatch:
 
 permissions:

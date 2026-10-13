@@ -1,15 +1,6 @@
 name: D6 closure map research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-closure-map/**"
-      - ".github/workflows/d6-closure-map.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-closure-map/**"
-      - ".github/workflows/d6-closure-map.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,23 +1,6 @@
 name: Двійковий SENS визначає точну D3 EQ у narrate
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/narrate.lisp'
-      - 'tests/semantic/narrate-d3-atom-eq-law.bits'
-      - 'tests/semantic/narrate-d3-atom-eq-mutant.bits'
-      - 'scripts/ci_failure_contract.py'
-      - 'knowledge/red-test-quarantine.json'
-      - '.github/workflows/narrate-d3-atom-eq-law.yml'
-  pull_request:
-    paths:
-      - 'lib/narrate.lisp'
-      - 'tests/semantic/narrate-d3-atom-eq-law.bits'
-      - 'tests/semantic/narrate-d3-atom-eq-mutant.bits'
-      - 'scripts/ci_failure_contract.py'
-      - 'knowledge/red-test-quarantine.json'
-      - '.github/workflows/narrate-d3-atom-eq-law.yml'
   workflow_dispatch:
 
 permissions:

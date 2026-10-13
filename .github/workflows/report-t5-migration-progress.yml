@@ -1,19 +1,6 @@
 name: report-t5-migration-progress
 
 on:
-  pull_request:
-    paths:
-      - "scripts/report_t5_migration_progress.py"
-      - "tests/test_report_t5_migration_progress.py"
-      - ".github/workflows/report-t5-migration-progress.yml"
-      - "scripts/audit_t5_file_pairs.py"
-      - "scripts/migration-readiness-census.py"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/report_t5_migration_progress.py"
-      - "tests/test_report_t5_migration_progress.py"
-      - ".github/workflows/report-t5-migration-progress.yml"
   workflow_dispatch:
 
 permissions:

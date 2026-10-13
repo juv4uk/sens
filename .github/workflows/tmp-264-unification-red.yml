@@ -1,10 +1,7 @@
 name: tmp-264-unification-red
 
 on:
-  push:
-    branches:
-      - feat/219-consume-unification-outcomes
-
+  workflow_dispatch:
 permissions:
   contents: read
 

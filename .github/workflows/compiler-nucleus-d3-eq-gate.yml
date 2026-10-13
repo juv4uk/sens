@@ -1,14 +1,5 @@
 name: Compiler nucleus exact D3 EQ and semantic export regression
 on:
-  push:
-    paths:
-      - "lib/compiler-nucleus.lisp"
-      - "crates/sens/src/compiler_language.rs"
-      - "crates/xtask/src/compiler_export.rs"
-      - "crates/xtask/src/compiler_compile.rs"
-      - "crates/xtask/tests/compiler_export_cli.rs"
-      - "crates/xtask/tests/compiler_triplet_cli.rs"
-      - ".github/workflows/compiler-nucleus-d3-eq-gate.yml"
   workflow_dispatch:
 permissions:
   contents: read

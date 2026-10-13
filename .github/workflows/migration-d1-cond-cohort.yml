@@ -1,24 +1,7 @@
 name: Migration exact D1 COND physical T5 cohort
 
 on:
-  pull_request:
-    paths:
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
-      - 'tests/test_migration_d1_cond_cohort.py'
-      - 'scripts/sens_spaced_view.py'
-      - 'tests/test_sens_spaced_view.py'
-      - 'tests/test_migration_d1_cond_integrated_audit.py'
-      - 'crates/sens/tests/migration_d1_cond_cohort.rs'
-      - '.github/workflows/migration-d1-cond-cohort.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
-      - 'tests/test_migration_d1_cond_cohort.py'
-      - 'tests/test_migration_d1_cond_integrated_audit.py'
-      - 'crates/sens/tests/migration_d1_cond_cohort.rs'
-      - '.github/workflows/migration-d1-cond-cohort.yml'
-
+  workflow_dispatch:
 permissions:
   contents: read
 

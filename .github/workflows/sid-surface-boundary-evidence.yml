@@ -1,10 +1,6 @@
 name: SID surface boundary evidence
 
 on:
-  pull_request:
-    paths:
-      - crates/my-lisp/examples/sid_surface_boundary_benchmark.rs
-      - .github/workflows/sid-surface-boundary-evidence.yml
   workflow_dispatch:
 
 jobs:

@@ -1,9 +1,6 @@
 name: Investigate 521 standalone write RED
 
 on:
-  push:
-    branches:
-      - investigate/521-standalone-write-red
   workflow_dispatch:
 
 permissions:

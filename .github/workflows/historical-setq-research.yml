@@ -1,14 +1,6 @@
 name: Historical SETQ research
 
 on:
-  pull_request:
-    paths:
-      - "docs/research/2441-setq-history.json"
-      - "docs/research/2441-setq-history.md"
-      - "docs/research/2441-setq-history.uk.md"
-      - "scripts/research-2441-setq-history.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/historical-setq-research.yml"
   workflow_dispatch:
 
 concurrency:

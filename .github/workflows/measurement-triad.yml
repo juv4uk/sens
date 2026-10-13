@@ -1,12 +1,5 @@
 name: SENS benchmark methodology triad
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/measurement-triad.yml"
-      - "benchmarks/measurement-triad/**"
-      - "benchmarks/README.md"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/domain_owner_generated.rs"
   workflow_dispatch:
 
 permissions:

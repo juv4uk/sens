@@ -1,11 +1,7 @@
 name: Verify 432 CAR CDR bounded basis
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-432-car-cdr-bounded-basis.yml'
-      - 'docs/research/canon-sculpt-car-cdr-bounded-search.lisp'
-
+  workflow_dispatch:
 jobs:
   bounded-search:
     runs-on: ubuntu-24.04

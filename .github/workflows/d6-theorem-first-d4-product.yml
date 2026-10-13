@@ -1,12 +1,6 @@
 name: D6 theorem-first D4 product census
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-theorem-first-d4-product/**"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - "benchmarks/post-d4-semantic-placement/placement.json"
-      - ".github/workflows/d6-theorem-first-d4-product.yml"
   workflow_dispatch:
 
 permissions:

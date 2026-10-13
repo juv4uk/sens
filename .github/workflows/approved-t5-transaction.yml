@@ -1,18 +1,6 @@
 name: approved-t5-transaction
 
 on:
-  pull_request:
-    paths:
-      - "scripts/migrate-approved-t5.py"
-      - "tests/test_approved_t5_transaction.py"
-      - "docs/APPROVED-T5-TRANSACTION.uk.md"
-      - ".github/workflows/approved-t5-transaction.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/migrate-approved-t5.py"
-      - "tests/test_approved_t5_transaction.py"
-      - ".github/workflows/approved-t5-transaction.yml"
   workflow_dispatch:
 
 permissions:

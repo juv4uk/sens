@@ -1,17 +1,6 @@
 name: Pure physical T5 bare-session parity and performance
 
 on:
-  pull_request:
-    paths:
-      - 'crates/sens-cli/src/main.rs'
-      - 'crates/sens-cli/tests/physical_bare_session_cli.rs'
-      - '.github/workflows/physical-bare-session.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'crates/sens-cli/src/main.rs'
-      - 'crates/sens-cli/tests/physical_bare_session_cli.rs'
-      - '.github/workflows/physical-bare-session.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,12 +1,6 @@
 name: D5 SENS derivation closeout research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d5-sens-derivation-closeout/**"
-      - "scripts/research-2616-d5-sens-derivation-closeout.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d5-sens-derivation-closeout.yml"
   workflow_dispatch:
 
 permissions:

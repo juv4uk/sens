@@ -1,27 +1,6 @@
 name: Benchmark registry
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/**"
-      - "scripts/benchmark_registry.py"
-      - "scripts/test_benchmark_registry.py"
-      - "benchmarks/support-exemptions.json"
-      - "benchmarks/support-exemptions.schema.json"
-      - "scripts/benchmark_sweep.py"
-      - "scripts/test_benchmark_sweep.py"
-      - ".github/workflows/benchmark-registry.yml"
-  pull_request:
-    paths:
-      - "benchmarks/**"
-      - "scripts/benchmark_registry.py"
-      - "scripts/test_benchmark_registry.py"
-      - "benchmarks/support-exemptions.json"
-      - "benchmarks/support-exemptions.schema.json"
-      - "scripts/benchmark_sweep.py"
-      - "scripts/test_benchmark_sweep.py"
-      - ".github/workflows/benchmark-registry.yml"
   workflow_dispatch:
 
 permissions:

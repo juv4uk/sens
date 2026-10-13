@@ -1,24 +1,5 @@
 name: migration-dynamic-binding-triage
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-dynamic-binding-triage-2026-10-08.json"
-      - "tests/test_migration_dynamic_binding_triage.py"
-      - "benchmarks/arithmetic.lisp"
-      - "benchmarks/closures.lisp"
-      - "benchmarks/recursion.lisp"
-      - "scripts/migrate-three-pass.py"
-      - ".github/workflows/migration-dynamic-binding-triage.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-dynamic-binding-triage-2026-10-08.json"
-      - "tests/test_migration_dynamic_binding_triage.py"
-      - "benchmarks/arithmetic.lisp"
-      - "benchmarks/closures.lisp"
-      - "benchmarks/recursion.lisp"
-      - "scripts/migrate-three-pass.py"
-      - ".github/workflows/migration-dynamic-binding-triage.yml"
   workflow_dispatch:
 
 permissions:

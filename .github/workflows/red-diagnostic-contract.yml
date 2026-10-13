@@ -1,17 +1,6 @@
 name: Червоний має говорити — 24 год і UNINFORMATIVE-OUTPUT
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/ci_failure_contract.py'
-      - 'knowledge/red-test-quarantine.json'
-      - '.github/workflows/red-diagnostic-contract.yml'
-  pull_request:
-    paths:
-      - 'scripts/ci_failure_contract.py'
-      - 'knowledge/red-test-quarantine.json'
-      - '.github/workflows/red-diagnostic-contract.yml'
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:

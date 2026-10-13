@@ -1,10 +1,6 @@
 name: D4 D5 APPEND dedup probe
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/d4_d5_append_dedup.rs"
-      - ".github/workflows/d4-d5-append-dedup.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,15 +1,6 @@
 name: Post-D4 root minimization R3
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/post-d4-root-min-r3/**"
-      - ".github/workflows/post-d4-root-min-r3.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/post-d4-root-min-r3/**"
-      - ".github/workflows/post-d4-root-min-r3.yml"
   workflow_dispatch:
 
 jobs:

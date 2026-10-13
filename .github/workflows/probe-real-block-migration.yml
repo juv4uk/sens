@@ -1,15 +1,6 @@
 name: probe real block canonical migration
 
 on:
-  pull_request:
-    paths:
-      - "lib/machine/block.lisp"
-      - "lib/machine/block.sens"
-      - "scripts/migrate.py"
-      - "scripts/migrate-t5-batch.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - ".github/workflows/probe-real-block-migration.yml"
   workflow_dispatch:
 
 permissions:

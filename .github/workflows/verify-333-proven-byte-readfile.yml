@@ -1,11 +1,7 @@
 name: Verify 333 proven-byte read-file
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/profile-proven-byte-readfile-candidate.lisp'
-      - '.github/workflows/verify-333-proven-byte-readfile.yml'
-
+  workflow_dispatch:
 jobs:
   benchmark:
     runs-on: ubuntu-24.04

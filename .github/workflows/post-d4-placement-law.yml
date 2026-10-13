@@ -1,19 +1,7 @@
 name: Post-D4 placement law research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2236-post-d4-placement-law.py"
-      - "docs/research/2236-post-d4-placement-law.md"
-      - ".github/workflows/post-d4-placement-law.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2236-post-d4-placement-law.py"
-      - "docs/research/2236-post-d4-placement-law.md"
-      - ".github/workflows/post-d4-placement-law.yml"
-
+  workflow_dispatch:
 jobs:
   post-d4-placement-law:
     name: Post-D4 parent + delta witness

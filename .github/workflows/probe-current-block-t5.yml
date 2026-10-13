@@ -1,10 +1,5 @@
 name: probe-current-block-t5
 on:
-  pull_request:
-    paths:
-      - 'lib/machine/block.lisp'
-      - 'scripts/migrate-three-pass.py'
-      - '.github/workflows/probe-current-block-t5.yml'
   workflow_dispatch:
 permissions:
   contents: read

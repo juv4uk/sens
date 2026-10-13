@@ -1,18 +1,6 @@
 name: Числовий носій — тільки явно кваліфіковані D24+
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "crates/sens/src/binary_number.rs"
-      - "crates/sens/src/domain_numeric.rs"
-      - ".github/workflows/d24-explicit-binary-number.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/binary_number.rs"
-      - "crates/sens/src/domain_numeric.rs"
-      - ".github/workflows/d24-explicit-binary-number.yml"
   workflow_dispatch:
 
 permissions:

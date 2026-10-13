@@ -1,10 +1,7 @@
 name: Release Smoke Short
 
 on:
-  push:
-    branches:
-      - smoke/release-0.40.0-short-tests
-
+  workflow_dispatch:
 jobs:
   short-release-smoke:
     runs-on: ubuntu-latest

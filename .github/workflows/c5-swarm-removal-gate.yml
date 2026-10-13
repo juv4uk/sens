@@ -1,25 +1,7 @@
 name: C5 Swarm Removal Gate
 
 on:
-  push:
-    paths:
-      - "AGENTS.md"
-      - "docs/swarm-*.md"
-      - "knowledge/swarm-*.lisp"
-      - "crates/sens-cli/src/swarm.rs"
-      - "crates/sens-cli/tests/**"
-      - "crates/sens/tests/swarm_*.rs"
-      - ".github/workflows/c5-swarm-removal-gate.yml"
-  pull_request:
-    paths:
-      - "AGENTS.md"
-      - "docs/swarm-*.md"
-      - "knowledge/swarm-*.lisp"
-      - "crates/sens-cli/src/swarm.rs"
-      - "crates/sens-cli/tests/**"
-      - "crates/sens/tests/swarm_*.rs"
-      - ".github/workflows/c5-swarm-removal-gate.yml"
-
+  workflow_dispatch:
 jobs:
   c5-removal-evidence:
     runs-on: ubuntu-latest

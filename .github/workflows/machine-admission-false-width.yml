@@ -1,21 +1,6 @@
 name: Точна ширина невиконуваного x86 admission datum
 
 on:
-  pull_request:
-    paths:
-      - "lib/machine/admission/x86-64.lisp"
-      - "lib/machine/lowering/semantic-effects.lisp"
-      - "tests/semantic/machine-effects-d1-fallback-law.bits"
-      - "crates/sens/tests/machine_admission_false_width.rs"
-      - ".github/workflows/machine-admission-false-width.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/admission/x86-64.lisp"
-      - "lib/machine/lowering/semantic-effects.lisp"
-      - "tests/semantic/machine-effects-d1-fallback-law.bits"
-      - "crates/sens/tests/machine_admission_false_width.rs"
-      - ".github/workflows/machine-admission-false-width.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,29 +1,6 @@
 name: Ukrainian source heads to exact D3-D5 AST
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/mixed_source.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "lib/compiler-nucleus.lisp"
-      - "crates/sens/tests/compiler_uk_projection.rs"
-      - "lib/domains/d3.lisp"
-      - "lib/domains/d4.lisp"
-      - "lib/domains/d5.lisp"
-      - ".github/workflows/uk-source-exact-heads.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/mixed_source.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "lib/compiler-nucleus.lisp"
-      - "crates/sens/tests/compiler_uk_projection.rs"
-      - "lib/domains/d3.lisp"
-      - "lib/domains/d4.lisp"
-      - "lib/domains/d5.lisp"
-      - ".github/workflows/uk-source-exact-heads.yml"
   workflow_dispatch:
 
 permissions:

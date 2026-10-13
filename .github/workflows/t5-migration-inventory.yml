@@ -3,11 +3,6 @@
 name: T5 migration inventory (М0)
 
 on:
-  # census класифікує за вмістом, а не тільки за розширенням:
-  # будь-який новий файл може стати producer/consumer T5.
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

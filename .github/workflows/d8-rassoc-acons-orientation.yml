@@ -1,24 +1,6 @@
 name: D8 RASSOC-ACONS orientation research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-rassoc-acons-orientation/**"
-      - "docs/research/3741-d8-rassoc-acons-orientation.md"
-      - "docs/research/3741-d8-rassoc-acons-orientation.uk.md"
-      - "knowledge/d5-ratified.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-rassoc-acons-orientation.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-rassoc-acons-orientation/**"
-      - "docs/research/3741-d8-rassoc-acons-orientation.md"
-      - "docs/research/3741-d8-rassoc-acons-orientation.uk.md"
-      - "knowledge/d5-ratified.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-rassoc-acons-orientation.yml"
   workflow_dispatch:
 
 jobs:

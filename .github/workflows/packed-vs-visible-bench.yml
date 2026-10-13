@@ -1,27 +1,6 @@
 name: SENS physical bytes vs visible bits — performance
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/examples/packed_vs_visible_bench.rs"
-      - "crates/sens/examples/packed_vs_visible_runtime.rs"
-      - "crates/sens/examples/sens_cold_start_probe.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens/src/source_packing.rs"
-      - "benchmarks/packed-vs-visible/**"
-      - ".github/workflows/packed-vs-visible-bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/examples/packed_vs_visible_bench.rs"
-      - "crates/sens/examples/packed_vs_visible_runtime.rs"
-      - "crates/sens/examples/sens_cold_start_probe.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens/src/source_packing.rs"
-      - "benchmarks/packed-vs-visible/**"
-      - ".github/workflows/packed-vs-visible-bench.yml"
   workflow_dispatch:
 
 permissions:

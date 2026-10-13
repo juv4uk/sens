@@ -1,18 +1,6 @@
 name: D8 INTEGERP-RATIONALP sign research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-integerp-rationalp-sign/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-integerp-rationalp-sign.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-integerp-rationalp-sign/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-integerp-rationalp-sign.yml"
   workflow_dispatch:
 
 jobs:

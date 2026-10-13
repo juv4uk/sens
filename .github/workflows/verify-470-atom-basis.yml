@@ -1,11 +1,7 @@
 name: Verify 470 ATOM lower basis
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-470-atom-basis.yml'
-      - 'docs/research/470/**'
-
+  workflow_dispatch:
 jobs:
   atom-basis:
     runs-on: ubuntu-24.04

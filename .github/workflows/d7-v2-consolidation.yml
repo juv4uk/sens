@@ -1,19 +1,6 @@
 name: D7 v2 consolidation
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d7-v2-stable-residents.json"
-      - "knowledge/d7-v2-evidence-ledger.json"
-      - "knowledge/d7-v2-geometry-ledger.json"
-      - "knowledge/d7-v2-candidate-d.json"
-      - "knowledge/d7-full-map.json"
-      - "benchmarks/d7-v2/**"
-      - "scripts/check-d7-v2-consolidation.py"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - ".github/workflows/d7-v2-consolidation.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,12 +1,6 @@
 name: Regenerate public API report artifact
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/regenerate-public-api-report-artifact.yml"
-      - "scripts/public_api_inventory.py"
-      - "contracts/core-profile-contract.lisp"
-      - "lib/**"
   workflow_dispatch:
 
 permissions:

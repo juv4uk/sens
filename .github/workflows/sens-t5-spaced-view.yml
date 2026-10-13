@@ -1,20 +1,5 @@
 name: SENS T5 exact spaced view
 on:
-  pull_request:
-    paths:
-      - "scripts/sens_t5_spaced_view.py"
-      - "tests/test_sens_t5_spaced_view.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
-      - ".github/workflows/sens-t5-spaced-view.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/sens_t5_spaced_view.py"
-      - "tests/test_sens_t5_spaced_view.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
-      - ".github/workflows/sens-t5-spaced-view.yml"
   workflow_dispatch:
 permissions:
   contents: read

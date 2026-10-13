@@ -1,12 +1,7 @@
 name: Issue 74 real read-file benchmark
 
 on:
-  pull_request:
-    paths:
-      - lib/utf8.lisp
-      - scripts/benchmark-semantic-registry-read.lisp
-      - .github/workflows/issue-74-real-readfile-benchmark.yml
-
+  workflow_dispatch:
 jobs:
   benchmark:
     runs-on: ubuntu-latest

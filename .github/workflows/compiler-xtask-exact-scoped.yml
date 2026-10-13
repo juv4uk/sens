@@ -1,17 +1,7 @@
 name: SENS xtask — точний компілятор SW1 і T5
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "crates/xtask/src/compiler_compile.rs"
-      - ".github/workflows/compiler-xtask-exact-scoped.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/xtask/src/compiler_compile.rs"
-      - ".github/workflows/compiler-xtask-exact-scoped.yml"
-
+  workflow_dispatch:
 jobs:
   xtask-compiler-exact-domain:
     runs-on: ubuntu-latest

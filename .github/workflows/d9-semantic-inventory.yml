@@ -1,21 +1,6 @@
 name: D9 semantic inventory
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-selector-seed.json"
-      - "knowledge/d9-overflow-review-v1.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-v1-semantic-inventory.py"
-      - ".github/workflows/d9-semantic-inventory.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-v1-semantic-inventory.py"
-      - ".github/workflows/d9-semantic-inventory.yml"
   workflow_dispatch:
 
 jobs:

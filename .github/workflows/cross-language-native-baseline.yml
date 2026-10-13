@@ -1,15 +1,6 @@
 name: Cross-language native baseline
 
 on:
-  pull_request:
-    paths:
-      - 'benchmarks/cross-language/native-baseline/**'
-      - '.github/workflows/cross-language-native-baseline.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'benchmarks/cross-language/native-baseline/**'
-      - '.github/workflows/cross-language-native-baseline.yml'
   workflow_dispatch:
 
 permissions:

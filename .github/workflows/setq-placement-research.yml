@@ -1,22 +1,6 @@
 name: SETQ placement research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2489-setq-placement.py"
-      - "docs/research/2489-setq-placement.md"
-      - "docs/research/2489-setq-placement.uk.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/setq-placement-research.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2489-setq-placement.py"
-      - "docs/research/2489-setq-placement.md"
-      - "docs/research/2489-setq-placement.uk.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/setq-placement-research.yml"
   workflow_dispatch:
 
 permissions:

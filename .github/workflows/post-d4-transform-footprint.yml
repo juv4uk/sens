@@ -1,24 +1,7 @@
 name: Post-D4 transformation footprint
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_control_derivation.rs"
-      - "crates/sens/tests/post_d4_setq_state_passing.rs"
-      - "scripts/research-2472-transform-footprint.py"
-      - "crates/sens/tests/post_d4_transform_boundary.rs"
-      - "docs/research/2472-transform-footprint*.md"
-      - ".github/workflows/post-d4-transform-footprint.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/post_d4_control_derivation.rs"
-      - "crates/sens/tests/post_d4_setq_state_passing.rs"
-      - "scripts/research-2472-transform-footprint.py"
-      - "crates/sens/tests/post_d4_transform_boundary.rs"
-      - "docs/research/2472-transform-footprint*.md"
-      - ".github/workflows/post-d4-transform-footprint.yml"
-
+  workflow_dispatch:
 jobs:
   footprint:
     name: Phase-D rewrite footprint

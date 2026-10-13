@@ -1,20 +1,7 @@
 name: Scientific quantity direct D1 cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/quantity.lisp"
-      - "tests/test_quantity_d1_direct_cutover.py"
-      - "crates/sens/tests/quantity_d1_direct_cutover.rs"
-      - ".github/workflows/quantity-direct-d1.yml"
-  pull_request:
-    paths:
-      - "lib/quantity.lisp"
-      - "tests/test_quantity_d1_direct_cutover.py"
-      - "crates/sens/tests/quantity_d1_direct_cutover.rs"
-      - ".github/workflows/quantity-direct-d1.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

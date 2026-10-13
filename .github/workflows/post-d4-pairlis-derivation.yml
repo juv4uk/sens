@@ -1,11 +1,6 @@
 name: Post-D4 PAIRLIS derivation research
 
 on:
-  pull_request:
-    paths:
-      - "lib/core1.lisp"
-      - "tests/fixtures/2286-pairlis-bind-witness.lisp"
-      - ".github/workflows/post-d4-pairlis-derivation.yml"
   workflow_dispatch:
 
 permissions:

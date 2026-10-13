@@ -1,27 +1,6 @@
 name: Generation accounting research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/generation-accounting/**"
-      - "benchmarks/generation-certificate/**"
-      - "crates/sens/examples/selector_certificate_bench.rs"
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
-      - "scripts/research-2304-semantic-fact-ledger.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/generation-accounting.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/generation-accounting/**"
-      - "benchmarks/generation-certificate/**"
-      - "crates/sens/examples/selector_certificate_bench.rs"
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
-      - "scripts/research-2304-semantic-fact-ledger.py"
-      - "knowledge/function-status-census.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/generation-accounting.yml"
   workflow_dispatch:
 
 concurrency:

@@ -1,20 +1,7 @@
 name: Issue 1352 UTF-8 binary plus contract
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - lib/utf8.lisp
-      - crates/sens/tests/utf8.rs
-      - tests/test_utf8_d1_predicate_migration.py
-      - .github/workflows/issue-1352-utf8-binary-add.yml
-  pull_request:
-    paths:
-      - lib/utf8.lisp
-      - crates/sens/tests/utf8.rs
-      - tests/test_utf8_d1_predicate_migration.py
-      - .github/workflows/issue-1352-utf8-binary-add.yml
-
+  workflow_dispatch:
 jobs:
   focused:
     runs-on: ubuntu-latest

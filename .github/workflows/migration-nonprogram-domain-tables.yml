@@ -1,19 +1,7 @@
 name: Domain D1-D9 non-program original source classification
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/migration-nonprogram-domain-tables-2026-10-08.json'
-      - 'tests/test_migration_nonprogram_domain_tables.py'
-      - 'lib/domains/d*.lisp'
-      - '.github/workflows/migration-nonprogram-domain-tables.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/migration-nonprogram-domain-tables-2026-10-08.json'
-      - 'tests/test_migration_nonprogram_domain_tables.py'
-      - 'lib/domains/d*.lisp'
-      - '.github/workflows/migration-nonprogram-domain-tables.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 

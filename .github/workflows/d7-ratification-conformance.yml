@@ -1,29 +1,6 @@
 name: D7 v2 owner-boundary conformance
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d7-keyboard-v2-ratified.json"
-      - "lib/domains/d7.lisp"
-      - "scripts/check-d7-keyboard-v2-table.py"
-      - "scripts/check-d7-runtime-projection.py"
-      - "crates/sens/src/d7_keyboard.rs"
-      - "crates/sens/src/d7_display_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/text7_projection.rs"
-      - "crates/sens/tests/d7_runtime_presentation.rs"
-      - "crates/sens/tests/d7_keyboard_t5.rs"
-      - ".github/workflows/d7-ratification-conformance.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d7-keyboard-v2-ratified.json"
-      - "lib/domains/d7.lisp"
-      - "scripts/check-d7-runtime-projection.py"
-      - "crates/sens/src/d7_display_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/tests/d7_runtime_presentation.rs"
-      - ".github/workflows/d7-ratification-conformance.yml"
   workflow_dispatch:
 
 permissions:

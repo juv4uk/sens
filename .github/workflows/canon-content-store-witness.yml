@@ -1,20 +1,5 @@
 name: Canon and content-store exact D1 witnesses
 on:
-  pull_request:
-    paths:
-      - "tests/fixtures/witness-runner.lisp"
-      - "tests/fixtures/content-store-authority-witness.lisp"
-      - ".github/workflows/canon-content-store-witness.yml"
-      - "crates/sens/tests/d3_empty_control.rs"
-      - "crates/sens/tests/content_store_authority.rs"
-  push:
-    branches: [main]
-    paths:
-      - "tests/fixtures/witness-runner.lisp"
-      - "tests/fixtures/content-store-authority-witness.lisp"
-      - ".github/workflows/canon-content-store-witness.yml"
-      - "crates/sens/tests/d3_empty_control.rs"
-      - "crates/sens/tests/content_store_authority.rs"
   workflow_dispatch:
 
 permissions:

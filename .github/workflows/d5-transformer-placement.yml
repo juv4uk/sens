@@ -1,23 +1,7 @@
 name: D5 transformer placement
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/eval/**"
-      - "crates/sens/src/value.rs"
-      - "crates/sens/tests/d5_transformer_placement.rs"
-      - "docs/research/2198-d5-transformer-placement*.md"
-      - ".github/workflows/d5-transformer-placement.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "crates/sens/src/eval/**"
-      - "crates/sens/src/value.rs"
-      - "crates/sens/tests/d5_transformer_placement.rs"
-      - "docs/research/2198-d5-transformer-placement*.md"
-      - ".github/workflows/d5-transformer-placement.yml"
-
+  workflow_dispatch:
 jobs:
   d5-placement:
     name: D5 transformer placement

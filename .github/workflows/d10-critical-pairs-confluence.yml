@@ -1,16 +1,6 @@
 name: D10 Newman Knuth Bendix critical-pair confluence
 
 on:
-  push:
-    paths:
-      - 'knowledge/d10-critical-pairs-confluence-20261009.json'
-      - 'tests/test_d10_critical_pairs_confluence.py'
-      - '.github/workflows/d10-critical-pairs-confluence.yml'
-  pull_request:
-    paths:
-      - 'knowledge/d10-critical-pairs-confluence-20261009.json'
-      - 'tests/test_d10_critical_pairs_confluence.py'
-      - '.github/workflows/d10-critical-pairs-confluence.yml'
   workflow_dispatch:
 
 permissions:

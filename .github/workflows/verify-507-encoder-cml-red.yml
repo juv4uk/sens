@@ -1,11 +1,7 @@
 name: Verify 507 whole encoder CML RED
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-507-encoder-cml-red.yml'
-      - 'docs/superpowers/plans/2026-09-18-compiled-encoder-bootstrap*'
-
+  workflow_dispatch:
 jobs:
   encoder-cml-red:
     runs-on: ubuntu-24.04

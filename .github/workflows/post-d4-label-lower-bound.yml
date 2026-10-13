@@ -1,11 +1,6 @@
 name: Post-D4 LABEL lower bound research
 
 on:
-  pull_request:
-    paths:
-      - "lib/core1.lisp"
-      - "tests/fixtures/2234-label-self-binding-witness.lisp"
-      - ".github/workflows/post-d4-label-lower-bound.yml"
   workflow_dispatch:
 
 permissions:

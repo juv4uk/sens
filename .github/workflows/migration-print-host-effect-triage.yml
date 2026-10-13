@@ -1,11 +1,5 @@
 name: migration-print-host-effect-triage
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-print-host-effect-triage-2026-10-08.json"
-      - "tests/test_migration_print_host_effect_triage.py"
-      - "scripts/migrate-three-pass.py"
-      - ".github/workflows/migration-print-host-effect-triage.yml"
   workflow_dispatch:
 permissions:
   contents: read

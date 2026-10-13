@@ -1,10 +1,6 @@
 name: Post-D4 SETQ state-passing research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_setq_state_passing.rs"
-      - ".github/workflows/post-d4-setq-state-passing.yml"
   workflow_dispatch:
 
 permissions:

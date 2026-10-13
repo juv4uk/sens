@@ -1,61 +1,29 @@
 name: CI — основні перевірки SENS
 
-# Замороження власником 2026-10-11: лише Core. Початковий workflow збережено в
-# research/paused-actions/20261011/ci-pre-freeze.yml.
+# OWNER 2026-10-13: ONE automatic workflow per main commit.
+# All other topic workflows are manual; a single scoped check is chosen here.
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: sens-one-focused-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core:
     name: Перевірка ядра та доменного контракту
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          toolchain: "1.99.0"
-      - name: Компіляція crate ядра без інших обчислювальних ядер
-        run: cargo check --locked -p sens --lib
-      - name: Числова арифметика D24/D48 і Value evaluator без переповнення
-        run: |
-          cargo test --locked -p sens --lib binary_number::tests
-          cargo test --locked -p sens --lib qualified_numeric_domain_value_tests
-          cargo test --locked -p sens --lib eval::d6_arithmetic::tests
-          cargo test --locked -p sens --lib binary_framing::tests
-          cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
-          cargo test --locked -p sens --test binary_number_live
-          cargo test --locked -p sens --test numeric_domain_math_stress
-          cargo test --locked -p sens --test numeric_composition_frames
-          cargo test --locked -p sens --test math_domain_exclusivity
-          cargo test --locked -p sens --test physical_d2_d7_binding
-      - name: Core4 FASL — доменні виклики не стають числами
-        run: |
-          RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::valid_fasl_path_selects_core4_and_evaluates_current_core
-          RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::same_hash_ordinary_reader_fasl_cannot_reinterpret_d3_heads_as_numbers
-      - name: Перевірка ратифікованих числових доменів D24/D48/…
-        run: |
-          python3 scripts/check-numeric-domain-ratification.py --self-test
-          python3 scripts/check-numeric-domain-ratification.py
-      - name: Core4 D24+ — облік нечислових літералів без прихованого допуску
-        run: |
-          python3 scripts/check-core4-d24-migration.py --self-test
-          python3 scripts/check-core4-d24-migration.py --check
-      - name: Драбина D1–D10 у Rust Python C Lisp без старої восьмибітної identity
-        run: |
-          python3 scripts/check-domain-ladder-identity.py --self-test
-          python3 scripts/check-domain-ladder-identity.py --check
-      - name: Семантична ідентичність ядра з точною шириною
-        run: cargo test --locked -p sens --test domain_ladder --test domain_ast_value_identity --test domain_width_authority_test
-      - name: Регресійні тести старої логіки COND/ATOM/EQ у D3
-        run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
-      - name: Аудит активного джерела та семантики evaluator D3 із fail-closed
-        run: python3 scripts/check_d3_legacy_logic.py --strict
-      - name: Перевірка чистоти змін у вихідному коді ядра
-        run: git diff --check
+          fetch-depth: 2
+      - name: Один причинно пов'язаний точковий тест
+        env:
+          SENS_CI_BEFORE: ${{ github.event.before }}
+        run: python3 scripts/ci_one_focused_workflow.py --execute

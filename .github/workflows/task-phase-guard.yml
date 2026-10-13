@@ -1,12 +1,6 @@
 name: Task phase guard
 
 on:
-  pull_request:
-    paths:
-      - "scripts/check-task-phase.py"
-      - "scripts/task_schema_record.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/task-phase-guard.yml"
   workflow_dispatch:
   schedule:
     - cron: "20 4 * * *"

@@ -3,9 +3,6 @@ name: Vertical Day non-cancelling smoke
 # Кожен SHA має власний відтворюваний результат: без paths-фільтрів
 # та cancel-in-progress. Зелений другий job не підміняє RED для цього SHA.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

@@ -1,10 +1,6 @@
 name: bīja3 pure cube
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/bija3-pure-cube/**"
-      - ".github/workflows/bija3-pure-cube.yml"
   workflow_dispatch:
 
 jobs:

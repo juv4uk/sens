@@ -1,23 +1,6 @@
 name: Post-D4 root minimization
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/post-d4-root-min/**"
-      - "docs/research/*root-min*.md"
-      - "crates/sens/tests/post_d4_setq_state_passing.rs"
-      - "crates/sens/tests/post_d4_transform_boundary.rs"
-      - "crates/sens/tests/post_d4_setq_shared_location.rs"
-      - ".github/workflows/post-d4-root-min.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/post-d4-root-min/**"
-      - "docs/research/*root-min*.md"
-      - "crates/sens/tests/post_d4_setq_state_passing.rs"
-      - "crates/sens/tests/post_d4_transform_boundary.rs"
-      - "crates/sens/tests/post_d4_setq_shared_location.rs"
-      - ".github/workflows/post-d4-root-min.yml"
   workflow_dispatch:
 
 permissions:

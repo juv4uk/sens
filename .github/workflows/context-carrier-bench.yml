@@ -1,15 +1,6 @@
 name: Context carrier benchmark
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/context-carrier/**"
-      - ".github/workflows/context-carrier-bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/context-carrier/**"
-      - ".github/workflows/context-carrier-bench.yml"
   workflow_dispatch:
 
 jobs:

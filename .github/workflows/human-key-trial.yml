@@ -1,19 +1,6 @@
 name: Human-key two-key trial harness
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/human-wire/payloads.json"
-      - "benchmarks/human-wire/chunking.py"
-      - "benchmarks/human-wire/trial.py"
-      - ".github/workflows/human-key-trial.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/human-wire/payloads.json"
-      - "benchmarks/human-wire/chunking.py"
-      - "benchmarks/human-wire/trial.py"
-      - ".github/workflows/human-key-trial.yml"
   workflow_dispatch:
 
 jobs:

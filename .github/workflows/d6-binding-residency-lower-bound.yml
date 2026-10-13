@@ -1,20 +1,6 @@
 name: D6 binding-policy lower bound
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
-      - "scripts/research-2489-setq-placement.py"
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - ".github/workflows/d6-binding-residency-lower-bound.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2518-d6-binding-residency-lower-bound.py"
-      - "scripts/research-2489-setq-placement.py"
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - ".github/workflows/d6-binding-residency-lower-bound.yml"
   workflow_dispatch:
 
 permissions:

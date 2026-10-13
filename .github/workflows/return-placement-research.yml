@@ -1,20 +1,6 @@
 name: RETURN placement research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2488-return-placement.py"
-      - "docs/research/2488-return-placement*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/return-placement-research.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2488-return-placement.py"
-      - "docs/research/2488-return-placement*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/return-placement-research.yml"
   workflow_dispatch:
 
 permissions:

@@ -2,22 +2,7 @@ name: Compiler selfhost lineage contract
 # #3822 stored executable fixed-point report gate.
 
 on:
-  pull_request:
-    paths:
-      - "contracts/compiler-selfhost-lineage-v1.lisp"
-      - "scripts/validate-compiler-selfhost-lineage.py"
-      - "scripts/measure-nano-sens-size.py"
-      - "evidence/compiler-selfhost-lineage-*.json"
-      - ".github/workflows/compiler-selfhost-lineage-contract.yml"
-  push:
-    branches: [main]
-    paths:
-      - "contracts/compiler-selfhost-lineage-v1.lisp"
-      - "scripts/validate-compiler-selfhost-lineage.py"
-      - "scripts/measure-nano-sens-size.py"
-      - "evidence/compiler-selfhost-lineage-*.json"
-      - ".github/workflows/compiler-selfhost-lineage-contract.yml"
-
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

@@ -1,20 +1,7 @@
 name: Knowledge exact-D1 partial recovery
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/knowledge.lisp"
-      - "tests/test_knowledge_d1_recovery.py"
-      - "crates/sens/tests/knowledge_d1_recovery.rs"
-      - ".github/workflows/knowledge-d1-recovery.yml"
-  pull_request:
-    paths:
-      - "lib/knowledge.lisp"
-      - "tests/test_knowledge_d1_recovery.py"
-      - "crates/sens/tests/knowledge_d1_recovery.rs"
-      - ".github/workflows/knowledge-d1-recovery.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,20 +1,7 @@
 name: D10 generalized congruence evidence
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-generalized-congruence-research-v1.json
-      - tests/test_d10_generalized_crt.py
-      - docs/research/D10-GENERALIZED-CRT-PERIODS.uk.md
-      - .github/workflows/d10-generalized-congruence.yml
-  push:
-    branches:
-      - main
-    paths:
-      - knowledge/d10-generalized-congruence-research-v1.json
-      - tests/test_d10_generalized_crt.py
-      - .github/workflows/d10-generalized-congruence.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

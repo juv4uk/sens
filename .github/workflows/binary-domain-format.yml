@@ -1,14 +1,6 @@
 name: Binary-domain semantic context
 
 on:
-  pull_request:
-    paths:
-      - "scripts/check-binary-domain-format.py"
-      - "scripts/task_schema_record.py"
-      - "scripts/check-task-record-structure.py"
-      - "knowledge/binary-domain-format-baseline.json"
-      - "knowledge/task-record-structure-baseline.json"
-      - ".github/workflows/binary-domain-format.yml"
   workflow_dispatch:
   schedule:
     - cron: "0 4 * * *"

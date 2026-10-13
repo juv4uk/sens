@@ -1,26 +1,7 @@
 name: t5-migrator-contract-guard
 
 on:
-  pull_request:
-    paths:
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/sens_source_resolver.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/test_sens_code_migration.py"
-      - "tests/test_t5_migrator_contract_guard.py"
-      - ".github/workflows/t5-migrator-contract-guard.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/sens_source_resolver.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/test_sens_code_migration.py"
-      - "tests/test_t5_migrator_contract_guard.py"
-      - ".github/workflows/t5-migrator-contract-guard.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

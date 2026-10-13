@@ -1,17 +1,6 @@
 name: D6 PURE-UNKNOWN anti-numerology
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-closure-map/**"
-      - ".github/workflows/d6-pure-unknown-anti-numerology.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-closure-map/**"
-      - ".github/workflows/d6-pure-unknown-anti-numerology.yml"
   workflow_dispatch:
 
 permissions:

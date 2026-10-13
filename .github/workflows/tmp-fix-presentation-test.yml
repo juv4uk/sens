@@ -1,10 +1,7 @@
 name: Temporary presentation test repair
 
 on:
-  push:
-    branches:
-      - fix/presentation-bool-boundary
-
+  workflow_dispatch:
 permissions:
   contents: write
 

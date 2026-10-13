@@ -1,19 +1,6 @@
 name: D5 SET SETQ sibling law research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d5-set-setq-sibling-law/**"
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - "knowledge/d5-historical-full-map.json"
-      - ".github/workflows/d5-set-setq-sibling-law.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d5-set-setq-sibling-law/**"
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - "knowledge/d5-historical-full-map.json"
-      - ".github/workflows/d5-set-setq-sibling-law.yml"
   workflow_dispatch:
 
 jobs:

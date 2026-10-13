@@ -1,18 +1,6 @@
 name: Original machine-block lexical coordinate proof
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/prove_lexical_locals.py'
-      - 'tests/test_prove_lexical_locals.py'
-      - 'docs/research/machine-block-local-coordinates.uk.md'
-      - '.github/workflows/prove-lexical-locals.yml'
-      - 'lib/machine/block.lisp'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/prove_lexical_locals.py'
-      - 'tests/test_prove_lexical_locals.py'
   workflow_dispatch:
 
 permissions:
