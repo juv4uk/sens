@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import prove_lexical_locals as proof
 
-ORIGINAL = ROOT / "lib/machine/block.lisp"
+ORIGINAL = ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt"
 NAMES = (
     "machine-block", "machine-block-empty", "machine-block-one",
     "machine-block-append", "machine-block-concat", "machine-block-forms",

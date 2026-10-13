@@ -14,7 +14,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-ORIGINAL = ROOT / "lib/machine/block.lisp"
+ORIGINAL = ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt"
 ORACLE = ROOT / "tests/test_machine_block_historical_oracle.py"
 TEXT7 = ROOT / "crates/sens/src/text7_projection_generated.rs"
 SOURCE_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"

@@ -15,7 +15,7 @@ import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "lib/machine/block.lisp"
+SOURCE = ROOT / "docs/archive/historical/machine-block-original-200201b7.source.txt"
 SOURCE_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"
 NAMES = frozenset((
     "machine-block", "machine-block-empty", "machine-block-one",
