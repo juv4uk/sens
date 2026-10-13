@@ -165,15 +165,20 @@
       ((010 b)  (001 fail))
       ((010 ()) (101010000 (011 a) (011 b) (101010000 (100 a) (100 b) bindings))))))
 
+; Внутрішній Lisp-owned носій одноразового walk; жодної нової Dn-адреси.
+; D4:0011 DEFINE + D4:0010 LAMBDA замість невиконуваного D6:001000 LET.
+(0011 уніфікація-входження-розв'язано?
+  (0010 (variable resolved bindings)
+    (110
+      ((101100100 resolved)
+       (unify-equal? (1001 variable) (1001 resolved)))
+      ((010 resolved) (010 (001 (0))))
+      ((101110101 variable (100 resolved) bindings) (010 ()))
+      ((010 ()) (101110101 variable (011 resolved) bindings)))))
+
 (0011 occurs-check?
   (0010 (variable term bindings)
-    (001000 ((resolved (101110100 term bindings)))
-      (110
-        ((101100100 resolved)
-         (unify-equal? (1001 variable) (1001 resolved)))
-        ((010 resolved) (010 (001 (0))))
-        ((101110101 variable (100 resolved) bindings) (010 ()))
-        ((010 ()) (101110101 variable (011 resolved) bindings))))))
+    (уніфікація-входження-розв'язано? variable (101110100 term bindings) bindings)))
 
 (0011 occurs-check occurs-check?)
 
