@@ -1,0 +1,41 @@
+name: head-residency-witness
+
+# Точковий інформативний страж міграції: ширина бінарного ключа = адреса домену,
+# тож КОЖЕН бінарний головний вузол у мігрованих джерелах мусить бути
+# ратифікованим резидентом ТОЧНО своєї ширини (усі 2046 функцій D1..D10 як
+# єдина авторитетна таблиця). Страж падає лише на справжній помилці —
+# хибній ширині (не 1..10) або не-резиденті — а не на проміжному стані
+# міграції, бо всі допустимі коди мають ширину 1..10.
+#
+# Вивід — інформативна таблиця (домен | ширина | резидентів | сайтів |
+# різних | поза-таблицею), а не «ok/fail».
+
+on:
+  push:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/**/*.lisp"
+      - "lib/domains/*.lisp"
+      - "scripts/check-migrated-head-residency.py"
+      - ".github/workflows/head-residency-witness.yml"
+  pull_request:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/**/*.lisp"
+      - "lib/domains/*.lisp"
+      - "scripts/check-migrated-head-residency.py"
+      - ".github/workflows/head-residency-witness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  witness:
+    name: Every binary head is a ratified exact-width resident
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Head residency (lib + scripts)
+        run: python3 scripts/check-migrated-head-residency.py lib scripts

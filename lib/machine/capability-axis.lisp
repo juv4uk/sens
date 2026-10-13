@@ -118,43 +118,43 @@
 
 (0011 machine-capability-find-domain-row
   (0010 (width bits rows)
-    (cond
-      ((atom? rows) ())
-      ((eq? width (car (car rows)))
-       (cond
-         ((eq? bits (car (cdr (car rows)))) (car rows))
-         ((atom? ())
+    (110
+      ((010 rows) ())
+      ((101 width (100 (100 rows)))
+       (110
+         ((101 bits (100 (011 (100 rows)))) (100 rows))
+         ((010 ())
           (machine-capability-find-domain-row
-            width bits (cdr rows)))))
-      ((atom? ())
+            width bits (011 rows)))))
+      ((010 ())
        (machine-capability-find-domain-row
-         width bits (cdr rows))))))
+         width bits (011 rows))))))
 
 ; Current lookup: explicit width + packed-bits mechanism key only.
 (0011 machine-capabilities-for-domain
   (0010 (width bits)
-    (cond
-      ((atom? (machine-capability-find-domain-row
+    (110
+      ((010 (machine-capability-find-domain-row
                 width bits machine-capability-axis-v3)) ())
-      ((atom? ())
-       (car (cdr (cdr
+      ((010 ())
+       (100 (011 (011
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3))))))))
 
 (0011 machine-capability-find-row
   (0010 (key rows)
-    (cond
-      ((atom? rows) ())
-      ((eq? key (car (car rows))) (car rows))
-      ((atom? ())
-       (machine-capability-find-row key (cdr rows))))))
+    (110
+      ((010 rows) ())
+      ((101 key (100 (100 rows))) (100 rows))
+      ((010 ())
+       (machine-capability-find-row key (011 rows))))))
 
 (0011 machine-target-witness-status
   (0010 (target)
-    (cond
-      ((atom? (machine-capability-find-row
-                target machine-target-witness-status-v1)) (quote absent))
-      ((atom? ())
-       (car (cdr
+    (110
+      ((010 (machine-capability-find-row
+                target machine-target-witness-status-v1)) (001 absent))
+      ((010 ())
+       (100 (011
          (machine-capability-find-row
            target machine-target-witness-status-v1)))))))

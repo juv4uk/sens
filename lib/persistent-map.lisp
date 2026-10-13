@@ -1,5 +1,8 @@
 ; Персистентна map без прихованої арифметики.
 ;
+; Migrated: COND else (010 ()) → exact D1:1 (010 (001 ())).
+; Key equality is D3 EQ only. No host truthiness. Width is identity.
+;
 ; Поточний числовий закон SENS допускає арифметику лише над явно
 ; кваліфікованими D24+ значеннями. Попередня AVL-реалізація зберігала
 ; host-подібні висоти 0/1/-1 і порівнювала codepoint через D5 LESSP.
@@ -26,7 +29,7 @@
        (1110 (111 key value)))
       ((101 key (100 (100 entries)))
        (111 (111 key value) (011 entries)))
-      ((010 ())
+      ((010 (001 ()))
        (111 (100 entries)
             (map-insert key value (011 entries)))))))
 
@@ -36,9 +39,10 @@
       ((0101 entries) (001 ()))
       ((101 key (100 (100 entries)))
        (1110 (011 (100 entries))))
-      ((010 ())
+      ((010 (001 ()))
        (map-get key (011 entries))))))
 
+; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.
 (0011 map-contains?
   (0010 (key entries)
     (0100 (010 (map-get key entries)))))

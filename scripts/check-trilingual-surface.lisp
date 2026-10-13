@@ -7,486 +7,486 @@
 ; for malformed/duplicate/missing human surfaces. --require-complete keeps
 ; the historical release gate behavior.
 
-(def tri-statuses
-  (quote (stable candidate missing compatibility-only)))
+(0011 tri-statuses
+  (001 (stable candidate missing compatibility-only)))
 
-(def tri-human-surfaces
-  (quote (uk en sa)))
+(0011 tri-human-surfaces
+  (001 (uk en sa)))
 
-(def tri-fail
-  (lambda (kind detail)
-    (let ((shown
+(0011 tri-fail
+  (0010 (kind detail)
+    (001000 ((shown
             (print
-              (list
-                (quote trilingual-surface-error)
+              (1110
+                (001 trilingual-surface-error)
                 kind
                 detail))))
       ; Intentional unbound diagnostic: file-mode CLI returns non-zero.
       (trilingual-surface-check-failed kind detail))))
 
-(def tri-member-state
-  (lambda (value values)
-    (cond
-      ((atom values) (structural-kind empty-list) (quote absent))
-      ((atom values) (structural-kind atom) (quote malformed))
-      ((atom values) (structural-kind pair)
-       (cond
-         ((equal? value (car values)) (structural-relation same)
-          (quote present))
-         ((equal? value (car values)) (structural-relation distinct)
-          (tri-member-state value (cdr values))))))))
+(0011 tri-member-state
+  (0010 (value values)
+    (110
+      ((010 values) (structural-kind empty-list) (001 absent))
+      ((010 values) (structural-kind atom) (001 malformed))
+      ((010 values) (structural-kind pair)
+       (110
+         ((equal? value (100 values)) (structural-relation same)
+          (001 present))
+         ((equal? value (100 values)) (structural-relation distinct)
+          (tri-member-state value (011 values))))))))
 
-(def tri-triple-state
-  (lambda (value)
-    (cond
-      ((atom value) (structural-kind empty-list) (quote no))
-      ((atom value) (structural-kind atom) (quote no))
-      ((atom value) (structural-kind pair)
-       (let ((rest1 (cdr value)))
-         (cond
-           ((atom rest1) (structural-kind pair)
-            (let ((rest2 (cdr rest1)))
-              (cond
-                ((atom rest2) (structural-kind pair)
-                 (let ((rest3 (cdr rest2)))
-                   (cond
-                     ((atom rest3) (structural-kind empty-list) (quote yes))
-                     ((atom rest3) (structural-kind atom) (quote no))
-                     ((atom rest3) (structural-kind pair) (quote no)))))
-                ((atom rest2) (structural-kind empty-list) (quote no))
-                ((atom rest2) (structural-kind atom) (quote no)))))
-           ((atom rest1) (structural-kind empty-list) (quote no))
-           ((atom rest1) (structural-kind atom) (quote no))))))))
+(0011 tri-triple-state
+  (0010 (value)
+    (110
+      ((010 value) (structural-kind empty-list) (001 no))
+      ((010 value) (structural-kind atom) (001 no))
+      ((010 value) (structural-kind pair)
+       (001000 ((rest1 (011 value)))
+         (110
+           ((010 rest1) (structural-kind pair)
+            (001000 ((rest2 (011 rest1)))
+              (110
+                ((010 rest2) (structural-kind pair)
+                 (001000 ((rest3 (011 rest2)))
+                   (110
+                     ((010 rest3) (structural-kind empty-list) (001 yes))
+                     ((010 rest3) (structural-kind atom) (001 no))
+                     ((010 rest3) (structural-kind pair) (001 no)))))
+                ((010 rest2) (structural-kind empty-list) (001 no))
+                ((010 rest2) (structural-kind atom) (001 no)))))
+           ((010 rest1) (structural-kind empty-list) (001 no))
+           ((010 rest1) (structural-kind atom) (001 no))))))))
 
-(def tri-special-quote-sym-state
-  (lambda (field)
-    (cond
+(0011 tri-special-quote-sym-state
+  (0010 (field)
+    (110
       ((equal?
          field
-         (list (quote sym) (list (quote quote) (quote stable))))
+         (1110 (001 sym) (1110 (001 quote) (001 stable))))
        (structural-relation same)
-       (quote yes))
+       (001 yes))
       ((equal?
          field
-         (list (quote sym) (list (quote quote) (quote stable))))
+         (1110 (001 sym) (1110 (001 quote) (001 stable))))
        (structural-relation distinct)
-       (quote no)))))
+       (001 no)))))
 
-(def tri-field-language
-  (lambda (field)
-    (let ((special (tri-special-quote-sym-state field)))
-      (cond
-        ((eq special (quote yes)) (identity-relation same) (quote sym))
-        ((eq special (quote yes)) (identity-relation distinct) (car field))))))
+(0011 tri-field-language
+  (0010 (field)
+    (001000 ((special (tri-special-quote-sym-state field)))
+      (110
+        ((101 special (001 yes)) (identity-relation same) (001 sym))
+        ((101 special (001 yes)) (identity-relation distinct) (100 field))))))
 
-(def tri-field-status
-  (lambda (field)
-    (let ((special (tri-special-quote-sym-state field)))
-      (cond
-        ((eq special (quote yes)) (identity-relation same) (quote stable))
-        ((eq special (quote yes)) (identity-relation distinct) (third field))))))
+(0011 tri-field-status
+  (0010 (field)
+    (001000 ((special (tri-special-quote-sym-state field)))
+      (110
+        ((101 special (001 yes)) (identity-relation same) (001 stable))
+        ((101 special (001 yes)) (identity-relation distinct) (third field))))))
 
-(def tri-valid-ordinary-field
-  (lambda (field)
-    (let ((shape (tri-triple-state field)))
-      (cond
-        ((eq shape (quote yes)) (identity-relation distinct)
-         (tri-fail (quote malformed-surface) field))
-        ((eq shape (quote yes)) (identity-relation same)
-         (let* ((language (car field))
+(0011 tri-valid-ordinary-field
+  (0010 (field)
+    (001000 ((shape (tri-triple-state field)))
+      (110
+        ((101 shape (001 yes)) (identity-relation distinct)
+         (tri-fail (001 malformed-surface) field))
+        ((101 shape (001 yes)) (identity-relation same)
+         (001001 ((language (100 field))
                 (name (second field))
                 (status (third field)))
-           (cond
-             ((atom language) (structural-kind atom)
-              (cond
-                ((atom name) (structural-kind atom)
-                 (cond
-                   ((atom status) (structural-kind atom)
-                    (let ((state (tri-member-state status tri-statuses)))
-                      (cond
-                        ((eq state (quote present)) (identity-relation same)
-                         (quote valid))
-                        ((eq state (quote present)) (identity-relation distinct)
-                         (tri-fail (quote unknown-status) field))))
-                   ((atom status) (structural-kind empty-list)
-                    (tri-fail (quote malformed-status) field))
-                   ((atom status) (structural-kind pair)
-                    (tri-fail (quote malformed-status) field))))
-                ((atom name) (structural-kind empty-list)
-                 (tri-fail (quote malformed-name) field))
-                ((atom name) (structural-kind pair)
-                 (tri-fail (quote malformed-name) field))))
-             ((atom language) (structural-kind empty-list)
-              (tri-fail (quote malformed-surface-name) field))
-             ((atom language) (structural-kind pair)
-              (tri-fail (quote malformed-surface-name) field))))))))))
+           (110
+             ((010 language) (structural-kind atom)
+              (110
+                ((010 name) (structural-kind atom)
+                 (110
+                   ((010 status) (structural-kind atom)
+                    (001000 ((state (tri-member-state status tri-statuses)))
+                      (110
+                        ((101 state (001 present)) (identity-relation same)
+                         (001 valid))
+                        ((101 state (001 present)) (identity-relation distinct)
+                         (tri-fail (001 unknown-status) field))))
+                   ((010 status) (structural-kind empty-list)
+                    (tri-fail (001 malformed-status) field))
+                   ((010 status) (structural-kind pair)
+                    (tri-fail (001 malformed-status) field))))
+                ((010 name) (structural-kind empty-list)
+                 (tri-fail (001 malformed-name) field))
+                ((010 name) (structural-kind pair)
+                 (tri-fail (001 malformed-name) field))))
+             ((010 language) (structural-kind empty-list)
+              (tri-fail (001 malformed-surface-name) field))
+             ((010 language) (structural-kind pair)
+              (tri-fail (001 malformed-surface-name) field))))))))))
 
-(def tri-require-human-surfaces
-  (lambda (seen)
-    (let ((uk-state (tri-member-state (quote uk) seen)))
-      (cond
-        ((eq uk-state (quote present)) (identity-relation distinct)
-         (tri-fail (quote missing-human-surface) (quote uk)))
-        ((eq uk-state (quote present)) (identity-relation same)
-         (let ((en-state (tri-member-state (quote en) seen)))
-           (cond
-             ((eq en-state (quote present)) (identity-relation distinct)
-              (tri-fail (quote missing-human-surface) (quote en)))
-             ((eq en-state (quote present)) (identity-relation same)
-              (let ((sa-state (tri-member-state (quote sa) seen)))
-                (cond
-                  ((eq sa-state (quote present)) (identity-relation distinct)
-                   (tri-fail (quote missing-human-surface) (quote sa)))
-                  ((eq sa-state (quote present)) (identity-relation same)
-                   (quote valid))))))))))))
+(0011 tri-require-human-surfaces
+  (0010 (seen)
+    (001000 ((uk-state (tri-member-state (001 uk) seen)))
+      (110
+        ((101 uk-state (001 present)) (identity-relation distinct)
+         (tri-fail (001 missing-human-surface) (001 uk)))
+        ((101 uk-state (001 present)) (identity-relation same)
+         (001000 ((en-state (tri-member-state (001 en) seen)))
+           (110
+             ((101 en-state (001 present)) (identity-relation distinct)
+              (tri-fail (001 missing-human-surface) (001 en)))
+             ((101 en-state (001 present)) (identity-relation same)
+              (001000 ((sa-state (tri-member-state (001 sa) seen)))
+                (110
+                  ((101 sa-state (001 present)) (identity-relation distinct)
+                   (tri-fail (001 missing-human-surface) (001 sa)))
+                  ((101 sa-state (001 present)) (identity-relation same)
+                   (001 valid))))))))))))
 
-(def tri-validate-fields
-  (lambda (fields seen)
-    (cond
-      ((atom fields) (structural-kind empty-list)
+(0011 tri-validate-fields
+  (0010 (fields seen)
+    (110
+      ((010 fields) (structural-kind empty-list)
        (tri-require-human-surfaces seen))
-      ((atom fields) (structural-kind atom)
-       (tri-fail (quote malformed-field-tail) fields))
-      ((atom fields) (structural-kind pair)
-       (let* ((field (car fields))
+      ((010 fields) (structural-kind atom)
+       (tri-fail (001 malformed-field-tail) fields))
+      ((010 fields) (structural-kind pair)
+       (001001 ((field (100 fields))
               (special (tri-special-quote-sym-state field)))
-         (cond
-           ((eq special (quote yes)) (identity-relation same)
-            (let ((dup (tri-member-state (quote sym) seen)))
-              (cond
-                ((eq dup (quote present)) (identity-relation same)
-                 (tri-fail (quote duplicate-surface) (quote sym)))
-                ((eq dup (quote present)) (identity-relation distinct)
+         (110
+           ((101 special (001 yes)) (identity-relation same)
+            (001000 ((dup (tri-member-state (001 sym) seen)))
+              (110
+                ((101 dup (001 present)) (identity-relation same)
+                 (tri-fail (001 duplicate-surface) (001 sym)))
+                ((101 dup (001 present)) (identity-relation distinct)
                  (tri-validate-fields
-                   (cdr fields)
-                   (cons (quote sym) seen))))))
-           ((eq special (quote yes)) (identity-relation distinct)
-            (let ((valid (tri-valid-ordinary-field field)))
-              (let* ((language (tri-field-language field))
+                   (011 fields)
+                   (111 (001 sym) seen))))))
+           ((101 special (001 yes)) (identity-relation distinct)
+            (001000 ((valid (tri-valid-ordinary-field field)))
+              (001001 ((language (tri-field-language field))
                      (dup (tri-member-state language seen)))
-                (cond
-                  ((eq dup (quote present)) (identity-relation same)
-                   (tri-fail (quote duplicate-surface) language))
-                  ((eq dup (quote present)) (identity-relation distinct)
+                (110
+                  ((101 dup (001 present)) (identity-relation same)
+                   (tri-fail (001 duplicate-surface) language))
+                  ((101 dup (001 present)) (identity-relation distinct)
                    (tri-validate-fields
-                     (cdr fields)
-                     (cons language seen)))))))))))))
+                     (011 fields)
+                     (111 language seen)))))))))))))
 
-(def tri-validate-row
-  (lambda (row)
-    (cond
-      ((atom row) (structural-kind empty-list)
-       (tri-fail (quote malformed-entry) row))
-      ((atom row) (structural-kind atom)
-       (tri-fail (quote malformed-entry) row))
-      ((atom row) (structural-kind pair)
-       (let ((identity (car row)))
-         (cond
-           ((atom identity) (structural-kind atom)
-            (let ((valid (tri-validate-fields (cdr row) (quote ()))))
+(0011 tri-validate-row
+  (0010 (row)
+    (110
+      ((010 row) (structural-kind empty-list)
+       (tri-fail (001 malformed-entry) row))
+      ((010 row) (structural-kind atom)
+       (tri-fail (001 malformed-entry) row))
+      ((010 row) (structural-kind pair)
+       (001000 ((identity (100 row)))
+         (110
+           ((010 identity) (structural-kind atom)
+            (001000 ((valid (tri-validate-fields (011 row) (001 ()))))
               identity))
-           ((atom identity) (structural-kind empty-list)
-            (tri-fail (quote malformed-identity) row))
-           ((atom identity) (structural-kind pair)
-            (tri-fail (quote malformed-identity) row))))))))
+           ((010 identity) (structural-kind empty-list)
+            (tri-fail (001 malformed-identity) row))
+           ((010 identity) (structural-kind pair)
+            (tri-fail (001 malformed-identity) row))))))))
 
-(def tri-validate-rows
-  (lambda (rows seen-identities)
-    (cond
-      ((atom rows) (structural-kind empty-list)
-       (cond
-         ((atom seen-identities) (structural-kind empty-list)
-          (tri-fail (quote empty-registry) (quote ())))
-         ((atom seen-identities) (structural-kind pair)
-          (quote valid))
-         ((atom seen-identities) (structural-kind atom)
-          (tri-fail (quote malformed-seen-identities) seen-identities))))
-      ((atom rows) (structural-kind atom)
-       (tri-fail (quote malformed-entry-tail) rows))
-      ((atom rows) (structural-kind pair)
-       (let* ((identity (tri-validate-row (car rows)))
+(0011 tri-validate-rows
+  (0010 (rows seen-identities)
+    (110
+      ((010 rows) (structural-kind empty-list)
+       (110
+         ((010 seen-identities) (structural-kind empty-list)
+          (tri-fail (001 empty-registry) (001 ())))
+         ((010 seen-identities) (structural-kind pair)
+          (001 valid))
+         ((010 seen-identities) (structural-kind atom)
+          (tri-fail (001 malformed-seen-identities) seen-identities))))
+      ((010 rows) (structural-kind atom)
+       (tri-fail (001 malformed-entry-tail) rows))
+      ((010 rows) (structural-kind pair)
+       (001001 ((identity (tri-validate-row (100 rows)))
               (dup (tri-member-state identity seen-identities)))
-         (cond
-           ((eq dup (quote present)) (identity-relation same)
-            (tri-fail (quote duplicate-semantic-id) identity))
-           ((eq dup (quote present)) (identity-relation distinct)
+         (110
+           ((101 dup (001 present)) (identity-relation same)
+            (tri-fail (001 duplicate-semantic-id) identity))
+           ((101 dup (001 present)) (identity-relation distinct)
             (tri-validate-rows
-              (cdr rows)
-              (cons identity seen-identities)))))))))
+              (011 rows)
+              (111 identity seen-identities)))))))))
 
-(def tri-surface-status
-  (lambda (fields wanted)
-    (cond
-      ((atom fields) (structural-kind empty-list) (quote ()))
-      ((atom fields) (structural-kind atom) (quote ()))
-      ((atom fields) (structural-kind pair)
-       (let* ((field (car fields))
+(0011 tri-surface-status
+  (0010 (fields wanted)
+    (110
+      ((010 fields) (structural-kind empty-list) (001 ()))
+      ((010 fields) (structural-kind atom) (001 ()))
+      ((010 fields) (structural-kind pair)
+       (001001 ((field (100 fields))
               (language (tri-field-language field)))
-         (cond
-           ((eq language wanted) (identity-relation same)
+         (110
+           ((101 language wanted) (identity-relation same)
             (tri-field-status field))
-           ((eq language wanted) (identity-relation distinct)
-            (tri-surface-status (cdr fields) wanted))))))))
+           ((101 language wanted) (identity-relation distinct)
+            (tri-surface-status (011 fields) wanted))))))))
 
-(def tri-all-status-state
-  (lambda (fields languages wanted)
-    (cond
-      ((atom languages) (structural-kind empty-list) (quote all))
-      ((atom languages) (structural-kind atom) (quote not-all))
-      ((atom languages) (structural-kind pair)
-       (let ((current
-               (tri-surface-status fields (car languages))))
-         (cond
-           ((eq current wanted) (identity-relation same)
+(0011 tri-all-status-state
+  (0010 (fields languages wanted)
+    (110
+      ((010 languages) (structural-kind empty-list) (001 all))
+      ((010 languages) (structural-kind atom) (001 not-all))
+      ((010 languages) (structural-kind pair)
+       (001000 ((current
+               (tri-surface-status fields (100 languages))))
+         (110
+           ((101 current wanted) (identity-relation same)
             (tri-all-status-state
               fields
-              (cdr languages)
+              (011 languages)
               wanted))
-           ((eq current wanted) (identity-relation distinct)
-            (quote not-all))))))))
+           ((101 current wanted) (identity-relation distinct)
+            (001 not-all))))))))
 
-(def tri-public-kind
-  (lambda (row)
-    (let ((state
+(0011 tri-public-kind
+  (0010 (row)
+    (001000 ((state
             (tri-all-status-state
-              (cdr row)
+              (011 row)
               tri-human-surfaces
-              (quote compatibility-only))))
-      (cond
-        ((eq state (quote all)) (identity-relation same)
-         (quote compatibility-only))
-        ((eq state (quote all)) (identity-relation distinct)
-         (quote public))))))
+              (001 compatibility-only))))
+      (110
+        ((101 state (001 all)) (identity-relation same)
+         (001 compatibility-only))
+        ((101 state (001 all)) (identity-relation distinct)
+         (001 public))))))
 
-(def tri-stable-kind
-  (lambda (row)
-    (let ((state
+(0011 tri-stable-kind
+  (0010 (row)
+    (001000 ((state
             (tri-all-status-state
-              (cdr row)
+              (011 row)
               tri-human-surfaces
-              (quote stable))))
-      (cond
-        ((eq state (quote all)) (identity-relation same)
-         (quote all-stable))
-        ((eq state (quote all)) (identity-relation distinct)
-         (quote not-all-stable))))))
+              (001 stable))))
+      (110
+        ((101 state (001 all)) (identity-relation same)
+         (001 all-stable))
+        ((101 state (001 all)) (identity-relation distinct)
+         (001 not-all-stable))))))
 
-(def tri-surface-presence
-  (lambda (fields wanted)
-    (let ((value (tri-surface-status fields wanted)))
-      (cond
-        ((atom value) (structural-kind empty-list) (quote absent))
-        ((atom value) (structural-kind atom) (quote present))
-        ((atom value) (structural-kind pair) (quote present))))))
+(0011 tri-surface-presence
+  (0010 (fields wanted)
+    (001000 ((value (tri-surface-status fields wanted)))
+      (110
+        ((010 value) (structural-kind empty-list) (001 absent))
+        ((010 value) (structural-kind atom) (001 present))
+        ((010 value) (structural-kind pair) (001 present))))))
 
-(def tri-count-status
-  (lambda (rows language wanted acc)
-    (cond
-      ((atom rows) (structural-kind empty-list) acc)
-      ((atom rows) (structural-kind atom) acc)
-      ((atom rows) (structural-kind pair)
-       (let ((status
-               (tri-surface-status (cdr (car rows)) language)))
-         (cond
-           ((eq status wanted) (identity-relation same)
-            (tri-count-status (cdr rows) language wanted (+ acc 1)))
-           ((eq status wanted) (identity-relation distinct)
-            (tri-count-status (cdr rows) language wanted acc))))))))
+(0011 tri-count-status
+  (0010 (rows language wanted acc)
+    (110
+      ((010 rows) (structural-kind empty-list) acc)
+      ((010 rows) (structural-kind atom) acc)
+      ((010 rows) (structural-kind pair)
+       (001000 ((status
+               (tri-surface-status (011 (100 rows)) language)))
+         (110
+           ((101 status wanted) (identity-relation same)
+            (tri-count-status (011 rows) language wanted (01010 acc 1)))
+           ((101 status wanted) (identity-relation distinct)
+            (tri-count-status (011 rows) language wanted acc))))))))
 
-(def tri-count-public
-  (lambda (rows acc)
-    (cond
-      ((atom rows) (structural-kind empty-list) acc)
-      ((atom rows) (structural-kind atom) acc)
-      ((atom rows) (structural-kind pair)
-       (let ((kind (tri-public-kind (car rows))))
-         (cond
-           ((eq kind (quote public)) (identity-relation same)
-            (tri-count-public (cdr rows) (+ acc 1)))
-           ((eq kind (quote public)) (identity-relation distinct)
-            (tri-count-public (cdr rows) acc))))))))
+(0011 tri-count-public
+  (0010 (rows acc)
+    (110
+      ((010 rows) (structural-kind empty-list) acc)
+      ((010 rows) (structural-kind atom) acc)
+      ((010 rows) (structural-kind pair)
+       (001000 ((kind (tri-public-kind (100 rows))))
+         (110
+           ((101 kind (001 public)) (identity-relation same)
+            (tri-count-public (011 rows) (01010 acc 1)))
+           ((101 kind (001 public)) (identity-relation distinct)
+            (tri-count-public (011 rows) acc))))))))
 
-(def tri-count-symbolic
-  (lambda (rows acc)
-    (cond
-      ((atom rows) (structural-kind empty-list) acc)
-      ((atom rows) (structural-kind atom) acc)
-      ((atom rows) (structural-kind pair)
-       (let ((state
+(0011 tri-count-symbolic
+  (0010 (rows acc)
+    (110
+      ((010 rows) (structural-kind empty-list) acc)
+      ((010 rows) (structural-kind atom) acc)
+      ((010 rows) (structural-kind pair)
+       (001000 ((state
                (tri-surface-presence
-                 (cdr (car rows))
-                 (quote sym))))
-         (cond
-           ((eq state (quote present)) (identity-relation same)
-            (tri-count-symbolic (cdr rows) (+ acc 1)))
-           ((eq state (quote present)) (identity-relation distinct)
-            (tri-count-symbolic (cdr rows) acc))))))))
+                 (011 (100 rows))
+                 (001 sym))))
+         (110
+           ((101 state (001 present)) (identity-relation same)
+            (tri-count-symbolic (011 rows) (01010 acc 1)))
+           ((101 state (001 present)) (identity-relation distinct)
+            (tri-count-symbolic (011 rows) acc))))))))
 
-(def tri-count-common-stable
-  (lambda (rows acc)
-    (cond
-      ((atom rows) (structural-kind empty-list) acc)
-      ((atom rows) (structural-kind atom) acc)
-      ((atom rows) (structural-kind pair)
-       (let ((public (tri-public-kind (car rows))))
-         (cond
-           ((eq public (quote public)) (identity-relation distinct)
-            (tri-count-common-stable (cdr rows) acc))
-           ((eq public (quote public)) (identity-relation same)
-            (let ((stable (tri-stable-kind (car rows))))
-              (cond
-                ((eq stable (quote all-stable)) (identity-relation same)
-                 (tri-count-common-stable (cdr rows) (+ acc 1)))
-                ((eq stable (quote all-stable)) (identity-relation distinct)
-                 (tri-count-common-stable (cdr rows) acc)))))))))))
+(0011 tri-count-common-stable
+  (0010 (rows acc)
+    (110
+      ((010 rows) (structural-kind empty-list) acc)
+      ((010 rows) (structural-kind atom) acc)
+      ((010 rows) (structural-kind pair)
+       (001000 ((public (tri-public-kind (100 rows))))
+         (110
+           ((101 public (001 public)) (identity-relation distinct)
+            (tri-count-common-stable (011 rows) acc))
+           ((101 public (001 public)) (identity-relation same)
+            (001000 ((stable (tri-stable-kind (100 rows))))
+              (110
+                ((101 stable (001 all-stable)) (identity-relation same)
+                 (tri-count-common-stable (011 rows) (01010 acc 1)))
+                ((101 stable (001 all-stable)) (identity-relation distinct)
+                 (tri-count-common-stable (011 rows) acc)))))))))))
 
-(def tri-release-state
-  (lambda (rows)
-    (cond
-      ((atom rows) (structural-kind empty-list) (quote confirmed))
-      ((atom rows) (structural-kind atom) (quote open))
-      ((atom rows) (structural-kind pair)
-       (let ((public (tri-public-kind (car rows))))
-         (cond
-           ((eq public (quote public)) (identity-relation distinct)
-            (tri-release-state (cdr rows)))
-           ((eq public (quote public)) (identity-relation same)
-            (let ((stable (tri-stable-kind (car rows))))
-              (cond
-                ((eq stable (quote all-stable)) (identity-relation same)
-                 (tri-release-state (cdr rows)))
-                ((eq stable (quote all-stable)) (identity-relation distinct)
-                 (quote open)))))))))))
+(0011 tri-release-state
+  (0010 (rows)
+    (110
+      ((010 rows) (structural-kind empty-list) (001 confirmed))
+      ((010 rows) (structural-kind atom) (001 open))
+      ((010 rows) (structural-kind pair)
+       (001000 ((public (tri-public-kind (100 rows))))
+         (110
+           ((101 public (001 public)) (identity-relation distinct)
+            (tri-release-state (011 rows)))
+           ((101 public (001 public)) (identity-relation same)
+            (001000 ((stable (tri-stable-kind (100 rows))))
+              (110
+                ((101 stable (001 all-stable)) (identity-relation same)
+                 (tri-release-state (011 rows)))
+                ((101 stable (001 all-stable)) (identity-relation distinct)
+                 (001 open)))))))))))
 
-(def tri-mode
-  (lambda (argv)
-    (cond
-      ((atom argv) (structural-kind empty-list) (quote report))
-      ((atom argv) (structural-kind atom)
-       (tri-fail (quote malformed-argv) argv))
-      ((atom argv) (structural-kind pair)
-       (let ((rest (cdr argv)))
-         (cond
-           ((atom rest) (structural-kind empty-list)
-            (cond
-              ((equal? (car argv) "--require-complete")
+(0011 tri-mode
+  (0010 (argv)
+    (110
+      ((010 argv) (structural-kind empty-list) (001 report))
+      ((010 argv) (structural-kind atom)
+       (tri-fail (001 malformed-argv) argv))
+      ((010 argv) (structural-kind pair)
+       (001000 ((rest (011 argv)))
+         (110
+           ((010 rest) (structural-kind empty-list)
+            (110
+              ((equal? (100 argv) "--require-complete")
                (structural-relation same)
-               (quote require-complete))
-              ((equal? (car argv) "--require-complete")
+               (001 require-complete))
+              ((equal? (100 argv) "--require-complete")
                (structural-relation distinct)
-               (tri-fail (quote unknown-argument) (car argv)))))
-           ((atom rest) (structural-kind atom)
-            (tri-fail (quote malformed-argv) argv))
-           ((atom rest) (structural-kind pair)
-            (tri-fail (quote too-many-arguments) argv))))))))
+               (tri-fail (001 unknown-argument) (100 argv)))))
+           ((010 rest) (structural-kind atom)
+            (tri-fail (001 malformed-argv) argv))
+           ((010 rest) (structural-kind pair)
+            (tri-fail (001 too-many-arguments) argv))))))))
 
-(def tri-registry-form
-  (car
+(0011 tri-registry-form
+  (100
     (read-all
       (read-file "lib/surface/semantic-registry.lisp"))))
 
-(def tri-rows
-  (cond
-    ((atom tri-registry-form) (structural-kind empty-list)
-     (tri-fail (quote malformed-registry-root) tri-registry-form))
-    ((atom tri-registry-form) (structural-kind atom)
-     (tri-fail (quote malformed-registry-root) tri-registry-form))
-    ((atom tri-registry-form) (structural-kind pair)
-     (cond
-       ((eq (car tri-registry-form) (quote sr/1))
+(0011 tri-rows
+  (110
+    ((010 tri-registry-form) (structural-kind empty-list)
+     (tri-fail (001 malformed-registry-root) tri-registry-form))
+    ((010 tri-registry-form) (structural-kind atom)
+     (tri-fail (001 malformed-registry-root) tri-registry-form))
+    ((010 tri-registry-form) (structural-kind pair)
+     (110
+       ((101 (100 tri-registry-form) (001 sr/1))
         (identity-relation same)
-        (cdr tri-registry-form))
-       ((eq (car tri-registry-form) (quote sr/1))
+        (011 tri-registry-form))
+       ((101 (100 tri-registry-form) (001 sr/1))
         (identity-relation distinct)
         (tri-fail
-          (quote malformed-registry-root)
-          (car tri-registry-form)))))))
+          (001 malformed-registry-root)
+          (100 tri-registry-form)))))))
 
-(def tri-validation
-  (tri-validate-rows tri-rows (quote ())))
+(0011 tri-validation
+  (tri-validate-rows tri-rows (001 ())))
 
-(def tri-public-count
+(0011 tri-public-count
   (tri-count-public tri-rows 0))
 
-(def tri-symbolic-count
+(0011 tri-symbolic-count
   (tri-count-symbolic tri-rows 0))
 
-(def tri-common-stable-count
+(0011 tri-common-stable-count
   (tri-count-common-stable tri-rows 0))
 
-(def tri-release
+(0011 tri-release
   (tri-release-state tri-rows))
 
-(def tri-report
-  (list
-    (quote trilingual-surface-report)
-    (list (quote entries) (length tri-rows))
-    (list (quote public-semantic-identities) tri-public-count)
-    (list (quote shared-symbolic-identities) tri-symbolic-count)
-    (list
-      (quote uk)
-      (list (quote stable)
-            (tri-count-status tri-rows (quote uk) (quote stable) 0))
-      (list (quote candidate)
-            (tri-count-status tri-rows (quote uk) (quote candidate) 0))
-      (list (quote missing)
-            (tri-count-status tri-rows (quote uk) (quote missing) 0))
-      (list (quote compatibility-only)
+(0011 tri-report
+  (1110
+    (001 trilingual-surface-report)
+    (1110 (001 entries) (000000 tri-rows))
+    (1110 (001 public-semantic-identities) tri-public-count)
+    (1110 (001 shared-symbolic-identities) tri-symbolic-count)
+    (1110
+      (001 uk)
+      (1110 (001 stable)
+            (tri-count-status tri-rows (001 uk) (001 stable) 0))
+      (1110 (001 candidate)
+            (tri-count-status tri-rows (001 uk) (001 candidate) 0))
+      (1110 (001 missing)
+            (tri-count-status tri-rows (001 uk) (001 missing) 0))
+      (1110 (001 compatibility-only)
             (tri-count-status
               tri-rows
-              (quote uk)
-              (quote compatibility-only)
+              (001 uk)
+              (001 compatibility-only)
               0)))
-    (list
-      (quote en)
-      (list (quote stable)
-            (tri-count-status tri-rows (quote en) (quote stable) 0))
-      (list (quote candidate)
-            (tri-count-status tri-rows (quote en) (quote candidate) 0))
-      (list (quote missing)
-            (tri-count-status tri-rows (quote en) (quote missing) 0))
-      (list (quote compatibility-only)
+    (1110
+      (001 en)
+      (1110 (001 stable)
+            (tri-count-status tri-rows (001 en) (001 stable) 0))
+      (1110 (001 candidate)
+            (tri-count-status tri-rows (001 en) (001 candidate) 0))
+      (1110 (001 missing)
+            (tri-count-status tri-rows (001 en) (001 missing) 0))
+      (1110 (001 compatibility-only)
             (tri-count-status
               tri-rows
-              (quote en)
-              (quote compatibility-only)
+              (001 en)
+              (001 compatibility-only)
               0)))
-    (list
-      (quote sa)
-      (list (quote stable)
-            (tri-count-status tri-rows (quote sa) (quote stable) 0))
-      (list (quote candidate)
-            (tri-count-status tri-rows (quote sa) (quote candidate) 0))
-      (list (quote missing)
-            (tri-count-status tri-rows (quote sa) (quote missing) 0))
-      (list (quote compatibility-only)
+    (1110
+      (001 sa)
+      (1110 (001 stable)
+            (tri-count-status tri-rows (001 sa) (001 stable) 0))
+      (1110 (001 candidate)
+            (tri-count-status tri-rows (001 sa) (001 candidate) 0))
+      (1110 (001 missing)
+            (tri-count-status tri-rows (001 sa) (001 missing) 0))
+      (1110 (001 compatibility-only)
             (tri-count-status
               tri-rows
-              (quote sa)
-              (quote compatibility-only)
+              (001 sa)
+              (001 compatibility-only)
               0)))
-    (list
-      (quote trilingual-stable-identities)
+    (1110
+      (001 trilingual-stable-identities)
       tri-common-stable-count
       tri-public-count)
-    (list (quote release-parity) tri-release)))
+    (1110 (001 release-parity) tri-release)))
 
-(def tri-shown
+(0011 tri-shown
   (print tri-report))
 
-(def tri-selected-mode
+(0011 tri-selected-mode
   (tri-mode *argv*))
 
-(cond
-  ((eq tri-selected-mode (quote require-complete))
+(110
+  ((101 tri-selected-mode (001 require-complete))
    (identity-relation same)
-   (cond
-     ((eq tri-release (quote confirmed))
+   (110
+     ((101 tri-release (001 confirmed))
       (identity-relation same)
       tri-report)
-     ((eq tri-release (quote confirmed))
+     ((101 tri-release (001 confirmed))
       (identity-relation distinct)
-      (tri-fail (quote release-parity-open) tri-report))))
-  ((eq tri-selected-mode (quote require-complete))
+      (tri-fail (001 release-parity-open) tri-report))))
+  ((101 tri-selected-mode (001 require-complete))
    (identity-relation distinct)
    tri-report))

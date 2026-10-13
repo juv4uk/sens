@@ -3,12 +3,14 @@
 
 Axiom: the binary key width IS the domain address.
 Checks:
-  1. lib/knowledge.lisp has no bare host truthiness in COND else (001 t)
-  2. Exact D1:1 form (010 (001 ())) is present
-  3. Key surface present (tell-knowledge, module-clauses-now, reason-in)
-  4. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
+  1. lib/knowledge.lisp size >= 1000 and no PLACEHOLDER
+  2. No host COND else (1110 (001 t)
+  3. Exact D1:1 form present
+  4. Key surface: tell-knowledge, module-clauses-now, reason-in
+  5. D1–D10 exact-width tables
 
 Run:
+    python3 scripts/assemble_knowledge.py   # if needed
     python3 scripts/test-knowledge-d1-bitness.py
 """
 from __future__ import annotations
@@ -37,7 +39,12 @@ def check_knowledge() -> list[str]:
         return [f"missing {KNOW.relative_to(ROOT)}"]
     text = KNOW.read_text(encoding="utf-8")
     if len(text) < 1000:
-        errs.append(f"knowledge: file too small ({len(text)} bytes) — run restore-knowledge-d1.py")
+        errs.append(
+            f"knowledge: truncated ({len(text)} bytes) — "
+            "run: python3 scripts/assemble_knowledge.py"
+        )
+    if "PLACEHOLDER" in text:
+        errs.append("knowledge: PLACEHOLDER present — run assemble_knowledge.py")
     if HOST_T in text:
         errs.append("knowledge: host COND else (1110 (001 t) still present")
     if D1_TRUE not in text:
@@ -77,7 +84,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("KNOWLEDGE: PASS — no host COND t, exact D1, surface intact")
+    print("KNOWLEDGE: PASS — full file, no host COND t, exact D1, surface intact")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
