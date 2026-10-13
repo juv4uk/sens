@@ -34,7 +34,9 @@
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
 ; operand is still returned as a value without being reinterpreted as a test.
-(00001010 and rest
+(0011 and
+  (make-macro
+    (0010 rest
   (110
     ((010 rest) (010 ()))
     ((010 (011 rest)) (100 rest))
@@ -56,9 +58,11 @@
                    (111 (001 ())
                      (111 (001 ()) (001 ()))))
                  (001 ())))
-           (001 ()))))))))
+           (001 ()))))))))))
 
-(00001010 or rest
+(0011 or
+  (make-macro
+    (0010 rest
   (110
     ((010 rest) (010 (111 () ())))
     ((010 (011 rest)) (100 rest))
@@ -77,7 +81,7 @@
              (111
                (111 (001 or) (011 rest))
                (001 ())))
-           (001 ())))))))
+           (001 ())))))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
@@ -92,7 +96,7 @@
 ; a real caller needs it, don't build it speculatively now).
 (0011 gensym
   (0010 (prefix)
-    (11101101 (110011110 prefix (11110100 (01011010))))))
+    (11101101 (110011110 prefix (11110100 (mono-ns))))))
 
 (0011 pair
   (0010 (left right)
@@ -198,7 +202,7 @@
   (0010 (values acc)
     (110
       ((0100 (010 values)) acc)
-      ((11110111 (010 values) (001 (0)))
+      ((equal? (010 values) (001 (0)))
        (зворот-до (011 values) (111 (100 values) acc))))))
 
 (0011 reverse-onto зворот-до)
@@ -230,7 +234,7 @@
     (110
       ((0100 (010 values)) (10100 acc))
       ((010 values)  (001 ()))
-      ((11110111 (010 values) (001 (0)))
+      ((equal? (010 values) (001 (0)))
        (map-onto f (011 values) (111 (f (100 values)) acc))))))
 
 (0011 map
@@ -316,14 +320,16 @@
          (100 (011 (100 bindings)))
          (core4-let-values (011 bindings)))))))
 
-(00001010 let (bindings body)
+(0011 let
+  (make-macro
+    (0010 (bindings body)
   (111
     (111
       (001 00001000)
       (111
         (core4-let-parameters bindings)
         (111 body (001 ()))))
-    (core4-let-values bindings)))
+    (core4-let-values bindings)))))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -363,61 +369,22 @@
 (0011 equal?
   (0010 (a b)
     (110
-      ((0100 (010 a))
+      ((010 a)
        (110
-         ((0100 (010 b))
-          (001 (1)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
-       (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
-          (110
-            ((101 a b) 
-             (001 (1)))
-            ((101 a b) 
-             (001 (0)))))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
-       (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (110
-            ((11110111 (100 a) (100 b)) 
-             (11110111 (011 a) (011 b)))
-            ((0100 (11110111 (100 a) (100 b)))
-             (001 (0))))))))))
+         ((010 b) (101 a b))
+         ((010 ()) (010 (001 (0))))))
+      ((010 b) (010 (001 (0))))
+      ((equal? (100 a) (100 b))
+       (equal? (011 a) (011 b)))
+      ((010 ()) (010 (001 (0)))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
-; retain their own result domains, so predicate consumers normalize them here.
-(0011 truthy?
-  (0010 (value)
-    (110
-      
-      ((010 value) 
-       (110
-         ((101 value 0)  (001 ()))
-         ((0100 (101 value 0)) t)))
-      ((010 value) 
-       (110
-         ((11110111 value (001 (0)))  (001 ()))
-         ((11110111 value (001 (0)))  (001 ()))
-         ((11110111 value (001 (0)))  (001 ()))
-         ((010 ())  t))))))
-
+; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
+; D3 COND instead of being coerced through retired host truthiness.
 (0011 not?
   (0010 (value)
     (110
-      ((truthy? value)  (001 ()))
-      ((0100 (truthy? value)) t))))
+      (value (010 (001 (0))))
+      ((010 ()) (010 ())))))
 
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
@@ -449,8 +416,8 @@
       
       ((010 lst) 
        (110
-         ((11110111 item (100 lst))  t)
-         ((0100 (11110111 item (100 lst)))
+         ((equal? item (100 lst))  (010 (001 ())))
+         ((0100 (equal? item (100 lst)))
           (11101 item (011 lst))))))))
 
 (0011 assoc
@@ -459,8 +426,8 @@
       
       ((010 alist) 
        (110
-         ((11110111 key (100 (100 alist)))  (100 alist))
-         ((0100 (11110111 key (100 (100 alist))))
+         ((equal? key (100 (100 alist)))  (100 alist))
+         ((0100 (equal? key (100 (100 alist))))
           (11100 key (011 alist))))))))
 
 
@@ -477,7 +444,9 @@
 
 (0011 pairlis спарувати)
 
-(00001010 let* (bindings body)
+(0011 let*
+  (make-macro
+    (0010 (bindings body)
   ; D3 ATOM повертає точний D1:1 для порожнього списку прив'язок.
   ; Непорожні прив'язки переходять до рекурсивного LET через D1:1 за замовчуванням.
   (110
@@ -492,7 +461,7 @@
                  (111 (111 (001 let*)
                              (111 (011 bindings)
                                    (111 body (001 ()))))
-                       (001 ())))))))
+                       (001 ())))))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -570,7 +539,7 @@
 ; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
 ; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
 ; (власник, 2026-09-26): рядок розбирають лише примітиви string-first
-; (00111111), string-rest (01000000) і string->codepoint (01000101). Не-рядок
+; через точні D9 STRING-FIRST/STRING-REST і D8 CHAR-CODE. Не-рядок
 ; дає природну помилку Type від string-first; неправильна кількість
 ; аргументів — Arity від прив'язки лямбди.
 (0011 string<?
@@ -580,10 +549,10 @@
       ((110011100 b) 
        (1001 (1110 (110011110 a "") (001 ()))))
       ((110011100 a) 
-       (1001 (1110 (110011110 b "") t)))
-      ((11010 (11100000 (110101011 a)) (11100000 (110101011 b)))  t)
+       (1001 (1110 (110011110 b "") (010 (001 ())))))
+      ((11010 (11100000 (110101011 a)) (11100000 (110101011 b)))  (010 (001 ())))
       ((101 (110101011 a) (110101011 b)) 
-       (10110001 (110011101 a) (110011101 b)))
+       (string<? (110011101 a) (110011101 b)))
       )))
 
 
@@ -716,9 +685,9 @@
       ((0100 (010 remaining)) 1)
       ((11010 current (100 remaining)) 
        (nondecreasing-from? (100 remaining) (011 remaining)))
-      ((11110111 current (100 remaining)) 
+      ((equal? current (100 remaining)) 
        (nondecreasing-from? (100 remaining) (011 remaining)))
-      ((0100 (11110111 current (100 remaining))) 0))))
+      ((0100 (equal? current (100 remaining))) 0))))
 
 (0011 nonincreasing-from?
   (0010 (current remaining)
@@ -726,9 +695,9 @@
       ((0100 (010 remaining)) 1)
       ((11011 current (100 remaining)) 
        (nonincreasing-from? (100 remaining) (011 remaining)))
-      ((11110111 current (100 remaining)) 
+      ((equal? current (100 remaining)) 
        (nonincreasing-from? (100 remaining) (011 remaining)))
-      ((0100 (11110111 current (100 remaining))) 0))))
+      ((0100 (equal? current (100 remaining))) 0))))
 
 (0011 <=
   (0010 (first . remaining)
@@ -771,7 +740,7 @@
       ((101 n 0) 
        (number->string-onto
          (10111 n #d10)
-         (110011110 (01000111 (00101100 n #d10)) acc))))))
+         (110011110 (digit->string (00101100 n #d10)) acc))))))
 
 (0011 number->string
   (0010 (n)
@@ -799,7 +768,9 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(00001010 -> forms
+(0011 ->
+  (make-macro
+    (0010 forms
   (110
     
     ((010 forms) 
@@ -818,9 +789,11 @@
           (110
             ((0100 (010 rest)) step)
             ((010 rest) 
-             (111 (001 ->) (111 step rest))))))))))
+             (111 (001 ->) (111 step rest))))))))))))
 
-(00001010 ->> forms
+(0011 ->>
+  (make-macro
+    (0010 forms
   (110
     
     ((010 forms) 
@@ -839,7 +812,7 @@
           (110
             ((0100 (010 rest)) step)
             ((010 rest) 
-             (111 (001 ->>) (111 step rest))))))))))
+             (111 (001 ->>) (111 step rest))))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -856,8 +829,8 @@
 (0011 sqrt-iter
   (0010 (guess x n)
     (110
-      ((11110111 n 0)  guess)
-      ((0100 (11110111 n 0))
+      ((equal? n 0)  guess)
+      ((0100 (equal? n 0))
        (sqrt-iter (11110110 (01010 guess (11110110 x guess)) 2) x (01011 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
@@ -879,11 +852,11 @@
   (0010 (x)
     (110
       ((11010 x 0)  (001 ()))
-      ((11110111 x 0)  0)
-      ((11110111 x (10111 x 1)) 
+      ((equal? x 0)  0)
+      ((equal? x (10111 x 1)) 
        (let ((r (110111010 x)))
          (110
-           ((11110111 (10110 r r) x)  r)
+           ((equal? (10110 r r) x)  r)
            ((010 ())  (sqrt-iter (11110110 x 2) x 8)))))
       ((010 ())  (sqrt-iter (11110110 x 2.0) x 5)))))
 
@@ -948,9 +921,9 @@
       ((010 items) 
        (let ((rest-min (000010 (011 items))))
          (110
-           ((11110111 rest-min (001 ())) 
+           ((equal? rest-min (001 ())) 
             (100 items))
-           ((0100 (11110111 rest-min (001 ())))
+           ((0100 (equal? rest-min (001 ())))
             (110
               ((11010 (100 items) rest-min)  (100 items))
               ((0100 (11010 (100 items) rest-min)) rest-min)))))))))
@@ -962,9 +935,9 @@
       ((010 items) 
        (let ((rest-max (000011 (011 items))))
          (110
-           ((11110111 rest-max (001 ())) 
+           ((equal? rest-max (001 ())) 
             (100 items))
-           ((0100 (11110111 rest-max (001 ())))
+           ((0100 (equal? rest-max (001 ())))
             (110
               ((11011 (100 items) rest-max)  (100 items))
               ((0100 (11011 (100 items) rest-max)) rest-max)))))))))
@@ -1058,7 +1031,9 @@
          (100 peers)
          (my-postcore-build-definitions source (011 peers)))))))
 
-(00001010 my-postcore-materialize-stable-peers args
+(0011 my-postcore-materialize-stable-peers
+  (make-macro
+    (0010 args
   (001001 ((semantic-id (100 args))
              (source (1001 args))
              (group (my-postcore-peer-group
@@ -1067,7 +1042,7 @@
       ((010 group) source)
       ((010 (001 ()))
        (my-postcore-build-definitions source
-         (my-postcore-missing-peers source (011 group) (11100111)))))))
+         (my-postcore-missing-peers source (011 group) (11100111)))))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (0011 divmod
@@ -1078,7 +1053,7 @@
 (0011 null?
   (0010 (x)
     (110
-      ((0100 (010 x)) t)
+      ((0100 (010 x)) (010 (001 ())))
       ((010 x)  (001 ()))
       ((010 x)  (001 ())))))
 

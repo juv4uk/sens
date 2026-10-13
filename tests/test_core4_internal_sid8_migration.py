@@ -1,47 +1,41 @@
 #!/usr/bin/env python3
-"""Побайтовий доказ вузької міграції внутрішніх викликів Core4.
-
-Історичні 8-бітні внутрішні SID не мають власного ратифікованого
-доменного викличного закону. Визначені в Lisp функції викликаються за
-їхнім ім'ям у тому самому завантаженому середовищі. Це source witness,
-не повний доказ runtime-parity.
-"""
+"""Core4 width-firewall: 2046 residents, exact domains, no retired executable heads."""
 from __future__ import annotations
 
 from collections import Counter
-import hashlib
 import importlib.util
 from pathlib import Path
+import re
 import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/core4.lisp"
-OLD_BLOB = "38c9c6d7f325f60105988596138d51a1238b68b0"
-MIGRATED = {
-    "00011111": "nondecreasing-from?",
-    "00100000": "nonincreasing-from?",
-}
-CURRENT_DEFINE = "0011"   # D4 DEFINE, not legacy W8 00001001
-CURRENT_LAMBDA = "0010"   # D4 LAMBDA
-CURRENT_COND = "110"      # D3 COND
+DOMAIN_DIR = ROOT / "lib/domains"
 
-spec = importlib.util.spec_from_file_location(
-    "_core4_exact_ast", ROOT / "scripts/cond-modernize.py"
-)
+spec = importlib.util.spec_from_file_location("_core4_ast", ROOT / "scripts/cond-modernize.py")
 if spec is None or spec.loader is None:
-    raise RuntimeError("AST parser is unavailable")
+    raise RuntimeError("AST parser unavailable")
 parser = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = parser
 spec.loader.exec_module(parser)
 
-
-def git_blob(data: bytes) -> str:
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+FORBIDDEN_ACTIVE = {
+    "00001010",  # historical W8 DEFMACRO
+    "01000111",  # historical internal DIGIT->STRING slot
+    "01011010",  # historical MONO-NS slot
+    "11110111",  # historical structural EQUAL slot
+    "10110001",  # historical recursive STRING< slot
+}
+D9_REQUIRED = {
+    "110011100": "STRING-EMPTY?",
+    "110011101": "STRING-REST",
+    "110011110": "STRING-APPEND",
+    "110101011": "STRING-FIRST",
+}
 
 
 def active_heads(source: str) -> Counter:
-    """Лише виконувані голови: цитата/рядок/коментар не виклик."""
     counts: Counter = Counter()
     stack = list(parser.parse(source))
     while stack:
@@ -57,63 +51,105 @@ def active_heads(source: str) -> Counter:
     return counts
 
 
-def require_core4_invariants(source: str) -> None:
-    forms = parser.parse(source)
-    head_counts = active_heads(source)
-    for old, name in MIGRATED.items():
-        if head_counts[old] != 0:
-            raise ValueError("застаріла виконувана SID8-голова: " + old)
-        if head_counts[name] != 3:
-            raise ValueError("порушений лічильник Lisp-голови " + name)
-        matching = [
-            form for form in forms
-            if form.children
-            and form.children[0].atom == CURRENT_DEFINE
-            and len(form.children) >= 3
-            and form.children[1].atom == name
-            and form.children[2].children
-            and form.children[2].children[0].atom == CURRENT_LAMBDA
-        ]
-        if len(matching) != 1:
-            raise ValueError("відсутнє D4-визначення " + name)
-    if head_counts[CURRENT_COND] < 1:
-        raise ValueError("втрачено D3 COND")
+def active_atoms(source: str) -> list[str]:
+    atoms: list[str] = []
+    stack = list(parser.parse(source))
+    while stack:
+        node = stack.pop()
+        if node.opaque:
+            continue
+        if node.atom is not None:
+            atoms.append(node.atom)
+            continue
+        if not node.children:
+            continue
+        head = node.children[0].atom
+        if head in {"001", "00000001", "quote"}:
+            if head is not None:
+                atoms.append(head)
+            continue
+        stack.extend(node.children)
+    return atoms
 
 
-class Core4InternalCutover(unittest.TestCase):
+def domain_rows(width: int) -> dict[str, str]:
+    text = (DOMAIN_DIR / f"d{width}.lisp").read_text(encoding="utf-8")
+    rows: dict[str, str] = {}
+    for line in text.splitlines():
+        m = re.match(rf"^\s*\(([01]{{{width}}})\s+", line)
+        if not m:
+            continue
+        lisp = re.search(r"\(LISP\s+(\(\)|[^()\s]+)\)", line)
+        if lisp is None:
+            raise ValueError(f"D{width} malformed LISP field at {m.group(1)}")
+        rows[m.group(1)] = lisp.group(1)
+    return rows
+
+
+def verify(source: str) -> None:
+    heads = active_heads(source)
+    if "t" in active_atoms(source):
+        raise ValueError("Core4 still contains executable host truth T")
+    for head in FORBIDDEN_ACTIVE:
+        if heads[head]:
+            raise ValueError("forbidden migrated head survived: " + head)
+
+    d8 = domain_rows(8)
+    for head in heads:
+        if len(head) == 8 and set(head) <= {"0", "1"} and head not in d8:
+            raise ValueError("active 8-bit head is not a D8 resident: " + head)
+
+    d9 = domain_rows(9)
+    for bits, name in D9_REQUIRED.items():
+        if heads[bits] < 1:
+            raise ValueError(f"Core4 lost exact D9 head {bits} {name}")
+        if d9.get(bits) != name:
+            raise ValueError(f"D9 authority drift: {bits} -> {d9.get(bits)!r}, expected {name}")
+
+    if heads["mono-ns"] != 1:
+        raise ValueError("Core4 must retain exactly one honest MONO-NS mechanism boundary")
+    if domain_rows(10).get("0011110110") != "MONO-NS":
+        raise ValueError("D10 MONO-NS authority drifted")
+
+
+class Core4WidthFirewall(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_exact_six_head_migration_and_no_other_byte_changes(self):
-        restored = self.source
-        for old, name in MIGRATED.items():
-            restored = restored.replace("(" + name + " ", "(" + old + " ")
-        self.assertEqual(git_blob(restored.encode("utf-8")), OLD_BLOB)
-        for old, name in MIGRATED.items():
-            self.assertEqual(restored.count("(" + old + " "), 3)
-            self.assertEqual(self.source.count("(" + name + " "), 3)
+    def test_all_2046_d1_d10_residents_are_dense_exact_width(self):
+        total = 0
+        for width in range(1, 11):
+            rows = domain_rows(width)
+            expected = {f"{n:0{width}b}" for n in range(1 << width)}
+            self.assertEqual(set(rows), expected, f"D{width} must be complete exact-width authority")
+            total += len(rows)
+        self.assertEqual(total, 2046)
 
-    def test_existing_lisp_defined_functions_replace_legacy_internal_slots(self):
-        require_core4_invariants(self.source)
+    def test_core4_obeys_domain_width_firewall(self):
+        verify(self.source)
 
-    def test_negative_old_internal_slot_is_rejected(self):
-        mutated = self.source.replace("(nondecreasing-from? ", "(00011111 ", 1)
-        with self.assertRaisesRegex(ValueError, "застаріла"):
-            require_core4_invariants(mutated)
+    def test_seven_macros_are_language_owned_not_w8_defmacro(self):
+        heads = active_heads(self.source)
+        self.assertEqual(heads["00001010"], 0)
+        self.assertEqual(heads["make-macro"], 7)
+        for name in ["and", "or", "let", "let*", "->", "->>", "my-postcore-materialize-stable-peers"]:
+            self.assertIn(f"(0011 {name}", self.source)
 
-    def test_negative_missing_D4_definition_is_rejected(self):
-        mutated = self.source.replace(
-            "(0011 nonincreasing-from?", "(0011 disallowed-rename", 1
-        )
-        with self.assertRaisesRegex(ValueError, "відсутнє"):
-            require_core4_invariants(mutated)
+    def test_negative_old_macro_head_is_rejected(self):
+        mutated = self.source.replace("(0011 and", "(00001010 and", 1)
+        with self.assertRaisesRegex(ValueError, "forbidden migrated head"):
+            verify(mutated)
 
-    def test_quoted_old_words_are_not_executable_heads(self):
-        quoted = "(001 (00011111 x)) (quote (00100000 y))"
-        counts = active_heads(quoted)
-        self.assertEqual(counts["00011111"], 0)
-        self.assertEqual(counts["00100000"], 0)
+    def test_negative_cross_width_collision_is_rejected(self):
+        mutated = self.source.replace("(110101011 ", "(11100000 ", 1)
+        with self.assertRaisesRegex(ValueError, "lost exact D9"):
+            verify(mutated)
+
+    def test_negative_host_truth_is_rejected(self):
+        mutated = self.source.replace("(010 (001 ()))", "t", 1)
+        with self.assertRaisesRegex(ValueError, "host truth"):
+            verify(mutated)
 
 
 if __name__ == "__main__":

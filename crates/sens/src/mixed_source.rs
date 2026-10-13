@@ -468,7 +468,18 @@ pub fn parse_mixed_exact_domain_core_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+
+    // Core4 is owner-pinned semantic source. Materialize only admitted D8
+    // direct mechanisms and exact D9 residents here; ordinary source parsing
+    // never gains width inference from this migration bridge.
+    let parsed = parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .collect::<Result<Vec<_>, _>>()?;
+    parsed
+        .into_iter()
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .collect()
 }
 
 fn parse_mixed_source(
