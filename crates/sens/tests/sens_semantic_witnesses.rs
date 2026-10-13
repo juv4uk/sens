@@ -125,3 +125,79 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
         );
     }
 }
+
+
+const WORLD_LIBRARY: &str = include_str!("../../../lib/world.lisp");
+const WORLD_EXACT_ARITY_BINARY: &str =
+    include_str!("../../../tests/semantic/world-exact-arity-structure.bits");
+const WORLD_EXACT_ARITY_WITNESS: &str =
+    include_str!("../../../tests/semantic/world-exact-arity-witness.lisp");
+
+/// Semantic answers live in executable SENS witnesses; Rust only loads the
+/// library and accepts exact D1 YES from each self-verdict.
+#[test]
+fn world_exact_snapshot_shape_binary_self_verdict() {
+    assert!(
+        WORLD_EXACT_ARITY_BINARY.bytes().all(|byte|
+            matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
+        ),
+        "structural arity law must be written as canonical binary SENS"
+    );
+
+    let binary_forms = parse_canonical_binary(WORLD_EXACT_ARITY_BINARY)
+        .expect("exact D1/D3/D4 binary world-shape witness");
+    assert_eq!(binary_forms.len(), 3, "three binary arity self-verdicts");
+
+    let mut session = Session::default();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("Core library must load");
+    load_reasoning(&mut session, "lib/world.lisp", WORLD_LIBRARY);
+
+    for (index, form) in binary_forms.iter().enumerate() {
+        let outcome = eval_parsed_expressions(
+            std::slice::from_ref(form),
+            &mut session,
+        )
+        .unwrap_or_else(|error| panic!(
+            "binary world arity witness {} failed to execute: {error:?}",
+            index + 1
+        ))
+        .value;
+        assert_eq!(
+            outcome.as_predicate_bit(),
+            Some(true),
+            "binary world arity witness {} must return exact D1 YES: {outcome}",
+            index + 1
+        );
+    }
+
+    // world? is a source-local Lisp binding, not a ratified callable D10
+    // identity. Exercise it by its language binding rather than forging a
+    // wider identity; built-in primitive heads remain exact D3/D1 coordinates.
+    // Each row compares actual and expected D1 answers inside SENS, so the
+    // host only transports the final YES verdict.
+    let direct_forms = sens::parse_mixed_exact_domain(WORLD_EXACT_ARITY_WITNESS)
+        .expect("SENS-owned world? exact-arity witness must parse");
+    assert_eq!(direct_forms.len(), 7, "seven SENS-owned world shape cases");
+    for (index, form) in direct_forms.iter().enumerate() {
+        let outcome = eval_parsed_expressions(
+            std::slice::from_ref(form),
+            &mut session,
+        )
+        .unwrap_or_else(|error| panic!(
+            "SENS world? self-verdict {} failed to execute: {error:?}",
+            index + 1
+        ))
+        .value;
+        assert_eq!(
+            outcome.as_predicate_bit(),
+            Some(true),
+            "SENS world? self-verdict {} must return exact D1 YES: {outcome}",
+            index + 1
+        );
+    }
+}
