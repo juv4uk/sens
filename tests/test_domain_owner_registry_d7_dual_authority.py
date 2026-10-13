@@ -75,7 +75,10 @@ class D7DualAuthorityTests(unittest.TestCase):
                     GENERATOR.validate_d7_dual_authority(D7_V1, mutant)
 
         wrong_ascii = deepcopy(D7_V2)
-        wrong_ascii["table"][0]["ascii"] = wrong_ascii["table"][1]["ascii"]
+        wrong_ascii["table"][0]["ascii"], wrong_ascii["table"][1]["ascii"] = (
+            wrong_ascii["table"][1]["ascii"],
+            wrong_ascii["table"][0]["ascii"],
+        )
         with self.assertRaisesRegex(ValueError, "ASCII projection"):
             GENERATOR.validate_d7_dual_authority(D7_V1, wrong_ascii)
 
