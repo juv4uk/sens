@@ -160,6 +160,9 @@ jobs:
           cargo test -p sens --lib \
             compiler_bootstrap::tests::compiler_evidence_decoder_fails_closed_on_malformed_bytes \
             -- --nocapture
+          cargo test --locked -p sens --lib \
+            compiler_bootstrap::tests::compiler_evidence_exhaustive_2046_coordinates_exact_width \
+            -- --exact --nocapture
 
       - name: Verified whole-program compiler artifact seam
         run: |
