@@ -248,14 +248,13 @@
 (0011 filter-onto
   (0010 (predicate values acc)
     (110
-      ((0100 (010 values)) (10100 acc))
-      ((010 values)  (10100 acc))
-      ((010 values) 
+      ((0101 values) (10100 acc))
+      ((0100 (010 values))
        (let ((decision (predicate (100 values))))
          (110
            (decision
             (filter-onto predicate (011 values) (111 (100 values) acc)))
-           ((010 predicate)
+           ((not? decision)
             (filter-onto predicate (011 values) acc))))))))
 
 (0011 filter

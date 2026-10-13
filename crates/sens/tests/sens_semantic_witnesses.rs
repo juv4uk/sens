@@ -152,3 +152,24 @@ fn epistemic_d1_shortening_binary_sens_self_verdict() {
         );
     }
 }
+
+const FILTER_CORE4_LAW: &str =
+    include_str!("../../../tests/semantic/filter-core4-d4-law.bits");
+
+/// Mechanical runner only: the complete filter law and failure path live in binary SENS.
+#[test]
+fn core4_filter_exact_binary_sens_self_verdict() {
+    assert!(
+        FILTER_CORE4_LAW
+            .bytes()
+            .all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+        "filter law must be exact binary SENS source"
+    );
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("current Core4 must load");
+    let forms = parse_canonical_binary(FILTER_CORE4_LAW)
+        .expect("canonical D2 framing with exact D1/D3/D4/D6/D7 words");
+    assert_eq!(forms.len(), 1, "one executable SENS self-verdict");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("binary SENS filter law must self-verify");
+}

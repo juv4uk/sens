@@ -363,38 +363,27 @@
 (0011 equal?
   (0010 (a b)
     (110
-      ((0100 (010 a))
+      ; Empty list is data, not a predicate answer: compare it before atoms/pairs.
+      ((0101 a)
        (110
-         ((0100 (010 b))
-          (001 (1)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
+         ((0101 b) (001 (1)))
+         ((010 (001 ())) (001 (0)))))
+      ((0101 b) (001 (0)))
+      ((010 a)
        (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
+         ((010 b)
           (110
-            ((101 a b) 
-             (001 (1)))
-            ((101 a b) 
-             (001 (0)))))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
+            ((101 a b) (001 (1)))
+            ((0100 (101 a b)) (001 (0)))))
+         ((010 (001 ())) (001 (0)))))
+      ((010 b) (001 (0)))
+      ; Both remaining values are nonempty pairs. Compare heads, then tails.
+      ((010 (001 ()))
        (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (110
-            ((11110111 (100 a) (100 b)) 
-             (11110111 (011 a) (011 b)))
-            ((0100 (11110111 (100 a) (100 b)))
-             (001 (0))))))))))
+         ((equal? (100 a) (100 b))
+          (equal? (011 a) (011 b)))
+         ((0100 (equal? (100 a) (100 b)))
+          (001 (0))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.

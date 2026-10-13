@@ -20,3 +20,11 @@ layer. Its executable heads include exact D9 `RESULT-TAGGED?` and
 If either the true or false result law is wrong, SENS takes an intentionally
 non-callable D1 branch and rejects its own witness. The host runner therefore
 does not need an expected semantic value.
+
+`filter-core4-d4-law.bits` is a binary SENS self-verdict for Core4's
+Lisp-owned `filter`. D6 FILTER applies D3 ATOM to a quoted list containing
+D3 identities `001`, nested `(010)`, and `011`. The program checks its
+first result with D3 EQ, its second item through CAR/CDR, and the exact end
+with D4 NULL. A failed membership, order, or length check calls the
+deliberately unbound `filter-law-fail` head. It never calls the non-callable
+D8 EQUAL identity, and no host language contains the expected list.
