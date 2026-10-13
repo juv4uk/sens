@@ -6,6 +6,7 @@ on:
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_migrate_one_to_sens.py'
+      - 'tests/test_migrate_one_exact_domain_witness.py'
       - '.github/workflows/migrate-one-to-sens.yml'
   push:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_migrate_one_to_sens.py'
+      - 'tests/test_migrate_one_exact_domain_witness.py'
       - '.github/workflows/migrate-one-to-sens.yml'
   workflow_dispatch:
 permissions:
@@ -28,6 +30,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
+      - name: D1–D10 exhaustive 2046 and adversarial upstream witnesses
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_migrate_one_exact_domain_witness.py' -v
       - name: Show canonical physical canary (read-only, no publication)
         run: |
           set -euo pipefail
