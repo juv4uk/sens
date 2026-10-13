@@ -22,8 +22,11 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Candidate-S focused tests
-        run: cargo test -p sens outer_envelope::tests --lib
+      - name: Candidate-S exhaustive 2046 coordinates and independent golden bytes
+        run: cargo test --locked -p sens --lib outer_envelope::tests::exact_2046_candidate_census_and_independent_byte_golden_vectors
+
+      - name: Candidate-S focused tests (existing suite unchanged)
+        run: cargo test --locked -p sens outer_envelope::tests --lib
 
       - name: Candidate-S no-warning compile
         env:
