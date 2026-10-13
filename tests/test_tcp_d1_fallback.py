@@ -1,132 +1,118 @@
 #!/usr/bin/env python3
-"""AST-pinned TCP D1 cutover witness independent of unrelated header/loader edits.
+"""Лише механічні координати/AST; SENS-твердження живуть у binary fixture.
 
-Historical cutover: D4 NOT(D3 EQ(...)) -> D3 ATOM(D3 QUOTE EMPTY) as
-the fallback test after the first successful decoder-tag branch. Do NOT
-assert whole-source byte equality across later, independently reviewed changes.
+Не оцінює логіку TCP, не задає truth table, не визначає семантику D1.
+Уся семантика: tests/fixtures/semantic/tcp-exact-selftest.lisp.
 """
 from pathlib import Path
-import copy
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/tcp.lisp"
-OLD = "(0100 (101 (100 decoded) (001 decoded)))"
-NEW = "(010 (001 ()))"
+WITNESS = ROOT / "tests/fixtures/semantic/tcp-exact-selftest.lisp"
+TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|\(|\)|[^\s()";]+')
 
 
-def tokens(source):
-    return [m.group(0) for m in re.finditer(
-        r'"(?:\\.|[^"\\])*"|;[^\n]*|\(|\)|[^\s()";]+', source)
-        if not m.group(0).startswith(";")]
-
-
-def parse(source):
+def forms(source: str):
     stack = [[]]
-    for token in tokens(source):
-        if token == "(":
+    for match in TOKEN.finditer(source):
+        value = match.group()
+        if value.startswith(";"):
+            continue
+        if value == "(":
             child = []
             stack[-1].append(child)
             stack.append(child)
-        elif token == ")":
-            if len(stack) < 2:
-                raise ValueError("unbalanced close")
+        elif value == ")":
+            if len(stack) == 1:
+                raise ValueError("надлишкова закривальна дужка")
             stack.pop()
         else:
-            stack[-1].append(token)
+            stack[-1].append(value)
     if len(stack) != 1:
-        raise ValueError("unbalanced open")
+        raise ValueError("незавершена форма")
     return stack[0]
 
 
-def tcp_text_policy(source):
-    roots = parse(source)
-    defs = {x[1]: x for x in roots
-            if isinstance(x, list) and len(x) >= 3 and x[0] == "0011"}
-    if len(defs) != 7:
-        raise ValueError("TCP must retain seven Lisp-owned entrypoints")
-    method = defs["tcp-read-bytes->text"]
-    expected = [
-        "0011", "tcp-read-bytes->text",
-        ["0010", ["bytes"],
-         ["001000", [["decoded", ["utf8-decode-string", "bytes"]]],
-          ["110",
-           [["101", ["100", "decoded"], ["001", "decoded"]],
-            ["1001", "decoded"]],
-           [["010", ["001", []]], "decoded"]]]]]
-    if method != expected:
-        raise ValueError("TCP dispatcher changed: expected two-branch exact D3/D1 policy")
-    # Rebuild the sole historical branch and compare all remaining AST nodes.
-    # Replace the executable AST node, not a textual comment that mentions
-    # the same D3 expression. This migration guard is intentionally AST-aware.
-    prior = copy.deepcopy(method)
-    prior[2][2][2][2][0] = [
-        "0100", ["101", ["100", "decoded"], ["001", "decoded"]]]
-    old_method = [
-        "0011", "tcp-read-bytes->text",
-        ["0010", ["bytes"],
-         ["001000", [["decoded", ["utf8-decode-string", "bytes"]]],
-          ["110",
-           [["101", ["100", "decoded"], ["001", "decoded"]],
-            ["1001", "decoded"]],
-           [["0100", ["101", ["100", "decoded"], ["001", "decoded"]]],
-            "decoded"]]]]]
-    if prior != old_method:
-        raise ValueError("historical one-branch reconstruction failed")
-    return defs
+def exact_domains():
+    rows = []
+    for width in range(1, 11):
+        path = ROOT / "lib/domains" / f"d{width}.lisp"
+        keys = re.findall(r"(?m)^\s*\(([01]+)\s+\(ук\s", path.read_text(encoding="utf-8"))
+        rows.append((width, keys))
+    return rows
 
 
-def domain_rows(width):
-    source = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
-    return re.findall(r"(?m)^\s*\(([01]+)\s+\(ук\s", source)
+class TcpMechanicalDomainCensus(unittest.TestCase):
+    def test_all_2046_coordinates_retain_exact_domain_width(self):
+        total, meaningful_bits = 0, 0
+        for width, words in exact_domains():
+            self.assertEqual(len(words), 1 << width, f"D{width} resident count")
+            self.assertEqual(len(set(words)), 1 << width, f"D{width} uniqueness")
+            self.assertEqual(
+                set(words),
+                {format(value, f"0{width}b") for value in range(1 << width)},
+                f"D{width} leading zeros/width",
+            )
+            total += len(words)
+            meaningful_bits += width * len(words)
+        self.assertEqual((total, meaningful_bits), (2046, 18434))
 
-
-class TcpD1ExhaustiveFallback(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.source = SOURCE.read_text(encoding="utf-8")
-
-    def test_historical_one_branch_semantics_preserved_after_other_edits(self):
-        self.assertNotIn(OLD, self.source)
-        defs = tcp_text_policy(self.source)
+    def test_two_tcp_bindings_use_unambiguous_d4_heads(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        tree = forms(source)
+        self.assertEqual(len(tree), 7)
+        defs = {definition[1]: definition for definition in tree}
         self.assertEqual(len(defs), 7)
-        print("TCP-D1: bounded original D4 NOT(EQ) branch -> "
-              "D3 ATOM(QUOTE EMPTY) fallback; all other policy AST nodes unchanged")
+        for name in ("tcp-read-bytes->text", "tcp-write-via-raw"):
+            outer = defs[name]
+            self.assertEqual(outer[0], "0011")
+            self.assertEqual(outer[2][0], "0010")
+            application = outer[2][2]
+            self.assertEqual(len(application), 2)
+            closure = application[0]
+            self.assertEqual(closure[0], "0010")
+            self.assertEqual(len(closure[1]), 1)
+            self.assertEqual(len(closure), 3)
+        self.assertNotIn("(001000 ", source)
+        self.assertNotIn("(00001000 ", source)
 
-    def test_all_domain_widths_and_coordinates_are_stable(self):
-        for width in range(1, 11):
-            keys = domain_rows(width)
-            self.assertEqual(len(keys), 1 << width, f"D{width} missing resident")
-            self.assertEqual(len(set(keys)), len(keys), f"D{width} duplicate coordinate")
-            self.assertEqual(set(keys), {f"{n:0{width}b}" for n in range(1 << width)})
-        self.assertIn("010", domain_rows(3))
-        self.assertIn("001", domain_rows(3))
-        self.assertIn("101", domain_rows(3))
-        self.assertIn("0100", domain_rows(4))
+    def test_sens_fixture_heads_preserve_exact_width_and_no_named_calls(self):
+        source = WITNESS.read_text(encoding="utf-8")
+        tree = forms(source)
+        self.assertEqual(len(tree), 1)
+        heads = []
 
-    def test_semantic_code_heads_save_seven_bits(self):
-        former, current = (4+3+3+3), (3+3)
-        self.assertEqual((former, current, former-current), (13,6,7))
-        print("TCP-D1: function heads 13 -> 6 bits; physical T5 not measured")
+        def visit(node, quoted=False):
+            if not isinstance(node, list) or not node:
+                return
+            head = node[0]
+            if not quoted:
+                if isinstance(head, str) and set(head) <= {"0", "1"}:
+                    heads.append(head)
+                elif isinstance(head, list):
+                    visit(head)
+                else:
+                    raise AssertionError(f"небінарна виконувана голова: {head!r}")
+            quote = head == "001"
+            for arg in node[1:]:
+                if isinstance(arg, list):
+                    visit(arg, quoted or quote)
 
-    def test_exhaustive_two_value_d1_law(self):
-        for equality in (False,True):
-            previous = "text" if equality else ("fallback" if not equality else "missing")
-            current = "text" if equality else "fallback"
-            self.assertEqual(current, previous)
+        visit(tree[0])
+        self.assertIn("110", heads)
+        self.assertIn("0010", heads)
+        self.assertIn("11110111", heads)
+        self.assertIn("001101001", heads)
+        self.assertTrue(all(1 <= len(h) <= 9 for h in heads))
 
-    def test_mutations_are_rejected(self):
-        tcp_text_policy(self.source)
-        for altered in (
-            self.source.replace("("+NEW, "((1)", 1),
-            self.source.replace("("+NEW, "((0100 (001 ()))", 1),
-            self.source.replace("("+NEW, "((010 (001 (0)))", 1),
-            self.source.replace("("+NEW, "((001 ())", 1),
-            self.source.replace("(1001 decoded)", "decoded", 1),
-        ):
-            with self.assertRaises(ValueError):
-                tcp_text_policy(altered)
+    def test_width_mutation_never_becomes_valid_same_domain_code(self):
+        words = {width: set(rows) for width, rows in exact_domains()}
+        self.assertIn("001101001", words[9])
+        self.assertNotIn("001101001"[:-1], words[9])
+        self.assertIn("0010", words[4])
+        self.assertNotIn("0010"[:-1], words[4])
 
 
 if __name__ == "__main__":
