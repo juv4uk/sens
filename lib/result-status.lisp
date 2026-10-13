@@ -172,7 +172,7 @@
             (make-proved goal positive-results))
            ((0100 (010 opposite-results))
             (make-proved opposite opposite-results))
-           ((010 (001 ())) (001 ())))))))))
+           ((010 (001 ())) (001 ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
