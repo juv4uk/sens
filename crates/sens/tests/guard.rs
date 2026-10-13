@@ -317,8 +317,11 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 fn guard_reference_field_uses_existing_assoc_under_exact_d4_lambda() {
     assert!(!GUARD_SOURCE.contains("(001000 "));
     assert!(!GUARD_SOURCE.contains("(11100 "));
-    assert!(GUARD_SOURCE.contains("(assoc field (011 reference))"));
-    assert!(GUARD_SOURCE.contains("((0010 (entry)"));
+    assert!(GUARD_SOURCE.contains("(guard-reference-field-onto field (011 reference))"));
+    assert!(GUARD_SOURCE.contains("(101 field (100 (100 entries)))"));
+    assert!(GUARD_SOURCE.contains("(0101 entries)"));
+    assert!(!GUARD_SOURCE.contains("(assoc field"));
+    assert!(!GUARD_SOURCE.contains("(11110111"));
     let start = GUARD_SOURCE
         .find("(0011 guard-reference-field")
         .expect("Lisp-owned guard-reference-field must exist");
