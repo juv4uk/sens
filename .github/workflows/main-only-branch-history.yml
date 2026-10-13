@@ -1,7 +1,8 @@
 name: SENS main-only branch history census
 
+# КАРАНТИН АВТОЗАПУСКІВ 2026-10-13: лише один точковий автоматичний SENS-свідок.
+# Історичний аудит гілок збережено для ручного розслідування, не запускається на create.
 on:
-  create:
   workflow_dispatch:
 
 permissions:
