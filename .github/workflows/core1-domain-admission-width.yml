@@ -1,0 +1,22 @@
+name: Core1 — точна бітність допущених доменних слів
+
+on:
+  pull_request:
+    paths:
+      - "lib/core1.lisp"
+      - "lib/domains/d*.lisp"
+      - "tests/test_core1_domain_admission_width.py"
+      - ".github/workflows/core1-domain-admission-width.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-domain-source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Позитивні та негативні перевірки бітності Core1 і D1–D10
+        run: python3 -m unittest discover -s tests -p 'test_core1_domain_admission_width.py' -v
