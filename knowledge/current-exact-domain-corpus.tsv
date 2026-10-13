@@ -1,18 +1,18 @@
 domain	width	word	status	role	authority_ref	normative_source	mechanism_status
-D1	1	0	admitted	NO	#1699	knowledge/d1-d7-foundation.json	separate-not-projected
-D1	1	1	admitted	YES	#1699	knowledge/d1-d7-foundation.json	separate-not-projected
-D2	2	00	admitted	SEPARATOR	#1702	knowledge/d1-d7-foundation.json	separate-not-projected
-D2	2	01	admitted	CLOSE	#1702	knowledge/d1-d7-foundation.json	separate-not-projected
-D2	2	10	admitted	OPEN	#1702	knowledge/d1-d7-foundation.json	separate-not-projected
-D2	2	11	admitted	DOT	#1702	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	000	admitted	EMPTY	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	001	admitted	QUOTE	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	010	admitted	ATOM	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	011	admitted	CDR	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	100	admitted	CAR	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	101	admitted	EQ	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	110	admitted	COND	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
-D3	3	111	admitted	CONS	#3202	knowledge/d1-d7-foundation.json	separate-not-projected
+D1	1	0	admitted	NO	#1699	knowledge/d1-d6-foundation.json	separate-not-projected
+D1	1	1	admitted	YES	#1699	knowledge/d1-d6-foundation.json	separate-not-projected
+D2	2	00	admitted	SEPARATOR	#1702	knowledge/d1-d6-foundation.json	separate-not-projected
+D2	2	01	admitted	CLOSE	#1702	knowledge/d1-d6-foundation.json	separate-not-projected
+D2	2	10	admitted	OPEN	#1702	knowledge/d1-d6-foundation.json	separate-not-projected
+D2	2	11	admitted	DOT	#1702	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	000	admitted	EMPTY	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	001	admitted	QUOTE	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	010	admitted	ATOM	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	011	admitted	CDR	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	100	admitted	CAR	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	101	admitted	EQ	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	110	admitted	COND	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
+D3	3	111	admitted	CONS	#3202	knowledge/d1-d6-foundation.json	separate-not-projected
 D4	4	0000	admitted	APPLY	#3272	knowledge/d4-cleanroom.json	separate-not-projected
 D4	4	0001	admitted	EVAL	#3272	knowledge/d4-cleanroom.json	separate-not-projected
 D4	4	0010	admitted	LAMBDA	#3272	knowledge/d4-cleanroom.json	separate-not-projected
@@ -125,131 +125,131 @@ D6	6	111100	admitted	ANY	#3393	knowledge/d6-ratified.json	separate-not-projected
 D6	6	111101	admitted	ALL	#3393	knowledge/d6-ratified.json	separate-not-projected
 D6	6	111110	admitted	INTEGERP	#3393	knowledge/d6-ratified.json	separate-not-projected
 D6	6	111111	admitted	RATIONALP	#3393	knowledge/d6-ratified.json	separate-not-projected
-D7	7	0000000	admitted	varga.K.voiceless	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000001	admitted	varga.K.voiceless-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000010	admitted	varga.K.voiced	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000011	admitted	varga.K.voiced-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000100	admitted	varga.K.nasal	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000101	admitted	varga.C.voiceless	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000110	admitted	varga.C.voiceless-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0000111	admitted	varga.C.voiced	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001000	admitted	varga.C.voiced-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001001	admitted	varga.C.nasal	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001010	admitted	varga.T-retroflex.voiceless	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001011	admitted	varga.T-retroflex.voiceless-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001100	admitted	varga.T-retroflex.voiced	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001101	admitted	varga.T-retroflex.voiced-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001110	admitted	varga.T-retroflex.nasal	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0001111	admitted	varga.T-dental.voiceless	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010000	admitted	varga.T-dental.voiceless-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010001	admitted	varga.T-dental.voiced	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010010	admitted	varga.T-dental.voiced-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010011	admitted	varga.T-dental.nasal	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010100	admitted	varga.P.voiceless	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010101	admitted	varga.P.voiceless-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010110	admitted	varga.P.voiced	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0010111	admitted	varga.P.voiced-aspirated	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011000	admitted	varga.P.nasal	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011001	admitted	text.digit.8	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011010	admitted	text.digit.9	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011011	admitted	text.punctuation.ellipsis	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011100	admitted	text.digit.0	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011101	admitted	text.digit.2	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011110	admitted	text.digit.3	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0011111	admitted	text.digit.1	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100000	admitted	non-varga.K.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100001	owner-reserved-pinned		#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100010	admitted	text.modifier.uk-capital-next-letter	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100011	admitted	text.modifier.uk-combining-acute-stress	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100100	admitted	non-varga.C.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100101	admitted	non-varga.C.voiced-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100110	admitted	non-varga.C.primary-sonorant	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0100111	admitted	non-varga.uk-ext.softness	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101000	admitted	non-varga.T-retroflex.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101001	admitted	text.punctuation.left-guillemet	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101010	owner-reserved-pinned		#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101011	admitted	text.punctuation.right-guillemet	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101100	admitted	non-varga.T-dental.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101101	admitted	non-varga.T-dental.voiced-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101110	admitted	non-varga.T-dental.primary-sonorant	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0101111	admitted	non-varga.T-dental.lateral-or-secondary-sonorant	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110000	admitted	non-varga.P.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110001	admitted	text.punctuation.em-dash	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110010	admitted	non-varga.P.primary-sonorant	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110011	admitted	text.punctuation.en-dash	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110100	admitted	non-varga.G-glottal.primary-voiceless-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110101	admitted	non-varga.G-glottal.voiced-fricative	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110110	admitted	text.punctuation.left-double-quotation-mark	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0110111	admitted	text.punctuation.right-double-quotation-mark	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111000	admitted	text.digit.4	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111001	admitted	text.digit.6	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111010	admitted	text.digit.7	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111011	admitted	text.digit.5	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111100	admitted	non-varga.uk-ext.ts	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111101	admitted	non-varga.uk-ext.tsh	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111110	admitted	non-varga.uk-ext.dz	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	0111111	admitted	non-varga.uk-ext.dzh	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000000	admitted	vowel.a.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000001	admitted	vowel.a.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000010	admitted	vowel.a.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000011	admitted	vowel.a.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000100	admitted	vowel.i.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000101	admitted	vowel.i.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000110	admitted	vowel.i.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1000111	admitted	vowel.i.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001000	admitted	vowel.u.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001001	admitted	vowel.u.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001010	admitted	vowel.u.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001011	admitted	vowel.u.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001100	admitted	vowel.r-vocalic.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001101	admitted	vowel.r-vocalic.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001110	admitted	vowel.r-vocalic.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1001111	admitted	vowel.r-vocalic.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010000	admitted	vowel.l-vocalic.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010001	admitted	vowel.l-vocalic.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010010	admitted	vowel.l-vocalic.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010011	admitted	vowel.l-vocalic.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010100	admitted	vowel.e.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010101	admitted	vowel.e.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010110	admitted	vowel.e.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1010111	admitted	vowel.e.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011000	admitted	vowel.o.oral.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011001	admitted	vowel.o.oral.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011010	admitted	vowel.o.nasal.short	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011011	admitted	vowel.o.nasal.long	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011100	admitted	vowel.uk-ext.a	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011101	admitted	vowel.uk-ext.e	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011110	admitted	vowel.uk-ext.o	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1011111	admitted	vowel.uk-ext.y	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100000	admitted	sign.space	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100001	admitted	sign.newline	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100010	admitted	sign.tab	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100011	admitted	sign.left-paren	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100100	admitted	sign.right-paren	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100101	admitted	sign.double-quote	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100110	admitted	sign.backslash	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1100111	admitted	sign.underscore	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101000	admitted	sign.anusvara	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101001	admitted	sign.visarga	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101010	admitted	sign.avagraha	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101011	admitted	sign.danda	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101100	admitted	sign.double-danda	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101101	admitted	sign.ampersand	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101110	admitted	sign.pipe	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1101111	admitted	sign.backquote	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110000	admitted	sign.plus	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110001	admitted	sign.minus	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110010	admitted	sign.star	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110011	admitted	sign.slash	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110100	admitted	sign.equals	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110101	admitted	sign.less	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110110	admitted	sign.greater	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1110111	admitted	sign.question	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111000	admitted	sign.bang	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111001	admitted	sign.apostrophe	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111010	admitted	sign.dot	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111011	admitted	sign.comma	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111100	admitted	sign.colon	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111101	admitted	sign.semicolon	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111110	admitted	sign.hash	#3572	knowledge/d7-ratified.json	separate-not-projected
-D7	7	1111111	admitted	sign.at	#3572	knowledge/d7-ratified.json	separate-not-projected
+D7	7	0000000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0000111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0001111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0010111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0011111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0100111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0101111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0110111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	0111111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1000111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1001111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1010111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1011111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1100111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1101111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1110111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111000	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111001	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111010	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111011	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111100	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111101	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111110	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
+D7	7	1111111	admitted		2026-10-13 D7 keyboard/v2	knowledge/d7-keyboard-v2-ratified.json	text-data-only
