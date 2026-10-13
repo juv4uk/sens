@@ -18,6 +18,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/life-1.yml"
+      - "tests/fixtures/life-1-exact-d3-semantic.lisp"
       - "contracts/life-1-contract.lisp"
       - "lib/bridge/prolog-to-datalog.lisp"
       - "lib/life-1-scheduler.lisp"
