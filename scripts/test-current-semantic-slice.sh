@@ -1,6 +1,74 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Основний семантичний контроль виконується САМОЮ двійковою мовою SENS.
+# Rust/Python тут не визначають логіку; лише зібрані binary SENS-програми.
+run_native_binary_semantics() {
+  local bindir="${CARGO_TARGET_DIR:-target}/debug"
+  if [[ "${SENS_BINARY_BUILT:-0}" != "1" ]]; then
+    cargo build --locked -p sens-cli --bin sens --bin sens-trit
+  fi
+  local file output peer
+  # Verify physical T5 bytes against exact visible binary words. This is
+  # transport only; semantic judgments below remain owned by SENS itself.
+  python3 - <<'PY'
+import hashlib
+import sys
+from pathlib import Path
+sys.path.insert(0, 'scripts')
+from sens_t5_codec import encode_projection
+root = Path('tests/semantic/native-t5')
+cases = sorted(root.glob('*.bits'))
+if len(cases) != 11:
+    raise SystemExit(f'NATIVE_T5_CORPUS_INVALID layer=transport expected=11 actual={len(cases)} reproduce=bash scripts/test-current-semantic-slice.sh --native-binary-only')
+for source in cases:
+    packed = source.with_suffix('.sens')
+    expected = encode_projection(source.read_text(encoding='ascii'))
+    actual = packed.read_bytes()
+    if actual != expected:
+        first = next((i for i, (a, b) in enumerate(zip(actual, expected)) if a != b), min(len(actual), len(expected)))
+        raise SystemExit(f'NATIVE_T5_MISMATCH test_id={source.stem} layer=transport fixture={packed} fixture_sha256={hashlib.sha256(actual).hexdigest()} expected_sha256={hashlib.sha256(expected).hexdigest()} actual_sha256={hashlib.sha256(actual).hexdigest()} first_difference_byte={first} first_bad_sha=UNRESOLVED reproduce="bash scripts/test-current-semantic-slice.sh --native-binary-only"')
+print('NATIVE_T5_TRANSPORT_PASS pairs=11')
+PY
+  for case_name in atom-empty atom-pair eq-reflexive eq-distinct car-cons cdr-cons cond-short-circuit nested-cons-atom; do
+    file="tests/semantic/native-t5/${case_name}.sens"
+    if ! output="$("$bindir/sens" "$file")"; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED execution %s\n' "$file" >&2
+      return 1
+    fi
+    # The SENS program performs all logic and returns its own exact D1 verdict.
+    if [[ "$output" != "1" ]]; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED D1 verdict %s=%s\n' "$file" "$output" >&2
+      return 1
+    fi
+    if ! peer="$("$bindir/sens-trit" eval "$file")"; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED independent entrypoint %s\n' "$file" >&2
+      return 1
+    fi
+    if [[ "$peer" != "$output" ]]; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED oracle/entrypoint mismatch %s\n' "$file" >&2
+      return 1
+    fi
+  done
+  for case_name in reject-cond-three-fields reject-cond-non-d1 reject-eq-pair; do
+    file="tests/semantic/native-t5/${case_name}.sens"
+    if "$bindir/sens" "$file" >/dev/null 2>&1; then
+      printf 'SENS-NATIVE-SEMANTICS: BLOCKED invalid binary program admitted %s\n' "$file" >&2
+      return 1
+    fi
+  done
+  printf 'SENS-NATIVE-SEMANTICS: PASS 8 SENS-owned positive verdicts, 3 fail-closed negatives\n'
+}
+
+if [[ "${1:-}" == "--native-binary-only" ]]; then
+  [[ $# -eq 1 ]] || { echo "NATIVE_T5_USAGE: unexpected arguments" >&2; exit 2; }
+  run_native_binary_semantics
+  exit $?
+elif [[ $# -ne 0 ]]; then
+  echo "NATIVE_T5_USAGE: pass --native-binary-only or no arguments" >&2
+  exit 2
+fi
+
 # #231 / #112-#114: the fast semantic lane executes current Lisp-owned
 # expectations through host observers. It deliberately does not run legacy
 # host-authored Canon truth assertions; deep/current-contract lanes retain
