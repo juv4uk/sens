@@ -125,3 +125,45 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
         );
     }
 }
+
+const YANTRA_D4_BIND_LAW: &str =
+    include_str!("../../../tests/semantic/yantra-d4-bind-law.bits");
+const YANTRA_D4_BIND_MUTANT: &str =
+    include_str!("../../../tests/semantic/yantra-d4-bind-mutant.bits");
+
+/// Лише доставка бітів та запуск. Точні закони D1/D3/D4/D7 і відмова
+/// недопущеної D1-голови визначені у двох бінарних SENS-програмах.
+#[test]
+fn yantra_d4_binary_self_verdict_and_one_bit_negative() {
+    for source in [YANTRA_D4_BIND_LAW, YANTRA_D4_BIND_MUTANT] {
+        assert!(source.bytes().all(|byte|
+            matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
+        ), "program may contain only exact domain bits and whitespace");
+    }
+
+    let good = parse_canonical_binary(YANTRA_D4_BIND_LAW)
+        .expect("exact-width SENS syntax must parse without host aliases");
+    assert_eq!(good.len(), 6, "six independent self-verdict programs");
+    for (index, expression) in good.iter().enumerate() {
+        eval_parsed_expressions(
+            std::slice::from_ref(expression),
+            &mut Session::default(),
+        ).unwrap_or_else(|error| panic!("SENS self-verdict #{} rejected: {error:?}", index + 1));
+    }
+
+    // Метаморфне підтвердження носія: рівно один W1-біт відрізняється.
+    // Очікувану логіку не обчислює Rust: негативне рішення виносить SENS
+    // у непридатну до виклику координату D1:0.
+    let positive: Vec<_> = YANTRA_D4_BIND_LAW.lines().next().unwrap()
+        .split_whitespace().collect();
+    let negative: Vec<_> = YANTRA_D4_BIND_MUTANT.split_whitespace().collect();
+    assert_eq!(positive.len(), negative.len(), "framing cannot drift");
+    let changed: Vec<_> = positive.iter().zip(negative.iter())
+        .filter(|(a, b)| a != b).collect();
+    assert_eq!(changed, vec![(&"1", &"0")], "one exact D1 bit flipped");
+    let bad = parse_canonical_binary(YANTRA_D4_BIND_MUTANT)
+        .expect("one-bit mutant still has valid D2 frames");
+    assert_eq!(bad.len(), 1);
+    assert!(eval_parsed_expressions(&bad, &mut Session::default()).is_err(),
+        "SENS must reject its own incorrect law");
+}
