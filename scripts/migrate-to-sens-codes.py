@@ -619,6 +619,21 @@ def binary_rewrite(
         re.findall(r"\(\s*(?:0011|(?i:DEFINE))\s+([^\s()]+)", source)
     )
 
+    def require_resolved_identity(resolution, token: str, offset: int):
+        """A resolver's positive verdict MUST carry a current exact identity.
+
+        A Python assert is not an admission gate: -O removes it entirely.
+        This is an infrastructure consistency check, not a SENS semantic law.
+        """
+        identity = resolution.current
+        if identity is None:
+            line, column = line_col(source, offset)
+            raise BinaryMigrationError(
+                f"INCONSISTENT_DOMAIN_RESOLUTION {token!r} at {line}:{column}: "
+                "resolver says resolved without a current exact-domain identity"
+            )
+        return identity
+
     def is_bound(name: str) -> bool:
         return name in global_bindings or any(
             name in entry["bindings"] for entry in frames
@@ -812,8 +827,7 @@ def binary_rewrite(
             else:
                 resolution = resolver.resolve_head(token)
                 if resolution.resolved:
-                    identity = resolution.current
-                    assert identity is not None
+                    identity = require_resolved_identity(resolution, token, start)
                     if identity.label == "EMPTY":
                         raise BinaryMigrationError(
                             "structural EMPTY/000 cannot be used as a callable head"
@@ -848,8 +862,7 @@ def binary_rewrite(
                     raise BinaryMigrationError(
                         f"unresolved legacy SID value {token!r}"
                     )
-                identity = resolution.current
-                assert identity is not None
+                identity = require_resolved_identity(resolution, token, start)
                 out.append(identity.bits)
             elif token in {"0", "1"}:
                 # Canonical source spelling for the exact D1 PredicateBit.
@@ -870,8 +883,7 @@ def binary_rewrite(
                         f"unresolved domain coordinate {token!r} at "
                         f"{line_col(source, start)[0]}:{line_col(source, start)[1]}"
                     )
-                identity = resolution.current
-                assert identity is not None
+                identity = require_resolved_identity(resolution, token, start)
                 out.append(identity.bits)
             elif (re.fullmatch(
                 r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
