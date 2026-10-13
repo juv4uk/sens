@@ -2,20 +2,11 @@ name: SENS — один точковий автоматичний двійков
 
 # Рівно один автоматичний job; лише SENS визначає семантичний результат.
 # Один центральний workflow: positive law + fail-closed guards.
+# Branch pushes always receive one SENS witness; new branch/merge is allowed.
+# No paths filter: docs, implementation, migration, and workflow changes all trigger.
 on:
   push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ci.yml'
-      - 'scripts/ci_one_focused_workflow.py'
-      - 'scripts/ci_failure_contract.py'
-      - 'tests/semantic/time-d1-predicate-law.sens'
-      - 'tests/semantic/domain-logic-2040/mutant.sens'
-      - 'lib/time.lisp'
-      - 'tests/semantic/knowledge-exact-arity-structure.*'
-      - 'lib/knowledge.lisp'
-      - 'lib/domains/**'
-      - 'crates/sens/src/eval/**'
+    branches: ['**']
 
 permissions:
   contents: read

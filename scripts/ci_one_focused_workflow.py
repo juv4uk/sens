@@ -52,14 +52,13 @@ def verify():
             automatic = set(found) - {"workflow_dispatch", "workflow_call"}
             if path.name == "ci.yml":
                 if automatic != {"push"}:
-                    raise ValueError(f"очікується єдиний push main: {sorted(automatic)}")
+                    raise ValueError(f"очікується єдиний push для всіх гілок: {sorted(automatic)}")
                 block = found["push"]
-                if not re.search(r"^\s+branches:\s*\[main\]", block, re.M):
-                    raise ValueError("push не обмежений main")
-                if not re.search(r"^\s+paths:\s*$", block, re.M):
-                    raise ValueError("відсутній вузький paths-фільтр")
-                if "tags:" in block:
-                    raise ValueError("push тегів заборонений")
+                if not re.search(r"^\s+branches:\s*\['\*\*'\]\s*$", block, re.M):
+                    raise ValueError("push мусить охоплювати всі гілки без винятків")
+                for disallowed in ("paths:", "paths-ignore:", "tags:", "tags-ignore:", "branches-ignore:"):
+                    if disallowed in block:
+                        raise ValueError("push не може фільтрувати коміти: " + disallowed)
                 auto.append(path.name)
             elif automatic:
                 raise ValueError(f"додатковий автоматичний тригер {sorted(automatic)}")
