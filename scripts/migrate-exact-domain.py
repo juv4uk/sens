@@ -14,7 +14,10 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 WORD8 = re.compile(r"[01]{8}\Z")
-TARGET = re.compile(r"D([3-9]):([01]{3,9})")
+# Exact type widths are independently pinned; never decode a domain through
+# a decimal suffix, nor infer a current identity from a historical W8 payload.
+DOMAIN_WIDTHS = {"D3": 3, "D4": 4}
+CORE_SUCCESSOR = re.compile(r"(D[34]):([01]+)\s+([A-Z][A-Z0-9?]*)\Z")
 FIELD = re.compile(r'\((ук|укр|san|en|LISP|sym)\s+("(?:\\.|[^"\\])*"|\(\)|[^()\s]+)\)')
 SAFE_OLD = {
     ("D3", "QUOTE"), ("D3", "ATOM"), ("D3", "EQ"),
@@ -52,19 +55,27 @@ def load_authority(root: Path = ROOT):
 
     surfaces = {}
     ambiguous = set()
-    for domain in ("D3", "D4"):
+    for domain, width in DOMAIN_WIDTHS.items():
+        descriptor = foundation["domains"][domain]
+        if descriptor.get("width") != width:
+            raise ValueError(f"{domain}: owner width changed")
+        residents = descriptor["residents"]
+        expected = {f"{coordinate:0{width}b}" for coordinate in range(1 << width)}
+        if set(residents) != expected:
+            raise ValueError(f"{domain}: missing/extra resident coordinate in authority")
         table = (root / "lib/domains" / (domain.lower() + ".lisp")).read_text(encoding="utf-8")
-        residents = foundation["domains"][domain]["residents"]
+        seen_rows = set()
         for line in table.splitlines():
-            row = re.match(r"^\s*\(([01]{3,4})\s+(.*)$", line)
+            # Match ALL binary-looking coordinates, including malformed widths.
+            # Silently skipping them would migrate against a partial codebook.
+            row = re.match(r"^\s*\(([01]+)\s+(.*)$", line)
             if not row:
                 continue
             bits, tail = row.groups()
-            if len(bits) != int(domain[1:]):
-                continue
-            label = residents.get(bits)
-            if label is None:
-                raise ValueError(f"owner table drift at {domain}:{bits}")
+            if len(bits) != width or bits not in residents or bits in seen_rows:
+                raise ValueError(f"{domain}: invalid/duplicate exact-width row {bits}")
+            seen_rows.add(bits)
+            label = residents[bits]
             identity = Identity(domain, bits, label)
             for _, raw in FIELD.findall(tail):
                 if raw == "()":
@@ -75,6 +86,8 @@ def load_authority(root: Path = ROOT):
                     ambiguous.add(key)
                 else:
                     surfaces[key] = identity
+        if seen_rows != expected:
+            raise ValueError(f"{domain}: incomplete ratified domain table")
     for key in ambiguous:
         del surfaces[key]
     if not all(x in surfaces for x in ("car", "quote", "перше", "атом?")):
@@ -91,11 +104,18 @@ def load_authority(root: Path = ROOT):
             "DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"
         }:
             continue
-        targets = TARGET.findall(row.get("current_target") or "")
-        if len(targets) != 1:
+        evidence = row.get("current_target") or ""
+        # Only an *entire*, singly attributed D3/D4 successor is admissible.
+        # D5+ or multi-target historical observations remain provenance/HOLD.
+        successor = CORE_SUCCESSOR.fullmatch(evidence) if isinstance(evidence, str) else None
+        if successor is None:
+            if isinstance(evidence, str) and evidence.startswith(("D3:", "D4:")):
+                raise ValueError(f"historical {code}: malformed exact-domain successor")
             continue
-        domain, bits = "D" + targets[0][0], targets[0][1]
+        domain, bits, claimed_label = successor.groups()
         label = foundation["domains"][domain]["residents"].get(bits)
+        if len(bits) != DOMAIN_WIDTHS[domain] or label != claimed_label:
+            raise ValueError(f"historical {code}: width/role does not match {domain}:{bits}")
         if (domain, label) in SAFE_OLD:
             legacy[code] = Identity(domain, bits, label)
     if len(seen) != 256:

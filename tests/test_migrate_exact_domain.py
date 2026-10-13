@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +93,63 @@ class ExactDomainMigrationTests(unittest.TestCase):
         source = """(user-defined x)
 """
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+
+    def test_table_migration_blocks_nonexact_duplicate_or_missing_d3_rows(self):
+        # Only migrator/authority integrity: semantic verdicts remain SENS-owned.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            required = (
+                "knowledge/d1-d9-foundation.json",
+                "knowledge/sens8-current-coverage-v1.json",
+                "lib/domains/d3.lisp",
+                "lib/domains/d4.lisp",
+            )
+            for rel in required:
+                destination = root / rel
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes((ROOT / rel).read_bytes())
+            d3 = root / "lib/domains/d3.lisp"
+            pristine = d3.read_text(encoding="utf-8")
+            self.assertIn("(100 (ук", pristine)
+            for label, changed in (
+                ("extra-bit", pristine.replace("(100 (ук", "(1000 (ук", 1)),
+                ("duplicate", pristine.replace("(101 (ук", "(100 (ук", 1)),
+                ("missing", "".join(
+                    line for line in pristine.splitlines(keepends=True)
+                    if not line.lstrip().startswith("(100 ")
+                )),
+            ):
+                with self.subTest(case=label):
+                    d3.write_text(changed, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "D3:"):
+                        mod.load_authority(root)
+            d3.write_text(pristine, encoding="utf-8")
+            self.assertEqual(mod.load_authority(root), (self.surfaces, self.legacy))
+
+    def test_historical_d3_successor_requires_exact_width_and_proved_role(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            required = (
+                "knowledge/d1-d9-foundation.json",
+                "knowledge/sens8-current-coverage-v1.json",
+                "lib/domains/d3.lisp",
+                "lib/domains/d4.lisp",
+            )
+            for rel in required:
+                destination = root / rel
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes((ROOT / rel).read_bytes())
+            path = root / "knowledge/sens8-current-coverage-v1.json"
+            original = json.loads(path.read_text(encoding="utf-8"))
+            for candidate in ("D3:1001 CAR", "D3:100 WRONG", "D3:100 CAR extra"):
+                with self.subTest(target=candidate):
+                    changed = json.loads(json.dumps(original))
+                    row = next(row for row in changed["rows"]
+                               if row["legacy_code"] == "00000101")
+                    row["current_target"] = candidate
+                    path.write_text(json.dumps(changed), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "historical 00000101"):
+                        mod.load_authority(root)
 
     def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
         source = "(00100111 evaluator-fallback expression)\n"

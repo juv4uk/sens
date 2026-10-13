@@ -59,6 +59,8 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check-domain-ladder-identity.py --self-test --check
+          # Instrumental migration proof, not an alternate semantic oracle.
+          python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
