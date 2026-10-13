@@ -72,7 +72,7 @@ jobs:
           test "$(tail -n 1 "$RUNNER_TEMP/node-law.txt")" = "1"
           test "$(tail -n 1 "$RUNNER_TEMP/node-mutant.txt")" = "0"
           # Mutant changes exactly ONE already typed D1 word, never width or D2.
-          diff_count="$(paste <(tr ' ' '\\n' < "${base}-law.lisp" | sed '/^$/d') <(tr ' ' '\\n' < "${base}-mutant.lisp" | sed '/^$/d') | awk '$1 != $2 { if ($1!="1" || $2!="0") exit 3; n++ } END {print n+0}')"
+          diff_count="$(paste <(tr '[:space:]' '\n' < "${base}-law.lisp" | sed '/^$/d') <(tr '[:space:]' '\n' < "${base}-mutant.lisp" | sed '/^$/d') | awk '$1 != $2 { if ($1!="1" || $2!="0") exit 3; n++ } END {print n+0}')"
           test "$diff_count" = 1
       - name: Execute semantic laws owned by binary SENS
         run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
