@@ -15,11 +15,63 @@
 ; (lib/reason.lisp) into a word list joined by `because`/`and`. It narrates
 ; each node's `rule` field, not its `goal` field.
 
+; Structural list-shape tests replace D6 LENGTH + D8 EQUAL and naked 2/3.
+; All branches return exact D1; list data never acquires numeric truthiness.
+; NULL is the admitted exact D4 empty-list predicate and returns D1.
+; It avoids trying to call atom-only EQ on structural ().
+(0011 narrate-proper-list?
+  (0010 (value)
+    (110
+      ((0101 value)
+       (010 (001 ())))
+      ((010 value)
+       (101 (001 0) (001 1)))
+      ((010 (001 ()))
+       (narrate-proper-list? (011 value))))))
+
+; Structural arity checks return exact D1:YES only at the requested boundary.
+; Rejecting cases short-circuit before CDR walks; NULL safely recognizes ().
+(0011 narrate-list-exact-two?
+  (0010 (value)
+    (110
+      ((0100 (narrate-proper-list? value))
+       (101 (001 0) (001 1)))
+      ((0101 value)
+       (101 (001 0) (001 1)))
+      ((010 value)
+       (101 (001 0) (001 1)))
+      ((0101 (011 value))
+       (101 (001 0) (001 1)))
+      ((0101 (011 (011 value)))
+       (010 (001 ())))
+      ((010 (001 ()))
+       (101 (001 0) (001 1))))))
+
+(0011 narrate-list-exact-three?
+  (0010 (value)
+    (110
+      ((0100 (narrate-proper-list? value))
+       (101 (001 0) (001 1)))
+      ((0101 value)
+       (101 (001 0) (001 1)))
+      ((010 value)
+       (101 (001 0) (001 1)))
+      ((0101 (011 value))
+       (101 (001 0) (001 1)))
+      ((0101 (011 (011 value)))
+       (101 (001 0) (001 1)))
+      ((0101 (011 (011 (011 value))))
+       (010 (001 ())))
+      ((010 (001 ()))
+       (101 (001 0) (001 1))))))
+
 (0011 narrate-fact
   (0010 (fact)
     (110
-      ((11110111 (000000 fact) 2)  (1110 (1001 fact) (001 is) (001 a) (100 fact)))
-      ((11110111 (000000 fact) 3)  (1110 (1001 fact) (100 fact) (10011 fact)))
+      ((narrate-list-exact-two? fact)
+       (1110 (1001 fact) (001 is) (001 a) (100 fact)))
+      ((narrate-list-exact-three? fact)
+       (1110 (1001 fact) (100 fact) (10011 fact)))
       ((010 (001 ())) fact))))
 
 (0011 provenance-goal (0010 (prov) (1001 prov)))
@@ -79,12 +131,7 @@
   (0010 (outcome)
     (1110 (001 invalid) (001 outcome-shape) outcome)))
 
-(0011 narrate-outcome-arity?
-  (0010 (outcome expected)
-    (110
-      ((0100 (result-proper-list? outcome)) (001 ()))
-      ((11110111 (000000 outcome) expected) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+; Outcome arity is structural: the exact D3/D4 helpers above own the shape check.
 
 (0011 narrate-outcome
   (0010 (outcome)
@@ -98,11 +145,11 @@
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
       ((101 (100 outcome) (001 proved))
        (110
-         ((narrate-outcome-arity? outcome 3) (narrate-proved-outcome outcome))
+         ((narrate-list-exact-three? outcome) (narrate-proved-outcome outcome))
          ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 unknown))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 unknown)
             (001 because)
@@ -111,7 +158,7 @@
          ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 partial))
        (110
-         ((narrate-outcome-arity? outcome 3)
+         ((narrate-list-exact-three? outcome)
           (1110
             (001 partial)
             (001 value)
@@ -121,7 +168,7 @@
          ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 blocked))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 blocked)
             (001 because)
@@ -129,7 +176,7 @@
          ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 disputed))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 disputed)
             (001 because)
@@ -138,7 +185,7 @@
          ((010 (001 ())) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 invalid))
        (110
-         ((narrate-outcome-arity? outcome 3)
+         ((narrate-list-exact-three? outcome)
           (1110
             (001 invalid)
             (001 because)
