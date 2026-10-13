@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/life-1.yml"
+      - "tests/fixtures/life-1-exact-d3-semantic.lisp"
       - "contracts/life-1-contract.lisp"
       - "lib/bridge/prolog-to-datalog.lisp"
       - "lib/life-1-scheduler.lisp"
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/life-1.yml"
+      - "tests/fixtures/life-1-exact-d3-semantic.lisp"
       - "contracts/life-1-contract.lisp"
       - "lib/bridge/prolog-to-datalog.lisp"
       - "lib/life-1-scheduler.lisp"
@@ -45,6 +47,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y swi-prolog-nox
           swipl --version
+
+      - name: Двійковий SENS сам визначає всі позитивні й негативні свідки
+        run: cargo test --locked -p sens --test life_1_scheduler -- --nocapture
 
       - name: Prove the canonical real LIFE-1 spine
         run: |
