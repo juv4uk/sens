@@ -165,12 +165,28 @@ impl PackedBitstream {
             return None;
         }
 
-        let mut value = 0u16;
-        for position in bit_offset..end {
-            let byte = *self.bytes.get(position / 8)?;
-            value = (value << 1) | u16::from((byte >> (7 - position % 8)) & 1);
-        }
-        DomainCoordinate::new(width, value)
+        // D10 (10 біт) може початись після семи попередніх бітів:
+        // 7 + 10 = 17 біт. Тому вікно з трьох байтів є достатнім.
+        // Це лише механіка MSB-first: ширина залишається координатою Dn.
+        let byte_index = bit_offset / 8;
+        let intra_byte = bit_offset % 8;
+        let word_bits = usize::from(width);
+        let first = u32::from(*self.bytes.get(byte_index)?);
+        let second = if intra_byte + word_bits > 8 {
+            u32::from(*self.bytes.get(byte_index.checked_add(1)?)?)
+        } else {
+            0
+        };
+        let third = if intra_byte + word_bits > 16 {
+            u32::from(*self.bytes.get(byte_index.checked_add(2)?)?)
+        } else {
+            0
+        };
+        let window = (first << 16) | (second << 8) | third;
+        let shift = 24 - intra_byte - word_bits;
+        let mask = (1u32 << word_bits) - 1;
+        let bits = ((window >> shift) & mask) as u16;
+        DomainCoordinate::new(width, bits)
     }
 
     /// Split the mechanical container into its physical payload and exact bit
@@ -681,6 +697,45 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn three_byte_window_preserves_d10_and_reports_every_bit_of_cost() {
+        // 7 + 10 + 3 = 20 біт, рівно три байти і лише 4 кінцеві
+        // невикористані біти. Жодного вирівнювання між координатами.
+        let d10 = DomainCoordinate::new(10, 0b10_1010_0101).unwrap();
+        let d3 = DomainCoordinate::new(3, 0b111).unwrap();
+        let mut packer = BitPacker::new();
+        let prefix = packer.push(crate::Bit7::new(0b1010101).unwrap());
+        let middle = packer.push_coordinate(d10);
+        let suffix = packer.push_coordinate(d3);
+        let packed = packer.finish();
+
+        assert_eq!((prefix, middle, suffix), (0, 7, 17));
+        assert_eq!(packed.bit_len(), 20, "семантичні біти: 7+10+3");
+        assert_eq!(packed.byte_len(), 3, "не три байти на слово");
+        assert_eq!(packed.valid_bits_in_last_byte(), 4);
+        assert_eq!(packed.read_coordinate(middle, 10), Some(d10));
+        assert_eq!(packed.read_coordinate(suffix, 3), Some(d3));
+        assert_eq!(packed.read_coordinate(middle, 9).unwrap().width(), 9,
+                   "ширину задає граматика, не випадковий payload");
+
+        // Пошкодження сусіднього D3 змінює лише D3, а не десять бітів D10.
+        let (bytes, bit_len) = packed.into_parts();
+        let mut neighbor_changed = bytes.clone();
+        neighbor_changed[2] ^= 0b0100_0000;
+        let neighbor = PackedBitstream::from_parts(neighbor_changed, bit_len).unwrap();
+        assert_eq!(neighbor.read_coordinate(middle, 10), Some(d10));
+        assert_ne!(neighbor.read_coordinate(suffix, 3), Some(d3));
+
+        // Невикористаний четвертий молодший біт не стає ще одним словом.
+        let mut bad_padding = bytes;
+        bad_padding[2] |= 1;
+        assert!(PackedBitstream::from_parts(bad_padding, bit_len).is_none());
+        assert!(neighbor.read_coordinate(middle + 1, 10).is_some(),
+                "читач голих бітів не знає меж: лише явний розклад ширин");
+        assert!(neighbor.read_coordinate(suffix + 1, 3).is_none(),
+                "за межами двадцяти змістових бітів читання заборонене");
     }
 
     #[test]
