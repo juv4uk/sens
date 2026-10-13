@@ -108,7 +108,8 @@ pub fn expr_to_exact_program_data(expr: &Expr) -> Result<Value, LanguageError> {
                 let begin = finished.len().checked_sub(len).ok_or_else(|| {
                     invalid_program_data("точнодоменна програма: пошкоджена структура списку")
                 })?;
-                finished.push(Value::list(finished.split_off(begin)));
+                let items = finished.split_off(begin);
+                finished.push(Value::list(items));
             }
             Step::Pair => {
                 let tail = finished.pop().ok_or_else(|| {
