@@ -6,6 +6,8 @@ on:
     paths:
       - 'lib/canon.lisp'
       - 'lib/core1.lisp'
+      - 'lib/reason.lisp'
+      - 'tests/semantic/reason-d4-pair-selectors.bits'
       - 'lib/core1-arity.bits'
       - 'lib/core1-arity.sens'
       - 'tests/fixtures/core1-arity-semantic.bits'
@@ -96,6 +98,19 @@ jobs:
           target/debug/sens-trit eval "$RUNNER_TEMP/core1-admitted-selectors.sens" > "$RUNNER_TEMP/core1-admitted-trit.out"
           cmp "$RUNNER_TEMP/core1-admitted-sens.out" "$RUNNER_TEMP/core1-admitted-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/core1-admitted-sens.out"
+
+      - name: SENS judges reason pair-selector laws and one-bit mutants
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/reason-d4-pair-selectors.bits "$RUNNER_TEMP/reason-d4-pair-selectors.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/reason-d4-pair-selectors.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/reason-d4-pair-selectors.sens" > "$RUNNER_TEMP/reason-d4-pair-selectors.open.bits"
+          cmp tests/semantic/reason-d4-pair-selectors.bits "$RUNNER_TEMP/reason-d4-pair-selectors.open.bits"
+          target/debug/sens "$RUNNER_TEMP/reason-d4-pair-selectors.sens" > "$RUNNER_TEMP/reason-d4-pair-selectors.sens.out"
+          target/debug/sens-trit eval "$RUNNER_TEMP/reason-d4-pair-selectors.sens" > "$RUNNER_TEMP/reason-d4-pair-selectors.trit.out"
+          cmp "$RUNNER_TEMP/reason-d4-pair-selectors.sens.out" "$RUNNER_TEMP/reason-d4-pair-selectors.trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/reason-d4-pair-selectors.sens.out"
 
       - name: Core1 admitted function coordinates judged by physical SENS
         shell: bash
