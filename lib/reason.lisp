@@ -24,7 +24,12 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ((101 (100 value) *reason-index-schema*) #d1:1)
+      ; A proper rule list can have a compound first rule. Verify CAR is
+      ; an atom before passing it to EQ (EQ accepts atoms only).
+      ((010 (100 value))
+       (110
+         ((101 (100 value) *reason-index-schema*) #d1:1)
+         (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
 (0011 reason-index-linear
