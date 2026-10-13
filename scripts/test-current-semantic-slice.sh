@@ -30,33 +30,47 @@ for source in cases:
         raise SystemExit(f'NATIVE_T5_MISMATCH test_id={source.stem} layer=transport fixture={packed} fixture_sha256={hashlib.sha256(actual).hexdigest()} expected_sha256={hashlib.sha256(expected).hexdigest()} actual_sha256={hashlib.sha256(actual).hexdigest()} first_difference_byte={first} first_bad_sha=UNRESOLVED reproduce="bash scripts/test-current-semantic-slice.sh --native-binary-only"')
 print('NATIVE_T5_TRANSPORT_PASS pairs=11')
 PY
+  local temp rc fixture_sha actual_sha
+  temp="$(mktemp -d)"
+  trap 'rm -rf -- "$temp"' EXIT
+  printf '1\n' > "$temp/expected-d1"
+  : > "$temp/failure-reports.jsonl"
+
+  # Both entrypoints execute exactly the same physical SENS program.
+  # Each program computes its own D1 truth; the observer only compares bytes.
   for case_name in atom-empty atom-pair eq-reflexive eq-distinct car-cons cdr-cons cond-short-circuit nested-cons-atom; do
     file="tests/semantic/native-t5/${case_name}.sens"
-    if ! output="$("$bindir/sens" "$file")"; then
-      printf 'SENS-NATIVE-SEMANTICS: BLOCKED execution %s\n' "$file" >&2
-      return 1
-    fi
-    # The SENS program performs all logic and returns its own exact D1 verdict.
-    if [[ "$output" != "1" ]]; then
-      printf 'SENS-NATIVE-SEMANTICS: BLOCKED D1 verdict %s=%s\n' "$file" "$output" >&2
-      return 1
-    fi
-    if ! peer="$("$bindir/sens-trit" eval "$file")"; then
-      printf 'SENS-NATIVE-SEMANTICS: BLOCKED independent entrypoint %s\n' "$file" >&2
-      return 1
-    fi
-    if [[ "$peer" != "$output" ]]; then
-      printf 'SENS-NATIVE-SEMANTICS: BLOCKED oracle/entrypoint mismatch %s\n' "$file" >&2
-      return 1
-    fi
+    python3 scripts/ci_failure_contract.py run \
+      --test-id "native-t5-${case_name}-sens" --layer eval \
+      --fixture "$file" --expected-file "$temp/expected-d1" \
+      --report-file "$temp/failure-reports.jsonl" \
+      -- "$bindir/sens" "$file" || return 1
+    python3 scripts/ci_failure_contract.py run \
+      --test-id "native-t5-${case_name}-sens-trit" --layer transport \
+      --fixture "$file" --expected-file "$temp/expected-d1" \
+      --report-file "$temp/failure-reports.jsonl" \
+      -- "$bindir/sens-trit" eval "$file" || return 1
   done
+
+  # Reject mutants only after eight successful executions demonstrate that
+  # the SENS engine really runs, not merely that an executable is missing.
   for case_name in reject-cond-three-fields reject-cond-non-d1 reject-eq-pair; do
     file="tests/semantic/native-t5/${case_name}.sens"
-    if "$bindir/sens" "$file" >/dev/null 2>&1; then
-      printf 'SENS-NATIVE-SEMANTICS: BLOCKED invalid binary program admitted %s\n' "$file" >&2
+    rc=0
+    "$bindir/sens" "$file" > "$temp/mutant.stdout" 2> "$temp/mutant.stderr" || rc=$?
+    if [[ "$rc" -eq 0 ]]; then
+      fixture_sha="$(sha256sum "$file" | cut -d ' ' -f 1)"
+      actual_sha="$(sha256sum "$temp/mutant.stdout" | cut -d ' ' -f 1)"
+      printf 'SENS_MUTANT_MISSED test_id=native-t5-%s layer=eval fixture=%s fixture_sha256=%s expected=reject actual_exit=0 expected_sha256=%s actual_sha256=%s first_difference=exit_status first_bad_sha=UNRESOLVED reproduce="%s %s"\n' \
+        "$case_name" "$file" "$fixture_sha" \
+        "$(sha256sum /dev/null | cut -d ' ' -f 1)" "$actual_sha" "$bindir/sens" "$file" >&2
       return 1
     fi
+    printf 'SENS_MUTANT_REJECTED test_id=native-t5-%s layer=eval actual_exit=%s fixture_sha256=%s\n' \
+      "$case_name" "$rc" "$(sha256sum "$file" | cut -d ' ' -f 1)"
   done
+  python3 scripts/ci_failure_contract.py scan \
+    --report-file "$temp/failure-reports.jsonl" --allow-empty
   printf 'SENS-NATIVE-SEMANTICS: PASS 8 SENS-owned positive verdicts, 3 fail-closed negatives\n'
 }
 
