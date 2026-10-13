@@ -5,7 +5,12 @@ const GUARD_SOURCE: &str = include_str!("../../../lib/guard.lisp");
 fn eval_guard(source: &str) -> String {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source(
+        "lib/unify.lisp",
+        include_str!("../../../lib/unify.lisp"),
+        &mut session,
+    )
+    .unwrap();
     eval_program(GUARD_SOURCE, &mut session).unwrap();
     eval_program(
         include_str!("../../../knowledge/guard-reference.lisp"),
