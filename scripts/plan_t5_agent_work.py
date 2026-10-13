@@ -22,7 +22,7 @@ from migration_source_scope import archived_benchmark_source
 
 SOURCE_SCHEMA = "sens-original-three-pass-eligibility/v1"
 OUTPUT_SCHEMA = "sens-t5-disjoint-agent-workshards/v1"
-SHARD_STATUS = "UNCLAIMED__BLOCKED_NOT_ADMITTED"
+SHARD_STATUS = "UNCLAIMED__MIGRATION_WORK_OPEN"
 MAX_FILES_PER_SHARD = 100
 HEX = set("0123456789abcdef")
 
@@ -314,12 +314,12 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             pending.append(item)
     if reviewed:
         groups.append(("reviewed-nonprogram-data",
-            "Owner-reviewed immutable schema/ISA/evidence/expr records need a DATA format contract; NEVER publish or count as executable .sens migration.",
+            "Investigate exact schema/ISA/evidence/expr migration without file-level HOLD; preserve original evidence. Executable SENS admission requires independently proved language law.",
             sorted(({"path": path, "source_git_blob_sha": item["source_git_blob_sha"]}
                     for path, item in reviewed.items()), key=lambda x: x["path"])))
     if archives:
         groups.append(("archived-benchmark-data",
-            "Frozen historical performance snapshots are NONPROGRAM evidence; preserve original bytes/measurements, NEVER publish executable .sens.",
+            "Migrate or preserve historical measurement representations with provenance; no agent may freeze the file. Do not claim executable parity without native SENS oracle.",
             sorted(archives.values(), key=lambda x: x["path"])))
     if pending:
         groups.append(("oracle-pending",
@@ -353,13 +353,13 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             is_data = family in ("reviewed-nonprogram-data", "archived-benchmark-data")
             shards.append({
                 "shard_id": shard_id, "family": family,
-                "status": ("UNCLAIMED__NONPROGRAM_DATA_ONLY" if is_data else SHARD_STATUS),
+                "status": ("UNCLAIMED__DATA_MIGRATION_OPEN" if is_data else SHARD_STATUS),
                 "claimed_by": None, "source_count": len(group),
                 "sources": group, "input_sources_sha256": digest.hexdigest(),
                 "next_action": action,
-                "claim_template": f"CLAIM: {shard_id} / repo=juv4uk/sens / owner=AGENT / branch=BRANCH / PR=PENDING",
-                "release_gate": ("DATA_CONTRACT_NO_EXECUTABLE_T5" if is_data
-                                 else "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"),
+                "claim_template": f"CLAIM: {shard_id} / repo=juv4uk/sens / owner=AGENT / branch=main / sourceSHA=PINNED",
+                "release_gate": ("NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION" if is_data
+                                 else "NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION"),
             })
     if sum(x["source_count"] for x in shards) != len(seen):
         raise PlanError("shards did not cover every original source")
@@ -370,7 +370,9 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
         "mode": "NO_WRITE_NO_AUTO_ASSIGN_NO_ORACLE_CLAIMS",
         "summary": {
             "original_unpaired": len(seen),
-            "blocked": sum_blocked,
+            "blocked": sum_blocked,  # historical first-symptom census, NOT work holds
+            "administrative_file_holds": 0,
+            "migration_work_open": len(seen),
             "mechanical_pending_oracle": len(pending),
             "archived_mechanical_nonprogram_originals": len(archived_candidates),
             "reviewed_nonprogram_originals": len(reviewed),

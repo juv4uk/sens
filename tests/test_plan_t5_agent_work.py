@@ -80,7 +80,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
                          {"lib/old0.lisp","lib/old1.lisp","lib/old2.lisp","test/ready.lisp"})
         self.assertTrue(all(s["claimed_by"] is None for s in shards))
         self.assertTrue(all(s["status"] == mod.SHARD_STATUS for s in shards))
-        self.assertTrue(all(s["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+        self.assertTrue(all(s["release_gate"] == "NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION"
                             for s in shards))
 
     def test_output_is_deterministic_independent_of_input_row_order(self):
@@ -110,10 +110,10 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["source_count"], 1)
         self.assertEqual(data[0]["sources"][0]["path"], src["path"])
-        self.assertEqual(data[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
-        self.assertEqual(data[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+        self.assertEqual(data[0]["release_gate"], "NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION")
+        self.assertEqual(data[0]["status"], "UNCLAIMED__DATA_MIGRATION_OPEN")
         other = [x for x in plan["shards"] if x["family"] != "reviewed-nonprogram-data"]
-        self.assertTrue(all(x["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+        self.assertTrue(all(x["release_gate"] == "NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION"
                             for x in other))
         seen = [x["path"] for shard in plan["shards"] for x in shard["sources"]]
         self.assertEqual(len(seen), 4)
@@ -195,8 +195,8 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         archive = [shard for shard in result["shards"]
                    if shard["family"] == "archived-benchmark-data"]
         self.assertEqual(len(archive), 1)
-        self.assertEqual(archive[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
-        self.assertEqual(archive[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(archive[0]["status"], "UNCLAIMED__DATA_MIGRATION_OPEN")
+        self.assertEqual(archive[0]["release_gate"], "NATIVE_SENS_ORACLE_REQUIRED_FOR_EXECUTABLE_ADMISSION")
         self.assertEqual(archive[0]["sources"][0]["path"], archived)
         self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
         self.assertEqual(result["summary"]["executable_or_unclassified_originals"], 3)
