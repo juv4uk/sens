@@ -22,15 +22,15 @@
 ; exact-domain identities.  The focused guard lowers this file before execution
 ; and rejects any historical Sid/Call node.
 
-(визначити compiler-authority-find
-  (функція (ідентичність rows)
-    (за-умовою
-      ((атом? rows) ())
-      ((тотожне? ідентичність (перше (перше rows))) (перше rows))
-      ((атом? ()) (compiler-authority-find ідентичність (решта rows))))))
+(0011 compiler-authority-find
+  (0010 (ідентичність rows)
+    (110
+      ((010 rows) ())
+      ((101 ідентичність (100 (100 rows))) (100 rows))
+      ((010 ()) (compiler-authority-find ідентичність (011 rows))))))
 
-(визначити compiler-nucleus
-  (функція (ідентичність authority)
+(0011 compiler-nucleus
+  (0010 (ідентичність authority)
     (compiler-authority-find ідентичність authority)))
 
 
@@ -38,8 +38,8 @@
 ; DECOMPOSE is an explicitly supplied first-class mechanism.  The language
 ; chooses when to invoke it; the host function may reveal only exact width/bits
 ; and has no identity->meaning authority.
-(визначити compiler-domain-shape
-  (функція (decompose ідентичність)
+(0011 compiler-domain-shape
+  (0010 (decompose ідентичність)
     (decompose ідентичність)))
 
 
