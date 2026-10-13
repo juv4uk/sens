@@ -62,7 +62,6 @@
       ((101 VALUE 110) T)
       ((101 VALUE 0010) T)
       ((101 VALUE 0011) T)
-      ((101 VALUE 0011) T)
       ((101 VALUE 01010) T)
       ((101 VALUE 01011) T)
       ((101 VALUE 0100) T)
