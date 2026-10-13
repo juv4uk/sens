@@ -156,8 +156,10 @@ def verify():
     # Mechanical ratchet: one existing workflow must prove native SENS exec,
     # not merely green Python unittest dots. The dynamic scan validates receipts.
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
-    if ci_text.count("--executor-report-file") != 5:
-        errors.append("UNINFORMATIVE-EXECUTOR: 5 direct SENS receipts required")
+    # The count of witnesses grows with SENS. Never freeze it to one CI snapshot.
+    # The static named checks and dynamic SHA-bound receipts are authoritative.
+    if ci_text.count("--executor-report-file") < 5:
+        errors.append("UNINFORMATIVE-EXECUTOR: required native SENS call sites are missing")
     for step in ci_text.split("      - name: ")[1:]:
         if "--layer eval" in step:
             if ("--executor-report-file" not in step
