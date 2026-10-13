@@ -951,6 +951,88 @@ mod tests {
         eprintln!("F3M5LA_BETA_K_ONE_ZERO={}\t{}", hex(payload), expression.human_projection());
     }
 
+    /// Four classic, closed higher-order combinators. Only the combinator
+    /// itself is a five-byte F3M-5λA payload; its test applications are
+    /// intentionally built outside that payload.
+    ///
+    /// B f g x = f (g x)
+    /// C f x y = f y x
+    /// S f g x = f x (g x)
+    /// W f x   = f x x
+    /// Their behavior is decided by the real SENS evaluator, not by a
+    /// host-language reimplementation of the lambda calculus.
+    #[test]
+    fn five_byte_bcsw_exact_sens_reduction() {
+        use F3m5LambdaExpr::{Bound, One, Zero};
+
+        fn lambda(body: F3m5LambdaExpr) -> F3m5LambdaExpr {
+            F3m5LambdaExpr::Lambda(Box::new(body))
+        }
+        fn apply(function: F3m5LambdaExpr, argument: F3m5LambdaExpr) -> F3m5LambdaExpr {
+            F3m5LambdaExpr::Apply(Box::new(function), Box::new(argument))
+        }
+
+        let i = lambda(Bound(0));
+        let k = lambda(lambda(Bound(1)));
+        let b = lambda(lambda(lambda(apply(Bound(2), apply(Bound(1), Bound(0))))));
+        let c = lambda(lambda(lambda(apply(apply(Bound(2), Bound(0)), Bound(1)))));
+        let s = lambda(lambda(lambda(apply(
+            apply(Bound(2), Bound(0)),
+            apply(Bound(1), Bound(0)),
+        ))));
+        let w = lambda(lambda(apply(apply(Bound(1), Bound(0)), Bound(0))));
+
+        // Fixed byte witnesses from the existing canonical research ranker.
+        // These are NOT production F3M-5 mappings and do not change D1-D4.
+        let witnesses = [
+            ("B", b, [0x00, 0x00, 0x3F, 0xEA, 0x96], 8usize),
+            ("C", c, [0x00, 0x00, 0x3F, 0xF9, 0xF2], 8),
+            ("S", s, [0x00, 0x27, 0x73, 0x55, 0xDA], 10),
+            ("W", w, [0x00, 0x00, 0x05, 0x24, 0x5D], 7),
+        ];
+
+        for (name, combinator, physical, nodes) in witnesses {
+            assert_eq!(combinator.node_count(), nodes, "{name} node count");
+            let encoded = encode_candidate(&combinator).expect("closed five-byte combinator");
+            assert_eq!(encoded, physical, "{name} physical bytes");
+            assert_eq!(
+                decode_candidate(physical).expect("canonical five-byte decode"),
+                combinator,
+                "{name} exact rank/unrank"
+            );
+
+            for predicate in [false, true] {
+                let value = if predicate { One } else { Zero };
+                let applied = match name {
+                    "B" => apply(apply(apply(combinator.clone(), i.clone()), i.clone()), value),
+                    "C" => apply(apply(apply(combinator.clone(), k.clone()), Zero), value),
+                    "S" => apply(apply(apply(combinator.clone(), k.clone()), k.clone()), value),
+                    "W" => apply(apply(combinator.clone(), k.clone()), value),
+                    _ => unreachable!("fixed proof corpus"),
+                };
+
+                // The research evaluator is a secondary cross-check only.
+                assert_eq!(
+                    eval_candidate(&applied).expect("secondary candidate evaluation"),
+                    F3m5LambdaValue::Bit(predicate),
+                    "{name} secondary result"
+                );
+                let mut session = Session::bare();
+                let observed = eval_candidate_with_sens_runtime(&applied, &mut session)
+                    .expect("real SENS evaluator must execute higher-order law");
+                assert_eq!(
+                    observed.as_predicate_bit(),
+                    Some(predicate),
+                    "{name} real SENS result for D1:{predicate}"
+                );
+            }
+            eprintln!(
+                "F3M5LA_BCSW name={name} bytes={} nodes={nodes} authority=SENS",
+                hex(physical)
+            );
+        }
+    }
+
     #[test]
     fn free_reference_still_fails_closed() {
         assert!(encode_candidate(&F3m5LambdaExpr::Bound(0)).is_err());

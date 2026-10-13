@@ -233,6 +233,10 @@ F3M-1 таблиця.
 | **F3M-5λ (research)** | `05 61 69 CB 4A` | nameless 11-node witness | **QUOTE+ATOM+CONS+CAR+CDR+EQ+COND+LAMBDA**, виконано canonical SENS evaluator-ом | exact D1 `0` |
 | **F3M-5λA (research)** | `00 00 00 02 4B` | `APPLY(λ.BOUND(0),1)` | самодостатня **β-редукція**: I застосовується до D1 `1` прямо з 40-бітного payload | exact D1 `1` |
 | **F3M-5λA (research)** | `00 00 0D 06 4F` | `APPLY(APPLY(λ.λ.BOUND(1),1),0)` | вкладене застосування **K**; лексичне замикання зберігає перший аргумент | exact D1 `1` |
+| **F3M-5λA (research)** | `00 00 3F EA 96` | **B** = `λf.λg.λx.f(g x)` | композиція функцій; 8 вузлів | `B I I x = x` |
+| **F3M-5λA (research)** | `00 00 3F F9 F2` | **C** = `λf.λx.λy.f y x` | перестановка аргументів; 8 вузлів | `C K 0 x = x` |
+| **F3M-5λA (research)** | `00 27 73 55 DA` | **S** = `λf.λg.λx.f x (g x)` | три замикання і три застосування; 10 вузлів | `S K K x = x` |
+| **F3M-5λA (research)** | `00 00 05 24 5D` | **W** = `λf.λx.f x x` | дублювання аргументу; 7 вузлів | `W K x = x` |
 | **F3M-4** | `BA AD F0 0D` | `IF-ATOM(IF-ATOM(CDR(CONS(CAR(CONS(QUOTE(NIL),QUOTE(NIL))),NIL)),1,1),0,QUOTE(0))` | красивий hex-код випадково дав **6/6 класів + 2×COND** | `0` |
 | **F3M-4** | `FE ED FA CE` | `ATOM(CAR(CONS(IF-ATOM(1,0,QUOTE(NIL)),IF-ATOM(QUOTE(NIL),QUOTE(NIL),CAR(CONS(QUOTE(1),NIL))))))` | ще один mnemonic hex: **2×COND, 13 encoded-операцій** | `1` |
 | **F3M-4** | `FF FF 4F 4F` | `ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої **64K** сторінки F3M-4 | executes |
@@ -276,6 +280,12 @@ Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/se
 [F3M-4 extremes + final-64K search run 38198382120](https://github.com/juv4uk/sens/actions/runs/38198382120).
 [F3M-5λ nameless/de-Bruijn + real SENS runtime proof run 38260383334](https://github.com/juv4uk/sens/actions/runs/38260383334) — SUCCESS. Цей proof **не змінює** чинний F3M-5 mapping: F3M-5λ поки окремий research candidate, без production routing і без заяви exhaustive 2^40 sweep.
 [F3M-5λA: β-редукція та вкладені APPLY на реальному SENS, run 38263454497](https://github.com/juv4uk/sens/actions/runs/38263454497) — SUCCESS; boundary checks і **65 536** стратифікованих roundtrip-зразків у 40-бітному просторі, не повний exhaustive 2^40 evaluator sweep. [Код та тести](crates/sens/src/frame3_micro_v5_lambda_app.rs) · [документовані межі й докази](docs/project-modes-2026-10-12.uk.md).
+**Нові B/C/S/W:** п'ятибайтові коди та закони вище зафіксовано в точковому
+дослідному тесті `five_byte_bcsw_exact_sens_reduction`; він перевіряє
+зворотний ранг, точні 5 фізичних байтів і виконання `B I I x`, `C K 0 x`,
+`S K K x`, `W K x` для обох значень D1 справжнім evaluator SENS.
+**До нового успішного прогону це додані перевірки, а не окремо підтверджений CI proof.**
+П'ятибайтовим є **сам комбінатор**, не весь тестовий вираз із зовнішніми аргументами.
 Для цілеспрямованого відтворення без запуску всіх тестів: `cargo test --locked -p sens frame3_micro_v5_lambda_app::tests -- --nocapture`. Визначення семантики залишається за канонічним SENS, а Rust тут перевіряє носій і parity.
 
 ### Відтворення
