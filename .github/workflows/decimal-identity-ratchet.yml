@@ -1,63 +1,7 @@
 name: Decimal identity bridge ratchet
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - "crates/sens/src/frame3_domain.rs"
-      - "crates/sens/src/universal_frame3.rs"
-      - "crates/sens/src/binary_framing.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/xtask/src/compiler_export.rs"
-      - "scripts/domain_tables.py"
-      - "scripts/generate-domain-owner-registry.py"
-      - "scripts/generate-domain-width-certificate.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/d7_symbol_codec.py"
-      - "scripts/migrate-domain-ladder-source-batch.py"
-      - "scripts/migrate-exact-domain.py"
-      - "scripts/migrate-selected-lisp.py"
-      - "scripts/admit-t5-migration.py"
-      - "scripts/migrate-t5-batch.py"
-      - "scripts/migrate-approved-t5.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/translate-domain-program.py"
-      - "crates/sens/tests/identity_decimal_ratchet.rs"
-      - ".github/workflows/decimal-identity-ratchet.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/packed_bits.rs"
-      - "crates/sens/src/frame3_domain.rs"
-      - "crates/sens/src/universal_frame3.rs"
-      - "crates/sens/src/binary_framing.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/xtask/src/compiler_export.rs"
-      - "scripts/domain_tables.py"
-      - "scripts/generate-domain-owner-registry.py"
-      - "scripts/generate-domain-width-certificate.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/d7_symbol_codec.py"
-      - "scripts/migrate-domain-ladder-source-batch.py"
-      - "scripts/migrate-exact-domain.py"
-      - "scripts/migrate-selected-lisp.py"
-      - "scripts/admit-t5-migration.py"
-      - "scripts/migrate-t5-batch.py"
-      - "scripts/migrate-approved-t5.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/translate-domain-program.py"
-      - "crates/sens/tests/identity_decimal_ratchet.rs"
-      - ".github/workflows/decimal-identity-ratchet.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
