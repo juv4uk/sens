@@ -1,14 +1,31 @@
 name: SENS RED cause routing (four classes)
 
 on:
+  workflow_run:
+    workflows:
+      - 'Драбина доменів — точна ширина та механіка'
+      - 'Vertical Day immutable L0 and native smoke'
+      - 'T5 migration inventory (М0)'
+      - 'Vertical Day non-cancelling smoke'
+      - 'Physical binary SENS CLI smoke'
+      - 'audit-t5-program-syntax'
+      - 'Hosted CI'
+      - 'SENS file authority guard — physical T5 oracle'
+      - 'Двійковий SENS визначає точну D3 EQ у narrate'
+    types: [completed]
+    branches: [main]
   schedule:
-    - cron: '47 */2 * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
   actions: read
   issues: write
+
+concurrency:
+  group: sens-red-quarantine-updater
+  cancel-in-progress: false
 
 jobs:
   red-cause-contract:
@@ -20,8 +37,15 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_red_cause_router.py' -v
       - name: Focused test — aged RED routing
         run: python3 -m unittest discover -s tests -p 'test_aged_red_quarantine.py' -v
+      - name: Tests for immediate RED workflow quarantine
+        run: python3 -m unittest discover -s tests -p 'test_quarantine_red_workflows.py' -v
       - name: Audit existing cause ledger
         run: python3 scripts/red_cause_router.py audit
+      - name: Quarantine current RED workflows immediately in issue #5741
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/quarantine_red_workflows.py --issue 5741
       - name: Quarantine aged failed runs in issue #5741 (without changing checks)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
