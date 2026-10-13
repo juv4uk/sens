@@ -817,6 +817,15 @@ fn lift_head(source: &str, head: Expr, bound_names: &HashSet<String>) -> Result<
         // The ordinary parser intentionally owns exact-eight compatibility.
         // Never reinterpret that historical spelling as D8 here.
         8 => Ok(head),
+        // D10 is a 10-bit ratified mechanical coordinate, NOT an admitted
+        // callable mixed-source head. The old fallback could leave it as a
+        // decimal Number and erase the leading zeroes / domain width.
+        // Reject only executable head position: quoted data stays opaque.
+        10 => Err(LanguageError::new(
+            ErrorKind::Parse,
+            "D10 exact-domain call head is not admitted in mixed source",
+            head.span,
+        )),
         _ => Ok(head),
     }
 }
@@ -909,6 +918,94 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn всі_2046_доменних_голів_зберігають_точну_ширину_або_відмовляють() {
+        // Exhaustive finite census, not a claim that 2046 operations are
+        // executable. D1..D10: sum(2^w)=2046, sum(w*2^w)=18434 bits.
+        // When a value is identical across widths, the owner width is
+        // still decisive. Print the FIRST exact counterexample only.
+        let mut coordinates = HashSet::new();
+        let mut significant_bits = 0usize;
+        let mut accepted_short = 0usize;
+        let mut rejected_noncallable = 0usize;
+        let mut untouched_compatibility = 0usize;
+        let bound = HashSet::new();
+        for width in 1u8..=10 {
+            for payload in 0u16..(1u16 << width) {
+                assert!(coordinates.insert((width, payload)));
+                significant_bits += usize::from(width);
+                let spelling = format!("{payload:0digits$b}", digits = usize::from(width));
+                assert_eq!(spelling.len(), usize::from(width));
+                let head = Expr {
+                    kind: ExprKind::Symbol(Rc::from(spelling.as_str())),
+                    span: Span { start: 0, end: spelling.len() },
+                };
+                let result = lift_head(&spelling, head, &bound);
+                match width {
+                    3..=6 => {
+                        let lifted = result.unwrap_or_else(|e| {
+                            panic!("D{width}:{spelling} should have an exact identity: {e}")
+                        });
+                        let ExprKind::DomainIdentity(identity) = lifted.kind else {
+                            panic!("D{width}:{spelling} lost exact identity: {:?}", lifted.kind)
+                        };
+                        assert_eq!(identity.width(), usize::from(width), "D{width}:{spelling}");
+                        assert_eq!(identity.packed_bits(), payload, "D{width}:{spelling}");
+                        assert_eq!(lifted.span.end, usize::from(width));
+                        accepted_short += 1;
+                    }
+                    7 | 10 => {
+                        let err = result.expect_err(&format!(
+                            "D{width}:{spelling} was promoted to an unadmitted call"
+                        ));
+                        assert_eq!(err.kind, ErrorKind::Parse, "D{width}:{spelling}");
+                        assert_eq!(err.span.start, 0);
+                        assert_eq!(err.span.end, usize::from(width), "D{width}:{spelling}");
+                        assert!(err.message.contains(&format!("D{width}")));
+                        rejected_noncallable += 1;
+                    }
+                    1 | 2 | 8 | 9 => {
+                        let untouched = result.unwrap_or_else(|e| {
+                            panic!("D{width}:{spelling} must keep its existing compatibility path: {e}")
+                        });
+                        assert!(matches!(untouched.kind, ExprKind::Symbol(_)),
+                            "D{width}:{spelling} unexpectedly gained callability");
+                        assert_eq!(untouched.span.end, usize::from(width));
+                        untouched_compatibility += 1;
+                    }
+                    _ => unreachable!(),
+                }
+            }
+        }
+        assert_eq!(coordinates.len(), 2046);
+        assert_eq!(significant_bits, 18434);
+        assert_eq!(accepted_short, 120); // D3..D6 mechanical identity, not admission
+        assert_eq!(rejected_noncallable, 1152); // 128 D7 + 1024 D10
+        assert_eq!(untouched_compatibility, 774); // D1, D2, D8, D9
+    }
+
+    #[test]
+    fn d10_head_is_blocked_but_quoted_word_and_nested_data_remain_opaque() {
+        for spelling in ["0000000000", "0000000001", "1111111111"] {
+            let source = format!("({spelling} x)");
+            let err = parse_mixed_exact_domain(&source)
+                .expect_err("unadmitted D10 call-head must not become a decimal callable");
+            assert_eq!(err.kind, ErrorKind::Parse, "D10:{spelling}");
+            assert!(err.message.contains("D10"), "{err}");
+            assert_eq!(err.span.start, 1);
+            assert_eq!(err.span.end, 11);
+
+            let quote = format!("(001 ({spelling} x))");
+            let forms = parse_mixed_exact_domain(&quote)
+                .expect("quoted ten-bit source is data, not an executable head");
+            let ExprKind::List(parts) = &forms[0].kind else {
+                panic!("D3 quote source should remain a list");
+            };
+            assert!(is_exact_quote(&parts[0]));
+            assert!(matches!(parts[1].kind, ExprKind::List(_)));
+        }
     }
 
     #[test]
