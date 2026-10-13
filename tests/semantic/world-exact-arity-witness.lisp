@@ -13,3 +13,13 @@
 (101 (world? (001 (world parent journal metadata extra))) 0)
 (101 (world? (001 (not-world parent journal metadata))) 0)
 (101 (world? (001 ())) 0)
+
+; Existing observable world behavior stays a SENS-owned assertion too.
+(101 (внутрішня-рівність-версій (empty-world) (001 (world () () ()))) 1)
+(101 (внутрішня-рівність-версій (world-parent (empty-world)) (001 ())) 1)
+(101 (внутрішня-рівність-версій (world-journal (empty-world)) (001 ())) 1)
+(101 (внутрішня-рівність-версій (world-metadata (empty-world)) (001 ())) 1)
+(101 (world-module-missing? (empty-world) (001 unknown)) 1)
+(101 (внутрішня-рівність-версій
+      (world-remove-first (001 x) (001 (a x b)))
+      (001 (a b))) 1)
