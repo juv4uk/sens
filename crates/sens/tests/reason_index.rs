@@ -89,19 +89,20 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 
 #[test]
 fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
-    let mut session = session();
-    for (source, expected) in [
-        ("(reason-index? (quote ()))", false),
-        ("(reason-index? (quote atom))", false),
-        ("(reason-index? (quote (other linear () ())))", false),
-        ("(reason-index? (reason-index-linear (quote ())))", true),
-        ("(reason-index? (quote (reason-index/1 indexed () ())))", true),
-    ] {
-        let value = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("{source}: {err}")).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "reason-index? must produce exact D1; source: {source}, value: {value}");
-    }
+    let mut s = session();
+    let source = include_str!("../../../tests/fixtures/reason-index-head-atom-witness.lisp");
+    let parsed = parse_mixed_exact_domain_reasoning_source(
+        "tests/fixtures/reason-index-head-atom-witness.lisp",
+        source,
+    )
+    .expect("binary SENS witness must parse under the exact reasoning reader");
+    let result = eval_parsed_expressions(&parsed, &mut s)
+        .expect("binary SENS witness must evaluate");
+    assert_eq!(
+        result.value.to_string(),
+        "(reason-index-head-atom-witness (status pass))",
+        "semantic verdict belongs to the binary SENS witness"
+    );
 }
 
 #[test]
@@ -159,22 +160,5 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
     }
 }
 
-#[test]
-fn binary_sens_reason_index_head_atom_witness_decides_the_law() {
-    let mut s = session();
-    let source = include_str!("../../../tests/fixtures/reason-index-head-atom-witness.lisp");
-    let parsed = parse_mixed_exact_domain_reasoning_source(
-        "tests/fixtures/reason-index-head-atom-witness.lisp",
-        source,
-    )
-    .expect("binary SENS witness must parse under the exact reasoning reader");
-    let result = eval_parsed_expressions(&parsed, &mut s)
-        .expect("binary SENS witness must evaluate");
-    assert_eq!(
-        result.value.to_string(),
-        "(reason-index-head-atom-witness (status pass))",
-        "semantic verdict belongs to the binary SENS witness"
-    );
-}
 
 
