@@ -249,7 +249,13 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
             ExprKind::BinaryNumber(number) => Value::BinaryNumber(number.clone()),
             ExprKind::Sid(sid) => Value::Sid(*sid),
-            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
+            // D3:000 is the language's canonical empty list, not a callable/data
+            // identity when quoted. Preserve every other domain identity at data
+            // position so exact-width residents do not collapse into names/numbers.
+            ExprKind::DomainIdentity(identity) => match identity {
+                crate::DomainIdentity::D3(word) if word.word().packed_bits() == 0 => Value::Nil,
+                _ => Value::DomainIdentity(*identity),
+            },
             ExprKind::NumericBuffer(buffer) => Value::NumericBuffer(buffer.clone()),
             ExprKind::String(value) => Value::String(value.clone()),
             ExprKind::Symbol(symbol) => Value::Symbol(symbol.clone()),
@@ -356,6 +362,30 @@ mod exact_d4_define_arity_tests {
             kind: ExprKind::Symbol(Rc::from("ім'я")),
             span: Span::default(),
         }
+    }
+
+    #[test]
+    fn quote_of_canonical_d3_empty_coordinate_is_structural_nil() {
+        let empty = Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(
+                crate::Bija3::from_word(crate::Bit3::new(0).unwrap()),
+            )),
+            span: Span::default(),
+        };
+        assert!(matches!(quoted(&empty).unwrap(), Value::Nil));
+    }
+
+    #[test]
+    fn quote_preserves_nonempty_d3_domain_identity() {
+        let quote = crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap());
+        let expression = Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(quote)),
+            span: Span::default(),
+        };
+        assert!(matches!(
+            quoted(&expression).unwrap(),
+            Value::DomainIdentity(crate::DomainIdentity::D3(value)) if value == quote
+        ));
     }
 
     #[test]
