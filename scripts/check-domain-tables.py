@@ -158,7 +158,7 @@ def validate_d10_catalogue():
         fail("D10 pointer has no canonical_current")
     source_path = current.get("path")
     if not isinstance(source_path, str) or re.fullmatch(
-        r"knowledge/d10-v[0-9]+-semantic-inventory\\.json", source_path
+        r"knowledge/d10-v[0-9]+-semantic-inventory\.json", source_path
     ) is None:
         fail(f"D10 canonical source path is invalid: {source_path!r}")
     source_bytes = (ROOT / source_path).read_bytes()
@@ -319,7 +319,7 @@ def main() -> int:
     total += 512
 
     validate_d10_grid_guard_self_test()
-    d10_rows = validate_d10_catalogue()
+    validate_d10_catalogue()
     # D10 is owner-ratified as a whole 10-bit domain, while its 1024 rows are
     # not individually ratified residents and have no physical T5 authorization.
     # Keep them out of the D1-D9 "current resident" total and cross-domain
