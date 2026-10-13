@@ -40,6 +40,38 @@ def parse_words(source: str) -> list[str]:
     return words
 
 
+def encode_typed_domain_words(words: list[tuple[str, str]]) -> bytes:
+    """Pack *explicitly typed* current D1–D9 words, without widening.
+
+    This is a transport boundary, NOT semantic or callable admission.
+    D2 is syntax, D7 is data; matching numeric W8 bits never authorizes SID8.
+    D10's 1024-coordinate owner codebook is ratified, but this typed
+    PROGRAM admission stays pending. The separate raw W10/W11 physical
+    transport remains valid and must not be disabled.
+    """
+    if not words:
+        raise SensT5Error("empty exact-domain word stream")
+    accepted = []
+    for index, item in enumerate(words, 1):
+        if not isinstance(item, tuple) or len(item) != 2:
+            raise SensT5Error(f"word {index}: require (domain, exact bits)")
+        domain, bits = item
+        if domain == "D10":
+            raise SensT5Error(
+                f"word {index}: D10_RUNTIME_HOLD: 10-bit identity is not typed program admission"
+            )
+        if not isinstance(domain, str) or not re.fullmatch(r"D[1-9]", domain):
+            raise SensT5Error(
+                f"word {index}: explicit current D1..D9 tag required; SID8 cannot be inferred"
+            )
+        width = int(domain[1:])
+        if not isinstance(bits, str) or len(bits) != width or re.fullmatch(r"[01]+", bits) is None:
+            raise SensT5Error(
+                f"word {index}: {domain} requires exactly {width} binary digits"
+            )
+        accepted.append(bits)
+    return encode_words(accepted)
+
 def encode_words(words: list[str]) -> bytes:
     if not words:
         raise SensT5Error("empty program")
