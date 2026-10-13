@@ -1,21 +1,39 @@
-//! B2: presentation must preserve the semantic distinction established by
-//! lib/result-status.my instead of collapsing every non-proof into one phrase.
+//! B2: presentation regressions use the current exact-domain source readers.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, load_core_library, parse_exact_domain_source, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_reasoning_source, Session,
+};
 
 fn eval_outcome_narration(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/result-status.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/narrate.lisp"), &mut session).unwrap();
-    eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
+    load_core_library(&mut session)
+        .expect("canonical Core4 bootstrap must load");
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+    ] {
+        let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+            .unwrap_or_else(|error| panic!("{path}: exact reasoning reader: {error}"));
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("{path}: exact reasoning evaluator: {error}"));
+    }
+    for (path, source) in [
+        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
+        ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
+    ] {
+        let parsed = parse_exact_domain_source(source)
+            .unwrap_or_else(|error| panic!("{path}: exact-domain reader: {error}"));
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("{path}: exact-domain evaluator: {error}"));
+    }
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("fixture exact reader: {error}\nsource: {source}"));
+    eval_parsed_expressions(&expressions, &mut session)
+        .unwrap_or_else(|error| panic!("evaluation failed: {error}\nsource: {source}"))
         .value
         .to_string()
 }
-
 #[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"

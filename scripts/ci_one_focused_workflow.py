@@ -5,7 +5,8 @@ from pathlib import Path
 import re
 import sys
 
-WORKFLOWS = Path(__file__).resolve().parents[1] / ".github/workflows"
+ROOT = Path(__file__).resolve().parents[1]
+WORKFLOWS = ROOT / ".github/workflows"
 ON = re.compile(r"""^['"]?on['"]?:\s*(.*)$""")
 EVENT = re.compile(r"^  ([\w-]+):")
 
@@ -38,6 +39,78 @@ def events(source):
     raise ValueError("відсутнє on:")
 
 
+
+def verify_migration_source_shapes():
+    """Mechanical guard only: exact-domain source boundaries, never a truth table."""
+    errors = []
+    try:
+        reason = (ROOT / "lib/reason.lisp").read_text(encoding="utf-8")
+        start = reason.find("(0011 reason-index?")
+        end = reason.find("(0011 міркування-пошук-кошика", start)
+        if end < 0:
+            end = reason.find("(0011 reason-index-linear", start)
+        if start < 0 or end < 0:
+            errors.append("reason.lisp: cannot isolate reason-index? production form")
+        else:
+            body = reason[start:end]
+            ordered = [
+                "((010 value) #d1:0)",
+                "((0101 value) #d1:0)",
+                "((010 (100 value))",
+                "((101 (100 value) *reason-index-schema*)",
+            ]
+            positions = [body.find(token) for token in ordered]
+            if any(position < 0 for position in positions) or positions != sorted(positions):
+                errors.append(
+                    "reason.lisp: require exact D1 atom-reject, D4 NULL, "
+                    "D3 ATOM(CAR), then D3 EQ in that order"
+                )
+    except OSError as exc:
+        errors.append(f"reason.lisp: {exc}")
+
+    try:
+        source = (ROOT / "lib/narrate.lisp").read_text(encoding="utf-8")
+        active = "\n".join(
+            line for line in source.splitlines() if not line.lstrip().startswith(";")
+        )
+        start = active.find("(0011 narrate-proper-list?")
+        end = active.find("(0011 narrate-fact", start)
+        if start < 0 or end < 0:
+            errors.append("narrate.lisp: cannot isolate structural arity helpers")
+        else:
+            helpers = active[start:end]
+            required = (
+                "(0011 narrate-proper-list?",
+                "(0011 narrate-list-exact-two?",
+                "(0011 narrate-list-exact-three?",
+                "((010 value)",
+                "((0101 value)",
+                "(011 value)",
+            )
+            for token in required:
+                if token not in helpers:
+                    errors.append(f"narrate.lisp: required exact-width structure missing: {token}")
+            if "000000" in helpers or "11110111" in helpers:
+                errors.append("narrate.lisp: D6 LENGTH or D8 EQUAL returned to arity helpers")
+            if "#d1:" in helpers:
+                errors.append("narrate.lisp: compatibility D1 projection used instead of raw one-bit words")
+        if "(0011 narrate-outcome-arity?" in active:
+            errors.append("narrate.lisp: legacy arity function still present")
+    except OSError as exc:
+        errors.append(f"narrate.lisp: {exc}")
+
+    for error in errors:
+        print("SENS_SOURCE_BOUNDARY_FAIL", error, flush=True)
+    if not errors:
+        print(
+            "SENS_SOURCE_BOUNDARY_PASS "
+            "reason-index?=D1/D4/D3-before-EQ; "
+            "narrate=raw-D1+D3/D4-without-D6/D8",
+            flush=True,
+        )
+    return errors
+
+
 def verify():
     paths = sorted([*WORKFLOWS.glob("*.yml"), *WORKFLOWS.glob("*.yaml")])
     if not paths:
@@ -66,6 +139,7 @@ def verify():
             errors.append(f"{path.name}: {exc}")
     if auto != ["ci.yml"]:
         errors.append(f"очікується один ci.yml, знайдено {auto}")
+    errors.extend(verify_migration_source_shapes())
     for error in errors:
         print("SENS_CI_BUDGET_FAIL", error, flush=True)
     if errors:

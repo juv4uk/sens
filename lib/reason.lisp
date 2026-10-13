@@ -32,7 +32,13 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ((101 (100 value) *reason-index-schema*) #d1:1)
+      ((0101 value) #d1:0)
+      ; An ordinary rule list can start with a compound CAR.
+      ; D3 EQ accepts atoms only, so establish ATOM(CAR(value)) first.
+      ((010 (100 value))
+       (110
+         ((101 (100 value) *reason-index-schema*) #d1:1)
+         (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
 ; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
