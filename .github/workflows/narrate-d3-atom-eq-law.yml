@@ -1,6 +1,10 @@
-# КАРАНТИН 2026-10-13: тестові очікування D3 EQ не підтверджені канонічним SENS.
-# Причина: некоректний тестовий контракт. Відновлення — лише після явної перевірки.
-# Доказ: https://github.com/juv4uk/sens/actions/runs/38451690826
+# КАРАНТИН 2026-10-13: недовірений тест D3 EQ.
+# Доказ попередньої YAML-відмови: https://github.com/juv4uk/sens/actions/runs/38451690826
+# Цей workflow не може виконати тест або виділити runner.
+# Відновлення можливе тільки після явного дозволу власника і перевірки
+# фізичної двійкової SENS-програми канонічним оракулом SENS.
+# Застарілі .bits -> .lisp копії, зовнішні truth-таблиці та хибні
+# очікування видалено, а не приховано за умовою if.
 name: КАРАНТИН — D3 EQ narrate (недовірені тести)
 
 on:
@@ -11,45 +15,8 @@ permissions:
 
 jobs:
   narrate-d3-exact:
-    # Карантин без виділення runner: тестові очікування потребують перевірки SENS-оракулом.
     if: ${{ false }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Підготувати незмінний журнал відмов
-        shell: bash
-        run: |
-          : > "$RUNNER_TEMP/narrate-diagnostic.jsonl"
-      - name: Контракт діагностики має відкидати відсутні поля
-        run: python3 scripts/ci_failure_contract.py self-test
-      - name: Зібрати механізм виконання SENS і діагностувати збій
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/ci_failure_contract.py run \
-            --test-id narrate-sens-cli-build \
-            --layer transport \
-            --fixture tests/semantic/narrate-d3-atom-eq-law.bits \
-            --report-file "$RUNNER_TEMP/narrate-diagnostic.jsonl" \
-            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
-      - name: Виконати двійкові закони через контрольовану діагностику
-        shell: bash
-        run: |
-          set -euo pipefail
-          diagnostic='scripts/ci_failure_contract.py'
-          report="$RUNNER_TEMP/narrate-diagnostic.jsonl"
-          for kind in law mutant; do
-            fixture="tests/semantic/narrate-d3-atom-eq-$kind.bits"
-            program="$RUNNER_TEMP/narrate-$kind.sens"
-            cp "$fixture" "$RUNNER_TEMP/narrate-$kind.lisp"
-            python3 "$diagnostic" run --test-id "narrate-$kind-encode" --layer encode --fixture "$fixture" --report-file "$report" -- target/debug/sens-trit encode "$RUNNER_TEMP/narrate-$kind.lisp"
-            python3 "$diagnostic" run --test-id "narrate-$kind-open" --layer transport --fixture "$fixture" --expected-file "$fixture" --report-file "$report" -- target/debug/sens-trit open "$program"
-            if [ "$kind" = law ]; then printf '1\n' > "$RUNNER_TEMP/narrate-expected"; else printf '0\n' > "$RUNNER_TEMP/narrate-expected"; fi
-            python3 "$diagnostic" run --test-id "narrate-$kind-eval" --layer eval --fixture "$fixture" --expected-file "$RUNNER_TEMP/narrate-expected" --report-file "$report" -- target/debug/sens "$program"
-            python3 "$diagnostic" run --test-id "narrate-$kind-trit-eval" --layer eval --fixture "$fixture" --expected-file "$RUNNER_TEMP/narrate-expected" --report-file "$report" -- target/debug/sens-trit eval "$program"
-          done
-      - name: UNINFORMATIVE-OUTPUT — перевірити всі червоні діагностики
-        if: always()
-        run: python3 scripts/ci_failure_contract.py scan --report-file "$RUNNER_TEMP/narrate-diagnostic.jsonl" --allow-empty
+      - name: Карантин — запуск заборонено
+        run: exit 1
