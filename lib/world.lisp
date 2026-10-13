@@ -288,7 +288,7 @@
   (1110 (001 cond)
         (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
               (1110 (001 quote) (001 Conflict-detected)))
-        (1110 (001 t)
+        (1110 #d1:1
               (1110 (001 def) (001 *knowledge-journal*)
                     (1110 (001 world-journal)
                           (1110 (001 world-tell-all)
@@ -340,7 +340,7 @@
                                                 (1110 (001 second)
                                                       (001 *legacy-knowledge-transition*))))
                                     (1110 (001 00000101) (001 *legacy-knowledge-transition*)))))
-                      (1110 (001 t)
+                      (1110 #d1:1
                             (1110 (001 00000101) (001 *legacy-knowledge-transition*))))))))
 
 (00001010 advise (module-name clause)
