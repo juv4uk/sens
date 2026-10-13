@@ -1,0 +1,53 @@
+name: Двійковий SENS — структурний закон відступу
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/dispatch/native-first-execute.lisp"
+      - "tests/semantic/native-first-execute-fallback-law.bits"
+      - "tests/semantic/native-first-execute-fallback-mutant.bits"
+      - ".github/workflows/native-first-execute-fallback-d1.yml"
+  pull_request:
+    paths:
+      - "lib/machine/dispatch/native-first-execute.lisp"
+      - "tests/semantic/native-first-execute-fallback-law.bits"
+      - "tests/semantic/native-first-execute-fallback-mutant.bits"
+      - ".github/workflows/native-first-execute-fallback-d1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sens-native-fallback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Зібрати наявний двійковий SENS та інтеграційний механізм
+        run: cargo build --locked -p sens-cli --bin sens-trit --bin sens
+      - name: SENS сам перевіряє структуру, COND і однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/native-first-execute-fallback-law.bits "$RUNNER_TEMP/law.lisp"
+          cp tests/semantic/native-first-execute-fallback-mutant.bits "$RUNNER_TEMP/mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/mutant.lisp"
+          target/debug/sens-trit eval "$RUNNER_TEMP/law.sens" > "$RUNNER_TEMP/law.out"
+          test "$(cat "$RUNNER_TEMP/law.out")" = "1"
+          if target/debug/sens-trit eval "$RUNNER_TEMP/mutant.sens" > "$RUNNER_TEMP/mutant.out" 2> "$RUNNER_TEMP/mutant.err"; then
+            echo "ПОМИЛКА: змінений на один біт SENS виконав заборонену гілку"
+            exit 1
+          fi
+          grep -Fq "not callable" "$RUNNER_TEMP/mutant.err"
+          test ! -s "$RUNNER_TEMP/mutant.out"
+          echo "SENS сам обчислив позитивний закон і відхилив мутант"
+      - name: Уже наявний інтеграційний свідок відступу та native-route
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="$(target/debug/sens tests/fixtures/native-first-execution-witness.lisp)"
+          test "$result" = "(pass pass pass pass pass)"
