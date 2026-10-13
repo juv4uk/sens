@@ -147,7 +147,7 @@ def verify():
     print("SENS_CI_BUDGET_PASS " + json.dumps({
         "workflow_files": len(paths),
         "automatic_workflows": auto,
-        "semantic_authority": "physical_binary_SENS",
+        "ci_role": "mechanical_workflow_budget_only",
     }, ensure_ascii=False, sort_keys=True), flush=True)
     return 0
 
