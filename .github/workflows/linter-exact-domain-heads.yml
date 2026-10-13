@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "lib/linter.lisp"
+      - "crates/sens/tests/lint_gate.rs"
       - "tests/test_linter_domain_head_cutover.py"
       - ".github/workflows/linter-exact-domain-heads.yml"
   workflow_dispatch:
