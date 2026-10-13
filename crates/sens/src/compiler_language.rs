@@ -822,6 +822,9 @@ pub fn verify_compiler_program_artifact_from_sens(
         "required-capabilities",
         "artifact-status",
     ];
+    // Seven admitted fields require seven bits, not a heap-allocated
+    // HashSet. A repeated bit rejects ambiguous first-/last-wins fields.
+    let mut seen_fields = 0u8;
     for row in &rows[1..] {
         let parts = compiler_artifact_list(row, "compiler artifact field")?;
         if parts.len() != 2 {
@@ -834,11 +837,18 @@ pub fn verify_compiler_program_artifact_from_sens(
                 "compiler artifact field name must be a symbol",
             ));
         };
-        if !ALLOWED_FIELDS.contains(&name.as_ref()) {
+        let Some(index) = ALLOWED_FIELDS.iter().position(|&allowed| allowed == name.as_ref()) else {
             return Err(invalid_projection(format!(
                 "compiler artifact contains unsupported field {name}"
             )));
+        };
+        let bit = 1u8 << index;
+        if seen_fields & bit != 0 {
+            return Err(invalid_projection(format!(
+                "duplicate compiler artifact field {name}"
+            )));
         }
+        seen_fields |= bit;
     }
 
     let kind = compiler_artifact_field(&rows[1..], "artifact-kind")?;
@@ -1019,6 +1029,20 @@ pub fn compiler_execution_role_from_sens(
 mod tests {
     use super::*;
 
+    // The compiler nucleus self-traverses an entire canonical source corpus.
+    // Keep all proof assertions and run this intentionally deep witness on
+    // a named test thread with a sufficient explicit stack. This does NOT
+    // change the interpreter or grant unbounded recursion in production.
+    fn run_full_program_witness(test: impl FnOnce() + Send + 'static) {
+        std::thread::Builder::new()
+            .name("сенс-компілятор-доказ".to_string())
+            .stack_size(64 * 1024 * 1024)
+            .spawn(test)
+            .expect("cannot create compiler proof thread")
+            .join()
+            .expect("compiler proof failed or panicked");
+    }
+
     fn d3(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D3(
             crate::Bija3::from_word(crate::Bit3::new(raw).expect("D3 test word")),
@@ -1144,6 +1168,12 @@ mod tests {
             .expect("D4 semantic input")
             .expect("LAMBDA is in compiler closure");
         assert_eq!(d4_input.lowering_role, CompilerLoweringRole::LambdaForm);
+        // Same numeric payload is not the same operation: D3:010 != D4:0010.
+        assert_eq!(d3_input.identity.packed_bits(), d4_input.identity.packed_bits());
+        assert_eq!(d3_input.identity.width(), 3);
+        assert_eq!(d4_input.identity.width(), 4);
+        assert_ne!(d3_input.identity, d4_input.identity);
+        assert_ne!(d3_input.proof_ref, d4_input.proof_ref);
         assert_eq!(d4_input.authority_ref, COMPILER_ROLE_LAW_REF);
         assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
         assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
@@ -1200,7 +1230,48 @@ mod tests {
     }
 
     #[test]
+    fn whole_program_artifact_verifier_rejects_duplicate_fields_before_execution() {
+        for field in [
+            "artifact-kind", "program-wire-sha256", "semantic-requests-sha256",
+            "authority-provenance", "semantic-requests", "required-capabilities",
+            "artifact-status",
+        ] {
+            let repeated = Value::Symbol(Rc::from(field));
+            let artifact = Value::list([
+                Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+                Value::list([repeated.clone(), Value::Nil]),
+                Value::list([repeated, Value::Nil]),
+            ]);
+            let error = verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &"00".repeat(32),
+                "0123456789abcdef0123456789abcdef01234567",
+            )
+            .expect_err("duplicate authority field must be rejected");
+            assert_eq!(error.kind, ErrorKind::InvalidForm);
+            assert!(
+                error.to_string().contains("duplicate compiler artifact field"),
+                "unexpected duplicate-field error for {field}: {error}"
+            );
+        }
+
+        let unknown = Value::list([
+            Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+            Value::list([Value::Symbol(Rc::from("unknown-backend")), Value::Nil]),
+        ]);
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &unknown,
+                &"00".repeat(32),
+                "0123456789abcdef0123456789abcdef01234567",
+            )
+            .unwrap_err().to_string().contains("unsupported field")
+        );
+    }
+
+    #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
+        run_full_program_witness(|| {
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
@@ -1249,11 +1320,16 @@ mod tests {
                 proof_ref_for_lowering_role(request.lowering_role)
             );
         }
+        });
     }
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        run_full_program_witness(|| {
+        // The compiler source is D3/D4: the historical generic parser may
+        // reintroduce legacy W8 nodes before the artifact gets verified.
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses with exact domain widths");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1293,10 +1369,12 @@ mod tests {
             verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision)
                 .is_err()
         );
+        });
     }
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
+        run_full_program_witness(|| {
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
             .expect("compiler nucleus parses through exact-domain seam");
         let lowered = crate::lower_program(&parsed);
@@ -1407,6 +1485,7 @@ mod tests {
                 "whole artifact leaked backend policy: {forbidden}"
             );
         }
+        });
     }
 
     #[test]
