@@ -76,8 +76,12 @@
     (110
       ((010 plan)
        (001 distinct))
-      ((101 (100 plan) tag)
-       (001 same))
+      ((010 (100 plan))
+       (110
+         ((101 (100 plan) tag)
+          (001 same))
+         (#d1:1
+          (001 distinct))))
       (#d1:1
        (001 distinct)))))
 
