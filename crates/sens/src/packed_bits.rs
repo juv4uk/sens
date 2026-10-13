@@ -708,6 +708,45 @@ mod tests {
     }
 
     #[test]
+    fn three_byte_window_preserves_d10_and_reports_every_bit_of_cost() {
+        // 7 + 10 + 3 = 20 біт, рівно три байти і лише 4 кінцеві
+        // невикористані біти. Жодного вирівнювання між координатами.
+        let d10 = DomainCoordinate::new(10, 0b10_1010_0101).unwrap();
+        let d3 = DomainCoordinate::new(3, 0b111).unwrap();
+        let mut packer = BitPacker::new();
+        let prefix = packer.push(crate::Bit7::new(0b1010101).unwrap());
+        let middle = packer.push_coordinate(d10);
+        let suffix = packer.push_coordinate(d3);
+        let packed = packer.finish();
+
+        assert_eq!((prefix, middle, suffix), (0, 7, 17));
+        assert_eq!(packed.bit_len(), 20, "семантичні біти: 7+10+3");
+        assert_eq!(packed.byte_len(), 3, "не три байти на слово");
+        assert_eq!(packed.valid_bits_in_last_byte(), 4);
+        assert_eq!(packed.read_coordinate(middle, 10), Some(d10));
+        assert_eq!(packed.read_coordinate(suffix, 3), Some(d3));
+        assert_eq!(packed.read_coordinate(middle, 9).unwrap().width(), 9,
+                   "ширину задає граматика, не випадковий payload");
+
+        // Пошкодження сусіднього D3 змінює лише D3, а не десять бітів D10.
+        let (bytes, bit_len) = packed.into_parts();
+        let mut neighbor_changed = bytes.clone();
+        neighbor_changed[2] ^= 0b0100_0000;
+        let neighbor = PackedBitstream::from_parts(neighbor_changed, bit_len).unwrap();
+        assert_eq!(neighbor.read_coordinate(middle, 10), Some(d10));
+        assert_ne!(neighbor.read_coordinate(suffix, 3), Some(d3));
+
+        // Невикористаний четвертий молодший біт не стає ще одним словом.
+        let mut bad_padding = bytes;
+        bad_padding[2] |= 1;
+        assert!(PackedBitstream::from_parts(bad_padding, bit_len).is_none());
+        assert!(neighbor.read_coordinate(middle + 1, 10).is_some(),
+                "читач голих бітів не знає меж: лише явний розклад ширин");
+        assert!(neighbor.read_coordinate(suffix + 1, 3).is_none(),
+                "за межами двадцяти змістових бітів читання заборонене");
+    }
+
+    #[test]
     fn domain_coordinate_reader_fails_closed_on_bad_width_and_noncanonical_padding() {
         let mut packer = BitPacker::new();
         let start = packer.push_coordinate(DomainCoordinate::new(10, 0b10_1010_0101).unwrap());
