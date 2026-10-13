@@ -1,4 +1,8 @@
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_program,
+    parse_mixed_exact_domain, parse_mixed_exact_domain_fs_source,
+    parse_mixed_exact_domain_utf8_source, Session,
+};
 use std::fs;
 
 /// `read-file` is language-owned (lib/fs.lisp) over the host's
@@ -14,13 +18,25 @@ fn linter_gate() {
 
     // Evaluate the libraries directly to load them into the environment
     let core_src = fs::read_to_string("../../lib/core.lisp").unwrap();
-    eval_program(&core_src, &mut session).unwrap();
+    eval_pinned_legacy_core_source("lib/core.lisp", &core_src, &mut session)
+        .expect("pin legacy Core source to exact domain reader");
     let utf8_src = fs::read_to_string("../../lib/utf8.lisp").unwrap();
-    eval_program(&utf8_src, &mut session).unwrap();
+    let utf8_forms = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &utf8_src)
+        .expect("pin UTF8 source to exact domain reader");
+    eval_parsed_expressions(&utf8_forms, &mut session).expect("load UTF8");
     let fs_src = fs::read_to_string("../../lib/fs.lisp").unwrap();
-    eval_program(&fs_src, &mut session).unwrap();
+    let fs_forms = parse_mixed_exact_domain_fs_source("lib/fs.lisp", &fs_src)
+        .expect("pin FS source to exact domain reader");
+    eval_parsed_expressions(&fs_forms, &mut session).expect("load FS");
     let linter_src = fs::read_to_string("../../lib/linter.lisp").unwrap();
-    eval_program(&linter_src, &mut session).unwrap();
+    // The linter owns exact D3/D4/D6 heads.  The historical eval_program
+    // reader treats e.g. 0011 as an ordinary integer; that route is NOT
+    // allowed to reinterpret domain-qualified source as legacy numeric data.
+    // Reuse the existing mixed typed-reader, not a new byte/semantic table.
+    let linter_forms = parse_mixed_exact_domain(&linter_src)
+        .expect("linter source preserves exact D1-D10 head widths");
+    eval_parsed_expressions(&linter_forms, &mut session)
+        .expect("load exact-domain linter");
 
     // Check if linter.my works by defining the threshold script
     let runner_src = r#"
@@ -31,11 +47,12 @@ fn linter_gate() {
             (cond
               ((атом? remaining) all-violations)
               ((атом? (quote fallback))
-               (let ((violations (lint-check (car remaining) thresholds)))
-                 (cond
-                   ((атом? violations) (check-file-loop path (cdr remaining) all-violations))
-                   ((атом? (quote fallback))
-                    (check-file-loop path (cdr remaining) (cons (list path (car remaining) violations) all-violations)))))))))
+               ((lambda (violations)
+                  (cond
+                    ((атом? violations) (check-file-loop path (cdr remaining) all-violations))
+                    ((атом? (quote fallback))
+                     (check-file-loop path (cdr remaining) (cons (list path (car remaining) violations) all-violations)))))
+                (lint-check (car remaining) thresholds))))))
 
         (def check-file
           (lambda (path)
