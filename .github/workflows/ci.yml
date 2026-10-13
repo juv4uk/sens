@@ -119,6 +119,20 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Фізичний T5-оракул — справжній sens-trit читає фізичний SENS (не Python-істина)
+        id: t5-oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum target/debug/sens-trit tests/test_approved_t5_transaction.py
+          SENS_TRIT_BIN="$PWD/target/debug/sens-trit" \
+          python3 scripts/ci_failure_contract.py run \
+            --test-id approved-t5-physical-oracle \
+            --layer encode \
+            --fixture tests/test_approved_t5_transaction.py \
+            --report-file "$report" \
+            -- python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
       - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
         if: github.event_name == 'workflow_dispatch'
@@ -559,6 +573,7 @@ jobs:
           CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
           QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
           TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
+          T5_ORACLE_OUTCOME: ${{ steps.t5-oracle.outcome }}
           FRAME3_OUTCOME: ${{ steps.frame3-bcsw.outcome }}
           MIGRATOR_OUTCOME: ${{ steps.migrator-optimized.outcome }}
         run: |
@@ -599,7 +614,7 @@ jobs:
             --require unify-observe-d1-law \
             --require unify-observe-d1-mutant || native_rc=$?
           diagnostic_rc=0
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$T5_ORACLE_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
             python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
