@@ -1,0 +1,33 @@
+name: "Міграція обчислювача: точний домен і сумісний backend"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/canon.rs"
+      - ".github/workflows/eval-domain-primitive-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/eval/canon.rs"
+      - ".github/workflows/eval-domain-primitive-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  eval-canon-sparse-compat:
+    name: "EVAL: точні домени + 45 явних сумісних механізмів"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Тести точного D3/D4/D9 й негативний аудит 256 історичних байтів"
+        run: cargo test --locked -p sens --lib eval::canon::exact_domain_primitive_tests -- --nocapture
+      - name: "Переконатися, що тести не перезаписали код"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
