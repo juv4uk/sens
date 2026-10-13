@@ -411,11 +411,22 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
 /// through the already existing five-trits-per-byte T5 codec.
 pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
     let words = keyboard_d7_words(source)?;
-    let packed = encode_ternary_words(&words)?;
-    if decode_d7_uk_t5(&packed)? != source {
-        return Err(D7T5Error::AmbiguousText);
+    // The same owner D7 table already defines the reverse projection.
+    // Check each exact W7 coordinate before packing; decoding the complete
+    // packed file here would add a redundant T5 pass and allocate a String.
+    for (character, word) in source.chars().zip(words.iter()) {
+        let BinarySourceWord::W7(cell) = word else {
+            return Err(D7T5Error::NonD7Word);
+        };
+        let canonical = crate::semantic_registry::d7_uk_keyboard_glyph(cell.packed_bits())
+            .ok_or(D7T5Error::UnrenderableD7Cell)?;
+        let mut utf8 = [0u8; 4];
+        let input: &str = character.encode_utf8(&mut utf8);
+        if canonical != input {
+            return Err(D7T5Error::AmbiguousText);
+        }
     }
-    Ok(packed)
+    Ok(encode_ternary_words(&words)?)
 }
 
 /// Strictly decode *only* W7 words with admitted Ukrainian keyboard glyphs.

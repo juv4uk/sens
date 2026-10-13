@@ -73,6 +73,26 @@ fn d7_stack_glyph_projection_preserves_t5_and_multibyte_error_offset() {
                Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 }));
 }
 
+/// Точковий фізичний свідок: однаковий потік точних W7 слів має
+/// ідентичні T5 байти навіть за сотень UTF-8 символів/меж п'яти тритів.
+/// Невідомий символ після них повідомляє точний UTF-8 byte_offset.
+#[test]
+fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
+    let segment = "Кіт! (.)\\n";
+    let source = segment.repeat(31);
+    let segment_words = decode_ternary_words(&encode_d7_uk_t5(segment).unwrap()).unwrap();
+    let expected_words: Vec<_> = (0..31).flat_map(|_| segment_words.iter().copied()).collect();
+    let packed = encode_d7_uk_t5(&source).unwrap();
+    assert_eq!(packed, encode_ternary_words(&expected_words).unwrap(),
+               "T5 bytes must match the independent W7 encoding");
+    let actual = decode_ternary_words(&packed).unwrap();
+    assert_eq!(actual, expected_words, "all W7 bits and boundaries survive");
+    assert!(actual.iter().all(|word| word.width() == 7), "no implicit D2/D8");
+    assert_eq!(decode_d7_uk_t5(&packed).unwrap(), source);
+    assert_eq!(encode_d7_uk_t5(&(source.clone() + "🙂")),
+               Err(D7T5Error::UnassignedKeyboardGlyph { byte_offset: source.len() }));
+}
+
 #[test]
 fn invalid_unicode_or_bad_physical_byte_fails_closed() {
     assert!(matches!(encode_d7_uk_t5("🙂"), Err(D7T5Error::UnassignedKeyboardGlyph { .. })));
