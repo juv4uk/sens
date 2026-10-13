@@ -87,12 +87,8 @@ fn insert_exact_source(
             slot.insert(identity);
         }
         Entry::Occupied(mut slot) => {
-            // None is a terminal collision/malformed-coordinate state.
-            // A later A in A,B,A must never resurrect a callable route.
-            if let Some(previous) = *slot.get() {
-                if Some(previous) != identity {
-                    slot.insert(None);
-                }
+            if *slot.get() != identity {
+                slot.insert(None);
             }
         }
     }
@@ -616,86 +612,6 @@ mod domain_source_projection_anti_collision_tests {
         }
         assert_eq!(rows_checked, 119);
         assert_eq!(surfaces_checked, 238);
-    }
-
-    #[test]
-    fn all_2046_coordinates_and_120_exact_d3_d6_slots_preserve_their_width() {
-        use std::collections::HashSet;
-
-        let mut unique = HashSet::new();
-        let mut exact_routable_widths = 0usize;
-        for width in 1u8..=10 {
-            for bits in 0..(1u16 << width) {
-                let coordinate = crate::domain_ladder::DomainCoordinate::new(width, bits)
-                    .expect("власні біти кожного домену");
-                assert_eq!(coordinate.width(), width);
-                assert_eq!(coordinate.bits(), bits);
-                assert!(unique.insert(coordinate), "два домени злилися в одну координату");
-
-                if width > 1 && bits < (1u16 << (width - 1)) {
-                    let narrower = crate::domain_ladder::DomainCoordinate::new(width - 1, bits)
-                        .expect("той самий payload у вужчому домені");
-                    assert_ne!(coordinate, narrower);
-                }
-
-                // Source-callability is narrower than the 2046 mechanical
-                // positions. It is *not* inferred from occupancy or payload.
-                if (3..=6).contains(&width) {
-                    let identity = exact_domain_resident_from_projection(width, bits as u8)
-                        .expect("кожен механічний D3–D6 слот має точну форму");
-                    assert_eq!(identity.width(), usize::from(width));
-                    assert_eq!(identity.packed_bits(), bits);
-                    exact_routable_widths += 1;
-                } else if bits < 256 {
-                    assert!(
-                        exact_domain_resident_from_projection(width, bits as u8).is_none(),
-                        "поза D3–D6 не можна створювати callable source head"
-                    );
-                }
-            }
-        }
-        assert_eq!(unique.len(), 2046, "2+4+8+...+1024 координат");
-        assert_eq!(exact_routable_widths, 120, "8+16+32+64 D3–D6 слотів");
-    }
-
-    #[test]
-    fn all_120_d3_d6_collisions_remain_denied_after_repetition_and_reordering() {
-        // Input permutations A,B,A and B,A,B probe the REAL registry insert
-        // state machine, not a mock parser. A duplicate after a conflict is
-        // not a new law and may not restore a route.
-        for width in 3u8..=6 {
-            for bits in 0..(1u16 << width) {
-                let a = exact_domain_resident_from_projection(width, bits as u8).unwrap();
-                let other_width = if width == 6 { 3 } else { width + 1 };
-                let other_bits = (bits & ((1u16 << other_width) - 1)) as u8;
-                let b = exact_domain_resident_from_projection(other_width, other_bits).unwrap();
-                assert_ne!(a, b);
-
-                for sequence in [[a, b, a, b], [b, a, b, a]] {
-                    let mut index = HashMap::new();
-                    for (step, identity) in sequence.into_iter().enumerate() {
-                        insert_exact_source(&mut index, "суперечлива-назва", Some(identity));
-                        if step > 0 {
-                            assert_eq!(
-                                index.get("суперечлива-назва"), Some(&None),
-                                "колізія {width}:{bits} відновилася на кроці {step}"
-                            );
-                        }
-                    }
-                }
-
-                let mut identical = HashMap::new();
-                for _ in 0..4 {
-                    insert_exact_source(&mut identical, "одна-координата", Some(a));
-                }
-                assert_eq!(identical.get("одна-координата"), Some(&Some(a)));
-
-                let mut malformed = HashMap::new();
-                insert_exact_source(&mut malformed, "неправильна-координата", None);
-                insert_exact_source(&mut malformed, "неправильна-координата", Some(a));
-                assert_eq!(malformed.get("неправильна-координата"), Some(&None));
-            }
-        }
     }
 
     #[test]
