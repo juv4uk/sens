@@ -153,8 +153,10 @@ impl BinaryNumber {
         if other.numeric_domain_width != Some(width) {
             return None;
         }
-        let product = Self::normalize(self.bits.clone())
-            .mul(&Self::normalize(other.bits.clone()));
+        // Dn admission was already checked above. The magnitude operations
+        // read canonical bits directly; their result is re-admitted below.
+        // No duplicate normalize/clone/decimal bridge on this hot path.
+        let product = self.mul(other);
         let selected = if product.width() > width {
             width.checked_mul(2)?
         } else {
@@ -176,8 +178,9 @@ impl BinaryNumber {
         if other.numeric_domain_width != Some(width) {
             return None;
         }
-        let difference = Self::normalize(self.bits.clone())
-            .checked_sub(&Self::normalize(other.bits.clone()))?;
+        // Both operands have the same exact Dn tag; ordinary bit ordering
+        // and subtraction therefore agree without stripping/rebuilding them.
+        let difference = self.checked_sub(other)?;
         let mut word = vec![0; width.checked_sub(difference.width())?];
         word.extend_from_slice(difference.as_bits());
         Self::from_numeric_domain_bits(width, &word)
@@ -212,7 +215,9 @@ impl BinaryNumber {
         if other.numeric_domain_width != Some(width) {
             return None;
         }
-        match Self::normalize(self.bits.clone()).cmp(&Self::normalize(other.bits.clone())) {
+        // Same admitted Dn on both sides: tagged comparison is bit ordering.
+        // Avoid cloning two canonical magnitudes merely to compare them.
+        match self.cmp(other) {
             Ordering::Less => Some((true, other.checked_sub_admitted_numeric(self)?)),
             _ => Some((false, self.checked_sub_admitted_numeric(other)?)),
         }
@@ -313,7 +318,14 @@ impl BinaryNumber {
         }
 
         let mut result = Self::zero();
-        let mut shifted = self.clone();
+        // Shift-and-add works on the unqualified magnitude: carrying a Dn
+        // tag into intermediate shifts would misrepresent their bit width.
+        // One bit-vector allocation replaces the old double-normalization
+        // at the admitted Dn caller.
+        let mut shifted = Self {
+            bits: self.bits.clone(),
+            numeric_domain_width: None,
+        };
         for bit in other.bits.iter().rev() {
             if *bit == 1 {
                 result = result.add(&shifted);
