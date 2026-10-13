@@ -1,22 +1,57 @@
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_reasoning_source, Session,
+};
 
 fn session() -> Session {
     let mut session = Session::default();
-    for library in [
-        include_str!("../../../lib/core.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
+    load_core_library(&mut session)
+        .expect("canonical current Core4 bootstrap must load");
+
+    for (path, library) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
     ] {
-        eval_program(library, &mut session).expect("reason index fixture should load");
+        let parsed = parse_mixed_exact_domain_reasoning_source(path, library)
+            .unwrap_or_else(|error| panic!("exact reasoning parse failed for {path}: {error}"));
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("exact reasoning load failed for {path}: {error}"));
     }
     session
 }
 
 fn eval(session: &mut Session, source: &str) -> String {
-    eval_program(source, session)
+    let parsed = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("exact fixture parse failed: {error}\nsource: {source}"));
+    eval_parsed_expressions(&parsed, session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
         .to_string()
+}
+
+#[test]
+fn normal_nested_rule_list_is_not_probed_with_eq_as_a_schema_tag() {
+    let mut s = session();
+    let source = r#"
+      (def rules (quote (((mortal socrates))
+                         ((not? (mortal socrates))))))
+      (reason-index-mode (reason-ensure-index rules))
+    "#;
+    assert_eq!(eval(&mut s, source), "indexed");
+}
+
+#[test]
+fn canonical_index_is_recognized_and_malformed_index_falls_back_safely() {
+    let mut s = session();
+    let source = r#"
+      (def rules (quote (((p one)) ((q two)))))
+      (list
+        (cond ((reason-index? (reason-make-index rules))
+               (quote canonical-index)))
+        (reason-index-mode
+          (reason-ensure-index (quote (not-an-index indexed))))
+    "#;
+    assert_eq!(eval(&mut s, source), "(canonical-index linear)");
 }
 
 #[test]
