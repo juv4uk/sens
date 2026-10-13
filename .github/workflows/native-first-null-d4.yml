@@ -1,0 +1,47 @@
+name: SENS — D4 NULL на структурному хвості
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/dispatch/native-first.lisp"
+      - "tests/semantic/native-first-null-arity-law.bits"
+      - "tests/semantic/native-first-null-arity-mutant.bits"
+      - ".github/workflows/native-first-null-d4.yml"
+  pull_request:
+    paths:
+      - "lib/machine/dispatch/native-first.lisp"
+      - "tests/semantic/native-first-null-arity-law.bits"
+      - "tests/semantic/native-first-null-arity-mutant.bits"
+      - ".github/workflows/native-first-null-d4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-d4-null:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Зібрати наявний фізичний інтерпретатор SENS
+        run: cargo build --locked -p sens-cli --bin sens-trit
+      - name: Сама двійкова SENS перевіряє NULL і однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/native-first-null-arity-law.bits "$RUNNER_TEMP/law.lisp"
+          cp tests/semantic/native-first-null-arity-mutant.bits "$RUNNER_TEMP/mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/mutant.lisp"
+          target/debug/sens-trit eval-core4 "$RUNNER_TEMP/law.sens" > "$RUNNER_TEMP/law.out"
+          test "$(cat "$RUNNER_TEMP/law.out")" = "1"
+          if target/debug/sens-trit eval-core4 "$RUNNER_TEMP/mutant.sens" > "$RUNNER_TEMP/mutant.out" 2> "$RUNNER_TEMP/mutant.err"; then
+            echo "ПОМИЛКА: SENS допустив однобітний негативний свідок"
+            exit 1
+          fi
+          grep -Fq "not callable" "$RUNNER_TEMP/mutant.err"
+          test ! -s "$RUNNER_TEMP/mutant.out"
+          echo "D1/D2/D3/D4: закон виконується, мутант відхилено мовою SENS"
