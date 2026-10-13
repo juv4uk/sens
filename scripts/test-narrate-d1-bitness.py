@@ -29,7 +29,9 @@ REQUIRED = (
     "narrate-provenance",
     "narrate-answer",
     "narrate-outcome",
-    "narrate-outcome-arity?",
+    "narrate-proper-list?",
+    "narrate-list-exact-two?",
+    "narrate-list-exact-three?",
     "result-proper-list?",
     "provenance-goal",
     "provenance-rule",
@@ -49,6 +51,12 @@ def check_narrate() -> list[str]:
         errs.append(f"narrate: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
         errs.append("narrate: exact D1:1 form (010 (001 ())) missing")
+    active_code = "\n".join(
+        line for line in text.splitlines() if not line.lstrip().startswith(";")
+    )
+    for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
+        if legacy in active_code:
+            errs.append(f"narrate: legacy arity mechanism still active: {legacy}")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"narrate: required surface missing: {fn}")
