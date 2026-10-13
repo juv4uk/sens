@@ -219,9 +219,7 @@ def audit(args):
         except (KeyError, ValueError, TypeError):
             problematic.append(test_id + ":MISSING_FIRST_SEEN owner=" + owner)
             continue
-        if now() - seen > dt.timedelta(hours=24) and (
-            item.get("stamp") not in STAMP or owner == "UNASSIGNED"
-        ):
+        if now() - seen > dt.timedelta(hours=24):
             problematic.append(test_id + ":ESCALATION-24H owner=" + owner)
         if item.get("stamp") in {"TRANSITIONAL", "FLAKE"}:
             try:
