@@ -24,7 +24,7 @@ SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
 NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
 HISTORICAL=ROOT/"contracts"/"core1-historical-sid-map.lisp"
-TEXT7=ROOT/"crates"/"sens"/"src"/"text7_projection_generated.rs"
+TEXT7=ROOT/"knowledge"/"d7-keyboard-v2-ratified.json"
 
 class KeyboardV2Sid8MigrationTests(unittest.TestCase):
     """Fresh SID8 imports use the owner-ratified keyboard v2, not old SLP1."""
@@ -142,7 +142,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
             with self.subTest(code=code), self.assertRaises(mod.MigrationError):
                 resolver.head(mod.Tok("ATOM", code, 0))
         # The source D3 EMPTY value is still canonical data.
-        self.assertEqual(mod.migrate_file("()", resolver, {}), "000\\n")
+        self.assertEqual(mod.migrate_file("()", resolver, {}), "000\n")
 
 
 class ThreePassMigrationTests(unittest.TestCase):

@@ -25,7 +25,7 @@ from sens_source_resolver import build_resolver
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
-TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
+TEXT7 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 DOMAIN_SURFACES = [
