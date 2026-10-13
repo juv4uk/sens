@@ -115,7 +115,7 @@ mod tests {
         }
         assert_eq!(seen, 128);
         assert_eq!(DomainCoordinate::new(7, 128), None);
-        assert_eq!(crate::Bit7::new(128), None);
+        assert!(crate::Bit7::new(128).is_none());
         // Старий v1-резерв тепер є W7-текстом, але не функцією.
         for bits in [0b0100001, 0b0101010] {
             assert_eq!(DomainCoordinate::new(7, bits).unwrap().owner_residency(), Some(true));
