@@ -62,7 +62,7 @@ fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
 fn binary_sens_owns_d1_d4_structural_arity_law() {
     let source = include_str!("../../../tests/semantic/narrate-arity-d1-d4-law.bits");
     assert!(
-        source.bytes().all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
         "SENS-owned witness must contain only exact binary words and whitespace"
     );
     let mut session = Session::default();
