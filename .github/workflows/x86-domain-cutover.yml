@@ -5,6 +5,9 @@ on:
     paths:
       - "lib/machine/atoms/x86-64.lisp"
       - "lib/machine/operands/x86-64.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
+      - "tests/semantic/x86-lowering-d1-law.lisp"
+      - "tests/semantic/x86-lowering-d1-mutant.lisp"
       - "crates/sens/tests/x86_domain_cutover.rs"
       - ".github/workflows/x86-domain-cutover.yml"
   push:
@@ -12,6 +15,9 @@ on:
     paths:
       - "lib/machine/atoms/x86-64.lisp"
       - "lib/machine/operands/x86-64.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
+      - "tests/semantic/x86-lowering-d1-law.lisp"
+      - "tests/semantic/x86-lowering-d1-mutant.lisp"
       - "crates/sens/tests/x86_domain_cutover.rs"
       - ".github/workflows/x86-domain-cutover.yml"
   workflow_dispatch:
@@ -32,3 +38,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: 28 D4 LAMBDA та точний D1 операндів
         run: cargo test --locked -p sens --test x86_domain_cutover -- --nocapture
+
+      - name: Двійковий SENS сам перевіряє D1 і мутацію
+        run: |
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-law.lisp
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval tests/semantic/x86-lowering-d1-law.sens
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode tests/semantic/x86-lowering-d1-mutant.lisp
+          ! cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval tests/semantic/x86-lowering-d1-mutant.sens
