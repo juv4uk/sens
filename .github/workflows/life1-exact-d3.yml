@@ -1,0 +1,27 @@
+name: LIFE-1 — точна структурна рівність D3 та 2046 координат
+
+on:
+  pull_request:
+    paths:
+      - "lib/life-1-scheduler.lisp"
+      - "crates/sens/tests/life_1_scheduler.rs"
+      - "tests/test_life1_exact_d3_2046.py"
+      - ".github/workflows/life1-exact-d3.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/life-1-scheduler.lisp"
+      - "crates/sens/tests/life_1_scheduler.rs"
+      - "tests/test_life1_exact_d3_2046.py"
+      - ".github/workflows/life1-exact-d3.yml"
+
+jobs:
+  life1-exact-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Бітність усіх 2046 координат і шість мігрованих викликів
+        run: python3 -m unittest discover -s tests -p test_life1_exact_d3_2046.py -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Живе виконання LIFE-1: порожні, вкладені й нерівні дані
+        run: cargo test --locked -p sens --test life_1_scheduler -- --nocapture
