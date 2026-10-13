@@ -159,7 +159,10 @@
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
 (0011 guard-reference-field
   (0010 (field reference)
-    (001000 ((entry (11100 field (011 reference))))
-      (110
-        ((010 entry) (001 ()))
-        ((010 (001 ())) (1001 entry))))))
+    ; Use an existing D4 LAMBDA for one local binding, not the unadmitted
+    ; six-bit LET/ASSOC call heads. ASSOC is the existing Core Lisp closure.
+    ((0010 (entry)
+       (110
+         ((010 entry) (001 ()))
+         ((010 (001 ())) (1001 entry))))
+     (assoc field (011 reference)))))
