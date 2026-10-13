@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/result-status.lisp has no bare host truthiness (t / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as predicate carrier
+  2. Exact D1:1 and D1:0 forms are present as predicate carriers
   3. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Does not prove runtime callability or T5 physical execution. Run:
@@ -22,6 +22,7 @@ STATUS = ROOT / "lib" / "result-status.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|NIL)(?!\w)")
 D1_TRUE = "(010 (001 ()))"
+D1_FALSE = "(101 (001 (0)) (001 (1)))"
 
 
 def check_status() -> list[str]:
@@ -40,6 +41,8 @@ def check_status() -> list[str]:
         errs.append(f"result-status: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
         errs.append("result-status: exact D1:1 form (010 (001 ())) missing")
+    if D1_FALSE not in text:
+        errs.append("result-status: exact D1:0 form (101 (001 (0)) (001 (1))) missing")
     return errs
 
 
@@ -72,7 +75,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("RESULT-STATUS: PASS — no host truthiness, exact D1 forms")
+    print("RESULT-STATUS: PASS — no host truthiness, exact D1:0/D1:1 forms")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
