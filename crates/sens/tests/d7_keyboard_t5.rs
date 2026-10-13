@@ -78,7 +78,7 @@ fn d7_stack_glyph_projection_preserves_t5_and_multibyte_error_offset() {
 /// Невідомий символ після них повідомляє точний UTF-8 byte_offset.
 #[test]
 fn d7_repeated_utf8_uses_exact_words_without_post_encode_decode() {
-    let segment = "Кіт! (.)\\n";
+    let segment = "Кіт! (.)\n";
     let source = segment.repeat(31);
     let segment_words = decode_ternary_words(&encode_d7_uk_t5(segment).unwrap()).unwrap();
     let expected_words: Vec<_> = (0..31).flat_map(|_| segment_words.iter().copied()).collect();
