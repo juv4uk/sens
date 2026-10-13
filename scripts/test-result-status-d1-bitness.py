@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "lib" / "result-status.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
+W8 = re.compile(r"\(([01]{8})(?=\s|\))")
 HOST = re.compile(r"(?<!\w)(t|NIL)(?!\w)")
 D1_TRUE = "(010 (001 ()))"
 D1_FALSE = "(101 (001 (0)) (001 (1)))"
