@@ -76,7 +76,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - Only the 171 unambiguous, ratified current targets were used automatically.
 - Generic source changes were limited to executable list heads, excluding quoted code, comments, strings and arbitrary data.
 - Historical identity tables `lib/core1.lisp` (405) and `lib/meta-eval.lisp` (1263) were treated separately: function-ID data were also rewritten to keep discriminator tables coherent; the latter's historic DEFMACRO identifier was uniquely resolved in the `my-defmacro-name?` context to D5:00011 MACRO.
-- The embedded bootstrap `lib/macro.lisp` was **restored**, and its 32 tentative substitutions are **excluded** from the count after Hosted CI exposed an actual runtime dispatch error (exact-width code interpreted as a number, not callable). Never describe that file as migrated.
+- Historical state on 2026-10-11: the embedded bootstrap `lib/macro.lisp` was restored after a mechanical rewrite made exact-width code parse as numeric/non-callable data. **Resolved 2026-10-13**: the file is now migrated deliberately to D3/D4 with a path-pinned exact-domain reader for quoted D4 code-data. Hosted CI step `Macro bootstrap D3/D4 migration witness` passes on run `38341643019`; do not count the old 32 tentative substitutions as the migration—the current source is a smaller rewritten bootstrap.
 
 | Cohort | Migrated counts |
 |---|---:|
@@ -111,7 +111,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 2. `00110111` MAP has two current matches, D6:101000 and D8:11000101; the global legacy mapping remains unresolved. Source-local one-list proofs now migrate 15 calls to D6:101000: 4 in `lib/yantra.lisp`, 8 in `lib/linter.lisp`, 1 in `lib/knowledge.lisp`, and 2 inside `lib/core.lisp`'s `let` expansion. Regression: `tests/test_sid8_d6_map_source_cutover.py`. D8 MAP remains distinct; do not change the normative historical map.
 3. Internal helper cells 00011001, 00011111, 00100000, 01000111 have no ratified semantic residents; seen in `lib/core.lisp` / `lib/core4.lisp`.
 4. Historical MONO-NS, UNIX-TIME-NOW, NTP-QUERY-RAW await D10 successor authority, including in `lib/time.lisp`.
-5. Embedded `lib/macro.lisp` **must not** be mechanically rewritten: Hosted CI `38163596334` confirmed runtime error `expression is not callable` after replacement; file was restored on main in commit `c5253cf7`. Fix the interpreter/domain callable dispatch with an executable witness before retrying that file.
+5. ~~Embedded `lib/macro.lisp` HOLD~~ — **RESOLVED 2026-10-13**. Hosted CI `38163596334` correctly rejected the old mechanical replacement because quoted short codes became numbers. The current migration removes the obsolete EVAL construction, uses D3/D4 exact identities, and materializes only quoted `D4:0010 LAMBDA` / `D4:0011 DEFINE` code-data through the path-pinned macro reader. Runtime witness: `migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda`, green in Hosted CI run `38341643019`.
 6. Preserve historical audit and benchmark artifacts, and do not silently alter non-head 8-bit data until their identity role has proof.
 
 ## 2026-10-11 context-specific D6 MAP witness
