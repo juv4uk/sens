@@ -370,11 +370,12 @@ def main() -> int:
             seen[value] = key
 
     if total != 1022:
-        fail(f"expected D1-D9 current residents total 1022 rows, found {total}")
+        fail(f"expected D1-D9 table-row total 1022, found {total}")
 
     print("DOMAIN-TABLES: PASS")
     print("files=10 layout=one-domain-per-file; D1-D9 tables plus separately gated D10 codebook")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:128,d8:256,d9:512 current-residents=1022")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:128,d8:256,d9:512")
+    print("D1-D9-table-rows=1022; D7=128 keyboard glyph cells, not semantic residents or Lisp callables")
     print("D10=1024/1024 unique 10-bit coordinates; resident-ratification=0; physical-T5-authorized=0")
     print("D10-negative-self-test=one-bit-mutation,duplicate,missing-row rejected")
     print("d7-v2=128/128 keyboard cells; legacy v1 reserved only in history")

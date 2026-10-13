@@ -8,7 +8,7 @@
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
-  "total_rows": 1020,
+  "total_rows": 1022,
   "entries": [
     {
       "path": "lib/domains/d1.lisp",
@@ -54,10 +54,12 @@
     },
     {
       "path": "lib/domains/d7.lisp",
-      "git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726",
+      "git_blob_sha1": "568bdf3ced54a635c0cd82257fa5f19234dff213",
       "domain": "D7",
       "bit_width": 7,
-      "expected_rows": 126
+      "expected_rows": 128,
+      "historical_v1_git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726",
+      "projection": "sens.d7.keyboard/v2"
     },
     {
       "path": "lib/domains/d8.lisp",
@@ -73,5 +75,6 @@
       "bit_width": 9,
       "expected_rows": 512
     }
-  ]
+  ],
+  "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately"
 }

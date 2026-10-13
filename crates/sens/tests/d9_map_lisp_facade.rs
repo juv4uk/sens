@@ -1,6 +1,9 @@
 //! D9 map coordinates without admitted mechanisms must remain fail-closed.
 //! These tests exercise separately named Lisp-owned AVL closures only.
-use sens::{eval_program, eval_pinned_legacy_core_source, eval_pinned_reasoning_source, Session};
+use sens::{
+    eval_program, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    Expr, ExprKind, Session,
+};
 
 fn session() -> Session {
     let mut session = Session::default();
@@ -37,6 +40,61 @@ fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
             source.matches("(нехай-похідне").count(),
             expected_macro_count,
             "source macro cutover drift in {path}"
+        );
+    }
+}
+
+fn collect_exact_head_identities(expr: &Expr, out: &mut Vec<(usize, u16)>) {
+    let ExprKind::List(items) = &expr.kind else {
+        return;
+    };
+    if let Some(head) = items.first() {
+        if let ExprKind::DomainIdentity(identity) = &head.kind {
+            out.push((identity.width(), identity.packed_bits()));
+        }
+    }
+    for item in items.iter() {
+        collect_exact_head_identities(item, out);
+    }
+}
+
+#[test]
+fn persistent_map_string_order_has_exact_width_qualified_heads() {
+    let source = include_str!("../../../lib/persistent-map.lisp");
+    for obsolete in ["00111100", "00111111", "01000000", "01000101"] {
+        assert!(
+            !source.contains(&format!("({obsolete} ")),
+            "historical W8 executable head survived migration: {obsolete}"
+        );
+    }
+
+    let parsed = sens::parse_mixed_exact_domain_reasoning_source(
+        "lib/persistent-map.lisp",
+        source,
+    )
+    .expect("persistent-map exact-domain source must parse");
+
+    let mut heads = Vec::new();
+    for expr in &parsed {
+        collect_exact_head_identities(expr, &mut heads);
+    }
+
+    for (width, bits, expected, name) in [
+        (9usize, 0b110011100u16, 3usize, "STRING-EMPTY?"),
+        (9usize, 0b110101011u16, 4usize, "STRING-FIRST"),
+        (9usize, 0b110011101u16, 2usize, "STRING-REST"),
+        (8usize, 0b11100000u16, 4usize, "CHAR-CODE"),
+    ] {
+        let actual = heads
+            .iter()
+            .filter(|&&(actual_width, actual_bits)| {
+                actual_width == width && actual_bits == bits
+            })
+            .count();
+        assert_eq!(
+            actual, expected,
+            "{name} must retain exact D{width}:{bits:0width$b} identity; got {actual}",
+            width = width
         );
     }
 }
