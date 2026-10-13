@@ -24,6 +24,27 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
     parse_mixed_source(source, false)
 }
 
+/// Parse ONLY the current metacircular source with its exact binary D9
+/// SYMBOL? head. All other mixed heads retain their existing exact-width
+/// admission rules; materializing D9 is not a grant of runtime callability.
+/// This is the same pinned nine-bit reader used by existing reasoning sources.
+pub fn parse_mixed_exact_domain_meta_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/meta-eval.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "meta exact-domain reader is restricted to lib/meta-eval.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, false)?
+        .into_iter()
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .collect()
+}
+
 /// Parse a trusted `lib/machine/**` Lisp source file whose outer definition
 /// and lambda wrappers still use historical 8-bit syntax, but whose executable
 /// bodies contain current exact-width D3-D6 call heads.
