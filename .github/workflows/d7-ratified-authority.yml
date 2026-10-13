@@ -29,6 +29,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
           python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
           python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_no_historical_runtime.py' -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove current Rust W7 occupancy, projection and physical transport
         run: |
