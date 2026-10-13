@@ -199,6 +199,40 @@ pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
         });
     }
 
+    // A canonical negative Dn composition is smaller than every admitted
+    // natural in the SAME domain, including zero. Do not construct temporary
+    // rational denominators or multiply just to discover opposite signs.
+    // This is a mechanism shortcut over already-ratified binary Dn values.
+    match (lhs, rhs) {
+        (Value::BinaryNumber(natural), Value::NumericComposition(signed))
+            if signed.negative =>
+        {
+            if natural.numeric_domain_width() != Some(signed.domain_width()) {
+                return None;
+            }
+            return Some(match operator {
+                "=" => false,
+                "<" => false,
+                ">" => true,
+                _ => return None,
+            });
+        }
+        (Value::NumericComposition(signed), Value::BinaryNumber(natural))
+            if signed.negative =>
+        {
+            if natural.numeric_domain_width() != Some(signed.domain_width()) {
+                return None;
+            }
+            return Some(match operator {
+                "=" => false,
+                "<" => true,
+                ">" => false,
+                _ => return None,
+            });
+        }
+        _ => {}
+    }
+
     let (width, x_neg, xn, xd) = ingredients(lhs)?;
     let (other_width, y_neg, yn, yd) = ingredients(rhs)?;
     if width != other_width { return None; }
@@ -272,6 +306,48 @@ mod tests {
         let d24 = Value::BinaryNumber(d(24, 1));
         assert_eq!(compare("=", &legacy, &d24), None);
         assert_eq!(compare("=", &d24, &legacy), None);
+    }
+
+    #[test]
+    fn signed_dn_vs_natural_is_ordered_without_rational_cross_products() {
+        for width in [24usize, 48, 96, 192] {
+            let zero = Value::BinaryNumber(d(width, 0));
+            let two = Value::BinaryNumber(d(width, 2));
+            let neg_fraction = canonical_parts(true, &d(width, 2), &d(width, 3))
+                .expect("ratified negative Dn rational");
+            let positive_fraction = canonical_parts(false, &d(width, 2), &d(width, 3))
+                .expect("ratified positive Dn rational");
+            for (op, expected_forward, expected_reverse) in [
+                ("=", false, false),
+                ("<", false, true),
+                (">", true, false),
+            ] {
+                for natural in [&zero, &two] {
+                    let forward = compare(op, natural, &neg_fraction);
+                    let reverse = compare(op, &neg_fraction, natural);
+                    assert_eq!(
+                        forward, Some(expected_forward),
+                        "test_id=dn-sign-shortcut layer=eval D{width} op={op} positive-versus-negative: expected={expected_forward}, actual={forward:?}; reproduce=cargo test -p sens signed_dn_vs_natural_is_ordered_without_rational_cross_products"
+                    );
+                    assert_eq!(
+                        reverse, Some(expected_reverse),
+                        "test_id=dn-sign-shortcut layer=eval D{width} op={op} negative-versus-positive: expected={expected_reverse}, actual={reverse:?}; reproduce=cargo test -p sens signed_dn_vs_natural_is_ordered_without_rational_cross_products"
+                    );
+                }
+            }
+            // The ordinary rational path must still handle *positive*
+            // signed/rational compositions rather than the sign shortcut.
+            assert_eq!(compare(">", &two, &positive_fraction), Some(true));
+            assert_eq!(compare("<", &positive_fraction, &two), Some(true));
+            assert_eq!(compare("=", &two, &positive_fraction), Some(false));
+            let other_width = width * 2;
+            let wrong = Value::BinaryNumber(d(other_width, 2));
+            assert_eq!(compare("=", &neg_fraction, &wrong), None);
+            assert_eq!(compare("=", &wrong, &neg_fraction), None);
+            let unqualified = Value::BinaryNumber(BinaryNumber::one());
+            assert_eq!(compare("=", &neg_fraction, &unqualified), None);
+            assert_eq!(compare("=", &unqualified, &neg_fraction), None);
+        }
     }
 
     #[test]
