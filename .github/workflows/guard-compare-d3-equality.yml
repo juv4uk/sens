@@ -1,0 +1,45 @@
+name: Guard compare — exact D3 structural equality
+
+on:
+  pull_request:
+    paths:
+      - "lib/guard.lisp"
+      - "crates/wsm-guard-core/src/lib.rs"
+      - "crates/sens/tests/guard.rs"
+      - ".github/workflows/guard-compare-d3-equality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/guard.lisp"
+      - "crates/wsm-guard-core/src/lib.rs"
+      - "crates/sens/tests/guard.rs"
+      - ".github/workflows/guard-compare-d3-equality.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  guard-compare:
+    name: Exact structural equality and domain-width witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: guard-compare-d3-equality
+      - name: Nested equality and mismatch witnesses
+        run: cargo test -p sens --test guard guard_compare_reuses_exact_structural_equality_for_nested_states -- --exact --nocapture
+      - name: Exact D3/D4 AST width and legacy-W8 rejection
+        run: cargo test -p sens --test guard guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal -- --exact --nocapture
+      - name: Full Guard semantics suite
+        run: cargo test -p sens --test guard -- --nocapture
+      - name: Production Guard loader includes the existing comparator dependency
+        run: cargo test -p wsm-guard-core
+      - name: Lisp source balance
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib/guard.lisp
+      - name: Diff hygiene, scoped to this change
+        run: git diff --check HEAD^1 HEAD -- lib/guard.lisp crates/wsm-guard-core/src/lib.rs crates/sens/tests/guard.rs .github/workflows/guard-compare-d3-equality.yml
