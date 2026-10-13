@@ -339,6 +339,81 @@ pub fn parse_mixed_exact_domain_fs_source(
         .collect()
 }
 
+fn lift_macro_bootstrap_code_data(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "macro bootstrap source exceeds structure depth",
+            expression.span,
+        ));
+    }
+
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+
+    let mut lifted = items.to_vec();
+    if is_exact_quote(&lifted[0]) {
+        if lifted.len() == 2 {
+            if let Some(spelling @ ("0010" | "0011")) = source_spelling(source, &lifted[1]) {
+                let words = parse_binary_source_words(spelling)?;
+                let word = words
+                    .first()
+                    .expect("one exact D4 macro-template identity")
+                    .word;
+                lifted[1] = Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+                    span: lifted[1].span,
+                };
+            }
+        }
+        return Ok(Expr {
+            kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+            span,
+        });
+    }
+
+    for item in &mut lifted {
+        *item = lift_macro_bootstrap_code_data(source, item.clone(), depth + 1)?;
+    }
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
+}
+
+/// Read only `lib/macro.lisp` after its domain-ladder cutover.
+///
+/// Executable heads are lifted by the ordinary exact-domain bridge. The two
+/// quoted D4 identities used as generated code data (LAMBDA=0010,
+/// DEFINE=0011) are materialized as DomainIdentity values rather than numeric
+/// data. No other quoted payload is retyped and no legacy W8 authority is used.
+pub fn parse_mixed_exact_domain_macro_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/macro.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "macro bootstrap exact-domain reader is restricted to lib/macro.lisp",
+            Span::default(),
+        ));
+    }
+
+    parse_mixed_source(source, false)?
+        .into_iter()
+        .map(|expr| lift_macro_bootstrap_code_data(source, expr, 0))
+        .collect()
+}
+
 /// Parse the process/TCP Lisp-owned adapters with exact current-domain call heads.
 /// This exception is path-bound to these two source files; ordinary source must
 /// never infer semantic width from short numeric-looking literals. QUOTE keeps
@@ -1762,6 +1837,46 @@ mod tests {
             if id.width() == 9 && id.packed_bits() == 0b110011100));
 
         assert!(parse_mixed_exact_domain_utf8_source("lib/not-utf8.lisp", source).is_err());
+    }
+
+    #[test]
+    fn macro_reader_types_only_the_d4_code_templates_inside_quote() {
+        let source = "(make-macro (0010 args (111 (001 0011) (111 (001 0010) (001 (0010))))))";
+        let parsed = parse_mixed_exact_domain_macro_source("lib/macro.lisp", source)
+            .expect("path-pinned macro bootstrap source");
+
+        let ExprKind::List(top) = &parsed[0].kind else { panic!("top list"); };
+        let ExprKind::List(lambda) = &top[1].kind else { panic!("lambda"); };
+        assert!(matches!(
+            &lambda[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0010
+        ));
+
+        let ExprKind::List(cons) = &lambda[2].kind else { panic!("CONS"); };
+        let ExprKind::List(quoted_define) = &cons[1].kind else { panic!("quoted DEFINE"); };
+        assert!(matches!(
+            &quoted_define[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0011
+        ));
+
+        let ExprKind::List(tail) = &cons[2].kind else { panic!("CONS tail"); };
+        let ExprKind::List(quoted_lambda) = &tail[1].kind else { panic!("quoted LAMBDA"); };
+        assert!(matches!(
+            &quoted_lambda[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0010
+        ));
+
+        let ExprKind::List(quoted_list) = &tail[2].kind else { panic!("quoted list"); };
+        let ExprKind::List(data) = &quoted_list[1].kind else { panic!("quoted list payload"); };
+        assert!(
+            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "nested quoted numeric-looking data must stay data"
+        );
+
+        assert!(parse_mixed_exact_domain_macro_source("lib/not-macro.lisp", source).is_err());
     }
 
     #[test]
