@@ -1,15 +1,7 @@
 name: Міграція ядра — E3 з точними 10 бітами D10
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/frame3_domain.rs"
-      - ".github/workflows/e3-d10-exact-width.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/frame3_domain.rs"
-      - ".github/workflows/e3-d10-exact-width.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
