@@ -168,6 +168,21 @@ jobs:
             --expected-file "$RUNNER_TEMP/expected-knowledge-d1" \
             --report-file "$report" \
             -- target/debug/sens "$program"
+      - name: Точний QUOTE/D7 та негативний SLP1 — міграційні межі
+        id: quoted-d7
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          for fixture in test_sens_quoted_datum_law.py test_slp1_d7_v2_quote_boundary.py; do
+            echo "test_id=$fixture layer=encode semantic_authority=binary-SENS"
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "$fixture" \
+              --layer encode \
+              --fixture "tests/$fixture" \
+              --report-file "$report" \
+              -- python3 -m unittest discover -s tests -p "$fixture" -v
+          done
       - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
@@ -179,10 +194,11 @@ jobs:
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
+          QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$QUOTED_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
           else
             # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
