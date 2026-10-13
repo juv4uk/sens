@@ -629,7 +629,11 @@ pub fn load_meta_evaluator_library(
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
     eval_program(META_SEMANTIC_REGISTRY_SOURCE, session)?;
-    eval_program(META_EVAL_LIBRARY_SOURCE, session)
+    // The metacircular witness now contains exact D3/D4 call heads.
+    // Reuse the already-approved mixed reader: quoted interpreter data
+    // stays data, whereas executable binary heads retain domain widths.
+    let forms = parse_mixed_exact_domain(META_EVAL_LIBRARY_SOURCE)?;
+    eval_parsed_expressions(&forms, session)
 }
 
 /// Load language-owned time semantics into a session that already has the
