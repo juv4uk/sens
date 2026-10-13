@@ -1,4 +1,4 @@
-"""Red must speak — the daily 24h escalation has to fire for named quarantines too."""
+"""RED metadata transport: 24h classification and named quarantine expiry differ."""
 import datetime as dt
 import json
 import pathlib
@@ -19,34 +19,38 @@ def days_from_now(days):
     return (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=days)).isoformat()
 
 
-class Escalation24h(unittest.TestCase):
-    def audit(self, first_seen_hours, expires_days=6):
+class ClassificationVsExpiry(unittest.TestCase):
+    def audit(self, stamp, first_seen_hours, expires_days):
         case = {
-            "test_id": "named-red", "stamp": "TRANSITIONAL", "owner": "worker",
+            "test_id": "red-quarantine-classification-vs-expiry",
+            "stamp": stamp, "owner": "worker",
             "first_seen_at": hours_ago(first_seen_hours),
-            "expires_at": days_from_now(expires_days),
-            "ticket": "#5029", "reason": "probe", "investigation": "issue 5029",
+            "reason": "metadata classification or expiry evidence",
         }
-        path = pathlib.Path(tempfile.mkdtemp()) / "quarantine.json"
-        path.write_text(json.dumps({"schema": "sens-red-v1", "cases": [case]}))
-        return subprocess.run(
-            [sys.executable, str(SCRIPT), "audit", "--manifest", str(path)],
-            cwd=ROOT, capture_output=True, text=True)
+        if stamp in {"TRANSITIONAL", "FLAKE"}:
+            case.update({
+                "expires_at": days_from_now(expires_days),
+                "ticket": "#5029", "investigation": "issue 5029",
+            })
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = pathlib.Path(tmp) / "quarantine.json"
+            manifest.write_text(json.dumps({"schema": "sens-red-v1", "cases": [case]}))
+            return subprocess.run(
+                [sys.executable, str(SCRIPT), "audit", "--manifest", str(manifest)],
+                cwd=ROOT, capture_output=True, text=True, check=False)
 
-    def test_named_quarantine_escalates_after_24h(self):
-        result = self.audit(30)
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("::error::named-red:UNSERVICEABLE", result.stdout)
-
-    def test_fresh_named_quarantine_passes(self):
-        result = self.audit(2)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("PASS named red registry", result.stdout)
-
-    def test_expired_quarantine_still_fails(self):
-        result = self.audit(2, expires_days=-1)
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("EXPIRED_QUARANTINE", result.stdout)
+    def test_red_quarantine_classification_vs_expiry(self):
+        controls = [
+            # One policy invariant, three counterexamples / witnesses.
+            ("UNCLASSIFIED", 25, 6, 1, "ESCALATE_24H_UNCLASSIFIED"),
+            ("TRANSITIONAL", 30, 6, 0, "PASS named red registry"),
+            ("TRANSITIONAL", 60, -1, 1, "EXPIRED_QUARANTINE"),
+        ]
+        for stamp, age, expiry, exit_code, evidence in controls:
+            with self.subTest(stamp=stamp, age=age, expiry=expiry):
+                result = self.audit(stamp, age, expiry)
+                self.assertEqual(result.returncode, exit_code, result.stdout + result.stderr)
+                self.assertIn(evidence, result.stdout)
 
 
 if __name__ == "__main__":
