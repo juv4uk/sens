@@ -28,10 +28,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: "Канонічні ширини доменів D1–D10 і форма оповіді"
         run: python3 scripts/test-narrate-d1-bitness.py
-      - name: "AST арності використовує рівно D3/D4"
+      - name: "AST: D1-біти результату, D3/D4-структура"
         run: cargo test --locked -p sens --test narrate_outcomes arity_helpers_use_exact_d1_predicates_with_d3_d4_structure -- --exact --nocapture
       - name: "Позитивний і негативний свідки точного D1"
         run: cargo test --locked -p sens --test narrate_outcomes arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes -- --exact --nocapture
+      - name: "Відомі status-теги проходять перевірку символу"
+        run: cargo test --locked -p sens --test narrate_outcomes known_status_tags_survive_symbol_tag_guard -- --exact --nocapture
       - name: "Уся наявна регресія оповіді"
         run: cargo test --locked -p sens --test narrate_outcomes -- --nocapture
       - name: "Джерела не змінено під час перевірки"
