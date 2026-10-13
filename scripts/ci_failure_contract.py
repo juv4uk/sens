@@ -169,7 +169,7 @@ def run(args):
     version = None
     if native:
         manifest_text = Path("crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
-        match = re.search(r'^version\\s*=\\s*"([^"]+)"', manifest_text, re.M)
+        match = re.search(r'^version\s*=\s*"([^"]+)"', manifest_text, re.M)
         if not match:
             print("::error::UNINFORMATIVE-EXECUTOR missing executable package version")
             return 1
@@ -211,7 +211,7 @@ def run(args):
               " exit=" + str(completed.returncode), flush=True)
         if args.executor_report_file:
             with open(args.executor_report_file, "a", encoding="utf-8") as stream:
-                stream.write(json.dumps(receipt, ensure_ascii=False, sort_keys=True) + "\\n")
+                stream.write(json.dumps(receipt, ensure_ascii=False, sort_keys=True) + "\n")
     if passed:
         print("PASS test_id=" + args.test_id + " layer=" + args.layer +
               " executor=" + kind, flush=True)
@@ -244,7 +244,7 @@ def run(args):
     print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True))
     if args.report_file:
         with open(args.report_file, "a", encoding="utf-8") as stream:
-            stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\\n")
+            stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
     if errors:
         print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
         return 1
@@ -278,7 +278,7 @@ def scan_executors(args):
             binary = Path("target/debug/sens")
             fixture = Path(record["fixture"])
             version = re.search(
-                r'^version\\s*=\\s*"([^"]+)"',
+                r'^version\s*=\s*"([^"]+)"',
                 Path("crates/sens-cli/Cargo.toml").read_text(encoding="utf-8"), re.M
             )
             if not binary.is_file() or not os.access(binary, os.X_OK):
