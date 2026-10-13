@@ -78,20 +78,20 @@ fn world_recognizer_requires_exact_four_element_proper_list() {
     }
 }
 
-fn collect_call_head_widths(expr: &Expr, widths: &mut Vec<usize>) {
+fn collect_call_head_coordinates(expr: &Expr, coordinates: &mut Vec<(usize, u16)>) {
     let ExprKind::List(items) = &expr.kind else {
         return;
     };
     if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = items.first() {
-        widths.push(identity.width());
+        coordinates.push((identity.width(), identity.packed_bits()));
     }
     for item in items.iter() {
-        collect_call_head_widths(item, widths);
+        collect_call_head_coordinates(item, coordinates);
     }
 }
 
 #[test]
-fn world_shape_validator_uses_only_exact_d3_and_d4_call_heads() {
+fn world_shape_validator_uses_exact_d3_structure_and_d4_null() {
     let parsed = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", D3)
         .expect("current immutable-world source must parse");
     let definition = parsed
@@ -107,13 +107,26 @@ fn world_shape_validator_uses_only_exact_d3_and_d4_call_heads() {
         })
         .expect("the source must define world?");
 
-    let mut widths = Vec::new();
-    collect_call_head_widths(definition, &mut widths);
-    widths.sort_unstable();
-    widths.dedup();
+    let mut coordinates = Vec::new();
+    collect_call_head_coordinates(definition, &mut coordinates);
+    coordinates.sort_unstable();
+    coordinates.dedup();
+    let widths = coordinates
+        .iter()
+        .map(|(width, _)| *width)
+        .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         widths,
-        vec![3, 4],
-        "world? should use D3 structure plus D4 NULL, not LENGTH or a wider helper"
+        [3usize, 4usize].into_iter().collect(),
+        "world? must not dispatch through D5-D10 or historical W8"
     );
+    for required in [(3, 0b010), (3, 0b011), (3, 0b110), (4, 0b0101)] {
+        assert!(
+            coordinates.contains(&required),
+            "missing exact call-head D{}:{:0width$b}",
+            required.0,
+            required.1,
+            width = required.0
+        );
+    }
 }
