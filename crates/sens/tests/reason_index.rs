@@ -88,7 +88,7 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 }
 
 #[test]
-fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
+fn binary_sens_owns_reason_index_car_eq_guard_law() {
     let mut session = session();
     let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
     assert!(

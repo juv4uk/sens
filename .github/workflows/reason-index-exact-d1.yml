@@ -26,6 +26,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: "Бінарний SENS: CAR перед EQ та D1"
-        run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
+        run: cargo test --locked -p sens --test reason_index binary_sens_owns_reason_index_car_eq_guard_law -- --exact --nocapture
       - name: Профільні свідки й повний набір 2046 координат
         run: cargo test --locked -p sens --test reason_index -- --nocapture
