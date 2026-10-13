@@ -304,17 +304,19 @@
 ;
 ; `symbol?` itself is language-owned in core.lisp, derived without a Rust builtin,
 ; so this distinction adds no primitive to the closed Canon.
+; This predicate crosses a D3:110 COND boundary: always yield the
+; exact one-bit D1 result. () is data, never an implicit false predicate.
 (0011 my-unresolved-name?
   (0010 (name env-ref)
     (110
       ((110101100 name)
        (110
-         ((101 name t) (001 ()))
-         ((my-canon-name? name) (001 ()))
-         ((env-bound? name env-ref) (001 ()))
-         ((my-primitive? (my-default-binding name)) (001 ()))
-         ((010 ()) t)))
-      )))
+         ((101 name t) #d1:0)
+         ((my-canon-name? name) #d1:0)
+         ((env-bound? name env-ref) #d1:0)
+         ((my-primitive? (my-default-binding name)) #d1:0)
+         (#d1:1 #d1:1)))
+      (#d1:1 #d1:0))))
 
 (0011 my-macro?
   (0010 (value)
