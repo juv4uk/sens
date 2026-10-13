@@ -22,9 +22,18 @@
 
 ; Shape: (reason-index/1 indexed|linear ORIGINAL-RULES BUCKETS)
 ; A bucket is (PREDICATE RULE...), with rules restored to original order.
-(0011 reason-index-mode second)
-(0011 reason-index-rules third)
-(0011 reason-index-buckets fourth)
+; D4:1001 CADR, D5:10011 CADDR, D3:011 CDR: no named selector alias.
+; Canonical index schema: (schema mode original-rules buckets).
+; D6:100111 CADDDR is ratified data, not silently callable here.
+(0011 reason-index-mode
+  (0010 (index)
+    (1001 index)))
+(0011 reason-index-rules
+  (0010 (index)
+    (10011 index)))
+(0011 reason-index-buckets
+  (0010 (index)
+    (10011 (011 index))))
 
 ; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
 ; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).

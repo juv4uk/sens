@@ -36,7 +36,33 @@ run_native_binary_semantics() {
       return 1
     fi
   done
-  printf 'SENS-NATIVE-SEMANTICS: PASS 8 SENS-owned positive verdicts, 3 fail-closed negatives\n'
+  # Native SENS itself judges the D4/D5 index-field selector law.
+  # D6:100111 is quoted data here; no unadmitted invocation.
+  local selector_law="tests/semantic/reason-index-width-selectors-law.sens"
+  local selector_mutant="tests/semantic/reason-index-width-selectors-mutant.sens"
+  local selector_result selector_peer
+  if ! selector_result="$("$bindir/sens" "$selector_law")"; then
+    printf 'REGRESSION id=reason-index-width-selectors layer=eval fixture=%s expected=D1:1 actual=execution-error\n' "$selector_law" >&2
+    sha256sum "$selector_law" >&2
+    return 1
+  fi
+  if [[ "$selector_result" != "1" ]]; then
+    printf 'REGRESSION id=reason-index-width-selectors layer=eval fixture=%s expected=D1:1 actual=%s\n' "$selector_law" "$selector_result" >&2
+    sha256sum "$selector_law" >&2
+    return 1
+  fi
+  if ! selector_peer="$("$bindir/sens-trit" eval "$selector_law")" || [[ "$selector_peer" != "$selector_result" ]]; then
+    printf 'REGRESSION id=reason-index-width-selectors-peer layer=eval fixture=%s expected=D1:1 actual=%s\n' "$selector_law" "$selector_peer" >&2
+    sha256sum "$selector_law" >&2
+    return 1
+  fi
+  if "$bindir/sens" "$selector_mutant" >/dev/null 2>&1; then
+    printf 'REGRESSION id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=noncallable-error actual=accepted\n' "$selector_mutant" >&2
+    sha256sum "$selector_mutant" >&2
+    return 1
+  fi
+  printf 'SENS_NATIVE_D4_D5_SELECTOR: PASS law=1 mutant=blocked\n'
+  printf 'SENS-NATIVE-SEMANTICS: PASS 9 SENS-owned positive verdicts, 4 fail-closed negatives\n'
 }
 
 case "${1:-}" in
