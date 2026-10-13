@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/narrate.lisp has no bare host truthiness (t / T / NIL)
-  2. Explicit exact D1 literal #d1:1 is present
+  2. Exact-domain source uses raw D1 words 0/1, not compatibility projection
   3. Reuses result-proper-list? from migrated result-status surface
   4. Key narrate function surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -23,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[1]
 NARRATE = ROOT / "lib" / "narrate.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "#d1:1"
 REQUIRED = (
     "narrate-fact",
     "narrate-provenance",
@@ -49,23 +48,24 @@ def check_narrate() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"narrate: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("narrate: explicit exact D1 literal #d1:1 missing")
-    active_code = "\n".join(
+    active_code = "\\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith(";")
     )
-    # Apply the exact-D1 sentinel guard only to the arity helpers.
-    # Other narration branches may legitimately construct structural empty lists.
+    if "#d1:" in active_code:
+        errs.append("narrate: compatibility D1 projection used in exact-domain source")
+    # Check only the structural arity helpers, not unrelated presentation data.
     helper_start = active_code.find("(0011 narrate-proper-list?")
     helper_end = active_code.find("(0011 narrate-fact", helper_start)
     if helper_start < 0 or helper_end < 0:
         errs.append("narrate: cannot isolate the D3/D4 arity helper source")
     else:
         arity_helpers = active_code[helper_start:helper_end]
-        if "(010 (001 ()))" in arity_helpers:
-            errs.append("narrate: arity helpers must return exact D1 literal #d1:1")
-        if "#d1:1" not in arity_helpers or "#d1:0" not in arity_helpers:
-            errs.append("narrate: arity helpers must use both exact D1 verdict literals")
+        if "#d1:" in arity_helpers:
+            errs.append("narrate: arity helpers must use raw D1 words 0/1 in exact mode")
+        if not re.search(r"\\(\\(0101 value\\)\\s+1\\)", arity_helpers):
+            errs.append("narrate: exact D1 YES word is missing from NULL(value) branch")
+        if not re.search(r"\\(\\(010 value\\)\\s+0\\)", arity_helpers):
+            errs.append("narrate: exact D1 NO word is missing from ATOM(value) branch")
     for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
         if legacy in active_code:
             errs.append(f"narrate: legacy arity mechanism still active: {legacy}")
