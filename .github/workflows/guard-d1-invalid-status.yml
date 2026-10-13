@@ -1,4 +1,4 @@
-name: Guard exact-D1 invalid-status contract
+name: Guard exact-D1 direct-status migration
 
 on:
   push:
@@ -24,8 +24,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - name: "D1-D10: prove 2046 exact resident coordinates and full-source provenance"
+      - name: "D1-D10: 2046 coordinates, 2 historical Git blobs, 93 call-head bits"
         run: python3 -m unittest discover -s tests -p 'test_guard_d1_invalid_status.py' -v
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Guard: execute eight accepted and four invalid states with strict D1"
+      - name: "Guard: exact D1, 12 status responses, historical parity, short-circuit"
         run: cargo test --locked -p sens --test guard_d1_invalid_status -- --nocapture

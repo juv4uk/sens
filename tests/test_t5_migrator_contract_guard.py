@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_projection
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
-TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
+TEXT7 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 SURFACES = [ROOT / "lib" / "domains" / f"d{i}.lisp" for i in range(1, 7)]

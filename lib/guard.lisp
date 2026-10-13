@@ -7,26 +7,26 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 ;
-; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ())).
+; Predicate results now use direct typed D1 W1 projections #d1:1 / #d1:0.
 ; Two-field COND only. Width is identity; every bit of the domain address valued.
 
 (0011 guard-decision?
   (0010 (decision)
     (110
-      ((101 decision (001 allow)) (010 (001 ())))
-      ((101 decision (001 warn)) (010 (001 ())))
-      ((101 decision (001 reject)) (010 (001 ())))
-      ((101 decision (001 unknown)) (010 (001 ())))
-      ((010 (001 ())) (0100 (010 (001 ())))))))
+      ((101 decision (001 allow)) #d1:1)
+      ((101 decision (001 warn)) #d1:1)
+      ((101 decision (001 reject)) #d1:1)
+      ((101 decision (001 unknown)) #d1:1)
+      (#d1:1 #d1:0))))
 
 (0011 guard-evidence-status?
   (0010 (status)
     (110
-      ((101 status (001 confirmed)) (010 (001 ())))
-      ((101 status (001 partial)) (010 (001 ())))
-      ((101 status (001 unresolved)) (010 (001 ())))
-      ((101 status (001 broken)) (010 (001 ())))
-      ((010 (001 ())) (0100 (010 (001 ())))))))
+      ((101 status (001 confirmed)) #d1:1)
+      ((101 status (001 partial)) #d1:1)
+      ((101 status (001 unresolved)) #d1:1)
+      ((101 status (001 broken)) #d1:1)
+      (#d1:1 #d1:0))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -55,7 +55,7 @@
        (1110 (001 invalid-guard-decision) decision))
       ((0100 (guard-evidence-status? evidence-status))
        (1110 (001 invalid-evidence-status) evidence-status))
-      ((010 (001 ()))
+      (#d1:1
        (1110
          (001 guard-finding)
          (1110 (001 schema) (001 guard/1))
@@ -72,7 +72,7 @@
            (001 unknown-routes)
            (110
              ((101 decision (001 unknown)) (guard-unknown-routes))
-             ((010 (001 ())) (001 ())))))))))
+             (#d1:1 (001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -100,7 +100,7 @@
        (make-guard-finding
          (001 allow) (001 confirmed) subject observed expected
          (001 ()) (001 invariant-preserved) (001 no-action) evidence))
-      ((010 (001 ()))
+      (#d1:1
        (make-guard-finding
          (001 warn) (001 confirmed) subject observed expected
          (1110 (001 expected) expected (001 observed) observed)
@@ -141,7 +141,7 @@
          (001 synchronization-result-has-no-drift-record)
          (001 record-drift-before-unfreezing-commits)
          evidence))
-      ((010 (001 ()))
+      (#d1:1
        (make-guard-finding
          (001 allow) (001 confirmed) (001 ecosystem-sync)
          (1110 commit-state sync-state drift-state)
@@ -160,4 +160,4 @@
     (001000 ((entry (11100 field (011 reference))))
       (110
         ((010 entry) (001 ()))
-        ((010 (001 ())) (1001 entry))))))
+        (#d1:1 (1001 entry))))))
