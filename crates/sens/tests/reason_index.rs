@@ -136,3 +136,22 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
     }
     assert_eq!(DomainCoordinate::new(10, 1024), None);
 }
+
+#[test]
+fn reason_index_builder_diagnostic_first_failing_stage() {
+    let mut s = session();
+    let probes = [
+        "(reason-term-predicate (quote (p a)))",
+        "(reason-rule-predicate (quote ((p a))))",
+        "(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))",
+        "(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))",
+        "(reason-index-build-scan (quote ()) (quote ()) (quote ()) 0)",
+        "(reason-index-build-scan (quote (((p a)))) (quote (((p a)))) (quote ()) 0)",
+        "(reason-make-index (quote (((p a)))))",
+    ];
+    for (i, probe) in probes.iter().enumerate() {
+        let actual = eval_program(probe, &mut s);
+        eprintln!("reason-index step {i}: {probe} => {actual:?}");
+        assert!(actual.is_ok(), "failed at stage {i} : {probe}");
+    }
+}
