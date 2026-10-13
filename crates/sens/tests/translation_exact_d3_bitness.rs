@@ -84,3 +84,28 @@ fn всі_2046_координат_д1_д10_зберігають_ширину_і_
         DomainCoordinate::new(3, 0b101)
     );
 }
+
+#[test]
+fn атомарна_довжина_має_справжній_d3_так_ні_а_не_порівняння_пар() {
+    use sens::{eval_parsed_expressions, parse_mixed_exact_domain, Session};
+
+    fn run(source: &str) -> Result<String, String> {
+        let forms = parse_mixed_exact_domain(source).map_err(|e| e.to_string())?;
+        let value = eval_parsed_expressions(&forms, &mut Session::default())
+            .map_err(|e| e.to_string())?;
+        Ok(value.value.to_string())
+    }
+
+    // Однакове атомарне число після D6 LENGTH: відповідь D1.
+    let five = run("(101 (000000 (001 (a b c d e))) 5)")
+        .expect("D3 EQ атомарного D6 LENGTH=5");
+    let four = run("(101 (000000 (001 (a b c d e))) 4)")
+        .expect("D3 EQ атомарного D6 LENGTH!=4");
+    assert_ne!(five, four, "D3 EQ мусить розрізняти 5 і 4");
+
+    // Відмінність від D8 EQUAL принципова: D3 EQ не порівнює пари.
+    assert!(
+        run("(101 (001 (a b)) (001 (a b)))").is_err(),
+        "D3 EQ не повинен silently порівнювати структурні Pair"
+    );
+}
