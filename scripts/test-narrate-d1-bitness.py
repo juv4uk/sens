@@ -62,9 +62,9 @@ def check_narrate() -> list[str]:
         arity_helpers = active_code[helper_start:helper_end]
         if "#d1:" in arity_helpers:
             errs.append("narrate: arity helpers must use raw D1 words 0/1 in exact mode")
-        if not re.search(r"\\(\\(0101 value\\)\\s+1\\)", arity_helpers):
+        if not re.search(r"\(\(0101 value\)\s+1\)", arity_helpers):
             errs.append("narrate: exact D1 YES word is missing from NULL(value) branch")
-        if not re.search(r"\\(\\(010 value\\)\\s+0\\)", arity_helpers):
+        if not re.search(r"\(\(010 value\)\s+0\)", arity_helpers):
             errs.append("narrate: exact D1 NO word is missing from ATOM(value) branch")
     for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
         if legacy in active_code:
