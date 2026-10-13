@@ -1,0 +1,21 @@
+name: Knowledge — макроси D4 без історичного W8
+
+on:
+  pull_request:
+    paths:
+      - "lib/knowledge.lisp"
+      - "tests/test_domain_lisp_corpus_knowledge_macros.py"
+      - ".github/workflows/knowledge-macro-d4-cutover.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d4-macro-source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити 11 макросів, 2046 доменних ключів і негативні мутації
+        run: python3 -m unittest discover -s tests -p 'test_domain_lisp_corpus_knowledge_macros.py' -v
