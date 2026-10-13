@@ -246,49 +246,43 @@ impl BitPacker {
         start
     }
 
-    /// Append one exact W9 word with no interior alignment or padding.
-    pub fn push_w9(&mut self, word: Bit9) -> usize {
+    /// Append one exact small-domain word through a three-byte MSB window.
+    ///
+    /// The input width and payload were validated by Bit9/DomainCoordinate.
+    /// Existing low tail bits are zero; no padding occurs between words.
+    /// At most three target bytes are touched, even for unaligned D10.
+    #[inline]
+    fn append_exact_window(&mut self, width: usize, bits: u16) -> usize {
+        debug_assert!((1..=10).contains(&width));
+        debug_assert!(u32::from(bits) < (1u32 << width));
         let start = self.bit_len;
+        let end = start.checked_add(width).expect("packed bit count overflow");
+        let byte_index = start / 8;
+        let occupied = start % 8 + width;
+        let window = u32::from(bits) << (24 - occupied);
 
-        for index in 0..9 {
-            let bit_in_byte = self.bit_len % 8;
-            if bit_in_byte == 0 {
-                self.bytes.push(0);
-            }
-
-            if word.bit(index) == Some(true) {
-                let byte_index = self.bit_len / 8;
-                self.bytes[byte_index] |= 1 << (7 - bit_in_byte);
-            }
-
-            self.bit_len += 1;
+        self.bytes.resize(byte_len_for_bits(end), 0);
+        self.bytes[byte_index] |= (window >> 16) as u8;
+        if occupied > 8 {
+            self.bytes[byte_index + 1] |= (window >> 8) as u8;
         }
-
+        if occupied > 16 {
+            self.bytes[byte_index + 2] |= window as u8;
+        }
+        self.bit_len = end;
         start
     }
 
-    /// Append an already validated D1–D10 coordinate, bit for bit.
+    /// Append one exact W9 word with no interior alignment or padding.
+    pub fn push_w9(&mut self, word: Bit9) -> usize {
+        self.append_exact_window(9, word.packed_bits())
+    }
+
+    /// Append a ratified D1–D10 coordinate, retaining exact width and zeros.
     ///
-    /// No byte is allocated per domain word: only the final packed payload
-    /// can contain unused low tail bits. The caller retains the width schedule
-    /// as source/grammar information; this does not invent a wire envelope.
+    /// This mechanism never infers domain identity from the numeric payload.
     pub fn push_coordinate(&mut self, coordinate: DomainCoordinate) -> usize {
-        let start = self.bit_len;
-        let width = usize::from(coordinate.width());
-        let bits = coordinate.bits();
-
-        for index in (0..width).rev() {
-            let bit_in_byte = self.bit_len % 8;
-            if bit_in_byte == 0 {
-                self.bytes.push(0);
-            }
-            if (bits >> index) & 1 != 0 {
-                self.bytes[self.bit_len / 8] |= 1 << (7 - bit_in_byte);
-            }
-            self.bit_len += 1;
-        }
-
-        start
+        self.append_exact_window(usize::from(coordinate.width()), coordinate.bits())
     }
 
     /// Finish packing without adding any semantic padding or delimiter.
@@ -664,6 +658,41 @@ mod tests {
             DomainCoordinate::new(10, 257),
             "equal numeric payloads never establish equal domain identity"
         );
+    }
+
+    #[test]
+    fn all_domain_writes_match_independent_bitwise_reference() {
+        for width in 1u8..=10 {
+            for bits in 0u16..(1u16 << width) {
+                let coordinate = DomainCoordinate::new(width, bits).unwrap();
+                for prefix in 0..8usize {
+                    let mut packer = BitPacker::new();
+                    for _ in 0..prefix {
+                        packer.push(Bit1::new(1).unwrap());
+                    }
+                    assert_eq!(packer.push_coordinate(coordinate), prefix);
+                    let packed = packer.finish();
+
+                    // Independent one-bit-at-a-time reference: no reuse of
+                    // append_exact_window, read_coordinate or packed words.
+                    let mut expected = vec![0u8; (prefix + usize::from(width) + 7) / 8];
+                    for position in 0..prefix {
+                        expected[position / 8] |= 1 << (7 - position % 8);
+                    }
+                    for bit_index in 0..usize::from(width) {
+                        let bit = (bits >> (usize::from(width) - 1 - bit_index)) & 1;
+                        if bit != 0 {
+                            let position = prefix + bit_index;
+                            expected[position / 8] |= 1 << (7 - position % 8);
+                        }
+                    }
+                    assert_eq!(packed.bytes(), expected.as_slice(),
+                        "D{width} payload={bits:b} offset={prefix}");
+                    assert_eq!(packed.bit_len(), prefix + usize::from(width));
+                    assert_eq!(packed.read_coordinate(prefix, width), Some(coordinate));
+                }
+            }
+        }
     }
 
     #[test]
