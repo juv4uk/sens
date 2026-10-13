@@ -8,6 +8,9 @@ on:
       - "crates/sens/tests/binary_only_language.rs"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - "tests/semantic/meta-eval-mutual-d4-law.bits"
+      - "tests/semantic/yantra-d4-bind-law.bits"
+      - "tests/semantic/yantra-d4-bind-mutant.bits"
+      - "lib/yantra.lisp"
       - "tests/semantic/x86-encoder-let-d4-law.bits"
       - "tests/semantic/x86-encoder-let-d4-mutant.bits"
       - "lib/machine/encoding/x86-64.lisp"
@@ -24,6 +27,9 @@ on:
       - "crates/sens/tests/binary_only_language.rs"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - "tests/semantic/meta-eval-mutual-d4-law.bits"
+      - "tests/semantic/yantra-d4-bind-law.bits"
+      - "tests/semantic/yantra-d4-bind-mutant.bits"
+      - "lib/yantra.lisp"
       - "tests/semantic/x86-encoder-let-d4-law.bits"
       - "tests/semantic/x86-encoder-let-d4-mutant.bits"
       - "lib/machine/encoding/x86-64.lisp"
@@ -52,3 +58,5 @@ jobs:
         run: cargo test --locked -p sens --test sens_semantic_witnesses meta_eval_mutual_d4_exact_sens_self_verdict -- --nocapture
       - name: Бінарний SENS перевіряє x86 LAMBDA та однобітний мутант
         run: cargo test --locked -p sens --test sens_semantic_witnesses x86_encoding_let_to_exact_d4_binary_sens_verdict -- --nocapture
+      - name: Двійковий SENS доводить зв’язування Yantra D4 і відхиляє однобітний мутант
+        run: cargo test --locked -p sens --test sens_semantic_witnesses yantra_d4_binary_self_verdict_and_one_bit_negative -- --nocapture
