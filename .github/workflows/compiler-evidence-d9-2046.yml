@@ -1,0 +1,23 @@
+name: Точний D9 доказ компілятора — 2046 координат
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/compiler_bootstrap.rs"
+      - ".github/workflows/compiler-evidence-d9-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d9-compiler-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Довести 1022 D1–D9 roundtrip та 1024 D10 fail-closed
+        run: cargo test --locked -p sens --lib compiler_bootstrap::tests::compiler_evidence_exhaustive_2046_coordinates_exact_width -- --exact --nocapture
+      - name: Перевірити цілісність ABI і негативні свідки
+        run: cargo test --locked -p sens --lib compiler_bootstrap::tests:: -- --nocapture
