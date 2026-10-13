@@ -4,7 +4,7 @@
 
 use sens::{
     eval_parsed_expressions, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
-    eval_program, parse_exact_domain_source, parse_mixed_exact_domain, Session,
+    parse_exact_domain_source, parse_mixed_exact_domain, Session,
 };
 
 fn eval_advice_corpus(source: &str) -> String {
@@ -49,8 +49,12 @@ fn eval_advice_corpus(source: &str) -> String {
         result
             .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
     }
-    eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
+    // Parse the actual test program with the same exact-domain boundary
+    // used for the pinned corpus. Never turn D3 call heads into host numbers.
+    let program = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|e| panic!("Advice Taker exact-domain reader: {e}\nsource: {source}"));
+    eval_parsed_expressions(&program, &mut session)
+        .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"))
         .value
         .to_string()
 }
@@ -58,9 +62,9 @@ fn eval_advice_corpus(source: &str) -> String {
 #[test]
 fn direct_controlled_fact_reaches_proved_narration() {
     let source = r#"
-        (advise astronomy (understand (quote (earth is a planet))))
+        (advise astronomy (understand (001 (earth is a planet))))
         (narrate-outcome
-          (reason-in-observe (quote astronomy) (quote (planet earth))))
+          (reason-in-observe (001 astronomy) (001 (planet earth))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
 }
@@ -69,15 +73,15 @@ fn direct_controlled_fact_reaches_proved_narration() {
 fn multistep_rules_survive_admission_reasoning_and_presentation() {
     let source = r#"
         (advise-all science
-          (quote (
+          (001 (
             ((planet earth))
             ((has (var x) mass) (planet (var x)))
             ((valuable (var x)) (has (var x) mass))
           )))
         (let* ((outcome
-                 (reason-in-observe (quote science) (quote (valuable earth))))
+                 (reason-in-observe (001 science) (001 (valuable earth))))
                (words (narrate-outcome outcome)))
-          (list (result-status outcome) (car words)))
+          (list (result-status outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -86,7 +90,7 @@ fn multistep_rules_survive_admission_reasoning_and_presentation() {
 fn recursive_rule_survives_the_same_end_to_end_path() {
     let source = r#"
         (advise-all family
-          (quote (
+          (001 (
             ((parent alice bob))
             ((parent bob charlie))
             ((ancestor (var x) (var y)) (parent (var x) (var y)))
@@ -96,10 +100,10 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
           )))
         (let* ((outcome
                  (reason-in-observe
-                   (quote family)
-                   (quote (ancestor alice charlie))))
+                   (001 family)
+                   (001 (ancestor alice charlie))))
                (words (narrate-outcome outcome)))
-          (list (result-status outcome) (car words)))
+          (list (result-status outcome) (100 words)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved proved)");
 }
@@ -107,12 +111,12 @@ fn recursive_rule_survives_the_same_end_to_end_path() {
 #[test]
 fn explicit_conflict_is_rejected_and_cannot_replace_the_existing_fact() {
     let source = r#"
-        (advise ethics (quote ((mortal socrates))))
+        (advise ethics (001 ((mortal socrates))))
         (let* ((decision
-                 (advise ethics (quote ((not? (mortal socrates))))))
+                 (advise ethics (001 ((not? (mortal socrates))))))
                (outcome
-                 (reason-in-observe (quote ethics) (quote (mortal socrates)))))
-          (list (car decision) (result-status outcome)))
+                 (reason-in-observe (001 ethics) (001 (mortal socrates)))))
+          (list (100 decision) (result-status outcome)))
     "#;
     assert_eq!(eval_advice_corpus(source), "(conflict proved)");
 }
@@ -122,12 +126,12 @@ fn knowledge_package_round_trip_precedes_reasoning_without_eval_of_package_data(
     let source = r#"
         (def package
           (make-knowledge-package
-            (quote archive)
-            (quote (((planet mars))))))
-        (def *knowledge-journal* (quote ()))
+            (001 archive)
+            (001 (((planet mars))))))
+        (def *knowledge-journal* (001 ()))
         (import-knowledge-package package)
         (narrate-outcome
-          (reason-in-observe (quote archive) (quote (planet mars))))
+          (reason-in-observe (001 archive) (001 (planet mars))))
     "#;
     assert_eq!(eval_advice_corpus(source), "(proved mars is a planet)");
 }
