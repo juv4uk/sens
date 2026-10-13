@@ -9,13 +9,12 @@ if not __debug__:
 root=Path(__file__).resolve().parents[1]
 old=json.loads((root/"knowledge/d1-d5-foundation.json").read_text(encoding="utf-8"))
 d6f=json.loads((root/"knowledge/d1-d6-foundation.json").read_text(encoding="utf-8"))
-d7f=json.loads((root/"knowledge/d1-d7-foundation.json").read_text(encoding="utf-8"))
 d8f=json.loads((root/"knowledge/d1-d8-foundation.json").read_text(encoding="utf-8"))
 foundation=json.loads((root/"knowledge/d1-d9-foundation.json").read_text(encoding="utf-8"))
 d4=json.loads((root/"knowledge/d4-cleanroom.json").read_text(encoding="utf-8"))
 d5=json.loads((root/"knowledge/d5-ratified.json").read_text(encoding="utf-8"))
 d6=json.loads((root/"knowledge/d6-ratified.json").read_text(encoding="utf-8"))
-d7=json.loads((root/"knowledge/d7-ratified.json").read_text(encoding="utf-8"))
+d7=json.loads((root/"knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))
 d8=json.loads((root/"knowledge/d8-ratified.json").read_text(encoding="utf-8"))
 d9=json.loads((root/"knowledge/d9-ratified.json").read_text(encoding="utf-8"))
 contract=(root/"language-contract.lisp").read_text(encoding="utf-8")
@@ -25,7 +24,6 @@ rat=(root/"contracts/d1-d9-foundation-ratification.lisp").read_text(encoding="ut
 assert foundation["status"]=="owner-ratified"
 assert old["authority"]=="#3331"
 assert d6f["authority"]=="#3393"
-assert d7f["authority"]=="#3572"
 assert d8f["authority"]=="#3960"
 assert foundation["authority"]=="#4008"
 assert foundation["current_domains"]==["D1","D2","D3","D4","D5","D6","D7","D8","D9"]
@@ -38,10 +36,16 @@ assert foundation["domains"]["D3"]["residents"]=={
 assert foundation["domains"]["D4"]["residents"]==d4["residents"]
 assert foundation["domains"]["D5"]["residents"]==d5["residents"]
 assert foundation["domains"]["D6"]["residents"]==d6["residents"]
-assert foundation["domains"]["D7"]["residents"]==d7["residents"]
+# The D1–D9 foundation ledger is a historical authority snapshot for D7.
+# Current executable and display mappings must use the separate owner D7 v2 table.
+assert foundation["domains"]["D7"]["width"]==7
+assert (d7["schema"],d7["status"],d7["width"],d7["capacity"],d7["occupancy"]) == (
+    "sens.d7.keyboard/v2","owner-ratified",7,128,128)
+assert len(d7["table"])==128
+assert [row["bits"] for row in d7["table"]]==[format(index,"07b") for index in range(128)]
 assert foundation["domains"]["D8"]["residents"]==d8["residents"]
 assert foundation["domains"]["D9"]["residents"]==d9["residents"]
-assert len(foundation["domains"]["D7"]["residents"])==126
+assert len(d7["table"])==128
 assert len(foundation["domains"]["D8"]["residents"])==256
 assert len(foundation["domains"]["D9"]["residents"])==512
 assert len(set(foundation["domains"]["D9"]["residents"].values()))==512
