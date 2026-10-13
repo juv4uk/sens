@@ -13,14 +13,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focussed-${{ github.ref }}
+  group: sens-full-cargo-locked-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   binary-sens-law:
     name: Часові D1 предикати — один фізичний SENS-свідок і чинні негативні контроли
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -70,6 +70,18 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Один ПОВНИЙ Cargo workspace run — locked, non-cancellable
+        id: full-workspace-cargo
+        timeout-minutes: 105
+        shell: bash
+        env:
+          CARGO_BUILD_JOBS: '2'
+          RUST_TEST_THREADS: '2'
+          RUST_BACKTRACE: '1'
+        run: |
+          set -euo pipefail
+          echo "FULL_WORKSPACE_CARGO_START sha=$GITHUB_SHA run_id=$GITHUB_RUN_ID"
+          cargo test --workspace --all-targets --locked
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
         shell: bash
