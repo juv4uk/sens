@@ -33,6 +33,7 @@ on:
       - 'tests/fixtures/machine-block-semantic.bits'
       - 'tests/fixtures/machine-block-semantic.sens'
       - 'tests/fixtures/canon-ladder-logic.bits'
+      - 'tests/semantic/canon-d1-fallback-law.bits'
       - 'tests/fixtures/canon-ladder-logic.sens'
       - '.github/workflows/canon-binary-law.yml'
   workflow_dispatch:
@@ -60,6 +61,25 @@ jobs:
           target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/canon-trit.out"
           cmp "$RUNNER_TEMP/canon-sens.out" "$RUNNER_TEMP/canon-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/canon-sens.out"
+
+      - name: Canon D1 fallback and one-bit mutant are judged by binary SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          index=0
+          while IFS= read -r bits || [[ -n "$bits" ]]; do
+            [[ -z "$bits" ]] && continue
+            index=$((index + 1))
+            printf '%s\n' "$bits" > "$RUNNER_TEMP/canon-d1-law.lisp"
+            target/debug/sens-trit encode "$RUNNER_TEMP/canon-d1-law.lisp"
+            target/debug/sens-trit open "$RUNNER_TEMP/canon-d1-law.sens" > "$RUNNER_TEMP/canon-d1-law.open.bits"
+            cmp "$RUNNER_TEMP/canon-d1-law.lisp" "$RUNNER_TEMP/canon-d1-law.open.bits"
+            target/debug/sens "$RUNNER_TEMP/canon-d1-law.sens" > "$RUNNER_TEMP/canon-d1-law.sens.out"
+            target/debug/sens-trit eval "$RUNNER_TEMP/canon-d1-law.sens" > "$RUNNER_TEMP/canon-d1-law.trit.out"
+            cmp "$RUNNER_TEMP/canon-d1-law.sens.out" "$RUNNER_TEMP/canon-d1-law.trit.out"
+            printf '1\n' | cmp - "$RUNNER_TEMP/canon-d1-law.sens.out"
+          done < tests/semantic/canon-d1-fallback-law.bits
+          test "$index" -eq 4
 
       - name: Execute machine-block laws and D7 binder admission in exact SENS
         shell: bash
