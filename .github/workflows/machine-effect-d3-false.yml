@@ -1,19 +1,9 @@
-# ЄДИНИЙ ЦІЛЬОВИЙ АВТОМАТИЧНИЙ SENS-ТЕСТ, 2026-10-13.
+# РУЧНИЙ SENS-СВІДОК, 2026-10-13. Єдиний автоматичний workflow — ci.yml.
 # Семантика — лише у фізичних двійкових .sens/.bits; host перевіряє бітність,
 # транспортування й D1-вердикт. Інші workflows залишаються ручними.
 name: SENS — один двійковий закон D3 + однобітний мутант
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/effects/u64.lisp"
-      - "tests/semantic/machine-effect-d3-false-law.bits"
-      - "tests/semantic/machine-effect-d3-false-mutant.bits"
-      - "tests/semantic/machine-effect-d3-false-law.sens"
-      - "tests/semantic/machine-effect-d3-false-mutant.sens"
-      - "scripts/ci_failure_contract.py"
-      - ".github/workflows/machine-effect-d3-false.yml"
   workflow_dispatch:
 
 permissions:
