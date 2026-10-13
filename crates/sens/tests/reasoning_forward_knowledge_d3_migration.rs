@@ -3,7 +3,7 @@
 //! Frozen W8 files remain provenance only. They used the old NIL-as-false
 //! conditional convention, so executing them with the ratified exact-D1 COND
 //! would test a retired law rather than current behavior.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Expr, ExprKind, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const UNIFY: &str = include_str!("../../../lib/unify.lisp");
