@@ -26,13 +26,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-      - name: Не допустити жодного іншого автоматичного workflow
-        id: budget
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/ci_one_focused_workflow.py
-          python3 scripts/check-domain-ladder-identity.py --self-test --check
       - name: Синтаксис усіх YAML-файлів репозиторію
         id: yaml-syntax
         shell: ruby {0}
@@ -58,6 +51,13 @@ jobs:
             warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
           end
           exit(failures.empty? ? 0 : 1)
+      - name: Не допустити жодного іншого автоматичного workflow
+        id: budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci_one_focused_workflow.py
+          python3 scripts/check-domain-ladder-identity.py --self-test --check
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
