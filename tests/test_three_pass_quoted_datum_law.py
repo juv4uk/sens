@@ -79,8 +79,8 @@ class QuotedDatumLadderLaw(unittest.TestCase):
         }
         for name, bits in cases.items():
             with self.subTest(name=name):
-                out, _ = self.migrate("'" + name + "\\n")
-                self.assertEqual(out, f"10 001 00 {bits} 01\\n")
+                out, _ = self.migrate("'" + name + "\n")
+                self.assertEqual(out, f"10 001 00 {bits} 01\n")
                 self.assertEqual(len(bits), 1 if name in ("ні", "NIL") else
                                  3 if name in ("CAR", "перше", "як-є") else
                                  8 if name in ("SQRT", "корінь") else
@@ -89,10 +89,10 @@ class QuotedDatumLadderLaw(unittest.TestCase):
     def test_ambiguous_ladder_surface_blocks_instead_of_guessing_d7(self):
         # Canonical tables have MAP in both D6 and D8.
         with self.assertRaisesRegex(mod.MigrationError, "ambiguous quoted ladder"):
-            self.migrate("'MAP\\n")
+            self.migrate("'MAP\n")
 
     def test_quote_recursively_prefers_ladder_inside_data_lists(self):
-        out, _ = self.migrate("'(CAR nonresident)\\n")
+        out, _ = self.migrate("'(CAR nonresident)\n")
         self.assertTrue(out.startswith("10 001 00 10 100 00 10 "), out)
         self.assertNotIn(" CAR ", out)
 
