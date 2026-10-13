@@ -148,6 +148,10 @@ def verify():
                 for disallowed in ("paths:", "paths-ignore:", "tags:", "tags-ignore:", "branches-ignore:"):
                     if disallowed in block:
                         raise ValueError("push не може фільтрувати коміти: " + disallowed)
+                pr_block = found["pull_request"]
+                for disallowed in ("paths:", "paths-ignore:", "branches:", "branches-ignore:", "types:"):
+                    if disallowed in pr_block:
+                        raise ValueError("pull_request не може фільтрувати потрібні перевірки: " + disallowed)
                 auto.append(path.name)
             elif automatic:
                 raise ValueError(f"додатковий автоматичний тригер {sorted(automatic)}")
