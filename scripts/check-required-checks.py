@@ -34,13 +34,15 @@ def required_checks(root: Path = ROOT) -> tuple[str, ...]:
 def job_check_names(root: Path = ROOT) -> tuple[list[tuple[str, str]], list[str]]:
     names: list[tuple[str, str]] = []
     warnings: list[str] = []
-    for path in sorted((root / ".github" / "workflows").glob("*.yml")):
+    for path in sorted(p for p in (root / ".github" / "workflows").iterdir()
+                       if p.suffix in {".yml", ".yaml"}):
         try:
             document = yaml.safe_load(path.read_text(encoding="utf-8"))
         except yaml.YAMLError as exc:
             warnings.append(f"{path.name}: YAML parse failed ({exc})")
             continue
         if not isinstance(document, dict):
+            warnings.append(f"{path.name}: YAML root must be a mapping")
             continue
         jobs = document.get("jobs")
         if not isinstance(jobs, dict):
@@ -75,8 +77,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"REQUIRED_CHECKS_BLOCKED: {exc}", file=sys.stderr)
         return 2
     for warning in warnings:
-        print(f"REQUIRED_CHECKS_WARN: {warning}", file=sys.stderr)
-    if problems:
+        print(f"REQUIRED_CHECKS_BLOCKED: {warning}", file=sys.stderr)
+    if problems or warnings:
         for problem in problems:
             print(f"REQUIRED_CHECKS_BLOCKED: {problem}", file=sys.stderr)
         return 1
