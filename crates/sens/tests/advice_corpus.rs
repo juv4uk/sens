@@ -67,6 +67,9 @@ fn eval_advice_corpus(source: &str) -> String {
         ("family", "(110000011 (001 family))"),
         ("ethics", "(110000011 (001 ethics))"),
         ("archive", "(110000011 (001 archive))"),
+        ("journal-events-astronomy", "(module-journal-events (001 astronomy) *knowledge-journal*)"),
+        ("journal-reversed-astronomy", "(10100 (module-journal-events (001 astronomy) *knowledge-journal*))"),
+        ("journal-single-event", "(apply-journal-event (001 ()) (100 *knowledge-journal*))"),
         ("ethics-proof", "(101001110 (001 (mortal socrates)) (110000011 (001 ethics)))"),
     ] {
         let native = parse_exact_domain_source(witness)
@@ -86,18 +89,6 @@ fn direct_controlled_fact_reaches_proved_narration() {
         (narrate-outcome
           (reason-in-observe (001 astronomy) (001 (planet earth))))
     "#;
-    // The program below is evaluated by SENS itself. Rust prints the actual
-    // journal, exact D9 REASON result, and observation; it defines no law.
-    // This localizes the first failing transition instead of a generic red.
-    let diagnostic = eval_advice_corpus(r#"
-        (advise astronomy (understand (001 (earth is a planet))))
-        (1110
-          (101010010 (001 astronomy))
-          (110000011 (001 astronomy))
-          (101001110 (001 (planet earth)) (110000011 (001 astronomy)))
-          (000010000 (001 (planet earth)) (110000011 (001 astronomy))))
-    "#);
-    eprintln!("ADVICE_NATIVE_DIAGNOSTIC layers=journal,clauses,reason,observe output={diagnostic}");
     assert_eq!(eval_advice_corpus(source), "(proved earth is a planet)");
 }
 
