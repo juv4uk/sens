@@ -59,5 +59,20 @@ jobs:
             echo "BLOCKED: мутант пройшов, хоча його SENS-гілка зобов'язана відмовити" >&2
             exit 1
           fi
+      - name: SENS-вирок для четвертого і п'ятого вузла — власна D3 логіка, однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="tests/semantic/persistent-vector-node-selectors"
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- verify "${base}-law.lisp"
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- verify "${base}-mutant.lisp"
+          # Rust/host не обчислює EQ/COND: сам двійковий SENS видає D1:1 чи D1:0.
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval "${base}-law.sens" > "$RUNNER_TEMP/node-law.txt"
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval "${base}-mutant.sens" > "$RUNNER_TEMP/node-mutant.txt"
+          test "$(tail -n 1 "$RUNNER_TEMP/node-law.txt")" = "1"
+          test "$(tail -n 1 "$RUNNER_TEMP/node-mutant.txt")" = "0"
+          # Mutant changes exactly ONE already typed D1 word, never width or D2.
+          diff_count="$(paste <(tr ' ' '\\n' < "${base}-law.lisp" | sed '/^$/d') <(tr ' ' '\\n' < "${base}-mutant.lisp" | sed '/^$/d') | awk '$1 != $2 { if ($1!="1" || $2!="0") exit 3; n++ } END {print n+0}')"
+          test "$diff_count" = 1
       - name: Execute semantic laws owned by binary SENS
         run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
