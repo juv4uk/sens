@@ -1,13 +1,8 @@
 name: SENS-owned binary semantic witnesses
 
 # One automatic targeted job. Existing broader witnesses remain manual-only.
+# Єдиний автоматичний main workflow — ci.yml. Цей свідок ручний.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/world.lisp'
-      - 'tests/semantic/world-metadata-selector-*'
-      - '.github/workflows/sens-owned-semantic-witnesses.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +10,7 @@ permissions:
 
 jobs:
   world-metadata-exact:
-    if: github.event_name == 'push'
+    if: ${{ false }} # Карантин: самовільний запуск недопустимий
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     permissions:
