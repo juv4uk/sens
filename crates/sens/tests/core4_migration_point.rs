@@ -14,6 +14,7 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
         ("(equal? (quote (a b)) (quote (a b)))", true),
         ("(equal? (quote (a b)) (quote (a c)))", false),
         ("(member? (quote b) (quote (a b c)))", true),
+        ("(member? (quote z) (quote (a b c)))", false),
         ("(null? (quote ()))", true),
         ("(null? (quote (a)))", false),
         ("(string<? \"a\" \"b\")", true),
@@ -22,6 +23,16 @@ fn core4_point_witness_crosses_predicates_strings_macros_and_fresh_symbols() {
             .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
             .value;
         assert_eq!(value.as_predicate_bit(), Some(expected), "{source} -> {value}");
+    }
+
+    for (source, expected) in [
+        ("(assoc (quote b) (quote ((a . 1) (b . 2))))", "(b . 2)"),
+        ("(assoc (quote z) (quote ((a . 1) (b . 2))))", "()"),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("{source} failed: {e:?}"))
+            .value;
+        assert_eq!(value.to_string(), expected, "{source}");
     }
 
     for (source, expected) in [

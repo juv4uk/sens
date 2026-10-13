@@ -413,22 +413,16 @@
 (0011 member?
   (0010 (item lst)
     (110
-      
-      ((010 lst) 
-       (110
-         ((equal? item (100 lst))  (010 (001 ())))
-         ((0100 (equal? item (100 lst)))
-          (11101 item (011 lst))))))))
+      ((0101 lst) (010 (001 (0))))
+      ((equal? item (100 lst)) (010 ()))
+      ((010 ()) (member? item (011 lst))))))
 
 (0011 assoc
   (0010 (key alist)
     (110
-      
-      ((010 alist) 
-       (110
-         ((equal? key (100 (100 alist)))  (100 alist))
-         ((0100 (equal? key (100 (100 alist))))
-          (11100 key (011 alist))))))))
+      ((0101 alist) (001 ()))
+      ((equal? key (100 (100 alist))) (100 alist))
+      ((010 ()) (assoc key (011 alist))))))
 
 
 ; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
@@ -1052,10 +1046,7 @@
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
 (0011 null?
   (0010 (x)
-    (110
-      ((0100 (010 x)) (010 (001 ())))
-      ((010 x)  (001 ()))
-      ((010 x)  (001 ())))))
+    (0101 x)))
 
 (0011 subst
   (0010 (x y z)
