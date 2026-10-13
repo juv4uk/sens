@@ -18,6 +18,22 @@
 ;
 ; Quiescence is liveness/control data, never truth.
 
+; Точне структурне порівняння для ключів рою: жодного історичного W8
+; і жодного ототожнення W8:11110111 з D8:11110111.
+; D3 ATOM/ EQ/ CAR/ CDR/ COND; відповідь — виключно D1:1 або D1:0.
+; Порівняння атомів перед викликом D3 EQ, пар — рекурсивно.
+(0011 життя--рівні?
+  (0010 (ліве праве)
+    (110
+      ((010 ліве)
+       (110
+         ((010 праве) (101 ліве праве))
+         ((010 (001 ())) (001 ()))))
+      ((010 праве) (001 ()))
+      ((життя--рівні? (100 ліве) (100 праве))
+       (життя--рівні? (011 ліве) (011 праве)))
+      ((010 (001 ())) (001 ())))))
+
 (0011 life-scheduler-field
   (0010 (entry field)
     (110
@@ -36,9 +52,9 @@
                    field))
                 ((0100 (010 row))
                  (110
-                   ((життя-рівні-дані? field (100 row)) 
+                   ((життя--рівні? field (100 row)) 
                     (100 (011 row)))
-                   ((0100 (життя-рівні-дані? field (100 row)))
+                   ((0100 (життя--рівні? field (100 row)))
                     (life-scheduler-field
                       (111 (100 entry) (011 rows))
                       field)))))))))))))
@@ -57,8 +73,8 @@
       ((0100 (010 keys)) (001 absent))
       ((0100 (010 keys))
        (110
-         ((життя-рівні-дані? key (100 keys))  (001 present))
-         ((0100 (життя-рівні-дані? key (100 keys)))
+         ((життя--рівні? key (100 keys))  (001 present))
+         ((0100 (життя--рівні? key (100 keys)))
           (life-scheduler-key-present? key (011 keys))))))))
 
 (0011 life-scheduler-dedup-pending
@@ -83,36 +99,18 @@
   (0010 (pending)
     (life-scheduler-dedup-pending pending (001 ()))))
 
-; Структурна рівність — Lisp-owned D3 ATOM/EQ/CAR/CDR/COND.
-; D8:11110111 є зареєстрованою координатою, але тут немає callable-механізму.
-; Рекурсія по CAR/CDR розрізняє атомарні та складені терми.
-(0011 життя-рівні-дані?
-  (0010 (ліве праве)
-    (110
-      ((010 ліве)
-       (110
-         ((010 праве) (101 ліве праве))
-         ((010 ()) #d1:0)))
-      ((010 праве) #d1:0)
-      ((життя-рівні-дані? (100 ліве) (100 праве))
-       (життя-рівні-дані? (011 ліве) (011 праве)))
-      ((010 ()) #d1:0))))
-
-; Приватний D4 носій одного CAR; логіка порівняння — Lisp-owned D3.
-(0011 життя-проєкція-порівняти
-  (0010 (expected projections projection)
-    (110
-      ((життя-рівні-дані? expected projection)
-       (001 present))
-      ((0100 (життя-рівні-дані? expected projection))
-       (life-scheduler-projection-match? expected (011 projections))))))
-
 (0011 life-scheduler-projection-match?
   (0010 (expected projections)
     (110
-      ((010 projections) (001 absent))
+      ((0100 (010 projections)) (001 absent))
       ((0100 (010 projections))
-       (життя-проєкція-порівняти expected projections (100 projections))))))
+       (001000 ((projection (100 projections)))
+         (110
+           ((життя--рівні? expected projection)
+            
+            (001 present))
+           ((0100 (життя--рівні? expected projection))
+            (life-scheduler-projection-match? expected (011 projections)))))))))
 
 (0011 life-scheduler-projection-ready?
   (0010 (invocation projections)
