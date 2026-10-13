@@ -66,6 +66,10 @@ jobs:
       - name: Build exact binary execution and transport tools
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
+      - name: Двійковий SENS сам визначає логіку (8 PASS / 3 BLOCK)
+        shell: bash
+        run: SENS_BINARY_BUILT=1 bash scripts/test-current-semantic-slice.sh --native-binary-only
+
       - name: SENS-owned D1/D3 semantic self-verdict
         shell: bash
         run: |
