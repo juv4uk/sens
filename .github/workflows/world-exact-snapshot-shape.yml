@@ -1,0 +1,39 @@
+name: World exact snapshot shape
+
+on:
+  pull_request:
+    paths:
+      - "lib/world.lisp"
+      - "crates/sens/tests/reasoning_world_d3_migration.rs"
+      - ".github/workflows/world-exact-snapshot-shape.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/world.lisp"
+      - "crates/sens/tests/reasoning_world_d3_migration.rs"
+      - ".github/workflows/world-exact-snapshot-shape.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  world-shape:
+    name: Immutable-world arity and exact D3/D4 witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: world-exact-snapshot-shape
+      - name: Targeted valid and malformed snapshot witnesses
+        run: cargo test -p sens --test reasoning_world_d3_migration world_recognizer_requires_exact_four_element_proper_list -- --exact --nocapture
+      - name: Enforce exact D3/D4 call-head widths
+        run: cargo test -p sens --test reasoning_world_d3_migration world_shape_validator_uses_only_exact_d3_and_d4_call_heads -- --exact --nocapture
+      - name: Full world migration suite
+        run: cargo test -p sens --test reasoning_world_d3_migration -- --nocapture
+      - name: Check Lisp source balance
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib/world.lisp
+      - name: Diff hygiene
+        run: git show --format= --check HEAD
