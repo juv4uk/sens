@@ -25,6 +25,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: "Бінарний SENS: правило не плутають із тегом індексу"
-        run: cargo test --locked -p sens --test reason_index binary_sens_reason_index_head_atom_witness_decides_the_law -- --exact --nocapture
+        run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
       - name: Профільні свідки й повний набір 2046 координат
         run: cargo test --locked -p sens --test reason_index -- --nocapture
