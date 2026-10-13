@@ -18,12 +18,14 @@
 (0011 reason-index-rules third)
 (0011 reason-index-buckets fourth)
 
+; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
+; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).
 (0011 reason-index?
   (0010 (value)
     (110
-      ((010 value) (010 (001 (0))))
-      ((101 (100 value) *reason-index-schema*) (010 ()))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 value) #d1:0)
+      ((101 (100 value) *reason-index-schema*) #d1:1)
+      (#d1:1 #d1:0))))
 
 (0011 reason-index-linear
   (0010 (rules)
