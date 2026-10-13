@@ -1,0 +1,30 @@
+name: Файлове сховище — точна ревізія D24+ через D6
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/lisp-fs.lisp"
+      - "crates/sens/tests/lisp_fs_d24_revision_cutover.rs"
+      - ".github/workflows/lisp-fs-d24-revision-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/lisp-fs.lisp"
+      - "crates/sens/tests/lisp_fs_d24_revision_cutover.rs"
+      - ".github/workflows/lisp-fs-d24-revision-cutover.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-fs-d24:
+    name: Дійсний D24/D48 ADD1 у бібліотеці FS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Виконати позитивні та негативні FS свідки
+        run: cargo test --locked -p sens --test lisp_fs_d24_revision_cutover -- --nocapture
