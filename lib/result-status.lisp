@@ -160,8 +160,10 @@
                   index
                   0)))
          (110
-           ((11110101 (110111011 (010 positive-results))
-                 (110111011 (010 opposite-results)))
+           ((110
+              ((110111011 (010 positive-results))
+               (110111011 (010 opposite-results)))
+              ((010 (001 ())) (101 (001 (0)) (001 (1)))))
             (make-disputed
               (1110
                 (make-proved goal positive-results)
