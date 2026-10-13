@@ -111,6 +111,8 @@ jobs:
         run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
       - name: Виконати фізичний .sens із типізованих двійкових слів
         run: cargo test --locked -p sens --test physical_t5_execution
+      - name: Перевірити незалежні повноваження D7 Sound7 v1 та keyboard/text-data v2
+        run: python3 -m unittest discover -s tests -p 'test_domain_owner_registry_d7_dual_authority.py' -v
       - name: Перевірити, що заповнення D3–D10 походить лише з ратифікованих карт
         run: python3 scripts/generate-domain-owner-registry.py --check
       - name: Перевірити фізичне заповнення D8/D9 без допуску до семантичного виконання
