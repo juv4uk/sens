@@ -1,9 +1,13 @@
-use sens::{eval_program, load_core_library, load_process_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, load_process_library, parse_mixed_exact_domain_utf8_source, Session};
 
 fn utf8_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
-    eval_program(include_str!("../../../lib/utf8.lisp"), &mut session).unwrap();
+    let source = include_str!("../../../lib/utf8.lisp");
+    let exact = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", source)
+        .expect("UTF-8 current exact-domain source must parse");
+    eval_parsed_expressions(&exact, &mut session)
+        .expect("UTF-8 source must load through its width-preserving reader");
     session
 }
 
