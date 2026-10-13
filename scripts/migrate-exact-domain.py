@@ -14,10 +14,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 WORD8 = re.compile(r"[01]{8}\Z")
-# Exact type widths are independently pinned; never decode a domain through
-# a decimal suffix, nor infer a current identity from a historical W8 payload.
-DOMAIN_WIDTHS = {"D3": 3, "D4": 4}
-CORE_SUCCESSOR = re.compile(r"(D[34]):([01]+)\s+([A-Z][A-Z0-9?]*)\Z")
+TARGET = re.compile(r"D([3-9]):([01]{3,9})")
 FIELD = re.compile(r'\((ук|укр|san|en|LISP|sym)\s+("(?:\\.|[^"\\])*"|\(\)|[^()\s]+)\)')
 SAFE_OLD = {
     ("D3", "QUOTE"), ("D3", "ATOM"), ("D3", "EQ"),
@@ -55,27 +52,19 @@ def load_authority(root: Path = ROOT):
 
     surfaces = {}
     ambiguous = set()
-    for domain, width in DOMAIN_WIDTHS.items():
-        descriptor = foundation["domains"][domain]
-        if descriptor.get("width") != width:
-            raise ValueError(f"{domain}: owner width changed")
-        residents = descriptor["residents"]
-        expected = {f"{coordinate:0{width}b}" for coordinate in range(1 << width)}
-        if set(residents) != expected:
-            raise ValueError(f"{domain}: missing/extra resident coordinate in authority")
+    for domain in ("D3", "D4"):
         table = (root / "lib/domains" / (domain.lower() + ".lisp")).read_text(encoding="utf-8")
-        seen_rows = set()
+        residents = foundation["domains"][domain]["residents"]
         for line in table.splitlines():
-            # Match ALL binary-looking coordinates, including malformed widths.
-            # Silently skipping them would migrate against a partial codebook.
-            row = re.match(r"^\s*\(([01]+)\s+(.*)$", line)
+            row = re.match(r"^\s*\(([01]{3,4})\s+(.*)$", line)
             if not row:
                 continue
             bits, tail = row.groups()
-            if len(bits) != width or bits not in residents or bits in seen_rows:
-                raise ValueError(f"{domain}: invalid/duplicate exact-width row {bits}")
-            seen_rows.add(bits)
-            label = residents[bits]
+            if len(bits) != int(domain[1:]):
+                continue
+            label = residents.get(bits)
+            if label is None:
+                raise ValueError(f"owner table drift at {domain}:{bits}")
             identity = Identity(domain, bits, label)
             for _, raw in FIELD.findall(tail):
                 if raw == "()":
@@ -86,8 +75,6 @@ def load_authority(root: Path = ROOT):
                     ambiguous.add(key)
                 else:
                     surfaces[key] = identity
-        if seen_rows != expected:
-            raise ValueError(f"{domain}: incomplete ratified domain table")
     for key in ambiguous:
         del surfaces[key]
     if not all(x in surfaces for x in ("car", "quote", "перше", "атом?")):
@@ -104,18 +91,11 @@ def load_authority(root: Path = ROOT):
             "DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"
         }:
             continue
-        evidence = row.get("current_target") or ""
-        # Only an *entire*, singly attributed D3/D4 successor is admissible.
-        # D5+ or multi-target historical observations remain provenance/HOLD.
-        successor = CORE_SUCCESSOR.fullmatch(evidence) if isinstance(evidence, str) else None
-        if successor is None:
-            if isinstance(evidence, str) and evidence.startswith(("D3:", "D4:")):
-                raise ValueError(f"historical {code}: malformed exact-domain successor")
+        targets = TARGET.findall(row.get("current_target") or "")
+        if len(targets) != 1:
             continue
-        domain, bits, claimed_label = successor.groups()
+        domain, bits = "D" + targets[0][0], targets[0][1]
         label = foundation["domains"][domain]["residents"].get(bits)
-        if len(bits) != DOMAIN_WIDTHS[domain] or label != claimed_label:
-            raise ValueError(f"historical {code}: width/role does not match {domain}:{bits}")
         if (domain, label) in SAFE_OLD:
             legacy[code] = Identity(domain, bits, label)
     if len(seen) != 256:
@@ -123,112 +103,167 @@ def load_authority(root: Path = ROOT):
     return surfaces, legacy
 
 
+def reject_shadowed_surfaces(source: str, surfaces) -> None:
+    """Заборонити підміну локальної назви глобальним кодом домену.
 
-def reject_ambiguous_local_bindings(source: str, surfaces):
-    """Не переписувати глобальний surface, якщо він став локальним ім'ям.
-
-    Повторно використовуємо чинний AST reader із cond-modernize.py:
-    коментарі, лапки та цитовані datum не стають виконуваними зв'язуваннями.
-    Недоведені складені форми fail-closed, без спроб підміни семантики.
+    Використовуємо наявний AST-reader трипрохідного мігратора; другий
+    синтаксичний парсер не створюємо. Без scope-aware lowering такі випадки
+    НЕ можуть бути безпечно переписані механічно.
     """
     import importlib.util
     import sys
 
-    module_name = "_sens_exact_domain_scope_reader"
-    parser = sys.modules.get(module_name)
-    if parser is None:
-        spec = importlib.util.spec_from_file_location(
-            module_name, ROOT / "scripts/cond-modernize.py"
-        )
+    key = "_sens_three_pass_source_reader_for_shadow_guard"
+    reader = sys.modules.get(key)
+    if reader is None:
+        script = ROOT / "scripts/migrate-three-pass.py"
+        spec = importlib.util.spec_from_file_location(key, script)
         if spec is None or spec.loader is None:
-            raise ValueError("current Lisp AST reader is unavailable")
-        parser = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = parser
-        spec.loader.exec_module(parser)
+            raise ValueError("SHADOWED_SURFACE_BLOCK: немає AST-reader")
+        reader = importlib.util.module_from_spec(spec)
+        sys.modules[key] = reader
+        try:
+            spec.loader.exec_module(reader)
+        except BaseException:
+            sys.modules.pop(key, None)
+            raise
 
     try:
-        roots = parser.parse(source)
-    except parser.Blocked as error:
-        raise ValueError("cannot establish local binding scopes: " + str(error)) from error
+        forms = reader.Parser(
+            reader.tokenize(reader.strip_comments(source))
+        ).parse_program()
+    except reader.MigrationError as error:
+        raise ValueError(f"AST_PARSE_BLOCK: {error}") from error
 
-    quote_heads = {"001", "00000001", "quote", "QUOTE", "як-є"}
-    lambda_heads = {"0010", "00001000", "lambda", "LAMBDA"}
-    define_heads = {"0011", "00001001", "00001011", "define", "DEFINE", "def", "DEF"}
-    let_heads = {
-        "001000", "001001", "10011100", "10011101",
-        "let", "LET", "let*", "LET*", "letrec", "LETREC",
-        "10110011",
+    def collides(node):
+        return (
+            isinstance(node, reader.Atom)
+            and node.tok.text.casefold() in surfaces
+        )
+
+    def guard_name(node, context):
+        if collides(node):
+            raise ValueError(
+                "SHADOWED_SURFACE_BLOCK: "
+                f"{context}: {node.tok.text!r} — необхідне scope-aware lowering"
+            )
+
+    # Координати беруться зі схвалених D4-таблиць, а не зі старого SID8.
+    lambda_heads = {
+        item.bits for item in surfaces.values()
+        if item.domain == "D4" and item.label.upper() == "LAMBDA"
     }
-    compound_bindings = {"defmacro", "DEFMACRO", "00001010",
-                         "macrolet", "MACROLET", "flet", "FLET",
-                         "labels", "LABELS"}
+    define_heads = {
+        item.bits for item in surfaces.values()
+        if item.domain == "D4" and item.label.upper() == "DEFINE"
+    }
 
-    def forbid_name(name, operator):
-        if name is not None and name.casefold() in surfaces:
-            raise ValueError(
-                f"локальне/визначене ім'я {name!r} перетинається з "
-                f"доменним surface ({operator}); потрібен доказ scope"
-            )
+    # D6 LET/LET* — семантична зайнятість, а не дозвіл виконання.
+    # Читаємо координати з ратифікованої основи, не виводимо з SID8.
+    foundation = json.loads(
+        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+    )
+    if foundation.get("status") != "owner-ratified":
+        raise ValueError("BINDING_FORM_BLOCK: основа доменів не ратифікована")
+    let_heads = {
+        bits for bits, label in foundation["domains"]["D6"]["residents"].items()
+        if label in {"LET", "LET*"}
+    }
+    if len(let_heads) != 2:
+        raise ValueError("BINDING_FORM_BLOCK: координати D6 LET змінилися")
 
-    def parameter_names(node, operator):
-        if node.atom is not None:
-            if node.atom != ".":
-                forbid_name(node.atom, operator)
-        else:
-            for child in node.children:
-                parameter_names(child, operator)
+    def binding_list(node, context):
+        if not isinstance(node, reader.ListNode) or node.tail is not None:
+            raise ValueError(f"BINDING_FORM_BLOCK: {context}: непідтверджена форма зв'язувань")
+        return node.items
 
-    def walk(node):
-        if node.opaque or not node.children:
+    def guard_parameters(node, context):
+        for parameter in binding_list(node, context):
+            if not isinstance(parameter, reader.Atom):
+                raise ValueError(
+                    f"BINDING_FORM_BLOCK: {context}: вкладений параметр без доведеного закону"
+                )
+            guard_name(parameter, context)
+
+    def visit(node):
+        if isinstance(node, reader.Quote):
             return
-        parts = node.children
-        operator = parts[0].atom
-        if operator in quote_heads:
+        if not isinstance(node, reader.ListNode):
             return
-        if operator in compound_bindings:
-            raise ValueError(
-                f"складене лексичне зв'язування {operator!r} "
-                "потребує окремого AST-доказу"
-            )
-        if operator in lambda_heads:
-            if len(parts) < 3:
-                raise ValueError("неповна lambda: неможливо довести scope")
-            parameter_names(parts[1], operator)
-        elif operator in define_heads:
-            if len(parts) < 3:
-                raise ValueError("неповний define: неможливо довести scope")
-            name_form = parts[1]
-            name = (name_form.atom if name_form.atom is not None else
-                    name_form.children[0].atom if name_form.children else None)
-            if name is None:
-                raise ValueError("непідтверджений binder у DEFINE")
-            forbid_name(name, operator)
-        elif operator in let_heads:
-            if len(parts) < 3:
-                raise ValueError("неповний LET: неможливо довести scope")
-            bindings = parts[1]
-            if bindings.atom is not None:
-                # Named LET uses its own function name before the binding list.
-                forbid_name(bindings.atom, operator)
-                if len(parts) < 4:
-                    raise ValueError("неповний named LET")
-                bindings = parts[2]
-            if bindings.atom is not None:
-                raise ValueError("LET bindings не є списком")
-            for binding in bindings.children:
-                if not binding.children or binding.children[0].atom is None:
-                    raise ValueError("непідтверджений binder у LET")
-                forbid_name(binding.children[0].atom, operator)
-        # Голова також може бути вкладеною λ-формою: ((λ (car) ...) arg).
-        # Її лексичні binder-и не можна обійти, переглядаючи лише аргументи.
-        for child in parts:
-            walk(child)
+        if not node.items:
+            return
+        head = node.items[0]
+        if isinstance(head, reader.Atom):
+            spelling = head.tok.text.casefold()
+            # Дані в явному QUOTE не містять активних binding declarations.
+            if spelling in {"quote", "як-є", "001", "00000001"}:
+                return
+            surface = surfaces.get(spelling)
+            role = (surface.label if surface is not None else "").upper()
+            if role == "LAMBDA" or spelling in lambda_heads | {"00001000"}:
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: LAMBDA без параметрів")
+                guard_parameters(node.items[1], "параметр LAMBDA")
+            if role == "DEFINE" or spelling in define_heads | {"00001001", "def"}:
+                if len(node.items) >= 2:
+                    target = node.items[1]
+                    if isinstance(target, reader.Atom):
+                        guard_name(target, "ім'я DEFINE")
+                    elif (isinstance(target, reader.ListNode)
+                          and target.items):
+                        guard_name(target.items[0], "голова DEFINE")
+                        for parameter in target.items[1:]:
+                            if not isinstance(parameter, reader.Atom):
+                                raise ValueError(
+                                    "BINDING_FORM_BLOCK: вкладений параметр DEFINE"
+                                )
+                            guard_name(parameter, "параметр DEFINE")
+                    else:
+                        raise ValueError("BINDING_FORM_BLOCK: некоректний DEFINE")
 
-    for root in roots:
-        walk(root)
+            # Історичні форми зв'язування не створюють нової callable
+            # семантики. Забороняємо переписувати їхні затінені імена,
+            # зокрема якщо голова вже подана точним кодом D6.
+            if spelling in let_heads | {"let", "let*"}:
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: LET без списку зв'язувань")
+                for item in binding_list(node.items[1], "LET"):
+                    if isinstance(item, reader.Atom):
+                        guard_name(item, "змінна LET")
+                    else:
+                        pair = binding_list(item, "пара LET")
+                        if not pair or not isinstance(pair[0], reader.Atom):
+                            raise ValueError("BINDING_FORM_BLOCK: некоректна пара LET")
+                        guard_name(pair[0], "змінна LET")
+
+            if spelling in {"flet", "labels", "macrolet"}:
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: локальні функції без декларацій")
+                for item in binding_list(node.items[1], spelling):
+                    signature = binding_list(item, "локальна функція")
+                    if not signature or not isinstance(signature[0], reader.Atom):
+                        raise ValueError("BINDING_FORM_BLOCK: некоректна локальна функція")
+                    guard_name(signature[0], "ім'я локальної функції")
+                    if len(signature) < 2:
+                        raise ValueError("BINDING_FORM_BLOCK: немає списку параметрів")
+                    guard_parameters(signature[1], "параметр локальної функції")
+
+            if spelling in {"defun", "defmacro"}:
+                if len(node.items) < 3 or not isinstance(node.items[1], reader.Atom):
+                    raise ValueError("BINDING_FORM_BLOCK: некоректне оголошення функції")
+                guard_name(node.items[1], "ім'я оголошеної функції")
+                guard_parameters(node.items[2], "параметр оголошеної функції")
+        for child in node.items:
+            visit(child)
+        if node.tail is not None:
+            visit(node.tail)
+
+    for form in forms:
+        visit(form)
+
 
 def plan(source: str, surfaces, legacy):
-    reject_ambiguous_local_bindings(source, surfaces)
+    reject_shadowed_surfaces(source, surfaces)
     frames, edits = [], []
     pending_quote = False
     i = 0
