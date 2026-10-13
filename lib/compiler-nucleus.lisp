@@ -494,13 +494,47 @@
          ((compiler-true ()) (compiler-result-fail))))
       ((compiler-true ()) (compiler-result-fail)))))
 
-(0011 compiler-program-list
-  (0010
-    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження)
+; Tail-position list traversal keeps stack bounded by expression nesting,
+; not by the number of sibling forms. The accumulator stores requests reversed.
+; Request selection and failure remain entirely SENS-owned.
+(0011 compiler-reverse-onto
+  (0010 (items accumulator)
     (110
-      ((010 nodes) (compiler-result-ok ()))
+      ((010 items) accumulator)
       ((compiler-true ())
-       (compiler-merge-results
+       (compiler-reverse-onto
+         (011 items)
+         (111 (100 items) accumulator))))))
+
+(0011 compiler-program-list-continue
+  (0010
+    (shape-or-empty decompose node-result remaining d3-law d4-law d3-proof d4-proof походження accumulator)
+    (110
+      ((compiler-result-success node-result)
+       (compiler-program-list-acc
+         shape-or-empty
+         decompose
+         remaining
+         d3-law
+         d4-law
+         d3-proof
+         d4-proof
+         походження
+         (compiler-reverse-onto
+           (compiler-result-requests node-result)
+           accumulator)))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(0011 compiler-program-list-acc
+  (0010
+    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження accumulator)
+    (110
+      ((010 nodes)
+       (compiler-result-ok (compiler-reverse-onto accumulator ())))
+      ((compiler-true ())
+       (compiler-program-list-continue
+         shape-or-empty
+         decompose
          (compiler-program-node
            shape-or-empty
            decompose
@@ -510,15 +544,27 @@
            d3-proof
            d4-proof
            походження)
-         (compiler-program-list
-           shape-or-empty
-           decompose
-           (011 nodes)
-           d3-law
-           d4-law
-           d3-proof
-           d4-proof
-           походження))))))
+         (011 nodes)
+         d3-law
+         d4-law
+         d3-proof
+         d4-proof
+         походження
+         accumulator)))))
+
+(0011 compiler-program-list
+  (0010
+    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження)
+    (compiler-program-list-acc
+      shape-or-empty
+      decompose
+      nodes
+      d3-law
+      d4-law
+      d3-proof
+      d4-proof
+      походження
+      ())))
 
 (0011 compiler-program-node
   (0010

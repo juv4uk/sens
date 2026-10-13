@@ -71,6 +71,19 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: FULL_CARGO_WORKSPACE — одноразовий повний прогін на точному SHA
+        if: contains(github.event.head_commit.message, '[full-cargo-once]') || github.event_name == 'workflow_dispatch'
+        id: full-cargo
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "FULL_CARGO_ONCE commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id full-cargo-workspace-all-targets \
+            --layer transport \
+            --fixture lib/compiler-nucleus.lisp \
+            --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" \
+            -- cargo test --workspace --all-targets --locked
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
         shell: bash
