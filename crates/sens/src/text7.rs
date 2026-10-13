@@ -2,14 +2,16 @@ use std::{fmt, rc::Rc};
 
 use crate::{BinarySourceWord, Bit7, BitPacker, PackedBitstream};
 
-/// Canonical SENS text identity: an exact sequence of UPC-7 cells.
+/// Canonical SENS D7 v2 text identity: exact, typed 7-bit coordinates.
 ///
-/// Each cell is logically seven bits wide (`0000000..1111111`). The host
-/// stores one cell per `u8` only as a mechanism representation; the upper bit
-/// is forbidden and never becomes part of Text identity.
+/// The current keyboard profile has 128 ASCII-indexed coordinates. The
+/// en/uk/san Unicode views are projections, not alternate machine identities.
+/// A transient host byte per cell does not turn D7 into historical SID8.
 ///
-/// Human Unicode spelling is deliberately absent from this type. Layout
-/// selection and Unicode/UTF-8 decoding belong to the reader/boundary layer.
+/// Human Unicode spelling is deliberately absent from canonical equality,
+/// dense transport, and the legacy #t7: token. The ASCII keyboard projection
+/// alone is an exact identity conversion; Ukrainian/Devanagari rendering
+/// belongs to the separately versioned boundary projector.
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct Text7 {
     cells: Rc<[u8]>,
@@ -47,6 +49,24 @@ impl Text7 {
         Ok(Self {
             cells: cells.into(),
         })
+    }
+
+    /// Admit the owner-ratified D7 v2 *English keyboard* projection.
+    ///
+    /// ASCII position 0..=127 is already the exact W7 coordinate. UTF-8
+    /// multibyte glyphs require a separately selected uk/san projection:
+    /// interpreting their bytes as new D7 cells would silently corrupt
+    /// the program. The first offending input byte is reported, not masked.
+    pub fn from_ascii_projection(source: &str) -> Result<Self, Text7CellError> {
+        Self::from_cells(source.as_bytes().to_vec())
+    }
+
+    /// Display W7 cells through the English ASCII projection only.
+    ///
+    /// This is a human boundary view, never a new canonical wire encoding.
+    /// Other script projections must not be inferred from these glyphs.
+    pub fn to_ascii_projection(&self) -> String {
+        self.cells.iter().copied().map(char::from).collect()
     }
 
     /// Canonical machine transport for one Text7 value.
@@ -347,6 +367,70 @@ mod tests {
 
         assert_eq!(left, same);
         assert_ne!(left, different);
+    }
+
+    /// One test covers every D7 v2 keyboard position, including C0 and DEL:
+    /// 128 W7 values are exactly 896 meaningful bits or 112 physical bytes.
+    #[test]
+    fn d7_v2_ascii_128_exact_coordinates_without_sid8_widening() {
+        let ascii: String = (0u8..=127).map(char::from).collect();
+        let cells = Text7::from_ascii_projection(&ascii).expect("128 exact W7 coordinates");
+        assert_eq!(cells.cells(), &(0u8..=127).collect::<Vec<_>>());
+        assert_eq!(cells.to_ascii_projection(), ascii);
+        assert_eq!(cells.to_source_words().len(), 128);
+        assert!(cells.to_source_words().iter().all(
+            |word| matches!(word, BinarySourceWord::W7(_))
+        ));
+        let packed = cells.to_packed_w7();
+        assert_eq!(packed.bit_len(), 128 * 7);
+        assert_eq!(packed.byte_len(), 112);
+        assert_eq!(Text7::from_packed_w7(&packed).unwrap(), cells);
+        // Same host numeric value in W8 is NOT a W7 coordinate.
+        let old = BinarySourceWord::W8(crate::Bit8::new(0b1101001).unwrap());
+        assert_eq!(
+            Text7::from_source_words(&[old]).unwrap_err(),
+            Text7WordError::InvalidWordWidth { index: 0, width: 8 }
+        );
+    }
+
+    /// Independent physical bytes for one genuine Lisp binding "identity".
+    /// This is not merely an encode->decode round-trip; wrong MSB-first
+    /// packing would pass a symmetric codec but fail these golden vectors.
+    #[test]
+    fn d7_v2_ascii_lisp_identifier_golden_and_bad_padding_fail_closed() {
+        let name = Text7::from_ascii_projection("identity").unwrap();
+        assert_eq!(name.cells(), b"identity");
+        let physical = name.to_packed_w7();
+        assert_eq!(physical.bit_len(), 56);
+        assert_eq!(physical.byte_len(), 7);
+        assert_eq!(physical.bytes(), &[0xd3, 0x93, 0x2e, 0xee, 0x9a, 0x7a, 0x79]);
+        assert_eq!(Text7::from_packed_w7(&physical).unwrap().to_ascii_projection(), "identity");
+
+        let unaligned = Text7::from_ascii_projection("value").unwrap().to_packed_w7();
+        assert_eq!(unaligned.bit_len(), 35);
+        assert_eq!(unaligned.bytes(), &[0xed, 0x87, 0x67, 0x5c, 0xa0]);
+        assert_eq!(unaligned.valid_bits_in_last_byte(), 3);
+        let mut corrupt = unaligned.bytes().to_vec();
+        corrupt[4] |= 0b0000_0001;
+        assert!(PackedBitstream::from_parts(corrupt, 35).is_none());
+        let wrong_length = PackedBitstream::from_parts(unaligned.bytes().to_vec(), 36)
+            .expect("36 bits can form an intact generic bitstream");
+        assert_eq!(
+            Text7::from_packed_w7(&wrong_length).unwrap_err(),
+            Text7W7Error::UnalignedBitLen { bit_len: 36 }
+        );
+    }
+
+    #[test]
+    fn d7_v2_unicode_requires_explicit_non_ascii_keyboard_projection() {
+        for source in ["ї", "ґ", "क", "🙂", "aї"] {
+            let error = Text7::from_ascii_projection(source).unwrap_err();
+            let index = source.as_bytes().iter().position(|byte| *byte >= 128).unwrap();
+            assert_eq!(error.index(), index);
+            assert_eq!(error.packed_byte(), source.as_bytes()[index]);
+        }
+        assert_eq!(Text7::from_ascii_projection("a'b").unwrap().to_ascii_projection(), "a'b");
+        assert_eq!(Text7::from_ascii_projection("").unwrap().len(), 0);
     }
 
     #[test]
