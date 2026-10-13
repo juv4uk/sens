@@ -1,0 +1,26 @@
+name: Міграція мовних метаданих — доменні координати
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/language_items.rs"
+      - "crates/sens/tests/domain_language_metadata_cutover.rs"
+      - ".github/workflows/domain-language-metadata-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/language_items.rs"
+      - "crates/sens/tests/domain_language_metadata_cutover.rs"
+      - ".github/workflows/domain-language-metadata-cutover.yml"
+
+jobs:
+  domain-language-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Компільованість точнодоменного каталогу
+        run: cargo check --locked -p sens --lib
+      - name: Позитивні і негативні свідки exact-domain метаданих
+        run: cargo test --locked -p sens --test domain_language_metadata_cutover
