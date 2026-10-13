@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Фізичний T5-файл .sens для ТОЧНИХ двійкових слів SENS.
 
-Семантичний payload складається тільки з 0/1 слів D1..D9.
+Семантичний payload складається тільки з 0/1 слів D1..D9.\nНовий typed API вимагає явний домен; D10 та історичний SID8 fail-closed.
 Трит 2 існує лише між словами (ніколи не всередині SENS слова).
 Один байт містить п'ять тритів (0..242), padding = 0..4 фінальних 2.
 Завершувача 22 немає: кінець файла визначається кількістю байтів.
@@ -32,6 +32,38 @@ def parse_words(source: str) -> list[str]:
             )
     return words
 
+
+
+def encode_typed_domain_words(words: list[tuple[str, str]]) -> bytes:
+    """Pack *explicitly typed* current D1–D9 words, without widening.
+
+    This is a transport boundary, NOT semantic or callable admission.
+    D2 is syntax, D7 is data; matching numeric W8 bits never authorizes SID8.
+    D10's 1024-coordinate owner codebook is ratified but its T5 reader/runtime
+    gates are pending. Never emit a D10 word as an unverified physical program.
+    """
+    if not words:
+        raise SensT5Error("empty exact-domain word stream")
+    accepted = []
+    for index, item in enumerate(words, 1):
+        if not isinstance(item, tuple) or len(item) != 2:
+            raise SensT5Error(f"word {index}: require (domain, exact bits)")
+        domain, bits = item
+        if domain == "D10":
+            raise SensT5Error(
+                f"word {index}: D10_RUNTIME_HOLD: 10-bit codebook is not T5 execution admission"
+            )
+        if not isinstance(domain, str) or not re.fullmatch(r"D[1-9]", domain):
+            raise SensT5Error(
+                f"word {index}: explicit current D1..D9 tag required; SID8 cannot be inferred"
+            )
+        width = int(domain[1:])
+        if not isinstance(bits, str) or len(bits) != width or re.fullmatch(r"[01]+", bits) is None:
+            raise SensT5Error(
+                f"word {index}: {domain} requires exactly {width} binary digits"
+            )
+        accepted.append(bits)
+    return encode_words(accepted)
 
 def encode_words(words: list[str]) -> bytes:
     if not words:
