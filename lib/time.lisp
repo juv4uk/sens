@@ -99,15 +99,14 @@
 ;   (accepted host unix-seconds nanosecond)
 ; Current control law: numeric comparisons produce exact D1 PredicateBit;
 ; AND/OR consume only that typed answer. All COND clauses are two-field
-; (test expression). Explicit (ATOM ()) is the D1:1 result; D1:0 is EQ of
-; distinct quoted atoms — not bare Number 1/0 as predicate carriers.
-; neither T/NIL, structural () nor rich classifiers act as tests.
+; (test expression). Predicate constants are direct one-bit values, not
+; Number 0/1, T/NIL, structural () or rich classifiers used as truth.
 (0011 internet-time-mode-valid?
   (0010 (mode)
     (110
       ((101 mode 4) #d1:1)
       ((101 mode 5) #d1:1)
-      (#d1:1 (101 (001 (0)) (001 (1))))))
+      (#d1:1 #d1:0)))
 )
 
 (0011 internet-time-stratum-valid?
@@ -116,8 +115,8 @@
       ((11011 stratum 0)
        (110
          ((11010 stratum 16) #d1:1)
-         (#d1:1 (101 (001 (0)) (001 (1))))))
-      (#d1:1 (101 (001 (0)) (001 (1))))))
+         (#d1:1 #d1:0)))
+      (#d1:1 #d1:0)))
 )
 
 (0011 internet-time-fields->observation
@@ -202,7 +201,7 @@
     (110
       ((11011 now-ns deadline-ns) #d1:1)
       ((101 now-ns deadline-ns) #d1:1)
-      (#d1:1 (101 (001 (0)) (001 (1))))))
+      (#d1:1 #d1:0)))
 )
 
 (0011 deadline-after-ns
