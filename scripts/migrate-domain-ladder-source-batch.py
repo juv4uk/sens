@@ -28,7 +28,9 @@ ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
 SCOPES = ("lib/", "knowledge/", "scripts/", "experiments/", "racket/boot/")
 SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
         "knowledge/d10-source-snapshots/", "research/", "docs/", "tests/")
-HOLDS = {"lib/macro.lisp", "lib/machine/block.lisp"}
+# Do not impose a file-name-based migration veto. Every tracked source in
+# the active scopes reaches the source-era/parser/evidence classification below;
+# uncertainty is reported with its concrete reason instead of silently skipped.
 
 # Ця декларативна схема вже включена до незалежного SHA-прикріпленого
 # non-program manifest; ніколи не видавати її записи за виклики функцій.
@@ -354,7 +356,7 @@ def run(root, write=False, selected=None):
     for path in paths:
         if selected and path not in selected:
             continue
-        if (path in HOLDS or path.startswith(SKIP) or
+        if (path.startswith(SKIP) or
                 not (path.startswith(SCOPES) or
                      path.startswith("benchmarks/") and path.count("/") == 1)):
             continue
