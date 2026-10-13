@@ -10,7 +10,7 @@
 ;;
 ;; Reuses (2000+ surface):
 ;;   map-empty, внутрішня-мапа-вставити, внутрішня-мапа-отримати,
-;;   внутрішня-мапа-містить, внутрішня-мапа-список, внутрішня-довжина,
+;;   внутрішня-мапа-містить, внутрішня-довжина,
 ;;   knowledge-content-address, world-content-address, world-address-content.
 ;;
 ;; Незмінний content-addressed store — persistent map від канонічної адреси з
@@ -43,4 +43,4 @@
 
 (0011 content-store-size
   (0010 (store)
-    (внутрішня-довжина (внутрішня-мапа-список store))))
+    (внутрішня-довжина store)))
