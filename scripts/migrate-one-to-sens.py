@@ -68,6 +68,41 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def verify_upstream_t5_witness(report, source_name, source_era, words, payload, codec):
+    """Fail closed if upstream report and independently decoded T5 differ."""
+    if not isinstance(report, dict) or report.get("schema") != "sens-three-pass-t5-migration/v3":
+        raise ValueError("THREE_PASS_WITNESS: missing v3 report")
+    if report.get("source_era") != source_era or report.get("mode") != "write-new-only":
+        raise ValueError("THREE_PASS_WITNESS: era/staging mismatch")
+    rows, summary = report.get("files"), report.get("summary")
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(summary, dict):
+        raise ValueError("THREE_PASS_WITNESS: expected exactly one reported source")
+    for key, number in (("files_seen", 1), ("files_written", 1), ("files_blocked", 0)):
+        if type(summary.get(key)) is not int or summary[key] != number:
+            raise ValueError("THREE_PASS_WITNESS: source/accounting mismatch: " + key)
+    row = rows[0]
+    if not isinstance(row, dict):
+        raise ValueError("THREE_PASS_WITNESS: missing result row")
+    name = Path(source_name)
+    expected = {
+        "path": name.name,
+        "output": name.with_suffix(".sens").name,
+        "status": "written",
+        "bytes": len(payload),
+        "semantic_word_count": len(words),
+        "semantic_bits": sum(map(len, words)),
+        "transport_trits": sum(map(len, words)) + len(words) - 1,
+        "physical_sha256": hashlib.sha256(payload).hexdigest(),
+        "typed_word_sha256": codec.typed_sha256(words),
+    }
+    for key, value in expected.items():
+        if type(row.get(key)) is not type(value) or row[key] != value:
+            raise ValueError("THREE_PASS_WITNESS: physical/report mismatch: " + key)
+    if not isinstance(row.get("passes"), dict):
+        raise ValueError("THREE_PASS_WITNESS: missing pass accounting")
+    return expected
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="один .lisp у поточному репозиторії")
@@ -127,14 +162,24 @@ def main() -> int:
 
         if completed.returncode != 0:
             file_rows = (state or {}).get("files") or [{}]
+            evidence = file_rows[0]
+            reason = evidence.get(
+                "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
+            )
+            # Preserve the actual failing token, rather than turning an
+            # actionable quoted-datum blocker into an anonymous rejection.
+            token = evidence.get("token")
+            if isinstance(token, str) and token and token not in reason:
+                reason += f" [token={token}]"
             print(json.dumps({
                 "status": "blocked",
                 "source": str(rel),
                 "output": expected_rel,
                 "source_era": args.source_era,
-                "reason": file_rows[0].get(
-                    "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
-                ),
+                "reason": reason,
+                "token": token,
+                "line": evidence.get("line"),
+                "column": evidence.get("column"),
             }, ensure_ascii=False, indent=2))
             return 2
 
@@ -156,6 +201,18 @@ def main() -> int:
         typed_hash = codec.typed_sha256(words)
         output_hash = hashlib.sha256(payload).hexdigest()
 
+        try:
+            witness = verify_upstream_t5_witness(
+                state, rel.name, args.source_era, words, payload, codec
+            )
+        except ValueError as exc:
+            print(json.dumps({
+                "status": "blocked", "source": str(rel),
+                "output": expected_rel, "source_era": args.source_era,
+                "reason": str(exc),
+            }, ensure_ascii=False, indent=2))
+            return 2
+
         result = {
             "status": "would-write" if args.dry_run else "written",
             "source": str(rel),
@@ -164,6 +221,9 @@ def main() -> int:
             "physical_sha256": output_hash,
             "typed_word_sha256": typed_hash,
             "bytes": len(payload),
+            "semantic_bits": witness["semantic_bits"],
+            "transport_trits": witness["transport_trits"],
+            "semantic_word_count": witness["semantic_word_count"],
             "words": words,
             "source_era": args.source_era,
             "semantic_parity": "NOT_VERIFIED",
