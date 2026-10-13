@@ -6,17 +6,18 @@ use sens::{eval_program, Session};
 
 fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
-    for library in [
-        include_str!("../../../lib/core.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
-        include_str!("../../../lib/understand.lisp"),
-        include_str!("../../../lib/result-status.lisp"),
-        include_str!("../../../lib/narrate.lisp"),
+    for (library_path, library) in [
+        ("lib/core.lisp", include_str!("../../../lib/core.lisp")),
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+        ("lib/understand.lisp", include_str!("../../../lib/understand.lisp")),
+        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
+        ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
     ] {
-        eval_program(library, &mut session).unwrap();
+        eval_program(library, &mut session)
+            .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
     }
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
