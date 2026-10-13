@@ -79,10 +79,11 @@ def domain_rows(width: int) -> dict[str, str]:
         m = re.match(rf"^\s*\(([01]{{{width}}})\s+", line)
         if not m:
             continue
-        lisp = re.search(r"\(LISP\s+(\(\)|[^()\s]+)\)", line)
+        lisp = re.search(r'\(LISP\s+(\(\)|"[^"]*"|[^()\s]+)\)', line)
         if lisp is None:
             raise ValueError(f"D{width} malformed LISP field at {m.group(1)}")
-        rows[m.group(1)] = lisp.group(1)
+        name = lisp.group(1)
+        rows[m.group(1)] = name[1:-1] if name.startswith('"') else name
     return rows
 
 
