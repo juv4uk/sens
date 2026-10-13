@@ -439,8 +439,10 @@ mod tests {
                     let identity = BinarySourceWord::W9(
                         crate::Bit9::new(bits).expect("D9 carrier")
                     ).domain_identity();
-                    let error = encode_outer_records(&[OuterRecord::D(identity)])
-                        .expect_err("no D9 extension ratified for candidate S");
+                    let error = match encode_outer_records(&[OuterRecord::D(identity)]) {
+                        Err(error) => error,
+                        Ok(_) => panic!("D9:{bits:09b} falsely admitted into draft D1..D8 tree"),
+                    };
                     assert_eq!(error, OuterEnvelopeError::InvalidDomain {
                         width: 9, payload: bits,
                     }, "D9:{bits:09b} was narrowed or misreported");
