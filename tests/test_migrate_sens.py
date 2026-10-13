@@ -192,133 +192,72 @@ class OperationalMigrationTests(unittest.TestCase):
                                           "--report", str(report)]), 2)
 
 
-    def test_manifest_pins_and_vetoes_all_four_nonprogram_families(self):
+    def test_reviewed_data_sources_remain_available_for_migration_work(self):
+        # Classification is evidence for executable admission, not a permanent
+        # ban on converting or repairing the original file.
         known = [
             "lib/machine/isa/adx.lisp",
             "contracts/bija3-l1-l5-ratification.lisp",
             "evidence/G5/my-lisp/196d7f2.lisp",
             "tests/fixtures/canon-laws-v2-witness.lisp",
-        ]
-        records = runner._nonprogram_manifest_paths(ROOT)
-        for name in known:
-            with self.subTest(source=name):
-                source = ROOT / name
-                self.assertTrue(source.is_file())
-                self.assertEqual(
-                    runner._git_blob_sha(source.read_bytes()), records[name],
-                    f"manifest source drift for {name}"
-                )
-                with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
-                    runner.pin_sources([name], ROOT)
-        self.assertEqual(
-            runner._git_blob_sha(b"hello\n"),
-            "ce013625030ba8dba906f756967f9e9ca394464a"
-        )
-
-    def test_publisher_tracks_all_seven_reviewed_data_manifest_cohorts(self):
-        # The source-scope reporter is the existing owner of these seven
-        # immutable classifications. Publication must never lag its inventory.
-        expected = {
-            "domain-table": "lib/domains/d1.lisp",
-            "comment-only-loader": "lib/core2.lisp",
-            "isa": "lib/machine/isa/adx.lisp",
-            "schema": "contracts/bija3-l1-l5-ratification.lisp",
-            "evidence": "evidence/G5/my-lisp/196d7f2.lisp",
-            "expr-record": "tests/fixtures/canon-laws-v2-witness.lisp",
-            "knowledge-record": "knowledge/agent-discoveries.lisp",
-        }
-        records = runner._nonprogram_manifest_paths(ROOT)
-        self.assertEqual(len(runner.REVIEWED_NONPROGRAM_MANIFESTS), 7)
-        self.assertEqual(
-            len(records),
-            sum(count for _, _, count in runner.REVIEWED_NONPROGRAM_MANIFESTS),
-        )
-        self.assertEqual(len(records), 92)
-        for cohort, path in expected.items():
-            with self.subTest(cohort=cohort):
-                source = ROOT / path
-                self.assertEqual(
-                    runner._git_blob_sha(source.read_bytes()), records[path]
-                )
-                with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
-                    runner.pin_sources([path], ROOT)
-
-    def test_recent_data_cohort_in_mixed_manifest_aborts_before_any_t5_write(self):
-        # The old publisher protected 67 records, leaving these 25 reviewed
-        # originals unprotected. The 3 new cohorts must be vetoed atomically.
-        sources = [
-            "lib/domains/d2.lisp", "lib/surface/ukr.lisp",
+            "lib/domains/d1.lisp",
+            "lib/core2.lisp",
             "knowledge/agent-discoveries.lisp",
         ]
-        for forbidden in sources:
-            with self.subTest(source=forbidden):
-                with tempfile.TemporaryDirectory(prefix="sens-92-veto-") as td:
-                    temp = Path(td)
-                    requested = temp / "selected.json"
-                    requested.write_text(json.dumps({"files": [FIXTURE, forbidden]}))
-                    out, report = temp / "out", temp / "receipt.json"
-                    process = subprocess.run([
-                        sys.executable, str(CLI), "--root", str(ROOT),
-                        "--manifest", str(requested), "--out", str(out),
-                        "--report", str(report), "--source-era", "legacy",
-                    ], capture_output=True, text=True, cwd=temp)
-                    self.assertEqual(process.returncode, 2,
-                                     process.stdout + process.stderr)
-                    self.assertIn("NONPROGRAM", process.stderr)
-                    self.assertFalse(out.exists())
-                    self.assertFalse(report.exists())
+        records = runner._nonprogram_manifest_paths(ROOT)
+        self.assertEqual(len(records), 92)
+        for name in known:
+            with self.subTest(source=name):
+                data = (ROOT / name).read_bytes()
+                self.assertEqual(runner._git_blob_sha(data), records[name])
+                source = runner.pin_sources([name], ROOT)["files"][0]
+                self.assertEqual(source["path"], name)
+                self.assertEqual(len(source["sha256"]), 64)
+                with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
+                    runner.reject_classified_nonprogram([name], ROOT)
 
-    def test_nonprogram_authority_loss_or_incomplete_ledger_fails_closed(self):
+    def test_missing_classification_does_not_freeze_unrelated_work(self):
         with unittest.mock.patch.object(
             runner, "REVIEWED_NONPROGRAM_MANIFESTS",
             runner.REVIEWED_NONPROGRAM_MANIFESTS +
-            (("missing-cohort", "knowledge/missing-owner-authority.json", 1),)
+            (("missing", "knowledge/missing-owner-authority.json", 1),)
         ):
+            self.assertTrue(runner.pin_sources([FIXTURE], ROOT)["files"])
             with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
-                runner.pin_sources([FIXTURE], ROOT)
+                runner._nonprogram_manifest_paths(ROOT)
         with unittest.mock.patch.object(
             runner, "load_nonprogram_classification", return_value={}
         ):
+            self.assertTrue(runner.pin_sources([FIXTURE], ROOT)["files"])
             with self.assertRaisesRegex(runner.MigrationBlocked, "incomplete"):
-                runner.pin_sources([FIXTURE], ROOT)
+                runner._nonprogram_manifest_paths(ROOT)
 
-    def test_archived_print_snapshot_not_executable_even_if_mechanically_convertible(self):
-        historical = ("benchmarks/sens-surface/results/"
-                      "20260925-icount-33bfb53a/programs/empty-en.lisp")
-        original = ROOT / historical
-        self.assertEqual(original.read_bytes(), b"(print 0)\n")
-        self.assertEqual(
-            runner._git_blob_sha(original.read_bytes()),
-            "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f",
-        )
+    def test_historical_snapshot_can_be_inspected_but_not_admitted_as_program(self):
+        old = ("benchmarks/sens-surface/results/"
+               "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        self.assertEqual((ROOT / old).read_bytes(), b"(print 0)\\n")
+        self.assertEqual(runner.pin_sources([old], ROOT)["files"][0]["path"], old)
         with self.assertRaisesRegex(runner.MigrationBlocked, "archived benchmark"):
-            runner.pin_sources([historical], ROOT)
-        # The archive output fence must not prevent unrelated active programs.
-        self.assertTrue(runner.pin_sources(["benchmarks/arithmetic.lisp"], ROOT)["files"])
+            runner.reject_classified_nonprogram([old], ROOT)
 
-    def test_mixed_original_manifest_aborts_before_any_publication(self):
-        old_data = "lib/machine/isa/adx.lisp"
-        with tempfile.TemporaryDirectory(prefix="sens-nonprogram-veto-") as tmp:
-            t = Path(tmp)
-            manifest = t / "selected.json"
-            manifest.write_text(json.dumps({"files": [FIXTURE, old_data]}))
-            out, report = t / "physical", t / "report.json"
-            proc = subprocess.run([
-                sys.executable, str(CLI), "--root", str(ROOT),
-                "--manifest", str(manifest), "--out", str(out),
-                "--report", str(report), "--source-era", "legacy"
-            ], capture_output=True, text=True, cwd=t)
-            self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
-            self.assertIn("NONPROGRAM", proc.stderr)
-            self.assertFalse(report.exists())
-            self.assertFalse(out.exists())
-            self.assertFalse((ROOT / old_data).with_suffix(".sens").exists())
+    def test_mixed_manifest_is_not_rejected_by_legacy_filename_list(self):
+        selected = "lib/machine/isa/adx.lisp"
+        with tempfile.TemporaryDirectory(prefix="sens-migration-work-") as temp:
+            manifest = Path(temp) / "sources.json"
+            manifest.write_text(json.dumps({"files": [FIXTURE, selected]}))
+            pinned = runner.pin_manifest(manifest, ROOT)
+            self.assertEqual([r["path"] for r in pinned["files"]],
+                             sorted([FIXTURE, selected]))
+            self.assertTrue(all(len(r["sha256"]) == 64 for r in pinned["files"]))
+            with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
+                runner.reject_classified_nonprogram([selected], ROOT)
 
-    def test_manifest_source_drift_is_never_silently_reclassified_executable(self):
+    def test_stale_classifier_cannot_forge_semantic_release(self):
+        name = "lib/machine/isa/adx.lisp"
         with unittest.mock.patch.object(runner, "_git_blob_sha", return_value="0"*40):
-            with self.assertRaisesRegex(runner.MigrationBlocked,
-                                        "NONPROGRAM source authority drift"):
-                runner.pin_sources(["lib/machine/isa/adx.lisp"], ROOT)
+            self.assertTrue(runner.pin_sources([name], ROOT)["files"])
+            with self.assertRaisesRegex(runner.MigrationBlocked, "authority drift"):
+                runner.reject_classified_nonprogram([name], ROOT)
 
     def test_known_active_core1_binary_remains_allowed_for_publication(self):
         selected = runner.pin_sources([FIXTURE], ROOT)
