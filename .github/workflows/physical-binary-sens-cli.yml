@@ -3,9 +3,6 @@ name: Physical binary SENS CLI smoke
 # An immutable result per push SHA. Never cancel an older physical-binary
 # witness just because other agents advance main.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
