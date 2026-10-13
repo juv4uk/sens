@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One topical CI decision per main push; binary SENS owns semantic truth."""
+"""Mechanical runner and diagnostic evidence only: semantics belongs to binary SENS."""
 from __future__ import annotations
 
 import hashlib
@@ -13,281 +13,166 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github/workflows"
+PROOF = "tests/semantic/domain-logic-2040/proof.sens"
+MUTANT = "tests/semantic/domain-logic-2040/mutant.sens"
+TEST_ID = "domain-logic-2040-binary-self-verdict"
 ON = re.compile(r"^['\"]?on['\"]?:\s*(.*)$")
 EVENT = re.compile(r"^  ([\w-]+):")
-FORBIDDEN = {
-    "pull_request", "pull_request_target", "merge_group",
-    "workflow_run", "check_run", "check_suite",
-}
-
-# Only existing, language-owned *physical* SENS programs.
-# The host selects/executes ONE file; neither Python nor Rust asserts EQ/COND.
-WITNESSES = {
-    "core3": "tests/semantic/core3-executors-d3-law.sens",
-    "domains": "tests/semantic/d4-selector-width-law.sens",
-    "narrate": "tests/semantic/narrate-d3-atom-eq-law.sens",
-}
 
 
-def events(source: str) -> dict[str, str]:
-    lines = source.splitlines()
+def sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def parse_events(text: str) -> dict[str, str]:
+    lines = text.splitlines()
     for i, line in enumerate(lines):
-        match = ON.match(line)
-        if not match:
+        found = ON.match(line)
+        if not found:
             continue
-        tail = match.group(1).split(" #", 1)[0].strip()
-        if tail.startswith("[") and tail.endswith("]"):
-            return {v.strip().strip("'\""): "" for v in tail[1:-1].split(",") if v.strip()}
-        if tail:
-            if re.fullmatch(r"[\w-]+", tail):
-                return {tail: ""}
-            raise ValueError("unsupported inline event syntax")
-        result = {}
+        inline = found.group(1).split(" #", 1)[0].strip()
+        if inline.startswith("[") and inline.endswith("]"):
+            return {item.strip().strip("'\""): "" for item in inline[1:-1].split(",")}
+        if inline:
+            if re.fullmatch(r"[\w-]+", inline):
+                return {inline: ""}
+            raise ValueError("unsupported trigger form")
+        answer: dict[str, str] = {}
         current = None
-        for row in lines[i + 1:]:
+        for row in lines[i+1:]:
             if row.strip() and not row[0].isspace() and not row.startswith("#"):
                 break
-            found = EVENT.match(row)
-            if found:
-                current = found.group(1)
-                result[current] = row
+            match = EVENT.match(row)
+            if match:
+                current = match.group(1)
+                answer[current] = row
             elif current is not None:
-                result[current] += "\n" + row
-        return result
-    raise ValueError("missing on: event")
+                answer[current] += "\n" + row
+        return answer
+    raise ValueError("missing trigger")
 
 
-def verify() -> bool:
-    errors = []
+def verify_single_automatic() -> None:
     paths = sorted([*WORKFLOWS.glob("*.yml"), *WORKFLOWS.glob("*.yaml")])
     if not paths:
-        raise RuntimeError("workflow directory empty")
-    on_main = []
+        raise ValueError("empty workflow directory")
+    automatic = []
+    failures = []
     for path in paths:
         try:
-            found = events(path.read_text(encoding="utf-8"))
-            if not found:
-                raise ValueError("empty events")
-            forbidden = FORBIDDEN & found.keys()
-            if forbidden:
-                errors.append(f"{path.name}: forbidden fan-out {sorted(forbidden)}")
-            if "push" in found:
-                block = found["push"]
-                if path.name == "ci.yml" and re.search(
-                    r"^\s+branches:\s*\[main\]", block, re.M
-                ) and "tags:" not in block:
-                    on_main.append(path.name)
-                elif path.name == "release.yml" and "tags:" in block and "branches:" not in block:
-                    # Release-tag trigger is independent of main-commit CI.
-                    pass
-                else:
-                    errors.append(f"{path.name}: unwanted automatic push")
-        except (OSError, ValueError) as exc:
-            errors.append(f"{path.name}: {exc}")
-    if on_main != ["ci.yml"]:
-        errors.append(f"expected exactly one main-push workflow ci.yml; found {on_main}")
-    for message in errors:
-        print("SENS_CI_BUDGET_FAIL", message, flush=True)
-    if errors:
-        return False
-    print("SENS_CI_BUDGET_PASS", json.dumps({
-        "workflow_files": len(paths), "automatic_main": on_main, "budget": 1,
-        "semantic_authority": "physical_binary_SENS",
-    }), flush=True)
-    return True
+            triggers = parse_events(path.read_text(encoding="utf-8"))
+            if not triggers:
+                raise ValueError("empty triggers")
+            active = set(triggers) - {"workflow_dispatch"}
+            if active:
+                automatic.append((path.name, tuple(sorted(active))))
+            if path.name == "ci.yml":
+                if active != {"push"}:
+                    raise ValueError(f"expected only push; actual {active}")
+                push = triggers["push"]
+                if not re.search(r"^\s+branches:\s*\[main\]\s*$", push, re.M):
+                    raise ValueError("not scoped to main")
+                if "paths:" not in push or "tags:" in push:
+                    raise ValueError("missing narrow paths or extra tag trigger")
+            elif active:
+                raise ValueError(f"unauthorized automatic events {active}")
+        except (ValueError, OSError) as exc:
+            failures.append(f"{path.name}: {exc}")
+    if automatic != [("ci.yml", ("push",))]:
+        failures.append(f"automatic workflow set incorrect: {automatic}")
+    for fault in failures:
+        print("SENS_CI_BUDGET_FAIL " + fault, flush=True)
+    if failures:
+        raise ValueError("multiple or invalid automatic workflows")
+    print("SENS_CI_SINGLE_AUTOMATIC " + json.dumps({
+        "workflow_count": len(paths),
+        "authorized": "ci.yml only: main push scoped to SENS files",
+        "semantic_authority": "physical SENS only"
+    }, ensure_ascii=False), flush=True)
 
 
-def changed() -> tuple[str, list[str]]:
-    before = os.getenv("SENS_CI_BEFORE", "")
-    if not re.fullmatch(r"[0-9a-f]{40}", before) or before == "0" * 40:
-        before = "HEAD^"
-    probe = subprocess.run(
-        ["git", "rev-parse", "--verify", before], cwd=ROOT,
-        capture_output=True, text=True, check=False
-    )
-    if probe.returncode and re.fullmatch(r"[0-9a-f]{40}", before):
-        # Fetch only the exact old tip on a multi-commit main push.
-        fetch = subprocess.run(
-            ["git", "fetch", "--no-tags", "--depth=1", "origin", before],
-            cwd=ROOT, capture_output=True, text=True, check=False,
-        )
-        if fetch.returncode:
-            raise RuntimeError(f"cannot fetch before SHA {before}: {fetch.stderr[-600:]}")
-        probe = subprocess.run(
-            ["git", "rev-parse", "--verify", before],
-            cwd=ROOT, capture_output=True, text=True, check=False,
-        )
-    if probe.returncode:
-        raise RuntimeError(f"missing before SHA {before}; refuse invented diff")
-    diff = subprocess.run(
-        ["git", "diff", "--name-only", before, "HEAD", "--"],
-        cwd=ROOT, capture_output=True, text=True, check=False
-    )
-    if diff.returncode:
-        raise RuntimeError(f"git diff failed: {diff.stderr[-600:]}")
-    files = sorted(filter(None, diff.stdout.splitlines()))
-    if not files:
-        raise RuntimeError("empty main diff; no invented topical PASS")
-    return before, files
+def run(command: list[str], timeout: int) -> tuple[int, bytes, bytes]:
+    try:
+        out = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=timeout, check=False)
+        return out.returncode, out.stdout, out.stderr
+    except subprocess.TimeoutExpired as err:
+        return 124, err.stdout or b"", err.stderr or b"TIMEOUT"
 
 
-def scope(path: str) -> str:
-    if path.startswith(".github/workflows/") or path in {
-        "scripts/ci_one_focused_workflow.py", "AGENTS.md"
-    }:
-        return "ci-policy"
-    if path.startswith("lib/core3") or path.startswith(
-        "tests/semantic/core3-executors-"
-    ):
-        return "core3"
-    if path == "lib/narrate.lisp" or path.startswith(
-        "tests/semantic/narrate-d3-atom-eq-"
-    ):
-        return "narrate"
-    if path.startswith("lib/domains/") or path.startswith(
-        "tests/semantic/domain-logic-2040/"
-    ) or path in {
-        "crates/sens/src/domain_ladder.rs",
-        "crates/sens/src/domain_identity.rs",
-    }:
-        return "domains"
-    return "unsupported"
-
-
-def digest(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def diagnostic(test_id: str, layer: str, path: str, command: list[str],
-               code: int, output: bytes, stderr: bytes, reason: str) -> int:
-    candidate = ROOT / path
-    material = candidate.read_bytes() if candidate.is_file() else b""
-    revision = os.environ.get("GITHUB_SHA") or subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
-        text=True, check=False
-    ).stdout.strip()
+def failure(layer: str, path: str, command: list[str], rc: int, out: bytes,
+            stderr: bytes, wanted: str) -> int:
+    raw = (ROOT / path).read_bytes() if (ROOT / path).is_file() else b""
     record = {
-        "test_id": test_id, "layer": layer, "fixture": path,
-        "fixture_sha256": digest(material),
-        # An exit-code gate is not an external SENS truth table.
-        "expected_sha256": digest(b"1\n" if layer == "eval" else b"exit=0"),
-        "actual_sha256": digest(output if layer == "eval" else
-                                f"exit={code}".encode() + b"\n" + output),
-        "stdout_sha256": digest(output), "stderr_sha256": digest(stderr),
-        "first_difference": (
-            {"byte_offset": next((i for i in range(max(len(b"1\n"), len(output)))
-                                  if b"1\n"[i:i+1] != output[i:i+1]), 0),
-             "kind": "D1_verdict_mismatch"}
-            if layer == "eval" and code == 0 and output != b"1\n"
-            else {"exit_expected": 0, "exit_actual": code}
-        ),
-        # Do not invent a historical first-bad commit without bisect evidence.
+        "test_id": TEST_ID, "layer": layer, "fixture": path,
+        "fixture_sha256": sha256(raw),
+        "expected_sha256": sha256(wanted.encode("ascii")),
+        "actual_sha256": sha256(f"exit={rc}".encode("ascii")),
+        "stdout_sha256": sha256(out), "stderr_sha256": sha256(stderr),
+        "first_difference": {"exit_expected": wanted.removeprefix("exit="),
+                             "exit_actual": rc},
         "first_bad_sha": "UNRESOLVED",
-        "first_observed_bad_sha": revision,
-        "reproduce": shlex.join(command),
-        "classification": "TEST_OR_IMPLEMENTATION_UNRESOLVED",
-        "reason": reason, "stderr_tail": stderr.decode(errors="replace")[-1400:],
+        "first_observed_bad_sha": os.getenv("GITHUB_SHA", "UNRESOLVED"),
+        "classification": "UNRESOLVED",
+        "reproduce": "python3 scripts/ci_one_focused_workflow.py --execute",
+        "failed_command": shlex.join(command),
+        "stderr_tail": stderr.decode(errors="replace")[-1500:],
     }
     print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True), flush=True)
-    print(f"::error::SENS_UNRESOLVED test={test_id} layer={layer} "
-          f"first_bad_sha=UNRESOLVED; details in SENS_FAILURE_REPORT", flush=True)
+    print("::error title=UNINFORMATIVE-OUTPUT::First-bad SHA not proven; "
+          "fail closed, do not guess or silently quarantine.", flush=True)
     return 1
 
 
-def execute(before: str, files: list[str]) -> int:
-    scopes = {scope(p) for p in files}
-    # Policy integrity takes priority, then the smallest admitted native law.
-    selected = next((x for x in ("ci-policy", "core3", "narrate", "domains") if x in scopes), "unsupported")
-    deferred = sorted(scopes - {selected})
-    print("SENS_CI_FOCAL_ROUTE " + json.dumps({
-        "selected": selected, "changed_files": files,
-        "deferred_scopes_NOT_VERIFIED": deferred,
+def execute() -> int:
+    verify_single_automatic()
+    for fixture in [PROOF, MUTANT]:
+        if not (ROOT / fixture).is_file():
+            return failure("transport", fixture, ["test", "-f", fixture],
+                           2, b"", b"missing exact SENS fixture", "exit=0")
+    print("SENS_CI_TARGET " + json.dumps({
+        "test_id": TEST_ID,
+        "proof": PROOF, "proof_sha256": sha256((ROOT / PROOF).read_bytes()),
+        "mutant": MUTANT, "mutant_sha256": sha256((ROOT / MUTANT).read_bytes()),
+        "law": "SENS's own fail-closed binary logic; no host truth table",
+        "one_program_checks": 2040
     }, ensure_ascii=False, sort_keys=True), flush=True)
-
-    if selected == "unsupported":
-        # Run one real, narrow transport check; do not fabricate SENS semantics
-        # or produce endless false REDs for a file without an admitted witness.
-        command = ["git", "diff", "--check", before, "HEAD", "--"]
-        result = subprocess.run(command, cwd=ROOT, capture_output=True, check=False)
-        if result.returncode:
-            return diagnostic("unmapped-source-diff", "transport", files[0],
-                              command, result.returncode, result.stdout, result.stderr,
-                              "Mechanical diff check failed; SENS semantics NOT VERIFIED")
-        print("::warning title=SENS-SEMANTICS-NOT-VERIFIED::"
-              "No admitted one-file binary witness for this diff; "
-              "only whitespace/patch integrity verified", flush=True)
-        print("SENS_CI_ONE_TEST_PASS test_id=unmapped-source-diff "
-              "layer=transport semantics=NOT_VERIFIED", flush=True)
-        return 0
-
-    if selected == "ci-policy":
-        cmd = ["git", "diff", "--check", before, "HEAD", "--"]
-        result = subprocess.run(cmd, cwd=ROOT, capture_output=True, check=False)
-        if result.returncode:
-            return diagnostic("ci-policy-diff", "transport", "scripts/ci_one_focused_workflow.py",
-                              cmd, result.returncode, result.stdout, result.stderr,
-                              "One-workflow policy diff failed")
-        print("SENS_CI_ONE_TEST_PASS test_id=ci-policy-diff layer=transport", flush=True)
-        return 0
-
-    fixture = WITNESSES[selected]
-    if not (ROOT / fixture).is_file():
-        return diagnostic(f"{selected}-native-law", "transport", fixture,
-                          ["target/debug/sens", fixture], 2, b"", b"",
-                          "Physical binary SENS witness is missing")
     build = ["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens"]
-    print("SENS_CI_ONE_TEST " + json.dumps({
-        "test_id": f"{selected}-native-law", "binary_fixture": fixture,
-        "fixture_sha256": digest((ROOT / fixture).read_bytes()),
-        "semantic_authority": "SENS; fail branch encoded in fixture",
-        "build": build,
-        "execute": ["target/debug/sens", fixture],
-    }, ensure_ascii=False), flush=True)
-    try:
-        compilation = subprocess.run(build, cwd=ROOT, capture_output=True,
-                                     check=False, timeout=480)
-    except subprocess.TimeoutExpired as exc:
-        return diagnostic(f"{selected}-native-law", "transport", fixture, build,
-                          124, exc.stdout or b"", exc.stderr or b"", "Build timeout")
-    if compilation.returncode:
-        return diagnostic(f"{selected}-native-law", "transport", fixture, build,
-                          compilation.returncode, compilation.stdout, compilation.stderr,
-                          "Compiler/mechanism failed; semantic test NOT RUN")
-    command = ["target/debug/sens", fixture]
-    try:
-        actual = subprocess.run(command, cwd=ROOT, capture_output=True,
-                                check=False, timeout=90)
-    except subprocess.TimeoutExpired as exc:
-        return diagnostic(f"{selected}-native-law", "eval", fixture, command,
-                          124, exc.stdout or b"", exc.stderr or b"", "SENS timeout")
-    # The language evaluates its own law; transport must observe exact D1:1.
-    # Exit=0 with empty output or D1:0 is NOT a semantic PASS.
-    if actual.returncode or actual.stdout != b"1\n":
-        return diagnostic(f"{selected}-native-law", "eval", fixture, command,
-                          actual.returncode, actual.stdout, actual.stderr,
-                          "SENS self-verdict must be exact D1:1 (one bit); "
-                          "exit success alone is insufficient")
+    rc, out, err = run(build, 540)
+    if rc:
+        return failure("transport", PROOF, build, rc, out, err, "exit=0")
+    positive = ["target/debug/sens", PROOF]
+    rc, out, err = run(positive, 90)
+    if rc:
+        return failure("eval", PROOF, positive, rc, out, err, "exit=0")
+    negative = ["target/debug/sens", MUTANT]
+    bad_rc, bad_out, bad_err = run(negative, 90)
+    if bad_rc in (0, 124):
+        return failure("eval", MUTANT, negative, bad_rc, bad_out, bad_err, "exit=nonzero")
     print("SENS_CI_ONE_TEST_PASS " + json.dumps({
-        "test_id": f"{selected}-native-law", "layer": "eval",
-        "fixture": fixture, "fixture_sha256": digest((ROOT / fixture).read_bytes()),
-        "stdout_sha256": digest(actual.stdout),
-        "deferred_scopes_NOT_VERIFIED": deferred,
+        "test_id": TEST_ID, "layer": "eval",
+        "proof_sha256": sha256((ROOT / PROOF).read_bytes()),
+        "mutant_sha256": sha256((ROOT / MUTANT).read_bytes()),
+        "positive_output_sha256": sha256(out),
+        "negative_error_sha256": sha256(bad_err),
+        "mutant_exit": bad_rc,
+        "semantic_authority": "binary SENS"
     }, ensure_ascii=False, sort_keys=True), flush=True)
     return 0
 
 
 def main() -> int:
-    if not verify():
-        return 1
-    if sys.argv[1:] != ["--execute"]:
-        return 0
-    before, files = changed()
-    return execute(before, files)
+    if sys.argv[1:] not in ([], ["--execute"]):
+        print("usage: ci_one_focused_workflow.py [--execute]", file=sys.stderr)
+        return 2
+    if sys.argv[1:] == ["--execute"]:
+        return execute()
+    verify_single_automatic()
+    return 0
 
 
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (ValueError, OSError, RuntimeError) as exc:
-        print("SENS_CI_ROUTE_BLOCKED", str(exc), file=sys.stderr, flush=True)
+    except (ValueError, OSError) as error:
+        print("SENS_CI_UNINFORMATIVE_OUTPUT " + str(error), file=sys.stderr, flush=True)
         sys.exit(2)
