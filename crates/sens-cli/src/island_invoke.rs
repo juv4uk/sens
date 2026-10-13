@@ -89,23 +89,23 @@ ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z).
     Ok(path)
 }
 
-fn invoke_common_lisp(sens: Sens8, payload: &str) -> Result<Vec<u8>, String> {
+fn invoke_common_lisp(id: CommonLispLegacyAbiSemanticId, payload: &str) -> Result<Vec<u8>, String> {
     CommonLispKernel::default()
         .evaluate(&CommonLispRequest::new(
-            CommonLispLegacyAbiSemanticId(sens.packed_byte()),
+            id,
             payload,
         ))
         .map(|result| result.stdout)
         .map_err(|error| error.to_string())
 }
 
-fn invoke_prolog(sens: Sens8, payload: &str) -> Result<Vec<u8>, String> {
+fn invoke_prolog(id: PrologLegacyAbiSemanticId, payload: &str) -> Result<Vec<u8>, String> {
     let template = first_prolog_template(payload).unwrap_or_else(|| "true".to_string());
     let program = prolog_fixture_path()?;
     let result = PrologKernel::default().execute(
         &program,
         &PrologRequest::new(
-            PrologLegacyAbiSemanticId(sens.packed_byte()),
+            id,
             PrologQuery::new(payload, template),
         ),
     );
@@ -214,8 +214,15 @@ fn evaluate_raw_invoke(
     let payload = text_argument(&arguments[1], "native payload", span)?;
 
     let (producer, native_result) = match mechanism.as_str() {
-        "common-lisp" => ("common-lisp", invoke_common_lisp(sens, &payload)),
-        "prolog" => ("prolog", invoke_prolog(sens, &payload)),
+        // Окрема історична ABI-межа: W8 тут не є D8:10101000 ROUND.
+        "common-lisp" => (
+            "common-lisp",
+            invoke_common_lisp(CommonLispLegacyAbiSemanticId(sens.packed_byte()), &payload),
+        ),
+        "prolog" => (
+            "prolog",
+            invoke_prolog(PrologLegacyAbiSemanticId(sens.packed_byte()), &payload),
+        ),
         "clips" => ("clips", invoke_clips(&payload)),
         "datalog" => ("datalog", invoke_datalog(&payload)),
         other => {

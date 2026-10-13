@@ -1,0 +1,24 @@
+name: Історична ABI-межа острівних ядер
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens-cli/src/island_invoke.rs"
+      - "tests/test_island_legacy_abi_seam.py"
+      - ".github/workflows/island-legacy-abi-seam.yml"
+  workflow_dispatch:
+
+jobs:
+  island-abi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Довести точне збереження історичного W8 ABI і відмінність D8 ROUND
+        run: python3 -m unittest discover -s tests -p 'test_island_legacy_abi_seam.py' -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити компіляцію основного CLI з типізованою ABI-межею
+        run: cargo check --locked -p sens-cli --bin sens
