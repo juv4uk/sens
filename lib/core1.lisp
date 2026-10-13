@@ -12,6 +12,12 @@
 ; D6:100111 CADDDR stays RATIFIED DATA but is not physically callable yet;
 ; no Rust/Python backdoor may silently admit that runtime function.
 ; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
+; Exact physical D1/D3/D4 arity slice: C1-ONE-ARGP and C1-TWO-ARGP.
+; lib/core1-arity.{bits,sens} encodes the current Core1 laws without host
+; name interpretation. 20 language-owned semantic laws are executed by
+; tests/fixtures/core1-arity-semantic.{bits,sens}; no Python/Rust semantic
+; expectations. Historical false result () differs from exact D1 0.
+; No new primitive; no implicit D6/D10 callability or D7 function duplicate.
 ; Exact binary Core1 admission slice: C1-ADMITTED-SID-VALUEP runs from
 ; lib/core1-admission.{bits,sens}; 21 SENS-owned laws live in
 ; tests/fixtures/core1-admission-semantic.{bits,sens}.
