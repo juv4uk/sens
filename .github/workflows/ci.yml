@@ -61,23 +61,36 @@ jobs:
             --expected-file "$RUNNER_TEMP/expected-d1" \
             --report-file "$report" \
             -- target/debug/sens "$program"
-      - name: Негативний контроль — SENS мусить відхилити мутант
+      - name: Негативний контроль — виключно SENS non-callable, не помилка парсера
         shell: bash
         run: |
           set -euo pipefail
           mutant=tests/semantic/domain-logic-2040/mutant.sens
-          echo "test_id=sens-domain-logic-2040-mutant layer=eval expected=nonzero"
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=sens-domain-logic-2040-mutant layer=eval expected=SENS-non-callable"
           sha256sum "$mutant"
-          set +e
-          target/debug/sens "$mutant" > "$RUNNER_TEMP/mutant.stdout" 2> "$RUNNER_TEMP/mutant.stderr"
-          rc=$?
-          set -e
-          sha256sum "$RUNNER_TEMP/mutant.stdout" "$RUNNER_TEMP/mutant.stderr"
-          if [[ "$rc" == 0 ]]; then
-            echo "::error title=SENS_MISSED_MUTANT::test_id=sens-domain-logic-2040-mutant layer=eval actual=exit-0 expected=reject; reproduce: target/debug/sens $mutant"
-            exit 1
-          fi
-          echo "SENS_MUTANT_REJECTED rc=$rc"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-domain-logic-2040-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --report-file "$report" \
+            -- bash -c '
+              set +e
+              target/debug/sens tests/semantic/domain-logic-2040/mutant.sens > "$RUNNER_TEMP/mutant.stdout" 2> "$RUNNER_TEMP/mutant.stderr"
+              code=$?
+              if [ "$code" -eq 0 ]; then
+                echo "Mutant unexpectedly accepted by SENS" >&2
+                cat "$RUNNER_TEMP/mutant.stdout" >&2
+                exit 1
+              fi
+              if ! grep -qi "not callable" "$RUNNER_TEMP/mutant.stderr"; then
+                echo "Mutant rejected for an unrelated reason: not a proven SENS non-callable branch" >&2
+                cat "$RUNNER_TEMP/mutant.stderr" >&2
+                exit 1
+              fi
+              echo "SENS_MUTANT_REJECTED_BY_NONCALLABLE rc=$code"
+              exit 0
+            '
       - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
