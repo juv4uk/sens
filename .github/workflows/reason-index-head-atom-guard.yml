@@ -1,0 +1,41 @@
+name: "Reason index: guard CAR atom before EQ"
+
+on:
+  pull_request:
+    paths:
+      - "lib/reason.lisp"
+      - "crates/sens/tests/reason_index.rs"
+      - ".github/workflows/reason-index-head-atom-guard.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/reason.lisp"
+      - "crates/sens/tests/reason_index.rs"
+      - ".github/workflows/reason-index-head-atom-guard.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reason-index-head-atom:
+    name: "reason-index? never feeds a pair to EQ"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Nested rule list is safely recognized as non-index"
+        run: cargo test --locked -p sens --test reason_index normal_nested_rule_list_is_not_probed_with_eq_as_a_schema_tag -- --exact --nocapture
+      - name: "Canonical index and malformed index negative witness"
+        run: cargo test --locked -p sens --test reason_index canonical_index_is_recognized_and_malformed_index_falls_back_safely -- --exact --nocapture
+      - name: "Full reason index regression suite"
+        run: cargo test --locked -p sens --test reason_index -- --nocapture
+      - name: "Whitespace and checkout integrity"
+        if: always()
+        shell: bash
+        run: |
+          git diff --check
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
