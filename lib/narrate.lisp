@@ -7,7 +7,7 @@
 ; `understand-is`/`understand-relation` — round-tripping a sentence through
 ; `understand` then `narrate-fact` returns the original words.
 ;
-; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ())).
+; Migrated: host truthiness → exact D1 literal #d1:1; domain width remains explicit.
 ; Reuses result-proper-list? from lib/result-status.lisp and existing
 ; project selectors. Width is identity; every bit of the domain address valued.
 ;
@@ -23,10 +23,10 @@
   (0010 (value)
     (110
       ((0101 value)
-       (010 (001 ())))
+       #d1:1)
       ((010 value)
        #d1:0)
-      ((010 (001 ()))
+      (#d1:1
        (narrate-proper-list? (011 value))))))
 
 ; Structural arity checks return exact D1:YES only at the requested boundary.
@@ -43,8 +43,8 @@
       ((0101 (011 value))
        #d1:0)
       ((0101 (011 (011 value)))
-       (010 (001 ())))
-      ((010 (001 ()))
+       #d1:1)
+      (#d1:1
        #d1:0))))
 
 (0011 narrate-list-exact-three?
@@ -61,8 +61,8 @@
       ((0101 (011 (011 value)))
        #d1:0)
       ((0101 (011 (011 (011 value))))
-       (010 (001 ())))
-      ((010 (001 ()))
+       #d1:1)
+      (#d1:1
        #d1:0))))
 
 (0011 narrate-fact

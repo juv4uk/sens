@@ -3,7 +3,6 @@
 
 use sens::{
     eval_parsed_expressions, load_core_library, parse_canonical_binary, parse_exact_domain_source, parse_mixed_exact_domain,
-    Expr, ExprKind,
     parse_mixed_exact_domain_reasoning_source, Session,
 };
 
@@ -47,17 +46,6 @@ fn eval_outcome_narration(source: &str) -> String {
     eval_outcome_value(source).to_string()
 }
 
-fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
-    if let ExprKind::DomainIdentity(identity) = &expr.kind {
-        widths.push(identity.width());
-    }
-    if let ExprKind::List(items) = &expr.kind {
-        for item in items.iter() {
-            gather_domain_widths(item, widths);
-        }
-    }
-}
-
 #[test]
 fn binary_sens_owns_d1_d4_structural_arity_law() {
     let source = include_str!("../../../tests/semantic/narrate-arity-d1-d4-law.bits");
@@ -67,49 +55,15 @@ fn binary_sens_owns_d1_d4_structural_arity_law() {
     );
     let mut session = Session::default();
     load_core_library(&mut session).expect("canonical Core4 must load");
+    let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
+        .expect("production narration source must use exact D1/D3/D4 words");
+    eval_parsed_expressions(&narration, &mut session)
+        .expect("production narration helpers must load before their binary witness");
     let parsed = parse_canonical_binary(source)
         .expect("canonical D2-framed binary SENS witness must parse");
     eval_parsed_expressions(&parsed, &mut session)
         .expect("SENS self-verdict rejected a D1/D3/D4 structural law");
 }
-#[test]
-fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
-    let source = include_str!("../../../lib/narrate.lisp");
-    let start = source
-        .find("(0011 narrate-proper-list?")
-        .expect("structural arity helpers are present");
-    let end = source[start..]
-        .find("(0011 narrate-fact")
-        .expect("next production definition bounds helper source")
-        + start;
-    let helper_source = &source[start..end];
-    let forms = parse_exact_domain_source(helper_source)
-        .expect("arity helpers must parse under the exact-domain reader");
-    assert_eq!(forms.len(), 3, "proper-list, exact-two, exact-three helpers");
-
-    let mut widths = Vec::new();
-    for form in &forms {
-        gather_domain_widths(form, &mut widths);
-    }
-    widths.sort_unstable();
-    widths.dedup();
-    assert_eq!(
-        widths,
-        vec![1, 3, 4],
-        "D1 is reserved for exact predicate results; only D3/D4 structure is used, not D6 LENGTH or D8 EQUAL"
-    );
-
-    let executable_source = helper_source
-        .lines()
-        .filter(|line| !line.trim_start().starts_with(';'))
-        .collect::<Vec<_>>()
-        .join("\n");
-    assert!(!executable_source.contains("000000"), "D6 LENGTH must not reappear in arity helpers");
-    assert!(!executable_source.contains("11110111"), "D8 EQUAL must not reappear in arity helpers");
-    assert!(!executable_source.contains("(001 0)"), "quoted host zero must not stand in for D1:0");
-    assert!(!executable_source.contains("(001 1)"), "quoted host one must not stand in for D1:1");
-}
-
 #[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"

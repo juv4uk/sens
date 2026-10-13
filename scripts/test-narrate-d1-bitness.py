@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/narrate.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present
+  2. Explicit exact D1 literal #d1:1 is present
   3. Reuses result-proper-list? from migrated result-status surface
   4. Key narrate function surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NARRATE = ROOT / "lib" / "narrate.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "#d1:1"
 REQUIRED = (
     "narrate-fact",
     "narrate-provenance",
@@ -50,10 +50,12 @@ def check_narrate() -> list[str]:
             continue
         errs.append(f"narrate: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
-        errs.append("narrate: exact D1:1 form (010 (001 ())) missing")
+        errs.append("narrate: explicit exact D1 literal #d1:1 missing")
     active_code = "\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith(";")
     )
+    if "(010 (001 ()))" in active_code:
+        errs.append("narrate: constructed true sentinel must be explicit #d1:1")
     for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
         if legacy in active_code:
             errs.append(f"narrate: legacy arity mechanism still active: {legacy}")
