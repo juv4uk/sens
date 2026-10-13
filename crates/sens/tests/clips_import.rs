@@ -413,3 +413,49 @@ fn clips_defrule_with_a_forall_condition_imports_correctly() {
         "(((done) (forall (item (var x)) (checked (var x)))))"
     );
 }
+
+fn eval_exact_clips_slot_lookup(source: &str) -> String {
+    let mut session = Session::default();
+    // Old eval_program(lib/core.lisp) interprets migrated binary heads as
+    // numbers. This path uses the already proven, source-pinned D3/D4 loader.
+    sens::eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("canonical source-pinned bootstrap");
+
+    // Execute both original production definitions: slot-value-of + lookup.
+    // Other historical CLIPS importer functions have separate migration
+    // blockers and are not dependencies of this purely structural search.
+    let full = include_str!("../../../lib/clips-import.lisp");
+    let begin = full.find("(0011 clips-slot-value-of").unwrap();
+    let end = full[begin..]
+        .find("(0011 clips-positional-args")
+        .map(|relative| begin + relative)
+        .unwrap();
+    let definitions = sens::parse_mixed_exact_domain(&full[begin..end])
+        .expect("real D3/D4 CLIPS definition parses");
+    sens::eval_parsed_expressions(&definitions, &mut session)
+        .expect("real CLIPS slot definition loads");
+    let request = sens::parse_mixed_exact_domain(source)
+        .expect("D3 quoted test input parses");
+    sens::eval_parsed_expressions(&request, &mut session)
+        .expect("real D3 EQ slot lookup executes")
+        .value
+        .to_string()
+}
+
+#[test]
+fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
+    // Regress against unreachable lookup; execute production D3/D4 definition.
+    for (source, expected) in [
+        ("(clips-lookup-slot-value (quote name) (quote ((name alice) (age 42))))", "alice"),
+        ("(clips-lookup-slot-value (quote name) (quote ((age 42) (name bob))))", "bob"),
+        ("(clips-lookup-slot-value (quote name) (quote ((age 42) (colour red))))", "()"),
+        ("(clips-lookup-slot-value (quote name) (quote (bare-atom (name alice))))", "alice"),
+        ("(clips-lookup-slot-value (quote name) (quote (((nested head) ignored) (name alice))))", "alice"),
+    ] {
+        assert_eq!(eval_exact_clips_slot_lookup(source), expected, "slot traversal failed for {source}");
+    }
+}

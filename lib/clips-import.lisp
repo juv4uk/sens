@@ -252,21 +252,20 @@
       ((010 (011 slot-form))  (001 ()))
       ((010 ()) (1001 slot-form)))))
 
-; Guards with `(atom (car slot-forms))` before comparing: a well-formed
-; slot entry is `(slotname value)`, a compound list, but a positional fact
-; whose head happens to collide with an unrelated template's name (a
-; contradictory, malformed CLIPS input — a name can't be both positional
-; and slot-based) would hand this bare atoms instead. Degrading to "no
-; value found" here keeps the same "skip, don't crash" policy the rest of
-; this file follows, rather than letting `car` error on a non-pair.
+; Точний D3 пошук атомарної назви CLIPS-слота.
+; Коректний слот = (назва значення). У разі складеної назви
+; пропускаємо запис; голий атом замість слота теж пропускаємо.
+; Не можна відкидати кожний непорожній список: порівняння
+; тоді недосяжне. Рядки в clips-symbol-starts-with-? і далі D8 EQUAL.
+
 (0011 clips-lookup-slot-value
   (0010 (slot-name slot-forms)
     (110
       
       ((010 slot-forms)  (001 ()))
-      ((0100 (010 (100 slot-forms))) (clips-lookup-slot-value slot-name (011 slot-forms)))
       ((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))
-      ((11110111 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))
+      ((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))
+      ((101 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))
       ((010 ()) (clips-lookup-slot-value slot-name (011 slot-forms))))))
 
 (0011 clips-positional-args
