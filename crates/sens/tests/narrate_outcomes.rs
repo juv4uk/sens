@@ -1,7 +1,9 @@
 //! B2: presentation must preserve the semantic distinction established by
 //! lib/result-status.my instead of collapsing every non-proof into one phrase.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, parse_exact_domain_source, Session,
+};
 
 fn eval_outcome_value(source: &str) -> sens::Value {
     let mut session = Session::default();
@@ -9,7 +11,15 @@ fn eval_outcome_value(source: &str) -> sens::Value {
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/result-status.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/narrate.lisp"), &mut session).unwrap();
+
+    // narrate.lisp has exact D8/D9 heads. The ordinary compatibility parser
+    // treats those spellings as numeric literals; use the explicit exact-width
+    // source API so width remains part of identity during this test.
+    let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
+        .expect("canonical narration source must preserve each domain width");
+    eval_parsed_expressions(&narration, &mut session)
+        .expect("exact-domain narration library must load");
+
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
