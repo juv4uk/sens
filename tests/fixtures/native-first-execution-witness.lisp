@@ -86,6 +86,17 @@
             (detail
               (malformed-native-plan
                 (native-plan ((ret))))))))
-        (001 ()))))))))
+        (111
+          ; A non-atomic tag is data, never an argument to D3 EQ.
+          (native-first-execution-witness-check
+            (native-first-execute-plan
+              (001 ((malformed-tag) payload)))
+            (001
+              (execution-route invalid-plan
+                (status rejected)
+                (detail
+                  (unknown-native-first-plan
+                    ((malformed-tag) payload))))))
+          (001 ())))))))))
 
 (native-first-execution-witness)
