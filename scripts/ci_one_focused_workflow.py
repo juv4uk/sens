@@ -182,7 +182,9 @@ def verify():
                     "knowledge-exact-arity-structure",
                     "sens-domain-logic-2040-mutant",
                     "sens-reason-index-width-selectors-law",
-                    "sens-reason-index-width-selectors-mutant"):
+                    "sens-reason-index-width-selectors-mutant",
+                    "unify-observe-d1-law",
+                    "unify-observe-d1-mutant"):
         if ("--require " + test_id) not in ci_text:
             errors.append("UNINFORMATIVE-EXECUTOR: missing required " + test_id)
     if ci_text.count("semantic_authority=binary-SENS") < 3:
