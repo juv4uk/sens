@@ -103,6 +103,14 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
+          # Mechanical compiler schema gate: SENS owns language meaning;
+          # Rust merely rejects ambiguous duplicate transport fields.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id compiler-artifact-seven-bit-slot-guard \
+            --layer transport \
+            --fixture crates/sens/src/compiler_language.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib compiler_language::tests::whole_program_artifact_verifier_rejects_duplicate_fields_before_execution -- --exact --nocapture
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
