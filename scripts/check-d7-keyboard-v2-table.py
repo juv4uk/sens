@@ -14,6 +14,8 @@ def run() -> None:
     ):
         raise ValueError("D7 v2 owner authority mismatch")
     raw=doc["table"]
+    if '"' in D7_TABLE.read_text(encoding="utf-8"):
+        raise ValueError("D7 table must not contain quote characters")
     actual=read_domain_table(D7_TABLE)
     if len(raw)!=128 or len(actual)!=128:
         raise ValueError("D7 v2 requires exactly 128 rows")

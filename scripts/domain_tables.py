@@ -49,9 +49,19 @@ class DomainTableRow:
         return "surface"
 
 
-def decode(token: str, *, literal_empty: bool = False) -> str | None:
+def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False) -> str | None:
     if token == "()":
         return "()" if literal_empty else None
+    if d7_surface:
+        match = re.fullmatch(r"U\+([0-9A-F]{4,6})", token)
+        if match:
+            point = int(match.group(1), 16)
+            if point > 0x10FFFF or 0xD800 <= point <= 0xDFFF:
+                raise ValueError("invalid D7 Unicode scalar escape")
+            return chr(point)
+        if len(token) != 1 or not token.isalpha():
+            raise ValueError(f"invalid bare D7 surface glyph: {token!r}")
+        return token
     if token.startswith('"') and token.endswith('"'):
         # Escaped punctuation, whitespace and quotes belong to the glyph,
         # not to D7 binary identity.
@@ -83,12 +93,12 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 domain=f"D{expected_width}",
                 width=expected_width,
                 bits=bits,
-                uk=decode(uk, literal_empty=literal_empty),
-                ukr=decode(ukr, literal_empty=literal_empty),
-                san=decode(san, literal_empty=literal_empty),
-                en=decode(en, literal_empty=literal_empty),
+                uk=decode(uk, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                ukr=decode(ukr, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                san=decode(san, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                en=decode(en, literal_empty=literal_empty, d7_surface=expected_width == 7),
                 lisp=decode(lisp, literal_empty=literal_empty),
-                sym=decode(sym, literal_empty=literal_empty),
+                sym=decode(sym, literal_empty=literal_empty, d7_surface=expected_width == 7),
             )
         )
     expected = 1 << expected_width
