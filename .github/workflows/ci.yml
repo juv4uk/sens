@@ -54,11 +54,21 @@ jobs:
             warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
           end
           exit(failures.empty? ? 0 : 1)
-      - name: Міграція — заборонити бездоказові file-name holds
+      - name: Міграція — нуль адміністративних HOLD, усі файли доступні для роботи
         shell: bash
         run: |
           set -euo pipefail
+          # CI_GLUE_NO_SEMANTICS: test migration eligibility/provenance only.
+          # A semantic PASS requires independent native physical SENS elsewhere.
+          bash -n scripts/migrate-active-lib-exact.sh
           python3 tests/test_domain_ladder_source_batch.py BatchSourceTests.test_macro_and_machine_sources_are_assessed_not_name_blocked
+          python3 tests/test_migrate_sens.py \
+            OperationalMigrationTests.test_reviewed_paths_can_be_pinned_for_migration_repair \
+            OperationalMigrationTests.test_missing_review_ledger_does_not_freeze_unrelated_work \
+            OperationalMigrationTests.test_historical_snapshot_can_be_inspected_without_path_hold \
+            OperationalMigrationTests.test_mixed_manifest_no_old_classification_veto \
+            OperationalMigrationTests.test_stale_classifier_does_not_veto_genuine_sha_pins
+          python3 tests/test_plan_t5_agent_work.py -v
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
