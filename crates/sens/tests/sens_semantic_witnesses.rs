@@ -7,7 +7,8 @@
 
 use sens::{
     eval_parsed_expressions, eval_pinned_legacy_core_source,
-    parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
+    parse_canonical_binary, parse_mixed_exact_domain_reasoning_source,
+    encode_binary_projection_ternary, open_ternary_program, Session,
 };
 
 const RESULT_STATUS: &str = include_str!("../../../lib/result-status.lisp");
@@ -50,11 +51,30 @@ const X86_ENCODING_DIRECT_D4_LAW: &str =
     include_str!("../../../tests/semantic/x86-encoder-let-d4-law.bits");
 const X86_ENCODING_DIRECT_D4_MUTANT: &str =
     include_str!("../../../tests/semantic/x86-encoder-let-d4-mutant.bits");
+const X86_ENCODING_DIRECT_D4_LAW_T5: &[u8] =
+    include_bytes!("../../../tests/semantic/x86-encoder-let-d4-law.sens");
+const X86_ENCODING_DIRECT_D4_MUTANT_T5: &[u8] =
+    include_bytes!("../../../tests/semantic/x86-encoder-let-d4-mutant.sens");
+const META_EVAL_MUTUAL_D4_LAW_T5: &[u8] =
+    include_bytes!("../../../tests/semantic/meta-eval-mutual-d4-law.sens");
+
+fn require_canonical_t5(source: &str, physical: &[u8]) {
+    // Mechanical-only codec check; no host-language expected logical values.
+    assert_eq!(encode_binary_projection_ternary(source).unwrap(), physical);
+    let opened = open_ternary_program(physical).unwrap();
+    assert_eq!(
+        opened.split_whitespace().collect::<Vec<_>>(),
+        source.split_whitespace().collect::<Vec<_>>(),
+    );
+}
+
 
 /// Лише механічний транспорт: усі закони й вердикти закодовано самою
 /// двійковою мовою SENS, а не таблицею очікувань у Rust або Python.
 #[test]
 fn x86_encoding_let_to_exact_d4_binary_sens_verdict() {
+    require_canonical_t5(X86_ENCODING_DIRECT_D4_LAW, X86_ENCODING_DIRECT_D4_LAW_T5);
+    require_canonical_t5(X86_ENCODING_DIRECT_D4_MUTANT, X86_ENCODING_DIRECT_D4_MUTANT_T5);
     for source in [X86_ENCODING_DIRECT_D4_LAW, X86_ENCODING_DIRECT_D4_MUTANT] {
         assert!(source.bytes().all(|byte|
             matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
@@ -96,6 +116,7 @@ const META_EVAL_MUTUAL_D4_LAW: &str =
 /// належать виключно виконуваним бітовим формам SENS.
 #[test]
 fn meta_eval_mutual_d4_exact_sens_self_verdict() {
+    require_canonical_t5(META_EVAL_MUTUAL_D4_LAW, META_EVAL_MUTUAL_D4_LAW_T5);
     assert!(
         META_EVAL_MUTUAL_D4_LAW
             .bytes()
@@ -111,4 +132,5 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
             .unwrap_or_else(|error| panic!(
                 "binary SENS self-proof {} rejected its own law: {error}", index + 1
             ));
+    }
 }
