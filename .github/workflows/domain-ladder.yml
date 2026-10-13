@@ -1,3 +1,6 @@
+# КАРАНТИН 2026-10-13: чинна заборона запуску недовіреного тесту.
+# Виконуваний код тестів збережено, але усі jobs заблоковані до окремого
+# семантичного допуску власником; ручний workflow_dispatch не обходить заборону.
 name: Драбина доменів — точна ширина та механіка
 
 on:
@@ -5,6 +8,7 @@ on:
 
 jobs:
   exact-width-ladder:
+    if: ${{ false }} # КАРАНТИН 2026-10-13 — жоден runner до owner review
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -41,6 +45,7 @@ jobs:
         run: python3 benchmarks/d7-ratification-conformance/validate.py
 
   utf8-d1-runtime:
+    if: ${{ false }} # КАРАНТИН 2026-10-13 — жоден runner до owner review
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
