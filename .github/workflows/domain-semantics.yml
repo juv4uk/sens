@@ -1,0 +1,45 @@
+name: domain-semantics
+
+# ЄДИНІ автоматичні ворога семантики доменів. Двійковий SENS — єдина влада:
+# жодних таблиць «очікуваної істини» в Rust/Python. Раннер лише збирає
+# фізичний SENS і перевіряє друк PASS. Точково й інформативно.
+# Логіка:  D3..D9 закони              (check-domain-logic-laws.lisp).
+# Бітність: Dn має рівно 2^n рядків,
+#           D3 має вісім РІЗНИХ адрес (check-domain-bitness-laws.lisp).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/domains/**'
+      - 'scripts/check-domain-logic-laws.lisp'
+      - 'scripts/check-domain-bitness-laws.lisp'
+      - '.github/workflows/domain-semantics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  domain-laws:
+    name: Domain laws in binary SENS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build physical SENS
+        run: cargo build --locked -p sens-cli --bin sens
+      - name: Logic laws — D3..D9 semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$(target/debug/sens scripts/check-domain-logic-laws.lisp)"
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -q 'DOMAIN-LOGIC-LAWS: PASS'
+      - name: Bitness laws — Dn = 2^n rows, D3 eight distinct
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$(target/debug/sens scripts/check-domain-bitness-laws.lisp)"
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -q 'DOMAIN-BITNESS-LAWS: PASS'
