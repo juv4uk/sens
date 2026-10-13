@@ -5,15 +5,9 @@ name: benchmarks-reality
 # економія генераторів, метрики графа доменів, алгебра функцій-чисел (закони
 # ширини — саме нова реальність D24+), стрес інваріантності. Кожен бенчмарк
 # друкує свій вердикт; гейт його звіряє — інформативно, без truth-таблиць.
+# ПОЛІТИКА ВЛАСНИКА: рівно один автоматичний workflow (ci.yml).
+# Performance evidence лишається доступним вручну; додатковий push заборонено.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'benchmarks/generator-economy/**'
-      - 'benchmarks/domain-graph-metrics/**'
-      - 'benchmarks/function-number-algebra/**'
-      - 'benchmarks/semantic-invariance-stress/**'
-      - '.github/workflows/benchmarks-reality.yml'
   workflow_dispatch:
 
 permissions:
