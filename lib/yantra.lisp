@@ -184,26 +184,29 @@
 ; OpenAI's content field is null when the assistant emits only tool calls.
 (0011 json-message-content
   (0010 (jm)
-    (001000 ((c (alist-ref "content" jm)))
+    ((0010 (c)
       (110
         ((101 c (001 ())) "")
-        ((010 ()) c)))))
+        ((010 ()) c)))
+     (alist-ref "content" jm))))
 
 (0011 json->tool-call
   (0010 (jtc)
-    (001000 ((fn (alist-ref "function" jtc)))
+    ((0010 (fn)
       (1110 (111 (001 id) (alist-ref "id" jtc))
             (111 (001 name) (alist-ref "name" fn))
-            (111 (001 arguments) (alist-ref "arguments" fn))))))
+            (111 (001 arguments) (alist-ref "arguments" fn))))
+     (alist-ref "function" jtc))))
 
 (0011 json->message
   (0010 (jm)
-    (001000 ((tcs (alist-ref "tool_calls" jm)))
+    ((0010 (tcs)
       (1111 (1110 (111 (001 role) (alist-ref "role" jm))
                     (111 (001 content) (json-message-content jm)))
               (110
                 (tcs (1110 (111 (001 tool-calls) (101000 json->tool-call tcs))))
-                )))))
+                )))
+     (alist-ref "tool_calls" jm))))
 
 (0011 extract-assistant-message
   (0010 (response-json)
