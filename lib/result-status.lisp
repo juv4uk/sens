@@ -11,6 +11,10 @@
 ;   (blocked reason)
 ;   (disputed evidence)
 ;   (invalid reason payload)
+;
+; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ())).
+; D1:0 remains (101 (001 (0)) (001 (1))) where needed. Two-field COND.
+; Width is identity; every bit of the domain address is valued.
 
 (0011 make-proved
   (0010 (statement results)
@@ -39,27 +43,26 @@
 (0011 result-tagged?
   (0010 (result)
     (110
-      
-      ((010 result)  (001 ()))
-      ((101 (100 result) (001 proved)) t)
-      ((101 (100 result) (001 unknown)) t)
-      ((101 (100 result) (001 partial)) t)
-      ((101 (100 result) (001 blocked)) t)
-      ((101 (100 result) (001 disputed)) t)
-      ((101 (100 result) (001 invalid)) t)
-      )))
+      ((010 result) (001 ()))
+      ((101 (100 result) (001 proved)) (010 (001 ())))
+      ((101 (100 result) (001 unknown)) (010 (001 ())))
+      ((101 (100 result) (001 partial)) (010 (001 ())))
+      ((101 (100 result) (001 blocked)) (010 (001 ())))
+      ((101 (100 result) (001 disputed)) (010 (001 ())))
+      ((101 (100 result) (001 invalid)) (010 (001 ())))
+      ((010 (001 ())) (001 ())))))
 
 (0011 result-status
   (0010 (result)
     (110
       ((result-tagged? result) (100 result))
-      )))
+      ((010 (001 ())) (001 ())))))
 
 (0011 result-payload
   (0010 (result)
     (110
       ((result-tagged? result) (011 result))
-      )))
+      ((010 (001 ())) (001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
@@ -67,38 +70,42 @@
 (0011 result-proper-list?
   (0010 (value)
     (110
-      
-      ((010 value)  (110
-         ((101 value (001 ())) t)
-         ))
-      ((010 ()) (result-proper-list? (011 value))))))
+      ((010 value)
+       (110
+         ((101 value (001 ())) (010 (001 ())))
+         ((010 (001 ())) (001 ()))))
+      ((010 (001 ()))
+       (result-proper-list? (011 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
 (0011 result-not-head?
   (0010 (head)
     (110
-      ((101 head (001 not?)) t)
-      ((101 head (001 not)) t)
-      )))
+      ((101 head (001 not?)) (010 (001 ())))
+      ((101 head (001 not)) (010 (001 ())))
+      ((010 (001 ())) (001 ())))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
 ; logical shape, `(not? goal)`, additionally requires exactly one recursively
 ; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
+; Arity check uses exact D3 ATOM/CDR + D4 selector; no W8 / D6 LENGTH.
 (0011 result-goal?
   (0010 (goal)
     (110
-      
-      ((010 goal)  (001 ()))
+      ((010 goal) (001 ()))
       ((0100 (result-proper-list? goal)) (001 ()))
       ((0100 (110101100 (100 goal))) (001 ()))
       ((result-not-head? (100 goal))
        (110
-         ((11110111 (000000 goal) 2)  (result-goal? (1001 goal)))
-         ))
-      ((010 ()) t))))
+         ((010 (011 goal))
+          (110
+            ((010 (011 (011 goal))) (result-goal? (1001 goal)))
+            ((010 (001 ())) (001 ()))))
+         ((010 (001 ())) (001 ()))))
+      ((010 (001 ())) (010 (001 ()))))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
@@ -107,14 +114,14 @@
   (0010 (goal)
     (110
       ((0100 (result-goal? goal)) (001 ()))
-      ((result-not-head? (100 goal)) t)
-      )))
+      ((result-not-head? (100 goal)) (010 (001 ())))
+      ((010 (001 ())) (001 ())))))
 
 (0011 result-opposite-goal
   (0010 (goal)
     (110
       ((result-negated-goal? goal) (1001 goal))
-      ((010 ()) (1110 (001 not?) goal)))))
+      ((010 (001 ())) (1110 (001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
@@ -134,7 +141,7 @@
     (110
       ((0100 (result-goal? goal))
        (make-invalid (001 invalid-goal) goal))
-      ((010 ())
+      ((010 (001 ()))
        (001001 ((opposite (result-opposite-goal goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
@@ -162,7 +169,7 @@
             (make-proved goal positive-results))
            ((110111011 (010 opposite-results))
             (make-proved opposite opposite-results))
-           ))))))
+           ((010 (001 ())) (001 ())))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
@@ -178,6 +185,6 @@
        (make-invalid (001 invalid-goal) goal))
       ((101010010 module-name)
        (reason-observe goal (110000011 module-name)))
-      ((010 ())
+      ((010 (001 ()))
        (make-blocked
          (1110 (001 module-not-found) module-name))))))
