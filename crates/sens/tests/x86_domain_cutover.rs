@@ -97,3 +97,10 @@ fn xmm_sentinel_shortens_quoted_data_without_collapsing_d3_and_d8() {
         );
     }
 }
+
+#[test]
+fn x86_lowerer_has_no_legacy_let() {
+    let s = include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp");
+    assert!(!s.contains("(001000 "));
+    assert!(!s.contains("(let ("));
+}
