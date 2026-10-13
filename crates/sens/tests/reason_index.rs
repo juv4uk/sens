@@ -27,6 +27,22 @@ fn eval(session: &mut Session, source: &str) -> String {
 }
 
 #[test]
+fn diagnostic_bucket_rebuild_handles_existing_nonempty_bucket() {
+    let mut s = session();
+    let source = r#"
+      (reason-index-add-reversed
+        (quote q)
+        (quote ((q second)))
+        (quote ((p ((p first)))))
+      )
+    "#;
+    assert_eq!(
+        eval(&mut s, source),
+        "((p ((p first))) (q ((q second))))"
+    );
+}
+
+#[test]
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
