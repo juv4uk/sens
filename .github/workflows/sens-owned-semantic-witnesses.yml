@@ -30,8 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Execute semantic laws owned by binary SENS
-        run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
       - name: Двійковий SENS сам перевіряє D4 λ й однобітний мутант
         shell: bash
         run: |
@@ -61,4 +59,5 @@ jobs:
             echo "BLOCKED: мутант пройшов, хоча його SENS-гілка зобов'язана відмовити" >&2
             exit 1
           fi
-
+      - name: Execute semantic laws owned by binary SENS
+        run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
