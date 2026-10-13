@@ -167,13 +167,23 @@ def run(args):
                          if negative else expected)
     binary_sha = digest(executor.read_bytes()) if native else None
     version = None
+    binary_version = None
     if native:
+        with executor.open("rb") as stream:
+            if stream.read(4) != bytes((127, 69, 76, 70)):
+                raise ValueError("UNINFORMATIVE-EXECUTOR: sens executable is not ELF")
+        version_process = subprocess.run([str(executor), "--version"], capture_output=True, check=False)
+        binary_version = version_process.stdout.decode("utf-8", errors="replace").strip()
+        if version_process.returncode != 0 or not binary_version.startswith("sens "):
+            raise ValueError("UNINFORMATIVE-EXECUTOR: sens ELF did not report version")
         manifest_text = Path("crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
         match = re.search(r'^version\s*=\s*"([^"]+)"', manifest_text, re.M)
         if not match:
             print("::error::UNINFORMATIVE-EXECUTOR missing executable package version")
             return 1
         version = match.group(1)
+        if binary_version != "sens " + version:
+            raise ValueError("UNINFORMATIVE-EXECUTOR: ELF/Cargo version mismatch")
 
     reproduce = shlex.join(cmd)
     kind = "NATIVE_SENS_ORACLE" if native else "CI_GLUE_NO_SEMANTICS"
@@ -196,7 +206,7 @@ def run(args):
     receipt = {
         "test_id": args.test_id, "layer": args.layer, "kind": kind,
         "executor": str(executor) if native else cmd[0],
-        "executor_sha256": binary_sha, "package_version": version,
+        "executor_sha256": binary_sha, "package_version": version, "binary_version": binary_version,
         "fixture": str(fixture), "fixture_sha256": fixture_sha,
         "expected_sha256": digest(expected_evidence),
         "actual_sha256": digest(actual),
@@ -206,6 +216,7 @@ def run(args):
         "reproduce": reproduce, "mode": "negative" if negative else "positive",
         "observed_sha": os.environ.get("GITHUB_SHA", "LOCAL"),
     }
+    print("TEST_EXECUTOR_ACTUAL_OUTPUT=" + repr(actual.decode("utf-8", errors="replace")[-2048:]), flush=True)
     print("TEST_EXECUTOR_RECEIPT=" + json.dumps(receipt, ensure_ascii=False, sort_keys=True),
           flush=True)
     if native:
