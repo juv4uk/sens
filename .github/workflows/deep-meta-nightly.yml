@@ -1,9 +1,8 @@
-name: Deep Meta-Eval Nightly
+# Карантин планових запусків 2026-10-13: лише один автоматичний SENS-тест.
+# Історичні діагностики збережені, доступні вручну; автоматичний schedule прибрано.
+name: Deep Meta-Eval (manual diagnostic)
 
 on:
-  schedule:
-    # 00:17 UTC = deep-night window in Ukraine (02:17/03:17 local by season).
-    - cron: '17 0 * * *'
   workflow_dispatch:
     inputs:
       extended_b5:
