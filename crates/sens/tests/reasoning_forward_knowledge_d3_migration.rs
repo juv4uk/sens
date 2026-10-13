@@ -3,7 +3,7 @@
 //! Frozen W8 files remain provenance only. They used the old NIL-as-false
 //! conditional convention, so executing them with the ratified exact-D1 COND
 //! would test a retired law rather than current behavior.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Expr, ExprKind, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const UNIFY: &str = include_str!("../../../lib/unify.lisp");
@@ -62,5 +62,82 @@ fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
         ("(fire-rule-on-facts (quote ((fact a) (derived a))) (quote ()))", "()"),
     ] {
         assert_eq!(observed(program), expected, "current reasoning behavior changed: {program}");
+    }
+}
+
+
+#[test]
+fn knowledge_var_and_negation_require_exactly_one_argument() {
+    for (program, expected) in [
+        ("(knowledge-term-valid? (quote (var x)))", "1"),
+        ("(knowledge-term-valid? (quote (var)))", "0"),
+        ("(knowledge-term-valid? (quote (var x extra)))", "0"),
+        ("(knowledge-goal-valid? (quote (not? (mortal socrates))))", "1"),
+        ("(knowledge-goal-valid? (quote (not?)))", "0"),
+        ("(knowledge-goal-valid? (quote (not? (mortal socrates) extra)))", "0"),
+        ("(knowledge-goal-valid? (quote (not (mortal socrates))))", "1"),
+    ] {
+        assert_eq!(
+            observed(program),
+            expected,
+            "Перевірка знань має вимагати точно один аргумент: {program}"
+        );
+    }
+}
+
+fn collect_call_head_coordinates(expr: &Expr, coordinates: &mut Vec<(usize, u16)>) {
+    let ExprKind::List(items) = &expr.kind else {
+        return;
+    };
+    if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = items.first() {
+        coordinates.push((identity.width(), identity.packed_bits()));
+    }
+    for item in items.iter() {
+        collect_call_head_coordinates(item, coordinates);
+    }
+}
+
+fn named_definition<'a>(forms: &'a [Expr], name: &str) -> &'a Expr {
+    forms.iter().find(|expression| {
+        let ExprKind::List(items) = &expression.kind else {
+            return false;
+        };
+        matches!(
+            items.get(1).map(|item| &item.kind),
+            Some(ExprKind::Symbol(symbol)) if symbol.as_ref() == name
+        )
+    }).unwrap_or_else(|| panic!("немає визначення Lisp: {name}"))
+}
+
+#[test]
+fn knowledge_unary_validators_use_only_exact_d3_d4_structure() {
+    assert!(!KNOWLEDGE_D3.contains("(000000 term)"));
+    assert!(!KNOWLEDGE_D3.contains("(000000 goal)"));
+    assert!(!KNOWLEDGE_D3.contains("(unify-equal? (000000"));
+    for name in ["knowledge-term-valid?", "knowledge-goal-valid?"] {
+        let forms = parse_mixed_exact_domain_reasoning_source("lib/knowledge.lisp", KNOWLEDGE_D3)
+            .expect("джерело знань має зберігати точні домени голів викликів");
+        let mut coordinates = Vec::new();
+        collect_call_head_coordinates(named_definition(&forms, name), &mut coordinates);
+        coordinates.sort_unstable();
+        coordinates.dedup();
+        let widths = coordinates
+            .iter()
+            .map(|(width, _)| *width)
+            .collect::<std::collections::BTreeSet<_>>();
+        assert_eq!(
+            widths,
+            [3usize, 4usize].into_iter().collect(),
+            "{name} не має використовувати D6 LENGTH, W8 EQUAL або некваліфікований ширший засіб"
+        );
+        for required in [(3, 0b010), (3, 0b011), (3, 0b110), (4, 0b1001)] {
+            assert!(
+                coordinates.contains(&required),
+                "{name} бракує D{}:{:0width$b}",
+                required.0,
+                required.1,
+                width = required.0
+            );
+        }
     }
 }
