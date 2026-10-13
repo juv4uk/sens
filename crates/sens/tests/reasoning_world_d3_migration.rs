@@ -3,7 +3,7 @@
 //! The frozen W8 source is retained as provenance, but it cannot be executed
 //! as a semantic oracle after COND was ratified to accept exact D1 only:
 //! historical NIL-as-false is intentionally no longer a current language law.
-use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Expr, ExprKind, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const OLD: &str = include_str!("../../../tests/fixtures/world-d3-before.lisp");
@@ -55,4 +55,65 @@ fn world_d3_current_semantics_replay_the_frozen_behavioral_witnesses() {
     ] {
         assert_eq!(observe(program), expected, "current D3 world changed: {program}");
     }
+}
+
+
+#[test]
+fn world_recognizer_requires_exact_four_element_proper_list() {
+    for (program, expected) in [
+        ("(world? (empty-world))", "1"),
+        ("(world? (quote (world () () ()))", "1"),
+        ("(world? (quote (world)))", "()"),
+        ("(world? (quote (world parent)))", "()"),
+        ("(world? (quote (world parent journal)))", "()"),
+        ("(world? (quote (world parent journal metadata extra)))", "()"),
+        ("(world? (quote (not-world parent journal metadata)))", "()"),
+        ("(world? (quote ()))", "()"),
+    ] {
+        assert_eq!(
+            observe(program),
+            expected,
+            "world? must accept only the exact snapshot shape: {program}"
+        );
+    }
+}
+
+fn collect_call_head_widths(expr: &Expr, widths: &mut Vec<usize>) {
+    let ExprKind::List(items) = &expr.kind else {
+        return;
+    };
+    if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = items.first() {
+        widths.push(identity.width());
+    }
+    for item in items {
+        collect_call_head_widths(item, widths);
+    }
+}
+
+#[test]
+fn world_shape_validator_uses_only_exact_d3_and_d4_call_heads() {
+    let parsed = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", D3)
+        .expect("current immutable-world source must parse");
+    let definition = parsed
+        .iter()
+        .find(|expression| {
+            let ExprKind::List(items) = &expression.kind else {
+                return false;
+            };
+            matches!(
+                items.get(1).map(|item| &item.kind),
+                Some(ExprKind::Symbol(name)) if name == "world?"
+            )
+        })
+        .expect("the source must define world?");
+
+    let mut widths = Vec::new();
+    collect_call_head_widths(definition, &mut widths);
+    widths.sort_unstable();
+    widths.dedup();
+    assert_eq!(
+        widths,
+        vec![3, 4],
+        "world? should use D3 structure plus D4 NULL, not LENGTH or a wider helper"
+    );
 }
