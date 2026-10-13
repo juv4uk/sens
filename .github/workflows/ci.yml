@@ -1,28 +1,41 @@
-name: CI — основні перевірки SENS
+name: SENS — один точковий та інформативний тест
 
-# OWNER 2026-10-13: QUARANTINE.
-# Automatic CI is paused because its current semantic tests are disputed.
-# Run manually only after the owner explicitly authorizes the corrected SENS tests.
+# ВЛАСНИК: один автоматичний CI лише для змін з визначеним SENS-свідком.
+# Без масових тестів, Python/Rust truth-таблиць чи зайвого runner fan-out.
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'scripts/ci_one_focused_workflow.py'
+      - 'lib/core3.lisp'
+      - 'lib/core3-executors.bits'
+      - 'lib/core3-executors.sens'
+      - 'tests/semantic/core3-executors-d3-law.sens'
+      - 'lib/domains/**'
+      - 'crates/sens/src/domain_ladder.rs'
+      - 'crates/sens/src/domain_identity.rs'
+      - 'tests/semantic/domain-logic-2040/**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focused-${{ github.ref }}
+  group: sens-single-focused-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  core:
-    name: Перевірка ядра та доменного контракту
+  one-sens-proof:
+    name: Один двійковий SENS-свідок або точкова перевірка CI
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 2
-      - name: Один причинно пов'язаний точковий тест
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Одна причинно пов'язана перевірка — SENS сам визначає семантику
         env:
           SENS_CI_BEFORE: ${{ github.event.before }}
         run: python3 scripts/ci_one_focused_workflow.py --execute
