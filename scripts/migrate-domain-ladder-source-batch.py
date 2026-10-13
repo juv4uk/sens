@@ -55,7 +55,7 @@ def _exact_codebook(bits, width, origin):
 
 
 def _git_blob_sha1(payload):
-    prefix = b"blob " + str(len(payload)).encode("ascii") + b"\\0"
+    prefix = b"blob " + str(len(payload)).encode("ascii") + b"\0"
     return hashlib.sha1(prefix + payload).hexdigest()
 
 
