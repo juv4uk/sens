@@ -6,6 +6,10 @@ on:
     paths:
       - 'lib/canon.lisp'
       - 'lib/core1.lisp'
+      - 'lib/core1-records.bits'
+      - 'lib/core1-records.sens'
+      - 'tests/fixtures/core1-records-semantic.bits'
+      - 'tests/fixtures/core1-records-semantic.sens'
       - 'lib/core1-selectors.bits'
       - 'lib/core1-selectors.sens'
       - 'tests/fixtures/core1-selectors-semantic.bits'
@@ -72,3 +76,17 @@ jobs:
           target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-trit.out"
           cmp "$RUNNER_TEMP/core1-sens.out" "$RUNNER_TEMP/core1-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/core1-sens.out"
+
+      - name: Core1 record constructors and predicate gap under SENS-owned laws
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit open lib/core1-records.sens > "$RUNNER_TEMP/core1-records-source.bits"
+          cmp lib/core1-records.bits "$RUNNER_TEMP/core1-records-source.bits"
+          program='tests/fixtures/core1-records-semantic.sens'
+          target/debug/sens-trit open "$program" > "$RUNNER_TEMP/core1-records-witness.bits"
+          cmp tests/fixtures/core1-records-semantic.bits "$RUNNER_TEMP/core1-records-witness.bits"
+          target/debug/sens "$program" > "$RUNNER_TEMP/core1-records-sens.out"
+          target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-records-trit.out"
+          cmp "$RUNNER_TEMP/core1-records-sens.out" "$RUNNER_TEMP/core1-records-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/core1-records-sens.out"
