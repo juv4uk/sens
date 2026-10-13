@@ -4,7 +4,7 @@
 //! користуються conformance-перевірки, машинні протоколи й точне відтворення
 //! джерела. Цей модуль змінює лише те, що інтерактивна поверхня показує людині.
 
-use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Sens8, Value};
+use crate::{semantic_registry, ErrorKind, Exactness, LanguageError, NumericBuffer, Value};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PresentationLanguage {
     Canonical,
@@ -21,16 +21,13 @@ fn uk_operation_name(name: &str) -> String {
         "PRIM_CAR" => "перше".to_string(),
         "PRIM_CDR" => "решта".to_string(),
         other => semantic_registry::semantic_id_for_surface(other)
-            .map(uk_semantic_name)
+            .and_then(|semantic_id| {
+                semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
+                    .into_iter()
+                    .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
+            })
             .unwrap_or_else(|| other.to_string()),
     }
-}
-
-fn uk_semantic_name(semantic_id: Sens8) -> String {
-    semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
-        .into_iter()
-        .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
-        .unwrap_or_else(|| format!("W8:{}", semantic_registry::semantic_id_bits(semantic_id)))
 }
 
 fn canonical_inexact(number: f64) -> String {
@@ -98,7 +95,10 @@ fn render_uk(value: &Value) -> String {
                     .map(str::to_string)
                     .unwrap_or_else(|| format!("#<домен D{}:{domain}>", domain.width()))
             } else {
-                format!("#<сумісний W8:{} {}>", sid, uk_semantic_name(*sid))
+                let ukrainian_surface = semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
+                    .into_iter()
+                    .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()));
+                format!("#<сумісний W8:{} {}>", sid, ukrainian_surface.unwrap_or_else(|| sid.to_string()))
             }
         }
         Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "uk")
@@ -480,6 +480,36 @@ mod tests {
         assert_eq!(
             render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
             "(phalana ām)"
+        );
+    }
+
+    #[test]
+    fn equal_payload_d3_d4_identities_remain_visibly_distinct() {
+        let d3_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
+        ));
+        let d4_eval = Value::DomainIdentity(crate::DomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(0b0001).unwrap()),
+        ));
+
+        // Same integer payload does not erase exact domain width: 001 != 0001.
+        assert_eq!(d3_quote.to_string(), "001");
+        assert_eq!(d4_eval.to_string(), "0001");
+        assert_eq!(
+            render_value_for_presentation(&d3_quote, PresentationLanguage::Ukrainian),
+            "як-є"
+        );
+        assert_eq!(
+            render_value_for_presentation(&d4_eval, PresentationLanguage::Ukrainian),
+            "обчислити"
+        );
+        assert_eq!(
+            render_value_for_presentation(&d3_quote, PresentationLanguage::Sanskrit),
+            "svarūpa"
+        );
+        assert_eq!(
+            render_value_for_presentation(&d4_eval, PresentationLanguage::Sanskrit),
+            "vicāraṇa"
         );
     }
 
