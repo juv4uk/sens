@@ -296,8 +296,8 @@
        (110
          ((101 (100 term) (001 var))
           (110
-            ; The variable constructor is exactly (var name): inspect its
-            ; cdr/cddr with D3 ATOM, not D6 LENGTH or an unqualified 2.
+            ; Конструктор змінної має точну форму (var ім'я): перевіряємо
+            ; cdr/cddr через D3 ATOM, без D6 LENGTH і некваліфікованого числа 2.
             ((010 (011 term)) (010 (001 (0))))
             ((010 (011 (011 term))) (knowledge-symbol? (1001 term)))
             ((010 ()) (010 (001 (0))))))
@@ -319,8 +319,8 @@
       ((0100 (knowledge-symbol? (100 goal))) (010 (001 (0))))
       ((knowledge-not-head? (100 goal))
        (110
-         ; not/not? accept exactly one argument. An empty cdr means zero;
-         ; an atomic cddr means exactly one; a pair at cddr means excess.
+         ; not/not? приймають рівно один аргумент. Порожній cdr означає нуль;
+         ; атомарний cddr — рівно один, а пара в cddr — надлишкові аргументи.
          ((010 (011 goal)) (010 (001 (0))))
          ((010 (011 (011 goal))) (knowledge-goal-valid? (1001 goal)))
          ((010 ()) (010 (001 (0))))))
