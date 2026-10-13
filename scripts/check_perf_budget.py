@@ -50,6 +50,9 @@ def check_case(b, m, env):
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     must(b.get("fixture_sha256") == digest and m.get("fixture_sha256") == digest,
          name + ": fixture SHA drift")
+    reproduce = b.get("reproduce")
+    must(isinstance(reproduce, str) and reproduce.strip() and reproduce != "MISSING",
+         name + ": missing one-command reproduction")
     budget = b.get("limit_ir_per_op")
     operations = m.get("operations")
     must(integer(budget) and budget > 0 and integer(operations) and operations > 0,
@@ -71,11 +74,11 @@ def check_case(b, m, env):
         "fixture_sha256": digest, "measured_ir_per_op": per_op,
         "budget_ir_per_op": budget, "excess_ir_per_op": max(0, per_op-budget),
         "first_difference": {"metric": "Cachegrind.Ir/op", "delta": per_op-budget},
-        "reproduce": b.get("reproduce", "MISSING"),
+        "reproduce": reproduce,
     }
 
 
-def evaluate(budgets, evidence):
+def evaluate(budgets, evidence, *, emit=True):
     must(budgets.get("schema") == "sens-ir-budget/v1", "budget schema")
     must(evidence.get("schema") == "sens-ir-evidence/v1", "evidence schema")
     must(bool(HEX40.fullmatch(str(evidence.get("git_sha", "")))),
@@ -94,11 +97,13 @@ def evaluate(budgets, evidence):
         result["git_sha"] = evidence["git_sha"]
         excess += result["excess_ir_per_op"]
         marker = "PERF-BUDGET-EXCEEDED" if result["excess_ir_per_op"] else "PERF-BUDGET-PASS"
-        print(marker + " " + json.dumps(result, ensure_ascii=False, sort_keys=True))
-    print("PERF-DEBT " + json.dumps({
-        "excess_ir_per_op_sum": excess, "cases": len(cases),
-        "warning": "Sum meaningful only within this fixed comparable workload set"
-    }, sort_keys=True))
+        if emit:
+            print(marker + " " + json.dumps(result, ensure_ascii=False, sort_keys=True))
+    if emit:
+        print("PERF-DEBT " + json.dumps({
+            "excess_ir_per_op_sum": excess, "cases": len(cases),
+            "warning": "Sum meaningful only within this fixed comparable workload set"
+        }, sort_keys=True))
     return int(excess > 0)
 
 
@@ -118,7 +123,8 @@ def self_test():
             b = {"id": "synthetic.case", "layer": "eval", "metric": "Cachegrind.Ir/op",
                  "evidence_status": "PINNED_REAL_MEASUREMENT", "baseline_commit": "a"*40,
                  "baseline_evidence_sha256": "b"*64, "fixture": "tests/sample.sens",
-                 "fixture_sha256": sha, "limit_ir_per_op": 20, "environment": env}
+                 "fixture_sha256": sha, "limit_ir_per_op": 20, "environment": env,
+                 "reproduce": "python3 scripts/check_perf_budget.py --budgets budgets.json --evidence evidence.json"}
             m = {"id": "synthetic.case", "layer": "eval", "metric": "Cachegrind.Ir/op",
                  "semantic_parity": True, "isolation": "matched_control_same_binary",
                  "fixture_sha256": sha, "operations": 10,
@@ -126,12 +132,12 @@ def self_test():
             policy = {"schema": "sens-ir-budget/v1", "cases": [b]}
             data = {"schema": "sens-ir-evidence/v1", "git_sha": "c"*40,
                     "environment": env, "rows": [m]}
-            must(evaluate(policy, data) == 0, "false rejection")
+            must(evaluate(policy, data, emit=False) == 0, "false rejection")
             m["paired_i_refs"] = [{"active": 320, "control": 20}] * 3
-            must(evaluate(policy, data) == 1, "missed budget overrun")
+            must(evaluate(policy, data, emit=False) == 1, "missed budget overrun")
             data["environment"] = {**env, "cpu": "different"}
             try:
-                evaluate(policy, data)
+                evaluate(policy, data, emit=False)
             except ValueError:
                 pass
             else:
