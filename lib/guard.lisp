@@ -7,7 +7,7 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 ;
-; Predicate results now use direct typed D1 W1 projections #d1:1 / #d1:0.
+; Predicate results now use direct typed one-bit W1 projections without ATOM/NOT.
 ; Two-field COND only. Width is identity; every bit of the domain address valued.
 
 (0011 guard-decision?

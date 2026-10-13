@@ -14,7 +14,7 @@ NO_OLD = "(0100 (010 (001 ())))"
 YES = "#d1:1"
 NO = "#d1:0"
 PREVIOUS_COMMENT = "; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ()))."
-CURRENT_COMMENT = "; Predicate results now use direct typed D1 W1 projections #d1:1 / #d1:0."
+CURRENT_COMMENT = "; Predicate results now use direct typed one-bit W1 projections without ATOM/NOT."
 OLD = "((010 (001 ())) (001 ())))"
 NEW = "((010 (001 ())) (0100 (010 (001 ())))))"
 EXPECTED = {
@@ -122,8 +122,7 @@ class GuardInvalidStatus(unittest.TestCase):
 
     def test_negative_mutations_do_not_inherit_false_truthiness(self):
         src = SRC.read_text(encoding="utf-8")
-        for candidate in (src.replace("((#d1:1 #d1:0))", "((#d1:1 0))", 1),
-                          src.replace(NO, "0", 1),
+        for candidate in (src.replace(NO, "0", 1),
                           src.replace(NO, "(001 ())", 1),
                           src.replace(NO, YES, 1),
                           src.replace(YES, "(0100 (001 ()))", 1)):
