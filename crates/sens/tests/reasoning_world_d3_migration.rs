@@ -63,12 +63,12 @@ fn world_recognizer_requires_exact_four_element_proper_list() {
     for (program, expected) in [
         ("(world? (empty-world))", "1"),
         ("(world? (quote (world () () ())))", "1"),
-        ("(world? (quote (world)))", "()"),
-        ("(world? (quote (world parent)))", "()"),
-        ("(world? (quote (world parent journal)))", "()"),
-        ("(world? (quote (world parent journal metadata extra)))", "()"),
-        ("(world? (quote (not-world parent journal metadata)))", "()"),
-        ("(world? (quote ()))", "()"),
+        ("(world? (quote (world)))", "0"),
+        ("(world? (quote (world parent)))", "0"),
+        ("(world? (quote (world parent journal)))", "0"),
+        ("(world? (quote (world parent journal metadata extra)))", "0"),
+        ("(world? (quote (not-world parent journal metadata)))", "0"),
+        ("(world? (quote ()))", "0"),
     ] {
         assert_eq!(
             observe(program),
