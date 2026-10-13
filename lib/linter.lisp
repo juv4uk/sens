@@ -1,5 +1,10 @@
-; lib/linter.lisp — Linter for my-lisp ASTs
+; lib/linter.lisp — Linter for SENS ASTs.
 ; Analyzes size, nesting, complexity, globals, and effects.
+; Exact migration: list-empty tests D8:11110111 EQUAL -> D4:0101 NULL;
+; conditional head match D8:11110111 -> guarded D3:101 EQ.
+; Only these proved narrower laws are substituted. Remaining D8 EQUAL calls
+; retain their independent D8 identity; no universal SID8-to-D3 coercion.
+; Exact D1 verdicts are 1 and 0; a pair is never passed to D3 EQ.
 
 ;; Голова форми для розпізнавання. Лінтер обходить і хвости списків, тож
 ;; def/lambda/defmacro/let — лише коли у формі щонайменше три елементи;
@@ -74,7 +79,13 @@
     (110
       
       ((010 ast)  0)
-      ((11110111 (lint-form-head ast) (001 cond))
+      ; D8 EQUAL is only necessary for structures. The head is checked
+      ; by D3 ATOM before the exact D3 EQ on the two atomic code words.
+      ; A pair-head routes to the ordinary fallback; EQ never sees a pair.
+      ((110
+         ((010 (lint-form-head ast))
+          (101 (lint-form-head ast) (001 cond)))
+         (#d1:1 #d1:0))
        (101110 (0010 (acc clause) (01010 acc (lint-complexity clause)))
                (000000 (011 ast))
                (011 ast)))
@@ -114,7 +125,7 @@
        (001000 ((bindings (100 (011 ast)))
              (body (100 (011 (011 ast)))))
          (110
-           ((11110111 bindings (001 ()))
+           ((0101 bindings)
             (collect-free-vars body bound-vars))
            ((010 ())
             (001000 ((binding (100 bindings)))
@@ -221,7 +232,7 @@
 (0011 get-threshold
   (0010 (key thresholds default)
     (110
-      ((11110111 thresholds (001 ())) default)
+      ((0101 thresholds) default)
       ((11110111 (100 (100 thresholds)) key) (011 (100 thresholds)))
       ((010 ()) (get-threshold key (011 thresholds) default)))))
 
