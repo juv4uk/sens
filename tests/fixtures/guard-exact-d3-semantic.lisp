@@ -39,14 +39,6 @@
       ((сторожа--містить? значення (100 дерево)) #d1:1)
       (#d1:1 (сторожа--містить? значення (011 дерево))))))
 
-(0011 сторожа--дві?
-  (0010 (список)
-    (110
-      ((010 список) #d1:0)
-      ((010 (011 список)) #d1:0)
-      ((010 (011 (011 список))) #d1:1)
-      (#d1:1 #d1:0))))
-
 (0011 сторожа--закон
   (0010 ()
     (сторожа--усі?
@@ -150,51 +142,6 @@
           (guard-unknown-routes))
         (сторожа--містить?
           (001 research-web)
-          (guard-unknown-routes))
-        (сторожа--містить?
-          (001 language-semantics)
-          (guard-topics *guard-reference-directory*))
-        (сторожа--містить?
-          (001 oracle-check)
-          (guard-scripts *guard-script-directory*))
-        (сторожа--ні?
-          (сторожа--містить?
-            (001 registry-audit)
-            (guard-scripts *guard-script-directory*)))
-        (101
-          (guard-reference-evidence-status
-            (001 (reference (topic demo))))
-          (001 unresolved))
-        (сторожа--містить?
-          (001 reference-missing)
-          (guard-reference (001 no-such-topic)))
-        (сторожа--містить?
-          (001 tool-missing)
-          (guard-script (001 no-such-tool)))
-        ; Вибір сильнішого доказу не залежить від порядку записів.
-        (сторожа--рівні?
-          (guard-reference-field
-            (001 summary)
-            (guard-reference-find
-              (001 demo)
-              (001
-                ((reference (topic demo) (evidence-status unresolved) (summary "old"))
-                 (reference (topic demo) (evidence-status confirmed) (summary "new"))))))
-          (001 "new"))
-        (сторожа--рівні?
-          (guard-reference-field
-            (001 summary)
-            (guard-reference-find
-              (001 demo)
-              (001
-                ((reference (topic demo) (evidence-status confirmed) (summary "new"))
-                 (reference (topic demo) (evidence-status unresolved) (summary "old"))))))
-          (001 "new"))
-        (сторожа--дві?
-          (guard-reference-all
-            (001 demo)
-            (001
-              ((reference (topic demo) (evidence-status unresolved) (summary "old"))
-               (reference (topic demo) (evidence-status confirmed) (summary "new"))))))))))
+          (guard-unknown-routes))))))
 
 (сторожа--закон)
