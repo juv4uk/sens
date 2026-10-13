@@ -130,47 +130,52 @@ impl PackedBitstream {
         Bits::<N>::new(((window >> shift) & mask) as u8)
     }
 
-    /// Read one exact W9 word at a known bit offset.
+    /// Extract up to ten exact semantic bits from at most three bytes.
     ///
-    /// W9 is intentionally separate from `Bits<N>` so the one-byte W1-W8
-    /// fast path remains unchanged.
-    pub fn read_w9(&self, bit_offset: usize) -> Option<Bit9> {
-        let end = bit_offset.checked_add(9)?;
-        if end > self.bit_len {
-            return None;
-        }
-
-        let mut value = 0u16;
-        for position in bit_offset..end {
-            let byte = self.bytes[position / 8];
-            let bit_in_byte = position % 8;
-            let bit = u16::from((byte >> (7 - bit_in_byte)) & 1);
-            value = (value << 1) | bit;
-        }
-
-        Bit9::new(value)
-    }
-
-    /// Read any exact D1–D10 coordinate at a caller-supplied bit offset.
-    ///
-    /// Its width comes from the source/grammar, never from the payload bits.
-    /// This extends the existing W1–W9 fast paths without rounding a D10
-    /// word down to W8/W9 or granting runtime callability by width.
-    pub fn read_coordinate(&self, bit_offset: usize, width: u8) -> Option<DomainCoordinate> {
+    /// D10 at a seven-bit offset spans 17 physical bits. This is a fixed
+    /// MSB-first window, not a decimal conversion or width inference.
+    /// W1–W8 retain their dedicated existing fast path.
+    fn read_bounded_window(&self, bit_offset: usize, width: usize) -> Option<u16> {
         if !(1..=10).contains(&width) {
             return None;
         }
-        let end = bit_offset.checked_add(usize::from(width))?;
+        let end = bit_offset.checked_add(width)?;
         if end > self.bit_len {
             return None;
         }
 
-        let mut value = 0u16;
-        for position in bit_offset..end {
-            let byte = *self.bytes.get(position / 8)?;
-            value = (value << 1) | u16::from((byte >> (7 - position % 8)) & 1);
-        }
-        DomainCoordinate::new(width, value)
+        let byte_index = bit_offset / 8;
+        let start_in_byte = bit_offset % 8;
+        let occupied = start_in_byte + width;
+        let first = u32::from(*self.bytes.get(byte_index)?);
+        let second = if occupied > 8 {
+            u32::from(*self.bytes.get(byte_index + 1)?)
+        } else {
+            0
+        };
+        let third = if occupied > 16 {
+            u32::from(*self.bytes.get(byte_index + 2)?)
+        } else {
+            0
+        };
+        let window = (first << 16) | (second << 8) | third;
+        let shift = 24 - occupied;
+        let mask = (1u32 << width) - 1;
+        Some(((window >> shift) & mask) as u16)
+    }
+
+    /// Read one exact W9 word at a known bit offset, without a per-bit scan.
+    ///
+    /// W9 stays distinct from the W1–W8 `Bits<N>` fast path.
+    pub fn read_w9(&self, bit_offset: usize) -> Option<Bit9> {
+        Bit9::new(self.read_bounded_window(bit_offset, 9)?)
+    }
+
+    /// Read a width-qualified D1–D10 coordinate without per-bit scanning.
+    ///
+    /// Width comes from the caller's grammar. No payload grants callability.
+    pub fn read_coordinate(&self, bit_offset: usize, width: u8) -> Option<DomainCoordinate> {
+        DomainCoordinate::new(width, self.read_bounded_window(bit_offset, usize::from(width))?)
     }
 
     /// Split the mechanical container into its physical payload and exact bit
@@ -678,6 +683,10 @@ mod tests {
                     assert_eq!(packed.byte_len(), (packed.bit_len() + 7) / 8);
                     assert_eq!(packed.read_coordinate(offset, width), Some(coordinate));
                     assert_eq!(packed.read_coordinate(offset + 1, width), None);
+                    if width == 9 {
+                        assert_eq!(packed.read_w9(offset).unwrap().packed_bits(), bits);
+                        assert!(packed.read_w9(offset + 1).is_none());
+                    }
                 }
             }
         }
