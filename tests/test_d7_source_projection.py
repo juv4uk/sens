@@ -1,4 +1,4 @@
-"""D7 keyboard/v2: current 128/128 text projection, distinct local ordinals."""
+"""D7 keyboard/v2: current 128/128 W7 text, no retired local ordinals."""
 from __future__ import annotations
 import sys
 import unittest
@@ -43,20 +43,15 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertFalse(digit["arithmetic_number"])
         self.assertFalse(digit["callable"])
 
-    def test_local_ordinal_keeps_independent_donor_provenance(self):
-        for n in range(1, 15):
-            ordinal = project(f"{n:07b}", role="local-ordinal")
-            self.assertEqual(ordinal["source_order"], n)
-            self.assertEqual(ordinal["donor_ref"], f"shiva-sutra:{n}")
-            self.assertFalse(ordinal["callable"])
-            self.assertFalse(ordinal["arithmetic_number"])
-        for bits in ("0000000", "0100001", "0101010", "0001111"):
-            with self.assertRaisesRegex(D7ProjectionError, "no donor-ratified"):
-                project(bits, role="local-ordinal")
+    def test_retired_local_ordinal_is_not_a_current_d7_source_role(self):
+        for n in range(128):
+            with self.subTest(word=n):
+                with self.assertRaisesRegex(D7ProjectionError, "only current D7 text"):
+                    project(f"{n:07b}", role="local-ordinal")
 
     def test_legacy_sound_and_phonetic_namespaces_are_not_current(self):
         for role in ("", "sound-text", "sound", "Number"):
-            with self.assertRaisesRegex(D7ProjectionError, "role must be explicit"):
+            with self.assertRaisesRegex(D7ProjectionError, "only current D7 text"):
                 project("0000000", role=role)
         with self.assertRaisesRegex(D7ProjectionError, "unsupported"):
             project("0000000", role="text", namespace="slp1")
