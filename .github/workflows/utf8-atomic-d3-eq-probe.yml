@@ -25,7 +25,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Структурний свідок 10 D3 і негативні мутації
         run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
-      - name: 256 байтів × 5 меж × два точні домени
-        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_matches_d8_equal_for_all_256_bytes_at_five_boundaries -- --exact --nocapture
-      - name: D3 не підміняє структурну D8 рівність
-        run: cargo test --locked -p sens --test utf8 utf8_d3_atom_eq_must_not_replace_structural_d8_equal -- --exact --nocapture
+      - name: 256 байтів × 5 меж × прямий точний D3
+        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries -- --exact --nocapture
+      - name: D8 лишається не-викличним без окремого допуску
+        run: cargo test --locked -p sens --test utf8 utf8_d3_eq_rejects_nonatoms_and_d8_equal_remains_unadmitted -- --exact --nocapture
