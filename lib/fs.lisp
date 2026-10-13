@@ -1,7 +1,7 @@
 ; File text policy owned by Lisp.
 ; Політика текстового читання/запису файлів, якою володіє Lisp.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Migrated: two-field COND only; explicit D1 fallbacks #d1:1.
 ; Reuses utf8-encode-string from lib/utf8.lisp and host mechanisms
 ; read-file-utf8-raw / write-file-bytes. Width is identity; every bit valued.
 ;
@@ -24,7 +24,7 @@
       (110
         ((101 (100 decoded) (001 decoded))
          (1001 decoded))
-        ((010 (001 ()))
+        (#d1:1
          decoded)))))
 
 ; Historical write-file returns the text after successful write;

@@ -1,0 +1,31 @@
+name: Binary SENS semantic oracle — D1 and D3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/fs.lisp"
+      - "crates/sens/tests/binary_sens_d1_cond_oracle.rs"
+      - "tests/oracles/d1-cond-law/**"
+      - ".github/workflows/binary-sens-d1-cond-oracle.yml"
+  pull_request:
+    paths:
+      - "lib/fs.lisp"
+      - "crates/sens/tests/binary_sens_d1_cond_oracle.rs"
+      - "tests/oracles/d1-cond-law/**"
+      - ".github/workflows/binary-sens-d1-cond-oracle.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  binary-self-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Run original binary SENS semantic laws from physical T5"
+        run: cargo test --locked -p sens --test binary_sens_d1_cond_oracle -- --nocapture
+      - name: "Verify existing current exact-binary interpreter preflight"
+        run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
