@@ -64,6 +64,27 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertEqual(mod.canonical_uk_from_words(WORDS.split()), UK)
         self.assertEqual(mod.project_current_uk(UK), WORDS.split())
 
+    def test_text7_authority_is_ratified_d7_keyboard_v2_not_the_retired_donor(self):
+        # Retirement of the historical .rs donor must not silently degrade the
+        # gate to an empty projection: the gate consumes the ratified D7
+        # keyboard/v2 table (width 7, 128/128) and fails closed on the donor.
+        import json
+        foundation = mod.three_pass.load_foundation(
+            ROOT / "knowledge/d1-d9-foundation.json")
+        donor = ROOT / "crates/sens/src/text7_projection_generated.rs"
+        self.assertIn("No executable or display mapping",
+                      donor.read_text(encoding="utf-8"))
+        with self.assertRaises(mod.three_pass.MigrationError):
+            mod.three_pass.build_text7(foundation, donor)
+        ratified = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
+        payload = json.loads(ratified.read_text(encoding="utf-8"))
+        self.assertEqual(payload["schema"], "sens.d7.keyboard/v2")
+        self.assertEqual(
+            (payload["width"], payload["capacity"], payload["occupancy"]),
+            (7, 128, 128))
+        self.assertIn("keyboard-v2", mod.three_pass.build_text7(foundation, ratified))
+        self.assertTrue(self.verify()["canonical_uk_roundtrip"])
+
     def test_single_atom_and_empty_list_are_distinct_from_d2_separator(self):
         self.assertEqual(mod.canonical_uk_from_words(["0"]), "ні\n")
         self.assertEqual(mod.canonical_uk_from_words(["1"]), "так\n")

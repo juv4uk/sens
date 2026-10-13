@@ -189,8 +189,13 @@ def project_current_uk(source: str) -> list[str]:
         ROOT / "contracts/core1-historical-sid-map.lisp",
         ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
+    # Ratified D7 keyboard/v2 (width 7, capacity 128, occupancy 128/128) is the
+    # single current Text7 authority. The historical
+    # crates/sens/src/text7_projection_generated.rs donor carries no executable
+    # SA_SLP1_ENCODE/UK_ENCODE mapping and stays fail-closed: it is never
+    # silently substituted for the ratified table.
     text7 = three_pass.build_text7(
-        data, ROOT / "crates/sens/src/text7_projection_generated.rs"
+        data, ROOT / "knowledge/d7-keyboard-v2-ratified.json"
     )
     resolver = three_pass.Resolver(legacy, my, upper, source_era="auto")
     visible = three_pass.migrate_file(source, resolver, text7)
