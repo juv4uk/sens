@@ -7,8 +7,9 @@
 ; Width is identity; every bit of the domain address is valued.
 ; Bounded physical migration: D3 CAR/CDR selectors C1-SECOND/C1-THIRD/
 ; C1-FOURTH live as exact binary at lib/core1-selectors.{bits,sens}.
-; SENS itself executes seven semantic observations in
-; tests/fixtures/core1-selectors-semantic.{bits,sens}, returning D1:1 on PASS.
+; SENS itself executes ten semantic observations in
+; tests/fixtures/core1-selectors-semantic.{bits,sens}, returning D1:1 on PASS. D4 CADR, D5 CADDR, D6 CADDDR are
+; checked against the same three D3-composed Core1 selectors.
 ; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
 
 (0011 C1-SECOND
