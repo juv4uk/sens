@@ -5,11 +5,15 @@
 use sens::{eval_program, Session, Value};
 
 pub const CORE: &str = include_str!("../../../lib/core.lisp");
+pub const UNIFY: &str = include_str!("../../../lib/unify.lisp");
 pub const GUARD: &str = include_str!("../../../lib/guard.lisp");
 
 pub fn load_session() -> Result<Session, String> {
     let mut session = Session::default();
     eval_program(CORE, &mut session).map_err(|error| format!("core: {error}"))?;
+    // Guard reuses the existing exact-D1 structural comparator; keep the
+    // executable Lisp dependency explicit instead of adding a Rust primitive.
+    eval_program(UNIFY, &mut session).map_err(|error| format!("unify: {error}"))?;
     eval_program(GUARD, &mut session).map_err(|error| format!("guard: {error}"))?;
     Ok(session)
 }
