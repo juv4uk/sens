@@ -1,6 +1,14 @@
 ; lib/si-derived.lisp — exact constants derived only from the 7 SI defining constants
 ; Точні похідні константи, виведені лише з 7 визначальних констант SI
 ;
+; Migrated: pure exact-rational composition. No host truthiness. No COND.
+; No decimal approximations. Width is identity; every bit valued.
+;
+; Reuses (2000+ surface):
+;   si:avogadro-constant, si:elementary-charge, si:boltzmann-constant,
+;   si:planck-constant (lib/si.lisp defining records),
+;   exact multiply (10110) and exact divide (11110110).
+;
 ; No decimal approximations are stored here. Every value below is an exact
 ; Rational expression over exact SI defining constants from lib/si.lisp.
 ; Якщо результат має нескінченний десятковий запис, він усе одно лишається
