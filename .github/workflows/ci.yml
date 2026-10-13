@@ -13,7 +13,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focussed-${{ github.ref }}
+  # Each commit gets its own slot; GitHub otherwise replaces older PENDING runs.
+  group: sens-one-focussed-${{ github.repository }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
