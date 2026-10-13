@@ -30,7 +30,7 @@ ARTIFACTS = {
     "semantic-registry": "crates/sens/src/semantic_registry.rs",
     "necessary-forms": "crates/sens/src/eval/necessary_forms_generated.rs",
     "historical-map": "contracts/core1-historical-sid-map.lisp",
-    "text7": "crates/sens/src/text7_projection_generated.rs",
+    "text7": "knowledge/d7-keyboard-v2-ratified.json",
 }
 
 
