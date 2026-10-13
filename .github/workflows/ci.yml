@@ -129,6 +129,8 @@ jobs:
             --fixture crates/sens/src/compiler_language.rs \
             --report-file "$report" \
             -- cargo test --locked -p sens --lib compiler_language::tests::whole_program_artifact_verifier_rejects_duplicate_fields_before_execution -- --exact --nocapture
+          cargo test --locked -p sens --lib quote_of_canonical_d3_empty_coordinate_is_structural_nil -- --nocapture
+          cargo test --locked -p sens --lib quote_preserves_nonempty_d3_domain_identity -- --nocapture
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
