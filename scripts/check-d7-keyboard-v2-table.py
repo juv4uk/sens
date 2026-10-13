@@ -32,7 +32,7 @@ def run() -> None:
     # letters are bare, punctuation/marks/digits are quoted.
     # Never infer any executable role from the D7 LISP=() column.
     import re
-    visible = re.findall(r"^  \\(([01]{7}) (.+)\\)$", D7_TABLE.read_text(encoding="utf-8"), re.MULTILINE)
+    visible = re.findall(r"^  \(([01]{7}) (.+)\)$", D7_TABLE.read_text(encoding="utf-8"), re.MULTILINE)
     if len(visible) != 128:
         raise ValueError("D7 surface table must contain 128 rows")
     def spelling(ch: str, index: int) -> str:
