@@ -100,9 +100,11 @@ def build_sens_helpers() -> tuple[Path, Path]:
 
 def load_cases() -> dict[str, dict[str, object]]:
     payload = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    if payload.get("schema") != "sens-store-air-load-fixtures/v1":
+        raise RuntimeError(f"unexpected owner fixture schema at {FIXTURE}")
     ready = {
         row["id"]: row
-        for row in payload["workloads"]
+        for row in payload["fixtures"]
         if row.get("kind") == "paired-program" and row.get("id") in CASES
     }
     missing = sorted(set(CASES) - set(ready))
