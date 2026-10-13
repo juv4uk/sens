@@ -98,7 +98,7 @@ fn render_uk(value: &Value) -> String {
                 let ukrainian_surface = semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(*sid)
                     .into_iter()
                     .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()));
-                format!("#<сумісний W8:{} {}>", sid, ukrainian_surface.unwrap_or_else(|| sid.to_string()))
+                format!("#<сумісний W8:{} {}>", sid, ukrainian_surface.unwrap_or_else(|| format!("W8:{}", semantic_registry::semantic_id_bits(*sid))))
             }
         }
         Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "uk")
