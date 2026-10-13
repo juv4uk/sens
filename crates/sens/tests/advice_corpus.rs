@@ -49,9 +49,10 @@ fn eval_advice_corpus(source: &str) -> String {
         result
             .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
     }
-    // Parse the actual test program with the same exact-domain boundary
-    // used for the pinned corpus. Never turn D3 call heads into host numbers.
-    let program = parse_mixed_exact_domain(source)
+    // The authored corpus contains literal 3-bit QUOTE/CAR heads. The mixed
+    // legacy reader may reinterpret 001/100 as numeric values (#q2:1/1).
+    // The exact reader preserves their domain widths; W8/D8 remains distinct.
+    let program = parse_exact_domain_source(source)
         .unwrap_or_else(|e| panic!("Advice Taker exact-domain reader: {e}\nsource: {source}"));
     eval_parsed_expressions(&program, &mut session)
         .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"))
