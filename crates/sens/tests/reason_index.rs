@@ -75,3 +75,57 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     source.push_str("))))");
     assert_eq!(eval(&mut s, &source), "linear");
 }
+
+#[test]
+fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
+    let mut session = session();
+    for (source, expected) in [
+        ("(reason-index? (quote ()))", false),
+        ("(reason-index? (quote atom))", false),
+        ("(reason-index? (quote (other linear () ())))", false),
+        ("(reason-index? (reason-index-linear (quote ())))", true),
+        ("(reason-index? (reason-make-index (quote (((p a))))))", true),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|err| panic!("{source}: {err}")).value;
+        assert_eq!(value.as_predicate_bit(), Some(expected),
+            "reason-index? must produce exact D1; source: {source}, value: {value}");
+    }
+}
+
+#[test]
+fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() {
+    // This counts 2046 mechanical coordinates (NOT 2046 callable functions).
+    // The test detects truncation, cross-domain aliasing and accidental
+    // logical padding, independently of display labels or legacy SID8.
+    use sens::domain_ladder::DomainCoordinate;
+    use std::collections::HashSet;
+
+    let mut seen = HashSet::new();
+    let mut bit_count = 0usize;
+    for width in 1u8..=10 {
+        let capacity = 1u16 << width;
+        for payload in 0..capacity {
+            let coordinate = DomainCoordinate::new(width, payload)
+                .expect("every in-width pair must be representable");
+            assert!(seen.insert(coordinate),
+                "collision in D{width}: {payload:0w$b}", w = usize::from(width));
+            assert_eq!(coordinate.width(), width);
+            assert_eq!(coordinate.bits(), payload);
+            assert_ne!(DomainCoordinate::new(width, capacity), Some(coordinate));
+            bit_count += usize::from(width);
+        }
+        assert!(DomainCoordinate::new(width, capacity).is_none(),
+            "oversize value must not truncate into D{width}");
+        assert!(DomainCoordinate::new(width, u16::MAX).is_none());
+    }
+    assert_eq!(seen.len(), 2046);
+    assert_eq!(bit_count, 18_434);
+    assert_eq!((bit_count + 7) / 8, 2305);
+    assert_eq!(8 * ((bit_count + 7) / 8) - bit_count, 6);
+    for width in 1u8..=9 {
+        assert_ne!(DomainCoordinate::new(width, 1),
+                   DomainCoordinate::new(width + 1, 1));
+    }
+    assert_eq!(DomainCoordinate::new(10, 1024), None);
+}
