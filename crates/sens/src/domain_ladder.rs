@@ -11,6 +11,42 @@
 //! D7: `knowledge/d7-keyboard-v2-ratified.json` — чинні 128/128
 //! семибітних координат даних. Жодна координата не надає callability.
 
+/// Exact 10-bit mechanical carrier, not a resident AST value or a callable
+/// function. No implicit widening/narrowing to D9 or historical Function8.
+/// The host stores its payload in u16, but only ten bits belong to SENS.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct DomainD10 {
+    bits: u16,
+}
+
+impl DomainD10 {
+    pub const fn new(bits: u16) -> Option<Self> {
+        if bits < (1u16 << 10) {
+            Some(Self { bits })
+        } else {
+            None
+        }
+    }
+
+    pub const fn packed_bits(self) -> u16 {
+        self.bits
+    }
+
+    pub const fn coordinate(self) -> DomainCoordinate {
+        DomainCoordinate {
+            width: 10,
+            bits: self.bits,
+        }
+    }
+
+    pub const fn from_coordinate(coordinate: DomainCoordinate) -> Option<Self> {
+        if coordinate.width != 10 {
+            return None;
+        }
+        Self::new(coordinate.bits)
+    }
+}
+
 /// A width-qualified, meaning-free code word in the D1–D10 ladder.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DomainCoordinate {
