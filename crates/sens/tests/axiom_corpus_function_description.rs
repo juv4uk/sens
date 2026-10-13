@@ -4,29 +4,65 @@
 //! The function identities under test are exact D5 bit patterns.
 
 use sens::{
-    eval_parsed_expressions, parse, Bit5, CoreD5, DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_parsed_expressions, parse_mixed_exact_domain, BinaryNumber, Session, Value,
 };
 use std::collections::HashSet;
 
 const FUNCTIONS: [u8; 4] = [0b01010, 0b01011, 0b10110, 0b10111];
 
-fn exact_d5_result(bits: u8, args: &str) -> String {
-    let mut parsed = parse(&format!("(__axiom_probe__ {args})")).expect("probe payload");
-    let mut form = parsed.remove(0);
-    let ExprKind::List(items) = form.kind else {
-        panic!("probe must parse as list");
-    };
-    let mut items = items.to_vec();
-    items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
-            Bit5::new(bits).unwrap(),
-        ))),
-        span: Span::default(),
-    };
-    form.kind = ExprKind::List(items.into());
+// Only the transport of seed operands is host-owned. Exact 24-bit D24
+// numbers are admitted as data, never inferred from "1" or a short Dn word.
+// Every derived integer, NEG and RATIO below is computed by actual SENS D5.
+fn d24_seed(value: u32) -> Value {
+    let mut bits = vec![0; 24];
+    for offset in 0..24 {
+        bits[23 - offset] = ((value >> offset) & 1) as u8;
+    }
+    Value::BinaryNumber(
+        BinaryNumber::from_numeric_domain_bits(24, &bits)
+            .expect("only explicitly qualified 24-bit source data"),
+    )
+}
 
-    match eval_parsed_expressions(&[form], &mut Session::default()) {
-        Ok(result) => result.value.to_string(),
+fn run_exact_d5(source: &str, session: &mut Session) -> Result<Value, sens::LanguageError> {
+    let forms = parse_mixed_exact_domain(source)?;
+    eval_parsed_expressions(&forms, session).map(|out| out.value)
+}
+
+fn admitted_seed(spelling: &str, session: &mut Session) -> Value {
+    match spelling {
+        "0" => d24_seed(0),
+        "1" => d24_seed(1),
+        "-1" => {
+            session.environment.define("d24-zero", d24_seed(0));
+            session.environment.define("d24-one", d24_seed(1));
+            run_exact_d5("(01011 d24-zero d24-one)", session)
+                .expect("D5:01011 derives NEG(1) from explicit D24 seeds")
+        }
+        "2" => {
+            session.environment.define("d24-one", d24_seed(1));
+            run_exact_d5("(01010 d24-one d24-one)", session)
+                .expect("D5:01010 derives 2 from explicit D24 seeds")
+        }
+        _ => panic!("unadmitted axiom fixture: {spelling}"),
+    }
+}
+
+fn exact_d5_result(bits: u8, args: &str) -> String {
+    let operands = args.split_whitespace().collect::<Vec<_>>();
+    assert_eq!(operands.len(), 2, "binary D5 law has exactly two operands");
+    assert!(bits < 32, "D5 function code is exactly five bits");
+
+    let mut session = Session::default();
+    let left = admitted_seed(operands[0], &mut session);
+    let right = admitted_seed(operands[1], &mut session);
+    session.environment.define("left", left);
+    session.environment.define("right", right);
+    // Native SENS decides the outcome. No Rust arithmetic or numeric
+    // interpretation of D1-D10 code words is involved here.
+    let source = format!("({bits:05b} left right)");
+    match run_exact_d5(&source, &mut session) {
+        Ok(value) => value.to_string(),
         Err(error) => format!("ERR:{:?}", error.kind),
     }
 }
