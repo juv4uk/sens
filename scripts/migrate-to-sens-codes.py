@@ -523,8 +523,9 @@ def build_text7_encoder(foundation, generated_projection: Path):
     if generated_projection.suffix == ".json":
         authority = json.loads(generated_projection.read_text(encoding="utf-8"))
         if (authority.get("schema"), authority.get("status"),
-                authority.get("width"), authority.get("occupancy")) != (
-                "sens.d7.keyboard/v2", "owner-ratified", 7, 128):
+                authority.get("width"), authority.get("capacity"),
+                authority.get("occupancy")) != (
+                "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
             raise BinaryMigrationError("D7 keyboard/v2 owner authority invalid")
         rows = authority.get("table", [])
         if len(rows) != 128:
@@ -704,7 +705,14 @@ def binary_rewrite(
     # Only names introduced by an admitted DEFINE or D4 LAMBDA parameter
     # become contextual D2-framed D7 identifiers. Never guess that an
     # arbitrary quoted/data D7 list is a source symbol or String.
-    global_bindings: set[str] = set()
+    #
+    # Forward references (mutual recursion): a symbol that the source itself
+    # introduces with an admitted DEFINE is a legal call head even before its
+    # defining form is reached. Seed the binding set from the source so only
+    # those names are admitted; every other unbound head stays fail-closed.
+    global_bindings: set[str] = set(
+        re.findall(r"\(\s*(?:0011|(?i:DEFINE))\s+([^\s()]+)", source)
+    )
 
     def is_bound(name: str) -> bool:
         return name in global_bindings or any(
@@ -720,7 +728,7 @@ def binary_rewrite(
         # Rust canonical_reader::text7_binding_key now owns this exact
         # D2/W7 form in binder, variable-reference and executable call-head
         # contexts. No global D7->symbol reinterpretation is permitted.
-        if role not in {"binder", "reference", "call-head"}:
+        if role not in {"binder", "reference", "call-head", "quoted-datum"}:
             raise BinaryMigrationError(f"UNADMITTED_TEXT7_ROLE {role}: {token!r}")
         cells = encode_text7_spelling(token, text7_candidates)
         if not cells:
@@ -942,6 +950,24 @@ def binary_rewrite(
                 # Canonical source spelling for the exact D1 PredicateBit.
                 # Do not treat these as Number-domain values.
                 out.append(token)
+            elif re.fullmatch(r"[01]{3,9}", token):
+                # An exact domain coordinate (D3-D9, D8 handled above) is a
+                # first-class identity used as a value, not a Number. It keeps
+                # its exact-width word and is never re-spelled as Text7.
+                if resolver is None:
+                    raise BinaryMigrationError(
+                        "history-aware SourceResolver is required "
+                        "for domain coordinates"
+                    )
+                resolution = resolver.resolve_head(token)
+                if not resolution.resolved:
+                    raise BinaryMigrationError(
+                        f"unresolved domain coordinate {token!r} at "
+                        f"{line_col(source, start)[0]}:{line_col(source, start)[1]}"
+                    )
+                identity = resolution.current
+                assert identity is not None
+                out.append(identity.bits)
             elif (re.fullmatch(
                 r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
                 r"(?:[eE][+-]?[0-9]+)?(?:/[0-9]+)?",
@@ -956,7 +982,9 @@ def binary_rewrite(
                 # physical envelope. The full-width bits alone never authorize
                 # silent Number inference or replacement with D7 text glyphs.
                 raise BinaryMigrationError(
-                    f"numeric literal {token!r} belongs to Number, not Text7; "
+                    f"numeric literal {token!r} at "
+                    f"{line_col(source, start)[0]}:{line_col(source, start)[1]} "
+                    "belongs to Number, not Text7; "
                     "ratified Number widths are 24 -> 48 -> 96 -> ...; "
                     "numeric lowering is not yet supplied by this migration"
                 )
@@ -974,6 +1002,13 @@ def binary_rewrite(
                     parameter_owner["bindings"].add(token)
                 elif not quoted and is_bound(token):
                     emit_text7_atom(token, role="reference")
+                elif quoted:
+                    # Owner law 2026-10-13: quoted data is checked against the
+                    # function ladder (EVAL/APPLY principle). An exact ladder
+                    # coordinate keeps its exact-width identity (handled above);
+                    # anything with no place in the ladder is D7 spelling,
+                    # which preserves every source bit (case included).
+                    emit_text7_atom(token, role="quoted-datum")
                 else:
                     source_line, source_col = line_col(source, start)
                     context = "quoted-data" if quoted else "unbound-reference"

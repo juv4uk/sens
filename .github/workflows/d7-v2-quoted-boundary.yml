@@ -1,0 +1,24 @@
+name: "D7 v2 / SLP1 — цитовані дані й 128/128 точних позицій"
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "tests/test_sens_quoted_datum_law.py"
+      - "tests/test_slp1_d7_v2_quote_boundary.py"
+      - ".github/workflows/d7-v2-quoted-boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote-identity-7bit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: "SLP1 old fail-closed, D7 v2 128/128 + QUOTE binary"
+        run: |
+          python3 -m unittest discover -s tests -p 'test_slp1_d7_v2_quote_boundary.py' -v
+          python3 -m unittest discover -s tests -p 'test_sens_quoted_datum_law.py' -v
