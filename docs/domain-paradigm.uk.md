@@ -48,22 +48,24 @@ exact binary object
 
 ---
 
-## 3. D1–D8 — не просто вісім таблиць
+## 3. D1–D10 — не просто десять таблиць
 
-Ратифікована драбина:
+Ратифікована драбина за точною шириною (структура/дані/виконуваність — окремі ролі):
 
 ```text
-D1  1 bit
-D2  2 bits
-D3  3 bits
-D4  4 bits
-D5  5 bits
-D6  6 bits
-D7  7 bits
-D8  8 bits
+D1   1 bit
+D2   2 bits — структура
+D3   3 bits
+D4   4 bits
+D5   5 bits
+D6   6 bits
+D7   7 bits — дані
+D8   8 bits
+D9   9 bits
+D10 10 bits — резидентність без автоматичної виконуваності
 ```
 
-Поточна owner-ratified картина: D1–D6 dense, D7 126/128 під #3572 із двома owner-reserved coordinates, D8 256/256 під #3960, D9 512/512 під #4008. Для human-readable projections у репозиторії справді є окремі `lib/domains/d1.lisp … d9.lisp`, але **таблиця не є законом домену** — вона лише показує вже admitted identity через human surfaces.
+Поточна owner-ratified картина: D1–D6 мають точні ширини 1–6 бітів; D7 keyboard/v2 має 128/128 точних 7-бітних координат даних; D8 — 256/256 під #3960, D9 — 512/512 під #4008, D10 — 1024/1024 ратифікованих 10-бітних координат. Резидентність не надає автоматичного права виклику. D2 — лише чотири двобітні структурні слова. Для human-readable projections у репозиторії справді є окремі `lib/domains/d1.lisp … d9.lisp`, але **таблиця не є законом домену** — вона лише показує вже admitted identity через human surfaces.
 
 Ємність Dn дорівнює `2^n`, але **capacity ≠ occupancy**.
 
@@ -88,8 +90,8 @@ implemented resident
 Наприклад, selector-family має два D3-корені:
 
 ```text
-101  CAR
-110  CDR
+100  CAR
+011  CDR
 ```
 
 і закон продовження:
@@ -102,10 +104,10 @@ append 1 → compose CDR
 Звідси механічно:
 
 ```text
-1010  CAAR
-1011  CADR
-1100  CDAR
-1101  CDDR
+1000  CAAR
+1001  CADR
+0110  CDAR
+0111  CDDR
 ```
 
 Наступний біт знову подвоює родину.
