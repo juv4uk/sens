@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI-only provenance audit. Never interprets SENS, never decides a language law."""
+"""Mechanical workflow attestation audit. Never parses or executes SENS semantics."""
 from pathlib import Path
 import re
 import sys
@@ -24,21 +24,28 @@ def audit():
         uses_python_test = "python3 -m unittest" in stage or "python3 -O tests/" in stage
         if claims_native and uses_python_test:
             errors.append(f"{title}: Python migrator advertised as native SENS authority")
-        if claims_native and "ci_native_sens_witness.sh run" not in stage:
-            errors.append(f"{title}: native semantic claim without native witness runner")
+        if claims_native and not all(token in stage for token in (
+            "ci_failure_contract.py run", "--executor-report-file", "-- target/debug/sens"
+        )):
+            errors.append(f"{title}: semantic claim without a verified native CLI subprocess")
     for identity in EXPECTED:
-        needle = "ci_native_sens_witness.sh run " + identity + " "
-        if source.count(needle) != 1:
-            errors.append(f"{identity}: expected exactly one declared native ELF execution")
-        if "ci_native_sens_witness.sh scan" not in source:
-            errors.append("missing native-executor log ratchet")
-    if not any("if: always()" in stage and "ci_native_sens_witness.sh scan" in stage for stage in stages):
-        errors.append("native log ratchet must execute even if earlier witness failed")
+        matching = [stage for stage in stages if "--test-id " + identity + " " in stage or "--test-id " + identity + " \\" in stage]
+        if len(matching) != 1 or not all(item in matching[0] for item in (
+            "ci_failure_contract.py run", "--executor-report-file", "-- target/debug/sens"
+        )):
+            errors.append(f"{identity}: expected exactly one native CLI witness with receipt")
+    scanners = [stage for stage in stages if "scan-executors" in stage and "if: always()" in stage]
+    if len(scanners) != 1:
+        errors.append("native executor ratchet must run exactly once even on prior failure")
+    else:
+        for identity in EXPECTED:
+            if "--require " + identity not in scanners[0]:
+                errors.append(f"ratchet omits required witness {identity}")
     for issue in errors:
         print("::error::UNINFORMATIVE-EXECUTOR " + issue, flush=True)
     if errors:
         return 1
-    print("SENS_EXECUTOR_STATIC_AUDIT_PASS native_witnesses="
+    print("SENS_EXECUTOR_STATIC_AUDIT_PASS verified_native_cli_claims="
           + ",".join(EXPECTED) + " python_semantic_oracles=0", flush=True)
     return 0
 
