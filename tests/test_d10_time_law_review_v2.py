@@ -81,8 +81,19 @@ class TimeReview(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)
             (root/'lib').mkdir()
+            # The live file is valid; the archived witness is independently bad.
+            (root/'lib/time.lisp').write_bytes((ROOT/'lib/time.lisp').read_bytes())
+            pinned=root/'bad-archive.lisp'
+            pinned.write_text('(0011 civil-from-days ())\n',encoding='utf-8')
+            with self.assertRaisesRegex(AssertionError,'pinned source moved'):
+                mod.verify(copy.deepcopy(ledger),root,require_checkout=True,pinned_source=pinned)
+
+    def test_ci_mode_rejects_missing_live_d4_definition(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            (root/'lib').mkdir()
             (root/'lib/time.lisp').write_text('(00001001 civil-from-days 000)\n',encoding='utf-8')
-            with self.assertRaisesRegex(AssertionError,'source moved'):
+            with self.assertRaisesRegex(AssertionError,'live D4 DEFINE missing/duplicated'):
                 mod.verify(copy.deepcopy(ledger),root,require_checkout=True)
 
     def test_source_optional_mode_is_explicitly_not_admission(self):
