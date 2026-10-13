@@ -22,10 +22,13 @@ fn eval_guard(source: &str) -> String {
     sens::eval_parsed_expressions(&guard_forms, &mut session)
         .expect("guard library must load with exact D3/D4 identities");
     let reference_source = include_str!("../../../knowledge/guard-reference.lisp");
-    let reference_forms = parse_mixed_exact_domain(reference_source)
-        .expect("guard reference exact-width source");
+    let reference_forms = sens::parse_mixed_exact_domain_guard_reference_source(
+        "knowledge/guard-reference.lisp",
+        reference_source,
+    )
+    .expect("curated Guard directory must parse through its path-pinned data reader");
     sens::eval_parsed_expressions(&reference_forms, &mut session)
-        .expect("guard reference directory must load as data");
+        .expect("legacy quoted Guard directory must remain data, not binary-looking calls");
 
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("guard evaluation failed: {e}\\nsource: {source}"))
@@ -338,4 +341,22 @@ fn guard_reference_field_uses_existing_assoc_under_exact_d4_lambda() {
         [3usize, 4usize].into_iter().collect(),
         "guard-reference-field should use only D3 list operations and D4 lambda/selectors"
     );
+}
+
+
+#[test]
+fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() {
+    let source = include_str!("../../../knowledge/guard-reference.lisp");
+    let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
+        "knowledge/guard-reference.lisp",
+        source,
+    )
+    .expect("Guard reference data-only entrypoint");
+    assert_eq!(parsed.len(), 1);
+    assert!(
+        sens::parse_mixed_exact_domain_guard_reference_source("lib/guard.lisp", source).is_err(),
+        "the legacy W8 data wrapper must not become a general reader"
+    );
+    let rendered = format!("{:?}", parsed[0].kind);
+    assert!(rendered.contains("guard-reference-directory"));
 }
