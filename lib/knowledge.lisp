@@ -296,7 +296,10 @@
        (110
          ((101 (100 term) (001 var))
           (110
-            ((unify-equal? (000000 term) 2) (knowledge-symbol? (1001 term)))
+            ; (var name) is unary: D3 ATOM checks cdr/cddr directly.
+            ; No D6 LENGTH or unqualified numeric arity literal is needed.
+            ((010 (011 term)) (010 (001 (0))))
+            ((010 (011 (011 term))) (knowledge-symbol? (1001 term)))
             ((010 ()) (010 (001 (0))))))
          ((010 ()) (knowledge-terms-valid? term))))
       ((010 ()) (knowledge-terms-valid? term)))))
@@ -316,7 +319,10 @@
       ((0100 (knowledge-symbol? (100 goal))) (010 (001 (0))))
       ((knowledge-not-head? (100 goal))
        (110
-         ((unify-equal? (000000 goal) 2) (knowledge-goal-valid? (1001 goal)))
+         ; (not? goal) and (not goal) accept exactly one argument.
+         ; D3 ATOM/CDR distinguish zero, one, and excess arguments.
+         ((010 (011 goal)) (010 (001 (0))))
+         ((010 (011 (011 goal))) (knowledge-goal-valid? (1001 goal)))
          ((010 ()) (010 (001 (0))))))
       ((010 ()) (knowledge-terms-valid? (011 goal))))))
 
