@@ -50,7 +50,7 @@
 ; The recognition function returns exactly D1:YES or D1:NO.
 (101 (world-no-common-ancestor? (001 World-no-common-ancestor)) 1)
 (101 (world-no-common-ancestor? (empty-world)) 0)
-(101 (world-no-common-ancestor? (001 ())) 0)
+(101 (world-no-common-ancestor? (001 unrelated-atom)) 0)
 
 ; NIL must not be dereferenced as an immutable world.
 (101
