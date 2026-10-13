@@ -162,14 +162,24 @@ def main() -> int:
 
         if completed.returncode != 0:
             file_rows = (state or {}).get("files") or [{}]
+            evidence = file_rows[0]
+            reason = evidence.get(
+                "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
+            )
+            # Preserve the actual failing token, rather than turning an
+            # actionable quoted-datum blocker into an anonymous rejection.
+            token = evidence.get("token")
+            if isinstance(token, str) and token and token not in reason:
+                reason += f" [token={token}]"
             print(json.dumps({
                 "status": "blocked",
                 "source": str(rel),
                 "output": expected_rel,
                 "source_era": args.source_era,
-                "reason": file_rows[0].get(
-                    "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
-                ),
+                "reason": reason,
+                "token": token,
+                "line": evidence.get("line"),
+                "column": evidence.get("column"),
             }, ensure_ascii=False, indent=2))
             return 2
 
