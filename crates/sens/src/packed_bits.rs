@@ -227,23 +227,9 @@ impl BitPacker {
     /// Bits are copied most-significant first, matching `Bits<N>::bit`.
     /// No alignment or padding is inserted before or after the word.
     pub fn push<const N: usize>(&mut self, word: Bits<N>) -> usize {
-        let start = self.bit_len;
-
-        for index in 0..N {
-            let bit_in_byte = self.bit_len % 8;
-            if bit_in_byte == 0 {
-                self.bytes.push(0);
-            }
-
-            if word.bit(index) == Some(true) {
-                let byte_index = self.bit_len / 8;
-                self.bytes[byte_index] |= 1 << (7 - bit_in_byte);
-            }
-
-            self.bit_len += 1;
-        }
-
-        start
+        // Bits<N> is constructible only for 1..=8. The same bounded
+        // MSB-first window serves all exact widths without a per-bit loop.
+        self.append_exact_window(N, u16::from(word.packed_bits()))
     }
 
     /// Append one exact small-domain word through a three-byte MSB window.
