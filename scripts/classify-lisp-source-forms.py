@@ -85,6 +85,17 @@ def scan_heads(path: str, text: str) -> list[Head]:
     def current_quoted() -> bool:
         return bool(frames and frames[-1]["quoted"])
 
+    # A quoted *form* is data, even when it syntactically contains lists.
+    # Only explicit QUOTE is recognized here. It grants no W8 -> D8 meaning.
+    quote_heads = {"quote", "як-є", "001", "00000001"}
+    # The next list after LAMBDA/DEFINE names binders, not calls.
+    # Do not hide the later function body or initializer expressions.
+    binder_heads = {
+        "0010", "00001000", "lambda", "функція", "phalana",
+        "0011", "00001001", "00001011", "define", "def",
+        "визначити", "nirvacana",
+    }
+
     while i < len(text):
         ch = text[i]
 
@@ -138,9 +149,24 @@ def scan_heads(path: str, text: str) -> list[Head]:
             continue
 
         if ch == "(":
-            quoted = current_quoted() or pending_quote
+            parent = frames[-1] if frames else None
+            binder_list = bool(parent and parent["binding_next"])
+            quoted = (
+                current_quoted()
+                or pending_quote
+                or bool(parent and parent["quote_children"])
+                or binder_list
+            )
+            if parent:
+                parent["binding_next"] = False
+            # A nested list can itself be the operator. The following atom
+            # then belongs to its arguments, not a second executable head.
+            if parent and parent["need_head"]:
+                parent["need_head"] = False
             frames.append({
                 "quoted": quoted,
+                "quote_children": False,
+                "binding_next": False,
                 "need_head": True,
                 "open_offset": i,
             })
@@ -175,12 +201,21 @@ def scan_heads(path: str, text: str) -> list[Head]:
             i += 1
             continue
 
-        if frames and frames[-1]["need_head"]:
+        if frames:
             frame = frames[-1]
-            if not frame["quoted"]:
-                line, col = line_col(text, start)
-                heads.append(Head(path, line, col, start, i, token, False))
-            frame["need_head"] = False
+            if frame["need_head"]:
+                if not frame["quoted"] and not pending_quote:
+                    line, col = line_col(text, start)
+                    heads.append(Head(path, line, col, start, i, token, False))
+                    normalized = token.casefold()
+                    if normalized in quote_heads:
+                        frame["quote_children"] = True
+                    if normalized in binder_heads:
+                        frame["binding_next"] = True
+                frame["need_head"] = False
+            elif frame["binding_next"]:
+                # A variadic binder atom consumes the declaration position.
+                frame["binding_next"] = False
 
         pending_quote = False
 
