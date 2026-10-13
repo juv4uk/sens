@@ -91,7 +91,13 @@ DP-доказ першого 6/6-capability коду `16 3C 63` та exhaustive-
 а кожен F3M-5 вираз містить щонайменше новий `EQ` або `LAMBDA`.
 65 536 stratified roundtrip samples по 40-бітному простору та executable
 witness `03 B1 C7 07 93` із усіма D1–D3 capability-класами + LAMBDA
-проходять чинний proof gate. Повні evaluator sweeps 2^32/2^40 не заявляються. Деталі:
+проходять чинний proof gate. Повні evaluator sweeps 2^32/2^40 не заявляються.
+Окремі **дослідні** F3M-5λ та F3M-5λA додають безіменні лексичні посилання
+де Брейна та внутрішнє застосування функцій: `00 00 00 02 4B` виконує
+`(λx.x) 1`, а `00 00 0D 06 4F` — `((λx.λy.x) 1) 0`; обидва повертають
+точний D1 `1` у справжньому SENS evaluator. Це **не** інше трактування
+чинного `.f3m` F3M-5 і **не** production admission: закон `BOUND(n)` ще
+потребує канонічної ратифікації. Деталі:
 [профілі F3M за довжиною](docs/frame3-micro-length-profiles-2026-10-12.uk.md) ·
 [назви фізичних кодеків](docs/codec-naming-2026-10-12.uk.md).
 
@@ -193,8 +199,13 @@ F3M-1 таблиця.
 
 ### Круті програми, які реально поміщаються в 1–5 байтів
 
-Це не намальовані opcode-приклади: байти нижче проходять чинний dense
-enumerator, canonical SENS parser і реальний evaluator.
+Це не намальовані opcode-приклади: для **F3M-1..5** наведено
+перевірені фізичні свідки чинних профілів; **F3M-5λ / F3M-5λA** —
+окремі дослідні ранкери зі справжніми лексичними замиканнями й викликами,
+підтвердженими реальним SENS evaluator. **Однакові 5 байтів у цих
+різних ранкерах можуть означати різні програми**: дослідні байти не можна
+неявно відкривати production F3M-5 декодером. Назви функцій та λ у таблиці —
+лише людський перегляд точних доменних ідентичностей.
 
 | F3M | Байти | Програма | Що в ній крутого | Результат |
 |---|---|---|---|---|
@@ -217,7 +228,11 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-4** | `F5 A7 BC 39` | `ATOM(CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),QUOTE(0))))))))` | metric-saturating witness: **6/6 класів, 2×COND, 16 encoded-операцій, depth 6, 12 nodes** | `1` |
 | **F3M-5** | `03 B1 C7 07 93` | `IF-ATOM(EQ(ATOM(LAMBDA((),QUOTE(0))),ATOM(QUOTE(1))),CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(1),QUOTE(NIL))))),QUOTE(NIL))` | **усі D1–D3 capability-класи + LAMBDA** в одному 5-байтному executable witness | `0` |
 | **F3M-5λ (research)** | `00 00 00 00 00` | `λ.BOUND(0)` | **справжня nameless identity-функція**: `BOUND(0) → Local{depth:0,index:0}`, D4 LAMBDA; `λx.x = λy.y = λfoo.foo` | повертає аргумент |
+| **F3M-5λ (research)** | `00 00 00 00 10` | `λ.λ.BOUND(1)` (**K**) | замикання з двома аргументами; повертає перший | `K a b = a` |
+| **F3M-5λ (research)** | `00 00 00 00 0F` | `λ.λ.BOUND(0)` (**KI**) | замикання з двома аргументами; повертає другий | `KI a b = b` |
 | **F3M-5λ (research)** | `05 61 69 CB 4A` | nameless 11-node witness | **QUOTE+ATOM+CONS+CAR+CDR+EQ+COND+LAMBDA**, виконано canonical SENS evaluator-ом | exact D1 `0` |
+| **F3M-5λA (research)** | `00 00 00 02 4B` | `APPLY(λ.BOUND(0),1)` | самодостатня **β-редукція**: I застосовується до D1 `1` прямо з 40-бітного payload | exact D1 `1` |
+| **F3M-5λA (research)** | `00 00 0D 06 4F` | `APPLY(APPLY(λ.λ.BOUND(1),1),0)` | вкладене застосування **K**; лексичне замикання зберігає перший аргумент | exact D1 `1` |
 | **F3M-4** | `BA AD F0 0D` | `IF-ATOM(IF-ATOM(CDR(CONS(CAR(CONS(QUOTE(NIL),QUOTE(NIL))),NIL)),1,1),0,QUOTE(0))` | красивий hex-код випадково дав **6/6 класів + 2×COND** | `0` |
 | **F3M-4** | `FE ED FA CE` | `ATOM(CAR(CONS(IF-ATOM(1,0,QUOTE(NIL)),IF-ATOM(QUOTE(NIL),QUOTE(NIL),CAR(CONS(QUOTE(1),NIL))))))` | ще один mnemonic hex: **2×COND, 13 encoded-операцій** | `1` |
 | **F3M-4** | `FF FF 4F 4F` | `ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої **64K** сторінки F3M-4 | executes |
@@ -260,6 +275,8 @@ Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/se
 [F3M-4 dense 32-bit proof run 38197907496](https://github.com/juv4uk/sens/actions/runs/38197907496).
 [F3M-4 extremes + final-64K search run 38198382120](https://github.com/juv4uk/sens/actions/runs/38198382120).
 [F3M-5λ nameless/de-Bruijn + real SENS runtime proof run 38260383334](https://github.com/juv4uk/sens/actions/runs/38260383334) — SUCCESS. Цей proof **не змінює** чинний F3M-5 mapping: F3M-5λ поки окремий research candidate, без production routing і без заяви exhaustive 2^40 sweep.
+[F3M-5λA: β-редукція та вкладені APPLY на реальному SENS, run 38263454497](https://github.com/juv4uk/sens/actions/runs/38263454497) — SUCCESS; boundary checks і **65 536** стратифікованих roundtrip-зразків у 40-бітному просторі, не повний exhaustive 2^40 evaluator sweep. [Код та тести](crates/sens/src/frame3_micro_v5_lambda_app.rs) · [документовані межі й докази](docs/project-modes-2026-10-12.uk.md).
+Для цілеспрямованого відтворення без запуску всіх тестів: `cargo test --locked -p sens frame3_micro_v5_lambda_app::tests -- --nocapture`. Визначення семантики залишається за канонічним SENS, а Rust тут перевіряє носій і parity.
 
 ### Відтворення
 
