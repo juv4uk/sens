@@ -1,0 +1,33 @@
+name: GPU packet — точні 2046 доменних координат
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/gpu_execution_packet.rs"
+      - ".github/workflows/gpu-exact-domain-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu-exact-domain-2046-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gpu-coordinate-proof:
+    name: 2046 точних координат і негативний GPU допуск
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: "2"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - name: 2046 координат — бітність, допуск та зворотне кодування
+        run: >-
+          cargo test --locked -p sens --lib
+          gpu_execution_packet::tests::усі_2046_координат_не_отримують_вигаданого_gpu_допуску
+          -- --exact --nocapture
+      - name: Усі наявні GPU packet негативні та позитивні свідки
+        run: cargo test --locked -p sens --lib gpu_execution_packet::tests -- --nocapture
