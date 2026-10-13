@@ -13,6 +13,7 @@ mod bit9;
 mod binary_number;
 mod domain_numeric;
 mod bits;
+pub mod d7_keyboard;
 mod canonical_reader;
 pub mod universal_frame3;
 pub mod frame3_domain;

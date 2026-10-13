@@ -1,6 +1,6 @@
 {
   "schema": "d7-ratification/v1",
-  "status": "owner-ratified",
+  "status": "historical-superseded-by-v2-keyboard-profile",
   "authority": "#3572",
   "date": "2026-10-05",
   "domain": "D7",
@@ -1926,5 +1926,7 @@
     ],
     "candidate_occupancy": 124,
     "note": "Any adoption changes Text7 identity and needs a separate owner decision."
-  }
+  },
+  "superseded_by": "knowledge/d7-keyboard-v2-ratified.json",
+  "legacy_v1_warning": "Never decode NEW D7 v2 with these historical phoneme/text coordinates; explicit versioned migration required"
 }

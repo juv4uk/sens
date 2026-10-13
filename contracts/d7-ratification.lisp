@@ -1,54 +1,30 @@
-; contracts/d7-ratification.lisp
-; OWNER-RATIFIED 2026-10-05 — issue #3572.
-; Normative D7 cut: 126 admitted residents + 2 owner-reserved/pinned coordinates.
-; Full exact map: knowledge/d7-ratified.json
-
+; Owner-ratified SENS D7 keyboard migration profile — 2026-10-13.
+; Supersedes the historical D7 v1 sound/Text7 glyph mapping as normative
+; for NEW migrated text data. Old payloads MUST be decoded as v1 first.
 (
-  (schema . d7-ratification/1)
+  (schema . d7-ratification/2)
   (status . owner-ratified)
-  (owner-ratification . #3572)
-  (date . "2026-10-05")
+  (date . "2026-10-13")
   (domain . D7)
   (width . #d7)
   (capacity . #d128)
-  (occupancy . #d126)
-  (owner-reserved-pinned . ("0100001" "0101010"))
-  (normative-map . "knowledge/d7-ratified.json")
-
-  (occupancy-basis
-    . ((baseline-recovered . #d107)
-       (owner-admitted-same-coordinate-shiva-overlays . #d19)
-       (owner-ratified-residents . #d126)
-       (owner-reserved-pinned . #d2)))
-
-  (role-counts
-    . ((phonology-eligible-recovered . #d75)
-       (baseline-non-phonological-recovered . #d32)
-       (text-digits . #d10)
-       (text-modifiers . #d2)
-       (text-punctuation . #d7)))
-
+  (occupancy . #d128)
+  (kind . "typed text/data keyboard-coordinate migration profile")
+  (normative-map . "knowledge/d7-keyboard-v2-ratified.json")
+  (historical-v1-map . "knowledge/d7-ratified.json")
+  (rust-mechanism . "crates/sens/src/d7_keyboard.rs")
   (laws
-    . ((d7-coordinate-law . "exact seven-bit coordinate + D7 role/law admitted by #3572")
-       (report-labels . "human names, glyphs and report labels are projections/provenance only")
-       (digits . "D7 text digits are Text and never arithmetic Number")
-       (local-ordinal . "LocalOrdinal is a separate W7 role and does not consume Sound/Text occupancy")
-       (runtime-separation . "D7 residency does not imply generic Core callability; missing mechanisms fail closed")
-       (no-d6-prefix . "D7 has no automatic D6-prefix or parent||bit semantic inheritance")
-       (reserved . "0100001 and 0101010 remain owner-reserved/pinned, not free allocation slots")))
-
-  (d14-boundary
-    . ((d7-coordinate-effect . NONE)
-       (unique-sound-ceiling . "39/43")
-       (dual-h-grammar-path . "43/43")
-       (interpretation . "h1/h2 are grammar-node multiplicity in D14; this does not prove two D7 phonemes")))
-
-  (candidate-d
-    . ((status . NOT-RATIFIED)
-       (issue . #3432)
-       (h . ("0110100" "0100001"))
-       (r . ("0101110" "0101010"))
-       (l . ("0101111" "0101110"))
-       (candidate-occupancy . #d124)
-       (rule . "Any Text7 identity migration requires a separate owner decision")))
+    . ((coordinate . "0..127 equals numeric 7-bit ASCII position")
+       (english . "ASCII projection is exact identity")
+       (ukrainian . "keyboard-position UK bijection; apostrophe at ASCII 39")
+       (sanskrit . "Devanagari InScript-inspired scalar projection; no SLP1/X-SAMPA")
+       (no-phonetic-equivalence . "same coordinate across projections is keyboard placement, not identical sound")
+       (data-not-syntax . "D7 is typed data: structural D2 and executable domains stay distinct")
+       (framing . "projection mode and exact bit-length are properties of enclosing value, not each 7-bit cell")
+       (roundtrip . "encode(project(x, mode), mode) == x for every 0..127 and each mode")
+       (lossless-scope . "exact supported codepoint stream; no automatic Unicode normalization")
+       (fail-closed . "unmapped codepoints and noncanonical bit padding must fail explicitly")
+       (non-authority . "D7 projection cannot mint callability, number or functional meaning")
+       (migration . "old 126/128 sound coordinates remain historical v1, never silently reinterpreted as v2")
+       (extension . "new characters and script capabilities require future explicit versioned admission")))
 )

@@ -1,12 +1,7 @@
-; D7: exact owner-ratified 7-bit identities, human text/sound projections.
-; Authority: knowledge/d7-ratified.json (#3572). Glyphs are not resident identity.
-; Text D7 space/dot are DATA; D2 separator/dot are parser STRUCTURE by context.
-; 'ук'/'укр'/'sym': Ukrainian keyboard glyphs, no English letters.
-; 'san': Sanskrit IAST. 'en': English pilot romanized phonemes; NOT Sanskrit.
-; 'en-ipa': codec-only (no extra Lisp column or new resident); 'LISP': no call admission.
-; Missing projection () does not delete a D7 resident.
-; 126/128 ratified, owner-reserved 0100001,0101010.
-; D7 uppercase input may use the ratified text modifier 0100010.
+; D7 v1 HISTORICAL COMPATIBILITY TABLE (126/128, issue #3572).
+; Superseded for NEW migrated text data by keyboard D7 v2, owner-ratified 2026-10-13.
+; See contracts/d7-ratification.lisp and knowledge/d7-keyboard-v2-ratified.json.
+; DO NOT reinterpret v1 bitstreams as v2 without explicit decode/reencode.
 
 (domain-table/1
   (0000000 (ук "к") (укр "к") (san "k") (en "k") (LISP ()) (sym "к"))
