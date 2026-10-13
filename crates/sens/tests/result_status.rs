@@ -2,7 +2,7 @@
 //! `reason` / `reason-in` keep their historical compatibility results while
 //! result-status.my provides explicit observations without information collapse.
 
-use sens::{eval_program, Session};
+use sens::{eval_program, parse_mixed_exact_domain, Expr, ExprKind, Session};
 
 fn eval_result_status(source: &str) -> String {
     let mut session = Session::default();
@@ -175,3 +175,79 @@ fn reason_observe_rejects_malformed_goal_as_data() {
         "(invalid invalid-goal 42)"
     );
 }
+
+#[test]
+fn negation_goal_requires_exactly_one_argument_without_legacy_w8_equal() {
+    let source = include_str!("../../../lib/result-status.lisp");
+    assert_eq!(
+        source.matches("(11110111 ").count(),
+        0,
+        "historical W8 EQUAL must not decide the shape of a current Lisp goal"
+    );
+    assert!(
+        !source.contains("(000000 goal)"),
+        "D6 LENGTH plus an unqualified numeric 2 is not needed for structural arity"
+    );
+
+    assert_eq!(
+        eval_result_status(
+            r#"(result-goal? (quote (not? (mortal socrates))))"#
+        ),
+        "t",
+        "one well-formed nested goal must be admitted"
+    );
+    assert_eq!(
+        eval_result_status(r#"(result-goal? (quote (not?)))"#),
+        "()",
+        "a missing argument must be rejected"
+    );
+    assert_eq!(
+        eval_result_status(
+            r#"(result-goal? (quote (not? (mortal socrates) extra)))"#
+        ),
+        "()",
+        "an additional argument must be rejected"
+    );
+    assert_eq!(
+        eval_result_status(
+            r#"(result-goal? (quote (not? (not? (mortal) extra))))"#
+        ),
+        "()",
+        "a malformed nested negation must stay invalid"
+    );
+
+    // The edited definition keeps exact D9 validation, and uses exact D3
+    // structure plus D4 selection. It contains neither D6 LENGTH nor W8.
+    let start = source
+        .find("(0011 result-goal?")
+        .expect("result-goal? definition is present");
+    let end = source[start..]
+        .find("; A well-shaped top-level negative query asks")
+        .expect("next section boundary is present")
+        + start;
+    let ast = parse_mixed_exact_domain(&source[start..end])
+        .expect("result-goal? must remain valid exact-domain source");
+    assert_eq!(ast.len(), 1);
+
+    fn gather_widths(expr: &Expr, widths: &mut Vec<usize>) {
+        if let ExprKind::DomainIdentity(identity) = &expr.kind {
+            widths.push(identity.width());
+        }
+        if let ExprKind::List(items) = &expr.kind {
+            for item in items {
+                gather_widths(item, widths);
+            }
+        }
+    }
+
+    let mut widths = Vec::new();
+    gather_widths(&ast[0], &mut widths);
+    widths.sort_unstable();
+    widths.dedup();
+    assert_eq!(
+        widths,
+        vec![3, 4, 9],
+        "only exact D3 structure, D4 selector/definition, and existing D9 validator remain"
+    );
+}
+
