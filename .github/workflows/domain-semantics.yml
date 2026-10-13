@@ -6,14 +6,8 @@ name: domain-semantics
 # Логіка:  D3..D9 закони              (check-domain-logic-laws.lisp).
 # Бітність: Dn має рівно 2^n рядків,
 #           D3 має вісім РІЗНИХ адрес (check-domain-bitness-laws.lisp).
+# Карантин: лише ci.yml автоматичний; цей .lisp-тест не є фізичним SENS.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/domains/**'
-      - 'scripts/check-domain-logic-laws.lisp'
-      - 'scripts/check-domain-bitness-laws.lisp'
-      - '.github/workflows/domain-semantics.yml'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +15,7 @@ permissions:
 
 jobs:
   domain-laws:
+    if: ${{ false }} # Недозволений семантичний тест: жодного runner
     name: Domain laws in binary SENS
     runs-on: ubuntu-24.04
     timeout-minutes: 20
