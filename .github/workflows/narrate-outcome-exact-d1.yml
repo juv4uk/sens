@@ -1,0 +1,43 @@
+name: "Оповідь: точний D1 для перевірки арності"
+
+on:
+  pull_request:
+    paths:
+      - "lib/narrate.lisp"
+      - "crates/sens/tests/narrate_outcomes.rs"
+      - "scripts/test-narrate-d1-bitness.py"
+      - ".github/workflows/narrate-outcome-exact-d1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/narrate.lisp"
+      - "crates/sens/tests/narrate_outcomes.rs"
+      - "scripts/test-narrate-d1-bitness.py"
+      - ".github/workflows/narrate-outcome-exact-d1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  narrate-outcome-arity:
+    name: "Арність оповіді повертає лише точний D1"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Канонічні ширини доменів D1–D10 і форма оповіді"
+        run: python3 scripts/test-narrate-d1-bitness.py
+      - name: "AST арності використовує рівно D3/D4"
+        run: cargo test --locked -p sens --test narrate_outcomes arity_helpers_use_only_exact_d3_d4_domain_identities -- --exact --nocapture
+      - name: "Позитивний і негативний свідки точного D1"
+        run: cargo test --locked -p sens --test narrate_outcomes arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes -- --exact --nocapture
+      - name: "Уся наявна регресія оповіді"
+        run: cargo test --locked -p sens --test narrate_outcomes -- --nocapture
+      - name: "Джерела не змінено під час перевірки"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
