@@ -1,0 +1,21 @@
+name: Вибір механізмів — точний D1 та обхід списку
+
+on:
+  pull_request:
+    paths:
+      - "lib/mechanism-selector.lisp"
+      - "tests/test_mechanism_selector_d1_scan.py"
+      - ".github/workflows/mechanism-selector-d1-scan.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити D1/D3/D4/D5/D9 та негативні сценарії
+        run: python3 -m unittest discover -s tests -p 'test_mechanism_selector_d1_scan.py' -v
