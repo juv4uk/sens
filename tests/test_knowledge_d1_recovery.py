@@ -43,7 +43,7 @@ def check(source: str):
     if source.count(MARKER) != 1:
         raise ValueError("missing immutable triad recovery boundary")
     before, extra = source.split("\n" + MARKER, 1)
-    if git_blob(before + "\n") != HISTORIC_PARTIAL_BLOB:
+    if git_blob(before) != HISTORIC_PARTIAL_BLOB:
         raise ValueError("previous 20 live functions were modified without proof")
     roots = parse(MARKER + extra)
     if len(roots) != 3:
