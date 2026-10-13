@@ -1,7 +1,7 @@
 ; Process-result interpretation owned by Lisp.
 ; Інтерпретація результату процесу, якою володіє Lisp.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Two-field D3 COND with exact direct D1:1 fallback values; D3 () stays data.
 ; Reuses utf8-decode-string from lib/utf8.lisp and process-run-raw host.
 ; Width is identity; every bit of the domain address is valued.
 ;
@@ -44,11 +44,11 @@
                  (process-raw-exit-code raw)
                  (1001 stdout-result)
                  (1001 stderr-result)))
-              ((010 (001 ()))
+              (#d1:1
                (1110 (001 rejected) (001 stderr-invalid-utf8)))))
-           ((010 (001 ()))
+           (#d1:1
             (1110 (001 rejected) (001 stdout-invalid-utf8))))))
-      ((010 (001 ()))
+      (#d1:1
        (1110 (001 rejected) (001 invalid-process-result))))))
 
 (0011 process-run-text
@@ -62,7 +62,7 @@
     (110
       ((101 code (001 ())) -1)
       ((0100 (101 code (001 ()))) code)
-      ((010 (001 ())) -1))))
+      (#d1:1 -1))))
 
 (0011 process-run
   (0010 (program args)
@@ -75,7 +75,7 @@
            (100 (011 (011 (011 result))))))
         ((0100 (101 (100 result) (001 decoded-process)))
          result)
-        ((010 (001 ())) result)))))
+        (#d1:1 result)))))
 
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
