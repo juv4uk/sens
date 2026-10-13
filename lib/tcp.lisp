@@ -23,12 +23,13 @@
 
 (0011 tcp-read-bytes->text
   (0010 (bytes)
-    (001000 ((decoded (utf8-decode-string bytes)))
-      (110
-        ((101 (100 decoded) (001 decoded))
-         (1001 decoded))
-        ((010 (001 ()))
-         decoded)))))
+    ((0010 (decoded)
+       (110
+         ((101 (100 decoded) (001 decoded))
+          (1001 decoded))
+         ((010 (001 ()))
+          decoded)))
+     (utf8-decode-string bytes))))
 
 (0011 tcp-read
   (0010 (connection)
@@ -43,8 +44,8 @@
 ; policy belongs to Lisp.
 (0011 tcp-write-via-raw
   (0010 (connection text)
-    (001000 ((written (tcp-write-raw connection (tcp-write-text->bytes text))))
-      text)))
+    ((0010 (written) text)
+     (tcp-write-raw connection (tcp-write-text->bytes text)))))
 
 (0011 tcp-write
   (0010 (connection text)
