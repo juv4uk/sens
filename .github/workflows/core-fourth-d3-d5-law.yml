@@ -36,4 +36,4 @@ jobs:
           target/debug/sens tests/semantic/core-fourth-d3-d5-law.sens > "$RUNNER_TEMP/fourth.out"
           target/debug/sens-trit eval tests/semantic/core-fourth-d3-d5-law.sens > "$RUNNER_TEMP/fourth-trit.out"
           cmp "$RUNNER_TEMP/fourth.out" "$RUNNER_TEMP/fourth-trit.out"
-          printf '1\\n' | cmp - "$RUNNER_TEMP/fourth.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/fourth.out"
