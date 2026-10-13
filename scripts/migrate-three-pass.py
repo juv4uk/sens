@@ -465,7 +465,54 @@ def extract_projection(text: str,name: str):
     if not out: raise MigrationError(f"empty Text7 projection {name}")
     return out
 
+def _keyboard_v2(projection_path: Path):
+    """One ratified 7-bit coordinate table; language is a VIEW, not semantics."""
+    authority = json.loads(projection_path.read_text(encoding="utf-8"))
+    if (authority.get("schema"), authority.get("status"),
+            authority.get("width"), authority.get("capacity"),
+            authority.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
+        raise MigrationError("D7 keyboard/v2 is not ratified 128/128")
+    rows = authority.get("table", [])
+    if len(rows) != 128:
+        raise MigrationError("D7 keyboard/v2 missing coordinates")
+    indexes = {language: {} for language in ("en", "uk", "san")}
+    for number, row in enumerate(rows):
+        bits = f"{number:07b}"
+        if row.get("bits") != bits or row.get("ascii") != chr(number):
+            raise MigrationError(f"D7 keyboard/v2 coordinate drift: {bits}")
+        for language, field in (("en", "ascii"), ("uk", "uk"), ("san", "san")):
+            glyph = row.get(field)
+            if not isinstance(glyph, str) or len(glyph) != 1:
+                raise MigrationError(f"D7 keyboard/v2 bad {language} glyph: {bits}")
+            if glyph in indexes[language]:
+                raise MigrationError(f"D7 keyboard/v2 ambiguous {language} glyph: {glyph!r}")
+            indexes[language][glyph] = bits
+    return {"keyboard-v2": indexes}
+
+
+def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
+    """Choose a view only if the identifier contains one unambiguous script."""
+    scripts = set()
+    for ch in spelling:
+        cp = ord(ch)
+        if ("a" <= ch <= "z") or ("A" <= ch <= "Z"):
+            scripts.add("en")
+        elif 0x0400 <= cp <= 0x052F:
+            scripts.add("uk")
+        elif 0x0900 <= cp <= 0x097F:
+            scripts.add("san")
+        elif ch.isalpha():
+            raise MigrationError(f"D7 keyboard/v2 unsupported letter {ch!r}", token)
+    if len(scripts) > 1:
+        raise MigrationError("D7 keyboard/v2 mixed-script identifier is ambiguous", token)
+    return next(iter(scripts), "en")
+
+
 def build_text7(data, projection_path: Path):
+    if projection_path.suffix == ".json":
+        return _keyboard_v2(projection_path)
+    # Historical phonetic Text7 is supported only via an explicit old .rs path.
     text=projection_path.read_text(encoding="utf-8")
     slp=extract_projection(text,"SA_SLP1_ENCODE")
     uk=extract_projection(text,"UK_ENCODE")
@@ -489,6 +536,22 @@ def build_text7(data, projection_path: Path):
     return buckets
 
 def text7_encode(spelling: str,candidates,tok: Tok):
+    if "keyboard-v2" in candidates:
+        if not spelling:
+            raise MigrationError("empty D7 keyboard/v2 identifier", tok)
+        view = _keyboard_v2_mode(spelling, tok)
+        indexes = candidates["keyboard-v2"]
+        chosen = indexes[view]
+        result = []
+        for glyph in spelling:
+            bits = chosen.get(glyph)
+            if bits is None:
+                raise MigrationError(
+                    f"D7 keyboard/v2 cannot encode {glyph!r} U+{ord(glyph):04X} in {view}",
+                    tok,
+                )
+            result.append(bits)
+        return result
     words=[]
     i=0
     while i<len(spelling):
@@ -963,7 +1026,8 @@ def main():
     ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
     ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
     ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
-    ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
+    ap.add_argument("--text7", type=Path, default=REPO_ROOT / "knowledge/d7-keyboard-v2-ratified.json",
+                    help="D7 keyboard/v2 by default; historical .rs projection only for explicitly versioned old sources")
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
