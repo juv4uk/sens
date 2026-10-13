@@ -201,7 +201,10 @@ def inspect_decimal_identity_bridges(path: str, source: str) -> list[str]:
                     findings.append(f"line {line_no}: default/decimal format of identity payload")
         elif path.endswith(".py"):
             for match in PYTHON_FSTRING.finditer(line):
-                if _decimal_default_placeholder(match.group("body"), match.group("args")):
+                # An f-string has inline fields but no separate .format() args.
+                # Requiring an absent regex group raises IndexError before
+                # the identity ratchet can emit a named FAIL.
+                if _decimal_default_placeholder(match.group("body")):
                     findings.append(f"line {line_no}: default/decimal f-string of identity payload")
             for match in PYTHON_FORMAT_CALL.finditer(line):
                 if _decimal_default_placeholder(match.group("body"), match.group("args")):
@@ -388,6 +391,8 @@ def self_test() -> None:
          "u16::from_str_radix(word, 2).unwrap();"),
         ("scripts/sens_t5_codec.py",
          "int(word, 2); int(trits, 3)"),
+        ("scripts/sens_t5_codec.py",
+         'projected = f"{bits:08b}"'),
         ("crates/sens-cli/src/main.rs",
          "port.parse::<u16>().ok() // projection-human: TCP port is human transport configuration"),
         ("crates/sens-cli/src/main.rs",
@@ -402,6 +407,7 @@ def self_test() -> None:
         ("crates/sens/src/source_words.rs", "let payload = token.parse::<u16>()?;"),
         ("crates/sens/src/mixed_source.rs", "u16::from_str_radix(word, 10).unwrap();"),
         ("scripts/sens_t5_codec.py", "payload = int(word)"),
+        ("scripts/sens_t5_codec.py", 'projected = f"{bits}"'),
         ("crates/sens/src/domain_identity.rs", 'format!("{bits}", bits = identity.packed_bits());'),
         ("crates/sens-cli/src/main.rs", "port.parse::<u16>().ok()"),
     )
