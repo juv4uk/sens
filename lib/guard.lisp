@@ -6,24 +6,27 @@
 ; Guard is not another reasoner: it packages observed state, the active
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
+;
+; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ())).
+; Two-field COND only. Width is identity; every bit of the domain address valued.
 
 (0011 guard-decision?
   (0010 (decision)
     (110
-      ((101 decision (001 allow)) t)
-      ((101 decision (001 warn)) t)
-      ((101 decision (001 reject)) t)
-      ((101 decision (001 unknown)) t)
-      )))
+      ((101 decision (001 allow)) (010 (001 ())))
+      ((101 decision (001 warn)) (010 (001 ())))
+      ((101 decision (001 reject)) (010 (001 ())))
+      ((101 decision (001 unknown)) (010 (001 ())))
+      ((010 (001 ())) (001 ())))))
 
 (0011 guard-evidence-status?
   (0010 (status)
     (110
-      ((101 status (001 confirmed)) t)
-      ((101 status (001 partial)) t)
-      ((101 status (001 unresolved)) t)
-      ((101 status (001 broken)) t)
-      )))
+      ((101 status (001 confirmed)) (010 (001 ())))
+      ((101 status (001 partial)) (010 (001 ())))
+      ((101 status (001 unresolved)) (010 (001 ())))
+      ((101 status (001 broken)) (010 (001 ())))
+      ((010 (001 ())) (001 ())))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -52,7 +55,7 @@
        (1110 (001 invalid-guard-decision) decision))
       ((0100 (guard-evidence-status? evidence-status))
        (1110 (001 invalid-evidence-status) evidence-status))
-      ((010 ())
+      ((010 (001 ()))
        (1110
          (001 guard-finding)
          (1110 (001 schema) (001 guard/1))
@@ -69,7 +72,7 @@
            (001 unknown-routes)
            (110
              ((101 decision (001 unknown)) (guard-unknown-routes))
-             )))))))
+             ((010 (001 ())) (001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -97,7 +100,7 @@
        (make-guard-finding
          (001 allow) (001 confirmed) subject observed expected
          (001 ()) (001 invariant-preserved) (001 no-action) evidence))
-      ((010 ())
+      ((010 (001 ()))
        (make-guard-finding
          (001 warn) (001 confirmed) subject observed expected
          (1110 (001 expected) expected (001 observed) observed)
@@ -138,7 +141,7 @@
          (001 synchronization-result-has-no-drift-record)
          (001 record-drift-before-unfreezing-commits)
          evidence))
-      ((010 ())
+      ((010 (001 ()))
        (make-guard-finding
          (001 allow) (001 confirmed) (001 ecosystem-sync)
          (1110 commit-state sync-state drift-state)
@@ -156,6 +159,5 @@
   (0010 (field reference)
     (001000 ((entry (11100 field (011 reference))))
       (110
-        
-        ((010 entry)  (001 ()))
-        ((010 ()) (1001 entry))))))
+        ((010 entry) (001 ()))
+        ((010 (001 ())) (1001 entry))))))
