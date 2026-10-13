@@ -380,7 +380,7 @@ fn main() {
         if arg == "--tcp" || arg.starts_with("--tcp=") {
             let port = arg
                 .strip_prefix("--tcp=")
-                .and_then(|p| p.parse::<u16>().ok())
+                .and_then(|p| p.parse::<u16>().ok()) // projection-human: TCP port is human transport configuration, not a SENS domain identity.
                 .unwrap_or(9999);
             if sexpr_protocol {
                 run_tcp_repl_sexpr(

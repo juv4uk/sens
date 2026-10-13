@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Fail-closed, cross-language domain-ladder guard for canonical SENS paths.
+"""Fail-closed domain-ladder and decimal-identity-bridge guard for SENS.
 
 This replaces the old eight-bit identity guard, not the historical evidence.
 Its jurisdiction is explicitly enumerated below; unlisted compatibility
 consumers remain migration debt and are not falsely declared migrated.
 Domain *capacity* never proves a resident callable. D24+ is arithmetic only.
+Identity transport is bits+width; decimal strings may not bridge identities.
 """
 from __future__ import annotations
 
@@ -90,6 +91,134 @@ OLD_IDENTITY = re.compile(
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 C_COMMENTS = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
 
+# Identity paths are deliberately narrow: general D24+ arithmetic and ordinary
+# CLI values may use numeric projections, but a domain identity must never cross
+# decimal text between its width-qualified binary source and the next domain.
+IDENTITY_PATHS = (
+    *(f"lib/domains/d{n}.lisp" for n in range(1, 11)),
+    "crates/sens/src/domain_ladder.rs",
+    "crates/sens/src/domain_identity.rs",
+    "crates/sens/src/domain_words.rs",
+    "crates/sens/src/source_words.rs",
+    "crates/sens/src/canonical_reader.rs",
+    "crates/sens/src/mixed_source.rs",
+    "crates/sens/src/source_packing.rs",
+    "crates/sens/src/packed_bits.rs",
+    "crates/sens/src/ternary_transport.rs",
+    "crates/sens/src/semantic_registry.rs",
+    "crates/sens/src/compiler_bootstrap.rs",
+    "crates/sens/src/binary_execution.rs",
+    "crates/sens-cli/src/main.rs",
+    "crates/sens-cli/src/bin/sens-trit.rs",
+    "scripts/sens_t5_codec.py",
+)
+# Human-entered CLI transport configuration is not a domain identity. Such a
+# decimal boundary must be marked on the exact line, never whitelisted by file.
+HUMAN_PROJECTION_PATHS = frozenset({
+    "crates/sens-cli/src/main.rs",
+})
+INTEGER_TYPE = r"(?:u8|u16|u32|u64|u128|usize|i8|i16|i32|i64|i128|isize)"
+DECIMAL_IDENTITY_RULES = (
+    ("implicit/default-base integer parse",
+     re.compile(r"\.parse\s*(?:::\s*<\s*" + INTEGER_TYPE + r"\s*>)?\s*\(")),
+    ("decimal or autodetected radix parse",
+     re.compile(r"\bfrom_str_radix\s*\([^;\n]*,\s*(?:0|10)\s*\)")),
+    ("Python default/base-10 integer parse",
+     re.compile(r"\bint\s*\(\s*[^,()\n]+\s*(?:,\s*(?:0|10)\s*)?\)")),
+    ("decimal-only number formatter",
+     re.compile(r"\bto_decimal_string\s*\(")),
+    ("numeric identity payload converted to decimal text",
+     re.compile(r"(?:\b(?:self\.)?(?:bits|payload|packed|raw|ordinal)\b|packed_bits\s*\(\s*\))\s*\.\s*to_string\s*\(")),
+    ("Python string conversion of numeric identity payload",
+     re.compile(r"\bstr\s*\(\s*(?:self\.)?(?:bits|payload|packed|raw|ordinal)\b")),
+)
+IDENTITY_NUMERIC_FIELD = re.compile(
+    r"\b(?:bits|payload|packed|raw|ordinal|coordinate_bits|domain_bits)\b"
+    r"|packed_bits\s*\("
+)
+RUST_FORMAT_CALL = re.compile(r"\b(?:format|write|writeln)!\s*\(\s*\"([^\"]*)\"([^)]*)")
+PYTHON_FSTRING = re.compile(r"""(?i)\bf(?P<quote>['"])(?P<body>.*?)(?P=quote)""")
+PYTHON_FORMAT_CALL = re.compile(r"""(?P<quote>['"])(?P<body>.*?)(?P=quote)\.format\s*\((?P<args>[^)]*)""")
+
+
+def _marked_human_projection(path: str, line: str) -> bool:
+    if path not in HUMAN_PROJECTION_PATHS:
+        return False
+    # The marker must be a real comment, not merely text inside a string.
+    if path.endswith(".rs"):
+        comment = line.split("//", 1)[1] if "//" in line else ""
+    elif path.endswith(".py"):
+        comment = line.split("#", 1)[1] if "#" in line else ""
+    elif path.endswith(".lisp"):
+        comment = line.split(";", 1)[1] if ";" in line else ""
+    else:
+        return False
+    return bool(re.search(r"\bprojection-human\b", comment))
+
+
+def _decimal_default_placeholder(template: str, arguments: str = "") -> bool:
+    # Inspect actual interpolation expressions/arguments, not ordinary prose in
+    # an error message (e.g. "packed binary reader rejected: {err}").
+    # Default formatting of an identity payload loses leading zeroes. Explicit
+    # binary (:b / b) formatting is a source projection, not a decimal bridge.
+    for field in re.findall(r"\{([^{}]*)\}", template):
+        expression = field.split(":", 1)[0].split("!", 1)[0].strip()
+        is_identity = bool(
+            IDENTITY_NUMERIC_FIELD.search(expression)
+            or IDENTITY_NUMERIC_FIELD.search(arguments)
+        )
+        if not is_identity:
+            continue
+        if ":" not in field:
+            return True
+        spec = field.split(":", 1)[1]
+        if spec == "" or spec.endswith("d"):
+            return True
+    return False
+
+
+def inspect_decimal_identity_bridges(path: str, source: str) -> list[str]:
+    if path not in IDENTITY_PATHS:
+        return []
+    source_lines = source.splitlines()
+    masked_lines = [
+        "" if _marked_human_projection(path, line) else line
+        for line in source_lines
+    ]
+    body = executable_text(path, "\n".join(masked_lines))
+    findings = []
+    for label, pattern in DECIMAL_IDENTITY_RULES:
+        for match in pattern.finditer(body):
+            line = body.count("\n", 0, match.start()) + 1
+            findings.append(f"line {line}: {label}")
+
+    for line_no, line in enumerate(body.splitlines(), 1):
+        if not IDENTITY_NUMERIC_FIELD.search(line):
+            continue
+        if path.endswith(".rs"):
+            for match in RUST_FORMAT_CALL.finditer(line):
+                if _decimal_default_placeholder(match.group(1), match.group(2)):
+                    findings.append(f"line {line_no}: default/decimal format of identity payload")
+        elif path.endswith(".py"):
+            for match in PYTHON_FSTRING.finditer(line):
+                if _decimal_default_placeholder(match.group("body"), match.group("args")):
+                    findings.append(f"line {line_no}: default/decimal f-string of identity payload")
+            for match in PYTHON_FORMAT_CALL.finditer(line):
+                if _decimal_default_placeholder(match.group("body"), match.group("args")):
+                    findings.append(f"line {line_no}: default/decimal .format() of identity payload")
+    return findings
+
+
+def inspect_identity_paths(root: Path) -> None:
+    for rel in IDENTITY_PATHS:
+        path = root / rel
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"missing identity-boundary source: {rel}")
+        source = path.read_text(encoding="utf-8")
+        findings = inspect_decimal_identity_bridges(rel, source)
+        if findings:
+            raise ValueError(f"decimal intermediary in {rel}: {'; '.join(findings[:8])}")
+
 
 def executable_text(path: str, source: str) -> str:
     # Documentation/provenance remains available in comments. Only actual
@@ -145,8 +274,8 @@ W8_COLLISION = {
 }
 ACTIVE_GATES = (
     "scripts/test-binary-language-pipeline.sh",
-    ".github/workflows/ci.yml",
-    ".github/workflows/ci-hosted.yml",
+    ".github/workflows/domain-bitness-laws.yml",
+    ".github/workflows/domain-logic-laws.yml",
 )
 
 
@@ -200,6 +329,7 @@ def inspect_active_gates(root: Path) -> None:
 
 
 def inspect_files(root: Path) -> dict[int, int]:
+    inspect_identity_paths(root)
     for rel in CANONICAL:
         path = root / rel
         if not path.is_file() or path.is_symlink():
@@ -236,6 +366,34 @@ def self_test() -> None:
     for path, code in clean:
         if inspect_code(path, code):
             raise ValueError(f"clean source rejected: {path}")
+
+    decimal_clean = (
+        ("crates/sens/src/domain_ladder.rs",
+         'format!("{:0width$b}", bits, width = width);'),
+        ("crates/sens/src/mixed_source.rs",
+         "u16::from_str_radix(word, 2).unwrap();"),
+        ("scripts/sens_t5_codec.py",
+         "int(word, 2); int(trits, 3)"),
+        ("crates/sens-cli/src/main.rs",
+         "port.parse::<u16>().ok() // projection-human: TCP port is human transport configuration"),
+        ("crates/sens-cli/src/main.rs",
+         'return Err(format!("packed binary reader rejected: {err}"));'),
+    )
+    for path, code in decimal_clean:
+        if inspect_decimal_identity_bridges(path, code):
+            raise ValueError(f"bit-preserving/human-boundary conversion rejected: {path} {code}")
+
+    decimal_bad = (
+        ("crates/sens/src/domain_ladder.rs", "let source = self.bits.to_string();"),
+        ("crates/sens/src/source_words.rs", "let payload = token.parse::<u16>()?;"),
+        ("crates/sens/src/mixed_source.rs", "u16::from_str_radix(word, 10).unwrap();"),
+        ("scripts/sens_t5_codec.py", "payload = int(word)"),
+        ("crates/sens/src/domain_identity.rs", 'format!("{bits}", bits = identity.packed_bits());'),
+        ("crates/sens-cli/src/main.rs", "port.parse::<u16>().ok()"),
+    )
+    for path, code in decimal_bad:
+        if not inspect_decimal_identity_bridges(path, code):
+            raise ValueError(f"decimal identity bridge escaped ratchet: {path} {code}")
     bad = (
         ("code.rs", "use crate::Sens8;"),
         ("code.rs", "Value::Sid(whatever)"),
@@ -271,7 +429,10 @@ def self_test() -> None:
     try:
         inspect_files(Path("/nonexistent-domain-ladder-guard-probe"))
     except ValueError as exc:
-        if "missing active source" not in str(exc):
+        if not any(marker in str(exc) for marker in (
+            "missing identity-boundary source",
+            "missing active source",
+        )):
             raise
     else:
         raise ValueError("missing sources were admitted")

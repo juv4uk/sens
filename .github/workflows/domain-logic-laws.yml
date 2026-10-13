@@ -14,6 +14,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - name: "Статичний ratchet: заборонити десяткові мости ідентичності"
+        run: |
+          python3 scripts/check-domain-ladder-identity.py --self-test
+          python3 scripts/check-domain-ladder-identity.py --check
       - uses: dtolnay/rust-toolchain@stable
       - name: Build physical SENS mechanism
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
