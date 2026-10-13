@@ -73,7 +73,7 @@
   (0010 (rule fact)
     ((0010 (pattern template) ((0010 (bindings) (110
           ((failed-subst? bindings) (001 no-match))
-          ((010 ()) (101101001 template bindings)))) (101010000 pattern fact (001 ())))) (100 rule) (1001 rule))))
+          (#d1:1 (101101001 template bindings)))) (101010000 pattern fact (001 ())))) (100 rule) (1001 rule))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
@@ -108,14 +108,14 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) ((0010 (result) (110
+      (#d1:1 ((0010 (result) (110
              ((0100 (010 result)) (110
                 ((101 result (001 no-match)) (fire-rule-on-facts rule (011 facts)))
-                ((010 ()) (111 result (fire-rule-on-facts rule (011 facts))))))
+                (#d1:1 (111 result (fire-rule-on-facts rule (011 facts))))))
              ((010 result)  (110
                 ((101 result (001 no-match)) (fire-rule-on-facts rule (011 facts)))
-                ((010 ()) (111 result (fire-rule-on-facts rule (011 facts))))))
-             ((010 ()) (111 result (fire-rule-on-facts rule (011 facts)))))) (fire-rule rule (100 facts)))))))
+                (#d1:1 (111 result (fire-rule-on-facts rule (011 facts))))))
+             (#d1:1 (111 result (fire-rule-on-facts rule (011 facts)))))) (fire-rule rule (100 facts)))))))
 
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
@@ -146,7 +146,7 @@
     (110
       
       ((010 rules)  (001 ()))
-      ((010 ()) (1111 (fire-rule-on-facts (100 rules) facts)
+      (#d1:1 (1111 (fire-rule-on-facts (100 rules) facts)
                   (fire-rules-on-facts (011 rules) facts))))))
 
 (0011 fire-rules-on-working-memory
@@ -199,13 +199,13 @@
       
       ((010 facts)  wm)
       ((11101 (100 facts) wm) (append-new (011 facts) wm))
-      ((010 ()) (append-new (011 facts) (111 (100 facts) wm))))))
+      (#d1:1 (append-new (011 facts) (111 (100 facts) wm))))))
 
 (0011 run
   (0010 (rules facts)
     ((0010 (merged) (110
         ((unify-equal? (000000 merged) (000000 facts))  facts)
-        ((010 ()) (run rules merged)))) (append-new (fire-rules-on-facts rules facts) facts))))
+        (#d1:1 (run rules merged)))) (append-new (fire-rules-on-facts rules facts) facts))))
 
 (0011 assert-facts!
   (make-macro
@@ -248,7 +248,7 @@
       
       ((010 facts)  (001 ()))
       ((unify-equal? fact (100 facts)) (011 facts))
-      ((010 ()) (111 (100 facts) (retract-fact fact (011 facts)))))))
+      (#d1:1 (111 (100 facts) (retract-fact fact (011 facts)))))))
 
 (0011 retract-fact!
   (make-macro
@@ -327,7 +327,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((010 ()) (111 (fact-of (100 entries)) (map-fact-of (011 entries)))))))
+      (#d1:1 (111 (fact-of (100 entries)) (map-fact-of (011 entries)))))))
 
 ; Same `fire-rule` as Step 1, but wraps a successful result with the
 ; single supporting fact that produced it.
@@ -336,28 +336,28 @@
     ((0010 (result) (110
         ((0100 (010 result)) (110
            ((101 result (001 no-match)) (001 no-match))
-           ((010 ()) (make-justified result (1110 fact)))))
+           (#d1:1 (make-justified result (1110 fact)))))
         ((010 result)  (110
            ((101 result (001 no-match)) (001 no-match))
-           ((010 ()) (make-justified result (1110 fact)))))
-        ((010 ()) (make-justified result (1110 fact))))) (fire-rule rule fact))))
+           (#d1:1 (make-justified result (1110 fact)))))
+        (#d1:1 (make-justified result (1110 fact))))) (fire-rule rule fact))))
 
 (0011 fire-rule-on-facts-tms
   (0010 (rule facts)
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) ((0010 (result) (110
+      (#d1:1 ((0010 (result) (110
              ((0100 (010 result)) (fire-rule-on-facts-tms rule (011 facts)))
              ((010 result)  (fire-rule-on-facts-tms rule (011 facts)))
-             ((010 ()) (111 result (fire-rule-on-facts-tms rule (011 facts)))))) (fire-rule-tms rule (100 facts)))))))
+             (#d1:1 (111 result (fire-rule-on-facts-tms rule (011 facts)))))) (fire-rule-tms rule (100 facts)))))))
 
 (0011 fire-rules-on-facts-tms
   (0010 (rules facts)
     (110
       
       ((010 rules)  (001 ()))
-      ((010 ()) (1111 (fire-rule-on-facts-tms (100 rules) facts)
+      (#d1:1 (1111 (fire-rule-on-facts-tms (100 rules) facts)
                   (fire-rules-on-facts-tms (011 rules) facts))))))
 
 (0011 justified-member?
@@ -365,8 +365,8 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((unify-equal? fact (fact-of (100 entries))) (010 ()))
-      ((010 ()) (justified-member? fact (011 entries))))))
+      ((unify-equal? fact (fact-of (100 entries))) #d1:1)
+      (#d1:1 (justified-member? fact (011 entries))))))
 
 (0011 add-new-justified
   (0010 (new-entries entries)
@@ -375,14 +375,14 @@
       ((010 new-entries)  entries)
       ((justified-member? (fact-of (100 new-entries)) entries)
        (add-new-justified (011 new-entries) entries))
-      ((010 ()) (add-new-justified (011 new-entries) (111 (100 new-entries) entries))))))
+      (#d1:1 (add-new-justified (011 new-entries) (111 (100 new-entries) entries))))))
 
 ; The fixpoint loop over justified facts, mirroring `run` from Step 4.
 (0011 run-tms
   (0010 (rules entries)
     ((0010 (new-entries) ((0010 (merged) (110
           ((unify-equal? (000000 merged) (000000 entries))  entries)
-          ((010 ()) (run-tms rules merged)))) (add-new-justified new-entries entries))) (fire-rules-on-facts-tms rules (map-fact-of entries)))))
+          (#d1:1 (run-tms rules merged)))) (add-new-justified new-entries entries))) (fire-rules-on-facts-tms rules (map-fact-of entries)))))
 
 (0011 *justified-memory* (001 ()))
 
@@ -402,7 +402,7 @@
       
       ((010 entries)  (001 ()))
       ((unify-equal? fact (fact-of (100 entries))) (remove-justified fact (011 entries)))
-      ((010 ()) (111 (100 entries) (remove-justified fact (011 entries)))))))
+      (#d1:1 (111 (100 entries) (remove-justified fact (011 entries)))))))
 
 (0011 dependents-of
   (0010 (fact entries)
@@ -411,7 +411,7 @@
       ((010 entries)  (001 ()))
       ((11101 fact (supports-of (100 entries)))
        (111 (fact-of (100 entries)) (dependents-of fact (011 entries))))
-      ((010 ()) (dependents-of fact (011 entries))))))
+      (#d1:1 (dependents-of fact (011 entries))))))
 
 ; Retracts `fact`, then recursively retracts everything that named it in
 ; their support set — the cascade truth maintenance is for.
@@ -424,7 +424,7 @@
     (110
       
       ((010 facts)  entries)
-      ((010 ()) (retract-facts-tms (011 facts) (retract-fact-tms (100 facts) entries))))))
+      (#d1:1 (retract-facts-tms (011 facts) (retract-fact-tms (100 facts) entries))))))
 
 (0011 retract-fact-tms!
   (make-macro
@@ -486,28 +486,28 @@
     ((0010 (result) (110
         ((0100 (010 result)) (110
            ((101 result (001 no-match)) (001 no-match))
-           ((010 ()) (1110 result (1110 fact)))))
+           (#d1:1 (1110 result (1110 fact)))))
         ((010 result)  (110
            ((101 result (001 no-match)) (001 no-match))
-           ((010 ()) (1110 result (1110 fact)))))
-        ((010 ()) (1110 result (1110 fact))))) (fire-rule rule fact))))
+           (#d1:1 (1110 result (1110 fact)))))
+        (#d1:1 (1110 result (1110 fact))))) (fire-rule rule fact))))
 
 (0011 fire-rule-on-facts-jtms
   (0010 (rule facts)
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) ((0010 (result) (110
+      (#d1:1 ((0010 (result) (110
              ((0100 (010 result)) (fire-rule-on-facts-jtms rule (011 facts)))
              ((010 result)  (fire-rule-on-facts-jtms rule (011 facts)))
-             ((010 ()) (111 result (fire-rule-on-facts-jtms rule (011 facts)))))) (fire-rule-jtms rule (100 facts)))))))
+             (#d1:1 (111 result (fire-rule-on-facts-jtms rule (011 facts)))))) (fire-rule-jtms rule (100 facts)))))))
 
 (0011 fire-rules-on-facts-jtms
   (0010 (rules facts)
     (110
       
       ((010 rules)  (001 ()))
-      ((010 ()) (1111 (fire-rule-on-facts-jtms (100 rules) facts)
+      (#d1:1 (1111 (fire-rule-on-facts-jtms (100 rules) facts)
                   (fire-rules-on-facts-jtms (011 rules) facts))))))
 
 (0011 find-entry
@@ -516,7 +516,7 @@
       
       ((010 entries)  (001 ()))
       ((unify-equal? fact (fact-of (100 entries))) (100 entries))
-      ((010 ()) (find-entry fact (011 entries))))))
+      (#d1:1 (find-entry fact (011 entries))))))
 
 (0011 remove-entry-jtms
   (0010 (fact entries)
@@ -524,7 +524,7 @@
       
       ((010 entries)  (001 ()))
       ((unify-equal? fact (fact-of (100 entries))) (remove-entry-jtms fact (011 entries)))
-      ((010 ()) (111 (100 entries) (remove-entry-jtms fact (011 entries)))))))
+      (#d1:1 (111 (100 entries) (remove-entry-jtms fact (011 entries)))))))
 
 ; Folds one new `(fact justification)` pair into `entries`: a brand-new
 ; fact gets a fresh entry; a fact already present gets `justification`
@@ -536,7 +536,7 @@
         ((0100 (010 existing)) (111 (1110 fact justification) entries))
         ((010 existing)  (111 (1110 fact justification) entries))
         ((11101 justification (justifications-of existing)) entries)
-        ((010 ()) (111 (111 fact (111 justification (justifications-of existing)))
+        (#d1:1 (111 (111 fact (111 justification (justifications-of existing)))
                  (remove-entry-jtms fact entries))))) (find-entry fact entries))))
 
 (0011 add-new-entries-jtms
@@ -544,7 +544,7 @@
     (110
       
       ((010 new-entries)  entries)
-      ((010 ()) (add-new-entries-jtms
+      (#d1:1 (add-new-entries-jtms
            (011 new-entries)
            (add-justification (fact-of (100 new-entries)) (1001 (100 new-entries)) entries))))))
 
@@ -557,7 +557,7 @@
   (0010 (rules entries)
     ((0010 (merged) (110
         ((unify-equal? merged entries) entries)
-        ((010 ()) (run-jtms rules merged)))) (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries))))
+        (#d1:1 (run-jtms rules merged)))) (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries))))
 
 (0011 *jtms-memory* (001 ()))
 
@@ -655,9 +655,9 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) ((0010 (s) (110
+      (#d1:1 ((0010 (s) (110
              ((failed-subst? s) (match-plain-condition-jtms condition (011 facts) state))
-             ((010 ()) (111 (jtms-make-state s (111 (100 facts) (jtms-state-used state)))
+             (#d1:1 (111 (jtms-make-state s (111 (100 facts) (jtms-state-used state)))
                        (match-plain-condition-jtms condition (011 facts) state))))) (101010000 condition (100 facts) (jtms-state-subst state)))))))
 
 (0011 match-or-condition-jtms
@@ -665,7 +665,7 @@
     (110
       
       ((010 alternatives)  (001 ()))
-      ((010 ()) (1111 (match-one-condition-jtms (100 alternatives) facts state)
+      (#d1:1 (1111 (match-one-condition-jtms (100 alternatives) facts state)
                   (match-or-condition-jtms (011 alternatives) facts state))))))
 
 (0011 match-one-condition-jtms
@@ -682,7 +682,7 @@
        (110
          ((0001 (101101001 (1001 condition) (jtms-state-subst state))) (1110 state))
          ))
-      ((010 ()) (match-plain-condition-jtms condition facts state)))))
+      (#d1:1 (match-plain-condition-jtms condition facts state)))))
 
 (0011 match-conditions-jtms
   (0010 (conditions facts state)
@@ -694,7 +694,7 @@
     (110
       
       ((010 states)  (001 ()))
-      ((010 ()) (111 (1110 (101101001 head (jtms-state-subst (100 states))) (jtms-state-used (100 states)))
+      (#d1:1 (111 (1110 (101101001 head (jtms-state-subst (100 states))) (jtms-state-used (100 states)))
                 (map-apply-head-jtms head (011 states)))))))
 
 (0011 fire-rule-jtms-multi
@@ -706,14 +706,14 @@
     (110
       
       ((010 rules)  (001 ()))
-      ((010 ()) (1111 (fire-rule-jtms-multi (100 rules) facts)
+      (#d1:1 (1111 (fire-rule-jtms-multi (100 rules) facts)
                   (fire-rules-jtms-multi (011 rules) facts))))))
 
 (0011 run-jtms-multi
   (0010 (rules entries)
     ((0010 (merged) (110
         ((unify-equal? merged entries) entries)
-        ((010 ()) (run-jtms-multi rules merged)))) (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries))))
+        (#d1:1 (run-jtms-multi rules merged)))) (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries))))
 
 (0011 run-jtms-multi!
   (make-macro
@@ -726,7 +726,7 @@
       
       ((010 justifications)  (001 ()))
       ((11101 fact (100 justifications)) (prune-justifications fact (011 justifications)))
-      ((010 ()) (111 (100 justifications) (prune-justifications fact (011 justifications)))))))
+      (#d1:1 (111 (100 justifications) (prune-justifications fact (011 justifications)))))))
 
 (0011 prune-entry
   (0010 (fact entry)
@@ -737,7 +737,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((010 ()) (111 (prune-entry fact (100 entries)) (prune-all-entries fact (011 entries)))))))
+      (#d1:1 (111 (prune-entry fact (100 entries)) (prune-all-entries fact (011 entries)))))))
 
 (0011 unsupported-facts
   (0010 (entries)
@@ -746,7 +746,7 @@
       ((010 entries)  (001 ()))
       ((0100 (010 (justifications-of (100 entries)))) (111 (fact-of (100 entries)) (unsupported-facts (011 entries))))
       ((010 (justifications-of (100 entries)))  (111 (fact-of (100 entries)) (unsupported-facts (011 entries))))
-      ((010 ()) (unsupported-facts (011 entries))))))
+      (#d1:1 (unsupported-facts (011 entries))))))
 
 (0011 drop-unsupported
   (0010 (entries)
@@ -755,7 +755,7 @@
       ((010 entries)  (001 ()))
       ((0100 (010 (justifications-of (100 entries)))) (drop-unsupported (011 entries)))
       ((010 (justifications-of (100 entries)))  (drop-unsupported (011 entries)))
-      ((010 ()) (111 (100 entries) (drop-unsupported (011 entries)))))))
+      (#d1:1 (111 (100 entries) (drop-unsupported (011 entries)))))))
 
 ; Removes `fact`'s own entry outright, then prunes every justification-set
 ; elsewhere that named it. Any entry left with zero justification-sets has
@@ -767,14 +767,14 @@
     ((0010 (pruned) ((0010 (newly-unsupported remaining) (110
           
           ((010 newly-unsupported)  remaining)
-          ((010 ()) (retract-facts-jtms newly-unsupported remaining)))) (unsupported-facts pruned) (drop-unsupported pruned))) (prune-all-entries fact (remove-entry-jtms fact entries)))))
+          (#d1:1 (retract-facts-jtms newly-unsupported remaining)))) (unsupported-facts pruned) (drop-unsupported pruned))) (prune-all-entries fact (remove-entry-jtms fact entries)))))
 
 (0011 retract-facts-jtms
   (0010 (facts entries)
     (110
       
       ((010 facts)  entries)
-      ((010 ()) (retract-facts-jtms (011 facts) (retract-fact-jtms (100 facts) entries))))))
+      (#d1:1 (retract-facts-jtms (011 facts) (retract-fact-jtms (100 facts) entries))))))
 
 (0011 retract-fact-jtms!
   (make-macro
@@ -862,9 +862,9 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) ((0010 (s) (110
+      (#d1:1 ((0010 (s) (110
              ((failed-subst? s) (match-condition-against-facts condition (011 facts) bindings))
-             ((010 ()) (111 s (match-condition-against-facts condition (011 facts) bindings))))) (101010000 condition (100 facts) bindings))))))
+             (#d1:1 (111 s (match-condition-against-facts condition (011 facts) bindings))))) (101010000 condition (100 facts) bindings))))))
 
 ; Step 7: negation as failure — `(not (pattern))` conditions. This is the
 ; capability `lib/clips-import.lisp`'s Step 5 flagged as missing and worked
@@ -900,10 +900,10 @@
       ((010 condition)  (001 ()))
       ((0100 (010 (100 condition))) (110
          ((101 (100 condition) (001 not?)) (001 (1)))
-         ((010 ()) (101 (100 condition) (001 not)))))
+         (#d1:1 (101 (100 condition) (001 not)))))
       ((010 (100 condition))  (110
          ((101 (100 condition) (001 not?)) (001 (1)))
-         ((010 ()) (101 (100 condition) (001 not)))))
+         (#d1:1 (101 (100 condition) (001 not)))))
       )))
 
 (0011 match-negated-condition
@@ -960,7 +960,7 @@
     (110
       
       ((010 alternatives)  (001 ()))
-      ((010 ()) (1111 (match-one-condition (100 alternatives) facts bindings)
+      (#d1:1 (1111 (match-one-condition (100 alternatives) facts bindings)
                   (match-or-condition (011 alternatives) facts bindings))))))
 
 ; Step 11: `(and (pattern1) (pattern2) ...)` conditions — the same bug
@@ -1192,7 +1192,7 @@
     (110
       
       ((010 (match-conditions sub-conditions facts bindings))  (001 ()))
-      ((010 ()) (1110 bindings)))))
+      (#d1:1 (1110 bindings)))))
 
 (0011 condition-is-forall?
   (0010 (condition)
@@ -1207,10 +1207,10 @@
   (0010 (candidates rest-conditions facts)
     (110
       
-      ((010 candidates)  (010 ()))
+      ((010 candidates)  #d1:1)
       
       ((010 (match-conditions rest-conditions facts (100 candidates)))  (001 ()))
-      ((010 ()) (forall-every-candidate-satisfies? (011 candidates) rest-conditions facts)))))
+      (#d1:1 (forall-every-candidate-satisfies? (011 candidates) rest-conditions facts)))))
 
 (0011 match-forall-condition
   (0010 (first-condition rest-conditions facts bindings)
@@ -1230,7 +1230,7 @@
       ((condition-is-exists? condition) (match-exists-condition (011 condition) facts bindings))
       ((condition-is-forall? condition)
        (match-forall-condition (1001 condition) (011 (011 condition)) facts bindings))
-      ((010 ()) (match-condition-against-facts condition facts bindings)))))
+      (#d1:1 (match-condition-against-facts condition facts bindings)))))
 
 ; Built directly on `thread-conjunction` (lib/unify.lisp) — the same
 ; conjunction-walking kernel `lib/reason.lisp`'s `prove-goals` threads a
@@ -1248,7 +1248,7 @@
     (110
       
       ((010 substs)  (001 ()))
-      ((010 ()) (111 (101101001 head (100 substs)) (map-apply-head head (011 substs)))))))
+      (#d1:1 (111 (101101001 head (100 substs)) (map-apply-head head (011 substs)))))))
 
 ; Fires a `(head cond1 cond2 ...)` rule against a fact list: finds every
 ; substitution satisfying the whole condition conjunction, and returns one
@@ -1275,5 +1275,5 @@
   (0010 (rules facts)
     ((0010 (merged) (110
         ((unify-equal? (000000 merged) (000000 facts))  facts)
-        ((010 ()) (run-multi rules merged)))) (append-new (fire-rules-multi rules facts) facts))))
+        (#d1:1 (run-multi rules merged)))) (append-new (fire-rules-multi rules facts) facts))))
 
