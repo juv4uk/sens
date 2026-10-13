@@ -39,7 +39,7 @@
         (1110
           (content-store-put (fs-objects fs) value)
           (внутрішня-мапа-вставити name address (fs-bindings fs))
-          (01010 1 (fs-revision fs)))
+          (001110 (fs-revision fs)))
         address))))
 
 ; fs-read returns (found value address) or (not-found name).
@@ -379,7 +379,7 @@
     (1110
       (fs-objects fs)
       (fs-bindings-without (внутрішня-мапа-список (fs-bindings fs)) name map-empty)
-      (01010 1 (fs-revision fs)))))
+      (001110 (fs-revision fs)))))
 
 ; Root-commit equivalence over immutable trees, derived from D3
 ; ATOM/EQ/CAR/CDR and D4 NULL; returns exact D1 at every recursion level.
@@ -423,7 +423,7 @@
                          (внутрішня-мапа-вставити (fs-package-field (001 name) event)
                                      address
                                      (fs-bindings fs))
-                         (01010 1 (fs-revision fs))))))))
+                         (001110 (fs-revision fs))))))))
               ((101 op (001 unbind))
                (1110 (001 accepted)
                      (fs-unbind fs (fs-package-field (001 name) event))))
