@@ -105,8 +105,9 @@ class TcpMechanicalDomainCensus(unittest.TestCase):
         visit(tree[0])
         self.assertIn("110", heads)
         self.assertIn("0010", heads)
-        self.assertIn("11110111", heads)
+        self.assertIn("110011100", heads)
         self.assertIn("001101001", heads)
+        self.assertNotIn("11110111", heads, "старий W8-looking виклик не допускається")
         self.assertTrue(all(1 <= len(h) <= 9 for h in heads))
 
     def test_width_mutation_never_becomes_valid_same_domain_code(self):
