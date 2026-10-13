@@ -1,7 +1,8 @@
 use crate::bignum::BigInt;
 use crate::BinaryNumber;
 use crate::domain_numeric::DomainNumericComposition;
-use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
+use crate::semantic_registry::LegacyRegistrySlot;
+use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Text7};
 use crate::DomainIdentity;
 use std::{
     cell::RefCell, cmp::Ordering, fmt, net::TcpListener, net::TcpStream, ops::Neg, rc::Rc,
@@ -493,9 +494,12 @@ pub enum Value {
     /// Ratified NEG and reduced RATIO are compositions of existing D24+
     /// natural atoms, not a new numeric domain or an n-bit scalar word.
     NumericComposition(DomainNumericComposition),
-    /// Legacy exact-eight compatibility identity. Canonical Core values use
-    /// `DomainIdentity` during the #2817 migration.
-    Sid(Sens8),
+    /// Historical W8 compatibility slot, not a canonical semantic identity.
+    ///
+    /// A slot is useful only at a migration/transport seam. It cannot be
+    /// promoted to D8 by payload equality; current semantic identity is carried
+    /// exclusively by the exact-width `DomainIdentity` variant.
+    Sid(LegacyRegistrySlot),
     /// Canonical domain-qualified Core identity.
     DomainIdentity(DomainIdentity),
     String(Rc<str>),
@@ -1004,6 +1008,41 @@ mod exact_domain_value_tests {
             CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
         )));
         assert_ne!(old, current);
+    }
+
+    #[test]
+    fn every_legacy_w8_slot_stays_distinct_from_the_same_d8_payload() {
+        for raw in 0u16..=u8::MAX as u16 {
+            let bits = raw as u8;
+            let legacy = Value::Sid(
+                crate::semantic_registry::LegacyRegistrySlot::from_packed_byte(bits),
+            );
+            let domain = Value::DomainIdentity(DomainIdentity::D8(
+                CoreD8::from_word(Bit8::new(bits).unwrap()),
+            ));
+
+            assert_eq!(
+                legacy.as_domain_identity(),
+                None,
+                "legacy W8 {bits:08b} cannot become a domain identity",
+            );
+            assert_ne!(
+                legacy,
+                domain,
+                "W8 {bits:08b} cannot alias D8 {bits:08b}",
+            );
+        }
+    }
+
+    #[test]
+    fn equal_payload_d3_and_d4_keep_their_own_widths() {
+        let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b010).unwrap()));
+        let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0010).unwrap()));
+
+        assert_eq!(d3.width(), 3);
+        assert_eq!(d4.width(), 4);
+        assert_eq!(d3.packed_bits(), d4.packed_bits());
+        assert_ne!(Value::DomainIdentity(d3), Value::DomainIdentity(d4));
     }
 }
 
