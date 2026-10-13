@@ -10,11 +10,14 @@ fn eval_outcome_value(source: &str) -> sens::Value {
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/result-status.lisp"), &mut session).unwrap();
+    // result-status.lisp and narrate.lisp carry exact-width D8/D9 words.
+    // Do not load either through the ordinary compatibility reader: it can
+    // interpret e.g. 11110111 as a numeric value instead of a domain identity.
+    let statuses = parse_exact_domain_source(include_str!("../../../lib/result-status.lisp"))
+        .expect("canonical result-status source must preserve each domain width");
+    eval_parsed_expressions(&statuses, &mut session)
+        .expect("exact-domain result-status library must load");
 
-    // narrate.lisp has exact D8/D9 heads. The ordinary compatibility parser
-    // treats those spellings as numeric literals; use the explicit exact-width
-    // source API so width remains part of identity during this test.
     let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
         .expect("canonical narration source must preserve each domain width");
     eval_parsed_expressions(&narration, &mut session)
