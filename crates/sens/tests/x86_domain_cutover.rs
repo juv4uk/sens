@@ -104,3 +104,21 @@ fn x86_lowerer_has_no_legacy_let() {
     assert!(!s.contains("(001000 "));
     assert!(!s.contains("(let ("));
 }
+
+#[test]
+fn x86_lowerer_seven_d4_local_apps_and_62_opaque_w8_rows() {
+    let source = include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp");
+    let ast = parse_mixed_exact_domain_machine_source(
+        "lib/machine/lowering/semantic-x86-64.lisp", source
+    ).expect("точнодоменний x86");
+    assert_eq!(ast.len(), 37);
+    // Шість мігрованих LET + одна раніше ратифікована локальна LAMBDA.
+    assert_eq!(source.matches("((0010 (forms)").count(), 7);
+    let history = source.split_once("; First executable semantic-lowering witness.").unwrap().0;
+    let rows = history.lines().filter(|line| {
+        let b = line.trim().as_bytes();
+        b.len() > 10 && b[0] == b'(' && b[9] == b' '
+            && b[1..9].iter().all(|v| *v == b'0' || *v == b'1')
+    }).count();
+    assert_eq!(rows, 62, "цитовані W8 не є D8-викликами");
+}
