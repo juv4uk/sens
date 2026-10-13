@@ -138,13 +138,18 @@
   (0010 (outcome)
     (1110 (001 invalid) (001 outcome-shape) outcome)))
 
+; Arity is a predicate, not a host truth value: each path returns exact D1.
+; Keep the length/equality operations at their own exact widths: D6 LENGTH
+; (000000), D8 EQUAL (11110111), with no flattening to a historical byte.
 (0011 narrate-outcome-arity?
   (0010 (outcome expected)
     (110
-      ((0100 (result-proper-list? outcome)) (001 ()))
-      ((11110111 (000000 outcome) expected)  t)
-
-      )))
+      ((0100 (result-proper-list? outcome))
+       (101 (001 (0)) (001 (1))))
+      ((11110111 (000000 outcome) expected)
+       (010 (001 ())))
+      ((010 (001 ()))
+       (101 (001 (0)) (001 (1)))))))
 
 (0011 narrate-outcome
   (0010 (outcome)
