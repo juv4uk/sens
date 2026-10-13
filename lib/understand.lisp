@@ -3,7 +3,7 @@
 ; format — the "text -> structure" half of the Advice Taker vision from
 ; private/lisp-to-knowledge.md §6, deliberately without a real NLP model.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Migrated: two-field COND only; unconditional branches use exact D1:1.
 ; Pairs with migrated lib/narrate.lisp (structure -> text). Reuses project
 ; selectors 100/011/1001/10011/100111. Width is identity; every bit valued.
 ;
@@ -26,7 +26,7 @@
       ((010 words) (001 ()))
       ((101 (100 words) (001 a)) (011 words))
       ((101 (100 words) (001 an)) (011 words))
-      ((010 (001 ())) words))))
+      (#d1:1 words))))
 
 (0011 understand-is
   (0010 (words)
@@ -49,7 +49,7 @@
        (understand-universal words))
       ((101 (1001 words) (001 is))
        (understand-is words))
-      ((010 (001 ()))
+      (#d1:1
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`.
@@ -70,5 +70,5 @@
        (understand-query-is words))
       ((101 (100 words) (001 does))
        (understand-query-relation words))
-      ((010 (001 ()))
+      (#d1:1
        (001 ())))))
