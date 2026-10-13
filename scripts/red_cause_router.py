@@ -170,7 +170,38 @@ def failure_inventory(repo, token, clock, hours, max_pages):
     raise ValueError("INCOMPLETE_INVENTORY: max page limit reached; no silent green")
 
 
-def report(findings, stats, live=None):
+def weekly_metric(records, clock, verified_ids=None):
+    """Share of ALL newly observed red cases in the last seven days resolved by swarm.
+
+    Audit mode uses internally valid ledger entries only; live mode requires
+    actual green proof-run verification. Never fabricate a rate for 0 cases.
+    """
+    start = clock - dt.timedelta(days=7)
+    cohort = []
+    for record in records:
+        try:
+            observed = utc(record["first_seen_at"])
+        except (KeyError, TypeError, ValueError, AttributeError):
+            continue  # The caller's audit already marks this row invalid.
+        if start <= observed <= clock:
+            cohort.append(record)
+    solved = [
+        r for r in cohort if r.get("state") == "resolved"
+        and r.get("resolved_by") == "swarm"
+        and not validate_case(r, clock)
+        and (verified_ids is None or r["run_id"] in verified_ids)
+    ]
+    unresolved = sum(r.get("state") != "resolved" for r in cohort)
+    total = len(cohort)
+    return {
+        "window_days": 7, "cases": total, "resolved_by_swarm": len(solved),
+        "unresolved": unresolved,
+        "percent": None if total == 0 else round(100 * len(solved) / total, 2),
+        "evidence": "ledger-only" if verified_ids is None else "github-proof-verified",
+    }
+
+
+def report(findings, stats, live=None, weekly=None):
     for ident, tag in findings[:60]:
         print(f"::error::SENS-RED run={ident} {tag}")
     if len(findings) > 60:
@@ -180,12 +211,19 @@ def report(findings, stats, live=None):
     print(f"SENS_RED_CAUSE_SUMMARY findings={len(findings)} verified_swarm={num} verified_total={den} autonomy={metric}")
     if live is not None:
         print(f"SENS_RED_CAUSE_INVENTORY failed_runs={live}")
+    if weekly is not None:
+        print("SENS_RED_WEEKLY " + json.dumps(weekly, ensure_ascii=False, sort_keys=True))
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as dst:
             dst.write(f"### SENS RED: cause routing\n\nUnresolved/audit findings: **{len(findings)}**. "
                       f"Verified without owner: **{num}/{den}** ({metric}). "
                       f"Run inventory: **{live if live is not None else 'offline'}**.\n")
+            if weekly is not None:
+                rate = 'N/A' if weekly['percent'] is None else str(weekly['percent']) + '%'
+                dst.write(f"\nSeven-day red cohort: **{weekly['resolved_by_swarm']}/{weekly['cases']}** "
+                          f"resolved by swarm (**{rate}**); outstanding: "
+                          f"**{weekly['unresolved']}**; evidence: {weekly['evidence']}.\n")
     return 1 if findings else 0
 
 
@@ -227,7 +265,8 @@ def main():
                     findings.append((ident, "UNCLASSIFIED " + failed["run_url"]))
                     if clock - utc(failed["first_seen_at"]) >= dt.timedelta(hours=24):
                         findings.append((ident, "ESCALATE_24H SWARM_TRIAGE " + failed["run_url"]))
-        return report(findings, stats, live)
+        ids = {case['run_id'] for case in verified} if args.mode == 'live' else None
+        return report(findings, stats, live, weekly_metric(data['cases'], clock, ids))
     except (OSError, ValueError, KeyError, TypeError, urllib.error.URLError) as e:
         print("::error::SENS_RED_AUDIT_BLOCKED " + str(e))
         return 1

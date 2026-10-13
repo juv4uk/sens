@@ -1,7 +1,8 @@
 name: Червоний має говорити — 24 год і UNINFORMATIVE-OUTPUT
 
-# Карантин власника 2026-10-13: неправильні тести не запускати автоматично.
-# Ручний режим збережено лише для майбутнього окремого дозволу власника.
+# Директива 2026-10-13: заборонено НЕІНФОРМАТИВНИЙ КЛАС, а не тести.
+# Тут дозволена ручна діагностика; один автоматичний workflow лишається ci.yml.
+# Самовільного запуску GitHub Actions немає.
 on:
   workflow_dispatch:
 
@@ -18,3 +19,5 @@ jobs:
         run: python3 scripts/ci_failure_contract.py self-test
       - name: Аудит 24 год, власників і завершення карантину
         run: python3 scripts/ci_failure_contract.py audit
+      - name: Причини червоних і автономність рою за сім діб
+        run: python3 scripts/red_cause_router.py audit
