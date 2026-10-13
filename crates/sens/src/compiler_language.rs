@@ -1253,7 +1253,11 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        // The compiler nucleus is authored in exact-domain syntax. The generic
+        // reader treats bare historical-looking words as numeric literals and
+        // cannot produce canonical program-data for this domain-only witness.
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses through the exact-domain reader");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
