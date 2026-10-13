@@ -59,6 +59,7 @@ mod compiler_language;
 mod domain_words;
 mod domain_identity;
 pub mod domain_ladder;
+pub use domain_ladder::DomainD10;
 #[allow(dead_code)]
 mod domain_owner_generated;
 mod packed_bits;
