@@ -283,7 +283,7 @@ jobs:
           flips=0
           for ((i=0; i<${#original[@]}; i++)); do
             if [[ "${original[i]}" != "${changed[i]}" ]]; then
-              [[ "$i" -eq 25 && "${original[i]}" == 1 && "${changed[i]}" == 0 ]] || { echo "::error::REASON_D1_MUTANT_NOT_CANONICAL index=$i"; exit 1; }
+              [[ "$i" -eq 18 && "${original[i]}" == 0 && "${changed[i]}" == 1 ]] || { echo "::error::REASON_D1_MUTANT_NOT_CANONICAL index=$i"; exit 1; }
               flips=$((flips + 1))
             fi
           done
