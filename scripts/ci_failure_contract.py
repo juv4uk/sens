@@ -94,7 +94,8 @@ def check_report(record):
         or ("exit_expected" in difference and "exit_actual" in difference)
     ):
         errors.append("invalid:first_difference")
-    if not record.get("fixture", "").startswith("tests/") or not Path(record["fixture"]).is_file():
+    fixture_path = record.get("fixture")
+    if not isinstance(fixture_path, str) or not fixture_path.startswith("tests/") or not Path(fixture_path).is_file():
         errors.append("invalid:fixture_path")
     elif digest(Path(record["fixture"]).read_bytes()) != record.get("fixture_sha256"):
         errors.append("invalid:fixture_digest")

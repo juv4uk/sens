@@ -30,17 +30,27 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Підготувати незмінний журнал відмов
+        shell: bash
+        run: : > "$RUNNER_TEMP/narrate-diagnostic.jsonl"
       - name: Контракт діагностики має відкидати відсутні поля
         run: python3 scripts/ci_failure_contract.py self-test
-      - name: Зібрати механізм виконання SENS
-        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Зібрати механізм виконання SENS і діагностувати збій
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci_failure_contract.py run \
+            --test-id narrate-sens-cli-build \
+            --layer transport \
+            --fixture tests/semantic/narrate-d3-atom-eq-law.bits \
+            --report-file "$RUNNER_TEMP/narrate-diagnostic.jsonl" \
+            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
       - name: Виконати двійкові закони через контрольовану діагностику
         shell: bash
         run: |
           set -euo pipefail
           diagnostic='scripts/ci_failure_contract.py'
           report="$RUNNER_TEMP/narrate-diagnostic.jsonl"
-          : > "$report"
           for kind in law mutant; do
             fixture="tests/semantic/narrate-d3-atom-eq-$kind.bits"
             program="$RUNNER_TEMP/narrate-$kind.sens"
