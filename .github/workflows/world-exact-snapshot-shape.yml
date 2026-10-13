@@ -7,7 +7,6 @@ on:
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - "crates/sens/tests/reasoning_world_d3_migration.rs"
       - "tests/semantic/world-exact-arity-structure.bits"
-      - "tests/semantic/world-exact-arity-witness.lisp"
       - ".github/workflows/world-exact-snapshot-shape.yml"
   push:
     branches: [main]
@@ -16,7 +15,6 @@ on:
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - "crates/sens/tests/reasoning_world_d3_migration.rs"
       - "tests/semantic/world-exact-arity-structure.bits"
-      - "tests/semantic/world-exact-arity-witness.lisp"
       - ".github/workflows/world-exact-snapshot-shape.yml"
 
 permissions:
@@ -38,6 +36,8 @@ jobs:
       - name: Run binary and SENS-owned world self-verdicts
         run: cargo test -p sens --test sens_semantic_witnesses world_exact_snapshot_shape_binary_self_verdict -- --exact --nocapture
       - name: Keep world migration source boundary
-        run: cargo test -p sens --test reasoning_world_d3_migration -- --nocapture
+        run: cargo test -p sens --test reasoning_world_d3_migration world_d3_candidate_does_not_rewrite_w8_quote_data -- --exact --nocapture
+      - name: Audit exact D3/D4 call-head source shape
+        run: cargo test -p sens --test reasoning_world_d3_migration world_shape_source_uses_only_exact_d3_d4_call_heads -- --exact --nocapture
       - name: Diff hygiene for changed files only
-        run: git diff --check HEAD^1 HEAD -- lib/world.lisp crates/sens/tests/sens_semantic_witnesses.rs crates/sens/tests/reasoning_world_d3_migration.rs tests/semantic/world-exact-arity-structure.bits tests/semantic/world-exact-arity-witness.lisp .github/workflows/world-exact-snapshot-shape.yml
+        run: git diff --check HEAD^1 HEAD -- lib/world.lisp crates/sens/tests/sens_semantic_witnesses.rs crates/sens/tests/reasoning_world_d3_migration.rs tests/semantic/world-exact-arity-structure.bits .github/workflows/world-exact-snapshot-shape.yml
