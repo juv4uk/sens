@@ -60,4 +60,39 @@ library_benchmark_group!(
     benchmarks = packed_reads_2046
 );
 
-iai_callgrind::main!(library_benchmark_groups = d3_mechanical_owner, exact_domain_packed_reads);
+/// Preallocate exactly the payload needed for the writer benchmark.
+/// Corpus generation and checks happen in setup, outside Callgrind counting.
+fn packed_write_corpus(max_width: u8) -> (BitPacker, Vec<DomainCoordinate>) {
+    assert!((1..=10).contains(&max_width));
+    let mut coordinates = Vec::new();
+    let mut payload_bits = 0usize;
+    for width in 1..=max_width {
+        for bits in 0u16..(1u16 << width) {
+            coordinates.push(DomainCoordinate::new(width, bits).unwrap());
+            payload_bits += usize::from(width);
+        }
+    }
+    assert_eq!(coordinates.len(), 2046);
+    assert_eq!(payload_bits, 18_434);
+    (BitPacker::with_capacity_bits(payload_bits), coordinates)
+}
+
+#[library_benchmark]
+#[bench::all_d1_d10(args = (10u8), setup = packed_write_corpus)]
+fn packed_writes_2046(input: (BitPacker, Vec<DomainCoordinate>)) -> usize {
+    let (mut packer, coordinates) = input;
+    for &coordinate in black_box(&coordinates) {
+        black_box(packer.push_coordinate(coordinate));
+    }
+    let output = black_box(packer.finish());
+    black_box(output.bit_len())
+}
+
+library_benchmark_group!(
+    name = exact_domain_packed_writes;
+    benchmarks = packed_writes_2046
+);
+
+iai_callgrind::main!(
+    library_benchmark_groups = d3_mechanical_owner, exact_domain_packed_reads, exact_domain_packed_writes
+);
