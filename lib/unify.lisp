@@ -100,12 +100,15 @@
       ((010 (100 term)) (101 (100 term) (001 var)))
       ((010 ()) (010 (001 (0)))))))
 
+; Canonical substitution pair access: D4:1000 CAAR and D4:0110 CDAR.
+; Both are four-bit callable identities, unlike text D7 or non-admitted D6.
+; No secondary host lookup, no reconstructed old coordinate table.
 (0011 lookup-subst
   (0010 (variable bindings)
     (110
       
       ((010 bindings)  variable)
-      ((unify-equal? (100 (100 bindings)) (1001 variable)) (011 (100 bindings)))
+      ((unify-equal? (1000 bindings) (1001 variable)) (0110 bindings))
       ((010 ()) (lookup-subst variable (011 bindings))))))
 
 (0011 extend-subst

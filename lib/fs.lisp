@@ -20,12 +20,13 @@
 ; the same explicit rejection utf8-decode-string produces for process/TCP.
 (0011 read-file
   (0010 (path)
-    (001000 ((decoded (read-file-utf8-raw path)))
+    ((0010 (decoded)
       (110
         ((101 (100 decoded) (001 decoded))
          (1001 decoded))
         (#d1:1
-         decoded)))))
+         decoded)))
+     (read-file-utf8-raw path))))
 
 ; Historical write-file returns the text after successful write;
 ; encoding policy belongs to Lisp, host only persists bytes.

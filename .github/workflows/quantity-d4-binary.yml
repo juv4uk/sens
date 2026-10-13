@@ -1,0 +1,33 @@
+name: SENS · D4 λ у наукових константах
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/quantity.lisp"
+      - "tests/semantic/quantity-d4-bind-law.bits"
+      - "tests/semantic/quantity-d4-bind-mutant.bits"
+      - "crates/sens/tests/quantity_d4_transport.rs"
+      - ".github/workflows/quantity-d4-binary.yml"
+  pull_request:
+    paths:
+      - "lib/quantity.lisp"
+      - "tests/semantic/quantity-d4-bind-law.bits"
+      - "tests/semantic/quantity-d4-bind-mutant.bits"
+      - "crates/sens/tests/quantity_d4_transport.rs"
+      - ".github/workflows/quantity-d4-binary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  binary-sens-self-verdict:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Сам SENS перевіряє лексичне зв'язування та мутант
+        run: cargo test -p sens --test quantity_d4_transport -- --nocapture

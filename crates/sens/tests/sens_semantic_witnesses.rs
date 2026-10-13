@@ -125,3 +125,30 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
         );
     }
 }
+
+const EPISTEMIC_D1_SHORTENING_LAW: &str =
+    include_str!("../../../tests/semantic/epistemic-d1-shortening-law.bits");
+
+/// Rust тільки транспортує виконувані двійкові SENS-форми.
+/// Рівність D3 ATOM(QUOTE empty) та D1:YES, негативна гілка і
+/// вибір COND визначаються виключно SENS-програмою.
+#[test]
+fn epistemic_d1_shortening_binary_sens_self_verdict() {
+    assert!(
+        EPISTEMIC_D1_SHORTENING_LAW.bytes().all(|b|
+            matches!(b, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
+        ),
+        "SENS witness must contain only binary words and separators"
+    );
+    let forms = parse_canonical_binary(EPISTEMIC_D1_SHORTENING_LAW)
+        .expect("canonical D2/D3/D1 program");
+    for form in forms.iter() {
+        let verdict = eval_parsed_expressions(
+            std::slice::from_ref(form), &mut Session::default()
+        ).expect("SENS-owned D1 law must execute").value;
+        assert_eq!(
+            verdict.as_predicate_bit(), Some(true),
+            "binary SENS self-verdict is not D1:YES: {verdict}"
+        );
+    }
+}

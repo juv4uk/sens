@@ -34,6 +34,7 @@
 (0011 d8 (load-domain "lib/domains/d8.lisp"))
 (0011 d9 (load-domain "lib/domains/d9.lisp"))
 (0011 d10 (load-domain "lib/domains/d10.lisp"))
+(0011 d11 (load-domain "lib/domains/d11.lisp"))
 
 (bitness-check (001 d1) (table-rows d1) 2)
 (bitness-check (001 d2) (table-rows d2) 4)
@@ -45,5 +46,7 @@
 (bitness-check (001 d8) (table-rows d8) 256)
 (bitness-check (001 d9) (table-rows d9) 512)
 (bitness-check (001 d10) (table-rows d10) 1024)
+; D11 — словник тестів, sparse: рівно 43 зайнятих координати з 2048 (авторитет)
+(bitness-check (001 d11) (table-rows d11) 43)
 
-(11011011 "DOMAIN-BITNESS-LAWS: PASS d1..d10 = 2,4,8,16,32,64,128,256,512,1024")
+(11011011 "DOMAIN-BITNESS-LAWS: PASS d1..d10 = 2^n; d11 = 43 (sparse testing vocabulary)")
