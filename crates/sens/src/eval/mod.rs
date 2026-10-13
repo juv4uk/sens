@@ -555,23 +555,31 @@ fn dispatch_call(
     let routed_head_sid = head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
-    let necessary_head = head_name
-        .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+    // Ratified D4 source surfaces take the exact-domain evaluator path,
+    // including historical spelling aliases already resolved by the owner
+    // registry. Only a genuinely historical W8 head retains the legacy route.
+    // Never infer a current D8 identity from an eight-bit payload.
+    if let Some(identity) = head_name.and_then(necessary_forms::domain_identity_for_symbol) {
+        return dispatch_domain_call(identity, arguments, environment, span);
+    }
+    let necessary_head = head_sid.and_then(necessary_forms::identity_for_semantic_id);
 
-    if routed_head_sid == Some(crate::sens!(00000001)) {
-        special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
-        let value = special_forms::quoted(&arguments[0])?;
-        return Ok(EvalStep::Value(value));
+    // Історичні W8 QUOTE/COND не утворюють незалежного закону виконання:
+    // лише засвідчена українська/санскритська проєкція реєстру може
+    // направити сумісний виклик до справжнього D3. Однаковий payload
+    // інших W8 і D8 не допускає такого переходу.
+    let compatible_d3 = routed_head_sid
+        .and_then(crate::semantic_registry::compatibility_d3_route_from_ratified_domains);
+    if let Some(identity) = compatible_d3 {
+        if is_d3(identity, 0b001) || is_d3(identity, 0b110) {
+            return dispatch_domain_call(identity, arguments, environment, span);
+        }
     }
     if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Lambda) {
         return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
     }
     if necessary_head == Some(necessary_forms::NecessaryFormIdentity::Define) {
         return special_forms::evaluate_definition(arguments, environment, span).map(EvalStep::Value);
-    }
-    if routed_head_sid == Some(crate::sens!(00000111)) {
-        return special_forms::evaluate_cond(arguments, environment, span);
     }
 
     if let Some(name) = head_name {
@@ -795,5 +803,106 @@ mod exact_domain_program_tests {
         let error = eval_exact_domain_program("(001 42)", &mut session)
             .expect_err("числа потребують окремого допуску D24+");
         assert_eq!(error.kind, ErrorKind::Parse);
+    }
+}
+
+#[cfg(test)]
+mod domain_eval_cutover_necessary_forms {
+    use super::*;
+
+    fn arguments(source: &str) -> (Vec<Expr>, Span) {
+        let parsed = parse(source).expect("допущена історична проєкція D4");
+        let expression = &parsed[0];
+        let ExprKind::List(parts) = &expression.kind else {
+            panic!("очікуємо викличну форму");
+        };
+        (parts[1..].to_vec(), expression.span)
+    }
+
+    #[test]
+    fn ukrainian_lambda_source_uses_exact_d4_mechanism() {
+        let (args, span) = arguments("(функція (x) x)");
+        let env = Environment::root();
+        let via_source = dispatch_call(Some("функція"), None, None, &args, &env, span)
+            .expect("джерельна проєкція D4:0010");
+        let identity = necessary_forms::domain_identity_for_symbol("функція")
+            .expect("ратифікована функція");
+        assert!(matches!(via_source, EvalStep::Value(Value::Closure(_))));
+        assert!(matches!(
+            dispatch_domain_call(identity, &args, &env, span)
+                .expect("точна D4:0010"),
+            EvalStep::Value(Value::Closure(_))
+        ));
+        assert_eq!(identity.width(), 4);
+    }
+
+    #[test]
+    fn ukrainian_define_source_uses_exact_d4_mechanism() {
+        let (args, span) = arguments("(визначити перевірка ())");
+        let source_env = Environment::root();
+        let exact_env = Environment::root();
+        let identity = necessary_forms::domain_identity_for_symbol("визначити")
+            .expect("ратифікована D4:0011");
+        dispatch_call(Some("визначити"), None, None, &args, &source_env, span)
+            .expect("визначення через доменну таблицю");
+        dispatch_domain_call(identity, &args, &exact_env, span)
+            .expect("пряме визначення D4:0011");
+        assert!(matches!(source_env.get("перевірка"), Some(Value::Nil)));
+        assert!(matches!(exact_env.get("перевірка"), Some(Value::Nil)));
+    }
+
+    #[test]
+    fn only_necessary_d4_heads_gain_this_route() {
+        assert!(necessary_forms::domain_identity_for_symbol("функція").is_some());
+        assert!(necessary_forms::domain_identity_for_symbol("визначити").is_some());
+        // D3 ATOM, a foreign symbol, and an old bare byte must not inherit
+        // the D4 necessary-form mechanism by payload or spelling.
+        assert!(necessary_forms::domain_identity_for_symbol("атом?").is_none());
+        assert!(necessary_forms::domain_identity_for_symbol("чужий-виклик").is_none());
+        assert!(necessary_forms::domain_identity_for_symbol("00001000").is_none());
+    }
+}
+
+#[cfg(test)]
+mod domain_eval_cutover_d3_compatibility {
+    use super::*;
+
+    #[test]
+    fn only_ratified_d3_projection_bridges_historical_quote_and_cond() {
+        for (legacy, bits) in [
+            (crate::sens!(00000001), 0b001u8),
+            (crate::sens!(00000111), 0b110u8),
+        ] {
+            let identity = crate::semantic_registry::compatibility_d3_route_from_ratified_domains(legacy)
+                .expect("історичний W8 має доказову проєкцію в D3");
+            assert!(is_d3(identity, bits));
+            assert_eq!(identity.width(), 3);
+        }
+        for unrelated in [crate::sens!(10101000), crate::sens!(11110111)] {
+            assert!(
+                crate::semantic_registry::compatibility_d3_route_from_ratified_domains(unrelated).is_none(),
+                "невідома W8-комірка не може стати чинним D3/D8"
+            );
+        }
+    }
+
+    #[test]
+    fn historical_quote_runs_identically_to_exact_d3_quote() {
+        let mut legacy = Session::bare();
+        let mut exact = Session::bare();
+        let old_value = eval_program("(00000001 (a b))", &mut legacy)
+            .expect("старе цитування має пройти засвідчений D3-маршрут");
+        let new_value = eval_exact_domain_program("(001 (a b))", &mut exact)
+            .expect("чинне точнодоменне цитування");
+        assert_eq!(old_value.value, new_value.value);
+    }
+
+    #[test]
+    fn legacy_cond_rejects_three_part_clause_by_current_d3_contract() {
+        let mut session = Session::bare();
+        let err = eval_program("(00000111 ((00000010 (00000001 ())) (00000001 yes) (00000001 no)))", &mut session)
+            .expect_err("двопольний D3 COND забороняє історичну тричастинну клаузу");
+        assert_eq!(err.kind, ErrorKind::InvalidForm);
+        assert!(err.message.contains("D3:110"), "{}", err.message);
     }
 }
