@@ -97,16 +97,18 @@ def check_report(record):
     ):
         errors.append("invalid:first_difference")
     fixture_path = record.get("fixture")
-    # This path is source provenance: full Cargo points to lib/compiler-nucleus.lisp,
-    # while migration checks may point to scripts/ or crates/. Keep root ownership
-    # and digest verification, not a brittle tests/-only whitelist.
+    # Source provenance includes the actual workspace manifest for full Cargo.
+    # Admit exactly Cargo.toml at the repository root, never arbitrary root files.
+    # Paths still must be inside the checkout and match their physical SHA-256.
     allowed = {"tests", "lib", "crates", "scripts", "knowledge", "benchmarks", "witnesses"}
+    root_fixture = "Cargo.toml"
     if not isinstance(fixture_path, str):
         errors.append("invalid:fixture_path")
     else:
         fixture = Path(fixture_path)
         if (fixture.is_absolute() or not fixture.parts or ".." in fixture.parts
-                or fixture.parts[0] not in allowed or not fixture.is_file()
+                or (fixture.parts[0] not in allowed and str(fixture) != root_fixture)
+                or not fixture.is_file()
                 or not fixture.resolve().is_relative_to(Path.cwd().resolve())):
             errors.append("invalid:fixture_path")
         elif digest(fixture.read_bytes()) != record.get("fixture_sha256"):
@@ -487,6 +489,14 @@ def self_test():
     )
     if check_report(pending):
         raise RuntimeError("real compiler RED with unresolved history was discarded as malformed")
+    cargo_fixture = Path("Cargo.toml")
+    cargo_report = dict(pending, fixture=str(cargo_fixture),
+                        fixture_sha256=digest(cargo_fixture.read_bytes()))
+    if check_report(cargo_report):
+        raise RuntimeError("full Cargo root-manifest provenance rejected")
+    other_root = dict(cargo_report, fixture="Cargo.lock")
+    if "invalid:fixture_path" not in check_report(other_root):
+        raise RuntimeError("arbitrary workspace-root provenance admitted")
     bad_path = dict(pending, fixture="../lib/compiler-nucleus.lisp")
     if "invalid:fixture_path" not in check_report(bad_path):
         raise RuntimeError("relative traversal escaped report path guard")
