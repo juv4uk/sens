@@ -62,6 +62,10 @@ jobs:
       - name: World D3 exact-D1 migration witnesses
         if: always()
         run: cargo test --locked -p sens --test reasoning_world_d3_migration
+      - name: Forward exact-width macro cutover witness
+        if: always()
+        run: cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
+
       - name: Forward/knowledge D3+D9 migration witnesses
         if: always()
         run: |

@@ -1,42 +1,37 @@
 ; File text policy owned by Lisp.
 ; Політика текстового читання/запису файлів, якою володіє Lisp.
 ;
-; Host capabilities `read-file-bytes` and `write-file-bytes` expose only raw
-; byte mechanism (with allowlist enforcement already applied at that
-; boundary); this layer owns UTF-8 decoding/encoding and the public meanings
-; of `read-file` and `write-file`, mirroring the split already established
-; for `process-run` (lib/process.lisp) and `tcp-read`/`tcp-write` (lib/tcp.lisp).
-; Load `lib/utf8.lisp` before this file.
-
-; #1228: `read-file` on a real multi-kilobyte file drove the pure-Lisp
-; byte-by-byte path (`utf8-decode-string` over `read-file-bytes`) to ~47s
-; (release) / ~100s (debug) for a single ~20KB registry file — see my-lisp
-; issue #333. `read-file-utf8-raw` is a raw host mechanism, high-load
-; execution only: it does not decide UTF-8 meaning, it returns the exact
-; same two-tag domain (`decoded`/`rejected invalid-utf8`) that
-; `utf8-decode-string` already defines, so this rewiring changes no
-; language-facing contract. `utf8-decode-string`/`utf8-decode`/
-; `utf8-all-bytes?` in lib/utf8.lisp are kept, unchanged, as the semantic
-; reference this mechanism is checked against (see
-; tests/utf8-fast-path-parity.lisp).
+; Migrated: two-field COND only; explicit D1 fallbacks #d1:1.
+; Reuses utf8-encode-string from lib/utf8.lisp and host mechanisms
+; read-file-utf8-raw / write-file-bytes. Width is identity; every bit valued.
 ;
-; Historical `read-file` returns the decoded text directly. Invalid UTF-8 is
-; no longer a raw Rust IO error: it returns the same explicit rejection value
-; `utf8-decode-string` already produces for process/TCP bytes.
+; Host capabilities expose only raw byte mechanism (allowlist already applied).
+; This layer owns UTF-8 decoding/encoding and public meanings of read-file /
+; write-file, mirroring process-run (lib/process.lisp) and tcp-read/tcp-write
+; (lib/tcp.lisp). Load `lib/utf8.lisp` before this file.
+;
+; #1228: pure-Lisp byte-by-byte utf8-decode-string over read-file-bytes was too
+; slow for multi-kilobyte registry files. read-file-utf8-raw is high-load host
+; mechanism only: same two-tag domain (decoded / rejected invalid-utf8) that
+; utf8-decode-string defines — language-facing contract unchanged.
+; Semantic reference remains lib/utf8.lisp (tests/utf8-fast-path-parity.lisp).
+
+; Historical read-file returns decoded text directly. Invalid UTF-8 returns
+; the same explicit rejection utf8-decode-string produces for process/TCP.
 (0011 read-file
   (0010 (path)
     (001000 ((decoded (read-file-utf8-raw path)))
       (110
         ((101 (100 decoded) (001 decoded))
          (1001 decoded))
-        ((010 (001 ()))
+        (#d1:1
          decoded)))))
 
-; Historical `write-file` returns the text it was given after a successful
-; write; encoding policy belongs to Lisp, the host only persists bytes.
+; Historical write-file returns the text after successful write;
+; encoding policy belongs to Lisp, host only persists bytes.
 (0011 write-file
   (0010 (path text)
     (1001 (1110 (write-file-bytes path (utf8-encode-string text)) text))))
- 
+
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.

@@ -67,24 +67,13 @@ fn eval_arity_predicate(source: &str) -> sens::Value {
 
 #[test]
 fn arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes() {
-    // COND consumes exact D1 only: host truthiness and structural Nil are not predicates.
-    let cases = [
-        ("(narrate-list-exact-two? (quote (unknown subject)))", true),
-        ("(narrate-list-exact-three? (quote (proved statement results)))", true),
-        ("(narrate-list-exact-two? (quote (unknown)))", false),
-        ("(narrate-list-exact-three? (quote (partial value bound extra)))", false),
-        ("(narrate-list-exact-two? 42)", false),
-        ("(narrate-list-exact-two? (quote (unknown . subject)))", false),
-    ];
-
-    for (source, expected) in cases {
-        let actual = eval_arity_predicate(source).as_predicate_bit();
-        assert_eq!(
-            actual,
-            Some(expected),
-            "{source}: expected an exact D1 PredicateBit, not host truthiness"
-        );
-    }
+    let source = include_str!("../../../tests/fixtures/narrate-arity-d1-witness.lisp");
+    let result = eval_arity_predicate(source);
+    assert_eq!(
+        result.to_string(),
+        "(narrate-arity-d1-witness (status pass))",
+        "the binary SENS witness owns positive/negative arity verdicts"
+    );
 }
 
 fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
@@ -136,27 +125,12 @@ fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
 
 #[test]
 fn known_status_tags_survive_symbol_tag_guard() {
-    let cases = [
-        (
-            r#"(narrate-outcome (make-invalid (quote invalid-goal) 42))"#,
-            "(invalid because invalid-goal payload 42)",
-        ),
-        (
-            r#"(narrate-outcome (make-unknown (quote subject)) )"#,
-            "(unknown because no-proof-found-for subject)",
-        ),
-        (
-            r#"(narrate-outcome (make-partial (quote ()) (quote (depth . 12))))"#,
-            "(partial value () bound (depth . 12))",
-        ),
-        (
-            r#"(narrate-outcome (make-blocked (quote (depends-on corpus))) )"#,
-            "(blocked because (depends-on corpus))",
-        ),
-    ];
-    for (source, expected) in cases {
-        assert_eq!(eval_outcome_narration(source), expected, "source: {source}");
-    }
+    let source = include_str!("../../../tests/fixtures/narrate-status-tag-witness.lisp");
+    assert_eq!(
+        eval_outcome_narration(source),
+        "(narrate-status-tag-witness (status pass))",
+        "the binary SENS witness owns status-tag presentation verdicts"
+    );
 }
 
 #[test]

@@ -33,7 +33,7 @@
 (0011 collect-symbols-onto
   (0010 (expr acc)
     (110
-      ((110101100 expr) (110 ((11101 expr acc) acc) ((010 (001 ())) (111 expr acc))))
+      ((SYMBOL? expr) (110 ((MEMBER expr acc) acc) ((010 (001 ())) (111 expr acc))))
       ((010 expr) acc)
       ((010 (001 ())) (collect-symbols-onto (011 expr) (collect-symbols-onto (100 expr) acc))))))
 
@@ -57,8 +57,8 @@
 (0011 insert-sorted-onto
   (0010 (sym before after)
     (110
-      ((010 after) (reverse-onto before (1110 sym)))
-      ((10110001 (11101110 sym) (11101110 (100 after)))
+      ((010 after) (reverse-onto before (LIST sym)))
+      ((STRING< (SYMBOL->STRING sym) (SYMBOL->STRING (100 after)))
        (reverse-onto before (111 sym after)))
       ((010 (001 ())) (insert-sorted-onto sym (111 (100 after) before) (011 after))))))
 
@@ -77,10 +77,10 @@
 (0011 print-table-onto
   (0010 (symbols id)
     (110 ((010 symbols) (001 ())) ((010 (001 ())) ((0010 ()
-            (11011011 (111 (11101110 (100 symbols)) id))
+            (PRINT (LIST (SYMBOL->STRING (100 symbols)) id))
             (print-table-onto (011 symbols) (01010 id 1))))))))
 
-(0011 core-forms (110101001 (110110111 "lib/core4.lisp")))
+(0011 core-forms (READ-ALL (READ-FILE "lib/core4.lisp")))
 (0011 all-symbols (collect-all-symbols core-forms (001 ())))
 (0011 sorted-symbols (sort-symbols all-symbols))
 

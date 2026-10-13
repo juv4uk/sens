@@ -16,6 +16,10 @@
 ; D1:0 (101 (001 (0)) (001 (1))). `()` is data only, never predicate false.
 ; Two-field COND throughout.
 ; Width is identity; every bit of the domain address is valued.
+; Current migration rule: every executable call whose ratified resident is in
+; D9 uses that exact 9-bit identity below. Helpers not yet admitted to a
+; callable D9-or-lower resident stay named and fail closed rather than being
+; guessed into D7/D10 or a historical W8 slot.
 
 (0011 make-proved
   (0010 (statement results)
@@ -56,13 +60,13 @@
 (0011 result-status
   (0010 (result)
     (110
-      ((result-tagged? result) (100 result))
+      ((000000100 result) (100 result))
       ((010 (001 ())) (001 ())))))
 
 (0011 result-payload
   (0010 (result)
     (110
-      ((result-tagged? result) (011 result))
+      ((000000100 result) (011 result))
       ((010 (001 ())) (001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
@@ -103,7 +107,7 @@
        (110
          ((010 (011 goal))
           (110
-            ((010 (011 (011 goal))) (result-goal? (1001 goal)))
+            ((010 (011 (011 goal))) (000011101 (1001 goal)))
             ((010 (001 ())) (101 (001 (0)) (001 (1))))))
          ((010 (001 ())) (101 (001 (0)) (001 (1))))))
       ((010 (001 ())) (010 (001 ()))))))
@@ -114,14 +118,14 @@
 (0011 result-negated-goal?
   (0010 (goal)
     (110
-      ((0100 (result-goal? goal)) (101 (001 (0)) (001 (1))))
+      ((0100 (000011101 goal)) (101 (001 (0)) (001 (1))))
       ((result-not-head? (100 goal)) (010 (001 ())))
       ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
 
 (0011 result-opposite-goal
   (0010 (goal)
     (110
-      ((result-negated-goal? goal) (1001 goal))
+      ((000111010 goal) (1001 goal))
       ((010 (001 ())) (1110 (001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
@@ -140,10 +144,10 @@
 (0011 reason-observe
   (0010 (goal rules-or-index)
     (110
-      ((0100 (result-goal? goal))
-       (make-invalid (001 invalid-goal) goal))
+      ((0100 (000011101 goal))
+       (000001101 (001 invalid-goal) goal))
       ((010 (001 ()))
-       (001001 ((opposite (result-opposite-goal goal))
+       (001001 ((opposite (000111110 goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
                 (101011011
@@ -164,14 +168,14 @@
               ((0100 (010 positive-results))
                (0100 (010 opposite-results)))
               ((010 (001 ())) (101 (001 (0)) (001 (1)))))
-            (make-disputed
+            (000000111
               (1110
-                (make-proved goal positive-results)
-                (make-proved opposite opposite-results))))
+                (000111101 goal positive-results)
+                (000111101 opposite opposite-results))))
            ((0100 (010 positive-results))
-            (make-proved goal positive-results))
+            (000111101 goal positive-results))
            ((0100 (010 opposite-results))
-            (make-proved opposite opposite-results))
+            (000111101 opposite opposite-results))
            ((010 (001 ())) (001 ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
@@ -183,11 +187,11 @@
   (0010 (module-name goal)
     (110
       ((0100 (110101100 module-name))
-       (make-invalid (001 invalid-module) module-name))
-      ((0100 (result-goal? goal))
-       (make-invalid (001 invalid-goal) goal))
+       (000001101 (001 invalid-module) module-name))
+      ((0100 (000011101 goal))
+       (000001101 (001 invalid-goal) goal))
       ((101010010 module-name)
-       (reason-observe goal (110000011 module-name)))
+       (000010000 goal (110000011 module-name)))
       ((010 (001 ()))
-       (make-blocked
+       (000100111
          (1110 (001 module-not-found) module-name))))))

@@ -312,7 +312,7 @@
         ((C1-LABEL-NAMEP (100 EXPR))
          (C1-EVAL (C1-THIRD EXPR) ENV GLOBAL))
         ((C1-LAMBDA-NAMEP (100 EXPR))
-         (FUNCTION
+         (00001
            (0010 (ARGS GLOBAL-AT-CALL)
              ((0010 (BOUND)
                 (110

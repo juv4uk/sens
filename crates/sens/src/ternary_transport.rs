@@ -381,7 +381,6 @@ pub enum D7T5Error {
     UnassignedKeyboardGlyph { byte_offset: usize },
     NonD7Word,
     UnrenderableD7Cell,
-    InvalidCapitalModifier,
     AmbiguousText,
 }
 
@@ -395,24 +394,14 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     if source.is_empty() {
         return Err(D7T5Error::EmptyText);
     }
-    let mut out = Vec::new();
-    for (offset, character) in source.char_indices() {
-        let lower: String = character.to_lowercase().collect();
-        let glyph = if character.is_uppercase() {
-            lower.as_str()
-        } else {
-            &source[offset..offset + character.len_utf8()]
-        };
-        let cell = crate::semantic_registry::d7_uk_keyboard_cell(glyph)
+    // D7 v2 assigns each Ukrainian keyboard character one exact W7 cell.
+    // The old D7 uppercase modifier must not add a phantom word.
+    source.char_indices().map(|(offset, ch)| {
+        let glyph = ch.to_string();
+        let cell = crate::semantic_registry::d7_uk_keyboard_cell(&glyph)
             .ok_or(D7T5Error::UnassignedKeyboardGlyph { byte_offset: offset })?;
-        if character.is_uppercase() {
-            // #3572: D7:0100010 (uppercase-next), not an extra glyph
-            // or a host-created resident.
-            out.push(BinarySourceWord::W7(Bit7::new(0b0100010).unwrap()));
-        }
-        out.push(BinarySourceWord::W7(Bit7::new(cell).unwrap()));
-    }
-    Ok(out)
+        Ok(BinarySourceWord::W7(Bit7::new(cell).expect("D7 table is exactly W7")))
+    }).collect()
 }
 
 /// Encode strictly admitted Ukrainian keyboard characters as D7 W7 words
@@ -431,31 +420,13 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
 pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
     let words = decode_ternary_words(packed)?;
     let mut text = String::new();
-    let mut index = 0usize;
-    while index < words.len() {
-        let BinarySourceWord::W7(mut word) = words[index] else {
+    for word in &words {
+        let BinarySourceWord::W7(cell) = word else {
             return Err(D7T5Error::NonD7Word);
         };
-        let capital = word.packed_bits() == 0b0100010;
-        if capital {
-            index += 1;
-            let Some(BinarySourceWord::W7(next)) = words.get(index).copied() else {
-                return Err(D7T5Error::InvalidCapitalModifier);
-            };
-            word = next;
-        }
-        let glyph = crate::semantic_registry::d7_uk_keyboard_glyph(word.packed_bits())
+        let glyph = crate::semantic_registry::d7_uk_keyboard_glyph(cell.packed_bits())
             .ok_or(D7T5Error::UnrenderableD7Cell)?;
-        if capital {
-            // A modifier applies only to a lowercase Ukrainian letter.
-            if glyph.chars().count() != 1 || !glyph.chars().all(char::is_lowercase) {
-                return Err(D7T5Error::InvalidCapitalModifier);
-            }
-            text.extend(glyph.chars().flat_map(char::to_uppercase));
-        } else {
-            text.push_str(glyph);
-        }
-        index += 1;
+        text.push_str(glyph);
     }
     if keyboard_d7_words(&text)? != words {
         return Err(D7T5Error::AmbiguousText);

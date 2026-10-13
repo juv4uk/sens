@@ -8,11 +8,11 @@
 //! - W1-W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier.
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
-//! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
+//! - D7 is keyboard/v2 W7 data identity and never enters callable routing by width.
 //! - D8 exact identity is current; a packed transport byte never establishes its domain.
 
 use crate::{
-    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, SoundD7,
+    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, D7DataWord,
 };
 use std::fmt;
 
@@ -24,7 +24,7 @@ pub enum DomainIdentity {
     D4(CoreD4),
     D5(CoreD5),
     D6(CoreD6),
-    D7(SoundD7),
+    D7(D7DataWord),
     D8(CoreD8),
     D9(CoreD9),
 }
@@ -61,7 +61,7 @@ impl DomainIdentity {
             BinarySourceWord::W4(word) => Self::D4(CoreD4::from_word(word)),
             BinarySourceWord::W5(word) => Self::D5(CoreD5::from_word(word)),
             BinarySourceWord::W6(word) => Self::D6(CoreD6::from_word(word)),
-            BinarySourceWord::W7(word) => Self::D7(SoundD7::from_word(word)),
+            BinarySourceWord::W7(word) => Self::D7(D7DataWord::from_word(word)),
             BinarySourceWord::W8(word) => Self::D8(CoreD8::from_word(word)),
             BinarySourceWord::W9(word) => Self::D9(CoreD9::from_word(word)),
         }
@@ -221,8 +221,8 @@ impl From<CoreD5> for DomainIdentity {
 impl From<CoreD6> for DomainIdentity {
     fn from(value: CoreD6) -> Self { Self::D6(value) }
 }
-impl From<SoundD7> for DomainIdentity {
-    fn from(value: SoundD7) -> Self { Self::D7(value) }
+impl From<D7DataWord> for DomainIdentity {
+    fn from(value: D7DataWord) -> Self { Self::D7(value) }
 }
 impl From<CoreD8> for DomainIdentity {
     fn from(value: CoreD8) -> Self { Self::D8(value) }

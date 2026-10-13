@@ -97,3 +97,55 @@ fn xmm_sentinel_shortens_quoted_data_without_collapsing_d3_and_d8() {
         );
     }
 }
+
+#[test]
+fn x86_lowerer_has_no_legacy_let() {
+    let s = include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp");
+    assert!(!s.contains("(001000 "));
+    assert!(!s.contains("(let ("));
+}
+
+#[test]
+fn x86_lowerer_seven_d4_local_apps_and_62_opaque_w8_rows() {
+    let source = include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp");
+    let ast = parse_mixed_exact_domain_machine_source(
+        "lib/machine/lowering/semantic-x86-64.lisp", source
+    ).expect("точнодоменний x86");
+    assert_eq!(ast.len(), 37);
+    // Шість мігрованих LET + одна раніше ратифікована локальна LAMBDA.
+    assert_eq!(source.matches("((0010 (forms)").count(), 7);
+    let history = source.split_once("; First executable semantic-lowering witness.").unwrap().0;
+    let rows = history.lines().filter(|line| {
+        let b = line.trim().trim_start_matches('(').as_bytes();
+        b.len() > 9 && b[8] == b' '
+            && b[..8].iter().all(|v| *v == b'0' || *v == b'1')
+    }).count();
+    assert_eq!(rows, 62, "цитовані W8 не є D8-викликами");
+}
+
+#[test]
+fn x86_exact_width_witness_checks_2046_coordinates_and_18434_bits() {
+    use sens::domain_ladder::DomainCoordinate;
+    let (mut count, mut flips) = (0usize, 0usize);
+    for width in 1..=10u8 {
+        for bits in 0..(1u16 << width) {
+            let c = DomainCoordinate::new(width, bits).unwrap();
+            let spelling = c.видимі_біти();
+            assert_eq!(spelling.len(), width as usize);
+            assert_eq!(DomainCoordinate::з_видимих_бітів(&spelling), Some(c));
+            count += 1;
+            for i in 0..width as usize {
+                let mut mutant = spelling.as_bytes().to_vec();
+                mutant[i] = if mutant[i] == b'0' { b'1' } else { b'0' };
+                let changed = DomainCoordinate::з_видимих_бітів(
+                    std::str::from_utf8(&mutant).unwrap()
+                ).unwrap();
+                assert_eq!(changed.width(), width);
+                assert_ne!(changed, c, "D{width}:{spelling}, bit {i}");
+                flips += 1;
+            }
+        }
+    }
+    assert_eq!(count, 2046);
+    assert_eq!(flips, 18_434);
+}

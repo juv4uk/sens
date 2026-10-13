@@ -16,7 +16,7 @@
 ; finite data can pass through Advice Taker's existing knowledge grammar.
 
 ; Migrated PredicateBit carriers: bare (101 1 0) → exact D1:0 form
-; (101 (001 (0)) (001 (1))). D1:1 remains (010 (001 ())). Width is identity.
+; (101 (001 (0)) (001 (1))). D1:1 is projected directly as #d1:1. Width is identity.
 ; Two-field COND only. Every bit of the domain address is valued.
 ;
 
@@ -33,7 +33,7 @@
       ((010 x)
        (101 x (001 ())))
       ; Пара: точний D1-предикат забезпечує рекурсію без невідомого імені.
-      ((010 (001 ()))
+      (#d1:1
        (science-proper-list? (011 x))))))
 
 ; Exact Lisp-owned length predicate. The caller separately rejects dotted tails.
@@ -43,7 +43,7 @@
     (110
       ((010 items) (101 remaining 0))
       ((101 remaining 0) (101 (001 (0)) (001 (1))))
-      ((010 (001 ()))
+      (#d1:1
        (science-list-length-equals? (011 items) (01011 remaining 1))))))
 
 (0011 science-sixth
@@ -69,7 +69,7 @@
        (110
          ((101 (110101100 (1001 x)) (001 ())) (001 ()))
          
-         ((010 (10011 x))  (010 (001 ())))
+         ((010 (10011 x))  #d1:1)
          ))
       )))
 
@@ -84,7 +84,7 @@
     (110
       
       ((010 dimensions)  (110
-         ((101 dimensions (001 ())) (010 (001 ())))
+         ((101 dimensions (001 ())) #d1:1)
          ))
       ((dimension? (100 dimensions))
        (science-dimensions-valid? (011 dimensions)))
@@ -217,25 +217,25 @@
        (110
          ((101 (110101100 (1001 x)) (001 ())) (001 ()))
          
-         ((010 (10011 x))  (010 (001 ())))
+         ((010 (10011 x))  #d1:1)
          ))
       )))
 
 (0011 scientific-constant-status-valid?
   (0010 (status)
     (110
-      ((101 status (001 exact-by-definition)) (010 (001 ())))
-      ((101 status (001 exact-derived)) (010 (001 ())))
-      ((101 status (001 measured)) (010 (001 ())))
+      ((101 status (001 exact-by-definition)) #d1:1)
+      ((101 status (001 exact-derived)) #d1:1)
+      ((101 status (001 measured)) #d1:1)
       )))
 
 (0011 scientific-constant-kind-valid?
   (0010 (kind)
     (110
-      ((101 kind (001 physical-defining)) (010 (001 ())))
-      ((101 kind (001 physical-derived)) (010 (001 ())))
-      ((101 kind (001 physical-measured)) (010 (001 ())))
-      ((101 kind (001 mathematical)) (010 (001 ())))
+      ((101 kind (001 physical-defining)) #d1:1)
+      ((101 kind (001 physical-derived)) #d1:1)
+      ((101 kind (001 physical-measured)) #d1:1)
+      ((101 kind (001 mathematical)) #d1:1)
       )))
 
 (0011 make-scientific-constant
@@ -265,7 +265,7 @@
          ((101 (scientific-constant-kind-valid? (110110101 x)) (001 ())) (001 ()))
          ((101 (110101100 (science-sixth x)) (001 ())) (001 ()))
          ((101 (science-source? (science-seventh x)) (001 ())) (001 ()))
-         ((010 ()) (010 (001 ())))))
+         ((010 ()) #d1:1)))
       )))
 
 (0011 scientific-constant-name

@@ -28,3 +28,6 @@ jobs:
       - name: Перевірити точнодоменне джерельне пакування та декодування
         run: >-
           cargo test --locked -p sens --lib source_packing::tests:: -- --nocapture
+      - name: Перевірити всі 2046 координат і 18434 однобітові мутації
+        run: >-
+          cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture

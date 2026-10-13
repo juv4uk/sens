@@ -194,7 +194,6 @@ pub mod semantic_registry_export {
 pub mod syntax;
 mod text7;
 mod text7_projection;
-mod text7_projection_generated;
 mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
@@ -225,7 +224,7 @@ pub use compiler_language::{
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
-pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
+pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, D7DataWord, CoreD8, CoreD9, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use binary_framing::{
@@ -259,8 +258,7 @@ pub use source_packing::{
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
-    encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
-    TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
+    encode_text7, render_text7, Text7Layout, Text7ProjectionError,
 };
 
 pub use binary_execution::{eval_t5_program, PhysicalT5Program, T5ExecutionError};
