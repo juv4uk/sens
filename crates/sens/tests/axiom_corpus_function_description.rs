@@ -89,8 +89,9 @@ fn qualified_primitive_seed_pairs_have_no_single_separating_tuple() {
 #[test]
 fn language_derived_d24_two_creates_a_single_separating_witness() {
     let one = atom(D24_ONE);
-    let Value::BinaryNumber(two) = invoke(0b01010, &one, &one)
-        .expect("SENS D5:01010 must execute on same-domain D24 words")
+    let evaluated_two = invoke(0b01010, &one, &one)
+        .expect("SENS D5:01010 must execute on same-domain D24 words");
+    let Value::BinaryNumber(ref two) = evaluated_two
     else { panic!("SENS addition did not retain an exact D24+ numeric carrier"); };
     assert_eq!(two.numeric_domain_width(), Some(24));
     assert_eq!(two.exact_numeric_domain_bits(), atom(D24_TWO).exact_numeric_domain_bits());
@@ -110,7 +111,8 @@ fn language_derived_d24_two_creates_a_single_separating_witness() {
 fn bounded_closure_only_gains_separation_after_sens_derives_two() {
     let zero = atom(D24_ZERO);
     let one = atom(D24_ONE);
-    let Value::BinaryNumber(two) = invoke(0b01010, &one, &one).expect("SENS D24 plus")
+    let evaluated_two = invoke(0b01010, &one, &one).expect("SENS D24 plus");
+    let Value::BinaryNumber(ref two) = evaluated_two
     else { panic!("derived D24 two is not a numeric-domain atom"); };
 
     let primitive = [&zero, &one];
@@ -121,11 +123,11 @@ fn bounded_closure_only_gains_separation_after_sens_derives_two() {
     assert!(primitive_separators.is_empty(),
         "primitive-only D24 words unexpectedly separate all D5 identities: {primitive_separators:?}");
 
-    let closure = [&zero, &one, &two];
+    let closure = [&zero, &one, two];
     let closure_separators = closure.iter()
         .flat_map(|a| closure.iter().map(move |b| (*a, *b)))
         .filter(|(a,b)| distinct_count(&signature(a, b)) == FUNCTIONS.len())
         .collect::<Vec<_>>();
-    assert!(closure_separators.contains(&(&one, &two)),
+    assert!(closure_separators.contains(&(&one, two)),
         "language-derived D24 two must produce a separating tuple: {closure_separators:?}");
 }
