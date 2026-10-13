@@ -131,6 +131,13 @@ jobs:
             -- cargo test --locked -p sens --lib compiler_language::tests::whole_program_artifact_verifier_rejects_duplicate_fields_before_execution -- --exact --nocapture
           cargo test --locked -p sens --lib quote_of_canonical_d3_empty_coordinate_is_structural_nil -- --nocapture
           cargo test --locked -p sens --lib quote_preserves_nonempty_d3_domain_identity -- --nocapture
+      - name: Презентація зберігає точну ширину D3/D4
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=presentation-exact-domain-width semantic_authority=domain-ladder"
+          sha256sum crates/sens/src/presentation.rs
+          cargo test --locked -p sens --lib presentation::tests::equal_payload_d3_d4_identities_remain_visibly_distinct -- --exact --nocapture
       - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
         id: law
         shell: bash
