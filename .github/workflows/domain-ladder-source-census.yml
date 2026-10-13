@@ -1,6 +1,11 @@
 name: Domain-ladder source-only bulk census
 
 on:
+  pull_request:
+    paths:
+      - scripts/migrate-domain-ladder-source-batch.py
+      - tests/test_domain_ladder_source_batch.py
+      - .github/workflows/domain-ladder-source-census.yml
   push:
     branches: [main]
     paths:

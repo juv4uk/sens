@@ -21,8 +21,9 @@ SCRIPT_DIR = ROOT / "scripts"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 from report_original_migration_candidates import load_nonprogram_classification
+from domain_tables import read_domain_table
 BITS = re.compile(r"[01]{8}\Z")
-TARGET = re.compile(r"D([1-9]):([01]{1,9})")
+TARGET = re.compile(r"D(10|[1-9]):([01]+)")
 ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
 SCOPES = ("lib/", "knowledge/", "scripts/", "experiments/", "racket/boot/")
 SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
@@ -44,7 +45,99 @@ PARTIAL_D4_WITH_LEGACY_D3 = {
 }
 
 
+
+def _exact_codebook(bits, width, origin):
+    """Require all 2**width bitstrings, no decimal IDs or padding aliases."""
+    expected = [format(number, f"0{width}b") for number in range(1 << width)]
+    if len(bits) != len(expected) or sorted(bits) != expected:
+        raise ValueError(f"{origin}: missing, duplicate or wrong-width coordinate")
+    return len(expected)
+
+
+def _git_blob_sha1(payload):
+    prefix = b"blob " + str(len(payload)).encode("ascii") + b"\\0"
+    return hashlib.sha1(prefix + payload).hexdigest()
+
+
+def verify_full_domain_bitspace(root):
+    """Migration PRECONDITION, not an admission of 2046 executable functions.
+
+    Validate D1..D9 against the historical owner foundation, except D7 whose
+    current authority is keyboard/v2. D10 is ratified as a complete 1024-code
+    catalogue, but every opcode remains execution-blocked pending proof.
+    """
+    foundation = json.loads((root / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8"))
+    d7 = json.loads((root / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8"))
+    d10 = json.loads((root / "knowledge/d10-owner-whole-domain-ratification-20261012.json").read_text(encoding="utf-8"))
+    pointer = json.loads((root / "knowledge/d10-current-inventory.json").read_text(encoding="utf-8"))
+    if foundation.get("status") != "owner-ratified":
+        raise ValueError("missing ratified D1-D9 foundation")
+    if (d7.get("schema"), d7.get("status"), d7.get("width"), d7.get("capacity"), d7.get("occupancy")) != (
+        "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128
+    ):
+        raise ValueError("D7 v2 128/128 owner authority drift")
+    if not (d10.get("ratified") is True
+            and d10.get("ratification_mode") == "ATOMIC_WHOLE_DOMAIN_NOT_PER_RESIDENT"
+            and d10["inventory"]["rows"] == 1024
+            and d10["inventory"]["code_width_bits"] == 10
+            and d10["evidence_separation"]["physical_runtime_t5_opcode_admission"] is False):
+        raise ValueError("D10 owner/codebook cannot be mistaken for runtime admission")
+    if (pointer["canonical_current"]["git_blob"] != d10["inventory"]["git_blob"]
+            or pointer["canonical_current"]["path"] != d10["inventory"]["path"]):
+        raise ValueError("D10 owner/current inventory pointer mismatch")
+    d10_payload = (root / d10["inventory"]["path"]).read_bytes()
+    if _git_blob_sha1(d10_payload) != d10["inventory"]["git_blob"]:
+        raise ValueError("D10 source blob changed without owner re-ratification")
+    d10_inventory = json.loads(d10_payload)
+    if d10_inventory.get("width") != 10 or d10_inventory.get("capacity") != 1024:
+        raise ValueError("D10 exact 10-bit inventory drift")
+    inventory_rows = d10_inventory.get("rows", [])
+    if _exact_codebook([row["coordinate"] for row in inventory_rows], 10, "D10 owner inventory") != 1024:
+        raise ValueError("D10 owner coverage incomplete")
+    if any(row.get("physical_t5_authorized") is True for row in inventory_rows):
+        raise ValueError("D10 physical runtime has not been admitted")
+    d7_cells = d7.get("table", [])
+    if _exact_codebook([row["bits"] for row in d7_cells], 7, "D7 v2 owner table") != 128:
+        raise ValueError("D7 v2 coverage incomplete")
+    for number, row in enumerate(d7_cells):
+        if row["bits"] != f"{number:07b}" or row["ascii"] != chr(number):
+            raise ValueError("D7 v2 ASCII coordinate drift")
+    for field in ("ascii", "uk", "san"):
+        glyphs = [row[field] for row in d7_cells]
+        if any(not isinstance(glyph, str) or len(glyph) != 1 for glyph in glyphs) or len(set(glyphs)) != 128:
+            raise ValueError("D7 v2 ambiguous keyboard glyphs: " + field)
+
+    total_cells = 0
+    total_bits = 0
+    widths = {}
+    for width in range(1, 11):
+        domain = f"D{width}"
+        rows = read_domain_table(root / "lib/domains" / f"d{width}.lisp")
+        coordinates = [row.bits for row in rows]
+        n = _exact_codebook(coordinates, width, domain + " canonical Lisp")
+        if width == 7:
+            if set(coordinates) != {row["bits"] for row in d7_cells} or any(row.lisp is not None for row in rows):
+                raise ValueError("D7 v2 text coordinate drift or callable injection")
+        elif width == 10:
+            if set(coordinates) != {row["coordinate"] for row in inventory_rows}:
+                raise ValueError("D10 table/inventory mismatch")
+        else:
+            owner = foundation["domains"].get(domain, {})
+            if owner.get("width") != width or set(coordinates) != set(owner.get("residents", {})):
+                raise ValueError(domain + " source table disagrees with ratified owner")
+        widths[domain] = n
+        total_cells += n
+        total_bits += n * width
+    if total_cells != 2046 or total_bits != 18434:
+        raise ValueError("D1-D10 full bitspace total unexpectedly changed")
+    return {"typed_coordinates": total_cells, "meaningful_bits": total_bits,
+            "counts_by_domain": widths, "runtime_admission_claims_added": 0}
+
+
 def authority(root):
+    # A current migration must not run against a stale D7 owner, damaged D10
+    # codebook, or wrongly widened/narrowed D1-D10 coordinates.
+    verify_full_domain_bitspace(root)
     a = json.loads((root / "knowledge/sens8-current-coverage-v1.json").read_text())
     f = json.loads((root / "knowledge/d1-d9-foundation.json").read_text())
     if a.get("status") != "AUDIT-COMPLETE" or len(a.get("rows", [])) != 256:
@@ -65,6 +158,12 @@ def authority(root):
             mapping[old] = word
         else:
             blocked[old] = x["classification"]
+    if len(mapping) + len(blocked) != 256:
+        raise ValueError("all 256 SID8 donor cells must receive an explicit disposition")
+    # Owner ratification of the complete D10 catalogue is not T5 permission.
+    # A D10 candidate stays unresolved until a separately proved runtime law.
+    if any(len(word) == 10 for word in mapping.values()):
+        raise ValueError("D10 whole-domain ratification is not executable SID8 admission")
     return mapping, blocked
 
 def rewrite(src, mapping, blocked):
@@ -111,7 +210,11 @@ def rewrite(src, mapping, blocked):
             if not closed:
                 problems.append("unclosed string")
             continue
-        if src.startswith("#'", i) or c in ("'", chr(96)):
+        if c == chr(96) or c == ",":
+            problems.append("quasiquote/unquote needs explicit parser and execution proof")
+            i += 2 if src.startswith(",@", i) else 1
+            continue
+        if src.startswith("#'", i) or c == "'":
             quote = True
             i += 2 if src.startswith("#'", i) else 1
             continue
@@ -135,10 +238,7 @@ def rewrite(src, mapping, blocked):
         if c.isspace():
             i += 1
             continue
-        if c == ",":
-            quote = True
-            i += 2 if src.startswith(",@", i) else 1
-            continue
+
         start = i
         while i < len(src) and not src[i].isspace() and src[i] not in "()'\",;" + chr(96) and not src.startswith("#|", i):
             i += 1
@@ -327,6 +427,11 @@ def run(root, write=False, selected=None):
         "admitted_heads": sum(x["potential_heads"] for x in report if x["status"] == "admitted"),
         "blocked_files": sum(x["status"] == "blocked" for x in report),
         "write": write,
+        "verified_full_ladder_coordinates": 2046,
+        "verified_full_ladder_meaningful_bits": 18434,
+        "historical_sid8_donor_cells": 256,
+        "known_legacy_successors": len(mapping),
+        "historical_held_cells": len(blocked),
     }
     return {"schema": "domain_ladder-lisp-source-batch/v1", "summary": summary, "files": report}
 
