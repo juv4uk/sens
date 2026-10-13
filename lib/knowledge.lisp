@@ -161,15 +161,14 @@
 
 (0011 check-conflict check-conflict?)
 
-; Macro AST constructor below still reifies its historical COND guard;
-; direct predicate sites elsewhere use literal W1 identities.
+; COND macro expansion now carries its W1 guard directly, without ATOM.
 (0011 tell-knowledge
   (make-macro
     (0010 (module-name rules)
       (1110 (001 cond)
       (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
       (1110 (001 quote) (001 Conflict-detected)))
-      (1110 (010 (001 ()))
+      (1110 #d1:1
       (1110 (001 def) (001 *knowledge-journal*)
       (1110 (001 append)
       (1110 (001 clauses->tell-events) (1110 (001 quote) module-name) rules)
