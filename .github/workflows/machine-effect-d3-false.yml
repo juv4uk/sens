@@ -1,0 +1,77 @@
+name: Машинний D3 false — 10 двійкових законів SENS і негативний біт
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/machine/effects/u64.lisp'
+      - 'tests/semantic/machine-effect-d3-false-*.bits'
+      - 'tests/semantic/machine-effect-d3-false-*.sens'
+      - '.github/workflows/machine-effect-d3-false.yml'
+  pull_request:
+    paths:
+      - 'lib/machine/effects/u64.lisp'
+      - 'tests/semantic/machine-effect-d3-false-*.bits'
+      - 'tests/semantic/machine-effect-d3-false-*.sens'
+      - '.github/workflows/machine-effect-d3-false.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-machine-effect-false:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Створити журнал червоного
+        shell: bash
+        run: : > "$RUNNER_TEMP/machine-effect-d3-false.jsonl"
+      - name: Збірка виконавця — механізм, не семантичний оракул
+        shell: bash
+        run: |
+          python3 scripts/ci_failure_contract.py run \
+            --test-id machine-effect-executor-build --layer transport \
+            --fixture tests/semantic/machine-effect-d3-false-law.bits \
+            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Довести структурну міграцію без повторного W8
+        shell: bash
+        run: |
+          printf '13\n' > "$RUNNER_TEMP/count-expected"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id machine-effect-thirteen-exact-d3 --layer parse \
+            --fixture tests/semantic/machine-effect-d3-false-law.bits \
+            --expected-file "$RUNNER_TEMP/count-expected" \
+            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+            -- grep -cF '(010 (001 (000)))' lib/machine/effects/u64.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id machine-effect-no-old-W8-zero --layer parse \
+            --fixture tests/semantic/machine-effect-d3-false-law.bits \
+            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+            -- bash -c '! grep -Fq "(010 (001 (00000000)))" lib/machine/effects/u64.lisp'
+      - name: Виконати позитивний і негативний D1 вердикти самим SENS
+        shell: bash
+        run: |
+          for kind in law mutant; do
+            fixture="tests/semantic/machine-effect-d3-false-$kind.bits"
+            program="tests/semantic/machine-effect-d3-false-$kind.sens"
+            if [ "$kind" = law ]; then printf '1\n' > "$RUNNER_TEMP/verdict"; else printf '0\n' > "$RUNNER_TEMP/verdict"; fi
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "machine-effect-$kind-t5-decode" --layer transport \
+              --fixture "$fixture" --expected-file "$fixture" \
+              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+              -- target/debug/sens-trit open "$program" || exit 1
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "machine-effect-$kind-eval" --layer eval \
+              --fixture "$fixture" --expected-file "$RUNNER_TEMP/verdict" \
+              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+              -- target/debug/sens "$program" || exit 1
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "machine-effect-$kind-trit-eval" --layer eval \
+              --fixture "$fixture" --expected-file "$RUNNER_TEMP/verdict" \
+              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+              -- target/debug/sens-trit eval "$program" || exit 1
+          done
+      - name: UNINFORMATIVE-OUTPUT — кожна відмова повинна говорити
+        if: always()
+        run: python3 scripts/ci_failure_contract.py scan --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" --allow-empty

@@ -12,19 +12,28 @@
 ; proved by the current exact-D5 PLUS native donor. It guarantees the mathematical
 ; sum fits u64 without making this effect a new arithmetic semantic primitive.
 
+; Exact-width structural false, not historical W8 zero:
+; ATOM(QUOTE(one-element list)) is always D1:0, independently of the
+; quoted element. Thirteen old 8-bit data words were replaced by D3:000;
+; 13*(8-3)=65 source identity bits saved. D3:000 stays structural empty;
+; it is NOT D1:0. The evaluated predicate still returns D1:0.
+; Executable binary SENS laws and an exact one-bit negative mutant:
+; tests/semantic/machine-effect-d3-false-{law,mutant}.{bits,sens}.
+; No W8->D8 reinterpretation, no new primitive, no arithmetic-law change.
+
 (0011 machine-effect-wire-denominator-one?
   (0010 (text)
     (110
-      ((110011100 text) (010 (001 (00000000))))
+      ((110011100 text) (010 (001 (000))))
       ((тотожне? (110101011 text) "/")
        (001000 ((rest (110011101 text)))
          (110
-           ((110011100 rest) (010 (001 (00000000))))
+           ((110011100 rest) (010 (001 (000))))
            ((тотожне? (110101011 rest) "1")
             (110
               ((110011100 (110011101 rest)) (010 (001 ())))
-              ((010 (001 ())) (010 (001 (00000000))))))
-           ((010 (001 ())) (010 (001 (00000000)))))))
+              ((010 (001 ())) (010 (001 (000))))))
+           ((010 (001 ())) (010 (001 (000)))))))
       ((010 (001 ()))
        (machine-effect-wire-denominator-one? (110011101 text))))))
 
@@ -34,7 +43,7 @@
       (110
         ((110101010 "#q2:" wire)
          (machine-effect-wire-denominator-one? wire))
-        ((010 (001 ())) (010 (001 (00000000))))))))
+        ((010 (001 ())) (010 (001 (000))))))))
 
 (0011 machine-effect-within-inclusive-integer-range?
   (0010 (value lower upper)
@@ -50,16 +59,16 @@
        (machine-effect-within-inclusive-integer-range?
          value 0 4294967295))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 (0011 machine-effect-bounded-u64-add-form?
   (0010 (effect)
     (110
-      ((010 effect) (010 (001 (00000000))))
+      ((010 effect) (010 (001 (000))))
       ((тотожне? (000000 effect) 3)
        (тотожне? (100 effect) (001 bounded-u64-add)))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 (0011 machine-effect-bounded-u64-add
   (0010 (left right)
@@ -87,25 +96,25 @@
        (machine-effect-within-inclusive-integer-range?
          value 0 18446744073709551615))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 (0011 machine-effect-bounded-u64-sub-form?
   (0010 (effect)
     (110
-      ((010 effect) (010 (001 (00000000))))
+      ((010 effect) (010 (001 (000))))
       ((тотожне? (000000 effect) 3)
        (тотожне? (100 effect) (001 bounded-u64-sub)))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 (0011 machine-effect-bounded-u64-mul-form?
   (0010 (effect)
     (110
-      ((010 effect) (010 (001 (00000000))))
+      ((010 effect) (010 (001 (000))))
       ((тотожне? (000000 effect) 3)
        (тотожне? (100 effect) (001 bounded-u64-mul)))
       ((010 (001 ()))
-       (010 (001 (00000000)))))))
+       (010 (001 (000)))))))
 
 ; Застосовувати лише точні предикати D5/D6 як тести D3 COND.
 ; Історичні W8 числові порівняння не є D1 PredicateBit.
