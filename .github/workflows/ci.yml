@@ -211,6 +211,9 @@ jobs:
             -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
       - name: Reason-index — 2 SENS-owned D4/D5 selector witnesses
         id: reason-selectors
+        # Keep following native SENS witnesses running; the final fail-closed
+        # scanner still blocks CI via steps.reason-selectors.outcome on failure.
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
