@@ -10,7 +10,15 @@
 ; index construction into an unbounded O(N^2) walk.
 
 (0011 *reason-index-schema* (001 reason-index/1))
-(0011 *reason-index-max-predicates* 64)
+; 64 структурні комірки-бюджети, без числової арифметики.
+; Один НОВИЙ предикат споживає одну комірку, повторний — жодної.
+; Це звичайні цитовані дані (64 порожні списки), не 64 функції.
+(0011 *reason-index-fuel*
+  (001
+    (() () () () () () () () () () () () () () () ()
+     () () () () () () () () () () () () () () () ()
+     () () () () () () () () () () () () () () () ()
+     () () () () () () () () () () () () () () () ())))
 
 ; Shape: (reason-index/1 indexed|linear ORIGINAL-RULES BUCKETS)
 ; A bucket is (PREDICATE RULE...), with rules restored to original order.
@@ -67,9 +75,8 @@
       ((010 rule)  (001 ()))
       ((010 ()) (reason-term-predicate (100 rule))))))
 
-; Buckets are accumulated with each bucket's rules reversed. Predicate count
-; is bounded, so this structural alist update has a fixed worst-case bucket
-; walk rather than an unbounded distinct-predicate walk.
+; Buckets accumulate reversed source order. Finite structural fuel bounds the
+; number of DISTINCT predicates, without unqualified numeric arithmetic.
 (0011 reason-index-add-reversed
   (0010 (predicate rule buckets)
     (110
@@ -95,7 +102,7 @@
          (reason-index-normalize-buckets (011 buckets)))))))
 
 (0011 reason-index-build-scan
-  (0010 (remaining original buckets predicate-count)
+  (0010 (remaining original buckets fuel)
     (110
       
       ((010 remaining)  (1110
@@ -113,29 +120,29 @@
             (001000 ((entry (міркування-пошук-кошика predicate buckets)))
               (110
                 
-                ((010 entry)  (110
-                   ((11010 predicate-count *reason-index-max-predicates*)
+                ; Новий ключ: порожній запас => чесний linear fallback.
+                ((010 entry)
+                 (110
+                   ((010 fuel) (reason-index-linear original))
+                   (#d1:1
                     (reason-index-build-scan
                       (011 remaining)
                       original
                       (reason-index-add-reversed
                         predicate (100 remaining) buckets)
-                      (01010 predicate-count 1)))
-                   ((unify-equal?
-                      (11010 predicate-count *reason-index-max-predicates*)
-                      (010 (001 (x))))
-                    (reason-index-linear original))))
-                ((010 ())
+                      (011 fuel)))))
+                ; Повторений ключ не займає жодного нового біта бюджету.
+                (#d1:1
                  (reason-index-build-scan
                    (011 remaining)
                    original
                    (reason-index-add-reversed
                      predicate (100 remaining) buckets)
-                   predicate-count)))))))))))
+                   fuel)))))))))))
 
 (0011 reason-make-index
   (0010 (rules)
-    (reason-index-build-scan rules rules (001 ()) 0)))
+    (reason-index-build-scan rules rules (001 ()) *reason-index-fuel*)))
 
 (0011 reason-ensure-index
   (0010 (rules-or-index)
