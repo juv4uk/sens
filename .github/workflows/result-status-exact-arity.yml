@@ -1,0 +1,37 @@
+name: Result-status exact negation arity
+
+on:
+  pull_request:
+    paths:
+      - "lib/result-status.lisp"
+      - "crates/sens/tests/result_status.rs"
+      - ".github/workflows/result-status-exact-arity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/result-status.lisp"
+      - "crates/sens/tests/result_status.rs"
+      - ".github/workflows/result-status-exact-arity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-negation-arity:
+    name: D3/D4 exact arity and result-status conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: result-status-exact-arity
+      - name: Targeted positive and negative structural-arity witness
+        run: cargo test -p sens --test result_status negation_goal_requires_exactly_one_argument_without_legacy_w8_equal -- --exact --nocapture
+      - name: Full result-status conformance suite
+        run: cargo test -p sens --test result_status -- --nocapture
+      - name: Check Lisp source balance
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib/result-status.lisp
+      - name: Diff hygiene
+        run: git diff --check
