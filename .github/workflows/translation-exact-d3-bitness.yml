@@ -1,0 +1,25 @@
+name: Переклад — точний D3 EQ та 2046 бітових координат
+
+on:
+  pull_request:
+    paths:
+      - "lib/translation.lisp"
+      - "crates/sens/tests/translation_exact_d3_bitness.rs"
+      - ".github/workflows/translation-exact-d3-bitness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-translation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Вичерпний точковий свідок D1–D10
+        run: cargo test --locked -p sens --test translation_exact_d3_bitness -- --nocapture
+      - name: Існуюча виконувана регресія перекладу
+        run: cargo test --locked -p sens --test translation_boundary -- --nocapture
