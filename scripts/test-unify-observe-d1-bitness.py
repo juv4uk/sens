@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: unify-observe COND + domain bitness.
+"""Mechanical source/width audit; semantic verdict belongs only to binary SENS.
 
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/unify-observe.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as fallback
-  3. Reuses unify surface 101010000
-  4. Key outcomes unified / unification-failure present
+  2. Historical D6/D9 executable heads are absent (no implicit callability)
+  3. Existing one-call unify compatibility boundary remains in the source
+  4. Key human outcome surfaces are present, without host truth tables
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Run:
@@ -22,12 +22,12 @@ ROOT = Path(__file__).resolve().parents[1]
 UO = ROOT / "lib" / "unify-observe.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
 REQUIRED = (
     "unify-observe",
     "unification-failure",
     "unified",
-    "101010000",
+    "уніфікація-спостереження-стан",
+    "unify",
 )
 
 
@@ -42,8 +42,9 @@ def check_uo() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"unify-observe: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("unify-observe: exact D1:1 form (010 (001 ())) missing")
+    executable = text[text.find("(0011 "):]
+    if re.search(r"\\((?:001000|101010000)(?=\\s|\\()", executable):
+        errs.append("unify-observe: historical D6/D9 executable head present")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"unify-observe: required surface missing: {fn}")
@@ -79,7 +80,7 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("UNIFY-OBSERVE: PASS — two-field COND, exact D1, unify surface reuse")
+    print("UNIFY-OBSERVE: SOURCE PASS — no host truthiness or legacy D6/D9 executable head; semantics not asserted")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")

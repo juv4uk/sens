@@ -395,36 +395,39 @@ jobs:
             --fixture tests/fixtures/semantic/tcp-exact-selftest.bits \
             --report-file "$report" \
             -- cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
-      - name: Двійковий SENS — D1 fallback у мігрованому unify-observe та однобітний мутант
+      - name: UNIFY observer — SENS D1/D3/D4/D5/D8 fail-closed law and one-bit mutant
         id: unify-observe-d1
         shell: bash
         run: |
           set -euo pipefail
-          # Mechanical source identity gate, not a host-language semantic oracle.
-          grep -Fq '(#d1:1' lib/unify-observe.lisp
-          if grep -Fq '((010 (001 ()))' lib/unify-observe.lisp; then
-            echo 'REGRESSION: computed host truth in unify-observe' >&2
+          # Structure-only guards: meaning and verdict remain binary SENS.
+          grep -Fq '(0011 уніфікація-спостереження-стан' lib/unify-observe.lisp
+          if grep -Eq '\((001000|101010000)([[:space:]]|\()' lib/unify-observe.lisp; then
+            echo 'REGRESSION: historical D6/D9 executable head in unify-observe' >&2
             exit 1
           fi
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          for verdict in law mutant; do
-            program="tests/semantic/unify-observe-d1-fallback-$verdict.sens"
-            case "$verdict" in
-              law) expected='1' ;;
-              mutant) expected='0' ;;
-            esac
-            printf '%s\n' "$expected" > "$RUNNER_TEMP/unify-observe-$verdict.expected"
-            echo "test_id=unify-observe-d1-$verdict layer=eval executor=target/debug/sens expected=$expected"
+          evidence="$RUNNER_TEMP/sens-native-evidence.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-unify-d1"
+          for program in tests/semantic/unify-observe-d1-fallback-{law,mutant}.sens; do
             sha256sum "$program"
-            python3 scripts/ci_failure_contract.py run \
-              --test-id "unify-observe-d1-$verdict" \
-              --layer eval \
-              --fixture "$program" \
-              --expected-file "$RUNNER_TEMP/unify-observe-$verdict.expected" \
-              --report-file "$report" \
-              --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
-              -- target/debug/sens "$program"
           done
+          python3 scripts/ci_failure_contract.py run \
+            --test-id unify-observe-d1-exact-domain-law \
+            --layer eval \
+            --fixture tests/semantic/unify-observe-d1-fallback-law.sens \
+            --expected-file "$RUNNER_TEMP/expected-unify-d1" \
+            --report-file "$report" \
+            --executor-report-file "$evidence" \
+            -- target/debug/sens tests/semantic/unify-observe-d1-fallback-law.sens
+          python3 scripts/ci_failure_contract.py run \
+            --test-id unify-observe-d1-one-bit-mutant \
+            --layer eval \
+            --fixture tests/semantic/unify-observe-d1-fallback-mutant.sens \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$evidence" \
+            -- target/debug/sens tests/semantic/unify-observe-d1-fallback-mutant.sens
       - name: Вбудовані перевірки реальності — інформативні гейти, що відповідають чинному main
         shell: bash
         run: |

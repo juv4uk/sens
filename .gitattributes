@@ -1,5 +1,9 @@
 * text=auto eol=lf
 
+# Physical T5 SENS files are raw bytes; newline translation would change exact bits.
+*.sens -text -diff
+*.сенс -text -diff
+
 # vendor/ holds `cargo vendor` output committed byte-for-byte, with its own
 # .cargo-checksum.json per crate. The blanket eol=lf rule above silently
 # rewrites any CRLF files in there on checkout, breaking cargo's checksum
