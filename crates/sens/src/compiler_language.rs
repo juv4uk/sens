@@ -1264,6 +1264,33 @@ mod tests {
 
         let artifact = compiler_program_artifact_from_sens(program, &digest, revision)
             .expect("SENS whole-program artifact");
+        // Failure-only forensic proof: identify the exact form rejected by
+        // the SENS-owned traversal; do not change its verdict.
+        if matches!(
+            list_values(&artifact).first(),
+            Some(Value::Symbol(tag)) if tag.as_ref() == "compiler-compilation-error/1"
+        ) {
+            eprintln!("SENS_COMPILER_REJECTED_WHOLE_PROGRAM nodes={}", decoded.len());
+            for (index, expression) in decoded.iter().enumerate() {
+                let isolated = Value::list([expr_program_data(expression)]);
+                match compiler_program_requests_from_sens(isolated) {
+                    Ok(result) => {
+                        let rows = list_values(&result);
+                        if !matches!(rows.first(), Some(Value::DomainIdentity(_))) {
+                            eprintln!("SENS_COMPILER_RESULT_SHAPE index={index} head={:?}", rows.first());
+                        }
+                        if rows.first().and_then(|value| value.as_predicate_bit()) != Some(true) {
+                            let display = format!("{expression:?}");
+                            eprintln!(
+                                "SENS_COMPILER_REJECTED_FORM index={index} expression={}",
+                                display.chars().take(2400).collect::<String>()
+                            );
+                        }
+                    }
+                    Err(error) => eprintln!("SENS_COMPILER_EXECUTION_ERROR index={index} detail={error}"),
+                }
+            }
+        }
         let verified =
             verify_compiler_program_artifact_from_sens(&artifact, &digest, revision)
                 .expect("current SENS artifact verifies");
