@@ -39,6 +39,10 @@ assert foundation["domains"]["D6"]["residents"]==d6["residents"]
 # The D1–D9 foundation ledger is a historical authority snapshot for D7.
 # Current executable and display mappings must use the separate owner D7 v2 table.
 assert foundation["domains"]["D7"]["width"]==7
+assert foundation["domains"]["D7"]["occupancy"]==128
+assert foundation["domains"]["D7"]["normative_map"]=="knowledge/d7-keyboard-v2-ratified.json"
+assert len(foundation["domains"]["D7"]["residents"])==128
+assert set(foundation["domains"]["D7"]["residents"].values())=={"text-data"}
 assert (d7["schema"],d7["status"],d7["width"],d7["capacity"],d7["occupancy"]) == (
     "sens.d7.keyboard/v2","owner-ratified",7,128,128)
 assert len(d7["table"])==128
