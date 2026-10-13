@@ -54,8 +54,18 @@ def check_narrate() -> list[str]:
     active_code = "\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith(";")
     )
-    if "(010 (001 ()))" in active_code:
-        errs.append("narrate: constructed true sentinel must be explicit #d1:1")
+    # Apply the exact-D1 sentinel guard only to the arity helpers.
+    # Other narration branches may legitimately construct structural empty lists.
+    helper_start = active_code.find("(0011 narrate-proper-list?")
+    helper_end = active_code.find("(0011 narrate-fact", helper_start)
+    if helper_start < 0 or helper_end < 0:
+        errs.append("narrate: cannot isolate the D3/D4 arity helper source")
+    else:
+        arity_helpers = active_code[helper_start:helper_end]
+        if "(010 (001 ()))" in arity_helpers:
+            errs.append("narrate: arity helpers must return exact D1 literal #d1:1")
+        if "#d1:1" not in arity_helpers or "#d1:0" not in arity_helpers:
+            errs.append("narrate: arity helpers must use both exact D1 verdict literals")
     for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
         if legacy in active_code:
             errs.append(f"narrate: legacy arity mechanism still active: {legacy}")
