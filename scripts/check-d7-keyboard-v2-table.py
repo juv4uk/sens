@@ -14,8 +14,6 @@ def run() -> None:
     ):
         raise ValueError("D7 v2 owner authority mismatch")
     raw=doc["table"]
-    if '"' in D7_TABLE.read_text(encoding="utf-8"):
-        raise ValueError("D7 table must not contain quote characters")
     actual=read_domain_table(D7_TABLE)
     if len(raw)!=128 or len(actual)!=128:
         raise ValueError("D7 v2 requires exactly 128 rows")
@@ -30,6 +28,28 @@ def run() -> None:
             expected("ascii"), expected("uk")
         ):
             raise ValueError(f"D7:{bits} glyph drift")
+    # Visible glyph spelling follows the same convention as other domain tables:
+    # letters are bare, punctuation/marks/digits are quoted.
+    # Never infer any executable role from the D7 LISP=() column.
+    import re
+    visible = re.findall(r"^  \\(([01]{7}) (.+)\\)$", D7_TABLE.read_text(encoding="utf-8"), re.MULTILINE)
+    if len(visible) != 128:
+        raise ValueError("D7 surface table must contain 128 rows")
+    def spelling(ch: str, index: int) -> str:
+        return "()" if index < 32 or index == 127 else ch if ch.isalpha() else json.dumps(ch, ensure_ascii=False)
+    for index, (bits, body) in enumerate(visible):
+        r = raw[index]
+        if bits != r["bits"]:
+            raise ValueError(f"D7:{bits} row order drift")
+        parts = [(name, spelling(r[field], index)) for name, field in (
+            ("ук", "uk"), ("укр", "uk"), ("san", "san"),
+            ("en", "ascii"), ("LISP", None), ("sym", "uk")
+        ) if field is not None]
+        for name, expected in parts:
+            if f"({name} {expected})" not in body:
+                raise ValueError(f"D7:{bits} incorrect bare/quoted {name} surface")
+        if "(LISP ())" not in body:
+            raise ValueError(f"D7:{bits} must not create a callable")
     for lang in ("ascii","uk","san"):
         glyphs=[r[lang] for r in raw]
         if len(set(glyphs))!=128 or any(len(g)!=1 for g in glyphs):

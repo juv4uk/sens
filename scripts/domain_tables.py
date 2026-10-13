@@ -53,14 +53,13 @@ def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False)
     if token == "()":
         return "()" if literal_empty else None
     if d7_surface:
-        match = re.fullmatch(r"U\+([0-9A-F]{4,6})", token)
-        if match:
-            point = int(match.group(1), 16)
-            if point > 0x10FFFF or 0xD800 <= point <= 0xDFFF:
-                raise ValueError("invalid D7 Unicode scalar escape")
-            return chr(point)
+        if token.startswith('"') and token.endswith('"'):
+            glyph = json.loads(token)
+            if len(glyph) != 1 or glyph.isalpha():
+                raise ValueError(f"D7 quoted surface must be exactly one non-letter: {token!r}")
+            return glyph
         if len(token) != 1 or not token.isalpha():
-            raise ValueError(f"invalid bare D7 surface glyph: {token!r}")
+            raise ValueError(f"invalid unquoted D7 letter: {token!r}")
         return token
     if token.startswith('"') and token.endswith('"'):
         # Escaped punctuation, whitespace and quotes belong to the glyph,
