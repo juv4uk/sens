@@ -1,4 +1,4 @@
-use sens::{load_core_library, load_time_library, Session, Value};
+use sens::{eval_program, load_core_library, load_time_library, Session, Value};
 
 
 /// Назва з таблиці функцій веде до коду, що має примітив (хостовий механізм).
@@ -96,4 +96,66 @@ fn time_stable_peers_reuse_the_same_lisp_closures() {
             }
         }
     }
+}
+
+
+fn eval_exact_time_source(
+    source: &str,
+    session: &mut Session,
+) -> Result<Value, sens::LanguageError> {
+    let expressions = sens::parse_mixed_exact_domain_time_source("lib/time.lisp", source)?;
+    Ok(sens::eval_parsed_expressions(&expressions, session)?.value)
+}
+
+#[test]
+fn time_predicates_use_exact_d1_literals_and_keep_boundary_laws() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core functions");
+    load_time_library(&mut session).expect("Lisp-owned time functions");
+
+    // Reuse actual existing time-library functions; this is not a synthetic
+    // coordinate-only test. Direct D1 values must remain typed predicates.
+    for (source, expected) in [
+        ("(internet-time-mode-valid? 4)", true),
+        ("(internet-time-mode-valid? 5)", true),
+        ("(internet-time-mode-valid? 3)", false),
+        ("(internet-time-mode-valid? 6)", false),
+        ("(internet-time-stratum-valid? 1)", true),
+        ("(internet-time-stratum-valid? 15)", true),
+        ("(internet-time-stratum-valid? 0)", false),
+        ("(internet-time-stratum-valid? 16)", false),
+        ("(deadline-reached-at? 9 10)", false),
+        ("(deadline-reached-at? 10 10)", true),
+        ("(deadline-reached-at? 11 10)", true),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "{source} must return exact D1, not a Number or structural ()"
+        );
+    }
+
+    for (source, expected) in [("#d1:0", false), ("#d1:1", true)] {
+        let value = eval_exact_time_source(source, &mut session).unwrap();
+        assert_eq!(value.as_predicate_bit(), Some(expected), "{source}");
+    }
+    for source in ["0", "1"] {
+        let value = eval_program(source, &mut session).unwrap().value;
+        assert_eq!(value.as_predicate_bit(), None, "{source} must remain numeric");
+    }
+
+    let code: String = include_str!("../../../lib/time.lisp")
+        .lines()
+        .filter(|line| !line.trim_start().starts_with(';'))
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert_eq!(code.matches("(010 (001 ()))").count(), 0,
+        "no redundant ATOM(QUOTE empty) truth constructors");
+    assert_eq!(code.matches("(101 (001 (0)) (001 (1)))").count(), 0,
+        "no redundant EQ(QUOTE 0, QUOTE 1) false constructors");
+    assert_eq!(code.matches("#d1:1").count(), 20);
+    assert_eq!(code.matches("#d1:0").count(), 4);
 }
