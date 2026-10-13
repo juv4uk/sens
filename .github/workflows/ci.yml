@@ -2,11 +2,12 @@ name: SENS — один точковий автоматичний двійков
 
 # Рівно один автоматичний job; лише SENS визначає семантичний результат.
 # Один центральний workflow: positive law + fail-closed guards.
-# Branch pushes always receive one SENS witness; new branch/merge is allowed.
+# Every branch push and pull_request receives one central SENS witness; no extra automatic workflows.
 # No paths filter: docs, implementation, migration, and workflow changes all trigger.
 on:
   push:
     branches: ['**']
+  pull_request:
   workflow_dispatch:
 
 permissions:
