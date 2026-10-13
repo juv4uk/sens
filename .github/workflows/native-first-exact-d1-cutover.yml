@@ -1,0 +1,31 @@
+name: Native-first exact-D1 source migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/dispatch/native-first.lisp"
+      - "tests/test_native_first_exact_d1_cutover.py"
+      - "crates/sens/tests/native_first_d1_cutover.rs"
+      - ".github/workflows/native-first-exact-d1-cutover.yml"
+  pull_request:
+    paths:
+      - "lib/machine/dispatch/native-first.lisp"
+      - "tests/test_native_first_exact_d1_cutover.py"
+      - "crates/sens/tests/native_first_d1_cutover.rs"
+      - ".github/workflows/native-first-exact-d1-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: "2046 D1-D10 coordinates; 30 source sites; exact bit overhead"
+        run: python3 -m unittest discover -s tests -p test_native_first_exact_d1_cutover.py -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "D1 runtime oracle and strict-negative cases"
+        run: cargo test --locked -p sens --test native_first_d1_cutover -- --nocapture

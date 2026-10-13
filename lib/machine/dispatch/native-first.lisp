@@ -26,7 +26,7 @@
     (110
       ((010 (011 cons-expression))
        (native-first-fallback expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-plan-car-cons-u64-rest-left
          expression
          (011 cons-expression))))))
@@ -36,7 +36,7 @@
     (110
       ((010 (011 cons-arguments))
        (native-first-fallback expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-plan-car-cons-u64-rest-right
          expression
          cons-arguments
@@ -55,11 +55,11 @@
                  (x86-u64-imm-value (x86-as-u64-imm (100 cons-arguments)))
                  (x86-u64-imm-value (x86-as-u64-imm (100 rest-after-left))))
                x86-pair-cell-bytes))
-            ((native-first-domain-true ())
+            ((010 (001 ()))
              (native-first-fallback expression))))
-         ((native-first-domain-true ())
+         ((010 (001 ()))
           (native-first-fallback expression))))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-fallback expression)))))
 
 (0011 native-first-plan-car-argument
@@ -67,15 +67,15 @@
     (110
       ((010 argument)
        (native-first-fallback expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (110
          ((010 (100 argument))
           (native-first-fallback expression))
-         ((native-first-domain-true ())
+         ((010 (001 ()))
           (110
             ((101 (100 argument) (001 111))
              (native-first-plan-car-cons-u64 expression argument))
-            ((native-first-domain-true ())
+            ((010 (001 ()))
              (native-first-fallback expression)))))))))
 
 (0011 native-first-plan-car
@@ -83,11 +83,11 @@
     (110
       ((010 (011 expression))
        (native-first-fallback expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (110
          ((010 (011 (011 expression)))
           (native-first-plan-car-argument expression (100 (011 expression))))
-         ((native-first-domain-true ())
+         ((010 (001 ()))
           (native-first-fallback expression)))))))
 
 (0011 native-first-plan
@@ -95,15 +95,15 @@
     (110
       ((010 expression)
        (native-first-fallback expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (110
          ((010 (100 expression))
           (native-first-fallback expression))
-         ((native-first-domain-true ())
+         ((010 (001 ()))
           (110
             ((101 (100 expression) (001 100))
              (native-first-plan-car expression))
-            ((native-first-domain-true ())
+            ((010 (001 ()))
              (native-first-fallback expression)))))))))
 
 ; #4081 — exact-domain native-first classifier.
@@ -129,13 +129,13 @@
   (0010 (shape bit0 bit1 bit2)
     (110
       ((010 shape)
-       (native-first-domain-false ()))
+       (0100 (010 (001 ()))))
       ((101 (100 shape) 3)
        (native-first-domain-key3-bits?
          (100 (011 shape))
          bit0 bit1 bit2))
-      ((native-first-domain-true ())
-       (native-first-domain-false ())))))
+      ((010 (001 ()))
+       (0100 (010 (001 ())))))))
 
 (0011 native-first-domain-key3-bits?
   (0010 (bits bit0 bit1 bit2)
@@ -146,26 +146,26 @@
           (101
             (100 (011 (011 bits)))
             bit2))
-         ((native-first-domain-true ())
-          (native-first-domain-false ()))))
-      ((native-first-domain-true ())
-       (native-first-domain-false ())))))
+         ((010 (001 ()))
+          (0100 (010 (001 ()))))))
+      ((010 (001 ()))
+       (0100 (010 (001 ())))))))
 
 (0011 native-first-domain-d3-car?
   (0010 (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
-      (native-first-domain-true ())
-      (native-first-domain-false ())
-      (native-first-domain-false ()))))
+      (010 (001 ()))
+      (0100 (010 (001 ())))
+      (0100 (010 (001 ()))))))
 
 (0011 native-first-domain-d3-cons?
   (0010 (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
-      (native-first-domain-true ())
-      (native-first-domain-true ())
-      (native-first-domain-true ()))))
+      (010 (001 ()))
+      (010 (001 ()))
+      (010 (001 ())))))
 
 (0011 native-first-plan-domain-cons-argument
   (0010 (shape-or-empty expression argument)
@@ -174,7 +174,7 @@
        (native-first-fallback expression))
       ((native-first-domain-d3-cons? shape-or-empty (100 argument))
        (native-first-plan-car-cons-u64 expression argument))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-fallback expression)))))
 
 (0011 native-first-plan-domain-car
@@ -189,9 +189,9 @@
             shape-or-empty
             expression
             (100 (011 expression))))
-         ((native-first-domain-true ())
+         ((010 (001 ()))
           (native-first-fallback expression))))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-fallback expression)))))
 
 (0011 native-first-plan-domain
@@ -201,5 +201,5 @@
        (native-first-fallback expression))
       ((native-first-domain-d3-car? shape-or-empty (100 expression))
        (native-first-plan-domain-car shape-or-empty expression))
-      ((native-first-domain-true ())
+      ((010 (001 ()))
        (native-first-fallback expression)))))
