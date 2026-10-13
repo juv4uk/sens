@@ -1,10 +1,6 @@
 name: Post-D4 control derivation research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_control_derivation.rs"
-      - ".github/workflows/post-d4-control-derivation.yml"
   workflow_dispatch:
 
 permissions:

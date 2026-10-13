@@ -1,20 +1,7 @@
 name: Proof-addressed root identity
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/proof-address-root/**"
-      - ".github/workflows/proof-address-root.yml"
-      - "benchmarks/d5-closure-map/run.py"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/proof-address-root/**"
-      - ".github/workflows/proof-address-root.yml"
-      - "benchmarks/d5-closure-map/run.py"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-
+  workflow_dispatch:
 jobs:
   proof-address:
     name: Proof address vs semantic domain

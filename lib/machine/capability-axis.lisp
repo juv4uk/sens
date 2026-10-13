@@ -123,10 +123,10 @@
       ((101 width (100 (100 rows)))
        (110
          ((101 bits (100 (011 (100 rows)))) (100 rows))
-         ((010 ())
+         (#d1:1
           (machine-capability-find-domain-row
             width bits (011 rows)))))
-      ((010 ())
+      (#d1:1
        (machine-capability-find-domain-row
          width bits (011 rows))))))
 
@@ -136,7 +136,7 @@
     (110
       ((010 (machine-capability-find-domain-row
                 width bits machine-capability-axis-v3)) ())
-      ((010 ())
+      (#d1:1
        (100 (011 (011
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3))))))))
@@ -146,7 +146,7 @@
     (110
       ((010 rows) ())
       ((101 key (100 (100 rows))) (100 rows))
-      ((010 ())
+      (#d1:1
        (machine-capability-find-row key (011 rows))))))
 
 (0011 machine-target-witness-status
@@ -154,7 +154,7 @@
     (110
       ((010 (machine-capability-find-row
                 target machine-target-witness-status-v1)) (001 absent))
-      ((010 ())
+      (#d1:1
        (100 (011
          (machine-capability-find-row
            target machine-target-witness-status-v1)))))))

@@ -1,27 +1,10 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: SENS performance reality — T5 and paired CPU
 
 # Actual measurements, independent of the existing conformance CI.
 # No cancel-in-progress: evidence remains attributable to an immutable SHA.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 3 * * *"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/sens-performance-reality.yml"
-      - "scripts/benchmark-sens-physical.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/sens_t5_spaced_view.py"
-      - "benchmarks/current-en-vs-d1d8/**"
-      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
-  pull_request:
-    paths:
-      - ".github/workflows/sens-performance-reality.yml"
-      - "scripts/benchmark-sens-physical.py"
-      - "benchmarks/current-en-vs-d1d8/**"
-      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
-
 permissions:
   contents: read
 

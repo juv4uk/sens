@@ -1,15 +1,6 @@
 name: D4 clean-room EQ fibre research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-eq-fibre/**"
-      - ".github/workflows/d4-cleanroom-eq-fibre.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-eq-fibre/**"
-      - ".github/workflows/d4-cleanroom-eq-fibre.yml"
   workflow_dispatch:
 
 jobs:

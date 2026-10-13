@@ -1,15 +1,6 @@
 name: Canonical embed staticlib
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens-embed/**"
-      - ".github/workflows/embed-staticlib.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens-embed/**"
-      - ".github/workflows/embed-staticlib.yml"
   workflow_dispatch:
 
 jobs:

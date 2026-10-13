@@ -1,18 +1,7 @@
 name: D10 linguistic mark and rewrite research
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-linguistic-law-intake-20261009.json
-      - tests/test_d10_linguistic_laws.py
-      - .github/workflows/d10-linguistic-law-intake.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-linguistic-law-intake-20261009.json
-      - tests/test_d10_linguistic_laws.py
-      - .github/workflows/d10-linguistic-law-intake.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

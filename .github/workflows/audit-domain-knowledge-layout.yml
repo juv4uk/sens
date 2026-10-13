@@ -1,20 +1,6 @@
 name: Audited domain-source knowledge/layout cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/astronomy.lisp"
-      - "knowledge/physics.lisp"
-      - "knowledge/family.lisp"
-      - "knowledge/guard-reference.lisp"
-      - "lib/machine/layout/pair-x86-64.lisp"
-      - "tests/fixtures/lisp-fs-conformance.lisp"
-      - "tests/fixtures/rivnopravnist-uk.lisp"
-      - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
-      - "tests/fixtures/semantic-coordinate-matrix-845.lisp"
-      - "tests/test_sid8_knowledge_layout_source.py"
-      - ".github/workflows/audit-domain-knowledge-layout.yml"
   workflow_dispatch:
 
 permissions:

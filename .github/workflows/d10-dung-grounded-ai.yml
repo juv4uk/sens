@@ -1,17 +1,6 @@
 name: D10 Dung grounded symbolic AI evidence
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-dung-grounded-argumentation-20261009.json'
-      - 'scripts/check_d10_dung_grounded.py'
-      - 'tests/oracles/d10_dung_grounded_sbcl.lisp'
-      - 'docs/research/d10-dung-grounded-ai.uk.md'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - '.github/workflows/d10-dung-grounded-ai.yml'
-  push:
-    branches:
-      - research/d10-dung-grounded-argumentation-20261009
   workflow_dispatch:
 
 permissions:

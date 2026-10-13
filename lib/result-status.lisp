@@ -12,8 +12,9 @@
 ;   (disputed evidence)
 ;   (invalid reason payload)
 ;
-; Migrated predicate law: true = exact D1:1 (010 (001 ())); false = exact
-; D1:0 (101 (001 (0)) (001 (1))). `()` is data only, never predicate false.
+; PredicateBit comes from exact D3:010 ATOM and D4:0100 NOT, not from
+; synthetic EQ of quoted digit lists. TRUE = D1:1; FALSE = D1:0 by
+; (0100 (010 (001 ()))). The D3:000 empty is data, never numeric zero.
 ; Two-field COND throughout.
 ; Width is identity; every bit of the domain address is valued.
 ; Current migration rule: every executable call whose ratified resident is in
@@ -48,14 +49,14 @@
 (0011 result-tagged?
   (0010 (result)
     (110
-      ((010 result) (101 (001 (0)) (001 (1))))
+      ((010 result) (0100 (010 (001 ()))))
       ((101 (100 result) (001 proved)) (010 (001 ())))
       ((101 (100 result) (001 unknown)) (010 (001 ())))
       ((101 (100 result) (001 partial)) (010 (001 ())))
       ((101 (100 result) (001 blocked)) (010 (001 ())))
       ((101 (100 result) (001 disputed)) (010 (001 ())))
       ((101 (100 result) (001 invalid)) (010 (001 ())))
-      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
+      ((010 (001 ())) (0100 (010 (001 ())))))))
 
 (0011 result-status
   (0010 (result)
@@ -78,7 +79,7 @@
       ((010 value)
        (110
          ((101 value (001 ())) (010 (001 ())))
-         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+         ((010 (001 ())) (0100 (010 (001 ()))))))
       ((010 (001 ()))
        (result-proper-list? (011 value))))))
 
@@ -89,7 +90,7 @@
     (110
       ((101 head (001 not?)) (010 (001 ())))
       ((101 head (001 not)) (010 (001 ())))
-      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
+      ((010 (001 ())) (0100 (010 (001 ())))))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -100,16 +101,16 @@
 (0011 result-goal?
   (0010 (goal)
     (110
-      ((010 goal) (101 (001 (0)) (001 (1))))
-      ((0100 (result-proper-list? goal)) (101 (001 (0)) (001 (1))))
-      ((0100 (110101100 (100 goal))) (101 (001 (0)) (001 (1))))
+      ((010 goal) (0100 (010 (001 ()))))
+      ((0100 (result-proper-list? goal)) (0100 (010 (001 ()))))
+      ((0100 (110101100 (100 goal))) (0100 (010 (001 ()))))
       ((result-not-head? (100 goal))
        (110
          ((010 (011 goal))
           (110
             ((010 (011 (011 goal))) (000011101 (1001 goal)))
-            ((010 (001 ())) (101 (001 (0)) (001 (1))))))
-         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+            ((010 (001 ())) (0100 (010 (001 ()))))))
+         ((010 (001 ())) (0100 (010 (001 ()))))))
       ((010 (001 ())) (010 (001 ()))))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
@@ -118,9 +119,9 @@
 (0011 result-negated-goal?
   (0010 (goal)
     (110
-      ((0100 (000011101 goal)) (101 (001 (0)) (001 (1))))
+      ((0100 (000011101 goal)) (0100 (010 (001 ()))))
       ((result-not-head? (100 goal)) (010 (001 ())))
-      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
+      ((010 (001 ())) (0100 (010 (001 ())))))))
 
 (0011 result-opposite-goal
   (0010 (goal)
@@ -128,6 +129,11 @@
       ((000111010 goal) (1001 goal))
       ((010 (001 ())) (1110 (001 not?) goal)))))
 
+; Both positive and opposite queries use the already-ratified exact D9:101001110
+; REASON entry, sharing one immutable reason-index. This removes two legacy
+; unqualified depth=0 intermediates and a duplicated proof-engine call.
+; Depth initialization remains owned by lib/reason.lisp and must be migrated
+; separately under D24+ numeric law; do not rebrand host 0 as D1:NO.
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
 ; - only explicit opposite proof(s) => proved(opposite, all-results)
@@ -149,25 +155,13 @@
       ((010 (001 ()))
        (001001 ((opposite (000111110 goal))
               (index (reason-ensure-index rules-or-index))
-              (positive-results
-                (101011011
-                  goal
-                  (reason-index-candidates goal index)
-                  (001 ())
-                  index
-                  0))
-              (opposite-results
-                (101011011
-                  opposite
-                  (reason-index-candidates opposite index)
-                  (001 ())
-                  index
-                  0)))
+              (positive-results (101001110 goal index))
+              (opposite-results (101001110 opposite index)))
          (110
            ((110
               ((0100 (010 positive-results))
                (0100 (010 opposite-results)))
-              ((010 (001 ())) (101 (001 (0)) (001 (1)))))
+              ((010 (001 ())) (0100 (010 (001 ())))))
             (000000111
               (1110
                 (000111101 goal positive-results)

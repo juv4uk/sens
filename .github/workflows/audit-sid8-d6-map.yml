@@ -1,15 +1,6 @@
 name: Audit historical SID8 MAP cutover into D6
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - lib/yantra.lisp
-      - lib/linter.lisp
-      - knowledge/sens8-current-coverage-v1.json
-      - knowledge/d1-d9-foundation.json
-      - tests/test_sid8_d6_map_source_cutover.py
-      - .github/workflows/audit-sid8-d6-map.yml
   workflow_dispatch:
 
 permissions:

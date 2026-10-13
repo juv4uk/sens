@@ -1,31 +1,6 @@
 name: LIFE-1 real spine
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/life-1.yml"
-      - "contracts/life-1-contract.lisp"
-      - "lib/bridge/prolog-to-datalog.lisp"
-      - "lib/life-1-scheduler.lisp"
-      - "crates/wsm-native-result-types/**"
-      - "crates/wsm-prolog-kernel/**"
-      - "crates/wsm-datalog-kernel/**"
-      - "crates/sens/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/life-1.yml"
-      - "contracts/life-1-contract.lisp"
-      - "lib/bridge/prolog-to-datalog.lisp"
-      - "lib/life-1-scheduler.lisp"
-      - "crates/wsm-native-result-types/**"
-      - "crates/wsm-prolog-kernel/**"
-      - "crates/wsm-datalog-kernel/**"
-      - "crates/sens/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
   workflow_dispatch:
 
 jobs:

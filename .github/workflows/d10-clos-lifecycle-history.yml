@@ -1,12 +1,5 @@
 name: D10 CLOS lifecycle primary-source research
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-clos-instance-lifecycle-residual-v1.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'scripts/check_d10_clos_lifecycle_history.py'
-      - '.github/workflows/d10-clos-lifecycle-history.yml'
   workflow_dispatch:
 jobs:
   guard:

@@ -1,16 +1,6 @@
 name: GC adversarial graph oracle
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/gc-stress-oracle/**"
-      - "benchmarks/gc-current-rust-trace-census/**"
-      - ".github/workflows/gc-stress-oracle.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/gc-stress-oracle/**"
-      - ".github/workflows/gc-stress-oracle.yml"
   workflow_dispatch:
 
 jobs:

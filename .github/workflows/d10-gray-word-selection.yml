@@ -1,16 +1,5 @@
 name: D10 reflected Gray binary word oracle and selection
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-gray-reflected-binary-research-v1.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-fill-v1-state.json'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - 'knowledge/d10-selection-transition-history.json'
-      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
-      - 'scripts/check_d10_gray_word_selection.py'
-      - 'tests/d10_gray_word_r6rs.ss'
-      - '.github/workflows/d10-gray-word-selection.yml'
   workflow_dispatch:
 jobs:
   gray-real-donor:

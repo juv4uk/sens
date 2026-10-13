@@ -1,14 +1,6 @@
 name: Independent root domain attack
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/independent-root-domain/**"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "benchmarks/d6-closure-map/**"
-      - "benchmarks/nonlocal-exit-domain/**"
-      - "benchmarks/root-domain-automorphism/**"
-      - ".github/workflows/independent-root-domain.yml"
   workflow_dispatch:
 
 concurrency:

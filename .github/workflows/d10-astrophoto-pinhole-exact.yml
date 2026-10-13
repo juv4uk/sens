@@ -1,18 +1,7 @@
 name: D10 astrofoto pinhole exact research
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-astrophoto-exact-pinhole-research-20261009.json
-      - tests/test_d10_astrophoto_pinhole_exact.py
-      - .github/workflows/d10-astrophoto-pinhole-exact.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-astrophoto-exact-pinhole-research-20261009.json
-      - tests/test_d10_astrophoto_pinhole_exact.py
-      - .github/workflows/d10-astrophoto-pinhole-exact.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

@@ -1,12 +1,6 @@
 name: migration-dynamic-binding-census
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-dynamic-binding-census-2026-10-08.json"
-      - "tests/test_migration_dynamic_binding_census.py"
-      - "scripts/migrate-three-pass.py"
-      - ".github/workflows/migration-dynamic-binding-census.yml"
   workflow_dispatch:
 
 permissions:

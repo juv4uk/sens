@@ -1,39 +1,6 @@
 name: Universal Frame3 Rust proof
 on:
-  push:
-    paths:
-      - 'crates/sens/src/universal_frame3.rs'
-      - 'crates/sens/src/frame3_v2.rs'
-      - 'crates/sens/examples/frame3_f3_bench.rs'
-      - 'crates/sens/examples/frame3_v3_bench.rs'
-      - 'crates/sens/examples/frame3_v2_bench.rs'
-      - 'crates/sens/examples/frame3_v2_paired_bench.rs'
-      - 'crates/sens/src/lib.rs'
-      - 'crates/sens/src/frame3_grammar.rs'
-      - 'crates/sens/src/frame3_semantic.rs'
-      - 'crates/sens/tests/frame3_grammar_rank.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - 'research/framed3/rust_codec/canonical_form_capacity.rs'
-      - 'research/framed3/semantic_redundancy_research.py'
-      - 'research/framed3/test_semantic_redundancy_research.py'
-      - '.github/workflows/universal-frame3-rust.yml'
-  pull_request:
-    paths:
-      - 'crates/sens/src/universal_frame3.rs'
-      - 'crates/sens/src/frame3_v2.rs'
-      - 'crates/sens/examples/frame3_f3_bench.rs'
-      - 'crates/sens/examples/frame3_v3_bench.rs'
-      - 'crates/sens/examples/frame3_v2_bench.rs'
-      - 'crates/sens/examples/frame3_v2_paired_bench.rs'
-      - 'crates/sens/src/lib.rs'
-      - 'crates/sens/src/frame3_grammar.rs'
-      - 'crates/sens/src/frame3_semantic.rs'
-      - 'crates/sens/tests/frame3_grammar_rank.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - 'research/framed3/rust_codec/canonical_form_capacity.rs'
-      - 'research/framed3/semantic_redundancy_research.py'
-      - 'research/framed3/test_semantic_redundancy_research.py'
-      - '.github/workflows/universal-frame3-rust.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

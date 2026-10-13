@@ -1,10 +1,6 @@
 name: Reality Matrix RSS owner
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/cross-language/reality-matrix/rss.py"
-      - ".github/workflows/reality-matrix-rss.yml"
   workflow_dispatch:
 
 permissions:

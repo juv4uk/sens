@@ -1,15 +1,6 @@
 name: GC historical donor witness
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/gc-mccarthy-donor/**"
-      - ".github/workflows/gc-mccarthy-donor.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/gc-mccarthy-donor/**"
-      - ".github/workflows/gc-mccarthy-donor.yml"
   workflow_dispatch:
 
 permissions:

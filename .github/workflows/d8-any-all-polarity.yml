@@ -1,22 +1,6 @@
 name: D8 ANY-ALL predicate polarity research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-any-all-polarity/**"
-      - "docs/research/3663-d8-any-all-polarity.md"
-      - "docs/research/3663-d8-any-all-polarity.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-any-all-polarity.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-any-all-polarity/**"
-      - "docs/research/3663-d8-any-all-polarity.md"
-      - "docs/research/3663-d8-any-all-polarity.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-any-all-polarity.yml"
   workflow_dispatch:
 
 jobs:

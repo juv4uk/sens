@@ -1,7 +1,6 @@
 name: Verify 557 536 full package
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:

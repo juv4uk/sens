@@ -302,7 +302,12 @@ def current_residents(data):
         for bits,label in desc["residents"].items():
             if domain=="D3" and label=="EMPTY":
                 continue
-            labels[str(label).upper()]=(bits,domain)
+            # A label may exist in several domains (MAP in D6 and D8, OPEN/CLOSE/
+            # TEXT-DATA likewise). The migration admits call-domains D3-D6, so the
+            # LOWEST domain must win: first-wins keeps MAP -> D6 101000 instead of
+            # letting D8 overwrite it, which made en 'map' resolve to a non-D3-D6
+            # resident and broke every my-lisp head resolution.
+            labels.setdefault(str(label).upper(),(bits,domain))
     # Include D11 testing vocabulary for binary SENS test migrations
     if "D11" in data.get("domains",{}):
         desc=data["domains"]["D11"]
@@ -427,14 +432,11 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
         historical_rows=list(HISTORICAL_ROW_RE.finditer(hist_text))
         for m in historical_rows:
             sid,my_name,historical,*_rest=m.groups()
-            candidates=set()
-            for name in (my_name,historical):
-                by_role=residents.get(normalize_role(name))
-                if by_role is not None:
-                    candidates.add(by_role)
-            if len(candidates)==1:
-                ident=next(iter(candidates))
-                proven_legacy.setdefault(sid,(ident[0],ident[1],"historical-name-successor"))
+            # Prefer my_name (modern name); historical is only for verification.
+            my_cand=residents.get(normalize_role(my_name))
+            if my_cand is not None:
+                # Modern name resolves; accept it as the authoritative mapping.
+                proven_legacy.setdefault(sid,(my_cand[0],my_cand[1],"historical-name-successor"))
 
     # Preserve knowledge that an old function existed even when it has no
     # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
@@ -566,7 +568,7 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
-    def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None):
+    def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None,d9_residents=None):
         if source_era not in ("auto","legacy","current"):
             raise ValueError(f"invalid source era {source_era!r}")
         if source_era=="current" and not admitted_d8:
@@ -576,6 +578,7 @@ class Resolver:
         self.upper=upper
         self.source_era=source_era
         self.admitted_d8=set(admitted_d8 or ())
+        self.d9_residents=set(d9_residents or ())
         self.global_binding_words={}
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
@@ -608,13 +611,17 @@ class Resolver:
                     "D3:000 is EMPTY data, never an executable call head", tok,
                 )
             if width in (7, 9, 10):
-                role = {7: "D7 keyboard text/data",
-                        9: "D9 owner residency without a verified callable route",
-                        10: "D10 owner codebook without runtime admission"}[width]
-                raise MigrationError(
-                    f"exact D{width}:{t} is {role}; executable mechanism required",
-                    tok,
-                )
+                if width == 9 and t in self.d9_residents:
+                    # Ratified D9 functions are executable
+                    pass
+                else:
+                    role = {7: "D7 keyboard text/data",
+                            9: "D9 owner residency without a verified callable route",
+                            10: "D10 owner codebook without runtime admission"}[width]
+                    raise MigrationError(
+                        f"exact D{width}:{t} is {role}; executable mechanism required",
+                        tok,
+                    )
             if width > 10:
                 raise MigrationError(
                     f"unqualified {width}-bit call head has no admitted domain mechanism",
@@ -744,12 +751,10 @@ def collect_global_bindings(forms,resolver=None):
     return bindings
 
 
-def lambda_parameter_names(node: ListNode) -> tuple[str, ...]:
-    if node.tail is not None:
-        raise MigrationError(
-            "dotted lambda parameter list has no admitted Text7 binding law",
-            node.tok,
-        )
+def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
+    if isinstance(node, Atom):
+        # Variadic lambda: bare symbol parameter binds all args as a list.
+        return (node.tok.text,)
     names=[]
     for param in node.items:
         if not isinstance(param,Atom):
@@ -758,6 +763,14 @@ def lambda_parameter_names(node: ListNode) -> tuple[str, ...]:
                 node.tok,
             )
         names.append(param.tok.text)
+    if node.tail is not None:
+        # Dotted lambda: tail parameter is also a binding.
+        if not isinstance(node.tail, Atom):
+            raise MigrationError(
+                "dotted lambda tail must be a human identifier atom",
+                node.tok,
+            )
+        names.append(node.tail.tok.text)
     return tuple(names)
 
 
@@ -795,10 +808,10 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # into a function address or Text7 glyphs by matching its spelling.
     # Bare bit words outside 0/1 remain domain addresses, *not* numerals;
     # exact D24+ payload words also require an explicit domain-bearing envelope.
+    from domain_tables import is_number_width
     binary_word = bool(re.fullmatch(r"[01]+", t))
     numeric_width = len(t)
-    domain_width = (numeric_width >= 24 and numeric_width % 24 == 0
-                    and (numeric_width // 24 & (numeric_width // 24 - 1)) == 0)
+    domain_width = is_number_width(numeric_width)
     if ((NUMERIC_RE.fullmatch(t) and not binary_word)
             or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
             or (binary_word and domain_width)):
@@ -919,14 +932,28 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
 
             # D4 LAMBDA: parameter declarations are one contextual Text7 frame
             # per identifier; its body executes under the newly introduced scope.
+            # Variadic lambda: bare symbol parameter binds all args as a list.
             if not quoted and head_bits=="0010" and idx==1:
-                if not isinstance(item,ListNode):
-                    raise MigrationError(
-                        "lambda parameters must be a proper list",
-                        item.tok if isinstance(item,Atom) else None,
+                if isinstance(item, Atom):
+                    # Variadic lambda: single parameter name
+                    lambda_names = (item.tok.text,)
+                    words.append(D2_OPEN)
+                    words.extend(
+                        encode_text7_identifier(
+                            item.tok.text,
+                            text7,
+                            Tok("ATOM", item.tok.text, item.tok.offset),
+                        )
                     )
-                lambda_names=lambda_parameter_names(item)
-                words.extend(encode_lambda_params(item,text7))
+                    words.append(D2_CLOSE)
+                    continue
+                if not isinstance(item, ListNode):
+                    raise MigrationError(
+                        "lambda parameters must be a proper list or bare symbol",
+                        item.tok if isinstance(item, Atom) else None,
+                    )
+                lambda_names = lambda_parameter_names(item)
+                words.extend(encode_lambda_params(item, text7))
                 continue
 
             if not quoted and head_bits=="0010" and idx>=2:
@@ -1115,6 +1142,7 @@ def main():
     if args.source_era=="current" and "D8" not in data.get("current_domains",()):
         ap.error("--source-era=current requires a foundation ratifying D8")
     admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
+    d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     legacy, my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
         args.semantic_registry, args.necessary_forms, args.historical_map,
@@ -1156,7 +1184,7 @@ def main():
         rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
+        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8, d9_residents)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")

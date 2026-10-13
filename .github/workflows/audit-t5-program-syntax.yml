@@ -1,27 +1,9 @@
-name: audit-t5-program-syntax
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — audit-t5-program-syntax
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    paths:
-      - '**/*.lisp'
-      - '**/*.sens'
-      - 'scripts/guard_original_sens_admission.py'
-      - 'tests/test_guard_original_sens_admission.py'
-      - 'knowledge/migration-admissions/**'
-      - 'scripts/audit_t5_program_syntax.py'
-      - 'scripts/audit_t5_file_pairs.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/migrate.py'
-      - 'crates/sens-cli/**'
-      - 'crates/sens/src/parser.rs'
-      - 'crates/sens/src/syntax.rs'
-      - 'crates/sens/src/semantic_registry.rs'
-      - 'tests/test_audit_t5_program_syntax.py'
-      - 'docs/T5-PROGRAM-SYNTAX-AUDIT-2026-10-08.uk.md'
-      - '.github/workflows/audit-t5-program-syntax.yml'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +11,7 @@ permissions:
 
 jobs:
   d2-grammar-audit:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

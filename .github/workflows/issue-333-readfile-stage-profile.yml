@@ -1,14 +1,7 @@
 name: Issue 333 read-file stage profile
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/profile-read-file-stages.lisp'
-      - '.github/workflows/issue-333-readfile-stage-profile.yml'
-      - 'lib/utf8.lisp'
-      - 'lib/fs.lisp'
-      - 'crates/my-lisp-host/src/lib.rs'
-
+  workflow_dispatch:
 jobs:
   profile:
     runs-on: ubuntu-24.04
@@ -20,7 +13,7 @@ jobs:
         with:
           shared-key: issue-333-readfile-stage-profile
       - name: Build my-lisp CLI
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin my-lisp
       - name: Profile Lisp-owned read-file stages
         run: |
           /usr/bin/time -f 'profile_wall_seconds=%e' \

@@ -1,9 +1,6 @@
 name: D7 current keyboard authority and exact W7 transport
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

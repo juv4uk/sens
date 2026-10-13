@@ -1,14 +1,26 @@
-; Core2 profile marker.
+; Core2 — точний профіль спільного ядра SENS.
+; Це завантажуваний маркер профілю, а НЕ друге джерело семантики.
+; Не вводити тут приватні T/NIL, ATOM, EQ, COND або таблицю Function8.
 ;
-; Core2 no longer owns a private T/NIL, ATOM, EQ or COND wrapper layer.
-; The selected-Core signal remains a mechanical profile fact; the shared
-; language foundation is owned once by SENS:
+; Канонічні машинні тотожності задаються ШИРИНОЮ ТА БІТАМИ:
+;   D1  0 / 1                   — НІ / ТАК, рівно один біт;
+;   D2  00 / 10 / 01 / 11     — межа / відкрити / закрити / крапка;
+;   D3  000                   — порожня структура;
+;   D3  001 / 010 / 101 / 110 — QUOTE / ATOM / EQ / COND.
+; D4 0010 (LAMBDA) і D4 0011 (DEFINE) належать своєму домену:
+; цей файл не створює для них механізм виконання.
+; D3:101 не є D8:11110111; рівність бітового суфікса не дає
+; права автоматично змінювати домен або викликати нерозкритий D8.
+; D7 цифра — текстовий символ, не математичний операнд D24+.
 ;
-;   predicate -> exact one bit (0 / 1)
-;   ATOM      -> shared Function8 law
-;   EQ        -> shared Function8 law
-;   COND      -> exactly (test expression)
+; Один точковий мовний закон:
+; tests/semantic/core2-d3-domain-law.bits
+; tests/semantic/core2-d3-domain-mutant.bits
+; Обидва — виключно двійкові слова SENS з межами D2.
+; EQ/COND формують власний D1-висновок; мутант міняє лише один
+; D1-біт очікування для випадку D3 проти D8.
+; Зовнішній код може лише транспортувати, не визначати семантику.
+; Жодної прихованої сумісності, десяткового посередника чи shim.
 ;
-; Historical Contract-6 behavior remains available in git history only.
-; This file stays as the explicit Core2 loader source so the host does not
-; need a compatibility shim or a special case.
+; Історичний Contract-6 залишається тільки в Git provenance.
+; Порожній executable-body навмисний: Core2 не дублює спільне ядро.

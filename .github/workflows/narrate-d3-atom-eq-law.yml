@@ -1,0 +1,22 @@
+# КАРАНТИН 2026-10-13: недовірений тест D3 EQ.
+# Доказ попередньої YAML-відмови: https://github.com/juv4uk/sens/actions/runs/38451690826
+# Цей workflow не може виконати тест або виділити runner.
+# Відновлення можливе тільки після явного дозволу власника і перевірки
+# фізичної двійкової SENS-програми канонічним оракулом SENS.
+# Застарілі .bits -> .lisp копії, зовнішні truth-таблиці та хибні
+# очікування видалено, а не приховано за умовою if.
+name: КАРАНТИН — D3 EQ narrate (недовірені тести)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  narrate-d3-exact:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Карантин — запуск заборонено
+        run: exit 1

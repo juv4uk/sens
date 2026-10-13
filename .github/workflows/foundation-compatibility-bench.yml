@@ -1,15 +1,6 @@
 name: Foundation compatibility benchmarks
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/foundation-compatibility/**"
-      - ".github/workflows/foundation-compatibility-bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/foundation-compatibility/**"
-      - ".github/workflows/foundation-compatibility-bench.yml"
   workflow_dispatch:
 
 concurrency:

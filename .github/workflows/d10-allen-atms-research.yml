@@ -1,13 +1,5 @@
 name: D10 Allen 1983 / ATMS 1986 historical semantic review
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-allen-atms-research-20261009.json"
-      - "scripts/check_d10_allen_atms_research.py"
-      - "tests/test_d10_allen_atms_research.py"
-      - ".github/workflows/d10-allen-atms-research.yml"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d1-d9-foundation.json"
   workflow_dispatch:
 jobs:
   source-and-independent-witnesses:

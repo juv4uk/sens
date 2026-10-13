@@ -1,17 +1,6 @@
 name: Two explicit SENS codecs - T5 default, F3 tiny
 on:
-  push:
-    paths:
-      - 'crates/sens/examples/two_codec_small_programs.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - 'docs/codec-two-routes-t5-f3-2026-10-11.uk.md'
-      - '.github/workflows/two-codec-small-f3-policy.yml'
-  pull_request:
-    paths:
-      - 'crates/sens/examples/two_codec_small_programs.rs'
-      - 'research/framed3/rust_codec/senc.rs'
-      - 'docs/codec-two-routes-t5-f3-2026-10-11.uk.md'
-      - '.github/workflows/two-codec-small-f3-policy.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

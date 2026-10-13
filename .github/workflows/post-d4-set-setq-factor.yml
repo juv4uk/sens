@@ -1,18 +1,6 @@
 name: Post-D4 SET SETQ factor
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - "docs/research/2589-set-setq-factor*.md"
-      - ".github/workflows/post-d4-set-setq-factor.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "crates/sens/tests/post_d4_set_setq_factor.rs"
-      - "docs/research/2589-set-setq-factor*.md"
-      - ".github/workflows/post-d4-set-setq-factor.yml"
   workflow_dispatch:
 
 permissions:

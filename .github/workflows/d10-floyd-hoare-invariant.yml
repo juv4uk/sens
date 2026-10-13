@@ -1,16 +1,6 @@
 name: D10 Floyd Hoare finite inductive invariant research
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json
-      - tests/test_d10_floyd_hoare_inductiveness.py
-      - knowledge/d10-proposal-ledger.tsv
-      - .github/workflows/d10-floyd-hoare-invariant.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json
-      - tests/test_d10_floyd_hoare_inductiveness.py
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

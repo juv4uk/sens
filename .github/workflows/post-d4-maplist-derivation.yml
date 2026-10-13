@@ -1,16 +1,7 @@
 name: Post-D4 MAPLIST derivation research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_maplist.rs"
-      - ".github/workflows/post-d4-maplist-derivation.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/post_d4_maplist.rs"
-      - ".github/workflows/post-d4-maplist-derivation.yml"
-
+  workflow_dispatch:
 jobs:
   focused:
     name: Post-D4 MAPLIST derivation research

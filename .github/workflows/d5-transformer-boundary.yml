@@ -1,29 +1,7 @@
 name: D5 transformer boundary research
 
 on:
-  pull_request:
-    paths:
-      - "lib/macro.lisp"
-      - "crates/sens/src/eval/macro_substrate.rs"
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "crates/sens/tests/macro_derivation.rs"
-      - "scripts/research-2181-d5-transformer-boundary.py"
-      - "docs/research/2181-d5-transformer-boundary*.md"
-      - ".github/workflows/d5-transformer-boundary.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "lib/macro.lisp"
-      - "crates/sens/src/eval/macro_substrate.rs"
-      - "crates/sens/src/eval/mod.rs"
-      - "crates/sens/src/eval/closures.rs"
-      - "crates/sens/tests/macro_derivation.rs"
-      - "scripts/research-2181-d5-transformer-boundary.py"
-      - "docs/research/2181-d5-transformer-boundary*.md"
-      - ".github/workflows/d5-transformer-boundary.yml"
-
+  workflow_dispatch:
 jobs:
   d5-transformer-boundary:
     name: D5 transformer boundary

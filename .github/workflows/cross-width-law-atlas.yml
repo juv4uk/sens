@@ -1,18 +1,6 @@
 name: Cross-width family-law atlas
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/cross-width-law-atlas.json"
-      - "scripts/check-cross-width-law-atlas.py"
-      - ".github/workflows/cross-width-law-atlas.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "knowledge/cross-width-law-atlas.json"
-      - "scripts/check-cross-width-law-atlas.py"
-      - ".github/workflows/cross-width-law-atlas.yml"
   workflow_dispatch:
 
 permissions:

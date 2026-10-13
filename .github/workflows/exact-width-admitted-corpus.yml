@@ -1,21 +1,6 @@
 name: Historical pre-bīja3 exact-width corpus donor
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2352-exact-width-corpus.py"
-      - "knowledge/exact-width-admitted-corpus.json"
-      - "knowledge/exact-width-admitted-corpus.tsv"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/exact-width-admitted-corpus.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2352-exact-width-corpus.py"
-      - "knowledge/exact-width-admitted-corpus.json"
-      - "knowledge/exact-width-admitted-corpus.tsv"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/exact-width-admitted-corpus.yml"
   workflow_dispatch:
 
 concurrency:

@@ -1,9 +1,6 @@
 name: Investigate 521 standalone write RED
 
 on:
-  push:
-    branches:
-      - investigate/521-standalone-write-red
   workflow_dispatch:
 
 permissions:
@@ -17,7 +14,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Build release CLI
-        run: cargo build --release -p my-lisp-cli --bin my-lisp
+        run: cargo build --release -p sens-cli --bin my-lisp
       - name: Generate identical 81791-char control and write witnesses
         shell: bash
         run: |

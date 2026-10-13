@@ -1,17 +1,5 @@
 name: Core3 profile exact two-field D3 source cutover
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/check-core3-profile-contract.lisp
-      - scripts/check-core4-predicate-answer-scale.lisp
-      - experiments/core4-predicate-answer-carrier-matrix.lisp
-      - tests/test_core3_profile_d3_source.py
-      - lib/core3.lisp
-      - tests/semantic/core3-executors-d3-law.bits
-      - tests/semantic/core3-executors-d3-law.sens
-      - crates/sens/tests/core3_native_semantics.rs
-      - .github/workflows/core3-profile-d3-source.yml
   workflow_dispatch:
 permissions:
   contents: read

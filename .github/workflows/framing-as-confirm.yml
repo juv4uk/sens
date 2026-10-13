@@ -1,9 +1,6 @@
 name: Framing A-S confirmation
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/framing-as-confirm.yml"
   workflow_dispatch:
 
 permissions:

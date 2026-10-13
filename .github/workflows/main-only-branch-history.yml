@@ -1,14 +1,8 @@
 name: SENS main-only branch history census
 
+# КАРАНТИН АВТОЗАПУСКІВ 2026-10-13: лише один точковий автоматичний SENS-свідок.
+# Історичний аудит гілок збережено для ручного розслідування, не запускається на create.
 on:
-  create:
-  push:
-    branches: [main]
-    paths:
-      - 'research/branch-history/20261011/index.json'
-      - 'research/branch-history/20261011/live-heads-pages-*.json'
-      - 'scripts/check_main_only_branch_history.py'
-      - '.github/workflows/main-only-branch-history.yml'
   workflow_dispatch:
 
 permissions:
@@ -39,7 +33,8 @@ jobs:
           if-no-files-found: ignore
 
   classify-legacy-branches:
-    if: github.event_name != 'create'
+    # Continue the independent historical census even if the live-ref inventory detects new branches.
+    if: ${{ always() && github.event_name != 'create' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -57,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/check_main_only_branch_history.py --check-new --classify --output "$RUNNER_TEMP/branch-verdicts.json"
+          python3 scripts/check_main_only_branch_history.py --classify --output "$RUNNER_TEMP/branch-verdicts.json"
       - name: Зберегти точні результати для черги #5549
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,12 +1,6 @@
 name: Verify #528 semantic registry parity
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/check_semantic_registry.py'
-      - 'scripts/check-semantic-registry.lisp'
-      - '.github/workflows/verify-528-semantic-registry-parity.yml'
-      - 'lib/surface/semantic-registry.lisp'
   workflow_dispatch:
 
 jobs:
@@ -16,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build my-lisp
-        run: cargo build --release -p my-lisp-cli --bin my-lisp
+        run: cargo build --release -p sens-cli --bin my-lisp
 
       - name: Require Lisp replacement
         shell: bash

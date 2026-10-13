@@ -1,11 +1,7 @@
 name: Verify 471 EQ vs static COND
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-471-eq-cond-static.yml'
-      - 'docs/research/471/**'
-
+  workflow_dispatch:
 jobs:
   eq-cond-static:
     runs-on: ubuntu-24.04

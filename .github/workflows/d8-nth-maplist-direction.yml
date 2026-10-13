@@ -1,24 +1,6 @@
 name: D8 NTH-MAPLIST direction research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-nth-maplist-direction/**"
-      - "docs/research/3744-d8-nth-maplist-direction.md"
-      - "docs/research/3744-d8-nth-maplist-direction.uk.md"
-      - "knowledge/d5-ratified.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-nth-maplist-direction.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-nth-maplist-direction/**"
-      - "docs/research/3744-d8-nth-maplist-direction.md"
-      - "docs/research/3744-d8-nth-maplist-direction.uk.md"
-      - "knowledge/d5-ratified.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-nth-maplist-direction.yml"
   workflow_dispatch:
 
 jobs:

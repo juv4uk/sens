@@ -1,10 +1,6 @@
 name: L1-L5 D4 falsifier
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/l1-l5-d4-falsifier/**"
-      - ".github/workflows/l1-l5-d4-falsifier.yml"
   workflow_dispatch:
 
 jobs:

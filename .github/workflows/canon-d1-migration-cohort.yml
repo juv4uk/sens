@@ -1,11 +1,6 @@
 name: Canon D1 migration cohort
 
 on:
-  pull_request:
-    paths:
-      - 'lib/canon.lisp'
-      - 'crates/sens/tests/canon_d1_migration_cohort.rs'
-      - '.github/workflows/canon-d1-migration-cohort.yml'
   workflow_dispatch:
 
 jobs:

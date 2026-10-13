@@ -1,5 +1,6 @@
 use sens::{
-    eval_parsed_expressions, eval_program, parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
+    eval_parsed_expressions, eval_program, parse_canonical_binary, parse_exact_domain_source,
+    parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn session() -> Session {
@@ -88,21 +89,47 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 }
 
 #[test]
-fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
+fn binary_sens_semantic_migration_witness_covers_reason_index_and_narration() {
     let mut s = session();
-    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
+
+    // SENS itself owns the reason-index CAR/EQ law and its exact D1 verdict.
+    let reason_bits = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
     assert!(
-        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
-        "the SENS law must be binary words plus separators only"
+        reason_bits.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
+        "reason-index law must contain only binary words and separators"
     );
-    let expressions =
-        parse_canonical_binary(source).expect("canonical D2-framed binary SENS must parse");
-    let result = eval_parsed_expressions(&expressions, &mut s)
-        .expect("binary SENS self-verdict rejected the production reason-index? laws");
+    let reason_exprs =
+        parse_canonical_binary(reason_bits).expect("canonical binary reason-index law");
+    let reason_verdict = eval_parsed_expressions(&reason_exprs, &mut s)
+        .expect("SENS rejected its reason-index CAR/EQ law");
     assert_eq!(
-        result.value.as_predicate_bit(),
+        reason_verdict.value.as_predicate_bit(),
         Some(true),
-        "the final positive reason-index/1 control must return exact D1:YES"
+        "reason-index law must return exact D1:YES"
+    );
+
+    let statuses = parse_exact_domain_source(include_str!("../../../lib/result-status.lisp"))
+        .expect("result-status source must preserve exact domain identities");
+    eval_parsed_expressions(&statuses, &mut s)
+        .expect("exact-domain result-status source must load");
+    let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
+        .expect("narration source must preserve D1/D3/D4 widths");
+    eval_parsed_expressions(&narration, &mut s)
+        .expect("exact-domain narration source must load");
+
+    let narrate_bits = include_str!("../../../tests/semantic/narrate-arity-d1-d4-law.bits");
+    assert!(
+        narrate_bits.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
+        "narration law must contain only binary words and separators"
+    );
+    let narrate_exprs =
+        parse_canonical_binary(narrate_bits).expect("canonical binary narration law");
+    let narrate_verdict = eval_parsed_expressions(&narrate_exprs, &mut s)
+        .expect("SENS rejected its narration arity law");
+    assert_eq!(
+        narrate_verdict.value.as_predicate_bit(),
+        Some(true),
+        "narration law must return exact D1:YES"
     );
 }
 

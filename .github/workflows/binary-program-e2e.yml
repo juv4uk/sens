@@ -1,18 +1,6 @@
 name: Binary executable T5 end-to-end
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    paths:
-      - "examples/binary/**"
-      - "crates/sens/tests/binary_program_e2e.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/eval/**"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - ".github/workflows/binary-program-e2e.yml"
   workflow_dispatch:
 
 permissions:

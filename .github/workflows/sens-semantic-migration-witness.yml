@@ -1,0 +1,38 @@
+name: "SENS: one binary semantic migration witness"
+
+on:
+  pull_request:
+    paths:
+      - "lib/reason.lisp"
+      - "lib/narrate.lisp"
+      - "lib/result-status.lisp"
+      - "crates/sens/tests/reason_index.rs"
+      - "crates/sens/tests/narrate_outcomes.rs"
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
+      - "tests/semantic/narrate-arity-d1-d4-law.bits"
+      - ".github/workflows/sens-semantic-migration-witness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/reason.lisp"
+      - "lib/narrate.lisp"
+      - "lib/result-status.lisp"
+      - "crates/sens/tests/reason_index.rs"
+      - "crates/sens/tests/narrate_outcomes.rs"
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
+      - "tests/semantic/narrate-arity-d1-d4-law.bits"
+      - ".github/workflows/sens-semantic-migration-witness.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  binary-semantic-migration:
+    name: "Одне доведення SENS: D1/D3/D4 + CAR/EQ"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Виконати єдиний двійковий SENS-свідок"
+        run: cargo test --locked -p sens --test reason_index binary_sens_semantic_migration_witness_covers_reason_index_and_narration -- --exact --nocapture

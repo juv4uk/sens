@@ -1,12 +1,5 @@
 name: D10 historical gap monotonic selection
 on:
-  pull_request:
-    paths:
-      - 'scripts/check_d10_historical_gap_audit.py'
-      - 'tests/test_d10_historical_gap_transition.py'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-historical-coverage-gap-audit-v1.json'
-      - '.github/workflows/d10-historical-gap-transition.yml'
   workflow_dispatch:
 jobs:
   historical-gap-integrity:

@@ -1,10 +1,7 @@
 name: migration-admission-sweep-490
 
 on:
-  push:
-    branches:
-      - migration-admission-sweep-490
-
+  workflow_dispatch:
 permissions:
   contents: read
 

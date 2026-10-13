@@ -6,14 +6,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, read_domain_tables
+from domain_tables import DOMAIN_TABLES, machine_word, read_domain_tables
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = DOMAIN_TABLES[:6]
 GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
 
 EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32, "D6": 64}
-DISPLAY_ONLY = {("D2", f"{n:02b}") for n in range(4)} | {("D3", "000")}
+DISPLAY_ONLY = {("D2", machine_word(n, 2)) for n in range(4)} | {("D3", "000")}
 
 
 def fail(message: str) -> None:

@@ -1,20 +1,7 @@
 name: migration-atom-t5-cohort
 
 on:
-  pull_request:
-    paths:
-      - 'tests/fixtures/migration-atom-cohort/**'
-      - 'tests/test_migration_atom_cohort.py'
-      - 'crates/sens/tests/migration_atom_cohort.rs'
-      - '.github/workflows/migration-atom-t5-cohort.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/fixtures/migration-atom-cohort/**'
-      - 'tests/test_migration_atom_cohort.py'
-      - 'crates/sens/tests/migration_atom_cohort.rs'
-      - '.github/workflows/migration-atom-t5-cohort.yml'
-
+  workflow_dispatch:
 permissions:
   contents: read
 

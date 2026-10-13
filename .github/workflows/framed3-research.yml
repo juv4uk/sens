@@ -1,15 +1,5 @@
 name: "Дослід рамкового стискання: оборотність і місткість"
 on:
-  push:
-    paths:
-      - 'research/framed3/**'
-      - 'crates/sens/tests/canonical_d2_rank_research.rs'
-      - '.github/workflows/framed3-research.yml'
-  pull_request:
-    paths:
-      - 'research/framed3/**'
-      - 'crates/sens/tests/canonical_d2_rank_research.rs'
-      - '.github/workflows/framed3-research.yml'
   workflow_dispatch:
 permissions:
   contents: read

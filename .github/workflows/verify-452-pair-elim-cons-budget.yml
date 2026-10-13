@@ -1,11 +1,7 @@
 name: Verify 452 pair-elim cons budget
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-452-pair-elim-cons-budget.yml'
-      - 'docs/research/452/**'
-
+  workflow_dispatch:
 jobs:
   cons-budget:
     runs-on: ubuntu-24.04

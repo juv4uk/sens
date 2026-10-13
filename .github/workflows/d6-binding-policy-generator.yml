@@ -1,20 +1,6 @@
 name: D6 binding-policy generator
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - "docs/research/2506-d6-binding-policy-generator*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d6-binding-policy-generator.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-      - "docs/research/2506-d6-binding-policy-generator*.md"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d6-binding-policy-generator.yml"
   workflow_dispatch:
 
 permissions:

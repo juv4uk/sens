@@ -1,19 +1,6 @@
 name: Canonical binary-only preflight (D1-D9 exact source)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    paths:
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/binary_framing.rs"
-      - "crates/sens/tests/current_binary_preflight.rs"
-      - "lib/domains/d3.lisp"
-      - "contracts/bija3-l1-l5-ratification.lisp"
-      - ".github/workflows/current-binary-preflight.yml"
   workflow_dispatch:
 
 permissions:

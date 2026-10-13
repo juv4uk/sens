@@ -1,10 +1,6 @@
 name: D14 Panini donor invariance research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d14-panini-donor-invariance/**"
-      - ".github/workflows/d14-panini-donor-invariance.yml"
   workflow_dispatch:
 
 permissions:

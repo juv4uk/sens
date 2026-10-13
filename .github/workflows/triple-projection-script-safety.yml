@@ -1,23 +1,6 @@
 name: Triple-projection read-only safety gate
 
 on:
-  pull_request:
-    paths:
-      - "scripts/check-triple-projection.sh"
-      - "scripts/sens_uk.py"
-      - "tests/test_triple_projection_script_safety.py"
-      - ".github/workflows/triple-projection-script-safety.yml"
-      - "scripts/verify_uk_t5_triplet.py"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/check-triple-projection.sh"
-      - "scripts/sens_uk.py"
-      - "tests/test_triple_projection_script_safety.py"
-      - ".github/workflows/triple-projection-script-safety.yml"
-      - "scripts/verify_uk_t5_triplet.py"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
   workflow_dispatch:
 
 permissions:

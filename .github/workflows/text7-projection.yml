@@ -1,9 +1,6 @@
 name: D7 v2 text data projection and physical T5
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

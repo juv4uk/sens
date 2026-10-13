@@ -1,21 +1,6 @@
 name: Historical flat function-table projection
 
 on:
-  pull_request:
-    paths:
-      - lib/surface/semantic-registry.lisp
-      - scripts/generate-function-table.lisp
-      - lib/generated/function-table.lisp
-      - docs/generated/function-table.md
-      - .github/workflows/function-table-256.yml
-  push:
-    branches: [main]
-    paths:
-      - lib/surface/semantic-registry.lisp
-      - scripts/generate-function-table.lisp
-      - lib/generated/function-table.lisp
-      - docs/generated/function-table.md
-      - .github/workflows/function-table-256.yml
   workflow_dispatch:
 
 permissions:

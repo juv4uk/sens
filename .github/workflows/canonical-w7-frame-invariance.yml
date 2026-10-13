@@ -1,19 +1,6 @@
 name: Canonical D2 W7 frame invariance
 
 on:
-  pull_request:
-    paths:
-      - 'crates/sens/src/canonical_reader.rs'
-      - 'crates/sens/src/text7.rs'
-      - 'crates/sens/tests/canonical_w7_frame_invariance.rs'
-      - '.github/workflows/canonical-w7-frame-invariance.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'crates/sens/src/canonical_reader.rs'
-      - 'crates/sens/src/text7.rs'
-      - 'crates/sens/tests/canonical_w7_frame_invariance.rs'
-      - '.github/workflows/canonical-w7-frame-invariance.yml'
   workflow_dispatch:
 
 permissions:

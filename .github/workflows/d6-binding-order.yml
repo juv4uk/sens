@@ -1,15 +1,6 @@
 name: D6 binding order research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-binding-order/**"
-      - ".github/workflows/d6-binding-order.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-binding-order/**"
-      - ".github/workflows/d6-binding-order.yml"
   workflow_dispatch:
 
 jobs:

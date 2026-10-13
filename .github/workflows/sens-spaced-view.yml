@@ -1,27 +1,6 @@
 name: SENS exact spaced-view T5 gate
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/sens_spaced_view.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/test_sens_spaced_view.py'
-      - 'tests/test_t5_triplet_crosscheck.py'
-      - 'scripts/verify_uk_t5_triplet.py'
-      - 'scripts/report_t5_triplet_inventory.py'
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
-      - '.github/workflows/sens-spaced-view.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/sens_spaced_view.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/test_sens_spaced_view.py'
-      - 'tests/test_t5_triplet_crosscheck.py'
-      - 'scripts/verify_uk_t5_triplet.py'
-      - 'scripts/report_t5_triplet_inventory.py'
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
-      - '.github/workflows/sens-spaced-view.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,15 +1,6 @@
 name: D6 parity duality research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-parity-duality/**"
-      - ".github/workflows/d6-parity-duality.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-parity-duality/**"
-      - ".github/workflows/d6-parity-duality.yml"
   workflow_dispatch:
 
 jobs:

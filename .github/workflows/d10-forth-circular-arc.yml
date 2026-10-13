@@ -1,22 +1,7 @@
 name: D10 Forth circular arc evidence
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-forth-circular-arc-v1.json
-      - docs/research/D10-FORTH-CIRCULAR-ARC.uk.md
-      - tests/test_d10_forth_circular_arc.py
-      - tests/oracles/d10-forth-within.fs
-      - .github/workflows/d10-forth-circular-arc.yml
-  push:
-    branches:
-      - main
-    paths:
-      - knowledge/d10-forth-circular-arc-v1.json
-      - tests/test_d10_forth_circular_arc.py
-      - tests/oracles/d10-forth-within.fs
-      - .github/workflows/d10-forth-circular-arc.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

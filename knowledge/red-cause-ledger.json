@@ -1,0 +1,20 @@
+{
+  "schema": "sens-red-cause-v1",
+  "policy": "SENS operational cause and ownership; never a replacement for language or diagnostic semantics",
+  "cases": [
+    {
+      "run_id": 38449331229,
+      "run_url": "https://github.com/juv4uk/sens/actions/runs/38449331229",
+      "first_seen_at": "2026-10-13T18:45:24Z",
+      "cause": "AGENT_DEFECT",
+      "stamp": "REGRESSION",
+      "owner": "swarm",
+      "state": "resolved",
+      "resolved_by": "swarm",
+      "proof_run_url": "https://github.com/juv4uk/sens/actions/runs/38449427457",
+      "proof_sha": "1513f94f84beb35c63d93b856166ed665f7d9e5a",
+      "description": "Escaping in the transported Python regex incorrectly rejected valid GitHub workflow run URLs; first red had four matching metadata test failures.",
+      "remediation": "Restored single-backslash regex escapes; same scoped CI ran all tests successfully at proof_sha."
+    }
+  ]
+}

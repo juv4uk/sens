@@ -1,22 +1,6 @@
 name: D10 symbolic AI antiunification research
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
-      - 'scripts/d10_antiunify_oracle.py'
-      - 'tests/test_d10_symbolic_ai_antiunification.py'
-      - 'tests/test_d10_symbolic_ai_crossruntime.py'
-      - 'tests/d10_symbolic_anti_unify_donor.pl'
-      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
-      - 'scripts/d10_antiunify_oracle.py'
-      - 'tests/test_d10_symbolic_ai_antiunification.py'
-      - 'tests/test_d10_symbolic_ai_crossruntime.py'
-      - 'tests/d10_symbolic_anti_unify_donor.pl'
-      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

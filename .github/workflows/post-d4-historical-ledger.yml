@@ -1,24 +1,6 @@
 name: Historical ingest ledger
 
 on:
-  pull_request:
-    paths:
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "docs/research/2344-post-d4-historical-ledger.md"
-      - "docs/research/2344-post-d4-historical-ledger.uk.md"
-      - "scripts/research-2344-historical-ledger.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/post-d4-historical-ledger.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "docs/research/2344-post-d4-historical-ledger.md"
-      - "docs/research/2344-post-d4-historical-ledger.uk.md"
-      - "scripts/research-2344-historical-ledger.py"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/post-d4-historical-ledger.yml"
   workflow_dispatch:
 
 permissions:

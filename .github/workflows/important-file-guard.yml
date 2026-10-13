@@ -1,9 +1,9 @@
-name: SENS file authority guard — physical T5 oracle
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — SENS file authority guard — physical T5 oracle
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       base_sha:
@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   file-authority:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     name: Physical SENS T5 file-admission oracle
     runs-on: ubuntu-24.04
     timeout-minutes: 15

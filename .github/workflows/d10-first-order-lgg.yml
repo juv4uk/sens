@@ -1,25 +1,6 @@
 name: D10 first-order symbolic anti-unification source oracles
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-first-order-lgg-research-v1.json'
-      - 'scripts/research_d10_first_order_lgg.py'
-      - 'tests/test_research_d10_first_order_lgg.py'
-      - 'tests/oracles/d10_first_order_lgg.pl'
-      - 'lib/reason.lisp'
-      - 'knowledge/d10-ai-interest-proposal-v1.json'
-      - '.github/workflows/d10-first-order-lgg.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-first-order-lgg-research-v1.json'
-      - 'scripts/research_d10_first_order_lgg.py'
-      - 'tests/test_research_d10_first_order_lgg.py'
-      - 'tests/oracles/d10_first_order_lgg.pl'
-      - 'lib/reason.lisp'
-      - 'knowledge/d10-ai-interest-proposal-v1.json'
-      - '.github/workflows/d10-first-order-lgg.yml'
   workflow_dispatch:
 
 permissions:

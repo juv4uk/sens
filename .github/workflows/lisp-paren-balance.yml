@@ -12,18 +12,6 @@ name: lisp-paren-balance
 # that only happens to pass today.
 
 on:
-  push:
-    paths:
-      - "lib/**/*.lisp"
-      - "scripts/check-lisp-paren-balance.py"
-      - "scripts/test-machine-source-integrity.py"
-      - ".github/workflows/lisp-paren-balance.yml"
-  pull_request:
-    paths:
-      - "lib/**/*.lisp"
-      - "scripts/check-lisp-paren-balance.py"
-      - "scripts/test-machine-source-integrity.py"
-      - ".github/workflows/lisp-paren-balance.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,19 +1,7 @@
 name: D5 selector residue research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2175-d5-selector-residue.py"
-      - "docs/research/2175-d5-selector-residue*.md"
-      - ".github/workflows/d5-selector-residue.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2175-d5-selector-residue.py"
-      - "docs/research/2175-d5-selector-residue*.md"
-      - ".github/workflows/d5-selector-residue.yml"
-
+  workflow_dispatch:
 jobs:
   d5-selector-residue:
     name: D5 selector subtree + residue

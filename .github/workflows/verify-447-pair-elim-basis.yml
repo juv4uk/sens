@@ -1,11 +1,7 @@
 name: Verify 447 pair eliminator basis
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-447-pair-elim-basis.yml'
-      - 'docs/research/447/**'
-
+  workflow_dispatch:
 jobs:
   pair-elim-model:
     runs-on: ubuntu-24.04
@@ -21,7 +17,7 @@ jobs:
         run: |
           printf '%s\n' '(car (quote ()))' > /tmp/car-nonpair.lisp
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/car-nonpair.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- /tmp/car-nonpair.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -33,7 +29,7 @@ jobs:
         run: |
           printf '%s\n' '(cdr (quote atom-value))' > /tmp/cdr-nonpair.lisp
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/cdr-nonpair.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- /tmp/cdr-nonpair.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"

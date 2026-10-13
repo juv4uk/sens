@@ -3,34 +3,6 @@ name: Physical T5 performance benchmarks
 # Record real numbers from release binaries, not pass/fail-only smoke.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/physical-t5-performance.yml"
-      - "benchmarks/byte-pack/physical_t5.py"
-      - "benchmarks/byte-pack/physical_phase.py"
-      - "crates/sens/examples/physical_t5_phase_probe.rs"
-      - "tests/test_physical_t5_inprocess_protocol.py"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
-  pull_request:
-    paths:
-      - ".github/workflows/physical-t5-performance.yml"
-      - "benchmarks/byte-pack/physical_t5.py"
-      - "benchmarks/byte-pack/physical_phase.py"
-      - "crates/sens/examples/physical_t5_phase_probe.rs"
-      - "tests/test_physical_t5_inprocess_protocol.py"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
-
 permissions:
   contents: read
 

@@ -1,16 +1,7 @@
 name: Post-D4 DEFINE mutation boundary
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_define_mutation_boundary.rs"
-      - ".github/workflows/post-d4-define-mutation-boundary.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/post_d4_define_mutation_boundary.rs"
-      - ".github/workflows/post-d4-define-mutation-boundary.yml"
-
+  workflow_dispatch:
 jobs:
   focused:
     name: D4 DEFINE mutation boundary

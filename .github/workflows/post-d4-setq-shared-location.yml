@@ -1,18 +1,7 @@
 name: Post-D4 SETQ shared-location lower bound
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_setq_shared_location.rs"
-      - "docs/research/2402-setq-shared-location*.md"
-      - ".github/workflows/post-d4-setq-shared-location.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/post_d4_setq_shared_location.rs"
-      - "docs/research/2402-setq-shared-location*.md"
-      - ".github/workflows/post-d4-setq-shared-location.yml"
-
+  workflow_dispatch:
 jobs:
   focused:
     name: SETQ shared-location lower bound

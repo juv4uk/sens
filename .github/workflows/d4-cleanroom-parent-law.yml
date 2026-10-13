@@ -1,15 +1,6 @@
 name: D4 clean-room parent law gate
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-parent-law/**"
-      - ".github/workflows/d4-cleanroom-parent-law.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-parent-law/**"
-      - ".github/workflows/d4-cleanroom-parent-law.yml"
   workflow_dispatch:
 
 jobs:

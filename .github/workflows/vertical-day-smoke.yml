@@ -1,11 +1,11 @@
-name: Vertical Day non-cancelling smoke
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — Vertical Day non-cancelling smoke
 
 # Кожен SHA має власний відтворюваний результат: без paths-фільтрів
 # та cancel-in-progress. Зелений другий job не підміняє RED для цього SHA.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   vertical:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     name: Lisp-owned pair to real CPU, with fail-closed rejection
     runs-on: ubuntu-24.04
     timeout-minutes: 30

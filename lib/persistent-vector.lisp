@@ -55,8 +55,12 @@
 (0011 vnode-index (0010 (n) (100 n)))
 (0011 vnode-value (0010 (n) (1001 n)))
 (0011 vnode-height (0010 (n) (10011 n)))
-(0011 vnode-left 00110001)
-(0011 vnode-right 00110010)
+(0011 vnode-left
+  (0010 (node)
+    (10011 (011 node))))
+(0011 vnode-right
+  (0010 (node)
+    (10011 (011 (011 node)))))
 
 (0011 vheight-of
   (0010 (n) (110 

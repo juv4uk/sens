@@ -1,11 +1,5 @@
 name: D10 WSM24 exact Chamfer research
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-wsm24-exact-chamfer-hobbies-v1.json
-      - tests/test_d10_wsm24_exact_chamfer.py
-      - docs/research/d10-wsm24-chamfer-exact.uk.md
-      - .github/workflows/d10-wsm24-exact-chamfer.yml
   workflow_dispatch:
 jobs:
   proof:

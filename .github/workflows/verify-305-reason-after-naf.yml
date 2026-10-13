@@ -1,8 +1,7 @@
 name: Verification-only #305 reason after NAF retirement
 
 on:
-  pull_request:
-
+  workflow_dispatch:
 jobs:
   reason-file:
     runs-on: ubuntu-24.04

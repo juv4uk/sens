@@ -1,21 +1,6 @@
 name: D10 binary Lyndon factorization donor oracle
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-binary-lyndon-factorization-v1.json'
-      - 'scripts/check_d10_binary_lyndon_factorization.py'
-      - 'tests/test_d10_binary_lyndon_factorization.py'
-      - 'tests/d10_binary_lyndon_factorization_chez.ss'
-      - 'docs/research/d10-binary-lyndon-factorization.uk.md'
-      - '.github/workflows/d10-binary-lyndon-factorization.yml'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-  push:
-    paths:
-      - 'knowledge/d10-binary-lyndon-factorization-v1.json'
-      - 'scripts/check_d10_binary_lyndon_factorization.py'
-      - 'tests/test_d10_binary_lyndon_factorization.py'
-      - 'tests/d10_binary_lyndon_factorization_chez.ss'
-      - '.github/workflows/d10-binary-lyndon-factorization.yml'
+  workflow_dispatch:
 jobs:
   prove-donor-law:
     runs-on: ubuntu-latest

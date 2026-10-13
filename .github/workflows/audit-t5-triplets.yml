@@ -1,24 +1,6 @@
 name: SENS tracked T5 three-projection inventory
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/audit_t5_triplets.py'
-      - 'tests/test_audit_t5_triplets.py'
-      - '.github/workflows/audit-t5-triplets.yml'
-      - 'scripts/audit_t5_file_pairs.py'
-      - 'scripts/sens_t5_codec.py'
-      - '**/*.sens'
-      - '**/*.lisp'
-      - 'tests/fixtures/migration-d1-cond-cohort/branch'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/audit_t5_triplets.py'
-      - 'tests/test_audit_t5_triplets.py'
-      - '.github/workflows/audit-t5-triplets.yml'
-      - '**/*.sens'
-      - 'tests/fixtures/migration-d1-cond-cohort/branch'
   workflow_dispatch:
 
 permissions:

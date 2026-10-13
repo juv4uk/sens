@@ -1,22 +1,6 @@
 name: Generative domain forecast research
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - "docs/research/2322-generative-domain-forecast.md"
-      - "docs/research/2322-generative-domain-forecast.uk.md"
-      - ".github/workflows/generative-domain-forecast.yml"
-      - "knowledge/repo-tooling-inventory.lisp"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - "docs/research/2322-generative-domain-forecast.md"
-      - "docs/research/2322-generative-domain-forecast.uk.md"
-      - ".github/workflows/generative-domain-forecast.yml"
-      - "knowledge/repo-tooling-inventory.lisp"
   workflow_dispatch:
 
 jobs:

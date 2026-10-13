@@ -2,16 +2,6 @@ name: Historical pre-bīja3 D3-D4 dispatch benchmark
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/domain1234-dispatch.yml"
-      - "benchmarks/domain1234-dispatch/**"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/domain1234-dispatch.yml"
-      - "benchmarks/domain1234-dispatch/**"
-
 concurrency:
   group: d34-dispatch-${{ github.ref }}
   cancel-in-progress: true

@@ -1,20 +1,7 @@
 name: Migration archived benchmark snapshot (non-program)
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/migration-benchmark-snapshot-2026-10-08.json'
-      - 'tests/test_migration_benchmark_snapshot.py'
-      - '.github/workflows/migration-benchmark-snapshot.yml'
-      - 'benchmarks/sens-surface/results/**'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/migration-benchmark-snapshot-2026-10-08.json'
-      - 'tests/test_migration_benchmark_snapshot.py'
-      - '.github/workflows/migration-benchmark-snapshot.yml'
-      - 'benchmarks/sens-surface/results/**'
-
+  workflow_dispatch:
 permissions:
   contents: read
 

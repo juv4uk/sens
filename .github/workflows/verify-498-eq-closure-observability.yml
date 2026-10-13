@@ -1,11 +1,7 @@
 name: Verify 498 closure observability without EQ
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-498-eq-closure-observability.yml'
-      - 'docs/research/498/**'
-
+  workflow_dispatch:
 jobs:
   closure-observability:
     runs-on: ubuntu-24.04

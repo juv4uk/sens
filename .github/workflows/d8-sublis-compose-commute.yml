@@ -1,18 +1,6 @@
 name: D8 SUBLIS-COMPOSE commutativity research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-sublis-compose-commute/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-sublis-compose-commute.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-sublis-compose-commute/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-sublis-compose-commute.yml"
   workflow_dispatch:
 
 jobs:

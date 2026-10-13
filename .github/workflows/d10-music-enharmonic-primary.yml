@@ -1,20 +1,6 @@
 name: D10 music notation primary source research gate
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-music-enharmonic-primary-review-v1.json'
-      - 'scripts/check_d10_music_enharmonic_primary.py'
-      - 'tests/test_d10_music_enharmonic_primary.py'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - '.github/workflows/d10-music-enharmonic-primary.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-music-enharmonic-primary-review-v1.json'
-      - 'scripts/check_d10_music_enharmonic_primary.py'
-      - 'tests/test_d10_music_enharmonic_primary.py'
-      - '.github/workflows/d10-music-enharmonic-primary.yml'
   workflow_dispatch:
 
 permissions:

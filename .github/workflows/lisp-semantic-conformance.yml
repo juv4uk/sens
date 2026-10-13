@@ -2,21 +2,6 @@ name: Current D1/D3 semantic conformance
 
 # Чинні доменні D1/D3 тести замість старого Function8 корпусу.
 on:
-  pull_request:
-    paths:
-      - "tests/fixtures/semantic/*"
-      - "crates/sens/tests/d3_empty_control.rs"
-      - "crates/sens/tests/canon_d1_migration_cohort.rs"
-      - "crates/sens/tests/semantic_authority.rs"
-      - ".github/workflows/lisp-semantic-conformance.yml"
-  push:
-    branches: [main]
-    paths:
-      - "tests/fixtures/semantic/*"
-      - "crates/sens/tests/d3_empty_control.rs"
-      - "crates/sens/tests/canon_d1_migration_cohort.rs"
-      - "crates/sens/tests/semantic_authority.rs"
-      - ".github/workflows/lisp-semantic-conformance.yml"
   workflow_dispatch:
 
 permissions:

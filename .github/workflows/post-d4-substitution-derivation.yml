@@ -1,16 +1,7 @@
 name: Post-D4 SUBST/SUBLIS derivation research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/tests/post_d4_substitution.rs"
-      - ".github/workflows/post-d4-substitution-derivation.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/post_d4_substitution.rs"
-      - ".github/workflows/post-d4-substitution-derivation.yml"
-
+  workflow_dispatch:
 jobs:
   focused:
     name: Post-D4 SUBST/SUBLIS derivation research

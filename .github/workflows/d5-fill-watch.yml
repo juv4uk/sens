@@ -1,24 +1,6 @@
 name: D5 fill watch
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2724-d5-fill-watch.py"
-      - "benchmarks/d5-closure-map/run.py"
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d5-d6-semantic-ledger.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d5-fill-watch.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/research-2724-d5-fill-watch.py"
-      - "benchmarks/d5-closure-map/run.py"
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d5-d6-semantic-ledger.json"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/d5-fill-watch.yml"
   workflow_dispatch:
 
 permissions:

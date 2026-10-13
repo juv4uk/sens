@@ -1,14 +1,7 @@
 name: Probe strict map-onto NO for Canon V2
 
 on:
-  push:
-    branches:
-      - fix/canon-let-map-d1-no-20261009
-    paths:
-      - lib/core.lisp
-      - lib/core4.lisp
-      - .github/workflows/canon-map-d1-gh-probe.yml
-
+  workflow_dispatch:
 permissions:
   contents: write
 

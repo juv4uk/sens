@@ -1,17 +1,6 @@
 name: Human-wire D1-D5 chunking research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/human-wire/payloads.json"
-      - "benchmarks/human-wire/chunking.py"
-      - ".github/workflows/human-wire-chunking.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/human-wire/payloads.json"
-      - "benchmarks/human-wire/chunking.py"
-      - ".github/workflows/human-wire-chunking.yml"
   workflow_dispatch:
 
 jobs:

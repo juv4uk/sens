@@ -1,20 +1,6 @@
 name: Migration nonprogram knowledge records
 on:
-  pull_request:
-    paths:
-      - 'knowledge/*.lisp'
-      - 'knowledge/migration-nonprogram-knowledge-records-2026-10-08.json'
-      - 'scripts/report_original_migration_candidates.py'
-      - 'tests/test_migration_nonprogram_knowledge_records.py'
-      - '.github/workflows/migration-nonprogram-knowledge-records.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/*.lisp'
-      - 'knowledge/migration-nonprogram-knowledge-records-2026-10-08.json'
-      - 'scripts/report_original_migration_candidates.py'
-      - 'tests/test_migration_nonprogram_knowledge_records.py'
-      - '.github/workflows/migration-nonprogram-knowledge-records.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

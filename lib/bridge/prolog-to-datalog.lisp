@@ -28,9 +28,7 @@
 
 (0011 prolog-substitutions-to-datalog-facts
   (0010 (observation)
-    (001000 ((source-ref-row (11100 (001 source-ref) (011 observation)))
-          (variable-row (11100 (001 variable) (011 observation)))
-          (values-row (11100 (001 values) (011 observation))))
+    ((0010 (source-ref-row variable-row values-row)
       (110
         ((0100 (010 source-ref-row))
          (1110 (001 projection-failure) (001 missing-source-ref)))
@@ -58,4 +56,7 @@
                  (1110 (001 facts)
                        (prolog-values-to-datalog-facts
                          (100 (011 variable-row))
-                         (011 values-row)))))))))))))
+                         (011 values-row)))))))))))
+     (11100 (001 source-ref) (011 observation))
+     (11100 (001 variable) (011 observation))
+     (11100 (001 values) (011 observation)))))

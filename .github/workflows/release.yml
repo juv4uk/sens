@@ -1,8 +1,9 @@
 name: Release
 
+# Карантин власника 2026-10-13: автоматичний релізний workflow вимкнено.
+# Ручний запуск із вибраного релізного тегу — лише після явного дозволу власника.
 on:
-  push:
-    tags: ['l*']
+  workflow_dispatch:
 
 permissions:
   contents: read

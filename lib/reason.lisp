@@ -33,7 +33,7 @@
     (110
       ((010 value) #d1:0)
       ((0101 value) #d1:0)
-      ; CAR(value) may be a compound rule. Guard before atom-only EQ.
+      ; A rule list may begin with a compound CAR. Only EQ atom heads.
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)
@@ -43,14 +43,18 @@
 ; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
 ; заходить у CAR(CAR ()) на порожньому alist; тут ніколи не робимо CAR
 ; до перевірки D3 ATOM. Голова кошика мусить бути атомом.
+; Nested pair selectors use ratified exact D4, not repeated D3 chains:
+; D4:1000 CAAR = CAR(CAR), D4:0110 CDAR = CDR(CAR).
+; These are admitted call heads; D7 is text/data only.
+
 (0011 міркування-пошук-кошика
   (0010 (predicate buckets)
     (110
       ((010 buckets) (001 ()))
       ((010 (100 buckets)) (001 ()))
-      ((010 (100 (100 buckets)))
+      ((010 (1000 buckets))
        (110
-         ((101 predicate (100 (100 buckets))) (100 buckets))
+         ((101 predicate (1000 buckets)) (100 buckets))
          (#d1:1 (міркування-пошук-кошика predicate (011 buckets)))))
       (#d1:1 (001 ())))))
 
@@ -87,9 +91,9 @@
     (110
       
       ((010 buckets)  (1110 (1110 predicate rule)))
-      ((101 predicate (100 (100 buckets)))
+      ((101 predicate (1000 buckets))
        (111
-         (111 predicate (111 rule (011 (100 buckets))))
+         (111 predicate (111 rule (0110 buckets)))
          (011 buckets)))
       ((010 ())
        (111
@@ -103,7 +107,7 @@
       ((010 buckets)  (001 ()))
       ((010 ())
        (111
-         (111 (100 (100 buckets)) (10100 (011 (100 buckets))))
+         (111 (1000 buckets) (10100 (0110 buckets)))
          (reason-index-normalize-buckets (011 buckets)))))))
 
 (0011 reason-index-build-scan
@@ -309,7 +313,7 @@
       ((010 ())
        (111
          (1110
-           (100 (100 results))
+           (1000 results)
            (1111 proofs (1110 (1001 (100 results)))))
          (map-goal-results (011 results) proofs))))))
 
@@ -373,7 +377,7 @@
     (110
       
       ((010 alist)  (1110 entry))
-      ((unify-equal? (100 (100 alist)) (100 entry))
+      ((unify-equal? (1000 alist) (100 entry))
        (111
          (111
            (100 entry)

@@ -1,18 +1,6 @@
 name: D8 CURRY-FLIP independence research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-curry-flip-independence/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-curry-flip-independence.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-curry-flip-independence/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-curry-flip-independence.yml"
   workflow_dispatch:
 
 jobs:

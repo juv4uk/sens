@@ -65,7 +65,7 @@
 
 (0011 compiler-false
   (0010 (seed)
-    (010 (111 seed ()))))
+    #d1:0))
 
 ; A verified bit sequence is a proper list of D1 atoms. To test the
 ; empty-list terminator, use the ratified ATOM predicate, not EQ over a

@@ -1,26 +1,7 @@
 name: H-NIL corpus witness
 
 on:
-  pull_request:
-    paths:
-      - "lib/**"
-      - "language-contract.lisp"
-      - "crates/sens/src/eval/canon.rs"
-      - "experiments/research-2019-h-nil-corpus.py"
-      - "docs/research/2019-alt-basis-h-nil.*"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/h-nil-corpus-witness.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/**"
-      - "language-contract.lisp"
-      - "crates/sens/src/eval/canon.rs"
-      - "experiments/research-2019-h-nil-corpus.py"
-      - "docs/research/2019-alt-basis-h-nil.*"
-      - "knowledge/repo-tooling-inventory.lisp"
-      - ".github/workflows/h-nil-corpus-witness.yml"
-
+  workflow_dispatch:
 jobs:
   witness:
     runs-on: ubuntu-latest

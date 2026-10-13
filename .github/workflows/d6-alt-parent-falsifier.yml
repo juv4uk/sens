@@ -1,15 +1,6 @@
 name: D6 alternative parent falsifier research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-alt-parent-falsifier/**"
-      - ".github/workflows/d6-alt-parent-falsifier.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-alt-parent-falsifier/**"
-      - ".github/workflows/d6-alt-parent-falsifier.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,0 +1,80 @@
+# РУЧНИЙ SENS-СВІДОК, 2026-10-13. Єдиний автоматичний workflow — ci.yml.
+# Семантика — лише у фізичних двійкових .sens/.bits; host перевіряє бітність,
+# транспортування й D1-вердикт. Інші workflows залишаються ручними.
+name: SENS — один двійковий закон D3 + однобітний мутант
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sens-one-binary-witness
+  cancel-in-progress: false
+
+jobs:
+  one-sens-law:
+    name: D3 ATOM/QUOTE → D1 · 1 law + 1 bit mutant
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Один двійковий тест з інформативною діагностикою
+        id: self_verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-red.jsonl"
+          : > "$report"
+          base="tests/semantic/machine-effect-d3-false"
+
+          python3 scripts/ci_failure_contract.py run \
+            --test-id d3-physical-executor --layer transport \
+            --fixture "${base}-law.bits" --report-file "$report" \
+            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+          printf '1\n' > "$RUNNER_TEMP/d1-yes"
+          printf '0\n' > "$RUNNER_TEMP/d1-no"
+
+          # Механічний Hamming-1 свідок: жодної нової семантичної таблиці.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id d3-one-bit-delta --layer transport \
+            --fixture "${base}-law.bits" --expected-file "$RUNNER_TEMP/d1-yes" \
+            --report-file "$report" \
+            -- awk 'NR==FNR {for (i=1;i<=NF;i++) a[i]=$i; n=NF; next}
+              {if (NF!=n) exit 2; for (i=1;i<=NF;i++) if (a[i]!=$i) {
+                if ((a[i]=="0" && $i=="1") || (a[i]=="1" && $i=="0")) changes++;
+                else exit 2
+              } if (changes!=1) exit 2; print "1"}' \
+              "${base}-law.bits" "${base}-mutant.bits"
+
+          for kind in law mutant; do
+            fixture="${base}-${kind}.bits"
+            program="${base}-${kind}.sens"
+            if [[ "$kind" == law ]]; then expected="$RUNNER_TEMP/d1-yes"
+            else expected="$RUNNER_TEMP/d1-no"; fi
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "d3-${kind}-physical-identity" --layer transport \
+              --fixture "$fixture" --expected-file "$fixture" --report-file "$report" \
+              -- target/debug/sens-trit open "$program"
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "d3-${kind}-sens-verdict" --layer eval \
+              --fixture "$fixture" --expected-file "$expected" --report-file "$report" \
+              -- target/debug/sens "$program"
+          done
+
+      - name: UNINFORMATIVE-OUTPUT · навіть невдала збірка мусить говорити
+        if: always()
+        shell: bash
+        env:
+          TEST_OUTCOME: ${{ steps.self_verdict.outcome }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-red.jsonl"
+          if [[ "$TEST_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
+          else
+            python3 scripts/ci_failure_contract.py scan --report-file "$report"
+          fi

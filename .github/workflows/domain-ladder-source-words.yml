@@ -1,20 +1,7 @@
 name: "Драбина D1–D10: механічний носій джерельних слів"
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens/tests/domain_ladder_source_words.rs"
-      - ".github/workflows/domain-ladder-source-words.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/lib.rs"
-      - "crates/sens/tests/domain_ladder_source_words.rs"
-      - ".github/workflows/domain-ladder-source-words.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

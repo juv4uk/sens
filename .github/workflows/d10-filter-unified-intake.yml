@@ -2,23 +2,6 @@ name: D10 unified candidate mechanical sieve
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d10-filter/all-candidates.tsv"
-      - "knowledge/d10-current-inventory.json"
-      - "knowledge/d10-candidate-database-v1.json"
-      - "scripts/check_d10_candidate_database.py"
-      - "scripts/d10_batch_work.py"
-      - "scripts/d10_full_census_batches.py"
-      - "scripts/d10_prepare_filter_input.py"
-      - "scripts/d10_restore_candidate_catalog.py"
-      - "tests/test_d10_restore_candidate_catalog.py"
-      - "scripts/d10_mechanical_filter.py"
-      - "tests/test_d10_prepare_filter_input.py"
-      - "tests/test_d10_mechanical_filter.py"
-      - ".github/workflows/d10-filter-unified-intake.yml"
-
 permissions:
   contents: write
 

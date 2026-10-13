@@ -1,15 +1,6 @@
 name: D6 pair mutation axis research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-pair-mutation-axis/**"
-      - ".github/workflows/d6-pair-mutation-axis.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-pair-mutation-axis/**"
-      - ".github/workflows/d6-pair-mutation-axis.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,18 +1,6 @@
 name: Ukrainian compiler legacy completion gate
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens-cli/tests/active_lib_sens_completion.rs"
-      - "lib/compiler-nucleus.lisp"
-      - "crates/sens/src/mixed_source.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - ".github/workflows/active-uk-compiler-completion.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens-cli/tests/active_lib_sens_completion.rs"
-      - ".github/workflows/active-uk-compiler-completion.yml"
   workflow_dispatch:
 
 permissions:

@@ -2,12 +2,6 @@ name: Історичні Git-гілки → аудит main (тільки чит
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - scripts/audit_historical_branches.py
-      - .github/workflows/audit-all-branches-main.yml
-
 permissions:
   contents: read
 

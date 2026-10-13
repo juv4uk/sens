@@ -1,6 +1,6 @@
 ; Персистентна map без прихованої арифметики.
 ;
-; Migrated: COND else (010 ()) → exact D1:1 (010 (001 ())).
+; Migrated: COND fallback is the single exact D1:YES bit, never an extra D3 ATOM/QUOTE computation.
 ; Key equality is D3 EQ only. No host truthiness. Width is identity.
 ;
 ; Поточний числовий закон SENS допускає арифметику лише над явно
@@ -29,7 +29,7 @@
        (1110 (111 key value)))
       ((101 key (100 (100 entries)))
        (111 (111 key value) (011 entries)))
-      ((010 (001 ()))
+      (#d1:1
        (111 (100 entries)
             (map-insert key value (011 entries)))))))
 
@@ -39,7 +39,7 @@
       ((0101 entries) (001 ()))
       ((101 key (100 (100 entries)))
        (1110 (011 (100 entries))))
-      ((010 (001 ()))
+      (#d1:1
        (map-get key (011 entries))))))
 
 ; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.

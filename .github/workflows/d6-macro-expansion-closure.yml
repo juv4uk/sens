@@ -1,15 +1,6 @@
 name: D6 macro expansion closure research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-macro-expansion-closure/**"
-      - ".github/workflows/d6-macro-expansion-closure.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-macro-expansion-closure/**"
-      - ".github/workflows/d6-macro-expansion-closure.yml"
   workflow_dispatch:
 
 jobs:

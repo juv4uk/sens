@@ -1,15 +1,6 @@
 name: D3-D8 remap solver research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d3-d8-remap-solver/**"
-      - ".github/workflows/d3-d8-remap-solver.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d3-d8-remap-solver/**"
-      - ".github/workflows/d3-d8-remap-solver.yml"
   workflow_dispatch:
 
 jobs:

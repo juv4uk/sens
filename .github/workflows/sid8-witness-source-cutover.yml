@@ -1,13 +1,6 @@
 name: SID8 witness Lisp source cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "tests/fixtures/*-witness.lisp"
-      - "tests/test_sid8_witness_*.py"
-      - "scripts/audit_lisp_migration_edits.py"
-      - ".github/workflows/sid8-witness-source-cutover.yml"
   workflow_dispatch:
 
 permissions:

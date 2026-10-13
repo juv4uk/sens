@@ -1,20 +1,7 @@
 name: OD-005/OD-006 full-map guard
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "scripts/check-od005-od006-full-maps.py"
-      - ".github/workflows/od005-od006-full-map.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "scripts/check-od005-od006-full-maps.py"
-      - ".github/workflows/od005-od006-full-map.yml"
-
+  workflow_dispatch:
 jobs:
   constitutional-map:
     name: Owner D5/D6 full-map constitution

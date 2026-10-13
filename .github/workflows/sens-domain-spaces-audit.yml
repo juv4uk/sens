@@ -1,17 +1,6 @@
 name: sens-domain-spaces-audit
 
 on:
-  pull_request:
-    paths:
-      - "scripts/check-sens-domain-spaces.py"
-      - "tests/test_sens_domain_spaces.py"
-      - ".github/workflows/sens-domain-spaces-audit.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/check-sens-domain-spaces.py"
-      - "tests/test_sens_domain_spaces.py"
-      - ".github/workflows/sens-domain-spaces-audit.yml"
   workflow_dispatch:
 
 permissions:

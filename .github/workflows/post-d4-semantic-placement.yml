@@ -1,24 +1,7 @@
 name: Post-D4 semantic placement
 
 on:
-  pull_request:
-    paths:
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-      - "benchmarks/post-d4-semantic-placement/**"
-      - "docs/research/2703-post-d4-semantic-placement*.md"
-      - ".github/workflows/post-d4-semantic-placement.yml"
-  push:
-    branches: [main]
-    paths:
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - "benchmarks/post-d4-root-min-closeout/run.py"
-      - "benchmarks/post-d4-semantic-placement/**"
-      - "docs/research/2703-post-d4-semantic-placement*.md"
-      - ".github/workflows/post-d4-semantic-placement.yml"
-
+  workflow_dispatch:
 jobs:
   placement:
     name: 19-row semantic placement

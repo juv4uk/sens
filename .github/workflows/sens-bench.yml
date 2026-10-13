@@ -7,29 +7,6 @@ name: Contract 11.8 W1-W9 carrier benchmark
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/sens-bench.yml"
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/examples/domain12345678_bench.rs"
-      - "benchmarks/domain12345678/**"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/sens-bench.yml"
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/examples/domain12345678_bench.rs"
-      - "benchmarks/domain12345678/**"
-
-# Pinned-SHA Cachegrind measurements must not be cancelled by the push storm.
-# Path-scoped triggers already limit measurements to changed carrier code.
-
 jobs:
   bench:
     runs-on: ubuntu-latest

@@ -1,19 +1,6 @@
 name: Canonical SENS migration entrypoint
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/migrate.py'
-      - 'tests/test_migrate_entrypoint.py'
-      - '.github/workflows/migrate-entrypoint.yml'
-      - 'README.md'
-      - 'AGENTS.md'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/migrate.py'
-      - 'tests/test_migrate_entrypoint.py'
-      - '.github/workflows/migrate-entrypoint.yml'
   workflow_dispatch:
 
 permissions:

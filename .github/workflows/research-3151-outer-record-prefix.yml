@@ -1,11 +1,7 @@
 name: Outer record prefix research
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/research-3151-outer-record-prefix.py'
-      - '.github/workflows/research-3151-outer-record-prefix.yml'
-
+  workflow_dispatch:
 jobs:
   witness:
     runs-on: ubuntu-latest

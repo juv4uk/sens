@@ -1,14 +1,5 @@
 name: Audited SID8 Lisp script source delta
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/generate-functions-md.lisp
-      - scripts/benchmark-semantic-registry-read.lisp
-      - tests/test_sid8_two_script_source_delta.py
-      - knowledge/sens8-current-coverage-v1.json
-      - knowledge/d1-d9-foundation.json
-      - .github/workflows/audit-sid8-lisp-script-source.yml
   workflow_dispatch:
 permissions:
   contents: read

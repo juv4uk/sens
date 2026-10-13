@@ -1,19 +1,6 @@
 name: d10-ground-congruence-symbolic-ai-research
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-ground-congruence-closure-research-20261009.json'
-      - 'scripts/check_d10_ground_congruence_research.py'
-      - 'tests/test_d10_ground_congruence_research.py'
-      - 'docs/research/D10-GROUND-CONGRUENCE-20261009.uk.md'
-      - '.github/workflows/d10-ground-congruence-research.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-ground-congruence-closure-research-20261009.json'
-      - 'scripts/check_d10_ground_congruence_research.py'
-      - 'tests/test_d10_ground_congruence_research.py'
-      - '.github/workflows/d10-ground-congruence-research.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

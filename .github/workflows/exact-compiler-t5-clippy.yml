@@ -1,27 +1,6 @@
 name: SENS exact compiler and T5 strict Clippy
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/compiler_language.rs"
-      - "crates/sens/src/syntax.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/sens-cli/src/bin/sens-to-sens.rs"
-      - "crates/sens/tests/english_names_in_code.rs"
-      - "crates/sens-cli/src/bin/sens-to-sens.rs"
-      - ".github/workflows/exact-compiler-t5-clippy.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/compiler_language.rs"
-      - "crates/sens/src/syntax.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/sens-cli/src/bin/sens-to-sens.rs"
-      - "crates/sens/tests/english_names_in_code.rs"
-      - "crates/sens-cli/src/bin/sens-to-sens.rs"
-      - ".github/workflows/exact-compiler-t5-clippy.yml"
   workflow_dispatch:
 
 permissions:

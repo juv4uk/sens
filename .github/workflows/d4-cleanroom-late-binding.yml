@@ -1,15 +1,6 @@
 name: D4 clean-room late binding research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-late-binding/**"
-      - ".github/workflows/d4-cleanroom-late-binding.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-late-binding/**"
-      - ".github/workflows/d4-cleanroom-late-binding.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,19 +1,6 @@
 name: Foundation debt ledger
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/foundation-debt-ledger.json"
-      - "scripts/check-foundation-debt.py"
-      - ".github/workflows/foundation-debt-ledger.yml"
-      - "knowledge/repo-tooling-inventory.lisp"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/foundation-debt-ledger.json"
-      - "scripts/check-foundation-debt.py"
-      - ".github/workflows/foundation-debt-ledger.yml"
-      - "knowledge/repo-tooling-inventory.lisp"
   workflow_dispatch:
 
 jobs:

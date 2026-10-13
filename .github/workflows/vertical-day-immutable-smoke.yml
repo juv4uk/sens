@@ -1,9 +1,9 @@
-name: Vertical Day immutable L0 and native smoke
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — Vertical Day immutable L0 and native smoke
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   oracle-native-smoke:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

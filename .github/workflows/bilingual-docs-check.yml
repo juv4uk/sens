@@ -1,15 +1,7 @@
 name: Bilingual Documentation Check
 
 on:
-  push:
-    paths:
-      - "**/*.md"
-      - "scripts/check-bilingual-docs"
-  pull_request:
-    paths:
-      - "**/*.md"
-      - "scripts/check-bilingual-docs"
-
+  workflow_dispatch:
 jobs:
   check:
     runs-on: ubuntu-24.04

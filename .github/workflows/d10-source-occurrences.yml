@@ -1,14 +1,5 @@
 name: D10 lossless historical source occurrences
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-filter/all-candidates.tsv'
-      - 'knowledge/d10-filter/all-source-occurrences.tsv'
-      - 'knowledge/d10-filter/source-occurrence-manifest.json'
-      - 'scripts/d10_restore_source_occurrences.py'
-      - 'tests/test_d10_restore_source_occurrences.py'
-      - '.github/workflows/d10-source-occurrences.yml'
   workflow_dispatch:
 permissions:
   contents: read

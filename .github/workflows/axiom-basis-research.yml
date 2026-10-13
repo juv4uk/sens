@@ -1,16 +1,6 @@
 name: Axiom basis research oracle
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/axiom-basis-minimality/**"
-      - "benchmarks/README.md"
-      - ".github/workflows/axiom-basis-research.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/axiom-basis-minimality/**"
-      - ".github/workflows/axiom-basis-research.yml"
   workflow_dispatch:
 
 permissions:

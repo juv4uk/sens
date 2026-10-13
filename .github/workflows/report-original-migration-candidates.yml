@@ -1,30 +1,5 @@
 name: Report original T5 migration candidates
 on:
-  pull_request:
-    paths:
-      - '**/*.lisp'
-      - '**/*.sens'
-      - 'scripts/report_original_migration_candidates.py'
-      - 'knowledge/migration-nonprogram-*-2026-10-08.json'
-      - 'scripts/migration_source_scope.py'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/test_report_original_migration_candidates.py'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'contracts/core1-historical-sid-map.lisp'
-      - '.github/workflows/report-original-migration-candidates.yml'
-  push:
-    branches: [main]
-    paths:
-      - '**/*.lisp'
-      - '**/*.sens'
-      - 'scripts/report_original_migration_candidates.py'
-      - 'scripts/migration_source_scope.py'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'contracts/core1-historical-sid-map.lisp'
-      - '.github/workflows/report-original-migration-candidates.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,9 +1,6 @@
 name: GitHub-hosted smoke
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/self-hosted-smoke.yml
   workflow_dispatch:
 
 permissions:

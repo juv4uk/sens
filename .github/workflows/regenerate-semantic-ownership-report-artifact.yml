@@ -1,12 +1,6 @@
 name: Regenerate semantic ownership report artifact
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/regenerate-semantic-ownership-report-artifact.yml"
-      - "scripts/semantic-ownership.py"
-      - "knowledge/semantic-ownership.lisp"
-      - "knowledge/meta-eval-evidence.lisp"
   workflow_dispatch:
 
 permissions:

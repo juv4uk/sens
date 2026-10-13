@@ -1,25 +1,6 @@
 name: D6 historical-unplaced handoff
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-history-handoff/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-pure-unknown-parent-tournament/**"
-      - "benchmarks/d6-pure-unknown-antinumerology/**"
-      - "benchmarks/d6-pure-unknown-domain-firewall/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-history-handoff.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-history-handoff/**"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "benchmarks/d6-pure-unknown-parent-tournament/**"
-      - "benchmarks/d6-pure-unknown-antinumerology/**"
-      - "benchmarks/d6-pure-unknown-domain-firewall/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-history-handoff.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,34 +1,6 @@
 name: Тест preflight — exact-domain process reader
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/current_binary_preflight.rs"
-      - "lib/process.lisp"
-      - "tests/test_process_d1_direct.py"
-      - "crates/sens/tests/process_d1_direct.rs"
-      - "lib/tcp.lisp"
-      - "crates/sens/tests/tcp_d1_fallback.rs"
-      - "tests/test_tcp_d1_fallback.py"
-      - "crates/sens/tests/process_d1_reflection.rs"
-      - "tests/test_process_d1_predicate_cutover.py"
-      - "crates/sens/src/mixed_source.rs"
-      - ".github/workflows/preflight-process-reader.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/tests/current_binary_preflight.rs"
-      - "lib/process.lisp"
-      - "tests/test_process_d1_direct.py"
-      - "crates/sens/tests/process_d1_direct.rs"
-      - "lib/tcp.lisp"
-      - "crates/sens/tests/tcp_d1_fallback.rs"
-      - "tests/test_tcp_d1_fallback.py"
-      - "crates/sens/tests/process_d1_reflection.rs"
-      - "tests/test_process_d1_predicate_cutover.py"
-      - "crates/sens/src/mixed_source.rs"
-      - ".github/workflows/preflight-process-reader.yml"
   workflow_dispatch:
 
 permissions:

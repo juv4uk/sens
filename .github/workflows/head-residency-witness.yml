@@ -11,20 +11,6 @@ name: head-residency-witness
 # різних | поза-таблицею), а не «ok/fail».
 
 on:
-  push:
-    paths:
-      - "lib/**/*.lisp"
-      - "scripts/**/*.lisp"
-      - "lib/domains/*.lisp"
-      - "scripts/check-migrated-head-residency.py"
-      - ".github/workflows/head-residency-witness.yml"
-  pull_request:
-    paths:
-      - "lib/**/*.lisp"
-      - "scripts/**/*.lisp"
-      - "lib/domains/*.lisp"
-      - "scripts/check-migrated-head-residency.py"
-      - ".github/workflows/head-residency-witness.yml"
   workflow_dispatch:
 
 permissions:

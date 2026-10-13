@@ -1,15 +1,6 @@
 name: mixed-source-compatibility-boundary
 
 on:
-  pull_request:
-    paths:
-      - 'crates/sens/src/mixed_source.rs'
-      - '.github/workflows/mixed-source-compatibility-boundary.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'crates/sens/src/mixed_source.rs'
-      - '.github/workflows/mixed-source-compatibility-boundary.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,15 +1,6 @@
 name: Pair eliminator lower bound research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/pair-eliminator-lower-bound/**"
-      - ".github/workflows/pair-eliminator-lower-bound.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/pair-eliminator-lower-bound/**"
-      - ".github/workflows/pair-eliminator-lower-bound.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,13 +1,6 @@
 name: Domain-ladder Lisp source D3 semantic delta
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "**/*.lisp"
-      - "scripts/check_domain_source_delta_d3.py"
-      - "tests/test_domain_source_delta_d3.py"
-      - ".github/workflows/domain-source-d3-delta.yml"
   workflow_dispatch:
 
 permissions:

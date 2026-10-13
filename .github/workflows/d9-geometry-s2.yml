@@ -1,19 +1,6 @@
 name: D9 geometry S2
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d9-v1-geometry-state.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "scripts/check-d9-geometry-s2.py"
-      - ".github/workflows/d9-geometry-s2.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-v1-geometry-state.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "scripts/check-d9-geometry-s2.py"
-      - ".github/workflows/d9-geometry-s2.yml"
   workflow_dispatch:
 
 jobs:

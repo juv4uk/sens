@@ -1,13 +1,6 @@
 name: D6 theorem-first D5 child search
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-theorem-first-d5-child/**"
-      - "benchmarks/d5-closure-map/**"
-      - "benchmarks/d6-closure-map/**"
-      - "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
-      - ".github/workflows/d6-theorem-first-d5-child.yml"
   workflow_dispatch:
 
 permissions:

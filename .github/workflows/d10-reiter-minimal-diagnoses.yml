@@ -1,17 +1,6 @@
 name: D10 Reiter 1987 finite minimal diagnoses evidence
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-reiter-minimal-diagnoses-20261009.json'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - 'scripts/check_d10_reiter_minimal_diagnoses.py'
-      - 'tests/oracles/d10_reiter_minimal_diagnoses_sbcl.lisp'
-      - 'docs/research/d10-reiter-minimal-diagnoses.uk.md'
-      - '.github/workflows/d10-reiter-minimal-diagnoses.yml'
-  push:
-    branches:
-      - research/d10-reiter-diagnoses-after-ledger68-20261009
   workflow_dispatch:
 
 permissions:

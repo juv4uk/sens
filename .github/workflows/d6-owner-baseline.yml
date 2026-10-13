@@ -1,17 +1,6 @@
 name: D6 owner baseline guard
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2764-d6-owner-baseline.py"
-      - "knowledge/d6-historical-full-map.json"
-      - ".github/workflows/d6-owner-baseline.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2764-d6-owner-baseline.py"
-      - "knowledge/d6-historical-full-map.json"
-      - ".github/workflows/d6-owner-baseline.yml"
   workflow_dispatch:
 
 permissions:

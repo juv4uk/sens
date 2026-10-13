@@ -1,11 +1,7 @@
 name: Verify 493 EQ serialization collision
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-493-eq-serialization.yml'
-      - 'docs/research/493/**'
-
+  workflow_dispatch:
 jobs:
   eq-serialization:
     runs-on: ubuntu-24.04

@@ -6,10 +6,6 @@ name: Migrate active lib (exact domain)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - agent/vivaka-hub/4380-migrate-code-subset
-
 jobs:
   migrate:
     runs-on: ubuntu-latest

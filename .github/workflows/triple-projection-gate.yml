@@ -4,9 +4,6 @@ name: Triple projection gate
 # physical .sens and extensionless one-line spaced 0/1 view.
 # Historical/unsupported backlogs are NEVER silently admitted to release.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

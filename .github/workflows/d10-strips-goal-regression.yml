@@ -1,18 +1,6 @@
 name: D10 STRIPS independent oracle
 on:
-  pull_request:
-    paths:
-      - 'scripts/check_d10_strips_goal_regression.py'
-      - 'tests/test_d10_strips_goal_regression.py'
-      - 'tests/oracles/d10_strips_goal_regression.pl'
-      - 'knowledge/d10-symbolic-ai-strips-goal-regression-research-v1.json'
-      - '.github/workflows/d10-strips-goal-regression.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/check_d10_strips_goal_regression.py'
-      - 'tests/test_d10_strips_goal_regression.py'
-      - '.github/workflows/d10-strips-goal-regression.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

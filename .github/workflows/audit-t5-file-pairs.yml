@@ -1,27 +1,6 @@
 name: Audit T5 file pairs
 
 on:
-  pull_request:
-    paths:
-      - "**/*.sens"
-      - "**/*.lisp"
-      - "tests/fixtures/**"
-      - "lib/**"
-      - "examples/**"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/audit_t5_file_pairs.py"
-      - "tests/test_audit_t5_file_pairs.py"
-      - ".github/workflows/audit-t5-file-pairs.yml"
-  push:
-    branches: [main]
-    paths:
-      - "**/*.sens"
-      - "tests/fixtures/**"
-      - "lib/**"
-      - "examples/**"
-      - "scripts/audit_t5_file_pairs.py"
-      - "tests/test_audit_t5_file_pairs.py"
-      - ".github/workflows/audit-t5-file-pairs.yml"
   workflow_dispatch:
 
 permissions:

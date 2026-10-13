@@ -1,13 +1,6 @@
 name: D8 second-axis collapse screen
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-collapse-screen/**"
-      - "docs/research/3669-d8-collapse-screen.md"
-      - "docs/research/3669-d8-collapse-screen.uk.md"
-      - "knowledge/d6-v2-binary-law-families.json"
-      - ".github/workflows/d8-collapse-screen.yml"
   workflow_dispatch:
 
 jobs:

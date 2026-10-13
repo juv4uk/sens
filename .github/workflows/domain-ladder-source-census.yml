@@ -1,22 +1,6 @@
 name: Domain-ladder source-only bulk census
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'lib/**/*.lisp'
-      - scripts/migrate-domain-ladder-source-batch.py
-      - tests/test_domain_ladder_source_batch.py
-      - tests/test_domain_ladder_d3_enforcement.py
-      - scripts/enforce-function-table-mechanisms.lisp
-      - scripts/enforce-island-math-evidence.lisp
-      - tests/test_domain_ladder_d4_policy_cohort.py
-      - scripts/enforce-function-table-mechanisms.lisp
-      - scripts/enforce-island-math-evidence.lisp
-      - scripts/semantic-authority-guard-enforce.lisp
-      - knowledge/guard-fact-policy.lisp
-      - knowledge/guard-reference.lisp
-      - .github/workflows/domain-ladder-source-census.yml
   workflow_dispatch:
 
 permissions:

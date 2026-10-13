@@ -1,13 +1,8 @@
+# Owner 2026-10-13: manual only; the D4 binary gate is the sole automatic test.
 name: Rust nightly arbitrary-width integer witness
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/rust-nightly-int-witness/**"
-      - ".github/workflows/rust-nightly-int-witness.yml"
   workflow_dispatch:
-  schedule:
-    - cron: "23 3 * * *"
 
 permissions:
   contents: read

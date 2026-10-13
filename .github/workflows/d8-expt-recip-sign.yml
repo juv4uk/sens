@@ -1,18 +1,6 @@
 name: D8 EXPT reciprocal-sign research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-expt-recip-sign/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-expt-recip-sign.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-expt-recip-sign/**"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-expt-recip-sign.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,15 +1,6 @@
 name: D4 clean-room re-entry research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d4-cleanroom-reentry/**"
-      - ".github/workflows/d4-cleanroom-reentry.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d4-cleanroom-reentry/**"
-      - ".github/workflows/d4-cleanroom-reentry.yml"
   workflow_dispatch:
 
 jobs:

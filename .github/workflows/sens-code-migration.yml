@@ -1,46 +1,7 @@
 name: sens-code-migration
 
 on:
-  pull_request:
-    paths:
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/migrate-approved-t5.py"
-      - "scripts/sens_source_resolver.py"
-      - "scripts/classify-lisp-source-forms.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/audit-sens-name-debt.py"
-      - "scripts/migrate-sens-ecosystem.py"
-      - "tests/test_sens_code_migration.py"
-      - "tests/test_classify_lisp_source_forms.py"
-      - "tests/test_three_pass_migration.py"
-      - "tests/test_migrate_approved_t5.py"
-      - "tests/test_sens_t5_codec.py"
-      - "contracts/core1-historical-sid-map.lisp"
-      - "knowledge/d1-d9-foundation.json"
-      - "knowledge/number-width-ratified.json"
-      - ".github/workflows/sens-code-migration.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/migrate-to-sens-codes.py"
-      - "scripts/migrate-approved-t5.py"
-      - "scripts/sens_source_resolver.py"
-      - "scripts/classify-lisp-source-forms.py"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/audit-sens-name-debt.py"
-      - "scripts/migrate-sens-ecosystem.py"
-      - "tests/test_sens_code_migration.py"
-      - "tests/test_classify_lisp_source_forms.py"
-      - "tests/test_three_pass_migration.py"
-      - "tests/test_migrate_approved_t5.py"
-      - "tests/test_sens_t5_codec.py"
-      - "contracts/core1-historical-sid-map.lisp"
-      - "knowledge/d1-d9-foundation.json"
-      - "knowledge/number-width-ratified.json"
-      - ".github/workflows/sens-code-migration.yml"
-
+  workflow_dispatch:
 concurrency:
   group: sens-code-migration-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

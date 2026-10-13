@@ -98,11 +98,13 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
+; Exact D5:10011 CADDR followed by D4:1001 CADR.
+; Only the projection is refactored; BIPM SI records remain unchanged.
 ; A scientific-constant/1 record stores its quantity in the third field; a
 ; quantity/1 stores its numeric value in the second field.
 (0011 si:constant-value
   (0010 (constant)
-    (100 (011 (100 (011 (011 constant)))))))
+    (1001 (10011 constant))))
 
 ; Backward-compatible arithmetic surface, derived from the records above.
 (0011 si:cesium-frequency (si:constant-value si:defining-cesium-frequency))

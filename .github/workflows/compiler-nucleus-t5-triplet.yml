@@ -1,30 +1,6 @@
 name: Compiler nucleus three-file T5 triplet
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/compiler-nucleus-t5-triplet.yml"
-      - "lib/compiler-nucleus.lisp"
-      - "scripts/migrate-three-pass.py"
-      - "scripts/sens_t5_codec.py"
-      - "knowledge/d1-d9-foundation.json"
-      - "knowledge/sens8-current-coverage-v1.json"
-      - "contracts/core1-historical-sid-map.lisp"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "crates/sens/src/semantic_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/eval/necessary_forms_generated.rs"
-      - "crates/sens/src/text7_projection_generated.rs"
-      - "lib/domains/d1.lisp"
-      - "lib/domains/d3.lisp"
-      - "lib/domains/d4.lisp"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "crates/xtask/src/compiler_compile.rs"
-      - "crates/xtask/src/main.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/binary_execution.rs"
-      - "tests/test_migrate_t5_batch.py"
   workflow_dispatch:
 
 permissions:

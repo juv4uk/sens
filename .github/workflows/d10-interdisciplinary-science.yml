@@ -1,14 +1,5 @@
 name: D10 interdisciplinary science research admission
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-interdisciplinary-science-proposals-20261009.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'knowledge/d10-fill-v1-state.json'
-      - 'knowledge/d10-selection-transition-history.json'
-      - 'scripts/check_d10_science_interests_v1.py'
-      - 'docs/research/d10-interdisciplinary-science-20261009.uk.md'
-      - '.github/workflows/d10-interdisciplinary-science.yml'
   workflow_dispatch:
 jobs:
   research-law-oracle:

@@ -1,15 +1,6 @@
 name: Binary domain separation research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/binary-domain-separation/**"
-      - ".github/workflows/binary-domain-separation.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/binary-domain-separation/**"
-      - ".github/workflows/binary-domain-separation.yml"
   workflow_dispatch:
 
 jobs:

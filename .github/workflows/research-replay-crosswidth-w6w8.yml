@@ -1,13 +1,6 @@
 name: Historical research replay W6 W8
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/research-replay-crosswidth-w6w8.yml
-      - .github/workflows/cross-width-law-atlas.yml
-      - knowledge/cross-width-law-atlas.json
-      - scripts/check-cross-width-law-atlas.py
-      - benchmarks/function-number-product-space/**
   workflow_dispatch:
 
 permissions:

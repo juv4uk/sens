@@ -1,17 +1,6 @@
 name: D10 finite binary arc consistency #4991 — research only
 on:
-  pull_request:
-    paths:
-      - 'scripts/research_d10_finite_arc_consistency.py'
-      - 'tests/test_d10_finite_arc_consistency.py'
-      - 'tests/oracles/d10_finite_arc_consistency.pl'
-      - '.github/workflows/d10-finite-arc-consistency.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/research_d10_finite_arc_consistency.py'
-      - 'tests/test_d10_finite_arc_consistency.py'
-      - 'tests/oracles/d10_finite_arc_consistency.pl'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

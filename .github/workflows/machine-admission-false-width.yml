@@ -1,17 +1,6 @@
 name: Точна ширина невиконуваного x86 admission datum
 
 on:
-  pull_request:
-    paths:
-      - "lib/machine/admission/x86-64.lisp"
-      - "crates/sens/tests/machine_admission_false_width.rs"
-      - ".github/workflows/machine-admission-false-width.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/machine/admission/x86-64.lisp"
-      - "crates/sens/tests/machine_admission_false_width.rs"
-      - ".github/workflows/machine-admission-false-width.yml"
   workflow_dispatch:
 
 permissions:
@@ -30,3 +19,23 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: D3 ATOM + D1 біт та недоторкане D8
         run: cargo test --locked -p sens --test machine_admission_false_width -- --nocapture
+      - name: Двійковий SENS сам доводить D1:YES/D1:NO та вибір COND
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          count=0
+          while IFS= read -r bits || [[ -n "$bits" ]]; do
+            [[ -z "$bits" ]] && continue
+            count=$((count + 1))
+            printf '%s\n' "$bits" > "$RUNNER_TEMP/machine-effect-d1.lisp"
+            target/debug/sens-trit encode "$RUNNER_TEMP/machine-effect-d1.lisp"
+            target/debug/sens-trit open "$RUNNER_TEMP/machine-effect-d1.sens" > "$RUNNER_TEMP/machine-effect-d1.open.bits"
+            cmp "$RUNNER_TEMP/machine-effect-d1.lisp" "$RUNNER_TEMP/machine-effect-d1.open.bits"
+            target/debug/sens "$RUNNER_TEMP/machine-effect-d1.sens" > "$RUNNER_TEMP/machine-effect-d1.sens.out"
+            target/debug/sens-trit eval "$RUNNER_TEMP/machine-effect-d1.sens" > "$RUNNER_TEMP/machine-effect-d1.trit.out"
+            cmp "$RUNNER_TEMP/machine-effect-d1.sens.out" "$RUNNER_TEMP/machine-effect-d1.trit.out"
+            printf '1\n' | cmp - "$RUNNER_TEMP/machine-effect-d1.sens.out"
+          done < tests/semantic/machine-effects-d1-fallback-law.bits
+          test "$count" -eq 5
+

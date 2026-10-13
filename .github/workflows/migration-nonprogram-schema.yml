@@ -1,26 +1,7 @@
 name: Migration non-program schema manifest
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_schema_manifest.py"
-      - "contracts/*.lisp"
-      - "lib/function-table-mechanisms.lisp"
-      - "lib/island-math-evidence.lisp"
-      - "tests/fixtures/island-math-evidence/*.lisp"
-      - ".github/workflows/migration-nonprogram-schema.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_schema_manifest.py"
-      - "contracts/*.lisp"
-      - "lib/function-table-mechanisms.lisp"
-      - "lib/island-math-evidence.lisp"
-      - "tests/fixtures/island-math-evidence/*.lisp"
-      - ".github/workflows/migration-nonprogram-schema.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

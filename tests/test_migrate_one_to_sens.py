@@ -61,10 +61,15 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_unknown_ukrainian_identifiers_are_not_encoded_as_fake_calls(self):
-        source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
+        # A genuinely unknown Ukrainian head must fail closed, never become a
+        # fake call or unstructured text. The former fixture
+        # lib/surface/ukr-acceptance.lisp is now a registered, migrated pair
+        # (it has a committed .sens and its identifiers are registered ukr
+        # surfaces), so it no longer demonstrates an unknown identifier.
+        source = ROOT / "tests" / "fixtures" / "unknown-uk-head.lisp"
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "ukr-acceptance.sens"
+            target = Path(td) / "unknown-uk-head.sens"
             result = invoke(source, "--source-era", "legacy", "--output", str(target))
             self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)

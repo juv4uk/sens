@@ -1,21 +1,6 @@
 name: D10 Clojure reference review
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-crossrepo-clojure-reference-v1.json"
-      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
-      - "scripts/check-d10-crossrepo-clojure-reference-v1.py"
-      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
-      - ".github/workflows/d10-crossrepo-clojure-reference-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d10-crossrepo-clojure-reference-v1.json"
-      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
-      - "scripts/check-d10-crossrepo-clojure-reference-v1.py"
-      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
-      - ".github/workflows/d10-crossrepo-clojure-reference-v1.yml"
   workflow_dispatch:
 
 jobs:

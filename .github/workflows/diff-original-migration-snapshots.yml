@@ -1,12 +1,6 @@
 name: original-migration-snapshot-delta
 
 on:
-  pull_request:
-    paths:
-      - "scripts/diff_original_migration_snapshots.py"
-      - "tests/test_diff_original_migration_snapshots.py"
-      - "docs/MIGRATION-SNAPSHOT-DELTA.uk.md"
-      - ".github/workflows/diff-original-migration-snapshots.yml"
   workflow_dispatch:
 
 permissions:

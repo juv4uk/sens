@@ -1,0 +1,46 @@
+name: SENS RED cause routing (four classes)
+
+# Owner quarantine 2026-10-13: no automatic GitHub Actions on push, PR,
+# workflow_run, or schedule while workflow tests are under correction.
+# Manual dispatch only; never unquarantine without explicit owner approval.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: sens-red-quarantine-updater
+  cancel-in-progress: false
+
+jobs:
+  red-cause-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Pure metadata mutants (no host-language semantic oracle)
+        run: python3 -m unittest discover -s tests -p 'test_red_cause_router.py' -v
+      - name: Focused test — aged RED routing
+        run: python3 -m unittest discover -s tests -p 'test_aged_red_quarantine.py' -v
+      - name: Tests for immediate RED workflow quarantine
+        run: python3 -m unittest discover -s tests -p 'test_quarantine_red_workflows.py' -v
+      - name: Audit existing cause ledger
+        run: python3 scripts/red_cause_router.py audit
+      - name: Quarantine current RED workflows immediately in issue #5741
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/quarantine_red_workflows.py --issue 5741
+      - name: Quarantine aged failed runs in issue #5741 (without changing checks)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/aged_red_quarantine.py --days 7 --issue 5741
+      - name: Inventory live workflow failures (no job logs required)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/red_cause_router.py live --max-pages 50

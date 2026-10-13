@@ -1,10 +1,7 @@
 name: temporary 4242 native-first exact-SENS generator
 
 on:
-  push:
-    branches:
-      - release/4242-native-first-exact-sens
-
+  workflow_dispatch:
 permissions:
   contents: write
 

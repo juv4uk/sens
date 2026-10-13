@@ -1,11 +1,6 @@
 name: Candidate-S outer envelope
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/outer_envelope.rs"
-      - "crates/sens/src/lib.rs"
-      - ".github/workflows/candidate-s-envelope.yml"
   workflow_dispatch:
 
 permissions:

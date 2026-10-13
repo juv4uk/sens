@@ -1,17 +1,6 @@
 name: Audit SID8 in-place machine Lisp cutover
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - lib/machine/admission/x86-64.lisp
-      - lib/machine/atoms/x86-64.lisp
-      - lib/machine/encoding/x86-64.lisp
-      - lib/machine/operands/x86-64.lisp
-      - lib/machine/profile/minimal-runtime-x86-64.lisp
-      - lib/machine/projection/x86-64.lisp
-      - tests/test_sid8_machine_source_cutover.py
-      - .github/workflows/audit-sid8-machine-source.yml
   workflow_dispatch:
 
 permissions:

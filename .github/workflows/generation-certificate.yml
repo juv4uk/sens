@@ -1,17 +1,6 @@
 name: Selector generation certificate research
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/examples/selector_certificate_bench.rs"
-      - "benchmarks/generation-certificate/**"
-      - ".github/workflows/generation-certificate.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/examples/selector_certificate_bench.rs"
-      - "benchmarks/generation-certificate/**"
-      - ".github/workflows/generation-certificate.yml"
   workflow_dispatch:
 
 concurrency:

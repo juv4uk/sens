@@ -1,27 +1,6 @@
 name: D10 single-stream restoration
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d10-single-stream-restoration-v1.json"
-      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "knowledge/archipelago-map-v1.json"
-      - "scripts/check-d10-single-stream-restoration-v1.py"
-      - "scripts/check-d10-ownership-cleanup-v1.py"
-      - "scripts/check-d10-ownership-cleanup-v2.py"
-      - "scripts/check-archipelago-map-v1.py"
-      - ".github/workflows/d10-single-stream-restoration.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d10-single-stream-restoration-v1.json"
-      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
-      - "knowledge/d10-v1-semantic-inventory.json"
-      - "knowledge/d10-fill-v1-state.json"
-      - "scripts/check-d10-single-stream-restoration-v1.py"
-      - ".github/workflows/d10-single-stream-restoration.yml"
   workflow_dispatch:
 
 jobs:

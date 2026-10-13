@@ -1,22 +1,6 @@
 name: Read-only SENS T5 triple-view inventory
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/report_t5_triplet_inventory.py'
-      - 'tests/test_report_t5_triplet_inventory.py'
-      - '.github/workflows/report-t5-triplet-inventory.yml'
-      - 'scripts/audit_t5_file_pairs.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
-      - '**/*.sens'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/report_t5_triplet_inventory.py'
-      - 'tests/test_report_t5_triplet_inventory.py'
-      - '.github/workflows/report-t5-triplet-inventory.yml'
-      - 'tests/fixtures/migration-d1-cond-cohort/**'
   workflow_dispatch:
 
 permissions:

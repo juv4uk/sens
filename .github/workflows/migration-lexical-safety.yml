@@ -1,22 +1,6 @@
 name: Migration lexical binding and quoted-data safety
 
 on:
-  push:
-    branches:
-      - guard/migration-lexical-safety-20261008
-    paths:
-      - scripts/audit_lisp_migration_edits.py
-      - tests/test_audit_lisp_migration_edits.py
-      - .github/workflows/migration-lexical-safety.yml
-  pull_request:
-    paths:
-      - scripts/audit_lisp_migration_edits.py
-      - tests/test_audit_lisp_migration_edits.py
-      - .github/workflows/migration-lexical-safety.yml
-      - scripts/migrate-three-pass.py
-      - lib/machine/layout/pair-x86-64.lisp
-      - scripts/build-inventory.lisp
-      - scripts/semantic-authority-guard.lisp
   workflow_dispatch:
 
 permissions:

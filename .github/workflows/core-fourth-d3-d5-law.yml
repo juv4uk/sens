@@ -1,0 +1,26 @@
+name: Чинний D3/D5 селектор FOURTH — закони двійкового SENS
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sens-fourth-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Зібрати лише механізми SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Двійковий SENS вирішує сім законів
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit open tests/semantic/core-fourth-d3-d5-law.sens > "$RUNNER_TEMP/fourth.bits"
+          cmp tests/semantic/core-fourth-d3-d5-law.bits "$RUNNER_TEMP/fourth.bits"
+          target/debug/sens tests/semantic/core-fourth-d3-d5-law.sens > "$RUNNER_TEMP/fourth.out"
+          target/debug/sens-trit eval tests/semantic/core-fourth-d3-d5-law.sens > "$RUNNER_TEMP/fourth-trit.out"
+          cmp "$RUNNER_TEMP/fourth.out" "$RUNNER_TEMP/fourth-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/fourth.out"

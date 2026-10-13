@@ -1,21 +1,6 @@
 name: Historical Ukrainian Markdown reference exactness
 
 on:
-  pull_request:
-    paths:
-      - 'docs/ukrainian-api.md'
-      - 'lib/surface/semantic-registry.lisp'
-      - 'lib/surface/uk-docs.lisp'
-      - 'tests/test_ukrainian_api_compat_coverage.py'
-      - '.github/workflows/uk-api-compat-coverage.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'docs/ukrainian-api.md'
-      - 'lib/surface/semantic-registry.lisp'
-      - 'lib/surface/uk-docs.lisp'
-      - 'tests/test_ukrainian_api_compat_coverage.py'
-      - '.github/workflows/uk-api-compat-coverage.yml'
   workflow_dispatch:
 
 permissions:

@@ -85,7 +85,7 @@
          ((11110111 sens-ref (semantic-registry-row-id (100 rows)))
           
           (100 rows))
-         ((0100 (11110111 sens-ref (semantic-registry-row-id (100 rows))))
+         (#d1:1
           (semantic-registry-find-row sens-ref (011 rows))))))))
 
 (0011 semantic-registry-find-id-in-namespaces

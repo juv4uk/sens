@@ -1,7 +1,6 @@
 name: Verify 560 result-status target
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:

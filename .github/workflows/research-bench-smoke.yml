@@ -5,21 +5,6 @@ name: Research benchmark smoke
 # evidence artifacts; semantic/parity failures are the merge-blocking signal.
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/research-bench-smoke.yml"
-      - "benchmarks/semantic-tree/**"
-      - "benchmarks/self-description/**"
-      - "benchmarks/agent-messages/run.py"
-      - "benchmarks/agent-messages/size_by_kind.py"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/research-bench-smoke.yml"
-      - "benchmarks/semantic-tree/**"
-      - "benchmarks/self-description/**"
-      - "benchmarks/agent-messages/run.py"
-      - "benchmarks/agent-messages/size_by_kind.py"
   workflow_dispatch:
 
 concurrency:

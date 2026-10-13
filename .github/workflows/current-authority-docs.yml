@@ -1,51 +1,6 @@
 name: Current authority docs
 
 on:
-  pull_request:
-    paths:
-      - README.md
-      - language-contract.lisp
-      - contracts/numeric-domains-ratification.lisp
-      - knowledge/number-width-ratified.json
-      - knowledge/d10-owner-whole-domain-ratification-20261012.json
-      - knowledge/d10-current-inventory.json
-      - knowledge/d10-v18-semantic-inventory.json
-      - scripts/check_d10_owner_whole_domain_ratification.py
-      - scripts/check-numeric-domain-ratification.py
-      - CURRENT.md
-      - docs/semantic-authority-map.md
-      - docs/semantic-authority-map.uk.md
-      - docs/domain-paradigm.uk.md
-      - docs/program-surface-translator.md
-      - docs/ukrainian-api.md
-      - docs/README.md
-      - docs/domain-surfaces-d9.md
-      - lib/domains/d9.lisp
-      - scripts/check-current-authority-docs.sh
-      - .github/workflows/current-authority-docs.yml
-  push:
-    branches: [main]
-    paths:
-      - README.md
-      - language-contract.lisp
-      - contracts/numeric-domains-ratification.lisp
-      - knowledge/number-width-ratified.json
-      - knowledge/d10-owner-whole-domain-ratification-20261012.json
-      - knowledge/d10-current-inventory.json
-      - knowledge/d10-v18-semantic-inventory.json
-      - scripts/check_d10_owner_whole_domain_ratification.py
-      - scripts/check-numeric-domain-ratification.py
-      - CURRENT.md
-      - docs/semantic-authority-map.md
-      - docs/semantic-authority-map.uk.md
-      - docs/domain-paradigm.uk.md
-      - docs/program-surface-translator.md
-      - docs/ukrainian-api.md
-      - docs/README.md
-      - docs/domain-surfaces-d9.md
-      - lib/domains/d9.lisp
-      - scripts/check-current-authority-docs.sh
-      - .github/workflows/current-authority-docs.yml
   workflow_dispatch:
 
 permissions:

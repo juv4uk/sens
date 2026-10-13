@@ -1,26 +1,7 @@
 name: D6 OD-006 cross-era authority
 
 on:
-  pull_request:
-    paths:
-      - "scripts/research-2764-d6-owner-baseline.py"
-      - "scripts/research-2764-d6-pre-od006-archival-guard.py"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "scripts/research-2619-d6-residency-readiness.py"
-      - "benchmarks/d6-ratification-noncontagion/**"
-      - "knowledge/d6-historical-full-map.json"
-      - ".github/workflows/d6-od006-cross-era-authority.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/research-2764-d6-owner-baseline.py"
-      - "scripts/research-2764-d6-pre-od006-archival-guard.py"
-      - "benchmarks/d6-unknown-frontier/**"
-      - "scripts/research-2619-d6-residency-readiness.py"
-      - "benchmarks/d6-ratification-noncontagion/**"
-      - "knowledge/d6-historical-full-map.json"
-      - ".github/workflows/d6-od006-cross-era-authority.yml"
-
+  workflow_dispatch:
 jobs:
   authority:
     name: Current OD-006 vs PRE-OD006 evidence

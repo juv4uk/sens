@@ -1,32 +1,7 @@
 name: OD005/OD006 runtime admission audit
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "knowledge/od005-od006-runtime-admission-audit.json"
-      - "lib/surface/semantic-registry.lisp"
-      - "crates/sens/src/parser.rs"
-      - "crates/sens/src/sens.rs"
-      - "crates/sens/src/syntax.rs"
-      - "crates/sens/tests/od005_od006_runtime_admission_gap.rs"
-      - "scripts/audit-od005-od006-runtime-admission.py"
-      - ".github/workflows/od005-od006-runtime-admission.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "knowledge/od005-od006-runtime-admission-audit.json"
-      - "lib/surface/semantic-registry.lisp"
-      - "crates/sens/src/parser.rs"
-      - "crates/sens/src/sens.rs"
-      - "crates/sens/src/syntax.rs"
-      - "crates/sens/tests/od005_od006_runtime_admission_gap.rs"
-      - "scripts/audit-od005-od006-runtime-admission.py"
-      - ".github/workflows/od005-od006-runtime-admission.yml"
-
+  workflow_dispatch:
 jobs:
   admission-audit:
     name: D5/D6 owner residency vs runtime identity

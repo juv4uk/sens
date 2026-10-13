@@ -1,22 +1,6 @@
 name: D8 REDUCE-SCAN direction research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-reduce-scan-direction/**"
-      - "docs/research/3674-d8-reduce-scan-direction.md"
-      - "docs/research/3674-d8-reduce-scan-direction.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-reduce-scan-direction.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-reduce-scan-direction/**"
-      - "docs/research/3674-d8-reduce-scan-direction.md"
-      - "docs/research/3674-d8-reduce-scan-direction.uk.md"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-reduce-scan-direction.yml"
   workflow_dispatch:
 
 jobs:

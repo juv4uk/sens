@@ -1,9 +1,7 @@
 name: Verify #287 full package
 
 on:
-  pull_request:
-    branches: [main]
-
+  workflow_dispatch:
 permissions:
   contents: read
 

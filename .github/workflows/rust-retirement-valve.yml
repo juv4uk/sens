@@ -1,8 +1,7 @@
 name: Rust Retirement Valve
 
 on:
-  pull_request:
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -21,7 +20,7 @@ jobs:
           shared-key: rust-retirement-valve
 
       - name: Build existing Lisp runner
-        run: cargo build -p my-lisp-cli --bin my-lisp
+        run: cargo build -p sens-cli --bin my-lisp
 
       - name: Collect real Rust diff facts
         env:

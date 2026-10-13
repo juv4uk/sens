@@ -1,18 +1,7 @@
 name: Post-D4 SETQ lower bound
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/environment.rs"
-      - "docs/research/2402-nearest-binding-mutation.md"
-      - ".github/workflows/post-d4-setq-lower-bound.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/environment.rs"
-      - "docs/research/2402-nearest-binding-mutation.md"
-      - ".github/workflows/post-d4-setq-lower-bound.yml"
-
+  workflow_dispatch:
 jobs:
   lower-bound:
     name: nearest-existing mutation vs D4 shadow

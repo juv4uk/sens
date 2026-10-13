@@ -1,15 +1,5 @@
 name: D10 1024-code canonical research coordinate placement
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'knowledge/d10-v18-semantic-inventory.json'
-      - 'knowledge/d10-v18-coordinate-transfer-20261012.json'
-      - 'knowledge/d10-current-inventory.json'
-      - 'knowledge/d10-v17-semantic-inventory.json'
-      - 'knowledge/d10-v17-complete-research-gauge-20261012.json'
-      - 'scripts/check_d10_v18_research_placement.py'
-      - '.github/workflows/d10-v18-coordinate-placement.yml'
   workflow_dispatch:
 permissions:
   contents: read

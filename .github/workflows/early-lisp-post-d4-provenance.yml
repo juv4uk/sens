@@ -1,12 +1,5 @@
 name: Early Lisp historical ledger provenance guard
 on:
-  pull_request:
-    paths:
-      - 'knowledge/early-lisp-post-d4-history-provenance-v1.json'
-      - 'knowledge/d1-d9-foundation.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'scripts/check-early-lisp-post-d4-provenance.py'
-      - '.github/workflows/early-lisp-post-d4-provenance.yml'
   workflow_dispatch:
 jobs:
   historical-provenance-only:

@@ -1,20 +1,5 @@
 name: canonical-one-file-T5
 on:
-  pull_request:
-    paths:
-      - 'scripts/migrate-one-to-sens.py'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/test_migrate_one_to_sens.py'
-      - '.github/workflows/migrate-one-to-sens.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/migrate-one-to-sens.py'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'tests/test_migrate_one_to_sens.py'
-      - '.github/workflows/migrate-one-to-sens.yml'
   workflow_dispatch:
 permissions:
   contents: read

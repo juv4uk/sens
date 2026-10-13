@@ -1,19 +1,6 @@
 name: migration-eq-cohort
 
 on:
-  pull_request:
-    paths:
-      - 'tests/fixtures/migration-eq-cohort/**'
-      - 'tests/test_migration_eq_cohort.py'
-      - 'crates/sens/tests/migration_eq_cohort.rs'
-      - '.github/workflows/migration-eq-cohort.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/fixtures/migration-eq-cohort/**'
-      - 'tests/test_migration_eq_cohort.py'
-      - 'crates/sens/tests/migration_eq_cohort.rs'
-      - '.github/workflows/migration-eq-cohort.yml'
   workflow_dispatch:
 
 permissions:

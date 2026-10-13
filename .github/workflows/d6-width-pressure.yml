@@ -1,17 +1,6 @@
 name: D6 structural width pressure
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-width-pressure/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-width-pressure.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-width-pressure/**"
-      - "docs/research/2344-post-d4-historical-ledger.json"
-      - ".github/workflows/d6-width-pressure.yml"
   workflow_dispatch:
 
 permissions:

@@ -1,18 +1,7 @@
 name: D10 Younger 1967 ambiguity oracle
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-younger-1967-cnf-ambiguity-research.json
-      - tests/test_d10_younger_cnf_ambiguity.py
-      - .github/workflows/d10-younger-cnf-ambiguity.yml
-  push:
-    branches: [main]
-    paths:
-      - knowledge/d10-younger-1967-cnf-ambiguity-research.json
-      - tests/test_d10_younger_cnf_ambiguity.py
-      - .github/workflows/d10-younger-cnf-ambiguity.yml
-
+  workflow_dispatch:
 permissions:
   contents: read
 

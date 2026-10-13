@@ -1,22 +1,6 @@
 name: Proven physical T5 migration admission
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/admit-t5-migration.py'
-      - 'tests/test_admit_t5_migration.py'
-      - '.github/workflows/admit-t5-migration.yml'
-      - 'docs/ADMIT-T5-MIGRATION.uk.md'
-      - 'scripts/migrate-three-pass.py'
-      - 'scripts/sens_t5_codec.py'
-      - 'knowledge/migration-admissions/**'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/admit-t5-migration.py'
-      - 'tests/test_admit_t5_migration.py'
-      - '.github/workflows/admit-t5-migration.yml'
-      - 'knowledge/migration-admissions/**'
   workflow_dispatch:
 
 permissions:

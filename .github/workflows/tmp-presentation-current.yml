@@ -1,10 +1,7 @@
 name: Temporary presentation repair current
 
 on:
-  push:
-    branches:
-      - fix/presentation-bool-boundary-current
-
+  workflow_dispatch:
 permissions:
   contents: write
 

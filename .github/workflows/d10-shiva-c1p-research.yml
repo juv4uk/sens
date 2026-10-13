@@ -1,11 +1,5 @@
 name: D10 Shiva C1P canonical binary-matrix research
 on:
-  pull_request:
-    paths:
-      - knowledge/d10-shiva-c1p-canonical-order-research-v1.json
-      - scripts/check_d10_shiva_c1p_research.py
-      - docs/research/d10-shiva-c1p-canonical-order.uk.md
-      - .github/workflows/d10-shiva-c1p-research.yml
   workflow_dispatch:
 jobs:
   exact-c1p-proof:

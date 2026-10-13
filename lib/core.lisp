@@ -113,7 +113,7 @@
 
 (0011 fourth
   (0010 (values)
-    (100111 values)))
+    (10011 (011 values))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure

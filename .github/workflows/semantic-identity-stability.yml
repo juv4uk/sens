@@ -1,17 +1,6 @@
 name: Semantic identity stability benchmark
 
 on:
-  pull_request:
-    paths:
-      - 'lib/surface/semantic-registry.lisp'
-      - 'benchmarks/semantic-identity-stability/**'
-      - '.github/workflows/semantic-identity-stability.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/surface/semantic-registry.lisp'
-      - 'benchmarks/semantic-identity-stability/**'
-      - '.github/workflows/semantic-identity-stability.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,13 +1,5 @@
 name: D10 archived donor evidence guard
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-crossrepo-linguistic-v1.json'
-      - 'knowledge/d10-crossrepo-domain-v1.json'
-      - 'knowledge/d10-crossrepo-knowledge-tooling-v1.json'
-      - 'knowledge/d10-v1-semantic-inventory.json'
-      - 'scripts/check-d10-archived-donors.py'
-      - '.github/workflows/d10-archived-donors.yml'
   workflow_dispatch:
 jobs:
   archived-donors:

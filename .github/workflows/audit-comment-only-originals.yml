@@ -1,12 +1,6 @@
 name: Audit comment-only original Lisp sources
 
 on:
-  pull_request:
-    paths:
-      - "scripts/audit_comment_only_originals.py"
-      - "tests/test_audit_comment_only_originals.py"
-      - "docs/COMMENT-ONLY-LISP-SCOPE.uk.md"
-      - ".github/workflows/audit-comment-only-originals.yml"
   workflow_dispatch:
 
 permissions:

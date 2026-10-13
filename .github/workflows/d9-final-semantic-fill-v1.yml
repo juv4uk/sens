@@ -1,30 +1,6 @@
 name: D9 final semantic fill v1
 
 on:
-  pull_request:
-    paths:
-      - "lib/forward.lisp"
-      - "lib/lisp-fs.lisp"
-      - "lib/clips-import.lisp"
-      - "lib/canon.lisp"
-      - "lib/linter.lisp"
-      - "lib/process.lisp"
-      - "lib/tcp.lisp"
-      - "knowledge/d9-final-semantic-fill-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-final-semantic-fill-v1.py"
-      - "scripts/check-d9-v1-semantic-inventory.py"
-      - "scripts/check-d9-world-quantity-harvest-v1.py"
-      - ".github/workflows/d9-final-semantic-fill-v1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d9-final-semantic-fill-v1.json"
-      - "knowledge/d9-v1-semantic-inventory.json"
-      - "knowledge/d9-fill-v1-state.json"
-      - "scripts/check-d9-final-semantic-fill-v1.py"
-      - ".github/workflows/d9-final-semantic-fill-v1.yml"
   workflow_dispatch:
 
 jobs:

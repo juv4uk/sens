@@ -1,18 +1,6 @@
 name: Міграція внутрішніх Core-викликів
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "lib/core.lisp"
-      - "tests/test_core_lisp_helper_head_cutover.py"
-      - ".github/workflows/core-helper-head-cutover.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "lib/core.lisp"
-      - "tests/test_core_lisp_helper_head_cutover.py"
-      - ".github/workflows/core-helper-head-cutover.yml"
   workflow_dispatch:
 
 jobs:

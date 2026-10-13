@@ -31,7 +31,7 @@ fn eight_current_text_cells_use_exactly_seven_dense_bytes() {
 
 #[test]
 fn all_exact_w7_cells_preserve_width_via_source_words() {
-    let datum = Text7::from_cells((0u8..=127).collect()).unwrap();
+    let datum = Text7::from_cells((0u8..=127).collect::<Vec<_>>()).unwrap();
     let words = datum.to_source_words();
     assert_eq!(words.len(), 128);
     for word in &words {

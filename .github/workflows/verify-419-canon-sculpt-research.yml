@@ -1,14 +1,7 @@
 name: Verify 419 Canon sculpture research
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/verify-419-canon-sculpt-research.yml'
-      - 'docs/research/canon-sculpt-audit.lisp'
-      - 'docs/research/canon-sculpt-structural-basis.lisp'
-      - 'docs/research/canon-sculpt-probes/**'
-      - 'docs/superpowers/plans/2026-09-18-canon-sculpt-audit.md'
-
+  workflow_dispatch:
 jobs:
   research-probes:
     runs-on: ubuntu-24.04
@@ -26,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"
@@ -40,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
+          output=$(cargo run -q -p sens-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
           status=$?
           set -e
           printf '%s\n' "$output"

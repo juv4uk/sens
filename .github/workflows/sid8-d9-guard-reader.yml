@@ -1,14 +1,5 @@
 name: SID8 D9 Guard reader source cutover
 on:
-  push:
-    branches: [main]
-    paths:
-      - scripts/semantic-authority-guard-enforce.lisp
-      - scripts/semantic-authority-guard.lisp
-      - tests/test_sid8_d9_guard_reader_cutover.py
-      - tests/test_migrate_sid8_source_batch.py
-      - tests/test_sid8_d4_policy_cohort.py
-      - .github/workflows/sid8-d9-guard-reader.yml
   workflow_dispatch:
 
 permissions:

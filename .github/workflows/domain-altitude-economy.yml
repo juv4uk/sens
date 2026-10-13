@@ -1,17 +1,6 @@
 name: Domain altitude economy
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/domain-altitude-economy/**"
-      - "scripts/check-domain-altitude-economy.py"
-      - ".github/workflows/domain-altitude-economy.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/domain-altitude-economy/**"
-      - "scripts/check-domain-altitude-economy.py"
-      - ".github/workflows/domain-altitude-economy.yml"
   workflow_dispatch:
 
 jobs:

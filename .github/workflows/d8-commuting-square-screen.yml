@@ -1,24 +1,6 @@
 name: D8 commuting-square research screen
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d8-commuting-square-screen/run.py"
-      - "docs/research/3618-d8-commuting-square-screen.md"
-      - "docs/research/3618-d8-commuting-square-screen.uk.md"
-      - "knowledge/d6-v2-binary-law-families.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-commuting-square-screen.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "benchmarks/d8-commuting-square-screen/run.py"
-      - "docs/research/3618-d8-commuting-square-screen.md"
-      - "docs/research/3618-d8-commuting-square-screen.uk.md"
-      - "knowledge/d6-v2-binary-law-families.json"
-      - "knowledge/d6-ratified.json"
-      - ".github/workflows/d8-commuting-square-screen.yml"
   workflow_dispatch:
 
 jobs:

@@ -1,17 +1,6 @@
 name: D10 cyclic binary canonical phase research
 
 on:
-  pull_request:
-    paths:
-      - 'knowledge/d10-cyclic-word-canon-20261009.json'
-      - 'knowledge/d10-proposal-ledger.tsv'
-      - 'scripts/check_d10_cyclic_word_canon.py'
-      - 'tests/oracles/d10_cyclic_word_canon_sbcl.lisp'
-      - 'docs/research/d10-cyclic-word-canon.uk.md'
-      - '.github/workflows/d10-cyclic-word-canon.yml'
-  push:
-    branches:
-      - research/d10-cyclic-binary-word-canon-20261009
   workflow_dispatch:
 
 permissions:

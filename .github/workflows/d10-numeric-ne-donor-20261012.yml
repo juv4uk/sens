@@ -1,14 +1,5 @@
 name: D10 exact numeric inequality donor replay
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/check_d10_numeric_not_equal_donor_20261012.py'
-      - 'knowledge/d10-crossrepo-early-lisp-v1.json'
-      - 'knowledge/d10-v18-semantic-inventory.json'
-      - 'knowledge/d10-owner-whole-domain-ratification-20261012.json'
-      - 'knowledge/d10-current-inventory.json'
-      - '.github/workflows/d10-numeric-ne-donor-20261012.yml'
   workflow_dispatch:
 permissions:
   contents: read

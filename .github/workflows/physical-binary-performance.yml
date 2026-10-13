@@ -1,36 +1,6 @@
 name: SENS physical binary performance measurements
 
 on:
-  # Controlled replay lane: main scoreboard runs on source changes.
-  # This additional Cachegrind-capable runner runs only for its own changes.
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/physical-binary-performance/**"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-quote-cohort-main/*.sens"
-      - "tests/fixtures/migration-multiform-cohort-main/*.sens"
-      - "tests/fixtures/migration-d1-cond-cohort/*.sens"
-      - "tests/fixtures/migration-pair-cohort-main/*.sens"
-      - "tests/fixtures/migration-d4-selector-cohort/*.sens"
-      - "tests/fixtures/migration-eq-cond-cohort-main/*.sens"
-      - ".github/workflows/physical-binary-performance.yml"
-  pull_request:
-    paths:
-      - "benchmarks/physical-binary-performance/**"
-      - "scripts/sens_t5_codec.py"
-      - "tests/fixtures/migration-quote-cohort-main/*.sens"
-      - "tests/fixtures/migration-multiform-cohort-main/*.sens"
-      - "tests/fixtures/migration-d1-cond-cohort/*.sens"
-      - "tests/fixtures/migration-pair-cohort-main/*.sens"
-      - "tests/fixtures/migration-d4-selector-cohort/*.sens"
-      - "tests/fixtures/migration-eq-cond-cohort-main/*.sens"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/eval/**"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - ".github/workflows/physical-binary-performance.yml"
   workflow_dispatch:
     inputs:
       repetitions:

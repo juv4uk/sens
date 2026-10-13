@@ -1,0 +1,5 @@
+{
+  "schema": "sens-red-v1",
+  "policy": "2026-10-13 red-must-speak: no silent skip, no speculative first_bad_sha",
+  "cases": []
+}

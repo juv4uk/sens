@@ -1,22 +1,7 @@
 name: Migration non-program evidence manifest
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_evidence_manifest.py"
-      - "evidence/**/*.lisp"
-      - "tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp"
-      - ".github/workflows/migration-nonprogram-evidence.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
-      - "tests/test_migration_nonprogram_evidence_manifest.py"
-      - "evidence/**/*.lisp"
-      - "tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp"
-      - ".github/workflows/migration-nonprogram-evidence.yml"
-
+  workflow_dispatch:
 permissions:
   contents: read
 

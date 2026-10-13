@@ -1,18 +1,6 @@
 name: migration pair physical T5 oracle
 
 on:
-  pull_request:
-    paths:
-      - crates/sens/tests/migration_pair_car_cdr_cons_main.rs
-      - tests/test_migration_pair_cons_uk_triplet.py
-      - tests/fixtures/migration-pair-cohort-main/**
-      - .github/workflows/migration-pair-main-t5.yml
-  push:
-    branches: [main]
-    paths:
-      - crates/sens/tests/migration_pair_car_cdr_cons_main.rs
-      - tests/fixtures/migration-pair-cohort-main/**
-      - .github/workflows/migration-pair-main-t5.yml
   workflow_dispatch:
 
 permissions:

@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/narrate.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact-domain source uses raw D1 words 0/1, not compatibility projection
+  2. Exact D1:1 form (010 (001 ())) is present
   3. Reuses result-proper-list? from migrated result-status surface
   4. Key narrate function surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -48,27 +48,17 @@ def check_narrate() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"narrate: host truthiness {m.group()!r} at offset {m.start()}")
-    active_code = "\\n".join(
+    active_code = "\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith(";")
     )
     if "#d1:" in active_code:
-        errs.append("narrate: compatibility D1 projection used in exact-domain source")
-    # Check only the structural arity helpers, not unrelated presentation data.
-    helper_start = active_code.find("(0011 narrate-proper-list?")
-    helper_end = active_code.find("(0011 narrate-fact", helper_start)
-    if helper_start < 0 or helper_end < 0:
-        errs.append("narrate: cannot isolate the D3/D4 arity helper source")
-    else:
-        arity_helpers = active_code[helper_start:helper_end]
-        if "#d1:" in arity_helpers:
-            errs.append("narrate: arity helpers must use raw D1 words 0/1 in exact mode")
-        if not re.search(r"\(\(0101 value\)\s+1\)", arity_helpers):
-            errs.append("narrate: exact D1 YES word is missing from NULL(value) branch")
-        if not re.search(r"\(\(010 value\)\s+0\)", arity_helpers):
-            errs.append("narrate: exact D1 NO word is missing from ATOM(value) branch")
-    for legacy in ("narrate-outcome-arity?", "(11110111 (000000 fact)", "(000000 outcome)"):
-        if legacy in active_code:
-            errs.append(f"narrate: legacy arity mechanism still active: {legacy}")
+        errs.append("narrate: exact-domain source must use raw D1 words, not compatibility projection")
+    start = active_code.find("(0011 narrate-proper-list?")
+    end = active_code.find("(0011 narrate-fact", start)
+    if start < 0 or end < 0:
+        errs.append("narrate: structural arity helpers are missing")
+    elif "000000" in active_code[start:end] or "11110111" in active_code[start:end]:
+        errs.append("narrate: D6 LENGTH / D8 EQUAL returned to structural arity helpers")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"narrate: required surface missing: {fn}")

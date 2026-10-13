@@ -1,20 +1,7 @@
 name: migration-quote-cohort
 
 on:
-  pull_request:
-    paths:
-      - 'tests/fixtures/migration-quote-cohort/**'
-      - 'tests/test_migration_quote_cohort.py'
-      - 'crates/sens/tests/migration_quote_cohort.rs'
-      - '.github/workflows/migration-quote-cohort.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/fixtures/migration-quote-cohort/**'
-      - 'tests/test_migration_quote_cohort.py'
-      - 'crates/sens/tests/migration_quote_cohort.rs'
-      - '.github/workflows/migration-quote-cohort.yml'
-
+  workflow_dispatch:
 permissions:
   contents: read
 

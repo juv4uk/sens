@@ -1,16 +1,6 @@
 name: D6 non-prefix falsifier research
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/d6-nonprefix-falsifier/**"
-      - ".github/workflows/d6-nonprefix-falsifier.yml"
-      - "scripts/research-2506-d6-binding-policy-generator.py"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/d6-nonprefix-falsifier/**"
-      - ".github/workflows/d6-nonprefix-falsifier.yml"
   workflow_dispatch:
 
 jobs:

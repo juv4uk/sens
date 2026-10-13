@@ -1,17 +1,6 @@
 name: Independent root-domain automorphism
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/root-domain-automorphism/**"
-      - "benchmarks/post-d4-root-min-closeout/**"
-      - "benchmarks/d5-structural-discovery/factor-graph.json"
-      - ".github/workflows/root-domain-automorphism.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/root-domain-automorphism/**"
-      - ".github/workflows/root-domain-automorphism.yml"
   workflow_dispatch:
 
 jobs:

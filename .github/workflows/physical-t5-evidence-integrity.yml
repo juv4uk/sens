@@ -1,29 +1,6 @@
 name: Physical T5 evidence integrity
 
 on:
-  pull_request:
-    paths:
-      - "benchmarks/evidence-integrity/**"
-      - "scripts/benchmark-sens-physical.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/sens_t5_spaced_view.py"
-      - "tests/test_physical_t5_evidence_integrity.py"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
-      - ".github/workflows/physical-t5-evidence-integrity.yml"
-  push:
-    branches: [main]
-    paths:
-      - "benchmarks/evidence-integrity/**"
-      - "scripts/benchmark-sens-physical.py"
-      - "scripts/sens_t5_codec.py"
-      - "scripts/sens_t5_spaced_view.py"
-      - "tests/test_physical_t5_evidence_integrity.py"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
-      - "tests/fixtures/migration-d1-cond-cohort/**"
-      - ".github/workflows/physical-t5-evidence-integrity.yml"
   workflow_dispatch:
 
 permissions:

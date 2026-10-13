@@ -1,19 +1,6 @@
 name: D5 D6 SETQ identity consistency
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "benchmarks/d5-d6-setq-identity/**"
-      - ".github/workflows/d5-d6-setq-identity.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d6-historical-full-map.json"
-      - "benchmarks/d5-d6-setq-identity/**"
-      - ".github/workflows/d5-d6-setq-identity.yml"
   workflow_dispatch:
 
 permissions:

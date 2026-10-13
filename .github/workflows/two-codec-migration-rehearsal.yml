@@ -1,17 +1,6 @@
 name: Two-codec SENS migration rehearsal - inventory, stage, restore
 on:
-  push:
-    paths:
-      - 'scripts/prepare-two-codec-migration.py'
-      - 'crates/sens/examples/two_codec_small_programs.rs'
-      - '.github/workflows/two-codec-migration-rehearsal.yml'
-      - 'docs/two-codec-migration-plan-2026-10-11.uk.md'
-  pull_request:
-    paths:
-      - 'scripts/prepare-two-codec-migration.py'
-      - 'crates/sens/examples/two_codec_small_programs.rs'
-      - '.github/workflows/two-codec-migration-rehearsal.yml'
-      - 'docs/two-codec-migration-plan-2026-10-11.uk.md'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

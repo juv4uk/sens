@@ -1,25 +1,7 @@
 name: D4 bootstrap placement research
 
 on:
-  pull_request:
-    paths:
-      - "lib/core1.lisp"
-      - "scripts/research-2159-d4-pair-grammar.py"
-      - "scripts/research-2162-d4-polarity.py"
-      - "docs/research/2159-d4-pair-grammar*.md"
-      - "docs/research/2162-d4-polarity*.md"
-      - ".github/workflows/d4-bootstrap-research.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "lib/core1.lisp"
-      - "scripts/research-2159-d4-pair-grammar.py"
-      - "scripts/research-2162-d4-polarity.py"
-      - "docs/research/2159-d4-pair-grammar*.md"
-      - "docs/research/2162-d4-polarity*.md"
-      - ".github/workflows/d4-bootstrap-research.yml"
-
+  workflow_dispatch:
 jobs:
   d4-research:
     name: D4 pair grammar + polarity
