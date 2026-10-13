@@ -12,12 +12,15 @@
 ; D6:100111 CADDDR stays RATIFIED DATA but is not physically callable yet;
 ; no Rust/Python backdoor may silently admit that runtime function.
 ; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
-; Physical D3/D4 record slice: C1-MAKE-ERROR, C1-ERRORP, C1-MAKE-FOUND,
-; C1-FOUNDP -> lib/core1-records.{bits,sens}; 12 language-owned laws in
-; tests/fixtures/core1-records-semantic.{bits,sens}. No new host semantics.
-; Historical Core1 predicate-false produces structural (); it is NOT D1:0.
-; This witness documents the gap rather than silently retyping that value.
-; W7 is used for absent local and tag names; exact resident heads keep widths.
+; Exact binary Core1 admission slice: C1-ADMITTED-SID-VALUEP runs from
+; lib/core1-admission.{bits,sens}; 21 SENS-owned laws live in
+; tests/fixtures/core1-admission-semantic.{bits,sens}.
+; 13 accepted domain words, 7 rejected (including D6 noncallable data),
+; and short-circuit COND. This historical Core1 predicate returns structural
+; () for a negative answer; it is NOT the canonical D1:0. The test preserves
+; that observable mismatch; it does not assert modern D1 predicate admission.
+; Quoted record tags remain blocked pending a real atomic D7 datum law;
+; no fake D7 representation may be EQ-comparable to an atom.
 
 (0011 C1-SECOND
   (0010 (X)
