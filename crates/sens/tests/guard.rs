@@ -4,21 +4,31 @@ const GUARD_SOURCE: &str = include_str!("../../../lib/guard.lisp");
 
 fn eval_guard(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .unwrap();
     sens::eval_pinned_reasoning_source(
         "lib/unify.lisp",
         include_str!("../../../lib/unify.lisp"),
         &mut session,
     )
     .unwrap();
-    eval_program(GUARD_SOURCE, &mut session).unwrap();
-    eval_program(
-        include_str!("../../../knowledge/guard-reference.lisp"),
-        &mut session,
-    )
-    .unwrap();
+
+    let guard_forms = parse_mixed_exact_domain(GUARD_SOURCE)
+        .expect("guard library exact-width source");
+    sens::eval_parsed_expressions(&guard_forms, &mut session)
+        .expect("guard library must load with exact D3/D4 identities");
+    let reference_source = include_str!("../../../knowledge/guard-reference.lisp");
+    let reference_forms = parse_mixed_exact_domain(reference_source)
+        .expect("guard reference exact-width source");
+    sens::eval_parsed_expressions(&reference_forms, &mut session)
+        .expect("guard reference directory must load as data");
+
     eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("guard evaluation failed: {e}\nsource: {source}"))
+        .unwrap_or_else(|e| panic!("guard evaluation failed: {e}\\nsource: {source}"))
         .value
         .to_string()
 }
@@ -297,4 +307,35 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
             width = required.0
         );
     }
+}
+
+
+#[test]
+fn guard_reference_field_uses_existing_assoc_under_exact_d4_lambda() {
+    assert!(!GUARD_SOURCE.contains("(001000 "));
+    assert!(!GUARD_SOURCE.contains("(11100 "));
+    assert!(GUARD_SOURCE.contains("(assoc field (011 reference))"));
+    assert!(GUARD_SOURCE.contains("((0010 (entry)"));
+    let start = GUARD_SOURCE
+        .find("(0011 guard-reference-field")
+        .expect("Lisp-owned guard-reference-field must exist");
+    let end = GUARD_SOURCE[start..]
+        .find("\\n(0011 ")
+        .map(|offset| start + offset)
+        .expect("guard-reference-field must be a bounded definition");
+    let parsed = parse_mixed_exact_domain(&GUARD_SOURCE[start..end])
+        .expect("guard-reference-field must parse with exact widths");
+    let mut coordinates = Vec::new();
+    collect_call_head_coordinates(&parsed[0], &mut coordinates);
+    coordinates.sort_unstable();
+    coordinates.dedup();
+    let widths = coordinates
+        .iter()
+        .map(|(width, _)| *width)
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(
+        widths,
+        [3usize, 4usize].into_iter().collect(),
+        "guard-reference-field should use only D3 list operations and D4 lambda/selectors"
+    );
 }
