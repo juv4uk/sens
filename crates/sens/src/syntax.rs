@@ -802,6 +802,74 @@ pub(crate) mod wire {
     }
 }
 
+/// Strict AST transport admission for the ratified exact-domain projection.
+/// This is a mechanical carrier gate, not a SENS semantic oracle. Historical
+/// eight-bit function identities, number literals and calls are not silently
+/// promoted into exact-domain identities. Iterate with an explicit heap stack
+/// so malformed/deep trees fail closed before the recursive encoders run.
+fn exact_ast_transport_admitted(expressions: &[Expr]) -> bool {
+    let mut pending: Vec<(&Expr, u32)> = expressions.iter().map(|expr| (expr, 0)).collect();
+    while let Some((expr, depth)) = pending.pop() {
+        match &expr.kind {
+            ExprKind::DomainIdentity(_) | ExprKind::String(_) | ExprKind::Symbol(_)
+            | ExprKind::Local { .. } => {}
+            ExprKind::BinaryNumber(number) => {
+                if number.numeric_domain_width().is_none()
+                    || number.exact_numeric_domain_bits().is_none()
+                {
+                    return false;
+                }
+            }
+            ExprKind::List(items) => {
+                if depth >= MAX_STRUCTURE_DEPTH {
+                    return false;
+                }
+                pending.extend(items.iter().map(|item| (item, depth + 1)));
+            }
+            ExprKind::Pair(head, tail) => {
+                if depth >= MAX_STRUCTURE_DEPTH {
+                    return false;
+                }
+                pending.push((head, depth + 1));
+                pending.push((tail, depth + 1));
+            }
+            ExprKind::Number(..) | ExprKind::Rational(_) | ExprKind::NumericBuffer(_)
+            | ExprKind::Sid(_) | ExprKind::Call(..) | ExprKind::DomainCall(..) => {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+/// AST snapshot codec accepting only existing exact-domain data and
+/// explicitly domain-qualified D24+ numbers; preserves Dn widths as encoded.
+pub fn encode_exact_wire_program(expressions: &[Expr]) -> Option<Vec<u8>> {
+    exact_ast_transport_admitted(expressions).then(|| wire::encode_program(expressions))
+}
+
+/// Reject legacy wire identities, including SID8 hidden inside quoted pairs.
+pub fn decode_exact_wire_program(bytes: &[u8]) -> Option<Vec<Expr>> {
+    let program = wire::decode_program(bytes)?;
+    exact_ast_transport_admitted(&program).then_some(program)
+}
+
+/// Source-hashed FASL envelope with the same exact-domain admission gate.
+pub fn encode_exact_fasl_program(
+    expressions: &[Expr],
+    source_hash: &[u8; 32],
+) -> Option<Vec<u8>> {
+    exact_ast_transport_admitted(expressions)
+        .then(|| fasl::encode_program(expressions, source_hash))
+}
+
+/// A historic MYF1 snapshot remains readable through the existing legacy
+/// entrypoint, but cannot enter the exact AST lane unless every node qualifies.
+pub fn decode_exact_fasl_program(bytes: &[u8]) -> Option<(Vec<Expr>, [u8; 32])> {
+    let (program, source_hash) = fasl::decode_program(bytes)?;
+    exact_ast_transport_admitted(&program).then_some((program, source_hash))
+}
+
 #[cfg(test)]
 mod wire_tests {
     use super::wire::{decode_program, encode_program};
