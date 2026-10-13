@@ -1,0 +1,31 @@
+name: CLIPS D3 slot — 2046 адрес і живий oracle
+
+on:
+  pull_request:
+    paths:
+      - "lib/clips-import.lisp"
+      - "crates/sens/tests/clips_import.rs"
+      - "tests/test_clips_exact_d3_slot_2046.py"
+      - ".github/workflows/clips-d3-slot-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити D3/D8, 2046 адрес і негативні контрприклади
+        run: python3 -m unittest discover -s tests -p 'test_clips_exact_d3_slot_2046.py' -v
+
+  live-slot-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити реальне виконання слотів CLIPS у Rust
+        run: cargo test --locked -p sens --test clips_import clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias -- --exact --nocapture
