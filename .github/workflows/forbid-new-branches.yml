@@ -1,24 +1,24 @@
 name: Політика нових Git-гілок SENS — короткоживучі дозволені
 
+# КАРАНТИН АВТОЗАПУСКУ 2026-10-13: create — не автоматичний тест SENS.
+# Цей файл збережено тільки для ручного перегляду політики гілок.
 on:
-  create:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   new-branch-policy:
-    if: ${{ github.event.ref_type == 'branch' && github.event.ref != 'main' }}
     name: Політика нової Git-гілки SENS
     runs-on: ubuntu-24.04
     steps:
       - name: Зафіксувати короткоживучу гілку як дозволену
         env:
-          NEW_REF: ${{ github.event.ref }}
           ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
-          echo "::notice title=Короткоживучі гілки дозволені::${NEW_REF} від ${ACTOR}; дотримуйтесь AGENTS.md: атомарна зміна, PR та оперативне злиття в main через #5041."
+          echo "::notice title=Ручний аудит гілок::Автоматичний create-тригер вимкнено; ${ACTOR}, дотримуйтесь AGENTS.md: атомарна зміна, PR та контрольована інтеграція через #5041."
 
 # Ця подія сигналізує ПІСЛЯ створення ref. Вона більше не відхиляє створення
 # гілки: наказ власника 2026-10-12 дозволяє короткоживучі робочі гілки.
