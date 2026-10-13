@@ -122,6 +122,9 @@ jobs:
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
+      # Compiler nucleus traversals are recursive; match the established
+      # 32 MiB stack policy used by the core/hosted CI for stack-heavy tests.
+      RUST_MIN_STACK: "33554432"
     steps:
       - uses: actions/checkout@v5
       - name: Default SENS core has no runtime dependencies

@@ -5,7 +5,9 @@ Authority inputs:
 - D3/D4: knowledge/exact-width-admitted-corpus.json (widths 3/4 only)
 - D5: knowledge/d5-historical-full-map.json (OD-005)
 - D6: knowledge/d6-historical-full-map.json (OD-006)
-- D7: knowledge/d7-ratified.json (#3572; 126 residents, 2 pinned reservations)\n- D8/D9: dense-width occupancy certificates from #3960/#4008 exact resident maps
+- D7 v1: knowledge/d7-ratified.json (#3572; historical Sound7 occupancy 126/128)
+- D7 v2: knowledge/d7-keyboard-v2-ratified.json (current text/data surface 128/128)
+- D8/D9: dense-width occupancy certificates from #3960/#4008 exact resident maps
 
 The generated Rust intentionally excludes human labels, surfaces and legacy
 backend bytes. Those are projections/compatibility metadata, not occupancy
@@ -23,6 +25,7 @@ CORPUS = ROOT / "knowledge" / "exact-width-admitted-corpus.json"
 D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6 = ROOT / "knowledge" / "d6-historical-full-map.json"
 D7 = ROOT / "knowledge" / "d7-ratified.json"
+D7_V2 = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
 D8 = ROOT / "knowledge" / "d8-ratified.json"
 D9 = ROOT / "knowledge" / "d9-ratified.json"
 OUT = ROOT / "crates" / "sens" / "src" / "domain_owner_generated.rs"
@@ -32,11 +35,89 @@ def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def validate_d7_dual_authority(d7_v1, d7_v2):
+    """Validate D7 v1 Sound7 occupancy and v2 keyboard surface independently.
+
+    The 126-row v1 occupancy bitmap is retained as a role-specific historical
+    Sound7 projection. The current v2 text/data keyboard has 128 coordinates.
+    Neither table may silently fill, erase, or reinterpret the other's rows.
+    """
+    reserved = {"0100001", "0101010"}
+    full_w7 = {f"{number:07b}" for number in range(128)}
+    v1_residents = d7_v1.get("residents", {})
+
+    if not isinstance(v1_residents, dict) or (
+        d7_v1.get("schema") != "d7-ratification/v1"
+        or d7_v1.get("domain") != "D7"
+        or d7_v1.get("authority") != "#3572"
+        or d7_v1.get("status") != "historical-superseded-by-v2-keyboard-profile"
+        or d7_v1.get("width") != 7
+        or d7_v1.get("capacity") != 128
+        or d7_v1.get("occupancy") != 126
+        or d7_v1.get("owner_reserved_pinned") != 2
+        or len(d7_v1.get("reserved_coordinates", [])) != 2
+        or set(d7_v1.get("reserved_coordinates", [])) != reserved
+    ):
+        raise ValueError("D7 v1 historical Sound7 authority shape mismatch")
+
+    v1_words = set(v1_residents)
+    if (
+        len(v1_words) != 126
+        or any(not isinstance(word, str) or len(word) != 7 or set(word) - {"0", "1"} for word in v1_words)
+        or v1_words & reserved
+        or v1_words | reserved != full_w7
+        or len(set(v1_residents.values())) != 126
+    ):
+        raise ValueError("D7 v1 Sound7 resident coordinates drift")
+
+    table = d7_v2.get("table", [])
+    if (
+        d7_v2.get("schema") != "sens.d7.keyboard/v2"
+        or d7_v2.get("status") != "owner-ratified"
+        or d7_v2.get("width") != 7
+        or d7_v2.get("capacity") != 128
+        or d7_v2.get("occupancy") != 128
+        or d7_v2.get("semantic_scope") != "Text/Data W7 migration projection ONLY; not callable Core"
+        or not isinstance(table, list)
+        or len(table) != 128
+    ):
+        raise ValueError("D7 v2 keyboard authority shape mismatch")
+
+    words = [row.get("bits") if isinstance(row, dict) else None for row in table]
+    if (
+        any(not isinstance(word, str) or len(word) != 7 or set(word) - {"0", "1"} for word in words)
+        or len(set(words)) != 128
+        or set(words) != full_w7
+    ):
+        raise ValueError("D7 v2 keyboard coordinates must be a complete exact W7 domain")
+
+    for field in ("ascii", "uk", "san"):
+        values = [row.get(field) for row in table]
+        if any(
+            not isinstance(value, str)
+            or len(value) != 1
+            or 0xD800 <= ord(value) <= 0xDFFF
+            for value in values
+        ) or len(set(values)) != 128:
+            raise ValueError(f"D7 v2 {field} projection must be a bijection of 128 Unicode scalars")
+
+    for row in table:
+        expected_ascii = chr(int(row["bits"], 2))
+        if row["ascii"] != expected_ascii:
+            raise ValueError("D7 v2 ASCII projection must equal its numeric seven-bit coordinate")
+
+    # These are parallel authorities, not interchangeable occupancy sources:
+    # the text/data keyboard supports all 128 positions while v1 Sound7 retains
+    # exactly 126 historical residents with two explicitly pinned reservations.
+    return list(v1_words)
+
+
 def owner_rows():
     corpus = load_json(CORPUS)
     d5 = load_json(D5)
     d6 = load_json(D6)
     d7 = load_json(D7)
+    d7_v2 = load_json(D7_V2)
     rows = []
 
     for row in corpus["rows"]:
@@ -56,29 +137,13 @@ def owner_rows():
     rows.extend((5, row["coordinate"], 1) for row in d5["coordinates"])
     rows.extend((6, row["coordinate"], 2) for row in d6["coordinates"])
 
-    # The D7 authority describes occupancy, not executable primitives.
-    # Include only owner-ratified residents; never infer a role from width
-    # and never fill the two pinned/reserved cells.
-    reserved = {"0100001", "0101010"}
-    if (
-        d7.get("domain") != "D7"
-        or d7.get("authority") != "#3572"
-        or d7.get("status") != "owner-ratified"
-        or d7.get("width") != 7
-        or d7.get("capacity") != 128
-        or d7.get("occupancy") != 126
-        or set(d7.get("reserved_coordinates", [])) != reserved
-        or d7.get("owner_reserved_pinned") != 2
-    ):
-        raise SystemExit("D7 owner authority or reservations drift")
-    d7_words = list(d7.get("residents", {}))
-    if (
-        len(d7_words) != 126
-        or any(len(word) != 7 or set(word) - {"0", "1"} for word in d7_words)
-        or set(d7_words) & reserved
-        or set(d7_words) | reserved != {f"{n:07b}" for n in range(128)}
-    ):
-        raise SystemExit("D7 admitted coordinate set drift")
+    # D7 v1 Sound7 occupancy and D7 v2 keyboard/text-data surface are distinct
+    # authorities. The v2 128/128 keyboard map must never silently fill v1's
+    # two pinned reservations or turn a surface position into semantic occupancy.
+    try:
+        d7_words = validate_d7_dual_authority(d7, d7_v2)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     rows.extend((7, word, 3) for word in d7_words)
     rows.sort(key=lambda row: (row[0], int(row[1], 2)))
 
@@ -160,7 +225,9 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
 {body}
 ];
 
-/// Bitset derived mechanically from exactly the above D3-D7 owner rows.
+/// Bitset derived mechanically from exactly the above D3-D7 occupancy rows.
+/// D7 is historical #3572 Sound7 v1 occupancy (126/128), NOT the separate
+/// current keyboard/text-data v2 surface (128/128); the two are not conflated.
 /// No language names, callable laws, or backend/SID8 lookup are encoded.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct DomainOwnerBitmap {{

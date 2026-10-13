@@ -99,6 +99,11 @@ on:
 jobs:
   exact-width-ladder:
     runs-on: ubuntu-latest
+    # Match the repository's stack-heavy Rust test policy; keep the complete
+    # library suite enabled rather than skipping recursive compiler witnesses.
+    env:
+      RUST_TEST_THREADS: "1"
+      RUST_MIN_STACK: "33554432"
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -111,6 +116,8 @@ jobs:
         run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
       - name: Виконати фізичний .sens із типізованих двійкових слів
         run: cargo test --locked -p sens --test physical_t5_execution
+      - name: Перевірити незалежні повноваження D7 Sound7 v1 та keyboard/text-data v2
+        run: python3 -m unittest discover -s tests -p 'test_domain_owner_registry_d7_dual_authority.py' -v
       - name: Перевірити, що заповнення D3–D10 походить лише з ратифікованих карт
         run: python3 scripts/generate-domain-owner-registry.py --check
       - name: Перевірити фізичне заповнення D8/D9 без допуску до семантичного виконання
