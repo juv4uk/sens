@@ -7,6 +7,7 @@
 ;   D5  01010=plus 11010=lessp? 11011=greaterp?
 ;   D6  000000=length 001000=let
 ;   D8  11110111=equal? 11011011=print
+;   D9  110110111=read-file 110101001=read-all
 ;
 ; Символи — eq? (D3 101); числа — лише доведеними порядковими предикатами
 ; lessp?/greaterp? (lib/utf8.lisp). Рівність 2+3==5 виражено як
@@ -47,6 +48,10 @@
 
 ; D8 — структурна рівність
 (law-check (001 equal-list-self)     (11110111 (1110 (001 a) (001 b)) (1110 (001 a) (001 b))))
+
+; D9 — читання файла (IO) і ідентичність схеми
+(law-check (001 read-file-schema)
+  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))
 
 ; define + посилання на змінну
 (law-check (001 define-then-use) (11010 law-two 3))
