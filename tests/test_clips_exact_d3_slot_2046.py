@@ -29,6 +29,8 @@ def verify_source(source):
         raise AssertionError("небезпечний guard відсікає усі списки слотів")
     if GOOD_GUARD not in body or SKIP_ATOM not in body:
         raise AssertionError("не доведено пропуск пошкоджених записів")
+    if body.index(SKIP_ATOM) > body.index(GOOD_GUARD):
+        raise AssertionError("атом треба пропустити до виклику вкладеного CAR")
     if OLD_EQUAL in body:
         raise AssertionError("атомарну назву зіставлено через старий D8 EQUAL")
     if NEW_EQ not in body:
@@ -141,6 +143,17 @@ class ClipsSlotD3Exact2046(unittest.TestCase):
         broken = self.source.replace(STRING_EQUAL, STRING_EQUAL.replace(
             "11110111", "101", 1), 1)
         with self.assertRaisesRegex(AssertionError, "рядковий D8"):
+            verify_source(broken)
+
+    def test_negative_malformed_slot_guard_order(self):
+        verify_source(self.source)
+        broken = self.source.replace(
+            SKIP_ATOM + "\n      " + GOOD_GUARD,
+            GOOD_GUARD + "\n      " + SKIP_ATOM,
+            1,
+        )
+        self.assertNotEqual(broken, self.source)
+        with self.assertRaisesRegex(AssertionError, "вкладеного CAR"):
             verify_source(broken)
 
     def test_negative_loss_of_malformed_atom_guard(self):
