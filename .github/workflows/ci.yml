@@ -470,7 +470,7 @@ jobs:
             sha256sum "$program"
           done
           python3 scripts/ci_failure_contract.py run \
-            --test-id unify-observe-d1-exact-domain-law \
+            --test-id unify-observe-d1-law \
             --layer eval \
             --fixture tests/semantic/unify-observe-d1-fallback-law.sens \
             --expected-file "$RUNNER_TEMP/expected-unify-d1" \
@@ -478,7 +478,7 @@ jobs:
             --executor-report-file "$evidence" \
             -- target/debug/sens tests/semantic/unify-observe-d1-fallback-law.sens
           python3 scripts/ci_failure_contract.py run \
-            --test-id unify-observe-d1-one-bit-mutant \
+            --test-id unify-observe-d1-mutant \
             --layer eval \
             --fixture tests/semantic/unify-observe-d1-fallback-mutant.sens \
             --expect-error-substring "not callable" \
