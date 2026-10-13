@@ -11,6 +11,8 @@ on:
       - 'tests/fixtures/core1-found-semantic.bits'
       - 'tests/fixtures/core1-found-semantic.sens'
       - 'lib/reason.lisp'
+      - 'lib/unify.lisp'
+      - 'tests/semantic/unify-substitution-d4.bits'
       - 'tests/semantic/reason-d4-pair-selectors.bits'
       - 'lib/core1-arity.bits'
       - 'lib/core1-arity.sens'
@@ -115,6 +117,19 @@ jobs:
           target/debug/sens-trit eval "$RUNNER_TEMP/reason-d4-pair-selectors.sens" > "$RUNNER_TEMP/reason-d4-pair-selectors.trit.out"
           cmp "$RUNNER_TEMP/reason-d4-pair-selectors.sens.out" "$RUNNER_TEMP/reason-d4-pair-selectors.trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/reason-d4-pair-selectors.sens.out"
+
+      - name: SENS judges substitution-pair selectors and bit mutants
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/unify-substitution-d4.bits "$RUNNER_TEMP/unify-substitution-d4.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/unify-substitution-d4.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/unify-substitution-d4.sens" > "$RUNNER_TEMP/unify-substitution-d4.open.bits"
+          cmp tests/semantic/unify-substitution-d4.bits "$RUNNER_TEMP/unify-substitution-d4.open.bits"
+          target/debug/sens "$RUNNER_TEMP/unify-substitution-d4.sens" > "$RUNNER_TEMP/unify-substitution-d4.sens.out"
+          target/debug/sens-trit eval "$RUNNER_TEMP/unify-substitution-d4.sens" > "$RUNNER_TEMP/unify-substitution-d4.trit.out"
+          cmp "$RUNNER_TEMP/unify-substitution-d4.sens.out" "$RUNNER_TEMP/unify-substitution-d4.trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/unify-substitution-d4.sens.out"
 
       - name: Core1 admitted function coordinates judged by physical SENS
         shell: bash
