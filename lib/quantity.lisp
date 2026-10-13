@@ -16,6 +16,9 @@
 ; finite data can pass through Advice Taker's existing knowledge grammar.
 ;
 ; Migrated: COND else (010 ()) → exact D1:1 (010 (001 ())).
+; scientific-constant->clauses: old D6:001000 LET replaced by exact D4:0010
+; lexical lambda application, one binder, initializer evaluated once.
+; Binary SENS checks: tests/semantic/quantity-d4-bind-{law,mutant}.bits.
 ; Migrated PredicateBit carriers: bare (101 1 0) → exact D1:0 form
 ; (101 (001 (0)) (001 (1))). D1:1 is projected directly as #d1:1. Width is identity.
 ; Two-field COND only. Every bit of the domain address is valued.
@@ -195,8 +198,8 @@
     (110
       ((101 (scientific-constant? constant) (001 ())) (001 ()))
       ((010 (001 ()))
-       (001000 ((name (scientific-constant-name constant)))
-         (1110
+       ((0010 (name)
+          (1110
            (1110 (1110 (001 scientific-constant) name))
            (1110
              (1110 (001 constant-value)
@@ -221,4 +224,6 @@
            (1110
              (1110 (001 constant-source)
                    name
-                   (scientific-constant-source constant)))))))))
+                   (scientific-constant-source constant))))
+         )
+         (scientific-constant-name constant))))))
