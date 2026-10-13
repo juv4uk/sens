@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - name: Статичний ratchet: заборонити десяткові мости ідентичності
+      - name: "Статичний ratchet: заборонити десяткові мости ідентичності"
         run: |
           python3 scripts/check-domain-ladder-identity.py --self-test
           python3 scripts/check-domain-ladder-identity.py --check
