@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+    eval_parsed_expressions, eval_program, parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn session() -> Session {
@@ -89,19 +89,16 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 
 #[test]
 fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
-    let mut session = session();
-    for (source, expected) in [
-        ("(reason-index? (quote ()))", false),
-        ("(reason-index? (quote atom))", false),
-        ("(reason-index? (quote (other linear () ())))", false),
-        ("(reason-index? (reason-index-linear (quote ())))", true),
-        ("(reason-index? (quote (reason-index/1 indexed () ())))", true),
-    ] {
-        let value = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("{source}: {err}")).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "reason-index? must produce exact D1; source: {source}, value: {value}");
-    }
+    let mut s = session();
+    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
+    assert!(
+        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
+        "the SENS law must be binary words plus separators only"
+    );
+    let expressions =
+        parse_canonical_binary(source).expect("canonical D2-framed binary SENS must parse");
+    eval_parsed_expressions(&expressions, &mut s)
+        .expect("SENS self-verdict rejected the CAR/ATOM/EQ positive-negative law");
 }
 
 #[test]

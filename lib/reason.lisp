@@ -32,7 +32,12 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ((101 (100 value) *reason-index-schema*) #d1:1)
+      ((0101 value) #d1:0)
+      ; CAR(value) may be a compound rule. Guard before atom-only EQ.
+      ((010 (100 value))
+       (110
+         ((101 (100 value) *reason-index-schema*) #d1:1)
+         (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
 ; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
