@@ -314,7 +314,7 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 
 
 #[test]
-fn guard_reference_field_uses_existing_assoc_under_exact_d4_lambda() {
+fn guard_reference_field_uses_only_exact_d3_d4_structure() {
     assert!(!GUARD_SOURCE.contains("(001000 "));
     assert!(!GUARD_SOURCE.contains("(11100 "));
     assert!(GUARD_SOURCE.contains("(guard-reference-field-onto field (011 reference))"));
