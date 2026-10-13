@@ -263,8 +263,8 @@ jobs:
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$mutant"
           # This fallthrough is executed, not a dead-branch proxy.
-          # A one-bit D1:1 -> D1:0 mutation changes the native SENS value
-          # from 1 to NIL (empty list); it does not produce a runtime error.
+          # This current one-bit D1:0 -> D1:1 mutation selects the forbidden
+          # native D1:0 call-head branch. SENS must reject it, not return NIL.
           if grep -Fq '(010 ())' lib/reason.lisp; then
             echo '::error::REGRESSION: synthetic D3 ATOM(()) fallback in reason.lisp'
             exit 1
@@ -297,12 +297,11 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens tests/semantic/reason-direct-fallback-d1-law.sens
-          printf '()\n' > "$RUNNER_TEMP/reason-d1-mutant.expected"
           python3 scripts/ci_failure_contract.py run \
             --test-id reason-direct-fallback-d1-mutant \
             --layer eval \
             --fixture tests/semantic/reason-direct-fallback-d1-mutant.sens \
-            --expected-file "$RUNNER_TEMP/reason-d1-mutant.expected" \
+            --expect-error-substring "not callable" \
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens tests/semantic/reason-direct-fallback-d1-mutant.sens
