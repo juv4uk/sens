@@ -1,37 +1,31 @@
-; lib/macro.lisp — bootstrap derivation on exact 8-bit function identities.
+; lib/macro.lisp — bootstrap макровизначення на точних доменах.
 ;
-; #1325: the language has one function-identity space: 00000000..11111111.
-; Human words are not function identities.
+; Семантична identity тут уже не 8-бітна площина:
+;   D3:001 QUOTE, D3:010 ATOM, D3:011 CDR, D3:100 CAR,
+;   D3:110 COND, D3:111 CONS, D4:0010 LAMBDA, D4:0011 DEFINE.
 ;
-; SID 00001010 is derived here from mechanisms already selected by:
-;   00001001 + 00001000 + 00000100 + the narrow host Closure->Macro mechanism.
+; `make-macro` — вузький host-substrate Closure -> Macro. Він не створює
+; окремої SENS identity. Сам DEFMACRO лишається мовно-виведеним.
 ;
-; `make-macro` below is NOT a my-lisp function identity. It is an explicit
-; temporary host substrate with no SID and is tracked by #1330/#1328 until that
-; boundary is removed or represented without creating a second function ontology.
-;
-; Every actual my-lisp function used below is invoked only by its eight bits.
-; No SID is wrapped in a string, symbol, quote-label, or named identity.
+; Дві цитовані форми 0010/0011 нижче є саме code-data identities. Path-pinned
+; reader lib/macro.lisp матеріалізує їх як D4 DomainIdentity, не як числа.
 
 (make-macro
-  (01001101
-    (00000100 (00000001 00001000)
-      (00000100 (00000001 args)
-        (00000001
-          ((00000111
-             ((00000010 args)
-              (make-macro))
-             ((00000010 (00000110 args))
-              (make-macro))
-             ((00000010 (00000001 ()))
-              (00000100 (00000001 00001001)
-                (00000100 (00000101 args)
-                  (00000100
-                    (00000100 (00000001 make-macro)
-                      (00000100
-                        (00000100 (00000001 00001000)
-                          (00000100
-                            (00000101 (00000110 args))
-                            (00000110 (00000110 args))))
-                        (00000001 ())))
-                    (00000001 ()))))))))))))
+  (0010 args
+    (110
+      ((010 args)
+       (make-macro))
+      ((010 (011 args))
+       (make-macro))
+      ((010 (001 ()))
+       (111 (001 0011)
+         (111 (100 args)
+           (111
+             (111 (001 make-macro)
+               (111
+                 (111 (001 0010)
+                   (111
+                     (100 (011 args))
+                     (011 (011 args))))
+                 (001 ())))
+             (001 ()))))))))
