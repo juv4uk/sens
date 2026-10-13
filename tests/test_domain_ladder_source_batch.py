@@ -289,5 +289,30 @@ class BatchSourceTests(unittest.TestCase):
         self.assertGreaterEqual(report["summary"]["blocked_files"], 1)
         self.assertEqual(report["files"][0]["status"], "blocked")
 
+
+    def test_forward_assert_fact_quotes_exact_d3_cons(self):
+        source = (ROOT / "lib/forward.lisp").read_text(encoding="utf-8")
+        start = source.index("(0011 assert-fact!")
+        stop = source.index("; Tries to unify", start)
+        body = source[start:stop]
+
+        # Historical W8 identity is only provenance. The ratified crosswalk
+        # proves exact-width D3:111 CONS; equal payload alone is not authority.
+        self.assertEqual(self.mapping["00000100"], "111")
+        self.assertNotIn("00000100", self.blocked)
+        self.assertEqual(body.count("(001 00000100)"), 0)
+        self.assertEqual(body.count("(001 111)"), 1)
+        self.assertIn("(make-macro", body)
+        self.assertIn("(0010 (fact)", body)
+        self.assertIn("(001 def)", body)
+
+        ladder = MOD.verify_full_domain_bitspace(ROOT)
+        self.assertEqual(ladder["typed_coordinates"], 2046)
+        self.assertEqual(ladder["meaningful_bits"], 18434)
+        self.assertEqual(ladder["runtime_admission_claims_added"], 0)
+        self.assertEqual(ladder["counts_by_domain"], {
+            f"D{width}": 1 << width for width in range(1, 11)
+        })
+
 if __name__ == "__main__":
     unittest.main()

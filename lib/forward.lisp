@@ -62,7 +62,7 @@
 (0011 assert-fact!
   (make-macro
     (0010 (fact)
-      (1110 (001 def) (001 *working-memory*) (1110 (001 00000100) fact (001 *working-memory*))))))
+      (1110 (001 def) (001 *working-memory*) (1110 (001 111) fact (001 *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
