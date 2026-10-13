@@ -27,7 +27,17 @@ CASES = ("d3-quote-empty", "d3-car-empty")
 
 
 def run_text(args: list[str], *, cwd: Path | None = None) -> str:
-    return subprocess.check_output(args, cwd=cwd, text=True, stderr=subprocess.STDOUT).strip()
+    """Preserve the SENS/competitor failure, including its actual diagnostic."""
+    completed = subprocess.run(
+        args, cwd=cwd, text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, check=False,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"EXTERNAL-ADAPTER-FAILED exit={completed.returncode} "
+            f"command={args!r} output={completed.stdout.strip()!r}"
+        )
+    return completed.stdout.strip()
 
 
 def parse_kv(text: str) -> dict[str, str]:
