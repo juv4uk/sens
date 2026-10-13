@@ -101,6 +101,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: UTF-8 точний D1 без підміни числових аргументів — 14 результатів
+        run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити побітове пакування D1–D10 без вирівнювання
         run: >-
