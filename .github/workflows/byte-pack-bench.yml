@@ -1,9 +1,9 @@
+# Карантин автоматичного schedule 2026-10-13: тільки ci.yml виконується сам.
+# Бенчмарк залишається ручним дослідним інструментом.
 name: Byte-pack efficiency benchmark
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "41 3 * * *"
 concurrency:
   group: byte-pack-bench-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
