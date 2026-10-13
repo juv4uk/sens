@@ -49,27 +49,27 @@
   (0010 (value)
     (110
       ((010 value)
-       (native-first-domain-false ()))
+       #d1:0)
       ((010 (011 value))
-       (native-first-domain-false ()))
+       #d1:0)
       ((101 (011 (011 value)) ())
-       (native-first-domain-true ()))
-      ((native-first-domain-true ())
-       (native-first-domain-false ())))))
+       #d1:1)
+      (#d1:1
+       #d1:0))))
 
 (0011 native-first-proper-list-length-3?
   (0010 (value)
     (110
       ((010 value)
-       (native-first-domain-false ()))
+       #d1:0)
       ((010 (011 value))
-       (native-first-domain-false ()))
+       #d1:0)
       ((010 (011 (011 value)))
-       (native-first-domain-false ()))
+       #d1:0)
       ((101 (011 (011 (011 value))) ())
-       (native-first-domain-true ()))
-      ((native-first-domain-true ())
-       (native-first-domain-false ())))))
+       #d1:1)
+      (#d1:1
+       #d1:0))))
 
 (0011 native-first-plan-tag-state
   (0010 (plan tag)
@@ -78,7 +78,7 @@
        (001 distinct))
       ((101 (100 plan) tag)
        (001 same))
-      ((native-first-domain-true ())
+      (#d1:1
        (001 distinct)))))
 
 (0011 native-first-execute-native-plan-result
@@ -88,7 +88,7 @@
        (native-first-execution-completed (001 native) result))
       ((101 (100 result) (001 rejected))
        (native-first-execution-rejected (001 native) result))
-      ((native-first-domain-true ())
+      (#d1:1
        (native-first-execution-completed (001 native) result)))))
 
 (0011 native-first-execute-native-plan
@@ -106,7 +106,7 @@
        (110
          ((native-first-proper-list-length-3? plan)
           (native-first-execute-native-plan plan))
-         ((native-first-domain-true ())
+         (#d1:1
           (native-first-execution-rejected
             (001 native)
             (native-first-list-2 (001 malformed-native-plan) plan)))))
@@ -118,11 +118,11 @@
           (native-first-execution-rejected
             (001 invalid-plan)
             (native-first-list-2 (001 unknown-native-first-plan) plan))
-         ((native-first-domain-true ())
+         (#d1:1
           (native-first-execution-rejected
             (001 invalid-plan)
             (native-first-list-2 (001 malformed-fallback-tag-state) plan)))))
-      ((native-first-domain-true ())
+      (#d1:1
        (native-first-execution-rejected
          (001 invalid-plan)
          (native-first-list-2 (001 unknown-native-first-plan) plan))))))))
@@ -139,7 +139,7 @@
        (110
          ((101 forms ())
           (001 ()))
-         ((native-first-domain-true ())
+         (#d1:1
           (111
             (native-first-execution-rejected
               (001 evaluator)
@@ -147,7 +147,7 @@
                 (001 malformed-source-form-tail)
                 forms))
             (001 ())))))
-      ((native-first-domain-true ())
+      (#d1:1
        (111
          (native-first-execute-expression (100 forms))
          (native-first-execute-source-forms (011 forms)))))))

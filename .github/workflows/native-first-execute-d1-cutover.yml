@@ -1,0 +1,31 @@
+name: Native-first execute exact D1 cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/dispatch/native-first-execute.lisp"
+      - "tests/test_native_first_execute_d1_cutover.py"
+      - "crates/sens/tests/native_first_execute_d1_cutover.rs"
+      - ".github/workflows/native-first-execute-d1-cutover.yml"
+  pull_request:
+    paths:
+      - "lib/machine/dispatch/native-first-execute.lisp"
+      - "tests/test_native_first_execute_d1_cutover.py"
+      - "crates/sens/tests/native_first_execute_d1_cutover.rs"
+      - ".github/workflows/native-first-execute-d1-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  direct-d1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: "D1 D10 ladder audit and full-source 18-callsite provenance"
+        run: python3 -m unittest discover -s tests -p test_native_first_execute_d1_cutover.py -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Current-domain real bridge execution and negative witnesses"
+        run: cargo test --locked -p sens --test native_first_execute_d1_cutover -- --nocapture
