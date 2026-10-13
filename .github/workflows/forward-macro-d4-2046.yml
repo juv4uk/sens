@@ -1,0 +1,30 @@
+name: "Forward D4 — 2046 точних координат і живий oracle"
+
+on:
+  pull_request:
+    paths:
+      - "lib/forward.lisp"
+      - "tests/test_forward_macro_d4_2046.py"
+      - ".github/workflows/forward-macro-d4-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-domain-and-ast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Вичерпні 2046 адрес і 10 AST-макросів із негативними мутаціями"
+        run: python3 -m unittest discover -s tests -p 'test_forward_macro_d4_2046.py' -v
+
+  real-reasoning-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Реальний Rust-оракул forward/knowledge (без підміни тестів)"
+        run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
