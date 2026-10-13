@@ -625,7 +625,13 @@ class ThreePassMigrationTests(unittest.TestCase):
             all(set(word) <= {"0","1"} for word in words),
             "the real machine-block source must reach an all-binary candidate",
         )
-        self.assertEqual(resolver.counts["pass1-sens8"],17)
+        # The original machine-block witness needed 17 historical W8 routes.
+        # That source has since been migrated to exact D3/D4 code; requiring
+        # 17 SID8 hits here would force a regression to retired semantics.
+        self.assertEqual(resolver.counts["pass1-sens8"], 0)
+        self.assertGreater(resolver.counts["already-exact"], 0)
+        self.assertEqual(source.count("(0011 "), 6)
+        self.assertNotIn("(00001001 ", source)
 
         for name in (
             "machine-block",
