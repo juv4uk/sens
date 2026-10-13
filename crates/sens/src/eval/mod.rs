@@ -100,7 +100,7 @@ pub fn eval_program(source: &str, session: &mut Session) -> Result<EvalResult, L
 /// Compatibility-only surface names are not admitted Dn call heads; otherwise
 /// a raw List could reach the evaluator's historical symbol dispatcher.
 /// Traversal is iterative and skips D3 quoted data and D4 binder positions.
-fn validate_exact_executable_heads(expressions: &[Expr]) -> Result<(), LanguageError> {
+pub(crate) fn validate_exact_executable_heads(expressions: &[Expr]) -> Result<(), LanguageError> {
     let mut pending: Vec<&Expr> = expressions.iter().collect();
     while let Some(expr) = pending.pop() {
         match &expr.kind {

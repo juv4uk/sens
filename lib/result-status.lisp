@@ -12,8 +12,9 @@
 ;   (disputed evidence)
 ;   (invalid reason payload)
 ;
-; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ())).
-; D1:0 remains (101 (001 (0)) (001 (1))) where needed. Two-field COND.
+; Migrated predicate law: true = exact D1:1 (010 (001 ())); false = exact
+; D1:0 (101 (001 (0)) (001 (1))). `()` is data only, never predicate false.
+; Two-field COND throughout.
 ; Width is identity; every bit of the domain address is valued.
 
 (0011 make-proved
@@ -43,14 +44,14 @@
 (0011 result-tagged?
   (0010 (result)
     (110
-      ((010 result) (001 ()))
+      ((010 result) (101 (001 (0)) (001 (1))))
       ((101 (100 result) (001 proved)) (010 (001 ())))
       ((101 (100 result) (001 unknown)) (010 (001 ())))
       ((101 (100 result) (001 partial)) (010 (001 ())))
       ((101 (100 result) (001 blocked)) (010 (001 ())))
       ((101 (100 result) (001 disputed)) (010 (001 ())))
       ((101 (100 result) (001 invalid)) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
 
 (0011 result-status
   (0010 (result)
@@ -73,7 +74,7 @@
       ((010 value)
        (110
          ((101 value (001 ())) (010 (001 ())))
-         ((010 (001 ())) (001 ()))))
+         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
       ((010 (001 ()))
        (result-proper-list? (011 value))))))
 
@@ -84,7 +85,7 @@
     (110
       ((101 head (001 not?)) (010 (001 ())))
       ((101 head (001 not)) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -95,16 +96,16 @@
 (0011 result-goal?
   (0010 (goal)
     (110
-      ((010 goal) (001 ()))
-      ((0100 (result-proper-list? goal)) (001 ()))
-      ((0100 (110101100 (100 goal))) (001 ()))
+      ((010 goal) (101 (001 (0)) (001 (1))))
+      ((0100 (result-proper-list? goal)) (101 (001 (0)) (001 (1))))
+      ((0100 (110101100 (100 goal))) (101 (001 (0)) (001 (1))))
       ((result-not-head? (100 goal))
        (110
          ((010 (011 goal))
           (110
             ((010 (011 (011 goal))) (result-goal? (1001 goal)))
-            ((010 (001 ())) (001 ()))))
-         ((010 (001 ())) (001 ()))))
+            ((010 (001 ())) (101 (001 (0)) (001 (1))))))
+         ((010 (001 ())) (101 (001 (0)) (001 (1))))))
       ((010 (001 ())) (010 (001 ()))))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
@@ -113,9 +114,9 @@
 (0011 result-negated-goal?
   (0010 (goal)
     (110
-      ((0100 (result-goal? goal)) (001 ()))
+      ((0100 (result-goal? goal)) (101 (001 (0)) (001 (1))))
       ((result-not-head? (100 goal)) (010 (001 ())))
-      ((010 (001 ())) (001 ())))))
+      ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
 
 (0011 result-opposite-goal
   (0010 (goal)
