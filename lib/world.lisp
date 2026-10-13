@@ -329,6 +329,12 @@
   (0010 (transition)
     (101 (1000 transition) (001 accepted))))
 
+; Тільки похідний SENS-селектор. D3:100 CAR витягає рішення
+; з (decision world); числовий 00000101 не може бути викликом CAR.
+(0011 внутрішнє-рішення-переходу
+  (0010 (transition)
+    (100 transition)))
+
 (0011 legacy-world-transition-expansion
   (0010 (transition)
     (1110 (001 second)
@@ -347,9 +353,9 @@
                                           (1110 (001 world-journal)
                                                 (1110 (001 second)
                                                       (001 *legacy-knowledge-transition*))))
-                                    (1110 (001 00000101) (001 *legacy-knowledge-transition*)))))
+                                    (1110 (001 внутрішнє-рішення-переходу) (001 *legacy-knowledge-transition*)))))
                       (1110 #d1:1
-                            (1110 (001 00000101) (001 *legacy-knowledge-transition*))))))))
+                            (1110 (001 внутрішнє-рішення-переходу) (001 *legacy-knowledge-transition*))))))))
 
 (00001010 advise (module-name clause)
   (legacy-world-transition-expansion
