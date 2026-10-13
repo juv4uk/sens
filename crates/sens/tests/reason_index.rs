@@ -1,13 +1,20 @@
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+};
 
 fn session() -> Session {
     let mut session = Session::default();
-    for library in [
-        include_str!("../../../lib/core.lisp"),
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
+    sens::eval_pinned_legacy_core_source(
+        "lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session,
+    ).expect("канонічний Core має завантажуватись власним точним reader");
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
     ] {
-        eval_program(library, &mut session).expect("reason index fixture should load");
+        let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+            .unwrap_or_else(|error| panic!("{path}: exact source reader: {error}"));
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("{path}: exact source evaluator: {error}"));
     }
     session
 }
