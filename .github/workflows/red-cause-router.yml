@@ -1,6 +1,29 @@
 name: SENS RED cause routing (four classes)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/red_cause_router.py'
+      - 'scripts/aged_red_quarantine.py'
+      - 'scripts/quarantine_red_workflows.py'
+      - 'tests/test_red_cause_router.py'
+      - 'tests/test_aged_red_quarantine.py'
+      - 'tests/test_quarantine_red_workflows.py'
+      - 'knowledge/red-cause-ledger.json'
+      - 'docs/ci-red-cause-policy.uk.md'
+      - '.github/workflows/red-cause-router.yml'
+  pull_request:
+    paths:
+      - 'scripts/red_cause_router.py'
+      - 'scripts/aged_red_quarantine.py'
+      - 'scripts/quarantine_red_workflows.py'
+      - 'tests/test_red_cause_router.py'
+      - 'tests/test_aged_red_quarantine.py'
+      - 'tests/test_quarantine_red_workflows.py'
+      - 'knowledge/red-cause-ledger.json'
+      - 'docs/ci-red-cause-policy.uk.md'
+      - '.github/workflows/red-cause-router.yml'
   workflow_run:
     workflows:
       - 'Драбина доменів — точна ширина та механіка'
