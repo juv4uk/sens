@@ -1,3 +1,6 @@
+# КАРАНТИН 2026-10-13: чинна заборона запуску недовіреного тесту.
+# Виконуваний код тестів збережено, але усі jobs заблоковані до окремого
+# семантичного допуску власником; ручний workflow_dispatch не обходить заборону.
 name: Physical binary SENS CLI smoke
 
 # An immutable result per push SHA. Never cancel an older physical-binary
@@ -10,6 +13,7 @@ permissions:
 
 jobs:
   physical-binary-cli:
+    if: ${{ false }} # КАРАНТИН 2026-10-13 — жоден runner до owner review
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
