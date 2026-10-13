@@ -173,8 +173,8 @@ fn projection_match_live_first_later_missing_and_empty() {
 
     let production = include_str!("../../../lib/life-1-scheduler.lisp");
     let start = production
-        .find("(0011 життя-проєкція-порівняти")
-        .expect("real private D4 helper");
+        .find("(0011 життя-рівні-дані?")
+        .expect("real Lisp-owned D3 structural equality");
     let end = production[start..]
         .find("(0011 life-scheduler-projection-ready?")
         .map(|relative| start + relative)
@@ -183,12 +183,29 @@ fn projection_match_live_first_later_missing_and_empty() {
     assert!(source.contains("((010 projections) (001 absent))"));
     assert!(!source.contains("((0100 (010 projections)) (001 absent))"));
     assert!(!source.contains("(001000 (("));
+    assert!(!source.contains("(11110111 "), "retired noncallable D8 EQUAL");
     assert!(source.contains("(життя-проєкція-порівняти expected projections (100 projections))"));
     let definitions = parse_mixed_exact_domain(source)
         .expect("current exact-width D3/D4 definitions");
-    assert_eq!(definitions.len(), 2);
+    assert_eq!(definitions.len(), 3);
     eval_parsed_expressions(&definitions, &mut session)
         .expect("load real LIFE-1 match functions");
+
+    for (left, right, expected) in [
+        ("x", "x", "1"),
+        ("x", "y", "0"),
+        ("(a (b c))", "(a (b c))", "1"),
+        ("(a (b c))", "(a (b d))", "0"),
+        ("()", "()", "1"),
+        ("()", "(a)", "0"),
+    ] {
+        let program = format!("(життя-рівні-дані? (001 {left}) (001 {right}))");
+        let forms = parse_mixed_exact_domain(&program).expect("nested exact-domain data");
+        let actual = eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("Lisp-owned structural equality {program}: {error:?}"))
+            .value.to_string();
+        assert_eq!(actual, expected, "{program}");
+    }
 
     for (argument, expected) in [
         ("()", "absent"),
