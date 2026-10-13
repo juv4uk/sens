@@ -49,12 +49,12 @@
   (0010 (result)
     (110
       ((010 result) (101 (001 (0)) (001 (1))))
-      ((101 (100 result) (001 proved)) (010 (001 ())))
-      ((101 (100 result) (001 unknown)) (010 (001 ())))
-      ((101 (100 result) (001 partial)) (010 (001 ())))
-      ((101 (100 result) (001 blocked)) (010 (001 ())))
-      ((101 (100 result) (001 disputed)) (010 (001 ())))
-      ((101 (100 result) (001 invalid)) (010 (001 ())))
+      ((equal? (100 result) (001 proved)) (010 (001 ())))
+      ((equal? (100 result) (001 unknown)) (010 (001 ())))
+      ((equal? (100 result) (001 partial)) (010 (001 ())))
+      ((equal? (100 result) (001 blocked)) (010 (001 ())))
+      ((equal? (100 result) (001 disputed)) (010 (001 ())))
+      ((equal? (100 result) (001 invalid)) (010 (001 ())))
       ((010 (001 ())) (101 (001 (0)) (001 (1)))))))
 
 (0011 result-status
