@@ -101,13 +101,16 @@
          (compiler-bit-xor seed (100 left) (100 right))
          (compiler-xor-bits seed (011 left) (011 right)))))))
 
+; Exact selectors: D4:1001 CADR, D5:10011 CADDR.
+; D6 is ratified but these longer selectors lack executable admission;
+; compose admitted D5 and D3 instead. No D7 text/data aliases.
 (0011 compiler-shape-width
   (0010 (shape)
     (100 shape)))
 
 (0011 compiler-shape-bits
   (0010 (shape)
-    (100 (011 shape))))
+    (1001 shape)))
 
 (0011 compiler-law-width
   (0010 (law)
@@ -115,27 +118,27 @@
 
 (0011 compiler-law-empty-bits
   (0010 (law)
-    (100 (011 law))))
+    (1001 law)))
 
 (0011 compiler-law-xor-mask
   (0010 (law)
-    (100 (011 (011 law)))))
+    (10011 law)))
 
 (0011 compiler-law-l5-spine
   (0010 (law)
-    (100 (011 (011 (011 law))))))
+    (10011 (011 law))))
 
 (0011 compiler-law-l5-atom-bits
   (0010 (law)
-    (100 (011 (compiler-law-l5-spine law)))))
+    (1001 (compiler-law-l5-spine law))))
 
 (0011 compiler-law-l5-head-bits
   (0010 (law)
-    (100 (011 (011 (compiler-law-l5-spine law))))))
+    (10011 (compiler-law-l5-spine law))))
 
 (0011 compiler-law-l5-cond-bits
   (0010 (law)
-    (100 (011 (011 (011 (compiler-law-l5-spine law)))))))
+    (10011 (011 (compiler-law-l5-spine law)))))
 
 ; Full D3 compiler closure is derived only from the ratified L1/L4/L5
 ; structure.  The three spine roles are read by ordered position; their duals
