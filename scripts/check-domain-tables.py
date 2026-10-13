@@ -3,17 +3,25 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 import re
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, read_domain_table
+from check_d10_owner_whole_domain_ratification import run as check_d10_owner_ratification
+from domain_tables import (
+    DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,
+    DomainTableRow, read_domain_table,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 D7_AUTHORITY = ROOT / "knowledge/d7-keyboard-v2-ratified.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
 D9_AUTHORITY = ROOT / "knowledge/d9-ratified.json"
+D10_AUTHORITY = ROOT / "knowledge/d10-owner-whole-domain-ratification-20261012.json"
+D10_POINTER = ROOT / "knowledge/d10-current-inventory.json"
+D10_INVENTORY = ROOT / "knowledge/d10-v18-semantic-inventory.json"
 
 
 def fail(message: str) -> None:
@@ -80,6 +88,86 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
                 fail(f"{domain}:{row.bits}: predicate san must not end in ?")
 
     return rows
+
+
+def validate_d10_table(rows: list[DomainTableRow], residents: dict[str, str]) -> list[DomainTableRow]:
+    """Validate the owner-ratified D10 catalogue without granting runtime admission."""
+    expected_bits = [f"{number:010b}" for number in range(1024)]
+    if len(rows) != 1024:
+        raise ValueError(f"D10: expected 1024 rows, found {len(rows)}")
+    if len(residents) != 1024 or set(residents) != set(expected_bits):
+        raise ValueError("D10: authority inventory must be the complete 10-bit coordinate set")
+
+    actual_bits = [row.bits for row in rows]
+    if actual_bits != expected_bits:
+        first = next(
+            (index for index, (actual, expected) in enumerate(zip(actual_bits, expected_bits))
+             if actual != expected),
+            min(len(actual_bits), len(expected_bits)),
+        )
+        got = actual_bits[first] if first < len(actual_bits) else "<missing>"
+        raise ValueError(
+            f"D10: row {first} must be exact coordinate {expected_bits[first]}, got {got}"
+        )
+
+    for row in rows:
+        if row.domain != "D10" or row.width != 10 or len(row.bits) != 10:
+            raise ValueError(f"D10:{row.bits}: coordinate/domain width must be exactly 10")
+        resident = residents.get(row.bits)
+        if not isinstance(resident, str) or not resident:
+            raise ValueError(f"D10:{row.bits}: missing pinned inventory resident")
+        if row.en is None or not en_matches_resident(row.en, resident):
+            raise ValueError(
+                f"D10:{row.bits}: en {row.en!r} does not match inventory {resident!r}"
+            )
+        if row.lisp is None or row.lisp.casefold() != resident.casefold():
+            raise ValueError(
+                f"D10:{row.bits}: LISP {row.lisp!r} does not preserve inventory name {resident!r}"
+            )
+        for attr in ("uk", "ukr", "san"):
+            if getattr(row, attr) is None:
+                raise ValueError(f"D10:{row.bits}: missing {attr}")
+        if row.en.endswith("?"):
+            if row.uk is not None and not row.uk.endswith("?"):
+                raise ValueError(f"D10:{row.bits}: predicate uk must end in ?")
+            if row.ukr is not None and not row.ukr.endswith("?"):
+                raise ValueError(f"D10:{row.bits}: predicate ukr must end in ?")
+            if row.san is not None and row.san.endswith("?"):
+                raise ValueError(f"D10:{row.bits}: predicate san must not end in ?")
+    return rows
+
+
+def self_test_d10_table_validator() -> int:
+    """Positive control plus focused mutations for width, density and identity."""
+    residents = {}
+    rows = []
+    for number in range(1024):
+        bits = f"{number:010b}"
+        name = f"fixture-{number}"
+        residents[bits] = name
+        rows.append(DomainTableRow(
+            "D10", 10, bits, "uk-" + bits, "ukr-" + bits,
+            "san-" + bits, name, name, None,
+        ))
+    validate_d10_table(rows, residents)
+
+    mutations = [
+        ("missing row", rows[:-1]),
+        ("short coordinate", [replace(rows[0], bits="000000000"), *rows[1:]]),
+        ("duplicate coordinate", [rows[0], replace(rows[1], bits=rows[0].bits), *rows[2:]]),
+        ("out-of-order coordinate", [rows[1], rows[0], *rows[2:]]),
+        ("wrong domain", [replace(rows[0], domain="D9"), *rows[1:]]),
+        ("wrong declared width", [replace(rows[0], width=9), *rows[1:]]),
+        ("English label drift", [replace(rows[0], en="wrong"), *rows[1:]]),
+        ("LISP identity drift", [replace(rows[0], lisp="wrong"), *rows[1:]]),
+    ]
+    for label, mutant in mutations:
+        try:
+            validate_d10_table(mutant, residents)
+        except ValueError:
+            continue
+        raise ValueError(f"D10 self-test admitted mutation: {label}")
+    return len(mutations)
 
 
 def validate_d7(authority: dict):
@@ -204,7 +292,34 @@ def main() -> int:
     all_rows.extend(d9_rows)
     total += 512
 
+
+    # D10 whole-domain ratification is distinct from per-resident proofs and
+    # physical T5/runtime admission. Reuse the owner checker, then validate
+    # the human table against the exact pinned inventory and exact 10-bit grid.
+    try:
+        check_d10_owner_ratification(ROOT)
+        d10_authority = json.loads(D10_AUTHORITY.read_text(encoding="utf-8"))
+        d10_pointer = json.loads(D10_POINTER.read_text(encoding="utf-8"))
+        if d10_pointer["canonical_current"]["path"] != str(D10_INVENTORY.relative_to(ROOT)):
+            fail("D10: current inventory pointer path drift")
+        inventory_blob = d10_authority["inventory"]["git_blob"]
+        if d10_pointer["canonical_current"]["git_blob"] != inventory_blob:
+            fail("D10: pointer and owner authority inventory pins differ")
+        inventory = json.loads(D10_INVENTORY.read_text(encoding="utf-8"))
+        expected_pin = f"; Pinned input Git blob: {inventory_blob}"
+        if expected_pin not in D10_TABLE.read_text(encoding="utf-8").splitlines():
+            fail("D10: human table does not pin the ratified inventory blob")
+        d10_residents = {
+            row["coordinate"]: row["semantic_name"] for row in inventory["rows"]
+        }
+        d10_rows = read_domain_table(D10_TABLE)
+        d10_negative_cases = self_test_d10_table_validator()
+        validate_d10_table(d10_rows, d10_residents)
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        fail(f"D10 exact-width/authority validation: {exc}")
+
     validate_compact_uk(all_rows)
+
 
     for attr in ("uk", "ukr", "san"):
         seen = {}
@@ -223,13 +338,20 @@ def main() -> int:
 
     if total != 1022:
         fail(f"expected D1-D9 current residents total 1022 rows, found {total}")
+    combined_total = total + len(d10_rows)
+    if len(d10_rows) != 1024 or combined_total != 2046:
+        fail(f"D10 catalogue count mismatch: d10={len(d10_rows)}, combined={combined_total}")
 
     print("DOMAIN-TABLES: PASS")
-    print("files=9 layout=one-domain-per-file")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:128,d8:256,d9:512 total=1022")
+    print("files=10 layout=one-domain-per-file")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:128,d8:256,d9:512,d10:1024 total=2046")
+    print("D1-D9 current residents=1022; D10 whole-domain catalogue=1024")
+    print("D10=selected:1024 placed:1024 unplaced:0 per-row-ratified:0")
+    print("D10 exact-width=10 ordered-range=0000000000..1111111111 mutation-controls=" + str(d10_negative_cases) + " PASS")
+    print("D10 semantic-law-attestation=INCOMPLETE physical-T5-runtime-admission=FALSE")
     print("d7-v2=128/128 keyboard cells; legacy v1 reserved only in history")
     print("D7 symbol availability is independent of semantic residency")
-    print("non-D7-surface-collisions=0 namespaces=uk,ukr,san")
+    print("non-D7-surface-collisions=0 namespaces=uk,ukr,san (D1-D9 audit; D10 labels remain separately scoped)")
     print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! in uk,ukr,en predicate=? in uk,ukr,en")
     print("d9-runtime=W9-carrier-separate-fail-closed-#4038")
     print("columns=ук->укр->san->en->LISP->sym")
