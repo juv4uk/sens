@@ -1,0 +1,18 @@
+name: Міграція ядра — E3 з точними 10 бітами D10
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exhaustive-d10:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Вичерпно перевірити всі 1024 точні 10-бітні координати
+        run: cargo test --locked -p sens --lib frame3_domain::tests::d10_ -- --nocapture
+      - name: Перевірити всі попередні E3-вектори без зміни форматів
+        run: cargo test --locked -p sens --lib frame3_domain::tests
