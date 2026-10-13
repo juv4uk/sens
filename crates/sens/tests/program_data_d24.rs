@@ -156,7 +156,7 @@ fn ітеративний_обхід_зберігає_порядок_форми_
     assert!(matches!(n.as_ref(), Value::Nil));
 
     // Invalid legacy node nested at depth must not be sanitized by the walk.
-    let bad = вузол(ExprKind::Sid(sens::Sens8::from_packed_byte(0b0010_0011)));
+    let bad = вузол(ExprKind::Sid(sens::sens!(00100011)));
     assert_eq!(expr_to_exact_program_data(&вузол(ExprKind::List(Rc::from([bad]))))
         .unwrap_err().kind, ErrorKind::InvalidForm);
 
