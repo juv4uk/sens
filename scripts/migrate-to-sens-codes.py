@@ -523,8 +523,9 @@ def build_text7_encoder(foundation, generated_projection: Path):
     if generated_projection.suffix == ".json":
         authority = json.loads(generated_projection.read_text(encoding="utf-8"))
         if (authority.get("schema"), authority.get("status"),
-                authority.get("width"), authority.get("occupancy")) != (
-                "sens.d7.keyboard/v2", "owner-ratified", 7, 128):
+                authority.get("width"), authority.get("capacity"),
+                authority.get("occupancy")) != (
+                "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
             raise BinaryMigrationError("D7 keyboard/v2 owner authority invalid")
         rows = authority.get("table", [])
         if len(rows) != 128:
