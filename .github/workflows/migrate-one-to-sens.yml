@@ -26,14 +26,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Run real one-file canonical three-pass tests
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
       - name: D1–D10 exhaustive 2046 and adversarial upstream witnesses
         run: |
           set -euo pipefail
           python3 -m unittest discover -s tests -p 'test_migrate_one_exact_domain_witness.py' -v
+      - name: Run real one-file canonical three-pass tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
       - name: Show canonical physical canary (read-only, no publication)
         run: |
           set -euo pipefail
