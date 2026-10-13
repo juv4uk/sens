@@ -136,9 +136,9 @@ IDENTITY_NUMERIC_FIELD = re.compile(
     r"\b(?:bits|payload|packed|raw|ordinal|coordinate_bits|domain_bits)\b"
     r"|packed_bits\s*\("
 )
-RUST_FORMAT_CALL = re.compile(r"\b(?:format|write|writeln)!\s*\(\s*\"([^\"]*)\"")
+RUST_FORMAT_CALL = re.compile(r"\b(?:format|write|writeln)!\s*\(\s*\"([^\"]*)\"([^)]*)")
 PYTHON_FSTRING = re.compile(r"""(?i)\bf(?P<quote>['"])(?P<body>.*?)(?P=quote)""")
-PYTHON_FORMAT_CALL = re.compile(r"""(?P<quote>['"])(?P<body>.*?)(?P=quote)\.format\s*\(""")
+PYTHON_FORMAT_CALL = re.compile(r"""(?P<quote>['"])(?P<body>.*?)(?P=quote)\.format\s*\((?P<args>[^)]*)""")
 
 
 def _marked_human_projection(path: str, line: str) -> bool:
@@ -201,7 +201,7 @@ def inspect_decimal_identity_bridges(path: str, source: str) -> list[str]:
                     findings.append(f"line {line_no}: default/decimal format of identity payload")
         elif path.endswith(".py"):
             for match in PYTHON_FSTRING.finditer(line):
-                if _decimal_default_placeholder(match.group("body")):
+                if _decimal_default_placeholder(match.group("body"), match.group("args")):
                     findings.append(f"line {line_no}: default/decimal f-string of identity payload")
             for match in PYTHON_FORMAT_CALL.finditer(line):
                 if _decimal_default_placeholder(match.group("body"), match.group("args")):
@@ -376,6 +376,8 @@ def self_test() -> None:
          "int(word, 2); int(trits, 3)"),
         ("crates/sens-cli/src/main.rs",
          "port.parse::<u16>().ok() // projection-human: TCP port is human transport configuration"),
+        ("crates/sens-cli/src/main.rs",
+         'return Err(format!("packed binary reader rejected: {err}"));'),
     )
     for path, code in decimal_clean:
         if inspect_decimal_identity_bridges(path, code):
