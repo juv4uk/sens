@@ -93,10 +93,26 @@
 ; Guard explains the relation without replacing either authority.
 ; Oracle дає очікувану семантику, observer — фактичний стан, Guard пояснює
 ; їхнє співвідношення, не підміняючи жодне джерело.
+
+; Структурний закон Guard належить двійковому SENS, не Rust і не W8.
+; D3:010 ATOM, 101 EQ лише для атомів, 100 CAR, 011 CDR, 110 COND.
+; Повертає рівно D1 PredicateBit; невідомий механізм не допускається.
+(0011 сторожа--рівні?
+  (0010 (ліве праве)
+    (110
+      ((010 ліве)
+       (110
+         ((010 праве) (101 ліве праве))
+         (#d1:1 #d1:0)))
+      ((010 праве) #d1:0)
+      ((сторожа--рівні? (100 ліве) (100 праве))
+       (сторожа--рівні? (011 ліве) (011 праве)))
+      (#d1:1 #d1:0))))
+
 (0011 guard-compare
   (0010 (subject expected observed evidence)
     (110
-      ((11110111 expected observed)
+      ((сторожа--рівні? expected observed)
        (make-guard-finding
          (001 allow) (001 confirmed) subject observed expected
          (001 ()) (001 invariant-preserved) (001 no-action) evidence))
