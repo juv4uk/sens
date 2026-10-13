@@ -115,6 +115,14 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
+      # SENS-native semantic suite is a manual extension of the SAME workflow.
+      # Automatic pushes retain the one focused SENS job; no second runner.
+      - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/test-current-semantic-slice.sh --native-binary-only
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash
