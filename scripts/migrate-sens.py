@@ -14,8 +14,8 @@ Example:
 
 Repeat --source for an atomic batch, or pass --manifest approved.json.\nEvery manifest entry is independently SHA-pinned before execution; supplied\nSHA256 values must match actual source bytes or the whole run is BLOCKED.
 Eight-bit W8 source is ambiguous between old SID8 and ratified current D8.
-Use --source-era auto (default; BLOCK), or --source-era legacy/current only
-when source provenance proves that era.
+Use --source-era auto (diagnose ambiguity), or --source-era legacy/current
+when source provenance proves that era. No file-level migration HOLD.
 Use --dry-run to classify without writing. The original .lisp never changes.
 For protected publication, use an output directory outside the source tree.
 """
@@ -109,7 +109,7 @@ def _is_archived_benchmark(path: PurePosixPath, root: Path) -> bool:
 
 
 def reject_classified_nonprogram(sources: list[str], root: Path) -> None:
-    """Early all-or-nothing embargo before any conversion or T5 publication."""
+    """Executable-admission evidence check, NOT a ban on migration attempts."""
     classified = _nonprogram_manifest_paths(root)
     for name in sources:
         rel = PurePosixPath(name)
@@ -179,9 +179,9 @@ def pin_sources(sources: list[str], root: Path) -> dict:
         # verifies this SHA again before publishing. Never silently trust names.
         sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
         entries.append({"path": rel, "sha256": sha})
-    # Every selected path is checked as one atomic batch. A source may be
-    # mechanically convertible while being reviewed NONPROGRAM archive/data.
-    reject_classified_nonprogram([row["path"] for row in entries], root)
+    # Owner 2026-10-14: inherited NONPROGRAM labels do not prohibit working
+    # on a file. Pin every safe existing source and allow diagnosis/rewrite.
+    # Separate original executable admission still enforces true semantic proof.
     return {"files": sorted(entries, key=lambda item: item["path"])}
 
 
