@@ -54,10 +54,29 @@ fn eval_advice_corpus(source: &str) -> String {
     // The exact reader preserves their domain widths; W8/D8 remains distinct.
     let program = parse_exact_domain_source(source)
         .unwrap_or_else(|e| panic!("Advice Taker exact-domain reader: {e}\nsource: {source}"));
-    eval_parsed_expressions(&program, &mut session)
-        .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"))
-        .value
-        .to_string()
+    let evaluated = eval_parsed_expressions(&program, &mut session)
+        .unwrap_or_else(|e| panic!("Advice Taker exact-domain eval: {e}\nsource: {source}"));
+
+    // Тимчасовий діагностичний транспорт: тільки SENS читає свій журнал
+    // і сам виконує точні D9 проєкції / доказ. Rust не обчислює вердикт.
+    // Виконуємо після тестової програми, щоб не впливати на її результат.
+    for (label, witness) in [
+        ("journal", "*knowledge-journal*"),
+        ("astronomy", "(110000011 (001 astronomy))"),
+        ("science", "(110000011 (001 science))"),
+        ("family", "(110000011 (001 family))"),
+        ("ethics", "(110000011 (001 ethics))"),
+        ("archive", "(110000011 (001 archive))"),
+        ("ethics-proof", "(101001110 (001 (mortal socrates)) (110000011 (001 ethics)))"),
+    ] {
+        let native = parse_exact_domain_source(witness)
+            .and_then(|forms| eval_parsed_expressions(&forms, &mut session));
+        match native {
+            Ok(observation) => eprintln!("ADVICE_SENS_OBSERVE {label}: {}", observation.value),
+            Err(error) => eprintln!("ADVICE_SENS_OBSERVE {label} ERROR: {error}"),
+        }
+    }
+    evaluated.value.to_string()
 }
 
 #[test]
