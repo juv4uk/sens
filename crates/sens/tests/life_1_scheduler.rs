@@ -174,7 +174,7 @@ fn life_scheduler_exact_d3_structural_equality() {
     ];
     for (left, right, expected) in examples {
         let source = format!(
-            "(110 \\n              ((життя--рівні? (001 {left}) (001 {right})) (001 збігається)) \\n              ((010 (001 ())) (001 різне)))"
+            "(110 ((життя--рівні? (001 {left}) (001 {right})) (001 збігається)) ((010 (001 ())) (001 різне)))"
         );
         let actual = eval_text(&source, &mut session);
         assert_eq!(actual, expected, "відмінність у {left} та {right}");
