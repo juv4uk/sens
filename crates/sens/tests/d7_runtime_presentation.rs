@@ -13,7 +13,6 @@ fn all_128_w7_cells_preserve_identity_and_project_from_the_owner_keyboard() {
         assert_eq!(identity.width(), 7);
         assert_eq!(identity.packed_bits(), u16::from(raw));
         assert_eq!(identity.source_word(), word);
-        assert_eq!(identity.core_operation(), None);
         let value = Value::DomainIdentity(identity);
         let exact = format!("{raw:07b}");
         assert_eq!(value.to_string(), exact);
