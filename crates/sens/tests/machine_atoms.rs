@@ -10,8 +10,11 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    if path.ends_with("lib/machine/block.lisp") {
-        let source_path = "lib/machine/block.lisp";
+    let relative = path.strip_prefix(repo_root())
+        .expect("Lisp fixture path must be inside the SENS repository");
+    let source_path = relative.to_str()
+        .expect("machine fixture path must be valid UTF-8");
+    if source_path.starts_with("lib/machine/") {
         let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
             .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
         eval_parsed_expressions(&parsed, session)
