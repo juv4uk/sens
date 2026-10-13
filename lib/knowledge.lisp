@@ -56,7 +56,7 @@
   (0010 (module-name clauses)
     (110
       ((010 clauses) (001 ()))
-      ((010 (001 ()))
+      (#d1:1
        (111
          (1110 (001 tell) module-name (100 clauses))
          (clauses->tell-events module-name (011 clauses)))))))
@@ -90,7 +90,7 @@
          module-name
          (011 journal)
          (111 (100 journal) acc)))
-      ((010 (001 ()))
+      (#d1:1
        (module-journal-events-onto
          module-name
          (011 journal)
@@ -105,13 +105,13 @@
     (110
       ((010 journal) (010 (001 (0))))
       ((101 (1001 (100 journal)) module-name) (010 ()))
-      ((010 (001 ())) (module-journal-has-module? module-name (011 journal))))))
+      (#d1:1 (module-journal-has-module? module-name (011 journal))))))
 
 (0011 knowledge-symbol?
   (0010 (value)
     (110
       ((010 value) (101 value (11101101 (11110100 value))))
-      ((010 (001 ())) (010 (001 (0)))))))
+      (#d1:1 (010 (001 (0)))))))
 
 (0011 module-known?
   (0010 (module-name)
@@ -122,7 +122,7 @@
     (110
       ((101 (100 event) (001 tell)) (111 (10011 event) clauses))
       ((101 (100 event) (001 retract)) (retract-fact (10011 event) clauses))
-      ((010 (001 ())) clauses))))
+      (#d1:1 clauses))))
 
 (0011 module-clauses-now
   (0010 (module-name)
@@ -138,13 +138,13 @@
   (0010 (module-name goal)
     (110
       ((101010010 module-name) (101001110 goal (110000011 module-name)))
-      ((010 (001 ())) (001 Module-not-found)))))
+      (#d1:1 (001 Module-not-found)))))
 
 (0011 forward-in
   (0010 (module-name)
     (110
       ((101010010 module-name) (run-multi (110000011 module-name) (001 ())))
-      ((010 (001 ())) (001 Module-not-found)))))
+      (#d1:1 (001 Module-not-found)))))
 
 (0011 check-conflict?
   (0010 (module-name rules)
@@ -154,10 +154,10 @@
           ((0010 (proofs)
              (110
                ((010 proofs) (010 (001 (0))))
-               ((010 (001 ())) (010 ()))))
+               (#d1:1 (010 ()))))
            (101111010 module-name (opposite-knowledge-head head))))
         (1000 rules)))
-      ((010 (001 ())) (010 (001 (0)))))))
+      (#d1:1 (010 (001 (0)))))))
 
 (0011 check-conflict check-conflict?)
 
@@ -183,14 +183,14 @@
     (110
       ((0101 value) (010 ()))
       ((010 value) (010 (001 (0))))
-      ((010 (001 ())) (knowledge-proper-list? (011 value))))))
+      (#d1:1 (knowledge-proper-list? (011 value))))))
 
 (0011 opposite-knowledge-head
   (0010 (head)
     (110
       ((101 (100 head) (001 not)) (1001 head))
       ((101 (100 head) (001 not?)) (1001 head))
-      ((010 (001 ())) (1110 (001 not?) head)))))
+      (#d1:1 (1110 (001 not?) head)))))
 
 (0011 knowledge-clause-valid?
   (0010 (clause)
@@ -276,3 +276,26 @@
       ((010 package) (001 ()))
       ((101 name (1000 package)) (0110 package))
       (#d1:1 (knowledge-package-field name (011 package))))))
+
+; Історичний пакет знань 0.1 відновлений з lib/knowledge.lisp @ 327b51ca1f.
+; Дані пакета не eval. Назви полів належать цитованим даним, не D7-функціям.
+; Умови: пряма D1-бітність; D4:1000 CAAR; D3:111 CONS; D4:1110 LIST.
+; Ні SID8-псевдонімів, ні D10-ратифікації чи нових примітивів.
+(0011 *knowledge-package-version* (001 (0 1)))
+
+(0011 knowledge-package-entries-valid?
+  (0010 (entries)
+    (110
+      ((0101 entries) #d1:1)
+      ((010 entries) #d1:0)
+      ((010 (100 entries)) #d1:0)
+      ((knowledge-symbol? (1000 entries))
+       (knowledge-package-entries-valid? (011 entries)))
+      (#d1:1 #d1:0))))
+
+(0011 make-knowledge-package
+  (0010 (module-name clauses)
+    (1110 (111 (001 format) (001 my-lisp-knowledge))
+          (111 (001 version) *knowledge-package-version*)
+          (111 (001 module) module-name)
+          (111 (001 clauses) clauses))))
