@@ -27,8 +27,8 @@ fn session() -> Session {
 fn inline_exact_d1_matches_both_unmodified_legacy_helpers() {
     let mut s = session();
     for (direct, previous, expected) in [
-        ("(010 (001 ()))", "(native-first-domain-true (001 ()))", true),
-        ("(0100 (010 (001 ())))", "(native-first-domain-false (001 ()))", false),
+        ("#d1:1", "(native-first-domain-true (001 ()))", true),
+        ("#d1:0", "(native-first-domain-false (001 ()))", false),
     ] {
         let new_value = eval(&mut s, direct).expect("exact domain call executable");
         let old_value = eval(&mut s, previous).expect("retained historical helper executable");
@@ -60,9 +60,8 @@ fn no_coercion_from_empty_list_or_numeric_one_into_d1() {
 
 #[test]
 fn exact_reader_does_not_generalize_machine_source_paths() {
-    assert_eq!(SOURCE.matches("(0100 (010 (001 ())))").count(), 6);
-    // 24 standalone YES subforms plus 6 YES subforms within NO.
-    assert_eq!(SOURCE.matches("(010 (001 ()))").count(), 30);
+    assert_eq!(SOURCE.matches("#d1:0").count(), 6);
+    assert_eq!(SOURCE.matches("#d1:1").count(), 24);
     assert!(!SOURCE.contains("(native-first-domain-true ())"));
     assert!(!SOURCE.contains("(native-first-domain-false ())"));
     assert!(parse_mixed_exact_domain_machine_source("lib/untrusted.lisp", SOURCE).is_err());

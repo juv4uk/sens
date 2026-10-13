@@ -394,6 +394,28 @@ impl Parser<'_> {
             ));
         }
 
+        // Перехідна текстова проєкція D1. В канонічному бінарному коді
+        // тотожність уже є самим 1-бітовим словом 0/1. В історичному
+        // текстовому читачі самі "0"/"1" залишаються числами.
+        // Явний #d1:0/#d1:1 знімає неоднозначність БЕЗ нової операції,
+        // без виклику ATOM/NOT та без ототожнення D1:NO з D3:EMPTY.
+        if let Some(bit) = token.strip_prefix("#d1:") {
+            if self.mode != ReaderMode::LegacyCompatibility || !matches!(bit, "0" | "1") {
+                return Err(self.error(
+                    "D1 textual projection requires exactly #d1:0 or #d1:1 in compatibility source",
+                    start,
+                    self.cursor,
+                ));
+            }
+            let words = crate::parse_binary_source_words(bit)
+                .map_err(|_| self.error("invalid one-bit domain identity", start, self.cursor))?;
+            let word = words[0].word;
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+                span: Span { start, end: self.cursor },
+            });
+        }
+
         // В окремому exact-режимі біти означають виключно
         // ширино-залежну DomainIdentity. Історичний 8-бітний payload
         // тут не дає права на виклик; це вирішує окремий domain law.

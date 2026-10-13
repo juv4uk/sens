@@ -10,8 +10,8 @@ SOURCE = ROOT / "lib/machine/dispatch/native-first.lisp"
 HISTORIC_SHA = "6c6777744fc401b6f5eff24631f40eaeab4c13a3"
 OLD_YES = "(native-first-domain-true ())"
 OLD_NO = "(native-first-domain-false ())"
-YES = "(010 (001 ()))"
-NO = "(0100 (010 (001 ())))"
+YES = "#d1:1"
+NO = "#d1:0"
 
 
 def parse(src):
@@ -37,7 +37,7 @@ def parse(src):
 
 def audit(text):
     no_n = text.count(NO)
-    yes_n = text.count(YES) - no_n  # D1:NO contains D1:YES as its inner argument
+    yes_n = text.count(YES)  # direct values: no nested D3/D4 constructors
     if (yes_n, no_n) != (24, 6):
         raise ValueError(f"expected 24 independent YES + 6 NO, got {yes_n}+{no_n}")
     if OLD_YES in text or OLD_NO in text:
@@ -99,12 +99,12 @@ class NativeFirstD1(unittest.TestCase):
         ]:
             rows = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
             self.assertRegex(rows, rf"(?m)^\s*\({code}\s+.*\(LISP {name}\)")
-        head_bits = 24 * (3 + 3) + 6 * (4 + 3 + 3)
-        self.assertEqual(head_bits, 204)
-        self.assertEqual(head_bits - 30, 174)
-        print("30 D1 values: 204 current exact function-head bits; "
-              "30 ideal semantic D1 bits; 174 bits of source reification overhead. "
-              "Neither old named-call bits nor physical T5 size is inferred.")
+        historical_constructors = 24 * (3 + 3) + 6 * (4 + 3 + 3)
+        self.assertEqual(historical_constructors, 204)
+        self.assertEqual(24 + 6, 30)  # 30 direct, exact one-bit D1 atoms
+        self.assertEqual(historical_constructors - 30, 174)
+        print("30 direct D1 values instead of 204 constructor-head bits; "
+              "174 head-bit overhead removed in typed AST, physical T5 not measured")
 
     def test_d1_truth_table(self):
         for original in [False, True]:
