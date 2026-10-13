@@ -140,6 +140,23 @@ def verify():
     if auto != ["ci.yml"]:
         errors.append(f"очікується один ci.yml, знайдено {auto}")
     errors.extend(verify_migration_source_shapes())
+    # Mechanical ratchet: one existing workflow must prove native SENS exec,
+    # not merely green Python unittest dots. The dynamic scan validates receipts.
+    ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
+    if ci_text.count("--executor-report-file") != 3:
+        errors.append("UNINFORMATIVE-EXECUTOR: 3 direct SENS receipts required")
+    if ci_text.count("scripts/ci_failure_contract.py scan-executors") != 1:
+        errors.append("UNINFORMATIVE-EXECUTOR: missing native receipts scanner")
+    for test_id in ("sens-time-d1-predicate-law",
+                    "knowledge-exact-arity-structure",
+                    "sens-domain-logic-2040-mutant"):
+        if ("--require " + test_id) not in ci_text:
+            errors.append("UNINFORMATIVE-EXECUTOR: missing required " + test_id)
+    if ci_text.count("semantic_authority=binary-SENS") != 2:
+        errors.append("UNINFORMATIVE-EXECUTOR: only two positive CLI laws may claim binary SENS")
+    if "executor=CI_GLUE_NO_SEMANTICS" not in ci_text:
+        errors.append("UNINFORMATIVE-EXECUTOR: Python migration tests lack honest executor label")
+
     for error in errors:
         print("SENS_CI_BUDGET_FAIL", error, flush=True)
     if errors:
