@@ -32,9 +32,29 @@ jobs:
           grep -Fq "not callable" "$RUNNER_TEMP/mutant.err"
           test ! -s "$RUNNER_TEMP/mutant.out"
           echo "SENS сам обчислив позитивний закон і відхилив мутант"
+      - name: SENS розрізняє atom-tag від pair-tag і відхиляє однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          law=tests/semantic/native-first-tag-atom-law.bits
+          mutant=tests/semantic/native-first-tag-atom-mutant.bits
+          sha256sum "$law" "$mutant"
+          cp "$law" "$RUNNER_TEMP/tag-law.lisp"
+          cp "$mutant" "$RUNNER_TEMP/tag-mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/tag-law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/tag-mutant.lisp"
+          target/debug/sens-trit eval "$RUNNER_TEMP/tag-law.sens" > "$RUNNER_TEMP/tag-law.out"
+          test "$(cat "$RUNNER_TEMP/tag-law.out")" = "1"
+          if target/debug/sens-trit eval "$RUNNER_TEMP/tag-mutant.sens" > "$RUNNER_TEMP/tag-mutant.out" 2> "$RUNNER_TEMP/tag-mutant.err"; then
+            echo "ПОМИЛКА: однобітний мутант не викликав SENS-відмову"
+            exit 1
+          fi
+          grep -Fq "not callable" "$RUNNER_TEMP/tag-mutant.err"
+          test ! -s "$RUNNER_TEMP/tag-mutant.out"
+          echo "SENS_TAG_ATOM_LAW_PASS, SENS_TAG_ATOM_MUTANT_REJECTED"
       - name: Уже наявний інтеграційний свідок відступу та native-route
         shell: bash
         run: |
           set -euo pipefail
           result="$(target/debug/sens tests/fixtures/native-first-execution-witness.lisp)"
-          test "$result" = "(pass pass pass pass pass)"
+          test "$result" = "(pass pass pass pass pass pass)"
