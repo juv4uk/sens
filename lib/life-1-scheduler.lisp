@@ -95,7 +95,7 @@
 (0011 life-scheduler-projection-match?
   (0010 (expected projections)
     (110
-      ((0100 (010 projections)) (001 absent))
+      ((010 projections) (001 absent))
       ((0100 (010 projections))
        (життя-проєкція-порівняти expected projections (100 projections))))))
 
