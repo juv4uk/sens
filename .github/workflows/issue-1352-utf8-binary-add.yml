@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: 256 байтів × 5 границь × D3/D8, точна ширина та D1
-        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_matches_d8_equal_for_all_256_bytes_at_five_boundaries -- --exact --nocapture
-      - name: Заборона підміни структурного D8 EQUAL на атомарний D3 EQ
-        run: cargo test --locked -p sens --test utf8 utf8_d3_atom_eq_must_not_replace_structural_d8_equal -- --exact --nocapture
+      - name: 256 байтів × 5 границь × точний D3 та D1
+        run: cargo test --locked -p sens --test utf8 utf8_atomic_d3_eq_exhaustive_256_bytes_at_five_boundaries -- --exact --nocapture
+      - name: D3 відхиляє списки, D8 лишається без механізму
+        run: cargo test --locked -p sens --test utf8 utf8_d3_eq_rejects_nonatoms_and_d8_equal_remains_unadmitted -- --exact --nocapture
