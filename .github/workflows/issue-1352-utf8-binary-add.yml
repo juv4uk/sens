@@ -1,6 +1,14 @@
 name: Issue 1352 UTF-8 binary plus contract
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - lib/utf8.lisp
+      - crates/sens/tests/utf8.rs
+      - tests/test_utf8_d1_predicate_migration.py
+      - tests/test_utf8_d1_predicate_migration.py
+      - .github/workflows/issue-1352-utf8-binary-add.yml
   pull_request:
     paths:
       - lib/utf8.lisp
@@ -14,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: D1 точковий AST свідок
+        run: python3 -m unittest discover -s tests -p test_utf8_d1_predicate_migration.py -v
       - name: UTF-8 semantic regression
-        run: cargo test -p sens --test utf8 -- --nocapture
-      - name: UTF-8 stack regression
-        run: cargo test -p sens --test utf8_stack -- --nocapture
+        run: cargo test --locked -p sens --test utf8 --test utf8_stack --no-fail-fast -- --nocapture

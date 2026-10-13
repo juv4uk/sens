@@ -96,3 +96,33 @@ fn utf8_layer_keeps_process_library_as_a_separate_top_level_load() {
     load_process_library(&mut session)
         .expect("UTF-8, process and TCP language layers must load sequentially");
 }
+
+#[test]
+fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
+    let mut session = utf8_session();
+    for (source, expected) in [
+        ("(utf8-in-range? 0 0 255)", true),
+        ("(utf8-in-range? 255 0 255)", true),
+        ("(utf8-in-range? 256 0 255)", false),
+        ("(utf8-in-range? -1 0 255)", false),
+        ("(utf8-continuation-byte? 127)", false),
+        ("(utf8-continuation-byte? 128)", true),
+        ("(utf8-continuation-byte? 191)", true),
+        ("(utf8-continuation-byte? 192)", false),
+        ("(utf8-byte? 0)", true),
+        ("(utf8-byte? 255)", true),
+        ("(utf8-byte? 256)", false),
+        ("(utf8-all-bytes? (quote ()))", true),
+        ("(utf8-all-bytes? (quote (0 127 255)))", true),
+        ("(utf8-all-bytes? (quote (0 256)))", false),
+        ("(utf8-two-continuations? 128 191)", true),
+        ("(utf8-two-continuations? 128 192)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("{source} failed: {e:?}")).value;
+        assert_eq!(
+            actual.as_predicate_bit(), Some(expected),
+            "{source}: expected an exact D1 bit, never ordinary Number 0/1"
+        );
+    }
+}
