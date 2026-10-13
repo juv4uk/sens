@@ -35,6 +35,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Physical input / visible reference semantic parity
         run: cargo test --locked -q -p sens --test direct_t5_pipeline
+      - name: Exact-domain T5 migration — 4 pointwise bitness witnesses
+        run: cargo test --locked -p sens --lib exact_t5_cutover_tests -- --nocapture
       - name: Original SENS CLI evaluation and diagnostic regression
         run: cargo test --locked -q -p sens-cli --bin sens-trit
       - name: Негативні свідки коректності T5-вимірювань за Python і Python -O
