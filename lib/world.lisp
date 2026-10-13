@@ -28,7 +28,16 @@
   (0010 (value)
     (110
       ((010 value) (010 (001 (0))))
-      ((101 (100 value) (001 world)) (010 ()))
+      ((101 (100 value) (001 world))
+       (110
+         ; Exact shape: (world parent journal metadata).
+         ; D3 ATOM/CDR tests required tails; D4 NULL rejects an extra field.
+         ; No D6 LENGTH, numeric arity literal, or host-side list checker.
+         ((010 (011 value)) (010 (001 (0))))
+         ((010 (011 (011 value))) (010 (001 (0))))
+         ((010 (011 (011 (011 value)))) (010 (001 (0))))
+         ((0101 (011 (011 (011 (011 value))))) (010 ()))
+         ((010 ()) (010 (001 (0))))))
       ((010 ()) (010 (001 (0)))))))
 
 (0011 world-parent (0010 (world) (1001 world)))
