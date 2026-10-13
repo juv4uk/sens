@@ -542,6 +542,7 @@ jobs:
         if: always()
         shell: bash
         env:
+          FULL_CARGO_OUTCOME: ${{ steps.full-cargo.outcome }}
           BUDGET_OUTCOME: ${{ steps.budget.outcome }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           PACKED_OUTCOME: ${{ steps.packed.outcome }}
@@ -563,6 +564,17 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          # An optional full-Cargo failure terminates before native witnesses begin.
+          # Preserve and validate that actual root-cause report rather than
+          # misdiagnosing never-executed native laws as missing SENS receipts.
+          if [[ "$FULL_CARGO_OUTCOME" == failure ]]; then
+            echo '::error::FULL_CARGO_ROOT_FAILURE: see failing Cargo step and its original evidence'
+            python3 scripts/ci_failure_contract.py scan \
+              --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" || exit 1
+            # A correctly classified transitional failure still blocks this
+            # complete-workspace run: do not launder the suite into GREEN.
+            exit 1
+          fi
           # Ratchet first: even a green Python runner cannot impersonate SENS.
           # The scanner validates all required receipts against the actual executable,
           # physical fixture hashes, binary package version and exact commands.
