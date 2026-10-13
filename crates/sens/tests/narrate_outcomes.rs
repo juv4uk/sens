@@ -44,28 +44,15 @@ fn eval_outcome_narration(source: &str) -> String {
     eval_outcome_value(source).to_string()
 }
 
-// Isolated witness for narrate-outcome-arity?: the current-main result-status.lisp
-// has an independently reported extra closing parenthesis, so this targeted test
-// supplies only its small proper-list predicate dependency. The full integration
-// suite below still loads the real result-status library and exposes that blocker.
+// Isolated witness for the structural arity predicates in narrate.lisp.
+// It intentionally does not load result-status.lisp: current main has an
+// independently owned parse blocker there, tracked in PR #5676.
 fn eval_arity_predicate(source: &str) -> sens::Value {
-    const ARITY_TEST_SUPPORT: &str = r#"
-      (0011 result-proper-list?
-        (0010 (value)
-          (110
-            ((010 value) (101 value (001 ())))
-            ((010 (001 ())) (result-proper-list? (011 value))))))
-    "#;
-
     let mut session = Session::default();
     load_core_library(&mut session)
         .expect("canonical current Core4 bootstrap must load via its public loader");
-    let support = parse_exact_domain_source(ARITY_TEST_SUPPORT)
-        .expect("test support uses only exact D1/D3 source words");
-    eval_parsed_expressions(&support, &mut session)
-        .expect("test-only proper-list predicate must load");
     let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
-        .expect("canonical narration source must preserve each domain width");
+        .expect("narration source must use exact domains and no unqualified numbers");
     eval_parsed_expressions(&narration, &mut session)
         .expect("exact-domain narration library must load");
     eval_program(source, &mut session)
@@ -77,11 +64,12 @@ fn eval_arity_predicate(source: &str) -> sens::Value {
 fn arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes() {
     // COND consumes exact D1 only: host truthiness and structural Nil are not predicates.
     let cases = [
-        ("(narrate-outcome-arity? (quote (unknown subject)) 2)", true),
-        ("(narrate-outcome-arity? (quote (proved statement results)) 3)", true),
-        ("(narrate-outcome-arity? (quote (unknown)) 2)", false),
-        ("(narrate-outcome-arity? (quote (partial value bound extra)) 3)", false),
-        ("(narrate-outcome-arity? 42 2)", false),
+        ("(narrate-list-exact-two? (quote (unknown subject)))", true),
+        ("(narrate-list-exact-three? (quote (proved statement results)))", true),
+        ("(narrate-list-exact-two? (quote (unknown)))", false),
+        ("(narrate-list-exact-three? (quote (partial value bound extra)))", false),
+        ("(narrate-list-exact-two? 42)", false),
+        ("(narrate-list-exact-two? (quote (unknown . subject)))", false),
     ];
 
     for (source, expected) in cases {
