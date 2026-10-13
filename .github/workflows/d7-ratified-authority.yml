@@ -36,12 +36,12 @@ jobs:
           cargo test --locked -p sens --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire
           cargo test --locked -p sens --lib text7_projection::tests
           cargo test --locked -p sens --lib d7_keyboard::tests
-      - name: Execute binary SENS-owned D1/D3/D7/D8/D9 semantic verdict
+      - name: Execute binary SENS-owned domain and compiler selector self-verdicts
         shell: bash
         run: |
           set -euo pipefail
           cargo build --locked -p sens-cli --bin sens
-          for witness in tests/semantic/d1-d3-control-law.bits tests/semantic/d4-d6-selector-chain.bits; do
+          for witness in tests/semantic/d1-d3-control-law.bits tests/semantic/d4-d6-selector-chain.bits tests/semantic/compiler-nucleus-l1-l5-selectors.bits; do
             filename="$(basename "$witness" .bits)"
             python3 - "$witness" "$RUNNER_TEMP/$filename.sens" <<'PY'
           import sys

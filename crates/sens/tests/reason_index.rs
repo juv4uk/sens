@@ -27,20 +27,6 @@ fn eval(session: &mut Session, source: &str) -> String {
 }
 
 #[test]
-fn binary_sens_owns_reason_index_car_eq_guard_law() {
-    let mut s = session();
-    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
-    assert!(
-        source.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
-        "the semantic law must be visible binary SENS, not a host truth table"
-    );
-    let expressions = parse_canonical_binary(source)
-        .expect("canonical D2-framed binary SENS must parse");
-    eval_parsed_expressions(&expressions, &mut s)
-        .expect("binary SENS rejected its CAR/ATOM/EQ positive-negative law");
-}
-
-#[test]
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
@@ -102,6 +88,20 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 }
 
 #[test]
+fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
+    let mut s = session();
+    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
+    assert!(
+        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
+        "the SENS law must be binary words plus separators only"
+    );
+    let expressions =
+        parse_canonical_binary(source).expect("canonical D2-framed binary SENS must parse");
+    eval_parsed_expressions(&expressions, &mut s)
+        .expect("SENS self-verdict rejected the CAR/ATOM/EQ positive-negative law");
+}
+
+#[test]
 fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() {
     // This counts 2046 mechanical coordinates (NOT 2046 callable functions).
     // The test detects truncation, cross-domain aliasing and accidental
@@ -136,4 +136,22 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
                    DomainCoordinate::new(width + 1, 1));
     }
     assert_eq!(DomainCoordinate::new(10, 1024), None);
+}
+
+#[test]
+fn reason_index_builder_diagnostic_first_failing_stage() {
+    let mut s = session();
+    let probes = [
+        ("(reason-term-predicate (quote (p a)))", "p"),
+        ("(reason-rule-predicate (quote ((p a))))", "p"),
+        ("(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
+        ("(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
+        ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
+         "(reason-index/1 indexed () ())"),
+        ("(reason-make-index (quote (((p a)))))",
+         "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
+    ];
+    for (probe, expected) in probes {
+        assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");
+    }
 }

@@ -6,9 +6,14 @@ on:
     paths:
       - 'lib/canon.lisp'
       - 'lib/core1.lisp'
+      - 'lib/core1-admission.bits'
+      - 'lib/core1-admission.sens'
+      - 'tests/fixtures/core1-admission-semantic.bits'
+      - 'tests/fixtures/core1-admission-semantic.sens'
       - 'lib/core1-selectors.bits'
       - 'lib/core1-selectors.sens'
       - 'tests/fixtures/core1-selectors-semantic.bits'
+      - 'tests/semantic/core1-admitted-selectors.bits'
       - 'tests/fixtures/core1-selectors-semantic.sens'
       - 'lib/machine/block.lisp'
       - 'lib/machine/block.bits'
@@ -72,3 +77,32 @@ jobs:
           target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-trit.out"
           cmp "$RUNNER_TEMP/core1-sens.out" "$RUNNER_TEMP/core1-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/core1-sens.out"
+
+
+      - name: SENS checks Core1 D4/D5 cutover and one-bit mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          # SENS semantic verdict is entirely in the binary program. Host moves bytes.
+          cp tests/semantic/core1-admitted-selectors.bits "$RUNNER_TEMP/core1-admitted-selectors.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/core1-admitted-selectors.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/core1-admitted-selectors.sens" > "$RUNNER_TEMP/core1-admitted-open.bits"
+          cmp tests/semantic/core1-admitted-selectors.bits "$RUNNER_TEMP/core1-admitted-open.bits"
+          target/debug/sens "$RUNNER_TEMP/core1-admitted-selectors.sens" > "$RUNNER_TEMP/core1-admitted-sens.out"
+          target/debug/sens-trit eval "$RUNNER_TEMP/core1-admitted-selectors.sens" > "$RUNNER_TEMP/core1-admitted-trit.out"
+          cmp "$RUNNER_TEMP/core1-admitted-sens.out" "$RUNNER_TEMP/core1-admitted-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/core1-admitted-sens.out"
+
+      - name: Core1 admitted function coordinates judged by physical SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit open lib/core1-admission.sens > "$RUNNER_TEMP/core1-admission-source.bits"
+          cmp lib/core1-admission.bits "$RUNNER_TEMP/core1-admission-source.bits"
+          program='tests/fixtures/core1-admission-semantic.sens'
+          target/debug/sens-trit open "$program" > "$RUNNER_TEMP/core1-admission-witness.bits"
+          cmp tests/fixtures/core1-admission-semantic.bits "$RUNNER_TEMP/core1-admission-witness.bits"
+          target/debug/sens "$program" > "$RUNNER_TEMP/core1-admission-sens.out"
+          target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-admission-trit.out"
+          cmp "$RUNNER_TEMP/core1-admission-sens.out" "$RUNNER_TEMP/core1-admission-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/core1-admission-sens.out"

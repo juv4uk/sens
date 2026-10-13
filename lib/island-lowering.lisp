@@ -37,8 +37,7 @@
 
 (0011 island-lower-binary
   (0010 (sid executor left right)
-    (001000 ((selection (mechanism-select sid executor)))
-      (110
+    ((0010 (selection) (110
         ((010 selection)
          (1110
            (001 island-lowering-failure)
@@ -47,12 +46,9 @@
         ((010 (001 ()))
          (110
            ((101 (100 selection) (001 mechanism-selected))
-            (001000 ((mechanism (100111 selection)))
-              (110
+            ((0010 (mechanism) (110
                 ((101 mechanism (001 bounded-exact-add))
-                 (001000 ((payload
-                         (island-lowering-add-payload executor left right)))
-                   (110
+                 ((0010 (payload) (110
                      ((010 payload)
                       (1110
                         (001 island-lowering-failure)
@@ -61,11 +57,11 @@
                      ((010 (001 ()))
                       (1110
                         (001 island-lowering-result)
-                        sid executor mechanism payload)))))
+                        sid executor mechanism payload)))) (island-lowering-add-payload executor left right)))
                 ((010 (001 ()))
                  (1110
                    (001 island-lowering-failure)
                    (001 unsupported-selected-mechanism)
-                   sid executor mechanism)))))
+                   sid executor mechanism)))) (100111 selection)))
            ((010 (001 ()))
-            selection)))))))
+            selection))))) (mechanism-select sid executor))))

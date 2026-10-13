@@ -12,18 +12,32 @@
 ; D6:100111 CADDDR stays RATIFIED DATA but is not physically callable yet;
 ; no Rust/Python backdoor may silently admit that runtime function.
 ; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
+; Exact binary Core1 admission slice: C1-ADMITTED-SID-VALUEP runs from
+; lib/core1-admission.{bits,sens}; 21 SENS-owned laws live in
+; tests/fixtures/core1-admission-semantic.{bits,sens}.
+; 13 accepted domain words, 7 rejected (including D6 noncallable data),
+; and short-circuit COND. This historical Core1 predicate returns structural
+; () for a negative answer; it is NOT the canonical D1:0. The test preserves
+; that observable mismatch; it does not assert modern D1 predicate admission.
+; Quoted record tags remain blocked pending a real atomic D7 datum law;
+; no fake D7 representation may be EQ-comparable to an atom.
+
+; Exact selector cutover: D4:1001 CADR and D5:10011 CADDR.
+; Fourth = admitted D5 CADDR after D3:011 CDR.
+; D6 CADDDR is a ratified identity, not an admitted physical call.
+; This profile does not gain any new primitive or D7 text fallback.
 
 (0011 C1-SECOND
   (0010 (X)
-    (100 (011 X))))
+    (1001 X)))
 
 (0011 C1-THIRD
   (0010 (X)
-    (100 (011 (011 X)))))
+    (10011 X)))
 
 (0011 C1-FOURTH
   (0010 (X)
-    (100 (011 (011 (011 X))))))
+    (10011 (011 X))))
 
 (0011 C1-MAKE-ERROR
   (0010 (KIND DETAIL)
