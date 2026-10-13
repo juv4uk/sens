@@ -64,6 +64,38 @@ class QuotedDatumLadderLaw(unittest.TestCase):
         out, _ = self.migrate("'(001 101)\n")
         self.assertEqual(out, "10 001 00 10 001 00 101 01 01\n")
 
+    def test_quoted_names_use_exact_domain_identity_before_d7(self):
+        # Each canonical display projection points to its exact domain address.
+        cases = {
+            "ні": "0",                  # D1
+            "NIL": "0",                 # D1 historic surface
+            "CAR": "100",               # D3
+            "перше": "100",             # D3 Ukrainian surface
+            "як-є": "001",              # D3 QUOTE
+            "SQRT": "00001110",         # D8
+            "корінь": "00001110",       # D8 Ukrainian surface
+            "guard-evidence-status?": "000000000",  # D9 data identity
+            "missing-capability": "0000000000",    # D10 data identity
+        }
+        for name, bits in cases.items():
+            with self.subTest(name=name):
+                out, _ = self.migrate("'" + name + "\\n")
+                self.assertEqual(out, f"10 001 00 {bits} 01\\n")
+                self.assertEqual(len(bits), 1 if name in ("ні", "NIL") else
+                                 3 if name in ("CAR", "перше", "як-є") else
+                                 8 if name in ("SQRT", "корінь") else
+                                 9 if name == "guard-evidence-status?" else 10)
+
+    def test_ambiguous_ladder_surface_blocks_instead_of_guessing_d7(self):
+        # Canonical tables have MAP in both D6 and D8.
+        with self.assertRaisesRegex(mod.MigrationError, "ambiguous quoted ladder"):
+            self.migrate("'MAP\\n")
+
+    def test_quote_recursively_prefers_ladder_inside_data_lists(self):
+        out, _ = self.migrate("'(CAR nonresident)\\n")
+        self.assertTrue(out.startswith("10 001 00 10 100 00 10 "), out)
+        self.assertNotIn(" CAR ", out)
+
     def test_quoted_name_without_ladder_place_becomes_d2_framed_d7(self):
         out, _ = self.migrate("'(a . b)\n")
         self.assertEqual(out, "10 001 00 10 10 1100001 01 11 10 1100010 01 01 01\n")
