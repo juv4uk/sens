@@ -1,5 +1,5 @@
 ;; knowledge.lisp - A module system for the Lisp Knowledge Representation
-;; Migrated: (001 t) COND else → exact D1:1 (010 (001 ())). Width is identity.
+;; Direct predicates use exact D1:1/D1:0; D3 ATOM only tests actual shapes.
 
 ;; --- append-only fact journal --------------------------------------------
 ;; Earlier, `*knowledge-base*` held one snapshot per module — every
@@ -103,15 +103,15 @@
 (0011 module-journal-has-module?
   (0010 (module-name journal)
     (110
-      ((010 journal) (010 (001 (0))))
-      ((101 (1001 (100 journal)) module-name) (010 ()))
+      ((010 journal) #d1:0)
+      ((101 (1001 (100 journal)) module-name) #d1:1)
       (#d1:1 (module-journal-has-module? module-name (011 journal))))))
 
 (0011 knowledge-symbol?
   (0010 (value)
     (110
       ((010 value) (101 value (11101101 (11110100 value))))
-      (#d1:1 (010 (001 (0)))))))
+      (#d1:1 #d1:0))))
 
 (0011 module-known?
   (0010 (module-name)
@@ -153,15 +153,16 @@
        ((0010 (head)
           ((0010 (proofs)
              (110
-               ((010 proofs) (010 (001 (0))))
-               (#d1:1 (010 ()))))
+               ((010 proofs) #d1:0)
+               (#d1:1 #d1:1)))
            (101111010 module-name (opposite-knowledge-head head))))
         (1000 rules)))
-      (#d1:1 (010 (001 (0)))))))
+      (#d1:1 #d1:0))))
 
 (0011 check-conflict check-conflict?)
 
-; Migrated: COND else (001 t) → exact D1:1 (010 (001 ()))
+; Macro AST constructor below still reifies its historical COND guard;
+; direct predicate sites elsewhere use literal W1 identities.
 (0011 tell-knowledge
   (make-macro
     (0010 (module-name rules)
@@ -181,8 +182,8 @@
 (0011 knowledge-proper-list?
   (0010 (value)
     (110
-      ((0101 value) (010 ()))
-      ((010 value) (010 (001 (0))))
+      ((0101 value) #d1:1)
+      ((010 value) #d1:0)
       (#d1:1 (knowledge-proper-list? (011 value))))))
 
 (0011 opposite-knowledge-head

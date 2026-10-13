@@ -491,6 +491,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Source form is checked mechanically. Actual semantics: native SENS.
+          code="$(sed '/^[[:space:]]*;/d' lib/knowledge.lisp)"
+          if printf '%s\n' "$code" | grep -Fq '(010 (001 (0)))'; then
+            echo '::error::KNOWLEDGE_LEGACY_D1_FALSE'
+            exit 1
+          fi
+          if printf '%s\n' "$code" | grep -Fq '(010 ())'; then
+            echo '::error::KNOWLEDGE_LEGACY_D1_TRUE'
+            exit 1
+          fi
+          grep -Fq '((0101 value) #d1:1)' lib/knowledge.lisp
+          grep -Fq '((010 value) #d1:0)' lib/knowledge.lisp
+          grep -Fq '((010 journal) #d1:0)' lib/knowledge.lisp
           program=tests/semantic/knowledge-exact-arity-structure.sens
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           printf '1\n' > "$RUNNER_TEMP/expected-knowledge-d1"
