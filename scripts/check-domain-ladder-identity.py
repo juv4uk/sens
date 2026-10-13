@@ -30,6 +30,9 @@ CANONICAL = (
     "scripts/check-core4-d24-migration.py",
     "benchmarks/domain12345678/run.py",
     "benchmarks/domain1234-dispatch/d34_dispatch.c",
+    "lib/process.lisp",
+    "lib/tcp.lisp",
+    "lib/utf8.lisp",
     "crates/sens/src/bignum.rs",
     "crates/sens/src/binary_execution.rs",
     "crates/sens/src/binary_number.rs",
@@ -96,6 +99,9 @@ C_COMMENTS = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
 # decimal text between its width-qualified binary source and the next domain.
 IDENTITY_PATHS = (
     *(f"lib/domains/d{n}.lisp" for n in range(1, 11)),
+    "lib/process.lisp",
+    "lib/tcp.lisp",
+    "lib/utf8.lisp",
     "crates/sens/src/domain_ladder.rs",
     "crates/sens/src/domain_identity.rs",
     "crates/sens/src/domain_words.rs",
