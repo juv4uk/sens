@@ -7,7 +7,14 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "lib/guard.lisp"
-PREVIOUS_BLOB = "b2a99bd7899b18a14ec877faad98cb4402b787c2"
+PREVIOUS_BLOB = "4447f58dc304d7c6dbcc69506a6b49986d90b7a8"
+PREVIOUS_GENERATION = "b2a99bd7899b18a14ec877faad98cb4402b787c2"
+YES_OLD = "(010 (001 ()))"
+NO_OLD = "(0100 (010 (001 ())))"
+YES = "#d1:1"
+NO = "#d1:0"
+PREVIOUS_COMMENT = "; Migrated: bare host truthiness t → exact D1:1 form (010 (001 ()))."
+CURRENT_COMMENT = "; Predicate results now use direct typed D1 W1 projections #d1:1 / #d1:0."
 OLD = "((010 (001 ())) (001 ())))"
 NEW = "((010 (001 ())) (0100 (010 (001 ())))))"
 EXPECTED = {
@@ -43,8 +50,8 @@ def parse(source):
 def predicate_branches(source):
     funcs = {row[1]: row for row in parse(source)
              if isinstance(row, list) and len(row) >= 3 and row[0] == "0011"}
-    yes = ["010", ["001", []]]
-    no = ["0100", yes]
+    yes = YES
+    no = NO
     results = {}
     for name, statuses in EXPECTED.items():
         root = funcs[name]
@@ -82,17 +89,30 @@ def audit_cells():
 
 
 class GuardInvalidStatus(unittest.TestCase):
-    def test_historical_full_source_is_only_two_control_replacements(self):
+    def test_historical_full_source_is_exactly_17_direct_d1_replacements(self):
         after = SRC.read_text(encoding="utf-8")
-        self.assertEqual(after.count(NEW), 2)
-        self.assertEqual(after.count(OLD), 1)  # A third NIL is data, not predicate.
-        before = after.replace(NEW, OLD)
+        self.assertEqual((after.count(YES), after.count(NO)), (15, 2))
+        self.assertNotIn(YES_OLD, after)
+        self.assertNotIn(NO_OLD, after)
+        self.assertNotIn("((#d1:1) 0)", after)
+        before = (after.replace(NO, NO_OLD).replace(YES, YES_OLD)
+                  .replace(CURRENT_COMMENT, PREVIOUS_COMMENT))
         data = before.encode("utf-8")
         digest = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
         self.assertEqual(digest, PREVIOUS_BLOB)
-        print(f"GUARD-D1: source bytes {len(data)} -> {len(after.encode('utf-8'))}; "
-              "2 true D1:NO outcomes; +14 function-head identity bits total "
-              "(2 × [D4:0100=4 + D3:010=3]); no physical .sens claimed")
+        # Check the prior migration, too: NIL must remain data, never D1 NO.
+        before_two = before.replace(NEW, OLD)
+        older = before_two.encode("utf-8")
+        older_digest = hashlib.sha1(
+            b"blob " + str(len(older)).encode() + b"\0" + older
+        ).hexdigest()
+        self.assertEqual(older_digest, PREVIOUS_GENERATION)
+        head_bits = 15 * (3 + 3) + 2 * (4 + 3 + 3)
+        self.assertEqual(head_bits, 110)
+        self.assertEqual(head_bits - 17, 93)
+        print(f"GUARD-D1: UTF8 bytes {len(data)} -> {len(after.encode('utf-8'))}; "
+              "17 direct D1 bits replace 110 function-head bits; "
+              "93 bits of AST call-head overhead removed, physical T5 NOT measured")
 
     def test_both_guards_accept_exactly_eight_rationalized_statuses(self):
         self.assertEqual(sum(predicate_branches(SRC.read_text(encoding="utf-8")).values()), 8)
@@ -102,14 +122,20 @@ class GuardInvalidStatus(unittest.TestCase):
 
     def test_negative_mutations_do_not_inherit_false_truthiness(self):
         src = SRC.read_text(encoding="utf-8")
-        for candidate in (src.replace(NEW, OLD, 1),
-                          src.replace(NEW, "((010 (001 ())) 0)", 1),
-                          src.replace(NEW, "((010 (001 ())) (0100 (001 ())))", 1)):
+        for candidate in (src.replace("((#d1:1 #d1:0))", "((#d1:1 0))", 1),
+                          src.replace(NO, "0", 1),
+                          src.replace(NO, "(001 ())", 1),
+                          src.replace(NO, YES, 1),
+                          src.replace(YES, "(0100 (001 ()))", 1)):
             with self.assertRaises(ValueError):
                 predicate_branches(candidate)
 
     def test_no_unqualified_zero_is_substituted_for_d1(self):
-        self.assertNotIn("((010 (001 ())) 0)", SRC.read_text(encoding="utf-8"))
+        src = SRC.read_text(encoding="utf-8")
+        self.assertNotIn("((#d1:1) 0)", src)
+        self.assertNotIn("((#d1:1) 1)", src)
+        self.assertEqual(src.count(NO), 2)
+        self.assertEqual(src.count(YES), 15)
 
 
 if __name__ == "__main__":

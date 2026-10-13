@@ -71,6 +71,49 @@ fn d4_not_accepts_guard_invalid_d1_but_rejects_empty() {
 }
 
 #[test]
+fn direct_d1_matches_original_evaluated_guard_for_every_status() {
+    let split = ALL.find("(0011 guard-unknown-routes").unwrap();
+    let old = ALL[..split]
+        .replace("#d1:0", "(0100 (010 (001 ())))")
+        .replace("#d1:1", "(010 (001 ()))");
+    let old_definitions = parse_mixed_exact_domain(&old)
+        .expect("historical exact guard predicates parse");
+    let mut historical = Session::default();
+    eval_parsed_expressions(&old_definitions, &mut historical)
+        .expect("historical 2 predicates evaluate");
+
+    let mut migrated = session();
+    for (name, valid) in ACCEPTED {
+        for status in valid.iter().copied().chain(["unrecognized", "no-such-value"]) {
+            let old_out = predicate(&mut historical, name, status);
+            let new_out = predicate(&mut migrated, name, status);
+            assert_eq!(new_out, old_out,
+                "{name}/{status}: direct W1 must match historical ATOM/NOT");
+        }
+    }
+}
+
+#[test]
+fn direct_cond_short_circuits_and_d3_empty_stays_outside_d1() {
+    let mut s = session();
+    let exact = parse_mixed_exact_domain(
+        "(110 (#d1:1 (001 chosen)) (#d1:1 (unknown-unreachable)))"
+    ).expect("D3 COND accepts direct D1");
+    let chosen = eval_parsed_expressions(&exact, &mut s)
+        .expect("second branch must never evaluate")
+        .value;
+    assert_eq!(chosen.to_string(), "chosen");
+
+    let no = parse_mixed_exact_domain("#d1:0").unwrap();
+    let zero = eval_parsed_expressions(&no, &mut s).unwrap().value;
+    let empty = parse_mixed_exact_domain("(001 ())").unwrap();
+    let nil = eval_parsed_expressions(&empty, &mut s).unwrap().value;
+    assert_eq!(zero.as_predicate_bit(), Some(false));
+    assert_eq!(nil.as_predicate_bit(), None);
+    assert_ne!(nil, zero);
+}
+
+#[test]
 fn source_does_not_encode_status_predicates_as_plain_numeric_or_host_bool() {
     let definitions = parse_mixed_exact_domain(&ALL[..ALL.find("(0011 guard-unknown-routes").unwrap()])
         .expect("bounded Guard module");
