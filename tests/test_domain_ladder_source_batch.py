@@ -37,7 +37,7 @@ class BatchSourceTests(unittest.TestCase):
                      if item["path"] == "contracts/d7-ratification.lisp")
         payload = (ROOT / entry["path"]).read_bytes()
         digest = hashlib.sha1(
-            b"blob " + str(len(payload)).encode("ascii") + b"\\0" + payload
+            b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload
         ).hexdigest()
         self.assertEqual(owner["schema"], "sens.d7.keyboard/v2")
         self.assertEqual(owner["occupancy"], 128)
