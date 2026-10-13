@@ -204,26 +204,36 @@ impl<'a> CanonicalCompilerDecoder<'a> {
         };
 
         let width = self.take_byte()?;
-        let packed = self.take_byte()?;
+        // Keep the D1–D8 single-byte digest ABI; D9 is exactly two
+        // little-endian bytes, as already written by the encoder.
+        // D10 has no Value::DomainIdentity carrier here.
+        let packed = match width {
+            1..=8 => u16::from(self.take_byte()?),
+            9 => {
+                let low = self.take_byte()?;
+                let high = self.take_byte()?;
+                u16::from_le_bytes([low, high])
+            }
+            _ => return Err(format!(
+                "canonical compiler domain identity width must be 1..=9, got {width}"
+            )),
+        };
         let invalid = || {
             format!(
                 "canonical compiler domain identity has invalid D{width} payload {packed}"
             )
         };
         let source = match width {
-            1 => BinarySourceWord::W1(Bit1::new(packed).ok_or_else(invalid)?),
-            2 => BinarySourceWord::W2(Bit2::new(packed).ok_or_else(invalid)?),
-            3 => BinarySourceWord::W3(Bit3::new(packed).ok_or_else(invalid)?),
-            4 => BinarySourceWord::W4(Bit4::new(packed).ok_or_else(invalid)?),
-            5 => BinarySourceWord::W5(Bit5::new(packed).ok_or_else(invalid)?),
-            6 => BinarySourceWord::W6(Bit6::new(packed).ok_or_else(invalid)?),
-            7 => BinarySourceWord::W7(Bit7::new(packed).ok_or_else(invalid)?),
-            8 => BinarySourceWord::W8(Bit8::new(packed).ok_or_else(invalid)?),
-            _ => {
-                return Err(format!(
-                    "canonical compiler domain identity width must be 1..=8, got {width}"
-                ));
-            }
+            1 => BinarySourceWord::W1(Bit1::new(packed as u8).ok_or_else(invalid)?),
+            2 => BinarySourceWord::W2(Bit2::new(packed as u8).ok_or_else(invalid)?),
+            3 => BinarySourceWord::W3(Bit3::new(packed as u8).ok_or_else(invalid)?),
+            4 => BinarySourceWord::W4(Bit4::new(packed as u8).ok_or_else(invalid)?),
+            5 => BinarySourceWord::W5(Bit5::new(packed as u8).ok_or_else(invalid)?),
+            6 => BinarySourceWord::W6(Bit6::new(packed as u8).ok_or_else(invalid)?),
+            7 => BinarySourceWord::W7(Bit7::new(packed as u8).ok_or_else(invalid)?),
+            8 => BinarySourceWord::W8(Bit8::new(packed as u8).ok_or_else(invalid)?),
+            9 => BinarySourceWord::W9(crate::Bit9::new(packed).ok_or_else(invalid)?),
+            _ => unreachable!("width checked before reading payload"),
         };
         Ok(Value::DomainIdentity(DomainIdentity::from_source_word(source)))
     }
@@ -316,6 +326,7 @@ mod tests {
             DomainIdentity::from_source_word(BinarySourceWord::W6(Bit6::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W7(Bit7::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(1).unwrap())),
+            DomainIdentity::from_source_word(BinarySourceWord::W9(crate::Bit9::new(1).unwrap())),
         ];
 
         let value = Value::list(
@@ -332,7 +343,7 @@ mod tests {
         assert_eq!(decoded, value);
 
         let mut cursor = decoded;
-        for expected_width in 1..=8 {
+        for expected_width in 1..=9 {
             let Value::Pair(head, tail) = &cursor else {
                 panic!("round-trip list must retain all exact-width identities");
             };
@@ -345,11 +356,71 @@ mod tests {
         }
     }
 
+
+    /// Exact D1–D9 compiler evidence = 1022 independently addressed values.
+    /// All D10 coordinates (1024) must stay outside this Value ABI:
+    /// 2046 coordinates are NOT 2046 executable functions.
+    #[test]
+    fn compiler_evidence_exhaustive_2046_coordinates_exact_width() {
+        use crate::{
+            BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
+            DomainCoordinate, DomainIdentity,
+        };
+
+        let mut checked = 0usize;
+        for width in 1u8..=9 {
+            for bits in 0u16..(1u16 << width) {
+                let source = match width {
+                    1 => BinarySourceWord::W1(Bit1::new(bits as u8).unwrap()),
+                    2 => BinarySourceWord::W2(Bit2::new(bits as u8).unwrap()),
+                    3 => BinarySourceWord::W3(Bit3::new(bits as u8).unwrap()),
+                    4 => BinarySourceWord::W4(Bit4::new(bits as u8).unwrap()),
+                    5 => BinarySourceWord::W5(Bit5::new(bits as u8).unwrap()),
+                    6 => BinarySourceWord::W6(Bit6::new(bits as u8).unwrap()),
+                    7 => BinarySourceWord::W7(Bit7::new(bits as u8).unwrap()),
+                    8 => BinarySourceWord::W8(Bit8::new(bits as u8).unwrap()),
+                    9 => BinarySourceWord::W9(Bit9::new(bits).unwrap()),
+                    _ => unreachable!(),
+                };
+                let identity = DomainIdentity::from_source_word(source);
+                let value = Value::DomainIdentity(identity);
+                let encoded = compiler_evidence_canonical_bytes(&value).unwrap();
+                assert_eq!(&encoded[..2], &[0x01, width]);
+                if width == 9 {
+                    assert_eq!(encoded.len(), 4);
+                    assert_eq!(&encoded[2..], &bits.to_le_bytes());
+                } else {
+                    assert_eq!(encoded.len(), 3, "D{width} historical hash ABI");
+                    assert_eq!(encoded[2], bits as u8);
+                }
+                let decoded = compiler_evidence_from_canonical_bytes(&encoded)
+                    .unwrap_or_else(|error| panic!("D{width} {bits:b}: {error}"));
+                assert_eq!(decoded, value, "D{width} {bits:b}");
+                checked += 1;
+            }
+        }
+        assert_eq!(checked, 1022);
+
+        for bits in 0u16..1024 {
+            let coordinate = DomainCoordinate::new(10, bits).unwrap();
+            assert_eq!(coordinate.width(), 10);
+            let [low, high] = bits.to_le_bytes();
+            assert!(
+                compiler_evidence_from_canonical_bytes(&[0x01, 10, low, high]).is_err(),
+                "D10 {bits:010b} must not silently truncate into D9/W8"
+            );
+        }
+    }
+
     #[test]
     fn compiler_evidence_decoder_fails_closed_on_malformed_bytes() {
         assert!(compiler_evidence_from_canonical_bytes(&[0xff]).is_err());
         assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x00, 0x00]).is_err());
         assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x03, 0x08]).is_err());
+        assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x09, 0xff]).is_err());
+        assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x09, 0xff, 0x02]).is_err());
+        assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x09, 0x00, 0x01, 0x00]).is_err());
+        assert!(compiler_evidence_from_canonical_bytes(&[0x01, 0x0a, 0x00, 0x00]).is_err());
         assert!(compiler_evidence_from_canonical_bytes(&[0x02, 0x01]).is_err());
 
         let mut invalid_utf8 = vec![0x03];
