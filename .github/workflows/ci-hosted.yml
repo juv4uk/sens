@@ -102,7 +102,7 @@ jobs:
         run: |
           cargo test --locked -p sens --test content_store
           cargo test --locked -p sens --test content_store_authority
-      - name: D3 obsolete COND/ATOM/EQ scanner regression tests
+      - name: Mechanical D3 source-shape scanner (non-semantic)
         if: always()
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
       - name: Migrated time-source exact D3 runtime witnesses
@@ -113,7 +113,7 @@ jobs:
           cargo test --locked -p sens --test clock
           cargo test --locked -p sens --test timezone_ownership
           cargo test --locked -p sens --test time_host_surface
-      - name: D3 stale core-logic audit (fail closed)
+      - name: Mechanical stale-D3 migration lint (non-semantic, fail closed)
         if: always()
         run: python3 scripts/check_d3_legacy_logic.py --strict
 
