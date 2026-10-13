@@ -171,10 +171,9 @@
       (1110 (001 clauses->tell-events) (1110 (001 quote) module-name) rules)
       (001 *knowledge-journal*))))))))
 
-; --- remainder of knowledge surface restored; full body in follow-up if needed ---
-; Core journal/defmodule/tell/reason-in/forward-in migrated to D1.
-; Remaining advise/package/usage helpers follow same D1 discipline.
-; See scripts/restore-knowledge-d1.py for complete 41k restore from f6f1f1b.
+; Валідатори термів і цілей відновлено окремим доказовим зрізом.
+; Інші заархівовані API не вмикаються цим патчем: кожен потребує власного
+; SENS-закону й залишається fail-closed до такого доказу.
 
 (0011 knowledge-proper-list?
   (0010 (value)
@@ -193,19 +192,68 @@
 (0011 knowledge-clause-valid?
   (0010 (clause)
     (110
-      ((010 clause) (010 (001 (0))))
-      ((0100 (knowledge-proper-list? clause)) (010 (001 (0))))
-      ((010 (001 ())) (010 ())))))
+      ((010 clause) #d1:0)
+      ((0100 (knowledge-proper-list? clause)) #d1:0)
+      ((0100 (knowledge-goal-valid? (100 clause))) #d1:0)
+      (#d1:1 (knowledge-goals-valid? (011 clause))))))
 
-;; Exact D1 recovery from f6f1f1b3d1c234a5fcc1b98e585f1d3a91ea553d.
-;; Only three proof-bounded functions here; no historical D7, no implicit T/NIL.
-;; Remaining archived definitions are blocked until each D1/D24 law is proven.
+;; Точна арність змінної (var ім'я) та заперечення (not?/not goal):
+;; D3 ATOM/CDR + D4 CADR/NOT, без D6 LENGTH і некваліфікованого числа 2.
+;; Очікування семантики лежать у tests/semantic/knowledge-exact-arity-structure.bits.
 
 (0011 knowledge-not-head?
   (0010 (head)
     (110
       ((101 head (001 not?)) #d1:1)
       ((101 head (001 not)) #d1:1)
+      (#d1:1 #d1:0))))
+
+(0011 knowledge-terms-valid?
+  (0010 (terms)
+    (110
+      ((0101 terms) #d1:1)
+      ((010 terms) #d1:0)
+      ((knowledge-term-valid? (100 terms))
+       (knowledge-terms-valid? (011 terms)))
+      (#d1:1 #d1:0))))
+
+(0011 knowledge-term-valid?
+  (0010 (term)
+    (110
+      ((010 term) #d1:1)
+      ((010 (100 term))
+       (110
+         ((101 (100 term) (001 var))
+          (110
+            ; (var ім'я): нуль аргументів відхиляємо; один перевіряємо,
+            ; пару після CDDR відхиляємо. Жодного числового LENGTH.
+            ((010 (011 term)) #d1:0)
+            ((010 (011 (011 term))) (knowledge-symbol? (1001 term)))
+            (#d1:1 #d1:0)))
+         (#d1:1 (knowledge-terms-valid? term))))
+      (#d1:1 (knowledge-terms-valid? term)))))
+
+(0011 knowledge-goal-valid?
+  (0010 (goal)
+    (110
+      ((010 goal) #d1:0)
+      ((0100 (knowledge-proper-list? goal)) #d1:0)
+      ((0100 (knowledge-symbol? (100 goal))) #d1:0)
+      ((knowledge-not-head? (100 goal))
+       (110
+         ; (not? goal) та (not goal) мають мати рівно один аргумент.
+         ((010 (011 goal)) #d1:0)
+         ((010 (011 (011 goal))) (knowledge-goal-valid? (1001 goal)))
+         (#d1:1 #d1:0)))
+      (#d1:1 (knowledge-terms-valid? (011 goal))))))
+
+(0011 knowledge-goals-valid?
+  (0010 (goals)
+    (110
+      ((0101 goals) #d1:1)
+      ((010 goals) #d1:0)
+      ((knowledge-goal-valid? (100 goals))
+       (knowledge-goals-valid? (011 goals)))
       (#d1:1 #d1:0))))
 
 (0011 knowledge-clauses-valid?
