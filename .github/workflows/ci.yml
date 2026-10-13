@@ -5,17 +5,6 @@ name: SENS — один точковий та інформативний тес�
 on:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/ci.yml'
-      - 'scripts/ci_one_focused_workflow.py'
-      - 'lib/core3.lisp'
-      - 'lib/core3-executors.bits'
-      - 'lib/core3-executors.sens'
-      - 'tests/semantic/core3-executors-d3-law.sens'
-      - 'lib/domains/**'
-      - 'crates/sens/src/domain_ladder.rs'
-      - 'crates/sens/src/domain_identity.rs'
-      - 'tests/semantic/domain-logic-2040/**'
   workflow_dispatch:
 
 permissions:
