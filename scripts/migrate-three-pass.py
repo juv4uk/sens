@@ -302,7 +302,12 @@ def current_residents(data):
         for bits,label in desc["residents"].items():
             if domain=="D3" and label=="EMPTY":
                 continue
-            labels[str(label).upper()]=(bits,domain)
+            # A label may exist in several domains (MAP in D6 and D8, OPEN/CLOSE/
+            # TEXT-DATA likewise). The migration admits call-domains D3-D6, so the
+            # LOWEST domain must win: first-wins keeps MAP -> D6 101000 instead of
+            # letting D8 overwrite it, which made en 'map' resolve to a non-D3-D6
+            # resident and broke every my-lisp head resolution.
+            labels.setdefault(str(label).upper(),(bits,domain))
     # Include D11 testing vocabulary for binary SENS test migrations
     if "D11" in data.get("domains",{}):
         desc=data["domains"]["D11"]
