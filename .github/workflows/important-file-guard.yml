@@ -80,8 +80,11 @@ jobs:
               historical_map=Path("contracts/core1-historical-sid-map.lisp"),
               foundation=foundation, registry=registry, domain_surfaces=surfaces,
           )
+          # Ratified D7 keyboard/v2 is the current Text7 authority; the retired
+          # crates/sens/src/text7_projection_generated.rs donor carries no
+          # executable SA_SLP1/UK mapping and is fail-closed.
           glyphs = migration.build_text7_encoder(
-              data, Path("crates/sens/src/text7_projection_generated.rs")
+              data, Path("knowledge/d7-keyboard-v2-ratified.json")
           )
           sources = {
               "current": "(define identity (lambda (value) value)) (identity ())",
