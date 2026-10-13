@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focussed-${{ github.ref }}
+  group: sens-one-focussed-${{ github.ref }}-${{ contains(github.event.head_commit.message, '[full-cargo-once]') && github.sha || 'ordinary' }}
   cancel-in-progress: false
 
 jobs:
