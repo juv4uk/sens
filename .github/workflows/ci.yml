@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -k macro_and_machine_sources_are_assessed_not_name_blocked -v
+          python3 tests/test_domain_ladder_source_batch.py BatchSourceTests.test_macro_and_machine_sources_are_assessed_not_name_blocked
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
