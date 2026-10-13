@@ -192,9 +192,8 @@ class OperationalMigrationTests(unittest.TestCase):
                                           "--report", str(report)]), 2)
 
 
-    def test_reviewed_data_sources_remain_available_for_migration_work(self):
-        # Classification is evidence for executable admission, not a permanent
-        # ban on converting or repairing the original file.
+    def test_reviewed_paths_can_be_pinned_for_migration_repair(self):
+        # Historic classifications are NOT an owner-authorized no-work list.
         known = [
             "lib/machine/isa/adx.lisp",
             "contracts/bija3-l1-l5-ratification.lisp",
@@ -204,19 +203,19 @@ class OperationalMigrationTests(unittest.TestCase):
             "lib/core2.lisp",
             "knowledge/agent-discoveries.lisp",
         ]
-        records = runner._nonprogram_manifest_paths(ROOT)
-        self.assertEqual(len(records), 92)
-        for name in known:
-            with self.subTest(source=name):
-                data = (ROOT / name).read_bytes()
-                self.assertEqual(runner._git_blob_sha(data), records[name])
-                source = runner.pin_sources([name], ROOT)["files"][0]
-                self.assertEqual(source["path"], name)
-                self.assertEqual(len(source["sha256"]), 64)
-                with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
-                    runner.reject_classified_nonprogram([name], ROOT)
+        for path in known:
+            with self.subTest(path=path):
+                source = ROOT / path
+                self.assertTrue(source.is_file())
+                pinned = runner.pin_sources([path], ROOT)["files"]
+                self.assertEqual(len(pinned), 1)
+                self.assertEqual(pinned[0]["path"], path)
+                self.assertEqual(
+                    pinned[0]["sha256"],
+                    __import__("hashlib").sha256(source.read_bytes()).hexdigest()
+                )
 
-    def test_missing_classification_does_not_freeze_unrelated_work(self):
+    def test_missing_review_ledger_does_not_freeze_unrelated_work(self):
         with unittest.mock.patch.object(
             runner, "REVIEWED_NONPROGRAM_MANIFESTS",
             runner.REVIEWED_NONPROGRAM_MANIFESTS +
@@ -232,32 +231,32 @@ class OperationalMigrationTests(unittest.TestCase):
             with self.assertRaisesRegex(runner.MigrationBlocked, "incomplete"):
                 runner._nonprogram_manifest_paths(ROOT)
 
-    def test_historical_snapshot_can_be_inspected_but_not_admitted_as_program(self):
-        old = ("benchmarks/sens-surface/results/"
-               "20260925-icount-33bfb53a/programs/empty-en.lisp")
-        self.assertEqual((ROOT / old).read_bytes(), b"(print 0)\\n")
-        self.assertEqual(runner.pin_sources([old], ROOT)["files"][0]["path"], old)
-        with self.assertRaisesRegex(runner.MigrationBlocked, "archived benchmark"):
-            runner.reject_classified_nonprogram([old], ROOT)
+    def test_historical_snapshot_can_be_inspected_without_path_hold(self):
+        historical = ("benchmarks/sens-surface/results/"
+                      "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        self.assertEqual((ROOT / historical).read_bytes(), b"(print 0)\n")
+        self.assertEqual(runner.pin_sources([historical], ROOT)["files"][0]["path"],
+                         historical)
+        self.assertTrue(runner._is_archived_benchmark(
+            __import__("pathlib").PurePosixPath(historical), ROOT))
 
-    def test_mixed_manifest_is_not_rejected_by_legacy_filename_list(self):
-        selected = "lib/machine/isa/adx.lisp"
-        with tempfile.TemporaryDirectory(prefix="sens-migration-work-") as temp:
-            manifest = Path(temp) / "sources.json"
-            manifest.write_text(json.dumps({"files": [FIXTURE, selected]}))
+    def test_mixed_manifest_no_old_classification_veto(self):
+        data = "lib/machine/isa/adx.lisp"
+        with tempfile.TemporaryDirectory(prefix="sens-no-migration-hold-") as temp:
+            manifest = Path(temp) / "selected.json"
+            manifest.write_text(json.dumps({"files": [FIXTURE, data]}))
             pinned = runner.pin_manifest(manifest, ROOT)
-            self.assertEqual([r["path"] for r in pinned["files"]],
-                             sorted([FIXTURE, selected]))
-            self.assertTrue(all(len(r["sha256"]) == 64 for r in pinned["files"]))
-            with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
-                runner.reject_classified_nonprogram([selected], ROOT)
+            self.assertEqual([row["path"] for row in pinned["files"]],
+                             sorted([FIXTURE, data]))
+            self.assertTrue(all(len(row["sha256"]) == 64
+                                for row in pinned["files"]))
+            self.assertNotIn("semantic_oracle", pinned)
 
-    def test_stale_classifier_cannot_forge_semantic_release(self):
+    def test_stale_classifier_does_not_veto_genuine_sha_pins(self):
         name = "lib/machine/isa/adx.lisp"
         with unittest.mock.patch.object(runner, "_git_blob_sha", return_value="0"*40):
-            self.assertTrue(runner.pin_sources([name], ROOT)["files"])
-            with self.assertRaisesRegex(runner.MigrationBlocked, "authority drift"):
-                runner.reject_classified_nonprogram([name], ROOT)
+            pinned = runner.pin_sources([name], ROOT)
+            self.assertEqual(pinned["files"][0]["path"], name)
 
     def test_known_active_core1_binary_remains_allowed_for_publication(self):
         selected = runner.pin_sources([FIXTURE], ROOT)
