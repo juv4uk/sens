@@ -68,6 +68,7 @@ CHECKS = [
     "scripts/check_d10_v13_standards.py",
     "scripts/check_d10_v17_complete_research_gauge.py",
     "scripts/check_d10_v18_research_placement.py",
+    "scripts/check_domain_source_delta_d3.py",
     "scripts/check_main_only_branch_history.py",
     "scripts/check_semantic_registry.py",]
 
@@ -90,6 +91,14 @@ def main() -> int:
                 f"output_sha256={digest} tail={tail!r}",
                 flush=True,
             )
+            # The final JSON brace is never an actionable diagnosis.
+            # Preserve actual output and the exact one-command replay.
+            print(f"SENS_REALITY_FAILURE test_id={os.path.basename(rel)} "
+                  f"commit={os.environ.get('GITHUB_SHA', 'LOCAL')} "
+                  f"reproduce={sys.executable} {rel}", flush=True)
+            print("SENS_REALITY_FAILURE_OUTPUT_BEGIN", flush=True)
+            print(blob.decode("utf-8", "replace")[-12000:], flush=True)
+            print("SENS_REALITY_FAILURE_OUTPUT_END", flush=True)
             failures.append(rel)
     if failures:
         print(f"REALITY-CHECKS-FAIL {len(failures)}/{len(CHECKS)}", flush=True)
