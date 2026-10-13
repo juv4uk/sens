@@ -1,0 +1,48 @@
+name: Двійковий SENS визначає точну D3 EQ у narrate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/narrate.lisp'
+      - 'tests/semantic/narrate-d3-atom-eq-law.bits'
+      - 'tests/semantic/narrate-d3-atom-eq-mutant.bits'
+      - '.github/workflows/narrate-d3-atom-eq-law.yml'
+  pull_request:
+    paths:
+      - 'lib/narrate.lisp'
+      - 'tests/semantic/narrate-d3-atom-eq-law.bits'
+      - 'tests/semantic/narrate-d3-atom-eq-mutant.bits'
+      - '.github/workflows/narrate-d3-atom-eq-law.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  narrate-d3-exact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Зібрати механізм виконання SENS
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Виконати закон і один пошкоджений біт силами SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp 'tests/semantic/narrate-d3-atom-eq-law.bits' "$RUNNER_TEMP/narrate-law.lisp"
+          cp 'tests/semantic/narrate-d3-atom-eq-mutant.bits' "$RUNNER_TEMP/narrate-mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/narrate-law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/narrate-mutant.lisp"
+          for kind in law mutant; do
+            program="$RUNNER_TEMP/narrate-$kind.sens"
+            target/debug/sens-trit open "$program" > "$RUNNER_TEMP/narrate-$kind.bits"
+            cmp "tests/semantic/narrate-d3-atom-eq-$kind.bits" "$RUNNER_TEMP/narrate-$kind.bits"
+            target/debug/sens "$program" > "$RUNNER_TEMP/narrate-$kind.out"
+            target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/narrate-$kind-trit.out"
+            cmp "$RUNNER_TEMP/narrate-$kind.out" "$RUNNER_TEMP/narrate-$kind-trit.out"
+          done
+          printf '1\n' | cmp - "$RUNNER_TEMP/narrate-law.out"
+          printf '0\n' | cmp - "$RUNNER_TEMP/narrate-mutant.out"
