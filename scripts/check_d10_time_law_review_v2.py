@@ -11,12 +11,13 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 ROOT=Path(os.environ.get('SENS_ROOT',Path(__file__).resolve().parents[1]))
 LEDGER=ROOT/'knowledge/d10-time-law-review-v2.json'
 
-def verify(data, root, *, require_checkout=False):
+def verify(data, root, *, require_checkout=False, pinned_source=None):
     if not __debug__:
         raise RuntimeError("BLOCK: Python -O disables assertion-based research gates")
     assert data['schema']=='d10-time-law-review-v2/v1'
@@ -35,7 +36,7 @@ def verify(data, root, *, require_checkout=False):
         assert row['coordinate'] is None and row['ratified_resident'] is False
         assert row['selected_in_canonical_inventory'] is False
         assert row['source_file']=='lib/time.lisp'
-        assert row['source_definition_form']=='00001001'
+        assert row['source_definition_form']=='0011'
         assert row['source_git_blob_sha']==data['source_git_blob_sha']
         assert row['observable_law'] and row['falsifier']
         assert row['surface_uk'] and row['surface_ukr']
@@ -45,22 +46,56 @@ def verify(data, root, *, require_checkout=False):
         assert row['unblock_fanout'] is None and row['expressibility_gap'] is None
         assert len(row['witnesses'])>=2
         assert all('input' in v and 'expect' in v for v in row['witnesses'])
+    # Source history and live SENS have DIFFERENT ownership and lifetimes.
+    # The pinned SHA is an immutable research witness, not the required SHA
+    # of the evolving source file. A lawful D1/D4 migration must not alter
+    # the historical proof or silently ratify D10 candidates.
     source=root/'lib/time.lisp'
     if source.exists():
-        raw=source.read_bytes()
-        blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+bytes([0])+raw).hexdigest()
-        assert blob==data['source_git_blob_sha'],f'source moved: {blob}'
-        lines=raw.decode('utf-8').splitlines()
-        for r in rows:
-            line=lines[r['source_line']-1]
-            prefix='('+r['source_definition_form']+' '+r['semantic_name'].lower()
-            assert line.startswith(prefix),(r['semantic_name'],r['source_line'])
-            assert line[len(prefix):][:1] in ('',' ',chr(9),')')
-        print('SOURCE: pinned Git blob and exact definition lines PASS')
+        current_lines=source.read_text(encoding='utf-8').splitlines()
+        for row in rows:
+            prefix='(0011 '+row['semantic_name'].lower()
+            matches=[
+                line for line in current_lines
+                if line.startswith(prefix)
+                and line[len(prefix):][:1] in ('',' ',chr(9),')')
+            ]
+            assert len(matches)==1, f"live D4 DEFINE missing/duplicated: {row['semantic_name']}"
+        print('LIVE: nine D4 definitions preserved, independent of historical source SHA')
     elif require_checkout:
-        raise AssertionError('BLOCK: pinned lib/time.lisp missing; cannot validate source provenance')
+        raise AssertionError('BLOCK: pinned lib/time.lisp missing; cannot validate live source')
     else:
-        print('SOURCE: SKIP, no lib/time.lisp in checkout (research fixture only)')
+        print('LIVE: SKIP, no lib/time.lisp in checkout (research fixture only)')
+
+    archived=None
+    if pinned_source is not None:
+        path=Path(pinned_source)
+        assert path.is_file(), f'BLOCK: pinned source snapshot missing: {path}'
+        archived=path.read_bytes()
+    else:
+        # A full local clone can supply historical Git objects without network.
+        # CI may be shallow; its workflow fetches this exact blob via GitHub.
+        result=subprocess.run(
+            ['git','-C',str(root),'cat-file','blob',data['source_git_blob_sha']],
+            capture_output=True, check=False,
+        )
+        if result.returncode==0:
+            archived=result.stdout
+    if archived is not None:
+        sha=hashlib.sha1(b'blob '+str(len(archived)).encode()+b'\0'+archived).hexdigest()
+        assert sha==data['source_git_blob_sha'], f'pinned source moved: {sha}'
+        frozen_lines=archived.decode('utf-8').splitlines()
+        for row in rows:
+            assert 0<row['source_line']<=len(frozen_lines),row['semantic_name']
+            line=frozen_lines[row['source_line']-1]
+            prefix='('+row['source_definition_form']+' '+row['semantic_name'].lower()
+            assert line.startswith(prefix),(row['semantic_name'],row['source_line'])
+            assert line[len(prefix):][:1] in ('',' ',chr(9),')')
+        print('ARCHIVE: verified immutable Git blob and nine exact historical D4 definitions')
+    elif require_checkout:
+        raise AssertionError('BLOCK: pinned historical Git blob unavailable; supply --pinned-source')
+    else:
+        print('ARCHIVE: SKIP, historical blob not present in this partial clone')
     inventory=root/'knowledge/d10-v1-semantic-inventory.json'
     foundation=root/'knowledge/d1-d9-foundation.json'
     if inventory.exists() and foundation.exists():
@@ -85,5 +120,6 @@ def verify(data, root, *, require_checkout=False):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--require-checkout', action='store_true', help='Fail closed without pinned lib/time.lisp and canonical D1–D10 registries')
+    parser.add_argument('--pinned-source', type=Path, help='Immutable source fetched by the ledger Git blob SHA')
     args=parser.parse_args()
-    verify(json.loads(LEDGER.read_text(encoding='utf-8')), ROOT, require_checkout=args.require_checkout)
+    verify(json.loads(LEDGER.read_text(encoding='utf-8')), ROOT, require_checkout=args.require_checkout, pinned_source=args.pinned_source)
