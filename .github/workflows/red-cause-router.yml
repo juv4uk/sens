@@ -1,44 +1,9 @@
 name: SENS RED cause routing (four classes)
 
+# Owner quarantine 2026-10-13: no automatic GitHub Actions on push, PR,
+# workflow_run, or schedule while workflow tests are under correction.
+# Manual dispatch only; never unquarantine without explicit owner approval.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/red_cause_router.py'
-      - 'scripts/aged_red_quarantine.py'
-      - 'scripts/quarantine_red_workflows.py'
-      - 'tests/test_red_cause_router.py'
-      - 'tests/test_aged_red_quarantine.py'
-      - 'tests/test_quarantine_red_workflows.py'
-      - 'knowledge/red-cause-ledger.json'
-      - 'docs/ci-red-cause-policy.uk.md'
-      - '.github/workflows/red-cause-router.yml'
-  pull_request:
-    paths:
-      - 'scripts/red_cause_router.py'
-      - 'scripts/aged_red_quarantine.py'
-      - 'scripts/quarantine_red_workflows.py'
-      - 'tests/test_red_cause_router.py'
-      - 'tests/test_aged_red_quarantine.py'
-      - 'tests/test_quarantine_red_workflows.py'
-      - 'knowledge/red-cause-ledger.json'
-      - 'docs/ci-red-cause-policy.uk.md'
-      - '.github/workflows/red-cause-router.yml'
-  workflow_run:
-    workflows:
-      - 'Драбина доменів — точна ширина та механіка'
-      - 'Vertical Day immutable L0 and native smoke'
-      - 'T5 migration inventory (М0)'
-      - 'Vertical Day non-cancelling smoke'
-      - 'Physical binary SENS CLI smoke'
-      - 'audit-t5-program-syntax'
-      - 'Hosted CI'
-      - 'SENS file authority guard — physical T5 oracle'
-      - 'Двійковий SENS визначає точну D3 EQ у narrate'
-    types: [completed]
-    branches: [main]
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
