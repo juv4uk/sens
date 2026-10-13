@@ -611,13 +611,12 @@
 (0011 symbol?
   (0010 (value)
     (110
-      
-      ((010 value) 
+      ((010 value)
        (110
          ((101 value (11101101 (11110100 value)))
-           (010 (001 ())))
-         ))
-      ((010 value)  (001 ())))))
+          (010 (001 ())))
+         ((010 ()) #d1:0)))
+      ((010 ()) #d1:0))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
