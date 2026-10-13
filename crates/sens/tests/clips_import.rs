@@ -425,11 +425,11 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
     )
     .expect("canonical source-pinned bootstrap");
 
-    // Evaluate the *actual* modified production definition in isolation.
+    // Execute both original production definitions: slot-value-of + lookup.
     // Other historical CLIPS importer functions have separate migration
     // blockers and are not dependencies of this purely structural search.
     let full = include_str!("../../../lib/clips-import.lisp");
-    let begin = full.find("(0011 clips-lookup-slot-value").unwrap();
+    let begin = full.find("(0011 clips-slot-value-of").unwrap();
     let end = full[begin..]
         .find("(0011 clips-positional-args")
         .map(|relative| begin + relative)
