@@ -60,8 +60,11 @@ def migration_maps():
         ROOT / "contracts/core1-historical-sid-map.lisp",
         ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
+    # Ratified D7 keyboard/v2 (width 7, occupancy 128/128) is the current Text7
+    # authority. The retired crates/sens/src/text7_projection_generated.rs donor
+    # has no executable mapping and is never silently substituted.
     text7 = three_pass.build_text7(
-        data, ROOT / "crates/sens/src/text7_projection_generated.rs"
+        data, ROOT / "knowledge/d7-keyboard-v2-ratified.json"
     )
     return data, legacy, my, upper, text7
 
