@@ -33,6 +33,31 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check-domain-ladder-identity.py --self-test --check
+      - name: Синтаксис усіх YAML-файлів репозиторію
+        id: yaml-syntax
+        shell: ruby {0}
+        run: |
+          require "yaml"
+
+          paths = Dir.glob("**/*.{yml,yaml}", File::FNM_DOTMATCH)
+                     .select { |path| File.file?(path) && !path.split("/").include?(".git") }
+                     .sort
+          failures = []
+
+          paths.each do |path|
+            begin
+              YAML.parse_stream(File.read(path))
+            rescue Psych::Exception => error
+              detail = error.message.lines.first.to_s.strip
+              failures << [path, detail]
+            end
+          end
+
+          puts "YAML_SYNTAX_AUDIT checked=#{paths.length} failed=#{failures.length}"
+          failures.each do |path, detail|
+            warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
+          end
+          exit(failures.empty? ? 0 : 1)
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
