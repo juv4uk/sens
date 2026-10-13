@@ -15,6 +15,8 @@ on:
       - "lib/guard.lisp"
       - "crates/wsm-guard-core/src/lib.rs"
       - "crates/sens/tests/guard.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/lib.rs"
       - ".github/workflows/guard-compare-d3-equality.yml"
 
 permissions:
