@@ -219,8 +219,8 @@ jobs:
           mutant=tests/semantic/reason-index-width-selectors-mutant.sens
           printf '1\n' > "$RUNNER_TEMP/reason-selectors-law.expected"
           # Exact D4 one-bit mutation: CADR 1001 -> CAAR 1000.
-          # CAAR then applies CAR to a non-pair: native SENS must reject,
-          # not silently produce the unmutated law's D1:YES verdict.
+          # Current mutant reaches a noncallable D1:0 identity; native SENS
+          # must reject it rather than return the unmutated D1:YES verdict.
           sha256sum "$law" "$mutant"
           for kind in law mutant; do
             source="tests/semantic/reason-index-width-selectors-${kind}.bits"
