@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
-# #1675 completion driver v2 — migrate the active authored Lisp library to exact
-# domain codes with the CANONICAL converter, then VERIFY the migration against
-# its consumers. Any file whose migration breaks a consumer is HELD (reverted),
-# so a non-identity-preserving rewrite can never land.
+# #1675 exact-domain active-library migration driver.
+# Owner directive 2026-10-14: NO agent-imposed file HOLD/FREEZE. A failed
+# consumer means WORK TO REPAIR, not a ban on migrating that source.
 #
-# Why v2: a bare rewrite is not a migration. A migrated source has derived
-# consumers — tests that `include_str!` the file, generated reports, generated
-# registries. The canonical tool rewrites heads only; it does not know whether a
-# head was a call or context-sensitive. v2 closes that gap by executing the
-# consumers after each file and holding any file that fails them.
+# Check mode reports exact convertible sites. Apply mode keeps attempted
+# rewrites in the working tree, even if a consumer fails, for direct repair.
+# It NEVER runs 'git checkout --' to discard migration work and NEVER returns
+# success on an unresolved conversion or failing consumer.
+#
+# WARNING: run --apply only in a dedicated, clean worktree. Every source is
+# checked for existing staged/unstaged changes before the rewrite, so an
+# unrelated agent's modifications are not overwritten.
 #
 # Usage:
 #   scripts/migrate-active-lib-exact.sh            # check only (default)
-#   scripts/migrate-active-lib-exact.sh --apply    # rewrite + self-verify (holds bad files)
+#   scripts/migrate-active-lib-exact.sh --apply    # attempt all + report fixes
 #
-# Exit: 0 iff every active file reports convertible=0 OR is held with a reason.
+# Exit: 0 only if all active sources have convertible=0 and consumers passed.
 
 set -euo pipefail
 
@@ -63,9 +65,9 @@ check_group() {
 check_group "--language" "${lang[@]}"
 check_group "" "${ordinary[@]}"
 
-# --- consumer verification: the migration must not change behaviour ----------
-# These are the consumers that embed or depend on active lib sources. A rewrite
-# that breaks any of them is not identity-preserving and must be held.
+# --- consumer verification: failing consumers are repair tasks, NOT file holds ---
+# A rewrite is not DONE until consumers pass. Keep it visible when red so
+# the correct domain mapping can be repaired without discarding the attempt.
 verify_consumers() {
   local rc=0
   # derived artifacts must stay fresh after any rewrite
@@ -91,26 +93,46 @@ if [[ "$MODE" != "apply" ]]; then
   exit 1
 fi
 
-# --- apply one file at a time; hold any file whose rewrite breaks a consumer --
-held=(); applied=()
+# --- attempt every source; NEVER discard work or freeze a file ------------
+needs_repair=(); applied=()
 for entry in "${offenders[@]}"; do
   f="${entry%:*}"; flag="${entry##*:}"
-  echo "  trying: $f ${flag:-(ordinary)}"
-  "${TOOL[@]}" $flag "$f"
+  echo "  migrating: $f ${flag:-(ordinary)}"
+
+  # Another agent's changes are not the migrator's to overwrite.
+  if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
+    needs_repair+=("$f:existing-worktree-changes")
+    echo "    REPAIR_REQUIRED: existing changes; coordinate edits, no automatic overwrite"
+    continue
+  fi
+
+  if ! "${TOOL[@]}" $flag "$f"; then
+    needs_repair+=("$f:converter-error")
+    echo "    REPAIR_REQUIRED: converter error; source stays available, no file ban"
+    continue
+  fi
   if verify_consumers; then
-    applied+=("$f"); echo "    OK (identity preserved)"
+    applied+=("$f")
+    echo "    CONSUMERS_PASS: $f"
   else
-    git checkout -- "$f" 2>/dev/null || true
-    held+=("$f"); echo "    HELD (reverted — rewrite not identity-preserving; needs tool fix)"
+    needs_repair+=("$f:consumer-failure")
+    echo "    REPAIR_REQUIRED: consumer failure; keep changed source to fix identity"
   fi
 done
 
 echo
-echo "applied: ${#applied[@]}   held: ${#held[@]}"
-for h in "${held[@]}"; do echo "  HELD: $h"; done
+echo "consumers-pass: ${#applied[@]}   needs-repair: ${#needs_repair[@]}"
+for item in "${needs_repair[@]}"; do echo "  REPAIR_REQUIRED: $item"; done
 
-# re-check: held files stay offenders by design
-offenders=(); check_group "--language" "${lang[@]}"; check_group "" "${ordinary[@]}"
-echo "remaining convertible offenders (incl. held): ${#offenders[@]}"
-# success = every non-held file is clean
-(( ${#held[@]} == 0 )) && exit 0 || exit 1
+# A report is not a semantic pass. Show every remaining convertible source,
+# whether it was attempted, changed, or already in the caller's worktree.
+offenders=()
+check_group "--language" "${lang[@]}"
+check_group "" "${ordinary[@]}"
+echo "remaining convertible offenders: ${#offenders[@]}"
+if (( ${#needs_repair[@]} != 0 || ${#offenders[@]} != 0 )); then
+  echo "MIGRATION_INCOMPLETE: actionable diagnostics above; NO FILE HOLD"
+  exit 1
+fi
+echo "MIGRATION_COMPLETE: exact-domain sources and consumers verified"
+exit 0
