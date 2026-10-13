@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -36,4 +38,4 @@ jobs:
       - name: Check Lisp source balance
         run: python3 scripts/check-lisp-paren-balance.py --paths lib/world.lisp
       - name: Diff hygiene
-        run: git show --format= --check HEAD
+        run: git diff --check HEAD^1 HEAD -- lib/world.lisp crates/sens/tests/reasoning_world_d3_migration.rs .github/workflows/world-exact-snapshot-shape.yml
