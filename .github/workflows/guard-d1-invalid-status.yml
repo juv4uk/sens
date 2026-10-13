@@ -5,12 +5,16 @@ on:
     branches: [main]
     paths:
       - "lib/guard.lisp"
+      - "crates/sens/tests/guard.rs"
+      - "tests/fixtures/guard-exact-d3-semantic.lisp"
       - "tests/test_guard_d1_invalid_status.py"
       - "crates/sens/tests/guard_d1_invalid_status.rs"
       - ".github/workflows/guard-d1-invalid-status.yml"
   pull_request:
     paths:
       - "lib/guard.lisp"
+      - "crates/sens/tests/guard.rs"
+      - "tests/fixtures/guard-exact-d3-semantic.lisp"
       - "tests/test_guard_d1_invalid_status.py"
       - "crates/sens/tests/guard_d1_invalid_status.rs"
       - ".github/workflows/guard-d1-invalid-status.yml"
@@ -27,5 +31,7 @@ jobs:
       - name: "D1-D10: 2046 coordinates, 2 historical Git blobs, 93 call-head bits"
         run: python3 -m unittest discover -s tests -p 'test_guard_d1_invalid_status.py' -v
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Guard: exact D1, 12 status responses, historical parity, short-circuit"
+      - name: "SENS сам перевіряє логіку Guard у двійковій програмі"
+        run: cargo test --locked -p sens --test guard -- --nocapture
+      - name: "Перехідний механічний свідок старого D1-інтерфейсу"
         run: cargo test --locked -p sens --test guard_d1_invalid_status -- --nocapture
