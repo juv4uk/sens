@@ -16,7 +16,7 @@ permissions:
   contents: read
 concurrency:
   group: sens-one-automatic-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   binary-self-verdict:
     name: SENS сам перевіряє свої закони та мутант
