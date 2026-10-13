@@ -104,7 +104,8 @@
 
 ; D4:1000 CAAR | D4:1001 CADR | D4:0111 CDDR
 ; D5:10011 CADDR | D6:100111 CADDDR — exact selector identities.
-; D7 is data, not the fifth's selector; missing D7 mechanism fails closed.
+; D6:011111 CDDDDR composes with D3:100 CAR for fifth.
+; D7 is data: no fifth-selector is inferred from W7.
 
 (0011 second
   (0010 (values)
@@ -142,7 +143,7 @@
 ; сама операція, виписана вручну замість названа.
 (0011 fifth
   (0010 (values)
-    (100 (011 (011 (011 (011 values)))))))
+    (100 (011111 values))))
 
 (0011 caar
   (0010 (values)
