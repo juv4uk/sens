@@ -1,6 +1,20 @@
 name: Точнодоменна міграція машинного блока
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_domain_source_cutover.py"
+      - "lib/machine/block-exact.lisp"
+      - "tests/test_machine_block_domain_source_cutover.py"
+      - "crates/sens/tests/machine_block_roundtrip.rs"
+      - "crates/sens/tests/machine_atoms.rs"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
+      - "crates/sens/tests/machine_typed_operands.rs"
+      - "crates/sens/tests/machine_minimal_profile.rs"
+      - ".github/workflows/machine-block-exact-cutover.yml"
   pull_request:
     paths:
       - "lib/machine/block-exact.lisp"
@@ -26,5 +40,16 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Вісімбітний історичний блок лишається незмінним свідком
         run: python3 -m unittest discover -s tests -p test_machine_block_historical_oracle.py -v
+      - name: Точковий доказ 17 голів та 69 бітів
+        run: python3 -m unittest discover -s tests -p test_machine_block_domain_source_cutover.py -v
+      - name: Історичні локальні координати й фізична карантинна межа
+        run: python3 -m unittest discover -s tests -p test_prove_lexical_locals.py -v
       - name: Точні D3/D4 і дев'ять історичних спостережень
         run: cargo test --locked -p sens --test machine_block_exact_domain -- --nocapture
+      - name: Інтеграція основного машинного блока в Rust
+        run: |
+          cargo test --locked -p sens --test machine_block_roundtrip -- --nocapture
+          cargo test --locked -p sens --test machine_atoms -- --nocapture
+          cargo test --locked -p sens --test machine_exact_d3_structural -- --nocapture
+          cargo test --locked -p sens --test machine_typed_operands -- --nocapture
+          cargo test --locked -p sens --test machine_minimal_profile -- --nocapture

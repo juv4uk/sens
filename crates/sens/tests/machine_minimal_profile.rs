@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, eval_parsed_expressions, parse_mixed_exact_domain_machine_source, load_core_library, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -13,8 +13,16 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    if path.ends_with("lib/machine/block.lisp") {
+        let source_path = "lib/machine/block.lisp";
+        let parsed = parse_mixed_exact_domain_machine_source(source_path, &source)
+            .unwrap_or_else(|error| panic!("{source_path}: exact-domain read failed: {error}"));
+        eval_parsed_expressions(&parsed, session)
+            .unwrap_or_else(|error| panic!("{source_path}: exact-domain execution failed: {error}"));
+    } else {
+        eval_program(&source, session)
+            .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    }
 }
 
 fn profile_session() -> Session {
