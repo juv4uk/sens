@@ -110,7 +110,7 @@
 
 (0011 compiler-shape-bits
   (0010 (shape)
-    (1001 shape)))
+    (100 (011 shape))))
 
 (0011 compiler-law-width
   (0010 (law)
@@ -118,27 +118,27 @@
 
 (0011 compiler-law-empty-bits
   (0010 (law)
-    (1001 law)))
+    (100 (011 law))))
 
 (0011 compiler-law-xor-mask
   (0010 (law)
-    (10011 law)))
+    (100 (011 (011 law)))))
 
 (0011 compiler-law-l5-spine
   (0010 (law)
-    (10011 (011 law))))
+    (100 (011 (011 (011 law))))))
 
 (0011 compiler-law-l5-atom-bits
   (0010 (law)
-    (1001 (compiler-law-l5-spine law))))
+    (100 (011 (compiler-law-l5-spine law)))))
 
 (0011 compiler-law-l5-head-bits
   (0010 (law)
-    (10011 (compiler-law-l5-spine law))))
+    (100 (011 (011 (compiler-law-l5-spine law))))))
 
 (0011 compiler-law-l5-cond-bits
   (0010 (law)
-    (10011 (011 (compiler-law-l5-spine law)))))
+    (100 (011 (011 (011 (compiler-law-l5-spine law)))))))
 
 ; Full D3 compiler closure is derived only from the ratified L1/L4/L5
 ; structure.  The three spine roles are read by ordered position; their duals
@@ -224,7 +224,9 @@
 ; where ordered-children is the exact two-child fibre generated from #3272.
 ; The structure carries no role names.  SENS assigns the first/second
 ; irreducible bootstrap child to LambdaForm/DefineForm respectively.
-; D4 bootstrap roles select exact D5:10011 CADDR and D4:1001 CADR.
+; Bootstrap uses exact D3 CAR/CDR compositions for selector access;
+; canonical D4:1001 CADR and D5:10011 CADDR keep their separate identities.
+; The compiler's present lowering law does not yet admit D5 calls.
 ; The domain width remains part of the callable identity; no D6/D7 alias.
 (0011 compiler-d4-law-width
   (0010 (law)
@@ -232,7 +234,7 @@
 
 (0011 compiler-d4-law-children
   (0010 (law)
-    (10011 law)))
+    (100 (011 (011 law)))))
 
 (0011 compiler-d4-law-first-child
   (0010 (law)
@@ -240,7 +242,7 @@
 
 (0011 compiler-d4-law-second-child
   (0010 (law)
-    (1001 (compiler-d4-law-children law))))
+    (100 (011 (compiler-d4-law-children law)))))
 
 (0011 compiler-role-from-d4-bootstrap-bits
   (0010 (seed bits law)
@@ -398,7 +400,7 @@
 
 (0011 compiler-request-role
   (0010 (request)
-    (1001 request)))
+    (100 (011 request))))
 
 ; Validate source shape only after SENS has already derived the abstract role.
 ; This is deliberately role -> arity/shape, never domain-bits -> shape.
