@@ -179,7 +179,11 @@ def run(args):
     kind = "NATIVE_SENS_ORACLE" if native else "CI_GLUE_NO_SEMANTICS"
     print("TEST_EXECUTOR_START kind=" + kind + " test_id=" + args.test_id
           + " command=" + reproduce, flush=True)
-    completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as child:
+        print("TEST_EXECUTOR_PID kind=" + kind + " test_id=" + args.test_id +
+              " pid=" + str(child.pid), flush=True)
+        stdout, stderr = child.communicate()
+        completed = subprocess.CompletedProcess(cmd, child.returncode, stdout, stderr)
     actual = completed.stderr if negative else completed.stdout
     passed = ((completed.returncode != 0
                and args.expect_error_substring.encode("utf-8").lower() in completed.stderr.lower()
