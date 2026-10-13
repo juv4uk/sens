@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - 'lib/canon.lisp'
+      - 'lib/machine/block.lisp'
+      - 'lib/machine/block.bits'
+      - 'lib/machine/block.sens'
+      - 'tests/fixtures/machine-block-semantic.bits'
+      - 'tests/fixtures/machine-block-semantic.sens'
       - 'tests/fixtures/canon-ladder-logic.bits'
       - 'tests/fixtures/canon-ladder-logic.sens'
       - '.github/workflows/canon-binary-law.yml'
@@ -33,3 +38,18 @@ jobs:
           target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/canon-trit.out"
           cmp "$RUNNER_TEMP/canon-sens.out" "$RUNNER_TEMP/canon-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/canon-sens.out"
+
+      - name: Execute machine-block laws and D7 binder admission in exact SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Physical source and witness are separate; no host semantic assertions.
+          target/debug/sens-trit open lib/machine/block.sens > "$RUNNER_TEMP/machine-block-source.bits"
+          cmp lib/machine/block.bits "$RUNNER_TEMP/machine-block-source.bits"
+          source='tests/fixtures/machine-block-semantic.sens'
+          target/debug/sens-trit open "$source" > "$RUNNER_TEMP/machine-block-witness.bits"
+          cmp tests/fixtures/machine-block-semantic.bits "$RUNNER_TEMP/machine-block-witness.bits"
+          target/debug/sens "$source" > "$RUNNER_TEMP/machine-block-sens.out"
+          target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/machine-block-trit.out"
+          cmp "$RUNNER_TEMP/machine-block-sens.out" "$RUNNER_TEMP/machine-block-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/machine-block-sens.out"
