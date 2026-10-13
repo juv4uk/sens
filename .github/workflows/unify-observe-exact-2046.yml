@@ -1,0 +1,31 @@
+name: UNIFY-OBSERVE — точні D3/D4 і 2046 адрес
+
+on:
+  pull_request:
+    paths:
+      - "lib/unify-observe.lisp"
+      - "tests/test_unify_observe_exact_2046.py"
+      - "crates/sens/tests/unify_observe_exact.rs"
+      - ".github/workflows/unify-observe-exact-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-domain-ast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Вичерпні 2046 адрес, 6 мовних проєкцій та негативні AST свідки
+        run: python3 -m unittest discover -s tests -p 'test_unify_observe_exact_2046.py' -v
+
+  live-outcome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Живий Rust oracle на справжній Lisp-owned UNIFY
+        run: cargo test --locked -p sens --test unify_observe_exact -- --nocapture
