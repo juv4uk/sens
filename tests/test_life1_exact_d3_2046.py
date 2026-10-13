@@ -17,14 +17,14 @@ class ExactLifeOneTests(unittest.TestCase):
     def test_six_historical_equal_calls_migrated(self):
         source = LIFE.read_text(encoding="utf-8")
         code = "\n".join(line.split(";", 1)[0] for line in source.splitlines())
-        self.assertIsNone(re.search(r"\\(11110111(?=[\\s()])", code))
+        self.assertIsNone(re.search(r"\(11110111(?=[\s()])", code))
         # Шість справжніх замінених call sites, рекурсія та визначення окремо.
         self.assertEqual(
-            len(re.findall(r"\\(життя--рівні\\?(?=[\\s()])", code)), 8
+            len(re.findall(r"\(життя--рівні\?(?=[\s()])", code)), 8
         )
         self.assertIn("(0011 життя--рівні?", code)
         for head in ("010", "101", "100", "011", "110"):
-            self.assertRegex(code, r"\\(" + head + r"(?=[\\s()])")
+            self.assertRegex(code, r"\(" + head + r"(?=[\s()])")
         self.assertIn("(semantic-id 00001100)", source)  # дані, не call
 
     def test_all_exact_domain_residents_are_distinct(self):
