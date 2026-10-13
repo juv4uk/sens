@@ -265,8 +265,8 @@ W8_COLLISION = {
 }
 ACTIVE_GATES = (
     "scripts/test-binary-language-pipeline.sh",
-    ".github/workflows/ci.yml",
-    ".github/workflows/ci-hosted.yml",
+    ".github/workflows/domain-bitness-laws.yml",
+    ".github/workflows/domain-logic-laws.yml",
 )
 
 
@@ -418,7 +418,10 @@ def self_test() -> None:
     try:
         inspect_files(Path("/nonexistent-domain-ladder-guard-probe"))
     except ValueError as exc:
-        if "missing active source" not in str(exc):
+        if not any(marker in str(exc) for marker in (
+            "missing identity-boundary source",
+            "missing active source",
+        )):
             raise
     else:
         raise ValueError("missing sources were admitted")

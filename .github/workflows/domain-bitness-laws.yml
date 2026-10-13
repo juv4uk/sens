@@ -3,7 +3,7 @@ name: domain-bitness-laws
 # Тест бітності доменів двійковим сенсом. Семантику визначає сам SENS:
 # scripts/check-domain-bitness-laws.lisp читає таблиці мовою (read-file/read-all)
 # і перевіряє закон «домен Dn має рівно 2^n рядків» — ширина = ідентичність.
-# Раннер збирає my-lisp і запускає файл; очікується друк PASS.
+# Раннер збирає чинний sens-cli (бінарна назва my-lisp) і запускає SENS закон.
 
 on:
   workflow_dispatch:
@@ -18,6 +18,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - name: Статичний ratchet: заборонити десяткові мости ідентичності
+        run: |
+          python3 scripts/check-domain-ladder-identity.py --self-test
+          python3 scripts/check-domain-ladder-identity.py --check
       - name: Build my-lisp
         run: cargo build --release -p sens-cli --bin my-lisp
       - name: Run domain bitness laws
