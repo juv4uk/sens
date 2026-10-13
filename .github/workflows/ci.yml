@@ -13,34 +13,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-one-focussed-${{ github.ref }}-${{ contains(github.event.head_commit.message, '[full-cargo-once]') && github.sha || 'ordinary' }}
+  group: sens-one-focussed-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   binary-sens-law:
     name: Часові D1 предикати — один фізичний SENS-свідок і чинні негативні контроли
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
           fetch-depth: 1
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Одноразовий ПОВНИЙ cargo test — весь workspace і всі targets
-        id: full-workspace-cargo
-        if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[full-cargo-once]') }}
-        timeout-minutes: 75
-        shell: bash
-        env:
-          CARGO_BUILD_JOBS: '2'
-          RUST_TEST_THREADS: '2'
-        run: |
-          set -euo pipefail
-          echo "FULL_CARGO_ONCE commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked"
-          echo "run_id=$GITHUB_RUN_ID run_attempt=$GITHUB_RUN_ATTEMPT"
-          # Exactly one unfiltered Cargo test invocation.
-          cargo test --workspace --all-targets --locked
       - name: Синтаксис усіх YAML-файлів репозиторію
         id: yaml-syntax
         shell: ruby {0}
@@ -84,6 +69,7 @@ jobs:
             --fixture tests/test_migrate_exact_domain.py \
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
+      - uses: dtolnay/rust-toolchain@1.99.0
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
         shell: bash
