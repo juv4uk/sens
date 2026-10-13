@@ -755,11 +755,6 @@ def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
     if isinstance(node, Atom):
         # Variadic lambda: bare symbol parameter binds all args as a list.
         return (node.tok.text,)
-    if node.tail is not None:
-        raise MigrationError(
-            "dotted lambda parameter list has no admitted Text7 binding law",
-            node.tok,
-        )
     names=[]
     for param in node.items:
         if not isinstance(param,Atom):
@@ -768,6 +763,14 @@ def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
                 node.tok,
             )
         names.append(param.tok.text)
+    if node.tail is not None:
+        # Dotted lambda: tail parameter is also a binding.
+        if not isinstance(node.tail, Atom):
+            raise MigrationError(
+                "dotted lambda tail must be a human identifier atom",
+                node.tok,
+            )
+        names.append(node.tail.tok.text)
     return tuple(names)
 
 
