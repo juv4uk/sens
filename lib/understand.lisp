@@ -3,98 +3,29 @@
 ; format — the "text -> structure" half of the Advice Taker vision from
 ; private/lisp-to-knowledge.md §6, deliberately without a real NLP model.
 ;
+; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Pairs with migrated lib/narrate.lisp (structure -> text). Reuses project
+; selectors 100/011/1001/10011/100111. Width is identity; every bit valued.
+;
 ; `understand` takes a *word list*, not a raw string — my-lisp has no string
-; primitives (split/char-access), and adding them just to tokenize sentences
-; would grow the Rust built-in surface for a feature this project's own
-; CLAUDE.md says to avoid growing it for. So `(all planet have mass)` stands
-; in for "All planets have mass": the caller has already done tokenization
-; and (crucially) picked the exact singular class name the knowledge base
-; uses — there is no morphology here (no plural stripping, no verb
-; conjugation). This is "controlled" natural language in the strict sense:
-; three fixed sentence shapes, matched structurally, not parsed statistically.
-; A real free-text `understand` (LLM-backed) is a separate, later step — see
-; PLAN.md Крок 9.6, deliberately removed once already for lacking this
-; project's usual rigor (tests, trilingual docs, no hidden network calls).
+; primitives. Controlled natural language: three fixed sentence shapes,
+; matched structurally, not parsed statistically.
 ;
 ; Shapes recognized:
 ;   (X is a Y)   / (X is an Y) / (X is Y)  -> fact:  ((Y X))
 ;   (X V Y)                                -> fact:  ((V X Y))
 ;   (all X have Y)                         -> rule:  ((has (var w) Y) (X (var w)))
 ;
-; Query shapes (via `understand-query`, text -> goal structure -> a query
-; `reason` can take):
+; Query shapes (via `understand-query`):
 ;   (is X a Y)   / (is X an Y) / (is X Y)  -> goal:  (Y X)
 ;   (does X V Y)                           -> goal:  (V X Y)
-;
-; Місток контрольованої природної мови від фіксованої форми речення до
-; знаннєвого clause `(head . body)`, у форматі `lib/knowledge.lisp`/`lib/reason.lisp`
-; — половина "текст -> структура" бачення Advice Taker з
-; private/lisp-to-knowledge.md §6, свідомо без справжньої NLP-моделі.
-;
-; `understand` приймає *список слів*, не сирий рядок — my-lisp не має
-; рядкових примітивів (split/доступ до символів), а додавати їх лише заради
-; токенізації речень означало б розширювати поверхню Rust built-in саме
-; там, де власний `CLAUDE.md` проєкту просить цього не робити. Тож
-; `(all planet have mass)` заміняє "All planets have mass": виклик уже
-; токенізований, і (важливо) там уже точна однина назви класу, яку
-; використовує база знань — тут немає морфології (без відкидання множини,
-; без відмінювання дієслів). Це "контрольована" природна мова в строгому
-; сенсі: три фіксовані форми речень, зіставлені структурно, не статистично.
-; Справжній `understand` вільного тексту (на LLM) — окремий, пізніший крок —
-; див. PLAN.md Крок 9.6, вже раз свідомо видалений за брак звичної для
-; проєкту строгості (тестів, трилінгвальної документації, прихованих
-; мережевих викликів).
-;
-; Розпізнавані форми:
-;   (X is a Y)   / (X is an Y) / (X is Y)  -> факт:  ((Y X))
-;   (X V Y)                                -> факт:  ((V X Y))
-;   (all X have Y)                         -> правило: ((has (var w) Y) (X (var w)))
-;
-; Форми запитання (через `understand-query`, низ -> структура "goals" ->
-; структура запиту для `reason`):
-;   (is X a Y)   / (is X an Y) / (is X Y)  -> запит:  (Y X)
-;   (does X V Y)                           -> запит:  (V X Y)
-;
-; Eine Brücke kontrollierter natürlicher Sprache von einer festen Satzform zu
-; einem Wissens-Clause `(head . body)`, im Format von `lib/knowledge.lisp`/
-; `lib/reason.lisp` — die Hälfte "Text -> Struktur" der Advice-Taker-Vision aus
-; private/lisp-to-knowledge.md §6, bewusst ohne echtes NLP-Modell.
-;
-; `understand` nimmt eine *Wortliste*, keinen rohen String entgegen — my-lisp
-; hat keine String-Primitive (split/Zeichenzugriff), und sie nur zur
-; Tokenisierung von Sätzen hinzuzufügen würde die Rust-Built-in-Oberfläche
-; genau dort vergrößern, wo das eigene CLAUDE.md des Projekts davon abrät.
-; `(all planet have mass)` steht daher für "All planets have mass": der
-; Aufrufer hat die Tokenisierung bereits erledigt und (entscheidend) den
-; exakten Singular-Klassennamen gewählt, den die Wissensbasis verwendet —
-; hier gibt es keine Morphologie (kein Pluralabbau, keine Verbkonjugation).
-; Dies ist "kontrollierte" natürliche Sprache im strengen Sinn: drei feste
-; Satzformen, strukturell abgeglichen, nicht statistisch geparst. Ein
-; echtes `understand` für Freitext (LLM-gestützt) ist ein separater, späterer
-; Schritt — siehe PLAN.md Schritt 9.6, bereits einmal bewusst entfernt wegen
-; fehlender Sorgfalt (Tests, trilinguale Doku, versteckte Netzwerkaufrufe).
-;
-; Erkannte Formen:
-;   (X is a Y)   / (X is an Y) / (X is Y)  -> Fakt:   ((Y X))
-;   (X V Y)                                -> Fakt:   ((V X Y))
-;   (all X have Y)                         -> Regel:  ((has (var w) Y) (X (var w)))
-;
-; Frageformen (über `understand-query`, Text -> Goal-Struktur -> Anfrage für
-; `reason`):
-;   (is X a Y)   / (is X an Y) / (is X Y)  -> Anfrage: (Y X)
-;   (does X V Y)                           -> Anfrage: (V X Y)
 
 (0011 strip-article
   (0010 (words)
     (110
-      ((101 (100 words) (001 a))
-       
-       (011 words))
-      ((101 (100 words) (001 an))
-       
-       (011 words))
-      ((0100 (101 (100 words) (001 an)))
-       words))))
+      ((101 (100 words) (001 a)) (011 words))
+      ((101 (100 words) (001 an)) (011 words))
+      ((010 (001 ())) words))))
 
 (0011 understand-is
   (0010 (words)
@@ -117,36 +48,14 @@
   (0010 (words)
     (110
       ((101 (100 words) (001 all))
-       
        (understand-universal words))
       ((101 (1001 words) (001 is))
-       
        (understand-is words))
-      ((0100 (101 (1001 words) (001 is)))
+      ((010 (001 ()))
        (understand-relation words)))))
 
-; `understand-query` is the goal-shaped complement of `understand`: it turns
-; a fixed *question* shape into a goal `(head . args)` that `reason` can be
-; asked directly — "Is Socrates mortal?" -> `(mortal socrates)`. Unlike
-; `understand`, which returns a list of clauses (facts/rules) to add to a
-; knowledge base, this returns exactly one goal, the thing you *ask*.
+; `understand-query` is the goal-shaped complement of `understand`.
 ; Controlled, structural, deterministic: no morphology, no network, no LLM.
-;
-; `understand-query` — доповнення у формі запиту до `understand`: перетворює
-; фіксовану *форму запитання* на мету `(head . args)`, яку можна одразу
-; поставити `reason` — "Is Socrates mortal?" -> `(mortal socrates)`. На
-; відміну від `understand`, який повертає список clause (фактів/правил) для
-; додавання до бази знань, цей повертає рівно одну мету — те, про що
-; *запитують*. Контрольовано, структурно, детерміновано: без морфології,
-; без мережі, без LLM.
-;
-; `understand-query` ist das Ziel-Gegenstück zu `understand`: es wandelt eine
-; feste *Frageform* in ein Ziel `(head . args)` um, das direkt an `reason`
-; gestellt werden kann — "Is Socrates mortal?" -> `(mortal socrates)`. Anders
-; als `understand`, das eine Liste von Klauseln (Fakten/Regeln) liefert, die
-; in die Wissensbasis aufgenommen werden, liefert dies genau ein Ziel — das,
-; wonach man *fragt*. Kontrolliert, strukturell, deterministisch: keine
-; Morphologie, kein Netz, kein LLM.
 (0011 understand-query-is
   (0010 (words)
     (001000 ((subject (1001 words))
@@ -161,9 +70,8 @@
   (0010 (words)
     (110
       ((101 (100 words) (001 is))
-       
        (understand-query-is words))
       ((101 (100 words) (001 does))
-       
        (understand-query-relation words))
-      )))
+      ((010 (001 ()))
+       (001 ())))))
