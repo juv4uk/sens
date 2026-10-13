@@ -189,7 +189,7 @@ mod tests {{
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 4).count(), 14);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 5).count(), 32);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 6).count(), 64);
-        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 126);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 128);
 
         for (width, bits) in [(4, 0b1100), (5, 0b01010), (6, 0b001111)] {{
             assert!(DOMAIN_OWNER_COORDINATES
