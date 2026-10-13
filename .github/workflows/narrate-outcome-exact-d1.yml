@@ -5,10 +5,9 @@ on:
     paths:
       - "lib/narrate.lisp"
       - "crates/sens/tests/narrate_outcomes.rs"
+      - "tests/semantic/narrate-arity-d1-d4-law.bits"
       - "scripts/test-narrate-d1-bitness.py"
       - ".github/workflows/narrate-outcome-exact-d1.yml"
-      - "tests/fixtures/narrate-status-tag-witness.lisp"
-      - "tests/fixtures/narrate-arity-d1-witness.lisp"
   push:
     branches: [main]
     paths:
@@ -32,10 +31,9 @@ jobs:
         run: python3 scripts/test-narrate-d1-bitness.py
       - name: "AST: D1-біти результату, D3/D4-структура"
         run: cargo test --locked -p sens --test narrate_outcomes arity_helpers_use_exact_d1_predicates_with_d3_d4_structure -- --exact --nocapture
-      - name: "Бінарний SENS: точна арність і D1"
-        run: cargo test --locked -p sens --test narrate_outcomes arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes -- --exact --nocapture
-      - name: "Бінарний SENS: теги статусу не зникають"
-        run: cargo test --locked -p sens --test narrate_outcomes known_status_tags_survive_symbol_tag_guard -- --exact --nocapture
+      - name: "Бінарний SENS: D1/D3/D4 structural self-verdict"
+        run: cargo test --locked -p sens --test narrate_outcomes binary_sens_owns_d1_d4_structural_arity_law -- --exact --nocapture
+
       - name: "Уся наявна регресія оповіді"
         run: cargo test --locked -p sens --test narrate_outcomes -- --nocapture
       - name: "Джерела не змінено під час перевірки"

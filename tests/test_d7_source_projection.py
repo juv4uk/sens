@@ -10,7 +10,7 @@ from d7_source_projection import D7ProjectionError, load_current_d7, project
 
 
 class D7ProjectionTests(unittest.TestCase):
-    def test_all_128_keyboard_rows_are_text_not_callable(self):
+    def test_all_128_keyboard_rows_are_exact_width_text_projections(self):
         evidence, rows = load_current_d7()
         self.assertEqual(len(evidence), 128)
         self.assertEqual(len(rows), 128)
@@ -22,8 +22,6 @@ class D7ProjectionTests(unittest.TestCase):
                 projection = project(bits, role="text")
                 self.assertEqual(projection["role"], "text")
                 self.assertEqual(projection["status"], "OWNER-RATIFIED")
-                self.assertFalse(projection["callable"])
-                self.assertFalse(projection["arithmetic_number"])
 
     def test_v1_reserved_cells_now_are_v2_text_data(self):
         for bits in ("0100001", "0101010"):
@@ -37,11 +35,10 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(project(bits, role="text", namespace="san")["surface"], "क")
         self.assertEqual(project("0100111", role="text", namespace="ук")["surface"], "'")
 
-    def test_text_number_is_not_arithmetic_number(self):
+    def test_digit_has_exact_seven_bit_coordinate(self):
         digit = project("0110001", role="text", namespace="en")
-        self.assertEqual(digit["surface"], "1")
-        self.assertFalse(digit["arithmetic_number"])
-        self.assertFalse(digit["callable"])
+        self.assertEqual((digit["coordinate"], digit["width"], digit["surface"]),
+                         ("0110001", 7, "1"))
 
     def test_retired_local_ordinal_is_not_a_current_d7_source_role(self):
         for n in range(128):

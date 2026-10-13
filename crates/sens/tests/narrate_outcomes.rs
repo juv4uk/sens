@@ -2,7 +2,7 @@
 //! lib/result-status.my instead of collapsing every non-proof into one phrase.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, parse_exact_domain_source, parse_mixed_exact_domain,
+    eval_parsed_expressions, load_core_library, parse_canonical_binary, parse_exact_domain_source, parse_mixed_exact_domain,
     Expr, ExprKind,
     parse_mixed_exact_domain_reasoning_source, Session,
 };
@@ -47,35 +47,6 @@ fn eval_outcome_narration(source: &str) -> String {
     eval_outcome_value(source).to_string()
 }
 
-// Isolated witness for the structural arity predicates in narrate.lisp.
-// It intentionally does not load result-status.lisp: current main has an
-// independently owned parse blocker there, tracked in PR #5676.
-fn eval_arity_predicate(source: &str) -> sens::Value {
-    let mut session = Session::default();
-    load_core_library(&mut session)
-        .expect("canonical current Core4 bootstrap must load via its public loader");
-    let narration = parse_exact_domain_source(include_str!("../../../lib/narrate.lisp"))
-        .expect("narration source must use exact domains and no unqualified numbers");
-    eval_parsed_expressions(&narration, &mut session)
-        .expect("exact-domain narration library must load");
-    let expressions = parse_mixed_exact_domain(source)
-        .unwrap_or_else(|error| panic!("exact arity fixture parse failed: {error}\nsource: {source}"));
-    eval_parsed_expressions(&expressions, &mut session)
-        .unwrap_or_else(|error| panic!("arity expression failed: {error}\nsource: {source}"))
-        .value
-}
-
-#[test]
-fn arity_predicate_returns_exact_d1_for_valid_and_invalid_shapes() {
-    let source = include_str!("../../../tests/fixtures/narrate-arity-d1-witness.lisp");
-    let result = eval_arity_predicate(source);
-    assert_eq!(
-        result.to_string(),
-        "(narrate-arity-d1-witness (status pass))",
-        "the binary SENS witness owns positive/negative arity verdicts"
-    );
-}
-
 fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
     if let ExprKind::DomainIdentity(identity) = &expr.kind {
         widths.push(identity.width());
@@ -87,6 +58,20 @@ fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
     }
 }
 
+#[test]
+fn binary_sens_owns_d1_d4_structural_arity_law() {
+    let source = include_str!("../../../tests/semantic/narrate-arity-d1-d4-law.bits");
+    assert!(
+        source.bytes().all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+        "SENS-owned witness must contain only exact binary words and whitespace"
+    );
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("canonical Core4 must load");
+    let parsed = parse_canonical_binary(source)
+        .expect("canonical D2-framed binary SENS witness must parse");
+    eval_parsed_expressions(&parsed, &mut session)
+        .expect("SENS self-verdict rejected a D1/D3/D4 structural law");
+}
 #[test]
 fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
     let source = include_str!("../../../lib/narrate.lisp");
@@ -123,16 +108,6 @@ fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
     assert!(!executable_source.contains("11110111"), "D8 EQUAL must not reappear in arity helpers");
     assert!(!executable_source.contains("(001 0)"), "quoted host zero must not stand in for D1:0");
     assert!(!executable_source.contains("(001 1)"), "quoted host one must not stand in for D1:1");
-}
-
-#[test]
-fn known_status_tags_survive_symbol_tag_guard() {
-    let source = include_str!("../../../tests/fixtures/narrate-status-tag-witness.lisp");
-    assert_eq!(
-        eval_outcome_narration(source),
-        "(narrate-status-tag-witness (status pass))",
-        "the binary SENS witness owns status-tag presentation verdicts"
-    );
 }
 
 #[test]
