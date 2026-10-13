@@ -99,6 +99,11 @@ on:
 jobs:
   exact-width-ladder:
     runs-on: ubuntu-latest
+    # Match the repository's stack-heavy Rust test policy; keep the complete
+    # library suite enabled rather than skipping recursive compiler witnesses.
+    env:
+      RUST_TEST_THREADS: "1"
+      RUST_MIN_STACK: "33554432"
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
