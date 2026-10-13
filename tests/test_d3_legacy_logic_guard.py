@@ -402,41 +402,42 @@ class LegacyD3GuardTests(unittest.TestCase):
     def test_function_table_generator_safe_d3_migration_is_monotonic(self):
         path = "scripts/generate-function-table.lisp"
         source = (ROOT / path).read_text(encoding="utf-8")
-        rules = [f.rule for f in MODULE.scan_lisp(source, path)]
+        findings = MODULE.scan_lisp(source, path)
+        rules = [f.rule for f in findings]
 
-        # Only four non-trivial historical result-matches remain.
-        # Both surface word/class cases now use exact D3 EQ (D1 result).
-        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 4)
+        # The active generator is fully on the strict D3 control law.
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 0)
         self.assertNotIn("COND_HOST_TRUTH", rules)
         self.assertNotIn("LEGACY_W8_CALL", rules)
 
-        # Replacing either two-field D3 EQ clause with its old three-field
-        # result-matching COND must fail the strict scanner.
+        # Preserve the already-established adversarial witnesses elsewhere in
+        # this generator: reverting any exact two-field predicate clause must
+        # immediately reintroduce scanner debt.
         for klass, value in (("member", "word"), ("nonmember", "(11110100 word)")):
             with self.subTest(klass=klass):
                 exact = (
                     f"((101 (string-membership-helper word) "
                     f"(class-membership string {klass}))\\n       {value})"
-                )
-                # Decode one escaped newline for the contiguous Lisp source form.
-                exact = exact.replace("\\n", "\n")
+                ).replace("\\n", "\n")
                 legacy = (
                     f"((string-membership-helper word)\\n"
                     f"       (class-membership string {klass})\\n"
                     f"       {value})"
                 ).replace("\\n", "\n")
                 self.assertIn(exact, source)
-                drift = source.replace(exact, legacy, 1)
-                findings = [f.rule for f in MODULE.scan_lisp(drift, path)]
-                self.assertGreater(findings.count("COND_NOT_TWO_FIELDS"), 4)
+                drift = MODULE.scan_lisp(source.replace(exact, legacy, 1), path)
+                self.assertGreater(
+                    [f.rule for f in drift].count("COND_NOT_TWO_FIELDS"), 0
+                )
 
         pair = "((010 sections) (001 ()))"
         self.assertIn(pair, source)
         regression = source.replace(pair, "((010 sections) (1) (001 ()))", 1)
-        new_rules = [f.rule for f in MODULE.scan_lisp(regression, path)]
         self.assertGreater(
-            new_rules.count("COND_NOT_TWO_FIELDS"),
-            rules.count("COND_NOT_TWO_FIELDS"),
+            [f.rule for f in MODULE.scan_lisp(regression, path)].count(
+                "COND_NOT_TWO_FIELDS"
+            ),
+            0,
         )
 
         predicate = "((010 (001 ())) (find-section name (011 sections)))"
@@ -446,6 +447,48 @@ class LegacyD3GuardTests(unittest.TestCase):
             "COND_HOST_TRUTH",
             [f.rule for f in MODULE.scan_lisp(regression, path)],
         )
+
+        # String comparisons are atomic: D3:101 EQ is sufficient and remains
+        # distinct from the wider D8:11110111 structural EQUAL identity.
+        d3 = (ROOT / "lib/domains/d3.lisp").read_text(encoding="utf-8")
+        d8 = (ROOT / "lib/domains/d8.lisp").read_text(encoding="utf-8")
+        self.assertIn(
+            "(101 (ук тотожне?) (укр тотожне?) (san abheda) (en eq?) (LISP EQ)",
+            d3,
+        )
+        self.assertIn(
+            "(11110111 (ук однакові?) (укр однакові?) (san tulya) (en equal?) (LISP EQUAL)",
+            d8,
+        )
+        self.assertEqual(len("101"), 3)
+        self.assertEqual(len("11110111"), 8)
+
+        for exact in (
+            "((101 current-wsm wsm-output)\n         (110",
+            "((101 current-md md-output)\n            (11011011",
+            '((101 (100 *argv*) "--check")\n   (check-projections))',
+        ):
+            with self.subTest(exact=exact):
+                self.assertIn(exact, source)
+
+        # Point diagnostic: restoring one expected-result field produces
+        # exactly one old three-field COND finding, not a vague global failure.
+        exact = "((101 current-wsm wsm-output)\n         (110"
+        reverted = source.replace(
+            exact,
+            "((101 current-wsm wsm-output)\n         (1)\n         (110",
+            1,
+        )
+        drift = MODULE.scan_lisp(reverted, path)
+        three_field = [f for f in drift if f.rule == "COND_NOT_TWO_FIELDS"]
+        self.assertEqual(len(three_field), 1)
+        self.assertEqual(three_field[0].operation, "COND")
+
+        # CLI *argv* is a list of strings: empty -> write, "--check" -> check,
+        # every other nonempty argv -> exact-D1 fallback -> write.
+        self.assertIn("((010 *argv*)\n   (write-projections))", source)
+        self.assertIn('((101 (100 *argv*) "--check")', source)
+        self.assertIn("((010 (001 ()))\n   (write-projections))", source)
 
     def test_fpga_program_symbol_table_exact_d1_migration(self):
         path = "scripts/program-symbol-table.lisp"

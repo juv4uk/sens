@@ -5,6 +5,7 @@ on:
     paths:
       - lib/surface/semantic-registry.lisp
       - scripts/generate-function-table.lisp
+      - tests/test_d3_legacy_logic_guard.py
       - lib/generated/function-table.lisp
       - docs/generated/function-table.md
       - .github/workflows/function-table-256.yml
@@ -13,6 +14,7 @@ on:
     paths:
       - lib/surface/semantic-registry.lisp
       - scripts/generate-function-table.lisp
+      - tests/test_d3_legacy_logic_guard.py
       - lib/generated/function-table.lisp
       - docs/generated/function-table.md
       - .github/workflows/function-table-256.yml
@@ -28,6 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Verify exact D3 function-table generator guard
+        run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -k function_table_generator_safe_d3_migration_is_monotonic -v
       - name: Build SENS tooling runtime
         run: cargo build -p sens-cli --bin sens
       - name: Verify deterministic historical function-table projection
