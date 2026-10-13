@@ -91,7 +91,7 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 sym=decode(sym, literal_empty=literal_empty),
             )
         )
-    expected = 126 if expected_width == 7 else 1 << expected_width
+    expected = 1 << expected_width
     if len(rows) != expected:
         raise ValueError(f"{path}: expected {expected} rows, found {len(rows)}")
     return rows
