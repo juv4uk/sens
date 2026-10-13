@@ -59,6 +59,7 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/ci_executor_invariant.py
+          python3 scripts/ci_failure_contract.py self-test
           python3 scripts/check-domain-ladder-identity.py --self-test --check
           # Instrumental migration proof, not an alternate semantic oracle.
           # Failures retain fixture, command and actual output via RED contract.
