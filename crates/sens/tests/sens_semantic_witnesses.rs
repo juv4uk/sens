@@ -182,7 +182,7 @@ fn world_exact_snapshot_shape_binary_self_verdict() {
     // host only transports the final YES verdict.
     let direct_forms = sens::parse_mixed_exact_domain(WORLD_EXACT_ARITY_WITNESS)
         .expect("SENS-owned world? exact-arity witness must parse");
-    assert_eq!(direct_forms.len(), 7, "seven SENS-owned world shape cases");
+    assert_eq!(direct_forms.len(), 13, "SENS-owned shape and existing behavior cases");
     for (index, form) in direct_forms.iter().enumerate() {
         let outcome = eval_parsed_expressions(
             std::slice::from_ref(form),
