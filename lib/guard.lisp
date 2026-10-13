@@ -96,7 +96,9 @@
 (0011 guard-compare
   (0010 (subject expected observed evidence)
     (110
-      ((11110111 expected observed)
+      ; Reuse the existing reasoning-local D3 structural comparator.
+      ; It returns exact D1 PredicateBit, unlike the legacy Core EQUAL carrier.
+      ((unify-equal? expected observed)
        (make-guard-finding
          (001 allow) (001 confirmed) subject observed expected
          (001 ()) (001 invariant-preserved) (001 no-action) evidence))
