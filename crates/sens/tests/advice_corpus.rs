@@ -49,24 +49,6 @@ fn eval_advice_corpus(source: &str) -> String {
         result
             .unwrap_or_else(|error| panic!("SENS corpus dependency {library_path} failed: {error}"));
     }
-    // DIAGNOSTIC ONLY: each expression is evaluated by SENS. Rust does not
-    // supply a truth value; remove these observers after isolating bad D1.
-    if source.contains("(advise-all science") {
-        for (label, program) in [
-            ("module-symbol", "(внутрішній-символ? (quote science))"),
-            ("knowledge-proper", "(knowledge-proper-list? (quote (((planet earth)))))"),
-            ("knowledge-clauses", "(knowledge-clauses-valid? (quote (((planet earth)))))"),
-            ("world-known", "(world-module-known? (empty-world) (quote science))"),
-            ("world-missing", "(world-module-missing? (empty-world) (quote science))"),
-            ("batch-conflict", "(advice-batch-conflict (quote (((planet earth)))) (quote (((planet earth)))) (quote (((planet earth)))))"),
-            ("batch-decision", "(advice-all-decision-in-world (empty-world) (quote science) (quote (((planet earth)))))"),
-        ] {
-            let observed = eval_program(program, &mut session)
-                .map(|value| value.value.to_string())
-                .unwrap_or_else(|error| format!("SENS_ERROR: {error}"));
-            eprintln!("SENS_ADVICE_DIAGNOSTIC {label}: {observed}");
-        }
-    }
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
