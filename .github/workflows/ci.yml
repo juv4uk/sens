@@ -262,6 +262,11 @@ jobs:
             --fixture tests/fixtures/semantic/tcp-exact-selftest.bits \
             --report-file "$report" \
             -- cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
+      - name: Вбудовані перевірки реальності — інформативні гейти, що відповідають чинному main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/run-reality-checks.py
       - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
