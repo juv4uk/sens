@@ -68,8 +68,8 @@
       ((101 (100 x) *dimension-schema*)
        (110
          ((101 (110101100 (1001 x)) (001 ())) (001 ()))
-         ((010 (001 ())) #d1:1)))
-      ((010 (001 ())) (001 ())))))
+         (#d1:1 #d1:1)))
+      (#d1:1 (001 ())))))
 
 (0011 dimension-base
   (0010 (dimension) (1001 dimension)))
@@ -88,7 +88,7 @@
       ((101 (science-proper-list? x) (001 ())) (001 ()))
       ((101 (100 x) *unit-schema*)
        (science-proper-list? (011 x)))
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 unit-dimensions
   (0010 (unit) (011 unit)))
@@ -105,7 +105,7 @@
       ((101 (science-list-length-equals? x 3) (101 (001 (0)) (001 (1)))) (001 ()))
       ((101 (100 x) *quantity-schema*)
        (unit? (10011 x)))
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 quantity-value
   (0010 (quantity) (1001 quantity)))
@@ -124,7 +124,7 @@
       ((101 (science-proper-list? x) (001 ())) (001 ()))
       ((101 (science-list-length-equals? x 3) (101 (001 (0)) (001 (1)))) (001 ()))
       ((101 (100 x) *science-source-schema*) #d1:1)
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 science-source-authority
   (0010 (source) (1001 source)))
@@ -137,14 +137,14 @@
     (110
       ((101 status (001 exact-by-definition)) #d1:1)
       ((101 status (001 measured)) #d1:1)
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 scientific-constant-kind-valid?
   (0010 (kind)
     (110
       ((101 kind (001 physical-defining)) #d1:1)
       ((101 kind (001 physical-derived)) #d1:1)
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 make-scientific-constant
   (0010 (name quantity status kind system source)
@@ -164,8 +164,8 @@
          ((101 (scientific-constant-kind-valid? (110110101 x)) (001 ())) (001 ()))
          ((101 (110101100 (science-sixth x)) (001 ())) (001 ()))
          ((101 (science-source? (science-seventh x)) (001 ())) (001 ()))
-         ((010 (001 ())) #d1:1)))
-      ((010 (001 ())) (001 ())))))
+         (#d1:1 #d1:1)))
+      (#d1:1 (001 ())))))
 
 (0011 scientific-constant-name
   (0010 (constant) (1001 constant)))
@@ -197,7 +197,7 @@
   (0010 (constant)
     (110
       ((101 (scientific-constant? constant) (001 ())) (001 ()))
-      ((010 (001 ()))
+      (#d1:1
        ((0010 (name)
           (1110
            (1110 (1110 (001 scientific-constant) name))
