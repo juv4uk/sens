@@ -6,6 +6,8 @@ on:
       - "lib/guard.lisp"
       - "crates/wsm-guard-core/src/lib.rs"
       - "crates/sens/tests/guard.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/lib.rs"
       - ".github/workflows/guard-compare-d3-equality.yml"
   push:
     branches: [main]
@@ -42,4 +44,4 @@ jobs:
       - name: Lisp source balance
         run: python3 scripts/check-lisp-paren-balance.py --paths lib/guard.lisp
       - name: Diff hygiene, scoped to this change
-        run: git diff --check HEAD^1 HEAD -- lib/guard.lisp crates/wsm-guard-core/src/lib.rs crates/sens/tests/guard.rs .github/workflows/guard-compare-d3-equality.yml
+        run: git diff --check HEAD^1 HEAD -- lib/guard.lisp crates/wsm-guard-core/src/lib.rs crates/sens/tests/guard.rs crates/sens/src/mixed_source.rs crates/sens/src/lib.rs .github/workflows/guard-compare-d3-equality.yml
