@@ -7,12 +7,12 @@ on:
       - lib/utf8.lisp
       - crates/sens/tests/utf8.rs
       - tests/test_utf8_d1_predicate_migration.py
-      - tests/test_utf8_d1_predicate_migration.py
       - .github/workflows/issue-1352-utf8-binary-add.yml
   pull_request:
     paths:
       - lib/utf8.lisp
       - crates/sens/tests/utf8.rs
+      - tests/test_utf8_d1_predicate_migration.py
       - .github/workflows/issue-1352-utf8-binary-add.yml
 
 jobs:

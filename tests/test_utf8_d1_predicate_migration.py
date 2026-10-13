@@ -77,6 +77,19 @@ class Utf8PredicateD1Cutover(unittest.TestCase):
     def test_14_precise_arity_checked_control_results(self):
         result = audit(SOURCE.read_text(encoding="utf-8"))
         self.assertEqual(sum(len(values) for values in result.values()), 14)
+        ones = sum(v for row in result.values() for v in row)
+        zeroes = 14 - ones
+        self.assertEqual((ones, zeroes), (5, 9))
+        # D3 reification costs 6 head-bits (ATOM + QUOTE) for YES and
+        # 9 (EQ + QUOTE + QUOTE) for NO; D2 framing/data is additional.
+        # A direct typed D1 source/literal would require just 1 semantic bit
+        # per output, once an owner-approved physical representation exists.
+        reification_heads = 6 * ones + 9 * zeroes
+        self.assertEqual(reification_heads, 111)
+        self.assertEqual(reification_heads - 14, 97)
+        print(f"UTF8-D1: 14 outputs = 14 ideal semantic bits; "
+              f"currently {reification_heads} D3 function-head bits "
+              f"(+D2 structure and quoted data); no physical .sens admission")
 
     def test_numeric_operands_and_domain_codes_remain_data(self):
         source = SOURCE.read_text(encoding="utf-8")
