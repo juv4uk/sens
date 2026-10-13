@@ -125,3 +125,43 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
         );
     }
 }
+
+
+/// Тільки фізична/лексична доставка. Правило розгалуження і однобітний
+/// мутант належать виконуваним 0/1 формам SENS, не Rust.
+#[test]
+fn native_first_parity_cond_guard_is_decided_by_binary_sens() {
+    const LAW: &str =
+        include_str!("../../../tests/semantic/native-first-parity-cond-law.bits");
+    const MUTANT: &str =
+        include_str!("../../../tests/semantic/native-first-parity-cond-mutant.bits");
+
+    for source in [LAW, MUTANT] {
+        assert!(
+            source.bytes().all(|b| matches!(b, b'0' | b'1' | b' ' | b'\n' | b'\t' | b'\r')),
+            "семантичний тест має містити лише двійкові слова SENS"
+        );
+    }
+
+    // Лише транспорт: порядок і ширини слів незмінні, мутує рівно один D1-біт.
+    let law_words: Vec<_> = LAW.split_whitespace().collect();
+    let mutant_words: Vec<_> = MUTANT.split_whitespace().collect();
+    assert_eq!(law_words.len(), 61);
+    assert_eq!(law_words.len(), mutant_words.len());
+    assert_eq!(law_words.iter().map(|s| s.len()).sum::<usize>(), 115);
+    let delta: Vec<_> = law_words.iter().zip(&mutant_words)
+        .filter(|(a, b)| a != b).collect();
+    assert_eq!(delta, vec![(&"1", &"0")]);
+
+    // Визначення двох результатів і всіх умов — всередині двійкового SENS.
+    // Host лише спостерігає кінцевий типізований D1-біт, без свого COND/EQ.
+    for (program, d1_yes) in [(LAW, true), (MUTANT, false)] {
+        let forms = parse_canonical_binary(program)
+            .expect("чинний canonical D2/domain reader має прийняти SENS");
+        assert_eq!(forms.len(), 1);
+        let verdict = eval_parsed_expressions(&forms, &mut Session::default())
+            .expect("бінарний SENS має сам обчислити результат").value;
+        assert_eq!(verdict.as_predicate_bit(), Some(d1_yes),
+            "виконуваний SENS повернув неправильний D1-вердикт");
+    }
+}
