@@ -1,4 +1,4 @@
-use sens::{eval_program, Session};
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session};
 use std::fs;
 
 /// `read-file` is language-owned (lib/fs.lisp) over the host's
@@ -20,7 +20,14 @@ fn linter_gate() {
     let fs_src = fs::read_to_string("../../lib/fs.lisp").unwrap();
     eval_program(&fs_src, &mut session).unwrap();
     let linter_src = fs::read_to_string("../../lib/linter.lisp").unwrap();
-    eval_program(&linter_src, &mut session).unwrap();
+    // The linter owns exact D3/D4/D6 heads.  The historical eval_program
+    // reader treats e.g. 0011 as an ordinary integer; that route is NOT
+    // allowed to reinterpret domain-qualified source as legacy numeric data.
+    // Reuse the existing mixed typed-reader, not a new byte/semantic table.
+    let linter_forms = parse_mixed_exact_domain(&linter_src)
+        .expect("linter source preserves exact D1-D10 head widths");
+    eval_parsed_expressions(&linter_forms, &mut session)
+        .expect("load exact-domain linter");
 
     // Check if linter.my works by defining the threshold script
     let runner_src = r#"
