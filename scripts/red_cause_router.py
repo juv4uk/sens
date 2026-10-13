@@ -20,7 +20,7 @@ STAMPS = {"REGRESSION", "TRANSITIONAL", "FLAKE"}
 SAMPLE_HOURS = 24
 REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 SHA = re.compile(r"^[0-9a-f]{40}$")
-RUN = re.compile(r"^https://github\\.com/([^/]+)/([^/]+)/actions/runs/(\\d+)$")
+RUN = re.compile(r"^https://github\.com/([^/]+)/([^/]+)/actions/runs/(\d+)$")
 
 
 def utc(value):
@@ -73,7 +73,7 @@ def validate_case(case, clock):
     if cause == "LEGACY_BINDING" and not (case.get("legacy_marker") and case.get("provenance")):
         errors.append("MISSING_LEGACY_PROVENANCE")
     if stamp in {"FLAKE", "TRANSITIONAL"}:
-        if not re.fullmatch(r"#\\d+", str(case.get("ticket", ""))):
+        if not re.fullmatch(r"#\d+", str(case.get("ticket", ""))):
             errors.append("MISSING_QUARANTINE_TICKET")
         if not case.get("investigation"):
             errors.append("MISSING_INVESTIGATION")
@@ -169,9 +169,9 @@ def report(findings, stats, live=None):
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as dst:
-            dst.write(f"### SENS RED: cause routing\\n\\nUnresolved/audit findings: **{len(findings)}**. "
+            dst.write(f"### SENS RED: cause routing\n\nUnresolved/audit findings: **{len(findings)}**. "
                       f"Verified without owner: **{num}/{den}** ({metric}). "
-                      f"Run inventory: **{live if live is not None else 'offline'}**.\\n")
+                      f"Run inventory: **{live if live is not None else 'offline'}**.\n")
     return 1 if findings else 0
 
 
