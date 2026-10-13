@@ -1,161 +1,276 @@
 #!/usr/bin/env python3
-"""SENS CI failure-output contract observer; never a semantic oracle.
-
-One scanner invocation corresponds to one independently executed SENS test.
-The SENS witness alone owns meaning, expectations and its result.
-"""
-from __future__ import annotations
-
+"""CI diagnostic transport for SENS-owned binary verdicts. NOT a semantic oracle."""
 import argparse
-from datetime import date, datetime, timedelta, timezone
+import datetime as dt
+import hashlib
 import json
 import os
 from pathlib import Path
 import re
+import shlex
+import subprocess
 import sys
 
-PREFIX = "SENS-FAILURE "
-HEX64 = re.compile(r"[0-9a-f]{64}\Z")
-HEX40 = re.compile(r"[0-9a-f]{40}\Z")
-ISSUE = re.compile(r"#[1-9][0-9]*\Z")
-LAYERS = frozenset(("parse", "eval", "encode", "transport"))
-CLASSES = frozenset(("REGRESSION", "TRANSITIONAL", "FLAKE", "UNCLASSIFIED"))
+SHA = re.compile(r"^[0-9a-f]{40}$")
+DIGEST = re.compile(r"^[0-9a-f]{64}$")
+LAYER = {"parse", "eval", "encode", "transport"}
+STAMP = {"REGRESSION", "TRANSITIONAL", "FLAKE"}
+FIELDS = (
+    "test_id", "layer", "fixture", "fixture_sha256", "expected_sha256",
+    "actual_sha256", "first_difference", "first_bad_sha", "reproduce",
+    "stamp", "observed_at", "first_observed_bad_sha",
+)
 
 
-class Invalid(Exception):
-    pass
+def digest(raw):
+    return hashlib.sha256(raw).hexdigest()
 
 
-def require(condition: bool, reason: str) -> None:
-    if not condition:
-        raise Invalid(reason)
+def now():
+    return dt.datetime.now(dt.timezone.utc)
 
 
-def iso_time(value: object) -> datetime:
-    require(isinstance(value, str), "observed_at requires timezone")
+def parse_time(value):
+    if not isinstance(value, str):
+        raise ValueError("missing ISO-8601 UTC time")
+    parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp needs timezone")
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def validate_manifest(manifest):
+    if manifest.get("schema") != "sens-red-v1" or not isinstance(manifest.get("cases"), list):
+        raise ValueError("manifest must have schema=sens-red-v1 and cases[]")
+    seen = set()
+    for item in manifest["cases"]:
+        tid = item.get("test_id", "")
+        if not isinstance(tid, str) or not tid or tid in seen:
+            raise ValueError("duplicate/empty quarantine test_id")
+        seen.add(tid)
+        stamp = item.get("stamp")
+        if stamp not in STAMP:
+            raise ValueError(tid + ": invalid/missing classification")
+        for field in ("owner", "first_seen_at", "reason"):
+            if not item.get(field):
+                raise ValueError(tid + ": missing " + field)
+        begin = parse_time(item["first_seen_at"])
+        if begin > now() + dt.timedelta(minutes=5):
+            raise ValueError(tid + ": future first_seen_at")
+        if stamp in {"TRANSITIONAL", "FLAKE"}:
+            if not re.fullmatch(r"#\d+", item.get("ticket", "")):
+                raise ValueError(tid + ": quarantine needs ticket #N")
+            expiry = parse_time(item.get("expires_at"))
+            if expiry <= begin:
+                raise ValueError(tid + ": invalid expiry")
+            if not item.get("investigation"):
+                raise ValueError(tid + ": named investigation required")
+    return manifest
+
+
+def check_report(record):
+    errors = []
+    for key in FIELDS:
+        if key not in record or record[key] in ("", None):
+            errors.append("missing:" + key)
+    if record.get("layer") not in LAYER:
+        errors.append("invalid:layer")
+    if record.get("stamp") not in STAMP:
+        errors.append("invalid:stamp")
+    for key in ("fixture_sha256", "expected_sha256", "actual_sha256"):
+        if not DIGEST.fullmatch(str(record.get(key, ""))):
+            errors.append("invalid:" + key)
+    if not SHA.fullmatch(str(record.get("first_bad_sha", ""))):
+        errors.append("UNRESOLVED_FIRST_BAD_SHA")
+    if not SHA.fullmatch(str(record.get("first_observed_bad_sha", ""))):
+        errors.append("invalid:first_observed_bad_sha")
     try:
-        stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise Invalid("invalid observed_at") from exc
-    require(stamp.tzinfo is not None, "observed_at timezone is mandatory")
-    return stamp.astimezone(timezone.utc)
-
-
-def validate(record: object, *, now: datetime) -> dict:
-    require(isinstance(record, dict), "SENS-FAILURE must be JSON object")
-    r = record
-    require(isinstance(r.get("id"), str) and r["id"].strip() and "\n" not in r["id"], "missing/invalid id")
-    require(isinstance(r.get("layer"), str) and r["layer"] in LAYERS, "missing/invalid layer")
-    inp = r.get("input")
-    require(isinstance(inp, dict), "missing input")
-    if set(inp) == {"program"}:
-        require(isinstance(inp["program"], str) and bool(inp["program"]), "empty input.program")
-    elif set(inp) == {"fixture", "sha256"}:
-        require(isinstance(inp["fixture"], str) and bool(inp["fixture"].strip()), "missing fixture path")
-        require(isinstance(inp["sha256"], str) and bool(HEX64.fullmatch(inp["sha256"])), "invalid fixture sha256")
-    else:
-        raise Invalid("input requires program OR fixture+sha256")
-    for key in ("expected_sha256", "actual_sha256"):
-        require(isinstance(r.get(key), str) and bool(HEX64.fullmatch(r[key])), "missing/invalid " + key)
-    require(r["expected_sha256"] != r["actual_sha256"], "expected and actual digests are equal")
-    diff = r.get("first_difference")
-    require(isinstance(diff, dict), "missing first_difference")
-    require(set(diff) == {"offset", "unit"}, "first_difference requires offset and unit")
-    require(type(diff["offset"]) is int and diff["offset"] >= 0, "first_difference.offset invalid")
-    require(isinstance(diff["unit"], str) and diff["unit"] in ("bit", "byte"), "first_difference.unit invalid")
-    require(isinstance(r.get("first_bad_sha"), str) and bool(HEX40.fullmatch(r["first_bad_sha"])),
-            "missing/invalid first_bad_sha; do not invent SHA")
-    require(isinstance(r.get("reproduce"), str) and r["reproduce"].strip() and "\n" not in r["reproduce"],
-            "missing or multiline reproduce")
-    require(isinstance(r.get("classification"), str) and r["classification"] in CLASSES,
-            "missing/invalid classification")
-    observed = iso_time(r.get("observed_at"))
-    require(observed <= now + timedelta(minutes=5), "future observed_at")
-    return r
-
-
-def validate_quarantine(manifest: object, *, now: datetime) -> dict:
-    require(isinstance(manifest, dict) and set(manifest) == {"entries"}, "manifest requires entries only")
-    require(isinstance(manifest["entries"], list), "manifest.entries must be array")
-    result: dict[str, dict] = {}
-    for entry in manifest["entries"]:
-        require(isinstance(entry, dict), "quarantine entry is not object")
-        for key in ("id", "classification", "issue", "owner", "since", "expires", "reason"):
-            require(isinstance(entry.get(key), str) and entry[key].strip(), "quarantine missing " + key)
-        require(entry["classification"] in ("TRANSITIONAL", "FLAKE"), "REGRESSION cannot be quarantined")
-        require(bool(ISSUE.fullmatch(entry["issue"])), "issue must be #N")
+        parse_time(record.get("observed_at"))
+    except (ValueError, TypeError):
+        errors.append("invalid:observed_at")
+    difference = record.get("first_difference")
+    if not isinstance(difference, dict) or not (
+        ("byte_offset" in difference and "bit_offset" in difference)
+        or ("exit_expected" in difference and "exit_actual" in difference)
+    ):
+        errors.append("invalid:first_difference")
+    if not record.get("fixture", "").startswith("tests/") or not Path(record["fixture"]).is_file():
+        errors.append("invalid:fixture_path")
+    elif digest(Path(record["fixture"]).read_bytes()) != record.get("fixture_sha256"):
+        errors.append("invalid:fixture_digest")
+    if not isinstance(record.get("reproduce"), str) or not record.get("reproduce").strip():
+        errors.append("invalid:reproduce")
+    if record.get("stamp") in {"TRANSITIONAL", "FLAKE"}:
+        if not re.fullmatch(r"#\d+", str(record.get("ticket", ""))):
+            errors.append("invalid:ticket")
+        for key in ("owner", "first_seen_at", "expires_at", "investigation"):
+            if not record.get(key):
+                errors.append("missing:" + key)
         try:
-            start, end = date.fromisoformat(entry["since"]), date.fromisoformat(entry["expires"])
-        except ValueError as exc:
-            raise Invalid("invalid quarantine date") from exc
-        require(end >= start, "quarantine expires before since")
-        require(entry["id"] not in result, "duplicate quarantine id")
-        require(end >= now.date(), "expired quarantine " + entry["id"])
-        result[entry["id"]] = entry
-    return result
+            if parse_time(record["expires_at"]) <= now():
+                errors.append("EXPIRED_QUARANTINE")
+        except (KeyError, ValueError, TypeError):
+            errors.append("invalid:expires_at")
+    return errors
 
 
-def analyze(log: str, exit_code: int, manifest: object, *, now: datetime) -> tuple[int, str]:
-    reports = [line[len(PREFIX):] for line in log.splitlines() if line.startswith(PREFIX)]
-    if exit_code == 0:
-        if reports:
-            return 2, "UNINFORMATIVE-OUTPUT: hidden RED envelope in successful command"
-        return 0, "PASS: SENS source test exited successfully"
-    if len(reports) != 1:
-        return 2, f"UNINFORMATIVE-OUTPUT: expected one SENS-FAILURE envelope, found {len(reports)}; raw_exit={exit_code}"
-    try:
-        report = validate(json.loads(reports[0]), now=now)
-        quarantined = validate_quarantine(manifest, now=now)
-    except (ValueError, Invalid) as exc:
-        return 2, f"UNINFORMATIVE-OUTPUT: {exc}; raw_exit={exit_code}"
-    cls = report["classification"]
-    label = f"id={report['id']} layer={report['layer']} first_bad_sha={report['first_bad_sha']} reproduce={report['reproduce']}"
-    if cls == "REGRESSION":
-        return 1, f"REGRESSION BLOCK: {label}; raw_exit={exit_code}"
-    if cls == "UNCLASSIFIED":
-        age = now - iso_time(report["observed_at"])
-        if age > timedelta(hours=24):
-            return 3, f"ESCALATE-24H owner=juv4uk: unclassified RED age={age}; {label}"
-        return 1, f"UNCLASSIFIED RED: pending <24h triage; {label}"
-    item = quarantined.get(report["id"])
-    if item is None or item["classification"] != cls:
-        return 2, f"UNINFORMATIVE-OUTPUT: no matching named quarantine for {cls}; {label}"
-    if report.get("ticket") != item["issue"]:
-        return 2, f"UNINFORMATIVE-OUTPUT: quarantine ticket mismatch; {label}"
-    return 0, (f"QUARANTINED RED [{cls}] id={item['id']} issue={item['issue']} "
-               f"owner={item['owner']} since={item['since']} expires={item['expires']} "
-               f"reason={item['reason']}; {label}; raw_exit={exit_code}")
+def difference(expected, actual, status):
+    for offset in range(max(len(expected), len(actual))):
+        e = expected[offset] if offset < len(expected) else None
+        a = actual[offset] if offset < len(actual) else None
+        if e != a:
+            if e is None or a is None:
+                return {"byte_offset": offset, "bit_offset": 0,
+                        "expected_byte": e, "actual_byte": a, "kind": "length"}
+            xor = e ^ a
+            bit = next(i for i in range(8) if xor & (1 << (7 - i)))
+            return {"byte_offset": offset, "bit_offset": bit,
+                    "expected_byte": e, "actual_byte": a, "kind": "content"}
+    return {"exit_expected": 0, "exit_actual": status}
 
 
-def emit(message: str, code: int) -> None:
-    print(message, file=sys.stderr if code else sys.stdout)
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        safe = message.replace("%", "%25").replace("\r", " ").replace("\n", " ")
-        if code:
-            print("::error::" + safe)
-        elif message.startswith("QUARANTINED"):
-            print("::warning::" + safe)
-        summary = os.getenv("GITHUB_STEP_SUMMARY")
-        if summary:
-            with open(summary, "a", encoding="utf-8") as stream:
-                stream.write("\n### SENS red-test contract\n\n" + message.replace("|", "\\|") + "\n")
+def run(args):
+    manifest = validate_manifest(json.loads(Path(args.manifest).read_text()))
+    fixture = Path(args.fixture)
+    if not fixture.is_file() or not args.command:
+        raise ValueError("fixture and command are required")
+    cmd = list(args.command)
+    if cmd[0] == "--":
+        cmd = cmd[1:]
+    if not cmd:
+        raise ValueError("missing subprocess command")
+    expected = Path(args.expected_file).read_bytes() if args.expected_file else b""
+    completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    actual = completed.stdout
+    if args.output_file:
+        Path(args.output_file).write_bytes(actual)
+    if completed.returncode == 0 and (not args.expected_file or actual == expected):
+        print("PASS test_id=" + args.test_id + " layer=" + args.layer)
+        return 0
+    item = next((x for x in manifest["cases"] if x["test_id"] == args.test_id), None)
+    stamp = item["stamp"] if item else "REGRESSION"
+    observed = os.environ.get("GITHUB_SHA", "")
+    record = {
+        "test_id": args.test_id, "layer": args.layer,
+        "fixture": args.fixture, "fixture_sha256": digest(fixture.read_bytes()),
+        "expected_sha256": digest(expected), "actual_sha256": digest(actual),
+        "first_difference": difference(expected, actual, completed.returncode),
+        "first_bad_sha": (item or {}).get("first_bad_sha") or os.environ.get("SENS_FIRST_BAD_SHA", "UNRESOLVED"),
+        "first_observed_bad_sha": observed if SHA.fullmatch(observed) else "UNRESOLVED",
+        "observed_at": now().isoformat(), "reproduce": shlex.join(cmd),
+        "stamp": stamp, "stderr_tail": completed.stderr.decode("utf-8", errors="replace")[-1500:],
+        "exit_code": completed.returncode,
+    }
+    if item:
+        for key in ("ticket", "owner", "reason", "first_seen_at", "expires_at", "investigation"):
+            if key in item:
+                record[key] = item[key]
+    errors = check_report(record)
+    print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True))
+    if args.report_file:
+        with open(args.report_file, "a", encoding="utf-8") as stream:
+            stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    if errors:
+        print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
+        return 1
+    if item and now() - parse_time(item["first_seen_at"]) > dt.timedelta(hours=24):
+        print("::warning::ESCALATION-24H " + args.test_id + " owner=" + item["owner"])
+    if stamp == "REGRESSION":
+        print("::error::REGRESSION " + args.test_id + " — semantic/release blocker")
+        return 1
+    print("::warning::NAMED-QUARANTINE " + stamp + " " + args.test_id
+          + " ticket=" + item["ticket"] + " expires=" + item["expires_at"])
+    return 0
 
 
-def main(argv: list[str] | None = None) -> int:
+def scan(args):
+    validate_manifest(json.loads(Path(args.manifest).read_text()))
+    path = Path(args.report_file)
+    if not path.is_file() or not path.read_text().strip():
+        if args.allow_empty:
+            print("PASS no failed tests; nothing silently skipped")
+            return 0
+        print("UNINFORMATIVE-OUTPUT no diagnostic report")
+        return 1
+    failures = []
+    for line_number, line in enumerate(path.read_text().splitlines(), 1):
+        try:
+            errors = check_report(json.loads(line))
+        except (ValueError, TypeError) as exc:
+            errors = ["invalid:json:" + str(exc)]
+        failures += [str(line_number) + ":" + e for e in errors]
+    if failures:
+        print("UNINFORMATIVE-OUTPUT " + ", ".join(failures))
+        return 1
+    print("PASS diagnostic shape for " + str(len(path.read_text().splitlines())) + " failed test(s)")
+    return 0
+
+
+def self_test():
+    fixture = Path("tests/semantic/narrate-d3-atom-eq-law.bits")
+    if not fixture.exists():
+        raise ValueError("run from repo root")
+    record = {
+        "test_id": "diagnostic-self-test", "layer": "eval",
+        "fixture": str(fixture), "fixture_sha256": digest(fixture.read_bytes()),
+        "expected_sha256": digest(b"1\n"), "actual_sha256": digest(b"0\n"),
+        "first_difference": difference(b"1\n", b"0\n", 0),
+        "first_bad_sha": "a" * 40, "first_observed_bad_sha": "b" * 40,
+        "observed_at": now().isoformat(), "reproduce": "sens fixture.sens",
+        "stamp": "REGRESSION",
+    }
+    if check_report(record):
+        raise RuntimeError("valid mechanical report rejected")
+    for field in FIELDS:
+        mutant = dict(record)
+        mutant.pop(field)
+        if not check_report(mutant):
+            raise RuntimeError("missing field passed: " + field)
+    for field in ("first_bad_sha", "fixture_sha256", "actual_sha256"):
+        mutant = dict(record, **{field: "UNKNOWN"})
+        if not check_report(mutant):
+            raise RuntimeError("invalid digest/SHA passed: " + field)
+    for fake in (b"", b"0", b"1", b"1\nextra"):
+        if fake != b"1\n" and "byte_offset" not in difference(b"1\n", fake, 0):
+            raise RuntimeError("missing first difference")
+    validate_manifest({"schema": "sens-red-v1", "cases": []})
+    for stamp in ("TRANSITIONAL", "FLAKE"):
+        try:
+            validate_manifest({"schema": "sens-red-v1", "cases": [
+                {"test_id": "x", "stamp": stamp, "owner": "worker",
+                 "first_seen_at": now().isoformat(), "reason": "needs investigation"}
+            ]})
+        except ValueError:
+            pass
+        else:
+            raise RuntimeError("unnamed quarantine was accepted")
+    print("PASS diagnostic contract + missing-field mutants + quarantine guards")
+    return 0
+
+
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("scan", choices=["scan"])
-    parser.add_argument("--log", type=Path, required=True)
-    parser.add_argument("--exit-code", type=int, required=True)
-    parser.add_argument("--manifest", type=Path, default=Path("data/ci-test-quarantine.json"))
-    args = parser.parse_args(argv)
+    sub = parser.add_subparsers(dest="action", required=True)
+    p = sub.add_parser("run")
+    p.add_argument("--test-id", required=True)
+    p.add_argument("--layer", required=True, choices=sorted(LAYER))
+    p.add_argument("--fixture", required=True)
+    p.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
+    p.add_argument("--report-file")
+    p.add_argument("--expected-file")
+    p.add_argument("--output-file")
+    p.add_argument("command", nargs=argparse.REMAINDER)
+    c = sub.add_parser("scan")
+    c.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
+    c.add_argument("--report-file", required=True)
+    c.add_argument("--allow-empty", action="store_true")
+    sub.add_parser("self-test")
+    args = parser.parse_args()
     try:
-        log = args.log.read_text(encoding="utf-8", errors="replace")
-        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-        code, message = analyze(log, args.exit_code, manifest, now=datetime.now(timezone.utc))
-    except (OSError, ValueError, Invalid) as exc:
-        code, message = 2, f"UNINFORMATIVE-OUTPUT: cannot load log/manifest: {exc}"
-    emit(message, code)
-    return code
+        return {"run": run, "scan": scan, "self-test": lambda a: self_test()}[args.action](args)
+    except (OSError, ValueError, RuntimeError) as exc:
+        print("UNINFORMATIVE-OUTPUT diagnostic transport error: " + str(exc), file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
