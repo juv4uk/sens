@@ -28,7 +28,7 @@ D3 control specimen:
 ```
 
 It also proves fail-closed behavior for human executable spellings, noncallable
-D7 data (including the two owner-reserved coordinates), and D10 width without
+D7 keyboard/v2 data (all 128 exact seven-bit coordinates), and D10 width without
 a ratified physical transport. The test **does not** claim independent
 language-semantic oracle parity or a generalized D10 executor. Those require
 separate Lisp-owned oracles/Vertical Day smoke; a matching encode/decode
@@ -37,3 +37,15 @@ digest alone is not proof of meaning.
 CI: `.github/workflows/binary-program-e2e.yml` checks structural/T5 transport. `.github/workflows/physical-binary-sens-cli.yml` executes the D3 and D5 specimens through both physical CLIs. The workflow runs on every
 `main` push, on relevant PRs, and on manual dispatch, using **GitHub-hosted
 Ubuntu**. It does not cancel itself when other agents advance `main`.
+
+## Семантичний свідок SENS
+
+`tests/semantic/d1-d3-control-law.bits` — виконувана двійкова SENS-програма,
+не Python/Rust-таблиця істинності. Перевіряє негативні колізії однакового
+payload між сусідніми точними ширинами D1, D3–D9, тотожність W7/W8/W9,
+ATOM порожньої структури та CAR/CDR після CONS. Лише якщо всі перевірки
+успішні, сам SENS повертає точний D1:1; при невдачі — D1:0.
+D2 залишається граматикою, а не окремим виконуваним атомом. D10
+не запускаємо фізичним T5 без допущеного механізму.
+Rust/Python тут можуть транспортувати та перевіряти біти, але не
+призначають семантичних результатів.
