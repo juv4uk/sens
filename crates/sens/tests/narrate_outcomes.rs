@@ -9,7 +9,6 @@ fn eval_outcome_narration(source: &str) -> String {
     let mut session = Session::default();
     load_core_library(&mut session)
         .expect("canonical Core4 bootstrap must load");
-
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
@@ -35,7 +34,6 @@ fn eval_outcome_narration(source: &str) -> String {
         .value
         .to_string()
 }
-
 #[test]
 fn proved_outcome_keeps_the_ground_answer_and_real_premise() {
     let source = r#"

@@ -62,4 +62,4 @@ GitHub Actions workflow не активувати без явного дозво
 
 ## One focused migration witness
 
-`sens-semantic-migration-witness.yml` runs exactly one focused integration test. That runner executes the visible-binary laws for reasoning-index CAR/EQ and narration D1/D3/D4 in SENS itself. Rust only loads and runs those laws, requiring their exact D1 success; it contains no duplicated semantic truth table. Python remains a mechanical domain-width/source-shape guard and does not decide semantic outcomes.
+`sens-semantic-migration-witness.yml` runs exactly one integration test. That runner executes the existing visible-binary D3 ATOM/EQ law in SENS itself, then mechanically checks production-source order and exact D1/D3/D4 AST widths. Rust contains no duplicate semantic truth table; no unratified library name is made callable merely to satisfy a test.
