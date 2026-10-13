@@ -2,7 +2,8 @@
 //! lib/result-status.my instead of collapsing every non-proof into one phrase.
 
 use sens::{
-    eval_parsed_expressions, eval_program, parse_exact_domain_source, Session,
+    eval_parsed_expressions, eval_program, parse_exact_domain_source,
+    parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn eval_outcome_value(source: &str) -> sens::Value {
