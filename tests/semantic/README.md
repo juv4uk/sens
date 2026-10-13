@@ -28,3 +28,4 @@ Wrong branches invoke non-callable D1 zero so SENS itself rejects the witness;
 Rust only parses and executes the bits and contains no expected truth table.
 
 
+

@@ -6,6 +6,7 @@ on:
     paths:
       - "tests/semantic/**"
       - "lib/result-status.lisp"
+      - "lib/persistent-vector.lisp"
       - "lib/core.lisp"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - ".github/workflows/sens-owned-semantic-witnesses.yml"
@@ -13,6 +14,7 @@ on:
     paths:
       - "tests/semantic/**"
       - "lib/result-status.lisp"
+      - "lib/persistent-vector.lisp"
       - "lib/core.lisp"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - ".github/workflows/sens-owned-semantic-witnesses.yml"
@@ -30,3 +32,33 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Execute semantic laws owned by binary SENS
         run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
+      - name: Двійковий SENS сам перевіряє D4 λ й однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="tests/semantic/persistent-vector-rotation-d4"
+          # Тільки механіка: слова кодованого SENS мають коректну ширину.
+          for variant in law mutant; do
+            cargo run --quiet --locked -p sens-cli --bin sens-trit -- encode "${base}-${variant}.lisp"
+          done
+          # Одна зміна у D1-слові даних, решта канонічного D2/T5 не міняється.
+          mapfile -t good < <(tail -n 1 "${base}-law.lisp" | tr ' ' '\n' | sed '/^$/d')
+          mapfile -t bad < <(tr ' ' '\n' < "${base}-mutant.lisp" | sed '/^$/d')
+          [[ "${#good[@]}" -eq "${#bad[@]}" ]]
+          changes=0
+          for ((i=0; i<${#good[@]}; i++)); do
+            if [[ "${good[i]}" != "${bad[i]}" ]]; then
+              [[ "${good[i]}" == 0 && "${bad[i]}" == 1 ]]
+              ((changes+=1))
+            fi
+          done
+          [[ "$changes" -eq 1 ]]
+
+          # SENS має власні D3 COND/EQ та fail-гілку (0).
+          cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval "${base}-law.sens" > "$RUNNER_TEMP/sens-pass.txt"
+          grep -Fxq "1" "$RUNNER_TEMP/sens-pass.txt"
+          if cargo run --quiet --locked -p sens-cli --bin sens-trit -- eval "${base}-mutant.sens" > "$RUNNER_TEMP/sens-mutant.txt" 2>&1; then
+            echo "BLOCKED: мутант пройшов, хоча його SENS-гілка зобов'язана відмовити" >&2
+            exit 1
+          fi
+

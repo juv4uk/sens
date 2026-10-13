@@ -77,17 +77,17 @@
 
 (0011 vrotate-left
   (0010 (n)
-    (001000 ((r (vnode-right n)))
+    ((0010 (r)
       (vmake-balanced-node (vnode-index r) (vnode-value r)
         (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-left n) (vnode-left r))
-        (vnode-right r)))))
+        (vnode-right r))) (vnode-right n))))
 
 (0011 vrotate-right
   (0010 (n)
-    (001000 ((l (vnode-left n)))
+    ((0010 (l)
       (vmake-balanced-node (vnode-index l) (vnode-value l)
         (vnode-left l)
-        (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-right l) (vnode-right n))))))
+        (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-right l) (vnode-right n)))) (vnode-left n))))
 
 (0011 vbalance
   (0010 (n)
