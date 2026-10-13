@@ -96,7 +96,9 @@ class TcpMechanicalDomainCensus(unittest.TestCase):
                 else:
                     raise AssertionError(f"небінарна виконувана голова: {head!r}")
             quote = head == "001"
-            for arg in node[1:]:
+            for index, arg in enumerate(node[1:], 1):
+                if head in ("0010", "0011") and index == 1:
+                    continue  # binders/імена не є виконуваною головою
                 if isinstance(arg, list):
                     visit(arg, quoted or quote)
 
