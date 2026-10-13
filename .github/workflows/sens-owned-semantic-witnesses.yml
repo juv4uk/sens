@@ -7,6 +7,8 @@ on:
       - "tests/semantic/**"
       - "lib/result-status.lisp"
       - "lib/persistent-vector.lisp"
+      - "lib/persistent-map.lisp"
+      - "crates/sens/tests/persistent_map_binary_oracle.rs"
       - "lib/core.lisp"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - ".github/workflows/sens-owned-semantic-witnesses.yml"
@@ -15,6 +17,8 @@ on:
       - "tests/semantic/**"
       - "lib/result-status.lisp"
       - "lib/persistent-vector.lisp"
+      - "lib/persistent-map.lisp"
+      - "crates/sens/tests/persistent_map_binary_oracle.rs"
       - "lib/core.lisp"
       - "crates/sens/tests/sens_semantic_witnesses.rs"
       - ".github/workflows/sens-owned-semantic-witnesses.yml"
@@ -76,3 +80,5 @@ jobs:
           test "$diff_count" = 1
       - name: Execute semantic laws owned by binary SENS
         run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
+      - name: Виконати точний SENS-закон персистентної мапи і мутант
+        run: cargo test --locked -p sens --test persistent_map_binary_oracle -- --nocapture
