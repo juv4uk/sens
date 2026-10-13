@@ -80,8 +80,7 @@ CANONICAL = (
     "crates/sens/src/universal_frame3.rs",
 )
 EXPECTED = {1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64,
-            7: 126, 8: 256, 9: 512, 10: 1024}
-D7_RESERVED = {"0100001", "0101010"}
+            7: 128, 8: 256, 9: 512, 10: 1024}
 OLD_IDENTITY = re.compile(
     r"(?<![\w])(?:Sid8|Sens8|Function8|sid8|sens8|function8)(?![\w])"
     r"|(?:Value|ExprKind)::Sid\b"
@@ -130,8 +129,6 @@ def inspect_domains(table_texts: dict[int, str]) -> dict[int, int]:
         if len(set(words)) != len(words):
             raise ValueError(f"D{domain}: duplicate domain coordinate")
         expected = {f"{index:0{domain}b}" for index in range(1 << domain)}
-        if domain == 7:
-            expected -= D7_RESERVED
         if set(words) != expected:
             raise ValueError(f"D{domain}: wrong rows, gaps or unauthorized coordinates")
         counts[domain] = len(words)
@@ -256,7 +253,6 @@ def self_test() -> None:
     toy = {n: "(domain-table/1\n" + "".join(
         f" ({i:0{n}b} (ук тест))\n"
         for i in range(1 << n)
-        if n != 7 or f"{i:07b}" not in D7_RESERVED
     ) + ")\n" for n in EXPECTED}
     counts = inspect_domains(toy)
     if counts != EXPECTED:
