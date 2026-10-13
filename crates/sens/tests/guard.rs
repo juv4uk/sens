@@ -19,11 +19,7 @@ fn guard_semantics_are_owned_by_binary_sens() {
         .expect("SENS core bootstrap transport");
 
     load_sens(&mut session, "lib/guard.lisp", include_str!("../../../lib/guard.lisp"));
-    load_sens(
-        &mut session,
-        "knowledge/guard-reference.lisp",
-        include_str!("../../../knowledge/guard-reference.lisp"),
-    );
+
 
     let source = include_str!("../../../tests/fixtures/guard-exact-d3-semantic.lisp");
     let forms = parse_mixed_exact_domain(source).expect("SENS semantic witness parse");
