@@ -8,8 +8,18 @@ use sens::{
 fn eval_outcome_value(source: &str) -> sens::Value {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
+    // These reasoning libraries contain exact D9 call heads; use their
+    // source-pinned reader rather than the legacy numeric compatibility parser.
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+    ] {
+        let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+            .unwrap_or_else(|error| panic!("exact reasoning parse failed for {path}: {error}"));
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("exact reasoning load failed for {path}: {error}"));
+    }
+
     // result-status.lisp and narrate.lisp carry exact-width D8/D9 words.
     // Do not load either through the ordinary compatibility reader: it can
     // interpret e.g. 11110111 as a numeric value instead of a domain identity.
