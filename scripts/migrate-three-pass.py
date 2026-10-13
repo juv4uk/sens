@@ -553,17 +553,7 @@ def text7_encode(spelling: str,candidates,tok: Tok):
                 )
             result.append(bits)
         return result
-    words=[]
-    i=0
-    while i<len(spelling):
-        rows=candidates.get(spelling[i],())
-        for key,cells in rows:
-            if spelling.startswith(key,i):
-                words.extend(cells); i+=len(key); break
-        else:
-            ch=spelling[i]
-            raise MigrationError(f"Text7 cannot encode {ch!r} U+{ord(ch):04X}",tok)
-    return words
+    raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
     def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None):
