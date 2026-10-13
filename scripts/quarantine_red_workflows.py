@@ -154,6 +154,9 @@ def main():
         return 1
     try:
         head, failed, pending, seen = snapshot(args.repo, token)
+        if not failed:
+            print("::warning::NO_CURRENT_HEAD_RED — retaining prior quarantine; absent rerun is not SUCCESS")
+            return 0
         body = render(args.repo, head, failed, pending, seen)
         if args.dry_run:
             print(body)
