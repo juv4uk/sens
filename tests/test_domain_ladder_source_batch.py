@@ -26,6 +26,27 @@ class BatchSourceTests(unittest.TestCase):
             self.assertNotIn(code, self.mapping)
             self.assertIn(code, self.blocked)
 
+    def test_d7_schema_sha_pin_tracks_owner_ratified_keyboard_v2(self):
+        import hashlib
+        import json
+        schema = json.loads((ROOT / "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json")
+                            .read_text(encoding="utf-8"))
+        owner = json.loads((ROOT / "knowledge/d7-keyboard-v2-ratified.json")
+                           .read_text(encoding="utf-8"))
+        entry = next(item for item in schema["entries"]
+                     if item["path"] == "contracts/d7-ratification.lisp")
+        payload = (ROOT / entry["path"]).read_bytes()
+        digest = hashlib.sha1(
+            b"blob " + str(len(payload)).encode("ascii") + b"\\0" + payload
+        ).hexdigest()
+        self.assertEqual(owner["schema"], "sens.d7.keyboard/v2")
+        self.assertEqual(owner["occupancy"], 128)
+        self.assertEqual(entry["git_blob_sha1"], digest)
+        self.assertEqual(entry["previous_pinned_git_blob_sha1"],
+                         "c51ec57ca40ddf585a22ca8cbddab5efb4f11028")
+        self.assertIn(b"(status . owner-ratified)", payload)
+        self.assertIn(b"knowledge/d7-keyboard-v2-ratified.json", payload)
+
     def test_all_2046_exact_domain_coordinates_are_not_assumed_callable(self):
         witness = MOD.verify_full_domain_bitspace(ROOT)
         self.assertEqual(witness["typed_coordinates"], 2046)
