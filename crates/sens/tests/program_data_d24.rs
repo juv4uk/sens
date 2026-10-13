@@ -115,9 +115,9 @@ fn вичерпний_точковий_тест_2046_координат_з_ре�
         .expect("1022 бітно-точних AST атомів проходять єдиним шляхом");
     let mut current = &converted;
     for form in &typed {
-        let ExprKind::DomainIdentity(expected) = form.kind else { unreachable!() };
+        let ExprKind::DomainIdentity(expected) = &form.kind else { unreachable!() };
         let Value::Pair(head, tail) = current else { panic!("втрачена форма"); };
-        assert!(matches!(head.as_ref(), Value::DomainIdentity(actual) if *actual == expected));
+        assert!(matches!(head.as_ref(), Value::DomainIdentity(actual) if *actual == *expected));
         current = tail.as_ref();
     }
     assert!(matches!(current, Value::Nil));
