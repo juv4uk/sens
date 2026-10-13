@@ -35,7 +35,7 @@ def verify(data, root, *, require_checkout=False):
         assert row['coordinate'] is None and row['ratified_resident'] is False
         assert row['selected_in_canonical_inventory'] is False
         assert row['source_file']=='lib/time.lisp'
-        assert row['source_definition_form']=='00001001'
+        assert row['source_definition_form']=='0011'
         assert row['source_git_blob_sha']==data['source_git_blob_sha']
         assert row['observable_law'] and row['falsifier']
         assert row['surface_uk'] and row['surface_ukr']
