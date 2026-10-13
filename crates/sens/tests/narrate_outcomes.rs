@@ -94,7 +94,7 @@ fn gather_domain_widths(expr: &Expr, widths: &mut Vec<usize>) {
 }
 
 #[test]
-fn arity_helpers_use_only_exact_d3_d4_domain_identities() {
+fn arity_helpers_use_exact_d1_predicates_with_d3_d4_structure() {
     let source = include_str!("../../../lib/narrate.lisp");
     let start = source
         .find("(0011 narrate-proper-list?")
@@ -116,8 +116,8 @@ fn arity_helpers_use_only_exact_d3_d4_domain_identities() {
     widths.dedup();
     assert_eq!(
         widths,
-        vec![3, 4],
-        "shape checks must use D3 structure and D4 selectors only; not D6 LENGTH or D8 EQUAL"
+        vec![1, 3, 4],
+        "D1 is reserved for exact predicate results; only D3/D4 structure is used, not D6 LENGTH or D8 EQUAL"
     );
 
     let executable_source = helper_source
