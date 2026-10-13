@@ -32,7 +32,7 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ; CAR may be a compound rule; check its atomhood before EQ.
+      ((0101 value) #d1:0)
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)

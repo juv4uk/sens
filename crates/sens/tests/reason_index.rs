@@ -1,5 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+    eval_parsed_expressions, eval_program, parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn session() -> Session {
@@ -89,20 +89,16 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 
 #[test]
 fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
-    let mut s = session();
-    let source = include_str!("../../../tests/fixtures/reason-index-head-atom-witness.lisp");
-    let parsed = parse_mixed_exact_domain_reasoning_source(
-        "tests/fixtures/reason-index-head-atom-witness.lisp",
-        source,
-    )
-    .expect("binary SENS witness must parse under the exact reasoning reader");
-    let result = eval_parsed_expressions(&parsed, &mut s)
-        .expect("binary SENS witness must evaluate");
-    assert_eq!(
-        result.value.to_string(),
-        "(reason-index-head-atom-witness (status pass))",
-        "semantic verdict belongs to the binary SENS witness"
+    let mut session = session();
+    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
+    assert!(
+        source.bytes().all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+        "SENS-owned witness must contain only exact binary words and whitespace"
     );
+    let parsed = parse_canonical_binary(source)
+        .expect("canonical D2-framed binary SENS witness must parse");
+    eval_parsed_expressions(&parsed, &mut session)
+        .expect("SENS self-verdict rejected the CAR/ATOM/EQ schema guard law");
 }
 
 #[test]
@@ -159,6 +155,3 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
         assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");
     }
 }
-
-
-

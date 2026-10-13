@@ -1,7 +1,9 @@
 ; Experimental extension for mutually recursive top-level lambda definitions.
 ; Load after the current Core4 profile (`lib/core4.lisp`) and lib/meta-eval.lisp.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Міграція: 10 однозв'язувальних D6:001000 LET усунено через чинну D4:0010 LAMBDA.
+; Семантика: те саме одноразове обчислення аргументу, те саме локальне зв'язування.
+; Two-field D3 COND and exact D1 fallback (010 (001 ())) preserved.
 ; Reuses existing meta-eval surface: my-apply, my-eval-body, bind-params,
 ; env-lookup, my-macro?, my-lambda-form?, my-fifth, my-fourth.
 ; Width is identity; every bit of the domain address is valued.
@@ -51,13 +53,12 @@
 
 (0011 my-group-closure-from-def
   (0010 (form group captured-env)
-    (001000 ((lambda-form (10011 form)))
-      (1110 (001 recursive-group-closure)
+    ((0010 (lambda-form) (1110 (001 recursive-group-closure)
             (1001 form)
             (1001 lambda-form)
             (011 (011 lambda-form))
             group
-            captured-env))))
+            captured-env)) (10011 form))))
 
 ; Build onto the captured environment so later definitions in the same group
 ; appear earlier in the alist, matching same-frame overwrite order.
@@ -66,15 +67,14 @@
     (110
       ((010 forms) out)
       ((010 (001 ()))
-       (001000 ((form (100 forms)))
-         (my-build-group-env-onto
+       ((0010 (form) (my-build-group-env-onto
            (011 forms)
            group
            captured-env
            (111
              (111 (1001 form)
                    (my-group-closure-from-def form group captured-env))
-             out)))))))
+             out))) (100 forms))))))
 
 (0011 my-build-group-env
   (0010 (group captured-env)
@@ -82,14 +82,12 @@
 
 (0011 my-apply-group-closure
   (0010 (fn args)
-    (001000 ((group-env
-            (my-build-group-env (my-fifth fn) (my-sixth fn))))
-      (my-eval-body
+    ((0010 (group-env) (my-eval-body
         (my-fourth fn)
         (bind-params
           (10011 fn)
           args
-          group-env)))))
+          group-env))) (my-build-group-env (my-fifth fn) (my-sixth fn)))))
 
 ; Apply wrapper: group closures go through group path; others reuse my-apply.
 (0011 my-group-apply
@@ -127,11 +125,9 @@
   (0010 (fn args)
     (110
       ((my-group-closure? fn)
-       (001000 ((group-env
-               (my-build-group-env (my-fifth fn) (my-sixth fn))))
-         (my-group-eval-body
+       ((0010 (group-env) (my-group-eval-body
            (my-fourth fn)
-           (bind-params (10011 fn) args group-env))))
+           (bind-params (10011 fn) args group-env))) (my-build-group-env (my-fifth fn) (my-sixth fn))))
       ((010 (001 ())) (my-apply fn args)))))
 
 (0011 my-group-eval
@@ -146,14 +142,13 @@
          ((101 (100 expr) (001 lambda))
           (1110 (001 closure) (1001 expr) (011 (011 expr)) env))
          ((010 (001 ()))
-          (001000 ((fn (my-group-eval (100 expr) env)))
-            (110
+          ((0010 (fn) (110
               ((my-macro? fn)
                (my-group-eval (my-apply fn (011 expr)) env))
               ((010 (001 ()))
                (my-group-apply-owned
                  fn
-                 (my-group-eval-list (011 expr) env))))))))
+                 (my-group-eval-list (011 expr) env))))) (my-group-eval (100 expr) env)))))
       ((010 (001 ()))
        (my-group-apply-owned
          (my-group-eval (100 expr) env)
@@ -164,8 +159,7 @@
     (110
       ((010 form) (111 env (my-group-eval form env)))
       ((101 (100 form) (001 def))
-       (001000 ((value (my-group-eval (10011 form) env)))
-         (111 (111 (111 (1001 form) value) env) value)))
+       ((0010 (value) (111 (111 (111 (1001 form) value) env) value)) (my-group-eval (10011 form) env)))
       ((101 (100 form) (001 defmacro))
        (my-eval-top-form form env))
       ((010 (001 ())) (111 env (my-group-eval form env))))))
@@ -174,17 +168,13 @@
   (0010 (forms env)
     (110
       ((my-lambda-def-form? (100 forms))
-       (001000 ((group (my-take-lambda-def-group forms)))
-         (001000 ((rest (my-drop-lambda-def-group forms)))
-           (001000 ((group-env (my-build-group-env group env)))
-             (110
+       ((0010 (group) ((0010 (rest) ((0010 (group-env) (110
                ((010 rest) (111 group-env (011 (100 group-env))))
-               ((010 (001 ())) (my-eval-program-with-groups rest group-env)))))))
+               ((010 (001 ())) (my-eval-program-with-groups rest group-env)))) (my-build-group-env group env))) (my-drop-lambda-def-group forms))) (my-take-lambda-def-group forms)))
       ((010 (001 ()))
-       (001000 ((result (my-group-eval-top-form (100 forms) env)))
-         (110
+       ((0010 (result) (110
            ((010 (011 forms)) result)
            ((010 (001 ()))
             (my-eval-program-with-groups
               (011 forms)
-              (100 result)))))))))
+              (100 result))))) (my-group-eval-top-form (100 forms) env))))))

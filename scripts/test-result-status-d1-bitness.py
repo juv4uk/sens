@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: result-status PredicateBit + domain bitness.
+"""Mechanical source-shape inventory for result-status migration.
 
-Axiom: the binary key width IS the domain address.
-Checks:
-  1. lib/result-status.lisp has no bare host truthiness (t / NIL)
-  2. Exact D1:1 and D1:0 forms are present as predicate carriers
-  3. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
+NON-SEMANTIC: this script does not define D1 truth, result-status behavior, or
+language correctness. The semantic gate is the self-checking binary SENS
+program tests/semantic/result-status-d1-law.bits, executed by
+crates/sens/tests/sens_semantic_witnesses.rs as a mechanism-only harness.
 
-Does not prove runtime callability or T5 physical execution. Run:
-
-    python3 scripts/test-result-status-d1-bitness.py
+This checker may report source drift/bit-shape facts only.
 """
 from __future__ import annotations
 

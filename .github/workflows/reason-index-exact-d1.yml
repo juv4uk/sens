@@ -6,6 +6,7 @@ on:
     paths:
       - "lib/reason.lisp"
       - "crates/sens/tests/reason_index.rs"
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
       - ".github/workflows/reason-index-exact-d1.yml"
   pull_request:
     paths:
@@ -24,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Бінарний SENS: правило не плутають із тегом індексу"
+      - name: "Бінарний SENS: CAR перед EQ та D1"
         run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
       - name: Профільні свідки й повний набір 2046 координат
         run: cargo test --locked -p sens --test reason_index -- --nocapture

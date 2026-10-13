@@ -6,6 +6,9 @@ on:
     paths:
       - "tests/fixtures/canonical-binary-smoke.lisp"
       - "crates/sens/tests/binary_only_language.rs"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - "tests/semantic/meta-eval-mutual-d4-law.bits"
+      - "lib/meta-eval-mutual.lisp"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/domain_identity.rs"
       - "crates/sens/src/eval/**"
@@ -16,6 +19,9 @@ on:
     paths:
       - "tests/fixtures/canonical-binary-smoke.lisp"
       - "crates/sens/tests/binary_only_language.rs"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - "tests/semantic/meta-eval-mutual-d4-law.bits"
+      - "lib/meta-eval-mutual.lisp"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/domain_identity.rs"
       - "crates/sens/src/eval/**"
@@ -36,3 +42,5 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Execute code written only in bits
         run: cargo test --locked -p sens --test binary_only_language -- --nocapture
+      - name: Двійковий SENS перевіряє прямий D4 LAMBDA та вкладені зв’язування
+        run: cargo test --locked -p sens --test sens_semantic_witnesses meta_eval_mutual_d4_exact_sens_self_verdict -- --nocapture
