@@ -15,11 +15,7 @@ fn guard_semantics_are_owned_by_binary_sens() {
     let mut session = Session::default();
 
     // Bootstrap є тільки механізмом; жодних host-authored expected-cases.
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
-        &mut session,
-    )
+    load_core_library(&mut session)
         .expect("SENS core bootstrap transport");
 
     load_sens(&mut session, "lib/guard.lisp", include_str!("../../../lib/guard.lisp"));
