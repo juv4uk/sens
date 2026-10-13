@@ -7,7 +7,7 @@ import json
 import re
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, read_domain_table
+from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, machine_word, read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
@@ -94,7 +94,7 @@ def validate_d7(authority: dict):
     if len(rows) != 128 or len(ledger) != 128:
         fail("D7: exactly 128 rows required")
     for number, (row, source) in enumerate(zip(rows, ledger)):
-        bits = f"{number:07b}"
+        bits = machine_word(number, 7)
         if source.get("bits") != bits or row.bits != bits:
             fail(f"D7:{bits}: coordinate/order drift")
         if row.lisp is not None:

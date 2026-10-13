@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, read_domain_table, read_domain_tables
+from domain_tables import DOMAIN_TABLES, machine_word, read_domain_table, read_domain_tables
 
 ROOT = Path(__file__).resolve().parents[1]
 D5 = DOMAIN_TABLES[4]
@@ -22,7 +22,7 @@ def main() -> int:
     if len(d5) != 32:
         fail(f"expected 32 D5 rows, found {len(d5)}")
 
-    expected_bits = {f"{n:05b}" for n in range(32)}
+    expected_bits = {machine_word(n, 5) for n in range(32)}
     actual_bits = {row.bits for row in d5}
     if actual_bits != expected_bits:
         fail("D5 table must cover exactly 00000..11111")

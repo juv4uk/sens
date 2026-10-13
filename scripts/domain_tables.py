@@ -68,6 +68,23 @@ def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False)
     return token
 
 
+def machine_word(number: int, width: int) -> str:
+    """The machine reads SENS as binary; a number is only its human projection."""
+    if number < 0:
+        raise ValueError(f"a machine word needs a non-negative number: {number}")
+    word = format(number, "b")
+    if len(word) > width:
+        raise ValueError(f"{number} does not fit in a {width}-bit word")
+    return word.zfill(width)
+
+
+def human_number(word: str) -> int:
+    """Decimal is a projection of the binary machine word, never its source."""
+    if not word or any(bit not in "01" for bit in word):
+        raise ValueError(f"{word!r} is not a binary machine word")
+    return int(word, 2)
+
+
 def read_domain_table(path: Path) -> list[DomainTableRow]:
     expected_width = int(path.stem.removeprefix("d"))
     rows: list[DomainTableRow] = []
