@@ -1,11 +1,11 @@
 //! Регресійна когорта #5029: виконуємо Canon напряму, без історичного
 //! witness-runner (він мігрується окремо в #5025).
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_exact_domain_program, eval_program, load_core_library, Session};
 
 fn canon_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("current Core library");
-    eval_program(include_str!("../../../lib/canon.lisp"), &mut session)
+    eval_exact_domain_program(include_str!("../../../lib/canon.lisp"), &mut session)
         .expect("Canon source must load");
     session
 }
