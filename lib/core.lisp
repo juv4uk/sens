@@ -143,13 +143,13 @@
 
 (0011 caar
   (0010 (values)
-    (1000 values))
+    (1000 values)))
 
 (0011 cadr second)
 
 (0011 cddr
   (0010 (values)
-    (0111 values))
+    (0111 values)))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
