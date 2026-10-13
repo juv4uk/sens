@@ -87,7 +87,8 @@ class CanonicalOneFileMigration(unittest.TestCase):
 
         This historical witness explicitly requires the peer bindings to be
         loaded before evaluating it.  The current D1-D9 word migrator cannot
-        attest that `модуль` and `abs` refer to one executable identity.
+        attest that `модуль` and `abs` refer to one executable identity, so the
+        D7 keyboard/v2 mixed-script guard rejects it instead of guessing.
         A missing environment is a real BLOCK, never physical admission.
         """
         source = ROOT / "lib" / "surface" / "peer-identity-acceptance.lisp"
@@ -99,8 +100,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(report["status"], "blocked")
         self.assertEqual(report["source_era"], "auto")
         self.assertEqual(report["output"], "lib/surface/peer-identity-acceptance.sens")
-        self.assertIn("quoted symbol datum has no ratified D2/D7 binary representation", report["reason"])
-        self.assertIn("модуль", report["reason"])
+        self.assertIn("mixed-script identifier is ambiguous", report["reason"])
         self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
         self.assertEqual(source.read_bytes(), original_source)
 

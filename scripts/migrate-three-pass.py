@@ -777,7 +777,7 @@ def encode_lambda_params(node: ListNode,text7):
     return words
 
 
-def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
+def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None):
     t=node.tok.text
     if t in lexical_env:
         return encode_text7_identifier(t,text7,node.tok)
@@ -807,14 +807,21 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
             node.tok,
         )
     if quoted:
-        # The current canonical D2/D7 contract does not ratify a reversible
-        # symbol-datum representation. A D2-framed Text7 identifier is NOT
-        # interchangeable with a quoted Value::Symbol: fail closed instead
-        # of guessing that ordinary symbol data is a binder/call-head frame.
-        raise MigrationError(
-            "quoted symbol datum has no ratified D2/D7 binary representation",
-            node.tok,
-        )
+        # Ратифікований власником закон 2026-10-13
+        # (docs/QUOTED-DATA-AND-STRING-ADMISSION-LAW-2026-10-13.uk.md):
+        # цитовані дані перевіряються на місце в драбині функцій (EVAL/APPLY).
+        # D1-предикати 0/1 та точні координати драбини D3-D9 зберігають свою
+        # точну ширину як дані; те, що не має місця в драбині, — звичайне
+        # D2-рамкове D7-написання з роллю `quoted-datum`, яке зберігає
+        # кожен біт джерела, включно з регістром.
+        if t in {"0", "1"} or re.fullmatch(r"[01]{3,9}", t):
+            return [t]
+        return encode_text7_identifier(t, text7, node.tok)
+    # Нецитовані дані: ім'я, яке джерело саме зв'язує глобально (DEFINE),
+    # є Text7-посиланням, а не сирим текстом. Решта лишається точно як
+    # написано і пізніше fail-closed перевіркою фізичного 0/1-слова.
+    if resolver is not None and t in resolver.global_binding_words:
+        return list(resolver.global_binding_words[t])
     return [t]
 
 
@@ -981,7 +988,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
     if isinstance(node,String):
         return encode_string(node,text7)
     if isinstance(node,Atom):
-        return encode_atom_data(node,text7,lexical_env=lexical_env,quoted=quoted)
+        return encode_atom_data(node,text7,lexical_env=lexical_env,quoted=quoted,resolver=resolver)
     raise TypeError(node)
 
 def line_col(source: str,offset: int):
