@@ -89,6 +89,21 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: ФС — одна реальна SENS-перевірка форми журналу та незмінного позитивного стану
+        if: contains(github.event.head_commit.message, '[fs-journal-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CI_GLUE_NO_SEMANTICS: Cargo лише виконує SENS-визначення й
+          # повідомляє фактичний вердикт. Нативний .sens оракул окремий.
+          sha256sum lib/lisp-fs.lisp tests/fixtures/lisp-fs-conformance.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id fs-journal-structural-alist-integration \
+            --layer transport \
+            --fixture tests/fixtures/lisp-fs-conformance.lisp \
+            --report-file "$RUNNER_TEMP/sens-fs-journal-red.jsonl" \
+            -- cargo test --locked -p sens --test content_store \
+                 lisp_fs_conformance_fixture_is_deterministic -- --exact --nocapture
       - name: FULL_CARGO_WORKSPACE — одноразовий повний прогін на точному SHA
         if: contains(github.event.head_commit.message, '[full-cargo-once]') || github.event_name == 'workflow_dispatch'
         id: full-cargo
