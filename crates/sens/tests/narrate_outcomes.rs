@@ -2,7 +2,8 @@
 //! lib/result-status.my instead of collapsing every non-proof into one phrase.
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse_exact_domain_source, Expr, ExprKind,
+    eval_parsed_expressions, load_core_library, parse_exact_domain_source, parse_mixed_exact_domain,
+    Expr, ExprKind,
     parse_mixed_exact_domain_reasoning_source, Session,
 };
 
@@ -35,8 +36,10 @@ fn eval_outcome_value(source: &str) -> sens::Value {
     eval_parsed_expressions(&narration, &mut session)
         .expect("exact-domain narration library must load");
 
-    eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("exact fixture parse failed: {error}\nsource: {source}"));
+    eval_parsed_expressions(&expressions, &mut session)
+        .unwrap_or_else(|error| panic!("evaluation failed: {error}\nsource: {source}"))
         .value
 }
 
@@ -55,7 +58,9 @@ fn eval_arity_predicate(source: &str) -> sens::Value {
         .expect("narration source must use exact domains and no unqualified numbers");
     eval_parsed_expressions(&narration, &mut session)
         .expect("exact-domain narration library must load");
-    eval_program(source, &mut session)
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("exact arity fixture parse failed: {error}\nsource: {source}"));
+    eval_parsed_expressions(&expressions, &mut session)
         .unwrap_or_else(|error| panic!("arity expression failed: {error}\nsource: {source}"))
         .value
 }
