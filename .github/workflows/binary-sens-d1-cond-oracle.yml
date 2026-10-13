@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "lib/fs.lisp"
+      - "tests/semantic/fs-d4-binding-law.bits"
+      - "tests/semantic/fs-d4-binding-mutant.bits"
       - "crates/sens/tests/binary_sens_d1_cond_oracle.rs"
       - "tests/oracles/d1-cond-law/**"
       - ".github/workflows/binary-sens-d1-cond-oracle.yml"
@@ -29,3 +31,34 @@ jobs:
         run: cargo test --locked -p sens --test binary_sens_d1_cond_oracle -- --nocapture
       - name: "Verify existing current exact-binary interpreter preflight"
         run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
+
+      - name: SENS власноруч перевіряє D4 зв'язування FS (позитивні й однобітний негативний)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          mkdir -p "$RUNNER_TEMP/fs-sens-proof"
+          python3 - "$RUNNER_TEMP/fs-sens-proof" <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+          root = Path(sys.argv[1])
+          for name in ("law", "mutant"):
+              source = Path(f"tests/semantic/fs-d4-binding-{name}.bits").read_text(encoding="ascii")
+              for number, line in enumerate(source.splitlines(), 1):
+                  words = line.split()
+                  if not words or any(set(word) - {"0", "1"} for word in words):
+                      raise SystemExit(f"Invalid binary word in FS {name} witness {number}")
+                  (root / f"{name}-{number}.sens").write_bytes(encode_projection(" ".join(words)))
+          PY
+          for file in "$RUNNER_TEMP"/fs-sens-proof/law-*.sens; do
+            target/debug/sens "$file" > "$file.sens-out"
+            target/debug/sens-trit eval "$file" > "$file.trit-out"
+            cmp "$file.sens-out" "$file.trit-out"
+            test "$(cat "$file.sens-out")" = "1"
+          done
+          if target/debug/sens "$RUNNER_TEMP/fs-sens-proof/mutant-1.sens" > "$RUNNER_TEMP/fs-sens-proof/mutant.out" 2>&1; then
+            echo "BLOCKED: one-bit mutated SENS verdict succeeded" >&2
+            exit 1
+          fi
