@@ -2,13 +2,14 @@
 //! lib/result-status.my instead of collapsing every non-proof into one phrase.
 
 use sens::{
-    eval_parsed_expressions, eval_program, parse_exact_domain_source,
+    eval_parsed_expressions, eval_program, load_core_library, parse_exact_domain_source,
     parse_mixed_exact_domain_reasoning_source, Session,
 };
 
 fn eval_outcome_value(source: &str) -> sens::Value {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    load_core_library(&mut session)
+        .expect("canonical current Core4 bootstrap must load via its public loader");
     // These reasoning libraries contain exact D9 call heads; use their
     // source-pinned reader rather than the legacy numeric compatibility parser.
     for (path, source) in [
