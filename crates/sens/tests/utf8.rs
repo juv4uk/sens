@@ -93,27 +93,67 @@ fn utf8_rejects_non_bytes_before_protocol_interpretation() {
 }
 
 
+fn explicitly_typed_d8_equal_call(d3: &[sens::Expr]) -> Vec<sens::Expr> {
+    let sens::ExprKind::List(items) = &d3[0].kind else {
+        panic!("потрібна форма-виклик")
+    };
+    let mut parts = items.to_vec();
+    parts[0] = sens::Expr {
+        kind: sens::ExprKind::DomainIdentity(sens::DomainIdentity::D8(
+            sens::CoreD8::from_word(
+                sens::Bit8::new(0b11110111).expect("ратифікована D8-координата"),
+            ),
+        )),
+        span: parts[0].span,
+    };
+    vec![sens::Expr {
+        kind: sens::ExprKind::List(std::rc::Rc::from(parts.into_boxed_slice())),
+        span: d3[0].span,
+    }]
+}
+
 #[test]
 fn utf8_atomic_d3_eq_matches_d8_equal_for_all_256_bytes_at_five_boundaries() {
-    // D3:101 EQ та D8:11110111 EQUAL мають різну ширину й семантику
-    // для списків. Рівність допустима лише для двох атомарних чисел.
+    // Читач правильно не здогадується: W8 payload сам собою НЕ є D8.
+    let opaque = parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp", "(11110111 0 0)",
+    ).expect("синтаксис W8-коду залишається допустимим");
+    let sens::ExprKind::List(opaque_items) = &opaque[0].kind else {
+        panic!("потрібна форма-виклик")
+    };
+    assert!(
+        !matches!(&opaque_items[0].kind, sens::ExprKind::DomainIdentity(_)),
+        "вісім бітів не повинні автоматично створювати D8-виклик"
+    );
+
+    // D3 EQ на числових атомах порівнюємо із явно типізованим D8 EQUAL.
+    // Це НЕ змінює reader, W8 carrier або загальну D8 callability.
     let mut session = Session::default();
     let mut checked = 0_usize;
     for byte in 0_u16..=255 {
         for boundary in [0_u16, 224, 237, 240, 244] {
-            for (head, expected_width) in [("101", 3), ("11110111", 8)] {
-                let source = format!("({head} {byte} {boundary})");
-                let parsed = parse_mixed_exact_domain_utf8_source(
-                    "lib/utf8.lisp", &source,
-                ).expect("цей функційний код має читатися лише за своєю шириною");
-                let sens::ExprKind::List(args) = &parsed[0].kind else {
-                    panic!("очікується одна форма виклику")
-                };
-                assert!(matches!(
-                    &args[0].kind,
-                    sens::ExprKind::DomainIdentity(identity) if identity.width() == expected_width
-                ), "{source}: ширина функції не збігається з доменом");
-                let result = eval_parsed_expressions(&parsed, &mut session)
+            let source = format!("(101 {byte} {boundary})");
+            let d3 = parse_mixed_exact_domain_utf8_source(
+                "lib/utf8.lisp", &source,
+            ).expect("точне D3 джерело");
+            let sens::ExprKind::List(d3_items) = &d3[0].kind else {
+                panic!("потрібна форма-виклик")
+            };
+            assert!(matches!(
+                &d3_items[0].kind,
+                sens::ExprKind::DomainIdentity(identity) if identity.width() == 3
+            ), "{source}: D3 має бути саме трьохбітним");
+
+            let d8 = explicitly_typed_d8_equal_call(&d3);
+            let sens::ExprKind::List(d8_items) = &d8[0].kind else {
+                panic!("потрібна форма-виклик")
+            };
+            assert!(matches!(
+                &d8_items[0].kind,
+                sens::ExprKind::DomainIdentity(identity) if identity.width() == 8
+            ), "явний D8 виклик мусить залишатися восьмибітним");
+            for parsed in [&d3[..], &d8[..]] {
+                let result = eval_parsed_expressions(parsed, &mut session)
                     .unwrap_or_else(|error| panic!("{source}: {error}"));
                 assert_eq!(
                     result.value.as_predicate_bit(),
@@ -130,18 +170,16 @@ fn utf8_atomic_d3_eq_matches_d8_equal_for_all_256_bytes_at_five_boundaries() {
 #[test]
 fn utf8_d3_atom_eq_must_not_replace_structural_d8_equal() {
     let mut session = Session::default();
-    let atomic_only = parse_mixed_exact_domain_utf8_source(
+    let d3 = parse_mixed_exact_domain_utf8_source(
         "lib/utf8.lisp", "(101 (001 (a b)) (001 (a b)))",
     ).expect("синтаксис допустимий");
-    let error = eval_parsed_expressions(&atomic_only, &mut session)
+    let d8 = explicitly_typed_d8_equal_call(&d3);
+    let error = eval_parsed_expressions(&d3, &mut session)
         .expect_err("D3 EQ не приймає список як атом");
     assert_eq!(error.kind, sens::ErrorKind::Type);
 
-    let structural = parse_mixed_exact_domain_utf8_source(
-        "lib/utf8.lisp", "(11110111 (001 (a b)) (001 (a b)))",
-    ).expect("D8 EQUAL залишається окремою ратифікованою функцією");
-    let outcome = eval_parsed_expressions(&structural, &mut session)
-        .expect("D8 EQUAL має підтримувати структурне порівняння");
+    let outcome = eval_parsed_expressions(&d8, &mut session)
+        .expect("лише D8 EQUAL може виконати структурне порівняння");
     assert_eq!(outcome.value.as_predicate_bit(), Some(true));
 }
 
