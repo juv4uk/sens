@@ -17,51 +17,35 @@
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 4;
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
     Car,
     Cdr,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct SelectorProgram {
-    steps: [Step; MAX_SELECTOR_DEPTH],
-    len: usize,
-}
-
-fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
+/// Decode only the exact-width, ratified selector shape. No temporary
+/// instruction array: the suffix bits already encode the execution order.
+fn decode(identity: CoreDomainIdentity) -> Option<(Step, u8, usize)> {
     let width = identity.width();
     if !(3..=6).contains(&width) {
         return None;
     }
 
     let payload = identity.packed_bits();
-    let prefix = payload >> (width - 3);
-    let root = match prefix {
+    let root = match payload >> (width - 3) {
         0b100 => Step::Car,
         0b011 => Step::Cdr,
         _ => return None,
     };
+    Some((root, payload, width - 3))
+}
 
-    let suffix_len = width - 3;
-    let mut steps = [Step::Car; MAX_SELECTOR_DEPTH];
-    steps[0] = root;
-
-    for index in 0..suffix_len {
-        let shift = suffix_len - 1 - index;
-        steps[index + 1] = if ((payload >> shift) & 1) == 0 {
-            Step::Car
-        } else {
-            Step::Cdr
-        };
+#[inline]
+fn select(step: Step, value: &Value, span: Span) -> Result<Value, LanguageError> {
+    match step {
+        Step::Car => special_forms::car_value(value, span),
+        Step::Cdr => special_forms::cdr_value(value, span),
     }
-
-    Some(SelectorProgram {
-        steps,
-        len: 1 + suffix_len,
-    })
 }
 
 pub(super) fn invoke(
@@ -69,7 +53,7 @@ pub(super) fn invoke(
     args: &[Value],
     span: Span,
 ) -> Option<Result<Value, LanguageError>> {
-    let program = decode(identity)?;
+    let (root, payload, suffix_len) = decode(identity)?;
 
     if args.len() != 1 {
         return Some(Err(LanguageError::new(
@@ -82,19 +66,37 @@ pub(super) fn invoke(
         )));
     }
 
-    let mut value = args[0].clone();
-    for step in program.steps[..program.len].iter().rev() {
-        value = match step {
-            Step::Car => match special_forms::car_value(&value, span) {
-                Ok(value) => value,
-                Err(error) => return Some(Err(error)),
-            },
-            Step::Cdr => match special_forms::cdr_value(&value, span) {
-                Ok(value) => value,
-                Err(error) => return Some(Err(error)),
-            },
+    // Lisp selector composition executes the rightmost step first. Those
+    // steps are precisely the low-order payload bits; the D3 root runs last.
+    // The first step borrows the argument directly instead of allocating an
+    // unnecessary clone of the complete input list.
+    let first = if suffix_len == 0 {
+        root
+    } else if payload & 1 == 0 {
+        Step::Car
+    } else {
+        Step::Cdr
+    };
+    let mut value = match select(first, &args[0], span) {
+        Ok(value) => value,
+        Err(error) => return Some(Err(error)),
+    };
+    for shift in 1..suffix_len {
+        let step = if (payload >> shift) & 1 == 0 {
+            Step::Car
+        } else {
+            Step::Cdr
+        };
+        value = match select(step, &value, span) {
+            Ok(value) => value,
+            Err(error) => return Some(Err(error)),
         };
     }
-
+    if suffix_len != 0 {
+        value = match select(root, &value, span) {
+            Ok(value) => value,
+            Err(error) => return Some(Err(error)),
+        };
+    }
     Some(Ok(value))
 }
