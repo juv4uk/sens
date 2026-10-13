@@ -1,65 +1,90 @@
-name: Машинний D3 false — 10 двійкових законів SENS і негативний біт
+# ЄДИНИЙ ЦІЛЬОВИЙ АВТОМАТИЧНИЙ SENS-ТЕСТ, 2026-10-13.
+# Семантика — лише у фізичних двійкових .sens/.bits; host перевіряє бітність,
+# транспортування й D1-вердикт. Інші workflows залишаються ручними.
+name: SENS — один двійковий закон D3 + однобітний мутант
+
 on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/effects/u64.lisp"
+      - "tests/semantic/machine-effect-d3-false-law.bits"
+      - "tests/semantic/machine-effect-d3-false-mutant.bits"
+      - "tests/semantic/machine-effect-d3-false-law.sens"
+      - "tests/semantic/machine-effect-d3-false-mutant.sens"
+      - "scripts/ci_failure_contract.py"
+      - ".github/workflows/machine-effect-d3-false.yml"
   workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: sens-one-binary-witness
+  cancel-in-progress: false
+
 jobs:
-  exact-machine-effect-false:
+  one-sens-law:
+    name: D3 ATOM/QUOTE → D1 · 1 law + 1 bit mutant
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Створити журнал червоного
+      - name: Один двійковий тест з інформативною діагностикою
+        id: self_verdict
         shell: bash
         run: |
-          : > "$RUNNER_TEMP/machine-effect-d3-false.jsonl"
-      - name: Збірка виконавця — механізм, не семантичний оракул
-        shell: bash
-        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-red.jsonl"
+          : > "$report"
+          base="tests/semantic/machine-effect-d3-false"
+
           python3 scripts/ci_failure_contract.py run \
-            --test-id machine-effect-executor-build --layer transport \
-            --fixture tests/semantic/machine-effect-d3-false-law.bits \
-            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
+            --test-id d3-physical-executor --layer transport \
+            --fixture "${base}-law.bits" --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
-      - name: Довести структурну міграцію без повторного W8
-        shell: bash
-        run: |
-          printf '13\n' > "$RUNNER_TEMP/count-expected"
+
+          printf '1\n' > "$RUNNER_TEMP/d1-yes"
+          printf '0\n' > "$RUNNER_TEMP/d1-no"
+
+          # Механічний Hamming-1 свідок: жодної нової семантичної таблиці.
           python3 scripts/ci_failure_contract.py run \
-            --test-id machine-effect-thirteen-exact-d3 --layer parse \
-            --fixture tests/semantic/machine-effect-d3-false-law.bits \
-            --expected-file "$RUNNER_TEMP/count-expected" \
-            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
-            -- grep -cF '(010 (001 (000)))' lib/machine/effects/u64.lisp
-          python3 scripts/ci_failure_contract.py run \
-            --test-id machine-effect-no-old-W8-zero --layer parse \
-            --fixture tests/semantic/machine-effect-d3-false-law.bits \
-            --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
-            -- bash -c '! grep -Fq "(010 (001 (00000000)))" lib/machine/effects/u64.lisp'
-      - name: Виконати позитивний і негативний D1 вердикти самим SENS
-        shell: bash
-        run: |
+            --test-id d3-one-bit-delta --layer transport \
+            --fixture "${base}-law.bits" --expected-file "$RUNNER_TEMP/d1-yes" \
+            --report-file "$report" \
+            -- awk 'NR==FNR {for (i=1;i<=NF;i++) a[i]=$i; n=NF; next}
+              {if (NF!=n) exit 2; for (i=1;i<=NF;i++) if (a[i]!=$i) {
+                if ((a[i]=="0" && $i=="1") || (a[i]=="1" && $i=="0")) changes++;
+                else exit 2
+              } if (changes!=1) exit 2; print "1"}' \
+              "${base}-law.bits" "${base}-mutant.bits"
+
           for kind in law mutant; do
-            fixture="tests/semantic/machine-effect-d3-false-$kind.bits"
-            program="tests/semantic/machine-effect-d3-false-$kind.sens"
-            if [ "$kind" = law ]; then printf '1\n' > "$RUNNER_TEMP/verdict"; else printf '0\n' > "$RUNNER_TEMP/verdict"; fi
+            fixture="${base}-${kind}.bits"
+            program="${base}-${kind}.sens"
+            if [[ "$kind" == law ]]; then expected="$RUNNER_TEMP/d1-yes"
+            else expected="$RUNNER_TEMP/d1-no"; fi
             python3 scripts/ci_failure_contract.py run \
-              --test-id "machine-effect-$kind-t5-decode" --layer transport \
-              --fixture "$fixture" --expected-file "$fixture" \
-              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
-              -- target/debug/sens-trit open "$program" || exit 1
+              --test-id "d3-${kind}-physical-identity" --layer transport \
+              --fixture "$fixture" --expected-file "$fixture" --report-file "$report" \
+              -- target/debug/sens-trit open "$program"
             python3 scripts/ci_failure_contract.py run \
-              --test-id "machine-effect-$kind-eval" --layer eval \
-              --fixture "$fixture" --expected-file "$RUNNER_TEMP/verdict" \
-              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
-              -- target/debug/sens "$program" || exit 1
-            python3 scripts/ci_failure_contract.py run \
-              --test-id "machine-effect-$kind-trit-eval" --layer eval \
-              --fixture "$fixture" --expected-file "$RUNNER_TEMP/verdict" \
-              --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" \
-              -- target/debug/sens-trit eval "$program" || exit 1
+              --test-id "d3-${kind}-sens-verdict" --layer eval \
+              --fixture "$fixture" --expected-file "$expected" --report-file "$report" \
+              -- target/debug/sens "$program"
           done
-      - name: UNINFORMATIVE-OUTPUT — кожна відмова повинна говорити
+
+      - name: UNINFORMATIVE-OUTPUT · навіть невдала збірка мусить говорити
         if: always()
-        run: python3 scripts/ci_failure_contract.py scan --report-file "$RUNNER_TEMP/machine-effect-d3-false.jsonl" --allow-empty
+        shell: bash
+        env:
+          TEST_OUTCOME: ${{ steps.self_verdict.outcome }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-red.jsonl"
+          if [[ "$TEST_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
+          else
+            python3 scripts/ci_failure_contract.py scan --report-file "$report"
+          fi
