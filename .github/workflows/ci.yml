@@ -54,6 +54,11 @@ jobs:
             warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
           end
           exit(failures.empty? ? 0 : 1)
+      - name: Міграція — заборонити бездоказові file-name holds
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
