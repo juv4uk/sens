@@ -1,9 +1,9 @@
-name: Binary-domain semantic context
+# Карантин планових запусків 2026-10-13: лише один автоматичний SENS-тест.
+# Історичні діагностики збережені, доступні вручну; автоматичний schedule прибрано.
+name: Binary-domain semantic context (manual only)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 4 * * *"
 
 permissions:
   contents: read
