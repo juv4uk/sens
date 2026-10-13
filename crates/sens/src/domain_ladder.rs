@@ -8,10 +8,10 @@
 //! приймає ключ іншої довжини. Рівний packed payload у різних ширинах
 //! — різні координати.
 //!
-//! D7 dual authority (не змішувати):
-//! - exact-width / keyboard surface: `lib/domains/d7.lisp` — 128 рядків W7;
-//! - owner occupancy: `knowledge/d7-ratified.json` (#3572) — 126 admitted,
-//!   reserved `0100001` і `0101010`. Surface row ≠ automatic occupancy.
+//! D7 v2: 128/128 точних клавіатурних координат з
+//! `knowledge/d7-keyboard-v2-ratified.json`, усі лише Text/Data.
+//! Історична D7 v1 (126/128) не є поточною владою координат.
+//! Зайнятість комірки ≠ дозвіл викликати функцію.
 
 /// A width-qualified, meaning-free code word in the D1–D10 ladder.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -55,8 +55,8 @@ impl DomainCoordinate {
     /// D1/D2 structural/predicate roles stay unprojected.
     /// Some(true) proves occupancy, never a callable mechanism or human name.
     ///
-    /// D7: returns false for the two #3572 pinned reservations even though
-    /// the keyboard surface table lists all 128 exact-width rows.
+    /// D7 v2: every one of 128 W7 text/data coordinates is occupied.
+    /// Occupancy alone cannot mint a callable mechanism.
     pub fn owner_residency(self) -> Option<bool> {
         if self.width == 10 {
             // Whole-domain ratification; NOT physical T5 or callability.
@@ -92,23 +92,16 @@ mod tests {
         }
     }
 
-    /// Exact W7 is always representable (128 coordinates).
-    /// Owner occupancy (#3572) admits 126; two cells stay reserved.
-    /// Keyboard surface may still print those cells — that is not occupancy.
+    /// Вичерпний свідок точності: усі W7 = 128/128 data-only;
+    /// помилкове розширення до восьмого біта й callable неприпустимі.
     #[test]
-    fn d7_exact_width_is_full_while_owner_occupancy_keeps_two_reservations() {
-        let mut admitted = 0usize;
+    fn d7_keyboard_v2_exhaustive_width_and_noncallability() {
+        let mut seen = 0usize;
         for bits in 0..128u16 {
             let coordinate = DomainCoordinate::new(7, bits).expect("exact W7");
             assert_eq!(coordinate.width(), 7);
             assert_eq!(coordinate.bits(), bits);
-            let admission = coordinate.owner_residency().expect("D7 has owner rows");
-            assert_eq!(
-                admission,
-                bits != 0b0100001 && bits != 0b0101010,
-                "owner-reserved D7 words must stay unassigned in occupancy"
-            );
-            admitted += usize::from(admission);
+            assert_eq!(coordinate.owner_residency(), Some(true));
             let typed = crate::DomainIdentity::from_source_word(
                 crate::BinarySourceWord::W7(
                     crate::Bit7::new(bits as u8).expect("seven-bit word"),
@@ -116,24 +109,19 @@ mod tests {
             );
             assert_eq!(typed.width(), 7);
             assert_eq!(typed.packed_bits(), bits);
-            assert!(typed.core_operation().is_none(), "D7 residency is not callability");
+            assert!(typed.core_operation().is_none(), "D7 must never be callable");
+            assert_ne!(coordinate, DomainCoordinate::new(8, bits).unwrap());
+            seen += 1;
         }
-        assert_eq!(admitted, 126);
-        // Width or equal payload in another domain must not inherit D7 occupancy.
-        assert_ne!(
-            DomainCoordinate::new(6, 0b0100001).unwrap(),
-            DomainCoordinate::new(7, 0b0100001).unwrap(),
-            "same payload in D6 and D7 is not the same coordinate"
-        );
-        assert_eq!(
-            DomainCoordinate::new(8, 0b0100001).unwrap().owner_residency(),
-            Some(true),
-            "D8 is separately owner-ratified, not inherited from D7"
-        );
-        assert_eq!(
-            DomainCoordinate::new(10, 0b0100001).unwrap().owner_residency(),
-            Some(true)
-        );
+        assert_eq!(seen, 128);
+        assert_eq!(DomainCoordinate::new(7, 128), None);
+        assert_eq!(crate::Bit7::new(128), None);
+        // Старий v1-резерв тепер є W7-текстом, але не функцією.
+        for bits in [0b0100001, 0b0101010] {
+            assert_eq!(DomainCoordinate::new(7, bits).unwrap().owner_residency(), Some(true));
+            assert_ne!(DomainCoordinate::new(7, bits), DomainCoordinate::new(8, bits));
+        }
+        assert_ne!(DomainCoordinate::new(6, 33), DomainCoordinate::new(7, 33));
     }
 
     #[test]

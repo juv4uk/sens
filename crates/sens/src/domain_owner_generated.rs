@@ -161,6 +161,7 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 7, bits: 0b0011110, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0011111, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0100000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100001, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0100010, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0100011, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0100100, source: 3 },
@@ -169,6 +170,7 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 7, bits: 0b0100111, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0101000, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0101001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101010, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0101011, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0101100, source: 3 },
     DomainOwnerCoordinate { width: 7, bits: 0b0101101, source: 3 },
@@ -269,7 +271,7 @@ pub(crate) const DOMAIN_OWNER_BITMAPS: &[DomainOwnerBitmap] = &[
     DomainOwnerBitmap { width: 4, slots: [0x000000000000fddf, 0x0000000000000000] },
     DomainOwnerBitmap { width: 5, slots: [0x00000000ffffffff, 0x0000000000000000] },
     DomainOwnerBitmap { width: 6, slots: [0xffffffffffffffff, 0x0000000000000000] },
-    DomainOwnerBitmap { width: 7, slots: [0xfffffbfdffffffff, 0xffffffffffffffff] },
+    DomainOwnerBitmap { width: 7, slots: [0xffffffffffffffff, 0xffffffffffffffff] },
 ];
 
 /// Widths whose *entire* coordinate set is covered by separately owner-ratified
@@ -283,12 +285,12 @@ mod tests {
 
     #[test]
     fn generated_projection_has_owner_counts_and_controls() {
-        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 243);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 245);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 3).count(), 7);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 4).count(), 14);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 5).count(), 32);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 6).count(), 64);
-        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 126);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 128);
 
         for (width, bits) in [(4, 0b1100), (5, 0b01010), (6, 0b001111)] {
             assert!(DOMAIN_OWNER_COORDINATES
@@ -298,13 +300,18 @@ mod tests {
     }
 
     #[test]
-    fn generated_d7_occupancy_excludes_two_pinned_reservations() {
+    fn d7_keyboard_v2_occupies_all_128_without_callability() {
+        let d7 = DOMAIN_OWNER_COORDINATES.iter()
+            .filter(|row| row.width == 7).collect::<Vec<_>>();
+        assert_eq!(d7.len(), 128);
         for word in 0..128u8 {
-            let admitted = DOMAIN_OWNER_COORDINATES
-                .iter()
-                .any(|row| row.width == 7 && row.bits == word);
-            assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
+            assert!(d7.iter().any(|row| row.bits == word && row.source == 3),
+                "D7 v2 data coordinate must be present");
         }
+        let mask = DOMAIN_OWNER_BITMAPS.iter().find(|m| m.width == 7).unwrap();
+        assert_eq!(mask.slots, [u64::MAX, u64::MAX]);
+        // This table proves occupancy only. Executability requires an
+        // independent ratified Core operation mechanism.
     }
 
     #[test]
