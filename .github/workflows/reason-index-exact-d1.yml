@@ -12,6 +12,7 @@ on:
     paths:
       - "lib/reason.lisp"
       - "crates/sens/tests/reason_index.rs"
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
       - ".github/workflows/reason-index-exact-d1.yml"
   workflow_dispatch:
 
