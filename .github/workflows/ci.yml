@@ -84,7 +84,7 @@ jobs:
           python3 scripts/ci_failure_contract.py run \
             --test-id full-cargo-workspace-all-targets \
             --layer transport \
-            --fixture lib/compiler-nucleus.lisp \
+            --fixture Cargo.toml \
             --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" \
             -- cargo test --workspace --all-targets --locked
       - name: D1 source census — direct predicate bits, no wrapper constructors
