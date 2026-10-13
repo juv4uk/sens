@@ -22,17 +22,22 @@
 ; Quoted record tags remain blocked pending a real atomic D7 datum law;
 ; no fake D7 representation may be EQ-comparable to an atom.
 
+; Exact selector cutover: D4:1001 CADR and D5:10011 CADDR.
+; Fourth = admitted D5 CADDR after D3:011 CDR.
+; D6 CADDDR is a ratified identity, not an admitted physical call.
+; This profile does not gain any new primitive or D7 text fallback.
+
 (0011 C1-SECOND
   (0010 (X)
-    (100 (011 X))))
+    (1001 X)))
 
 (0011 C1-THIRD
   (0010 (X)
-    (100 (011 (011 X)))))
+    (10011 X)))
 
 (0011 C1-FOURTH
   (0010 (X)
-    (100 (011 (011 (011 X))))))
+    (10011 (011 X))))
 
 (0011 C1-MAKE-ERROR
   (0010 (KIND DETAIL)
