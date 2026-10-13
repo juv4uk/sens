@@ -165,6 +165,21 @@ fn d3_semantics_are_executed_and_decided_by_binary_sens() {
         ),
     ];
 
+    // Mechanical mutation control only: both programs have the same domain
+    // word positions and exactly ONE D1 source bit is inverted.
+    let pass_words = fixtures[0].0.split_whitespace().collect::<Vec<_>>();
+    let fail_words = fixtures[1].0.split_whitespace().collect::<Vec<_>>();
+    assert_eq!(pass_words.len(), 223, "pinned exact-word count");
+    assert_eq!(pass_words.len(), fail_words.len(), "no word added or deleted");
+    assert_eq!(pass_words.iter().map(|word| word.len()).sum::<usize>(), 457);
+    assert_eq!(fixtures[0].1.len(), 136, "pinned physical T5 size");
+    assert_eq!(fixtures[0].1.len(), fixtures[1].1.len());
+    let changed = pass_words.iter().zip(&fail_words)
+        .filter(|(before, after)| before != after)
+        .collect::<Vec<_>>();
+    assert_eq!(changed.as_slice(), &[(&"1", &"0")],
+        "the negative SENS program must invert exactly one D1 bit");
+
     for (source, physical, verdict) in fixtures {
         // Only exact binary SENS is admitted: no English/Lisp identifiers.
         assert!(source.bytes().all(|byte|
