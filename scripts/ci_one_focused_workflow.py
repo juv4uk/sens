@@ -25,6 +25,7 @@ FORBIDDEN = {
 WITNESSES = {
     "core3": "tests/semantic/core3-executors-d3-law.sens",
     "domains": "tests/semantic/d4-selector-width-law.sens",
+    "knowledge": "tests/semantic/knowledge-exact-arity-structure.sens",
     "narrate": "tests/semantic/narrate-d3-atom-eq-law.sens",
 }
 
@@ -140,6 +141,10 @@ def scope(path: str) -> str:
         "tests/semantic/core3-executors-"
     ):
         return "core3"
+    if path == "lib/knowledge.lisp" or path.startswith(
+        "tests/semantic/knowledge-exact-arity-structure."
+    ):
+        return "knowledge"
     if path == "lib/narrate.lisp" or path.startswith(
         "tests/semantic/narrate-d3-atom-eq-"
     ):
@@ -197,7 +202,7 @@ def diagnostic(test_id: str, layer: str, path: str, command: list[str],
 def execute(before: str, files: list[str]) -> int:
     scopes = {scope(p) for p in files}
     # Policy integrity takes priority, then the smallest admitted native law.
-    selected = next((x for x in ("ci-policy", "core3", "narrate", "domains") if x in scopes), "unsupported")
+    selected = next((x for x in ("knowledge", "ci-policy", "core3", "narrate", "domains") if x in scopes), "unsupported")
     deferred = sorted(scopes - {selected})
     print("SENS_CI_FOCAL_ROUTE " + json.dumps({
         "selected": selected, "changed_files": files,
