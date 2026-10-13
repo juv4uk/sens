@@ -48,6 +48,7 @@ jobs:
 
           puts "YAML_SYNTAX_AUDIT checked=#{paths.length} failed=#{failures.length}"
           failures.each do |path, detail|
+            puts "YAML_SYNTAX_FAILURE path=#{path} detail=#{detail}"
             warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
           end
           exit(failures.empty? ? 0 : 1)
