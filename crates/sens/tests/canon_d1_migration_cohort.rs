@@ -1,11 +1,15 @@
 //! Регресійна когорта #5029: виконуємо Canon напряму, без історичного
 //! witness-runner (він мігрується окремо в #5025).
-use sens::{eval_exact_domain_program, eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain, Session};
 
 fn canon_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("current Core library");
-    eval_exact_domain_program(include_str!("../../../lib/canon.lisp"), &mut session)
+    // Existing mixed-domain reader preserves compatibility D1 projections
+    // while lifting canonical D3/D4 call heads into exact domain identities.
+    let forms = parse_mixed_exact_domain(include_str!("../../../lib/canon.lisp"))
+        .expect("Canon current D3/D4 source must parse");
+    eval_parsed_expressions(&forms, &mut session)
         .expect("Canon source must load");
     session
 }
