@@ -1,0 +1,26 @@
+name: Точні доменні голови лінтера
+
+on:
+  pull_request:
+    paths:
+      - "lib/linter.lisp"
+      - "tests/test_linter_domain_head_cutover.py"
+      - ".github/workflows/linter-exact-domain-heads.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-domain-heads:
+    name: D3 EQ / 2046 точних координат
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Точний бітовий свідок усіх доменів і негативних мутацій
+        run: python3 tests/test_linter_domain_head_cutover.py -v
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Поведінкова регресія живого лінтера
+        run: cargo test --locked -p sens --test lint_gate -- --nocapture
