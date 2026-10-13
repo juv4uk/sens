@@ -1,23 +1,16 @@
 name: Знання — точковий бінарний SENS-свідок
 
+# КАРАНТИН: єдиний автоматичний тест — ci.yml у main.
+# Неканонічний .bits -> .lisp тест арності заборонено запускати.
 on:
-  pull_request:
-    paths:
-      - "lib/knowledge.lisp"
-      - "tests/semantic/knowledge-exact-arity-structure.bits"
-      - ".github/workflows/knowledge-exact-arity-self-witness.yml"
-  push:
-    branches: [main]
-    paths:
-      - "lib/knowledge.lisp"
-      - "tests/semantic/knowledge-exact-arity-structure.bits"
-      - ".github/workflows/knowledge-exact-arity-self-witness.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   knowledge-exact-arity:
+    if: ${{ false }} # Жодного runner без підтвердженої фізичної .sens-програми
     name: Двійкова SENS-семантика арності термів
     runs-on: ubuntu-24.04
     timeout-minutes: 15
