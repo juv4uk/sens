@@ -1,0 +1,31 @@
+name: Advice Taker — точний D3 і 2046 адрес
+
+on:
+  pull_request:
+    paths:
+      - "lib/understand.lisp"
+      - "tests/test_understand_exact_d3_2046.py"
+      - "crates/sens/tests/understand_exact_empty.rs"
+      - ".github/workflows/understand-d3-empty-2046.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exhaustive-domains:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Вісім AST- і негативних тестів та 2046 записів D1–D10
+        run: python3 -m unittest discover -s tests -p 'test_understand_exact_d3_2046.py' -v
+
+  live-rust-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Виконати поточний D3/D4 Advice Taker через Rust
+        run: cargo test --locked -p sens --test understand_exact_empty -- --nocapture
