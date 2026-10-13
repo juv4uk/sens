@@ -1,10 +1,6 @@
 name: GPU packet — точні 2046 доменних координат
 
 on:
-  pull_request:
-    paths:
-      - "crates/sens/src/gpu_execution_packet.rs"
-      - ".github/workflows/gpu-exact-domain-2046.yml"
   workflow_dispatch:
 
 permissions:
