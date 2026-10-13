@@ -95,14 +95,14 @@ jobs:
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           : > "$report"
+          : > "$RUNNER_TEMP/sens-native-evidence.jsonl"
           python3 scripts/ci_failure_contract.py run \
             --test-id one-sens-transport-build \
             --layer transport \
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens
-      # SENS-native semantic suite is a manual extension of the SAME workflow.
-      # Automatic pushes retain the one focused SENS job; no second runner.
+      # Manual, deeper suite has independent witnesses, never an automatic green claim.
       - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
         if: github.event_name == 'workflow_dispatch'
         shell: bash
@@ -168,38 +168,25 @@ jobs:
             --fixture "$program" \
             --expected-file "$RUNNER_TEMP/expected-d1" \
             --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
-      - name: Негативний контроль — виключно SENS non-callable, не помилка парсера
+      - name: Негативний контроль — безпосередній процес SENS відкидає non-callable
         id: mutant
         shell: bash
         run: |
           set -euo pipefail
           mutant=tests/semantic/domain-logic-2040/mutant.sens
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          echo "test_id=sens-domain-logic-2040-mutant layer=eval expected=SENS-non-callable"
+          echo "test_id=sens-domain-logic-2040-mutant layer=eval executor=target/debug/sens"
           sha256sum "$mutant"
           python3 scripts/ci_failure_contract.py run \
             --test-id sens-domain-logic-2040-mutant \
             --layer eval \
             --fixture "$mutant" \
+            --expect-error-substring "not callable" \
             --report-file "$report" \
-            -- bash -c '
-              set +e
-              target/debug/sens tests/semantic/domain-logic-2040/mutant.sens > "$RUNNER_TEMP/mutant.stdout" 2> "$RUNNER_TEMP/mutant.stderr"
-              code=$?
-              if [ "$code" -eq 0 ]; then
-                echo "Mutant unexpectedly accepted by SENS" >&2
-                cat "$RUNNER_TEMP/mutant.stdout" >&2
-                exit 1
-              fi
-              if ! grep -qi "not callable" "$RUNNER_TEMP/mutant.stderr"; then
-                echo "Mutant rejected for an unrelated reason: not a proven SENS non-callable branch" >&2
-                cat "$RUNNER_TEMP/mutant.stderr" >&2
-                exit 1
-              fi
-              echo "SENS_MUTANT_REJECTED_BY_NONCALLABLE rc=$code"
-              exit 0
-            '
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$mutant"
       - name: Двійковий закон арності знань — рівно D3/D4 і точний D1:YES
         id: knowledge
         shell: bash
@@ -216,15 +203,16 @@ jobs:
             --fixture "$program" \
             --expected-file "$RUNNER_TEMP/expected-knowledge-d1" \
             --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
-      - name: Точний QUOTE/D7 та негативний SLP1 — міграційні межі
+      - name: CI-клей Python — механічні межі кодування QUOTE/D7 та SLP1 (не semantic oracle)
         id: quoted-d7
         shell: bash
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           for fixture in test_sens_quoted_datum_law.py test_slp1_d7_v2_quote_boundary.py; do
-            echo "test_id=$fixture layer=encode semantic_authority=binary-SENS"
+            echo "test_id=$fixture layer=encode executor=CI_GLUE_NO_SEMANTICS"
             python3 scripts/ci_failure_contract.py run \
               --test-id "$fixture" \
               --layer encode \
@@ -244,17 +232,17 @@ jobs:
             --fixture scripts/migrate-to-sens-codes.py \
             --report-file "$report" \
             -- python3 -O tests/test_migrate_resolver_failclosed.py
-      - name: TCP — точний двійковий D3/D4-свідок
+      - name: TCP — Rust інтеграційний тест з викликом SENS-бібліотеки (не окремий native CLI oracle)
         id: tcp-migration
         shell: bash
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          echo "test_id=tcp-binary-d4-law layer=eval semantic_authority=binary-SENS"
+          echo "test_id=tcp-binary-d4-law layer=transport executor=rust-integration—not-native-cli"
           sha256sum tests/fixtures/semantic/tcp-exact-selftest.bits lib/tcp.lisp
           python3 scripts/ci_failure_contract.py run \
             --test-id tcp-binary-d4-law \
-            --layer eval \
+            --layer transport \
             --fixture tests/fixtures/semantic/tcp-exact-selftest.bits \
             --report-file "$report" \
             -- cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
@@ -276,9 +264,22 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          # Ratchet first: even a green Python runner cannot impersonate SENS.
+          # The scanner validates three receipts against the actual executable,
+          # physical fixture hashes, binary package version and exact commands.
+          native_rc=0
+          python3 scripts/ci_failure_contract.py scan-executors \
+            --report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --require sens-time-d1-predicate-law \
+            --require sens-domain-logic-2040-mutant \
+            --require knowledge-exact-arity-structure || native_rc=$?
+          diagnostic_rc=0
           if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
-            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
-            # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
-            python3 scripts/ci_failure_contract.py scan --report-file "$report"
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
+          fi
+          if [[ "$native_rc" -ne 0 || "$diagnostic_rc" -ne 0 ]]; then
+            echo "::error::UNINFORMATIVE-EXECUTOR or UNINFORMATIVE-OUTPUT; blocking CI"
+            exit 1
           fi
