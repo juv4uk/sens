@@ -170,7 +170,7 @@ class KnowledgeMacroDomainCutover(unittest.TestCase):
                 table = (ROOT / f"lib/domains/d{width}.lisp").read_text(
                     encoding="utf-8"
                 )
-                keys = re.findall(r"(?m)^  \\(([01]+)\\s", table)
+                keys = re.findall(r"(?m)^  \(([01]+)\s", table)
                 self.assertEqual(keys,
                                  [f"{value:0{width}b}"
                                   for value in range(1 << width)])
