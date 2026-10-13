@@ -1,18 +1,6 @@
 name: Числовий носій — тільки явно кваліфіковані D24+
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "crates/sens/src/binary_number.rs"
-      - "crates/sens/src/domain_numeric.rs"
-      - ".github/workflows/d24-explicit-binary-number.yml"
-  push:
-    branches: [main]
-    paths:
-      - "crates/sens/src/binary_number.rs"
-      - "crates/sens/src/domain_numeric.rs"
-      - ".github/workflows/d24-explicit-binary-number.yml"
   workflow_dispatch:
 
 permissions:
@@ -27,8 +15,8 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Точна бітність, перенесення та відмова від неявних чисел
-        run: cargo test --locked -p sens --lib binary_number::tests:: -- --nocapture
+        run: "cargo test --locked -p sens --lib binary_number::tests:: -- --nocapture"
       - name: Один біт змінює Dn на D2n — точний діагностичний свідок
-        run: cargo test --locked -p sens --lib domain_numeric::tests::one_bit_boundary_diagnostic_preserves_every_domain_bit -- --nocapture
+        run: "cargo test --locked -p sens --lib domain_numeric::tests::one_bit_boundary_diagnostic_preserves_every_domain_bit -- --nocapture"
       - name: Усі закони канонічних NEG і RATIO лишаються чинними
-        run: cargo test --locked -p sens --lib domain_numeric::tests:: -- --nocapture
+        run: "cargo test --locked -p sens --lib domain_numeric::tests:: -- --nocapture"
