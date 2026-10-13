@@ -13,6 +13,10 @@ on:
       - 'tests/semantic/knowledge-exact-arity-structure.*'
       - 'lib/knowledge.lisp'
       - 'lib/domains/**'
+      - 'lib/domains/d4.lisp'
+      - 'lib/result-status.lisp'
+      - 'lib/narrate.lisp'
+      - 'lib/reason.lisp'
       - 'crates/sens/src/eval/**'
 
 permissions:

@@ -1,5 +1,6 @@
 use sens::{
-    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
+    eval_parsed_expressions, eval_program, parse_canonical_binary, parse_exact_domain_source,
+    parse_mixed_exact_domain_reasoning_source, Expr, ExprKind, Session,
 };
 
 fn session() -> Session {
@@ -88,20 +89,63 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
 }
 
 #[test]
-fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
-    let mut session = session();
-    for (source, expected) in [
-        ("(reason-index? (quote ()))", false),
-        ("(reason-index? (quote atom))", false),
-        ("(reason-index? (quote (other linear () ())))", false),
-        ("(reason-index? (reason-index-linear (quote ())))", true),
-        ("(reason-index? (quote (reason-index/1 indexed () ())))", true),
-    ] {
-        let value = eval_program(source, &mut session)
-            .unwrap_or_else(|err| panic!("{source}: {err}")).value;
-        assert_eq!(value.as_predicate_bit(), Some(expected),
-            "reason-index? must produce exact D1; source: {source}, value: {value}");
+fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
+    let mut s = session();
+
+    // The law itself is binary SENS: only admitted D3 ATOM/EQ primitives
+    // decide the semantic result. No unratified user function is made callable.
+    let law = include_str!("../../../tests/semantic/narrate-d3-atom-eq-law.bits");
+    assert!(
+        law.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
+        "the semantic witness must be visible binary words plus separators"
+    );
+    let forms = parse_canonical_binary(law).expect("canonical binary ATOM/EQ law");
+    let verdict = eval_parsed_expressions(&forms, &mut s)
+        .expect("SENS rejected the canonical ATOM/EQ law");
+    assert_eq!(
+        verdict.value.as_predicate_bit(),
+        Some(true),
+        "SENS primitive law must produce exact D1:YES"
+    );
+
+    // These are mechanical invariants over production source, not a host
+    // truth table: prove EQ cannot see a pair and each helper keeps its width.
+    let reason_source = include_str!("../../../lib/reason.lisp");
+    let rs = reason_source.find("(0011 reason-index?").expect("reason-index? exists");
+    let re = reason_source[rs..].find("(0011 reason-index-linear").expect("reason-index? ends").saturating_add(rs);
+    let body = &reason_source[rs..re];
+    let empty_guard = body.find("((0101 value)").expect("D4 NULL guard");
+    let car_atom_guard = body.find("((010 (100 value))").expect("D3 ATOM(CAR) guard");
+    let eq_call = body.find("((101 (100 value) *reason-index-schema*)").expect("D3 EQ call");
+    assert!(empty_guard < car_atom_guard && car_atom_guard < eq_call,
+        "D4 NULL and D3 ATOM(CAR) must guard D3 EQ, in that order");
+
+    let narration_source = include_str!("../../../lib/narrate.lisp");
+    let hs = narration_source.find("(0011 narrate-proper-list?").expect("D3/D4 helpers exist");
+    let he = narration_source[hs..].find("(0011 narrate-fact").expect("helper span ends").saturating_add(hs);
+    let helper_source = &narration_source[hs..he];
+    let helper_forms = parse_exact_domain_source(helper_source)
+        .expect("arity helpers must retain exact-domain identities");
+    assert_eq!(helper_forms.len(), 3, "one proper-list helper and two arity helpers");
+    let mut widths = Vec::new();
+    fn collect_widths(expr: &sens::Expr, widths: &mut Vec<usize>) {
+        if let ExprKind::DomainIdentity(identity) = &expr.kind {
+            widths.push(identity.width());
+        }
+        if let ExprKind::List(items) = &expr.kind {
+            for item in items.iter() {
+                collect_widths(item, widths);
+            }
+        }
     }
+    for form in &helper_forms {
+        collect_widths(form, &mut widths);
+    }
+    widths.sort_unstable();
+    widths.dedup();
+    assert_eq!(widths, vec![1, 3, 4], "D1 results; D3 structure; D4 empty-list predicate");
+    assert!(!helper_source.contains("000000"), "D6 LENGTH must not return to arity helpers");
+    assert!(!helper_source.contains("11110111"), "D8 EQUAL must not return to arity helpers");
 }
 
 #[test]
