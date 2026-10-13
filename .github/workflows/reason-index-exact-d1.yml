@@ -24,11 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Exact D1: coordinate and non-atom negatives"
+      - name: "Exact D1: reject nested rule-head as schema tag"
         run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
-      - name: "64 unique predicates stay indexed"
+      - name: "Structural fuel: exactly 64 unique predicates stay indexed"
         run: cargo test --locked -p sens --test reason_index exactly_sixty_four_distinct_predicates_remain_indexed -- --exact --nocapture
-      - name: "65 unique predicates fall back without numeric arithmetic"
+      - name: "Structural fuel: 65 unique predicates fall back"
         run: cargo test --locked -p sens --test reason_index too_many_distinct_predicates_fall_back_to_linear_mode -- --exact --nocapture
-      - name: "Full index regression and all 2046 exact-width coordinates"
+      - name: "Full reason-index regression and 2046 domain coordinates"
         run: cargo test --locked -p sens --test reason_index -- --nocapture

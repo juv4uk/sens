@@ -48,6 +48,8 @@ fn indexed_bucket_preserves_source_rule_order_exactly() {
 #[test]
 fn variable_goal_falls_back_to_every_rule() {
     let mut s = session();
+    // Довжина як некваліфіковане число нині не є D24+ арифметикою.
+    // Перевіряємо сильніший інваріант: усі правила + первісний порядок.
     let source = r#"
       (def rules (quote (((p one)) ((q two)) ((r three)))))
       (reason-index-candidates
@@ -56,8 +58,7 @@ fn variable_goal_falls_back_to_every_rule() {
     "#;
     assert_eq!(
         eval(&mut s, source),
-        "(((p one)) ((q two)) ((r three)))",
-        "variable goals must retain every original rule without a numeric LENGTH projection"
+        "(((p one)) ((q two)) ((r three)))"
     );
 }
 
@@ -156,17 +157,16 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
 fn reason_index_builder_diagnostic_first_failing_stage() {
     let mut s = session();
     let probes = [
-        "(reason-term-predicate (quote (p a)))",
-        "(reason-rule-predicate (quote ((p a))))",
-        "(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))",
-        "(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))",
-        "(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-capacity-slots*)",
-        "(reason-index-build-scan (quote (((p a)))) (quote (((p a)))) (quote ()) *reason-index-capacity-slots*)",
-        "(reason-make-index (quote (((p a)))))",
+        ("(reason-term-predicate (quote (p a)))", "p"),
+        ("(reason-rule-predicate (quote ((p a))))", "p"),
+        ("(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
+        ("(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
+        ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
+         "(reason-index/1 indexed () ())"),
+        ("(reason-make-index (quote (((p a)))))",
+         "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
     ];
-    for (i, probe) in probes.iter().enumerate() {
-        let actual = eval_program(probe, &mut s);
-        eprintln!("reason-index step {i}: {probe} => {actual:?}");
-        assert!(actual.is_ok(), "failed at stage {i} : {probe}");
+    for (probe, expected) in probes {
+        assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");
     }
 }

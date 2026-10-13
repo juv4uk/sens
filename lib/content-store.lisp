@@ -4,16 +4,21 @@
 ;; stored as `(world-history journal metadata)`, not with recursively duplicated
 ;; parent snapshots; navigation remains the responsibility of live World values.
 ;;
+;; Migrated: pure surface composition over exact D1 map (lib/persistent-map.lisp)
+;; and world/knowledge content addresses. No host truthiness. No new COND.
+;; Width is identity; every bit of the domain address is valued.
+;;
+;; Reuses (2000+ surface):
+;;   map-empty, внутрішня-мапа-вставити, внутрішня-мапа-отримати,
+;;   внутрішня-мапа-містить, внутрішня-мапа-список, внутрішня-довжина,
+;;   knowledge-content-address, world-content-address, world-address-content.
+;;
 ;; Незмінний content-addressed store — persistent map від канонічної адреси з
 ;; `lib/world.lisp` до звичайних my-lisp-даних. Повторний однаковий вміст замінює
-;; той самий ключ і не ростить store. Світ зберігається як `(world-history
-;; journal metadata)`, без рекурсивного дублювання parent snapshots.
+;; той самий ключ і не ростить store.
 ;;
 ;; Ein unveränderlicher content-addressed Store ist eine persistente Map von der
-;; kanonischen Adresse aus `lib/world.lisp` zu gewöhnlichen my-lisp-Daten. Gleicher
-;; Inhalt ersetzt denselben Schlüssel statt den Store zu vergrößern. Welten
-;; werden als `(world-history journal metadata)` ohne rekursive Elternkopien
-;; gespeichert.
+;; kanonischen Adresse aus `lib/world.lisp` zu gewöhnlichen my-lisp-Daten.
 
 (0011 empty-content-store
   (0010 () map-empty))
