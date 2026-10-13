@@ -1,0 +1,32 @@
+name: SENS-owned binary semantic witnesses
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/semantic/**"
+      - "lib/result-status.lisp"
+      - "lib/core.lisp"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - ".github/workflows/sens-owned-semantic-witnesses.yml"
+  pull_request:
+    paths:
+      - "tests/semantic/**"
+      - "lib/result-status.lisp"
+      - "lib/core.lisp"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - ".github/workflows/sens-owned-semantic-witnesses.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  binary-self-verdicts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Execute semantic laws owned by binary SENS
+        run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture

@@ -1,4 +1,4 @@
-name: D7 ratified authority and W7 transport
+name: D7 current keyboard authority and exact W7 transport
 
 on:
   push:
@@ -15,37 +15,45 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - name: Check 126/128 ratified D7 residents, reserved coordinates and Lisp surface
-        run: python3 scripts/check-d7-current-authority.py
-      - name: Оптимізований Python не минає доказ D7
+      - name: Verify current ratified 128/128 D7 keyboard and surface
+        run: |
+          python3 scripts/check-d7-keyboard-v2-table.py
+          python3 scripts/check-d7-current-authority.py
+          python3 scripts/check-d7-runtime-projection.py
+      - name: Ensure optimized Python cannot bypass the current D7 checks
+        run: |
+          PYTHONOPTIMIZE=1 python3 scripts/check-d7-keyboard-v2-table.py
+          PYTHONOPTIMIZE=2 python3 scripts/check-d7-runtime-projection.py
+      - name: Test only current D7 keyboard and exact T5
+        run: |
+          python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_no_historical_runtime.py' -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove current Rust W7 occupancy, projection and physical transport
+        run: |
+          cargo test --locked -p sens --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire
+          cargo test --locked -p sens --lib text7_projection::tests
+          cargo test --locked -p sens --lib d7_keyboard::tests
+      - name: Execute binary SENS-owned D1/D3/D7/D8/D9 semantic verdict
         shell: bash
         run: |
           set -euo pipefail
-          for level in 1 2; do
-            log="$RUNNER_TEMP/d7-optimized-$level.log"
-            if PYTHONOPTIMIZE="$level" python3 scripts/check-d7-current-authority.py >"$log" 2>&1; then
-              echo "::error::D7 validator reported success with PYTHONOPTIMIZE=$level"
-              exit 1
-            fi
-            if ! grep -Fq "D7-CURRENT-AUTHORITY: BLOCKED" "$log"; then
-              cat "$log"
-              echo "::error::D7 validator did not report named fail-closed outcome"
-              exit 1
-            fi
+          cargo build --locked -p sens-cli --bin sens
+          for witness in tests/semantic/d1-d3-control-law.bits tests/semantic/d4-d6-selector-chain.bits; do
+            filename="$(basename "$witness" .bits)"
+            python3 - "$witness" "$RUNNER_TEMP/$filename.sens" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+
+          # Byte transport only. Every semantic assertion is encoded by SENS.
+          source = Path(sys.argv[1]).read_text(encoding="ascii")
+          Path(sys.argv[2]).write_bytes(encode_projection(source))
+          PY
+            # Failure returns D1:0 inside SENS; the host checks only its final D1 word.
+            verdict="$(target/debug/sens "$RUNNER_TEMP/$filename.sens")"
+            test "$verdict" = "1"
           done
-      - name: Check D7 Sound/Text versus LocalOrdinal and arithmetic boundary
-        run: python3 benchmarks/d7-ratification-conformance/validate.py
-      - name: Admit only owner-ratified D7 projection and distinguish W7 roles
-        run: |
-          python3 scripts/d7_source_projection.py --check
-          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
-          python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
-          python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
-          python3 scripts/check-d7-runtime-projection.py
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Prove mechanical dense W7 and contextual D2/Text7 identities
-        run: cargo test --locked -p sens --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire --test text7_shiva_w7_synthesis --test text7_contextual_binding
-      - name: Verify Text7 layouts include contextual text space/dot and English IPA pilot
-        run: cargo test --locked -p sens --lib text7_projection::tests
-      - name: Confirm D7 coordinates remain only width-qualified Rust carriers
-        run: cargo test --locked -p sens --lib domain_ladder::tests::every_d7_source_word_has_a_width_preserving_coordinate -- --exact

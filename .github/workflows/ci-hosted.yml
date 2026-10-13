@@ -62,16 +62,18 @@ jobs:
       - name: World D3 exact-D1 migration witnesses
         if: always()
         run: cargo test --locked -p sens --test reasoning_world_d3_migration
+      - name: Forward exact-width macro cutover witness
+        if: always()
+        run: cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
+
       - name: Forward/knowledge D3+D9 migration witnesses
         if: always()
         run: |
           cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
           cargo test --locked -p sens --test knowledge_exact_macro_migration
-      - name: Result-status exact D1 and domain-bitness witness
+      - name: Result-status semantic law — binary SENS self-verdict
         if: always()
-        run: |
-          python3 scripts/test-result-status-d1-bitness.py
-          cargo test --locked -p sens --test result_status result_status_predicates_are_exact_d1_bits -- --exact --nocapture
+        run: cargo test --locked -p sens --test sens_semantic_witnesses result_status_exact_d1_binary_self_verdict -- --exact --nocapture
       - name: Legacy core D6 MAP reader execution
         if: always()
         run: cargo test --locked -p sens --test legacy_core_d6_map_reader
@@ -100,7 +102,7 @@ jobs:
         run: |
           cargo test --locked -p sens --test content_store
           cargo test --locked -p sens --test content_store_authority
-      - name: D3 obsolete COND/ATOM/EQ scanner regression tests
+      - name: Mechanical D3 source-shape scanner (non-semantic)
         if: always()
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
       - name: Migrated time-source exact D3 runtime witnesses
@@ -111,7 +113,7 @@ jobs:
           cargo test --locked -p sens --test clock
           cargo test --locked -p sens --test timezone_ownership
           cargo test --locked -p sens --test time_host_surface
-      - name: D3 stale core-logic audit (fail closed)
+      - name: Mechanical stale-D3 migration lint (non-semantic, fail closed)
         if: always()
         run: python3 scripts/check_d3_legacy_logic.py --strict
 

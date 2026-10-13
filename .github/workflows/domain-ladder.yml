@@ -22,7 +22,7 @@ on:
       - "knowledge/d10-ratified.json"
       - "crates/sens/src/text7.rs"
       - "crates/sens/src/text7_projection.rs"
-      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-keyboard-v2-ratified.json"
       - "contracts/d7-ratification.lisp"
       - "lib/domains/d7.lisp"
       - "scripts/check-d7-current-authority.py"
@@ -70,7 +70,7 @@ on:
       - "knowledge/d9-ratified.json"
       - "crates/sens/src/text7.rs"
       - "crates/sens/src/text7_projection.rs"
-      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-keyboard-v2-ratified.json"
       - "contracts/d7-ratification.lisp"
       - "lib/domains/d7.lisp"
       - "scripts/check-d7-current-authority.py"
@@ -120,7 +120,7 @@ jobs:
       - name: Перевірити фізичне заповнення D8/D9 без допуску до семантичного виконання
         run: >-
           cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
-      - name: Перевірити ратифіковані координати D7 та дві зарезервовані комірки
+      - name: Перевірити всі 128 чинних 7-бітних координат даних D7
         run: python3 scripts/check-d7-current-authority.py
       - name: Перевірити відповідність таблиць D7 ратифікованим координатам
         run: python3 scripts/check-domain-tables.py

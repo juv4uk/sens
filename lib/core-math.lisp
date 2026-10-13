@@ -1,5 +1,9 @@
 ; core-math.lisp — мінімальний канон Core-Math.
 ;
+; Migrated: ontology pinned to exact-width domains. Width is identity;
+; every bit of the domain address is valued. No host truthiness.
+; No executable law until #2425 is proved in the simple form below.
+;
 ; Спільна онтологія з Core: #2490.
 ;
 ;   semantic object
@@ -18,8 +22,12 @@
 ; Однакові біти в різних доменах НЕ означають однакову семантику.
 ; Людські назви функцій/операцій — лише проєкції.
 ;
-; Core і Core-Math можуть зараз розходитись.
-; Це нормально.
+; Reuses (2000+ surface):
+;   D1–D10 domain tables (lib/domains/dN.lisp),
+;   function-table / semantic-registry for SID coordinates,
+;   island-math-evidence for mechanism-only witnesses (not law).
+;
+; Core і Core-Math можуть зараз розходитись. Це нормально.
 ;
 ; Бажаний напрям:
 ;   divergence where evidence differs

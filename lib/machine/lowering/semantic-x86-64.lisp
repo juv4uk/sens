@@ -426,16 +426,14 @@
 
 (0011 x86-encode-current-d6-unary-u64
   (0010 (width bits value)
-    (let ((forms
-                  (x86-lower-current-d6-unary-u64-forms
-                    width bits value)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-d6-unary-u64))
          (001 unsupported-current-domain-d6-unary-u64))
         ((101 forms (001 exact-d6-fallback-required))
          (001 exact-d6-fallback-required))
         ((010 ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program forms)))) (x86-lower-current-d6-unary-u64-forms
+                    width bits value))))
 
 ; #4017 exact D5:10111 QUOTIENT bounded dispatcher.
 ; Only equal positive exact integers inside signed i64 enter IDIV. This is a
@@ -471,16 +469,14 @@
 
 (0011 x86-encode-current-quotient-i64
   (0010 (width bits left right)
-    (let ((forms
-                  (x86-lower-current-quotient-i64-forms
-                    width bits left right)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-quotient-i64))
          (001 unsupported-current-domain-quotient-i64))
         ((101 forms (001 exact-d5-fallback-required))
          (001 exact-d5-fallback-required))
         ((010 ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program forms)))) (x86-lower-current-quotient-i64-forms
+                    width bits left right))))
 
 ; #4018 exact D5 order-predicate machine proof.
 ; These forms intentionally produce only an INTERNAL machine bit in RAX.
@@ -530,14 +526,13 @@
 
 (0011 x86-encode-current-order-bit
   (0010 (width bits left right)
-    (let ((forms (x86-lower-order-i64-forms width bits left right)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-order-i64))
          (001 unsupported-current-domain-order-i64))
         ((101 forms (001 exact-d5-fallback-required))
          (001 exact-d5-fallback-required))
         ((010 ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program forms)))) (x86-lower-order-i64-forms width bits left right))))
 
 ; #4064/#4068 exact D5:01000 ZEROP bounded machine proof.
 ; Full ZEROP semantics include the historical epsilon policy for rational
@@ -575,15 +570,13 @@
 
 (0011 x86-encode-current-zerop-bit
   (0010 (width bits value)
-    (001000
-      ((forms (x86-lower-current-zerop-u64-forms width bits value)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-zerop-u64))
          (001 unsupported-current-domain-zerop-u64))
         ((101 forms (001 exact-d5-fallback-required))
          (001 exact-d5-fallback-required))
         ((010 ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program forms)))) (x86-lower-current-zerop-u64-forms width bits value))))
 
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
@@ -602,14 +595,12 @@
 
 (0011 x86-encode-current-structural-u64
   (0010 (width bits left right)
-    (let ((forms
-                  (x86-lower-current-structural-u64-forms
-                    width bits left right)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-structural-u64))
          (001 unsupported-current-domain-structural-u64))
         ((010 ())
-         (x86-encode-admitted-program-or-reject forms))))))
+         (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-structural-u64-forms
+                    width bits left right))))
 
 ; #4000 exact-domain bounded composition for current D3 EQ + COND.
 ; This route intentionally does not expose an independent numeric-boolean EQ
@@ -633,14 +624,12 @@
 (0011 x86-encode-current-eq-cond-u64
   (0010
     (eq-width eq-bits cond-width cond-bits left right then-value else-value)
-    (let ((forms
-            (x86-lower-current-eq-cond-u64-forms
-              eq-width eq-bits cond-width cond-bits
-              left right then-value else-value)))
-      (110
+    ((0010 (forms) (110
         ((101 forms (001 unsupported-current-domain-eq-cond-u64))
          (001 unsupported-current-domain-eq-cond-u64))
         ((010 ())
-         (x86-encode-admitted-program-or-reject forms))))))
+         (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-eq-cond-u64-forms
+              eq-width eq-bits cond-width cond-bits
+              left right then-value else-value))))
 
 

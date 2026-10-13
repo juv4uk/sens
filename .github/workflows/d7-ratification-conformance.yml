@@ -1,29 +1,28 @@
-name: D7 role-boundary conformance
+name: D7 v2 owner-boundary conformance
 
 on:
   pull_request:
     paths:
-      - "crates/sens/src/text7.rs"
+      - "knowledge/d7-keyboard-v2-ratified.json"
       - "lib/domains/d7.lisp"
-      - "knowledge/d7-ratified.json"
+      - "scripts/check-d7-keyboard-v2-table.py"
       - "scripts/check-d7-runtime-projection.py"
+      - "crates/sens/src/d7_keyboard.rs"
       - "crates/sens/src/d7_display_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/text7_projection.rs"
       - "crates/sens/tests/d7_runtime_presentation.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/tests/text7_canonical_wire.rs"
-      - "benchmarks/d7-ratification-conformance/**"
+      - "crates/sens/tests/d7_keyboard_t5.rs"
       - ".github/workflows/d7-ratification-conformance.yml"
   push:
     branches: [main]
     paths:
+      - "knowledge/d7-keyboard-v2-ratified.json"
       - "lib/domains/d7.lisp"
-      - "knowledge/d7-ratified.json"
       - "scripts/check-d7-runtime-projection.py"
       - "crates/sens/src/d7_display_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/tests/d7_runtime_presentation.rs"
-      - "crates/sens/src/domain_identity.rs"
       - ".github/workflows/d7-ratification-conformance.yml"
   workflow_dispatch:
 
@@ -34,14 +33,14 @@ jobs:
   d7-conformance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Verify ratified D7 role boundaries
-        run: python3 benchmarks/d7-ratification-conformance/validate.py
-      - name: Verify generated D7 display against Lisp and pinned coordinates
-        run: python3 scripts/check-d7-runtime-projection.py
-      - name: Test D7 mechanical, Text7 and human projection boundaries
-        run: cargo test --locked -p sens --test d7_runtime_presentation --test d7_w7_pack --test canonical_w7_frame_invariance
+      - name: Prove only the current ratified D7 v2 owner map is used
+        run: |
+          python3 scripts/check-d7-keyboard-v2-table.py
+          python3 scripts/check-d7-runtime-projection.py
+      - name: Prove exact W7 vs D2 and prevent callable aliases
+        run: cargo test --locked -p sens --test d7_runtime_presentation --test d7_keyboard_t5 --test d7_w7_pack --test canonical_w7_frame_invariance

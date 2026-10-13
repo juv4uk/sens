@@ -102,17 +102,23 @@
   (0010 (left right)
     (111 left (111 right (001 ())))))
 
+; D4:1000 CAAR | D4:1001 CADR | D4:0111 CDDR
+; D5:10011 CADDR is executable; D6 selector coordinates are ratified,
+; but not physically admitted as call heads. Never manufacture D6 dispatch.
+; fourth = D5 CADDR ∘ D3 CDR; fifth = D5 CADDR ∘ D4 CDDR.
+; D7 is text data, not an escape hatch for deeper selectors.
+
 (0011 second
   (0010 (values)
-    (100 (011 values))))
+    (1001 values)))
 
 (0011 third
   (0010 (values)
-    (100 (011 (011 values)))))
+    (10011 values)))
 
 (0011 fourth
   (0010 (values)
-    (100 (011 (011 (011 values))))))
+    (10011 (011 values))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -138,19 +144,17 @@
 ; сама операція, виписана вручну замість названа.
 (0011 fifth
   (0010 (values)
-    (100 (011 (011 (011 (011 values)))))))
+    (10011 (0111 values))))
 
 (0011 caar
   (0010 (values)
-    (100 (100 values))))
+    (1000 values)))
 
-(0011 cadr
-  (0010 (values)
-    (100 (011 values))))
+(0011 cadr second)
 
 (0011 cddr
   (0010 (values)
-    (011 (011 values))))
+    (0111 values)))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing

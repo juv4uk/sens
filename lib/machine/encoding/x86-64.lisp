@@ -2905,11 +2905,7 @@
 ; required no-index SIB byte instead of silently emitting an invalid address.
 (0011 x86-encode-mov-r64-mem-disp8
   (0010 (destination base displacement)
-    (let ((dst (x86-reg-code destination)))
-      (let ((base-code (x86-reg-code base)))
-        (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
-          (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
-            (110
+    ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
                   rex
@@ -2918,16 +2914,12 @@
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
               ((010 ())
-                (1110 rex 139 modrm (x86-disp8-byte displacement))))))))))
+                (1110 rex 139 modrm (x86-disp8-byte displacement))))) (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code)))) (x86-reg-code base))) (x86-reg-code destination))))
 
 ; MOV [base + disp8], r64, opcode 89 /r.
 (0011 x86-encode-mov-mem-disp8-r64
   (0010 (base displacement source)
-    (let ((base-code (x86-reg-code base)))
-      (let ((src (x86-reg-code source)))
-        (let ((rex (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code))))
-          (let ((modrm (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code))))
-            (110
+    ((0010 (base-code) ((0010 (src) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
                   rex
@@ -2936,7 +2928,7 @@
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
               ((010 ())
-                (1110 rex 137 modrm (x86-disp8-byte displacement))))))))))
+                (1110 rex 137 modrm (x86-disp8-byte displacement))))) (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code)))) (x86-reg-code source))) (x86-reg-code base))))
 
 ; LEA r64, [base + disp8], opcode 0x8D /r -- per #175's pinned XED evidence
 ; (`PATTERN : 0x8D MOD[mm] MOD!=3 REG[rrr] RM[nnn] MODRM() REMOVE_SEGMENT()`,
@@ -2950,11 +2942,7 @@
 ; disturb a CMP result still pending in a nearby branch.
 (0011 x86-encode-lea-r64-mem-disp8
   (0010 (destination base displacement)
-    (let ((dst (x86-reg-code destination)))
-      (let ((base-code (x86-reg-code base)))
-        (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
-          (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
-            (110
+    ((0010 (dst) ((0010 (base-code) ((0010 (rex) ((0010 (modrm) (110
               ((101 (x86-low3 base-code) 4)
                 (1110
                   rex
@@ -2963,7 +2951,7 @@
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
               ((010 ())
-                (1110 rex 141 modrm (x86-disp8-byte displacement))))))))))
+                (1110 rex 141 modrm (x86-disp8-byte displacement))))) (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code)))) (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code)))) (x86-reg-code base))) (x86-reg-code destination))))
 
 ; Group-1 ALU r/m64, r64 (mod=3 register/register), opcode base+1: ADD 0x01,
 ; OR 0x09, AND 0x21, SUB 0x29, XOR 0x31, CMP 0x39 (Intel SDM, confirmed
@@ -3042,14 +3030,13 @@
 ; the constant into a scratch register first.
 (0011 x86-encode-alu-r64-imm32
   (0010 (opcode-extension destination immediate)
-    (let ((dst (x86-reg-code destination)))
-      (111
+    ((0010 (dst) (111
         (x86-encode-rex 1 0 0 (x86-high1 dst))
         (111
           129
           (111
             (x86-encode-modrm 3 opcode-extension (x86-low3 dst))
-            (x86-imm32-bytes immediate)))))))
+            (x86-imm32-bytes immediate))))) (x86-reg-code destination))))
 
 (0011 x86-encode-add-r64-imm32
   (0010 (destination immediate)
@@ -3091,21 +3078,19 @@
 ; for r8-r15.
 (0011 x86-encode-push-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (110
+    ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110 (x86-encode-rex 0 0 0 1) (01010 80 (x86-low3 code))))
         ((010 ())
-          (1110 (01010 80 (x86-low3 code))))))))
+          (1110 (01010 80 (x86-low3 code)))))) (x86-reg-code register))))
 
 (0011 x86-encode-pop-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (110
+    ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110 (x86-encode-rex 0 0 0 1) (01010 88 (x86-low3 code))))
         ((010 ())
-          (1110 (01010 88 (x86-low3 code))))))))
+          (1110 (01010 88 (x86-low3 code)))))) (x86-reg-code register))))
 
 ; INC r64 / DEC r64: group-5 opcode 0xFF, /reg extension (not a register
 ; operand) selects the operation -- INC is /0, DEC is /1 -- per #175's
@@ -3117,19 +3102,17 @@
 ; ModRM group-5 path, never the legacy one.
 (0011 x86-encode-inc-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
-        (x86-encode-modrm 3 0 (x86-low3 code))))))
+        (x86-encode-modrm 3 0 (x86-low3 code)))) (x86-reg-code register))))
 
 (0011 x86-encode-dec-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
-        (x86-encode-modrm 3 1 (x86-low3 code))))))
+        (x86-encode-modrm 3 1 (x86-low3 code)))) (x86-reg-code register))))
 
 ; NOT r64 / NEG r64: group-3 opcode 0xF7, /reg extension (not a register
 ; operand) selects the operation -- NOT is /2, NEG is /3 -- per #175's
@@ -3138,19 +3121,17 @@
 ; REX.B only for r8-r15.
 (0011 x86-encode-not-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
-        (x86-encode-modrm 3 2 (x86-low3 code))))))
+        (x86-encode-modrm 3 2 (x86-low3 code)))) (x86-reg-code register))))
 
 (0011 x86-encode-neg-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
-        (x86-encode-modrm 3 3 (x86-low3 code))))))
+        (x86-encode-modrm 3 3 (x86-low3 code)))) (x86-reg-code register))))
 
 ; SHL/SHR/SAR r64, imm8: group-2 opcode 0xC1, /reg extension selects the
 ; operation -- SHL is /4, SHR is /5, SAR is /7 (/6 duplicates SHL under an
@@ -3162,12 +3143,11 @@
 ; becomes the raw trailing byte directly.
 (0011 x86-encode-shift-r64-imm8
   (0010 (opcode-extension register count)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         193
         (x86-encode-modrm 3 opcode-extension (x86-low3 code))
-        count))))
+        count)) (x86-reg-code register))))
 
 (0011 x86-encode-shl-r64-imm8
   (0010 (register count)
@@ -3312,8 +3292,7 @@
 ; genuinely a runtime value, not something knowable from the bytes alone.
 (0011 x86-encode-group5-indirect-r64
   (0010 (opcode-extension register)
-    (let ((code (x86-reg-code register)))
-      (110
+    ((0010 (code) (110
         ((101 (x86-high1 code) 1)
           (1110
             (x86-encode-rex 0 0 0 1)
@@ -3322,7 +3301,7 @@
         ((010 ())
           (1110
             255
-            (x86-encode-modrm 3 opcode-extension (x86-low3 code))))))))
+            (x86-encode-modrm 3 opcode-extension (x86-low3 code)))))) (x86-reg-code register))))
 
 (0011 x86-encode-call-r64
   (0010 (register)
@@ -3421,11 +3400,10 @@
 ; Quotient is stored in RAX, remainder in RDX.
 (0011 x86-encode-idiv-r64
   (0010 (source)
-    (let ((src-code (x86-reg-code source)))
-      (1110
+    ((0010 (src-code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 src-code))
         247
-        (x86-encode-modrm 3 7 (x86-low3 src-code))))))
+        (x86-encode-modrm 3 7 (x86-low3 src-code)))) (x86-reg-code source))))
 
 ; CMOVcc r64, r64: conditional move, opcode 0x0F 0x40+cc.
 ; Moves source to destination if condition code is satisfied.
@@ -3477,13 +3455,12 @@
 ; TEST r/m64, imm32: Group 3 opcode 0xF7 /0 id, ModRM mod=3, reg=0, rm=dest.
 (0011 x86-encode-test-r64-imm32
   (0010 (destination immediate)
-    (let ((code (x86-reg-code destination)))
-      (1111
+    ((0010 (code) (1111
         (1110
           (x86-encode-rex 1 0 0 (x86-high1 code))
           247
           (x86-encode-modrm 3 0 (x86-low3 code)))
-        (x86-imm32-bytes immediate)))))
+        (x86-imm32-bytes immediate))) (x86-reg-code destination))))
 
 ; BT r/m64, r64: opcode 0x0F 0xA3 /r. ModRM reg=index, rm=base.
 ; Sets Carry Flag (CF) to the value of the bit at the given index.
@@ -3500,13 +3477,12 @@
 ; Group 8 bit operations with imm8: opcode 0x0F 0xBA /reg ib.
 (0011 x86-encode-group8-r64-imm8
   (0010 (opcode-extension register bit-index)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
         186
         (x86-encode-modrm 3 opcode-extension (x86-low3 code))
-        bit-index))))
+        bit-index)) (x86-reg-code register))))
 
 (0011 x86-encode-bt-r64-imm8
   (0010 (register bit-index)
@@ -3594,11 +3570,10 @@
 ; BSWAP r64: opcode 0x0F (0xC8 + rd). Byte Swap (reverse byte order).
 (0011 x86-encode-bswap-r64
   (0010 (register)
-    (let ((code (x86-reg-code register)))
-      (1110
+    ((0010 (code) (1110
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
-        (01010 200 (x86-low3 code))))))
+        (01010 200 (x86-low3 code)))) (x86-reg-code register))))
 
 ; ROL / ROR r64, imm8: group-2 opcode 0xC1, /0 for ROL, /1 for ROR.
 (0011 x86-encode-rol-r64-imm8
@@ -3763,13 +3738,7 @@
                 (x86-low3 dst-code)
                 (x86-low3 base-code)))
             (disp-byte (x86-disp8-byte displacement)))
-        (let ((address-tail
-                (110
-                  ((101 (x86-low3 base-code) 4)
-                   (1110 modrm (x86-encode-sib 0 4 4) disp-byte))
-                  ((010 ())
-                   (1110 modrm disp-byte)))))
-          (110
+        ((0010 (address-tail) (110
             ((менше? (додати (x86-high1 dst-code) (x86-high1 base-code)) 1)
              (1111
                (1110 102 15 map-byte opcode-byte)
@@ -3786,7 +3755,11 @@
                  15
                  map-byte
                  opcode-byte)
-               address-tail))))))))
+               address-tail)))) (110
+                  ((101 (x86-low3 base-code) 4)
+                   (1110 modrm (x86-encode-sib 0 4 4) disp-byte))
+                  ((010 ())
+                   (1110 modrm disp-byte))))))))
 
 (0011 x86-encode-aesenc-xmm-mem-disp8
   (0010 (dst base displacement)

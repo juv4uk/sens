@@ -1,4 +1,4 @@
-"""D7 keyboard/v2: current 128/128 text projection, distinct local ordinals."""
+"""D7 keyboard/v2: current 128/128 W7 text, no retired local ordinals."""
 from __future__ import annotations
 import sys
 import unittest
@@ -10,7 +10,7 @@ from d7_source_projection import D7ProjectionError, load_current_d7, project
 
 
 class D7ProjectionTests(unittest.TestCase):
-    def test_all_128_keyboard_rows_are_text_not_callable(self):
+    def test_all_128_keyboard_rows_are_exact_width_text_projections(self):
         evidence, rows = load_current_d7()
         self.assertEqual(len(evidence), 128)
         self.assertEqual(len(rows), 128)
@@ -22,8 +22,6 @@ class D7ProjectionTests(unittest.TestCase):
                 projection = project(bits, role="text")
                 self.assertEqual(projection["role"], "text")
                 self.assertEqual(projection["status"], "OWNER-RATIFIED")
-                self.assertFalse(projection["callable"])
-                self.assertFalse(projection["arithmetic_number"])
 
     def test_v1_reserved_cells_now_are_v2_text_data(self):
         for bits in ("0100001", "0101010"):
@@ -37,26 +35,20 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(project(bits, role="text", namespace="san")["surface"], "क")
         self.assertEqual(project("0100111", role="text", namespace="ук")["surface"], "'")
 
-    def test_text_number_is_not_arithmetic_number(self):
+    def test_digit_has_exact_seven_bit_coordinate(self):
         digit = project("0110001", role="text", namespace="en")
-        self.assertEqual(digit["surface"], "1")
-        self.assertFalse(digit["arithmetic_number"])
-        self.assertFalse(digit["callable"])
+        self.assertEqual((digit["coordinate"], digit["width"], digit["surface"]),
+                         ("0110001", 7, "1"))
 
-    def test_local_ordinal_keeps_independent_donor_provenance(self):
-        for n in range(1, 15):
-            ordinal = project(f"{n:07b}", role="local-ordinal")
-            self.assertEqual(ordinal["source_order"], n)
-            self.assertEqual(ordinal["donor_ref"], f"shiva-sutra:{n}")
-            self.assertFalse(ordinal["callable"])
-            self.assertFalse(ordinal["arithmetic_number"])
-        for bits in ("0000000", "0100001", "0101010", "0001111"):
-            with self.assertRaisesRegex(D7ProjectionError, "no donor-ratified"):
-                project(bits, role="local-ordinal")
+    def test_retired_local_ordinal_is_not_a_current_d7_source_role(self):
+        for n in range(128):
+            with self.subTest(word=n):
+                with self.assertRaisesRegex(D7ProjectionError, "only current D7 text"):
+                    project(f"{n:07b}", role="local-ordinal")
 
     def test_legacy_sound_and_phonetic_namespaces_are_not_current(self):
         for role in ("", "sound-text", "sound", "Number"):
-            with self.assertRaisesRegex(D7ProjectionError, "role must be explicit"):
+            with self.assertRaisesRegex(D7ProjectionError, "only current D7 text"):
                 project("0000000", role=role)
         with self.assertRaisesRegex(D7ProjectionError, "unsupported"):
             project("0000000", role="text", namespace="slp1")

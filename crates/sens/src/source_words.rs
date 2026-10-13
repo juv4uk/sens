@@ -122,9 +122,9 @@ impl BinarySourceWord {
     /// Lift an exact seven-bit source word into the typed D7 carrier.
     /// Contract 11.8 retains D7 residency under #3572, but exact width alone
     /// still does not select a D7 role or grant generic Core callability.
-    pub const fn d7(self) -> Option<crate::SoundD7> {
+    pub const fn d7(self) -> Option<crate::D7DataWord> {
         match self {
-            Self::W7(word) => Some(crate::SoundD7::from_word(word)),
+            Self::W7(word) => Some(crate::D7DataWord::from_word(word)),
             _ => None,
         }
     }
@@ -194,8 +194,8 @@ impl From<crate::CoreD6> for BinarySourceWord {
     }
 }
 
-impl From<crate::SoundD7> for BinarySourceWord {
-    fn from(value: crate::SoundD7) -> Self {
+impl From<crate::D7DataWord> for BinarySourceWord {
+    fn from(value: crate::D7DataWord) -> Self {
         Self::W7(value.word())
     }
 }

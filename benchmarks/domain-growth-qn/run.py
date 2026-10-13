@@ -170,13 +170,15 @@ def external_non_authoritative_audit() -> dict:
     assert len(d6g) == 32 and all(len(rs) == 2 for rs in d6g.values())
     d6_same_cat = sum(len({r["category"] for r in rs}) == 1 for rs in d6g.values())
 
-    d7_source = (ROOT / "benchmarks/d7-ratification-conformance/validate.py").read_text(encoding="utf-8")
-    d7_is_role_domain = (
-        "D7 = Sound7/Sanskrit sound-related objects" in d7_source
-        and "D7 != general arithmetic Number" in d7_source
-        and "OCCUPANCY-CLAIM=NONE" in d7_source
+    d7 = json.loads(
+        (ROOT / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8")
     )
-    assert d7_is_role_domain
+    if (d7.get("schema"), d7.get("status"), d7.get("width"),
+            d7.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 7, 128):
+        raise ValueError("D7 current W7 owner gate drift")
+    if [r["bits"] for r in d7["table"]] != bits(7):
+        raise ValueError("D7 current exact coordinate drift")
 
     return {
         "authority": "NON-AUTHORITATIVE-FALSIFICATION-ONLY",
@@ -191,8 +193,8 @@ def external_non_authoritative_audit() -> dict:
             "D6_same_category": complement_same(d6rows, 6, "coordinate", "category"),
         },
         "D7_current_ontology": {
-            "is_role_domain_not_core_occupancy_map": True,
-            "roles": ["sound-cell", "local-ordinal"],
+            "current_keyboard_cells": 128,
+            "data_only_not_callable": True,
             "core_prefix_continuation_claim": False,
         },
     }
@@ -234,8 +236,8 @@ def solve() -> dict:
         "D7_conclusion": {
             "pure_geometry_capacity": 128,
             "selector_subtree_capacity": 32,
-            "current_repo_semantics": "Sound7/local-ordinal role domain; not proven Core.D6 prefix continuation",
-            "architectural_choice": "keep D7 separate or define distinct Core.D7 before claiming uninterrupted Core ladder",
+            "current_repo_semantics": "D7 keyboard/v2 data-only W7; no implicit prefix law or callability",
+            "architectural_choice": "use ratified D7 exact width and data-only projection; do not infer semantic selector continuity",
         },
         "production_mutation": False,
     }

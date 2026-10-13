@@ -5,6 +5,13 @@
 ;   D1:0 / false carrier = (001 ())
 ; Duplicate D4:0011 arm removed (one kept). Two-field COND discipline.
 ; Width is identity; every bit of the domain address is valued.
+; Bounded physical migration: D3 CAR/CDR selectors C1-SECOND/C1-THIRD/
+; C1-FOURTH live as exact binary at lib/core1-selectors.{bits,sens}.
+; SENS itself executes nine semantic observations in
+; tests/fixtures/core1-selectors-semantic.{bits,sens}, returning D1:1 on PASS. D4 CADR and D5 CADDR are verified against D3-composed selectors.
+; D6:100111 CADDDR stays RATIFIED DATA but is not physically callable yet;
+; no Rust/Python backdoor may silently admit that runtime function.
+; This is NOT full Core1 cutover; historic evaluator paths stay unchanged.
 
 (0011 C1-SECOND
   (0010 (X)

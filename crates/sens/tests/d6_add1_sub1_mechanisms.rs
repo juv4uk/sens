@@ -1,6 +1,6 @@
 use sens::{
     eval_parsed_expressions, Bit5, Bit6, Bit7, Bit8, CoreD5, CoreD6, CoreD8, DomainIdentity,
-    Expr, ExprKind, Rational, Session, SoundD7, Span,
+    Expr, ExprKind, Rational, Session, D7DataWord, Span,
 };
 
 fn exact_d6_call(bits: u8, args: &str, session: &mut Session) -> Result<String, sens::LanguageError> {
@@ -74,7 +74,7 @@ fn equal_payloads_in_other_domains_do_not_inherit_d6_mechanisms() {
     // Same packed payload 14 has independent identities across widths.
     let d5 = DomainIdentity::D5(CoreD5::from_word(Bit5::new(14).unwrap()));
     let d6 = DomainIdentity::D6(CoreD6::from_word(Bit6::new(14).unwrap()));
-    let d7 = DomainIdentity::D7(SoundD7::from_word(Bit7::new(14).unwrap()));
+    let d7 = DomainIdentity::D7(D7DataWord::from_word(Bit7::new(14).unwrap()));
     let d8 = DomainIdentity::D8(CoreD8::from_word(Bit8::new(14).unwrap()));
 
     assert_eq!(d5.packed_bits(), d6.packed_bits());

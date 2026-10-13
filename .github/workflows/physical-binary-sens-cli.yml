@@ -66,6 +66,28 @@ jobs:
       - name: Build exact binary execution and transport tools
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
+      - name: SENS-owned D1/D3 semantic self-verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-binary"
+          python3 - "$RUNNER_TEMP/sens-binary/d1-d3-control-law.sens" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+
+          # Transport only. The semantic law and failure branches are encoded
+          # in the SENS program itself; Python supplies no expected truth table.
+          source = " ".join(Path("tests/semantic/d1-d3-control-law.bits").read_text(encoding="ascii").split())
+          Path(sys.argv[1]).write_bytes(encode_projection(source))
+          PY
+          target/debug/sens "$RUNNER_TEMP/sens-binary/d1-d3-control-law.sens"             > "$RUNNER_TEMP/sens-binary/d1-d3-control-law.verdict"
+          test "$(cat "$RUNNER_TEMP/sens-binary/d1-d3-control-law.verdict")" = "1"
+          target/debug/sens-trit eval "$RUNNER_TEMP/sens-binary/d1-d3-control-law.sens"             > "$RUNNER_TEMP/sens-binary/d1-d3-control-law.trit-verdict"
+          cmp "$RUNNER_TEMP/sens-binary/d1-d3-control-law.verdict"               "$RUNNER_TEMP/sens-binary/d1-d3-control-law.trit-verdict"
+
+
       - name: Physical source words and pure execution agree across both entrypoints
         shell: bash
         run: |
@@ -347,6 +369,7 @@ jobs:
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
             examples/binary/d3-primitives-program.bits \
             examples/binary/d3-cond-program.bits \
+            tests/semantic/d1-d3-control-law.bits \
             examples/binary/d5-label-recursion.bits \
             examples/binary/d5-label-copy.bits \
             examples/binary/d5-label-map.bits \

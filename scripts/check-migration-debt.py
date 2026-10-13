@@ -154,7 +154,10 @@ def main(argv: list[str]) -> int:
     scopes = tuple(a for a in args if a != "--fail") or DEFAULT_SCOPES
     authority = load_operator_authority()
     paths = sorted(p for p in ROOT.rglob("*.lisp") if in_scope(p, scopes))
-    userdef = user_defined_names(paths)
+    # Користувацькі імена треба бачити ПО ВСЬОМУ репо, незалежно від звітної
+    # області: інакше визначення з lib/ не видно при запуску на scripts/ лише.
+    whole = sorted(p for p in ROOT.rglob("*.lisp") if in_scope(p, ("lib", "scripts", "racket", "examples")))
+    userdef = user_defined_names(whole)
 
     rows: list[tuple[str, str, int, str, str]] = []
     total = 0
