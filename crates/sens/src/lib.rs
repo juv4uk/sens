@@ -224,7 +224,7 @@ pub use compiler_language::{
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
-pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
+pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, D7DataWord, CoreD8, CoreD9, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use binary_framing::{
