@@ -666,6 +666,20 @@ class Resolver:
             self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
 
+        # D7 є текстовою/фонемною ідентичністю, не викликаною функцією.
+        # Для D9 таблиця резидентів сама по собі не доводить виконуваність.
+        # Без окремого допущеного механізму забороняємо обидві голови.
+        if len(t) in (7, 9) and set(t) <= set("01"):
+            if len(t) == 7:
+                raise MigrationError(
+                    f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
+                    tok,
+                )
+            raise MigrationError(
+                f"D9 {t}: відсутній доказ допущеного механізму виклику",
+                tok,
+            )
+
         # Source-defined global callables shadow human builtin surfaces.
         # Exact binary identities above remain authoritative: only a name
         # that appeared as a proven global DEFINE target takes this route.
