@@ -24,11 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Exact D1: reject nested rule-head as schema tag"
-        run: cargo test --locked -p sens --test reason_index reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean -- --exact --nocapture
-      - name: "Structural fuel: exactly 64 unique predicates stay indexed"
-        run: cargo test --locked -p sens --test reason_index exactly_sixty_four_distinct_predicates_remain_indexed -- --exact --nocapture
-      - name: "Structural fuel: 65 unique predicates fall back"
-        run: cargo test --locked -p sens --test reason_index too_many_distinct_predicates_fall_back_to_linear_mode -- --exact --nocapture
+      - name: "Binary SENS witness: nested rule head is not a schema tag"
+        run: cargo test --locked -p sens --test reason_index binary_sens_reason_index_head_atom_witness_decides_the_law -- --exact --nocapture
       - name: "Full reason-index regression and 2046 domain coordinates"
         run: cargo test --locked -p sens --test reason_index -- --nocapture
