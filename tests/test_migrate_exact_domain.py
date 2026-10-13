@@ -86,7 +86,11 @@ class ExactDomainMigrationTests(unittest.TestCase):
         )
 
     def test_unbalanced_source_fails_closed(self):
-        with self.assertRaisesRegex(ValueError, "unterminated list"):
+        # Reader reports the precise unclosed delimiter and line; rejecting
+        # invalid syntax remains mandatory, not an exception-text shortcut.
+        with self.assertRaisesRegex(
+            ValueError, r"cannot establish local binding scopes: unclosed '\(' at line 1"
+        ):
             mod.plan("(car x", self.surfaces, self.legacy)
 
     def test_unknown_heads_are_left_for_semantic_review(self):
