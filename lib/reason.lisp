@@ -1,4 +1,5 @@
 ; reason.lisp — backward-chaining Advice Taker inference engine.
+; Unconditional COND fallbacks are exact D1:1, never synthetic D3 ATOM(()) truth.
 ; Rules are `(head . body)`. `reason` preserves its historical public result:
 ; a list of `(substitution proof)` pairs, or `()` when no proof is found.
 ;
@@ -101,7 +102,7 @@
     (110
       
       ((010 rule)  (001 ()))
-      ((010 ()) (reason-term-predicate (100 rule))))))
+      (#d1:1 (reason-term-predicate (100 rule))))))
 
 ; Buckets accumulate reversed source order. Finite structural fuel bounds the
 ; number of DISTINCT predicates, without unqualified numeric arithmetic.
@@ -114,7 +115,7 @@
        (111
          (111 predicate (111 rule (0110 buckets)))
          (011 buckets)))
-      ((010 ())
+      (#d1:1
        (111
          (100 buckets)
          (reason-index-add-reversed predicate rule (011 buckets)))))))
@@ -124,7 +125,7 @@
     (110
       
       ((010 buckets)  (001 ()))
-      ((010 ())
+      (#d1:1
        (111
          (111 (1000 buckets) (10100 (0110 buckets)))
          (reason-index-normalize-buckets (011 buckets)))))))
@@ -138,13 +139,13 @@
          (001 indexed)
          original
          (reason-index-normalize-buckets buckets)))
-      ((010 ())
+      (#d1:1
        (001000 ((predicate (reason-rule-predicate (100 remaining))))
          (110
            ; One non-indexable head is enough to require the exact historical
            ; scan, because that head may unify with predicates outside a bucket.
            ((101 predicate (001 ())) (reason-index-linear original))
-           ((010 ())
+           (#d1:1
             (001000 ((entry (міркування-пошук-кошика predicate buckets)))
               (110
                 
@@ -176,7 +177,7 @@
   (0010 (rules-or-index)
     (110
       ((reason-index? rules-or-index) rules-or-index)
-      ((010 ()) (reason-make-index rules-or-index)))))
+      (#d1:1 (reason-make-index rules-or-index)))))
 
 ; If indexing is safe, only rules whose head starts with the same predicate
 ; can unify with this goal. Bucket order is exactly source rule order. Any
@@ -187,16 +188,16 @@
       (110
         ((101 (reason-index-mode index) (001 linear))
          (reason-index-rules index))
-        ((010 ())
+        (#d1:1
          (001000 ((predicate (reason-term-predicate goal)))
            (110
              ((101 predicate (001 ())) (reason-index-rules index))
-             ((010 ())
+             (#d1:1
               (001000 ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
                 (110
                   
                   ((010 entry)  (001 ()))
-                  ((010 ()) (011 entry))))))))))))
+                  (#d1:1 (011 entry))))))))))))
 
 ; Public `reason` accepts either the historical rule list or an already-built
 ; finite `reason-index/1`. Plain callers are unchanged; repeated-query callers
@@ -221,7 +222,7 @@
     (110
       
       ((010 results)  acc)
-      ((010 ()) (prove-goal-accumulate
+      (#d1:1 (prove-goal-accumulate
            (011 results)
            (111 (100 results) acc))))))
 
@@ -243,7 +244,7 @@
     (110
       
       ((010 rules)  (10100 acc))
-      ((010 ())
+      (#d1:1
        (001000 ((rule-results
                (prove-rule goal (100 rules) bindings all-rules depth)))
          (prove-goal-scan
@@ -269,7 +270,7 @@
     (110
       
       ((010 lst)  (001 ()))
-      ((010 ()) (111 (f (100 lst)) (map-proofs f (011 lst)))))))
+      (#d1:1 (111 (f (100 lst)) (map-proofs f (011 lst)))))))
 
 ; Try one rule, then wrap every successful body result in its proof node.
 (0011 prove-rule
@@ -278,7 +279,7 @@
       (001000 ((new-subst (101010000 goal (100 renamed-rule) bindings)))
         (110
           ((failed-subst? new-subst) (001 ()))
-          ((010 ())
+          (#d1:1
            (001000 ((body-results
                    (101010001
                      (011 renamed-rule)
@@ -329,7 +330,7 @@
     (110
       
       ((010 results)  (001 ()))
-      ((010 ())
+      (#d1:1
        (111
          (1110
            (1000 results)
@@ -364,7 +365,7 @@
     (110
       
       ((010 nodes)  (001 ()))
-      ((010 ())
+      (#d1:1
        (001001 ((_1 (print-indent level))
               (_2 (11011011 (001 |-)))
               (_3 (explain-proof-node (100 nodes) level)))
@@ -374,7 +375,7 @@
   (0010 (level)
     (110
       ((101 level 0) (001 ()))
-      ((010 ())
+      (#d1:1
        (001000 ((_ (11011011 (001 ..))))
          (print-indent (01011 level 1)))))))
 
@@ -389,7 +390,7 @@
                 (_2 (11011011 (001 prove:)))
                 (_3 (11011011 goal)))
            (001 ())))
-        ((010 ()) (101001011 (1001 (100 results))))))))
+        (#d1:1 (101001011 (1001 (100 results))))))))
 
 (0011 add-usage
   (0010 (entry alist)
@@ -402,14 +403,14 @@
            (100 entry)
            (01010 (011 entry) (011 (100 alist))))
          (011 alist)))
-      ((010 ()) (111 (100 alist) (add-usage entry (011 alist)))))))
+      (#d1:1 (111 (100 alist) (add-usage entry (011 alist)))))))
 
 (0011 merge-usage
   (0010 (a b)
     (110
       
       ((010 a)  b)
-      ((010 ()) (merge-usage (011 a) (add-usage (100 a) b))))))
+      (#d1:1 (merge-usage (011 a) (add-usage (100 a) b))))))
 
 (0011 count-usage
   (0010 (node)
@@ -425,7 +426,7 @@
     (110
       
       ((010 nodes)  (001 ()))
-      ((010 ())
+      (#d1:1
        (merge-usage
          (count-usage (100 nodes))
          (count-usage-list (011 nodes)))))))
@@ -435,7 +436,7 @@
     (110
       
       ((010 (100111 node))  (001 fact))
-      ((010 ()) (001 rule)))))
+      (#d1:1 (001 rule)))))
 
 (0011 provenance
   (0010 (node)
@@ -449,7 +450,7 @@
          (1110
            (001 derived-from)
            (provenance-list (100111 node)))))
-      ((010 ())
+      (#d1:1
        (1110
          (001 statement)
          (1001 node)
@@ -460,7 +461,7 @@
     (110
       
       ((010 nodes)  (001 ()))
-      ((010 ())
+      (#d1:1
        (111
          (101101111 (100 nodes))
          (provenance-list (011 nodes)))))))

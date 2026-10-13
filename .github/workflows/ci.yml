@@ -262,6 +262,48 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$mutant"
+          # This fallthrough is executed, not a dead-branch proxy.
+          # Width-1 D1:0 mutation must be rejected by native SENS.
+          if grep -Fq '(010 ())' lib/reason.lisp; then
+            echo '::error::REGRESSION: synthetic D3 ATOM(()) fallback in reason.lisp'
+            exit 1
+          fi
+          grep -Fq '#d1:1' lib/reason.lisp
+          for kind in law mutant; do
+            source="tests/semantic/reason-direct-fallback-d1-${kind}.bits"
+            physical="tests/semantic/reason-direct-fallback-d1-${kind}.sens"
+            tr -s '[:space:]' '\n' < "$source" | sed '/^$/d' > "$RUNNER_TEMP/reason-d1-${kind}-source.words"
+            target/debug/sens-trit open "$physical" | tr -s '[:space:]' '\n' | sed '/^$/d' > "$RUNNER_TEMP/reason-d1-${kind}-physical.words"
+            cmp "$RUNNER_TEMP/reason-d1-${kind}-source.words" "$RUNNER_TEMP/reason-d1-${kind}-physical.words"
+          done
+          original=( $(cat "$RUNNER_TEMP/reason-d1-law-source.words") )
+          changed=( $(cat "$RUNNER_TEMP/reason-d1-mutant-source.words") )
+          test "${#original[@]}" -eq "${#changed[@]}"
+          flips=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${changed[i]}" ]]; then
+              [[ "$i" -eq 25 && "${original[i]}" == 1 && "${changed[i]}" == 0 ]] || { echo "::error::REASON_D1_MUTANT_NOT_CANONICAL index=$i"; exit 1; }
+              flips=$((flips + 1))
+            fi
+          done
+          test "$flips" -eq 1
+          printf '1\n' > "$RUNNER_TEMP/reason-d1.expected"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id reason-direct-fallback-d1-law \
+            --layer eval \
+            --fixture tests/semantic/reason-direct-fallback-d1-law.sens \
+            --expected-file "$RUNNER_TEMP/reason-d1.expected" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens tests/semantic/reason-direct-fallback-d1-law.sens
+          python3 scripts/ci_failure_contract.py run \
+            --test-id reason-direct-fallback-d1-mutant \
+            --layer eval \
+            --fixture tests/semantic/reason-direct-fallback-d1-mutant.sens \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens tests/semantic/reason-direct-fallback-d1-mutant.sens
       - name: Core2 — SENS-only D3/D8 law and single-bit falsifier
         id: core2
         shell: bash
@@ -614,6 +656,8 @@ jobs:
             --require core-d4-vs-d8-width-law \
             --require sens-reason-index-width-selectors-law \
             --require sens-reason-index-width-selectors-mutant \
+            --require reason-direct-fallback-d1-law \
+            --require reason-direct-fallback-d1-mutant \
             --require unify-observe-d1-law \
             --require unify-observe-d1-mutant || native_rc=$?
           diagnostic_rc=0
