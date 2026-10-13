@@ -65,6 +65,11 @@ jobs:
       - name: Forward/knowledge D3+D9 migration witnesses
         if: always()
         run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
+      - name: Result-status exact D1 and domain-bitness witness
+        if: always()
+        run: |
+          python3 scripts/test-result-status-d1-bitness.py
+          cargo test --locked -p sens --test result_status result_status_predicates_are_exact_d1_bits -- --exact --nocapture
       - name: Legacy core D6 MAP reader execution
         if: always()
         run: cargo test --locked -p sens --test legacy_core_d6_map_reader
