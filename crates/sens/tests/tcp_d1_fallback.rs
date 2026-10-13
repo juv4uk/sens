@@ -14,7 +14,7 @@ fn tcp_semantic_law_is_decided_by_binary_sens_only() {
     load_core_library(&mut session).expect("допущене ядро D3/D4");
     load_tcp_library(&mut session).expect("чинний TCP-модуль SENS");
     let program = parse_mixed_exact_domain_process_tcp_source(TCP_PATH, SELFTEST)
-        .expect("двійкові D3/D4/D8/D9 голови, дані не виконуються як код");
+        .expect("двійкові D3/D4/D9 голови, дані не виконуються як код");
     let result = eval_parsed_expressions(&program, &mut session)
         .expect("SENS-виконавець на власній програмі-свідку");
     // Rust лише спостерігає єдиний підсумковий D1; усі умови та
