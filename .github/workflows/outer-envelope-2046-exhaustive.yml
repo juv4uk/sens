@@ -1,0 +1,31 @@
+name: Candidate-S independent 2046-bit exactness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/outer_envelope.rs"
+      - ".github/workflows/outer-envelope-2046-exhaustive.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/outer_envelope.rs"
+      - ".github/workflows/outer-envelope-2046-exhaustive.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-2046:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exhaustive coordinates and independent wire oracle
+        run: cargo test --locked -p sens --lib outer_envelope::tests::exact_2046_candidate_census_and_independent_byte_golden_vectors
+      - name: Full existing outer-envelope suite
+        run: cargo test --locked -p sens --lib outer_envelope::tests
+      - name: Keep production build warning-free
+        env:
+          RUSTFLAGS: "-D warnings"
+        run: cargo check --locked -p sens --lib
