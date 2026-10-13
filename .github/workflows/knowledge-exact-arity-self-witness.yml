@@ -1,0 +1,43 @@
+name: Знання — точковий бінарний SENS-свідок
+
+on:
+  pull_request:
+    paths:
+      - "lib/knowledge.lisp"
+      - "tests/semantic/knowledge-exact-arity-structure.bits"
+      - ".github/workflows/knowledge-exact-arity-self-witness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/knowledge.lisp"
+      - "tests/semantic/knowledge-exact-arity-structure.bits"
+      - ".github/workflows/knowledge-exact-arity-self-witness.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  knowledge-exact-arity:
+    name: Двійкова SENS-семантика арності термів
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Виконати один самоперевірний SENS-свідок
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --quiet -p sens-cli --bin sens-trit
+
+          # Тільки транспорт: наявні двійкові слова кладуться в тимчасовий
+          # шлях .lisp через обмеження encode CLI. Жодної логіки не задає хост.
+          cp tests/semantic/knowledge-exact-arity-structure.bits \
+            "$RUNNER_TEMP/knowledge-exact-arity.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/knowledge-exact-arity.lisp"
+
+          # Правильна арність дає SENS-вирок; порушення веде до невикличної
+          # D1-гілки. Код завершення самого двійкового інтерпретатора — oracle.
+          result="$(target/debug/sens-trit eval "$RUNNER_TEMP/knowledge-exact-arity.sens")"
+          printf 'SENS-вирок: %s\n' "$result"
+          printf '%s\n' 'PASS: бінарний SENS-свідок завершився без мовної відмови.'
