@@ -23,6 +23,7 @@
 (0011 strip-article
   (0010 (words)
     (110
+      ((010 words) (001 ()))
       ((101 (100 words) (001 a)) (011 words))
       ((101 (100 words) (001 an)) (011 words))
       ((010 (001 ())) words))))
@@ -47,6 +48,7 @@
 (0011 understand
   (0010 (words)
     (110
+      ((010 words) (001 ()))
       ((101 (100 words) (001 all))
        (understand-universal words))
       ((101 (1001 words) (001 is))
@@ -69,6 +71,7 @@
 (0011 understand-query
   (0010 (words)
     (110
+      ((010 words) (001 ()))
       ((101 (100 words) (001 is))
        (understand-query-is words))
       ((101 (100 words) (001 does))
