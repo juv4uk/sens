@@ -15,6 +15,7 @@ D8_TABLE = ROOT / "lib" / "domains" / "d8.lisp"
 D9_TABLE = ROOT / "lib" / "domains" / "d9.lisp"
 D10_TABLE = ROOT / "lib" / "domains" / "d10.lisp"
 CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,)
+NUMBER_RATIFICATION = ROOT / "knowledge" / "number-width-ratified.json"
 
 TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
@@ -83,6 +84,24 @@ def human_number(word: str) -> int:
     if not word or any(bit not in "01" for bit in word):
         raise ValueError(f"{word!r} is not a binary machine word")
     return int(word, 2)
+
+
+def number_domains() -> tuple[tuple[str, int], ...]:
+    """The owner-ratified D24+ numeric ladder: exact domain name and exact width."""
+    policy = json.loads(NUMBER_RATIFICATION.read_text(encoding="utf-8"))
+    return tuple(zip(policy["ratified_domains"], policy["ratified_prefix_bits"]))
+
+
+def is_number_width(width: int) -> bool:
+    """The numeric domain law D(24 * 2^n), n >= 0 — the only widths a number may live in."""
+    return width >= 24 and width % 24 == 0 and (width // 24) & (width // 24 - 1) == 0
+
+
+def number_word(number: int, width: int) -> str:
+    """A numeric object is exact bits + an explicit D24+ domain, never an unqualified number."""
+    if not is_number_width(width):
+        raise ValueError(f"{width} is not a D24+ numeric domain width")
+    return machine_word(number, width)
 
 
 def read_domain_table(path: Path) -> list[DomainTableRow]:

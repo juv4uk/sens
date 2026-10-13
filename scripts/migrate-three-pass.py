@@ -808,10 +808,10 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # into a function address or Text7 glyphs by matching its spelling.
     # Bare bit words outside 0/1 remain domain addresses, *not* numerals;
     # exact D24+ payload words also require an explicit domain-bearing envelope.
+    from domain_tables import is_number_width
     binary_word = bool(re.fullmatch(r"[01]+", t))
     numeric_width = len(t)
-    domain_width = (numeric_width >= 24 and numeric_width % 24 == 0
-                    and (numeric_width // 24 & (numeric_width // 24 - 1)) == 0)
+    domain_width = is_number_width(numeric_width)
     if ((NUMERIC_RE.fullmatch(t) and not binary_word)
             or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
             or (binary_word and domain_width)):
