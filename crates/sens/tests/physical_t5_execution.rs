@@ -147,69 +147,41 @@ fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
 }
 
 
-/// All seven D3 residents execute from physical T5 through the same
-/// exact-width D2 reader. Their meaning is owned by the ratified D3 table;
-/// this test only records the observable results of admitted mechanisms.
+/// SENS owns the entire semantic law matrix in its executable 0/1 program.
+/// Rust checks only bit-exact T5 carriage, execution, and the final one-bit
+/// verdict protocol; it does not restate D3 behavior in a host-side table.
 #[test]
-fn sens_zero_all_seven_d3_residents_execute_without_lisp_bootstrap() {
-    #[derive(Clone, Copy)]
-    enum Observation {
-        StructuralEmpty,
-        D1Yes,
-        PairOfEmpty,
-    }
-    let witnesses = [
-        ("D3:001 QUOTE", "10 001 00 000 01", Observation::StructuralEmpty),
-        ("D3:010 ATOM", "10 010 00 000 01", Observation::D1Yes),
+fn d3_semantics_are_executed_and_decided_by_binary_sens() {
+    let fixtures: [(&str, &[u8], bool); 2] = [
         (
-            "D3:011 CDR",
-            "10 011 00 10 111 00 000 00 000 01 01",
-            Observation::StructuralEmpty,
+            include_str!("../../../tests/fixtures/semantic/d3-selftest.lisp"),
+            include_bytes!("../../../tests/fixtures/semantic/d3-selftest.sens"),
+            true,
         ),
         (
-            "D3:100 CAR",
-            "10 100 00 10 111 00 000 00 000 01 01",
-            Observation::StructuralEmpty,
+            include_str!("../../../tests/fixtures/semantic/d3-selftest-negative.lisp"),
+            include_bytes!("../../../tests/fixtures/semantic/d3-selftest-negative.sens"),
+            false,
         ),
-        ("D3:101 EQ", "10 101 00 000 00 000 01", Observation::D1Yes),
-        (
-            "D3:110 COND",
-            "10 110 00 10 1 00 1 01 01",
-            Observation::D1Yes,
-        ),
-        ("D3:111 CONS", "10 111 00 000 00 000 01", Observation::PairOfEmpty),
     ];
 
-    for (name, source, expected) in witnesses {
-        let words = sens::parse_binary_source_words(source)
-            .expect("ratified binary form")
-            .into_iter()
-            .map(|token| token.word)
-            .collect::<Vec<_>>();
-        let physical = encode_ternary_words(&words).expect("canonical physical T5");
-        assert_eq!(decode_ternary_program(&physical).unwrap(), words, "{name}");
-        let result = eval_t5_program(&physical, &mut Session::default())
-            .unwrap_or_else(|_| panic!("{name} must execute directly from T5 bytes"));
-        assert!(result.output.is_empty(), "{name} must not print");
-        match expected {
-            Observation::StructuralEmpty => {
-                assert!(matches!(&result.value, Value::Nil), "{name}");
-                assert_eq!(result.value.as_predicate_bit(), None, "{name}");
-            }
-            Observation::D1Yes => {
-                assert_eq!(result.value.as_predicate_bit(), Some(true), "{name}");
-            }
-            Observation::PairOfEmpty => {
-                assert!(
-                    matches!(
-                        &result.value,
-                        Value::Pair(head, tail)
-                            if matches!(head.as_ref(), Value::Nil)
-                                && matches!(tail.as_ref(), Value::Nil)
-                    ),
-                    "{name} must produce the structural pair (() . ())"
-                );
-            }
-        }
+    for (source, physical, verdict) in fixtures {
+        // Only exact binary SENS is admitted: no English/Lisp identifiers.
+        assert!(source.bytes().all(|byte|
+            byte == b'0' || byte == b'1' || byte.is_ascii_whitespace()
+        ));
+        assert_eq!(
+            sens::encode_binary_projection_ternary(source)
+                .expect("current exact D2/T5 SENS source"),
+            physical,
+            "the tracked .sens must match its binary source bit-for-bit"
+        );
+        let result = eval_t5_program(physical, &mut Session::default())
+            .expect("SENS self-test must execute directly from packed T5");
+        assert!(result.output.is_empty(), "pure SENS self-test does not print");
+        assert_eq!(
+            result.value.as_predicate_bit(), Some(verdict),
+            "SENS, not Rust, must compute its D1 pass/fail verdict"
+        );
     }
 }
