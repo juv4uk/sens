@@ -1,20 +1,48 @@
-name: #956 Lisp semantic registry targeted
+name: "SENS registry — двійкова перевірка COND"
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/surface/semantic-registry-api.lisp"
+      - "tests/semantic/registry-find-row-cond-law.bits"
+      - "tests/semantic/registry-find-row-cond-mutant.bits"
+      - ".github/workflows/956-semreg-targeted.yml"
   pull_request:
     paths:
       - "lib/surface/semantic-registry-api.lisp"
-      - "crates/sens/tests/semantic_registry_lisp.rs"
-      - "tests/fixtures/semantic-registry-self-hosted-witness.lisp"
-      - "scripts/generate-rust-semantic-registry.lisp"
+      - "tests/semantic/registry-find-row-cond-law.bits"
+      - "tests/semantic/registry-find-row-cond-mutant.bits"
       - ".github/workflows/956-semreg-targeted.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  semantic-registry-lisp:
-    runs-on: ubuntu-latest
+  registry-d1-self-verdict:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Run Lisp-owned semantic registry witness
-        run: cargo test -p sens --test semantic_registry_lisp -- --nocapture
+      - name: Зібрати наявний фізичний читач та виконавець SENS
+        run: cargo build --locked -p sens-cli --bin sens-trit
+      - name: SENS сам перевіряє гілку пошуку та однобітний мутант
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/semantic/registry-find-row-cond-law.bits "$RUNNER_TEMP/registry-law.lisp"
+          cp tests/semantic/registry-find-row-cond-mutant.bits "$RUNNER_TEMP/registry-mutant.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/registry-law.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/registry-mutant.lisp"
+          target/debug/sens-trit eval "$RUNNER_TEMP/registry-law.sens" > "$RUNNER_TEMP/law.out"
+          test "$(cat "$RUNNER_TEMP/law.out")" = "1"
+          if target/debug/sens-trit eval "$RUNNER_TEMP/registry-mutant.sens" > "$RUNNER_TEMP/mutant.out" 2> "$RUNNER_TEMP/mutant.err"; then
+            echo "БЛОКЕР: однобітний негативний SENS-свідок не відхилено"
+            exit 1
+          fi
+          grep -Fq "not callable" "$RUNNER_TEMP/mutant.err"
+          test ! -s "$RUNNER_TEMP/mutant.out"
+          echo "SENS: двійковий закон і негативний свідок виконані"
