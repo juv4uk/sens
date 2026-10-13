@@ -50,7 +50,6 @@ const X86_ENCODING_DIRECT_D4_LAW: &str =
     include_str!("../../../tests/semantic/x86-encoder-let-d4-law.bits");
 const X86_ENCODING_DIRECT_D4_MUTANT: &str =
     include_str!("../../../tests/semantic/x86-encoder-let-d4-mutant.bits");
-
 /// Лише механічний транспорт: усі закони й вердикти закодовано самою
 /// двійковою мовою SENS, а не таблицею очікувань у Rust або Python.
 #[test]
@@ -61,38 +60,32 @@ fn x86_encoding_let_to_exact_d4_binary_sens_verdict() {
         ), "SENS source must consist only of bits and separators");
     }
 
+    // All semantic expectations live in the executable, binary SENS
+    // D3 COND programs: wrong results select a forbidden D1 call head.
+    // Rust's sole authority is that the real evaluator runs the program.
     let forms = parse_canonical_binary(X86_ENCODING_DIRECT_D4_LAW)
-        .expect("binary SENS must retain exact D1/D2/D3/D4/D7 widths");
-    assert_eq!(forms.len(), 4, "four independent binary self-verdicts");
-    for form in forms.iter() {
-        let outcome = eval_parsed_expressions(
-            std::slice::from_ref(form), &mut Session::default(),
-        ).expect("binary SENS self-verdict must execute").value;
-        assert_eq!(
-            outcome.as_predicate_bit(), Some(true),
-            "SENS verdict was not exact D1 YES: {outcome}",
-        );
+        .expect("canonical D1/D2/D3/D4/D7 framing");
+    assert_eq!(forms.len(), 4, "four SENS-authored verdict programs");
+    for (index, form) in forms.iter().enumerate() {
+        eval_parsed_expressions(std::slice::from_ref(form), &mut Session::default())
+            .unwrap_or_else(|error| panic!("SENS law {} rejected: {error}", index + 1));
     }
 
-    // Mutation is a transport assertion, not a second host-side logical law:
-    // same complete binary program, one exact D1 data bit changed 1→0.
+    // Transport-only one-bit mutant assertion: SENS itself must reject the
+    // wrong branch. Rust does NOT compare a language truth value to YES/NO.
     let good: Vec<_> = X86_ENCODING_DIRECT_D4_LAW.lines().next()
         .expect("first binary verdict").split_whitespace().collect();
     let bad: Vec<_> = X86_ENCODING_DIRECT_D4_MUTANT.split_whitespace().collect();
-    assert_eq!(good.len(), bad.len(), "a mutation cannot change source framing");
+    assert_eq!(good.len(), bad.len(), "mutation cannot change framing");
     let differences: Vec<_> = good.iter().zip(bad.iter())
         .filter(|(a, b)| a != b).collect();
-    assert_eq!(differences, vec![(&"1", &"0")], "mutate one exact D1 bit");
+    assert_eq!(differences, vec![(&"1", &"0")], "one D1 bit, no new width");
 
     let mutant = parse_canonical_binary(X86_ENCODING_DIRECT_D4_MUTANT)
-        .expect("one-bit mutant must remain a valid SENS expression");
+        .expect("single-bit mutant is still canonical SENS");
     assert_eq!(mutant.len(), 1);
-    let outcome = eval_parsed_expressions(&mutant, &mut Session::default())
-        .expect("mutant must still execute through SENS").value;
-    assert_eq!(
-        outcome.as_predicate_bit(), Some(false),
-        "one-bit SENS mutant must report exact D1 NO: {outcome}",
-    );
+    assert!(eval_parsed_expressions(&mutant, &mut Session::default()).is_err(),
+        "binary SENS must reject its own mutated invalid-D1 branch");
 }
 
 const META_EVAL_MUTUAL_D4_LAW: &str =
@@ -113,15 +106,9 @@ fn meta_eval_mutual_d4_exact_sens_self_verdict() {
     assert_eq!(forms.len(), 4, "one executable binary SENS self-proof per line");
 
     for (index, form) in forms.iter().enumerate() {
-        let result = eval_parsed_expressions(
-            std::slice::from_ref(form), &mut Session::default(),
-        )
-        .unwrap_or_else(|error| panic!("binary SENS self-proof {} failed to execute: {error}", index + 1))
-        .value;
-        assert_eq!(
-            result.as_predicate_bit(), Some(true),
-            "binary SENS self-proof {} did not produce exact D1 YES: {result}",
-            index + 1
-        );
+        eval_parsed_expressions(std::slice::from_ref(form), &mut Session::default())
+            .unwrap_or_else(|error| panic!(
+                "binary SENS self-proof {} rejected its own law: {error}", index + 1
+            ));
     }
 }

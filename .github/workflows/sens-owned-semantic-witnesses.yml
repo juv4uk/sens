@@ -28,5 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Виконати власні D4 закони двійкового SENS — чотири самоперевірки
+        run: cargo test --locked -p sens --test sens_semantic_witnesses x86_encoding_let_to_exact_d4_binary_sens_verdict -- --exact --nocapture
+      - name: Виконати D4 взаємну рекурсію двійкового SENS — ще чотири самоперевірки
+        run: cargo test --locked -p sens --test sens_semantic_witnesses meta_eval_mutual_d4_exact_sens_self_verdict -- --exact --nocapture
       - name: Execute semantic laws owned by binary SENS
         run: cargo test --locked -p sens --test sens_semantic_witnesses -- --nocapture
