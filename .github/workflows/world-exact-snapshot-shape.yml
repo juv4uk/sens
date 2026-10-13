@@ -1,0 +1,43 @@
+name: World exact snapshot shape
+
+on:
+  pull_request:
+    paths:
+      - "lib/world.lisp"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - "crates/sens/tests/reasoning_world_d3_migration.rs"
+      - "tests/semantic/world-exact-arity-structure.bits"
+      - "tests/semantic/world-exact-arity-witness.lisp"
+      - ".github/workflows/world-exact-snapshot-shape.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/world.lisp"
+      - "crates/sens/tests/sens_semantic_witnesses.rs"
+      - "crates/sens/tests/reasoning_world_d3_migration.rs"
+      - "tests/semantic/world-exact-arity-structure.bits"
+      - "tests/semantic/world-exact-arity-witness.lisp"
+      - ".github/workflows/world-exact-snapshot-shape.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  world-shape:
+    name: Binary SENS world-shape self-verdicts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: world-exact-snapshot-shape
+      - name: Run binary and SENS-owned world self-verdicts
+        run: cargo test -p sens --test sens_semantic_witnesses world_exact_snapshot_shape_binary_self_verdict -- --exact --nocapture
+      - name: Keep world migration source boundary
+        run: cargo test -p sens --test reasoning_world_d3_migration -- --nocapture
+      - name: Diff hygiene for changed files only
+        run: git diff --check HEAD^1 HEAD -- lib/world.lisp crates/sens/tests/sens_semantic_witnesses.rs crates/sens/tests/reasoning_world_d3_migration.rs tests/semantic/world-exact-arity-structure.bits tests/semantic/world-exact-arity-witness.lisp .github/workflows/world-exact-snapshot-shape.yml
