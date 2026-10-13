@@ -1,4 +1,7 @@
-use sens::{eval_program, load_macro_library, Environment, Session, Value};
+use sens::{
+    eval_program, load_macro_library, parse_mixed_exact_domain_macro_source, Environment, Expr,
+    ExprKind, Session, Value, MACRO_LIBRARY_SOURCE,
+};
 use std::rc::Rc;
 
 fn eval_with_derived_macros(source: &str) -> String {
@@ -19,6 +22,75 @@ fn assert_same_macro_value(values: [Value; 2]) {
         }
         other => panic!("expected two Macro bindings, got {other:?}"),
     }
+}
+
+fn binary_runs(source: &str) -> Vec<&str> {
+    source
+        .split(|ch: char| ch != '0' && ch != '1')
+        .filter(|token| !token.is_empty())
+        .collect()
+}
+
+fn scan_exact_macro_ast(
+    expr: &Expr,
+    legacy: &mut usize,
+    d3: &mut Vec<u16>,
+    d4: &mut Vec<u16>,
+) {
+    match &expr.kind {
+        ExprKind::Sid(_) => *legacy += 1,
+        ExprKind::DomainIdentity(identity) => match identity.width() {
+            3 => d3.push(identity.packed_bits()),
+            4 => d4.push(identity.packed_bits()),
+            _ => {}
+        },
+        ExprKind::List(items) => {
+            for item in items.iter() {
+                scan_exact_macro_ast(item, legacy, d3, d4);
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn migrated_macro_bootstrap_is_d3_d4_only_and_executes_generated_define_lambda() {
+    let legacy_words = binary_runs(MACRO_LIBRARY_SOURCE)
+        .into_iter()
+        .filter(|word| word.len() == 8)
+        .collect::<Vec<_>>();
+    assert!(
+        legacy_words.is_empty(),
+        "lib/macro.lisp must not retain executable/data SID8 tokens: {legacy_words:?}"
+    );
+
+    let parsed = parse_mixed_exact_domain_macro_source("lib/macro.lisp", MACRO_LIBRARY_SOURCE)
+        .expect("migrated macro source must use its exact-domain reader");
+    let mut legacy = 0;
+    let mut d3 = Vec::new();
+    let mut d4 = Vec::new();
+    for expr in &parsed {
+        scan_exact_macro_ast(expr, &mut legacy, &mut d3, &mut d4);
+    }
+    assert_eq!(legacy, 0, "macro AST must contain no legacy SID nodes");
+    for required in [0b001, 0b010, 0b011, 0b100, 0b110, 0b111] {
+        assert!(d3.contains(&required), "missing D3:{required:03b}");
+    }
+    assert!(
+        d4.iter().filter(|&&bits| bits == 0b0010).count() >= 2,
+        "D4:0010 must exist both as the bootstrap lambda and generated code data"
+    );
+    assert!(d4.contains(&0b0011), "generated DEFINE must be exact D4:0011");
+
+    let environment = Environment::root();
+    let mut session = Session { environment };
+    load_macro_library(&mut session).expect("exact-domain macro bootstrap must load");
+    let result = eval_program(
+        "(defmacro exact-identity (x) x) (exact-identity 37)",
+        &mut session,
+    )
+    .expect("generated D4 DEFINE/LAMBDA must execute after value->expr roundtrip");
+    assert_eq!(result.value.to_string(), "37");
 }
 
 #[test]
