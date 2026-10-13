@@ -61,7 +61,7 @@
 
      (native-coverage
        (class general-control-flow)
-       (representative (cond ((eq? 1 1) 42) ((00000010 ()) 0)))
+       (representative (110 ((101 (001 000) (001 000)) 1) ((010 (001 000)) 0)))
        (status blocked-runtime-prerequisite)
        (reason source-control-native-path-needs-label-graph)
        (evidence native-first-dispatch-witness)
