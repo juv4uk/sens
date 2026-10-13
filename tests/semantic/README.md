@@ -62,9 +62,8 @@ GitHub Actions workflow не активувати без явного дозво
 
 ## Migration source guard
 
-The single automatic workflow remains `.github/workflows/ci.yml`. Its existing
-physical SENS proof and negative mutant own the semantic verdict. The same job's
-mechanical policy script additionally checks the production migration boundary:
-D4 NULL and D3 ATOM(CAR) precede D3 EQ in `lib/reason.lisp`, and narration arity
-uses exact raw D1 results with D3/D4 structure rather than D6 LENGTH or D8 EQUAL.
-These source-shape checks do not replace or duplicate SENS semantics.
+The only automatic workflow is `.github/workflows/ci.yml`. Its physical SENS proof
+and negative mutant own the semantic verdict. The same job's mechanical policy
+script also checks the source boundary: D4 NULL and D3 ATOM(CAR) precede D3 EQ in
+`lib/reason.lisp`; narration arity uses raw D1 results with D3/D4 structure,
+without D6 LENGTH or D8 EQUAL. Manual benchmark workflows remain manual.

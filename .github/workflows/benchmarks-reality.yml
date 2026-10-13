@@ -1,0 +1,45 @@
+name: benchmarks-reality
+
+# Круті бенчмарки, витягнуті з надр на воркфлоу й перероблені під нову
+# реальність. Двійковий SENS — влада; тут — точкові вимірювані факти мови:
+# економія генераторів, метрики графа доменів, алгебра функцій-чисел (закони
+# ширини — саме нова реальність D24+), стрес інваріантності. Кожен бенчмарк
+# друкує свій вердикт; гейт його звіряє — інформативно, без truth-таблиць.
+# ПОЛІТИКА ВЛАСНИКА: рівно один автоматичний workflow (ci.yml).
+# Performance evidence лишається доступним вручну; додатковий push заборонено.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    name: Buried benchmarks in the new reality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generator economy — one-off never amortises
+        run: |
+          set -euo pipefail
+          out="$(python3 benchmarks/generator-economy/generator_economy.py)"
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -q 'falsifiers:'
+      - name: Domain graph metrics
+        run: |
+          set -euo pipefail
+          out="$(python3 benchmarks/domain-graph-metrics/run.py)"
+          printf '%s\n' "$out" | tail -5
+          printf '%s\n' "$out" | grep -q 'host_timing'
+      - name: Function-number algebra — width laws
+        run: |
+          set -euo pipefail
+          out="$(python3 benchmarks/function-number-algebra/probe.py)"
+          printf '%s\n' "$out" | grep -q 'full_mul'
+      - name: Semantic invariance stress — no canonical drift
+        run: |
+          set -euo pipefail
+          out="$(python3 benchmarks/semantic-invariance-stress/invariance_suite.py)"
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -q 'VERDICT: INVARIANT'
