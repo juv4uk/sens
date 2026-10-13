@@ -75,17 +75,26 @@
 ; Only ordinary predicate-headed compound terms are safe index keys.
 ; `(var x)` is deliberately excluded: as a logic variable it can unify with
 ; any rule head and must therefore retain the historical full scan.
+; Власний D3-предикат змінної, без непрозорого SID8 або D9-виклику.
+; EQ приймає лише атоми: тому спочатку ATOM(term), потім ATOM(CAR(term)).
+(0011 reason-var-form?
+  (0010 (term)
+    (110
+      ((010 term) #d1:0)
+      ((010 (100 term))
+       (110
+         ((101 (100 term) (001 var)) #d1:1)
+         (#d1:1 #d1:0)))
+      (#d1:1 #d1:0))))
+
+; Невідомі/складені голови залишаються на лінійному шляху.
 (0011 reason-term-predicate
   (0010 (term)
     (110
-      
-      ((010 term)  (001 ()))
-      ((101100100 term) (001 ()))
-      
-      ((010 (100 term))  (110
-         ((110101100 (100 term)) (100 term))
-         ))
-      )))
+      ((010 term) (001 ()))
+      ((reason-var-form? term) (001 ()))
+      ((010 (100 term)) (100 term))
+      (#d1:1 (001 ())))))
 
 (0011 reason-rule-predicate
   (0010 (rule)
@@ -249,10 +258,10 @@
 (0011 rename-vars
   (0010 (term depth)
     (110
-      
-      ((010 term)  term)
-      ((101100100 term) (1110 (001 var) (111 (1001 term) depth)))
-      ((010 ()) (111 (rename-vars (100 term) depth)
+      ((010 term) term)
+      ((reason-var-form? term)
+       (1110 (001 var) (111 (1001 term) depth)))
+      (#d1:1 (111 (rename-vars (100 term) depth)
                    (rename-vars (011 term) depth))))))
 
 (0011 map-proofs
