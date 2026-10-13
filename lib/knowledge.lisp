@@ -268,6 +268,58 @@
        (knowledge-clauses-valid? (011 clauses)))
       (#d1:1 #d1:0))))
 
+; Повернено історичний пакетний закон із lib/knowledge.lisp @ 327b51ca,
+; не новий host-shim. Первинна міграція D4 DEFINE/LAMBDA, D3 COND/CAR/CDR,
+; D4 NULL, D9:101001110 REASON; рішення про наявність доказу — D1.
+; Десятибітні координати цих похідних функцій не оголошуються викличними:
+; лише SENS-DEFINE встановлює їхні локальні Lisp-зв'язування.
+; Нуль доказів = D4 NULL(()) -> продовжити; наявний доказ -> конфлікт.
+(0011 advice-negative-head-conflict
+  (0010 (rules all-rules)
+    (110
+      ((0101 rules) (001 ()))
+      ((010 rules) (001 ()))
+      (#d1:1
+       ((0010 (head)
+          (110
+            ((knowledge-not-head? (100 head))
+             ((0010 (positive)
+                ((0010 (proofs)
+                   (110
+                     ((0101 proofs)
+                      (advice-negative-head-conflict (011 rules) all-rules))
+                     (#d1:1 (1110 head positive (100 proofs)))))
+                 (101001110 positive all-rules)))
+              (1001 head)))
+            (#d1:1
+             (advice-negative-head-conflict (011 rules) all-rules))))
+        (100 (100 rules)))))))
+
+; Фіксуємо один з трьох доказів конфлікту: нова клауза, протилежна
+; голова, перший доказ. Спочатку весь пакет, тоді чинні світові правила.
+; Якщо жодна пара не суперечить — точний порожній список, без host truth.
+(0011 advice-batch-conflict
+  (0010 (clauses remaining all-rules)
+    (110
+      ((0101 remaining)
+       ((0010 (global)
+          (110
+            ((0101 global) (001 ()))
+            (#d1:1
+             (1110 (100 clauses) (100 global) (10011 global)))))
+        (advice-negative-head-conflict all-rules all-rules)))
+      ((010 remaining) (001 ()))
+      (#d1:1
+       ((0010 (opposite)
+          ((0010 (proofs)
+             (110
+               ((0101 proofs)
+                (advice-batch-conflict clauses (011 remaining) all-rules))
+               (#d1:1
+                (1110 (100 remaining) opposite (100 proofs)))))
+           (101001110 opposite all-rules)))
+        (opposite-knowledge-head (100 (100 remaining))))))))
+
 ; Ратифікований D4:1000 = CAR(CAR), D4:0110 = CDR(CAR).
 ; Точна бітність та однобітний негатив: tests/semantic/knowledge-d4-selectors-*.bits.
 (0011 knowledge-package-field
