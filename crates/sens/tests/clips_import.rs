@@ -413,3 +413,19 @@ fn clips_defrule_with_a_forall_condition_imports_correctly() {
         "(((done) (forall (item (var x)) (checked (var x)))))"
     );
 }
+
+#[test]
+fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
+    // The previous NOT(ATOM(slot-form))/ATOM(slot-form) pair always
+    // recursed, making its lookup branch unreachable. This tests actual
+    // evaluation, not just that the source contains D3:101.
+    for (source, expected) in [
+        ("(clips-lookup-slot-value (quote name) (quote ((name alice) (age 42))))", "alice"),
+        ("(clips-lookup-slot-value (quote name) (quote ((age 42) (name bob))))", "bob"),
+        ("(clips-lookup-slot-value (quote name) (quote ((age 42) (colour red))))", "()"),
+        ("(clips-lookup-slot-value (quote name) (quote (bare-atom (name alice))))", "alice"),
+        ("(clips-lookup-slot-value (quote name) (quote (((nested head) ignored) (name alice))))", "alice"),
+    ] {
+        assert_eq!(eval_import(source), expected, "slot traversal failed for {source}");
+    }
+}
