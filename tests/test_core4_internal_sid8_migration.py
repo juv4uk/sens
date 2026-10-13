@@ -143,7 +143,7 @@ class Core4WidthFirewall(unittest.TestCase):
             verify(mutated)
 
     def test_negative_cross_width_collision_is_rejected(self):
-        mutated = self.source.replace("(110101011 ", "(11100000 ", 1)
+        mutated = self.source.replace("(110101011 ", "(11100000 ")
         with self.assertRaisesRegex(ValueError, "lost exact D9"):
             verify(mutated)
 
