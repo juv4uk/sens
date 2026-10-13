@@ -57,11 +57,53 @@
 ; zeigen, wenn der Kopf genau dieses Regel zum Zeitpunkt der Ableitung
 ; nicht vollständig konkretisiert war; dies ist dokumentiert, nicht
 ; verborgen.
+; Structural list-shape tests replace D6 LENGTH + D8 EQUAL and naked 2/3.
+; All branches return exact D1; list data never acquires numeric truthiness.
+(0011 narrate-proper-list?
+  (0010 (value)
+    (110
+      ((010 value)
+       (101 value (001 ())))
+      ((010 (001 ()))
+       (narrate-proper-list? (011 value))))))
+
+(0011 narrate-list-exact-two?
+  (0010 (value)
+    (110
+      ((0100 (narrate-proper-list? value))
+       (101 (001 (0)) (001 (1))))
+      ((010 value)
+       (101 (001 (0)) (001 (1))))
+      ((010 (011 value))
+       (101 (001 (0)) (001 (1))))
+      ((101 (011 (011 value)) (001 ()))
+       (010 (001 ())))
+      ((010 (001 ()))
+       (101 (001 (0)) (001 (1)))))))
+
+(0011 narrate-list-exact-three?
+  (0010 (value)
+    (110
+      ((0100 (narrate-proper-list? value))
+       (101 (001 (0)) (001 (1))))
+      ((010 value)
+       (101 (001 (0)) (001 (1))))
+      ((010 (011 value))
+       (101 (001 (0)) (001 (1))))
+      ((010 (011 (011 value)))
+       (101 (001 (0)) (001 (1))))
+      ((101 (011 (011 (011 value))) (001 ()))
+       (010 (001 ())))
+      ((010 (001 ()))
+       (101 (001 (0)) (001 (1)))))))
+
 (0011 narrate-fact
   (0010 (fact)
     (110
-      ((11110111 (000000 fact) 2)  (1110 (1001 fact) (001 is) (001 a) (100 fact)))
-      ((11110111 (000000 fact) 3)  (1110 (1001 fact) (100 fact) (10011 fact)))
+      ((narrate-list-exact-two? fact)
+       (1110 (1001 fact) (001 is) (001 a) (100 fact)))
+      ((narrate-list-exact-three? fact)
+       (1110 (1001 fact) (100 fact) (10011 fact)))
       ((010 ()) fact))))
 
 
@@ -141,15 +183,9 @@
 ; Arity is a predicate, not a host truth value: each path returns exact D1.
 ; Keep the length/equality operations at their own exact widths: D6 LENGTH
 ; (000000), D8 EQUAL (11110111), with no flattening to a historical byte.
-(0011 narrate-outcome-arity?
-  (0010 (outcome expected)
-    (110
-      ((0100 (result-proper-list? outcome))
-       (101 (001 (0)) (001 (1))))
-      ((11110111 (000000 outcome) expected)
-       (010 (001 ())))
-      ((010 (001 ()))
-       (101 (001 (0)) (001 (1)))))))
+; Outcome arities are checked structurally. The requested size is encoded by
+; the called predicate, not as an unqualified numeric argument.
+
 
 (0011 narrate-outcome
   (0010 (outcome)
@@ -166,11 +202,11 @@
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
       ((101 (100 outcome) (001 proved))
        (110
-         ((narrate-outcome-arity? outcome 3) (narrate-proved-outcome outcome))
+         ((narrate-list-exact-three? outcome) (narrate-proved-outcome outcome))
          ((010 ()) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 unknown))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 unknown)
             (001 because)
@@ -179,7 +215,7 @@
          ((010 ()) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 partial))
        (110
-         ((narrate-outcome-arity? outcome 3)
+         ((narrate-list-exact-three? outcome)
           (1110
             (001 partial)
             (001 value)
@@ -189,7 +225,7 @@
          ((010 ()) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 blocked))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 blocked)
             (001 because)
@@ -197,7 +233,7 @@
          ((010 ()) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 disputed))
        (110
-         ((narrate-outcome-arity? outcome 2)
+         ((narrate-list-exact-two? outcome)
           (1110
             (001 disputed)
             (001 because)
@@ -206,7 +242,7 @@
          ((010 ()) (narrate-invalid-outcome-shape outcome))))
       ((101 (100 outcome) (001 invalid))
        (110
-         ((narrate-outcome-arity? outcome 3)
+         ((narrate-list-exact-three? outcome)
           (1110
             (001 invalid)
             (001 because)
