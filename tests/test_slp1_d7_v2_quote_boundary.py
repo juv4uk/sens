@@ -136,7 +136,7 @@ class ExactD7QuotedBoundary(unittest.TestCase):
         self.assertNotIn("pub(crate) const SA_SLP1_ENCODE", source)
         self.assertNotIn("pub(crate) const UK_ENCODE", source)
         with self.assertRaisesRegex(
-            migration.BinaryMigrationError, "missing Text7 projection",
+            migration.BinaryMigrationError, "HISTORICAL_D7_DISABLED",
         ):
             migration.build_text7_encoder(None, RETIRED)
 
