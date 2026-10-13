@@ -68,13 +68,19 @@ def verify():
                     errors.append(f"{path.name}: unwanted automatic push")
         except (ValueError, OSError) as exc:
             errors.append(f"{path.name}: {exc}")
-    if on_main != ["ci.yml"]:
-        errors.append(f"expected precisely one main-commit workflow: {on_main}")
+    # Owner quarantine overrides the one-workflow MAXIMUM: until the owner
+    # explicitly reauthorizes a corrected check, the ACTIVE count must be zero.
+    # This is a quarantine assertion, not a silent skip of red semantic tests.
+    if on_main:
+        errors.append(f"automatic main-commit CI prohibited during quarantine: {on_main}")
     for item in errors:
         print("SENS_CI_BUDGET_FAIL", item, flush=True)
     if errors:
         return False
-    print("SENS_CI_BUDGET_PASS", json.dumps({"workflows": len(paths), "automatic_main": 1}), flush=True)
+    print("SENS_CI_BUDGET_PASS", json.dumps({
+        "workflows": len(paths), "automatic_main": 0, "authorized_maximum": 1,
+        "owner_quarantine": True
+    }), flush=True)
     return True
 
 
