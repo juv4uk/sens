@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: TCP точковий свідок: 7 бітів і всі 2046 координат D1-D10
+      - name: "TCP точковий свідок: 7 бітів і всі 2046 координат D1-D10"
         run: python3 -m unittest discover -s tests -p test_tcp_d1_fallback.py -v
       - name: TCP виконуваний двостановий D1 і відхилення Number 1
         run: cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
