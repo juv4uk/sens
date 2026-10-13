@@ -41,7 +41,7 @@
 (0011 utf8-all-bytes?
   (0010 (bytes)
     (110
-      ((0100 (010 bytes))
+      ((010 bytes)
        (110
          ((101 bytes (001 ()))  (010 (001 ())))
          ((0100 (101 bytes (001 ()))) (101 (001 (0)) (001 (1))))))
@@ -87,7 +87,7 @@
 (0011 utf8-decode-onto
   (0010 (bytes out)
     (110
-      ((0100 (010 bytes))
+      ((010 bytes)
        (1110 (001 decoded) (10100 out)))
       ((0100 (010 bytes))
        (001001 ((b1 (100 bytes))
@@ -101,7 +101,7 @@
               ; 2-byte sequence: C2..DF 80..BF
               ((utf8-in-range? b1 194 223) 
                (110
-                 ((0100 (010 r1))
+                 ((010 r1)
                   (1110 (001 rejected) (001 invalid-utf8)))
                  ((0100 (010 r1))
                   (001000 ((b2 (100 r1)))
@@ -119,12 +119,12 @@
                  ; 3-byte sequence with overlong/surrogate exclusions.
                  ((utf8-in-range? b1 224 239) 
                   (110
-                    ((0100 (010 r1))
+                    ((010 r1)
                      (1110 (001 rejected) (001 invalid-utf8)))
                     ((0100 (010 r1))
                      (001000 ((r2 (011 r1)))
                        (110
-                         ((0100 (010 r2))
+                         ((010 r2)
                           (1110 (001 rejected) (001 invalid-utf8)))
                          ((0100 (010 r2))
                           (001001 ((b2 (100 r1))
@@ -150,17 +150,17 @@
                     ; 4-byte sequence, restricted to Unicode scalar <= 10FFFF.
                     ((utf8-in-range? b1 240 244) 
                      (110
-                       ((0100 (010 r1))
+                       ((010 r1)
                         (1110 (001 rejected) (001 invalid-utf8)))
                        ((0100 (010 r1))
                         (001000 ((r2 (011 r1)))
                           (110
-                            ((0100 (010 r2))
+                            ((010 r2)
                              (1110 (001 rejected) (001 invalid-utf8)))
                             ((0100 (010 r2))
                              (001000 ((r3 (011 r2)))
                                (110
-                                 ((0100 (010 r3))
+                                 ((010 r3)
                                   (1110 (001 rejected) (001 invalid-utf8)))
                                  ((0100 (010 r3))
                                   (001001 ((b2 (100 r1))
@@ -206,7 +206,7 @@
 (0011 unicode-scalars->string-onto
   (0010 (scalars out)
     (110
-      ((0100 (010 scalars))
+      ((010 scalars)
        out)
       ((0100 (010 scalars))
        (unicode-scalars->string-onto
