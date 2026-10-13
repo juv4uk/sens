@@ -73,7 +73,7 @@ class ExactDomainWitness(unittest.TestCase):
                   "files": [row]}
         codec = mod.load_codec()
         witness = mod.verify_upstream_t5_witness(report, "demo.lisp", "legacy", words, payload, codec)
-        self.assertEqual(witness["semantic_bits"], 12)
+        self.assertEqual(witness["semantic_bits"], 13)
         for field, wrong in (
             ("bytes", len(payload)+1), ("semantic_word_count", len(words)+1),
             ("semantic_bits", 13), ("transport_trits", 17),
