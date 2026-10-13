@@ -10,6 +10,8 @@ on:
       - 'scripts/ci_one_focused_workflow.py'
       - 'scripts/ci_failure_contract.py'
       - 'tests/semantic/domain-logic-2040/**'
+      - 'tests/semantic/knowledge-exact-arity-structure.*'
+      - 'lib/knowledge.lisp'
       - 'lib/domains/**'
       - 'lib/domains/d4.lisp'
       - 'lib/result-status.lisp'
@@ -99,6 +101,23 @@ jobs:
               echo "SENS_MUTANT_REJECTED_BY_NONCALLABLE rc=$code"
               exit 0
             '
+      - name: Двійковий закон арності знань — рівно D3/D4 і точний D1:YES
+        id: knowledge
+        shell: bash
+        run: |
+          set -euo pipefail
+          program=tests/semantic/knowledge-exact-arity-structure.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-knowledge-d1"
+          echo "test_id=knowledge-exact-arity-structure layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id knowledge-exact-arity-structure \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-knowledge-d1" \
+            --report-file "$report" \
+            -- target/debug/sens "$program"
       - name: Червоний має говорити — валідність діагностики
         if: always()
         shell: bash
@@ -107,10 +126,11 @@ jobs:
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           LAW_OUTCOME: ${{ steps.law.outcome }}
           MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
+          KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty
           else
             # Невдалий/пропущений етап без звіту ніколи не перетворюємо в PASS.
