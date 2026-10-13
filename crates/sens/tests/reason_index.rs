@@ -92,7 +92,7 @@ fn reason_index_predicate_returns_exact_d1_not_atom_or_legacy_boolean() {
     let mut session = session();
     let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
     assert!(
-        source.bytes().all(|byte| matches!(byte, b'0' | b'1' | b' ' | b'\\n' | b'\\r' | b'\\t')),
+        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
         "SENS-owned witness must contain only exact binary words and whitespace"
     );
     let parsed = parse_canonical_binary(source)
