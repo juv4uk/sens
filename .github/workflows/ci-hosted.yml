@@ -67,6 +67,7 @@ jobs:
         run: |
           cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
           cargo test --locked -p sens --test knowledge_exact_macro_migration
+          cargo test --locked -p sens --test forward_exact_macro_migration
       - name: Result-status exact D1 and domain-bitness witness
         if: always()
         run: |
