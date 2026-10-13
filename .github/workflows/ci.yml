@@ -60,7 +60,15 @@ jobs:
           python3 scripts/ci_one_focused_workflow.py
           python3 scripts/check-domain-ladder-identity.py --self-test --check
           # Instrumental migration proof, not an alternate semantic oracle.
-          python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
+          # Failures retain fixture, command and actual output via RED contract.
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          : > "$report"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id exact-domain-migrator-d3-d4 \
+            --layer encode \
+            --fixture tests/test_migrate_exact_domain.py \
+            --report-file "$report" \
+            -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Одноразовий ПОВНИЙ cargo test — весь workspace і всі targets
         id: full-workspace-cargo
