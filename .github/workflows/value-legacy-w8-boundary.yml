@@ -1,0 +1,28 @@
+name: "Межа legacy W8 у Value"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/value.rs"
+      - ".github/workflows/value-legacy-w8-boundary.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/value.rs"
+      - ".github/workflows/value-legacy-w8-boundary.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-domain-value-boundary:
+    name: "Перевірити exact-width і W8/D8 розділення"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Зібрати бібліотеку"
+        run: cargo check --locked -p sens --lib
+      - name: "Перебрати всі W8 payloads і перевірити бітову ширину"
+        run: cargo test --locked -p sens --lib value::exact_domain_value_tests -- --nocapture
