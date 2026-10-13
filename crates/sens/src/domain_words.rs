@@ -147,15 +147,15 @@ impl CoreD6 {
     }
 }
 
-/// Exact seven-bit logical carrier for the ratified D7 Sound7/local-ordinal domain.
+/// Exact seven-bit logical carrier for the ratified D7 keyboard/v2 W7 data domain.
 ///
-/// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
+/// This proves D7 membership only. keyboard/v2 W7 data laws own interpretation;
 /// callability or selector geometry must never be inferred from its width.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct SoundD7(Bit7);
+pub struct D7DataWord(Bit7);
 
-impl SoundD7 {
+impl D7DataWord {
     /// Wrap an already validated seven-bit logical word.
     pub const fn from_word(word: Bit7) -> Self {
         Self(word)
@@ -351,7 +351,7 @@ mod tests {
 
         for raw in 0..=127 {
             let word = Bit7::new(raw).unwrap();
-            assert!(SoundD7::from_word(word).word() == word);
+            assert!(D7DataWord::from_word(word).word() == word);
         }
 
         for raw in 0..=255 {
@@ -375,7 +375,7 @@ mod tests {
         assert_eq!(size_of::<CoreD4>(), 1);
         assert_eq!(size_of::<CoreD5>(), 1);
         assert_eq!(size_of::<CoreD6>(), 1);
-        assert_eq!(size_of::<SoundD7>(), 1);
+        assert_eq!(size_of::<D7DataWord>(), 1);
         assert_eq!(size_of::<CoreD8>(), 1);
         assert_eq!(size_of::<CoreD9>(), 2);
         assert_eq!(size_of::<DomainD10>(), 2);
