@@ -25,7 +25,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Створити журнал червоного
         shell: bash
-        run: : > "$RUNNER_TEMP/machine-effect-d3-false.jsonl"
+        run: |
+          : > "$RUNNER_TEMP/machine-effect-d3-false.jsonl"
       - name: Збірка виконавця — механізм, не семантичний оракул
         shell: bash
         run: |
