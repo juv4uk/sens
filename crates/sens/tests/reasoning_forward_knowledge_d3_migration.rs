@@ -80,7 +80,7 @@ fn knowledge_var_and_negation_require_exactly_one_argument() {
         assert_eq!(
             observed(program),
             expected,
-            "knowledge validator must enforce exact unary shape: {program}"
+            "Перевірка знань має вимагати точно один аргумент: {program}"
         );
     }
 }
@@ -106,7 +106,7 @@ fn named_definition<'a>(forms: &'a [Expr], name: &str) -> &'a Expr {
             items.get(1).map(|item| &item.kind),
             Some(ExprKind::Symbol(symbol)) if symbol.as_ref() == name
         )
-    }).unwrap_or_else(|| panic!("missing Lisp definition: {name}"))
+    }).unwrap_or_else(|| panic!("немає визначення Lisp: {name}"))
 }
 
 #[test]
@@ -116,7 +116,7 @@ fn knowledge_unary_validators_use_only_exact_d3_d4_structure() {
     assert!(!KNOWLEDGE_D3.contains("(unify-equal? (000000"));
     for name in ["knowledge-term-valid?", "knowledge-goal-valid?"] {
         let forms = parse_mixed_exact_domain_reasoning_source("lib/knowledge.lisp", KNOWLEDGE_D3)
-            .expect("knowledge source must preserve exact call-head domains");
+            .expect("джерело знань має зберігати точні домени голів викликів");
         let mut coordinates = Vec::new();
         collect_call_head_coordinates(named_definition(&forms, name), &mut coordinates);
         coordinates.sort_unstable();
@@ -128,12 +128,12 @@ fn knowledge_unary_validators_use_only_exact_d3_d4_structure() {
         assert_eq!(
             widths,
             [3usize, 4usize].into_iter().collect(),
-            "{name} must not use D6 LENGTH, W8 EQUAL, or an unqualified wider helper"
+            "{name} не має використовувати D6 LENGTH, W8 EQUAL або некваліфікований ширший засіб"
         );
         for required in [(3, 0b010), (3, 0b011), (3, 0b110), (4, 0b1001)] {
             assert!(
                 coordinates.contains(&required),
-                "{name} is missing D{}:{:0width$b}",
+                "{name} бракує D{}:{:0width$b}",
                 required.0,
                 required.1,
                 width = required.0
