@@ -147,25 +147,30 @@ impl CoreD6 {
     }
 }
 
-/// Exact seven-bit logical carrier for the ratified D7 Sound7/local-ordinal domain.
+/// Seven-bit TEXT/DATA carrier for the current keyboard D7 v2 (128/128).
 ///
-/// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
-/// callability or selector geometry must never be inferred from its width.
+/// Machine identity is the *exact* W7 coordinate; en/uk/san are display-only
+/// projections. This typed word never creates a Sound7 law or a callable.
+/// A byte-sized temporary Rust value is not an eight-bit SENS wire cell.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct SoundD7(Bit7);
+pub struct TextD7(Bit7);
 
-impl SoundD7 {
-    /// Wrap an already validated seven-bit logical word.
+impl TextD7 {
+    /// Accept only an already validated seven-bit word (0..=127).
     pub const fn from_word(word: Bit7) -> Self {
         Self(word)
     }
 
-    /// Recover the mechanical seven-bit word without interpreting it.
+    /// Recover the same seven meaningful bits, without text projection.
     pub const fn word(self) -> Bit7 {
         self.0
     }
 }
+
+/// Historical API spelling only. This alias adds no sound semantics, extra
+/// bits, implicit legacy decoding or resident callability.
+pub type SoundD7 = TextD7;
 
 /// Exact eight-bit logical carrier for the ratified D8 domain.
 ///
@@ -363,6 +368,60 @@ mod tests {
             let word = Bit9::new(raw).unwrap();
             assert!(CoreD9::from_word(word).word() == word);
         }
+    }
+
+    /// D3 | D7 | D4 occupies fourteen bits, not three padded host bytes.
+    /// Separate golden vectors catch a shared pack/unpack bit-order bug.
+    #[test]
+    fn text_d7_keyboard_v2_all_cells_exact_14_bit_physical_witness() {
+        use crate::{BitPacker, BinarySourceWord, DomainIdentity, PackedBitstream};
+        use crate::domain_ladder::DomainCoordinate;
+
+        let before = DomainCoordinate::new(3, 0b001).expect("D3");
+        let after = DomainCoordinate::new(4, 0b0010).expect("D4");
+        for raw in 0u8..=127 {
+            let cell = TextD7::from_word(Bit7::new(raw).expect("exact seven bits"));
+            let previous_api: SoundD7 = cell;
+            assert_eq!(previous_api.word().packed_bits(), raw);
+            let identity = DomainIdentity::from_source_word(BinarySourceWord::W7(cell.word()));
+            assert_eq!(identity.width(), 7);
+            assert_eq!(identity.packed_bits(), u16::from(raw));
+            assert!(identity.core_operation().is_none(),
+                "Text/D7 must not mint any callable mechanism");
+            let d7 = DomainCoordinate::new(7, u16::from(raw)).unwrap();
+            assert_ne!(d7, DomainCoordinate::new(8, u16::from(raw)).unwrap());
+
+            let mut packer = BitPacker::new();
+            assert_eq!(packer.push_coordinate(before), 0);
+            assert_eq!(packer.push_coordinate(d7), 3);
+            assert_eq!(packer.push_coordinate(after), 10);
+            let bytes = packer.finish();
+            assert_eq!(bytes.bit_len(), 14);
+            assert_eq!(bytes.byte_len(), 2);
+            assert_eq!(bytes.valid_bits_in_last_byte(), 6);
+            assert_eq!(bytes.read_coordinate(0, 3), Some(before));
+            assert_eq!(bytes.read_coordinate(3, 7), Some(d7));
+            assert_eq!(bytes.read_coordinate(10, 4), Some(after));
+
+            // Independently specified MSB-first golden bytes, not a
+            // codec-to-itself round-trip.
+            let golden: Option<[u8; 2]> = match raw {
+                0 => Some([0x20, 0x08]),
+                65 => Some([0x30, 0x48]),
+                127 => Some([0x3f, 0xc8]),
+                _ => None,
+            };
+            if let Some(expected) = golden {
+                assert_eq!(bytes.bytes(), expected, "W7 offset or bit order drift");
+            }
+            assert_eq!(bytes.bytes()[1] & 0b0000_0011, 0,
+                "unused physical padding must be zero");
+            let mut corrupt = bytes.bytes().to_vec();
+            corrupt[1] |= 1;
+            assert!(PackedBitstream::from_parts(corrupt, 14).is_none(),
+                "nonzero padding must fail closed");
+        }
+        assert!(Bit7::new(128).is_none(), "W8 must not fit W7");
     }
 
     #[test]

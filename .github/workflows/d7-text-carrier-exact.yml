@@ -1,0 +1,25 @@
+name: D7 — точний текстовий носій, 14 біт без вирівнювання
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/lib.rs"
+      - ".github/workflows/d7-text-carrier-exact.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/lib.rs"
+      - ".github/workflows/d7-text-carrier-exact.yml"
+
+jobs:
+  exact-text-d7:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Усі 128 клітинок D7, незалежні golden-вектори, зіпсований padding
+        run: cargo test --locked -p sens --lib domain_words::tests::text_d7_keyboard_v2_all_cells_exact_14_bit_physical_witness -- --exact
+      - name: Збереження всієї драбини типізованих слів
+        run: cargo test --locked -p sens --lib domain_words::tests::domain_carriers_round_trip_all_logical_words -- --exact
