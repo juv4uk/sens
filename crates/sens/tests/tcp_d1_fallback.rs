@@ -1,25 +1,33 @@
 //! Механічний transport двійкового SENS-свідка; жодного Rust-оракула логіки.
 use sens::{
-    eval_parsed_expressions, load_core_library, load_tcp_library,
+    decode_ternary_program, encode_ternary_words, eval_t5_program,
+    load_core_library, load_tcp_library, parse_binary_source_words,
     parse_mixed_exact_domain_process_tcp_source, ExprKind, Session,
 };
 
 const TCP_PATH: &str = "lib/tcp.lisp";
 const TCP_SOURCE: &str = include_str!("../../../lib/tcp.lisp");
-const SELFTEST: &str = include_str!("../../../tests/fixtures/semantic/tcp-exact-selftest.lisp");
+const SELFTEST: &str = include_str!("../../../tests/fixtures/semantic/tcp-exact-selftest.bits");
 
 #[test]
-fn tcp_semantic_law_is_decided_by_binary_sens_only() {
+fn tcp_semantic_law_is_decided_by_physical_binary_sens_only() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("допущене ядро D3/D4");
     load_tcp_library(&mut session).expect("чинний TCP-модуль SENS");
-    let program = parse_mixed_exact_domain_process_tcp_source(TCP_PATH, SELFTEST)
-        .expect("двійкові D3/D4/D9 голови, дані не виконуються як код");
-    let result = eval_parsed_expressions(&program, &mut session)
-        .expect("SENS-виконавець на власній програмі-свідку");
-    // Rust лише спостерігає єдиний підсумковий D1; усі умови та
-    // позитивні/негативні гілки сформульовані самою мовою SENS.
-    assert_eq!(result.value.as_predicate_bit(), Some(true), "SENS повернув D1:NO");
+
+    // Транспорт кодує САМІ точні слова W1/W2/W3/W9 та не визначає
+    // expected UTF-8/TCP значень. Єдиний семантичний оракул — SENS.
+    let words = parse_binary_source_words(SELFTEST)
+        .expect("жодних людських викличних голів або некваліфікованих чисел")
+        .into_iter().map(|token| token.word).collect::<Vec<_>>();
+    assert_eq!(words.len(), 51, "точний D2 синтаксичний транспорт");
+    assert_eq!(words.iter().map(|word| word.width()).sum::<usize>(), 127);
+    let physical = encode_ternary_words(&words).expect("безвтратне D2/T5");
+    assert_eq!(decode_ternary_program(&physical).expect("фізичний T5"), words);
+
+    let verdict = eval_t5_program(&physical, &mut session)
+        .expect("фізичний SENS-виконавець виконує власний TCP-свідок");
+    assert_eq!(verdict.value.as_predicate_bit(), Some(true), "SENS повернув D1:NO");
 }
 
 #[test]
