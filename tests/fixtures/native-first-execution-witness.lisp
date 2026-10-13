@@ -15,11 +15,11 @@
   (0010 (actual expected)
     (110
       ((11110111 actual expected)
-       (1)
        (001 pass))
-      ((11110111 actual expected)
-       (0)
-       (1110 (001 fail) actual expected)))))
+      (#d1:1
+       (111 (001 fail)
+         (111 actual
+           (111 expected (001 ()))))))))
 
 (0011 native-first-execution-witness
   (0010 ()
