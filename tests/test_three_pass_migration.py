@@ -323,11 +323,14 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("'(() . ())\n")
         self.assertEqual(out,"10 001 00 10 000 11 000 01 01\n")
 
-    def test_quoted_symbol_datum_remains_blocked_independently_of_numerics(self):
-        with self.assertRaisesRegex(
-            mod.MigrationError, "quoted symbol datum has no ratified"
-        ):
-            self.migrate("'(a . b)\n")
+    def test_quoted_symbol_datum_is_transported_as_ratified_d7_text(self):
+        # Ratified quoted-datum law: a quoted free symbol with no place in the
+        # callable D3-D10 ladder is transported as D7 Text/Data (D7 never
+        # creates a callable), framed exactly and never silently dropped.
+        out,_=self.migrate("'(a . b)\n")
+        self.assertEqual(
+            out,"10 001 00 10 10 1100001 01 11 10 1100010 01 01 01\n"
+        )
 
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
         out,_=self.migrate("(CONS x y)\n")
