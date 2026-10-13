@@ -4,12 +4,13 @@ on:
   push:
     branches: [main]
     paths:
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
       - "lib/reason.lisp"
       - "crates/sens/tests/reason_index.rs"
-      - "tests/semantic/reason-index-car-eq-guard-law.bits"
       - ".github/workflows/reason-index-exact-d1.yml"
   pull_request:
     paths:
+      - "tests/semantic/reason-index-car-eq-guard-law.bits"
       - "lib/reason.lisp"
       - "crates/sens/tests/reason_index.rs"
       - ".github/workflows/reason-index-exact-d1.yml"
@@ -25,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Бінарний SENS: compound CAR не є тегом індексу"
+      - name: "Бінарний SENS: CAR-атом та schema-EQ"
         run: cargo test --locked -p sens --test reason_index binary_sens_owns_reason_index_car_eq_guard_law -- --exact --nocapture
-      - name: Профільні свідки й повний набір 2046 координат
+      - name: Профільні свідки й усі 2046 координат
         run: cargo test --locked -p sens --test reason_index -- --nocapture

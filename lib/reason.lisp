@@ -33,7 +33,7 @@
     (110
       ((010 value) #d1:0)
       ((0101 value) #d1:0)
-      ; CAR(value) can be a compound rule. ATOM guard must precede EQ.
+      ; CAR(value) may be a compound rule. Guard before atom-only EQ.
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)

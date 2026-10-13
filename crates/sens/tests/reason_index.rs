@@ -32,12 +32,12 @@ fn binary_sens_owns_reason_index_car_eq_guard_law() {
     let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
     assert!(
         source.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
-        "semantic law must be written as visible binary SENS words"
+        "the semantic law must be visible binary SENS, not a host truth table"
     );
     let expressions = parse_canonical_binary(source)
-        .expect("binary law must be valid D2-framed SENS");
+        .expect("canonical D2-framed binary SENS must parse");
     eval_parsed_expressions(&expressions, &mut s)
-        .expect("SENS's own CAR/ATOM/EQ law rejected its counterexample or positive control");
+        .expect("binary SENS rejected its CAR/ATOM/EQ positive-negative law");
 }
 
 #[test]

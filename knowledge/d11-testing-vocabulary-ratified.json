@@ -1,0 +1,448 @@
+{
+  "schema": "sens.d11.testing/v1",
+  "status": "owner-ratified",
+  "date": "2026-10-13",
+  "width": 11,
+  "capacity": 2048,
+  "occupancy": 43,
+  "semantic_scope": "Testing vocabulary for binary SENS semantic tests; not callable Core",
+  "ratified_by": "PROJECT_OWNER",
+  "rules": {
+    "coordinates": "exact 11-bit binary 0..2047",
+    "encoding": "MSB-first densely packed, exact externally known bit length; bad frames reject",
+    "unknown": "fail-closed; no lossy substitutes",
+    "scope": "test vocabulary only; never admitted as callable language primitive"
+  },
+  "table": [
+    {
+      "bits": "00000000000",
+      "ascii": "\u0000",
+      "uk": "прочитати-файл",
+      "ukr": "прочитати-файл",
+      "san": "paṭhana-sañcikā",
+      "en": "read-file",
+      "lisp": "READ-FILE",
+      "sym": ""
+    },
+    {
+      "bits": "00000000001",
+      "ascii": "\u0001",
+      "uk": "прочитати-sens",
+      "ukr": "прочитати-sens",
+      "san": "paṭhana-sens",
+      "en": "read-sens",
+      "lisp": "READ-SENS",
+      "sym": ""
+    },
+    {
+      "bits": "00000000010",
+      "ascii": "\u0002",
+      "uk": "декодувати-t5",
+      "ukr": "декодувати-t5",
+      "san": "vikodana-t5",
+      "en": "decode-t5",
+      "lisp": "DECODE-T5",
+      "sym": ""
+    },
+    {
+      "bits": "00000000011",
+      "ascii": "\u0003",
+      "uk": "довжина",
+      "ukr": "довжина",
+      "san": "pramāṇa",
+      "en": "length",
+      "lisp": "LENGTH",
+      "sym": ""
+    },
+    {
+      "bits": "00000000100",
+      "ascii": "\u0004",
+      "uk": "порахувати",
+      "ukr": "порахувати",
+      "san": "saṃkhyā",
+      "en": "count",
+      "lisp": "COUNT",
+      "sym": ""
+    },
+    {
+      "bits": "00000000101",
+      "ascii": "\u0005",
+      "uk": "рівні?",
+      "ukr": "рівні?",
+      "san": "samāna?",
+      "en": "equal?",
+      "lisp": "EQUAL?",
+      "sym": ""
+    },
+    {
+      "bits": "00000000110",
+      "ascii": "\u0006",
+      "uk": "друкувати",
+      "ukr": "друкувати",
+      "san": "mudraṇa",
+      "en": "print",
+      "lisp": "PRINT",
+      "sym": ""
+    },
+    {
+      "bits": "00000000111",
+      "ascii": "\u0007",
+      "uk": "зріз",
+      "ukr": "зріз",
+      "san": "khaṇḍa",
+      "en": "slice",
+      "lisp": "SLICE",
+      "sym": ""
+    },
+    {
+      "bits": "00000001000",
+      "ascii": "\b",
+      "uk": "взяти",
+      "ukr": "взяти",
+      "san": "grahaṇa",
+      "en": "take",
+      "lisp": "TAKE",
+      "sym": ""
+    },
+    {
+      "bits": "00000001001",
+      "ascii": "\t",
+      "uk": "скинути",
+      "ukr": "скинути",
+      "san": "tyāga",
+      "en": "drop",
+      "lisp": "DROP",
+      "sym": ""
+    },
+    {
+      "bits": "00000001010",
+      "ascii": "\n",
+      "uk": "істина",
+      "ukr": "істина",
+      "san": "satya",
+      "en": "t",
+      "lisp": "T",
+      "sym": ""
+    },
+    {
+      "bits": "00000001011",
+      "ascii": "\u000b",
+      "uk": "хиба",
+      "ukr": "хиба",
+      "san": "asatya",
+      "en": "nil",
+      "lisp": "NIL",
+      "sym": ""
+    },
+    {
+      "bits": "00000001100",
+      "ascii": "\f",
+      "uk": "якщо",
+      "ukr": "якщо",
+      "san": "yadi",
+      "en": "if",
+      "lisp": "IF",
+      "sym": ""
+    },
+    {
+      "bits": "00000001101",
+      "ascii": "\r",
+      "uk": "якщо-то-інакше",
+      "ukr": "якщо-то-інакше",
+      "san": "anyathā",
+      "en": "if-else",
+      "lisp": "IF-ELSE",
+      "sym": ""
+    },
+    {
+      "bits": "00000001110",
+      "ascii": "\u000e",
+      "uk": "стверджувати",
+      "ukр": "стверджувати",
+      "san": "pratijñā",
+      "en": "assert",
+      "lisp": "ASSERT",
+      "sym": ""
+    },
+    {
+      "bits": "00000001111",
+      "ascii": "\u000f",
+      "uk": "провал",
+      "ukр": "провал",
+      "san": "patana",
+      "en": "fail",
+      "lisp": "FAIL",
+      "sym": ""
+    },
+    {
+      "bits": "00000010000",
+      "ascii": "\u0010",
+      "uk": "є?",
+      "ukr": "є?",
+      "san": "asti?",
+      "en": "exists?",
+      "lisp": "EXISTS?",
+      "sym": ""
+    },
+    {
+      "bits": "00000010001",
+      "ascii": "\u0011",
+      "uk": "всі?",
+      "ukr": "всі?",
+      "san": "sarva?",
+      "en": "all?",
+      "lisp": "ALL?",
+      "sym": ""
+    },
+    {
+      "bits": "00000010010",
+      "ascii": "\u0012",
+      "uk": "і",
+      "ukр": "і",
+      "san": "ca",
+      "en": "and",
+      "lisp": "AND",
+      "sym": ""
+    },
+    {
+      "bits": "00000010011",
+      "ascii": "\u0013",
+      "uk": "або",
+      "ukр": "або",
+      "san": "vā",
+      "en": "or",
+      "lisp": "OR",
+      "sym": ""
+    },
+    {
+      "bits": "00000010100",
+      "ascii": "\u0014",
+      "uk": "не",
+      "ukр": "не",
+      "san": "na",
+      "en": "not",
+      "lisp": "NOT",
+      "sym": ""
+    },
+    {
+      "bits": "00000010101",
+      "ascii": "\u0015",
+      "uk": "тест-шлях",
+      "ukр": "тест-шлях",
+      "san": "parīkṣā-mārga",
+      "en": "test-path",
+      "lisp": "TEST-PATH",
+      "sym": ""
+    },
+    {
+      "bits": "00000010110",
+      "ascii": "\u0016",
+      "uk": "тест-байти",
+      "ukр": "тест-байти",
+      "san": "parīkṣā-bāita",
+      "en": "test-bytes",
+      "lisp": "TEST-BYTES",
+      "sym": ""
+    },
+    {
+      "bits": "00000010111",
+      "ascii": "\u0017",
+      "uk": "тест-слова",
+      "ukр": "тест-слова",
+      "san": "parīkṣā-pada",
+      "en": "test-words",
+      "lisp": "TEST-WORDS",
+      "sym": ""
+    },
+    {
+      "bits": "00000011000",
+      "ascii": "\u0018",
+      "uk": "д2-відкрити",
+      "ukр": "д2-відкрити",
+      "san": "d2-vivṛta",
+      "en": "d2-open",
+      "lisp": "D2-OPEN",
+      "sym": ""
+    },
+    {
+      "bits": "00000011001",
+      "ascii": "\u0019",
+      "uk": "д2-закрити",
+      "ukр": "д2-закрити",
+      "san": "d2-saṃvṛta",
+      "en": "d2-close",
+      "lisp": "D2-CLOSE",
+      "sym": ""
+    },
+    {
+      "bits": "00000011010",
+      "ascii": "\u001a",
+      "uk": "д2-роздільник",
+      "ukр": "д2-роздільник",
+      "san": "d2-vibhāga",
+      "en": "d2-sep",
+      "lisp": "D2-SEP",
+      "sym": ""
+    },
+    {
+      "bits": "00000011011",
+      "ascii": "\u001b",
+      "uk": "д3-порожній",
+      "ukр": "д3-порожній",
+      "san": "d3-śūnya",
+      "en": "d3-empty",
+      "lisp": "D3-EMPTY",
+      "sym": ""
+    },
+    {
+      "bits": "00000011100",
+      "ascii": "\u001c",
+      "uk": "має-define",
+      "ukр": "має-define",
+      "san": "asti-define",
+      "en": "has-define",
+      "lisp": "HAS-DEFINE",
+      "sym": ""
+    },
+    {
+      "bits": "00000011101",
+      "ascii": "\u001d",
+      "uk": "має-lambda",
+      "ukр": "має-lambda",
+      "san": "asti-lambda",
+      "en": "has-lambda",
+      "lisp": "HAS-LAMBDA",
+      "sym": ""
+    },
+    {
+      "bits": "00000011110",
+      "ascii": "\u001e",
+      "uk": "має-quote",
+      "ukр": "має-quote",
+      "san": "asti-quote",
+      "en": "has-quote",
+      "lisp": "HAS-QUOTE",
+      "sym": ""
+    },
+    {
+      "bits": "00000011111",
+      "ascii": "\u001f",
+      "uk": "має-cons",
+      "ukр": "має-cons",
+      "san": "asti-cons",
+      "en": "has-cons",
+      "lisp": "HAS-CONS",
+      "sym": ""
+    },
+    {
+      "bits": "00000100000",
+      "ascii": " ",
+      "uk": "має-car",
+      "ukр": "має-car",
+      "san": "asti-car",
+      "en": "has-car",
+      "lisp": "HAS-CAR",
+      "sym": ""
+    },
+    {
+      "bits": "00000100001",
+      "ascii": "!",
+      "uk": "має-atom",
+      "ukр": "має-atom",
+      "san": "asti-atom",
+      "en": "has-atom",
+      "lisp": "HAS-ATOM",
+      "sym": ""
+    },
+    {
+      "bits": "00000100010",
+      "ascii": "\"",
+      "uk": "має-eq",
+      "ukр": "має-eq",
+      "san": "asti-eq",
+      "en": "has-eq",
+      "lisp": "HAS-EQ",
+      "sym": ""
+    },
+    {
+      "bits": "00000100011",
+      "ascii": "#",
+      "uk": "має-cond",
+      "ukр": "має-cond",
+      "san": "asti-cond",
+      "en": "has-cond",
+      "lisp": "HAS-COND",
+      "sym": ""
+    },
+    {
+      "bits": "00000100100",
+      "ascii": "$",
+      "uk": "всі-точність",
+      "ukр": "всі-точність",
+      "san": "sarva-sūkṣma",
+      "en": "all-exact",
+      "lisp": "ALL-EXACT",
+      "sym": ""
+    },
+    {
+      "bits": "00000100101",
+      "ascii": "%",
+      "uk": "структура-збалансована",
+      "ukр": "структура-збалансована",
+      "san": "racanā-samāna",
+      "en": "struct-balanced",
+      "lisp": "STRUCT-BALANCED",
+      "sym": ""
+    },
+    {
+      "bits": "00000100110",
+      "ascii": "&",
+      "uk": "без-точки",
+      "ukр": "без-точки",
+      "san": "bindu-rahita",
+      "en": "no-dot",
+      "lisp": "NO-DOT",
+      "sym": ""
+    },
+    {
+      "bits": "00000100111",
+      "ascii": "'",
+      "uk": "точний-розмір",
+      "ukр": "точний-розмір",
+      "san": "sūkṣma-pramāṇa",
+      "en": "exact-size",
+      "lisp": "EXACT-SIZE",
+      "sym": ""
+    },
+    {
+      "bits": "00000101000",
+      "ascii": "(",
+      "uk": "тест-прохід",
+      "ukр": "тест-прохід",
+      "san": "parīkṣā-siddhi",
+      "en": "test-pass",
+      "lisp": "TEST-PASS",
+      "sym": ""
+    },
+    {
+      "bits": "00000101001",
+      "ascii": ")",
+      "uk": "тест-провал",
+      "ukр": "тест-провал",
+      "san": "parīkṣā-viphalatā",
+      "en": "test-fail",
+      "lisp": "TEST-FAIL",
+      "sym": ""
+    },
+    {
+      "bits": "00000101010",
+      "ascii": "*",
+      "uk": "тест-елемент",
+      "ukr": "тест-елемент",
+      "san": "parīkṣā-aṃśa",
+      "en": "test-element",
+      "lisp": "TEST-ELEMENT",
+      "sym": ""
+    }
+  ]
+}
