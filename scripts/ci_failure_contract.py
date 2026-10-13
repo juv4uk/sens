@@ -76,13 +76,14 @@ def check_report(record):
             errors.append("missing:" + key)
     if record.get("layer") not in LAYER:
         errors.append("invalid:layer")
-    if record.get("stamp") not in STAMP:
+    if record.get("stamp") not in STAMP | {"UNCLASSIFIED"}:
         errors.append("invalid:stamp")
     for key in ("fixture_sha256", "expected_sha256", "actual_sha256"):
         if not DIGEST.fullmatch(str(record.get(key, ""))):
             errors.append("invalid:" + key)
-    if not SHA.fullmatch(str(record.get("first_bad_sha", ""))):
-        errors.append("UNRESOLVED_FIRST_BAD_SHA")
+    first_bad = record.get("first_bad_sha")
+    if first_bad != "UNRESOLVED" and not SHA.fullmatch(str(first_bad)):
+        errors.append("invalid:first_bad_sha")
     if not SHA.fullmatch(str(record.get("first_observed_bad_sha", ""))):
         errors.append("invalid:first_observed_bad_sha")
     try:
@@ -96,10 +97,20 @@ def check_report(record):
     ):
         errors.append("invalid:first_difference")
     fixture_path = record.get("fixture")
-    if not isinstance(fixture_path, str) or not fixture_path.startswith("tests/") or not Path(fixture_path).is_file():
+    # This path is source provenance: full Cargo points to lib/compiler-nucleus.lisp,
+    # while migration checks may point to scripts/ or crates/. Keep root ownership
+    # and digest verification, not a brittle tests/-only whitelist.
+    allowed = {"tests", "lib", "crates", "scripts", "knowledge", "benchmarks", "witnesses"}
+    if not isinstance(fixture_path, str):
         errors.append("invalid:fixture_path")
-    elif digest(Path(record["fixture"]).read_bytes()) != record.get("fixture_sha256"):
-        errors.append("invalid:fixture_digest")
+    else:
+        fixture = Path(fixture_path)
+        if (fixture.is_absolute() or not fixture.parts or ".." in fixture.parts
+                or fixture.parts[0] not in allowed or not fixture.is_file()
+                or not fixture.resolve().is_relative_to(Path.cwd().resolve())):
+            errors.append("invalid:fixture_path")
+        elif digest(fixture.read_bytes()) != record.get("fixture_sha256"):
+            errors.append("invalid:fixture_digest")
     if not isinstance(record.get("reproduce"), str) or not record.get("reproduce").strip():
         errors.append("invalid:reproduce")
     if record.get("stamp") in {"TRANSITIONAL", "FLAKE"}:
@@ -266,6 +277,12 @@ def run(args):
     if stamp == "REGRESSION":
         print("::error::REGRESSION " + args.test_id + " — semantic/release blocker")
         return 1
+    if stamp == "UNCLASSIFIED":
+        print("::error::UNCLASSIFIED-RED test=" + args.test_id
+              + " first_bad_sha=" + str(record["first_bad_sha"])
+              + " first_observed_bad_sha=" + str(record["first_observed_bad_sha"])
+              + " reproduce=" + reproduce)
+        return 1
     print("::warning::NAMED-QUARANTINE " + stamp + " " + args.test_id
           + " ticket=" + item["ticket"] + " expires=" + item["expires_at"])
     return 0
@@ -368,14 +385,26 @@ def scan(args):
         print("UNINFORMATIVE-OUTPUT no diagnostic report")
         return 1
     failures = []
+    unclassified = []
     for line_number, line in enumerate(path.read_text().splitlines(), 1):
         try:
-            errors = check_report(json.loads(line))
+            record = json.loads(line)
+            errors = check_report(record)
+            if not errors and record.get("stamp") == "UNCLASSIFIED":
+                unclassified.append(
+                    str(line_number) + ":test=" + str(record.get("test_id"))
+                    + " first_bad_sha=" + str(record.get("first_bad_sha"))
+                    + " reproduce=" + str(record.get("reproduce"))
+                )
         except (ValueError, TypeError) as exc:
             errors = ["invalid:json:" + str(exc)]
         failures += [str(line_number) + ":" + e for e in errors]
     if failures:
         print("UNINFORMATIVE-OUTPUT " + ", ".join(failures))
+        return 1
+    if unclassified:
+        for item in unclassified:
+            print("::error::UNCLASSIFIED-RED " + item)
         return 1
     print("PASS diagnostic shape for " + str(len(path.read_text().splitlines())) + " failed test(s)")
     return 0
@@ -443,6 +472,35 @@ def self_test():
         mutant = dict(record, **{field: "UNKNOWN"})
         if not check_report(mutant):
             raise RuntimeError("invalid digest/SHA passed: " + field)
+    # An unknown first causative SHA is explicit debt, not fake evidence.
+    compiler_fixture = Path("lib/compiler-nucleus.lisp")
+    pending = dict(
+        record,
+        stamp="UNCLASSIFIED",
+        first_bad_sha="UNRESOLVED",
+        fixture=str(compiler_fixture),
+        fixture_sha256=digest(compiler_fixture.read_bytes()),
+    )
+    if check_report(pending):
+        raise RuntimeError("real compiler RED with unresolved history was discarded as malformed")
+    bad_path = dict(pending, fixture="../lib/compiler-nucleus.lisp")
+    if "invalid:fixture_path" not in check_report(bad_path):
+        raise RuntimeError("relative traversal escaped report path guard")
+    import tempfile
+    import contextlib
+    import io
+    with tempfile.TemporaryDirectory(prefix="sens-unclassified-red-") as tmp:
+        report = Path(tmp) / "red.jsonl"
+        report.write_text(json.dumps(pending) + "\n", encoding="utf-8")
+        output = io.StringIO()
+        args = argparse.Namespace(
+            report_file=str(report), manifest="knowledge/red-test-quarantine.json",
+            allow_empty=False,
+        )
+        with contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 1 or "UNCLASSIFIED-RED" not in output.getvalue():
+            raise RuntimeError("unclassified RED was reported as PASS")
     for fake in (b"", b"0", b"1", b"1\nextra"):
         if fake != b"1\n" and "byte_offset" not in difference(b"1\n", fake, 0):
             raise RuntimeError("missing first difference")
