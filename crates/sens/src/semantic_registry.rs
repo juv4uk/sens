@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bit3, Bit4, Bit5, Bit9, CoreD5, CoreD9, CoreDomainIdentity, DomainIdentity};
+use crate::{Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -31,11 +31,16 @@ mod d5_definition_bindings_generated {
     include!("d5_definition_bindings_generated.rs");
 }
 
+mod d6_definition_bindings_generated {
+    include!("d6_definition_bindings_generated.rs");
+}
+
 mod d9_definition_bindings_generated {
     include!("d9_definition_bindings_generated.rs");
 }
 
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
+use d6_definition_bindings_generated::D6_DEFINITION_BINDINGS;
 use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
 use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use d7_display_generated::D7_DISPLAY_ROWS;
@@ -181,6 +186,21 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
         .iter()
         .find(|row| row.name == name)
         .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
+}
+
+/// Binding-only D6 lookup for an already-evaluated Lisp definition.
+///
+/// A matching name does not make D6 callable. The caller may populate an
+/// exact mechanism slot only when a real root callable value exists.
+pub(crate) fn d6_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
+    D6_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .map(|row| {
+            DomainIdentity::D6(CoreD6::from_word(
+                Bit6::new(row.bits).expect("generated D6 binding is exactly six bits"),
+            ))
+        })
 }
 
 /// Binding-only D9 lookup for language-owned Lisp definitions.
@@ -414,6 +434,26 @@ mod exact_registry_vs_historical_slot_tests {
             assert_eq!(u16::from(identity.packed_bits()), bits);
         }
         assert_eq!(domain_identity_for_surface("__unknown_domain_name__"), None);
+    }
+}
+
+#[cfg(test)]
+mod exact_d6_binding_projection_tests {
+    use super::*;
+
+    #[test]
+    fn reduce_definition_resolves_to_exact_d6_without_generic_callability() {
+        let identity = d6_binding_identity_for_definition("reduce")
+            .expect("ratified D6 REDUCE must have binding-only identity");
+        assert_eq!(identity.width(), 6);
+        assert_eq!(identity.packed_bits(), 0b101110);
+        assert!(identity.core_operation().is_none(),
+            "binding authority must not grant generic D6 callability");
+    }
+
+    #[test]
+    fn unknown_definition_does_not_gain_d6_identity() {
+        assert_eq!(d6_binding_identity_for_definition("__unknown_d6_binding__"), None);
     }
 }
 

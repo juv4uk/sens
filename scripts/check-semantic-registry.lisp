@@ -6,61 +6,61 @@
 ; canonical reader would turn lexical ID 0001 into numeric value 1 and erase
 ; the required "at least four digits" evidence.
 
-(def sr-same?
-  (lambda (left right)
-    (cond
+(0011 sr-same?
+  (0010 (left right)
+    (110
       ((equal? left right) (structural-relation same) t)
-      ((equal? left right) (structural-relation distinct) (quote ())))))
+      ((equal? left right) (structural-relation distinct) (001 ())))))
 
-(def sr-nonempty-list?
-  (lambda (value)
-    (cond
-      ((atom value) (structural-kind pair) t)
-      ((atom value) (structural-kind empty-list) (quote ()))
-      ((atom value) (structural-kind atom) (quote ())))))
+(0011 sr-nonempty-list?
+  (0010 (value)
+    (110
+      ((010 value) (structural-kind pair) t)
+      ((010 value) (structural-kind empty-list) (001 ()))
+      ((010 value) (structural-kind atom) (001 ())))))
 
-(def sr-member?
-  (lambda (value values)
-    (cond
-      ((atom values) (structural-kind empty-list) (quote ()))
-      ((atom values) (structural-kind atom) (quote ()))
-      ((atom values) (structural-kind pair)
-       (cond
-         ((sr-same? value (car values)) t)
-         (t (sr-member? value (cdr values))))))))
+(0011 sr-member?
+  (0010 (value values)
+    (110
+      ((010 values) (structural-kind empty-list) (001 ()))
+      ((010 values) (structural-kind atom) (001 ()))
+      ((010 values) (structural-kind pair)
+       (110
+         ((sr-same? value (100 values)) t)
+         (t (sr-member? value (011 values))))))))
 
-(def sr-uniq-add
-  (lambda (value values)
-    (cond
+(0011 sr-uniq-add
+  (0010 (value values)
+    (110
       ((sr-member? value values) values)
-      (t (cons value values)))))
+      (t (111 value values)))))
 
-(def sr-flush-token
-  (lambda (current tokens)
-    (cond
+(0011 sr-flush-token
+  (0010 (current tokens)
+    (110
       ((string-empty? current) tokens)
-      (t (cons current tokens)))))
+      (t (111 current tokens)))))
 
-(def sr-whitespace?
-  (lambda (ch)
+(0011 sr-whitespace?
+  (0010 (ch)
     (or (sr-same? ch " ")
         (sr-same? ch "\n")
         (sr-same? ch "\r")
         (sr-same? ch "\t"))))
 
-(def sr-tokenize-onto
-  (lambda (text current tokens in-comment)
-    (cond
+(0011 sr-tokenize-onto
+  (0010 (text current tokens in-comment)
+    (110
       ((string-empty? text)
-       (reverse (sr-flush-token current tokens)))
+       (10100 (sr-flush-token current tokens)))
       (t
-       (let* ((ch (string-first text))
+       (001001 ((ch (string-first text))
               (rest (string-rest text)))
-         (cond
+         (110
            (in-comment
-            (cond
+            (110
               ((sr-same? ch "\n")
-               (sr-tokenize-onto rest "" tokens (quote ())))
+               (sr-tokenize-onto rest "" tokens (001 ())))
               (t
                (sr-tokenize-onto rest "" tokens t))))
            ((sr-same? ch ";")
@@ -74,126 +74,126 @@
               rest
               ""
               (sr-flush-token current tokens)
-              (quote ())))
+              (001 ())))
            ((or (sr-same? ch "(") (sr-same? ch ")"))
             (sr-tokenize-onto
               rest
               ""
-              (cons ch (sr-flush-token current tokens))
-              (quote ())))
+              (111 ch (sr-flush-token current tokens))
+              (001 ())))
            (t
             (sr-tokenize-onto
               rest
               (string-append current ch)
               tokens
-              (quote ())))))))))
+              (001 ())))))))))
 
-(def sr-tokenize
-  (lambda (text)
-    (sr-tokenize-onto text "" (quote ()) (quote ()))))
+(0011 sr-tokenize
+  (0010 (text)
+    (sr-tokenize-onto text "" (001 ()) (001 ()))))
 
 ; Parse result shapes:
 ;   ("ok" value remaining-tokens)
 ;   ("error" message)
-(def sr-parse-list
-  (lambda (tokens acc)
-    (cond
-      ((atom tokens) (structural-kind empty-list)
-       (list "error" "unclosed-list"))
-      ((atom tokens) (structural-kind atom)
-       (list "error" "malformed-token-stream"))
-      ((atom tokens) (structural-kind pair)
-       (cond
-         ((sr-same? (car tokens) ")")
-          (list "ok" (reverse acc) (cdr tokens)))
+(0011 sr-parse-list
+  (0010 (tokens acc)
+    (110
+      ((010 tokens) (structural-kind empty-list)
+       (1110 "error" "unclosed-list"))
+      ((010 tokens) (structural-kind atom)
+       (1110 "error" "malformed-token-stream"))
+      ((010 tokens) (structural-kind pair)
+       (110
+         ((sr-same? (100 tokens) ")")
+          (1110 "ok" (10100 acc) (011 tokens)))
          (t
-          (let ((parsed (sr-parse-one tokens)))
-            (cond
-              ((sr-same? (car parsed) "error") parsed)
+          (001000 ((parsed (sr-parse-one tokens)))
+            (110
+              ((sr-same? (100 parsed) "error") parsed)
               (t
                (sr-parse-list
                  (third parsed)
-                 (cons (second parsed) acc)))))))))))
+                 (111 (second parsed) acc)))))))))))
 
-(def sr-parse-one
-  (lambda (tokens)
-    (cond
-      ((atom tokens) (structural-kind empty-list)
-       (list "error" "unexpected-eof"))
-      ((atom tokens) (structural-kind atom)
-       (list "error" "malformed-token-stream"))
-      ((atom tokens) (structural-kind pair)
-       (let ((token (car tokens)))
-         (cond
+(0011 sr-parse-one
+  (0010 (tokens)
+    (110
+      ((010 tokens) (structural-kind empty-list)
+       (1110 "error" "unexpected-eof"))
+      ((010 tokens) (structural-kind atom)
+       (1110 "error" "malformed-token-stream"))
+      ((010 tokens) (structural-kind pair)
+       (001000 ((token (100 tokens)))
+         (110
            ((sr-same? token "(")
-            (sr-parse-list (cdr tokens) (quote ())))
+            (sr-parse-list (011 tokens) (001 ())))
            ((sr-same? token ")")
-            (list "error" "unexpected-closing-paren"))
+            (1110 "error" "unexpected-closing-paren"))
            (t
-            (list "ok" token (cdr tokens)))))))))
+            (1110 "ok" token (011 tokens)))))))))
 
-(def sr-parse-root
-  (lambda (tokens)
-    (let ((parsed (sr-parse-one tokens)))
-      (cond
-        ((sr-same? (car parsed) "error") parsed)
+(0011 sr-parse-root
+  (0010 (tokens)
+    (001000 ((parsed (sr-parse-one tokens)))
+      (110
+        ((sr-same? (100 parsed) "error") parsed)
         (t
-         (let ((remaining (third parsed)))
-           (cond
-             ((atom remaining) (structural-kind empty-list)
-              (list "ok" (second parsed)))
-             ((atom remaining) (structural-kind atom)
-              (list "error" "malformed-token-stream"))
-             ((atom remaining) (structural-kind pair)
-              (list "error" "extra-top-level-forms")))))))))
+         (001000 ((remaining (third parsed)))
+           (110
+             ((010 remaining) (structural-kind empty-list)
+              (1110 "ok" (second parsed)))
+             ((010 remaining) (structural-kind atom)
+              (1110 "error" "malformed-token-stream"))
+             ((010 remaining) (structural-kind pair)
+              (1110 "error" "extra-top-level-forms")))))))))
 
-(def sr-digit?
-  (lambda (ch)
-    (sr-member? ch (quote ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+(0011 sr-digit?
+  (0010 (ch)
+    (sr-member? ch (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(def sr-all-digits?
-  (lambda (text)
-    (cond
+(0011 sr-all-digits?
+  (0010 (text)
+    (110
       ((string-empty? text) t)
       (t
-       (cond
+       (110
          ((sr-digit? (string-first text))
           (sr-all-digits? (string-rest text)))
-         (t (quote ())))))))
+         (t (001 ())))))))
 
-(def sr-at-least-four-chars?
-  (lambda (text)
-    (cond
-      ((string-empty? text) (quote ()))
+(0011 sr-at-least-four-chars?
+  (0010 (text)
+    (110
+      ((string-empty? text) (001 ()))
       (t
-       (let ((a (string-rest text)))
-         (cond
-           ((string-empty? a) (quote ()))
+       (001000 ((a (string-rest text)))
+         (110
+           ((string-empty? a) (001 ()))
            (t
-            (let ((b (string-rest a)))
-              (cond
-                ((string-empty? b) (quote ()))
+            (001000 ((b (string-rest a)))
+              (110
+                ((string-empty? b) (001 ()))
                 (t
-                 (let ((c (string-rest b)))
-                   (cond
-                     ((string-empty? c) (quote ()))
+                 (001000 ((c (string-rest b)))
+                   (110
+                     ((string-empty? c) (001 ()))
                      (t t)))))))))))))
 
-(def sr-valid-id?
-  (lambda (text)
+(0011 sr-valid-id?
+  (0010 (text)
     (and (sr-at-least-four-chars? text)
          (sr-all-digits? text))))
 
-(def sr-between?
-  (lambda (value low high)
+(0011 sr-between?
+  (0010 (value low high)
     (and (>= value low) (<= value high))))
 
 ; Alphabetic coverage for every current human surface, including Latin
 ; Extended Additional used by Sanskrit transliteration (ṃ/ṇ/ṛ/ṣ), plus common
 ; future scripts. The guarded law is that punctuation-only spellings may not
 ; live under a human-language surface.
-(def sr-letter-codepoint?
-  (lambda (cp)
+(0011 sr-letter-codepoint?
+  (0010 (cp)
     (or
       (sr-between? cp 65 90)
       (sr-between? cp 97 122)
@@ -211,215 +211,215 @@
       (sr-between? cp 7680 7935)
       (sr-between? cp 19968 40959))))
 
-(def sr-has-letter?
-  (lambda (text)
-    (cond
-      ((string-empty? text) (quote ()))
+(0011 sr-has-letter?
+  (0010 (text)
+    (110
+      ((string-empty? text) (001 ()))
       (t
-       (cond
+       (110
          ((sr-letter-codepoint? (string->codepoint (string-first text))) t)
          (t (sr-has-letter? (string-rest text))))))))
 
-(def sr-status?
-  (lambda (status)
+(0011 sr-status?
+  (0010 (status)
     (sr-member?
       status
-      (quote ("stable" "candidate" "missing" "compatibility-only")))))
+      (001 ("stable" "candidate" "missing" "compatibility-only")))))
 
-(def sr-first-wave-present?
-  (lambda (languages)
+(0011 sr-first-wave-present?
+  (0010 (languages)
     (and (sr-member? "uk" languages)
          (sr-member? "en" languages)
          (sr-member? "sa" languages))))
 
-(def sr-fail
-  (lambda (detail)
-    (let ((a (princ "semantic registry error: "))
+(0011 sr-fail
+  (0010 (detail)
+    (001000 ((a (princ "semantic registry error: "))
           (b (princ (write-to-string detail)))
           (c (princ "\n")))
       ; Deliberately cross a real UnknownSymbol boundary after printing the
       ; diagnostic. The dynamically constructed missing symbol carries the
       ; rejection payload in the error itself, so redirected stdout buffering
       ; cannot erase the useful detail before the non-zero process exit.
-      (eval
-        (list
+      (0001
+        (1110
           (string->symbol
             (string-append
               "semantic-registry-check-failed:"
               (write-to-string detail))))))))
 
 ; Result: ("ok" updated-all-surfaces has-sym), or sr-fail.
-(def sr-validate-surfaces
-  (lambda (identity surfaces entry-languages all-surfaces has-sym)
-    (cond
-      ((atom surfaces) (structural-kind empty-list)
-       (cond
+(0011 sr-validate-surfaces
+  (0010 (identity surfaces entry-languages all-surfaces has-sym)
+    (110
+      ((010 surfaces) (structural-kind empty-list)
+       (110
          ((sr-first-wave-present? entry-languages)
-          (list "ok" all-surfaces has-sym))
+          (1110 "ok" all-surfaces has-sym))
          (t
           (sr-fail
-            (list identity "missing-explicit-first-wave-surface"
+            (1110 identity "missing-explicit-first-wave-surface"
                   entry-languages)))))
-      ((atom surfaces) (structural-kind atom)
-       (sr-fail (list identity "surface-tail-not-list" surfaces)))
-      ((atom surfaces) (structural-kind pair)
-       (let ((surface (car surfaces)))
-         (cond
+      ((010 surfaces) (structural-kind atom)
+       (sr-fail (1110 identity "surface-tail-not-list" surfaces)))
+      ((010 surfaces) (structural-kind pair)
+       (001000 ((surface (100 surfaces)))
+         (110
            ((sr-nonempty-list? surface)
-            (cond
-              ((= (length surface) 3)
-               (let* ((language (car surface))
+            (110
+              ((= (000000 surface) 3)
+               (001001 ((language (100 surface))
                       (name (second surface))
                       (status (third surface)))
-                 (cond
-                   ((or (not (string? language))
-                        (not (string? name))
-                        (not (string? status)))
-                    (sr-fail (list identity "surface-fields-must-be-atoms" surface)))
+                 (110
+                   ((or (0100 (string? language))
+                        (0100 (string? name))
+                        (0100 (string? status)))
+                    (sr-fail (1110 identity "surface-fields-must-be-atoms" surface)))
                    ((sr-member? language entry-languages)
-                    (sr-fail (list identity "duplicate-surface" language)))
-                   ((not (sr-status? status))
-                    (sr-fail (list identity language "unknown-status" status)))
+                    (sr-fail (1110 identity "duplicate-surface" language)))
+                   ((0100 (sr-status? status))
+                    (sr-fail (1110 identity language "unknown-status" status)))
                    ((and (sr-same? status "missing")
-                         (not (sr-same? name "—")))
-                    (sr-fail (list identity language "missing-requires-dash" name)))
-                   ((and (not (or (sr-same? status "missing")
+                         (0100 (sr-same? name "—")))
+                    (sr-fail (1110 identity language "missing-requires-dash" name)))
+                   ((and (0100 (or (sr-same? status "missing")
                                   (sr-same? status "compatibility-only")))
                          (sr-same? name "—"))
-                    (sr-fail (list identity language status "requires-name")))
+                    (sr-fail (1110 identity language status "requires-name")))
                    ((sr-same? name identity)
-                    (sr-fail (list identity language "surface-name-equals-id")))
-                   ((and (not (sr-same? language "sym"))
-                         (not (sr-same? name "—"))
-                         (not (sr-has-letter? name)))
+                    (sr-fail (1110 identity language "surface-name-equals-id")))
+                   ((and (0100 (sr-same? language "sym"))
+                         (0100 (sr-same? name "—"))
+                         (0100 (sr-has-letter? name)))
                     (sr-fail
-                      (list identity language
+                      (1110 identity language
                             "punctuation-belongs-under-sym" name)))
                    (t
                     (sr-validate-surfaces
                       identity
-                      (cdr surfaces)
-                      (cons language entry-languages)
+                      (011 surfaces)
+                      (111 language entry-languages)
                       (sr-uniq-add language all-surfaces)
                       (or has-sym (sr-same? language "sym")))))))
               (t
-               (sr-fail (list identity "surface-must-have-three-fields" surface)))))
+               (sr-fail (1110 identity "surface-must-have-three-fields" surface)))))
            (t
-            (sr-fail (list identity "surface-must-be-list" surface)))))))))
+            (sr-fail (1110 identity "surface-must-be-list" surface)))))))))
 
-(def sr-validate-entries
-  (lambda (entries seen-ids all-surfaces symbolic-count count)
-    (cond
-      ((atom entries) (structural-kind empty-list)
-       (cond
+(0011 sr-validate-entries
+  (0010 (entries seen-ids all-surfaces symbolic-count count)
+    (110
+      ((010 entries) (structural-kind empty-list)
+       (110
          ((= count 0)
-          (sr-fail (list "registry-has-no-semantic-identities")))
+          (sr-fail (1110 "registry-has-no-semantic-identities")))
          (t
-          (list "ok" count all-surfaces symbolic-count))))
-      ((atom entries) (structural-kind atom)
-       (sr-fail (list "registry-tail-not-list" entries)))
-      ((atom entries) (structural-kind pair)
-       (let ((entry (car entries)))
-         (cond
+          (1110 "ok" count all-surfaces symbolic-count))))
+      ((010 entries) (structural-kind atom)
+       (sr-fail (1110 "registry-tail-not-list" entries)))
+      ((010 entries) (structural-kind pair)
+       (001000 ((entry (100 entries)))
+         (110
            ((sr-nonempty-list? entry)
-            (cond
-              ((>= (length entry) 2)
-               (let ((identity (car entry)))
-                 (cond
-                   ((not (string? identity))
-                    (sr-fail (list "semantic-id-must-be-token" identity)))
-                   ((not (sr-valid-id? identity))
-                    (sr-fail (list "semantic-id-must-be-four-plus-digits" identity)))
+            (110
+              ((>= (000000 entry) 2)
+               (001000 ((identity (100 entry)))
+                 (110
+                   ((0100 (string? identity))
+                    (sr-fail (1110 "semantic-id-must-be-token" identity)))
+                   ((0100 (sr-valid-id? identity))
+                    (sr-fail (1110 "semantic-id-must-be-four-plus-digits" identity)))
                    ((sr-member? identity seen-ids)
-                    (sr-fail (list "duplicate-semantic-id" identity)))
+                    (sr-fail (1110 "duplicate-semantic-id" identity)))
                    (t
-                    (let ((surface-result
+                    (001000 ((surface-result
                             (sr-validate-surfaces
                               identity
-                              (cdr entry)
-                              (quote ())
+                              (011 entry)
+                              (001 ())
                               all-surfaces
-                              (quote ()))))
+                              (001 ()))))
                       (sr-validate-entries
-                        (cdr entries)
-                        (cons identity seen-ids)
+                        (011 entries)
+                        (111 identity seen-ids)
                         (second surface-result)
-                        (cond
-                          ((third surface-result) (+ symbolic-count 1))
+                        (110
+                          ((third surface-result) (01010 symbolic-count 1))
                           (t symbolic-count))
-                        (+ count 1)))))))
+                        (01010 count 1)))))))
               (t
-               (sr-fail (list "malformed-semantic-entry" entry)))))
+               (sr-fail (1110 "malformed-semantic-entry" entry)))))
            (t
-            (sr-fail (list "malformed-semantic-entry" entry)))))))))
+            (sr-fail (1110 "malformed-semantic-entry" entry)))))))))
 
-(def sr-insert-string
-  (lambda (value sorted)
-    (cond
-      ((atom sorted) (structural-kind empty-list) (list value))
-      ((atom sorted) (structural-kind atom) (list value sorted))
-      ((atom sorted) (structural-kind pair)
-       (cond
-         ((string<? value (car sorted)) (cons value sorted))
+(0011 sr-insert-string
+  (0010 (value sorted)
+    (110
+      ((010 sorted) (structural-kind empty-list) (1110 value))
+      ((010 sorted) (structural-kind atom) (1110 value sorted))
+      ((010 sorted) (structural-kind pair)
+       (110
+         ((string<? value (100 sorted)) (111 value sorted))
          (t
-          (cons (car sorted)
-                (sr-insert-string value (cdr sorted)))))))))
+          (111 (100 sorted)
+                (sr-insert-string value (011 sorted)))))))))
 
-(def sr-sort-strings
-  (lambda (values acc)
-    (cond
-      ((atom values) (structural-kind empty-list) acc)
-      ((atom values) (structural-kind atom) (sr-insert-string values acc))
-      ((atom values) (structural-kind pair)
+(0011 sr-sort-strings
+  (0010 (values acc)
+    (110
+      ((010 values) (structural-kind empty-list) acc)
+      ((010 values) (structural-kind atom) (sr-insert-string values acc))
+      ((010 values) (structural-kind pair)
        (sr-sort-strings
-         (cdr values)
-         (sr-insert-string (car values) acc))))))
+         (011 values)
+         (sr-insert-string (100 values) acc))))))
 
-(def sr-join-space
-  (lambda (values)
-    (cond
-      ((atom values) (structural-kind empty-list) "")
-      ((atom values) (structural-kind atom) values)
-      ((atom values) (structural-kind pair)
-       (cond
-         ((atom (cdr values)) (structural-kind empty-list) (car values))
-         ((atom (cdr values)) (structural-kind atom)
+(0011 sr-join-space
+  (0010 (values)
+    (110
+      ((010 values) (structural-kind empty-list) "")
+      ((010 values) (structural-kind atom) values)
+      ((010 values) (structural-kind pair)
+       (110
+         ((010 (011 values)) (structural-kind empty-list) (100 values))
+         ((010 (011 values)) (structural-kind atom)
           (string-append
-            (car values)
-            (string-append " " (cdr values))))
-         ((atom (cdr values)) (structural-kind pair)
+            (100 values)
+            (string-append " " (011 values))))
+         ((010 (011 values)) (structural-kind pair)
           (string-append
-            (car values)
+            (100 values)
             (string-append
               " "
-              (sr-join-space (cdr values))))))))))
+              (sr-join-space (011 values))))))))))
 
-(def sr-source
+(0011 sr-source
   (read-file "lib/surface/semantic-registry.lisp"))
 
-(def sr-parsed
+(0011 sr-parsed
   (sr-parse-root (sr-tokenize sr-source)))
 
-(cond
-  ((sr-same? (car sr-parsed) "error")
+(110
+  ((sr-same? (100 sr-parsed) "error")
    (sr-fail (second sr-parsed)))
   (t
-   (let ((root (second sr-parsed)))
-     (cond
-       ((not (sr-nonempty-list? root))
-        (sr-fail (list "registry-root-must-be-list")))
-       ((not (sr-same? (car root) "sr/1"))
-        (sr-fail (list "registry-must-start-with-sr/1" (car root))))
+   (001000 ((root (second sr-parsed)))
+     (110
+       ((0100 (sr-nonempty-list? root))
+        (sr-fail (1110 "registry-root-must-be-list")))
+       ((0100 (sr-same? (100 root) "sr/1"))
+        (sr-fail (1110 "registry-must-start-with-sr/1" (100 root))))
        (t
-        (let* ((result
+        (001001 ((result
                  (sr-validate-entries
-                   (cdr root)
-                   (quote ())
-                   (quote ())
+                   (011 root)
+                   (001 ())
+                   (001 ())
                    0
                    0))
                (identity-count (second result))
-               (surface-names (sr-sort-strings (third result) (quote ())))
+               (surface-names (sr-sort-strings (third result) (001 ())))
                (symbolic-count (fourth result))
                (a (princ
                     (string-append
@@ -441,4 +441,4 @@
                         "\n"))))
                (d (princ "numeric-only authority: CONFIRMED\n"))
                (e (princ "meaning-first shape: CONFIRMED\n")))
-          (quote semantic-registry-ok)))))))
+          (001 semantic-registry-ok)))))))

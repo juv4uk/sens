@@ -56,7 +56,7 @@
     },
     {
       "path": "contracts/d7-ratification.lisp",
-      "git_blob_sha1": "c51ec57ca40ddf585a22ca8cbddab5efb4f11028"
+      "git_blob_sha1": "9c8e3861208384250724688f688d1daba90e2c82"
     },
     {
       "path": "contracts/d8-ratification.lisp",

@@ -670,6 +670,14 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         environment.bind_domain_code_slot_once(identity, value.clone());
     }
 
+    if let Some(identity) = semantic_registry::d6_binding_identity_for_definition(name) {
+        // D6 residency remains separate from execution. Only an actual
+        // language-owned callable definition can populate this exact slot.
+        if identity.core_operation().is_none() {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+        }
+    }
+
     let direct_d5_binding = semantic_registry::d5_binding_identity_for_definition(name);
     if let Some(identity) = direct_d5_binding {
         if super::necessary_forms::identity_for_domain_identity(identity).is_none()
