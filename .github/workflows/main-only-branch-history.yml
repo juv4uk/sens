@@ -2,6 +2,12 @@ name: SENS main-only branch history census
 
 on:
   create:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/check_main_only_branch_history.py'
+      - '.github/workflows/main-only-branch-history.yml'
+      - 'tests/test_check_main_only_branch_history.py'
   push:
     branches: [main]
     paths:
@@ -9,14 +15,16 @@ on:
       - 'research/branch-history/20261011/live-heads-pages-*.json'
       - 'scripts/check_main_only_branch_history.py'
       - '.github/workflows/main-only-branch-history.yml'
+      - 'tests/test_check_main_only_branch_history.py'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  prohibit-new-branch-detection:
-    # This is detective, not preventive. GitHub Rulesets must restrict branch creation.
+  branch-history-inventory:
+    # Current policy permits short-lived refs; this job inventories rather than forbids them.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -25,7 +33,7 @@ jobs:
           ref: main
           fetch-depth: 1
           persist-credentials: false
-      - name: Перевірити повноту інвентарю та нові віддалені гілки
+      - name: Зіставити історичний інвентар; нові короткі refs залишити на triage
         shell: bash
         run: |
           set -euo pipefail
@@ -38,8 +46,17 @@ jobs:
           path: ${{ runner.temp }}/new-branches.json
           if-no-files-found: ignore
 
+  branch-history-policy-tests:
+    if: github.event_name == 'pull_request'
+    name: Перевірки політики коротких гілок
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Позитивні й негативні свідки історичного census
+        run: python3 -m unittest discover -s tests -p 'test_check_main_only_branch_history.py' -v
+
   classify-legacy-branches:
-    if: github.event_name != 'create'
+    if: github.event_name != 'create' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

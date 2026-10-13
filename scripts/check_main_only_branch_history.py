@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Fail-closed SENS branch-history census. Read-only. Never creates branches.
+"""Fail-closed historical SENS branch census. Read-only. Never creates branches.
 
-The six exact-SHA manifests live on main. This tool distinguishes:
+Short-lived working branches are permitted by the current owner policy when an
+exact file CLAIM, atomic PR, and integration path through #5041 exist. New refs
+are reported for triage; their existence alone is not a failure. Missing source
+evidence and git comparison errors remain fail-closed. The six exact-SHA manifests live on main. This tool distinguishes:
 * IN_MAIN_ANCESTRY: original head commit is an ancestor of current main;
 * TREE_EQUIVALENT_NOT_ANCESTRY: same current tree, not proof of past evidence;
 * NEEDS_CONTENT_REVIEW: current tree differs from main; semantic review needed;
@@ -96,10 +99,20 @@ def classify_snapshot(rows: list[dict[str, str]], current_main: str) -> list[dic
     return classifications
 
 
+def exit_status(report: dict, classify_requested: bool) -> int:
+    """Only incomplete historical evidence blocks; newly created refs are observations."""
+    if classify_requested and any(
+        x["status"] in ("DIFF_ERROR", "MISSING_SOURCE_OBJECT")
+        for x in report.get("results", [])
+    ):
+        return 2
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check-new", action="store_true",
-                    help="Fail if origin has newly created branches absent in the snapshot")
+                    help="Report origin branches absent from the historical snapshot for triage")
     ap.add_argument("--classify", action="store_true",
                     help="Read-only ancestry/tree comparison of each recorded head")
     ap.add_argument("--output", default="")
@@ -132,13 +145,16 @@ def main() -> int:
     print(json.dumps({k: v for k, v in report.items() if k not in ("results", "removed_since_snapshot")},
                      ensure_ascii=False))
     if report["branches_created"]:
-        print("FAIL: new branch creation detected; this job CANNOT prevent creation", file=sys.stderr)
-        return 1
-    if args.classify and any(x["status"] in ("DIFF_ERROR", "MISSING_SOURCE_OBJECT")
-                             for x in report["results"]):
-        print("BLOCKED: source evidence incomplete", file=sys.stderr)
-        return 2
-    return 0
+        print(
+            "NOTICE: знайдено " + str(len(report["branches_created"]))
+            + " ref поза історичним snapshot. Сам факт створення короткої гілки дозволений; "
+              "перевірте CLAIM у #5029 і PR/інтеграцію через #5041. Повний перелік є у JSON-звіті.",
+            file=sys.stderr,
+        )
+    status = exit_status(report, args.classify)
+    if status == 2:
+        print("BLOCKED: source evidence incomplete (MISSING_SOURCE_OBJECT/DIFF_ERROR)", file=sys.stderr)
+    return status
 
 
 if __name__ == "__main__":
