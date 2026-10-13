@@ -1,4 +1,4 @@
-//! Envelope E3: domain-aware self-contained carrier for Core D1-D9 and explicit D24+.
+//! Envelope E3: domain-aware self-contained carrier for Core D1-D10 and explicit D24+.
 //!
 //! Historical wire/research name: S3/v3.  This is an Envelope, not Frame3/F3;
 //! the old filename/API is retained only for compatibility with evidence/tests.
@@ -8,7 +8,7 @@
 //! exact-width bytes); equal magnitudes in D24 and D48 are DIFFERENT words.
 //!
 //! S3 03 | canonical ULEB word-count | canonical byte-DP blocks | CRC32.
-//! RAW (0): count, per-word descriptors (1..9 for Core, 0x80 + ULEB
+//! RAW (0): count, per-word descriptors (1..9 for Core, 10 for exact D10, 0x80 + ULEB
 //! numeric ladder index), then tightly packed bits in descriptor order.
 //! REPEAT (1): count, descriptor, one aligned payload.
 //! NUMERIC_RUN (2): count, shared numeric ladder index, aligned payloads.
@@ -19,6 +19,7 @@
 //! invent numeric literals, resident occupancy, signedness, or widening.
 
 use crate::{parse_canonical_word_sequence, BinarySourceWord, Bit1};
+use crate::domain_words::DomainD10;
 use crate::frame3_grammar::{count_inner, rank_binary_source_words, unrank_binary_source_words, ExactWord, MAX_INNER_BITS};
 
 const MAGIC: [u8; 3] = [b'S', b'3', 3];
@@ -35,6 +36,8 @@ const MAX_NUMERIC_LEVEL: u8 = 18; // 786432-byte D6291456 fits MAX_BYTES; resour
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Word {
     Core(BinarySourceWord),
+    /// Exact D10 coordinate. A u16 host slot carries only ten semantic bits.
+    D10(DomainD10),
     Numeric { level: u8, bytes: Vec<u8> },
 }
 
@@ -60,13 +63,14 @@ impl Word {
     fn width_bits(&self) -> usize {
         match self {
             Self::Core(w) => w.width(),
+            Self::D10(_) => 10,
             Self::Numeric { bytes, .. } => bytes.len() * 8,
         }
     }
 
     fn descriptor_cost(&self) -> usize {
         match self {
-            Self::Core(_) => 1,
+            Self::Core(_) | Self::D10(_) => 1,
             Self::Numeric { level, .. } => 1 + uleb_len(*level as usize),
         }
     }
@@ -123,6 +127,7 @@ fn crc32(bytes: &[u8]) -> u32 {
 fn put_descriptor(word: &Word, out: &mut Vec<u8>) {
     match word {
         Word::Core(w) => out.push(w.width() as u8),
+        Word::D10(_) => out.push(10),
         Word::Numeric { level, .. } => {
             out.push(NUMERIC_DESCRIPTOR);
             write_uleb(*level as usize, out);
@@ -136,6 +141,7 @@ fn descriptor(input: &[u8], at: &mut usize) -> Result<Word, Error> {
     match kind {
         1..=9 => Ok(Word::Core(ExactWord::new(kind, 0)
             .map_err(|_| Error::Malformed)?.to_binary_source())),
+        10 => Ok(Word::D10(DomainD10::new(0).expect("valid ten-bit D10 placeholder"))),
         NUMERIC_DESCRIPTOR => {
             let level = read_uleb(input, at)?;
             let level = u8::try_from(level).map_err(|_| Error::TooLarge)?;
@@ -148,6 +154,7 @@ fn descriptor(input: &[u8], at: &mut usize) -> Result<Word, Error> {
 fn word_bit(word: &Word, bit: usize) -> u8 {
     match word {
         Word::Core(w) => ((w.packed_bits() >> (w.width() - 1 - bit)) & 1) as u8,
+        Word::D10(w) => ((w.packed_bits() >> (9 - bit)) & 1) as u8,
         Word::Numeric { bytes, .. } => (bytes[bit / 8] >> (7 - bit % 8)) & 1,
     }
 }
@@ -187,6 +194,14 @@ fn read_packed(templates: &mut [Word], input: &[u8], pos: &mut usize) -> Result<
                 *old = ExactWord::new(width as u8, value)
                     .map_err(|_| Error::Malformed)?.to_binary_source();
             }
+            Word::D10(old) => {
+                let mut value = 0u16;
+                for _ in 0..10 {
+                    value = (value << 1) | u16::from((body[bit_pos / 8] >> (7 - bit_pos % 8)) & 1);
+                    bit_pos += 1;
+                }
+                *old = DomainD10::new(value).ok_or(Error::Malformed)?;
+            }
             Word::Numeric { bytes, .. } => {
                 for byte in bytes.iter_mut() {
                     let mut value = 0u8;
@@ -210,7 +225,7 @@ fn read_packed(templates: &mut [Word], input: &[u8], pos: &mut usize) -> Result<
 fn valid_structure(words: &[Word]) -> Result<(), Error> {
     let surrogate = words.iter().map(|w| match w {
         Word::Core(core) => *core,
-        Word::Numeric { .. } => BinarySourceWord::W1(Bit1::new(0).unwrap()),
+        Word::D10(_) | Word::Numeric { .. } => BinarySourceWord::W1(Bit1::new(0).unwrap()),
     }).collect::<Vec<_>>();
     parse_canonical_word_sequence(&surrogate).map(|_| ()).map_err(|_| Error::InvalidD2)
 }
@@ -536,6 +551,72 @@ mod tests {
         assert!(decode(&mutated).is_err());
         let mut changed = good.clone(); changed[2] = 1;
         assert_eq!(decode(&changed), Err(Error::BadVersion));
+    }
+
+
+    /// Вичерпний свідок 1024/1024 координат D10: разом із D2/D3/D8 вони
+    /// займають точно 25 змістовних бітів, не 32, без внутрішніх padding.
+    #[test]
+    fn d10_all_coordinates_have_exact_ten_bit_payload_and_distinct_d8_identity() {
+        let open = Word::Core(BinarySourceWord::W2(crate::Bit2::new(0b10).unwrap()));
+        let close = Word::Core(BinarySourceWord::W2(crate::Bit2::new(0b01).unwrap()));
+        let quote = Word::Core(BinarySourceWord::W3(crate::Bit3::new(0b001).unwrap()));
+        let d8 = Word::Core(BinarySourceWord::W8(crate::Bit8::new(0b1010_1000).unwrap()));
+        for payload in 0u16..1024 {
+            let d10 = Word::D10(DomainD10::new(payload).unwrap());
+            assert_eq!(d10.width_bits(), 10);
+            assert_ne!(d10, Word::Core(BinarySourceWord::W8(
+                crate::Bit8::new((payload & 0xff) as u8).unwrap()
+            )));
+            let sequence = vec![open.clone(), quote.clone(), d10.clone(), d8.clone(), close.clone()];
+            let mut packed = Vec::new();
+            write_packed(&sequence, &mut packed);
+            assert_eq!(packed.len(), 4);
+            assert_eq!(packed[3] & 0x7f, 0, "лише кінцевий padding дозволено");
+            // Незалежний текстовий оракул, а не повторення реалізації write_packed.
+            let expected = format!("10001{payload:010b}1010100001");
+            assert_eq!(expected.len(), 25);
+            for (offset, expected_bit) in expected.bytes().enumerate() {
+                assert_eq!((packed[offset / 8] >> (7 - offset % 8)) & 1, expected_bit - b'0',
+                    "D10={payload}, зсув={offset}");
+            }
+            let encoded = encode(&sequence).expect("канонічний E3 має приймати D10");
+            assert_eq!(decode(&encoded).unwrap(), sequence);
+        }
+        assert_eq!(DomainD10::new(1024), None);
+        assert_eq!(DomainD10::new(u16::MAX), None);
+    }
+
+    #[test]
+    fn d10_descriptor_and_padding_are_canonical_without_implicit_callability() {
+        let d10 = Word::D10(DomainD10::new(0b1010_1010_10).unwrap());
+        assert_eq!(d10.descriptor_cost(), 1);
+        let one = vec![d10.clone()];
+        let encoded = encode(&one).unwrap();
+        assert_eq!(decode(&encoded).unwrap(), one);
+        // Явний RAW-дескриптор 10, незалежний від вибору DP-планувальника.
+        let mut raw = MAGIC.to_vec();
+        write_uleb(1, &mut raw);
+        raw.push(RAW);
+        write_uleb(1, &mut raw);
+        raw.push(10);
+        raw.extend_from_slice(&[0xaa, 0x80]);
+        let checksum = crc32(&raw);
+        raw.extend_from_slice(&checksum.to_be_bytes());
+        assert_eq!(decode(&raw).unwrap(), one);
+        // Канонічний CRC не дозволяє приховати ненульовий padding.
+        let mut bad_padding = raw[..raw.len() - 4].to_vec();
+        *bad_padding.last_mut().unwrap() |= 1;
+        let checksum = crc32(&bad_padding);
+        bad_padding.extend_from_slice(&checksum.to_be_bytes());
+        assert_eq!(decode(&bad_padding), Err(Error::NonCanonical));
+        for invalid in [11u8, 0x7f] {
+            let mut wrong = raw[..raw.len() - 4].to_vec();
+            wrong[6] = invalid;
+            let checksum = crc32(&wrong);
+            wrong.extend_from_slice(&checksum.to_be_bytes());
+            assert_eq!(decode(&wrong), Err(Error::Malformed));
+        }
     }
 
     #[test]
