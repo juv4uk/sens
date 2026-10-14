@@ -7,11 +7,7 @@
       (p #d1:0)
       (#d1:1 #d1:1))))
 
-(0011 структура--всі?
-  (0010 (predicates)
-    (110
-      ((010 predicates) #d1:0)
-      ((100 predicates) ; Structural equality is SENS-owned: neither Rust nor Python chooses words.
+; Structural equality is SENS-owned: neither Rust nor Python chooses words.
 (0011 структура--рівні?
   (0010 (left right)
     (110
@@ -24,7 +20,11 @@
        (структура--рівні? (011 left) (011 right)))
       (#d1:1 #d1:0))))
 
-(структура--всі? (011 predicates)))
+(0011 структура--всі?
+  (0010 (predicates)
+    (110
+      ((010 predicates) #d1:0)
+      ((100 predicates) (структура--всі? (011 predicates)))
       (#d1:1 #d1:0))))
 
 (структура--всі?
