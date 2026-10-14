@@ -20,7 +20,7 @@ fn codec_emits_exact_t5_d2_order() {
     // README: (CAR (CONS () ())) -> 10 100 00 10 111 00 000 00 000 01 01
     assert_eq!(
         eval("(t5-encode (quote (100 (111 () ()))))", &mut s),
-        eval("(quote (a 100 c a 111 c () c () b b))", &mut s)
+        eval("(quote (d2-open 100 d2-sep d2-open 111 d2-sep () d2-sep () d2-close d2-close))", &mut s)
     );
 }
 
@@ -31,8 +31,8 @@ fn codec_distinguishes_d2_dot_from_separator() {
     let mut s = codec_session();
     for (source, expected) in [
         ("100", "(100)"),
-        ("(100 111)", "(a 100 c 111 b)"),
-        ("(100 . 111)", "(a 100 d 111 b)"),
+        ("(100 111)", "(d2-open 100 d2-sep 111 d2-close)"),
+        ("(100 . 111)", "(d2-open 100 d2-dot 111 d2-close)"),
     ] {
         let encoded = eval(&format!("(t5-encode (quote {source}))"), &mut s);
         let expected_stream = eval(&format!("(quote {expected})"), &mut s);
