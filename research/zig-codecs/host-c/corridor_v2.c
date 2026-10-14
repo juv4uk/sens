@@ -8,17 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/* The only imported symbols are mechanical Zig C ABI v2 functions. */
-extern uint32_t sens_zig_codec_abi_version(void);
-extern int sens_zig_t5_validate(const uint8_t *src, size_t len);
-extern ptrdiff_t sens_zig_t5_encode_be3(
-    const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
-extern ptrdiff_t sens_zig_t5_decode_be3(
-    const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
-extern ptrdiff_t sens_zig_f3c_pack(
-    const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
-extern ptrdiff_t sens_zig_f3c_unpack(
-    const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
+/* The sole declaration source for the existing mechanical Zig ABI v2. */
+#include "zig_transport_v2.h"
 
 static int check_number(const char *id, ptrdiff_t actual, ptrdiff_t expected) {
     if (actual == expected) return 1;
