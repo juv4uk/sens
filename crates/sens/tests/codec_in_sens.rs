@@ -24,6 +24,28 @@ fn codec_emits_exact_t5_d2_order() {
     );
 }
 
+// Exact structural D2 order, tested through compact SENS-owned marker proxies.
+// This is not yet proof of physical two-bit tokens in a packed .sens file.
+#[test]
+fn codec_distinguishes_d2_dot_from_separator() {
+    let mut s = codec_session();
+    for (source, expected) in [
+        ("100", "(100)"),
+        ("(100 111)", "(a 100 c 111 b)"),
+        ("(100 . 111)", "(a 100 d 111 b)"),
+    ] {
+        let encoded = eval(&format!("(t5-encode (quote {source}))"), &mut s);
+        let expected_stream = eval(&format!("(quote {expected})"), &mut s);
+        assert_eq!(
+            encoded, expected_stream,
+            "D2 marker order mismatch: source={source} expected={expected}"
+        );
+        let returned = eval(&format!("(t5-roundtrip (quote {source}))"), &mut s);
+        let wanted = eval(&format!("(quote {source})"), &mut s);
+        assert_eq!(returned, wanted, "D2 roundtrip mismatch: source={source}");
+    }
+}
+
 #[test]
 fn codec_round_trips_every_shape() {
     let mut s = codec_session();
