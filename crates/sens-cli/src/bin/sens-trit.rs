@@ -99,10 +99,10 @@ fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
         return Err("expected a physical .sens file".into());
     }
-    let bytes = fs::read(path).map_err(|e| format!("read .sens: {e}"))?;
-    #[cfg(feature = "zig-transport")]
-    zig_transport::validate_t5(&bytes)?;
-    Ok(bytes)
+    // Read only: all Zig-mode callers decode exact T5 once via
+    // admitted_physical_program/admitted_t5_words/exact_t5_words.
+    // Do not allocate/decode the same carrier twice on hot-path.
+    fs::read(path).map_err(|e| format!("read .sens: {e}"))
 }
 
 
