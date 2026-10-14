@@ -175,8 +175,7 @@
 
 (0011 translation-review-candidate
   (0010 (module-name proposal)
-    (001000 ((kind (translation-kind proposal))
-          (payload (translation-payload proposal)))
+    ((0010 (kind payload)
       (110
         ((101 (translation-candidate-payload-valid? kind payload) (001 ()))
          (make-translation-review
@@ -192,7 +191,9 @@
            proposal (advice-all-decision module-name payload)))
         (#d1:1
          (make-translation-review
-           (001 rejected) (001 invalid-kind) proposal kind))))))
+           (001 rejected) (001 invalid-kind) proposal kind))))
+     (translation-kind proposal)
+     (translation-payload proposal))))
 
 ; `translation-review` is pure with respect to knowledge state. Even a review
 ; classified as accepted has NOT written anything. Admission remains an
