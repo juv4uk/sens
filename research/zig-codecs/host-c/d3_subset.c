@@ -11,10 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern uint32_t sens_zig_codec_abi_version(void);
-extern ptrdiff_t sens_zig_t5_encode_be3(const uint8_t *, size_t, uint8_t *, size_t);
-extern ptrdiff_t sens_zig_t5_decode_be3(const uint8_t *, size_t, uint8_t *, size_t);
-extern int sens_zig_t5_validate(const uint8_t *, size_t);
+/* One Zig mechanical ABI v2 contract shared with the corridor smoke host. */
+#include "zig_transport_v2.h"
 
 #define MAX_WORDS 512
 #define MAX_CHILDREN 16
