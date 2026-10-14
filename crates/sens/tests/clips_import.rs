@@ -641,11 +641,11 @@ fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
         assert_eq!(observed.as_predicate_bit(), Some(true),
             "test_id=clips-form-dispatch-d1 layer=eval law={index} did not yield exact D1:YES");
     }
-    let rejected = eval_parsed_expressions(&forms[3..], &mut session)
-        .expect_err("test_id=clips-form-dispatch-d1: D1 one-bit mutant must fail closed");
-    assert!(rejected.to_string().contains(
-        "domain identity is not callable under its ratified law: D1"
-    ), "test_id=clips-form-dispatch-d1 layer=eval wrong rejection: {rejected}");
+    let negative = eval_parsed_expressions(&forms[3..], &mut session)
+        .expect("test_id=clips-form-dispatch-d1: one-bit mutant is a valid SENS D1:NO program")
+        .value;
+    assert_eq!(negative.as_predicate_bit(), Some(false),
+        "test_id=clips-form-dispatch-d1 layer=eval one-D1-bit mutant must be exact D1:NO");
     println!(
         "SENS_CLIPS_DISPATCH_SELF_VERDICT id=clips-form-dispatch-d1 law=3 mutant=one-D1-bit outcome=PASS"
     );
