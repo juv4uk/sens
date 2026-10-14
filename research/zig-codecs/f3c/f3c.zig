@@ -1,6 +1,6 @@
 //! Frame3 Carrier (F3C) for exact-width SENS T5, Zig 0.16.0.
-//! Independent bounded rank/unrank, not Rust FFI. The source of format
-//! parity is research/framed3/rust_codec/senc.rs and frame3_small.rs.
+//! Independent bounded rank/unrank, with exact physical-byte witnesses.
+//! No external implementation provides language semantics.
 //! F3C is explicit .senc 0xf3; never sniff or silently fall back to T5.
 //! This module checks D3-profile program *shape*, not semantic call authority.
 const std = @import("std");
@@ -30,7 +30,7 @@ fn allowed(n: usize, pos: usize) []const u8 {
     return &.{ 0, 1, 2 };
 }
 
-/// Rust F3 frame_ways_table, but exact u256 suffices for 128 trits
+/// Physical rank-count table; exact u256 suffices for 128 trits
 /// (the full 3^128 universe fits inside 256 bits).
 fn ways(n: usize) [FRAME_MAX_TRITS + 1][4]Uint {
     var table = std.mem.zeroes([FRAME_MAX_TRITS + 1][4]Uint);
@@ -323,7 +323,7 @@ fn encodeFrame(allocator: Allocator, words: []const Word) ![]u8 {
     return result;
 }
 
-/// Rust-compatible tiny F3C choice; null means retain original T5.
+/// Bounded physical F3C choice; null means retain original T5.
 pub fn encode(allocator: Allocator, original_t5: []const u8) !?[]u8 {
     const words = try t5.decode(allocator, original_t5);
     defer allocator.free(words);
@@ -372,7 +372,7 @@ pub fn decode(allocator: Allocator, carrier: []const u8) ![]u8 {
     defer allocator.free(words);
     if (!canonicalProgram(words)) return Error.InvalidProgram;
 
-    // Rust frame_decode checks frame_transport + encode frame == original.
+    // Physical canonicality demands byte-exact replay after decode.
     const recomposed = try frameTrits(allocator, words);
     defer allocator.free(recomposed);
     if (!std.mem.eql(u8, recomposed, trits)) return Error.InvalidFrame;
@@ -387,7 +387,7 @@ pub fn decode(allocator: Allocator, carrier: []const u8) ![]u8 {
     return physical;
 }
 
-test "F3C Rust golden: QUOTE data exact physical bytes" {
+test "F3C physical golden: QUOTE data exact bytes" {
     const a = std.testing.allocator;
     const original = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
     const encoded = (try encode(a, &original)).?;
@@ -411,7 +411,7 @@ test "F3C refuses non-saving empty shell and noncanonical physical inputs" {
     try std.testing.expectError(t5.Error.InvalidPhysicalByte, encode(a, &.{0xf3}));
 }
 
-test "F3C Rust golden: nested CAR CONS .senc roundtrip" {
+test "F3C physical golden: nested CAR CONS .senc roundtrip" {
     const a = std.testing.allocator;
     const source = [_]u8{ 0x66, 0x38, 0x67, 0x89, 0x89, 0x3b, 0x35 };
     const encoded = (try encode(a, &source)).?;
