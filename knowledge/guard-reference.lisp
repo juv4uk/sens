@@ -1108,9 +1108,9 @@
       ((00000010 references) () (001 ()))
       ((00000010 references) (1) (001 ()))
       (t
-       (00000100
-         (guard-reference-field (001 topic) (00000101 references))
-         (guard-topics (00000110 references)))))))
+       (111
+         (guard-reference-field (001 topic) (100 references))
+         (guard-topics (011 references)))))))
 
 ; One canonical entry point for a cold agent: "ask Guard" without needing
 ; to know whether the answer lives in the tool directory or the reference

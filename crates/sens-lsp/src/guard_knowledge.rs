@@ -752,6 +752,66 @@ mod tests {
         assert_eq!(seen.values().sum::<usize>(), 48, "all data symbols accounted for");
     }
 
+
+    #[test]
+    fn guard_topics_exact_d3_list_ops_reject_three_independent_w8_mutants() {
+        // Exact-domain AST transport check. Native SENS, not Rust, owns semantics.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let start = full.find("(0011 guard-topics\n")
+            .expect("D4 guard-topics definition missing");
+        let rest = &full[start..];
+        let end = rest.find("\n; One canonical entry point for a cold agent:")
+            .expect("guard-topics section terminator missing");
+        let form = rest[..end].trim();
+
+        fn exact_list_ops(code: &str) -> [usize; 3] {
+            fn visit(expr: &Expr, tally: &mut [usize; 3]) {
+                if let ExprKind::List(items) = &expr.kind {
+                    if let Some(Expr { kind: ExprKind::DomainIdentity(id), .. }) = items.first() {
+                        if id.width() == 3 {
+                            let expected = match id.packed_bits() {
+                                0b111 => Some((0, 3)), // CONS plus two operands
+                                0b100 => Some((1, 2)), // CAR plus one operand
+                                0b011 => Some((2, 2)), // CDR plus one operand
+                                _ => None,
+                            };
+                            if let Some((index, arity)) = expected {
+                                assert_eq!(items.len(), arity, "D3 list-op arity differs");
+                                tally[index] += 1;
+                            }
+                        }
+                    }
+                    for child in items.iter() {
+                        visit(child, tally);
+                    }
+                }
+            }
+            let trees = sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", code
+            ).expect("pinned Guard exact-domain reader");
+            let mut tally = [0; 3];
+            for expr in &trees {
+                visit(expr, &mut tally);
+            }
+            tally
+        }
+
+        assert_eq!(exact_list_ops(form), [1, 1, 1], "one D3 CONS, CAR, CDR");
+        let mutations = [
+            ("(111\n", "(00000100\n", [0, 1, 1]),
+            ("(100 references)", "(00000101 references)", [1, 0, 1]),
+            ("(011 references)", "(00000110 references)", [1, 1, 0]),
+        ];
+        for (exact, historical, expected) in mutations {
+            assert_eq!(form.matches(exact).count(), 1, "unique head {exact}");
+            let mutant = form.replacen(exact, historical, 1);
+            assert_eq!(
+                exact_list_ops(&mutant), expected,
+                "eight source bits cannot impersonate exact D3 {exact}"
+            );
+        }
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
