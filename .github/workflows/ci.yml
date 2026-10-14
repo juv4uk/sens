@@ -81,6 +81,8 @@ jobs:
           # Fail-closed Zig cleanroom ratchet on EVERY branch, not only research.
           # CI_GLUE_NO_SEMANTICS; no new workflow or second semantic oracle.
           python3 scripts/check-zig-cleanroom.py --self-test
+          # CI_GLUE_NO_SEMANTICS: transactional publication rejects unpinned or corrupt evidence.
+          python3 tests/test_verify_zig_publication.py -v
           python3 scripts/check-zig-cleanroom.py
           python3 -m unittest discover -s tests -p 'test_zig_publication_candidate.py' -v
           python3 scripts/check-domain-ladder-identity.py --self-test --check
