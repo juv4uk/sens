@@ -145,7 +145,7 @@
     (110
       ((101 (100 raw) (001 ntp-fields))
        (internet-time-fields->observation
-         (100 (011 raw))
+         (1001 raw)
          (100 (011 (011 raw)))
          (100 (011 (011 (011 raw))))
          (100 (011 (011 (011 (011 raw)))))
