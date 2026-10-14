@@ -289,14 +289,28 @@ fn execute() -> Result<(), String> {
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            let reference = sens::encode_binary_projection_ternary(&projection)
-                .map_err(|e| explain_encode_failure(&projection, e))?;
-            // SENS owns the grammar/semantic admission; physical bytes are
-            // produced by Zig in the official zig-transport variant.
+            // In Zig mode the SENS reader owns exact grammar and width
+            // admission. Zig alone performs the physical T5 packing from
+            // dense meaningful bits + a separately declared width schedule.
+            // No Rust Word/enum/SID8/host truth passes the transport ABI.
             #[cfg(feature = "zig-transport")]
-            let bytes = zig_transport::repack_t5(&reference)?;
+            let bytes = {
+                let tokens = sens::parse_binary_source_words(&projection)
+                    .map_err(|e| format!("SENS exact source words rejected: {}", e.render(&projection)))?;
+                let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
+                if words.is_empty() {
+                    return Err("empty canonical SENS program".into());
+                }
+                sens::parse_canonical_word_sequence(&words)
+                    .map_err(|e| format!("SENS canonical D2 reader rejected: {e}"))?;
+                let packed = sens::pack_binary_source_words(&words);
+                let widths = words.iter().map(|word| word.width() as u8).collect::<Vec<_>>();
+                zig_transport::encode_dense_t5(&packed, &widths)?
+            };
+            // The non-Zig mode remains the independent Rust reference.
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = reference;
+            let bytes = sens::encode_binary_projection_ternary(&projection)
+                .map_err(|e| explain_encode_failure(&projection, e))?;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;
