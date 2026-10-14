@@ -106,7 +106,7 @@
          (1
           (1111 (narrate-fact goal)
             (111 (001 because) (narrate-derivation derivations))))))
-     (provenance-derived-from (101101111 proof)))))
+     (provenance-list (100111 proof)))))
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
 ; ----------------------------------------------------------------------
