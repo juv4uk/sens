@@ -60,7 +60,7 @@ def main():
             "platform": platform.platform(), "seed": 20261014}
     if meta["zig_version"] != args.zig_pin:
         raise RuntimeError(f"zig pin mismatch expected {args.zig_pin}, got {meta['zig_version']}")
-    command(["zig", "test", "research/zig-codecs/tests.zig"])
+    command(["zig", "test", "research/zig-codecs/tests.zig", "-lc"])
     command(["cargo", "build", "--locked", "--release", "-p", "sens",
              "--example", RUST_EXE])
     zb = out / "zig_f3c_bench"
