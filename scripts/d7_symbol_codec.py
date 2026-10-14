@@ -28,6 +28,8 @@ class D7CodecError(ValueError):
 class D7SymbolCodec:
     def __init__(self, authority: dict | None = None) -> None:
         doc = json.loads(SOURCE.read_text(encoding="utf-8")) if authority is None else authority
+        if not isinstance(doc, dict):
+            raise D7CodecError("D7 v2 authority must be a JSON object")
         if (doc.get("schema"), doc.get("status"), doc.get("width"),
                 doc.get("capacity"), doc.get("occupancy")) != (
                 "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
@@ -35,6 +37,9 @@ class D7SymbolCodec:
         table = doc.get("table")
         if not isinstance(table, list) or len(table) != 128:
             raise D7CodecError("D7 v2 requires 128 exact W7 cells")
+        for index, entry in enumerate(table):
+            if not isinstance(entry, dict):
+                raise D7CodecError(f"D7 v2 coordinate row {index:07b} must be an object")
         self.forward: dict[str, dict[str, str]] = {}
         self.reverse: dict[str, dict[str, str]] = {}
         for surface in ("uk", "san", "ascii"):
@@ -47,7 +52,7 @@ class D7SymbolCodec:
             self.reverse[surface] = {}
         for index, entry in enumerate(table):
             bits = f"{index:07b}"
-            if not isinstance(entry, dict) or entry.get("bits") != bits or entry.get("ascii") != chr(index):
+            if entry.get("bits") != bits or entry.get("ascii") != chr(index):
                 raise D7CodecError(f"D7 v2 coordinate drift at {bits}")
             for surface in self.forward:
                 glyph = entry[surface]
