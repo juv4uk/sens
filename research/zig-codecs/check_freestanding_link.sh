@@ -93,7 +93,7 @@ for target in x86_64-freestanding thumb-freestanding-eabi; do
     echo "ZIG_FREESTANDING_LINK_PASS target=$target ABI_exports=${#names[@]} entry=NONE"
     sha256sum "$obj" "$elf" | tee "$output/$target-SHA256.txt"
     grep -E 'Class:|Machine:|Type:' "$output/$target-elf-header.txt"
-    grep -E '[[:space:]]\.text[[:space:]]' "$output/$target-size.txt"
+    grep -E '^\.text[[:space:]]' "$output/$target-size.txt"
 done
 
 echo "ZIG_FREESTANDING_BOTH_TARGETS_PASS semantic_authority=SENS actual_ESP32_S3=NOT_TESTED stack_bound=NOT_MEASURED"
