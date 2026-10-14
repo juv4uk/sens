@@ -53,6 +53,19 @@ class CurrentD7KeyboardTests(unittest.TestCase):
         with self.assertRaises(D7CodecError):
             D7SymbolCodec(doc)
 
+    def test_malformed_authority_rows_reject_with_exact_w7_diagnostic(self):
+        original = json.loads(
+            (ROOT / "knowledge/d7-keyboard-v2-ratified.json").read_text(encoding="utf-8")
+        )
+        for index, invalid in ((0, None), (7, []), (81, 123)):
+            with self.subTest(index=index):
+                doc = json.loads(json.dumps(original))
+                doc["table"][index] = invalid
+                with self.assertRaisesRegex(D7CodecError, f"{index:07b}"):
+                    D7SymbolCodec(doc)
+        with self.assertRaisesRegex(D7CodecError, "JSON object"):
+            D7SymbolCodec([])
+
 
 if __name__ == "__main__":
     unittest.main()
