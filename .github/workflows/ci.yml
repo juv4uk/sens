@@ -253,9 +253,22 @@ jobs:
           candidate = temp / "source.sens"
           zig = temp / "sens-zig-transport"
           sens = Path("target/debug/sens-trit")
+          # This tracked corpus is migrated from a prior era. Never relabel
+          # its physical bits as a new-era source merely because hashes match.
+          provenance = temp / "quote-fixture-translation.json"
+          provenance.write_text(json.dumps({
+              "fixture_origin": "historical",
+              "source": "tests/fixtures/migration-quote-cohort-main/quote-legacy",
+              "source_sha256": sha(source.read_bytes()),
+              "admission": "CI_FIXTURE_ONLY_NOT_RELEASE_AUTHORIZATION",
+          }) + "\n")
           receipt = {
               "schema": "sens-zig-publication-candidate/v1",
-              "source_era": "current",
+              "source_era": "translated",
+              "translation_receipt": {
+                  "path": str(provenance),
+                  "sha256": sha(provenance.read_bytes()),
+              },
               "source_sha256": sha(source.read_bytes()),
               "physical_sha256": sha(candidate.read_bytes()),
               "zig_executor_sha256": sha(zig.read_bytes()),
