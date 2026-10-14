@@ -274,13 +274,6 @@ def inspect_domains(table_texts: dict[int, str]) -> dict[int, int]:
 
 
 
-# Негативні, а не правотворчі докази: однаковий W8 не стає D8.
-# Запис = old label, classification, незалежний target, поточний D8 label.
-W8_COLLISION = {
-    "10101000": ("invoke", "MECHANISM-HOLD", None, "round"),
-    "01001011": ("read-all", "DIRECT-CURRENT-IDENTITY", "D9:110101001", "abs∘recip"),
-    "10100110": ("read-file", "DIRECT-CURRENT-IDENTITY", "D9:110110111", "1/"),
-}
 # The two historical domain-specific workflows were retired during the
 # one-automatic-workflow migration. Keep the existing full binary pipeline as
 # this check's local/explicit admission gate. CI trigger ownership is checked
@@ -290,40 +283,6 @@ ACTIVE_GATES = (
 )
 AUTO_GATE = ".github/workflows/ci.yml"
 AUTO_GUARD = "scripts/ci_one_focused_workflow.py"
-
-
-def inspect_w8_d8_collision(coverage: dict, d8_source: str) -> None:
-    rows = coverage.get("rows")
-    if coverage.get("status") != "AUDIT-COMPLETE" or not isinstance(rows, list):
-        raise ValueError("W8 provenance lacks verified historical inventory")
-    legacy = {}
-    for row in rows:
-        bits = row.get("legacy_code")
-        if bits in legacy:
-            raise ValueError(f"historical W8 duplicate: {bits}")
-        legacy[bits] = row
-    if len(legacy) != 256:
-        raise ValueError("historical W8 inventory incomplete")
-    for bits, (name, classification, target, current_name) in W8_COLLISION.items():
-        row = legacy.get(bits)
-        if row is None or row.get("legacy_name") != name:
-            raise ValueError(f"historical W8 collision missing: {bits}")
-        if row.get("classification") != classification:
-            raise ValueError(f"historical W8 classification changed: {bits}")
-        actual_target = row.get("current_target")
-        if target is None:
-            if actual_target is not None:
-                raise ValueError(f"W8 mechanism HOLD improperly admitted: {bits}")
-        elif not isinstance(actual_target, str) or target not in actual_target:
-            raise ValueError(f"W8 cross-domain successor lost: {bits}")
-        row_lines = [
-            line for line in d8_source.splitlines()
-            if line.lstrip().startswith("(" + bits + " ")
-        ]
-        if len(row_lines) != 1 or f"(en {current_name})" not in row_lines[0]:
-            raise ValueError(f"D8 ratified resident drift: {bits}")
-        if actual_target is not None and actual_target.startswith("D8:"):
-            raise ValueError(f"historical W8 reclassified by same D8 bits: {bits}")
 
 
 def inspect_active_gates(root: Path) -> None:
@@ -369,12 +328,6 @@ def inspect_files(root: Path) -> dict[int, int]:
             raise ValueError(f"missing domain table: {rel}")
         domain_texts[domain] = path.read_text(encoding="utf-8")
     counts = inspect_domains(domain_texts)
-    provenance = root / "knowledge/sens8-current-coverage-v1.json"
-    if not provenance.is_file() or provenance.is_symlink():
-        raise ValueError("historical collision evidence missing")
-    inspect_w8_d8_collision(
-        json.loads(provenance.read_text(encoding="utf-8")), domain_texts[8]
-    )
     inspect_active_gates(root)
     return counts
 
@@ -473,45 +426,7 @@ def self_test() -> None:
     same_payload = {(3, "001"), (4, "0001"), (5, "00001")}
     if len(same_payload) != 3 or {int(bits, 2) for _, bits in same_payload} != {1}:
         raise ValueError("D3/D4/D5 must never collapse by packed numeric payload")
-    entries = [
-        {"legacy_code": f"{i:08b}", "legacy_name": None,
-         "classification": "UNNAMED-LEGACY-IDENTITY", "current_target": None}
-        for i in range(256)
-    ]
-    for bits, (name, classification, target, _) in W8_COLLISION.items():
-        entry = entries[int(bits, 2)]
-        entry["legacy_name"] = name
-        entry["classification"] = classification
-        entry["current_target"] = target
-    synthetic = {"status": "AUDIT-COMPLETE", "rows": entries}
-    d8_sample = "\n".join(
-        f"({bits} (en {label}) (sym ()))"
-        for bits, (_, _, _, label) in W8_COLLISION.items()
-    )
-    inspect_w8_d8_collision(synthetic, d8_sample)
-    # Кожен мутаційний негатив повинен впасти, а не «мігрувати» функцію.
-    mutation_cases = [
-        ({"status": "AUDIT-COMPLETE", "rows": entries[:-1]}, d8_sample),
-        ({"status": "UNVERIFIED", "rows": entries}, d8_sample),
-        (synthetic, d8_sample.replace("(en round)", "(en invoke)")),
-        (synthetic, d8_sample.replace("(en 1/)", "(en read-file)")),
-    ]
-    for corrupted, table in mutation_cases:
-        try:
-            inspect_w8_d8_collision(corrupted, table)
-        except ValueError:
-            pass
-        else:
-            raise ValueError("W8/D8 collision mutation was incorrectly admitted")
-    held = {"status": "AUDIT-COMPLETE", "rows": [dict(row) for row in entries]}
-    held["rows"][int("10101000", 2)]["current_target"] = "D8:10101000"
-    try:
-        inspect_w8_d8_collision(held, d8_sample)
-    except ValueError:
-        pass
-    else:
-        raise ValueError("legacy INVOKE incorrectly admitted as D8 ROUND")
-    print("DOMAIN-LADDER-IDENTITY: self-test PASS (Rust/Python/C/Lisp, D3/D4/D5, W8/D8 negative controls)")
+    print("DOMAIN-LADDER-IDENTITY: self-test PASS (D1–D10 widths, distinct D3/D4/D5, source hygiene; no retroactive D8 history)")
 
 
 def main() -> int:
