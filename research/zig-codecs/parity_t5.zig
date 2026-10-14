@@ -88,7 +88,7 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
         checked += 1;
         const check = accepts(allocator, line) catch |err| {
             failures += 1;
-            std.debug.print("FAIL test_id=t5-parity-fixture-io layer=transport file={s} fixture_sha256=UNAVAILABLE replay_sha256=UNAVAILABLE first_diff=NA expected={s} actual=HARNESS_ERROR error={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
+            std.debug.print("можливість-розв'язати-цікаву-задачу (fail) test_id=t5-parity-fixture-io layer=transport file={s} fixture_sha256=UNAVAILABLE replay_sha256=UNAVAILABLE first_diff=NA expected={s} actual=HARNESS_ERROR error={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
                 line,
                 if (expect_accept) "ACCEPT" else "REJECT",
                 @errorName(err),
@@ -102,7 +102,7 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
                 std.fmt.bytesToHex(sha, .lower)
             else
                 [_]u8{'-'} ** 64;
-            std.debug.print("FAIL test_id=t5-parity layer=transport file={s} bytes={d} fixture_sha256={s} replay_sha256={s} first_diff={any} expected={s} actual={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
+            std.debug.print("можливість-розв'язати-цікаву-задачу (fail) test_id=t5-parity layer=transport file={s} bytes={d} fixture_sha256={s} replay_sha256={s} first_diff={any} expected={s} actual={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
                 line,
                 check.byte_count,
                 &fixture_hex,
@@ -117,7 +117,7 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
     }
     if (checked == 0) {
         failures += 1;
-        std.debug.print("FAIL test_id=t5-parity-empty-list layer=transport file={s} expected=NONEMPTY actual=EMPTY reproduce='zig run -lc research/zig-codecs/parity_t5.zig'\n", .{list_path});
+        std.debug.print("можливість-розв'язати-цікаву-задачу (fail) test_id=t5-parity-empty-list layer=transport file={s} expected=NONEMPTY actual=EMPTY reproduce='zig run -lc research/zig-codecs/parity_t5.zig'\n", .{list_path});
     }
     std.debug.print("list={s} expect={s} checked={d} failures={d}\n", .{
         list_path, if (expect_accept) "ACCEPT" else "REJECT", checked, failures,
