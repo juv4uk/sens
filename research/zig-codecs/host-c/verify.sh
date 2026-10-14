@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Manual Rust-free C host of the existing Zig ABI v2; no extra CI workflow.
 set -Eeuo pipefail
-root="$(cd "$(dirname "\${BASH_SOURCE[0]}")/../../.." && pwd)"
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$root"
-zig_bin="\${ZIG:-zig}"
-cc_bin="\${CC:-cc}"
+zig_bin="${ZIG:-zig}"
+cc_bin="${CC:-cc}"
 pinned="$(cat .zig-version)"
 if ! command -v "$zig_bin" >/dev/null 2>&1; then
     echo "SENS_C_CORRIDOR_UNVERIFIED layer=toolchain missing=zig" >&2
@@ -19,7 +19,7 @@ if [[ "$actual" != "$pinned" ]]; then
     echo "SENS_C_CORRIDOR_UNVERIFIED layer=toolchain zig_pin=$pinned actual=$actual" >&2
     exit 2
 fi
-if [[ -n "\${SENS_C_HOST_OUT_DIR:-}" ]]; then
+if [[ -n "${SENS_C_HOST_OUT_DIR:-}" ]]; then
     mkdir -p "$SENS_C_HOST_OUT_DIR"
     out="$(cd "$SENS_C_HOST_OUT_DIR" && pwd)"
 else
