@@ -63,6 +63,7 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
         ("proper-empty", "(narrate-proper-list? (001 ()))"),
         ("proper-one", "(narrate-proper-list? (001 (a)))"),
         ("answer-empty", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ())))"),
+        ("answer-nested", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ((proved (planet mars) (planet mars) ())))))"),
         ("outcome-unknown", "(narrate-outcome (001 (unknown subject)))"),
     ] {
         let expressions = parse_mixed_exact_domain(expression)
