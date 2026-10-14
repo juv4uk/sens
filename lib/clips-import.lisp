@@ -373,8 +373,7 @@
 (0011 clips-facts->clauses-onto
   (0010 (facts templates acc)
     (110
-      ((0100 (010 facts)) (10100 acc))
-      ((010 facts)  (10100 acc))
+      ((010 facts) (10100 acc))
       ((010 ()) (clips-facts->clauses-onto
            (011 facts) templates
            (111 (clips-fact-clause (clips-convert-template (100 facts) templates)) acc))))))
@@ -884,8 +883,7 @@
 (0011 clips-import-forms-onto
   (0010 (forms templates acc)
     (110
-      ((0100 (010 forms)) (10100 acc))
-      ((010 forms)  (10100 acc))
+      ((010 forms) (10100 acc))
       ((010 ()) (clips-import-forms-onto
            (011 forms) templates
            (clips-cons-each-onto (clips-form->clauses (100 forms) templates) acc))))))
