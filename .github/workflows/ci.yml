@@ -40,6 +40,21 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: EPISTEMIC — бінарний D3 EQ/D1 самовердикт і однобітний мутант
+        id: epistemic-d1-exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/epistemic-eq-d1-law-mutant.bits"
+          sha256sum "$fixture" crates/sens/tests/sens_semantic_witnesses.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-eq-d1-law-mutant \
+            --layer eval \
+            --fixture "$fixture" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- cargo test --locked -p sens --test sens_semantic_witnesses \
+                 epistemic_d3_eq_d1_law_and_one_bit_mutant -- --exact --nocapture
       - name: Zig — чистота фізичного референсу та точні транспортні тести
         shell: bash
         run: |
@@ -108,7 +123,6 @@ jobs:
             --fixture tests/test_migrate_exact_domain.py \
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
-      - uses: dtolnay/rust-toolchain@1.99.0
       - name: Мігратор exact-domain — Rust перевіряє лише механічний W8 firewall
         shell: bash
         run: |
@@ -387,20 +401,6 @@ jobs:
             --fixture tests/test_approved_t5_transaction.py \
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v
-      - name: EPISTEMIC — бінарний D3 EQ/D1 самовердикт і однобітний мутант
-        id: epistemic-d1-exact
-        shell: bash
-        run: |
-          set -euo pipefail
-          fixture="tests/semantic/epistemic-eq-d1-law-mutant.bits"
-          sha256sum "$fixture" crates/sens/tests/sens_semantic_witnesses.rs
-          python3 scripts/ci_failure_contract.py run \
-            --test-id epistemic-eq-d1-law-mutant \
-            --layer eval \
-            --fixture "$fixture" \
-            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
-            -- cargo test --locked -p sens --test sens_semantic_witnesses \
-                 epistemic_d3_eq_d1_law_and_one_bit_mutant -- --exact --nocapture
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
       - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[sens-native-run]'))
