@@ -20,6 +20,7 @@ struct Analysis {
     edits: Vec<Edit>,
     named_calls: usize,
     blocked_host_capabilities: usize,
+    blocked_unratified: usize,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -241,7 +242,12 @@ fn walk_expr(
             // in the mixed reader. Other spellings may be migrated only
             // through the ratified domain-qualified source index.
             if semantic_registry_export::exact_uk_callable_for_source_head(spelling).is_none() {
-                push_head_edit(head, spelling, analysis);
+                if semantic_registry_export::admitted_core_domain_for_surface(spelling).is_some() {
+                    push_head_edit(head, spelling, analysis);
+                } else {
+                    // Legacy surface recognition is NOT ratified callable authority.
+                    analysis.blocked_unratified += 1;
+                }
             }
         }
 
@@ -477,12 +483,22 @@ fn main() {
 
         if check {
             println!(
-                "{filename}: convertible={} named-calls={} blocked-host={}",
+                "{filename}: convertible={} named-calls={} blocked-host={} blocked-unratified={}",
                 analysis.edits.len(),
                 analysis.named_calls,
-                analysis.blocked_host_capabilities
+                analysis.blocked_host_capabilities,
+                analysis.blocked_unratified
             );
-            changes_available |= !analysis.edits.is_empty();
+            changes_available |= !analysis.edits.is_empty() || analysis.blocked_unratified > 0;
+            continue;
+        }
+
+        if analysis.blocked_unratified > 0 {
+            eprintln!(
+                "sens-to-sens: {filename}: BLOCKED_UNRATIFIED_HEADS={} (historical W8 never becomes current domain code)",
+                analysis.blocked_unratified
+            );
+            failed = true;
             continue;
         }
 
@@ -512,10 +528,11 @@ fn main() {
         let remaining =
             analyze(&output, &host_capabilities).expect("rewritten source was just validated");
         println!(
-            "{filename}: replaced={} named-calls-remaining={} blocked-host={}",
+            "{filename}: replaced={} named-calls-remaining={} blocked-host={} blocked-unratified={}",
             analysis.edits.len(),
             remaining.named_calls,
-            remaining.blocked_host_capabilities
+            remaining.blocked_host_capabilities,
+            remaining.blocked_unratified
         );
     }
 
@@ -563,8 +580,7 @@ mod tests {
     #[test]
     fn preserves_comments_strings_and_quote_data() {
         let source = "; (+ 8 9)\n(quote (+ 1 2))\n\"car (+ 3 4)\"\n(atom? x)\n";
-        let expected =
-            "; (+ 8 9)\n(001 (+ 1 2))\n\"car (+ 3 4)\"\n(010 x)\n";
+        let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
@@ -572,8 +588,7 @@ mod tests {
     fn derived_functions_and_current_macros_use_exact_codes() {
         let source =
             "(let ((xs (list 1 2 3))) (and (member? 2 xs) (or () (length xs))))";
-        let expected =
-            "(001000 ((xs (1110 1 2 3))) (and (11101 2 xs) (or () (000000 xs))))";
+        let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
@@ -581,8 +596,7 @@ mod tests {
     fn defmacro_head_is_exact_and_its_target_shadows_later_surface_calls() {
         let source =
             "(defmacro list (x) (quote shadowed)) (list (never-defined-function))";
-        let expected =
-            "(defmacro list (x) (001 shadowed)) (list (never-defined-function))";
+        let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
@@ -590,8 +604,7 @@ mod tests {
     fn local_bindings_shadow_registry_surfaces() {
         let source =
             "(lambda (list) (list 1 2)) (let ((car (lambda (x) x))) (car (list 1 2)))";
-        let expected =
-            "(0010 (list) (list 1 2)) (001000 ((car (0010 (x) x))) (car (1110 1 2)))";
+        let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
@@ -599,8 +612,7 @@ mod tests {
     fn top_level_and_local_definitions_shadow_registry_surfaces() {
         let source =
             "(define list (lambda args (quote shadowed))) (list 1 2) (lambda () (define list (lambda args 7)) (list 1 2))";
-        let expected =
-            "(0011 list (0010 args (001 shadowed))) (list 1 2) (0010 () (0011 list (0010 args 7)) (list 1 2))";
+        let expected = source;
         assert_eq!(rewrite(source), expected);
     }
 
@@ -615,17 +627,17 @@ mod tests {
         // code slot 00101010 (#1468), so calls to it become the code.
         assert_eq!(
             rewrite_language("(define reverse (lambda (xs) (reverse xs))) (reverse (list 1))"),
-            "(0011 reverse (0010 (xs) (10100 xs))) (10100 (1110 1))"
+            "(define reverse (lambda (xs) (reverse xs))) (reverse (list 1))"
         );
         // A primitive surface still shadows: redefining it is not the language's function.
         assert_eq!(
             rewrite_language("(define car (lambda (x) x)) (car 1)"),
-            "(0011 car (0010 (x) x)) (car 1)"
+            "(define car (lambda (x) x)) (car 1)"
         );
         // Local definitions always shadow.
         assert_eq!(
             rewrite_language("(lambda () (define reverse (lambda (x) x)) (reverse 1))"),
-            "(0010 () (0011 reverse (0010 (x) x)) (reverse 1))"
+            "(lambda () (define reverse (lambda (x) x)) (reverse 1))"
         );
     }
 
@@ -633,7 +645,7 @@ mod tests {
     fn unratified_compatibility_def_does_not_invent_a_domain_code() {
         assert_eq!(
             rewrite("(def f (lambda (x) (car x)))"),
-            "(def f (0010 (x) (100 x)))"
+            "(def f (lambda (x) (car x)))"
         );
     }
 
@@ -657,13 +669,16 @@ mod tests {
 
     #[test]
     fn ratified_exact_width_is_the_only_replacement_authority() {
-        let car = semantic_registry_export::admitted_core_domain_for_surface("car")
-            .expect("ratified D3:100 CAR");
-        assert_eq!((car.width(), car.packed_bits()), (3, 0b100));
-        assert_eq!(rewrite("(car xs)"), "(100 xs)");
-        assert_eq!(rewrite("(let ((x (write-to-string v))) (string->symbol x))"),
-                   "(001000 ((x (write-to-string v))) (string->symbol x))");
-        assert!(!rewrite("(let ((x (write-to-string v))) (string->symbol x))").contains("10011100"));
+        // The current source index intentionally admits uk/sa, never
+        // English display words through historical SID8.
+        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("car"), None);
+        let source = "(let ((x (write-to-string v))) (string->symbol x))";
+        let audit = analyze(source, &no_host()).expect("well-formed historical source");
+        assert!(audit.edits.is_empty(), "no historical W8 source write");
+        assert!(audit.blocked_unratified >= 3, "every unratified call remains visible");
+        assert_eq!(rewrite(source), source);
+        assert!(!rewrite(source).contains("10011100"));
+        assert!(!rewrite(source).contains("01001100"));
         assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("write-to-string"), None);
         assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("string->symbol"), None);
     }
