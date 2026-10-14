@@ -218,6 +218,13 @@ jobs:
           cargo test --locked -p sens --lib universal_frame3::tests::e1_zig_rust_shared_physical_corpus -- --exact --nocapture \
             | tee "$RUNNER_TEMP/sens-e1-corpus.log"
           grep -Fxq 'test universal_frame3::tests::e1_zig_rust_shared_physical_corpus ... ok' "$RUNNER_TEMP/sens-e1-corpus.log"
+          echo 'test_id=e1-to-native-sens-one-bit-self-verdict layer=eval semantic_authority=binary-SENS'
+          sha256sum crates/sens/src/binary_execution.rs tests/fixtures/semantic/exact-d3-logic-selftest.sens tests/fixtures/semantic/exact-d3-logic-mutant.sens
+          cargo test --locked -p sens --lib binary_execution::e1_exact_word_execution_tests::e1_carrier_executes_existing_sens_binary_self_verdict_and_mutant -- --exact --nocapture \
+            | tee "$RUNNER_TEMP/sens-e1-native-verdict.log"
+          grep -Fxq 'test binary_execution::e1_exact_word_execution_tests::e1_carrier_executes_existing_sens_binary_self_verdict_and_mutant ... ok' "$RUNNER_TEMP/sens-e1-native-verdict.log"
+          grep -Fxq 'E1_NATIVE_SENS_VERDICT_PASS label=positive D1=1' "$RUNNER_TEMP/sens-e1-native-verdict.log"
+          grep -Fxq 'E1_NATIVE_SENS_VERDICT_PASS label=one-bit-mutant D1=0' "$RUNNER_TEMP/sens-e1-native-verdict.log"
           echo 'test_id=zig-to-sens-cli-abi layer=transport semantic_authority=SENS'
           cargo build --locked -p sens-cli --bin sens-trit
           CLI_RUST_ZIG=target/debug/sens-trit
