@@ -251,6 +251,7 @@ fn prim_01001101(
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
     StringToSymbol,
+    SymbolToString,
     CharCode,
     Read,
     WriteToString,
@@ -280,6 +281,7 @@ pub(crate) fn domain_primitive_kind(
         CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
             0b11100000 => Some(DomainPrimitiveKind::CharCode),
             0b11101101 => Some(DomainPrimitiveKind::StringToSymbol),
+            0b11101110 => Some(DomainPrimitiveKind::SymbolToString),
             0b11101010 => Some(DomainPrimitiveKind::Read),
             0b11110100 => Some(DomainPrimitiveKind::WriteToString),
             0b11110111 => Some(DomainPrimitiveKind::Equal),
@@ -301,7 +303,7 @@ fn invoke_domain_primitive(
     let kind = domain_primitive_kind(identity)?;
     Some((|| {
         let expected = match kind {
-            DomainPrimitiveKind::StringToSymbol => 1,
+            DomainPrimitiveKind::StringToSymbol | DomainPrimitiveKind::SymbolToString => 1,
             DomainPrimitiveKind::CharCode => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
@@ -341,6 +343,11 @@ fn invoke_domain_primitive(
             DomainPrimitiveKind::StringToSymbol => {
                 // D8:11101101, direct scalar/string mechanism, no byte fallback.
                 special_forms::string_to_symbol_values(args, span)
+            }
+            DomainPrimitiveKind::SymbolToString => {
+                // D8:11101110, exact inverse carrier with the existing string
+                // mechanism. No historical byte/alias is ever consulted.
+                special_forms::symbol_to_string_values(args, span)
             }
             DomainPrimitiveKind::CharCode => {
                 // D8:11100000 CHAR-CODE reuses the already-tested scalar
