@@ -120,8 +120,8 @@
 (0011 my-definition-name?
   (0010 (name)
     (110
-      ((my-define-name? name) t)
-      ((my-def-compat-name? name) t)
+      ((my-define-name? name) #d1:1)
+      ((my-def-compat-name? name) #d1:1)
       )))
 
 ; Canon identity is an atom or (). D4 NULL/NOT project that
@@ -203,7 +203,7 @@
     (110
       
       ((010 frame)  (001 ()))
-      ((101 (100 (100 frame)) name) t)
+      ((101 (100 (100 frame)) name) #d1:1)
       ((010 ()) (my-frame-bound? name (011 frame))))))
 
 (0011 my-frame-lookup
@@ -217,7 +217,7 @@
     (110
       
       ((010 env-ref)  (001 ()))
-      ((my-shared-frame-binding? (100 env-ref)) t)
+      ((my-shared-frame-binding? (100 env-ref)) #d1:1)
       ((010 ()) (my-env-has-shared-frame? (011 env-ref))))))
 
 (0011 my-shared-frame-value
@@ -296,14 +296,14 @@
 (0011 env-bound?
   (0010 (name env-ref)
     (110
-      ((my-canon-name? name) t)
+      ((my-canon-name? name) #d1:1)
       
       ((010 env-ref)  (001 ()))
       ((my-shared-frame-binding? (100 env-ref))
        (110
-         ((my-frame-bound? name (011 (100 env-ref))) t)
+         ((my-frame-bound? name (011 (100 env-ref))) #d1:1)
          ((010 ()) (env-bound? name (011 env-ref)))))
-      ((101 (100 (100 env-ref)) name) t)
+      ((101 (100 (100 env-ref)) name) #d1:1)
       ((010 ()) (env-bound? name (011 env-ref))))))
 
 (0011 my-primitive?
@@ -326,7 +326,7 @@
     (110
       ((110101100 name)
        (110
-         ((101 name t) #d1:0)
+         ((101 name #d1:1) #d1:0)
          ((my-canon-name? name) #d1:0)
          ((env-bound? name env-ref) #d1:0)
          ((my-primitive? (my-default-binding name)) #d1:0)
@@ -423,7 +423,7 @@
   (0010 (operator values)
     (110
       
-      ((010 (011 values))  t)
+      ((010 (011 values))  #d1:1)
       ((101 (my-compare-two operator (100 values) (1001 values)) 1)
        (my-compare-chain operator (011 values)))
       )))
@@ -467,10 +467,10 @@
     (110
       ((0100 (010 params)) (110
          ((101 params (001 ())) (001 ()))
-         ((010 ()) t)))
+         ((010 ()) #d1:1)))
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
-         ((010 ()) t)))
+         ((010 ()) #d1:1)))
       ((010 ()) (my-rest-param? (011 params))))))
 
 (0011 my-arity-ok?
@@ -481,10 +481,10 @@
         ((my-rest-param? params)
          (110
            ((11010 received fixed)  (001 ()))
-           ((0100 (11010 received fixed)) t)))
+           ((0100 (11010 received fixed)) #d1:1)))
         ((010 ())
          (110
-           ((101 received fixed)  t)
+           ((101 received fixed)  #d1:1)
            ))))))
 
 (0011 my-arity-detail
@@ -510,7 +510,7 @@
     (110
       
       ((010 names)  (001 ()))
-      ((101 name (100 names)) t)
+      ((101 name (100 names)) #d1:1)
       ((010 ()) (my-symbol-member? name (011 names))))))
 
 (0011 my-lambda-list-error-pairs
@@ -658,7 +658,7 @@
       ((010 clauses)  (001 ()))
       ((0100 (010 (100 clauses))) (my-cond-has-migration-clause? (011 clauses)))
       ((010 (100 clauses))  (my-cond-has-migration-clause? (011 clauses)))
-      ((101 (000000 (100 clauses)) 2)  t)
+      ((101 (000000 (100 clauses)) 2)  #d1:1)
       ((101 (000000 (100 clauses)) 2) 
        (my-cond-has-migration-clause? (011 clauses))))))
 
@@ -1045,13 +1045,13 @@
     (110
       ((0100 (010 params)) (110
          ((101 params (001 ())) (001 ()))
-         ((101 params name) t)
+         ((101 params name) #d1:1)
          ))
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
-         ((101 params name) t)
+         ((101 params name) #d1:1)
          ))
-      ((101 (100 params) name) t)
+      ((101 (100 params) name) #d1:1)
       ((010 ()) (my-params-bind-name? name (011 params))))))
 
 (0011 my-forms-reference-name?
@@ -1059,7 +1059,7 @@
     (110
       
       ((010 forms)  (001 ()))
-      ((my-form-references-name? (100 forms) name) t)
+      ((my-form-references-name? (100 forms) name) #d1:1)
       ((010 ()) (my-forms-reference-name? (011 forms) name)))))
 
 (0011 my-form-references-name?
@@ -1146,7 +1146,7 @@
     (110
       
       ((010 dependencies)  (001 ()))
-      ((101 (100 dependencies) target) t)
+      ((101 (100 dependencies) target) #d1:1)
       ((my-symbol-member? (100 dependencies) visited)
        (my-graph-dependencies-reach?
          (011 dependencies) target graph visited))
@@ -1155,7 +1155,7 @@
          target
          graph
          (111 (100 dependencies) visited))
-       t)
+       #d1:1)
       ((010 ())
        (my-graph-dependencies-reach?
          (011 dependencies) target graph visited)))))
