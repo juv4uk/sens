@@ -80,8 +80,8 @@ def main() -> int:
         "rust_flags": "cargo --locked --release (release profile in Cargo.toml)",
     }
     (out / "environment.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-    if meta["zig"] != "0.17.0":
-        raise RuntimeError(f"Zig pin mismatch: expected 0.17.0, actual {meta['zig']}")
+    if meta["zig"] != "0.16.0":
+        raise RuntimeError(f"Zig pin mismatch: expected 0.16.0, actual {meta['zig']}")
 
     checked(["zig", "test", "research/zig-codecs/t5/t5.zig"])
     checked(["cargo", "build", "--locked", "--release", "-p", "sens",
