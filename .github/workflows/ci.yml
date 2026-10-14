@@ -189,7 +189,7 @@ jobs:
             2> "$RUNNER_TEMP/zig-firewall-transport.err"; then
             echo '::error::FAIL-OPEN test_id=zig-shared-abi-invalid-physical layer=transport expected=reject actual=accept'; exit 1
           fi
-          grep -Fq 'Zig physical T5 rejected; no SENS execution' "$RUNNER_TEMP/zig-firewall-transport.err"
+          grep -Fq 'Zig T5 physical decode rejected: transport_status=-1' "$RUNNER_TEMP/zig-firewall-transport.err"
           printf '\065' > "$RUNNER_TEMP/zig-firewall-invalid-d2.sens"
           if target/debug/sens "$RUNNER_TEMP/zig-firewall-invalid-d2.sens" \
             > "$RUNNER_TEMP/zig-firewall-semantic.out" \
@@ -211,6 +211,22 @@ jobs:
           grep -Fq 'byte_offset: 4' "$RUNNER_TEMP/zig-d7-invalid.err"
           test ! -e "$RUNNER_TEMP/zig-d7-invalid.sens"
           echo 'ZIG_D7_SENS_WORDS_ZIG_PACK_PASS'
+          # Zig T5 DECODES physical input; SENS owns exact D2 admission.
+          "$CLI_RUST_ZIG" open "$RUNNER_TEMP/source.sens" > "$RUNNER_TEMP/zig-decode-open.txt"
+          printf '10 001 00 000 01\n' | cmp - "$RUNNER_TEMP/zig-decode-open.txt"
+          "$CLI_RUST_ZIG" decode "$RUNNER_TEMP/source.sens" > "$RUNNER_TEMP/zig-decode-words.txt"
+          printf '10\n001\n00\n000\n01\n' | cmp - "$RUNNER_TEMP/zig-decode-words.txt"
+          "$CLI_RUST_ZIG" explain "$RUNNER_TEMP/source.sens" > "$RUNNER_TEMP/zig-decode-explain.txt"
+          grep -Fq 'D2 syntax PASS' "$RUNNER_TEMP/zig-decode-explain.txt"
+          "$CLI_RUST_ZIG" open-f3 "$RUNNER_TEMP/source.senc" > "$RUNNER_TEMP/zig-decode-open-f3.txt"
+          cmp "$RUNNER_TEMP/zig-decode-open.txt" "$RUNNER_TEMP/zig-decode-open-f3.txt"
+          if "$CLI_RUST_ZIG" decode "$RUNNER_TEMP/zig-firewall-invalid-physical.sens"; then
+            echo '::error::FAIL-OPEN test_id=zig-dense-decode-invalid-physical layer=transport expected=reject actual=accept'; exit 1
+          fi
+          if "$CLI_RUST_ZIG" open "$RUNNER_TEMP/zig-firewall-invalid-d2.sens"; then
+            echo '::error::FAIL-OPEN test_id=zig-dense-decode-invalid-d2 layer=parse expected=reject actual=accept'; exit 1
+          fi
+          echo 'ZIG_DENSE_T5_DECODE_TO_SENS_D2_PASS'
           echo 'ZIG_SHARED_GATEWAY_SENS_AND_MY_LISP_PHYSICAL_PASS'
           echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
 
