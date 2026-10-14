@@ -199,6 +199,8 @@ jobs:
           echo "test_id=clips-defrule-d4-split layer=transport executor=rust-integration-not-native-T5 semantic_authority=SENS"
           sha256sum lib/clips-import.lisp crates/sens/tests/clips_import.rs crates/sens/src/mixed_source.rs
           cargo test --locked -p sens --lib mixed_source::tests::ordinary_mixed_reader_executes_immediately_applied_exact_d4_lambda -- --exact --nocapture
+          cargo test --locked -p sens --lib mixed_source::tests::clips_source_lifts_only_admitted_d8_symbol_to_string_and_never_quoted_payload -- --exact --nocapture
+          cargo test --locked -p sens --lib domain_identity::tests::d8_symbol_to_string_exact_core_mechanism_excludes_one_bit_neighbor -- --exact --nocapture
           cargo test --locked -p sens --test clips_import clips_defrule_ -- --nocapture
           cargo test --locked -p sens --test clips_import clips_deftemplate_applies_inside_defrule_conditions_and_conclusions -- --exact --nocapture
       - name: LIFE-1 — точковий SENS-закон готовності проєкції й негативні випадки
