@@ -119,9 +119,24 @@ pub fn canonical_parts(
     canonical(negative, normalized(numerator), normalized(denominator), width)
 }
 
+/// Fast, non-semantic Dn admission. No rational cross-product, host magnitude
+/// conversion, or shared binary prefix may stand in for the exact domain tag.
+/// This does not compare mathematical values or authorize mixed-Dn coercion.
+pub fn numeric_value_domain_width(value: &Value) -> Option<usize> {
+    match value {
+        Value::BinaryNumber(n) => n.numeric_domain_width(),
+        Value::NumericComposition(c) => Some(c.domain_width()),
+        _ => None,
+    }
+}
+
+pub fn shared_numeric_domain_width(lhs: &Value, rhs: &Value) -> Option<usize> {
+    let width = numeric_value_domain_width(lhs)?;
+    (numeric_value_domain_width(rhs) == Some(width)).then_some(width)
+}
+
 pub fn is_domain_value(v: &Value) -> bool {
-    matches!(v, Value::NumericComposition(_))
-        || matches!(v, Value::BinaryNumber(n) if n.numeric_domain_width().is_some())
+    numeric_value_domain_width(v).is_some()
 }
 
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
@@ -149,9 +164,11 @@ pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
         }
     }
 
-    let (width, x_neg, x_num, x_den) = ingredients(lhs)?;
-    let (other_width, y_neg, y_num, y_den) = ingredients(rhs)?;
-    if width != other_width { return None; }
+    // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
+    // constituents into the private calculation.
+    let width = shared_numeric_domain_width(lhs, rhs)?;
+    let (_, x_neg, x_num, x_den) = ingredients(lhs)?;
+    let (_, y_neg, y_num, y_den) = ingredients(rhs)?;
 
     let (negative, numerator, denominator) = match operator {
         "+" | "-" => {
@@ -243,9 +260,11 @@ pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
         _ => {}
     }
 
-    let (width, x_neg, xn, xd) = ingredients(lhs)?;
-    let (other_width, y_neg, yn, yd) = ingredients(rhs)?;
-    if width != other_width { return None; }
+    // The generic signed/rational comparison needs exact products only after
+    // both operands have independently passed the domain-identity gate.
+    shared_numeric_domain_width(lhs, rhs)?;
+    let (_, x_neg, xn, xd) = ingredients(lhs)?;
+    let (_, y_neg, yn, yd) = ingredients(rhs)?;
     let order = match (x_neg, y_neg) {
         (true, false) => Ordering::Less,
         (false, true) => Ordering::Greater,
@@ -316,6 +335,33 @@ mod tests {
         let d24 = Value::BinaryNumber(d(24, 1));
         assert_eq!(compare("=", &legacy, &d24), None);
         assert_eq!(compare("=", &d24, &legacy), None);
+    }
+
+    #[test]
+    fn exact_dn_admission_never_depends_on_rational_value_equality() {
+        let unqualified = Value::BinaryNumber(BinaryNumber::one());
+        for width in [24usize, 48, 96, 192, 384] {
+            let one = Value::BinaryNumber(d(width, 1));
+            let two = Value::BinaryNumber(d(width, 2));
+            let fraction = canonical_parts(false, &d(width, 1), &d(width, 3))
+                .expect("exact nonintegral fraction in Dn");
+            let signed = canonical_parts(true, &d(width, 1), &d(width, 1))
+                .expect("exact negative integer in Dn");
+            let same_magnitude_doubled_width = Value::BinaryNumber(d(width * 2, 1));
+
+            assert_eq!(numeric_value_domain_width(&fraction), Some(width));
+            assert_eq!(numeric_value_domain_width(&signed), Some(width));
+            for lhs in [&one, &fraction, &signed] {
+                for rhs in [&two, &fraction, &signed] {
+                    assert_eq!(shared_numeric_domain_width(lhs, rhs), Some(width),
+                        "D{width}: admission depends only on exact Dn tags");
+                }
+                assert_eq!(shared_numeric_domain_width(lhs, &same_magnitude_doubled_width), None);
+                assert_eq!(shared_numeric_domain_width(&same_magnitude_doubled_width, lhs), None);
+                assert_eq!(shared_numeric_domain_width(lhs, &unqualified), None);
+                assert_eq!(shared_numeric_domain_width(&unqualified, lhs), None);
+            }
+        }
     }
 
     #[test]
