@@ -172,7 +172,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     c_binary_digest: list[str] = []
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
-        receipt = re.search(r"^C_D3_SUBSET_RECEIPT zig=\\S+ c_binary_sha256=([0-9a-f]{64})$",
+        receipt = re.search(r"^C_D3_SUBSET_RECEIPT zig=\S+ c_binary_sha256=([0-9a-f]{64})$",
                             stdout, re.MULTILINE)
         if receipt is None:
             raise AuditFailure("test_id=H2_C_BINARY layer=dependency missing_binary_sha256")
