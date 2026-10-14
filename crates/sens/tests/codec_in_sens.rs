@@ -29,6 +29,36 @@ fn codec_emits_exact_t5_d2_order() {
     );
 }
 
+// These are *named* D2 proxies in a mixed .lisp interpreter. The expected
+// order is fixed by SENS's D2 law (10 open, 00 separator, 11 dot, 01 close).
+// This test does NOT assert actual T5 physical bytes or callable admission.
+#[test]
+fn codec_distinguishes_exact_d2_dot_from_separator() {
+    let mut s = codec_session();
+    for (source, expected_words) in [
+        ("100", "(100)"),
+        ("(100 111)", "(d2-open 100 d2-sep 111 d2-close)"),
+        ("(100 . 111)", "(d2-open 100 d2-dot 111 d2-close)"),
+    ] {
+        let actual = eval(&format!("(t5-encode (quote {source}))"), &mut s);
+        let expected = eval(&format!("(quote {expected_words})"), &mut s);
+        assert_eq!(
+            actual, expected,
+            "D2 marker-order mismatch: source={source}; expected={expected_words}"
+        );
+
+        let decoded = eval(
+            &format!("(t5-decode (t5-encode (quote {source})))"),
+            &mut s,
+        );
+        let source_value = eval(&format!("(quote {source})"), &mut s);
+        assert_eq!(
+            decoded, source_value,
+            "D2 round-trip mismatch for {source}; encoded={actual}"
+        );
+    }
+}
+
 #[test]
 fn codec_round_trips_every_shape() {
     let mut s = codec_session();
