@@ -24,7 +24,8 @@ def command(args: argparse.Namespace) -> list[str]:
     if args.action == "preview":
         return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
                 *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
-                "--report", str(args.report), "--source-era", args.source_era]
+                "--report", str(args.report), "--source-era", args.source_era,
+                *(part for spec in args.linked_definition for part in ("--linked-definition", spec))]
     if args.action == "view":
         # Reuse canonical physical T5 decoder; no second implementation.
         # This command never creates physical .sens or edits .lisp.
@@ -59,6 +60,9 @@ def parser() -> argparse.ArgumentParser:
     preview.add_argument("--report", type=Path, required=True)
     preview.add_argument("--source-era", choices=("auto", "legacy", "current"),
                          default="auto", help="auto блокує невідоме W8; явно legacy/current лише з provenance")
+    preview.add_argument("--linked-definition", action="append", default=[],
+                         metavar="lib/FILE.lisp@GIT_BLOB:NAME",
+                         help="SHA-pinned external D4 DEFINE, тільки preview; без фізичної публікації")
 
     view = sub.add_parser("view", help="перевірити або підготувати читабельну 0/1-проєкцію існуючого .sens")
     view.add_argument("--sens", required=True, help="відносний шлях name.sens")
