@@ -46,8 +46,8 @@
           (1110 (001 produces) produces))))
 
 ; --- Shape predicates ---------------------------------------------------
-; Predicate truth is exact D1:1 / D1:0 (raw 1/0 in executable source).
-; D3:101 EQ receives only atom heads; no NIL-as-false or new host primitive.
+; Migrated source-ref?, epistemic--claim-ref? and evidence? return strict D1.
+; Other shape predicates remain transitional. EQ takes only guarded atom heads.
 
 (0011 source-ref?
   (0010 (value)
@@ -105,23 +105,24 @@
 (0011 evidence?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
-      ((0100 (101 (100 value) (001 evidence))) (001 ()))
-      ((010 (011 value)) (001 ()))
-      ((010 (1001 value)) (001 ()))
-      ((0100 (101 (100 (1001 value)) (001 claim-ref))) (001 ()))
-      ((010 (0111 value)) (001 ()))
-      ((010 (100 (0111 value))) (001 ()))
-      ((0100 (101 (100 (100 (0111 value))) (001 method))) (001 ()))
-      ((010 (011 (0111 value))) (001 ()))
-      ((010 (100 (011 (0111 value)))) (001 ()))
-      ((0100 (101 (100 (100 (011 (0111 value)))) (001 outcome))) (001 ()))
-      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (supports contradicts inconclusive)))) (001 ()))
-      ((010 (011 (011 (0111 value)))) (001 ()))
-      ((010 (100 (011 (011 (0111 value))))) (001 ()))
-      ((0100 (101 (100 (100 (011 (011 (0111 value))))) (001 source-ref))) (001 ()))
-      ((110111011 (010 (011 (011 (011 (0111 value)))))) (001 ()))
-      (#d1:1 #d1:1))))
+      ((010 value) 0)
+      ((0100 (010 (100 value))) 0)
+      ((0100 (101 (100 value) (001 evidence))) 0)
+      ((010 (011 value)) 0)
+      ((010 (1001 value)) 0)
+      ((0100 (101 (100 (1001 value)) (001 claim-ref))) 0)
+      ((010 (0111 value)) 0)
+      ((010 (100 (0111 value))) 0)
+      ((0100 (101 (100 (100 (0111 value))) (001 method))) 0)
+      ((010 (011 (0111 value))) 0)
+      ((010 (100 (011 (0111 value)))) 0)
+      ((0100 (101 (100 (100 (011 (0111 value)))) (001 outcome))) 0)
+      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (supports contradicts inconclusive)))) 0)
+      ((010 (011 (011 (0111 value)))) 0)
+      ((010 (100 (011 (011 (0111 value))))) 0)
+      ((0100 (101 (100 (100 (011 (011 (0111 value))))) (001 source-ref))) 0)
+      ((110111011 (010 (011 (011 (011 (0111 value)))))) 0)
+      (1 1))))
 
 (0011 intent?
   (0010 (value)
