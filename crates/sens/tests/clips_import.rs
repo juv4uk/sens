@@ -516,3 +516,48 @@ fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
         assert_eq!(eval_exact_clips_slot_lookup(source), expected, "slot traversal failed for {source}");
     }
 }
+
+/// SENS decides the positive and negative D1 statements in a binary-headed
+/// fixture. Rust owns only source-pinned definition loading and fail-closed
+/// observation of the deliberately false one-bit expectation.
+#[test]
+fn clips_deftemplate_d1_self_verdict_and_mutant() {
+    let mut session = Session::default();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("test_id=clips-deftemplate-d1: pinned Core must load");
+    let library = include_str!("../../../lib/clips-import.lisp");
+    let start = library.find("(0011 clips-deftemplate-form?\n")
+        .expect("test_id=clips-deftemplate-d1: real production definition exists");
+    let end = library[start..].find("(0011 clips-string-empty?")
+        .map(|offset| start + offset)
+        .expect("test_id=clips-deftemplate-d1: next independent definition exists");
+    let source = sens::parse_mixed_exact_domain(&library[start..end])
+        .expect("test_id=clips-deftemplate-d1: exact production D3/D4 definitions parse");
+    eval_parsed_expressions(&source, &mut session)
+        .expect("test_id=clips-deftemplate-d1: production definition loads");
+
+    let program = include_str!("../../../tests/semantic/clips-deftemplate-d1-law.lisp");
+    let forms = sens::parse_mixed_exact_domain(program)
+        .expect("test_id=clips-deftemplate-d1: SENS-owned binary law parses");
+    assert_eq!(forms.len(), 3, "two SENS laws and one single-D1-bit mutant");
+    for (index, form) in forms[..2].iter().enumerate() {
+        let value = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|error| panic!(
+                "test_id=clips-deftemplate-d1 layer=eval law={index} error={error}"
+            )).value;
+        assert_eq!(
+            value.as_predicate_bit(), Some(true),
+            "test_id=clips-deftemplate-d1 layer=eval law={index} is not SENS D1:YES"
+        );
+    }
+    let err = eval_parsed_expressions(&forms[2..], &mut session)
+        .expect_err("test_id=clips-deftemplate-d1: one-bit mutant must fail closed");
+    assert!(
+        err.to_string().contains("domain identity is not callable under its ratified law: D1"),
+        "test_id=clips-deftemplate-d1 layer=eval wrong failure class: {err}"
+    );
+}
