@@ -70,24 +70,6 @@ jobs:
             OperationalMigrationTests.test_mixed_manifest_no_old_classification_veto \
             OperationalMigrationTests.test_stale_classifier_does_not_veto_genuine_sha_pins
           python3 tests/test_plan_t5_agent_work.py -v
-      - name: Одноразовий точний migrate.py preview після PROVENANCE
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "MIGRATION_TEST_ID=narrate-provenance-physical-preview"
-          report="$RUNNER_TEMP/sens-narrate-provenance-preview.json"
-          rc=0
-          python3 scripts/migrate.py preview lib/narrate.lisp \
-            --mirror "$RUNNER_TEMP/sens-narrate-provenance-preview" \
-            --report "$report" \
-            --source-era current || rc=$?
-          echo "MIGRATOR_EXIT=$rc"
-          if test -f "$report"; then
-            python3 -m json.tool "$report"
-          else
-            echo "::error::MIGRATION_REPORT_MISSING"
-          fi
-          exit "$rc"
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
