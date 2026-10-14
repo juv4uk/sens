@@ -58,3 +58,19 @@ SENS: власні точні домени, callability, закони, D2, ло�
 Примітив `sens_zig_t5_encode_dense(payload_bits, meaningful_bit_len, widths, word_count, out, capacity)` реалізовано в Zig (існуючий `transport_abi.zig`). Зовнішнє ABI бачить два непрозорі буфери, точну довжину, кількість слів та вихідну місткість, а не Rust-структури та не SENS semantic enum. Відхиляються неканонічний tail, short buffer, невірна ширина, несумісна кількість значущих бітів. Позитив: 12 бітів `10 001 00 000 01` → фізичні байти `63 89 06 A1`; різна бітність `1` та `01` → різні T5 байти. Zig сам формує вихідний T5.
 
 У Rust CLI є лише тимчасовий mechanical адаптер `sens::pack_binary_source_words` та width-schedule зі вже SENS-прийнятих слів. **SENS закон цим адаптером не ратифікується**. `verify_companion` все ще використовує Rust reference, тож незалежні Rust↔Zig receipts залишаються, але Rust output НЕ є входом нового Zig T5 encode. Для D7 — незмінну допущену SENS glyph→W7 перевірку винесено в `d7_uk_keyboard_words` без фізичного упаковування; Rust-only шлях лишився референсом. CI для D7 з `Кіт` і негативом `Кі🙂` включено до чинного Zig ABI кроку (фактичний результат лише після завершення SHA-run).
+
+
+## Третій атомарний зріз — фізичний T5 decode також належить Zig
+
+**Дата:** 14.10.2026; гілка `zig-codecs-t5-f3c-bench-20261014`; cutover лише під `--features zig-transport`. Повний SHA verdict див. #5779; не вважати старі CI-кроки підтвердженням наступного коміту.
+
+- Zig `sens_zig_t5_decode_dense` розпаковує **тільки фізичний T5** в MSB-first щільні payload bits + точний `widths[]`, повертає дві довжини в caller-owned outputs. Probe+fill, no host Word/ExprKind layout у FFI. Невірна фізика → -1, замалі буфери → -2; жодне не означає SENS D1:NO.
+- Спільний Rust ABI gateway відновлює `PackedBitstream::from_parts` із перевіркою канонічного tail та передає `widths[]` чинному SENS `unpack_binary_source_words` / `parse_canonical_packed_words`, не робить Rust T5 base-3 декодування.
+- `PhysicalT5Program::from_packed_words` у `crates/sens/src/binary_execution.rs` зводить отримані SENS exact words до **тих самих** canonical D2 parsing, lowering, executable-head gate та evaluator, що й наявний Rust-донор; нових admission rules немає.
+- `sens` / `my-lisp` та `sens-trit open/view/decode/explain/eval/eval-core4`, explicit F3C open/decode/eval/pack → Zig physical decode → SENS canonical reader. `verify` так само більше не використовує Rust T5 decoder у feature-mode.
+- D7 `decode-d7-uk` тепер викликає SENS-owned `decode_d7_uk_words` на точних W7-словах, які розпакував Zig. Незалежний `decode_d7_uk_t5` як Rust reference збережено.
+- Прибрано зайвий попередній Zig-validate з `read_sens`: усі її фактичні Zig-mode споживачі роблять явне повне Zig decode або F3C → Zig T5 → SENS без тихого Rust fallback.
+
+**Focused receipts:** Zig `opaque decoder recovers exact SENS dense bits and widths` (golden 63 89 06 A1, width 2/3/2/3/2, query/short buffer/invalid 0xf3, D1:1 ≠ D2:01). Інтеграційний CI крок перевіряє `sens`/`my-lisp`/`sens-trit`, фізичний мутант, самотній D2 CLOSE, open/decode/explain/F3C parity й друкує `ZIG_DENSE_T5_DECODE_TO_SENS_D2_PASS`; run [38513286305](https://github.com/juv4uk/sens/actions/runs/38513286305) підтвердив механічний step PASS, але whole-run FAILURE у незалежному старому D8/SID8 migration test #5778. D7 iteration compile error E0277 з проміжного SHA виправлено комітом `e07dd78f9672135016b30866c46e5a2e139e96eb`, новий combined CI receipt має підтвердити саме цей SHA.
+
+**Що ще НЕ реалізовано:** єдиний Zig ABI для **всіх бібліотечних Rust-core споживачів** поза CLI; E1/E2/E3, heapless freestanding, ESP32-S3, повне відділення host Rust machinery від ратифікованого semantic law. Rust `decode_ternary_words` лишається незалежним еталонним транспортним кодеком (не source of SENS meaning). Full no-leakage та native binary SENS-oracle cutover НЕ DONE; production OFF.
