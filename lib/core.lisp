@@ -332,7 +332,7 @@
     (111 bindings (111 body (001 ())))))
 
 (00001010 let (bindings body)
-  (111 (1110 (001 00001000) (внутрішнє-відображення (0010 (binding) (100 binding)) bindings) body)
+  (111 (1110 (001 0010) (внутрішнє-відображення (0010 (binding) (100 binding)) bindings) body)
         (внутрішнє-відображення (0010 (binding) (1001 binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
@@ -495,7 +495,7 @@
      ; This avoids the unadmitted D6:001000 LET execution path while
      ; retaining the language-owned sequential-binding law.
      (111
-       (111 (001 00001000)
+       (111 (001 0010)
          (111
            (111 (100 (100 bindings)) (001 ()))
            (111
@@ -613,7 +613,7 @@
     (110
       ((010 value)
        (110
-         ((101 value (11101101 (11110100 value)))
+         ((101 value (string->symbol (write-to-string value)))
           (010 (001 ())))
          ((010 ()) #d1:0)))
       ((010 ()) #d1:0))))
@@ -1146,7 +1146,7 @@
     (110
       
       ((010 m) 
-       (111 (111 (001 00000001) (111 (100 m) (001 ())))
+       (111 (111 (001 001) (111 (100 m) (001 ())))
                  (apply-quote-args (011 m)))))))
 
 (0011 apply
