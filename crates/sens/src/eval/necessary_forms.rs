@@ -6,7 +6,9 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry::{self, LegacyRegistrySlot};
-use crate::{Bit4, CoreD4, CoreDomainIdentity};
+use crate::CoreDomainIdentity;
+#[cfg(test)]
+use crate::{Bit4, CoreD4};
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -18,16 +20,17 @@ pub(crate) enum NecessaryFormIdentity {
     Lambda,
 }
 
+/// A historical Lisp-signature mechanism may point only to an already
+/// ratified D4 surface; its old W8 byte never supplies the current bits.
 fn canonical_domain_identity(
     mechanism: generated::NecessaryFormMechanism,
-) -> CoreDomainIdentity {
-    let bits = match mechanism {
-        generated::NecessaryFormMechanism::Lambda => 0b0010,
-        generated::NecessaryFormMechanism::Define => 0b0011,
+) -> Option<CoreDomainIdentity> {
+    let surface = match mechanism {
+        generated::NecessaryFormMechanism::Lambda => "функція",
+        generated::NecessaryFormMechanism::Define => "визначити",
     };
-    CoreDomainIdentity::D4(CoreD4::from_word(
-        Bit4::new(bits).expect("necessary-form D4 coordinate must fit"),
-    ))
+    let identity = semantic_registry::domain_identity_for_surface(surface)?;
+    identity_for_domain_identity(identity).map(|_| identity)
 }
 
 /// Select the evaluator mechanism from the exact canonical domain identity.
@@ -68,14 +71,38 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
 fn domain_identity_for_legacy_semantic_id(
     legacy: LegacyRegistrySlot,
 ) -> Option<CoreDomainIdentity> {
+    // The W8 slot locates historical source surfaces, never a D4 code.
+    // Stable Ukrainian/Sanskrit names must prove a unique current D4 route.
+    let surfaces = semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(legacy);
+    let mut admitted = None;
+    let mut has_qualified_surface = false;
+    for (namespace, surface) in &surfaces {
+        if !matches!(*namespace, "ук" | "укр" | "sa") {
+            continue;
+        }
+        has_qualified_surface = true;
+        let identity = semantic_registry::domain_identity_for_surface(surface)?;
+        identity_for_domain_identity(identity)?;
+        if admitted.is_some_and(|previous| previous != identity) {
+            return None;
+        }
+        admitted = Some(identity);
+    }
+    if has_qualified_surface {
+        return admitted;
+    }
+
+    // Only the Lisp-owned, English-only historical alias (currently "def")
+    // can use its explicit signature record. Never derive a D4 route from
+    // an arbitrary W8 byte or bypass a conflicting native surface.
+    if surfaces.is_empty() || surfaces.iter().any(|(namespace, _)| *namespace != "en") {
+        return None;
+    }
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
         .find(|row| row.semantic_id == legacy.packed_byte())
         .map(|row| row.mechanism)?;
-    let identity = canonical_domain_identity(mechanism);
-
-    // Select the evaluator mechanism only after exact D4 qualification.
-    identity_for_domain_identity(identity).map(|_| identity)
+    canonical_domain_identity(mechanism)
 }
 
 pub(crate) fn identity_for_semantic_id(
