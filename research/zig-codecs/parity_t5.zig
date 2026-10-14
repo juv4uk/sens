@@ -44,20 +44,19 @@ fn firstDiff(a: []const u8, b: []const u8) usize {
     return n;
 }
 
-/// Повертає true, якщо файл канонічний (decode->encode == байти).
-fn accepts(allocator: std.mem.Allocator, path: []const u8, detail: *bool) !bool {
-    const original = readFile(allocator, path) catch { detail.* = false; return false; };
+/// Неканонічний носій => REJECT; неможливість прочитати fixture => ПОМИЛКА harness.
+/// Відсутній негативний файл ніколи не вважається успішно відхиленим T5.
+fn accepts(allocator: std.mem.Allocator, path: []const u8) !bool {
+    const original = try readFile(allocator, path);
     defer allocator.free(original);
-    const words = t5.decodeCoordinates(allocator, original) catch { detail.* = false; return false; };
+    const words = t5.decodeCoordinates(allocator, original) catch |err| switch (err) {
+        error.OutOfMemory => return err,
+        else => return false,
+    };
     defer allocator.free(words);
-    const re = t5.encodeCoordinates(allocator, words) catch { detail.* = false; return false; };
+    const re = try t5.encodeCoordinates(allocator, words);
     defer allocator.free(re);
-    if (!std.mem.eql(u8, original, re)) {
-        detail.* = false;
-        return false;
-    }
-    detail.* = true;
-    return true;
+    return std.mem.eql(u8, original, re);
 }
 
 fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accept: bool) !usize {
@@ -70,8 +69,15 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
         const line = std.mem.trim(u8, raw, " \t\r");
         if (line.len == 0 or line[0] == '#') continue;
         checked += 1;
-        var ok = false;
-        const got = accepts(allocator, line, &ok) catch false;
+        const got = accepts(allocator, line) catch |err| {
+            failures += 1;
+            std.debug.print("FAIL test_id=t5-parity-fixture-io layer=transport file={s} expected={s} actual=HARNESS_ERROR error={s} reproduce='zig run -lc research/zig-codecs/parity_t5.zig'\n", .{
+                line,
+                if (expect_accept) "ACCEPT" else "REJECT",
+                @errorName(err),
+            });
+            continue;
+        };
         if (got != expect_accept) {
             failures += 1;
             std.debug.print("FAIL test_id=t5-parity layer=transport file={s} expected={s} actual={s} reproduce='zig run parity_t5.zig'\n", .{
@@ -84,6 +90,10 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
             defer allocator.free(original);
             std.debug.print("OK file={s} bytes={d} fnv64={x}\n", .{ line, original.len, fnv64(original) });
         }
+    }
+    if (checked == 0) {
+        failures += 1;
+        std.debug.print("FAIL test_id=t5-parity-empty-list layer=transport file={s} expected=NONEMPTY actual=EMPTY reproduce='zig run -lc research/zig-codecs/parity_t5.zig'\n", .{list_path});
     }
     std.debug.print("list={s} expect={s} checked={d} failures={d}\n", .{
         list_path, if (expect_accept) "ACCEPT" else "REJECT", checked, failures,
