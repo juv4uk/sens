@@ -141,10 +141,10 @@
 (0011 life-scheduler-select-ready
   (0010 (pending projections)
     (110
-      ((0100 (010 pending))
+      ((010 pending)
        (001 (scheduler-selection none)))
       ((0100 (010 pending))
-       (001000 ((invocation (100 pending)))
+       ((0010 (invocation)
          (110
            ((101 (life-scheduler-projection-ready? invocation projections)
                 (001 present))
@@ -157,7 +157,8 @@
            ((101 (life-scheduler-projection-ready? invocation projections)
                 (001 absent))
             
-            (life-scheduler-select-ready (011 pending) projections))))))))
+            (life-scheduler-select-ready (011 pending) projections))))
+        (100 pending))))))
 
 (0011 life-scheduler-quiescence-state
   (0010 (projections lifecycle-state)
