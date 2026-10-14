@@ -593,7 +593,7 @@ class Resolver:
             for name, tok in bindings
         }
 
-    def head(self,tok: Tok):
+    def head(self,tok: Tok,text7=None):
         t=tok.text
         # Domain identity is (exact width, exact bits), never a flat SID8
         # number. A *resident* D7 or D10 coordinate is not automatically
@@ -711,8 +711,14 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
-        # D1/D2 or any unresolved dynamic/user function stays exactly as written.
+        # D1 words stay exact. An unresolved NAME is data -> D7 text (its
+        # glyphs, e.g. "/", live in the ratified D7 keyboard). Never leave raw
+        # text as a physical word: the T5 codec must reject that.
         self.counts["passthrough-head"]+=1
+        if t and set(t) <= {"0", "1"}:
+            return [t],"passthrough-head"
+        if text7 is not None:
+            return encode_text7_identifier(t,text7,tok),"d7-name-head"
         return [t],"passthrough-head"
 
 def frame_text7(cells, tok: Tok):
@@ -939,7 +945,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                         item.tok.text,text7,item.tok
                     ))
                     continue
-                head,_=resolver.head(item.tok)
+                head,_=resolver.head(item.tok,text7)
                 head_bits=head[0]
                 words.extend(head)
                 continue
