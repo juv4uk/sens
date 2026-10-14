@@ -850,7 +850,7 @@
       ((0100 (010 (100 form))) (001 ()))
       ((101 (100 form) (001 deffacts)) (clips-deffacts->clauses form templates))
       ((101 (100 form) (001 defrule)) (clips-defrule->clauses form templates))
-      (1 (001 ())))))
+      (#d1:1 (001 ())))))
 
 ; Same non-tail-call problem as `clips-facts->clauses` above, one level up:
 ; `(append (clips-form->clauses ...) (clips-import-forms ...))` nests one
