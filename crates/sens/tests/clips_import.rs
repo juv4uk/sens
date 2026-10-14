@@ -55,7 +55,7 @@ fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
     // is the negative witness. Failure must be D1:NO, never the NIL datum.
     for (label, source, expected) in [
         ("positive", "(clips-string-starts-with-double-colon? \"::sensor\")", "1"),
-        ("one-bit-shape-mutant", "(clips-string-starts-with-double-colon? \":sensor\")", "0"),
+        ("one-character-mutant", "(clips-string-starts-with-double-colon? \":sensor\")", "0"),
         ("non-prefix", "(clips-string-starts-with-double-colon? \"sensor::value\")", "0"),
         ("empty", "(clips-string-starts-with-double-colon? \"\")", "0"),
         ("short", "(clips-string-starts-with-double-colon? \":\")", "0"),
@@ -85,6 +85,22 @@ fn clips_defrule_exact_pipeline_probes() {
         (
             "conclusions",
             "(clips-assert-conclusions (quote ((assert (has-mass ?x)))))",
+        ),
+        (
+            "preamble",
+            "(clips-strip-rule-preamble (quote ((planet ?x) => (assert (has-mass ?x)))))",
+        ),
+        (
+            "conditions",
+            "(clips-convert-vars (quote ((planet ?x))))",
+        ),
+        (
+            "templates",
+            "(clips-convert-template-list (quote ((planet ?x))) (quote ()))",
+        ),
+        (
+            "from-parts",
+            "(clips-defrule-clauses-from-parts (quote ((planet (var x)))) (quote ((assert (has-mass ?x)))) (quote ()))",
         ),
         (
             "defrule",
