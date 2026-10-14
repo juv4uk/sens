@@ -191,6 +191,45 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
                                self.base, "--head", self.head(),
                                "--strict"]), 2)
 
+    def test_nonregular_sens_is_not_counted_as_physical_corpus(self):
+        # Git's 120000/160000 paths are metadata, never packed T5 bytes.
+        blob = subprocess.run(
+            ["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+            input=b"archived-physical-target", capture_output=True, check=True,
+        ).stdout.decode("ascii").strip()
+        self.call("update-index", "--add", "--cacheinfo",
+                  f"120000,{blob},lib/archived.sens")
+        self.call("commit", "-q", "-m", "index-only .sens symlink")
+        census = snapshot(self.repo, self.head())
+        self.assertEqual(census["sens_count"], 0)
+        self.assertEqual(census["nonregular_sens_count"], 1)
+        self.assertEqual(census["nonregular_sens_paths"], ["lib/archived.sens"])
+        self.assertEqual(census["valid_triples"], 0)
+
+        # Gitlinks to commits are not physical .sens files either.
+        self.call("update-index", "--add", "--cacheinfo",
+                  f"160000,{self.head()},lib/vendor.sens")
+        self.call("commit", "-q", "-m", "index-only .sens gitlink")
+        census = snapshot(self.repo, self.head())
+        self.assertEqual(census["sens_count"], 0)
+        self.assertEqual(census["nonregular_sens_count"], 2)
+        self.assertEqual(census["nonregular_sens_paths"],
+                         ["lib/archived.sens", "lib/vendor.sens"])
+
+        # One actual regular Git byte blob must be counted exactly once;
+        # unpaired paths, including archived links, do not prove a triple.
+        (self.repo / "lib/payload.sens").write_bytes(encode_words(["10", "01"]))
+        self.call("add", "--", "lib/payload.sens")
+        self.call("commit", "-q", "-m", "regular orphan physical T5")
+        census = snapshot(self.repo, self.head())
+        self.assertEqual(census["sens_count"], 1)
+        self.assertEqual(census["nonregular_sens_count"], 2)
+        self.assertEqual(census["valid_triples"], 0)
+        self.assertEqual(census["paired_count"], 0)
+        self.assertEqual(main(["--root", str(self.repo), "--base",
+                               self.base, "--head", self.head(),
+                               "--strict"]), 0)
+
     def test_triple_deletion_visible_and_strict_fails(self):
         self.add_triple("lib/first")
         self.commit("pair")
