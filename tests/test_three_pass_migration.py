@@ -76,6 +76,51 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
         self.assertEqual(resolver.counts["pass1-sens8"], 1)
 
 
+class D11TestingVocabularyBoundaryTests(unittest.TestCase):
+    """D11 test data must never mint callable successors by shared name."""
+
+    def test_all_d11_words_stay_testing_data_not_callable_names(self):
+        foundation = json.loads(
+            (ROOT / "knowledge/d1-d11-foundation.json").read_text(encoding="utf-8")
+        )
+        vocabulary = json.loads(
+            (ROOT / "knowledge/d11-testing-vocabulary-ratified.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(vocabulary["status"], "owner-ratified")
+        self.assertIn("not callable Core", vocabulary["semantic_scope"])
+        rows = vocabulary["table"]
+        self.assertEqual(len(rows), 43)
+        self.assertEqual(
+            {row["bits"]: row["lisp"] for row in rows},
+            foundation["domains"]["D11"]["residents"],
+        )
+        routed = mod.current_residents(foundation)
+        preserved_lower = []
+        testing_only = []
+        for row in rows:
+            bits, name = row["bits"], row["lisp"].upper()
+            self.assertEqual(len(bits), 11, name)
+            self.assertEqual(set(bits) - {"0", "1"}, set(), name)
+            target = routed.get(name)
+            # Positive: original lower-domain identities remain stable;
+            # negative: no test-only coordinate becomes a callable head.
+            self.assertNotEqual(target, (bits, "D11"), name)
+            if target is None:
+                testing_only.append(name)
+            else:
+                self.assertIn(target[1], (
+                    "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10",
+                ))
+                preserved_lower.append(name)
+        self.assertEqual(len(preserved_lower), 9)
+        self.assertEqual(len(testing_only), 34)
+        self.assertEqual(routed["NOT"], ("0100", "D4"))
+        self.assertEqual(routed["LENGTH"], ("000000", "D6"))
+        self.assertNotIn("TEST-PASS", routed)
+
+
 class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
     """All 2046 D1–D10 typed coordinates; no SID8-by-payload alias."""
 
