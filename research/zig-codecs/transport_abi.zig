@@ -44,21 +44,17 @@ pub export fn sens_zig_t5_encode(src: [*]const Word, count: usize, dst: [*]u8, c
 /// F3C: -3 means no saving, NOT an invalid T5 program.
 pub export fn sens_zig_f3c_pack(src: [*]const u8, len: usize, dst: [*]u8, cap: usize) isize {
     if (len == 0 or len > f3c.MAX_TINY_T5_BYTES) return -1;
-    const a = std.heap.c_allocator;
-    const physical = (f3c.encode(a, src[0..len]) catch return -1) orelse return -3;
-    defer a.free(physical);
-    if (physical.len > cap) return -2;
-    @memcpy(dst[0..physical.len], physical);
-    return @intCast(physical.len);
+    var scratch: [f3c.ABI_SCRATCH_BYTES]u8 = undefined;
+    const written = (f3c.encodeInto(src[0..len], dst[0..cap], &scratch)
+        catch |err| return if (err == error.BufferTooSmall) -2 else -1) orelse return -3;
+    return @intCast(written);
 }
 pub export fn sens_zig_f3c_unpack(src: [*]const u8, len: usize, dst: [*]u8, cap: usize) isize {
     if (len < 2 or len >= f3c.MAX_TINY_T5_BYTES) return -1;
-    const a = std.heap.c_allocator;
-    const physical = f3c.decode(a, src[0..len]) catch return -1;
-    defer a.free(physical);
-    if (physical.len > cap) return -2;
-    @memcpy(dst[0..physical.len], physical);
-    return @intCast(physical.len);
+    var scratch: [f3c.ABI_SCRATCH_BYTES]u8 = undefined;
+    const written = f3c.decodeInto(src[0..len], dst[0..cap], &scratch)
+        catch |err| return if (err == error.BufferTooSmall) -2 else -1;
+    return @intCast(written);
 }
 test "no-allocation-crossing Zig C ABI roundtrip and caller bounds" {
     try std.testing.expectEqual(@as(u32, 2), sens_zig_codec_abi_version());

@@ -387,6 +387,74 @@ pub fn decode(allocator: Allocator, carrier: []const u8) ![]u8 {
     return physical;
 }
 
+/// F3C transport operations can run against caller-owned, bounded SRAM.
+/// The existing rank/unrank and physical canonicality algorithms stay intact;
+/// this adapter replaces *system heap* with a finite FixedBufferAllocator.
+/// It is an explicit scratch arena, not a zero-temporary-memory claim.
+/// A firmware target must size/place this buffer and verify its own stack.
+pub const ABI_SCRATCH_BYTES: usize = 8 * 1024;
+
+/// Return null when F3C does not save bytes. No caller-output mutation on
+/// failure, no-saving, or insufficient output capacity. In-place input/output
+/// buffers are supported because the candidate is staged in scratch first.
+pub fn encodeInto(original_t5: []const u8, out: []u8, scratch: []u8) !?usize {
+    if (original_t5.len == 0 or original_t5.len > MAX_TINY_T5_BYTES)
+        return Error.FrameRange;
+    var bounded = std.heap.FixedBufferAllocator.init(scratch);
+    const candidate = (try encode(bounded.allocator(), original_t5)) orelse return null;
+    if (candidate.len > out.len) return error.BufferTooSmall;
+    @memcpy(out[0..candidate.len], candidate);
+    return candidate.len;
+}
+
+/// Decode an explicit F3C carrier into caller-owned canonical T5 bytes.
+/// All parsing, canonicality checks and size checks finish before writing.
+pub fn decodeInto(carrier: []const u8, out: []u8, scratch: []u8) !usize {
+    var bounded = std.heap.FixedBufferAllocator.init(scratch);
+    const physical = try decode(bounded.allocator(), carrier);
+    if (physical.len > out.len) return error.BufferTooSmall;
+    @memcpy(out[0..physical.len], physical);
+    return physical.len;
+}
+
+test "F3C bounded SRAM adapters match golden quote and nested carriers" {
+    var scratch: [ABI_SCRATCH_BYTES]u8 = undefined;
+    var buffer: [32]u8 = undefined;
+    const quote_t5 = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    @memcpy(buffer[0..quote_t5.len], &quote_t5);
+    const quote_packed = (try encodeInto(buffer[0..quote_t5.len], buffer[0..], &scratch)).?;
+    try std.testing.expectEqual(@as(usize, 3), quote_packed);
+    try std.testing.expectEqualSlices(u8, &.{ 0xf3, 0x40, 0x60 }, buffer[0..quote_packed]);
+    const quote_unpacked = try decodeInto(buffer[0..quote_packed], &buffer, &scratch);
+    try std.testing.expectEqual(@as(usize, quote_t5.len), quote_unpacked);
+    try std.testing.expectEqualSlices(u8, &quote_t5, buffer[0..quote_unpacked]);
+
+    const nested_t5 = [_]u8{ 0x66, 0x38, 0x67, 0x89, 0x89, 0x3b, 0x35 };
+    @memcpy(buffer[0..nested_t5.len], &nested_t5);
+    const nested_packed = (try encodeInto(buffer[0..nested_t5.len], &buffer, &scratch)).?;
+    try std.testing.expectEqualSlices(u8, &.{ 0xf3, 0x36, 0x5f, 0x1b, 0xd0, 0xc9 },
+        buffer[0..nested_packed]);
+    const nested_unpacked = try decodeInto(buffer[0..nested_packed], &buffer, &scratch);
+    try std.testing.expectEqualSlices(u8, &nested_t5, buffer[0..nested_unpacked]);
+}
+
+test "F3C bounded SRAM rejects errors without touching caller bytes" {
+    var scratch: [ABI_SCRATCH_BYTES]u8 = undefined;
+    var buffer: [32]u8 = [_]u8{0xa5} ** 32;
+    const quote_t5 = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    const quote_f3 = [_]u8{ 0xf3, 0x40, 0x60 };
+    try std.testing.expectError(error.BufferTooSmall,
+        encodeInto(&quote_t5, buffer[0..2], &scratch));
+    try std.testing.expectError(error.BufferTooSmall,
+        decodeInto(&quote_f3, buffer[0..3], &scratch));
+    try std.testing.expect((try encodeInto(&.{0x64}, &buffer, &scratch)) == null);
+    try std.testing.expectError(Error.WrongCarrier,
+        decodeInto(&.{ 0xf4, 0x40, 0x60 }, &buffer, &scratch));
+    try std.testing.expectError(t5.Error.InvalidPhysicalByte,
+        encodeInto(&.{0xff}, &buffer, &scratch));
+    try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 32), &buffer);
+}
+
 test "F3C physical golden: QUOTE data exact bytes" {
     const a = std.testing.allocator;
     const original = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
