@@ -348,8 +348,14 @@ fn execute() -> Result<(), String> {
             }
             let text = fs::read_to_string(path)
                 .map_err(|e| format!("read UTF-8 D7 keyboard text: {e}"))?;
-            let bytes = sens::encode_d7_uk_t5(&text)
+            let reference = sens::encode_d7_uk_t5(&text)
                 .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
+            // Same opaque physical Zig boundary as ordinary encode; a D7
+            // digit is TEXT DATA and never becomes host/Rust D24 arithmetic.
+            #[cfg(feature = "zig-transport")]
+            let bytes = zig_transport::repack_t5(&reference)?;
+            #[cfg(not(feature = "zig-transport"))]
+            let bytes = reference;
             let output_path = path.with_extension("sens");
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&output_path).map_err(|e| format!("create T5 text record: {e}"))?;
@@ -472,6 +478,10 @@ fn execute() -> Result<(), String> {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
             let bytes = fs::read(&sens_path).map_err(|e| format!("read .sens: {e}"))?;
+            // No direct Rust physical decode path through the Zig-mode
+            // verification command; malformed transport fails at Zig first.
+            #[cfg(feature = "zig-transport")]
+            zig_transport::validate_t5(&bytes)?;
             verify_companion(&projection, &bytes)
         }
         _ => Err(USAGE.into()),
