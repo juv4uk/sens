@@ -13,43 +13,44 @@
 ; the minimal scalar/string bridges `codepoint->string` and
 ; `string->codepoint`; neither bridge knows UTF-8.
 
-; Internal UTF-8 range decisions are exact-Q values, never generic truth.
+; UTF-8 predicate verdicts are direct D1 bits: #d1:1 / #d1:0.
+; Structural () remains data; byte arithmetic remains in its admitted numeric roles.
 (0011 utf8-in-range?
   (0010 (value low high)
     (110
-      ((11010 value low)  (010 (001 (0))))
+      ((11010 value low)  #d1:0)
       ((0100 (11010 value low))
        (110
-         ((0100 (11010 high value))  (010 (001 ())))
-         ((0100 (0100 (11010 high value))) (010 (001 (0)))))))))
+         ((0100 (11010 high value))  #d1:1)
+         ((0100 (0100 (11010 high value))) #d1:0))))))
 
 (0011 utf8-continuation-byte?
   (0010 (b)
     (110
-      ((utf8-in-range? b 128 191)  (010 (001 ())))
-      ((0100 (utf8-in-range? b 128 191)) (010 (001 (0)))))))
+      ((utf8-in-range? b 128 191)  #d1:1)
+      ((0100 (utf8-in-range? b 128 191)) #d1:0))))
 
 (0011 utf8-byte?
   (0010 (b)
     (110
       ((utf8-in-range? b 0 255) 
        (110
-         ((101 (00101100 b 1) 0)  (010 (001 ())))
-         ((0100 (101 (00101100 b 1) 0)) (010 (001 (0))))))
-      ((0100 (utf8-in-range? b 0 255)) (010 (001 (0)))))))
+         ((101 (00101100 b 1) 0)  #d1:1)
+         ((0100 (101 (00101100 b 1) 0)) #d1:0)))
+      ((0100 (utf8-in-range? b 0 255)) #d1:0))))
 
 (0011 utf8-all-bytes?
   (0010 (bytes)
     (110
       ((010 bytes)
        (110
-         ((101 bytes (001 ()))  (010 (001 ())))
-         ((0100 (101 bytes (001 ()))) (010 (001 (0))))))
+         ((101 bytes (001 ()))  #d1:1)
+         ((0100 (101 bytes (001 ()))) #d1:0)))
       ((0100 (010 bytes))
        (110
          ((utf8-byte? (100 bytes)) 
           (utf8-all-bytes? (011 bytes)))
-         ((0100 (utf8-byte? (100 bytes))) (010 (001 (0)))))))))
+         ((0100 (utf8-byte? (100 bytes))) #d1:0))))))
 
 (0011 utf8-three-byte-second-ok?
   (0010 (b1 b2)
@@ -80,9 +81,9 @@
     (110
       ((utf8-continuation-byte? b3) 
        (110
-         ((utf8-continuation-byte? b4)  (010 (001 ())))
-         ((0100 (utf8-continuation-byte? b4)) (010 (001 (0))))))
-      ((0100 (utf8-continuation-byte? b3)) (010 (001 (0)))))))
+         ((utf8-continuation-byte? b4)  #d1:1)
+         ((0100 (utf8-continuation-byte? b4)) #d1:0)))
+      ((0100 (utf8-continuation-byte? b3)) #d1:0))))
 
 (0011 utf8-decode-onto
   (0010 (bytes out)

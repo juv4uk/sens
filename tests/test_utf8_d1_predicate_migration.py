@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Виконавчі D1-предикати UTF-8: AST-позиції, арність, ратифіковані біти, мутації."""
+"""CI_GLUE_NO_SEMANTICS: AST/bitness audit for SENS-owned UTF-8 predicates."""
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/utf8.lisp"
-YES = ["010", ["001", []]]
-NO = ["101", ["001", ["0"]], ["001", ["1"]]]
+YES = "#d1:1"
+NO = "#d1:0"
 EXPECTED = {
     "utf8-in-range?": [0, 1, 0],
     "utf8-continuation-byte?": [1, 0],
@@ -125,16 +125,15 @@ class Utf8PredicateD1Cutover(unittest.TestCase):
         ones = sum(v for row in result.values() for v in row)
         zeroes = 14 - ones
         self.assertEqual((ones, zeroes), (5, 9))
-        # D3 reification costs 6 head-bits (ATOM + QUOTE) for YES and
-        # 9 (EQ + QUOTE + QUOTE) for NO; D2 framing/data is additional.
-        # A direct typed D1 source/literal would require just 1 semantic bit
-        # per output, once an owner-approved physical representation exists.
-        reification_heads = 6 * ones + 9 * zeroes
-        self.assertEqual(reification_heads, 111)
-        self.assertEqual(reification_heads - 14, 97)
-        print(f"UTF8-D1: 14 outputs = 14 ideal semantic bits; "
-              f"currently {reification_heads} D3 function-head bits "
-              f"(+D2 structure and quoted data); no physical .sens admission")
+        # CI_GLUE_NO_SEMANTICS: inventory only; SENS defines the verdict.
+        # Every branch body is now a direct 1-bit predicate, not
+        # ATOM(QUOTE ...) reification or a numeric proxy.
+        direct_bits = ones + zeroes
+        self.assertEqual(direct_bits, 14)
+        self.assertEqual(source_bits := direct_bits, 14)
+        print(f"UTF8-D1: direct exact predicate results={source_bits}, "
+              "saved 97 D3 head-bits versus the historical synthetic carriers; "
+              "execution semantics belong to SENS")
 
     def test_numeric_operands_and_domain_codes_remain_data(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -175,9 +174,9 @@ class Utf8PredicateD1Cutover(unittest.TestCase):
     def test_two_negative_mutations_are_rejected(self):
         source = SOURCE.read_text(encoding="utf-8")
         with self.assertRaises(ValueError):
-            audit(source.replace("(010 (001 ()))", "1", 1))
+            audit(source.replace("#d1:1", "1", 1))
         with self.assertRaises(ValueError):
-            audit(source.replace("(101 (001 (0)) (001 (1)))", "0", 1))
+            audit(source.replace("#d1:0", "0", 1))
 
 
 if __name__ == "__main__":

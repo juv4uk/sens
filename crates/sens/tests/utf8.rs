@@ -219,3 +219,45 @@ fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
         );
     }
 }
+
+const UTF8_D1_LAW: &str =
+    include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
+
+/// The executable SENS program compares actual/expected D1 itself.
+/// Rust only transports the fixture, executes it, and observes the final bit.
+/// No Python or Rust function duplicates the UTF-8 predicate oracle.
+#[test]
+fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
+    let program = sens::parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp", UTF8_D1_LAW,
+    ).expect("the current pinned UTF-8 reader must parse binary SENS law");
+    assert_eq!(program.len(), 8, "eight focused SENS-owned UTF-8 verdicts");
+
+    let mut session = utf8_session();
+    for (index, form) in program.iter().enumerate() {
+        let result = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|error| {
+                panic!("test_id=utf8-d1-direct layer=eval fixture=tests/semantic/utf8-direct-d1-law.lisp form={index} error={error}")
+            });
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(true),
+            "test_id=utf8-d1-direct form={index} SENS self-verdict was not D1:YES: {}",
+            result.value
+        );
+    }
+
+    let mutant_source = UTF8_D1_LAW.replacen("#d1:0", "#d1:1", 1);
+    assert_eq!(mutant_source.len(), UTF8_D1_LAW.len(), "one bit, no frame drift");
+    let mutations = UTF8_D1_LAW.bytes().zip(mutant_source.bytes())
+        .filter(|(before, after)| before != after).count();
+    assert_eq!(mutations, 1, "the mutant must change only one D1 bit");
+    let mutant = sens::parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp", &mutant_source,
+    ).expect("one-bit mutant remains valid SENS source");
+    let mut mutant_session = utf8_session();
+    assert!(
+        sens::eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut mutant_session).is_err(),
+        "SENS itself must fail closed on the one-bit false verdict"
+    );
+}
