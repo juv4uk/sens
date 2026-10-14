@@ -179,6 +179,10 @@ static int execute(const char *path, const char *expected) {
     if (size <= 0 || sens_zig_t5_validate(physical, (size_t)size) != 0) {
         failure = "ZIG_PHYSICAL_REJECT"; goto fail;
     }
+    /* Physical T5 receipt from the actual Zig encoder, never a verdict. */
+    printf("C_D3_SUBSET_T5 source=%s bytes=%td hex=", path, size);
+    for (ptrdiff_t i = 0; i < size; ++i) printf("%02x", (unsigned)physical[i]);
+    putchar('\n');
     ptrdiff_t decoded = sens_zig_t5_decode_be3(physical, (size_t)size, restored, sizeof restored);
     if (decoded < 0 || (size_t)decoded != count || memcmp(be3, restored, count)) {
         failure = "ZIG_BE3_MISMATCH"; goto fail;
