@@ -40,6 +40,11 @@ path = "src/bin/sens-to-sens.rs"
 name = "sens-trit"
 path = "src/bin/sens-trit.rs"
 
+[features]
+default = []
+# Canonical physical T5/F3C carrier produced by Zig, Rust remains SENS evaluator.
+zig-transport = []
+
 [dependencies]
 sens = { path = "../sens" }
 sens-host = { path = "../sens-host" }
