@@ -104,13 +104,14 @@
     (110
       ((0100 (010 projections)) (001 absent))
       ((0100 (010 projections))
-       (001000 ((projection (100 projections)))
+       ((0010 (projection)
          (110
            ((життя--рівні? expected projection)
             
             (001 present))
            ((0100 (життя--рівні? expected projection))
-            (life-scheduler-projection-match? expected (011 projections)))))))))
+            (life-scheduler-projection-match? expected (011 projections)))))
+        (100 projections))))))
 
 (0011 life-scheduler-projection-ready?
   (0010 (invocation projections)
