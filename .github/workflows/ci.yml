@@ -240,6 +240,37 @@ jobs:
             echo '::error::FAIL-OPEN test_id=zig-dense-decode-invalid-d2 layer=parse expected=reject actual=accept'; exit 1
           fi
           echo 'ZIG_DENSE_T5_DECODE_TO_SENS_D2_PASS'
+          # Real candidate preflight: source pin + two executor pins,
+          # Zig physical replay, independently pinned SENS process output.
+          # This is NOT a release GO or proof of receipt authenticity.
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+          temp = Path(os.environ["RUNNER_TEMP"])
+          source = temp / "firewall-quote.lisp"
+          candidate = temp / "source.sens"
+          zig = temp / "sens-zig-transport"
+          sens = Path("target/debug/sens-trit")
+          receipt = {
+              "schema": "sens-zig-publication-candidate/v1",
+              "source_era": "current",
+              "source_sha256": sha(source.read_bytes()),
+              "physical_sha256": sha(candidate.read_bytes()),
+              "zig_executor_sha256": sha(zig.read_bytes()),
+              "sens_executor_sha256": sha(sens.read_bytes()),
+              "expected_native_stdout_sha256": sha(b"()\n"),
+          }
+          (temp / "quote-preflight.json").write_text(json.dumps(receipt) + "\n")
+          PY
+          python3 scripts/verify_zig_publication_candidate.py \
+            --candidate "$RUNNER_TEMP/source.sens" \
+            --source "$RUNNER_TEMP/firewall-quote.lisp" \
+            --receipt "$RUNNER_TEMP/quote-preflight.json" \
+            --zig "$RUNNER_TEMP/sens-zig-transport" \
+            --sens target/debug/sens-trit
+          echo 'ZIG_PUBLISH_CANDIDATE_PREFLIGHT_PASS_NOT_RELEASED'
           echo 'ZIG_SHARED_GATEWAY_SENS_AND_MY_LISP_PHYSICAL_PASS'
           echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
 
