@@ -405,7 +405,8 @@ test "F3C refuses non-saving empty shell and noncanonical physical inputs" {
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{0xf3}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{ 0xf4, 0x40, 0x60 }));
-    const too_long = [_]u8{0xf3} ** 16;
+    const too_long = [_]u8{ 0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3,
+        0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3, 0xf3 };
     try std.testing.expectError(Error.WrongCarrier, decode(a, &too_long));
     try std.testing.expectError(t5.Error.InvalidPhysicalByte, encode(a, &.{0xf3}));
 }
