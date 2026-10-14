@@ -133,3 +133,59 @@ test "IEEE CRC32 golden and one-byte mutant" {
     try verifyCrc32("123456789", checksum);
     try std.testing.expectError(error.IntegrityMismatch, verifyCrc32("123456788", checksum));
 }
+// This envelope stores physical MSB-first bits, not a resident/function ID.
+// The calling SENS law must supply the exact widths and meaningful bit length;
+// Zig must not infer a domain from the bytes or grant executable authority.
+test "D1..D10 exhaustive field transport keeps exact declared rung and every bit" {
+    var count: usize = 0;
+    var width: u8 = 1;
+    while (width <= 10) : (width += 1) {
+        const limit: u16 = @as(u16, 1) << @as(u4, @intCast(width));
+        const bytes_needed: usize = (@as(usize, width) + 7) / 8;
+        const widths = [_]u8{width};
+        const other_width = [_]u8{if (width == 10) @as(u8, 9) else width + 1};
+        var bits: u16 = 0;
+        while (bits < limit) : (bits += 1) {
+            const fields = [_]Field{.{ .width = width, .bits = bits }};
+            var physical: [2]u8 = [_]u8{0xa5} ** 2;
+            const bit_len = try pack(physical[0..bytes_needed], &fields);
+            try std.testing.expectEqual(@as(usize, width), bit_len);
+
+            var restored: [1]u64 = .{std.math.maxInt(u64)};
+            try unpack(physical[0..bytes_needed], bit_len, &widths, &restored);
+            try std.testing.expectEqual(@as(u64, bits), restored[0]);
+
+            // Same payload bytes plus a different declared domain is NOT a
+            // valid widening/truncation when the original bit length is fixed.
+            var forbidden: [1]u64 = .{0xdeadbeef};
+            try std.testing.expectError(error.LengthMismatch,
+                unpack(physical[0..bytes_needed], bit_len, &other_width, &forbidden));
+            try std.testing.expectEqual(@as(u64, 0xdeadbeef), forbidden[0]);
+
+            if (width % 8 != 0) {
+                // Mutate just ONE unused physical padding bit, never a
+                // meaningful bit. Neither alias nor silent repair is allowed.
+                var mutant = physical;
+                mutant[bytes_needed - 1] |= 1;
+                try std.testing.expectError(error.NonCanonicalTail,
+                    unpack(mutant[0..bytes_needed], bit_len, &widths, &forbidden));
+                try std.testing.expectEqual(@as(u64, 0xdeadbeef), forbidden[0]);
+            }
+            count += 1;
+        }
+    }
+    try std.testing.expectEqual(@as(usize, 2046), count);
+}
+
+test "exact-width field envelope refuses truncated and trailing bytes" {
+    const field = [_]Field{.{ .width = 10, .bits = 0b0010101010 }};
+    var physical: [2]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 10), try pack(&physical, &field));
+    var restored: [1]u64 = .{0xdeadbeef};
+    try std.testing.expectError(error.LengthMismatch,
+        unpack(physical[0..1], 10, &.{10}, &restored));
+    const appended = [_]u8{ physical[0], physical[1], 0 };
+    try std.testing.expectError(error.LengthMismatch,
+        unpack(&appended, 10, &.{10}, &restored));
+    try std.testing.expectEqual(@as(u64, 0xdeadbeef), restored[0]);
+}
