@@ -70,7 +70,7 @@
 (0011 life-scheduler-key-present?
   (0010 (key keys)
     (110
-      ((0100 (010 keys)) (001 absent))
+      ((010 keys) (001 absent))
       ((0100 (010 keys))
        (110
          ((життя--рівні? key (100 keys))  (001 present))
@@ -102,7 +102,7 @@
 (0011 life-scheduler-projection-match?
   (0010 (expected projections)
     (110
-      ((0100 (010 projections)) (001 absent))
+      ((010 projections) (001 absent))
       ((0100 (010 projections))
        ((0010 (projection)
          (110
@@ -160,7 +160,7 @@
 (0011 life-scheduler-quiescence-state
   (0010 (projections lifecycle-state)
     (110
-      ((0100 (010 projections))
+      ((010 projections)
        (110
          ((101 lifecycle-state (001 no-transition-required))
           
@@ -173,7 +173,7 @@
 (0011 life-scheduler-quiescence
   (0010 (pending projections lifecycle-state)
     (110
-      ((0100 (010 pending))
+      ((010 pending)
        (life-scheduler-quiescence-state projections lifecycle-state))
       ((0100 (010 pending))
        (001 (quiescence-state active))))))
