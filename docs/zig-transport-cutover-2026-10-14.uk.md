@@ -69,3 +69,31 @@ target/debug/sens-trit eval-f3 output.senc
 python3 research/zig-codecs/t5/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-t5-paired
 python3 research/zig-codecs/f3c/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-f3c-paired
 ```
+
+
+## Очищення транспортного ABI · 14.10.2026
+
+У `research/zig-codecs/transport_abi.zig` прибрано неактивний
+`sens_zig_t5_encode` на padded `extern struct` і `c_allocator`.
+Єдиним підтримуваним входом кодування T5 через межу Zig↔Rust є
+`sens_zig_t5_encode_be3` (ABI v2: `[width, MSB, LSB]`, буфер
+надає викликач). Код Rust `sens-trit` використовує саме цей символ;
+зовнішнім користувачам колишнього структурного символу потрібна
+міграція на v2. Ані `.sens` wire, ані семантика SENS не змінені.
+
+Наявний пакет `research/zig-codecs/tests.zig` містить точковий
+`typed ladder via public Zig ABI v2, D10 fail closed`:
+D8/D9 — точний двобайтовий T5 і зворотна типізація, D10 — відмова
+виконуваного T5 ABI, недостатня місткість — відмова без запису.
+Це **механічні тести**; статус PASS можна заявляти тільки після
+справжнього запуску компілятора, не за фактом GitHub-коміту.
+
+```sh
+zig version
+zig test research/zig-codecs/tests.zig --test-filter "typed ladder via public Zig ABI v2"
+zig test research/zig-codecs/tests.zig
+```
+
+Стан на момент зміни: вихідні файли і зміни в `main` перевірено
+через GitHub, але Zig compiler run і device/cross-target proof
+ще не підтверджені. Нових CI workflow для цього не потрібно.
