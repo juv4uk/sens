@@ -43,9 +43,31 @@ class PublicationCandidateTest(unittest.TestCase):
         )
         self.write()
         self.mutant = None
+        self.trusted_translation_sha256 = None
+        self.origin = base / "pre-translation-original.lisp"
+        self.origin.write_bytes(b"(historical source snapshot)")
 
     def write(self):
         self.receipt.write_text(json.dumps(self.data), encoding="utf-8")
+
+    def translation_evidence(self, **changes):
+        evidence_path = self.receipt.parent / "migration-attestation.json"
+        evidence = {
+            "schema": gate.TRANSLATION_SCHEMA,
+            "origin_era": "historical",
+            "origin_path": str(self.origin),
+            "origin_sha256": sha(self.origin.read_bytes()),
+            "post_translation_source_sha256": sha(self.source.read_bytes()),
+            "candidate_physical_sha256": sha(self.candidate.read_bytes()),
+        }
+        evidence.update(changes)
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        digest = sha(evidence_path.read_bytes())
+        self.data["source_era"] = "translated"
+        self.data["translation_receipt"] = dict(path=str(evidence_path), sha256=digest)
+        self.trusted_translation_sha256 = digest
+        self.write()
+        return evidence_path
 
     def runner(self, command, **kwargs):
         self.assertEqual(kwargs.get("check"), False)
@@ -87,7 +109,8 @@ class PublicationCandidateTest(unittest.TestCase):
 
     def check(self):
         return gate.verify(self.candidate, self.source, self.receipt,
-                           self.zig, self.sens, runner=self.runner)
+                           self.zig, self.sens, runner=self.runner,
+                           trusted_translation_sha256=self.trusted_translation_sha256)
 
     def test_exact_source_zig_replay_and_native_sens_receipt(self):
         verdict = self.check()
@@ -108,16 +131,47 @@ class PublicationCandidateTest(unittest.TestCase):
         self.write()
         with self.assertRaisesRegex(gate.Rejected, "separate provenance"):
             self.check()
-        proof = self.receipt.parent / "migration-attestation.json"
-        proof.write_bytes(b'{"origin":"historical","witness":"source hash pinned"}')
-        self.data["translation_receipt"] = dict(
-            path=str(proof), sha256=sha(proof.read_bytes())
-        )
-        self.write()
+        proof = self.translation_evidence()
         self.assertEqual(self.check()["source_era"], "translated")
+        self.assertEqual(self.check()["provenance_status"],
+                         "EXTERNAL_PIN_AND_SOURCE_BOUND_NOT_AUTHENTICATED")
+        self.trusted_translation_sha256 = None
+        with self.assertRaisesRegex(gate.Rejected, "independent provenance pin"):
+            self.check()
+        self.trusted_translation_sha256 = sha(proof.read_bytes())
         proof.write_bytes(b"mutated")
         with self.assertRaisesRegex(gate.Rejected, "translation_receipt: digest mismatch"):
             self.check()
+
+    def test_translation_provenance_cannot_bind_unrelated_source_or_carrier(self):
+        cases = (
+            ("post_translation_source_sha256", "post_translation_source"),
+            ("candidate_physical_sha256", "post_translation_physical"),
+            ("origin_sha256", "translation_origin"),
+        )
+        for field, message in cases:
+            with self.subTest(field=field):
+                self.translation_evidence(**{field: "0" * 64})
+                with self.assertRaisesRegex(gate.Rejected, message):
+                    self.check()
+
+    def test_era_receipt_must_have_explicit_schema_and_historical_origin(self):
+        for changes, expected in (
+            ({"schema": "unrelated-format"}, "schema mismatch"),
+            ({"origin_era": "current"}, "origin era must be explicit"),
+            ({"origin_path": str(self.source)}, "distinct absolute file"),
+        ):
+            with self.subTest(changes=changes):
+                self.translation_evidence(**changes)
+                with self.assertRaisesRegex(gate.Rejected, expected):
+                    self.check()
+
+    def test_self_pinned_receipt_does_not_prove_independent_provenance(self):
+        self.translation_evidence()
+        self.trusted_translation_sha256 = "0" * 64
+        with self.assertRaisesRegex(gate.Rejected, "independent_translation_pin"):
+            self.check()
+
 
     def test_physical_and_source_sha_mismatches_fail_closed(self):
         for key in ("source_sha256", "physical_sha256", "zig_executor_sha256",
@@ -186,24 +240,34 @@ class PublicationCandidateTest(unittest.TestCase):
                         self.zig, self.sens, runner=adversarial)
 
     def test_changed_translation_evidence_during_execution_is_rejected(self):
-        proof = self.receipt.parent / "migration-attestation.json"
-        proof.write_bytes(b'{"origin":"historical","approved":false}')
-        self.data["source_era"] = "translated"
-        self.data["translation_receipt"] = dict(
-            path=str(proof), sha256=sha(proof.read_bytes())
-        )
-        self.write()
+        proof = self.translation_evidence()
         original_runner = self.runner
 
         def adversarial(command, **kwargs):
             result = original_runner(command, **kwargs)
             if command[1] == "backend":
-                proof.write_bytes(b'{"origin":"historical","approved":true}')
+                proof.write_bytes(proof.read_bytes() + b" ")
             return result
 
         with self.assertRaisesRegex(gate.Rejected, "translation provenance mutated"):
             gate.verify(self.candidate, self.source, self.receipt,
-                        self.zig, self.sens, runner=adversarial)
+                        self.zig, self.sens, runner=adversarial,
+                        trusted_translation_sha256=self.trusted_translation_sha256)
+
+    def test_changed_original_during_execution_is_rejected(self):
+        self.translation_evidence()
+        original_runner = self.runner
+
+        def adversarial(command, **kwargs):
+            result = original_runner(command, **kwargs)
+            if command[1] == "backend":
+                self.origin.write_bytes(self.origin.read_bytes() + b"!")
+            return result
+
+        with self.assertRaisesRegex(gate.Rejected, "translation origin mutated"):
+            gate.verify(self.candidate, self.source, self.receipt,
+                        self.zig, self.sens, runner=adversarial,
+                        trusted_translation_sha256=self.trusted_translation_sha256)
 
     def test_never_lets_unsafe_paths_pass(self):
         candidate = self.candidate
