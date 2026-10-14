@@ -1,5 +1,6 @@
-// Zig is built only for the explicitly enabled zig-transport feature.
-// Normal Rust-only SENS core, tests, WASM and development remain buildable.
+// Zig owns the DEFAULT sens-cli physical transport. The Rust-only CLI is an
+// explicit --no-default-features compatibility build, never a silent fallback.
+// Standalone SENS core/WASM do not inherit the sens-cli physical backend.
 use std::{env, path::PathBuf, process::Command};
 
 fn main() {
