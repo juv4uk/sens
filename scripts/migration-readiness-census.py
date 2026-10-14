@@ -277,7 +277,7 @@ def build_report() -> dict:
                     and not nonarchive_auto
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
-                "rule": "every ACTIVE/UNCLASSIFIED original remains BLOCKED until independent oracle proof; Git-SHA reviewed DATA and archived mechanical candidates are NONPROGRAM, never executable credit; no .sens emitted",
+                "rule": "read-only readiness census: it emits no .sens and grants no executable credit; this report is evidence, not an authority; nothing here blocks a publication",
             },
         }
         return result

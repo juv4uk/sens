@@ -170,7 +170,7 @@ class ReadinessContractTests(unittest.TestCase):
         with patch.object(census.subprocess, "run", side_effect=fn):
             report = census.build_report()
         self.assertIn("research-only", report["authority"])
-        self.assertIn("BLOCKED", report["gate"]["rule"])
+        self.assertIn("read-only", report["gate"]["rule"])
         self.assertNotIn("oracle_passed", report)
 
 
