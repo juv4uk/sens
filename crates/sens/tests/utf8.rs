@@ -190,8 +190,7 @@ fn utf8_layer_keeps_process_library_as_a_separate_top_level_load() {
         .expect("UTF-8, process and TCP language layers must load sequentially");
 }
 
-#[test]
-fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
+fn check_utf8_helper_returns_exact_d1_predicate_on_boundaries() {
     // Exact domain-qualified D24 operands, with SENS deciding every result.
     let mut session = utf8_session();
     let zero = "#d24:000000000000000000000000";
@@ -241,6 +240,11 @@ fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
     assert_eq!(error.kind, sens::ErrorKind::Type);
 }
 
+#[test]
+fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
+    check_utf8_helper_returns_exact_d1_predicate_on_boundaries();
+}
+
 const UTF8_D1_LAW: &str =
     include_str!("../../../tests/semantic/utf8-direct-d1-law.lisp");
 
@@ -267,6 +271,10 @@ fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
             result.value
         );
     }
+
+    // Reuse the exact original regression body: all 18 boundaries and the
+    // negative unqualified-Number Type gate are exercised by the same CI step.
+    check_utf8_helper_returns_exact_d1_predicate_on_boundaries();
 
     let mutant_source = UTF8_D1_LAW.replacen("#d1:0", "#d1:1", 1);
     assert_eq!(mutant_source.len(), UTF8_D1_LAW.len(), "one bit, no frame drift");
