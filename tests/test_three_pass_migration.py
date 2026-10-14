@@ -120,6 +120,32 @@ class D11TestingVocabularyBoundaryTests(unittest.TestCase):
         self.assertEqual(routed["LENGTH"], ("000000", "D6"))
         self.assertNotIn("TEST-PASS", routed)
 
+    def test_no_d11_test_identity_enters_any_three_pass_successor_map(self):
+        # Inspect all three REAL migration maps, not just current_residents().
+        # Historical name and generated-surface imports must not accidentally
+        # promote the ratified *test data* D11 to callable SENS identities.
+        foundation = mod.load_foundation(
+            ROOT / "knowledge/d1-d11-foundation.json"
+        )
+        legacy, my, upper = mod.build_three_pass_maps(
+            foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
+            SEMANTIC_REGISTRY, NECESSARY, HISTORICAL, COVERAGE,
+        )
+        for stage, mapping in (("legacy", legacy), ("my", my), ("upper", upper)):
+            for spelling, identity in mapping.items():
+                if identity is not None:
+                    self.assertNotEqual(
+                        identity[1], "D11",
+                        f"{stage}:{spelling!r} must not import testing-only D11",
+                    )
+
+        # Nine same-spelling D11 tests cannot erase the lower ratified identity.
+        self.assertEqual(upper["NOT"], ("0100", "D4"))
+        self.assertEqual(upper["LENGTH"], ("000000", "D6"))
+        # Unique D11 test names are valid testing DATA, not implicit calls.
+        for name in ("DECODE-T5", "TEST-WORDS", "TEST-PASS"):
+            self.assertIsNone(upper.get(name), name)
+
 
 class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
     """All 2046 D1–D10 typed coordinates; no SID8-by-payload alias."""
