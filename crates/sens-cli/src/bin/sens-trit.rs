@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (backend | encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 // Compiled only in the official Zig-transport build. Rust validates SENS
 // program syntax; Zig owns all physical wire bytes for these commands.
@@ -322,6 +322,7 @@ fn execute() -> Result<(), String> {
     // У разі передавання одного файла .sens читаємо його як людина,
     // а не показуємо на екран внутрішні трити чи сирі байти.
     let (command, file, trusted_hash) = match args.as_slice() {
+        [arg] if arg == "backend" => ("backend", "", None),
         [path] if path.ends_with(".sens") => ("open", path.as_str(), None),
         [command, path] => (command.as_str(), path.as_str(), None),
         [command, path, expected]
@@ -332,6 +333,13 @@ fn execute() -> Result<(), String> {
     let path = Path::new(file);
 
     match command {
+        "backend" => {
+            #[cfg(feature = "zig-transport")]
+            println!("transport=zig abi=1 semantic_authority=SENS");
+            #[cfg(not(feature = "zig-transport"))]
+            println!("transport=rust-reference semantic_authority=SENS");
+            Ok(())
+        }
         "encode-d7-uk" => {
             // Physical T5 record; no D2 source grammar and NO execution.
             if path.extension().and_then(|ext| ext.to_str()) != Some("txt") {
