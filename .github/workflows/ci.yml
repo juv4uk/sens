@@ -446,6 +446,11 @@ jobs:
             e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict \
             -- --exact --nocapture | tee "$RUNNER_TEMP/sens-e1-cli-unit.log"
           grep -Fxq 'test e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict ... ok' "$RUNNER_TEMP/sens-e1-cli-unit.log"
+          # Two narrow Zig-physical W7 data tests; SENS alone owns D7 glyphs.
+          cargo test --locked -p sens-cli --bin sens-trit \
+            d7_zig_cli_boundary_tests:: -- --nocapture | tee "$RUNNER_TEMP/sens-d7-zig-boundary.log"
+          grep -Fq 'test d7_zig_cli_boundary_tests::keyboard_w7_is_sens_owned_zig_carries_exact_bytes_and_rejects_non_d7 ... ok' "$RUNNER_TEMP/sens-d7-zig-boundary.log"
+          grep -Fq 'test d7_zig_cli_boundary_tests::d7_default_cli_routes_do_not_decode_or_encode_t5_in_rust ... ok' "$RUNNER_TEMP/sens-d7-zig-boundary.log"
           bin=target/debug/sens-trit
           "$bin" backend
           test -x "$bin"
