@@ -133,8 +133,8 @@
       ((010 term) term)
       ((var? term) term)
       ((010 (001 ()))
-       (111 (apply-subst-walked (100 term) bindings)
-            (apply-subst-walked (011 term) bindings))))))
+       (111 (apply-subst (100 term) bindings)
+            (apply-subst (011 term) bindings))))))
 
 (0011 thread-conjunction
   (0010 (conditions state try-one)
