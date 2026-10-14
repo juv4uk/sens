@@ -257,8 +257,8 @@ fn nibble(char: u8) !u8 {
     return error.InvalidHexDigit;
 }
 
-/// One immutable *physical* fixture corpus for independent encode/decode on
-/// each implementation. Its binary words do not confer SENS call authority.
+// One immutable *physical* fixture corpus for independent encode/decode on
+// each implementation. Its binary words do not confer SENS call authority.
 test "E1 shared exact-width carrier corpus: independent encode and decode" {
     const corpus = @embedFile("../fixtures/e1-v1.bits");
     var lines = std.mem.splitScalar(u8, corpus, '\n');
