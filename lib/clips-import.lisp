@@ -818,15 +818,16 @@
 ; umgewandelt bekommt.
 (0011 clips-defrule->clauses
   (0010 (form templates)
-    (001000 ((split (clips-split-at-arrow (clips-strip-rule-preamble (0111 form)))))
-      (001000 ((conditions (clips-convert-vars (clips-convert-template-list (100 split) templates)))
-            (relevant (clips-drop-printouts (1001 split))))
-        (110
-          ((clips-all-asserts? relevant)
-           (clips-clauses-for-conclusions
-             (clips-convert-template-list (clips-assert-conclusions relevant) templates)
-             conditions))
-          )))))
+    ((0010 (split)
+       (001000 ((conditions (clips-convert-vars (clips-convert-template-list (100 split) templates)))
+             (relevant (clips-drop-printouts (1001 split))))
+         (110
+           ((clips-all-asserts? relevant)
+            (clips-clauses-for-conclusions
+              (clips-convert-template-list (clips-assert-conclusions relevant) templates)
+              conditions))
+           )))
+     (clips-split-at-arrow (clips-strip-rule-preamble (0111 form))))))
 
 ; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
 ; not-yet-supported forms produce no clauses rather than erroring — a
