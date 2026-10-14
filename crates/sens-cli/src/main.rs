@@ -140,17 +140,23 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
 /// Neither human spellings nor an eight-bit compatibility reader participate.
 /// An explicit binary file never gains ambient host capabilities or Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    // When Zig transport is chosen, ALL physical .sens ingress passes through
-    // the one Zig byte gateway before the SENS-owned canonical reader.
-    // Zig errors are mechanical rejects, not a SENS D1:NO or fallback request.
+    // Zig performs the sole physical T5 decode in the enabled mode.
+    // The SENS-owned D2 reader consumes the exact dense bits and width
+    // schedule: NO Rust T5 parser, host enum or fallback defines semantics.
     #[cfg(feature = "zig-transport")]
-    zig_transport_gateway::validate_t5(bytes)?;
-    // Exact-width T5 words feed the canonical D2 reader directly.
-    // No ASCII surface, dense re-packing or duplicate bit-unpacking.
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|err| format!("physical T5 transport rejected: {err:?}"))?;
-    let forms = sens::parse_canonical_word_sequence(&words)
-        .map_err(|err| format!("exact packed binary reader rejected: {err}"))?;
+    let forms = {
+        let (packed, widths) = zig_transport_gateway::decode_dense_t5(bytes)?;
+        sens::parse_canonical_packed_words(&packed, &widths)
+            .map_err(|err| format!("exact packed binary reader rejected: {err}"))?
+    };
+    // Independent Rust mechanical reference remains available without Zig.
+    #[cfg(not(feature = "zig-transport"))]
+    let forms = {
+        let words = sens::decode_ternary_words(bytes)
+            .map_err(|err| format!("physical T5 transport rejected: {err:?}"))?;
+        sens::parse_canonical_word_sequence(&words)
+            .map_err(|err| format!("exact packed binary reader rejected: {err}"))?
+    };
 
     // The physically typed D1–D9 entry point has no implicit Lisp macro
     // surface. Session::default() loads lib/macro.lisp on EVERY invocation;
