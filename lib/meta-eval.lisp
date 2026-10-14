@@ -503,8 +503,7 @@
 (0011 my-symbol-member?
   (0010 (name names)
     (110
-      
-      ((010 names)  (001 ()))
+      ((010 names)  #d1:0)
       ((101 name (100 names)) #d1:1)
       ((010 ()) (my-symbol-member? name (011 names))))))
 
