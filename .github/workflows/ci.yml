@@ -29,6 +29,12 @@ jobs:
           persist-credentials: false
           # HEAD^ is required by the fail-closed D3 source-delta guard.
           fetch-depth: 2
+      - name: Zig — обов'язковий інваріант чистоти від старої семантики
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci_zig_purity.py --self-test
+          python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
       - name: Встановити Zig 0.16.0 для типового транспортного кодека
         shell: bash
         run: |
@@ -276,6 +282,7 @@ jobs:
           path: |
             ${{ runner.temp }}/zig-rust-t5-results/
             ${{ runner.temp }}/zig-rust-f3c-results/
+            ${{ runner.temp }}/sens-zig-purity.json
           if-no-files-found: error
           retention-days: 14
 
