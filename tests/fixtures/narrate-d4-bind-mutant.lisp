@@ -15,6 +15,12 @@
        (оповідь--рівні? (011 a) (011 b)))
       (#d1:1 #d1:0))))
 
+(0011 оповідь--старе-нове?
+  (0010 (proof)
+    (оповідь--рівні?
+      (provenance-derived-from (provenance proof))
+      (provenance-list (100111 proof)))))
+
 (0011 оповідь--d4-закон
   (0010 ()
     (110
@@ -30,7 +36,12 @@
               (001 (proved (planet earth) (planet earth)
                        ((proved (planet mars) (planet mars) ())))))
             (001 (earth is a planet because mars is a planet)))
-          #d1:0)
+          (110
+            ((оповідь--старе-нове?
+               (001 (proved (planet earth) (planet earth)
+                       ((proved (planet mars) (planet mars) ())))))
+             #d1:0)
+            (#d1:1 #d1:0)))
          (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
