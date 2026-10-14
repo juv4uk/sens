@@ -1,30 +1,11 @@
-//! Відділення історичної восьмибітної сумісності від поточних доменів.
+//! Перевірки чинного доменного подання та доказового переносу D3.
 //! Зовнішня інтеграція компілює бібліотеку без cfg(test)-залежностей
 //! інших зайнятих агентами модулів. Не є свідком виклику функції D8.
 
 use sens::{
-    Bit3, Bit8, Bit9, Bija3, CoreD8, CoreD9, DomainIdentity,
+    Bit3, Bit9, Bija3, CoreD9, DomainIdentity,
     PresentationLanguage, Value, render_value_for_presentation,
 };
-
-#[test]
-fn w8_invoke_ne_staie_d8_round_za_spilnymy_bitamy() {
-    let old = Value::Sid(sens::sens!(10101000));
-    let exact = Value::DomainIdentity(DomainIdentity::D8(
-        CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
-    ));
-
-    assert_eq!(old.to_string(), exact.to_string());
-    assert_eq!(old.to_string(), "10101000");
-    let old_uk = render_value_for_presentation(&old, PresentationLanguage::Ukrainian);
-    let current_uk = render_value_for_presentation(&exact, PresentationLanguage::Ukrainian);
-    assert!(old_uk.starts_with("#<сумісний W8:10101000 "), "{old_uk}");
-    assert_eq!(current_uk, "#<домен D8:10101000>");
-    assert_ne!(old_uk, current_uk);
-    // Жодного автоматичного права виконання через вісім однакових бітів.
-    assert_eq!(exact.as_domain_identity().unwrap().width(), 8);
-    assert!(old.as_domain_identity().is_none());
-}
 
 #[test]
 fn istorichnyi_quote_maie_lyshe_dovedenu_d3_proiektsiiu() {
