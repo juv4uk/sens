@@ -691,6 +691,68 @@ mod tests {
     }
 
     #[test]
+    fn guard_ask_preserves_all_48_d3_quote_heads_against_w8_mutants() {
+        // Rust checks exact width in AST; SENS alone defines the semantics.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let at = full.find("(0011 guard-ask\n").expect("guard-ask missing");
+        let form = full[at..].trim();
+
+        fn exact_quote_count(source: &str) -> usize {
+            fn visit(expr: &Expr) -> usize {
+                match &expr.kind {
+                    ExprKind::List(items) => {
+                        usize::from(matches!(
+                            items.first(),
+                            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                                if id.width() == 3 && id.packed_bits() == 0b001
+                        )) + items.iter().map(visit).sum::<usize>()
+                    }
+                    _ => 0,
+                }
+            }
+            sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", source
+            )
+            .expect("pinned Guard exact-domain reader")
+            .iter()
+            .map(visit)
+            .sum()
+        }
+
+        let quote_sites: Vec<_> = form.match_indices("(001 ").map(|(at, _)| at).collect();
+        assert_eq!(quote_sites.len(), 48, "guard-ask D3 quote sites");
+        assert_eq!(exact_quote_count(form), 48, "all 48 exact D3:001 identities");
+        let mut seen = std::collections::BTreeMap::new();
+        for at in quote_sites {
+            // Each quoted value here is a bare atom, never a nested form.
+            let after_head = at + "(001 ".len();
+            let atom_end = form[after_head..]
+                .find(')')
+                .expect("quoted atom terminator")
+                + after_head;
+            let atom = &form[after_head..atom_end];
+            assert!(!atom.is_empty(), "quoted atom must be non-empty");
+            assert!(!atom.contains('('), "quoted datum is a bare atom: {atom}");
+            *seen.entry(atom.to_owned()).or_insert(0usize) += 1;
+            let mut mutant = form.to_owned();
+            mutant.replace_range(at..after_head, "(00000001 ");
+            assert_eq!(
+                exact_quote_count(&mutant), 47,
+                "W8 QUOTE must remain distinct from D3 at {atom}, offset {at}"
+            );
+        }
+        for atom in [
+            "not-found", "query", "decision", "unknown", "unknown-routes",
+            "result", "type", "reference-topic", "source", "entry",
+            "knowledge/guard-reference.lisp", "tool", "guard-script-directory",
+            "ambiguous"
+        ] {
+            assert!(seen.contains_key(atom), "missing Guard response field: {atom}");
+        }
+        assert_eq!(seen.values().sum::<usize>(), 48, "all data symbols accounted for");
+    }
+
+    #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
         assert_eq!(surface_domain_coordinate("функція"), Some(D4_LAMBDA));
