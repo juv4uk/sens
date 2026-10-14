@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: meta-eval-mutual COND + domain bitness.
+"""Mechanical source inventory: meta-eval-mutual D1 surface + domain bitness.
+
+CI_GLUE_NO_SEMANTICS: this Python file never establishes a SENS logical PASS.
 
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/meta-eval-mutual.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as fallback
+  2. Exact D1:1 token #d1:1 is present as fallback; derived spelling not mandatory
   3. Key surface present (group-closure / group-eval / eval-program-with-groups)
   4. Reuses existing meta-eval helpers (my-apply, bind-params, env-lookup)
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -23,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MUT = ROOT / "lib" / "meta-eval-mutual.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "#d1:1"
 REQUIRED = (
     "my-group-closure?",
     "my-group-eval",
@@ -49,7 +51,7 @@ def check_mutual() -> list[str]:
             continue
         errs.append(f"meta-eval-mutual: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
-        errs.append("meta-eval-mutual: exact D1:1 form (010 (001 ())) missing")
+        errs.append("meta-eval-mutual: explicit exact D1:1 token missing (mechanical)")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"meta-eval-mutual: required surface missing: {fn}")
@@ -85,10 +87,10 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("META-EVAL-MUTUAL: PASS — two-field COND, exact D1, meta-eval reuse")
+    print("META-EVAL-MUTUAL: MECHANICAL_PASS — source markers only; semantic_pass=NOT_INFERRED")
     for n in range(1, 11):
-        print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
-    print("BITNESS: PASS — every domain key width equals domain address")
+        print(f"D{n}: MECHANICAL_PASS width={n} rows={1 << n}/{1 << n}")
+    print("BITNESS: MECHANICAL_PASS — exact key widths only; semantic_pass=NOT_INFERRED")
     return 0
 
 
