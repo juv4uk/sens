@@ -219,6 +219,11 @@ fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
 }
 
 
+const COMPILER_ARITY_D1_LAW: &str =
+    include_str!("../../../tests/semantic/compiler-arity-proper-list-law.lisp");
+const COMPILER_ARITY_D1_MUTANT: &str =
+    include_str!("../../../tests/semantic/compiler-arity-proper-list-mutant.lisp");
+
 const COMPILER_PROGRAM_LIST_D1_LAW: &str =
     include_str!("../../../tests/semantic/compiler-program-list-d1-law.lisp");
 const COMPILER_PROGRAM_LIST_D1_MUTANT: &str =
@@ -258,5 +263,35 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
             .is_err(),
         "one-bit D1 mutation must select SENS-owned fail-closed CAR(QUOTE EMPTY)"
+    );
+
+    // Строгі arity і COND-clause закони визначені лише самими SENS-формами.
+    let exact = parse_mixed_exact_domain(COMPILER_ARITY_D1_LAW)
+        .expect("SENS exact D1/D3/D4 arity and proper-list law parses");
+    assert_eq!(exact.len(), 14, "14 independent SENS self-verdicts");
+    for (index, form) in exact.iter().enumerate() {
+        let verdict = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|error| panic!("SENS arity/proper-list law {index}: {error}"))
+            .value;
+        assert_eq!(
+            verdict.as_predicate_bit(),
+            Some(true),
+            "SENS arity/proper-list self-verdict {index} was not exact D1:YES: {verdict}"
+        );
+    }
+
+    // Лише один очікуваний біт D1:0 → D1:1; SENS сам викликає свій
+    // fail-closed CAR(QUOTE EMPTY) і відхиляє неприпустимий mutant.
+    assert_eq!(
+        COMPILER_ARITY_D1_LAW.replacen("#d1:0", "#d1:1", 1),
+        COMPILER_ARITY_D1_MUTANT
+    );
+    let mutant = parse_mixed_exact_domain(COMPILER_ARITY_D1_MUTANT)
+        .expect("one-bit SENS mutant must parse");
+    assert_eq!(mutant.len(), exact.len());
+    assert!(
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
+            .is_err(),
+        "SENS must reject the false success of improper one-argument dotted tail"
     );
 }

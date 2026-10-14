@@ -411,7 +411,7 @@
   (0010 (arguments)
     (110
       ((010 arguments) (compiler-false ()))
-      ((010 (011 arguments)) (compiler-true ()))
+      ((0101 (011 arguments)) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 (0011 compiler-exactly-two
@@ -419,7 +419,7 @@
     (110
       ((010 arguments) (compiler-false ()))
       ((010 (011 arguments)) (compiler-false ()))
-      ((010 (011 (011 arguments))) (compiler-true ()))
+      ((0101 (011 (011 arguments))) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
@@ -436,7 +436,8 @@
 (0011 compiler-cond-clauses-valid
   (0010 (clauses)
     (110
-      ((010 clauses) (compiler-true ()))
+      ((0101 clauses) (compiler-true ()))
+      ((010 clauses) (compiler-false ()))
       ((compiler-exactly-two (100 clauses))
        (compiler-cond-clauses-valid (011 clauses)))
       ((compiler-true ()) (compiler-false ())))))
