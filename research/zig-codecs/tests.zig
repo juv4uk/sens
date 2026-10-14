@@ -68,6 +68,37 @@ test "modern D8 and D9 share payload but not their T5 identity" {
     try std.testing.expectEqualSlices(u8, &.{ 0x1e, 0x53 }, &n_out);
 }
 
+// Current owner-ratified domain ladder only. Exhaust all D8 payloads and
+// compare with independent D9 identities carrying the SAME payload bits.
+// This is a transport/width law, not a historical mapping or a SENS evaluator.
+test "D8 exhaustive current-ladder physical width stays distinct from D9" {
+    for (0..256) |payload| {
+        const d8 = ladder.D8.init(@intCast(payload));
+        const d9 = ladder.D9.init(@intCast(payload));
+        const eight = d8.coordinate();
+        const nine = d9.coordinate();
+        try std.testing.expectEqual(@as(u16, @intCast(payload)), eight.bits);
+        try std.testing.expectEqual(eight.bits, nine.bits);
+        try std.testing.expect(!eight.same(nine));
+        try std.testing.expect(@TypeOf(d8) != @TypeOf(d9));
+        try std.testing.expectError(error.WrongDomainWidth,
+            ladder.fromCarrier(8, d9.toCarrier()));
+        try std.testing.expectError(error.WrongDomainWidth,
+            ladder.fromCarrier(9, d8.toCarrier()));
+
+        const e = eight.triplet();
+        const n = nine.triplet();
+        var physical_eight: [2]u8 = undefined;
+        var physical_nine: [2]u8 = undefined;
+        const elen = try t5.encodeTripletsInto(&physical_eight, &e);
+        const nlen = try t5.encodeTripletsInto(&physical_nine, &n);
+        try std.testing.expectEqual(@as(usize, 2), elen);
+        try std.testing.expectEqual(@as(usize, 2), nlen);
+        try std.testing.expect(!std.mem.eql(u8, physical_eight[0..elen],
+            physical_nine[0..nlen]));
+    }
+}
+
 test "D1 zero and D3 three zero bits stay different T5 words" {
     // Neither this test nor Zig assigns either word a SENS semantic law.
     const one = (try ladder.D1.fromBinary("0")).coordinate().triplet();
