@@ -82,7 +82,7 @@
     },
     "D7": {
       "width": 7,
-      "authority": "#3572",
+      "authority": "owner-ratified-2026-10-13-keyboard-v2",
       "canonical_table": {
         "path": "lib/domains/d7.lisp",
         "key_width": 7,
