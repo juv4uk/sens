@@ -19,7 +19,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_projection, parse_words  # noqa: E402
-from verify_h2_cross_host import CASES, preflight  # noqa: E402
+from verify_h2_cross_host import AuditFailure, CASES, preflight  # noqa: E402
 
 C_SOURCE = "research/zig-codecs/host-c/h2_t5_dump.c"
 ABI_SOURCE = "research/zig-codecs/transport_abi.zig"
@@ -237,7 +237,7 @@ def main() -> int:
             }
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
         return 0
-    except (PhysicalError, OSError, ValueError, KeyError) as exc:
+    except (PhysicalError, AuditFailure, OSError, ValueError, KeyError) as exc:
         print(f"H2_PHYSICAL_UNVERIFIED {exc}", file=sys.stderr)
         return 1
 
