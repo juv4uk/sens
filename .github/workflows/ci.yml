@@ -95,11 +95,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "test_id=unify-d1-native-self-verdict layer=eval semantic_authority=SENS"
+          echo "test_id=unify-d1-native-self-verdict layer=transport semantic_authority=SENS via pinned Lisp reader; physical_T5_receipt=none"
           sha256sum lib/unify.lisp crates/sens/tests/unify_occurs_exact_d3.rs tests/fixtures/unify-exact-d1-law.lisp tests/fixtures/unify-exact-d1-mutant.lisp
           python3 scripts/ci_failure_contract.py run \
             --test-id unify-d1-native-self-verdict \
-            --layer eval \
+            --layer transport \
             --fixture tests/fixtures/unify-exact-d1-law.lisp \
             --report-file "$RUNNER_TEMP/sens-unify-d1-red.jsonl" \
             -- cargo test --locked -p sens --test unify_occurs_exact_d3 native_unify_d1_self_verdict_and_one_bit_mutant -- --nocapture
