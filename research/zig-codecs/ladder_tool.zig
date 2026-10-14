@@ -80,6 +80,14 @@ fn parseWords(out: []t5.Word, data: []const u8) !usize {
     return count;
 }
 
+// Optional F3C consumes ordinary D1..D9 T5; D10 is transport-only.
+fn f3cCandidateWidths(words: []const t5.Word) bool {
+    for (words) |w| {
+        if (w.width > 9) return false;
+    }
+    return true;
+}
+
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
     const data = try readFile(allocator, "caar.lines");
@@ -115,18 +123,25 @@ pub fn main() !void {
     }
     std.debug.print("T5 roundtrip=EXACT words={d}\n", .{back.len});
 
-    // 3. F3C: чи зменшує (opt-in). null = лишити T5.
-    const carrier_opt = try f3c.encode(allocator, t5_bytes);
-    if (carrier_opt) |carrier| {
-        defer allocator.free(carrier);
-        const restored = try f3c.decode(allocator, carrier);
-        defer allocator.free(restored);
-        const ok = std.mem.eql(u8, restored, t5_bytes);
-        std.debug.print("F3C bytes={d} saves={d} roundtrip={s}\n", .{
-            carrier.len, t5_bytes.len - carrier.len, if (ok) "EXACT" else "MISMATCH",
-        });
+    // 3. F3C is optional and currently requires the ordinary D1..D9 T5
+    // profile. A valid D10 coordinate must remain in T5, not be reinterpreted
+    // as executable D9 or rejected by an optional compression attempt.
+    if (f3cCandidateWidths(words)) {
+        const carrier_opt = try f3c.encode(allocator, t5_bytes);
+        if (carrier_opt) |carrier| {
+            defer allocator.free(carrier);
+            const restored = try f3c.decode(allocator, carrier);
+            defer allocator.free(restored);
+            const ok = std.mem.eql(u8, restored, t5_bytes);
+            std.debug.print("F3C bytes={d} saves={d} roundtrip={s}\n", .{
+                carrier.len, t5_bytes.len - carrier.len, if (ok) "EXACT" else "MISMATCH",
+            });
+            if (!ok) return error.F3CRoundtripMismatch;
+        } else {
+            std.debug.print("F3C bytes=none (T5 retained)\n", .{});
+        }
     } else {
-        std.debug.print("F3C bytes=none (T5 retained)\n", .{});
+        std.debug.print("F3C bytes=none (D10 coordinate profile; T5 retained)\n", .{});
     }
 
     // 4. Бенч: encode/decode, ns/op (механічний транспорт, не семантика).
@@ -171,4 +186,21 @@ test "ladder D10 exact words and strict two-column input" {
         try std.testing.expectEqual(expected.width, actual.width);
         try std.testing.expectEqual(expected.bits, actual.bits);
     }
+}
+
+test "optional F3C must not reject canonical D10 coordinates" {
+    const one = [_]t5.Word{.{ .width = 9, .bits = 0 }};
+    const two = [_]t5.Word{.{ .width = 10, .bits = 0 }};
+    const mixed = [_]t5.Word{ .{ .width = 1, .bits = 1 }, .{ .width = 10, .bits = 1023 } };
+    try std.testing.expect(f3cCandidateWidths(&one));
+    try std.testing.expect(!f3cCandidateWidths(&two));
+    try std.testing.expect(!f3cCandidateWidths(&mixed));
+
+    const canonical = try t5.encodeCoordinates(std.testing.allocator, &two);
+    defer std.testing.allocator.free(canonical);
+    try std.testing.expectEqualSlices(u8, &.{ 0, 0 }, canonical);
+    const back = try t5.decodeCoordinates(std.testing.allocator, canonical);
+    defer std.testing.allocator.free(back);
+    try std.testing.expectEqualSlices(t5.Word, &two, back);
+    try std.testing.expectError(t5.Error.UnsupportedDomainWidth, t5.decode(std.testing.allocator, canonical));
 }
