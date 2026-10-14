@@ -70,16 +70,16 @@ python3 scripts/verify_zig_publication_candidate.py \
 Виклик у довіреному релізному середовищі (значення PIN має надійти з незалежного рішення власника, не від неперевіреного файла):
 
 ```bash
-python3 scripts/verify-zig-publication.py \\
-  --input /approved/candidate.sens \\
-  --source-file /approved/source.lisp \\
-  --provenance /approved/provenance.json \\
-  --owner-approved-provenance-sha256 "\$OWNER_APPROVED_PROVENANCE_SHA256" \\
-  --zig-runner /pinned/sens-trit \\
-  --zig-runner-sha256 "\$ZIG_RUNNER_SHA256" \\
-  --sens-executor /pinned/sens-executor \\
-  --sens-executor-sha256 "\$SENS_EXECUTOR_SHA256" \\
-  --expected-output-sha256 "\$OWNER_APPROVED_OUTPUT_SHA256" \\
+python3 scripts/verify-zig-publication.py \
+  --input /approved/candidate.sens \
+  --source-file /approved/source.lisp \
+  --provenance /approved/provenance.json \
+  --owner-approved-provenance-sha256 "$OWNER_APPROVED_PROVENANCE_SHA256" \
+  --zig-runner /pinned/sens-trit \
+  --zig-runner-sha256 "$ZIG_RUNNER_SHA256" \
+  --sens-executor /pinned/sens-executor \
+  --sens-executor-sha256 "$SENS_EXECUTOR_SHA256" \
+  --expected-output-sha256 "$OWNER_APPROVED_OUTPUT_SHA256" \
   --out /publish/candidate.sens
 ```
 
