@@ -107,7 +107,7 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-fs-journal-red.jsonl" \
             -- cargo test --locked -p sens --test content_store \
                  lisp_fs_journal_replay_rejects_ -- --nocapture
-      - name: UTF-8 — 8 SENS D1 self-verdicts і однобітний негативний контроль
+      - name: UTF-8 — 2 структурні SENS D1 вердикти й однобітний негативний контроль
         if: contains(github.event.head_commit.message, '[utf8-d1-once]')
         shell: bash
         run: |
