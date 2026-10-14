@@ -64,21 +64,21 @@ fn evaluate(physical: &[u8], source: &str, structural_only: bool) -> Result<bool
     // narrator. It must not interpret D7 text frames as Symbol, and it makes
     // no claim about quoted words in the wider narrator contract.
     if !structural_only {
-    // Read-only observations to locate the first language-level divergence.
-    // No host expected-value table; the SENS fixture below still owns verdicts.
-    for (label, expression) in [
-        ("proper-empty", "(narrate-proper-list? (001 ()))"),
-        ("proper-one", "(narrate-proper-list? (001 (a)))"),
-        ("answer-empty", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ())))"),
-        ("answer-nested", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ((proved (planet mars) (planet mars) ())))))"),
-        ("outcome-unknown", "(narrate-outcome (001 (unknown subject)))"),
-    ] {
-        let expressions = parse_mixed_exact_domain(expression)
-            .map_err(|e| format!("probe reader {label}: {e}"))?;
-        let result = eval_parsed_expressions(&expressions, &mut session)
-            .map_err(|e| format!("physical probe {label}: {e}"))?;
-        eprintln!("PHYSICAL_NARRATE_OBSERVATION {label}={}", result.value);
-    }
+        // Read-only observations locate the first full-language divergence.
+        // D7 text frames MUST NOT be silently reinterpreted as symbols.
+        for (label, expression) in [
+            ("proper-empty", "(narrate-proper-list? (001 ()))"),
+            ("proper-one", "(narrate-proper-list? (001 (a)))"),
+            ("answer-empty", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ())))"),
+            ("answer-nested", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ((proved (planet mars) (planet mars) ())))))"),
+            ("outcome-unknown", "(narrate-outcome (001 (unknown subject)))"),
+        ] {
+            let expressions = parse_mixed_exact_domain(expression)
+                .map_err(|e| format!("probe reader {label}: {e}"))?;
+            let result = eval_parsed_expressions(&expressions, &mut session)
+                .map_err(|e| format!("physical probe {label}: {e}"))?;
+            eprintln!("PHYSICAL_NARRATE_OBSERVATION {label}={}", result.value);
+        }
     }
     let parsed = parse_mixed_exact_domain(source)
         .map_err(|e| format!("SENS self-verdict reader: {e}"))?;
@@ -129,7 +129,7 @@ fn run() -> Result<(), String> {
 fn main() -> ExitCode {
     match run() {
         Ok(()) => {
-            println!("PHYSICAL_NARRATE_SENS_LAW_AND_MUTANT=PASS");
+            println!("PHYSICAL_NARRATE_COMMAND=PASS");
             ExitCode::SUCCESS
         }
         Err(error) => {
