@@ -36,13 +36,13 @@
 (0011 my-fc-primitive?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
+      ((010 value) #d1:0)
       (#d1:1 (101 (100 value) (001 primitive))))))
 
 (0011 my-fc-closure?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
+      ((010 value) #d1:0)
       (#d1:1 (101 (100 value) (001 closure))))))
 
 (0011 my-fc-bind-params
@@ -89,7 +89,7 @@
          ((101 op (001 >)) (11011 (100 args) (1001 args)))
          (#d1:1 (001 ())))
        (my-fc-compare-chain op (011 args)))
-      (#d1:1 (001 ())))))
+      (#d1:1 #d1:0))))
 
 (0011 my-fc-apply-primitive
   (0010 (name args)
