@@ -496,3 +496,40 @@ test "heapless T5 encode never writes on malformed input, tiny buffer or overlap
     try std.testing.expectError(error.OverlappingBuffers, encodeTripletsInto(&alias, alias[0..3]));
     try std.testing.expectEqualSlices(u8, &.{ 1, 0, 1 }, alias[0..3]);
 }
+
+
+test "canonical T5 truncation may remain a different valid coordinate" {
+    // Physical-only counterexample. T5 has no embedded file length or digest.
+    // D9:100000000 is 51 02, but its first byte 51 independently forms
+    // D5:10000. Therefore a generic "all truncated T5 must reject" gate
+    // would reject a valid coordinate without external integrity evidence.
+    const a = std.testing.allocator;
+    const full_word = [_]Word{.{ .width = 9, .bits = 0b100000000 }};
+    const physical = try encode(a, &full_word);
+    defer a.free(physical);
+    try std.testing.expectEqualSlices(u8, &.{ 0x51, 0x02 }, physical);
+
+    const shorter_physical = physical[0..1];
+    try validatePhysical(physical);
+    try validatePhysical(shorter_physical);
+
+    const full_decoded = try decode(a, physical);
+    defer a.free(full_decoded);
+    try std.testing.expectEqualSlices(Word, &full_word, full_decoded);
+
+    const shorter_decoded = try decode(a, shorter_physical);
+    defer a.free(shorter_decoded);
+    try std.testing.expectEqualSlices(Word, &.{.{
+        .width = 5,
+        .bits = 0b10000,
+    }}, shorter_decoded);
+
+    const shorter_reencoded = try encode(a, shorter_decoded);
+    defer a.free(shorter_reencoded);
+    try std.testing.expectEqualSlices(u8, shorter_physical, shorter_reencoded);
+
+    // Both are canonical; only externally pinned size/SHA can establish
+    // whether the shorter valid file was an unintended truncation.
+    try std.testing.expect(physical.len != shorter_physical.len);
+    try std.testing.expect(full_decoded[0].width != shorter_decoded[0].width);
+}
