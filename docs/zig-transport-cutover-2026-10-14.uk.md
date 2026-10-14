@@ -23,7 +23,7 @@ target/sens-zig-transport f3c-pack input.sens output.senc
 target/sens-zig-transport f3c-unpack output.senc restored.sens
 cmp input.sens restored.sens
 cargo build --locked -p sens-cli --bin sens-trit
-target/debug/sens-trit backend  # transport=zig abi=1 semantic_authority=SENS
+target/debug/sens-trit backend  # transport=zig abi=2 semantic_authority=SENS
 target/debug/sens-trit eval input.sens
 target/debug/sens-trit eval-f3 output.senc
 ```
@@ -47,3 +47,10 @@ target/debug/sens-trit eval-f3 output.senc
 **Межа:** це НЕ зміна типової фізичної структури (`.sens` T5 і `.senc` F3C залишаються як були), не ввімкнення Zig у `sens` core/WASM/freestanding/FPGA, не завершення E1/E2/E3 і не оголошення зеленого релізу. Rust reference збережено до повного corpus-паритету. Загальний CI має відомий окремий RED SID8/D8 (#5778) — не маскувати. F3M лишається дослідним профілем. Конверт Zig не може змінювати SENS-семантику.
 
 Докази: [T5/F3C real paired benchmarks](../research/zig-codecs/RESULTS-2026-10-14.uk.md), [#5766](https://github.com/juv4uk/sens/issues/5766), [#5767](https://github.com/juv4uk/sens/issues/5767), [#5768](https://github.com/juv4uk/sens/issues/5768), [#5770](https://github.com/juv4uk/sens/issues/5770), [#5771](https://github.com/juv4uk/sens/issues/5771).
+
+## ABI v2, без Rust layout → SENS (14.10.2026)
+- Основний `sens-trit` передає механічні слова Zig як caller-owned послідовність трійок байтів `[exact_width_u8, payload_MSB_u8, payload_LSB_u8]`. Це **тільки внутрішній ABI шлюзу**, не новий wire-format і не мовне значення SENS.
+- Фізичні T5 байти виробляє тільки Zig; Rust передає ширину й біти як opaque payload, без доменних номерів, host-enum, `repr(C)` або native endian.
+- `sens_zig_t5_encode_be3` відхиляє нецілі трійки, нульову/непідтримувану ширину, надлишковий payload і недостатню місткість буфера.
+- `sens_zig_codec_abi_version() == 2`; попередній експорт `sens_zig_t5_encode` збережений для старого ABI-клієнта, але **за замовчуванням не викликається** із `sens-trit`. Поза межами host не переносити `usize/isize` у фізичний конверт.
+- Доказ в `research/zig-codecs/transport_abi.zig`: різні фізичні T5 для D1:1 та D2:01, позитивний golden і негативні перекручені triplets. Це mechanical gate; семантичне рішення належить SENS.

@@ -18,14 +18,13 @@ const USAGE: &str =
 // program syntax; Zig owns all physical wire bytes for these commands.
 #[cfg(feature = "zig-transport")]
 mod zig_transport {
-    #[repr(C)]
-    struct Word { width: u8, bits: u16 }
-
     unsafe extern "C" {
         fn sens_zig_codec_abi_version() -> u32;
         fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
-        fn sens_zig_t5_encode(
-            input: *const Word, count: usize, output: *mut u8, capacity: usize
+        // ABI v2: caller-owned width + big-endian payload triplets.
+        // Never send repr(C)/repr(Rust) structs across the language boundary.
+        fn sens_zig_t5_encode_be3(
+            input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
         ) -> isize;
         fn sens_zig_f3c_pack(
             input: *const u8, len: usize, output: *mut u8, capacity: usize
@@ -37,7 +36,7 @@ mod zig_transport {
 
     fn version() -> Result<(), String> {
         // SAFETY: zero-argument pure function from a statically linked Zig library.
-        if unsafe { sens_zig_codec_abi_version() } != 1 {
+        if unsafe { sens_zig_codec_abi_version() } != 2 {
             return Err("Zig codec C ABI version mismatch".into());
         }
         Ok(())
@@ -57,14 +56,22 @@ mod zig_transport {
         expected_bytes: &[u8],
     ) -> Result<Vec<u8>, String> {
         version()?;
-        let typed: Vec<Word> = words.iter().map(|w| Word {
-            width: w.width() as u8,
-            bits: w.packed_bits(),
-        }).collect();
+        let mut physical_words = Vec::with_capacity(words.len() * 3);
+        for word in words {
+            let width = u8::try_from(word.width())
+                .map_err(|_| "Zig T5 width out of one-byte ABI range")?;
+            let bits = word.packed_bits();
+            physical_words.push(width);
+            physical_words.push((bits >> 8) as u8);
+            physical_words.push(bits as u8);
+        }
         let mut bytes = vec![0u8; expected_bytes.len()];
-        // SAFETY: pointers are valid for exactly the advertised slice lengths.
+        // SAFETY: Zig sees only caller-owned raw bytes + exact byte length.
         let len = unsafe {
-            sens_zig_t5_encode(typed.as_ptr(), typed.len(), bytes.as_mut_ptr(), bytes.len())
+            sens_zig_t5_encode_be3(
+                physical_words.as_ptr(), physical_words.len(),
+                bytes.as_mut_ptr(), bytes.len()
+            )
         };
         if len < 0 || len as usize != bytes.len() || bytes != expected_bytes {
             return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
@@ -335,7 +342,7 @@ fn execute() -> Result<(), String> {
     match command {
         "backend" => {
             #[cfg(feature = "zig-transport")]
-            println!("transport=zig abi=1 semantic_authority=SENS");
+            println!("transport=zig abi=2 semantic_authority=SENS");
             #[cfg(not(feature = "zig-transport"))]
             println!("transport=rust-reference semantic_authority=SENS");
             Ok(())
