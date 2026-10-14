@@ -55,13 +55,13 @@
       ((101 ch "\n") "\\n")
       ((101 ch "\r") "\\r")
       ((101 ch "\t") "\\t")
-      (1 ch))))
+      (#d1:1 ch))))
 
 (0011 json-escape-onto
   (0010 (s acc)
     (110
       ((110011100 s) acc)
-      (1 (json-escape-onto (110011101 s)
+      (#d1:1 (json-escape-onto (110011101 s)
                            (110011110 acc (json-escape-char (110101011 s))))))))
 
 (0011 json-escape
@@ -75,7 +75,7 @@
     (110
       
       ((010 items)  acc)
-      (1 (strcat-onto (011 items) (110011110 acc (100 items)))))))
+      (#d1:1 (strcat-onto (011 items) (110011110 acc (100 items)))))))
 
 (0011 strcat
   (0010 args
@@ -88,7 +88,7 @@
   (0010 (k)
     (110
       ((110101100 k) (json-encode-string (11101110 k)))
-      (1 (json-encode-string k)))))
+      (#d1:1 (json-encode-string k)))))
 
 ; Objects are alists (lists of dotted pairs), arrays are proper lists.
 ; Disambiguation for this protocol's data: a list is an OBJECT iff its
@@ -100,7 +100,7 @@
   (0010 (v)
     (110
       
-      (1 (001 ()))
+      (#d1:1 (001 ()))
       
       ((010 (100 v))  (001 ()))
       
@@ -117,21 +117,21 @@
          ((string-membership-helper v)
           
           (json-encode-string v))
-         (1 (11110100 v))))
+         (#d1:1 (11110100 v))))
       ((json-object? v) (json-encode-object v))
-      (1 (json-encode-array v)))))
+      (#d1:1 (json-encode-array v)))))
 
 (0011 json-encode-object-entries
   (0010 (entries acc)
     (110
       
       ((010 entries)  acc)
-      (1 (001000 ((entry (100 entries)))
+      (#d1:1 (001000 ((entry (100 entries)))
            (json-encode-object-entries
             (011 entries)
             (strcat acc
                     (110 ((110011100 acc) "")
-                          (1 ","))
+                          (#d1:1 ","))
                     (json-encode-key (100 entry))
                     ":"
                     (json-encode-value (011 entry)))))))))
@@ -145,11 +145,11 @@
     (110
       
       ((010 items)  acc)
-      (1 (json-encode-array-items
+      (#d1:1 (json-encode-array-items
           (011 items)
           (strcat acc
                   (110 ((110011100 acc) "")
-                        (1 ","))
+                        (#d1:1 ","))
                   (json-encode-value (100 items))))))))
 
 (0011 json-encode-array
@@ -187,7 +187,7 @@
     ((0010 (c)
       (110
         ((101 c (001 ())) "")
-        (1 c)))
+        (#d1:1 c)))
      (alist-ref "content" jm))))
 
 (0011 json->tool-call
@@ -232,7 +232,7 @@
        (1110 (111 "role" "tool")
              (111 "tool_call_id" (msg-tool-call-id m))
              (111 "content" (msg-content m))))
-      (1 (001000 ((tcs (msg-tool-calls m)))
+      (#d1:1 (001000 ((tcs (msg-tool-calls m)))
            (1111 (1110 (111 "role" (msg-role m))
                          (111 "content" (msg-content m)))
                    (110 (tcs (1110 (111 "tool_calls" (101000 encode-tool-call tcs))))
@@ -311,7 +311,7 @@
               "]\n"
               stdout
               (110 ((110011100 stderr) "")
-                    (1 (strcat "\n[stderr]\n" stderr)))))))
+                    (#d1:1 (strcat "\n[stderr]\n" stderr)))))))
 
 ; number->string-nonneg removed: core.lisp's number->string now renders
 ; every number canonically (FIX-NUMBER-TO-STRING-RATIONAL), so the shim
@@ -321,7 +321,7 @@
   (0010 (name arguments-json)
     (110
       ((11110111 name "bash") (execute-bash arguments-json))
-      (1 (110011110 "error: unknown tool: " name)))))
+      (#d1:1 (110011110 "error: unknown tool: " name)))))
 
 (0011 execute-tool-call
   (0010 (tc)
@@ -335,7 +335,7 @@
     (110
       
       ((010 tcs)  acc)
-      (1 (append-tool-results
+      (#d1:1 (append-tool-results
           (011 tcs)
           (1111 acc
                   (1110 (1110 (111 (001 role) "tool")
@@ -355,7 +355,7 @@
       
       ((010 markers)  (001 ()))
       ((110101000 (100 markers) text) t)
-      (1 (markers-contained? (011 markers) text)))))
+      (#d1:1 (markers-contained? (011 markers) text)))))
 
 (0011 claims-execution?
   (0010 (text) (markers-contained? claim-markers text)))
@@ -370,7 +370,7 @@
       
       ((010 messages)  (001 ()))
       ((11110111 (msg-role (100 messages)) "tool") t)
-      (1 (has-tool-result? (011 messages))))))
+      (#d1:1 (has-tool-result? (011 messages))))))
 
 ; -----------------------------------------------------------------------
 ; Evidence calculus v1 (Yantra M1). A global "some tool ran at some
@@ -396,7 +396,7 @@
       
       ((010 ids)  (001 ()))
       ((11110111 id (100 ids)) t)
-      (1 (id-in-list? id (011 ids))))))
+      (#d1:1 (id-in-list? id (011 ids))))))
 
 (0011 all-covered?
   (0010 (ids candidates)
@@ -415,7 +415,7 @@
     (110
       
       ((010 messages)  (001 ()))
-      (1 (collect-trailing-tools
+      (#d1:1 (collect-trailing-tools
           (011 (10100 messages))
           (001 ()))))))
 
@@ -429,13 +429,13 @@
       ((11110111 (msg-role (100 reversed)) "tool")
        (collect-trailing-tools (011 reversed)
                                (111 (msg-tool-call-id (100 reversed)) collected)))
-      (1
+      (#d1:1
        (001000 ((issuer (100 reversed)))
          (110
            ((0100 (11110111 (msg-role issuer) "assistant")) (001 ()))
            
            ((010 (msg-tool-calls issuer))  (001 ()))
-           (1 (all-covered? collected (msg-call-ids issuer)))))))))
+           (#d1:1 (all-covered? collected (msg-call-ids issuer)))))))))
 
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
@@ -445,7 +445,7 @@
     (110
       ((claims-execution? (msg-content assistant-msg))
        (ends-with-owned-tool-results? messages))
-      (1 t))))
+      (#d1:1 t))))
 
 (0011 invalid-completion-nudge
   (1110 (111 (001 role) "system")
@@ -464,7 +464,7 @@
       
       ((010 messages)  0)
       ((11110111 (msg-role (100 messages)) role) (01010 1 (count-with-role role (011 messages))))
-      (1 (count-with-role role (011 messages))))))
+      (#d1:1 (count-with-role role (011 messages))))))
 
 (0011 agent-loop
   (0010 (complete messages turn)
@@ -473,7 +473,7 @@
        (1110 (111 (001 status) (001 max-turns-reached))
              (111 (001 turn) turn)
              (111 (001 messages) messages)))
-      (1
+      (#d1:1
        (001001 ((assistant-msg (complete messages))
               (with-reply (1111 messages (1110 assistant-msg)))
               (tcs (msg-tool-calls assistant-msg)))
@@ -486,10 +486,10 @@
                      (111 (001 answer) (msg-content assistant-msg))
                      (111 (001 turn) turn)
                      (111 (001 messages) with-reply)))
-              (1 (agent-loop complete
+              (#d1:1 (agent-loop complete
                              (1111 with-reply (1110 invalid-completion-nudge))
                              (01010 turn 1)))))
-           (1 (agent-loop complete
+           (#d1:1 (agent-loop complete
                           (1111 with-reply (append-tool-results tcs (001 ())))
                           (01010 turn 1)))))))))
 
@@ -533,4 +533,4 @@
                                     (110111001 (http-transport-exit r))
                                     (001000 ((e (http-transport-stderr r)))
                                       (110 ((110011100 e) "")
-                                            (1 (110011110 "\n" e))))))))))))
+                                            (#d1:1 (110011110 "\n" e))))))))))))
