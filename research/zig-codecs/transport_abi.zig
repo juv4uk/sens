@@ -29,6 +29,49 @@ pub export fn sens_zig_t5_encode_be3(
     return @intCast(written);
 }
 
+/// Symmetric ABI v2 ingress: canonical T5 bytes -> caller-owned BE3 words.
+/// Only physical width+payload crosses; Zig never assigns semantic identity.
+/// Positive return is exact BE3 byte count; -1 invalid; -2 insufficient output.
+/// An error never changes destination bytes. No allocator crosses this ABI.
+pub export fn sens_zig_t5_decode_be3(
+    src: [*]const u8, byte_len: usize, dst: [*]u8, capacity: usize,
+) isize {
+    if (byte_len == 0 or byte_len > t5.MAX_PHYSICAL_BYTES) return -1;
+    const written = t5.decodeTripletsInto(dst[0..capacity], src[0..byte_len])
+        catch |err| return if (err == error.BufferTooSmall) -2 else -1;
+    return @intCast(written);
+}
+
+test "ABI v2 Zig is the mechanical T5 ingress and egress without code registry" {
+    const be3 = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
+    var carrier: [16]u8 = undefined;
+    try std.testing.expectEqual(@as(isize, 4),
+        sens_zig_t5_encode_be3(&be3, be3.len, &carrier, carrier.len));
+    try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, carrier[0..4]);
+
+    var decoded: [18]u8 = .{0x75} ** 18;
+    try std.testing.expectEqual(@as(isize, be3.len),
+        sens_zig_t5_decode_be3(&carrier, 4, &decoded, decoded.len));
+    try std.testing.expectEqualSlices(u8, &be3, decoded[0..be3.len]);
+    try std.testing.expectEqual(@as(u8, 0x75), decoded[be3.len]);
+
+    var short: [14]u8 = .{0x42} ** 14;
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_t5_decode_be3(&carrier, 4, &short, short.len));
+    for (short) |b| try std.testing.expectEqual(@as(u8, 0x42), b);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_decode_be3(&.{0xf3}, 1, &decoded, decoded.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_decode_be3(&.{ 0, 0 }, 2, &decoded, decoded.len));
+
+    // The output is not written through an overlapping Rust/C host buffer.
+    var same: [32]u8 = .{0x77} ** 32;
+    @memcpy(same[0..4], carrier[0..4]);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_decode_be3(&same, 4, &same, same.len));
+    try std.testing.expectEqualSlices(u8, carrier[0..4], same[0..4]);
+}
+
 /// F3C: -3 means no saving, NOT an invalid T5 program.
 pub export fn sens_zig_f3c_pack(src: [*]const u8, len: usize, dst: [*]u8, cap: usize) isize {
     if (len == 0 or len > f3c.MAX_TINY_T5_BYTES) return -1;
