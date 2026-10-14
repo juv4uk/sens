@@ -87,6 +87,89 @@ test "opaque T5 ABI: preserve physical domain-width collision and separate gramm
     try std.testing.expectEqual(@as(u8, 0xa1), in_place[0]);
 }
 
+/// SENS-supplied exact payload bits + width schedule -> Zig T5 bytes.
+/// Both inputs are opaque physical data, not a Rust enum, SID8 or truth value.
+/// The width schedule is a declared mechanical boundary, NOT callability.
+/// -1 bad mechanical input, -2 output capacity; neither is SENS D1:NO.
+/// `exact_bit_len` is meaningful bits, NOT rounded physical byte length.
+pub export fn sens_zig_t5_encode_dense(
+    bits: [*]const u8,
+    exact_bit_len: usize,
+    widths: [*]const u8,
+    word_count: usize,
+    dst: [*]u8,
+    cap: usize,
+) isize {
+    if (word_count == 0 or word_count > t5.MAX_PHYSICAL_BYTES * 5)
+        return -1;
+    if (exact_bit_len == 0 or exact_bit_len > t5.MAX_PHYSICAL_BYTES * 5)
+        return -1;
+    if (word_count > exact_bit_len) return -1;
+    const packed_len = (exact_bit_len + 7) / 8;
+    const payload = bits[0..packed_len];
+    if (exact_bit_len % 8 != 0) {
+        const unused: u3 = @intCast(8 - exact_bit_len % 8);
+        const tail_mask: u8 = (@as(u8, 1) << unused) - 1;
+        if ((payload[payload.len - 1] & tail_mask) != 0) return -1;
+    }
+
+    const schedule = widths[0..word_count];
+    var remaining = exact_bit_len;
+    for (schedule) |width| {
+        if (width == 0 or width > 9 or width > remaining) return -1;
+        remaining -= width;
+    }
+    if (remaining != 0) return -1;
+
+    const a = std.heap.c_allocator;
+    const words = a.alloc(t5.Word, word_count) catch return -1;
+    defer a.free(words);
+    var pos: usize = 0;
+    for (schedule, 0..) |width, index| {
+        var word_bits: u16 = 0;
+        for (0..@as(usize, width)) |_| {
+            const bit: u16 = @intCast(
+                (payload[pos / 8] >> @as(u3, @intCast(7 - pos % 8))) & 1
+            );
+            word_bits = (word_bits << 1) | bit;
+            pos += 1;
+        }
+        words[index] = .{ .width = width, .bits = word_bits };
+    }
+    const encoded = t5.encode(a, words) catch return -1;
+    defer a.free(encoded);
+    if (encoded.len > cap) return -2;
+    @memcpy(dst[0..encoded.len], encoded);
+    return @intCast(encoded.len);
+}
+
+test "opaque dense SENS words become Zig-owned T5 bytes with exact widths" {
+    var out: [16]u8 = undefined;
+    // 10 | 001 | 00 | 000 | 01 = 100010000001, 12 meaningful bits.
+    const widths = [_]u8{ 2, 3, 2, 3, 2 };
+    const input = [_]u8{ 0x88, 0x10 };
+    try std.testing.expectEqual(@as(isize, 4),
+        sens_zig_t5_encode_dense(&input, 12, &widths, widths.len, &out, out.len));
+    try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, out[0..4]);
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_t5_encode_dense(&input, 12, &widths, widths.len, &out, 3));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_dense(&.{ 0x88, 0x11 }, 12, &widths, widths.len, &out, out.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_dense(&input, 11, &widths, widths.len, &out, out.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_dense(&input, 12, &.{ 2, 3, 2, 4, 2 }, 5, &out, out.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_dense(&input, 12, &.{ 2, 3, 0, 5, 2 }, 5, &out, out.len));
+
+    try std.testing.expectEqual(@as(isize, 1),
+        sens_zig_t5_encode_dense(&.{0x80}, 1, &.{1}, 1, &out, out.len));
+    try std.testing.expectEqual(@as(u8, 0xa1), out[0]);
+    try std.testing.expectEqual(@as(isize, 1),
+        sens_zig_t5_encode_dense(&.{0x40}, 2, &.{2}, 1, &out, out.len));
+    try std.testing.expectEqual(@as(u8, 0x35), out[0]);
+}
+
 test "no-allocation-crossing Zig C ABI roundtrip and caller bounds" {
     try std.testing.expectEqual(@as(u32, 1), sens_zig_codec_abi_version());
     const words = [_]Word{
