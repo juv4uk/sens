@@ -79,6 +79,12 @@ pub fn main() !void {
         std.debug.print("fixture impl=zig forms={d} words={d} bytes={d} fnv64={x}\n", .{
             forms, words.len, physical.len, fnv64(physical),
         });
+        std.debug.print("physical impl=zig forms={d} hex=", .{forms});
+        const alphabet = "0123456789abcdef";
+        for (physical) |byte| {
+            std.debug.print("{c}{c}", .{ alphabet[byte >> 4], alphabet[byte & 15] });
+        }
+        std.debug.print("\n", .{});
 
         // Warmed isolated codec path; startup and build costs are separate.
         for (0..3) |_| {
