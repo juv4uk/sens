@@ -12,8 +12,8 @@ fn helper_source() -> &'static str {
     let start = SOURCE.find("(0011 епістеміка--рівні-посилання?")
         .expect("епістемічна Lisp-функція мусить мати D4 DEFINE");
     let end = SOURCE[start..]
-        .find("; supporting-evidence —")
-        .expect("наступне визначення має залишатися в джерелі")
+        .find("(0011 supporting-evidence\n")
+        .expect("наступне D4 DEFINE мусить залишатися в джерелі")
         + start;
     &SOURCE[start..end]
 }
