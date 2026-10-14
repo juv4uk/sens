@@ -1260,14 +1260,14 @@
     (110
       ((010 (011 rule))
        (map-apply-head (100 rule) (1110 (001 ()))))
-      ((111 (010 (011 rule)))
+      ((0100 (010 (011 rule)))
        (map-apply-head (100 rule) (match-conditions (011 rule) facts (001 ())))))))
 
 (0011 fire-rules-multi
   (0010 (rules facts)
     (110
       ((010 rules) (001 ()))
-      ((111 (010 rules))
+      ((0100 (010 rules))
        (1111 (fire-rule-multi (100 rules) facts)
                  (fire-rules-multi (011 rules) facts))))))
 
