@@ -10,9 +10,8 @@ pub export fn sens_zig_codec_abi_version() u32 { return 2; }
 
 pub export fn sens_zig_t5_validate(src: [*]const u8, len: usize) c_int {
     if (len == 0 or len > t5.MAX_PHYSICAL_BYTES) return -1;
-    const a = std.heap.c_allocator;
-    const words = t5.decode(a, src[0..len]) catch return -1;
-    defer a.free(words);
+    // Heapless physical scan only: no host allocator or SENS semantic dispatch.
+    t5.validatePhysical(src[0..len]) catch return -1;
     return 0;
 }
 /// Explicit and alignment-independent ABI v2 for exact-width T5 words.

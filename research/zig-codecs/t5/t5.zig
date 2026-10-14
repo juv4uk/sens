@@ -93,6 +93,63 @@ fn encodeWidth(allocator: std.mem.Allocator, words: []const Word, max_width: u8)
     return out;
 }
 
+/// Allocation-free T5 physical validation for hosted and freestanding
+/// adapters. This checks only the wire (ternary byte range, separator, tail,
+/// declared width), never a function identity, domain meaning, or SENS law.
+///
+/// The canonical T5 encoder emits one separator trit between opaque words and
+/// pads the final physical byte with 0..4 separator trits. These conditions
+/// are sufficient for byte-for-byte canonical replay without allocating words.
+pub fn validatePhysical(data: []const u8) Error!void {
+    if (data.len == 0) return Error.EmptyProgram;
+    if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
+    for (data) |byte| {
+        if (byte >= 243) return Error.InvalidPhysicalByte;
+    }
+
+    var tail: usize = 0;
+    tail_scan: {
+        var i = data.len;
+        while (i > 0) {
+            i -= 1;
+            var byte = data[i];
+            for (0..TRITS_PER_BYTE) |_| {
+                if (byte % 3 != 2) break :tail_scan;
+                tail += 1;
+                byte /= 3;
+            }
+        }
+    }
+    if (tail >= TRITS_PER_BYTE) return Error.InvalidTail;
+    const useful_trits = data.len * TRITS_PER_BYTE - tail;
+
+    var consumed: usize = 0;
+    var width: u8 = 0;
+    for (data) |raw| {
+        if (consumed == useful_trits) break;
+        var byte = raw;
+        var digits: [TRITS_PER_BYTE]u8 = undefined;
+        var j: usize = TRITS_PER_BYTE;
+        while (j > 0) {
+            j -= 1;
+            digits[j] = byte % 3;
+            byte /= 3;
+        }
+        for (digits) |digit| {
+            if (consumed == useful_trits) break;
+            consumed += 1;
+            if (digit == 2) {
+                if (width == 0) return Error.EmptyDomainWord;
+                width = 0;
+            } else {
+                if (width >= 9) return Error.UnsupportedDomainWidth;
+                width += 1;
+            }
+        }
+    }
+    if (width == 0) return Error.EmptyDomainWord;
+}
+
 /// Декодує тільки фізичний T5; для виконання далі потрібен чинний SENS reader.
 /// Caller owns returned words and must free them with the same allocator.
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) ![]Word {
@@ -242,4 +299,41 @@ test "межі T5: invalid physical, tail, empty, надлишкова шири�
     try std.testing.expectError(Error.EmptyDomainWord, decode(a, &.{0xa2}));
     try std.testing.expectError(Error.EmptyDomainWord, decode(a, &.{0x4d}));
     try std.testing.expectError(Error.UnsupportedDomainWidth, decode(a, &.{ 0x00, 0x00 }));
+}
+
+test "heapless physical admission agrees with allocating T5 on all one-byte inputs" {
+    const allocator = std.testing.allocator;
+    for (0..256) |n| {
+        const physical = [_]u8{@intCast(n)};
+        const fast_ok = blk: {
+            validatePhysical(&physical) catch break :blk false;
+            break :blk true;
+        };
+        const reference_ok = blk: {
+            const decoded = decode(allocator, &physical) catch break :blk false;
+            allocator.free(decoded);
+            break :blk true;
+        };
+        try std.testing.expectEqual(reference_ok, fast_ok);
+    }
+}
+
+test "heapless T5 validator preserves opaque 8-bit widths and rejects damaged wire" {
+    const allocator = std.testing.allocator;
+    const source = [_]Word{
+        .{ .width = 8, .bits = 0xa8 },
+        .{ .width = 8, .bits = 0 },
+        .{ .width = 1, .bits = 1 },
+    };
+    const physical = try encode(allocator, &source);
+    defer allocator.free(physical);
+    try validatePhysical(physical);
+    const recovered = try decode(allocator, physical);
+    defer allocator.free(recovered);
+    try std.testing.expectEqualSlices(Word, &source, recovered);
+    try std.testing.expectError(Error.EmptyProgram, validatePhysical(&.{}));
+    try std.testing.expectError(Error.InvalidPhysicalByte, validatePhysical(&.{0xff}));
+    try std.testing.expectError(Error.InvalidTail, validatePhysical(&.{0xf2}));
+    try std.testing.expectError(Error.EmptyDomainWord, validatePhysical(&.{0xa2}));
+    try std.testing.expectError(Error.UnsupportedDomainWidth, validatePhysical(&.{0x00, 0x00}));
 }
