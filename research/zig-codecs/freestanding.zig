@@ -117,7 +117,10 @@ test "freestanding fail closed: invalid, capacity, scratch, overlap, no saving" 
         &.{ 0xf4, 0x40, 0x60 }, 3, &dst, dst.len, &scratch, scratch.len));
     try std.testing.expectEqual(@as(i32, -3), sens_zig_free_f3c_pack(
         &.{0x64}, 1, &dst, dst.len, &scratch, scratch.len));
+    // Both spans must be large enough; test real overlap, not tiny scratch.
+    var shared: [f3c.ABI_SCRATCH_BYTES]u8 = undefined;
     try std.testing.expectEqual(@as(i32, -1), sens_zig_free_f3c_pack(
-        &.{ 0x63, 0x89, 0x06, 0xa1 }, 4, &dst, dst.len, &dst, dst.len));
+        &.{ 0x63, 0x89, 0x06, 0xa1 }, 4,
+        &shared, shared.len, &shared, shared.len));
     try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 32), &dst);
 }
