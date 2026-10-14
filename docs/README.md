@@ -30,14 +30,15 @@ D10 ratification — нормативне рішення над повним к�
 
 Колонки: `ук → укр → san → en → LISP → sym`.
 
-D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008 і має canonical human table `../lib/domains/d9.lisp`; нормативна machine-readable карта — `../knowledge/d9-ratified.json`.
+**Чинна D7 — keyboard/v2, 128/128** семибітових текстових координат (ратифікація власника 13.10.2026): [`knowledge/d7-keyboard-v2-ratified.json`](../knowledge/d7-keyboard-v2-ratified.json), [`lib/domains/d7.lisp`](../lib/domains/d7.lisp). Координати `0100001` і `0101010` були зарезервовані **тільки в історичній звуковій v1 (126/128)**; нові програми не можуть успадкувати той старий профіль без явної конверсії. D7 — дані/текст, не числа й не callable Core. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008; нормативна машинна карта — [`knowledge/d9-ratified.json`](../knowledge/d9-ratified.json), людська — [`lib/domains/d9.lisp`](../lib/domains/d9.lisp).
 
 ## Human surfaces
 
 - [`uk-surface-naming.md`](uk-surface-naming.md) — коротке `ук`, повне `укр`, selector-`п/р`, `?`, `!`.
 - [`ukrainian-api.md`](ukrainian-api.md) — сучасний український surface-довідник без дублювання таблиць.
 - [`program-surface-translator.md`](program-surface-translator.md) — механічний переклад source spellings через exact-domain projections.
-- [`domain-surfaces-d7.md`](domain-surfaces-d7.md) — специфіка D7 sound/text surfaces.
+- [`d7-keyboard-v2.uk.md`](d7-keyboard-v2.uk.md) — **чинна** D7 v2: клавіатурні/text-проєкції, точна бітність і профіль декодування.
+- [`domain-surfaces-d7.md`](domain-surfaces-d7.md) — **архівна D7 v1** (126/128), звукова карта та історична provenance; не кодувати нові дані за нею.
 - [`domain-surfaces-d8.md`](domain-surfaces-d8.md) — специфіка D8 human surfaces.
 - [`domain-surfaces-d9.md`](domain-surfaces-d9.md) — D9 512/512 human projection і межа W9 runtime.
 
