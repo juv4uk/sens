@@ -47,6 +47,22 @@ def inspect(foundation, keyboard):
     if actual != expected:
         findings.append("BAD_D7_V2_COORDINATES")
         return findings
+    for index, row in enumerate(table):
+        if not isinstance(row, dict) or row.get("bits") != format(index, "07b"):
+            findings.append("BAD_D7_V2_ROW_ORDER")
+            return findings
+        if row.get("ascii") != chr(index):
+            findings.append("BAD_D7_V2_ASCII")
+            return findings
+    for view in ("ascii", "uk", "san"):
+        glyphs = [row.get(view) for row in table]
+        if not all(isinstance(glyph, str) and len(glyph) == 1
+                   for glyph in glyphs):
+            findings.append("BAD_D7_V2_GLYPH:" + view)
+            return findings
+        if len(set(glyphs)) != 128:
+            findings.append("BAD_D7_V2_BIJECTION:" + view)
+            return findings
 
     d7 = domains.get("D7")
     if not isinstance(d7, dict):
@@ -65,8 +81,18 @@ def inspect(foundation, keyboard):
                         f" missing_v2_coordinates={','.join(lost) or 'none'}")
     if d7.get("owner_reserved_pinned"):
         findings.append("HISTORICAL_D7_RESERVED_CELLS")
-    # Names are NOT compared: the v2 keyboard is a projection, never a
-    # replacement for historical phoneme names by matching bit payload.
+    if (d7.get("authority") != "owner-ratified-2026-10-13-keyboard-v2"
+        or d7.get("normative_map")
+            != "knowledge/d7-keyboard-v2-ratified.json"
+        or d7.get("callability") != "none-inferred-from-text-data"
+        or d7.get("capacity") != 128
+        or d7.get("role_counts", {}).get("text_data") != 128):
+        findings.append("FOUNDATION_D7_V2_METADATA_DRIFT")
+    if any(label != "text-data" for label in d7.get("residents", {}).values()):
+        findings.append("FOUNDATION_D7_V2_ROLE_DRIFT")
+    # Current foundation stores 128 text/data roles, not glyph identities.
+    # The keyboard JSON owns the glyph projections. Never assign phoneme-v1
+    # meanings by matching bits; no v1 payload migration cohort exists.
     return findings
 
 
@@ -75,12 +101,18 @@ def self_test():
     keyboard = {
         "schema": "sens.d7.keyboard/v2", "status": "owner-ratified",
         "width": 7, "capacity": 128, "occupancy": 128,
-        "table": [{"bits": k} for k in keys],
+        "table": [{"bits": k, "ascii": chr(i), "uk": chr(i),
+                   "san": chr(i)} for i, k in enumerate(keys)],
     }
     good = {
         "current_domains": ["D7"],
-        "domains": {"D7": {"width": 7, "occupancy": 128,
-                           "residents": {k: "text-data" for k in keys}}},
+        "domains": {"D7": {
+            "width": 7, "capacity": 128, "occupancy": 128,
+            "authority": "owner-ratified-2026-10-13-keyboard-v2",
+            "normative_map": "knowledge/d7-keyboard-v2-ratified.json",
+            "callability": "none-inferred-from-text-data",
+            "role_counts": {"text_data": 128},
+            "residents": {k: "text-data" for k in keys}}},
     }
     assert inspect(good, keyboard) == []
     old = json.loads(json.dumps(good))
@@ -97,7 +129,19 @@ def self_test():
     bad = json.loads(json.dumps(keyboard))
     bad["table"] = bad["table"][:-1]
     assert "BAD_D7_V2_TABLE_LENGTH" in inspect(good, bad)
-    print("D7_FOUNDATION_AUDIT_SELF_TEST_PASS cases=4")
+    bad_ascii = json.loads(json.dumps(keyboard))
+    bad_ascii["table"][0]["ascii"] = "x"
+    assert "BAD_D7_V2_ASCII" in inspect(good, bad_ascii)
+    bad_uk = json.loads(json.dumps(keyboard))
+    bad_uk["table"][1]["uk"] = bad_uk["table"][0]["uk"]
+    assert "BAD_D7_V2_BIJECTION:uk" in inspect(good, bad_uk)
+    old_role = json.loads(json.dumps(good))
+    old_role["domains"]["D7"]["residents"]["0000000"] = "vowel.a.oral.short"
+    assert "FOUNDATION_D7_V2_ROLE_DRIFT" in inspect(old_role, keyboard)
+    old_authority = json.loads(json.dumps(good))
+    old_authority["domains"]["D7"]["authority"] = "#3572"
+    assert "FOUNDATION_D7_V2_METADATA_DRIFT" in inspect(old_authority, keyboard)
+    print("D7_FOUNDATION_AUDIT_SELF_TEST_PASS cases=8")
 
 
 def main():
