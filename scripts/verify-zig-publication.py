@@ -67,7 +67,20 @@ def verify_and_publish(args: argparse.Namespace) -> dict:
     original = source.read_bytes()
     if source.suffix != '.sens' or not original:
         raise PublicationRejected('input must be a nonempty physical .sens file')
-    provenance = json.loads(args.provenance.read_text(encoding='utf-8'))
+    # A self-declared era or self-consistent hashes do not authenticate
+    # provenance. The SHA approval pin MUST arrive from outside this manifest
+    # (e.g. an owner-controlled release decision / protected CI input).
+    # This is an integrity trust anchor, NOT signature verification.
+    provenance_snapshot = args.provenance.read_bytes()
+    approved = require_digest(
+        'owner_approved_provenance_sha256',
+        getattr(args, 'owner_approved_provenance_sha256', None),
+    )
+    if sha(provenance_snapshot) != approved:
+        raise PublicationRejected('owner approval pin differs from provenance SHA256')
+    if provenance_snapshot != getattr(args, '_provenance_snapshot', None):
+        raise PublicationRejected('provenance changed since publication request')
+    provenance = json.loads(provenance_snapshot)
     if not isinstance(provenance, dict) or provenance.get('schema') != 'sens-publication-provenance/v1':
         raise PublicationRejected('provenance: schema sens-publication-provenance/v1 required')
     if provenance.get('source_era') not in ('current', 'legacy'):
@@ -78,6 +91,34 @@ def verify_and_publish(args: argparse.Namespace) -> dict:
         raise PublicationRejected('original source differs from provenance SHA256')
     if sha(original) != require_digest('physical_sha256', provenance.get('physical_sha256')):
         raise PublicationRejected('input differs from provenance physical SHA256')
+
+    # Historical translation is permitted ONLY with a separately stored,
+    # pinned and content-bound external translation receipt. Neither Zig
+    # nor the publisher is allowed to infer an era from equal physical bits.
+    translation_path = None
+    translation_snapshot = None
+    translation = None
+    if provenance['source_era'] == 'legacy':
+        item = provenance.get('translation_receipt')
+        if not isinstance(item, dict) or not isinstance(item.get('path'), str):
+            raise PublicationRejected('legacy source requires separate translation receipt')
+        translation_path = Path(item['path'])
+        if (not translation_path.is_absolute() or translation_path.is_symlink()
+                or not translation_path.is_file()):
+            raise PublicationRejected('translation receipt must be an absolute regular file')
+        if translation_path.stat().st_size > 1024 * 1024:
+            raise PublicationRejected('translation receipt too large')
+        translation_snapshot = translation_path.read_bytes()
+        if sha(translation_snapshot) != require_digest('translation_receipt_sha256', item.get('sha256')):
+            raise PublicationRejected('translation receipt SHA256 mismatch')
+        translation = json.loads(translation_snapshot)
+        if (not isinstance(translation, dict)
+                or translation.get('schema') != 'sens-translation-receipt/v1'
+                or translation.get('source_era') != 'legacy'
+                or translation.get('source_sha256') != provenance['source_sha256']
+                or translation.get('physical_sha256') != provenance['physical_sha256']):
+            raise PublicationRejected('translation receipt does not bind legacy source and physical candidate')
+        require_digest('canonical_source_sha256', translation.get('canonical_source_sha256'))
 
     runner = args.zig_runner.resolve(strict=True)
     executor = args.sens_executor.resolve(strict=True)
@@ -102,6 +143,9 @@ def verify_and_publish(args: argparse.Namespace) -> dict:
             raise PublicationRejected('canonical SENS projection was not binary ASCII') from exc
         if not re.fullmatch(r'[01]+(?: [01]+)*\n', canonical):
             raise PublicationRejected('noncanonical visible SENS projection')
+        if (translation is not None
+                and sha(visible) != translation['canonical_source_sha256']):
+            raise PublicationRejected('translation receipt canonical-source SHA256 mismatch')
         witness = root / 'cycle' / 'candidate.lisp'
         witness.parent.mkdir()
         witness.write_bytes(visible)
@@ -133,8 +177,14 @@ def verify_and_publish(args: argparse.Namespace) -> dict:
             raise PublicationRejected('pinned executable changed during verification')
         if source.read_bytes() != original:
             raise PublicationRejected('source changed during verification')
-        if args.provenance.read_bytes() != args._provenance_snapshot:
+        if args.provenance.read_bytes() != provenance_snapshot:
             raise PublicationRejected('provenance changed during verification')
+        if (translation_path is not None
+                and (translation_path.is_symlink()
+                     or translation_path.read_bytes() != translation_snapshot)):
+            raise PublicationRejected('translation receipt changed during verification')
+        if sha(provenance_snapshot) != approved:
+            raise PublicationRejected('owner approval pin changed during verification')
 
     destination = args.out.absolute()
     if destination.suffix != '.sens' or destination == source:
@@ -156,6 +206,8 @@ def verify_and_publish(args: argparse.Namespace) -> dict:
     return {
         'schema': 'sens-sterile-publication-receipt/v1',
         'source_era': provenance['source_era'],
+        'owner_approved_provenance_sha256': approved,
+        'translation_receipt_sha256': sha(translation_snapshot) if translation_snapshot is not None else None,
         'source_sha256': provenance['source_sha256'],
         'physical_sha256': sha(original),
         'replayed_sha256': sha(original),
@@ -174,6 +226,8 @@ def main() -> int:
     ap.add_argument('--source-file', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--provenance', type=Path, required=True)
+    ap.add_argument('--owner-approved-provenance-sha256', required=True,
+                    help='independent owner-controlled SHA256 pin for complete provenance JSON')
     ap.add_argument('--zig-runner', type=Path, required=True)
     ap.add_argument('--zig-runner-sha256', required=True)
     ap.add_argument('--sens-executor', type=Path, required=True)
