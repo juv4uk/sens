@@ -12,7 +12,7 @@ permissions:
 jobs:
   narrate-d3-exact:
     if: ${{ false }} # КАРАНТИН: червоний, run 38564298095
- ubuntu-24.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Карантин — запуск заборонено
         run: exit 1
