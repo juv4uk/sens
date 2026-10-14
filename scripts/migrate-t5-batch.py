@@ -91,6 +91,50 @@ def discover(repo: Path, requested: list[str]) -> tuple[list[Path], list[dict]]:
     return sorted(found, key=lambda p: p.as_posix()), failures
 
 
+def verified_linked_definitions(repo: Path, specs: list[str]) -> tuple[list[tuple[str, mig.Tok]], list[dict]]:
+    """Only explicit blob-pinned external D4 DEFINEs; no runtime admission."""
+    import re
+
+    names: set[str] = set()
+    bindings: list[tuple[str, mig.Tok]] = []
+    evidence: list[dict] = []
+    for spec in specs:
+        qualified, delim, name = spec.rpartition(":")
+        filename, at, expected_blob = qualified.rpartition("@")
+        rel = Path(filename)
+        if (not delim or not at or not name or any(ch.isspace() for ch in name)
+                or not re.fullmatch(r"[0-9a-f]{40}", expected_blob)
+                or forbidden_components(rel) or len(rel.parts) < 2
+                or rel.parts[0] != "lib" or rel.suffix != ".lisp"):
+            raise ValueError("linked definition requires lib/FILE.lisp@40-hex-git-blob:NAME")
+        assert_no_links(repo, rel)
+        payload = (repo / rel).read_bytes()
+        actual_blob = hashlib.sha1(
+            b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload
+        ).hexdigest()
+        if actual_blob != expected_blob:
+            raise ValueError(f"linked source Git blob mismatch: {rel}")
+        forms = mig.Parser(
+            mig.tokenize(mig.strip_comments(payload.decode("utf-8")))
+        ).parse_program()
+        matches = [
+            tok for candidate, tok in mig.collect_global_bindings(forms)
+            if candidate == name
+        ]
+        if len(matches) != 1:
+            raise ValueError(f"linked name has no exact D4 DEFINE: {rel}:{name}")
+        if name in names:
+            raise ValueError(f"duplicate linked definition name: {name}")
+        if name in mig.quoted_ladder_surfaces():
+            raise ValueError(f"linked name already has an exact domain: {name}")
+        names.add(name)
+        bindings.append((name, matches[0]))
+        evidence.append({"path": rel.as_posix(), "git_blob": actual_blob,
+                         "defined_name": name, "kind": "D4_DEFINE_LEXICAL_ONLY",
+                         "runtime_admitted": False})
+    return bindings, evidence
+
+
 def run(args: argparse.Namespace) -> dict:
     repo = args.root.resolve()
     out = args.out.resolve()
@@ -105,6 +149,12 @@ def run(args: argparse.Namespace) -> dict:
     if out.is_symlink() or report.is_symlink():
         raise ValueError("symlink output/report is forbidden")
     paths, failures = discover(repo, args.paths)
+
+    linked, linked_evidence = verified_linked_definitions(
+        repo, list(getattr(args, "linked_definition", ()) or ())
+    )
+    if args.write and linked:
+        raise ValueError("linked imports are PREVIEW ONLY; physical runtime admission not proven")
 
     data = mig.load_foundation(INPUTS["foundation"])
     source_era = args.source_era
@@ -137,7 +187,9 @@ def run(args: argparse.Namespace) -> dict:
             original = source.read_bytes()
             row["source_sha256"] = digest(original)
             readable = original.decode("utf-8")
-            projection = mig.migrate_file(readable, resolver, text7)
+            projection = mig.migrate_file(
+                readable, resolver, text7, linked_bindings=linked
+            )
             words = mig.parse_words(projection)
             packed = mig.encode_projection(projection)
             if mig.decode_bytes(packed) != words:
@@ -167,9 +219,11 @@ def run(args: argparse.Namespace) -> dict:
         ledger.append(row)
     ledger.sort(key=lambda e: e["path"])
 
-    # A single BLOCK (including discovery failures) forbids *all* writes.
-    # A review may still inspect each mechanically feasible would-write row.
-    if args.write and not any(row["status"] == "blocked" for row in ledger):
+    # Per-file publication: a blocked file blocks only itself. Every
+    # mechanically feasible candidate is published independently, so one
+    # unproven source can never hold back the rest of the batch. Safety is
+    # enforced per file: no clobber, no symlink, source unchanged, atomic write.
+    if args.write:
         for rel, destination, original, packed, row in staged:
             try:
                 assert_no_links(repo, rel)
@@ -178,30 +232,11 @@ def run(args: argparse.Namespace) -> dict:
                     raise ValueError("existing .sens output: overwrite forbidden")
                 if (repo / rel).read_bytes() != original:
                     raise ValueError("source changed during migration")
-            except (ValueError, OSError) as exc:
-                row.update(status="blocked", reason=str(exc))
-        if not any(row["status"] == "blocked" for row in ledger):
-            created: list[Path] = []
-            active: dict | None = None
-            try:
-                for rel, destination, original, packed, row in staged:
-                    active = row
-                    assert_no_links(repo, rel)
-                    assert_no_links(out, destination)
-                    if (repo / rel).read_bytes() != original:
-                        raise ValueError("source changed during batch publication")
-                    target = out / destination
-                    mig.write_atomic_no_clobber(target, packed)
-                    created.append(target)
+                mig.write_atomic_no_clobber(out / destination, packed)
             except (ValueError, OSError, mig.SensT5Error) as exc:
-                # Only unlink OUR newly created targets, not existing targets.
-                for target in reversed(created):
-                    target.unlink(missing_ok=True)
-                if active is not None:
-                    active.update(status="blocked", reason="atomic batch aborted: " + str(exc))
+                row.update(status="blocked", reason=str(exc))
             else:
-                for _, _, _, _, row in staged:
-                    row["status"] = "written"
+                row["status"] = "written"
 
     admitted = sum(e["status"] in ("would-write", "written") for e in ledger)
     blocked = sum(e["status"] == "blocked" for e in ledger)
@@ -213,7 +248,8 @@ def run(args: argparse.Namespace) -> dict:
         "authority": {"foundation_sha256": digest(INPUTS["foundation"].read_bytes()),
                       "codec": "physical-T5-5-trits-per-byte",
                       "source_era": source_era,
-                      "w8_policy": "auto blocks ambiguity; legacy and current require explicit choice"},
+                      "w8_policy": "auto resolves mapped historical SID8; legacy explicit history; current exact ratified D8; unmapped rejects",
+                      "linked_source_definitions": linked_evidence},
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
                     "files_written": written,
                     "files_would_write": candidates,
@@ -243,7 +279,10 @@ def main() -> int:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"),
                         default="auto",
-                        help="auto FAILS on ambiguous W8; choose legacy/current only with provenance")
+                        help="auto resolves mapped historical SID8, fails on unknown; current preserves ratified D8; legacy is explicit")
+    parser.add_argument("--linked-definition", action="append", default=[],
+                        metavar="lib/FILE.lisp@GIT_BLOB:NAME",
+                        help="explicit Git-pinned D4 export; PREVIEW ONLY, no runtime admission")
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()
@@ -253,7 +292,7 @@ def main() -> int:
         print(f"FATAL migration setup: {exc}", file=sys.stderr)
         return 3
     print(json.dumps(result["summary"], ensure_ascii=False))
-    return 2 if result["summary"]["files_blocked"] or not result["summary"]["files_admitted"] else 0
+    return 0 if result["summary"]["files_admitted"] else 2
 
 
 if __name__ == "__main__":
