@@ -220,6 +220,113 @@ fn validatePhysicalWidth(data: []const u8, max_width: u8) Error!void {
     if (width == 0) return Error.EmptyDomainWord;
 }
 
+/// Caller-owned, allocation-free T5 -> ABI-v2 byte triples [width, MSB, LSB].
+/// Physical D1..D9 only. This is NOT a language code registry or admission.
+/// All validation, required size and aliasing are checked before first write.
+pub fn decodeTripletsInto(out: []u8, input: []const u8) WriteError!usize {
+    try validatePhysical(input);
+
+    var last = input[input.len - 1];
+    var tail: usize = 0;
+    while (last % 3 == 2) : (tail += 1) last /= 3;
+    const useful = input.len * TRITS_PER_BYTE - tail;
+
+    // First pass counts exact words without retaining or interpreting them.
+    var word_count: usize = 1;
+    var consumed: usize = 0;
+    for (input) |raw| {
+        if (consumed == useful) break;
+        var byte = raw;
+        var digits: [TRITS_PER_BYTE]u8 = undefined;
+        var j: usize = TRITS_PER_BYTE;
+        while (j > 0) {
+            j -= 1;
+            digits[j] = byte % 3;
+            byte /= 3;
+        }
+        for (digits) |digit| {
+            if (consumed == useful) break;
+            consumed += 1;
+            if (digit == 2) word_count += 1;
+        }
+    }
+
+    const needed = word_count * 3;
+    if (out.len < needed) return error.BufferTooSmall;
+    const src_addr = @intFromPtr(input.ptr);
+    const dst_addr = @intFromPtr(out.ptr);
+    if ((src_addr <= dst_addr and dst_addr - src_addr < input.len) or
+        (dst_addr < src_addr and src_addr - dst_addr < needed))
+        return error.OverlappingBuffers;
+
+    // Second pass writes only after the entire carrier has passed preflight.
+    consumed = 0;
+    var written: usize = 0;
+    var width: u8 = 0;
+    var bits: u16 = 0;
+    for (input) |raw| {
+        if (consumed == useful) break;
+        var byte = raw;
+        var digits: [TRITS_PER_BYTE]u8 = undefined;
+        var j: usize = TRITS_PER_BYTE;
+        while (j > 0) {
+            j -= 1;
+            digits[j] = byte % 3;
+            byte /= 3;
+        }
+        for (digits) |digit| {
+            if (consumed == useful) break;
+            consumed += 1;
+            if (digit == 2) {
+                out[written] = width;
+                out[written + 1] = @intCast(bits >> 8);
+                out[written + 2] = @intCast(bits & 0xff);
+                written += 3;
+                width = 0;
+                bits = 0;
+            } else {
+                width += 1;
+                bits = (bits << 1) | @as(u16, digit);
+            }
+        }
+    }
+    out[written] = width;
+    out[written + 1] = @intCast(bits >> 8);
+    out[written + 2] = @intCast(bits & 0xff);
+    written += 3;
+    std.debug.assert(written == needed);
+    return needed;
+}
+
+test "caller-owned T5 decode triplets preflights width capacity and aliasing" {
+    const be3 = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
+    const carrier = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    var output: [18]u8 = .{0x7e} ** 18;
+    try std.testing.expectEqual(@as(usize, be3.len), try decodeTripletsInto(&output, &carrier));
+    try std.testing.expectEqualSlices(u8, &be3, output[0..be3.len]);
+
+    var short: [14]u8 = .{0x5a} ** 14;
+    try std.testing.expectError(error.BufferTooSmall, decodeTripletsInto(&short, &carrier));
+    for (short) |b| try std.testing.expectEqual(@as(u8, 0x5a), b);
+    try std.testing.expectError(Error.InvalidPhysicalByte, decodeTripletsInto(&output, &.{0xf3}));
+    try std.testing.expectError(Error.UnsupportedDomainWidth, decodeTripletsInto(&output, &.{ 0x00, 0x00 }));
+    try std.testing.expectError(Error.EmptyProgram, decodeTripletsInto(&output, &.{}));
+
+    var overlap: [32]u8 = .{0x6b} ** 32;
+    @memcpy(overlap[0..carrier.len], &carrier);
+    try std.testing.expectError(error.OverlappingBuffers,
+        decodeTripletsInto(overlap[0..], overlap[0..carrier.len]));
+    try std.testing.expectEqualSlices(u8, &carrier, overlap[0..carrier.len]);
+
+    // Same payload does not erase domain width on ABI v2 ingress.
+    var a: [3]u8 = undefined;
+    var b: [3]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 3), try decodeTripletsInto(&a, &.{0xa1}));
+    try std.testing.expectEqual(@as(usize, 3), try decodeTripletsInto(&b, &.{0x35}));
+    try std.testing.expectEqualSlices(u8, &.{ 1, 0, 1 }, &a);
+    try std.testing.expectEqualSlices(u8, &.{ 2, 0, 1 }, &b);
+}
+
 /// Декодує тільки фізичний T5; для виконання далі потрібен чинний SENS reader.
 /// Caller owns returned words and must free them with the same allocator.
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) ![]Word {
