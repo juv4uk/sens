@@ -160,13 +160,25 @@ jobs:
             sha256sum "$elf"
             size -A "$elf"
             readelf -W -S "$elf" | grep -E '[[:space:]]\.text[[:space:]]'
-            nm -u "$elf" | tee "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"
-            if test -s "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"; then
-              echo "::error::unresolved symbol in linked freestanding $target"; exit 1
+            # An entry-less LLD-linked ELF can omit the symbol table entirely:
+            # 'nm: no symbols' (exit 1) is NOT evidence of an undefined import.
+            # Check the linked image's static relocation/dynamic dependencies,
+            # and verify exported ABI names on the *real* compiled object.
+            readelf -W -r "$elf" | tee "$RUNNER_TEMP/sens-zig-free-$target-linked-relocations.txt"
+            if grep -Eq '^[[:space:]]*[0-9a-fA-F]+[[:space:]]+[0-9a-fA-F]+[[:space:]]+R_' "$RUNNER_TEMP/sens-zig-free-$target-linked-relocations.txt"; then
+              echo "::error::linked freestanding $target retains unresolved relocation"; exit 1
             fi
-            nm --defined-only "$elf" | grep 'sens_zig_free_' |
-              tee "$RUNNER_TEMP/sens-zig-free-$target-exports.txt"
-            test "$(grep -c 'sens_zig_free_' "$RUNNER_TEMP/sens-zig-free-$target-exports.txt")" -eq 5
+            if readelf -W -l "$elf" | grep -Eq 'INTERP|DYNAMIC'; then
+              echo "::error::linked freestanding $target depends on a dynamic loader"; exit 1
+            fi
+            obj="$RUNNER_TEMP/sens-zig-free-$target.o"
+            nm --defined-only "$obj" | tee "$RUNNER_TEMP/sens-zig-free-$target-object-symbols.txt"
+            for symbol in sens_zig_free_t5_validate sens_zig_free_t5_encode_be3 sens_zig_free_f3c_pack sens_zig_free_f3c_unpack sens_zig_free_crc32; do
+              if ! grep -Eq "[[:space:]][TW][[:space:]]${symbol}$" "$RUNNER_TEMP/sens-zig-free-$target-object-symbols.txt"; then
+                echo "::error::freestanding ABI symbol missing target=$target symbol=$symbol"; exit 1
+              fi
+            done
+            echo "ZIG_FREESTANDING_STATIC_PROOF_PASS target=$target object_ABI=5 linker=LLD"
           done
           # Generic Thumb linked ELF is still NOT Xtensa / ESP32-S3 firmware.
           # Generic Thumb is cross-object evidence, not an ESP32-S3 flash proof.
