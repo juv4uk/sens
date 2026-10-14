@@ -29,6 +29,18 @@ echo "ZIG_FREESTANDING_BEGIN zig=$version git_sha=$(git rev-parse HEAD 2>/dev/nu
 echo "F3C_MEMORY_COMPONENTS scratch_bytes=8192 rank_table_stack_bytes=0 suffix_rom_bytes=4000 total_stack_bound=NOT_MEASURED"
 echo "semantic_authority=SENS transport_only=true esp32_s3_cpu=NOT_TESTED"
 
+# The same manual command verifies exact physical byte behavior before linking.
+# Zig tests prove transport mechanics only; semantic authority remains SENS.
+for suite in research/zig-codecs/tests.zig research/zig-codecs/freestanding.zig; do
+    label="$(basename "$suite" .zig)"
+    if ! "$zig_bin" test "$suite" -lc > "$output/$label-host-tests.log" 2>&1; then
+        cat "$output/$label-host-tests.log" >&2
+        echo "ZIG_FREESTANDING_FAIL phase=host-physical-tests suite=$suite" >&2
+        exit 1
+    fi
+    echo "ZIG_FREESTANDING_HOST_TEST_PASS suite=$suite"
+done
+
 names=(
     sens_zig_free_t5_validate
     sens_zig_free_t5_encode_be3
