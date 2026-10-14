@@ -259,13 +259,15 @@
 ;; `reason-in`/`forward-in`-Aufrufer behalten ihren Vertrag, während
 ;; `world-tell-all` die einzige Schreibsemantik liefert. Nach der Migration der
 ;; übrigen globalen Writer kann diese Hülle entfallen.
-(00001010 defmodule (name rules)
+(0011 defmodule
+  (make-macro
+    (0010 (name rules)
   (1110 (001 def) (001 *knowledge-journal*)
         (1110 (001 world-journal)
               (1110 (001 world-tell-all)
                     (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
                     (1110 (001 quote) name)
-                    rules))))
+                    rules))))))
 
 ;; The other two legacy journal macros follow the same bridge. `tell-knowledge`
 ;; deliberately keeps its established pre-write conflict check and delegates
@@ -284,7 +286,9 @@
 ;; delegiert nur den akzeptierten Übergang; `retract-knowledge` bleibt
 ;; bedingungslos, weil Wissensentzug keinen Widerspruch erzeugen kann. Beide
 ;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
-(00001010 tell-knowledge (module-name rules)
+(0011 tell-knowledge
+  (make-macro
+    (0010 (module-name rules)
   (1110 (001 cond)
         (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
               (1110 (001 quote) (001 Conflict-detected)))
@@ -294,15 +298,17 @@
                           (1110 (001 world-tell-all)
                                 (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
                                 (1110 (001 quote) module-name)
-                                rules))))))
+                                rules))))))))
 
-(00001010 retract-knowledge (module-name clause)
+(0011 retract-knowledge
+  (make-macro
+    (0010 (module-name clause)
   (1110 (001 def) (001 *knowledge-journal*)
         (1110 (001 world-journal)
               (1110 (001 world-retract)
                     (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
                     (1110 (001 quote) module-name)
-                    clause))))
+                    clause))))))
 
 (0011 advise-all-world
   (0010 (world module-name clauses)
@@ -359,19 +365,23 @@
                       (1110 (001 #d1:1)
                             (1110 (001 внутрішнє-рішення-переходу) (001 *legacy-knowledge-transition*))))))))
 
-(00001010 advise (module-name clause)
+(0011 advise
+  (make-macro
+    (0010 (module-name clause)
   (legacy-world-transition-expansion
     (1110 (001 advise-world)
           (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
           (1110 (001 quote) module-name)
-          clause)))
+          clause)))))
 
-(00001010 advise-all (module-name clauses)
+(0011 advise-all
+  (make-macro
+    (0010 (module-name clauses)
   (legacy-world-transition-expansion
     (1110 (001 advise-all-world)
           (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
           (1110 (001 quote) module-name)
-          clauses)))
+          clauses)))))
 
 ;; World interchange reuses the established, versioned `my-lisp-knowledge`
 ;; envelope. Export reads one explicit snapshot. Import validates the envelope
@@ -459,11 +469,13 @@
 ;; Der Paketimport schließt die Writer-Migration ab: Prüfung, Versionierung,
 ;; Konflikte und atomarer Übergang liegen beim datenreinen World-Importer; nur
 ;; ein akzeptiertes Ergebnis bindet das Journal neu.
-(00001010 import-knowledge-package (package)
+(0011 import-knowledge-package
+  (make-macro
+    (0010 (package)
   (legacy-world-transition-expansion
     (1110 (001 import-knowledge-package-world)
           (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-          package)))
+          package)))))
 
 ;; History navigation is derived from parent links, not timestamps. Depth is
 ;; absolute from the root (`empty-world` = 0). `world-diff from to` returns the
