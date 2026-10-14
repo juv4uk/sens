@@ -23,6 +23,7 @@
 | 08.10.2026 17:13:10 | T5 перейшов на фізичний EOF без окремого кінцевого 22, commit c97152c4cc3225d964351913cf3aadc8e5e8fcb2 | Сучасний T5: 0/1 переносять біти, трит 2 лише між словами та в останньому заповненні 0..4; 5 тритів на байт. Поточний Rust кодек — crates/sens/src/ternary_transport.rs. |
 | 12.10.2026 (owner decision; Git commit 11.10 22:56:07 UTC) | D10 1024/1024 як цілісний домен, commit 03e365f7b06db208f752271cee944d15c326c770, knowledge/d10-owner-whole-domain-ratification-20261012.json | Це whole-domain codebook authority, НЕ незалежне підтвердження усіх 1024 локальних законів, F1/F2/F3 чи runtime виконання. |
 | 13.10.2026 | D7 v2 keyboard/text 128/128, contracts/d7-ratification.lisp та knowledge/d7-keyboard-v2-ratified.json | Нові текстові дані використовують v2. Старий D7 v1 decode → явна конверсія → v2 encode; ніколи не переосмислювати старі 7 бітів мовчки. |
+| 13.10.2026 13:01:48 UTC | Ратифіковано окремий **тестовий словник D11** (43/2048): [0b4fceac](https://github.com/juv4uk/sens/commit/0b4fceac9074ab683571bebf0fc8f577cfd51b30), `knowledge/d11-testing-vocabulary-ratified.json` | Тестові назви НЕ дають виклику Core, не розширюють T5 до D11 і не можуть затіняти раніше ратифіковані домени. |
 | 14.10.2026 | Zig T5 #5767, paired parity #5770, benchmarks #5771, current-ladder firewall #5779 | Zig 0.16.0 — поточний інтеграційний pin; Zig D1–D9 decode/encode для звичайного профілю, окремий D1–D10 *Coordinates лише фізична механіка. СЕМАНТИКА — SENS. |
 
 Першоджерела: https://github.com/juv4uk/sens/issues/3572 ; https://github.com/juv4uk/sens/issues/3960 ; https://github.com/juv4uk/sens/issues/4008 ; https://github.com/juv4uk/sens/issues/5767 ; https://github.com/juv4uk/sens/blob/main/language-contract.lisp .
@@ -34,14 +35,15 @@
 - D7 символи «0…9» — текст, не математика. При цитуванні спершу перевірити наявну ратифіковану координату об'єкта у власному домені, D7 — лише для непокритого тексту.
 - D1–D10 — координати та закони; лише явно кваліфіковані D24/D48/D96/D192+ — математичні значення. Десяткове відображення для людини не стає внутрішнім оператором або ідентичністю.
 - T5 може не виявити усічення, якщо коротший потік сам є канонічним: D9 100000000 => hex 51 02; префікс 51 => окрема D5 10000. Невіддільність усунення байта доводиться лише pinned expected byte length + SHA-256 із зовнішнього receipt, НЕ послабленням канонічного кодека.
-- D10 у T5 coordinates — транспорт, не дозвіл на execute. D11 не розширювати мовчки: його окремий стан/агент визначає власник; Contract major #d11 не є дозволом додати ширину 11 до T5.
+- D10 у T5 coordinates — транспорт, не дозвіл на execute. D11 має ратифіковану **лише тестову лексику 43/2048** від 13.10.2026, без callable Core і без дозволу D11 в T5; Contract major #d11 також не є дозволом додавати цю ширину до T5.
 - У Zig не відтворювати історичні SID8/Sens8/Function8/W8 типи/диспетчери/порівняння як семантичну владу; provenance лишається в архівній Git-історії, поза активними gates.
 
-## Виявлений документаційний дрейф (НЕ виправляти присвоєнням нової влади)
+## Звірка усунених невідповідностей (точні SHA станом на 14.10)
 
-- docs/language-core.md ще описує D7 як 126/128 і відсутню актуальну D10-частину. CURRENT.md та language-contract.lisp встановлюють нинішні D7 v2 128/128 і D10 whole-domain. Потрібне вузьке DOC-CLAIM на звіряння тексту, без зміни семантики.
-- knowledge/sens-primary.lisp прямо позначено operational/non-authoritative, знімок Contract 11.8, D10 research-unratified. Його треба читати як історичну доктрину та окремо виправити статус/покажчики під чинний Contract 11.9, не перетворюючи на другий контракт.
-- docs/migration/domain-ladder-cutover-2026-10-12.uk.md — датований зріз (зокрема з D7-reserved), не джерело стану D7 після 13.10.
+- **ВИПРАВЛЕНО ІНШИМ АГЕНТОМ:** `docs/language-core.md` (перевірений blob `49986b7d493f24ac77a8b976f5f21fe117faa5f6`) вже описує Contract 11.9, D7 v2 keyboard 128/128 та D10 whole-domain. Первісне повідомлення про відкритий drift залишилось лише історичним свідченням.
+- **ВИПРАВЛЕНО:** ненормативний `knowledge/sens-primary.lisp` узгоджено з Contract 11.9 та D10 whole-domain комітом [b2732f64](https://github.com/juv4uk/sens/commit/b2732f64427454c3b133dcc6c2d06e90e808972e); україномовні коментарі — [1ffcba39](https://github.com/juv4uk/sens/commit/1ffcba3919da97fcfaec3500f55cadd096e8b792), blob `a909f0be4ac99d8094eae1e6350b35edae47ce4e`. Відповідний SHA-пін відновлено [fedb13c5](https://github.com/juv4uk/sens/commit/fedb13c5a57f1fa405eed199ad6f7c3bd61fb0cb). Окремий D10 не став автоматично callable Core.
+- **ВИПРАВЛЕНО ІНШИМИ АГЕНТАМИ:** `knowledge/d1-d11-foundation.json` (перевірений blob `363ddf6895ea87fabc772ad19e448d63abb343a6`) має D1…D11 по одному, D10 відновлено [d019d135](https://github.com/juv4uk/sens/commit/d019d13553e9b9c0c8d3b95dc7dddcd5ec6aa6db). Його D7 після [9e6a69c4](https://github.com/juv4uk/sens/commit/9e6a69c4b3a17b4405703e49da6e9b4c4523afba) точно дорівнює D7 у `knowledge/d1-d9-foundation.json`: 128 точних семибітових ключів, без старих reserved. Перевірено JSON-об'єкти, а не runtime.
+- `docs/migration/domain-ladder-cutover-2026-10-12.uk.md` — історичний датований зріз (із D7-reserved), не чинна D7-карта після 13.10.
 - Стара дата виникнення файлу, тесту або старої 8-бітної таблиці не доводить дату сучасної ратифікації. Для спірної сутності фіксувати чотири окремі події: first research/implementation, owner ratification, codebook commit, first native executable witness.
 
 ## Черга міграції і маршрути відповідальності
