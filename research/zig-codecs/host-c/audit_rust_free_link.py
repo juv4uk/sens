@@ -82,14 +82,14 @@ def scan(data: dict[str, str]) -> dict:
                 len(re.findall(r'@import\s*\(', active)) == len(expected),
                 "H1_ZIG_IMPORT_CLOSURE", f"file={path} indirect import")
     script = data[DRIVER]
-    normalized = re.sub(r'\\\r?\n[ \t]*', " ", script)
+    normalized = re.sub(r'[ \t]*\\\r?\n[ \t]*', " ", script)
     active = "\n".join(s for s in normalized.splitlines()
                        if not s.lstrip().startswith("#"))
     for cmd, expected, label in (
         ("zig_bin", ZIG_RECIPE, "H1_ZIG_BUILD_RECIPE"),
         ("cc_bin", C_RECIPE, "H1_C_LINK_RECIPE"),
     ):
-        found = re.findall(r'(?m)^[ \t]*"\$' + cmd + r'" (?:build-lib|-std=c11[^\n]*)',
+        found = re.findall(r'(?m)^[ \t]*"\$' + cmd + r'" (?:build-lib|-std=c11)[^\n]*',
                            active)
         found = [x.strip() for x in found]
         if cmd == "cc_bin":
@@ -164,14 +164,18 @@ def link_and_run(root: Path, result: dict) -> dict:
         check_result(
             ["zig", "build-lib", ZIG_ABI, "-O", "ReleaseFast", "-lc", "-fPIC",
              f"-femit-bin={archive}"], cwd=root, label="H1_ZIG_BUILD")
+        c_object = out / "d3_subset.o"
         check_result(
             ["cc", "-std=c11", "-Wall", "-Wextra", "-Werror", "-pedantic", "-O2",
-             C_FILE, str(archive), "-lm", "-ldl", "-pthread",
+             "-c", C_FILE, "-o", str(c_object)],
+            cwd=root, label="H1_C_COMPILE")
+        check_result(
+            ["cc", str(c_object), str(archive), "-lm", "-ldl", "-pthread",
              f"-Wl,-Map={map_file}", "-o", str(exe)],
-            cwd=root, label="H1_C_BUILD")
+            cwd=root, label="H1_C_LINK")
         linked = map_file.read_text(encoding="utf-8", errors="replace")
-        require(archive.name in linked and C_FILE.split("/")[-1] in linked,
-                "H1_LINK_MAP", "missing explicit C source or Zig archive in link map")
+        require(archive.name in linked and c_object.name in linked,
+                "H1_LINK_MAP", "missing explicit C object or Zig archive in link map")
         # No Rust-specific archives, compiler objects or .rlibs in actual map.
         forbid = re.search(r"(?i)(?:[^\s()]*\.rlib\b|(?:^|/|\\)librust[^\s/]*\.(?:a|so)\b)",
                            linked)
