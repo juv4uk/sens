@@ -796,7 +796,7 @@ mod tests {
                      expected_len={} actual_len={} first_diff={} \
                      expected_byte={:?} actual_byte={:?} \
                      reproduce='cargo test --locked -p sens --lib \
-                     git_tracked_physical_t5_corpus_roundtrips_exact_coordinates -- --exact --nocapture'",
+                     ternary_transport::tests::git_tracked_physical_t5_corpus_roundtrips_exact_coordinates -- --exact --nocapture'",
                     physical.len(), replay.len(), first_diff,
                     physical.get(first_diff), replay.get(first_diff)
                 );
