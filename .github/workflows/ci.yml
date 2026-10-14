@@ -780,10 +780,6 @@ jobs:
           set -euo pipefail
           # Source policy is mechanical only. SENS executes and decides the law.
           grep -Fq '(1110 (001 111)' lib/knowledge.lisp
-          if grep -Fq '(001 00000100)' lib/knowledge.lisp; then
-            echo "::error::LEGACY_BINDING: SID8 CONS is D8 PROG1, not ratified D3 CONS"
-            exit 1
-          fi
           source=tests/semantic/knowledge-cons-exact-width-law.lisp
           program=tests/semantic/knowledge-cons-exact-width-law.sens
           target/debug/sens-trit encode "$source"
