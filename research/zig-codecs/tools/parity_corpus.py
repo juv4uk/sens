@@ -31,15 +31,28 @@ def tracked_corpus(root: pathlib.Path) -> list[str]:
             "git ls-files недоступний: "
             + proc.stderr.decode("utf-8", errors="replace").strip()
         )
-    # -z зберігає пробіли й нелатинські шляхи; ніколи не парсити по рядках.
-    paths = sorted(root / os.fsdecode(item)
-                   for item in proc.stdout.split(b"\0") if item)
-    if not paths:
+    # Git -z зберігає шляхи точно; downstream Zig читає manifest по рядках.
+    names = [os.fsdecode(item) for item in proc.stdout.split(b"\0") if item]
+    if not names:
         raise RuntimeError("немає жодного git-tracked .sens (порожній корпус)")
-    missing = [str(path) for path in paths if not path.is_file()]
-    if missing:
-        raise RuntimeError("git-tracked .sens відсутній на диску: " + missing[0])
-    return [str(path) for path in paths]
+    if len(set(names)) != len(names):
+        raise RuntimeError("дублікати / unmerged записи Git-індексу .sens")
+    paths = []
+    for name in sorted(names):
+        if "\n" in name or "\r" in name:
+            raise RuntimeError(f"непредставний CR/LF у назві tracked .sens: {name!r}")
+        path = root / name
+        if path.is_symlink():
+            raise RuntimeError(f"символічне посилання tracked .sens: {name!r}")
+        if not path.is_file():
+            raise RuntimeError(f"git-tracked .sens відсутній на диску: {name!r}")
+        # Складені шляхи через symlink-каталоги також не можуть вийти з root.
+        try:
+            path.resolve(strict=True).relative_to(root)
+        except ValueError as exc:
+            raise RuntimeError(f"tracked .sens виходить за межі root: {name!r}") from exc
+        paths.append(str(path))
+    return paths
 
 
 def main() -> int:
