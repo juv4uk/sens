@@ -2,6 +2,7 @@
 //! Avoid standalone f3c.zig import escaping its module root.
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
+const ladder = @import("domain_ladder.zig");
 const f3c = @import("f3c/f3c.zig");
 const abi = @import("transport_abi.zig");
 const freestanding = @import("freestanding.zig");
@@ -15,6 +16,7 @@ test "import exact-width transport suites" {
     std.debug.assert(freestanding.F3C_SCRATCH_BYTES == 8192);
     std.debug.assert(freestanding.F3C_SUFFIX_ROM_BYTES == 4000);
     _ = t5;
+    _ = ladder;
     _ = f3c;
     _ = abi;
     _ = freestanding;
