@@ -39,7 +39,7 @@ pub fn parse_mixed_exact_domain_meta_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, false)?
+    parse_mixed_source(source, true)?
         .into_iter()
         .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
         .collect()
