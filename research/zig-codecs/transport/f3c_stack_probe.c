@@ -43,6 +43,14 @@ __attribute__((noinline)) static void *exercise(void *opaque) {
     uint8_t buffer[32];
     for (size_t i = 0; i < sizeof scratch; i++) scratch[i] = (uint8_t)i;
     memset(buffer, STACK_CANARY, sizeof buffer);
+    if (sample->input == NULL) {
+        // The control thread touches the same scratch and C frame without
+        // entering the Zig transport ABI.
+        sample->actual_length = 0;
+        sample->ok = scratch[0] == 0 &&
+                     scratch[SCRATCH_BYTES - 1] == (uint8_t)(SCRATCH_BYTES - 1);
+        return NULL;
+    }
     memcpy(buffer, sample->input, sample->input_length);
 
     const int32_t actual = sample->unpack
@@ -59,7 +67,7 @@ __attribute__((noinline)) static void *exercise(void *opaque) {
     return NULL;
 }
 
-static int measure(struct sample *sample) {
+static int measure(struct sample *sample, size_t *touched_out) {
     const long page_long = sysconf(_SC_PAGESIZE);
     if (page_long <= 0) {
         fputs("ZIG_F3C_STACK_SAMPLE_FAIL phase=page_size\n", stderr);
@@ -110,6 +118,7 @@ static int measure(struct sample *sample) {
     while (first_changed < stack_size &&
            stack[first_changed] == STACK_CANARY) first_changed++;
     const size_t touched = stack_size - first_changed;
+    *touched_out = touched;
     // Leave at least 64 KiB sentinel margin: avoid a silent stack overflow.
     const int passed = sample->ok && touched > 0 &&
                        touched < stack_size - (64u * 1024u);
@@ -118,7 +127,9 @@ static int measure(struct sample *sample) {
            " caller_scratch_bytes=%u target=x86_64-linux reason=%s\n",
            passed ? "PASS" : "FAIL", sample->name, sample->actual_length,
            touched, stack_size, SCRATCH_BYTES,
-           passed ? "golden_bytes_match" : "golden_or_guard_margin_failure");
+           passed ? (sample->input == NULL ? "baseline_no_zig_call"
+                                            : "golden_bytes_match")
+                  : "golden_or_guard_margin_failure");
     fflush(stdout);
     munmap(mapping, allocation);
     return passed ? 0 : 1;
@@ -126,6 +137,7 @@ static int measure(struct sample *sample) {
 
 int main(void) {
     struct sample samples[] = {
+        {"baseline", 0, NULL, 0, NULL, 0, -99, 0},
         {"pack_quote", 0, quote_t5, sizeof quote_t5,
          quote_f3, sizeof quote_f3, -99, 0},
         {"unpack_quote", 1, quote_f3, sizeof quote_f3,
@@ -135,10 +147,20 @@ int main(void) {
         {"unpack_nested", 1, nested_f3, sizeof nested_f3,
          nested_t5, sizeof nested_t5, -99, 0},
     };
-    for (size_t i = 0; i < sizeof samples / sizeof samples[0]; i++) {
-        if (measure(&samples[i]) != 0) return 1;
+    const size_t count = sizeof samples / sizeof samples[0];
+    size_t touched[sizeof samples / sizeof samples[0]] = {0};
+    for (size_t i = 0; i < count; i++) {
+        if (measure(&samples[i], &touched[i]) != 0) return 1;
     }
-    puts("ZIG_F3C_STACK_HOST_SAMPLES_PASS cases=4"
+    for (size_t i = 1; i < count; i++) {
+        const long long delta =
+            (long long)touched[i] - (long long)touched[0];
+        printf("ZIG_F3C_STACK_BASELINE_DELTA case=%s"
+               " touched_delta_bytes=%lld baseline_touched_bytes=%zu"
+               " measurement=CANARY_LOWER_BOUND\n",
+               samples[i].name, delta, touched[0]);
+    }
+    puts("ZIG_F3C_STACK_HOST_SAMPLES_PASS cases=4 baseline=1"
          " worst_case_stack_bound=NOT_PROVEN esp32_s3=NOT_TESTED");
     return 0;
 }
