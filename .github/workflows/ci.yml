@@ -228,6 +228,15 @@ jobs:
             --report-file "$report" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$program"
+      - name: GUARD_ONCE — точний D3:001 проти історичного W8 QUOTE (Rust лише механізм)
+        if: contains(github.event.head_commit.message, '[guard-once]')
+        id: guard-once
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=guard-evidence-status-d3-width layer=parse mechanical_only=true semantic_pass=false"
+          sha256sum knowledge/guard-reference.lisp crates/sens-lsp/src/guard_knowledge.rs
+          cargo test --locked -p sens-lsp guard_evidence_status_uses_exact_d3_data_without_w8_alias -- --nocapture
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash
