@@ -139,3 +139,58 @@ fn epistemic_d1_shortening_binary_sens_self_verdict() {
         );
     }
 }
+
+const EPISTEMIC_EQ_D1_LAW_MUTANT: &str =
+    include_str!("../../../tests/semantic/epistemic-eq-d1-law-mutant.bits");
+
+/// Двійкова SENS-програма сама визначає вердикт:
+/// D3:010 ATOM(D3:001 QUOTE(D3:000 empty)) == D1:1.
+/// Якщо єдина очікувана координата D1 змінена 1→0, SENS переходить
+/// на недопущений виклик (D1:0); Rust лише відстежує результат виконання.
+#[test]
+fn epistemic_d3_eq_d1_law_and_one_bit_mutant() {
+    assert!(
+        EPISTEMIC_EQ_D1_LAW_MUTANT.bytes().all(|c|
+            matches!(c, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
+        ),
+        "epistemic self-verdict must be canonical binary SENS only"
+    );
+
+    let lines: Vec<&str> = EPISTEMIC_EQ_D1_LAW_MUTANT.lines()
+        .filter(|line| !line.trim().is_empty())
+        .collect();
+    assert_eq!(lines.len(), 2, "one positive SENS law and its mutant");
+
+    let law_tokens: Vec<&str> = lines[0].split_whitespace().collect();
+    let mutant_tokens: Vec<&str> = lines[1].split_whitespace().collect();
+    assert_eq!(law_tokens.len(), mutant_tokens.len(), "D2 framing preserved");
+    let changes: Vec<(&str, &str)> = law_tokens.iter().zip(mutant_tokens.iter())
+        .filter(|(left, right)| left != right)
+        .map(|(left, right)| (*left, *right))
+        .collect();
+    assert_eq!(changes, vec![("1", "0")],
+        "exactly one D1 bit changes; no domain-width substitution");
+
+    let law = parse_canonical_binary(lines[0])
+        .expect("binary epistemic D3/D1 law must parse");
+    assert_eq!(law.len(), 1, "one executable D2-framed law");
+    let value = eval_parsed_expressions(&law, &mut Session::default())
+        .expect("SENS-owned positive law must execute")
+        .value;
+    assert!(value.as_predicate_bit().is_some(),
+        "successful SENS self-verdict must remain D1, not NIL/data");
+
+    let mutant = parse_canonical_binary(lines[1])
+        .expect("one-bit mutant must retain canonical D2 framing");
+    assert_eq!(mutant.len(), 1);
+    let failure = eval_parsed_expressions(&mutant, &mut Session::default())
+        .err()
+        .expect("SENS must reject its own one-bit falsifier");
+    assert!(
+        failure.to_string().contains("domain identity is not callable under its ratified law: D1"),
+        "negative witness failed for an unrelated cause: {failure}"
+    );
+    println!(
+        "SENS_NATIVE_EPISTEMIC_D1 id=epistemic-eq-d1-law-mutant layer=eval positive=executed mutant=D1-noncallable fixture=tests/semantic/epistemic-eq-d1-law-mutant.bits"
+    );
+}
