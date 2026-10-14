@@ -416,6 +416,34 @@ impl Parser<'_> {
             });
         }
 
+        // Числовий D24+ носій: явна кваліфікація домену й точного бітового
+        // слова — "#d<width>:<bits>", де width кратна 24 і є 24*2^k, а bits
+        // рівно width біт. Дзеркалить #d1: і знімає потребу «вгадувати» число.
+        // Це і є міст «джерело -> D24-операнд» для математики: жоден
+        // некваліфікований літерал не стає операндом.
+        if let Some(rest) = token.strip_prefix("#d") {
+            if let Some((width_text, bits)) = rest.split_once(':') {
+                let width = width_text.parse::<usize>().ok();
+                let ok = width.is_some_and(crate::BinaryNumber::is_numeric_domain_width)
+                    && width.is_some_and(|w| w == bits.len())
+                    && bits.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+                if !ok {
+                    return Err(self.error(
+                        "numeric domain carrier requires #d<24*2^k>:<exactly that many bits>",
+                        start,
+                        self.cursor,
+                    ));
+                }
+                let words: Vec<u8> = bits.bytes().map(|byte| byte - b'0').collect();
+                let number = crate::BinaryNumber::from_numeric_domain_bits(width.unwrap(), &words)
+                    .ok_or_else(|| self.error("invalid exact numeric domain word", start, self.cursor))?;
+                return Ok(Expr {
+                    kind: ExprKind::BinaryNumber(number),
+                    span: Span { start, end: self.cursor },
+                });
+            }
+        }
+
         // В окремому exact-режимі біти означають виключно
         // ширино-залежну DomainIdentity. Історичний 8-бітний payload
         // тут не дає права на виклик; це вирішує окремий domain law.
