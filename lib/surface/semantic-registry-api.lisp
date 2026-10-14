@@ -126,7 +126,7 @@
 
 (0011 semantic-registry-round-trip
   (0010 (sens-ref)
-    (001001 ((printed (11110100 sens-ref))
+    (001001 ((printed (write-to-string sens-ref))
            (forms
              (110101001 printed)))
       (100 forms))))
