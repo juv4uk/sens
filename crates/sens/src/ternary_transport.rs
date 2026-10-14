@@ -445,7 +445,7 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
 /// truth semantics are allowed in this data projection.
 pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Error> {
     let mut text = String::new();
-    for word in &words {
+    for word in words {
         let BinarySourceWord::W7(cell) = word else {
             return Err(D7T5Error::NonD7Word);
         };
