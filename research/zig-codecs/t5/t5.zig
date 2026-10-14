@@ -3,6 +3,7 @@
 //! Rust-орієнтир: crates/sens/src/ternary_transport.rs.
 //! ВАЖЛИВО: цей модуль НЕ перевіряє D2-синтаксис і НЕ є оракулом семантики.
 const std = @import("std");
+const sterile = @import("../sterile/domain_word.zig");
 
 pub const Word = struct {
     /// D1..D9 — саме ширина слова, НЕ десятковий ідентифікатор функції.
@@ -25,9 +26,10 @@ pub const Error = error{
 };
 
 fn validWord(word: Word, max_width: u8) bool {
-    if (word.width == 0 or word.width > max_width) return false;
-    const limit: u32 = @as(u32, 1) << @as(u5, @intCast(word.width));
-    return @as(u32, word.bits) < limit;
+    if (word.width > max_width) return false;
+    // Runtime carrier inputs are admitted through comptime-width types.
+    // The numeric payload alone never defines a domain identity.
+    return sterile.LadderWord.fromCarrier(word.width, word.bits) != null;
 }
 
 fn appendDigit(
