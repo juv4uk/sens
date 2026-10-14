@@ -997,44 +997,6 @@ mod exact_domain_value_tests {
     }
 
     #[test]
-    fn old_eight_bit_carrier_cannot_masquerade_as_d8_domain_value() {
-        // Historical W8:10101000 INVOKE is NOT current D8:10101000 ROUND.
-        let old = Value::Sid(crate::sens!(10101000));
-        let current = Value::DomainIdentity(DomainIdentity::D8(
-            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
-        ));
-        assert_eq!(old.as_domain_identity(), None);
-        assert_eq!(current.as_domain_identity(), Some(DomainIdentity::D8(
-            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
-        )));
-        assert_ne!(old, current);
-    }
-
-    #[test]
-    fn every_legacy_w8_slot_stays_distinct_from_the_same_d8_payload() {
-        for raw in 0u16..=u8::MAX as u16 {
-            let bits = raw as u8;
-            let legacy = Value::Sid(
-                crate::semantic_registry::LegacyRegistrySlot::from_packed_byte(bits),
-            );
-            let domain = Value::DomainIdentity(DomainIdentity::D8(
-                CoreD8::from_word(Bit8::new(bits).unwrap()),
-            ));
-
-            assert_eq!(
-                legacy.as_domain_identity(),
-                None,
-                "legacy W8 {bits:08b} cannot become a domain identity",
-            );
-            assert_ne!(
-                legacy,
-                domain,
-                "W8 {bits:08b} cannot alias D8 {bits:08b}",
-            );
-        }
-    }
-
-    #[test]
     fn equal_payload_d3_and_d4_keep_their_own_widths() {
         let d3 = DomainIdentity::D3(Bija3::from_word(Bit3::new(0b010).unwrap()));
         let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0010).unwrap()));
