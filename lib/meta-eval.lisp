@@ -195,14 +195,14 @@
   (0010 (binding)
     (110
       
-      ((010 binding)  (001 ()))
+      ((010 binding)  #d1:0)
       ((010 ()) (101 (100 binding) 0)))))
 
 (0011 my-frame-bound?
   (0010 (name frame)
     (110
       
-      ((010 frame)  (001 ()))
+      ((010 frame)  #d1:0)
       ((101 (100 (100 frame)) name) #d1:1)
       ((010 ()) (my-frame-bound? name (011 frame))))))
 
@@ -216,7 +216,7 @@
   (0010 (env-ref)
     (110
       
-      ((010 env-ref)  (001 ()))
+      ((010 env-ref)  #d1:0)
       ((my-shared-frame-binding? (100 env-ref)) #d1:1)
       ((010 ()) (my-env-has-shared-frame? (011 env-ref))))))
 
@@ -298,7 +298,7 @@
     (110
       ((my-canon-name? name) #d1:1)
       
-      ((010 env-ref)  (001 ()))
+      ((010 env-ref)  #d1:0)
       ((my-shared-frame-binding? (100 env-ref))
        (110
          ((my-frame-bound? name (011 (100 env-ref))) #d1:1)
