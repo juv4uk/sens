@@ -118,6 +118,7 @@ jobs:
             tail -n 28 "$RUNNER_TEMP/narrate-t5-$action.log"
             if test "$rc" -ne 0; then exit "$rc"; fi
           done
+          cargo run --locked -p sens --example probe_linked_narrate_t5 -- "$T5_CANDIDATE"
       - name: T5 — явний D4 import, перевірка блобу й відмова від непідтвердженого виклику
         shell: bash
         run: |
