@@ -533,3 +533,56 @@ test "canonical T5 truncation may remain a different valid coordinate" {
     try std.testing.expect(physical.len != shorter_physical.len);
     try std.testing.expect(full_decoded[0].width != shorter_decoded[0].width);
 }
+
+test "all 59049 representable two-byte T5 carriers agree across validators and decoders" {
+    // Physical transport property test, not SENS syntax or function admission.
+    const a = std.testing.allocator;
+    var accepted_nine: usize = 0;
+    var accepted_coordinates: usize = 0;
+    var d10_only: usize = 0;
+
+    for (0..243) |first| {
+        for (0..243) |second| {
+            const wire = [_]u8{ @intCast(first), @intCast(second) };
+            const fast_nine = blk: {
+                validatePhysical(&wire) catch break :blk false;
+                break :blk true;
+            };
+            const fast_coordinates = blk: {
+                validateCoordinatesPhysical(&wire) catch break :blk false;
+                break :blk true;
+            };
+            var decoded_nine = false;
+            if (decode(a, &wire)) |words| {
+                defer a.free(words);
+                decoded_nine = true;
+                const canonical = try encode(a, words);
+                defer a.free(canonical);
+                try std.testing.expectEqualSlices(u8, &wire, canonical);
+            } else |err| {
+                if (err == error.OutOfMemory) return err;
+            }
+            var decoded_coordinates = false;
+            if (decodeCoordinates(a, &wire)) |words| {
+                defer a.free(words);
+                decoded_coordinates = true;
+                const canonical = try encodeCoordinates(a, words);
+                defer a.free(canonical);
+                try std.testing.expectEqualSlices(u8, &wire, canonical);
+            } else |err| {
+                if (err == error.OutOfMemory) return err;
+            }
+            try std.testing.expectEqual(decoded_nine, fast_nine);
+            try std.testing.expectEqual(decoded_coordinates, fast_coordinates);
+            try std.testing.expect(!decoded_nine or decoded_coordinates);
+            if (decoded_nine) accepted_nine += 1;
+            if (decoded_coordinates) accepted_coordinates += 1;
+            if (decoded_coordinates and !decoded_nine) d10_only += 1;
+        }
+    }
+    // Exactly 2^10 unpadded ten-bit words occupy both physical bytes.
+    // None is admitted by the D1..D9-only physical reader.
+    try std.testing.expectEqual(@as(usize, 1024), d10_only);
+    try std.testing.expect(accepted_nine > 0);
+    try std.testing.expect(accepted_coordinates > accepted_nine);
+}
