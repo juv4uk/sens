@@ -10,7 +10,7 @@
 (sens-primary/2
   (status operational)
   (issues 1590 3020 4248 4247 4250)
-  (updated 2026-10-08)
+  (updated 2026-10-14)
 
   (vertical
     (ідентичність exact-domain-bits)
@@ -32,10 +32,14 @@
       (D4 0001))
     (universal-eight-bit-space false))
 
+  ; Current ratification: Contract 11.9, owner decision 2026-10-12.
+  ; Source: knowledge/d10-owner-whole-domain-ratification-20261012.json.
+  ; Whole D10 codebook residency is not independent per-row proof,
+  ; executable callability or physical T5 opcode admission.
   (current-foundation
-    (contract 11 8)
-    (ratified-domains D1 D2 D3 D4 D5 D6 D7 D8 D9)
-    (D10 research-unratified))
+    (contract 11 9)
+    (ratified-domains D1 D2 D3 D4 D5 D6 D7 D8 D9 D10)
+    (D10 whole-domain-codebook-ratified mechanism-admission-separate))
 
   (axioms
     (1 (sens-is-not text string quoted-literal decimal-semantic-id
