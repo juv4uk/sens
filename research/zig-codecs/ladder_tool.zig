@@ -88,7 +88,7 @@ pub fn main() !void {
     const words = word_buf[0..count];
 
     // 1. T5: кодування через сам Zig-кодек.
-    const t5_bytes = try t5.encode(allocator, words);
+    const t5_bytes = try t5.encodeCoordinates(allocator, words);
     defer allocator.free(t5_bytes);
     const t5_sha = sha256Hex(t5_bytes);
     var hex_buf: [8192]u8 = undefined;
@@ -98,7 +98,7 @@ pub fn main() !void {
     });
 
     // 2. Round-trip: decode мусить дати ті самі точні слова.
-    const back = try t5.decode(allocator, t5_bytes);
+    const back = try t5.decodeCoordinates(allocator, t5_bytes);
     defer allocator.free(back);
     if (back.len != words.len) return error.RoundtripLength;
     for (back, words) |b, w| {
@@ -124,14 +124,14 @@ pub fn main() !void {
     const reps: usize = 20000;
     var begin = nanoseconds();
     for (0..reps) |_| {
-        const bytes = try t5.encode(allocator, words);
+        const bytes = try t5.encodeCoordinates(allocator, words);
         std.mem.doNotOptimizeAway(bytes);
         allocator.free(bytes);
     }
     const enc_ns = nanoseconds() - begin;
     begin = nanoseconds();
     for (0..reps) |_| {
-        const decoded = try t5.decode(allocator, t5_bytes);
+        const decoded = try t5.decodeCoordinates(allocator, t5_bytes);
         std.mem.doNotOptimizeAway(decoded);
         allocator.free(decoded);
     }
