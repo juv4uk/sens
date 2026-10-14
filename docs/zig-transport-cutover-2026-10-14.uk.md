@@ -1,5 +1,49 @@
 # Перехід фізичного транспорту SENS на Zig · 14.10.2026
 
+## Нове рішення власника: Zig — єдиний турнікет, але НЕ реєстр кодів
+
+> **«Zig — турнікет, не реєстр. Реєстр — контракт, ратифікований власником. SENS вирішує значення, Zig дає коди обом, Rust тримає байти. Той, хто дає, не вирішує; той, хто вирішує, — закон».**
+
+Це **архітектурна ціль обов'язкового шляху виконання**, а не твердження, що нинішній `main` уже довів відсутність усіх обходів. Цей документ — технічний handoff; нормативну владу зберігають `CURRENT.md`, `language-contract.lisp`, `contracts/numeric-domains-ratification.lisp` та ратифіковані `lib/domains/dN.lisp`/knowledge-таблиці. **Генератор читає тільки ратифіковані джерела і породжує відповідні проєкції SENS/Zig/Rust** із exact domain, width, bits та SHA джерела; Zig не призначає жодної нової координати й не розв'язує конфліктів semantic registry.
+
+```text
+Нормативний контракт SENS + ратифіковані домени
+             │ генерація/пін джерела, НЕ Zig-влада
+             ▼
+      проєкції для SENS / Zig / Rust
+
+SENS: law + admitted words ──► Zig: exact width/physical encode ──► Rust: opaque bytes/storage
+SENS: law + semantic verdict ◄── Zig: exact physical decode/validate ◄── Rust: opaque bytes/input
+```
+
+**Важлива межа:** у стрілках до/від Zig проходять *типізовані механічні слова або фізичні байти*, не Rust `ExprKind`/`Value`, host `bool` чи самопризначений opcode. На вході Zig перевіряє width/payload/buffer/profile/canonicality; SENS сам вирішує, чи це допустима функція, D2-структура, D1-істина, D7-текст, D24+-число або взагалі не виконуваний об'єкт. На виході Zig повертає механічний носій/помилку; Rust не може підмінити семантичне `D1:NO` host-статусом відмови транспорту. Будь-який `Rust-only` reference/backend — **лише явно обраний порівняльний режим**, не непомітний production fallback.
+
+### Аудит реалізованого стану проти цілі, перевірка 14.10.2026
+
+| Ділянка | Підтверджено в коді | Невиконаний перехід |
+|---|---|---|
+| `crates/sens-cli/Cargo.toml` + `build.rs` | `zig-transport` — default для CLI; пін Zig 0.16.0; відсутність компілятора не перемикає типову збірку мовчки на Rust | Це **не** автоматично Zig-default для всього `crates/sens`/WASM/FPGA |
+| `research/zig-codecs/transport_abi.zig` | ABI **v2**, caller-owned `[width, MSB, LSB]` для `sens_zig_t5_encode_be3`, безалокаційний `sens_zig_t5_validate`, явні F3C pack/unpack | Поки **немає** відповідного `sens_zig_t5_decode_be3` для повернення exact-width слів Zig→SENS; no-bypass ingress усіх CLI не доведено |
+| `crates/sens-cli/src/bin/sens-trit.rs` | Зовнішні `.sens` байти проходять Zig physical validate; encode BE3 доходить до Zig та порівнюється з поточним reference | CLI досі викликає `sens::decode_ternary_words`, `sens::decode_ternary_program`, `sens::open_ternary_program` після фізичного validation; ще не повне `Zig decode→canonical typed words→SENS reader` |
+| `crates/sens-cli/src/main.rs`, `crates/sens/src/binary_execution.rs`, `crates/sens/src/ternary_transport.rs` | Існують прямі Rust decode/encode-функції T5 і внутрішній перехід до SENS reader | Прямі production ingress/egress маршрути потребують поступової інвентаризації/переведення, окремо від еталонних бенчмарків і тестових reference-path |
+
+**Отже, сьогодні не заявляти:** `single-gateway-complete`, `Rust-bypass-eliminated`, `Zig-decoder-ABI-ready`, `native-semantic-PASS` або `all-targets-freestanding` без точного commit/run receipt. Сам факт default Zig CLI і успішний Zig↔Rust byte-parity не доводить повного турнікета.
+
+### Порядок точкової реалізації без нового глобального блокера
+
+1. **#5777 → #5779, M1 — симетричний декодер в Zig ABI.** Додати **окремо заявленим CLAIM** caller-owned Zig `T5 bytes→BE3 typed width/payload` із точними length/capacity/error, no host layout або Zig registry. Спочатку підтвердити canonical T5 механіку D1–D9; D10 лишається **окремим coordinate-only профілем**. Не міняти ABI-version без явної сумісності та доказу, не вписувати D11/D24+ у T5 автоматично.
+2. **M2 — один CLI ingress/egress через турнікет.** Почати із `sens-trit`: Rust передає bytes у Zig, Zig повертає лише механічні слова, SENS-owned reader робить D2/semantic admission; у зворотному напрямі SENS exact-width → Zig BE3 encoder → Rust зберігає тільки байти. Залишити test-only reference як *явно* обрану незалежну перевірку. Будь-яка відмова Zig — fail-closed, не `try Rust`.
+3. **M3 — інвентаризація інших entrypoints.** Окремими неперетинними CLAIM перевести `sens-cli/main.rs`, `sens/binary_execution.rs` і решту реальних runtime boundary calls; для Cargo package boundaries потрібна явна технічна схема без cyclic dependencies. `ternary_transport.rs` може лишитися порівняльним reference, але **не прихованим production bypass**. Не масово видаляти reference-код або робити компілятор Zig джерелом семантики.
+4. **M4 — доменна генерація, окрема від gateway.** Контракт→машинні exact-bit проєкції із source SHA, контроль довжин і провідних нулів, без самостійного `Zig defines Dn`. D7 — одразу чинна keyboard v2 128/128 (історичний v1 **не має мігрованого корпусу**, не вводити conversion gate); D11 43/2048 — тестовий словник без callable; D24/D48/... — окремо ратифіковані числові домени, їхній майбутній фізичний конверт вимагає **окремого** явного закону.
+
+### Доказ для кожної підланки
+
+- **Позитив:** байт-у-байт Zig↔Rust *reference* roundtrip на **одному git-tracked SHA-корпусі**, збереження width і leading zeros (зокрема `D1:1` ≠ `D2:01`), і окремий позитивний нативний SENS self-verdict.
+- **Негатив:** invalid length/byte/padding, недостатня місткість, перевищення профілю, переплутаний D8/D9 width, `D10` execution поза профілем, test-only D11 як callable, host `NO` замість Zig error або SENS `D1:NO`, спроба обійти Zig прямим Rust-decoder у *обраному production entrypoint*. Не додавати порівняння **історичний SID8→сучасний D8**.
+- **Квитанція:** `test_id`, layer, exact file/commit/fixture SHA, expected/actual, перша відмінність, одна команда відтворення, actual central CI exact-SHA status; benchmark на однаковому корпусі та апаратурі. Жодного нового авто-workflow: чинний `.github/workflows/ci.yml` лишається єдиним; семантичний PASS виключно SENS.
+
+**Координація:** [#5029](https://github.com/juv4uk/sens/issues/5029) для неперетинного CLAIM, [#5779](https://github.com/juv4uk/sens/issues/5779) для firewall, [#5777](https://github.com/juv4uk/sens/issues/5777) для ABI, [#5767](https://github.com/juv4uk/sens/issues/5767) для T5, [#5770](https://github.com/juv4uk/sens/issues/5770) для parity. Цей handoff **не** призначає Zig кодів, не запускає CI, не створює нової ратифікації і не уповноважує самовільне злиття.
+
 ## Явне рішення власника: «переходим на зіг» → «зроби дефолтним кодеком»
 
 **Переходимо на Zig для фізичних кодеків та транспорту.** Мова SENS, її ратифіковані двійкові слова й D2/D3 закони, SENS evaluator, невідворотні нормативні рішення і 2046 координат **не перетворюються на Zig-семантику**. Zig володіє лише зовнішніми байтами, пакуванням, конвертом; зміна ідентичності через десятковий SID8/W8/Sens8 неприпустима.
@@ -9,7 +53,7 @@
 - `research/zig-codecs/t5/t5.zig` — незалежний exact-width T5; D1–D9, padding/width/canonicality.
 - `research/zig-codecs/f3c/f3c.zig` — обмежений F3C, явний `.senc` з `0xf3`, без sniffing/fallback, тільки якщо весь файл коротший.
 - `research/zig-codecs/transport.zig` — Zig фізичний файловий інструмент; `t5-check`, `t5-roundtrip`, `f3c-pack`, `f3c-check`, `f3c-unpack`; create-exclusive, вихідні дані зберігаються.
-- `research/zig-codecs/transport_abi.zig` — Zig-owned синхронний C ABI v1: T5 validate/encode і F3C pack/unpack; **виклик не передає власності пам’яті через FFI**.
+- `research/zig-codecs/transport_abi.zig` — Zig-owned синхронний C ABI v2: T5 validate/encode і F3C pack/unpack; **виклик не передає власності пам’яті через FFI**.
 - `crates/sens-cli/build.rs` і `crates/sens-cli/src/bin/sens-trit.rs` — звичайна Cargo-збірка `sens-cli` компілює фізичний Zig ABI за замовчуванням, `sens-trit encode`, `encode-f3`/F3C decode й фізична `.sens` перевірка користуються Zig, а Rust reader перевіряє канонічну граматику і виконує програму. Rust reference залишається як **незалежний контроль**, а збірка Rust-only вмикається тільки явно через `--no-default-features` (не прихований fallback).
 
 ## Пін компілятора й інтеграція в міграцію
