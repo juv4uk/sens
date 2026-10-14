@@ -161,6 +161,16 @@ pub fn encodeTripletsInto(out: []u8, input: []const u8) WriteError!usize {
 /// pads the final physical byte with 0..4 separator trits. These conditions
 /// are sufficient for byte-for-byte canonical replay without allocating words.
 pub fn validatePhysical(data: []const u8) Error!void {
+    return validatePhysicalWidth(data, 9);
+}
+
+/// Allocation-free D1..D10 coordinate profile. This is physical integrity
+/// only: a well-formed D10 word is NOT thereby executable or resident.
+pub fn validateCoordinatesPhysical(data: []const u8) Error!void {
+    return validatePhysicalWidth(data, 10);
+}
+
+fn validatePhysicalWidth(data: []const u8, max_width: u8) Error!void {
     if (data.len == 0) return Error.EmptyProgram;
     if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
     for (data) |byte| {
@@ -202,7 +212,7 @@ pub fn validatePhysical(data: []const u8) Error!void {
                 if (width == 0) return Error.EmptyDomainWord;
                 width = 0;
             } else {
-                if (width >= 9) return Error.UnsupportedDomainWidth;
+                if (width >= max_width) return Error.UnsupportedDomainWidth;
                 width += 1;
             }
         }
@@ -376,6 +386,50 @@ test "heapless physical admission agrees with allocating T5 on all one-byte inpu
         };
         try std.testing.expectEqual(reference_ok, fast_ok);
     }
+}
+
+test "heapless physical D10 coordinate validator preserves all 2046 exact words" {
+    const allocator = std.testing.allocator;
+    var total: usize = 0;
+    var width: u8 = 1;
+    while (width <= 10) : (width += 1) {
+        const limit: u16 = @as(u16, 1) << @as(u4, @intCast(width));
+        var bits: u16 = 0;
+        while (bits < limit) : (bits += 1) {
+            const original = [_]Word{.{ .width = width, .bits = bits }};
+            const wire = try encodeCoordinates(allocator, &original);
+            defer allocator.free(wire);
+            try validateCoordinatesPhysical(wire);
+            const decoded = try decodeCoordinates(allocator, wire);
+            defer allocator.free(decoded);
+            try std.testing.expectEqualSlices(Word, &original, decoded);
+            // A mechanically valid D10 carrier never opens the D1..D9
+            // physical path, much less grants SENS execution rights.
+            if (width == 10) {
+                try std.testing.expectError(Error.UnsupportedDomainWidth,
+                    validatePhysical(wire));
+            }
+            total += 1;
+        }
+    }
+    try std.testing.expectEqual(@as(usize, 2046), total);
+}
+
+test "heapless D10 coordinate profile keeps D9 fail closed on physical mutants" {
+    // Exactly ten zero bits is a D10 physical coordinate; it is not D9.
+    try validateCoordinatesPhysical(&.{ 0x00, 0x00 });
+    try std.testing.expectError(Error.UnsupportedDomainWidth,
+        validatePhysical(&.{ 0x00, 0x00 }));
+    try std.testing.expectError(Error.UnsupportedDomainWidth,
+        validateCoordinatesPhysical(&.{ 0x00, 0x00, 0x00 }));
+    try std.testing.expectError(Error.InvalidPhysicalByte,
+        validateCoordinatesPhysical(&.{0xf3}));
+    try std.testing.expectError(Error.InvalidTail,
+        validateCoordinatesPhysical(&.{0xf2}));
+    try std.testing.expectError(Error.EmptyDomainWord,
+        validateCoordinatesPhysical(&.{0xa2}));
+    try std.testing.expectError(Error.EmptyProgram,
+        validateCoordinatesPhysical(&.{}));
 }
 
 test "heapless T5 validator preserves opaque 8-bit widths and rejects damaged wire" {
