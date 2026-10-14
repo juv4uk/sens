@@ -119,6 +119,8 @@ jobs:
           zig test research/zig-codecs/domain_ladder.zig
           echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
           zig test research/zig-codecs/domain_e1.zig
+          echo 'test_id=zig-mixed-exact-domain-sequence layer=transport semantic_authority=SENS source_rungs=D1-D10'
+          zig test research/zig-codecs/domain_sequence.zig
           zig test research/zig-codecs/tests.zig -lc
           zig test research/zig-codecs/transport/e1_writer.zig
           # Same focused Zig step, no new workflow: compile and actually link
