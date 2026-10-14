@@ -142,8 +142,6 @@
        (narrate-invalid-outcome-shape outcome))
       ((0100 (010 (100 outcome)))
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
-      ((0100 (110101100 (100 outcome)))
-       (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
       ((101 (100 outcome) (001 proved))
        (110
          ((narrate-list-exact-three? outcome) (narrate-proved-outcome outcome))
