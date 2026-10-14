@@ -32,12 +32,12 @@
       (D4 0001))
     (universal-eight-bit-space false))
 
-  ; Operational pointer only: current authority is language-contract.lisp 11.9.
-  ; D7 keyboard/text v2 was ratified on 2026-10-13 (128/128), distinct
-  ; from historical D7 sound/Text v1 (126/128).
-  ; D10 was owner-ratified as one whole 1024/1024 catalogue on 2026-10-12.
-  ; D10 is not implicitly included in the D1-D9 Core, and its ratification
-  ; does NOT establish per-resident proofs or runtime callability.
+  ; Лише операційне посилання: чинна влада — language-contract.lisp 11.9.
+  ; Клавіатурний текстовий D7 v2 ратифіковано 13.10.2026 (128/128);
+  ; історична звукова карта D7 v1 мала 126/128 і не є поточною.
+  ; D10 ратифіковано 12.10.2026 як цілісний каталог 1024/1024.
+  ; D10 не включено автоматично до Core D1–D9; ратифікація не доводить
+  ; окремих законів резидентів і не допускає їх до виконання.
   (current-foundation
     (contract 11 9)
     (ratified-domains D1 D2 D3 D4 D5 D6 D7 D8 D9)
