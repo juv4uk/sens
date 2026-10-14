@@ -2,6 +2,7 @@
 """End-to-end safe batch regression using existing REAL Core1 executable .lisp."""
 import argparse
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -28,11 +29,13 @@ class RealBatchTest(unittest.TestCase):
         shutil.copy2(PROVEN.with_suffix(".lisp"), self.root / "lib/third.lisp")
         (self.root / "lib/unknown.lisp").write_text("(UNKNOWN ())\n", encoding="utf-8")
 
-    def call(self, *paths, write=False, out=None, era="legacy"):
+    def call(self, *paths, write=False, out=None, era="legacy", linked_definitions=()):
         return subprocess.run([
             sys.executable, str(DRIVER), *paths, "--root", str(self.root),
             "--out", str(out or self.out), "--report", str(self.report),
             *(["--source-era", era] if era else []),
+            *(part for spec in linked_definitions
+              for part in ("--linked-definition", spec)),
             *(["--write"] if write else []),
         ], text=True, capture_output=True)
 
@@ -52,6 +55,58 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual(report["summary"]["files_blocked"], 0)
         self.assertTrue((output / "compiler-nucleus.sens").exists())
         self.assertEqual(source.read_bytes(), before, "migration must keep canonical source byte-exact")
+
+    def test_explicit_linked_definition_is_verified_and_preview_only(self):
+        provider = self.root / "lib/provider.lisp"
+        consumer = self.root / "lib/consumer.lisp"
+        provider.write_text("(0011 helper (0010 (x) x))\n", encoding="utf-8")
+        consumer.write_text("(0011 caller (0010 (x) (helper x)))\n", encoding="utf-8")
+        payload = provider.read_bytes()
+        git_blob = hashlib.sha1(
+            b"blob " + str(len(payload)).encode() + b"\\0" + payload
+        ).hexdigest()
+        spec = f"lib/provider.lisp@{git_blob}:helper"
+
+        unlinked = self.call("lib/consumer.lisp", era="current")
+        self.assertEqual(unlinked.returncode, 2, unlinked.stdout + unlinked.stderr)
+        self.assertEqual(json.loads(self.report.read_text())["summary"]["files_blocked"], 1)
+
+        linked = self.call("lib/consumer.lisp", era="current",
+                           linked_definitions=(spec,))
+        self.assertEqual(linked.returncode, 0, linked.stdout + linked.stderr)
+        report = json.loads(self.report.read_text())
+        self.assertEqual(report["summary"]["files_would_write"], 1)
+        self.assertEqual(report["summary"]["files_written"], 0)
+        self.assertEqual(
+            report["authority"]["linked_source_definitions"][0]["git_blob"], git_blob
+        )
+        self.assertFalse(report["authority"]["linked_source_definitions"][0]["runtime_admitted"])
+        self.assertFalse((self.out / "lib/consumer.sens").exists())
+
+        forbidden = self.call("lib/consumer.lisp", era="current", write=True,
+                              linked_definitions=(spec,))
+        self.assertEqual(forbidden.returncode, 3, forbidden.stdout + forbidden.stderr)
+        self.assertFalse((self.out / "lib/consumer.sens").exists())
+
+    def test_stale_or_fabricated_linked_definition_is_rejected(self):
+        provider = self.root / "lib/provider.lisp"
+        consumer = self.root / "lib/consumer.lisp"
+        provider.write_text("(0011 helper (0010 (x) x))\n", encoding="utf-8")
+        consumer.write_text("(0011 caller (0010 (x) (helper x)))\n", encoding="utf-8")
+        payload = provider.read_bytes()
+        git_blob = hashlib.sha1(
+            b"blob " + str(len(payload)).encode() + b"\\0" + payload
+        ).hexdigest()
+        for spec in (
+            "lib/provider.lisp@" + "0" * 40 + ":helper",
+            f"lib/provider.lisp@{git_blob}:imaginary",
+            f"../provider.lisp@{git_blob}:helper",
+        ):
+            with self.subTest(spec=spec):
+                proc = self.call("lib/consumer.lisp", era="current",
+                                 linked_definitions=(spec,))
+                self.assertEqual(proc.returncode, 3, proc.stdout + proc.stderr)
+                self.assertFalse((self.out / "lib/consumer.sens").exists())
 
     def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):
         source = self.root / "lib/legacy-d9.lisp"
@@ -90,16 +145,19 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual(rerun.returncode, 2)
         self.assertEqual((self.out / "lib/third.sens").read_bytes(), expected)
 
-    def test_auto_blocks_ambiguous_historical_w8_without_writing(self):
-        # The real previously admitted C1-THIRD source uses historical
-        # exact-eight heads; unqualified W8 is NOT proof of a modern D8 call.
+    def test_auto_resolves_historical_w8_as_sid8(self):
+        # No source in the corpus carries D8, so an eight-bit head has no live
+        # D8 reading: auto resolves the historical SID8 head through the same
+        # registry the legacy era uses, instead of blocking a vacuous W8/D8
+        # ambiguity (owner: that check was dumb).
         p = self.call("lib/third.lisp", write=True, era=None)
-        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         doc = json.loads(self.report.read_text())
         self.assertEqual(doc["authority"]["source_era"], "auto")
-        self.assertEqual(doc["summary"]["files_written"], 0)
-        self.assertIn("ambiguous W8", doc["files"][0]["reason"])
-        self.assertFalse((self.out / "lib/third.sens").exists())
+        self.assertEqual(doc["summary"]["files_written"], 1)
+        self.assertGreater(doc["files"][0]["passes"]["pass1-sens8"], 0)
+        self.assertEqual((self.out / "lib/third.sens").read_bytes(),
+                         PROVEN.with_suffix(".sens").read_bytes())
 
     def test_explicit_legacy_is_recorded_and_cannot_be_inferred(self):
         p = self.call("lib/third.lisp", write=True, era="legacy")
@@ -111,13 +169,15 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual((self.out / "lib/third.sens").read_bytes(),
                          PROVEN.with_suffix(".sens").read_bytes())
 
-    def test_current_d8_head_stays_exact_and_legacy_is_not_guessed(self):
+    def test_current_d8_head_stays_exact_while_auto_resolves_historical(self):
         src = self.root / "lib/current.lisp"
         src.write_text("(10000000 ())\n", encoding="utf-8")
+        # No D8 in the corpus -> auto has no live D8 reading to be ambiguous
+        # with: it resolves the eight-bit head through the historical registry.
         p = self.call("lib/current.lisp", era="auto")
-        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
-        self.assertIn("ambiguous W8", json.loads(self.report.read_text())
-                      ["files"][0]["reason"])
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertGreater(json.loads(self.report.read_text())
+                           ["files"][0]["passes"]["pass1-sens8"], 0)
         p = self.call("lib/current.lisp", era="current", write=True)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         data = json.loads(self.report.read_text())
@@ -156,23 +216,23 @@ class RealBatchTest(unittest.TestCase):
             branch.with_suffix(".sens").read_bytes()
         )
 
-    def test_existing_target_in_group_blocks_every_other_write(self):
-        # A pre-existing destination is never overwritten, AND no other
-        # candidate in the cohort may be published if this one BLOCKS.
+    def test_existing_target_blocks_only_itself_and_others_publish(self):
+        # A pre-existing destination is never overwritten, but it blocks
+        # only itself: the other mechanically feasible candidate still
+        # publishes. (Owner decision: no all-or-nothing cohort blocking.)
         branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
         shutil.copy2(branch, self.root / "lib/branch.lisp")
         (self.out / "lib").mkdir(parents=True)
         (self.out / "lib/branch.sens").write_bytes(b"sentinel")
         p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
-        self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
+        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
         d = json.loads(self.report.read_text())
-        self.assertEqual(d["summary"]["files_written"], 0)
-        self.assertEqual(d["summary"]["files_would_write"], 1)
+        self.assertEqual(d["summary"]["files_written"], 1)
         self.assertEqual(d["summary"]["files_blocked"], 1)
         self.assertEqual((self.out / "lib/branch.sens").read_bytes(), b"sentinel")
-        self.assertFalse((self.out / "lib/third.sens").exists())
+        self.assertTrue((self.out / "lib/third.sens").exists())
 
-    def test_mid_transaction_writer_failure_rolls_back_created_binary(self):
+    def test_mid_batch_writer_failure_blocks_only_the_failed_file(self):
         branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
         shutil.copy2(branch, self.root / "lib/branch.lisp")
         spec = importlib.util.spec_from_file_location(
@@ -197,12 +257,12 @@ class RealBatchTest(unittest.TestCase):
                           side_effect=intermittent_writer):
             outcome = batch.run(args)
         self.assertEqual(len(calls), 2)
-        self.assertEqual(outcome["summary"]["files_written"], 0)
+        self.assertEqual(outcome["summary"]["files_written"], 1)
         self.assertEqual(outcome["summary"]["files_blocked"], 1)
-        self.assertEqual(outcome["summary"]["files_would_write"], 1)
-        self.assertIn("atomic batch aborted",
+        self.assertEqual(outcome["summary"]["files_would_write"], 0)
+        self.assertIn("test injected second-write failure",
                       str([e.get("reason", "") for e in outcome["files"]]))
-        self.assertFalse((self.out / "lib/branch.sens").exists())
+        self.assertTrue((self.out / "lib/branch.sens").exists())
         self.assertFalse((self.out / "lib/third.sens").exists())
         self.assertEqual((self.root / "lib/branch.lisp").read_bytes(),
                          branch.read_bytes())
