@@ -1,10 +1,7 @@
 # Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
 # RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
 # (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
-# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
-# Не виконувати до виправлення семантичного контракту у двійковому SENS.
-# Повторні запуски, автоматичні тести, виділення runner заборонені.
-name: КАРАНТИН — SENS file authority guard — physical T5 oracle
+name: SENS file authority guard — physical T5 oracle
 
 on:
   workflow_dispatch:
