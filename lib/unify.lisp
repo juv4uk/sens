@@ -67,11 +67,11 @@
       ((010 a)
        (110
          ((010 b) (101 a b))
-         ((010 ()) (010 (001 (0))))))
-      ((010 b) (010 (001 (0))))
+         ((010 ()) #d1:0)))
+      ((010 b) #d1:0)
       ((unify-equal? (100 a) (100 b))
        (unify-equal? (011 a) (011 b)))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 ()) #d1:0))))
 
 (0011 logic-var
   (0010 (name)
@@ -96,9 +96,9 @@
 (0011 var?
   (0010 (term)
     (110
-      ((010 term) (010 (001 (0))))
+      ((010 term) #d1:0)
       ((010 (100 term)) (101 (100 term) (001 var)))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 ()) #d1:0))))
 
 ; Canonical substitution pair access: D4:1000 CAAR and D4:0110 CDAR.
 ; Both are four-bit callable identities, unlike text D7 or non-admitted D6.
@@ -154,7 +154,7 @@
   (0010 (bindings)
     (110
       ((010 bindings) (101 bindings (001 fail)))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 ()) #d1:0))))
 
 (0011 unify-walked
   (0010 (a b bindings)
@@ -175,7 +175,7 @@
     (110
       ((101100100 resolved)
        (unify-equal? (1001 variable) (1001 resolved)))
-      ((010 resolved) (010 (001 (0))))
+      ((010 resolved) #d1:0)
       ((101110101 variable (100 resolved) bindings) (010 ()))
       ((010 ()) (101110101 variable (011 resolved) bindings)))))
 
