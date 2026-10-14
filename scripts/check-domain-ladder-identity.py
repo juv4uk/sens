@@ -13,6 +13,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -310,6 +311,32 @@ def inspect_active_gates(root: Path) -> None:
         raise ValueError("retired eight-bit guard reintroduced in active tree")
 
 
+def inspect_generated_width_certificate(root: Path) -> None:
+    generator = root / "scripts/generate-domain-width-certificate.py"
+    if not generator.is_file() or generator.is_symlink():
+        raise ValueError(
+            "D7_V2_CERTIFICATE_GENERATOR_MISSING "
+            "layer=source-projection "
+            "reproduce='python3 scripts/generate-domain-width-certificate.py --check'"
+        )
+    probe = subprocess.run(
+        [sys.executable, str(generator), "--check"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if probe.returncode != 0:
+        detail = (probe.stderr or probe.stdout).strip()
+        raise ValueError(
+            "D7_V2_CERTIFICATE_DRIFT "
+            "id=d7-v2-exact-surface-identity layer=source-projection "
+            f"expected=owner-ratified-keyboard-v2-and-current-width-SHA "
+            f"actual={detail!r} "
+            "reproduce='python3 scripts/generate-domain-width-certificate.py --check'"
+        )
+
+
 def inspect_files(root: Path) -> dict[int, int]:
     inspect_identity_paths(root)
     for rel in CANONICAL:
@@ -329,6 +356,10 @@ def inspect_files(root: Path) -> dict[int, int]:
         domain_texts[domain] = path.read_text(encoding="utf-8")
     counts = inspect_domains(domain_texts)
     inspect_active_gates(root)
+    # The same sole automatic CI invokes this --check. Reuse the existing
+    # generated certificate and canonical D7 keyboard/v2 projection check
+    # instead of trusting exact row widths with swapped glyph identities.
+    inspect_generated_width_certificate(root)
     return counts
 
 
