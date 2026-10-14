@@ -902,25 +902,25 @@
 ; Muster *nicht* gegen die aktuellen Fakten (mit der aktuellen
 ; Substitution) abgeglichen werden kann — keine neuen Bindungen, `subst`
 ; läuft unverändert durch.
+; A negated condition is an exact D1 predicate, never the list (1).
+; Both tags are atoms; a compound head is not a negation operator.
 (0011 condition-is-not?
   (0010 (condition)
     (110
-      
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (110
-         ((101 (100 condition) (001 not?)) (001 (1)))
-         (#d1:1 (101 (100 condition) (001 not)))))
-      ((010 (100 condition))  (110
-         ((101 (100 condition) (001 not?)) (001 (1)))
-         (#d1:1 (101 (100 condition) (001 not)))))
-      )))
+      ((010 condition) #d1:0)
+      ((0100 (010 (100 condition))) #d1:0)
+      ((101 (100 condition) (001 not?)) #d1:1)
+      ((101 (100 condition) (001 not)) #d1:1)
+      (#d1:1 #d1:0))))
 
+; Negation-as-failure: keep the original substitution only if no fact
+; matches the inner condition; a match must produce zero candidates.
 (0011 match-negated-condition
   (0010 (inner-pattern facts bindings)
     (110
-      ((0100 (010 (match-condition-against-facts inner-pattern facts bindings))) (1110 bindings))
-      ((010 (match-condition-against-facts inner-pattern facts bindings))  (1110 bindings))
-      )))
+      ((010 (match-condition-against-facts inner-pattern facts bindings))
+       (1110 bindings))
+      (#d1:1 (001 ())))))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
 ; before fixing (not guessed), the same way Step 7's `not` gap was found:
