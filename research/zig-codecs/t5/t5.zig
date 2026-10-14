@@ -93,6 +93,66 @@ fn encodeWidth(allocator: std.mem.Allocator, words: []const Word, max_width: u8)
     return out;
 }
 
+/// Caller-owned T5 encode from ABI-v2 triples [width, high bits, low bits].
+/// This is an *in-process* physical bridge, not a SENS wire word or semantic ID.
+/// No allocator, libc, heap, or function dispatch. Exact width stays opaque.
+/// Preflight the complete source and output capacity before writing any bytes.
+/// Input and written output must not overlap (checked before the first write).
+pub const WriteError = Error || error{
+    InvalidTriplets,
+    BufferTooSmall,
+    OverlappingBuffers,
+};
+
+pub fn encodeTripletsInto(out: []u8, input: []const u8) WriteError!usize {
+    if (input.len == 0) return Error.EmptyProgram;
+    if (input.len % 3 != 0) return error.InvalidTriplets;
+    const count = input.len / 3;
+    const trit_budget = MAX_PHYSICAL_BYTES * TRITS_PER_BYTE;
+    var total_trits: usize = 0;
+
+    // First pass is read-only: reject invalid words even with tiny output.
+    for (0..count) |i| {
+        const at = i * 3;
+        const word = Word{
+            .width = input[at],
+            .bits = (@as(u16, input[at + 1]) << 8) | @as(u16, input[at + 2]),
+        };
+        if (!validWord(word, 9)) return Error.UnsupportedDomainWidth;
+        const cost: usize = @as(usize, word.width) + @as(usize, @intFromBool(i != 0));
+        if (cost > trit_budget - total_trits) return Error.TransportTooLarge;
+        total_trits += cost;
+    }
+
+    const needed = (total_trits + TRITS_PER_BYTE - 1) / TRITS_PER_BYTE;
+    if (out.len < needed) return error.BufferTooSmall;
+    // Compare only the bytes actually written; never allow alias corruption.
+    const src_addr = @intFromPtr(input.ptr);
+    const dst_addr = @intFromPtr(out.ptr);
+    if ((src_addr <= dst_addr and dst_addr - src_addr < input.len) or
+        (dst_addr < src_addr and src_addr - dst_addr < needed))
+        return error.OverlappingBuffers;
+
+    var index: usize = 0;
+    var current: u8 = 0;
+    var used: u8 = 0;
+    for (0..count) |i| {
+        if (i != 0) appendDigit(out, &index, &current, &used, 2);
+        const at = i * 3;
+        const width = input[at];
+        const bits = (@as(u16, input[at + 1]) << 8) | @as(u16, input[at + 2]);
+        var shift: u8 = width;
+        while (shift > 0) {
+            shift -= 1;
+            const digit: u8 = @intCast((bits >> @as(u4, @intCast(shift))) & 1);
+            appendDigit(out, &index, &current, &used, digit);
+        }
+    }
+    while (used != 0) appendDigit(out, &index, &current, &used, 2);
+    std.debug.assert(index == needed);
+    return needed;
+}
+
 /// Allocation-free T5 physical validation for hosted and freestanding
 /// adapters. This checks only the wire (ternary byte range, separator, tail,
 /// declared width), never a function identity, domain meaning, or SENS law.
@@ -336,4 +396,49 @@ test "heapless T5 validator preserves opaque 8-bit widths and rejects damaged wi
     try std.testing.expectError(Error.InvalidTail, validatePhysical(&.{0xf2}));
     try std.testing.expectError(Error.EmptyDomainWord, validatePhysical(&.{0xa2}));
     try std.testing.expectError(Error.UnsupportedDomainWidth, validatePhysical(&.{0x00, 0x00}));
+}
+
+test "heapless ABI v2 T5 encode matches allocating physical reference across widths" {
+    const a = std.testing.allocator;
+    var out: [8]u8 = undefined;
+    var width: u8 = 1;
+    while (width <= 9) : (width += 1) {
+        const maximum: u16 = (@as(u16, 1) << @as(u4, @intCast(width))) - 1;
+        for ([_]u16{ 0, 1, maximum }) |bits| {
+            const triplets = [_]u8{
+                width, @intCast(bits >> 8), @intCast(bits & 0xff),
+            };
+            const reference = try encode(a, &.{.{ .width = width, .bits = bits }});
+            defer a.free(reference);
+            const n = try encodeTripletsInto(&out, &triplets);
+            try std.testing.expectEqualSlices(u8, reference, out[0..n]);
+            try validatePhysical(out[0..n]);
+        }
+    }
+    const pair = [_]u8{ 8, 0, 0xa8, 8, 0, 0, 1, 0, 1 };
+    const expected = try encode(a, &.{
+        .{ .width = 8, .bits = 0xa8 },
+        .{ .width = 8, .bits = 0 },
+        .{ .width = 1, .bits = 1 },
+    });
+    defer a.free(expected);
+    const n = try encodeTripletsInto(&out, &pair);
+    try std.testing.expectEqualSlices(u8, expected, out[0..n]);
+}
+
+test "heapless T5 encode never writes on malformed input, tiny buffer or overlap" {
+    var out: [12]u8 = [_]u8{0xa5} ** 12;
+    try std.testing.expectError(Error.EmptyProgram, encodeTripletsInto(&out, &.{}));
+    try std.testing.expectError(error.InvalidTriplets, encodeTripletsInto(&out, &.{ 1, 0 }));
+    try std.testing.expectError(Error.UnsupportedDomainWidth, encodeTripletsInto(&out, &.{ 0, 0, 0 }));
+    try std.testing.expectError(Error.UnsupportedDomainWidth, encodeTripletsInto(&out, &.{ 2, 0, 4 }));
+    try std.testing.expectError(Error.UnsupportedDomainWidth, encodeTripletsInto(&out, &.{ 9, 2, 0 }));
+    try std.testing.expectError(error.BufferTooSmall, encodeTripletsInto(out[0..0], &.{ 1, 0, 1 }));
+    try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 12), &out);
+    var alias: [8]u8 = [_]u8{0} ** 8;
+    alias[0] = 1;
+    alias[1] = 0;
+    alias[2] = 1;
+    try std.testing.expectError(error.OverlappingBuffers, encodeTripletsInto(&alias, alias[0..3]));
+    try std.testing.expectEqualSlices(u8, &.{ 1, 0, 1 }, alias[0..3]);
 }

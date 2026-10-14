@@ -23,21 +23,10 @@ pub export fn sens_zig_t5_encode_be3(
     if (byte_len == 0 or byte_len % 3 != 0) return -1;
     const count = byte_len / 3;
     if (count > t5.MAX_PHYSICAL_BYTES * 5) return -1;
-    const a = std.heap.c_allocator;
-    const typed = a.alloc(t5.Word, count) catch return -1;
-    defer a.free(typed);
-    for (0..count) |i| {
-        const at = i * 3;
-        typed[i] = .{
-            .width = src[at],
-            .bits = (@as(u16, src[at + 1]) << 8) | @as(u16, src[at + 2]),
-        };
-    }
-    const physical = t5.encode(a, typed) catch return -1;
-    defer a.free(physical);
-    if (physical.len > capacity) return -2;
-    @memcpy(dst[0..physical.len], physical);
-    return @intCast(physical.len);
+    // The complete v2 path is caller-owned and allocation-free.
+    const written = t5.encodeTripletsInto(dst[0..capacity], src[0..byte_len])
+        catch |err| return if (err == error.BufferTooSmall) -2 else -1;
+    return @intCast(written);
 }
 
 pub export fn sens_zig_t5_encode(src: [*]const Word, count: usize, dst: [*]u8, cap: usize) isize {
