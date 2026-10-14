@@ -109,7 +109,11 @@ pub(super) fn division_on_values(
     // checking for division by zero (which needs an admitted division).
     let admitted_operands = match values {
         [single] => domain_numeric::is_domain_value(single),
-        [lhs, rhs] if argument_count == 2 => domain_numeric::compare("=", lhs, rhs).is_some(),
+        // Domain admission is an exact-width identity check, not a
+        // rational equality query. Comparing fractions here would multiply
+        // potentially huge numerators before the actual division even starts.
+        [lhs, rhs] if argument_count == 2 =>
+            domain_numeric::shared_numeric_domain_width(lhs, rhs).is_some(),
         _ => false,
     };
     if !admitted_operands {
