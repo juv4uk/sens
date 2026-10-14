@@ -108,6 +108,42 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.assertEqual(out["new_triples"],0)
         self.assertEqual(out["head_census"]["paired_count"],1)
 
+    def test_symlink_or_gitlink_cannot_inflate_migration_triples(self):
+        self.add_triple("lib/first")
+        self.commit("ordinary regular-file triple")
+        self.assertEqual(snapshot(self.repo, self.head())["valid_triples"], 1)
+
+        # Git index staging works without OS-level symlink privileges, so this
+        # test covers the historical Git blobs on all host platforms.
+        for member in ("lib/first.lisp", "lib/first.sens", "lib/first"):
+            target_blob = subprocess.run(
+                ["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+                input=b"archived-target-path", stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, check=True,
+            ).stdout.decode("ascii").strip()
+            self.call("update-index", "--add", "--cacheinfo",
+                      f"120000,{target_blob},{member}")
+            self.call("commit", "-q", "-m", "staged historical symlink")
+            rows = snapshot(self.repo, self.head())
+            self.assertEqual(rows["valid_triples"], 0, member)
+            self.assertEqual(rows["invalid_triples"], 1, member)
+            self.assertIn("not a regular Git file", rows["rows"][0]["reason"])
+            self.assertEqual(main(["--root", str(self.repo), "--base",
+                                   self.base, "--head", self.head(),
+                                   "--strict"]), 2)
+            self.call("add", "--", member)
+            self.call("commit", "-q", "-m", "restore regular Git blob")
+            self.assertEqual(snapshot(self.repo, self.head())["valid_triples"], 1)
+
+        # A submodule/gitlink is not a .sens byte blob either.
+        self.call("update-index", "--add", "--cacheinfo",
+                  f"160000,{self.head()},lib/first.sens")
+        self.call("commit", "-q", "-m", "staged gitlink instead of T5 bytes")
+        rows = snapshot(self.repo, self.head())
+        self.assertEqual(rows["valid_triples"], 0)
+        self.assertEqual(rows["invalid_triples"], 1)
+        self.assertIn("160000", rows["rows"][0]["reason"])
+
     def test_triple_deletion_visible_and_strict_fails(self):
         self.add_triple("lib/first")
         self.commit("pair")
