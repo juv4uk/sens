@@ -6,8 +6,8 @@
 //! root: `knowledge/guard-reference.lisp` (the reference bureau: each topic
 //! points at authority, the canonical how-to and the verification evidence)
 //! and `lib/guard.lisp` (the shared guard-finding functions). This module
-//! reads both at runtime, parses them with the SAME canonical reader the
-//! evaluator uses (`sens::parse`), and walks the parsed AST. No string
+//! reads both at runtime through the exact-domain mixed reader used for
+//! admitted D3/D4 source heads, and walks the parsed AST. No string
 //! copy of any summary/authority/how-to/verify text exists here — if the
 //! WSM files change, what the IDE shows follows, because the IDE serves the
 //! live parse.
@@ -182,41 +182,31 @@ fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
         .map(|identity| (identity.width(), u16::from(identity.packed_bits())))
 }
 
-/// Domain-first head matcher.
+/// Доменний заголовок визначається шириною та точними бітами.
 ///
-/// Canonical domain AST and admitted surfaces compare through exact
-/// (domain-width, payload) identity. Historical exact-eight source remains a
-/// separately named compatibility branch so old guard files keep loading
-/// during the #2817 migration. The legacy byte is never converted into a
-/// domain identity.
-fn head_is_domain_or_legacy(
-    expr: &Expr,
-    domain: (usize, u16),
-    legacy_bytes: &[u8],
-) -> bool {
+/// Вісім бітів історичного Sens8 не можуть підтверджувати закон D3/D4.
+/// Дозволені людські написання лише проєктують уже відому координату.
+fn head_has_exact_domain(expr: &Expr, domain: (usize, u16)) -> bool {
     match &expr.kind {
         ExprKind::DomainIdentity(identity) => {
             (identity.width(), identity.packed_bits()) == domain
         }
-        ExprKind::Sid(code) => legacy_bytes.contains(&code.packed_byte()),
         ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(domain),
         _ => false,
     }
 }
 
 fn is_quote_head(expr: &Expr) -> bool {
-    head_is_domain_or_legacy(expr, D3_QUOTE, &[0b0000_0001])
+    head_has_exact_domain(expr, D3_QUOTE)
 }
 
-/// True when `expr` is canonical Core.D4 DEFINE, an admitted DEFINE surface,
-/// or one of the explicitly preserved historical exact-eight definition heads.
 fn is_define_head(expr: &Expr) -> bool {
-    head_is_domain_or_legacy(expr, D4_DEFINE, &[0b0000_1001, 0b0000_1011])
+    head_has_exact_domain(expr, D4_DEFINE)
         || as_symbol(expr).is_some_and(sens::is_define_surface_name)
 }
 
 fn is_lambda_head(expr: &Expr) -> bool {
-    head_is_domain_or_legacy(expr, D4_LAMBDA, &[0b0000_1000])
+    head_has_exact_domain(expr, D4_LAMBDA)
         || as_symbol(expr).is_some_and(sens::is_lambda_surface_name)
 }
 
@@ -240,13 +230,12 @@ fn read_fields<'a>(
 
 /// Parse knowledge/guard-reference.lisp into topic entries.
 ///
-/// Historical structure used exact-eight heads; canonical domain heads and
-/// admitted surfaces are accepted as well. Legacy bytes remain compatibility
-/// input only while the guard files migrate.
+/// Канонічні заголовки D3/D4 та допущені проєкції. Історичні W8
+/// байти не можуть виступати доказом D3/D4-семантики.
 /// where each `(reference ...)` is a series of `(field value)` pairs.
 fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
     let mut out = HashMap::new();
-    let Ok(expressions) = sens::parse(source) else {
+    let Ok(expressions) = sens::parse_mixed_exact_domain(source) else {
         return out;
     };
     for expression in &expressions {
@@ -254,10 +243,10 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
             Some(list) => list,
             None => continue,
         };
-        if !is_define_head(&list[0]) {
+        if !list.first().is_some_and(is_define_head) {
             continue;
         }
-        if as_symbol(&list[1]) != Some("*guard-reference-directory*") {
+        if list.get(1).and_then(as_symbol) != Some("*guard-reference-directory*") {
             continue;
         }
         let Some(value) = list.get(2) else { continue };
@@ -265,7 +254,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
         let Some(value_list) = as_list(value) else {
             continue;
         };
-        if !is_quote_head(&value_list[0]) {
+        if !value_list.first().is_some_and(is_quote_head) {
             continue;
         }
         let Some(data) = value_list.get(1).and_then(as_list) else {
@@ -352,7 +341,7 @@ impl GuardReference {
 /// functions, which is exactly what arity diagnostics and hover need.
 fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
     let mut out = HashMap::new();
-    let Ok(expressions) = sens::parse(source) else {
+    let Ok(expressions) = sens::parse_mixed_exact_domain(source) else {
         return out;
     };
     for expression in &expressions {
@@ -360,16 +349,16 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
             ExprKind::List(items) => items,
             _ => continue,
         };
-        if !is_define_head(&head[0]) {
+        if !head.first().is_some_and(is_define_head) {
             continue;
         }
-        let ExprKind::Symbol(name) = &head[1].kind else {
+        let Some(Expr { kind: ExprKind::Symbol(name), .. }) = head.get(1) else {
             continue;
         };
         let Some(lambda) = head.get(2).and_then(as_list) else {
             continue;
         };
-        if !is_lambda_head(&lambda[0]) {
+        if !lambda.first().is_some_and(is_lambda_head) {
             continue;
         }
         let Some(params) = lambda.get(1).and_then(as_list) else {
@@ -412,6 +401,29 @@ mod tests {
        (lifecycle current-design)
        (provenance repo commit def456)
        (unknown-route research-web)))))"#;
+
+    #[test]
+    fn exact_guard_reference_quote_keeps_d3_identity_distinct_from_w8() {
+        // Позитивний свідок: D4 DEFINE містить D3 QUOTE і лише дані.
+        let exact = "(0011 *guard-reference-directory* (001 ((reference (topic точний-домен) (summary \"дані\")))))";
+        let topics = parse_topics(exact);
+        assert!(topics.contains_key("точний-домен"),
+            "D3:001 має зберегти цитований довідник");
+
+        // Негативний свідок: рівний payload W8 не є D3 QUOTE.
+        let legacy = exact.replacen("(001 ((", "(00000001 ((", 1);
+        assert!(parse_topics(&legacy).is_empty(),
+            "W8:00000001 не може підміняти D3:001");
+
+        let exact_define = "(0011 точна-функція (0010 (x) x))";
+        let functions = parse_functions(exact_define);
+        assert_eq!(functions.get("точна-функція").map(|f| f.arity), Some(1));
+
+        // Так само D4:0011/0010 не тотожні W8:00000011/00000010.
+        let wrong_width_define = "(00000011 точна-функція (00000010 (x) x))";
+        assert!(parse_functions(wrong_width_define).is_empty(),
+            "ширина D4 є частиною ідентичності");
+    }
 
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
