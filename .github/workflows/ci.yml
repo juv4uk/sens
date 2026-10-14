@@ -109,9 +109,21 @@ jobs:
           "$ZIG" test research/zig-codecs/f3c/f3c.zig
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
-          "$RUNNER_TEMP/zig-t5-bench" 2>&1 | head -35
+          "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
+          sed -n '1,35p' "$RUNNER_TEMP/zig-t5-bench-smoke.txt"
 
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Zig ↔ Rust T5 парний бенчмарк — однакові фізичні байти (manual benchmark protocol)
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.17.0:$PATH"
+          python3 research/zig-codecs/t5/run_paired_bench.py \
+            --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
+
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
