@@ -201,6 +201,55 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: E1 CLI → лише SENS: позитивний D1, однобітний мутант і CRC
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          cargo test --locked -p sens-cli --bin sens-trit \
+            e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/sens-e1-cli-unit.log"
+          grep -Fxq 'test e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict ... ok' "$RUNNER_TEMP/sens-e1-cli-unit.log"
+          bin=target/debug/sens-trit
+          "$bin" backend
+          test -x "$bin"
+          for test_case in positive mutant; do
+            if [[ "$test_case" == positive ]]; then
+              fixture=tests/fixtures/semantic/exact-d3-logic-selftest.sens
+            else
+              fixture=tests/fixtures/semantic/exact-d3-logic-mutant.sens
+            fi
+            cp "$fixture" "$RUNNER_TEMP/e1-$test_case.sens"
+            "$bin" encode-e1 "$RUNNER_TEMP/e1-$test_case.sens"
+            test -s "$RUNNER_TEMP/e1-$test_case.e1"
+            "$bin" eval "$RUNNER_TEMP/e1-$test_case.sens" > "$RUNNER_TEMP/e1-$test_case-t5.verdict"
+            "$bin" eval-e1 "$RUNNER_TEMP/e1-$test_case.e1" > "$RUNNER_TEMP/e1-$test_case-e1.verdict"
+            cmp "$RUNNER_TEMP/e1-$test_case-t5.verdict" "$RUNNER_TEMP/e1-$test_case-e1.verdict" || {
+              echo "::error::E1_CLI_SENS_VERDICT_MISMATCH case=$test_case"; exit 1;
+            }
+            echo "E1_NATIVE_SENS_CLI_PASS case=$test_case"
+            sha256sum "$fixture" "$RUNNER_TEMP/e1-$test_case.e1"
+          done
+          if cmp -s "$RUNNER_TEMP/e1-positive-e1.verdict" "$RUNNER_TEMP/e1-mutant-e1.verdict"; then
+            echo "::error::E1_CLI_D1_MUTANT_DID_NOT_CHANGE_SENS_RESULT"; exit 1
+          fi
+          cp "$RUNNER_TEMP/e1-positive.e1" "$RUNNER_TEMP/e1-corrupt.e1"
+          python3 - "$RUNNER_TEMP/e1-corrupt.e1" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          data = bytearray(p.read_bytes())
+          data[-1] ^= 1  # Physical CRC mutant only, never semantic truth.
+          p.write_bytes(data)
+          PY
+          if "$bin" eval-e1 "$RUNNER_TEMP/e1-corrupt.e1" > "$RUNNER_TEMP/e1-corrupt.out" 2> "$RUNNER_TEMP/e1-corrupt.err"; then
+            echo "::error::E1_CLI_FAIL_OPEN_CORRUPTED_CRC"; exit 1
+          fi
+          grep -q 'Integrity' "$RUNNER_TEMP/e1-corrupt.err" || {
+            echo "::error::E1_CLI_REJECTION_UNINFORMATIVE"; exit 1;
+          }
+          echo 'E1_NATIVE_SENS_CLI_VERDICTS_PASS: positive/mutant differ, T5 matches E1, CRC fails closed'
+
       - name: Фізичний T5-оракул — справжній sens-trit читає фізичний SENS (не Python-істина)
         id: t5-oracle
         shell: bash
