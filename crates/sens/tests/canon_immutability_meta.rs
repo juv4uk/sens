@@ -129,7 +129,9 @@ fn meta_canon_nonatom_is_sens_owned() {
                     "(my-canon-semantic-id (001 car))",
                     "(my-canon-identity (001 car))",
                 ] {
-                    let observed = match eval_program(probe, &mut session) {
+                    let parsed = sens::parse_mixed_exact_domain(probe)
+                        .expect("probe is exact-domain SENS syntax");
+                    let observed = match sens::eval_parsed_expressions(&parsed, &mut session) {
                         Ok(r) => r.value.to_string(),
                         Err(failure) => format!("ERROR: {failure}"),
                     };
