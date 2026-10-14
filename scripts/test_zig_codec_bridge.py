@@ -15,6 +15,63 @@ from zig_codec_bridge import ZigCodecError, build_transport, verify_t5
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
 
+# Independently pinned physical vectors. Width is part of each word's identity:
+# D1:1 != D2:01, and D2:00/11 must survive without trimmed leading bits.
+GOLDEN_WIDTH_VECTORS = {
+    "d1_zero": "50",
+    "d1_one": "a1",
+    "d2_zero_zero": "1a",
+    "d2_zero_one": "35",
+    "d2_one_zero": "6b",
+    "d2_one_one": "86",
+    "d2_d3_d2_multiple_words": "663b",
+    "d9_leading_zero_width": "5102",
+    "d10_zero_coordinate": "0000",
+}
+NEGATIVE_PHYSICAL = {
+    "invalid_byte_243": "f3",
+    "empty": "",
+    "all_padding": "f2",
+    "empty_domain_word": "a2",
+}
+
+
+def sha(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def assert_physical_roundtrip(executable: Path, name: str, raw: bytes) -> None:
+    proof = verify_t5(executable, raw)
+    expected = sha(raw)
+    if (proof.get("physical_sha256") != expected or
+            proof.get("profile") != "D1-D10_COORDINATES_NOT_EXECUTION" or
+            proof.get("zig_version") != "0.16.0"):
+        raise AssertionError(
+            f"ZIG_T5_GOLDEN_MISMATCH test_id=zig-migration-bridge-t5-exact-physical "
+            f"layer=transport fixture={name} expected_sha256={expected} "
+            f"actual={proof!r} first_difference=UNKNOWN "
+            "reproduce='python3 scripts/test_zig_codec_bridge.py'"
+        )
+
+
+def assert_physical_rejected(executable: Path, name: str, raw: bytes) -> None:
+    try:
+        verify_t5(executable, raw)
+    except ZigCodecError as exc:
+        if "ZIG_CODEC_FAILURE" not in str(exc):
+            raise AssertionError(
+                f"ZIG_T5_REJECT_HARNESS_ERROR test_id=zig-migration-bridge-t5-exact-physical "
+                f"layer=transport fixture={name} fixture_sha256={sha(raw)} "
+                f"expected=physical_reject actual={exc!s}"
+            ) from exc
+    else:
+        raise AssertionError(
+            f"ZIG_T5_FALSE_ACCEPT test_id=zig-migration-bridge-t5-exact-physical "
+            f"layer=transport fixture={name} fixture_sha256={sha(raw)} "
+            "expected=physical_reject actual=accepted first_difference=NA "
+            "reproduce='python3 scripts/test_zig_codec_bridge.py'"
+        )
+
 
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="sens-zig-migration-smoke-") as temp:
@@ -26,6 +83,21 @@ def main() -> None:
                 f"ZIG_BRIDGE_MISMATCH id=zig-migration-bridge-t5-exact-physical "
                 f"layer=transport expected_sha256={expected} actual={evidence}"
             )
+        for name, hex_bytes in GOLDEN_WIDTH_VECTORS.items():
+            assert_physical_roundtrip(executable, name, bytes.fromhex(hex_bytes))
+        for name, hex_bytes in NEGATIVE_PHYSICAL.items():
+            assert_physical_rejected(executable, name, bytes.fromhex(hex_bytes))
+        # Distinct widths produce distinct canonical bytes, even with a common
+        # low-order value. Physical bytes never imply function callability.
+        if bytes.fromhex(GOLDEN_WIDTH_VECTORS["d1_one"]) == bytes.fromhex(
+            GOLDEN_WIDTH_VECTORS["d2_zero_one"]
+        ):
+            raise AssertionError("D1_D2_WIDTH_COLLISION")
+        # Canonical truncation can become another valid word: D10:0000000000
+        # has two physical zero bytes; its one-byte prefix is D5:00000.
+        # T5 cannot detect this without a pinned original length + SHA.
+        assert_physical_roundtrip(executable, "canonical_d5_prefix_of_d10", b"\x00")
+
         # Exact ten-bit D10 zero coordinate: TWO 0x00 bytes. This is not an
         # executable D1..D9 word, but migration must preserve its physical bits.
         d10 = bytes([0x00, 0x00])
@@ -67,6 +139,10 @@ def main() -> None:
           f"layer=transport zig=0.16.0 physical_sha256={expected} "
           "first_difference=NONE malformed_ff=REJECTED d10_transport=ACCEPTED "
           "d10_executable=REJECTED overwidth_d15=REJECTED "
+          f"width_goldens={len(GOLDEN_WIDTH_VECTORS)} "
+          f"negative_gates={len(NEGATIVE_PHYSICAL) + 2} "
+          "d1_d2_distinct=YES d2_zero_and_one=YES "
+          "canonical_truncation_requires_external_sha=YES "
           "semantic_authority=SENS")
 
 
