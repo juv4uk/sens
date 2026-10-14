@@ -66,6 +66,8 @@
 (0011 my-semantic-id?
   (0010 (name semantic-id)
     (110
+      ; D3 EQ is defined only on atoms. A source list is never a name.
+      ((0100 (010 name)) #d1:0)
       ((101 name semantic-id) #d1:1)
       (#d1:1 (101 (my-semantic-id-for-surface name) semantic-id)))))
 
@@ -75,6 +77,8 @@
 (0011 my-canon-semantic-id
   (0010 (name)
     (110
+      ; Lists are data, not callable Canon names or D3-EQ operands.
+      ((0100 (010 name)) (001 ()))
       ((101 name 001) 001)
       ((101 name 010) 010)
       ((101 name 101) 101)
