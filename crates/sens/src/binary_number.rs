@@ -338,11 +338,20 @@ impl BinaryNumber {
     }
 
 
+    /// Magnitude ordering is deliberately distinct from semantic identity
+    /// ordering: Ord includes the exact numeric domain, while these private
+    /// bit-arithmetic mechanisms must not compare domain tags as values.
+    fn cmp_magnitude(&self, other: &Self) -> Ordering {
+        self.width()
+            .cmp(&other.width())
+            .then_with(|| self.bits.cmp(&other.bits))
+    }
+
     /// Exact subtraction in the natural Number slice. Underflow has no
     /// canonical natural result; signed encoding remains a separate law.
-    /// All arithmetic runs on canonical binary digits, never host integers.
+    /// The result is an unqualified mechanism magnitude, not Dn admission.
     pub fn checked_sub(&self, other: &Self) -> Option<Self> {
-        if self < other {
+        if self.cmp_magnitude(other) == Ordering::Less {
             return None;
         }
         let mut reversed = Vec::with_capacity(self.bits.len());
@@ -384,7 +393,7 @@ impl BinaryNumber {
             } else {
                 remainder.bits.push(bit);
             }
-            if &remainder >= divisor {
+            if remainder.cmp_magnitude(divisor) != Ordering::Less {
                 remainder = remainder.checked_sub(divisor)?;
                 quotient.push(1);
             } else {
@@ -396,8 +405,11 @@ impl BinaryNumber {
 
     /// Euclidean greatest common divisor. The result is again binary Number.
     pub fn gcd(&self, other: &Self) -> Self {
-        let mut a = self.clone();
-        let mut b = other.clone();
+        // GCD returns a private magnitude even if either source carries Dn.
+        // Otherwise gcd(x, 0) would accidentally return a domain-qualified
+        // value and later remainder comparisons could interpret tags as size.
+        let mut a = Self::normalize(self.bits.clone());
+        let mut b = Self::normalize(other.bits.clone());
         while !b.is_zero() {
             let (_, remainder) = a.div_rem(&b).expect("nonzero divisor");
             a = b;
@@ -559,6 +571,41 @@ mod tests {
         assert_eq!(a.div_rem(&BinaryNumber::zero()), None);
         assert_eq!(a.gcd(&BinaryNumber::parse("100").unwrap()).bits(), "10");
         assert_eq!(BinaryNumber::zero().gcd(&BinaryNumber::zero()).bits(), "0");
+    }
+
+    #[test]
+    fn magnitude_mechanisms_do_not_compare_domain_identity_as_value() {
+        // These are mechanism-only checks: no Dn arithmetic operation is
+        // admitted by calling the raw unqualified helpers.
+        let admitted = |width: usize, value: &str| {
+            let magnitude = BinaryNumber::parse(value).unwrap();
+            let mut word = vec![0; width - magnitude.width()];
+            word.extend_from_slice(magnitude.as_bits());
+            BinaryNumber::from_numeric_domain_bits(width, &word).unwrap()
+        };
+        let six = admitted(24, "110");
+        let four = admitted(24, "100");
+        let zero = admitted(24, "0");
+        assert_ne!(six, BinaryNumber::parse("110").unwrap());
+        assert_eq!(six.numeric_domain_width(), Some(24));
+
+        assert_eq!(six.checked_sub(&four).unwrap(), BinaryNumber::parse("10").unwrap());
+        assert_eq!(four.checked_sub(&six), None);
+        let (quotient, remainder) = six.div_rem(&four).unwrap();
+        assert_eq!(quotient, BinaryNumber::one());
+        assert_eq!(remainder, BinaryNumber::parse("10").unwrap());
+        assert_eq!(six.gcd(&four), BinaryNumber::parse("10").unwrap());
+        assert_eq!(six.gcd(&zero), BinaryNumber::parse("110").unwrap());
+        assert_eq!(zero.gcd(&zero), BinaryNumber::zero());
+
+        // The admitted Dn boundary still preserves D24 for outputs and
+        // refuses a D24/D48 mixture; raw magnitude math changes no law.
+        let (q, r) = six.div_rem_admitted_numeric(&four).unwrap();
+        assert_eq!(q.numeric_domain_width(), Some(24));
+        assert_eq!(r.numeric_domain_width(), Some(24));
+        assert_eq!(q.exact_numeric_domain_bits().unwrap().len(), 24);
+        assert_eq!(r.exact_numeric_domain_bits().unwrap().len(), 24);
+        assert_eq!(six.div_rem_admitted_numeric(&admitted(48, "100")), None);
     }
 
     #[test]
