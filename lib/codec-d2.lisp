@@ -25,19 +25,7 @@
            (codec-encode (011 x)
              (111 codec-close acc))))))))
 
-(0011 codec-decode
-  (0010 (tokens)
-    (110
-      ((101 (100 tokens) codec-open)
-       ((0010 (r1)
-          ((0010 (v1)
-             ((0010 (r2)
-                (111 (111 v1 (100 (codec-decode r2)))
-                     (011 (011 (codec-decode r2))))))
-           (100 r1))))
-        (codec-decode (011 tokens))))
-      (#d1:1
-       (111 (100 tokens) (011 tokens))))))
+(0011 codec-decode (0010 (tokens) (110 ((101 (100 tokens) codec-open) ((0010 (r1) ((0010 (v1) ((0010 (r2) (111 (111 v1 (100 (codec-decode r2))) (011 (011 (codec-decode r2))))) (011 r1))) (100 r1))) (codec-decode (011 tokens)))) (#d1:1 (111 (100 tokens) (011 tokens))))))
 
 (0011 codec-roundtrip
   (0010 (x)
