@@ -453,7 +453,7 @@ pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Erro
             .ok_or(D7T5Error::UnrenderableD7Cell)?;
         text.push_str(glyph);
     }
-    if keyboard_d7_words(&text)? != words {
+    if keyboard_d7_words(&text)?.as_slice() != words {
         return Err(D7T5Error::AmbiguousText);
     }
     Ok(text)
