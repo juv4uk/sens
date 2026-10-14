@@ -129,6 +129,15 @@ jobs:
           echo 'test_id=zig-freestanding-linked-physical-abi layer=transport semantic_authority=SENS executor=zig-0.16'
           bash research/zig-codecs/check_freestanding_link.sh \
             "$RUNNER_TEMP/sens-zig-freestanding"
+          # Hosted Linux measurement of touched stack with a 256 KiB guard-
+          # protected pthread stack; this is NOT MCU worst-case stack proof.
+          echo 'test_id=zig-f3c-stack-host-canary layer=transport semantic_authority=SENS executor=zig-0.16-plus-linux'
+          zig build-lib research/zig-codecs/freestanding.zig -dynamic -lc \
+            -O ReleaseSmall -femit-bin="$RUNNER_TEMP/libsens-zig-free-stack.so"
+          cc -std=c11 -O0 -fno-omit-frame-pointer -Wall -Wextra -Werror \
+            research/zig-codecs/stack_probe.c -pthread -ldl \
+            -o "$RUNNER_TEMP/sens-zig-stack-probe"
+          "$RUNNER_TEMP/sens-zig-stack-probe" "$RUNNER_TEMP/libsens-zig-free-stack.so"
       - name: Синтаксис усіх YAML-файлів репозиторію
         id: yaml-syntax
         shell: ruby {0}
