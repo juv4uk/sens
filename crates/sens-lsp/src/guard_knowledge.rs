@@ -467,7 +467,7 @@ mod tests {
         // Історичні W8-контейнери лишаються відокремленими від D3.
         let whole = include_str!("../../../knowledge/guard-reference.lisp");
         let start = whole
-            .find("(00001011 guard-reference-evidence-status\n")
+            .find("(0011 guard-reference-evidence-status\n")
             .expect("guard-reference-evidence-status missing");
         let rest = &whole[start..];
         let end = rest
@@ -571,7 +571,7 @@ mod tests {
         // AST-only witness: semantic decisions still belong to native SENS.
         let full = include_str!("../../../knowledge/guard-reference.lisp");
         let start = full
-            .find("(00001011 guard-script\n")
+            .find("(0011 guard-script\n")
             .expect("missing exact Guard script definition");
         let rest = &full[start..];
         let end = rest
@@ -861,6 +861,59 @@ mod tests {
             !definition_head_is_d4(&mutant),
             "historical W8 must never impersonate D4:0011"
         );
+    }
+
+
+    #[test]
+    fn guard_last_two_define_heads_use_exact_d4_and_reject_w8_width() {
+        // Structural readback, never a replacement for native SENS evaluation.
+        let source = include_str!("../../../knowledge/guard-reference.lisp");
+        let cases = [
+            ("guard-script", "\n(0011 guard-scripts"),
+            ("guard-reference-evidence-status", "\n(0011 guard-evidence-status-strength"),
+        ];
+
+        fn has_exact_d4_define_and_lambda(code: &str, name: &str) -> bool {
+            let trees = sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", code,
+            ).expect("pinned Guard reader must parse this source");
+            assert_eq!(trees.len(), 1, "exactly one top-level definition: {name}");
+            let ExprKind::List(def) = &trees[0].kind else {
+                panic!("expected one definition form: {name}");
+            };
+            assert_eq!(def.len(), 3, "DEFINE target and value: {name}");
+            assert!(matches!(&def[1].kind, ExprKind::Symbol(symbol)
+                if symbol.as_ref() == name), "must not rename definition target");
+            let ExprKind::List(lambda) = &def[2].kind else {
+                panic!("lambda body must be retained for {name}");
+            };
+            assert!(matches!(lambda.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0010
+            ), "D4:0010 lambda must remain exact for {name}");
+            matches!(def.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0011
+            )
+        }
+
+        for (name, next_marker) in cases {
+            let exact = format!("(0011 {name}\n");
+            let historical = format!("(00001011 {name}\n");
+            assert_eq!(source.matches(&exact).count(), 1, "{name} must be unique");
+            assert!(!source.contains(&historical), "{name} must have no historical DEFINE");
+            let from = source.find(&exact).expect("ratified Guard definition present");
+            let next = source[from..].find(next_marker)
+                .expect("following Guard definition present") + from;
+            let form = source[from..next].trim();
+            assert!(has_exact_d4_define_and_lambda(form, name), "{name} uses D4");
+            let mutant = form.replacen(&exact, &historical, 1);
+            assert_ne!(mutant, form, "{name} one-head mutation applied");
+            assert!(
+                !has_exact_d4_define_and_lambda(&mutant, name),
+                "historical W8 must never be admitted as D4:0011 for {name}"
+            );
+        }
     }
 
     #[test]

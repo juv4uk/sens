@@ -973,7 +973,7 @@
       ((101 (guard-reference-field (001 name) (100 tools)) name) (100 tools))
       ((010 (001 ())) (guard-script-find name (011 tools))))))
 
-(00001011 guard-script
+(0011 guard-script
   (0010 (name)
     (10011100 ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
@@ -1007,7 +1007,7 @@
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
-(00001011 guard-reference-evidence-status
+(0011 guard-reference-evidence-status
   (0010 (reference)
     (10011100 ((status (guard-reference-field (001 evidence-status) reference)))
       (00000111
