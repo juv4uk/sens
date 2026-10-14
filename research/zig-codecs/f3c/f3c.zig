@@ -145,7 +145,7 @@ fn unrank(allocator: Allocator, n: usize, index: Uint) ![]u8 {
     return out;
 }
 
-/// Single external D2 frame; exact words remain typed, never decimal IDs.
+/// Single external D2 frame; exact words remain width-qualified physical bits.
 fn frameTrits(allocator: Allocator, words: []const Word) ![]u8 {
     if (words.len < 2 or !same(words[0], 2, 2) or !same(words[words.len - 1], 2, 1))
         return Error.InvalidFrame;
