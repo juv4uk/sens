@@ -13,6 +13,8 @@ extern uint32_t sens_zig_codec_abi_version(void);
 extern int sens_zig_t5_validate(const uint8_t *src, size_t len);
 extern ptrdiff_t sens_zig_t5_encode_be3(
     const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
+extern ptrdiff_t sens_zig_t5_decode_be3(
+    const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
 extern ptrdiff_t sens_zig_f3c_pack(
     const uint8_t *src, size_t len, uint8_t *dst, size_t capacity);
 extern ptrdiff_t sens_zig_f3c_unpack(
@@ -35,6 +37,82 @@ static int check_bytes(const char *id, const uint8_t *actual,
             return 0;
         }
     }
+    return 1;
+}
+
+/* Independently exercise Zig-owned ingress in a Rust-free caller.
+ * The decoded BE3 triples are physical data, not a SENS semantic verdict.
+ */
+static int witness_zig_decode_be3(void) {
+    static const uint8_t golden_t5[] = {0x63, 0x89, 0x06, 0xa1};
+    static const uint8_t golden_be3[] = {
+        2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1
+    };
+    static const uint8_t w1[] = {1, 0, 1};
+    static const uint8_t w2[] = {2, 0, 1};
+    static const uint8_t w9[] = {9, 0, 1};
+    static const uint8_t invalid_byte[] = {243};
+    static const uint8_t overwide_word[] = {0, 0};
+    static const uint8_t invalid_tail[] = {0xf2};
+    uint8_t decoded[32] = {0};
+    uint8_t reencoded[32] = {0};
+    uint8_t sentinel[32];
+    uint8_t too_small[14];
+    uint8_t alias[32] = {0};
+    uint8_t d1_be3[3] = {0};
+    uint8_t d2_be3[3] = {0};
+    uint8_t d9_be3[3] = {0};
+    uint8_t d9_t5[4] = {0};
+
+    if (!check_number("be3-ingress-golden-size",
+            sens_zig_t5_decode_be3(golden_t5, sizeof golden_t5, decoded, sizeof decoded),
+            (ptrdiff_t)sizeof golden_be3)) return 0;
+    if (!check_bytes("be3-ingress-golden", decoded, golden_be3, sizeof golden_be3)) return 0;
+    if (!check_number("be3-reencode-size",
+            sens_zig_t5_encode_be3(decoded, sizeof golden_be3, reencoded, sizeof reencoded),
+            (ptrdiff_t)sizeof golden_t5)) return 0;
+    if (!check_bytes("be3-reencode-carrier", reencoded, golden_t5, sizeof golden_t5)) return 0;
+
+    /* Mechanical rejection must never overwrite caller-owned output. */
+    memset(decoded, 0x5a, sizeof decoded);
+    memset(sentinel, 0x5a, sizeof sentinel);
+    if (!check_number("be3-reject-byte243",
+            sens_zig_t5_decode_be3(invalid_byte, sizeof invalid_byte, decoded, sizeof decoded),
+            -1)) return 0;
+    if (!check_bytes("be3-reject-byte243-unchanged", decoded, sentinel, sizeof decoded)) return 0;
+    if (!check_number("be3-reject-overwidth-d10",
+            sens_zig_t5_decode_be3(overwide_word, sizeof overwide_word, decoded, sizeof decoded),
+            -1)) return 0;
+    if (!check_bytes("be3-reject-overwidth-unchanged", decoded, sentinel, sizeof decoded)) return 0;
+    if (!check_number("be3-reject-invalid-tail",
+            sens_zig_t5_decode_be3(invalid_tail, sizeof invalid_tail, decoded, sizeof decoded),
+            -1)) return 0;
+    if (!check_bytes("be3-reject-tail-unchanged", decoded, sentinel, sizeof decoded)) return 0;
+
+    memset(too_small, 0x5a, sizeof too_small);
+    if (!check_number("be3-reject-capacity",
+            sens_zig_t5_decode_be3(golden_t5, sizeof golden_t5, too_small, sizeof too_small),
+            -2)) return 0;
+    if (!check_bytes("be3-reject-capacity-unchanged", too_small, sentinel, sizeof too_small)) return 0;
+
+    memcpy(alias, golden_t5, sizeof golden_t5);
+    if (!check_number("be3-reject-alias",
+            sens_zig_t5_decode_be3(alias, sizeof golden_t5, alias, sizeof alias), -1)) return 0;
+    if (!check_bytes("be3-reject-alias-unchanged", alias, golden_t5, sizeof golden_t5)) return 0;
+
+    if (!check_number("be3-d1-width",
+            sens_zig_t5_decode_be3((const uint8_t[]){0xa1}, 1, d1_be3, sizeof d1_be3), 3)) return 0;
+    if (!check_number("be3-d2-width",
+            sens_zig_t5_decode_be3((const uint8_t[]){0x35}, 1, d2_be3, sizeof d2_be3), 3)) return 0;
+    if (!check_bytes("be3-d1-leading-bit", d1_be3, w1, sizeof w1)) return 0;
+    if (!check_bytes("be3-d2-leading-zero", d2_be3, w2, sizeof w2)) return 0;
+
+    /* W9:000000001 remains nine bits rather than shrinking to W1. */
+    if (!check_number("be3-w9-encode-size",
+            sens_zig_t5_encode_be3(w9, sizeof w9, d9_t5, sizeof d9_t5), 2)) return 0;
+    if (!check_number("be3-w9-decode-size",
+            sens_zig_t5_decode_be3(d9_t5, 2, d9_be3, sizeof d9_be3), 3)) return 0;
+    if (!check_bytes("be3-w9-leading-zeros", d9_be3, w9, sizeof w9)) return 0;
     return 1;
 }
 
@@ -97,6 +175,7 @@ int main(void) {
             sens_zig_f3c_unpack(f3c, sizeof known_f3c, unpacked, sizeof unpacked), 4)) return 1;
     if (!check_bytes("f3c-recovered-t5", unpacked, known_t5, sizeof known_t5)) return 1;
 
+    if (!witness_zig_decode_be3()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
