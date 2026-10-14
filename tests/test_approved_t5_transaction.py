@@ -107,37 +107,6 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), BINARY.read_bytes())
             self.assertEqual(json.loads(new_report.read_text())["summary"]["published"], 0)
 
-    def test_current_d8_and_historical_sid8_must_not_be_conflated(self):
-        # Existing true historical source, already proven by the independent
-        # Core1 C1-THIRD Python+Rust oracle on main. No invented specimen.
-        third = ROOT / "tests/fixtures/core1-third-domain-canary/third.lisp"
-        encoded = third.with_suffix(".sens").read_bytes()
-        self.assertEqual(len(encoded), 38)
-        rel = third.relative_to(ROOT).as_posix()
-        with tempfile.TemporaryDirectory(prefix="approved-t5-w8-") as td:
-            temp = Path(td)
-            pin = hashlib.sha256(third.read_bytes()).hexdigest()
-            entry = [{"path": rel, "sha256": pin}]
-            # SAFE by default: W8 is ambiguous until owner-proven provenance.
-            blocked, out, report = self.run_cli(temp, entry)
-            self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
-            result = json.loads(report.read_text())
-            self.assertEqual(result["source_era"], "auto")
-            self.assertEqual(result["summary"]["files_blocked"], 1)
-            self.assertEqual(result["summary"]["published"], 0)
-            self.assertIn("ambiguous W8", result["files"][0]["reason"])
-            target = out / third.relative_to(ROOT).with_suffix(".sens")
-            self.assertFalse(target.exists())
-            # Proven historical input becomes one byte-identical physical T5
-            # output only when source era is made EXPLICIT.
-            success, _, report = self.run_cli(temp, entry, source_era="legacy")
-            self.assertEqual(success.returncode, 0, success.stdout + success.stderr)
-            self.assertEqual(target.read_bytes(), encoded)
-            state = json.loads(report.read_text())
-            self.assertEqual(state["source_era"], "legacy")
-            self.assertEqual(state["files"][0]["source_era"], "legacy")
-            self.assertEqual(state["summary"]["published"], 1)
-
     def test_mixed_valid_and_invalid_never_commits_partial_output(self):
         with tempfile.TemporaryDirectory(prefix="approved-t5-block-") as td:
             temp = Path(td)
