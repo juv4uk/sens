@@ -27,6 +27,7 @@ CASES = (
      "81cc330df7fda46c52317d2c11cda19e7a72f2e1"),
 )
 C_SOURCE = "research/zig-codecs/host-c/d3_subset.c"
+C_ABI_HEADER = "research/zig-codecs/host-c/zig_transport_v2.h"
 C_DRIVER = "research/zig-codecs/host-c/verify_d3_subset.sh"
 RUST_DRIVERS = ("scripts/prove-retired-d3-laws.sh", "scripts/prove-retired-quote-inert.sh")
 ZIG_ABI = "research/zig-codecs/transport_abi.zig"
@@ -37,7 +38,7 @@ WORDS = re.compile(rb"^[01 \t\r\n]+$")
 # Unrelated dirty worktree files do not block the migration swarm.
 H2_TRACKED_INPUTS = (
     "research/zig-codecs/host-c/verify_h2_cross_host.py",
-    C_SOURCE, C_DRIVER, ZIG_ABI,
+    C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI,
     "research/zig-codecs/t5/t5.zig",
     "research/zig-codecs/f3c/f3c.zig",
     "scripts/sens_t5_codec.py", ".zig-version", *RUST_DRIVERS,
@@ -184,7 +185,7 @@ def preflight(root: Path) -> dict:
         cases.append(inspect_pair(
             name, (base / f"{name}-law.bits").read_bytes(),
             (base / f"{name}-mutant.bits").read_bytes(), pos_pin, neg_pin))
-    for path in (C_SOURCE, C_DRIVER, ZIG_ABI, *RUST_DRIVERS):
+    for path in (C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI, *RUST_DRIVERS):
         if not (root / path).is_file():
             raise AuditFailure(f"test_id=H2_SOURCE layer=provenance missing={path}")
     c_src = (root / C_SOURCE).read_text(encoding="utf-8")
@@ -210,7 +211,7 @@ def preflight(root: Path) -> dict:
         "host_a": "SENS-native-via-Rust", "host_b": "Rust-free-C-through-Zig-ABI-v2",
         "cases": cases,
         "source_sha256": {p: sha256((root / p).read_bytes())
-                          for p in (C_SOURCE, C_DRIVER, ZIG_ABI, *RUST_DRIVERS)},
+                          for p in (C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI, *RUST_DRIVERS)},
     }
 
 
