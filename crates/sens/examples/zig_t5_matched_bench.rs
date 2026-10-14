@@ -62,6 +62,11 @@ fn main() {
             "fixture impl=rust forms={} words={} bytes={} fnv64={:x}",
             forms, words.len(), physical.len(), fnv64(&physical)
         );
+        print!("physical impl=rust forms={} hex=", forms);
+        for byte in &physical {
+            print!("{byte:02x}");
+        }
+        println!();
 
         for _ in 0..3 {
             black_box(encode_ternary_words(&words).expect("warm encode"));
