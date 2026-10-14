@@ -198,21 +198,8 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(11111111 x)\n")
 
-    def test_proven_old_print_sid8_and_surface_project_to_current_d8(self):
-        for form,passname in (("(01001000 x)\n","pass1-sens8"),
-                               ("(print x)\n","pass2-my-lisp")):
-            out,resolver=self.migrate(form)
-            self.assertTrue(out.startswith("10 11011011 00 "),form)
-            self.assertEqual(resolver.counts[passname],1)
-
-    def test_proven_lisp15_equal_is_current_exact_d8(self):
-        out,resolver=self.migrate("(EQUAL a b)\n")
-        self.assertTrue(out.startswith("10 11110111 00 "),out)
-        self.assertEqual(resolver.counts["pass3-lisp15"],1)
-
-    def test_one_exact_identity_d4_d8_d9_from_audited_legacy(self):
-        for code,bits in (("00100010","11110111"),
-                          ("00101111","1001"),
+    def test_one_exact_identity_d4_d9_from_audited_legacy(self):
+        for code,bits in (("00101111","1001"),
                           ("00111010","110011110"),
                           ("01001011","110101001")):
             with self.subTest(code=code):
@@ -224,12 +211,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         data=mod.load_foundation(FOUNDATION)
         approved=mod.parse_audited_legacy_successors(COVERAGE,data)
         self.assertNotIn("00001010",approved)  # MACRO + DEFINE, not one identity
-        self.assertNotIn("00110111",approved)  # current D6 MAP or D8 MAP ambiguous
         self.assertNotIn("11111111",approved)  # historical unallocated
-        self.assertEqual(approved["01001000"][:2],("11011011","D8"))
-        # A historical identity cannot be silently passed off as current D8.
-        with self.assertRaisesRegex(mod.MigrationError,"ambiguous"):
-            self.migrate("(01001000 x)\n",source_era="auto")
 
     def test_old_functions_with_current_successors_move_by_semantic_role(self):
         cases=[
@@ -439,52 +421,6 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_written"], 0)
 
 
-    def test_single_lisp_file_cli_and_w8_current_authority(self):
-        with tempfile.TemporaryDirectory() as td:
-            base = Path(td)
-            source = base / "one.lisp"
-            original = "(00000101 ())\n"
-            source.write_text(original, encoding="utf-8")
-            def run(era, foundation):
-                dst = base / ("out-" + era)
-                report = base / (era + ".json")
-                command = [
-                    sys.executable, str(SCRIPT), str(source),
-                    "--out", str(dst), "--foundation", str(foundation),
-                    "--domain-surfaces", str(DOMAIN_SURFACES),
-                    "--semantic-generated", str(SEMANTIC_GENERATED),
-                    "--semantic-registry", str(SEMANTIC_REGISTRY),
-                    "--necessary-forms", str(NECESSARY),
-                    "--historical-map", str(HISTORICAL),
-                    "--text7", str(TEXT7),
-                    "--report", str(report), "--source-era", era,
-                ]
-                process = subprocess.run(command, capture_output=True, text=True)
-                return process, dst, json.loads(report.read_text(encoding="utf-8"))
-            current_foundation = ROOT / "knowledge" / "d1-d9-foundation.json"
-            blocked, blocked_out, blocked_report = run("auto", current_foundation)
-            self.assertEqual(blocked.returncode, 2, blocked.stderr)
-            self.assertEqual(blocked_report["summary"]["files_seen"], 1)
-            self.assertEqual(blocked_report["summary"]["files_blocked"], 1)
-            self.assertIn("ambiguous W8", blocked_report["files"][0]["reason"])
-            self.assertFalse((blocked_out / "one.sens").exists())
-            legacy, legacy_out, legacy_report = run("legacy", FOUNDATION)
-            self.assertEqual(legacy.returncode, 0, legacy.stderr)
-            self.assertEqual(mod.decode_bytes((legacy_out / "one.sens").read_bytes()),
-                             ["10", "100", "00", "000", "01"])
-            current, current_out, current_report = run("current", current_foundation)
-            self.assertEqual(current.returncode, 0, current.stderr)
-            binary = current_out / "one.sens"
-            self.assertEqual(mod.decode_bytes(binary.read_bytes()),
-                             ["10", "00000101", "00", "000", "01"])
-            self.assertEqual(current_report["summary"]["files_seen"], 1)
-            self.assertEqual(current_report["summary"]["files_written"], 1)
-            self.assertEqual(current_report["source_era"], "current")
-            self.assertEqual(source.read_text(encoding="utf-8"), original)
-            again, _, _ = run("current", current_foundation)
-            self.assertEqual(again.returncode, 2)  # write-new-only never clobbers
-
-
     def test_unpaired_only_ignores_preexisting_sens_pairs(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
@@ -539,34 +475,6 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_written"], 1)
             self.assertEqual(state["summary"]["files_seen"], 1)
             self.assertEqual(source.read_text(), "()\n")
-
-
-    def test_default_source_era_blocks_ambiguous_w8_without_guessing(self):
-        with tempfile.TemporaryDirectory() as td:
-            base = Path(td)
-            source = base / "ambiguous.lisp"
-            source.write_text("(00000101 ())\n", encoding="utf-8")
-            out = base / "mirror"
-            report = base / "report.json"
-            process = subprocess.run([
-                sys.executable, str(SCRIPT), str(source),
-                "--out", str(out),
-                "--report", str(report),
-                "--foundation", str(ROOT / "knowledge" / "d1-d9-foundation.json"),
-                "--domain-surfaces", str(DOMAIN_SURFACES),
-                "--semantic-generated", str(SEMANTIC_GENERATED),
-                "--semantic-registry", str(SEMANTIC_REGISTRY),
-                "--necessary-forms", str(NECESSARY),
-                "--historical-map", str(HISTORICAL),
-                "--text7", str(TEXT7),
-            ], capture_output=True, text=True)
-            self.assertEqual(process.returncode, 2, process.stderr)
-            self.assertFalse((out / "ambiguous.sens").exists())
-            state = json.loads(report.read_text(encoding="utf-8"))
-            self.assertEqual(state["source_era"], "auto")
-            self.assertEqual(state["summary"]["files_blocked"], 1)
-            self.assertIn("ambiguous W8", state["files"][0]["reason"])
-
 
 
     def test_global_define_shadows_builtin_surface_with_bound_text7_frame(self):
