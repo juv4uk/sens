@@ -6,7 +6,7 @@
 
 use sens::{
     encode_binary_frame, eval_parsed_expressions_incremental, load_core_library, parse,
-    BinaryFrame, Environment, Session, Value,
+    BinaryFrame, Bit1, BitPacker, Environment, PackedBitstream, Session, Value,
 };
 use std::{
     ffi::{CStr, CString},
@@ -369,11 +369,11 @@ pub unsafe extern "C" fn my_lisp_embed_session_free(session: *mut MyLispEmbedSes
     }
 }
 
-/// Canonical binary framing of one evaluated result value, as transport bits
-/// (one byte per bit, MSB-first) -- exactly what `encode_binary_frame`
-/// produces. A value with no canonical domain frame is refused, so the
-/// boundary fails closed instead of inventing a width for the host.
-fn binary_frame_bits_for_value(value: &Value) -> Result<Vec<u8>, String> {
+/// Canonical binary framing of one evaluated result value, packed densely
+/// MSB-first (8 bits per byte, no padding) -- one bit must never cost one
+/// byte. A value with no canonical domain frame is refused, so the boundary
+/// fails closed instead of inventing a width for the host.
+fn binary_frame_stream_for_value(value: &Value) -> Result<PackedBitstream, String> {
     let frame = match value {
         Value::DomainIdentity(identity) => BinaryFrame::Domain(*identity),
         Value::BinaryNumber(number) => BinaryFrame::BinaryNumber(number.clone()),
@@ -388,14 +388,23 @@ fn binary_frame_bits_for_value(value: &Value) -> Result<Vec<u8>, String> {
             ))
         }
     };
-    encode_binary_frame(&frame).map_err(|error| format!("binary frame encode failed: {error:?}"))
+    let bits = encode_binary_frame(&frame)
+        .map_err(|error| format!("binary frame encode failed: {error:?}"))?;
+    let mut packer = BitPacker::new();
+    for bit in bits {
+        let word =
+            Bit1::new(bit).ok_or_else(|| format!("non-bit value in canonical frame: {bit}"))?;
+        packer.push(word);
+    }
+    Ok(packer.finish())
 }
 
 /// Binary value channel (ABI v5). Evaluates `source` and, when the result
-/// value has a canonical binary domain frame, writes its transport bits (one
-/// byte per bit, MSB-first) to `*out_bytes` with byte length `*out_len` and
-/// meaningful bit length `*out_bit_len`. The domain width travels inside the
-/// frame; the host must never infer a domain from the byte count.
+/// value has a canonical binary domain frame, writes it as a densely packed
+/// bit stream (8 bits per byte, MSB-first, no padding) to `*out_bytes` with
+/// byte length `*out_len` and meaningful bit length `*out_bit_len`. The
+/// domain width travels inside the frame; the host must never infer a domain
+/// from the byte count, and a one-bit payload must not become a one-byte one.
 ///
 /// Returns 0 on success, 1 when the value has no canonical binary frame
 /// (fail-closed; nothing written), and 2 on parse/eval error with the rendered
@@ -446,20 +455,22 @@ pub unsafe extern "C" fn my_lisp_embed_eval_binary(
         }
     };
 
-    let outcome = catch_unwind(AssertUnwindSafe(|| -> Result<Vec<u8>, String> {
+    let outcome = catch_unwind(AssertUnwindSafe(|| -> Result<PackedBitstream, String> {
         let session = &mut *session;
         let expressions = parse(&source).map_err(|error| format!("error: {}", error.render(&source)))?;
         let result = eval_parsed_expressions_incremental(&expressions, &mut session.session)
             .map_err(|error| format!("error: {}", error.render(&source)))?;
-        binary_frame_bits_for_value(&result.value)
+        binary_frame_stream_for_value(&result.value)
     }));
 
     match outcome {
-        Ok(Ok(bits)) => {
-            let len = bits.len();
-            *out_bytes = Box::into_raw(bits.into_boxed_slice()) as *mut u8;
-            *out_len = len;
-            *out_bit_len = len;
+        Ok(Ok(packed)) => {
+            let bytes = packed.bytes().to_vec();
+            let byte_len = bytes.len();
+            let bit_len = packed.bit_len();
+            *out_bytes = Box::into_raw(bytes.into_boxed_slice()) as *mut u8;
+            *out_len = byte_len;
+            *out_bit_len = bit_len;
             0
         }
         Ok(Err(message)) => {
@@ -523,13 +534,19 @@ mod tests {
     }
 
     #[test]
-    fn binary_channel_round_trips_a_d24_binary_number_frame() {
+    fn binary_channel_packs_bits_without_byte_padding() {
         use sens::BinaryNumber;
         let mut word = vec![0u8; 24];
         word[23] = 1;
         let number = BinaryNumber::from_numeric_domain_bits(24, &word).expect("d24 word");
         let value = Value::BinaryNumber(number.clone());
-        let bits = binary_frame_bits_for_value(&value).expect("canonical frame");
+        let packed = binary_frame_stream_for_value(&value).expect("packed frame");
+        // The requirement this boundary exists for: one bit must never cost
+        // one byte. Dense packing means byte count is strictly below bit count.
+        assert!(packed.byte_len() < packed.bit_len());
+        let bits: Vec<u8> = (0..packed.bit_len())
+            .map(|index| (packed.bytes()[index / 8] >> (7 - index % 8)) & 1)
+            .collect();
         let (frame, consumed) = sens::decode_binary_frame(&bits).expect("decode");
         assert_eq!(consumed, bits.len());
         assert_eq!(frame, BinaryFrame::BinaryNumber(number));
@@ -538,7 +555,7 @@ mod tests {
     #[test]
     fn binary_channel_fails_closed_for_a_value_without_a_domain_frame() {
         let value = Value::Symbol(std::rc::Rc::from("not-a-domain-value"));
-        assert!(binary_frame_bits_for_value(&value).is_err());
+        assert!(binary_frame_stream_for_value(&value).is_err());
     }
 
     #[test]

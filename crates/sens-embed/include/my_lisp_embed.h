@@ -38,6 +38,8 @@ int32_t my_lisp_embed_register_unary(
     MyLispEmbedUnaryFn callback,
     void *context);
 char *my_lisp_embed_eval(MyLispEmbedSession *session, const char *utf8_source);
+/* Densely packed result bits: 8 bits per byte, MSB-first, no padding.
+   *out_bit_len is the meaningful bit count; never infer a domain from *out_len. */
 int32_t my_lisp_embed_eval_binary(
     MyLispEmbedSession *session,
     const char *utf8_source,
