@@ -45,6 +45,25 @@ class ExactDomainMigrationTests(unittest.TestCase):
 """
         self.assertEqual(self.rewrite(source), expected)
 
+    def test_prefixed_quote_in_list_head_is_data_not_an_executable_head(self):
+        # Source apostrophe and CL function-quote must not be rewritten as
+        # executable SENS D3:100, even when occupying list-head position.
+        for source in ("('car x)", "(#'car x)", "('перше x)",
+                       "('00000101 x)"):
+            with self.subTest(source=source):
+                self.assertEqual(self.rewrite(source), source)
+
+    def test_unquoted_nested_call_after_quoted_head_remains_migratable(self):
+        # A quoted datum blocks only its own head, not an independent call.
+        self.assertEqual(
+            self.rewrite("('car (car x))"),
+            "('car (100 x))",
+        )
+        self.assertEqual(
+            self.rewrite("(#'car (car x))"),
+            "(#'car (100 x))",
+        )
+
     def test_already_exact_heads_are_idempotent(self):
         source = """(100 x)
 (011 (100 x))
