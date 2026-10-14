@@ -1,0 +1,24 @@
+name: Full Cargo workspace (manual)
+# Ручний повний прогін усього workspace. Не запускається автоматично.
+# Призначення (розпорядження власника 14.10.2026): коли в CI багато червоного --
+# запустити ЦЕЙ workflow і розібрати причину до кореня.
+# Див. AGENTS.md -> OWNER-CI-RED-DISCIPLINE-20261014.
+on:
+  workflow_dispatch:
+
+jobs:
+  full-cargo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: FULL_CARGO_WORKSPACE -- повний прогін на точному SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "FULL_CARGO_MANUAL commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id full-cargo-workspace-all-targets \
+            --layer transport \
+            --fixture Cargo.toml \
+            --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" \
+            -- cargo test --workspace --all-targets --locked

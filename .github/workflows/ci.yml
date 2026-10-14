@@ -150,23 +150,6 @@ jobs:
           echo "test_id=compiler-program-list-sens-fail-closed layer=transport semantic_authority=SENS"
           sha256sum lib/compiler-nucleus.lisp crates/sens/tests/compiler_nucleus_sens.rs tests/semantic/compiler-program-list-d1-law.lisp tests/semantic/compiler-program-list-d1-mutant.lisp
           cargo test --locked -p sens --test compiler_nucleus_sens compiler_program_list_fail_closed_is_sens_owned -- --exact --nocapture
-      # Власник 2026-10-14: обов'язковість '-D warnings' знято — попередження Rust
-      # самі по собі не роблять CI червоним. АЛЕ коли червоного багато, цей повний
-      # прогін ОБОВ'ЯЗКОВО запускається і причина розбирається до кореня.
-      # Див. AGENTS.md -> OWNER-CI-RED-DISCIPLINE-20261014.
-      - name: FULL_CARGO_WORKSPACE — одноразовий повний прогін на точному SHA
-        if: contains(github.event.head_commit.message, '[full-cargo-once]') || github.event_name == 'workflow_dispatch'
-        id: full-cargo
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "FULL_CARGO_ONCE commit=$GITHUB_SHA command=cargo test --workspace --all-targets --locked"
-          python3 scripts/ci_failure_contract.py run \
-            --test-id full-cargo-workspace-all-targets \
-            --layer transport \
-            --fixture Cargo.toml \
-            --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" \
-            -- cargo test --workspace --all-targets --locked
       - name: D1 source census — direct predicate bits, no wrapper constructors
         id: source-census
         shell: bash
@@ -785,7 +768,6 @@ jobs:
         if: always()
         shell: bash
         env:
-          FULL_CARGO_OUTCOME: ${{ steps.full-cargo.outcome }}
           BUDGET_OUTCOME: ${{ steps.budget.outcome }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           PACKED_OUTCOME: ${{ steps.packed.outcome }}
@@ -812,17 +794,6 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          # An optional full-Cargo failure terminates before native witnesses begin.
-          # Preserve and validate that actual root-cause report rather than
-          # misdiagnosing never-executed native laws as missing SENS receipts.
-          if [[ "$FULL_CARGO_OUTCOME" == failure ]]; then
-            echo '::error::FULL_CARGO_ROOT_FAILURE: see failing Cargo step and its original evidence'
-            python3 scripts/ci_failure_contract.py scan \
-              --report-file "$RUNNER_TEMP/sens-full-cargo-red.jsonl" || exit 1
-            # A correctly classified transitional failure still blocks this
-            # complete-workspace run: do not launder the suite into GREEN.
-            exit 1
-          fi
           # Власник 2026-10-14: обмеження UNINFORMATIVE-EXECUTOR знято —
           # мова ще не зріла вимагати нативної SENS-паритетності з Rust/Python.
           # Діагностика нижче лишається; нативні квитанції більше не вимагаються.
