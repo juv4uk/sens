@@ -107,17 +107,38 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     if (b"transport=zig" not in backend.stdout
             or b"semantic_authority=SENS" not in backend.stdout):
         raise Rejected("SENS executable has no evidenced Zig mechanical backend")
+    # A digest of the source and a digest of the carrier are NOT a binding:
+    # both could be separately pinned while referring to different programs.
+    # Only the language-owned canonical SENS source admission can produce the
+    # corresponding physical T5 file. This step deliberately stays OUTSIDE Zig.
+    # A translated-era receipt identifies the upstream historical source;
+    # the supplied .lisp here must be the admitted POST-translation bit source.
+    if source.suffix != ".lisp":
+        raise Rejected("post-admission source must have .lisp suffix")
     with tempfile.TemporaryDirectory(prefix="sens-pub-preflight-") as temp:
-        replay_path = Path(temp) / "replay.sens"
+        temp_dir = Path(temp)
+        replay_path = temp_dir / "replay.sens"
         run_checked([str(zig_bin), "t5-roundtrip", str(candidate), str(replay_path)],
                     runner=runner)
-        if not replay_path.is_file() or replay_path.is_symlink():
-            raise Rejected("Zig did not produce the exact physical replay")
-        replay = replay_path.read_bytes()
+        replay = read_fixed(replay_path)
         if replay != original:
             raise Rejected(
                 f"Zig byte replay mismatch original_sha={digest(original)} "
                 f"replay_sha={digest(replay)}"
+            )
+        # Execute SENS source→transport; never rely on an unverified
+        # Python/Rust projection or on the two independent manifest hashes.
+        source_snapshot = temp_dir / "admitted-source.lisp"
+        source_snapshot.write_bytes(initial_source)
+        run_checked([str(sens_bin), "encode", str(source_snapshot)], runner=runner)
+        encoded_path = source_snapshot.with_suffix(".sens")
+        if not encoded_path.is_file() or encoded_path.is_symlink():
+            raise Rejected("SENS source encode produced no regular physical .sens")
+        encoded = read_fixed(encoded_path)
+        if encoded != original:
+            raise Rejected(
+                f"SENS source/physical mismatch source_sha={digest(initial_source)} "
+                f"candidate_sha={digest(original)} encoded_sha={digest(encoded)}"
             )
     native = run_checked([str(sens_bin), "eval", str(candidate)], runner=runner)
     pinned("native_SENS_verdict", digest(native.stdout),
