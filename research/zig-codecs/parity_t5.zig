@@ -48,9 +48,9 @@ fn firstDiff(a: []const u8, b: []const u8) usize {
 fn accepts(allocator: std.mem.Allocator, path: []const u8, detail: *bool) !bool {
     const original = readFile(allocator, path) catch { detail.* = false; return false; };
     defer allocator.free(original);
-    const words = t5.decode(allocator, original) catch { detail.* = false; return false; };
+    const words = t5.decodeCoordinates(allocator, original) catch { detail.* = false; return false; };
     defer allocator.free(words);
-    const re = t5.encode(allocator, words) catch { detail.* = false; return false; };
+    const re = t5.encodeCoordinates(allocator, words) catch { detail.* = false; return false; };
     defer allocator.free(re);
     if (!std.mem.eql(u8, original, re)) {
         detail.* = false;
