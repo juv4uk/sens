@@ -306,6 +306,78 @@ mod qualified_numeric_domain_value_tests {
         assert_eq!(err.kind, ErrorKind::DivisionByZero);
     }
 
+    /// One focused Core execution witness. The mathematical comparison is
+    /// performed by the exact D5 SENS functions, not by a host Fraction/f64
+    /// oracle; Rust only inspects the returned D1 predicate and named failures.
+    /// D24 operands are injected as exact domain-qualified values because the
+    /// physical source-to-D24 reader boundary remains a separate task.
+    #[test]
+    fn binary_d5_exact_q_axiom_witness_with_single_input_mutation() {
+        let mut session = crate::Session::default();
+        let qualified = |width: usize, bits: &str| -> Value {
+            assert!(bits.len() <= width && !bits.is_empty());
+            let mut word = vec![0u8; width - bits.len()];
+            word.extend(bits.bytes().map(|bit| match bit {
+                b'0' => 0,
+                b'1' => 1,
+                _ => panic!("expected exact binary magnitude"),
+            }));
+            Value::BinaryNumber(
+                BinaryNumber::from_numeric_domain_bits(width, &word)
+                    .expect("full-width admitted Dn input"),
+            )
+        };
+        for (name, bits) in [
+            ("a", "1"), ("b", "10"), ("c", "11"), ("f", "110"),
+            ("g", "111"), ("z", "0"),
+        ] {
+            session.environment.define(name, qualified(24, bits));
+        }
+        // Same magnitude as D24:a, but a different domain identity.
+        session.environment.define("w", qualified(48, "1"));
+        session.environment.define("u", Value::BinaryNumber(BinaryNumber::one()));
+
+        // D5 10111 = quotient, D5 01010 = sum, D5 11010/11011
+        // = less/greater. The two D1:NO results prove exact equality
+        // of 1/3 + 1/6 and 1/2 under SENS's admitted total order.
+        // The one-input mutation 1/6 -> 1/7 MUST change the less verdict.
+        let cases = [
+            ("equal-not-less", "(11010 (01010 (10111 a c) (10111 a f)) (10111 a b))", false),
+            ("equal-not-greater", "(11011 (01010 (10111 a c) (10111 a f)) (10111 a b))", false),
+            ("mutated-less", "(11010 (01010 (10111 a c) (10111 a g)) (10111 a b))", true),
+        ];
+        for (id, source, expected) in cases {
+            let parsed = crate::parse_mixed_exact_domain(source)
+                .unwrap_or_else(|err| panic!("id={id} layer=parse source={source} actual={err}"));
+            let actual = crate::eval_parsed_expressions(&parsed, &mut session)
+                .unwrap_or_else(|err| panic!("id={id} layer=eval source={source} actual={err}"))
+                .value.as_predicate_bit();
+            assert_eq!(
+                actual,
+                Some(expected),
+                "REGRESSION id={id} layer=eval source={source} expected=D1:{} actual={actual:?} reproduce=cargo_test_binary_d5_exact_q_axiom_witness_with_single_input_mutation",
+                u8::from(expected),
+            );
+        }
+
+        // A source-level exact binary D5 call must not grant arithmetic
+        // admission to a zero divisor, a different Dn or a bare Number.
+        for (id, source, kind) in [
+            ("denominator-zero", "(10111 a z)", ErrorKind::DivisionByZero),
+            ("mixed-d24-d48", "(10111 a w)", ErrorKind::Type),
+            ("unqualified-number", "(10111 a u)", ErrorKind::Type),
+        ] {
+            let parsed = crate::parse_mixed_exact_domain(source)
+                .unwrap_or_else(|err| panic!("id={id} layer=parse source={source} actual={err}"));
+            let error = crate::eval_parsed_expressions(&parsed, &mut session)
+                .expect_err("negative D5 witness must fail closed");
+            assert_eq!(
+                error.kind, kind,
+                "REGRESSION id={id} layer=eval source={source} expected={kind:?} actual={error:?} reproduce=cargo_test_binary_d5_exact_q_axiom_witness_with_single_input_mutation",
+            );
+        }
+    }
+
     #[test]
     fn core_runtime_d24_full_multiplication_produces_exact_d48() {
         let env = Environment::root();
