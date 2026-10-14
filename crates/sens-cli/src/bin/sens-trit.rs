@@ -20,12 +20,49 @@ const USAGE: &str =
 #[path = "../zig_transport_gateway.rs"]
 mod zig_transport;
 
+/// The ONLY physical T5 decoder for an enabled Zig transport path.
+/// SENS alone reconstructs exact typed words and applies the D2 grammar.
+fn exact_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let (packed, widths) = zig_transport::decode_dense_t5(bytes)?;
+        return sens::unpack_binary_source_words(&packed, &widths)
+            .ok_or("SENS rejected exact physical word-width schedule".into());
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        sens::decode_ternary_words(bytes)
+            .map_err(|e| format!("physical T5 transport rejected: {e:?}"))
+    }
+}
+
+fn admitted_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    let words = exact_t5_words(bytes)?;
+    sens::parse_canonical_word_sequence(&words)
+        .map_err(|e| format!("canonical packed SENS parser rejected: {e}"))?;
+    Ok(words)
+}
+
+fn admitted_physical_program(bytes: &[u8]) -> Result<sens::PhysicalT5Program, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let (packed, widths) = zig_transport::decode_dense_t5(bytes)?;
+        return sens::PhysicalT5Program::from_packed_words(&packed, &widths)
+            .map_err(|e| format!("canonical packed SENS parser rejected: {e:?}"));
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        sens::PhysicalT5Program::decode(bytes)
+            .map_err(|e| format!("canonical packed SENS parser rejected: {e:?}"))
+    }
+}
+
 fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
     #[cfg(feature = "zig-transport")]
     {
         let restored = zig_transport::decode_f3(bytes)?;
-        let parsed = sens::PhysicalT5Program::decode(&restored)
-            .map_err(|e| format!("Zig F3C restored inadmissible SENS program: {e:?}"))?;
+        let parsed = admitted_physical_program(&restored)
+            .map_err(|e| format!("Zig F3C restored inadmissible SENS program: {e}"))?;
         if parsed.form_count() != 1 {
             return Err("Zig F3C restored more than one root".into());
         }
@@ -39,8 +76,8 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
 fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        let parsed = sens::PhysicalT5Program::decode(bytes)
-            .map_err(|e| format!("SENS input is not an executable canonical T5 program: {e:?}"))?;
+        let parsed = admitted_physical_program(bytes)
+            .map_err(|e| format!("SENS input is not an executable canonical T5 program: {e}"))?;
         if parsed.form_count() != 1 || bytes.len() > 16 {
             return Ok(None);
         }
@@ -181,6 +218,9 @@ fn eval_t5_bytes_core4(
     // Decode physical T5 exactly ONCE through the current D2 reader,
     // before any optional Core4 bootstrap. There is no text rendering,
     // duplicate grammar, or intermediate packed-bit representation here.
+    #[cfg(feature = "zig-transport")]
+    let program = admitted_physical_program(bytes)?;
+    #[cfg(not(feature = "zig-transport"))]
     let program = sens::PhysicalT5Program::decode(bytes).map_err(|e| match e {
         sens::T5ExecutionError::Transport(error) =>
             format!("physical T5 decode rejected: {error:?}"),
@@ -219,8 +259,7 @@ fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> S
 /// binary word becomes a line so the existing error renderer's line is the
 /// failed word coordinate in the physical SENS stream.
 fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|e| format!("physical T5 transport rejected: {e:?}"))?;
+    let words = exact_t5_words(bytes)?;
     let projection = sens::render_ternary_words_vertical(&words);
     sens::parse_canonical_binary(&projection)
         .map_err(|e| format!(
@@ -325,6 +364,9 @@ fn execute() -> Result<(), String> {
         }
         "open" | "view" => {
             let bytes = read_sens(path)?;
+            #[cfg(feature = "zig-transport")]
+            let human = sens::render_ternary_words_spaced(&admitted_t5_words(&bytes)?);
+            #[cfg(not(feature = "zig-transport"))]
             let human = sens::open_ternary_program(&bytes)
                 .map_err(|e| format!("open .sens: {}", explain_d2_rejection(&bytes, e)))?;
             // ЄДИНИЙ видимий роздільник — ASCII space; 2 / EOS / pad сховані.
@@ -333,6 +375,9 @@ fn execute() -> Result<(), String> {
         }
         "decode" => {
             let bytes = read_sens(path)?;
+            #[cfg(feature = "zig-transport")]
+            let words = admitted_t5_words(&bytes)?;
+            #[cfg(not(feature = "zig-transport"))]
             let words = sens::decode_ternary_program(&bytes)
                 .map_err(|e| format!("decode .sens: {e:?}"))?;
             // Попередній вертикальний API залишаємо для інструментів.
@@ -387,6 +432,9 @@ fn execute() -> Result<(), String> {
 
         "open-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
+            #[cfg(feature = "zig-transport")]
+            let human = sens::render_ternary_words_spaced(&admitted_t5_words(&canonical_t5)?);
+            #[cfg(not(feature = "zig-transport"))]
             let human = sens::open_ternary_program(&canonical_t5)
                 .map_err(|e| format!("canonical reader after F3: {e:?}"))?;
             println!("{human}");
@@ -394,6 +442,9 @@ fn execute() -> Result<(), String> {
         }
         "decode-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
+            #[cfg(feature = "zig-transport")]
+            let words = admitted_t5_words(&canonical_t5)?;
+            #[cfg(not(feature = "zig-transport"))]
             let words = sens::decode_ternary_program(&canonical_t5)
                 .map_err(|e| format!("canonical words after F3: {e:?}"))?;
             print!("{}", sens::render_ternary_words_vertical(&words));
