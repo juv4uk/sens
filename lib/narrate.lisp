@@ -138,7 +138,7 @@
   (0010 (outcome)
     (110
       ((010 outcome) (narrate-invalid-outcome-shape outcome))
-      ((0100 (result-proper-list? outcome))
+      ((0100 (narrate-proper-list? outcome))
        (narrate-invalid-outcome-shape outcome))
       ((0100 (010 (100 outcome)))
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
