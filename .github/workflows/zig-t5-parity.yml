@@ -1,4 +1,4 @@
-name: Zig T5 parity (manual)
+name: Zig T5 parity — стан драбини (manual)
 # Приймання #5767: Zig T5 byte-exact на РЕАЛЬНОМУ корпусі .sens + негативні фікстури.
 # Ручний; не чіпає .sens-дефолт, не виконує програму.
 on:
@@ -24,11 +24,11 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-      - name: Одиничні тести T5 (передумова)
+      - name: Фундамент — одиничні тести T5
         run: zig test research/zig-codecs/t5/t5.zig
-      - name: Зібрати parity_t5 (ReleaseFast)
+      - name: Зібрати інструмент стану драбини (ReleaseFast)
         run: zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig -femit-bin="$RUNNER_TEMP/parity_t5"
-      - name: Корпус (реальні .sens + негативи) і паритет
+      - name: Стан драбини T5 на реальному корпусі — кожна розбіжність = можливість-розв'язати-цікаву-задачу
         shell: bash
         run: |
           set -euo pipefail
@@ -40,7 +40,7 @@ jobs:
           echo "=== REJECT (негативи) ==="; cat parity_reject.txt
           "$RUNNER_TEMP/parity_t5" 2>&1 | tee parity.log
           grep -Fq 'PARITY_SUMMARY failures=0' parity.log
-      - name: Зберегти сирі виводи
+      - name: Зберегти свідчення
         if: always()
         uses: actions/upload-artifact@v4
         with:
