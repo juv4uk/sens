@@ -113,6 +113,32 @@ def load_table_evidence(foundation: dict) -> dict[str, dict]:
 
         table_coordinates = {row.bits for row in rows}
         ratified_coordinates = set(foundation["domains"][domain]["residents"])
+
+        if domain == "D7":
+            # Reuse the existing owner-ratified keyboard/v2 checker rather
+            # than minting a second surface/Unicode law inside this generator.
+            # Width+coordinate parity alone misses a swapped printable glyph
+            # at the same seven-bit address; that would re-certify bad data
+            # merely because its table Git SHA had changed.
+            from d7_source_projection import D7ProjectionError, load_current_d7
+
+            try:
+                keyboard_v2, keyboard_rows = load_current_d7()
+            except (D7ProjectionError, ValueError) as exc:
+                raise SystemExit(
+                    "D7_V2_WIDTH_CERTIFICATE_SOURCE_MISMATCH "
+                    f"layer=surface fixture={table_path.relative_to(ROOT)} "
+                    f"actual={exc!s} "
+                    "reproduce='python3 scripts/generate-domain-width-certificate.py --check'"
+                ) from exc
+            if (set(keyboard_v2) != ratified_coordinates
+                    or set(keyboard_rows) != ratified_coordinates):
+                raise SystemExit(
+                    "D7_V2_WIDTH_CERTIFICATE_COORDINATE_MISMATCH "
+                    "layer=identity expected=current-ratified-foundation "
+                    "actual=keyboard-v2-differs "
+                    "reproduce='python3 scripts/generate-domain-width-certificate.py --check'"
+                )
         if table_coordinates != ratified_coordinates:
             missing = sorted(ratified_coordinates - table_coordinates)
             extra = sorted(table_coordinates - ratified_coordinates)
