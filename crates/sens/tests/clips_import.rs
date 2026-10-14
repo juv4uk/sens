@@ -521,7 +521,7 @@ fn clips_slot_lookup_scans_named_atom_slots_without_d8_structural_alias() {
 /// fixture. Rust owns only source-pinned definition loading and fail-closed
 /// observation of the deliberately false one-bit expectation.
 #[test]
-fn clips_deftemplate_d1_self_verdict_and_mutant() {
+fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
     let mut session = Session::default();
     eval_pinned_legacy_core_source(
         "lib/core.lisp",
