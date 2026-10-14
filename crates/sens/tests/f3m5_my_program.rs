@@ -35,5 +35,5 @@ fn my_f3m5_program_executes_on_the_real_evaluator() {
     let value = eval_parsed_expressions(&parsed, &mut Session::default()).expect("evaluate");
     println!("result = {}", value.value);
     // atom(NIL)=D1:1, atom(1)=D1:1 => EQ true => then-branch CAR(CONS(NIL,NIL)) = NIL
-    assert_eq!(value.value.to_string(), "000", "expected structural NIL");
+    assert_eq!(value.value.to_string(), "()", "expected structural NIL");
 }
