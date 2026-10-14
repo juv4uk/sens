@@ -1,58 +1,121 @@
 #!/usr/bin/env python3
-"""CI_GLUE_NO_SEMANTICS — lexical sterility guard for production Zig sources.
+"""CI_GLUE_NO_SEMANTICS — fail-closed lexical + dependency scan of Zig.
 
-This checker does NOT interpret SENS, recognize callable functions, or accept
-an executable program. It only prevents forbidden historical vocabulary and
-host-text identity coercions inside the Zig transport implementation.
+Every git-tracked Zig file, including future paths, is checked.  This tool
+NEVER determines SENS domain meaning, execution admission or truth.
 """
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-ZIG_ROOTS = (Path("research/zig-codecs"), Path("zig"))
+TRANSPORT_ROOT = Path("research/zig-codecs")
+ALLOWED_BUILTINS = frozenset(("std", "builtin", "root"))
+
+# Read the whole source, including comments and literals.  Exact D8/W8 widths
+# are valid mechanical coordinates; an old identity must not be smuggled
+# through a compound/CamelCase identifier or alternative punctuation.
 FORBIDDEN = (
-    re.compile(r"(?i)\b(?:sid|sens)[_-]?8\b"),
-    re.compile(r"(?i)\b(?:legacy|historical|decimal)\b"),
-    re.compile(r"(?i)\b(?:parseint|parseunsigned|atoi|strtol|fromdecimal|asdecimal)\b"),
+    re.compile(r"(?i)(?:sid|sens|function|func)[\s._/-]*8(?![0-9])"),
+    re.compile(r"(?i)(?:legacy|historical)"),
+    re.compile(r"(?i)(?:decimal|parseint|parseunsigned|atoi|strtol|fromdecimal|asdecimal)"),
+    re.compile(r"(?i)(?:\.lisp\b|crates/sens|contracts/|knowledge/|research/framed3/)"),
+    re.compile(r"(?i)(?:old|flat)[\s._/-]*(?:opcode|registry|dispatch|identity)"),
+    re.compile(r"@cImport\s*\("),
 )
+IMPORT = re.compile(r'@import\s*\(\s*"([^"]+)"\s*\)')
+EMBED = re.compile(r'@embedFile\s*\(\s*"([^"]+)"\s*\)')
 
 
-def violations(path: Path, contents: str) -> list[str]:
+def violations(path: Path, contents: str, *, root: Path = ROOT) -> list[str]:
     findings: list[str] = []
+    relative_root = (root / TRANSPORT_ROOT).resolve()
+    source_path = root / path
     for number, line in enumerate(contents.splitlines(), 1):
         for pattern in FORBIDDEN:
-            match = pattern.search(line)
-            if match:
-                findings.append(f"{path}:{number}: forbidden Zig transport vocabulary {match.group()!r}")
+            found = pattern.search(line)
+            if found:
+                findings.append(
+                    f"{path}:{number}: forbidden Zig transport vocabulary {found.group()!r}"
+                )
+        for call in IMPORT.finditer(line):
+            name = call.group(1)
+            if name in ALLOWED_BUILTINS:
+                continue
+            target = (source_path.parent / name).resolve()
+            if not name.endswith(".zig") or not target.is_relative_to(relative_root):
+                findings.append(f"{path}:{number}: forbidden Zig import {name!r}")
+        # Embedded documents are a hidden route for importing old registries.
+        # Embeds inside the Zig-only subtree remain allowed for physical tests.
+        for call in EMBED.finditer(line):
+            name = call.group(1)
+            target = (source_path.parent / name).resolve()
+            if not target.is_relative_to(relative_root):
+                findings.append(f"{path}:{number}: forbidden Zig embed {name!r}")
     return findings
 
 
 def scan(root: Path = ROOT) -> list[str]:
-    files = sorted(
-        p for relative in ZIG_ROOTS
-        if (root / relative).is_dir()
-        for p in (root / relative).rglob("*.zig")
-        if p.is_file()
-    )
-    if not files:
-        return ["no Zig transport sources found: cannot confirm cleanroom"]
+    try:
+        output = subprocess.check_output(
+            ["git", "ls-files", "-z", "--", "*.zig"],
+            cwd=root,
+            stderr=subprocess.PIPE,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        return [f"cannot enumerate tracked Zig sources: {exc}"]
+    paths = sorted({Path(value.decode("utf-8")) for value in output.split(b"\0") if value})
+    if not paths:
+        return ["no tracked Zig sources found: cannot confirm cleanroom"]
+    allowed = (root / TRANSPORT_ROOT).resolve()
     errors: list[str] = []
-    for path in files:
-        errors.extend(violations(path.relative_to(root), path.read_text(encoding="utf-8")))
+    for path in paths:
+        physical = root / path
+        if not physical.resolve().is_relative_to(allowed):
+            errors.append(f"{path}:0: Zig source outside transport subtree")
+        if physical.is_symlink():
+            errors.append(f"{path}:0: symlinked Zig source is not allowed")
+            continue
+        try:
+            contents = physical.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            errors.append(f"{path}:0: unreadable Zig source: {exc}")
+            continue
+        errors.extend(violations(path, contents, root=root))
     return errors
 
 
 def self_test() -> None:
-    assert not violations(Path("sample.zig"), "// physical length is transport metadata")
-    assert violations(Path("sample.zig"), "const SID8 = 0;")
-    assert violations(Path("sample.zig"), "// legacy code")
-    assert violations(Path("sample.zig"), "parseInt(bytes)")
-    assert violations(Path("sample.zig"), "const Sens_8 = 1;")
-    assert violations(Path("sample.zig"), "// decimal bridge")
+    good = (
+        '// D8:00000001 is not D9:000000001',
+        'const std = @import("std");',
+        'const t5 = @import("../t5.zig");',
+        'const a = DomainWord(8).init(0b0000_0001);',
+        'const bits = @embedFile("../t5.zig");',
+    )
+    bad = (
+        "const SID8 = 0;",
+        "const KernelSid8Alias = 0;",
+        'const RootSens_8Stage = 0;',
+        "const Function8Old = 0;",
+        "// legacy code",
+        "// historically supported",
+        "parseInt(bytes)",
+        "const old_registry = 8;",
+        'const bytes = @embedFile("../../../contracts/core.lisp");',
+        'const foreign = @import("../../../crates/sens/src/lib.zig");',
+        "const x = @cImport({});",
+        'const src = "lib/core.lisp";',
+    )
+    path = Path("research/zig-codecs/t5/sterile/probe.zig")
+    for src in good:
+        assert not violations(path, src), f"false positive for {src!r}"
+    for src in bad:
+        assert violations(path, src), f"failed to reject {src!r}"
     print("CLEANROOM_LEXICAL_GUARD_SELFTEST_PASS")
 
 
@@ -68,7 +131,7 @@ def main() -> int:
         for error in errors:
             print(f"ZIG_CLEANROOM_RED: {error}", file=sys.stderr)
         return 1
-    print("ZIG_CLEANROOM_LEXICAL_PASS: production Zig source and comments")
+    print("ZIG_CLEANROOM_LEXICAL_PASS: all tracked Zig sources, comments, imports, embeds")
     return 0
 
 
