@@ -565,6 +565,69 @@ mod tests {
         assert_eq!(mutant_count, 3, "both nil sites and field-name site checked");
     }
 
+
+    #[test]
+    fn guard_script_ten_data_quotes_keep_d3_identity_against_w8_mutants() {
+        // AST-only witness: semantic decisions still belong to native SENS.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let start = full
+            .find("(00001011 guard-script\n")
+            .expect("missing exact Guard script definition");
+        let rest = &full[start..];
+        let end = rest
+            .find("\n(0011 guard-scripts")
+            .expect("missing next Guard definition");
+        let form = rest[..end].trim();
+
+        fn exact_quote_heads(form: &str) -> usize {
+            fn visit(expr: &Expr) -> usize {
+                match &expr.kind {
+                    ExprKind::List(items) => usize::from(matches!(
+                        items.first(),
+                        Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                            if id.width() == 3 && id.packed_bits() == 0b001
+                    )) + items.iter().map(visit).sum::<usize>(),
+                    _ => 0,
+                }
+            }
+            sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp",
+                form,
+            )
+            .expect("pinned Guard source reader")
+            .iter()
+            .map(visit)
+            .sum()
+        }
+
+        let expected = [
+            ("tool-missing", 2_usize),
+            ("name", 2),
+            ("decision", 2),
+            ("unknown", 2),
+            ("unknown-routes", 2),
+        ];
+        assert_eq!(exact_quote_heads(form), 10, "ten exact D3:001 data quotes");
+        let mut mutations = 0;
+        for (symbol, multiplicity) in expected {
+            let from = format!("(001 {symbol})");
+            let to = format!("(00000001 {symbol})");
+            let sites: Vec<_> = form.match_indices(&from).map(|(index, _)| index).collect();
+            assert_eq!(sites.len(), multiplicity, "quoted field changed: {symbol}");
+            for site in sites {
+                let mut mutant = form.to_owned();
+                mutant.replace_range(site..site + from.len(), &to);
+                assert_eq!(
+                    exact_quote_heads(&mutant),
+                    9,
+                    "W8 must not alias D3:001 at {symbol}, offset {site}"
+                );
+                mutations += 1;
+            }
+        }
+        assert_eq!(mutations, 10, "all ten single-width mutations exercised");
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));

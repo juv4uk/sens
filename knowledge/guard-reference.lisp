@@ -978,15 +978,15 @@
     (10011100 ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
         ((00000010 tool) () (00100111
-           (00000001 tool-missing)
-           (00100111 (00000001 name) name)
-           (00100111 (00000001 decision) (00000001 unknown))
-           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           (001 tool-missing)
+           (00100111 (001 name) name)
+           (00100111 (001 decision) (001 unknown))
+           (00100111 (001 unknown-routes) (guard-unknown-routes))))
         ((00000010 tool) (1) (00100111
-           (00000001 tool-missing)
-           (00100111 (00000001 name) name)
-           (00100111 (00000001 decision) (00000001 unknown))
-           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           (001 tool-missing)
+           (00100111 (001 name) name)
+           (00100111 (001 decision) (001 unknown))
+           (00100111 (001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
 (0011 guard-scripts
