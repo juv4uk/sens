@@ -40,7 +40,7 @@ jobs:
             --lines research/zig-codecs/tools/caar.lines --view "$RUNNER_TEMP/caar.view"
           echo "===== wire (телеграфний запис) ====="; cat "$RUNNER_TEMP/caar.view"
           echo "===== ladder_tool ====="
-          ( cd research/zig-codecs/tools && "$RUNNER_TEMP/ladder_tool" ) | tee "$RUNNER_TEMP/ladder.log"
+          ( cd research/zig-codecs/tools && "$RUNNER_TEMP/ladder_tool" ) 2>&1 | tee "$RUNNER_TEMP/ladder.log"
           grep -Fq 'T5 roundtrip=EXACT' "$RUNNER_TEMP/ladder.log"
           grep -Fq 'op=encode ns_per_op=' "$RUNNER_TEMP/ladder.log"
           grep -Fq 'op=decode ns_per_op=' "$RUNNER_TEMP/ladder.log"

@@ -82,7 +82,8 @@ pub fn main() !void {
     defer allocator.free(t5_bytes);
     const t5_sha = sha256Hex(t5_bytes);
     std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
-        words.len, t5_bytes.len, t5_sha[0..16], t5_bytes[0..@min(t5_bytes.len, 24)],
+        words.len, t5_bytes.len, t5_sha[0..16],
+        std.fmt.fmtSliceHexLower(t5_bytes),
     });
 
     // 2. Round-trip: decode мусить дати ті самі точні слова.
