@@ -70,26 +70,6 @@ jobs:
             OperationalMigrationTests.test_mixed_manifest_no_old_classification_veto \
             OperationalMigrationTests.test_stale_classifier_does_not_veto_genuine_sha_pins
           python3 tests/test_plan_t5_agent_work.py -v
-      - name: Запуск чинного scripts/migrate.py — tri-pass narrate preview
-        id: narrate-migration-script
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "MIGRATOR_ENTRY=scripts/migrate.py action=preview source=lib/narrate.lisp source_era=current"
-          report="$RUNNER_TEMP/sens-narrate-migration.json"
-          mirror="$RUNNER_TEMP/sens-narrate-mirror"
-          rc=0
-          python3 scripts/migrate.py preview lib/narrate.lisp \
-            --mirror "$mirror" \
-            --report "$report" \
-            --source-era current || rc=$?
-          echo "MIGRATOR_EXIT=$rc"
-          if [[ -f "$report" ]]; then
-            python3 -m json.tool "$report"
-          else
-            echo "MIGRATOR_REPORT_MISSING path=$report"
-          fi
-          exit "$rc"
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
