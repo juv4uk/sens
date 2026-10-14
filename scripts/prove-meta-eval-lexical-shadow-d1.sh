@@ -58,13 +58,64 @@ for i, (head, form) in enumerate(zip(expected_heads, positive), 1):
         raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: wrong live call-head case={i}")
     if ("(0011 " + head + "\n").encode("ascii") not in library:
         raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: current library missing definition case={i}")
-for case, form in enumerate((*positive, *negatives), 1):
-    depth = 0
-    for ch in form:
-        if ch == "(": depth += 1
-        elif ch == ")": depth -= 1
-        if depth < 0: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: early D2 close case={case}")
-    if depth: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: open D2 frame case={case}")
+# D2 source grammar only: one complete list, two COND branches, exact D3
+# words and exact D1 literals. This never computes EQ/COND predicates.
+def one_d2_form(source: str, case: int):
+    tokens = re.findall(r"\(|\)|[^\s()]+", source)
+    position = 0
+    def item():
+        nonlocal position
+        if position >= len(tokens):
+            raise ValueError("incomplete D2 list")
+        word = tokens[position]
+        position += 1
+        if word == ")":
+            raise ValueError("unmatched D2 close")
+        if word != "(":
+            return word
+        children = []
+        while True:
+            if position >= len(tokens):
+                raise ValueError("unclosed D2 list")
+            if tokens[position] == ")":
+                position += 1
+                return children
+            children.append(item())
+    try:
+        form = item()
+        if position != len(tokens):
+            raise ValueError("extra top-level source after SENS self-verdict")
+        return form
+    except (ValueError, RecursionError) as exc:
+        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: D2 structural error case={case}: {exc}")
+
+def expected_operand(program, case: int, expected_head: str):
+    tree = one_d2_form(program, case)
+    fail = lambda why: (_ for _ in ()).throw(SystemExit(
+        f"META_LEXICAL_TRANSPORT_RED: malformed SENS self-verdict case={case}: {why}"))
+    if not isinstance(tree, list) or len(tree) != 3 or tree[0] != "110":
+        fail("single D3 COND head required")
+    yes, no = tree[1:]
+    if not isinstance(yes, list) or len(yes) != 2 or yes[1] != "#d1:1":
+        fail("positive COND branch must end in D1:YES")
+    if no != ["#d1:1", ["#d1:0"]]:
+        fail("negative COND branch must invoke exact noncallable D1:NO")
+    test = yes[0]
+    if not isinstance(test, list) or len(test) != 3 or test[0] != "101":
+        fail("predicate must be exact D3 EQ word")
+    call, operand = test[1:]
+    if not isinstance(call, list) or len(call) != 3 or call[0] != expected_head:
+        fail("live predicate call-head and arity differ from expected source")
+    if operand not in ("#d1:0", "#d1:1"):
+        fail("EQ expected operand is not one exact D1 word")
+    return operand
+
+for i, (head, good, bad) in enumerate(zip(expected_heads, positive, negatives), 1):
+    operand = expected_operand(good, i, head)
+    opposite = expected_operand(bad, i, head)
+    if (operand, opposite) not in (("#d1:0", "#d1:1"), ("#d1:1", "#d1:0")):
+        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: wrong D1 mutant identity case={i}")
+
 for i, (good, wrong) in enumerate(zip(positive, negatives), 1):
     for role, expression in (("law", good), ("mutant", wrong)):
         payload = library + b"\n" + expression.encode("utf-8") + b"\n"
