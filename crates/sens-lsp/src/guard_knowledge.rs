@@ -381,8 +381,8 @@ fn parse_functions(source: &str) -> HashMap<String, GuardFunction> {
 mod tests {
     use super::*;
 
-    const SAMPLE_REFERENCE: &str = r#"(def *guard-reference-directory*
-  (quote
+    const SAMPLE_REFERENCE: &str = r#"(0011 *guard-reference-directory*
+  (001
     ((reference
        (topic language-semantics)
        (summary "Meaning of WSM programs")
