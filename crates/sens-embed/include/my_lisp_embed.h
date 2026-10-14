@@ -2,12 +2,13 @@
 #define MY_LISP_EMBED_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define MY_LISP_EMBED_ABI_VERSION 4u
+#define MY_LISP_EMBED_ABI_VERSION 5u
 
 typedef struct MyLispEmbedSession MyLispEmbedSession;
 typedef int32_t (*MyLispEmbedNullaryFn)(void *context, uint32_t *out_result);
@@ -37,6 +38,14 @@ int32_t my_lisp_embed_register_unary(
     MyLispEmbedUnaryFn callback,
     void *context);
 char *my_lisp_embed_eval(MyLispEmbedSession *session, const char *utf8_source);
+int32_t my_lisp_embed_eval_binary(
+    MyLispEmbedSession *session,
+    const char *utf8_source,
+    uint8_t **out_bytes,
+    size_t *out_len,
+    size_t *out_bit_len,
+    char **out_error);
+void my_lisp_embed_free_bits(uint8_t *bytes, size_t len);
 void my_lisp_embed_free_string(char *value);
 void my_lisp_embed_session_free(MyLispEmbedSession *session);
 

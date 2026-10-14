@@ -5,7 +5,8 @@
 //! `sens`; no second evaluator lives here.
 
 use sens::{
-    eval_parsed_expressions_incremental, load_core_library, parse, Environment, Session,
+    encode_binary_frame, eval_parsed_expressions_incremental, load_core_library, parse,
+    BinaryFrame, Environment, Session, Value,
 };
 use std::{
     ffi::{CStr, CString},
@@ -17,7 +18,7 @@ use std::{
 /// C ABI contract version.  Hosts must compare this value before using the
 /// session exports, rather than treating matching symbol names as proof of
 /// compatibility.
-pub const MY_LISP_EMBED_ABI_VERSION: u32 = 4;
+pub const MY_LISP_EMBED_ABI_VERSION: u32 = 5;
 
 /// Result tags that a nullary or typed-unary host mechanism may return
 /// through the C ABI.
@@ -368,6 +369,128 @@ pub unsafe extern "C" fn my_lisp_embed_session_free(session: *mut MyLispEmbedSes
     }
 }
 
+/// Canonical binary framing of one evaluated result value, as transport bits
+/// (one byte per bit, MSB-first) -- exactly what `encode_binary_frame`
+/// produces. A value with no canonical domain frame is refused, so the
+/// boundary fails closed instead of inventing a width for the host.
+fn binary_frame_bits_for_value(value: &Value) -> Result<Vec<u8>, String> {
+    let frame = match value {
+        Value::DomainIdentity(identity) => BinaryFrame::Domain(*identity),
+        Value::BinaryNumber(number) => BinaryFrame::BinaryNumber(number.clone()),
+        Value::NumericComposition(composition) => {
+            BinaryFrame::NumericComposition(composition.clone())
+        }
+        Value::Text7(text) => BinaryFrame::Text(text.clone()),
+        Value::Rational(rational) => BinaryFrame::Number(rational.clone()),
+        other => {
+            return Err(format!(
+                "value has no canonical binary domain frame: {other:?}"
+            ))
+        }
+    };
+    encode_binary_frame(&frame).map_err(|error| format!("binary frame encode failed: {error:?}"))
+}
+
+/// Binary value channel (ABI v5). Evaluates `source` and, when the result
+/// value has a canonical binary domain frame, writes its transport bits (one
+/// byte per bit, MSB-first) to `*out_bytes` with byte length `*out_len` and
+/// meaningful bit length `*out_bit_len`. The domain width travels inside the
+/// frame; the host must never infer a domain from the byte count.
+///
+/// Returns 0 on success, 1 when the value has no canonical binary frame
+/// (fail-closed; nothing written), and 2 on parse/eval error with the rendered
+/// error in `*out_error` (release with `my_lisp_embed_free_string`).
+///
+/// # Safety
+///
+/// `session` must be null or a live session, `source` a valid NUL-terminated
+/// string, and every out pointer non-null and writable. Bytes written to
+/// `*out_bytes` must be released with `my_lisp_embed_free_bits`.
+#[no_mangle]
+pub unsafe extern "C" fn my_lisp_embed_eval_binary(
+    session: *mut MyLispEmbedSession,
+    source: *const c_char,
+    out_bytes: *mut *mut u8,
+    out_len: *mut usize,
+    out_bit_len: *mut usize,
+    out_error: *mut *mut c_char,
+) -> i32 {
+    if !out_bytes.is_null() {
+        *out_bytes = ptr::null_mut();
+    }
+    if !out_len.is_null() {
+        *out_len = 0;
+    }
+    if !out_bit_len.is_null() {
+        *out_bit_len = 0;
+    }
+    if !out_error.is_null() {
+        *out_error = ptr::null_mut();
+    }
+    if session.is_null()
+        || source.is_null()
+        || out_bytes.is_null()
+        || out_len.is_null()
+        || out_bit_len.is_null()
+    {
+        return 2;
+    }
+
+    let source = match CStr::from_ptr(source).to_str() {
+        Ok(source) => source.to_owned(),
+        Err(_) => {
+            if !out_error.is_null() {
+                *out_error = into_c_string("error: source is not valid UTF-8".to_owned());
+            }
+            return 2;
+        }
+    };
+
+    let outcome = catch_unwind(AssertUnwindSafe(|| -> Result<Vec<u8>, String> {
+        let session = &mut *session;
+        let expressions = parse(&source).map_err(|error| format!("error: {}", error.render(&source)))?;
+        let result = eval_parsed_expressions_incremental(&expressions, &mut session.session)
+            .map_err(|error| format!("error: {}", error.render(&source)))?;
+        binary_frame_bits_for_value(&result.value)
+    }));
+
+    match outcome {
+        Ok(Ok(bits)) => {
+            let len = bits.len();
+            *out_bytes = Box::into_raw(bits.into_boxed_slice()) as *mut u8;
+            *out_len = len;
+            *out_bit_len = len;
+            0
+        }
+        Ok(Err(message)) => {
+            if !out_error.is_null() {
+                *out_error = into_c_string(message);
+            }
+            1
+        }
+        Err(_) => {
+            if !out_error.is_null() {
+                *out_error = into_c_string("error: canonical session panicked".to_owned());
+            }
+            2
+        }
+    }
+}
+
+/// Releases bytes returned by `my_lisp_embed_eval_binary`. A null pointer or
+/// zero length is a no-op.
+///
+/// # Safety
+///
+/// `bytes`/`len` must be exactly the pair returned by one successful
+/// `my_lisp_embed_eval_binary` call that has not already been freed.
+#[no_mangle]
+pub unsafe extern "C" fn my_lisp_embed_free_bits(bytes: *mut u8, len: usize) {
+    if !bytes.is_null() && len > 0 {
+        drop(Box::from_raw(ptr::slice_from_raw_parts_mut(bytes, len)));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -396,7 +519,26 @@ mod tests {
     #[test]
     fn reports_the_documented_abi_version() {
         assert_eq!(my_lisp_embed_abi_version(), MY_LISP_EMBED_ABI_VERSION);
-        assert_eq!(MY_LISP_EMBED_ABI_VERSION, 4);
+        assert_eq!(MY_LISP_EMBED_ABI_VERSION, 5);
+    }
+
+    #[test]
+    fn binary_channel_round_trips_a_d24_binary_number_frame() {
+        use sens::BinaryNumber;
+        let mut word = vec![0u8; 24];
+        word[23] = 1;
+        let number = BinaryNumber::from_numeric_domain_bits(24, &word).expect("d24 word");
+        let value = Value::BinaryNumber(number.clone());
+        let bits = binary_frame_bits_for_value(&value).expect("canonical frame");
+        let (frame, consumed) = sens::decode_binary_frame(&bits).expect("decode");
+        assert_eq!(consumed, bits.len());
+        assert_eq!(frame, BinaryFrame::BinaryNumber(number));
+    }
+
+    #[test]
+    fn binary_channel_fails_closed_for_a_value_without_a_domain_frame() {
+        let value = Value::Symbol(std::rc::Rc::from("not-a-domain-value"));
+        assert!(binary_frame_bits_for_value(&value).is_err());
     }
 
     #[test]
