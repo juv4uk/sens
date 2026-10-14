@@ -122,7 +122,7 @@
         ((010 trigger) 
          (001 absent))
         ((0100 (010 trigger))
-         (001000 ((tail (011 trigger)))
+         ((0010 (tail)
            (110
              
              ((010 tail) 
@@ -133,7 +133,8 @@
                   (001 projection-ready)
                   (100 tail)
                   provenance-ref-value)
-                projections)))))))))
+                projections))))
+          (011 trigger)))))))
 
 (0011 life-scheduler-select-ready
   (0010 (pending projections)
