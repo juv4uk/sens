@@ -29,6 +29,10 @@ FORBIDDEN = (
 )
 IMPORT = re.compile(r'@import\s*\(\s*"([^"]+)"\s*\)')
 EMBED = re.compile(r'@embedFile\s*\(\s*"([^"]+)"\s*\)')
+IMPORT_CALL = re.compile(r"@import\s*\(")
+EMBED_CALL = re.compile(r"@embedFile\s*\(")
+SINGLE_LITERAL = re.compile(r'\s*"([^"\\]*)"\s*\)')
+
 
 
 def violations(path: Path, contents: str, *, root: Path = ROOT) -> list[str]:
@@ -42,6 +46,14 @@ def violations(path: Path, contents: str, *, root: Path = ROOT) -> list[str]:
                 findings.append(
                     f"{path}:{number}: forbidden Zig transport vocabulary {found.group()!r}"
                 )
+        # Reject any compile-time concatenation or nonliteral path. A Zig
+        # import name must appear as a single visible, auditable string.
+        for function, calls in (("@import", IMPORT_CALL), ("@embedFile", EMBED_CALL)):
+            for call in calls.finditer(line):
+                if SINGLE_LITERAL.match(line[call.end():]) is None:
+                    findings.append(
+                        f"{path}:{number}: nonliteral {function} forbidden in Zig corridor"
+                    )
         for call in IMPORT.finditer(line):
             name = call.group(1)
             if name in ALLOWED_BUILTINS:
@@ -110,6 +122,9 @@ def self_test() -> None:
         'const foreign = @import("../../../crates/sens/src/lib.zig");',
         "const x = @cImport({});",
         'const src = "lib/core.lisp";',
+        'const exploit = @import("crates/" ++ "sens.zig");',
+        'const hidden = @embedFile(prefix ++ "registry");',
+        'const escape = @import("../\\x2e/engine.zig");',
     )
     path = Path("research/zig-codecs/t5/sterile/probe.zig")
     for src in good:
