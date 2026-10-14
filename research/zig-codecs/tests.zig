@@ -44,3 +44,40 @@ test "ladder D1 and D2 stay distinct through canonical T5 physical adapter" {
     try std.testing.expectError(error.UnsupportedDomainWidth,
         t5.encodeTripletsInto(&left, &d10));
 }
+
+test "modern D8 and D9 share payload but not their T5 identity" {
+    // Both have payload 10101000; the D9 source has its own leading zero.
+    const eight = (try ladder.D8.fromBinary("10101000")).coordinate();
+    const nine = (try ladder.D9.fromBinary("010101000")).coordinate();
+    try std.testing.expectEqual(eight.bits, nine.bits);
+    try std.testing.expect(!eight.same(nine));
+    try std.testing.expectError(error.WrongDomainWidth,
+        ladder.fromCarrier(8, .{ .width = nine.width, .bits = nine.bits }));
+    try std.testing.expectError(error.WrongDomainWidth,
+        ladder.fromCarrier(9, .{ .width = eight.width, .bits = eight.bits }));
+
+    const e = eight.triplet();
+    const n = nine.triplet();
+    var e_out: [2]u8 = undefined;
+    var n_out: [2]u8 = undefined;
+    const elen = try t5.encodeTripletsInto(&e_out, &e);
+    const nlen = try t5.encodeTripletsInto(&n_out, &n);
+    try std.testing.expectEqual(@as(usize, 2), elen);
+    try std.testing.expectEqual(@as(usize, 2), nlen);
+    try std.testing.expectEqualSlices(u8, &.{ 0x5b, 0x08 }, &e_out);
+    try std.testing.expectEqualSlices(u8, &.{ 0x1e, 0x53 }, &n_out);
+}
+
+test "D1 zero and D3 three zero bits stay different T5 words" {
+    // Neither this test nor Zig assigns either word a SENS semantic law.
+    const one = (try ladder.D1.fromBinary("0")).coordinate().triplet();
+    const three = (try ladder.D3.fromBinary("000")).coordinate().triplet();
+    var left: [1]u8 = undefined;
+    var right: [1]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, 1),
+        try t5.encodeTripletsInto(&left, &one));
+    try std.testing.expectEqual(@as(usize, 1),
+        try t5.encodeTripletsInto(&right, &three));
+    try std.testing.expectEqual(@as(u8, 0x50), left[0]);
+    try std.testing.expectEqual(@as(u8, 0x08), right[0]);
+}
