@@ -89,19 +89,19 @@ jobs:
             --fixture tests/test_migrate_exact_domain.py \
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
-      - name: Zig 0.17 — T5/F3C exact-width codec tests (mechanics only)
+      - name: Zig 0.16 — T5/F3C exact-width codec tests (mechanics only)
         if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
         shell: bash
         run: |
           set -euo pipefail
           # Єдиний автоматичний workflow; механічне Zig parity != SENS semantic PASS.
-          # Пінована стабільна Zig 0.17.0 + офіційна SHA256 фізичного архіву.
+          # Пінована стабільна Zig 0.16.0 + офіційна SHA256 фізичного архіву.
           curl --fail --location --retry 3 --silent --show-error \
-            https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz \
-            --output "$RUNNER_TEMP/zig-0.17.0.tar.xz"
-          echo '1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026  '"$RUNNER_TEMP/zig-0.17.0.tar.xz" | sha256sum --check --status
-          tar -xJf "$RUNNER_TEMP/zig-0.17.0.tar.xz" -C "$RUNNER_TEMP"
-          ZIG="$RUNNER_TEMP/zig-x86_64-linux-0.17.0/zig"
+            https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz \
+            --output "$RUNNER_TEMP/zig-0.16.0.tar.xz"
+          echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-0.16.0.tar.xz" | sha256sum --check --status
+          tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
+          ZIG="$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig"
           "$ZIG" version
           echo 'test_id=zig-t5-exact-width layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" test research/zig-codecs/t5/t5.zig
@@ -118,9 +118,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.17.0:$PATH"
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
           python3 research/zig-codecs/t5/run_paired_bench.py \
-            --zig-pin 0.17.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
           cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
       - name: Zig ↔ Rust F3C парний бенчмарк — дійсні .senc байти
@@ -128,7 +128,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.17.0:$PATH"
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
           python3 research/zig-codecs/f3c/run_paired_bench.py \
             --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
