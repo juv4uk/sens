@@ -224,14 +224,14 @@ const Parser = struct {
     const Head = union(enum) { atom: Word, form };
 
     fn expression(self: *Parser, data: bool, depth: usize) error{InvalidProgram}!Head {
-        if (self.pos >= self.words.len or depth > 64) return Error.InvalidProgram;
+        if (self.pos >= self.words.len or depth > 64) return error.InvalidProgram;
         const word = self.words[self.pos];
         if (same(word, 2, 2)) {
             self.pos += 1;
             try self.list(data, depth + 1);
             return .form;
         }
-        if (word.width == 2) return Error.InvalidProgram;
+        if (word.width == 2) return error.InvalidProgram;
         self.pos += 1;
         return .{ .atom = word };
     }
@@ -258,19 +258,19 @@ const Parser = struct {
             while (self.pos < self.words.len and same(self.words[self.pos], 2, 0)) {
                 self.pos += 1;
             }
-            if (self.pos >= self.words.len) return Error.InvalidProgram;
+            if (self.pos >= self.words.len) return error.InvalidProgram;
             const next = self.words[self.pos];
             if (same(next, 2, 1)) {
                 self.pos += 1;
                 if (elements == 0) {
-                    if (!data) return Error.InvalidProgram;
+                    if (!data) return error.InvalidProgram;
                 } else if (!data and !admittedHead(head, elements - 1)) {
-                    return Error.InvalidProgram;
+                    return error.InvalidProgram;
                 }
                 return;
             }
             if (same(next, 2, 3)) { // dotted tail
-                if (elements == 0) return Error.InvalidProgram;
+                if (elements == 0) return error.InvalidProgram;
                 self.pos += 1;
                 const quote_arg = data or switch (head) {
                     .atom => |h| same(h, 3, 1),
@@ -282,9 +282,9 @@ const Parser = struct {
                     self.pos += 1;
                 }
                 if (self.pos >= self.words.len or !same(self.words[self.pos], 2, 1))
-                    return Error.InvalidProgram;
+                    return error.InvalidProgram;
                 self.pos += 1;
-                if (!data and !admittedHead(head, elements - 1)) return Error.InvalidProgram;
+                if (!data and !admittedHead(head, elements - 1)) return error.InvalidProgram;
                 return;
             }
             const quote_arg = data or (elements > 0 and switch (head) {
@@ -295,7 +295,7 @@ const Parser = struct {
             if (elements == 0) head = node;
             elements += 1;
         }
-        return Error.InvalidProgram;
+        return error.InvalidProgram;
     }
 };
 
