@@ -334,7 +334,10 @@ def plan(source: str, surfaces, legacy):
         frame = frames[-1] if frames else None
         if frame and frame["first"]:
             frame["first"] = False
-            if not frame["quoted"]:
+            # A prefix quote or function-quote applies to this head atom.
+            # Its spelling is datum, not a callable SENS head; otherwise
+            # ('car x) or (#'car x) silently becomes ('100 x) / (#'100 x).
+            if not frame["quoted"] and not pending_quote:
                 identity = surfaces.get(token.casefold()) or legacy.get(token)
                 if identity and token != identity.bits:
                     edits.append(Edit(start, i, token, identity))
