@@ -524,14 +524,8 @@ jobs:
           set -euo pipefail
           echo "test_id=guard-evidence-status-d3-width layer=parse mechanical_only=true semantic_pass=false"
           sha256sum knowledge/guard-reference.lisp crates/sens-lsp/src/guard_knowledge.rs
-          cargo test --locked -p sens-lsp guard_evidence_status_uses_exact_d3_data_without_w8_alias -- --nocapture
-          cargo test --locked -p sens-lsp guard_topics_preserves_three_exact_d3_quotes_and_rejects_w8_mutants -- --nocapture
-          cargo test --locked -p sens-lsp guard_script_ten_data_quotes_keep_d3_identity_against_w8_mutants -- --nocapture
-          cargo test --locked -p sens-lsp guard_reference_missing_evidence_has_22_exact_d3_quote_heads_not_w8 -- --nocapture
-          cargo test --locked -p sens-lsp guard_ask_preserves_all_48_d3_quote_heads_against_w8_mutants -- --nocapture
-          cargo test --locked -p sens-lsp guard_topics_exact_d3_list_ops_reject_three_independent_w8_mutants -- --nocapture
-          cargo test --locked -p sens-lsp guard_reference_stronger_definition_has_exact_d4_width_not_w8 -- --nocapture
-          cargo test --locked -p sens-lsp guard_last_two_define_heads_use_exact_d4_and_reject_w8_width -- --nocapture
+          cargo test --locked -p sens-lsp --lib guard_knowledge::tests:: -- --nocapture
+
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash

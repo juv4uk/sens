@@ -916,6 +916,73 @@ mod tests {
         }
     }
 
+
+    #[test]
+    fn all_sixteen_guard_definitions_are_exact_d4_and_reject_historical_w8() {
+        // AST-width witness only: native binary SENS owns semantics.
+        let source = include_str!("../../../knowledge/guard-reference.lisp");
+        let names = [
+            "guard-script-find", "guard-script", "guard-scripts",
+            "guard-reference-evidence-status", "guard-evidence-status-strength",
+            "guard-reference-stronger", "guard-reference-all",
+            "guard-reference-find-strongest", "guard-reference-find",
+            "guard-reference", "guard-explain", "guard-how-to",
+            "guard-authority", "guard-verify", "guard-topics", "guard-ask",
+        ];
+
+        fn is_exact_d4_definition(source: &str, name: &str) -> bool {
+            let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", source
+            ).expect("the pinned Guard reader must parse each function");
+            assert_eq!(parsed.len(), 1, "single Guard definition: {name}");
+            let ExprKind::List(def) = &parsed[0].kind else {
+                panic!("definition must be a list: {name}");
+            };
+            assert_eq!(def.len(), 3, "DEFINE must have two operands: {name}");
+            assert!(matches!(&def[1].kind, ExprKind::Symbol(symbol)
+                if symbol.as_ref() == name), "definition name changed: {name}");
+            let ExprKind::List(lambda) = &def[2].kind else {
+                panic!("LAMBDA missing from definition: {name}");
+            };
+            assert!(matches!(lambda.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0010
+            ), "exact D4:0010 LAMBDA required for {name}");
+            matches!(def.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0011
+            )
+        }
+
+        let mut covered = 0;
+        for (i, name) in names.iter().enumerate() {
+            let exact = format!("(0011 {name}\n");
+            let historical = format!("(00001011 {name}\n");
+            assert_eq!(source.matches(&exact).count(), 1, "one D4 definition: {name}");
+            assert!(!source.contains(&historical), "historical W8 DEFINE remains: {name}");
+            let begin = source.find(&exact).expect("existing Guard definition");
+            let end = match names.get(i + 1) {
+                Some(next_name) => {
+                    let next = format!("(0011 {next_name}\n");
+                    begin + exact.len() +
+                        source[begin + exact.len()..].find(&next)
+                            .expect("next exact Guard definition")
+                }
+                None => source.len(),
+            };
+            let form = source[begin..end].trim();
+            assert!(is_exact_d4_definition(form, name), "{name} must have D4 identity");
+            let mutant = form.replacen(&exact, &historical, 1);
+            assert_ne!(mutant, form, "{name} width mutation changed source");
+            assert!(
+                !is_exact_d4_definition(&mutant, name),
+                "historical W8 must not alias D4 DEFINE for {name}"
+            );
+            covered += 1;
+        }
+        assert_eq!(covered, 16, "all Guard entrypoints and W8 mutants covered");
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
