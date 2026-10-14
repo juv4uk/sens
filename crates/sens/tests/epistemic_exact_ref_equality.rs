@@ -109,3 +109,55 @@ fn nested_reference_equality_returns_only_exact_d1() {
         );
     }
 }
+
+const SOURCE_REF_D1_LAW: &str =
+    include_str!("../../../tests/semantic/epistemic-source-ref-d1-law.lisp");
+
+/// SENS owns all five true verdicts and the one-bit falsifier. Rust
+/// carries actual D3/D4 source words, invokes SENS, and checks only
+/// exact D1 identity / fail-closed execution, never host-provided semantics.
+#[test]
+fn source_ref_sens_d1_self_verdict_and_one_bit_mutant() {
+    let start = SOURCE.find("(0011 source-ref?\n")
+        .expect("source-ref? must be defined by D4 DEFINE");
+    let end = SOURCE[start..].find("(0011 epistemic--claim-ref?\n")
+        .expect("the next D4 DEFINE delimits this precise source-only cutover")
+        + start;
+    let definitions = parse_mixed_exact_domain(&SOURCE[start..end])
+        .expect("source-ref? exact D3/D4 words parse");
+    assert_eq!(definitions.len(), 1, "one production definition");
+    let mut session = Session::default();
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("production source-ref? D4 definition loads");
+
+    let laws: Vec<&str> = SOURCE_REF_D1_LAW.lines()
+        .filter(|line| line.starts_with("(110 "))
+        .collect();
+    assert_eq!(laws.len(), 6, "five SENS laws and one one-bit falsifier");
+    assert_eq!(laws[0].len(), laws[5].len(), "same bit-word framing");
+    let diffs: Vec<(u8, u8)> = laws[0].bytes().zip(laws[5].bytes())
+        .filter(|(left, right)| left != right)
+        .collect();
+    assert_eq!(diffs, vec![(b'1', b'0')], "exactly one D1 bit is mutated");
+
+    for (index, law) in laws.into_iter().enumerate() {
+        let forms = parse_mixed_exact_domain(law)
+            .unwrap_or_else(|e| panic!("SENS source-ref D1 law {index} did not parse: {e}"));
+        assert_eq!(forms.len(), 1, "one canonical SENS law per row");
+        let verdict = eval_parsed_expressions(&forms, &mut session);
+        if index < 5 {
+            let result = verdict.unwrap_or_else(|e|
+                panic!("SENS D1 law {index} failed before its own verdict: {e}"));
+            assert_eq!(result.value.as_predicate_bit(), Some(true),
+                "source-ref D1 law {index} must return exact D1:YES");
+        } else {
+            let error = verdict.err()
+                .expect("SENS one-bit falsifier must fail closed");
+            assert!(
+                error.to_string().contains("domain identity is not callable under its ratified law: D1"),
+                "source-ref one-bit mutant failed for an unrelated reason: {error}"
+            );
+        }
+    }
+    println!("SENS_SOURCE_REF_D1_VERDICT id=epistemic-source-ref-d1 layer=eval law=5 one-bit-mutant=PASS fixture=tests/semantic/epistemic-source-ref-d1-law.lisp");
+}
