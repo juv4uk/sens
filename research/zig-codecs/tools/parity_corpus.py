@@ -20,8 +20,6 @@ NEGATIVES = {
     "neg-overwidth.sens": bytes([0x3E, 0x97, 0x07]),  # 12 біт в одному слові (>W11)
 }
 
-
-
 def tracked_corpus(root: pathlib.Path) -> list[str]:
     """Лише git-tracked .sens: незакомічені файли рою НЕ входять у доказ."""
     proc = subprocess.run(
@@ -35,7 +33,7 @@ def tracked_corpus(root: pathlib.Path) -> list[str]:
         )
     # -z зберігає пробіли й нелатинські шляхи; ніколи не парсити по рядках.
     paths = sorted(root / os.fsdecode(item)
-                   for item in proc.stdout.split(b"\\0") if item)
+                   for item in proc.stdout.split(b"\0") if item)
     if not paths:
         raise RuntimeError("немає жодного git-tracked .sens (порожній корпус)")
     missing = [str(path) for path in paths if not path.is_file()]
