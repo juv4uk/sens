@@ -109,6 +109,20 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- cargo test --locked -p sens --test sens_semantic_witnesses \
                  epistemic_d3_eq_d1_law_and_one_bit_mutant -- --exact --nocapture
+          # Targeted source-derived witness; opt-in prevents unrelated CI freezes.
+          if [[ "${{ contains(github.event.head_commit.message, '[epistemic-source-once]') }}" == "true" ]]; then
+            fixture="tests/semantic/epistemic-source-ref-d1-law.lisp"
+            sha256sum "$fixture" lib/epistemic.lisp crates/sens/tests/epistemic_exact_ref_equality.rs
+            python3 scripts/ci_failure_contract.py run \
+              --test-id epistemic-source-ref-d1-one-bit \
+              --layer transport \
+              --fixture "$fixture" \
+              --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+              -- cargo test --locked -p sens --test epistemic_exact_ref_equality \
+                 source_ref_sens_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
+          else
+            echo 'EPISTEMIC_SOURCE_REF_OPT_IN_NOT_REQUESTED'
+          fi
       - name: Zig — чистота фізичного референсу та точні транспортні тести
         shell: bash
         run: |
