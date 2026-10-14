@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Встановити Zig 0.16.0 (дефолтний транспортний кодек; потрібен sens-cli/build.rs)
         shell: bash
         run: |
@@ -36,9 +39,6 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-        with:
-          fetch-depth: 0
-          persist-credentials: false
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
