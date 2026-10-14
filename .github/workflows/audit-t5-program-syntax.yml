@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
       - name: Встановити Zig 0.16.0 (дефолтний транспортний кодек; потрібен sens-cli/build.rs)
         shell: bash
         run: |
@@ -25,8 +27,6 @@ jobs:
           tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
-        with:
-          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Build the ACTUAL SENS binary reader
         run: cargo build -q -p sens-cli --bin sens-trit
