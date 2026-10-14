@@ -14,6 +14,12 @@ unsafe extern "C" {
         widths: *const u8, word_count: usize,
         output: *mut u8, capacity: usize,
     ) -> isize;
+    fn sens_zig_t5_decode_dense(
+        input: *const u8, len: usize,
+        output_bits: *mut u8, bit_bytes_capacity: usize,
+        output_widths: *mut u8, word_capacity: usize,
+        meaningful_bits: *mut usize, word_count: *mut usize,
+    ) -> i32;
     fn sens_zig_f3c_pack(
         input: *const u8, len: usize, output: *mut u8, capacity: usize
     ) -> isize;
@@ -37,6 +43,56 @@ pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
         return Err("Zig physical T5 rejected; no SENS execution".into());
     }
     Ok(())
+}
+
+/// Zig decodes ONLY physical T5; SENS still owns the D2 reader and
+/// all executable semantics. Return canonical dense bits + word-widths.
+/// Two-phase ABI refuses malformed T5 before any Rust SENS evaluation.
+pub fn decode_dense_t5(bytes: &[u8]) -> Result<(sens::PackedBitstream, Vec<usize>), String> {
+    version()?;
+    let mut bit_len = 0usize;
+    let mut word_count = 0usize;
+    let mut no_bits: [u8; 0] = [];
+    let mut no_widths: [u8; 0] = [];
+    // SAFETY: query call has zero output capacities; Zig only writes the
+    // two stack-owned length variables and never dereferences output buffers.
+    let query = unsafe {
+        sens_zig_t5_decode_dense(
+            bytes.as_ptr(), bytes.len(),
+            no_bits.as_mut_ptr(), 0,
+            no_widths.as_mut_ptr(), 0,
+            &mut bit_len, &mut word_count,
+        )
+    };
+    if query != -2 || bit_len == 0 || word_count == 0 {
+        return Err(format!("Zig T5 physical decode rejected: transport_status={query}"));
+    }
+    let bit_bytes = bit_len.checked_add(7).ok_or("Zig T5 bit length overflow")? / 8;
+    let mut packed = vec![0u8; bit_bytes];
+    let mut widths = vec![0u8; word_count];
+    let mut verified_bit_len = 0usize;
+    let mut verified_word_count = 0usize;
+    // SAFETY: caller-owned buffers remain allocated throughout this
+    // synchronous call; Zig validates all capacities before any write.
+    let actual = unsafe {
+        sens_zig_t5_decode_dense(
+            bytes.as_ptr(), bytes.len(),
+            packed.as_mut_ptr(), packed.len(),
+            widths.as_mut_ptr(), widths.len(),
+            &mut verified_bit_len, &mut verified_word_count,
+        )
+    };
+    if actual != 0 || verified_bit_len != bit_len || verified_word_count != word_count {
+        return Err(format!(
+            "Zig T5 physical decode changed under identical input: status={actual}"
+        ));
+    }
+    let packed = sens::PackedBitstream::from_parts(packed, bit_len)
+        .ok_or("Zig returned noncanonical dense physical bits")?;
+    // No Rust domain/token enum crosses ABI: SENS's own packed-word reader
+    // will interpret these exact widths and preserve identity.
+    let widths = widths.into_iter().map(usize::from).collect();
+    Ok((packed, widths))
 }
 
 /// Exact SENS-owned word bitstream plus explicit word-width schedule.
