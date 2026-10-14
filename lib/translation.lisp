@@ -281,5 +281,6 @@
 
 (0011 translation-review-with-evidence
   (0010 (module-name proposal journal)
-    (001000 ((review (translation-review module-name proposal)))
-      (1110 review (translation-evidence-next review journal)))))
+    ((0010 (review)
+       (1110 review (translation-evidence-next review journal)))
+     (translation-review module-name proposal))))
