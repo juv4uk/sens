@@ -391,6 +391,18 @@ mod tests {
     }
 
     #[test]
+    fn e1_zig_shared_raw_physical_golden_bytes_only() {
+        // Cross-implementation physical fixture, not a Rust semantic verdict.
+        let words = source("10 001 01");
+        let bytes = [
+            0x53, 0x33, 0x01, 0x03, 0x00, 0x03, 0x23, 0x20,
+            0x8a, 0x36, 0x20, 0x5d, 0x52,
+        ];
+        assert_eq!(encode(&words).unwrap(), bytes);
+        assert_eq!(decode(&bytes).unwrap(), words);
+    }
+
+    #[test]
     fn wrong_d2_rejected() {
         assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));
         assert_eq!(encode(&source("10")), Err(Frame3Error::InvalidD2));

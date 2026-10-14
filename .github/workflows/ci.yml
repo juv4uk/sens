@@ -112,6 +112,10 @@ jobs:
           "$ZIG" test research/zig-codecs/t5/t5.zig
           echo 'test_id=zig-f3c-rank-parity layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" test research/zig-codecs/tests.zig -lc
+          echo 'test_id=zig-e1-heapless-physical-preflight layer=transport semantic_authority=SENS admission=NOT_TESTED'
+          "$ZIG" test research/zig-codecs/transport/e1.zig
+          echo 'test_id=rust-e1-donor-byte-parity layer=transport semantic_authority=SENS admission=NOT_TESTED'
+          cargo test --locked -p sens --lib e1_zig_shared_raw_physical_golden_bytes_only -- --exact
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
