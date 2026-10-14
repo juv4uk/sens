@@ -68,8 +68,9 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     initial_source = read_fixed(source)
     zig_binary = read_fixed(zig_bin, max_size=MAX_EXECUTABLE_SIZE)
     sens_binary = read_fixed(sens_bin, max_size=MAX_EXECUTABLE_SIZE)
+    receipt_bytes = read_fixed(receipt_path)
     try:
-        receipt = json.loads(read_fixed(receipt_path))
+        receipt = json.loads(receipt_bytes)
     except (json.JSONDecodeError, UnicodeError) as exc:
         raise Rejected("malformed admission receipt") from exc
     if not isinstance(receipt, dict) or receipt.get("schema") != SCHEMA:
@@ -85,6 +86,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
         receipt.get("expected_native_stdout_sha256", ""),
         receipt.get("expected_native_stdout_sha256"),
     )
+    translation_snapshot = None
+    translation_path = None
     if receipt["source_era"] == "translated":
         # Translation happened OUTSIDE Zig. This is a content-binding check,
         # not an authentication signature or approval of that translation.
@@ -94,7 +97,9 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
         translation = Path(item["path"])
         if not translation.is_absolute() or translation == candidate:
             raise Rejected("translation receipt requires distinct absolute path")
-        pinned("translation_receipt", digest(read_fixed(translation)), item.get("sha256"))
+        translation_path = translation
+        translation_snapshot = read_fixed(translation)
+        pinned("translation_receipt", digest(translation_snapshot), item.get("sha256"))
     elif "translation_receipt" in receipt:
         raise Rejected("current-era source must not carry translation evidence")
     # Never interpret validity from Zig's physical success alone.
@@ -120,6 +125,11 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     # Reject concurrent substitution between initial admission and verdict.
     if read_fixed(source) != initial_source or read_fixed(candidate) != original:
         raise Rejected("source/candidate mutated during admission")
+    if read_fixed(receipt_path) != receipt_bytes:
+        raise Rejected("admission receipt mutated during verification")
+    if (translation_path is not None
+            and read_fixed(translation_path) != translation_snapshot):
+        raise Rejected("translation provenance mutated during verification")
     if (read_fixed(zig_bin, max_size=MAX_EXECUTABLE_SIZE) != zig_binary
             or read_fixed(sens_bin, max_size=MAX_EXECUTABLE_SIZE) != sens_binary):
         raise Rejected("executor changed during admission")
