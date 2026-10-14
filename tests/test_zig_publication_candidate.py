@@ -61,6 +61,21 @@ class PublicationCandidateTest(unittest.TestCase):
                 body = body[:-1]
             Path(command[3]).write_bytes(body)
             return subprocess.CompletedProcess(command, 0, stdout=b"", stderr=b"")
+        if op == "encode":
+            # Fake process executes the same I/O interface as real sens-trit;
+            # it is CI glue, NEVER a replacement for SENS semantic authority.
+            src = Path(command[2])
+            if src.suffix != ".lisp":
+                self.fail("SENS encode must receive a binary source snapshot")
+            if self.mutant == "encode-error":
+                return subprocess.CompletedProcess(command, 1, stdout=b"",
+                                                   stderr=b"source rejected")
+            if self.mutant != "encode-missing":
+                projection = self.candidate.read_bytes()
+                if self.mutant == "source-mismatch":
+                    projection = bytes.fromhex("35")
+                src.with_suffix(".sens").write_bytes(projection)
+            return subprocess.CompletedProcess(command, 0, stdout=b"", stderr=b"")
         if op == "eval":
             if self.mutant == "native-error":
                 return subprocess.CompletedProcess(command, 1, stdout=b"", stderr=b"rejected")
@@ -120,6 +135,30 @@ class PublicationCandidateTest(unittest.TestCase):
         self.mutant = "replay"
         with self.assertRaisesRegex(gate.Rejected, "Zig byte replay mismatch"):
             self.check()
+
+    def test_sens_source_projection_must_match_pinned_candidate(self):
+        # Even when both SHA fields are correct for their own respective
+        # files, mismatched source→T5 is NOT a publishable candidate.
+        self.mutant = "source-mismatch"
+        with self.assertRaisesRegex(gate.Rejected, "SENS source/physical mismatch"):
+            self.check()
+
+    def test_sens_source_reencoding_must_run_and_emit_a_regular_file(self):
+        self.mutant = "encode-error"
+        with self.assertRaisesRegex(gate.Rejected, "executor rejected"):
+            self.check()
+        self.mutant = "encode-missing"
+        with self.assertRaisesRegex(gate.Rejected, "SENS source encode produced no"):
+            self.check()
+
+    def test_post_translation_source_must_be_exact_binary_lisp(self):
+        self.source = self.source.with_suffix(".txt")
+        self.source.write_bytes(b"10 001 00 000 01\n")
+        self.data["source_sha256"] = sha(self.source.read_bytes())
+        self.write()
+        with self.assertRaisesRegex(gate.Rejected, "post-admission source"):
+            self.check()
+
 
     def test_backend_must_claim_zig_and_sens_separately(self):
         self.mutant = "backend"
