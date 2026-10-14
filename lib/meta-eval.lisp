@@ -344,7 +344,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
@@ -357,7 +357,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
@@ -370,7 +370,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 recursive-group-closure))))))
 
 (0011 my-lambda-form?
@@ -509,7 +509,7 @@
   (0010 (name names)
     (110
       
-      ((010 names)  #d1:0)
+      ((010 names)  (001 ()))
       ((101 name (100 names)) #d1:1)
       ((010 ()) (my-symbol-member? name (011 names))))))
 
@@ -1058,7 +1058,7 @@
   (0010 (forms name)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((my-form-references-name? (100 forms) name) #d1:1)
       ((010 ()) (my-forms-reference-name? (011 forms) name)))))
 
@@ -1145,7 +1145,7 @@
   (0010 (dependencies target graph visited)
     (110
       
-      ((010 dependencies)  #d1:0)
+      ((010 dependencies)  (001 ()))
       ((101 (100 dependencies) target) #d1:1)
       ((my-symbol-member? (100 dependencies) visited)
        (my-graph-dependencies-reach?
