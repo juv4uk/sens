@@ -26,11 +26,33 @@ def git(root: Path, *args: str) -> bytes:
     return p.stdout
 
 
+def tree_modes(root: Path, ref: str) -> dict[str, str]:
+    """Read the immutable Git tree, retaining file modes and exact UTF-8 paths.
+
+    A Git symlink (120000) holds its target as a blob. Reading its contents
+    with git show is NOT evidence of a regular executable or physical file.
+    """
+    raw = git(root, "ls-tree", "-r", "-z", "--full-tree", ref)
+    modes = {}
+    for record in raw.split(b"\0"):
+        if not record:
+            continue
+        meta, separator, path = record.partition(b"\t")
+        parts = meta.split()
+        if not separator or len(parts) != 3:
+            raise ValueError("invalid Git tree entry (fail closed)")
+        mode, kind, _object_id = parts
+        name = path.decode("utf-8", errors="strict")
+        if name in modes:
+            raise ValueError(f"duplicate Git tree path: {name!r}")
+        if kind not in (b"blob", b"commit"):
+            raise ValueError(f"unexpected Git tree kind at {name!r}")
+        modes[name] = mode.decode("ascii")
+    return modes
+
+
 def files(root: Path, ref: str) -> set[str]:
-    # Never shell interpolate untrusted revs/paths; commit resolve below.
-    blob = git(root, "ls-tree", "-r", "-z", "--name-only", ref)
-    return {s.decode("utf-8", errors="strict")
-            for s in blob.split(b"\0") if s}
+    return set(tree_modes(root, ref))
 
 
 def blob(root: Path, ref: str, path: str) -> bytes:
@@ -43,7 +65,8 @@ def sha(data: bytes) -> str:
 
 def snapshot(root: Path, ref: str) -> dict:
     sha_ref = git(root, "rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
-    names = files(root, sha_ref)
+    modes = tree_modes(root, sha_ref)
+    names = set(modes)
     sources = {p for p in names if p.endswith(".lisp")}
     pairs = sorted(p[:-5] for p in names if p.endswith(".sens") and p[:-5]+".lisp" in sources)
     triples = sorted(stem for stem in pairs if stem in names)
@@ -57,6 +80,13 @@ def snapshot(root: Path, ref: str) -> dict:
              "scope": "fixture" if stem.startswith("tests/fixtures/") else "non_fixture",
              "semantic_oracle": "NOT_ATTESTED_BY_THIS_MECHANICAL_AUDIT"}
         try:
+            # Only regular Git blobs can prove a same-stem physical triple.
+            # Symlinks and gitlinks remain visible as invalid rows (not silently
+            # absent), so the migration census cannot count them as verified.
+            for member in (lisp, sens, stem):
+                if member in names and modes[member] not in ("100644", "100755"):
+                    raise ValueError(
+                        f"not a regular Git file: {member} mode={modes[member]}")
             packed = blob(root, sha_ref, sens)
             words = decode_bytes(packed)
             if encode_words(words) != packed:
