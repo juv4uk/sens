@@ -12,7 +12,7 @@ permissions:
 jobs:
   d2-grammar-audit:
     if: ${{ false }} # КАРАНТИН: червоний, run 38564269748
- ubuntu-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
