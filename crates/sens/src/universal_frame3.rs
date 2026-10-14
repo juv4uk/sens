@@ -402,6 +402,47 @@ mod tests {
         assert_eq!(decode(&bytes).unwrap(), words);
     }
 
+
+    #[test]
+    fn e1_zig_rust_shared_physical_corpus() {
+        // Independent byte parity ONLY: native binary SENS owns admission/eval.
+        let corpus = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"), "/../../research/zig-codecs/fixtures/e1-v1.bits"
+        ));
+        let mut tested = 0;
+        for line in corpus.lines().filter(|s| !s.is_empty() && !s.starts_with('#')) {
+            let mut columns = line.split('|');
+            let label = columns.next().expect("corpus case");
+            let bits = columns.next().expect("exact binary words");
+            let hex = columns.next().expect("physical E1 carrier hex");
+            assert!(columns.next().is_none(), "too many columns case={label}");
+            assert_eq!(hex.len() % 2, 0, "odd hex case={label}");
+            let expected = hex.as_bytes().chunks_exact(2).map(|pair| {
+                let digits = std::str::from_utf8(pair).expect("physical hex ASCII");
+                u8::from_str_radix(digits, 16).expect("valid physical hex")
+            }).collect::<Vec<_>>();
+            let words = source(bits);
+            let actual = encode(&words).expect("physical encoder accepts corpus");
+            if actual != expected {
+                let offset = actual.iter().zip(&expected)
+                    .position(|(left, right)| left != right)
+                    .unwrap_or_else(|| actual.len().min(expected.len()));
+                panic!(
+                    "E1_BYTE_PARITY_FAIL case={label} first_diff_offset={offset} \
+                     expected_len={} actual_len={} expected={expected:02x?} actual={actual:02x?}",
+                    expected.len(), actual.len()
+                );
+            }
+            assert_eq!(
+                decode(&expected).expect("Rust physical decode+canonical roundtrip"),
+                words,
+                "E1_DECODE_MISMATCH case={label}"
+            );
+            tested += 1;
+        }
+        assert_eq!(tested, 16, "corpus lost fixtures");
+    }
+
     #[test]
     fn wrong_d2_rejected() {
         assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));

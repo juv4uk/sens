@@ -165,6 +165,11 @@ jobs:
           cargo test --locked -p sens --lib universal_frame3::tests::e1_zig_shared_raw_physical_golden_bytes_only -- --exact --nocapture \
             | tee "$RUNNER_TEMP/sens-e1-donor-golden.log"
           grep -Fxq 'test universal_frame3::tests::e1_zig_shared_raw_physical_golden_bytes_only ... ok' "$RUNNER_TEMP/sens-e1-donor-golden.log"
+          echo 'test_id=e1-zig-rust-shared-physical-corpus layer=transport semantic_authority=SENS admission=NOT_TESTED'
+          sha256sum research/zig-codecs/fixtures/e1-v1.bits research/zig-codecs/transport/e1_writer.zig
+          cargo test --locked -p sens --lib universal_frame3::tests::e1_zig_rust_shared_physical_corpus -- --exact --nocapture \
+            | tee "$RUNNER_TEMP/sens-e1-corpus.log"
+          grep -Fxq 'test universal_frame3::tests::e1_zig_rust_shared_physical_corpus ... ok' "$RUNNER_TEMP/sens-e1-corpus.log"
           echo 'test_id=zig-to-sens-cli-abi layer=transport semantic_authority=SENS'
           cargo build --locked -p sens-cli --bin sens-trit
           CLI_RUST_ZIG=target/debug/sens-trit

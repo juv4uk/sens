@@ -250,3 +250,69 @@ test "E1 fail-closed aliases with valid CRC, explicit widths and caller bounds" 
     try std.testing.expectError(error.BufferTooSmall,
         encode(&a, &right, scratch[0..1]));
 }
+
+fn nibble(char: u8) !u8 {
+    if (char >= '0' and char <= '9') return char - '0';
+    if (char >= 'a' and char <= 'f') return char - 'a' + 10;
+    return error.InvalidHexDigit;
+}
+
+/// One immutable *physical* fixture corpus for independent encode/decode on
+/// each implementation. Its binary words do not confer SENS call authority.
+test "E1 shared exact-width carrier corpus: independent encode and decode" {
+    const corpus = @embedFile("../fixtures/e1-v1.bits");
+    var lines = std.mem.splitScalar(u8, corpus, '\n');
+    var tested: usize = 0;
+    while (lines.next()) |line| {
+        if (line.len == 0 or line[0] == '#') continue;
+        var columns = std.mem.splitScalar(u8, line, '|');
+        const name = columns.next() orelse return error.MissingCase;
+        const bits_source = columns.next() orelse return error.MissingWords;
+        const hex = columns.next() orelse return error.MissingPhysical;
+        try std.testing.expect(columns.next() == null);
+        try std.testing.expect(hex.len > 0 and hex.len % 2 == 0);
+
+        var words: [256]Word = undefined;
+        var count: usize = 0;
+        var tokens = std.mem.tokenizeScalar(u8, bits_source, ' ');
+        while (tokens.next()) |token| {
+            try std.testing.expect(token.len >= 1 and token.len <= 9);
+            try std.testing.expect(count < words.len);
+            var payload: u16 = 0;
+            for (token) |digit| {
+                try std.testing.expect(digit == '0' or digit == '1');
+                payload = (payload << 1) | @as(u16, digit - '0');
+            }
+            words[count] = .{ .width = @intCast(token.len), .bits = payload };
+            count += 1;
+        }
+        var expected: [2048]u8 = undefined;
+        const exp_len = hex.len / 2;
+        try std.testing.expect(exp_len <= expected.len);
+        for (0..exp_len) |i| {
+            expected[i] = ((try nibble(hex[2 * i])) << 4) |
+                (try nibble(hex[2 * i + 1]));
+        }
+        var output: [2048]u8 = undefined;
+        var scratch: [257]Step = undefined;
+        const encoded_len = try encode(words[0..count], &output, &scratch);
+        std.testing.expectEqualSlices(u8, expected[0..exp_len], output[0..encoded_len]) catch |err| {
+            std.debug.print("E1_BYTE_PARITY_FAIL case={s} fixture=e1-v1.bits\n", .{name});
+            return err;
+        };
+
+        // Independent physical decoder and the canonical byte replay path.
+        var decoded: [256]Word = undefined;
+        var replay: [2048]u8 = undefined;
+        const recovered = try inspectCanonical(
+            expected[0..exp_len], &decoded, &scratch, &replay,
+        );
+        try std.testing.expectEqual(count, recovered);
+        for (words[0..count], decoded[0..recovered]) |left, right| {
+            try std.testing.expectEqual(left.width, right.width);
+            try std.testing.expectEqual(left.bits, right.bits);
+        }
+        tested += 1;
+    }
+    try std.testing.expectEqual(@as(usize, 16), tested);
+}
