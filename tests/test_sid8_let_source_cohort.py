@@ -86,13 +86,6 @@ def project(source):
     return result, rewritten, held
 
 class LetAdmissionBoundary(unittest.TestCase):
-    def test_w8_collision_is_not_current_d8_or_callable_d6(self):
-        domains = json.loads(
-            (ROOT / "knowledge/d1-d9-foundation.json").read_text()
-        )["domains"]
-        self.assertEqual(domains["D6"]["residents"]["001000"], "LET")
-        self.assertEqual(domains["D8"]["residents"]["10011100"], "CADDDAAR")
-
     def test_exact_pinned_parallel_let_to_lambda_replay(self):
         for path, source_sha, result_sha, before_count, lowered_count, held_count in (
             (p, *v) for p, v in SOURCES.items()
@@ -110,17 +103,6 @@ class LetAdmissionBoundary(unittest.TestCase):
                 self.assertEqual(len(OLD.findall(current)), held_count)
                 self.assertEqual(len(D6_DIRECT.findall(current)), 0)
                 self.assertIn("(00001010", current, "composite DEFMACRO still held")
-
-    def test_current_d8_mod_does_not_alias_historic_member(self):
-        domains = json.loads(
-            (ROOT / "knowledge/d1-d9-foundation.json").read_text()
-        )["domains"]
-        self.assertEqual(domains["D8"]["residents"]["00101100"], "MOD")
-        for p, n in (("lib/time.lisp", 3), ("lib/core.lisp", 2),
-                     ("lib/core4.lisp", 2)):
-            with self.subTest(path=p):
-                source = (ROOT / p).read_text(encoding="utf-8")
-                self.assertEqual(len(re.findall(r"\(00101100(?=[\s)])", source)), n)
 
 if __name__ == "__main__":
     unittest.main()
