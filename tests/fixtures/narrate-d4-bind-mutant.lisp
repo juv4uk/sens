@@ -21,17 +21,14 @@
       ((оповідь--рівні?
          (narrate-answer
            (001 (planet earth))
-           (001 (statement (planet earth) (source fact) (rule (planet earth))
-                    (derived-from ()))))
+           (001 (proved (planet earth) (planet earth) ())))
          (001 (earth is a planet)))
        (110
          ((оповідь--рівні?
             (narrate-answer
               (001 (planet earth))
-              (001 (statement (planet earth) (source rule) (rule (planet earth))
-                       (derived-from
-                         ((statement (planet mars) (source fact) (rule (planet mars))
-                           (derived-from ())))))))
+              (001 (proved (planet earth) (planet earth)
+                       ((proved (planet mars) (planet mars) ())))))
             (001 (earth is a planet because mars is a planet)))
           #d1:0)
          (#d1:1 #d1:0)))
