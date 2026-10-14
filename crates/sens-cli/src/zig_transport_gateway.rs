@@ -9,6 +9,11 @@ unsafe extern "C" {
     fn sens_zig_t5_repack(
         input: *const u8, len: usize, output: *mut u8, capacity: usize
     ) -> isize;
+    fn sens_zig_t5_encode_dense(
+        packed_bits: *const u8, exact_bit_len: usize,
+        widths: *const u8, word_count: usize,
+        output: *mut u8, capacity: usize,
+    ) -> isize;
     fn sens_zig_f3c_pack(
         input: *const u8, len: usize, output: *mut u8, capacity: usize
     ) -> isize;
@@ -32,6 +37,34 @@ pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
         return Err("Zig physical T5 rejected; no SENS execution".into());
     }
     Ok(())
+}
+
+/// Exact SENS-owned word bitstream plus explicit word-width schedule.
+/// Zig creates T5 physical bytes; Rust enum/Word never crosses the C ABI.
+/// A host usize here is an ABI transport length, never SENS domain identity.
+pub fn encode_dense_t5(packed: &sens::PackedBitstream, widths: &[u8]) -> Result<Vec<u8>, String> {
+    version()?;
+    if widths.is_empty() || packed.bit_len() == 0 {
+        return Err("empty SENS transport bitstream".into());
+    }
+    let trits = packed.bit_len().checked_add(widths.len() - 1)
+        .ok_or("T5 trit count overflow")?;
+    let cap = trits.checked_add(4).ok_or("T5 padding overflow")? / 5;
+    let mut physical = vec![0u8; cap];
+    // SAFETY: packed.bytes(), widths and physical are caller-owned and remain
+    // alive for the duration of this call. Zig checks exact widths and bounds.
+    let len = unsafe {
+        sens_zig_t5_encode_dense(
+            packed.bytes().as_ptr(), packed.bit_len(),
+            widths.as_ptr(), widths.len(), physical.as_mut_ptr(), physical.len()
+        )
+    };
+    if len < 0 || len as usize != physical.len() {
+        return Err(format!(
+            "Zig T5 exact-bit pack rejected: transport_status={len} expected_bytes={cap}"
+        ));
+    }
+    Ok(physical)
 }
 
 /// Physical byte gateway only. The existing SENS-owned projection
