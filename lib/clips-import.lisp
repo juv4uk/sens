@@ -323,22 +323,22 @@
          ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         ((010 ()) (001000 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))
+         ((010 ()) ((0010 (slot-order)
               (110
                 
                 ((010 slot-order)  term)
-                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))))))
+                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
       ((010 (100 term))  (110
          ((101 (100 term) (001 not)) (1110 (001 not?) (clips-convert-template (1001 term) templates)))
          ((101 (100 term) (001 or)) (111 (001 or) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         ((010 ()) (001000 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))
+         ((010 ()) ((0010 (slot-order)
               (110
                 
                 ((010 slot-order)  term)
-                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))))))
+                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
       ((010 ()) term))))
 
 (0011 clips-convert-template-list
