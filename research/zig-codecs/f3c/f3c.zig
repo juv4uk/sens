@@ -401,11 +401,12 @@ test "F3C Rust golden: QUOTE data exact physical bytes" {
 test "F3C refuses non-saving empty shell and noncanonical physical inputs" {
     const a = std.testing.allocator;
     try std.testing.expect((try encode(a, &.{0x64})) == null);
-    try std.testing.expectError(Error.NotSmallerThanT5, decode(a, &.{ 0xf3, 0x00 }));
+    try std.testing.expectError(Error.InvalidProgram, decode(a, &.{ 0xf3, 0x00 }));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{0xf3}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{ 0xf4, 0x40, 0x60 }));
-    try std.testing.expectError(Error.WrongCarrier, decode(a, &.{0xf3} ** 16));
+    const too_long = [_]u8{0xf3} ** 16;
+    try std.testing.expectError(Error.WrongCarrier, decode(a, &too_long));
     try std.testing.expectError(t5.Error.InvalidPhysicalByte, encode(a, &.{0xf3}));
 }
 
