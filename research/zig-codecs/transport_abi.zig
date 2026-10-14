@@ -45,7 +45,7 @@ pub export fn sens_zig_f3c_unpack(src: [*]const u8, len: usize, dst: [*]u8, cap:
 }
 /// Opaque physical-file boundary: host passes only bytes, never Rust Word/
 /// enum/ExprKind layout or host truthiness. Transport-only canonical repack.
-/// The existing typed v1 ABI symbol is retained for independent legacy clients,
+/// The existing typed v1 ABI symbol remains for independent compatibility clients,
 /// but the feature-gated Rust CLI must call THIS byte-oriented function.
 /// -1 = malformed physical T5; -2 = caller buffer too small. Neither means
 /// SENS D1:NO or any semantic verdict; Zig does not parse executable D2.
@@ -88,7 +88,7 @@ test "opaque T5 ABI: preserve physical domain-width collision and separate gramm
 }
 
 /// SENS-supplied exact payload bits + width schedule -> Zig T5 bytes.
-/// Both inputs are opaque physical data, not a Rust enum, SID8 or truth value.
+/// Both inputs are opaque physical data, not a host enum or truth value.
 /// The width schedule is a declared mechanical boundary, NOT callability.
 /// -1 bad mechanical input, -2 output capacity; neither is SENS D1:NO.
 /// `exact_bit_len` is meaningful bits, NOT rounded physical byte length.
