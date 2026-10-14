@@ -63,7 +63,7 @@ class RealBatchTest(unittest.TestCase):
         consumer.write_text("(0011 caller (0010 (x) (helper x)))\n", encoding="utf-8")
         payload = provider.read_bytes()
         git_blob = hashlib.sha1(
-            b"blob " + str(len(payload)).encode() + b"\\0" + payload
+            b"blob " + str(len(payload)).encode() + b"\0" + payload
         ).hexdigest()
         spec = f"lib/provider.lisp@{git_blob}:helper"
 
@@ -95,7 +95,7 @@ class RealBatchTest(unittest.TestCase):
         consumer.write_text("(0011 caller (0010 (x) (helper x)))\n", encoding="utf-8")
         payload = provider.read_bytes()
         git_blob = hashlib.sha1(
-            b"blob " + str(len(payload)).encode() + b"\\0" + payload
+            b"blob " + str(len(payload)).encode() + b"\0" + payload
         ).hexdigest()
         for spec in (
             "lib/provider.lisp@" + "0" * 40 + ":helper",
