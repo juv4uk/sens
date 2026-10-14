@@ -163,7 +163,7 @@
            ((110
               ((0100 (010 positive-results))
                (0100 (010 opposite-results)))
-              (#d1:1 0))
+              (#d1:1 #d1:0))
             (000000111
               (1110
                 (000111101 goal positive-results)
