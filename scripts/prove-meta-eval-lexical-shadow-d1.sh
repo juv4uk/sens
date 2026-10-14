@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# CI_GLUE_NO_SEMANTICS: native SENS owns all lexical-dependency claims.
-# This script only pins transport, source provenance and observed execution.
+# CI_GLUE_NO_SEMANTICS: only native SENS judges eight lexical laws.
+# One source form per case: report the first precise failing case.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [[ $# -gt 1 ]]; then
@@ -17,68 +17,81 @@ if [[ ! -x "$cli" ]]; then
   printf 'REGRESSION test_id=%s layer=eval expected=native-executor actual=missing reproduce=%q\n' "$id" "$reproduce" >&2
   exit 1
 fi
+
+# Transport-only: exact source equality outside ONE D1 bit and D2 balance.
+# This code does not evaluate quote, binder lookup, or D1 semantic truth.
 python3 - "$law" "$mutant" <<'PY'
 from pathlib import Path
 import sys
-
-law = Path(sys.argv[1]).read_text(encoding="utf-8")
-mutant = Path(sys.argv[2]).read_text(encoding="utf-8")
-before = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:0"
-after = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:1"
-if law.count(before) != 1 or mutant != law.replace(before, after):
-    raise SystemExit("META_LEXICAL_TRANSPORT_RED: mutant must change exactly quoted datum D1:0 -> D1:1")
-if law.count("(101 (my-form-references-name? ") != 5:
-    raise SystemExit("META_LEXICAL_TRANSPORT_RED: expected five live single-form checks")
-if law.count("(101 (my-lambda-def-references-name? ") != 3:
-    raise SystemExit("META_LEXICAL_TRANSPORT_RED: expected three live definition checks")
-for kind, source in (("positive", law), ("mutant", mutant)):
+positive = Path(sys.argv[1]).read_text(encoding="utf-8")
+negative = Path(sys.argv[2]).read_text(encoding="utf-8")
+def forms(source: str) -> list[str]:
+    return [line.strip() for line in source.splitlines()
+            if line.strip() and not line.lstrip().startswith(";")]
+p, n = forms(positive), forms(negative)
+if len(p) != 8 or len(n) != 8:
+    raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: require eight forms, actual={len(p)}/{len(n)}")
+first_expected = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:0"
+first_mutated = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:1"
+if p[0].count(first_expected) != 1 or n != [p[0].replace(first_expected, first_mutated), *p[1:]]:
+    raise SystemExit("META_LEXICAL_TRANSPORT_RED: mutant must change one D1 bit, in case=1 only")
+for i, text in enumerate((*p, *n), 1):
     depth = 0
-    for raw_line in source.splitlines():
-        line = raw_line.split(";", 1)[0]
-        for ch in line:
-            if ch == "(":
-                depth += 1
-            elif ch == ")":
-                depth -= 1
-            if depth < 0:
-                raise SystemExit("META_LEXICAL_TRANSPORT_RED: unmatched close in " + kind)
-    if depth != 0:
-        raise SystemExit("META_LEXICAL_TRANSPORT_RED: unmatched open in " + kind)
-print("META_LEXICAL_TRANSPORT_PASS source_forms=8 mutant_changed_D1_bits=1 semantic_pass=NOT_INFERRED")
+    for ch in text:
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        if depth < 0:
+            raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: premature D2 close form={i}")
+    if depth:
+        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: unmatched D2 open form={i}")
+print("META_LEXICAL_TRANSPORT_PASS positive_forms=8 mutant_changed_D1_bits=1 semantic_pass=NOT_INFERRED")
 PY
 
+mapfile -t forms < <(grep -v '^[[:space:]]*;' "$law" | sed '/^[[:space:]]*$/d')
+mapfile -t mutant_forms < <(grep -v '^[[:space:]]*;' "$mutant" | sed '/^[[:space:]]*$/d')
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-cat "$lib" "$law" > "$tmp/positive.lisp"
-cat "$lib" "$mutant" > "$tmp/mutant.lisp"
 printf 'NATIVE_SENS_EXECUTOR id=%s path=%s version=%s reproduce=%q\n' "$id" "$cli" "$("$cli" --version)" "$reproduce"
-sha256sum "$cli" "$lib" "$law" "$mutant" "$tmp/positive.lisp" "$tmp/mutant.lisp"
+sha256sum "$cli" "$lib" "$law" "$mutant"
 printf '1\n' > "$tmp/expected"
-if ! "$cli" "$tmp/positive.lisp" > "$tmp/actual" 2> "$tmp/positive.err"; then
-  printf 'REGRESSION id=%s layer=eval fixture=%s expected=D1:YES actual=execution-error first_diff=unknown reproduce=%q\n' "$id" "$law" "$reproduce" >&2
-  cat "$tmp/positive.err" >&2
-  sha256sum "$tmp/expected" "$tmp/actual" >&2
-  exit 1
-fi
-printf 'NATIVE_SENS_DIGESTS id=%s expected_sha256=' "$id"
-sha256sum "$tmp/expected"
-printf 'NATIVE_SENS_DIGESTS id=%s actual_sha256=' "$id"
-sha256sum "$tmp/actual"
-if ! cmp -s "$tmp/expected" "$tmp/actual"; then
-  printf 'REGRESSION id=%s layer=eval fixture=%s expected=D1:YES actual=wrong-verdict first_diff=0 reproduce=%q\n' "$id" "$law" "$reproduce" >&2
-  exit 1
-fi
-if "$cli" "$tmp/mutant.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
-  printf 'REGRESSION id=%s-mutant layer=eval fixture=%s expected=D1-noncallable actual=accepted first_diff=quoted-D1 reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
+for i in "${!forms[@]}"; do
+  case_no=$((i+1))
+  case_id="$id-$case_no"
+  { cat "$lib"; printf '\n%s\n' "${forms[$i]}"; } > "$tmp/$case_no.lisp"
+  printf 'NATIVE_SENS_CASE id=%s layer=eval test_case=%s fixture=%s reproduce=%q\n' "$case_id" "$case_no" "$law" "$reproduce"
+  sha256sum "$tmp/$case_no.lisp"
+  if ! "$cli" "$tmp/$case_no.lisp" > "$tmp/actual" 2> "$tmp/stderr"; then
+    printf 'REGRESSION test_id=%s layer=eval fixture=%s expected=D1:1 actual=execution-error first_diff=unknown reproduce=%q\n' "$case_id" "$law" "$reproduce" >&2
+    cat "$tmp/stderr" >&2
+    sha256sum "$tmp/expected" "$tmp/actual" >&2
+    exit 1
+  fi
+  printf 'NATIVE_SENS_DIGESTS test_id=%s expected_sha256=' "$case_id"
+  sha256sum "$tmp/expected"
+  printf 'NATIVE_SENS_DIGESTS test_id=%s actual_sha256=' "$case_id"
+  sha256sum "$tmp/actual"
+  if ! cmp -s "$tmp/expected" "$tmp/actual"; then
+    first_diff="$(cmp "$tmp/expected" "$tmp/actual" 2>/dev/null | head -n1 || true)"
+    printf 'REGRESSION test_id=%s layer=eval fixture=%s expected=D1:1 actual=wrong-verdict first_diff=%q reproduce=%q\n' "$case_id" "$law" "$first_diff" "$reproduce" >&2
+    exit 1
+  fi
+done
+
+{ cat "$lib"; printf '\n%s\n' "${mutant_forms[0]}"; } > "$tmp/mutant-1.lisp"
+sha256sum "$tmp/mutant-1.lisp"
+if "$cli" "$tmp/mutant-1.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+  printf 'REGRESSION test_id=%s-mutant-1 layer=eval fixture=%s expected=D1-noncallable actual=accepted first_diff=quoted-D1 reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
   sha256sum "$tmp/mutant.out" >&2
   exit 1
 fi
 if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.err"; then
-  printf 'UNINFORMATIVE-NEGATIVE id=%s-mutant layer=eval fixture=%s expected=D1-noncallable actual=unrelated-failure first_diff=unknown reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
+  printf 'UNINFORMATIVE-NEGATIVE test_id=%s-mutant-1 layer=eval fixture=%s expected=D1-noncallable actual=unrelated-failure first_diff=unknown reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
   cat "$tmp/mutant.err" >&2
   sha256sum "$tmp/mutant.err" >&2
   exit 1
 fi
-printf 'NATIVE_SENS_NEGATIVE id=%s-mutant stderr_sha256=' "$id"
+printf 'NATIVE_SENS_NEGATIVE test_id=%s-mutant-1 stderr_sha256=' "$id"
 sha256sum "$tmp/mutant.err"
-printf 'NATIVE_SENS_PASS id=%s SENS_self_verdicts=8 mutant=D1-noncallable authority=SENS\n' "$id"
+printf 'NATIVE_SENS_PASS test_id=%s positive_forms=8 mutant=D1-noncallable authority=binary-SENS\n' "$id"
