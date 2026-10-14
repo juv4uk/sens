@@ -1273,7 +1273,6 @@
 (0011 my-eval-program
   (0010 (forms env-ref)
     (110
-      ((0100 (010 forms)) (111 env-ref (001 ())))
       ((010 forms)  (111 env-ref (001 ())))
       ((010 ())
        (001000 ((program-env (my-ensure-shared-frame env-ref)))
