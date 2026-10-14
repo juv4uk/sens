@@ -16,10 +16,13 @@
 ;
 ; At call time the group environment is reconstructed from that data.
 
+; D3:110 condition requires an exact D1 control bit, not quoted D3 empty.
+; These two predicates return D1:0 on negative branches so callers can
+; compose them inside D3 COND without historical truthiness.
 (0011 my-group-closure?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
+      ((010 value) #d1:0)
       (#d1:1 (101 (100 value) (001 recursive-group-closure))))))
 
 (0011 my-sixth
@@ -29,10 +32,10 @@
 (0011 my-lambda-def-form?
   (0010 (form)
     (110
-      ((010 form) (001 ()))
+      ((010 form) #d1:0)
       ((101 (100 form) (001 def))
        (my-lambda-form? (10011 form)))
-      (#d1:1 (001 ())))))
+      (#d1:1 #d1:0))))
 
 (0011 my-take-lambda-def-group
   (0010 (forms)
