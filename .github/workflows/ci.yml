@@ -120,6 +120,8 @@ jobs:
           "$ZIG" test research/zig-codecs/tests.zig -lc
           echo 'test_id=zig-e1-heapless-physical-preflight layer=transport semantic_authority=SENS admission=NOT_TESTED'
           "$ZIG" test research/zig-codecs/transport/e1.zig
+          echo 'test_id=zig-e1-canonical-dp-writer layer=transport semantic_authority=SENS admission=NOT_TESTED'
+          "$ZIG" test research/zig-codecs/transport/e1_writer.zig
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
