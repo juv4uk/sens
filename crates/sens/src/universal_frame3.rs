@@ -443,6 +443,81 @@ mod tests {
         assert_eq!(tested, 16, "corpus lost fixtures");
     }
 
+    /// Exact physical sizes for the same 16 verified E1 carrier vectors.
+    /// These are bytes, NOT throughput, execution cost or semantic authority.
+    /// F3C eligibility is decided by the existing explicit tiny program
+    /// codec, not silently projected to zero or to an E1/T5 length.
+    #[test]
+    fn e1_t5_f3c_exact_physical_size_matrix() {
+        use crate::{decode_ternary_words, encode_ternary_words};
+
+        let corpus = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../research/zig-codecs/transport/fixtures/e1-v1.bits"
+        ));
+        let mut cases = 0usize;
+        let mut total_e1 = 0usize;
+        let mut total_t5 = 0usize;
+        let mut t5_cases = 0usize;
+        let mut f3c_cases = 0usize;
+        let mut e1_smaller = 0usize;
+        let mut t5_smaller = 0usize;
+        let mut equal = 0usize;
+
+        for line in corpus.lines().filter(|line| !line.is_empty() && !line.starts_with('#')) {
+            let mut parts = line.split('|');
+            let label = parts.next().expect("fixture label");
+            let binary = parts.next().expect("exact-width binary fixture");
+            let expected_hex = parts.next().expect("canonical E1 hex");
+            assert!(parts.next().is_none(), "fixture has extra columns: {label}");
+            let words = source(binary);
+            let bits: usize = words.iter().map(|w| w.width()).sum();
+            let physical_e1 = encode(&words).expect("admitted E1 fixture");
+            let encoded_hex = physical_e1.iter().map(|byte| format!("{byte:02x}"))
+                .collect::<String>();
+            assert_eq!(encoded_hex, expected_hex, "E1 fixture changed: {label}");
+            assert_eq!(decode(&physical_e1).unwrap(), words, "E1 width loss: {label}");
+
+            let t5 = encode_ternary_words(&words).ok().filter(|bytes| {
+                decode_ternary_words(bytes).is_ok_and(|recovered| recovered == words)
+            });
+            let f3c = t5.as_ref().and_then(|bytes| {
+                crate::frame3_small::encode_explicit_small_f3(bytes)
+                    .ok().flatten().filter(|packed| {
+                        crate::frame3_small::decode_explicit_small_f3(packed)
+                            .is_ok_and(|recovered| recovered == *bytes)
+                    })
+            });
+            let t5_bytes = t5.as_ref().map(|v| v.len());
+            let f3c_bytes = f3c.as_ref().map(|v| v.len());
+            let size_repr = |n: Option<usize>| {
+                n.map_or_else(|| "NA".to_string(), |size| size.to_string())
+            };
+            println!(
+                "E1_SIZE_RECORD case={label} words={} exact_bits={bits} e1_bytes={} t5_bytes={} f3c_bytes={}",
+                words.len(), physical_e1.len(), size_repr(t5_bytes), size_repr(f3c_bytes)
+            );
+            total_e1 += physical_e1.len();
+            if let Some(t5_size) = t5_bytes {
+                t5_cases += 1;
+                total_t5 += t5_size;
+                if physical_e1.len() < t5_size { e1_smaller += 1; }
+                else if physical_e1.len() > t5_size { t5_smaller += 1; }
+                else { equal += 1; }
+            }
+            if f3c_bytes.is_some() { f3c_cases += 1; }
+            cases += 1;
+        }
+        assert_eq!(cases, 16, "the fixed byte parity corpus cannot silently shrink");
+        assert_eq!(e1_smaller + t5_smaller + equal, t5_cases);
+        println!(
+            "E1_SIZE_SUMMARY cases={cases} t5_representable={t5_cases} f3c_eligible={f3c_cases} \
+             sum_e1_bytes={total_e1} sum_t5_comparable_bytes={total_t5} \
+             e1_smaller={e1_smaller} t5_smaller={t5_smaller} equal={equal} \
+             speed=NOT_MEASURED semantic_authority=SENS"
+        );
+    }
+
     #[test]
     fn wrong_d2_rejected() {
         assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));
