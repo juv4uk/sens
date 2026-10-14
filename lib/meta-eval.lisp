@@ -633,12 +633,11 @@
   (0010 (clauses)
     (110
       
-      ((010 clauses)  (001 ()))
+      ((010 clauses) #d1:0)
       ((0100 (010 (100 clauses))) (my-cond-has-migration-clause? (011 clauses)))
       ((010 (100 clauses))  (my-cond-has-migration-clause? (011 clauses)))
       ((101 (000000 (100 clauses)) 2)  #d1:1)
-      ((101 (000000 (100 clauses)) 2) 
-       (my-cond-has-migration-clause? (011 clauses))))))
+      (#d1:1 (my-cond-has-migration-clause? (011 clauses))))))
 
 (0011 my-eval-cond-result-mode
   (0010 (clauses env-ref migration-compatibility?)
@@ -1002,9 +1001,9 @@
     (110
       
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((101 params name) #d1:1)
-         ))
+         (#d1:1 #d1:0)))
       ((101 (100 params) name) #d1:1)
       ((010 ()) (my-params-bind-name? name (011 params))))))
 
@@ -1012,7 +1011,7 @@
   (0010 (forms name)
     (110
       
-      ((010 forms)  (001 ()))
+      ((010 forms) #d1:0)
       ((my-form-references-name? (100 forms) name) #d1:1)
       ((010 ()) (my-forms-reference-name? (011 forms) name)))))
 
@@ -1022,23 +1021,23 @@
       
       ((010 form)  (110
          ((110101100 form) (101 form name))
-         ))
+         (#d1:1 #d1:0)))
       ((0100 (010 (100 form))) (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) (001 ()))
+         ((my-canon-quote-name? (100 form)) #d1:0)
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) (001 ()))
+            ((my-params-bind-name? name (1001 form)) #d1:0)
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 (100 form))  (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) (001 ()))
+         ((my-canon-quote-name? (100 form)) #d1:0)
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) (001 ()))
+            ((my-params-bind-name? name (1001 form)) #d1:0)
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 ()) (my-forms-reference-name? form name)))))
@@ -1047,7 +1046,7 @@
   (0010 (form name)
     (001000 ((lambda-form (10011 form)))
       (110
-        ((my-params-bind-name? name (1001 lambda-form)) (001 ()))
+        ((my-params-bind-name? name (1001 lambda-form)) #d1:0)
         ((010 ()) (my-forms-reference-name? (011 (011 lambda-form)) name))))))
 
 (0011 my-lambda-def-names
@@ -1097,7 +1096,7 @@
   (0010 (dependencies target graph visited)
     (110
       
-      ((010 dependencies)  (001 ()))
+      ((010 dependencies) #d1:0)
       ((101 (100 dependencies) target) #d1:1)
       ((my-symbol-member? (100 dependencies) visited)
        (my-graph-dependencies-reach?
