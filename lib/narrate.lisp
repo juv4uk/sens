@@ -77,7 +77,7 @@
 (0011 provenance-goal (0010 (prov) (1001 prov)))
 (0011 provenance-source (0010 (prov) (1001 (10011 prov))))
 (0011 provenance-rule (0010 (prov) (1001 (100111 prov))))
-(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))
+(0011 provenance-derived-from (0010 (prov) (1001 (100 (011 (011 (011 (011 prov))))))))
 
 (0011 narrate-derivation
   (0010 (derivations)
