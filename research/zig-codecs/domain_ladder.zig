@@ -263,6 +263,30 @@ pub fn WideDomainWord(comptime width: u16) type {
             return .{ .bits = bits };
         }
 
+        /// Exact source bits, not a decimal string or an integer parser.
+        /// There is no inference of arithmetic, resident status or callability.
+        pub fn fromBinary(source: []const u8) CoordinateError!Self {
+            if (source.len != @as(usize, width)) return error.WrongDomainWidth;
+            var payload: Payload = 0;
+            for (source) |digit| {
+                if (digit != '0' and digit != '1') return error.InvalidBinaryDigit;
+                payload = (payload << 1) | @as(Payload, digit - '0');
+            }
+            return init(payload);
+        }
+
+        /// Render exactly the declared rung width, including leading zeros.
+        pub fn writeBinary(self: Self, out: []u8) CoordinateError!void {
+            if (out.len != @as(usize, width)) return error.BufferLengthMismatch;
+            var remaining = self.bits;
+            var cursor = out.len;
+            while (cursor != 0) {
+                cursor -= 1;
+                out[cursor] = if ((remaining & 1) == 0) '0' else '1';
+                remaining >>= 1;
+            }
+        }
+
         pub const byte_len: usize = @divExact(width, 8);
 
         /// Explicit MSB-first *physical bytes*, not a numeric value or
@@ -342,6 +366,42 @@ test "wide ladder MSB bytes retain every bit without admitting mathematics" {
     try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x01, 0xa8 }, &bytes);
     try std.testing.expectError(error.WrongByteLength,
         WideDomainWord(48).fromBytes(&bytes));
+}
+
+test "all wide rungs source bits roundtrip and every one-bit mutant remains width-qualified" {
+    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+        const D = WideDomainWord(width);
+        const zero = D.init(0);
+        var raw: [width]u8 = undefined;
+        try zero.writeBinary(&raw);
+        for (raw) |char| try std.testing.expectEqual(@as(u8, '0'), char);
+        try std.testing.expectEqual(zero.bits, (try D.fromBinary(&raw)).bits);
+
+        // Exercise each possible bit position independently without T5 or
+        // external truth tables: a bit's *position* belongs to its domain.
+        for (0..width) |bit_index| {
+            var changed = raw;
+            changed[bit_index] = '1';
+            const decoded = try D.fromBinary(&changed);
+            try std.testing.expectEqual(@as(u32, 1), @popCount(decoded.bits));
+            var projected: [width]u8 = undefined;
+            try decoded.writeBinary(&projected);
+            try std.testing.expectEqualSlices(u8, &changed, &projected);
+            const physical = decoded.writeBytes();
+            try std.testing.expectEqual(decoded.bits,
+                (try D.fromBytes(&physical)).bits);
+        }
+        try std.testing.expectError(error.WrongDomainWidth,
+            D.fromBinary(raw[0 .. width - 1]));
+        var erroneous: [width]u8 = raw;
+        erroneous[width - 1] = '2';
+        try std.testing.expectError(error.InvalidBinaryDigit,
+            D.fromBinary(&erroneous));
+        var too_short: [width - 1]u8 = undefined;
+        try std.testing.expectError(error.BufferLengthMismatch,
+            D.init(1).writeBinary(&too_short));
+        try std.testing.expect(!@hasDecl(D, "toCarrier"));
+    }
 }
 
 test "2046 binary sources and 3-byte host triplets preserve every domain bit" {
