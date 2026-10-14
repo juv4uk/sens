@@ -67,6 +67,15 @@
   (0010 (seed)
     #d1:0))
 
+; Exact proper-list end is NIL, not every atom. Derive the observation
+; from the admitted D3 ATOM + atom-only D3 EQ laws. N0's compiler ISA
+; does not claim a D4 NULL lowering role or invent a callable bridge.
+(0011 compiler-list-end?
+  (0010 (value)
+    (110
+      ((010 value) (101 value (001 ())))
+      (#d1:1 (compiler-false ())))))
+
 ; A verified bit sequence is a proper list of D1 atoms. To test the
 ; empty-list terminator, use the ratified ATOM predicate, not EQ over a
 ; non-atomic pair: exact D3 EQ admits two ATOMS, not a list-versus-NIL.
@@ -411,7 +420,7 @@
   (0010 (arguments)
     (110
       ((010 arguments) (compiler-false ()))
-      ((0101 (011 arguments)) (compiler-true ()))
+      ((compiler-list-end? (011 arguments)) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 (0011 compiler-exactly-two
@@ -419,7 +428,7 @@
     (110
       ((010 arguments) (compiler-false ()))
       ((010 (011 arguments)) (compiler-false ()))
-      ((0101 (011 (011 arguments))) (compiler-true ()))
+      ((compiler-list-end? (011 (011 arguments))) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
@@ -436,7 +445,7 @@
 (0011 compiler-cond-clauses-valid
   (0010 (clauses)
     (110
-      ((0101 clauses) (compiler-true ()))
+      ((compiler-list-end? clauses) (compiler-true ()))
       ((010 clauses) (compiler-false ()))
       ((compiler-exactly-two (100 clauses))
        (compiler-cond-clauses-valid (011 clauses)))
@@ -550,7 +559,7 @@
   (0010
     (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження accumulator)
     (110
-      ((0101 nodes)
+      ((compiler-list-end? nodes)
        (compiler-result-ok (compiler-reverse-onto accumulator ())))
       ((010 nodes) (compiler-result-fail))
       ((compiler-true ())
