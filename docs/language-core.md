@@ -1,6 +1,6 @@
 # SENS language core — exact-domain identity
 
-Цей документ описує технічну модель Contract 11.
+Цей документ пояснює технічну модель чинного Contract 11.9. Семантичну владу визначають `language-contract.lisp` та ратифікаційні контракти; цей огляд не є окремим нормативним джерелом.
 
 Для концептуального пояснення, чому SENS перейшов до domain-law growth, див. [`domain-paradigm.uk.md`](domain-paradigm.uk.md).
 
@@ -35,12 +35,13 @@ D3  exact three-bit Core foundation — RATIFIED
 D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit full compact domain — RATIFIED #3393
-D7  exact seven-bit sound/text domain — RATIFIED #3572 (126/128)
-D8  exact eight-bit full compact domain — RATIFIED #3960 (256/256)
-D9  exact nine-bit full compact domain — RATIFIED #4008 (512/512)
+D7  exact seven-bit keyboard text/data v2 — RATIFIED 2026-10-13 (128/128); historical sound v1 #3572 (126/128)
+D8  exact eight-bit full compact domain — RATIFIED #3960 (256/256; 2026-10-06)
+D9  exact nine-bit full compact domain — RATIFIED #4008 (512/512; 2026-10-07)
+D10 exact ten-bit whole-domain catalogue — RATIFIED 2026-10-12 (1024/1024; per-row proofs/runtime admission separate)
 ```
 
-General exact-width carrier має зберігати W1…W9 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 is ratified #3960 with 256/256 distinct residents.
+General exact-width carrier має зберігати W1…W10 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D8 is ratified #3960 with 256/256 distinct residents; D9 is ratified #4008. Поточний D7 v2 визначають `contracts/d7-ratification.lisp` і `knowledge/d7-keyboard-v2-ratified.json`; попередня карта #3572 лишається історичним v1. D10 є ратифікованим цілим доменом, але не автоматично дозволеним для T5-виконання.
 
 При цьому:
 
@@ -266,21 +267,15 @@ Coordinate basis зберігає походження доказу:
 
 ---
 
-## D7 — owner-ratified sound/text domain
+## D7 — поточні keyboard/text/data v2 (128/128)
 
-D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.8.
+**Чинний D7 v2:** власницька ратифікація 13.10.2026, рівно 128/128 семибітних текстових координат. Машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-keyboard-v2-ratified.json`, чинний Contract 11.9 (`language-contract.lisp`). Проєкції клавіатури `en`/`uk`/`san` не створюють нових доменних значень. D7 є типізованими текстовими даними: цифри-гліфи `0`…`9` не є математичними значеннями чи функціональними кодами; D2-структуру й функціональні домени не замінювати D7-поданням.
 
-D8 **OWNER-RATIFIED #3960**, 256/256 distinct residents. Нормативні машинні джерела: `contracts/d8-ratification.lisp`, `knowledge/d8-ratified.json`, Contract 11.8. Ratified residency не означає автоматичну runtime callability.
+**Історичний D7 v1:** власник #3572 05.10.2026 ратифікував 126/128 звукових координат (107 baseline та 19 overlays), а `0100001` і `0101010` були зарезервовані **тільки в v1**. Джерело архівної карти — `knowledge/d7-ratified.json`. Не приписувати цим резервам жодної сили над D7 v2; міграція старих даних потребує явного визначення версії та перетворення, а не мовчазного прочитання тих самих 7 бітів як v2.
 
-Поточний cut складається з 107 baseline-recovered residents та 19 owner-admitted same-coordinate Shiva overlays. Координати `0100001` і `0101010` лишаються owner-reserved/pinned — це не вільні opcode-и.
+Фонологічні v1-witnesses (varga 5×5, vowel 7×2×2, non-varga laws) зберігаються як provenance, **не як поточна розкладка D7 v2**. Hakāradvitva `43/43` належить D14 grammar topology (42 unique sounds: `39/43` interval ceiling, 43-node path з h₁/h₂), не змінює нинішні D7-координати. Shiva candidate D (`h/r/l` migration та ḹ-line) не був частиною #3572 і потребував окремого рішення #3432; це теж архівний дослід, не поточний D7 v2.
 
-Рольова межа лишається суворою: Text digits є Text, не Number; LocalOrdinal — окрема W7 role і не витрачає Sound/Text occupancy. D7 residency не робить домен generic callable Core.
-
-Фонологічні witnesses зберігають свою силу без переписування provenance: varga 5×5 product, vowel 7×2×2 із `length XOR 0000001` та `nasal XOR 0000010`, а non-varga має локальні/shared-factor закони без примусового глобального place-axis.
-
-Hakāradvitva `43/43` належить D14 grammar topology: для 42 unique sounds точна interval ceiling = `39/43`, а `43/43` виникає лише на 43-node grammar path з h₁/h₂. Це має **zero D7 coordinate effect** і не доводить існування двох фонетичних h.
-
-Shiva candidate D (`h/r/l` migration + відмова від двох ḹ-line identities) **не входить** у #3572 і потребує окремого owner decision (#3432).
+D7 residency не означає автоматичну runtime callability, математичний допуск чи право замінювати іншодоменні цитовані об'єкти.
 
 ---
 
@@ -303,6 +298,18 @@ Coordinate basis лишається provenance-distinct:
 Ратифікація робить усі 512 координат нормативними resident identities, але не перетворює S4 gauge на семантичну теорему. D9 residency також не означає автоматичну runtime callability: відсутній mechanism лишається fail-closed.
 
 Legacy Sens8/Sid8/Function8, semantic-registry source codes і pre-ratification D9 placement artifacts є provenance only.
+
+---
+
+## D10 — цілісний ратифікований каталог 1024/1024
+
+D10 **OWNER-RATIFIED** як один точний десятибітний домен 12.10.2026. Джерела: `knowledge/d10-owner-whole-domain-ratification-20261012.json`, `knowledge/d10-current-inventory.json` та `language-contract.lisp` (Contract 11.9). Це ратифікація всього каталогу координат і оголошених законів, **не** автоматичний доказ 1024 окремих локальних механізмів.
+
+Окремо залишаються F1 provenance, F2 позитивні й негативні свідки, F3 незалежність поведінки, F4 фізичний допуск для виконання. D10-слово може бути **фізично представлене як координата**, але це не дає загального дозволу на T5 execution чи виклик. Дозвіл визначає тільки чинний SENS-контракт і прийнятий механізм.
+
+Ратифіковані D24/D48/D96/D192/... є **окремими числовими доменами**, а не арифметичним тлумаченням D1–D10. D7 цифри залишаються текстом. Десяткове відображення числових результатів можливе лише як зовнішня людська проєкція кваліфікованих D24+ значень.
+
+**Хронологічний орієнтир для міграції:** D8 набув нинішньої влади тільки після власницького акту [#3960](https://github.com/juv4uk/sens/issues/3960) 06.10.2026 18:37 UTC та коміту [cf7011418](https://github.com/juv4uk/sens/commit/cf7011418d1daf583ce7cdfe78f16af74ef66e2c) 18:55 UTC; попередні плоскі 8-бітові коди — архівна provenance, а не ранній D8. D9 ратифіковано власником [#4008](https://github.com/juv4uk/sens/issues/4008) і кодом [04058d2d](https://github.com/juv4uk/sens/commit/04058d2d0b69489a145539aff52fa3517ca4d82c); D7 v2 замінив історичну v1-клавіатурну/звукову проєкцію 13.10.2026. Для міграції перевіряти **дату ратифікації, дату коду, а також дату появи механізму окремо**.
 
 ---
 
@@ -446,7 +453,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W9 є спільною механічною основою. Чинна semantic ratification охоплює D1–D9; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, D8 ratified #3960, D9 ratified #4008.
+Поточна exact-width ladder W1–W10 є спільною механічною основою. Чинна семантична ратифікація охоплює D1–D10 (D7 v2 від 13.10; D8 #3960; D9 #4008; D10 whole-domain від 12.10), але окремі механізми та докази виконуваності залишаються незалежними. Числові домени D24/D48/D96/D192/... мають власну, окрему від D1–D10, ратифікацію.
 
 Profile може вибирати mechanism, але не може:
 
@@ -494,6 +501,7 @@ D6 = 6 bits
 D7 = 7 bits
 D8 = 8 bits
 D9 = 9 bits
+D10 = 10 bits
 ```
 
 Rust is byte-addressed, so a transient typed value may need a host byte (or a wider
