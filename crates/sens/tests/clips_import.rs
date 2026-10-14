@@ -35,10 +35,12 @@ fn eval_import(source: &str) -> String {
         eval_pinned_reasoning_source(path, library, &mut session)
             .unwrap_or_else(|err| panic!("test_id=clips-defrule-d4-split: {path} failed to load: {err}"));
     }
-    let forms = parse_mixed_exact_domain(include_str!("../../../lib/clips-import.lisp"))
-        .expect("test_id=clips-defrule-d4-split: CLIPS source must parse with exact-width heads");
-    eval_parsed_expressions(&forms, &mut session)
-        .expect("test_id=clips-defrule-d4-split: CLIPS library must load through exact-domain reader");
+    eval_pinned_reasoning_source(
+        "lib/clips-import.lisp",
+        include_str!("../../../lib/clips-import.lisp"),
+        &mut session,
+    )
+    .expect("test_id=clips-defrule-d4-split: CLIPS library must load through pinned exact D9 reader");
     // Test inputs retain their historical data spelling. Only executable
     // library source is parsed as current exact-domain SENS.
     eval_program(source, &mut session)
