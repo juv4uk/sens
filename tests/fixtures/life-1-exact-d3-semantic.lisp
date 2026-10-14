@@ -103,7 +103,22 @@
         (життя--рівні?
           (life-scheduler-quiescence
             (001 ()) (001 ()) (001 no-transition-required))
-          (001 (quiescence-state quiescent))))))
+          (001 (quiescence-state quiescent)))
+        ; LIFE-1 select-ready: порожня черга, готовий виклик, пропуск неготового.
+        (життя--рівні?
+          (life-scheduler-select-ready (001 ()) (001 ()))
+          (001 (scheduler-selection none)))
+        (життя--рівні?
+          (life-scheduler-select-ready
+            (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
+            (001 ((projection-ready prolog-to-datalog observation-42))))
+          (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
+        (життя--рівні?
+          (life-scheduler-select-ready
+            (001 ((pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-99) (priority ordinary) (semantic-id 00001100)) (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100))))
+            (001 ((projection-ready prolog-to-datalog observation-42))))
+          (001 (scheduler-selection ready (pending-invocation (producer datalog) (trigger (projection-ready prolog-to-datalog)) (provenance-ref observation-42) (priority ordinary) (semantic-id 00001100)) ())))
+      )))
 
 (0011 життя--свідок
   (0010 ()
