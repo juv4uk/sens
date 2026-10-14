@@ -29,7 +29,8 @@
 //! файл збирався й на попередньому коміті.
 
 use sens::{
-    eval_lowered_expressions, fasl_decode_program, fasl_encode_program, lower_program, parse, Expr,
+    eval_lowered_expressions, fasl_decode_program, fasl_encode_program, lower_program, parse,
+    parse_exact_domain_source, Expr,
     Session,
 };
 use std::{env, fs, path::Path, process::ExitCode};
@@ -48,8 +49,11 @@ fn main() -> ExitCode {
     };
 
     if mode == "encode" {
+        // Текст форми `sens` -- це точні коди, не людські імена й не числа:
+        // читаємо їх точним читачем, інакше голий код на кшталт 01011
+        // став би числом 11, а не D5 DIFFERENCE.
         for part in ["setup", "call"] {
-            let program = parse(&text(part)).expect("surface text parses");
+            let program = parse_exact_domain_source(&text(part)).expect("exact sens text parses");
             fs::write(file(part, "fasl"), fasl_encode_program(&program, &[0u8; 32]))
                 .expect("fasl written");
         }
@@ -61,6 +65,9 @@ fn main() -> ExitCode {
             let bytes = fs::read(file(part, "fasl"))
                 .unwrap_or_else(|e| panic!("{name}-sens.{part}.fasl (run encode first): {e}"));
             fasl_decode_program(&bytes).expect("fasl decodes").0
+        } else if form == "sens-text" {
+            // SENS-коди як текст: точний читач, без lower (коди вже виконувані).
+            parse_exact_domain_source(&text(part)).expect("exact sens text parses")
         } else {
             let parsed = parse(&text(part)).expect("text parses");
             lower_program(&parsed)
