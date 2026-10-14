@@ -152,6 +152,20 @@ jobs:
           CLI_RUST_ZIG=target/debug/sens-trit
           "$CLI_RUST_ZIG" backend | tee "$RUNNER_TEMP/sens-zig-backend.txt"
           grep -Fxq "transport=zig abi=1 semantic_authority=SENS" "$RUNNER_TEMP/sens-zig-backend.txt"
+          # zig-firewall-opaque-encode: real CLI Rust→opaque Zig bytes→SENS.
+          # Tracked canonical bit-view is a SENS fixture, not a Rust semantic oracle.
+          cp tests/fixtures/migration-quote-cohort-main/quote-legacy "$RUNNER_TEMP/firewall-quote.lisp"
+          "$CLI_RUST_ZIG" encode "$RUNNER_TEMP/firewall-quote.lisp"
+          cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/firewall-quote.sens"
+          sha256sum "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/firewall-quote.sens"
+          # D2 CLOSE by itself is T5-transport-valid but SENS-grammar-invalid.
+          # Zig must not reinterpret it as a host bool or silently allow execution.
+          printf '01\n' > "$RUNNER_TEMP/firewall-close.lisp"
+          if "$CLI_RUST_ZIG" encode "$RUNNER_TEMP/firewall-close.lisp"; then
+            echo '::error::FAIL-OPEN test_id=zig-firewall-invalid-d2 layer=parse expected=reject actual=accept'; exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/firewall-close.sens"
+          echo 'ZIG_OPAQUE_ABI_SENS_BINARY_SOURCE_ROUNDTRIP_PASS'
           # The Zig ABI produces physical data; Rust SENS evaluates it.
           "$CLI_RUST_ZIG" encode-f3 "$RUNNER_TEMP/source.sens"
           cmp "$RUNNER_TEMP/source.senc" "$RUNNER_TEMP/framed.senc"
