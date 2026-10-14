@@ -30,29 +30,35 @@ fn allowed(n: usize, pos: usize) []const u8 {
     return &.{ 0, 1, 2 };
 }
 
-/// Physical rank-count table; exact u256 suffices for 128 trits
-/// (the full 3^128 universe fits inside 256 bits).
-fn ways(n: usize) [FRAME_MAX_TRITS + 1][4]Uint {
-    var table = std.mem.zeroes([FRAME_MAX_TRITS + 1][4]Uint);
-    for (0..4) |previous| table[n][previous] = 1;
-    var pos = n;
-    while (pos > 0) {
-        pos -= 1;
-        for (0..4) |previous_index| {
-            var count: Uint = 0;
-            for (allowed(n, pos)) |digit| {
-                if (previous_index == 3 and digit == 2) continue;
-                count += table[pos + 1][@as(usize, digit) + 1];
-            }
-            table[pos][previous_index] = count;
-        }
+/// Exact physical suffix counts (middle trits 0,1,2; no adjacent 2).
+/// Fixed frame edges are 1,0 and 0,1. A[0]=1, A[1]=3 and
+/// A[k]=2*(A[k-1]+A[k-2]); previous=2 instead gives 2*A[k-1].
+/// This immutable 125 x u256 table replaces a 129 x 4 x u256 local array.
+/// This is byte-frame enumeration, NOT SENS semantic authority.
+const SUFFIX_COUNTS: [FRAME_MAX_TRITS - 3]Uint = blk: {
+    var counts: [FRAME_MAX_TRITS - 3]Uint = undefined;
+    counts[0] = 1;
+    counts[1] = 3;
+    for (2..counts.len) |i| {
+        counts[i] = 2 * (counts[i - 1] + counts[i - 2]);
     }
-    return table;
+    break :blk counts;
+};
+
+/// Source-level immutable data footprint, not an ELF measurement.
+pub const SUFFIX_ROM_BYTES: usize = @sizeOf(@TypeOf(SUFFIX_COUNTS));
+
+fn completions(n: usize, next_pos: usize, preceding_digit: u8) Uint {
+    if (next_pos >= n - 2) return 1;
+    const k = n - 2 - @max(next_pos, 2);
+    if (next_pos < 2 or preceding_digit != 2 or k == 0)
+        return SUFFIX_COUNTS[k];
+    return 2 * SUFFIX_COUNTS[k - 1];
 }
 
 fn capacity(n: usize) Uint {
     if (n < 4 or n > FRAME_MAX_TRITS) return 0;
-    return ways(n)[0][0];
+    return SUFFIX_COUNTS[n - 4];
 }
 
 const Bucket = struct {
@@ -99,7 +105,6 @@ fn widthBucket(width_needed: usize) ?Bucket {
 fn rank(trits: []const u8) Error!Uint {
     const n = trits.len;
     if (n < 4 or n > FRAME_MAX_TRITS) return Error.FrameRange;
-    const table = ways(n);
     var result: Uint = 0;
     var previous: i8 = -1;
     for (trits, 0..) |digit, pos| {
@@ -111,7 +116,7 @@ fn rank(trits: []const u8) Error!Uint {
                 break;
             }
             if (candidate > digit) break;
-            result += table[pos + 1][@as(usize, candidate) + 1];
+            result += completions(n, pos + 1, candidate);
         }
         if (!found) return Error.InvalidFrame;
         previous = @intCast(digit);
@@ -124,14 +129,13 @@ fn unrank(allocator: Allocator, n: usize, index: Uint) ![]u8 {
         return Error.FrameRange;
     const out = try allocator.alloc(u8, n);
     errdefer allocator.free(out);
-    const table = ways(n);
     var remaining = index;
     var previous: i8 = -1;
     for (0..n) |pos| {
         var found = false;
         for (allowed(n, pos)) |digit| {
             if (previous == 2 and digit == 2) continue;
-            const count = table[pos + 1][@as(usize, digit) + 1];
+            const count = completions(n, pos + 1, digit);
             if (remaining < count) {
                 out[pos] = digit;
                 previous = @intCast(digit);
@@ -488,6 +492,20 @@ test "F3C physical golden: nested CAR CONS .senc roundtrip" {
     const recovered = try decode(a, encoded);
     defer a.free(recovered);
     try std.testing.expectEqualSlices(u8, &source, recovered);
+}
+
+
+test "F3C immutable suffix counts enumerate all short physical frames" {
+    try std.testing.expectEqual(@as(usize, 4000), SUFFIX_ROM_BYTES);
+    const a = std.testing.allocator;
+    for (4..11) |n| {
+        var ordinal: Uint = 0;
+        while (ordinal < capacity(n)) : (ordinal += 1) {
+            const digits = try unrank(a, n, ordinal);
+            defer a.free(digits);
+            try std.testing.expectEqual(ordinal, try rank(digits));
+        }
+    }
 }
 
 test "Frame3 bucket boundaries and rank/unrank without changing bit widths" {

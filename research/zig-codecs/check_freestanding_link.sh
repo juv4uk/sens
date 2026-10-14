@@ -26,7 +26,7 @@ output="${1:-$(mktemp -d -t sens-zig-freestanding.XXXXXXXX)}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd)"
 echo "ZIG_FREESTANDING_BEGIN zig=$version git_sha=$(git rev-parse HEAD 2>/dev/null || echo UNKNOWN) output=$output"
-echo "F3C_MEMORY_COMPONENTS scratch_bytes=8192 rank_table_bytes=16512 total_stack_bound=NOT_MEASURED"
+echo "F3C_MEMORY_COMPONENTS scratch_bytes=8192 rank_table_stack_bytes=0 suffix_rom_bytes=4000 total_stack_bound=NOT_MEASURED"
 echo "semantic_authority=SENS transport_only=true esp32_s3_cpu=NOT_TESTED"
 
 names=(
