@@ -431,15 +431,25 @@
       ((compiler-list-end? (011 (011 arguments))) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
+; Proper variadic tails: only the exact EMPTY terminates a list.
+; D3 ATOM detects a malformed nonempty atom; EQ sees EMPTY only after ATOM.
+; The already-admitted compiler-list-end? owns that distinction in SENS.
+(0011 compiler-proper-tail?
+  (0010 (tail)
+    (110
+      ((compiler-list-end? tail) (compiler-true ()))
+      ((010 tail) (compiler-false ()))
+      (#d1:1 (compiler-proper-tail? (011 tail))))))
+
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
-; Runtime create_lambda enforces the same minimum arity and preserves every
-; body expression, so the compiler shape law must match that variadic body.
+; Both mandatory argument cells must be pairs, and all remaining cells must
+; form a proper list; nested data elements may themselves be dotted pairs.
 (0011 compiler-at-least-two
   (0010 (arguments)
     (110
       ((010 arguments) (compiler-false ()))
       ((010 (011 arguments)) (compiler-false ()))
-      ((compiler-true ()) (compiler-true ())))))
+      (#d1:1 (compiler-proper-tail? (011 (011 arguments)))))))
 
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
 (0011 compiler-cond-clauses-valid

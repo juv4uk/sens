@@ -219,6 +219,11 @@ fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
 }
 
 
+const COMPILER_VARIADIC_D1_LAW: &str =
+    include_str!("../../../tests/semantic/compiler-variadic-tail-d1-law.lisp");
+const COMPILER_VARIADIC_D1_MUTANT: &str =
+    include_str!("../../../tests/semantic/compiler-variadic-tail-d1-mutant.lisp");
+
 const COMPILER_ARITY_D1_LAW: &str =
     include_str!("../../../tests/semantic/compiler-arity-proper-list-law.lisp");
 const COMPILER_ARITY_D1_MUTANT: &str =
@@ -293,5 +298,34 @@ fn compiler_program_list_fail_closed_is_sens_owned() {
         eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
             .is_err(),
         "SENS must reject the false success of improper one-argument dotted tail"
+    );
+
+    // Всі expected/actual і закон списку належать SENS-коду.
+    // Rust — тільки читач/виконавець 15 самодостатніх D1-вердиктів.
+    let variadic = parse_mixed_exact_domain(COMPILER_VARIADIC_D1_LAW)
+        .expect("exact SENS variadic proper-tail laws parse");
+    assert_eq!(variadic.len(), 15, "15 SENS-owned variadic arity verdicts");
+    for (index, form) in variadic.iter().enumerate() {
+        let verdict = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|error| panic!("SENS variadic tail law {index}: {error}"))
+            .value;
+        assert_eq!(
+            verdict.as_predicate_bit(),
+            Some(true),
+            "SENS variadic tail self-verdict {index} was not D1:YES: {verdict}"
+        );
+    }
+    assert_eq!(
+        COMPILER_VARIADIC_D1_LAW.replacen("#d1:1", "#d1:0", 1),
+        COMPILER_VARIADIC_D1_MUTANT,
+        "mutant changes exactly one expected D1 bit"
+    );
+    let mutant = parse_mixed_exact_domain(COMPILER_VARIADIC_D1_MUTANT)
+        .expect("one-bit SENS variadic mutant parses");
+    assert_eq!(mutant.len(), variadic.len());
+    assert!(
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
+            .is_err(),
+        "SENS must itself reject the one-bit variadic verdict mutant"
     );
 }
