@@ -52,7 +52,7 @@ expected_heads = (["my-form-references-name?"] * 5
 for i, (head, form) in enumerate(zip(expected_heads, positive), 1):
     if not form.startswith("(110 ((101 (" + head + " "):
         raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: wrong live call-head case={i}")
-    if ("(0011 " + head + "\\n").encode("ascii") not in library:
+    if ("(0011 " + head + "\n").encode("ascii") not in library:
         raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: current library missing definition case={i}")
 for case, form in enumerate((*positive, *negatives), 1):
     depth = 0
@@ -63,7 +63,7 @@ for case, form in enumerate((*positive, *negatives), 1):
     if depth: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: open D2 frame case={case}")
 for i, (good, wrong) in enumerate(zip(positive, negatives), 1):
     for role, expression in (("law", good), ("mutant", wrong)):
-        payload = library + b"\\n" + expression.encode("utf-8") + b"\\n"
+        payload = library + b"\n" + expression.encode("utf-8") + b"\n"
         sha = hashlib.sha256(payload).hexdigest()
         print(f"META_LEXICAL_SOURCE_SHA case={i} role={role} sha256={sha}")
 print("META_LEXICAL_TRANSPORT_PASS positive_forms=8 one-bit-mutants=8 semantic_pass=NOT_INFERRED")
