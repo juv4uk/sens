@@ -38,7 +38,7 @@
   (0010 (variable bindings)
     (110
       ((0101 bindings) (001 ()))
-      ((101 variable (100 (100 bindings)))
+      ((unify-equal? variable (100 (100 bindings)))
        (011 (100 bindings)))
       ((010 (001 ()))
        (lookup-subst variable (011 bindings))))))
@@ -78,14 +78,14 @@
 (0011 failed-subst?
   (0010 (bindings)
     (110
-      ((101 bindings (001 fail)) (010 (001 ())))
-      ((010 (001 ())) (010 (001 (0)))))))
+      ((010 bindings) (101 bindings (001 fail)))
+      (#d1:1 #d1:0))))
 
 (0011 unify-walked
   (0010 (a b bindings)
     (110
       ((failed-subst? bindings) (001 fail))
-      ((101 a b) bindings)
+      ((unify-equal? a b) bindings)
       ((var? a) (unify-var a b bindings))
       ((var? b) (unify-var b a bindings))
       ((010 a)
@@ -105,7 +105,7 @@
   (0010 (variable term bindings)
     (001000 ((resolved (walk term bindings)))
       (110
-        ((101 variable resolved) (010 (001 ())))
+        ((unify-equal? variable resolved) (010 (001 ())))
         ((var? resolved) (010 (001 (0))))
         ((010 resolved) (010 (001 (0))))
         ((010 (001 ()))
