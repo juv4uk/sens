@@ -192,7 +192,7 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
                                "--strict"]), 2)
 
     def test_nonregular_sens_is_not_counted_as_physical_corpus(self):
-        # Git's 120000/160000 paths are metadata, never packed T5 bytes.
+        # Git 120000/160000 позначає посилання, а не фізичні байти T5.
         blob = subprocess.run(
             ["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
             input=b"archived-physical-target", capture_output=True, check=True,
@@ -206,7 +206,7 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.assertEqual(census["nonregular_sens_paths"], ["lib/archived.sens"])
         self.assertEqual(census["valid_triples"], 0)
 
-        # Gitlinks to commits are not physical .sens files either.
+        # Git-посилання на коміт також не є фізичним файлом .sens.
         self.call("update-index", "--add", "--cacheinfo",
                   f"160000,{self.head()},lib/vendor.sens")
         self.call("commit", "-q", "-m", "index-only .sens gitlink")
@@ -216,8 +216,8 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.assertEqual(census["nonregular_sens_paths"],
                          ["lib/archived.sens", "lib/vendor.sens"])
 
-        # One actual regular Git byte blob must be counted exactly once;
-        # unpaired paths, including archived links, do not prove a triple.
+        # Справжній байтовий Git-файл рахуємо рівно один раз.
+        # Самотній файл або архівне посилання не доводять повну тріаду.
         (self.repo / "lib/payload.sens").write_bytes(encode_words(["10", "01"]))
         self.call("add", "--", "lib/payload.sens")
         self.call("commit", "-q", "-m", "regular orphan physical T5")
