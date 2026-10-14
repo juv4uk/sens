@@ -139,8 +139,71 @@ def negative_self_test(root: Path) -> None:
             print(f"H2_NEGATIVE_PASS test_id={test_id} category={expected_diagnostic}")
         else:
             raise AuditFailure(f"test_id={test_id} layer=source expected=REJECT actual=ACCEPT")
-    print(f"H2_PREFLIGHT_NEGATIVES_PASS rejected={len(probes)}")
 
+    # These parser negatives concern physical bytes only, not SENS meaning.
+    fixture = "tests/semantic/retired-d3-cond-law.bits"
+    example = f"C_D3_SUBSET_T5 source={fixture} bytes=1 hex=a1"
+    missing = "test_id=H2_C_T5"
+    for label, stream in (
+        ("MISSING_PHYSICAL_T5", ""),
+        ("DUPLICATE_PHYSICAL_T5", example + "\n" + example),
+        ("SHORT_PHYSICAL_T5", example.replace("bytes=1", "bytes=2")),
+        ("BAD_PHYSICAL_HEX", example.replace("hex=a1", "hex=zz")),
+    ):
+        try:
+            parse_c_physical(stream)
+        except (AuditFailure, ValueError) as exc:
+            if missing not in str(exc) and label != "BAD_PHYSICAL_HEX":
+                raise AuditFailure(f"test_id={label} layer=transport wrong_reason={exc}") from exc
+            print(f"H2_NEGATIVE_PASS test_id={label} category=H2_C_T5")
+        else:
+            raise AuditFailure(f"test_id={label} layer=transport expected=REJECT actual=ACCEPT")
+    print(f"H2_PREFLIGHT_NEGATIVES_PASS rejected={len(probes) + 4}")
+
+
+
+def parse_c_physical(stdout: str) -> dict[str, dict]:
+    """Read ACTUAL Zig T5 bytes reported by the C process (all six inputs)."""
+    observed = {}
+    for line in stdout.splitlines():
+        if not line.startswith("C_D3_SUBSET_T5"):
+            continue
+        match = re.fullmatch(
+            r"C_D3_SUBSET_T5 source=(tests/semantic/[a-z0-9-]+-(?:law|mutant)\.bits)"
+            r" bytes=([1-9][0-9]*) hex=([0-9a-f]+)", line)
+        if not match:
+            raise AuditFailure(f"test_id=H2_C_T5 layer=transport malformed_receipt={line[:200]}")
+        source, length, hexdump = match.groups()
+        if source in observed:
+            raise AuditFailure(f"test_id=H2_C_T5 layer=transport duplicate_receipt={source}")
+        if len(hexdump) != 2 * int(length):
+            raise AuditFailure(f"test_id=H2_C_T5 layer=transport fixture={source} "
+                               f"expected_hex_len={2 * int(length)} actual={len(hexdump)}")
+        data = bytes.fromhex(hexdump)
+        observed[source] = {"bytes": len(data), "sha256": sha256(data)}
+    expected = {f"tests/semantic/{name}-{role}.bits"
+                for name, _, _ in CASES for role in ("law", "mutant")}
+    if set(observed) != expected:
+        raise AuditFailure(f"test_id=H2_C_T5 layer=transport "
+                           f"missing={sorted(expected - set(observed))} "
+                           f"extra={sorted(set(observed) - expected)}")
+    return observed
+
+
+def verify_native_physical(stdout: str, physical: dict, files: tuple[tuple[str, str], ...]) -> None:
+    """Compare C/Zig actual physical T5 SHA to hashes of native SENS input files."""
+    for source, suffix in files:
+        regex = rf"(?m)^([0-9a-f]{{64}})[ \t]+\S*/{re.escape(suffix)}[ \t]*$"
+        hits = re.findall(regex, stdout)
+        if len(hits) != 1:
+            raise AuditFailure(f"test_id=H2_NATIVE_T5 layer=transport "
+                               f"fixture={source} expected=one_native_SHA actual={len(hits)}")
+        actual = hits[0]
+        expected = physical[source]["sha256"]
+        if actual != expected:
+            raise AuditFailure(f"test_id=H2_T5_PARITY layer=transport fixture={source} "
+                               f"expected_zig_c_sha256={expected} actual_native_sha256={actual} "
+                               "first_diff=unavailable_without_native_raw")
 
 def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
     result = subprocess.run(cmd, cwd=root, capture_output=True, text=True, errors="replace", check=False)
@@ -170,6 +233,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     if not exe.is_file():
         raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
     c_binary_digest: list[str] = []
+    c_physical: dict[str, dict] = {}
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
         receipt = re.search(r"^C_D3_SUBSET_RECEIPT zig=\S+ c_binary_sha256=([0-9a-f]{64})$",
@@ -189,17 +253,33 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
                     raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1_NONCALLABLE C={matching[0]}")
                 if state == "law" and "result=D1:1" not in matching[0]:
                     raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1:YES C={matching[0]}")
+        # Unlike source hashes, these six bytestrings are emitted by the
+        # actual C process after Zig ABI v2 has encoded the exact BE3 words.
+        c_physical.update(parse_c_physical(stdout))
     c_host = invoke(["bash", C_DRIVER], root,
                     "C_D3_SUBSET_SOURCE_WITNESS_PASS", validator=check_c_verdicts)
-    native_a = invoke(["bash", RUST_DRIVERS[0], str(exe)], root, "NATIVE_SENS_PASS id=retired-d3-eq")
-    native_b = invoke(["bash", RUST_DRIVERS[1], str(exe)], root,
-                      "NATIVE_SENS_PASS test_id=retired-quote-inert-d3")
+    native_a = invoke(
+        ["bash", RUST_DRIVERS[0], str(exe)], root, "NATIVE_SENS_PASS id=retired-d3-eq",
+        validator=lambda output: verify_native_physical(
+            output, c_physical, tuple(
+                (f"tests/semantic/retired-d3-{kind}-{role}.bits", f"{kind}-{role}.sens")
+                for kind in ("cond", "eq") for role in ("law", "mutant"))))
+    native_b = invoke(
+        ["bash", RUST_DRIVERS[1], str(exe)], root,
+        "NATIVE_SENS_PASS test_id=retired-quote-inert-d3",
+        validator=lambda output: verify_native_physical(
+            output, c_physical, tuple(
+                (f"tests/semantic/retired-quote-inert-d3-{role}.bits", f"{role}.sens")
+                for role in ("law", "mutant"))))
     receipt.update({
         "status": "TWO_HOST_EXECUTED", "semantic_status": "SUBSET_MATCHED",
         "scope": "only 3 pinned D1/D2/D3 binary self-verdicts + one-bit negatives",
         "toolchain": {"zig_version": pinned, "c_compiler": shutil.which("cc")},
         "rust_host_binary_sha256": sha256(exe.read_bytes()),
         "c_host_binary_sha256": c_binary_digest[0],
+        "physical_t5_sha256": {p: item["sha256"] for p, item in sorted(c_physical.items())},
+        "physical_t5_bytes": {p: item["bytes"] for p, item in sorted(c_physical.items())},
+        "transport_status": "ZIG_C_AND_NATIVE_SENS_PHYSICAL_SHA256_MATCHED_SIX_OF_SIX",
         "runs": {"zig": zig, "rust_build": build, "c": c_host, "native_d3": native_a, "native_quote": native_b},
     })
     return receipt
