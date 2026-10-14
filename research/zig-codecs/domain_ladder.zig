@@ -125,6 +125,81 @@ pub fn fromCarrier(comptime width: u8, carrier: t5.Word) CarrierError!DomainWord
     return Domain.init(@intCast(carrier.bits));
 }
 
+
+/// Explicit typed-to-physical single-word T5 adapter. A DomainWord is
+/// required at compile time: arbitrary width/payload pairs cannot be passed
+/// as if they were trusted typed coordinates. The result is physical only.
+pub fn encodeTypedWord(
+    comptime width: u8,
+    allocator: std.mem.Allocator,
+    word: DomainWord(width),
+) ![]u8 {
+    const physical = [_]t5.Word{word.toCarrier()};
+    return if (width == 10)
+        t5.encodeCoordinates(allocator, &physical)
+    else
+        t5.encode(allocator, &physical);
+}
+
+/// Restore exactly one typed coordinate; no executable-domain admission.
+/// D10 uses the coordinate-only T5 path, never the <=D9 execution path.
+pub fn decodeTypedWord(
+    comptime width: u8,
+    allocator: std.mem.Allocator,
+    physical: []const u8,
+) !DomainWord(width) {
+    const words = if (width == 10)
+        try t5.decodeCoordinates(allocator, physical)
+    else
+        try t5.decode(allocator, physical);
+    defer allocator.free(words);
+    if (words.len != 1) return error.NotSingleWord;
+    return fromCarrier(width, words[0]);
+}
+
+test "all 2046 typed ladder coordinates roundtrip over canonical T5" {
+    const allocator = std.testing.allocator;
+    var seen: usize = 0;
+    inline for (1..11) |w| {
+        const width: u8 = @intCast(w);
+        const D = DomainWord(width);
+        const limit = @as(usize, 1) << w;
+        for (0..limit) |n| {
+            const typed = D.init(@intCast(n));
+            const wire = try encodeTypedWord(width, allocator, typed);
+            defer allocator.free(wire);
+            const restored = try decodeTypedWord(width, allocator, wire);
+            try std.testing.expectEqual(typed.bits, restored.bits);
+            seen += 1;
+        }
+    }
+    try std.testing.expectEqual(@as(usize, 2046), seen);
+}
+
+test "typed T5 admission fails closed on wrong rung or multiple words" {
+    const allocator = std.testing.allocator;
+    const d1 = try encodeTypedWord(1, allocator, D1.init(1));
+    defer allocator.free(d1);
+    try std.testing.expectError(error.WrongDomainWidth,
+        decodeTypedWord(2, allocator, d1));
+
+    const d9 = try encodeTypedWord(9, allocator, D9.init(0b010101000));
+    defer allocator.free(d9);
+    try std.testing.expectError(error.WrongDomainWidth,
+        decodeTypedWord(8, allocator, d9));
+
+    const d10 = try encodeTypedWord(10, allocator, D10.init(0b1000000000));
+    defer allocator.free(d10);
+    try std.testing.expectError(t5.Error.UnsupportedDomainWidth,
+        t5.decode(allocator, d10));
+
+    const two = [_]t5.Word{ .{ .width = 1, .bits = 1 }, .{ .width = 1, .bits = 0 } };
+    const wire = try t5.encode(allocator, &two);
+    defer allocator.free(wire);
+    try std.testing.expectError(error.NotSingleWord,
+        decodeTypedWord(1, allocator, wire));
+}
+
 test "all 2046 D1..D10 coordinates retain exact width and payload" {
     inline for (1..11) |w| {
         const D = DomainWord(@intCast(w));
