@@ -13,6 +13,9 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import tempfile
+
+import zig_codec_bridge
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
@@ -121,6 +124,11 @@ def run(args: argparse.Namespace) -> dict:
     # A cohort is all-or-none: retain physical candidates in memory until
     # every requested original has passed conversion and final source checks.
     staged: list[tuple[Path, Path, bytes, bytes, dict]] = []
+    # Explicit cross-implementation verification; no semantic authority or
+    # silent fallback. Compile once for this batch, outside the source tree.
+    zig_temp = tempfile.TemporaryDirectory(prefix="sens-zig-batch-") if args.zig_codec else None
+    zig_binary = (zig_codec_bridge.build_transport(Path(zig_temp.name))
+                  if zig_temp is not None else None)
     for rel in paths:
         source = repo / rel
         destination = mig.sens_destination(rel)
@@ -142,6 +150,9 @@ def run(args: argparse.Namespace) -> dict:
             packed = mig.encode_projection(projection)
             if mig.decode_bytes(packed) != words:
                 raise ValueError("exact typed T5 word roundtrip failed")
+            if zig_binary is not None:
+                evidence = zig_codec_bridge.verify_t5(zig_binary, packed)
+                row["zig_transport"] = evidence
             # Disallow use of generated textual bytes as a misleading .sens file.
             if packed == projection.encode("ascii"):
                 raise ValueError("invalid text disguised as physical .sens")
@@ -213,6 +224,8 @@ def run(args: argparse.Namespace) -> dict:
         stage.replace(report)
     finally:
         stage.unlink(missing_ok=True)
+    if zig_temp is not None:
+        zig_temp.cleanup()
     return result
 
 
@@ -227,6 +240,8 @@ def main() -> int:
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"),
                         default="auto",
                         help="auto resolves mapped historical SID8, fails on unknown; current preserves ratified D8; legacy is explicit")
+    parser.add_argument("--zig-codec", action="store_true",
+                        help="require pinned Zig 0.16 physical T5 roundtrip for every candidate")
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()

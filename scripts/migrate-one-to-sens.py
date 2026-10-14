@@ -33,6 +33,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts" / "migrate-three-pass.py"
 CODEC = ROOT / "scripts" / "sens_t5_codec.py"
+sys.path.insert(0, str(ROOT / "scripts"))
+import zig_codec_bridge
 
 def load_codec():
     spec = importlib.util.spec_from_file_location("sens_t5_codec", CODEC)
@@ -108,6 +110,8 @@ def main() -> int:
     parser.add_argument("source", type=Path, help="один .lisp у поточному репозиторії")
     parser.add_argument("--output", type=Path, help="явний target; default = same-stem .sens")
     parser.add_argument("--dry-run", action="store_true", help="перевірити без запису target")
+    parser.add_argument("--zig-codec", action="store_true",
+                        help="застосувати точний Zig 0.16 T5 побайтовий контроль")
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                         help="auto блокує двозначні W8; legacy = історичний SID8, current = D8")
     args = parser.parse_args()
@@ -223,6 +227,11 @@ def main() -> int:
             "semantic_parity": "NOT_VERIFIED",
             "three_pass": (state or {}).get("files", [{}])[0].get("passes", {}),
         }
+
+        if args.zig_codec:
+            with tempfile.TemporaryDirectory(prefix="sens-zig-one-") as ztd:
+                zig_binary = zig_codec_bridge.build_transport(Path(ztd))
+                result["zig_transport"] = zig_codec_bridge.verify_t5(zig_binary, payload)
 
         if sha256_file(source) != source_hash_before:
             raise SystemExit("BLOCK: source changed during migration")

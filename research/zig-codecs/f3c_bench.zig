@@ -1,5 +1,5 @@
 //! Matched physical F3C benchmark: Rust example zig_f3c_matched_bench.rs.
-//! Zig 0.17.0, Linux x86_64 + libc; mechanics only, not SENS semantics.
+//! Zig 0.16.0, Linux x86_64 + libc; mechanics only, not SENS semantics.
 const std = @import("std");
 const f3c = @import("f3c/f3c.zig");
 

@@ -1,4 +1,4 @@
-//! SENS transport CLI, Zig 0.17.0. The production T5/F3C *mechanism*
+//! SENS transport CLI, Zig 0.16.0. The production T5/F3C *mechanism*
 //! lives in Zig; the existing SENS reader/evaluator remains sole semantic owner.
 //! Commands never execute a program and never guess the physical profile.
 //! The filesystem adapter is libc-hosted; the codec itself does not do I/O.

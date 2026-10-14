@@ -44,9 +44,12 @@ def rows(stdout, name):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pairs", type=int, default=3)
-    p.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0", "0.17.0"))
+    p.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0",))
     p.add_argument("--out-dir", type=Path, required=True)
     args = p.parse_args()
+    pinned = (ROOT / ".zig-version").read_text(encoding="utf-8").strip()
+    if pinned != "0.16.0" or args.zig_pin != pinned:
+        raise RuntimeError("Zig pin drift: both repository and benchmark must use 0.16.0")
     if args.pairs < 3:
         raise RuntimeError("need >=3 paired independent process series")
     out = args.out_dir.resolve()

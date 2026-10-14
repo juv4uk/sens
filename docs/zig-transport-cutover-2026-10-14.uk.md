@@ -12,6 +12,21 @@
 - `research/zig-codecs/transport_abi.zig` — Zig-owned синхронний C ABI v1: T5 validate/encode і F3C pack/unpack; **виклик не передає власності пам’яті через FFI**.
 - `crates/sens-cli/build.rs` і `crates/sens-cli/src/bin/sens-trit.rs` — звичайна Cargo-збірка `sens-cli` компілює фізичний Zig ABI за замовчуванням, `sens-trit encode`, `encode-f3`/F3C decode й фізична `.sens` перевірка користуються Zig, а Rust reader перевіряє канонічну граматику і виконує програму. Rust reference залишається як **незалежний контроль**, а збірка Rust-only вмикається тільки явно через `--no-default-features` (не прихований fallback).
 
+## Пін компілятора й інтеграція в міграцію
+
+- Канонічний пін інструмента: `.zig-version` = `0.16.0`.
+- `crates/sens-cli/build.rs` перевіряє точний `zig version` перед збіркою фізичного ABI; `ZIG=/path/to/zig` підтримується.
+- `scripts/migrate.py preview --zig-codec` і `scripts/migrate-t5-batch.py --zig-codec` додають незалежний Zig `t5-check` / `t5-roundtrip` та byte-exact SHA-свідок до кожного згенерованого T5 файлу. `scripts/migrate-one-to-sens.py --zig-codec` робить те саме до запису.
+- Це **явне включення** перевірки, не прихований автоматичний fallback. Відсутність потрібного Zig або розбіжність байтів зупиняє відповідну Zig-перевірку, але не змінює SENS-законів. Наявні маршрути міграції зберігають попередню поведінку без цього прапорця.
+- Парні T5/F3C benchmark scripts приймають тільки `0.16.0` і перевіряють `.zig-version`. Старі історичні бенчмарки з `0.17.0` не підміняють нові результати.
+
+```sh
+python3 scripts/migrate.py preview tests/fixtures/migration-d1-cond-cohort \
+  --source-era current --mirror /tmp/sens-preview --report /tmp/sens-preview.json --zig-codec
+python3 research/zig-codecs/t5/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-t5-paired
+python3 research/zig-codecs/f3c/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-f3c-paired
+```
+
 ## Відтворення на Linux з чинним піном Zig 0.16.0
 
 ```sh

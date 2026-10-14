@@ -22,9 +22,12 @@ def command(args: argparse.Namespace) -> list[str]:
         return [sys.executable, str(SCRIPTS / "report_original_migration_candidates.py"),
                 "--out", str(args.report)]
     if args.action == "preview":
-        return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
-                *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
-                "--report", str(args.report), "--source-era", args.source_era]
+        cmd = [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
+               *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
+               "--report", str(args.report), "--source-era", args.source_era]
+        if args.zig_codec:
+            cmd.append("--zig-codec")
+        return cmd
     if args.action == "view":
         # Reuse canonical physical T5 decoder; no second implementation.
         # This command never creates physical .sens or edits .lisp.
@@ -55,6 +58,8 @@ def parser() -> argparse.ArgumentParser:
 
     preview = sub.add_parser("preview", help="реальний трипрохідний попередній перегляд; без запису .sens")
     preview.add_argument("paths", nargs="+", help="явні відносні шляхи до .lisp чи каталогів")
+    preview.add_argument("--zig-codec", action="store_true",
+                         help="independently verify physical T5 with pinned Zig 0.16")
     preview.add_argument("--mirror", type=Path, required=True)
     preview.add_argument("--report", type=Path, required=True)
     preview.add_argument("--source-era", choices=("auto", "legacy", "current"),

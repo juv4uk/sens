@@ -60,8 +60,11 @@ def main() -> int:
     cli = argparse.ArgumentParser()
     cli.add_argument("--out-dir", type=Path, required=True)
     cli.add_argument("--pairs", type=int, default=3)
-    cli.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0", "0.17.0"))
+    cli.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0",))
     args = cli.parse_args()
+    pinned = (ROOT / ".zig-version").read_text(encoding="utf-8").strip()
+    if pinned != "0.16.0" or args.zig_pin != pinned:
+        raise RuntimeError("Zig pin drift: both repository and benchmark must use 0.16.0")
     if args.pairs < 3:
         raise SystemExit("--pairs must be >=3 independent outer process pairs")
 
