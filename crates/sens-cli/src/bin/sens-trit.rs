@@ -12,7 +12,128 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (backend | encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+
+// Compiled only in the official Zig-transport build. Rust validates SENS
+// program syntax; Zig owns all physical wire bytes for these commands.
+#[cfg(feature = "zig-transport")]
+mod zig_transport {
+    #[repr(C)]
+    struct Word { width: u8, bits: u16 }
+
+    unsafe extern "C" {
+        fn sens_zig_codec_abi_version() -> u32;
+        fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
+        fn sens_zig_t5_encode(
+            input: *const Word, count: usize, output: *mut u8, capacity: usize
+        ) -> isize;
+        fn sens_zig_f3c_pack(
+            input: *const u8, len: usize, output: *mut u8, capacity: usize
+        ) -> isize;
+        fn sens_zig_f3c_unpack(
+            input: *const u8, len: usize, output: *mut u8, capacity: usize
+        ) -> isize;
+    }
+
+    fn version() -> Result<(), String> {
+        // SAFETY: zero-argument pure function from a statically linked Zig library.
+        if unsafe { sens_zig_codec_abi_version() } != 1 {
+            return Err("Zig codec C ABI version mismatch".into());
+        }
+        Ok(())
+    }
+
+    pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
+        version()?;
+        // SAFETY: the borrowed byte slice lives through the synchronous call.
+        if unsafe { sens_zig_t5_validate(bytes.as_ptr(), bytes.len()) } != 0 {
+            return Err("Zig physical T5 rejected; no SENS execution".into());
+        }
+        Ok(())
+    }
+
+    pub fn encode_t5(
+        words: &[sens::BinarySourceWord],
+        expected_bytes: &[u8],
+    ) -> Result<Vec<u8>, String> {
+        version()?;
+        let typed: Vec<Word> = words.iter().map(|w| Word {
+            width: w.width() as u8,
+            bits: w.packed_bits(),
+        }).collect();
+        let mut bytes = vec![0u8; expected_bytes.len()];
+        // SAFETY: pointers are valid for exactly the advertised slice lengths.
+        let len = unsafe {
+            sens_zig_t5_encode(typed.as_ptr(), typed.len(), bytes.as_mut_ptr(), bytes.len())
+        };
+        if len < 0 || len as usize != bytes.len() || bytes != expected_bytes {
+            return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
+        }
+        Ok(bytes)
+    }
+
+    pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
+        version()?;
+        if t5.len() > 16 { return Ok(None); }
+        let mut bytes = vec![0u8; 16];
+        // SAFETY: Zig writes at most the provided capacity.
+        let len = unsafe {
+            sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len())
+        };
+        if len == -3 { return Ok(None); } // not smaller: T5 remains production
+        if len <= 0 { return Err(format!("Zig F3C pack rejected: code={len}")); }
+        bytes.truncate(len as usize);
+        if bytes.len() >= t5.len() { return Err("Zig F3C did not save bytes".into()); }
+        Ok(Some(bytes))
+    }
+
+    pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
+        version()?;
+        let mut output = vec![0u8; 16];
+        // SAFETY: caller owns valid input/output slices until call returns.
+        let len = unsafe {
+            sens_zig_f3c_unpack(
+                carrier.as_ptr(), carrier.len(), output.as_mut_ptr(), output.len()
+            )
+        };
+        if len <= 0 { return Err(format!("explicit Zig F3C rejected: code={len}")); }
+        output.truncate(len as usize);
+        // Zig first, then the existing SENS canonical parser/evaluator.
+        validate_t5(&output)?;
+        Ok(output)
+    }
+}
+
+fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let restored = zig_transport::decode_f3(bytes)?;
+        let parsed = sens::PhysicalT5Program::decode(&restored)
+            .map_err(|e| format!("Zig F3C restored inadmissible SENS program: {e:?}"))?;
+        if parsed.form_count() != 1 {
+            return Err("Zig F3C restored more than one root".into());
+        }
+        return Ok(restored);
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    { sens::frame3_small::decode_explicit_small_f3(bytes)
+        .map_err(|e| format!("explicit small F3 rejected: {e:?}")) }
+}
+
+fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let parsed = sens::PhysicalT5Program::decode(bytes)
+            .map_err(|e| format!("SENS input is not an executable canonical T5 program: {e:?}"))?;
+        if parsed.form_count() != 1 || bytes.len() > 16 {
+            return Ok(None);
+        }
+        return zig_transport::encode_f3(bytes);
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    { sens::frame3_small::encode_explicit_small_f3(bytes)
+        .map_err(|e| format!("tiny F3 encode rejected: {e:?}")) }
+}
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -25,7 +146,10 @@ fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
         return Err("expected a physical .sens file".into());
     }
-    fs::read(path).map_err(|e| format!("read .sens: {e}"))
+    let bytes = fs::read(path).map_err(|e| format!("read .sens: {e}"))?;
+    #[cfg(feature = "zig-transport")]
+    zig_transport::validate_t5(&bytes)?;
+    Ok(bytes)
 }
 
 
@@ -36,8 +160,7 @@ fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
     let framed = fs::read(path).map_err(|e| format!("read explicit F3 .senc: {e}"))?;
     // The bounded F3 decoder restores physically canonical T5; all SENS
     // parsing and execution stays in the same production D2/T5 pipeline.
-    sens::frame3_small::decode_explicit_small_f3(&framed)
-        .map_err(|e| format!("explicit small F3 rejected: {e:?}"))
+    decode_f3_carrier(&framed)
 }
 
 
@@ -66,15 +189,14 @@ fn read_explicit_f3_sha256(path: &Path, expected_hex: &str) -> Result<Vec<u8>, S
     if mismatch != 0 {
         return Err("F3 SHA-256 mismatch: no decoding or execution permitted".into());
     }
-    sens::frame3_small::decode_explicit_small_f3(&bytes)
-        .map_err(|e| format!("SHA-256 verified but F3 canonical decode rejected: {e:?}"))
+    decode_f3_carrier(&bytes)
+        .map_err(|e| format!("SHA-256 verified but F3 canonical decode rejected: {e}"))
 }
 
 fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
     // Operator-requested only: never change the normal T5 .sens source.
     let original = read_sens(path)?;
-    let framed = sens::frame3_small::encode_explicit_small_f3(&original)
-        .map_err(|e| format!("tiny F3 encode rejected: {e:?}"))?
+    let framed = encode_f3_carrier(&original)?
         .ok_or("this .sens program is not a smaller valid original F3 file")?;
     let dest = path.with_extension("senc");
     let mut out = OpenOptions::new().create_new(true).write(true)
@@ -200,6 +322,7 @@ fn execute() -> Result<(), String> {
     // У разі передавання одного файла .sens читаємо його як людина,
     // а не показуємо на екран внутрішні трити чи сирі байти.
     let (command, file, trusted_hash) = match args.as_slice() {
+        [arg] if arg == "backend" => ("backend", "", None),
         [path] if path.ends_with(".sens") => ("open", path.as_str(), None),
         [command, path] => (command.as_str(), path.as_str(), None),
         [command, path, expected]
@@ -210,6 +333,13 @@ fn execute() -> Result<(), String> {
     let path = Path::new(file);
 
     match command {
+        "backend" => {
+            #[cfg(feature = "zig-transport")]
+            println!("transport=zig abi=1 semantic_authority=SENS");
+            #[cfg(not(feature = "zig-transport"))]
+            println!("transport=rust-reference semantic_authority=SENS");
+            Ok(())
+        }
         "encode-d7-uk" => {
             // Physical T5 record; no D2 source grammar and NO execution.
             if path.extension().and_then(|ext| ext.to_str()) != Some("txt") {
@@ -237,8 +367,18 @@ fn execute() -> Result<(), String> {
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            let bytes = sens::encode_binary_projection_ternary(&projection)
+            let reference = sens::encode_binary_projection_ternary(&projection)
                 .map_err(|e| explain_encode_failure(&projection, e))?;
+            // SENS owns the grammar/semantic admission; physical bytes are
+            // produced by Zig in the official zig-transport variant.
+            #[cfg(feature = "zig-transport")]
+            let bytes = {
+                let typed = sens::decode_ternary_words(&reference)
+                    .map_err(|e| format!("canonical T5 words rejected: {e:?}"))?;
+                zig_transport::encode_t5(&typed, &reference)?
+            };
+            #[cfg(not(feature = "zig-transport"))]
+            let bytes = reference;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;

@@ -89,7 +89,113 @@ jobs:
             --fixture tests/test_migrate_exact_domain.py \
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
+      - name: Zig 0.16 — T5/F3C exact-width codec tests (mechanics only)
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Єдиний автоматичний workflow; механічне Zig parity != SENS semantic PASS.
+          # Пінована стабільна Zig 0.16.0 + офіційна SHA256 фізичного архіву.
+          curl --fail --location --retry 3 --silent --show-error \
+            https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz \
+            --output "$RUNNER_TEMP/zig-0.16.0.tar.xz"
+          echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-0.16.0.tar.xz" | sha256sum --check --status
+          tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
+          ZIG="$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig"
+          "$ZIG" version
+          echo 'test_id=zig-t5-exact-width layer=transport semantic_authority=SENS status=mechanical'
+          "$ZIG" test research/zig-codecs/t5/t5.zig
+          echo 'test_id=zig-f3c-rank-parity layer=transport semantic_authority=SENS status=mechanical'
+          "$ZIG" test research/zig-codecs/tests.zig -lc
+          echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
+          "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
+          "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
+          sed -n '1,35p' "$RUNNER_TEMP/zig-t5-bench-smoke.txt"
+          echo 'test_id=zig-production-file-transport layer=transport semantic_authority=SENS'
+          "$ZIG" build-exe research/zig-codecs/transport.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/sens-zig-transport"
+          CLI="$RUNNER_TEMP/sens-zig-transport"
+          # Physical T5 corpus input; Zig is authoritative for physical packing.
+          cp tests/fixtures/migration-quote-cohort-main/quote-legacy.sens "$RUNNER_TEMP/source.sens"
+          "$CLI" t5-check "$RUNNER_TEMP/source.sens"
+          "$CLI" t5-roundtrip "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
+          cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
+          "$CLI" f3c-pack "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/framed.senc"
+          printf '\363\100\140' | cmp - "$RUNNER_TEMP/framed.senc"
+          "$CLI" f3c-check "$RUNNER_TEMP/framed.senc"
+          "$CLI" f3c-unpack "$RUNNER_TEMP/framed.senc" "$RUNNER_TEMP/unpacked.sens"
+          cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/unpacked.sens"
+          # Failure is informative and fail-closed: wrong suffix, repeated output, bad carrier.
+          if "$CLI" f3c-pack "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/framed.senc"; then
+            echo '::error::FAIL-OPEN: Zig clobber accepted'; exit 1
+          fi
+          if "$CLI" t5-check "$RUNNER_TEMP/framed.senc"; then
+            echo '::error::FAIL-OPEN: F3C masqueraded as T5'; exit 1
+          fi
+          printf '\363\000' > "$RUNNER_TEMP/invalid.senc"
+          if "$CLI" f3c-unpack "$RUNNER_TEMP/invalid.senc" "$RUNNER_TEMP/mutant.sens"; then
+            echo '::error::FAIL-OPEN: malformed F3C accepted'; exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/mutant.sens"
+          echo 'ZIG_TRANSPORT_EXPLICIT_T5_F3C_PHYSICAL_PASS; SENS_SEMANTICS_NOT_TESTED'
+
+
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: "Zig→Rust SENS CLI: physical T5/F3C ABI and real native execution"
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          zig version
+          echo 'test_id=zig-to-sens-cli-abi layer=transport semantic_authority=SENS'
+          cargo build --locked -p sens-cli --bin sens-trit --features zig-transport
+          CLI_RUST_ZIG=target/debug/sens-trit
+          "$CLI_RUST_ZIG" backend | tee "$RUNNER_TEMP/sens-zig-backend.txt"
+          grep -Fxq "transport=zig abi=1 semantic_authority=SENS" "$RUNNER_TEMP/sens-zig-backend.txt"
+          # The Zig ABI produces physical data; Rust SENS evaluates it.
+          "$CLI_RUST_ZIG" encode-f3 "$RUNNER_TEMP/source.sens"
+          cmp "$RUNNER_TEMP/source.senc" "$RUNNER_TEMP/framed.senc"
+          "$CLI_RUST_ZIG" eval "$RUNNER_TEMP/source.sens" > "$RUNNER_TEMP/sens-t5-result.txt"
+          "$CLI_RUST_ZIG" eval-f3 "$RUNNER_TEMP/source.senc" > "$RUNNER_TEMP/sens-f3c-result.txt"
+          cmp "$RUNNER_TEMP/sens-t5-result.txt" "$RUNNER_TEMP/sens-f3c-result.txt"
+          "$CLI_RUST_ZIG" open-f3 "$RUNNER_TEMP/source.senc" > "$RUNNER_TEMP/sens-view.txt"
+          if "$CLI_RUST_ZIG" eval-f3 "$RUNNER_TEMP/invalid.senc"; then
+            echo '::error::FAIL-OPEN: Zig F3C mutant executed'; exit 1
+          fi
+          echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
+
+      - name: Zig ↔ Rust T5 парний бенчмарк — однакові фізичні байти (manual benchmark protocol)
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          python3 research/zig-codecs/t5/run_paired_bench.py \
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
+      - name: Zig ↔ Rust F3C парний бенчмарк — дійсні .senc байти
+        if: always() && github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          python3 research/zig-codecs/f3c/run_paired_bench.py \
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
+
+      - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
+        if: always() && github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zig-rust-codec-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/zig-rust-t5-results/
+            ${{ runner.temp }}/zig-rust-f3c-results/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
