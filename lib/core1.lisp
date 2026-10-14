@@ -1,8 +1,8 @@
 ; lib/core1.lisp — Core1 evaluator profile on exact domains.
 ;
-; Migrated: bare host T/NIL as PredicateBit carriers → exact D1 forms.
-;   D1:1 = (010 (001 ()))
-;   D1:0 / false carrier = (001 ())
+; Ratified D1 predicates use exact one-bit carriers; no computed truth constructor.
+;   D1:YES = #d1:1; D1:NO = #d1:0. Domain width remains part of identity.
+;   (001 ()) is structural D3:000 EMPTY, never a D1:NO predicate.
 ; Duplicate D4:0011 arm removed (one kept). Two-field COND discipline.
 ; Width is identity; every bit of the domain address is valued.
 ; Bounded physical migration: D3 CAR/CDR selectors C1-SECOND/C1-THIRD/
@@ -95,7 +95,7 @@
         ((101 ENV (001 ())) (001 C1-MISSING))
         ((101 (100 (100 ENV)) NAME)
          (C1-MAKE-FOUND (011 (100 ENV))))
-        ((010 (001 ()))
+        (#d1:1
          (C1-LOOKUP-IN NAME (011 ENV)))))))
 
 (0011 C1-ADMITTED-SID-VALUEP
@@ -140,7 +140,7 @@
       ((101 NAME (001 list)) 1110)
       ((101 NAME (001 NOT))  0100)
       ((101 NAME (001 not))  0100)
-      ((010 (001 ())) (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 C1-DEFAULT
   (0010 (NAME)
@@ -148,7 +148,7 @@
        (110
          ((101 IDENTITY (001 ()))
           (C1-MAKE-ERROR (001 UNBOUND) NAME))
-         ((010 (001 ())) IDENTITY)))
+         (#d1:1 IDENTITY)))
      (C1-PRIMITIVE-IDENTITY NAME))))
 
 (0011 C1-LOOKUP
@@ -156,11 +156,11 @@
     ((0010 (LOCAL)
        (110
          ((C1-FOUNDP LOCAL) (C1-FOUND-VALUE LOCAL))
-         ((010 (001 ()))
+         (#d1:1
           ((0010 (TOP)
              (110
                ((C1-FOUNDP TOP) (C1-FOUND-VALUE TOP))
-               ((010 (001 ())) (C1-DEFAULT NAME))))
+               (#d1:1 (C1-DEFAULT NAME))))
            (C1-LOOKUP-IN NAME GLOBAL)))))
      (C1-LOOKUP-IN NAME ENV))))
 
@@ -193,10 +193,10 @@
         ((101 PARAMS (001 ()))
          (110
            ((101 ARGS (001 ())) ENV)
-           ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) (001 TOO-MANY-ARGUMENTS)))))
+           (#d1:1 (C1-MAKE-ERROR (001 ARITY) (001 TOO-MANY-ARGUMENTS)))))
         ((101 ARGS (001 ()))
          (C1-MAKE-ERROR (001 ARITY) (001 TOO-FEW-ARGUMENTS)))
-        ((010 (001 ()))
+        (#d1:1
          (C1-BIND
            (011 PARAMS)
            (011 ARGS)
@@ -210,38 +210,38 @@
        (110
          ((C1-ONE-ARGP ARGS)
           (110
-            ((101 (100 ARGS) (001 ())) (010 (001 ())))
-            ((010 (001 ())) (001 ()))))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+            ((101 (100 ARGS) (001 ())) #d1:1)
+            (#d1:1 (001 ()))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 010)
        (110
          ((C1-ONE-ARGP ARGS) (010 (100 ARGS)))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 101)
        (110
          ((C1-TWO-ARGP ARGS) (101 (100 ARGS) (100 (011 ARGS))))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 111)
        (110
          ((C1-TWO-ARGP ARGS) (111 (100 ARGS) (100 (011 ARGS))))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 100)
        (110
          ((C1-ONE-ARGP ARGS)
           (110
             ((010 (100 ARGS))
              (C1-MAKE-ERROR (001 TYPE) (001 CAR-REQUIRES-PAIR)))
-            ((010 (001 ())) (100 (100 ARGS)))))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+            (#d1:1 (100 (100 ARGS)))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 011)
        (110
          ((C1-ONE-ARGP ARGS)
           (110
             ((010 (100 ARGS))
              (C1-MAKE-ERROR (001 TYPE) (001 CDR-REQUIRES-PAIR)))
-            ((010 (001 ())) (011 (100 ARGS)))))
-         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
-      ((010 (001 ()))
+            (#d1:1 (011 (100 ARGS)))))
+         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+      (#d1:1
        (C1-MAKE-ERROR (001 UNSUPPORTED-PRIMITIVE) SID)))))
 
 (0011 C1-EVLIS
@@ -249,15 +249,15 @@
     (0010 (FORMS ENV GLOBAL)
       (110
         ((101 FORMS (001 ())) (001 ()))
-        ((010 (001 ()))
+        (#d1:1
          ((0010 (FIRST)
             (110
               ((C1-ERRORP FIRST) FIRST)
-              ((010 (001 ()))
+              (#d1:1
                ((0010 (REST)
                   (110
                     ((C1-ERRORP REST) REST)
-                    ((010 (001 ())) (111 FIRST REST))))
+                    (#d1:1 (111 FIRST REST))))
                 (C1-EVLIS (011 FORMS) ENV GLOBAL)))))
           (C1-EVAL (100 FORMS) ENV GLOBAL)))))))
 
@@ -267,13 +267,13 @@
       (110
         ((101 CLAUSES (001 ()))
          (C1-MAKE-ERROR (001 UNSATISFIED-CONDITIONAL) (001 ())))
-        ((010 (001 ()))
+        (#d1:1
          ((0010 (TEST-VALUE)
             (110
               ((C1-ERRORP TEST-VALUE) TEST-VALUE)
               ((101 TEST-VALUE (001 ()))
                (C1-EVCON (011 CLAUSES) ENV GLOBAL))
-              ((010 (001 ()))
+              (#d1:1
                (C1-EVAL
                  (1001 (100 CLAUSES))
                  ENV
@@ -291,7 +291,7 @@
        (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-IDENTITY FN) ARGS))
       ((C1-FUNARGP FN)
        (FN ARGS GLOBAL))
-      ((010 (001 ()))
+      (#d1:1
        (C1-MAKE-ERROR (001 NOT-CALLABLE) FN)))))
 
 (0011 C1-QUOTE-NAMEP
@@ -343,9 +343,9 @@
          (110
            ((101 EXPR (001 ())) (001 ()))
            ((101 EXPR (001 nil)) (001 ()))
-           ((101 EXPR (001 t)) (010 (001 ())))
+           ((101 EXPR (001 t)) #d1:1)
            ((C1-ADMITTED-SID-VALUEP EXPR) EXPR)
-           ((010 (001 ())) (C1-LOOKUP EXPR ENV GLOBAL))))
+           (#d1:1 (C1-LOOKUP EXPR ENV GLOBAL))))
         ((C1-QUOTE-NAMEP (100 EXPR))
          (1001 EXPR))
         ((C1-COND-NAMEP (100 EXPR))
@@ -358,7 +358,7 @@
              ((0010 (BOUND)
                 (110
                   ((C1-ERRORP BOUND) BOUND)
-                  ((010 (001 ()))
+                  (#d1:1
                    (C1-EVAL
                      (10011 EXPR)
                      BOUND
@@ -371,15 +371,15 @@
          (C1-MAKE-ERROR
            (001 INVALID-FORM)
            (001 DEFINE-IS-TOP-LEVEL-ONLY)))
-        ((010 (001 ()))
+        (#d1:1
          ((0010 (FN)
             (110
               ((C1-ERRORP FN) FN)
-              ((010 (001 ()))
+              (#d1:1
                ((0010 (ARGS)
                   (110
                     ((C1-ERRORP ARGS) ARGS)
-                    ((010 (001 ())) (C1-APPLY FN ARGS GLOBAL))))
+                    (#d1:1 (C1-APPLY FN ARGS GLOBAL))))
                 (C1-EVLIS (011 EXPR) ENV GLOBAL)))))
           (C1-EVAL (100 EXPR) ENV GLOBAL)))))))
 
@@ -416,7 +416,7 @@
                (110
                  ((C1-ERRORP VALUE)
                   (C1-MAKE-WORLD VALUE GLOBAL))
-                 ((010 (001 ()))
+                 (#d1:1
                   (C1-EVAL-PROGRAM
                     (011 FORMS)
                     (111
@@ -428,12 +428,12 @@
          (C1-MAKE-WORLD
            (C1-EVAL (100 FORMS) (001 ()) GLOBAL)
            GLOBAL))
-        ((010 (001 ()))
+        (#d1:1
          ((0010 (VALUE)
             (110
               ((C1-ERRORP VALUE)
                (C1-MAKE-WORLD VALUE GLOBAL))
-              ((010 (001 ()))
+              (#d1:1
                (C1-EVAL-PROGRAM
                  (011 FORMS)
                  GLOBAL))))
