@@ -6,7 +6,7 @@
     "schema": "d1-d9-foundation-ratification/v1",
     "status": "owner-ratified",
     "authority": "#4008",
-    "git_blob_sha1": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+    "git_blob_sha1": "bed8c18752384c86e582f61f6c497686009e551b"
   },
   "current_domains": [
     "D1",
@@ -86,8 +86,8 @@
       "canonical_table": {
         "path": "lib/domains/d7.lisp",
         "key_width": 7,
-        "rows": 126,
-        "git_blob_sha1": "6865941d1375d386ed5e0691ccf00ca6ebd6900e"
+        "rows": 128,
+        "git_blob_sha1": "568bdf3ced54a635c0cd82257fa5f19234dff213"
       }
     },
     "D8": {
