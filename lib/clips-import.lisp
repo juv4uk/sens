@@ -215,13 +215,20 @@
              (clips-templates-from-forms (011 forms))))
       (#d1:1 (clips-templates-from-forms (011 forms))))))
 
+; A template registry is a list of (atomic-name . slot-order) pairs.
+; This derived lookup needs no D5 ASSOC / D8 EQUAL callable admission.
+; Empty or malformed entries fail closed as data (), not D1:NO.
 (0011 clips-template-slot-order
   (0010 (name templates)
-    ((0010 (entry)
-       (110
-         ((010 entry)  (001 ()))
-         (#d1:1 (011 entry))))
-     (11100 name templates))))
+    (110
+      ((0100 (010 name)) (001 ()))
+      ((010 templates) (001 ()))
+      ((010 (100 templates))
+       (clips-template-slot-order name (011 templates)))
+      ((0100 (010 (100 (100 templates))))
+       (clips-template-slot-order name (011 templates)))
+      ((101 name (100 (100 templates))) (011 (100 templates)))
+      (#d1:1 (clips-template-slot-order name (011 templates))))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
 ; `(precursors)` in wine-external.clp's `ask-a-question` rule — CLIPS reads
