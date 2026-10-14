@@ -26,15 +26,17 @@ p = parse_words(positive_path.read_text(encoding="ascii"))
 n = parse_words(negative_path.read_text(encoding="ascii"))
 if len(p) != len(n):
     raise SystemExit("T5_TRANSPORT_RED: mutant changed word count")
-changed = [(a, b) for a, b in zip(p, n) if a != b]
-if len(changed) != 1 or changed[0] != ("0", "1"):
-    raise SystemExit("T5_TRANSPORT_RED: mutant must flip only one D1 bit")
+changed_indices = [index for index, (a, b) in enumerate(zip(p, n)) if a != b]
+# The only permitted mutation is the first item of the D3-quoted two-element list.
+# This is an exact D2 token position check, NOT a host semantic truth table.
+if changed_indices != [14] or p[11:18] != ["001", "00", "10", "0", "00", "1", "01"] or n[14] != "1":
+    raise SystemExit("T5_TRANSPORT_RED: mutate only first quoted D1 datum")
 for name, words in (("law", p), ("mutant", n)):
     physical = encode_projection(" ".join(words))
     if decode_bytes(physical) != words:
         raise SystemExit("T5_TRANSPORT_RED: codec lost exact word identity")
     (directory / f"{name}.sens").write_bytes(physical)
-print(f"QUOTE_INERT_T5_READY word_count={len(p)} mutant_changed_words={len(changed)} semantic_pass=NOT_INFERRED")
+print(f"QUOTE_INERT_T5_READY word_count={len(p)} mutant_changed_words={len(changed_indices)} semantic_pass=NOT_INFERRED")
 PY
 
 printf 'test_id=%s layer=eval executor=%s version=%s\n' "$id" "$cli" "$("$cli" --version)"
@@ -66,4 +68,13 @@ if "$cli" "$tmp/mutant.sens" > "$tmp/mutant.actual" 2> "$tmp/mutant.stderr"; the
   sha256sum "$tmp/mutant.actual" >&2
   exit 1
 fi
-printf 'NATIVE_SENS_PASS test_id=%s physical_positive=1 mutant=rejected authority=binary-SENS\n' "$id"
+if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.stderr"; then
+  printf 'UNINFORMATIVE-NEGATIVE test_id=%s layer=eval fixture=%s expected=D1-noncallable actual=unclassified-failure reproduce=%q\n' \
+    "$id-mutant" "$mutant" "$reproduce" >&2
+  cat "$tmp/mutant.stderr" >&2
+  sha256sum "$tmp/mutant.stderr" >&2
+  exit 1
+fi
+printf 'NATIVE_SENS_NEGATIVE test_id=%s kind=D1-noncallable sha256_stderr=' "$id-mutant"
+sha256sum "$tmp/mutant.stderr"
+printf 'NATIVE_SENS_PASS test_id=%s physical_positive=1 mutant=D1-noncallable authority=binary-SENS\n' "$id"
