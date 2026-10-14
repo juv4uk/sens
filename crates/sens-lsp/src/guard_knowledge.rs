@@ -507,6 +507,65 @@ mod tests {
     }
 
     #[test]
+    fn guard_topics_preserves_three_exact_d3_quotes_and_rejects_w8_mutants() {
+        // Це перевірка AST-ширини носієм Rust. Семантичний оракул — тільки SENS.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let start = full
+            .find("(0011 guard-topics\n")
+            .expect("missing D4:0011 guard-topics definition");
+        let rest = &full[start..];
+        let end = rest
+            .find("\n; One canonical entry point for a cold agent:")
+            .expect("missing end of guard-topics section");
+        let form = rest[..end].trim();
+
+        fn d3_quotes(code: &str) -> usize {
+            fn visit(expr: &Expr) -> usize {
+                match &expr.kind {
+                    ExprKind::List(items) => {
+                        usize::from(matches!(
+                            items.first(),
+                            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                                if id.width() == 3 && id.packed_bits() == 0b001
+                        )) + items.iter().map(visit).sum::<usize>()
+                    }
+                    _ => 0,
+                }
+            }
+            sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp",
+                code,
+            )
+            .expect("guard-topics exact-domain parse")
+            .iter()
+            .map(visit)
+            .sum()
+        }
+
+        assert_eq!(form.matches("(001 ())").count(), 2, "two explicit nil quotations");
+        assert_eq!(form.matches("(001 topic)").count(), 1, "one field-name quotation");
+        assert_eq!(d3_quotes(form), 3, "all three quotes must retain D3 width");
+
+        let mut mutant_count = 0;
+        for (exact, legacy) in [
+            ("(001 ())", "(00000001 ())"),
+            ("(001 topic)", "(00000001 topic)"),
+        ] {
+            for (at, _) in form.match_indices(exact) {
+                let mut mutant = form.to_owned();
+                mutant.replace_range(at..at + exact.len(), legacy);
+                assert_eq!(
+                    d3_quotes(&mutant),
+                    2,
+                    "W8 != D3 for {exact}, byte offset {at}"
+                );
+                mutant_count += 1;
+            }
+        }
+        assert_eq!(mutant_count, 3, "both nil sites and field-name site checked");
+    }
+
+    #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
         assert_eq!(surface_domain_coordinate("функція"), Some(D4_LAMBDA));
