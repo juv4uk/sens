@@ -508,6 +508,30 @@ mod tests {
             if f3c_bytes.is_some() { f3c_cases += 1; }
             cases += 1;
         }
+        // A separately proven SENS tiny F3C witness is included to avoid
+        // claiming F3C lacks useful cases just because the fixed E1 set has none.
+        // This is NOT a 17th case in the immutable E1 byte-parity corpus.
+        let tiny_t5 = [0x63, 0x89, 0x06, 0xa1];
+        let tiny_f3c = [0xf3, 0x40, 0x60];
+        let tiny_words = decode_ternary_words(&tiny_t5)
+            .expect("original tiny SENS fixture must decode exactly");
+        let e1_tiny = encode(&tiny_words).expect("E1 physical carrier for tiny fixture");
+        assert_eq!(decode(&e1_tiny).unwrap(), tiny_words);
+        assert_eq!(encode_ternary_words(&tiny_words).unwrap(), tiny_t5);
+        assert_eq!(
+            crate::frame3_small::encode_explicit_small_f3(&tiny_t5).unwrap(),
+            Some(tiny_f3c.to_vec())
+        );
+        assert_eq!(
+            crate::frame3_small::decode_explicit_small_f3(&tiny_f3c).unwrap(),
+            tiny_t5
+        );
+        let tiny_bits: usize = tiny_words.iter().map(|word| word.width()).sum();
+        println!(
+            "E1_F3C_TINY_REFERENCE case=admitted_quote words={} exact_bits={} \
+             e1_bytes={} t5_bytes=4 f3c_bytes=3 semantic_authority=SENS",
+            tiny_words.len(), tiny_bits, e1_tiny.len()
+        );
         assert_eq!(cases, 16, "the fixed byte parity corpus cannot silently shrink");
         assert_eq!(e1_smaller + t5_smaller + equal, t5_cases);
         println!(
