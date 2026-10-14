@@ -48,6 +48,45 @@ fn eval_import(source: &str) -> String {
 }
 
 #[test]
+fn clips_defrule_exact_pipeline_probes() {
+    // Diagnostic transport only: every intermediate value is computed by SENS.
+    // These probes locate the first real failure without inventing a Rust
+    // replacement for the SENS parser, evaluator or CLIPS rules.
+    let samples = [
+        (
+            "split",
+            "(clips-split-at-arrow (quote ((planet ?x) => (assert (has-mass ?x)))))",
+        ),
+        (
+            "all-asserts",
+            "(clips-all-asserts? (quote ((assert (has-mass ?x)))))",
+        ),
+        (
+            "conclusions",
+            "(clips-assert-conclusions (quote ((assert (has-mass ?x)))))",
+        ),
+        (
+            "defrule",
+            "(clips-defrule->clauses (quote (defrule mass-rule (planet ?x) => (assert (has-mass ?x)))) (quote ()))",
+        ),
+    ];
+    let mut seen = Vec::new();
+    for (label, source) in samples {
+        let result = eval_import(source);
+        println!("SENS_CLIPS_INTERMEDIATE test_id=clips-defrule-d4-split step={label} actual={result}");
+        seen.push((label, result));
+    }
+    for (label, result) in seen {
+        if label != "all-asserts" {
+            assert_ne!(
+                result, "()",
+                "test_id=clips-defrule-d4-split layer=eval step={label} returned empty SENS value"
+            );
+        }
+    }
+}
+
+#[test]
 fn clips_deffacts_becomes_zero_condition_clauses() {
     // A real CLIPS `deffacts` block, read as data rather than evaluated.
     let source = r#"
