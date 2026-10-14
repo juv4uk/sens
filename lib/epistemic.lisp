@@ -46,19 +46,20 @@
           (1110 (001 produces) produces))))
 
 ; --- Shape predicates ---------------------------------------------------
-; Valid returns typed #d1:1; malformed retains quoted empty — no new
-; error/exception type, same idiom as lib/result-status.lisp.
+; Predicate truth is exact D1:1 / D1:0 (raw 1/0 in executable source).
+; D3:101 EQ receives only atom heads; no NIL-as-false or new host primitive.
 
 (0011 source-ref?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
-      ((010 (011 value)) (001 ()))
-      ((101 (100 value) (001 digest)) #d1:1)
-      ((101 (100 value) (001 proof)) #d1:1)
-      ((101 (100 value) (001 test)) #d1:1)
-      ((101 (100 value) (001 observation)) #d1:1)
-      (#d1:1 (001 ())))))
+      ((010 value) 0)
+      ((010 (011 value)) 0)
+      ((0100 (010 (100 value))) 0)
+      ((101 (100 value) (001 digest)) 1)
+      ((101 (100 value) (001 proof)) 1)
+      ((101 (100 value) (001 test)) 1)
+      ((101 (100 value) (001 observation)) 1)
+      (1 0))))
 
 (0011 epistemic--claim-ref?
   (0010 (value)
