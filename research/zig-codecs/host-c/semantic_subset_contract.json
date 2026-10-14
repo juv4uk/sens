@@ -1,0 +1,151 @@
+{
+  "schema": "sens.host-neutral.h1-subset-evidence/v1",
+  "status": "NON_NORMATIVE_SOURCE_MANIFEST",
+  "as_of": "2026-10-14",
+  "authority": {
+    "semantic": "SENS only: CURRENT.md -> language-contract.lisp Contract 11.9 -> owner-ratified D1/D2/D3 laws -> native SENS executable witness",
+    "boundary": "research/zig-codecs/transport_abi.zig",
+    "c_implementation": "research/zig-codecs/host-c/d3_subset.c",
+    "c_implementation_git_blob_sha1": "85ba457f354b982ad6440d6c4d179229f796b366",
+    "manual_c_build": "bash research/zig-codecs/host-c/verify_d3_subset.sh",
+    "native_sens_positive_negative": [
+      "bash scripts/prove-retired-d3-laws.sh",
+      "bash scripts/prove-retired-quote-inert.sh"
+    ],
+    "notes": "This record describes existing implementation/test scope. It does not approve an opcode, a domain law, Rust replacement or universal portability."
+  },
+  "mechanical_ingress": {
+    "abi_version": 2,
+    "abi_word_representation": "BE3 [exact_width_u8,payload_MSB_u8,payload_LSB_u8]",
+    "wire": "canonical physical T5 only; BE3 is an in-process FFI triplet, not .sens",
+    "functions": [
+      "sens_zig_t5_encode_be3",
+      "sens_zig_t5_validate",
+      "sens_zig_t5_decode_be3"
+    ],
+    "ordinary_t5_widths": "D1..D9",
+    "d10": "coordinate-only profile; not admitted by ordinary Zig C ABI v2",
+    "d11": "testing vocabulary, no ABI/runtime admission"
+  },
+  "implemented_closed_subset": {
+    "domain_identity": "(exact_domain, exact_width, exact_bits, admitted_law)",
+    "d1_control_outcomes": {
+      "0": "NO",
+      "1": "YES"
+    },
+    "d2_structure": {
+      "10": "OPEN",
+      "11": "DOT: unsupported by this minimal C parser",
+      "00": "SEPARATOR",
+      "01": "CLOSE"
+    },
+    "d3_data": {
+      "000": "EMPTY, not executable call-head"
+    },
+    "d3_callable_heads_current_small_c_executor": {
+      "100": "CAR, one argument from nonempty quoted list",
+      "101": "EQ, two atom operands",
+      "110": "COND, two-field clauses with exact D1 controls",
+      "001": "QUOTE, one argument",
+      "010": "ATOM, one argument"
+    },
+    "d3_outside_implemented_scope": [
+      "011 CDR",
+      "111 CONS"
+    ],
+    "unsupported": "Any unlisted executable head/shape; named external functions, D7 text-data calls, D8/D9 function calls, D10 whole-catalogue calls, D11 test vocabulary",
+    "limits": {
+      "maximum_t5_word_width": 9,
+      "maximum_source_words": 512,
+      "maximum_list_children": 16,
+      "maximum_nesting_depth": 32
+    },
+    "semantics_note": "A host may mechanically carry higher-width atom data in this test harness; that does not make it a callable domain identity. No numeric D24+ execution is implemented."
+  },
+  "fixture_pairs": [
+    {
+      "test_id": "retired-d3-cond",
+      "positive": {
+        "path": "tests/semantic/retired-d3-cond-law.bits",
+        "git_blob_sha1": "fb0a68205bb80e3f8e14dfab6da14c5b70f1e0dc",
+        "source_sha256": "f0eab878854f9ae872eb1767e561a7ef77d71ccbabf80251e4ae874661fc425d"
+      },
+      "one_bit_mutant": {
+        "path": "tests/semantic/retired-d3-cond-mutant.bits",
+        "git_blob_sha1": "6432daaa5979b4ba25091b87921c35be8030d91d",
+        "source_sha256": "547ea1854da4b5de06442868e005ad5843a4b76e46e35695d8b762b64c607303"
+      },
+      "exact_word_count": 21,
+      "mutated_word_zero_based": 4,
+      "mutation": "D1:0 -> D1:1; exactly one bit, with same width/word count",
+      "c_positive_observation": "D1:1",
+      "c_mutant_error_category": "NONCALLABLE_HEAD",
+      "native_sens_positive_observation": "D1:1",
+      "native_sens_mutant_error_substring": "domain identity is not callable under its ratified law: D1",
+      "transport_and_semantic_results": "PENDING paired execution on identical source/physical payload and pinned binaries"
+    },
+    {
+      "test_id": "retired-d3-eq",
+      "positive": {
+        "path": "tests/semantic/retired-d3-eq-law.bits",
+        "git_blob_sha1": "2b784c881d67a9afc755985782c1bbbed5aa48fd",
+        "source_sha256": "280af5af7a5fc8dc2eb9347fca7189012bb3dbba066ed5e0a93e59b4ebb40c28"
+      },
+      "one_bit_mutant": {
+        "path": "tests/semantic/retired-d3-eq-mutant.bits",
+        "git_blob_sha1": "8a0568e31d11fed716370cb5d57049c42556f36e",
+        "source_sha256": "c2cb1457988bf52e7f37c605f3145b6ed51b0ee24e123227ba817e07912ce7e1"
+      },
+      "exact_word_count": 35,
+      "mutated_word_zero_based": 16,
+      "mutation": "D1:0 -> D1:1; exactly one bit, with same width/word count",
+      "c_positive_observation": "D1:1",
+      "c_mutant_error_category": "NONCALLABLE_HEAD",
+      "native_sens_positive_observation": "D1:1",
+      "native_sens_mutant_error_substring": "domain identity is not callable under its ratified law: D1",
+      "transport_and_semantic_results": "PENDING paired execution on identical source/physical payload and pinned binaries"
+    },
+    {
+      "test_id": "retired-quote-inert-d3",
+      "positive": {
+        "path": "tests/semantic/retired-quote-inert-d3-law.bits",
+        "git_blob_sha1": "bb04950a253a125c60c9c823ef47de1d8a3f0d8e",
+        "source_sha256": "bfb27ff28afe1f3c6df6dd76c5a6ee043ae0c6867de5e05a4481c9a787043c73"
+      },
+      "one_bit_mutant": {
+        "path": "tests/semantic/retired-quote-inert-d3-mutant.bits",
+        "git_blob_sha1": "81cc330df7fda46c52317d2c11cda19e7a72f2e1",
+        "source_sha256": "a4e04039faa1accd4ac42f06b78c299b9466d7e1d710d849ad05fd38c1ae4559"
+      },
+      "exact_word_count": 43,
+      "mutated_word_zero_based": 14,
+      "mutation": "D1:0 -> D1:1; exactly one bit, with same width/word count",
+      "c_positive_observation": "D1:1",
+      "c_mutant_error_category": "NONCALLABLE_HEAD",
+      "native_sens_positive_observation": "D1:1",
+      "native_sens_mutant_error_substring": "domain identity is not callable under its ratified law: D1",
+      "transport_and_semantic_results": "PENDING paired execution on identical source/physical payload and pinned binaries"
+    }
+  ],
+  "comparison_requirements": {
+    "program_count": 6,
+    "pairs": 3,
+    "per_program": [
+      "git blob SHA-1",
+      "source SHA-256",
+      "physical T5 SHA-256",
+      "Zig ABI version",
+      "C binary SHA-256",
+      "native SENS binary SHA-256",
+      "verdict/error category",
+      "stdout/stderr SHA-256",
+      "first mismatch",
+      "single reproduce command"
+    ],
+    "positive": "Both independent hosts must accept and return D1:1; source-level prediction alone is not a parity receipt.",
+    "negative": "Both must reject the same one-bit mutant for an uncallable D1 head, not for transport, parser or timeout errors; host-native error text need not be byte-identical.",
+    "proof_state": "SOURCE_PINNED_ONLY; H2 two-host binary-parity and semantic-parity need runtime receipts",
+    "automatic_ci_workflow_added": false,
+    "release_or_global_coverage_implied": false
+  }
+}
