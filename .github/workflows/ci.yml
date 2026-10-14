@@ -50,7 +50,7 @@ jobs:
           sha256sum "$fixture" crates/sens/tests/sens_semantic_witnesses.rs
           python3 scripts/ci_failure_contract.py run \
             --test-id epistemic-eq-d1-law-mutant \
-            --layer eval \
+            --layer transport \
             --fixture "$fixture" \
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- cargo test --locked -p sens --test sens_semantic_witnesses \
