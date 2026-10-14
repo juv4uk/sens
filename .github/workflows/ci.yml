@@ -111,6 +111,33 @@ jobs:
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
           sed -n '1,35p' "$RUNNER_TEMP/zig-t5-bench-smoke.txt"
+          echo 'test_id=zig-production-file-transport layer=transport semantic_authority=SENS'
+          "$ZIG" build-exe research/zig-codecs/transport.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/sens-zig-transport"
+          CLI="$RUNNER_TEMP/sens-zig-transport"
+          # Physical T5 corpus input; Zig is authoritative for physical packing.
+          cp tests/fixtures/migration-quote-cohort-main/quote-legacy.sens "$RUNNER_TEMP/source.sens"
+          "$CLI" t5-check "$RUNNER_TEMP/source.sens"
+          "$CLI" t5-roundtrip "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
+          cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
+          "$CLI" f3c-pack "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/framed.senc"
+          printf '\\363\\100\\140' | cmp - "$RUNNER_TEMP/framed.senc"
+          "$CLI" f3c-check "$RUNNER_TEMP/framed.senc"
+          "$CLI" f3c-unpack "$RUNNER_TEMP/framed.senc" "$RUNNER_TEMP/unpacked.sens"
+          cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/unpacked.sens"
+          # Failure is informative and fail-closed: wrong suffix, repeated output, bad carrier.
+          if "$CLI" f3c-pack "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/framed.senc"; then
+            echo '::error::FAIL-OPEN: Zig clobber accepted'; exit 1
+          fi
+          if "$CLI" t5-check "$RUNNER_TEMP/framed.senc"; then
+            echo '::error::FAIL-OPEN: F3C masqueraded as T5'; exit 1
+          fi
+          printf '\\363\\000' > "$RUNNER_TEMP/invalid.senc"
+          if "$CLI" f3c-unpack "$RUNNER_TEMP/invalid.senc" "$RUNNER_TEMP/mutant.sens"; then
+            echo '::error::FAIL-OPEN: malformed F3C accepted'; exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/mutant.sens"
+          echo 'ZIG_TRANSPORT_EXPLICIT_T5_F3C_PHYSICAL_PASS; SENS_SEMANTICS_NOT_TESTED'
+
 
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Zig ↔ Rust T5 парний бенчмарк — однакові фізичні байти (manual benchmark protocol)
