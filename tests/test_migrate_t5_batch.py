@@ -67,9 +67,13 @@ class RealBatchTest(unittest.TestCase):
         ).hexdigest()
         spec = f"lib/provider.lisp@{git_blob}:helper"
 
+        # The pre-existing permissive mode can transport an unbound D7
+        # spelling; only explicit linked previews enforce binding provenance.
         unlinked = self.call("lib/consumer.lisp", era="current")
-        self.assertEqual(unlinked.returncode, 2, unlinked.stdout + unlinked.stderr)
-        self.assertEqual(json.loads(self.report.read_text())["summary"]["files_blocked"], 1)
+        self.assertEqual(unlinked.returncode, 0, unlinked.stdout + unlinked.stderr)
+        self.assertEqual(
+            json.loads(self.report.read_text())["authority"]["linked_source_definitions"], []
+        )
 
         linked = self.call("lib/consumer.lisp", era="current",
                            linked_definitions=(spec,))
@@ -82,6 +86,15 @@ class RealBatchTest(unittest.TestCase):
         )
         self.assertFalse(report["authority"]["linked_source_definitions"][0]["runtime_admitted"])
         self.assertFalse((self.out / "lib/consumer.sens").exists())
+
+        # A source-backed helper does not admit an unrelated unbound head.
+        unknown = self.root / "lib/unproven.lisp"
+        unknown.write_text("(0011 caller (0010 (x) (unproven x)))\n", encoding="utf-8")
+        missing = self.call("lib/unproven.lisp", era="current",
+                            linked_definitions=(spec,))
+        self.assertEqual(missing.returncode, 2, missing.stdout + missing.stderr)
+        failure = json.loads(self.report.read_text())
+        self.assertIn("UNBOUND_LINKED_CALL_HEAD", failure["files"][0]["reason"])
 
         forbidden = self.call("lib/consumer.lisp", era="current", write=True,
                               linked_definitions=(spec,))
