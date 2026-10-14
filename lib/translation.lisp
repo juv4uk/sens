@@ -241,15 +241,16 @@
     (110
       ((101 (translation-review-valid? review) (001 ())) (001 ()))
       ((101 (translation-review-status review) (001 accepted))
-       (001000 ((proposal (translation-review-proposal review)))
-         (110
-           ((101 (translation-envelope-valid? proposal) (001 ())) (001 ()))
-           ((101 (translation-status proposal) (001 candidate))
-            (110
-              ((101 (translation-kind proposal) (001 clause)) #d1:1)
-              ((101 (translation-kind proposal) (001 batch)) #d1:1)
-              (#d1:1 (001 ()))))
-           (#d1:1 (001 ())))))
+       ((0010 (proposal)
+          (110
+            ((101 (translation-envelope-valid? proposal) (001 ())) (001 ()))
+            ((101 (translation-status proposal) (001 candidate))
+             (110
+               ((101 (translation-kind proposal) (001 clause)) #d1:1)
+               ((101 (translation-kind proposal) (001 batch)) #d1:1)
+               (#d1:1 (001 ()))))
+            (#d1:1 (001 ()))))
+        (translation-review-proposal review)))
       (#d1:1 (001 ())))))
 
 (0011 translation-admission-payload
