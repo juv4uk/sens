@@ -119,19 +119,24 @@ def negative_self_test(root: Path) -> None:
     name, good_pin, bad_pin = CASES[0]
     good = (root / "tests" / "semantic" / f"{name}-law.bits").read_bytes()
     bad = (root / "tests" / "semantic" / f"{name}-mutant.bits").read_bytes()
+    malformed = good.replace(b"10", b"1x", 1)
+    wrong_count = bad + b" 0"
+    wrong_width = bad.replace(b"10 110", b"10 1100", 1)
     probes = {
-        "SOURCE_PIN_DRIFT": (good + b" ", bad, good_pin, bad_pin),
-        "BAD_BINARY_CHAR": (good.replace(b"10", b"1x", 1), bad, good_pin, bad_pin),
-        "WRONG_WORD_COUNT": (good, bad + b" 0", good_pin, git_blob(bad + b" 0")),
-        "WRONG_BIT_WIDTH": (good, bad.replace(b"10 110", b"10 1100", 1),
-                            good_pin, git_blob(bad.replace(b"10 110", b"10 1100", 1))),
-        "NO_MUTATION": (good, good, good_pin, good_pin),
+        "SOURCE_PIN_DRIFT": ((good + b" ", bad, good_pin, bad_pin), "actual_blob="),
+        "BAD_BINARY_CHAR": ((malformed, bad, git_blob(malformed), bad_pin), "invalid_binary_source"),
+        "WRONG_WORD_COUNT": ((good, wrong_count, good_pin, git_blob(wrong_count)), "actual="),
+        "WRONG_BIT_WIDTH": ((good, wrong_width, good_pin, git_blob(wrong_width)),
+                            "expected=exact_same_width"),
+        "NO_MUTATION": ((good, good, good_pin, good_pin), "expected=one_bit_0_to_1"),
     }
-    for test_id, args in probes.items():
+    for test_id, (args, expected_diagnostic) in probes.items():
         try:
             inspect_pair(name, *args)
-        except AuditFailure:
-            print(f"H2_NEGATIVE_PASS test_id={test_id}")
+        except AuditFailure as exc:
+            if expected_diagnostic not in str(exc):
+                raise AuditFailure(f"test_id={test_id} layer=source wrong_negative_reason={exc}") from exc
+            print(f"H2_NEGATIVE_PASS test_id={test_id} category={expected_diagnostic}")
         else:
             raise AuditFailure(f"test_id={test_id} layer=source expected=REJECT actual=ACCEPT")
     print(f"H2_PREFLIGHT_NEGATIVES_PASS rejected={len(probes)}")
@@ -164,8 +169,14 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     exe = root / sens_bin
     if not exe.is_file():
         raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
+    c_binary_digest: list[str] = []
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
+        receipt = re.search(r"^C_D3_SUBSET_RECEIPT zig=\\S+ c_binary_sha256=([0-9a-f]{64})$",
+                            stdout, re.MULTILINE)
+        if receipt is None:
+            raise AuditFailure("test_id=H2_C_BINARY layer=dependency missing_binary_sha256")
+        c_binary_digest.append(receipt.group(1))
         for name, _, _ in CASES:
             for state, expected in (("law", "C_D3_SUBSET_PASS"),
                                     ("mutant", "C_D3_SUBSET_NEGATIVE_PASS")):
@@ -188,6 +199,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         "scope": "only 3 pinned D1/D2/D3 binary self-verdicts + one-bit negatives",
         "toolchain": {"zig_version": pinned, "c_compiler": shutil.which("cc")},
         "rust_host_binary_sha256": sha256(exe.read_bytes()),
+        "c_host_binary_sha256": c_binary_digest[0],
         "runs": {"zig": zig, "rust_build": build, "c": c_host, "native_d3": native_a, "native_quote": native_b},
     })
     return receipt
