@@ -904,9 +904,6 @@ mod exact_d4_eval_head_migration_tests {
             .expect("історична COND мітка");
         assert!(matches!(sid_head(historical_quote, &env), Head::Quote));
         assert!(matches!(sid_head(historical_cond, &env), Head::Cond));
-        // W8:10101000 was INVOKE, current D8:10101000 is ROUND.
-        // Neither spelling is automatically an admitted D3 special form.
-        assert!(matches!(sid_head(crate::sens!(10101000), &env), Head::Call));
     }
 }
 

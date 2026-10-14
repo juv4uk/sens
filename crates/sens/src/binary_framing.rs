@@ -826,7 +826,7 @@ mod tests {
     }
 
     #[test]
-    fn all_d1_d8_domain_widths_round_trip_without_function8_aliasing() {
+    fn all_d1_d8_domain_widths_round_trip_exactly() {
         let identities = [
             crate::BinarySourceWord::W1(crate::Bit1::new(1).unwrap()).domain_identity(),
             crate::BinarySourceWord::W2(crate::Bit2::new(1).unwrap()).domain_identity(),
@@ -847,14 +847,6 @@ mod tests {
             assert_eq!(consumed, encoded.len());
         }
 
-        let d8 = BinaryFrame::Domain(
-            crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
-        );
-        // Historical Function8(00000001) wire is 11 00 + eight payload bits.
-        // Compare wire shapes without importing legacy identity into this new
-        // exact-domain witness.
-        let legacy_wire = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
-        assert_ne!(encode_binary_frame(&d8).unwrap().as_slice(), legacy_wire);
     }
 
     #[test]

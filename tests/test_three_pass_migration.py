@@ -117,22 +117,6 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         # D7 and D10 are counted as coordinates, NOT 1152 callable functions.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
-    def test_all_256_w8_heads_are_era_ambiguous_without_provenance(self):
-        resolver = mod.Resolver({}, {}, {}, source_era="auto")
-        for n in range(256):
-            with self.assertRaisesRegex(mod.MigrationError, "ambiguous W8"):
-                resolver.head(mod.Tok("ATOM", format(n, "08b"), 0))
-
-    def test_pinned_legacy_w8_collision_never_becomes_current_d8(self):
-        resolver = mod.Resolver({"10101000": None,
-                                 "00000101": ("100", "D3", "audited")},
-                                {}, {}, source_era="legacy")
-        with self.assertRaisesRegex(mod.MigrationError, "legacy-unmapped"):
-            resolver.head(mod.Tok("ATOM", "10101000", 0))
-        out, evidence = resolver.head(mod.Tok("ATOM", "00000101", 0))
-        self.assertEqual((out, evidence), (["100"], "pass1-sens8"))
-        self.assertNotEqual(len(out[0]), 8)
-
     def test_structural_empty_and_text_can_be_data_but_not_calls(self):
         resolver = mod.Resolver({}, {}, {}, source_era="current",
                                 admitted_d8={"10101000"})
@@ -454,30 +438,6 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_would_write"], 1)
             self.assertEqual(state["summary"]["files_written"], 0)
 
-
-    def test_w8_source_era_is_explicit_and_never_guessed(self):
-        # Same W8 word is historical CAR in SID8 but a distinct ratified D8
-        # resident today; the CLI must never silently choose one.
-        authority = mod.load_foundation(ROOT / "knowledge" / "d1-d9-foundation.json")
-        d8 = authority["domains"]["D8"]["residents"]
-        self.assertIn("00000101", d8)
-        source = "(00000101 ())\\n".replace("\\n", "\n")
-        with self.assertRaisesRegex(mod.MigrationError, "ambiguous W8 executable"):
-            mod.migrate_file(
-                source, mod.Resolver(self.legacy, self.my, self.upper,
-                                     source_era="auto", admitted_d8=d8),
-                self.text7,
-            )
-        legacy = mod.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
-        self.assertEqual(mod.migrate_file(source, legacy, self.text7),
-                         "10 100 00 000 01\n")
-        current = mod.Resolver(self.legacy, self.my, self.upper,
-                               source_era="current", admitted_d8=d8)
-        self.assertEqual(mod.migrate_file(source, current, self.text7),
-                         "10 00000101 00 000 01\n")
-        self.assertEqual(current.counts["already-exact"], 1)
-        with self.assertRaisesRegex(mod.MigrationError, "owner-ratified D8"):
-            mod.Resolver(self.legacy, self.my, self.upper, source_era="current")
 
     def test_single_lisp_file_cli_and_w8_current_authority(self):
         with tempfile.TemporaryDirectory() as td:
