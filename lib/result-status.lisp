@@ -51,26 +51,26 @@
 (0011 result-tagged?
   (0010 (result)
     (110
-      ((010 result) 0)
-      ((101 (100 result) (001 proved)) 1)
-      ((101 (100 result) (001 unknown)) 1)
-      ((101 (100 result) (001 partial)) 1)
-      ((101 (100 result) (001 blocked)) 1)
-      ((101 (100 result) (001 disputed)) 1)
-      ((101 (100 result) (001 invalid)) 1)
-      (1 0))))
+      ((010 result) #d1:0)
+      ((101 (100 result) (001 proved)) #d1:1)
+      ((101 (100 result) (001 unknown)) #d1:1)
+      ((101 (100 result) (001 partial)) #d1:1)
+      ((101 (100 result) (001 blocked)) #d1:1)
+      ((101 (100 result) (001 disputed)) #d1:1)
+      ((101 (100 result) (001 invalid)) #d1:1)
+      (#d1:1 #d1:0))))
 
 (0011 result-status
   (0010 (result)
     (110
       ((000000100 result) (100 result))
-      (1 (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 result-payload
   (0010 (result)
     (110
       ((000000100 result) (011 result))
-      (1 (001 ())))))
+      (#d1:1 (001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
@@ -80,8 +80,8 @@
     (110
       ((010 value)
        (110
-         ((101 value (001 ())) 1)
-         (1 0)))
+         ((101 value (001 ())) #d1:1)
+         (#d1:1 #d1:0)))
       (1
        (result-proper-list? (011 value))))))
 
@@ -90,9 +90,9 @@
 (0011 result-not-head?
   (0010 (head)
     (110
-      ((101 head (001 not?)) 1)
-      ((101 head (001 not)) 1)
-      (1 0))))
+      ((101 head (001 not?)) #d1:1)
+      ((101 head (001 not)) #d1:1)
+      (#d1:1 #d1:0))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -103,17 +103,17 @@
 (0011 result-goal?
   (0010 (goal)
     (110
-      ((010 goal) 0)
-      ((0100 (result-proper-list? goal)) 0)
-      ((0100 (110101100 (100 goal))) 0)
+      ((010 goal) #d1:0)
+      ((0100 (result-proper-list? goal)) #d1:0)
+      ((0100 (110101100 (100 goal))) #d1:0)
       ((result-not-head? (100 goal))
        (110
          ((010 (011 goal))
           (110
             ((010 (011 (011 goal))) (000011101 (1001 goal)))
-            (1 0)))
-         (1 0)))
-      (1 1))))
+            (#d1:1 #d1:0)))
+         (#d1:1 #d1:0)))
+      (#d1:1 #d1:1))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
@@ -121,15 +121,15 @@
 (0011 result-negated-goal?
   (0010 (goal)
     (110
-      ((0100 (000011101 goal)) 0)
-      ((result-not-head? (100 goal)) 1)
-      (1 0))))
+      ((0100 (000011101 goal)) #d1:0)
+      ((result-not-head? (100 goal)) #d1:1)
+      (#d1:1 #d1:0))))
 
 (0011 result-opposite-goal
   (0010 (goal)
     (110
       ((000111010 goal) (1001 goal))
-      (1 (1110 (001 not?) goal)))))
+      (#d1:1 (1110 (001 not?) goal)))))
 
 ; Both positive and opposite queries use the already-ratified exact D9:101001110
 ; REASON entry, sharing one immutable reason-index. This removes two legacy
@@ -163,7 +163,7 @@
            ((110
               ((0100 (010 positive-results))
                (0100 (010 opposite-results)))
-              (1 0))
+              (#d1:1 0))
             (000000111
               (1110
                 (000111101 goal positive-results)
@@ -172,7 +172,7 @@
             (000111101 goal positive-results))
            ((0100 (010 opposite-results))
             (000111101 opposite opposite-results))
-           (1 (001 ()))))))))
+           (#d1:1 (001 ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a

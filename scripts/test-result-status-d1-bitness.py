@@ -19,8 +19,8 @@ STATUS = ROOT / "lib" / "result-status.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 W8 = re.compile(r"\(([01]{8})(?=\s|\))")
 HOST = re.compile(r"(?<!\w)(t|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
-D1_FALSE = "(101 (001 (0)) (001 (1)))"
+D1_TRUE = "#d1:1"
+D1_FALSE = "#d1:0"
 
 
 def check_status() -> list[str]:
@@ -38,9 +38,9 @@ def check_status() -> list[str]:
             continue
         errs.append(f"result-status: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
-        errs.append("result-status: exact D1:1 form (010 (001 ())) missing")
+        errs.append("result-status: direct exact D1:1 bit missing")
     if D1_FALSE not in text:
-        errs.append("result-status: exact D1:0 form (101 (001 (0)) (001 (1))) missing")
+        errs.append("result-status: direct exact D1:0 bit missing")
     for line_no, line in enumerate(text.splitlines(), 1):
         if line.lstrip().startswith(";"):
             continue
