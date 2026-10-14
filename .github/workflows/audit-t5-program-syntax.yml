@@ -1,6 +1,5 @@
-# КАРАНТИН (повернено 14.10.2026 за тріажем): ШКІДЛИВА перевірка — воркфлоу не ставить пінований Zig; build.rs:24 NotFound.
-# Не дає сигналу про код (run 38566007163). Повторні запуски/runner — заборонені.
-# Чинний сигнал про D24 лишається у видимих ci-hosted / vertical-day-*.
+# Виведено з карантину 14.10.2026: додано крок Zig 0.16.0 — він ДЕФОЛТНИЙ транспортний
+# кодек, і sens-cli/build.rs вимагає його для збірки. Раніше падало на build.rs:24 NotFound.
 name: audit-t5-program-syntax
 
 on:
@@ -11,11 +10,21 @@ permissions:
 
 jobs:
   d2-grammar-audit:
-    if: ${{ false }} # КАРАНТИН: шкідлива, run 38566007163
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Встановити Zig 0.16.0 (дефолтний транспортний кодек; потрібен sens-cli/build.rs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error \
+            https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz \
+            --output "$RUNNER_TEMP/zig-0.16.0.tar.xz"
+          echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-0.16.0.tar.xz" | sha256sum --check --status
+          tar -xJf "$RUNNER_TEMP/zig-0.16.0.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
         with:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@1.99.0
