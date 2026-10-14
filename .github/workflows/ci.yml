@@ -147,7 +147,7 @@ jobs:
             # Entry-less ELF has no executable roots; force each real ABI
             # export into the link or LLD discards the entire transport core.
             "$ZIG" build-exe research/zig-codecs/freestanding.zig \
-              -target "$target" -O ReleaseSmall -fno-entry \
+              -target "$target" -O ReleaseSmall -fno-entry -fno-strip \
               -fcompiler-rt -fno-unwind-tables \
               --force_undefined sens_zig_free_t5_validate \
               --force_undefined sens_zig_free_t5_encode_be3 \
