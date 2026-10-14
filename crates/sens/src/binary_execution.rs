@@ -39,8 +39,11 @@ impl PhysicalT5Program {
     }
 
     /// The SAME SENS admission/evaluator for typed words restored from ANY
-    /// physical carrier; no text, no re-encoding and no historical dispatch.
-    fn from_exact_words(words: &[BinarySourceWord]) -> Result<Self, LanguageError> {
+    /// physical carrier, including the Zig-owned T5 ABI boundary.
+    /// The caller must already have validated the physical carrier; this
+    /// entry performs canonical SENS D2 reading and callable admission only.
+    /// No text, re-encoding, hidden Rust T5 decoding or historical dispatch.
+    pub fn from_exact_words(words: &[BinarySourceWord]) -> Result<Self, LanguageError> {
         let parsed = parse_t5_domain_words(words)?;
         let forms = lower_exact_domain_program(&parsed);
         validate_exact_executable_heads(&forms)?;
