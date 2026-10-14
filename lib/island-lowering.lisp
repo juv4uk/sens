@@ -5,7 +5,7 @@
 ; mechanism projection.
 ; For bounded exact addition, admitted semantic transports carry arguments only.
 ; The operation itself is never serialized as "+", "add", a Lisp form, or a
-; Prolog goal: exact SID8 plus the selected mechanism already owns that choice.
+; Prolog goal: exact-domain identity plus the selected mechanism owns that choice.
 ;
 ; CLIPS semantic boundary under #1169:
 ; raw native Eval remains diagnostic-only. Semantic CLIPS addition is admitted
@@ -21,8 +21,8 @@
 
 (0011 island-lowering-add-payload
   (0010 (executor left right)
-    (001000 ((l (11110100 left))
-          (r (11110100 right)))
+    (001000 ((l (write-to-string left))
+          (r (write-to-string right)))
       (110
         ((101 executor (001 common-lisp))
          (island-lowering-append4 "" l " " r))
