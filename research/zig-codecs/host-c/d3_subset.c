@@ -240,7 +240,7 @@ int main(int argc, char **argv) {
         {"tests/semantic/retired-quote-inert-d3-mutant.bits", "NONCALLABLE_HEAD"}
     };
     if (argc != 1) { fprintf(stderr, "usage: %s (run from repository root)\n", argv[0]); return 2; }
-    if (sens_zig_codec_abi_version() != 2) {
+    if (sens_zig_codec_abi_version() != SENS_ZIG_TRANSPORT_ABI_VERSION) {
         fputs("C_D3_SUBSET_FAIL layer=transport category=BAD_ABI_VERSION\n", stderr); return 2;
     }
     for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
