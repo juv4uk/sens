@@ -217,16 +217,19 @@
   (0010 (scalars)
     (unicode-scalars->string-onto scalars "")))
 
+; D6 LET is ratified but this path does not infer executable binding
+; from a bare numeric head. Use the admitted D4 LAMBDA application, like TCP.
+; Decode once; the original two-branch semantic law remains SENS-owned.
 (0011 utf8-decode-string
   (0010 (bytes)
-    (001000 ((decoded (utf8-decode bytes)))
-      (110
-        ((101 (100 decoded) (001 decoded))
-         
-         (1110 (001 decoded)
-               (unicode-scalars->string (100 (011 decoded)))))
-        ((0100 (101 (100 decoded) (001 decoded)))
-         decoded)))))
+    ((0010 (decoded)
+       (110
+         ((101 (100 decoded) (001 decoded))
+          (1110 (001 decoded)
+                (unicode-scalars->string (100 (011 decoded)))))
+         ((0100 (101 (100 decoded) (001 decoded)))
+          decoded)))
+     (utf8-decode bytes))))
 
 (0011 utf8-encode-string-onto
   (0010 (text out)
