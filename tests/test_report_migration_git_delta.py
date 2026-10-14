@@ -177,7 +177,7 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         # A falsely paired non-regular source remains an invalid row; it
         # must never acquire an apparently credible source_sha256 receipt.
         (self.repo / "lib/ghost.sens").write_bytes(encode_words(["10", "01"]))
-        (self.repo / "lib/ghost").write_bytes(b"10 01\\n")
+        (self.repo / "lib/ghost").write_bytes(b"10 01\n")
         self.call("add", "--", "lib/ghost.sens", "lib/ghost")
         self.call("commit", "-q", "-m", "attempt to pair archived symlink")
         result = snapshot(self.repo, self.head())
