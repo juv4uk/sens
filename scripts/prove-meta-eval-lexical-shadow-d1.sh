@@ -3,8 +3,11 @@
 # One source form per case: report the first precise failing case.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if [[ $# -gt 1 ]]; then
-  echo "usage: bash scripts/prove-meta-eval-lexical-shadow-d1.sh [native-sens-path]" >&2
+fixture_only=false
+if [[ "${1:-}" == "--check-fixtures" ]]; then
+  fixture_only=true
+elif [[ $# -gt 1 ]]; then
+  echo "usage: bash scripts/prove-meta-eval-lexical-shadow-d1.sh [native-sens-path|--check-fixtures]" >&2
   exit 2
 fi
 cli="${1:-target/debug/sens}"
@@ -14,17 +17,15 @@ mutant=tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp
 mutants=tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp
 id=meta-eval-lexical-shadow-d1
 reproduce="bash scripts/prove-meta-eval-lexical-shadow-d1.sh $cli"
-if [[ ! -x "$cli" ]]; then
-  printf 'REGRESSION test_id=%s layer=eval expected=native-executor actual=missing reproduce=%q\n' "$id" "$reproduce" >&2
-  exit 1
-fi
+
 
 # Transport-only: exact source equality outside ONE D1 bit and D2 balance.
 # This code does not evaluate quote, binder lookup, or D1 semantic truth.
-python3 - "$law" "$mutant" "$mutants" <<'PY'
+python3 - "$law" "$mutant" "$mutants" "$lib" <<'PY'
 from pathlib import Path
 import re
 import sys
+import hashlib
 def forms(path):
     return [line.strip() for line in Path(path).read_text(encoding="utf-8").splitlines()
             if line.strip() and not line.lstrip().startswith(";")]
@@ -43,6 +44,16 @@ if negatives != [flip_expected(form) for form in positive]:
     raise SystemExit("META_LEXICAL_TRANSPORT_RED: each negative must change exactly its own D1 bit")
 if first_mutant != [negatives[0], *positive[1:]]:
     raise SystemExit("META_LEXICAL_TRANSPORT_RED: prior one-bit mutant provenance mismatch")
+# Fixture integrity only: never infer the meaning of a D1/D3 value from Python.
+# Pin each source call to its actual, still named library definition.
+library = Path(sys.argv[4]).read_bytes()
+expected_heads = (["my-form-references-name?"] * 5
+                  + ["my-lambda-def-references-name?"] * 3)
+for i, (head, form) in enumerate(zip(expected_heads, positive), 1):
+    if not form.startswith("(110 ((101 (" + head + " "):
+        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: wrong live call-head case={i}")
+    if ("(0011 " + head + "\\n").encode("ascii") not in library:
+        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: current library missing definition case={i}")
 for case, form in enumerate((*positive, *negatives), 1):
     depth = 0
     for ch in form:
@@ -50,9 +61,22 @@ for case, form in enumerate((*positive, *negatives), 1):
         elif ch == ")": depth -= 1
         if depth < 0: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: early D2 close case={case}")
     if depth: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: open D2 frame case={case}")
+for i, (good, wrong) in enumerate(zip(positive, negatives), 1):
+    for role, expression in (("law", good), ("mutant", wrong)):
+        payload = library + b"\\n" + expression.encode("utf-8") + b"\\n"
+        sha = hashlib.sha256(payload).hexdigest()
+        print(f"META_LEXICAL_SOURCE_SHA case={i} role={role} sha256={sha}")
 print("META_LEXICAL_TRANSPORT_PASS positive_forms=8 one-bit-mutants=8 semantic_pass=NOT_INFERRED")
 PY
 
+if [[ "$fixture_only" == true ]]; then
+  printf 'META_LEXICAL_FIXTURES_VERIFIED_ONLY positive_forms=8 negative_forms=8 semantic_pass=NOT_RUN\n'
+  exit 0
+fi
+if [[ ! -x "$cli" ]]; then
+  printf 'REGRESSION test_id=%s layer=eval expected=native-executor actual=missing reproduce=%q\n' "$id" "$reproduce" >&2
+  exit 1
+fi
 mapfile -t forms < <(grep -v '^[[:space:]]*;' "$law" | sed '/^[[:space:]]*$/d')
 mapfile -t mutant_forms < <(grep -v '^[[:space:]]*;' "$mutants" | sed '/^[[:space:]]*$/d')
 tmp="$(mktemp -d)"
