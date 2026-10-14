@@ -45,4 +45,39 @@
          (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
-(оповідь--d4-закон)
+; D3 atom/eq dispatch must reject numeric and pair tags WITHOUT D9 SYMBOL?.
+; SENS itself compares expected and actual; the host observes only final D1.
+(0011 оповідь--перевірка-тегів
+  (0010 (rows)
+    (110
+      ((010 rows) #d1:1)
+      ((оповідь--рівні? (100 (100 rows)) (1001 (100 rows)))
+       (оповідь--перевірка-тегів (011 rows)))
+      (#d1:1 #d1:0))))
+
+(0011 оповідь--теги-закон
+  (0010 ()
+    (оповідь--перевірка-тегів
+      (1110
+        (1110 (narrate-outcome (001 (42 payload)))
+              (001 (invalid outcome-tag 42)))
+        (1110 (narrate-outcome (001 ((bad-tag) payload)))
+              (001 (invalid outcome-tag (bad-tag))))
+        (1110 (narrate-outcome (001 (mystery payload)))
+              (001 (invalid outcome-tag mystery)))
+        (1110 (narrate-outcome (001 (() payload)))
+              (001 (invalid outcome-tag ())))
+        (1110 (narrate-outcome (001 (unknown)))
+              (001 (invalid outcome-shape (unknown))))
+        (1110 (narrate-outcome (001 (blocked dependency)))
+              (001 (blocked because dependency)))
+        (1110 (narrate-outcome (001 (unknown subject)))
+              (001 (unknown because no-proof-found-for subject)))))))
+
+(0011 оповідь--загальний-закон
+  (0010 ()
+    (110
+      ((оповідь--теги-закон) (оповідь--d4-закон))
+      (#d1:1 #d1:0))))
+
+(оповідь--загальний-закон)
