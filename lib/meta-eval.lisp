@@ -50,7 +50,7 @@
   (0010 (result)
     (110
       
-      ((010 result)  (001 ()))
+      ((010 result)  #d1:0)
       ((010 ()) (101 (100 result) my-result-fail-token)))))
 
 (0011 my-result-value
@@ -310,7 +310,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  (001 ()))
+      ((010 value)  #d1:0)
       ((010 ()) (101 (100 value) (001 primitive))))))
 
 ; UnknownSymbol belongs to name resolution, not application. A symbol produced
