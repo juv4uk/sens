@@ -495,6 +495,41 @@ test "F3C physical golden: nested CAR CONS .senc roundtrip" {
 }
 
 
+/// Test-only old 4-state recurrence, deliberately independent of
+/// SUFFIX_COUNTS and completions(). It is NOT linked into production F3C.
+test "F3C differential all physical suffix transitions versus four-state DP" {
+    var compared: usize = 0;
+    for (4..FRAME_MAX_TRITS + 1) |n| {
+        // This 16,512-byte array exists only in this host test, not in
+        // rank(), unrank(), capacity(), or the freestanding ABI.
+        var table = std.mem.zeroes([FRAME_MAX_TRITS + 1][4]Uint);
+        for (0..4) |previous| table[n][previous] = 1;
+        var pos = n;
+        while (pos > 0) {
+            pos -= 1;
+            for (0..4) |previous| {
+                var count: Uint = 0;
+                for (allowed(n, pos)) |digit| {
+                    if (previous == 3 and digit == 2) continue;
+                    count += table[pos + 1][@as(usize, digit) + 1];
+                }
+                table[pos][previous] = count;
+            }
+        }
+        try std.testing.expectEqual(table[0][0], capacity(n));
+        for (0..n) |position| {
+            for (allowed(n, position)) |digit| {
+                try std.testing.expectEqual(
+                    table[position + 1][@as(usize, digit) + 1],
+                    completions(n, position + 1, digit),
+                );
+                compared += 1;
+            }
+        }
+    }
+    try std.testing.expectEqual(@as(usize, 23750), compared);
+}
+
 test "F3C immutable suffix counts enumerate all short physical frames" {
     try std.testing.expectEqual(@as(usize, 4000), SUFFIX_ROM_BYTES);
     const a = std.testing.allocator;
