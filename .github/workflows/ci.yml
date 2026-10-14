@@ -303,6 +303,16 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          # Точковий SENS D5→D24 закон: SENS повертає D1;
+          # Rust спостерігає механізм, не встановлює семантику.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id d5-exact-q-binary-predicate \
+            --layer transport \
+            --fixture crates/sens/src/eval/arithmetic.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib \
+              binary_d5_exact_q_axiom_witness_with_single_input_mutation \
+              -- --nocapture
       - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
         shell: bash
         run: |
