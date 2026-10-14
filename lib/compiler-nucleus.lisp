@@ -471,6 +471,22 @@
 ; Program traversal policy is semantic and therefore SENS-owned.
 ; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
 ; Other admitted forms recursively compile every argument position.
+; Exact D3 COND clauses are pairs of source expressions, not
+; calls whose head is the D1 predicate. Flatten each admitted pair into
+; predicate, result, then the remaining clauses. D3 handles the traversal;
+; no new domain coordinate or callable slot is created.
+(0011 compiler-cond-child-expressions
+  (0010 (clauses)
+    (110
+      ((010 clauses) ())
+      ((compiler-exactly-two (100 clauses))
+       (111
+         (100 (100 clauses))
+         (111
+           (100 (011 (100 clauses)))
+           (compiler-cond-child-expressions (011 clauses)))))
+      (#d1:1 ()))))
+
 (0011 compiler-domain-children
   (0010 (request arguments)
     (110
@@ -480,6 +496,8 @@
        (011 arguments))
       ((101 (compiler-request-role request) (001 define-form))
        (011 arguments))
+      ((101 (compiler-request-role request) (001 cond-form))
+       (compiler-cond-child-expressions arguments))
       ((compiler-true ()) arguments))))
 
 (0011 compiler-domain-result
