@@ -61,13 +61,15 @@ def violations(path: Path, contents: str, *, root: Path = ROOT) -> list[str]:
             target = (source_path.parent / name).resolve()
             if not name.endswith(".zig") or not target.is_relative_to(relative_root):
                 findings.append(f"{path}:{number}: forbidden Zig import {name!r}")
-        # Embedded documents are a hidden route for importing old registries.
-        # Embeds inside the Zig-only subtree remain allowed for physical tests.
+        # There is no safe lexical proof for arbitrary embedded file bytes:
+        # even an in-tree text fixture can bypass the .zig source scanner.
+        # A pure transport corridor does not need embeds; keep ALL source
+        # evidence external and feed physical bytes through runtime buffers.
         for call in EMBED.finditer(line):
-            name = call.group(1)
-            target = (source_path.parent / name).resolve()
-            if not target.is_relative_to(relative_root):
-                findings.append(f"{path}:{number}: forbidden Zig embed {name!r}")
+            findings.append(
+                f"{path}:{number}: Zig compile-time embed forbidden "
+                f"(unscanned physical dependency)"
+            )
     return findings
 
 
@@ -107,7 +109,7 @@ def self_test() -> None:
         'const std = @import("std");',
         'const t5 = @import("../t5.zig");',
         'const a = DomainWord(8).init(0b0000_0001);',
-        'const bits = @embedFile("../t5.zig");',
+
     )
     bad = (
         "const SID8 = 0;",
@@ -118,6 +120,7 @@ def self_test() -> None:
         "// historically supported",
         "parseInt(bytes)",
         "const old_registry = 8;",
+        'const bits = @embedFile("../t5.zig");',
         'const bytes = @embedFile("../../../contracts/core.lisp");',
         'const foreign = @import("../../../crates/sens/src/lib.zig");',
         "const x = @cImport({});",
