@@ -21,8 +21,7 @@
 
 (0011 island-lowering-add-payload
   (0010 (executor left right)
-    (001000 ((l (write-to-string left))
-          (r (write-to-string right)))
+    ((0010 (l r)
       (110
         ((101 executor (001 common-lisp))
          (island-lowering-append4 "" l " " r))
@@ -33,7 +32,9 @@
         ((101 executor (001 clips))
          (island-lowering-append4 "" l " " r))
         ((010 (001 ()))
-         (001 ()))))))
+         (001 ()))))
+      (write-to-string left)
+      (write-to-string right))))
 
 (0011 island-lower-binary
   (0010 (sid executor left right)
