@@ -90,6 +90,19 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: UNIFY — SENS D1 власний закон та однобітний негативний свідок
+        id: unify-d1-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=unify-d1-native-self-verdict layer=transport semantic_authority=SENS via pinned Lisp reader; physical_T5_receipt=none"
+          sha256sum lib/unify.lisp crates/sens/tests/unify_occurs_exact_d3.rs tests/fixtures/unify-exact-d1-law.lisp tests/fixtures/unify-exact-d1-mutant.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id unify-d1-native-self-verdict \
+            --layer transport \
+            --fixture tests/fixtures/unify-exact-d1-law.lisp \
+            --report-file "$RUNNER_TEMP/sens-unify-d1-red.jsonl" \
+            -- cargo test --locked -p sens --test unify_occurs_exact_d3 native_unify_d1_self_verdict_and_one_bit_mutant -- --nocapture
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
