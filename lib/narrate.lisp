@@ -119,14 +119,15 @@
 
 (0011 narrate-proved-outcome
   (0010 (outcome)
-    (001000 ((statement (1001 outcome))
-          (results (10011 outcome)))
-      (110
-        ((010 results) (1110 (001 proved) statement (001 without-proof-result)))
-        (1
-         (1111
-           (1110 (001 proved))
-           (narrate-answer statement (1001 (100 results)))))))))
+    ((0010 (statement results)
+       (110
+         ((010 results) (1110 (001 proved) statement (001 without-proof-result)))
+         (1
+          (1111
+            (1110 (001 proved))
+            (narrate-answer statement (1001 (100 results)))))))
+     (1001 outcome)
+     (10011 outcome))))
 
 (0011 narrate-invalid-outcome-shape
   (0010 (outcome)
