@@ -859,7 +859,9 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # написано і пізніше fail-closed перевіркою фізичного 0/1-слова.
     if resolver is not None and t in resolver.global_binding_words:
         return list(resolver.global_binding_words[t])
-    return [t]
+    # Owner rule: unresolved names are DATA -> D7 text (all their glyphs, e.g. "/",
+    # live in the ratified D7 keyboard). Never leave raw text as a physical word.
+    return encode_text7_identifier(t, text7, node.tok)
 
 
 def encode_string(node: String,text7):
