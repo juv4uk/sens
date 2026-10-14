@@ -69,18 +69,7 @@
       ; D3 EQ is defined only on atoms. A source list is never a name.
       ((0100 (010 name)) #d1:0)
       ((101 name semantic-id) #d1:1)
-      (#d1:1
-       (001000 ((donor-id (my-semantic-id-for-surface name)))
-         (110
-           ; Historical IDs here are lookup data, never D8 identities.
-           ((101 semantic-id 0010) (101 donor-id 00001000))
-           ((101 semantic-id 0011)
-            (110
-              ((101 donor-id 00001001) #d1:1)
-              ((101 donor-id 00001011) #d1:1)
-              (#d1:1 #d1:0)))
-           ((101 semantic-id 00011) (101 donor-id 00001010))
-           (#d1:1 (101 donor-id semantic-id))))))))
+      (#d1:1 (101 (my-semantic-id-for-surface name) semantic-id)))))
 
 ; The D6 LET binding list is data for the pinned mixed reader.
 ; Evaluate D3:110 outside that binding position so its head retains 3 bits.
@@ -97,19 +86,7 @@
       ((101 name 100) 100)
       ((101 name 011) 011)
       ((101 name 110) 110)
-      (#d1:1
-       (001000 ((donor-id (my-semantic-id-for-surface name)))
-         (110
-           ; Explicit provenance bridge only: old W8 words cannot execute.
-           ; Exactly seven ratified D3 residents are projected here.
-           ((101 donor-id 00000001) 001)
-           ((101 donor-id 00000010) 010)
-           ((101 donor-id 00000011) 101)
-           ((101 donor-id 00000100) 111)
-           ((101 donor-id 00000101) 100)
-           ((101 donor-id 00000110) 011)
-           ((101 donor-id 00000111) 110)
-           (#d1:1 (001 ()))))))))
+      (#d1:1 (my-semantic-id-for-surface name)))))
 
 (0011 my-canon-identity
   (0010 (name)

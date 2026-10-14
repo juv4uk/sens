@@ -118,25 +118,11 @@ const META_CANON_NONATOM_LAW: &str =
 fn meta_canon_nonatom_is_sens_owned() {
     let forms = sens::parse_mixed_exact_domain(META_CANON_NONATOM_LAW)
         .expect("binary SENS D1/D3 Canon non-atom law parses");
-    assert_eq!(forms.len(), 8, "two non-atom and six domain-projected SENS-owned verdicts");
+    assert_eq!(forms.len(), 2, "two SENS-owned atomic-boundary verdicts");
     let mut session = meta_session();
     for (index, form) in forms.iter().enumerate() {
         let observed = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
             .unwrap_or_else(|e| {
-                // Diagnostic observations only: SENS still owns every verdict.
-                for probe in [
-                    "(my-semantic-id-for-surface (001 car))",
-                    "(my-canon-semantic-id (001 car))",
-                    "(my-canon-identity (001 car))",
-                ] {
-                    let parsed = sens::parse_mixed_exact_domain(probe)
-                        .expect("probe is exact-domain SENS syntax");
-                    let observed = match sens::eval_parsed_expressions(&parsed, &mut session) {
-                        Ok(r) => r.value.to_string(),
-                        Err(failure) => format!("ERROR: {failure}"),
-                    };
-                    eprintln!("test_id=meta-canon-nonatom probe={probe} actual={observed}");
-                }
                 panic!("test_id=meta-canon-nonatom layer=eval fixture=tests/semantic/meta-canon-nonatom-d1-law.lisp form={index} error={e}")
             });
         assert_eq!(
