@@ -1,4 +1,16 @@
-use sens::{eval_program, ErrorKind, Session};
+use sens::{eval_program, BinaryNumber, ErrorKind, Session, Value};
+
+/// Explicit D24 test value — no textual numeric literal exists for D24+
+/// (the parser rejects unqualified arithmetic literals by ratified law).
+fn d24(value: u32) -> Value {
+    let mut bits = vec![0u8; 24];
+    for i in 0..24 {
+        bits[23 - i] = ((value >> i) & 1) as u8;
+    }
+    Value::BinaryNumber(
+        BinaryNumber::from_numeric_domain_bits(24, &bits).expect("explicit D24 test value"),
+    )
+}
 
 fn meta_session() -> Session {
     let mut session = Session::default();
@@ -103,9 +115,23 @@ fn hostile_meta_environment_cannot_retarget_canon_resolution() {
 
 #[test]
 fn noncanon_shadowing_survives_in_meta_eval() {
+    // Суть — робота над ЗМІННИМИ: `+` затіняється зовнішньою лямбдою, а `a`/`b`
+    // тримають значення. За ратифікованим правилом операнди математики — лише
+    // D24+; текстових D24-літералів немає, тож значення біндимо у змінні як явні
+    // D24 (канон: d5_add_mul_and_order_use_explicit_d24_values_not_literals).
+    let mut session = meta_session();
+    session.environment.define("d24-two", d24(2));
+    session.environment.define("d24-three", d24(3));
+    let result = eval_program(
+        r#"(my-eval (read "((lambda (+) (+ a b)) (lambda (a b) (* a b)))") (list (cons (quote a) d24-two) (cons (quote b) d24-three)))"#,
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("meta-eval host failure: {error}"))
+    .value;
     assert_eq!(
-        meta_eval("((lambda (+) (+ 2 3)) (lambda (a b) (* a b)))"),
-        "6"
+        result,
+        d24(6),
+        "shadowed + over D24 variables a/b must yield D24 six"
     );
 }
 
