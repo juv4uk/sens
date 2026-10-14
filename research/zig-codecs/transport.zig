@@ -5,6 +5,7 @@
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const f3c = @import("f3c/f3c.zig");
+const sterile_cycle = @import("t5/sterile/physical_cycle.zig");
 
 const CFile = opaque {};
 extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
@@ -147,6 +148,14 @@ pub fn main(init: std.process.Init) !void {
         return Error.CanonicalRoundtripMismatch;
     }
 
+    // A physical file cannot leave the Zig boundary without a full
+    // decode -> digest -> encode -> exact-byte cycle on its T5 payload.
+    // This is MECHANICAL ONLY: independent SENS provenance/admission
+    // must still be checked outside this transport adapter.
+    const checked_t5 = if (dest_is_f3c) original else output;
+    const receipt = try sterile_cycle.verifyPhysicalCycle(allocator, checked_t5);
+    if (receipt.semantic_status != .not_verified)
+        return Error.CanonicalRoundtripMismatch;
     try writeFileNew(allocator, dest_path, output);
     const reopened = try readFile(allocator, dest_path);
     defer allocator.free(reopened);
