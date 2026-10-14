@@ -193,12 +193,21 @@
 ; aktualisieren. Um das Ergebnis zurückzusynchronisieren, ruf `assert-facts!`
 ; selbst auf oberster Ebene auf: `(assert-facts! (run rules *working-memory*))`.
 
+; Structural membership is a derived SENS law over fact data.
+; Unlike historical D5 MEMBER, it must not call CAR on an empty list,
+; nor require an unadmitted D8 EQUAL mechanism for compound facts.
+(0011 факт-наявний?
+  (0010 (fact memory)
+    (110
+      ((0101 memory) #d1:0)
+      ((unify-equal? fact (100 memory)) #d1:1)
+      (#d1:1 (факт-наявний? fact (011 memory))))))
+
 (0011 append-new
   (0010 (facts wm)
     (110
-      
-      ((010 facts)  wm)
-      ((11101 (100 facts) wm) (append-new (011 facts) wm))
+      ((010 facts) wm)
+      ((факт-наявний? (100 facts) wm) (append-new (011 facts) wm))
       (#d1:1 (append-new (011 facts) (111 (100 facts) wm))))))
 
 (0011 run
