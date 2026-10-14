@@ -5,6 +5,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 fixture_only=false
 if [[ "${1:-}" == "--check-fixtures" ]]; then
+  if [[ $# -ne 1 ]]; then
+    echo "usage: bash scripts/prove-meta-eval-lexical-shadow-d1.sh --check-fixtures" >&2
+    exit 2
+  fi
   fixture_only=true
 elif [[ $# -gt 1 ]]; then
   echo "usage: bash scripts/prove-meta-eval-lexical-shadow-d1.sh [native-sens-path|--check-fixtures]" >&2
