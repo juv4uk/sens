@@ -76,6 +76,25 @@ fn accepts(allocator: std.mem.Allocator, path: []const u8) !Check {
     };
 }
 
+fn manifestPath(raw: []const u8) []const u8 {
+    return if (raw.len != 0 and raw[raw.len - 1] == '\r')
+        raw[0 .. raw.len - 1]
+    else
+        raw;
+}
+
+test "T5 manifest preserves exact whitespace in tracked filenames" {
+    try std.testing.expectEqualStrings(
+        "/repo/ a file .sens \t",
+        manifestPath("/repo/ a file .sens \t\r"),
+    );
+    try std.testing.expectEqualStrings(
+        "/repo/\tleading.sens ",
+        manifestPath("/repo/\tleading.sens "),
+    );
+    try std.testing.expectEqualStrings("", manifestPath(""));
+}
+
 fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accept: bool) !usize {
     const data = try readFile(allocator, list_path);
     defer allocator.free(data);
@@ -83,7 +102,9 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
     var checked: usize = 0;
     var it = std.mem.splitScalar(u8, data, '\n');
     while (it.next()) |raw| {
-        const line = std.mem.trim(u8, raw, " \t\r");
+        // Preserve exact Git path bytes (including leading/trailing spaces or tabs).
+        // Only a terminal CR belongs to a CRLF manifest line ending.
+        const line = manifestPath(raw);
         if (line.len == 0 or line[0] == '#') continue;
         checked += 1;
         const check = accepts(allocator, line) catch |err| {
