@@ -174,8 +174,8 @@ jobs:
           fi
           echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
 
-      - name: Zig ↔ Rust T5 парний бенчмарк — однакові фізичні байти (manual benchmark protocol)
-        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+      - name: Zig ↔ Rust T5 — обов'язковий парний бенчмарк байтового паритету
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -184,8 +184,8 @@ jobs:
             --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
           cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
-      - name: Zig ↔ Rust F3C парний бенчмарк — дійсні .senc байти
-        if: always() && github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+      - name: Zig ↔ Rust F3C — обов'язковий парний бенчмарк .senc
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -195,15 +195,82 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
+      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          sha = os.environ["GITHUB_SHA"]
+          cases = (
+              ("T5", "zig-rust-t5-results",
+               "TRANSPORT_PARITY_VERIFIED; TIMING_EXPLORATORY; SEMANTICS_NOT_TESTED", 240),
+              ("F3C", "zig-rust-f3c-results",
+               "F3C_TRANSPORT_PARITY_VERIFIED; TIMING_EXPLORATORY; SEMANTICS_NOT_TESTED", 120),
+          )
+          errors = []
+          for name, dirname, expected, required_samples in cases:
+              folder = root / dirname
+              required = ("STATUS", "environment.json", "samples.jsonl", "summary.md")
+              missing = [file for file in required if not (folder / file).is_file()
+                         or not (folder / file).stat().st_size]
+              if missing:
+                  errors.append(f"{name} MISSING_EVIDENCE files={missing} at={folder}")
+                  continue
+              status = (folder / "STATUS").read_text().strip()
+              if status != expected:
+                  errors.append(f"{name} BAD_STATUS expected={expected!r} actual={status!r}")
+              try:
+                  meta = json.loads((folder / "environment.json").read_text())
+                  found_sha = meta.get("git_sha")
+                  if found_sha != sha:
+                      errors.append(f"{name} WRONG_COMMIT expected={sha} actual={found_sha}")
+                  versions = (meta.get("zig"), meta.get("zig_version"))
+                  if "0.16.0" not in versions:
+                      errors.append(f"{name} WRONG_ZIG_VERSION actual={versions}")
+                  digests = meta.get("binary_sha256", {})
+                  if sorted(digests) != ["rust", "zig"] or any(
+                      len(value) != 64 for value in digests.values()
+                  ):
+                      errors.append(f"{name} MISSING_BINARY_SHA values={digests!r}")
+                  rows = [json.loads(line) for line in
+                          (folder / "samples.jsonl").read_text().splitlines()]
+                  if len(rows) != required_samples:
+                      errors.append(
+                          f"{name} MISSING_SAMPLES expected={required_samples} actual={len(rows)}"
+                      )
+                  pairs = set(row.get("pair") for row in rows)
+                  impls = set(row.get("impl") for row in rows)
+                  if pairs != {0, 1, 2} or impls != {"zig", "rust"}:
+                      errors.append(f"{name} BROKEN_PAIRING pairs={pairs} impls={impls}")
+                  for row in rows:
+                      if row.get("elapsed_ns", 0) <= 0 or row.get("reps", 0) <= 0:
+                          errors.append(f"{name} INVALID_SAMPLE row={row!r}")
+                          break
+                  print(f"BENCH_EVIDENCE codec={name} commit={sha} samples={len(rows)} "
+                        f"physical_parity={status.split(';')[0]} timings=EXPLORATORY")
+              except (OSError, ValueError, TypeError, KeyError) as exc:
+                  errors.append(f"{name} UNINFORMATIVE_OUTPUT exception={exc}")
+          if errors:
+              for error in errors:
+                  print("::error::BENCH_REQUIRED " + error, flush=True)
+              raise SystemExit(1)
+          print("BENCH_REQUIRED_T5_F3C_PASS: both codecs mandatory; no speed threshold; SENS semantics NOT inferred")
+          PY
+
       - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
-        if: always() && github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zig-rust-codec-${{ github.sha }}
           path: |
             ${{ runner.temp }}/zig-rust-t5-results/
             ${{ runner.temp }}/zig-rust-f3c-results/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
 
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
