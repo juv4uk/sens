@@ -337,15 +337,15 @@
   (0010 (value)
     (110
       
-      ((010 value)  (001 ()))
-      ((010 ()) (101 (100 value) (001 macro))))))
+      ((010 value) #d1:0)
+      (#d1:1 (101 (100 value) (001 macro))))))
 
 (0011 my-closure?
   (0010 (value)
     (110
       
-      ((010 value)  (001 ()))
-      ((010 ()) (101 (100 value) (001 closure))))))
+      ((010 value) #d1:0)
+      (#d1:1 (101 (100 value) (001 closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
 ; Environment. At call time my-apply reconstructs the one self-binding that
@@ -357,8 +357,8 @@
   (0010 (value)
     (110
       
-      ((010 value)  (001 ()))
-      ((010 ()) (101 (100 value) (001 recursive-closure))))))
+      ((010 value) #d1:0)
+      (#d1:1 (101 (100 value) (001 recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
 ; same raw group and captured outer environment; my-apply reconstructs the
@@ -463,9 +463,9 @@
     (110
       
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
-         ((010 ()) #d1:1)))
-      ((010 ()) (my-rest-param? (011 params))))))
+         ((101 params (001 ())) #d1:0)
+         (#d1:1 #d1:1)))
+      (#d1:1 (my-rest-param? (011 params))))))
 
 (0011 my-arity-ok?
   (0010 (params args)
