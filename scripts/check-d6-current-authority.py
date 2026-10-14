@@ -32,12 +32,12 @@ for bits,name in d["residents"].items():
     assert f"(D6:{bits} {name})" in contract,(bits,name)
 
 assert "(minor . 9)" in lang
-assert "Contract 11.8" in lang
+assert "; Contract 11.9 —" in lang
 assert "#3393" in lang
-assert "D6  full compact 64/64" in current
-assert "D7  owner-ratified 126/128" in current
-assert "D8  full compact 256/256" in current
-assert "D9  full compact 512/512" in current
+assert "D6  full compact — exact 6-bit keys (64/64)" in current
+assert "D7  v2 keyboard text/data — exact 7-bit keys (128/128)" in current
+assert "D8  full compact — exact 8-bit keys (256/256)" in current
+assert "D9  full compact — exact 9-bit keys (512/512)" in current
 
 print("D6-CURRENT-AUTHORITY: PASS")
 print("occupancy=64/64 distinct=64 selector-proof=16 law-anchored=16 owner-gauge=32")
