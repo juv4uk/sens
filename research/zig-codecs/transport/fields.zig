@@ -80,7 +80,7 @@ pub fn validateBlocks(size: usize, blocks: []const Block) Error!void {
     }
     if (offset != size) return error.InvalidBlockMap;
 }
-/// IEEE CRC32 parity with Rust E1/E2. Corruption detection, not authentication.
+/// IEEE CRC32 check of physical bytes. Corruption detection, not authentication.
 pub fn crc32(data: []const u8) u32 {
     var crc: u32 = 0xffffffff;
     for (data) |b| {
@@ -127,7 +127,7 @@ test "field overflow and block corruption reject" {
         .{ .offset_bytes = 1, .length_bytes = 4 },
     }));
 }
-test "Rust-compatible CRC32 golden and one-byte mutant" {
+test "IEEE CRC32 golden and one-byte mutant" {
     const checksum = crc32("123456789");
     try std.testing.expectEqual(@as(u32, 0xcbf43926), checksum);
     try verifyCrc32("123456789", checksum);
