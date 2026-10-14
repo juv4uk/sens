@@ -6,7 +6,7 @@ license-file = "../../LICENSE"
 
 [[bin]]
 name = "my-lisp"
-path = "src/main.rs"
+path = "src/bin/my-lisp.rs"
 
 [[bin]]
 name = "sens"
