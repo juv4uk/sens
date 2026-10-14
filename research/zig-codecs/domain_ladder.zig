@@ -25,12 +25,12 @@ pub const Coordinate = struct {
 
     pub fn parseBinary(source: []const u8) CoordinateError!Coordinate {
         if (source.len == 0 or source.len > 10) return error.InvalidWidth;
-        var packed: u16 = 0;
+        var payload_bits: u16 = 0;
         for (source) |digit| {
             if (digit != '0' and digit != '1') return error.InvalidBinaryDigit;
-            packed = (packed << 1) | @as(u16, digit - '0');
+            payload_bits = (payload_bits << 1) | @as(u16, digit - '0');
         }
-        return init(@intCast(source.len), packed);
+        return init(@intCast(source.len), payload_bits);
     }
 
     /// Writes exactly width source bits; no decimal conversion, padding or
@@ -47,8 +47,8 @@ pub const Coordinate = struct {
     /// Only an explicit helper ABI [width, payload-MSB, payload-LSB].
     /// Not a serialized .sens/.senc or executable semantic function.
     pub fn fromTriplet(raw: [3]u8) CoordinateError!Coordinate {
-        const packed = (@as(u16, raw[1]) << 8) | @as(u16, raw[2]);
-        return init(raw[0], packed);
+        const payload_bits = (@as(u16, raw[1]) << 8) | @as(u16, raw[2]);
+        return init(raw[0], payload_bits);
     }
 
     pub fn triplet(self: Coordinate) [3]u8 {
@@ -213,9 +213,9 @@ test "2046 binary sources and 3-byte host triplets preserve every domain bit" {
     var width: u8 = 1;
     while (width <= 10) : (width += 1) {
         const limit: u16 = @as(u16, 1) << @as(u4, @intCast(width));
-        var packed: u16 = 0;
-        while (packed < limit) : (packed += 1) {
-            const original = try Coordinate.init(width, packed);
+        var payload_bits: u16 = 0;
+        while (payload_bits < limit) : (payload_bits += 1) {
+            const original = try Coordinate.init(width, payload_bits);
             var data: [10]u8 = undefined;
             const bits = data[0..@as(usize, width)];
             try original.writeBinary(bits);
