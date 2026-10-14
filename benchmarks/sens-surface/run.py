@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""#1413 вісь A — об'єктивний бенчмарк поверхонь мови sens.
+"""#{d1413} вісь A — об'єктивний бенчмарк поверхонь мови sens.
 
 Одна й та сама програма генерується з ОДНОГО шаблону в чотири форми, що
 відрізняються лише написанням примітивів:
 
   en    — англійські імена (def/lambda/cond/eq/+ ...)
-  sens  — голі SENS-коди (00001011/00001000/...)
+  sens  — голі SENS-коди ({d00001011}/{d00001000}/...)
   uk    — українські імена (визначити/функція/за-умовою/тотожне?/додати ...)
   wrap  — англійські імена, але eq/atom/cons/car/cdr/+/- обгорнуті
-          написаними Lisp-функціями (стиль більшості lib/*.lisp, #1277)
+          написаними Lisp-функціями (стиль більшості lib/*.lisp, #{d1277})
 
 Імена користувацьких функцій (fib, loop, ...) однакові в усіх формах —
 різниться лише поверхня примітивів.
 
 Навантаження навмисно використовують лише eq/atom/cons/car/cdr/+/-.
-Після Predicate1 reset (#1703/#1663) кожна умова COND є двочастинною:
+Після Predicate1 reset (#{d1703}/#{d1663}) кожна умова COND є двочастинною:
 предикат напряму повертає точний one-bit результат, без T/NIL truthiness
 і без expected-result поля.
 
@@ -38,22 +38,23 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+import re
 
 # ---------------------------------------------------------------------------
 # Поверхні: токен шаблону -> написання в кожній формі.
 # SENS-коди звірені з docs/generated/function-table.md.
 SURFACES = {
-    "def":    {"en": "def",    "sens": "00001011", "uk": "визначити", "wrap": "def", "legacy-en": "def"},
-    "lambda": {"en": "lambda", "sens": "00001000", "uk": "функція",   "wrap": "lambda", "legacy-en": "lambda"},
-    "cond":   {"en": "cond",   "sens": "00000111", "uk": "за-умовою", "wrap": "cond", "legacy-en": "cond"},
-    "quote":  {"en": "quote",  "sens": "00000001", "uk": "як-є",      "wrap": "quote", "legacy-en": "quote"},
-    "eq":     {"en": "eq?",     "sens": "00000011", "uk": "тотожне?",  "wrap": "my-eq", "legacy-en": "eq"},
-    "atom":   {"en": "atom?",   "sens": "00000010", "uk": "атом?",     "wrap": "my-atom", "legacy-en": "atom"},
-    "cons":   {"en": "cons",   "sens": "00000100", "uk": "сполучити", "wrap": "my-cons", "legacy-en": "cons"},
-    "car":    {"en": "car",    "sens": "00000101", "uk": "перше",     "wrap": "my-car", "legacy-en": "car"},
-    "cdr":    {"en": "cdr",    "sens": "00000110", "uk": "решта",     "wrap": "my-cdr", "legacy-en": "cdr"},
-    "+":      {"en": "+",      "sens": "00001100", "uk": "додати",    "wrap": "my-add", "legacy-en": "+"},
-    "-":      {"en": "-",      "sens": "00001101", "uk": "відняти",   "wrap": "my-sub", "legacy-en": "-"},
+    "def":    {"en": "def",    "sens": "0011", "uk": "визначити", "wrap": "def", "legacy-en": "def"},
+    "lambda": {"en": "lambda", "sens": "0010", "uk": "функція",   "wrap": "lambda", "legacy-en": "lambda"},
+    "cond":   {"en": "cond",   "sens": "110", "uk": "за-умовою", "wrap": "cond", "legacy-en": "cond"},
+    "quote":  {"en": "quote",  "sens": "001", "uk": "як-є",      "wrap": "quote", "legacy-en": "quote"},
+    "eq":     {"en": "eq?",     "sens": "101", "uk": "тотожне?",  "wrap": "my-eq", "legacy-en": "eq"},
+    "atom":   {"en": "atom?",   "sens": "010", "uk": "атом?",     "wrap": "my-atom", "legacy-en": "atom"},
+    "cons":   {"en": "cons",   "sens": "111", "uk": "сполучити", "wrap": "my-cons", "legacy-en": "cons"},
+    "car":    {"en": "car",    "sens": "100", "uk": "перше",     "wrap": "my-car", "legacy-en": "car"},
+    "cdr":    {"en": "cdr",    "sens": "011", "uk": "решта",     "wrap": "my-cdr", "legacy-en": "cdr"},
+    "+":      {"en": "+",      "sens": "01010", "uk": "додати",    "wrap": "my-add", "legacy-en": "+"},
+    "-":      {"en": "-",      "sens": "01011", "uk": "відняти",   "wrap": "my-sub", "legacy-en": "-"},
 }
 ALL_FORMS = ["en", "sens", "uk", "wrap", "legacy-en"]
 FORMS = ["en", "sens"]  # за замовчуванням: англійський Lisp проти SENS
@@ -99,18 +100,18 @@ def ack_py(m, n):
 
 BUILD = """\
 ({def} build ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (({eq} 0 0) (build ({-} n 1) ({cons} n acc))))))
+  ({cond} (({eq} n {d0}) acc)
+        (({eq} {d0} {d0}) (build ({-} n {d1}) ({cons} n acc))))))
 """
 LEN = """\
 ({def} len ({lambda} (xs n)
   ({cond} (({atom} xs) n)
-        (({eq} 0 0) (len ({cdr} xs) ({+} n 1))))))
+        (({eq} {d0} {d0}) (len ({cdr} xs) ({+} n {d1}))))))
 """
 TREE = """\
 ({def} mk ({lambda} (d)
-  ({cond} (({eq} d 0) ({quote} leaf))
-        (({eq} 0 0) ({cons} (mk ({-} d 1)) (mk ({-} d 1)))))))
+  ({cond} (({eq} d {d0}) ({quote} leaf))
+        (({eq} {d0} {d0}) ({cons} (mk ({-} d {d1})) (mk ({-} d {d1})))))))
 """
 
 # Кожне навантаження: setup (визначення), call (вираз-відповідь),
@@ -121,9 +122,9 @@ WORKLOADS = {
         "params": {"N": 25}, "small": {"N": 16},
         "setup": """\
 ({def} fib ({lambda} (n)
-  ({cond} (({eq} n 0) 0)
-        (({eq} n 1) 1)
-        (({eq} 0 0) ({+} (fib ({-} n 1)) (fib ({-} n 2)))))))
+  ({cond} (({eq} n {d0}) {d0})
+        (({eq} n {d1}) {d1})
+        (({eq} {d0} {d0}) ({+} (fib ({-} n {d1})) (fib ({-} n {d2})))))))
 """,
         "call": "(fib {N})",
         "expected": lambda p: str(fib_py(p["N"])),
@@ -133,8 +134,8 @@ WORKLOADS = {
         "params": {"N": 300000}, "small": {"N": 5000},
         "setup": """\
 ({def} loop ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (({eq} 0 0) (loop ({-} n 1) ({+} acc 2))))))
+  ({cond} (({eq} n {d0}) acc)
+        (({eq} {d0} {d0}) (loop ({-} n {d1}) ({+} acc {d2}))))))
 """,
         "call": "(loop {N} 0)",
         "expected": lambda p: str(2 * p["N"]),
@@ -145,10 +146,10 @@ WORKLOADS = {
         "setup": BUILD + LEN + """\
 ({def} rev ({lambda} (xs acc)
   ({cond} (({atom} xs) acc)
-        (({eq} 0 0) (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
+        (({eq} {d0} {d0}) (rev ({cdr} xs) ({cons} ({car} xs) acc))))))
 ({def} work ({lambda} (r total)
-  ({cond} (({eq} r 0) total)
-        (({eq} 0 0) (work ({-} r 1) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) 0)))))))
+  ({cond} (({eq} r {d0}) total)
+        (({eq} {d0} {d0}) (work ({-} r {d1}) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) {d0})))))))
 """,
         "call": "(work {R} 0)",
         "expected": lambda p: str(p["N"] * p["R"]),
@@ -158,13 +159,13 @@ WORKLOADS = {
         "params": {"N": 100, "R": 5000}, "small": {"N": 100, "R": 50},
         "setup": BUILD + """\
 ({def} mem ({lambda} (x xs)
-  ({cond} (({atom} xs) 0)
-        (({eq} x ({car} xs)) 1)
-        (({eq} 0 0) (mem x ({cdr} xs))))))
+  ({cond} (({atom} xs) {d0})
+        (({eq} x ({car} xs)) {d1})
+        (({eq} {d0} {d0}) (mem x ({cdr} xs))))))
 ({def} xs (build {N} ({quote} ())))
 ({def} work ({lambda} (r hits)
-  ({cond} (({eq} r 0) hits)
-        (({eq} 0 0) (work ({-} r 1) ({+} hits (mem {N} xs)))))))
+  ({cond} (({eq} r {d0}) hits)
+        (({eq} {d0} {d0}) (work ({-} r {d1}) ({+} hits (mem {N} xs)))))))
 """,
         "call": "(work {R} 0)",
         "expected": lambda p: str(p["R"]),
@@ -174,10 +175,10 @@ WORKLOADS = {
         "params": {"N": 200000}, "small": {"N": 5000},
         "setup": """\
 ({def} make-adder ({lambda} (k) ({lambda} (x) ({+} x k))))
-({def} add3 (make-adder 3))
+({def} add3 (make-adder {d3}))
 ({def} loop ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (({eq} 0 0) (loop ({-} n 1) (add3 acc))))))
+  ({cond} (({eq} n {d0}) acc)
+        (({eq} {d0} {d0}) (loop ({-} n {d1}) (add3 acc))))))
 """,
         "call": "(loop {N} 0)",
         "expected": lambda p: str(3 * p["N"]),
@@ -187,9 +188,9 @@ WORKLOADS = {
         "params": {"N": 7}, "small": {"N": 3},
         "setup": """\
 ({def} ack ({lambda} (m n)
-  ({cond} (({eq} m 0) ({+} n 1))
-        (({eq} n 0) (ack ({-} m 1) 1))
-        (({eq} 0 0) (ack ({-} m 1) (ack m ({-} n 1)))))))
+  ({cond} (({eq} m {d0}) ({+} n {d1}))
+        (({eq} n {d0}) (ack ({-} m {d1}) {d1}))
+        (({eq} {d0} {d0}) (ack ({-} m {d1}) (ack m ({-} n {d1})))))))
 """,
         "call": "(ack 3 {N})",
         "expected": lambda p: str(ack_py(3, p["N"])),
@@ -199,8 +200,8 @@ WORKLOADS = {
         "params": {"N": 16}, "small": {"N": 10},
         "setup": TREE + """\
 ({def} cnt ({lambda} (x)
-  ({cond} (({atom} x) 1)
-        (({eq} 0 0) ({+} (cnt ({car} x)) (cnt ({cdr} x)))))))
+  ({cond} (({atom} x) {d1})
+        (({eq} {d0} {d0}) ({+} (cnt ({car} x)) (cnt ({cdr} x)))))))
 """,
         "call": "(cnt (mk {N}))",
         "expected": lambda p: str(2 ** p["N"]),
@@ -210,15 +211,15 @@ WORKLOADS = {
         "params": {"N": 400}, "small": {"N": 30},
         "setup": """\
 ({def} mkal ({lambda} (n acc)
-  ({cond} (({eq} n 0) acc)
-        (({eq} 0 0) (mkal ({-} n 1) ({cons} ({cons} n ({+} n n)) acc))))))
+  ({cond} (({eq} n {d0}) acc)
+        (({eq} {d0} {d0}) (mkal ({-} n {d1}) ({cons} ({cons} n ({+} n n)) acc))))))
 ({def} look ({lambda} (k al)
-  ({cond} (({atom} al) 0)
+  ({cond} (({atom} al) {d0})
         (({eq} k ({car} ({car} al))) ({cdr} ({car} al)))
-        (({eq} 0 0) (look k ({cdr} al))))))
+        (({eq} {d0} {d0}) (look k ({cdr} al))))))
 ({def} sumall ({lambda} (k al acc)
-  ({cond} (({eq} k 0) acc)
-        (({eq} 0 0) (sumall ({-} k 1) al ({+} acc (look k al)))))))
+  ({cond} (({eq} k {d0}) acc)
+        (({eq} {d0} {d0}) (sumall ({-} k {d1}) al ({+} acc (look k al)))))))
 """,
         "call": "(sumall {N} (mkal {N} ({quote} ())) 0)",
         "expected": lambda p: str(p["N"] * (p["N"] + 1)),
@@ -229,14 +230,14 @@ WORKLOADS = {
         "setup": BUILD + """\
 ({def} mymap ({lambda} (f xs)
   ({cond} (({atom} xs) xs)
-        (({eq} 0 0) ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
+        (({eq} {d0} {d0}) ({cons} (f ({car} xs)) (mymap f ({cdr} xs)))))))
 ({def} myfold ({lambda} (f acc xs)
   ({cond} (({atom} xs) acc)
-        (({eq} 0 0) (myfold f (f acc ({car} xs)) ({cdr} xs))))))
+        (({eq} {d0} {d0}) (myfold f (f acc ({car} xs)) ({cdr} xs))))))
 ({def} work ({lambda} (r total)
-  ({cond} (({eq} r 0) total)
-        (({eq} 0 0) (work ({-} r 1)
-                 ({+} total (myfold ({lambda} (a b) ({+} a b)) 0
+  ({cond} (({eq} r {d0}) total)
+        (({eq} {d0} {d0}) (work ({-} r {d1})
+                 ({+} total (myfold ({lambda} (a b) ({+} a b)) {d0}
                                    (mymap ({lambda} (x) ({+} x x)) (build {N} ({quote} ()))))))))))
 """,
         "call": "(work {R} 0)",
@@ -247,11 +248,11 @@ WORKLOADS = {
         "params": {"N": 300000}, "small": {"N": 5000},
         "setup": """\
 ({def} is-even ({lambda} (n)
-  ({cond} (({eq} n 0) 1)
-        (({eq} 0 0) (is-odd ({-} n 1))))))
+  ({cond} (({eq} n {d0}) {d1})
+        (({eq} {d0} {d0}) (is-odd ({-} n {d1}))))))
 ({def} is-odd ({lambda} (n)
-  ({cond} (({eq} n 0) 0)
-        (({eq} 0 0) (is-even ({-} n 1))))))
+  ({cond} (({eq} n {d0}) {d0})
+        (({eq} {d0} {d0}) (is-even ({-} n {d1}))))))
 """,
         "call": "(is-even {N})",
         "expected": lambda p: "1" if p["N"] % 2 == 0 else "0",
@@ -262,13 +263,18 @@ WORKLOADS = {
         "setup": TREE + LEN + """\
 ({def} flat ({lambda} (x acc)
   ({cond} (({atom} x) ({cons} x acc))
-        (({eq} 0 0) (flat ({car} x) (flat ({cdr} x) acc))))))
+        (({eq} {d0} {d0}) (flat ({car} x) (flat ({cdr} x) acc))))))
 """,
         "call": "(len (flat (mk {N}) ({quote} ())) 0)",
         "expected": lambda p: str(2 ** p["N"]),
     },
 }
 
+
+def d24(value):
+    """Явне D24-значення: носій #d24:<24 bits>. Прості числа не є операндами."""
+    bits = format(int(value) & ((1 << 24) - 1), "024b")
+    return "#d24:" + bits
 
 def program_text(wl, params):
     return wl["setup"] + "(print " + wl["call"] + ")\n"
@@ -279,8 +285,11 @@ EMPTY_SRC = "(print 0)\n"
 
 def render(template, form, params):
     out = template
+    # Числа завжди D24: і параметри {N}/{R}, і літеральні {d0}/{d1}/...
     for key, value in params.items():
-        out = out.replace("{" + key + "}", str(value))
+        out = out.replace("{" + key + "}", d24(value))
+    for match in sorted(set(re.findall(r"\{d(\d+)\}", out)), key=len, reverse=True):
+        out = out.replace("{d" + match + "}", d24(int(match)))
     # Довші токени першими, щоб {cdr}/{car} не зачепили одне одного.
     for token in sorted(SURFACES, key=len, reverse=True):
         out = out.replace("{" + token + "}", SURFACES[token][form])
@@ -303,7 +312,7 @@ LOAD_CONTEXT_RULE = "idle: load1 < 0.25*nproc; high: інакше; unknown: npro
 
 
 def load_context(load1, nproc):
-    """Класифікує контекст навантаження за #1586. Названий стан, не мовчазне
+    """Класифікує контекст навантаження за #{d1586}. Названий стан, не мовчазне
     припущення: 'unknown' краще за фальшиве 'idle'."""
     if nproc is None or nproc <= 0:
         return "unknown"
