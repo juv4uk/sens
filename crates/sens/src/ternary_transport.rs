@@ -441,7 +441,7 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
 /// D2 words (00/01/10/11) never become D7 text or punctuation.
 pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Error> {
     let mut text = String::new();
-    for word in &words {
+    for word in words {
         let BinarySourceWord::W7(cell) = word else {
             return Err(D7T5Error::NonD7Word);
         };
@@ -449,7 +449,7 @@ pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Erro
             .ok_or(D7T5Error::UnrenderableD7Cell)?;
         text.push_str(glyph);
     }
-    if keyboard_d7_words(&text)? != words {
+    if keyboard_d7_words(&text)?.as_slice() != words {
         return Err(D7T5Error::AmbiguousText);
     }
     Ok(text)
