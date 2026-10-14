@@ -106,7 +106,7 @@ jobs:
           echo 'test_id=zig-t5-exact-width layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" test research/zig-codecs/t5/t5.zig
           echo 'test_id=zig-f3c-rank-parity layer=transport semantic_authority=SENS status=mechanical'
-          "$ZIG" test research/zig-codecs/tests.zig
+          "$ZIG" test research/zig-codecs/tests.zig -lc
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
@@ -140,6 +140,28 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Zig→Rust SENS CLI: physical T5/F3C ABI and real native execution
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          zig version
+          echo 'test_id=zig-to-sens-cli-abi layer=transport semantic_authority=SENS'
+          cargo build --locked -p sens-cli --bin sens-trit --features zig-transport
+          CLI_RUST_ZIG=target/debug/sens-trit
+          # The Zig ABI produces physical data; Rust SENS evaluates it.
+          "$CLI_RUST_ZIG" encode-f3 "$RUNNER_TEMP/source.sens"
+          cmp "$RUNNER_TEMP/source.senc" "$RUNNER_TEMP/framed.senc"
+          "$CLI_RUST_ZIG" eval "$RUNNER_TEMP/source.sens" > "$RUNNER_TEMP/sens-t5-result.txt"
+          "$CLI_RUST_ZIG" eval-f3 "$RUNNER_TEMP/source.senc" > "$RUNNER_TEMP/sens-f3c-result.txt"
+          cmp "$RUNNER_TEMP/sens-t5-result.txt" "$RUNNER_TEMP/sens-f3c-result.txt"
+          "$CLI_RUST_ZIG" open-f3 "$RUNNER_TEMP/source.senc" > "$RUNNER_TEMP/sens-view.txt"
+          if "$CLI_RUST_ZIG" eval-f3 "$RUNNER_TEMP/invalid.senc"; then
+            echo '::error::FAIL-OPEN: Zig F3C mutant executed'; exit 1
+          fi
+          echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
+
       - name: Zig ↔ Rust T5 парний бенчмарк — однакові фізичні байти (manual benchmark protocol)
         if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
         shell: bash
