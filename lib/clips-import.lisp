@@ -806,19 +806,29 @@
 ; für `not`/`or`/`and` gab), sodass ein Template-Fakt, verschachtelt in
 ; einer von beiden, jetzt auch seine benannten Slots in positionale Form
 ; umgewandelt bekommt.
+; Each intermediate list is computed once by language-owned derived
+; functions. No ambiguous computed LAMBDA head or unadmitted LET slot.
+(0011 clips-defrule-clauses-from-parts
+  (0010 (conditions relevant templates)
+    (110
+      ((clips-all-asserts? relevant)
+       (clips-clauses-for-conclusions
+         (clips-convert-template-list (clips-assert-conclusions relevant) templates)
+         conditions))
+      (1 (001 ())))))
+
+(0011 clips-defrule-clauses-from-split
+  (0010 (split templates)
+    (clips-defrule-clauses-from-parts
+      (clips-convert-vars (clips-convert-template-list (100 split) templates))
+      (clips-drop-printouts (1001 split))
+      templates)))
+
 (0011 clips-defrule->clauses
   (0010 (form templates)
-    ((0010 (split)
-       ((0010 (conditions relevant)
-         (110
-           ((clips-all-asserts? relevant)
-            (clips-clauses-for-conclusions
-              (clips-convert-template-list (clips-assert-conclusions relevant) templates)
-              conditions))
-           ))
-        (clips-convert-vars (clips-convert-template-list (100 split) templates))
-        (clips-drop-printouts (1001 split))))
-     (clips-split-at-arrow (clips-strip-rule-preamble (0111 form))))))
+    (clips-defrule-clauses-from-split
+      (clips-split-at-arrow (clips-strip-rule-preamble (0111 form)))
+      templates)))
 
 ; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
 ; not-yet-supported forms produce no clauses rather than erroring — a
