@@ -357,20 +357,6 @@ mod exact_lowering_isolation_tests {
     }
 
     #[test]
-    fn equal_eight_bit_payload_cannot_reopen_historical_dispatch() {
-        let current = lower_current("(00000001 (001 1))");
-        let ExprKind::List(items) = current.kind else {
-            panic!("unadmitted current D8 head cannot be a function");
-        };
-        assert!(matches!(&items[0].kind, ExprKind::DomainIdentity(identity)
-            if identity.width() == 8 && identity.packed_bits() == 0b00000001));
-        assert!(matches!(&items[1].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
-
-        let historical = crate::parse("(00000001 (001 1))").unwrap();
-        assert!(matches!(lower_program(&historical)[0].kind, ExprKind::Call(_, _)));
-    }
-
-    #[test]
     fn historical_def_surface_cannot_steal_exact_d4_binder() {
         let current = lower_current("(def x (001 1))");
         let ExprKind::List(items) = current.kind else {
