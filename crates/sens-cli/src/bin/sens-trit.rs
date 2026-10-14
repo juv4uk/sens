@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (backend | encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (backend | encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | encode-e1 path.sens | eval-e1 path.e1 | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 // Compiled only in the official Zig-transport build. Rust validates SENS
 // program syntax; Zig owns all physical wire bytes for these commands.
@@ -159,6 +159,24 @@ fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+
+/// E1 has an explicit experimental .e1 carrier. Neither .sens nor .senc
+/// changes its meaning, and opening any path never implicitly runs SENS.
+fn read_explicit_e1(path: &Path) -> Result<Vec<u8>, String> {
+    if path.extension().and_then(|ext| ext.to_str()) != Some("e1") {
+        return Err("E1 requires an explicit .e1 file; no T5/F3C autodetection".into());
+    }
+    fs::read(path).map_err(|e| format!("read explicit E1: {e}"))
+}
+
+/// Mechanical E1 encoding only. The currently ratified canonical D2 reader
+/// checks exact words; the E1 codec does not grant any semantic identity.
+fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
+    let words = sens::decode_ternary_program(physical_t5)
+        .map_err(|e| format!("SENS canonical T5/D2 rejected: {e:?}"))?;
+    sens::envelope_e1::encode(&words)
+        .map_err(|e| format!("E1 physical encode rejected: {e:?}"))
+}
 
 fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("senc") {
@@ -432,6 +450,29 @@ fn execute() -> Result<(), String> {
             println!("{}", result.value);
             Ok(())
         }
+        "encode-e1" => {
+            let bytes = read_sens(path)?;
+            let e1 = encode_e1_from_t5(&bytes)?;
+            // A new, explicit physical carrier only; never replace the .sens.
+            let target = path.with_extension("e1");
+            let mut output = OpenOptions::new().create_new(true).write(true)
+                .open(&target)
+                .map_err(|e| format!("create explicit E1 (will not overwrite): {e}"))?;
+            output.write_all(&e1).map_err(|e| format!("write E1: {e}"))?;
+            println!("E1_PHYSICAL_ENCODED bytes={} semantic_authority=SENS", e1.len());
+            Ok(())
+        }
+        "eval-e1" => {
+            // Explicit SENS execution only: CRC/E1 decoding followed by the
+            // SAME ratified exact-domain admission/evaluator used by T5.
+            let e1 = read_explicit_e1(path)?;
+            let mut session = sens::Session::default();
+            let result = sens::eval_e1_program(&e1, &mut session)
+                .map_err(|e| format!("E1 -> current SENS rejected: {e:?}"))?;
+            for output in result.output { println!("{output}"); }
+            println!("{}", result.value);
+            Ok(())
+        }
         "encode-f3" => write_explicit_small_f3(path),
         "verify-f3-sha256" => {
             let restored = read_explicit_f3_sha256(
@@ -492,6 +533,37 @@ fn main() {
     if let Err(message) = execute() {
         eprintln!("sens-trit: {message}");
         process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod e1_cli_mechanism_tests {
+    use super::*;
+
+    #[test]
+    fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
+        let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
+        let mutant = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
+        for source in [positive.as_slice(), mutant.as_slice()] {
+            let packed = encode_e1_from_t5(source).expect("T5->E1 physical encoding");
+            let mut original = sens::Session::default();
+            let mut e1_session = sens::Session::default();
+            let from_t5 = sens::eval_t5_program(source, &mut original)
+                .expect("SENS native exact source verdict");
+            let from_e1 = sens::eval_e1_program(&packed, &mut e1_session)
+                .expect("SENS native verdict after E1 bytes");
+            assert_eq!(from_t5.value.as_predicate_bit(),
+                       from_e1.value.as_predicate_bit());
+            assert_eq!(from_t5.output, from_e1.output);
+            let mut damaged = packed;
+            *damaged.last_mut().expect("CRC suffix") ^= 1;
+            assert!(matches!(
+                sens::eval_e1_program(&damaged, &mut sens::Session::default()),
+                Err(sens::E1ExecutionError::Transport(
+                    sens::universal_frame3::Frame3Error::Integrity
+                ))
+            ), "CRC corruption must be rejected before evaluator");
+        }
     }
 }
 
