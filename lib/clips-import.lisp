@@ -121,11 +121,10 @@
 (0011 clips-deftemplate-form?
   (0010 (form)
     (110
-      
-      ((010 form)  (001 ()))
-      ((0100 (010 (100 form))) (101 (100 form) (001 deftemplate)))
-      ((010 (100 form))  (101 (100 form) (001 deftemplate)))
-      )))
+      ((010 form) 0)
+      ((0100 (010 (100 form))) 0)
+      ((101 (100 form) (001 deftemplate)) 1)
+      (1 0))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
 ; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
