@@ -117,6 +117,8 @@ jobs:
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
           echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
           zig test research/zig-codecs/domain_ladder.zig
+          echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
+          zig test research/zig-codecs/domain_e1.zig
           zig test research/zig-codecs/tests.zig -lc
           zig test research/zig-codecs/transport/e1_writer.zig
           # Same focused Zig step, no new workflow: compile and actually link
