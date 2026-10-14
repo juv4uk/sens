@@ -195,6 +195,9 @@ jobs:
           python3 scripts/ci_executor_invariant.py
           python3 scripts/ci_failure_contract.py self-test
           python3 scripts/check-domain-ladder-identity.py --self-test --check
+          # SENS-ratified prefix ↔ Zig physical profile; not a semantic or runtime oracle.
+          python3 scripts/check-numeric-domain-ratification.py --self-test
+          python3 scripts/check-numeric-domain-ratification.py
           # Instrumental migration proof, not an alternate semantic oracle.
           # Failures retain fixture, command and actual output via RED contract.
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
