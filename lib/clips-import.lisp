@@ -172,9 +172,9 @@
        ((0010 (after)
           (110
             ((101 after (001 ())) (110011101 (110011101 s)))
-            ((010 ()) after)))
+            (#d1:1 after)))
         (clips-string-after-last-double-colon (110011101 (110011101 s)))))
-      ((010 ()) (clips-string-after-last-double-colon (110011101 s))))))
+      (#d1:1 (clips-string-after-last-double-colon (110011101 s))))))
 
 (0011 clips-strip-module-prefix
   (0010 (sym)
@@ -183,9 +183,9 @@
        ((0010 (after)
           (110
             ((101 after (001 ())) sym)
-            ((010 ()) (11101101 after))))
+            (#d1:1 (11101101 after))))
         (clips-string-after-last-double-colon (11101110 sym))))
-      ((010 ()) sym))))
+      (#d1:1 sym))))
 
 (0011 clips-deftemplate-name (0010 (form) (clips-strip-module-prefix (1001 form))))
 
@@ -196,7 +196,7 @@
     (110
       
       ((010 slot-forms)  (001 ()))
-      ((010 ()) (111 (clips-slot-name (100 slot-forms)) (clips-slot-names (011 slot-forms)))))))
+      (#d1:1 (111 (clips-slot-name (100 slot-forms)) (clips-slot-names (011 slot-forms)))))))
 
 (0011 clips-deftemplate-slots
   (0010 (form)
@@ -210,14 +210,14 @@
       ((clips-deftemplate-form? (100 forms))
        (111 (111 (clips-deftemplate-name (100 forms)) (clips-deftemplate-slots (100 forms)))
              (clips-templates-from-forms (011 forms))))
-      ((010 ()) (clips-templates-from-forms (011 forms))))))
+      (#d1:1 (clips-templates-from-forms (011 forms))))))
 
 (0011 clips-template-slot-order
   (0010 (name templates)
     ((0010 (entry)
        (110
          ((010 entry)  (001 ()))
-         ((010 ()) (011 entry))))
+         (#d1:1 (011 entry))))
      (11100 name templates))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
@@ -251,7 +251,7 @@
     (110
       
       ((010 (011 slot-form))  (001 ()))
-      ((010 ()) (1001 slot-form)))))
+      (#d1:1 (1001 slot-form)))))
 
 ; Точний D3 пошук атомарної назви CLIPS-слота.
 ; Коректний слот = (назва значення). У разі складеної назви
@@ -267,14 +267,14 @@
       ((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))
       ((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))
       ((101 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))
-      ((010 ()) (clips-lookup-slot-value slot-name (011 slot-forms))))))
+      (#d1:1 (clips-lookup-slot-value slot-name (011 slot-forms))))))
 
 (0011 clips-positional-args
   (0010 (slot-order slot-forms)
     (110
       
       ((010 slot-order)  (001 ()))
-      ((010 ()) (111 (clips-lookup-slot-value (100 slot-order) slot-forms)
+      (#d1:1 (111 (clips-lookup-slot-value (100 slot-order) slot-forms)
                 (clips-positional-args (011 slot-order) slot-forms))))))
 
 ; Step 13 (fold-in fix, verified before writing — same discipline as
@@ -322,30 +322,30 @@
          ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         ((010 ()) ((0010 (slot-order)
+         (#d1:1 ((0010 (slot-order)
               (110
                 
                 ((010 slot-order)  term)
-                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
+                (#d1:1 (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
       ((010 (100 term))  (110
          ((101 (100 term) (001 not)) (1110 (001 not?) (clips-convert-template (1001 term) templates)))
          ((101 (100 term) (001 or)) (111 (001 or) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
          ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         ((010 ()) ((0010 (slot-order)
+         (#d1:1 ((0010 (slot-order)
               (110
                 
                 ((010 slot-order)  term)
-                ((010 ()) (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
-      ((010 ()) term))))
+                (#d1:1 (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
+      (#d1:1 term))))
 
 (0011 clips-convert-template-list
   (0010 (terms templates)
     (110
       
       ((010 terms)  (001 ()))
-      ((010 ()) (111 (clips-convert-template (100 terms) templates)
+      (#d1:1 (111 (clips-convert-template (100 terms) templates)
                 (clips-convert-template-list (011 terms) templates))))))
 
 (0011 clips-fact-clause
@@ -373,7 +373,7 @@
   (0010 (facts templates acc)
     (110
       ((010 facts) (10100 acc))
-      ((010 ()) (clips-facts->clauses-onto
+      (#d1:1 (clips-facts->clauses-onto
            (011 facts) templates
            (111 (clips-fact-clause (clips-convert-template (100 facts) templates)) acc))))))
 
@@ -469,7 +469,7 @@
       ((clips-var? term) (clips-var-term term))
       
       ((010 term)  term)
-      ((010 ()) (111 (clips-convert-vars (100 term)) (clips-convert-vars (011 term)))))))
+      (#d1:1 (111 (clips-convert-vars (100 term)) (clips-convert-vars (011 term)))))))
 
 ; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
 ; Guards the `=>`-check with `(atom (car body))` first: a condition like
@@ -482,10 +482,10 @@
       ((010 (100 body))
        (110
          ((101 (100 body) (001 =>)) (1110 (001 ()) (011 body)))
-         ((010 ()) ((0010 (rest)
+         (#d1:1 ((0010 (rest)
               (1110 (111 (100 body) (100 rest)) (1001 rest)))
               (clips-split-at-arrow (011 body))))))
-      ((010 ()) ((0010 (rest)
+      (#d1:1 ((0010 (rest)
            (1110 (111 (100 body) (100 rest)) (1001 rest)))
            (clips-split-at-arrow (011 body)))))))
 
@@ -604,7 +604,7 @@
       
       ((010 forms)  (001 ()))
       ((clips-printout-form? (100 forms)) (clips-drop-printouts (011 forms)))
-      ((010 ()) (111 (100 forms) (clips-drop-printouts (011 forms)))))))
+      (#d1:1 (111 (100 forms) (clips-drop-printouts (011 forms)))))))
 
 (0011 clips-all-asserts?
   (0010 (forms)
@@ -657,14 +657,14 @@
     (110
       
       ((010 forms)  (001 ()))
-      ((010 ()) (1111 (011 (100 forms)) (clips-assert-conclusions (011 forms)))))))
+      (#d1:1 (1111 (011 (100 forms)) (clips-assert-conclusions (011 forms)))))))
 
 (0011 clips-clauses-for-conclusions
   (0010 (conclusions conditions)
     (110
       
       ((010 conclusions)  (001 ()))
-      ((010 ()) (111 (111 (clips-convert-vars (100 conclusions)) conditions)
+      (#d1:1 (111 (111 (clips-convert-vars (100 conclusions)) conditions)
                 (clips-clauses-for-conclusions (011 conclusions) conditions))))))
 
 ; Step 5 (superseded — history kept, not silently erased): originally
@@ -782,7 +782,7 @@
       
       ((010 body)  body)
       ((clips-rule-preamble-form? (100 body)) (clips-strip-rule-preamble (011 body)))
-      ((010 ()) body))))
+      (#d1:1 body))))
 
 ; Step 19's `exists`/`forall` guard — skip a whole rule rather than
 ; import one that could never fire — is gone now that `lib/forward.lisp`
@@ -884,13 +884,13 @@
     (110
       
       ((010 items)  acc)
-      ((010 ()) (clips-cons-each-onto (011 items) (111 (100 items) acc))))))
+      (#d1:1 (clips-cons-each-onto (011 items) (111 (100 items) acc))))))
 
 (0011 clips-import-forms-onto
   (0010 (forms templates acc)
     (110
       ((010 forms) (10100 acc))
-      ((010 ()) (clips-import-forms-onto
+      (#d1:1 (clips-import-forms-onto
            (011 forms) templates
            (clips-cons-each-onto (clips-form->clauses (100 forms) templates) acc))))))
 
