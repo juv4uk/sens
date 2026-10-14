@@ -1,12 +1,13 @@
-# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
-# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
-# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
+# КАРАНТИН (повернено 14.10.2026 за тріажем): ШКІДЛИВА перевірка — застаріла передумова: ValueError not raised.
+# Не дає сигналу про код (run 38566017915). Повторні запуски/runner — заборонені.
+# Чинний сигнал про D24 лишається у видимих ci-hosted / vertical-day-*.
 name: Драбина доменів — точна ширина та механіка
 
 on:
   workflow_dispatch:
 jobs:
   exact-width-ladder:
+    if: ${{ false }} # КАРАНТИН: шкідлива, run 38566017915
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
