@@ -36,13 +36,18 @@ def snapshot(root: Path, file_list: Path) -> dict:
     root = root.resolve(strict=True)
     rows = []
     seen = set()
-    for line_no, raw in enumerate(file_list.read_text(encoding="utf-8").splitlines(), 1):
-        name = raw.strip()
-        if not name or name.startswith("#"):
+    # The producer and Zig parity reader preserve path characters verbatim.
+    # Only LF separates records; CR is removable solely as a CRLF terminator.
+    for line_no, raw in enumerate(file_list.read_text(encoding="utf-8").split("\n"), 1):
+        name = raw.removesuffix("\r")
+        if not name:
             continue
         path = Path(name)
         if not path.is_absolute():
             path = root / path
+        # Preserve the physical witness: do not hash a symlink's target as .sens.
+        if path.is_symlink():
+            raise SnapshotError(f"symlink:line={line_no}:{name}")
         path = path.resolve(strict=False)
         try:
             rel = path.relative_to(root).as_posix()
