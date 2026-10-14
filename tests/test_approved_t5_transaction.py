@@ -144,16 +144,17 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             pin = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
             proc, output, report = self.run_cli(temp, [
                 {"path": REL, "sha256": pin},
-                {"path": "benchmarks/arithmetic.lisp",
-                 "sha256": hashlib.sha256(
-                     (ROOT / "benchmarks/arithmetic.lisp").read_bytes()
-                 ).hexdigest()},
+                # Source was migrated and is now valid; an intentionally
+                # incorrect pin remains invalid regardless of source-era.
+                # This proves mixed-validity publication is atomic.
+                {"path": "benchmarks/arithmetic.lisp", "sha256": "0" * 64},
             ])
             self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
             self.assertFalse((output / SOURCE.relative_to(ROOT).with_suffix(".sens")).exists())
             result = json.loads(report.read_text())
             self.assertEqual(result["summary"]["published"], 0)
-            self.assertGreater(result["summary"]["files_blocked"], 0)
+            self.assertEqual(result["summary"]["files_ready"], 1)
+            self.assertEqual(result["summary"]["files_blocked"], 1)
 
     def test_wrong_sha_and_traversal_are_fail_closed(self):
         with tempfile.TemporaryDirectory(prefix="approved-t5-sha-") as td:
