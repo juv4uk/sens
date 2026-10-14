@@ -29,13 +29,14 @@ fn readFile(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
     return bytes;
 }
 
-/// FNV-1a 64: фіксована ширина, без великого буфера (на великих файлах hex
-/// переповнював стек і давав SIGSEGV).
-fn fnv64(bytes: []const u8) u64 {
-    var hash: u64 = 0xcbf29ce484222325;
-    for (bytes) |b| hash = (hash ^ @as(u64, b)) *% 0x100000001b3;
-    return hash;
-}
+/// Дайджести зберігаються як 32 байти, без створення великих hex-буферів.
+const Check = struct {
+    accepted: bool,
+    byte_count: usize,
+    fixture_sha256: [32]u8,
+    replay_sha256: ?[32]u8 = null,
+    first_diff: ?usize = null,
+};
 
 fn firstDiff(a: []const u8, b: []const u8) usize {
     const n = @min(a.len, b.len);
@@ -45,18 +46,34 @@ fn firstDiff(a: []const u8, b: []const u8) usize {
 }
 
 /// Неканонічний носій => REJECT; неможливість прочитати fixture => ПОМИЛКА harness.
-/// Відсутній негативний файл ніколи не вважається успішно відхиленим T5.
-fn accepts(allocator: std.mem.Allocator, path: []const u8) !bool {
+/// Жодна фізична відмова не перетворюється на семантичний вердикт SENS.
+fn accepts(allocator: std.mem.Allocator, path: []const u8) !Check {
     const original = try readFile(allocator, path);
     defer allocator.free(original);
+    var fixture_sha: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(original, &fixture_sha, .{});
+    const rejected = Check{
+        .accepted = false,
+        .byte_count = original.len,
+        .fixture_sha256 = fixture_sha,
+    };
     const words = t5.decodeCoordinates(allocator, original) catch |err| switch (err) {
         error.OutOfMemory => return err,
-        else => return false,
+        else => return rejected,
     };
     defer allocator.free(words);
     const re = try t5.encodeCoordinates(allocator, words);
     defer allocator.free(re);
-    return std.mem.eql(u8, original, re);
+    var replay_sha: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(re, &replay_sha, .{});
+    const same = std.mem.eql(u8, original, re);
+    return .{
+        .accepted = same,
+        .byte_count = original.len,
+        .fixture_sha256 = fixture_sha,
+        .replay_sha256 = replay_sha,
+        .first_diff = if (same) null else firstDiff(original, re),
+    };
 }
 
 fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accept: bool) !usize {
@@ -69,26 +86,33 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
         const line = std.mem.trim(u8, raw, " \t\r");
         if (line.len == 0 or line[0] == '#') continue;
         checked += 1;
-        const got = accepts(allocator, line) catch |err| {
+        const check = accepts(allocator, line) catch |err| {
             failures += 1;
-            std.debug.print("FAIL test_id=t5-parity-fixture-io layer=transport file={s} expected={s} actual=HARNESS_ERROR error={s} reproduce='zig run -lc research/zig-codecs/parity_t5.zig'\n", .{
+            std.debug.print("FAIL test_id=t5-parity-fixture-io layer=transport file={s} fixture_sha256=UNAVAILABLE replay_sha256=UNAVAILABLE first_diff=NA expected={s} actual=HARNESS_ERROR error={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
                 line,
                 if (expect_accept) "ACCEPT" else "REJECT",
                 @errorName(err),
             });
             continue;
         };
-        if (got != expect_accept) {
+        const fixture_hex = std.fmt.bytesToHex(check.fixture_sha256, .lower);
+        if (check.accepted != expect_accept) {
             failures += 1;
-            std.debug.print("FAIL test_id=t5-parity layer=transport file={s} expected={s} actual={s} reproduce='zig run parity_t5.zig'\n", .{
+            const replay_hex = if (check.replay_sha256) |sha|
+                std.fmt.bytesToHex(sha, .lower)
+            else
+                [_]u8{'-'} ** 64;
+            std.debug.print("FAIL test_id=t5-parity layer=transport file={s} bytes={d} fixture_sha256={s} replay_sha256={s} first_diff={any} expected={s} actual={s} reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{
                 line,
+                check.byte_count,
+                &fixture_hex,
+                &replay_hex,
+                check.first_diff,
                 if (expect_accept) "ACCEPT" else "REJECT",
-                if (got) "ACCEPT" else "REJECT",
+                if (check.accepted) "ACCEPT" else "REJECT",
             });
         } else if (expect_accept) {
-            const original = try readFile(allocator, line);
-            defer allocator.free(original);
-            std.debug.print("OK file={s} bytes={d} fnv64={x}\n", .{ line, original.len, fnv64(original) });
+            std.debug.print("OK file={s} bytes={d} sha256={s}\n", .{ line, check.byte_count, &fixture_hex });
         }
     }
     if (checked == 0) {
