@@ -15,16 +15,32 @@
 //! sens-Daten über `read`/`quote` — kein eigener Tokenizer oder
 //! String-Primitive nötig.
 
-use sens::{eval_program, Session};
+use sens::{
+    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    eval_program, parse_mixed_exact_domain, Session,
+};
 
 fn eval_import(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/clips-import.lisp"), &mut session).unwrap();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session,
+    )
+    .expect("test_id=clips-defrule-d4-split: exact-domain Core must load");
+    for (path, library) in [
+        ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
+    ] {
+        eval_pinned_reasoning_source(path, library, &mut session)
+            .unwrap_or_else(|err| panic!("test_id=clips-defrule-d4-split: {path} failed to load: {err}"));
+    }
+    let forms = parse_mixed_exact_domain(include_str!("../../../lib/clips-import.lisp"))
+        .expect("test_id=clips-defrule-d4-split: CLIPS source must parse with exact-width heads");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("test_id=clips-defrule-d4-split: CLIPS library must load through exact-domain reader");
+    // Test inputs retain their historical data spelling. Only executable
+    // library source is parsed as current exact-domain SENS.
     eval_program(source, &mut session)
         .unwrap_or_else(|e| panic!("evaluation failed: {e}\nsource: {source}"))
         .value
