@@ -140,11 +140,56 @@ fn lower_domain_arguments(
     lower_all(arguments, depth, mode)
 }
 
+/// Preserve historical QUOTE/COND/binder argument shape while continuing
+/// staged lowering inside an already-typed legacy call. This is a compatibility
+/// mechanism only: no W8 word is promoted to current D8 or admitted by payload.
+fn lower_historical_arguments(
+    sid: Sens8,
+    arguments: &[Expr],
+    depth: u32,
+    mode: LowerMode,
+) -> Rc<[Expr]> {
+    if historical_head_has_d3_law(sid, 0b001) {
+        return arguments.into();
+    }
+    if historical_head_has_d3_law(sid, 0b110) {
+        return arguments
+            .iter()
+            .map(|clause| match &clause.kind {
+                ExprKind::List(parts) => Expr {
+                    kind: ExprKind::List(lower_all(parts, depth + 1, mode)),
+                    span: clause.span,
+                },
+                _ => clause.clone(),
+            })
+            .collect();
+    }
+    if necessary_forms::identity_for_semantic_id(sid).is_some() {
+        return arguments
+            .iter()
+            .enumerate()
+            .map(|(index, argument)| {
+                if index == 0 {
+                    argument.clone()
+                } else {
+                    lower(argument, depth + 1, mode)
+                }
+            })
+            .collect();
+    }
+    lower_all(arguments, depth, mode)
+}
+
 fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
     if depth > MAX_STRUCTURE_DEPTH {
         return expression.clone();
     }
     let kind = match &expression.kind {
+        ExprKind::Call(sid, arguments) if mode == LowerMode::Historical => {
+            ExprKind::Call(*sid, lower_historical_arguments(*sid, arguments, depth, mode))
+        }
+        // Exact-domain lowering never interprets a pre-existing historical
+        // Call as an admitted current-domain operation.
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
         ExprKind::DomainCall(identity, arguments) => {
             ExprKind::DomainCall(*identity, lower_domain_arguments(*identity, arguments, depth, mode))
@@ -171,37 +216,10 @@ fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
             }
 
             match head_sid(&items[0]) {
-                Some(sid) if historical_head_has_d3_law(sid, 0b001) => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if historical_head_has_d3_law(sid, 0b110) => ExprKind::Call(
+                Some(sid) => ExprKind::Call(
                     sid,
-                    arguments
-                        .iter()
-                        .map(|clause| match &clause.kind {
-                            ExprKind::List(parts) => Expr {
-                                kind: ExprKind::List(lower_all(parts, depth + 1, mode)),
-                                span: clause.span,
-                            },
-                            _ => clause.clone(),
-                        })
-                        .collect(),
+                    lower_historical_arguments(sid, arguments, depth, mode),
                 ),
-                Some(sid) if necessary_forms::identity_for_semantic_id(sid).is_some() => {
-                    ExprKind::Call(
-                        sid,
-                        arguments
-                            .iter()
-                            .enumerate()
-                            .map(|(index, argument)| {
-                                if index == 0 {
-                                    argument.clone()
-                                } else {
-                                    lower(argument, depth + 1, mode)
-                                }
-                            })
-                            .collect(),
-                    )
-                }
-                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth, mode)),
                 None => ExprKind::List(lower_all(items, depth, mode)),
             }
         }
@@ -268,6 +286,35 @@ mod domain_ladder_lowering_migration_tests {
     fn lowered_one(source: &str) -> Expr {
         let parsed = crate::parse(source).expect("сумісний читач");
         lower_program(&parsed).into_iter().next().expect("одна форма")
+    }
+
+    #[test]
+    fn staged_historical_call_lowers_its_body_without_rewriting_quote_or_binders() {
+        // Mechanical AST projection only: language semantics are proved by
+        // the native binary SENS witnesses, not by this host-language test.
+        for source in [
+            "(00000001 (00000101 x))",
+            "(00000111 ((00000101 x) (00000001 (00000101 y))))",
+            "(00001000 (x) (00000001 (00000101 x)))",
+            "(00001011 x (00000101 y))",
+            "(00000110 (00000001 x) (00000101 y))",
+        ] {
+            let parsed = crate::parse(source).expect("valid historical source");
+            let ExprKind::List(items) = &parsed[0].kind else {
+                panic!("historical source must have a list head");
+            };
+            let ExprKind::Sid(sid) = &items[0].kind else {
+                panic!("historical list head must be an exact W8 token");
+            };
+            let staged = Expr {
+                kind: ExprKind::Call(*sid, items[1..].into()),
+                span: parsed[0].span,
+            };
+            let expected = lower_program(&parsed);
+            let actual = lower_program(&[staged]);
+            assert_eq!(actual, expected, "staged vs source lowering: {source}");
+            assert_eq!(lower_program(&actual), actual, "idempotence: {source}");
+        }
     }
 
     #[test]
