@@ -457,6 +457,52 @@ def self_test() -> None:
     same_payload = {(3, "001"), (4, "0001"), (5, "00001")}
     if len(same_payload) != 3 or {int(bits, 2) for _, bits in same_payload} != {1}:
         raise ValueError("D3/D4/D5 must never collapse by packed numeric payload")
+    # The active D7 keyboard/v2 validator checks glyph identity and forbids
+    # callable LISP surfaces, not just 128/128 addresses. Falsify both laws
+    # in a TEMPORARY same-width copy; never mutate canonical domain tables.
+    from tempfile import TemporaryDirectory
+    from unittest.mock import patch
+    import d7_source_projection
+
+    keyboard_source = (ROOT / "lib/domains/d7.lisp").read_text(encoding="utf-8")
+    exact_row = [
+        line for line in keyboard_source.splitlines()
+        if line.lstrip().startswith("(0110000 ")
+    ]
+    if len(exact_row) != 1 or '(en "0")' not in exact_row[0] or "(LISP ())" not in exact_row[0]:
+        raise ValueError("D7_V2_MUTANT_FIXTURE_INVALID id=d7-v2-surface-and-callability")
+    mutations = (
+        ("glyph-identity", exact_row[0].replace('(en "0")', '(en "1")', 1), "glyph drift"),
+        ("noncallable-text", exact_row[0].replace("(LISP ())", "(LISP PRINT)", 1),
+         "callable/coordinate drift"),
+    )
+    with TemporaryDirectory(prefix="sens-d7-v2-negative-") as folder:
+        mutated_table = Path(folder) / "d7.lisp"
+        for case, altered_row, expected_reason in mutations:
+            mutated = keyboard_source.replace(exact_row[0], altered_row, 1)
+            if mutated == keyboard_source:
+                raise ValueError(f"D7_V2_MUTANT_NOT_APPLIED case={case}")
+            mutated_table.write_text(mutated, encoding="utf-8")
+            with patch.object(d7_source_projection, "D7_TABLE", mutated_table):
+                try:
+                    d7_source_projection.load_current_d7()
+                except d7_source_projection.D7ProjectionError as exc:
+                    if expected_reason not in str(exc):
+                        raise ValueError(
+                            f"D7_V2_MUTANT_WRONG_REJECTION id=d7-v2-surface-and-callability "
+                            f"case={case} expected={expected_reason!r} actual={exc!s} "
+                            "reproduce='python3 scripts/check-domain-ladder-identity.py --self-test'"
+                        ) from exc
+                else:
+                    raise ValueError(
+                        f"D7_V2_MUTANT_FALSE_ACCEPT id=d7-v2-surface-and-callability "
+                        f"case={case} expected=REJECT actual=ACCEPT "
+                        "reproduce='python3 scripts/check-domain-ladder-identity.py --self-test'"
+                    )
+    print("D7_V2_MUTANT_PASS id=d7-v2-surface-and-callability layer=source-projection "
+          "golden=128/128 wrong_glyph=REJECTED false_callable=REJECTED "
+          "semantic_authority=SENS")
+
     print("DOMAIN-LADDER-IDENTITY: self-test PASS (D1–D10 widths, distinct D3/D4/D5, source hygiene; no retroactive D8 history)")
 
 
