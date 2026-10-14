@@ -337,7 +337,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 macro))))))
 
 (0011 my-closure?
@@ -386,7 +386,7 @@
   (0010 (form)
     (110
       
-      ((010 form)  #d1:0)
+      ((010 form)  (001 ()))
       ((my-definition-name? (100 form))
        (110
          ((my-canon-name? (1001 form)) (001 ()))
