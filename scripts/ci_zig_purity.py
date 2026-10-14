@@ -58,14 +58,15 @@ def self_test():
 def audit(report_path):
     raw = subprocess.check_output(["git", "ls-files", "-z", "--", "*.zig"], cwd=ROOT)
     tracked = sorted({Path(p.decode("utf-8")) for p in raw.split(b"\0") if p})
-    # Enforce the LOCAL physical-reference-module contract only. The language
-    # is free for semantic implementation, migration, tests etc. elsewhere.
-    scoped = [p for p in tracked if (ROOT / p).resolve().is_relative_to(REFERENCE.resolve())]
+    # Owner order 2026-10-14: historical identities must not enter ANY Zig
+    # source, regardless of directory or whether Zig handles codegen or IO.
+    # No runtime/domain law is inferred from this mechanical source scan.
+    scoped = tracked
     failures = []
     digest = hashlib.sha256()
     if not scoped:
         failures.append({
-            "path": "research/zig-codecs", "line": 0,
+            "path": "*.zig", "line": 0,
             "reason": "missing-reference-module", "marker": "",
         })
     for path in scoped:
@@ -79,12 +80,12 @@ def audit(report_path):
                 "reason": "non-utf8-zig-reference", "marker": "",
             })
     record = {
-        "schema": "sens-zig-reference-cleanliness/v2",
+        "schema": "sens-zig-ladder-cleanliness/v3",
         "kind": "source-hygiene-not-semantic-oracle",
-        "scope": "research/zig-codecs/**/*.zig",
+        "scope": "all git-tracked *.zig",
         "language_roles_restricted": False,
         "all_tracked_zig_files": len(tracked),
-        "reference_zig_files": len(scoped),
+        "reference_zig_files": len([p for p in tracked if (ROOT / p).resolve().is_relative_to(REFERENCE.resolve())]),
         "source_sha256": digest.hexdigest(),
         "contamination_count": len(failures),
         "violations": failures,
