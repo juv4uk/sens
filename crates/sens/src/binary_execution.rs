@@ -36,6 +36,23 @@ impl PhysicalT5Program {
     pub fn decode(physical: &[u8]) -> Result<Self, T5ExecutionError> {
         let words = decode_ternary_words(physical).map_err(T5ExecutionError::Transport)?;
         let parsed = parse_t5_domain_words(&words).map_err(T5ExecutionError::Language)?;
+        Self::from_parsed_canonical(parsed)
+    }
+
+    /// External physical transport (Zig) already produced dense bits and
+    /// explicit W1..W9 widths. Reuse EXACTLY the same SENS D2 canonical
+    /// reader, executable-head admission, lowering and evaluator as Rust
+    /// reference T5. Zig cannot assign callability or host semantics here.
+    pub fn from_packed_words(
+        packed: &crate::PackedBitstream,
+        widths: &[usize],
+    ) -> Result<Self, T5ExecutionError> {
+        let parsed = crate::parse_canonical_packed_words(packed, widths)
+            .map_err(T5ExecutionError::Language)?;
+        Self::from_parsed_canonical(parsed)
+    }
+
+    fn from_parsed_canonical(parsed: Vec<Expr>) -> Result<Self, T5ExecutionError> {
         // Physical T5 has *already* preserved every exact W1..W9 width.
         // Historical lowering would consult flat W8 surfaces and could
         // reinterpret the source after a successful typed decode.
