@@ -78,7 +78,7 @@
   (0010 (name)
     (110
       ; Lists are data, not callable Canon names or D3-EQ operands.
-      ((0100 (010 name)) (001 ()))
+      ((0100 (010 name)) #d1:0)
       ((101 name 001) 001)
       ((101 name 010) 010)
       ((101 name 101) 101)
@@ -389,7 +389,7 @@
       ((010 form)  (001 ()))
       ((my-definition-name? (100 form))
        (110
-         ((my-canon-name? (1001 form)) (001 ()))
+         ((my-canon-name? (1001 form)) #d1:0)
          ((010 ()) (my-lambda-form? (10011 form)))))
       )))
 
@@ -466,10 +466,10 @@
   (0010 (params)
     (110
       ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((010 ()) #d1:1)))
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((010 ()) #d1:1)))
       ((010 ()) (my-rest-param? (011 params))))))
 
@@ -517,7 +517,7 @@
   (0010 (params seen)
     (110
       ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((110101100 params)
           (110
             ((my-canon-name? params)
@@ -527,7 +527,7 @@
             ))
          ((010 ()) (1110 (001 invalid-rest) params))))
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((110101100 params)
           (110
             ((my-canon-name? params)
@@ -552,7 +552,7 @@
   (0010 (params)
     (110
       ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((110101100 params)
           (110
             ((my-canon-name? params)
@@ -560,7 +560,7 @@
             ))
          ((010 ()) (1110 (001 invalid-parameters) params))))
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((110101100 params)
           (110
             ((my-canon-name? params)
@@ -1044,11 +1044,11 @@
   (0010 (name params)
     (110
       ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((101 params name) #d1:1)
          ))
       ((010 params)  (110
-         ((101 params (001 ())) (001 ()))
+         ((101 params (001 ())) #d1:0)
          ((101 params name) #d1:1)
          ))
       ((101 (100 params) name) #d1:1)
@@ -1073,20 +1073,20 @@
          ))
       ((0100 (010 (100 form))) (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) (001 ()))
+         ((my-canon-quote-name? (100 form)) #d1:0)
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) (001 ()))
+            ((my-params-bind-name? name (1001 form)) #d1:0)
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 (100 form))  (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) (001 ()))
+         ((my-canon-quote-name? (100 form)) #d1:0)
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) (001 ()))
+            ((my-params-bind-name? name (1001 form)) #d1:0)
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 ()) (my-forms-reference-name? form name)))))
@@ -1095,7 +1095,7 @@
   (0010 (form name)
     (001000 ((lambda-form (10011 form)))
       (110
-        ((my-params-bind-name? name (1001 lambda-form)) (001 ()))
+        ((my-params-bind-name? name (1001 lambda-form)) #d1:0)
         ((010 ()) (my-forms-reference-name? (011 (011 lambda-form)) name))))))
 
 (0011 my-lambda-def-names
