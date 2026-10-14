@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Регресійна перевірка джерел MAP після переходу до точних доменів.
+"""Регресійна перевірка джерел D6 MAP після переходу до точних доменів.
 
-Восьмибітний історичний запис 00110111 має ДВА різні можливі
-нащадки: D6:101000 і D8:11000101. Жодна з цих координат
-не стає виконуваним механізмом лише через збіг назви.
-Це перевірка джерел, а не доказ виконуваності MAP в Core.
+Чинний D8 окремо ратифіковано 2026-10-06 (#3960). Історичний
+SID8 не був його попередньою версією і не визначає D8-координат.
+Це механічна перевірка джерел, не семантичний оракул чи HOLD для D8.
 """
 from __future__ import annotations
 
@@ -23,34 +22,23 @@ import unittest
 }
 ВИКЛИК_Д6 = re.compile(r"\(101000(?=\s|\))")
 ВИКЛИК_СТАРИЙ = re.compile(r"\(00110111(?=\s|\))")
-ВИКЛИК_Д8 = re.compile(r"\(11000101(?=\s|\))")
 
 
 class ПеревіркиТочногоДоменуMap(unittest.TestCase):
-    def test_окремі_ратифіковані_координати(self):
+    def test_чинні_D6_та_D8_ратифіковані_незалежно(self):
         foundation = json.loads(
             (КОРІНЬ / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
         )
+        current_d8 = json.loads(
+            (КОРІНЬ / "knowledge/d8-ratified.json").read_text(encoding="utf-8")
+        )
         self.assertEqual(foundation["domains"]["D6"]["residents"]["101000"], "MAP")
-        self.assertEqual(foundation["domains"]["D8"]["residents"]["11000101"], "MAP")
-        self.assertNotEqual(("D6", "101000"), ("D8", "11000101"))
-
-    def test_неоднозначний_історичний_код_не_дає_одного_нащадка(self):
-        audit = json.loads(
-            (КОРІНЬ / "knowledge/sens8-current-coverage-v1.json").read_text(encoding="utf-8")
-        )
-        rows = [
-            row for row in audit["rows"]
-            if row["legacy_code"] == "00110111"
-        ]
-        self.assertEqual(len(rows), 1, "Історична комірка має бути однозначно знайдена")
-        targets = set(
-            re.findall(r"D[0-9]+:[01]+\s+MAP", rows[0].get("current_target") or "")
-        )
-        self.assertEqual(
-            targets, {"D6:101000 MAP", "D8:11000101 MAP"},
-            "Заборонено тихо призначати восьмибітному коду лише D6 або лише D8",
-        )
+        self.assertEqual(current_d8["authority"], "#3960")
+        self.assertEqual(current_d8["date"], "2026-10-06")
+        self.assertEqual(current_d8["status"], "owner-ratified")
+        self.assertEqual(current_d8["width"], 8)
+        self.assertEqual(current_d8["occupancy"], 256)
+        self.assertEqual(current_d8["residents"]["11000101"], "MAP")
 
     def test_перевірені_джерела_не_викликають_старий_восьмибітний_map(self):
         for path, кількість_д6 in ДЖЕРЕЛА.items():
@@ -63,12 +51,6 @@ class ПеревіркиТочногоДоменуMap(unittest.TestCase):
                 self.assertEqual(
                     len(ВИКЛИК_Д6.findall(source)), кількість_д6,
                     f"{path}: змінився перевірений зріз D6 MAP; потрібний новий доказ",
-                )
-                # Наявність однойменного D8 MAP у таблиці не є дозволом
-                # автоматично переписати ці історичні односпискові виклики.
-                self.assertIsNone(
-                    ВИКЛИК_Д8.search(source),
-                    f"{path}: підміна MAP на D8 потребує окремого доказу",
                 )
 
 

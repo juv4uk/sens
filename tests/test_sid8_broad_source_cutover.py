@@ -75,14 +75,22 @@ def count_top_level_arguments(source: str, index: int) -> int:
 
 
 class TestBroaderSid8LispCutover(unittest.TestCase):
-    def test_both_map_residents_are_distinct_and_ratified(self):
+    def test_current_map_residents_have_separate_ratifed_domain_authority(self):
+        # D6 and D8 are separately ratified current domains. Historical
+        # SID8 MAP source cells cannot act as D8's earlier authority.
         foundation = json.loads((ROOT / "knowledge/d1-d9-foundation.json").read_text())
+        current_d8 = json.loads((ROOT / "knowledge/d8-ratified.json").read_text())
         self.assertEqual(foundation["domains"]["D6"]["residents"]["101000"], "MAP")
-        self.assertEqual(foundation["domains"]["D8"]["residents"]["11000101"], "MAP")
-        audited = json.loads((ROOT / "knowledge/sens8-current-coverage-v1.json").read_text())
-        original = next(r for r in audited["rows"] if r["legacy_code"] == "00110111")
-        self.assertIn("D6:101000", original["current_target"])
-        self.assertIn("D8:11000101", original["current_target"])
+        self.assertEqual(current_d8["status"], "owner-ratified")
+        self.assertEqual(current_d8["authority"], "#3960")
+        self.assertEqual(current_d8["date"], "2026-10-06")
+        self.assertEqual(current_d8["width"], 8)
+        self.assertEqual(current_d8["occupancy"], 256)
+        self.assertEqual(current_d8["residents"]["11000101"], "MAP")
+        self.assertEqual(
+            foundation["domains"]["D8"]["residents"]["11000101"],
+            current_d8["residents"]["11000101"],
+        )
 
     def test_each_migrated_file_retains_the_exact_single_sequence_map_calls(self):
         total = 0
