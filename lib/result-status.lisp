@@ -82,7 +82,7 @@
        (110
          ((101 value (001 ())) #d1:1)
          (#d1:1 #d1:0)))
-      (1
+      (#d1:1
        (result-proper-list? (011 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
@@ -154,7 +154,7 @@
     (110
       ((0100 (000011101 goal))
        (000001101 (001 invalid-goal) goal))
-      (1
+      (#d1:1
        (001001 ((opposite (000111110 goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results (101001110 goal index))
@@ -188,6 +188,6 @@
        (000001101 (001 invalid-goal) goal))
       ((101010010 module-name)
        (000010000 goal (110000011 module-name)))
-      (1
+      (#d1:1
        (000100111
          (1110 (001 module-not-found) module-name))))))
