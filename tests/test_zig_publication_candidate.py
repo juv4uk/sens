@@ -133,6 +133,39 @@ class PublicationCandidateTest(unittest.TestCase):
                 with self.assertRaises(gate.Rejected):
                     self.check()
 
+    def test_changed_admission_receipt_during_execution_is_rejected(self):
+        original_runner = self.runner
+
+        def adversarial(command, **kwargs):
+            result = original_runner(command, **kwargs)
+            if command[1] == "backend":
+                self.receipt.write_text(self.receipt.read_text() + " ")
+            return result
+
+        with self.assertRaisesRegex(gate.Rejected, "admission receipt mutated"):
+            gate.verify(self.candidate, self.source, self.receipt,
+                        self.zig, self.sens, runner=adversarial)
+
+    def test_changed_translation_evidence_during_execution_is_rejected(self):
+        proof = self.receipt.parent / "migration-attestation.json"
+        proof.write_bytes(b'{"origin":"historical","approved":false}')
+        self.data["source_era"] = "translated"
+        self.data["translation_receipt"] = dict(
+            path=str(proof), sha256=sha(proof.read_bytes())
+        )
+        self.write()
+        original_runner = self.runner
+
+        def adversarial(command, **kwargs):
+            result = original_runner(command, **kwargs)
+            if command[1] == "backend":
+                proof.write_bytes(b'{"origin":"historical","approved":true}')
+            return result
+
+        with self.assertRaisesRegex(gate.Rejected, "translation provenance mutated"):
+            gate.verify(self.candidate, self.source, self.receipt,
+                        self.zig, self.sens, runner=adversarial)
+
     def test_never_lets_unsafe_paths_pass(self):
         candidate = self.candidate
         self.candidate = candidate.with_suffix(".lisp")
