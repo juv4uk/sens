@@ -63,10 +63,11 @@
 (0011 epistemic--claim-ref?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
-      ((010 (011 value)) (001 ()))
-      ((101 (100 value) (001 claim-ref)) #d1:1)
-      (#d1:1 (001 ())))))
+      ((010 value) 0)
+      ((010 (011 value)) 0)
+      ((0100 (010 (100 value))) 0)
+      ((101 (100 value) (001 claim-ref)) 1)
+      (1 0))))
 
 (0011 observation?
   (0010 (value)
