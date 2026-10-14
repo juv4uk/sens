@@ -1,4 +1,4 @@
-//! Frame3 Carrier (F3C) for exact-width SENS T5, Zig 0.17.0.
+//! Frame3 Carrier (F3C) for exact-width SENS T5, Zig 0.16.0.
 //! Independent bounded rank/unrank, not Rust FFI. The source of format
 //! parity is research/framed3/rust_codec/senc.rs and frame3_small.rs.
 //! F3C is explicit .senc 0xf3; never sniff or silently fall back to T5.
