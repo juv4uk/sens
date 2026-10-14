@@ -430,12 +430,12 @@
        (collect-trailing-tools (011 reversed)
                                (111 (msg-tool-call-id (100 reversed)) collected)))
       (#d1:1
-       (001000 ((issuer (100 reversed)))
+       ((0010 (issuer)
          (110
            ((0100 (11110111 (msg-role issuer) "assistant")) (001 ()))
            
            ((010 (msg-tool-calls issuer))  (001 ()))
-           (#d1:1 (all-covered? collected (msg-call-ids issuer)))))))))
+           (#d1:1 (all-covered? collected (msg-call-ids issuer))))) (100 reversed))))))
 
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
