@@ -167,9 +167,11 @@ def run(args: argparse.Namespace) -> dict:
         ledger.append(row)
     ledger.sort(key=lambda e: e["path"])
 
-    # A single BLOCK (including discovery failures) forbids *all* writes.
-    # A review may still inspect each mechanically feasible would-write row.
-    if args.write and not any(row["status"] == "blocked" for row in ledger):
+    # Per-file publication: a blocked file blocks only itself. Every
+    # mechanically feasible candidate is published independently, so one
+    # unproven source can never hold back the rest of the batch. Safety is
+    # enforced per file: no clobber, no symlink, source unchanged, atomic write.
+    if args.write:
         for rel, destination, original, packed, row in staged:
             try:
                 assert_no_links(repo, rel)
@@ -178,30 +180,11 @@ def run(args: argparse.Namespace) -> dict:
                     raise ValueError("existing .sens output: overwrite forbidden")
                 if (repo / rel).read_bytes() != original:
                     raise ValueError("source changed during migration")
-            except (ValueError, OSError) as exc:
-                row.update(status="blocked", reason=str(exc))
-        if not any(row["status"] == "blocked" for row in ledger):
-            created: list[Path] = []
-            active: dict | None = None
-            try:
-                for rel, destination, original, packed, row in staged:
-                    active = row
-                    assert_no_links(repo, rel)
-                    assert_no_links(out, destination)
-                    if (repo / rel).read_bytes() != original:
-                        raise ValueError("source changed during batch publication")
-                    target = out / destination
-                    mig.write_atomic_no_clobber(target, packed)
-                    created.append(target)
+                mig.write_atomic_no_clobber(out / destination, packed)
             except (ValueError, OSError, mig.SensT5Error) as exc:
-                # Only unlink OUR newly created targets, not existing targets.
-                for target in reversed(created):
-                    target.unlink(missing_ok=True)
-                if active is not None:
-                    active.update(status="blocked", reason="atomic batch aborted: " + str(exc))
+                row.update(status="blocked", reason=str(exc))
             else:
-                for _, _, _, _, row in staged:
-                    row["status"] = "written"
+                row["status"] = "written"
 
     admitted = sum(e["status"] in ("would-write", "written") for e in ledger)
     blocked = sum(e["status"] == "blocked" for e in ledger)
@@ -253,7 +236,7 @@ def main() -> int:
         print(f"FATAL migration setup: {exc}", file=sys.stderr)
         return 3
     print(json.dumps(result["summary"], ensure_ascii=False))
-    return 2 if result["summary"]["files_blocked"] or not result["summary"]["files_admitted"] else 0
+    return 0 if result["summary"]["files_admitted"] else 2
 
 
 if __name__ == "__main__":

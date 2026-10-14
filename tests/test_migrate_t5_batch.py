@@ -156,23 +156,23 @@ class RealBatchTest(unittest.TestCase):
             branch.with_suffix(".sens").read_bytes()
         )
 
-    def test_existing_target_in_group_blocks_every_other_write(self):
-        # A pre-existing destination is never overwritten, AND no other
-        # candidate in the cohort may be published if this one BLOCKS.
+    def test_existing_target_blocks_only_itself_and_others_publish(self):
+        # A pre-existing destination is never overwritten, but it blocks
+        # only itself: the other mechanically feasible candidate still
+        # publishes. (Owner decision: no all-or-nothing cohort blocking.)
         branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
         shutil.copy2(branch, self.root / "lib/branch.lisp")
         (self.out / "lib").mkdir(parents=True)
         (self.out / "lib/branch.sens").write_bytes(b"sentinel")
         p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
-        self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
+        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
         d = json.loads(self.report.read_text())
-        self.assertEqual(d["summary"]["files_written"], 0)
-        self.assertEqual(d["summary"]["files_would_write"], 1)
+        self.assertEqual(d["summary"]["files_written"], 1)
         self.assertEqual(d["summary"]["files_blocked"], 1)
         self.assertEqual((self.out / "lib/branch.sens").read_bytes(), b"sentinel")
-        self.assertFalse((self.out / "lib/third.sens").exists())
+        self.assertTrue((self.out / "lib/third.sens").exists())
 
-    def test_mid_transaction_writer_failure_rolls_back_created_binary(self):
+    def test_mid_batch_writer_failure_blocks_only_the_failed_file(self):
         branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
         shutil.copy2(branch, self.root / "lib/branch.lisp")
         spec = importlib.util.spec_from_file_location(
@@ -197,12 +197,12 @@ class RealBatchTest(unittest.TestCase):
                           side_effect=intermittent_writer):
             outcome = batch.run(args)
         self.assertEqual(len(calls), 2)
-        self.assertEqual(outcome["summary"]["files_written"], 0)
+        self.assertEqual(outcome["summary"]["files_written"], 1)
         self.assertEqual(outcome["summary"]["files_blocked"], 1)
-        self.assertEqual(outcome["summary"]["files_would_write"], 1)
-        self.assertIn("atomic batch aborted",
+        self.assertEqual(outcome["summary"]["files_would_write"], 0)
+        self.assertIn("test injected second-write failure",
                       str([e.get("reason", "") for e in outcome["files"]]))
-        self.assertFalse((self.out / "lib/branch.sens").exists())
+        self.assertTrue((self.out / "lib/branch.sens").exists())
         self.assertFalse((self.out / "lib/third.sens").exists())
         self.assertEqual((self.root / "lib/branch.lisp").read_bytes(),
                          branch.read_bytes())

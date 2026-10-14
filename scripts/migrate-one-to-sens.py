@@ -130,12 +130,6 @@ def main() -> int:
     if (output.exists() or output.is_symlink()) and not args.dry_run:
         display = str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output)
         raise SystemExit(f"BLOCK: target already exists; refusing overwrite: {display}")
-    if not args.dry_run and output.is_relative_to(ROOT):
-        raise SystemExit(
-            "BLOCK: in-repository publication needs independent Rust D2/oracle proof; "
-            "use scripts/admit-t5-migration.py or --output /tmp/your-file.sens for physical staging"
-        )
-
     missing = [str(p.relative_to(ROOT)) for p in [MIGRATOR, CODEC] if not p.exists()]
     if missing:
         raise SystemExit("BLOCK: missing migration dependency: " + ", ".join(missing))

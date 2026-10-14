@@ -78,14 +78,18 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertFalse(target.exists())
         self.assertEqual(source.read_bytes(), before)
 
-    def test_repository_publication_requires_separate_oracle_admission(self):
+    def test_in_repository_publication_is_not_policy_blocked(self):
+        # Owner decision: the in-repository publication ban is removed. A
+        # mechanically migratable source may now be published into the repo;
+        # only genuine semantic ambiguity may still block it.
         source = ROOT / "benchmarks" / "lists.lisp"
         target = source.with_suffix(".sens")
-        self.assertFalse(target.exists())
-        result = invoke(source, "--source-era", "legacy")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("in-repository publication needs independent", result.stderr)
-        self.assertFalse(target.exists())
+        try:
+            result = invoke(source, "--source-era", "legacy")
+            self.assertNotIn("in-repository publication needs independent",
+                             result.stderr)
+        finally:
+            target.unlink(missing_ok=True)
 
     def test_peer_identity_requires_loaded_surface_environment(self):
         """A single-file staging tool must not invent imports from core/uk.lisp.
