@@ -1,6 +1,6 @@
 //! Незалежний механічний T5-декодер/кодер (Zig 0.16.0).
 //! SENS залишається двійковим: трит 2 — лише межа у фізичному носії.
-//! Rust-орієнтир: crates/sens/src/ternary_transport.rs.
+//! Точна ширина й біти первинні; T5 є лише фізичним носієм.
 //! ВАЖЛИВО: цей модуль НЕ перевіряє D2-синтаксис і НЕ є оракулом семантики.
 const std = @import("std");
 
@@ -220,7 +220,7 @@ fn decodeWidth(allocator: std.mem.Allocator, data: []const u8, max_width: u8) ![
     if (width == 0) return Error.EmptyDomainWord;
     try decoded.append(allocator, .{ .width = width, .bits = bits });
 
-    // Як у чинному Rust: приймаємо тільки канонічний фізичний носій.
+    // Приймаємо тільки канонічне фізичне представлення.
     const canonical = try encodeWidth(allocator, decoded.items, max_width);
     defer allocator.free(canonical);
     if (!std.mem.eql(u8, canonical, data)) return Error.NoncanonicalEncoding;
