@@ -124,6 +124,16 @@ jobs:
           sha256sum lib/clips-import.lisp crates/sens/tests/clips_import.rs
           cargo test --locked -p sens --test clips_import clips_defrule_ -- --nocapture
           cargo test --locked -p sens --test clips_import clips_deftemplate_applies_inside_defrule_conditions_and_conclusions -- --exact --nocapture
+      - name: LIFE-1 — точковий SENS-закон готовності проєкції й негативні випадки
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[life-1-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only the SENS fixture defines expected behavior. Rust loads and observes D1.
+          echo 'test_id=life-1-projection-d3-law layer=transport executor=rust-loader semantic_authority=SENS_fixture'
+          sha256sum lib/life-1-scheduler.lisp tests/fixtures/life-1-exact-d3-semantic.lisp crates/sens/tests/life_1_scheduler.rs
+          cargo test --locked -p sens --test life_1_scheduler -- --nocapture
+
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
