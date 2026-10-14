@@ -82,7 +82,6 @@ jobs:
           python3 scripts/migrate.py preview lib/narrate.lisp \
             --source-era current \
             --linked-definition lib/reason.lisp@93853dc022c92844bc28d632c736430e2f2edf32:provenance-list \
-            --linked-definition lib/result-status.lisp@bcbd1eeb469d83ea9bbdfc0d6085cc0a666f25af:result-proper-list? \
             --mirror "$RUNNER_TEMP/sens-narrate-linked-out" \
             --report "$report" || rc=$?
           echo "LINKED_MIGRATOR_EXIT=$rc"
