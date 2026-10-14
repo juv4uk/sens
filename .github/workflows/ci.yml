@@ -531,6 +531,59 @@ jobs:
           sha256sum knowledge/guard-reference.lisp crates/sens-lsp/src/guard_knowledge.rs
           cargo test --locked -p sens-lsp --lib guard_knowledge::tests:: -- --nocapture
 
+      - name: GUARD_NATIVE_ONCE — двогілковий D3 COND/EQ з D1-самовердиктом і однобітним мутантом
+        # Native binary SENS is the only authority; shell validates transport and verdicts.
+        if: ${{ !cancelled() && contains(github.event.head_commit.message, '[guard-once]') }}
+        id: guard-native-once
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=tests/semantic/native-t5
+          law="$dir/guard-cond-eq-branch-law"
+          mutant="$dir/guard-cond-eq-branch-mutant"
+          echo "test_id=guard-cond-eq-branch layer=eval executor=NATIVE_SENS_ORACLE semantic_authority=SENS"
+          sha256sum "$law.bits" "$law.sens" "$mutant.bits" "$mutant.sens" target/debug/sens target/debug/sens-trit
+          for name in "$law" "$mutant"; do
+            target/debug/sens-trit open "$name.sens" > "$RUNNER_TEMP/$(basename "$name").actual.bits"
+            if ! cmp "$name.bits" "$RUNNER_TEMP/$(basename "$name").actual.bits"; then
+              echo "REGRESSION id=guard-cond-eq-transport layer=transport fixture=$name.sens expected=bits-file actual=roundtrip-mismatch reproduce=target/debug/sens-trit\ open\ $name.sens" >&2
+              exit 1
+            fi
+          done
+          read -ra original < "$law.bits"
+          read -ra changed < "$mutant.bits"
+          test "${#original[@]}" -eq "${#changed[@]}"
+          differences=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            test "${#original[i]}" -eq "${#changed[i]}"
+            for ((j=0; j<${#original[i]}; j++)); do
+              if [[ "${original[i]:j:1}" != "${changed[i]:j:1}" ]]; then
+                differences=$((differences + 1))
+              fi
+            done
+          done
+          if [[ "$differences" -ne 1 ]]; then
+            echo "REGRESSION id=guard-cond-eq-one-bit layer=transport expected=1 actual=$differences fixture=$mutant.bits reproduce=cmp\ $law.bits\ $mutant.bits" >&2
+            exit 1
+          fi
+          for entry in "$law:1" "$mutant:0"; do
+            name="${entry%:*}"
+            expected="${entry##*:}"
+            if ! actual="$(target/debug/sens "$name.sens")"; then
+              echo "REGRESSION id=guard-cond-eq-branch layer=eval fixture=$name.sens expected=D1:$expected actual=execution-error reproduce=target/debug/sens\ $name.sens" >&2
+              exit 1
+            fi
+            if [[ "$actual" != "$expected" ]]; then
+              echo "REGRESSION id=guard-cond-eq-branch layer=eval fixture=$name.sens expected=D1:$expected actual=$actual reproduce=target/debug/sens\ $name.sens" >&2
+              exit 1
+            fi
+            if ! peer="$(target/debug/sens-trit eval "$name.sens")" || [[ "$peer" != "$actual" ]]; then
+              echo "REGRESSION id=guard-cond-eq-peer layer=eval fixture=$name.sens expected=D1:$actual actual=${peer:-error} reproduce=target/debug/sens-trit\ eval\ $name.sens" >&2
+              exit 1
+            fi
+            echo "PASS test_id=guard-cond-eq-branch layer=eval authority=NATIVE_SENS verdict=D1:$actual fixture=$name.sens"
+          done
+
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash
