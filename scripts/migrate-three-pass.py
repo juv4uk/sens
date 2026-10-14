@@ -308,12 +308,9 @@ def current_residents(data):
             # letting D8 overwrite it, which made en 'map' resolve to a non-D3-D6
             # resident and broke every my-lisp head resolution.
             labels.setdefault(str(label).upper(),(bits,domain))
-    # D11 is test vocabulary, not permission to displace a ratified D3..D10
-    # identity with the same spelling. The existing lower-first rule applies.
-    if "D11" in data.get("domains",{}):
-        desc=data["domains"]["D11"]
-        for bits,label in desc["residents"].items():
-            labels.setdefault(str(label).upper(),(bits,"D11"))
+    # D11 is a separate testing-only inventory, never a callable-head or
+    # historical-successor lookup by human spelling. Its 43 typed words remain
+    # in the ratified D11 JSON and must not enter this source-name resolver.
     return labels
 
 def parse_current_surface_rows(path: Path):
