@@ -383,13 +383,12 @@
 (0011 my-lambda-def-form?
   (0010 (form)
     (110
-      
-      ((010 form)  (001 ()))
+      ((010 form)  #d1:0)
       ((my-definition-name? (100 form))
        (110
-         ((my-canon-name? (1001 form)) (001 ()))
+         ((my-canon-name? (1001 form)) #d1:0)
          ((010 ()) (my-lambda-form? (10011 form)))))
-      )))
+      (#d1:1 #d1:0))))
 
 (0011 my-fourth
   (0010 (values)
