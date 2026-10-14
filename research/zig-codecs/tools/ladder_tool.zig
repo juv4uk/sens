@@ -69,8 +69,8 @@ pub fn main() !void {
     std.debug.print("T5 roundtrip=EXACT words={d}\n", .{back.len});
 
     // 3. F3C: чи зменшує (opt-in). null = лишити T5.
-    const packed = try f3c.encode(allocator, t5_bytes);
-    if (packed) |carrier| {
+    const carrier_opt = try f3c.encode(allocator, t5_bytes);
+    if (carrier_opt) |carrier| {
         defer allocator.free(carrier);
         const restored = try f3c.decode(allocator, carrier);
         defer allocator.free(restored);
