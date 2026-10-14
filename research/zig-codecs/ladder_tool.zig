@@ -48,6 +48,16 @@ fn sha256Hex(bytes: []const u8) [64]u8 {
     return out;
 }
 
+/// Власний hex без std.fmt (у Zig 0.16 fmtSliceHexLower відсутній).
+fn hexInto(out: []u8, bytes: []const u8) []u8 {
+    const digits = "0123456789abcdef";
+    for (bytes, 0..) |b, i| {
+        out[i * 2] = digits[b >> 4];
+        out[i * 2 + 1] = digits[b & 0xf];
+    }
+    return out[0 .. bytes.len * 2];
+}
+
 fn parseWords(out: []t5.Word, data: []const u8) !usize {
     var count: usize = 0;
     var it = std.mem.splitScalar(u8, data, '\n');
@@ -81,9 +91,10 @@ pub fn main() !void {
     const t5_bytes = try t5.encode(allocator, words);
     defer allocator.free(t5_bytes);
     const t5_sha = sha256Hex(t5_bytes);
+    var hex_buf: [8192]u8 = undefined;
     std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
         words.len, t5_bytes.len, t5_sha[0..16],
-        std.fmt.fmtSliceHexLower(t5_bytes),
+        hexInto(&hex_buf, t5_bytes),
     });
 
     // 2. Round-trip: decode мусить дати ті самі точні слова.
