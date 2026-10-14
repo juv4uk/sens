@@ -82,11 +82,17 @@ class PublicationGateMechanicalTests(unittest.TestCase):
             zig_runner=self.runner, zig_runner_sha256=digest(self.runner.read_bytes()),
             sens_executor=self.executor, sens_executor_sha256=digest(self.executor.read_bytes()),
             expected_output_sha256=digest(b'1\n'),
+            owner_approved_provenance_sha256=digest(self.provenance.read_bytes()),
             _provenance_snapshot=self.provenance.read_bytes(),
         )
 
     def save_provenance(self):
         self.provenance.write_text(json.dumps(self.record))
+        # Test only: simulate a *new independent approval* for the mutated
+        # manifest so each adversarial test isolates its intended failure.
+        if hasattr(self, 'args'):
+            self.args._provenance_snapshot = self.provenance.read_bytes()
+            self.args.owner_approved_provenance_sha256 = digest(self.args._provenance_snapshot)
 
     def check_reject(self, phrase):
         with self.assertRaises(mod.PublicationRejected) as ctx:
@@ -107,6 +113,75 @@ class PublicationGateMechanicalTests(unittest.TestCase):
         self.save_provenance()
         self.args._provenance_snapshot = self.provenance.read_bytes()
         self.check_reject('explicit current/legacy')
+
+    def test_no_owner_approval_pin_cannot_publish(self):
+        self.args.owner_approved_provenance_sha256 = None
+        self.check_reject('owner_approved_provenance_sha256')
+        self.args.owner_approved_provenance_sha256 = digest(b'unapproved')
+        self.check_reject('owner approval pin differs')
+
+    def test_manifest_rewritten_after_owner_approval_rejected(self):
+        self.record['source_era'] = 'legacy'
+        self.provenance.write_text(json.dumps(self.record))
+        # The source JSON may be self-consistent, but the EXTERNAL pin did
+        # not approve its mutation. No physical data may be published.
+        self.check_reject('owner approval pin differs')
+
+    def _pin_translation(self):
+        self.record['source_era'] = 'legacy'
+        translation = self.root / 'independent-translation-receipt.json'
+        payload = {
+            'schema': 'sens-translation-receipt/v1',
+            'source_era': 'legacy',
+            'source_sha256': self.record['source_sha256'],
+            'physical_sha256': self.record['physical_sha256'],
+            'canonical_source_sha256': digest(b'10 001 00 000 01\n'),
+        }
+        translation.write_text(json.dumps(payload))
+        self.record['translation_receipt'] = {
+            'path': str(translation),
+            'sha256': digest(translation.read_bytes()),
+        }
+        self.save_provenance()
+        return translation, payload
+
+    def test_legacy_requires_separately_pinned_translation_proof(self):
+        self.record['source_era'] = 'legacy'
+        self.save_provenance()
+        self.check_reject('requires separate translation receipt')
+        proof, _ = self._pin_translation()
+        result = mod.verify_and_publish(self.args)
+        self.assertEqual(result['source_era'], 'legacy')
+        self.assertEqual(result['translation_receipt_sha256'], digest(proof.read_bytes()))
+        self.assertEqual(self.args.out.read_bytes(), GOOD_BYTES)
+
+    def test_translated_proof_wrong_binding_and_canonical_mutant_reject(self):
+        proof, payload = self._pin_translation()
+        payload['source_sha256'] = digest(b'a different era source')
+        proof.write_text(json.dumps(payload))
+        self.record['translation_receipt']['sha256'] = digest(proof.read_bytes())
+        self.save_provenance()
+        self.check_reject('does not bind legacy source')
+        payload['source_sha256'] = self.record['source_sha256']
+        payload['canonical_source_sha256'] = digest(b'01\n')
+        proof.write_text(json.dumps(payload))
+        self.record['translation_receipt']['sha256'] = digest(proof.read_bytes())
+        self.save_provenance()
+        self.check_reject('canonical-source SHA256 mismatch')
+
+    def test_translation_proof_mutation_after_admission_reject(self):
+        from unittest import mock
+        proof, payload = self._pin_translation()
+        actual_run = mod.run
+
+        def run_and_mutate(executable, *arguments, **kwargs):
+            result = actual_run(executable, *arguments, **kwargs)
+            if arguments and arguments[0] == 'backend':
+                proof.write_text(json.dumps({**payload, 'source_era': 'tampered'}))
+            return result
+
+        with mock.patch.object(mod, 'run', run_and_mutate):
+            self.check_reject('translation receipt changed during verification')
 
     def test_wrong_digest_rejected(self):
         self.record['physical_sha256'] = digest(b'wrong')
