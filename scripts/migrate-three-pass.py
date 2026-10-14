@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
-"""Three-pass historical SENS source migrator.
+"""Three-pass source migration: historical recognition into CURRENT exact domains.
 
-Pass 1 — legacy exact-eight Sens8/Sid8 call heads:
-    historical 8-bit identity -> proven current exact-domain successor.
-Pass 2 — my-lisp/current admitted surfaces:
-    registry/surface spelling -> current exact-domain identity.
-Pass 3 — historical LISP 1–1.5 uppercase names:
-    CAR/COND/LAMBDA/PLUS/... -> ratified D3-D6 resident.
+Interpret all historical spellings and eight-bit tokens through audited
+provenance; they are never themselves a current domain or call law.
+Pass 1: owner-audited historical eight-bit call heads -> exact successor, if proven.
+Pass 2: current admitted source surfaces -> corresponding exact-domain words.
+Pass 3: historical Lisp 1–1.5 names -> admitted current D3–D6 resident.
 
-Hard rules:
-- () serializes as D3 EMPTY = 000.
-- Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
-- Unknown executable heads PASS THROUGH unchanged after the three recognition passes.
-- D2 words are reserved exclusively for structural control and never pass as data/call heads.
-- Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
-- Comments disappear before migration.
-- Unqualified numeric literals fail closed: numbers require an explicit D24+ domain.
-- Domain-identity words (D1/D3-D9) are NEVER inferred to be numeric by spelling.
-- Unrecognized nonnumeric data/strings stay unresolved, not forced into Text7.
-- Output is a PHYSICAL T5 binary file with the same stem and extension .sens.\n- Unknown/unmapped words FAIL CLOSED: never ship text remnants as .sens.\n- Source .lisp is retained; migration never overwrites an existing .sens.
+Rules derived from current SENS contract and later owner decisions:
+- () is D3:000; nonempty list structure uses D2 10/00/11/01
+  (open/separator/dot/close). D2 is NEVER a call head or data identity.
+- D1:0/1 are predicates; identical payloads in D3–D10 are not D1.
+  Ratified domain occupancy alone never admits a callable mechanism.
+- Unresolved names may become D7 keyboard/v2 TEXT DATA if every glyph is
+  admitted. This is NOT permission to call that text as a function.
+  An unrepresentable identifier or unproved historical successor fails closed.
+- Quoted data resolves an admitted ladder identity before D7 text fallback.
+- Textual decimal tokens and #d/#b/#q2 textual forms project to D7 data,
+  NOT implicit numerical values. Bare binary words in numeric-width D24+
+  require an explicit admitted numeric domain/frame and fail closed here.
+- Current D7 keyboard/v2 128/128 is the ONLY text projection admitted by
+  this script. Historical .rs projection is rejected; no v1 corpus was
+  migrated, so no v1-to-v2 conversion prerequisite is needed.
+- Comments are stripped. Unresolved raw names cannot become .sens bytes.
+  The writer currently calls scripts/sens_t5_codec.py; byte parity with
+  the Zig physical codec must be proved independently, not assumed.
+- Output is a physical binary T5 .sens under --out with the same basename
+  as its .lisp source. Existing .sens files are never overwritten;
+  source .lisp is retained.
+
+Chronology for migration audit: D7 projection retirement 5aafc1e8
+(13 Oct 2026); numeric TEXT→D7 owner corrections 54078adb/629b077c
+(14 Oct 2026); D11 test-only noncallable guard 7a48037b (14 Oct).
+The above notes describe implementation, not a second semantic contract.
 """
 from __future__ import annotations
 
@@ -1153,7 +1167,7 @@ def main():
     ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
     ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
     ap.add_argument("--text7", type=Path, default=REPO_ROOT / "knowledge/d7-keyboard-v2-ratified.json",
-                    help="D7 keyboard/v2 by default; historical .rs projection only for explicitly versioned old sources")
+                    help="only current owner-ratified D7 keyboard/v2 JSON (128/128); historical .rs projections are rejected")
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
