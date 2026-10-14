@@ -1,7 +1,7 @@
 //! Тільки механічний провідник: усі позитивні й негативні закони — у SENS.
 //! ЖОДНИХ semantic expected cases або host-generated форм тут немає.
 
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, load_core_library, parse_mixed_exact_domain, Session};
 
 #[test]
 fn виконати_двійковий_свідок_life_1() {
@@ -9,11 +9,16 @@ fn виконати_двійковий_свідок_life_1() {
     load_core_library(&mut session).expect("транспорт: завантажити SENS Core");
 
     let scheduler = include_str!("../../../lib/life-1-scheduler.lisp");
-    eval_program(scheduler, &mut session).expect("транспорт: завантажити LIFE-1");
+    let scheduler = parse_mixed_exact_domain(scheduler)
+        .expect("транспорт: розібрати точні D3/D4 функції LIFE-1");
+    eval_parsed_expressions(&scheduler, &mut session)
+        .expect("транспорт: завантажити LIFE-1");
 
     // Єдиний оракул семантики: сама двійкова SENS-програма.
     let witness = include_str!("../../../tests/fixtures/life-1-exact-d3-semantic.lisp");
-    let result = eval_program(witness, &mut session)
+    let witness = parse_mixed_exact_domain(witness)
+        .expect("транспорт: розібрати точний SENS-свідок");
+    let result = eval_parsed_expressions(&witness, &mut session)
         .expect("транспорт: виконати SENS-свідок");
 
     // Це тільки спостереження вердикту D1:1, не перевірка логіки в Rust.
