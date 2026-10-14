@@ -44,6 +44,7 @@ def rows(stdout, name):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pairs", type=int, default=3)
+    p.add_argument("--zig-pin", default="0.17.0", choices=("0.16.0", "0.17.0"))
     p.add_argument("--out-dir", type=Path, required=True)
     args = p.parse_args()
     if args.pairs < 3:
@@ -57,8 +58,8 @@ def main():
             "rustc": command(["rustc", "-Vv"]).strip(),
             "cpu": platform.processor() or platform.uname().machine,
             "platform": platform.platform(), "seed": 20261014}
-    if meta["zig_version"] != "0.17.0":
-        raise RuntimeError(f"zig pin mismatch, got {meta['zig_version']}")
+    if meta["zig_version"] != args.zig_pin:
+        raise RuntimeError(f"zig pin mismatch expected {args.zig_pin}, got {meta['zig_version']}")
     command(["zig", "test", "research/zig-codecs/tests.zig"])
     command(["cargo", "build", "--locked", "--release", "-p", "sens",
              "--example", RUST_EXE])
