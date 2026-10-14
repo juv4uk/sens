@@ -213,11 +213,11 @@
 
 (0011 clips-template-slot-order
   (0010 (name templates)
-    (001000 ((entry (11100 name templates)))
-      (110
-        
-        ((010 entry)  (001 ()))
-        ((010 ()) (011 entry))))))
+    ((0010 (entry)
+       (110
+         ((010 entry)  (001 ()))
+         ((010 ()) (011 entry))))
+     (11100 name templates))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
 ; `(precursors)` in wine-external.clp's `ask-a-question` rule — CLIPS reads
