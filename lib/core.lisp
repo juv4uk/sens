@@ -468,13 +468,13 @@
          ((0100 (11110111 item (100 lst)))
           (11101 item (011 lst))))))))
 
-; ASSOC: NIL (and any improper atom tail) terminates the search.
-; D3 ATOM on NIL is D1:YES; never feed that NIL into CAR. Only a
-; nonempty pair may supply the first association and recursive CDR.
+; ASSOC: D4 NULL recognizes only the empty association list.
+; Unlike D3 ATOM, it must not silently accept an improper atom tail.
+; Only a nonempty pair may supply the first association and recursive CDR.
 (0011 assoc
   (0010 (key alist)
     (110
-      ((010 alist) (001 ()))
+      ((0101 alist) (001 ()))
       (#d1:1
        (110
          ((11110111 key (100 (100 alist))) (100 alist))
