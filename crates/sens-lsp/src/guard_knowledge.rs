@@ -628,6 +628,68 @@ mod tests {
         assert_eq!(mutations, 10, "all ten single-width mutations exercised");
     }
 
+
+    #[test]
+    fn guard_reference_missing_evidence_has_22_exact_d3_quote_heads_not_w8() {
+        // Structural width protection only. Native SENS is the semantic authority.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let start = full
+            .find("(0011 guard-reference\n")
+            .expect("guard-reference D4 definition missing");
+        let rest = &full[start..];
+        let end = rest
+            .find("\n(0011 guard-explain")
+            .expect("guard-reference delimiter missing");
+        let form = rest[..end].trim();
+
+        fn exact_quote_count(code: &str) -> usize {
+            fn visit(expr: &Expr) -> usize {
+                match &expr.kind {
+                    ExprKind::List(items) => {
+                        usize::from(matches!(
+                            items.first(),
+                            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                                if id.width() == 3 && id.packed_bits() == 0b001
+                        )) + items.iter().map(visit).sum::<usize>()
+                    }
+                    _ => 0,
+                }
+            }
+            sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", code
+            )
+            .expect("canonical pinned Guard reader")
+            .iter()
+            .map(visit)
+            .sum()
+        }
+
+        assert_eq!(exact_quote_count(form), 22, "eleven field/value atoms in two branches");
+
+        let quoted_symbols = [
+            "reference-missing", "schema", "guard-reference/1",
+            "topic", "decision", "unknown", "evidence-status",
+            "unresolved", "guidance", "choose-unknown-route", "unknown-routes",
+        ];
+        let mut mutants = 0;
+        for symbol in quoted_symbols {
+            let correct = format!("(001 {symbol})");
+            let historical = format!("(00000001 {symbol})");
+            let sites: Vec<_> = form.match_indices(&correct).map(|(at, _)| at).collect();
+            assert_eq!(sites.len(), 2, "expected two quoted records for {symbol}");
+            for at in sites {
+                let mut mutant = form.to_owned();
+                mutant.replace_range(at..at + correct.len(), &historical);
+                assert_eq!(
+                    exact_quote_count(&mutant), 21,
+                    "W8:00000001 must never alias D3:001 at {symbol}, byte {at}"
+                );
+                mutants += 1;
+            }
+        }
+        assert_eq!(mutants, 22, "all 22 single-site width mutants were exercised");
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
