@@ -119,7 +119,7 @@ fn lift_pinned_d8_io(
 
     if matches!(
         head_spelling,
-        Some("11100000" | "11110100" | "11101010" | "11101101")
+        Some("11100000" | "11110100" | "11101010" | "11101101" | "11101110")
     ) {
         let words = parse_binary_source_words(
             head_spelling.expect("known ratified D8 mechanism head")
@@ -276,7 +276,7 @@ pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Re
     }
     let base = if matches!(
         path,
-        "lib/world.lisp" | "lib/knowledge.lisp" | "lib/persistent-map.lisp" | "lib/lisp-fs.lisp"
+        "lib/world.lisp" | "lib/knowledge.lisp" | "lib/persistent-map.lisp" | "lib/lisp-fs.lisp" | "lib/clips-import.lisp"
     ) {
         parse_mixed_pinned_d8_io(source)?
     } else {
@@ -1055,6 +1055,44 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn clips_source_lifts_only_admitted_d8_symbol_to_string_and_never_quoted_payload() {
+        let literal = "(11101110 (001 word))";
+        let exact = only(
+            parse_mixed_exact_domain_reasoning_source("lib/clips-import.lisp", literal)
+                .expect("CLIPS is explicitly pinned for D8 mechanism heads"),
+        );
+        let ExprKind::List(call) = &exact.kind else { panic!("executable CLIPS call"); };
+        assert!(matches!(
+            &call[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 8 && identity.packed_bits() == 0b11101110
+        ), "only path-pinned source gets the exact D8 identity");
+
+        let quoted = only(
+            parse_mixed_exact_domain_reasoning_source(
+                "lib/clips-import.lisp",
+                "(001 (11101110 word))",
+            ).expect("CLIPS quoted data parses"),
+        );
+        let ExprKind::List(quote) = &quoted.kind else { panic!("D3 quote"); };
+        let ExprKind::List(data) = &quote[1].kind else { panic!("quote list datum"); };
+        assert!(
+            !matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted eight-bit-looking data never gains a callable D8 identity"
+        );
+
+        let unpinned = only(
+            parse_mixed_exact_domain_reasoning_source("lib/unify.lisp", literal)
+                .expect("other admitted source remains readable"),
+        );
+        let ExprKind::List(legacy) = &unpinned.kind else { panic!("unify source"); };
+        assert!(
+            !matches!(&legacy[0].kind, ExprKind::DomainIdentity(_)),
+            "same eight bits in another file do not authorize a D8 identity"
+        );
     }
 
     #[test]
