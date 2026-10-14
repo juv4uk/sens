@@ -337,7 +337,14 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
             Span::default(),
         ));
     }
-    parse_mixed_pinned_d8_io(source)
+    // The pinned legacy Core owns two macro-generated D4:0010 LAMBDA
+    // templates. Reuse the already-proven macro QUOTE code-data bridge:
+    // only a directly quoted D4:0010/0011 can become a typed identity.
+    // Arbitrary quoted lists, nested data and ordinary source stay opaque.
+    parse_mixed_pinned_d8_io(source)?
+        .into_iter()
+        .map(|expr| lift_macro_bootstrap_code_data(source, expr, 0))
+        .collect()
 }
 
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
@@ -1888,6 +1895,33 @@ mod tests {
             if id.width() == 9 && id.packed_bits() == 0b110011100));
 
         assert!(parse_mixed_exact_domain_utf8_source("lib/not-utf8.lisp", source).is_err());
+    }
+
+    #[test]
+    fn legacy_core_quote_code_template_preserves_d4_without_widening_ordinary_quote() {
+        // A macro builds executable LAMBDA code; its quoted D4 coordinate
+        // must be transported as DomainIdentity, never the host number 10.
+        let source = "(001 0010)";
+        let pinned = only(
+            parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
+                .expect("only pinned core may type its macro code template"),
+        );
+        let ExprKind::List(pinned_quote) = &pinned.kind else { panic!("pinned QUOTE"); };
+        assert!(matches!(&pinned_quote[1].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 4 && id.packed_bits() == 0b0010));
+
+        // No global inference: the same quoted token outside this pinned
+        // source is ordinary data, not a freshly admitted operation.
+        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary quoted data"));
+        let ExprKind::List(ordinary_quote) = &ordinary.kind else { panic!("ordinary QUOTE"); };
+        assert!(!matches!(&ordinary_quote[1].kind, ExprKind::DomainIdentity(_)));
+
+        let nested = only(parse_mixed_exact_domain_legacy_core_source(
+            "lib/core.lisp", "(001 (0010))").expect("nested quote data"));
+        let ExprKind::List(outer) = &nested.kind else { panic!("outer QUOTE"); };
+        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted list"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
+        assert!(parse_mixed_exact_domain_legacy_core_source("lib/not-core.lisp", source).is_err());
     }
 
     #[test]
