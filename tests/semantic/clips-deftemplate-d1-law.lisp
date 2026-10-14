@@ -1,13 +1,15 @@
-; SENS owns the truth test. Host code only loads these executable forms.
-; D9:010110100 is the ratified clips-deftemplate-form? derived coordinate.
-; Each successful law returns exact D1:1. The last form changes only
-; the expected D1 bit of the positive law (1 -> 0), thus invokes D1:0.
+; SENS owns the positive / negative truth decisions, not the Rust transport.
+; Source-defined CLIPS helper has ratified D9:010110100 residence; direct
+; D9 callability is NOT admitted yet, so its existing derived name is used
+; only as the transitional binder. D3 COND / D3 EQ own the D1 self-verdict.
+; In the mixed reader explicit #d1:0/1 preserve exact ONE-BIT identity.
+; The final program flips only the expected D1 bit (1 -> 0) of the first.
 (110
-  ((101 (010110100 (001 (deftemplate reading (slot sensor)))) 1) 1)
-  (1 (0)))
+  ((101 (clips-deftemplate-form? (001 (deftemplate reading (slot sensor)))) #d1:1) #d1:1)
+  (#d1:1 (#d1:0)))
 (110
-  ((101 (010110100 (001 (deffacts init (planet earth)))) 0) 1)
-  (1 (0)))
+  ((101 (clips-deftemplate-form? (001 (deffacts init (planet earth)))) #d1:0) #d1:1)
+  (#d1:1 (#d1:0)))
 (110
-  ((101 (010110100 (001 (deftemplate reading (slot sensor)))) 0) 1)
-  (1 (0)))
+  ((101 (clips-deftemplate-form? (001 (deftemplate reading (slot sensor)))) #d1:0) #d1:1)
+  (#d1:1 (#d1:0)))
