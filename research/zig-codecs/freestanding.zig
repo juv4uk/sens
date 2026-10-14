@@ -124,3 +124,19 @@ test "freestanding fail closed: invalid, capacity, scratch, overlap, no saving" 
         &shared, shared.len, &shared, shared.len));
     try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 32), &dst);
 }
+
+/// A physical source-level memory *component* audit, NOT maximum stack usage.
+/// FixedBufferAllocator scratch is supplied by the caller, while rank/unrank
+/// use a table of 129 rows × 4 lanes × u256 in automatic storage. Compiler
+/// frames, nested calls, spills and runtime helpers add unmeasured stack.
+pub const F3C_SCRATCH_BYTES: usize = f3c.ABI_SCRATCH_BYTES;
+pub const F3C_RANK_TABLE_BYTES: usize = @sizeOf([129][4]u256);
+
+test "F3C physical SRAM component audit, not a firmware stack guarantee" {
+    try std.testing.expectEqual(@as(usize, 8192), F3C_SCRATCH_BYTES);
+    try std.testing.expectEqual(@as(usize, 16512), F3C_RANK_TABLE_BYTES);
+    std.debug.print(
+        "F3C_MEMORY_COMPONENTS scratch_bytes={d} rank_table_bytes={d} total_stack_bound=NOT_MEASURED\n",
+        .{ F3C_SCRATCH_BYTES, F3C_RANK_TABLE_BYTES },
+    );
+}

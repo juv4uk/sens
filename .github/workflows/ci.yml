@@ -139,6 +139,27 @@ jobs:
               echo "::error::unexpected host libc import for $target"; exit 1
             fi
           done
+          # The linked ELF must resolve compiler builtins itself. Object-only
+          # nm -u above is informative but is NOT a freestanding link proof.
+          echo 'test_id=zig-freestanding-link-proof layer=transport semantic_authority=SENS status=link'
+          for target in x86_64-freestanding thumb-freestanding-eabi; do
+            elf="$RUNNER_TEMP/sens-zig-free-$target.elf"
+            "$ZIG" build-exe research/zig-codecs/freestanding.zig \
+              -target "$target" -O ReleaseSmall -fno-entry \
+              -fcompiler-rt -fno-unwind-tables -femit-bin="$elf"
+            echo "ZIG_FREESTANDING_LINK_PASS target=$target zig=$("$ZIG" version)"
+            readelf -h "$elf" | grep -E 'Class:|Machine:|Type:'
+            sha256sum "$elf"
+            size -A "$elf"
+            nm -u "$elf" | tee "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"
+            if test -s "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"; then
+              echo "::error::unresolved symbol in linked freestanding $target"; exit 1
+            fi
+            nm --defined-only "$elf" | grep 'sens_zig_free_' |
+              tee "$RUNNER_TEMP/sens-zig-free-$target-exports.txt"
+            test "$(grep -c 'sens_zig_free_' "$RUNNER_TEMP/sens-zig-free-$target-exports.txt")" -eq 5
+          done
+          # Generic Thumb linked ELF is still NOT Xtensa / ESP32-S3 firmware.
           # Generic Thumb is cross-object evidence, not an ESP32-S3 flash proof.
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
