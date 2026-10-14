@@ -30,7 +30,7 @@ D10 ratification — нормативне рішення над повним к�
 
 Колонки: `ук → укр → san → en → LISP → sym`.
 
-**Чинна D7 — keyboard/v2, 128/128** семибітових текстових координат (ратифікація власника 13.10.2026): [`knowledge/d7-keyboard-v2-ratified.json`](../knowledge/d7-keyboard-v2-ratified.json), [`lib/domains/d7.lisp`](../lib/domains/d7.lisp). Координати `0100001` і `0101010` були зарезервовані **тільки в історичній звуковій v1 (126/128)**; нові програми не можуть успадкувати той старий профіль без явної конверсії. D7 — дані/текст, не числа й не callable Core. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008; нормативна машинна карта — [`knowledge/d9-ratified.json`](../knowledge/d9-ratified.json), людська — [`lib/domains/d9.lisp`](../lib/domains/d9.lisp).
+**Чинна D7 — keyboard/v2, 128/128** семибітових текстових координат (ратифікація власника 13.10.2026): [`knowledge/d7-keyboard-v2-ratified.json`](../knowledge/d7-keyboard-v2-ratified.json), [`lib/domains/d7.lisp`](../lib/domains/d7.lisp). Координати `0100001` і `0101010` були зарезервовані **тільки в історичній звуковій v1 (126/128)**. **За D7 v1 нічого не встигли мігрувати**, тому нові програми використовують чинну D7 v2 без будь-якої процедури v1→v2 або додаткового міграційного блокування. D7 — дані/текст, не числа й не callable Core. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008; нормативна машинна карта — [`knowledge/d9-ratified.json`](../knowledge/d9-ratified.json), людська — [`lib/domains/d9.lisp`](../lib/domains/d9.lisp).
 
 ## Human surfaces
 
