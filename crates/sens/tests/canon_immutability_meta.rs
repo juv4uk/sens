@@ -118,7 +118,7 @@ const META_CANON_NONATOM_LAW: &str =
 fn meta_canon_nonatom_is_sens_owned() {
     let forms = sens::parse_mixed_exact_domain(META_CANON_NONATOM_LAW)
         .expect("binary SENS D1/D3 Canon non-atom law parses");
-    assert_eq!(forms.len(), 2, "two SENS-owned atomic-boundary verdicts");
+    assert_eq!(forms.len(), 8, "two non-atom and six domain-projected SENS-owned verdicts");
     let mut session = meta_session();
     for (index, form) in forms.iter().enumerate() {
         let observed = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
