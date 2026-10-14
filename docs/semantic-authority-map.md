@@ -37,7 +37,7 @@ exact binary word (digits 0/1)
 + admitted / proved law
 ```
 
-Current Core domains include D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 126/128 under #3572, D8 256/256 under #3960, D9 512/512 under #4008, and peer numeric D24/D48/D96/D192/... ratified 2026-10-11. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+Current Core domains include D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 keyboard v2 128/128 (current, ratified 2026-10-13; sound/Text v1 126/128 under #3572 is historical provenance only), D8 256/256 under #3960, D9 512/512 under #4008, and peer numeric D24/D48/D96/D192/... ratified 2026-10-11. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
 **Уточнення власника 12.10.2026 (Contract 11.9):** D1–D10 — це точні двійкові слова, тобто записи з цифр 0 і 1 та збереженою доменною identity, **але не математичні операнди**. На них заборонено числові `+ - * /` і математичні `< > =`, автоматичне перетворення на число чи арифметичне розширення. Виконувана арифметика допускає тільки явно доменно-кваліфіковані значення D24/D48/D96/… (включно з канонічними NEG/RATIO). Самі коди операторів у D5/D6 можуть запускати ці механізми над D24+, не стаючи числами. D3 EQ і D1 логіка залишаються законами ідентичності/предикатів, а не числовим порівнянням. Історичні Number/Rational та бездоменний BinaryNumber — сумісність/дані, не підстава для математичного виконання.
 
