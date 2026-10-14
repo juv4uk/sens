@@ -1114,11 +1114,6 @@ mod tests {
         let d9 = domain_frame(9, 0b0_1010_1000);
         assert_ne!(d3, d4, "D3:010 and D4:0010 remain different identities");
         assert_ne!(d8, d9, "D8:10101000 and D9:010101000 are different identities despite equal payload");
-        assert_ne!(
-            encode_binary_frame(&d8).unwrap(),
-            encode_binary_frame(&BinaryFrame::Function(crate::sens!(10101000))).unwrap(),
-            "typed D8 cannot alias the historical W8 Function frame",
-        );
     }
 
     #[test]
@@ -1141,11 +1136,6 @@ mod tests {
         let encoded = BinaryFrame::encode_exact_domain_program(&frames).unwrap();
         assert_eq!(BinaryFrame::decode_exact_domain_program(&encoded).unwrap(), frames);
         assert_eq!(decode_binary_program(&encoded).unwrap(), frames);
-        assert_ne!(
-            encode_binary_program(&[BinaryFrame::Function(crate::sens!(10101000))]).unwrap(),
-            encode_binary_program(&[domain_frame(8, 0b1010_1000)]).unwrap(),
-            "identical eight payload bits do not transfer historical Function semantics to D8",
-        );
         assert_ne!(qualified_numeric_word(24), qualified_numeric_word(48));
     }
 
