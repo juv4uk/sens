@@ -106,7 +106,15 @@ mod zig_transport {
 
 fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
     #[cfg(feature = "zig-transport")]
-    { return zig_transport::decode_f3(bytes); }
+    {
+        let restored = zig_transport::decode_f3(bytes)?;
+        let parsed = sens::PhysicalT5Program::decode(&restored)
+            .map_err(|e| format!("Zig F3C restored inadmissible SENS program: {e:?}"))?;
+        if parsed.form_count() != 1 {
+            return Err("Zig F3C restored more than one root".into());
+        }
+        return Ok(restored);
+    }
     #[cfg(not(feature = "zig-transport"))]
     { sens::frame3_small::decode_explicit_small_f3(bytes)
         .map_err(|e| format!("explicit small F3 rejected: {e:?}")) }
@@ -114,7 +122,14 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
 
 fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
     #[cfg(feature = "zig-transport")]
-    { return zig_transport::encode_f3(bytes); }
+    {
+        let parsed = sens::PhysicalT5Program::decode(bytes)
+            .map_err(|e| format!("SENS input is not an executable canonical T5 program: {e:?}"))?;
+        if parsed.form_count() != 1 || bytes.len() > 16 {
+            return Ok(None);
+        }
+        return zig_transport::encode_f3(bytes);
+    }
     #[cfg(not(feature = "zig-transport"))]
     { sens::frame3_small::encode_explicit_small_f3(bytes)
         .map_err(|e| format!("tiny F3 encode rejected: {e:?}")) }
