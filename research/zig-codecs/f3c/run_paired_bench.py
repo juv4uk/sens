@@ -44,7 +44,7 @@ def rows(stdout, name):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pairs", type=int, default=3)
-    p.add_argument("--zig-pin", default="0.17.0", choices=("0.16.0", "0.17.0"))
+    p.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0", "0.17.0"))
     p.add_argument("--out-dir", type=Path, required=True)
     args = p.parse_args()
     if args.pairs < 3:
@@ -115,7 +115,7 @@ def main():
     for s in samples:
         grouped[(s["case"], s["op"], s["impl"])].append(s["ns_per_op"])
     report = ["# Zig ↔ Rust F3C real benchmark", "",
-              "Zig 0.17.0 ReleaseFast vs existing Rust --release; F3C byte parity verified.",
+              f"Zig {args.zig_pin} ReleaseFast vs existing Rust --release; F3C byte parity verified.",
               "3+ process-pairs, same GitHub runner; no independently repeated host runs.",
               "NOT a SENS semantic oracle; research only, 95% K-J CI NOT_MEASURED.", "",
               "| Case | Operation | Zig p50 ns/op | Rust p50 ns/op | Rust/Zig |",

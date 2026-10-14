@@ -54,3 +54,18 @@ target/debug/sens-trit eval-f3 output.senc
 - `sens_zig_t5_encode_be3` відхиляє нецілі трійки, нульову/непідтримувану ширину, надлишковий payload і недостатню місткість буфера.
 - `sens_zig_codec_abi_version() == 2`; попередній експорт `sens_zig_t5_encode` збережений для старого ABI-клієнта, але **за замовчуванням не викликається** із `sens-trit`. Поза межами host не переносити `usize/isize` у фізичний конверт.
 - Доказ в `research/zig-codecs/transport_abi.zig`: різні фізичні T5 для D1:1 та D2:01, позитивний golden і негативні перекручені triplets. Це mechanical gate; семантичне рішення належить SENS.
+
+## Обов'язкові парні бенчмарки кожного коміту · рішення власника 14.10.2026
+
+**За прямим рішенням власника T5 та F3C benchmarks є обов'язковими для кожного GitHub push / PR**, незалежно від назви гілки або changed paths. Виконуються **тільки** в чинному автоматичному `.github/workflows/ci.yml`: Zig 0.16.0 (перевірений pinned download) ↔ Rust `--locked --release`, по **3 зовнішні парні серії** для кожного кодека на одному runner з перемішаним порядком запуску.
+
+- До кожного timing підтвердити **побайтову ідентичність** Zig↔Rust (фізичний T5/F3C, не SENS-семантику). Parity mismatch, missing sample, невірний SHA / pin / invalid elapsed / відсутній артефакт **блокують CI**. Жодного мовчазного skip.
+- Повинні існувати `STATUS`, `environment.json` із Git SHA, compiler version та SHA бінарників, `samples.jsonl`, `summary.md`. Обов'язковий evidence-gate звіряє **240 T5** та **120 F3C** рядків, обидва backend, рівно 3 пари. Окремий `upload-artifact` виконується навіть після помилки; відсутність артефакту — помилка.
+- **Швидкість не є семантичною істиною**, і самі плинні таймінги GitHub-hosted runner не мають hardcoded fail-порогу. CI блокує непідтверджені/неповні виміри, а не повільніший Zig або Rust. Немає неправдивих заяв про 95% K–J interval чи продуктивність усього SENS.
+- Це **обов'язковий фокусний mechanical benchmark**, а не автоматичне покриття всіх профілів, великий corpus, cross-target ESP32 або freestanding proof. Для цих задач вимоги #5770/#5771/#5772–#5775 залишаються відкритими.
+
+Локальне відтворення (Zig 0.16.0 і Rust/Cargo доступні в PATH):
+```sh
+python3 research/zig-codecs/t5/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-t5-paired
+python3 research/zig-codecs/f3c/run_paired_bench.py --zig-pin 0.16.0 --pairs 3 --out-dir /tmp/sens-f3c-paired
+```

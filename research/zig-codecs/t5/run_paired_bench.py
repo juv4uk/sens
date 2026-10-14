@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI_GLUE_NO_SEMANTICS: manual paired T5 Zig/Rust mechanical benchmark.
+"""CI_GLUE_NO_SEMANTICS: required paired T5 Zig/Rust mechanical benchmark.
 
 Only verified transport fixture hashes are used as the equality precondition.
 Never claim that this script proves the SENS evaluator's semantics.
