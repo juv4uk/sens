@@ -131,6 +131,21 @@ fn probe_meta_eval_d24_math_direct() {
     );
 }
 
+#[test]
+fn probe_variable_value_identity() {
+    // ДІАГНОСТИКА: що тримає змінна a у тілі лямбди, коли аргумент -- явний D24?
+    let two = "000000000000000000000010";
+    let three = "000000000000000000000011";
+    // Без затінення: застосувати лямбду до двох D24 і повернути перший параметр.
+    let direct = meta_eval(&format!("((lambda (a b) a) #d24:{two} #d24:{three})"));
+    // Із затіненням +: те саме, але через затінений +.
+    let shadow = meta_eval(&format!(
+        "((lambda (+) (+ #d24:{two} #d24:{three})) (lambda (a b) a))"
+    ));
+    assert_eq!(direct, "SENTINEL-DIRECT", "direct variable value");
+    assert_eq!(shadow, "SENTINEL-SHADOW", "shadowed variable value");
+}
+
 const META_CANON_NONATOM_LAW: &str =
     include_str!("../../../tests/semantic/meta-canon-nonatom-d1-law.lisp");
 
@@ -171,4 +186,15 @@ fn meta_canon_nonatom_is_sens_owned() {
         failure.is_err(),
         "SENS must reject wrong D1 result by evaluating CAR(QUOTE EMPTY)"
     );
+}
+
+#[test]
+fn probe_math_through_variables() {
+    // ВИРІШАЛЬНИЙ ЗОНД: математика на аргументах, що прийшли ЧЕРЕЗ ЗМІННІ a/b.
+    // Якщо D24 переживає зв'язування -- буде 6; якщо домен губиться --
+    // впаде з "math requires explicit D24+ operands".
+    let two = "000000000000000000000010";
+    let three = "000000000000000000000011";
+    let via_vars = meta_eval(&format!("((lambda (a b) (* a b)) #d24:{two} #d24:{three})"));
+    assert_eq!(via_vars, "SENTINEL-VIA-VARS", "math through variables");
 }
