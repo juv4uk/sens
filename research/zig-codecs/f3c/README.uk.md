@@ -14,7 +14,7 @@
 
 ```bash
 zig test research/zig-codecs/t5/t5.zig
-zig test research/zig-codecs/f3c/f3c.zig
+zig test research/zig-codecs/tests.zig    # F3C + T5 спільний module root
 ```
 
 Golden vector: T5 `63 89 06 a1` ↔ F3C `f3 40 60`; вкладена програма T5 `66 38 67 89 89 3b 35` ↔ F3C `f3 36 5f 1b d0 c9`. Є rank/unrank boundary checks, негативні carrier checks і перевірка D3 invalid empty frame.
