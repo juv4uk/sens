@@ -23,6 +23,19 @@ zig test research/zig-codecs/t5/t5.zig
 
 **Важливо:** ці тести перевіряють тільки Zig-механіку. Для статусу DONE потрібна окрема фактично запущена матриця Rust encode→Zig decode та Zig encode→Rust decode на фіксованому корпусі, реальні SHA та нативний SENS execution receipt там, де перевіряється семантика.
 
+## Ручний парний стенд (підготовлений, ще НЕ запущений)
+
+Потрібні Linux x86_64, Zig 0.17.0, Rust/Cargo та libc. Запускати лише на тому самому фізичному CPU. Скрипт виконує `zig test`, збирає Zig `-O ReleaseFast -lc` і поточний Rust `--locked --release`, перевіряє **повну рівність фізичних байтів** для чотирьох однакових корпусів перед публікацією результатів і зберігає raw-парні samples та SHA.
+
+```bash
+python3 research/zig-codecs/t5/run_paired_bench.py \\
+  --pairs 3 --out-dir /tmp/sens-zig-rust-t5
+cat /tmp/sens-zig-rust-t5/STATUS
+cat /tmp/sens-zig-rust-t5/summary.md
+```
+
+Порівнюються Zig [`bench.zig`](bench.zig) та чинний Rust [`zig_t5_matched_bench.rs`](../../../crates/sens/examples/zig_t5_matched_bench.rs). На кожному 1, 16, 128, 1024 повтореннях трійки точних слів `10 100 01` збігаються **всі фізичні байти**, не лише FNV-хеш. Отримана таблиця описує тільки прогріту механіку T5. Алокації/peak RSS, F3C, cold startup, confidence intervals та нативний SENS semantic receipts — **NOT_MEASURED**, їх ще слід довести окремо.
+
 ## Бенчмарки Zig ↔ Rust (обов'язкова залежність)
 
 Основний proof gate [#5771](https://github.com/juv4uk/sens/issues/5771). Спочатку запустити паритет, потім парні encode/decode на тих самих typed words і фізичних байтах, з однаковими обсягами та CPU, release-конфігураціями, серіями та warmups. Записати `ns/op`, `MiB/s`, `allocs/op`, p50/p95, 95% CI і *реальні* бінарні/корпусні SHA. Якщо паритет не пройшов — `BLOCKED_NO_TIMING`, а не вигаданий speedup.
