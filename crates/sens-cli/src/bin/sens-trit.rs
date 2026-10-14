@@ -471,8 +471,8 @@ fn execute() -> Result<(), String> {
             // produced by Zig in the official zig-transport variant.
             #[cfg(feature = "zig-transport")]
             let bytes = {
-                let typed = sens::decode_ternary_words(&reference)
-                    .map_err(|e| format!("canonical T5 words rejected: {e:?}"))?;
+                let typed = decode_canonical_t5_words(&reference)
+                    .map_err(|e| format!("canonical T5 words rejected: {e}"))?;
                 zig_transport::encode_t5(&typed, &reference)?
             };
             #[cfg(not(feature = "zig-transport"))]
@@ -883,6 +883,43 @@ mod eval_tests {
             assert!(!route.contains("sens::open_ternary_program("),
                 "read-only route uses Rust physical open: {marker}");
         }
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_encode_route_uses_exact_t5_words_without_rust_physical_decoder() {
+        // SENS owns source parsing and D2 admission, Zig owns the T5 bytes.
+        let projection = "10 001 00 000 01";
+        let reference = sens::encode_binary_projection_ternary(projection)
+            .expect("SENS canonical binary source");
+        assert_eq!(&reference, &[0x63, 0x89, 0x06, 0xa1]);
+        let expected = sens::parse_binary_source_words(projection)
+            .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let actual = decode_canonical_t5_words(&reference)
+            .expect("Zig physical T5 and existing SENS D2 reader");
+        assert_eq!(actual, expected);
+        assert_eq!(actual.iter().map(|w| w.width()).collect::<Vec<_>>(),
+                   [2, 3, 2, 3, 2]);
+        assert_eq!(zig_transport::encode_t5(&actual, &reference).unwrap(), reference);
+
+        // Fail closed before the Zig encoder can publish malformed bytes.
+        for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
+            assert!(decode_canonical_t5_words(invalid).is_err());
+        }
+        let lone_close = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
+        assert!(decode_canonical_t5_words(&lone_close).unwrap_err()
+            .contains("SENS canonical D2 rejected"));
+
+        // Scope the audit to the actual production encode command, excluding
+        // intentional Rust reference-only tests and unrelated library code.
+        let source = include_str!("sens-trit.rs");
+        let start = source.find("\"encode\" => {").expect("CLI encode command");
+        let block = &source[start..];
+        let route = &block[..block.find("\n        }").expect("encode command closes")];
+        assert!(route.contains("decode_canonical_t5_words(&reference)"));
+        assert!(!route.contains("sens::decode_ternary_words(&reference)"));
     }
 
     #[cfg(feature = "zig-transport")]
