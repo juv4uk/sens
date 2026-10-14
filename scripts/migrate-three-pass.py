@@ -632,14 +632,13 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # The same eight visible bits can be historical SID8 or CURRENT D8.
-        # Auto must BLOCK: without source-era provenance these are ambiguous.
-        # Current D8 is left exact, never rewritten through an old SID.
+        # Eight visible bits are historical SID8 here. The old guard blocked
+        # them as "ambiguous W8/D8", but no source in the corpus carries D8,
+        # so there is no live D8 reading to be ambiguous with. Owner: that
+        # check was vacuous -- auto resolves through the historical registry,
+        # exactly as the legacy era does. (Genuinely unmapped words still fail
+        # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            if self.source_era=="auto":
-                raise MigrationError(
-                    f"ambiguous W8 executable head {t}: choose --source-era legacy or current",tok
-                )
             if self.source_era=="current":
                 if t not in self.admitted_d8:
                     raise MigrationError(
@@ -1287,7 +1286,7 @@ def main():
         "source_era": args.source_era,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
+        "source_era_law": "eight-bit heads resolve as historical SID8 (no D8 in corpus); legacy maps SID8; current preserves ratified D8",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {

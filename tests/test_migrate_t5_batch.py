@@ -90,16 +90,19 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual(rerun.returncode, 2)
         self.assertEqual((self.out / "lib/third.sens").read_bytes(), expected)
 
-    def test_auto_blocks_ambiguous_historical_w8_without_writing(self):
-        # The real previously admitted C1-THIRD source uses historical
-        # exact-eight heads; unqualified W8 is NOT proof of a modern D8 call.
+    def test_auto_resolves_historical_w8_as_sid8(self):
+        # No source in the corpus carries D8, so an eight-bit head has no live
+        # D8 reading: auto resolves the historical SID8 head through the same
+        # registry the legacy era uses, instead of blocking a vacuous W8/D8
+        # ambiguity (owner: that check was dumb).
         p = self.call("lib/third.lisp", write=True, era=None)
-        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         doc = json.loads(self.report.read_text())
         self.assertEqual(doc["authority"]["source_era"], "auto")
-        self.assertEqual(doc["summary"]["files_written"], 0)
-        self.assertIn("ambiguous W8", doc["files"][0]["reason"])
-        self.assertFalse((self.out / "lib/third.sens").exists())
+        self.assertEqual(doc["summary"]["files_written"], 1)
+        self.assertGreater(doc["files"][0]["passes"]["pass1-sens8"], 0)
+        self.assertEqual((self.out / "lib/third.sens").read_bytes(),
+                         PROVEN.with_suffix(".sens").read_bytes())
 
     def test_explicit_legacy_is_recorded_and_cannot_be_inferred(self):
         p = self.call("lib/third.lisp", write=True, era="legacy")
@@ -111,13 +114,15 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual((self.out / "lib/third.sens").read_bytes(),
                          PROVEN.with_suffix(".sens").read_bytes())
 
-    def test_current_d8_head_stays_exact_and_legacy_is_not_guessed(self):
+    def test_current_d8_head_stays_exact_while_auto_resolves_historical(self):
         src = self.root / "lib/current.lisp"
         src.write_text("(10000000 ())\n", encoding="utf-8")
+        # No D8 in the corpus -> auto has no live D8 reading to be ambiguous
+        # with: it resolves the eight-bit head through the historical registry.
         p = self.call("lib/current.lisp", era="auto")
-        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
-        self.assertIn("ambiguous W8", json.loads(self.report.read_text())
-                      ["files"][0]["reason"])
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertGreater(json.loads(self.report.read_text())
+                           ["files"][0]["passes"]["pass1-sens8"], 0)
         p = self.call("lib/current.lisp", era="current", write=True)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         data = json.loads(self.report.read_text())
