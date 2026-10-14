@@ -4,6 +4,8 @@ use std::fs;
 use std::io::Read;
 use std::process;
 use std::rc::Rc;
+#[cfg(feature = "zig-transport")]
+mod zig_transport_gateway;
 mod lsp_entry;
 mod island_invoke;
 mod islands;
@@ -138,6 +140,11 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
 /// Neither human spellings nor an eight-bit compatibility reader participate.
 /// An explicit binary file never gains ambient host capabilities or Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    // When Zig transport is chosen, ALL physical .sens ingress passes through
+    // the one Zig byte gateway before the SENS-owned canonical reader.
+    // Zig errors are mechanical rejects, not a SENS D1:NO or fallback request.
+    #[cfg(feature = "zig-transport")]
+    zig_transport_gateway::validate_t5(bytes)?;
     // Exact-width T5 words feed the canonical D2 reader directly.
     // No ASCII surface, dense re-packing or duplicate bit-unpacking.
     let words = sens::decode_ternary_words(bytes)
