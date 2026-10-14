@@ -1,13 +1,11 @@
-# КАРАНТИН (повернено 14.10.2026 за тріажем): ШКІДЛИВА перевірка — застаріла передумова: ValueError not raised.
-# Не дає сигналу про код (run 38566017915). Повторні запуски/runner — заборонені.
-# Чинний сигнал про D24 лишається у видимих ci-hosted / vertical-day-*.
+# Виведено з карантину 14.10.2026 після фіксу тесту: test_two_negative_mutations_are_rejected
+# хибно падав через коментар із #d1:1 (мутація била в коментар, не в код). Тест полагоджено.
 name: Драбина доменів — точна ширина та механіка
 
 on:
   workflow_dispatch:
 jobs:
   exact-width-ladder:
-    if: ${{ false }} # КАРАНТИН: шкідлива, run 38566017915
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

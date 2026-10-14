@@ -172,11 +172,23 @@ class Utf8PredicateD1Cutover(unittest.TestCase):
         self.assertRegex(d8, r"(?m)^\s*\(11110111\s+.*\(LISP EQUAL\)")
 
     def test_two_negative_mutations_are_rejected(self):
+        # Мутувати треба ЖИВЕ входження носія, а не те, що в коментарі:
+        # у lib/utf8.lisp перше "#d1:1" стоїть у рядку-коментарі, і replace(...,1)
+        # підмінював саме його, лишаючи код недоторканим -> тест хибно падав.
         source = SOURCE.read_text(encoding="utf-8")
-        with self.assertRaises(ValueError):
-            audit(source.replace("#d1:1", "1", 1))
-        with self.assertRaises(ValueError):
-            audit(source.replace("#d1:0", "0", 1))
+
+        def first_live(carrier):
+            for m in re.finditer(re.escape(carrier), source):
+                line = source[source.rfind("\n", 0, m.start()) + 1:m.start()]
+                if ";" not in line:
+                    return m.start()
+            raise AssertionError(f"немає живого {carrier} у {SOURCE}")
+
+        for carrier, plain in (("#d1:1", "1"), ("#d1:0", "0")):
+            i = first_live(carrier)
+            mutated = source[:i] + plain + source[i + len(carrier):]
+            with self.assertRaises(ValueError):
+                audit(mutated)
 
 
 if __name__ == "__main__":
