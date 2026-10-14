@@ -187,6 +187,31 @@ pub fn WideDomainWord(comptime width: u16) type {
         pub fn init(bits: Payload) Self {
             return .{ .bits = bits };
         }
+
+        pub const byte_len: usize = @divExact(width, 8);
+
+        /// Explicit MSB-first *physical bytes*, not a numeric value or
+        /// an executable D24+ word. No implicit type/width erasure.
+        pub fn writeBytes(self: Self) [byte_len]u8 {
+            var out: [byte_len]u8 = undefined;
+            for (&out, 0..) |*byte, i| {
+                const shift: std.math.Log2IntCeil(Payload) =
+                    @intCast((byte_len - 1 - i) * 8);
+                byte.* = @truncate(self.bits >> shift);
+            }
+            return out;
+        }
+
+        /// No padding, truncation, guessed width or semantic admission.
+        pub fn fromBytes(raw: []const u8) error{WrongByteLength}!Self {
+            if (raw.len != byte_len) return error.WrongByteLength;
+            var bits: Payload = 0;
+            for (raw) |byte| {
+                bits = (bits << @as(std.math.Log2IntCeil(Payload), 8)) |
+                    @as(Payload, byte);
+            }
+            return init(bits);
+        }
     };
 }
 
@@ -207,6 +232,42 @@ test "D24 D48 D96 D192 are distinct exact-bit opaque carriers" {
     try std.testing.expect(WideDomainWord(24) != DomainWord(10));
 }
 
+
+test "wide ladder MSB bytes retain every bit without admitting mathematics" {
+    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+        const D = WideDomainWord(width);
+        const one = D.init(1);
+        const raw = one.writeBytes();
+        try std.testing.expectEqual(D.byte_len, raw.len);
+        for (raw[0 .. raw.len - 1]) |byte|
+            try std.testing.expectEqual(@as(u8, 0), byte);
+        try std.testing.expectEqual(@as(u8, 1), raw[raw.len - 1]);
+        try std.testing.expectEqual(one.bits, (try D.fromBytes(&raw)).bits);
+
+        const max = D.init(~@as(D.Payload, 0));
+        const full = max.writeBytes();
+        for (full) |byte|
+            try std.testing.expectEqual(@as(u8, 0xff), byte);
+        try std.testing.expectEqual(max.bits, (try D.fromBytes(&full)).bits);
+
+        var mutant = raw;
+        mutant[0] ^= 0b10000000;
+        // Every bit pattern is a valid opaque physical carrier. A flipped
+        // bit must change identity, NOT manufacture a new SENS law.
+        try std.testing.expect((try D.fromBytes(&mutant)).bits != one.bits);
+        try std.testing.expectError(error.WrongByteLength,
+            D.fromBytes(raw[0 .. raw.len - 1]));
+        const extra = [_]u8{0} ** (D.byte_len + 1);
+        try std.testing.expectError(error.WrongByteLength, D.fromBytes(&extra));
+        try std.testing.expect(!@hasDecl(D, "toCarrier"));
+    }
+
+    const coordinate = WideDomainWord(24).init(0b00000000_00000001_10101000);
+    const bytes = coordinate.writeBytes();
+    try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x01, 0xa8 }, &bytes);
+    try std.testing.expectError(error.WrongByteLength,
+        WideDomainWord(48).fromBytes(&bytes));
+}
 
 test "2046 binary sources and 3-byte host triplets preserve every domain bit" {
     var seen: usize = 0;
