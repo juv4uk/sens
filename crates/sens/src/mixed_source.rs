@@ -337,14 +337,82 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
             Span::default(),
         ));
     }
-    // The pinned legacy Core owns two macro-generated D4:0010 LAMBDA
-    // templates. Reuse the already-proven macro QUOTE code-data bridge:
-    // only a directly quoted D4:0010/0011 can become a typed identity.
-    // Arbitrary quoted lists, nested data and ordinary source stay opaque.
+    // Preserve the pinned D4 LAMBDA/DEFINE code-data bridge.
+    // Only the two existing language-owned AND/OR macro definitions also
+    // construct D3 COND/ATOM/CONS as executable code-data. Never infer D3
+    // identity from a quoted number elsewhere in Core or ordinary source.
     parse_mixed_pinned_d8_io(source)?
         .into_iter()
-        .map(|expr| lift_macro_bootstrap_code_data(source, expr, 0))
+        .map(|expr| {
+            let logic_macro = matches!(
+                &expr.kind,
+                ExprKind::List(parts)
+                    if parts.len() >= 3
+                        && source_spelling(source, &parts[0]) == Some("0011")
+                        && matches!(
+                            source_spelling(source, &parts[1]),
+                            Some("and" | "or")
+                        )
+            );
+            let expr = lift_macro_bootstrap_code_data(source, expr, 0)?;
+            if logic_macro {
+                lift_core_logic_macro_quote_words(source, expr, 0)
+            } else {
+                Ok(expr)
+            }
+        })
         .collect()
+}
+
+/// Preserve precisely the D3 identity of the executable code heads built
+/// inside Core's existing AND/OR macro templates. Their quoted head words
+/// are *code*, not numeric or D7 textual data. No other quote is retyped.
+fn lift_core_logic_macro_quote_words(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "core logic macro code-data exceeds the exact-domain depth bound",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+
+    let mut lifted = items.to_vec();
+    if is_exact_quote(&lifted[0]) || is_legacy_w8_quote_head(source, &lifted[0]) {
+        if lifted.len() == 2 && is_exact_quote(&lifted[0]) {
+            if let Some(spelling @ ("110" | "010" | "111")) =
+                source_spelling(source, &lifted[1])
+            {
+                let parsed = parse_binary_source_words(spelling)?;
+                let word = parsed[0].word;
+                lifted[1] = Expr {
+                    kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+                    span: lifted[1].span,
+                };
+            }
+        }
+        return Ok(Expr {
+            kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+            span,
+        });
+    }
+    for child in &mut lifted {
+        *child = lift_core_logic_macro_quote_words(source, child.clone(), depth + 1)?;
+    }
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
 }
 
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
