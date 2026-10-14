@@ -179,11 +179,11 @@
       ((010 a)
        (110
          ((010 b) (101 a b))
-         (#d1:1 #d1:0)))
-      ((010 b) #d1:0)
+         (1 0)))
+      ((010 b) 0)
       ((епістеміка--рівні-посилання? (100 a) (100 b))
        (епістеміка--рівні-посилання? (011 a) (011 b)))
-      (#d1:1 #d1:0))))
+      (1 0))))
 
 ; supporting-evidence returns () or the matching evidence record itself
 ; (retrieval, not a collapsed flag). Reuses evidence? / claim-ref helpers.
