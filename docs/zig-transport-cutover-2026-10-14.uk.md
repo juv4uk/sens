@@ -42,3 +42,14 @@ target/debug/sens-trit eval-f3 output.senc
 **Cutover у робочій гілці, не злитий у main.** Крок із `--features zig-transport` є практичною інтеграцією для доказу, а не доказом повної міграції всього core на Zig. Доки немає успішної компіляції ABI/нативної квитанції, повного корпусу файлів і інформативних green gates, **не вмикати Zig feature за замовчуванням для всього workspace**, не видаляти Rust reference і не стверджувати «production завершено». F3M лишається дослідницьким профілем. Конверт Zig — окрема ланка, метадані не можуть змінювати SENS-семантику.
 
 Докази: [T5/F3C real paired benchmarks](../research/zig-codecs/RESULTS-2026-10-14.uk.md), [#5766](https://github.com/juv4uk/sens/issues/5766), [#5767](https://github.com/juv4uk/sens/issues/5767), [#5768](https://github.com/juv4uk/sens/issues/5768), [#5770](https://github.com/juv4uk/sens/issues/5770), [#5771](https://github.com/juv4uk/sens/issues/5771).
+
+
+<!-- ZIG-FIREWALL-OPAQUE-T5-SLICE-20261014 -->
+## Перший атомарний зріз semantic firewall · #5779
+
+**Новий робочий шлях `sens-trit encode` із `--features zig-transport`:**
+`Rust-hosted sens::encode_binary_projection_ternary(source)` → **opaque фізичні T5 bytes** → Zig `sens_zig_t5_repack(input_ptr, exact_len, output_ptr, capacity)` → байт-у-байт порівняння й запис → SENS reader/виконавець. Rust CLI більше **не** передає свої `repr(C) Word{width,bits}` структури цьому маршруту, не робить Rust domain/word reinterpretation на ABI-кордоні. Результат Zig `-1` означає механічну відмову, `-2` — замалу місткість, **не D1:NO** і не семантичний висновок. Відмова Zig не запускає прихований Rust codec fallback.
+
+**Позитив/негатив Zig tests:** D1:1 у фізичному T5 `A1` і самотній D2 CLOSE `35` є різними бітовими словами; обидва є transport-valid. Окремо SENS reader, а **не Zig**, відхиляє `35` як виконувану граматику. Короткий буфер, фізично недійсний `F3` та порожній ввід відхиляються; in-place repack безпечний у чинному hosted механізмі.
+
+**Що цей крок НЕ доводить:** `encode_binary_projection_ternary` усе ще є Rust-hosted поточним механізмом проєкції, як і поточний SENS reader/evaluator. ABI v1 залишає стару типізовану функцію `sens_zig_t5_encode` для сумісності донорів; її ще потрібно вивести з усіх кінцевих споживачів перед повним cutover. `std.heap.c_allocator` у Zig ABI — hosted, а **не freestanding**; heapless core в #5775. Апаратний ESP32, E1/E2/E3, повний прохід через Zig в обидва боки та семантична незалежність від Rust — відкриті пункти #5779/#5772/#5777. **PRODUCTION_CUTOVER=OFF**.
