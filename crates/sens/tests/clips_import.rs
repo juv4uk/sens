@@ -596,3 +596,57 @@ fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
         "test_id=clips-deftemplate-d1 layer=eval wrong failure class: {err}"
     );
 }
+
+#[test]
+fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
+    // Rust transports real SENS source; D3 EQ and COND own all three YES
+    // results and the one-bit NO mutant, not a host-side result table.
+    let mut session = Session::default();
+    eval_pinned_legacy_core_source(
+        "lib/core.lisp",
+        include_str!("../../../lib/core.lisp"),
+        &mut session,
+    )
+    .expect("test_id=clips-form-dispatch-d1: pinned Core must load");
+
+    let source = include_str!("../../../lib/clips-import.lisp");
+    let start = source.find("(0011 clips-form->clauses\n")
+        .expect("test_id=clips-form-dispatch-d1: real dispatcher exists");
+    let end = source[start..].find("(0011 clips-cons-each-onto\n")
+        .map(|offset| start + offset)
+        .expect("test_id=clips-form-dispatch-d1: next source definition exists");
+    let functions = parse_mixed_exact_domain(&source[start..end])
+        .expect("test_id=clips-form-dispatch-d1: source code parses");
+    eval_parsed_expressions(&functions, &mut session)
+        .expect("test_id=clips-form-dispatch-d1: source function loads");
+
+    let fixture = include_str!("../../../tests/semantic/clips-form-dispatch-d1-law.lisp");
+    let bodies: Vec<_> = fixture.split("(110\n").skip(1).collect();
+    assert_eq!(bodies.len(), 4, "three SENS laws and one falsifier");
+    assert_eq!(bodies[0].len(), bodies[3].len(), "mutant preserves D2 form");
+    let substitutions: Vec<_> = bodies[0].bytes().zip(bodies[3].bytes())
+        .filter(|(before, after)| before != after)
+        .collect();
+    assert_eq!(substitutions, vec![(b'1', b'0')],
+        "the negative fixture must change precisely one D1 bit");
+
+    let forms = parse_mixed_exact_domain(fixture)
+        .expect("test_id=clips-form-dispatch-d1: all SENS laws must parse");
+    assert_eq!(forms.len(), 4);
+    for (index, form) in forms[..3].iter().enumerate() {
+        let observed = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|err| panic!(
+                "test_id=clips-form-dispatch-d1 layer=eval law={index} failed: {err}"
+            )).value;
+        assert_eq!(observed.as_predicate_bit(), Some(true),
+            "test_id=clips-form-dispatch-d1 layer=eval law={index} did not yield exact D1:YES");
+    }
+    let rejected = eval_parsed_expressions(&forms[3..], &mut session)
+        .expect_err("test_id=clips-form-dispatch-d1: D1 one-bit mutant must fail closed");
+    assert!(rejected.to_string().contains(
+        "domain identity is not callable under its ratified law: D1"
+    ), "test_id=clips-form-dispatch-d1 layer=eval wrong rejection: {rejected}");
+    println!(
+        "SENS_CLIPS_DISPATCH_SELF_VERDICT id=clips-form-dispatch-d1 law=3 mutant=one-D1-bit outcome=PASS"
+    );
+}
