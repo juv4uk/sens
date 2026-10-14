@@ -263,14 +263,20 @@ fn execute() -> Result<(), String> {
             }
             let text = fs::read_to_string(path)
                 .map_err(|e| format!("read UTF-8 D7 keyboard text: {e}"))?;
-            let reference = sens::encode_d7_uk_t5(&text)
-                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
-            // Same opaque physical Zig boundary as ordinary encode; a D7
-            // digit is TEXT DATA and never becomes host/Rust D24 arithmetic.
+            // SENS owns glyph→W7 identity and canonicality. Zig alone
+            // owns the physical T5 pack in the enabled transport mode.
             #[cfg(feature = "zig-transport")]
-            let bytes = zig_transport::repack_t5(&reference)?;
+            let bytes = {
+                let words = sens::d7_uk_keyboard_words(&text)
+                    .map_err(|e| format!("SENS D7 keyboard identity rejected: {e:?}"))?;
+                let packed = sens::pack_binary_source_words(&words);
+                let widths = words.iter().map(|word| word.width() as u8).collect::<Vec<_>>();
+                zig_transport::encode_dense_t5(&packed, &widths)?
+            };
+            // Independent Rust physical reference stays available without Zig.
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = reference;
+            let bytes = sens::encode_d7_uk_t5(&text)
+                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
             let output_path = path.with_extension("sens");
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&output_path).map_err(|e| format!("create T5 text record: {e}"))?;
