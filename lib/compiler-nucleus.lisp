@@ -27,7 +27,7 @@
     (110
       ((010 rows) ())
       ((101 ідентичність (100 (100 rows))) (100 rows))
-      ((010 ()) (compiler-authority-find ідентичність (011 rows))))))
+      (#d1:1 (compiler-authority-find ідентичність (011 rows))))))
 
 (0011 compiler-nucleus
   (0010 (ідентичність authority)
