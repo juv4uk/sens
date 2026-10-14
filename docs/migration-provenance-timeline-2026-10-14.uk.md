@@ -62,3 +62,28 @@
 ## 4. Критерій успішної підготовки
 
 Для обраного незалежного файлу: історичний source SHA + дата і ратифікаційне джерело встановлені; невизначені ідентичності позначені без домислів; відома межа виконуваності; заявлено неперетинний write-set; відтворюваний witness наявний або чесно `UNVERIFIED`. Суміжні агенти можуть безперервно рухати інші незалежні файли. **Ніякого нового нормативного бар'єра чи альтернативного оракула ця карта не створює.**
+
+
+## 5. Зріз M2 від 14.10: коли Zig став симетричним входом, а C — незалежним свідком
+
+**Статус:** довідкова Git-хронологія, НЕ ратифікація, НЕ новий semantic gate чи глобальний HOLD. Час — **Git committer UTC** за конкретним SHA; CI-verdict завжди окремо на точному SHA.
+
+| Час UTC 14.10 | Шлях і коміт | Що змінилося | Що **не** доведено |
+|---|---|---|---|
+| **13:58:16** | [5196b991](https://github.com/juv4uk/sens/commit/5196b9914a6678262a782003b88d1211a95b0fee), `research/zig-codecs/transport_abi.zig` | Додано симетричний фізичний Zig ABI v2 **T5 → caller-owned BE3**: exact width/bits і fail-closed ємність. | Немає D2 reader, semantic evaluator чи семантичного реєстру Zig. |
+| **14:11:11** | [015729fc](https://github.com/juv4uk/sens/commit/015729fc5eecafcb80290e5a27f5195867b16e48), `research/zig-codecs/host-c/d3_subset.c` | Додано незалежний **обмежений C-виконавець** із фізичним Zig ABI ingress для вибраного D1–D3 піднабору. | Сам файл не доводить Rust-free dependency closure або спільного semantic PASS двох хостів. |
+| **14:22:00** | [1bf97ee5](https://github.com/juv4uk/sens/commit/1bf97ee50d69a6e42ed7e756964e0dda8396ea60), `crates/sens/src/binary_execution.rs` | Відкрито чинний `PhysicalT5Program::from_exact_words`: **SENS** після Zig-фізики читає D2, перевіряє executable heads, відповідає за чинний закон. | Не переносить семантику з SENS до Zig. |
+| **14:24:29** | [221eb979](https://github.com/juv4uk/sens/commit/221eb9796ec03731968183e763b918189924ecee), `crates/sens-cli/src/bin/sens-trit.rs` | Zig BE3 ingress при ввімкненому Zig transport для eval/eval-core4/eval-f3, далі SENS reader. | Не доводить C-host і всіх CLI режимів. |
+| **14:30:46** | [0bb725b9](https://github.com/juv4uk/sens/commit/0bb725b9f1dce6301e9b2e4884d8d70494b07da4), той самий CLI-файл | Вилучено залишковий Rust T5 physical decode у Zig F3C feature path; збережено SENS `from_exact_words` і перевірку одного кореня. | Source cutover не тотожний незалежному native self-verdict. |
+
+**Механічна пастка конкурентного main:** [63b9e2ca](https://github.com/juv4uk/sens/commit/63b9e2ca8b2f03289cd4b8737b0cd20bafc38dc4) о 14:18:54 UTC імпортував `numeric_domains.zig` у `domain_ladder.zig` **до** появи файла в дереві; [23616d1b](https://github.com/juv4uk/sens/commit/23616d1bba6451484a71e436bb27b34be454c45d) о 14:26:53 додав його. Проміжний RED — Zig FileNotFound і його downstream evidence-кроки, **не** регресія семантики D24/D8. Перед зміною імпорту перевіряти існування модуля на **тому самому Git tree**, не створюючи нового загального блокера.
+
+### Незалежні lane, яким потрібна ця послідовність
+
+- **H0 #5777/#5775:** один Zig механічний ABI, exact word/BE3, version, ownership, error codes, bounds, CRC, SHA; **фізична** квитанція, не callability.
+- **H1 #5787:** C-host/C-evaluator без Rust у **реальному dependency closure** для вузького допущеного D1–D3 піднабору; C не ратифікує нових законів.
+- **H2 #5788:** однакові SHA-pinned позитивні та однобітні негативні входи на двох незалежних executors, окремі вердикти **A byte parity / B semantic parity**, output/error SHA, first mismatch і команда відтворення. Немає H2 PASS із самого T5 roundtrip.
+- **Міграція файлів #5141/#5609:** `old path@SHA + історична дата → ратифіковане джерело → exact domain/width/bits → admitted mechanism → native SENS self-verdict`. Один CLAIM на неперетинний write-set; не затримувати інші незалежні файли.
+
+**Незмінні часові межі:** під D7 v1 **нічого не було мігровано**, отже немає глобальної конверсії; чинна D7 keyboard v2 128/128 використовується відразу. D8 уперше owner-ratified 06.10, історичні 8-бітові коди не були його попередньою версією. D10 1024/1024 — residency, не автоматичний T5/callable admission; D11 — testing-only. Довідковий документ не стає другим semantic authority: лише власник, чинний SENS Contract 11.9 та ратифіковані аксіоми.
+
