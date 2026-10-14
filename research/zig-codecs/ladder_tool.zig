@@ -67,6 +67,7 @@ fn parseWords(out: []t5.Word, data: []const u8) !usize {
         var cols = std.mem.tokenizeAny(u8, line, " \t");
         const w_str = cols.next() orelse return error.BadLine;
         const b_str = cols.next() orelse return error.BadLine;
+        if (cols.next() != null) return error.BadLine; // exact two-column record
         const width = try std.fmt.parseInt(u8, w_str, 10);
         const bits = try std.fmt.parseInt(u16, b_str, 10);
         if (width == 0 or width > 10) return error.BadWidth;
@@ -96,12 +97,12 @@ pub fn main() !void {
     // Full data remains in the canonical T5 bytes; SHA covers every byte.
     if (t5_bytes.len <= hex_buf.len / 2) {
         std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
-            words.len, t5_bytes.len, t5_sha[0..16],
+            words.len, t5_bytes.len, t5_sha[0..],
             hexInto(&hex_buf, t5_bytes),
         });
     } else {
         std.debug.print("T5 words={d} bytes={d} sha256={s} hex=omitted-large\n", .{
-            words.len, t5_bytes.len, t5_sha[0..16],
+            words.len, t5_bytes.len, t5_sha[0..],
         });
     }
 
@@ -146,4 +147,28 @@ pub fn main() !void {
     const dec_ns = nanoseconds() - begin;
     std.debug.print("sample impl=zig op=encode ns_per_op={d} reps={d}\n", .{ enc_ns / reps, reps });
     std.debug.print("sample impl=zig op=decode ns_per_op={d} reps={d}\n", .{ dec_ns / reps, reps });
+}
+
+test "ladder D10 exact words and strict two-column input" {
+    var buf: [4]t5.Word = undefined;
+    const count = try parseWords(&buf, "# input records\n1 0\n10 1023\n");
+    try std.testing.expectEqual(@as(usize, 2), count);
+    try std.testing.expectEqual(@as(u8, 1), buf[0].width);
+    try std.testing.expectEqual(@as(u16, 0), buf[0].bits);
+    try std.testing.expectEqual(@as(u8, 10), buf[1].width);
+    try std.testing.expectEqual(@as(u16, 1023), buf[1].bits);
+    try std.testing.expectError(error.BadLine, parseWords(&buf, "10 0 extra\n"));
+    try std.testing.expectError(error.BadLine, parseWords(&buf, "10\n"));
+    try std.testing.expectError(error.BadWidth, parseWords(&buf, "11 0\n"));
+    try std.testing.expectError(error.BitsOverflow, parseWords(&buf, "10 1024\n"));
+
+    const physical = try t5.encodeCoordinates(std.testing.allocator, buf[0..count]);
+    defer std.testing.allocator.free(physical);
+    const back = try t5.decodeCoordinates(std.testing.allocator, physical);
+    defer std.testing.allocator.free(back);
+    try std.testing.expectEqual(count, back.len);
+    for (back, buf[0..count]) |actual, expected| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqual(expected.bits, actual.bits);
+    }
 }
