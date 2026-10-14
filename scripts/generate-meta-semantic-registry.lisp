@@ -23,7 +23,7 @@
     (110
       ((010 surface) ())
       
-      ((11110111 (surface-word surface) (001 ())) ())
+      ((101 (surface-word surface) (001 ())) ())
       ((11110111 (surface-word surface) "'") ())
       ((010 (001 ())) t))))
 
@@ -93,16 +93,16 @@
       "; Source authority: lib/surface/semantic-registry.lisp\n"
       "; Generator: scripts/generate-meta-semantic-registry.lisp\n"
       "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
-      "(00001001 my-semantic-surface-registry\n"
-      "  (00000001 (\n"
+      "(0011 my-semantic-surface-registry\n"
+      "  (001 (\n"
       (join-rows (10100 rows))
       "  )))\n\n"
-      "(00001001 my-semantic-id-for-surface\n"
-      "  (00001000 (name)\n"
-      "    (10011100 ((entry (00101101 name my-semantic-surface-registry)))\n"
-      "      (00000111\n"
-      "        ((00000010 entry) () (00000001 ()))\n"
-      "        ((00000010 entry) (0) (00101111 entry))))))\n")))
+      "(0011 my-semantic-id-for-surface\n"
+      "  (0010 (name)\n"
+      "    (001000 ((entry (assoc name my-semantic-surface-registry)))\n"
+      "      (110\n"
+      "        ((010 entry) (001 ()))\n"
+      "        ((010 ()) (1001 entry))))))\n")))
 
 (0011 registry-form
   (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
