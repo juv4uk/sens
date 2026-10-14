@@ -67,15 +67,19 @@ def snapshot(root: Path, ref: str) -> dict:
     sha_ref = git(root, "rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
     modes = tree_modes(root, sha_ref)
     names = set(modes)
-    sources = {p for p in names if p.endswith(".lisp")}
-    pairs = sorted(p[:-5] for p in names if p.endswith(".sens") and p[:-5]+".lisp" in sources)
+    all_sources = {p for p in names if p.endswith(".lisp")}
+    regular = {"100644", "100755"}
+    sources = {p for p in all_sources if modes[p] in regular}
+    nonregular_sources = sorted(all_sources - sources)
+    # Keep pairs with an invalid source visible as invalid rows; do not
+    # silently erase evidence of an attempted Git triple.
+    pairs = sorted(p[:-5] for p in names if p.endswith(".sens") and p[:-5]+".lisp" in all_sources)
     triples = sorted(stem for stem in pairs if stem in names)
     rows = []
     for stem in pairs:
         lisp = stem+".lisp"
         sens = stem+".sens"
         r = {"source": lisp, "physical": sens, "view": stem,
-             "source_sha256": sha(blob(root, sha_ref, lisp)),
              "has_view": stem in names,
              "scope": "fixture" if stem.startswith("tests/fixtures/") else "non_fixture",
              "semantic_oracle": "NOT_ATTESTED_BY_THIS_MECHANICAL_AUDIT"}
@@ -87,6 +91,10 @@ def snapshot(root: Path, ref: str) -> dict:
                 if member in names and modes[member] not in ("100644", "100755"):
                     raise ValueError(
                         f"not a regular Git file: {member} mode={modes[member]}")
+            # Only a regular Git .lisp object may supply source SHA.
+            # A 120000 blob is its link target, and a 160000 object is a
+            # commit; neither is source text to migrate.
+            r["source_sha256"] = sha(blob(root, sha_ref, lisp))
             packed = blob(root, sha_ref, sens)
             words = decode_bytes(packed)
             if encode_words(words) != packed:
@@ -104,10 +112,13 @@ def snapshot(root: Path, ref: str) -> dict:
             r["status"] = "INVALID_OR_INCOMPLETE_TRIPLE"
             r["reason"] = str(e)
         rows.append(r)
+    paired_regular_sources = {stem + ".lisp" for stem in pairs} & sources
     return {"commit":sha_ref, "lisp_count":len(sources),
+            "nonregular_lisp_count":len(nonregular_sources),
+            "nonregular_lisp_paths":nonregular_sources,
             "sens_count":sum(p.endswith(".sens") for p in names),
             "paired_count":len(pairs), "triple_count":len(triples),
-            "unpaired_count":len(sources)-len(pairs),
+            "unpaired_count":len(sources)-len(paired_regular_sources),
             "valid_triples":sum(r["status"]=="MECHANICAL_TRIPLE_VERIFIED" for r in rows),
             "invalid_triples":sum(r["status"]!="MECHANICAL_TRIPLE_VERIFIED" for r in rows),
             "rows":rows}
