@@ -22,15 +22,20 @@ fn make_session() -> Session {
         eval_parsed_expressions(&exprs, &mut session)
             .unwrap_or_else(|error| panic!("narrate-d4-bind: {path} evaluator: {error}"));
     }
-    for (path, source) in [
-        ("lib/result-status.lisp", include_str!("../../../lib/result-status.lisp")),
-        ("lib/narrate.lisp", include_str!("../../../lib/narrate.lisp")),
-    ] {
-        let exprs = parse_exact_domain_source(source)
-            .unwrap_or_else(|error| panic!("narrate-d4-bind: {path} reader: {error}"));
-        eval_parsed_expressions(&exprs, &mut session)
-            .unwrap_or_else(|error| panic!("narrate-d4-bind: {path} evaluator: {error}"));
-    }
+    // Existing result-status uses explicit #d1 projections, which are
+    // compatibility *text* syntax. A path-pinned reasoning reader respects
+    // those without reinterpreting the exact binary source of narrate.lisp.
+    let source = include_str!("../../../lib/result-status.lisp");
+    let exprs = parse_mixed_exact_domain_reasoning_source("lib/result-status.lisp", source)
+        .expect("narrate-d4-bind: pinned result-status reader");
+    eval_parsed_expressions(&exprs, &mut session)
+        .expect("narrate-d4-bind: result-status evaluator");
+
+    let source = include_str!("../../../lib/narrate.lisp");
+    let exprs = parse_exact_domain_source(source)
+        .expect("narrate-d4-bind: exact binary narrator reader");
+    eval_parsed_expressions(&exprs, &mut session)
+        .expect("narrate-d4-bind: narrator evaluator");
     session
 }
 
