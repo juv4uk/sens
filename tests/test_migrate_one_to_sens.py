@@ -113,6 +113,42 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
         self.assertEqual(source.read_bytes(), original_source)
 
+    def test_source_symlink_cannot_hide_original_identity(self):
+        # A link into the repo must not silently become the canonical source path.
+        with tempfile.TemporaryDirectory() as td:
+            alias = Path(td) / "alias.lisp"
+            alias.symlink_to(PROVEN)
+            before = PROVEN.read_bytes()
+            result = invoke(alias, "--dry-run", "--source-era", "legacy")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("source path contains symlink", result.stderr)
+            self.assertEqual(PROVEN.read_bytes(), before)
+
+    def test_dangling_output_symlink_does_not_publish_to_other_target(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            actual = base / "unrequested.sens"
+            alias = base / "requested.sens"
+            alias.symlink_to(actual)
+            result = invoke(PROVEN, "--output", str(alias), "--source-era", "legacy")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("output path contains symlink", result.stderr)
+            self.assertTrue(alias.is_symlink())
+            self.assertFalse(actual.exists(), "symlink must not redirect physical T5 publication")
+
+    def test_output_parent_symlink_does_not_redirect_publication(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            actual_dir = base / "actual"
+            actual_dir.mkdir()
+            alias_dir = base / "alias"
+            alias_dir.symlink_to(actual_dir, target_is_directory=True)
+            result = invoke(PROVEN, "--output", str(alias_dir / "data.sens"),
+                            "--source-era", "legacy")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("output path contains symlink", result.stderr)
+            self.assertFalse((actual_dir / "data.sens").exists())
+
     def test_source_outside_repository_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
