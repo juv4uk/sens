@@ -100,13 +100,13 @@
 ; retaining the proof's real premises.
 (0011 narrate-answer
   (0010 (goal proof)
-    (001000 ((derivations (provenance-derived-from (101101111 proof))))
-      (110
-        ((010 derivations) (narrate-fact goal))
-        (1
-         (1111 (narrate-fact goal)
-           (111 (001 because) (narrate-derivation derivations))))))))
-
+    ((0010 (derivations)
+       (110
+         ((010 derivations) (narrate-fact goal))
+         (1
+          (1111 (narrate-fact goal)
+            (111 (001 because) (narrate-derivation derivations))))))
+     (provenance-derived-from (101101111 proof)))))
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
 ; ----------------------------------------------------------------------
