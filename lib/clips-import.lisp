@@ -180,10 +180,11 @@
   (0010 (sym)
     (110
       ((110101100 sym)
-       (001000 ((after (clips-string-after-last-double-colon (11101110 sym))))
-         (110
-           ((101 after (001 ())) sym)
-           ((010 ()) (11101101 after)))))
+       ((0010 (after)
+          (110
+            ((101 after (001 ())) sym)
+            ((010 ()) (11101101 after))))
+        (clips-string-after-last-double-colon (11101110 sym))))
       ((010 ()) sym))))
 
 (0011 clips-deftemplate-name (0010 (form) (clips-strip-module-prefix (1001 form))))
