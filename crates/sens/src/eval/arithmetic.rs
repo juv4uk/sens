@@ -355,7 +355,7 @@ mod qualified_numeric_domain_value_tests {
             assert_eq!(
                 actual,
                 Some(expected),
-                "REGRESSION id={id} layer=eval source={source} expected=D1:{} actual={actual:?} reproduce=cargo_test_binary_d5_exact_q_axiom_witness_with_single_input_mutation",
+                "REGRESSION id={id} layer=eval source={source} expected=D1:{} actual={actual:?} reproduce=cargo test --locked -p sens --lib binary_d5_exact_q_axiom_witness_with_single_input_mutation -- --nocapture",
                 u8::from(expected),
             );
         }
@@ -373,7 +373,7 @@ mod qualified_numeric_domain_value_tests {
                 .expect_err("negative D5 witness must fail closed");
             assert_eq!(
                 error.kind, kind,
-                "REGRESSION id={id} layer=eval source={source} expected={kind:?} actual={error:?} reproduce=cargo_test_binary_d5_exact_q_axiom_witness_with_single_input_mutation",
+                "REGRESSION id={id} layer=eval source={source} expected={kind:?} actual={error:?} reproduce=cargo test --locked -p sens --lib binary_d5_exact_q_axiom_witness_with_single_input_mutation -- --nocapture",
             );
         }
     }
