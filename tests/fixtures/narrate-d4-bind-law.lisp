@@ -74,10 +74,37 @@
         (1110 (narrate-outcome (001 (unknown subject)))
               (001 (unknown because no-proof-found-for subject)))))))
 
+; Existing narrator list law must equal the reason/status source-owned law.
+; This compares SENS D1 verdicts, not a host table.
+(0011 оповідь--списки-парність?
+  (0010 (cases)
+    (110
+      ((010 cases) #d1:1)
+      ((101 (narrate-proper-list? (100 cases))
+            (result-proper-list? (100 cases)))
+       (оповідь--списки-парність? (011 cases)))
+      (#d1:1 #d1:0))))
+
+(0011 оповідь--списки-закон
+  (0010 ()
+    (оповідь--списки-парність?
+      (1110
+        (001 ())
+        (001 name)
+        (001 42)
+        (001 (a b))
+        (001 (a . b))
+        (001 (a b . c))
+        (001 ((a) (b c)))
+        (001 (a (b) c))))))
+
 (0011 оповідь--загальний-закон
   (0010 ()
     (110
-      ((оповідь--теги-закон) (оповідь--d4-закон))
+      ((оповідь--списки-закон)
+       (110
+         ((оповідь--теги-закон) (оповідь--d4-закон))
+         (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
 (оповідь--загальний-закон)
