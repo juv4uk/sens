@@ -77,7 +77,7 @@
 (0011 provenance-goal (0010 (prov) (1001 prov)))
 (0011 provenance-source (0010 (prov) (1001 (10011 prov))))
 (0011 provenance-rule (0010 (prov) (1001 (100111 prov))))
-(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))
+(0011 provenance-derived-from (0010 (prov) (1001 (100 (011 (011 (011 (011 prov))))))))
 
 (0011 narrate-derivation
   (0010 (derivations)
@@ -100,13 +100,13 @@
 ; retaining the proof's real premises.
 (0011 narrate-answer
   (0010 (goal proof)
-    (001000 ((derivations (provenance-derived-from (101101111 proof))))
-      (110
-        ((010 derivations) (narrate-fact goal))
-        (1
-         (1111 (narrate-fact goal)
-           (111 (001 because) (narrate-derivation derivations))))))))
-
+    ((0010 (derivations)
+       (110
+         ((010 derivations) (narrate-fact goal))
+         (1
+          (1111 (narrate-fact goal)
+            (111 (001 because) (narrate-derivation derivations))))))
+     (provenance-derived-from (101101111 proof)))))
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
 ; ----------------------------------------------------------------------
