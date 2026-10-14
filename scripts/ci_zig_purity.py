@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ZIG_ROOT = ROOT / "research" / "zig-codecs"
 BANNED = {
     "retired-eight-bit-identity": re.compile(
-        r"(?i)(?<![a-z0-9])(?:sens|sid|function|func|w)[\s._/-]*8\b"),
+        r"(?i)(?:(?:sens|sid|function|func)[\s._/-]*8(?![0-9])|(?<![a-z0-9])w[\s._/-]*8(?![0-9]))"),
     "retired-language-surface": re.compile(
         r"(?i)(?<![a-z0-9])(?:my[\s._/-]*lisp|core[\s._/-]*1)\b"),
     "historical-authority": re.compile(r"(?i)\b(?:legacy|historical)\b"),
@@ -49,6 +49,7 @@ def scan(path, source):
 def self_test():
     path = Path("research/zig-codecs/selftest.zig")
     for bad in ("Sens8", "sid_8", "SID-8", "Function8", "W8",
+                "KernelSid8", "ContaminatedSens8Alias", "Function8Old",
                 "my-lisp", "core1", "historical opcode",
                 "legacy registry", "flat dispatch", "lib/core.lisp",
                 'const x = @import("../../lib/law.zig");'):
