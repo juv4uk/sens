@@ -451,12 +451,14 @@
 ;   (x y . rest) -> at least 2
 ;   args         -> at least 0
 ; No host metadata is required.
+; An arity is D24 mathematics, not an implicitly promoted reader Number.
+; One derived structural counter supplies BOTH fixed and received counts.
 (0011 my-fixed-param-count
   (0010 (params)
     (110
-      
-      ((010 params)  0)
-      ((010 ()) (01010 1 (my-fixed-param-count (011 params)))))))
+      ((010 params) #d24:000000000000000000000000)
+      ((010 ()) (01010 #d24:000000000000000000000001
+                       (my-fixed-param-count (011 params)))))))
 
 (0011 my-rest-param?
   (0010 (params)
@@ -470,7 +472,7 @@
 (0011 my-arity-ok?
   (0010 (params args)
     (001000 ((fixed (my-fixed-param-count params))
-             (received (000000 args)))
+             (received (my-fixed-param-count args)))
       (110
         ((my-rest-param? params)
          (110
@@ -485,7 +487,7 @@
 (0011 my-arity-detail
   (0010 (params args)
     (001000 ((fixed (my-fixed-param-count params))
-          (received (000000 args)))
+          (received (my-fixed-param-count args)))
       (1110
         (001 expected)
         (110
