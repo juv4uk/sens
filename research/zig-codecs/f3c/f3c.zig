@@ -495,8 +495,8 @@ test "F3C physical golden: nested CAR CONS .senc roundtrip" {
 }
 
 
-/// Test-only old 4-state recurrence, deliberately independent of
-/// SUFFIX_COUNTS and completions(). It is NOT linked into production F3C.
+// Test-only four-state recurrence, deliberately independent of
+// SUFFIX_COUNTS and completions(). It is NOT linked into production F3C.
 test "F3C differential all physical suffix transitions versus four-state DP" {
     var compared: usize = 0;
     for (4..FRAME_MAX_TRITS + 1) |n| {
