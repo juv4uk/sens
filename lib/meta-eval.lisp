@@ -918,12 +918,6 @@
 (0011 my-eval-result
   (0010 (expr env-ref)
     (110
-      ((0100 (010 expr)) (110
-         ((my-unresolved-name? expr env-ref)
-          (my-result-fail
-            (my-error (001 unbound-symbol) expr)))
-         ((010 ())
-          (my-result-ok (env-lookup expr env-ref)))))
       ((010 expr)  (110
          ((my-unresolved-name? expr env-ref)
           (my-result-fail
