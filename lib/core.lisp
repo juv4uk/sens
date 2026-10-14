@@ -327,13 +327,18 @@
 ; application through the already proved Lisp-owned LET macro. The binding
 ; list and body are syntax, not values or fabricated D6 residents.
 ; (нехай-похідне ((x 7) (y 9)) (00100111 x y)) => (let ((x 7) (y 9)) ...).
-(00001010 нехай-похідне (bindings body)
+; Legacy DEFMACRO is a projection: D4 DEFINE + make-macro + D4 LAMBDA.
+(0011 нехай-похідне
+  (make-macro
+    (0010 (bindings body)
   (111 (001 let)
-    (111 bindings (111 body (001 ())))))
+    (111 bindings (111 body (001 ())))))))
 
-(00001010 let (bindings body)
+(0011 let
+  (make-macro
+    (0010 (bindings body)
   (111 (1110 (001 0010) (внутрішнє-відображення (0010 (binding) (100 binding)) bindings) body)
-        (внутрішнє-відображення (0010 (binding) (1001 binding)) bindings)))
+        (внутрішнє-відображення (0010 (binding) (1001 binding)) bindings)))))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -487,7 +492,9 @@
 
 (0011 pairlis спарувати)
 
-(00001010 let* (bindings body)
+(0011 let*
+  (make-macro
+    (0010 (bindings body)
   (110
     ((010 bindings) body)
     ((010 (001 ()))
@@ -503,7 +510,7 @@
                (111 (011 bindings)
                  (111 body (001 ()))))
              (001 ()))))
-       (111 (1001 (100 bindings)) (001 ()))))))
+       (111 (1001 (100 bindings)) (001 ()))))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -809,7 +816,9 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(00001010 -> forms
+(0011 ->
+  (make-macro
+    (0010 forms
   (110
     
     ((010 forms) 
@@ -828,9 +837,11 @@
           (110
             ((0100 (010 rest)) step)
             ((010 rest) 
-             (111 (001 ->) (111 step rest))))))))))
+             (111 (001 ->) (111 step rest))))))))))))
 
-(00001010 ->> forms
+(0011 ->>
+  (make-macro
+    (0010 forms
   (110
     
     ((010 forms) 
@@ -849,7 +860,7 @@
           (110
             ((0100 (010 rest)) step)
             ((010 rest) 
-             (111 (001 ->>) (111 step rest))))))))))
+             (111 (001 ->>) (111 step rest))))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -1073,7 +1084,9 @@
              (100 peers)
              (my-postcore-build-definitions source (011 peers)))))))
 
-(00001010 my-postcore-materialize-stable-peers args
+(0011 my-postcore-materialize-stable-peers
+  (make-macro
+    (0010 args
   (001001 ((semantic-id (100 args))
          (source (1001 args))
          (group
@@ -1086,7 +1099,7 @@
       ((010 group) 
        (my-postcore-build-definitions
          source
-         (my-postcore-missing-peers source (011 group) (11100111)))))))
+         (my-postcore-missing-peers source (011 group) (11100111)))))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (0011 divmod
