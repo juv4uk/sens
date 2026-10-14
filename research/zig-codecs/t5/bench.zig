@@ -1,5 +1,5 @@
 //! Linux-only, manual mechanical T5 benchmark. Zig 0.16.0: zig build-exe -O ReleaseFast -lc ...
-//! Matched workloads: crates/sens/examples/zig_t5_matched_bench.rs.
+//! Matched workloads are fixed by an independent differential harness.
 //! NO semantic SENS PASS. No file I/O or parsing in timed sections.
 const std = @import("std");
 const t5 = @import("t5.zig");
