@@ -5,6 +5,7 @@ Verifies domain names, rank and growth; not runtime callability or full occupanc
 """
 import argparse
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -126,6 +127,58 @@ def validate(policy, ratification, lang):
     ):
         need(needle in lang, "language: " + needle)
 
+
+def validate_zig_numeric_prefix(policy, zig_source):
+    """Mechanical width-profile parity only: no Zig authority or semantic admission.
+
+    The SENS-ratified JSON supplies the expected prefix. Zig provides merely
+    opaque fixed-width transport support for the listed four rungs.
+    """
+    declarations = re.findall(r"\bWIDE_WIDTHS\s*=", zig_source)
+    need(len(declarations) == 1, "Zig WIDE_WIDTHS must have one declaration")
+    match = re.search(
+        r"(?m)^[ \t]*pub[ \t]+const[ \t]+WIDE_WIDTHS[ \t]*="
+        r"[ \t]*\[_\]u16[ \t]*\{(?P<cells>[^{}]*)\}[ \t]*;",
+        zig_source,
+    )
+    need(match is not None, "Zig WIDE_WIDTHS has no explicit u16 literal profile")
+    cells = re.sub(r"//[^\n]*", "", match.group("cells"))
+    parts = [part.strip() for part in cells.split(",")]
+    if parts and not parts[-1]:
+        parts.pop()
+    need(bool(parts) and all(re.fullmatch(r"(?:0|[1-9][0-9]*)", part)
+                                 for part in parts),
+         "Zig WIDE_WIDTHS must contain literal physical widths")
+    widths = [int(part) for part in parts]
+    need(widths == policy["ratified_prefix_bits"],
+         f"Zig physical prefix {widths} differs from SENS-ratified {policy['ratified_prefix_bits']}")
+
+
+def selftest_zig_numeric_prefix(policy, zig_source):
+    validate_zig_numeric_prefix(policy, zig_source)
+    match = re.search(
+        r"(?m)^[ \t]*pub[ \t]+const[ \t]+WIDE_WIDTHS[ \t]*="
+        r"[ \t]*\[_\]u16[ \t]*\{(?P<cells>[^{}]*)\}[ \t]*;",
+        zig_source,
+    )
+    need(match is not None, "Zig numeric witness declaration missing")
+    original = match.group("cells")
+    expected = policy["ratified_prefix_bits"]
+    variants = (
+        zig_source.replace("pub const WIDE_WIDTHS", "pub const OTHER_WIDTHS", 1),
+        zig_source[:match.start("cells")] + ", ".join(map(str, [expected[0] + 1, *expected[1:]]))
+        + zig_source[match.end("cells"):],
+        zig_source[:match.start("cells")] + original.rstrip() + ", 384 "
+        + zig_source[match.end("cells"):],
+        zig_source + "\npub const WIDE_WIDTHS = [_]u16{ 24 };\n",
+    )
+    for index, damaged in enumerate(variants):
+        try:
+            validate_zig_numeric_prefix(policy, damaged)
+        except ValueError:
+            continue
+        raise ValueError(f"NUMERIC-DOMAIN-RATIFICATION: Zig mutant {index} was admitted")
+
 def validate_runtime_boundary(arithmetic, d6):
     """Assert that every Core math entry point checks explicit D24+ admission.
 
@@ -242,12 +295,15 @@ def main():
         lang = (ROOT / "language-contract.lisp").read_text(encoding="utf-8")
         arithmetic = (ROOT / "crates/sens/src/eval/arithmetic.rs").read_text(encoding="utf-8")
         d6 = (ROOT / "crates/sens/src/eval/d6_arithmetic.rs").read_text(encoding="utf-8")
+        zig_profile = (ROOT / "research/zig-codecs/numeric_domains.zig").read_text(encoding="utf-8")
         (selftest if args.self_test else validate)(policy, ratification, lang)
+        (selftest_zig_numeric_prefix if args.self_test else validate_zig_numeric_prefix)(
+            policy, zig_profile)
         (selftest_runtime if args.self_test else validate_runtime_boundary)(arithmetic, d6)
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS contract + static D24+-only Core entry guards (Rust execution requires separate cargo test); external/physical codec deferred")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS contract + Zig physical width-prefix parity + static D24+-only Core entry guards (Rust/Zig runtime execution requires separate tests); composite physical codec deferred")
     return 0
 
 if __name__ == "__main__":
