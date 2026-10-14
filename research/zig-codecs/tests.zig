@@ -116,3 +116,34 @@ test "D1 zero and D3 three zero bits stay different T5 words" {
     try std.testing.expectEqual(@as(u8, 0x50), left[0]);
     try std.testing.expectEqual(@as(u8, 0x08), right[0]);
 }
+
+
+test "typed ladder via public Zig ABI v2, D10 fail closed" {
+    const a = std.testing.allocator;
+    inline for (.{
+        ladder.D8.init(0b10101000),
+        ladder.D9.init(0b010101000),
+    }, .{ @as(u8, 8), @as(u8, 9) }) |word, width| {
+        const be3 = word.coordinate().triplet();
+        var wire: [3]u8 = [_]u8{0xa5} ** 3;
+        const n = abi.sens_zig_t5_encode_be3(&be3, be3.len, &wire, wire.len);
+        try std.testing.expectEqual(@as(isize, 2), n);
+        const typed_wire = try ladder.encodeTypedWord(width, a, word);
+        defer a.free(typed_wire);
+        try std.testing.expectEqualSlices(u8, typed_wire, wire[0..@intCast(n)]);
+        const decoded = try ladder.decodeTypedWord(width, a, wire[0..@intCast(n)]);
+        try std.testing.expectEqual(word.bits, decoded.bits);
+        try std.testing.expectEqual(@as(c_int, 0),
+            abi.sens_zig_t5_validate(&wire, @intCast(n)));
+    }
+    const d10 = ladder.D10.init(0b1000000000).coordinate().triplet();
+    var failed: [3]u8 = [_]u8{0xa5} ** 3;
+    try std.testing.expectEqual(@as(isize, -1),
+        abi.sens_zig_t5_encode_be3(&d10, d10.len, &failed, failed.len));
+    try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
+
+    const d8 = ladder.D8.init(0b10101000).coordinate().triplet();
+    try std.testing.expectEqual(@as(isize, -2),
+        abi.sens_zig_t5_encode_be3(&d8, d8.len, &failed, 1));
+    try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
+}
