@@ -114,8 +114,6 @@ jobs:
           "$ZIG" test research/zig-codecs/tests.zig -lc
           echo 'test_id=zig-e1-heapless-physical-preflight layer=transport semantic_authority=SENS admission=NOT_TESTED'
           "$ZIG" test research/zig-codecs/transport/e1.zig
-          echo 'test_id=rust-e1-donor-byte-parity layer=transport semantic_authority=SENS admission=NOT_TESTED'
-          cargo test --locked -p sens --lib e1_zig_shared_raw_physical_golden_bytes_only -- --exact
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
@@ -155,6 +153,10 @@ jobs:
           set -euo pipefail
           export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
           zig version
+          echo 'test_id=rust-e1-donor-byte-parity layer=transport semantic_authority=SENS admission=NOT_TESTED'
+          cargo test --locked -p sens --lib universal_frame3::tests::e1_zig_shared_raw_physical_golden_bytes_only -- --exact --nocapture \
+            | tee "$RUNNER_TEMP/sens-e1-donor-golden.log"
+          grep -Fxq 'test universal_frame3::tests::e1_zig_shared_raw_physical_golden_bytes_only ... ok' "$RUNNER_TEMP/sens-e1-donor-golden.log"
           echo 'test_id=zig-to-sens-cli-abi layer=transport semantic_authority=SENS'
           cargo build --locked -p sens-cli --bin sens-trit
           CLI_RUST_ZIG=target/debug/sens-trit
