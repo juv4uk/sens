@@ -170,10 +170,11 @@
     (110
       ((clips-string-empty? s) (001 ()))
       ((clips-string-starts-with-double-colon? s)
-       (001000 ((after (clips-string-after-last-double-colon (110011101 (110011101 s)))))
-         (110
-           ((101 after (001 ())) (110011101 (110011101 s)))
-           ((010 ()) after))))
+       ((0010 (after)
+          (110
+            ((101 after (001 ())) (110011101 (110011101 s)))
+            ((010 ()) after)))
+        (clips-string-after-last-double-colon (110011101 (110011101 s)))))
       ((010 ()) (clips-string-after-last-double-colon (110011101 s))))))
 
 (0011 clips-strip-module-prefix
