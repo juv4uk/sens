@@ -14,7 +14,7 @@ permissions:
 jobs:
   vertical:
     if: ${{ false }} # КАРАНТИН: червоний, run 38564275271
- Lisp-owned pair to real CPU, with fail-closed rejection
+    name: Lisp-owned pair to real CPU, with fail-closed rejection
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
