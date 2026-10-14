@@ -58,7 +58,7 @@ check_group() {
   for f in "${group[@]}"; do
     line="$(grep -F "$f: convertible=" <<<"$out" | head -1 || true)"
     if [[ -z "$line" ]]; then echo "  ?? no verdict for $f"; offenders+=("$f:$flag")
-    elif [[ "$line" == *"convertible=0"* ]]; then :
+    elif [[ "$line" == *"convertible=0 "* && "$line" == *"blocked-unratified=0"* ]]; then :
     else echo "  $line"; offenders+=("$f:$flag"); fi
   done
 }
