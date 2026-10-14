@@ -192,32 +192,53 @@ fn utf8_layer_keeps_process_library_as_a_separate_top_level_load() {
 
 #[test]
 fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
+    // Exact domain-qualified D24 operands, with SENS deciding every result.
     let mut session = utf8_session();
+    let zero = "#d24:000000000000000000000000";
+    let one = "#d24:000000000000000000000001";
+    let two = "#d24:000000000000000000000010";
+    let ascii = "#d24:000000000000000001111111";
+    let continuation = "#d24:000000000000000010000000";
+    let last_cont = "#d24:000000000000000010111111";
+    let after_cont = "#d24:000000000000000011000000";
+    let max = "#d24:000000000000000011111111";
+    let overflow = "#d24:000000000000000100000000";
     for (source, expected) in [
-        ("(utf8-in-range? 0 0 255)", true),
-        ("(utf8-in-range? 255 0 255)", true),
-        ("(utf8-in-range? 256 0 255)", false),
-        ("(utf8-in-range? -1 0 255)", false),
-        ("(utf8-continuation-byte? 127)", false),
-        ("(utf8-continuation-byte? 128)", true),
-        ("(utf8-continuation-byte? 191)", true),
-        ("(utf8-continuation-byte? 192)", false),
-        ("(utf8-byte? 0)", true),
-        ("(utf8-byte? 255)", true),
-        ("(utf8-byte? 256)", false),
-        ("(utf8-all-bytes? (quote ()))", true),
-        ("(utf8-all-bytes? (quote (0 127 255)))", true),
-        ("(utf8-all-bytes? (quote (0 256)))", false),
-        ("(utf8-two-continuations? 128 191)", true),
-        ("(utf8-two-continuations? 128 192)", false),
+        (format!("(utf8-in-range? {zero} {zero} {max})"), true),
+        (format!("(utf8-in-range? {max} {zero} {max})"), true),
+        (format!("(utf8-in-range? {overflow} {zero} {max})"), false),
+        (format!("(utf8-in-range? (01011 {zero} {one}) {zero} {max})"), false),
+        (format!("(utf8-continuation-byte? {ascii})"), false),
+        (format!("(utf8-continuation-byte? {continuation})"), true),
+        (format!("(utf8-continuation-byte? {last_cont})"), true),
+        (format!("(utf8-continuation-byte? {after_cont})"), false),
+        (format!("(utf8-byte? {zero})"), true),
+        (format!("(utf8-byte? {max})"), true),
+        (format!("(utf8-byte? {overflow})"), false),
+        (format!("(utf8-byte? (10111 {one} {two}))"), false),
+        (format!("(utf8-all-bytes? (001 ()))"), true),
+        (format!("(utf8-all-bytes? (001 ({zero} {ascii} {max})))"), true),
+        (format!("(utf8-all-bytes? (001 ({zero} {overflow})))"), false),
+        (format!("(utf8-all-bytes? (111 (10111 {one} {two}) (001 ())))"), false),
+        (format!("(utf8-two-continuations? {continuation} {last_cont})"), true),
+        (format!("(utf8-two-continuations? {continuation} {after_cont})"), false),
     ] {
-        let actual = eval_program(source, &mut session)
+        let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", &source)
+            .unwrap_or_else(|e| panic!("{source}: D24 source parse failed: {e:?}"));
+        let actual = eval_parsed_expressions(&parsed, &mut session)
             .unwrap_or_else(|e| panic!("{source} failed: {e:?}")).value;
         assert_eq!(
             actual.as_predicate_bit(), Some(expected),
-            "{source}: expected an exact D1 bit, never ordinary Number 0/1"
+            "{source}: expected exactly a D1 bit, not an unqualified Number"
         );
     }
+    // The historical unqualified input must remain fail-closed at the math gate.
+    let bare = parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp", "(utf8-in-range? 0 0 255)"
+    ).expect("historical Number remains parseable data");
+    let error = eval_parsed_expressions(&bare, &mut session)
+        .expect_err("unqualified Number cannot pass mathematical admission");
+    assert_eq!(error.kind, sens::ErrorKind::Type);
 }
 
 const UTF8_D1_LAW: &str =
@@ -231,7 +252,7 @@ fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
     let program = sens::parse_mixed_exact_domain_utf8_source(
         "lib/utf8.lisp", UTF8_D1_LAW,
     ).expect("the current pinned UTF-8 reader must parse binary SENS law");
-    assert_eq!(program.len(), 2, "two structural SENS-owned UTF-8 verdicts; numeric D24 boundaries remain transitional");
+    assert_eq!(program.len(), 5, "two structural and three D24 numeric SENS-owned UTF-8 verdicts");
 
     let mut session = utf8_session();
     for (index, form) in program.iter().enumerate() {
