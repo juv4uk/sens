@@ -3,7 +3,7 @@
 //! Rust-орієнтир: crates/sens/src/ternary_transport.rs.
 //! ВАЖЛИВО: цей модуль НЕ перевіряє D2-синтаксис і НЕ є оракулом семантики.
 const std = @import("std");
-const sterile = @import("../sterile/domain_word.zig");
+const sterile = @import("sterile/domain_word.zig");
 
 pub const Word = struct {
     /// D1..D9 — саме ширина слова, НЕ десятковий ідентифікатор функції.
