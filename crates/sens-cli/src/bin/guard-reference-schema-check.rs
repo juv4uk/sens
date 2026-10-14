@@ -60,28 +60,41 @@ impl ValidationResult {
 /// Механічна перевірка точної доменної тотожності каталогу Guard.
 /// D4:0011 і D3:001 задає SENS, Rust лише перевіряє збереження ширини AST.
 fn check_directory_domain(expressions: &[Expr]) -> Result<(), String> {
-    let mut directories = 0usize;
-    for expression in expressions {
-        let ExprKind::List(items) = &expression.kind else { continue };
-        if !matches!(items.get(1),
-            Some(Expr { kind: ExprKind::Symbol(name), .. })
-                if name.as_ref() == "*guard-reference-directory*"
-        ) { continue; }
-        directories += 1;
-        if !matches!(items.first(),
-            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                if id.width() == 4 && id.packed_bits() == 0b0011
-        ) { return Err("Guard reference requires exact D4:0011 DEFINE; W8 is not D4".into()); }
-        let Some(Expr { kind: ExprKind::List(quoted), .. }) = items.get(2) else {
-            return Err("Guard reference requires an exact D3:001 quoted directory".into());
-        };
-        if quoted.len() != 2 || !matches!(quoted.first(),
-            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
-                if id.width() == 3 && id.packed_bits() == 0b001
-        ) { return Err("Guard reference requires exact D3:001 QUOTE; W8 is not D3".into()); }
-    }
-    if directories == 0 {
-        return Err("Guard reference has no exact-domain directory definition".into());
+    // Обидва каталоги мають самостійно точні D4/D3 координати.
+    // Жоден історичний восьмибітний заголовок не отримує цього допуску.
+    for name in ["*guard-reference-directory*", "*guard-script-directory*"] {
+        let mut found = false;
+        for expression in expressions {
+            let ExprKind::List(items) = &expression.kind else { continue };
+            if !matches!(
+                items.get(1),
+                Some(Expr { kind: ExprKind::Symbol(symbol), .. })
+                    if symbol.as_ref() == name
+            ) {
+                continue;
+            }
+            found = true;
+            if !matches!(
+                items.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0011
+            ) {
+                return Err(format!("{name} requires exact D4:0011 DEFINE; W8 is not D4"));
+            }
+            let Some(Expr { kind: ExprKind::List(quoted), .. }) = items.get(2) else {
+                return Err(format!("{name} requires an exact D3:001 quoted directory"));
+            };
+            if quoted.len() != 2 || !matches!(
+                quoted.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 3 && id.packed_bits() == 0b001
+            ) {
+                return Err(format!("{name} requires exact D3:001 QUOTE; W8 is not D3"));
+            }
+        }
+        if !found {
+            return Err(format!("missing exact-domain directory definition: {name}"));
+        }
     }
     Ok(())
 }
@@ -349,7 +362,10 @@ mod tests {
        (verify (check1 check2))
        (lifecycle current-contract)
        (provenance commit abc123)
-       (unknown-route ask-agent)))))"#
+       (unknown-route ask-agent)))))
+(0011 *guard-script-directory*
+  (001
+    ((tool (name test-script)))))"#
             .into()
     }
 
@@ -383,6 +399,34 @@ mod tests {
         let path = temp_file(&source, "wrong-define-width");
         let failure = parse_guard_reference(&path).unwrap_err();
         assert!(failure.contains("D4:0011 DEFINE"), "{failure}");
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn rejects_w8_quote_for_script_directory_without_aliasing_d3() {
+        let source = sample_wsm().replacen(
+            "(0011 *guard-script-directory*\n  (001\n",
+            "(0011 *guard-script-directory*\n  (00000001\n",
+            1,
+        );
+        let path = temp_file(&source, "script-w8-quote");
+        let failure = parse_guard_reference(&path).unwrap_err();
+        assert!(failure.contains("*guard-script-directory*"), "{failure}");
+        assert!(failure.contains("D3:001 QUOTE"), "{failure}");
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn rejects_missing_exact_script_directory() {
+        let source = sample_wsm()
+            .split("\n(0011 *guard-script-directory*")
+            .next()
+            .unwrap()
+            .to_string();
+        let path = temp_file(&source, "missing-script-directory");
+        let failure = parse_guard_reference(&path).unwrap_err();
+        assert!(failure.contains("missing exact-domain directory definition"), "{failure}");
+        assert!(failure.contains("*guard-script-directory*"), "{failure}");
         fs::remove_file(path).unwrap();
     }
 

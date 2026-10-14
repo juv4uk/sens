@@ -822,7 +822,7 @@
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
 (0011 *guard-script-directory*
-  (00000001
+  (001
     ((tool
        (name oracle-check)
        (summary "Безпечна перевірка синтаксису WSM без виконання · Parse-only WSM preflight without evaluation")
