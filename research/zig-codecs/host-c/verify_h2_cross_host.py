@@ -137,7 +137,7 @@ def negative_self_test(root: Path) -> None:
     print(f"H2_PREFLIGHT_NEGATIVES_PASS rejected={len(probes)}")
 
 
-def invoke(cmd: list[str], root: Path, marker: str) -> dict:
+def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
     result = subprocess.run(cmd, cwd=root, capture_output=True, text=True, errors="replace", check=False)
     record = {
         "argv": cmd, "exit_code": result.returncode, "stdout_sha256": sha256(result.stdout.encode()),
@@ -148,6 +148,8 @@ def invoke(cmd: list[str], root: Path, marker: str) -> dict:
         excerpt = (result.stderr or result.stdout)[-1800:]
         raise AuditFailure(f"test_id=H2_RUN layer=execution command={cmd!r} "
                            f"exit={result.returncode} expected_marker={marker!r} diagnostic={excerpt!r}")
+    if validator is not None:
+        validator(result.stdout)
     return record
 
 
@@ -162,24 +164,22 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     exe = root / sens_bin
     if not exe.is_file():
         raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
-    c_host = invoke(["bash", C_DRIVER], root, "C_D3_SUBSET_SOURCE_WITNESS_PASS")
-    # Explicitly check each paired result, not just a summary and exit code.
-    c_recheck = subprocess.run(["bash", C_DRIVER], cwd=root,
-                               capture_output=True, text=True, check=False)
-    if c_recheck.returncode:
-        raise AuditFailure("test_id=H2_C_RECHECK layer=execution second_run_failed")
-    for name, _, _ in CASES:
-        for state, expected in (("law", "C_D3_SUBSET_PASS"),
-                                ("mutant", "C_D3_SUBSET_NEGATIVE_PASS")):
-            matching = [line for line in c_recheck.stdout.splitlines()
-                        if line.startswith(expected + " ") and
-                        f"source=tests/semantic/{name}-{state}.bits" in line]
-            if len(matching) != 1:
-                raise AuditFailure(f"test_id=H2_COMPARISON layer=execution C_missing={name}-{state}")
-            if state == "mutant" and "category=NONCALLABLE_HEAD" not in matching[0]:
-                raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1_NONCALLABLE C={matching[0]}")
-            if state == "law" and "result=D1:1" not in matching[0]:
-                raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1:YES C={matching[0]}")
+    def check_c_verdicts(stdout: str) -> None:
+        # These are observations from the C process, not Python-authored SENS laws.
+        for name, _, _ in CASES:
+            for state, expected in (("law", "C_D3_SUBSET_PASS"),
+                                    ("mutant", "C_D3_SUBSET_NEGATIVE_PASS")):
+                matching = [line for line in stdout.splitlines()
+                            if line.startswith(expected + " ") and
+                            f"source=tests/semantic/{name}-{state}.bits" in line]
+                if len(matching) != 1:
+                    raise AuditFailure(f"test_id=H2_COMPARISON layer=execution C_missing={name}-{state}")
+                if state == "mutant" and "category=NONCALLABLE_HEAD" not in matching[0]:
+                    raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1_NONCALLABLE C={matching[0]}")
+                if state == "law" and "result=D1:1" not in matching[0]:
+                    raise AuditFailure(f"test_id=H2_COMPARISON layer=eval expected=D1:YES C={matching[0]}")
+    c_host = invoke(["bash", C_DRIVER], root,
+                    "C_D3_SUBSET_SOURCE_WITNESS_PASS", validator=check_c_verdicts)
     native_a = invoke(["bash", RUST_DRIVERS[0], str(exe)], root, "NATIVE_SENS_PASS id=retired-d3-eq")
     native_b = invoke(["bash", RUST_DRIVERS[1], str(exe)], root,
                       "NATIVE_SENS_PASS test_id=retired-quote-inert-d3")
