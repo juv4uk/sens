@@ -482,14 +482,17 @@
       ((010 body)  (1110 (001 ()) (001 ())))
       ((0100 (010 (100 body))) (110
          ((101 (100 body) (001 =>)) (1110 (001 ()) (011 body)))
-         ((010 ()) (001000 ((rest (clips-split-at-arrow (011 body))))
-              (1110 (111 (100 body) (100 rest)) (1001 rest))))))
+         ((010 ()) ((0010 (rest)
+              (1110 (111 (100 body) (100 rest)) (1001 rest)))
+              (clips-split-at-arrow (011 body))))))
       ((010 (100 body))  (110
          ((101 (100 body) (001 =>)) (1110 (001 ()) (011 body)))
-         ((010 ()) (001000 ((rest (clips-split-at-arrow (011 body))))
-              (1110 (111 (100 body) (100 rest)) (1001 rest))))))
-      ((010 ()) (001000 ((rest (clips-split-at-arrow (011 body))))
-           (1110 (111 (100 body) (100 rest)) (1001 rest)))))))
+         ((010 ()) ((0010 (rest)
+              (1110 (111 (100 body) (100 rest)) (1001 rest)))
+              (clips-split-at-arrow (011 body))))))
+      ((010 ()) ((0010 (rest)
+           (1110 (111 (100 body) (100 rest)) (1001 rest)))
+           (clips-split-at-arrow (011 body)))))))
 
 ; Step 3: any number of `(assert (...))` forms after `=>`, not just one.
 ; my-lisp's rule format only ever has one head per clause, so N assertions
