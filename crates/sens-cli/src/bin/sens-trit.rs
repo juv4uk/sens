@@ -244,8 +244,11 @@ fn read_explicit_e1(path: &Path) -> Result<Vec<u8>, String> {
 /// Mechanical E1 encoding only. The currently ratified canonical D2 reader
 /// checks exact words; the E1 codec does not grant any semantic identity.
 fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
-    let words = sens::decode_ternary_program(physical_t5)
-        .map_err(|e| format!("SENS canonical T5/D2 rejected: {e:?}"))?;
+    // Default ingress: Zig owns physical T5 -> exact W1..W9 words;
+    // SENS's canonical D2 reader alone admits the word sequence.
+    // Only explicitly selected no-default-features uses Rust T5 reference.
+    let words = decode_canonical_t5_words(physical_t5)
+        .map_err(|e| format!("SENS canonical T5/D2 rejected: {e}"))?;
     sens::envelope_e1::encode(&words)
         .map_err(|e| format!("E1 physical encode rejected: {e:?}"))
 }
@@ -603,6 +606,42 @@ fn main() {
 #[cfg(test)]
 mod e1_cli_mechanism_tests {
     use super::*;
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn e1_encoder_uses_zig_t5_ingress_then_sens_d2_without_rust_physical_bypass() {
+        let physical = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        let words = zig_transport::decode_t5_words(physical)
+            .expect("Zig mechanically restores exact D1-D9 words");
+        let expected = sens::envelope_e1::encode(&words)
+            .expect("existing E1 encoder, not another semantic law");
+        assert_eq!(encode_e1_from_t5(physical).unwrap(), expected);
+        assert_eq!(words.iter().map(|word| word.width()).collect::<Vec<_>>(),
+                   vec![2, 3, 2, 3, 2]);
+
+        // A physically valid T5 carrier may still violate SENS D2 structure.
+        let lone_close = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
+        assert!(encode_e1_from_t5(&lone_close).unwrap_err()
+            .contains("SENS canonical D2 rejected"));
+        for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
+            assert!(encode_e1_from_t5(invalid).is_err(),
+                "malformed T5 must not produce an E1 carrier");
+        }
+
+        // Guard precisely this production entry, excluding unrelated Rust
+        // reference tests and explicitly selected non-Zig transport.
+        let source = include_str!("sens-trit.rs");
+        let start = source.find("fn encode_e1_from_t5(").unwrap();
+        let route = &source[start..];
+        let route = &route[..route.find("\n}\n").unwrap()];
+        assert!(route.contains("decode_canonical_t5_words(physical_t5)"));
+        assert!(!route.contains("sens::decode_ternary_program(physical_t5)"));
+        assert!(!route.contains("sens::decode_ternary_words(physical_t5)"));
+    }
 
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
