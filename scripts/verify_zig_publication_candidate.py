@@ -20,6 +20,7 @@ import tempfile
 SCHEMA = "sens-zig-publication-candidate/v1"
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 MAX_SIZE = 4 * 1024 * 1024
+MAX_EXECUTABLE_SIZE = 256 * 1024 * 1024
 
 
 class Rejected(ValueError):
@@ -30,11 +31,11 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def read_fixed(path: Path) -> bytes:
+def read_fixed(path: Path, *, max_size: int = MAX_SIZE) -> bytes:
     if path.is_symlink() or not path.is_file():
         raise Rejected(f"untrusted/missing regular file: {path}")
     size = path.stat().st_size
-    if not 0 < size <= MAX_SIZE:
+    if not 0 < size <= max_size:
         raise Rejected(f"empty/oversize file: {path}")
     return path.read_bytes()
 
@@ -65,8 +66,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
         raise Rejected("candidate must be physical .sens")
     original = read_fixed(candidate)
     initial_source = read_fixed(source)
-    zig_binary = read_fixed(zig_bin)
-    sens_binary = read_fixed(sens_bin)
+    zig_binary = read_fixed(zig_bin, max_size=MAX_EXECUTABLE_SIZE)
+    sens_binary = read_fixed(sens_bin, max_size=MAX_EXECUTABLE_SIZE)
     try:
         receipt = json.loads(read_fixed(receipt_path))
     except (json.JSONDecodeError, UnicodeError) as exc:
@@ -119,7 +120,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     # Reject concurrent substitution between initial admission and verdict.
     if read_fixed(source) != initial_source or read_fixed(candidate) != original:
         raise Rejected("source/candidate mutated during admission")
-    if read_fixed(zig_bin) != zig_binary or read_fixed(sens_bin) != sens_binary:
+    if (read_fixed(zig_bin, max_size=MAX_EXECUTABLE_SIZE) != zig_binary
+            or read_fixed(sens_bin, max_size=MAX_EXECUTABLE_SIZE) != sens_binary):
         raise Rejected("executor changed during admission")
     return {
         "status": "CANDIDATE_VERIFIED_NOT_PUBLISHED",
