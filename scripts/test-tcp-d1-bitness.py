@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/tcp.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as fallback
+  2. Ratified exact D1:1 directly guards the D3 COND fallback; no D3-derived detour
   3. Reuses utf8-decode-string / utf8-encode-string and tcp-*-raw
   4. Key tcp surface present
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TCP = ROOT / "lib" / "tcp.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "(#d1:1\n          decoded)"
 REQUIRED = (
     "tcp-listen",
     "tcp-listen-on",
@@ -48,8 +48,14 @@ def check_tcp() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"tcp: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("tcp: exact D1:1 form (010 (001 ())) missing")
+    code = "\n".join(
+        line for line in text.splitlines()
+        if not line.lstrip().startswith(";")
+    )
+    if code.count(D1_TRUE) != 1:
+        errs.append("tcp: require exactly one direct D1 YES in COND fallback")
+    if "(010 (001 ()))" in code:
+        errs.append("tcp: previous derived D3 ATOM(QUOTE EMPTY) fallback returned")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"tcp: required surface missing: {fn}")
