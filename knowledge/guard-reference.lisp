@@ -1028,7 +1028,7 @@
       ((101 status (001 broken)) 1)
       ((010 (001 ())) 0))))
 
-(00001011 guard-reference-stronger
+(0011 guard-reference-stronger
   (0010 (best candidate)
     (00000111
       ((00000010 best) () candidate)

@@ -812,6 +812,57 @@ mod tests {
         }
     }
 
+
+    #[test]
+    fn guard_reference_stronger_definition_has_exact_d4_width_not_w8() {
+        // Mechanical AST proof only; SENS owns the actual definition law.
+        let full = include_str!("../../../knowledge/guard-reference.lisp");
+        let begin = full
+            .find("(0011 guard-reference-stronger\n")
+            .expect("exact D4 stronger definition missing");
+        let rest = &full[begin..];
+        let end = rest
+            .find("\n(0011 guard-reference-all")
+            .expect("following D4 function missing");
+        let form = rest[..end].trim();
+
+        fn definition_head_is_d4(code: &str) -> bool {
+            let parsed = sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", code
+            ).expect("pinned Guard exact-domain reader");
+            assert_eq!(parsed.len(), 1, "one definition");
+            let ExprKind::List(def) = &parsed[0].kind else {
+                panic!("definition list expected");
+            };
+            assert_eq!(def.len(), 3, "DEFINE target and one value expression");
+            assert!(matches!(&def[1].kind, ExprKind::Symbol(name)
+                if name.as_ref() == "guard-reference-stronger"));
+            let ExprKind::List(lambda) = &def[2].kind else {
+                panic!("value must remain a lambda form");
+            };
+            assert!(matches!(lambda.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0010
+            ), "lambda retains exact D4:0010 identity");
+            matches!(def.first(),
+                Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                    if id.width() == 4 && id.packed_bits() == 0b0011
+            )
+        }
+
+        assert!(definition_head_is_d4(form), "ratified exact D4:0011 required");
+        let mutant = form.replacen(
+            "(0011 guard-reference-stronger",
+            "(00001011 guard-reference-stronger",
+            1
+        );
+        assert_ne!(mutant, form, "mutation must change exactly one head");
+        assert!(
+            !definition_head_is_d4(&mutant),
+            "historical W8 must never impersonate D4:0011"
+        );
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));

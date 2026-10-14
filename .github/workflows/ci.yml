@@ -510,6 +510,7 @@ jobs:
           cargo test --locked -p sens-lsp guard_reference_missing_evidence_has_22_exact_d3_quote_heads_not_w8 -- --nocapture
           cargo test --locked -p sens-lsp guard_ask_preserves_all_48_d3_quote_heads_against_w8_mutants -- --nocapture
           cargo test --locked -p sens-lsp guard_topics_exact_d3_list_ops_reject_three_independent_w8_mutants -- --nocapture
+          cargo test --locked -p sens-lsp guard_reference_stronger_definition_has_exact_d4_width_not_w8 -- --nocapture
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash
