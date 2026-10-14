@@ -79,17 +79,23 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(source.read_bytes(), before)
 
     def test_in_repository_publication_is_not_policy_blocked(self):
-        # Owner decision: the in-repository publication ban is removed. A
-        # mechanically migratable source may now be published into the repo;
-        # only genuine semantic ambiguity may still block it.
+        # Owner decision permits repository targets. This policy test must
+        # never publish or delete an existing canonical physical .sens file.
+        # Actual write-new-only and no-clobber are tested independently.
         source = ROOT / "benchmarks" / "lists.lisp"
         target = source.with_suffix(".sens")
-        try:
-            result = invoke(source, "--source-era", "legacy")
-            self.assertNotIn("in-repository publication needs independent",
-                             result.stderr)
-        finally:
-            target.unlink(missing_ok=True)
+        source_before = source.read_bytes()
+        target_before = target.read_bytes() if target.is_file() else None
+        result = invoke(source, "--dry-run", "--source-era", "legacy")
+        self.assertNotIn("in-repository publication needs independent",
+                         result.stderr)
+        self.assertEqual(source.read_bytes(), source_before)
+        if target_before is None:
+            self.assertFalse(target.exists() or target.is_symlink(),
+                             "dry-run must not create a physical .sens")
+        else:
+            self.assertEqual(target.read_bytes(), target_before,
+                             "dry-run must preserve pre-existing physical .sens")
 
     def test_peer_identity_requires_loaded_surface_environment(self):
         """A single-file staging tool must not invent imports from core/uk.lisp.
