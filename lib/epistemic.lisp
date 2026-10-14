@@ -204,13 +204,13 @@
   (0010 (requirements effective-capabilities)
     (110
       ((010 requirements) #d1:1)
-      ((0100 (11101 (100 requirements) effective-capabilities)) (001 ()))
+      ((0100 (11101 (100 requirements) effective-capabilities)) #d1:0)
       (#d1:1
        (epistemic--all-required-present? (011 requirements) effective-capabilities)))))
 
 (0011 intent-capabilities-satisfied?
   (0010 (intent effective-capabilities)
     (110
-      ((0100 (intent? intent)) (001 ()))
+      ((0100 (intent? intent)) #d1:0)
       (#d1:1
        (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
