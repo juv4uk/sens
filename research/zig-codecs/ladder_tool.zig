@@ -48,9 +48,8 @@ fn sha256Hex(bytes: []const u8) [64]u8 {
     return out;
 }
 
-fn parseWords(allocator: std.mem.Allocator, data: []const u8) ![]t5.Word {
-    var list = std.ArrayList(t5.Word).init(allocator);
-    errdefer list.deinit();
+fn parseWords(out: []t5.Word, data: []const u8) !usize {
+    var count: usize = 0;
     var it = std.mem.splitScalar(u8, data, '\n');
     while (it.next()) |raw| {
         const line = std.mem.trim(u8, raw, " \t\r");
@@ -62,18 +61,21 @@ fn parseWords(allocator: std.mem.Allocator, data: []const u8) ![]t5.Word {
         const bits = try std.fmt.parseInt(u16, b_str, 10);
         if (width == 0 or width > 10) return error.BadWidth;
         if (bits >= (@as(u32, 1) << @as(u5, @intCast(width)))) return error.BitsOverflow;
-        try list.append(.{ .width = width, .bits = bits });
+        if (count >= out.len) return error.TooManyWords;
+        out[count] = .{ .width = width, .bits = bits };
+        count += 1;
     }
-    if (list.items.len == 0) return error.EmptyProgram;
-    return list.toOwnedSlice();
+    if (count == 0) return error.EmptyProgram;
+    return count;
 }
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
     const data = try readFile(allocator, "research/zig-codecs/tools/caar.lines");
     defer allocator.free(data);
-    const words = try parseWords(allocator, data);
-    defer allocator.free(words);
+    var word_buf: [4096]t5.Word = undefined;
+    const count = try parseWords(&word_buf, data);
+    const words = word_buf[0..count];
 
     // 1. T5: кодування через сам Zig-кодек.
     const t5_bytes = try t5.encode(allocator, words);
