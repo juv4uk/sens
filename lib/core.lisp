@@ -99,7 +99,7 @@
 ; a real caller needs it, don't build it speculatively now).
 (0011 gensym
   (0010 (prefix)
-    (11101101 (110011110 prefix (11110100 (01011010))))))
+    (string->symbol (110011110 prefix (write-to-string (01011010))))))
 
 (0011 pair
   (0010 (left right)
@@ -538,12 +538,12 @@
        (001 (class-membership string nonmember)))
       ((010 value) 
        (110
-         ((101 (110101011 (11110100 value))
-              (110101011 (11110100 "")))
+         ((101 (110101011 (write-to-string value))
+              (110101011 (write-to-string "")))
           
           (001 (class-membership string member)))
-         ((101 (110101011 (11110100 value))
-              (110101011 (11110100 "")))
+         ((101 (110101011 (write-to-string value))
+              (110101011 (write-to-string "")))
           
           (001 (class-membership string nonmember)))))
       ((010 value) 
@@ -801,7 +801,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (11110100 n)))
+    (write-to-string n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
