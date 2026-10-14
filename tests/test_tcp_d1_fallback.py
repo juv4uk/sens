@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/tcp.lisp"
 HISTORIC_BLOB = "8860b61e171fcefa56147d93153071a14dd4c55e"
 OLD = "(0100 (101 (100 decoded) (001 decoded)))"
-NEW = "(010 (001 ()))"
+DERIVED = "(010 (001 ()))"
+DIRECT = "#d1:1"
 
 
 def _source_without_migration_comment(text: str) -> str:
@@ -41,15 +42,16 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
         # Count only code occurrences, not comments
         code_lines = [line for line in self.source.splitlines() if not line.lstrip().startswith(";")]
         code = "\n".join(code_lines)
-        self.assertEqual(code.count(NEW), 1)
+        self.assertEqual(code.count(DIRECT), 1)
+        self.assertNotIn(DERIVED, code)
         self.assertNotIn(OLD, code)
-        # Reconstruct by replacing the LAST occurrence (code, not comment)
-        # on the source WITHOUT the migration comment, to verify the
-        # surgical code replacement was exact.
+        # Restore the original historical source exact Git blob. The
+        # intermediate D3-derived predicate remains explicit provenance.
         clean = _source_without_migration_comment(self.source)
-        parts = clean.rsplit(NEW, 1)
-        self.assertEqual(len(parts), 2)
-        reconstructed = (parts[0] + OLD + parts[1]).encode("utf-8")
+        self.assertEqual(clean.count(DIRECT), 1)
+        intermediate = clean.replace(DIRECT, DERIVED, 1)
+        self.assertEqual(intermediate.count(DERIVED), 1)
+        reconstructed = intermediate.replace(DERIVED, OLD, 1).encode("utf-8")
         self.assertEqual(git_blob(reconstructed), HISTORIC_BLOB)
         print(f"TCP-D1: exact single source replacement; "
               f"UTF-8 bytes {len(reconstructed)} -> {len(self.source.encode('utf-8'))}")
@@ -69,11 +71,13 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
     def test_semantic_code_heads_save_seven_bits(self):
         # Count ONLY domain function identity bits, not D2 frames, payload,
         # word boundaries or physical packed T5 sizes.
-        former = (4 + 3 + 3 + 3)
-        current = (3 + 3)
-        self.assertEqual((former, current, former - current), (13, 6, 7))
-        print("TCP-D1: 13 -> 6 exact function-head bits, saving 7; "
-              "physical .sens size NOT measured")
+        former = 4 + 3 + 3 + 3
+        derived = 3 + 3
+        current = 0  # #d1:1 is a predicate word, not a function-call head
+        self.assertEqual((former, derived, current), (13, 6, 0))
+        self.assertEqual(former - current, 13)
+        print("TCP-D1: historical=13 derived=6 direct=0 function-head bits; "
+              "D1 payload=1 bit; physical .sens size NOT measured")
 
     def test_exhaustive_two_value_d1_law(self):
         # First COND branch handles successful tag equality; second has D1 YES.
@@ -89,14 +93,18 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
         # Count only code occurrences, not comments
         code_lines = [line for line in self.source.splitlines() if not line.lstrip().startswith(";")]
         code = "\n".join(code_lines)
-        self.assertEqual(code.count(NEW), 1)
+        self.assertEqual(code.count(DIRECT), 1)
+        clean = _source_without_migration_comment(self.source)
         for corrupted in (
-            code.replace(NEW, "(1)", 1),
-            code.replace(NEW, "(0100 (001 ()))", 1),
-            code.replace(NEW, "(010 (001 (0)))", 1),
+            clean.replace(DIRECT, "1", 1),        # numeric, not D1
+            clean.replace(DIRECT, "#d1:0", 1),   # wrong D1 predicate
+            clean.replace(DIRECT, "(0100 (001 ()))", 1),  # invalid NOT input
         ):
-            with self.assertRaises(AssertionError):
-                self.assertEqual(git_blob(corrupted.replace(NEW, OLD).encode("utf-8")), HISTORIC_BLOB)
+            self.assertNotIn(DIRECT, corrupted)
+            self.assertNotEqual(
+                git_blob(corrupted.replace(DIRECT, OLD, 1).encode("utf-8")),
+                HISTORIC_BLOB,
+            )
 
 
 if __name__ == "__main__":

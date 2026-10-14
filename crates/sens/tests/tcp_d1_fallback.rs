@@ -13,8 +13,13 @@ fn eval_exact(source: &str) -> Result<sens::Value, sens::LanguageError> {
 
 #[test]
 fn fallback_value_is_strict_d1_yes_and_not_number_one() {
-    let yes = eval_exact("(010 (001 ()))").expect("D3 ATOM of quoted empty");
+    let yes = eval_exact("#d1:1").expect("current exact D1 YES");
     assert_eq!(yes.as_predicate_bit(), Some(true));
+    let no = eval_exact("#d1:0").expect("current exact D1 NO");
+    assert_eq!(no.as_predicate_bit(), Some(false));
+    let historical = eval_exact("(010 (001 ()))")
+        .expect("previous D3 ATOM(QUOTE EMPTY) must yield same D1 YES");
+    assert_eq!(historical.as_predicate_bit(), yes.as_predicate_bit());
     let error = eval_exact("(0100 (001 ()))")
         .expect_err("D4 NOT must reject structural EMPTY, not coerce it to D1 NO");
     assert_eq!(error.kind, ErrorKind::Type);
@@ -24,8 +29,8 @@ fn fallback_value_is_strict_d1_yes_and_not_number_one() {
 #[test]
 fn both_d1_cond_outcomes_preserve_tcp_tag_dispatch() {
     for (source, expected) in [
-        ("(110 ((101 (001 decoded) (001 decoded)) (001 text)) ((010 (001 ())) (001 fallback)))", "text"),
-        ("(110 ((101 (001 rejected) (001 decoded)) (001 text)) ((010 (001 ())) (001 fallback)))", "fallback"),
+        ("(110 ((101 (001 decoded) (001 decoded)) (001 text)) (#d1:1 (001 fallback)))", "text"),
+        ("(110 ((101 (001 rejected) (001 decoded)) (001 text)) (#d1:1 (001 fallback)))", "fallback"),
     ] {
         let actual = eval_exact(source).expect("D3 COND with strict D1 equality and fallback");
         assert_eq!(actual.to_string(), expected);
@@ -48,7 +53,8 @@ fn real_tcp_file_reads_with_current_domain_widths() {
     let code_only = SOURCE.lines()
         .filter(|line| !line.trim_start().starts_with(';'))
         .collect::<Vec<_>>().join("\n");
-    assert_eq!(code_only.matches("(010 (001 ()))").count(), 1);
+    assert_eq!(code_only.matches("(#d1:1").count(), 1);
+    assert!(!code_only.contains("(010 (001 ()))"));
     assert!(!SOURCE.contains("(0100 (101 (100 decoded) (001 decoded)))"));
     assert!(parse_mixed_exact_domain_process_tcp_source("lib/untrusted.lisp", SOURCE).is_err());
 }

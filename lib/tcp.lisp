@@ -1,7 +1,7 @@
 ; TCP text interpretation and public listen policy owned by Lisp.
 ; Інтерпретація TCP-тексту й публічна політика listen, якими володіє Lisp.
 ;
-; Migrated: two-field COND only; explicit D1 fallbacks (010 (001 ())).
+; Migrated: two-field COND only; direct D1:YES fallback #d1:1.
 ; Reuses utf8-decode-string / utf8-encode-string from lib/utf8.lisp and
 ; tcp-listen-raw / tcp-read-raw / tcp-write-raw host mechanism.
 ; Width is identity; every bit of the domain address is valued.
@@ -27,7 +27,7 @@
        (110
          ((101 (100 decoded) (001 decoded))
           (1001 decoded))
-         ((010 (001 ()))
+         (#d1:1
           decoded)))
      (utf8-decode-string bytes))))
 
