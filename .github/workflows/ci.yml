@@ -139,7 +139,7 @@ jobs:
           cargo test --locked -p sens --test clips_import clips_defrule_ -- --nocapture
           cargo test --locked -p sens --test clips_import clips_deftemplate_applies_inside_defrule_conditions_and_conclusions -- --exact --nocapture
       - name: LIFE-1 — точковий SENS-закон готовності проєкції й негативні випадки
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[life-1-once]')
+        if: always() && github.event_name == 'push' && contains(github.event.head_commit.message, '[life-1-once]')
         shell: bash
         run: |
           set -euo pipefail
