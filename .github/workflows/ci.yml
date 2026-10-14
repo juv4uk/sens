@@ -123,6 +123,27 @@ jobs:
             --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
           cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
+      - name: Zig ↔ Rust F3C парний бенчмарк — дійсні .senc байти
+        if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.17.0:$PATH"
+          python3 research/zig-codecs/f3c/run_paired_bench.py \
+            --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
+
+      - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
+        if: always() && github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zig-rust-codec-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/zig-rust-t5-results/
+            ${{ runner.temp }}/zig-rust-f3c-results/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
