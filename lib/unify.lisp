@@ -95,11 +95,11 @@
          ((010 (001 ())) (001 fail))))
       ((010 b) (001 fail))
       ((010 (001 ()))
-       (001000 ((car-b (unify-walked (100 a) (100 b) bindings)))
+       (001000 ((car-b (unify (100 a) (100 b) bindings)))
          (110
            ((failed-subst? car-b) (001 fail))
            ((010 (001 ()))
-            (unify-walked (011 a) (011 b) car-b))))))))
+            (unify (011 a) (011 b) car-b))))))))
 
 (0011 occurs-check?
   (0010 (variable term bindings)
