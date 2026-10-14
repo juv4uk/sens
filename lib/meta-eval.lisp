@@ -50,7 +50,7 @@
   (0010 (result)
     (110
       
-      ((010 result)  #d1:0)
+      ((010 result)  (001 ()))
       ((010 ()) (101 (100 result) my-result-fail-token)))))
 
 (0011 my-result-value
@@ -195,14 +195,14 @@
   (0010 (binding)
     (110
       
-      ((010 binding)  #d1:0)
+      ((010 binding)  (001 ()))
       ((010 ()) (101 (100 binding) 0)))))
 
 (0011 my-frame-bound?
   (0010 (name frame)
     (110
       
-      ((010 frame)  #d1:0)
+      ((010 frame)  (001 ()))
       ((101 (100 (100 frame)) name) #d1:1)
       ((010 ()) (my-frame-bound? name (011 frame))))))
 
@@ -216,7 +216,7 @@
   (0010 (env-ref)
     (110
       
-      ((010 env-ref)  #d1:0)
+      ((010 env-ref)  (001 ()))
       ((my-shared-frame-binding? (100 env-ref)) #d1:1)
       ((010 ()) (my-env-has-shared-frame? (011 env-ref))))))
 
@@ -298,7 +298,7 @@
     (110
       ((my-canon-name? name) #d1:1)
       
-      ((010 env-ref)  #d1:0)
+      ((010 env-ref)  (001 ()))
       ((my-shared-frame-binding? (100 env-ref))
        (110
          ((my-frame-bound? name (011 (100 env-ref))) #d1:1)
@@ -310,7 +310,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 primitive))))))
 
 ; UnknownSymbol belongs to name resolution, not application. A symbol produced
@@ -337,14 +337,14 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 macro))))))
 
 (0011 my-closure?
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
@@ -357,7 +357,7 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
@@ -370,14 +370,14 @@
   (0010 (value)
     (110
       
-      ((010 value)  #d1:0)
+      ((010 value)  (001 ()))
       ((010 ()) (101 (100 value) (001 recursive-group-closure))))))
 
 (0011 my-lambda-form?
   (0010 (form)
     (110
       
-      ((010 form)  #d1:0)
+      ((010 form)  (001 ()))
       ((0100 (010 (100 form))) (my-lambda-name? (100 form)))
       ((010 (100 form))  (my-lambda-name? (100 form)))
       )))
@@ -386,10 +386,10 @@
   (0010 (form)
     (110
       
-      ((010 form)  #d1:0)
+      ((010 form)  (001 ()))
       ((my-definition-name? (100 form))
        (110
-         ((my-canon-name? (1001 form)) #d1:0)
+         ((my-canon-name? (1001 form)) (001 ()))
          ((010 ()) (my-lambda-form? (10011 form)))))
       )))
 
@@ -466,10 +466,10 @@
   (0010 (params)
     (110
       ((0100 (010 params)) (110
-         ((101 params #d1:0) #d1:0)
+         ((101 params (001 ())) (001 ()))
          ((010 ()) #d1:1)))
       ((010 params)  (110
-         ((101 params #d1:0) #d1:0)
+         ((101 params (001 ())) (001 ()))
          ((010 ()) #d1:1)))
       ((010 ()) (my-rest-param? (011 params))))))
 
@@ -480,7 +480,7 @@
       (110
         ((my-rest-param? params)
          (110
-           ((11010 received fixed)  #d1:0)
+           ((11010 received fixed)  (001 ()))
            ((0100 (11010 received fixed)) #d1:1)))
         ((010 ())
          (110
@@ -509,7 +509,7 @@
   (0010 (name names)
     (110
       
-      ((010 names)  #d1:0)
+      ((010 names)  (001 ()))
       ((101 name (100 names)) #d1:1)
       ((010 ()) (my-symbol-member? name (011 names))))))
 
@@ -1044,11 +1044,11 @@
   (0010 (name params)
     (110
       ((0100 (010 params)) (110
-         ((101 params #d1:0) #d1:0)
+         ((101 params (001 ())) (001 ()))
          ((101 params name) #d1:1)
          ))
       ((010 params)  (110
-         ((101 params #d1:0) #d1:0)
+         ((101 params (001 ())) (001 ()))
          ((101 params name) #d1:1)
          ))
       ((101 (100 params) name) #d1:1)
@@ -1073,20 +1073,20 @@
          ))
       ((0100 (010 (100 form))) (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) #d1:0)
+         ((my-canon-quote-name? (100 form)) (001 ()))
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) #d1:0)
+            ((my-params-bind-name? name (1001 form)) (001 ()))
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 (100 form))  (110
          ; Quoted data is not a lexical dependency.
-         ((my-canon-quote-name? (100 form)) #d1:0)
+         ((my-canon-quote-name? (100 form)) (001 ()))
          ; A nested lambda can shadow a candidate top-level name.
          ((my-lambda-name? (100 form))
           (110
-            ((my-params-bind-name? name (1001 form)) #d1:0)
+            ((my-params-bind-name? name (1001 form)) (001 ()))
             ((010 ()) (my-forms-reference-name? (011 (011 form)) name))))
          ((010 ()) (my-forms-reference-name? form name))))
       ((010 ()) (my-forms-reference-name? form name)))))
@@ -1095,7 +1095,7 @@
   (0010 (form name)
     (001000 ((lambda-form (10011 form)))
       (110
-        ((my-params-bind-name? name (1001 lambda-form)) #d1:0)
+        ((my-params-bind-name? name (1001 lambda-form)) (001 ()))
         ((010 ()) (my-forms-reference-name? (011 (011 lambda-form)) name))))))
 
 (0011 my-lambda-def-names
