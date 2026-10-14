@@ -115,6 +115,15 @@ jobs:
           set -euo pipefail
           echo "test_id=sens-to-sens-no-w8-as-domain layer=encode executor=rust-mechanical semantic_authority=ratified-domain-index"
           cargo test --locked -p sens-cli --bin sens-to-sens -- --nocapture
+      - name: CLIPS defrule — адресна перевірка роботи SENS через Rust-транспорт
+        if: contains(github.event.head_commit.message, '[clips-defrule-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=clips-defrule-d4-split layer=transport executor=rust-integration-not-native-T5 semantic_authority=SENS"
+          sha256sum lib/clips-import.lisp crates/sens/tests/clips_import.rs
+          cargo test --locked -p sens --test clips_import clips_defrule_ -- --nocapture
+          cargo test --locked -p sens --test clips_import clips_deftemplate_applies_inside_defrule_conditions_and_conclusions -- --exact --nocapture
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
