@@ -1,4 +1,7 @@
-name: Hosted CI
+# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
+# реальності поки не відповідає — run 38564292508 червоний на кроці «Verify migrated user demo sources run through canonical Core (+3 кроки D3/D9/macro)».
+# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
+name: КАРАНТИН — Hosted CI
 
 # Owner freeze 2026-10-11: Core-only required-check surface.
 # Prior hosted CI is archived, not deleted.
@@ -11,7 +14,8 @@ permissions:
 
 jobs:
   critical:
-    name: portable critical gates
+    if: ${{ false }} # КАРАНТИН: червоний, run 38564292508
+ portable critical gates
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

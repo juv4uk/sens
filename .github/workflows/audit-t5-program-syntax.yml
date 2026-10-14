@@ -1,4 +1,7 @@
-name: audit-t5-program-syntax
+# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
+# реальності поки не відповідає — run 38564269748 червоний на кроці «Build the ACTUAL SENS binary reader».
+# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
+name: КАРАНТИН — audit-t5-program-syntax
 
 on:
   workflow_dispatch:
@@ -8,7 +11,8 @@ permissions:
 
 jobs:
   d2-grammar-audit:
-    runs-on: ubuntu-latest
+    if: ${{ false }} # КАРАНТИН: червоний, run 38564269748
+ ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5

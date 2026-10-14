@@ -1,4 +1,7 @@
-name: Vertical Day immutable L0 and native smoke
+# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
+# реальності поки не відповідає — run 38564280846 червоний на кроці «Native CPU vertical mechanism witnesses».
+# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
+name: КАРАНТИН — Vertical Day immutable L0 and native smoke
 
 on:
   workflow_dispatch:
@@ -13,7 +16,8 @@ concurrency:
 
 jobs:
   oracle-native-smoke:
-    runs-on: ubuntu-24.04
+    if: ${{ false }} # КАРАНТИН: червоний, run 38564280846
+ ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
