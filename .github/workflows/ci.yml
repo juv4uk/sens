@@ -307,15 +307,16 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
-          # Точковий SENS D5→D24 закон: SENS повертає D1;
-          # Rust спостерігає механізм, не встановлює семантику.
+          # Один точковий закон: фізичний exact AST wire/FASL D24 →
+          # виконання SENS D5 → D1 і окремий канонічний NEG/RATIO кадр.
+          # Це НЕ граматика T5, НЕ Python/Rust семантичний оракул.
           python3 scripts/ci_failure_contract.py run \
-            --test-id d5-exact-q-binary-predicate \
+            --test-id d5-exact-q-binary-ast-wire-predicate \
             --layer transport \
-            --fixture crates/sens/src/eval/arithmetic.rs \
+            --fixture crates/sens/tests/ast_exact_domain_transport.rs \
             --report-file "$report" \
-            -- cargo test --locked -p sens --lib \
-              binary_d5_exact_q_axiom_witness_with_single_input_mutation \
+            -- cargo test --locked -p sens --test ast_exact_domain_transport \
+              точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком \
               -- --nocapture
       - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
         shell: bash
