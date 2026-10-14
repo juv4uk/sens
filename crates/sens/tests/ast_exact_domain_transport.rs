@@ -205,6 +205,54 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
         }
     }
 
+    // Замкненість від мінімальних математичних засновків: тут на вході
+    // ТІЛЬКИ D24(0) і D24(1). -1, 2, -2, 1/2, -1/2 виводяться
+    // бінарними функціями D5, а не потрапляють готовими значеннями.
+    // AST-дерево лишається точним свідком шляхів операцій;
+    // це ще НЕ сертифікат DERIVED_FACT світової моделі.
+    let нуль = || d24("0");
+    let один = || d24("1");
+    let два = || d5(0b01010, vec![один(), один()]);
+    let мінус_один = || d5(0b01011, vec![нуль(), один()]);
+    let мінус_два = || d5(0b01011, vec![мінус_один(), один()]);
+    let половина = || d5(0b10111, vec![один(), два()]);
+    let мінус_половина = || d5(0b01011, vec![нуль(), половина()]);
+
+    for (id, lhs, rhs) in [
+        ("seed-derived-minus-two-less-minus-one", мінус_два(), мінус_один()),
+        ("seed-derived-minus-one-less-minus-half", мінус_один(), мінус_половина()),
+        ("seed-derived-minus-half-less-zero", мінус_половина(), нуль()),
+        ("seed-derived-zero-less-half", нуль(), половина()),
+        ("seed-derived-half-less-one", половина(), один()),
+        ("seed-derived-one-less-two", один(), два()),
+    ] {
+        // Усі перевірки порядку виконують саме D5:11010 і D1 SENS.
+        // Зовнішній тест не обчислює арифметику вдруге.
+        let actual = run(id, d5(0b11010, vec![lhs, rhs]))
+            .expect("SENS D5 повинен вивести порядок засновків");
+        assert_eq!(
+            actual.as_predicate_bit(), Some(true),
+            "REGRESSION id={id} layer=eval expected=D1:YES actual={actual:?}; \
+             reproduce=cargo test --locked -p sens --test ast_exact_domain_transport \
+             точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком -- --nocapture"
+        );
+    }
+
+    // 1 + (-1) = 0 доводимо двома відсутніми строгими порядками,
+    // щоб не вдавати, що D3 EQ є математичною рівністю дробів.
+    for (id, opcode) in [
+        ("seed-derived-zero-not-less", 0b11010),
+        ("seed-derived-zero-not-greater", 0b11011),
+    ] {
+        let zero_from_seed = d5(0b01010, vec![один(), мінус_один()]);
+        let actual = run(id, d5(opcode, vec![zero_from_seed, нуль()]))
+            .expect("SENS D5 точна рівність нуля");
+        assert_eq!(
+            actual.as_predicate_bit(), Some(false),
+            "REGRESSION id={id} layer=eval expected=D1:NO actual={actual:?}"
+        );
+    }
+
     // Заборонені числові операнди не отримують допуску навіть після
     // фізичного exact AST wire/FASL round-trip.
     for (id, source, kind) in [
