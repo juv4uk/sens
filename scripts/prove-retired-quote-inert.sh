@@ -24,12 +24,15 @@ from sens_t5_codec import parse_words, encode_projection, decode_bytes
 directory, positive_path, negative_path = map(Path, sys.argv[1:])
 p = parse_words(positive_path.read_text(encoding="ascii"))
 n = parse_words(negative_path.read_text(encoding="ascii"))
-assert len(p) == len(n), "one-bit mutant preserves exact word count"
+if len(p) != len(n):
+    raise SystemExit("T5_TRANSPORT_RED: mutant changed word count")
 changed = [(a, b) for a, b in zip(p, n) if a != b]
-assert len(changed) == 1 and changed[0] == ("0", "1"), "mutant flips one quoted D1 bit"
+if len(changed) != 1 or changed[0] != ("0", "1"):
+    raise SystemExit("T5_TRANSPORT_RED: mutant must flip only one D1 bit")
 for name, words in (("law", p), ("mutant", n)):
     physical = encode_projection(" ".join(words))
-    assert decode_bytes(physical) == words, "T5 preserves every exact word"
+    if decode_bytes(physical) != words:
+        raise SystemExit("T5_TRANSPORT_RED: codec lost exact word identity")
     (directory / f"{name}.sens").write_bytes(physical)
 print(f"QUOTE_INERT_T5_READY word_count={len(p)} mutant_changed_words={len(changed)} semantic_pass=NOT_INFERRED")
 PY
