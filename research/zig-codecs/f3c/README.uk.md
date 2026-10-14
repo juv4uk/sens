@@ -1,6 +1,6 @@
 # Zig Frame3 Carrier (F3C) · exact-width SENS
 
-**Статус:** реалізовано дослідний Zig source, **ще не підтверджено фактичним Zig 0.17.0 компілятором чи Rust↔Zig parity**. Він доповнює поточний T5, не замінює Rust production.
+**Статус:** реалізовано дослідний Zig source, **ще не підтверджено фактичним Zig 0.16.0 компілятором чи Rust↔Zig parity**. Він доповнює поточний T5, не замінює Rust production.
 
 Контракт: [#5520](https://github.com/juv4uk/sens/issues/5520), [#5768](https://github.com/juv4uk/sens/issues/5768); Rust [frame3_small.rs](../../../crates/sens/src/frame3_small.rs) і [senc.rs](../../../research/framed3/rust_codec/senc.rs). Zig модуль `f3c.zig` незалежно від Rust FFI повторює bounded rank/unrank за таблицею допустимих тритових суфіксів, групує довжини у фізичні byte buckets, зберігає D1–D9 exact-width, а decode *fail-closed* перевіряє канонічність й перепаковує точний T5.
 
@@ -10,7 +10,7 @@
 - Провідні нулі бітових слів, D2 структуру, QUOTE-дані збережено. Транспортні 2 не є семантичними цифрами. У Zig використовується `u256` для bounded математики rank — це арифметика **фізичних номерів рамок**, не семантичний десятковий посередник.
 - F3C без внутрішньої CRC/MAC. Зовнішні довірені SHA-256 manifest/signature перед виконанням залишаються завданням loader/security.
 
-## Механічні тести, Zig 0.17.0
+## Механічні тести, Zig 0.16.0
 
 ```bash
 zig test research/zig-codecs/t5/t5.zig
