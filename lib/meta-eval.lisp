@@ -263,7 +263,7 @@
 (0011 my-env-define
   (0010 (name value env-ref)
     (110
-      ((0100 (010 env-ref)) (111 (111 name value) env-ref))
+      
       ((010 env-ref)  (111 (111 name value) env-ref))
       ((my-shared-frame-binding? (100 env-ref))
        (111
@@ -283,7 +283,7 @@
       (110
         ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
         ((my-canon-name? name) (my-canon-binding-error name))
-        ((0100 (010 env-ref)) (my-default-binding name))
+        
         ((010 env-ref)  (my-default-binding name))
         ((my-shared-frame-binding? (100 env-ref))
          (110
@@ -462,9 +462,7 @@
 (0011 my-rest-param?
   (0010 (params)
     (110
-      ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
-         ((010 ()) #d1:1)))
+      
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
          ((010 ()) #d1:1)))
@@ -513,16 +511,7 @@
 (0011 my-lambda-list-error-pairs
   (0010 (params seen)
     (110
-      ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
-         ((110101100 params)
-          (110
-            ((my-canon-name? params)
-             (1110 (001 canonical-parameter) params))
-            ((my-symbol-member? params seen)
-             (1110 (001 duplicate-parameter) params))
-            ))
-         ((010 ()) (1110 (001 invalid-rest) params))))
+      
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
          ((110101100 params)
@@ -548,14 +537,7 @@
 (0011 my-lambda-list-error
   (0010 (params)
     (110
-      ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
-         ((110101100 params)
-          (110
-            ((my-canon-name? params)
-             (1110 (001 canonical-parameter) params))
-            ))
-         ((010 ()) (1110 (001 invalid-parameters) params))))
+      
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
          ((110101100 params)
@@ -576,7 +558,7 @@
   (0010 (params body env-ref)
     (001000 ((problem (my-lambda-list-error params)))
       (110
-        ((0100 (010 problem)) (1110 (001 closure) params body env-ref))
+        
         ((010 problem)  (1110 (001 closure) params body env-ref))
         ((010 ()) (my-lambda-invalid-form problem))))))
 
@@ -592,7 +574,7 @@
        (001000 ((problem
                (my-lambda-list-error (1001 (10011 (100 forms))))))
          (110
-           ((0100 (010 problem)) (my-lambda-def-group-error (011 forms)))
+           
            ((010 problem)  (my-lambda-def-group-error (011 forms)))
            ((010 ()) problem)))))))
 
@@ -601,9 +583,7 @@
 (0011 bind-params
   (0010 (params args env-ref)
     (110
-      ((0100 (010 params)) (110
-         ((101 params (001 ())) env-ref)
-         ((010 ()) (111 (111 params args) env-ref))))
+      
       ((010 params)  (110
          ((101 params (001 ())) env-ref)
          ((010 ()) (111 (111 params args) env-ref))))
@@ -613,7 +593,7 @@
 (0011 my-eval-list-result
   (0010 (exprs env-ref)
     (110
-      ((0100 (010 exprs)) (my-result-ok (001 ())))
+      
       ((010 exprs)  (my-result-ok (001 ())))
       ((010 ())
        (001000 ((head-result (my-eval-result (100 exprs) env-ref)))
@@ -662,11 +642,7 @@
 (0011 my-eval-cond-result-mode
   (0010 (clauses env-ref migration-compatibility?)
     (110
-      ((0100 (010 clauses)) (110
-         (migration-compatibility? (my-result-ok (001 ())))
-         ((010 ())
-          (my-result-fail
-            (my-error (001 unsatisfied-conditional) (001 cond))))))
+      
       ((010 clauses)  (110
          (migration-compatibility? (my-result-ok (001 ())))
          ((010 ())
@@ -798,7 +774,7 @@
 (0011 my-apply-result
   (0010 (fn args caller-env)
     (110
-      ((0100 (010 fn)) (my-result-fail (my-error (001 not-callable) fn)))
+      
       ((010 fn)  (my-result-fail (my-error (001 not-callable) fn)))
       ((my-primitive? fn)
        (my-result-ok (my-apply-primitive (1001 fn) args)))
@@ -929,11 +905,7 @@
          ((my-lambda-name? (100 expr))
           (001000 ((problem (my-lambda-list-error (1001 expr))))
             (110
-              ((0100 (010 problem)) (my-result-ok
-                 (my-make-closure
-                   (1001 expr)
-                   (011 (011 expr))
-                   env-ref)))
+              
               ((010 problem)  (my-result-ok
                  (my-make-closure
                    (1001 expr)
@@ -952,11 +924,7 @@
          ((my-lambda-name? (100 expr))
           (001000 ((problem (my-lambda-list-error (1001 expr))))
             (110
-              ((0100 (010 problem)) (my-result-ok
-                 (my-make-closure
-                   (1001 expr)
-                   (011 (011 expr))
-                   env-ref)))
+              
               ((010 problem)  (my-result-ok
                  (my-make-closure
                    (1001 expr)
@@ -994,15 +962,7 @@
               ((my-lambda-form? value-form)
                (001000 ((problem (my-lambda-list-error (1001 value-form))))
                  (110
-                   ((0100 (010 problem)) (001000 ((value
-                            (1110 (001 recursive-closure)
-                                  (1001 form)
-                                  (1001 value-form)
-                                  (011 (011 value-form))
-                                  env-ref)))
-                      (111
-                        (my-env-define (1001 form) value env-ref)
-                        value)))
+                   
                    ((010 problem)  (001000 ((value
                             (1110 (001 recursive-closure)
                                   (1001 form)
@@ -1039,10 +999,7 @@
 (0011 my-params-bind-name?
   (0010 (name params)
     (110
-      ((0100 (010 params)) (110
-         ((101 params (001 ())) (001 ()))
-         ((101 params name) #d1:1)
-         ))
+      
       ((010 params)  (110
          ((101 params (001 ())) (001 ()))
          ((101 params name) #d1:1)
@@ -1061,9 +1018,7 @@
 (0011 my-form-references-name?
   (0010 (form name)
     (110
-      ((0100 (010 form)) (110
-         ((110101100 form) (101 form name))
-         ))
+      
       ((010 form)  (110
          ((110101100 form) (101 form name))
          ))
@@ -1214,7 +1169,7 @@
 (0011 my-eval-lambda-components
   (0010 (forms graph env-ref final-name)
     (110
-      ((0100 (010 forms)) (111 env-ref (env-lookup final-name env-ref)))
+      
       ((010 forms)  (111 env-ref (env-lookup final-name env-ref)))
       ((010 ())
        (001000 ((name (1001 (100 forms))))
@@ -1277,16 +1232,7 @@
             (001000 ((block (my-take-lambda-def-group forms)))
               (001000 ((problem (my-lambda-def-group-error block)))
                 (110
-                  ((0100 (010 problem)) (001000 ((rest (my-drop-lambda-def-group forms)))
-                     (001000 ((block-result
-                             (my-eval-lambda-block block program-env)))
-                       (110
-                         
-                         ((010 rest)  block-result)
-                         ((010 ())
-                          (my-eval-program
-                            rest
-                            (100 block-result)))))))
+                  
                   ((010 problem)  (001000 ((rest (my-drop-lambda-def-group forms)))
                      (001000 ((block-result
                              (my-eval-lambda-block block program-env)))
