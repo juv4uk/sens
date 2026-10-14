@@ -37,10 +37,10 @@ jobs:
           set -euo pipefail
           python3 research/zig-codecs/tools/ladder_program.py \
             research/zig-codecs/tools/caar.ladder \
-            --lines "$RUNNER_TEMP/caar.lines" --view "$RUNNER_TEMP/caar.view"
+            --lines research/zig-codecs/tools/caar.lines --view "$RUNNER_TEMP/caar.view"
           echo "===== wire (телеграфний запис) ====="; cat "$RUNNER_TEMP/caar.view"
           echo "===== ladder_tool ====="
-          "$RUNNER_TEMP/ladder_tool" < "$RUNNER_TEMP/caar.lines" | tee "$RUNNER_TEMP/ladder.log"
+          ( cd research/zig-codecs/tools && "$RUNNER_TEMP/ladder_tool" ) | tee "$RUNNER_TEMP/ladder.log"
           grep -Fq 'T5 roundtrip=EXACT' "$RUNNER_TEMP/ladder.log"
           grep -Fq 'op=encode ns_per_op=' "$RUNNER_TEMP/ladder.log"
           grep -Fq 'op=decode ns_per_op=' "$RUNNER_TEMP/ladder.log"

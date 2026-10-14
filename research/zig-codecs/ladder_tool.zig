@@ -71,7 +71,7 @@ fn parseWords(out: []t5.Word, data: []const u8) !usize {
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
-    const data = try readFile(allocator, "research/zig-codecs/tools/caar.lines");
+    const data = try readFile(allocator, "caar.lines");
     defer allocator.free(data);
     var word_buf: [4096]t5.Word = undefined;
     const count = try parseWords(&word_buf, data);
