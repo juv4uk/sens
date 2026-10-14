@@ -528,11 +528,9 @@
 (0011 clips-assert-form?
   (0010 (form)
     (110
-      
-      ((010 form)  (001 ()))
-      ((0100 (010 (100 form))) (101 (100 form) (001 assert)))
-      ((010 (100 form))  (101 (100 form) (001 assert)))
-      )))
+      ((010 form) 0)
+      ((010 (100 form)) (101 (100 form) (001 assert)))
+      (1 0))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
 ; rule. Verified before writing this (not guessed): a rule shaped
@@ -596,11 +594,9 @@
 (0011 clips-printout-form?
   (0010 (form)
     (110
-      
-      ((010 form)  (001 ()))
-      ((0100 (010 (100 form))) (101 (100 form) (001 printout)))
-      ((010 (100 form))  (101 (100 form) (001 printout)))
-      )))
+      ((010 form) 0)
+      ((010 (100 form)) (101 (100 form) (001 printout)))
+      (1 0))))
 
 (0011 clips-drop-printouts
   (0010 (forms)
@@ -613,10 +609,9 @@
 (0011 clips-all-asserts?
   (0010 (forms)
     (110
-      
-      ((010 forms)  1)
+      ((010 forms) 1)
       ((clips-assert-form? (100 forms)) (clips-all-asserts? (011 forms)))
-      )))
+      (1 0))))
 
 ; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
 ; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
@@ -769,12 +764,10 @@
 (0011 clips-rule-preamble-form?
   (0010 (form)
     (110
-      ((110100110 form) t)
-      
-      ((010 form)  (001 ()))
-      ((0100 (010 (100 form))) (101 (100 form) (001 declare)))
-      ((010 (100 form))  (101 (100 form) (001 declare)))
-      )))
+      ((110100110 form) 1)
+      ((010 form) 0)
+      ((010 (100 form)) (101 (100 form) (001 declare)))
+      (1 0))))
 
 (0011 clips-strip-rule-preamble
   (0010 (body)
