@@ -69,6 +69,12 @@
               (001 (invalid outcome-tag ())))
         (1110 (narrate-outcome (001 (unknown)))
               (001 (invalid outcome-shape (unknown))))
+        (1110 (narrate-outcome (001 (proved (planet earth) ())))
+              (001 (proved (planet earth) without-proof-result)))
+        (1110 (narrate-outcome
+                (001 (proved (planet earth)
+                         ((witness (proved (planet earth) (planet earth) ()))))))
+              (001 (proved earth is a planet)))
         (1110 (narrate-outcome (001 (blocked dependency)))
               (001 (blocked because dependency)))
         (1110 (narrate-outcome (001 (unknown subject)))
