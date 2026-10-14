@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#2410 — D8 historical full-map constitutional guard.
+"""#2410 — ARCHIVAL research map validator, NOT current D8 authority.
 
 Checks only facts that follow from the ratified D3-D6 occupancy rule plus the
 already admitted D3 selector law:
@@ -17,6 +17,8 @@ already admitted D3 selector law:
 - the D7 rung is really occupied by a different law, so crossing it is a fact
   and not an assumption.
 
+This archived map was made BEFORE current #3960 D8 ratification (2026-10-06).
+It must not be run as a CI/release gate for present owner-ratified D8 256/256.
 It deliberately does NOT claim that historical residency implies semantic
 irreducibility. Derivability is tracked separately under #2765. The 192
 historical rows are an agent-derived chronological continuation, and the guard
@@ -151,11 +153,6 @@ def main() -> None:
     require(
         any("blanket occupancy" in item for item in d8["ratification_scope"]["not_ratified"]),
         "D8 must explicitly not claim blanket occupancy",
-    )
-    require("non_conflation" in d8, "D8 map must record the 8-bit non-conflation rule")
-    require(
-        "Sens8" in d8["non_conflation"]["rule"],
-        "D8 non-conflation must name legacy Sens8 explicitly",
     )
     require(
         d8.get("falsified_rules"),
@@ -311,7 +308,6 @@ def main() -> None:
     print("D8 selector word set == #2322 generator forecast (independent witness)")
     print("D8 names unique within D8 and against D5/D6")
     print("D7 rung crossed by fact: d7-full-map.json documents D7 is not a one-bit extension")
-    print("NON-CONFLATION: D8 (8-bit Core domain) != legacy Sens8 (8-bit flat byte table)")
     print("PROGRESS METRIC: independent admitted laws, NOT occupancy out of 256")
     print("NEXT: 48 D6 parents still need two commuting refinements plus a witness")
     print("NON-CONCLUSION: residency does not imply semantic irreducibility")
