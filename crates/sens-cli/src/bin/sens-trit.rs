@@ -316,8 +316,10 @@ fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
     let canonical = sens::encode_binary_projection_ternary(source)
         .map_err(|e| format!("unadmitted .lisp projection: {e:?}"))?;
-    let decoded = sens::decode_ternary_program(binary)
-        .map_err(|e| format!("invalid .sens transport or grammar: {e:?}"))?;
+    // Default CLI: Zig decodes the exact physical words. SENS alone admits D2.
+    // The explicit reference build retains the original Rust T5 reader.
+    let decoded = decode_canonical_t5_words(binary)
+        .map_err(|e| format!("invalid .sens transport or grammar: {e}"))?;
     if canonical != binary {
         return Err("paired .lisp/.sens differs at the physical byte level".into());
     }
@@ -393,6 +395,12 @@ fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> S
 /// binary word becomes a line so the existing error renderer's line is the
 /// failed word coordinate in the physical SENS stream.
 fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
+    // Keep physical failures separate from SENS D2 grammar diagnostics:
+    // unlike open/decode, explain must see the words before D2 admission.
+    #[cfg(feature = "zig-transport")]
+    let words = zig_transport::decode_t5_words(bytes)
+        .map_err(|e| format!("physical T5 transport rejected: {e}"))?;
+    #[cfg(not(feature = "zig-transport"))]
     let words = sens::decode_ternary_words(bytes)
         .map_err(|e| format!("physical T5 transport rejected: {e:?}"))?;
     let projection = sens::render_ternary_words_vertical(&words);
@@ -778,6 +786,51 @@ mod eval_tests {
             sens::parse_binary_source_words("01").unwrap()[0].word,
         ]).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_verify_and_explain_share_physical_ingress_but_keep_d2_diagnostics() {
+        let golden = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        verify_companion("10 001 00 000 01", golden)
+            .expect("Zig T5 physical decode and SENS D2 companion admission");
+        assert!(explain_t5_bytes(golden).unwrap().contains("D2 syntax PASS"));
+
+        let bad_physical = verify_companion("10 001 00 000 01", &[0xf3])
+            .expect_err("bad Zig physical byte must reject");
+        assert!(bad_physical.contains("invalid .sens transport or grammar"),
+                "{bad_physical}");
+        assert!(explain_t5_bytes(&[0xf3]).unwrap_err()
+            .contains("physical T5 transport rejected"));
+
+        // Physically valid, structurally inadmissible: preserve the current
+        // SENS D2 diagnostic rather than reporting a physical T5 failure.
+        let lone_close = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
+        assert!(explain_t5_bytes(&lone_close).unwrap_err()
+            .contains("D2 grammar rejected"));
+
+        // Regression guard: the feature-default production helpers must not
+        // silently fall back to Rust's physical T5 decoder.
+        let source = include_str!("sens-trit.rs");
+        let verify_start = source.find("fn verify_companion(").unwrap();
+        let verify_end = source[verify_start..].find("\n}\n").unwrap() + verify_start + 3;
+        let verify_body = &source[verify_start..verify_end];
+        assert!(verify_body.contains("decode_canonical_t5_words(binary)"));
+        assert!(!verify_body.contains("sens::decode_ternary_program(binary)"));
+
+        let explain_start = source.find("fn explain_t5_bytes(").unwrap();
+        let explain_end = source[explain_start..].find("\n}\n").unwrap() + explain_start + 3;
+        let explain_body = &source[explain_start..explain_end];
+        let feature_branch = explain_body
+            .split("#[cfg(not(feature = \"zig-transport\"))]")
+            .next().unwrap();
+        assert!(feature_branch.contains("zig_transport::decode_t5_words(bytes)"));
+        assert!(!feature_branch.contains("sens::decode_ternary_words(bytes)"));
+        assert!(explain_body.contains("D2 grammar rejected"));
     }
 
     #[cfg(feature = "zig-transport")]
