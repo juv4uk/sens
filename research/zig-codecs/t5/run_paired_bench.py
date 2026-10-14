@@ -60,6 +60,7 @@ def main() -> int:
     cli = argparse.ArgumentParser()
     cli.add_argument("--out-dir", type=Path, required=True)
     cli.add_argument("--pairs", type=int, default=3)
+    cli.add_argument("--zig-pin", default="0.16.0", choices=("0.16.0", "0.17.0"))
     args = cli.parse_args()
     if args.pairs < 3:
         raise SystemExit("--pairs must be >=3 independent outer process pairs")
@@ -77,11 +78,12 @@ def main() -> int:
         "pairs": args.pairs,
         "seed": 20261014,
         "zig_flags": "-O ReleaseFast -lc",
+        "expected_zig_pin": args.zig_pin,
         "rust_flags": "cargo --locked --release (release profile in Cargo.toml)",
     }
     (out / "environment.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-    if meta["zig"] != "0.16.0":
-        raise RuntimeError(f"Zig pin mismatch: expected 0.16.0, actual {meta['zig']}")
+    if meta["zig"] != args.zig_pin:
+        raise RuntimeError(f"Zig pin mismatch: expected {args.zig_pin}, actual {meta['zig']}")
 
     checked(["zig", "test", "research/zig-codecs/t5/t5.zig"])
     checked(["cargo", "build", "--locked", "--release", "-p", "sens",
