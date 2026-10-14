@@ -82,3 +82,41 @@ test "D10 remains a mechanical coordinate, not a callable D9" {
     try std.testing.expectError(t5.Error.UnsupportedDomainWidth,
         t5.decode(std.testing.allocator, bytes));
 }
+
+
+/// Numeric-domain bit carriers, separate from the executable D1..D10 T5 path.
+/// Only the already declared D24/D48/D96/D192 widths are represented here.
+/// This is NOT numeric arithmetic, host Number conversion, domain membership,
+/// function admission, or a new SENS law. Only SENS decides those questions.
+pub fn WideDomainWord(comptime width: u16) type {
+    if (width != 24 and width != 48 and width != 96 and width != 192)
+        @compileError("Only declared wide SENS domain widths are available here");
+    return packed struct {
+        const Self = @This();
+        pub const domain_width: u16 = width;
+        pub const Payload = @Int(.unsigned, width);
+
+        bits: Payload,
+
+        pub fn init(bits: Payload) Self {
+            return .{ .bits = bits };
+        }
+    };
+}
+
+test "D24 D48 D96 D192 are distinct exact-bit opaque carriers" {
+    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+        const D = WideDomainWord(width);
+        try std.testing.expectEqual(@as(usize, width), @bitSizeOf(D));
+        try std.testing.expectEqual(@as(usize, width), @bitSizeOf(D.Payload));
+        try std.testing.expectEqual(width, D.domain_width);
+        const one = D.init(1);
+        try std.testing.expectEqual(@as(D.Payload, 1), one.bits);
+        // The wide type cannot silently turn into a physical T5 opcode word.
+        try std.testing.expect(!@hasDecl(D, "toCarrier"));
+    }
+    try std.testing.expect(WideDomainWord(24) != WideDomainWord(48));
+    try std.testing.expect(WideDomainWord(48) != WideDomainWord(96));
+    try std.testing.expect(WideDomainWord(96) != WideDomainWord(192));
+    try std.testing.expect(WideDomainWord(24) != DomainWord(10));
+}
