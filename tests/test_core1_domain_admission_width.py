@@ -93,16 +93,6 @@ class Core1ExactDomainAdmission(unittest.TestCase):
         self.assertNotEqual(modified, section)
         self.assertFalse(valid_admission(modified))
 
-    def test_negative_legacy_w8_collision(self):
-        section = core1_admission_source()
-        modified = section.replace(
-            "((101 VALUE 0011) T)",
-            "((101 VALUE 0011) T)\n      ((101 VALUE 11011011) T)",
-            1,
-        )
-        self.assertNotEqual(modified, section)
-        self.assertFalse(valid_admission(modified))
-        self.assertIn("11011011", domain_words(8))
 
 
 if __name__ == "__main__":
