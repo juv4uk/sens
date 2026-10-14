@@ -30,7 +30,7 @@ jobs:
           zig test research/zig-codecs/t5/t5.zig
           zig test research/zig-codecs/tests.zig
       - name: Зібрати ladder_tool (ReleaseFast)
-        run: zig build-exe -O ReleaseFast -lc research/zig-codecs/tools/ladder_tool.zig -femit-bin="$RUNNER_TEMP/ladder_tool"
+        run: zig build-exe -O ReleaseFast -lc research/zig-codecs/ladder_tool.zig -femit-bin="$RUNNER_TEMP/ladder_tool"
       - name: Драбина -> точні слова -> T5/F3C (round-trip + бенч)
         shell: bash
         run: |
