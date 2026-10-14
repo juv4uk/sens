@@ -46,3 +46,4 @@
 |---|---|---|
 | 2026-10-14 | Як не зробити червоне невидимим: фантомне червоне, YAML-пастки, проекції, турнікет | [`2026-10-14-redtriage-zig-audit.uk.md`](2026-10-14-redtriage-zig-audit.uk.md) |
 | 2026-10-14 | Мої граблі: подвійний CLAIM, SHA-pins, дубльовані PR | [`2026-10-14-claim-collision-and-pinned-sha.uk.md`](2026-10-14-claim-collision-and-pinned-sha.uk.md) |
+| 2026-10-14 | D24 у джерелі є, але лічильник арності в meta-eval некваліфікований | [`2026-10-14-d24-meta-eval-arity.uk.md`](2026-10-14-d24-meta-eval-arity.uk.md) |
