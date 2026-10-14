@@ -71,6 +71,9 @@ def snapshot(root: Path, ref: str) -> dict:
     regular = {"100644", "100755"}
     sources = {p for p in all_sources if modes[p] in regular}
     nonregular_sources = sorted(all_sources - sources)
+    all_physical = {p for p in names if p.endswith(".sens")}
+    physical = {p for p in all_physical if modes[p] in regular}
+    nonregular_physical = sorted(all_physical - physical)
     # Keep pairs with an invalid source visible as invalid rows; do not
     # silently erase evidence of an attempted Git triple.
     pairs = sorted(p[:-5] for p in names if p.endswith(".sens") and p[:-5]+".lisp" in all_sources)
@@ -116,7 +119,9 @@ def snapshot(root: Path, ref: str) -> dict:
     return {"commit":sha_ref, "lisp_count":len(sources),
             "nonregular_lisp_count":len(nonregular_sources),
             "nonregular_lisp_paths":nonregular_sources,
-            "sens_count":sum(p.endswith(".sens") for p in names),
+            "sens_count":len(physical),
+            "nonregular_sens_count":len(nonregular_physical),
+            "nonregular_sens_paths":nonregular_physical,
             "paired_count":len(pairs), "triple_count":len(triples),
             "unpaired_count":len(sources)-len(paired_regular_sources),
             "valid_triples":sum(r["status"]=="MECHANICAL_TRIPLE_VERIFIED" for r in rows),
