@@ -35,12 +35,12 @@ for bits,name in d["residents"].items():
 
 assert "(minor . 9)" in lang
 assert "#3305" in lang
-assert "D5  full compact 32/32" in current
+assert "D5  full compact — exact 5-bit keys (32/32)" in current
 assert "D5 **OWNER-RATIFIED #3305**" in core
-assert "D6  full compact 64/64" in current
-assert "D7  owner-ratified 126/128" in current
-assert "D8  full compact 256/256" in current
-assert "D9  full compact 512/512" in current
+assert "D6  full compact — exact 6-bit keys (64/64)" in current
+assert "D7  v2 keyboard text/data — exact 7-bit keys (128/128)" in current
+assert "D8  full compact — exact 8-bit keys (256/256)" in current
+assert "D9  full compact — exact 9-bit keys (512/512)" in current
 
 print("D5-CURRENT-AUTHORITY: PASS")
 print("occupancy=32/32 distinct=32 duplicates=0 generator=5 local-algebra=5 multi-delta=2 historical=4")
