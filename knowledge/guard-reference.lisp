@@ -1088,19 +1088,19 @@
 
 (0011 guard-explain
   (0010 (topic)
-    (guard-reference-field (00000001 summary) (guard-reference topic))))
+    (guard-reference-field (001 summary) (guard-reference topic))))
 
 (0011 guard-how-to
   (0010 (topic)
-    (guard-reference-field (00000001 how-to) (guard-reference topic))))
+    (guard-reference-field (001 how-to) (guard-reference topic))))
 
 (0011 guard-authority
   (0010 (topic)
-    (guard-reference-field (00000001 authority) (guard-reference topic))))
+    (guard-reference-field (001 authority) (guard-reference topic))))
 
 (0011 guard-verify
   (0010 (topic)
-    (guard-reference-field (00000001 verify) (guard-reference topic))))
+    (guard-reference-field (001 verify) (guard-reference topic))))
 
 (0011 guard-topics
   (0010 (references)

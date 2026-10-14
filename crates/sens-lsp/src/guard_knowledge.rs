@@ -426,6 +426,41 @@ mod tests {
     }
 
     #[test]
+    fn live_guard_getter_quotes_keep_exact_d3_and_reject_w8_alias() {
+        // Лише структурна перевірка джерела; семантичну істину визначає SENS.
+        let source = include_str!("../../../knowledge/guard-reference.lisp");
+        for (getter, field) in [
+            ("guard-explain", "summary"),
+            ("guard-how-to", "how-to"),
+            ("guard-authority", "authority"),
+            ("guard-verify", "verify"),
+        ] {
+            let marker = format!("(0011 {getter}\n");
+            let start = source.find(&marker).expect("missing admitted D4 getter");
+            let form = source[start..].split("\n\n").next().unwrap();
+            let head_bits = |code: &str| {
+                let tree = sens::parse_mixed_exact_domain(code).expect("exact D3/D4 source");
+                let ExprKind::List(definition) = &tree[0].kind else { panic!("DEFINE list") };
+                let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA list") };
+                let ExprKind::List(call) = &lambda[2].kind else { panic!("field call") };
+                let ExprKind::List(quoted) = &call[1].kind else { panic!("QUOTE list") };
+                assert!(matches!(&quoted[1].kind, ExprKind::Symbol(name) if name.as_ref() == field),
+                    "{getter} changed its literal field name");
+                matches!(&quoted[0].kind, ExprKind::DomainIdentity(id)
+                    if id.width() == 3 && id.packed_bits() == 0b001)
+            };
+            assert!(head_bits(form), "{getter}: D3:001 QUOTE required");
+            let mutant = form.replacen(
+                &format!("(001 {field})"),
+                &format!("(00000001 {field})"),
+                1,
+            );
+            assert_ne!(mutant, form, "{getter}: missing mutation site");
+            assert!(!head_bits(&mutant), "{getter}: W8 cannot alias D3:001");
+        }
+    }
+
+    #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));
         assert_eq!(surface_domain_coordinate("функція"), Some(D4_LAMBDA));
