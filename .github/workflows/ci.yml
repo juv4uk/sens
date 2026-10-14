@@ -197,7 +197,7 @@ jobs:
             -- python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
       - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[sens-native-run]'))
         shell: bash
         run: |
           set -euo pipefail
