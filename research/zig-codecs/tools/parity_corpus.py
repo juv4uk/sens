@@ -31,7 +31,8 @@ def main() -> int:
     a = ap.parse_args()
     root = pathlib.Path(a.root).resolve()
 
-    accept = sorted(str(p.relative_to(root)) for p in root.rglob("*.sens")
+    # Абсолютні шляхи: інструмент біжить із власної теки, не з кореня репо.
+    accept = sorted(str(p) for p in root.rglob("*.sens")
                     if ".git" not in p.parts and "target" not in p.parts)
     pathlib.Path(a.accept).write_text("\n".join(accept) + "\n", encoding="utf-8")
 
