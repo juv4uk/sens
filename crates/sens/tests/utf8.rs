@@ -252,7 +252,7 @@ fn utf8_direct_d1_self_verdict_and_one_bit_mutant() {
     let program = sens::parse_mixed_exact_domain_utf8_source(
         "lib/utf8.lisp", UTF8_D1_LAW,
     ).expect("the current pinned UTF-8 reader must parse binary SENS law");
-    assert_eq!(program.len(), 5, "two structural and three D24 numeric SENS-owned UTF-8 verdicts");
+    assert_eq!(program.len(), 20, "two structural and eighteen exact-D24 SENS-owned UTF-8 boundary verdicts");
 
     let mut session = utf8_session();
     for (index, form) in program.iter().enumerate() {
