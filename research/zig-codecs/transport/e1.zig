@@ -1,5 +1,5 @@
-//! E1 / historical S3/v1: bounded physical envelope reader for Zig 0.16.
-//! Rust donor: crates/sens/src/universal_frame3.rs.
+//! E1 (S3/v1 physical carrier): bounded reader for Zig 0.16.
+//! Pure carrier preflight only; width and payload are opaque transport data.
 //! It is NOT .sens T5, .senc F3C, E2/E3, or SENS semantic authority.
 //! This heapless/OS-free reader does NOT verify D2 or optimal-DP canonicality.
 //! A physical success must NOT be used as E1 executable/admission PASS.
@@ -121,7 +121,7 @@ fn parse(input: []const u8, output: ?[]Word) Error!usize {
 }
 
 /// Physical preflight only: exact counts/bytes, CRC, block bounds/padding.
-/// No SENS D2 admission, no Rust DP-canonical replay.
+/// No SENS D2 admission or canonical DP re-encode.
 pub fn inspect(input: []const u8) Error!usize {
     return parse(input, null);
 }
@@ -144,7 +144,7 @@ fn framed(body: []const u8, buf: []u8) []const u8 {
     return buf;
 }
 test "E1 v1 exact RAW wire and leading-zero widths" {
-    // Rust donor: exact source sequence '10 001 01'.
+    // Exact physical source words: '10 001 01'.
     const golden = [_]u8{ 0x53, 0x33, 0x01, 3, 0, 3, 0x23, 0x20,
         0x8a, 0x36, 0x20, 0x5d, 0x52 };
     var recovered: [3]Word = undefined;
