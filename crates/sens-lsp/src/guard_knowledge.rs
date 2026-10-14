@@ -460,6 +460,52 @@ mod tests {
         }
     }
 
+
+    #[test]
+    fn guard_evidence_status_uses_exact_d3_data_without_w8_alias() {
+        // Структурний тест reader, а не другий Rust-оракул семантики.
+        // Історичні W8-контейнери лишаються відокремленими від D3.
+        let whole = include_str!("../../../knowledge/guard-reference.lisp");
+        let start = whole
+            .find("(00001011 guard-reference-evidence-status\n")
+            .expect("guard-reference-evidence-status missing");
+        let rest = &whole[start..];
+        let end = rest
+            .find("\n(0011 guard-evidence-status-strength")
+            .expect("next exact D4 function missing");
+        let section = &rest[..end];
+
+        fn count_d3_quote(section: &str) -> usize {
+            fn visit(node: &Expr) -> usize {
+                let ExprKind::List(items) = &node.kind else { return 0 };
+                let this = usize::from(matches!(
+                    items.first(),
+                    Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                        if id.width() == 3 && id.packed_bits() == 0b001
+                ));
+                this + items.iter().map(visit).sum::<usize>()
+            }
+            sens::parse_mixed_exact_domain_guard_reference_source(
+                "knowledge/guard-reference.lisp", section
+            )
+            .expect("Guard source must parse by its pinned exact-domain reader")
+            .iter().map(visit).sum()
+        }
+
+        assert_eq!(count_d3_quote(section), 2, "D3:001 field and fallback");
+        for field in ["evidence-status", "unresolved"] {
+            let from = format!("(001 {field})");
+            assert_eq!(section.matches(&from).count(), 1, "unique source site: {field}");
+            let wrong_width = section.replacen(
+                &from, &format!("(00000001 {field})"), 1
+            );
+            assert_eq!(
+                count_d3_quote(&wrong_width), 1,
+                "{field}: W8 QUOTE must not acquire D3 identity"
+            );
+        }
+    }
+
     #[test]
     fn admitted_surfaces_resolve_to_exact_domain_coordinates() {
         assert_eq!(surface_domain_coordinate("як-є"), Some(D3_QUOTE));

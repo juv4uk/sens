@@ -1009,13 +1009,13 @@
 ; entry is deleted.
 (00001011 guard-reference-evidence-status
   (0010 (reference)
-    (10011100 ((status (guard-reference-field (00000001 evidence-status) reference)))
+    (10011100 ((status (guard-reference-field (001 evidence-status) reference)))
       (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((00000010 status) () (00000001 unresolved))
+        ((00000010 status) () (001 unresolved))
         ((00000010 status) (1) status)
         ((00000010 status) (0) status)))))
 
