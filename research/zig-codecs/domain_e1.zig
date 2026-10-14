@@ -21,12 +21,12 @@ pub fn encodeOne(
 ) Error!usize {
     if (width > 9) return error.UnsupportedDomainWidth;
     const carrier = value.toCarrier();
-    const opaque = [_]e1.Word{.{
+    const physical_words = [_]e1.Word{.{
         .width = carrier.width,
         .bits = carrier.bits,
     }};
     var steps: [2]writer.Step = undefined;
-    return writer.encode(&opaque, output, &steps);
+    return writer.encode(&physical_words, output, &steps);
 }
 
 /// Explicit typed restoration, not D2/evaluator admission.
