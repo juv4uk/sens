@@ -34,11 +34,11 @@ cat /tmp/sens-zig-rust-t5/STATUS
 cat /tmp/sens-zig-rust-t5/summary.md
 ```
 
-Порівнюються Zig [`bench.zig`](bench.zig) та чинний Rust [`zig_t5_matched_bench.rs`](../../../crates/sens/examples/zig_t5_matched_bench.rs). На кожному 1, 16, 128, 1024 повтореннях трійки точних слів `10 100 01` збігаються **всі фізичні байти**, не лише FNV-хеш. Отримана таблиця описує тільки прогріту механіку T5. Алокації/peak RSS, F3C, cold startup, confidence intervals та нативний SENS semantic receipts — **NOT_MEASURED**, їх ще слід довести окремо.
+Порівнюються Zig [`bench.zig`](bench.zig) та чинний Rust [`zig_t5_matched_bench.rs`](../../../crates/sens/examples/zig_t5_matched_bench.rs). На кожному 1, 16, 128, 1024 повтореннях трійки точних слів `10 100 01` збігаються **всі фізичні байти**, не лише FNV-хеш. Отримана таблиця описує тільки прогріту механіку T5. Алокації/peak RSS, F3C, cold startup, confidence intervals та нативний SENS semantic receipts — **можливість-розв'язати-цікаву-задачу (ще не заміряно)**, їх цікаво довести окремо.
 
 ## Бенчмарки Zig ↔ Rust (обов'язкова залежність)
 
-Основний proof gate [#5771](https://github.com/juv4uk/sens/issues/5771). Спочатку запустити паритет, потім парні encode/decode на тих самих typed words і фізичних байтах, з однаковими обсягами та CPU, release-конфігураціями, серіями та warmups. Записати `ns/op`, `MiB/s`, `allocs/op`, p50/p95, 95% CI і *реальні* бінарні/корпусні SHA. Якщо паритет не пройшов — `BLOCKED_NO_TIMING`, а не вигаданий speedup.
+Основний proof gate [#5771](https://github.com/juv4uk/sens/issues/5771). Спочатку запустити паритет, потім парні encode/decode на тих самих typed words і фізичних байтах, з однаковими обсягами та CPU, release-конфігураціями, серіями та warmups. Записати `ns/op`, `MiB/s`, `allocs/op`, p50/p95, 95% CI і *реальні* бінарні/корпусні SHA. Якщо паритет не пройшов — `можливість-розв'язати-цікаву-задачу (no-timing)`, а не вигаданий speedup.
 
 Ніяких нових автоматичних workflow: єдина автоматична точка — наявна `.github/workflows/ci.yml`. Важкі бенчмарки — тільки ручний режим до окремого дозволу власника.
 
