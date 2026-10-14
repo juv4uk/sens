@@ -106,7 +106,7 @@ jobs:
           echo 'test_id=zig-t5-exact-width layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" test research/zig-codecs/t5/t5.zig
           echo 'test_id=zig-f3c-rank-parity layer=transport semantic_authority=SENS status=mechanical'
-          "$ZIG" test research/zig-codecs/f3c/f3c.zig
+          "$ZIG" test research/zig-codecs/tests.zig
           echo 'test_id=zig-t5-bench-build layer=transport semantic_authority=SENS status=mechanical'
           "$ZIG" build-exe research/zig-codecs/t5/bench.zig -O ReleaseFast -lc -femit-bin="$RUNNER_TEMP/zig-t5-bench"
           "$RUNNER_TEMP/zig-t5-bench" > "$RUNNER_TEMP/zig-t5-bench-smoke.txt" 2>&1
