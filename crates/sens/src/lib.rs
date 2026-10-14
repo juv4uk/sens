@@ -628,7 +628,15 @@ pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageE
 pub fn load_meta_evaluator_library(
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
-    eval_program(META_SEMANTIC_REGISTRY_SOURCE, session)?;
+    // The generated registry carries historical 8-bit SID ids and legacy W8
+    // wrappers; the ordinary parser would read a bare id as a Number. Load it
+    // with the exact-domain reader (same owner-approved loader family as
+    // core/time/meta-eval), not the general parser.
+    let registry_forms = mixed_source::parse_mixed_exact_domain_registry_source(
+        "lib/generated/meta-semantic-registry.lisp",
+        META_SEMANTIC_REGISTRY_SOURCE,
+    )?;
+    eval_parsed_expressions(&registry_forms, session)?;
     // The metacircular witness now contains exact D3/D4 call heads.
     // Reuse the already-approved mixed reader: quoted interpreter data
     // stays data, whereas executable binary heads retain domain widths.
