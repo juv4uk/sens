@@ -1160,7 +1160,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
-                    help="auto блокує W8; legacy = сумісний старий SID8 лише з provenance; current = ратифікований D8")
+                    help="auto = відомий історичний SID8 через таблицю; legacy = явний історичний режим; current = точний ратифікований D8")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()

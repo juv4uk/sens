@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Manifest-driven transactional .lisp -> physical T5 .sens migration.
 
-The three-pass migrator is the semantic engine. This command is the
+The three-pass migrator translates source words; native SENS alone owns semantics. This command is the
 operational boundary for a real approved cohort:
 
   manifest -> source integrity -> semantic migration -> T5 roundtrip ->
@@ -219,7 +219,7 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--reader", type=Path, help="real built Rust sens-trit; REQUIRED for publication")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
-                    help="auto blocks ambiguous W8; legacy requires proven historical source; current preserves ratified D8")
+                    help="auto resolves known historical SID8 with mapping evidence; legacy is explicit historical; current preserves exact ratified D8")
     args = ap.parse_args()
 
     root = args.root.resolve()

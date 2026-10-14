@@ -196,7 +196,7 @@ def run(args: argparse.Namespace) -> dict:
         "authority": {"foundation_sha256": digest(INPUTS["foundation"].read_bytes()),
                       "codec": "physical-T5-5-trits-per-byte",
                       "source_era": source_era,
-                      "w8_policy": "auto blocks ambiguity; legacy and current require explicit choice"},
+                      "w8_policy": "auto resolves mapped historical SID8; legacy explicit history; current exact ratified D8; unmapped rejects"},
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
                     "files_written": written,
                     "files_would_write": candidates,
@@ -226,7 +226,7 @@ def main() -> int:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"),
                         default="auto",
-                        help="auto FAILS on ambiguous W8; choose legacy/current only with provenance")
+                        help="auto resolves mapped historical SID8, fails on unknown; current preserves ratified D8; legacy is explicit")
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()
