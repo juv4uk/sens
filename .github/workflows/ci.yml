@@ -694,11 +694,11 @@ jobs:
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
-          echo "test_id=meta-fc-predicates-d1 layer=eval executor=CI_GLUE_NO_SEMANTICS; SENS owns truth"
+          echo "test_id=meta-fc-predicates-d1 layer=transport executor=CI_GLUE_NO_SEMANTICS; SENS owns truth"
           sha256sum lib/meta-eval-first-class.lisp tests/semantic/meta-fc-predicates-d1-{law,mutant}.lisp
           python3 scripts/ci_failure_contract.py run \
             --test-id meta-fc-predicates-d1 \
-            --layer eval \
+            --layer transport \
             --fixture tests/semantic/meta-fc-predicates-d1-law.lisp \
             --report-file "$report" \
             -- cargo test --locked -p sens --test meta_fc_predicate_witness -- --nocapture
