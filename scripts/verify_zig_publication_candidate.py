@@ -18,6 +18,7 @@ import sys
 import tempfile
 
 SCHEMA = "sens-zig-publication-candidate/v1"
+TRANSLATION_SCHEMA = "sens-zig-translation-provenance/v1"
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 MAX_SIZE = 4 * 1024 * 1024
 MAX_EXECUTABLE_SIZE = 256 * 1024 * 1024
@@ -61,7 +62,8 @@ def run_checked(command: list[str], *, runner, timeout: int = 30):
 
 
 def verify(candidate: Path, source: Path, receipt_path: Path,
-           zig_bin: Path, sens_bin: Path, *, runner=subprocess.run) -> dict:
+           zig_bin: Path, sens_bin: Path, *, runner=subprocess.run,
+           trusted_translation_sha256: str | None = None) -> dict:
     if candidate.suffix != ".sens":
         raise Rejected("candidate must be physical .sens")
     original = read_fixed(candidate)
@@ -88,6 +90,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     )
     translation_snapshot = None
     translation_path = None
+    origin_snapshot = None
+    origin_path = None
     if receipt["source_era"] == "translated":
         # Translation happened OUTSIDE Zig. This is a content-binding check,
         # not an authentication signature or approval of that translation.
@@ -100,7 +104,35 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
         translation_path = translation
         translation_snapshot = read_fixed(translation)
         pinned("translation_receipt", digest(translation_snapshot), item.get("sha256"))
-    elif "translation_receipt" in receipt:
+        # A hash provided by the SAME candidate manifest cannot authenticate
+        # an era. Require a second, independently supplied trust pin.
+        if trusted_translation_sha256 is None:
+            raise Rejected("translated source requires independent provenance pin")
+        pinned("independent_translation_pin",
+               digest(translation_snapshot), trusted_translation_sha256)
+        try:
+            evidence = json.loads(translation_snapshot)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise Rejected("invalid translation provenance document") from exc
+        if not isinstance(evidence, dict) or evidence.get("schema") != TRANSLATION_SCHEMA:
+            raise Rejected("translation provenance schema mismatch")
+        if evidence.get("origin_era") != "historical":
+            raise Rejected("translation origin era must be explicit")
+        pinned("post_translation_source", digest(initial_source),
+               evidence.get("post_translation_source_sha256"))
+        pinned("post_translation_physical", digest(original),
+               evidence.get("candidate_physical_sha256"))
+        name = evidence.get("origin_path")
+        if not isinstance(name, str):
+            raise Rejected("translation origin requires separate source path")
+        origin_path = Path(name)
+        if (not origin_path.is_absolute()
+                or origin_path in (source, candidate, receipt_path, translation_path)):
+            raise Rejected("translation origin must be a distinct absolute file")
+        origin_snapshot = read_fixed(origin_path)
+        pinned("translation_origin", digest(origin_snapshot),
+               evidence.get("origin_sha256"))
+    elif "translation_receipt" in receipt or trusted_translation_sha256 is not None:
         raise Rejected("current-era source must not carry translation evidence")
     # Never interpret validity from Zig's physical success alone.
     backend = run_checked([str(sens_bin), "backend"], runner=runner)
@@ -151,6 +183,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
     if (translation_path is not None
             and read_fixed(translation_path) != translation_snapshot):
         raise Rejected("translation provenance mutated during verification")
+    if origin_path is not None and read_fixed(origin_path) != origin_snapshot:
+        raise Rejected("translation origin mutated during verification")
     if (read_fixed(zig_bin, max_size=MAX_EXECUTABLE_SIZE) != zig_binary
             or read_fixed(sens_bin, max_size=MAX_EXECUTABLE_SIZE) != sens_binary):
         raise Rejected("executor changed during admission")
@@ -160,6 +194,8 @@ def verify(candidate: Path, source: Path, receipt_path: Path,
         "physical_sha256": digest(original),
         "native_stdout_sha256": digest(native.stdout),
         "semantic_authority": "SENS_EXECUTED_NOT_RATIFIED_BY_THIS_SCRIPT",
+        "provenance_status": ("EXTERNAL_PIN_AND_SOURCE_BOUND_NOT_AUTHENTICATED"
+                              if translation_path is not None else "EXPLICIT_CURRENT_UNAUTHENTICATED"),
     }
 
 
@@ -167,9 +203,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     for opt in ("candidate", "source", "receipt", "zig", "sens"):
         parser.add_argument("--" + opt, type=Path, required=True)
+    parser.add_argument("--trusted-translation-sha256",
+                        help="independently established exact provenance SHA256; mandatory for translated era")
     args = parser.parse_args()
     try:
-        record = verify(args.candidate, args.source, args.receipt, args.zig, args.sens)
+        record = verify(
+            args.candidate, args.source, args.receipt, args.zig, args.sens,
+            trusted_translation_sha256=args.trusted_translation_sha256,
+        )
     except Rejected as exc:
         print(f"ZIG_PUBLICATION_CANDIDATE_RED: {exc}", file=sys.stderr)
         return 1
