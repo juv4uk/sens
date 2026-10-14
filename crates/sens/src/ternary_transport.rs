@@ -409,9 +409,10 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     }).collect()
 }
 
-/// Encode strictly admitted Ukrainian keyboard characters as D7 W7 words
-/// through the already existing five-trits-per-byte T5 codec.
-pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
+/// SENS-owned D7 keyboard word projection without physical T5 packing.
+/// Transport backends (Zig included) consume EXACT W7 words from this
+/// existing language law; no host bool, SID8 or glyph meaning enters ABI.
+pub fn d7_uk_keyboard_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     let words = keyboard_d7_words(source)?;
     // The same owner D7 table already defines the reverse projection.
     // Check each exact W7 coordinate before packing; decoding the complete
@@ -428,6 +429,14 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
             return Err(D7T5Error::AmbiguousText);
         }
     }
+    Ok(words)
+}
+
+/// Independent Rust reference transport for D7 keyboard words.
+/// The production Zig-mode CLI consumes d7_uk_keyboard_words and delegates
+/// only mechanical T5 bit packing to Zig.
+pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
+    let words = d7_uk_keyboard_words(source)?;
     Ok(encode_ternary_words(&words)?)
 }
 
