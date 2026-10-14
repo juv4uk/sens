@@ -43,3 +43,17 @@ cat /tmp/sens-zig-rust-t5/summary.md
 Ніяких нових автоматичних workflow: єдина автоматична точка — наявна `.github/workflows/ci.yml`. Важкі бенчмарки — тільки ручний режим до окремого дозволу власника.
 
 **Невизначеність:** Zig і Rust недоступні в середовищі цієї сесії; користувач надав результати локального бенчмарку, але raw `samples.jsonl`, `environment.json` і точний SHA ще не звірені незалежно. Не оголошувати production або semantic PASS.
+
+## Ширини: два профілі + статус D11 і D24+ (важливо для споживачів)
+
+Додано 14.10.2026 за фактом перевірки на реальному корпусі (`zig-t5-parity.yml`, run 38559040625, success: 118/118 `.sens` round-trip, 5/5 негативів відхилено).
+
+- **Звичайний шлях:** `t5.encode` / `t5.decode` / `t5.validatePhysical` — максимум **D9** (≤9 біт). Це виконуваний профіль.
+- **Координатний шлях:** `t5.encodeCoordinates` / `t5.decodeCoordinates` — максимум **D10** (≤10 біт). D10 — лише механічна координата; вона **не** дає callability.
+
+**Наслідок:** `lib/bridge/prolog-to-datalog.sens` містить D10-координати. Читати його треба **координатним** шляхом, інакше `UnsupportedDomainWidth`. (Саме на цьому спіткнувся `parity_t5.zig` до виправлення — файл при цьому валідний, round-trip OK.)
+
+- **D11 — НЕ підтримується кодеками.** `publication_cycle.zig` прямо асертить `width = 11 -> UnsupportedDomainWidth`, а «ordinary physical preflight must NOT widen to include D10». Водночас `lib/domains/d11.lisp` — ратифікований власником **тестовий словник** (exact-width 11-bit keys, 2048 ємність: `read-file`, `read-sens`, `decode-t5`, `length`, `count`, `equal?`, `print`, `slice`, `take`, `drop`, `t`, `nil`, `if`…). Тобто D11 існує як **доменна таблиця**, але **не** як ширина в транспорті — не розширювати T5 на 11 біт без окремого рішення власника.
+- **D24+ (числові) — окремий канал.** `domain_ladder.zig`: `DomainWord(1..10)` — виконувані координати; `WideDomainWord(24/48/96/192)` — точні числові носії (не арифметика, не допуск викликів). Кодек T5 їх не несе.
+
+Приклад перевірки координатного шляху: `parity_t5.zig` + `tools/parity_corpus.py` (workflow `zig-t5-parity.yml`).
