@@ -144,13 +144,22 @@ jobs:
           echo 'test_id=zig-freestanding-link-proof layer=transport semantic_authority=SENS status=link'
           for target in x86_64-freestanding thumb-freestanding-eabi; do
             elf="$RUNNER_TEMP/sens-zig-free-$target.elf"
+            # Entry-less ELF has no executable roots; force each real ABI
+            # export into the link or LLD discards the entire transport core.
             "$ZIG" build-exe research/zig-codecs/freestanding.zig \
               -target "$target" -O ReleaseSmall -fno-entry \
-              -fcompiler-rt -fno-unwind-tables -femit-bin="$elf"
+              -fcompiler-rt -fno-unwind-tables \
+              --force_undefined sens_zig_free_t5_validate \
+              --force_undefined sens_zig_free_t5_encode_be3 \
+              --force_undefined sens_zig_free_f3c_pack \
+              --force_undefined sens_zig_free_f3c_unpack \
+              --force_undefined sens_zig_free_crc32 \
+              -femit-bin="$elf"
             echo "ZIG_FREESTANDING_LINK_PASS target=$target zig=$("$ZIG" version)"
             readelf -h "$elf" | grep -E 'Class:|Machine:|Type:'
             sha256sum "$elf"
             size -A "$elf"
+            readelf -W -S "$elf" | grep -E '[[:space:]]\.text[[:space:]]'
             nm -u "$elf" | tee "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"
             if test -s "$RUNNER_TEMP/sens-zig-free-$target-linked-undefined.txt"; then
               echo "::error::unresolved symbol in linked freestanding $target"; exit 1
