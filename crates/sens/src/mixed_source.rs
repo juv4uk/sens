@@ -344,16 +344,7 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
     parse_mixed_pinned_d8_io(source)?
         .into_iter()
         .map(|expr| {
-            let logic_macro = matches!(
-                &expr.kind,
-                ExprKind::List(parts)
-                    if parts.len() >= 3
-                        && source_spelling(source, &parts[0]) == Some("0011")
-                        && matches!(
-                            source_spelling(source, &parts[1]),
-                            Some("and" | "or")
-                        )
-            );
+            let logic_macro = is_pinned_logic_macro_definition(source, &expr);
             let expr = lift_macro_bootstrap_code_data(source, expr, 0)?;
             if logic_macro {
                 lift_core_logic_macro_quote_words(source, expr, 0)
@@ -362,6 +353,21 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
             }
         })
         .collect()
+}
+
+/// Admit code-data retagging only inside an exact D4 DEFINE named AND/OR
+/// in the two pinned Core source eras. Ordinary quoted numbers are opaque.
+fn is_pinned_logic_macro_definition(source: &str, expression: &Expr) -> bool {
+    matches!(
+        &expression.kind,
+        ExprKind::List(parts)
+            if parts.len() >= 3
+                && source_spelling(source, &parts[0]) == Some("0011")
+                && matches!(
+                    source_spelling(source, &parts[1]),
+                    Some("and" | "or")
+                )
+    )
 }
 
 /// Preserve precisely the D3 identity of the executable code heads built
@@ -593,7 +599,14 @@ pub fn parse_mixed_exact_domain_core_source(
         .collect::<Result<Vec<_>, _>>()?;
     parsed
         .into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .map(|expr| {
+            let expr = lift_pinned_d9_language_calls(source, expr, 0)?;
+            if is_pinned_logic_macro_definition(source, &expr) {
+                lift_core_logic_macro_quote_words(source, expr, 0)
+            } else {
+                Ok(expr)
+            }
+        })
         .collect()
 }
 
