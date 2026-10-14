@@ -10,8 +10,10 @@ use std::{env, fs, process::ExitCode};
 
 const LAW: &str = include_str!("../../../tests/fixtures/narrate-d4-bind-law.lisp");
 const MUTANT: &str = include_str!("../../../tests/fixtures/narrate-d4-bind-mutant.lisp");
+const STRUCTURAL_LAW: &str = include_str!("../../../tests/fixtures/narrate-structural-physical-law.lisp");
+const STRUCTURAL_MUTANT: &str = include_str!("../../../tests/fixtures/narrate-structural-physical-mutant.lisp");
 
-fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
+fn evaluate(physical: &[u8], source: &str, structural_only: bool) -> Result<bool, String> {
     let mut session = Session::default();
     load_core_library(&mut session).map_err(|e| format!("core bootstrap: {e:?}"))?;
     // These are the actual SENS definitions, not a host copy of provenance.
@@ -48,6 +50,7 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
     // Physical internal calls continue to use their exact D7 wire keys.
     for name in [
         "narrate-answer", "narrate-outcome", "narrate-proper-list?",
+        "narrate-list-exact-two?", "narrate-list-exact-three?",
         "provenance-derived-from",
     ] {
         let wire = sens::Text7::from_ascii_projection(name)
@@ -57,6 +60,10 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
             .ok_or_else(|| format!("T5 never defined lexical Text7 binding for {name}"))?;
         session.environment.define(name, existing);
     }
+    // The structure-only fixture is a *subset* of the real physically decoded
+    // narrator. It must not interpret D7 text frames as Symbol, and it makes
+    // no claim about quoted words in the wider narrator contract.
+    if !structural_only {
     // Read-only observations to locate the first language-level divergence.
     // No host expected-value table; the SENS fixture below still owns verdicts.
     for (label, expression) in [
@@ -72,6 +79,7 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
             .map_err(|e| format!("physical probe {label}: {e}"))?;
         eprintln!("PHYSICAL_NARRATE_OBSERVATION {label}={}", result.value);
     }
+    }
     let parsed = parse_mixed_exact_domain(source)
         .map_err(|e| format!("SENS self-verdict reader: {e}"))?;
     let observed = eval_parsed_expressions(&parsed, &mut session)
@@ -81,27 +89,39 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
 }
 
 fn run() -> Result<(), String> {
-    let path = env::args().nth(1).ok_or("usage: probe_linked_narrate_t5 FILE.sens")?;
-    if env::args().nth(2).is_some() || !path.ends_with(".sens") {
-        return Err("expected one explicitly named physical .sens input".into());
+    let path = env::args().nth(1).ok_or("usage: probe_linked_narrate_t5 FILE.sens [--structural]")?;
+    let variant = env::args().nth(2);
+    if env::args().nth(3).is_some() || !path.ends_with(".sens")
+        || (variant.is_some() && variant.as_deref() != Some("--structural"))
+    {
+        return Err("expected FILE.sens and optional --structural".into());
     }
+    let structural_only = variant.is_some();
+    let (law, mutant) = if structural_only {
+        (STRUCTURAL_LAW, STRUCTURAL_MUTANT)
+    } else {
+        (LAW, MUTANT)
+    };
     let physical = fs::read(&path).map_err(|e| format!("physical read: {e}"))?;
-    if LAW.len() != MUTANT.len() ||
-        LAW.bytes().zip(MUTANT.bytes())
+    if law.len() != mutant.len() ||
+        law.bytes().zip(mutant.bytes())
             .filter(|(a, b)| a != b)
             .collect::<Vec<_>>().as_slice() != &[(b'1', b'0')]
     {
         return Err("SENS fixtures are not a single D1:1→D1:0 mutation".into());
     }
     for (label, source, expected) in [
-        ("law", LAW, true),
-        ("one-bit-mutant", MUTANT, false),
+        ("law", law, true),
+        ("one-bit-mutant", mutant, false),
     ] {
-        let verdict = evaluate(&physical, source)?;
+        let verdict = evaluate(&physical, source, structural_only)?;
         eprintln!("PHYSICAL_NARRATE_SENS_VERDICT {label}={verdict}");
         if verdict != expected {
             return Err(format!("physical T5 narrator did not respect SENS-owned {label} verdict"));
         }
+    }
+    if structural_only {
+        println!("PHYSICAL_NARRATE_STRUCTURAL_SENS_LAW_AND_MUTANT=PASS");
     }
     Ok(())
 }
