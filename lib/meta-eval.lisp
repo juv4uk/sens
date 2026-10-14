@@ -986,7 +986,6 @@
 (0011 my-eval-top-form
   (0010 (form env-ref)
     (110
-      ((0100 (010 form)) (111 env-ref (my-eval form env-ref)))
       ((010 form)  (111 env-ref (my-eval form env-ref)))
       ((my-definition-name? (100 form))
        (110
