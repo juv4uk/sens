@@ -120,6 +120,7 @@ pub fn encode_ternary_words(
 ///
 /// Не створює нового формату, не додає D10 до історичного Lisp-парсера
 /// та не припускає рівності W8 і сучасної доменної тотожності D8.
+#[cfg(test)]
 pub fn encode_ternary_coordinates(
     coordinates: &[crate::domain_ladder::DomainCoordinate],
 ) -> Result<Vec<u8>, TernaryTransportError> {
@@ -264,6 +265,7 @@ pub fn decode_ternary_words(
 /// Прочитати D1–D10 фізичні слова як механічні координати.
 ///
 /// D10 тут не є автоматично дозволеним викликом функції.
+#[cfg(test)]
 pub fn decode_ternary_coordinates(
     data: &[u8],
 ) -> Result<Vec<crate::domain_ladder::DomainCoordinate>, TernaryTransportError> {

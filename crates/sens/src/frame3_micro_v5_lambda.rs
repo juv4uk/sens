@@ -1148,7 +1148,7 @@ mod tests {
             let lowered = lower_candidate_to_sens_expr(&term).expect("closed K-family term");
             let first = runtime_list(vec![lowered, runtime_d1(true)]);
             let second = runtime_list(vec![first, runtime_d1(false)]);
-            let mut session = Session::bare();
+            let session = Session::bare();
             let actual = crate::eval_expr(&second, &session.environment)
                 .expect("real SENS nested closure execution");
             assert_eq!(actual.to_string(), expected);

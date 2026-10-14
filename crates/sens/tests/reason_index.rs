@@ -1,6 +1,6 @@
 use sens::{
     eval_parsed_expressions, eval_program, parse_canonical_binary, parse_exact_domain_source,
-    parse_mixed_exact_domain_reasoning_source, Expr, ExprKind, Session,
+    parse_mixed_exact_domain_reasoning_source, ExprKind, Session,
 };
 
 fn session() -> Session {

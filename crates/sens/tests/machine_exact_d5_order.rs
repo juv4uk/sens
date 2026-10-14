@@ -1,5 +1,5 @@
 use sens::{
-    eval_program, load_core_library, lower_program, parse, Bit5, CoreD5, ExprKind, Session,
+    eval_program, load_core_library, lower_program, parse, ExprKind, Session,
 };
 use std::fs;
 use std::path::PathBuf;

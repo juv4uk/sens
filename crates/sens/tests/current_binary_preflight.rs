@@ -2,7 +2,7 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, load_core_library, parse, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{eval_parsed_expressions, load_core_library, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {

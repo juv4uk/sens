@@ -160,16 +160,6 @@ pub(crate) fn evaluate_definition(
     }
 }
 
-/// Legacy surface routing has no independent Rust COND semantics.
-/// Both source spellings and exact D3 calls use the same D1-only mechanism.
-pub(crate) fn evaluate_cond(
-    clauses: &[Expr],
-    environment: &Environment,
-    span: Span,
-) -> Result<EvalStep, LanguageError> {
-    evaluate_domain_cond(clauses, environment, span)
-}
-
 pub fn exact_arity(
     operator: &str,
     arguments: &[Expr],
@@ -207,28 +197,6 @@ pub(crate) fn exact_domain_arity(
         format!(
             "D{}:{identity}: очікувано {expected} аргументів; отримано {}",
             identity.width(),
-            arguments.len()
-        ),
-        span,
-    ))
-}
-
-/// Arity check for a SENS form inside the core: the form is named by its
-/// 8-bit code, never by a surface spelling. `exact_arity` stays for host
-/// capabilities, which are not SENS identities.
-pub fn exact_sens_arity(
-    operator: crate::Sens8,
-    arguments: &[Expr],
-    expected: usize,
-    span: Span,
-) -> Result<(), LanguageError> {
-    if arguments.len() == expected {
-        return Ok(());
-    }
-    Err(LanguageError::new(
-        ErrorKind::Arity,
-        format!(
-            "{operator}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
             arguments.len()
         ),
         span,

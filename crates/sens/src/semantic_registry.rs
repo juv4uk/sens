@@ -234,37 +234,6 @@ pub(crate) fn d7_uk_keyboard_glyph(cell: u8) -> Option<&'static str> {
         .and_then(|row| row.uk)
 }
 
-/// Text-only sound/symbol display; never a callable source-name lookup.
-/// Sanskrit IAST and English IPA are separate views of SAME ratified D7 bits.
-pub(crate) fn d7_text_surface_glyph(cell: u8, layout: &str) -> Option<&'static str> {
-    let row = D7_DISPLAY_ROWS.iter().find(|row| row.bits == cell)?;
-    match layout {
-        "iast" => row.sa,
-        "deva" => row.deva,
-        "slp1" => row.slp1,
-        "en" => row.en,
-        "en-ipa" => row.en_ipa,
-        _ => None,
-    }
-}
-
-pub(crate) fn d7_text_surface_longest_prefix(rest: &str, layout: &str) -> Option<(usize, u8)> {
-    D7_DISPLAY_ROWS
-        .iter()
-        .filter_map(|row| {
-            let spelling = match layout {
-                "iast" => row.sa,
-                "deva" => row.deva,
-                "slp1" => row.slp1,
-                "en" => row.en,
-                "en-ipa" => row.en_ipa,
-                _ => None,
-            }?;
-            rest.starts_with(spelling).then_some((spelling.len(), row.bits))
-        })
-        .max_by_key(|(length, _)| *length)
-}
-
 pub(crate) fn d7_uk_keyboard_cell(glyph: &str) -> Option<u8> {
     D7_DISPLAY_ROWS
         .iter()

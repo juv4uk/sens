@@ -48,8 +48,6 @@ def render() -> str:
         "    pub(super) bits: u8,",
         "    pub(super) uk: Option<&'static str>,",
         "    pub(super) sa: Option<&'static str>,",
-        "    pub(super) deva: Option<&'static str>,",
-        "    pub(super) slp1: Option<&'static str>,",
         "    pub(super) en: Option<&'static str>,",
         "    pub(super) en_ipa: Option<&'static str>,",
         "}",
@@ -67,7 +65,7 @@ def render() -> str:
         uk, san, en = (rust_glyph(entry[key]) for key in ("uk", "san", "ascii"))
         parts.append(
             f"    D7DisplayRow {{ bits: 0b{bits}, uk: Some({uk}), sa: Some({san}), "
-            f"deva: Some({san}), slp1: None, en: Some({en}), en_ipa: None }},"
+            f"en: Some({en}), en_ipa: None }},"
         )
     parts += ["];", ""]
     return "\n".join(parts)
