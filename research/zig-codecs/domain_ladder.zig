@@ -2,6 +2,7 @@
 //! This is a representation, not a SENS semantic evaluator or oracle.
 //! D10 is a mechanical coordinate only; no callability is inferred.
 const std = @import("std");
+const numeric_domains = @import("numeric_domains.zig");
 const t5 = @import("t5/t5.zig");
 
 
@@ -250,7 +251,7 @@ test "D10 remains a mechanical coordinate, not a callable D9" {
 /// This is NOT numeric arithmetic, host Number conversion, domain membership,
 /// function admission, or a new SENS law. Only SENS decides those questions.
 pub fn WideDomainWord(comptime width: u16) type {
-    if (width != 24 and width != 48 and width != 96 and width != 192)
+    if (!numeric_domains.isWide(width))
         @compileError("Only declared wide SENS domain widths are available here");
     return packed struct {
         const Self = @This();
@@ -315,7 +316,7 @@ pub fn WideDomainWord(comptime width: u16) type {
 }
 
 test "D24 D48 D96 D192 are distinct exact-bit opaque carriers" {
-    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
         const D = WideDomainWord(width);
         try std.testing.expectEqual(@as(usize, width), @bitSizeOf(D));
         try std.testing.expectEqual(@as(usize, width), @bitSizeOf(D.Payload));
@@ -325,15 +326,15 @@ test "D24 D48 D96 D192 are distinct exact-bit opaque carriers" {
         // The wide type cannot silently turn into a physical T5 opcode word.
         try std.testing.expect(!@hasDecl(D, "toCarrier"));
     }
-    try std.testing.expect(WideDomainWord(24) != WideDomainWord(48));
-    try std.testing.expect(WideDomainWord(48) != WideDomainWord(96));
-    try std.testing.expect(WideDomainWord(96) != WideDomainWord(192));
-    try std.testing.expect(WideDomainWord(24) != DomainWord(10));
+    try std.testing.expect(WideDomainWord(numeric_domains.WIDE_WIDTHS[0]) != WideDomainWord(numeric_domains.WIDE_WIDTHS[1]));
+    try std.testing.expect(WideDomainWord(numeric_domains.WIDE_WIDTHS[1]) != WideDomainWord(numeric_domains.WIDE_WIDTHS[2]));
+    try std.testing.expect(WideDomainWord(numeric_domains.WIDE_WIDTHS[2]) != WideDomainWord(numeric_domains.WIDE_WIDTHS[3]));
+    try std.testing.expect(WideDomainWord(numeric_domains.WIDE_WIDTHS[0]) != DomainWord(10));
 }
 
 
 test "wide ladder MSB bytes retain every bit without admitting mathematics" {
-    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
         const D = WideDomainWord(width);
         const one = D.init(1);
         const raw = one.writeBytes();
@@ -361,15 +362,15 @@ test "wide ladder MSB bytes retain every bit without admitting mathematics" {
         try std.testing.expect(!@hasDecl(D, "toCarrier"));
     }
 
-    const coordinate = WideDomainWord(24).init(0b00000000_00000001_10101000);
+    const coordinate = WideDomainWord(numeric_domains.WIDE_WIDTHS[0]).init(0b00000000_00000001_10101000);
     const bytes = coordinate.writeBytes();
     try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x01, 0xa8 }, &bytes);
     try std.testing.expectError(error.WrongByteLength,
-        WideDomainWord(48).fromBytes(&bytes));
+        WideDomainWord(numeric_domains.WIDE_WIDTHS[1]).fromBytes(&bytes));
 }
 
 test "all wide rungs source bits roundtrip and every one-bit mutant remains width-qualified" {
-    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
         const D = WideDomainWord(width);
         const zero = D.init(0);
         var raw: [width]u8 = undefined;

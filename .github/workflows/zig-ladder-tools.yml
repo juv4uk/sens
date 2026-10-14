@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: "Гейт: константи домену походять із ратифікованого контракту"
+        run: python3 scripts/generate-numeric-domain-constants.py --check
       - name: Встановити Zig 0.16.0 (як у ci.yml)
         shell: bash
         run: |
