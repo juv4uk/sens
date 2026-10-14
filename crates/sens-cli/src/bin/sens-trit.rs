@@ -171,7 +171,8 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
     #[cfg(feature = "zig-transport")]
     {
         let restored = zig_transport::decode_f3(bytes)?;
-        let parsed = sens::PhysicalT5Program::decode(&restored)
+        let words = zig_transport::decode_t5_words(&restored)?;
+        let parsed = sens::PhysicalT5Program::from_exact_words(&words)
             .map_err(|e| format!("Zig F3C restored inadmissible SENS program: {e:?}"))?;
         if parsed.form_count() != 1 {
             return Err("Zig F3C restored more than one root".into());
@@ -186,7 +187,8 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
 fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
     #[cfg(feature = "zig-transport")]
     {
-        let parsed = sens::PhysicalT5Program::decode(bytes)
+        let words = zig_transport::decode_t5_words(bytes)?;
+        let parsed = sens::PhysicalT5Program::from_exact_words(&words)
             .map_err(|e| format!("SENS input is not an executable canonical T5 program: {e:?}"))?;
         if parsed.form_count() != 1 || bytes.len() > 16 {
             return Ok(None);
