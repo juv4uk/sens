@@ -18,14 +18,11 @@ const USAGE: &str =
 // program syntax; Zig owns all physical wire bytes for these commands.
 #[cfg(feature = "zig-transport")]
 mod zig_transport {
-    #[repr(C)]
-    struct Word { width: u8, bits: u16 }
-
     unsafe extern "C" {
         fn sens_zig_codec_abi_version() -> u32;
         fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
-        fn sens_zig_t5_encode(
-            input: *const Word, count: usize, output: *mut u8, capacity: usize
+        fn sens_zig_t5_repack(
+            input: *const u8, len: usize, output: *mut u8, capacity: usize
         ) -> isize;
         fn sens_zig_f3c_pack(
             input: *const u8, len: usize, output: *mut u8, capacity: usize
@@ -52,24 +49,28 @@ mod zig_transport {
         Ok(())
     }
 
-    pub fn encode_t5(
-        words: &[sens::BinarySourceWord],
-        expected_bytes: &[u8],
-    ) -> Result<Vec<u8>, String> {
+    /// Physical byte gateway only. The existing SENS-owned projection
+    /// supplies the admitted reference bytes; Rust must not translate them
+    /// into a host Word/enum ABI or interpret Zig status as SENS truth.
+    /// Zig independently decodes and re-encodes the bytes, fail-closed.
+    pub fn repack_t5(reference_bytes: &[u8]) -> Result<Vec<u8>, String> {
         version()?;
-        let typed: Vec<Word> = words.iter().map(|w| Word {
-            width: w.width() as u8,
-            bits: w.packed_bits(),
-        }).collect();
-        let mut bytes = vec![0u8; expected_bytes.len()];
-        // SAFETY: pointers are valid for exactly the advertised slice lengths.
+        let mut physical = vec![0u8; reference_bytes.len()];
+        // SAFETY: both caller-owned buffers live throughout this synchronous
+        // call, and Zig is bounded by the provided lengths/capacity.
         let len = unsafe {
-            sens_zig_t5_encode(typed.as_ptr(), typed.len(), bytes.as_mut_ptr(), bytes.len())
+            sens_zig_t5_repack(
+                reference_bytes.as_ptr(), reference_bytes.len(),
+                physical.as_mut_ptr(), physical.len()
+            )
         };
-        if len < 0 || len as usize != bytes.len() || bytes != expected_bytes {
-            return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
+        if len < 0 || len as usize != physical.len() {
+            return Err(format!("Zig T5 physical gateway rejected: transport_status={len}"));
         }
-        Ok(bytes)
+        if physical != reference_bytes {
+            return Err("Zig T5 repack mismatched authoritative physical input bytes".into());
+        }
+        Ok(physical)
     }
 
     pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
@@ -372,11 +373,7 @@ fn execute() -> Result<(), String> {
             // SENS owns the grammar/semantic admission; physical bytes are
             // produced by Zig in the official zig-transport variant.
             #[cfg(feature = "zig-transport")]
-            let bytes = {
-                let typed = sens::decode_ternary_words(&reference)
-                    .map_err(|e| format!("canonical T5 words rejected: {e:?}"))?;
-                zig_transport::encode_t5(&typed, &reference)?
-            };
+            let bytes = zig_transport::repack_t5(&reference)?;
             #[cfg(not(feature = "zig-transport"))]
             let bytes = reference;
             // Ніколи не перезаписувати наявний файл.
