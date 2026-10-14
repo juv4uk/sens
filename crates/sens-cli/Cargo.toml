@@ -41,9 +41,12 @@ name = "sens-trit"
 path = "src/bin/sens-trit.rs"
 
 [features]
-default = []
-# Canonical physical T5/F3C carrier produced by Zig, Rust remains SENS evaluator.
+# Owner decision 2026-10-14: Zig is the DEFAULT physical transport codec.
+# T5 remains the default .sens WIRE FORMAT; F3C remains explicit tiny .senc.
+# The SENS reader/evaluator alone owns semantics and execution admission.
+default = ["zig-transport"]
 zig-transport = []
+# Explicit legacy comparison: cargo ... --no-default-features (never silent fallback).
 
 [dependencies]
 sens = { path = "../sens" }
