@@ -115,6 +115,8 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_zig_purity.py --self-test
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
+          echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
+          zig test research/zig-codecs/ladder.zig
           zig test research/zig-codecs/tests.zig -lc
           zig test research/zig-codecs/transport/e1_writer.zig
       - name: Синтаксис усіх YAML-файлів репозиторію
