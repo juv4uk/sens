@@ -39,7 +39,7 @@
   (current-foundation
     (contract 11 9)
     (ratified-domains D1 D2 D3 D4 D5 D6 D7 D8 D9 D10)
-    (D10 whole-domain-codebook-ratified mechanism-admission-separate))
+    (D10 owner-ratified-codebook))
 
   (axioms
     (1 (sens-is-not text string quoted-literal decimal-semantic-id
