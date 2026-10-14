@@ -1,7 +1,7 @@
 # Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
 # RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
 # (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
-name: D3 EQ narrate (недовірені тести)
+name: D3 EQ narrate (кроки вилучено як хибні)
 
 on:
   workflow_dispatch:
@@ -13,3 +13,10 @@ jobs:
   narrate-d3-exact:
     runs-on: ubuntu-24.04
     steps:
+      - name: Стан перевірки — видимий, без хибних кроків
+        run: |
+          set -euo pipefail
+          echo "narrate-d3-atom-eq-law: справжні тестові кроки ВИЛУЧЕНО як хибні (commit 3bb8685d9)."
+          echo "За ПРАВИЛОМ 24 ГОДИН workflow лишається ВИДИМИМ; RED старший за 24 год ескалюється (Q_TRIAGE_24H, #5741)."
+          echo "Щоб перевірка стала реальною, треба відновити КОРЕКТНІ D3 EQ narrate-кроки (не хибні)."
+          echo "Це не PASS і не FAIL семантики — лише чесний стан порожньої перевірки."
