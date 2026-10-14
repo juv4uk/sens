@@ -121,10 +121,10 @@
 (0011 clips-deftemplate-form?
   (0010 (form)
     (110
-      ((010 form) 0)
-      ((0100 (010 (100 form))) 0)
-      ((101 (100 form) (001 deftemplate)) 1)
-      (1 0))))
+      ((010 form) #d1:0)
+      ((0100 (010 (100 form))) #d1:0)
+      ((101 (100 form) (001 deftemplate)) #d1:1)
+      (#d1:1 #d1:0))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
 ; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
@@ -448,8 +448,8 @@
       ((010 term)
        (110
          ((110101100 term) (clips-symbol-starts-with-? term))
-         (1 0)))
-      (1 0))))
+         (#d1:1 #d1:0)))
+      (#d1:1 #d1:0))))
 
 ; Both projections are atoms, so admitted D3 EQ suffices;
 ; D8 EQUAL is neither needed nor implicitly admitted here.
@@ -528,9 +528,9 @@
 (0011 clips-assert-form?
   (0010 (form)
     (110
-      ((010 form) 0)
+      ((010 form) #d1:0)
       ((010 (100 form)) (101 (100 form) (001 assert)))
-      (1 0))))
+      (#d1:1 #d1:0))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
 ; rule. Verified before writing this (not guessed): a rule shaped
@@ -594,9 +594,9 @@
 (0011 clips-printout-form?
   (0010 (form)
     (110
-      ((010 form) 0)
+      ((010 form) #d1:0)
       ((010 (100 form)) (101 (100 form) (001 printout)))
-      (1 0))))
+      (#d1:1 #d1:0))))
 
 (0011 clips-drop-printouts
   (0010 (forms)
@@ -609,9 +609,9 @@
 (0011 clips-all-asserts?
   (0010 (forms)
     (110
-      ((010 forms) 1)
+      ((010 forms) #d1:1)
       ((clips-assert-form? (100 forms)) (clips-all-asserts? (011 forms)))
-      (1 0))))
+      (#d1:1 #d1:0))))
 
 ; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
 ; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
@@ -764,10 +764,10 @@
 (0011 clips-rule-preamble-form?
   (0010 (form)
     (110
-      ((110100110 form) 1)
-      ((010 form) 0)
+      ((110100110 form) #d1:1)
+      ((010 form) #d1:0)
       ((010 (100 form)) (101 (100 form) (001 declare)))
-      (1 0))))
+      (#d1:1 #d1:0))))
 
 (0011 clips-strip-rule-preamble
   (0010 (body)
@@ -813,7 +813,7 @@
        (clips-clauses-for-conclusions
          (clips-convert-template-list (clips-assert-conclusions relevant) templates)
          conditions))
-      (1 (001 ())))))
+      (#d1:1 (001 ())))))
 
 (0011 clips-defrule-clauses-from-split
   (0010 (split templates)
