@@ -54,14 +54,6 @@ fn head_kind(sens: Sens8) -> HeadKind {
     }
 }
 
-fn target_sens(sens: Sens8) -> Sens8 {
-    if sens == sens::sens!(00001011) {
-        sens::sens!(00001001)
-    } else {
-        sens
-    }
-}
-
 fn host_capability_names() -> HashSet<String> {
     sens_host::install();
     installed_capabilities().into_iter().collect()
@@ -89,11 +81,21 @@ fn resolve_head<'a>(
     }
 }
 
-fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+fn push_head_edit(head: &Expr, spelling: &str, analysis: &mut Analysis) {
+    // Historical W8/SID8 is provenance ONLY. A code can be emitted only
+    // when the current ratified source-surface index grants its own
+    // domain-qualified D3/D4/D5/D6 coordinate.
+    let Some(exact) = semantic_registry_export::admitted_core_domain_for_surface(spelling) else {
+        return;
+    };
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: target_sens(sens).to_string(),
+        replacement: format!(
+            "{:0width$b}",
+            exact.packed_bits(),
+            width = exact.width(),
+        ),
     });
 }
 
@@ -235,15 +237,11 @@ fn walk_expr(
 
         let kind = head_kind(sens);
         if let Some(spelling) = surface {
-            // Current owner-ratified Ukrainian .lisp source heads ALREADY
-            // lower to exact-width DomainIdentity in the mixed reader.
-            // The historical Sens8 compatibility registry must not convert
-            // that primary source back to old 8-bit tokens. Keep counting
-            // the call as observed; only the legacy rewrite is suppressed.
-            if sens::semantic_registry_export::exact_uk_callable_for_source_head(spelling)
-                .is_none()
-            {
-                push_head_edit(head, sens, analysis);
+            // The current Ukrainian spelling is already an exact call
+            // in the mixed reader. Other spellings may be migrated only
+            // through the ratified domain-qualified source index.
+            if semantic_registry_export::exact_uk_callable_for_source_head(spelling).is_none() {
+                push_head_edit(head, spelling, analysis);
             }
         }
 
@@ -566,7 +564,7 @@ mod tests {
     fn preserves_comments_strings_and_quote_data() {
         let source = "; (+ 8 9)\n(quote (+ 1 2))\n\"car (+ 3 4)\"\n(atom? x)\n";
         let expected =
-            "; (+ 8 9)\n(00000001 (+ 1 2))\n\"car (+ 3 4)\"\n(00000010 x)\n";
+            "; (+ 8 9)\n(001 (+ 1 2))\n\"car (+ 3 4)\"\n(010 x)\n";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -575,7 +573,7 @@ mod tests {
         let source =
             "(let ((xs (list 1 2 3))) (and (member? 2 xs) (or () (length xs))))";
         let expected =
-            "(10011100 ((xs (00100111 1 2 3))) (10011010 (00101100 2 xs) (10011011 () (00101000 xs))))";
+            "(001000 ((xs (1110 1 2 3))) (and (11101 2 xs) (or () (000000 xs))))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -584,7 +582,7 @@ mod tests {
         let source =
             "(defmacro list (x) (quote shadowed)) (list (never-defined-function))";
         let expected =
-            "(00001010 list (x) (00000001 shadowed)) (list (never-defined-function))";
+            "(defmacro list (x) (001 shadowed)) (list (never-defined-function))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -593,7 +591,7 @@ mod tests {
         let source =
             "(lambda (list) (list 1 2)) (let ((car (lambda (x) x))) (car (list 1 2)))";
         let expected =
-            "(00001000 (list) (list 1 2)) (10011100 ((car (00001000 (x) x))) (car (00100111 1 2)))";
+            "(0010 (list) (list 1 2)) (001000 ((car (0010 (x) x))) (car (1110 1 2)))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -602,7 +600,7 @@ mod tests {
         let source =
             "(define list (lambda args (quote shadowed))) (list 1 2) (lambda () (define list (lambda args 7)) (list 1 2))";
         let expected =
-            "(00001001 list (00001000 args (00000001 shadowed))) (list 1 2) (00001000 () (00001001 list (00001000 args 7)) (list 1 2))";
+            "(0011 list (0010 args (001 shadowed))) (list 1 2) (0010 () (0011 list (0010 args 7)) (list 1 2))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -617,25 +615,25 @@ mod tests {
         // code slot 00101010 (#1468), so calls to it become the code.
         assert_eq!(
             rewrite_language("(define reverse (lambda (xs) (reverse xs))) (reverse (list 1))"),
-            "(00001001 reverse (00001000 (xs) (00101010 xs))) (00101010 (00100111 1))"
+            "(0011 reverse (0010 (xs) (10100 xs))) (10100 (1110 1))"
         );
         // A primitive surface still shadows: redefining it is not the language's function.
         assert_eq!(
             rewrite_language("(define car (lambda (x) x)) (car 1)"),
-            "(00001001 car (00001000 (x) x)) (car 1)"
+            "(0011 car (0010 (x) x)) (car 1)"
         );
         // Local definitions always shadow.
         assert_eq!(
             rewrite_language("(lambda () (define reverse (lambda (x) x)) (reverse 1))"),
-            "(00001000 () (00001001 reverse (00001000 (x) x)) (reverse 1))"
+            "(0010 () (0011 reverse (0010 (x) x)) (reverse 1))"
         );
     }
 
     #[test]
-    fn compatibility_def_maps_to_define_code() {
+    fn unratified_compatibility_def_does_not_invent_a_domain_code() {
         assert_eq!(
             rewrite("(def f (lambda (x) (car x)))"),
-            "(00001001 f (00001000 (x) (00000101 x)))"
+            "(def f (0010 (x) (100 x)))"
         );
     }
 
@@ -658,8 +656,15 @@ mod tests {
     }
 
     #[test]
-    fn public_sens_display_is_the_replacement_format() {
-        assert_eq!(target_sens(sens::sens!(00000101)).to_string(), "00000101");
-        assert_eq!(target_sens(sens::sens!(00001011)).to_string(), "00001001");
+    fn ratified_exact_width_is_the_only_replacement_authority() {
+        let car = semantic_registry_export::admitted_core_domain_for_surface("car")
+            .expect("ratified D3:100 CAR");
+        assert_eq!((car.width(), car.packed_bits()), (3, 0b100));
+        assert_eq!(rewrite("(car xs)"), "(100 xs)");
+        assert_eq!(rewrite("(let ((x (write-to-string v))) (string->symbol x))"),
+                   "(001000 ((x (write-to-string v))) (string->symbol x))");
+        assert!(!rewrite("(let ((x (write-to-string v))) (string->symbol x))").contains("10011100"));
+        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("write-to-string"), None);
+        assert_eq!(semantic_registry_export::admitted_core_domain_for_surface("string->symbol"), None);
     }
 }
