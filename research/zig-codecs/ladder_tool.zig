@@ -6,6 +6,30 @@ const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const f3c = @import("f3c/f3c.zig");
 
+const CFile = opaque {};
+extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
+extern "c" fn fclose(*CFile) c_int;
+extern "c" fn fseek(*CFile, c_long, c_int) c_int;
+extern "c" fn ftell(*CFile) c_long;
+extern "c" fn fread([*]u8, usize, usize, *CFile) usize;
+
+/// Читає файл через libc — як transport.zig; жодного std.io (немає в Zig 0.16).
+fn readFile(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
+    const zpath = try allocator.dupeZ(u8, path);
+    defer allocator.free(zpath);
+    const file = fopen(zpath.ptr, "rb") orelse return error.OpenFailed;
+    defer _ = fclose(file);
+    if (fseek(file, 0, 2) != 0) return error.SeekFailed;
+    const end = ftell(file);
+    if (end < 0) return error.SeekFailed;
+    if (fseek(file, 0, 0) != 0) return error.SeekFailed;
+    const bytes = try allocator.alloc(u8, @intCast(end));
+    errdefer allocator.free(bytes);
+    if (bytes.len != 0 and fread(bytes.ptr, 1, bytes.len, file) != bytes.len)
+        return error.ReadFailed;
+    return bytes;
+}
+
 const Timespec = extern struct { tv_sec: c_long, tv_nsec: c_long };
 extern "c" fn clock_gettime(clock_id: c_int, ts: *Timespec) c_int;
 const CLOCK_MONOTONIC: c_int = 1;
@@ -46,7 +70,7 @@ fn parseWords(allocator: std.mem.Allocator, data: []const u8) ![]t5.Word {
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
-    const data = try std.io.getStdIn().reader().readAllAlloc(allocator, 1 << 20);
+    const data = try readFile(allocator, "research/zig-codecs/tools/caar.lines");
     defer allocator.free(data);
     const words = try parseWords(allocator, data);
     defer allocator.free(words);
