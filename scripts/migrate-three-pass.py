@@ -580,6 +580,7 @@ class Resolver:
         self.admitted_d8=set(admitted_d8 or ())
         self.d9_residents=set(d9_residents or ())
         self.global_binding_words={}
+        self.strict_linked_preview=False
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
                      "passthrough-head":0}
@@ -710,9 +711,16 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
-        # D1 words stay exact. An unresolved NAME is data -> D7 text (its
-        # glyphs, e.g. "/", live in the ratified D7 keyboard). Never leave raw
-        # text as a physical word: the T5 codec must reject that.
+        # Strict linked preview must never promote an unproven executable
+        # name to an apparent D7-call mechanism. It requires source-backed
+        # lexical DEFINE evidence for every non-domain head.
+        if self.strict_linked_preview:
+            raise MigrationError(
+                f"UNBOUND_LINKED_CALL_HEAD {t!r}: no source-pinned D4 DEFINE",
+                tok,
+            )
+        # The historical non-linked migration mode retains its earlier
+        # behavior until its separate compatibility contract is retired.
         self.counts["passthrough-head"]+=1
         if t and set(t) <= {"0", "1"}:
             return [t],"passthrough-head"
@@ -1135,6 +1143,7 @@ def migrate_file(source: str,resolver,text7,linked_bindings=()):
     forms=Parser(tokens).parse_program()
     local = collect_global_bindings(forms, resolver)
     local_names = {name for name, _tok in local}
+    resolver.strict_linked_preview = bool(linked_bindings)
     # External function names are source-backed lexical bindings, not
     # ratified callable code residents. Reject duplicate DEFINE ownership.
     for name, tok in linked_bindings:
