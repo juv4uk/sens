@@ -91,8 +91,9 @@ def one_d2_form(source: str, case: int):
 
 def expected_operand(program, case: int, expected_head: str):
     tree = one_d2_form(program, case)
-    fail = lambda why: (_ for _ in ()).throw(SystemExit(
-        f"META_LEXICAL_TRANSPORT_RED: malformed SENS self-verdict case={case}: {why}"))
+    def fail(why: str):
+        raise SystemExit(
+            f"META_LEXICAL_TRANSPORT_RED: malformed SENS self-verdict case={case}: {why}")
     if not isinstance(tree, list) or len(tree) != 3 or tree[0] != "110":
         fail("single D3 COND head required")
     yes, no = tree[1:]
@@ -115,6 +116,26 @@ for i, (head, good, bad) in enumerate(zip(expected_heads, positive, negatives), 
     opposite = expected_operand(bad, i, head)
     if (operand, opposite) not in (("#d1:0", "#d1:1"), ("#d1:1", "#d1:0")):
         raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: wrong D1 mutant identity case={i}")
+
+# Check that the framing guard itself rejects corruptions. These probes are
+# transport faults, not host evaluations of any SENS logical law.
+first = positive[0]
+adversarial = {
+    "extra-top-level": first + " (#d1:1)",
+    "wrong-cond-head": first.replace("(110 ", "(111 ", 1),
+    "wrong-eq-head": first.replace("((101 ", "((100 ", 1),
+    "wrong-D1-fallback": first.replace("(#d1:1 (#d1:0))", "(#d1:1 (#d1:1))", 1),
+    "missing-D2-close": first[:-1],
+}
+for kind, corrupt in adversarial.items():
+    try:
+        expected_operand(corrupt, 1, expected_heads[0])
+    except SystemExit as error:
+        if not str(error).startswith("META_LEXICAL_TRANSPORT_RED:"):
+            raise SystemExit(f"META_LEXICAL_GUARD_RED: unexpected rejection class kind={kind}: {error}")
+    else:
+        raise SystemExit(f"META_LEXICAL_GUARD_RED: framing guard accepted synthetic corruption kind={kind}")
+print("META_LEXICAL_GUARD_SELFTEST_PASS synthetic_framing_faults=5 semantic_pass=NOT_INFERRED")
 
 for i, (good, wrong) in enumerate(zip(positive, negatives), 1):
     for role, expression in (("law", good), ("mutant", wrong)):
