@@ -49,7 +49,7 @@ fn evaluate(physical: &[u8], source: &str, structural_only: bool) -> Result<bool
     // bind those as TEST ADAPTER aliases to the closures just defined by T5.
     // Physical internal calls continue to use their exact D7 wire keys.
     for name in [
-        "narrate-answer", "narrate-outcome", "narrate-proper-list?",
+        "narrate-answer", "narrate-outcome", "narrate-fact", "narrate-proper-list?",
         "narrate-list-exact-two?", "narrate-list-exact-three?",
         "provenance-derived-from",
     ] {
