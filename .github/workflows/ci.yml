@@ -268,6 +268,28 @@ jobs:
           assert int(summary["equal"]) == sum(r["e1_bytes"] == r["t5_bytes"] for r in comparable)
           assert summary["speed"] == "NOT_MEASURED"
           assert summary["semantic_authority"] == "SENS"
+          # The 16 E1 byte-parity fixtures do not include an F3C-eligible
+          # program; measure one separately *known* executable tiny F3C case.
+          # Never pad NA entries with zero bytes or add it to the 16-case sum.
+          tiny_pattern = re.compile(
+              r"^E1_F3C_TINY_REFERENCE case=admitted_quote words=(\d+) "
+              r"exact_bits=(\d+) e1_bytes=(\d+) t5_bytes=4 f3c_bytes=3 "
+              r"semantic_authority=SENS$"
+          )
+          tiny = [m for line in lines if (m := tiny_pattern.fullmatch(line))]
+          if len(tiny) != 1:
+              raise SystemExit(f"E1_TINY_F3C_REFERENCE_UNINFORMATIVE matches={len(tiny)}")
+          tiny_record = {
+              "case": "admitted_quote",
+              "words": int(tiny[0].group(1)),
+              "exact_bits": int(tiny[0].group(2)),
+              "e1_bytes": int(tiny[0].group(3)),
+              "t5_bytes": 4,
+              "f3c_bytes": 3,
+              "provenance": "frame3_small::tests::produce_tiny_f3_only_when_full_file_is_smaller",
+          }
+          assert tiny_record["words"] >= 1 and tiny_record["exact_bits"] >= 1
+          assert tiny_record["e1_bytes"] >= 8
           corpus = Path("research/zig-codecs/transport/fixtures/e1-v1.bits")
           evidence = {
               "schema": "sens-e1-carrier-size/v1",
@@ -278,6 +300,7 @@ jobs:
               "e1_default": False,
               "summary": summary,
               "records": records,
+              "tiny_f3c_reference": tiny_record,
           }
           (base / "e1-carrier-size.json").write_text(
               json.dumps(evidence, ensure_ascii=False, indent=2) + "\n"
@@ -286,6 +309,8 @@ jobs:
               f"E1_CARRIER_SIZE_PASS cases={len(records)} "
               f"t5_comparable={len(comparable)} "
               f"f3c_eligible={summary['f3c_eligible']} "
+              f"tiny_f3c_bytes=3 tiny_t5_bytes=4 "
+              f"tiny_e1_bytes={tiny_record['e1_bytes']} "
               f"corpus_sha256={evidence['corpus_sha256']} speed=NOT_MEASURED"
           )
           PY
