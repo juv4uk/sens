@@ -119,6 +119,18 @@ fn noncanon_shadowing_survives_in_meta_eval() {
     );
 }
 
+#[test]
+fn probe_meta_eval_d24_math_direct() {
+    // ДІАГНОСТИЧНА ПРОБА: чи обчислює meta-eval математику на явних D24
+    // без жодного затінення. Якщо ні -- домен губиться в самому meta-eval.
+    let two = "000000000000000000000010";
+    let three = "000000000000000000000011";
+    assert_eq!(
+        meta_eval(&format!("(* #d24:{two} #d24:{three})")),
+        "6"
+    );
+}
+
 const META_CANON_NONATOM_LAW: &str =
     include_str!("../../../tests/semantic/meta-canon-nonatom-d1-law.lisp");
 
