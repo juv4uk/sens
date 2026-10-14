@@ -51,6 +51,28 @@ def forbidden_components(path: Path) -> bool:
     )
 
 
+def resolve_without_links(path: Path, role: str) -> Path:
+    """Відхилити symlink та '..' у ЗАДАНОМУ шляху ДО Path.resolve()."""
+    if ".." in path.parts:
+        raise ValueError(f"{role}: parent traversal forbidden")
+    absolute = path.absolute()
+    for component in (absolute, *absolute.parents):
+        if component.is_symlink():
+            raise ValueError(f"{role}: symlink path component forbidden: {component}")
+    return absolute.resolve()
+
+
+def verify_pinned_paths(args: argparse.Namespace, repo: Path, out: Path, report: Path) -> None:
+    """Перед публікацією підтвердити ті самі початкові адреси, без alias."""
+    for role, original, pinned in (
+        ("source repository", args.root, repo),
+        ("output mirror", args.out, out),
+        ("report", args.report, report),
+    ):
+        if resolve_without_links(original, role) != pinned:
+            raise ValueError(f"{role}: path changed during migration")
+
+
 def assert_no_links(base: Path, relative: Path) -> None:
     current = base
     if current.is_symlink():
@@ -95,9 +117,11 @@ def discover(repo: Path, requested: list[str]) -> tuple[list[Path], list[dict]]:
 
 
 def run(args: argparse.Namespace) -> dict:
-    repo = args.root.resolve()
-    out = args.out.resolve()
-    report = args.report.resolve()
+    # Важливо: Path.resolve() приховує symlink в аргументі користувача.
+    # Перевіряємо усі компоненти до нормалізації, включно з відносними.
+    repo = resolve_without_links(args.root, "source repository")
+    out = resolve_without_links(args.out, "output mirror")
+    report = resolve_without_links(args.report, "report")
     if not repo.is_dir():
         raise ValueError("source repository must exist")
     # No source edits, including accidental reports or files under the source tree.
@@ -183,6 +207,7 @@ def run(args: argparse.Namespace) -> dict:
     # unproven source can never hold back the rest of the batch. Safety is
     # enforced per file: no clobber, no symlink, source unchanged, atomic write.
     if args.write:
+        verify_pinned_paths(args, repo, out, report)
         for rel, destination, original, packed, row in staged:
             try:
                 assert_no_links(repo, rel)
@@ -214,7 +239,9 @@ def run(args: argparse.Namespace) -> dict:
                     "files_blocked": blocked},
         "files": ledger,
     }
+    verify_pinned_paths(args, repo, out, report)
     report.parent.mkdir(parents=True, exist_ok=True)
+    verify_pinned_paths(args, repo, out, report)
     stage = report.with_name(report.name + ".tmp")
     if stage.exists() or report.is_symlink():
         raise ValueError("report staging target already exists or is symlink")
