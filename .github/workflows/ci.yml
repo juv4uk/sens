@@ -216,6 +216,79 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          echo 'test_id=e1-t5-f3c-size-corpus layer=transport authority=SENS benchmark=PHYSICAL_SIZE_ONLY'
+          cargo test --locked -p sens --lib \
+            universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/e1-carrier-size.log"
+          grep -Fxq 'test universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix ... ok' "$RUNNER_TEMP/e1-carrier-size.log"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import os
+          import re
+
+          base = Path(os.environ["RUNNER_TEMP"])
+          lines = (base / "e1-carrier-size.log").read_text().splitlines()
+          records = []
+          pattern = re.compile(
+              r"^E1_SIZE_RECORD case=(\w+) words=(\d+) exact_bits=(\d+) "
+              r"e1_bytes=(\d+) t5_bytes=(\d+|NA) f3c_bytes=(\d+|NA)$"
+          )
+          for line in lines:
+              match = pattern.fullmatch(line)
+              if match:
+                  name, count, bits, e1, t5, f3c = match.groups()
+                  records.append({
+                      "case": name, "words": int(count), "exact_bits": int(bits),
+                      "e1_bytes": int(e1),
+                      "t5_bytes": None if t5 == "NA" else int(t5),
+                      "f3c_bytes": None if f3c == "NA" else int(f3c),
+                  })
+          summaries = [line for line in lines if line.startswith("E1_SIZE_SUMMARY ")]
+          if len(records) != 16 or len({r["case"] for r in records}) != 16 or len(summaries) != 1:
+              raise SystemExit(
+                  f"E1_SIZE_UNINFORMATIVE_OUTPUT records={len(records)} "
+                  f"unique={len({r['case'] for r in records})} summaries={len(summaries)}"
+              )
+          summary = dict(token.split("=", 1) for token in summaries[0].split()[1:])
+          comparable = [r for r in records if r["t5_bytes"] is not None]
+          assert int(summary["cases"]) == 16
+          assert int(summary["t5_representable"]) == len(comparable)
+          assert int(summary["f3c_eligible"]) == sum(r["f3c_bytes"] is not None for r in records)
+          assert int(summary["sum_e1_bytes"]) == sum(r["e1_bytes"] for r in records)
+          assert int(summary["sum_t5_comparable_bytes"]) == sum(r["t5_bytes"] for r in comparable)
+          assert int(summary["e1_smaller"]) == sum(r["e1_bytes"] < r["t5_bytes"] for r in comparable)
+          assert int(summary["t5_smaller"]) == sum(r["e1_bytes"] > r["t5_bytes"] for r in comparable)
+          assert int(summary["equal"]) == sum(r["e1_bytes"] == r["t5_bytes"] for r in comparable)
+          assert summary["speed"] == "NOT_MEASURED"
+          assert summary["semantic_authority"] == "SENS"
+          corpus = Path("research/zig-codecs/transport/fixtures/e1-v1.bits")
+          evidence = {
+              "schema": "sens-e1-carrier-size/v1",
+              "git_sha": os.environ["GITHUB_SHA"],
+              "corpus_sha256": hashlib.sha256(corpus.read_bytes()).hexdigest(),
+              "measurement": "physical_bytes_only_not_latency",
+              "semantic_authority": "SENS",
+              "e1_default": False,
+              "summary": summary,
+              "records": records,
+          }
+          (base / "e1-carrier-size.json").write_text(
+              json.dumps(evidence, ensure_ascii=False, indent=2) + "\n"
+          )
+          print(
+              f"E1_CARRIER_SIZE_PASS cases={len(records)} "
+              f"t5_comparable={len(comparable)} "
+              f"f3c_eligible={summary['f3c_eligible']} "
+              f"corpus_sha256={evidence['corpus_sha256']} speed=NOT_MEASURED"
+          )
+          PY
       - name: "E1 CLI → лише SENS: позитивний D1, однобітний мутант і CRC"
         shell: bash
         run: |
@@ -946,6 +1019,8 @@ jobs:
             ${{ runner.temp }}/zig-rust-t5-results/
             ${{ runner.temp }}/zig-rust-f3c-results/
             ${{ runner.temp }}/sens-zig-purity.json
+            ${{ runner.temp }}/e1-carrier-size.log
+            ${{ runner.temp }}/e1-carrier-size.json
           if-no-files-found: error
           retention-days: 14
 
