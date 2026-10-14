@@ -92,10 +92,18 @@ pub fn main() !void {
     defer allocator.free(t5_bytes);
     const t5_sha = sha256Hex(t5_bytes);
     var hex_buf: [8192]u8 = undefined;
-    std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
-        words.len, t5_bytes.len, t5_sha[0..16],
-        hexInto(&hex_buf, t5_bytes),
-    });
+    // Do not overflow the fixed diagnostic buffer on real multiword files.
+    // Full data remains in the canonical T5 bytes; SHA covers every byte.
+    if (t5_bytes.len <= hex_buf.len / 2) {
+        std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
+            words.len, t5_bytes.len, t5_sha[0..16],
+            hexInto(&hex_buf, t5_bytes),
+        });
+    } else {
+        std.debug.print("T5 words={d} bytes={d} sha256={s} hex=omitted-large\n", .{
+            words.len, t5_bytes.len, t5_sha[0..16],
+        });
+    }
 
     // 2. Round-trip: decode мусить дати ті самі точні слова.
     const back = try t5.decodeCoordinates(allocator, t5_bytes);
