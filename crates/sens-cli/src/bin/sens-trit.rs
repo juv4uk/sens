@@ -54,29 +54,52 @@ mod zig_transport {
         Ok(())
     }
 
-    pub fn encode_t5(
-        words: &[sens::BinarySourceWord],
-        expected_bytes: &[u8],
-    ) -> Result<Vec<u8>, String> {
+    /// Zig is the physical encoder; SENS supplies exact qualified words.
+    /// The required T5 byte count follows solely from widths and separators.
+    pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
         version()?;
-        let mut physical_words = Vec::with_capacity(words.len() * 3);
+        if words.is_empty() {
+            return Err("Zig physical T5 cannot encode an empty record".into());
+        }
+        let be3_capacity = words.len().checked_mul(3)
+            .ok_or("Zig BE3 input length overflow")?;
+        let semantic_trits = words.iter().try_fold(0usize, |n, word|
+            n.checked_add(word.width())
+        ).ok_or("Zig T5 semantic bit count overflow")?;
+        let used_trits = semantic_trits.checked_add(words.len() - 1)
+            .ok_or("Zig T5 separator count overflow")?;
+        let physical_capacity = used_trits.checked_add(4)
+            .ok_or("Zig T5 byte count overflow")? / 5;
+        let mut be3 = Vec::with_capacity(be3_capacity);
         for word in words {
             let width = u8::try_from(word.width())
                 .map_err(|_| "Zig T5 width out of one-byte ABI range")?;
             let bits = word.packed_bits();
-            physical_words.push(width);
-            physical_words.push((bits >> 8) as u8);
-            physical_words.push(bits as u8);
+            be3.push(width);
+            be3.push((bits >> 8) as u8);
+            be3.push(bits as u8);
         }
-        let mut bytes = vec![0u8; expected_bytes.len()];
-        // SAFETY: Zig sees only caller-owned raw bytes + exact byte length.
+        let mut bytes = vec![0u8; physical_capacity];
+        // SAFETY: Zig ABI v2 reads and writes only caller-owned byte slices.
         let len = unsafe {
             sens_zig_t5_encode_be3(
-                physical_words.as_ptr(), physical_words.len(),
-                bytes.as_mut_ptr(), bytes.len()
+                be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len()
             )
         };
-        if len < 0 || len as usize != bytes.len() || bytes != expected_bytes {
+        if len < 0 || usize::try_from(len).ok() != Some(bytes.len()) {
+            return Err(format!("Zig physical T5 encode rejected: code={len}"));
+        }
+        Ok(bytes)
+    }
+
+    /// Optional mechanical comparison to the existing Rust reference bytes.
+    /// The reference never controls the actual produced T5 output buffer.
+    pub fn encode_t5(
+        words: &[sens::BinarySourceWord],
+        expected_bytes: &[u8],
+    ) -> Result<Vec<u8>, String> {
+        let bytes = encode_t5_direct(words)?;
+        if bytes != expected_bytes {
             return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
         }
         Ok(bytes)
@@ -445,6 +468,14 @@ fn execute() -> Result<(), String> {
             }
             let text = fs::read_to_string(path)
                 .map_err(|e| format!("read UTF-8 D7 keyboard text: {e}"))?;
+            #[cfg(feature = "zig-transport")]
+            let bytes = {
+                // The ratified D7 table maps glyphs to W7 data, not D2 code.
+                let words = sens::encode_d7_uk_words(&text)
+                    .map_err(|e| format!("D7 keyboard projection rejected: {e:?}"))?;
+                zig_transport::encode_t5_direct(&words)?
+            };
+            #[cfg(not(feature = "zig-transport"))]
             let bytes = sens::encode_d7_uk_t5(&text)
                 .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
             let output_path = path.with_extension("sens");
@@ -457,6 +488,15 @@ fn execute() -> Result<(), String> {
         }
         "decode-d7-uk" => {
             let bytes = read_sens(path)?;
+            #[cfg(feature = "zig-transport")]
+            let text = {
+                // Zig validates and decodes only physical T5; SENS owns D7
+                // glyph identity and explicitly rejects non-W7 data.
+                let words = zig_transport::decode_t5_words(&bytes)?;
+                sens::decode_d7_uk_words(&words)
+                    .map_err(|e| format!("D7 keyboard W7 projection rejected: {e:?}"))?
+            };
+            #[cfg(not(feature = "zig-transport"))]
             let text = sens::decode_d7_uk_t5(&bytes)
                 .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
             println!("{text}");
@@ -968,5 +1008,57 @@ mod eval_tests {
         assert!(!route.contains("sens::parse_canonical_packed_words("));
         assert!(!route.contains("sens::open_ternary_program(bytes)"));
         assert!(!route.contains("sens::parse_canonical_binary(&visible)"));
+    }
+}
+
+
+#[cfg(all(test, feature = "zig-transport"))]
+mod d7_zig_cli_boundary_tests {
+    use super::*;
+
+    #[test]
+    fn keyboard_w7_is_sens_owned_zig_carries_exact_bytes_and_rejects_non_d7() {
+        let text = "Кіт! (.)\n";
+        let words = sens::encode_d7_uk_words(text).expect("ratified D7 Ukrainian glyphs");
+        assert_eq!(words.len(), text.chars().count());
+        assert!(words.iter().all(|w| w.width() == 7));
+        let carrier = zig_transport::encode_t5_direct(&words)
+            .expect("Zig-only physical T5 output");
+        // Independent Rust T5 reference is TEST-ONLY, never the primary output.
+        assert_eq!(carrier, sens::encode_d7_uk_t5(text).unwrap());
+        let restored = zig_transport::decode_t5_words(&carrier)
+            .expect("Zig-only physical T5 ingress");
+        assert_eq!(restored, words);
+        assert_eq!(sens::decode_d7_uk_words(&restored).unwrap(), text);
+
+        let error = sens::encode_d7_uk_words("Кі🙂").unwrap_err();
+        assert_eq!(error, sens::D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 });
+        let d2 = zig_transport::decode_t5_words(&[0x35])
+            .expect("valid D2:01 physical, not D7");
+        assert_eq!(sens::decode_d7_uk_words(&d2), Err(sens::D7T5Error::NonD7Word));
+        for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
+            assert!(zig_transport::decode_t5_words(invalid).is_err());
+        }
+        assert!(zig_transport::encode_t5_direct(&[]).is_err());
+    }
+
+    #[test]
+    fn d7_default_cli_routes_do_not_decode_or_encode_t5_in_rust() {
+        let source = include_str!("sens-trit.rs");
+        let e = source.find("\"encode-d7-uk\" => {").unwrap();
+        let segment = &source[e..];
+        let encode = &segment[..segment.find("\n        }").unwrap()];
+        let feature_encode = encode.split("#[cfg(not(feature = \"zig-transport\"))]").next().unwrap();
+        assert!(feature_encode.contains("sens::encode_d7_uk_words(&text)"));
+        assert!(feature_encode.contains("zig_transport::encode_t5_direct(&words)"));
+        assert!(!feature_encode.contains("sens::encode_d7_uk_t5(&text)"));
+
+        let d = source.find("\"decode-d7-uk\" => {").unwrap();
+        let segment = &source[d..];
+        let decode = &segment[..segment.find("\n        }").unwrap()];
+        let feature_decode = decode.split("#[cfg(not(feature = \"zig-transport\"))]").next().unwrap();
+        assert!(feature_decode.contains("zig_transport::decode_t5_words(&bytes)"));
+        assert!(feature_decode.contains("sens::decode_d7_uk_words(&words)"));
+        assert!(!feature_decode.contains("sens::decode_d7_uk_t5(&bytes)"));
     }
 }
