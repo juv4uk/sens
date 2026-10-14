@@ -112,11 +112,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "test_id=utf8-direct-d1-self-verdict layer=eval semantic_authority=SENS executor=rust-transport"
+          echo "test_id=utf8-direct-d1-self-verdict layer=transport semantic_authority=SENS executor=rust-transport"
           sha256sum lib/utf8.lisp tests/semantic/utf8-direct-d1-law.lisp crates/sens/tests/utf8.rs
           python3 scripts/ci_failure_contract.py run \
             --test-id utf8-direct-d1-self-verdict \
-            --layer eval \
+            --layer transport \
             --fixture tests/semantic/utf8-direct-d1-law.lisp \
             --report-file "$RUNNER_TEMP/sens-utf8-direct-d1-red.jsonl" \
             -- cargo test --locked -p sens --test utf8 \
