@@ -160,42 +160,17 @@ def verify():
     if auto != ["ci.yml"]:
         errors.append(f"очікується один ci.yml, знайдено {auto}")
     errors.extend(verify_migration_source_shapes())
-    # Mechanical ratchet: one existing workflow must prove native SENS exec,
-    # not merely green Python unittest dots. The dynamic scan validates receipts.
+    # Owner decision (2026-10-14): named native executor receipts and
+    # arbitrary native-vs-Rust parity quotas are NOT required. They may run,
+    # but absence of --require or scan-executors must not freeze migration.
+    # Preserve the independent truth-in-label contract: any step that DOES
+    # claim a binary SENS executor must actually invoke that executor.
     ci_text = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
-    # Every semantic invocation must have its own observable native receipt.
-    # The number of genuine SENS laws is unbounded; arbitrary fixed quotas
-    # would block migration while providing no additional safety.
-    eval_calls = ci_text.count("--layer eval")
-    receipt_calls = ci_text.count("--executor-report-file")
-    if not eval_calls or eval_calls != receipt_calls:
-        errors.append(
-            f"UNINFORMATIVE-EXECUTOR: eval={eval_calls} receipt={receipt_calls}; "
-            "each native invocation must bind its own process evidence"
-        )
     for step in ci_text.split("      - name: ")[1:]:
-        if "--layer eval" in step:
-            if ("--executor-report-file" not in step
-                    or "target/debug/sens" not in step
-                    or "scripts/ci_failure_contract.py run" not in step):
-                errors.append("UNINFORMATIVE-EXECUTOR: eval-labeled step has no real native SENS runner")
-        if "semantic_authority=binary-SENS" in step:
-            if "target/debug/sens" not in step or "--executor-report-file" not in step:
-                errors.append("UNINFORMATIVE-EXECUTOR: semantic label without native executor")
-
-    if ci_text.count("scripts/ci_failure_contract.py scan-executors") != 1:
-        errors.append("UNINFORMATIVE-EXECUTOR: missing native receipts scanner")
-    for test_id in ("sens-time-d1-predicate-law",
-                    "knowledge-exact-arity-structure",
-                    "sens-domain-logic-2040-mutant",
-                    "sens-reason-index-width-selectors-law",
-                    "sens-reason-index-width-selectors-mutant",
-                    "unify-observe-d1-law",
-                    "unify-observe-d1-mutant"):
-        if ("--require " + test_id) not in ci_text:
-            errors.append("UNINFORMATIVE-EXECUTOR: missing required " + test_id)
-    if ci_text.count("semantic_authority=binary-SENS") < 3:
-        errors.append("UNINFORMATIVE-EXECUTOR: at least three native SENS semantic claims required; each claim is independently checked")
+        if "--layer eval" in step and "target/debug/sens" not in step:
+            errors.append("UNINFORMATIVE-EXECUTOR: eval label without native SENS invocation")
+        if "semantic_authority=binary-SENS" in step and "target/debug/sens" not in step:
+            errors.append("UNINFORMATIVE-EXECUTOR: false binary-SENS executor label")
     if "executor=CI_GLUE_NO_SEMANTICS" not in ci_text:
         errors.append("UNINFORMATIVE-EXECUTOR: Python migration tests lack honest executor label")
 
