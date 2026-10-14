@@ -442,20 +442,22 @@
 ; argument can just as easily be a number, e.g. `(temperature 98)`), and
 ; `symbol->string` (called by `clips-symbol-starts-with-?`) errors on
 ; anything that isn't actually a symbol.
+; Only atoms may be variable symbols. D1:NO is explicit
+; for pairs and non-symbol atoms; no historical truthy NIL/UNKNOWN.
 (0011 clips-var?
   (0010 (term)
     (110
-      ((0100 (010 term)) (110
+      ((010 term)
+       (110
          ((110101100 term) (clips-symbol-starts-with-? term))
-         ))
-      ((010 term)  (110
-         ((110101100 term) (clips-symbol-starts-with-? term))
-         ))
-      )))
+         (1 0)))
+      (1 0))))
 
+; Both projections are atoms, so admitted D3 EQ suffices;
+; D8 EQUAL is neither needed nor implicitly admitted here.
 (0011 clips-symbol-starts-with-?
   (0010 (symbol)
-    (11110111 (110101011 (11101110 symbol)) (110101011 "?_"))))
+    (101 (110101011 (11101110 symbol)) (110101011 "?_"))))
 
 (0011 clips-var-term
   (0010 (symbol)
