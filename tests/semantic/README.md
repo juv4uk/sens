@@ -100,6 +100,8 @@ D1:0. `reason-index-width-selectors-mutant.sens` відрізняється рі
 - `scripts/prove-retired-quote-inert.sh` механічно пакує T5 через
   чинний codec, запускає native `target/debug/sens`, фіксує SHA-256,
   вимагає прийняття самовердикту та відхилення однобітного мутанта.
+  Відхилення мутанта має містити діагностику саме невикличного D1;
+  сторонній parse/CLI/transport збій дає `UNINFORMATIVE-NEGATIVE`, не PASS.
 
 ```sh
 cargo build --locked -p sens-cli --bin sens
