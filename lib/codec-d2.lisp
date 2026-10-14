@@ -21,7 +21,7 @@
     (110
       ((010 x)
        (111 x acc))
-      ((001 T)
+      ((101 (001 t) (001 t))
        (111 d2-open (t5-spine x (111 d2-close acc)))))))
 
 (0011 t5-spine
@@ -30,13 +30,13 @@
       ((010 s)
        (110
          ((101 s d3-empty) acc)
-         ((001 T) (111 d2-dot (t5-enc s acc)))))
-      ((001 T)
+         ((101 (001 t) (001 t)) (111 d2-dot (t5-enc s acc)))))
+      ((101 (001 t) (001 t))
        ((0010 (tail)
           (110
             ((010 (011 s))
              (t5-enc (100 s) tail))
-            ((001 T)
+            ((101 (001 t) (001 t))
              (t5-enc (100 s) (111 d2-sep tail)))))
         (t5-spine (011 s) acc))))))
 
@@ -48,14 +48,14 @@
   (0010 (x acc)
     (110
       ((010 x) acc)
-      ((001 T) (t5-rev (011 x) (111 (100 x) acc))))))
+      ((101 (001 t) (001 t)) (t5-rev (011 x) (111 (100 x) acc))))))
 
 (0011 t5-dec
   (0010 (tokens)
     (110
       ((101 (100 tokens) d2-open)
        (t5-dec-form (011 tokens) ()))
-      ((001 T)
+      ((101 (001 t) (001 t))
        (111 (100 tokens) (011 tokens))))))
 
 (0011 t5-dec-form
@@ -69,7 +69,7 @@
        ((0010 (d)
           (111 (t5-dot-tail (t5-rev elems ()) (100 d)) (011 d)))
         (t5-dec (011 tokens))))
-      ((001 T)
+      ((101 (001 t) (001 t))
        ((0010 (d)
           (t5-dec-form (011 d) (111 (100 d) elems)))
         (t5-dec tokens))))))
@@ -78,7 +78,7 @@
   (0010 (lst tail)
     (110
       ((010 lst) tail)
-      ((001 T) (111 (100 lst) (t5-dot-tail (011 lst) tail))))))
+      ((101 (001 t) (001 t)) (111 (100 lst) (t5-dot-tail (011 lst) tail))))))
 
 (0011 t5-decode
   (0010 (tokens)
