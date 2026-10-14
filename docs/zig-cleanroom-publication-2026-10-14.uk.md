@@ -59,3 +59,28 @@ python3 scripts/verify_zig_publication_candidate.py \
 - `SENS_RELEASE_GO_SHA` і політика реального релізу — окремий власницький дозвіл. Новий інструмент нічого не створює у світі, не змінює `main`, не позначає semantic law ратифікованим.
 - Тип `DomainWord` не замінює SENS семантику й не робить runtime фізичну пару `(width,bits)` автоматично callable; це лише механічний компіляційний захист.
 - Hosted ABI `std.heap.c_allocator`, E1/E2/E3, freestanding ESP32 і повне відділення Rust evaluator залишаються окремими пунктами #5779/#5775/#5776/#5772.
+
+
+## Реальна публікація: окремий власницький дозвіл і доказ перекладу
+
+`scripts/verify-zig-publication.py` **створює фізичний артефакт**, на відміну від read-only `verify_zig_publication_candidate.py`. Тому він тепер fail-closed, якщо немає `--owner-approved-provenance-sha256` — SHA-256 *сирих байтів усього* маніфесту `sens-publication-provenance/v1`, ухваленого та закріпленого **ПОЗА** публікатором в окремому довіреному контексті. Значення, щойно обчислене самим автором кандидата із власного JSON і підставлене в ту саму команду, не є незалежним дозволом власника. Перевірка хешу — контроль цілісності обраного довіреного входу, **не криптографічна автентифікація особи й не електронний підпис**. Без достовірного зовнішнього джерела дозволу випускати артефакт не можна.
+
+Для `source_era=legacy` потрібна **зовнішня** `translation_receipt` у маніфесті із абсолютним `path` та SHA-256 її JSON. Вона зберігається тільки поза Zig, має `schema=sens-translation-receipt/v1`, `source_era=legacy` і прив'язує `source_sha256`, `physical_sha256`, `canonical_source_sha256` (вихід Zig `open`/чинного SENS D2 reader). Публікатор порівнює всі три фактичні величини й повторно читає обидві квитанції перед атомарним записом. Історичний `source_era=auto`, відсутня чи змінена квитанція, помилковий SHA або mismatched canonical projection — відмова **до** створення виходу.
+
+Виклик у довіреному релізному середовищі (значення PIN має надійти з незалежного рішення власника, не від неперевіреного файла):
+
+```bash
+python3 scripts/verify-zig-publication.py \\
+  --input /approved/candidate.sens \\
+  --source-file /approved/source.lisp \\
+  --provenance /approved/provenance.json \\
+  --owner-approved-provenance-sha256 "\$OWNER_APPROVED_PROVENANCE_SHA256" \\
+  --zig-runner /pinned/sens-trit \\
+  --zig-runner-sha256 "\$ZIG_RUNNER_SHA256" \\
+  --sens-executor /pinned/sens-executor \\
+  --sens-executor-sha256 "\$SENS_EXECUTOR_SHA256" \\
+  --expected-output-sha256 "\$OWNER_APPROVED_OUTPUT_SHA256" \\
+  --out /publish/candidate.sens
+```
+
+Тести механіки `tests/test_verify_zig_publication.py` використовують несправжні локальні executable-фікстури **лише для перевірки відмов на межі**; вони не засвідчують правильність SENS-обчислення. Реальний публікаційний дозвіл потребує окремого незалежного власницького рішення, реального нативного SENS свідка й пінованого Zig runner. На відміну від фізичного SHA, жоден із цих доказів не може бути виведений із самих бітів T5.
