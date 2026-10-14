@@ -4,6 +4,62 @@
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 
+
+/// A single exact binary coordinate; width itself is identity, NOT the
+/// allocation size of the Zig payload or a language operation number.
+pub const CoordinateError = error{
+    InvalidWidth, PayloadOverflow, InvalidBinaryDigit,
+    WrongDomainWidth, BufferLengthMismatch,
+};
+
+pub const Coordinate = struct {
+    width: u8,
+    bits: u16,
+
+    pub fn init(width: u8, bits: u16) CoordinateError!Coordinate {
+        if (width == 0 or width > 10) return error.InvalidWidth;
+        const limit: u16 = @as(u16, 1) << @as(u4, @intCast(width));
+        if (bits >= limit) return error.PayloadOverflow;
+        return .{ .width = width, .bits = bits };
+    }
+
+    pub fn parseBinary(source: []const u8) CoordinateError!Coordinate {
+        if (source.len == 0 or source.len > 10) return error.InvalidWidth;
+        var packed: u16 = 0;
+        for (source) |digit| {
+            if (digit != '0' and digit != '1') return error.InvalidBinaryDigit;
+            packed = (packed << 1) | @as(u16, digit - '0');
+        }
+        return init(@intCast(source.len), packed);
+    }
+
+    /// Writes exactly width source bits; no decimal conversion, padding or
+    /// invisible removal of leading zeros.
+    pub fn writeBinary(self: Coordinate, output: []u8) CoordinateError!void {
+        _ = try init(self.width, self.bits);
+        if (output.len != self.width) return error.BufferLengthMismatch;
+        for (output, 0..) |*digit, index| {
+            const shift: u4 = @intCast(@as(usize, self.width) - 1 - index);
+            digit.* = if (((self.bits >> shift) & 1) == 0) '0' else '1';
+        }
+    }
+
+    /// Only an explicit helper ABI [width, payload-MSB, payload-LSB].
+    /// Not a serialized .sens/.senc or executable semantic function.
+    pub fn fromTriplet(raw: [3]u8) CoordinateError!Coordinate {
+        const packed = (@as(u16, raw[1]) << 8) | @as(u16, raw[2]);
+        return init(raw[0], packed);
+    }
+
+    pub fn triplet(self: Coordinate) [3]u8 {
+        return .{ self.width, @intCast(self.bits >> 8), @intCast(self.bits & 0xff) };
+    }
+
+    pub fn same(self: Coordinate, other: Coordinate) bool {
+        return self.width == other.width and self.bits == other.bits;
+    }
+};
+
 /// Each width names a DISTINCT Zig type. The packed payload contains exactly
 /// width bits; a physical byte's storage size never defines its domain.
 pub fn DomainWord(comptime width: u8) type {
@@ -20,12 +76,42 @@ pub fn DomainWord(comptime width: u8) type {
             return .{ .bits = bits };
         }
 
+
+        pub fn fromBinary(source: []const u8) CoordinateError!Self {
+            return fromCoordinate(try Coordinate.parseBinary(source));
+        }
+
+        pub fn fromCoordinate(source: Coordinate) CoordinateError!Self {
+            if (source.width != width) return error.WrongDomainWidth;
+            _ = try Coordinate.init(source.width, source.bits);
+            return .{ .bits = @intCast(source.bits) };
+        }
+
+        pub fn coordinate(self: Self) Coordinate {
+            return .{ .width = width, .bits = @as(u16, self.bits) };
+        }
+
+        pub fn writeBinary(self: Self, output: []u8) CoordinateError!void {
+            return self.coordinate().writeBinary(output);
+        }
+
         /// Explicit erasure into a *physical* carrier word, never a semantic ID.
         pub fn toCarrier(self: Self) t5.Word {
             return .{ .width = width, .bits = @intCast(self.bits) };
         }
     };
 }
+
+pub const D1 = DomainWord(1);
+pub const D2 = DomainWord(2);
+pub const D3 = DomainWord(3);
+pub const D4 = DomainWord(4);
+pub const D5 = DomainWord(5);
+pub const D6 = DomainWord(6);
+pub const D7 = DomainWord(7);
+pub const D8 = DomainWord(8);
+pub const D9 = DomainWord(9);
+pub const D10 = DomainWord(10);
 
 pub const CarrierError = error{ WrongDomainWidth, BitsOutOfRange };
 
@@ -119,4 +205,77 @@ test "D24 D48 D96 D192 are distinct exact-bit opaque carriers" {
     try std.testing.expect(WideDomainWord(48) != WideDomainWord(96));
     try std.testing.expect(WideDomainWord(96) != WideDomainWord(192));
     try std.testing.expect(WideDomainWord(24) != DomainWord(10));
+}
+
+
+test "2046 binary sources and 3-byte host triplets preserve every domain bit" {
+    var seen: usize = 0;
+    var width: u8 = 1;
+    while (width <= 10) : (width += 1) {
+        const limit: u16 = @as(u16, 1) << @as(u4, @intCast(width));
+        var packed: u16 = 0;
+        while (packed < limit) : (packed += 1) {
+            const original = try Coordinate.init(width, packed);
+            var data: [10]u8 = undefined;
+            const bits = data[0..@as(usize, width)];
+            try original.writeBinary(bits);
+            try std.testing.expect(original.same(try Coordinate.parseBinary(bits)));
+            try std.testing.expect(original.same(try Coordinate.fromTriplet(original.triplet())));
+            seen += 1;
+        }
+        try std.testing.expectError(error.PayloadOverflow, Coordinate.init(width, limit));
+    }
+    try std.testing.expectEqual(@as(usize, 2046), seen);
+}
+
+test "D1 D2 D8 D9 D10 cannot silently change rung" {
+    const d1 = try D1.fromBinary("1");
+    const d2 = try D2.fromBinary("01");
+    const d8 = try D8.fromBinary("00000001");
+    const d9 = try D9.fromBinary("000000001");
+    const d10 = try D10.fromBinary("0000000001");
+    try std.testing.expect(@TypeOf(d1) != @TypeOf(d2));
+    try std.testing.expect(@TypeOf(d8) != @TypeOf(d9));
+    try std.testing.expect(@TypeOf(d9) != @TypeOf(d10));
+    try std.testing.expect(!d1.coordinate().same(d2.coordinate()));
+    try std.testing.expect(!d8.coordinate().same(d9.coordinate()));
+    var exact: [10]u8 = undefined;
+    try d10.writeBinary(&exact);
+    try std.testing.expectEqualStrings("0000000001", &exact);
+    try std.testing.expectError(error.WrongDomainWidth,
+        D8.fromCoordinate(d9.coordinate()));
+    try std.testing.expectError(error.WrongDomainWidth,
+        D10.fromCoordinate(d1.coordinate()));
+}
+
+test "reject invalid binary characters, extra bit and invalid ABI triplets" {
+    try std.testing.expectError(error.InvalidWidth, Coordinate.parseBinary(""));
+    try std.testing.expectError(error.InvalidWidth, Coordinate.parseBinary("00000000000"));
+    try std.testing.expectError(error.InvalidWidth, Coordinate.init(0, 0));
+    try std.testing.expectError(error.InvalidWidth, Coordinate.init(11, 0));
+    try std.testing.expectError(error.PayloadOverflow, Coordinate.init(8, 256));
+    try std.testing.expectError(error.PayloadOverflow, Coordinate.init(10, 1024));
+    try std.testing.expectError(error.InvalidBinaryDigit, Coordinate.parseBinary("0x1"));
+    try std.testing.expectError(error.InvalidBinaryDigit, Coordinate.parseBinary("0 1"));
+    try std.testing.expectError(error.InvalidBinaryDigit, Coordinate.parseBinary("02"));
+    try std.testing.expectError(error.PayloadOverflow, Coordinate.fromTriplet(.{ 1, 0, 2 }));
+    try std.testing.expectError(error.InvalidWidth, Coordinate.fromTriplet(.{ 11, 0, 1 }));
+    var short: [1]u8 = undefined;
+    try std.testing.expectError(error.BufferLengthMismatch,
+        (try D3.fromBinary("001")).writeBinary(&short));
+}
+
+test "single bit mutants preserve rung and are rejected as another coordinate" {
+    var width: u8 = 1;
+    while (width <= 10) : (width += 1) {
+        const original = try Coordinate.init(width, 0);
+        var bit: u8 = 0;
+        while (bit < width) : (bit += 1) {
+            const next = try Coordinate.init(width, @as(u16, 1) << @as(u4, @intCast(bit)));
+            try std.testing.expect(!original.same(next));
+            try std.testing.expectEqual(original.width, next.width);
+            try std.testing.expectEqual(@as(u32, 1),
+                @popCount(original.bits ^ next.bits));
+        }
+    }
 }
