@@ -409,9 +409,10 @@ fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     }).collect()
 }
 
-/// Encode strictly admitted Ukrainian keyboard characters as D7 W7 words
-/// through the already existing five-trits-per-byte T5 codec.
-pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
+/// Map owner-ratified Ukrainian keyboard glyphs to exact W7 data words.
+/// No physical T5 encoding takes place here; external transports (including
+/// Zig ABI v2) may consume this checked, width-qualified SENS projection.
+pub fn encode_d7_uk_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
     let words = keyboard_d7_words(source)?;
     // The same owner D7 table already defines the reverse projection.
     // Check each exact W7 coordinate before packing; decoding the complete
@@ -428,13 +429,17 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
             return Err(D7T5Error::AmbiguousText);
         }
     }
-    Ok(encode_ternary_words(&words)?)
+    Ok(words)
 }
 
-/// Strictly decode *only* W7 words with admitted Ukrainian keyboard glyphs.
-/// D2 words (00/01/10/11) are never turned into D7 text or punctuation.
-pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
-    let words = decode_ternary_words(packed)?;
+/// Physical Rust T5 reference remains supported independently of Zig.
+pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
+    Ok(encode_ternary_words(&encode_d7_uk_words(source)?)?)
+}
+
+/// Render only ratified W7 Ukrainian keyboard words, without touching T5.
+/// D2 words (00/01/10/11) never become D7 text or punctuation.
+pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Error> {
     let mut text = String::new();
     for word in &words {
         let BinarySourceWord::W7(cell) = word else {
@@ -448,6 +453,11 @@ pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
         return Err(D7T5Error::AmbiguousText);
     }
     Ok(text)
+}
+
+/// Physical Rust T5 reference remains supported independently of Zig.
+pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
+    decode_d7_uk_words(&decode_ternary_words(packed)?)
 }
 
 #[cfg(test)]
