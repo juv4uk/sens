@@ -109,6 +109,12 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Мігратор exact-domain — Rust перевіряє лише механічний W8 firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=sens-to-sens-no-w8-as-domain layer=encode executor=rust-mechanical semantic_authority=ratified-domain-index"
+          cargo test --locked -p sens-cli --bin sens-to-sens -- --nocapture
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
