@@ -121,6 +121,20 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-utf8-direct-d1-red.jsonl" \
             -- cargo test --locked -p sens --test utf8 \
                  utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
+      - name: Meta Canon — exact D1 non-atom and one-bit mutant
+        if: contains(github.event.head_commit.message, '[canon-meta-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=meta-canon-nonatom layer=transport semantic_authority=SENS executor=rust-transport"
+          sha256sum lib/meta-eval.lisp crates/sens/tests/canon_immutability_meta.rs tests/semantic/meta-canon-nonatom-d1-law.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id meta-canon-nonatom \
+            --layer transport \
+            --fixture tests/semantic/meta-canon-nonatom-d1-law.lisp \
+            --report-file "$RUNNER_TEMP/sens-meta-canon-nonatom-red.jsonl" \
+            -- cargo test --locked -p sens --test canon_immutability_meta \
+                 meta_canon_nonatom_is_sens_owned -- --exact --nocapture
       - name: World LCA — SENS self-verdict and one-bit falsifier
         shell: bash
         run: |

@@ -108,3 +108,45 @@ fn noncanon_shadowing_survives_in_meta_eval() {
         "6"
     );
 }
+
+const META_CANON_NONATOM_LAW: &str =
+    include_str!("../../../tests/semantic/meta-canon-nonatom-d1-law.lisp");
+
+/// SENS compares its own results against exact D1 expectations.
+/// Rust only transports the binary-headed program and checks the final bit.
+#[test]
+fn meta_canon_nonatom_is_sens_owned() {
+    let forms = sens::parse_mixed_exact_domain(META_CANON_NONATOM_LAW)
+        .expect("binary SENS D1/D3 Canon non-atom law parses");
+    assert_eq!(forms.len(), 2, "two SENS-owned atomic-boundary verdicts");
+    let mut session = meta_session();
+    for (index, form) in forms.iter().enumerate() {
+        let observed = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|e| {
+                panic!("test_id=meta-canon-nonatom layer=eval fixture=tests/semantic/meta-canon-nonatom-d1-law.lisp form={index} error={e}")
+            });
+        assert_eq!(
+            observed.value.as_predicate_bit(),
+            Some(true),
+            "test_id=meta-canon-nonatom form={index} must return exact SENS D1:YES"
+        );
+    }
+
+    let changed = META_CANON_NONATOM_LAW.replacen("#d1:0", "#d1:1", 1);
+    assert_eq!(changed.len(), META_CANON_NONATOM_LAW.len());
+    assert_eq!(
+        META_CANON_NONATOM_LAW.bytes().zip(changed.bytes())
+            .filter(|(before, after)| before != after).count(),
+        1,
+        "one-bit D1 falsifier cannot change form layout"
+    );
+    let mutant = sens::parse_mixed_exact_domain(&changed)
+        .expect("one-bit mutant remains syntactically valid binary SENS");
+    let failure = sens::eval_parsed_expressions(
+        std::slice::from_ref(&mutant[1]), &mut session
+    );
+    assert!(
+        failure.is_err(),
+        "SENS must reject wrong D1 result by evaluating CAR(QUOTE EMPTY)"
+    );
+}
