@@ -580,30 +580,41 @@
   (0010 (left right)
     (110
       ((внутрішня-рівність-версій left right) left)
-      
-      (#d1:1 (001 World-no-common-ancestor))
-      
-      ((010 (world-parent right))  (001 World-no-common-ancestor))
-      (#d1:1 (world-common-ancestor-aligned (world-parent left)
-                                        (world-parent right))))))
+      ((010 left) (001 World-no-common-ancestor))
+      ((010 right) (001 World-no-common-ancestor))
+      ((010 (world-parent left)) (001 World-no-common-ancestor))
+      ((010 (world-parent right)) (001 World-no-common-ancestor))
+      (#d1:1
+       (world-common-ancestor-aligned (world-parent left)
+                                      (world-parent right))))))
 
+; An ancestor is found by walking immutable parents. Its SENS verdict
+; is a D1 predicate, never a numeric depth or an historical W8 EQ value.
+(0011 внутрішній-предок-світу?
+  (0010 (candidate world)
+    (110
+      ((010 world) #d1:0)
+      ((внутрішня-рівність-версій candidate world) #d1:1)
+      ((010 (world-parent world)) #d1:0)
+      (#d1:1
+       (внутрішній-предок-світу? candidate (world-parent world))))))
+
+; The first ancestor of left occurring in right's ancestry is the deepest
+; common world. This is pure SENS structure, independent of D24+ arithmetic.
 (0011 world-common-ancestor
   (0010 (left right)
-    (нехай-похідне ((left-depth (world-depth left))
-          (right-depth (world-depth right)))
-      (нехай-похідне ((target-depth (110
-                            ((11010 left-depth right-depth)  left-depth)
-                            (#d1:1 right-depth))))
-        (world-common-ancestor-aligned
-          (world-climb-to-depth left left-depth target-depth)
-          (world-climb-to-depth right right-depth target-depth))))))
+    (110
+      ((010 left) (001 World-no-common-ancestor))
+      ((010 right) (001 World-no-common-ancestor))
+      ((внутрішній-предок-світу? left right) left)
+      ((010 (world-parent left)) (001 World-no-common-ancestor))
+      (#d1:1 (world-common-ancestor (world-parent left) right)))))
 
 (0011 world-no-common-ancestor?
   (0010 (value)
     (110
-      
-      ((010 value)  (101 value (001 World-no-common-ancestor)))
-      )))
+      ((010 value) (101 value (001 World-no-common-ancestor)))
+      (#d1:1 #d1:0))))
 
 (0011 world-branch-diff
   (0010 (left right)
