@@ -24,8 +24,8 @@ pub const Error = error{
     NoncanonicalEncoding,
 };
 
-fn validWord(word: Word) bool {
-    if (word.width == 0 or word.width > 9) return false;
+fn validWord(word: Word, max_width: u8) bool {
+    if (word.width == 0 or word.width > max_width) return false;
     const limit: u32 = @as(u32, 1) << @as(u5, @intCast(word.width));
     return @as(u32, word.bits) < limit;
 }
@@ -51,12 +51,21 @@ fn appendDigit(
 /// Чистий T5 для вже типізованих слів (НЕ допуск виконуваної програми).
 /// Caller owns returned bytes and must free them with the same allocator.
 pub fn encode(allocator: std.mem.Allocator, words: []const Word) ![]u8 {
+    return encodeWidth(allocator, words, 9);
+}
+
+/// D10 is a *mechanical coordinate* only; this does NOT enable calls.
+pub fn encodeCoordinates(allocator: std.mem.Allocator, words: []const Word) ![]u8 {
+    return encodeWidth(allocator, words, 10);
+}
+
+fn encodeWidth(allocator: std.mem.Allocator, words: []const Word, max_width: u8) ![]u8 {
     if (words.len == 0) return Error.EmptyProgram;
 
     const trit_budget = MAX_PHYSICAL_BYTES * TRITS_PER_BYTE;
     var total_trits: usize = 0;
     for (words, 0..) |word, i| {
-        if (!validWord(word)) return Error.UnsupportedDomainWidth;
+        if (!validWord(word, max_width)) return Error.UnsupportedDomainWidth;
         const cost: usize = @as(usize, word.width) + @as(usize, @intFromBool(i != 0));
         if (cost > trit_budget - total_trits) return Error.TransportTooLarge;
         total_trits += cost;
@@ -87,6 +96,15 @@ pub fn encode(allocator: std.mem.Allocator, words: []const Word) ![]u8 {
 /// Декодує тільки фізичний T5; для виконання далі потрібен чинний SENS reader.
 /// Caller owns returned words and must free them with the same allocator.
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) ![]Word {
+    return decodeWidth(allocator, data, 9);
+}
+
+/// Read D1–D10 coordinates as physical words; never grant execution authority.
+pub fn decodeCoordinates(allocator: std.mem.Allocator, data: []const u8) ![]Word {
+    return decodeWidth(allocator, data, 10);
+}
+
+fn decodeWidth(allocator: std.mem.Allocator, data: []const u8, max_width: u8) ![]Word {
     if (data.len == 0) return Error.EmptyProgram;
     if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
     for (data) |byte| {
@@ -136,7 +154,7 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) ![]Word {
                 width = 0;
                 bits = 0;
             } else {
-                if (width >= 9) return Error.UnsupportedDomainWidth;
+                if (width >= max_width) return Error.UnsupportedDomainWidth;
                 width += 1;
                 bits = (bits << 1) | @as(u16, digit);
             }
@@ -146,10 +164,28 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) ![]Word {
     try decoded.append(allocator, .{ .width = width, .bits = bits });
 
     // Як у чинному Rust: приймаємо тільки канонічний фізичний носій.
-    const canonical = try encode(allocator, decoded.items);
+    const canonical = try encodeWidth(allocator, decoded.items, max_width);
     defer allocator.free(canonical);
     if (!std.mem.eql(u8, canonical, data)) return Error.NoncanonicalEncoding;
     return decoded.toOwnedSlice(allocator);
+}
+
+test "D10 mechanical coordinate bits do not become executable D9" {
+    const a = std.testing.allocator;
+    var bits: u16 = 0;
+    while (bits < 1024) : (bits += 1) {
+        const source = [_]Word{.{ .width = 10, .bits = bits }};
+        const physical = try encodeCoordinates(a, &source);
+        defer a.free(physical);
+        const recovered = try decodeCoordinates(a, physical);
+        defer a.free(recovered);
+        try std.testing.expectEqualSlices(Word, &source, recovered);
+        try std.testing.expectError(Error.UnsupportedDomainWidth, decode(a, physical));
+    }
+    try std.testing.expectError(
+        Error.UnsupportedDomainWidth,
+        encodeCoordinates(a, &.{.{ .width = 10, .bits = 1024 }}),
+    );
 }
 
 test "T5 відомі фізичні вектори exact-width" {
