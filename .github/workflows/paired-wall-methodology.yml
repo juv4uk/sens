@@ -13,6 +13,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Test randomized protocol, bootstrap, and fail-closed parity

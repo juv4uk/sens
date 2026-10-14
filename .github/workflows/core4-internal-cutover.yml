@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - name: Перевірити 2046 residents, точні ширини та негативні свідки
         run: python3 -m unittest discover -s tests -p 'test_core4_internal_sid8_migration.py' -v
       - name: Перевірити незмінність D24+ боргу Core4

@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Build actual SENS T5 opener / D2 grammar gate
         run: cargo build -p sens-cli --bin sens-trit

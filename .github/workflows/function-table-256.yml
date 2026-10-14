@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Build SENS tooling runtime
         run: cargo build -p sens-cli --bin sens

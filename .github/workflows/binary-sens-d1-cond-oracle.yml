@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: "Run physical binary SENS transport/mechanism witness"
         run: cargo test --locked -p sens --test binary_sens_d1_cond_oracle -- --nocapture

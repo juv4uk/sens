@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Physical input / visible reference semantic parity
         run: cargo test --locked -q -p sens --test direct_t5_pipeline

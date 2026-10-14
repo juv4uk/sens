@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Require not-yet-implemented Lisp topology witness
         run: cargo run --quiet -p sens-cli --bin my-lisp -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp

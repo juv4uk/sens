@@ -16,6 +16,7 @@ jobs:
       RUST_MIN_STACK: "33554432"
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: D3 ATOM + D1 біт та недоторкане D8
         run: cargo test --locked -p sens --test machine_admission_false_width -- --nocapture

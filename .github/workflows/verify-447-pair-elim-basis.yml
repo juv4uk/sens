@@ -10,6 +10,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Current CAR non-pair boundary is named Type failure

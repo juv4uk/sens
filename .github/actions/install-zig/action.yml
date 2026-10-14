@@ -1,0 +1,23 @@
+name: install-zig
+description: >-
+  Встановити пінований Zig 0.16.0 (дефолтний транспортний кодек SENS).
+  Потрібен будь-якому кроку, що збирає sens-cli: build.rs вимагає пінований Zig.
+inputs:
+  version:
+    description: Версія Zig (має збігатися з .zig-version)
+    required: false
+    default: "0.16.0"
+runs:
+  using: composite
+  steps:
+    - name: Встановити Zig 0.16.0 (дефолтний кодек; потрібен sens-cli/build.rs)
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl --fail --location --retry 3 --silent --show-error \
+          "https://ziglang.org/download/${{ inputs.version }}/zig-x86_64-linux-${{ inputs.version }}.tar.xz" \
+          --output "$RUNNER_TEMP/zig-${{ inputs.version }}.tar.xz"
+        echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  '"$RUNNER_TEMP/zig-${{ inputs.version }}.tar.xz" | sha256sum --check --status
+        tar -xJf "$RUNNER_TEMP/zig-${{ inputs.version }}.tar.xz" -C "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/zig-x86_64-linux-${{ inputs.version }}" >> "$GITHUB_PATH"
+        "$RUNNER_TEMP/zig-x86_64-linux-${{ inputs.version }}/zig" version

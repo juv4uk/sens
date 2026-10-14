@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Check current README agrees with owner contract and D3 table
         run: python3 -m unittest discover -s tests -p test_readme_owner_contract.py -v

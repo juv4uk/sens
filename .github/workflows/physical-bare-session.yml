@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact binary vs macro-bootstrapped CLI parity and negative fences
         run: cargo test --locked -p sens-cli --test physical_bare_session_cli -- --nocapture

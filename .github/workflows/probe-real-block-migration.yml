@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Build current Rust D2 reader
         run: cargo build -q -p sens-cli --bin sens-trit

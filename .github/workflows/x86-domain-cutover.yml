@@ -16,6 +16,7 @@ jobs:
       RUST_MIN_STACK: "33554432"
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: 28 D4 LAMBDA та точний D1 операндів
         run: cargo test --locked -p sens --test x86_domain_cutover -- --nocapture

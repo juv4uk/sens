@@ -9,6 +9,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - name: Strict T5 codec/view parity and malicious input/no-clobber tests
         run: python3 -m unittest discover -s tests -p 'test_sens_t5_spaced_view.py' -v
       - name: Verify committed Ukrainian Lisp / physical T5 / ASCII exact view

@@ -12,6 +12,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: ./.github/actions/install-zig
+
       - name: Checkout pinned CML after top-level Def fix
         uses: actions/checkout@v5
         with:

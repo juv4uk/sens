@@ -9,6 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ./.github/actions/install-zig
       - name: Build my-lisp
         run: cargo build --release -p sens-cli --bin my-lisp
 

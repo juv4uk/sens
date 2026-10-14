@@ -13,6 +13,7 @@ jobs:
         with:
           ref: release/4242-native-first-exact-sens
           fetch-depth: 0
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Rewrite native-first with canonical parser-aware migration
         shell: bash

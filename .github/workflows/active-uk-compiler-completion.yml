@@ -15,6 +15,7 @@ jobs:
       RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Active lib completion — exact Ukrainian compiler source, strict old-source gate elsewhere
         run: cargo test -p sens-cli --test cli active_lib_sens_completion -- --nocapture

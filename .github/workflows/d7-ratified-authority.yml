@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - name: Verify current ratified 128/128 D7 keyboard and surface
         run: |
           python3 scripts/check-d7-keyboard-v2-table.py

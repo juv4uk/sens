@@ -15,6 +15,7 @@ jobs:
         with:
           ref: fix/canon-let-map-d1-no-20261009
           persist-credentials: true
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Generate authentic FASL from updated core4 source
         run: cargo run --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl

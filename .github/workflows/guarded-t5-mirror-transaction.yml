@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/install-zig
       - uses: dtolnay/rust-toolchain@stable
       - name: Python atomic migration test suite
         run: |
