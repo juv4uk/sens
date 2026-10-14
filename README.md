@@ -461,7 +461,7 @@ SENS будує не одну плоску таблицю opcode, а **драб�
 | D4 | 4 | bootstrap |
 | D5 | 5 | наступний exact-width semantic domain |
 | D6 | 6 | наступний exact-width semantic domain |
-| D7 | 7 | Sound7/Text7 та окремі role laws |
+| D7 | 7 | чинна клавіатурна/text-data v2, 128/128; історична звукова v1 — окреме джерело |
 | D8 | 8 | повний owner-ratified domain |
 | D9 | 9 | повний owner-ratified domain |
 | D10 | 10 | весь каталог 1024/1024 ратифіковано; F1/F2/F3/T5 залишаються відкритими |
@@ -470,12 +470,14 @@ SENS будує не одну плоску таблицю opcode, а **драб�
 Поточна owner-ratified картина:
 
 ~~~text
-D7 = 126/128 admitted; 2 координати reserved
+D7 = 128/128 ratified keyboard/text v2; historical sound v1 was 126/128
 D8 = 256/256
 D9 = 512/512
 D10 = 1024/1024, whole-domain owner-ratified, T5 not admitted
 D24+ = owner-ratified numeric ladder
 ~~~
+
+**Чинна D7:** [ратифікована клавіатурна таблиця v2](knowledge/d7-keyboard-v2-ratified.json) від 13.10.2026 з усіма 128 точними семибітовими координатами. Два історично резервні місця `0100001` і `0101010` належали лише звуковій v1; старі дані вимагають явного декодування v1 та перекодування v2. D7 — текстові дані, не арифметика чи право виклику функції. [Опис чинного профілю](docs/d7-keyboard-v2.uk.md).
 
 D9 має окремий runtime-carrier ланцюг. Це механізм розміщення, а не привід звести D9 назад до D8/SID8.
 
