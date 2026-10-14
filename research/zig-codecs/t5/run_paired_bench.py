@@ -102,20 +102,24 @@ def main() -> int:
             order = ["zig", "rust"]
             rng.shuffle(order)
             paired_fixtures = {}
+            paired_bytes = {}
             for name in order:
                 run = subprocess.run([str(binaries[name])], cwd=ROOT,
                                      capture_output=True, text=True, check=True)
                 raw = run.stdout + "\n" + run.stderr
                 (out / f"pair-{pair:02d}-{name}.txt").write_text(raw, encoding="utf-8")
                 fx_rows = records(raw, "fixture")
+                physical_rows = records(raw, "physical")
                 sample_rows = records(raw, "sample")
-                if len(fx_rows) != 4 or len(sample_rows) != 40:
+                if len(fx_rows) != 4 or len(physical_rows) != 4 or len(sample_rows) != 40:
                     raise RuntimeError(f"UNINFORMATIVE-OUTPUT pair={pair} impl={name}, "
-                                       f"fixtures={len(fx_rows)} samples={len(sample_rows)}")
+                                       f"fixtures={len(fx_rows)} physical={len(physical_rows)} samples={len(sample_rows)}")
                 for f in fx_rows:
                     key = int(f["forms"])
                     paired_fixtures.setdefault(key, {})[name] = (
                         int(f["words"]), int(f["bytes"]), int(f["fnv64"], 16))
+                for physical_row in physical_rows:
+                    paired_bytes.setdefault(int(physical_row["forms"]), {})[name] = physical_row["hex"]
                 for s in sample_rows:
                     row = {
                         "pair": pair, "impl": name, "forms": int(s["forms"]),
@@ -128,6 +132,12 @@ def main() -> int:
                     handle.write(json.dumps(row) + "\n")
                     batches.append(row)
             for forms, sides in paired_fixtures.items():
+                b = paired_bytes.get(forms, {})
+                if b.get("zig") is None or b.get("rust") is None or b["zig"] != b["rust"]:
+                    (out / "STATUS").write_text(f"BLOCKED_NO_TIMING: physical byte mismatch forms={forms}\\n")
+                    raise RuntimeError(f"BLOCKED_NO_TIMING forms={forms}, physical byte mismatch")
+                if len(b["zig"]) != 2 * sides["zig"][1]:
+                    raise RuntimeError(f"BLOCKED_NO_TIMING forms={forms}, physical length mismatch")
                 if sides.get("zig") != sides.get("rust"):
                     (out / "STATUS").write_text(
                         f"BLOCKED_NO_TIMING: fixture mismatch forms={forms} "
