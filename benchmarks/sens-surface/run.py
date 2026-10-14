@@ -137,7 +137,7 @@ WORKLOADS = {
   ({cond} (({eq} n {d0}) acc)
         (({eq} {d0} {d0}) (loop ({-} n {d1}) ({+} acc {d2}))))))
 """,
-        "call": "(loop {N} 0)",
+        "call": "(loop {N} {d0})",
         "expected": lambda p: str(2 * p["N"]),
     },
     # Списки: побудова cons-ами, розворот акумулятором, підрахунок довжини.
@@ -151,7 +151,7 @@ WORKLOADS = {
   ({cond} (({eq} r {d0}) total)
         (({eq} {d0} {d0}) (work ({-} r {d1}) ({+} total (len (rev (build {N} ({quote} ())) ({quote} ())) {d0})))))))
 """,
-        "call": "(work {R} 0)",
+        "call": "(work {R} {d0})",
         "expected": lambda p: str(p["N"] * p["R"]),
     },
     # Пошук eq у списку (форма реального member?, #1278), найгірший випадок.
@@ -167,7 +167,7 @@ WORKLOADS = {
   ({cond} (({eq} r {d0}) hits)
         (({eq} {d0} {d0}) (work ({-} r {d1}) ({+} hits (mem {N} xs)))))))
 """,
-        "call": "(work {R} 0)",
+        "call": "(work {R} {d0})",
         "expected": lambda p: str(p["R"]),
     },
     # Замикання: створення і виклик lambda з захопленою змінною.
@@ -180,7 +180,7 @@ WORKLOADS = {
   ({cond} (({eq} n {d0}) acc)
         (({eq} {d0} {d0}) (loop ({-} n {d1}) (add3 acc))))))
 """,
-        "call": "(loop {N} 0)",
+        "call": "(loop {N} {d0})",
         "expected": lambda p: str(3 * p["N"]),
     },
     # Аккерман: глибока не-хвостова рекурсія з вкладеним викликом.
@@ -192,7 +192,7 @@ WORKLOADS = {
         (({eq} n {d0}) (ack ({-} m {d1}) {d1}))
         (({eq} {d0} {d0}) (ack ({-} m {d1}) (ack m ({-} n {d1})))))))
 """,
-        "call": "(ack 3 {N})",
+        "call": "(ack {d3} {N})",
         "expected": lambda p: str(ack_py(3, p["N"])),
     },
     # Бінарне дерево: алокація пар і обхід обох гілок.
@@ -221,7 +221,7 @@ WORKLOADS = {
   ({cond} (({eq} k {d0}) acc)
         (({eq} {d0} {d0}) (sumall ({-} k {d1}) al ({+} acc (look k al)))))))
 """,
-        "call": "(sumall {N} (mkal {N} ({quote} ())) 0)",
+        "call": "(sumall {N} (mkal {N} ({quote} ())) {d0})",
         "expected": lambda p: str(p["N"] * (p["N"] + 1)),
     },
     # Функції вищого порядку: map/fold з анонімними lambda.
@@ -240,7 +240,7 @@ WORKLOADS = {
                  ({+} total (myfold ({lambda} (a b) ({+} a b)) {d0}
                                    (mymap ({lambda} (x) ({+} x x)) (build {N} ({quote} ()))))))))))
 """,
-        "call": "(work {R} 0)",
+        "call": "(work {R} {d0})",
         "expected": lambda p: str(p["R"] * p["N"] * (p["N"] + 1)),
     },
     # Взаємна рекурсія двох функцій.
@@ -265,7 +265,7 @@ WORKLOADS = {
   ({cond} (({atom} x) ({cons} x acc))
         (({eq} {d0} {d0}) (flat ({car} x) (flat ({cdr} x) acc))))))
 """,
-        "call": "(len (flat (mk {N}) ({quote} ())) 0)",
+        "call": "(len (flat (mk {N}) ({quote} ())) {d0})",
         "expected": lambda p: str(2 ** p["N"]),
     },
 }
