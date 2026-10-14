@@ -107,11 +107,10 @@
       ((101 (1001 (100 journal)) module-name) #d1:1)
       (#d1:1 (module-journal-has-module? module-name (011 journal))))))
 
+; One symbol law is owned by Core; do not duplicate historical blank W8 slots.
 (0011 knowledge-symbol?
   (0010 (value)
-    (110
-      ((010 value) (101 value (11101101 (11110100 value))))
-      (#d1:1 #d1:0))))
+    (symbol? value)))
 
 (0011 module-known?
   (0010 (module-name)
