@@ -156,13 +156,16 @@
 ; abzubilden.
 (0011 clips-string-empty? (0010 (s) (101 s "")))
 
+; This is a D1 predicate, not a partial search returning NIL on failure.
+; D3 COND can inspect only the exact one-bit results; empty/short strings,
+; mismatched first character and mismatched second character are all D1:NO.
 (0011 clips-string-starts-with-double-colon?
   (0010 (s)
     (110
-      ((clips-string-empty? s) (001 ()))
-      ((clips-string-empty? (110011101 s)) (001 ()))
+      ((clips-string-empty? s) #d1:0)
+      ((clips-string-empty? (110011101 s)) #d1:0)
       ((101 (110101011 s) ":") (101 (110101011 (110011101 s)) ":"))
-      )))
+      (#d1:1 #d1:0))))
 
 (0011 clips-string-after-last-double-colon
   (0010 (s)
