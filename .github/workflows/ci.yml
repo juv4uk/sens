@@ -583,6 +583,70 @@ jobs:
             fi
             echo "PASS test_id=guard-cond-eq-branch layer=eval authority=NATIVE_SENS verdict=D1:$actual fixture=$name.sens"
           done
+          # A single flipped quoted D1 datum turns true EQ into false EQ;
+          # SENS must not execute CAR(nil) until the second clause is selected.
+          lazy="$dir/guard-cond-lazy-car-law"
+          lazy_mutant="$dir/guard-cond-lazy-car-mutant"
+          echo "test_id=guard-cond-lazy-car layer=eval executor=NATIVE_SENS_ORACLE semantic_authority=SENS"
+          sha256sum "$lazy.bits" "$lazy.sens" "$lazy_mutant.bits" "$lazy_mutant.sens"
+          for name in "$lazy" "$lazy_mutant"; do
+            projection="$RUNNER_TEMP/$(basename "$name").actual.bits"
+            target/debug/sens-trit open "$name.sens" > "$projection"
+            if ! cmp "$name.bits" "$projection"; then
+              echo "REGRESSION id=guard-cond-lazy-car-transport layer=transport fixture=$name.sens expected=bits-file actual=roundtrip-mismatch reproduce=target/debug/sens-trit\ open\ $name.sens" >&2
+              exit 1
+            fi
+          done
+          read -ra original < "$lazy.bits"
+          read -ra changed < "$lazy_mutant.bits"
+          if [[ "${#original[@]}" -ne "${#changed[@]}" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-width layer=transport expected=equal-word-count actual=unequal fixture=$lazy_mutant.bits" >&2
+            exit 1
+          fi
+          differences=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${#original[i]}" -ne "${#changed[i]}" ]]; then
+              echo "REGRESSION id=guard-cond-lazy-car-width layer=transport expected=equal-bit-width actual=mismatch word=$i" >&2
+              exit 1
+            fi
+            for ((j=0; j<${#original[i]}; j++)); do
+              if [[ "${original[i]:j:1}" != "${changed[i]:j:1}" ]]; then
+                differences=$((differences + 1))
+              fi
+            done
+          done
+          if [[ "$differences" -ne 1 ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-one-bit layer=transport expected=1 actual=$differences fixture=$lazy_mutant.bits" >&2
+            exit 1
+          fi
+          if ! result="$(target/debug/sens "$lazy.sens")" || [[ "$result" != "1" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-positive layer=eval fixture=$lazy.sens expected=D1:1 actual=${result:-execution-error} reproduce=target/debug/sens\ $lazy.sens" >&2
+            exit 1
+          fi
+          if ! peer="$(target/debug/sens-trit eval "$lazy.sens")" || [[ "$peer" != "$result" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-peer layer=eval fixture=$lazy.sens expected=D1:1 actual=${peer:-execution-error}" >&2
+            exit 1
+          fi
+          echo "PASS test_id=guard-cond-lazy-car-positive layer=eval authority=NATIVE_SENS verdict=D1:1"
+          if target/debug/sens "$lazy_mutant.sens" > "$RUNNER_TEMP/guard-lazy-car.stdout" 2> "$RUNNER_TEMP/guard-lazy-car.stderr"; then
+            echo "REGRESSION id=guard-cond-lazy-car-mutant layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=accepted reproduce=target/debug/sens\ $lazy_mutant.sens" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/guard-lazy-car.stderr"; then
+            echo "UNINFORMATIVE-NEGATIVE id=guard-cond-lazy-car-mutant layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=unrelated-error reproduce=target/debug/sens\ $lazy_mutant.sens" >&2
+            cat "$RUNNER_TEMP/guard-lazy-car.stderr" >&2
+            exit 1
+          fi
+          if target/debug/sens-trit eval "$lazy_mutant.sens" > "$RUNNER_TEMP/guard-lazy-car-peer.stdout" 2> "$RUNNER_TEMP/guard-lazy-car-peer.stderr"; then
+            echo "REGRESSION id=guard-cond-lazy-car-mutant-peer layer=eval fixture=$lazy_mutant.sens expected=rejection actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/guard-lazy-car-peer.stderr"; then
+            echo "UNINFORMATIVE-NEGATIVE id=guard-cond-lazy-car-mutant-peer layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=unrelated-error" >&2
+            cat "$RUNNER_TEMP/guard-lazy-car-peer.stderr" >&2
+            exit 1
+          fi
+          echo "PASS test_id=guard-cond-lazy-car-mutant layer=eval authority=NATIVE_SENS verdict=CAR-nonpair bit_mutations=1"
 
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
