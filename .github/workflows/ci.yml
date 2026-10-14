@@ -108,7 +108,7 @@ jobs:
           python3 scripts/check-zig-cleanroom.py --self-test
           python3 scripts/check-zig-cleanroom.py
           echo 'test_id=zig-cleanroom-width-negative layer=transport semantic_authority=SENS'
-          if "$ZIG" test research/zig-codecs/sterile/negative_mixed_width.zig > "$RUNNER_TEMP/zig-cleanroom-negative.log" 2>&1; then
+          if "$ZIG" test research/zig-codecs/t5/sterile/negative_mixed_width.zig > "$RUNNER_TEMP/zig-cleanroom-negative.log" 2>&1; then
             echo '::error::FAIL-OPEN test_id=zig-cleanroom-width-negative layer=transport expected=compile-reject actual=compiled'; exit 1
           fi
           grep -Eq 'expected type|found.*type|type mismatch' "$RUNNER_TEMP/zig-cleanroom-negative.log"
