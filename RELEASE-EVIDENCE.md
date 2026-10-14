@@ -2,6 +2,14 @@
 
 > **DRAFT · NO-GO (2026-10-12).** Не є release certificate. Цей файл навмисно відокремлює **підтверджену мовну ратифікацію** від **ще не перевіреної готовності конкретного релізного SHA**. Невідоме = BLOCK, не PASS.
 
+## 2026-10-14 · Точковий meta-eval non-atom proof
+
+- [d92fde6](https://github.com/juv4uk/sens/commit/d92fde6d7fe3c1f13aeeb15bb01801c810597d86): захист D3:101 EQ від неатомарного імені без нового мовного дозволу.
+- [8a8d84f](https://github.com/juv4uk/sens/commit/8a8d84fb0e05999c0b05ca63f171a34b8b84ebcc) і [зелений точковий CI](https://github.com/juv4uk/sens/actions/runs/38498178993): 2 SENS-owned self-verdicts і негативний однобітний mutant. Rust — транспорт, не оракул.
+- Це не доказ повного meta-eval або релізного Cargo: [попередній full-Cargo red](https://github.com/juv4uk/sens/actions/runs/38496532282) показав 4 падіння Canon. Подальший full-Cargo встановить актуальний стан на новому SHA.
+- Застаріле відображення Canon surface через W8 історичної таблиці не означає ідентичності D8; потрібна незалежно перевірена точна проєкція. Не змінювати доменні аксіоми заради зеленого тесту.
+
+
 ## Точка фіксації (заповнити лише після freeze)
 
 | Поле | Значення |
