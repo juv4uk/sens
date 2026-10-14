@@ -144,6 +144,53 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.assertEqual(rows["invalid_triples"], 1)
         self.assertIn("160000", rows["rows"][0]["reason"])
 
+    def test_unpaired_nonregular_lisp_is_not_a_migration_source(self):
+        # Git commit history may contain symlink/gitlink paths ending in
+        # .lisp; their blobs are not executable Lisp source text.
+        target_blob = subprocess.run(
+            ["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+            input=b"archived-source-path", capture_output=True, check=True,
+        ).stdout.decode("ascii").strip()
+        self.call("update-index", "--add", "--cacheinfo",
+                  f"120000,{target_blob},lib/ghost.lisp")
+        self.call("commit", "-q", "-m", "archival .lisp symlink")
+        result = snapshot(self.repo, self.head())
+        self.assertEqual(result["lisp_count"], 1)
+        self.assertEqual(result["unpaired_count"], 1)
+        self.assertEqual(result["nonregular_lisp_count"], 1)
+        self.assertEqual(result["nonregular_lisp_paths"], ["lib/ghost.lisp"])
+        self.assertEqual(result["invalid_triples"], 0)
+        self.assertEqual(main(["--root", str(self.repo), "--base",
+                               self.base, "--head", self.head(),
+                               "--strict"]), 0)
+
+        self.call("update-index", "--add", "--cacheinfo",
+                  f"160000,{self.head()},lib/foreign.lisp")
+        self.call("commit", "-q", "-m", "archival .lisp gitlink")
+        result = snapshot(self.repo, self.head())
+        self.assertEqual(result["lisp_count"], 1)
+        self.assertEqual(result["unpaired_count"], 1)
+        self.assertEqual(result["nonregular_lisp_count"], 2)
+        self.assertEqual(result["nonregular_lisp_paths"],
+                         ["lib/foreign.lisp", "lib/ghost.lisp"])
+
+        # A falsely paired non-regular source remains an invalid row; it
+        # must never acquire an apparently credible source_sha256 receipt.
+        (self.repo / "lib/ghost.sens").write_bytes(encode_words(["10", "01"]))
+        (self.repo / "lib/ghost").write_bytes(b"10 01\\n")
+        self.call("add", "--", "lib/ghost.sens", "lib/ghost")
+        self.call("commit", "-q", "-m", "attempt to pair archived symlink")
+        result = snapshot(self.repo, self.head())
+        self.assertEqual(result["paired_count"], 1)
+        self.assertEqual(result["valid_triples"], 0)
+        self.assertEqual(result["invalid_triples"], 1)
+        self.assertEqual(result["unpaired_count"], 1)
+        self.assertNotIn("source_sha256", result["rows"][0])
+        self.assertIn("mode=120000", result["rows"][0]["reason"])
+        self.assertEqual(main(["--root", str(self.repo), "--base",
+                               self.base, "--head", self.head(),
+                               "--strict"]), 2)
+
     def test_triple_deletion_visible_and_strict_fails(self):
         self.add_triple("lib/first")
         self.commit("pair")
