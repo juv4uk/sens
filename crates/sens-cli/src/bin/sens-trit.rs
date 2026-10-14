@@ -326,24 +326,6 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
-/// Expand a rejected *structural* physical T5 stream into the exact existing
-/// canonical D2 parser diagnostic. This is diagnostic-only: never substitute
-/// the parser result for open_ternary_program admission. Invalid transport
-/// stays invalid transport, without guessing a source width or era.
-fn explain_d2_rejection(bytes: &[u8], error: sens::TernaryTransportError) -> String {
-    let mut message = format!("{error:?}");
-    if matches!(error, sens::TernaryTransportError::InvalidProgramSyntax) {
-        if let Ok(words) = sens::decode_ternary_words(bytes) {
-            let visible = sens::render_ternary_words_spaced(&words);
-            if let Err(detail) = sens::parse_canonical_binary(&visible) {
-                message.push_str("; canonical D2: ");
-                message.push_str(&detail.render(&visible));
-            }
-        }
-    }
-    message
-}
-
 /// Run the explicitly requested SENS program on the current capability-free
 /// evaluator. Transport identity, D2 structural parsing, then semantic eval
 /// are independent gates; success does not prove that an old Lisp source
