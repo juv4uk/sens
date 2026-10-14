@@ -197,6 +197,20 @@ jobs:
             echo '::error::FAIL-OPEN test_id=zig-shared-abi-invalid-d2 layer=parse expected=reject actual=accept'; exit 1
           fi
           grep -Fq 'exact packed binary reader rejected' "$RUNNER_TEMP/zig-firewall-semantic.err"
+          # D7: SENS owns glyph→W7, Zig packs the bytes.  No D7 digit→D24.
+          printf 'Кіт' > "$RUNNER_TEMP/zig-d7.txt"
+          "$CLI_RUST_ZIG" encode-d7-uk "$RUNNER_TEMP/zig-d7.txt"
+          "$CLI_RUST_ZIG" decode-d7-uk "$RUNNER_TEMP/zig-d7.sens" > "$RUNNER_TEMP/zig-d7-out.txt"
+          printf 'Кіт\n' | cmp - "$RUNNER_TEMP/zig-d7-out.txt"
+          printf 'Кі🙂' > "$RUNNER_TEMP/zig-d7-invalid.txt"
+          if "$CLI_RUST_ZIG" encode-d7-uk "$RUNNER_TEMP/zig-d7-invalid.txt" \
+            > "$RUNNER_TEMP/zig-d7-invalid.out" \
+            2> "$RUNNER_TEMP/zig-d7-invalid.err"; then
+            echo '::error::FAIL-OPEN test_id=zig-d7-missing-glyph layer=parse expected=reject actual=accept'; exit 1
+          fi
+          grep -Fq 'byte_offset: 4' "$RUNNER_TEMP/zig-d7-invalid.err"
+          test ! -e "$RUNNER_TEMP/zig-d7-invalid.sens"
+          echo 'ZIG_D7_SENS_WORDS_ZIG_PACK_PASS'
           echo 'ZIG_SHARED_GATEWAY_SENS_AND_MY_LISP_PHYSICAL_PASS'
           echo 'ZIG_C_ABI_NATIVE_SENS_T5_F3C_PARITY_PASS'
 
