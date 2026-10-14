@@ -369,8 +369,7 @@
 (0011 my-group-closure?
   (0010 (value)
     (110
-      
-      ((010 value)  (001 ()))
+      ((010 value) #d1:0)
       ((010 ()) (101 (100 value) (001 recursive-group-closure))))))
 
 (0011 my-lambda-form?
