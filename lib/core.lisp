@@ -194,13 +194,15 @@
       ((0101 values) acc)
       ; Only a cons cell advances the accumulator. An improper nonempty
       ; tail is not silently counted as an empty list.
+      ; D5 PLUS accepts qualified D24 values, never an unqualified 1.
       ((0100 (010 values))
-       (length-onto (011 values) (01010 acc 1))))))
+       (length-onto (011 values)
+         (01010 acc #d24:000000000000000000000001))))))
 
 
 (0011 length
   (0010 (values)
-    (length-onto values 0)))
+    (length-onto values #d24:000000000000000000000000)))
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
