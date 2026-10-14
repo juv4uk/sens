@@ -90,6 +90,20 @@ jobs:
             --report-file "$report" \
             -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: NARRATE — SENS D4 binding law і однобітний D1 mutant
+        id: narrate-d4-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=narrate-d4-bind-self-verdict layer=transport semantic_authority=SENS physical_T5_receipt=none"
+          sha256sum lib/narrate.lisp crates/sens/tests/narrate_d4_bind_witness.rs tests/fixtures/narrate-d4-bind-{law,mutant}.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id narrate-d4-bind-self-verdict \
+            --layer transport \
+            --fixture tests/fixtures/narrate-d4-bind-law.lisp \
+            --report-file "$RUNNER_TEMP/sens-narrate-d4-red.jsonl" \
+            -- cargo test --locked -p sens --test narrate_d4_bind_witness -- --nocapture
+
       - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
         if: contains(github.event.head_commit.message, '[fs-journal-once]')
         shell: bash
