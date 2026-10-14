@@ -1266,7 +1266,30 @@ mod tests {
             .expect("SENS whole-program artifact");
         let verified =
             verify_compiler_program_artifact_from_sens(&artifact, &digest, revision)
-                .expect("current SENS artifact verifies");
+                .unwrap_or_else(|original_error| {
+                    // Diagnostic transport only: SENS compiles each exact
+                    // source form and returns its OWN D1 verdict.  Rust never
+                    // assigns identity, role, admission or expected semantics.
+                    // The first rejecting witness localizes a real RED.
+                    for (index, expression) in decoded.iter().enumerate() {
+                        let one_form = Value::list([expr_program_data(expression)]);
+                        let verdict = compiler_program_requests_from_sens(one_form)
+                            .unwrap_or_else(|error| {
+                                panic!(
+                                    "SENS compiler witness form={index} cannot execute: {error}; expr={expression:?}; original={original_error}"
+                                )
+                            });
+                        let rows = list_values(&verdict);
+                        if rows.first().and_then(|value| value.as_predicate_bit()) != Some(true) {
+                            panic!(
+                                "SENS rejected first standalone compiler form={index}: {expression:?}; SENS result={verdict}; original={original_error}"
+                            );
+                        }
+                    }
+                    panic!(
+                        "SENS accepted every standalone form but rejected the complete program: {original_error}"
+                    )
+                });
 
         assert_eq!(verified.program_wire_sha256, digest);
         assert_eq!(verified.sens_revision, revision);
