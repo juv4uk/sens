@@ -173,7 +173,8 @@
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
 (0011 guard-reference-field
   (0010 (field reference)
-    (001000 ((entry (11100 field (011 reference))))
-      (110
-        ((010 entry) (001 ()))
-        (#d1:1 (1001 entry))))))
+    ((0010 (entry)
+       (110
+         ((010 entry) (001 ()))
+         (#d1:1 (1001 entry))))
+     (11100 field (011 reference)))))
