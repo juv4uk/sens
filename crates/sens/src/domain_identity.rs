@@ -105,10 +105,10 @@ impl DomainIdentity {
             }
             Self::D8(value) if matches!(
                 value.word().packed_bits(),
-                0b11100000 | 0b11101010 | 0b11101101 | 0b11110100
+                0b11100000 | 0b11101010 | 0b11101101 | 0b11101110 | 0b11110100
             ) => {
-                // Only D8 CHAR-CODE, READ, STRING-TO-SYMBOL and
-                // WRITE-TO-STRING have exact mechanisms here. Residency alone
+                // Only the exact admitted D8 CHAR-CODE, READ, STRING-TO-SYMBOL,
+                // SYMBOL-TO-STRING and WRITE-TO-STRING can project here. Residency alone
                 // never grants callability to any other D8 coordinate.
                 Some(CoreDomainIdentity::D8(value))
             }
@@ -302,6 +302,30 @@ mod tests {
             let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
             assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
         }
+    }
+
+
+    #[test]
+    fn d8_symbol_to_string_exact_core_mechanism_excludes_one_bit_neighbor() {
+        let admitted = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(0b11101110).unwrap()),
+        );
+        assert!(matches!(
+            admitted.core_operation(),
+            Some(CoreDomainIdentity::D8(word))
+                if word.word().packed_bits() == 0b11101110
+        ), "ratified exact D8 SYMBOL-TO-STRING has its existing mechanism");
+
+        let neighbor = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(0b11101111).unwrap()),
+        );
+        assert!(neighbor.core_operation().is_none(),
+            "single-bit adjacent D8 residence is not implicitly callable");
+        let other_domain = DomainIdentity::from_source_word(
+            BinarySourceWord::W9(Bit9::new(0b011101110).unwrap()),
+        );
+        assert!(other_domain.core_operation().is_none(),
+            "identical payload in another domain grants no D8 callability");
     }
 
     #[test]
