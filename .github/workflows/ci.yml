@@ -41,6 +41,60 @@ jobs:
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
+        id: epistemic-native-physical
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_bits="tests/semantic/epistemic-eq-d1-law-mutant.bits"
+          physical_dir="$RUNNER_TEMP/epistemic-native-d1"
+          mkdir -p "$physical_dir"
+          cargo build --locked -p sens-cli --bin sens
+          # CI_GLUE_NO_SEMANTICS: only lossless W1..W11→T5 packing.
+          # Semantics belong exclusively to target/debug/sens below.
+          PYTHONPATH=scripts python3 - "$source_bits" "$physical_dir" <<'PY'
+          from pathlib import Path
+          import sys
+          from sens_t5_codec import decode_bytes, encode_words, parse_words
+
+          source = Path(sys.argv[1])
+          directory = Path(sys.argv[2])
+          lines = [line for line in source.read_text(encoding="utf-8").splitlines() if line.strip()]
+          if len(lines) != 2:
+              raise SystemExit("UNINFORMATIVE-INPUT: require one law and one mutant")
+          law, mutant = [parse_words(line) for line in lines]
+          if len(law) != len(mutant):
+              raise SystemExit("UNINFORMATIVE-INPUT: mutation changed the framing")
+          differences = [(a, b) for a, b in zip(law, mutant) if a != b]
+          if differences != [("1", "0")]:
+              raise SystemExit("UNINFORMATIVE-INPUT: mutation must flip exactly one D1 bit")
+          for label, words in (("law", law), ("mutant", mutant)):
+              physical = encode_words(words)
+              if decode_bytes(physical) != words:
+                  raise SystemExit("UNINFORMATIVE-INPUT: T5 round-trip changed word widths")
+              (directory / f"{label}.sens").write_bytes(physical)
+              print(f"T5_TRANSPORT id=epistemic-d3-d1-{label} bytes={len(physical)}")
+          PY
+          printf '1\n' > "$physical_dir/expected-d1"
+          sha256sum target/debug/sens "$source_bits" \
+            "$physical_dir/law.sens" "$physical_dir/mutant.sens" \
+            "$physical_dir/expected-d1"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-native-d3-eq-d1-law \
+            --layer eval \
+            --fixture "$physical_dir/law.sens" \
+            --expected-file "$physical_dir/expected-d1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$physical_dir/law.sens"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-native-d3-eq-d1-mutant \
+            --layer eval \
+            --fixture "$physical_dir/mutant.sens" \
+            --expect-error-substring "domain identity is not callable under its ratified law: D1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$physical_dir/mutant.sens"
       - name: EPISTEMIC — бінарний D3 EQ/D1 самовердикт і однобітний мутант
         id: epistemic-d1-exact
         shell: bash
