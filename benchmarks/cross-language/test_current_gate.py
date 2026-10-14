@@ -38,6 +38,26 @@ class CurrentCrossLanguageGateTests(unittest.TestCase):
     def test_required_gate_has_a_manifest_witness(self) -> None:
         self.assertIn("test_current_gate.py", self.data["witness"])
 
+    def test_current_status_doc_is_witnessed(self) -> None:
+        self.assertIn("CURRENT-STATUS-2026-10-14.uk.md", self.data["witness"])
+        status_doc = (
+            ROOT / "benchmarks" / "cross-language" / "CURRENT-STATUS-2026-10-14.uk.md"
+        )
+        self.assertTrue(status_doc.is_file(), "status map missing")
+        body = status_doc.read_text(encoding="utf-8")
+        self.assertIn("BLOCKED", body)
+        self.assertIn("Zig", body)
+        self.assertIn("CPython", body)
+        self.assertIn("переносяться", body)
+
+    def test_claim_separates_transport_from_language_ranking(self) -> None:
+        claim = self.data["claim"]
+        self.assertIn("must not be relabeled", claim)
+        self.assertTrue(
+            "Zig" in claim and "transport" in claim.lower(),
+            "claim must mention Zig transport vs language ranking",
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

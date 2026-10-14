@@ -7,16 +7,19 @@
     "FALSIFIER"
   ],
   "question": "Can matched CPython, Lua 5.4, Racket CS, and SENS workload phases be compared without conflating startup, loading, setup, and execution?",
-  "claim": "Historical Function8/FASL results remain provenance only. This stand deliberately stays BLOCKED until a current Contract 11.9 workload corpus, independent correctness oracle, exact source/environment capture, and semantic parity checks are implemented. Installing Guix or rerunning the historical harness is not sufficient to claim a current SENS-versus-Python comparison.",
+  "claim": "Historical Function8/FASL results remain provenance only. This stand deliberately stays BLOCKED until a current Contract 11.9 workload corpus, independent correctness oracle, exact source/environment capture, and semantic parity checks are implemented. Installing Guix or rerunning the historical harness is not sufficient to claim a current SENS-versus-Python comparison. Current multi-implementation numbers that DO exist are transport-only (Zig↔Rust T5/F3C in research/zig-codecs/RESULTS-2026-10-14.uk.md) and must not be relabeled as a language ranking. See CURRENT-STATUS-2026-10-14.uk.md.",
   "witness": [
     "README.md",
     "run.py",
     "manifest.scm",
     "BINARY_TREES_PROVENANCE.md",
-    "test_current_gate.py"
+    "test_current_gate.py",
+    "CURRENT-STATUS-2026-10-14.uk.md",
+    "../sens-surface/run.py",
+    "../../research/zig-codecs/RESULTS-2026-10-14.uk.md"
   ],
   "status": "BLOCKED-CURRENT-CANONICAL-REPLAY-NOT-IMPLEMENTED",
-  "generation": "Historical Function8/FASL donor only; current Contract 11.9 canonical workload replay pending",
+  "generation": "Historical Function8/FASL donor only; current Contract 11.9 canonical workload replay pending. Transport-layer Zig↔Rust evidence is separate and does not unblock this stand.",
   "axis": "cross-language/matched-workload-phase-and-semantic-parity",
   "reproduce": "printf 'SENS_BENCHMARK_STATUS=BLOCKED\\nBLOCKED: current Contract 11.9 canonical multi-language replay and independent oracle are not implemented; historical Function8/FASL output is provenance only.\\n'; exit 2"
 }
