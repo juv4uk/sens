@@ -850,14 +850,13 @@ fn lift_expression(
                 });
             }
 
-            // In machine/Core4 exact-source mode, a computed callable may itself
-            // be a list (most notably an immediately-applied legacy W8 lambda).
-            // Its executable body must be lifted before the outer call is walked;
-            // otherwise nested D3 heads survive as Numbers and strict COND fails.
-            // Ordinary mixed-source mode stays byte-for-byte compatible.
-            if descend_legacy_machine_wrappers
-                && matches!(&lifted[0].kind, ExprKind::List(_))
-            {
+            // A computed executable head is itself code, including ordinary
+            // immediately-applied exact D4 LAMBDA ((0010 ...) argument).
+            // Recursively lift that executable expression without turning
+            // historical W8 wrappers into current D8: lift_expression keeps
+            // such wrappers opaque outside the explicitly pinned machine mode.
+            // Exact D3 QUOTE still protects its entire payload as data.
+            if matches!(&lifted[0].kind, ExprKind::List(_)) {
                 lifted[0] = lift_expression(
                     source,
                     lifted[0].clone(),
@@ -1939,6 +1938,37 @@ mod tests {
         let ExprKind::List(payload) = &quote[1].kind else { panic!("quoted payload"); };
         assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
             "quoted data must never gain D9 callability");
+    }
+
+    #[test]
+    fn ordinary_mixed_reader_executes_immediately_applied_exact_d4_lambda() {
+        let source = "((0010 (x) (101 (100 x) (001 alpha))) (001 (alpha beta)))";
+        let forms = parse_mixed_exact_domain(source).expect("current D4 Lambda application");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::List(call) = &forms[0].kind else { panic!("outer application"); };
+        let ExprKind::List(lambda) = &call[0].kind else { panic!("computed lambda"); };
+        assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 4 && id.packed_bits() == 0b0010),
+            "D4:0010 must retain its width in a computed executable head");
+        let ExprKind::List(eq) = &lambda[2].kind else { panic!("lambda body"); };
+        assert!(matches!(&eq[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b101));
+        let mut session = crate::Session::default();
+        let evaluated = crate::eval_parsed_expressions(&forms, &mut session)
+            .expect("SENS must execute its current D4 lambda and D3 EQ");
+        assert_eq!(evaluated.value.as_predicate_bit(), Some(true),
+            "SENS D3 EQ returns its own exact D1:YES verdict");
+
+        let quoted = only(parse_mixed_exact_domain(
+            "((0010 (x) (001 (100 x))) (001 (a b)))"
+        ).expect("quote remains data inside computed lambda"));
+        let ExprKind::List(outer) = quoted.kind else { panic!("outer application"); };
+        let ExprKind::List(inner_lambda) = &outer[0].kind else { panic!("computed lambda"); };
+        let ExprKind::List(quote) = &inner_lambda[2].kind else { panic!("D3 QUOTE"); };
+        assert!(is_exact_quote(&quote[0]));
+        let ExprKind::List(data) = &quote[1].kind else { panic!("quoted data"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "W3-looking word inside quoted data cannot become callable");
     }
 
     #[test]
