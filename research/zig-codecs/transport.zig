@@ -75,6 +75,12 @@ fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8
         defer allocator.free(words);
         return try t5.encode(allocator, words);
     }
+    // D10 is a coordinate-only carrier. Decoding it never authorizes execute.
+    if (std.mem.eql(u8, command, "t5-coordinates-roundtrip")) {
+        const words = try t5.decodeCoordinates(allocator, source);
+        defer allocator.free(words);
+        return try t5.encodeCoordinates(allocator, words);
+    }
     if (std.mem.eql(u8, command, "f3c-pack")) {
         return (try f3c.encode(allocator, source)) orelse Error.NotSmallerThanT5;
     }
@@ -88,6 +94,11 @@ fn check(allocator: std.mem.Allocator, command: []const u8, source: []const u8) 
     if (std.mem.eql(u8, command, "t5-check")) {
         const words = try t5.decode(allocator, source);
         defer allocator.free(words);
+        return;
+    }
+    if (std.mem.eql(u8, command, "t5-coordinates-check")) {
+        // Explicit D1..D10 physical-only mode, not an SENS execution preflight.
+        try t5.validateCoordinatesPhysical(source);
         return;
     }
     if (std.mem.eql(u8, command, "f3c-check")) {
@@ -105,6 +116,7 @@ pub fn main(init: std.process.Init) !void {
     const command = args[1];
     const source_path = args[2];
     const check_only = std.mem.eql(u8, command, "t5-check") or
+        std.mem.eql(u8, command, "t5-coordinates-check") or
         std.mem.eql(u8, command, "f3c-check");
     if (check_only and args.len != 3) return Error.Usage;
     if (!check_only and args.len != 4) return Error.Usage;
@@ -112,6 +124,8 @@ pub fn main(init: std.process.Init) !void {
     const input_is_t5 =
         std.mem.eql(u8, command, "t5-check") or
         std.mem.eql(u8, command, "t5-roundtrip") or
+        std.mem.eql(u8, command, "t5-coordinates-check") or
+        std.mem.eql(u8, command, "t5-coordinates-roundtrip") or
         std.mem.eql(u8, command, "f3c-pack");
     const input_is_f3c = std.mem.eql(u8, command, "f3c-check") or
         std.mem.eql(u8, command, "f3c-unpack");

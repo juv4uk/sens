@@ -3,7 +3,8 @@
 
 The canonical SENS three-pass migrator still determines the exact typed words.
 This helper only independently validates and replays the generated physical T5
-bytes. It fails closed on missing/wrong Zig or any byte difference.
+bytes for declared D1..D10 coordinates (not executable program admission).
+It fails closed on missing/wrong Zig or any byte difference.
 """
 from __future__ import annotations
 
@@ -71,8 +72,10 @@ def verify_t5(binary: Path, physical: bytes) -> dict[str, str]:
         source = Path(directory) / "input.sens"
         restored = Path(directory) / "roundtrip.sens"
         source.write_bytes(physical)
-        _command([str(binary), "t5-check", str(source)])
-        _command([str(binary), "t5-roundtrip", str(source), str(restored)])
+        # D10 is valid transport but intentionally rejected by runnable D1..D9.
+        # The migration verifier must use the explicit coordinate-only profile.
+        _command([str(binary), "t5-coordinates-check", str(source)])
+        _command([str(binary), "t5-coordinates-roundtrip", str(source), str(restored)])
         replay = restored.read_bytes()
         if replay != physical:
             a = hashlib.sha256(physical).hexdigest()
@@ -85,5 +88,6 @@ def verify_t5(binary: Path, physical: bytes) -> dict[str, str]:
                 f"input_len={len(physical)} actual_len={len(replay)}"
             )
     return {"zig_version": "0.16.0", "codec": "T5",
+            "profile": "D1-D10_COORDINATES_NOT_EXECUTION",
             "physical_sha256": hashlib.sha256(physical).hexdigest(),
             "verdict": "PHYSICAL_BYTES_IDENTICAL_ONLY"}
