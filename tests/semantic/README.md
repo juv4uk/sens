@@ -320,6 +320,10 @@ bash scripts/prove-meta-eval-graph-d1.sh
 а не сторонній збій.
 
 ```sh
+# Механічна перевірка фікстур без нативного виконавця:
+bash scripts/prove-meta-eval-lexical-shadow-d1.sh --check-fixtures
+
+# Семантичний доказ — лише фактичне виконання SENS:
 cargo build --locked -p sens-cli --bin sens
 bash scripts/prove-meta-eval-lexical-shadow-d1.sh
 ```
@@ -331,8 +335,13 @@ expected/actual та конкретна native SENS діагностика му�
 Кожна з восьми позитивних форм і **кожен з восьми однобітних
 мутантів** виконується окремо, із власним `test_id`, SHA-256
 точного вхідного `.lisp` та командою відтворення.
-Механічний Python-крок звіряє всі 8 пар і відповідність
-старому першому мутанту; лише сам SENS вирішує EQ/COND.
+Механічний Python-крок звіряє всі 8 пар, визначеність
+іменованих викликів у **чинному** `lib/meta-eval.lisp`,
+відповідність старому першому мутанту та SHA-256 **кожного**
+точного тимчасового входу `cat library + newline + form + newline`.
+Прапорець `--check-fixtures` запускає це окремо й повідомляє
+`semantic_pass=NOT_RUN`, а не нативний PASS.
+Лише сам SENS вирішує EQ/COND.
 Жодного глобального HOLD чи нового автоматичного workflow.
 
 **Межа доказу:** helper-імена ще живуть у текстовому шарі
