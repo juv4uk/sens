@@ -114,6 +114,14 @@ jobs:
           echo "test_id=world-ancestor-sens-self-verdicts semantic_authority=SENS"
           sha256sum lib/world.lisp crates/sens/tests/world_ancestor_sens.rs tests/semantic/world-exact-arity-witness.lisp tests/semantic/world-ancestor-d1-law.lisp tests/semantic/world-ancestor-d1-mutant.lisp
           cargo test --locked -p sens --test world_ancestor_sens -- --nocapture
+      - name: Compiler N0 — SENS D1 proper-list law і однобітний mutant
+        if: contains(github.event.head_commit.message, '[compiler-list-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=compiler-program-list-sens-fail-closed layer=transport semantic_authority=SENS"
+          sha256sum lib/compiler-nucleus.lisp crates/sens/tests/compiler_nucleus_sens.rs tests/semantic/compiler-program-list-d1-law.lisp tests/semantic/compiler-program-list-d1-mutant.lisp
+          cargo test --locked -p sens --test compiler_nucleus_sens compiler_program_list_fail_closed_is_sens_owned -- --exact --nocapture
       - name: FULL_CARGO_WORKSPACE — одноразовий повний прогін на точному SHA
         if: contains(github.event.head_commit.message, '[full-cargo-once]') || github.event_name == 'workflow_dispatch'
         id: full-cargo

@@ -531,8 +531,9 @@
   (0010
     (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження accumulator)
     (110
-      ((010 nodes)
+      ((0101 nodes)
        (compiler-result-ok (compiler-reverse-onto accumulator ())))
+      ((010 nodes) (compiler-result-fail))
       ((compiler-true ())
        (compiler-program-list-continue
          shape-or-empty

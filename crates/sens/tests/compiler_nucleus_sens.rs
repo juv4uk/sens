@@ -217,3 +217,46 @@ fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
         }
     }
 }
+
+
+const COMPILER_PROGRAM_LIST_D1_LAW: &str =
+    include_str!("../../../tests/semantic/compiler-program-list-d1-law.lisp");
+const COMPILER_PROGRAM_LIST_D1_MUTANT: &str =
+    include_str!("../../../tests/semantic/compiler-program-list-d1-mutant.lisp");
+
+/// Чотири точні D1-вердикти обчислює двійковий SENS, а не Rust.
+#[test]
+fn compiler_program_list_fail_closed_is_sens_owned() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active core");
+    let nucleus = parse_mixed_exact_domain(NUCLEUS).expect("exact nucleus");
+    eval_parsed_expressions(&nucleus, &mut session).expect("nucleus loads");
+
+    let forms = parse_mixed_exact_domain(COMPILER_PROGRAM_LIST_D1_LAW)
+        .expect("four executable SENS-owned exact D1/D3/D4 verdicts");
+    assert_eq!(forms.len(), 4);
+    for (index, form) in forms.iter().enumerate() {
+        let verdict = eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+            .unwrap_or_else(|error| panic!("SENS law {index} failed: {error}"))
+            .value;
+        assert_eq!(
+            verdict.as_predicate_bit(),
+            Some(true),
+            "SENS law {index} must itself return exact D1:YES: {verdict}"
+        );
+    }
+
+    // Однобітний mutant змінює виключно очікуване D1:NO на D1:YES.
+    assert_eq!(
+        COMPILER_PROGRAM_LIST_D1_LAW.replacen("#d1:0", "#d1:1", 1),
+        COMPILER_PROGRAM_LIST_D1_MUTANT
+    );
+    let mutant = parse_mixed_exact_domain(COMPILER_PROGRAM_LIST_D1_MUTANT)
+        .expect("mutated SENS source must remain syntactically valid");
+    assert_eq!(mutant.len(), forms.len());
+    assert!(
+        eval_parsed_expressions(std::slice::from_ref(&mutant[0]), &mut session)
+            .is_err(),
+        "one-bit D1 mutation must select SENS-owned fail-closed CAR(QUOTE EMPTY)"
+    );
+}
