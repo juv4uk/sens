@@ -7,13 +7,10 @@
 ; Exact D1 verdicts are 1 and 0; a pair is never passed to D3 EQ.
 ;
 ; Migrated: COND else (010 ()) → exact D1:1 (010 (001 ())).
-; Width is identity. Reuses lint-form-head, lint-head, lint-size,
-; lint-nesting, lint-complexity, lint-effects surface.
+; Width is identity. Full surface restored (no truncation).
 ; Semantic witness: tests/fixtures/linter-d1-witness.lisp
 
-;; Голова форми для розпізнавання. Лінтер обходить і хвости списків, тож
-;; def/lambda/defmacro/let — лише коли у формі щонайменше три елементи;
-;; коротші форми впізнаються тільки як quote/cond.
+;; Голова форми для розпізнавання.
 (0011 lint-form-head
   (0010 (ast)
     (110
@@ -46,7 +43,7 @@
 (0011 lint-max2
   (0010 (a b)
     (110
-      ((11110011 a b) a)
+      ((11011 a b) a)
       ((010 (001 ())) b))))
 
 (0011 lint-size
@@ -67,36 +64,208 @@
 (0011 lint-complexity
   (0010 (ast)
     (110
-      ((010 ast) 1)
+      ((010 ast) 0)
+      ((110
+         ((010 (lint-form-head ast))
+          (101 (lint-form-head ast) (001 cond)))
+         (#d1:1 #d1:0))
+       (101110 (0010 (acc clause) (01010 acc (lint-complexity clause)))
+               (000000 (011 ast))
+               (011 ast)))
       ((010 (001 ()))
        (01010 (lint-complexity (100 ast))
               (lint-complexity (011 ast)))))))
+
+(0011 effectful-primitives
+  (001 ("print" "write-file" "process-run" "advise" "tell")))
 
 (0011 lint-effects
   (0010 (ast)
     (110
       ((010 ast) (001 ()))
-      ((101 (lint-form-head ast) (001 def))
-       (1111 (lint-effects (100 ast)) (lint-effects (011 ast))))
+      ((110101100 (100 ast))
+       (110
+         ((11101 (11101110 (100 ast)) effectful-primitives)
+          (111 ast (lint-effects (011 ast))))
+         ((010 (001 ()))
+          (1111 (lint-effects (100 ast)) (lint-effects (011 ast))))))
       ((010 (001 ()))
        (1111 (lint-effects (100 ast)) (lint-effects (011 ast)))))))
+
+(0011 collect-free-vars-let*
+  (0010 (ast bound-vars)
+    (110
+      ((0100 (010 (011 ast)))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (011 ast))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((0100 (010 (011 (011 ast))))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (011 (011 ast)))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (001 ()))
+       (001000 ((bindings (100 (011 ast)))
+              (body (100 (011 (011 ast)))))
+         (110
+           ((0101 bindings)
+            (collect-free-vars body bound-vars))
+           ((010 (001 ()))
+            ((0010 (binding)
+               (1111
+                (collect-free-vars (1001 binding) bound-vars)
+                (collect-free-vars-let*
+                  (1110 (001 let*) (011 bindings) body)
+                  (111 (11101110 (100 binding)) bound-vars))))
+             (100 bindings)))))))))
+
+(0011 collect-free-vars-letrec
+  (0010 (ast bound-vars)
+    (110
+      ((0100 (010 (011 ast)))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (011 ast))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((0100 (010 (011 (011 ast))))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (011 (011 ast)))
+       (1111 (collect-free-vars (100 ast) bound-vars)
+             (collect-free-vars (011 ast) bound-vars)))
+      ((010 (001 ()))
+       (001000 ((bindings (100 (011 ast)))
+              (body (100 (011 (011 ast)))))
+         (001000 ((all-names
+                 (101000 (0010 (b) (11101110 (100 b))) bindings)))
+           (001000 ((new-bound (1111 all-names bound-vars)))
+             (1111
+               (101110 append (001 ())
+                       (101000 (0010 (b)
+                              (collect-free-vars (1001 b) new-bound))
+                            bindings))
+               (collect-free-vars body new-bound)))))))))
 
 (0011 collect-free-vars
   (0010 (ast bound-vars)
     (110
-      ((010 ast)
+      ((0100 (110111011 (010 ast)))
        (110
-         ((lookup-subst ast bound-vars) (001 ()))
-         ((010 (001 ())) (1110 ast))))
+         ((110101100 ast)
+          (110
+            ((11101 (11101110 ast) bound-vars) (001 ()))
+            ((11101 (11101110 ast)
+                    (001 ("t" "def" "defmacro" "lambda" "let" "let*" "letrec"
+                          "cond" "quote" "list" "car" "cdr" "cons" "eq" "atom"
+                          "+" "-" "*" "/" "<" ">" "=" "<=" ">=" "print" "read" "eval")))
+             (001 ()))
+            ((010 (001 ())) (1110 ast))))))
+      ((11110111 (lint-form-head ast) (001 quote)) (001 ()))
+      ((11110111 (lint-form-head ast) (001 def))
+       (collect-free-vars (100 (011 (011 ast))) bound-vars))
+      ((11110111 (lint-form-head ast) (001 lambda))
+       (001000 ((params (100 (011 ast)))
+              (body (100 (011 (011 ast)))))
+         (001000 ((param-names
+                 (110
+                   ((110101100 params) (1110 (11101110 params)))
+                   ((010 (001 ()))
+                    (101000 (0010 (p) (11101110 p)) params)))))
+           (collect-free-vars body (1111 param-names bound-vars)))))
+      ((11110111 (lint-form-head ast) (001 defmacro))
+       (001000 ((params (100 (011 (011 ast))))
+              (body (100 (011 (011 (011 ast))))))
+         (001000 ((param-names
+                 (110
+                   ((110101100 params) (1110 (11101110 params)))
+                   ((010 (001 ()))
+                    (101000 (0010 (p) (11101110 p)) params)))))
+           (collect-free-vars body (1111 param-names bound-vars)))))
+      ((11110111 (lint-form-head ast) (001 let))
+       (110
+         ((0100 (110111011 (010 (011 ast))))
+          (1111 (collect-free-vars (100 ast) bound-vars)
+                (collect-free-vars (011 ast) bound-vars)))
+         ((110101100 (100 (011 ast)))
+          (001000 ((name (11101110 (100 (011 ast))))
+                 (bindings (100 (011 (011 ast))))
+                 (body (100 (011 (011 (011 ast))))))
+            (001000 ((new-bound
+                    (111 name
+                         (1111 (101000 (0010 (b) (11101110 (100 b))) bindings)
+                               bound-vars))))
+              (1111 (101110 append (001 ())
+                           (101000 (0010 (b)
+                                  (collect-free-vars (1001 b) bound-vars))
+                                bindings))
+                      (collect-free-vars body new-bound)))))
+         ((010 (001 ()))
+          (001000 ((bindings (100 (011 ast)))
+                 (body (100 (011 (011 ast)))))
+            (001000 ((new-bound
+                    (1111 (101000 (0010 (b) (11101110 (100 b))) bindings)
+                          bound-vars)))
+              (1111 (101110 append (001 ())
+                           (101000 (0010 (b)
+                                  (collect-free-vars (1001 b) bound-vars))
+                                bindings))
+                      (collect-free-vars body new-bound)))))))
+      ((11110111 (lint-form-head ast) (001 let*))
+       (collect-free-vars-let* ast bound-vars))
+      ((11110111 (lint-form-head ast) (001 letrec))
+       (collect-free-vars-letrec ast bound-vars))
       ((010 (001 ()))
        (1111 (collect-free-vars (100 ast) bound-vars)
              (collect-free-vars (011 ast) bound-vars))))))
+
+(0011 lint-globals
+  (0010 (ast)
+    (101110
+      (0010 (unique item)
+        (110
+          ((11101 item unique) unique)
+          ((010 (001 ())) (111 item unique))))
+      (001 ())
+      (collect-free-vars ast (001 ())))))
+
+(0011 lint-all
+  (0010 (ast)
+    (1110 (1110 (001 size) (lint-size ast))
+          (1110 (001 nesting) (lint-nesting ast))
+          (1110 (001 complexity) (lint-complexity ast))
+          (1110 (001 effects) (lint-effects ast))
+          (1110 (001 free-vars) (lint-globals ast)))))
 
 (0011 get-threshold
   (0010 (key thresholds default)
     (110
       ((0101 thresholds) default)
-      ((101 key (100 (100 thresholds)))
-       (011 (100 thresholds)))
-      ((010 (001 ()))
-       (get-threshold key (011 thresholds) default)))))
+      ((11110111 (100 (100 thresholds)) key) (011 (100 thresholds)))
+      ((010 (001 ())) (get-threshold key (011 thresholds) default)))))
+
+(0011 lint-check
+  (0010 (ast thresholds)
+    (001000 ((metrics (lint-all ast)))
+      (001000 ((size (1001 (100 metrics)))
+             (nesting (1001 (1001 metrics)))
+             (complexity (1001 (10011 metrics)))
+             (effects (1001 (100111 metrics)))
+             (globals (1001 (110110101 metrics))))
+        (1111
+          (110 ((11011 size (get-threshold (001 max-size) thresholds 99999))
+                (1110 (1110 (001 size-exceeded) size))))
+          (1111
+            (110 ((11011 nesting (get-threshold (001 max-nesting) thresholds 99999))
+                  (1110 (1110 (001 nesting-exceeded) nesting))))
+            (1111
+              (110 ((11011 complexity (get-threshold (001 max-complexity) thresholds 99999))
+                    (1110 (1110 (001 complexity-exceeded) complexity))))
+              (1111
+                (110 ((11011 (000000 globals) (get-threshold (001 max-globals) thresholds 99999))
+                      (1110 (1110 (001 globals-exceeded) globals))))
+                (110 ((11011 (000000 effects) (get-threshold (001 max-effects) thresholds 99999))
+                      (1110 (1110 (001 effects-exceeded) effects)))))))))))))
