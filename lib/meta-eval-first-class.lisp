@@ -27,11 +27,11 @@
     (111 (001 >)    (my-fc-primitive (001 >)))))
 
 (0011 my-fc-env-lookup
-  (0010 (name env-ref)
+  (0010 (name ctx)
     (110
-      ((010 env-ref) name)
-      ((101 (100 (100 env-ref)) name) (011 (100 env-ref)))
-      (#d1:1 (my-fc-env-lookup name (011 env-ref))))))
+      ((010 ctx) name)
+      ((101 (100 (100 ctx)) name) (011 (100 ctx)))
+      (#d1:1 (my-fc-env-lookup name (011 ctx))))))
 
 (0011 my-fc-primitive?
   (0010 (value)
@@ -46,37 +46,37 @@
       (#d1:1 (101 (100 value) (001 closure))))))
 
 (0011 my-fc-bind-params
-  (0010 (params args env-ref)
+  (0010 (params args ctx)
     (110
-      ((010 params) env-ref)
+      ((010 params) ctx)
       (#d1:1
        (111 (111 (100 params) (100 args))
-            (my-fc-bind-params (011 params) (011 args) env-ref))))))
+            (my-fc-bind-params (011 params) (011 args) ctx))))))
 
 (0011 my-fc-eval-list
-  (0010 (exprs env-ref)
+  (0010 (exprs ctx)
     (110
       ((010 exprs) (001 ()))
       (#d1:1
-       (111 (my-fc-eval (100 exprs) env-ref)
-            (my-fc-eval-list (011 exprs) env-ref))))))
+       (111 (my-fc-eval (100 exprs) ctx)
+            (my-fc-eval-list (011 exprs) ctx))))))
 
 (0011 my-fc-eval-body
-  (0010 (body env-ref)
+  (0010 (body ctx)
     (110
-      ((010 (011 body)) (my-fc-eval (100 body) env-ref))
+      ((010 (011 body)) (my-fc-eval (100 body) ctx))
       (#d1:1
        ((0010 ()
-          (my-fc-eval (100 body) env-ref)
-          (my-fc-eval-body (011 body) env-ref)))))))
+          (my-fc-eval (100 body) ctx)
+          (my-fc-eval-body (011 body) ctx)))))))
 
 (0011 my-fc-eval-cond
-  (0010 (clauses env-ref)
+  (0010 (clauses ctx)
     (110
       ((010 clauses) (001 ()))
-      ((my-fc-eval (100 (100 clauses)) env-ref)
-       (my-fc-eval (1001 (100 clauses)) env-ref))
-      (#d1:1 (my-fc-eval-cond (011 clauses) env-ref)))))
+      ((my-fc-eval (100 (100 clauses)) ctx)
+       (my-fc-eval (1001 (100 clauses)) ctx))
+      (#d1:1 (my-fc-eval-cond (011 clauses) ctx)))))
 
 ; Exact D1 chain: single remaining arg is true; pairwise op then recurse.
 (0011 my-fc-compare-chain
@@ -122,27 +122,27 @@
       (#d1:1 (1110 (001 not-callable) fn)))))
 
 (0011 my-fc-eval
-  (0010 (expr env-ref)
+  (0010 (expr ctx)
     (110
-      ((010 expr) (my-fc-env-lookup expr env-ref))
+      ((010 expr) (my-fc-env-lookup expr ctx))
       ((010 (100 expr))
        (110
          ; Syntax-only forms remain syntax. They are intentionally not values.
          ((101 (100 expr) (001 quote)) (1001 expr))
-         ((101 (100 expr) (001 cond)) (my-fc-eval-cond (011 expr) env-ref))
+         ((101 (100 expr) (001 cond)) (my-fc-eval-cond (011 expr) ctx))
          ((101 (100 expr) (001 lambda))
-          (1110 (001 closure) (1001 expr) (011 (011 expr)) env-ref))
+          (1110 (001 closure) (1001 expr) (011 (011 expr)) ctx))
          ; Every ordinary head is resolved through the environment first.
          ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
          ; the root primitive binding without the evaluator special-casing its name.
          (#d1:1
           (my-fc-apply
-            (my-fc-eval (100 expr) env-ref)
-            (my-fc-eval-list (011 expr) env-ref)))))
+            (my-fc-eval (100 expr) ctx)
+            (my-fc-eval-list (011 expr) ctx)))))
       (#d1:1
        (my-fc-apply
-         (my-fc-eval (100 expr) env-ref)
-         (my-fc-eval-list (011 expr) env-ref))))))
+         (my-fc-eval (100 expr) ctx)
+         (my-fc-eval-list (011 expr) ctx))))))
 
 ; Public experimental entry point. The root primitive environment is explicit
 ; Lisp data, so a future host/runtime only has to preserve the primitive mechanism
