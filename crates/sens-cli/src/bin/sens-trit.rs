@@ -169,6 +169,9 @@ fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
     let canonical = sens::encode_binary_projection_ternary(source)
         .map_err(|e| format!("unadmitted .lisp projection: {e:?}"))?;
+    #[cfg(feature = "zig-transport")]
+    let decoded = admitted_t5_words(binary)?;
+    #[cfg(not(feature = "zig-transport"))]
     let decoded = sens::decode_ternary_program(binary)
         .map_err(|e| format!("invalid .sens transport or grammar: {e:?}"))?;
     if canonical != binary {
@@ -326,6 +329,10 @@ fn execute() -> Result<(), String> {
         }
         "decode-d7-uk" => {
             let bytes = read_sens(path)?;
+            #[cfg(feature = "zig-transport")]
+            let text = sens::decode_d7_uk_words(&exact_t5_words(&bytes)?)
+                .map_err(|e| format!("SENS exact D7 keyboard rejected: {e:?}"))?;
+            #[cfg(not(feature = "zig-transport"))]
             let text = sens::decode_d7_uk_t5(&bytes)
                 .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
             println!("{text}");
