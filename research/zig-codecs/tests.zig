@@ -4,6 +4,7 @@ const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const publication_cycle = @import("publication_cycle.zig");
 const ladder = @import("domain_ladder.zig");
+const ladder_e1 = @import("domain_e1.zig");
 const f3c = @import("f3c/f3c.zig");
 const abi = @import("transport_abi.zig");
 const freestanding = @import("freestanding.zig");
@@ -19,6 +20,7 @@ test "import exact-width transport suites" {
     _ = t5;
     _ = publication_cycle;
     _ = ladder;
+    _ = ladder_e1;
     _ = f3c;
     _ = abi;
     _ = freestanding;
