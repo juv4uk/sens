@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import hashlib
 import io
 import re
 from collections import Counter
@@ -77,6 +78,12 @@ def archive_assertions(root: Path) -> set[str]:
     return expected
 
 
+def git_blob_sha1(data: bytes) -> str:
+    """Compare Git object identity without assigning any language semantics."""
+    header = b"blob " + str(len(data)).encode("ascii") + b"\x00"
+    return hashlib.sha1(header + data).hexdigest()
+
+
 def validate(rows: list[dict[str, str]], root: Path, expected: set[str]) -> Counter[str]:
     must(len(rows) >= len(expected), "LEDGER_LOSS: fewer ledger rows than archived tests")
     ids: set[str] = set()
@@ -110,11 +117,20 @@ def validate(rows: list[dict[str, str]], root: Path, expected: set[str]) -> Coun
                  f"LEDGER_CANDIDATE_MISSING: line={line} path={candidate}")
             must(SHA1.fullmatch(candidate_sha) is not None,
                  f"LEDGER_CANDIDATE_SHA: line={line} id={rid}")
+            actual_blob_sha = git_blob_sha1((root / candidate).read_bytes())
+            must(actual_blob_sha == candidate_sha,
+                 f"LEDGER_CANDIDATE_DRIFT: line={line} id={rid} "
+                 f"pinned={candidate_sha} actual={actual_blob_sha}")
         else:
             must(candidate_sha == "-", f"LEDGER_CANDIDATE_ORPHAN: line={line} id={rid}")
+        negative = r["negative_sens_witness"]
+        if negative not in ("", "-"):
+            must(negative.startswith("tests/") and
+                 Path(negative).suffix in (".sens", ".bits", ".lisp") and
+                 (root / negative).is_file(),
+                 f"LEDGER_NEGATIVE_MISSING: line={line} id={rid}")
         if status == "COVERED":
             must(candidate.endswith(".sens"), f"UNVERIFIED_NATIVE_PHYSICAL: line={line} id={rid}")
-            negative = r["negative_sens_witness"]
             must(negative.startswith("tests/") and negative.endswith(".sens") and
                  (root / negative).is_file(),
                  f"MISSING_NEGATIVE_SENS: line={line} id={rid}")
@@ -161,7 +177,12 @@ def self_test(rows: list[dict[str, str]], root: Path, expected: set[str]) -> Non
     must(target_path is not None, "LEDGER_SELF_TEST: require a candidate")
     target_path["candidate_sens_witness"] = "tests/semantic/not-a-real-witness.sens"
     rejects(bogus_path, "missing physical witness")
-    print("LEDGER_SELF_TEST_PASS: loss/duplicate/false-COVERED/missing-witness rejected")
+    stale = copy.deepcopy(rows)
+    pinned = next((row for row in stale if row["candidate_sens_witness"] != "-"), None)
+    must(pinned is not None, "LEDGER_SELF_TEST: require pinned candidate")
+    pinned["candidate_git_blob_sha1"] = "0" * 40
+    rejects(stale, "stale Git blob SHA")
+    print("LEDGER_SELF_TEST_PASS: loss/duplicate/false-COVERED/missing-witness/stale-blob rejected")
 
 
 def main() -> int:
