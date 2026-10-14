@@ -9,6 +9,8 @@ The resulting common corpus SHA is necessary, not sufficient, for byte parity.
 from __future__ import annotations
 
 import argparse
+import os
+import subprocess
 import hashlib
 import json
 from pathlib import Path
@@ -74,6 +76,34 @@ def snapshot(root: Path, file_list: Path) -> dict:
     return {**core, "corpus_sha256": sha(canonical(core))}
 
 
+def verify_git_index_membership(root: Path, current: dict) -> None:
+    """For strict real-corpus receipts: the manifest must cover every tracked .sens.
+
+    This is physical inventory only, never SENS semantic or executable admission.
+    """
+    proc = subprocess.run(
+        ["git", "-C", str(root.resolve(strict=True)), "ls-files", "-z", "--", "*.sens"],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+    )
+    if proc.returncode:
+        raise SnapshotError(
+            "git-index-unavailable:"
+            + proc.stderr.decode("utf-8", errors="replace").strip()
+        )
+    if proc.stdout and not proc.stdout.endswith(b"\0"):
+        raise SnapshotError("git-index-incomplete-nul-stream")
+    indexed = [os.fsdecode(part) for part in proc.stdout.split(b"\0") if part]
+    if len(indexed) != len(set(indexed)):
+        raise SnapshotError("git-index-duplicate-or-unmerged")
+    expected, observed = set(indexed), {row["path"] for row in current["files"]}
+    if expected != observed:
+        missing = sorted(expected - observed)
+        extra = sorted(observed - expected)
+        raise SnapshotError(
+            f"git-index-mismatch:missing={missing[:3]!r}:untracked={extra[:3]!r}"
+        )
+
+
 def first_difference(before: dict, after: dict) -> str:
     a = {r["path"]: r for r in before["files"]}
     b = {r["path"]: r for r in after["files"]}
@@ -88,8 +118,11 @@ def first_difference(before: dict, after: dict) -> str:
     return "metadata-only"
 
 
-def run(root: Path, file_list: Path, manifest: Path, mode: str) -> int:
+def run(root: Path, file_list: Path, manifest: Path, mode: str,
+        *, require_git_index: bool = False) -> int:
     current = snapshot(root, file_list)
+    if require_git_index:
+        verify_git_index_membership(root, current)
     if mode == "write":
         if manifest.exists():
             raise SnapshotError(f"manifest-already-exists:{manifest}; choose a fresh path")
@@ -118,9 +151,12 @@ def main() -> int:
     p.add_argument("--root", type=Path, default=Path("."))
     p.add_argument("--list", type=Path, required=True, dest="file_list")
     p.add_argument("--manifest", type=Path, required=True)
+    p.add_argument("--require-git-index", action="store_true",
+                   help="reject omitted or untracked .sens against git ls-files -z")
     args = p.parse_args()
     try:
-        return run(args.root, args.file_list, args.manifest, args.mode)
+        return run(args.root, args.file_list, args.manifest, args.mode,
+                   require_git_index=args.require_git_index)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         print("FAIL test_id=t5-corpus-snapshot layer=transport "
               f"expected=READABLE_CONSISTENT_CORPUS actual=HARNESS_ERROR error={error} "
