@@ -35,7 +35,8 @@ jobs:
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - name: Зібрати sens CLI (release)
-        run: cargo build --locked --release -p sens --bin sens
+        # Бінарник `sens` живе в крейті sens-cli, не в крейті sens.
+        run: cargo build --locked --release -p sens-cli --bin sens
       - name: Швидкість Lisp (en) проти SENS (sens)
         shell: bash
         run: |
