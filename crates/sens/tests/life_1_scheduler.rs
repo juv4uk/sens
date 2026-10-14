@@ -21,6 +21,16 @@ fn виконати_двійковий_свідок_life_1() {
     let result = eval_parsed_expressions(&witness, &mut session)
         .expect("транспорт: виконати SENS-свідок");
 
+    // D1:NO is a real SENS failure. Ask SENS to expose its own 16 case bits;
+    // Rust only prints the already-authored verdicts and NEVER changes truth.
+    if result.value.to_string() != "1" {
+        let probe = parse_mixed_exact_domain("(життя--свідок-біти)")
+            .expect("транспорт: SENS-діагностичний виклик");
+        let bits = eval_parsed_expressions(&probe, &mut session)
+            .expect("транспорт: виконати SENS-діагностику");
+        eprintln!("SENS_LIFE_1_CASE_BITS={}", bits.value);
+    }
+
     // Це тільки спостереження вердикту D1:1, не перевірка логіки в Rust.
     assert_eq!(result.value.to_string(), "1", "SENS повернув не D1:YES");
 }
