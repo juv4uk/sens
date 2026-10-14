@@ -836,10 +836,13 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # text, not a number. Mathematical values are explicit D24+ envelopes only.
     # So a plain decimal source token is admitted as D7 text (no binary<->decimal
     # redefinition); explicit #d/#b/#q2 and number-width bit words stay blocked.
-    if NUMERIC_RE.fullmatch(t) and not binary_word:
+    # Owner rule: math is D24+ only. A source numeric token (plain decimal,
+    # #d/#b/#q2 literal) is a textual projection -> D7 text, never a number.
+    # Only a bare 0/1 word whose width IS a numeric D24+ domain is numeric.
+    if (NUMERIC_RE.fullmatch(t) and not binary_word
+            or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)):
         return encode_text7_identifier(t, text7, node.tok)
-    if (re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
-            or (binary_word and domain_width)):
+    if binary_word and domain_width:
         raise MigrationError(
             "unqualified numeric literal blocked: requires explicit D24+ "
             "numeric-domain identity and admitted physical encoding",
