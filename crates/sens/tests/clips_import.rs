@@ -50,6 +50,25 @@ fn eval_import(source: &str) -> String {
 }
 
 #[test]
+fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
+    // The SENS library, not Rust, computes all predicates. One removed ':'
+    // is the negative witness. Failure must be D1:NO, never the NIL datum.
+    for (label, source, expected) in [
+        ("positive", "(clips-string-starts-with-double-colon? \"::sensor\")", "1"),
+        ("one-bit-shape-mutant", "(clips-string-starts-with-double-colon? \":sensor\")", "0"),
+        ("non-prefix", "(clips-string-starts-with-double-colon? \"sensor::value\")", "0"),
+        ("empty", "(clips-string-starts-with-double-colon? \"\")", "0"),
+        ("short", "(clips-string-starts-with-double-colon? \":\")", "0"),
+    ] {
+        let actual = eval_import(source);
+        assert_eq!(
+            actual, expected,
+            "test_id=clips-double-colon-d1 layer=eval SENS output={actual} case={label}"
+        );
+    }
+}
+
+#[test]
 fn clips_defrule_exact_pipeline_probes() {
     // Diagnostic transport only: every intermediate value is computed by SENS.
     // These probes locate the first real failure without inventing a Rust
