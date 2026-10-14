@@ -761,12 +761,19 @@
 ; ändert es nie das Endergebnis, welche Regel "zuerst dran ist" — das
 ; Verwerfen von `declare` verliert Information, die CLIPS nutzen würde, um
 ; zu ordnen, *wann* etwas feuert, nie *ob*.
+; CLIPS grammar: at rule preamble, an atom other than => is the
+; optional documentation datum; valid conditions and (declare ...) are pairs.
+; This is a position-specific SENS structural law, NOT a general stringp.
+; Do not grant the unadmitted D9:110100110 STRINGP runtime authority.
 (0011 clips-rule-preamble-form?
   (0010 (form)
     (110
-      ((110100110 form) #d1:1)
-      ((010 form) #d1:0)
-      ((010 (100 form)) (101 (100 form) (001 declare)))
+      ((010 form)
+       (110
+         ((101 form (001 =>)) #d1:0)
+         (#d1:1 #d1:1)))
+      ((0100 (010 (100 form))) #d1:0)
+      ((101 (100 form) (001 declare)) #d1:1)
       (#d1:1 #d1:0))))
 
 (0011 clips-strip-rule-preamble
