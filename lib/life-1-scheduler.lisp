@@ -39,12 +39,12 @@
     (110
       
       ((0100 (010 entry))
-       (001000 ((rows (011 entry)))
+       ((0010 (rows)
          (110
            
            ((0100 (010 rows))
-            (001000 ((row (100 rows)))
-              (110
+            ((0010 (row)
+         (110
                 
                 ((010 row) 
                  (life-scheduler-field
@@ -57,7 +57,9 @@
                    ((0100 (життя--рівні? field (100 row)))
                     (life-scheduler-field
                       (111 (100 entry) (011 rows))
-                      field)))))))))))))
+                      field))))))
+         (100 rows)))))
+         (011 entry))))))
 
 (0011 life-scheduler-invocation-key
   (0010 (invocation)
