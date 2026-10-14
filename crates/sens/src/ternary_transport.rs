@@ -440,10 +440,10 @@ pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
     Ok(encode_ternary_words(&words)?)
 }
 
-/// Strictly decode *only* W7 words with admitted Ukrainian keyboard glyphs.
-/// D2 words (00/01/10/11) are never turned into D7 text or punctuation.
-pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
-    let words = decode_ternary_words(packed)?;
+/// SENS-owned W7 glyph interpretation after a transport backend has
+/// already restored exact-width words. No physical T5 decoding or Zig/Rust
+/// truth semantics are allowed in this data projection.
+pub fn decode_d7_uk_words(words: &[BinarySourceWord]) -> Result<String, D7T5Error> {
     let mut text = String::new();
     for word in &words {
         let BinarySourceWord::W7(cell) = word else {
@@ -457,6 +457,13 @@ pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
         return Err(D7T5Error::AmbiguousText);
     }
     Ok(text)
+}
+
+/// Independent Rust T5 reference for D7; Zig-mode CLI instead calls
+/// decode_d7_uk_words on the exact words physically restored by Zig.
+pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
+    let words = decode_ternary_words(packed)?;
+    decode_d7_uk_words(&words)
 }
 
 #[cfg(test)]
