@@ -5,7 +5,7 @@
 //! machine-code claim is constructed by this adapter.
 
 use crate::{
-    decode_ternary_words, eval_lowered_expressions,
+    BinarySourceWord, decode_ternary_words, eval_lowered_expressions,
     eval::{lower::lower_exact_domain_program, validate_exact_executable_heads},
     ternary_transport::parse_t5_domain_words, EvalResult, Expr,
     LanguageError, Session, TernaryTransportError,
@@ -35,14 +35,15 @@ impl PhysicalT5Program {
     /// an accidental compatibility-only symbol in a partially lowered AST.
     pub fn decode(physical: &[u8]) -> Result<Self, T5ExecutionError> {
         let words = decode_ternary_words(physical).map_err(T5ExecutionError::Transport)?;
-        let parsed = parse_t5_domain_words(&words).map_err(T5ExecutionError::Language)?;
-        // Physical T5 has *already* preserved every exact W1..W9 width.
-        // Historical lowering would consult flat W8 surfaces and could
-        // reinterpret the source after a successful typed decode.
+        Self::from_exact_words(&words).map_err(T5ExecutionError::Language)
+    }
+
+    /// The SAME SENS admission/evaluator for typed words restored from ANY
+    /// physical carrier; no text, no re-encoding and no historical dispatch.
+    fn from_exact_words(words: &[BinarySourceWord]) -> Result<Self, LanguageError> {
+        let parsed = parse_t5_domain_words(words)?;
         let forms = lower_exact_domain_program(&parsed);
-        // Use the SAME fail-closed executable-head gate as the human
-        // exact-domain entry, before evaluating any form/side effect.
-        validate_exact_executable_heads(&forms).map_err(T5ExecutionError::Language)?;
+        validate_exact_executable_heads(&forms)?;
         Ok(Self { forms })
     }
 
@@ -60,6 +61,26 @@ impl PhysicalT5Program {
     }
 }
 
+/// E1 is a physical carrier, not another semantic evaluator.
+#[derive(Debug)]
+pub enum E1ExecutionError {
+    Transport(crate::universal_frame3::Frame3Error),
+    Language(LanguageError),
+}
+
+/// E1 bytes -> canonical exact-width words -> SAME SENS D2/admission/evaluator.
+/// This never adds a language identity, environment capability or T5 roundtrip.
+pub fn eval_e1_program(
+    physical_e1: &[u8],
+    session: &mut Session,
+) -> Result<EvalResult, E1ExecutionError> {
+    let words = crate::envelope_e1::decode(physical_e1)
+        .map_err(E1ExecutionError::Transport)?;
+    let program = PhysicalT5Program::from_exact_words(&words)
+        .map_err(E1ExecutionError::Language)?;
+    program.execute(session).map_err(E1ExecutionError::Language)
+}
+
 /// One-shot version of the same source-free program path.
 ///
 /// Keep this wrapper to preserve the stable public API and ensure it shares
@@ -72,6 +93,57 @@ pub fn eval_t5_program(
     program.execute(session).map_err(T5ExecutionError::Language)
 }
 
+
+#[cfg(test)]
+mod e1_exact_word_execution_tests {
+    use super::*;
+    use crate::{decode_ternary_words, encode_ternary_words};
+
+    #[test]
+    fn e1_carrier_executes_existing_sens_binary_self_verdict_and_mutant() {
+        // Both verdicts are computed by the SAME running SENS evaluator,
+        // never by an E1 codec, Rust truth table, or external language name.
+        let good = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
+        let bad = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
+        let mut observed = Vec::new();
+        let mut sources = Vec::new();
+        for (label, t5) in [("positive", good.as_slice()), ("one-bit-mutant", bad.as_slice())] {
+            let words = decode_ternary_words(t5).expect("pinned executable binary SENS T5");
+            let carrier = crate::envelope_e1::encode(&words).expect("E1 physical encode");
+            let restored = crate::envelope_e1::decode(&carrier).expect("E1 canonical replay");
+            assert_eq!(words, restored, "E1 must preserve exact domain widths: {label}");
+            assert_eq!(encode_ternary_words(&restored).unwrap(), t5,
+                       "E1 byte-for-byte source preservation: {label}");
+            let native = eval_t5_program(t5, &mut Session::default())
+                .expect("native SENS binary oracle");
+            let from_e1 = eval_e1_program(&carrier, &mut Session::default())
+                .expect("SENS executes exact words restored from E1");
+            assert_eq!(native.output, from_e1.output, "SENS output parity: {label}");
+            let verdict = from_e1.value.as_predicate_bit()
+                .expect("the SENS binary witness must return its own D1 verdict");
+            assert_eq!(native.value.as_predicate_bit(), Some(verdict),
+                       "SENS D1 verdict parity: {label}");
+            println!("E1_NATIVE_SENS_VERDICT_PASS label={label} D1={}", u8::from(verdict));
+            observed.push(verdict);
+            sources.push(words);
+            let mut corrupt = carrier;
+            *corrupt.last_mut().unwrap() ^= 1;
+            assert!(matches!(
+                eval_e1_program(&corrupt, &mut Session::default()),
+                Err(E1ExecutionError::Transport(
+                    crate::universal_frame3::Frame3Error::Integrity
+                ))
+            ), "CRC mutant cannot reach SENS: {label}");
+        }
+        assert_ne!(observed[0], observed[1], "one-bit mutant changes the SENS verdict");
+        assert_eq!(sources[0].len(), sources[1].len());
+        let changed: u32 = sources[0].iter().zip(&sources[1]).map(|(a, b)| {
+            assert_eq!(a.width(), b.width(), "the domain width cannot change");
+            (a.packed_bits() ^ b.packed_bits()).count_ones()
+        }).sum();
+        assert_eq!(changed, 1, "mutant changes exactly one semantic source bit");
+    }
+}
 
 #[cfg(test)]
 mod exact_t5_cutover_tests {
