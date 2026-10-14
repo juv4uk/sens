@@ -470,16 +470,17 @@
 (0011 my-arity-ok?
   (0010 (params args)
     (001000 ((fixed (my-fixed-param-count params))
-          (received (000000 args)))
+             (received (000000 args)))
       (110
         ((my-rest-param? params)
          (110
-           ((11010 received fixed)  (001 ()))
-           ((0100 (11010 received fixed)) #d1:1)))
-        ((010 ())
+           ((11010 received fixed) #d1:0)
+           ((0100 (11010 received fixed)) #d1:1)
+           (#d1:1 #d1:0)))
+        (#d1:1
          (110
-           ((101 received fixed)  #d1:1)
-           ))))))
+           ((101 received fixed) #d1:1)
+           (#d1:1 #d1:0)))))))
 
 (0011 my-arity-detail
   (0010 (params args)
