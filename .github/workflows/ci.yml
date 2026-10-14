@@ -125,10 +125,10 @@ jobs:
           echo 'test_id=zig-e1-canonical-dp-writer layer=transport semantic_authority=SENS admission=NOT_TESTED'
           "$ZIG" test research/zig-codecs/transport/e1_writer.zig
           echo 'test_id=zig-freestanding-pure-object layer=transport semantic_authority=SENS status=mechanical'
-          "$ZIG" test research/zig-codecs/transport/freestanding.zig -lc
+          "$ZIG" test research/zig-codecs/freestanding.zig -lc
           for target in x86_64-freestanding thumb-freestanding-eabi; do
             obj="$RUNNER_TEMP/sens-zig-free-$target.o"
-            "$ZIG" build-obj research/zig-codecs/transport/freestanding.zig \
+            "$ZIG" build-obj research/zig-codecs/freestanding.zig \
               -target "$target" -O ReleaseSmall -femit-bin="$obj"
             echo "ZIG_FREESTANDING_OBJECT_PASS target=$target zig=$("$ZIG" version)"
             readelf -h "$obj" | grep -E 'Class:|Machine:|Type:'

@@ -2,9 +2,9 @@
 //! All buffers/lengths explicit; no OS or libc, no semantic domain assignment.
 //! The F3C rank tables also consume stack: an object build is not MCU stack proof.
 const std = @import("std");
-const t5 = @import("../t5/t5.zig");
-const f3c = @import("../f3c/f3c.zig");
-const fields = @import("fields.zig");
+const t5 = @import("t5/t5.zig");
+const f3c = @import("f3c/f3c.zig");
+const fields = @import("transport/fields.zig");
 
 /// 0 = physically valid; positive = bytes written; -1 = invalid input;
 /// -2 = caller buffer too small; -3 = F3C cannot save space.
