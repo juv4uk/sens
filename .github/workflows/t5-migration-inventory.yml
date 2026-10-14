@@ -1,7 +1,7 @@
-# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
-# реальності поки не відповідає — run 38564263758 червоний на кроці «Незалежний негативний свідок».
-# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
-name: КАРАНТИН — T5 migration inventory (М0)
+# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
+# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
+# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
+name: T5 migration inventory (М0)
 
 on:
   workflow_dispatch:
@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   inventory:
-    if: ${{ false }} # КАРАНТИН: червоний, run 38564263758
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

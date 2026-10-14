@@ -1,7 +1,7 @@
-# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
-# реальності поки не відповідає — run 38564275271 червоний на кроці «Interpreter oracle and native physical CAR/CDR agree».
-# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
-name: КАРАНТИН — Vertical Day non-cancelling smoke
+# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
+# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
+# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
+name: Vertical Day non-cancelling smoke
 
 # Кожен SHA має власний відтворюваний результат: без paths-фільтрів
 # та cancel-in-progress. Зелений другий job не підміняє RED для цього SHA.
@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   vertical:
-    if: ${{ false }} # КАРАНТИН: червоний, run 38564275271
     name: Lisp-owned pair to real CPU, with fail-closed rejection
     runs-on: ubuntu-24.04
     timeout-minutes: 30

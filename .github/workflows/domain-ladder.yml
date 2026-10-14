@@ -1,3 +1,6 @@
+# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
+# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
+# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
 # КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
 # реальності поки не відповідає — run 38563840563 червоний на першому кроці
 # «UTF-8 точний D1 без підміни числових аргументів» і на Rust-свідку D1 (16 UTF-8).
@@ -9,7 +12,6 @@ on:
   workflow_dispatch:
 jobs:
   exact-width-ladder:
-    if: ${{ false }} # КАРАНТИН: червоний на UTF-8 D1 (run 38563840563)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -42,7 +44,6 @@ jobs:
         run: python3 benchmarks/d7-ratification-conformance/validate.py
 
   utf8-d1-runtime:
-    if: ${{ false }} # КАРАНТИН: червоний на UTF-8 D1
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:

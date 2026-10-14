@@ -1,7 +1,7 @@
-# КАРАНТИН (повернено 14.10.2026 після фактичної перевірки): інформативна, але
-# реальності поки не відповідає — run 38564280846 червоний на кроці «Native CPU vertical mechanism witnesses».
-# Це реальний, названий розрив, а не анахронізм. Повторні запуски/runner заборонені.
-name: КАРАНТИН — Vertical Day immutable L0 and native smoke
+# Виведено з карантину 14.10.2026 за ПРАВИЛОМ 24 ГОДИН (AGENTS.md; docs/ci-red-cause-policy.uk.md):
+# RED не ховаємо за if:false — workflow лишається ВИДИМИМ, а RED старший за 24 год ескалюється
+# (Q_TRIAGE_24H у #5741). Жоден gate не вимикаємо на підставі кольору.
+name: Vertical Day immutable L0 and native smoke
 
 on:
   workflow_dispatch:
@@ -16,7 +16,6 @@ concurrency:
 
 jobs:
   oracle-native-smoke:
-    if: ${{ false }} # КАРАНТИН: червоний, run 38564280846
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
