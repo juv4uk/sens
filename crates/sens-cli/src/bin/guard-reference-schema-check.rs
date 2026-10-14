@@ -6,7 +6,7 @@
 //! - Empty authority/verify
 //! - Unreviewed inbox entries (pending-review)
 
-use sens::parse;
+use sens::{parse_mixed_exact_domain_guard_reference_source, Expr, ExprKind};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -57,22 +57,49 @@ impl ValidationResult {
     }
 }
 
+/// Механічна перевірка точної доменної тотожності каталогу Guard.
+/// D4:0011 і D3:001 задає SENS, Rust лише перевіряє збереження ширини AST.
+fn check_directory_domain(expressions: &[Expr]) -> Result<(), String> {
+    let mut directories = 0usize;
+    for expression in expressions {
+        let ExprKind::List(items) = &expression.kind else { continue };
+        if !matches!(items.get(1),
+            Some(Expr { kind: ExprKind::Symbol(name), .. })
+                if name.as_ref() == "*guard-reference-directory*"
+        ) { continue; }
+        directories += 1;
+        if !matches!(items.first(),
+            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                if id.width() == 4 && id.packed_bits() == 0b0011
+        ) { return Err("Guard reference requires exact D4:0011 DEFINE; W8 is not D4".into()); }
+        let Some(Expr { kind: ExprKind::List(quoted), .. }) = items.get(2) else {
+            return Err("Guard reference requires an exact D3:001 quoted directory".into());
+        };
+        if quoted.len() != 2 || !matches!(quoted.first(),
+            Some(Expr { kind: ExprKind::DomainIdentity(id), .. })
+                if id.width() == 3 && id.packed_bits() == 0b001
+        ) { return Err("Guard reference requires exact D3:001 QUOTE; W8 is not D3".into()); }
+    }
+    if directories == 0 {
+        return Err("Guard reference has no exact-domain directory definition".into());
+    }
+    Ok(())
+}
+
 fn parse_guard_reference(file_path: &Path) -> Result<Vec<TopicEntry>, String> {
     let content = fs::read_to_string(file_path)
         .map_err(|e| format!("cannot read {}: {}", file_path.display(), e))?;
 
-    // Parser-parity gate: the canonical WSM reader (the same `parse` used to
-    // load this file in --oracle-help) must accept the file before the
-    // line-based field extractor below is trusted. This closes the gap where a
-    // structurally invalid file (e.g. an unbalanced paren) would otherwise
-    // still be reported as "Schema validation PASSED".
-    parse(&content).map_err(|error| {
-        format!(
-            "cannot parse {}: {}",
-            file_path.display(),
-            error.render(&content)
-        )
+    // Спільний path-bound exact-domain reader; без байтових припущень.
+    let parsed = parse_mixed_exact_domain_guard_reference_source(
+        "knowledge/guard-reference.lisp",
+        &content,
+    )
+    .map_err(|error| {
+        format!("cannot parse {}: {}", file_path.display(), error.render(&content))
     })?;
+    check_directory_domain(&parsed)
+        .map_err(|reason| format!("invalid exact-domain {}: {reason}", file_path.display()))?;
 
     // The catalogue is intentionally formatted one field per line. Parsing
     // those records line-by-line keeps this quality gate independent of the
@@ -312,8 +339,8 @@ mod tests {
     }
 
     fn sample_wsm() -> String {
-        r#"(def *guard-reference-directory*
-  (quote
+        r#"(0011 *guard-reference-directory*
+  (001
     ((reference
        (topic test-topic)
        (summary "Test summary")
@@ -338,6 +365,24 @@ mod tests {
         assert_eq!(entries[0].authority, vec!["file1.md", "file2.md"]);
         assert_eq!(entries[0].how_to, vec!["step1", "step2"]);
         assert_eq!(entries[0].verify, vec!["check1", "check2"]);
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn rejects_historical_w8_quote_with_matching_payload() {
+        let source = sample_wsm().replacen("(001\n", "(00000001\n", 1);
+        let path = temp_file(&source, "wrong-quote-width");
+        let failure = parse_guard_reference(&path).unwrap_err();
+        assert!(failure.contains("D3:001 QUOTE"), "{failure}");
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn rejects_historical_w8_define_with_matching_payload() {
+        let source = sample_wsm().replacen("(0011 *guard", "(00001001 *guard", 1);
+        let path = temp_file(&source, "wrong-define-width");
+        let failure = parse_guard_reference(&path).unwrap_err();
+        assert!(failure.contains("D4:0011 DEFINE"), "{failure}");
         fs::remove_file(path).unwrap();
     }
 
