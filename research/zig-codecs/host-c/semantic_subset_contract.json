@@ -6,7 +6,7 @@
     "semantic": "SENS only: CURRENT.md -> language-contract.lisp Contract 11.9 -> owner-ratified D1/D2/D3 laws -> native SENS executable witness",
     "boundary": "research/zig-codecs/transport_abi.zig",
     "c_implementation": "research/zig-codecs/host-c/d3_subset.c",
-    "c_implementation_git_blob_sha1": "85ba457f354b982ad6440d6c4d179229f796b366",
+    "c_implementation_git_blob_sha1": "74444f1251cd6b8c73c0e934f6dfce9672a44952",
     "manual_c_build": "bash research/zig-codecs/host-c/verify_d3_subset.sh",
     "native_sens_positive_negative": [
       "bash scripts/prove-retired-d3-laws.sh",
