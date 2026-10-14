@@ -108,4 +108,24 @@ for target in x86_64-freestanding thumb-freestanding-eabi; do
     grep -E '^\.text[[:space:]]' "$output/$target-size.txt"
 done
 
+# Hosted x86_64 observation of Zig's *actual linked freestanding object*.
+# This C-only probe adds pthread/libc measurement scaffolding, not to Zig.
+# Canary checks count the touched region for four golden calls; they do not
+# establish a worst-case frame bound, guaranteed stack pointer usage or
+# an ESP32-S3/Xtensa firmware budget.
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    command -v cc >/dev/null || {
+        echo "ZIG_F3C_STACK_SAMPLE_FAIL phase=toolchain missing=cc" >&2
+        exit 1
+    }
+    probe="$output/sens-zig-f3c-host-stack-probe"
+    cc -std=c11 -Wall -Wextra -Werror -O2 -fno-omit-frame-pointer \
+        -no-pie -pthread research/zig-codecs/transport/f3c_stack_probe.c \
+        "$output/sens-zig-x86_64-freestanding.o" -o "$probe"
+    sha256sum "$probe" | tee "$output/f3c-stack-host-probe-SHA256.txt"
+    "$probe" | tee "$output/f3c-stack-host-samples.txt"
+else
+    echo "ZIG_F3C_STACK_SAMPLE_UNSUPPORTED reason=host_not_x86_64 host=$(uname -m)"
+fi
+
 echo "ZIG_FREESTANDING_BOTH_TARGETS_PASS semantic_authority=SENS actual_ESP32_S3=NOT_TESTED stack_bound=NOT_MEASURED"
