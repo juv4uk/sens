@@ -70,27 +70,18 @@ jobs:
             OperationalMigrationTests.test_mixed_manifest_no_old_classification_veto \
             OperationalMigrationTests.test_stale_classifier_does_not_veto_genuine_sha_pins
           python3 tests/test_plan_t5_agent_work.py -v
-      - name: Одноразова перевірка SHA-зв'язування T5 та narrate preview
+      - name: T5 — явний D4 import, перевірка блобу й відмова від непідтвердженого виклику
         shell: bash
         run: |
           set -euo pipefail
-          python3 tests/test_migrate_t5_batch.py -v \
-            RealBatchTest.test_explicit_linked_definition_is_verified_and_preview_only \
-            RealBatchTest.test_stale_or_fabricated_linked_definition_is_rejected
-          report="$RUNNER_TEMP/sens-narrate-linked-preview.json"
-          rc=0
-          python3 scripts/migrate.py preview lib/narrate.lisp \
-            --source-era current \
-            --linked-definition lib/reason.lisp@93853dc022c92844bc28d632c736430e2f2edf32:provenance-list \
-            --mirror "$RUNNER_TEMP/sens-narrate-linked-out" \
-            --report "$report" || rc=$?
-          echo "LINKED_MIGRATOR_EXIT=$rc"
-          if test -f "$report"; then
-            python3 -m json.tool "$report"
-          else
-            echo "::error::LINKED_MIGRATION_REPORT_MISSING"
-          fi
-          exit "$rc"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id t5-sha-linked-source-transport \
+            --layer transport \
+            --fixture tests/test_migrate_t5_batch.py \
+            --report-file "$RUNNER_TEMP/sens-t5-linked-source-red.jsonl" \
+            -- python3 tests/test_migrate_t5_batch.py -v \
+              RealBatchTest.test_explicit_linked_definition_is_verified_and_preview_only \
+              RealBatchTest.test_stale_or_fabricated_linked_definition_is_rejected
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
