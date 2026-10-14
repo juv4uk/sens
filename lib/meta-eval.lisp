@@ -224,7 +224,7 @@
   (0010 (env-ref)
     (110
       
-      ((010 env-ref)  #d1:0)
+      ((010 env-ref)  (001 ()))
       ((my-shared-frame-binding? (100 env-ref)) (011 (100 env-ref)))
       ((010 ()) (my-shared-frame-value (011 env-ref))))))
 
@@ -590,7 +590,7 @@
   (0010 (forms)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((010 ())
        (001000 ((problem
                (my-lambda-list-error (1001 (10011 (100 forms))))))
@@ -722,7 +722,7 @@
   (0010 (forms)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((my-lambda-def-form? (100 forms))
        (111 (100 forms)
              (my-take-lambda-def-group (011 forms))))
@@ -732,7 +732,7 @@
   (0010 (forms)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((my-lambda-def-form? (100 forms))
        (my-drop-lambda-def-group (011 forms)))
       ((010 ()) forms))))
@@ -874,7 +874,7 @@
     (001000 ((caller-env
             (110
               
-              ((010 caller-env-rest)  #d1:0)
+              ((010 caller-env-rest)  (001 ()))
               ((010 ()) (100 caller-env-rest)))))
       (my-result-value (my-apply-result fn args caller-env)))))
 
@@ -1102,7 +1102,7 @@
   (0010 (forms)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((010 ()) (111 (1001 (100 forms))
                (my-lambda-def-names (011 forms)))))))
 
@@ -1110,7 +1110,7 @@
   (0010 (form candidates)
     (110
       
-      ((010 candidates)  #d1:0)
+      ((010 candidates)  (001 ()))
       ((my-lambda-def-references-name? form (100 candidates))
        (111 (100 candidates)
              (my-def-dependencies form (011 candidates))))
@@ -1120,7 +1120,7 @@
   (0010 (forms names)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((010 ())
        (111
          (1110
@@ -1137,7 +1137,7 @@
   (0010 (name graph)
     (110
       
-      ((010 graph)  #d1:0)
+      ((010 graph)  (001 ()))
       ((101 name (100 (100 graph))) (1001 (100 graph)))
       ((010 ()) (my-graph-dependencies name (011 graph))))))
 
@@ -1175,7 +1175,7 @@
   (0010 (name candidates graph)
     (110
       
-      ((010 candidates)  #d1:0)
+      ((010 candidates)  (001 ()))
       ((101 name (100 candidates))
        (111 (100 candidates)
              (my-scc-names name (011 candidates) graph)))
@@ -1191,7 +1191,7 @@
   (0010 (forms names)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((my-symbol-member? (1001 (100 forms)) names)
        (111 (100 forms)
              (my-select-defs-by-names (011 forms) names)))
@@ -1201,7 +1201,7 @@
   (0010 (forms names)
     (110
       
-      ((010 forms)  #d1:0)
+      ((010 forms)  (001 ()))
       ((my-symbol-member? (1001 (100 forms)) names)
        (my-remove-defs-by-names (011 forms) names))
       ((010 ())
