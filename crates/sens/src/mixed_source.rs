@@ -1059,6 +1059,34 @@ mod tests {
     }
 
     #[test]
+    fn core4_logic_macro_code_head_retains_d3_width_without_retyping_ordinary_data() {
+        // Reader/transport witness only. Semantic AND/OR truth remains owned
+        // by the existing SENS execution path in bootstrap_order.
+        let macro_source = "(0011 and (0010 rest (001 110)))";
+        let forms = parse_mixed_exact_domain_core_source("lib/core4.lisp", macro_source)
+            .expect("pinned Core4 macro reader");
+        let ExprKind::List(definition) = &forms[0].kind else { panic!("D4 DEFINE"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("D4 LAMBDA"); };
+        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("D3 QUOTE"); };
+        assert!(matches!(
+            &quoted[1].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b110
+        ), "quoted executable COND must be exactly D3:110");
+
+        // Identical spelling outside a logic-macro code template is quoted
+        // data, never an implicitly callable domain identity.
+        let data_source = "(0011 datum (0010 () (001 110)))";
+        let ordinary = parse_mixed_exact_domain_core_source("lib/core4.lisp", data_source)
+            .expect("ordinary quote is still accepted");
+        let ExprKind::List(definition) = &ordinary[0].kind else { panic!("DEFINE"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
+        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("QUOTE"); };
+        assert!(!matches!(&quoted[1].kind, ExprKind::DomainIdentity(_)));
+        assert!(parse_mixed_exact_domain_core_source("lib/untrusted.lisp", macro_source).is_err());
+    }
+
+    #[test]
     fn reasoning_source_is_path_bound_and_preserves_w8_macro_data() {
         let src = "(00001010 preserve (x) (110 ((010 x) (001 (101 x x)))))";
         for path in ["lib/world.lisp", "lib/forward.lisp", "lib/knowledge.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/persistent-map.lisp", "lib/content-store.lisp", "lib/lisp-fs.lisp"] {
