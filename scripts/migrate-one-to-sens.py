@@ -45,6 +45,17 @@ def load_codec():
     return module
 
 
+def resolve_without_links(path: Path, role: str) -> Path:
+    """Зберегти походження source/output: жодних symlink або '..' до resolve()."""
+    if ".." in path.parts:
+        raise SystemExit(f"BLOCK: {role} path contains parent traversal")
+    absolute = path.absolute()
+    for component in (absolute, *absolute.parents):
+        if component.is_symlink():
+            raise SystemExit(f"BLOCK: {role} path contains symlink: {component}")
+    return absolute.resolve()
+
+
 def atomic_no_clobber(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -116,7 +127,7 @@ def main() -> int:
                         help="auto блокує двозначні W8; legacy = історичний SID8, current = D8")
     args = parser.parse_args()
 
-    source = args.source.resolve()
+    source = resolve_without_links(args.source, "source")
     if source.suffix.lower() != ".lisp":
         raise SystemExit("BLOCK: source must have .lisp extension")
     try:
@@ -126,7 +137,8 @@ def main() -> int:
     if not source.is_file():
         raise SystemExit(f"BLOCK: source does not exist: {rel}")
 
-    output = (args.output or source.with_suffix(".sens")).resolve()
+    requested_output = args.output or source.with_suffix(".sens")
+    output = resolve_without_links(requested_output, "output")
     source_hash_before = sha256_file(source)
 
     if output == source:
@@ -235,6 +247,10 @@ def main() -> int:
 
         if sha256_file(source) != source_hash_before:
             raise SystemExit("BLOCK: source changed during migration")
+        if resolve_without_links(args.source, "source") != source:
+            raise SystemExit("BLOCK: source path changed during migration")
+        if resolve_without_links(requested_output, "output") != output:
+            raise SystemExit("BLOCK: output path changed during migration")
         if not args.dry_run:
             atomic_no_clobber(generated, output)
         print(json.dumps(result, ensure_ascii=False, indent=2))
