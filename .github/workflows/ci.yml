@@ -82,6 +82,46 @@ jobs:
             -- python3 tests/test_migrate_t5_batch.py -v \
               RealBatchTest.test_explicit_linked_definition_is_verified_and_preview_only \
               RealBatchTest.test_stale_or_fabricated_linked_definition_is_rejected
+      - name: Фізичний підзакон списків narrate — SENS один-біт mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          export T5_CANDIDATE="$RUNNER_TEMP/narrate-linked-structural.sens"
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import runpy
+          import sys
+          from pathlib import Path
+          root = Path.cwd()
+          sys.path.insert(0, str(root / "scripts"))
+          batch = runpy.run_path("scripts/migrate-t5-batch.py")
+          mig = batch["mig"]
+          linked, evidence = batch["verified_linked_definitions"](
+              root, ["lib/reason.lisp@93853dc022c92844bc28d632c736430e2f2edf32:provenance-list"]
+          )
+          data = mig.load_foundation(batch["INPUTS"]["foundation"])
+          legacy, my, upper = mig.build_three_pass_maps(
+              data, batch["INPUTS"]["domain_surfaces"],
+              batch["INPUTS"]["semantic_generated"], batch["INPUTS"]["semantic_registry"],
+              batch["INPUTS"]["necessary_forms"], batch["INPUTS"]["historical_map"],
+              batch["INPUTS"]["legacy_coverage"]
+          )
+          text7 = mig.build_text7(data, batch["INPUTS"]["text7"])
+          resolver = mig.Resolver(legacy, my, upper, source_era="current",
+                                  admitted_d8=data["domains"]["D8"]["residents"])
+          source = (root / "lib/narrate.lisp").read_text(encoding="utf-8")
+          projection = mig.migrate_file(source, resolver, text7, linked_bindings=linked)
+          words = mig.parse_words(projection)
+          physical = mig.encode_projection(projection)
+          assert mig.decode_bytes(physical) == words
+          digest = hashlib.sha256(physical).hexdigest()
+          print(f"PHYSICAL_NARRATE_STRUCTURE_CANDIDATE bytes={len(physical)} words={len(words)} sha256={digest}")
+          assert digest == "fe730292bfde63367dfa7035e7a02728c483d849569395d8595ca4c081fca835"
+          assert len(physical) == 5051
+          Path(os.environ["T5_CANDIDATE"]).write_bytes(physical)
+          PY
+          cargo run --locked -p sens --example probe_linked_narrate_t5 -- "$T5_CANDIDATE" --structural
       - name: Не допустити жодного іншого автоматичного workflow
         id: budget
         shell: bash
