@@ -407,7 +407,7 @@ mod tests {
     fn e1_zig_rust_shared_physical_corpus() {
         // Independent byte parity ONLY: native binary SENS owns admission/eval.
         let corpus = include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"), "/../../research/zig-codecs/fixtures/e1-v1.bits"
+            env!("CARGO_MANIFEST_DIR"), "/../../research/zig-codecs/transport/fixtures/e1-v1.bits"
         ));
         let mut tested = 0;
         for line in corpus.lines().filter(|s| !s.is_empty() && !s.starts_with('#')) {
