@@ -123,6 +123,18 @@ fn meta_canon_nonatom_is_sens_owned() {
     for (index, form) in forms.iter().enumerate() {
         let observed = sens::eval_parsed_expressions(std::slice::from_ref(form), &mut session)
             .unwrap_or_else(|e| {
+                // Diagnostic observations only: SENS still owns every verdict.
+                for probe in [
+                    "(my-semantic-id-for-surface (001 car))",
+                    "(my-canon-semantic-id (001 car))",
+                    "(my-canon-identity (001 car))",
+                ] {
+                    let observed = match eval_program(probe, &mut session) {
+                        Ok(r) => r.value.to_string(),
+                        Err(failure) => format!("ERROR: {failure}"),
+                    };
+                    eprintln!("test_id=meta-canon-nonatom probe={probe} actual={observed}");
+                }
                 panic!("test_id=meta-canon-nonatom layer=eval fixture=tests/semantic/meta-canon-nonatom-d1-law.lisp form={index} error={e}")
             });
         assert_eq!(
