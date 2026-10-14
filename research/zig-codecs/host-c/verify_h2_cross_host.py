@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 CASES = (
@@ -32,6 +33,19 @@ ZIG_ABI = "research/zig-codecs/transport_abi.zig"
 WORDS = re.compile(rb"^[01 \t\r\n]+$")
 
 
+# This pins the selected H2 source path, not every transitive Rust dependency.
+# Unrelated dirty worktree files do not block the migration swarm.
+H2_TRACKED_INPUTS = (
+    "research/zig-codecs/host-c/verify_h2_cross_host.py",
+    C_SOURCE, C_DRIVER, ZIG_ABI,
+    "research/zig-codecs/t5/t5.zig",
+    "research/zig-codecs/f3c/f3c.zig",
+    "scripts/sens_t5_codec.py", ".zig-version", *RUST_DRIVERS,
+    *(f"tests/semantic/{name}-{role}.bits"
+      for name, _, _ in CASES for role in ("law", "mutant")),
+)
+
+
 class AuditFailure(Exception):
     pass
 
@@ -42,6 +56,91 @@ def sha256(raw: bytes) -> str:
 
 def git_blob(raw: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\x00" + raw).hexdigest()
+
+
+def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
+    """Pin exact regular Git-tracked H2 inputs: HEAD == index == worktree."""
+    root = root.resolve()
+
+    def git(*args: str) -> str:
+        result = subprocess.run(["git", *args], cwd=root, capture_output=True,
+                                text=True, errors="replace", check=False)
+        if result.returncode:
+            raise AuditFailure(
+                f"test_id=H2_SOURCE_PIN layer=provenance command=git_{args[0]} "
+                f"exit={result.returncode} stderr={result.stderr.strip()[:220]!r}")
+        return result.stdout.strip()
+
+    actual_root = Path(git("rev-parse", "--show-toplevel")).resolve()
+    if actual_root != root:
+        raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                           f"expected_root={root} actual_root={actual_root}")
+    head = git("rev-parse", "--verify", "HEAD")
+    pinned = {}
+    for name in paths:
+        file = root / name
+        if file.is_symlink() or not file.is_file():
+            raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                               f"path={name} expected=regular_file actual=missing_or_symlink")
+        rows = git("ls-files", "--stage", "--", name).splitlines()
+        if len(rows) != 1 or "\t" not in rows[0]:
+            raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                               f"path={name} expected=one_index_entry actual={len(rows)}")
+        attrs, recorded_path = rows[0].split("\t", 1)
+        fields = attrs.split()
+        if (recorded_path != name or len(fields) != 3
+                or fields[0] not in ("100644", "100755") or fields[2] != "0"):
+            raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                               f"path={name} expected=regular_stage_zero actual={attrs!r}")
+        mode, index_blob, _stage = fields
+        expected = git("rev-parse", f"HEAD:{name}")
+        actual = git_blob(file.read_bytes())
+        if expected != index_blob or expected != actual:
+            raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance path={name} "
+                               f"expected_head_blob={expected} index_blob={index_blob} "
+                               f"actual_worktree_blob={actual}")
+        pinned[name] = {"git_blob_sha1": expected, "git_mode": mode}
+    return {
+        "head_sha": head, "tracked": pinned,
+        "scope": "selected H2 caller/codec/native scripts and six fixtures",
+        "not_claimed": "complete Rust build dependency closure",
+    }
+
+
+def git_provenance_self_test() -> None:
+    """Four synthetic provenance cases; never a mock semantic evaluator."""
+    with tempfile.TemporaryDirectory(prefix="sens-h2-pin-") as tmp:
+        root = Path(tmp)
+        def cmd(*args: str) -> None:
+            subprocess.run(["git", *args], cwd=root, check=True, capture_output=True)
+        cmd("init", "-q")
+        path = root / "input.bits"
+        path.write_bytes(b"10 001 00\n")
+        cmd("add", "input.bits")
+        cmd("-c", "user.name=H2", "-c", "user.email=h2@example.invalid",
+            "commit", "-qm", "pin")
+        assert verify_git_provenance(root, ("input.bits",))["tracked"]["input.bits"]["git_mode"] == "100644"
+        path.write_bytes(b"10 001 01\n")
+        for label in ("WORKTREE_CHANGED", "INDEX_STAGED"):
+            if label == "INDEX_STAGED":
+                cmd("add", "input.bits")
+            try:
+                verify_git_provenance(root, ("input.bits",))
+            except AuditFailure as exc:
+                if "expected_head_blob=" not in str(exc):
+                    raise
+            else:
+                raise AuditFailure(f"test_id=H2_{label} expected=REJECT actual=ACCEPT")
+        path.write_bytes(b"10 001 00\n")
+        cmd("add", "input.bits")
+        try:
+            verify_git_provenance(root, ("untracked.bits",))
+        except AuditFailure as exc:
+            if "expected=regular_file" not in str(exc):
+                raise
+        else:
+            raise AuditFailure("test_id=H2_UNTRACKED expected=REJECT actual=ACCEPT")
+    print("H2_GIT_SOURCE_PIN_SELF_TEST_PASS cases=4")
 
 
 def inspect_pair(name: str, pos_raw: bytes, neg_raw: bytes, pos_pin: str, neg_pin: str) -> dict:
@@ -222,6 +321,7 @@ def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
 
 
 def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
+    receipt["git_source_pin"] = verify_git_provenance(root, H2_TRACKED_INPUTS)
     for tool in ("zig", "cc", "cargo", "bash"):
         if not shutil.which(tool):
             raise AuditFailure(f"test_id=H2_RUN layer=toolchain missing={tool} "
@@ -296,6 +396,7 @@ def main() -> int:
         r = preflight(args.root)
         if args.self_test:
             negative_self_test(args.root)
+            git_provenance_self_test()
         if args.run:
             r = run_both(args.root, r, args.sens_bin)
         print(json.dumps(r, ensure_ascii=False, sort_keys=True))
