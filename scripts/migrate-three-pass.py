@@ -593,7 +593,7 @@ class Resolver:
             for name, tok in bindings
         }
 
-    def head(self,tok: Tok):
+    def head(self,tok: Tok,text7=None):
         t=tok.text
         # Domain identity is (exact width, exact bits), never a flat SID8
         # number. A *resident* D7 or D10 coordinate is not automatically
@@ -632,14 +632,13 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # The same eight visible bits can be historical SID8 or CURRENT D8.
-        # Auto must BLOCK: without source-era provenance these are ambiguous.
-        # Current D8 is left exact, never rewritten through an old SID.
+        # Eight visible bits are historical SID8 here. The old guard blocked
+        # them as "ambiguous W8/D8", but no source in the corpus carries D8,
+        # so there is no live D8 reading to be ambiguous with. Owner: that
+        # check was vacuous -- auto resolves through the historical registry,
+        # exactly as the legacy era does. (Genuinely unmapped words still fail
+        # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            if self.source_era=="auto":
-                raise MigrationError(
-                    f"ambiguous W8 executable head {t}: choose --source-era legacy or current",tok
-                )
             if self.source_era=="current":
                 if t not in self.admitted_d8:
                     raise MigrationError(
@@ -711,8 +710,14 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
-        # D1/D2 or any unresolved dynamic/user function stays exactly as written.
+        # D1 words stay exact. An unresolved NAME is data -> D7 text (its
+        # glyphs, e.g. "/", live in the ratified D7 keyboard). Never leave raw
+        # text as a physical word: the T5 codec must reject that.
         self.counts["passthrough-head"]+=1
+        if t and set(t) <= {"0", "1"}:
+            return [t],"passthrough-head"
+        if text7 is not None:
+            return encode_text7_identifier(t,text7,tok),"d7-name-head"
         return [t],"passthrough-head"
 
 def frame_text7(cells, tok: Tok):
@@ -830,10 +835,13 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # text, not a number. Mathematical values are explicit D24+ envelopes only.
     # So a plain decimal source token is admitted as D7 text (no binary<->decimal
     # redefinition); explicit #d/#b/#q2 and number-width bit words stay blocked.
-    if NUMERIC_RE.fullmatch(t) and not binary_word:
+    # Owner rule: math is D24+ only. A source numeric token (plain decimal,
+    # #d/#b/#q2 literal) is a textual projection -> D7 text, never a number.
+    # Only a bare 0/1 word whose width IS a numeric D24+ domain is numeric.
+    if (NUMERIC_RE.fullmatch(t) and not binary_word
+            or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)):
         return encode_text7_identifier(t, text7, node.tok)
-    if (re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
-            or (binary_word and domain_width)):
+    if binary_word and domain_width:
         raise MigrationError(
             "unqualified numeric literal blocked: requires explicit D24+ "
             "numeric-domain identity and admitted physical encoding",
@@ -859,7 +867,9 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     # написано і пізніше fail-closed перевіркою фізичного 0/1-слова.
     if resolver is not None and t in resolver.global_binding_words:
         return list(resolver.global_binding_words[t])
-    return [t]
+    # Owner rule: unresolved names are DATA -> D7 text (all their glyphs, e.g. "/",
+    # live in the ratified D7 keyboard). Never leave raw text as a physical word.
+    return encode_text7_identifier(t, text7, node.tok)
 
 
 def encode_string(node: String,text7):
@@ -937,7 +947,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                         item.tok.text,text7,item.tok
                     ))
                     continue
-                head,_=resolver.head(item.tok)
+                head,_=resolver.head(item.tok,text7)
                 head_bits=head[0]
                 words.extend(head)
                 continue
@@ -1119,11 +1129,20 @@ def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
             tmp_name.unlink(missing_ok=True)
 
 
-def migrate_file(source: str,resolver,text7):
+def migrate_file(source: str,resolver,text7,linked_bindings=()):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
-    resolver.set_global_bindings(collect_global_bindings(forms, resolver), text7)
+    local = collect_global_bindings(forms, resolver)
+    local_names = {name for name, _tok in local}
+    # External function names are source-backed lexical bindings, not
+    # ratified callable code residents. Reject duplicate DEFINE ownership.
+    for name, tok in linked_bindings:
+        if name in local_names:
+            raise MigrationError(
+                f"linked DEFINE conflicts with local DEFINE: {name}", tok
+            )
+    resolver.set_global_bindings([*local, *linked_bindings], text7)
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)
@@ -1150,7 +1169,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
-                    help="auto блокує W8; legacy = сумісний старий SID8 лише з provenance; current = ратифікований D8")
+                    help="auto = відомий історичний SID8 через таблицю; legacy = явний історичний режим; current = точний ратифікований D8")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1276,7 +1295,7 @@ def main():
         "source_era": args.source_era,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
+        "source_era_law": "eight-bit heads resolve as historical SID8 (no D8 in corpus); legacy maps SID8; current preserves ratified D8",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
