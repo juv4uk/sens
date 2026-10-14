@@ -207,6 +207,20 @@ fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     Ok(path.with_extension("sens"))
 }
 
+/// Physical T5 is decoded in Zig for normal CLI builds. Structural D2
+/// admission remains the SAME SENS canonical word reader, with no visible
+/// source reconstruction or implicit execution in read-only commands.
+fn decode_canonical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    #[cfg(feature = "zig-transport")]
+    let words = zig_transport::decode_t5_words(bytes)?;
+    #[cfg(not(feature = "zig-transport"))]
+    let words = sens::decode_ternary_words(bytes)
+        .map_err(|e| format!("reference physical T5 rejected: {e:?}"))?;
+    sens::parse_canonical_word_sequence(&words)
+        .map_err(|e| format!("SENS canonical D2 rejected: {e}"))?;
+    Ok(words)
+}
+
 fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
         return Err("expected a physical .sens file".into());
@@ -478,17 +492,19 @@ fn execute() -> Result<(), String> {
         }
         "open" | "view" => {
             let bytes = read_sens(path)?;
-            let human = sens::open_ternary_program(&bytes)
-                .map_err(|e| format!("open .sens: {}", explain_d2_rejection(&bytes, e)))?;
-            // ЄДИНИЙ видимий роздільник — ASCII space; 2 / EOS / pad сховані.
+            let words = decode_canonical_t5_words(&bytes)
+                .map_err(|e| format!("open .sens: {e}"))?;
+            // View is an external projection of exact SENS words; it never
+            // becomes the source consumed by the canonical D2 reader.
+            let human = sens::render_ternary_words_spaced(&words);
             println!("{human}");
             Ok(())
         }
         "decode" => {
             let bytes = read_sens(path)?;
-            let words = sens::decode_ternary_program(&bytes)
-                .map_err(|e| format!("decode .sens: {e:?}"))?;
-            // Попередній вертикальний API залишаємо для інструментів.
+            let words = decode_canonical_t5_words(&bytes)
+                .map_err(|e| format!("decode .sens: {e}"))?;
+            // Vertical human projection; no Rust physical T5 decoder in Zig build.
             print!("{}", sens::render_ternary_words_vertical(&words));
             Ok(())
         }
@@ -563,15 +579,15 @@ fn execute() -> Result<(), String> {
 
         "open-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
-            let human = sens::open_ternary_program(&canonical_t5)
-                .map_err(|e| format!("canonical reader after F3: {e:?}"))?;
-            println!("{human}");
+            let words = decode_canonical_t5_words(&canonical_t5)
+                .map_err(|e| format!("SENS canonical reader after F3: {e}"))?;
+            println!("{}", sens::render_ternary_words_spaced(&words));
             Ok(())
         }
         "decode-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
-            let words = sens::decode_ternary_program(&canonical_t5)
-                .map_err(|e| format!("canonical words after F3: {e:?}"))?;
+            let words = decode_canonical_t5_words(&canonical_t5)
+                .map_err(|e| format!("canonical words after F3: {e}"))?;
             print!("{}", sens::render_ternary_words_vertical(&words));
             Ok(())
         }
@@ -741,6 +757,58 @@ mod eval_tests {
             sens::parse_binary_source_words("01").unwrap()[0].word,
         ]).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_read_only_t5_open_and_decode_preserve_words_and_reject_invalid_d2() {
+        let carrier = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        let words = decode_canonical_t5_words(carrier)
+            .expect("Zig physical T5 -> current SENS D2 reader");
+        assert_eq!(sens::render_ternary_words_spaced(&words), "10 001 00 000 01");
+        assert_eq!(
+            sens::render_ternary_words_vertical(&words),
+            "10\n001\n00\n000\n01\n"
+        );
+        // Test-only reference: not a runtime fallback in the feature build.
+        assert_eq!(words, sens::decode_ternary_program(carrier).unwrap());
+
+        let multi = include_bytes!(
+            "../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens"
+        );
+        assert_eq!(
+            decode_canonical_t5_words(multi).unwrap(),
+            sens::decode_ternary_program(multi).unwrap()
+        );
+
+        // Physical validity must not automatically imply a valid D2 program.
+        let lone_close = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
+        let err = decode_canonical_t5_words(&lone_close).expect_err("invalid D2 close");
+        assert!(err.contains("SENS canonical D2 rejected"), "{err}");
+        for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
+            assert!(decode_canonical_t5_words(invalid).is_err(),
+                "malformed T5 must not reach SENS D2");
+        }
+        // A simple source audit prevents a regression to the Rust physical
+        // T5 decoder in the human-facing open/decode commands.
+        let source = include_str!("sens-trit.rs");
+        for marker in ["\"open\" | \"view\" => {", "\"decode\" => {",
+                       "\"open-f3\" => {", "\"decode-f3\" => {"] {
+            let start = source.find(marker).expect("read-only route exists");
+            let body = &source[start..];
+            let end = body.find("\n        }").expect("route ends");
+            let route = &body[..end];
+            assert!(route.contains("decode_canonical_t5_words"),
+                "read-only route bypasses Zig ingress: {marker}");
+            assert!(!route.contains("sens::decode_ternary_program("),
+                "read-only route uses Rust physical decode: {marker}");
+            assert!(!route.contains("sens::open_ternary_program("),
+                "read-only route uses Rust physical open: {marker}");
+        }
     }
 
     #[cfg(feature = "zig-transport")]
