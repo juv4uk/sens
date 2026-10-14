@@ -82,3 +82,34 @@ D1:0. `reason-index-width-selectors-mutant.sens` відрізняється рі
 для обох свідків, фіксує фізичні SHA, робить перевірку дійсних executor receipts
 і блокує відсутні докази. Rust/Python можуть перевіряти лише транспорт і текст
 джерела, ніколи не визначати EQ, COND або семантичний вердикт.
+
+## Археологічний QUOTE — один точковий бінарний свідок
+
+**Статус: PENDING native SENS, не COVERED.** Архівний тест
+`crates/sens/tests/meta_eval.rs::quote_returns_data_unevaluated`
+повертав іменований атом `radio` через метаобчислювач; нова пара
+**не** доводить повну meta-eval або D7/surface еквівалентність.
+
+- `retired-quote-inert-d3-law.bits` — 43 точні двійкові слова:
+  D3 QUOTE утримує інертний список `(D1:0 D1:1)`; D3 CAR
+  вибирає перший елемент, D3 EQ порівнює його з D1:0, а D3 COND
+  обирає D1:1 або навмисно не-callable гілку. Усі мовні
+  очікування визначено виконуваною бінарною SENS-програмою.
+- `retired-quote-inert-d3-mutant.bits` змінює рівно один біт даних
+  `D1:0 → D1:1`, без зміни ширини чи D2-граматики.
+- `scripts/prove-retired-quote-inert.sh` механічно пакує T5 через
+  чинний codec, запускає native `target/debug/sens`, фіксує SHA-256,
+  вимагає прийняття самовердикту та відхилення однобітного мутанта.
+
+```sh
+cargo build --locked -p sens-cli --bin sens
+bash scripts/prove-retired-quote-inert.sh
+```
+
+Механічний T5-вектор: 26 байтів positive, SHA-256
+`e2550941eb34e6e86baaf20025570c0aa2afc7c59355c5ec480310c46ff4506f`;
+26 байтів mutant, SHA-256
+`f97a1abd6a9a120be5b76806424a81dc0939c2823fdaa2d835b45526f133ac31`.
+Дайджести **не** є semantic PASS. До фактичного виконання SENS
+та доведення повної рівноцінності старого твердження рядки
+coverage-ledger лишаються PENDING.
