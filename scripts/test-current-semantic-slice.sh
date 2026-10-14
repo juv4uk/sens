@@ -56,11 +56,23 @@ run_native_binary_semantics() {
     sha256sum "$selector_law" >&2
     return 1
   fi
-  if "$bindir/sens" "$selector_mutant" >/dev/null 2>&1; then
-    printf 'REGRESSION id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=noncallable-error actual=accepted\n' "$selector_mutant" >&2
-    sha256sum "$selector_mutant" >&2
+  # Не перетворювати будь-який nonzero exit (reader crash / T5 decode error)
+  # на нібито успішний семантичний негативний свідок. Рішення — native SENS.
+  local selector_mutant_diagnostic
+  if selector_mutant_diagnostic="$("$bindir/sens" "$selector_mutant" 2>&1)"; then
+    printf 'REGRESSION id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=D1-noncallable actual=accepted reproduce=%q\n' \
+      "$selector_mutant" "$bindir/sens $selector_mutant" >&2
+    sha256sum "$bindir/sens" "$selector_mutant" >&2
     return 1
   fi
+  if [[ "$selector_mutant_diagnostic" != *"domain identity is not callable under its ratified law: D1"* ]]; then
+    printf 'UNINFORMATIVE-NEGATIVE id=reason-index-width-selectors-mutant layer=eval fixture=%s expected=D1-noncallable actual=unrelated-error first_diff=unknown reproduce=%q\n' \
+      "$selector_mutant" "$bindir/sens $selector_mutant" >&2
+    printf '%s\n' "$selector_mutant_diagnostic" >&2
+    sha256sum "$bindir/sens" "$selector_mutant" >&2
+    return 1
+  fi
+  printf 'SENS_NATIVE_NEGATIVE id=reason-index-width-selectors-mutant outcome=D1-noncallable input=%s\n' "$selector_mutant"
   # One SENS-authored binary program checks three facts together:
   # D4:0011 = D4:0011; D4:0011 != D8:00001010; final predicate D1:1.
   # Old SID8 DEFMACRO and current D8 REPEAT must NEVER alias.
