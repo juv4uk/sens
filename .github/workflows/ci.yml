@@ -120,7 +120,7 @@ jobs:
           "$CLI" t5-roundtrip "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
           cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/copy.sens"
           "$CLI" f3c-pack "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/framed.senc"
-          printf '\\363\\100\\140' | cmp - "$RUNNER_TEMP/framed.senc"
+          printf '\363\100\140' | cmp - "$RUNNER_TEMP/framed.senc"
           "$CLI" f3c-check "$RUNNER_TEMP/framed.senc"
           "$CLI" f3c-unpack "$RUNNER_TEMP/framed.senc" "$RUNNER_TEMP/unpacked.sens"
           cmp "$RUNNER_TEMP/source.sens" "$RUNNER_TEMP/unpacked.sens"
@@ -131,7 +131,7 @@ jobs:
           if "$CLI" t5-check "$RUNNER_TEMP/framed.senc"; then
             echo '::error::FAIL-OPEN: F3C masqueraded as T5'; exit 1
           fi
-          printf '\\363\\000' > "$RUNNER_TEMP/invalid.senc"
+          printf '\363\000' > "$RUNNER_TEMP/invalid.senc"
           if "$CLI" f3c-unpack "$RUNNER_TEMP/invalid.senc" "$RUNNER_TEMP/mutant.sens"; then
             echo '::error::FAIL-OPEN: malformed F3C accepted'; exit 1
           fi
@@ -157,7 +157,7 @@ jobs:
           set -euo pipefail
           export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
           python3 research/zig-codecs/f3c/run_paired_bench.py \
-            --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
