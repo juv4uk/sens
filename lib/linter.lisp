@@ -128,13 +128,14 @@
            ((0101 bindings)
             (collect-free-vars body bound-vars))
            ((010 ())
-            (001000 ((binding (100 bindings)))
-              (1111
+            ((0010 (binding)
+               (1111
                 (collect-free-vars (1001 binding) bound-vars)
                 (collect-free-vars-let*
                   (1110 (001 let*) (011 bindings) body)
                   (111 (11101110 (100 binding))
-                        bound-vars)))))))))))
+                        bound-vars))))
+             (100 bindings)))))))))
 
 (0011 collect-free-vars-letrec
   (0010 (ast bound-vars)
