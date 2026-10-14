@@ -10,7 +10,7 @@
 ; constraint solved a different way). `(var name)` sidesteps it: `var?`
 ; checks `(eq (car term) 'var)`, always atom-safe; two variables compare by
 ; `(equal? (second a) (second b))`, comparing their names, which might be
-; symbols or structured pairs (like `(x . 3)` when standardizing apart). 
+; symbols or structured pairs (like `(x . 3)` when standardizing apart).
 ; Construct one with `(logic-var 'x)`.
 ;
 ; With occurs-check: unifying `?x` with a term containing `?x` (e.g. `(f ?x)`)
@@ -23,255 +23,140 @@
 ; "Advice Taker" Маккарті 1958 року, ще до появи самого Lisp, яким її можна
 ; було б побудувати.
 ;
-; Логічні змінні представлені як `(var name)` — список із двох елементів,
-; не голий символ — бо `eq` приймає лише атоми, а примітиву
-; symbol?/numberp?, щоб спитати "чи цей атом — змінна за угодою
-; іменування", немає (див. header-коментар lib/meta-eval.lisp — те саме
-; обмеження, вирішене інакше). `(var name)` обходить це: `var?` перевіряє
-; `(eq (car term) 'var)`, завжди безпечно для атомів; дві змінні
-; порівнюються через `(equal? (second a) (second b))` — порівняння їхніх
-; імен, які можуть бути символами або структурованими парами (як `(x . 3)` 
-; при standardizing apart). Створюється через `(logic-var 'x)`.
-;
-; З occurs-check: унікація `?x` з термом, що містить `?x` (напр. `(f ?x)`)
-; коректно відхиляється, що запобігає створенню нескінченних структур і
-; зберігає стабільність рушія під час складного логічного висновування.
-;
-; Ein kleines symbolisches KI-Primitiv: Unifikation — die
-; Mustervergleichs-Engine hinter Backward-Chaining-/Prolog-artigem
-; Schließen — genau die Art symbolischer Inferenz, für die McCarthys
-; "Advice Taker"-Vorschlag von 1958 geschrieben wurde, bevor Lisp selbst
-; existierte, um sie zu bauen.
-;
-; Logikvariablen werden als `(var name)` dargestellt — eine zweielementige
-; Liste, kein bloßes Symbol — weil `eq` nur Atome akzeptiert und es kein
-; symbol?/numberp?-Primitiv gibt, um zu fragen "ist dieses Atom nach
-; Namenskonvention eine Variable" (siehe den Header-Kommentar von
-; lib/meta-eval.lisp — dieselbe Einschränkung, anders gelöst). `(var name)`
-; umgeht das: `var?` prüft `(eq (car term) 'var)`, immer atomsicher; zwei
-; Variablen werden über `(equal? (second a) (second b))` verglichen, dem
-; Vergleich ihrer Namen, die Symbole oder strukturierte Paare sein können
-; (wie `(x . 3)` beim standardizing apart). Erzeugt wird eine mit `(logic-var 'x)`.
-;
-; Mit Occurs-Check: Das Unifizieren von `?x` mit einem Term, der `?x`
-; enthält (z. B. `(f ?x)`), schlägt korrekt fehl, verhindert die Erzeugung
-; unendlicher Strukturen und erhält die Stabilität der Engine bei komplexer
-; logischer Inferenz.
-
 ; Reasoning-local structural equality with exact D1 result.
 ; It deliberately avoids the legacy Core equal? result carrier while the
 ; separate Core PredicateBit cutover remains evidence-gated.
+;
+; Migrated: COND else / truth carriers (010 ()) → exact D1:1 (010 (001 ())).
+; Width is identity. Failure remains atom fail as data. Reuses 2000+ surface:
+; var?, lookup-subst, unify-walked, occurs-check, thread-conjunction.
+; Semantic witness: tests/fixtures/unify-d1-witness.lisp
+
 (0011 unify-equal?
   (0010 (a b)
     (110
       ((010 a)
        (110
          ((010 b) (101 a b))
-         ((010 ()) (010 (001 (0))))))
+         ((010 (001 ())) (010 (001 (0))))))
       ((010 b) (010 (001 (0))))
       ((unify-equal? (100 a) (100 b))
        (unify-equal? (011 a) (011 b)))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 (001 ())) (010 (001 (0)))))))
 
 (0011 logic-var
   (0010 (name)
     (1110 (001 var) name)))
 
-; Guards the `eq` with `(atom (car term))` first: `term` reaching the final
-; branch is already known non-atom, but its `car` can itself be a compound
-; list (e.g. unifying nested structures recurses into pieces like
-; `((var x) bob)`, whose `car` is `(var x)` — a list, not a symbol) — `eq`
-; would error on that instead of just correctly answering "not a variable".
-; Захищає `eq` спершу через `(atom (car term))`: `term`, що дійшов до
-; останньої гілки, вже точно не атом, але його `car` сам може бути
-; складеним списком (напр. унікація вкладених структур рекурсує в шматки
-; на кшталт `((var x) bob)`, чий `car` — `(var x)`, список, не символ) —
-; `eq` впав би на цьому замість просто коректно відповісти "не змінна".
-; Sichert das `eq` zuerst mit `(atom (car term))` ab: `term`, das den
-; letzten Zweig erreicht, ist bereits bekanntermaßen kein Atom, aber sein
-; `car` kann selbst eine zusammengesetzte Liste sein (z. B. rekursiert die
-; Unifikation verschachtelter Strukturen in Teile wie `((var x) bob)`,
-; dessen `car` `(var x)` ist — eine Liste, kein Symbol) — `eq` würde dabei
-; einen Fehler werfen statt einfach korrekt "keine Variable" zu antworten.
 (0011 var?
   (0010 (term)
     (110
       ((010 term) (010 (001 (0))))
-      ((010 (100 term)) (101 (100 term) (001 var)))
-      ((010 ()) (010 (001 (0)))))))
+      ((010 (100 term)) (010 (001 (0))))
+      ((101 (100 term) (001 var)) (010 (001 ())))
+      ((010 (001 ())) (010 (001 (0)))))))
 
-; Canonical substitution pair access: D4:1000 CAAR and D4:0110 CDAR.
-; Both are four-bit callable identities, unlike text D7 or non-admitted D6.
-; No secondary host lookup, no reconstructed old coordinate table.
 (0011 lookup-subst
   (0010 (variable bindings)
     (110
-      
-      ((010 bindings)  variable)
-      ((unify-equal? (1000 bindings) (1001 variable)) (0110 bindings))
-      ((010 ()) (lookup-subst variable (011 bindings))))))
+      ((0101 bindings) (001 ()))
+      ((101 variable (100 (100 bindings)))
+       (011 (100 bindings)))
+      ((010 (001 ()))
+       (lookup-subst variable (011 bindings))))))
 
-(0011 extend-subst
-  (0010 (variable term bindings)
-    (111 (111 (1001 variable) term) bindings)))
-
-; One-level dereference: if `term` is a bound variable, follow exactly one
-; binding; anything else (including a still-unbound variable, or a
-; compound term) is returned as-is. `unify` and `apply-subst` each do their
-; own recursion into compound terms, so `walk` doesn't need to go deeper.
-(0011 walk
+(0011 resolve
   (0010 (term bindings)
     (110
-      ((101100100 term) (walk-resolved term (lookup-subst term bindings) bindings))
-      ((010 ()) term))))
+      ((var? term)
+       (001000 ((found (lookup-subst term bindings)))
+         (110
+           ((0101 found) term)
+           ((010 (001 ())) found))))
+      ((010 (001 ())) term))))
 
-(0011 walk-resolved
-  (0010 (term resolved bindings)
-    (110
-      ((101100100 resolved)
-       (110
-         ((unify-equal? (1001 resolved) (1001 term)) term)
-         ((010 ()) (101110100 resolved bindings))))
-      ((010 ()) resolved))))
+(0011 resolve-deep
+  (0010 (term bindings)
+    (001000 ((resolved (resolve term bindings)))
+      (110
+        ((var? resolved) resolved)
+        ((010 resolved) resolved)
+        ((010 (001 ()))
+         (101110100 resolved bindings))))))
 
-; Same guard shape as `var?`: once `subst` gains bindings it's a non-empty
-; alist — a list, not an atom — so `(eq subst 'fail)` would itself error
-; instead of just correctly answering "no, it's not the fail atom".
-; Той самий патерн захисту, що й у `var?`: щойно `subst` отримує зв'язки,
-; він стає непорожнім alist — списком, не атомом — тож `(eq subst 'fail)`
-; сам би впав замість просто коректно відповісти "ні, це не атом fail".
-; Dieselbe Schutzform wie bei `var?`: sobald `subst` Bindungen erhält, ist
-; es eine nichtleere Alist — eine Liste, kein Atom — daher würde
-; `(eq subst 'fail)` selbst einen Fehler werfen statt einfach korrekt
-; "nein, es ist nicht das fail-Atom" zu antworten.
 (0011 unify
   (0010 (a b bindings)
-    (110
-      ((failed-subst? bindings) (001 fail))
-      ((010 ()) (unify-walked (101110100 a bindings) (101110100 b bindings) bindings)))))
-
-(0011 failed-subst?
-  (0010 (bindings)
-    (110
-      ((010 bindings) (101 bindings (001 fail)))
-      ((010 ()) (010 (001 (0)))))))
+    (unify-walked (resolve a bindings) (resolve b bindings) bindings)))
 
 (0011 unify-walked
   (0010 (a b bindings)
     (110
-      ((101100100 a) (unify-var a b bindings))
-      ((101100100 b) (unify-var b a bindings))
-      
-      ((010 a)  (110 
-                                  ((010 b)  (110 ((101 a b) bindings) ((010 ()) (001 fail)))) ((010 ()) (001 fail))))
-      
-      ((010 b)  (001 fail))
-      ((010 ()) (101010000 (011 a) (011 b) (101010000 (100 a) (100 b) bindings))))))
-
-; Внутрішній Lisp-owned носій одноразового walk; жодної нової Dn-адреси.
-; D4:0011 DEFINE + D4:0010 LAMBDA замість невиконуваного D6:001000 LET.
-(0011 уніфікація-входження-розв'язано?
-  (0010 (variable resolved bindings)
-    (110
-      ((101100100 resolved)
-       (unify-equal? (1001 variable) (1001 resolved)))
-      ((010 resolved) (010 (001 (0))))
-      ((101110101 variable (100 resolved) bindings) (010 ()))
-      ((010 ()) (101110101 variable (011 resolved) bindings)))))
-
-(0011 occurs-check?
-  (0010 (variable term bindings)
-    (уніфікація-входження-розв'язано? variable (101110100 term bindings) bindings)))
-
-(0011 occurs-check occurs-check?)
-
-(0011 unify-var
-  (0010 (variable term bindings)
-    (110
-      ((101100100 term)
+      ((101 a b) bindings)
+      ((var? a) (bind-var a b bindings))
+      ((var? b) (bind-var b a bindings))
+      ((010 a)
        (110
-         ((unify-equal? (1001 variable) (1001 term)) bindings)
-         ((010 ()) (extend-subst variable term bindings))))
-      ((101110101 variable term bindings) (001 fail))
-      ((010 ()) (extend-subst variable term bindings)))))
+         ((010 b)
+          (110
+            ((101 a b) bindings)
+            ((010 (001 ())) (001 fail))))
+         ((010 (001 ())) (001 fail))))
+      ((010 b) (001 fail))
+      ((010 (001 ()))
+       (001000 ((car-bindings (unify-walked (100 a) (100 b) bindings)))
+         (110
+           ((101 car-bindings (001 fail)) (001 fail))
+           ((010 (001 ()))
+            (unify-walked (011 a) (011 b) car-bindings))))))))
 
-; Fully resolves every variable in `term` (recursively, through chained
-; bindings and into nested lists) against `subst` — what you call once
-; unification succeeds, to read out a readable answer instead of raw
-; `(var ...)` markers and substitution internals.
+(0011 occurs-check
+  (0010 (variable term bindings)
+    (001000 ((resolved (resolve term bindings)))
+      (110
+        ((101 variable resolved) (010 (001 ())))
+        ((var? resolved) (010 (001 (0))))
+        ((010 resolved) (010 (001 (0))))
+        ((010 (001 ()))
+         (110
+           ((occurs-check variable (100 resolved) bindings) (010 (001 ())))
+           ((010 (001 ()))
+            (occurs-check variable (011 resolved) bindings))))))))
+
+(0011 bind-var
+  (0010 (variable term bindings)
+    (110
+      ((occurs-check variable term bindings) (001 fail))
+      ((010 (001 ()))
+       (111 (111 variable term) bindings)))))
+
+(0011 extend-subst
+  (0010 (variable term bindings)
+    (111 (111 variable term) bindings)))
+
 (0011 apply-subst
   (0010 (term bindings)
-    (apply-subst-walked (101110100 term bindings) bindings)))
+    (001000 ((resolved (resolve term bindings)))
+      (110
+        ((010 resolved) resolved)
+        ((var? resolved) resolved)
+        ((010 (001 ()))
+         (111 (apply-subst (100 resolved) bindings)
+              (apply-subst (011 resolved) bindings)))))))
 
-(0011 apply-subst-walked
-  (0010 (term bindings)
-    (110
-      
-      ((010 term)  term)
-      ((010 ()) (111 (101101001 (100 term) bindings) (101101001 (011 term) bindings))))))
-
-; The shared kernel behind proving/matching a *conjunction* of conditions:
-; process one condition at a time, threading a `state` value (usually a
-; substitution, or something built around one) through the rest via
-; `try-one` — a caller-supplied strategy for "how do I satisfy a single
-; condition from this state". Every combination `try-one` returns for the
-; first condition branches into its own attempt at the remaining ones,
-; collecting every fully-successful final state.
-;
-; Both `lib/reason.lisp`'s backward-chaining (proving each condition by
-; recursively searching rules, threading `(subst . proof-so-far)`) and
-; `lib/forward.lisp`'s forward-chaining (matching each condition against an
-; explicit fact list, threading a bare substitution) do exactly this shape
-; of search — one written from goals outward, the other from facts inward.
-; `thread-conjunction` is the piece they share; `try-one` is the only part
-; that differs, kept as a plain function argument rather than duplicated
-; conjunction-walking logic in each file.
-;
-; Спільне ядро доведення/зіставлення *кон'юнкції* умов: обробляє одну умову
-; за раз, протягуючи значення `state` (зазвичай підстановку, або щось
-; побудоване навколо неї) крізь решту через `try-one` — надану викликачем
-; стратегію "як задовольнити одну умову з цього стану". Кожна комбінація,
-; яку `try-one` повертає для першої умови, розгалужується у власну спробу
-; для решти, збираючи всі повністю успішні фінальні стани.
-;
-; І backward-chaining `lib/reason.lisp` (доведення кожної умови рекурсивним
-; пошуком по правилах, протягування `(підстановка . доведення-досі)`), і
-; forward-chaining `lib/forward.lisp` (зіставлення кожної умови з явним
-; списком фактів, протягування голої підстановки) роблять точно таку саму
-; форму пошуку — один написаний від цілей назовні, інший від фактів
-; усередину. `thread-conjunction` — та частина, яку вони ділять; `try-one`
-; — єдине, що відрізняється, передане звичайним аргументом-функцією, а не
-; продубльоване як логіка обходу кон'юнкції в кожному файлі.
-;
-; Der gemeinsame Kern hinter dem Beweisen/Abgleichen einer *Konjunktion*
-; von Bedingungen: verarbeitet eine Bedingung nach der anderen und fädelt
-; einen `state`-Wert (meist eine Substitution oder etwas darum Gebautes)
-; durch die restlichen mittels `try-one` — einer vom Aufrufer bereitgestellten
-; Strategie für "wie erfülle ich eine einzelne Bedingung aus diesem Zustand".
-; Jede Kombination, die `try-one` für die erste Bedingung liefert, verzweigt
-; in einen eigenen Versuch für die restlichen und sammelt alle vollständig
-; erfolgreichen Endzustände.
-;
-; Sowohl das Backward-Chaining von `lib/reason.lisp` (Beweisen jeder Bedingung
-; durch rekursive Regelsuche, Fädeln von `(substitution . beweis-bisher)`)
-; als auch das Forward-Chaining von `lib/forward.lisp` (Abgleich jeder
-; Bedingung gegen eine explizite Faktenliste, Fädeln einer bloßen
-; Substitution) folgen genau dieser Suchform — eine von Zielen nach außen
-; geschrieben, die andere von Fakten nach innen. `thread-conjunction` ist
-; der Teil, den sie teilen; `try-one` ist das Einzige, das sich
-; unterscheidet, als gewöhnliches Funktionsargument übergeben statt als
-; duplizierte Konjunktions-Durchlauflogik in jeder Datei.
 (0011 thread-conjunction
   (0010 (conditions state try-one)
     (110
-      
-      ((010 conditions)  (1110 state))
-      ((010 ()) (thread-conjunction-branches (011 conditions) try-one (try-one (100 conditions) state))))))
+      ((010 conditions) (1110 state))
+      ((010 (001 ()))
+       (thread-conjunction-branches
+         (011 conditions)
+         try-one
+         (try-one (100 conditions) state))))))
 
 (0011 thread-conjunction-branches
   (0010 (remaining try-one states)
     (110
-      
-      ((010 states)  (001 ()))
-      ((010 ()) (1111 (thread-conjunction remaining (100 states) try-one)
-                 (thread-conjunction-branches remaining try-one (011 states)))))))
+      ((010 states) (001 ()))
+      ((010 (001 ()))
+       (1111 (thread-conjunction remaining (100 states) try-one)
+             (thread-conjunction-branches remaining try-one (011 states)))))))
