@@ -29,13 +29,12 @@ fn readFile(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
     return bytes;
 }
 
-fn hexInto(out: []u8, bytes: []const u8) []u8 {
-    const digits = "0123456789abcdef";
-    for (bytes, 0..) |b, i| {
-        out[i * 2] = digits[b >> 4];
-        out[i * 2 + 1] = digits[b & 0xf];
-    }
-    return out[0 .. bytes.len * 2];
+/// FNV-1a 64: фіксована ширина, без великого буфера (на великих файлах hex
+/// переповнював стек і давав SIGSEGV).
+fn fnv64(bytes: []const u8) u64 {
+    var hash: u64 = 0xcbf29ce484222325;
+    for (bytes) |b| hash = (hash ^ @as(u64, b)) *% 0x100000001b3;
+    return hash;
 }
 
 fn firstDiff(a: []const u8, b: []const u8) usize {
@@ -83,8 +82,7 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
         } else if (expect_accept) {
             const original = try readFile(allocator, line);
             defer allocator.free(original);
-            var hbuf: [8192]u8 = undefined;
-            std.debug.print("OK file={s} bytes={d} sha_hex={s}\n", .{ line, original.len, hexInto(&hbuf, original) });
+            std.debug.print("OK file={s} bytes={d} fnv64={x}\n", .{ line, original.len, fnv64(original) });
         }
     }
     std.debug.print("list={s} expect={s} checked={d} failures={d}\n", .{
