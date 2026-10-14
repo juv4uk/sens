@@ -120,21 +120,23 @@
       ((my-def-compat-name? name) t)
       )))
 
+; Canon identity is an atom or (). D4 NULL/NOT project that
+; structural distinction to an exact one-bit D1 predicate for D3 COND.
 (0011 my-canon-name?
   (0010 (name)
-    (110
-      ((my-canon-identity name) t)
-      )))
+    (0100 (0101 (my-canon-identity name)))))
 
+; Canon callable names remain the five currently admitted primitives.
+; The last branch explicitly rejects all other identities as D1:NO.
 (0011 my-canon-callable-identity?
   (0010 (identity-ref)
     (110
-      ((101 identity-ref (001 atom)) t)
-      ((101 identity-ref (001 eq)) t)
-      ((101 identity-ref (001 cons)) t)
-      ((101 identity-ref (001 car)) t)
-      ((101 identity-ref (001 cdr)) t)
-      )))
+      ((101 identity-ref (001 atom)) #d1:1)
+      ((101 identity-ref (001 eq)) #d1:1)
+      ((101 identity-ref (001 cons)) #d1:1)
+      ((101 identity-ref (001 car)) #d1:1)
+      ((101 identity-ref (001 cdr)) #d1:1)
+      (#d1:1 #d1:0))))
 
 (0011 my-canon-quote-name?
   (0010 (name)
