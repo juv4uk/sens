@@ -1,0 +1,15 @@
+name: SENS codec written in SENS (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  codec-in-sens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-zig
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Виконати SENS-кодек реальним бінарником"
+        run: cargo test --locked -p sens --test codec_in_sens -- --nocapture
