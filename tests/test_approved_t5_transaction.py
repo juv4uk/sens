@@ -108,35 +108,80 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             self.assertEqual(json.loads(new_report.read_text())["summary"]["published"], 0)
 
     def test_current_d8_and_historical_sid8_must_not_be_conflated(self):
-        # Existing true historical source, already proven by the independent
-        # Core1 C1-THIRD Python+Rust oracle on main. No invented specimen.
+        # Owner's explicit 14-Oct rule removed the VACUOUS automatic W8 block
+        # (commit 61417273). The checked-in corpus carries historical SID8,
+        # not modern D8 source. Do NOT silently reinstall that obsolete guard.
+        # Instead prove the actual transport: auto == explicit historical,
+        # current D8 remains exact, and a one-bit unknown SID8 FAILS CLOSED.
         third = ROOT / "tests/fixtures/core1-third-domain-canary/third.lisp"
+        original = third.read_bytes()
         encoded = third.with_suffix(".sens").read_bytes()
         self.assertEqual(len(encoded), 38)
         rel = third.relative_to(ROOT).as_posix()
-        with tempfile.TemporaryDirectory(prefix="approved-t5-w8-") as td:
+        pin = hashlib.sha256(original).hexdigest()
+        entry = [{"path": rel, "sha256": pin}]
+        with tempfile.TemporaryDirectory(prefix="approved-t5-provenance-") as td:
             temp = Path(td)
-            pin = hashlib.sha256(third.read_bytes()).hexdigest()
-            entry = [{"path": rel, "sha256": pin}]
-            # SAFE by default: W8 is ambiguous until owner-proven provenance.
-            blocked, out, report = self.run_cli(temp, entry)
-            self.assertEqual(blocked.returncode, 1, blocked.stdout + blocked.stderr)
-            result = json.loads(report.read_text())
-            self.assertEqual(result["source_era"], "auto")
-            self.assertEqual(result["summary"]["files_blocked"], 1)
-            self.assertEqual(result["summary"]["published"], 0)
-            self.assertIn("ambiguous W8", result["files"][0]["reason"])
+            automatic, out, report = self.run_cli(temp, entry)
+            self.assertEqual(automatic.returncode, 0, automatic.stdout + automatic.stderr)
+            auto_report = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(auto_report["source_era"], "auto")
+            self.assertEqual(auto_report["summary"]["published"], 1)
+            self.assertEqual(auto_report["files"][0]["source_era"], "auto")
+            self.assertGreater(auto_report["files"][0]["passes"]["pass1-sens8"], 0)
+            self.assertEqual(auto_report["files"][0]["semantic_oracle"], "NOT_VERIFIED")
             target = out / third.relative_to(ROOT).with_suffix(".sens")
-            self.assertFalse(target.exists())
-            # Proven historical input becomes one byte-identical physical T5
-            # output only when source era is made EXPLICIT.
-            success, _, report = self.run_cli(temp, entry, source_era="legacy")
-            self.assertEqual(success.returncode, 0, success.stdout + success.stderr)
             self.assertEqual(target.read_bytes(), encoded)
-            state = json.loads(report.read_text())
-            self.assertEqual(state["source_era"], "legacy")
-            self.assertEqual(state["files"][0]["source_era"], "legacy")
-            self.assertEqual(state["summary"]["published"], 1)
+            self.assertEqual(
+                auto_report["files"][0]["physical_sha256"],
+                hashlib.sha256(encoded).hexdigest(),
+            )
+
+            # Explicit historical mode must emit exactly the same T5 bytes,
+            # without replacing the automatically published file.
+            historical, legacy_out, legacy_report = self.run_cli(
+                temp, entry, out=temp / "legacy-output",
+                report=temp / "legacy-report.json", source_era="legacy",
+            )
+            self.assertEqual(historical.returncode, 0, historical.stdout + historical.stderr)
+            self.assertEqual(
+                (legacy_out / third.relative_to(ROOT).with_suffix(".sens")).read_bytes(),
+                encoded,
+            )
+            self.assertEqual(json.loads(legacy_report.read_text())["source_era"], "legacy")
+            self.assertEqual(target.read_bytes(), encoded)
+
+        # Current D8 is a DIFFERENT exact domain from the historical
+        # successor. This tests identity preservation, not Rust/Python callability.
+        legacy, my, upper, _ = mod.load_engine_maps(ROOT)
+        foundation = mod.engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+        d8 = foundation["domains"]["D8"]["residents"]
+        tok = mod.engine.Tok("ATOM", "10000000", 0)
+        auto = mod.engine.Resolver(legacy, my, upper, "auto", d8)
+        current = mod.engine.Resolver(legacy, my, upper, "current", d8)
+        historical_words, historical_pass = auto.head(tok)
+        current_words, current_pass = current.head(tok)
+        self.assertEqual(current_words, ["10000000"])
+        self.assertEqual(current_pass, "already-exact")
+        self.assertEqual(historical_pass, "pass1-sens8")
+        self.assertNotEqual(historical_words, current_words)
+
+        # Real historical QUOTE head 00000001 -> 00000000 is a single-bit
+        # mutant with NO mapped SID8 identity. No fallback to current D8
+        # or an assumed semantic meaning may occur, even on an SHA snapshot.
+        self.assertIn(b"00000001", original)
+        mutant = original.replace(b"00000001", b"00000000", 1)
+        self.assertEqual(len(mutant), len(original))
+        changed_bits = sum(
+            (left ^ right).bit_count() for left, right in zip(mutant, original)
+        )
+        self.assertEqual(changed_bits, 1)
+        with self.assertRaisesRegex(
+            mod.engine.MigrationError, "legacy-unmapped SID8/Sens8 00000000"
+        ):
+            mod.migrate_one(third, ROOT, mod.load_engine_maps(ROOT), mutant,
+                            source_era="auto")
+        self.assertEqual(third.read_bytes(), original)
 
     def test_mixed_valid_and_invalid_never_commits_partial_output(self):
         with tempfile.TemporaryDirectory(prefix="approved-t5-block-") as td:
