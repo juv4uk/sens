@@ -201,7 +201,7 @@ jobs:
             --fixture tests/semantic/time-d1-predicate-law.sens \
             --report-file "$report" \
             -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
-      - name: E1 CLI → лише SENS: позитивний D1, однобітний мутант і CRC
+      - name: "E1 CLI → лише SENS: позитивний D1, однобітний мутант і CRC"
         shell: bash
         run: |
           set -euo pipefail
