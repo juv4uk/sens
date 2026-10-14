@@ -25,6 +25,16 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
         eval_parsed_expressions(&parsed, &mut session)
             .map_err(|e| format!("SENS definitions {name}: {e}"))?;
     }
+    // Cross-file LINK (not semantic implementation): use the exact D7
+    // canonical wire key for the *existing SENS-defined* provenance closure.
+    // Neither a new function nor a new D9 resident is created.
+    let linked = session.environment.get("provenance-list")
+        .ok_or("reason.lisp did not DEFINE provenance-list")?;
+    let provider_wire = sens::Text7::from_ascii_projection("provenance-list")
+        .map_err(|e| format!("ratified D7 provider projection: {e:?}"))?
+        .to_canonical_wire_token();
+    session.environment.define(provider_wire, linked);
+
     // Only the physical T5 bytes, never the visible narrator .lisp source,
     // may introduce narrator functions in this test session.
     let program = PhysicalT5Program::decode(physical)
@@ -32,6 +42,21 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
     eprintln!("PHYSICAL_NARRATE_FORMS={}", program.form_count());
     program.execute(&mut session)
         .map_err(|e| format!("physical narrator SENS evaluation: {e}"))?;
+
+    // The EXISTING .lisp SENS-owned self-verdict has human surface spellings;
+    // bind those as TEST ADAPTER aliases to the closures just defined by T5.
+    // Physical internal calls continue to use their exact D7 wire keys.
+    for name in [
+        "narrate-answer", "narrate-outcome", "narrate-proper-list?",
+        "provenance-derived-from",
+    ] {
+        let wire = sens::Text7::from_ascii_projection(name)
+            .map_err(|e| format!("ratified D7 call-surface projection: {e:?}"))?
+            .to_canonical_wire_token();
+        let existing = session.environment.get(&wire)
+            .ok_or_else(|| format!("T5 never defined lexical Text7 binding for {name}"))?;
+        session.environment.define(name, existing);
+    }
     let parsed = parse_mixed_exact_domain(source)
         .map_err(|e| format!("SENS self-verdict reader: {e}"))?;
     let observed = eval_parsed_expressions(&parsed, &mut session)
