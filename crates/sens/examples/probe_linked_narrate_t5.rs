@@ -57,6 +57,20 @@ fn evaluate(physical: &[u8], source: &str) -> Result<bool, String> {
             .ok_or_else(|| format!("T5 never defined lexical Text7 binding for {name}"))?;
         session.environment.define(name, existing);
     }
+    // Read-only observations to locate the first language-level divergence.
+    // No host expected-value table; the SENS fixture below still owns verdicts.
+    for (label, expression) in [
+        ("proper-empty", "(narrate-proper-list? (001 ()))"),
+        ("proper-one", "(narrate-proper-list? (001 (a)))"),
+        ("answer-empty", "(narrate-answer (001 (planet earth)) (001 (proved (planet earth) (planet earth) ())))"),
+        ("outcome-unknown", "(narrate-outcome (001 (unknown subject)))"),
+    ] {
+        let expressions = parse_mixed_exact_domain(expression)
+            .map_err(|e| format!("probe reader {label}: {e}"))?;
+        let result = eval_parsed_expressions(&expressions, &mut session)
+            .map_err(|e| format!("physical probe {label}: {e}"))?;
+        eprintln!("PHYSICAL_NARRATE_OBSERVATION {label}={}", result.value);
+    }
     let parsed = parse_mixed_exact_domain(source)
         .map_err(|e| format!("SENS self-verdict reader: {e}"))?;
     let observed = eval_parsed_expressions(&parsed, &mut session)
