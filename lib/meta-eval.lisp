@@ -122,7 +122,7 @@
     (110
       ((my-define-name? name) #d1:1)
       ((my-def-compat-name? name) #d1:1)
-      )))
+      (#d1:1 #d1:0))))
 
 ; Canon identity is an atom or (). D4 NULL/NOT project that
 ; structural distinction to an exact one-bit D1 predicate for D3 COND.
@@ -376,11 +376,9 @@
 (0011 my-lambda-form?
   (0010 (form)
     (110
-      
-      ((010 form)  (001 ()))
-      ((0100 (010 (100 form))) (my-lambda-name? (100 form)))
+      ((010 form)  #d1:0)
       ((010 (100 form))  (my-lambda-name? (100 form)))
-      )))
+      (#d1:1 #d1:0))))
 
 (0011 my-lambda-def-form?
   (0010 (form)
