@@ -61,11 +61,13 @@
 ; this evaluator maps every admitted runtime spelling to the numeric semantic ID
 ; from lib/surface/semantic-registry.lisp. This file owns only the mapping from
 ; those opaque IDs to evaluator mechanisms.
+; Canon and semantic IDs are atoms: D3:101 EQ compares their exact
+; identity. D8:11110111 EQUAL has no admitted mechanism here.
 (0011 my-semantic-id?
   (0010 (name semantic-id)
     (110
-      ((11110111 name semantic-id) t)
-      ((010 ()) (11110111 (my-semantic-id-for-surface name) semantic-id)))))
+      ((101 name semantic-id) #d1:1)
+      (#d1:1 (101 (my-semantic-id-for-surface name) semantic-id)))))
 
 ; The D6 LET binding list is data for the pinned mixed reader.
 ; Evaluate D3:110 outside that binding position so its head retains 3 bits.
@@ -73,13 +75,13 @@
 (0011 my-canon-semantic-id
   (0010 (name)
     (110
-      ((11110111 name 001) 001)
-      ((11110111 name 010) 010)
-      ((11110111 name 101) 101)
-      ((11110111 name 111) 111)
-      ((11110111 name 100) 100)
-      ((11110111 name 011) 011)
-      ((11110111 name 110) 110)
+      ((101 name 001) 001)
+      ((101 name 010) 010)
+      ((101 name 101) 101)
+      ((101 name 111) 111)
+      ((101 name 100) 100)
+      ((101 name 011) 011)
+      ((101 name 110) 110)
       (#d1:1 (my-semantic-id-for-surface name)))))
 
 (0011 my-canon-identity
