@@ -46,8 +46,8 @@
           (1110 (001 produces) produces))))
 
 ; --- Shape predicates ---------------------------------------------------
-; Migrated source-ref?, epistemic--claim-ref?, evidence?, observation? return strict D1.
-; Other shape predicates remain transitional. EQ takes only guarded atom heads.
+; Exact D1 shape predicates: source-ref?, epistemic--claim-ref?, observation?,
+; claim?, evidence?, intent?. Atomic tags are checked before D3:101 EQ.
 
 (0011 source-ref?
   (0010 (value)
@@ -90,20 +90,24 @@
 (0011 claim?
   (0010 (value)
     (110
-      ((010 value) (001 ()))
-      ((0100 (101 (100 value) (001 claim))) (001 ()))
-      ((010 (011 value)) (001 ()))
-      ((010 (1001 value)) (001 ()))
-      ((0100 (101 (100 (1001 value)) (001 statement))) (001 ()))
-      ((010 (0111 value)) (001 ()))
-      ((010 (100 (0111 value))) (001 ()))
-      ((0100 (101 (100 (100 (0111 value))) (001 source))) (001 ()))
-      ((010 (011 (0111 value))) (001 ()))
-      ((010 (100 (011 (0111 value)))) (001 ()))
-      ((0100 (101 (100 (100 (011 (0111 value)))) (001 review))) (001 ()))
-      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (proposed reviewed rejected)))) (001 ()))
-      ((110111011 (010 (011 (011 (0111 value))))) (001 ()))
-      (#d1:1 #d1:1))))
+      ((010 value) 0)
+      ((0100 (010 (100 value))) 0)
+      ((0100 (101 (100 value) (001 claim))) 0)
+      ((010 (011 value)) 0)
+      ((010 (1001 value)) 0)
+      ((0100 (010 (100 (1001 value)))) 0)
+      ((0100 (101 (100 (1001 value)) (001 statement))) 0)
+      ((010 (0111 value)) 0)
+      ((010 (100 (0111 value))) 0)
+      ((0100 (010 (100 (100 (0111 value))))) 0)
+      ((0100 (101 (100 (100 (0111 value))) (001 source))) 0)
+      ((010 (011 (0111 value))) 0)
+      ((010 (100 (011 (0111 value)))) 0)
+      ((0100 (010 (100 (100 (011 (0111 value)))))) 0)
+      ((0100 (101 (100 (100 (011 (0111 value)))) (001 review))) 0)
+      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (proposed reviewed rejected)))) 0)
+      ((0100 (010 (011 (011 (0111 value))))) 0)
+      (1 1))))
 
 (0011 evidence?
   (0010 (value)
