@@ -11,6 +11,7 @@ cli="${1:-target/debug/sens}"
 lib=lib/meta-eval.lisp
 law=tests/semantic/meta-eval-lexical-shadow-d1-law.lisp
 mutant=tests/semantic/meta-eval-lexical-shadow-d1-mutant.lisp
+mutants=tests/semantic/meta-eval-lexical-shadow-d1-mutants.lisp
 id=meta-eval-lexical-shadow-d1
 reproduce="bash scripts/prove-meta-eval-lexical-shadow-d1.sh $cli"
 if [[ ! -x "$cli" ]]; then
@@ -20,41 +21,44 @@ fi
 
 # Transport-only: exact source equality outside ONE D1 bit and D2 balance.
 # This code does not evaluate quote, binder lookup, or D1 semantic truth.
-python3 - "$law" "$mutant" <<'PY'
+python3 - "$law" "$mutant" "$mutants" <<'PY'
 from pathlib import Path
+import re
 import sys
-positive = Path(sys.argv[1]).read_text(encoding="utf-8")
-negative = Path(sys.argv[2]).read_text(encoding="utf-8")
-def forms(source: str) -> list[str]:
-    return [line.strip() for line in source.splitlines()
+def forms(path):
+    return [line.strip() for line in Path(path).read_text(encoding="utf-8").splitlines()
             if line.strip() and not line.lstrip().startswith(";")]
-p, n = forms(positive), forms(negative)
-if len(p) != 8 or len(n) != 8:
-    raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: require eight forms, actual={len(p)}/{len(n)}")
-first_expected = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:0"
-first_mutated = "(my-form-references-name? (001 (001 target)) (001 target)) #d1:1"
-if p[0].count(first_expected) != 1 or n != [p[0].replace(first_expected, first_mutated), *p[1:]]:
-    raise SystemExit("META_LEXICAL_TRANSPORT_RED: mutant must change one D1 bit, in case=1 only")
-for i, text in enumerate((*p, *n), 1):
+positive, first_mutant, negatives = map(forms, sys.argv[1:])
+if len(positive) != 8 or len(first_mutant) != 8 or len(negatives) != 8:
+    raise SystemExit("META_LEXICAL_TRANSPORT_RED: require eight forms in every source")
+pattern = re.compile(r" #d1:([01])\) #d1:1\) \(#d1:1 \(#d1:0\)\)\)$")
+def flip_expected(form):
+    matches = list(pattern.finditer(form))
+    if len(matches) != 1:
+        raise SystemExit("META_LEXICAL_TRANSPORT_RED: ambiguous D1 EQ expectation")
+    match = matches[0]
+    new = "0" if match.group(1) == "1" else "1"
+    return form[:match.start(1)] + new + form[match.end(1):]
+if negatives != [flip_expected(form) for form in positive]:
+    raise SystemExit("META_LEXICAL_TRANSPORT_RED: each negative must change exactly its own D1 bit")
+if first_mutant != [negatives[0], *positive[1:]]:
+    raise SystemExit("META_LEXICAL_TRANSPORT_RED: prior one-bit mutant provenance mismatch")
+for case, form in enumerate((*positive, *negatives), 1):
     depth = 0
-    for ch in text:
-        if ch == "(":
-            depth += 1
-        elif ch == ")":
-            depth -= 1
-        if depth < 0:
-            raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: premature D2 close form={i}")
-    if depth:
-        raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: unmatched D2 open form={i}")
-print("META_LEXICAL_TRANSPORT_PASS positive_forms=8 mutant_changed_D1_bits=1 semantic_pass=NOT_INFERRED")
+    for ch in form:
+        if ch == "(": depth += 1
+        elif ch == ")": depth -= 1
+        if depth < 0: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: early D2 close case={case}")
+    if depth: raise SystemExit(f"META_LEXICAL_TRANSPORT_RED: open D2 frame case={case}")
+print("META_LEXICAL_TRANSPORT_PASS positive_forms=8 one-bit-mutants=8 semantic_pass=NOT_INFERRED")
 PY
 
 mapfile -t forms < <(grep -v '^[[:space:]]*;' "$law" | sed '/^[[:space:]]*$/d')
-mapfile -t mutant_forms < <(grep -v '^[[:space:]]*;' "$mutant" | sed '/^[[:space:]]*$/d')
+mapfile -t mutant_forms < <(grep -v '^[[:space:]]*;' "$mutants" | sed '/^[[:space:]]*$/d')
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR id=%s path=%s version=%s reproduce=%q\n' "$id" "$cli" "$("$cli" --version)" "$reproduce"
-sha256sum "$cli" "$lib" "$law" "$mutant"
+sha256sum "$cli" "$lib" "$law" "$mutant" "$mutants"
 printf '1\n' > "$tmp/expected"
 for i in "${!forms[@]}"; do
   case_no=$((i+1))
@@ -77,21 +81,21 @@ for i in "${!forms[@]}"; do
     printf 'REGRESSION test_id=%s layer=eval fixture=%s expected=D1:1 actual=wrong-verdict first_diff=%q reproduce=%q\n' "$case_id" "$law" "$first_diff" "$reproduce" >&2
     exit 1
   fi
+  { cat "$lib"; printf '\n%s\n' "${mutant_forms[$i]}"; } > "$tmp/mutant-$case_no.lisp"
+  printf 'NATIVE_SENS_MUTANT id=%s-mutant-%s fixture=%s reproduce=%q\n' "$id" "$case_no" "$mutants" "$reproduce"
+  sha256sum "$tmp/mutant-$case_no.lisp"
+  if "$cli" "$tmp/mutant-$case_no.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
+    printf 'REGRESSION test_id=%s-mutant-%s layer=eval fixture=%s expected=D1-noncallable actual=accepted first_diff=D1-EQ-expected-bit reproduce=%q\n' "$id" "$case_no" "$mutants" "$reproduce" >&2
+    sha256sum "$tmp/mutant.out" >&2
+    exit 1
+  fi
+  if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.err"; then
+    printf 'UNINFORMATIVE-NEGATIVE test_id=%s-mutant-%s layer=eval fixture=%s expected=D1-noncallable actual=unrelated-failure first_diff=unknown reproduce=%q\n' "$id" "$case_no" "$mutants" "$reproduce" >&2
+    cat "$tmp/mutant.err" >&2
+    sha256sum "$tmp/mutant.err" "$tmp/mutant.out" >&2
+    exit 1
+  fi
+  printf 'NATIVE_SENS_NEGATIVE test_id=%s-mutant-%s expected=D1-noncallable stderr_sha256=' "$id" "$case_no"
+  sha256sum "$tmp/mutant.err"
 done
-
-{ cat "$lib"; printf '\n%s\n' "${mutant_forms[0]}"; } > "$tmp/mutant-1.lisp"
-sha256sum "$tmp/mutant-1.lisp"
-if "$cli" "$tmp/mutant-1.lisp" > "$tmp/mutant.out" 2> "$tmp/mutant.err"; then
-  printf 'REGRESSION test_id=%s-mutant-1 layer=eval fixture=%s expected=D1-noncallable actual=accepted first_diff=quoted-D1 reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
-  sha256sum "$tmp/mutant.out" >&2
-  exit 1
-fi
-if ! grep -Fq 'domain identity is not callable under its ratified law: D1' "$tmp/mutant.err"; then
-  printf 'UNINFORMATIVE-NEGATIVE test_id=%s-mutant-1 layer=eval fixture=%s expected=D1-noncallable actual=unrelated-failure first_diff=unknown reproduce=%q\n' "$id" "$mutant" "$reproduce" >&2
-  cat "$tmp/mutant.err" >&2
-  sha256sum "$tmp/mutant.err" >&2
-  exit 1
-fi
-printf 'NATIVE_SENS_NEGATIVE test_id=%s-mutant-1 stderr_sha256=' "$id"
-sha256sum "$tmp/mutant.err"
-printf 'NATIVE_SENS_PASS test_id=%s positive_forms=8 mutant=D1-noncallable authority=binary-SENS\n' "$id"
+printf 'NATIVE_SENS_PASS test_id=%s positive_forms=8 negative_forms=8 mutant=D1-noncallable authority=SENS\n' "$id"
