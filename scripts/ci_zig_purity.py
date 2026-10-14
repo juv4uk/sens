@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""CI source-hygiene guard for one Zig reference module, not a language-role ban.
+"""Check every tracked Zig source for retired pre-D8 semantic identities.
 
-The owner permits any language for any task. Only research/zig-codecs is the
-designated clean reference for physical carrier compatibility. Other Zig code
-may implement anything; normative domain meaning comes from SENS contracts.
+No restriction on what Zig can implement. The SENS ladder owns all semantic
+identity; any Zig file may handle execution, compilation or physical transport
+but may never import old flat eight-bit identity or historical dispatch.
+Ratified current D8 began 2026-10-06 (#3960), not in the historical flat era.
 """
 import argparse
 import hashlib
