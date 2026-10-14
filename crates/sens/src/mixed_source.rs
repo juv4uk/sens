@@ -271,7 +271,7 @@ fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> 
 /// it callable: dispatch still requires a concrete mechanism slot installed by
 /// its evaluated Lisp definition.
 pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Result<Vec<Expr>, LanguageError> {
-    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/result-status.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
+    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/result-status.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp" | "lib/clips-import.lisp") {
         return Err(LanguageError::new(ErrorKind::Parse, "reasoning-source exact-domain reader requires a pinned source path", Span::default()));
     }
     let base = if matches!(
