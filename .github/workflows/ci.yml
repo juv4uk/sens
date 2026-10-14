@@ -140,7 +140,7 @@ jobs:
 
 
       - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Zig→Rust SENS CLI: physical T5/F3C ABI and real native execution
+      - name: "Zig→Rust SENS CLI: physical T5/F3C ABI and real native execution"
         if: github.ref_name == 'zig-codecs-t5-f3c-bench-20261014'
         shell: bash
         run: |
