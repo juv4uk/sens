@@ -39,13 +39,17 @@ class BatchPathPreflightTests(unittest.TestCase):
         self.out.mkdir()
         self.report = self.base / "receipt.json"
 
-    def invoke(self, *, root=None, out=None, report=None):
+    def invoke(self, *, root=None, out=None, report=None, publish=False):
+        # --write requires the same Zig-only physical path as production.
+        # These collision cases MUST reject before Zig is ever compiled.
+        arguments = [sys.executable, str(SCRIPT), "missing.lisp",
+                     "--root", str(root or self.repo),
+                     "--out", str(out or self.out),
+                     "--report", str(report or self.report)]
+        if publish:
+            arguments.extend(("--write", "--zig-codec"))
         return subprocess.run(
-            [sys.executable, str(SCRIPT), "missing.lisp",
-             "--root", str(root or self.repo),
-             "--out", str(out or self.out),
-             "--report", str(report or self.report)],
-            cwd=ROOT, capture_output=True, text=True, timeout=15,
+            arguments, cwd=ROOT, capture_output=True, text=True, timeout=15,
         )
 
     def test_regular_paths_and_stable_pins(self):
@@ -68,6 +72,31 @@ class BatchPathPreflightTests(unittest.TestCase):
         self.assertIn("symlink", result.stderr)
         self.assertEqual(protected.read_bytes(), b"ORIGINAL-DO-NOT-CLOBBER")
         self.assertTrue(alias.is_symlink())
+
+    def test_existing_physical_sens_bytes_never_become_json_receipt(self):
+        # Regression: without this guard stage.replace(report) can overwrite
+        # an already-published byte-exact .sens with text, even in dry-run.
+        (self.out / "lib").mkdir()
+        protected = self.out / "lib" / "third.sens"
+        original = bytes((0x00, 0xff, 0x21, 0x03, 0x00))
+        protected.write_bytes(original)
+        for publish in (False, True):
+            with self.subTest(publish=publish):
+                outcome = self.invoke(report=protected, publish=publish)
+                self.assertEqual(outcome.returncode, 3, outcome.stdout + outcome.stderr)
+                self.assertIn("ZIG_REPORT_OUTPUT_COLLISION layer=transport", outcome.stderr)
+                self.assertEqual(protected.read_bytes(), original)
+        self.assertEqual(list((self.out / "lib").iterdir()), [protected])
+
+    def test_nested_report_inside_output_mirror_rejected_before_zig(self):
+        embedded_report = self.out / "reports" / "receipt.json"
+        for publish in (False, True):
+            with self.subTest(publish=publish):
+                outcome = self.invoke(report=embedded_report, publish=publish)
+                self.assertEqual(outcome.returncode, 3, outcome.stdout + outcome.stderr)
+                self.assertIn("ZIG_REPORT_OUTPUT_COLLISION layer=transport", outcome.stderr)
+                self.assertFalse(embedded_report.exists())
+                self.assertEqual(list(self.out.iterdir()), [])
 
     def test_dangling_report_symlink_rejected(self):
         alias = self.base / "dangling.json"
