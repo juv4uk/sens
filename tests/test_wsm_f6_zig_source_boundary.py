@@ -22,7 +22,10 @@ def check_f6_route(source: str, label: str) -> None:
     live = re.sub(r"(?m)^\s*//[^\n]*$", "", source)
     if DIRECT.search(live):
         raise ValueError(f"F6_DIRECT_RUST_SOURCE layer=transport binary={label}")
-    if '#[path = "../zig_transport.rs"]' not in live:
+    # Compile each F6 bin against the one feature-gated Zig adapter in sens-cli lib.
+    # Reject a private source module, comment ghost or missing real import.
+    if ('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;' not in live
+            or '#[path = "../zig_transport.rs"]' in live):
         raise ValueError(f"F6_NO_ZIG_MODULE layer=transport binary={label}")
     for asset in ("unify", "reason", "forward", "knowledge", "persistent_map"):
         call = f"zig_transport::{asset}_source_bytes()?"
@@ -47,6 +50,17 @@ class F6ZigBoundaryTests(unittest.TestCase):
         for file in FILES:
             with self.subTest(file=file):
                 check_f6_route((ROOT / file).read_text(encoding="utf-8"), file)
+
+    def test_commented_shared_zig_import_cannot_pass(self) -> None:
+        for file in FILES:
+            source = (ROOT / file).read_text(encoding="utf-8")
+            mutant = source.replace(
+                "use sens_cli::zig_transport;",
+                "// use sens_cli::zig_transport;", 1,
+            )
+            self.assertNotEqual(mutant, source)
+            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_NO_ZIG_MODULE"):
+                check_f6_route(mutant, file)
 
     def test_direct_rust_embed_mutant_is_rejected(self) -> None:
         for file in FILES:

@@ -6,8 +6,7 @@ use std::io::{self, Read};
 
 
 #[cfg(feature = "zig-transport")]
-#[path = "../zig_transport.rs"]
-mod zig_transport;
+use sens_cli::zig_transport;
 
 // A host may request exact SENS source bytes only from the compiled Zig ABI.
 // Zig never decides what these sources mean and no Rust fallback is permitted.
