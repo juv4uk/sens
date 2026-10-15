@@ -17,6 +17,29 @@ comptime {
     _ = abi.sens_zig_f3c_unpack;
 }
 
+// Український REPL належить SENS. Zig — лише точний носій його джерела;
+// жодного тлумачення назв, семантики чи дозвільних таблиць у Zig.
+const repl_core_asset = @embedFile("lib/repl-core.lisp");
+
+pub export fn sens_zig_repl_core_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_core_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_core_asset.len);
+    if (capacity < repl_core_asset.len) return -2;
+    @memcpy(dst[0..repl_core_asset.len], repl_core_asset[0..repl_core_asset.len]);
+    return @intCast(repl_core_asset.len);
+}
+
+test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouched" {
+    const expected: isize = @intCast(repl_core_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(undefined, 0));
+    var small: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_core_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
+    var exact: [repl_core_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
+}
+
 // A single opaque asset, not a symbol registry. The caller owns memory;
 // capacity=0 queries exact byte length. -2 is fail-closed, no partial write.
 const linter_asset = @embedFile("lib/linter.lisp");
