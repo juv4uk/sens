@@ -721,6 +721,86 @@ def verify_h1_artifact_bytes(output: Path, h1_proof: dict) -> dict[str, str]:
 
 
 
+
+def verify_cargo_sens_artifact(stdout: str, root: Path, requested: str) -> dict:
+    """Bind the native SENS runner to Cargo's *actual built binary target*.
+
+    A successful Cargo exit followed by executing an arbitrary --sens-bin
+    path does not prove that Cargo just built that file. Match Cargo's
+    machine-readable compiler-artifact record (not a host-authored guess).
+    This binds build provenance only; SENS remains the sole semantic oracle.
+    """
+    root = root.resolve(strict=True)
+    expected_manifest = root / "crates/sens-cli/Cargo.toml"
+    expected_source = root / "crates/sens-cli/src/main.rs"
+    requested_path = Path(requested)
+    if ".." in requested_path.parts:
+        raise AuditFailure(
+            "test_id=H2_CARGO_ARTIFACT layer=provenance "
+            f"expected=canonical_requested_path actual={requested!r}")
+    expected_path = (
+        requested_path if requested_path.is_absolute()
+        else root / requested_path
+    )
+    artifacts: list[dict] = []
+    finishes = 0
+    lines = stdout.splitlines()
+    if not lines:
+        raise AuditFailure(
+            "test_id=H2_CARGO_ARTIFACT layer=provenance expected=JSON_receipt actual=empty")
+    for index, line in enumerate(lines):
+        try:
+            message = json.loads(line)
+        except (ValueError, TypeError) as exc:
+            raise AuditFailure(
+                f"test_id=H2_CARGO_ARTIFACT layer=provenance "
+                f"line={index} expected=Cargo_JSON actual=non_json") from exc
+        if not isinstance(message, dict):
+            raise AuditFailure(
+                f"test_id=H2_CARGO_ARTIFACT layer=provenance "
+                f"line={index} expected=Cargo_JSON_object")
+        reason = message.get("reason")
+        if reason == "build-finished":
+            finishes += 1
+            if message.get("success") is not True or index != len(lines) - 1:
+                raise AuditFailure(
+                    "test_id=H2_CARGO_ARTIFACT layer=provenance "
+                    "expected=last_successful_build_finished")
+        elif reason == "compiler-artifact":
+            target = message.get("target")
+            if not isinstance(target, dict):
+                raise AuditFailure(
+                    "test_id=H2_CARGO_ARTIFACT layer=provenance "
+                    "expected=complete_Cargo_target")
+            if target.get("name") != "sens" or target.get("kind") != ["bin"]:
+                continue
+            # Several workspace crates could call a binary 'sens'; the
+            # package manifest and the actual compiled source must agree.
+            if (message.get("manifest_path") != str(expected_manifest) or
+                    target.get("src_path") != str(expected_source)):
+                raise AuditFailure(
+                    "test_id=H2_CARGO_ARTIFACT layer=provenance "
+                    "expected=sens-cli_manifest_and_source")
+            artifacts.append(message)
+    if finishes != 1 or len(artifacts) != 1:
+        raise AuditFailure(
+            "test_id=H2_CARGO_ARTIFACT layer=provenance "
+            f"expected=one_target_and_finish actual=targets:{len(artifacts)} "
+            f"finishes:{finishes}")
+    built = artifacts[0].get("executable")
+    if not isinstance(built, str) or built != str(expected_path):
+        raise AuditFailure(
+            "test_id=H2_CARGO_ARTIFACT layer=provenance "
+            f"expected_built_path={expected_path} actual={built!r}")
+    return {
+        "target": "sens-cli/sens",
+        "manifest": str(expected_manifest),
+        "src_path": str(expected_source),
+        "executable": built,
+        "cargo_build_finished": "SUCCESS",
+    }
+
+
 def verify_native_host_artifact(
     root: Path, sens_bin: str, expected_sha256: str | None = None,
 ) -> tuple[Path, str]:
@@ -774,8 +854,16 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     pinned = (root / ".zig-version").read_text(encoding="ascii").strip()
     zig = invoke(["zig", "version"], root, pinned,
                  validator=lambda stdout: verify_zig_version_stdout(stdout, pinned))
-    build = invoke(["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens"], root, "")
-    exe, native_sha256 = verify_native_host_artifact(root, sens_bin)
+    # Modern Cargo emits an exact compiler-artifact executable path.
+    # Bind the native host to that path, not any preexisting --sens-bin file.
+    cargo_artifact: list[dict] = []
+    build = invoke(
+        ["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens",
+         "--features", "zig-transport", "--message-format=json"],
+        root, "", validator=lambda stdout: cargo_artifact.append(
+            verify_cargo_sens_artifact(stdout, root, sens_bin)))
+    exe, native_sha256 = verify_native_host_artifact(
+        root, cargo_artifact[0]["executable"])
     c_binary_digest: list[str] = []
     c_h1: list[dict] = []
     c_h1_artifact_bytes: list[dict[str, str]] = []
@@ -835,6 +923,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         "scope": "only 3 pinned D1/D2/D3 binary self-verdicts + one-bit negatives",
         "toolchain": {"zig_version": pinned, "c_compiler": shutil.which("cc")},
         "rust_host_binary_sha256": native_sha256,
+        "cargo_native_artifact_provenance": cargo_artifact[0],
         "c_host_binary_sha256": c_binary_digest[0],
         "h1_zig_c_elf_provenance": c_h1[0],
         "h1_independently_hashed_artifacts": c_h1_artifact_bytes[0],

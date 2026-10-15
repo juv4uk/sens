@@ -72,6 +72,49 @@ fn must_pass(output: Output, label: &str) -> Output {
 }
 
 #[test]
+fn rust_zig_d3_selftest_and_one_bit_mutant_are_executed_only_via_zig() {
+    // A real compiled CLI runs the SAME SENS-owned source fixtures. Rust
+    // neither embeds these files nor interprets their domain values.
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let fixture = repo.join("tests/fixtures/semantic");
+    let backend = must_pass(
+        run(env!("CARGO_BIN_EXE_sens-trit"), &["backend"]),
+        "Zig transport backend",
+    );
+    assert_eq!(backend.stdout, b"transport=zig abi=2 semantic_authority=SENS\n");
+
+    let positive = fixture.join("exact-d3-logic-selftest.sens");
+    let negative = fixture.join("exact-d3-logic-mutant.sens");
+    let opening = |file: &Path| must_pass(
+        Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("open").arg(file).output().expect("real Zig T5 open process"),
+        "Zig T5 physical words",
+    );
+    let executing = |file: &Path| must_pass(
+        Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("eval").arg(file).output().expect("real Zig -> SENS execution"),
+        "SENS-owned binary self-verdict",
+    );
+    let law_words = String::from_utf8(opening(&positive).stdout).expect("exact binary source");
+    let mutant_words = String::from_utf8(opening(&negative).stdout).expect("exact binary mutant");
+    let law = law_words.split_whitespace().collect::<Vec<_>>();
+    let mutant = mutant_words.split_whitespace().collect::<Vec<_>>();
+    assert_eq!(law.len(), mutant.len(), "mutant must preserve exact words");
+    let changed = law.iter().zip(mutant.iter()).map(|(a, b)| {
+        assert_eq!(a.len(), b.len(), "a one-bit mutant cannot alter domain width");
+        assert!(a.bytes().chain(b.bytes()).all(|x| x == b'0' || x == b'1'));
+        a.bytes().zip(b.bytes()).filter(|(x, y)| x != y).count()
+    }).sum::<usize>();
+    assert_eq!(changed, 1, "one SENS D1 bit changes; no domain-width alias");
+
+    let good = executing(&positive);
+    let bad = executing(&negative);
+    assert!(!good.stdout.is_empty() && !bad.stdout.is_empty());
+    assert_ne!(good.stdout, bad.stdout, "native SENS self-verdict must falsify mutant");
+    assert!(good.stderr.is_empty() && bad.stderr.is_empty());
+}
+
+#[test]
 fn rust_zig_sens_real_file_link_exact_bytes_and_fail_closed() {
     let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     // This extensionless fixture is the canonical binary projection; the

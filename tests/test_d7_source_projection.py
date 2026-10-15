@@ -32,8 +32,27 @@ class D7ProjectionTests(unittest.TestCase):
         bits = "1101011"
         self.assertEqual(project(bits, role="text", namespace="en")["surface"], "k")
         self.assertEqual(project(bits, role="text", namespace="ук")["surface"], "л")
-        self.assertEqual(project(bits, role="text", namespace="san")["surface"], "क")
+        self.assertEqual(project(bits, role="text", namespace="san")["surface"], "k")
         self.assertEqual(project("0100111", role="text", namespace="ук")["surface"], "'")
+
+    def test_iast_human_d7_preserves_all_128_exact_coordinates(self):
+        owner, rows = load_current_d7()
+        self.assertEqual(len({owner[f"{i:07b}"]["iast"] for i in range(128)}), 128)
+        for index in range(128):
+            bits = f"{index:07b}"
+            label = project(bits, role="text", namespace="san")["surface"]
+            if index < 32 or index == 127:
+                self.assertIsNone(label)
+            else:
+                self.assertEqual(label, owner[bits]["iast"])
+                self.assertFalse(any("\u0900" <= ch <= "\u097f" for ch in label))
+            self.assertIsNone(rows[bits].lisp)
+        # IAST digraph and dependent vowel have NO extra machine bits.
+        self.assertEqual(project("1001011", role="text", namespace="san")["surface"], "kh")
+        self.assertEqual(project("1101011", role="text", namespace="san")["surface"], "k")
+        self.assertEqual(project("1000101", role="text", namespace="san")["surface"], "ā")
+        self.assertEqual(project("1100101", role="text", namespace="san")["surface"], "◌ā")
+        self.assertEqual(project("1001011", role="text")["width"], 7)
 
     def test_digit_has_exact_seven_bit_coordinate(self):
         digit = project("0110001", role="text", namespace="en")

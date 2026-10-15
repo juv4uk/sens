@@ -1,0 +1,182 @@
+{
+  "schema": "sens-migration-run-inventory/v2",
+  "foundation": "knowledge/d1-d9-foundation.json (D1-D9; D8=256, D9=512) -- the CORRECT one",
+  "correction": "an earlier census used knowledge/d1-d7-foundation.json (stale, D1-D7) and wrongly reported a 'no D8' blocker. D8 is owner-ratified (#3960) and wired into d1-d9.",
+  "summary": {
+    "files_seen": 740,
+    "files_skipped_paired": 0,
+    "files_written": 433,
+    "files_would_write": 0,
+    "files_blocked": 307,
+    "resolved_heads": {
+      "already-exact": 23484,
+      "pass2-my-lisp": 1667,
+      "pass3-lisp15": 42,
+      "pass4-text7-global": 3396,
+      "passthrough-head": 30476
+    }
+  },
+  "blocker_classes": [
+    {
+      "reason": "legacy-unmapped my-lisp function 'def': no current D3-D6 residen",
+      "files": 77
+    },
+    {
+      "reason": "D9 <bits>: відсутній доказ допущеного механізму виклику",
+      "files": 67
+    },
+    {
+      "reason": "D7 keyboard/v2 mixed-script identifier is ambiguous",
+      "files": 36
+    },
+    {
+      "reason": "D2 word <n> is structural control only; it cannot be ordinary da",
+      "files": 33
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function '=': no current D3-D6 resident",
+      "files": 13
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '—' U+<n> in en",
+      "files": 13
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ū'",
+      "files": 9
+    },
+    {
+      "reason": "unexpected closing parenthesis",
+      "files": 8
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ā'",
+      "files": 6
+    },
+    {
+      "reason": "D3:<bits> is EMPTY data, never an executable call head",
+      "files": 4
+    },
+    {
+      "reason": "unterminated list",
+      "files": 3
+    },
+    {
+      "reason": "empty/unsupported binary program",
+      "files": 3
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'string<?': no current D3-D6 re",
+      "files": 2
+    },
+    {
+      "reason": "D2 word <n> is structural control only; it cannot be an executab",
+      "files": 2
+    },
+    {
+      "reason": "exact D7:<bits> is D7 keyboard text/data; executable mechanism r",
+      "files": 2
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ṇ'",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'mod': no current D3-D6 residen",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'equal?': no current D3-D6 resi",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'mono-ns': no current D3-D6 res",
+      "files": 2
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ī'",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ñ'",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ṛ'",
+      "files": 1
+    },
+    {
+      "reason": "ambiguous quoted ladder surface 'MAP': [('D6', '<bits>'), ('D8',",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '∘' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'second': no current D3-D6 resi",
+      "files": 1
+    },
+    {
+      "reason": "lambda parameter must be a human identifier atom",
+      "files": 1
+    },
+    {
+      "reason": "dotted pair requires exactly one tail before )",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '↔' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '→' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "ambiguous quoted ladder surface 'map': [('D6', '<bits>'), ('D8',",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '–' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "exact D10:<bits> is D10 owner codebook without runtime admission",
+      "files": 1
+    },
+    {
+      "reason": "unqualified <n>-bit call head has no admitted domain mechanism",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'рівне?': no current D3-D6 resi",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'defmacro': no current D3-D6 re",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '«' U+00AB in uk",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '/' U+002F in uk",
+      "files": 1
+    },
+    {
+      "reason": "unterminated string",
+      "files": 1
+    },
+    {
+      "reason": "backquote syntax has no admitted migration law",
+      "files": 1
+    },
+    {
+      "reason": "comma/unquote syntax has no admitted migration law",
+      "files": 1
+    }
+  ],
+  "note": "433 mechanical candidates via the Python codec; NOT corridor-certified, not semantically admitted."
+}

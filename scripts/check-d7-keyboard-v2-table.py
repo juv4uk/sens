@@ -24,7 +24,7 @@ def run() -> None:
         unprintable=index<32 or index==127
         expected=lambda field: None if unprintable else source[field]
         if (row.uk,row.ukr,row.san,row.en,row.sym)!=(
-            expected("uk"), expected("uk"), expected("san"),
+            expected("uk"), expected("uk"), expected("iast"),
             expected("ascii"), expected("uk")
         ):
             raise ValueError(f"D7:{bits} glyph drift")
@@ -42,7 +42,7 @@ def run() -> None:
         if bits != r["bits"]:
             raise ValueError(f"D7:{bits} row order drift")
         parts = [(name, spelling(r[field], index)) for name, field in (
-            ("ук", "uk"), ("укр", "uk"), ("san", "san"),
+            ("ук", "uk"), ("укр", "uk"), ("san", "iast"),
             ("en", "ascii"), ("LISP", None), ("sym", "uk")
         ) if field is not None]
         for name, expected in parts:
@@ -50,10 +50,16 @@ def run() -> None:
                 raise ValueError(f"D7:{bits} incorrect bare/quoted {name} surface")
         if "(LISP ())" not in body:
             raise ValueError(f"D7:{bits} must not create a callable")
-    for lang in ("ascii","uk","san"):
-        glyphs=[r[lang] for r in raw]
-        if len(set(glyphs))!=128 or any(len(g)!=1 for g in glyphs):
-            raise ValueError(f"D7 {lang} mapping must be 128 distinct scalars")
+    for lang in ("ascii", "uk", "san", "iast"):
+        glyphs = [r[lang] for r in raw]
+        if len(set(glyphs)) != 128 or any(not isinstance(g, str) or not g for g in glyphs):
+            raise ValueError(f"D7 {lang} must have 128 distinct labels")
+        if lang != "iast" and any(len(g) != 1 for g in glyphs):
+            raise ValueError(f"D7 {lang} machine codec must use one scalar per cell")
+        if lang == "iast" and any(any("\u0900" <= ch <= "\u097f" for ch in g) for g in glyphs):
+            raise ValueError("D7 IAST human column contains Devanagari")
+    if raw[75]["iast"] != "kh" or raw[107]["iast"] != "k" or raw[101]["iast"] != "◌ā":
+        raise ValueError("D7 IAST independent/consonant/dependent sign pins drift")
     if raw[39]["uk"]!="'" or raw[92]["uk"]!="ґ" or raw[96]["uk"]!="є":
         raise ValueError("D7 Ukrainian apostrophe/letter pins drift")
     print("D7 KEYBOARD V2: PASS — 128/128 cells, exact JSON mapping, no callable aliases")

@@ -661,7 +661,7 @@ def check_sanskrit_surface_zig_only(
     if ("pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in ffi_source):
         raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing declared C ABI signature")
     host = active(_route_between(
-        rust_corridor, "pub fn sanskrit_surface_bytes(", "\nfn require_same_exact_words("
+        rust_corridor, "pub fn sanskrit_surface_bytes(", "\n/// Opaque full-Ukrainian REPL source;"
     ))
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or "version()?;" not in host
@@ -678,6 +678,57 @@ def check_sanskrit_surface_zig_only(
     if ('.arg("zig_transport_root.zig")' not in active(build)
             or "cargo:rerun-if-changed=../../lib/surface/sa.lisp" not in build):
         raise CorridorBlocked("SANSKRIT_ZIG_ONLY stale build asset / different Zig root")
+
+
+def check_ukr_surface_zig_only(
+    repl_source: str, rust_corridor: str, zig_root: str, build: str,
+) -> None:
+    """Full Ukrainian surface bytes come from Zig, meaning stays with SENS."""
+    def active(source: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
+    repl = active(repl_source)
+    if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/ukr\.lisp"', repl):
+        raise CorridorBlocked("UKR_ZIG_ONLY Rust source embeds Ukrainian peer surface")
+    helper = active(_route_between(
+        repl_source, "fn ukr_surface_source(", "\n// The original Sanskrit source"
+    ))
+    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
+            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
+            or "super::zig_transport::ukr_surface_bytes()?" not in helper
+            or "String::from_utf8(bytes)" not in helper
+            or "RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback" not in helper):
+        raise CorridorBlocked("UKR_ZIG_ONLY missing real Zig source / Zigless refusal")
+    loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
+    if ("Some(ukr_surface_source()?)" not in loader
+            or "ukr_source.as_deref()" not in loader
+            or 'eval_program(source, &mut session)' not in loader):
+        raise CorridorBlocked("UKR_ZIG_ONLY REPL bypasses Zig ingress or SENS eval")
+    ffi = "sens_zig_ukr_bytes_copy"
+    asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
+    if not asset_path.is_file() or asset_path.is_symlink():
+        raise CorridorBlocked("UKR_ZIG_ONLY missing separate asset C ABI")
+    declared = active(asset_path.read_text(encoding="utf-8"))
+    if "pub(super) fn sens_zig_ukr_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
+        raise CorridorBlocked("UKR_ZIG_ONLY missing exact Rust asset FFI declaration")
+    host = active(_route_between(
+        rust_corridor, "pub fn ukr_surface_bytes(", "\nfn require_same_exact_words("
+    ))
+    if (host.count(f"asset_ffi::{ffi}(") != 2
+            or "version()?;" not in host
+            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in host
+            or "if copied != required" not in host
+            or "Ok(bytes)" not in host):
+        raise CorridorBlocked("UKR_ZIG_ONLY missing two-call Zig ABI or copy verification")
+    root = active(zig_root)
+    if (root.count('const ukr_asset = @embedFile("lib/surface/ukr.lisp");') != 1
+            or f"pub export fn {ffi}(" not in root
+            or "if (capacity == 0) return @intCast(ukr_asset.len);" not in root
+            or "if (capacity < ukr_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..ukr_asset.len], ukr_asset[0..ukr_asset.len]);" not in root):
+        raise CorridorBlocked("UKR_ZIG_ONLY wrong Zig byte copy or short-buffer refusal")
+    if ('.arg("zig_transport_root.zig")' not in active(build)
+            or "cargo:rerun-if-changed=../../lib/surface/ukr.lisp" not in build):
+        raise CorridorBlocked("UKR_ZIG_ONLY stale source or wrong Zig module root")
 
 
 def check() -> list[str]:
@@ -770,6 +821,10 @@ def check() -> list[str]:
         REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
     )
     notes.append("sanskrit-zig-only-byte-carrier")
+    check_ukr_surface_zig_only(
+        REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
+    )
+    notes.append("ukr-zig-only-byte-carrier")
     return notes
 
 

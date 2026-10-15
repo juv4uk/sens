@@ -100,13 +100,13 @@ def validate_d7(authority: dict):
         if row.lisp is not None:
             fail(f"D7:{bits}: data glyph cannot mint a Lisp callable")
         expected = (
-            (source["uk"], source["uk"], source["san"],
+            (source["uk"], source["uk"], source["iast"],
              source["ascii"], source["uk"])
             if 32 <= number < 127 else (None, None, None, None, None)
         )
         if (row.uk, row.ukr, row.san, row.en, row.sym) != expected:
             fail(f"D7:{bits}: keyboard projection drift")
-    for column in ("ascii", "uk", "san"):
+    for column in ("ascii", "uk", "san", "iast"):
         if len({source[column] for source in ledger}) != 128:
             fail(f"D7: {column} glyph collision")
     return rows

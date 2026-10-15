@@ -32,7 +32,19 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
-const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
+// Full Ukrainian source bytes are transported by Zig; SENS owns their meaning.
+fn ukr_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::ukr_surface_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|e| format!("ZIG_UKR_CARRIER UTF-8 error: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback".into())
+    }
+}
 // The original Sanskrit source is Zig-owned opaque bytes, never a Rust embed.
 fn sanskrit_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -130,6 +142,11 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             })?;
         }
         // Keep the same SENS evaluation order; only source transport changes.
+        let ukr_source = if surface == ReplSurface::UkrainianFull {
+            Some(ukr_surface_source()?)
+        } else {
+            None
+        };
         let sanskrit_source = if surface == ReplSurface::Sanskrit {
             Some(sanskrit_surface_source()?)
         } else {
@@ -137,7 +154,8 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         };
         let (name, source) = match surface {
             ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
-            ReplSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
+            ReplSurface::UkrainianFull => ("ukr.lisp", ukr_source.as_deref()
+                .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian full source")?),
             ReplSurface::Sanskrit => ("sa.lisp", sanskrit_source.as_deref()
                 .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
@@ -524,6 +542,25 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_ukr_surface_preserves_actual_source_bytes() {
+        let source = ukr_surface_source().expect("real Zig full Ukrainian bytes");
+        let bytes = crate::zig_transport::ukr_surface_bytes().expect("second Zig ABI copy");
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "UKR original byte parity");
+        assert!(source.starts_with("; Повна українська peer-поверхня"), "wrong source");
+        assert!(source.contains("canonical peer namespace"), "truncated source");
+        println!("ZIG_UKR_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_ukr_surface_denies_rust_only_loading() {
+        let err = ukr_surface_source().expect_err("no direct Rust Lisp source");
+        assert!(err.contains("RUST_ZIG_ONLY"), "{err}");
+        assert!(err.contains("no Rust source fallback"), "{err}");
     }
 
     #[cfg(feature = "zig-transport")]

@@ -53,6 +53,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # D7 owner requested IAST on the human SAN surface. Machine W7 remains
+          # 7-bit and reversible historic san/v2 codec remains separately typed.
+          echo 'test_id=d7-iast-human-display layer=presentation source=knowledge/d7-keyboard-v2-ratified.json semantic_authority=SENS'
+          python3 scripts/check-d7-keyboard-v2-table.py
+          python3 scripts/check-d7-runtime-projection.py
+          python3 -m unittest discover -s tests -p test_d7_source_projection.py -v
+          cargo test --locked -p sens --test d7_runtime_presentation -- --nocapture
+          cargo test --locked -p sens text7_projection::tests::iast_renders_exact_d7_cells_without_claiming_ambiguous_inverse -- --exact --nocapture
           # Physical bytes must never be overwritten by a JSON receipt.
           # Host path safety is tested before any Rust/Zig binary is invoked.
           echo 'test_id=zig-t5-report-no-overwrite layer=transport expected=reject-report-inside-sens-mirror'
@@ -77,6 +85,8 @@ jobs:
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_contract_carrier -- --nocapture
           cargo test --locked -p sens-cli --bin sens zig_sanskrit_surface -- --nocapture
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_sanskrit_surface -- --nocapture
+          cargo test --locked -p sens-cli --bin sens zig_ukr_surface -- --nocapture
+          cargo test --locked -p sens-cli --bin sens --no-default-features zig_ukr_surface -- --nocapture
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash
@@ -208,6 +218,9 @@ jobs:
           echo 'test_id=zig-migration-publish-live-route layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_check_migration_zig_only_path.py -v
           python3 scripts/check_migration_zig_only_path.py
+          # Real current API contract: no stale SID8 resolver, no Zig bypass.
+          echo 'test_id=zig-migration-current-three-pass-api layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
           # Same-stem .sens + readonly exact-bit view is a single guarded
           # publication: reject wrong projection names and inode replacement.
           echo 'test_id=zig-migration-same-stem-inode-rollback layer=transport verdict=filesystem-only semantic_authority=SENS'

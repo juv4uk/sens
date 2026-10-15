@@ -168,6 +168,48 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaisesRegex(blocked, "SANSKRIT_ZIG_ONLY"):
                     check(altered["repl"], altered["host"], altered["zig"], altered["build"])
 
+    def test_full_ukrainian_repl_zig_rejects_embeds_and_broken_transport(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_ukr_surface_zig_only"]
+        blocked = module["CorridorBlocked"]
+        files = {
+            "repl": (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8"),
+            "host": (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8"),
+            "zig": (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8"),
+            "build": (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8"),
+        }
+        check(files["repl"], files["host"], files["zig"], files["build"])
+        mutants = (
+            ("repl", "Some(ukr_surface_source()?)",
+             'Some(include_str!("../../../lib/surface/ukr.lisp").to_owned())'),
+            ("repl", "super::zig_transport::ukr_surface_bytes()?", "Vec::new()"),
+            ("repl", '"RUST_ZIG_ONLY: Ukrainian full surface requires Zig; no Rust source fallback"',
+             '"Rust source fallback activated"'),
+            ("host", "if copied != required",
+             "if false /* unsupported success despite truncated bytes */"),
+            ("zig", '@embedFile("lib/surface/ukr.lisp")', '@embedFile("lib/surface/sa.lisp")'),
+            ("zig", "if (capacity < ukr_asset.len) return -2;", "if (false) return -2;"),
+            ("zig", "@memcpy(dst[0..ukr_asset.len], ukr_asset[0..ukr_asset.len]);",
+             "// @memcpy(dst[0..ukr_asset.len], ukr_asset[0..ukr_asset.len]);"),
+            ("build", "cargo:rerun-if-changed=../../lib/surface/ukr.lisp",
+             "cargo:rerun-if-changed=../../lib/surface/stale.lisp"),
+        )
+        for target, needle, forged in mutants:
+            with self.subTest(target=target, needle=needle):
+                src = files[target]
+                if target == "host":
+                    start = src.index("pub fn ukr_surface_bytes(")
+                    end = src.index("\nfn require_same_exact_words(", start)
+                    self.assertIn(needle, src[start:end])
+                    modified = src[:start] + src[start:end].replace(needle, forged, 1) + src[end:]
+                else:
+                    self.assertIn(needle, src, "must mutate real source")
+                    modified = src.replace(needle, forged, 1)
+                changed = dict(files)
+                changed[target] = modified
+                with self.assertRaisesRegex(blocked, "UKR_ZIG_ONLY"):
+                    check(changed["repl"], changed["host"], changed["zig"], changed["build"])
+
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         self.assertIn("sens_zig_t5_decode_be3", body)
