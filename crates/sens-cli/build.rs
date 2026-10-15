@@ -11,6 +11,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../zig_transport_root.zig");
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
+    println!("cargo:rerun-if-changed=../../language-contract.lisp");
     // E1 ABI v2 imports the existing Zig physical reader/writer. Rebuild the
     // static corridor archive when its encoding law or CRC mechanism changes.
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/e1.zig");

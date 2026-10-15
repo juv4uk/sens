@@ -184,6 +184,19 @@ fn linter_source_zig_only() -> Result<String, String> {
     }
 }
 
+/// An exact source carrier through Zig. Interpretation stays SENS-owned.
+fn contract_source_zig_only() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = zig_transport::contract_source_bytes()?;
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_CONTRACT_CARRIER UTF-8 error: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: language contract requires Zig; no Rust source fallback".into())
+    }
+}
+
 fn main() {
     // Physical .sens is the exact binary entrypoint and needs no legacy
     // bootstrap or ambient host capabilities. Reject extra flags instead of
@@ -244,7 +257,13 @@ fn main() {
     // connection rebuilds its own `contract_version` `Value` locally from
     // these two numbers instead of cloning a shared one across threads.
     let (contract_major, contract_minor) = {
-        let contract_source = include_str!("../../../language-contract.lisp");
+        let contract_source = match contract_source_zig_only() {
+            Ok(source) => source,
+            Err(error) => {
+                eprintln!("sens: {error}");
+                process::exit(2);
+            }
+        };
         let mut throwaway = Session {
             environment: Environment::root(),
         };
@@ -713,6 +732,23 @@ mod core_profile_bootstrap_tests {
         let error = linter_source_zig_only().expect_err("Zig-less Rust must not load SENS linter");
         assert!(error.contains("RUST_ZIG_ONLY"));
         assert!(error.contains("no Rust project-source fallback"));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_contract_carrier_preserves_real_original_bytes() {
+        let text = contract_source_zig_only().expect("live Zig ABI");
+        let bytes = zig_transport::contract_source_bytes().expect("second Zig ABI copy");
+        assert_eq!(text.as_bytes(), bytes.as_slice(), "exact contract bytes");
+        assert!(text.starts_with("; language-contract.lisp"), "unexpected asset");
+        println!("ZIG_CONTRACT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_contract_carrier_denies_rust_only_host() {
+        let err = contract_source_zig_only().expect_err("no Rust fallback");
+        assert!(err.contains("RUST_ZIG_ONLY"));
     }
 
     #[test]

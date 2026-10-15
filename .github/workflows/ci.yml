@@ -69,6 +69,8 @@ jobs:
           zig test zig_transport_root.zig -lc
           cargo test --locked -p sens-cli --bin sens zig_linter_carrier -- --nocapture
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_linter_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens zig_contract_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens --no-default-features zig_contract_carrier -- --nocapture
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash

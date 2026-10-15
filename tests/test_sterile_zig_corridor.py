@@ -87,6 +87,39 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaisesRegex(blocked, "LINTER_ZIG_ONLY"):
                     check(changed["main"], changed["host"], changed["zig"], changed["build"])
 
+    def test_contract_zig_carrier_rejects_direct_rust_source_and_forged_copy(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_contract_zig_only"]
+        blocked = module["CorridorBlocked"]
+        sources = {
+            "main": (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8"),
+            "host": (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8"),
+            "zig": (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8"),
+            "build": (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8"),
+        }
+        check(sources["main"], sources["host"], sources["zig"], sources["build"])
+        mutations = (
+            ("main", "let contract_source = match contract_source_zig_only()",
+             'let contract_source = include_str!("../../../language-contract.lisp")'),
+            ("main", "zig_transport::contract_source_bytes()?", "Vec::new()"),
+            ("main", '"RUST_ZIG_ONLY: language contract requires Zig; no Rust source fallback"',
+             '"rust-reference"'),
+            ("host", "if copied != required", "if false /* forged byte count */"),
+            ("zig", '@embedFile("language-contract.lisp")', '@embedFile("lib/linter.lisp")'),
+            ("zig", "if (capacity < contract_asset.len) return -2;", "if (false) return -2;"),
+            ("zig", "@memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);",
+             "// @memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);"),
+            ("build", "cargo:rerun-if-changed=../../language-contract.lisp",
+             "cargo:rerun-if-changed=../../stale-contract.lisp"),
+        )
+        for target, needle, mutant in mutations:
+            with self.subTest(target=target, needle=needle):
+                self.assertIn(needle, sources[target], "mutation must hit live code")
+                modified = dict(sources)
+                modified[target] = sources[target].replace(needle, mutant, 1)
+                with self.assertRaisesRegex(blocked, "CONTRACT_ZIG_ONLY"):
+                    check(modified["main"], modified["host"], modified["zig"], modified["build"])
+
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         self.assertIn("sens_zig_t5_decode_be3", body)

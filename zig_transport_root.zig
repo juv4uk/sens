@@ -28,6 +28,26 @@ pub export fn sens_zig_linter_bytes_copy(dst: [*]u8, capacity: usize) isize {
     return @intCast(linter_asset.len);
 }
 
+// Contract source is an opaque byte asset, never a semantic registry.
+const contract_asset = @embedFile("language-contract.lisp");
+pub export fn sens_zig_contract_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (contract_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(contract_asset.len);
+    if (capacity < contract_asset.len) return -2;
+    @memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);
+    return @intCast(contract_asset.len);
+}
+test "contract exact-byte copy and no partial output on a short buffer" {
+    const length = sens_zig_contract_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(contract_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_contract_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var destination: [contract_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_contract_bytes_copy(&destination, destination.len));
+    try std.testing.expectEqualSlices(u8, contract_asset[0..contract_asset.len], &destination);
+}
+
 test "opaque linter bytes cross Zig without partial writes or semantic registry" {
     const required = sens_zig_linter_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(linter_asset.len)), required);

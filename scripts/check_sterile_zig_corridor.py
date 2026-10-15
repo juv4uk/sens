@@ -520,6 +520,42 @@ def check_linter_zig_only(
         raise CorridorBlocked("LINTER_ZIG_ONLY Cargo must build root Zig module and rebuild on source change")
 
 
+def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str, build: str) -> None:
+    """Physical source bytes only; exact contract meaning remains SENS-owned."""
+    def active(source: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
+    main = active(main_source)
+    host = active(rust_corridor)
+    root = active(zig_root)
+    if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*language-contract\.lisp"', main):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY direct Rust project contract embed")
+    helper = active(_route_between(main_source, "fn contract_source_zig_only(", "\nfn main() {"))
+    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
+            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
+            or "zig_transport::contract_source_bytes()?" not in helper
+            or "String::from_utf8(bytes)" not in helper
+            or "RUST_ZIG_ONLY: language contract requires Zig; no Rust source fallback" not in helper):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY missing live Zig-only helper / fail-closed refusal")
+    if ("let contract_source = match contract_source_zig_only()" not in main
+            or 'let quoted = format!("(quote {contract_source})");' not in main):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY main CLI bypassed Zig carrier or SENS quote")
+    ffi = "sens_zig_contract_bytes_copy"
+    if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
+            or "pub fn contract_source_bytes()" not in host
+            or "let copied = unsafe" not in host
+            or "if copied != required" not in host):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY missing checked Rust FFI egress")
+    if (root.count('const contract_asset = @embedFile("language-contract.lisp");') != 1
+            or f"pub export fn {ffi}(" not in root
+            or "if (capacity == 0) return @intCast(contract_asset.len);" not in root
+            or "if (capacity < contract_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);" not in root):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY Zig source/capacity/memcpy bypass")
+    if ('.arg("zig_transport_root.zig")' not in active(build)
+            or "cargo:rerun-if-changed=../../language-contract.lisp" not in build):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY stale Cargo ABI contract asset")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -602,6 +638,8 @@ def check() -> list[str]:
         raise CorridorBlocked("LINTER_ZIG_ONLY missing regular repository-root Zig asset module")
     check_linter_zig_only(main_source, body, ROOT_ZIG.read_text(encoding="utf-8"), build)
     notes.append("linter-zig-only-byte-carrier")
+    check_contract_zig_only(main_source, body, ROOT_ZIG.read_text(encoding="utf-8"), build)
+    notes.append("contract-zig-only-byte-carrier")
     return notes
 
 
