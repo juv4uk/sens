@@ -234,6 +234,29 @@ test "knowledge SENS source exact Zig C ABI bytes; no-clobber on short buffer" {
 
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
+// Original SENS persistent-map source: opaque Zig transport, no semantic registry.
+const persistent_map_asset = @embedFile("lib/persistent-map.lisp");
+pub export fn sens_zig_persistent_map_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (persistent_map_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(persistent_map_asset.len);
+    if (capacity < persistent_map_asset.len) return -2;
+    @memcpy(dst[0..persistent_map_asset.len], persistent_map_asset[0..persistent_map_asset.len]);
+    return @intCast(persistent_map_asset.len);
+}
+
+test "persistent-map opaque Zig asset preserves original bytes and refuses short copy" {
+    const required = sens_zig_persistent_map_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(persistent_map_asset.len)), required);
+    var short: [1]u8 = .{0xa5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_persistent_map_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xa5), short[0]);
+    var result: [persistent_map_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_persistent_map_bytes_copy(&result, result.len));
+    try std.testing.expectEqualSlices(u8, persistent_map_asset[0..persistent_map_asset.len], &result);
+}
+
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");
 pub export fn sens_zig_islands_manifest_bytes_copy(dst: [*]u8, capacity: usize) isize {
     if (islands_manifest_asset.len == 0) return -1;
