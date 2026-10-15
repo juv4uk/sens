@@ -78,7 +78,10 @@ def main() -> None:
         executable = build_transport(Path(temp))
         evidence = verify_t5(executable, GOLDEN_T5)
         expected = hashlib.sha256(GOLDEN_T5).hexdigest()
-        if evidence["physical_sha256"] != expected or evidence["zig_version"] != "0.16.0":
+        binary_sha = sha(executable.read_bytes())
+        if (evidence["physical_sha256"] != expected or
+                evidence["zig_version"] != "0.16.0" or
+                evidence.get("zig_binary_sha256") != binary_sha):
             raise AssertionError(
                 f"ZIG_BRIDGE_MISMATCH id=zig-migration-bridge-t5-exact-physical "
                 f"layer=transport expected_sha256={expected} actual={evidence}"
@@ -87,6 +90,34 @@ def main() -> None:
             assert_physical_roundtrip(executable, name, bytes.fromhex(hex_bytes))
         for name, hex_bytes in NEGATIVE_PHYSICAL.items():
             assert_physical_rejected(executable, name, bytes.fromhex(hex_bytes))
+        # Negative control: a non-Zig program can copy input bytes and exit 0;
+        # the bridge must refuse it BEFORE invoking either fake command.
+        fake = Path(temp) / "fake-zig"
+        fake.write_text(
+            '#!/bin/sh\n'
+            'if [ "$1" = "t5-coordinates-roundtrip" ]; then cp "$2" "$3"; fi\n'
+            'exit 0\n', encoding="utf-8"
+        )
+        fake.chmod(0o755)
+        try:
+            verify_t5(fake, GOLDEN_T5)
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_UNATTESTED_BINARY" not in str(exc):
+                raise AssertionError(f"wrong fake binary rejection: {exc}") from exc
+        else:
+            raise AssertionError("ZIG_CODEC_FAKE_BINARY_RECEIPT accepted foreign executable")
+
+        # A symlink to a genuine build must not silently impersonate it.
+        linked = Path(temp) / "linked-zig"
+        linked.symlink_to(executable)
+        try:
+            verify_t5(linked, GOLDEN_T5)
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_BINARY_NOT_REGULAR" not in str(exc):
+                raise AssertionError(f"wrong link rejection: {exc}") from exc
+        else:
+            raise AssertionError("ZIG_CODEC_LINKED_BINARY_RECEIPT accepted symlink")
+
         # Distinct widths produce distinct canonical bytes, even with a common
         # low-order value. Physical bytes never imply function callability.
         if bytes.fromhex(GOLDEN_WIDTH_VECTORS["d1_one"]) == bytes.fromhex(
@@ -135,12 +166,25 @@ def main() -> None:
                 "ZIG_BRIDGE_INVALID_ACCEPTED id=zig-migration-bridge-t5-exact-physical "
                 "layer=transport expected=reject-ff actual=accepted"
             )
+
+        # Negative control: modification AFTER Zig built the executable must
+        # invalidate the session receipt before executing any byte fixture.
+        with executable.open("ab") as stream:
+            stream.write(b"\n")
+        try:
+            verify_t5(executable, GOLDEN_T5)
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_BINARY_CHANGED" not in str(exc):
+                raise AssertionError(f"wrong mutated binary rejection: {exc}") from exc
+        else:
+            raise AssertionError("ZIG_CODEC_MUTATED_BINARY_RECEIPT accepted changed executable")
     print(f"ZIG_BRIDGE_PASS id=zig-migration-bridge-t5-exact-physical "
           f"layer=transport zig=0.16.0 physical_sha256={expected} "
           "first_difference=NONE malformed_ff=REJECTED d10_transport=ACCEPTED "
           "d10_executable=REJECTED overwidth_d15=REJECTED "
           f"width_goldens={len(GOLDEN_WIDTH_VECTORS)} "
-          f"negative_gates={len(NEGATIVE_PHYSICAL) + 2} "
+          f"negative_gates={len(NEGATIVE_PHYSICAL) + 5} "
+          f"zig_binary_sha256={binary_sha} "
           "d1_d2_distinct=YES d2_zero_and_one=YES "
           "canonical_truncation_requires_external_sha=YES "
           "semantic_authority=SENS")
