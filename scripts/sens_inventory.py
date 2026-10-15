@@ -145,7 +145,7 @@ def inspect(root: Path = ROOT, roots: tuple[str, ...] = ("lib", "tests/fixtures"
                     row["status"] = GOOD_UK
                     row["reason"] = "bounded D1/D3 UK parity; runtime and original oracle still pending"
                 except ProjectionBlocked as error:
-                    row["uk_blocker"] = str(error)
+                    row["uk_empty"] = str(error)
             except (ViewError, SensT5Error, InventoryBlocked, OSError, ValueError) as error:
                 row["status"] = BLOCKED
                 row["reason"] = str(error)

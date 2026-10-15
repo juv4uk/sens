@@ -45,7 +45,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -65,7 +65,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -85,7 +85,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -105,7 +105,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -125,7 +125,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -145,7 +145,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -165,7 +165,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -185,7 +185,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -205,7 +205,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -225,7 +225,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -245,7 +245,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -265,7 +265,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -285,7 +285,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -305,7 +305,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -325,7 +325,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -345,7 +345,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -365,7 +365,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -385,7 +385,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -405,7 +405,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -425,7 +425,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -445,7 +445,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -465,7 +465,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -485,7 +485,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -505,7 +505,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -525,7 +525,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -545,7 +545,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -565,7 +565,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -585,7 +585,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -605,7 +605,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -625,7 +625,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -645,7 +645,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D5",
@@ -665,7 +665,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -685,7 +685,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -705,7 +705,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -725,7 +725,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -745,7 +745,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -765,7 +765,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -785,7 +785,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -805,7 +805,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -825,7 +825,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -845,7 +845,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -865,7 +865,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -885,7 +885,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -905,7 +905,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -925,7 +925,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -945,7 +945,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -965,7 +965,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -985,7 +985,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1005,7 +1005,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1025,7 +1025,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1045,7 +1045,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1065,7 +1065,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1085,7 +1085,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1105,7 +1105,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1125,7 +1125,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1145,7 +1145,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1165,7 +1165,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1185,7 +1185,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1205,7 +1205,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1225,7 +1225,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1245,7 +1245,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1265,7 +1265,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1285,7 +1285,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1305,7 +1305,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1325,7 +1325,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1345,7 +1345,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1365,7 +1365,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1385,7 +1385,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1405,7 +1405,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1425,7 +1425,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1445,7 +1445,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1465,7 +1465,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1485,7 +1485,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1505,7 +1505,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1525,7 +1525,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1545,7 +1545,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1565,7 +1565,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1585,7 +1585,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1605,7 +1605,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1625,7 +1625,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1645,7 +1645,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1665,7 +1665,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1685,7 +1685,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1705,7 +1705,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1725,7 +1725,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1745,7 +1745,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1765,7 +1765,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1785,7 +1785,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1805,7 +1805,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1825,7 +1825,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1845,7 +1845,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1865,7 +1865,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1885,7 +1885,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1905,7 +1905,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1925,7 +1925,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     },
     {
       "domain": "Core.D6",
@@ -1945,7 +1945,7 @@
       "derived_lisp": "UNMEASURED",
       "compiler_support": "UNMEASURED",
       "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-      "blocker": "LEGACY-SENS8-ONLY-CARRIER"
+      "()": "LEGACY-SENS8-ONLY-CARRIER"
     }
   ]
 }

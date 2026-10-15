@@ -3,9 +3,9 @@
 Власник **не санкціонував file HOLD**. Підхід «автоматично зупинити й відкотити `compiler-nucleus.lisp` до виправлення alias-таблиці» з історичного опису нижче відкликано як адміністративне блокування. `scripts/migrate-active-lib-exact.sh` тепер **не виконує `git checkout --` і не заморожує файл**; він залишає спробу перепису для ремонту, фіксує `REPAIR_REQUIRED` і дає ненульовий код завершення за реальної помилки. Неправильна семантика не отримує PASS, але робота над нею продовжується. Нижче збережено історичний опис відмови як доказ, а не чинний наказ.
 
 ---
-# Migration blocker → solution (design note)
+# Migration () → solution (design note)
 
-## The blocker (precise)
+## The () (precise)
 
 The exact-domain migration of `lib/compiler-nucleus.lisp` by the canonical
 converter `sens-to-sens` is **not identity-preserving**. After the rewrite:
@@ -71,7 +71,7 @@ Stop *migrating* files and make **exactness the default at the source of truth**
 - the gate then becomes trivial — there is nothing "convertible" because sources
   are born exact.
 
-This turns the recurring blocker into a non-event.
+This turns the recurring () into a non-event.
 
 ## Concrete next steps
 

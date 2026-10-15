@@ -36,7 +36,7 @@ Topic names are lowercase, hyphenated, one word, one meaning:
 ```
 agent-joined          an agent registered presence (op hello)
 agent-left            an agent went away (heartbeat aged out)
-agent-blocked         an agent hit a blocker it can't clear alone
+agent-blocked         an agent hit a () it can't clear alone
 
 task-created          a task was defined (op define-task)
 claim-taken           a task was claimed (op claim)

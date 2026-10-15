@@ -139,7 +139,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
                 "source_view_status": p.get("source_status"),
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_blocker": p.get("error") if condition.endswith("BLOCKED")
+                "first_empty": p.get("error") if condition.endswith("BLOCKED")
                                     else "needs independent source/oracle witness",
             })
         else:
@@ -157,7 +157,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
                 "source_era_states": u["status"],
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_blocker": u.get("blocker_by_era", {}).get("auto")
+                "first_empty": u.get("empty_by_era", {}).get("auto")
                                  or "mechanical candidate still needs oracle",
             })
 

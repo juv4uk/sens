@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned, non-overlapping #4458 host-I/O blockers; never fake ready .sens."""
+"""Pinned, non-overlapping #4458 host-I/O empties; never fake ready .sens."""
 from __future__ import annotations
 
 import hashlib

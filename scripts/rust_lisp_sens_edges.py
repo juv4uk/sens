@@ -88,8 +88,111 @@ def production_rust_files(root: Path, tracked: set[str]) -> list[Path]:
     return files
 
 
+# Production scope is a Rust cfg condition, not merely a filesystem path.
+# Preserve offsets so the line in a failed receipt still points to real source.
+_CFG_TEST_ITEM = re.compile(
+    r"#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]\s*(?:pub\s+)?(?:mod|fn)\s+\w+\b"
+)
+_RAW_STRING = re.compile(r'(?:br|r)(?P<hashes>#{0,16})"')
+_CHAR_LITERAL = re.compile(r"'(?:\\.|[^'\\\n])'")
+
+
+def _code_shape(source: str) -> str:
+    """Mask Rust comments/string/char literals, keeping braces and offsets."""
+    output = list(source)
+    size = len(source)
+
+    def erase(first: int, last: int) -> None:
+        for offset in range(first, last):
+            if output[offset] != "\n":
+                output[offset] = " "
+
+    i = 0
+    while i < size:
+        start = i
+        if source.startswith("//", i):
+            end = source.find("\n", i + 2)
+            i = size if end < 0 else end
+            erase(start, i)
+            continue
+        if source.startswith("/*", i):
+            depth = 1
+            i += 2
+            while i < size and depth:
+                if source.startswith("/*", i):
+                    depth += 1
+                    i += 2
+                elif source.startswith("*/", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            erase(start, i)
+            continue
+        raw = _RAW_STRING.match(source, i)
+        if raw:
+            terminator = '"' + raw.group("hashes")
+            end = source.find(terminator, raw.end())
+            i = size if end < 0 else end + len(terminator)
+            erase(start, i)
+            continue
+        if source[i] == '"':
+            i += 1
+            while i < size:
+                if source[i] == "\\":
+                    i += 2
+                elif source[i] == '"':
+                    i += 1
+                    break
+                else:
+                    i += 1
+            i = min(i, size)
+            erase(start, i)
+            continue
+        char = _CHAR_LITERAL.match(source, i)
+        if char:
+            i = char.end()
+            erase(start, i)
+            continue
+        i += 1
+    return "".join(output)
+
+
+def _production_source(source: str) -> str:
+    """Exclude only proven #[cfg(test)] items; uncertain syntax stays RED."""
+    shape = _code_shape(source)
+    output = list(source)
+    for attr in _CFG_TEST_ITEM.finditer(shape):
+        start = attr.start()
+        opened = shape.find("{", attr.end())
+        ended = shape.find(";", attr.end())
+        if opened < 0 or (ended >= 0 and ended < opened):
+            if ended < 0:
+                continue  # malformed or unsupported: fail closed
+            stop = ended + 1
+        else:
+            depth = 0
+            stop = -1
+            for index in range(opened, len(shape)):
+                if shape[index] == "{":
+                    depth += 1
+                elif shape[index] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        stop = index + 1
+                        break
+            if stop < 0:
+                continue  # unmatched brace: do not silently hide source
+        for index in range(start, stop):
+            if output[index] != "\n":
+                output[index] = " "
+    return "".join(output)
+
+
 def scan_file(rs_path: Path, root: Path) -> list[dict]:
-    text = rs_path.read_text(encoding="utf-8", errors="replace")
+    original = rs_path.read_text(encoding="utf-8", errors="replace")
+    text = _production_source(original)
+    live = _code_shape(text)
     rel_rs = rs_path.relative_to(root).as_posix()
     edges: list[dict] = []
     includes = [
@@ -103,6 +206,10 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
         )
         includes.append((m.start(), m.group("kind"), raw))
     for position, kind, raw in sorted(includes):
+        # A comment, string literal, or cfg(test) body is no production edge.
+        # The live macro name must exist at the identical source offset.
+        if live[position:position + len(kind)] != kind:
+            continue
         if not is_sens_path(raw):
             continue
         resolved = (rs_path.parent / raw).resolve()

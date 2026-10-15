@@ -67,11 +67,11 @@ class MigrationDiffTests(unittest.TestCase):
         self.assertEqual(d["summary"]["semantically_admitted_by_this_tool"], 0)
         self.assertEqual(d["summary"]["unchanged_unpaired_sources"], 1)
 
-    def test_first_blocker_change_not_program_migration(self):
+    def test_first_empty_change_not_program_migration(self):
         a = report(row("lib/core.lisp", reason="legacy W8 ambiguity"))
         b = report(row("lib/core.lisp", reason="unbound dynamic local"))
         d = delta.compare(a, b)
-        self.assertEqual(d["changes"][0]["kind"], "FIRST_BLOCKER_CHANGED_NOT_MIGRATED")
+        self.assertEqual(d["changes"][0]["kind"], "FIRST_EMPTY_CHANGED_NOT_MIGRATED")
         self.assertEqual(d["summary"]["new_pairs_pending_proof"], 0)
 
     def test_candidate_is_not_oracle(self):

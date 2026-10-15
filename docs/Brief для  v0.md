@@ -74,7 +74,7 @@ Do not create an `epistemic-error` type or a new result protocol. Boolean predic
 
 | Fixture | Expected property |
 |---|---|
-| CML build blocker | Missing `process:cargo` yields false capability-satisfaction; existing `make-blocked` may describe the result outside this predicate. |
+| CML build () | Missing `process:cargo` yields false capability-satisfaction; existing `make-blocked` may describe the result outside this predicate. |
 | Sarvam transcript proposal | A machine output is a `proposed` claim/observation with external receipt; it does not enter World automatically. |
 | Host observation | Effective host snapshot remains distinct from an agent’s self-declaration. |
 | Reasoning proof | `evidence` accepts `(proof ...)` source-ref without forcing a digest. |
