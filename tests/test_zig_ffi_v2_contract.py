@@ -428,7 +428,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
             "fn sens_zig_linter_bytes_copy", 1,
         )
         self.assertNotEqual(mutated, self.asset_zig)
-        with self.assertRaisesRegex(ValueError, "asset_signature=sens_zig_linter_bytes_copy"):
+        with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_linter_bytes_copy"):
             check_root_asset_corridor(mutated, self.asset_rust, self.rust)
 
     def test_root_asset_copy_wrong_rust_pointer_constness_rejected(self):
