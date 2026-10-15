@@ -1,39 +1,4 @@
 {
   "schema": "sens-d8-ratification-proposal/v1",
-  "status": "PROPOSAL — NOT RATIFIED. Owner signature required.",
-  "why": "D3-D6 are 100% occupied (8/8, 16/16, 32/32, 64/64); D8 is absent from the foundation (current_domains = D1..D7). So no new identity has anywhere to live -- the migrator fails closed. This is a space limit, not a code defect.",
-  "what_to_ratify": {
-    "domain": "D8",
-    "width_bits": 8,
-    "coordinates_total": 256,
-    "effect": "gives room for the retired heads and the surfaces below; unblocks A2 and, with a call law, A1."
-  },
-  "retired_heads_needing_a_current_D8_coordinate": [
-    "00000000",
-    "00000001",
-    "00000010",
-    "00001100",
-    "00101100",
-    "00101110",
-    "01001011",
-    "10000100",
-    "11110100",
-    "11110110",
-    "11110111"
-  ],
-  "surfaces_needing_a_current_resident": [
-    "defmacro",
-    "reason",
-    "string->symbol",
-    "symbol?",
-    "unify",
-    "unix-time-now",
-    "порожній-текст?",
-    "рівне?"
-  ],
-  "note": "The coordinates themselves are the owner's decision. This file only enumerates what needs one and the exact bit strings seen in the live tree, so the act is one signature, not a research task.",
-  "measured_from": {
-    "schema": "sens-migration-run-inventory/v1",
-    "lib": "132 seen / 58 written / 74 blocked"
-  }
+  "status": "WITHDRAWN — based on a wrong foundation (d1-d7 instead of d1-d9). D8 is already owner-ratified (#3960) and wired into knowledge/d1-d9-foundation.json. See research/ratification-acts-2026-10-15.md.
 }
