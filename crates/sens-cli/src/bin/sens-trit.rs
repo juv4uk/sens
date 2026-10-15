@@ -595,6 +595,20 @@ mod rust_zig_only_cutover_tests {
         for command in ["encode", "verify", "open", "eval", "encode-d7-uk", "decode-f3"] {
             require_zig_transport(command).expect("Zig-enabled CLI admits physical commands");
         }
+        let physical = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        // Real physical fixture, restored by the linked Zig ABI (not a mock).
+        let words = decode_canonical_t5_words(physical)
+            .expect("Zig decode and SENS D2 acceptance");
+        assert_eq!(
+            words.iter().map(|word| word.width()).collect::<Vec<_>>(),
+            vec![2, 3, 2, 3, 2]
+        );
+        let replay = zig_transport::encode_t5_direct(&words)
+            .expect("Zig egress preserves the original physical bytes");
+        assert_eq!(replay.as_slice(), physical);
+        assert!(decode_canonical_t5_words(&[0xf3]).is_err());
     }
 }
 
