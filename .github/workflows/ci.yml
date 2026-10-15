@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
           # HEAD^ is required by the fail-closed D3 source-delta guard.
           fetch-depth: 2
-      - name: RELEASE-ADMISSION — точковий негатив F2/F4: байти не є семантичним PASS
+      - name: "RELEASE-ADMISSION — точковий негатив F2/F4: байти не є семантичним PASS"
         shell: bash
         run: |
           set -euo pipefail
