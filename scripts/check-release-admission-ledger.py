@@ -13,7 +13,8 @@
 
 Fail-closed: відсутній ledger, невідома схема, зіпсований запис, дубль `sens`,
 відсутнє будь-яке з F1–F4, або розбіжність typed_word_sha256 → НЕ admitted.
-Порожній ledger → 0/0.
+Порожній ledger → 0/0. Справжній T5 digest та формально правильні F1–F4 refs
+ще не є незалежним семантичним SENS-свідком; до такого proof admission = 0.
 """
 from __future__ import annotations
 
@@ -122,10 +123,11 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
         if ratified == 1:
             form_candidates.append(sens)
 
-    # A shape-only/draft check never authorizes physical release admission.
-    # Keep the form candidate count separately for review, but emit no
-    # executable proof or admitted_sens until content verification is enabled.
-    verified = sorted(form_candidates) if verify_content else []
+    # Matching T5 bytes prove physical identity only. F1–F4 references above
+    # are checked for SHAPE, not for a verified independent SENS oracle.
+    # Owner ratification is not executable admission: never inflate these
+    # counts until the native positive/negative evidence verifier exists.
+    verified: list[str] = []
     return {
         "schema": SCHEMA,
         "validation_mode": "content_verified" if verify_content else "form_only",
@@ -156,6 +158,13 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
     if args.no_verify_content:
         print(f"RELEASE_ADMISSION_FORM_ONLY entries={receipt['entries']} candidates={receipt['form_candidates']} admitted=0")
+    elif receipt["release_admitted"] == 0:
+        print(
+            "RELEASE_ADMISSION_BLOCKED: T5 digest + F1-F4 refs не доводять "
+            "незалежний SENS-оракул; release_admitted=0",
+            file=sys.stderr,
+        )
+        return 1
     else:
         print(f"RELEASE_ADMISSION_PASS entries={receipt['entries']} admitted={receipt['release_admitted']}")
     return 0
