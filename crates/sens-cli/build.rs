@@ -8,6 +8,11 @@ fn main() {
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/f3c/f3c.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport_abi.zig");
+    // E1 ABI v2 imports the existing Zig physical reader/writer. Rebuild the
+    // static corridor archive when its encoding law or CRC mechanism changes.
+    println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/e1.zig");
+    println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/e1_writer.zig");
+    println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/fields.zig");
     // Zig is resolved from the explicit ZIG override or from PATH.
     // Without these triggers Cargo could silently reuse a stale Zig archive
     // after its compiler selection changes, bypassing the pinned version probe.
