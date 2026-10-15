@@ -114,5 +114,78 @@ class SameStemPublicationTest(unittest.TestCase):
         self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
         self.assertFalse(self.view.exists())
 
+    def test_successful_writer_with_wrong_bytes_cannot_publish_view(self):
+        # A successful write is insufficient for verified T5 publication.
+        def writes_wrong_bytes(path, data):
+            self.write_new(path, b"wrong" if path == self.carrier else data)
+
+        with self.assertRaisesRegex(OSError, "PAIR_CARRIER_CREATION_UNVERIFIED"):
+            self.publish(writes_wrong_bytes)
+        self.assertEqual(self.carrier.read_bytes(), b"wrong")
+        self.assertFalse(self.view.exists())
+
+    def test_successful_writer_with_symlink_carrier_cannot_publish_view(self):
+        # An alias can contain the same bytes while being a different object.
+        target = self.root / "external"
+        target.write_bytes(self.carrier_bytes)
+
+        def writes_symlink(path, data):
+            if path == self.carrier:
+                path.symlink_to(target)
+            else:
+                self.write_new(path, data)
+
+        with self.assertRaisesRegex(OSError, "PAIR_CARRIER_CREATION_UNVERIFIED"):
+            self.publish(writes_symlink)
+        self.assertTrue(self.carrier.is_symlink())
+        self.assertEqual(target.read_bytes(), self.carrier_bytes)
+        self.assertFalse(self.view.exists())
+
+
+
+    def test_view_writer_returns_success_but_stores_wrong_bytes(self):
+        def incorrect_view(path, data):
+            self.write_new(path, b"wrong view" if path == self.view else data)
+        with self.assertRaisesRegex(OSError, "PAIR_VIEW_CREATION_UNVERIFIED"):
+            self.publish(incorrect_view)
+        self.assertFalse(self.carrier.exists())
+        self.assertEqual(self.view.read_bytes(), b"wrong view")
+
+    def test_view_writer_returns_success_but_changes_carrier_bytes(self):
+        def mutates_carrier(path, data):
+            if path == self.view:
+                self.carrier.write_bytes(b"changed")
+            self.write_new(path, data)
+        with self.assertRaisesRegex(OSError, "PAIR_ROLLBACK_BLOCKED"):
+            self.publish(mutates_carrier)
+        self.assertEqual(self.carrier.read_bytes(), b"changed")
+        self.assertEqual(self.view.read_bytes(), self.view_bytes)
+
+    def test_view_writer_returns_success_but_replaces_carrier_inode(self):
+        def swaps_carrier(path, data):
+            if path == self.view:
+                replacement = self.root / "replacement.sens"
+                replacement.write_bytes(self.carrier_bytes)
+                replacement.replace(self.carrier)
+            self.write_new(path, data)
+        with self.assertRaisesRegex(OSError, "PAIR_ROLLBACK_BLOCKED"):
+            self.publish(swaps_carrier)
+        self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
+        self.assertEqual(self.view.read_bytes(), self.view_bytes)
+
+    def test_view_writer_returns_success_but_stores_symlink(self):
+        target = self.root / "external"
+        target.write_bytes(self.view_bytes)
+        def symlink_view(path, data):
+            if path == self.view:
+                path.symlink_to(target)
+            else:
+                self.write_new(path, data)
+        with self.assertRaisesRegex(OSError, "PAIR_VIEW_CREATION_UNVERIFIED"):
+            self.publish(symlink_view)
+        self.assertFalse(self.carrier.exists())
+        self.assertTrue(self.view.is_symlink())
+        self.assertEqual(target.read_bytes(), self.view_bytes)
+
 if __name__ == "__main__":
     unittest.main()
