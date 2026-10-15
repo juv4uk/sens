@@ -74,6 +74,21 @@ fn decode_canonical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>
     Ok(words)
 }
 
+/// SENS owns exact source words and D2 admission. The host does not create
+/// physical T5 bytes; it forwards admitted width+bits to Zig ABI v2.
+#[cfg(feature = "zig-transport")]
+fn admitted_source_words(source: &str) -> Result<Vec<sens::BinarySourceWord>, String> {
+    let tokens = sens::parse_binary_source_words(source)
+        .map_err(|e| format!("SENS exact binary source rejected: {}", e.render(source)))?;
+    if tokens.is_empty() {
+        return Err("SENS exact binary source rejected: empty program".into());
+    }
+    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
+    sens::parse_canonical_word_sequence(&words)
+        .map_err(|e| format!("SENS canonical D2 rejected: {e}"))?;
+    Ok(words)
+}
+
 fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
         return Err("expected a physical .sens file".into());
@@ -167,20 +182,39 @@ fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
 }
 
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
-    let canonical = sens::encode_binary_projection_ternary(source)
+    // In a Zig-default build no Rust physical encoder supplies the expected
+    // bytes: SENS supplies exact words and Zig decodes/reencodes the carrier.
+    #[cfg(feature = "zig-transport")]
+    let expected_words = admitted_source_words(source)?;
+    #[cfg(not(feature = "zig-transport"))]
+    let reference = sens::encode_binary_projection_ternary(source)
         .map_err(|e| format!("unadmitted .lisp projection: {e:?}"))?;
-    // Default CLI: Zig decodes the exact physical words. SENS alone admits D2.
-    // The explicit reference build retains the original Rust T5 reader.
     let decoded = decode_canonical_t5_words(binary)
         .map_err(|e| format!("invalid .sens transport or grammar: {e}"))?;
-    if canonical != binary {
+    #[cfg(feature = "zig-transport")]
+    {
+        if decoded != expected_words {
+            return Err("paired .lisp/.sens differs in exact domain words".into());
+        }
+        zig_transport::encode_t5(&expected_words, binary)
+            .map_err(|e| format!("Zig physical companion replay rejected: {e}"))?;
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    if reference != binary {
         return Err("paired .lisp/.sens differs at the physical byte level".into());
     }
-    let info = sens::ternary_transport_accounting(&decoded)
-        .map_err(|e| format!("accounting failure: {e:?}"))?;
+    // Purely human accounting after Zig physical validation, never Rust T5 IO.
+    let semantic_bits = decoded.iter().try_fold(0usize, |n, word|
+        n.checked_add(word.width())
+    ).ok_or("SENS physical accounting length overflow")?;
+    let encoded_trits = semantic_bits.checked_add(decoded.len() - 1)
+        .ok_or("SENS physical accounting separator overflow")?;
+    let physical_trits = binary.len().checked_mul(5)
+        .ok_or("SENS physical accounting carrier overflow")?;
+    let trailing = physical_trits.checked_sub(encoded_trits)
+        .ok_or("SENS physical accounting invalid carrier length")?;
     println!("VERIFIED {} domain words; binary SENS={} semantic bits; transport={} trits; physical={} bytes; trailing={} trits",
-             info.word_count, info.semantic_bits, info.encoded_trits,
-             info.physical_bytes, info.tail_trits);
+             decoded.len(), semantic_bits, encoded_trits, binary.len(), trailing);
     Ok(())
 }
 
@@ -227,6 +261,7 @@ fn eval_t5_bytes_core4(
 
 /// Пояснити негативний результат без іншого парсера чи текстового fallback.
 /// Первинним рішенням назавжди лишається encode_binary_projection_ternary.
+#[cfg(not(feature = "zig-transport"))]
 fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> String {
     let mut message = format!("encode .lisp projection: {error:?}");
     let source_error = match &error {
@@ -335,18 +370,13 @@ fn execute() -> Result<(), String> {
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            let reference = sens::encode_binary_projection_ternary(&projection)
-                .map_err(|e| explain_encode_failure(&projection, e))?;
-            // SENS owns the grammar/semantic admission; physical bytes are
-            // produced by Zig in the official zig-transport variant.
+            // SENS validates exact words and D2; Zig alone packs the T5 bytes
+            // in production. Rust remains an explicit reference-only mode.
             #[cfg(feature = "zig-transport")]
-            let bytes = {
-                let typed = decode_canonical_t5_words(&reference)
-                    .map_err(|e| format!("canonical T5 words rejected: {e}"))?;
-                zig_transport::encode_t5(&typed, &reference)?
-            };
+            let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = reference;
+            let bytes = sens::encode_binary_projection_ternary(&projection)
+                .map_err(|e| explain_encode_failure(&projection, e))?;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;
@@ -765,12 +795,22 @@ mod eval_tests {
         assert_eq!(&reference, &[0x63, 0x89, 0x06, 0xa1]);
         let expected = sens::parse_binary_source_words(projection)
             .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
-        let actual = decode_canonical_t5_words(&reference)
-            .expect("Zig physical T5 and existing SENS D2 reader");
+        let actual = admitted_source_words(projection)
+            .expect("SENS-owned exact words and D2 admission");
         assert_eq!(actual, expected);
         assert_eq!(actual.iter().map(|w| w.width()).collect::<Vec<_>>(),
                    [2, 3, 2, 3, 2]);
-        assert_eq!(zig_transport::encode_t5(&actual, &reference).unwrap(), reference);
+        let zig_bytes = zig_transport::encode_t5_direct(&actual)
+            .expect("Zig sole T5 production encoder");
+        assert_eq!(zig_bytes, reference);
+        verify_companion(projection, &zig_bytes).expect("Zig replay + SENS D2");
+        // A one-bit D2-close on its own cannot be published as a program.
+        assert!(admitted_source_words("01").unwrap_err().contains("SENS canonical D2"));
+        assert!(admitted_source_words("10 001").is_err());
+        assert!(admitted_source_words("10 001 2").is_err());
+        let mut mutant = zig_bytes.clone();
+        mutant[0] ^= 1;
+        assert!(verify_companion(projection, &mutant).is_err());
 
         // Fail closed before the Zig encoder can publish malformed bytes.
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
@@ -788,8 +828,11 @@ mod eval_tests {
         let start = source.find("\"encode\" => {").expect("CLI encode command");
         let block = &source[start..];
         let route = &block[..block.find("\n        }").expect("encode command closes")];
-        assert!(route.contains("decode_canonical_t5_words(&reference)"));
-        assert!(!route.contains("sens::decode_ternary_words(&reference)"));
+        let zig_branch = route.split("#[cfg(not(feature = \"zig-transport\"))]")
+            .next().expect("default Zig branch");
+        assert!(zig_branch.contains("zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)"));
+        assert!(!zig_branch.contains("sens::encode_binary_projection_ternary("));
+        assert!(!zig_branch.contains("decode_canonical_t5_words(&reference)"));
     }
 
     #[cfg(feature = "zig-transport")]
