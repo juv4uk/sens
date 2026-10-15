@@ -15,7 +15,7 @@ FILES = (
     "crates/sens-cli/src/bin/wsm-fs-record-producer.rs",
     "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
 )
-DIRECT = re.compile(r'include_(?:str|bytes)!\s*\(\s*"[^"]*/lib/(?:unify|reason|forward|knowledge|persistent-map)\.lisp"')
+DIRECT = re.compile(r'include_(?:str|bytes)!\s*\(\s*"[^"]*/lib/(?:unify|reason|forward|knowledge|persistent-map|world)\.lisp"')
 
 def check_f6_route(source: str, label: str) -> None:
     # Commented-out code cannot impersonate a live Zig route.
@@ -27,7 +27,7 @@ def check_f6_route(source: str, label: str) -> None:
     if ('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;' not in live
             or '#[path = "../zig_transport.rs"]' in live):
         raise ValueError(f"F6_NO_ZIG_MODULE layer=transport binary={label}")
-    for asset in ("unify", "reason", "forward", "knowledge", "persistent_map"):
+    for asset in ("unify", "reason", "forward", "knowledge", "persistent_map", "world"):
         call = f"zig_transport::{asset}_source_bytes()?"
         if live.count(call) != 1:
             raise ValueError(f"F6_MISSING_ZIG_CARRIER layer=transport binary={label} asset={asset}")
@@ -40,7 +40,8 @@ def check_f6_route(source: str, label: str) -> None:
     c = live.find('("lib/forward.lisp", sources[2].as_str())')
     d = live.find('("lib/knowledge.lisp", sources[3].as_str())')
     e = live.find('("lib/persistent-map.lisp", sources[4].as_str())')
-    if a < 0 or b < 0 or c < 0 or d < 0 or e < 0 or not (a < b < c < d < e):
+    f = live.find('("lib/world.lisp", sources[5].as_str())')
+    if min(a, b, c, d, e, f) < 0 or not (a < b < c < d < e < f):
         raise ValueError(f"F6_ORDER_CHANGED layer=transport binary={label}")
     if "sens::eval_pinned_reasoning_source(path, source, &mut session)" not in live:
         raise ValueError(f"F6_NO_SENS_EVALUATOR layer=eval binary={label}")
@@ -60,6 +61,17 @@ class F6ZigBoundaryTests(unittest.TestCase):
             )
             self.assertNotEqual(mutant, source)
             with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_NO_ZIG_MODULE"):
+                check_f6_route(mutant, file)
+
+    def test_world_direct_source_embed_mutant_rejected(self) -> None:
+        for file in FILES:
+            source = (ROOT / file).read_text(encoding="utf-8")
+            mutant = source.replace(
+                '("lib/world.lisp", sources[5].as_str())',
+                '("lib/world.lisp", include_str!("../../../../lib/world.lisp"))', 1,
+            )
+            self.assertNotEqual(mutant, source)
+            with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
                 check_f6_route(mutant, file)
 
     def test_direct_rust_embed_mutant_is_rejected(self) -> None:

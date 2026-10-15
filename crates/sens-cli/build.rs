@@ -20,6 +20,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/forward.lisp");
     println!("cargo:rerun-if-changed=../../lib/knowledge.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
+    println!("cargo:rerun-if-changed=../../lib/world.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");

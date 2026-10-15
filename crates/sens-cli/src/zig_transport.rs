@@ -308,6 +308,31 @@ pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+
+/// Root Zig copies the World source byte-for-byte; SENS alone evaluates it.
+pub fn world_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_world_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 {
+        return Err("ZIG_WORLD_CARRIER invalid length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_WORLD_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_WORLD_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_world_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_WORLD_CARRIER byte-copy mismatch: {copied}"));
+    }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],

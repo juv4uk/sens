@@ -280,3 +280,27 @@ test "F6 persistent-map carrier: exact Zig bytes and unchanged short buffer" {
         sens_zig_persistent_map_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, persistent_map_asset[0..persistent_map_asset.len], &output);
 }
+
+
+// Root-only F6 World source carrier: opaque bytes, never semantic admission.
+const world_asset = @embedFile("lib/world.lisp");
+pub export fn sens_zig_world_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (world_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(world_asset.len);
+    if (capacity < world_asset.len) return -2;
+    @memcpy(dst[0..world_asset.len], world_asset[0..world_asset.len]);
+    return @intCast(world_asset.len);
+}
+
+test "F6 World carrier: exact Zig bytes and unchanged short buffer" {
+    const required = sens_zig_world_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(world_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_world_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [world_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_world_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, world_asset[0..world_asset.len], &output);
+}
