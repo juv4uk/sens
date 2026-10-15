@@ -1316,6 +1316,24 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
+      - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        # The release is GO only when every gate passes on ONE SHA (#4196). This step
+        # prints the GO count and names the red gates -- report-only, never greenwashed.
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
+          echo "release-go-gate exit=$?"
+          exit 0
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.json
+          if-no-files-found: warn
+
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
         # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
         # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
