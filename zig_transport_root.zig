@@ -255,3 +255,28 @@ test "islands release manifest exact bytes via Zig; short buffer not modified" {
         sens_zig_islands_manifest_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, islands_manifest_asset[0..islands_manifest_asset.len], &output);
 }
+
+ 
+// External source-asset adapter: Zig copies opaque bytes; only SENS assigns meaning.
+// Path/provenance policy belongs to the build and harness, never the physical codec.
+const persistent_map_asset = @embedFile("lib/persistent-map.lisp");
+pub export fn sens_zig_persistent_map_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (persistent_map_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(persistent_map_asset.len);
+    if (capacity < persistent_map_asset.len) return -2;
+    @memcpy(dst[0..persistent_map_asset.len], persistent_map_asset[0..persistent_map_asset.len]);
+    return @intCast(persistent_map_asset.len);
+}
+
+test "F6 persistent-map carrier: exact Zig bytes and unchanged short buffer" {
+    const required = sens_zig_persistent_map_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(persistent_map_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_persistent_map_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [persistent_map_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_persistent_map_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, persistent_map_asset[0..persistent_map_asset.len], &output);
+}
