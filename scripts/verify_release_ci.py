@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+from urllib.parse import urlsplit
 
 REQUIRED_CHECKS = (
     "portable critical gates",
@@ -26,7 +27,26 @@ SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
 REPO_RE = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 
 
-def verify_check_runs(payload, sha):
+def _trusted_actions_url(url, repo):
+    """Accept only a real GitHub Actions run URL on the expected repository."""
+    if not isinstance(url, str):
+        return False
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return False
+    if parts.scheme != "https" or parts.netloc != "github.com" or parts.fragment:
+        return False
+    match = re.fullmatch(
+        r"/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/actions/runs/[1-9][0-9]*"
+        r"(?:/job/[1-9][0-9]*)?/?", parts.path
+    )
+    return match is not None and (
+        repo is None or f"{match.group(1)}/{match.group(2)}" == repo
+    )
+
+
+def verify_check_runs(payload, sha, repo=None):
     """Return a check-run receipt, or reject any absent/red/pending/untrusted gate.
 
     Check-run IDs increase for reruns. Use the newest per exact name and SHA;
@@ -62,7 +82,7 @@ def verify_check_runs(payload, sha):
             raise ValueError(f"RELEASE_BLOCKED: missing exact-SHA check {name}")
         app = run.get("app") or {}
         url = run.get("details_url") or ""
-        if app.get("slug") != "github-actions" or "/actions/runs/" not in url:
+        if not isinstance(app, dict) or app.get("slug") != "github-actions" or not _trusted_actions_url(url, repo):
             raise ValueError(f"RELEASE_BLOCKED: untrusted check provider for {name}")
         if run.get("status") != "completed" or run.get("conclusion") != "success":
             raise ValueError(
@@ -90,7 +110,7 @@ def main(argv):
         data = json.loads(result.stdout)
     except json.JSONDecodeError as exc:
         raise ValueError("RELEASE_BLOCKED: invalid GitHub check-run JSON") from exc
-    receipt = verify_check_runs(data, sha)
+    receipt = verify_check_runs(data, sha, repo)
     print(json.dumps({"schema": "sens-release-ci-checks/v1", "sha": sha,
                       "repo": repo, "checks": receipt}, sort_keys=True))
     print(f"RELEASE_REQUIRED_CI_PASS {len(receipt)}/{len(REQUIRED_CHECKS)} exact-SHA gates")

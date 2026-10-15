@@ -106,6 +106,31 @@ class ExactReleaseChecksTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "untrusted check provider"):
                     MODULE.verify_check_runs(payload, SHA)
 
+    def test_reject_untrusted_actions_urls_and_cross_repo_runs(self):
+        # A provider slug does not authorize a foreign host or repository.
+        invalid_urls = (
+            "https://attacker.example/juv4uk/sens/actions/runs/100",
+            "https://github.com/juv4uk/other/actions/runs/100",
+            "http://github.com/juv4uk/sens/actions/runs/100",
+            "https://github.com.evil.example/juv4uk/sens/actions/runs/100",
+            "https://github.com/juv4uk/sens/actions/runs/100/../other",
+        )
+        for url in invalid_urls:
+            with self.subTest(url=url):
+                payload = complete_payload()
+                payload["check_runs"][0]["details_url"] = url
+                with self.assertRaisesRegex(ValueError, "untrusted check provider"):
+                    MODULE.verify_check_runs(payload, SHA, "juv4uk/sens")
+
+        valid = complete_payload()
+        valid["check_runs"][0]["details_url"] = (
+            "https://github.com/juv4uk/sens/actions/runs/100/job/200"
+        )
+        self.assertEqual(
+            len(MODULE.verify_check_runs(valid, SHA, "juv4uk/sens")),
+            len(MODULE.REQUIRED_CHECKS),
+        )
+
     def test_malformed_responses_and_bad_ids_fail_closed(self):
         for payload in ([], {}, {"check_runs": None}, {"check_runs": [None]}):
             with self.subTest(payload=payload):
