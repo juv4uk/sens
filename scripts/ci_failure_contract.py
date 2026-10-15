@@ -53,6 +53,26 @@ FOCAL_OUTCOME_ENV = (
 )
 
 
+def validate_focal_census():
+    # The CI file is the execution topology. A stale outcome name must never
+    # make the 23-skipped exception silently cover fewer actual checks.
+    workflow = Path(__file__).resolve().parents[1] / ".github/workflows/ci.yml"
+    source = workflow.read_text(encoding="utf-8")
+    marker = "      - name: Червоний має говорити — валідність діагностики"
+    if source.count(marker) != 1:
+        raise ValueError("FOCAL_OUTCOME_CENSUS_MISMATCH diagnostic step missing/duplicated")
+    step = source.split(marker, 1)[1].split("        run: |", 1)
+    if len(step) != 2:
+        raise ValueError("FOCAL_OUTCOME_CENSUS_MISMATCH diagnostic env/run framing")
+    actual = tuple(re.findall(r"^ {10}([A-Z0-9_]+_OUTCOME):", step[0], flags=re.MULTILINE))
+    if actual != FOCAL_OUTCOME_ENV:
+        raise ValueError(
+            "FOCAL_OUTCOME_CENSUS_MISMATCH expected="
+            + ",".join(FOCAL_OUTCOME_ENV)
+            + " actual=" + ",".join(actual)
+        )
+
+
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
@@ -429,6 +449,7 @@ def scan(args):
             os.environ.get("GITHUB_ACTIONS") == "true"
             and all(os.environ.get(name) == "skipped" for name in FOCAL_OUTCOME_ENV)
         ):
+            validate_focal_census()
             print("FOCAL_DIAGNOSTIC_NOT_APPLICABLE: 23/23 focal checks skipped; no verdict asserted")
             return 0
         print("UNINFORMATIVE-OUTPUT no diagnostic report")
@@ -572,6 +593,7 @@ def self_test():
     }}
     if len(FOCAL_OUTCOME_ENV) != 23:
         raise RuntimeError("central focal-step census changed: update exact CI contract")
+    validate_focal_census()
     with tempfile.TemporaryDirectory(prefix="sens-focal-nonexecution-") as tmp:
         report = Path(tmp) / "focal.jsonl"
         args = argparse.Namespace(
