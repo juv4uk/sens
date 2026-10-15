@@ -188,20 +188,21 @@ test "ladder D10 exact words and strict two-column input" {
         parseWords(&buf, "10 0000000002\n")); // decimal digit never valid
     try std.testing.expectError(error.InvalidBinaryDigit,
         parseWords(&buf, "10 1024\n")); // old decimal proxy rejected
-    const leading = try parseWords(&buf, "10 0000000001\n");
-    try std.testing.expectEqual(@as(usize, 1), leading);
-    try std.testing.expectEqual(@as(u8, 10), buf[0].width);
-    try std.testing.expectEqual(@as(u16, 1), buf[0].bits);
-
     const physical = try t5.encodeCoordinates(std.testing.allocator, buf[0..count]);
     defer std.testing.allocator.free(physical);
     const back = try t5.decodeCoordinates(std.testing.allocator, physical);
     defer std.testing.allocator.free(back);
     try std.testing.expectEqual(count, back.len);
-    for (back, buf[0..count]) |actual, expected| {
-        try std.testing.expectEqual(expected.width, actual.width);
-        try std.testing.expectEqual(expected.bits, actual.bits);
-    }
+    try std.testing.expectEqualSlices(t5.Word, &.{
+        .{ .width = 1, .bits = 0 },
+        .{ .width = 10, .bits = 1023 },
+    }, back);
+    // Separate positive leading-zero case only AFTER the original corpus
+    // has been encoded and checked; parsing reuses the same caller buffer.
+    const leading = try parseWords(&buf, "10 0000000001\n");
+    try std.testing.expectEqual(@as(usize, 1), leading);
+    try std.testing.expectEqual(@as(u8, 10), buf[0].width);
+    try std.testing.expectEqual(@as(u16, 1), buf[0].bits);
 }
 
 test "optional F3C must not reject canonical D10 coordinates" {
