@@ -36,17 +36,29 @@ class GoGateTests(unittest.TestCase):
         (self.root / "scripts" / name).write_text(
             f"import sys\nprint({msg!r})\nsys.exit({rc})\n", encoding="utf-8")
 
-    def test_all_go(self) -> None:
+    def _all_receipts(self) -> None:
+        # The existing checkers emit these independently named success tokens.
         for _, script, _ in self.module.GATES:
-            self._write(Path(script).name, 0, "OK")
+            self._write(
+                Path(script).name, 0,
+                self.module.SUCCESS_MARKERS[script] + " exact-corridor-evidence",
+            )
+
+    def _run_gate(self) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(CHECKER), str(self.root)],
+            capture_output=True, text=True, check=False,
+        )
+
+    def test_all_go(self) -> None:
+        self._all_receipts()
         proc = subprocess.run([sys.executable, str(CHECKER), str(self.root)],
                               capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("RELEASE_GATE_GO", proc.stdout)
 
     def test_one_red_is_no_go(self) -> None:
-        for _, script, _ in self.module.GATES:
-            self._write(Path(script).name, 0, "OK")
+        self._all_receipts()
         self._write("check_rust_isolated_only_zig.py", 1, "RED")
         proc = subprocess.run([sys.executable, str(CHECKER), str(self.root)],
                               capture_output=True, text=True)
@@ -62,6 +74,61 @@ class GoGateTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         self.assertIn("UNVERIFIED", proc.stdout)
         self.assertIn("RELEASE_GATE_PARTIAL", proc.stdout)
+
+
+
+    def test_zero_exit_silent_guard_is_not_structural_proof(self) -> None:
+        self._all_receipts()
+        self._write("check_sterile_zig_corridor.py", 0, "")
+        result = self._run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("UNVERIFIED", result.stdout)
+        self.assertIn("STERILE_ZIG_CORRIDOR_PASS", result.stdout)
+        self.assertNotIn("RELEASE_GATE_GO every", result.stdout)
+
+    def test_zero_exit_wrong_corridor_receipt_is_not_proof(self) -> None:
+        self._all_receipts()
+        self._write("check_migration_zig_only_path.py", 0, "CORRIDOR_OK")
+        result = self._run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("MIGRATION_ZIG_ONLY_PATH_OK", result.stdout)
+        self.assertIn("UNVERIFIED", result.stdout)
+
+    def test_success_marker_must_be_unique_and_last(self) -> None:
+        self._all_receipts()
+        checker = self.root / "scripts" / "check_sterile_zig_corridor.py"
+        marker = self.module.SUCCESS_MARKERS["scripts/check_sterile_zig_corridor.py"]
+        for source in (
+            f"print({marker!r})\nprint('INCOMPLETE')\n",
+            f"print({marker!r})\nprint({marker!r})\n",
+        ):
+            with self.subTest(source=source):
+                checker.write_text(source, encoding="utf-8")
+                result = self._run_gate()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("UNVERIFIED", result.stdout)
+
+    def test_symlinked_corridor_checker_cannot_fake_proof(self) -> None:
+        self._all_receipts()
+        fake = self.root / "fake.py"
+        marker = self.module.SUCCESS_MARKERS["scripts/check_sterile_zig_corridor.py"]
+        fake.write_text(f"print({marker!r})\n", encoding="utf-8")
+        checker = self.root / "scripts" / "check_sterile_zig_corridor.py"
+        checker.unlink()
+        checker.symlink_to(fake)
+        result = self._run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("missing regular checker script", result.stdout)
+        self.assertIn("UNVERIFIED", result.stdout)
+
+    def test_failing_guard_cannot_claim_go_with_valid_marker(self) -> None:
+        self._all_receipts()
+        script = "scripts/check_rust_sens_zig_corridor.py"
+        self._write(Path(script).name, 1, self.module.SUCCESS_MARKERS[script])
+        result = self._run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("corridor-structural", result.stdout)
+        self.assertIn("RELEASE_GATE_NO_GO", result.stdout)
 
 
 if __name__ == "__main__":
