@@ -10,6 +10,12 @@ rust_marker() {
     local pattern='(__rust_|rust_eh_personality|rust_alloc|rust_dealloc|rust_realloc|rust_alloc_zeroed|\.rlib($|[^[:alnum:]_])|librust[^[:space:]]*|lib(std|core|alloc)-[[:xdigit:]]+\.(a|so|dylib)|(^|[[:space:]])_?RN[[:alnum:]_]+)'
     [[ "$1" =~ $pattern ]]
 }
+# Reject spoofed, partial, or semantically inflated stdout BEFORE calling it a
+# C-host witness. Real provenance still requires inspecting the linked artifacts.
+expected_witness='SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED'
+valid_witness() {
+    [[ "$1" == "$expected_witness" ]]
+}
 # Only exact, DEFINED linker symbols can attest an ABI v2 export.
 # An archive heading, a similarly named symbol, or an undefined U is no proof.
 has_exact_defined_symbol() {
@@ -20,6 +26,19 @@ has_exact_defined_symbol() {
     ' <<< "$nm_output"
 }
 if [[ "${1:-}" == "--self-test" && "$#" -eq 1 ]]; then
+    if ! valid_witness "$expected_witness"; then
+        echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=transport case=valid-witness' >&2
+        exit 1
+    fi
+    for bogus in "PREFIX $expected_witness" "$expected_witness SUFFIX" \
+                 "${expected_witness/T5+F3C+E1/T5+F3C}" \
+                 "${expected_witness/abi=2/abi=3}" \
+                 "${expected_witness/NOT_TESTED/PASS}"; do
+        if valid_witness "$bogus"; then
+            echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=transport case=spoofed-witness' >&2
+            exit 1
+        fi
+    done
     if rust_marker $'libc.so.6\nlibstdc++.so.6\ncrt1.o'; then
         echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=normal-libraries' >&2
         exit 1
@@ -49,7 +68,7 @@ if [[ "${1:-}" == "--self-test" && "$#" -eq 1 ]]; then
             exit 1
         fi
     done
-    echo 'SENS_C_CORRIDOR_SELFTEST_PASS positive=4 negative=10 exact_zig_export=VERIFIED full_static_dependency_closure=NOT_VERIFIED'
+    echo 'SENS_C_CORRIDOR_SELFTEST_PASS witness_exact=true positive=5 negative=15 exact_zig_export=VERIFIED full_static_dependency_closure=NOT_VERIFIED'
     exit 0
 fi
 if [[ "$#" -ne 0 ]]; then
@@ -90,14 +109,12 @@ fi
 # The C witness checks real transport calls; it cannot inspect its own link.
 # Do not repeat its legacy hardcoded rust_linked=false as independent proof.
 witness="$("$out/sens-c-host-corridor")"
-if [[ "$witness" != *'SENS_C_CORRIDOR_PASS'* ]]; then
-    echo 'SENS_C_CORRIDOR_UNVERIFIED layer=transport missing=witness_pass' >&2
+if ! valid_witness "$witness"; then
+    echo 'SENS_C_CORRIDOR_UNVERIFIED layer=transport invalid_or_spoofed_witness' >&2
     exit 2
 fi
-if [[ "$witness" == *'rust_linked=false'* ]]; then
-    witness=${witness//rust_linked=false/rust_dependency_proof=NOT_TESTED}
-fi
-printf '%s\n' "$witness"
+# Do not print a PASS while ELF/archive dependency audits are still pending.
+# A late Rust marker must produce ONLY a failing diagnostic, never a PASS.
 # Scan the ACTUAL compiled ELF and archive, not only the written C source.
 for tool in readelf ar nm sha256sum; do
     if ! command -v "$tool" >/dev/null 2>&1; then
@@ -148,4 +165,9 @@ if rust_marker "$dynamic" || rust_marker "$members" || rust_marker "$undefined" 
     echo 'SENS_C_CORRIDOR_BLOCKED layer=dependency rust_marker_found' >&2
     exit 1
 fi
+# All available physical and dependency proofs completed successfully.
+# The C program's self-declared rust_linked=false is NOT standalone evidence:
+# qualify it with the actual (limited) symbol audit, then publish atomically.
+verified_witness="${witness/rust_linked=false/rust_dependency_proof=INSPECTED_NO_RUST_MARKERS}"
+printf '%s\n' "$verified_witness"
 echo "SENS_C_CORRIDOR_RECEIPT zig=$actual c_host_binary_sha256=$(sha256sum "$exe" | cut -d ' ' -f 1) zig_archive_sha256=$(sha256sum "$archive" | cut -d ' ' -f 1) dependencies=INSPECTED_NO_RUST_MARKERS exported_zig_ffi=VERIFIED nm_defined=INSPECTED full_static_dependency_closure=NOT_VERIFIED semantic_verdict=NOT_TESTED"
