@@ -157,6 +157,11 @@ jobs:
           cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          # Executable Rust host -> Zig E1/T5 -> binary SENS, one-bit and CRC negatives.
+          echo 'test_id=rust-zig-e1-sens-file-link layer=transport input=tests/fixtures/semantic/exact-d3-logic-selftest.sens semantic_authority=SENS'
+          cargo test --locked -p sens-cli --test e1_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'test rust_host_zig_e1_preserves_binary_sens_verdict_and_rejects_corruption ... ok' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'RUST_ZIG_E1_SENS_PASS layer=transport cases=2' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
           # Executable Zig -> BinarySourceWord -> SENS D2 parse; no text round-trip.
           echo 'test_id=zig-typed-word-explain layer=parse semantic_authority=SENS'
           # Native Rust host must actually call the D1..D10 Zig physical
