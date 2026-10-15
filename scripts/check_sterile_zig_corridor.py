@@ -238,6 +238,39 @@ def check_trit_t5_execution(source: str) -> None:
         raise CorridorBlocked("live eval/eval-core4 command bypasses Zig-gated execution")
 
 
+def check_trit_f3_no_rust_fallback(source: str) -> None:
+    """F3C physical ingress/egress always goes through the Zig ABI.
+
+    Unlike an explicit offline reference test, a CLI that can read/write
+    physical F3C without Zig is a second production codec implementation.
+    """
+    route = _route_between(source, "fn decode_f3_carrier(", "\nfn sibling_sens(")
+    marker = '    #[cfg(not(feature = "zig-transport"))]'
+    if route.count(marker) != 2:
+        raise CorridorBlocked("sens-trit F3C must gate both missing-Zig branches")
+    ingress, egress = route.split("fn encode_f3_carrier(", 1)
+    if ("zig_transport::decode_f3(bytes)?" not in ingress
+            or "zig_transport::decode_t5_words(&restored)?" not in ingress
+            or "return zig_transport::encode_f3(bytes);" not in egress
+            or "zig_transport::decode_t5_words(bytes)?" not in egress):
+        raise CorridorBlocked("sens-trit F3C ingress/egress bypasses Zig ABI")
+    # Remove comments before source-level evidence; inert markers are no proof.
+    live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
+    if "sens::frame3_small::" in live:
+        raise CorridorBlocked("sens-trit F3C retains a Rust physical codec fallback")
+    segments = [ingress.split(marker, 1)[1], egress.split(marker, 1)[1]]
+    for part, direction in zip(segments, ("decode", "encode")):
+        # The entire no-Zig arm must unconditionally reject; a string
+        # mentioning "no Rust fallback" beside a success return is insufficient.
+        expected = (
+            r'\s*\{\s*let _ = bytes;\s*Err\("F3C physical '
+            + direction
+            + r' requires Zig; no Rust fallback"\.into\(\)\)\s*\}\s*\}\s*'
+        )
+        if re.fullmatch(expected, part) is None:
+            raise CorridorBlocked(f"sens-trit F3C {direction} no-Zig path not fail-closed")
+
+
 def check_f3c_validate_before_no_savings(body: str) -> None:
     """F3C no-savings must never bypass Zig physical T5 validation.
 
@@ -433,6 +466,8 @@ def check() -> list[str]:
         raise CorridorBlocked("sens-trit.rs does not call zig_transport corridor API")
     check_trit_t5_egress(trit)
     notes.append("sens-trit-zig-only-egress")
+    check_trit_f3_no_rust_fallback(trit)
+    notes.append("sens-trit-zig-only-f3c-ingress-egress")
     check_trit_t5_execution(trit)
     notes.append("sens-trit-zig-only-t5-execution")
     check_trit_e1_egress(trit)

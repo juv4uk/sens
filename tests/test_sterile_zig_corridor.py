@@ -164,6 +164,53 @@ class SterileZigCorridorTests(unittest.TestCase):
                     check(mutant)
 
 
+
+    def test_f3c_cli_is_truly_zig_only_in_both_build_modes(self) -> None:
+        """Fail closed if an F3C Rust codec or fake denial is introduced."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_f3_no_rust_fallback"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(
+            encoding="utf-8"
+        )
+        check(source)
+
+        changes = (
+            (
+                'Err("F3C physical decode requires Zig; no Rust fallback".into())',
+                "sens::frame3_small::decode_explicit_small_f3(bytes)"
+                '.map_err(|e| format!("{e:?}"))',
+            ),
+            (
+                'Err("F3C physical encode requires Zig; no Rust fallback".into())',
+                "sens::frame3_small::encode_explicit_small_f3(bytes)"
+                '.map_err(|e| format!("{e:?}"))',
+            ),
+            (
+                'Err("F3C physical decode requires Zig; no Rust fallback".into())',
+                'Ok(bytes.to_vec()) // no Rust fallback',
+            ),
+            (
+                'Err("F3C physical encode requires Zig; no Rust fallback".into())',
+                'Ok(Some(bytes.to_vec())) // no Rust fallback',
+            ),
+            (
+                "let restored = zig_transport::decode_f3(bytes)?;",
+                'let restored = sens::frame3_small::decode_explicit_small_f3(bytes)'
+                '.map_err(|e| format!("{e:?}"))?;',
+            ),
+            (
+                "return zig_transport::encode_f3(bytes);",
+                "return Ok(Some(bytes.to_vec())); // zig_transport::encode_f3(bytes);",
+            ),
+        )
+        for original, forged in changes:
+            with self.subTest(mutant=original):
+                self.assertIn(original, source, "missing F3C code mutation anchor")
+                candidate = source.replace(original, forged, 1)
+                with self.assertRaises(blocked):
+                    check(candidate)
+
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]

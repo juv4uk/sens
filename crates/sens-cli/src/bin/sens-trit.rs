@@ -33,8 +33,10 @@ fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
         return Ok(restored);
     }
     #[cfg(not(feature = "zig-transport"))]
-    { sens::frame3_small::decode_explicit_small_f3(bytes)
-        .map_err(|e| format!("explicit small F3 rejected: {e:?}")) }
+    {
+        let _ = bytes;
+        Err("F3C physical decode requires Zig; no Rust fallback".into())
+    }
 }
 
 fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
@@ -49,8 +51,10 @@ fn encode_f3_carrier(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
         return zig_transport::encode_f3(bytes);
     }
     #[cfg(not(feature = "zig-transport"))]
-    { sens::frame3_small::encode_explicit_small_f3(bytes)
-        .map_err(|e| format!("tiny F3 encode rejected: {e:?}")) }
+    {
+        let _ = bytes;
+        Err("F3C physical encode requires Zig; no Rust fallback".into())
+    }
 }
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
@@ -662,6 +666,27 @@ mod eval_tests {
         assert!(USAGE.contains("eval path.sens"));
         assert!(USAGE.contains("eval-core4 path.sens"));
         assert!(!USAGE.contains("eval-core path.sens"));
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn f3c_physical_ingress_and_egress_require_zig_even_for_valid_bytes() {
+        // No fallback to the Rust physical codec even for a previously valid
+        // carrier. The host only delegates physical transport to Zig.
+        let good_carrier = [0xf3, 0x40, 0x60];
+        let good_t5 = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        for carrier in [&good_carrier[..], &[0xf3u8][..]] {
+            let err = decode_f3_carrier(carrier)
+                .expect_err("Rust F3C decoding is not allowed without Zig");
+            assert_eq!(err, "F3C physical decode requires Zig; no Rust fallback");
+        }
+        for carrier in [&good_t5[..], &[0xf3u8][..]] {
+            let err = encode_f3_carrier(carrier)
+                .expect_err("Rust F3C encoding is not allowed without Zig");
+            assert_eq!(err, "F3C physical encode requires Zig; no Rust fallback");
+        }
     }
 
     #[cfg(feature = "zig-transport")]
