@@ -97,9 +97,9 @@ jobs:
             -- --exact --nocapture | tee "$RUNNER_TEMP/zig-islands-manifest-default.log"
           grep -Fq 'test islands::zig_islands_manifest_tests::root_zig_release_manifest_exact_bytes_and_validated_protocol ... ok' "$RUNNER_TEMP/zig-islands-manifest-default.log"
           cargo test --locked -p sens-cli --bin sens --no-default-features \
-            root_zig_release_manifest_exact_bytes_and_validated_protocol \
-            -- --nocapture | tee "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
-          grep -Fq 'test islands::zig_islands_manifest_tests::root_zig_release_manifest_exact_bytes_and_validated_protocol ... ok' "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
+            islands::zig_islands_manifest_tests::islands_manifest_without_zig_feature_fails_closed \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
+          grep -Fq 'test islands::zig_islands_manifest_tests::islands_manifest_without_zig_feature_fails_closed ... ok' "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash
