@@ -1607,6 +1607,13 @@ jobs:
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
           python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          # Focused F6 exact-byte source boundary: source-only mutant controls
+          # plus real Zig-linked Rust binaries (no extra automatic workflow).
+          f6_source_rc=0
+          python3 -m unittest discover -s tests -p test_wsm_f6_zig_source_boundary.py -v || f6_source_rc=$?
+          f6_compile_rc=0
+          cargo build --locked -p sens-cli --bin wsm-fs-record-producer --bin wsm-fs-record-consumer || f6_compile_rc=$?
+
           # Emit a fresh, exact-commit mechanical receipt OUTSIDE the checkout.
           # The committed PLACEHOLDER is never silently filled by a unit test.
           boundary_report_rc=0
@@ -1627,7 +1634,7 @@ jobs:
             -- python3 -m unittest discover -s tests -p test_rust_zig_sens_boundary.py -v || boundary_unit_rc=$?
           production_rc=0
           python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$f6_source_rc" -ne 0 || "$f6_compile_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi

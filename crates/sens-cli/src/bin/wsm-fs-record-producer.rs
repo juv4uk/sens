@@ -6,6 +6,28 @@
 
 use sens::{eval_program, load_core_library, Environment, Session, Value};
 
+
+#[cfg(feature = "zig-transport")]
+#[path = "../zig_transport.rs"]
+mod zig_transport;
+
+// A host may request exact SENS source bytes only from the compiled Zig ABI.
+// Zig never decides what these sources mean and no Rust fallback is permitted.
+fn zig_bootstrap_sources() -> Result<[String; 2], String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let unify = String::from_utf8(zig_transport::unify_source_bytes()?)
+            .map_err(|error| format!("ZIG_F6_UNIFY_CARRIER invalid UTF-8: {error}"))?;
+        let reason = String::from_utf8(zig_transport::reason_source_bytes()?)
+            .map_err(|error| format!("ZIG_F6_REASON_CARRIER invalid UTF-8: {error}"))?;
+        Ok([unify, reason])
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: F6 source bootstrap requires the sterile Zig corridor; no Rust fallback".into())
+    }
+}
+
 const MAX_RECORD_BYTES: usize = 64 * 1024;
 
 fn main() {
@@ -16,9 +38,20 @@ fn main() {
         eprintln!("wsm-fs-record-producer: core bootstrap failed: {error}");
         std::process::exit(1);
     }
+    let sources = zig_bootstrap_sources().unwrap_or_else(|error| {
+        eprintln!("wsm-fs-record-producer: {error}");
+        std::process::exit(1);
+    });
     for (path, source) in [
-        ("lib/unify.lisp", include_str!("../../../../lib/unify.lisp")),
-        ("lib/reason.lisp", include_str!("../../../../lib/reason.lisp")),
+        ("lib/unify.lisp", sources[0].as_str()),
+        ("lib/reason.lisp", sources[1].as_str()),
+    ] {
+        if let Err(error) = sens::eval_pinned_reasoning_source(path, source, &mut session) {
+            eprintln!("wsm-fs-record-producer: Zig source bootstrap failed: {error}");
+            std::process::exit(1);
+        }
+    }
+    for (path, source) in [
         ("lib/forward.lisp", include_str!("../../../../lib/forward.lisp")),
         ("lib/knowledge.lisp", include_str!("../../../../lib/knowledge.lisp")),
         ("lib/persistent-map.lisp", include_str!("../../../../lib/persistent-map.lisp")),
