@@ -254,6 +254,56 @@ class CorridorCoverageTests(unittest.TestCase):
         self.assertTrue(any("invalid crate path" in x
                             for x in self.module.check(self.root)))
 
+    def test_symlinked_crate_src_file_and_nested_directory_fail_closed(self) -> None:
+        if sys.platform == "win32":
+            self.skipTest("creating symlinks requires Windows developer permissions")
+        # These four paths are NOT an attested Rust source inventory. In
+        # particular, rglob may not descend into a symlinked Rust directory.
+        external = self.root / "outside"
+        external.mkdir()
+        (external / "rogue.rs").write_text(
+            "fn f() { sens::decode_binary_frame(&[]); }", encoding="utf-8"
+        )
+        crates = self.root / "crates"
+        crates.mkdir()
+        (crates / "linkedcrate").symlink_to(external, target_is_directory=True)
+        (crates / "linkedsrc").mkdir()
+        (crates / "linkedsrc" / "src").symlink_to(external, target_is_directory=True)
+        write_crate(self.root, "linkedfile", "fn f() { zig_transport::decode_t5_words(&[]); }")
+        (crates / "linkedfile" / "src" / "rogue.rs").symlink_to(external / "rogue.rs")
+        write_crate(self.root, "linkeddir", "fn f() { zig_transport::decode_t5_words(&[]); }")
+        (crates / "linkeddir" / "src" / "hidden").symlink_to(
+            external, target_is_directory=True
+        )
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        for expected in (
+            "crates/linkedcrate",
+            "crates/linkedsrc/src",
+            "crates/linkedfile/src/rogue.rs",
+            "crates/linkeddir/src/hidden",
+        ):
+            with self.subTest(path=expected):
+                self.assertTrue(
+                    any(expected in error and "symlink" in error for error in errors),
+                    f"test_id=zig-source-symlink layer=transport "
+                    f"expected=BLOCKED({expected}) actual={errors!r}",
+                )
+
+    def test_symlinked_crates_root_is_not_a_trustworthy_inventory(self) -> None:
+        if sys.platform == "win32":
+            self.skipTest("creating symlinks requires Windows developer permissions")
+        external = self.root / "outside"
+        external.mkdir()
+        (self.root / "crates").symlink_to(external, target_is_directory=True)
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        self.assertTrue(
+            any("crates/" in error and "symlinked" in error for error in errors),
+            f"test_id=zig-symlinked-crates-root layer=transport "
+            f"expected=BLOCKED actual={errors!r}",
+        )
+
     def test_codec_owner_is_exempt(self) -> None:
         write_crate(self.root, "sens", "fn f() { decode_binary_frame(&[]); }")
         write_registry(self.root, [])
