@@ -99,12 +99,10 @@ class CorridorGuardTests(unittest.TestCase):
         self.assertTrue(self.module.check(self.root))
 
     def test_client_without_packed_bits_is_blocked(self) -> None:
-        mutate(
-            self.root,
-            "crates/sens-cli/src/zig_transport.rs",
-            "packed_bits",
-            "payload_bits",
-        )
+        path = self.root / "crates/sens-cli/src/zig_transport.rs"
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("packed_bits", text)
+        path.write_text(text.replace("packed_bits", "payload_bits"), encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
     def test_main_without_zig_decode_is_blocked(self) -> None:
