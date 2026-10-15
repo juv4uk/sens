@@ -143,6 +143,27 @@ test "Ukrainian API docs exact Zig bytes and no partial short-buffer write" {
     try std.testing.expectEqualSlices(u8, uk_docs_asset[0..uk_docs_asset.len], &output);
 }
 
+// Джерело уніфікації належить SENS; Zig переносить тільки точні байти.
+const unify_asset = @embedFile("lib/unify.lisp");
+pub export fn sens_zig_unify_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (unify_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(unify_asset.len);
+    if (capacity < unify_asset.len) return -2;
+    @memcpy(dst[0..unify_asset.len], unify_asset[0..unify_asset.len]);
+    return @intCast(unify_asset.len);
+}
+
+test "REPL unify source: exact Zig bytes and short buffer remains untouched" {
+    const required = sens_zig_unify_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(unify_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_unify_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [unify_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_unify_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, unify_asset[0..unify_asset.len], &output);
+}
+
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");
