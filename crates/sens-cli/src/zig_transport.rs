@@ -6,6 +6,11 @@
 #[path = "zig_transport_assets.rs"]
 mod asset_ffi;
 
+// Native Zig archive is named explicitly because Cargo's build-script link-lib
+// directive attaches to the library target once src/lib.rs exists. Other binary
+// targets still include this host-neutral transport module independently.
+// This is linking only; no Rust implementation or fallback is introduced.
+#[link(name = "sens_zig_transport", kind = "static")]
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
