@@ -61,7 +61,7 @@ class F6ZigBoundaryTests(unittest.TestCase):
     def test_persistent_map_rust_embed_and_missing_zig_routes_fail_closed(self) -> None:
         for file in FILES:
             source = (ROOT / file).read_text(encoding="utf-8")
-            direct = source + '\\nconst LEAK: &str = include_str!("../../../../lib/persistent-map.lisp");\\n'
+            direct = source + '\nconst LEAK: &str = include_str!("../../../../lib/persistent-map.lisp");\n'
             with self.subTest(file=file, kind="embed"), self.assertRaisesRegex(
                 ValueError, "F6_DIRECT_RUST_SOURCE"
             ):
@@ -69,7 +69,7 @@ class F6ZigBoundaryTests(unittest.TestCase):
             ghost = source.replace(
                 "zig_transport::persistent_map_source_bytes()?",
                 "missing_persistent_source()?", 1
-            ) + "\\n// zig_transport::persistent_map_source_bytes()?\\n"
+            ) + "\n// zig_transport::persistent_map_source_bytes()?\n"
             with self.subTest(file=file, kind="ghost"), self.assertRaisesRegex(
                 ValueError, "F6_MISSING_ZIG_CARRIER"
             ):
