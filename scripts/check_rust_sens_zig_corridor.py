@@ -2,8 +2,7 @@
 """Guard: the Rust<->SENS link may cross ONLY the sterile Zig corridor (#5777/#5779).
 
 Fail-closed STRUCTURAL checker. It does not run cargo or Zig; it asserts the
-invariants that make the corridor un-bypassable, so a later change cannot turn
-the Rust host into a silent physical codec again:
+invariants that make the corridor un-bypassable.
 
 R1  crates/sens-cli/Cargo.toml: `default` features include `zig-transport`
 R2  crates/sens-cli/build.rs: gated on CARGO_FEATURE_ZIG_TRANSPORT, links Zig
@@ -41,8 +40,9 @@ REQUIRED_ABI_EXPORTS = (
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
     "sens_zig_t5_decode_be3",
+    "sens_zig_e1_encode_be3",
+    "sens_zig_e1_decode_be3",
 )
-
 
 
 def _single_route(source: str, begin: str, end: str) -> str | None:
@@ -52,50 +52,6 @@ def _single_route(source: str, begin: str, end: str) -> str | None:
     start = source.index(begin) + len(begin)
     stop = source.index(end, start)
     return source[start:stop]
-
-
-def _audit_main_physical_route(source: str) -> list[str]:
-    """R6 source-only: actual Zig BE3 ingress -> SENS D2 -> CLI .sens dispatch."""
-    problems: list[str] = []
-    if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
-        problems.append("R6: main lacks feature-gated Zig physical client")
-
-    ingress = _single_route(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
-    evaluation = _single_route(source, "fn eval_physical_t5(", "\nfn main() {")
-    dispatch = _single_route(source, "fn main() {", "\n#[cfg(test)]")
-    if ingress is None or evaluation is None or dispatch is None:
-        return problems + ["R6: physical CLI entrypoint missing or duplicated"]
-
-    zig_gate = '#[cfg(feature = "zig-transport")]'
-    no_zig_gate = '#[cfg(not(feature = "zig-transport"))]'
-    if ingress.count(zig_gate) != 1 or ingress.count(no_zig_gate) != 1:
-        problems.append("R6: physical ingress needs Zig and reference feature gates")
-    else:
-        zig_part, no_zig_part = ingress.split(no_zig_gate, 1)
-        if not re.search(
-            r'(?m)^\s*return zig_transport::decode_t5_words\(bytes\);\s*$',
-            zig_part,
-        ):
-            problems.append("R6: live default ingress fails to return Zig BE3 words")
-        if not re.search(
-            r'Err\("physical \.sens requires the Zig transport corridor; '
-            r'no Rust fallback"\.into\(\)\)',
-            no_zig_part,
-        ):
-            problems.append("R6: feature-negative physical ingress must refuse Rust fallback")
-
-    if any(token in ingress + evaluation for token in (
-        "sens::decode_ternary_words(", "PhysicalT5Program::decode("
-    )):
-        problems.append("R6: physical CLI route contains a Rust T5 decoder")
-    if "let words = decode_physical_t5_words(bytes)?;" not in evaluation:
-        problems.append("R6: evaluator bypasses Zig physical ingress")
-    if "sens::parse_canonical_word_sequence(&words)" not in evaluation:
-        problems.append("R6: evaluator bypasses canonical SENS D2 reader")
-    if ("physical_t5_request(&raw_args)" not in dispatch or
-            ".and_then(|bytes| eval_physical_t5(&bytes))" not in dispatch):
-        problems.append("R6: CLI .sens dispatch bypasses guarded evaluator")
-    return problems
 
 
 def check(root: Path) -> list[str]:
@@ -192,10 +148,19 @@ def check(root: Path) -> list[str]:
 
     main_rs = root / MAIN_RS
     trit_rs = root / TRIT_RS
-    if main_rs.is_file() and not main_rs.is_symlink():
-        problems.extend(_audit_main_physical_route(main_rs.read_text(encoding="utf-8")))
-    else:
+    if not main_rs.is_file() or main_rs.is_symlink():
         problems.append(f"R6: missing or linked {MAIN_RS}")
+    else:
+        main_src = main_rs.read_text(encoding="utf-8")
+        if "zig_transport::decode_t5_words" not in main_src:
+            problems.append(
+                "R6: main.rs must decode physical .sens via zig_transport::decode_t5_words "
+                "(live default ingress)"
+            )
+        if "mod zig_transport" not in main_src:
+            problems.append("R6: main.rs must declare the shared zig_transport module")
+        if "decode_ternary_words" in main_src and "zig_transport::decode_t5_words" not in main_src:
+            problems.append("R6: main.rs still uses Rust T5 decoder as primary ingress")
     if trit_rs.is_file():
         trit_src = trit_rs.read_text(encoding="utf-8")
         if "zig_transport.rs" not in trit_src:

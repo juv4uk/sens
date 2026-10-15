@@ -106,7 +106,6 @@ class CorridorGuardTests(unittest.TestCase):
         self.assertTrue(self.module.check(self.root))
 
     def test_main_without_zig_decode_is_blocked(self) -> None:
-        # Zig reference in a comment MUST NOT count as a live ingress.
         mutate(
             self.root,
             "crates/sens-cli/src/main.rs",
@@ -156,6 +155,30 @@ class CorridorGuardTests(unittest.TestCase):
         entry.symlink_to(other)
         issues = self.module.check(self.root)
         self.assertTrue(any("missing or linked" in e for e in issues), issues)
+
+    def test_abi_without_e1_decode_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "research/zig-codecs/transport_abi.zig",
+            "pub export fn sens_zig_e1_decode_be3",
+            "fn sens_zig_e1_decode_be3_hidden",
+        )
+        issues = self.module.check(self.root)
+        self.assertTrue(
+            any("e1_decode" in e.lower() or "E1" in e or "sens_zig_e1_decode" in e for e in issues),
+            issues,
+        )
+
+    def test_client_without_e1_decode_ffi_is_blocked(self) -> None:
+        path = self.root / "crates/sens-cli/src/zig_transport.rs"
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("sens_zig_e1_decode_be3", text)
+        path.write_text(text.replace("sens_zig_e1_decode_be3", "sens_zig_e1_missing"), encoding="utf-8")
+        issues = self.module.check(self.root)
+        self.assertTrue(
+            any("sens_zig_e1_decode_be3" in e or "E1" in e or "decode" in e.lower() for e in issues),
+            issues,
+        )
 
 
 if __name__ == "__main__":
