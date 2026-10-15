@@ -19,7 +19,9 @@ R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
     research/zig-codecs/host-c/zig_transport_v2.h must declare the same
     physical ops as the Zig ABI (no host-invented ops, no missing ops),
     the ABI version must match, and every Rust-free host in host-c/*.c
-    must only call corridor ops (no rogue sens_zig_* invents).
+    must only call corridor ops (no rogue sens_zig_* invents). At least
+    one host must fail-closed reject invalid T5 via F3C pack (...)=-1
+    (same physical contract as Rust zig_transport::encode_f3).
 
 Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
@@ -53,7 +55,7 @@ EXPORT_RE = re.compile(r"pub export fn\s+([A-Za-z0-9_]+)")
 CALL_RE = re.compile(r"\b(sens_zig_[a-z0-9_]+)\s*\(")
 # Exclude non-code tokens so strings/comments cannot forge C→Zig call evidence.
 C_NONCODE_RE = re.compile(
-    r"""//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'""",
+    r"""//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'""",
     re.S,
 )
 
@@ -137,12 +139,10 @@ def check(root: Path) -> list[str]:
     else:
         header = header_path.read_text(encoding="utf-8")
         header_ops = set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*\(", header))
-        # version() is a zero-arg getter; still part of the surface.
         header_ops |= set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*;", header))
         zig_ops = set(exports)
         missing_in_header = sorted(zig_ops - header_ops)
         extra_in_header = sorted(header_ops - zig_ops - {"sens_zig_codec_abi_version"})
-        # version is exported in Zig as sens_zig_codec_abi_version; header may declare it too.
         if "sens_zig_codec_abi_version" in exports and "sens_zig_codec_abi_version" not in header_ops:
             missing_in_header = sorted(set(missing_in_header) | {"sens_zig_codec_abi_version"})
         if missing_in_header:
@@ -171,8 +171,6 @@ def check(root: Path) -> list[str]:
         physical_exports = set(exports) - {"sens_zig_codec_abi_version"}
         for host in sorted(host_dir.glob("*.c")):
             src = host.read_text(encoding="utf-8")
-            # Strip C comments AND quoted literals in lexical order: neither
-            # a string ghost nor comment markers inside a string prove a call.
             src = C_NONCODE_RE.sub(" ", src)
             calls = set(CALL_RE.findall(src))
             if not calls:
@@ -189,6 +187,25 @@ def check(root: Path) -> list[str]:
             problems.append(
                 "R5: no Rust-free host in host-c/*.c calls a physical Zig transport op "
                 "(version-only and commented calls are not evidence)"
+            )
+
+        # R5 F3C fail-closed (G6/G7 host-neutral): at least one host must reject
+        # invalid T5 via F3C pack with expected -1 — same physical contract as
+        # Rust zig_transport::encode_f3. Comments/string ghosts already stripped.
+        f3c_invalid_reject = False
+        for host in sorted(host_dir.glob("*.c")):
+            src = C_NONCODE_RE.sub(" ", host.read_text(encoding="utf-8"))
+            if re.search(
+                r"sens_zig_f3c_pack\s*\([^;]{0,200}\)\s*,\s*-1\s*\)",
+                src,
+            ):
+                f3c_invalid_reject = True
+                break
+        if not f3c_invalid_reject:
+            problems.append(
+                "R5: no Rust-free host exercises F3C pack rejection of invalid T5 "
+                "(expected check_number(..., sens_zig_f3c_pack(...), -1); "
+                "same fail-closed contract as Rust encode_f3)"
             )
 
     return problems
