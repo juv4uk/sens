@@ -72,8 +72,14 @@ def check_main_t5_ingress(source: str) -> None:
     if ingress.count(positive) != 1 or ingress.count(negative) != 1:
         raise CorridorBlocked("sens main T5 ingress missing separate feature gates")
     zig, reference = ingress.split(negative, 1)
-    if "zig_transport::decode_t5_words(bytes)" not in zig:
-        raise CorridorBlocked("sens main physical .sens must decode via zig_transport")
+    # A symbol mentioned only in a Rust comment does not cross Zig.
+    # Require the real return call on the default-feature ingress path.
+    active_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
+    if not re.search(
+        r"(?m)^\s*return\s+zig_transport::decode_t5_words\s*\(\s*bytes\s*\)\s*;",
+        active_zig,
+    ):
+        raise CorridorBlocked("sens main default physical .sens lacks live Zig return")
     if "sens::decode_ternary_words" in ingress or "PhysicalT5Program::decode(" in ingress:
         raise CorridorBlocked("sens main T5 ingress has Rust physical fallback")
     if "no Rust fallback" not in reference and "requires the Zig transport" not in reference:
