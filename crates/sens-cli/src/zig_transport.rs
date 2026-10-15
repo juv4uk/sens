@@ -53,10 +53,13 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
         .ok_or("Zig BE3 input length overflow")?;
     let mut be3 = Vec::with_capacity(be3_capacity);
     for word in words {
-        let width = word.width();
-        let bits = word.bits();
-        if width == 0 || width > 10 {
-            return Err(format!("unsupported domain width {width}"));
+        // The Rust enum is a carrier; preserve exact width without turning
+        // it into a host function number or a historical SID8 identity.
+        let width = u8::try_from(word.width())
+            .map_err(|_| "Zig BE3 width does not fit in u8")?;
+        let bits = word.packed_bits();
+        if width == 0 || width > 9 {
+            return Err(format!("unsupported physical T5 width {width}"));
         }
         let limit = 1u32 << width;
         if (bits as u32) >= limit {
@@ -118,8 +121,24 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
     for chunk in be3.chunks_exact(3) {
         let width = chunk[0];
         let bits = u16::from_be_bytes([chunk[1], chunk[2]]);
-        let word = sens::BinarySourceWord::from_width_bits(width, bits)
-            .map_err(|e| format!("Zig returned inadmissible coordinate: {e:?}"))?;
+        // Restore only exact source word *shapes*. SENS alone admits D2 and
+        // callable semantics later, Zig has provided physical width+payload.
+        if width < 9 && bits > u16::from(u8::MAX) {
+            return Err("Zig BE3 payload exceeds narrow carrier".into());
+        }
+        let low = bits as u8;
+        let word = match width {
+            1 => sens::Bit1::new(low).map(sens::BinarySourceWord::W1),
+            2 => sens::Bit2::new(low).map(sens::BinarySourceWord::W2),
+            3 => sens::Bit3::new(low).map(sens::BinarySourceWord::W3),
+            4 => sens::Bit4::new(low).map(sens::BinarySourceWord::W4),
+            5 => sens::Bit5::new(low).map(sens::BinarySourceWord::W5),
+            6 => sens::Bit6::new(low).map(sens::BinarySourceWord::W6),
+            7 => sens::Bit7::new(low).map(sens::BinarySourceWord::W7),
+            8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
+            9 => sens::Bit9::new(bits).map(sens::BinarySourceWord::W9),
+            _ => None,
+        }.ok_or_else(|| format!("Zig BE3 rejected exact carrier width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -173,6 +192,21 @@ mod tests {
         assert_eq!(encode_t5(&words, &golden).unwrap(), golden);
         assert!(encode_t5(&words, &[0xa1]).is_err());
         assert_eq!(decode_t5_words(&golden).unwrap(), words);
+    }
+
+    #[test]
+    fn zig_be3_keeps_d1_and_d2_distinct_with_one_bit_mutant() {
+        // Equal payload, distinct exact width; neither is a semantic opcode.
+        let one = sens::parse_binary_source_words("1").unwrap()[0].word;
+        let two = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let a = encode_t5_direct(&[one]).unwrap();
+        let b = encode_t5_direct(&[two]).unwrap();
+        assert_eq!(a, [0xa1]);
+        assert_eq!(b, [0x35]);
+        assert_ne!(a, b);
+        assert_eq!(decode_t5_words(&a).unwrap(), vec![one]);
+        assert_eq!(decode_t5_words(&b).unwrap(), vec![two]);
+        assert!(decode_t5_words(&[0xf3]).is_err());
     }
 
     #[test]
