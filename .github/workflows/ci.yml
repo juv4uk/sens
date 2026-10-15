@@ -181,6 +181,10 @@ jobs:
           cargo test --locked -p sens-cli --bin sens-trit explain_ -- --nocapture
           python3 scripts/ci_zig_purity.py --self-test
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
+          # Independent Rust-free C→Zig H2 corpus: typed widths, exact bytes,
+          # controlled negative reasons, immutable source provenance.
+          echo 'test_id=zig-h2-c-host-physical-migration layer=transport semantic_authority=SENS profile=D1-D9'
+          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run
           # The single auto-CI must audit the real Rust↔Zig source route,
           # not just Zig file purity. This is NOT semantic SENS admission.
           echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
@@ -246,10 +250,6 @@ jobs:
           zig test research/zig-codecs/transport/e1_writer.zig
           echo 'test_id=zig-rust-free-c-host-f3c-buffer-parity layer=transport semantic_authority=SENS semantic_verdict=NOT_TESTED'
           bash research/zig-codecs/host-c/verify.sh
-          # Independent Rust-free C→Zig H2 corpus: typed widths, exact bytes,
-          # controlled negative reasons, immutable source provenance.
-          echo 'test_id=zig-h2-c-host-physical-migration layer=transport semantic_authority=SENS profile=D1-D9'
-          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run
           echo 'test_id=zig-migration-bridge-t5-exact-physical layer=transport semantic_authority=SENS compiler=zig-0.16'
           python3 scripts/test_zig_codec_bridge.py
           # Same focused Zig step, no new workflow: compile and actually link
