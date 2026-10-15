@@ -149,6 +149,10 @@ jobs:
           # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
           echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
           python3 scripts/migration-zig-gate.py --self-test
+          # Release GO requires the exact-SHA completed central Zig CI job.
+          # Synthetic missing/red/stale check-run controls never assert GO.
+          echo 'test_id=release-central-zig-exact-sha-check layer=release-provenance verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_verify_release_ci.py -k central_zig_job -v
           # Axiom→guard provenance must be unambiguous, including nested JSON.
           # The negative fixture is SOURCE-ONLY; it never grants Zig/SENS GO.
           echo 'test_id=zig-corridor-axiom-duplicate-key-failclosed layer=provenance verdict=source-only semantic_authority=SENS'
