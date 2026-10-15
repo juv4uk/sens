@@ -281,7 +281,7 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
         migrator = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = migrator
         spec.loader.exec_module(migrator)
-        projection = "000\\n"
+        projection = "000\n"
         reference = migrator.encode_projection(projection)
         expected = migrator.hashlib.sha256(reference).hexdigest()
         binary = ROOT / "not-a-real-executable"  # mock only, NEVER a release receipt
