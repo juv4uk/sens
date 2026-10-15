@@ -1320,7 +1320,6 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
-      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
         # prints the GO count and names the red gates -- report-only, never greenwashed.
@@ -1357,7 +1356,7 @@ jobs:
           path: ${{ runner.temp }}/math-bench.json
           if-no-files-found: warn
 
-
+      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
         if: always()
         shell: bash
         run: |
