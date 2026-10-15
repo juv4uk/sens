@@ -62,6 +62,20 @@ class StageTwoProjectionsTests(unittest.TestCase):
                 pair.stage(ROOT, mirror, [self.BRANCH, self.BRANCH], "auto", True)
             self.assertFalse(list(mirror.rglob("*"))) if mirror.exists() else None
 
+    def test_retired_source_eras_cannot_relabel_current_domains(self):
+        # Current two-map migrator does not accept the historical SID8 era.
+        # Positive auto mode is covered by the existing executable fixture test.
+        for era in ("legacy", "current"):
+            with self.subTest(era=era), tempfile.TemporaryDirectory(
+                prefix="sens-two-era-negative-"
+            ) as td:
+                mirror = Path(td) / "mirror"
+                with self.assertRaisesRegex(
+                    pair.ProjectionBlocked, "CURRENT_ONLY.*SID8"
+                ):
+                    pair.stage(ROOT, mirror, [self.BRANCH], era, True)
+                self.assertFalse(mirror.exists())
+
     def test_invalid_program_does_not_claim_migration(self):
         # The bounded Ukrainian renderer must not make up a source-level
         # mapping for arbitrary arithmetic, a binder or unresolved call.
