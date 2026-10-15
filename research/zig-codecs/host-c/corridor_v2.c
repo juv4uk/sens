@@ -185,6 +185,73 @@ static int witness_zig_e1_encode_be3(void) {
     return 1;
 }
 
+/* Rust-free E1 ABI memory-boundary witness: byte ownership only.
+ * Adjacent caller-owned slices are legal; full/shifted alias and a corrupted
+ * CRC must not alter any destination byte. No SENS semantic verdict here.
+ */
+static int witness_zig_e1_decode_buffer_boundaries(void) {
+    static const uint8_t golden[] = {
+        0x53, 0x33, 1, 3, 0, 3, 0x23, 0x20,
+        0x8a, 0x36, 0x20, 0x5d, 0x52
+    };
+    static const uint8_t exact_be3[] = {2, 0, 2, 3, 0, 1, 2, 0, 1};
+    uint8_t shared[64];
+    uint8_t snapshot[sizeof shared];
+    uint8_t corrupt[sizeof golden];
+    uint8_t decoded[32];
+    uint8_t sentinel[sizeof decoded];
+
+    /* Two nonoverlapping slices of the same allocation may cross Zig. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    if (!check_number("e1-decode-adjacent-slices",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared + sizeof golden,
+                                   sizeof shared - sizeof golden),
+            (ptrdiff_t)sizeof exact_be3)) return 0;
+    if (!check_bytes("e1-decode-adjacent-exact-be3",
+                     shared + sizeof golden, exact_be3, sizeof exact_be3)) return 0;
+
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-full-alias-rejected",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared, sizeof shared), -1)) return 0;
+    if (!check_bytes("e1-decode-full-alias-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    /* Two overlap orientations: Zig must reject BEFORE touching memory. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-forward-overlap-rejected",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared + 5, sizeof shared - 5), -1)) return 0;
+    if (!check_bytes("e1-decode-forward-overlap-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared + 5, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-reverse-overlap-rejected",
+            sens_zig_e1_decode_be3(shared + 5, sizeof golden,
+                                   shared, sizeof shared), -1)) return 0;
+    if (!check_bytes("e1-decode-reverse-overlap-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    memcpy(corrupt, golden, sizeof golden);
+    corrupt[sizeof corrupt - 1] ^= 1u;
+    memset(decoded, 0x49, sizeof decoded);
+    memset(sentinel, 0x49, sizeof sentinel);
+    if (!check_number("e1-decode-crc-bit-mutant-rejected",
+            sens_zig_e1_decode_be3(corrupt, sizeof corrupt,
+                                   decoded, sizeof decoded), -1)) return 0;
+    if (!check_bytes("e1-decode-crc-bit-mutant-no-output-mutation",
+                     decoded, sentinel, sizeof decoded)) return 0;
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -246,6 +313,7 @@ int main(void) {
 
     if (!witness_zig_decode_be3()) return 1;
     if (!witness_zig_e1_encode_be3()) return 1;
+    if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
