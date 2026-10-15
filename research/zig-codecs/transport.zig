@@ -69,6 +69,24 @@ fn writeFileNew(allocator: std.mem.Allocator, path: []const u8, body: []const u8
     failed = false;
 }
 
+/// Reopen and verify ONLY an output successfully created by writeFileNew.
+/// The cleanup path is allocated before creation so even an allocation or
+/// readback error cannot strand a potentially unverified migration artifact.
+/// Failed verification never touches a pre-existing destination: exclusive
+/// creation by the caller is a required precondition.
+fn verifyCreatedFile(
+    allocator: std.mem.Allocator,
+    path: []const u8,
+    cleanup_path: [*:0]const u8,
+    expected: []const u8,
+) !void {
+    errdefer _ = remove(cleanup_path);
+    const reopened = try readFile(allocator, path);
+    defer allocator.free(reopened);
+    if (!std.mem.eql(u8, reopened, expected))
+        return Error.CanonicalRoundtripMismatch;
+}
+
 fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8) ![]u8 {
     if (std.mem.eql(u8, command, "t5-roundtrip")) {
         const words = try t5.decode(allocator, source);
@@ -161,13 +179,48 @@ pub fn main(init: std.process.Init) !void {
         return Error.CanonicalRoundtripMismatch;
     }
 
+    // Reserve the cleanup path BEFORE exclusive file creation. Every
+    // verification failure, including allocation/open/read error, deletes
+    // only this newly created artifact; no false release evidence survives.
+    const cleanup_path = try allocator.dupeZ(u8, dest_path);
+    defer allocator.free(cleanup_path);
     try writeFileNew(allocator, dest_path, output);
-    const reopened = try readFile(allocator, dest_path);
-    defer allocator.free(reopened);
-    if (!std.mem.eql(u8, reopened, output)) {
-        const zpath = try allocator.dupeZ(u8, dest_path);
-        defer allocator.free(zpath);
-        _ = remove(zpath.ptr);
-        return Error.CanonicalRoundtripMismatch;
-    }
+    try verifyCreatedFile(allocator, dest_path, cleanup_path.ptr, output);
+}
+
+
+test "Zig migration output is removed on failed readback, retained only when exact" {
+    // Zig 0.16 std.testing's isolated directory is owned by this test.
+    // Files carry opaque physical bytes; no SENS semantic admission.
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const allocator = std.testing.allocator;
+    const parent = try tmp.dir.realPathFileAlloc(std.testing.io, ".", allocator);
+    defer allocator.free(parent);
+
+    const failed = try std.fs.path.join(allocator, &.{ parent, "unverified.sens" });
+    defer allocator.free(failed);
+    const failed_z = try allocator.dupeZ(u8, failed);
+    defer allocator.free(failed_z);
+    try writeFileNew(allocator, failed, &.{ 0x00, 0x00 });
+    // Distinct bytes / source provenance cannot become a released artifact.
+    try std.testing.expectError(error.CanonicalRoundtripMismatch,
+        verifyCreatedFile(allocator, failed, failed_z.ptr, &.{ 0x00 }));
+    try std.testing.expectError(error.InputReadFailed,
+        readFile(allocator, failed));
+
+    const passed = try std.fs.path.join(allocator, &.{ parent, "verified.sens" });
+    defer allocator.free(passed);
+    const passed_z = try allocator.dupeZ(u8, passed);
+    defer allocator.free(passed_z);
+    const physical = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    try writeFileNew(allocator, passed, &physical);
+    try verifyCreatedFile(allocator, passed, passed_z.ptr, &physical);
+    const restored = try readFile(allocator, passed);
+    defer allocator.free(restored);
+    try std.testing.expectEqualSlices(u8, &physical, restored);
+    // Exclusive output is never overwritten by a concurrent/second writer.
+    try std.testing.expectError(error.OutputExistsOrUnavailable,
+        writeFileNew(allocator, passed, &.{0xff}));
+    try std.testing.expectEqualSlices(u8, &physical, restored);
 }
