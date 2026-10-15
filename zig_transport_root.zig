@@ -57,6 +57,26 @@ test "Sanskrit surface Zig C ABI copies exact bytes and refuses short buffers" {
     try std.testing.expectEqualSlices(u8, sanskrit_asset[0..sanskrit_asset.len], &out);
 }
 
+// Ukrainian peer surface is unchanged source bytes, not a code or name registry.
+const ukr_asset = @embedFile("lib/surface/ukr.lisp");
+pub export fn sens_zig_ukr_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (ukr_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(ukr_asset.len);
+    if (capacity < ukr_asset.len) return -2;
+    @memcpy(dst[0..ukr_asset.len], ukr_asset[0..ukr_asset.len]);
+    return @intCast(ukr_asset.len);
+}
+test "exact Ukrainian peer source, short copy refuses without writing" {
+    const length = sens_zig_ukr_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(ukr_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_ukr_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var out: [ukr_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_ukr_bytes_copy(&out, out.len));
+    try std.testing.expectEqualSlices(u8, ukr_asset[0..ukr_asset.len], &out);
+}
+
 test "contract exact-byte copy and no partial output on a short buffer" {
     const length = sens_zig_contract_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(contract_asset.len)), length);
