@@ -34,6 +34,75 @@ FS_RE = re.compile(r'\.(sens|lisp)')
 GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
 
 
+def _rust_live_tokens(source: str) -> str:
+    """Mask Rust comments and string literals before accepting a Zig route.
+
+    Source-only witness: never a parser, transport codec or semantic oracle.
+    Keep newlines and offsets; recognize nested /* */ and r###"..."### so
+    a dormant Rust literal cannot impersonate a live Zig ABI call.
+    """
+    masked = list(source)
+    length = len(source)
+
+    def blank(start: int, end: int) -> None:
+        for offset in range(start, end):
+            if masked[offset] != "\n":
+                masked[offset] = " "
+
+    i = 0
+    while i < length:
+        start = i
+        if source.startswith("//", i):
+            end = source.find("\n", i)
+            i = length if end < 0 else end
+            blank(start, i)
+            continue
+        if source.startswith("/*", i):
+            depth = 1
+            i += 2
+            while i < length and depth:
+                if source.startswith("/*", i):
+                    depth += 1
+                    i += 2
+                elif source.startswith("*/", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            blank(start, i)
+            continue
+
+        # Rust raw string literals (and byte raw strings), including multiple
+        # hash delimiters. r#ident without a quote remains a live identifier.
+        raw = i + int(source[i] == "b")
+        if raw < length and source[raw] == "r":
+            delimiter = raw + 1
+            while delimiter < length and source[delimiter] == "#":
+                delimiter += 1
+            if delimiter < length and source[delimiter] == '"':
+                suffix = '"' + ("#" * (delimiter - raw - 1))
+                close = source.find(suffix, delimiter + 1)
+                i = length if close < 0 else close + len(suffix)
+                blank(start, i)
+                continue
+
+        if source[i] == '"':
+            i += 1
+            while i < length:
+                if source[i] == "\\":
+                    i += 2
+                elif source[i] == '"':
+                    i += 1
+                    break
+                else:
+                    i += 1
+            i = min(i, length)
+            blank(start, i)
+            continue
+        i += 1
+    return "".join(masked)
+
+
 def _sha(root: Path, rel: str) -> str:
     import hashlib
     p = root / rel
@@ -48,7 +117,7 @@ def build_map(root: Path) -> dict:
             if "/tests/" in f"/{rel}" or "/examples/" in f"/{rel}":
                 continue
             src = path.read_text(encoding="utf-8", errors="replace")
-            corridor = bool(CORRIDOR_RE.search(src))
+            corridor = bool(CORRIDOR_RE.search(_rust_live_tokens(src)))
             direct = bool(DIRECT_RE.search(src))
             fs = bool(FS_RE.search(src))
             if not (corridor or direct or fs):
