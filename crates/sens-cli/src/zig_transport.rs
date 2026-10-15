@@ -198,21 +198,17 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
 /// Zig is the only physical E1 decoder on the feature-gated CLI ingress.
 pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     version()?;
-    if bytes.is_empty() {
-        return Err("Zig E1 rejected empty physical carrier".into());
+    // The current Zig E1 ABI has a bounded 64 KiB canonical replay window.
+    // E1 REPEAT can encode up to 4096 exact words in a very short frame;
+    // allocating from input byte length loses valid repeated-word programs.
+    if bytes.is_empty() || bytes.len() > 64 * 1024 {
+        return Err("Zig E1 physical frame outside bounded decode window".into());
     }
-    let capacity = bytes.len().saturating_mul(3).max(48);
-    let mut be3 = vec![0u8; capacity];
-    let mut written = unsafe {
+    const MAX_E1_WORDS: usize = 4096;
+    let mut be3 = vec![0u8; MAX_E1_WORDS * 3];
+    let written = unsafe {
         sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
     };
-    if written == -2 {
-        let capacity = bytes.len().saturating_mul(6).max(256);
-        be3 = vec![0u8; capacity];
-        written = unsafe {
-            sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
-        };
-    }
     if written <= 0
         || usize::try_from(written)
             .ok()
