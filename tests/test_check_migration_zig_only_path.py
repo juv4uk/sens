@@ -380,7 +380,7 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
             record["automatic_sens_companion"] = True
             manifest.write_text(json.dumps(record), encoding="utf-8")
             with self.assertRaisesRegex(
-                migrator.SensT5Error, "NONPROGRAM_MANIFEST_UNTRUSTED"
+                migrator.SensT5Error, "NONPROGRAM_MANIFEST_SHA_DRIFT"
             ):
                 migrator.reject_reviewed_nonprogram_source(source, sandbox)
 
