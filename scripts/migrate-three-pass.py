@@ -392,7 +392,9 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 candidates.add(by_role)
         # NEW REALITY: D8 is owner-ratified. An 8-bit registered name resolves to
         # its current D8 coordinate when that coordinate is admitted.
-        if not candidates and byte in admitted_d8:
+        # Optional D8 admission is never implied by historical 8-bit identity.
+        # None disables this fallback instead of crashing or auto-mapping SID8.
+        if not candidates and admitted_d8 is not None and byte in admitted_d8:
             candidates.add((byte, "D8"))
         unique=next(iter(candidates)) if len(candidates)==1 else None
         for namespace,name in surfaces:
