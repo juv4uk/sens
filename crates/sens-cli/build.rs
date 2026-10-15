@@ -8,6 +8,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/f3c/f3c.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport_abi.zig");
+    println!("cargo:rerun-if-changed=../../zig_transport_root.zig");
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
     // E1 ABI v2 imports the existing Zig physical reader/writer. Rebuild the
@@ -41,7 +42,7 @@ fn main() {
     let result = Command::new(&compiler)
         .current_dir(&root)
         .arg("build-lib")
-        .arg("research/zig-codecs/transport_abi.zig")
+        .arg("zig_transport_root.zig")
         .arg("-O")
         .arg("ReleaseFast")
         .arg("-lc")
