@@ -37,6 +37,10 @@ jobs:
           python3 scripts/check_corridor_axiom_binding.py .
           python3 -m unittest tests.test_check_corridor_axiom_binding -v
           python3 scripts/migration-zig-gate.py --require-zig
+          # Zig 0.16 native test suite with release-like optimizations and safety.
+          # Full migration proof + native physical test are separate GO inputs.
+          echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
+          zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
 
       - name: Release version alignment (gate #1 mechanical)
         run: |
