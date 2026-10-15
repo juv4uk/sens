@@ -137,7 +137,7 @@ class RustZigSensBoundaryTests(unittest.TestCase):
 
     def test_mixed_zig_token_cannot_hide_direct_rust_semantic_bypass(self) -> None:
         # Synthetic source is structural evidence ONLY, not executable SENS.
-        # Even a comment mentioning Zig may label a Rust file as "mixed";
+        # A comment mentioning Zig must NOT label a direct Rust source as mixed;
         # release preflight must still see the direct Rust semantic path.
         import subprocess
         import sys
@@ -164,11 +164,11 @@ class RustZigSensBoundaryTests(unittest.TestCase):
                 "// zig_transport appears in a comment ONLY\n"
                 "pub fn bypass() { let _ = eval::execute; }\n"
             )
-            self.assertEqual(report["contacts"][0]["kind"], "mixed")
-            self.assertEqual(report["bypasses"], [])  # legacy direct-only field
+            self.assertEqual(report["contacts"][0]["kind"], "direct")
+            self.assertEqual(report["bypasses"], ["crates/demo/src/lib.rs"])
             self.assertEqual(
                 [(c["path"], c["kind"]) for c in report["unresolved_bypasses"]],
-                [("crates/demo/src/lib.rs", "mixed")],
+                [("crates/demo/src/lib.rs", "direct")],
             )
             self.assertEqual(
                 report["unresolved_bypasses"][0]["sha256"],
@@ -176,7 +176,7 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             )
             self.assertEqual(rc, 1, output)
             self.assertIn("BOUNDARY_BYPASS_PRESENT", output)
-            self.assertIn("kind=mixed", output)
+            self.assertIn("kind=direct", output)
             self.assertIn("sha256=", output)
             self.assertIn("crates/demo/src/lib.rs", output)
 
@@ -201,6 +201,58 @@ class RustZigSensBoundaryTests(unittest.TestCase):
                 [("crates/demo/src/lib.rs", "direct")],
             )
             self.assertEqual(rc, 1, output)
+
+
+
+    def test_only_live_rust_tokens_can_claim_zig_corridor(self) -> None:
+        # A stale commented Zig call, quoted token or nested block comment
+        # cannot be counted as an active Rust -> Zig physical route.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root / "crates" / "demo" / "src"
+            folder.mkdir(parents=True)
+            path = folder / "lib.rs"
+
+            def classify(source: str) -> tuple[str, bool]:
+                path.write_text(source, encoding="utf-8")
+                records = self.mod.build_map(root)["contacts"]
+                self.assertEqual(len(records), 1, records)
+                return records[0]["kind"], records[0]["corridor"]
+
+            for ghost in (
+                "// zig_transport::encode_t5_direct()\n",
+                "/* zig_transport::encode_t5_direct() */\n",
+                "/* outer /* zig_transport::encode_t5_direct() */ still */\n",
+                'const EXAMPLE: &str = "zig_transport::encode_t5_direct()";\n',
+                'const EXAMPLE: &str = r##"zig_transport::encode_t5_direct()"##;\n',
+                'const EXAMPLE: &str = br#"sens_zig_t5_validate()"#;\n',
+            ):
+                with self.subTest(ghost=ghost):
+                    self.assertEqual(
+                        classify(ghost + 'fn physical() { let _ = ".sens"; }\n'),
+                        ("filesystem", False),
+                    )
+
+            # A real live imported symbol remains transport-only evidence.
+            self.assertEqual(
+                classify("use crate::zig_transport;\n"
+                         'fn physical() { let _ = ".sens"; '
+                         "let _ = zig_transport::encode_t5_direct; }\n"),
+                ("corridor", True),
+            )
+            # Even when a Zig import is real, direct Rust evaluation stays
+            # in the independently reported unresolved bypass list.
+            path.write_text(
+                "use crate::zig_transport;\n"
+                "fn bypass() { let _ = eval::execute; }\n",
+                encoding="utf-8",
+            )
+            record = self.mod.build_map(root)
+            self.assertEqual(record["contacts"][0]["kind"], "mixed")
+            self.assertEqual(
+                [row["kind"] for row in record["unresolved_bypasses"]],
+                ["mixed"],
+            )
 
 
 
