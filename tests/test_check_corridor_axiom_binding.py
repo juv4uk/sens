@@ -88,8 +88,10 @@ class AxiomBindingTests(unittest.TestCase):
         self.assertTrue(any("unknown corridor rule" in p for p in self.module.check(self.root)))
 
     def test_rule_cannot_point_to_another_existing_guard(self) -> None:
+        # R1's real owner is check_sterile_zig_corridor.py. Mutate to a
+        # DIFFERENT existing owner; a no-op cannot be a negative witness.
         edit_binding(self.root, lambda d: d["bindings"][0].update({
-            "guard": "scripts/check_sterile_zig_corridor.py"
+            "guard": "scripts/check_rust_sens_zig_corridor.py"
         }))
         self.assertTrue(any("must use its actual guard" in p for p in self.module.check(self.root)))
 
