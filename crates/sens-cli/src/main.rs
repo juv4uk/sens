@@ -11,7 +11,7 @@ mod repl;
 mod swarm;
 mod tcp_repl;
 #[cfg(feature = "zig-transport")]
-mod zig_transport;
+use sens_cli::zig_transport;
 use swarm::{dotted_alist_lookup, oracle_check, oracle_help, run_client, run_tcp_repl_sexpr};
 use tcp_repl::run_tcp_repl;
 

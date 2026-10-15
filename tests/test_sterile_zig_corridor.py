@@ -796,7 +796,9 @@ class SterileZigCorridorTests(unittest.TestCase):
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
         for mutant in (
-            source.replace('mod zig_transport;', 'mod untrusted_transport;'),
+            source.replace('use sens_cli::zig_transport;', 'use untrusted_transport;'),
+            source.replace('use sens_cli::zig_transport;', '// use sens_cli::zig_transport;'),
+            source.replace('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;', '#[cfg(test)]\nuse sens_cli::zig_transport;'),
             source.replace('fn decode_physical_t5_words(', 'fn bypass_physical_t5_words('),
             source.replace('fn eval_physical_t5(', 'fn bypass_eval_physical_t5('),
             source.replace('fn main() {', 'fn other_main() {'),

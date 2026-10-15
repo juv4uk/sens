@@ -183,8 +183,14 @@ def _route_between(source: str, begin: str, end: str) -> str:
 
 def check_main_t5_ingress(source: str) -> None:
     """Source-level guard only: default physical T5 MUST cross Zig ABI v2."""
-    if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
-        raise CorridorBlocked("sens main lacks default feature-gated Zig bridge")
+    # Check the live library import, not merely the spelling in a comment.
+    # A duplicate private module restores needless warnings and duplicate FFI.
+    live = re.sub(r"/\*.*?\*/|//[^\n]*", "", source, flags=re.S)
+    ingress_import = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*use\s+sens_cli::zig_transport\s*;'
+    if len(re.findall(ingress_import, live)) != 1 or re.search(
+        r"(?m)^\s*(?:#\[path\s*=.*?\]\s*)?mod\s+zig_transport\s*;", live
+    ):
+        raise CorridorBlocked("sens main must import exactly one live, feature-gated shared Zig bridge")
     ingress = _route_between(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
     positive = '#[cfg(feature = "zig-transport")]'
     negative = '#[cfg(not(feature = "zig-transport"))]'
