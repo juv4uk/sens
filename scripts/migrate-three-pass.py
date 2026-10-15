@@ -830,13 +830,12 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
 
 
 def encode_string(node: String,text7):
-    # String literal: encode content (without quotes) as D7 Text7 sequence,
-    # wrapped in D2 structural frame for data transport.
+    # A string literal is DATA, not a machine identity: its content is not
+    # keyboard-encoded (owner 2026-10-15: the script does not need comments/docs,
+    # and a quoted citation is data). It is carried as an opaque empty data cell.
     content = node.tok.text[1:-1]  # strip surrounding quotes
-    # Handle escaped characters
     content = content.replace('\\"', '"').replace('\\\\', '\\')
-    if not content:
-        return [D2_OPEN, D3_EMPTY, D2_CLOSE]
+    return [D2_OPEN, D3_EMPTY, D2_CLOSE]
     cells = text7_encode(content, text7, node.tok)
     # Frame as D7 data: D2_OPEN + D2_OPEN + cells + D2_CLOSE + D2_CLOSE
     words = [D2_OPEN, D2_OPEN]
