@@ -39,6 +39,29 @@ class CorridorBlocked(ValueError):
     pass
 
 
+def check_zig_abi_v2_live_exports(source: str) -> None:
+    """Only real Zig C-ABI exports count; comments and Rust externs are not proof.
+
+    This checks the mechanical symbol corridor, not SENS semantic admission.
+    """
+    live = re.sub(r"/\*.*?\*/|//[^\n]*", "", source, flags=re.S)
+    for name in REQUIRED_FFI:
+        declaration = re.compile(
+            r"(?m)^\s*pub\s+export\s+fn\s+" + re.escape(name) + r"\s*\("
+        )
+        if len(declaration.findall(live)) != 1:
+            raise CorridorBlocked(
+                f"transport_abi.zig missing/duplicated live Zig ABI v2 export {name}"
+            )
+    # An ABI mismatch cannot be treated as an alternate physical profile.
+    if not re.search(
+        r"\bpub\s+export\s+fn\s+sens_zig_codec_abi_version"
+        r"\s*\(\s*\)\s*u32\s*\{\s*return\s+2\s*;\s*\}",
+        live,
+    ):
+        raise CorridorBlocked("transport_abi.zig ABI version must return 2")
+
+
 def check_default_zig_build_gate(build: str) -> None:
     """R2: the default Rust host cannot silently return before compiling Zig.
 
@@ -487,12 +510,8 @@ def check() -> list[str]:
     notes.append("f3c-physical-only-d2")
 
     abi = ABI.read_text(encoding="utf-8")
-    for name in ("sens_zig_t5_encode_be3", "sens_zig_t5_decode_be3"):
-        if f"pub export fn {name}" not in abi:
-            raise CorridorBlocked(f"transport_abi.zig missing export {name}")
-    if "pub export fn sens_zig_e1_encode_be3" in abi and "pub export fn sens_zig_e1_decode_be3" not in abi:
-        raise CorridorBlocked("transport_abi.zig exports E1 encode without decode")
-    notes.append("abi-v2-encode-decode")
+    check_zig_abi_v2_live_exports(abi)
+    notes.append("abi-v2-all-live-exports")
 
     build = BUILD.read_text(encoding="utf-8")
     if "transport_abi.zig" not in build:

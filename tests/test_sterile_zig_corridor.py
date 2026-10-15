@@ -503,5 +503,31 @@ class SterileZigCorridorTests(unittest.TestCase):
                 check(mutant)
 
 
+    def test_all_zig_abi_v2_exports_are_live_not_comment_or_rust_names(self) -> None:
+        """Rust's declared extern cannot stand in for the real Zig symbol."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_zig_abi_v2_live_exports"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "research/zig-codecs/transport_abi.zig").read_text(
+            encoding="utf-8"
+        )
+        check(source)
+        for name in module["REQUIRED_FFI"]:
+            with self.subTest(export=name):
+                declaration = f"pub export fn {name}("
+                self.assertIn(declaration, source)
+                # A visible symbol name in a comment must not satisfy ABI v2.
+                changed = source.replace(declaration, "// " + declaration, 1)
+                with self.assertRaisesRegex(blocked, "live Zig ABI v2 export"):
+                    check(changed)
+        changed_version = source.replace(
+            "pub export fn sens_zig_codec_abi_version() u32 { return 2; }",
+            "pub export fn sens_zig_codec_abi_version() u32 { return 3; }",
+            1,
+        )
+        self.assertNotEqual(changed_version, source)
+        with self.assertRaisesRegex(blocked, "ABI version must return 2"):
+            check(changed_version)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
