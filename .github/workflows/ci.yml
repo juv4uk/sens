@@ -1316,6 +1316,25 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
+      - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
+        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p core-math-demand-rust --release
+          python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
+            --json "$RUNNER_TEMP/math-bench.json"
+
+      - name: Upload math benchmark (SENS vs Rust)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-bench-sens-vs-rust
+          path: ${{ runner.temp }}/math-bench.json
+          if-no-files-found: warn
+
+
         if: always()
         shell: bash
         run: |
