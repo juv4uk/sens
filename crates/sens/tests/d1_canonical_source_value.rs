@@ -69,3 +69,51 @@ fn human_numeric_parser_does_not_alias_canonical_d1_source() {
         );
     }
 }
+
+#[test]
+fn positional_cond_d1_guards_are_bare_binary_words_not_tagged_carriers() {
+    // Source is D2-framed and W1-exact; the syntactic position does not
+    // fabricate D1 for arbitrary expressions. No host semantic truth table.
+    let canonical = "10 110 00 10 0 00 0 01 00 10 1 00 1 01 01";
+    let parsed = parse_canonical_binary(canonical).expect("tag-free canonical COND");
+    assert_eq!(parsed.len(), 1);
+    let ExprKind::List(forms) = &parsed[0].kind else {
+        panic!("D2 opening must yield a list");
+    };
+    assert_eq!(forms.len(), 3, "COND head and two D1 clauses");
+    for (index, bit) in [(1usize, 0u16), (2usize, 1u16)] {
+        let ExprKind::List(clause) = &forms[index].kind else {
+            panic!("D2 clause must remain a list");
+        };
+        let ExprKind::DomainIdentity(identity) = &clause[0].kind else {
+            panic!("bare guard must remain a domain-qualified D1 word");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (1, bit));
+    }
+    assert!(
+        parse_canonical_binary("10 110 00 10 #d1:0 00 0 01 01").is_err(),
+        "human carrier must not become canonical binary"
+    );
+}
+
+#[test]
+fn transitional_d1_carrier_is_confined_to_compatibility_reader() {
+    // A blind migration of lib/*.lisp would change D1 predicates to numbers.
+    for bit in ["0", "1"] {
+        let tagged = parse(&format!("#d1:{bit}")).expect("temporary human carrier");
+        assert!(matches!(
+            &tagged[0].kind,
+            ExprKind::DomainIdentity(DomainIdentity::D1(_))
+        ));
+        let untagged = parse(bit).expect("legacy numeric reader");
+        assert!(matches!(
+            &untagged[0].kind,
+            ExprKind::Number(_, Exactness::Exact)
+        ));
+        assert!(matches!(
+            &parse_canonical_binary(bit).unwrap()[0].kind,
+            ExprKind::DomainIdentity(DomainIdentity::D1(_))
+        ));
+        assert!(parse_canonical_binary(&format!("#d1:{bit}")).is_err());
+    }
+}

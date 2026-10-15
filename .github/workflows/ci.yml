@@ -149,6 +149,10 @@ jobs:
           # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
           echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
           python3 scripts/migration-zig-gate.py --self-test
+          # Reader #5605: canonical COND has bare D1; #d1 is temporary
+          # for compatibility-only lib source; no separate workflow.
+          echo 'test_id=d1-cond-tag-free-source-boundary layer=reader verdict=focused-test semantic_authority=SENS'
+          cargo test --locked -p sens --test d1_canonical_source_value -- --nocapture
           # Canonical D2 COND carries bare W1 0/1, never #d1: in source.
           # Existing SENS-native oracle proves T5 physical round-trip and
           # keeps semantic verdicts inside binary SENS rather than host Rust.
