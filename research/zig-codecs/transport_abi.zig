@@ -94,7 +94,7 @@ test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" 
     var too_small: [8]u8 = .{0x6d} ** 8;
     try std.testing.expectEqual(@as(isize, -2),
         sens_zig_e1_encode_be3(&input, input.len, &too_small, too_small.len));
-    try std.testing.expectEqualSlices(u8, &.{0x6d} ** 8, &too_small);
+    for (too_small) |byte| try std.testing.expectEqual(@as(u8, 0x6d), byte);
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_e1_encode_be3(&.{ 10, 0, 0 }, 3, &physical, physical.len));
     try std.testing.expectEqual(@as(isize, -1),
