@@ -1,7 +1,13 @@
 ; lib/core1.lisp — Core1 evaluator profile on exact domains.
 ;
-; Ratified D1 predicates use exact one-bit carriers; no computed truth constructor.
-;   D1:YES = #d1:1; D1:NO = #d1:0. Domain width remains part of identity.
+; D1:YES = 1; D1:NO = 0 in CANONICAL positional-binary SENS;
+;   D2 framing/word position supplies exact one-bit domain identity.
+; TEMPORARY (#5605 READER / #5609 LIB): #d1:1 and #d1:0 BELOW are ONLY
+;   a LegacyCompatibility Lisp-reader bridge: that reader parses bare 0/1
+;   as Number, not PredicateBit. Never treat the sigil as canonical syntax.
+;   Removal: route this lib consumer through canonical exact-domain
+;   READER/AST, then prove SENS-native D1 positive + one-bit negative and
+;   exact T5 round-trip before switching to bare positional bits.
 ;   (001 ()) is structural D3:000 EMPTY, never a D1:NO predicate.
 ; Duplicate D4:0011 arm removed (one kept). Two-field COND discipline.
 ; Width is identity; every bit of the domain address is valued.
