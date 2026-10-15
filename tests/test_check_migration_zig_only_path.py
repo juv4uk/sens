@@ -103,21 +103,21 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
     def test_nested_uninvoked_verifier_is_not_a_receipt(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
                      "evidence = zig_codec_bridge.verify_t5(zig_binary, packed)",
-                     "def never_called():\\n"
-                     "                return zig_codec_bridge.verify_t5(zig_binary, packed)\\n"
-                     "            evidence = {'unverified': True}".replace("\\n", "\n"))
+                     "def never_called():\n"
+                     "                return zig_codec_bridge.verify_t5(zig_binary, packed)\n"
+                     "            evidence = {'unverified': True}")
         self.assertTrue(any("M3:" in msg or "M5:" in msg
                             for msg in self.module.check(self.root)))
 
     def test_nested_uninvoked_mint_cannot_satisfy_m8(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
                      "packed = zig_codec_bridge.carry_t5(zig_binary, projection)",
-                     "packed = reference_bytes\\n"
-                     "            def never_called():\\n"
-                     "                for _ in [0]:\\n"
-                     "                    packed = zig_codec_bridge.carry_t5(zig_binary, projection)\\n"
-                     "                    zig_codec_bridge.verify_t5(zig_binary, packed)\\n"
-                     "                    staged.append((rel, destination, original, packed, row))".replace("\\n", "\n"))
+                     "packed = reference_bytes\n"
+                     "            def never_called():\n"
+                     "                for _ in [0]:\n"
+                     "                    packed = zig_codec_bridge.carry_t5(zig_binary, projection)\n"
+                     "                    zig_codec_bridge.verify_t5(zig_binary, packed)\n"
+                     "                    staged.append((rel, destination, original, packed, row))")
         self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
 
     def test_write_gate_comment_and_pass_do_not_protect_publication(self) -> None:
