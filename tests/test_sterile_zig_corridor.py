@@ -25,6 +25,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertIn("STERILE_ZIG_CORRIDOR_PASS", completed.stdout)
+        self.assertIn("f3c-validate-before-no-savings", completed.stdout)
 
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
@@ -35,6 +36,39 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertNotIn("TRITS_BY_BYTE", body)
         self.assertIn("packed_bits", body)
         self.assertNotIn("from_width_bits", body)
+
+    def test_f3c_no_savings_rejects_validate_bypass_mutants(self) -> None:
+        """encode_f3 must validate via Zig before any length-based Ok(None)."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_f3c_validate_before_no_savings"]
+        blocked = module["CorridorBlocked"]
+        body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        check(body)
+
+        # Drop validation entirely: oversize invalid T5 would report None.
+        no_validate = body.replace("validate_t5(t5)?;", "/* bypassed */", 1)
+        with self.assertRaises(blocked):
+            check(no_validate)
+
+        # Put length gate before validation (classic silent bypass).
+        start = body.index("pub fn encode_f3(")
+        end = body.index("pub fn decode_f3(")
+        route = body[start:end]
+        swapped = route.replace(
+            "validate_t5(t5)?;\n    if t5.len() > 16 {",
+            "if t5.len() > 16 {\n        // mutant: length before Zig validate\n    }\n    if false {\n        validate_t5(t5)?;\n    if t5.len() > 16 {",
+            1,
+        )
+        if swapped == route:
+            # Anchor may vary slightly; force an early length return without validate.
+            swapped = route.replace(
+                "validate_t5(t5)?;",
+                "if t5.len() > 16 { return Ok(None); }\n    // mutant moved validate after length",
+                1,
+            )
+        mutant = body[:start] + swapped + body[end:]
+        with self.assertRaises(blocked):
+            check(mutant)
 
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
