@@ -151,6 +151,14 @@ jobs:
           grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           # Executable Zig -> BinarySourceWord -> SENS D2 parse; no text round-trip.
           echo 'test_id=zig-typed-word-explain layer=parse semantic_authority=SENS'
+          # Native Rust host must actually call the D1..D10 Zig physical
+          # validator; a mere FFI declaration is insufficient evidence.
+          # D10 passes coordinate-only, fails ordinary D9 executable ingress.
+          echo 'test_id=rust-calls-zig-d10-coordinate-only layer=transport semantic_authority=SENS'
+          cargo test --locked -p sens-cli --bin sens-trit \
+            zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/zig-d10-rust-host.log"
+          grep -Fq 'test zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 ... ok' "$RUNNER_TEMP/zig-d10-rust-host.log"
           cargo test --locked -p sens-cli --bin sens-trit explain_ -- --nocapture
           python3 scripts/ci_zig_purity.py --self-test
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
