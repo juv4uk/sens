@@ -141,21 +141,38 @@ def ensure_clean_git(root: Path) -> str:
     return exact_sha
 
 
-def require_controlled_rejection(r: subprocess.CompletedProcess, test_id: str) -> None:
-    """Only C's explicit reject() exit=2 counts; crashes/other failures do not."""
+def require_controlled_rejection(
+    r: subprocess.CompletedProcess, test_id: str, expected_category: str
+) -> None:
+    """Check the actual C-host failure reason, not just a generic red exit."""
+    if expected_category not in ("MALFORMED_BE3_LENGTH", "ZIG_ENCODE"):
+        raise PhysicalError(
+            f"test_id={test_id} layer=harness unsupported_expected_category="
+            f"{expected_category}"
+        )
     if r.returncode != 2 or r.stdout:
         raise PhysicalError(
             f"test_id={test_id} layer=transport expected_exit=2 "
             f"expected_stdout=EMPTY actual_exit={r.returncode} "
             f"stdout_sha256={digest(r.stdout)}")
-    if b"H2_T5_DUMP_REJECT layer=transport" not in r.stderr:
-        raise PhysicalError(f"test_id={test_id} layer=transport missing_error_category "
-                            f"stderr_sha256={digest(r.stderr)}")
+    expected_stderr = (
+        f"H2_T5_DUMP_REJECT layer=transport category={expected_category}\n"
+    ).encode("ascii")
+    if r.stderr != expected_stderr:
+        raise PhysicalError(
+            f"test_id={test_id} layer=transport "
+            f"expected_category={expected_category} "
+            f"expected_stderr_sha256={digest(expected_stderr)} "
+            f"actual_stderr_sha256={digest(r.stderr)}"
+        )
 
 
-def reject_run(executable: Path, root: Path, test_id: str, payload: bytes) -> None:
+def reject_run(
+    executable: Path, root: Path, test_id: str, payload: bytes, expected_category: str
+) -> None:
     require_controlled_rejection(
-        call([str(executable)], root, input_bytes=payload), test_id
+        call([str(executable)], root, input_bytes=payload),
+        test_id, expected_category
     )
 
 
@@ -237,17 +254,18 @@ def real_run(root: Path, records: list[dict]) -> dict:
                 f"expected=D1_D2_DISTINCT actual=COLLISION reproduce={REPRODUCE}"
             )
         negatives = [
-            ("EMPTY", b""), ("INCOMPLETE_BE3", b"\x01\x00"),
-            ("ZERO_WIDTH", b"\x00\x00\x00"),
-            ("D10_ORDINARY_REJECT", b"\x0a\x00\x01"),
-            ("D11_UNADMITTED_REJECT", b"\x0b\x00\x00"),
-            ("PAYLOAD_EXCEEDS_WIDTH", b"\x01\x00\x02"),
-            ("D2_PAYLOAD_OVERFLOW", b"\x02\x00\x04"),
-            ("D9_PAYLOAD_OVERFLOW", b"\x09\x02\x00"),
-            ("BE3_HIGH_BYTE_NONCANONICAL", b"\x01\x01\x00"),
+            ("EMPTY", b"", "MALFORMED_BE3_LENGTH"),
+            ("INCOMPLETE_BE3", b"\x01\x00", "MALFORMED_BE3_LENGTH"),
+            ("ZERO_WIDTH", b"\x00\x00\x00", "ZIG_ENCODE"),
+            ("D10_ORDINARY_REJECT", b"\x0a\x00\x01", "ZIG_ENCODE"),
+            ("D11_UNADMITTED_REJECT", b"\x0b\x00\x00", "ZIG_ENCODE"),
+            ("PAYLOAD_EXCEEDS_WIDTH", b"\x01\x00\x02", "ZIG_ENCODE"),
+            ("D2_PAYLOAD_OVERFLOW", b"\x02\x00\x04", "ZIG_ENCODE"),
+            ("D9_PAYLOAD_OVERFLOW", b"\x09\x02\x00", "ZIG_ENCODE"),
+            ("BE3_HIGH_BYTE_NONCANONICAL", b"\x01\x01\x00", "ZIG_ENCODE"),
         ]
-        for test_id, invalid in negatives:
-            reject_run(executable, root, test_id, invalid)
+        for test_id, invalid, category in negatives:
+            reject_run(executable, root, test_id, invalid, category)
         # A successful physical replay belongs to one immutable source
         # revision. Refuse a receipt if another writer mutated HEAD or any
         # tracked/untracked file during the build and C→Zig replay.
@@ -263,7 +281,7 @@ def real_run(root: Path, records: list[dict]) -> dict:
             "c_binary_sha256": digest(executable.read_bytes()),
             "positive_and_mutant_corpus": checks,
             "exact_width_h2_pair": exact_width_pair,
-            "negative_transport_rejected": [n for n, _ in negatives],
+            "negative_transport_rejected": [n for n, _, _ in negatives],
             "reproduce": REPRODUCE,
         }
 
@@ -288,14 +306,21 @@ def self_test() -> None:
         raise PhysicalError("test_id=H2_EXACT_WIDTH layer=transport reference_golden_drift")
     if first_mismatch(b"\x01\x02", b"\x01\x03") != 1:
         raise PhysicalError("test_id=FIRST_MISMATCH layer=diagnostics index_wrong")
-    # Crash/launcher failure with a plausible diagnostic is NOT a Zig reject.
+    # An exit=2 is not enough: assert the precise C/Zig error category.
     marker = b"H2_T5_DUMP_REJECT layer=transport category=ZIG_ENCODE\n"
 
     def synthetic(
         rc: int, stdout: bytes = b"", stderr: bytes = marker
     ) -> subprocess.CompletedProcess:
         return subprocess.CompletedProcess(["h2-controlled-negative"], rc, stdout, stderr)
-    require_controlled_rejection(synthetic(2), "H2_CONTROLLED_REJECT_POSITIVE")
+
+    require_controlled_rejection(
+        synthetic(2), "H2_CONTROLLED_REJECT_POSITIVE", "ZIG_ENCODE"
+    )
+    require_controlled_rejection(
+        synthetic(2, stderr=b"H2_T5_DUMP_REJECT layer=transport category=MALFORMED_BE3_LENGTH\n"),
+        "H2_CONTROLLED_LENGTH_POSITIVE", "MALFORMED_BE3_LENGTH"
+    )
     for label, response in [
         ("EXIT_ZERO", synthetic(0)),
         ("SIGSEGV", synthetic(-11)),
@@ -303,16 +328,21 @@ def self_test() -> None:
         ("COMMAND_NOT_FOUND", synthetic(127)),
         ("STDOUT_LEAK", synthetic(2, stdout=b"\x00")),
         ("MISSING_DIAGNOSTIC", synthetic(2, stderr=b"")),
+        ("WRONG_ZIG_CATEGORY", synthetic(2, stderr=b"H2_T5_DUMP_REJECT layer=transport category=ABI_VERSION\n")),
+        ("LENGTH_INSTEAD_OF_ZIG", synthetic(2, stderr=b"H2_T5_DUMP_REJECT layer=transport category=MALFORMED_BE3_LENGTH\n")),
+        ("EXTRA_DIAGNOSTIC", synthetic(2, stderr=marker + b"extra\n")),
     ]:
         try:
-            require_controlled_rejection(response, f"H2_REJECT_{label}")
+            require_controlled_rejection(
+                response, f"H2_REJECT_{label}", "ZIG_ENCODE"
+            )
         except PhysicalError:
             pass
         else:
             raise PhysicalError(
                 f"test_id=H2_REJECT_{label} layer=transport false_reject_pass"
             )
-    print("H2_CONTROLLED_REJECT_SYNTHETIC_PASS positive_exit=2 negative=6")
+    print("H2_CONTROLLED_REJECT_SYNTHETIC_PASS positive=2 negative=9 categories=PINNED")
     # Synthetic source provenance controls do not run Zig or grant release GO.
     sample = "a" * 40
     sample_root = Path("/tmp/sens-h2-provenance-synthetic")
