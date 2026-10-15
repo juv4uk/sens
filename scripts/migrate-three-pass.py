@@ -640,6 +640,20 @@ class Resolver:
             self.counts["pass4-text7-global"]+=1
             return self.global_binding_words[t],"pass4-text7-global"
 
+        # Historical (def ...) is already a D4 DEFINE declaration in
+        # collect_global_bindings(). Resolve its live head using the ratified
+        # DEFINE resident; never create a new code or infer one from spelling.
+        # Quoted 'def' and source-defined lexical shadows use other paths.
+        if t == "def":
+            successor = self.upper.get("DEFINE")
+            if successor != ("0011", "D4"):
+                raise MigrationError(
+                    "LEGACY_DEF_NO_D4_DEFINE: exact ratified D4:0011 required",
+                    tok,
+                )
+            self.counts["pass2-my-lisp"] += 1
+            return [successor[0]], "pass2-my-lisp"
+
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
         # the old registry but lacking a current resident is a blocker.
         if t in self.my:
