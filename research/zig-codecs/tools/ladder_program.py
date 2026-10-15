@@ -11,8 +11,8 @@
     D2 00
 
 Виходи:
-  * lines  — простий формат "width bits" (для Zig-інструментів, через stdin/файл)
-  * json   — [{width, bits}]
+  * lines  — "width exact_binary_bits" (для Zig; жодного десяткового посередника)
+  * json   — [{width, bits}], де bits — рядок 0/1 зі збереженою шириною
   * view   — канонічний бітовий запис: точні слова через один пробіл
 """
 from __future__ import annotations
@@ -51,10 +51,6 @@ def parse_source(text: str) -> list[tuple[int, str]]:
     return out
 
 
-def bits_to_int(bits: str) -> int:
-    return int(bits, 2)
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -65,13 +61,13 @@ def main() -> int:
     a = ap.parse_args()
 
     words = parse_source(pathlib.Path(a.source).read_text(encoding="utf-8"))
-    lines = "".join(f"{w} {bits_to_int(b)}\n" for w, b in words)
+    lines = "".join(f"{w} {b}\n" for w, b in words)
     view = " ".join(b for _, b in words) + "\n"
     if a.lines:
         pathlib.Path(a.lines).write_text(lines, encoding="utf-8")
     if a.json_out:
         pathlib.Path(a.json_out).write_text(
-            json.dumps([{"width": w, "bits": bits_to_int(b)} for w, b in words],
+            json.dumps([{"width": w, "bits": b} for w, b in words],
                        ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     if a.view:
         pathlib.Path(a.view).write_text(view, encoding="utf-8")

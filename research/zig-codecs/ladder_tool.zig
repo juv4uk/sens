@@ -1,10 +1,11 @@
 //! Нова реальність: драбина доменів -> фізичні байти через сам Zig-кодек.
-//! Вхід (stdin): рядки "width bits" (десяткові), ширина = ідентичність.
+//! Вхід: рядки "width exact_binary_bits"; ширина = домен, біти НЕ десяткові.
 //! Жодного історичного реєстру, жодного Rust/Python-кодека як оракула.
 //! НЕ виконує програму і НЕ судить семантику: лише транспорт і round-trip.
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const f3c = @import("f3c/f3c.zig");
+const ladder = @import("domain_ladder.zig");
 
 const CFile = opaque {};
 extern "c" fn fopen([*:0]const u8, [*:0]const u8) ?*CFile;
@@ -68,12 +69,14 @@ fn parseWords(out: []t5.Word, data: []const u8) !usize {
         const w_str = cols.next() orelse return error.BadLine;
         const b_str = cols.next() orelse return error.BadLine;
         if (cols.next() != null) return error.BadLine; // exact two-column record
+        // Width is only a rung selector. The payload is the actual exact
+        // bit string, including ALL leading zeros; no decimal intermediary.
         const width = try std.fmt.parseInt(u8, w_str, 10);
-        const bits = try std.fmt.parseInt(u16, b_str, 10);
         if (width == 0 or width > 10) return error.BadWidth;
-        if (bits >= (@as(u32, 1) << @as(u5, @intCast(width)))) return error.BitsOverflow;
+        const typed = try ladder.Coordinate.parseBinary(b_str);
+        if (typed.width != width) return error.WrongDomainWidth;
         if (count >= out.len) return error.TooManyWords;
-        out[count] = .{ .width = width, .bits = bits };
+        out[count] = .{ .width = typed.width, .bits = typed.bits };
         count += 1;
     }
     if (count == 0) return error.EmptyProgram;
@@ -166,7 +169,7 @@ pub fn main() !void {
 
 test "ladder D10 exact words and strict two-column input" {
     var buf: [4]t5.Word = undefined;
-    const count = try parseWords(&buf, "# input records\n1 0\n10 1023\n");
+    const count = try parseWords(&buf, "# input records\n1 0\n10 1111111111\n");
     try std.testing.expectEqual(@as(usize, 2), count);
     try std.testing.expectEqual(@as(u8, 1), buf[0].width);
     try std.testing.expectEqual(@as(u16, 0), buf[0].bits);
@@ -174,8 +177,21 @@ test "ladder D10 exact words and strict two-column input" {
     try std.testing.expectEqual(@as(u16, 1023), buf[1].bits);
     try std.testing.expectError(error.BadLine, parseWords(&buf, "10 0 extra\n"));
     try std.testing.expectError(error.BadLine, parseWords(&buf, "10\n"));
-    try std.testing.expectError(error.BadWidth, parseWords(&buf, "11 0\n"));
-    try std.testing.expectError(error.BitsOverflow, parseWords(&buf, "10 1024\n"));
+    try std.testing.expectError(error.BadWidth, parseWords(&buf, "11 00000000000\n"));
+    try std.testing.expectError(error.WrongDomainWidth,
+        parseWords(&buf, "10 1\n")); // discarded 9 leading zeros
+    try std.testing.expectError(error.WrongDomainWidth,
+        parseWords(&buf, "10 000000000\n")); // one-bit truncation
+    try std.testing.expectError(error.InvalidWidth,
+        parseWords(&buf, "10 00000000001\n")); // added bit
+    try std.testing.expectError(error.InvalidBinaryDigit,
+        parseWords(&buf, "10 0000000002\n")); // decimal digit never valid
+    try std.testing.expectError(error.InvalidBinaryDigit,
+        parseWords(&buf, "10 1024\n")); // old decimal proxy rejected
+    const leading = try parseWords(&buf, "10 0000000001\n");
+    try std.testing.expectEqual(@as(usize, 1), leading);
+    try std.testing.expectEqual(@as(u8, 10), buf[0].width);
+    try std.testing.expectEqual(@as(u16, 1), buf[0].bits);
 
     const physical = try t5.encodeCoordinates(std.testing.allocator, buf[0..count]);
     defer std.testing.allocator.free(physical);
