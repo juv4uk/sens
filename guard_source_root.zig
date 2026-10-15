@@ -1,6 +1,6 @@
 //! Opaque exact-byte carrier for WSM Guard's three bootstrap sources.
 //! Zig is *only* the sterile physical corridor; SENS alone executes semantics.
-//! No legacy SID8, domain registry, source-era metadata or callability here.
+//! No semantic registry or execution decision; source bytes stay untouched.
 const std = @import("std");
 
 const core_asset = @embedFile("lib/core.lisp");
