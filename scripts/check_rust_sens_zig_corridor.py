@@ -6,24 +6,14 @@ invariants that make the corridor un-bypassable, so a later change cannot turn
 the Rust host into a silent physical codec again:
 
 R1  crates/sens-cli/Cargo.toml: `default` features include `zig-transport`
-    (the corridor is ON by default) and the `zig-transport` feature exists.
-R2  crates/sens-cli/build.rs: the Zig transport is gated on
-    CARGO_FEATURE_ZIG_TRANSPORT, links `sens_zig_transport`, compiles
-    research/zig-codecs/transport_abi.zig, and pins/reads `.zig-version`.
-R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
-    functions (including the T5 ingress/egress), imports ONLY physical modules
-    (`std`, `t5/t5.zig`, `f3c/f3c.zig`, `transport/e1.zig`, `transport/e1_writer.zig`)
-    and never a registry/host/semantic module, and declares no `extern`/host struct.
-R4  `.zig-version` is a concrete version string (toolchain identity, not
-    semantic authority).
-R5  `crates/sens-cli/src/zig_transport.rs` is the shared sterile client:
-    FFI-only `sens_zig_*`, reconstructs W1..W9 via `packed_bits` + `BitN::new`,
-    never a local T5 algorithm (`ternary_transport` / `from_width_bits`).
-R6  `main.rs` and `sens-trit.rs` route physical T5 through `zig_transport::`
-    under the default feature (no silent Rust physical codec on that path).
+R2  crates/sens-cli/build.rs: gated on CARGO_FEATURE_ZIG_TRANSPORT, links Zig
+R3  transport_abi.zig: physical sens_zig_* only; T5/F3C/E1 modules
+R3b If E1 encode is exported, E1 decode must be exported too
+R4  `.zig-version` concrete
+R5  zig_transport.rs: FFI + packed_bits/BitN; E1 encode implies decode
+R6  main.rs and sens-trit route physical T5 through zig_transport
 
-The Rust-only build must stay an EXPLICIT `--no-default-features` choice, never
-a silent fallback. Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED with reasons.
+Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
 from __future__ import annotations
 
@@ -62,7 +52,6 @@ def check(root: Path) -> list[str]:
     abi = (root / ABI).read_text(encoding="utf-8")
     zigver = (root / ZIGVER).read_text(encoding="utf-8").strip()
 
-    # R1 -- corridor is ON by default, feature declared.
     features = re.search(r"\[features\](.*?)(?:\n\[|\Z)", cargo, re.S)
     feat_body = features.group(1) if features else ""
     default_match = re.search(r"^\s*default\s*=\s*\[([^\]]*)\]", feat_body, re.M)
@@ -75,7 +64,6 @@ def check(root: Path) -> list[str]:
     if not re.search(r"^\s*zig-transport\s*=", feat_body, re.M):
         problems.append("R1: `zig-transport` feature is not declared in crates/sens-cli/Cargo.toml")
 
-    # R2 -- build.rs requires the Zig corridor; no silent Rust transport.
     if "CARGO_FEATURE_ZIG_TRANSPORT" not in build:
         problems.append(
             "R2: build.rs does not gate on CARGO_FEATURE_ZIG_TRANSPORT "
@@ -88,7 +76,6 @@ def check(root: Path) -> list[str]:
     if ".zig-version" not in build:
         problems.append("R2: build.rs does not pin/read the repository `.zig-version`")
 
-    # R3 -- the corridor ABI is physical-only and semantics-free.
     exports = re.findall(r"pub export fn\s+([A-Za-z0-9_]+)", abi)
     if not exports:
         problems.append("R3: transport_abi.zig exports no `pub export fn` (no corridor ABI)")
@@ -112,11 +99,15 @@ def check(root: Path) -> list[str]:
             "caller-owned triplets, no padded host structs"
         )
 
-    # R4 -- pinned corridor version.
+    if "sens_zig_e1_encode_be3" in exports and "sens_zig_e1_decode_be3" not in exports:
+        problems.append(
+            "R3: E1 encode is exported without sens_zig_e1_decode_be3 "
+            "(Rust must not be the only E1 decoder)"
+        )
+
     if not re.fullmatch(r"\d+\.\d+\.\d+", zigver):
         problems.append(f"R4: `.zig-version` is not a concrete version string: {zigver!r}")
 
-    # R5 -- shared sterile Rust client (one turnstile, no local T5 codec).
     client_path = root / ZIG_CLIENT
     if not client_path.is_file() or client_path.is_symlink():
         problems.append(f"R5: missing regular sterile client {ZIG_CLIENT}")
@@ -136,8 +127,15 @@ def check(root: Path) -> list[str]:
                 problems.append(
                     f"R5: zig_transport.rs must not embed local codec marker `{token}`"
                 )
+        if "encode_e1_direct" in client and "decode_e1_words" not in client:
+            problems.append(
+                "R5: zig_transport.rs exports E1 encode without decode_e1_words"
+            )
+        if "sens_zig_e1_encode_be3" in client and "sens_zig_e1_decode_be3" not in client:
+            problems.append(
+                "R5: zig_transport.rs binds E1 encode FFI without decode FFI"
+            )
 
-    # R6 -- production CLI physical path crosses the sterile client only.
     main_rs = root / MAIN_RS
     trit_rs = root / TRIT_RS
     if main_rs.is_file():
