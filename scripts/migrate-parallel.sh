@@ -56,6 +56,19 @@ done
 total=${#FILES[@]}
 if (( total == 0 )); then echo "no .lisp sources under: ${PATHS[*]}" >&2; exit 2; fi
 
+# One source may not reach two Zig workers or race a new .sens output.
+python3 - "${FILES[@]}" <<'PY'
+import sys
+from pathlib import Path
+seen = set()
+for raw in sys.argv[1:]:
+    name = Path(raw).as_posix()
+    if name in seen:
+        raise SystemExit(f"ZIG_PARALLEL_BLOCKED test_id=duplicate-source layer=transport path={name}")
+    seen.add(name)
+PY
+if (( JOBS > total )); then JOBS=$total; fi
+
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/sens-migrate-XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -63,6 +76,7 @@ echo "migrate-parallel: ${total} file(s) across ${JOBS} worker(s)"
 
 declare -a PIDS=()
 declare -a WORKER_REPORTS=()
+declare -a WORKER_ARGS=()
 rc=0
 for (( w = 0; w < JOBS; w++ )); do
   # Round-robin the files so each worker's chunk is disjoint and balanced.
@@ -71,6 +85,9 @@ for (( w = 0; w < JOBS; w++ )); do
   (( ${#chunk[@]} == 0 )) && continue
   wreport="$WORK/report.$w.json"
   WORKER_REPORTS+=("$wreport")
+  winputs="$WORK/inputs.$w.paths"
+  printf '%s\0' "${chunk[@]}" >"$winputs"
+  WORKER_ARGS+=("$wreport" "$winputs")
   python3 scripts/migrate-t5-batch.py --out "$OUT" --report "$wreport" \
     "${EXTRA[@]}" "${chunk[@]}" >"$WORK/worker.$w.log" 2>&1 &
   PIDS+=("$!")
@@ -82,33 +99,82 @@ for (( w = 0; w < ${#WORKER_REPORTS[@]}; w++ )); do
 done
 
 # Merge the per-worker reports into one, preserving the canonical schema.
-python3 - "$REPORT" "${WORKER_REPORTS[@]}" <<'PY'
-import json, sys
-out_path, *reports = sys.argv[1:]
-merged = None
+python3 - "$REPORT" "$rc" "${WORKER_ARGS[@]}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+out = Path(sys.argv[1])
+worker_rc = int(sys.argv[2])
+pairs = sys.argv[3:]
+if not pairs or len(pairs) % 2:
+    raise SystemExit("ZIG_PARALLEL_REPORT_BLOCKED test_id=empty-worker-list layer=transport")
+
+keys = ("files_seen", "files_admitted", "files_written",
+        "files_would_write", "files_blocked")
+summary = dict.fromkeys(keys, 0)
+all_paths = set()
 files = []
-summary = {"files_seen": 0, "files_admitted": 0, "files_written": 0,
-           "files_would_write": 0, "files_blocked": 0}
-for rp in reports:
+baseline = None
+for report_path, input_path in zip(pairs[::2], pairs[1::2]):
     try:
-        with open(rp, encoding="utf-8") as fh:
-            d = json.load(fh)
-    except (OSError, ValueError):
-        continue
-    if merged is None:
-        merged = {k: v for k, v in d.items() if k not in ("files", "summary")}
-    files.extend(d.get("files", []))
-    for k in summary:
-        summary[k] += d.get("summary", {}).get(k, 0)
-files.sort(key=lambda e: e.get("path", ""))
-merged = merged or {"schema": "sens-t5-safe-batch/v1"}
-merged["mode"] = "parallel-merged"
-merged["files"] = files
-merged["summary"] = summary
-with open(out_path, "w", encoding="utf-8") as fh:
-    json.dump(merged, fh, ensure_ascii=False, indent=2)
-    fh.write("\n")
-print("merged summary:", json.dumps(summary, ensure_ascii=False))
+        raw = Path(input_path).read_bytes().split(b"\0")
+        if raw[-1] != b"":
+            raise ValueError("unterminated input manifest")
+        expected = [Path(p.decode("utf-8")).as_posix() for p in raw[:-1]]
+        with Path(report_path).open(encoding="utf-8") as stream:
+            report = json.load(stream)
+        if not isinstance(report, dict) or report.get("schema") != "sens-t5-safe-batch/v1":
+            raise ValueError("invalid report schema")
+        entries = report.get("files")
+        counts = report.get("summary")
+        if not isinstance(entries, list) or not isinstance(counts, dict):
+            raise ValueError("missing worker rows/summary")
+        if not expected or len(set(expected)) != len(expected):
+            raise ValueError("invalid worker inputs")
+        got = []
+        statuses = {"blocked": 0, "would-write": 0, "written": 0}
+        for row in entries:
+            if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+                raise ValueError("invalid worker row")
+            if row.get("status") not in statuses:
+                raise ValueError("unknown worker status")
+            statuses[row["status"]] += 1
+            got.append(row["path"])
+        if sorted(got) != sorted(expected) or set(got) & all_paths:
+            raise ValueError("worker report paths are missing/duplicate/foreign")
+        actual = {"files_seen": len(entries),
+                  "files_admitted": statuses["would-write"] + statuses["written"],
+                  "files_written": statuses["written"],
+                  "files_would_write": statuses["would-write"],
+                  "files_blocked": statuses["blocked"]}
+        for key in keys:
+            if type(counts.get(key)) is not int or counts[key] != actual[key]:
+                raise ValueError(f"invalid summary {key}")
+            summary[key] += counts[key]
+        metadata = {k: report.get(k) for k in ("root", "output_mirror", "authority", "mode")}
+        if baseline is None:
+            baseline = metadata
+        elif metadata != baseline:
+            raise ValueError("inconsistent worker source/output/authority")
+        all_paths.update(got)
+        files.extend(entries)
+    except (OSError, ValueError, UnicodeError, TypeError, KeyError) as err:
+        raise SystemExit(
+            f"ZIG_PARALLEL_REPORT_BLOCKED test_id=invalid-worker-report "
+            f"layer=transport report={report_path} reason={err}"
+        ) from err
+
+files.sort(key=lambda e: e["path"])
+status = "BLOCKED" if worker_rc or summary["files_blocked"] else "COMPLETE"
+merged = {"schema": "sens-t5-safe-batch/v1", **(baseline or {}),
+          "mode": "parallel-merged", "status": status,
+          "files": files, "summary": summary}
+out.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n",
+               encoding="utf-8")
+print("merged summary:", json.dumps(summary, ensure_ascii=False), "status:", status)
+if status != "COMPLETE":
+    raise SystemExit("ZIG_PARALLEL_REPORT_BLOCKED test_id=worker-rejected layer=transport")
 PY
 
 exit $rc
