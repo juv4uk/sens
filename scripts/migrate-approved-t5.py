@@ -128,13 +128,12 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         raise engine.MigrationError(
             "HISTORICAL_SOURCE_ERA_DISABLED: no SID8-to-current-D8 projection"
         )
-    # The owner-ratified D8 shares 8 visible bits with historical SID8.
-    # Never silently treat current D8 as old SID8. Only explicit legacy
-    # provenance may activate the historical successor mapping.
-    foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    admitted_d8 = foundation["domains"].get("D8", {}).get("residents", {})
-    d9_residents = foundation["domains"].get("D9", {}).get("residents", {})
-    resolver = engine.Resolver(my, upper, admitted_d8, d9_residents)
+    # D8 is a current width-qualified domain, never an implicit SID8 replay.
+    # The migration adapter carries only current-domain D9 residency metadata;
+    # this is not proof that a resident is callable by SENS.
+    foundation = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
+    d9_residents = set(foundation["domains"].get("D9", {}).get("residents", {}))
+    resolver = engine.Resolver(my, upper, d9_residents=d9_residents)
     if original is None:
         original = source.read_bytes()
     source_text = original.decode("utf-8")
