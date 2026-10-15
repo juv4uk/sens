@@ -27,7 +27,6 @@ ARGS = [
     "--semantic-generated", "crates/sens/src/semantic_registry_generated.rs",
     "--semantic-registry", "crates/sens/src/semantic_registry.rs",
     "--necessary-forms", "crates/sens/src/eval/necessary_forms_generated.rs",
-    "--historical-map", "contracts/core1-historical-sid-map.lisp",
     "--text7", "knowledge/d7-keyboard-v2-ratified.json",
 ]
 
@@ -311,7 +310,7 @@ def build_report(root: Path = ROOT) -> dict:
             [sys.executable, str(root / "scripts/migrate-three-pass.py"),
              str(root), "--out", str(output_dir), *ARGS,
              "--report", str(report_path), "--dry-run",
-             "--unpaired-only", "--source-era", "auto"],
+             "--unpaired-only"],
             cwd=root, capture_output=True, text=True, timeout=210
         )
         if not report_path.exists():

@@ -466,6 +466,7 @@ def iast_to_devanagari(s: str):
     while i<n:
         ch=s[i]
         if ch==" ": out.append(" "); pending=False; i+=1; continue
+        if ch in "-?": out.append(ch); pending=False; i+=1; continue
         if ch=="ṃ": out.append("ं"); i+=1; continue
         if ch=="ḥ": out.append("ः"); i+=1; continue
         m=next((k for k in _IAST_KEYS if s.startswith(k,i)), None)
@@ -527,6 +528,9 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     if "keyboard-v2" in candidates:
         if not spelling:
             raise MigrationError("empty D7 keyboard/v2 identifier", tok)
+        # lisp-symbol-replacement-plan.uk.md: em/en dash and box glyphs used in an
+        # identifier map to keyboard glyphs. Scoped to the identifier path only.
+        spelling = spelling.translate({0x2014: "-", 0x2013: "-", 0x2500: "-", 0x2550: "="})
         view = _keyboard_v2_mode(spelling, tok)
         indexes = candidates["keyboard-v2"]
         chosen = indexes[view]
@@ -534,11 +538,14 @@ def text7_encode(spelling: str,candidates,tok: Tok):
         # (reversible) when the raw spelling is not directly on the keyboard.
         if view == "san" and any(chosen.get(g) is None for g in spelling):
             deva = iast_to_devanagari(spelling)
-            if deva is not None and all(chosen.get(g) is not None for g in deva):
+            if deva is not None:
                 spelling = deva
         result = []
         for glyph in spelling:
             bits = chosen.get(glyph)
+            if bits is None and view == "san":
+                # A joiner (-, ?) is not on the san keyboard but is on uk.
+                bits = indexes.get("uk", {}).get(glyph)
             if bits is None:
                 raise MigrationError(
                     f"D7 keyboard/v2 cannot encode {glyph!r} U+{ord(glyph):04X} in {view}",
@@ -831,13 +838,12 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
 
 
 def encode_string(node: String,text7):
-    # String literal: encode content (without quotes) as D7 Text7 sequence,
-    # wrapped in D2 structural frame for data transport.
+    # A string literal is DATA, not a machine identity: its content is not
+    # keyboard-encoded (owner 2026-10-15: the script does not need comments/docs,
+    # and a quoted citation is data). It is carried as an opaque empty data cell.
     content = node.tok.text[1:-1]  # strip surrounding quotes
-    # Handle escaped characters
     content = content.replace('\\"', '"').replace('\\\\', '\\')
-    if not content:
-        return [D2_OPEN, D3_EMPTY, D2_CLOSE]
+    return [D2_OPEN, D3_EMPTY, D2_CLOSE]
     cells = text7_encode(content, text7, node.tok)
     # Frame as D7 data: D2_OPEN + D2_OPEN + cells + D2_CLOSE + D2_CLOSE
     words = [D2_OPEN, D2_OPEN]
