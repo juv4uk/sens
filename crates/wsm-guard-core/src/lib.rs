@@ -4,21 +4,66 @@
 
 use sens::{eval_pinned_legacy_core_source, eval_pinned_reasoning_source, eval_parsed_expressions, eval_program, parse_mixed_exact_domain, Session, Value};
 
-pub const CORE: &str = include_str!("../../../lib/core.lisp");
-pub const UNIFY: &str = include_str!("../../../lib/unify.lisp");
-pub const GUARD: &str = include_str!("../../../lib/guard.lisp");
+// Three exact source byte transfers. Zig copies bytes and never decides
+// what a SENS word, Guard policy or executable function means.
+#[link(name = "sens_zig_guard_sources", kind = "static")]
+unsafe extern "C" {
+    fn sens_zig_guard_core_source_copy(output: *mut u8, capacity: usize) -> isize;
+    fn sens_zig_guard_unify_source_copy(output: *mut u8, capacity: usize) -> isize;
+    fn sens_zig_guard_policy_source_copy(output: *mut u8, capacity: usize) -> isize;
+}
+
+type ZigSourceCopy = unsafe extern "C" fn(*mut u8, usize) -> isize;
+
+fn exact_source_copy(copy: ZigSourceCopy, label: &str) -> Result<String, String> {
+    // Size probe: the Zig carrier must not touch a zero-capacity destination.
+    let required = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+    if required <= 0 {
+        return Err(format!("ZIG_GUARD_SOURCE_INVALID label={label} size={required}"));
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| format!("ZIG_GUARD_SOURCE_OVERFLOW label={label}"))?;
+    // This is a host allocation bound, NOT a SENS domain or semantic limit.
+    if len > 8 * 1024 * 1024 {
+        return Err(format!("ZIG_GUARD_SOURCE_HOST_CAP label={label} size={len}"));
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe { copy(bytes.as_mut_ptr(), bytes.len()) };
+    if copied != required {
+        return Err(format!(
+            "ZIG_GUARD_SOURCE_COPY_MISMATCH label={label} expected={required} actual={copied}"
+        ));
+    }
+    String::from_utf8(bytes).map_err(|error| format!("ZIG_GUARD_SOURCE_UTF8 label={label}: {error}"))
+}
+
+fn core_source() -> Result<String, String> {
+    exact_source_copy(sens_zig_guard_core_source_copy, "core")
+}
+
+fn unify_source() -> Result<String, String> {
+    exact_source_copy(sens_zig_guard_unify_source_copy, "unify")
+}
+
+/// The very same exact Guard bootstrap bytes used by both Guard and CLI.
+/// This is a physical adapter, never a Rust semantic oracle.
+pub fn guard_source() -> Result<String, String> {
+    exact_source_copy(sens_zig_guard_policy_source_copy, "guard")
+}
 
 pub fn load_session() -> Result<Session, String> {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
+    let core = core_source()?;
+    eval_pinned_legacy_core_source("lib/core.lisp", &core, &mut session)
         .map_err(|error| format!("core: {error}"))?;
     // Guard reuses the existing exact-D1 structural comparator. Load the
-    // domain-aware reasoning source through its pinned reader; do not flatten
-    // its D3-D9 heads back into the legacy reader.
-    eval_pinned_reasoning_source("lib/unify.lisp", UNIFY, &mut session)
+    // domain-aware reasoning source through its pinned reader.
+    let unify = unify_source()?;
+    eval_pinned_reasoning_source("lib/unify.lisp", &unify, &mut session)
         .map_err(|error| format!("unify: {error}"))?;
+    let guard = guard_source()?;
     let guard_forms =
-        parse_mixed_exact_domain(GUARD).map_err(|error| format!("guard-parse: {error}"))?;
+        parse_mixed_exact_domain(&guard).map_err(|error| format!("guard-parse: {error}"))?;
     eval_parsed_expressions(&guard_forms, &mut session)
         .map_err(|error| format!("guard: {error}"))?;
     Ok(session)
