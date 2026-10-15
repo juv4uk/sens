@@ -140,6 +140,42 @@ test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" 
         sens_zig_e1_decode_be3(&.{0x53}, 1, &be3_out, be3_out.len));
 }
 
+test "E1 ABI v2 REPEAT keeps D2 leading zeros and rejects CRC mutant without writes" {
+    // Eight independent D2:01 words share bits but never shrink to D1:1.
+    // This tests Zig's physical REPEAT framing, not D2 syntax/callability.
+    const input = [_]u8{ 2, 0, 1 } ** 8;
+    var encoded: [64]u8 = .{0xa5} ** 64;
+    const written = sens_zig_e1_encode_be3(
+        &input, input.len, &encoded, encoded.len);
+    try std.testing.expectEqual(@as(isize, 12), written);
+    // S3 version, eight words, REPEAT block, eight repeats, exact D2 width.
+    try std.testing.expectEqualSlices(u8,
+        &.{ 0x53, 0x33, 1, 8, 1, 8, 2, 0x40 }, encoded[0..8]);
+    try std.testing.expectEqual(@as(u8, 0xa5), encoded[12]);
+
+    var restored: [input.len + 1]u8 = .{0x79} ** (input.len + 1);
+    try std.testing.expectEqual(@as(isize, input.len),
+        sens_zig_e1_decode_be3(encoded[0..12].ptr, 12,
+            &restored, restored.len));
+    try std.testing.expectEqualSlices(u8, &input, restored[0..input.len]);
+    try std.testing.expectEqual(@as(u8, 0x79), restored[input.len]);
+
+    // Decoding a canonical REPEAT still needs enough output for all words.
+    var short: [input.len - 1]u8 = .{0x6d} ** (input.len - 1);
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_e1_decode_be3(encoded[0..12].ptr, 12,
+            &short, short.len));
+    for (short) |byte| try std.testing.expectEqual(@as(u8, 0x6d), byte);
+
+    var mutant = encoded;
+    mutant[11] ^= 1; // One-bit CRC mutation, not a new SENS word.
+    restored = .{0x79} ** (input.len + 1);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_decode_be3(mutant[0..12].ptr, 12,
+            &restored, restored.len));
+    for (restored) |byte| try std.testing.expectEqual(@as(u8, 0x79), byte);
+}
+
 test "ABI v2 Zig is the mechanical T5 ingress and egress without code registry" {
     const be3 = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
     var carrier: [16]u8 = undefined;
