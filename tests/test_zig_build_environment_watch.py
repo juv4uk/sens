@@ -226,5 +226,28 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
             check_embedded_asset_watches(late, root)
 
 
+    def test_repl_prerequisite_zig_assets_have_live_rebuild_watches(self) -> None:
+        """A changed REPL Lisp source must invalidate the Zig static archive."""
+        source = BUILD.read_text(encoding="utf-8")
+        root = ZIG_ROOT.read_text(encoding="utf-8")
+        # Positive: same existing checker; no second source of policy.
+        check_embedded_asset_watches(source, root)
+        for asset in (
+            "lib/persistent-vector.lisp",
+            "lib/time.lisp",
+            "lib/epistemic.lisp",
+        ):
+            with self.subTest(asset=asset):
+                watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
+                self.assertEqual(source.count(watch), 1, asset)
+                self.assertIn(f'@embedFile("{asset}")', root)
+                # Negative: a missing live watch must fail the entire build gate.
+                mutant = source.replace(watch, "", 1)
+                with self.assertRaisesRegex(
+                    ValueError, "ZIG_CORRIDOR_STALE_ASSET.*missing_or_late_rebuild_watch"
+                ):
+                    check_embedded_asset_watches(mutant, root)
+
+
 if __name__ == "__main__":
     unittest.main()
