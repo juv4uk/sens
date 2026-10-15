@@ -1488,7 +1488,10 @@ mod zig_islands_manifest_tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn islands_manifest_without_zig_feature_fails_closed() {
-        let err = embedded_manifest_via_zig().expect_err("no Rust manifest fallback");
+        let err = match embedded_manifest_via_zig() {
+            Ok(_) => panic!("Zig-disabled profile must not accept a Rust manifest"),
+            Err(error) => error,
+        };
         assert!(err.contains("ZIG_ISLANDS_MANIFEST_CARRIER unavailable"));
     }
 }
