@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 
 id=repl-uk-native
 reproduce="bash scripts/prove-repl-uk-step.sh"
-for kind in step loop; do
+for kind in step loop queue; do
   law="tests/semantic/repl-uk-${kind}-law.lisp"
   mutant="tests/semantic/repl-uk-${kind}-mutant.lisp"
   python3 - "$law" "$mutant" <<'PY'
@@ -26,10 +26,12 @@ sha256sum lib/meta-eval.lisp lib/repl-core.lisp \
   tests/semantic/repl-uk-step-mutant.lisp \
   tests/semantic/repl-uk-loop-law.lisp \
   tests/semantic/repl-uk-loop-mutant.lisp \
+  tests/semantic/repl-uk-queue-law.lisp \
+  tests/semantic/repl-uk-queue-mutant.lisp \
   crates/sens/tests/repl_uk_semantic.rs
 
 echo "NATIVE_SENS_EXECUTOR test_id=$id layer=eval pinned_meta_reader=yes semantic_authority=SENS reproduce=$reproduce"
 # Єдина роль Rust тестового harness — виклик метациркулярного
 # SENS і спостереження за його D1-вердиктом, НЕ реалізація REPL.
 cargo test --locked -p sens --test repl_uk_semantic -- --nocapture
-echo "NATIVE_SENS_COMPLETE test_id=$id positives=2 one_bit_negatives=2 semantic_authority=SENS"
+echo "NATIVE_SENS_COMPLETE test_id=$id positives=3 one_bit_negatives=3 semantic_authority=SENS"
