@@ -1,0 +1,231 @@
+{
+  "schema": "sens-migration-run-inventory/v1",
+  "note": "Ran scripts/migrate-three-pass.py on the whole tree (main). Mechanical candidates, NOT corridor-certified: the three-pass migrator writes .sens via the Python codec, not the sterile Zig corridor (--zig-codec is not enforced here). Not semantically admitted (release_admitted=0). Recorded, not committed as .sens.",
+  "summary": {
+    "files_seen": 740,
+    "files_skipped_paired": 0,
+    "files_written": 283,
+    "files_would_write": 0,
+    "files_blocked": 457,
+    "resolved_heads": {
+      "already-exact": 5381,
+      "pass2-my-lisp": 352,
+      "pass3-lisp15": 15,
+      "pass4-text7-global": 873,
+      "passthrough-head": 19318
+    }
+  },
+  "resolved_heads": {
+    "already-exact": 5381,
+    "pass2-my-lisp": 352,
+    "pass3-lisp15": 15,
+    "pass4-text7-global": 873,
+    "passthrough-head": 19318
+  },
+  "blocker_classes": [
+    {
+      "reason": "retired SID8-era head <bits>: no current ratified D8 coordinate and no current n",
+      "files": 149
+    },
+    {
+      "reason": "exact D9:<bits> is D9 owner residency without a verified callable route; executa",
+      "files": 48
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'print': no current D3-D6 resident",
+      "files": 44
+    },
+    {
+      "reason": "D7 keyboard/v2 mixed-script identifier is ambiguous",
+      "files": 34
+    },
+    {
+      "reason": "D2 word <n> is structural control only; it cannot be ordinary data",
+      "files": 30
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "files": 21
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'reason': no current D3-D6 resident",
+      "files": 16
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'equal?': no current D3-D6 resident",
+      "files": 13
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '—' U+<n> in en",
+      "files": 12
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'and': no current D3-D6 resident",
+      "files": 9
+    },
+    {
+      "reason": "unexpected closing parenthesis",
+      "files": 8
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ū'",
+      "files": 7
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ā'",
+      "files": 6
+    },
+    {
+      "reason": "D3:<bits> is EMPTY data, never an executable call head",
+      "files": 4
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function '=': no current D3-D6 resident",
+      "files": 4
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'provenance': no current D3-D6 resident",
+      "files": 3
+    },
+    {
+      "reason": "unterminated list",
+      "files": 3
+    },
+    {
+      "reason": "empty/unsupported binary program",
+      "files": 3
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'string-append': no current D3-D6 resident",
+      "files": 3
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ī'",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'gensym': no current D3-D6 resident",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'pair': no current D3-D6 resident",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'string->symbol': no current D3-D6 resident",
+      "files": 2
+    },
+    {
+      "reason": "D2 word <n> is structural control only; it cannot be an executable head",
+      "files": 2
+    },
+    {
+      "reason": "exact D7:<bits> is D7 keyboard text/data; executable mechanism required",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'mono-ns': no current D3-D6 resident",
+      "files": 2
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'read-all': no current D3-D6 resident",
+      "files": 2
+    },
+    {
+      "reason": "D7 keyboard/v2 unsupported letter 'ñ'",
+      "files": 1
+    },
+    {
+      "reason": "ambiguous quoted ladder surface 'MAP': [('D6', '<bits>'), ('D8', '<bits>')]; use",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '∘' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "lambda parameter must be a human identifier atom",
+      "files": 1
+    },
+    {
+      "reason": "dotted pair requires exactly one tail before )",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '↔' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '→' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "ambiguous quoted ladder surface 'map': [('D6', '<bits>'), ('D8', '<bits>')]; use",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '–' U+<n> in en",
+      "files": 1
+    },
+    {
+      "reason": "exact D10:<bits> is D10 owner codebook without runtime admission; executable mec",
+      "files": 1
+    },
+    {
+      "reason": "unqualified <n>-bit call head has no admitted domain mechanism",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'symbol?': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'рівне?': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'defmacro': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '«' U+00AB in uk",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'порожній-текст?': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "D7 keyboard/v2 cannot encode '/' U+002F in uk",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'unix-time-now': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'unify': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "unterminated string",
+      "files": 1
+    },
+    {
+      "reason": "backquote syntax has no admitted migration law",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped my-lisp function 'binary': no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "legacy-unmapped Lisp <n>-<n>.<n> function EQUAL: no current D3-D6 resident",
+      "files": 1
+    },
+    {
+      "reason": "comma/unquote syntax has no admitted migration law",
+      "files": 1
+    }
+  ]
+}
