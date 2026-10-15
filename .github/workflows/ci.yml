@@ -1595,9 +1595,19 @@ jobs:
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
           python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          # One source-only positive/negative regression, in this same auto-CI:
+          # direct AND mixed Rust semantic paths remain unresolved even when
+          # a Zig transport token is present. No Rust or Python semantic oracle.
+          boundary_unit_rc=0
+          python3 scripts/ci_failure_contract.py run \
+            --test-id rust-zig-unresolved-boundary-provenance \
+            --layer transport \
+            --fixture scripts/report_rust_zig_sens_boundary.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_rust_zig_sens_boundary.py -v || boundary_unit_rc=$?
           production_rc=0
           python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi
