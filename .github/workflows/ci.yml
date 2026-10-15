@@ -1432,6 +1432,7 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — точний Q Rust-свідок, чесний статус SENS
+        if: ${{ !cancelled() }}
         # Rust runs the same Q corpus/checksum as the host-neutral reference.
         # SENS timing remains UNVERIFIED until an admitted physical .sens fixture exists.
         shell: bash
