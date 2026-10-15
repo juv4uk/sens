@@ -42,6 +42,91 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 
 
+# Externally pinned physical SHA of the four golden T5 bytes 63 89 06 a1.
+# A zero exit code or a self-asserted PASS string is not an evidence receipt.
+BRIDGE_GOLDEN_SHA256 = "90b993c83b34932d65b1001547f8833987eac2e44b238155a983cb8e5f68c978"
+BRIDGE_RECEIPT_EXACT = {
+    "id": "zig-migration-bridge-t5-exact-physical",
+    "layer": "transport",
+    "zig": "0.16.0",
+    "physical_sha256": BRIDGE_GOLDEN_SHA256,
+    "first_difference": "NONE",
+    "malformed_ff": "REJECTED",
+    "d10_transport": "ACCEPTED",
+    "d10_executable": "REJECTED",
+    "overwidth_d15": "REJECTED",
+    "external_trusted_sha_d10": "REQUIRED_WHEN_SUPPLIED",
+    "canonical_d10_to_d5_truncation": "REJECTED_WITH_EXTERNAL_PIN",
+    "d1_d2_distinct": "YES",
+    "d2_zero_and_one": "YES",
+    "canonical_truncation_requires_external_sha": "YES",
+    "semantic_authority": "SENS",
+}
+BRIDGE_RECEIPT_MINIMUM = {"width_goldens": 9, "negative_gates": 14}
+
+
+def verify_zig_bridge_receipt(stdout: str) -> dict[str, str]:
+    """Require informative physical proof, never infer it from exit=0.
+
+    A textual receipt is not an SENS semantic oracle or a cryptographic
+    compiler attestation. This gate only checks the already-run Zig proof.
+    """
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    markers = [line for line in lines if line.startswith("ZIG_BRIDGE_PASS")]
+    if len(markers) != 1 or not lines or markers[0] != lines[-1]:
+        raise ValueError("expected exactly one final ZIG_BRIDGE_PASS record")
+    tokens = markers[0].split()
+    if not tokens or tokens[0] != "ZIG_BRIDGE_PASS":
+        raise ValueError("malformed ZIG_BRIDGE_PASS prefix")
+    values: dict[str, str] = {}
+    for token in tokens[1:]:
+        if token.count("=") != 1:
+            raise ValueError(f"invalid receipt token={token!r}")
+        key, value = token.split("=", 1)
+        if not key or not value or key in values:
+            raise ValueError(f"empty/duplicate receipt field={key!r}")
+        values[key] = value
+    for key, expected in BRIDGE_RECEIPT_EXACT.items():
+        if values.get(key) != expected:
+            raise ValueError(f"field={key} expected={expected} actual={values.get(key)!r}")
+    for key, minimum in BRIDGE_RECEIPT_MINIMUM.items():
+        raw = values.get(key, "")
+        if re.fullmatch(r"[0-9]+", raw) is None or int(raw) < minimum:
+            raise ValueError(f"field={key} expected=>={minimum} actual={raw!r}")
+    binary_sha = values.get("zig_binary_sha256", "")
+    if re.fullmatch(r"[0-9a-f]{64}", binary_sha) is None:
+        raise ValueError("field=zig_binary_sha256 expected=lowercase_sha256")
+    return values
+
+
+def zig_bridge_receipt_self_test() -> None:
+    """Synthetic receipt mutations, not proof of executed Zig or SENS."""
+    values = {**BRIDGE_RECEIPT_EXACT,
+              **{k: str(v) for k, v in BRIDGE_RECEIPT_MINIMUM.items()},
+              "zig_binary_sha256": "a" * 64}
+    line = "ZIG_BRIDGE_PASS " + " ".join(f"{k}={v}" for k, v in values.items())
+    assert verify_zig_bridge_receipt(line)["semantic_authority"] == "SENS"
+    for mutant in (
+        "",
+        "ZIG_BRIDGE_PASS",
+        line.replace("physical_sha256=" + BRIDGE_GOLDEN_SHA256,
+                     "physical_sha256=" + "0" * 64),
+        line.replace("d10_executable=REJECTED", "d10_executable=ACCEPTED"),
+        line.replace("zig_binary_sha256=" + "a" * 64,
+                     "zig_binary_sha256=not-a-hash"),
+        line + "\n" + line,
+    ):
+        try:
+            verify_zig_bridge_receipt(mutant)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                "ZIG_BRIDGE_RECEIPT_SELF_TEST accepted a synthetic mutant"
+            )
+    print("MIGRATION_ZIG_RECEIPT_SELF_TEST_PASS negatives=6")
+
+
 def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
     try:
         completed = subprocess.run(
@@ -61,6 +146,20 @@ def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
         }
     status = "PASS" if completed.returncode == 0 else "FAIL"
     tail = (completed.stdout or "")[-800:] + (completed.stderr or "")[-400:]
+    if name == "test_zig_codec_bridge" and status == "PASS":
+        try:
+            verify_zig_bridge_receipt(completed.stdout or "")
+        except ValueError as error:
+            # A successful process with no exact physical evidence is RED.
+            # Preserve exit=0 as the process fact, but report status=FAIL.
+            status = "FAIL"
+            tail = (
+                "ZIG_BRIDGE_RECEIPT_UNINFORMATIVE "
+                "test_id=zig-migration-bridge-t5-exact-physical "
+                "layer=transport expected=verified_physical_receipt "
+                f"actual={error} first_difference=UNKNOWN "
+                "reproduce='python3 scripts/test_zig_codec_bridge.py'"
+            )
     return {
         "step": name,
         "status": status,
@@ -261,6 +360,7 @@ def verdict_self_test() -> None:
     assert gate_verdict(unavailable, self_test=False, skip_ladder=False) == "FAIL"
     assert gate_verdict(passing, self_test=False, skip_ladder=True) == "INCOMPLETE"
     assert gate_verdict(skipped, self_test=True, skip_ladder=True) == "SELF_TEST_ONLY"
+    zig_bridge_receipt_self_test()
     print("MIGRATION_ZIG_GATE_VERDICT_SELF_TEST_PASS negative_cases=13")
 
 

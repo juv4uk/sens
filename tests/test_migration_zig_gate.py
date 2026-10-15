@@ -131,5 +131,93 @@ class MigrationZigGateTests(unittest.TestCase):
                 self.assertIs(result["transport_verified"], False)
 
 
+
+class ZigBridgeReceiptEvidenceTests(unittest.TestCase):
+    """Source-independent synthetic process receipts, never Zig execution."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.mod = load()
+
+    def good_line(self) -> str:
+        values = {
+            **self.mod.BRIDGE_RECEIPT_EXACT,
+            **{k: str(v) for k, v in self.mod.BRIDGE_RECEIPT_MINIMUM.items()},
+            "zig_binary_sha256": "a" * 64,
+        }
+        return "ZIG_BRIDGE_PASS " + " ".join(
+            f"{k}={v}" for k, v in values.items()
+        )
+
+    def simulated_step(self, stdout: str, *, stderr: str = "", rc: int = 0) -> dict:
+        completed = subprocess.CompletedProcess(
+            args=["python", "test_zig_codec_bridge.py"],
+            returncode=rc, stdout=stdout, stderr=stderr,
+        )
+        with mock.patch.object(self.mod.subprocess, "run", return_value=completed):
+            return self.mod.run_step("test_zig_codec_bridge", ["python", "fake.py"])
+
+    def test_exact_zig_physical_receipt_passes_structural_gate(self):
+        result = self.simulated_step(self.good_line() + "\n")
+        self.assertEqual((result["status"], result["exit"]), ("PASS", 0))
+
+    def test_empty_stdout_exit_zero_is_not_physical_pass(self):
+        result = self.simulated_step("")
+        self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
+        self.assertIn("ZIG_BRIDGE_RECEIPT_UNINFORMATIVE", result["detail"])
+        self.assertIn("layer=transport", result["detail"])
+
+    def test_receipt_in_stderr_only_is_not_a_valid_proof(self):
+        result = self.simulated_step("", stderr=self.good_line())
+        self.assertEqual(result["status"], "FAIL")
+
+    def test_wrong_physical_sha_rejected(self):
+        bad = self.good_line().replace(
+            self.mod.BRIDGE_GOLDEN_SHA256, "0" * 64)
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_unsupported_zig_version_rejected(self):
+        bad = self.good_line().replace("zig=0.16.0", "zig=0.17.0")
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_d10_executable_false_admission_rejected(self):
+        bad = self.good_line().replace(
+            "d10_executable=REJECTED", "d10_executable=ACCEPTED")
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_wrong_sens_semantic_authority_rejected(self):
+        bad = self.good_line().replace(
+            "semantic_authority=SENS", "semantic_authority=Rust")
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_untrusted_binary_sha_rejected(self):
+        bad = self.good_line().replace("zig_binary_sha256=" + "a" * 64,
+                                       "zig_binary_sha256=unverified")
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_duplicate_receipt_rejected(self):
+        line = self.good_line()
+        self.assertEqual(self.simulated_step(line + "\n" + line)["status"], "FAIL")
+
+    def test_lost_negative_controls_rejected(self):
+        bad = self.good_line().replace("negative_gates=14", "negative_gates=0")
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_incomplete_receipt_is_not_last_line(self):
+        bad = self.good_line() + "\nUNVERIFIED-LATER"
+        self.assertEqual(self.simulated_step(bad)["status"], "FAIL")
+
+    def test_success_exit_cannot_override_missing_zig_proof_in_gate(self):
+        result = self.simulated_step("")
+        complete = [
+            {"step": name, "status": "PASS"}
+            for name in self.mod.REQUIRED_STEPS
+            if name != "test_zig_codec_bridge"
+        ] + [result]
+        self.assertEqual(
+            self.mod.gate_verdict(complete, self_test=False, skip_ladder=False),
+            "FAIL",
+        )
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
