@@ -152,6 +152,17 @@ class BatchSourceTests(unittest.TestCase):
                     " ".join(row.get("reasons", [])).lower(),
                 )
 
+    def test_selected_census_checks_only_relevant_reviewed_source_pins(self):
+        # Real SHA checks stay mandatory for selected inputs. Unrelated
+        # reviewed sources cannot stop analysis of lib/macro.lisp.
+        from unittest.mock import patch
+        selection = {"lib/macro.lisp"}
+        loader = MOD.load_nonprogram_classification
+        with patch.object(MOD, "load_nonprogram_classification", wraps=loader) as check:
+            result = MOD.run(ROOT, False, selection)
+        self.assertEqual(result["summary"]["scanned"], 1)
+        self.assertEqual(check.call_args.kwargs["selected_paths"], selection)
+
     def test_exact_sha_pinned_schema_metadata_is_not_executable_source(self):
         path = "lib/function-table-mechanisms.lisp"
         report = MOD.run(ROOT, False, {path})

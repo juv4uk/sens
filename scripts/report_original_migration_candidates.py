@@ -213,7 +213,7 @@ def _checked_nonprogram_entry(root: Path, path: str, expected_sha: str) -> dict:
             "semantic_oracle_admitted": False, "automatic_sens_companion": False}
 
 
-def load_nonprogram_classification(root: Path) -> dict[str, dict]:
+def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | None = None) -> dict[str, dict]:
     """Read ONLY the reviewed fixed cohort manifests, no dynamic wildcard."""
     rows: dict[str, dict] = {}
     for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
@@ -231,6 +231,11 @@ def load_nonprogram_classification(root: Path) -> dict[str, dict]:
         if not isinstance(entries, list) or len(entries) != expected_count:
             raise ValueError(f"nonprogram cohort size changed: {name}")
         for item in entries:
+            # Selection narrows which source blobs are checked, never which
+            # manifest schemas or declared cohort sizes must be valid.
+            # An unrelated changed DATA file must not stop a targeted repair.
+            if selected_paths is not None and item["path"] not in selected_paths:
+                continue
             row = _checked_nonprogram_entry(
                 root, item["path"], item["git_blob_sha1"]
             )

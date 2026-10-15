@@ -301,7 +301,7 @@ def run(root, write=False, selected=None):
     guard = guard_module(root)
     # Повторно використовуємо канонічні Git-blob pins із #4460.
     # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
-    reviewed = load_nonprogram_classification(root)
+    reviewed = load_nonprogram_classification(root, selected_paths=selected)
     pinned = reviewed.get(PINNED_SCHEMA_METADATA)
     if pinned is None or pinned["cohort"] != "schema":
         raise ValueError("missing independently reviewed schema metadata authority")

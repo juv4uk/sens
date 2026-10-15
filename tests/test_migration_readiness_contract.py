@@ -23,7 +23,7 @@ spec.loader.exec_module(census)
 
 
 def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_auto=False):
-    """Mock the canonical 3 source-era scans using REAL present source names."""
+    """Mock the sole current AUTO scan using real present source names."""
     observed = []
     calls = []
     first = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
@@ -36,7 +36,8 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_au
         observed.extend(argv)
         assert kwargs["cwd"] == ROOT
         assert kwargs["timeout"] == 180
-        era = argv[argv.index("--source-era") + 1]
+        assert "--source-era" not in argv
+        era = "auto"
         out = Path(argv[argv.index("--report") + 1])
         selected = possible.get(era, [])
         if newly_eligible and era == "auto":
@@ -92,7 +93,7 @@ class ReadinessContractTests(unittest.TestCase):
         observed, fn = fake_migrator_call()
         with patch.object(census.subprocess, "run", side_effect=fn):
             report = census.build_report()
-        self.assertEqual(observed[observed.index("--source-era")+1], "auto")
+        self.assertNotIn("--source-era", observed)
         self.assertEqual(observed[observed.index("--foundation")+1],
                          "knowledge/d1-d9-foundation.json")
         for opt in ("--unpaired-only", "--dry-run"):
@@ -113,41 +114,33 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(report["physical_outputs_created"], [])
         self.assertEqual(report["migrator_summary"]["files_written"], 0)
 
-    def test_same_original_set_scanned_in_all_three_eras_without_publish(self):
-        observed, fn = fake_migrator_call(per_era_candidates={
-            "legacy": ["tests/fixtures/core1-third-domain-canary/third.lisp"]
-        })
+    def test_single_auto_scan_keeps_complete_source_rows_without_publication(self):
+        observed, fn = fake_migrator_call()
         with patch.object(census.subprocess, "run", side_effect=fn):
             report = census.build_report()
-        self.assertEqual(observed.count("--source-era"), 3)
-        self.assertEqual(report["candidate_queues"].get(
-            "legacy-mechanical-needs-provenance-and-oracle"), 1)
-        self.assertEqual(report["candidate_queues"].get(
-            "blocked-in-all-eras-needs-semantic-or-nonprogram-triage"), 1)
+        self.assertNotIn("--source-era", observed)
         self.assertEqual(len(report["candidate_rows"]), 2)
         self.assertEqual(len(report["candidate_rows"][0]["source_sha256"]), 64)
+        self.assertTrue(all(set(row["status"]) == {"auto"}
+                            for row in report["candidate_rows"]))
         self.assertTrue(all(not row["semantic_oracle_admitted"] and
                             not row["physical_published"]
                             for row in report["candidate_rows"]))
-        self.assertEqual(report["per_era_summary"]["legacy"]["files_would_write"], 1)
-        self.assertEqual(report["empty_by_era_reason_counts"]["legacy"].get(
-            "ambiguous W8 executable head 00001001"), 1)
-        self.assertTrue(report["top_empty_transitions"])
-        self.assertEqual(sum(x["files"] for x in report["top_empty_transitions"]), 2)
-        self.assertEqual(report["per_era_summary"]["auto"]["files_would_write"], 0)
+        self.assertEqual(set(report["per_era_summary"]), {"auto"})
+        self.assertEqual(report["migrator_summary"]["files_written"], 0)
         self.assertTrue(report["gate"]["pass"])
 
-    def test_ambiguous_both_era_candidate_is_not_automatically_admitted(self):
+    def test_historical_only_candidate_cannot_influence_current_auto_scan(self):
         source = "tests/fixtures/core1-third-domain-canary/third.lisp"
         _, fn = fake_migrator_call(per_era_candidates={
             "legacy": [source], "current": [source]
         })
         with patch.object(census.subprocess, "run", side_effect=fn):
             report = census.build_report()
-        self.assertEqual(report["candidate_queues"].get(
-            "both-eras-mechanical-needs-provenance-and-oracle"), 1)
+        self.assertEqual(report["migrator_summary"]["files_would_write"], 0)
+        self.assertTrue(all(row["status"] == {"auto": "blocked"}
+                            for row in report["candidate_rows"]))
         self.assertTrue(report["gate"]["pass"])
-        self.assertEqual(report["physical_outputs_created"], [])
 
     def test_historical_archive_candidate_is_not_active_application(self):
         _, fn = fake_migrator_call(archived_auto=True)

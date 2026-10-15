@@ -59,7 +59,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         raise ValueError("expected canonical T5 readiness census v2")
     if pairs.get("mode") != "tracked-only":
         raise ValueError("cannot combine untracked or generated .sens output")
-    if readiness.get("mode") != "original unpaired .lisp only; three separate physical-free dry-runs":
+    if readiness.get("mode") != "original unpaired .lisp only; one physical-free dry-run (SID8/Sens8 eras retired)":
         raise ValueError("unexpected corpus interpretation in readiness input")
 
     pair_entries: dict[str, dict] = {}
@@ -91,7 +91,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
         if source in queue:
             raise ValueError(f"duplicate unpaired source: {source}")
         statuses = row.get("status")
-        if not isinstance(statuses, dict) or set(statuses) != {"auto", "legacy", "current"}:
+        if not isinstance(statuses, dict) or set(statuses) != {"auto"}:
             raise ValueError(f"incomplete source-era evidence: {source}")
         if any(v not in VALID_SOURCE_STATES for v in statuses.values()):
             raise ValueError(f"unexpected source-era state: {source}")
@@ -144,9 +144,12 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             })
         else:
             u = queue[source]
-            nonprogram = u.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM"
+            archived = u.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM"
+            reviewed = u.get("source_scope") == "NONPROGRAM_DATA_REVIEWED"
             condition = ("NONPROGRAM_ARCHIVED_NO_EXECUTABLE_T5"
-                         if nonprogram else
+                         if archived else
+                         "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5"
+                         if reviewed else
                          "MECHANICAL_CANDIDATE_NEEDS_ORACLE"
                          if any(v == "would-write" for v in u["status"].values()) else
                          "UNPAIRED_SOURCE_BLOCKED")
@@ -157,7 +160,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
                 "source_era_states": u["status"],
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_empty": u.get("empty_by_era", {}).get("auto")
+                "first_empty": u.get("empty")
                                  or "mechanical candidate still needs oracle",
             })
 

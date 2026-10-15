@@ -371,21 +371,10 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
     # сумісності наявних викликів інструмента; їхній вміст не читається.
     sem_rows=parse_semantic_rows(semantic_generated)
 
+    # A proposal-only historical SID8 crosswalk is provenance, never
+    # executable authority. Do not import research bridge rows into either
+    # current name resolution or call-head lowering.
     _bridge_by_sid = {}
-    # #2953 / sens8-bridge-proposal-v1: only EXACT-name matches are bridged.
-    # A Sens8 name resolves to its ratified-ladder target coordinate.
-    _bridge_path = REPO_ROOT / "research" / "sens8-bridge-proposal-v1.json"
-    if _bridge_path.is_file():
-        _bridge = json.loads(_bridge_path.read_text(encoding="utf-8"))
-        for _row in _bridge.get("exact_bridge", []):
-            _name = _row.get("sens8_name")
-            _tgt = _row.get("target") or ""
-            if _name and ":" in _tgt:
-                _dom, _bits = _tgt.split(":", 1)
-                current.setdefault(_name, (_bits, _dom))
-            _sid = _row.get("sid8")
-            if _sid and ":" in _tgt:
-                _bridge_by_sid[_sid] = tuple(_tgt.split(":", 1))
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
@@ -560,7 +549,9 @@ class Resolver:
         self.my=my
         self.upper=upper
         self.d9_residents=set(d9_residents or ())
-        self.bridge_by_sid=dict(bridge_by_sid or {})
+        if bridge_by_sid:
+            raise MigrationError("unratified SID8 bridge cannot authorize executable heads")
+        self.bridge_by_sid={}
         self.global_binding_words={}
         self.counts={"already-exact":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
@@ -620,10 +611,6 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
-            _tgt = self.bridge_by_sid.get(t)
-            if _tgt is not None:
-                self.counts["already-exact"]+=1
-                return [ _tgt[1] ],"already-exact"
             raise MigrationError(
                 f"retired SID8-era head {t}: no current named D3-D6 resident",
                 tok,
@@ -1235,8 +1222,8 @@ def main():
         args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
-    # NOTE: knowledge/d8-*.json is SID8/Sens8, not a domain. It is never wired
-    # as one; an eight-bit head is not executable.
+    # Current D8 is ratified, but occupancy never grants executable callability.
+    # An unproven eight-bit call head is rejected rather than inferred from SID8.
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     my, upper, bridge_by_sid = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,

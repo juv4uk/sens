@@ -30,20 +30,20 @@ def fixtures() -> tuple[dict, dict, set[str]]:
     }
     readiness = {
         "schema": mod.READINESS_SCHEMA,
-        "mode": "original unpaired .lisp only; three separate physical-free dry-runs",
+        "mode": "original unpaired .lisp only; one physical-free dry-run (SID8/Sens8 eras retired)",
         "migrator_summary": {"files_seen": 2},
         "skipped_existing_sens_pairs": ["lib/one.lisp"],
         "candidate_rows": [
             {"path": "lib/two.lisp", "source_sha256": "3" * 64,
-             "status": {"auto": "blocked", "legacy": "blocked", "current": "blocked"},
+             "status": {"auto": "blocked"},
              "source_scope": "UNCLASSIFIED_NEEDS_SOURCE_PROOF",
              "physical_published": False, "semantic_oracle_admitted": False,
-             "empty_by_era": {"auto": "unmapped W8"}},
+             "empty": "unmapped W8"},
             {"path": "benchmarks/archived.lisp", "source_sha256": "4" * 64,
-             "status": {"auto": "would-write", "legacy": "would-write", "current": "blocked"},
+             "status": {"auto": "would-write"},
              "source_scope": "ARCHIVED_BENCHMARK_NONPROGRAM",
              "physical_published": False, "semantic_oracle_admitted": False,
-             "empty_by_era": {}},
+             "empty": None},
         ],
     }
     return pairs, readiness, {
@@ -67,6 +67,20 @@ class T5ProgressLedgerTests(unittest.TestCase):
             "UNPAIRED_SOURCE_BLOCKED",
         ])
         self.assertTrue(all(not x["semantic_admitted"] for x in report["files"]))
+
+    def test_one_auto_pass_rejects_retired_three_era_evidence(self):
+        pairs, ready, sources = fixtures()
+        ready["candidate_rows"][0]["status"]["legacy"] = "blocked"
+        with self.assertRaisesRegex(ValueError, "incomplete source-era"):
+            mod.combine(pairs, ready, sources)
+
+    def test_reviewed_data_never_counts_as_executable_migration(self):
+        pairs, ready, sources = fixtures()
+        ready["candidate_rows"][0]["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
+        report = mod.combine(pairs, ready, sources)
+        reviewed = next(r for r in report["files"] if r["source"] == "lib/two.lisp")
+        self.assertEqual(reviewed["status"], "NONPROGRAM_REVIEWED_NO_EXECUTABLE_T5")
+        self.assertFalse(reviewed["semantic_admitted"])
 
     def test_source_not_in_either_input_blocks_audit(self):
         pairs, ready, sources = fixtures()

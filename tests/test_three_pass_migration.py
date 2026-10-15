@@ -151,8 +151,8 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                 seen.add(ident)
                 tok = mod.Tok("ATOM", bits, 0)
                 # Domain presence is NOT proof of callable admission.
-                # NEW REALITY: no ratified D8 (knowledge/d8-*.json is SID8/Sens8), so an
-                # eight-bit head is not executable either.
+                # D8 is owner-ratified as a domain, but its residents do not
+                # become executable merely because eight-bit coordinates exist.
                 blocked_width = width in (2, 7, 8, 9, 10) or (width == 3 and n == 0)
                 if blocked_width:
                     with self.subTest(width=width, index=n):
@@ -169,6 +169,15 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         self.assertEqual(admitted, 377 - (1 << 8))
         # D7 and D10 are counted as coordinates, NOT 1152 callable functions.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
+
+    def test_unratified_sid8_bridge_cannot_admit_d8_or_d9_calls(self):
+        for word in ("00001111", "00010110", "00100010"):
+            with self.subTest(word=word), self.assertRaisesRegex(
+                mod.MigrationError, "retired SID8-era head"
+            ):
+                mod.Resolver({}, {}).head(mod.Tok("ATOM", word, 0))
+        with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
+            mod.Resolver({}, {}, bridge_by_sid={"00010110": ("D9", "110111010")})
 
     def test_structural_empty_and_text_can_be_data_but_not_calls(self):
         resolver = mod.Resolver({}, {})
