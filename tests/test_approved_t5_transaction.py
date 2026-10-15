@@ -37,6 +37,27 @@ spec.loader.exec_module(mod)
 
 
 class ApprovedT5TransactionTests(unittest.TestCase):
+    def test_current_domain_map_api_is_three_values_and_no_sid8_dispatch(self):
+        """CI_GLUE_NO_SEMANTICS: API alignment, not a callable SENS verdict."""
+        maps = mod.load_engine_maps(ROOT)
+        self.assertEqual(len(maps), 3, "CURRENT_MAP_API_RED expected=my,upper,text7")
+        my, upper, text7 = maps
+        self.assertTrue(my and upper, "CURRENT_MAP_API_RED missing ratified surfaces")
+        self.assertIn("keyboard-v2", text7, "CURRENT_MAP_API_RED D7 v2 missing")
+        live = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            "my, upper, _historical_bridge_provenance = engine.build_three_pass_maps(",
+            live, "CURRENT_MAP_API_RED third return must remain nonauthoritative",
+        )
+        self.assertIn(
+            "engine.Resolver(my, upper, d9_residents=d9_residents)",
+            live, "CURRENT_MAP_API_RED D9 width argument lost",
+        )
+        self.assertNotIn(
+            "engine.Resolver(my, upper, admitted_d8",
+            live, "CURRENT_MAP_API_RED retired D8 positional bridge reintroduced",
+        )
+
     def test_true_rust_d2_rejects_t5_transport_valid_invalid_program(self):
         words = ["01"]  # D2 CLOSE alone is transport-valid, grammar-invalid.
         physical = mod.engine.encode_projection("01\n")
@@ -124,6 +145,41 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             self.assertEqual(result["summary"]["published"], 0)
             self.assertEqual(result["summary"]["files_ready"], 1)
             self.assertEqual(result["summary"]["files_blocked"], 1)
+
+    def test_publication_rejects_missing_zig_without_creating_carrier(self):
+        # A working Rust D2 reader cannot replace the sole Zig physical mint.
+        with tempfile.TemporaryDirectory(prefix="approved-t5-no-zig-") as td:
+            temp = Path(td)
+            manifest = temp / "manifest.json"
+            manifest.write_text(json.dumps({"files": [{"path": REL,
+                "sha256": hashlib.sha256(SOURCE.read_bytes()).hexdigest()}]}))
+            output = temp / "output"
+            result = subprocess.run([
+                sys.executable, str(SCRIPT), str(ROOT), "--manifest", str(manifest),
+                "--out", str(output), "--report", str(temp / "report.json"),
+                "--reader", str(actual_d2_reader()),
+            ], cwd=ROOT, capture_output=True, text=True, timeout=120,
+                env={**os.environ, "ZIG": str(temp / "missing-zig")})
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertFalse(list(output.rglob("*.sens")) if output.exists() else False)
+            receipt = json.loads((temp / "report.json").read_text())
+            self.assertEqual(receipt["summary"]["published"], 0)
+            self.assertIn("ZIG_CODEC_UNAVAILABLE", receipt["files"][-1]["reason"])
+
+    def test_migration_requires_zig_minted_bytes_not_python_reference(self):
+        from unittest import mock
+        maps = mod.load_engine_maps(ROOT)
+        original = SOURCE.read_bytes()
+        with mock.patch.object(mod.bridge, "carry_t5",
+                               side_effect=mod.bridge.ZigCodecError("ZIG_MINT_FAILED")):
+            with self.assertRaisesRegex(mod.bridge.ZigCodecError, "ZIG_MINT_FAILED"):
+                mod.migrate_one(SOURCE, ROOT, maps, original,
+                                zig_binary=Path("provided-attested-binary"))
+        with mock.patch.object(mod.bridge, "carry_t5", return_value=b"wrong"):
+            with self.assertRaisesRegex(mod.engine.SensT5Error,
+                                         "ZIG_MIGRATION_REFERENCE_MISMATCH"):
+                mod.migrate_one(SOURCE, ROOT, maps, original,
+                                zig_binary=Path("provided-attested-binary"))
 
     def test_wrong_sha_and_traversal_are_fail_closed(self):
         with tempfile.TemporaryDirectory(prefix="approved-t5-sha-") as td:

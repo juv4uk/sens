@@ -266,5 +266,162 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                      'if False:\\n        raise ValueError("ZIG_CARRY_REQUIRED_FOR_PUBLICATION")'.replace("\\n", "\n"))
         self.assertTrue(any("M9:" in message for message in self.module.check(self.root)))
 
+
+class StandaloneThreePassZigMintWitness(unittest.TestCase):
+    """One focused CI witness: exact Zig carry + forged/mutant rejection."""
+
+    def test_zig_mints_not_python_and_rejects_mutant_or_fake_receipt(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+
+        script = ROOT / "scripts/migrate-three-pass.py"
+        spec = importlib.util.spec_from_file_location("three_pass_zig_mint_witness", script)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        migrator = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = migrator
+        spec.loader.exec_module(migrator)
+        projection = "000\n"
+        reference = migrator.encode_projection(projection)
+        expected = migrator.hashlib.sha256(reference).hexdigest()
+        binary = ROOT / "not-a-real-executable"  # mock only, NEVER a release receipt
+        receipt = {
+            "physical_sha256": expected,
+            "source_pin_status": "MATCHED_CALLER_SUPPLIED_SHA256",
+            "zig_binary_sha256": "static-test-mock-not-real-proof",
+        }
+        bridge = SimpleNamespace(
+            carry_t5=Mock(return_value=reference),
+            verify_t5=Mock(return_value=receipt),
+        )
+        physical, actual_receipt = migrator.zig_mint_verified_t5(
+            projection, reference, binary, bridge,
+        )
+        self.assertEqual(physical, reference)
+        self.assertEqual(actual_receipt, receipt)
+        bridge.carry_t5.assert_called_once_with(
+            binary, projection, trusted_source_sha256=expected,
+        )
+        bridge.verify_t5.assert_called_once_with(
+            binary, reference, trusted_source_sha256=expected,
+        )
+
+        # The physical carrier must NEVER be replaced by the Python reference.
+        bridge.carry_t5.return_value = bytes([reference[0] ^ 1]) + reference[1:]
+        bridge.verify_t5.reset_mock()
+        with self.assertRaisesRegex(
+            migrator.SensT5Error, "ZIG_CARRY_REFERENCE_MISMATCH.*first_byte=0",
+        ):
+            migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
+        bridge.verify_t5.assert_not_called()
+
+        # Matching bytes but an unauthenticated receipt are not enough.
+        bridge.carry_t5.return_value = reference
+        bridge.verify_t5.return_value = {
+            **receipt, "source_pin_status": "NOT_SUPPLIED",
+        }
+        with self.assertRaisesRegex(
+            migrator.SensT5Error, "ZIG_CARRY_UNATTESTED_RECEIPT",
+        ):
+            migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
+
+    def test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored(self):
+        """One positive / negative / mutated-source witness for issue #4460."""
+        import json
+        import subprocess
+
+        spec = importlib.util.spec_from_file_location(
+            "three_pass_nonprogram_witness", ROOT / "scripts/migrate-three-pass.py"
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        migrator = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = migrator
+        spec.loader.exec_module(migrator)
+
+        # Positive: ordinary source outside the ratified NONPROGRAM cohort.
+        self.assertIsNone(
+            migrator.reject_reviewed_nonprogram_source(ROOT / "lib/forward.lisp")
+        )
+        for name in ("d1", "d4", "d5", "d6"):
+            with self.subTest(domain=name), self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"
+            ):
+                migrator.reject_reviewed_nonprogram_source(
+                    ROOT / f"lib/domains/{name}.lisp"
+                )
+
+        with tempfile.TemporaryDirectory() as temp:
+            sandbox = Path(temp)
+            (sandbox / "lib/domains").mkdir(parents=True)
+            (sandbox / "knowledge").mkdir()
+            source = sandbox / "lib/domains/d4.lisp"
+            original = (ROOT / "lib/domains/d4.lisp").read_bytes()
+            source.write_bytes(original)
+            for _, manifest, _ in migrator.NONPROGRAM_MANIFESTS:
+                destination = sandbox / manifest
+                destination.write_bytes((ROOT / manifest).read_bytes())
+
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+
+            # The manifest is a SHA-pinned fact, not an everlasting path veto.
+            source.write_bytes(original + b"; mutated review input\n")
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_SOURCE_SHA_DRIFT"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+            source.write_bytes(original)
+
+            manifest = sandbox / migrator.NONPROGRAM_MANIFESTS[0][1]
+            record = json.loads(manifest.read_text(encoding="utf-8"))
+            record["automatic_sens_companion"] = True
+            manifest.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_MANIFEST_SHA_DRIFT"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+
+        # Integration: dry-run must be blocked before minting, not just by
+        # the standalone helper. No Zig binary required for dry-run.
+        with tempfile.TemporaryDirectory() as temp:
+            dest = Path(temp)
+            proc = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/migrate-three-pass.py"),
+                 str(ROOT / "lib/domains/d4.lisp"), "--out", str(dest),
+                 "--dry-run", "--report", str(dest / "report.json")],
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+            self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+            report = json.loads((dest / "report.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["summary"]["files_blocked"], 1)
+            self.assertEqual(report["summary"]["files_would_write"], 0)
+            self.assertIn("NONPROGRAM_DATA_NOT_EXECUTABLE", report["files"][0]["reason"])
+            self.assertFalse((dest / "d4.sens").exists())
+            self.assertFalse((dest / "d4").exists())
+
+            # The parallel/batch producer must not evade the same barrier.
+            bulk = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/migrate-t5-batch.py"),
+                 "lib/domains/d4.lisp", "--root", str(ROOT),
+                 "--out", str(dest / "bulk-out"),
+                 "--report", str(dest / "bulk-report.json")],
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+            self.assertEqual(bulk.returncode, 2, bulk.stdout + bulk.stderr)
+            bulk_report = json.loads(
+                (dest / "bulk-report.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(bulk_report["summary"]["files_blocked"], 1)
+            self.assertEqual(bulk_report["summary"]["files_would_write"], 0)
+            self.assertIn(
+                "NONPROGRAM_DATA_NOT_EXECUTABLE",
+                bulk_report["files"][0]["reason"],
+            )
+            self.assertFalse((dest / "bulk-out/lib/domains/d4.sens").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
