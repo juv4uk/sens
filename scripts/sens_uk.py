@@ -35,19 +35,17 @@ def load_uk_surfaces() -> dict[str, str]:
             if bits in result and result[bits] != spelling:
                 raise C.SensT5Error(f"ambiguous ratified Ukrainian surface: {bits}")
             result[bits] = spelling
-    # D7 lives in the RATIFIED knowledge table, not the stub lib/domains/d7.lisp.
+
+    # The ACTIVE D7 is knowledge/d7-keyboard-v2-ratified.json -- per the current
+    # foundation (d1-d9 / d1-d11 domains.D7.normative_map). Not the stub
+    # lib/domains/d7.lisp and not the older d7-ratified.json / candidate-d.
     import json as _json
-    for name in ("d7-v2-candidate-d.json", "d7-ratified.json"):
-        f = ROOT / "knowledge" / name
-        if not f.exists():
-            continue
-        rows = _json.loads(f.read_text(encoding="utf-8")).get("rows") or []
-        for r in rows:
-            bits = r.get("coordinate")
-            uk = (r.get("layouts") or {}).get("uk") or (r.get("projection") or {}).get("deva")
+    f = ROOT / "knowledge" / "d7-keyboard-v2-ratified.json"
+    if f.exists():
+        for r in (_json.loads(f.read_text(encoding="utf-8")).get("table") or []):
+            bits = r.get("bits"); uk = r.get("uk")
             if bits and uk and bits not in result:
                 result[bits] = uk
-        break
     if not result:
         raise C.SensT5Error("missing ratified Ukrainian surfaces")
     return result
