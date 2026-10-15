@@ -544,6 +544,37 @@ fn main() {
 }
 
 #[cfg(test)]
+fn zig_test_fixture(name: &'static str) -> &'static [u8] {
+    // Tests are host-side consumers, not compile-time owners of SENS bytes.
+    // Resolve only these four tracked fixtures; arbitrary paths are rejected.
+    use std::sync::OnceLock;
+    static QUOTE: OnceLock<Vec<u8>> = OnceLock::new();
+    static SELFTEST: OnceLock<Vec<u8>> = OnceLock::new();
+    static MUTANT: OnceLock<Vec<u8>> = OnceLock::new();
+    static MULTIFORM: OnceLock<Vec<u8>> = OnceLock::new();
+    let slot = match name {
+        "migration-quote-cohort-main/quote-legacy.sens" => &QUOTE,
+        "semantic/exact-d3-logic-selftest.sens" => &SELFTEST,
+        "semantic/exact-d3-logic-mutant.sens" => &MUTANT,
+        "migration-multiform-cohort-main/two-forms.sens" => &MULTIFORM,
+        _ => panic!("unapproved SENS test fixture: {name}"),
+    };
+    slot.get_or_init(|| {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures")
+            .join(name);
+        let bytes = std::fs::read(&path)
+            .unwrap_or_else(|e| panic!("SENS fixture {}: {e}", path.display()));
+        // Default feature: only Zig can interpret the physical T5 framing.
+        // The same bytes then go to the existing SENS-owned semantic oracle.
+        #[cfg(feature = "zig-transport")]
+        zig_transport::decode_t5_words(&bytes)
+            .unwrap_or_else(|e| panic!("Zig physical fixture rejection {name}: {e}"));
+        bytes
+    }).as_slice()
+}
+
+#[cfg(test)]
 mod rust_zig_only_cutover_tests {
     use super::*;
 
@@ -593,9 +624,7 @@ mod rust_zig_only_cutover_tests {
         for command in ["encode", "verify", "open", "eval", "encode-d7-uk", "decode-f3"] {
             require_zig_transport(command).expect("Zig-enabled CLI admits physical commands");
         }
-        let physical = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let physical = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         // Real physical fixture, restored by the linked Zig ABI (not a mock).
         let words = decode_canonical_t5_words(physical)
             .expect("Zig decode and SENS D2 acceptance");
@@ -617,9 +646,7 @@ mod e1_cli_mechanism_tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn e1_export_cannot_bypass_missing_zig_corridor() {
-        let physical = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let physical = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let error = encode_e1_from_t5(physical).expect_err("Zig is mandatory for E1 output");
         assert!(error.contains("no Rust fallback"));
     }
@@ -627,9 +654,7 @@ mod e1_cli_mechanism_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn e1_encoder_uses_zig_t5_ingress_then_sens_d2_without_rust_physical_bypass() {
-        let physical = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let physical = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let words = zig_transport::decode_t5_words(physical)
             .expect("Zig mechanically restores exact D1-D9 words");
         let expected = sens::envelope_e1::encode(&words)
@@ -666,9 +691,7 @@ mod e1_cli_mechanism_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn e1_execution_uses_zig_physical_reader_then_native_sens_d2() {
-        let positive = include_bytes!(
-            "../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens"
-        );
+        let positive = zig_test_fixture("semantic/exact-d3-logic-selftest.sens");
         let mut s1 = sens::Session::default();
         let reference = sens::eval_t5_program(positive, &mut s1)
             .expect("SENS owns the physical T5 semantic witness");
@@ -705,9 +728,9 @@ mod e1_cli_mechanism_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
-        let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
-        let mutant = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
-        for source in [positive.as_slice(), mutant.as_slice()] {
+        let positive = zig_test_fixture("semantic/exact-d3-logic-selftest.sens");
+        let mutant = zig_test_fixture("semantic/exact-d3-logic-mutant.sens");
+        for source in [positive, mutant] {
             let packed = encode_e1_from_t5(source).expect("T5->E1 physical encoding");
             let mut original = sens::Session::default();
             let mut e1_session = sens::Session::default();
@@ -747,9 +770,7 @@ mod eval_tests {
         // No fallback to the Rust physical codec even for a previously valid
         // carrier. The host only delegates physical transport to Zig.
         let good_carrier = [0xf3, 0x40, 0x60];
-        let good_t5 = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let good_t5 = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         for carrier in [&good_carrier[..], &[0xf3u8][..]] {
             let err = decode_f3_carrier(carrier)
                 .expect_err("Rust F3C decoding is not allowed without Zig");
@@ -767,7 +788,7 @@ mod eval_tests {
     fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
         let bytes = [0xf3, 0x40, 0x60];
         let canonical = sens::frame3_small::decode_explicit_small_f3(&bytes).unwrap();
-        let t5 = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        let t5 = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         assert_eq!(&canonical, t5);
         let direct = eval_t5_bytes(t5).unwrap();
         let framed = eval_t5_bytes(&canonical).unwrap();
@@ -796,7 +817,7 @@ mod eval_tests {
 
     #[test]
     fn physical_quote_fixture_preserves_t5_and_exact_d2_structure() {
-        let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
         let visible = sens::render_ternary_words_spaced(&words);
         assert_eq!(visible, "10 001 00 000 01");
@@ -812,7 +833,7 @@ mod eval_tests {
 
     #[test]
     fn two_top_level_forms_share_one_physical_file_and_keep_d2_boundaries() {
-        let bytes = include_bytes!("../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
+        let bytes = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
         let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
         let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
         let packed = sens::pack_binary_source_words(&words);
@@ -847,9 +868,7 @@ mod eval_tests {
 
     #[test]
     fn explain_distinguishes_bad_transport_from_bad_d2_grammar() {
-        let bytes = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let receipt = explain_t5_bytes(bytes).expect("known current D2 syntax");
         assert!(receipt.contains("D2 syntax PASS"), "{receipt}");
         assert!(receipt.contains("semantic oracle NOT_VERIFIED"), "{receipt}");
@@ -865,9 +884,7 @@ mod eval_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn zig_verify_and_explain_share_physical_ingress_but_keep_d2_diagnostics() {
-        let golden = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let golden = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         verify_companion("10 001 00 000 01", golden)
             .expect("Zig T5 physical decode and SENS D2 companion admission");
         assert!(explain_t5_bytes(golden).unwrap().contains("D2 syntax PASS"));
@@ -913,9 +930,7 @@ mod eval_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn zig_read_only_t5_open_and_decode_preserve_words_and_reject_invalid_d2() {
-        let carrier = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let carrier = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let words = decode_canonical_t5_words(carrier)
             .expect("Zig physical T5 -> current SENS D2 reader");
         assert_eq!(sens::render_ternary_words_spaced(&words), "10 001 00 000 01");
@@ -926,9 +941,7 @@ mod eval_tests {
         // Test-only reference: not a runtime fallback in the feature build.
         assert_eq!(words, sens::decode_ternary_program(carrier).unwrap());
 
-        let multi = include_bytes!(
-            "../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens"
-        );
+        let multi = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
         assert_eq!(
             decode_canonical_t5_words(multi).unwrap(),
             sens::decode_ternary_program(multi).unwrap()
@@ -1015,9 +1028,7 @@ mod eval_tests {
     #[cfg(feature = "zig-transport")]
     #[test]
     fn zig_ingress_be3_preserves_exact_width_and_rejects_invalid_transport() {
-        let carrier = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let carrier = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let actual = zig_transport::decode_t5_words(carrier)
             .expect("Zig physical ingress on admitted binary program");
         let independent_reference = sens::decode_ternary_words(carrier)
@@ -1040,9 +1051,7 @@ mod eval_tests {
     #[cfg(not(feature = "zig-transport"))]
     #[test]
     fn physical_t5_eval_and_explicit_core4_refuse_without_zig() {
-        let bytes = include_bytes!(
-            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
+        let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         for bootstrap_core in [false, true] {
             let error = eval_t5_bytes_core4(bytes, bootstrap_core)
                 .expect_err("physical T5 cannot execute without Zig");
