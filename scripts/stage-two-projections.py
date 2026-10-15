@@ -51,7 +51,7 @@ def source_path(root: Path, supplied: str) -> tuple[Path, Path]:
 
 def migration_maps():
     data = three_pass.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    my, upper = three_pass.build_three_pass_maps(
+    my, upper, bridge_by_sid = three_pass.build_three_pass_maps(
         data,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
@@ -64,7 +64,7 @@ def migration_maps():
     text7 = three_pass.build_text7(
         data, ROOT / "knowledge/d7-keyboard-v2-ratified.json"
     )
-    return data, my, upper, text7
+    return data, my, upper, bridge_by_sid, text7
 
 
 def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
@@ -76,8 +76,10 @@ def prepare(root: Path, supplied: str, source_era: str, maps: tuple) -> dict:
         )
     rel, path = source_path(root, supplied)
     original = path.read_bytes()
-    _foundation, my, upper, text7 = maps
-    resolver = three_pass.Resolver(my, upper)
+    _foundation, my, upper, bridge_by_sid, text7 = maps
+    # Preserve audited historical-source provenance as data in the CURRENT
+    # resolver, not as a reinterpretation of modern ratified D8 identities.
+    resolver = three_pass.Resolver(my, upper, bridge_by_sid=bridge_by_sid)
     try:
         projection = three_pass.migrate_file(original.decode("utf-8"), resolver, text7)
         words = projection.split()
