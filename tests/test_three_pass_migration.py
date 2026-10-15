@@ -268,6 +268,24 @@ class ThreePassMigrationTests(unittest.TestCase):
                 ):
                     self.migrate(f"({word} x)\n")
 
+    def test_d9_full_residency_is_data_not_implicit_callability(self):
+        # Exact D9 residency: all 512 data coordinates are not executable mechanisms.
+        foundation = mod.load_foundation(FOUNDATION)
+        residents = set(foundation["domains"]["D9"]["residents"])
+        self.assertEqual(len(residents), 512)
+        resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
+        for word in ("000000000", "111111111"):
+            with self.subTest(word=word):
+                self.assertIn(word, residents)
+                with self.assertRaisesRegex(
+                    mod.MigrationError, "D9 .*відсутній доказ допущеного механізму"
+                ):
+                    mod.migrate_file(f"({word} x)\n", resolver, self.text7)
+                self.assertEqual(
+                    mod.migrate_file(f"(100 {word})\n", resolver, self.text7),
+                    f"10 100 00 {word} 01\n",
+                )
+
     def test_d7_d9_data_words_remain_distinct_from_executable_heads(self):
         # Зміна стосується лише позиції виклику, не даних.
         for word in ("0000000", "000000000"):
