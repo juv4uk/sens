@@ -120,7 +120,9 @@ def build_transport(directory: Path) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     if binary.exists() or binary.is_symlink():
         raise ZigCodecError("ZIG_CODEC_OUTPUT_EXISTS: refusing overwrite")
-    _command([compiler, "build-exe", SOURCE, "-O", "ReleaseFast", "-lc",
+    # Transport may parse caller-controlled T5 bytes. Keep optimizer and
+    # runtime safety checks on, matching the Rust-linked Zig static corridor.
+    _command([compiler, "build-exe", SOURCE, "-O", "ReleaseSafe", "-lc",
               f"-femit-bin={binary}"])
     _reject_linked_path_components(binary)
     if binary.is_symlink() or not binary.is_file():
