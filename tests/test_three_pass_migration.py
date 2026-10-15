@@ -281,12 +281,12 @@ class ThreePassMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "D9 .*відсутній доказ допущеного механізму"
                 ):
-                    mod.migrate_file(f"({word} x)\\n", resolver, self.text7)
+                    mod.migrate_file(f"({word} x)\n", resolver, self.text7)
                 # Same nine bits in data position remain exact, never widened
                 # or silently reinterpreted as a callable coordinate.
                 self.assertEqual(
-                    mod.migrate_file(f"(100 {word})\\n", resolver, self.text7),
-                    f"10 100 00 {word} 01\\n",
+                    mod.migrate_file(f"(100 {word})\n", resolver, self.text7),
+                    f"10 100 00 {word} 01\n",
                 )
 
     def test_d7_d9_data_words_remain_distinct_from_executable_heads(self):
