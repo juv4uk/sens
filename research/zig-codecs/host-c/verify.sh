@@ -15,13 +15,17 @@ if [[ "${1:-}" == "--self-test" && "$#" -eq 1 ]]; then
         echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=normal-libraries' >&2
         exit 1
     fi
-    for injected in '__rust_alloc' 'rust_eh_personality' 'libcore-a1b2c3d4.rlib' '_RNvCs0_foo'; do
+    for injected in '__rust_alloc' 'rust_eh_personality' 'libcore-a1b2c3d4.rlib' '_RNvCs0_foo' $'0000000000000100 T rust_eh_personality' $'0000000000000200 T _RNvCs0_foo'; do
         if ! rust_marker "$injected"; then
             echo "SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency missed=$injected" >&2
             exit 1
         fi
     done
-    echo 'SENS_C_CORRIDOR_SELFTEST_PASS positive=1 negative=4 full_static_dependency_closure=NOT_VERIFIED'
+    if rust_marker $'0000000000000030 T sens_zig_codec_abi_version\n0000000000000040 T sens_zig_t5_encode_be3'; then
+        echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=zig-ffi-symbols' >&2
+        exit 1
+    fi
+    echo 'SENS_C_CORRIDOR_SELFTEST_PASS positive=2 negative=6 full_static_dependency_closure=NOT_VERIFIED'
     exit 0
 fi
 if [[ "$#" -ne 0 ]]; then
@@ -99,8 +103,25 @@ if ! undefined="$(nm -u "$exe")"; then
     echo 'SENS_C_CORRIDOR_UNVERIFIED layer=dependency tool=nm' >&2
     exit 2
 fi
-if rust_marker "$dynamic" || rust_marker "$members" || rust_marker "$undefined"; then
+# Defined globals matter too: static Rust symbols need no unresolved imports.
+if ! defined_exe="$(nm -g --defined-only "$exe")"; then
+    echo 'SENS_C_CORRIDOR_UNVERIFIED layer=dependency tool=nm-defined-executable' >&2
+    exit 2
+fi
+if ! defined_archive="$(nm -g --defined-only "$archive")"; then
+    echo 'SENS_C_CORRIDOR_UNVERIFIED layer=dependency tool=nm-defined-archive' >&2
+    exit 2
+fi
+# Demand real FFI symbols in the linked Zig archive, not merely declarations.
+for symbol in sens_zig_codec_abi_version sens_zig_t5_encode_be3 sens_zig_t5_decode_be3; do
+    if [[ "$defined_archive" != *"$symbol"* ]]; then
+        echo "SENS_C_CORRIDOR_UNVERIFIED layer=dependency missing_zig_export=$symbol" >&2
+        exit 2
+    fi
+done
+if rust_marker "$dynamic" || rust_marker "$members" || rust_marker "$undefined" ||
+    rust_marker "$defined_exe" || rust_marker "$defined_archive"; then
     echo 'SENS_C_CORRIDOR_BLOCKED layer=dependency rust_marker_found' >&2
     exit 1
 fi
-echo "SENS_C_CORRIDOR_RECEIPT zig=$actual c_host_binary_sha256=$(sha256sum "$exe" | cut -d ' ' -f 1) zig_archive_sha256=$(sha256sum "$archive" | cut -d ' ' -f 1) dependencies=INSPECTED_NO_RUST_MARKERS full_static_dependency_closure=NOT_VERIFIED semantic_verdict=NOT_TESTED"
+echo "SENS_C_CORRIDOR_RECEIPT zig=$actual c_host_binary_sha256=$(sha256sum "$exe" | cut -d ' ' -f 1) zig_archive_sha256=$(sha256sum "$archive" | cut -d ' ' -f 1) dependencies=INSPECTED_NO_RUST_MARKERS exported_zig_ffi=VERIFIED nm_defined=INSPECTED full_static_dependency_closure=NOT_VERIFIED semantic_verdict=NOT_TESTED"
