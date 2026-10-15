@@ -115,5 +115,25 @@ cp "$TEST_PAYLOAD" "$destination"
                 self.assertEqual(list(self.local_bin.glob(".sens.*")), [])
 
 
+    def test_downloaded_cli_version_must_match_release_before_replacement(self):
+        target = self.local_bin / "sens"
+        for reported_version in ("sens 0.41.0", "my-lisp 0.42.0", "sens 0.42.0 extra"):
+            with self.subTest(reported_version=reported_version):
+                target.write_text("previous binary")
+                self.log.write_text("")
+                self.payload.write_text(
+                    '#!/bin/bash\n'
+                    'if [ "$1" = --version ]; then\n'
+                    f'    echo "{reported_version}"\n'
+                    'fi\n'
+                )
+                result = self.run_installer()
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("RELEASE_VERSION_MISMATCH", result.stderr)
+                self.assertEqual(target.read_text(), "previous binary")
+                self.assertEqual(list(self.local_bin.glob(".sens.*")), [])
+                self.assertNotIn("new install", self.log.read_text())
+
+
 if __name__ == "__main__":
     unittest.main()
