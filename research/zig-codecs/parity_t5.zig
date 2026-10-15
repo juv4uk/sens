@@ -92,6 +92,41 @@ fn skipManifestRow(line: []const u8) bool {
 }
 
 
+/// Duplicate paths are not independent T5 physical witnesses. Preserve
+/// literal path bytes, with only the manifest's terminal CR normalized.
+fn seenEarlierPath(data: []const u8, before: usize, candidate: []const u8) bool {
+    var previous = std.mem.splitScalar(u8, data[0..before], '\n');
+    while (previous.next()) |raw| {
+        const path = manifestPath(raw);
+        if (!skipManifestRow(path) and std.mem.eql(u8, path, candidate))
+            return true;
+    }
+    return false;
+}
+
+test "physical manifest rejects duplicate paths without erasing exact filenames" {
+    const manifest = "a.sens\r\n#law.sens\n a.sens\n#law.sens\r\na.sens\n";
+    var lines = std.mem.splitScalar(u8, manifest, '\n');
+    var offset: usize = 0;
+    var fresh: usize = 0;
+    var duplicates: usize = 0;
+    while (lines.next()) |raw| {
+        const previous_end = offset;
+        offset += raw.len;
+        if (offset < manifest.len) offset += 1;
+        const path = manifestPath(raw);
+        if (skipManifestRow(path)) continue;
+        if (seenEarlierPath(manifest, previous_end, path))
+            duplicates += 1
+        else
+            fresh += 1;
+    }
+    try std.testing.expectEqual(@as(usize, 3), fresh);
+    try std.testing.expectEqual(@as(usize, 2), duplicates);
+    try std.testing.expect(!seenEarlierPath(manifest, 0, "#law.sens"));
+    try std.testing.expect(!seenEarlierPath(manifest, manifest.len, "# note"));
+}
+
 test "T5 manifest preserves exact whitespace in tracked filenames" {
     try std.testing.expectEqualStrings(
         "/repo/ a file .sens \t",
@@ -121,12 +156,20 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
     defer allocator.free(data);
     var failures: usize = 0;
     var checked: usize = 0;
+    var offset: usize = 0;
     var it = std.mem.splitScalar(u8, data, '\n');
     while (it.next()) |raw| {
-        // Preserve exact Git path bytes (including leading/trailing spaces or tabs).
-        // Only a terminal CR belongs to a CRLF manifest line ending.
+        const previous_end = offset;
+        offset += raw.len;
+        if (offset < data.len) offset += 1;
+        // Only CRLF's terminal CR is normalized. Never trim legal path bytes.
         const line = manifestPath(raw);
         if (skipManifestRow(line)) continue;
+        if (seenEarlierPath(data, previous_end, line)) {
+            failures += 1;
+            std.debug.print("можливість-розв'язати-цікаву-задачу (fail) test_id=t5-parity-manifest-duplicate layer=transport manifest={s} path={s} byte_offset={d} fixture_sha256=UNAVAILABLE expected=UNIQUE actual=DUPLICATE reproduce='zig build-exe -O ReleaseFast -lc research/zig-codecs/parity_t5.zig && ./parity_t5'\n", .{ list_path, line, previous_end });
+            continue;
+        }
         checked += 1;
         const check = accepts(allocator, line) catch |err| {
             failures += 1;

@@ -46,6 +46,56 @@ RETURN_TYPES = {
 }
 
 
+
+def strip_c_comments(source: str) -> str:
+    """Remove // and /* */ without allowing comment-only ABI declarations.
+
+    Preserve newlines for ^-anchored declaration matching and quoted strings
+    (for example, a URL containing // is not a source comment). This is a
+    lexical source guard, not a substitute for native compiler/linker evidence.
+    """
+    out = []
+    index = 0
+    mode = "code"
+    while index < len(source):
+        ch = source[index]
+        nxt = source[index + 1] if index + 1 < len(source) else ""
+        if mode == "code":
+            if ch == '"':
+                mode = "string"
+                out.append(ch)
+            elif ch == "/" and nxt in "/*":
+                mode = "line" if nxt == "/" else "block"
+                out.extend("  ")
+                index += 2
+                continue
+            else:
+                out.append(ch)
+        elif mode == "string":
+            out.append(ch)
+            if ch == "\\" and nxt:
+                out.append(nxt)
+                index += 2
+                continue
+            if ch == '"':
+                mode = "code"
+        elif mode == "line":
+            if ch == "\n":
+                mode = "code"
+                out.append("\n")
+            else:
+                out.append(" ")
+        else:
+            if ch == "*" and nxt == "/":
+                mode = "code"
+                out.extend("  ")
+                index += 2
+                continue
+            out.append("\n" if ch == "\n" else " ")
+        index += 1
+    return "".join(out)
+
+
 def fail(layer: str, reason: str) -> None:
     raise ValueError(f"ZIG_ABI_V2_DRIFT layer={layer} reason={reason}")
 
@@ -106,6 +156,7 @@ def declarations(source: str, language: str) -> dict:
 
 
 def check_contract(zig: str, rust: str, header: str) -> None:
+    zig, rust, header = (strip_c_comments(source) for source in (zig, rust, header))
     if 'unsafe extern "C" {' not in rust:
         fail("rust", "missing_C_abi_linkage")
     if 'extern "C" {' not in header:
@@ -193,6 +244,57 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "unreviewed_exports=sens_zig_unreviewed"):
             check_contract(mutated, self.rust, self.header)
+
+
+    def test_zig_export_hidden_in_block_comment_does_not_count(self):
+        match = re.search(
+            r"(?ms)^pub export fn sens_zig_t5_decode_be3\(.*?^\}",
+            self.zig,
+        )
+        self.assertIsNotNone(match)
+        original = match.group(0)
+        mutated = self.zig.replace(original, "/*\n" + original + "\n*/", 1)
+        # The historical regex alone would see this ghost signature.
+        self.assertIsNotNone(ZIG_DECL.search(mutated))
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_t5_decode_be3"):
+            check_contract(mutated, self.rust, self.header)
+
+    def test_rust_version_check_hidden_in_comment_does_not_count(self):
+        match = re.search(
+            r"if\s+unsafe\s*\{\s*sens_zig_codec_abi_version\(\)\s*\}"
+            r"\s*!=\s*2\b",
+            self.rust,
+        )
+        self.assertIsNotNone(match)
+        mutated = self.rust.replace(match.group(0), "/* " + match.group(0) + " */", 1)
+        with self.assertRaisesRegex(ValueError, "version_check_not_fail_closed"):
+            check_contract(self.zig, mutated, self.header)
+
+    def test_c_header_prototype_hidden_in_line_comment_does_not_count(self):
+        match = re.search(
+            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\([^;]*?;",
+            self.header,
+        )
+        self.assertIsNotNone(match)
+        prototype = match.group(0)
+        # Comment every line so even a multiline declaration is not visible.
+        mutated = self.header.replace(
+            prototype, "".join("// " + line for line in prototype.splitlines(True)), 1,
+        )
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_f3c_unpack"):
+            check_contract(self.zig, self.rust, mutated)
+
+    def test_c_header_version_hidden_in_comment_does_not_count(self):
+        marker = "SENS_ZIG_TRANSPORT_ABI_VERSION = 2"
+        self.assertIn(marker, self.header)
+        mutated = self.header.replace(marker, "/* " + marker + " */", 1)
+        with self.assertRaisesRegex(ValueError, "header_version_not_2"):
+            check_contract(self.zig, self.rust, mutated)
+
+    def test_comment_markers_inside_quoted_string_are_not_comments(self):
+        source = 'const uri = "https://example.test/a/*still-string*/";\n'
+        self.assertEqual(strip_c_comments(source), source)
+
 
 
 if __name__ == "__main__":
