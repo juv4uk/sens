@@ -118,7 +118,7 @@ def check_trit_t5_egress(source: str) -> None:
     if "verify_companion(&projection, &bytes)" not in rust:
         raise CorridorBlocked("sens-trit encode no longer verifies Zig carrier")
 
-    companion = _route_between(source, "fn verify_companion(", "\n/// Run the explicitly")
+    companion = _route_between(source, "\nfn verify_companion(", "\n/// Run the explicitly")
     required_companion = (
         'let expected_words = admitted_source_words(source)?;',
         'if decoded != expected_words',
