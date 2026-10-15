@@ -367,7 +367,7 @@ mod zig_exact_egress_tests {
         require_same_exact_words(&source, &restored)
             .expect("byte-for-byte exact width and payload preservation");
         assert_eq!(source.len(), restored.len());
-        assert_eq!(restored.iter().map(sens::BinarySourceWord::width)
+        assert_eq!(restored.iter().copied().map(sens::BinarySourceWord::width)
             .collect::<Vec<_>>(), [1, 2, 3, 9]);
 
         // CRC mutation must fail before any Rust host can admit SENS meaning.
