@@ -165,6 +165,11 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
             raise ZigCodecError(
                 f"ZIG_CODEC_OUTPUT_NOT_REGULAR layer=transport command={command}"
             )
+        if before.st_nlink != 1:
+            raise ZigCodecError(
+                f"ZIG_CODEC_OUTPUT_LINKED layer=transport command={command} "
+                f"nlink={before.st_nlink}"
+            )
         with path.open("rb") as stream:
             physical = stream.read()
             opened = os.fstat(stream.fileno())
@@ -175,6 +180,7 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
         ) from error
     inode = (before.st_dev, before.st_ino)
     if (not stat.S_ISREG(after.st_mode)
+            or opened.st_nlink != 1 or after.st_nlink != 1
             or (opened.st_dev, opened.st_ino) != inode
             or (after.st_dev, after.st_ino) != inode):
         raise ZigCodecError(
