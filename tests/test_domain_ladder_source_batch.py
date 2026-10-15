@@ -64,7 +64,7 @@ class BatchSourceTests(unittest.TestCase):
         entry = next(e for e in manifest["entries"] if e["path"] == name)
         source = (ROOT / name).read_bytes()
         blob = hashlib.sha1(
-            b"blob " + str(len(source)).encode("ascii") + b"\\0" + source
+            b"blob " + str(len(source)).encode("ascii") + b"\0" + source
         ).hexdigest()
         self.assertEqual(entry["git_blob_sha1"], blob)
         self.assertEqual(entry["previous_pinned_git_blob_sha1"],
@@ -74,7 +74,7 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(entry["expected_rows"], 128)
         self.assertEqual(entry["projection"], "sens.d7.keyboard/v2")
         lines = source.decode("utf-8")
-        words = re.findall(r"(?m)^\\s*\\(([01]{7})\\s+\\(ук ", lines)
+        words = re.findall(r"(?m)^\s*\(([01]{7})\s+\(ук ", lines)
         self.assertEqual(len(words), 128)
         self.assertEqual(set(words), {format(i, "07b") for i in range(128)})
         self.assertIn("san IAST human notation", lines)
