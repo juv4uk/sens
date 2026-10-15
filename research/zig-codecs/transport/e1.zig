@@ -12,7 +12,7 @@ pub const MAX_BLOCK_WORDS: usize = 128;
 pub const MAX_FILE_BYTES: usize = 1024 * 1024;
 pub const Error = error{
     Truncated, TooLarge, BadVersion, InvalidBlock, InvalidWidth,
-    NonCanonical, IntegrityMismatch, BufferTooSmall,
+    NonCanonical, IntegrityMismatch, BufferTooSmall, OverlappingBuffers,
 };
 
 fn readCount(input: []const u8, cursor: *usize) Error!usize {
@@ -126,8 +126,21 @@ pub fn inspect(input: []const u8) Error!usize {
     return parse(input, null);
 }
 
-/// Preflight first; malformed input cannot partially mutate caller's buffer.
+/// Byte ranges must be disjoint. Encoding a word into the original frame
+/// while still decoding that same frame would invalidate the CRC preflight.
+fn slicesOverlap(left: []const u8, right: []const u8) bool {
+    if (left.len == 0 or right.len == 0) return false;
+    const a = @intFromPtr(left.ptr);
+    const b = @intFromPtr(right.ptr);
+    // Compare distances, never potentially overflowing pointer endpoints.
+    return if (a <= b) b - a < left.len else a - b < right.len;
+}
+
+/// Preflight first; malformed or aliased input cannot mutate caller's buffer.
 pub fn unpack(input: []const u8, output: []Word) Error!usize {
+    // Reject both full and partial aliases before reading or writing.
+    if (slicesOverlap(input, std.mem.sliceAsBytes(output)))
+        return error.OverlappingBuffers;
     const count = try inspect(input);
     if (output.len < count) return error.BufferTooSmall;
     return parse(input, output);
@@ -158,6 +171,35 @@ test "E1 v1 exact RAW wire and leading-zero widths" {
     var small: [2]Word = undefined;
     try std.testing.expectError(error.BufferTooSmall, unpack(&golden, &small));
 }
+test "E1 unpack rejects full and partial frame/output aliases without writes" {
+    const golden = [_]u8{ 0x53, 0x33, 0x01, 3, 0, 3, 0x23, 0x20,
+        0x8a, 0x36, 0x20, 0x5d, 0x52 };
+    // Independent output still decodes the exact same physical bytes.
+    var independent: [3]Word = undefined;
+    try std.testing.expectEqual(@as(usize, 3),
+        try unpack(&golden, &independent));
+    try std.testing.expectEqual(@as(u8, 3), independent[1].width);
+    try std.testing.expectEqual(@as(u16, 1), independent[1].bits);
+
+    // Backing storage has Word alignment, but its byte view is a valid frame.
+    var backing: [16]Word = undefined;
+    const bytes = std.mem.sliceAsBytes(backing[0..]);
+    @memcpy(bytes[0..golden.len], &golden);
+    const before = bytes[0..golden.len];
+
+    try std.testing.expectError(error.OverlappingBuffers,
+        unpack(bytes[0..golden.len], backing[0..3]));
+    try std.testing.expectEqualSlices(u8, &golden, before);
+
+    // The output starts at the LAST input byte's containing Word.
+    // The pointers differ: this is a partial overlap, not an identical alias.
+    const partial_index = (golden.len - 1) / @sizeOf(Word);
+    const partial = backing[partial_index .. partial_index + 3];
+    try std.testing.expectError(error.OverlappingBuffers,
+        unpack(bytes[0..golden.len], partial));
+    try std.testing.expectEqualSlices(u8, &golden, bytes[0..golden.len]);
+}
+
 test "E1 v1 exact REPEAT wire and empty frame" {
     const repeated = [_]u8{ 0x53, 0x33, 1, 3, 1, 3, 1, 0x80,
         0xe5, 0xa5, 0x56, 0xab };
