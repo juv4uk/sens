@@ -81,6 +81,58 @@ def check_default_zig_build_gate(build: str) -> None:
             "(CARGO_FEATURE_ZIG_TRANSPORT.is_none); no reversed or comment-only gate"
         )
 
+    # The feature gate alone is not a proof that Rust calls into Zig.
+    # Zig 0.16 exports a C-compatible archive; fail closed if Cargo omits
+    # either the pinned compiler, real root module build, or archive link.
+    if not re.search(
+        r'let\s+archive\s*=\s*out\.join\(\s*"libsens_zig_transport\.a"\s*\)\s*;',
+        active,
+    ):
+        raise CorridorBlocked("build.rs missing Zig transport output archive")
+    command = re.search(
+        r'let\s+result\s*=\s*Command::new\(\s*&compiler\s*\)'
+        r'(?P<args>.*?)\.status\(\)\s*\.expect\([^;]*\)\s*;'
+        r'\s*assert!\(\s*result\.success\(\)',
+        active,
+        re.S,
+    )
+    if command is None:
+        raise CorridorBlocked("build.rs must run checked Zig compiler build-lib command")
+    before = active[:command.start()]
+    pinned_route = (
+        'let pinned = include_str!("../../.zig-version").trim();',
+        '.arg("version")',
+        'assert!(version.status.success()',
+        'assert_eq!(actual, pinned,',
+    )
+    positions = [before.find(fragment) for fragment in pinned_route]
+    if any(pos < 0 for pos in positions) or positions != sorted(positions):
+        raise CorridorBlocked("build.rs must verify pinned Zig version before building")
+    args = command.group("args")
+    archive_route = (
+        '.arg("build-lib")',
+        '.arg("zig_transport_root.zig")',
+        '.arg("-lc")',
+        '.arg(format!("-femit-bin={}", archive.display()))',
+    )
+    positions = [args.find(fragment) for fragment in archive_route]
+    if any(pos < 0 for pos in positions) or positions != sorted(positions):
+        raise CorridorBlocked(
+            "build.rs must compile the root Zig 0.16 C ABI into the pinned archive"
+        )
+    after = active[command.end():]
+    link_search = re.search(
+        r'println!\(\s*"cargo:rustc-link-search=native=\{\}"\s*,'
+        r'\s*out\.display\(\)\s*\)\s*;',
+        after,
+    )
+    link_archive = re.search(
+        r'println!\(\s*"cargo:rustc-link-lib=static=sens_zig_transport"\s*\)\s*;',
+        after,
+    )
+    if link_search is None or link_archive is None or link_search.end() > link_archive.start():
+        raise CorridorBlocked("build.rs must link the compiled Zig archive into Rust")
+
 
 def _production_source(source: str) -> str:
     """Drop #[cfg(test)] modules so string literals in tests cannot fake routes."""
