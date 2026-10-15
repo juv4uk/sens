@@ -431,8 +431,11 @@ pub(crate) fn oracle_help(session: &mut Session, topic: Option<&str>) -> Result<
             "cannot read knowledge/guard-reference.lisp (run from the sens repo root): {error}"
         )
     })?;
+    // The static Guard source crosses the Zig byte corridor, not Rust include.
+    // The mutable reference directory stays dynamically reloaded as before.
+    let guard = wsm_guard_core::guard_source()?;
     for (name, source) in [
-        ("lib/guard.lisp", wsm_guard_core::GUARD),
+        ("lib/guard.lisp", guard.as_str()),
         ("knowledge/guard-reference.lisp", reference.as_str()),
     ] {
         let ast = parse(source)
