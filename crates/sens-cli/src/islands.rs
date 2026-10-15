@@ -286,11 +286,19 @@ fn install_root(args: &[String]) -> String {
 
 /// Root Zig asset copies the exact release-manifest bytes into caller memory.
 /// No direct Rust project-source embed, no fallback to a different authority.
+#[cfg(feature = "zig-transport")]
 fn embedded_manifest_via_zig() -> Result<Manifest, String> {
     let bytes = crate::zig_transport::islands_manifest_bytes()?;
     let source = std::str::from_utf8(&bytes)
         .map_err(|error| format!("ZIG_ISLANDS_MANIFEST_CARRIER invalid UTF-8: {error}"))?;
     load_manifest_str(source, "zig-root-asset")
+}
+
+/// A host with Zig intentionally disabled cannot access the embedded SENS
+/// distribution manifest; never silently return to Rust include_str! or fs.
+#[cfg(not(feature = "zig-transport"))]
+fn embedded_manifest_via_zig() -> Result<Manifest, String> {
+    Err("ZIG_ISLANDS_MANIFEST_CARRIER unavailable: Zig transport disabled; no Rust fallback".into())
 }
 
 // Manifest validation is distribution contract validation only; it cannot mint semantic authority.
@@ -1463,6 +1471,7 @@ pub fn run(args: &[String]) -> Result<String, String> {
 mod zig_islands_manifest_tests {
     use super::*;
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn root_zig_release_manifest_exact_bytes_and_validated_protocol() {
         let bytes = crate::zig_transport::islands_manifest_bytes().expect("Zig byte ferry");
@@ -1474,5 +1483,12 @@ mod zig_islands_manifest_tests {
         let via_wrapper = embedded_manifest_via_zig().expect("same Zig source");
         assert_eq!(via_wrapper.protocol, parsed.protocol);
         assert_eq!(via_wrapper.islands.len(), parsed.islands.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn islands_manifest_without_zig_feature_fails_closed() {
+        let err = embedded_manifest_via_zig().expect_err("no Rust manifest fallback");
+        assert!(err.contains("ZIG_ISLANDS_MANIFEST_CARRIER unavailable"));
     }
 }
