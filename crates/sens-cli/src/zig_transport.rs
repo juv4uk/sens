@@ -32,6 +32,30 @@ fn version() -> Result<(), String> {
     Ok(())
 }
 
+/// Механічний інваріант SENS ↔ Zig: кількість, ширина, біти.
+/// Не визначає значення функцій і не замінює SENS-семантичний оракул.
+fn require_same_exact_words(
+    expected: &[sens::BinarySourceWord],
+    actual: &[sens::BinarySourceWord],
+) -> Result<(), String> {
+    if expected.len() != actual.len() {
+        return Err(format!(
+            "ZIG_EGRESS_ROUNDTRIP_MISMATCH word_count expected={} actual={}",
+            expected.len(),
+            actual.len()
+        ));
+    }
+    for (index, (left, right)) in expected.iter().zip(actual).enumerate() {
+        if left.width() != right.width() || left.packed_bits() != right.packed_bits() {
+            return Err(format!(
+                "ZIG_EGRESS_ROUNDTRIP_MISMATCH index={index} expected_width={} expected_bits={:b} actual_width={} actual_bits={:b}",
+                left.width(), left.packed_bits(), right.width(), right.packed_bits()
+            ));
+        }
+    }
+    Ok(())
+}
+
 pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
     version()?;
     if unsafe { sens_zig_t5_validate(bytes.as_ptr(), bytes.len()) } != 0 {
@@ -76,6 +100,9 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     if len < 0 || usize::try_from(len).ok() != Some(bytes.len()) {
         return Err(format!("Zig physical T5 encode rejected: code={len}"));
     }
+    // Обидва напрями проходять тільки стерильний Zig ABI, без Rust T5 codec.
+    let restored = decode_t5_words(&bytes)?;
+    require_same_exact_words(words, &restored)?;
     Ok(bytes)
 }
 
@@ -254,4 +281,42 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     output.truncate(len as usize);
     validate_t5(&output)?;
     Ok(output)
+}
+
+#[cfg(test)]
+mod zig_exact_egress_tests {
+    use super::{decode_t5_words, encode_t5_direct, require_same_exact_words};
+
+    fn words(source: &str) -> Vec<sens::BinarySourceWord> {
+        sens::parse_binary_source_words(source)
+            .expect("точні двійкові слова")
+            .into_iter()
+            .map(|token| token.word)
+            .collect()
+    }
+
+    #[test]
+    fn t5_egress_uses_zig_for_exact_roundtrip() {
+        let expected = words("1 01 001 010101000");
+        let physical = encode_t5_direct(&expected).expect("Zig T5 encode");
+        let recovered = decode_t5_words(&physical).expect("Zig T5 decode");
+        require_same_exact_words(&expected, &recovered).unwrap();
+        assert_eq!(physical.len(), 4);
+    }
+
+    #[test]
+    fn t5_egress_blocks_width_bit_and_count_drift() {
+        let expected = words("1 01");
+        let changed_width = require_same_exact_words(&expected, &words("01 01"))
+            .expect_err("D1:1 і D2:01 — різні слова");
+        assert!(changed_width.contains("index=0"));
+        assert!(changed_width.contains("expected_width=1"));
+        assert!(changed_width.contains("actual_width=2"));
+        assert!(require_same_exact_words(&expected, &words("0 01"))
+            .unwrap_err().contains("index=0"));
+        assert!(require_same_exact_words(&expected, &words("1"))
+            .unwrap_err().contains("word_count expected=2 actual=1"));
+        assert!(require_same_exact_words(&expected, &words("1 01 0"))
+            .unwrap_err().contains("word_count expected=2 actual=3"));
+    }
 }
