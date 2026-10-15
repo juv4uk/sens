@@ -10,8 +10,7 @@ migration batch, in fixed order:
   1. ci_zig_purity           \u2014 no W8/Sens8/SID-8 contamination in *.zig
   2. check-domain-ladder-identity \u2014 width=identity on canonical surfaces
   3. migrate-exact-domain authority load \u2014 D3/D4 tables + owner ratification
-  4. test_zig_codec_bridge   \u2014 physical T5 round-trip (optional if Zig absent
-                              unless --require-zig; skipped under --self-test)
+  4. test_zig_codec_bridge   \u2014 REQUIRED physical T5 round-trip; --self-test is NOT a full gate
 
 Chronology / ratification history is documented, not re-derived here:
   docs/migration/semantic-chronology-handoff-2026-10-14.uk.md
@@ -23,7 +22,7 @@ Axiom reminder (language-core / owner):
   Zig is a turnstile (physical transport), never the registry of meaning;
   historical W8 is provenance archive, not current identity.
 
-Exit 0 only when every enabled step passes.
+Full gate PASS requires every required step. --self-test returns SELF_TEST_ONLY\n(no transport evidence); incomplete full gate exits 2.
 """
 from __future__ import annotations
 
@@ -155,12 +154,51 @@ def load_exact_domain_authority() -> dict:
     }
 
 
+REQUIRED_STEPS = (
+    "zig-pin",
+    "ci_zig_purity",
+    "check-domain-ladder-identity",
+    "migrate-exact-domain-authority",
+    "test_zig_codec_bridge",
+)
+
+
+def gate_verdict(steps: list[dict], *, self_test: bool, skip_ladder: bool) -> str:
+    """Never call a skipped, missing or failed physical Zig proof a PASS."""
+    if any(step["status"] == "FAIL" for step in steps):
+        return "FAIL"
+    if self_test:
+        return "SELF_TEST_ONLY"
+    if skip_ladder:
+        return "INCOMPLETE"
+    if [step["step"] for step in steps] != list(REQUIRED_STEPS):
+        return "INCOMPLETE"
+    if any(step["status"] != "PASS" for step in steps):
+        return "INCOMPLETE"
+    return "PASS"
+
+
+def verdict_self_test() -> None:
+    """Pure synthetic negatives; they never pretend Zig actually executed."""
+    passing = [{"step": name, "status": "PASS"} for name in REQUIRED_STEPS]
+    assert gate_verdict(passing, self_test=False, skip_ladder=False) == "PASS"
+    missing = passing[:-1]
+    assert gate_verdict(missing, self_test=False, skip_ladder=False) == "INCOMPLETE"
+    skipped = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "SKIP"}]
+    assert gate_verdict(skipped, self_test=False, skip_ladder=False) == "INCOMPLETE"
+    unavailable = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "FAIL"}]
+    assert gate_verdict(unavailable, self_test=False, skip_ladder=False) == "FAIL"
+    assert gate_verdict(passing, self_test=False, skip_ladder=True) == "INCOMPLETE"
+    assert gate_verdict(skipped, self_test=True, skip_ladder=True) == "SELF_TEST_ONLY"
+    print("MIGRATION_ZIG_GATE_VERDICT_SELF_TEST_PASS negative_cases=5")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--require-zig",
         action="store_true",
-        help="Fail if Zig 0.16.0 codec bridge cannot run (default: report SKIP).",
+        help="Compatibility option: Zig 0.16.0 is already mandatory for the full gate.",
     )
     parser.add_argument(
         "--report",
@@ -184,6 +222,7 @@ def main() -> int:
         parser.error("--self-test cannot satisfy --require-zig")
 
     if args.self_test:
+        verdict_self_test()
         args.skip_ladder_identity = True
 
     steps: list[dict] = []
@@ -229,14 +268,7 @@ def main() -> int:
             "test_zig_codec_bridge",
             [sys.executable, str(SCRIPTS / "test_zig_codec_bridge.py")],
         )
-    if bridge["status"] == "FAIL" and not args.require_zig:
-        detail = bridge.get("detail", "")
-        if "ZIG_CODEC_UNAVAILABLE" in detail or "ZIG_CODEC_VERSION" in detail:
-            bridge = {
-                **bridge,
-                "status": "SKIP",
-                "detail": detail + " | use --require-zig in CI with install-zig",
-            }
+    # Missing or wrong-version Zig stays FAIL; never translate it to SKIP.
     steps.append(bridge)
 
     report = {
@@ -258,8 +290,15 @@ def main() -> int:
         "steps": steps,
     }
 
-    failed = [s for s in steps if s["status"] == "FAIL"]
-    report["verdict"] = "PASS" if not failed else "FAIL"
+    report["verdict"] = gate_verdict(
+        steps, self_test=args.self_test, skip_ladder=args.skip_ladder_identity,
+    )
+    report["transport_verified"] = report["verdict"] == "PASS"
+    report["scope"] = (
+        "SELF_TEST_NOT_PHYSICAL" if args.self_test
+        else "PARTIAL_NO_LADDER" if args.skip_ladder_identity
+        else "FULL_PHYSICAL_ZIG"
+    )
 
     for step in steps:
         print(
@@ -279,7 +318,11 @@ def main() -> int:
             encoding="utf-8",
         )
 
-    return 0 if report["verdict"] == "PASS" else 1
+    return (
+        0 if report["verdict"] in ("PASS", "SELF_TEST_ONLY")
+        else 2 if report["verdict"] == "INCOMPLETE"
+        else 1
+    )
 
 
 if __name__ == "__main__":
