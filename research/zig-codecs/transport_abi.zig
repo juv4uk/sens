@@ -158,16 +158,17 @@ test "ABI v2 T5 encode rejects whole and partial alias without writes" {
     try std.testing.expectEqualSlices(u8, &original, &storage);
 
     var output: [4]u8 = .{0x79} ** 4;
+    const unchanged = [_]u8{0x79} ** 4;
     try std.testing.expectEqual(@as(isize, -2),
         sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, 3));
-    try std.testing.expectEqualSlices(u8, &.{0x79} ** 4, &output);
+    try std.testing.expectEqualSlices(u8, &unchanged, &output);
 
     // Ordinary T5 rejects an otherwise representable D10 coordinate;
     // a physical width is not a callable SENS function.
     const d10 = [_]u8{ 10, 0, 0 };
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_t5_encode_be3(&d10, d10.len, &output, output.len));
-    try std.testing.expectEqualSlices(u8, &.{0x79} ** 4, &output);
+    try std.testing.expectEqualSlices(u8, &unchanged, &output);
 
     // Positive control: an independent buffer accepts the SAME source.
     try std.testing.expectEqual(@as(isize, 4),
