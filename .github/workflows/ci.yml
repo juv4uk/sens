@@ -1611,6 +1611,12 @@ jobs:
           # This is a separate mechanical authority boundary, not a SENS semantic verdict.
           unit_rc=0
           python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
+          # One real Zig-linked, targeted positive/short-buffer negative Guard
+          # witness in the *existing* CI; Rust never reads project source bytes.
+          echo 'test_id=guard-static-zig-source-transport layer=transport semantic_authority=SENS'
+          guard_source_rc=0
+          cargo test --locked -p wsm-guard-core --lib \
+            zig_static_source_carriers_exact_and_reject_small_buffers -- --nocapture || guard_source_rc=$?
           edge_rc=0
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
@@ -1642,7 +1648,7 @@ jobs:
             -- python3 -m unittest discover -s tests -p test_rust_zig_sens_boundary.py -v || boundary_unit_rc=$?
           production_rc=0
           python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$f6_source_rc" -ne 0 || "$f6_compile_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+          if [[ "$unit_rc" -ne 0 || "$guard_source_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$f6_source_rc" -ne 0 || "$f6_compile_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi
