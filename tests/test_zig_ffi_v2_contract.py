@@ -78,9 +78,17 @@ def declarations(source: str, language: str) -> dict:
     for match in pattern.finditer(source):
         name = match.group("name")
         raw = match.group("args").strip()
-        args = () if not raw or raw == "void" else tuple(
-            parameter_role(part, language) for part in raw.split(",")
-        )
+        if not raw or raw == "void":
+            parts = []
+        else:
+            parts = [part.strip() for part in raw.split(",")]
+            # Zig allows a trailing comma in a multiline argument list.
+            # Ignore that single separator, not empty parameters in the middle.
+            if parts[-1] == "":
+                parts.pop()
+            if not parts or any(not part for part in parts):
+                fail(language, f"empty_parameter={name}")
+        args = tuple(parameter_role(part, language) for part in parts)
         result = RETURN_TYPES[language][match.group("return")]
         found.setdefault(name, []).append((args, result))
     for name, expected in EXPECTED.items():
