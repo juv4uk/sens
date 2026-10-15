@@ -24,6 +24,19 @@ pub export fn sens_zig_free_t5_encode_be3(
     return @intCast(count); // Physical output <= 4 MiB.
 }
 
+/// Inverse physical T5 ingress for a Rust-free C/MCU host. All storage is
+/// caller-owned: no heap, no semantic lookup, no D10 callable admission.
+/// Returns exact BE3 byte count, -1 on malformed/aliased input, -2 if small.
+pub export fn sens_zig_free_t5_decode_be3(
+    src: [*]const u8, len: u32, dst: [*]u8, capacity: u32,
+) i32 {
+    if (len == 0 or len > t5.MAX_PHYSICAL_BYTES) return -1;
+    const written = t5.decodeTripletsInto(
+        dst[0..@as(usize, capacity)], src[0..@as(usize, len)],
+    ) catch |e| return if (e == error.BufferTooSmall) -2 else -1;
+    return @intCast(written); // Bounded by T5 physical max and exact BE3.
+}
+
 fn overlaps(a_ptr: usize, a_len: usize, b_ptr: usize, b_len: usize) bool {
     if (a_len == 0 or b_len == 0) return false;
     return if (a_ptr <= b_ptr) b_ptr - a_ptr < a_len
@@ -101,6 +114,74 @@ test "freestanding T5 F3C CRC golden and exact 8-bit word" {
     const eight = [_]u8{ 8, 0, 0xa8 };
     try std.testing.expect(sens_zig_free_t5_encode_be3(
         &eight, eight.len, &buffer, buffer.len) > 0);
+}
+
+test "freestanding Zig T5 ingress exact BE3 bits and no-write negatives" {
+    const exact = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
+    const wire = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    var decoded: [18]u8 = .{0xa5} ** 18;
+    try std.testing.expectEqual(@as(i32, exact.len),
+        sens_zig_free_t5_decode_be3(&wire, wire.len, &decoded, decoded.len));
+    try std.testing.expectEqualSlices(u8, &exact, decoded[0..exact.len]);
+    try std.testing.expectEqual(@as(u8, 0xa5), decoded[exact.len]);
+
+    // Invalid physical input and insufficient destination cannot write bytes.
+    var short: [14]u8 = .{0x79} ** 14;
+    try std.testing.expectEqual(@as(i32, -2),
+        sens_zig_free_t5_decode_be3(&wire, wire.len, &short, short.len));
+    try std.testing.expectEqualSlices(u8, &([_]u8{0x79} ** 14), &short);
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_t5_decode_be3(&.{0xf3}, 1, &decoded, decoded.len));
+    try std.testing.expectEqualSlices(u8, &exact, decoded[0..exact.len]);
+
+    // The caller can use one allocation with adjacent, non-overlapping spans.
+    var shared: [32]u8 = .{0xa5} ** 32;
+    @memcpy(shared[0..wire.len], &wire);
+    try std.testing.expectEqual(@as(i32, exact.len),
+        sens_zig_free_t5_decode_be3(&shared, wire.len,
+            shared[wire.len..].ptr, exact.len));
+    try std.testing.expectEqualSlices(u8, &wire, shared[0..wire.len]);
+    try std.testing.expectEqualSlices(u8, &exact,
+        shared[wire.len .. wire.len + exact.len]);
+
+    // Full and two shifted aliases must reject BEFORE touching any bytes.
+    @memset(&shared, 0xa5);
+    @memcpy(shared[0..wire.len], &wire);
+    const before_full = shared;
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_t5_decode_be3(&shared, wire.len, &shared, shared.len));
+    try std.testing.expectEqualSlices(u8, &before_full, &shared);
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_t5_decode_be3(&shared, wire.len,
+            shared[2..].ptr, exact.len));
+    try std.testing.expectEqualSlices(u8, &before_full, &shared);
+
+    @memset(&shared, 0xa5);
+    @memcpy(shared[3 .. 3 + wire.len], &wire);
+    const before_reverse = shared;
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_t5_decode_be3(shared[3..].ptr, wire.len,
+            &shared, exact.len));
+    try std.testing.expectEqualSlices(u8, &before_reverse, &shared);
+
+    // Identical payload is not identical domain: physical D8 != D9.
+    var d8_wire: [4]u8 = undefined;
+    var d9_wire: [4]u8 = undefined;
+    const d8 = [_]u8{ 8, 0, 0xa8 };
+    const d9 = [_]u8{ 9, 0, 0xa8 };
+    const n8 = sens_zig_free_t5_encode_be3(&d8, d8.len, &d8_wire, d8_wire.len);
+    const n9 = sens_zig_free_t5_encode_be3(&d9, d9.len, &d9_wire, d9_wire.len);
+    try std.testing.expectEqual(@as(i32, 2), n8);
+    try std.testing.expectEqual(@as(i32, 2), n9);
+    try std.testing.expect(!std.mem.eql(u8, d8_wire[0..2], d9_wire[0..2]));
+    var recovered: [3]u8 = undefined;
+    try std.testing.expectEqual(@as(i32, 3),
+        sens_zig_free_t5_decode_be3(&d9_wire, @intCast(n9), &recovered, recovered.len));
+    try std.testing.expectEqualSlices(u8, &d9, &recovered);
+    var forbidden: [4]u8 = .{0xa5} ** 4;
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_t5_encode_be3(&.{ 10, 0, 1 }, 3, &forbidden, forbidden.len));
+    try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 4), &forbidden);
 }
 
 test "freestanding fail closed: invalid, capacity, scratch, overlap, no saving" {
