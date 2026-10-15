@@ -78,6 +78,35 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
     def test_real_shape_passes(self) -> None:
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_real_repository_migration_driver_has_live_zig_route(self) -> None:
+        self.assertEqual(self.module.check(ROOT), [])
+
+    def test_comment_only_zig_verify_is_not_a_release_receipt(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "evidence = zig_codec_bridge.verify_t5(zig_binary, packed)",
+                     "evidence = packed  # zig_codec_bridge.verify_t5(zig_binary, packed)")
+        self.assertTrue(any("M3:" in msg or "M5:" in msg
+                            for msg in self.module.check(self.root)))
+
+    def test_dead_if_false_zig_verifier_is_not_a_receipt(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "if zig_binary is not None:\n            evidence",
+                     "if False:\n            evidence")
+        self.assertTrue(any("M3:" in msg or "M5:" in msg
+                            for msg in self.module.check(self.root)))
+
+    def test_write_gate_comment_and_pass_do_not_protect_publication(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "if args.write and not args.zig_codec:\n        return 3",
+                     "# if args.write and not args.zig_codec:\n    if True:\n        pass")
+        self.assertTrue(any("M4:" in msg for msg in self.module.check(self.root)))
+
+    def test_comment_only_build_does_not_prove_pinned_zig(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "zig_binary = zig_codec_bridge.build_transport(Path(zig_temp.name)) if zig_temp else None",
+                     "zig_binary = None  # zig_codec_bridge.build_transport(Path(zig_temp.name))")
+        self.assertTrue(any("M2:" in msg for msg in self.module.check(self.root)))
+
     def test_missing_bridge_import_is_blocked(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py", "import zig_codec_bridge", "# no bridge")
         self.assertTrue(self.module.check(self.root))

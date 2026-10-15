@@ -26,11 +26,105 @@ Exit 0 = MIGRATION_ZIG_ONLY_PATH_OK; exit 1 = MIGRATION_ZIG_ONLY_PATH_BLOCKED.
 from __future__ import annotations
 
 import argparse
+import ast
 import sys
 from pathlib import Path
 
 BATCH = "scripts/migrate-t5-batch.py"
 BRIDGE = "scripts/zig_codec_bridge.py"
+
+
+def _live_nodes(root: ast.AST):
+    """AST nodes in executable-looking source; comments/strings/if False cannot certify a route."""
+    if isinstance(root, ast.If) and isinstance(root.test, ast.Constant) and root.test.value is False:
+        return
+    yield root
+    for child in ast.iter_child_nodes(root):
+        yield from _live_nodes(child)
+
+
+def _bridge_calls(root: ast.AST, operation: str) -> list[ast.Call]:
+    return [
+        node for node in _live_nodes(root)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == operation
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "zig_codec_bridge"
+    ]
+
+
+def _is_arg(node: ast.AST, name: str) -> bool:
+    return isinstance(node, ast.Attribute) and node.attr == name and (
+        isinstance(node.value, ast.Name) and node.value.id == "args"
+    )
+
+
+def _real_write_guard(node: ast.AST) -> bool:
+    if not isinstance(node, ast.If):
+        return False
+    expr = node.test
+    if not isinstance(expr, ast.BoolOp) or not isinstance(expr.op, ast.And):
+        return False
+    positive = any(_is_arg(v, "write") for v in expr.values)
+    negative = any(
+        isinstance(v, ast.UnaryOp) and isinstance(v.op, ast.Not)
+        and _is_arg(v.operand, "zig_codec") for v in expr.values
+    )
+    if not (positive and negative):
+        return False
+    return any(
+        isinstance(v, ast.Raise) or
+        (isinstance(v, ast.Return) and isinstance(v.value, ast.Constant)
+         and isinstance(v.value.value, int) and v.value.value != 0)
+        for statement in node.body for v in _live_nodes(statement)
+    )
+
+
+def check_migration_driver_ast(source: str) -> list[str]:
+    """Verify actual syntax and placement, not inert Zig-looking substrings."""
+    problems: list[str] = []
+    try:
+        tree = ast.parse(source, filename=BATCH)
+    except SyntaxError as exc:
+        return [f"M1: migration driver is not valid Python: {exc.msg} line={exc.lineno}"]
+    if not any(
+        isinstance(node, ast.Import)
+        and any(alias.name == "zig_codec_bridge" for alias in node.names)
+        for node in tree.body
+    ):
+        problems.append("M1: no live top-level import zig_codec_bridge")
+    runs = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "run"]
+    mains = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]
+    if len(runs) != 1 or len(mains) != 1:
+        return problems + ["M2-M5: require unique production run() and main()"]
+    run, main = runs[0], mains[0]
+    if not _bridge_calls(run, "build_transport"):
+        problems.append("M2: no live pinned Zig build_transport() call in run()")
+    if not _bridge_calls(run, "verify_t5"):
+        problems.append("M3: no live Zig verify_t5() call in run()")
+    if not any(_real_write_guard(node) for node in main.body):
+        problems.append("M4: main() lacks active --write/--zig-codec fail-closed exit")
+    # Must verify the candidate before it can enter the very same per-file
+    # publish list. A comment or fake call elsewhere is not a witness.
+    valid_flow = False
+    for node in _live_nodes(run):
+        if not isinstance(node, ast.For):
+            continue
+        verified = _bridge_calls(node, "verify_t5")
+        staged = [
+            n for n in _live_nodes(node)
+            if isinstance(n, ast.Call)
+            and isinstance(n.func, ast.Attribute)
+            and n.func.attr == "append"
+            and isinstance(n.func.value, ast.Name)
+            and n.func.value.id == "staged"
+        ]
+        if verified and staged and max(v.lineno for v in verified) < min(v.lineno for v in staged):
+            valid_flow = True
+    if not valid_flow:
+        problems.append("M5: same-file staged.append() not preceded by live Zig verify_t5()")
+    return problems
 
 
 def check(root: Path) -> list[str]:
@@ -44,35 +138,7 @@ def check(root: Path) -> list[str]:
     batch = batch_path.read_text(encoding="utf-8")
     bridge = bridge_path.read_text(encoding="utf-8")
 
-    # M1 -- the migration driver uses the corridor bridge.
-    if "import zig_codec_bridge" not in batch:
-        problems.append("M1: migrate-t5-batch.py does not import zig_codec_bridge "
-                        "(no sterile Zig corridor on the migration path)")
-
-    # M2 -- it builds the pinned transport.
-    if "zig_codec_bridge.build_transport(" not in batch:
-        problems.append("M2: migrate-t5-batch.py does not call "
-                        "zig_codec_bridge.build_transport (no pinned Zig transport)")
-
-    # M3 -- it certifies the candidate bytes through Zig.
-    if "zig_codec_bridge.verify_t5(" not in batch:
-        problems.append("M3: migrate-t5-batch.py does not call "
-                        "zig_codec_bridge.verify_t5 (bytes are never certified by Zig)")
-
-    # M4 -- publishing requires the corridor, fail-closed.
-    if "if args.write and not args.zig_codec" not in batch:
-        problems.append("M4: --write does not require --zig-codec; a physical .sens "
-                        "could be published WITHOUT the sterile Zig corridor")
-
-    # M5 -- the Zig certification precedes the publish staging.
-    verify_at = batch.find("zig_codec_bridge.verify_t5(")
-    staged_at = batch.find("staged.append(")
-    if verify_at == -1 or staged_at == -1:
-        problems.append("M5: cannot order Zig certification before publish staging "
-                        "(verify_t5 or staged.append missing)")
-    elif verify_at > staged_at:
-        problems.append("M5: publish staging (staged.append) precedes the Zig "
-                        "certification (verify_t5); a file could be staged uncertified")
+    problems.extend(check_migration_driver_ast(batch))
 
     # M7 -- the parallel runner (if present) must go through the canonical driver
     # and add no second path to a published .sens.
