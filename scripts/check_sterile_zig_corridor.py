@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed: Rust\u2194SENS physical wire must use the sterile Zig corridor.
+"""Fail-closed: Rust↔SENS physical wire must use the sterile Zig corridor.
 
 Does not run Zig. Does not admit programs. Audits source contracts only.
 Owner law: Zig = turnstile, SENS = meaning, Rust = opaque bytes / host.
@@ -206,6 +206,38 @@ def check_trit_t5_execution(source: str) -> None:
         raise CorridorBlocked("live eval/eval-core4 command bypasses Zig-gated execution")
 
 
+def check_f3c_validate_before_no_savings(body: str) -> None:
+    """F3C no-savings must never bypass Zig physical T5 validation.
+
+    Production encode_f3 must call validate_t5 before any length-based Ok(None).
+    A carrier that is oversize but invalid must fail closed, not report None.
+    """
+    prod = _production_source(body)
+    begin = "pub fn encode_f3("
+    end = "pub fn decode_f3("
+    if begin not in prod or prod.count(begin) != 1:
+        raise CorridorBlocked("zig_transport.rs missing unique encode_f3")
+    start = prod.index(begin) + len(begin)
+    if end not in prod[start:]:
+        raise CorridorBlocked("zig_transport.rs encode_f3 route not bounded")
+    route = prod[start:prod.index(end, start)]
+    if "validate_t5(t5)?" not in route and "validate_t5(t5)" not in route:
+        raise CorridorBlocked(
+            "encode_f3 must call validate_t5 before any no-savings decision"
+        )
+    # Length gate may exist, but only after validation.
+    val_at = route.find("validate_t5")
+    len_at = route.find("t5.len() > 16")
+    if len_at != -1 and (val_at == -1 or val_at > len_at):
+        raise CorridorBlocked(
+            "encode_f3 length-based Ok(None) must not precede Zig T5 validate"
+        )
+    if "sens_zig_f3c_pack" not in route:
+        raise CorridorBlocked("encode_f3 must call Zig F3C pack FFI")
+    if "ternary_transport" in route or "PhysicalT5Program" in route:
+        raise CorridorBlocked("encode_f3 must not embed Rust physical T5 codec")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -233,6 +265,9 @@ def check() -> list[str]:
             "zig_transport.rs must reconstruct BinarySourceWord via BitN::new"
         )
     notes.append("typed-w1-w9-reconstruction")
+
+    check_f3c_validate_before_no_savings(body)
+    notes.append("f3c-validate-before-no-savings")
 
     abi = ABI.read_text(encoding="utf-8")
     for name in ("sens_zig_t5_encode_be3", "sens_zig_t5_decode_be3"):
