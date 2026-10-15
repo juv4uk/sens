@@ -1401,6 +1401,7 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Rust→project dependency ledger (Zig-only burndown)
+        id: rust_project_deps_producer
         # Preserve actual evidence even if an earlier independent gate is RED.
         if: ${{ !cancelled() }}
         # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
@@ -1415,7 +1416,8 @@ jobs:
           fi
 
       - name: Upload Rust→project dependency ledger
-        if: always()
+        # A skipped producer has no file; failed attempted producers still report.
+        if: ${{ always() && steps.rust_project_deps_producer.outcome != 'skipped' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: rust-project-deps
@@ -1430,6 +1432,7 @@ jobs:
         run: python3 scripts/check_guards_are_real.py .
 
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        id: release_go_producer
         # Preserve actual evidence even if an earlier independent gate is RED.
         if: ${{ !cancelled() }}
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
@@ -1442,7 +1445,8 @@ jobs:
           exit 0
 
       - name: Upload release GO-gate report
-        if: always()
+        # A skipped producer has no file; failed attempted producers still report.
+        if: ${{ always() && steps.release_go_producer.outcome != 'skipped' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: release-go-gate
@@ -1450,6 +1454,7 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        id: math_bench_producer
         # Preserve actual evidence even if an earlier independent gate is RED.
         if: ${{ !cancelled() }}
         # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
@@ -1462,7 +1467,8 @@ jobs:
             --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
-        if: always()
+        # A skipped producer has no file; failed attempted producers still report.
+        if: ${{ always() && steps.math_bench_producer.outcome != 'skipped' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: math-bench-sens-vs-rust
