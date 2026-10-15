@@ -116,9 +116,8 @@ int main(void) {
   const unsigned char input[] = {0};
   unsigned char out[4] = {0};
   int rc = sens_zig_t5_validate(input, sizeof input);
-  if (sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1) {
-    return 1;
-  }
+  if (!check_number("f3c-invalid", sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1))
+    return 0;
   const char *suffix = "*/";
   return rc == 0 && prefix[0] && suffix[0] ? 0 : 1;
 }
@@ -150,6 +149,55 @@ int main(void) {
             any("F3C pack rejection of invalid T5" in p for p in problems),
             problems,
         )
+
+    def test_f3c_comma_operator_does_not_prove_rejection(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  uint8_t input[] = {243}, out[16] = {0};
+  sens_zig_t5_validate(input, sizeof input);
+  if (sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1)
+    return 0;
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
+
+    def test_f3c_check_number_without_fail_propagation_is_blocked(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  sens_zig_t5_validate(input, length);
+  check_number("ignored", sens_zig_f3c_pack(input, length, out, cap), -1);
+  return 0;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
+
+    def test_f3c_wrong_error_code_is_blocked(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  sens_zig_t5_validate(input, length);
+  if (!check_number("wrong", sens_zig_f3c_pack(input, length, out, cap), -2))
+    return 0;
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
 
     # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:

@@ -21,7 +21,7 @@ R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
     the ABI version must match, and every Rust-free host in host-c/*.c
     must only call corridor ops (no rogue sens_zig_* invents). At least
     one host must fail-closed reject invalid T5 via F3C pack (...)=-1
-    (same physical contract as Rust zig_transport::encode_f3).
+    (same physical contract as Rust zig_transport::encode_f3), and\n    must fail the witness if Zig returns anything other than -1.
 
 Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
@@ -57,6 +57,15 @@ CALL_RE = re.compile(r"\b(sens_zig_[a-z0-9_]+)\s*\(")
 C_NONCODE_RE = re.compile(
     r"""//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'""",
     re.S,
+)
+
+# Guard against ignored Zig return values and C comma-operator false proofs.
+# check_number must compare the ABI status with -1 and fail the witness on
+# mismatch. C_NONCODE_RE strips comments and string literals before matching.
+F3C_FAIL_CLOSED_RE = re.compile(
+    r"\bif\s*\(\s*!\s*check_number\s*\(\s*[^,;()]{0,160},\s*"
+    r"sens_zig_f3c_pack\s*\([^();]{1,220}\)\s*,\s*-1\s*\)"
+    r"\s*\)\s*return\s+0\s*;"
 )
 
 ZIG_VERSION_RE = re.compile(r"sens_zig_codec_abi_version\(\)\s*u32\s*\{\s*return\s+(\d+)")
@@ -189,23 +198,21 @@ def check(root: Path) -> list[str]:
                 "(version-only and commented calls are not evidence)"
             )
 
-        # R5 F3C fail-closed (G6/G7 host-neutral): at least one host must reject
-        # invalid T5 via F3C pack with expected -1 — same physical contract as
-        # Rust zig_transport::encode_f3. Comments/string ghosts already stripped.
+        # R5 F3C fail-closed (G6/G7/S2): require the C host to PROPAGATE
+        # the rejected Zig status. In C, a comma operator silently discards
+        # the F3C result: if (sens_zig_f3c_pack(...), -1) is not evidence.
+        # This regex is only structural; a native C+Zig run is still necessary.
         f3c_invalid_reject = False
         for host in sorted(host_dir.glob("*.c")):
             src = C_NONCODE_RE.sub(" ", host.read_text(encoding="utf-8"))
-            if re.search(
-                r"sens_zig_f3c_pack\s*\([^;]{0,200}\)\s*,\s*-1\s*\)",
-                src,
-            ):
+            if F3C_FAIL_CLOSED_RE.search(src):
                 f3c_invalid_reject = True
                 break
         if not f3c_invalid_reject:
             problems.append(
                 "R5: no Rust-free host exercises F3C pack rejection of invalid T5 "
-                "(expected check_number(..., sens_zig_f3c_pack(...), -1); "
-                "same fail-closed contract as Rust encode_f3)"
+                "(required: if (!check_number(..., sens_zig_f3c_pack(...), -1)) "
+                "return 0; a comma/ignored result is not evidence)"
             )
 
     return problems
