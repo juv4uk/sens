@@ -30,6 +30,15 @@ SCHEMA = "sens-rust-lisp-sens-edges/v1"
 INCLUDE_RE = re.compile(
     r'(?P<kind>include_str|include_bytes)!\s*\(\s*"(?P<path>(?:\\.|[^"\\])*)"\s*\)',
 )
+# Rust expands all-literal concat! before include_str!/include_bytes!.
+# A split path is still a direct embed of SENS bytes, never a Zig route.
+STATIC_CONCAT_INCLUDE_RE = re.compile(
+    r'(?P<kind>include_str|include_bytes)!\s*\(\s*concat!\s*\(\s*'
+    r'(?P<parts>"(?:\\.|[^"\\])*"(?:\s*,\s*"(?:\\.|[^"\\])*")*\s*,?)'
+    r'\s*\)\s*\)',
+)
+CONCAT_PART_RE = re.compile(r'"(?P<path>(?:\\.|[^"\\])*)"')
+
 SENS_SUFFIXES = (".lisp", ".sens", ".fasl", ".lisp.fasl")
 PRODUCTION_GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
 
@@ -83,9 +92,17 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
     text = rs_path.read_text(encoding="utf-8", errors="replace")
     rel_rs = rs_path.relative_to(root).as_posix()
     edges: list[dict] = []
-    for m in INCLUDE_RE.finditer(text):
-        kind = m.group("kind")
-        raw = unescape_rust_string(m.group("path"))
+    includes = [
+        (m.start(), m.group("kind"), unescape_rust_string(m.group("path")))
+        for m in INCLUDE_RE.finditer(text)
+    ]
+    for m in STATIC_CONCAT_INCLUDE_RE.finditer(text):
+        raw = "".join(
+            unescape_rust_string(part.group("path"))
+            for part in CONCAT_PART_RE.finditer(m.group("parts"))
+        )
+        includes.append((m.start(), m.group("kind"), raw))
+    for position, kind, raw in sorted(includes):
         if not is_sens_path(raw):
             continue
         resolved = (rs_path.parent / raw).resolve()
@@ -100,7 +117,7 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
                 "include_arg": raw,
                 "target": rel_target,
                 "exists": resolved.is_file(),
-                "line": text.count("\n", 0, m.start()) + 1,
+                "line": text.count("\n", 0, position) + 1,
                 "status": "RED",
                 "violation": "DIRECT_RUST_PROJECT_EMBED",
             }
