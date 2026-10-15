@@ -43,7 +43,8 @@ class MigrationZigGateTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
-        self.assertIn("verdict=PASS", completed.stdout)
+        self.assertIn("verdict=SELF_TEST_ONLY", completed.stdout)
+        self.assertNotIn("verdict=PASS", completed.stdout)
 
     def test_self_test_report_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -65,7 +66,9 @@ class MigrationZigGateTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
             data = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(data["schema"], "sens-migration-zig-gate/v1")
-            self.assertEqual(data["verdict"], "PASS")
+            self.assertEqual(data["verdict"], "SELF_TEST_ONLY")
+            self.assertIs(data["transport_verified"], False)
+            self.assertEqual(data["scope"], "SELF_TEST_NOT_PHYSICAL")
             self.assertEqual(data["zig_pin"], "0.16.0")
             self.assertIn("zig-is-turnstile-not-registry", data["axioms"])
             steps = {s["step"]: s["status"] for s in data["steps"]}
