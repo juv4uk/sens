@@ -153,7 +153,15 @@ def _require_external_source_sha256(
 
 
 def _reject_aliased_output_path(path: Path, command: str) -> None:
-    """Output provenance: also refuse symlinked ancestor directories."""
+    """Output provenance: distinguish forbidden leaf and ancestor symlinks."""
+    # A symlink in the output LEAF is not a symlinked parent. Keep the
+    # pre-existing NOT_REGULAR diagnostic while still refusing every alias.
+    # is_symlink() also detects a dangling symlink before an output read.
+    if path.is_symlink():
+        raise ZigCodecError(
+            f"ZIG_CODEC_OUTPUT_NOT_REGULAR layer=transport command={command} "
+            f"symlink_leaf={path}"
+        )
     try:
         _reject_linked_path_components(path)
     except ZigCodecError as error:
