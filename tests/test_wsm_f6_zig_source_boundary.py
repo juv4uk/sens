@@ -15,7 +15,7 @@ FILES = (
     "crates/sens-cli/src/bin/wsm-fs-record-producer.rs",
     "crates/sens-cli/src/bin/wsm-fs-record-consumer.rs",
 )
-DIRECT = re.compile(r'include_(?:str|bytes)!\s*\(\s*"[^"]*/lib/(?:unify|reason|forward|knowledge)\.lisp"')
+DIRECT = re.compile(r'include_(?:str|bytes)!\s*\(\s*"[^"]*/lib/(?:unify|reason|forward|knowledge|persistent-map)\.lisp"')
 
 def check_f6_route(source: str, label: str) -> None:
     # Commented-out code cannot impersonate a live Zig route.
@@ -24,7 +24,7 @@ def check_f6_route(source: str, label: str) -> None:
         raise ValueError(f"F6_DIRECT_RUST_SOURCE layer=transport binary={label}")
     if '#[path = "../zig_transport.rs"]' not in live:
         raise ValueError(f"F6_NO_ZIG_MODULE layer=transport binary={label}")
-    for asset in ("unify", "reason", "forward", "knowledge"):
+    for asset in ("unify", "reason", "forward", "knowledge", "persistent_map"):
         call = f"zig_transport::{asset}_source_bytes()?"
         if live.count(call) != 1:
             raise ValueError(f"F6_MISSING_ZIG_CARRIER layer=transport binary={label} asset={asset}")
@@ -38,6 +38,10 @@ def check_f6_route(source: str, label: str) -> None:
     d = live.find('("lib/knowledge.lisp", sources[3].as_str())')
     if a < 0 or b < 0 or c < 0 or d < 0 or not (a < b < c < d):
         raise ValueError(f"F6_ORDER_CHANGED layer=transport binary={label}")
+    persistent = live.find('("lib/persistent-map.lisp", sources[4].as_str())')
+    world = live.find('("lib/world.lisp",')
+    if persistent < 0 or world < 0 or persistent >= world:
+        raise ValueError(f"F6_PERSISTENT_ORDER_CHANGED layer=transport binary={label}")
     if "sens::eval_pinned_reasoning_source(path, source, &mut session)" not in live:
         raise ValueError(f"F6_NO_SENS_EVALUATOR layer=eval binary={label}")
 
@@ -53,6 +57,23 @@ class F6ZigBoundaryTests(unittest.TestCase):
             mutation = source + '\nconst SHADOW: &str = include_str!("../../../../lib/knowledge.lisp");\n'
             with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
                 check_f6_route(mutation, file)
+
+    def test_persistent_map_rust_embed_and_missing_zig_routes_fail_closed(self) -> None:
+        for file in FILES:
+            source = (ROOT / file).read_text(encoding="utf-8")
+            direct = source + '\\nconst LEAK: &str = include_str!("../../../../lib/persistent-map.lisp");\\n'
+            with self.subTest(file=file, kind="embed"), self.assertRaisesRegex(
+                ValueError, "F6_DIRECT_RUST_SOURCE"
+            ):
+                check_f6_route(direct, file)
+            ghost = source.replace(
+                "zig_transport::persistent_map_source_bytes()?",
+                "missing_persistent_source()?", 1
+            ) + "\\n// zig_transport::persistent_map_source_bytes()?\\n"
+            with self.subTest(file=file, kind="ghost"), self.assertRaisesRegex(
+                ValueError, "F6_MISSING_ZIG_CARRIER"
+            ):
+                check_f6_route(ghost, file)
 
     def test_zig_token_in_comment_cannot_replace_live_source_call(self) -> None:
         for file in FILES:
