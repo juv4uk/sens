@@ -166,7 +166,7 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -203,6 +203,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_uk_docs_bytes_copy", "lib/surface/uk-docs.lisp"),
         ("sens_zig_unify_bytes_copy", "lib/unify.lisp"),
         ("sens_zig_reason_bytes_copy", "lib/reason.lisp"),
+        ("sens_zig_forward_bytes_copy", "lib/forward.lisp"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
@@ -225,6 +226,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_uk_docs_bytes_copy", "lib/surface/uk-docs.lisp", "uk_docs_asset"),
         ("sens_zig_unify_bytes_copy", "lib/unify.lisp", "unify_asset"),
         ("sens_zig_reason_bytes_copy", "lib/reason.lisp", "reason_asset"),
+        ("sens_zig_forward_bytes_copy", "lib/forward.lisp", "forward_asset"),
     ):
         const_line = f'const {binding} = @embedFile("{asset}");'
         if len(re.findall(r"(?m)^[ \t]*" + re.escape(const_line) + r"[ \t]*$", zig_root)) != 1:
@@ -483,6 +485,39 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
             "fn sens_zig_reason_bytes_copy", 1)
         self.assertNotEqual(mutant, self.asset_zig)
         with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_reason_bytes_copy"):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
+
+    def test_forward_repl_source_is_only_carried_by_zig_in_original_load_order(self):
+        source = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
+        self.assertNotIn('include_str!("../../../lib/forward.lisp")', source)
+        self.assertIn("super::zig_transport::forward_source_bytes()?", source)
+        self.assertIn("let forward_source = forward_surface_source()?;", source)
+        self.assertIn('.chain(std::iter::once(("forward.lisp", forward_source.as_str())))', source)
+        for lhs, rhs in (
+            ('std::iter::once(("unify.lisp"', 'std::iter::once(("reason.lisp"'),
+            ('std::iter::once(("reason.lisp"', 'std::iter::once(("forward.lisp"'),
+            ('std::iter::once(("forward.lisp"', 'SURFACE_PREREQUISITES.iter().copied()'),
+        ):
+            self.assertLess(source.index(lhs), source.index(rhs), "REPL SENS source order changed")
+        self.assertIn("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback", source)
+        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        self.assertIn("cargo:rerun-if-changed=../../lib/forward.lisp", build)
+
+    def test_forward_asset_crosswired_bytes_rejected_before_release(self):
+        old = "@memcpy(dst[0..forward_asset.len], forward_asset[0..forward_asset.len]);"
+        mutant = self.asset_zig.replace(
+            old, "@memcpy(dst[0..forward_asset.len], reason_asset[0..forward_asset.len]);", 1,
+        )
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(ValueError, "wrong_copy_body=sens_zig_forward_bytes_copy"):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
+
+    def test_forward_asset_ghost_export_rejected(self):
+        mutant = self.asset_zig.replace(
+            "pub export fn sens_zig_forward_bytes_copy",
+            "fn sens_zig_forward_bytes_copy", 1)
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_forward_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
     def test_uk_docs_source_stays_inside_sterile_zig_corridor(self):

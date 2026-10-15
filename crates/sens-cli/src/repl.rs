@@ -16,7 +16,6 @@ use std::path::PathBuf;
 use std::process;
 
 const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    ("forward.lisp", include_str!("../../../lib/forward.lisp")),
     ("knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
     (
         "persistent-map.lisp",
@@ -43,6 +42,19 @@ fn unify_surface_source() -> Result<String, String> {
 }
 
 // lib/reason.lisp comes from Zig as opaque bytes; SENS alone evaluates it.
+// Source-only forward chaining via Zig, never a Rust source embed or rule registry.
+fn forward_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::forward_source_bytes()?;
+        String::from_utf8(bytes).map_err(|err| format!("ZIG_FORWARD_CARRIER UTF-8: {err}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback".into())
+    }
+}
+
 fn reason_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
@@ -166,8 +178,10 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         };
         let unify_source = unify_surface_source()?;
         let reason_source = reason_surface_source()?;
+        let forward_source = forward_surface_source()?;
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
             .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
+            .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
             .chain(SURFACE_PREREQUISITES.iter().copied());
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
@@ -589,6 +603,24 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_linter_carrier_forward_source_preserves_every_byte() {
+        let source = forward_surface_source().expect("forward source via Zig C ABI");
+        let bytes = crate::zig_transport::forward_source_bytes().expect("second Zig C byte copy");
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_FORWARD_CARRIER exact byte parity");
+        assert!(source.starts_with("; LEGACY_MIGRATION_DEBT"), "wrong SENS source asset");
+        println!("ZIG_FORWARD_CARRIER_PASS test_id=zig-forward-exact-carry layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_linter_carrier_forward_without_zig_denies_rust_bypass() {
+        let error = forward_surface_source().expect_err("only Zig may carry forward.lisp");
+        assert!(error.contains("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback"), "{error}");
+        println!("ZIG_FORWARD_NO_FALLBACK_PASS test_id=zig-forward-no-rust-bypass layer=transport");
     }
 
     #[cfg(feature = "zig-transport")]

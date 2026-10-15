@@ -187,6 +187,28 @@ test "reason SENS source via Zig exact byte ABI; short buffer untouched" {
     try std.testing.expectEqualSlices(u8, reason_asset[0..reason_asset.len], &result);
 }
 
+// The SENS forward-chaining program is opaque to Zig. Copy exact source bytes.
+const forward_asset = @embedFile("lib/forward.lisp");
+pub export fn sens_zig_forward_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (forward_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(forward_asset.len);
+    if (capacity < forward_asset.len) return -2;
+    @memcpy(dst[0..forward_asset.len], forward_asset[0..forward_asset.len]);
+    return @intCast(forward_asset.len);
+}
+
+test "forward REPL source exact Zig C bytes; short buffer stays unchanged" {
+    const required = sens_zig_forward_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(forward_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_forward_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [forward_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_forward_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, forward_asset[0..forward_asset.len], &output);
+}
+
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");
