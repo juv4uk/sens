@@ -2,7 +2,7 @@
 """T5 spaced-bit VIEW generator/checker (#4694 / #4449).
 
 Three projections of one admitted program (owner directive 2026-10-09):
-  path/name.lisp  — canonical Ukrainian human-readable projection (uk surface)
+  path/name.lisp  — canonical Ukrainian human-readable projection (укр surface)
   path/name.sens  — physical T5 machine file (exact D1-D9 words; 5 trits/byte)
   path/name       — generated read-only VIEW: exact bit-words [01]+ separated by
                     exactly one space, one trailing newline. No brackets, names,
