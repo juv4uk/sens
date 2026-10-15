@@ -106,13 +106,56 @@ class CorridorGuardTests(unittest.TestCase):
         self.assertTrue(self.module.check(self.root))
 
     def test_main_without_zig_decode_is_blocked(self) -> None:
+        # Zig reference in a comment MUST NOT count as a live ingress.
         mutate(
             self.root,
             "crates/sens-cli/src/main.rs",
-            "zig_transport::decode_t5_words",
-            "sens::decode_ternary_words_FORBIDDEN",
+            "return zig_transport::decode_t5_words(bytes);",
+            'return Err("disabled".into()); // zig_transport::decode_t5_words(bytes)',
         )
-        self.assertTrue(self.module.check(self.root))
+        issues = self.module.check(self.root)
+        self.assertTrue(any("live default ingress" in e for e in issues), issues)
+
+    def test_main_eval_rust_decoder_bypass_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "crates/sens-cli/src/main.rs",
+            "let words = decode_physical_t5_words(bytes)?;",
+            "let words = sens::decode_ternary_words(bytes)?; "
+            "// decode_physical_t5_words(bytes)",
+        )
+        issues = self.module.check(self.root)
+        self.assertTrue(any("Rust T5 decoder" in e for e in issues), issues)
+
+    def test_main_dispatch_bypass_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "crates/sens-cli/src/main.rs",
+            ".and_then(|bytes| eval_physical_t5(&bytes))",
+            '.and_then(|_| Err("disabled".into()))',
+        )
+        issues = self.module.check(self.root)
+        self.assertTrue(any("dispatch bypasses" in e for e in issues), issues)
+
+    def test_main_no_zig_cannot_fallback_to_rust(self) -> None:
+        mutate(
+            self.root,
+            "crates/sens-cli/src/main.rs",
+            'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())',
+            'Err("Rust T5 fallback enabled".into())',
+        )
+        issues = self.module.check(self.root)
+        self.assertTrue(any("feature-negative" in e for e in issues), issues)
+
+    def test_main_symlink_is_not_admitted(self) -> None:
+        entry = self.root / "crates/sens-cli/src/main.rs"
+        source = entry.read_text(encoding="utf-8")
+        entry.unlink()
+        other = self.root / "another.rs"
+        other.write_text(source, encoding="utf-8")
+        entry.symlink_to(other)
+        issues = self.module.check(self.root)
+        self.assertTrue(any("missing or linked" in e for e in issues), issues)
 
 
 if __name__ == "__main__":

@@ -44,6 +44,60 @@ REQUIRED_ABI_EXPORTS = (
 )
 
 
+
+def _single_route(source: str, begin: str, end: str) -> str | None:
+    """Extract exactly one physical Rust function body, not test/comment markers."""
+    if source.count(begin) != 1 or source.count(end) != 1:
+        return None
+    start = source.index(begin) + len(begin)
+    stop = source.index(end, start)
+    return source[start:stop]
+
+
+def _audit_main_physical_route(source: str) -> list[str]:
+    """R6 source-only: actual Zig BE3 ingress -> SENS D2 -> CLI .sens dispatch."""
+    problems: list[str] = []
+    if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
+        problems.append("R6: main lacks feature-gated Zig physical client")
+
+    ingress = _single_route(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
+    evaluation = _single_route(source, "fn eval_physical_t5(", "\nfn main() {")
+    dispatch = _single_route(source, "fn main() {", "\n#[cfg(test)]")
+    if ingress is None or evaluation is None or dispatch is None:
+        return problems + ["R6: physical CLI entrypoint missing or duplicated"]
+
+    zig_gate = '#[cfg(feature = "zig-transport")]'
+    no_zig_gate = '#[cfg(not(feature = "zig-transport"))]'
+    if ingress.count(zig_gate) != 1 or ingress.count(no_zig_gate) != 1:
+        problems.append("R6: physical ingress needs Zig and reference feature gates")
+    else:
+        zig_part, no_zig_part = ingress.split(no_zig_gate, 1)
+        if not re.search(
+            r'(?m)^\s*return zig_transport::decode_t5_words\(bytes\);\s*$',
+            zig_part,
+        ):
+            problems.append("R6: live default ingress fails to return Zig BE3 words")
+        if not re.search(
+            r'Err\("physical \.sens requires the Zig transport corridor; '
+            r'no Rust fallback"\.into\(\)\)',
+            no_zig_part,
+        ):
+            problems.append("R6: feature-negative physical ingress must refuse Rust fallback")
+
+    if any(token in ingress + evaluation for token in (
+        "sens::decode_ternary_words(", "PhysicalT5Program::decode("
+    )):
+        problems.append("R6: physical CLI route contains a Rust T5 decoder")
+    if "let words = decode_physical_t5_words(bytes)?;" not in evaluation:
+        problems.append("R6: evaluator bypasses Zig physical ingress")
+    if "sens::parse_canonical_word_sequence(&words)" not in evaluation:
+        problems.append("R6: evaluator bypasses canonical SENS D2 reader")
+    if ("physical_t5_request(&raw_args)" not in dispatch or
+            ".and_then(|bytes| eval_physical_t5(&bytes))" not in dispatch):
+        problems.append("R6: CLI .sens dispatch bypasses guarded evaluator")
+    return problems
+
+
 def check(root: Path) -> list[str]:
     problems: list[str] = []
 
