@@ -37,12 +37,12 @@ first_real_cyrillic_line() {
   ' "$1"
 }
 
-# Номер першого рядка з markdown-заголовком секції "English"/"Deutsch"
-# (короткі опції grep передаються ОКРЕМО -n -m 1 -i -E, не згруповано
-# -nmi1E -- GNU grep мовчки не знаходить нічого при такому групуванні,
-# з'ясовано живим тестуванням, не з документації).
-first_english_heading_line() {
-  grep -n -m 1 -i -E '^#{1,6}[[:space:]]*(english|deutsch)\b' "$1" 2>/dev/null \
+# Мовні заголовки для перевірки порядку секцій: Deutsch → Українська → English.
+# Мова позначається секцією лише тоді, коли є явний markdown-заголовок.
+# Інші документи можуть залишатися україномовними без перекладів.
+first_language_heading_line() {
+  local file="$1" names="$2"
+  grep -n -m 1 -i -E "^#{1,6}[[:space:]]*($names)([[:space:][:punct:]]|$)" "$file" 2>/dev/null \
     | cut -d: -f1 || true
 }
 
@@ -87,7 +87,7 @@ for file in "${files[@]}"; do
     if ((has_sibling)); then
       continue # ok -- окремий український sibling-файл несе зміст
     fi
-    printf 'English-only human documentation: %s (expected Ukrainian content or %s)\n' \
+    printf 'Немає українського змісту в документації: %s (очікується український текст або %s)\n' \
       "$file" "$sibling" >&2
     failed=1
     continue
@@ -95,37 +95,64 @@ for file in "${files[@]}"; do
 
   ((has_sibling)) && continue # sibling-форма не має внутрішньої структури для порівняння
 
-  # Дві незалежні перевірки, обидві застосовуються завжди (не
-  # взаємовиключні -- файл може мати секцію "## English" І ОКРЕМО
-  # мати розлогий англомовний вступ БЕЗ позначеної секції перед першою
-  # українською згадкою; кожна перевірка ловить свій клас боргу).
+  # Порядок мовних секцій не дорівнює пріоритету мов.
+  # Українська лишається основною: німецька може стояти перед нею
+  # у документації, англійська — після неї. Відсутні мови не вимагаються.
+  de_line=$(first_language_heading_line "$file" "deutsch|german")
+  uk_section_line=$(first_language_heading_line "$file" "українська|ukrainian")
+  en_line=$(first_language_heading_line "$file" "english")
+  uk_line=$(first_real_cyrillic_line "$file")
 
-  en_line=$(first_english_heading_line "$file")
-  if [[ -n "$en_line" ]]; then
-    # Секція "## English" є -- порівнюємо ОБСЯГ реального українського
-    # контенту до і після неї (символи, не рядки -- короткий
-    # трилінгвальний тег-заголовок не мусить важити як повний абзац).
-    read -r before after <<< "$(cyrillic_chars_before_after "$file" "$en_line")"
-    if (( before == 0 )) || (( after > before )); then
-      printf 'English-first content order: %s (English/Deutsch heading at line %s; %d Ukrainian char(s) before it, %d after) -- move the Ukrainian content before it, per language-policy.lisp human-facing-order\n' \
-        "$file" "$en_line" "$before" "$after" >&2
+  if [[ -n "$de_line" && -n "$uk_section_line" ]] && (( de_line >= uk_section_line )); then
+    printf 'Порядок мов: Deutsch має передувати Українській: %s (DE:%s UK:%s)\\n' "$file" "$de_line" "$uk_section_line" >&2
+    failed=1
+  fi
+  if [[ -n "$uk_section_line" && -n "$en_line" ]] && (( uk_section_line >= en_line )); then
+    printf 'Порядок мов: Українська має передувати English: %s (UK:%s EN:%s)\\n' "$file" "$uk_section_line" "$en_line" >&2
+    failed=1
+  fi
+  if [[ -n "$de_line" && -n "$en_line" ]] && (( de_line >= en_line )); then
+    printf 'Порядок мов: Deutsch має передувати English: %s (DE:%s EN:%s)\\n' "$file" "$de_line" "$en_line" >&2
+    failed=1
+  fi
+
+  # За відсутності явного заголовка Української її проза все одно
+  # має бути між німецькою та англійською секціями (якщо є обидві).
+  if [[ -n "$de_line" && -n "$en_line" && -z "$uk_section_line" ]]; then
+    if ! awk -v de="$de_line" -v en="$en_line" '
+      NR > de && NR < en {
+        line = $0
+        gsub(/\\[[^]]*\\]\\([^)]*\\)/, "", line)
+        if (line ~ /[А-Яа-яІіЇїЄєҐґ]/) found=1
+      }
+      END { exit !found }
+    ' "$file"; then
+      printf 'Немає українського змісту між Deutsch і English: %s\\n' "$file" >&2
       failed=1
     fi
   fi
 
-  # Незалежно від наявності секції "English": українська може бути
-  # лише куцим фрагментом у кінці великого файлу (напр. одне речення
-  # ліцензії наприкінці розлогого англійського тексту), поки основний
-  # текст перед нею -- англійська проза без жодної позначеної секції
-  # взагалі. Евристика: реальна кирилиця має з'явитись у першій
-  # половині файлу. Пропускається для зовсім коротких файлів
-  # (< 10 рядків) -- короткий stub з одним українським реченням
-  # ліцензії не потребує цієї перевірки, там немає з чим порівнювати
-  # "першу половину".
+  # Англійська секція не може випереджати весь український зміст.
+  if [[ -n "$en_line" ]] && { [[ -z "$uk_line" ]] || (( uk_line >= en_line )); }; then
+    printf 'Порядок мов: український зміст має передувати English: %s\\n' "$file" >&2
+    failed=1
+  fi
+
+  # За явної німецької секції український зміст не може весь
+  # передувати їй, якщо окремої секції Української немає.
+  if [[ -n "$de_line" && -z "$uk_section_line" && -n "$uk_line" ]] && (( uk_line < de_line )); then
+    printf 'Порядок мов: Deutsch має передувати українському тексту: %s\\n' "$file" >&2
+    failed=1
+  fi
+
+  # Для неструктурованих текстів зберігаємо старий сигнал слабкої
+  # української присутності, але не вимагаємо її в першій половині,
+  # якщо документ має німецьку секцію на початку.
+  
   total_lines=$(wc -l < "$file")
   if (( total_lines >= 10 )); then
     uk_line=$(first_real_cyrillic_line "$file")
-    if [[ -n "$uk_line" ]] && (( uk_line * 2 > total_lines )); then
+    if [[ -z "$de_line" && -n "$uk_line" ]] && (( uk_line * 2 > total_lines )); then
       printf 'Ukrainian content only in back half of file: %s (first real Cyrillic at line %s of %s) -- expected Ukrainian-primary prose near the start, per language-policy.lisp\n' \
         "$file" "$uk_line" "$total_lines" >&2
       failed=1
