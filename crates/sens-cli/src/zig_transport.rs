@@ -258,13 +258,13 @@ pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     if len == -3 {
         return Ok(None);
     }
-    if len <= 0 {
+    // Fail closed on non-positive, capacity overreport, or non-smaller framing.
+    // Zig may never claim more bytes than the caller-owned buffer.
+    if len <= 0 || usize::try_from(len).ok().filter(|&n| n < t5.len() && n <= bytes.len()).is_none()
+    {
         return Err(format!("Zig F3C pack rejected: code={len}"));
     }
     bytes.truncate(len as usize);
-    if bytes.len() >= t5.len() {
-        return Err("Zig F3C did not save bytes".into());
-    }
     Ok(Some(bytes))
 }
 
@@ -274,7 +274,8 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     let len = unsafe {
         sens_zig_f3c_unpack(carrier.as_ptr(), carrier.len(), output.as_mut_ptr(), output.len())
     };
-    if len <= 0 {
+    // Fail closed on non-positive or capacity overreport before any truncate.
+    if len <= 0 || usize::try_from(len).ok().filter(|&n| n <= output.len()).is_none() {
         return Err(format!("explicit Zig F3C rejected: code={len}"));
     }
     output.truncate(len as usize);
@@ -284,7 +285,7 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_e1_words, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words};
+    use super::{decode_e1_words, decode_f3, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -318,6 +319,42 @@ mod zig_exact_egress_tests {
             .expect("Zig F3C validation and encode")
             .expect("tiny F3C should save physical bytes");
         assert_eq!(packed, [0xf3, 0x40, 0x60]);
+    }
+
+    #[test]
+    fn f3c_pack_unpack_reject_overreported_lengths_contract() {
+        // Production paths must bound Zig-reported counts before truncate.
+        // Source-level contract mirror of the live encode_f3/decode_f3 bodies
+        // (same usize::try_from + capacity filter pattern used by E1).
+        let src = include_str!("zig_transport.rs");
+        let pack = src
+            .split("pub fn encode_f3(")
+            .nth(1)
+            .and_then(|s| s.split("pub fn decode_f3(").next())
+            .expect("encode_f3 route");
+        assert!(
+            pack.contains("usize::try_from(len)")
+                && pack.contains("n <= bytes.len()")
+                && pack.contains("n < t5.len()"),
+            "encode_f3 must reject overreported / non-smaller F3C lengths before truncate"
+        );
+        let unpack = src
+            .split("pub fn decode_f3(")
+            .nth(1)
+            .and_then(|s| s.split("#[cfg(test)]").next())
+            .expect("decode_f3 route");
+        assert!(
+            unpack.contains("usize::try_from(len)")
+                && unpack.contains("n <= output.len()"),
+            "decode_f3 must reject overreported F3C lengths before truncate"
+        );
+
+        // Live golden still round-trips under the stricter bound.
+        let small = encode_t5_direct(&words("10 001 00 000 01")).expect("T5");
+        let packed = encode_f3(&small).expect("pack").expect("saves");
+        assert_eq!(packed, [0xf3, 0x40, 0x60]);
+        let recovered = decode_f3(&packed).expect("unpack validates");
+        assert_eq!(recovered, small);
     }
 
     #[test]
