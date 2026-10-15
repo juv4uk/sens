@@ -108,15 +108,22 @@ def ensure_clean_git(root: Path) -> str:
     return head.stdout.decode("ascii").strip()
 
 
-def reject_run(executable: Path, root: Path, test_id: str, payload: bytes) -> None:
-    r = call([str(executable)], root, input_bytes=payload)
-    if r.returncode == 0 or r.stdout:
+def require_controlled_rejection(r: subprocess.CompletedProcess, test_id: str) -> None:
+    """Only C's explicit reject() exit=2 counts; crashes/other failures do not."""
+    if r.returncode != 2 or r.stdout:
         raise PhysicalError(
-            f"test_id={test_id} layer=transport expected=REJECT_EMPTY_OUTPUT "
-            f"actual_exit={r.returncode} stdout_sha256={digest(r.stdout)}")
+            f"test_id={test_id} layer=transport expected_exit=2 "
+            f"expected_stdout=EMPTY actual_exit={r.returncode} "
+            f"stdout_sha256={digest(r.stdout)}")
     if b"H2_T5_DUMP_REJECT layer=transport" not in r.stderr:
         raise PhysicalError(f"test_id={test_id} layer=transport missing_error_category "
                             f"stderr_sha256={digest(r.stderr)}")
+
+
+def reject_run(executable: Path, root: Path, test_id: str, payload: bytes) -> None:
+    require_controlled_rejection(
+        call([str(executable)], root, input_bytes=payload), test_id
+    )
 
 
 def real_run(root: Path, records: list[dict]) -> dict:
@@ -244,6 +251,28 @@ def self_test() -> None:
         raise PhysicalError("test_id=H2_EXACT_WIDTH layer=transport reference_golden_drift")
     if first_mismatch(b"\x01\x02", b"\x01\x03") != 1:
         raise PhysicalError("test_id=FIRST_MISMATCH layer=diagnostics index_wrong")
+    # Crash/launcher failure with a plausible diagnostic is NOT a Zig reject.
+    marker = b"H2_T5_DUMP_REJECT layer=transport category=ZIG_ENCODE\\n"
+    def synthetic(rc: int, stdout: bytes = b"", stderr: bytes = marker) -> subprocess.CompletedProcess:
+        return subprocess.CompletedProcess(["h2-controlled-negative"], rc, stdout, stderr)
+    require_controlled_rejection(synthetic(2), "H2_CONTROLLED_REJECT_POSITIVE")
+    for label, response in [
+        ("EXIT_ZERO", synthetic(0)),
+        ("SIGSEGV", synthetic(-11)),
+        ("OTHER_FAILURE", synthetic(1)),
+        ("COMMAND_NOT_FOUND", synthetic(127)),
+        ("STDOUT_LEAK", synthetic(2, stdout=b"\\x00")),
+        ("MISSING_DIAGNOSTIC", synthetic(2, stderr=b"")),
+    ]:
+        try:
+            require_controlled_rejection(response, f"H2_REJECT_{label}")
+        except PhysicalError:
+            pass
+        else:
+            raise PhysicalError(
+                f"test_id=H2_REJECT_{label} layer=transport false_reject_pass"
+            )
+    print("H2_CONTROLLED_REJECT_SYNTHETIC_PASS positive_exit=2 negative=6")
     print("H2_BE3_SYNTHETIC_PASS rejected=4 width_distinct=true physical_goldens=a1,35")
 
 
