@@ -305,24 +305,15 @@ class SourceResolver:
                     evidence=("owner-ratified exact-domain word",),
                 )
 
-        # PASS 1: legacy exact 8-bit SID8/Sens8.
+        # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired -- the
+        # sterile Zig corridor cleaned it. An eight-bit head is NOT resolved
+        # through a historical SID8/Sens8 registry (PASS 1 removed). It resolves
+        # only as a current ratified D8 coordinate or a current named D3-D6
+        # resident; otherwise it fails closed as a retired SID8-era head.
         if re.fullmatch(r"[01]{8}", token):
-            rows = self.hist_by_sid.get(token, [])
-            candidates = self.current_candidates_for_sid(token)
-            evidence = [f"legacy SID8/Sens8 {token}"]
-            evidence += [f"historical:{r.historical}" for r in rows]
-            evidence += [
-                f"registry:{ns}:{spelling}"
-                for ns, spelling in self.registry_sid_fields.get(token, [])
-            ]
-            return self._choose(
-                "sid8-sens8",
-                1,
-                token,
-                candidates,
-                legacy_sid8=token,
-                rows=rows,
-                evidence=evidence,
+            raise ResolverError(
+                f"retired SID8-era head {token}: no current ratified D8 coordinate and "
+                "no current named D3-D6 resident"
             )
 
         # PASS 2: exact my-lisp / admitted surface spelling.  This is

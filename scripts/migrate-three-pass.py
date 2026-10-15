@@ -651,31 +651,19 @@ class Resolver:
         # exactly as the legacy era does. (Genuinely unmapped words still fail
         # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            if self.source_era=="current":
-                if t not in self.admitted_d8:
-                    raise MigrationError(
-                        f"unratified current D8 executable head {t}",tok
-                    )
+            # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired -- the
+            # sterile Zig corridor cleaned it. An eight-bit head is NOT resolved
+            # through a historical registry. It is executable only as a CURRENT
+            # ratified D8 coordinate; otherwise it must carry a current named
+            # D3-D6 resident. There is no legacy SID8 lookup and no source-era map.
+            if t in self.admitted_d8:
                 self.counts["already-exact"]+=1
                 return [t],"already-exact"
-            if t not in self.legacy:
-                raise MigrationError(
-                    f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
-                    tok,
-                )
-            ident=self.legacy[t]
-            if ident is None:
-                raise MigrationError(
-                    f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
-                    tok,
-                )
-            if ident[1]=="D3" and ident[0]==D3_EMPTY:
-                raise MigrationError(
-                    f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
-                    tok,
-                )
-            self.counts["pass1-sens8"]+=1
-            return [ident[0]],"pass1-sens8"
+            raise MigrationError(
+                f"retired SID8-era head {t}: no current ratified D8 coordinate and "
+                "no current named D3-D6 resident",
+                tok,
+            )
 
         # D7 є текстовою/фонемною ідентичністю, не викликаною функцією.
         # Для D9 таблиця резидентів сама по собі не доводить виконуваність.
@@ -1298,7 +1286,7 @@ def main():
         "source_era": args.source_era,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "source_era_law": "eight-bit heads resolve as historical SID8 (no D8 in corpus); legacy maps SID8; current preserves ratified D8",
+        "source_era_law": "SID8/Sens8 retired by the sterile corridor; an eight-bit head is executable only as a current ratified D8 coordinate, else it needs a current named D3-D6 resident",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
