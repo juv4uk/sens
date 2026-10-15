@@ -6,6 +6,17 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Кодові голови є машинними ідентичностями драбини, а не
+# редакційним синтаксисом наших Lisp-джерел. Вихідний текст — ук.
+# Це МЕХАНІЧНИЙ доказ стилю; він не підтверджує семантику або Zig FFI.
+for source in lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; do
+  if sed '/^[[:space:]]*;/d' "$source" | grep -nE '\\([[:space:]]*[01]{3,24}([[:space:]]|\\))'; then
+    printf 'UKRAINIAN_SURFACE_SOURCE_RED file=%s reason=binary-call-head-in-Lisp reproduce=%s\n' "$source" "bash scripts/prove-repl-uk-step.sh" >&2
+    exit 1
+  fi
+done
+echo 'UKRAINIAN_SURFACE_SOURCE_OK machine_heads=0 semantic_pass=NOT_INFERRED'
+
 id=repl-uk-native
 reproduce="bash scripts/prove-repl-uk-step.sh"
 for kind in step loop queue define-function; do
