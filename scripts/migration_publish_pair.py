@@ -37,6 +37,10 @@ def publish_pair(
     # Byte parity alone is not provenance: an unrelated file can contain
     # identical bytes. Record the freshly created inode before second publish.
     created = carrier_path.lstat()
+    # Writer success is not proof that the Zig-certified carrier was recorded.
+    # Refuse a non-regular file or any byte drift before creating the view.
+    if not stat.S_ISREG(created.st_mode) or carrier_path.read_bytes() != carrier:
+        raise OSError("PAIR_CARRIER_CREATION_UNVERIFIED")
     try:
         write_new(view_path, view)
     except BaseException:
