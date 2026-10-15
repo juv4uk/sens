@@ -20,6 +20,9 @@ M6  scripts/zig_codec_bridge.py fails closed: it pins the compiler (0.16.0),
 
 M7  scripts/migrate-parallel.sh (if present) delegates to the canonical driver and
     never touches the codec directly (no second path).
+M8  the candidate staged for --write MUST originate in Zig carry_t5() in
+    the same per-file loop; Python reference bytes must never be published.
+M9  direct run(args) callers MUST reject --write without --zig-codec.
 
 Exit 0 = MIGRATION_ZIG_ONLY_PATH_OK; exit 1 = MIGRATION_ZIG_ONLY_PATH_BLOCKED.
 """
@@ -132,6 +135,71 @@ def _write_reachable_nodes(root: ast.AST):
         yield from _write_reachable_nodes(child)
 
 
+
+def _is_zig_carry(node: ast.AST) -> bool:
+    """Match a real Zig bridge call, never a lookalike comment or string."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "carry_t5"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "zig_codec_bridge"
+    )
+
+
+def _is_staging_packed(node: ast.AST) -> bool:
+    """Publisher's 5-field tuple must actually contain the Zig bytes."""
+    if not (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "append"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "staged"
+        and len(node.args) == 1
+    ):
+        return False
+    record = node.args[0]
+    return (
+        isinstance(record, ast.Tuple)
+        and len(record.elts) == 5
+        and isinstance(record.elts[3], ast.Name)
+        and record.elts[3].id == "packed"
+    )
+
+
+def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
+    """Conservative source proof of one real Zig byte producer before staging.
+
+    A dead/dry-run call, Python-packed replacement, multiple live writes to
+    packed, or staged reference bytes never establishes release evidence.
+    This is AST structural evidence, not a Zig runtime or SENS semantic PASS.
+    """
+    for loop in ast.walk(run):
+        if not isinstance(loop, ast.For):
+            continue
+        live = list(_write_reachable_nodes(loop))
+        staged = [node for node in live if _is_staging_packed(node)]
+        if not staged:
+            continue
+        packed_assignments = [
+            node for node in live
+            if isinstance(node, (ast.Assign, ast.AnnAssign))
+            and any(
+                isinstance(target, ast.Name) and target.id == "packed"
+                for target in (
+                    node.targets if isinstance(node, ast.Assign) else [node.target]
+                )
+            )
+        ]
+        if len(packed_assignments) != 1:
+            continue
+        mint = packed_assignments[0]
+        if (_is_zig_carry(mint.value)
+                and mint.lineno < min(s.lineno for s in staged)):
+            return True
+    return False
+
+
 def check_migration_driver_ast(source: str) -> list[str]:
     """Verify actual syntax and placement, not inert Zig-looking substrings."""
     problems: list[str] = []
@@ -156,6 +224,14 @@ def check_migration_driver_ast(source: str) -> list[str]:
         problems.append("M3: no live Zig verify_t5() call in run()")
     if not any(_real_write_guard(node) for node in main.body):
         problems.append("M4: main() lacks active --write/--zig-codec fail-closed exit")
+    if not any(_real_write_guard(node) for node in run.body):
+        problems.append("M9: direct run() lacks active --write/--zig-codec fail-closed exit")
+    if not _has_zig_mint_on_write(run):
+        problems.append(
+            "M8: --write staged bytes are not exclusively minted by live "
+            "zig_codec_bridge.carry_t5() in the same per-file loop "
+            "(Python reference and unproven staging forbidden)"
+        )
     # Prove that the physical Zig call is reachable ON THE WRITE PATH,
     # before the same file is staged. A dry-run-only call is no receipt.
     valid_flow = False
@@ -242,8 +318,8 @@ def main() -> int:
         for problem in problems:
             print(" -", problem, flush=True)
         return 1
-    print("MIGRATION_ZIG_ONLY_PATH_OK the sterile Zig corridor is the only path to "
-          "a published .sens (build + certify + --write gate + fail-closed bridge)",
+    print("MIGRATION_ZIG_ONLY_PATH_OK Zig MINTS published .sens: "
+          "build + live carry + certify + run/write guards + fail-closed bridge",
           flush=True)
     return 0
 
