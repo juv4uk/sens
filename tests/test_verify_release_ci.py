@@ -52,6 +52,34 @@ class ExactReleaseChecksTest(unittest.TestCase):
         self.assertTrue(all(x["sha"] == SHA and x["status"] == "success"
                             for x in receipt))
 
+    def test_release_requires_exact_sha_central_zig_job(self):
+        # Grounded in the actual GitHub Check Runs API name, not its longer
+        # YAML job label; SENS semantics stay separate from physical Zig.
+        central = "Часові D1 предикати — один фізичний SENS-свідок і чинні ..."
+        self.assertIn(central, MODULE.REQUIRED_CHECKS)
+        payload = complete_payload()
+        self.assertEqual(len(MODULE.verify_check_runs(payload, SHA)),
+                         len(MODULE.REQUIRED_CHECKS))
+
+        missing = copy.deepcopy(payload)
+        missing["check_runs"] = [
+            row for row in missing["check_runs"] if row["name"] != central
+        ]
+        with self.assertRaisesRegex(ValueError, "missing exact-SHA check"):
+            MODULE.verify_check_runs(missing, SHA, "juv4uk/sens")
+
+        for change, expected in (
+            ({"conclusion": "failure"}, "not green"),
+            ({"status": "in_progress", "conclusion": None}, "not green"),
+            ({"head_sha": "b" * 40}, "wrong check-run SHA"),
+        ):
+            with self.subTest(change=change):
+                mutant = copy.deepcopy(payload)
+                row = next(r for r in mutant["check_runs"] if r["name"] == central)
+                row.update(change)
+                with self.assertRaisesRegex(ValueError, expected):
+                    MODULE.verify_check_runs(mutant, SHA, "juv4uk/sens")
+
     def test_missing_required_check_is_rejected(self):
         payload = complete_payload()
         missing = MODULE.REQUIRED_CHECKS[0]
