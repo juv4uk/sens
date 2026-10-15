@@ -43,6 +43,17 @@ class InstallerTests(unittest.TestCase):
         self.payload = self.root / "payload"
         self.payload.write_text('#!/bin/bash\necho "new $*" >> "$TEST_LOG"\n'
                                 f'if [ "$1" = --version ]; then echo "sens {VERSION}"; fi\n')
+        # Native islands status emits diagnostic text with exit 0 even when an island is absent.
+        with self.payload.open("a") as script:
+            script.write(r'''
+if [ "$1" = islands ] && [ "$2" = status ]; then
+    if [ "${TEST_ISLAND_STATUS+x}" = x ]; then
+        printf '%s\n' "$TEST_ISLAND_STATUS"
+    else
+        printf '%s\n' "common-lisp distro: available" "prolog distro: available" "clips native: available" "datalog embedded: available (embedded)"
+    fi
+fi
+''')
         self.env["TEST_PAYLOAD"] = str(self.payload)
         self.stub("curl", '''echo "curl $*" >> "$TEST_LOG"
 while [ "$#" -gt 0 ]; do
@@ -133,6 +144,36 @@ cp "$TEST_PAYLOAD" "$destination"
                 self.assertEqual(target.read_text(), "previous binary")
                 self.assertEqual(list(self.local_bin.glob(".sens.*")), [])
                 self.assertNotIn("new install", self.log.read_text())
+
+
+    def test_four_islands_must_report_available_before_installer_claims_success(self):
+        healthy = [
+            "common-lisp distro: available",
+            "prolog distro: available",
+            "clips native: available",
+            "datalog embedded: available (embedded)",
+        ]
+        cases = (
+            ("probe-failed", healthy[:2] + ["clips native: probe-failed"] + healthy[3:],
+             "ISLAND_STATUS_NOT_READY: clips: probe-failed"),
+            ("absent", healthy[:1] + ["prolog distro: absent"] + healthy[2:],
+             "ISLAND_STATUS_NOT_READY: prolog: absent"),
+            ("unsupported", healthy[:3] + ["datalog embedded: unsupported"],
+             "ISLAND_STATUS_NOT_READY: datalog: unsupported"),
+            ("missing", healthy[:3],
+             "ISLAND_STATUS_INVALID: datalog: expected one row; found 0"),
+            ("duplicate", healthy + [healthy[0]],
+             "ISLAND_STATUS_INVALID: common-lisp: expected one row; found 2"),
+        )
+        for name, rows, expected_error in cases:
+            with self.subTest(name=name):
+                self.log.write_text("")
+                self.env["TEST_ISLAND_STATUS"] = "\n".join(rows)
+                result = self.run_installer()
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(expected_error, result.stderr)
+                self.assertNotIn("успішно встановлено", result.stdout)
+                self.assertIn("new islands status", self.log.read_text())
 
 
 if __name__ == "__main__":
