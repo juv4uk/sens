@@ -8,8 +8,10 @@
  *
  * The caller owns source and destination buffers. BE3 encodes each exact
  * word as [width, payload_hi, payload_lo] (in-process, not .sens wire).
- * Current T5 ABI functions use the ordinary D1..D9 physical profile;
- * D10 coordinate transport and D11 executable admission are NOT enabled.
+ * The existing T5 encode/decode/ordinary-validate ABI uses D1..D9.
+ * A separate D1..D10 coordinate-only validator is available; its success
+ * NEVER admits execution, changes SENS semantics, or permits D11.
+ * Encoding/decoding executable T5 through the ordinary ABI stays <= D9.
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -31,8 +33,13 @@ enum {
 };
 
 uint32_t sens_zig_codec_abi_version(void);
-/* Returns 0 for physically valid T5, -1 for invalid input. */
+/* Ordinary D1..D9 T5: physical success only, never semantic admission. */
 int sens_zig_t5_validate(const uint8_t *src, size_t len);
+/* Explicit D1..D10 COORDINATE-ONLY physical validation (0 or -1).
+ * D10 is NOT callable, and the ordinary T5 decode/encode route remains <=D9.
+ * No allocator, host struct, or width inference crosses this ABI boundary.
+ */
+int sens_zig_t5_validate_coordinates(const uint8_t *src, size_t len);
 /* Returns output length in bytes; -1 invalid, -2 capacity insufficient. */
 ptrdiff_t sens_zig_t5_encode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);

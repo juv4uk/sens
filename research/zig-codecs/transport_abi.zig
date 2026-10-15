@@ -15,6 +15,16 @@ pub export fn sens_zig_t5_validate(src: [*]const u8, len: usize) c_int {
     t5.validatePhysical(src[0..len]) catch return -1;
     return 0;
 }
+
+/// Separate D1..D10 physical COORDINATE profile for any C-compatible host.
+/// A 10-bit word remains opaque data: this does not grant SENS callability.
+/// The ordinary sens_zig_t5_validate and BE3 execution routes stay <= D9.
+/// ABI v2 addition: same caller-owned pointer/length and 0/-1 result contract.
+pub export fn sens_zig_t5_validate_coordinates(src: [*]const u8, len: usize) c_int {
+    if (len == 0 or len > t5.MAX_PHYSICAL_BYTES) return -1;
+    t5.validateCoordinatesPhysical(src[0..len]) catch return -1;
+    return 0;
+}
 pub export fn sens_zig_t5_encode_be3(
     src: [*]const u8, byte_len: usize, dst: [*]u8, capacity: usize,
 ) isize {
@@ -97,6 +107,42 @@ pub export fn sens_zig_e1_decode_be3(
         dst[at + 2] = @intCast(w.bits & 0xff);
     }
     return @intCast(need);
+}
+
+test "ABI v2 D10 coordinates stay separate from ordinary D9 transport" {
+    // D1 and D9 remain valid in BOTH profiles. No language result is inferred.
+    for ([_][]const u8{ &.{0xa1}, &.{ 0x51, 0x02 } }) |carrier| {
+        try std.testing.expectEqual(@as(c_int, 0),
+            sens_zig_t5_validate_coordinates(carrier.ptr, carrier.len));
+        try std.testing.expectEqual(@as(c_int, 0),
+            sens_zig_t5_validate(carrier.ptr, carrier.len));
+    }
+
+    // All 1024 exact D10 bit patterns use the coordinate-only T5 profile.
+    // Ordinary D1..D9 MUST reject the exact same physical bytes.
+    for (0..1024) |bits| {
+        const word = [_]t5.Word{.{ .width = 10, .bits = @intCast(bits) }};
+        const physical = try t5.encodeCoordinates(std.testing.allocator, &word);
+        defer std.testing.allocator.free(physical);
+        try std.testing.expectEqual(@as(usize, 2), physical.len);
+        try std.testing.expectEqual(@as(c_int, 0),
+            sens_zig_t5_validate_coordinates(physical.ptr, physical.len));
+        try std.testing.expectEqual(@as(c_int, -1),
+            sens_zig_t5_validate(physical.ptr, physical.len));
+        // This positive physical test never evaluates an SENS expression.
+    }
+
+    // Eleven exact zero bits plus four canonical tail trits 2:
+    // 00000 00000 02222 -> bytes 00 00 50. Not a D10 coordinate.
+    const d11 = [_]u8{ 0x00, 0x00, 0x50 };
+    try std.testing.expectEqual(@as(c_int, -1),
+        sens_zig_t5_validate_coordinates(&d11, d11.len));
+    try std.testing.expectEqual(@as(c_int, -1),
+        sens_zig_t5_validate_coordinates(&.{0xff}, 1));
+    try std.testing.expectEqual(@as(c_int, -1),
+        sens_zig_t5_validate_coordinates(&.{0xf2}, 1));
+    try std.testing.expectEqual(@as(c_int, -1),
+        sens_zig_t5_validate_coordinates(&.{}, 0));
 }
 
 test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" {
