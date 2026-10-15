@@ -236,7 +236,30 @@ echo "==> Реєстрація всіх 4 островів виконання (f
 "$EXE" install --profile four-kernel
 
 echo "==> Перевірка доступності ядер:"
-"$EXE" islands status
+ISLAND_STATUS="$("$EXE" islands status)"
+printf '%s\n' "$ISLAND_STATUS"
+
+# 'islands status' reports availability as data and may exit 0 for absent
+# runtimes. Do not announce all four installed before inspecting each row.
+for key in common-lisp prolog clips datalog; do
+    matches=0
+    while IFS= read -r row; do
+        case "$row" in
+            "$key "*)
+                matches=$((matches + 1))
+                status="${row##*: }"
+                if [[ "$status" != "available" && "$status" != "available (embedded)" ]]; then
+                    echo "ISLAND_STATUS_NOT_READY: $key: $status" >&2
+                    exit 1
+                fi
+                ;;
+        esac
+    done <<< "$ISLAND_STATUS"
+    if (( matches != 1 )); then
+        echo "ISLAND_STATUS_INVALID: $key: expected one row; found $matches" >&2
+        exit 1
+    fi
+done
 
 echo ""
 echo "==> Готово! my-lisp та всі 4 острови виконання успішно встановлено:"
