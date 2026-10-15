@@ -21,6 +21,7 @@ def _expected(tag):
         f"sens-cli_{version}_macos_x64",
         f"sens-cli_{version}_macos_arm64",
         "sens-cli-web.html",
+        "my-lisp-cli-web.html",
         "islands-manifest-v1.json",
         "install.sh",
     }
@@ -47,6 +48,9 @@ def _check_files(root, names):
         path = root / name
         if not path.is_file() or path.is_symlink() or path.stat().st_size == 0:
             raise ValueError(f"RELEASE_BLOCKED: invalid, missing or empty asset {name}")
+    # The current SENS name and historical public URL must serve identical bytes.
+    if _sha256(root / "my-lisp-cli-web.html") != _sha256(root / "sens-cli-web.html"):
+        raise ValueError("RELEASE_BLOCKED: web compatibility alias differs from canonical HTML")
 
 
 def _check_sha(sha):

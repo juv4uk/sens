@@ -22,6 +22,9 @@ class ReleaseAssetsTest(unittest.TestCase):
         self.dist.mkdir()
         for name in _expected(TAG):
             (self.dist / name).write_bytes(b"fake test fixture for " + name.encode())
+        (self.dist / "my-lisp-cli-web.html").write_bytes(
+            (self.dist / "sens-cli-web.html").read_bytes()
+        )
 
     def replay(self):
         target = self.root / "downloaded"
@@ -30,7 +33,7 @@ class ReleaseAssetsTest(unittest.TestCase):
 
     def test_complete_success(self):
         prepare(self.dist, TAG, SHA)
-        self.assertEqual(verify_replay(self.dist, self.replay(), TAG, SHA), 8)
+        self.assertEqual(verify_replay(self.dist, self.replay(), TAG, SHA), 9)
 
     def test_missing_msi_rejected(self):
         (self.dist / "sens-cli_0.42.0_windows_x64.msi").unlink()
@@ -47,10 +50,27 @@ class ReleaseAssetsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "empty"):
             prepare(self.dist, TAG, SHA)
 
+    def test_web_alias_missing_rejected(self):
+        (self.dist / "my-lisp-cli-web.html").unlink()
+        with self.assertRaisesRegex(ValueError, "missing"):
+            prepare(self.dist, TAG, SHA)
+
+    def test_web_alias_must_match_canonical_bytes(self):
+        (self.dist / "my-lisp-cli-web.html").write_bytes(b"different HTML")
+        with self.assertRaisesRegex(ValueError, "web compatibility alias differs"):
+            prepare(self.dist, TAG, SHA)
+
+    def test_tampered_web_alias_in_download_rejected(self):
+        prepare(self.dist, TAG, SHA)
+        replay = self.replay()
+        (replay / "my-lisp-cli-web.html").write_bytes(b"changed after staging")
+        with self.assertRaisesRegex(ValueError, "web compatibility alias differs"):
+            verify_replay(self.dist, replay, TAG, SHA)
+
     def test_bad_downloaded_checksum_rejected(self):
         prepare(self.dist, TAG, SHA)
         replay = self.replay()
-        (replay / "sens-cli-web.html").write_bytes(b"corrupt")
+        (replay / "sens-cli_0.42.0_macos_arm64").write_bytes(b"corrupt")
         with self.assertRaisesRegex(ValueError, "digest/size mismatch"):
             verify_replay(self.dist, replay, TAG, SHA)
 
@@ -83,6 +103,23 @@ class ReleaseAssetsTest(unittest.TestCase):
 
 class ReleaseWorkflowOrderingTest(unittest.TestCase):
     """Keep the workflow's last-moment SHA/owner-authorization barrier covered."""
+
+    def test_web_bundle_source_and_generated_wasm_names(self):
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        bundler = (root / "scripts" / "make-portable-web.mjs").read_text(encoding="utf-8")
+        self.assertTrue((root / "public" / "my-lisp-cli-web.html").is_file())
+        self.assertIn(
+            "node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html",
+            workflow,
+        )
+        self.assertIn("cp sens-cli-web.html my-lisp-cli-web.html", workflow)
+        self.assertIn("cmp -s sens-cli-web.html my-lisp-cli-web.html", workflow)
+        self.assertIn("            sens-cli-web.html\n            my-lisp-cli-web.html", workflow)
+        self.assertIn("wasm/sens_wasm_bg.wasm", bundler)
+        self.assertIn("wasm/sens_wasm.js", bundler)
+        self.assertNotIn("wasm/my_lisp_wasm_bg.wasm", bundler)
+        self.assertNotIn("wasm/my_lisp_wasm.js", bundler)
 
     def test_main_sha_and_owner_go_are_rechecked_after_replay_before_publish(self):
         root = Path(__file__).resolve().parents[1]

@@ -19,7 +19,7 @@ html = await replaceAsync(html, /<link\s+rel=["']stylesheet["']\s+href=["']([^"'
 // EN: Embed WASM as base64 and replace wasm-loader with embedded version.
 // UK: Вбудувати WASM як base64 і замінити wasm-loader на embedded версію.
 // DE: WASM als base64 einbetten und wasm-loader durch embedded Version ersetzen.
-const wasmBytes = await readFile(path.join(root, 'wasm/my_lisp_wasm_bg.wasm'));
+const wasmBytes = await readFile(path.join(root, 'wasm/sens_wasm_bg.wasm'));
 const wasmBase64 = wasmBytes.toString('base64');
 
 // EN: Inline wasm-bindgen JS if available for true standalone operation.
@@ -27,7 +27,7 @@ const wasmBase64 = wasmBytes.toString('base64');
 // DE: wasm-bindgen JS inline wenn verfügbar für echte eigenständige Operation.
 let wasmJs;
 try {
-  wasmJs = await readFile(path.join(root, 'wasm/my_lisp_wasm.js'), 'utf8');
+  wasmJs = await readFile(path.join(root, 'wasm/sens_wasm.js'), 'utf8');
   // EN: Replace import.meta.url to avoid invalid URL errors when loaded via Blob URL.
   wasmJs = wasmJs.replaceAll('import.meta.url', 'location.href');
 } catch (e) {

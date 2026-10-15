@@ -305,14 +305,19 @@ jobs:
 
       - name: Bundle the standalone HTML
         run: |
-          node scripts/make-portable-web.mjs public/sens-cli-web.html sens-cli-web.html
+          node scripts/make-portable-web.mjs public/my-lisp-cli-web.html sens-cli-web.html
           test -s sens-cli-web.html
+          # Keep the historical download URL byte-identical to the canonical asset.
+          cp sens-cli-web.html my-lisp-cli-web.html
+          cmp -s sens-cli-web.html my-lisp-cli-web.html
 
       - name: Stage portable HTML (not a public release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-web
-          path: sens-cli-web.html
+          path: |
+            sens-cli-web.html
+            my-lisp-cli-web.html
           if-no-files-found: error
           retention-days: 7
 
