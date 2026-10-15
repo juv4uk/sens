@@ -1115,7 +1115,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
         try:
             contents = manifest.read_bytes()
             manifest_sha = hashlib.sha1(
-                b"blob " + str(len(contents)).encode("ascii") + b"\\0" + contents
+                b"blob " + str(len(contents)).encode("ascii") + b"\0" + contents
             ).hexdigest()
             if manifest_sha != NONPROGRAM_MANIFEST_BLOB_SHA[name]:
                 raise SensT5Error(
