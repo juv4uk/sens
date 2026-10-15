@@ -68,7 +68,10 @@ def _built_executable_digest(binary: Path) -> str:
     expected = _BUILT_TRANSPORT_DIGESTS.get(canonical)
     if expected is None:
         raise ZigCodecError("ZIG_CODEC_UNATTESTED_BINARY: build with build_transport first")
+    original_inode = _require_unique_binary_inode(binary)
     actual = _binary_sha256(binary)
+    if _require_unique_binary_inode(binary) != original_inode:
+        raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_INODE")
     if actual != expected:
         raise ZigCodecError(
             f"ZIG_CODEC_BINARY_CHANGED expected_sha256={expected} actual_sha256={actual}"
@@ -78,6 +81,25 @@ def _built_executable_digest(binary: Path) -> str:
 
 class ZigCodecError(ValueError):
     pass
+
+
+def _require_unique_binary_inode(path: Path) -> tuple[int, int]:
+    """A SHA-attested Zig executable must have one regular physical name.
+
+    Hardlinks keep the same SHA but permit alias-based mutation outside the
+    build output path. This is transport provenance, not SENS semantics.
+    """
+    try:
+        entry = path.lstat()
+    except OSError as error:
+        raise ZigCodecError(f"ZIG_CODEC_BINARY_UNREADABLE: {error}") from error
+    if not stat.S_ISREG(entry.st_mode):
+        raise ZigCodecError("ZIG_CODEC_BINARY_NOT_REGULAR")
+    if entry.st_nlink != 1:
+        raise ZigCodecError(
+            f"ZIG_CODEC_BINARY_HARDLINKED nlink={entry.st_nlink}"
+        )
+    return (entry.st_dev, entry.st_ino)
 
 
 def _command(argv: list[str]) -> None:
@@ -127,6 +149,7 @@ def build_transport(directory: Path) -> Path:
     _reject_linked_path_components(binary)
     if binary.is_symlink() or not binary.is_file():
         raise ZigCodecError("ZIG_CODEC_MISSING_BUILT_BINARY")
+    _require_unique_binary_inode(binary)
     _BUILT_TRANSPORT_DIGESTS[binary.resolve(strict=True)] = _binary_sha256(binary)
     return binary
 
