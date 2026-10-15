@@ -90,9 +90,12 @@ def test_zig_output_readback_guard() -> None:
         for label, candidate, expected_error in (
             ("missing", root / "missing.sens", "ZIG_CODEC_OUTPUT_UNREADABLE"),
             ("symlink", root / "alias.sens", "ZIG_CODEC_OUTPUT_NOT_REGULAR"),
+            ("dangling-symlink", root / "dangling.sens", "ZIG_CODEC_OUTPUT_NOT_REGULAR"),
         ):
-            if label == "symlink":
-                candidate.symlink_to(physical)
+            if label in ("symlink", "dangling-symlink"):
+                candidate.symlink_to(
+                    physical if label == "symlink" else root / "missing-target.sens"
+                )
             try:
                 _read_zig_output(candidate, command="synthetic")
             except ZigCodecError as error:
