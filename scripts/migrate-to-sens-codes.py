@@ -38,6 +38,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from domain_tables import read_domain_table
+import zig_codec_bridge
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
@@ -1064,6 +1065,14 @@ def main():
     total_hits = 0
     # Validate every member of the batch before publishing any source.
     pending_outputs: list[tuple[Path, bytes]] = []
+    zig_temp = tempfile.TemporaryDirectory(prefix="sens-code-zig-") if args.sens_mirror else None
+    zig_binary = None
+    if zig_temp is not None:
+        try:
+            zig_binary = zig_codec_bridge.build_transport(Path(zig_temp.name))
+        except (OSError, zig_codec_bridge.ZigCodecError) as error:
+            zig_temp.cleanup()
+            raise SystemExit(f"ZIG_CARRY_REQUIRED_FOR_PUBLICATION: {error}") from error
 
     for path in sorted(source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror))):
         text = path.read_text(encoding="utf-8")
@@ -1085,9 +1094,27 @@ def main():
                     if args.sens_mirror:
                         target = args.sens_mirror / rel.with_suffix(".sens")
                         source_words = parse_words(converted)
-                        physical = encode_projection(converted)
-                        if decode_bytes(physical) != source_words:
+                        reference = encode_projection(converted)
+                        if decode_bytes(reference) != source_words:
                             raise SensT5Error("physical T5 roundtrip changed exact typed words")
+                        expected_sha = sha256(reference).hexdigest()
+                        physical = zig_codec_bridge.carry_t5(
+                            zig_binary, converted, trusted_source_sha256=expected_sha,
+                        )
+                        if physical != reference:
+                            first = next((i for i, (x, y) in enumerate(zip(reference, physical))
+                                          if x != y), min(len(reference), len(physical)))
+                            raise BinaryMigrationError(
+                                f"ZIG_CARRY_REFERENCE_MISMATCH expected_sha256={expected_sha} "
+                                f"actual_sha256={sha256(physical).hexdigest()} first_byte={first}"
+                            )
+                        receipt = zig_codec_bridge.verify_t5(
+                            zig_binary, physical, trusted_source_sha256=expected_sha,
+                        )
+                        if (receipt.get("physical_sha256") != expected_sha
+                                or receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256"
+                                or not receipt.get("zig_binary_sha256")):
+                            raise BinaryMigrationError("ZIG_CARRY_UNATTESTED_RECEIPT")
                         pending_outputs.append((target, physical))
                         status = "sens-written"
                         extra = {
@@ -1095,6 +1122,8 @@ def main():
                             "physical_bytes": len(physical),
                             "physical_sha256": sha256(physical).hexdigest(),
                             "typed_word_sha256": typed_sha256(source_words),
+                            "physical_producer": "PINNED_ZIG_T5_CARRY",
+                            "semantic_admitted": False,
                         }
                     else:
                         target = args.binary_mirror / rel
@@ -1103,7 +1132,7 @@ def main():
                         extra = {}
                 total_hits += len(hits)
                 blocked = []
-            except (BinaryMigrationError, SensT5Error, OSError) as error:
+            except (BinaryMigrationError, SensT5Error, OSError, zig_codec_bridge.ZigCodecError) as error:
                 converted = ""
                 hits = []
                 shadowed = []
@@ -1139,6 +1168,9 @@ def main():
             "empties": blocked,
             **(extra if (args.binary_mirror or args.sens_mirror) and status == "sens-written" else {}),
         })
+
+    if zig_temp is not None:
+        zig_temp.cleanup()
 
     if args.binary_mirror or args.sens_mirror:
         # Full-batch semantic admission is required, not "some files passed".

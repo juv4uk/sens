@@ -611,9 +611,10 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
+            # D8 is modern and distinct from the retired historical SID8 model.
             raise MigrationError(
-                f"retired SID8-era head {t}: no current named D3-D6 resident",
-                tok,
+                f"D8 {t}: no verified callable mechanism; exact residency "
+                "does not authorize historical SID8 substitution", tok,
             )
 
         # Source-defined global callables shadow human builtin surfaces.
@@ -634,6 +635,10 @@ class Resolver:
                     f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
                     tok,
                 )
+            if ident[1] not in ("D3", "D4", "D5", "D6") or len(ident[0]) != int(ident[1][1:]):
+                raise MigrationError(
+                    f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
+                )
             self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
 
@@ -644,6 +649,10 @@ class Resolver:
                 raise MigrationError(
                     f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
                     tok,
+                )
+            if ident[1] not in ("D3", "D4", "D5", "D6") or len(ident[0]) != int(ident[1][1:]):
+                raise MigrationError(
+                    f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
@@ -809,22 +818,17 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     return encode_text7_identifier(t, text7, node.tok)
 
 
-def encode_string(node: String,text7):
-    # A string literal is DATA, not a machine identity: its content is not
-    # keyboard-encoded (owner 2026-10-15: the script does not need comments/docs,
-    # and a quoted citation is data). It is carried as an opaque empty data cell.
-    content = node.tok.text[1:-1]  # strip surrounding quotes
-    content = content.replace('\\"', '"').replace('\\\\', '\\')
-    return [D2_OPEN, D3_EMPTY, D2_CLOSE]
-    cells = text7_encode(content, text7, node.tok)
-    # Frame as D7 data: D2_OPEN + D2_OPEN + cells + D2_CLOSE + D2_CLOSE
-    words = [D2_OPEN, D2_OPEN]
-    for cell in cells:
-        words.append(cell)
-    words.append(D2_CLOSE)
-    words.append(D2_CLOSE)
-    return words
+def encode_string(node: String, text7):
+    """Fail closed; arbitrary source strings cannot be replaced by D3 EMPTY.
 
+    String values require a separately admitted, reversible datum encoding.
+    A T5 roundtrip alone cannot detect loss of source content.
+    """
+    raise MigrationError(
+        "STRING_LITERAL_UNADMITTED: reversible string datum representation "
+        "is required; must not replace arbitrary strings with D3 EMPTY",
+        node.tok,
+    )
 
 def encode_clause(node,resolver,text7,lexical_env=()):
     """COND clause is structural; nested executable expressions retain scope."""
@@ -1363,6 +1367,7 @@ def main():
             "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
+        "migration_complete": bool(paths) and blocked == 0,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current named D3-D6 resident, else it fails closed",

@@ -232,6 +232,22 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 01010 00 "))
         self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
+    def test_string_literal_never_collapses_into_empty(self):
+        for datum in ('"alpha"', '"beta"', '""'):
+            with self.subTest(datum=datum):
+                with self.assertRaisesRegex(mod.MigrationError, "STRING_LITERAL_UNADMITTED"):
+                    self.migrate(f"(100 {datum})\n")
+
+    def test_sid8_bridge_cannot_authorize_any_executable_head(self):
+        with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
+            mod.Resolver(self.my, self.upper,
+                         bridge_by_sid={"01001011": ("D9", "110101001")})
+
+    def test_named_d9_resident_cannot_become_callable(self):
+        resolver = mod.Resolver({"unproved-d9": ("110101001", "D9")}, {})
+        with self.assertRaisesRegex(mod.MigrationError, "D9 .*callable"):
+            mod.migrate_file("(unproved-d9 x)\n", resolver, self.text7)
+
     def test_comments_disappear(self):
         a,_=self.migrate("; top\n(CAR #| nested #| inner |# body |# x)\n")
         b,_=self.migrate("(CAR x)\n")
