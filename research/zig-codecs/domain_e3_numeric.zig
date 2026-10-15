@@ -166,3 +166,30 @@ test "E3 one-word profile refuses mutation and never writes into a small buffer"
     damaged[size - 1] = @intCast(crc & 0xff);
     try std.testing.expectError(error.WrongProfile, decodeOne(24, &damaged));
 }
+
+// Independent negative witness: a correctly recomputed CRC cannot authorize
+// an unknown physical numeric-run descriptor. All-zero bytes retain the
+// declared wide width; the codec must not infer SENS arithmetic or callability.
+test "E3 unknown descriptor with valid CRC fails closed; zero widths stay exact" {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
+        const Domain = ladder.WideDomainWord(width);
+        const zero = Domain.init(0);
+        var frame: [frameBytes(width)]u8 = undefined;
+        const size = try encodeOne(width, zero, &frame);
+        try std.testing.expectEqual(@as(usize, frameBytes(width)), size);
+        try std.testing.expectEqual(zero.bits, (try decodeOne(width, frame[0..size])).bits);
+        for (frame[prefix.len + 1 .. size - 4]) |byte| {
+            try std.testing.expectEqual(@as(u8, 0), byte);
+        }
+
+        var unknown = frame;
+        unknown[prefix.len] = 0xff;
+        const crc = fields.crc32(unknown[0 .. size - 4]);
+        unknown[size - 4] = @intCast(crc >> 24);
+        unknown[size - 3] = @intCast((crc >> 16) & 0xff);
+        unknown[size - 2] = @intCast((crc >> 8) & 0xff);
+        unknown[size - 1] = @intCast(crc & 0xff);
+        try std.testing.expectError(error.WrongProfile,
+            decodeOne(width, unknown[0..size]));
+    }
+}
