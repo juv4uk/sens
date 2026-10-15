@@ -13,6 +13,8 @@ const CYKL: &str = include_str!("../../../tests/semantic/repl-uk-loop-law.lisp")
 const CYKL_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-loop-mutant.lisp");
 const CHERHA: &str = include_str!("../../../tests/semantic/repl-uk-queue-law.lisp");
 const CHERHA_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-queue-mutant.lisp");
+const VYZNACHYTY: &str = include_str!("../../../tests/semantic/repl-uk-define-function-law.lisp");
+const VYZNACHYTY_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-define-function-mutant.lisp");
 
 fn session() -> Session {
     let mut session = Session::default();
@@ -88,4 +90,11 @@ fn repl_uk_lisp_queue_recovery_and_stop_d1_native_self_verdict() {
     // Позитивна SENS-програма містить невідоме ім'я посередині,
     // відновлює значення й відкидає небезпечний рядок після виходу.
     prove(CHERHA, CHERHA_MUTANT, "repl-uk-queue", Some(3));
+}
+
+#[test]
+fn repl_uk_language_owned_d4_define_and_lambda_native_self_verdict() {
+    // Сам SENS створює вирази D4 ФУНКЦІЯ/ВИЗНАЧИТИ, визначає
+    // функцію та значення і доводить виконання тільки D1:1.
+    prove(VYZNACHYTY, VYZNACHYTY_MUTANT, "repl-uk-define-function", None);
 }
