@@ -83,6 +83,15 @@ fn manifestPath(raw: []const u8) []const u8 {
         raw;
 }
 
+// Explicit comment grammar: "#" or "# " starts a human comment.
+// A Git path such as "#law.sens" is a real file, not an implicit comment;
+// skipping it would give a false positive for the parity corpus.
+fn skipManifestRow(line: []const u8) bool {
+    return line.len == 0 or std.mem.eql(u8, line, "#") or
+        std.mem.startsWith(u8, line, "# ");
+}
+
+
 test "T5 manifest preserves exact whitespace in tracked filenames" {
     try std.testing.expectEqualStrings(
         "/repo/ a file .sens \t",
@@ -95,6 +104,18 @@ test "T5 manifest preserves exact whitespace in tracked filenames" {
     try std.testing.expectEqualStrings("", manifestPath(""));
 }
 
+test "manifest rejects silent skipping of hash-prefixed physical file paths" {
+    try std.testing.expect(skipManifestRow(""));
+    try std.testing.expect(skipManifestRow("#"));
+    try std.testing.expect(skipManifestRow("# physical corpus note"));
+    // Existing path bytes must remain literal; '#' without space is a path.
+    try std.testing.expect(!skipManifestRow("#positive.sens"));
+    try std.testing.expect(!skipManifestRow("#negative.sens"));
+    try std.testing.expect(!skipManifestRow(" #literal.sens"));
+    try std.testing.expect(!skipManifestRow("#positive.sens\r"));
+    try std.testing.expect(!skipManifestRow(manifestPath("#positive.sens\r")));
+}
+
 fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accept: bool) !usize {
     const data = try readFile(allocator, list_path);
     defer allocator.free(data);
@@ -105,7 +126,7 @@ fn processList(allocator: std.mem.Allocator, list_path: []const u8, expect_accep
         // Preserve exact Git path bytes (including leading/trailing spaces or tabs).
         // Only a terminal CR belongs to a CRLF manifest line ending.
         const line = manifestPath(raw);
-        if (line.len == 0 or line[0] == '#') continue;
+        if (skipManifestRow(line)) continue;
         checked += 1;
         const check = accepts(allocator, line) catch |err| {
             failures += 1;

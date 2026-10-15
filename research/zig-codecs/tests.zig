@@ -13,6 +13,7 @@ const freestanding = @import("freestanding.zig");
 const envelope_fields = @import("transport/fields.zig");
 const e1_physical = @import("transport/e1.zig");
 const e1_writer = @import("transport/e1_writer.zig");
+const physical_parity_manifest = @import("parity_t5.zig");
 
 test "import exact-width transport suites" {
     std.debug.assert(@sizeOf(t5.Word) > 0);
@@ -31,6 +32,7 @@ test "import exact-width transport suites" {
     _ = envelope_fields;
     _ = e1_physical;
     _ = e1_writer;
+    _ = physical_parity_manifest;
 }
 
 
