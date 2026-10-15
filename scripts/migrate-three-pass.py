@@ -1087,6 +1087,17 @@ NONPROGRAM_MANIFESTS = (
 )
 
 
+NONPROGRAM_MANIFEST_BLOB_SHA = {
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "3a5b4e3ef660109242e9e1562bca4a723f1868ef",
+    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
+    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "2f07df13cbd31edf76dcf105a2dc6dea922e4af8",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "c83fb0b6a7c12b1a9131d541306ed67ad4b7d620",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "60f44e5d6e278a7f43c2fe2c02016d314b53c801",
+}
+
+
 def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> None:
     """Prevent minting a physical .sens for SHA-reviewed data, not programs."""
     if source.is_symlink():
@@ -1102,7 +1113,16 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
         if not manifest.is_file() or manifest.is_symlink():
             raise SensT5Error(f"NONPROGRAM_MANIFEST_UNAVAILABLE layer=encode {name}")
         try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
+            contents = manifest.read_bytes()
+            manifest_sha = hashlib.sha1(
+                b"blob " + str(len(contents)).encode("ascii") + b"\\0" + contents
+            ).hexdigest()
+            if manifest_sha != NONPROGRAM_MANIFEST_BLOB_SHA[name]:
+                raise SensT5Error(
+                    f"NONPROGRAM_MANIFEST_SHA_DRIFT layer=encode manifest={name} "
+                    f"expected={NONPROGRAM_MANIFEST_BLOB_SHA[name]} actual={manifest_sha}"
+                )
+            record = json.loads(contents.decode("utf-8"))
         except (UnicodeError, OSError, ValueError) as exc:
             raise SensT5Error(f"NONPROGRAM_MANIFEST_INVALID layer=encode {name}: {exc}") from exc
         if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
