@@ -32,7 +32,8 @@ def mirror(dst: Path) -> None:
     # guard files named by bindings must exist
     for guard in ("scripts/check_rust_sens_zig_corridor.py",
                   "scripts/check_sterile_zig_corridor.py",
-                  "scripts/check_rust_sens_corridor_coverage.py"):
+                  "scripts/check_rust_sens_corridor_coverage.py",
+                  "scripts/check_migration_zig_only_path.py"):
         p = dst / guard
         p.parent.mkdir(parents=True, exist_ok=True)
         if not p.exists():
@@ -74,6 +75,16 @@ class AxiomBindingTests(unittest.TestCase):
     def test_missing_guard_file_is_blocked(self) -> None:
         edit_binding(self.root, lambda d: d["bindings"][0].update({"guard": "scripts/nope.py"}))
         self.assertTrue(self.module.check(self.root))
+
+    def test_real_migration_zig_guard_missing_fails_closed(self) -> None:
+        # Missing real M1 must fail, not turn the original broken mirror into
+        # false evidence that the canonical axiom binding itself is defective.
+        guard = self.root / "scripts/check_migration_zig_only_path.py"
+        guard.unlink()
+        self.assertTrue(any(
+            "M1-migration-zig-only-path" in msg and "does not exist" in msg
+            for msg in self.module.check(self.root)
+        ))
 
 
     def test_duplicate_rule_is_blocked(self) -> None:
