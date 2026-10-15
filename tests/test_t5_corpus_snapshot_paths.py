@@ -79,6 +79,30 @@ class ExactManifestPaths(unittest.TestCase):
         with self.assertRaisesRegex(snapshot.SnapshotError, "symlink:"):
             snapshot.snapshot(self.root, self.names)
 
+    def test_symlinked_parent_within_repo_is_rejected(self) -> None:
+        real = self.file("real/physical.sens", bytes.fromhex("5102"))
+        (self.root / "linked").symlink_to(real.parent, target_is_directory=True)
+        self.listing("linked/physical.sens")
+        with self.assertRaisesRegex(snapshot.SnapshotError, "symlink:line=1:linked/physical.sens"):
+            snapshot.snapshot(self.root, self.names)
+
+    def test_symlinked_parent_outside_repo_is_rejected(self) -> None:
+        outside = self.base / "external"
+        outside.mkdir()
+        (outside / "physical.sens").write_bytes(bytes.fromhex("5102"))
+        (self.root / "linked").symlink_to(outside, target_is_directory=True)
+        self.listing("linked/physical.sens")
+        with self.assertRaisesRegex(snapshot.SnapshotError, "symlink:line=1:linked/physical.sens"):
+            snapshot.snapshot(self.root, self.names)
+
+    def test_regular_nested_file_retains_exact_path_and_digest(self) -> None:
+        self.file("real/physical.sens", bytes.fromhex("5102"))
+        self.listing("real/physical.sens")
+        observed = snapshot.snapshot(self.root, self.names)
+        self.assertEqual(observed["files"][0]["path"], "real/physical.sens")
+        self.assertEqual(observed["files"][0]["bytes"], 2)
+        self.assertEqual(observed["files"][0]["sha256"], snapshot.sha(bytes.fromhex("5102")))
+
     def test_escape_outside_repository_rejected(self) -> None:
         outside = self.base / "outside.sens"
         outside.write_bytes(b"\x51")

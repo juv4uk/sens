@@ -45,9 +45,13 @@ def snapshot(root: Path, file_list: Path) -> dict:
         path = Path(name)
         if not path.is_absolute():
             path = root / path
-        # Preserve the physical witness: do not hash a symlink's target as .sens.
-        if path.is_symlink():
-            raise SnapshotError(f"symlink:line={line_no}:{name}")
+        # A linked parent can redirect to another file, even when the
+        # .sens leaf itself is regular. Reject EVERY linked path component.
+        cursor = path
+        while cursor != root and root in cursor.parents:
+            if cursor.is_symlink():
+                raise SnapshotError(f"symlink:line={line_no}:{name}")
+            cursor = cursor.parent
         path = path.resolve(strict=False)
         try:
             rel = path.relative_to(root).as_posix()
