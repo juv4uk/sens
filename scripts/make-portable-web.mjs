@@ -31,7 +31,10 @@ try {
   // EN: Replace import.meta.url to avoid invalid URL errors when loaded via Blob URL.
   wasmJs = wasmJs.replaceAll('import.meta.url', 'location.href');
 } catch (e) {
-  console.warn('wasm/my_lisp_wasm.js not found, WASM-only mode');
+  throw new Error('RELEASE_BLOCKED: required wasm/sens_wasm.js is missing; offline HTML forbidden', { cause: e });
+}
+if (!wasmJs.trim()) {
+  throw new Error('RELEASE_BLOCKED: required wasm/sens_wasm.js is empty');
 }
 
 // EN: Create embedded loader with base64 WASM data and inline wasm-bindgen JS.
@@ -55,14 +58,12 @@ function decodeBase64(base64) {
 const embeddedWasmBytes = decodeBase64('${wasmBase64}');
 `;
 
-if (wasmJs) {
-  embeddedLoader += `
+embeddedLoader += `
 // EN: Embedded wasm-bindgen JS text.
 // UK: Вбудований текст wasm-bindgen JS.
 // DE: Eingebetteter wasm-bindgen JS Text.
 const embeddedWasmJs = ${JSON.stringify(wasmJs)};
 `;
-}
 
 embeddedLoader += `
 // EN: Shim for compatibility with existing wasm-loader interface.
@@ -88,10 +89,9 @@ window.loadMyLispWasm = function() {
     return originalFetch.apply(this, arguments);
   };
   var dynamicImport = new Function('u', 'return import(u)');
-  ${wasmJs ? `
   const wasmJsBlob = new Blob([embeddedWasmJs], { type: 'text/javascript' });
   const wasmJsUrl = URL.createObjectURL(wasmJsBlob);
-  return dynamicImport(wasmJsUrl).then(function (mod) {` : `return dynamicImport('/wasm/my_lisp_wasm.js').then(function (mod) {`}
+  return dynamicImport(wasmJsUrl).then(function (mod) {
     return mod.default().then(function () {
       window.fetch = originalFetch;
       return mod;
