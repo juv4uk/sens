@@ -141,6 +141,10 @@ jobs:
           echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
           python3 scripts/check_sterile_zig_corridor.py
+          # Host-neutral R5 must observe actual C→Zig physical calls, not ghost strings.
+          echo 'test_id=zig-host-neutral-r5-call-site layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+          python3 scripts/check_rust_sens_zig_corridor.py
           # Host-neutral ABI v2 declarations are a blocking part of this one auto-CI.
           # Source-only proof: never upgrades physical or SENS semantic admission.
           echo 'test_id=zig-abi-v2-zig-rust-c-declarations layer=transport verdict=source-only semantic_authority=SENS'
