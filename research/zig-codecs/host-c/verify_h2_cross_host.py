@@ -657,6 +657,51 @@ def verify_h1_artifact_bytes(output: Path, h1_proof: dict) -> dict[str, str]:
     return verified
 
 
+
+def verify_native_host_artifact(
+    root: Path, sens_bin: str, expected_sha256: str | None = None,
+) -> tuple[Path, str]:
+    """Bind each actual native SENS invocation to one physical executable.
+
+    A version string or final SHA alone cannot establish which binary the
+    earlier native checks ran. Only accepts regular, executable files inside
+    the exact checked-out repository without symlink path components.
+    This is a host artifact proof, never a Zig/SENS semantic rule.
+    """
+    root = root.resolve(strict=True)
+    requested = Path(sens_bin)
+    if ".." in requested.parts:
+        raise AuditFailure(
+            f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
+            f"expected=canonical_path actual={sens_bin!r}")
+    target = requested if requested.is_absolute() else root / requested
+    try:
+        target.relative_to(root)
+    except ValueError as exc:
+        raise AuditFailure(
+            f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
+            f"expected=within_checkout actual={target}") from exc
+
+    current = Path(target.anchor)
+    for component in target.parts[1:]:
+        current = current / component
+        if current.is_symlink():
+            raise AuditFailure(
+                f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
+                f"path={target} actual=linked_component")
+    if not target.is_file() or not os.access(target, os.X_OK):
+        raise AuditFailure(
+            f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
+            f"path={target} expected=regular_executable actual=missing_or_nonexecutable")
+    digest = sha256(target.read_bytes())
+    if expected_sha256 is not None and digest != expected_sha256:
+        raise AuditFailure(
+            f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
+            f"path={target} expected_sha256={expected_sha256} "
+            f"actual_sha256={digest} status=REGRESSION")
+    return target, digest
+
+
 def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     receipt["git_source_pin"] = verify_git_provenance(root, H2_TRACKED_INPUTS)
     for tool in ("zig", "cc", "cargo", "bash"):
@@ -667,9 +712,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     zig = invoke(["zig", "version"], root, pinned,
                  validator=lambda stdout: verify_zig_version_stdout(stdout, pinned))
     build = invoke(["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens"], root, "")
-    exe = root / sens_bin
-    if not exe.is_file():
-        raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
+    exe, native_sha256 = verify_native_host_artifact(root, sens_bin)
     c_binary_digest: list[str] = []
     c_h1: list[dict] = []
     c_h1_artifact_bytes: list[dict[str, str]] = []
@@ -706,12 +749,16 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
             ["bash", C_DRIVER], root, "C_D3_SUBSET_SOURCE_WITNESS_PASS",
             validator=check_c_verdicts, env=c_env)
         c_h1_artifact_bytes.append(verify_h1_artifact_bytes(output, c_h1[0]))
+    # Record the physical native executable before BOTH runs; verify it
+    # again after each. The host cannot silently change between controls.
+    verify_native_host_artifact(root, str(exe), native_sha256)
     native_a = invoke(
         ["bash", RUST_DRIVERS[0], str(exe)], root, "NATIVE_SENS_PASS id=retired-d3-eq",
         validator=lambda output: verify_native_physical(
             output, c_physical, tuple(
                 (f"tests/semantic/retired-d3-{kind}-{role}.bits", f"{kind}-{role}.sens")
                 for kind in ("cond", "eq") for role in ("law", "mutant"))))
+    verify_native_host_artifact(root, str(exe), native_sha256)
     native_b = invoke(
         ["bash", RUST_DRIVERS[1], str(exe)], root,
         "NATIVE_SENS_PASS test_id=retired-quote-inert-d3",
@@ -719,11 +766,12 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
             output, c_physical, tuple(
                 (f"tests/semantic/retired-quote-inert-d3-{role}.bits", f"{role}.sens")
                 for role in ("law", "mutant"))))
+    verify_native_host_artifact(root, str(exe), native_sha256)
     receipt.update({
         "status": "TWO_HOST_EXECUTED", "semantic_status": "SUBSET_MATCHED",
         "scope": "only 3 pinned D1/D2/D3 binary self-verdicts + one-bit negatives",
         "toolchain": {"zig_version": pinned, "c_compiler": shutil.which("cc")},
-        "rust_host_binary_sha256": sha256(exe.read_bytes()),
+        "rust_host_binary_sha256": native_sha256,
         "c_host_binary_sha256": c_binary_digest[0],
         "h1_zig_c_elf_provenance": c_h1[0],
         "h1_independently_hashed_artifacts": c_h1_artifact_bytes[0],
