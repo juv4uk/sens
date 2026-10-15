@@ -393,6 +393,32 @@ static int witness_zig_f3c_shared_buffer_transport(void) {
     return 1;
 }
 
+/* Independent Rust-free host exercises the reviewed D1..D10 coordinate
+ * validator through the same Zig ABI v2. A valid D10 never becomes executable.
+ * This has no SENS interpretation and uses no Rust physical codec. */
+static int witness_coordinate_only_d10(void) {
+    static const uint8_t d10_zero[] = {0x00, 0x00};
+    static const uint8_t d1_yes[] = {0xa1};
+    static const uint8_t d11_zero[] = {0x00, 0x00, 0x50};
+    static const uint8_t invalid_trit[] = {0xff};
+
+    if (!check_number("coordinate-d10-zig-accept",
+            sens_zig_t5_validate_coordinates(d10_zero, sizeof d10_zero), 0)) return 0;
+    if (!check_number("coordinate-d10-ordinary-reject",
+            sens_zig_t5_validate(d10_zero, sizeof d10_zero), -1)) return 0;
+    if (!check_number("coordinate-d1-both-profiles",
+            sens_zig_t5_validate_coordinates(d1_yes, sizeof d1_yes), 0)) return 0;
+    if (!check_number("coordinate-d1-ordinary",
+            sens_zig_t5_validate(d1_yes, sizeof d1_yes), 0)) return 0;
+    if (!check_number("coordinate-d11-strict-reject",
+            sens_zig_t5_validate_coordinates(d11_zero, sizeof d11_zero), -1)) return 0;
+    if (!check_number("coordinate-invalid-trit-reject",
+            sens_zig_t5_validate_coordinates(invalid_trit, sizeof invalid_trit), -1)) return 0;
+    if (!check_number("coordinate-empty-reject",
+            sens_zig_t5_validate_coordinates(d10_zero, 0), -1)) return 0;
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -452,6 +478,7 @@ int main(void) {
             sens_zig_f3c_unpack(f3c, sizeof known_f3c, unpacked, sizeof unpacked), 4)) return 1;
     if (!check_bytes("f3c-recovered-t5", unpacked, known_t5, sizeof known_t5)) return 1;
 
+    if (!witness_coordinate_only_d10()) return 1;
     if (!witness_zig_decode_be3()) return 1;
     if (!witness_zig_e1_encode_be3()) return 1;
     if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
