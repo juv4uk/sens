@@ -169,12 +169,42 @@ def real_run(root: Path, records: list[dict]) -> dict:
                 "physical_bytes": len(expected), "first_mismatch_byte": None,
                 "status": "BYTE_EXACT",
             })
+        # Independent C-host -> Zig ABI -> T5 positive width pair.
+        # The numeric payload is equal (=1), but D1:1 and D2:01 MUST
+        # remain physically distinct. Neither case grants callability.
+        exact_width_pair = []
+        for name, words in (("D1_ONE", ["1"]), ("D2_LEADING_ZERO_ONE", ["01"])):
+            be3 = exact_be3(words)
+            expected_t5 = encode_projection(" ".join(words))
+            observed = call([str(executable)], root, input_bytes=be3)
+            mismatch = first_mismatch(expected_t5, observed.stdout)
+            if observed.returncode or mismatch is not None:
+                raise PhysicalError(
+                    f"test_id=H2_EXACT_WIDTH_{name} layer=transport "
+                    f"expected_sha256={digest(expected_t5)} "
+                    f"actual_sha256={digest(observed.stdout)} "
+                    f"first_mismatch_byte={mismatch} actual_exit={observed.returncode} "
+                    f"reproduce={REPRODUCE}"
+                )
+            exact_width_pair.append({
+                "test_id": name, "be3_sha256": digest(be3),
+                "physical_sha256": digest(observed.stdout),
+                "width_bits": len(words[0]), "status": "BYTE_EXACT",
+            })
+        if exact_width_pair[0]["physical_sha256"] == exact_width_pair[1]["physical_sha256"]:
+            raise PhysicalError(
+                f"test_id=H2_EXACT_WIDTH layer=transport "
+                f"expected=D1_D2_DISTINCT actual=COLLISION reproduce={REPRODUCE}"
+            )
         negatives = [
             ("EMPTY", b""), ("INCOMPLETE_BE3", b"\x01\x00"),
             ("ZERO_WIDTH", b"\x00\x00\x00"),
             ("D10_ORDINARY_REJECT", b"\x0a\x00\x01"),
             ("D11_UNADMITTED_REJECT", b"\x0b\x00\x00"),
             ("PAYLOAD_EXCEEDS_WIDTH", b"\x01\x00\x02"),
+            ("D2_PAYLOAD_OVERFLOW", b"\x02\x00\x04"),
+            ("D9_PAYLOAD_OVERFLOW", b"\x09\x02\x00"),
+            ("BE3_HIGH_BYTE_NONCANONICAL", b"\x01\x01\x00"),
         ]
         for test_id, invalid in negatives:
             reject_run(executable, root, test_id, invalid)
@@ -188,6 +218,7 @@ def real_run(root: Path, records: list[dict]) -> dict:
             "zig_library_sha256": digest(library.read_bytes()),
             "c_binary_sha256": digest(executable.read_bytes()),
             "positive_and_mutant_corpus": checks,
+            "exact_width_h2_pair": exact_width_pair,
             "negative_transport_rejected": [n for n, _ in negatives],
             "reproduce": REPRODUCE,
         }
@@ -207,9 +238,13 @@ def self_test() -> None:
     # D1:1 and D2:01 carry the same low bit but DIFFERENT exact widths.
     if exact_be3(["1"]) == exact_be3(["01"]):
         raise PhysicalError("test_id=EXACT_WIDTH layer=transport collapsed_D1_and_D2")
+    # Fixed independent physical sentinels: a leading zero is part of identity.
+    if (encode_projection("1") != b"\xa1" or
+            encode_projection("01") != b"\x35"):
+        raise PhysicalError("test_id=H2_EXACT_WIDTH layer=transport reference_golden_drift")
     if first_mismatch(b"\x01\x02", b"\x01\x03") != 1:
         raise PhysicalError("test_id=FIRST_MISMATCH layer=diagnostics index_wrong")
-    print("H2_BE3_SYNTHETIC_PASS rejected=4 width_distinct=true")
+    print("H2_BE3_SYNTHETIC_PASS rejected=4 width_distinct=true physical_goldens=a1,35")
 
 
 def main() -> int:
