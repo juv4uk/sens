@@ -7782,7 +7782,7 @@
   },
   {
    "n": 1154,
-   "t": "feat(#1048): replay island lowering with explicit CLIPS result blocker",
+   "t": "feat(#1048): replay island lowering with explicit CLIPS result ()",
    "c": "2026-09-23T03:26:41Z",
    "u": "2026-09-23T10:21:17Z",
    "s": "closed",

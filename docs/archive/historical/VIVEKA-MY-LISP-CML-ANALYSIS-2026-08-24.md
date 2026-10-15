@@ -14,7 +14,7 @@ Repository contracts, current source, and executable fixtures outrank this repor
 
 ## Executive conclusion
 
-The heterogeneous-compiler direction is real, not merely aspirational: CML has a shared IR and two physical consumers, the fpga-lisp emitter and the C emitter. However, the immediate blocker is neither CUDA nor a new Compute IR. The authority chain between the current `my-lisp` contract, its conformance fixtures, and CML is inconsistent.
+The heterogeneous-compiler direction is real, not merely aspirational: CML has a shared IR and two physical consumers, the fpga-lisp emitter and the C emitter. However, the immediate () is neither CUDA nor a new Compute IR. The authority chain between the current `my-lisp` contract, its conformance fixtures, and CML is inconsistent.
 
 The highest-value next milestone is:
 

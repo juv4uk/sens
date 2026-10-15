@@ -4,5 +4,12 @@ version = "0.1.0"
 edition = "2024"
 license-file = "../../LICENSE"
 
+[features]
+# Standalone Guard uses the pinned Zig physical source carrier by default.
+# A host may disable it only for explicit compatibility builds; source
+# requests must then fail closed, never fall back to Rust file embedding.
+default = ["zig-source"]
+zig-source = []
+
 [dependencies]
 sens = { path = "../sens" }

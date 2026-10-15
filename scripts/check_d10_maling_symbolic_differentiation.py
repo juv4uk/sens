@@ -250,7 +250,7 @@ def check_dossier_data(
     require(row.get("status") == "pending-review" and row.get("ratified") == "0",
             "proposal row must remain pending-review and unratified")
     require(row.get("blocked_source") == "NOT-A-MIGRATION-BLOCK",
-            "historical idea must not be invented as a migration blocker")
+            "historical idea must not be invented as a migration empty")
     provenance = row.get("donor_provenance", "")
     require(re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}:[^:\t\n]+:[1-9][0-9]*", provenance) is not None,
             "proposal provenance must pin repo@commit:path:line")

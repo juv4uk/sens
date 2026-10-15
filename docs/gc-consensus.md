@@ -68,7 +68,7 @@ M1-кандидати: великі Rational в heap АБО region/arena per com
 - Інструменти M0.5: `(gc-quarantine)` огляд, `(gc-promote id)`
   явне повернення, `(gc-journal)` append-only.
 
-## Р5 BLOCKER: фантомний cdr
+## Р5 (): фантомний cdr
 
 Жодного рядка heap-коду ДО пояснення бага:
 детерміноване падіння `cdr expects non-empty list` на quoted-даних

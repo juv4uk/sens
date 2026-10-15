@@ -168,7 +168,7 @@ V0 не заводить нового `epistemic-error` або незалежн�
 
 | Fixture | Minimum expression | Expected result |
 |---|---|---|
-| CML build blocker | Intent requires `process:cargo`; snapshot lacks it. | `intent-capabilities-satisfied?` повертає `()`; caller, за потреби, може побудувати `(blocked missing-capability)` через existing `result-status.lisp`. |
+| CML build () | Intent requires `process:cargo`; snapshot lacks it. | `intent-capabilities-satisfied?` повертає `()`; caller, за потреби, може побудувати `(blocked missing-capability)` через existing `result-status.lisp`. |
 | Sarvam transcript | Observation references selected audio/transcript; claim is `proposed`. | No direct World ingestion; receipt remains external. |
 | Host observation | Host capability snapshot is stored as `observation`, separate from agent declaration. | `declares` and `effective` cannot be conflated. |
 | Reasoning proof | Evidence uses `(proof ...)`, not an invented digest. | Existing `reason-explain`/provenance remains source engine. |

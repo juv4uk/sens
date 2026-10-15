@@ -153,7 +153,7 @@ def compare(before: dict, after: dict) -> dict:
             })
         elif old_row["status"] == "BLOCKED" and old_row["reason"] != new_row["reason"]:
             changes.append({
-                "path": path, "kind": "FIRST_BLOCKER_CHANGED_NOT_MIGRATED",
+                "path": path, "kind": "FIRST_EMPTY_CHANGED_NOT_MIGRATED",
                 "source_git_blob_sha": before_sha,
                 "before_reason": old_row["reason"], "after_reason": new_row["reason"],
                 "before_scope": old_scope, "after_scope": new_scope,

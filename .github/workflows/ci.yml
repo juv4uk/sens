@@ -39,6 +39,11 @@ jobs:
           python3 -m unittest discover -s tests -p test_migration_source_scope.py -v 2>&1 | tee "$RUNNER_TEMP/migration-archive-scope.log"
           grep -Fq 'Ran 1 test' "$RUNNER_TEMP/migration-archive-scope.log"
           grep -Fxq 'OK' "$RUNNER_TEMP/migration-archive-scope.log"
+          # Exact Git-path identity and orphan T5 are physical provenance, not admission.
+          echo 'test_id=migration-inventory-git-path-canonical layer=provenance expected=canonical-positive-alias-and-orphan-negative semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_report_t5_migration_progress.py -k test_noncanonical_aliases_rejected_by_source_inventory -k test_orphan_physical_sens_without_source_is_named -v 2>&1 | tee "$RUNNER_TEMP/migration-inventory-canonical.log"
+          grep -Fq 'Ran 2 tests' "$RUNNER_TEMP/migration-inventory-canonical.log"
+          grep -Fxq 'OK' "$RUNNER_TEMP/migration-inventory-canonical.log"
           # One early automated source+filesystem witness: a hardlink to
           # staging cannot impersonate a separately downloaded release asset.
           # -k matches two tests; count is checked to reject accidental zero-test PASS.
@@ -70,7 +75,13 @@ jobs:
           # checks ON and track all root-embedded release/migration bytes.
           # Mutants include ReleaseFast, wrong root, ghost comments, stale asset.
           echo 'test_id=zig-ffi-releasesafe-build-provenance layer=transport expected=ReleaseSafe semantic_authority=SENS'
-          python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v
+          # Keep genuine failures RED and emit classified diagnostic evidence.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id zig-build-environment-watch \
+            --layer transport \
+            --fixture tests/test_zig_build_environment_watch.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v
           # D7 owner requested IAST on the human SAN surface. Machine W7 remains
           # 7-bit and reversible historic san/v2 codec remains separately typed.
           echo 'test_id=d7-iast-human-display layer=presentation source=knowledge/d7-keyboard-v2-ratified.json semantic_authority=SENS'
@@ -221,7 +232,7 @@ jobs:
           # validator; a mere FFI declaration is insufficient evidence.
           # D10 passes coordinate-only, fails ordinary D9 executable ingress.
           echo 'test_id=rust-calls-zig-d10-coordinate-only layer=transport semantic_authority=SENS'
-          cargo test --locked -p sens-cli --bin sens-trit \
+          cargo test --locked -p sens-cli --lib \
             zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 \
             -- --exact --nocapture | tee "$RUNNER_TEMP/zig-d10-rust-host.log"
           grep -Fq 'test zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 ... ok' "$RUNNER_TEMP/zig-d10-rust-host.log"
@@ -253,7 +264,13 @@ jobs:
           python3 -m unittest discover -s tests -p test_zig_bridge_physical_binary_paths.py -v
           # Real current API contract: no stale SID8 resolver, no Zig bypass.
           echo 'test_id=zig-migration-current-three-pass-api layer=transport verdict=source-only semantic_authority=SENS'
-          python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
+          # Keep genuine failures RED and emit classified diagnostic evidence.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id zig-migration-current-three-pass-api \
+            --layer transport \
+            --fixture tests/test_migration_zig_current_api.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
           # Same-stem .sens + readonly exact-bit view is a single guarded
           # publication: reject wrong projection names and inode replacement.
           echo 'test_id=zig-migration-same-stem-inode-rollback layer=transport verdict=filesystem-only semantic_authority=SENS'
@@ -1387,6 +1404,7 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Rust→project dependency ledger (Zig-only burndown)
+        id: rust_project_deps
         # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
         # corridor. This writes the burndown ledger and fails if a NEW direct
         # dependency appeared -- the set may only shrink.
@@ -1399,8 +1417,9 @@ jobs:
           fi
 
       - name: Upload Rust→project dependency ledger
-        if: always()
-        uses: actions/upload-artifact@v4
+        # A skipped producer has no file to upload; failures remain visible.
+        if: ${{ !cancelled() && steps.rust_project_deps.outcome != 'skipped' }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: rust-project-deps
           path: ${{ runner.temp }}/rust-project-deps.json
@@ -1414,6 +1433,7 @@ jobs:
         run: python3 scripts/check_guards_are_real.py .
 
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        id: release_go_gate
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
         # prints the GO count and names the red gates -- report-only, never greenwashed.
         shell: bash
@@ -1424,26 +1444,30 @@ jobs:
           exit 0
 
       - name: Upload release GO-gate report
-        if: always()
-        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.release_go_gate.outcome != 'skipped' }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: release-go-gate
           path: ${{ runner.temp }}/release-go-gate.json
           if-no-files-found: warn
 
-      - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
-        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
-        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+      - name: MATH — точний Q Rust-свідок, чесний статус SENS
+        id: math_exact_q
+        if: ${{ !cancelled() }}
+        # Rust runs the same Q corpus/checksum as the host-neutral reference.
+        # SENS timing remains UNVERIFIED until an admitted physical .sens fixture exists.
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p core-math-demand-rust --release
+          cargo test --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --bin paired_exact_q
+          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release --bin paired_exact_q
+          python3 -m unittest discover -s tests -p test_bench_math_sens_vs_rust.py -v
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
-            --json "$RUNNER_TEMP/math-bench.json"
+            --require-rust --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
-        if: always()
-        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.math_exact_q.outcome != 'skipped' }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: math-bench-sens-vs-rust
           path: ${{ runner.temp }}/math-bench.json
@@ -1518,7 +1542,7 @@ jobs:
 
       - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: zig-rust-codec-${{ github.sha }}
           path: |
@@ -1597,7 +1621,7 @@ jobs:
           exit "$rc"
       - name: Зберегти фактичні результати одноразового мігратора
         if: ${{ always() && contains(github.event.head_commit.message, '[migration-apply-once]') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: sens-active-migration-${{ github.sha }}
           path: ${{ runner.temp }}/sens-active-migration/
@@ -1611,6 +1635,14 @@ jobs:
           # This is a separate mechanical authority boundary, not a SENS semantic verdict.
           unit_rc=0
           python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
+          # One real Zig-linked, targeted positive/short-buffer negative Guard
+          # witness in the *existing* CI; Rust never reads project source bytes.
+          echo 'test_id=guard-static-zig-source-transport layer=transport semantic_authority=SENS'
+          guard_source_rc=0
+          cargo test --locked -p wsm-guard-core --lib \
+            zig_static_source_carriers_exact_and_reject_small_buffers -- --nocapture || guard_source_rc=$?
+          cargo test --locked -p wsm-guard-core --no-default-features --lib \
+            guard_without_zig_refuses_all_sources_instead_of_falling_back -- --nocapture || guard_source_rc=$?
           edge_rc=0
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
@@ -1642,14 +1674,14 @@ jobs:
             -- python3 -m unittest discover -s tests -p test_rust_zig_sens_boundary.py -v || boundary_unit_rc=$?
           production_rc=0
           python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$f6_source_rc" -ne 0 || "$f6_compile_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+          if [[ "$unit_rc" -ne 0 || "$guard_source_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$f6_source_rc" -ne 0 || "$f6_compile_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi
           echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"
       - name: Зберегти точну карту Rust↔Zig↔SENS для поточного SHA
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node 24
         with:
           name: sens-rust-zig-boundary-${{ github.sha }}
           path: ${{ runner.temp }}/sens-rust-zig-boundary-${{ github.sha }}.json

@@ -6,6 +6,11 @@
 #[path = "zig_transport_assets.rs"]
 mod asset_ffi;
 
+// Native Zig archive is named explicitly because Cargo's build-script link-lib
+// directive attaches to the library target once src/lib.rs exists. Other binary
+// targets still include this host-neutral transport module independently.
+// This is linking only; no Rust implementation or fallback is introduced.
+#[link(name = "sens_zig_transport", kind = "static")]
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
@@ -277,15 +282,16 @@ pub fn knowledge_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
-/// Checked original lib/persistent-map.lisp bytes; Zig only transports opaque source.
+ 
+/// Project-authored lib/persistent-map.lisp is only opaque bytes at this edge.
+/// Root Zig adapter carries them; the host does not interpret source identity.
 pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        asset_ffi::sens_zig_persistent_map_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_persistent_map_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
-        return Err("ZIG_PERSISTENT_MAP_CARRIER invalid source length".into());
+        return Err("ZIG_PERSISTENT_MAP_CARRIER invalid length".into());
     }
     let len = usize::try_from(required)
         .map_err(|_| "ZIG_PERSISTENT_MAP_CARRIER length overflow")?;
@@ -297,7 +303,32 @@ pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
         asset_ffi::sens_zig_persistent_map_bytes_copy(bytes.as_mut_ptr(), bytes.len())
     };
     if copied != required {
-        return Err(format!("ZIG_PERSISTENT_MAP_CARRIER byte copy rejected: {copied}"));
+        return Err(format!("ZIG_PERSISTENT_MAP_CARRIER byte-copy mismatch: {copied}"));
+    }
+    Ok(bytes)
+}
+
+
+/// Root Zig copies the World source byte-for-byte; SENS alone evaluates it.
+pub fn world_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_world_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 {
+        return Err("ZIG_WORLD_CARRIER invalid length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_WORLD_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_WORLD_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_world_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_WORLD_CARRIER byte-copy mismatch: {copied}"));
     }
     Ok(bytes)
 }
@@ -749,4 +780,28 @@ mod zig_exact_egress_tests {
         assert!(require_same_exact_words(&expected, &words("1 01 0"))
             .unwrap_err().contains("word_count expected=2 actual=3"));
     }
+}
+
+/// SENS Content Store source crosses the sterile Zig corridor as exact bytes.
+pub fn content_store_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_content_store_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 {
+        return Err("ZIG_CONTENT_STORE_CARRIER invalid length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_CONTENT_STORE_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_CONTENT_STORE_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_content_store_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_CONTENT_STORE_CARRIER byte-copy mismatch: {copied}"));
+    }
+    Ok(bytes)
 }

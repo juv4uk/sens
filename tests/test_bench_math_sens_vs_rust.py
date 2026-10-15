@@ -49,6 +49,43 @@ class MathBenchTests(unittest.TestCase):
         self.assertEqual(sens["status"], "UNVERIFIED")
         self.assertNotIn("median_s", rust)   # no fabricated number
 
+    def test_rust_exact_q_receipt_rejects_wrong_checksum(self) -> None:
+        import json
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            binary = root / "benchmarks/core-math-demand-rust/target/release/paired_exact_q"
+            binary.parent.mkdir(parents=True)
+            binary.write_bytes(b"test-only-mocked-runner")
+            checksum, ops = self.m.workload_python(7)
+            valid = json.dumps({"schema": "sens-paired-exact-q-rust/v1",
+                                "iters": 7, "ops": ops, "checksum": str(checksum)})
+            with patch.object(self.m, "_run", return_value=(True, valid)):
+                measured = self.m.measure_rust(root, 7, 2)
+            self.assertEqual(measured["status"], "MEASURED")
+            self.assertEqual(measured["ops"], 21)
+            self.assertEqual(measured["checksum"], str(checksum))
+            self.assertIn("binary_sha256", measured)
+            mutant = json.dumps({"schema": "sens-paired-exact-q-rust/v1",
+                                 "iters": 7, "ops": ops, "checksum": "0"})
+            with patch.object(self.m, "_run", return_value=(True, mutant)):
+                rejected = self.m.measure_rust(root, 7, 2)
+            self.assertEqual(rejected["status"], "ERROR")
+            self.assertNotIn("median_s", rejected)
+
+    def test_rust_success_without_workload_receipt_does_not_count(self) -> None:
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            binary = root / "benchmarks/core-math-demand-rust/target/release/paired_exact_q"
+            binary.parent.mkdir(parents=True)
+            binary.write_bytes(b"mock")
+            with patch.object(self.m, "_run", return_value=(True, "done")):
+                rejected = self.m.measure_rust(root, 1, 1)
+            self.assertEqual(rejected["status"], "ERROR")
+
 
 if __name__ == "__main__":
     unittest.main()

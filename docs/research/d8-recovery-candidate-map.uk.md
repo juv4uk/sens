@@ -257,7 +257,7 @@ WRITE(READ(t)) = canonicalize(t)
 
 Отже це не console I/O, а мовний міст structure ↔ text.
 
-### D7 blocker
+### D7 ()
 
 Current mechanism використовує `Value::String`, а канонічний текстовий домен D7 — Text7/UPC-7. Тому обидва кандидати залишаються provisional до явного D7↔reader/writer bridge. Unicode/String representation не є D8 identity.
 

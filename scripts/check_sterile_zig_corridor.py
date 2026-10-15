@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI_TOML = ROOT / "crates" / "sens-cli" / "Cargo.toml"
 CORRIDOR = ROOT / "crates" / "sens-cli" / "src" / "zig_transport.rs"
 TRIT = ROOT / "crates" / "sens-cli" / "src" / "bin" / "sens-trit.rs"
+SHARED = ROOT / "crates" / "sens-cli" / "src" / "lib.rs"
 MAIN = ROOT / "crates" / "sens-cli" / "src" / "main.rs"
 REPL = ROOT / "crates" / "sens-cli" / "src" / "repl.rs"
 ABI = ROOT / "research" / "zig-codecs" / "transport_abi.zig"
@@ -39,6 +40,27 @@ REQUIRED_FFI = (
 
 class CorridorBlocked(ValueError):
     pass
+
+
+def check_trit_shared_zig_module(trit: str, library: str) -> None:
+    """The real, feature-gated shared module supplies ABI access to sens-trit.
+
+    Reject comments, duplicate implementations and no-feature fallbacks.
+    Rust must still use Zig for every physical entry/egress operation.
+    """
+    def live(text: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.S)
+
+    trit_live = live(trit)
+    library_live = live(library)
+    route = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*use\s+sens_cli::zig_transport\s*;'
+    exposed = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*pub\s+mod\s+zig_transport\s*;'
+    if len(re.findall(route, trit_live)) != 1:
+        raise CorridorBlocked("sens-trit must import the live, feature-gated shared Zig corridor exactly once")
+    if len(re.findall(exposed, library_live)) != 1:
+        raise CorridorBlocked("sens-cli lib must export exactly one feature-gated Zig corridor")
+    if re.search(r'(?m)^\s*(?:#\[path\s*=.*?\]\s*)?mod\s+zig_transport\s*;', trit_live):
+        raise CorridorBlocked("sens-trit must not privately compile a duplicate Zig corridor")
 
 
 def check_zig_abi_v2_live_exports(source: str) -> None:
@@ -161,8 +183,14 @@ def _route_between(source: str, begin: str, end: str) -> str:
 
 def check_main_t5_ingress(source: str) -> None:
     """Source-level guard only: default physical T5 MUST cross Zig ABI v2."""
-    if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
-        raise CorridorBlocked("sens main lacks default feature-gated Zig bridge")
+    # Check the live library import, not merely the spelling in a comment.
+    # A duplicate private module restores needless warnings and duplicate FFI.
+    live = re.sub(r"/\*.*?\*/|//[^\n]*", "", source, flags=re.S)
+    ingress_import = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*use\s+sens_cli::zig_transport\s*;'
+    if len(re.findall(ingress_import, live)) != 1 or re.search(
+        r"(?m)^\s*(?:#\[path\s*=.*?\]\s*)?mod\s+zig_transport\s*;", live
+    ):
+        raise CorridorBlocked("sens main must import exactly one live, feature-gated shared Zig bridge")
     ingress = _route_between(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
     positive = '#[cfg(feature = "zig-transport")]'
     negative = '#[cfg(not(feature = "zig-transport"))]'
@@ -853,8 +881,9 @@ def check() -> list[str]:
     notes.append("build-links-zig")
 
     trit = TRIT.read_text(encoding="utf-8")
-    if "zig_transport.rs" not in trit:
-        raise CorridorBlocked("sens-trit.rs must path-include zig_transport.rs")
+    if not SHARED.is_file() or SHARED.is_symlink():
+        raise CorridorBlocked("missing regular shared Zig transport library")
+    check_trit_shared_zig_module(trit, SHARED.read_text(encoding="utf-8"))
     if trit.count("fn sens_zig_t5_encode_be3") > 0:
         raise CorridorBlocked("sens-trit.rs still embeds local Zig FFI")
     if trit.count("zig_transport::") < 1:

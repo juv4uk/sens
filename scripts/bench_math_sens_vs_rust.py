@@ -115,16 +115,58 @@ def measure_python(iters: int, reps: int) -> dict:
                     "binary and not the SENS evaluator"}
 
 
-def measure_rust(root: Path, iters: int) -> dict:
-    for cand in ("target/release/core-math-demand-rust",
-                 "target/debug/core-math-demand-rust"):
-        if (root / cand).is_file():
-            ok, out = _run([str(root / cand)], root)
-            return {"side": "rust", "status": "MEASURED" if ok else "ERROR",
-                    "binary": cand, "output": out}
+def measure_rust(root: Path, iters: int, reps: int = 7) -> dict:
+    """Run the *matching Q workload*, not the unrelated demand-certificate CLI.
+
+    A successful exit alone is never measurement evidence: exact corpus, ops,
+    iteration count and checksum must match the independent Python reference.
+    """
+    candidates = (
+        "benchmarks/core-math-demand-rust/target/release/paired_exact_q",
+        "benchmarks/core-math-demand-rust/target/debug/paired_exact_q",
+    )
+    for cand in candidates:
+        binary = root / cand
+        if not binary.is_file():
+            continue
+        expected_checksum, expected_ops = workload_python(iters)
+        samples = []
+        for _ in range(reps):
+            start = time.perf_counter()
+            ok, out = _run([str(binary), "--iters", str(iters)], root)
+            elapsed = time.perf_counter() - start
+            if not ok:
+                return {"side": "rust", "status": "ERROR", "binary": cand,
+                        "note": "Rust runner exited unsuccessfully: " + out}
+            try:
+                result = json.loads(out)
+            except (ValueError, TypeError):
+                return {"side": "rust", "status": "ERROR", "binary": cand,
+                        "note": "Rust runner did not return valid JSON"}
+            if not isinstance(result, dict):
+                return {"side": "rust", "status": "ERROR", "binary": cand,
+                        "note": "Rust receipt is not a JSON object"}
+            if (result.get("schema") != "sens-paired-exact-q-rust/v1"
+                    or type(result.get("iters")) is not int
+                    or result["iters"] != iters
+                    or type(result.get("ops")) is not int
+                    or result["ops"] != expected_ops
+                    or result.get("checksum") != str(expected_checksum)):
+                return {"side": "rust", "status": "ERROR", "binary": cand,
+                        "expected_checksum": str(expected_checksum),
+                        "actual_checksum": result.get("checksum"),
+                        "note": "independent exact-Q workload/checksum mismatch"}
+            samples.append(elapsed)
+        import hashlib
+        return {"side": "rust", "status": "MEASURED", "binary": cand,
+                "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+                "iters": iters, "reps": reps, "ops": expected_ops,
+                "checksum": str(expected_checksum),
+                "median_s": statistics.median(samples),
+                "note": "wall clock includes subprocess startup; Rust research host only"}
     return {"side": "rust", "status": "UNVERIFIED",
-            "note": "build benchmarks/core-math-demand-rust first "
-                    "(cargo build -p core-math-demand-rust --release)"}
+            "note": "matching Q benchmark missing; build --manifest-path "
+                    "benchmarks/core-math-demand-rust/Cargo.toml --bin paired_exact_q --release"}
 
 
 def measure_sens(root: Path, iters: int) -> dict:
@@ -147,11 +189,12 @@ def main() -> int:
     parser.add_argument("--reps", type=int, default=7)
     parser.add_argument("--json", default="")
     parser.add_argument("--require-all", action="store_true")
+    parser.add_argument("--require-rust", action="store_true")
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
 
     rows = [measure_python(ns.iters, ns.reps),
-            measure_rust(root, ns.iters),
+            measure_rust(root, ns.iters, ns.reps),
             measure_sens(root, ns.iters)]
 
     print("MATH BENCHMARK: SENS vs Rust (exact rationals, same workload)")
@@ -175,6 +218,12 @@ def main() -> int:
             "corpus": CORPUS, "iters": ns.iters, "reps": ns.reps, "rows": rows,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    if any(r["status"] == "ERROR" for r in rows):
+        print("MATH_BENCH_ERROR (measured side failed the exact workload)")
+        return 1
+    if ns.require_rust and rows[1]["status"] != "MEASURED":
+        print("MATH_RUST_WITNESS_MISSING")
+        return 1
     if ns.require_all and unver:
         print("MATH_BENCH_INCOMPLETE (some side UNVERIFIED)")
         return 1

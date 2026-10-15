@@ -134,7 +134,7 @@ False-positive grepu (`=` matched inside `=?`). Поза класом (Б); ве
 6. **two-part (B)**: без змін — після кроку 2 зелений сам; verify witnesses.
 7. **Green**: повний локальний прогон + контрольні witnesses; CI.
 
-## 4. Non-blockers (після зеленої CI)
+## 4. Non-() (після зеленої CI)
 
 - `fpga-lisp` та `cml`: їх comparison-ops теж повертають 1/0 — завести issue/запис у обох,
   не синхронізувати зараз.

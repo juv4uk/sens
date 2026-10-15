@@ -165,7 +165,7 @@ class OriginalCandidateTests(unittest.TestCase):
                 mod.build_report(self.root)
 
 
-    def test_first_blocker_families_do_not_claim_semantic_admission(self):
+    def test_first_empty_families_do_not_claim_semantic_admission(self):
         samples = {
             "ambiguous 8-bit head 00001001": "w8-provenance",
             "legacy-unmapped my-lisp function 'print'": "host-effect",
@@ -178,8 +178,8 @@ class OriginalCandidateTests(unittest.TestCase):
         }
         for reason, family in samples.items():
             with self.subTest(reason=reason):
-                self.assertEqual(mod.blocker_family(reason), family)
-                self.assertTrue(mod.BLOCKER_ACTIONS[family])
+                self.assertEqual(mod.empty_family(reason), family)
+                self.assertTrue(mod.EMPTY_ACTIONS[family])
 
     def test_exhaustive_sha_pinned_cohorts_are_disjoint_and_stable(self):
         def row(name, reason, sha):
@@ -195,7 +195,7 @@ class OriginalCandidateTests(unittest.TestCase):
             row("a.lisp", "word 2 invalid", "b"*40),
             row("b.lisp", "ambiguous 8-bit head 00001011", "c"*40),
         ]
-        cohorts = mod.blocker_cohorts(sources)
+        cohorts = mod.empty_cohorts(sources)
         self.assertEqual([c["family"] for c in cohorts],
                          ["w8-provenance", "d2-or-domain-data"])
         self.assertEqual([c["count"] for c in cohorts], [2, 1])
@@ -209,12 +209,12 @@ class OriginalCandidateTests(unittest.TestCase):
         self.assertTrue(all(c["status"] == "BLOCKED_NOT_ORACLE_ADMITTED"
                             for c in cohorts))
         with self.assertRaisesRegex(ValueError, "duplicate"):
-            mod.blocker_cohorts(sources + sources[:1])
+            mod.empty_cohorts(sources + sources[:1])
         with self.assertRaisesRegex(ValueError, "not an unpaired"):
-            mod.blocker_cohorts([{**sources[0],
+            mod.empty_cohorts([{**sources[0],
                                   "same_stem_sens_already_exists": True}])
 
-    def test_full_old_original_blocker_rows_retained_not_only_first_20(self):
+    def test_full_old_original_empty_rows_retained_not_only_first_20(self):
         for i in range(25):
             (self.root / f"item{i}.lisp").write_text("(unknown)\\n")
         rows = [{"path": f"item{i}.lisp", "status": "blocked",
@@ -236,9 +236,9 @@ class OriginalCandidateTests(unittest.TestCase):
         with patch.object(mod.subprocess, "run", side_effect=fake_run):
             result = mod.build_report(self.root)
         self.assertEqual(len(result["blocked_sources"]), 25)
-        self.assertEqual(len(result["unpaired_blocker_sample"]), 20)
-        self.assertEqual(sum(c["count"] for c in result["blocker_cohorts"]), 25)
-        self.assertEqual(result["summary"]["blocker_family_counts"],
+        self.assertEqual(len(result["unpaired_empty_sample"]), 20)
+        self.assertEqual(sum(c["count"] for c in result["empty_cohorts"]), 25)
+        self.assertEqual(result["summary"]["empty_family_counts"],
                          {"d2-or-domain-data": 13, "w8-provenance": 12})
         self.assertEqual(result["summary"]["mechanical_candidates"], 0)
         self.assertTrue(all(len(x["source_git_blob_sha"]) == 40
@@ -261,7 +261,7 @@ class OriginalCandidateTests(unittest.TestCase):
                 "same_stem_sens_already_exists": False,
                 "status": "BLOCKED", "reason": reason,
             })
-        out = mod.blocker_coordinate_cohorts(sources)
+        out = mod.empty_coordinate_cohorts(sources)
         self.assertEqual(sum(x["count"] for x in out), len(sources))
         self.assertEqual(out[0]["family"], "w8-provenance")
         self.assertEqual(out[0]["coordinate"], "00001001")
@@ -276,14 +276,14 @@ class OriginalCandidateTests(unittest.TestCase):
         a = {"path":"old.lisp","source_git_blob_sha":"f"*40,
              "same_stem_sens_already_exists":False,"status":"BLOCKED",
              "reason":"legacy-unmapped SID8/Sens8 00100010 no resident"}
-        self.assertEqual(mod.blocker_coordinate_cohorts([a])[0]["coordinate"],"00100010")
+        self.assertEqual(mod.empty_coordinate_cohorts([a])[0]["coordinate"],"00100010")
         with self.assertRaisesRegex(ValueError,"duplicate"):
-            mod.blocker_coordinate_cohorts([a,a])
+            mod.empty_coordinate_cohorts([a,a])
         with self.assertRaisesRegex(ValueError,"exact Git blob"):
-            mod.blocker_coordinate_cohorts([{**a,"source_git_blob_sha":"0"*39}])
+            mod.empty_coordinate_cohorts([{**a,"source_git_blob_sha":"0"*39}])
         with self.assertRaisesRegex(ValueError,"unpaired BLOCK"):
-            mod.blocker_coordinate_cohorts([{**a,"status":"CANDIDATE_NOT_ADMITTED"}])
-        self.assertEqual(mod.blocker_coordinate_cohorts([]), [])
+            mod.empty_coordinate_cohorts([{**a,"status":"CANDIDATE_NOT_ADMITTED"}])
+        self.assertEqual(mod.empty_coordinate_cohorts([]), [])
 
 
     def test_reviewed_source_manifests_are_sha_pinned_nonexecutables(self):

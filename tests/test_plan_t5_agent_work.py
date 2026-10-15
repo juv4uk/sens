@@ -21,7 +21,7 @@ def fixture() -> dict:
     pin = "a" * 40
     blocked = [
         {"path": f"lib/old{i}.lisp", "source_git_blob_sha": f"{i+1:040x}",
-         "first_blocker": "ambiguous W8: unknown source era"}
+         "first_empty": "ambiguous W8: unknown source era"}
         for i in range(3)
     ]
     return {
@@ -38,13 +38,13 @@ def fixture() -> dict:
         },
         "blocked_sources": [
             {"path": row["path"], "source_git_blob_sha": row["source_git_blob_sha"],
-             "reason": row["first_blocker"], "status": "BLOCKED",
+             "reason": row["first_empty"], "status": "BLOCKED",
              "same_stem_sens_already_exists": False,
              "source_is_executable_proven": False,
              "independent_semantic_oracle_passed": False}
             for row in blocked
         ],
-        "blocker_cohorts": [{
+        "empty_cohorts": [{
             "family": "w8-provenance", "status": "BLOCKED_NOT_ORACLE_ADMITTED",
             "count": 3, "next_action": "Pin historic source-era Git witness",
             "original_sources": blocked,
@@ -86,7 +86,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
     def test_output_is_deterministic_independent_of_input_row_order(self):
         a = fixture()
         b = fixture()
-        b["blocker_cohorts"][0]["original_sources"].reverse()
+        b["empty_cohorts"][0]["original_sources"].reverse()
         self.assertEqual(mod.build_plan(a, 2), mod.build_plan(b, 2))
 
     def test_reviewed_nonprogram_original_gets_separate_no_t5_data_shard(self):
@@ -188,8 +188,8 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         a["blocked_sources"][0]["path"] = archived
         a["blocked_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
         a["blocked_sources"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
-        a["blocker_cohorts"][0]["original_sources"][0]["path"] = archived
-        a["blocker_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["empty_cohorts"][0]["original_sources"][0]["path"] = archived
+        a["empty_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
         a["summary"]["archived_benchmark_data_sources"] = 1
         result = mod.build_plan(a, 2)
         archive = [shard for shard in result["shards"]
@@ -232,7 +232,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
 
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
-        a["blocker_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
+        a["empty_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
         with self.assertRaisesRegex(mod.PlanError, "canonical ledger"):
             mod.build_plan(a, 2)
         a = fixture()
@@ -260,29 +260,29 @@ class PlanT5AgentWorkTests(unittest.TestCase):
             if change == "counts":
                 a["summary"]["scanned"] = 0
             elif change == "dotdot":
-                a["blocker_cohorts"][0]["original_sources"][0]["path"] = "../escape.lisp"
+                a["empty_cohorts"][0]["original_sources"][0]["path"] = "../escape.lisp"
             elif change == "bytepin":
                 a["mechanical_candidates"][0]["source_git_blob_sha"] = "bad"
             else:
-                a["blocker_cohorts"][0]["status"] = "ORACLE_ADMITTED"
+                a["empty_cohorts"][0]["status"] = "ORACLE_ADMITTED"
             with self.subTest(change=change), self.assertRaises(mod.PlanError):
                 mod.build_plan(a, 2)
         for n in [0, 101]:
             with self.assertRaises(mod.PlanError):
                 mod.build_plan(fixture(), n)
 
-    def test_cohort_shas_and_first_blockers_must_match_original_ledger(self):
+    def test_cohort_shas_and_first_empties_must_match_original_ledger(self):
         cases = ("sha-swap", "reason-swap", "extra-cohort", "missing-original",
                  "duplicate-original", "missing-ledger", "status-forgery",
                  "wrong-original-sha")
         for case in cases:
             state = fixture()
-            cohort_rows = state["blocker_cohorts"][0]["original_sources"]
+            cohort_rows = state["empty_cohorts"][0]["original_sources"]
             original_rows = state["blocked_sources"]
             if case == "sha-swap":
                 cohort_rows[0]["source_git_blob_sha"] = "0" * 40
             elif case == "reason-swap":
-                cohort_rows[0]["first_blocker"] = "unknown PRINT host effect"
+                cohort_rows[0]["first_empty"] = "unknown PRINT host effect"
             elif case == "extra-cohort":
                 cohort_rows[0]["path"] = "lib/forged.lisp"
             elif case == "missing-original":
@@ -314,7 +314,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
                 source.write_text("(001 ())\n", encoding="utf-8")
                 row["source_git_blob_sha"] = git_blob = mod.hashlib.sha1(
                     b"blob 9\0(001 ())\n").hexdigest()
-                for cohort in state["blocker_cohorts"]:
+                for cohort in state["empty_cohorts"]:
                     for member in cohort["original_sources"]:
                         if member["path"] == row["path"]:
                             member["source_git_blob_sha"] = git_blob
@@ -327,7 +327,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
             # accepted the claim. The Git-backed CLI MUST reject it.
             forged = json.loads(json.dumps(state))
             forged["blocked_sources"][0]["source_git_blob_sha"] = "f"*40
-            forged["blocker_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "f"*40
+            forged["empty_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "f"*40
             mod.build_plan(forged, 2)
             with self.assertRaisesRegex(mod.PlanError, "HEAD/index blob"):
                 mod.assert_original_git_head_parity(root, forged)
@@ -369,7 +369,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
                 pin = mod.hashlib.sha1(b"blob " + str(len(payload)).encode() +
                                       b"\0" + payload).hexdigest()
                 row["source_git_blob_sha"] = pin
-                for group in state["blocker_cohorts"]:
+                for group in state["empty_cohorts"]:
                     for member in group["original_sources"]:
                         if member["path"] == row["path"]:
                             member["source_git_blob_sha"] = pin

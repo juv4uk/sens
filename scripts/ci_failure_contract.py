@@ -23,6 +23,56 @@ FIELDS = (
 )
 
 
+# The *existing* central workflow publishes these exact 23 step outcomes.
+# Only when none ran is an absent focal receipt not a failed-test report.
+# A missing/failed/unknown outcome must never satisfy this gate.
+FOCAL_OUTCOME_ENV = (
+    "BUDGET_OUTCOME",
+    "BUILD_OUTCOME",
+    "PACKED_OUTCOME",
+    "SOURCE_OUTCOME",
+    "LAW_OUTCOME",
+    "MUTANT_OUTCOME",
+    "REASON_OUTCOME",
+    "UNIFY_OUTCOME",
+    "CORE2_OUTCOME",
+    "CORE_WIDTH_OUTCOME",
+    "KNOWLEDGE_OUTCOME",
+    "LINTER_OUTCOME",
+    "LINTER_MUTANT_OUTCOME",
+    "CORE_SENTINEL_OUTCOME",
+    "CORE_SENTINEL_MUTANT_OUTCOME",
+    "CORE1_OUTCOME",
+    "QUOTED_OUTCOME",
+    "TCP_OUTCOME",
+    "META_FC_OUTCOME",
+    "SID8_BROAD_OUTCOME",
+    "T5_ORACLE_OUTCOME",
+    "FRAME3_OUTCOME",
+    "MIGRATOR_OUTCOME",
+)
+
+
+def validate_focal_census():
+    # The CI file is the execution topology. A stale outcome name must never
+    # make the 23-skipped exception silently cover fewer actual checks.
+    workflow = Path(__file__).resolve().parents[1] / ".github/workflows/ci.yml"
+    source = workflow.read_text(encoding="utf-8")
+    marker = "      - name: Червоний має говорити — валідність діагностики"
+    if source.count(marker) != 1:
+        raise ValueError("FOCAL_OUTCOME_CENSUS_MISMATCH diagnostic step missing/duplicated")
+    step = source.split(marker, 1)[1].split("        run: |", 1)
+    if len(step) != 2:
+        raise ValueError("FOCAL_OUTCOME_CENSUS_MISMATCH diagnostic env/run framing")
+    actual = tuple(re.findall(r"^ {10}([A-Z0-9_]+_OUTCOME):", step[0], flags=re.MULTILINE))
+    if actual != FOCAL_OUTCOME_ENV:
+        raise ValueError(
+            "FOCAL_OUTCOME_CENSUS_MISMATCH expected="
+            + ",".join(FOCAL_OUTCOME_ENV)
+            + " actual=" + ",".join(actual)
+        )
+
+
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
@@ -70,10 +120,6 @@ def validate_manifest(manifest):
 
 
 def check_report(record):
-    # JSON scalars and arrays are legal JSON, not diagnostic objects.
-    # Report an informative failure rather than raising AttributeError.
-    if not isinstance(record, dict):
-        return ["invalid:record_type expected=object"]
     errors = []
     for key in FIELDS:
         if key not in record or record[key] in ("", None):
@@ -282,7 +328,7 @@ def run(args):
         print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
         return 1
     if stamp == "REGRESSION":
-        print("::error::REGRESSION " + args.test_id + " — semantic/release blocker")
+        print("::error::REGRESSION " + args.test_id + " — semantic/release empty")
         return 1
     if stamp == "UNCLASSIFIED":
         print("::error::UNCLASSIFIED-RED test=" + args.test_id
@@ -389,8 +435,24 @@ def scan(args):
     validate_manifest(json.loads(Path(args.manifest).read_text()))
     path = Path(args.report_file)
     if not path.is_file() or not path.read_text().strip():
-        if args.allow_empty:
-            print("PASS no failed tests; nothing silently skipped")
+        # In the focal hosted job --allow-empty is safe only if every
+        # monitored test actually succeeded. A failed, cancelled, skipped
+        # or absent step must never be converted into a success verdict.
+        if os.environ.get("GITHUB_ACTIONS") == "true" and any(
+            name in os.environ for name in FOCAL_OUTCOME_ENV
+        ):
+            validate_focal_census()
+            outcomes = tuple(os.environ.get(name) for name in FOCAL_OUTCOME_ENV)
+            if all(value == "skipped" for value in outcomes):
+                print("FOCAL_DIAGNOSTIC_NOT_APPLICABLE: 23/23 focal checks skipped; no verdict asserted")
+                return 0
+            if args.allow_empty and all(value == "success" for value in outcomes):
+                print("PASS 23/23 focal steps succeeded; no failed-test receipts")
+                return 0
+            print("UNINFORMATIVE-OUTPUT no diagnostic report for incomplete/failed focal steps")
+            return 1
+        if args.allow_empty and os.environ.get("GITHUB_ACTIONS") != "true":
+            print("PASS local empty diagnostic report; no hosted verdict asserted")
             return 0
         print("UNINFORMATIVE-OUTPUT no diagnostic report")
         return 1
@@ -439,7 +501,7 @@ def audit(args):
             else:
                 problematic.append(test_id + ":UNCLASSIFIED_RED owner=" + owner)
         elif stamp == "REGRESSION":
-            problematic.append(test_id + ":REGRESSION_BLOCKER owner=" + owner)
+            problematic.append(test_id + ":REGRESSION_EMPTY owner=" + owner)
         if stamp in {"TRANSITIONAL", "FLAKE"}:
             try:
                 if parse_time(item["expires_at"]) <= now():
@@ -471,11 +533,6 @@ def self_test():
         "observed_at": now().isoformat(), "reproduce": "sens fixture.sens",
         "stamp": "REGRESSION",
     }
-    # Existing automatic ci.yml runs self-test: hostile JSON shapes must
-    # generate informative diagnostics, never unchecked AttributeError.
-    for malformed in ([], None, 17, "ok"):
-        if check_report(malformed) != ["invalid:record_type expected=object"]:
-            raise RuntimeError("non-object diagnostic record accepted or poorly reported")
     if check_report(record):
         raise RuntimeError("valid mechanical report rejected")
     for field in FIELDS:
@@ -524,6 +581,67 @@ def self_test():
             rc = scan(args)
         if rc != 1 or "UNCLASSIFIED-RED" not in output.getvalue():
             raise RuntimeError("unclassified RED was reported as PASS")
+    # Positive and hostile controls for central CI when its 23 focal steps
+    # were not selected. Do not hide a real failure or a malformed receipt.
+    from unittest.mock import patch
+
+    focal_env = {"GITHUB_ACTIONS": "true", **{
+        name: "skipped" for name in FOCAL_OUTCOME_ENV
+    }}
+    if len(FOCAL_OUTCOME_ENV) != 23:
+        raise RuntimeError("central focal-step census changed: update exact CI contract")
+    validate_focal_census()
+    with tempfile.TemporaryDirectory(prefix="sens-focal-nonexecution-") as tmp:
+        report = Path(tmp) / "focal.jsonl"
+        args = argparse.Namespace(
+            report_file=str(report), manifest="knowledge/red-test-quarantine.json",
+            allow_empty=False,
+        )
+        output = io.StringIO()
+        with patch.dict(os.environ, focal_env), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 0 or "FOCAL_DIAGNOSTIC_NOT_APPLICABLE" not in output.getvalue():
+            raise RuntimeError("23 skipped focal steps generated a false red")
+        for label, mutation in (
+            ("actual-failure", {FOCAL_OUTCOME_ENV[0]: "failure"}),
+            ("missing-outcome", {FOCAL_OUTCOME_ENV[0]: ""}),
+            ("unknown-outcome", {FOCAL_OUTCOME_ENV[0]: "cancelled"}),
+            ("non-actions", {"GITHUB_ACTIONS": "false"}),
+        ):
+            output = io.StringIO()
+            with patch.dict(os.environ, {**focal_env, **mutation}), contextlib.redirect_stdout(output):
+                rc = scan(args)
+            if rc != 1 or "UNINFORMATIVE-OUTPUT no diagnostic report" not in output.getvalue():
+                raise RuntimeError("missing focal receipt was silently ignored: " + label)
+        # --allow-empty must not make a broken hosted step silently green.
+        args.allow_empty = True
+        for label, mutation in (
+            ("failed", {FOCAL_OUTCOME_ENV[0]: "failure"}),
+            ("skipped-mixed", {FOCAL_OUTCOME_ENV[0]: "success"}),
+            ("cancelled", {FOCAL_OUTCOME_ENV[0]: "cancelled"}),
+            ("missing", {FOCAL_OUTCOME_ENV[0]: ""}),
+        ):
+            output = io.StringIO()
+            with patch.dict(os.environ, {**focal_env, **mutation}), contextlib.redirect_stdout(output):
+                rc = scan(args)
+            if rc != 1 or "UNINFORMATIVE-OUTPUT" not in output.getvalue():
+                raise RuntimeError("--allow-empty bypassed focal failure: " + label)
+        passing = {"GITHUB_ACTIONS": "true", **{
+            name: "success" for name in FOCAL_OUTCOME_ENV
+        }}
+        output = io.StringIO()
+        with patch.dict(os.environ, passing), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 0 or "PASS 23/23 focal steps succeeded" not in output.getvalue():
+            raise RuntimeError("23 genuinely successful focal steps rejected")
+        args.allow_empty = False
+        report.write_text("[]\n", encoding="utf-8")
+        output = io.StringIO()
+        with patch.dict(os.environ, focal_env), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 1 or "invalid:record_type" not in output.getvalue():
+            raise RuntimeError("malformed focal report bypassed shape check in skipped mode")
+    print("FOCAL_NONEXECUTION_RATCHET_PASS: 23 skipped; 9 failing mutants blocked; 23 successes verified")
     for fake in (b"", b"0", b"1", b"1\nextra"):
         if fake != b"1\n" and "byte_offset" not in difference(b"1\n", fake, 0):
             raise RuntimeError("missing first difference")

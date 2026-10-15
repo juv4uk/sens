@@ -16,6 +16,12 @@
  },
  "exact_bridge": [
   {
+   "sid8": "00000001",
+   "sens8_name": "quote",
+   "target": "D3:001",
+   "basis": "exact en-name match (quote -> D3 QUOTE)"
+  },
+  {
    "sid8": "00001100",
    "sens8_name": "plus",
    "target": "D5:01010"
