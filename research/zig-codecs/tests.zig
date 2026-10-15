@@ -157,3 +157,52 @@ test "typed ladder via public Zig ABI v2, D10 fail closed" {
         abi.sens_zig_t5_encode_be3(&d8, d8.len, &failed, 1));
     try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
 }
+
+test "Zig ABI v2 F3C returns physical statuses without publishing error bytes" {
+    // Same Zig physical exports service Rust and the independent C host.
+    // Errors and no-saving are NOT executable SENS D1 truth values.
+    const quote_t5 = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    const quote_f3c = [_]u8{ 0xf3, 0x40, 0x60 };
+    const untouched = [_]u8{0x75} ** 32;
+    var output: [32]u8 = untouched;
+
+    try std.testing.expectEqual(@as(isize, -2),
+        abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, 2));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -1),
+        abi.sens_zig_f3c_pack(&.{0xff}, 1, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -3),
+        abi.sens_zig_f3c_pack(&.{0x64}, 1, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+
+    try std.testing.expectEqual(@as(isize, quote_f3c.len),
+        abi.sens_zig_f3c_pack(&quote_t5, quote_t5.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &quote_f3c, output[0..quote_f3c.len]);
+    try std.testing.expectEqual(@as(u8, 0x75), output[quote_f3c.len]);
+
+    output = untouched;
+    try std.testing.expectEqual(@as(isize, -2),
+        abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, 3));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -1),
+        abi.sens_zig_f3c_unpack(&.{ 0xf4, 0x40, 0x60 }, 3, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, quote_t5.len),
+        abi.sens_zig_f3c_unpack(&quote_f3c, quote_f3c.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &quote_t5, output[0..quote_t5.len]);
+    try std.testing.expectEqual(@as(u8, 0x75), output[quote_t5.len]);
+
+    // Both physical directions admit shared caller-owned input/output:
+    // Zig stages the candidate separately and never outsources allocation.
+    var shared: [32]u8 = untouched;
+    @memcpy(shared[0..quote_t5.len], &quote_t5);
+    try std.testing.expectEqual(@as(isize, quote_f3c.len),
+        abi.sens_zig_f3c_pack(shared[0..].ptr, quote_t5.len,
+            shared[0..].ptr, shared.len));
+    try std.testing.expectEqualSlices(u8, &quote_f3c, shared[0..quote_f3c.len]);
+    try std.testing.expectEqual(@as(isize, quote_t5.len),
+        abi.sens_zig_f3c_unpack(shared[0..].ptr, quote_f3c.len,
+            shared[0..].ptr, shared.len));
+    try std.testing.expectEqualSlices(u8, &quote_t5, shared[0..quote_t5.len]);
+}
