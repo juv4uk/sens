@@ -44,6 +44,11 @@ fn prove(positive: &str, mutant: &str, id: &str, expected_output_lines: Option<u
             "test_id={id} layer=eval fixture=positive actual={}",
             error.render(positive)
         ));
+    if id == "repl-uk-define-function" {
+        for line in &evidence.output {
+            println!("NATIVE_SENS_OBSERVATION test_id={id} layer=eval value={line}");
+        }
+    }
     // Лише кількість фізично опублікованих рядків: результат
     // та закон збереження стану вирішує сама SENS-програма.
     if let Some(count) = expected_output_lines {
