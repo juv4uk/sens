@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -99,13 +100,45 @@ def tool_path(name: str) -> str:
     return found
 
 
+def source_snapshot_ok(head: str, top: str, dirty: bytes, root: Path) -> bool:
+    """Exact source SHA + canonical repository root + no tracked/untracked drift.
+
+    Structural Git source identity only, NOT a signed supply-chain attestation.
+    """
+    return (
+        re.fullmatch(r"[0-9a-f]{40}", head) is not None
+        and Path(top).resolve() == root.resolve()
+        and not dirty
+    )
+
+
+def require_same_source_head(before: str, after: str) -> None:
+    if before != after:
+        raise PhysicalError(
+            f"test_id=H2_SOURCE_DRIFT layer=provenance "
+            f"expected_head={before} actual_head={after} reproduce={REPRODUCE}"
+        )
+
+
 def ensure_clean_git(root: Path) -> str:
     tool_path("git")
     head = call(["git", "rev-parse", "--verify", "HEAD"], root)
-    status = call(["git", "status", "--porcelain", "--untracked-files=no"], root)
-    if head.returncode or status.returncode or status.stdout.strip():
-        raise PhysicalError("test_id=H2_SOURCE layer=provenance source_not_clean_git_checkout")
-    return head.stdout.decode("ascii").strip()
+    top = call(["git", "rev-parse", "--show-toplevel"], root)
+    status = call(["git", "status", "--porcelain=v1", "--untracked-files=all"], root)
+    if head.returncode or top.returncode or status.returncode:
+        raise PhysicalError("test_id=H2_SOURCE layer=provenance git_source_probe_failed")
+    try:
+        exact_sha = head.stdout.decode("ascii").strip()
+        top_path = top.stdout.decode("utf-8").strip()
+    except UnicodeDecodeError as exc:
+        raise PhysicalError("test_id=H2_SOURCE layer=provenance noncanonical_git_output") from exc
+    if not source_snapshot_ok(exact_sha, top_path, status.stdout, root):
+        raise PhysicalError(
+            f"test_id=H2_SOURCE layer=provenance source_not_clean_exact_sha "
+            f"actual_head={exact_sha} root_matches={Path(top_path).resolve() == root.resolve()} "
+            f"status_sha256={digest(status.stdout)} reproduce={REPRODUCE}"
+        )
+    return exact_sha
 
 
 def require_controlled_rejection(r: subprocess.CompletedProcess, test_id: str) -> None:
@@ -215,6 +248,10 @@ def real_run(root: Path, records: list[dict]) -> dict:
         ]
         for test_id, invalid in negatives:
             reject_run(executable, root, test_id, invalid)
+        # A successful physical replay belongs to one immutable source
+        # revision. Refuse a receipt if another writer mutated HEAD or any
+        # tracked/untracked file during the build and C→Zig replay.
+        require_same_source_head(git_head, ensure_clean_git(root))
         return {
             "test_id": "H2_C_ZIG_PHYSICAL_EQUALITY", "status": "PHYSICAL_PARITY_PASS",
             "semantic_status": "NOT_VERIFIED_BY_THIS_TEST",
@@ -276,6 +313,31 @@ def self_test() -> None:
                 f"test_id=H2_REJECT_{label} layer=transport false_reject_pass"
             )
     print("H2_CONTROLLED_REJECT_SYNTHETIC_PASS positive_exit=2 negative=6")
+    # Synthetic source provenance controls do not run Zig or grant release GO.
+    sample = "a" * 40
+    sample_root = Path("/tmp/sens-h2-provenance-synthetic")
+    assert source_snapshot_ok(sample, str(sample_root), b"", sample_root)
+    for label, candidate_sha, candidate_top, candidate_dirty in (
+        ("UNKNOWN_SHA", "UNKNOWN", str(sample_root), b""),
+        ("SHORT_SHA", "abc", str(sample_root), b""),
+        ("UPPERCASE_SHA", "A" * 40, str(sample_root), b""),
+        ("NONHEX_SHA", "g" * 40, str(sample_root), b""),
+        ("WRONG_ROOT", sample, "/tmp/other-h2-repository", b""),
+        ("TRACKED_DIRTY", sample, str(sample_root), b" M source.zig\\n"),
+        ("UNTRACKED_DIRTY", sample, str(sample_root), b"?? injected.c\\n"),
+    ):
+        if source_snapshot_ok(candidate_sha, candidate_top, candidate_dirty, sample_root):
+            raise PhysicalError(
+                f"test_id=H2_SOURCE_{label} layer=provenance synthetic_false_pass"
+            )
+    try:
+        require_same_source_head(sample, "b" * 40)
+    except PhysicalError as exc:
+        if "H2_SOURCE_DRIFT" not in str(exc):
+            raise
+    else:
+        raise PhysicalError("test_id=H2_SOURCE_DRIFT layer=provenance head_change_accepted")
+    print("H2_SOURCE_SNAPSHOT_SELFTEST_PASS positive=1 negative=8 postflight=REQUIRED")
     print("H2_BE3_SYNTHETIC_PASS rejected=4 width_distinct=true physical_goldens=a1,35")
 
 
