@@ -82,6 +82,48 @@ pub export fn sens_zig_e1_encode_be3(
     return @intCast(size);
 }
 
+/// Decode canonical E1 physical carrier to BE3 [width, MSB, LSB] triplets.
+/// -1 invalid/noncanonical/alias; -2 BE3 output too small.
+/// Zig-local scratch only; no host allocator; no SENS semantic admission.
+pub export fn sens_zig_e1_decode_be3(
+    src: [*]const u8, byte_len: usize, dst: [*]u8, capacity: usize,
+) isize {
+    if (byte_len == 0 or byte_len > e1.MAX_FILE_BYTES) return -1;
+
+    const source_addr = @intFromPtr(src);
+    const dest_addr = @intFromPtr(dst);
+    if (capacity > 0 and
+        ((source_addr <= dest_addr and dest_addr - source_addr < byte_len) or
+            (dest_addr < source_addr and source_addr - dest_addr < capacity)))
+        return -1;
+
+    // Host corridor: keep stack bounded; huge E1 is not a CLI production path.
+    const max_frame: usize = 64 * 1024;
+    if (byte_len > max_frame) return -1;
+    var words: [e1.MAX_WORDS]e1.Word = undefined;
+    var scratch: [e1.MAX_WORDS + 1]e1_writer.Step = undefined;
+    var replay: [max_frame]u8 = undefined;
+    const count = e1_writer.inspectCanonical(
+        src[0..byte_len],
+        words[0..],
+        scratch[0..],
+        replay[0..byte_len],
+    ) catch |err| return if (err == error.BufferTooSmall) -2 else -1;
+
+    const need = count * 3;
+    if (need > capacity) return -2;
+    for (0..count) |i| {
+        const w = words[i];
+        if (w.width == 0 or w.width > 9) return -1;
+        if (w.bits >= (@as(u16, 1) << @as(u4, @intCast(w.width)))) return -1;
+        const at = i * 3;
+        dst[at] = w.width;
+        dst[at + 1] = @intCast(w.bits >> 8);
+        dst[at + 2] = @intCast(w.bits & 0xff);
+    }
+    return @intCast(need);
+}
+
 test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" {
     const input = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 1 };
     const expected = [_]u8{ 0x53, 0x33, 1, 3, 0, 3, 0x23, 0x20,
@@ -112,6 +154,19 @@ test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" 
         sens_zig_e1_encode_be3(shared[0..].ptr, input.len,
             shared[input.len - 2 ..].ptr, shared.len - input.len + 2));
     try std.testing.expectEqualSlices(u8, &before, &shared);
+
+    // Decode BE3 roundtrip of the same RAW witness; no Rust reference codec.
+    var be3_out: [16]u8 = .{0x11} ** 16;
+    try std.testing.expectEqual(@as(isize, input.len),
+        sens_zig_e1_decode_be3(&expected, expected.len, &be3_out, be3_out.len));
+    try std.testing.expectEqualSlices(u8, &input, be3_out[0..input.len]);
+    try std.testing.expectEqual(@as(u8, 0x11), be3_out[input.len]);
+    var tiny: [2]u8 = .{0x22} ** 2;
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_e1_decode_be3(&expected, expected.len, &tiny, tiny.len));
+    for (tiny) |b| try std.testing.expectEqual(@as(u8, 0x22), b);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_decode_be3(&.{0x53}, 1, &be3_out, be3_out.len));
 }
 
 test "ABI v2 Zig is the mechanical T5 ingress and egress without code registry" {
@@ -191,7 +246,7 @@ test "ABI v2 big endian triplets reject Rust layout and preserve exact word widt
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_t5_encode_be3(&input, input.len - 1, &buf, buf.len));
     try std.testing.expectEqual(@as(isize, -1),
-        sens_zig_t5_encode_be3(&.{ 0, 0, 1 }, 3, &buf, buf.len));
+        sens_zig_t5_encode_be3(&input, 0, 0, 1, 3, &buf, buf.len));
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_t5_encode_be3(&.{ 2, 0, 4 }, 3, &buf, buf.len));
     try std.testing.expectEqual(@as(isize, -1),
@@ -211,8 +266,6 @@ test "ABI v2 big endian triplets reject Rust layout and preserve exact word widt
 }
 
 test "ABI v2 T5 encode rejects whole and partial alias without writes" {
-    // An FFI caller may reuse one allocation. Either overlap is an invalid
-    // physical transport request; failure must leave ALL caller bytes intact.
     const source_be3 = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
     var storage: [32]u8 = .{0x5a} ** 32;
     @memcpy(storage[0..source_be3.len], &source_be3);
@@ -222,8 +275,6 @@ test "ABI v2 T5 encode rejects whole and partial alias without writes" {
         sens_zig_t5_encode_be3(&storage, source_be3.len, &storage, storage.len));
     try std.testing.expectEqualSlices(u8, &original, &storage);
 
-    // Source occupies [0..15), destination [13..17): only two bytes overlap.
-    // Do not depend on identical pointers to detect this mutation.
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_t5_encode_be3(&storage, source_be3.len,
             storage[13..].ptr, storage.len - 13));
@@ -235,27 +286,20 @@ test "ABI v2 T5 encode rejects whole and partial alias without writes" {
         sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, 3));
     try std.testing.expectEqualSlices(u8, &unchanged, &output);
 
-    // Ordinary T5 rejects an otherwise representable D10 coordinate;
-    // a physical width is not a callable SENS function.
     const d10 = [_]u8{ 10, 0, 0 };
     try std.testing.expectEqual(@as(isize, -1),
         sens_zig_t5_encode_be3(&d10, d10.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &unchanged, &output);
 
-    // Positive control: an independent buffer accepts the SAME source.
     try std.testing.expectEqual(@as(isize, 4),
         sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, &output);
 }
 
 test "ABI v2 T5 decode rejects partial overlap and accepts adjacent buffers" {
-    // Caller-owned buffers may share one allocation. Every rejected alias
-    // must leave both the T5 source and destination byte-for-byte unchanged.
-    // A merely adjacent destination is safe and must remain accepted.
     const carrier = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
     const expected = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
 
-    // Destination starts two bytes inside the T5 source.
     var forward: [32]u8 = .{0x6e} ** 32;
     @memcpy(forward[0..carrier.len], carrier[0..]);
     const forward_original = forward;
@@ -264,7 +308,6 @@ test "ABI v2 T5 decode rejects partial overlap and accepts adjacent buffers" {
             forward[2..].ptr, forward.len - 2));
     try std.testing.expectEqualSlices(u8, forward_original[0..], forward[0..]);
 
-    // Source starts inside the 15-byte BE3 destination (the opposite order).
     var reverse: [32]u8 = .{0x6e} ** 32;
     @memcpy(reverse[13 .. 13 + carrier.len], carrier[0..]);
     const reverse_original = reverse;
@@ -273,7 +316,6 @@ test "ABI v2 T5 decode rejects partial overlap and accepts adjacent buffers" {
             reverse[0..].ptr, reverse.len));
     try std.testing.expectEqualSlices(u8, reverse_original[0..], reverse[0..]);
 
-    // The exact end of source is NOT an overlap; preserve exact domain widths.
     var adjacent: [32]u8 = .{0x6e} ** 32;
     @memcpy(adjacent[0..carrier.len], carrier[0..]);
     try std.testing.expectEqual(@as(isize, expected.len),
