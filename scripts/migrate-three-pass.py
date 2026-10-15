@@ -493,13 +493,17 @@ def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
     scripts = set()
     for ch in spelling:
         cp = ord(ch)
+        if not ch.isalpha():
+            # A non-letter (hyphen, digit, punctuation) is a JOINER, not a script:
+            # śūnya-parīkṣā is all-san, not mixed en+san.
+            continue
         if ("a" <= ch <= "z") or ("A" <= ch <= "Z"):
             scripts.add("en")
         elif 0x0400 <= cp <= 0x052F:
             scripts.add("uk")
         elif 0x0900 <= cp <= 0x097F:
             scripts.add("san")
-        elif ch.isalpha():
+        else:
             if iast_to_devanagari(ch) is not None:
                 scripts.add("san")
             else:
