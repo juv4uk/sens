@@ -38,6 +38,7 @@ EXPECTED_RULES = {
     "S3-no-host-struct": "scripts/check_sterile_zig_corridor.py",
     "S4-sterility-contract-declared": "scripts/check_sterile_zig_corridor.py",
     "C1-host-coverage": "scripts/check_rust_sens_corridor_coverage.py",
+    "M1-migration-zig-only-path": "scripts/check_migration_zig_only_path.py",
 }
 
 
