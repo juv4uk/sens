@@ -200,7 +200,9 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
             fail("asset-zig", f"missing_opaque_embed={asset}")
-        if f"asset_ffi::{name}(" not in rust_transport:
+        # Exact 2-call handshake: size query (capacity=0) then checked copy.
+        # A surviving second call must not hide a deleted first call.
+        if rust_transport.count(f"asset_ffi::{name}(") != 2:
             fail("asset-rust", f"missing_opaque_call={name}")
 
     expected_zig = "dst: [*]u8, capacity: usize"
