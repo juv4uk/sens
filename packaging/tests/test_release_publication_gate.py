@@ -126,27 +126,23 @@ class ReleasePublicationGateTest(unittest.TestCase):
             ):
                 require_pinned_artifact_download(job.replace(pin.group(), broken))
 
-    def test_preflight_runs_workspace_test_clippy_and_triggers_on_release_docs(self):
-        preflight = (ROOT / ".github" / "workflows" / "release-preflight.yml").read_text(
-            encoding="utf-8"
+    def test_preflight_is_manual_only_and_keeps_strict_workspace_gates(self):
+        preflight = (
+            ROOT / ".github" / "workflows" / "release-preflight.yml"
+        ).read_text(encoding="utf-8")
+
+        # Only the central ci.yml is automatic under the ratified
+        # single-workflow budget; preflight remains an explicit release gate.
+        self.assertIn("on:\n  workflow_dispatch:\n", preflight)
+        self.assertIsNone(
+            re.search(r"(?m)^  (push|pull_request|schedule):", preflight),
+            "release-preflight must not introduce a second automatic workflow",
         )
         self.assertIn("cargo test --locked --workspace", preflight)
         self.assertIn(
             "cargo clippy --locked --workspace --all-targets -- -D warnings",
             preflight,
         )
-        push = preflight.split("  push:", 1)[1].split("  pull_request:", 1)[0]
-        pull_request = preflight.split("  pull_request:", 1)[1].split("  workflow_dispatch:", 1)[0]
-        for path in (
-            "RELEASE.md",
-            "RELEASE-EVIDENCE.md",
-            "docs/release-readiness-contract-11-9-2026-10-12.uk.md",
-            "scripts/release.lisp",
-            "rust-toolchain.toml",
-        ):
-            with self.subTest(path=path):
-                self.assertIn(f'- "{path}"', push)
-                self.assertIn(f'- "{path}"', pull_request)
 
 
 if __name__ == "__main__":
