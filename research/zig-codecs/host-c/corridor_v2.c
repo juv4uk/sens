@@ -288,6 +288,56 @@ static int witness_zig_f3c_invalid_t5_reject(void) {
     return 1;
 }
 
+
+/* Negative controls for Zig F3C ingress from an independent C host.
+ * Every rejection must leave the *whole* caller-owned destination unchanged.
+ * A successful recovery must then pass the very same Zig T5 physical validator
+ * used by Rust, without inferring any SENS callable or semantic identity.
+ */
+static int witness_zig_f3c_decode_fail_closed(void) {
+    static const uint8_t golden_f3c[] = {0xf3, 0x40, 0x60};
+    static const uint8_t golden_t5[] = {0x63, 0x89, 0x06, 0xa1};
+    static const uint8_t invalid_marker[] = {0xf4, 0x40, 0x60};
+    static const uint8_t invalid_short[] = {0xf3};
+    static const uint8_t invalid_program[] = {0xf3, 0x00};
+    const struct {
+        const char *id;
+        const uint8_t *bytes;
+        size_t length;
+    } negatives[] = {
+        {"f3c-unpack-wrong-marker", invalid_marker, sizeof invalid_marker},
+        {"f3c-unpack-truncated", invalid_short, sizeof invalid_short},
+        {"f3c-unpack-invalid-program", invalid_program, sizeof invalid_program},
+    };
+    uint8_t output[32];
+    uint8_t sentinel[sizeof output];
+    memset(sentinel, 0xa6, sizeof sentinel);
+    for (size_t i = 0; i < sizeof negatives / sizeof negatives[0]; ++i) {
+        memcpy(output, sentinel, sizeof output);
+        if (!check_number(negatives[i].id,
+                sens_zig_f3c_unpack(negatives[i].bytes, negatives[i].length,
+                                    output, sizeof output), -1)) return 0;
+        if (!check_bytes(negatives[i].id, output, sentinel, sizeof output)) return 0;
+    }
+    memcpy(output, sentinel, sizeof output);
+    if (!check_number("f3c-unpack-small-output",
+            sens_zig_f3c_unpack(golden_f3c, sizeof golden_f3c,
+                                output, sizeof golden_t5 - 1), -2)) return 0;
+    if (!check_bytes("f3c-unpack-small-output-unchanged", output,
+                     sentinel, sizeof output)) return 0;
+    if (!check_number("f3c-unpack-recovered-length",
+            sens_zig_f3c_unpack(golden_f3c, sizeof golden_f3c,
+                                output, sizeof output), sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-unpack-recovered-exact-t5", output,
+                     golden_t5, sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-unpack-untouched-suffix", output + sizeof golden_t5,
+                     sentinel + sizeof golden_t5,
+                     sizeof output - sizeof golden_t5)) return 0;
+    if (!check_number("f3c-unpack-recovered-zig-t5-validation",
+            sens_zig_t5_validate(output, sizeof golden_t5), 0)) return 0;
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -351,6 +401,7 @@ int main(void) {
     if (!witness_zig_e1_encode_be3()) return 1;
     if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
     if (!witness_zig_f3c_invalid_t5_reject()) return 1;
+    if (!witness_zig_f3c_decode_fail_closed()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
