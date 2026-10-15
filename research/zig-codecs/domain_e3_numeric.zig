@@ -5,6 +5,7 @@
 //! No libc, heap, host byte order, callbacks or semantic registry.
 const std = @import("std");
 const ladder = @import("domain_ladder.zig");
+const numeric_domains = @import("numeric_domains.zig");
 const fields = @import("transport/fields.zig");
 
 pub const Error = error{ BufferTooSmall, WrongLength, WrongProfile, IntegrityMismatch };
@@ -13,13 +14,12 @@ const prefix = [_]u8{ 'S', '3', 3, 1, 2, 1 };
 // v3 | one word | NUMERIC_RUN | one block word | explicit numeric rung.
 // Only one-word numeric-run is handled; this is NOT the full E3 decoder.
 fn levelFor(comptime width: u16) u8 {
-    return switch (width) {
-        24 => 0,
-        48 => 1,
-        96 => 2,
-        192 => 3,
-        else => @compileError("E3 numeric carrier expects declared D24/D48/D96/D192"),
-    };
+    // The single physical width profile is defined in numeric_domains.zig.
+    // E3 transports its ordinal; Zig does not independently assign domain IDs.
+    inline for (numeric_domains.WIDE_WIDTHS, 0..) |known_width, index| {
+        if (width == known_width) return @intCast(index);
+    }
+    @compileError("E3 numeric carrier expects a declared wide transport width");
 }
 
 fn frameBytes(comptime width: u16) usize {
@@ -89,9 +89,33 @@ test "E3 single numeric-run D24 and D48 independently pinned Rust wire vectors" 
     try std.testing.expectError(error.WrongLength, decodeOne(24, &gold48));
 }
 
+test "E3 single-source numeric width order and CRC-correct profile mutant" {
+    // Numeric rung order is imported from the shared physical profile, not
+    // independently declared by the E3 codec. CRC integrity alone never
+    // authorizes reinterpreting the same payload as another domain.
+    inline for (numeric_domains.WIDE_WIDTHS, 0..) |width, ordinal| {
+        const Domain = ladder.WideDomainWord(width);
+        const value = Domain.init(1);
+        var frame: [frameBytes(width)]u8 = undefined;
+        const len = try encodeOne(width, value, &frame);
+        try std.testing.expectEqual(@as(u8, @intCast(ordinal)), frame[prefix.len]);
+        try std.testing.expectEqual(value.bits, (try decodeOne(width, frame[0..len])).bits);
+
+        var wrong = frame;
+        wrong[prefix.len] = @intCast((ordinal + 1) % numeric_domains.WIDE_WIDTHS.len);
+        const crc = fields.crc32(wrong[0 .. len - 4]);
+        wrong[len - 4] = @intCast(crc >> 24);
+        wrong[len - 3] = @intCast((crc >> 16) & 0xff);
+        wrong[len - 2] = @intCast((crc >> 8) & 0xff);
+        wrong[len - 1] = @intCast(crc & 0xff);
+        try std.testing.expectError(error.WrongProfile,
+            decodeOne(width, wrong[0..len]));
+    }
+}
+
 test "E3 wide numeric bit positions remain exact across all declared rungs" {
     var checked: usize = 0;
-    inline for ([_]u16{ 24, 48, 96, 192 }) |width| {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
         const D = ladder.WideDomainWord(width);
         var frame: [frameBytes(width)]u8 = undefined;
         for (0..@as(usize, width)) |bit_index| {
