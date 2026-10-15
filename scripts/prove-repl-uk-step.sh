@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 # редакційним синтаксисом наших Lisp-джерел. Вихідний текст — ук.
 # Це МЕХАНІЧНИЙ доказ стилю; він не підтверджує семантику або Zig FFI.
 for source in lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; do
-  if sed '/^[[:space:]]*;/d' "$source" | grep -nE '\\([[:space:]]*[01]{3,24}([[:space:]]|\\))'; then
+  if sed '/^[[:space:]]*;/d' "$source" | grep -nE '[(][[:space:]]*[01]{3,24}([[:space:]]|[)])'; then
     printf 'UKRAINIAN_SURFACE_SOURCE_RED file=%s reason=binary-call-head-in-Lisp reproduce=%s\n' "$source" "bash scripts/prove-repl-uk-step.sh" >&2
     exit 1
   fi
