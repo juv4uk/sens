@@ -18,10 +18,12 @@ C_PATH = ROOT / "research/zig-codecs/host-c/zig_transport_v2.h"
 H2_C_PATH = ROOT / "research/zig-codecs/host-c/h2_t5_dump.c"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
-# these are the eight existing *physical* ABI v2 functions only.
+# nine reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
 EXPECTED = {
     "sens_zig_codec_abi_version": ((), "version"),
     "sens_zig_t5_validate": (("source", "length"), "status"),
+    # Reviewed #5777: physical D1..D10 coordinate profile (NO execution).
+    "sens_zig_t5_validate_coordinates": (("source", "length"), "status"),
     "sens_zig_t5_encode_be3": (("source", "length", "destination", "length"), "size"),
     "sens_zig_t5_decode_be3": (("source", "length", "destination", "length"), "size"),
     "sens_zig_e1_encode_be3": (("source", "length", "destination", "length"), "size"),
@@ -314,6 +316,33 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         self.assertNotEqual(mutated, self.zig)
         with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_t5_decode_be3"):
             check_contract(mutated, self.rust, self.header)
+
+    def test_coordinate_validator_is_reviewed_physical_only_abi(self):
+        name = "sens_zig_t5_validate_coordinates"
+        self.assertEqual(EXPECTED[name], (("source", "length"), "status"))
+        # The same actual native declaration must exist in every host.
+        for source, language in ((self.zig, "zig"), (self.rust, "rust"),
+                                 (self.header, "c")):
+            declared = declarations(strip_c_comments(source), language)
+            self.assertEqual(declared[name], EXPECTED[name])
+
+    def test_missing_rust_coordinate_validator_is_blocked(self):
+        old = "    fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;"
+        self.assertIn(old, self.rust)
+        altered = self.rust.replace(old, "", 1)
+        with self.assertRaisesRegex(
+            ValueError, "missing_or_duplicate=sens_zig_t5_validate_coordinates"
+        ):
+            check_contract(self.zig, altered, self.header)
+
+    def test_coordinate_validator_wrong_return_type_is_blocked(self):
+        old = "int sens_zig_t5_validate_coordinates("
+        self.assertIn(old, self.header)
+        altered = self.header.replace(old, "ptrdiff_t sens_zig_t5_validate_coordinates(", 1)
+        with self.assertRaisesRegex(
+            ValueError, "signature=sens_zig_t5_validate_coordinates"
+        ):
+            check_contract(self.zig, self.rust, altered)
 
     def test_missing_rust_ingress_is_rejected(self):
         mutated = self.rust.replace(
