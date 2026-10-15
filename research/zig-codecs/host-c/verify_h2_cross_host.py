@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import posixpath
 from pathlib import Path
 import re
@@ -483,8 +484,10 @@ def verify_native_physical(stdout: str, physical: dict, files: tuple[tuple[str, 
                                f"expected_zig_c_sha256={expected} actual_native_sha256={actual} "
                                "first_diff=unavailable_without_native_raw")
 
-def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
-    result = subprocess.run(cmd, cwd=root, capture_output=True, text=True, errors="replace", check=False)
+def invoke(cmd: list[str], root: Path, marker: str, validator=None,
+           env: dict[str, str] | None = None) -> dict:
+    result = subprocess.run(cmd, cwd=root, capture_output=True, text=True,
+                            errors="replace", check=False, env=env)
     record = {
         "argv": cmd, "exit_code": result.returncode, "stdout_sha256": sha256(result.stdout.encode()),
         "stderr_sha256": sha256(result.stderr.encode()), "expected_marker": marker,
@@ -611,6 +614,49 @@ def verify_h1_execution_receipt(
     }
 
 
+
+def verify_h1_artifact_bytes(output: Path, h1_proof: dict) -> dict[str, str]:
+    """Independently hash the two H1 build outputs selected by H2 itself.
+
+    H1 JSON and C stdout are statements from the child process. H2 needs
+    physical bytes from its own private build directory before granting
+    cross-host evidence. This verifies provenance, NEVER SENS callability.
+    """
+    if not output.is_absolute() or ".." in output.parts:
+        raise AuditFailure(
+            f"test_id=H2_H1_ARTIFACT layer=provenance "
+            f"expected=absolute_canonical_output actual={output}")
+    verified: dict[str, str] = {}
+    for filename, key in (
+        ("sens-c-host-d3", "c_binary_sha256"),
+        ("libsens_zig_transport.a", "zig_archive_sha256"),
+    ):
+        target = output / filename
+        current = Path(target.anchor)
+        for component in target.parts[1:]:
+            current = current / component
+            if current.is_symlink():
+                raise AuditFailure(
+                    f"test_id=H2_H1_ARTIFACT layer=provenance "
+                    f"file={filename} expected=unaliased_path actual=symlink_component")
+        if not target.is_file():
+            raise AuditFailure(
+                f"test_id=H2_H1_ARTIFACT layer=provenance "
+                f"file={filename} expected=regular_file actual=missing_or_nonregular")
+        expected = h1_proof.get(key)
+        if not isinstance(expected, str) or re.fullmatch(r"[0-9a-f]{64}", expected) is None:
+            raise AuditFailure(
+                f"test_id=H2_H1_ARTIFACT layer=provenance "
+                f"file={filename} expected=valid_reported_SHA actual={expected!r}")
+        actual = sha256(target.read_bytes())
+        if actual != expected:
+            raise AuditFailure(
+                f"test_id=H2_H1_ARTIFACT layer=provenance "
+                f"file={filename} expected_sha256={expected} actual_sha256={actual}")
+        verified[filename] = actual
+    return verified
+
+
 def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     receipt["git_source_pin"] = verify_git_provenance(root, H2_TRACKED_INPUTS)
     for tool in ("zig", "cc", "cargo", "bash"):
@@ -626,6 +672,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
     c_binary_digest: list[str] = []
     c_h1: list[dict] = []
+    c_h1_artifact_bytes: list[dict[str, str]] = []
     c_physical: dict[str, dict] = {}
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
@@ -648,8 +695,17 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         # Unlike source hashes, these six bytestrings are emitted by the
         # actual C process after Zig ABI v2 has encoded the exact BE3 words.
         c_physical.update(parse_c_physical(stdout))
-    c_host = invoke(["bash", C_DRIVER], root,
-                    "C_D3_SUBSET_SOURCE_WITNESS_PASS", validator=check_c_verdicts)
+    # Preserve the actual Zig static archive and C executable long enough
+    # for H2 to re-hash them, independent of the child-reported H1 receipt.
+    # Passing a private output directory to the existing H1 runner avoids
+    # reading a stale previous build or an arbitrary C-host path.
+    with tempfile.TemporaryDirectory(prefix="sens-h2-zig-c-") as h1_dir:
+        output = Path(h1_dir).absolute()
+        c_env = {**os.environ, "SENS_C_HOST_OUT_DIR": str(output)}
+        c_host = invoke(
+            ["bash", C_DRIVER], root, "C_D3_SUBSET_SOURCE_WITNESS_PASS",
+            validator=check_c_verdicts, env=c_env)
+        c_h1_artifact_bytes.append(verify_h1_artifact_bytes(output, c_h1[0]))
     native_a = invoke(
         ["bash", RUST_DRIVERS[0], str(exe)], root, "NATIVE_SENS_PASS id=retired-d3-eq",
         validator=lambda output: verify_native_physical(
@@ -670,6 +726,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         "rust_host_binary_sha256": sha256(exe.read_bytes()),
         "c_host_binary_sha256": c_binary_digest[0],
         "h1_zig_c_elf_provenance": c_h1[0],
+        "h1_independently_hashed_artifacts": c_h1_artifact_bytes[0],
         "physical_t5_sha256": {p: item["sha256"] for p, item in sorted(c_physical.items())},
         "physical_t5_bytes": {p: item["bytes"] for p, item in sorted(c_physical.items())},
         "transport_status": "ZIG_C_AND_NATIVE_SENS_PHYSICAL_SHA256_MATCHED_SIX_OF_SIX",
