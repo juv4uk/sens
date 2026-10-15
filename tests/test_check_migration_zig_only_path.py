@@ -266,5 +266,64 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                      'if False:\\n        raise ValueError("ZIG_CARRY_REQUIRED_FOR_PUBLICATION")'.replace("\\n", "\n"))
         self.assertTrue(any("M9:" in message for message in self.module.check(self.root)))
 
+
+class StandaloneThreePassZigMintWitness(unittest.TestCase):
+    """One focused CI witness: exact Zig carry + forged/mutant rejection."""
+
+    def test_zig_mints_not_python_and_rejects_mutant_or_fake_receipt(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+
+        script = ROOT / "scripts/migrate-three-pass.py"
+        spec = importlib.util.spec_from_file_location("three_pass_zig_mint_witness", script)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        migrator = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = migrator
+        spec.loader.exec_module(migrator)
+        projection = "000\\n"
+        reference = migrator.encode_projection(projection)
+        expected = migrator.hashlib.sha256(reference).hexdigest()
+        binary = ROOT / "not-a-real-executable"  # mock only, NEVER a release receipt
+        receipt = {
+            "physical_sha256": expected,
+            "source_pin_status": "MATCHED_CALLER_SUPPLIED_SHA256",
+            "zig_binary_sha256": "static-test-mock-not-real-proof",
+        }
+        bridge = SimpleNamespace(
+            carry_t5=Mock(return_value=reference),
+            verify_t5=Mock(return_value=receipt),
+        )
+        physical, actual_receipt = migrator.zig_mint_verified_t5(
+            projection, reference, binary, bridge,
+        )
+        self.assertEqual(physical, reference)
+        self.assertEqual(actual_receipt, receipt)
+        bridge.carry_t5.assert_called_once_with(
+            binary, projection, trusted_source_sha256=expected,
+        )
+        bridge.verify_t5.assert_called_once_with(
+            binary, reference, trusted_source_sha256=expected,
+        )
+
+        # The physical carrier must NEVER be replaced by the Python reference.
+        bridge.carry_t5.return_value = bytes([reference[0] ^ 1]) + reference[1:]
+        bridge.verify_t5.reset_mock()
+        with self.assertRaisesRegex(
+            migrator.SensT5Error, "ZIG_CARRY_REFERENCE_MISMATCH.*first_byte=0",
+        ):
+            migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
+        bridge.verify_t5.assert_not_called()
+
+        # Matching bytes but an unauthenticated receipt are not enough.
+        bridge.carry_t5.return_value = reference
+        bridge.verify_t5.return_value = {
+            **receipt, "source_pin_status": "NOT_SUPPLIED",
+        }
+        with self.assertRaisesRegex(
+            migrator.SensT5Error, "ZIG_CARRY_UNATTESTED_RECEIPT",
+        ):
+            migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
+
 if __name__ == "__main__":
     unittest.main()
