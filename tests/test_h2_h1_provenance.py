@@ -46,11 +46,11 @@ class H2H1ExactSourceAndBinaryReceipt(unittest.TestCase):
 
     def reject(self, lines, reason="H2_H1_CHAIN"):
         with self.assertRaisesRegex(h2.AuditFailure, reason):
-            h2.verify_h1_execution_receipt("\n".join(lines), self.sources)
+            h2.verify_h1_execution_receipt("\n".join(lines), self.sources, "0.16.0")
 
     def test_exact_h1_rust_free_chain_reaches_h2(self):
         verified = h2.verify_h1_execution_receipt(
-            "\n".join(self.transcript()), self.sources)
+            "\n".join(self.transcript()), self.sources, "0.16.0")
         self.assertEqual(verified["c_binary_sha256"], self.binary_sha)
         self.assertEqual(verified["zig_archive_sha256"], self.archive_sha)
         self.assertEqual(verified["d10_abi_physical"], "COORDINATE_ONLY")
@@ -117,6 +117,48 @@ class H2H1ExactSourceAndBinaryReceipt(unittest.TestCase):
         x[-1] = x[-1].replace(
             "semantic_authority=SENS", "semantic_authority=Rust")
         self.reject(x)
+
+
+    def test_zig_version_attached_to_real_h1_binary_receipt(self):
+        result = h2.verify_h1_execution_receipt(
+            "\n".join(self.transcript()), self.sources, "0.16.0")
+        self.assertEqual(result["zig_version_verified"], "0.16.0")
+
+    def test_h1_receipt_with_different_zig_version_is_rejected(self):
+        value = self.transcript()
+        value[3] = value[3].replace("zig=0.16.0 ", "zig=0.17.0 ")
+        self.reject(value, "expected_zig=")
+
+    def test_h1_receipt_with_spoofed_prefix_is_rejected(self):
+        value = self.transcript()
+        value[3] = value[3].replace("zig=0.16.0 ", "zig=0.16.0-spoof ")
+        self.reject(value, "expected_zig=")
+
+    def test_h1_receipt_with_prerelease_compiler_is_rejected(self):
+        value = self.transcript()
+        value[3] = value[3].replace("zig=0.16.0 ", "zig=0.16.0-dev.9 ")
+        self.reject(value, "expected_zig=")
+
+    def test_h1_receipt_cannot_reuse_another_version_pin(self):
+        with self.assertRaisesRegex(h2.AuditFailure, "expected_zig="):
+            h2.verify_h1_execution_receipt(
+                "\n".join(self.transcript()), self.sources, "0.15.2")
+
+    def test_exact_compiler_stdout_accepts_single_version(self):
+        h2.verify_zig_version_stdout("0.16.0\n", "0.16.0")
+
+    def test_compiler_stdout_rejects_spoofed_multiline_and_stale_versions(self):
+        for fake in ("0.16.0-fake\n", "0.16.0-dev.9\n", "zig 0.16.0\n",
+                     "0.16.0\nbuilt with 0.17.0\n", "0.15.2\n", ""):
+            with self.subTest(fake=fake), self.assertRaisesRegex(
+                    h2.AuditFailure, "H2_ZIG_VERSION"):
+                h2.verify_zig_version_stdout(fake, "0.16.0")
+
+    def test_compiler_pin_must_be_exact_numeric_version(self):
+        for bad_pin in ("0.16.0-dev", "0.16.0\n0.17.0", "0.16", ""):
+            with self.subTest(bad_pin=bad_pin), self.assertRaisesRegex(
+                    h2.AuditFailure, "invalid_pin"):
+                h2.verify_zig_version_stdout("0.16.0\n", bad_pin)
 
 
 if __name__ == "__main__":

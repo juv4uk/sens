@@ -500,6 +500,22 @@ def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
 
 
 
+
+def verify_zig_version_stdout(stdout: str, pinned: str) -> None:
+    """Pin actual compiler output, not a substring or an untrusted banner.
+
+    0.16.0-spoof, 0.16.0-dev and multi-line claims are NOT a 0.16.0
+    toolchain. Compiler identity is physical provenance, not SENS semantics.
+    """
+    if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", pinned) is None:
+        raise AuditFailure(
+            f"test_id=H2_ZIG_VERSION layer=toolchain invalid_pin={pinned!r}")
+    if stdout.splitlines() != [pinned]:
+        raise AuditFailure(
+            f"test_id=H2_ZIG_VERSION layer=toolchain "
+            f"expected_exact={pinned!r} actual={stdout[:200]!r}")
+
+
 # The C host is built and checked by H1, not independently authenticated by
 # seeing a valid C program verdict. The exact SHA of its already-executed
 # binary must agree with the ELF/AR verifier and the Git-pinned source bytes.
@@ -514,7 +530,9 @@ H1_READY = ("C_D3_SUBSET_H1_SOURCE_READY runtime_subset=D1-D3 "
             "cross_host_parity=NOT_VERIFIED semantic_authority=SENS")
 
 
-def verify_h1_execution_receipt(stdout: str, trusted_sources: dict[str, str]) -> dict:
+def verify_h1_execution_receipt(
+    stdout: str, trusted_sources: dict[str, str], expected_zig_version: str,
+) -> dict:
     """Bind the actual C process, H1 source checker and ELF audit to H2.
 
     This is mechanical executable/source provenance, NOT callable admission,
@@ -553,6 +571,11 @@ def verify_h1_execution_receipt(stdout: str, trusted_sources: dict[str, str]) ->
     if len(binary_lines) != 1 or binary_lines[0] is None:
         raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance "
                            "expected=one_exact_C_binary_SHA")
+    actual_zig_version = binary_lines[0].group(1)
+    if actual_zig_version != expected_zig_version:
+        raise AuditFailure(
+            f"test_id=H2_H1_CHAIN layer=toolchain "
+            f"expected_zig={expected_zig_version!r} actual_zig={actual_zig_version!r}")
     binary_sha = binary_lines[0].group(2)
     archive_sha = audit.get("zig_archive_sha256")
     if (audit.get("binary_sha256") != binary_sha or
@@ -584,6 +607,7 @@ def verify_h1_execution_receipt(stdout: str, trusted_sources: dict[str, str]) ->
                              (C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI)},
         "h1_elf_status": audit["status"],
         "d10_abi_physical": "COORDINATE_ONLY",
+        "zig_version_verified": actual_zig_version,
     }
 
 
@@ -594,7 +618,8 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
             raise AuditFailure(f"test_id=H2_RUN layer=toolchain missing={tool} "
                                "status=UNVERIFIED_NO_MOCK")
     pinned = (root / ".zig-version").read_text(encoding="ascii").strip()
-    zig = invoke(["zig", "version"], root, pinned)
+    zig = invoke(["zig", "version"], root, pinned,
+                 validator=lambda stdout: verify_zig_version_stdout(stdout, pinned))
     build = invoke(["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens"], root, "")
     exe = root / sens_bin
     if not exe.is_file():
@@ -604,7 +629,8 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     c_physical: dict[str, dict] = {}
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
-        h1 = verify_h1_execution_receipt(stdout, receipt["source_sha256"])
+        h1 = verify_h1_execution_receipt(
+            stdout, receipt["source_sha256"], pinned)
         c_h1.append(h1)
         c_binary_digest.append(h1["c_binary_sha256"])
         for name, _, _ in CASES:
