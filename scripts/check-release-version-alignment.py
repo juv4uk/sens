@@ -6,6 +6,7 @@ touch knowledge/release-admission-ledger.json.
 
 Checks that:
   * every release crate Cargo.toml package.version equals EXPECTED
+  * Cargo.lock has exactly one local package for each release crate at EXPECTED
   * guix.scm (version "…") equals EXPECTED
   * packaging/install.sh embeds EXPECTED and tag l{EXPECTED}
   * scripts/release.lisp mentions EXPECTED as the required release version
@@ -15,6 +16,7 @@ Drift fails closed. Absence of a required path fails closed.
 from __future__ import annotations
 
 import argparse
+import copy
 import re
 import sys
 import tomllib
@@ -49,6 +51,75 @@ def crate_version(name: str) -> str:
         raise AlignmentBlocked(f"{path}: package.version missing")
     return version
 
+
+
+def read_lock_packages() -> list[dict]:
+    """Read the ONE workspace lockfile; it is evidence, not a version authority."""
+    path = ROOT / "Cargo.lock"
+    if not path.is_file() or path.is_symlink():
+        raise AlignmentBlocked(f"missing regular workspace lockfile: {path}")
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+        raise AlignmentBlocked(f"Cargo.lock: unreadable TOML ({exc})") from exc
+    rows = data.get("package")
+    if not isinstance(rows, list):
+        raise AlignmentBlocked("Cargo.lock: [[package]] table missing")
+    return rows
+
+
+def validate_lock_packages(rows: list[dict]) -> dict[str, str]:
+    """Require each release crate exactly once as a local package at EXPECTED."""
+    seen: dict[str, str] = {}
+    for item in rows:
+        if not isinstance(item, dict):
+            raise AlignmentBlocked("Cargo.lock: malformed package entry")
+        name = item.get("name")
+        if name not in RELEASE_CRATES:
+            continue
+        if name in seen:
+            raise AlignmentBlocked(f"Cargo.lock: duplicate release package {name}")
+        version = item.get("version")
+        if not isinstance(version, str) or version != EXPECTED:
+            raise AlignmentBlocked(
+                f"Cargo.lock: {name} version {version!r} != {EXPECTED!r}"
+            )
+        if "source" in item:
+            raise AlignmentBlocked(
+                f"Cargo.lock: release package {name} must be local, not registry/git"
+            )
+        seen[name] = version
+    missing = set(RELEASE_CRATES) - set(seen)
+    if missing:
+        raise AlignmentBlocked(
+            f"Cargo.lock: missing local release packages {sorted(missing)}"
+        )
+    return seen
+
+
+def lock_negative_self_tests(rows: list[dict]) -> None:
+    """Mutate parsed data only. Never modify a real lockfile on disk."""
+    first = next(i for i, p in enumerate(rows)
+                 if isinstance(p, dict) and p.get("name") == RELEASE_CRATES[0])
+    stale = copy.deepcopy(rows)
+    stale[first]["version"] = "0.41.0"
+    absent = [copy.deepcopy(p) for p in rows
+              if not (isinstance(p, dict) and p.get("name") == RELEASE_CRATES[0])]
+    duplicate = copy.deepcopy(rows)
+    duplicate.append(copy.deepcopy(rows[first]))
+    external = copy.deepcopy(rows)
+    external[first]["source"] = "registry+https://github.com/rust-lang/crates.io-index"
+    for label, mutant in (
+        ("stale-version", stale),
+        ("missing-release-crate", absent),
+        ("duplicate-release-crate", duplicate),
+        ("registry-impostor", external),
+    ):
+        try:
+            validate_lock_packages(mutant)
+        except AlignmentBlocked:
+            continue
+        raise AssertionError(f"RELEASE_BLOCKED: lockfile mutant escaped: {label}")
 
 def guix_version() -> str:
     path = ROOT / "guix.scm"
@@ -90,6 +161,9 @@ def audit() -> dict:
     bad = {name: ver for name, ver in versions.items() if ver != EXPECTED}
     if bad:
         raise AlignmentBlocked(f"crate version drift (want {EXPECTED}): {bad}")
+    locked = validate_lock_packages(read_lock_packages())
+    if locked != versions:
+        raise AlignmentBlocked("Cargo.lock: release crate versions differ from Cargo.toml")
     gv = guix_version()
     if gv != EXPECTED:
         raise AlignmentBlocked(f"guix.scm version {gv!r} != {EXPECTED!r}")
@@ -101,6 +175,7 @@ def audit() -> dict:
         "expected": EXPECTED,
         "tag": TAG,
         "crates": versions,
+        "cargo_lock": locked,
         "guix": gv,
         "status": "PASS",
     }
@@ -114,7 +189,9 @@ def main() -> int:
         report = audit()
         assert report["status"] == "PASS"
         assert report["expected"] == EXPECTED
-        print("RELEASE_VERSION_ALIGNMENT_SELF_TEST_PASS")
+        assert report["cargo_lock"] == report["crates"]
+        lock_negative_self_tests(read_lock_packages())
+        print("RELEASE_VERSION_ALIGNMENT_SELF_TEST_PASS lock_mutants=4")
         return 0
     try:
         report = audit()
@@ -123,7 +200,7 @@ def main() -> int:
         return 1
     print(
         f"RELEASE_VERSION_ALIGNMENT_PASS expected={EXPECTED} "
-        f"crates={len(report['crates'])} guix={report['guix']} tag={TAG}"
+        f"crates={len(report['crates'])} locked={len(report['cargo_lock'])} guix={report['guix']} tag={TAG}"
     )
     return 0
 
