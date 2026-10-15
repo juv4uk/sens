@@ -17,6 +17,7 @@ TRIT = ROOT / "crates" / "sens-cli" / "src" / "bin" / "sens-trit.rs"
 MAIN = ROOT / "crates" / "sens-cli" / "src" / "main.rs"
 ABI = ROOT / "research" / "zig-codecs" / "transport_abi.zig"
 BUILD = ROOT / "crates" / "sens-cli" / "build.rs"
+F3C_ZIG = ROOT / "research" / "zig-codecs" / "f3c" / "f3c.zig"
 
 BANNED_IN_CORRIDOR = re.compile(
     r"(?i)\b(ternary_transport|PhysicalT5Program|TRITS_BY_BYTE|"
@@ -319,6 +320,37 @@ def check_f3c_bounds_reported_lengths(body: str) -> None:
             raise CorridorBlocked(f"{name} must truncate only after capacity filter")
 
 
+
+def check_zig_f3c_semantic_firewall(source: str) -> None:
+    """Only physical D2 structure in Zig; D3 callability belongs to SENS."""
+    production = source.split('\ntest "', 1)[0]
+    clean = re.sub(r"//[^\n]*", "", production)
+    anchor = "const Parser = struct {"
+    if clean.count(anchor) != 1:
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL missing unique Zig parser")
+    tail = clean.split(anchor, 1)[1]
+    if "\n};" not in tail:
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL unclosed Zig parser")
+    parser = tail.split("\n};", 1)[0]
+    banned = (
+        r"\badmittedHead\b|\bargc\b|\barity\b|\bcallable\b",
+        r"\b(?:QUOTE|ATOM|CAR|CDR|COND|CONS|EQ|NIL)\b",
+        r"\.\s*(?:bits|packed_bits)\b",
+        r"\bsame\s*\(\s*\w+\s*,\s*(?!2\b)\d",
+    )
+    if any(re.search(expr, parser) for expr in banned):
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL Zig D3 semantic dispatch")
+    if re.search(r"\b(?:canonicalProgram|admittedHead)\s*\(", clean):
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL old semantic gate restored")
+    if ("fn canonicalStructure(words: []const Word) bool {" not in clean or
+            "!canonicalStructure(words)" not in clean or
+            "if (!canonicalStructure(words)) return Error.InvalidProgram;" not in clean):
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL physical-only preflight removed")
+    if ("std.mem.eql(u8, original_t5, recovered)" not in clean or
+            "std.mem.eql(u8, canonical_f3, carrier)" not in clean):
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL physical byte replay removed")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -353,6 +385,11 @@ def check() -> list[str]:
     notes.append("f3c-decode-validates-t5")
     check_f3c_bounds_reported_lengths(body)
     notes.append("f3c-bounds-reported-lengths")
+
+    if not F3C_ZIG.is_file() or F3C_ZIG.is_symlink():
+        raise CorridorBlocked("F3C_SEMANTIC_FIREWALL missing regular f3c.zig")
+    check_zig_f3c_semantic_firewall(F3C_ZIG.read_text(encoding="utf-8"))
+    notes.append("f3c-physical-only-d2")
 
     abi = ABI.read_text(encoding="utf-8")
     for name in ("sens_zig_t5_encode_be3", "sens_zig_t5_decode_be3"):
