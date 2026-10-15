@@ -484,6 +484,13 @@ def check_linter_zig_only(
     main = live(main_source)
     host = live(rust_corridor)
     root = live(zig_root)
+    asset_module = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
+    if not asset_module.is_file() or asset_module.is_symlink():
+        raise CorridorBlocked("LINTER_ZIG_ONLY missing reviewed asset ABI module")
+    asset_source = live(asset_module.read_text(encoding="utf-8"))
+    if ('unsafe extern "C" {' not in asset_source or
+            "pub(super) fn sens_zig_linter_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in asset_source):
+        raise CorridorBlocked("LINTER_ZIG_ONLY missing declared Zig asset ABI")
     if (re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*linter\.lisp"', main)
             or re.search(r'(?:fs|std::fs)::read(?:_to_string)?\s*\(\s*"[^"]*linter\.lisp"', main)):
         raise CorridorBlocked("LINTER_ZIG_ONLY Rust directly embeds or reads project Lisp")
@@ -505,7 +512,8 @@ def check_linter_zig_only(
     linter_host = live(_route_between(
         rust_corridor, "pub fn linter_source_bytes(", "\n/// Exact opaque project contract"
     ))
-    if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
+    if (host.count(f"asset_ffi::{ffi}(") != 2
+            or '#[path = "zig_transport_assets.rs"]' not in host
             or "version()?;" not in linter_host
             or "let copied = unsafe" not in linter_host
             or "if copied != required" not in linter_host
@@ -530,6 +538,9 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
     main = active(main_source)
     host = active(rust_corridor)
     root = active(zig_root)
+    asset_source = active((ROOT / "crates/sens-cli/src/zig_transport_assets.rs").read_text(encoding="utf-8"))
+    if ("pub(super) fn sens_zig_contract_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in asset_source):
+        raise CorridorBlocked("CONTRACT_ZIG_ONLY missing declared Zig asset ABI")
     if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*language-contract\.lisp"', main):
         raise CorridorBlocked("CONTRACT_ZIG_ONLY direct Rust project contract embed")
     helper = active(_route_between(main_source, "fn contract_source_zig_only(", "\nfn main() {"))
@@ -546,10 +557,11 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
     contract_host = active(_route_between(
         rust_corridor, "pub fn contract_source_bytes(", "\nfn require_same_exact_words("
     ))
-    if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
+    if (host.count(f"asset_ffi::{ffi}(") != 2
+            or '#[path = "zig_transport_assets.rs"]' not in host
             or "let copied = unsafe" not in contract_host
             or "if copied != required" not in contract_host
-            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in contract_host):
+            or f"asset_ffi::{ffi}(bytes.as_mut_ptr(), bytes.len())" not in contract_host):
         raise CorridorBlocked("CONTRACT_ZIG_ONLY missing checked Rust FFI egress")
     if (root.count('const contract_asset = @embedFile("language-contract.lisp");') != 1
             or f"pub export fn {ffi}(" not in root
