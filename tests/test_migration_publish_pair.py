@@ -81,5 +81,38 @@ class SameStemPublicationTest(unittest.TestCase):
         self.assertEqual(self.carrier.read_bytes(), b"external replacement")
 
 
+
+    def test_mismatched_stem_rejected_before_any_publication(self):
+        other_view = self.root / "other"
+        with self.assertRaisesRegex(ValueError, "PAIR_NONCANONICAL_SAME_STEM"):
+            publisher.publish_pair(self.write_new, self.carrier, self.carrier_bytes,
+                                   other_view, self.view_bytes)
+        self.assertFalse(self.carrier.exists())
+        self.assertFalse(other_view.exists())
+
+    def test_non_sens_carrier_rejected_before_any_publication(self):
+        wrong_carrier = self.root / "branch.bin"
+        with self.assertRaisesRegex(ValueError, "PAIR_NONCANONICAL_SAME_STEM"):
+            publisher.publish_pair(self.write_new, wrong_carrier, self.carrier_bytes,
+                                   self.view, self.view_bytes)
+        self.assertFalse(wrong_carrier.exists())
+        self.assertFalse(self.view.exists())
+
+    def test_same_bytes_replacement_is_not_deleted_during_rollback(self):
+        # Use rename from a separately created inode, avoiding inode reuse
+        # from unlink-then-create; replacement bytes intentionally match.
+        def swaps_carrier_then_fails(path, data):
+            if path == self.view:
+                replacement = self.root / "replacement.sens"
+                replacement.write_bytes(self.carrier_bytes)
+                replacement.replace(self.carrier)
+                raise OSError("injected view failure")
+            self.write_new(path, data)
+
+        with self.assertRaisesRegex(OSError, "PAIR_ROLLBACK_BLOCKED"):
+            self.publish(swaps_carrier_then_fails)
+        self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
+        self.assertFalse(self.view.exists())
+
 if __name__ == "__main__":
     unittest.main()
