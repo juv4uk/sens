@@ -10,7 +10,9 @@ on:
       - "scripts/migration-zig-gate.py"
       - "scripts/zig_codec_bridge.py"
       - "scripts/test_zig_codec_bridge.py"
+      - "scripts/sens_t5_codec.py"
       - "tests/test_migration_zig_gate.py"
+      - "tests/test_t5_physical_python_parity.py"
       - ".zig-version"
       - ".github/actions/install-zig/**"
       - ".github/workflows/zig-transport-gate.yml"
@@ -21,7 +23,9 @@ on:
       - "scripts/migration-zig-gate.py"
       - "scripts/zig_codec_bridge.py"
       - "scripts/test_zig_codec_bridge.py"
+      - "scripts/sens_t5_codec.py"
       - "tests/test_migration_zig_gate.py"
+      - "tests/test_t5_physical_python_parity.py"
       - ".zig-version"
       - ".github/actions/install-zig/**"
       - ".github/workflows/zig-transport-gate.yml"
@@ -39,7 +43,9 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/install-zig
       - name: Unit tests (no semantic admission)
-        run: python3 -m unittest tests.test_migration_zig_gate -v
+        run: |
+          python3 -m unittest tests.test_migration_zig_gate -v
+          python3 -m unittest tests.test_t5_physical_python_parity -v
       - name: Migration \u2194 Zig preparation gate (require pinned Zig)
         run: |
           set -euo pipefail
