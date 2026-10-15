@@ -258,6 +258,36 @@ class SterileZigCorridorTests(unittest.TestCase):
 
 
 
+    def test_default_zig_build_compiles_root_and_links_real_archive(self) -> None:
+        """The live default Rust->Zig turnstile needs a pinned compiler and link."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_default_zig_build_gate"]
+        blocked = module["CorridorBlocked"]
+        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        check(build)
+
+        mutants = (
+            ("missing-command", '.arg("build-lib")', '.arg("version")'),
+            ("wrong-root", '.arg("zig_transport_root.zig")',
+             '.arg("research/zig-codecs/transport_abi.zig")'),
+            ("wrong-version-assert", 'assert_eq!(actual, pinned,',
+             'assert_eq!(actual, actual,'),
+            ("no-archive-emission",
+             '.arg(format!("-femit-bin={}", archive.display()))',
+             '.arg("-femit-bin=other.a")'),
+            ("no-link", 'println!("cargo:rustc-link-lib=static=sens_zig_transport");',
+             '// println!("cargo:rustc-link-lib=static=sens_zig_transport");'),
+            ("comment-only-build", '.arg("build-lib")',
+             '/* .arg("build-lib") */ .arg("version")'),
+        )
+        for label, old, new in mutants:
+            with self.subTest(test_id=label):
+                self.assertIn(old, build, "live Cargo build shape changed")
+                changed = build.replace(old, new, 1)
+                with self.assertRaises(blocked):
+                    check(changed)
+
+
     def test_f3c_cli_is_truly_zig_only_in_both_build_modes(self) -> None:
         """Fail closed if an F3C Rust codec or fake denial is introduced."""
         module = runpy.run_path(str(SCRIPT))
