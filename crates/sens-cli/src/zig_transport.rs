@@ -45,10 +45,10 @@ fn require_same_exact_words(
         ));
     }
     for (index, (left, right)) in expected.iter().zip(actual).enumerate() {
-        if left.width() != right.width() || left.bits() != right.bits() {
+        if left.width() != right.width() || left.packed_bits() != right.packed_bits() {
             return Err(format!(
                 "ZIG_EGRESS_ROUNDTRIP_MISMATCH index={index} expected_width={}                  expected_bits={:b} actual_width={} actual_bits={:b}",
-                left.width(), left.bits(), right.width(), right.bits()
+                left.width(), left.packed_bits(), right.width(), right.packed_bits()
             ));
         }
     }
