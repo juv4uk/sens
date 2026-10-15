@@ -23,6 +23,7 @@ REQUIRED_WORKSPACE_STEPS = (
 REQUIRED_COMMANDS = tuple(command for _, command in REQUIRED_WORKSPACE_STEPS)
 ALLOWED_EVENTS = frozenset(("workflow_dispatch", "workflow_call"))
 ZIG_RELEASE_SAFE_COMMAND = "zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc"
+C_HOST_ABI_COMMAND = "bash research/zig-codecs/host-c/verify.sh"
 
 
 def require_manual_preflight(source: str) -> None:
@@ -97,6 +98,15 @@ def require_manual_preflight(source: str) -> None:
             "          set -euo pipefail\n" not in body or
             native_match.start() <= physical_match.end()):
         raise AssertionError("RELEASE_BLOCKED: missing live Zig ReleaseSafe physical suite")
+
+    # Independent compiled C caller, actually executing the Zig ABI v2,
+    # must run after the optimized native Zig suite in the very same step.
+    # A simulated self-test or a comment is not a cross-host proof.
+    host_match = re.search(
+        r"(?m)^          " + re.escape(C_HOST_ABI_COMMAND) + r"[ \\t]*$", body,
+    )
+    if host_match is None or host_match.start() <= native_match.end():
+        raise AssertionError("RELEASE_BLOCKED: missing live Rust-free C Zig ABI witness")
 
 
 class ReleasePreflightScopeTest(unittest.TestCase):
@@ -260,6 +270,61 @@ class ReleasePreflightScopeTest(unittest.TestCase):
         self.assertNotEqual(broken, self.workflow)
         with self.assertRaisesRegex(
             AssertionError, "missing live Zig ReleaseSafe physical suite"
+        ):
+            require_manual_preflight(broken)
+
+
+    def test_negative_guard_rejects_forged_or_skipped_c_zig_abi_witness(self):
+        # A release-ready transport corridor includes an independent C caller.
+        live = "          " + C_HOST_ABI_COMMAND + "\n"
+        self.assertIn(live, self.workflow)
+        require_manual_preflight(self.workflow)
+        for replacement in (
+            "# " + C_HOST_ABI_COMMAND,
+            "echo " + C_HOST_ABI_COMMAND,
+            "true # " + C_HOST_ABI_COMMAND,
+            C_HOST_ABI_COMMAND + " || true",
+            C_HOST_ABI_COMMAND + " # ignored",
+            C_HOST_ABI_COMMAND + " --self-test",
+            "true",
+        ):
+            with self.subTest(replacement=replacement):
+                broken = self.workflow.replace(
+                    live, "          " + replacement + "\n", 1,
+                )
+                self.assertNotEqual(broken, self.workflow)
+                with self.assertRaisesRegex(
+                    AssertionError, "missing live Rust-free C Zig ABI witness",
+                ):
+                    require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_c_abi_only_in_unrelated_step(self):
+        live = "          " + C_HOST_ABI_COMMAND + "\n"
+        marker = "      - name: Upload release GO-gate report\n"
+        self.assertIn(live, self.workflow)
+        self.assertIn(marker, self.workflow)
+        fake = ("      - name: Unrelated decorative C test\n"
+                "        run: |\n"
+                "          set -euo pipefail\n" + live + "\n")
+        broken = self.workflow.replace(live, "", 1).replace(
+            marker, fake + marker, 1,
+        )
+        self.assertNotEqual(broken, self.workflow)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Rust-free C Zig ABI witness",
+        ):
+            require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_c_abi_before_optimized_zig_suite(self):
+        native = "          " + ZIG_RELEASE_SAFE_COMMAND + "\n"
+        host = "          " + C_HOST_ABI_COMMAND + "\n"
+        self.assertIn(native, self.workflow)
+        self.assertIn(host, self.workflow)
+        broken = self.workflow.replace(native, "          __REORDER__\n", 1)
+        broken = broken.replace(host, native, 1)
+        broken = broken.replace("          __REORDER__\n", host, 1)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Rust-free C Zig ABI witness",
         ):
             require_manual_preflight(broken)
 
