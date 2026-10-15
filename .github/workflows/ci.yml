@@ -253,7 +253,14 @@ jobs:
           python3 -m unittest discover -s tests -p test_zig_bridge_physical_binary_paths.py -v
           # Real current API contract: no stale SID8 resolver, no Zig bypass.
           echo 'test_id=zig-migration-current-three-pass-api layer=transport verdict=source-only semantic_authority=SENS'
-          python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
+          # Direct unit failures must create a classified receipt for step 63.
+          # Keep the real RED; the wrapper cannot grant semantic SENS PASS.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id zig-migration-current-three-pass-api \
+            --layer transport \
+            --fixture tests/test_migration_zig_current_api.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
           # Same-stem .sens + readonly exact-bit view is a single guarded
           # publication: reject wrong projection names and inode replacement.
           echo 'test_id=zig-migration-same-stem-inode-rollback layer=transport verdict=filesystem-only semantic_authority=SENS'
