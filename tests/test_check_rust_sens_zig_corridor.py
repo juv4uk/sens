@@ -19,6 +19,9 @@ CHECKER = ROOT / "scripts" / "check_rust_sens_zig_corridor.py"
 CORRIDOR_FILES = (
     "crates/sens-cli/Cargo.toml",
     "crates/sens-cli/build.rs",
+    "crates/sens-cli/src/zig_transport.rs",
+    "crates/sens-cli/src/main.rs",
+    "crates/sens-cli/src/bin/sens-trit.rs",
     "research/zig-codecs/transport_abi.zig",
     ".zig-version",
 )
@@ -78,7 +81,7 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             '@import("t5/t5.zig")',
-            '@import("semantic-registry.zig")',
+            '@import("semantic_registry.zig")',
         )
         self.assertTrue(self.module.check(self.root))
 
@@ -87,14 +90,32 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             "pub export fn sens_zig_codec_abi_version",
-            "pub export fn host_opcode",
+            "pub export fn host_eval_program",
         )
         self.assertTrue(self.module.check(self.root))
 
     def test_unpinned_zig_version_is_blocked(self) -> None:
-        (self.root / ".zig-version").write_text("stable\n", encoding="utf-8")
+        mutate(self.root, ".zig-version", "0.16.0", "latest")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_client_without_packed_bits_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "crates/sens-cli/src/zig_transport.rs",
+            "packed_bits",
+            "payload_bits",
+        )
+        self.assertTrue(self.module.check(self.root))
+
+    def test_main_without_zig_decode_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "crates/sens-cli/src/main.rs",
+            "zig_transport::decode_t5_words",
+            "sens::decode_ternary_words_FORBIDDEN",
+        )
         self.assertTrue(self.module.check(self.root))
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
