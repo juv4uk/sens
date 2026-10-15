@@ -82,6 +82,10 @@ def prepare(root, tag, sha):
 def verify_replay(staged, downloaded, tag, sha):
     staged, downloaded = Path(staged), Path(downloaded)
     _check_sha(sha)
+    # A replay must compare two independent artifact directories. Passing the
+    # staging path (or an equivalent ../ alias) twice is NOT a download proof.
+    if staged.resolve() == downloaded.resolve():
+        raise ValueError("RELEASE_BLOCKED: replay requires independent download directory")
     names = _expected(tag)
     all_names = names | {"release-provenance.json", "SHA256SUMS"}
     _check_files(staged, all_names)
