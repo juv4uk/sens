@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Fail-closed: published Rust↔Zig↔SENS boundary map is regenerable evidence (#5779).
+
+The map names every production Rust contact with SENS (corridor / mixed / direct /
+filesystem) and real file+SHA. Direct contacts are BYPASS debt — not greenwashed.
+No semantic SENS admission.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "report_rust_zig_sens_boundary.py"
+MAP_PATH = ROOT / "research" / "zig-codecs" / "rust_zig_sens_boundary.json"
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location("report_rust_zig_sens_boundary", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class RustZigSensBoundaryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.mod = load_module()
+
+    def test_published_map_exists_and_matches_schema(self) -> None:
+        self.assertTrue(
+            MAP_PATH.is_file(),
+            "boundary map must be published under research/zig-codecs/",
+        )
+        data = json.loads(MAP_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(data["schema"], "sens-rust-zig-sens-boundary/v1")
+        self.assertIn("#5777", data["owner_rule"])
+        self.assertIn("contacts", data)
+        self.assertIn("bypasses", data)
+        self.assertIn("legend", data)
+        for contact in data["contacts"]:
+            self.assertIn("path", contact)
+            self.assertIn("kind", contact)
+            self.assertIn("sha256", contact)
+            self.assertEqual(len(contact["sha256"]), 64)
+
+    def test_regeneration_matches_published_structure(self) -> None:
+        published = json.loads(MAP_PATH.read_text(encoding="utf-8"))
+        fresh = self.mod.build_map(ROOT)
+        pub_paths = sorted(c["path"] for c in published["contacts"])
+        fresh_paths = sorted(c["path"] for c in fresh["contacts"])
+        self.assertEqual(
+            pub_paths,
+            fresh_paths,
+            "published boundary map drifted from live scan — regenerate and commit",
+        )
+        pub_kinds = {c["path"]: c["kind"] for c in published["contacts"]}
+        fresh_kinds = {c["path"]: c["kind"] for c in fresh["contacts"]}
+        self.assertEqual(pub_kinds, fresh_kinds)
+        self.assertEqual(sorted(published["bypasses"]), sorted(fresh["bypasses"]))
+        import hashlib
+        for contact in fresh["contacts"]:
+            live = (ROOT / contact["path"]).read_bytes()
+            self.assertEqual(
+                contact["sha256"],
+                hashlib.sha256(live).hexdigest(),
+                f"stale SHA for {contact['path']}",
+            )
+
+    def test_corridor_contacts_include_zig_entrypoints(self) -> None:
+        data = self.mod.build_map(ROOT)
+        corridorish = {
+            c["path"]
+            for c in data["contacts"]
+            if c.get("corridor")
+        }
+        self.assertTrue(
+            any("zig_transport" in p or "zig_corridor" in p for p in corridorish),
+            f"expected zig transport/corridor among corridor contacts, got {corridorish}",
+        )
+
+    def test_check_fails_closed_on_direct_bypass(self) -> None:
+        data = self.mod.build_map(ROOT)
+        self.assertGreater(
+            len(data["bypasses"]),
+            0,
+            "expected direct bypass debt until full Zig cutover",
+        )
+        import sys
+        old = sys.argv[:]
+        try:
+            sys.argv = [
+                "report_rust_zig_sens_boundary.py",
+                str(ROOT),
+                "--out",
+                str(ROOT / "research/zig-codecs/rust_zig_sens_boundary.json"),
+                "--check",
+            ]
+            rc = self.mod.main()
+        finally:
+            sys.argv = old
+        self.assertEqual(rc, 1, "--check must stay RED while direct bypasses remain")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
