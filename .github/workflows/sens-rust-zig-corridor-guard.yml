@@ -1,6 +1,7 @@
-name: Rust↔SENS sterile Zig corridor guard
-# Owner rule (#5777/#5779): the Rust↔SENS link crosses ONLY the sterile Zig corridor.
+name: Rust\u2194SENS sterile Zig corridor guard
+# Owner rule (#5777/#5779): the Rust\u2194SENS link crosses ONLY the sterile Zig corridor.
 # Manual only (no extra automatic workflows, per #5777). Fail-closed structural guard.
+# Full sterile set: sterile source routes + host-neutral R5 + host coverage + axiom binding.
 on:
   workflow_dispatch:
 
@@ -9,14 +10,32 @@ permissions:
 
 jobs:
   corridor-guard:
-    name: Rust↔SENS crosses only the sterile Zig corridor
+    name: Rust\u2194SENS crosses only the sterile Zig corridor
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - name: Guard — Rust↔SENS only via the sterile Zig corridor
-        run: python3 scripts/check_rust_sens_zig_corridor.py .
+      - name: Sterile source routes (default=zig-transport, FFI-only)
+        run: |
+          set -euo pipefail
+          python3 scripts/check_sterile_zig_corridor.py
+          python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
 
-      - name: Negative controls — every invariant must fail closed
-        run: python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+      - name: Host-neutral R5 (physical ABI T5+E1+F3C, C reject invalid T5)
+        run: |
+          set -euo pipefail
+          python3 scripts/check_rust_sens_zig_corridor.py .
+          python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+
+      - name: Host coverage (no invisible Rust\u2194SENS bypass)
+        run: |
+          set -euo pipefail
+          python3 scripts/check_rust_sens_corridor_coverage.py .
+          python3 -m unittest discover -s tests -p test_check_rust_sens_corridor_coverage.py -v
+
+      - name: Axiom binding (every corridor rule traces to language-core)
+        run: |
+          set -euo pipefail
+          python3 scripts/check_corridor_axiom_binding.py .
+          python3 -m unittest discover -s tests -p test_check_corridor_axiom_binding.py -v
