@@ -107,7 +107,7 @@ def source_sha256(source: Path) -> str:
 
 def load_engine_maps(root: Path):
     data = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
-    my, upper = engine.build_three_pass_maps(
+    my, upper, _historical_bridge_provenance = engine.build_three_pass_maps(
         data,
         root / "crates/sens/src/domain_surface_registry_generated.rs",
         root / "crates/sens/src/semantic_registry_generated.rs",
