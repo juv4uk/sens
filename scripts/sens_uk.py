@@ -57,8 +57,10 @@ def render_words(words: list[str], surfaces: dict[str, str]) -> str:
                 raise C.SensT5Error("missing D2 separator between list items")
             frames[-1] = 1
         else:
+            # A canonical .lisp carries one or more top-level forms; separate
+            # them by a newline instead of rejecting the second one.
             if top_item:
-                raise C.SensT5Error("multiple top-level expressions unsupported")
+                result.append("\n")
             top_item = True
 
     for word in words:
