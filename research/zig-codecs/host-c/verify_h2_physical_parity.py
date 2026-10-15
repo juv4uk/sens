@@ -252,8 +252,11 @@ def self_test() -> None:
     if first_mismatch(b"\x01\x02", b"\x01\x03") != 1:
         raise PhysicalError("test_id=FIRST_MISMATCH layer=diagnostics index_wrong")
     # Crash/launcher failure with a plausible diagnostic is NOT a Zig reject.
-    marker = b"H2_T5_DUMP_REJECT layer=transport category=ZIG_ENCODE\\n"
-    def synthetic(rc: int, stdout: bytes = b"", stderr: bytes = marker) -> subprocess.CompletedProcess:
+    marker = b"H2_T5_DUMP_REJECT layer=transport category=ZIG_ENCODE\n"
+
+    def synthetic(
+        rc: int, stdout: bytes = b"", stderr: bytes = marker
+    ) -> subprocess.CompletedProcess:
         return subprocess.CompletedProcess(["h2-controlled-negative"], rc, stdout, stderr)
     require_controlled_rejection(synthetic(2), "H2_CONTROLLED_REJECT_POSITIVE")
     for label, response in [
@@ -261,7 +264,7 @@ def self_test() -> None:
         ("SIGSEGV", synthetic(-11)),
         ("OTHER_FAILURE", synthetic(1)),
         ("COMMAND_NOT_FOUND", synthetic(127)),
-        ("STDOUT_LEAK", synthetic(2, stdout=b"\\x00")),
+        ("STDOUT_LEAK", synthetic(2, stdout=b"\x00")),
         ("MISSING_DIAGNOSTIC", synthetic(2, stderr=b"")),
     ]:
         try:
