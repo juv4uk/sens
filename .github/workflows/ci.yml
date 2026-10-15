@@ -1617,6 +1617,8 @@ jobs:
           guard_source_rc=0
           cargo test --locked -p wsm-guard-core --lib \
             zig_static_source_carriers_exact_and_reject_small_buffers -- --nocapture || guard_source_rc=$?
+          cargo test --locked -p wsm-guard-core --no-default-features --lib \
+            guard_without_zig_refuses_all_sources_instead_of_falling_back -- --nocapture || guard_source_rc=$?
           edge_rc=0
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
