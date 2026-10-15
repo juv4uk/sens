@@ -107,6 +107,52 @@ static int witness_zig_decode_be3(void) {
     return 1;
 }
 
+/* Rust-free second client of the SAME Zig E1 physical export.
+ * This confirms ABI layout, canonical framing and negative error contracts
+ * without treating Zig transport as SENS execution or mathematical truth.
+ */
+static int witness_zig_e1_encode_be3(void) {
+    static const uint8_t source[] = {2, 0, 2, 3, 0, 1, 2, 0, 1};
+    static const uint8_t golden[] = {
+        0x53, 0x33, 1, 3, 0, 3, 0x23, 0x20,
+        0x8a, 0x36, 0x20, 0x5d, 0x52
+    };
+    static const uint8_t invalid_width[] = {10, 0, 0};
+    static const uint8_t invalid_bits[] = {2, 0, 4};
+    uint8_t output[64] = {0};
+    uint8_t too_small[8];
+    uint8_t unchanged[8];
+    uint8_t aliased[32] = {0};
+    memset(too_small, 0x72, sizeof too_small);
+    memset(unchanged, 0x72, sizeof unchanged);
+
+    if (!check_number("e1-canonical-size",
+            sens_zig_e1_encode_be3(source, sizeof source, output, sizeof output),
+            (ptrdiff_t)sizeof golden)) return 0;
+    if (!check_bytes("e1-canonical-raw-crc", output, golden, sizeof golden)) return 0;
+    if (!check_number("e1-small-output",
+            sens_zig_e1_encode_be3(source, sizeof source,
+                                   too_small, sizeof too_small), -2)) return 0;
+    if (!check_bytes("e1-small-output-unchanged",
+                     too_small, unchanged, sizeof too_small)) return 0;
+    if (!check_number("e1-truncated-triplet",
+            sens_zig_e1_encode_be3(source, sizeof source - 1,
+                                   output, sizeof output), -1)) return 0;
+    if (!check_number("e1-no-d10-admission",
+            sens_zig_e1_encode_be3(invalid_width, sizeof invalid_width,
+                                   output, sizeof output), -1)) return 0;
+    if (!check_number("e1-invalid-bits",
+            sens_zig_e1_encode_be3(invalid_bits, sizeof invalid_bits,
+                                   output, sizeof output), -1)) return 0;
+    memcpy(aliased, source, sizeof source);
+    if (!check_number("e1-source-output-alias",
+            sens_zig_e1_encode_be3(aliased, sizeof source,
+                                   aliased, sizeof aliased), -1)) return 0;
+    if (!check_bytes("e1-rejected-alias-keeps-input",
+                     aliased, source, sizeof source)) return 0;
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -167,6 +213,7 @@ int main(void) {
     if (!check_bytes("f3c-recovered-t5", unpacked, known_t5, sizeof known_t5)) return 1;
 
     if (!witness_zig_decode_be3()) return 1;
-    puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C exact_width=true semantic_verdict=NOT_TESTED");
+    if (!witness_zig_e1_encode_be3()) return 1;
+    puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
