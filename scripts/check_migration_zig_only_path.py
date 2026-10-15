@@ -43,6 +43,11 @@ def _live_nodes(root: ast.AST):
         return
     yield root
     for child in ast.iter_child_nodes(root):
+        # Defining a local callable does not execute its body. An inert
+        # verify_t5()/carry_t5() is not physical transport evidence.
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef,
+                              ast.Lambda, ast.ClassDef)):
+            continue
         yield from _live_nodes(child)
 
 
@@ -123,6 +128,9 @@ def _write_time_truth(node: ast.AST) -> bool | None:
 def _write_reachable_nodes(root: ast.AST):
     """Only statement paths guaranteed live on the admitted --write route."""
     yield root
+    if isinstance(root, (ast.FunctionDef, ast.AsyncFunctionDef,
+                         ast.Lambda, ast.ClassDef)):
+        return  # Nested callable bodies cannot certify --write.
     if isinstance(root, ast.If):
         condition = _write_time_truth(root.test)
         if condition is None:
@@ -185,7 +193,7 @@ def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
     packed, or staged reference bytes never establishes release evidence.
     This is AST structural evidence, not a Zig runtime or SENS semantic PASS.
     """
-    for loop in ast.walk(run):
+    for loop in _live_nodes(run):
         if not isinstance(loop, ast.For):
             continue
         live = list(_write_reachable_nodes(loop))
