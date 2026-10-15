@@ -89,6 +89,17 @@ jobs:
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_ukr_surface -- --nocapture
           cargo test --locked -p sens-cli --bin sens zig_uk_surface -- --nocapture
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_uk_surface -- --nocapture
+          # Rust distribution manifest must be obtained ONLY from the pinned
+          # Zig root asset; require a real named test (zero tests is not green).
+          echo 'test_id=zig-islands-release-manifest-ferry layer=transport semantic_authority=SENS'
+          cargo test --locked -p sens-cli --bin sens \
+            islands::zig_islands_manifest_tests::root_zig_release_manifest_exact_bytes_and_validated_protocol \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/zig-islands-manifest-default.log"
+          grep -Fq 'test islands::zig_islands_manifest_tests::root_zig_release_manifest_exact_bytes_and_validated_protocol ... ok' "$RUNNER_TEMP/zig-islands-manifest-default.log"
+          cargo test --locked -p sens-cli --bin sens --no-default-features \
+            root_zig_release_manifest_exact_bytes_and_validated_protocol \
+            -- --nocapture | tee "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
+          grep -Fq 'test islands::zig_islands_manifest_tests::root_zig_release_manifest_exact_bytes_and_validated_protocol ... ok' "$RUNNER_TEMP/zig-islands-manifest-no-default.log"
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash
