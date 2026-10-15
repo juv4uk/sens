@@ -120,3 +120,27 @@ test "opaque linter bytes cross Zig without partial writes or semantic registry"
         sens_zig_linter_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, linter_asset[0..linter_asset.len], &output);
 }
+
+// Release-islands manifest is opaque distribution data. Zig transports
+// exact checked-in bytes; Rust validates the JSON protocol, not the wire.
+const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");
+pub export fn sens_zig_islands_manifest_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (islands_manifest_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(islands_manifest_asset.len);
+    if (capacity < islands_manifest_asset.len) return -2;
+    @memcpy(dst[0..islands_manifest_asset.len], islands_manifest_asset[0..islands_manifest_asset.len]);
+    return @intCast(islands_manifest_asset.len);
+}
+
+test "islands release manifest exact bytes via Zig; short buffer not modified" {
+    const required = sens_zig_islands_manifest_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(islands_manifest_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_islands_manifest_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [islands_manifest_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_islands_manifest_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, islands_manifest_asset[0..islands_manifest_asset.len], &output);
+}
