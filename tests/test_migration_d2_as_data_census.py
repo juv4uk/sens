@@ -24,7 +24,7 @@ class D2AsDataCensus(unittest.TestCase):
             self.assertEqual(git_blob_sha1(source.read_bytes()), entry["git_blob_sha1"])
             self.assertFalse(
                 source.with_suffix(".sens").exists(),
-                f"{entry['path']}: D2-as-data blocker must not auto-publish .sens",
+                f"{entry['path']}: D2-as-data empty must not auto-publish .sens",
             )
 
     def test_isa_subset_routes_to_nonprogram_classification(self):

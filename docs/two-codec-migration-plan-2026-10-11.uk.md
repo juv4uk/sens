@@ -130,7 +130,7 @@ target/release/sens-trit open tests/fixtures/migration-quote-cohort-main/quote-l
 
 **SENS CLI encoder+decoder завершено:** [CI #38170817413](https://github.com/juv4uk/sens/actions/runs/38170817413), SHA 2ac5cbe001dcc949561aeb6bca231e52befd75a7, SUCCESS. Мала QUOTE-програма 4B T5 → 3B F3, оригінал побайтово не змінено, повторний запис і перевищення межі відхилено, дев’ять вибраних F3 дали exact open/decode/eval parity. [Raw artifact](https://github.com/juv4uk/sens/actions/runs/38170817413/artifacts/11714003230).
 
-## M3: цілісність перенесених F3 і фактичний CML blocker
+## M3: цілісність перенесених F3 і фактичний CML ()
 
 Оригінальна tiny F3 має щільний фізичний rank, але **не містить CRC/MAC**.
 Для файла з неперевіреного носія декодування й виконання дозволяти тільки

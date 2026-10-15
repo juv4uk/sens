@@ -187,7 +187,7 @@ def run(args: argparse.Namespace) -> dict:
         "warning": (
             "T5/view roundtrip alone does not admit the program: independent D2, "
             "canonical Ukrainian source renderer and historical/current oracle "
-            "are separate release blockers."
+            "are separate release empties."
         ),
     }
     if args.report is not None:

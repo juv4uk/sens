@@ -4,7 +4,7 @@
 
 **Goal:** Remove evaluator dependence from x86-64 byte generation by compiling the Lisp-owned encoder while preserving byte-for-byte parity and Lisp semantic authority.
 
-**Architecture:** Treat `lib/machine/encoding/x86-64.lisp` as upstream source authority. First run the exact file through CML's broader existing `cml x86-elf` freestanding compiler path to discover the first real blocker. The dedicated `cml-compile x86-elf` process bridge is intentionally arithmetic-slice-only and is not the encoder bootstrap path. CML may add compiler mechanism, but must not copy encoder truth into Rust/CML tables. The final path must compare interpreted encoder bytes A with compiled encoder bytes B and execute both through the same admitted host mechanism.
+**Architecture:** Treat `lib/machine/encoding/x86-64.lisp` as upstream source authority. First run the exact file through CML's broader existing `cml x86-elf` freestanding compiler path to discover the first real (). The dedicated `cml-compile x86-elf` process bridge is intentionally arithmetic-slice-only and is not the encoder bootstrap path. CML may add compiler mechanism, but must not copy encoder truth into Rust/CML tables. The final path must compare interpreted encoder bytes A with compiled encoder bytes B and execute both through the same admitted host mechanism.
 
 **Tech Stack:** my-lisp, CML pinned at an exact commit, x86-64 Lisp encoder, GitHub Actions, existing native execution host mechanism.
 
@@ -34,18 +34,18 @@
   `cd <pinned-cml> && cargo run --bin cml -- x86-elf <absolute-my-lisp>/lib/machine/encoding/x86-64.lisp /tmp/my-lisp-encoder`.
 - [ ] Require non-zero exit.
 - [ ] Capture the first compiler diagnostic verbatim.
-- [ ] Classify the blocker: source admission, IR lowering, freestanding backend admission, linking/runtime ABI, callable/export ABI, or result representation.
-- [ ] Create a CML issue for exactly that blocker, not a generic “compile encoder” request.
+- [ ] Classify the (): source admission, IR lowering, freestanding backend admission, linking/runtime ABI, callable/export ABI, or result representation.
+- [ ] Create a CML issue for exactly that (), not a generic “compile encoder” request.
 
-### Task 2: Minimal CML capability for the first blocker
+### Task 2: Minimal CML capability for the first ()
 
 **Repository:** `juv4uk/cml`
 
-- [ ] RED test reproduces the blocker using the smallest encoder-derived source slice that preserves the same unsupported construct.
+- [ ] RED test reproduces the () using the smallest encoder-derived source slice that preserves the same unsupported construct.
 - [ ] Implement only the compiler mechanism needed for that slice.
 - [ ] Verify no copied encoder byte/opcode expected table appears in CML.
-- [ ] Re-run the whole upstream encoder file and record the next blocker.
-- [ ] Repeat blocker-by-blocker; each independently reviewable change gets its own CML PR if it touches a distinct compiler concern.
+- [ ] Re-run the whole upstream encoder file and record the next ().
+- [ ] Repeat ()-by-(); each independently reviewable change gets its own CML PR if it touches a distinct compiler concern.
 
 ### Task 3: Callable compiled-encoder witness
 
@@ -71,4 +71,4 @@ A standalone ELF that merely “compiles” is insufficient. The compiled artifa
 - [ ] Exact-head my-lisp CI + bilingual docs.
 - [ ] Byte parity witness.
 - [ ] Physical CPU parity witness.
-- [ ] Update #507/#504 with exact supported surface and remaining blockers.
+- [ ] Update #507/#504 with exact supported surface and remaining ().

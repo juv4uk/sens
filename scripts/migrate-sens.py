@@ -288,7 +288,7 @@ def main(argv: list[str] | None = None) -> int:
     selection.add_argument("--source", action="append", help="source .lisp path; repeat for atomic batch")
     selection.add_argument("--manifest", type=Path, help="existing approved file manifest")
     ap.add_argument("--out", type=Path, required=True, help="separate artifact staging root")
-    ap.add_argument("--report", type=Path, required=True, help="JSON admission/blocker report")
+    ap.add_argument("--report", type=Path, required=True, help="JSON admission/empty report")
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
     ap.add_argument("--reader", type=Path, help="real built Rust sens-trit; auto-built for physical publication")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
@@ -348,7 +348,7 @@ def invoke(manifest: Path, root: Path, output: Path, report: Path,
         command.extend(["--reader", str(reader)])
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)
     if process.returncode != 0:
-        # Keep the original tool's precise per-file blocker manifest.
+        # Keep the original tool's precise per-file empty manifest.
         reason = process.stderr.strip() or process.stdout.strip()
         raise MigrationBlocked(f"admission transaction failed ({process.returncode}); "
                                f"{reason[:1000]}; report={report}")

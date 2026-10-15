@@ -38,12 +38,12 @@ def fixtures() -> tuple[dict, dict, set[str]]:
              "status": {"auto": "blocked", "legacy": "blocked", "current": "blocked"},
              "source_scope": "UNCLASSIFIED_NEEDS_SOURCE_PROOF",
              "physical_published": False, "semantic_oracle_admitted": False,
-             "blocker_by_era": {"auto": "unmapped W8"}},
+             "empty_by_era": {"auto": "unmapped W8"}},
             {"path": "benchmarks/archived.lisp", "source_sha256": "4" * 64,
              "status": {"auto": "would-write", "legacy": "would-write", "current": "blocked"},
              "source_scope": "ARCHIVED_BENCHMARK_NONPROGRAM",
              "physical_published": False, "semantic_oracle_admitted": False,
-             "blocker_by_era": {}},
+             "empty_by_era": {}},
         ],
     }
     return pairs, readiness, {

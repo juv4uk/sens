@@ -177,7 +177,7 @@ def main() -> int:
                 "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
             )
             # Preserve the actual failing token, rather than turning an
-            # actionable quoted-datum blocker into an anonymous rejection.
+            # actionable quoted-datum empty into an anonymous rejection.
             token = evidence.get("token")
             if isinstance(token, str) and token and token not in reason:
                 reason += f" [token={token}]"

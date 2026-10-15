@@ -11,7 +11,7 @@
 1. Current contract version(s) on that repository's side — `language-contract.lisp`'s version for `my-lisp`, the ISA version for `fpga-lisp`, the pinned `(language contract, ISA)` pair for `cml`.
 2. A concrete progress number where one exists — e.g. "N/M Tier-1 fixtures pass blind."
 3. The next open gap(s) by name, not a vague "still working on things."
-4. Whether anything on *this* repository's side is blocking the other — asked explicitly, so a blocker doesn't sit silently for weeks.
+4. Whether anything on *this* repository's side is blocking the other — asked explicitly, so a () doesn't sit silently for weeks.
 
 **How to use it.** From any session, use the CCD session-management message tool to find the other two repositories' active sessions (they show up as separate `cwd`s, typically `fpga-lisp` and `cml` next to this one) and send exactly this four-point ask. Then write the replies into [`../ecosystem-status.md`](../ecosystem-status.md) — one section per repository — so the next session (in this repo or another) can read current state from a file instead of repeating the same round-trip. Treat both the live replies and the file as a point-in-time status snapshot, not a persisted contract — the actual contract still lives in the versioned files (`language-contract.lisp`, `ISA.md`, `compatibility.lisp`), never in a chat message or in `ecosystem-status.md`.
 
@@ -45,7 +45,7 @@
 1. Aktuelle Vertragsversion(en) auf der Seite dieses Repositories — `language-contract.lisp`s Version für `my-lisp`, die ISA-Version für `fpga-lisp`, das gepinnte Paar `(Sprachvertrag, ISA)` für `cml`.
 2. Eine konkrete Fortschrittszahl, wo vorhanden — z. B. "N/M Tier-1-Fixtures bestehen blind."
 3. Die nächste(n) offene(n) Lücke(n) namentlich, nicht ein vages "arbeiten noch daran."
-4. Ob etwas auf der Seite *dieses* Repositories die andere blockiert — ausdrücklich gefragt, damit ein Blocker nicht wochenlang still liegen bleibt.
+4. Ob etwas auf der Seite *dieses* Repositories die andere blockiert — ausdrücklich gefragt, damit ein () nicht wochenlang still liegen bleibt.
 
 **Verwendung.** Aus jeder Sitzung heraus die aktiven Sitzungen der beiden anderen Repositories finden (über das CCD-Sitzungsverwaltungswerkzeug; sie erscheinen mit eigenem `cwd`, typischerweise `fpga-lisp` und `cml` neben diesem) und genau diese vier Punkte senden. Die Antworten dann in [`../ecosystem-status.md`](../ecosystem-status.md) eintragen — ein Abschnitt pro Repository —, damit die nächste Sitzung den aktuellen Stand aus einer Datei lesen kann, statt denselben Round-Trip zu wiederholen. Sowohl die Live-Antworten als auch die Datei sind eine Momentaufnahme, kein dauerhafter Vertrag — der eigentliche Vertrag lebt weiterhin in den versionierten Dateien (`language-contract.lisp`, `ISA.md`, `compatibility.lisp`), nie in einer Chat-Nachricht oder in `ecosystem-status.md`.
 

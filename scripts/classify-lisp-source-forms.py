@@ -73,7 +73,7 @@ def scan_heads(path: str, text: str) -> list[Head]:
     """Lexically find list heads while excluding quoted/comment/string data.
 
     This scanner intentionally does not call unknown heads "my-lisp".  Semantic
-    special-form container cleanup happens later; unknown heads are blockers /
+    special-form container cleanup happens later; unknown heads are empties /
     dynamic evidence, never static function identity.
     """
     heads: list[Head] = []

@@ -175,7 +175,7 @@
   },
   "constraints": [
     "Research-only source evidence, no authority to add opcode or D10 10-bit coordinate",
-    "No migration blocker invented",
+    "No migration () invented",
     "Any acceptance requires current-main dedup proof and proposal ledger/history append",
     "D2 exclusive control remains unchanged",
     "Historical source is a donor, not a claim of new primitive in historical computers"

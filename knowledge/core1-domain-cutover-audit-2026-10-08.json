@@ -298,7 +298,7 @@
   "next_steps": [
     "Replay existing Core1 historical fixture unchanged and capture typed outcomes before modification.",
     "For only one bounded admitted case, map old Core1 semantic role to current exact D3/D4 and independently test D1 predicate/error behavior.",
-    "Treat LABEL, historical T/NIL, FUNCTION/FUNARG closure adapter, and old numeric tokens as explicit blockers/adapters.",
+    "Treat LABEL, historical T/NIL, FUNCTION/FUNARG closure adapter, and old numeric tokens as explicit ()/adapters.",
     "Consume merged T5 codec/migrator without editing their agent-owned files; convert only after oracle parity evidence.",
     "Hand off physical .sens native verification to wsm-my-lisp#88 and update release pins only after independent green consumer CI."
   ]

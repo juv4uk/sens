@@ -652,7 +652,7 @@ class Resolver:
             return self.global_binding_words[t],"pass4-text7-global"
 
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
-        # the old registry but lacking a current resident is a blocker.
+        # the old registry but lacking a current resident is a empty.
         if t in self.my:
             ident=self.my[t]
             if ident is None:
@@ -1192,7 +1192,7 @@ def main():
             finally:
                 signal.alarm(0)
             # Strict physical T5: any historic name, passthrough or unencoded
-            # value still visible is a blocker, never a falsely binary file.
+            # value still visible is a empty, never a falsely binary file.
             words = parse_words(projection)
             payload = encode_projection(projection)
             if decode_bytes(payload) != words:

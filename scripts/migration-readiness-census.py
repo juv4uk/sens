@@ -141,7 +141,7 @@ def build_report() -> dict:
                 "reviewed_nonprogram_git_blob": (reviewed_row["source_git_blob_sha"] if reviewed_row
                                                  else None),
                 "status": {"auto": state_one},
-                "blocker": by_era["auto"][path].get("reason") if state_one == "blocked" else None,
+                "empty": by_era["auto"][path].get("reason") if state_one == "blocked" else None,
                 "semantic_oracle_admitted": False,
                 "physical_published": False,
             })
@@ -174,7 +174,7 @@ def build_report() -> dict:
             raise RuntimeError("source class partitions overlap or omit originals")
 
         # First-error visibility is insufficient: the initial AUTO W8 error
-        # often masks a deeper value/number/binder blocker. Summarize the
+        # often masks a deeper value/number/binder empty. Summarize the
         # second error exposed by each explicit-era diagnostic run, WITHOUT
         # treating that run as semantic authorization.
         # NEW REALITY: one scan, not three.
@@ -208,7 +208,7 @@ def build_report() -> dict:
             "actionable_executable_unknown_queues": dict(actionable_queues.most_common()),
             "reviewed_nonprogram_sources": sorted(reviewed.values(),
                                                  key=lambda item: item["path"]),
-            "blocker_by_era_reason_counts": reasons_by_era,
+            "empty_by_era_reason_counts": reasons_by_era,
             "candidate_rows": queue_rows,
             "source_scope": {
                 "reviewed_nonprogram_originals": len(reviewed),
@@ -245,7 +245,7 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "actionable_queues": result["actionable_executable_unknown_queues"], "source_scope": result["source_scope"], "top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "actionable_queues": result["actionable_executable_unknown_queues"], "source_scope": result["source_scope"], "top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["empty_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0

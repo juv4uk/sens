@@ -10,7 +10,7 @@
 python3 scripts/migrate.py candidates --report /tmp/original-candidates.json
 ```
 
-Звіт тепер містить `first_blocker_partition`: повний поділ **кожного
+Звіт тепер містить `first_empty_partition`: повний поділ **кожного
 оригінального непарного** `.lisp` із поточного Git-дерева за **ПЕРШОЮ**
 причиною відмови канонічного парсера у режимі D1–D9 / source-era auto.
 У кожному записі є `path`, `source_git_blob_sha`, причина і, якщо

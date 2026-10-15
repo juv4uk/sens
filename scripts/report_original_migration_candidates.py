@@ -32,7 +32,7 @@ ARGS = [
 
 # First blocking symptom only. This is scheduling metadata, NEVER evidence that
 # a Lisp record is an executable, or that a domain law has been admitted.
-BLOCKER_ACTIONS = {
+EMPTY_ACTIONS = {
     "w8-provenance": "Pin original source Git blob and prove legacy SID8 vs ratified current D8 before an explicit --source-era retry.",
     "host-effect": "Prove host I/O/effect semantics and independent old/current observable parity; do not guess PRINT mappings.",
     "unmapped-function": "Resolve function identity against owner-ratified D1-D9 and historical successor ledger; unknown stays BLOCKED.",
@@ -44,10 +44,10 @@ BLOCKER_ACTIONS = {
 }
 
 
-def blocker_family(reason: str) -> str:
+def empty_family(reason: str) -> str:
     """Stable first-symptom classification; does NOT attest executable meaning."""
     if not isinstance(reason, str):
-        raise ValueError("blocker reason must be text")
+        raise ValueError("empty reason must be text")
     r = reason.casefold()
     if ("ambiguous" in r or "ambiguity" in r or "двознач" in r) and any(
         marker in r for marker in ("w8", "d8", "8-bit", "eight-bit", "8 bit")
@@ -70,7 +70,7 @@ def blocker_family(reason: str) -> str:
     return "other-unproved"
 
 
-def blocker_cohorts(blocked_sources: list[dict]) -> list[dict]:
+def empty_cohorts(blocked_sources: list[dict]) -> list[dict]:
     """Build exhaustive disjoint source-blob-locked cohorts in stable order."""
     by_family: dict[str, list[dict]] = {}
     seen: set[str] = set()
@@ -81,17 +81,17 @@ def blocker_cohorts(blocked_sources: list[dict]) -> list[dict]:
         seen.add(path)
         if row["status"] != "BLOCKED" or row["same_stem_sens_already_exists"]:
             raise ValueError(f"not an unpaired BLOCKED source: {path}")
-        family = blocker_family(row["reason"])
+        family = empty_family(row["reason"])
         by_family.setdefault(family, []).append({
             "path": path,
             "source_git_blob_sha": row["source_git_blob_sha"],
-            "first_blocker": row["reason"],
+            "first_empty": row["reason"],
         })
     return [
         {
             "family": family,
             "count": len(rows),
-            "next_action": BLOCKER_ACTIONS[family],
+            "next_action": EMPTY_ACTIONS[family],
             "original_sources": sorted(rows, key=lambda row: row["path"]),
             "status": "BLOCKED_NOT_ORACLE_ADMITTED",
         }
@@ -101,7 +101,7 @@ def blocker_cohorts(blocked_sources: list[dict]) -> list[dict]:
 
 
 
-# Coordinate-specific first-blocker queues refine the existing broad family
+# Coordinate-specific first-empty queues refine the existing broad family
 # census. They preserve the family contract and never infer program meaning.
 COORDINATE_OWNER = {
     "w8-provenance": "#4459",
@@ -115,7 +115,7 @@ COORDINATE_OWNER = {
 }
 
 
-def first_blocker_coordinate(reason: str, family: str) -> str:
+def first_empty_coordinate(reason: str, family: str) -> str:
     """Split major shared laws by EXACT historical word, not guessed semantics."""
     if family == "w8-provenance":
         match = re.search(r"\b([01]{8})\b", reason)
@@ -133,10 +133,10 @@ def first_blocker_coordinate(reason: str, family: str) -> str:
     return "other"
 
 
-def blocker_coordinate_cohorts(blocked_sources: list[dict]) -> list[dict]:
+def empty_coordinate_cohorts(blocked_sources: list[dict]) -> list[dict]:
     """Full SHA-pinned first-error partition, exact W8 and word-position slices.
 
-    A source in this partition may have MANY later blockers. This is NOT
+    A source in this partition may have MANY later empties. This is NOT
     an executable-program classification or independent oracle certification.
     """
     grouped: dict[tuple[str, str], list[dict]] = {}
@@ -150,18 +150,18 @@ def blocker_coordinate_cohorts(blocked_sources: list[dict]) -> list[dict]:
                 or not isinstance(sha, str)
                 or not re.fullmatch(r"[0-9a-f]{40}", sha)):
             raise ValueError("coordinate cohort needs unpaired BLOCK and exact Git blob")
-        family = blocker_family(row["reason"])
-        coordinate = first_blocker_coordinate(row["reason"], family)
+        family = empty_family(row["reason"])
+        coordinate = first_empty_coordinate(row["reason"], family)
         grouped.setdefault((family, coordinate), []).append({
             "path": path,
             "source_git_blob_sha": sha,
-            "first_blocker": row["reason"],
+            "first_empty": row["reason"],
         })
     return [
         {
             "family": family, "coordinate": coordinate,
             "count": len(members), "owner_issue": COORDINATE_OWNER[family],
-            "next_action": BLOCKER_ACTIONS[family],
+            "next_action": EMPTY_ACTIONS[family],
             "status": "FIRST_BLOCK_ONLY_NOT_SEMANTICALLY_ADMITTED",
             "example_paths": sorted(m["path"] for m in members)[:5],
             "original_sources": sorted(members, key=lambda m: m["path"]),
@@ -366,14 +366,14 @@ def build_report(root: Path = ROOT) -> dict:
             (row for row in rows if row["status"] == "BLOCKED"),
             key=lambda row: row["path"],
         )
-        cohorts = blocker_cohorts(blocked_sources)
-        exact_cohorts = blocker_coordinate_cohorts(blocked_sources)
+        cohorts = empty_cohorts(blocked_sources)
+        exact_cohorts = empty_coordinate_cohorts(blocked_sources)
         # A separate actionable queue excludes reviewed DATA/archived
         # snapshots while preserving the complete raw BLOCK ledger.
         actionable_blocked = [r for r in blocked_sources if r["source_scope"]
                               not in ("NONPROGRAM_DATA_REVIEWED",
                                       "ARCHIVED_BENCHMARK_NONPROGRAM")]
-        actionable_cohorts = blocker_cohorts(actionable_blocked)
+        actionable_cohorts = empty_cohorts(actionable_blocked)
         archived_sources = [r for r in rows
                             if r["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"]
         if len(classified) + len(archived_sources) > len(rows):
@@ -381,7 +381,7 @@ def build_report(root: Path = ROOT) -> dict:
         if sum(x["count"] for x in exact_cohorts) != blocked:
             raise RuntimeError("exact coordinate cohort total differs from blocked corpus")
         if sum(cohort["count"] for cohort in cohorts) != blocked:
-            raise RuntimeError("source blocker cohort totals inconsistent")
+            raise RuntimeError("source empty cohort totals inconsistent")
         if len({row["path"] for row in rows}) != len(rows):
             raise RuntimeError("duplicate original source in migration ledger")
         return {
@@ -405,8 +405,8 @@ def build_report(root: Path = ROOT) -> dict:
                 ),
                 "actionable_blocked_sources": len(actionable_blocked),
                 "blocked": blocked,
-                "blocker_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
-                "exact_blocker_coordinates": len(exact_cohorts),
+                "empty_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
+                "exact_empty_coordinates": len(exact_cohorts),
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
                 "unpaired_candidates_needing_original_oracle": len(actionable),
@@ -420,7 +420,7 @@ def build_report(root: Path = ROOT) -> dict:
             "already_paired_sources_excluded": excluded,
             "reviewed_nonprogram_sources": sorted(
                 classified.values(), key=lambda item: item["path"]),
-            "actionable_blocker_cohorts": actionable_cohorts,
+            "actionable_empty_cohorts": actionable_cohorts,
             "classification_rule": (
                 "immutable DATA catalogues/records and archived benchmark "
                 "snapshots are not executable program migrations; raw "
@@ -431,9 +431,9 @@ def build_report(root: Path = ROOT) -> dict:
             "archived_nonprogram_candidates": archived,
             "actionable_not_yet_oracle_proven_candidates": actionable,
             "blocked_sources": blocked_sources,
-            "blocker_cohorts": cohorts,
-            "exact_blocker_cohorts": exact_cohorts,
-            "unpaired_blocker_sample": blocked_sources[:20],
+            "empty_cohorts": cohorts,
+            "exact_empty_cohorts": exact_cohorts,
+            "unpaired_empty_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
                 "prove exact historical function successor, D1/D2/w8 era and no host/IO effects",
