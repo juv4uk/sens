@@ -311,7 +311,7 @@ class SourceResolver:
         # only as a current ratified D8 coordinate or a current named D3-D6
         # resident; otherwise it fails closed as a retired SID8-era head.
         if re.fullmatch(r"[01]{8}", token):
-            raise ResolverError(
+            raise ValueError(
                 f"retired SID8-era head {token}: no current ratified D8 coordinate and "
                 "no current named D3-D6 resident"
             )
