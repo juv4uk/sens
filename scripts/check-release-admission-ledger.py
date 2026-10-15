@@ -122,18 +122,21 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
         if ratified == 1:
             form_candidates.append(sens)
 
-    # A shape-only/draft check never authorizes physical release admission.
-    # Keep the form candidate count separately for review, but emit no
-    # executable proof or admitted_sens until content verification is enabled.
-    verified = sorted(form_candidates) if verify_content else []
+    # Exact T5 bytes prove content integrity, not SENS semantic execution.
+    # F1-F4 references above are only format-checked; they are NOT independent
+    # native SENS positive/negative results or an executable Ukrainian oracle.
+    # Never derive release admission from byte integrity or owner ratification.
+    content_verified = sorted(form_candidates) if verify_content else []
     return {
         "schema": SCHEMA,
         "validation_mode": "content_verified" if verify_content else "form_only",
         "entries": len(entries),
         "form_candidates": len(form_candidates),
-        "uk_oracle_verified": len(verified),
-        "release_admitted": len(verified),
-        "admitted_sens": verified,
+        "content_verified": len(content_verified),
+        "content_verified_sens": content_verified,
+        "uk_oracle_verified": 0,
+        "release_admitted": 0,
+        "admitted_sens": [],
     }
 
 
@@ -157,7 +160,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.no_verify_content:
         print(f"RELEASE_ADMISSION_FORM_ONLY entries={receipt['entries']} candidates={receipt['form_candidates']} admitted=0")
     else:
-        print(f"RELEASE_ADMISSION_PASS entries={receipt['entries']} admitted={receipt['release_admitted']}")
+        # Physical integrity does not verify F2/F4 or the native Ukrainian oracle.
+        # An independently executed semantic witness is a separate release gate.
+        print("RELEASE_ADMISSION_BLOCKED: F2/F4 native SENS verdict and Ukrainian oracle not verified", file=sys.stderr)
+        return 2
     return 0
 
 

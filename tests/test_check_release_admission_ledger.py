@@ -104,12 +104,42 @@ class FormatTests(unittest.TestCase):
 
 
 class ContentTests(unittest.TestCase):
-    def test_real_fixture_hash_verifies_and_admits(self):
+    def test_real_fixture_hash_verifies_content_not_semantics(self):
         good = MODULE.content_sha256(ROOT, REAL_SENS)
         receipt = MODULE.validate_ledger(
             ledger([entry(sens=REAL_SENS, typed_word_sha256=good, ratified=1)])
         )
-        self.assertEqual(receipt["release_admitted"], 1)
+        self.assertEqual(receipt["content_verified"], 1)
+        self.assertEqual(receipt["uk_oracle_verified"], 0)
+        self.assertEqual(receipt["release_admitted"], 0)
+        self.assertEqual(receipt["admitted_sens"], [])
+
+    def test_fake_f2_f4_receipts_never_release_admit_real_t5(self):
+        good = MODULE.content_sha256(ROOT, REAL_SENS)
+        fake_ref = "juv4uk/sens@" + "f" * 40 + ":missing-native-witness.lisp:1"
+        candidate = entry(
+            sens=REAL_SENS,
+            typed_word_sha256=good,
+            f2_positive_witness=fake_ref,
+            f4_t5_execution=fake_ref,
+            ratified=1,
+        )
+        receipt = MODULE.validate_ledger(ledger([candidate]))
+        self.assertEqual(receipt["content_verified"], 1)
+        self.assertEqual(receipt["uk_oracle_verified"], 0)
+        self.assertEqual(receipt["release_admitted"], 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            from contextlib import redirect_stderr, redirect_stdout
+            import io
+
+            path = Path(tmp) / "ledger.json"
+            path.write_text(json.dumps(ledger([candidate])), encoding="utf-8")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                exit_code = MODULE.main(["--ledger", str(path)])
+            self.assertEqual(exit_code, 2)
+            self.assertNotIn("RELEASE_ADMISSION_PASS", stdout.getvalue())
+            self.assertIn("RELEASE_ADMISSION_BLOCKED", stderr.getvalue())
 
     def test_wrong_content_hash_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
@@ -140,7 +170,8 @@ class ContentTests(unittest.TestCase):
                 ledger([entry(sens="valid.sens", typed_word_sha256=digest, ratified=1)]),
                 root=repo,
             )
-            self.assertEqual(admitted["release_admitted"], 1)
+            self.assertEqual(admitted["content_verified"], 1)
+            self.assertEqual(admitted["release_admitted"], 0)
             for target in (regular, outside):
                 link = repo / "linked.sens"
                 link.symlink_to(target)
