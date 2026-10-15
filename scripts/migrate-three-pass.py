@@ -1031,7 +1031,7 @@ def main():
     ap.add_argument("root", type=Path)
     ap.add_argument("--out", type=Path, required=True,
                     help="окрема вихідна папка; .lisp НЕ змінюється")
-    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d11-foundation.json")
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
     ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
     ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
