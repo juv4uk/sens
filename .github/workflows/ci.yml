@@ -33,6 +33,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # One early automated source+filesystem witness: a hardlink to
+          # staging cannot impersonate a separately downloaded release asset.
+          # -k matches two tests; count is checked to reject accidental zero-test PASS.
+          echo 'test_id=zig-release-replay-inode-independence layer=provenance expected=copy-pass-hardlink-fail semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_verify_release_assets.py -k test_complete_success -k test_hardlinked_download_does_not_prove_independent_replay -v 2>&1 | tee "$RUNNER_TEMP/release-physical-replay.log"
+          grep -Fq 'Ran 2 tests' "$RUNNER_TEMP/release-physical-replay.log"
+          grep -Fxq 'OK' "$RUNNER_TEMP/release-physical-replay.log"
           # A mechanical fail-closed receipt test; SENS remains the semantic authority.
           sha256sum scripts/check-release-admission-ledger.py tests/test_check_release_admission_ledger.py tests/fixtures/migration-d1-cond-cohort/branch.sens
           python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -k fake_f2_f4_receipts_never_release_admit_real_t5 -v
