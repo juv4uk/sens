@@ -11,19 +11,17 @@ R2  crates/sens-cli/build.rs: the Zig transport is gated on
     CARGO_FEATURE_ZIG_TRANSPORT, links `sens_zig_transport`, compiles
     research/zig-codecs/transport_abi.zig, and pins/reads `.zig-version`.
 R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
-    functions (including the T5 ingress/egress), imports ONLY physical codec
+    functions (T5 + E1 + F3C physical ops), imports ONLY physical codec
     modules (`std` or t5/ + f3c/ + transport/) and never a registry/host/
-    semantic module, and declares no `extern`/host struct.
-R4  `.zig-version` is a concrete version string (toolchain identity, not
-    semantic authority).
+    semantic module, and declares no host `extern`/padded structs.
+R4  `.zig-version` is a concrete X.Y.Z string (not `latest` or a branch).
 R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
-    (research/zig-codecs/host-c/zig_transport_v2.h) declares EXACTLY the Zig
-    ABI export set and the same ABI version, and every Rust-free host in
-    host-c/*.c calls only ops from that set (no host-invented op, no private
-    codec).
+    research/zig-codecs/host-c/zig_transport_v2.h must declare the same
+    physical ops as the Zig ABI (no host-invented ops, no missing ops),
+    the ABI version must match, and every Rust-free host in host-c/*.c
+    must only call corridor ops (no rogue sens_zig_* invents).
 
-The Rust-only build must stay an EXPLICIT `--no-default-features` choice, never
-a silent fallback. Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED with reasons.
+Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
 from __future__ import annotations
 
@@ -45,6 +43,10 @@ REQUIRED_ABI_EXPORTS = (
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
     "sens_zig_t5_decode_be3",
+    "sens_zig_e1_encode_be3",
+    "sens_zig_e1_decode_be3",
+    "sens_zig_f3c_pack",
+    "sens_zig_f3c_unpack",
 )
 
 EXPORT_RE = re.compile(r"pub export fn\s+([A-Za-z0-9_]+)")
@@ -105,12 +107,12 @@ def check(root: Path) -> list[str]:
         if FORBIDDEN_IMPORT_RE.search(imported):
             problems.append(
                 f"R3: ABI imports `{imported}` -- a semantic/host/registry module "
-                "must not cross the corridor"
+                "must not cross the sterile corridor"
             )
-        elif not imported.startswith(PHYSICAL_IMPORT_PREFIXES):
+        elif not any(imported.startswith(p) for p in PHYSICAL_IMPORT_PREFIXES):
             problems.append(
                 f"R3: ABI imports `{imported}` -- only physical codec modules "
-                f"{PHYSICAL_IMPORT_PREFIXES} may cross the corridor"
+                f"{list(PHYSICAL_IMPORT_PREFIXES)} may cross the corridor"
             )
     if re.search(r"\bextern\b", abi):
         problems.append(
@@ -118,58 +120,64 @@ def check(root: Path) -> list[str]:
             "caller-owned triplets, no padded host structs"
         )
 
-    # R4 -- pinned corridor version.
+    # R4 -- concrete Zig pin.
     if not re.fullmatch(r"\d+\.\d+\.\d+", zigver):
         problems.append(f"R4: `.zig-version` is not a concrete version string: {zigver!r}")
 
     # R5 -- host-neutral: every host crosses the SAME corridor.
-    export_set = set(exports)
     header_path = root / C_HEADER
-    if not header_path.exists():
+    if not header_path.is_file():
         problems.append(f"R5: C header `{C_HEADER}` is missing (no host-neutral ABI source)")
     else:
         header = header_path.read_text(encoding="utf-8")
-        header_ops = set(CALL_RE.findall(header))
-        missing = export_set - header_ops
-        extra = header_ops - export_set
-        if missing:
+        header_ops = set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*\(", header))
+        # version() is a zero-arg getter; still part of the surface.
+        header_ops |= set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*;", header))
+        zig_ops = set(exports)
+        missing_in_header = sorted(zig_ops - header_ops)
+        extra_in_header = sorted(header_ops - zig_ops - {"sens_zig_codec_abi_version"})
+        # version is exported in Zig as sens_zig_codec_abi_version; header may declare it too.
+        if "sens_zig_codec_abi_version" in exports and "sens_zig_codec_abi_version" not in header_ops:
+            missing_in_header = sorted(set(missing_in_header) | {"sens_zig_codec_abi_version"})
+        if missing_in_header:
             problems.append(
                 "R5: C header declares fewer ops than the Zig ABI; missing: "
-                + ", ".join(sorted(missing))
+                + ", ".join(missing_in_header)
             )
-        if extra:
+        if extra_in_header:
             problems.append(
                 "R5: C header declares ops not in the Zig ABI (host-invented op): "
-                + ", ".join(sorted(extra))
+                + ", ".join(extra_in_header)
             )
         zig_version = ZIG_VERSION_RE.search(abi)
-        header_version = HEADER_VERSION_RE.search(header)
-        if not zig_version or not header_version:
+        hdr_version = HEADER_VERSION_RE.search(header)
+        if not zig_version or not hdr_version:
             problems.append("R5: corridor ABI version is not declared on both sides (Zig + C header)")
-        elif zig_version.group(1) != header_version.group(1):
+        elif zig_version.group(1) != hdr_version.group(1):
             problems.append(
                 f"R5: ABI version mismatch -- Zig returns {zig_version.group(1)}, "
-                f"C header says {header_version.group(1)}"
+                f"C header declares {hdr_version.group(1)}"
             )
-        # every Rust-free host must call only corridor ops, and at least one must exist
-        host_dir = root / C_HOST_DIR
-        host_files = sorted(host_dir.glob("*.c")) if host_dir.is_dir() else []
-        bound_hosts = 0
-        for host in host_files:
-            used = set(CALL_RE.findall(host.read_text(encoding="utf-8")))
-            if not used:
+
+    host_dir = root / C_HOST_DIR
+    if host_dir.is_dir():
+        called_any = False
+        for host in sorted(host_dir.glob("*.c")):
+            src = host.read_text(encoding="utf-8")
+            calls = set(CALL_RE.findall(src))
+            if not calls:
                 continue
-            bound_hosts += 1
-            rogue = used - export_set
+            called_any = True
+            rogue = sorted(c for c in calls if c not in set(exports) | {"sens_zig_codec_abi_version"})
             if rogue:
                 problems.append(
                     f"R5: host `{host.name}` calls ops outside the corridor: "
-                    + ", ".join(sorted(rogue))
+                    + ", ".join(rogue)
                 )
-        if host_files and bound_hosts == 0:
+        if not called_any:
             problems.append(
                 "R5: no Rust-free host in host-c/*.c calls the corridor "
-                "(the corridor is declared but unused by any host)"
+                "(host-neutral proof is empty)"
             )
 
     return problems
@@ -177,26 +185,18 @@ def check(root: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
-    ns = parser.parse_args()
-    root = Path(ns.root).resolve()
-    try:
-        problems = check(root)
-    except FileNotFoundError as exc:
-        print(f"CORRIDOR_BLOCKED missing corridor file: {exc}", flush=True)
-        return 1
+    parser.add_argument("root", nargs="?", default=".", type=Path)
+    args = parser.parse_args()
+    root = args.root.resolve()
+    problems = check(root)
     if problems:
-        print(
-            "CORRIDOR_BLOCKED Rust<->SENS link is not confined to the sterile Zig corridor:",
-            flush=True,
-        )
-        for problem in problems:
-            print(" -", problem, flush=True)
+        print("CORRIDOR_BLOCKED:", file=sys.stderr)
+        for item in problems:
+            print(f"  - {item}", file=sys.stderr)
         return 1
     print(
         "CORRIDOR_OK Rust<->SENS crosses only the sterile Zig corridor "
-        "(default zig-transport, no silent fallback, physical-only ABI, host-neutral)",
-        flush=True,
+        "(default zig-transport, no silent fallback, physical-only ABI, host-neutral)"
     )
     return 0
 
