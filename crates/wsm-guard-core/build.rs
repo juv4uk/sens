@@ -15,6 +15,11 @@ fn main() {
     }
     println!("cargo:rerun-if-env-changed=ZIG");
     println!("cargo:rerun-if-env-changed=PATH");
+    // Explicit compatibility builds may compile the host but cannot load
+    // SENS Guard sources. The Rust adapter below fails closed in that mode.
+    if env::var_os("CARGO_FEATURE_ZIG_SOURCE").is_none() {
+        return;
+    }
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
         .join("../..");
     let compiler = env::var_os("ZIG").unwrap_or_else(|| "zig".into());
