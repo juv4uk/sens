@@ -52,6 +52,10 @@ jobs:
           # Full migration proof + native physical test are separate GO inputs.
           echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
           zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+          # Independent Rust-free C caller compiled and linked with Zig ABI v2.
+          # Physical T5/F3C/E1 + ELF/archive evidence, never a semantic oracle.
+          echo 'test_id=zig-release-c-host-abi-v2 layer=transport semantic_authority=SENS host=C'
+          bash research/zig-codecs/host-c/verify.sh
 
       - name: Upload release GO-gate report
         if: always()
