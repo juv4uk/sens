@@ -148,7 +148,8 @@ def _is_zig_carry(node: ast.AST) -> bool:
         and node.func.attr == "carry_t5"
         and _is_named(node.func.value, "zig_codec_bridge")
         and len(node.args) == 2
-        and not node.keywords
+        and all(keyword.arg == "trusted_source_sha256" for keyword in node.keywords)
+        and len(node.keywords) <= 1
         and _is_named(node.args[0], "zig_binary")
         and _is_named(node.args[1], "projection")
     )

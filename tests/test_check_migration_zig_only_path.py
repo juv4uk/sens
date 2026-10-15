@@ -193,6 +193,23 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
         failures = self.module.check(self.root)
         self.assertTrue(any("M8:" in message for message in failures), failures)
 
+    def test_pinned_carry_optional_digest_matches_real_migrator(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.carry_t5(zig_binary, projection)",
+            "zig_codec_bridge.carry_t5(zig_binary, projection, "
+            "trusted_source_sha256=digest(reference_bytes))",
+        )
+        self.assertEqual(self.module.check(self.root), [])
+
+    def test_unreviewed_carry_keyword_cannot_authorize_publication(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.carry_t5(zig_binary, projection)",
+            "zig_codec_bridge.carry_t5(zig_binary, projection, source=reference_bytes)",
+        )
+        self.assertTrue(any("M8:" in message for message in self.module.check(self.root)))
+
     def test_carry_unpinned_binary_cannot_mint_staged_sens(self) -> None:
         self._mutate(
             "scripts/migrate-t5-batch.py",
