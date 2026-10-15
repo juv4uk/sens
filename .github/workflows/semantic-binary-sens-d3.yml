@@ -1,0 +1,39 @@
+name: SENS semantic selftest — binary D1-D3
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/physical_t5_execution.rs"
+      - "tests/fixtures/semantic/d3-selftest.lisp"
+      - "tests/fixtures/semantic/d3-selftest.sens"
+      - "tests/fixtures/semantic/d3-selftest-negative.lisp"
+      - "tests/fixtures/semantic/d3-selftest-negative.sens"
+      - ".github/workflows/semantic-binary-sens-d3.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  binary-sens-verdict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: "2"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - name: Точний T5 фізичний носій не змінює двійковий SENS
+        run: |
+          cargo run --locked --quiet -p sens-cli --bin sens-trit -- verify tests/fixtures/semantic/d3-selftest.lisp
+          cargo run --locked --quiet -p sens-cli --bin sens-trit -- verify tests/fixtures/semantic/d3-selftest-negative.lisp
+      - name: Закони D3 й рішення ТАК або НІ обчислює сам SENS
+        run: |
+          set -euo pipefail
+          yes_bit="$(cargo run --locked --quiet -p sens-cli --bin sens-trit -- eval tests/fixtures/semantic/d3-selftest.sens)"
+          no_bit="$(cargo run --locked --quiet -p sens-cli --bin sens-trit -- eval tests/fixtures/semantic/d3-selftest-negative.sens)"
+          test "$yes_bit" = 1 || { echo "SENS selftest did not return D1 YES" >&2; exit 1; }
+          test "$no_bit" = 0 || { echo "SENS one-bit negative witness did not return D1 NO" >&2; exit 1; }
+          echo "SENS-owned semantic verdict PASS: positive D1=1, one-bit mutant D1=0"
+      - name: Rust — тільки транспорт і передавання власного вердикту SENS
+        run: cargo test --locked -p sens --test physical_t5_execution d3_semantics_are_executed_and_decided_by_binary_sens -- --exact --nocapture
