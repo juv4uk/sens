@@ -144,6 +144,52 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
                 self.assertEqual(protected.read_bytes(), original)
                 self.assertFalse(self.report.exists())
 
+    def test_input_lisp_can_never_be_report_destination(self) -> None:
+        # A valid merged report cannot overwrite a canonical source file.
+        protected = self.root / "src/a.lisp"
+        original = protected.read_bytes()
+        for report in (protected, self.root / "src" / ".." / "src" / "a.lisp"):
+            with self.subTest(report=str(report)):
+                run = self.invoke("valid", "src/a.lisp", "src/b.lisp", report=report)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn("test_id=report-source-collision", run.stderr)
+                self.assertIn("layer=transport", run.stderr)
+                self.assertNotIn("--- worker", run.stdout)
+                self.assertEqual(protected.read_bytes(), original)
+                self.assertFalse(self.report.exists())
+        self.assertFalse(self.output.exists())
+
+    def test_report_symlink_to_source_is_blocked(self) -> None:
+        protected = self.root / "src/a.lisp"
+        original = protected.read_bytes()
+        alias = self.root / "receipt-link.json"
+        alias.symlink_to(protected)
+        run = self.invoke("valid", "src/a.lisp", report=alias)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=report-source-collision", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertEqual(protected.read_bytes(), original)
+        self.assertTrue(alias.is_symlink())
+        self.assertFalse(self.report.exists())
+
+    def test_report_hardlink_to_source_is_blocked(self) -> None:
+        protected = self.root / "src/a.lisp"
+        original = protected.read_bytes()
+        alias = self.root / "receipt-hardlink.json"
+        try:
+            os.link(protected, alias)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"hardlinks unavailable on this host: {exc}")
+        self.assertNotEqual(protected.resolve(), alias.resolve())
+        self.assertEqual(protected.stat().st_ino, alias.stat().st_ino)
+        run = self.invoke("valid", "src/a.lisp", report=alias)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=report-source-collision", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertEqual(protected.read_bytes(), original)
+        self.assertEqual(alias.read_bytes(), original)
+        self.assertFalse(self.report.exists())
+
     def test_duplicate_explicit_path_is_blocked_before_any_worker(self) -> None:
         run = self.invoke("valid", "src/a.lisp", "./src/a.lisp")
         self.assertNotEqual(run.returncode, 0)
