@@ -53,6 +53,13 @@ def require_manual_preflight(source: str) -> None:
         if command not in source:
             raise AssertionError("RELEASE_BLOCKED: missing preflight gate " + command)
 
+    # A release preflight must really run the pinned Zig 0.16 physical
+    # migration bridge. --self-test explicitly skips transport and exits 0,
+    # so it can never substitute for the mandatory pre-tag physical proof.
+    physical_command = "python3 scripts/migration-zig-gate.py --require-zig"
+    if re.search(r"(?m)^          " + re.escape(physical_command) + r"[ \\t]*$", source) is None:
+        raise AssertionError("RELEASE_BLOCKED: missing full Zig physical migration gate")
+
 
 class ReleasePreflightScopeTest(unittest.TestCase):
     @classmethod
@@ -88,6 +95,23 @@ class ReleasePreflightScopeTest(unittest.TestCase):
                 broken = self.workflow.replace(command, "echo skipped-release-gate", 1)
                 self.assertNotEqual(broken, self.workflow)
                 with self.assertRaisesRegex(AssertionError, "missing preflight gate"):
+                    require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_selftest_only_zig_migration(self):
+        current = "python3 scripts/migration-zig-gate.py --require-zig"
+        self.assertIn(current, self.workflow)
+        for replacement in (
+            "python3 scripts/migration-zig-gate.py --self-test",
+            "# " + current,
+            "echo " + current,
+            current + " --self-test",
+        ):
+            with self.subTest(replacement=replacement):
+                broken = self.workflow.replace(current, replacement, 1)
+                self.assertNotEqual(broken, self.workflow)
+                with self.assertRaisesRegex(
+                    AssertionError, "missing full Zig physical migration gate"
+                ):
                     require_manual_preflight(broken)
 
     def test_negative_guard_rejects_floating_event_mapping(self):
