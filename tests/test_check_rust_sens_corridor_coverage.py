@@ -68,6 +68,59 @@ class CorridorCoverageTests(unittest.TestCase):
         write_registry(self.root, [])
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_comment_only_zig_reference_does_not_hide_bypass(self) -> None:
+        write_crate(
+            self.root, "comment", "fn f() { sens::decode_binary_frame(&[]); } "
+            "// zig_transport::decode_t5_words(&bytes)\n",
+        )
+        write_registry(self.root, [])
+        self.assertTrue(any("crates/comment" in x for x in self.module.check(self.root)))
+
+    def test_string_only_zig_reference_does_not_hide_bypass(self) -> None:
+        write_crate(
+            self.root, "literal",
+            'fn f() { sens::decode_binary_frame(&[]); '
+            'let _s = "zig_transport::decode_t5_words(&bytes)"; }',
+        )
+        write_registry(self.root, [])
+        self.assertTrue(any("crates/literal" in x for x in self.module.check(self.root)))
+
+    def test_nested_block_comment_does_not_hide_bypass(self) -> None:
+        write_crate(
+            self.root, "nested", "/* outer /* inner */ "
+            "zig_transport::decode_t5_words(&bytes) */ "
+            "fn f() { sens::decode_binary_frame(&[]); }",
+        )
+        write_registry(self.root, [])
+        self.assertTrue(any("crates/nested" in x for x in self.module.check(self.root)))
+
+    def test_raw_string_does_not_hide_bypass(self) -> None:
+        write_crate(
+            self.root, "raw",
+            'fn f() { sens::decode_binary_frame(&[]); '
+            'let _s = r###"zig_transport::decode_t5_words(&bytes)"###; }',
+        )
+        write_registry(self.root, [])
+        self.assertTrue(any("crates/raw" in x for x in self.module.check(self.root)))
+
+    def test_bare_module_identifier_does_not_prove_corridor_use(self) -> None:
+        write_crate(
+            self.root, "module",
+            "mod zig_transport; fn f() { sens::decode_binary_frame(&[]); }",
+        )
+        write_registry(self.root, [])
+        self.assertTrue(any("crates/module" in x for x in self.module.check(self.root)))
+
+    def test_string_comment_delimiter_does_not_hide_real_call(self) -> None:
+        write_crate(
+            self.root, "real",
+            'fn f() { let _s = "/*"; '
+            'zig_transport::decode_t5_words(&bytes); '
+            'sens::decode_binary_frame(&[]); }',
+        )
+        write_registry(self.root, [])
+        self.assertEqual(self.module.check(self.root), [])
+
     def test_codec_owner_is_exempt(self) -> None:
         write_crate(self.root, "sens", "fn f() { decode_binary_frame(&[]); }")
         write_registry(self.root, [])

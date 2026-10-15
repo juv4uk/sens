@@ -30,8 +30,71 @@ CODEC_API = re.compile(
     r"decode_ternary_words|encode_ternary_words|"
     r"ternary_transport|frame3_small|PhysicalT5Program)\b"
 )
-# Anything that proves the host goes through the corridor.
-CORRIDOR_API = re.compile(r"\b(zig_transport|sens_zig_[a-z0-9_]+)\b")
+# A bare module name is not evidence of using the physical ABI. Require an
+# actual call; comments, strings and char literals are stripped below.
+CORRIDOR_API = re.compile(
+    r"\b(?:zig_transport::[A-Za-z_][A-Za-z0-9_]*|sens_zig_[a-z0-9_]+)\s*\("
+)
+RAW_STRING = re.compile(r'(?:br|rb|r)(?P<hashes>#{0,16})"')
+CHAR_LITERAL = re.compile(r"'(?:\\.|[^'\\\n])'")
+
+
+def _live_rust(source: str) -> str:
+    """Erase comments and literals before matching physical-codec routes.
+
+    Handles Rust raw strings and nested block comments; this remains a
+    structural guard, not a Rust parser or independent SENS oracle.
+    """
+    active: list[str] = []
+    i = 0
+    size = len(source)
+    while i < size:
+        if source.startswith("//", i):
+            stop = source.find("\n", i + 2)
+            i = stop if stop >= 0 else size
+            active.append(" ")
+            continue
+        if source.startswith("/*", i):
+            i += 2
+            depth = 1
+            while i < size and depth:
+                if source.startswith("/*", i):
+                    depth += 1
+                    i += 2
+                elif source.startswith("*/", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            active.append(" ")
+            continue
+        raw = RAW_STRING.match(source, i)
+        if raw:
+            ending = '"' + raw.group("hashes")
+            stop = source.find(ending, raw.end())
+            i = stop + len(ending) if stop >= 0 else size
+            active.append(" ")
+            continue
+        if source[i] == '"':
+            i += 1
+            while i < size:
+                if source[i] == "\\":
+                    i += 2
+                elif source[i] == '"':
+                    i += 1
+                    break
+                else:
+                    i += 1
+            active.append(" ")
+            continue
+        char = CHAR_LITERAL.match(source, i)
+        if char:
+            i = char.end()
+            active.append(" ")
+            continue
+        active.append(source[i])
+        i += 1
+    return "".join(active)
 
 
 def _crate_sources(crate: Path) -> list[Path]:
@@ -58,10 +121,12 @@ def check(root: Path) -> list[str]:
         if rel == CODEC_OWNER:
             continue  # the codec owner is allowed to own the physical codec
         sources = _crate_sources(crate)
-        touches_codec = any(CODEC_API.search(p.read_text(encoding="utf-8", errors="replace")) for p in sources)
+        live_sources = [_live_rust(p.read_text(encoding="utf-8", errors="replace"))
+                        for p in sources]
+        touches_codec = any(CODEC_API.search(src) for src in live_sources)
         if not touches_codec:
             continue
-        on_corridor = any(CORRIDOR_API.search(p.read_text(encoding="utf-8", errors="replace")) for p in sources)
+        on_corridor = any(CORRIDOR_API.search(src) for src in live_sources)
         if on_corridor:
             continue
         entry = exempt.get(rel)
