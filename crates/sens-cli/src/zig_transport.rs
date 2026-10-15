@@ -251,10 +251,12 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
 
 pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     version()?;
+    // Never report "no saving" for an unvalidated physical carrier.
+    // Even an oversized T5 input must cross the sterile Zig validator.
+    validate_t5(t5)?;
     if t5.len() > 16 {
         return Ok(None);
     }
-    validate_t5(t5)?;
     let mut bytes = vec![0u8; 16];
     let len = unsafe { sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len()) };
     if len == -3 {
@@ -286,7 +288,7 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_e1_words, decode_t5_words, encode_e1_direct, encode_t5_direct, require_same_exact_words};
+    use super::{decode_e1_words, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, require_same_exact_words};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -294,6 +296,32 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
+    }
+
+    #[test]
+    fn f3c_no_saving_never_bypasses_zig_t5_physical_validation() {
+        // Nine D9 coordinates need >16 canonical T5 bytes, with leading
+        // zeros intact. Only Zig decides their physical validity.
+        let long_words = words(&["010101000"; 9].join(" "));
+        let long_t5 = encode_t5_direct(&long_words).expect("Zig canonical T5");
+        assert!(long_t5.len() > 16);
+        assert!(encode_f3(&long_t5).expect("valid large Zig T5").is_none());
+
+        // Same length, but an out-of-range ternary byte is NEVER benign
+        // "F3C not smaller": reject it before the length-based decision.
+        let mut corrupt = long_t5.clone();
+        corrupt[0] = 0xf3;
+        let failure = encode_f3(&corrupt).expect_err("invalid large T5 must fail closed");
+        assert!(failure.contains("Zig physical T5 rejected"));
+
+        // Positive tiny F3C stays on Zig's byte-exact physical path.
+        let small = encode_t5_direct(&words("10 001 00 000 01"))
+            .expect("canonical small T5");
+        assert_eq!(small, [0x63, 0x89, 0x06, 0xa1]);
+        let packed = encode_f3(&small)
+            .expect("Zig F3C validation and encode")
+            .expect("tiny F3C should save physical bytes");
+        assert_eq!(packed, [0xf3, 0x40, 0x60]);
     }
 
     #[test]
