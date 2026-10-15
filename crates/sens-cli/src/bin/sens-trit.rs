@@ -112,20 +112,19 @@ fn read_explicit_e1(path: &Path) -> Result<Vec<u8>, String> {
 /// Mechanical E1 encoding only. The currently ratified canonical D2 reader
 /// checks exact words; the E1 codec does not grant any semantic identity.
 fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
-    // Default ingress: Zig owns physical T5 -> exact W1..W9 words;
-    // SENS's canonical D2 reader alone admits the word sequence.
-    // Only explicitly selected no-default-features uses Rust T5 reference.
-    let words = decode_canonical_t5_words(physical_t5)
-        .map_err(|e| format!("SENS canonical T5/D2 rejected: {e}"))?;
-    #[cfg(feature = "zig-transport")]
-    {
-        // Both physical directions cross Zig; SENS owns D2 admission above.
-        return zig_transport::encode_e1_direct(&words);
-    }
     #[cfg(not(feature = "zig-transport"))]
     {
-        let _ = words;
+        // Fail BEFORE decoding physical bytes: there is no Rust transport
+        // bypass, even if a caller asks for the explicit E1 carrier.
+        let _ = physical_t5;
         Err("E1 physical export requires Zig; no Rust fallback".into())
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        // Zig T5 ingress -> SENS-owned D2 admission -> Zig E1 egress.
+        let words = decode_canonical_t5_words(physical_t5)
+            .map_err(|e| format!("SENS canonical T5/D2 rejected: {e}"))?;
+        zig_transport::encode_e1_direct(&words)
     }
 }
 
