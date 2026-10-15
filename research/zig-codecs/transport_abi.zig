@@ -137,3 +137,40 @@ test "ABI v2 big endian triplets reject Rust layout and preserve exact word widt
     try std.testing.expectEqual(@as(u8, 0xa1), left[0]);
     try std.testing.expectEqual(@as(u8, 0x35), right[0]);
 }
+
+test "ABI v2 T5 encode rejects whole and partial alias without writes" {
+    // An FFI caller may reuse one allocation. Either overlap is an invalid
+    // physical transport request; failure must leave ALL caller bytes intact.
+    const source_be3 = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
+    var storage: [32]u8 = .{0x5a} ** 32;
+    @memcpy(storage[0..source_be3.len], &source_be3);
+    const original = storage;
+
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_be3(&storage, source_be3.len, &storage, storage.len));
+    try std.testing.expectEqualSlices(u8, &original, &storage);
+
+    // Source occupies [0..15), destination [13..17): only two bytes overlap.
+    // Do not depend on identical pointers to detect this mutation.
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_be3(&storage, source_be3.len,
+            storage[13..].ptr, storage.len - 13));
+    try std.testing.expectEqualSlices(u8, &original, &storage);
+
+    var output: [4]u8 = .{0x79} ** 4;
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, 3));
+    try std.testing.expectEqualSlices(u8, &.{0x79} ** 4, &output);
+
+    // Ordinary T5 rejects an otherwise representable D10 coordinate;
+    // a physical width is not a callable SENS function.
+    const d10 = [_]u8{ 10, 0, 0 };
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_be3(&d10, d10.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &.{0x79} ** 4, &output);
+
+    // Positive control: an independent buffer accepts the SAME source.
+    try std.testing.expectEqual(@as(isize, 4),
+        sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, &output);
+}
