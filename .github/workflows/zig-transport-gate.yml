@@ -48,8 +48,14 @@ jobs:
           assert data["transport_verified"] is True
           assert data["scope"] == "FULL_PHYSICAL_ZIG"
           assert [s["step"] for s in data["steps"]] == [
-              "zig-pin", "ci_zig_purity", "check_sterile_zig_corridor",
-              "check-domain-ladder-identity", "migrate-exact-domain-authority",
+              "zig-pin",
+              "ci_zig_purity",
+              "check_sterile_zig_corridor",
+              "check_rust_sens_zig_corridor",
+              "check_rust_sens_corridor_coverage",
+              "check_corridor_axiom_binding",
+              "check-domain-ladder-identity",
+              "migrate-exact-domain-authority",
               "test_zig_codec_bridge",
           ]
           assert data["zig_pin"] == "0.16.0"

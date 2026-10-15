@@ -23,17 +23,8 @@ class MigrationZigGateWorkflowTests(unittest.TestCase):
         module = runpy.run_path(str(GATE))
         required = list(module["REQUIRED_STEPS"])
         self.assertIn("check_sterile_zig_corridor", required)
-        self.assertEqual(
-            required,
-            [
-                "zig-pin",
-                "ci_zig_purity",
-                "check_sterile_zig_corridor",
-                "check-domain-ladder-identity",
-                "migrate-exact-domain-authority",
-                "test_zig_codec_bridge",
-            ],
-        )
+        self.assertIn("check_rust_sens_zig_corridor", required)
+        self.assertIn("check_corridor_axiom_binding", required)
 
         yml = WORKFLOW.read_text(encoding="utf-8")
         match = re.search(
