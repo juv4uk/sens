@@ -26,8 +26,10 @@ Exit 0 always unless --require-all is passed and a side is UNVERIFIED.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import re
 import statistics
 import subprocess
 import sys
@@ -115,16 +117,58 @@ def measure_python(iters: int, reps: int) -> dict:
                     "binary and not the SENS evaluator"}
 
 
-def measure_rust(root: Path, iters: int) -> dict:
-    for cand in ("target/release/core-math-demand-rust",
-                 "target/debug/core-math-demand-rust"):
-        if (root / cand).is_file():
-            ok, out = _run([str(root / cand)], root)
-            return {"side": "rust", "status": "MEASURED" if ok else "ERROR",
-                    "binary": cand, "output": out}
-    return {"side": "rust", "status": "UNVERIFIED",
-            "note": "build benchmarks/core-math-demand-rust first "
-                    "(cargo build -p core-math-demand-rust --release)"}
+def measure_rust(root: Path, iters: int, reps: int, rust_binary: str,
+                 expected_checksum: int, expected_ops: int) -> dict:
+    """Accept only a checked, exact-Q *paired* executable, never demand/research cargo."""
+    if not rust_binary:
+        return {"side": "rust", "status": "UNVERIFIED",
+                "note": "no exact-Q Rust executable specified (--rust-binary)"}
+    path = Path(rust_binary)
+    if not path.is_absolute():
+        path = root / path
+    if not path.is_file():
+        return {"side": "rust", "status": "UNVERIFIED",
+                "note": f"paired Rust executable does not exist: {path}"}
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    samples = []
+    for rep in range(reps):
+        before = time.perf_counter()
+        ok, output = _run([str(path), "--iters", str(iters)], root)
+        elapsed = time.perf_counter() - before
+        if not ok:
+            return {"side": "rust", "status": "ERROR",
+                    "note": f"MATH_RUST_EXEC_FAILED repetition={rep} output={output}"}
+        try:
+            row = json.loads(output)
+            if not isinstance(row, dict) or set(row) != {
+                "schema", "iters", "ops", "checksum"
+            }:
+                raise ValueError("wrong/missing exact-Q receipt fields")
+            if row["schema"] != "sens-exact-q-rust-benchmark/v1":
+                raise ValueError("not the matched Rust exact-Q benchmark")
+            if type(row["iters"]) is not int or row["iters"] != iters:
+                raise ValueError("iteration count differs from Python corpus")
+            if type(row["ops"]) is not int or row["ops"] != expected_ops:
+                raise ValueError("operation count differs from Python corpus")
+            if not isinstance(row["checksum"], str) or not re.fullmatch(
+                r"-?(0|[1-9][0-9]*)", row["checksum"]
+            ):
+                raise ValueError("invalid exact integer checksum")
+            if row["checksum"] != str(expected_checksum):
+                raise ValueError(
+                    f"checksum differs from Python corpus expected={expected_checksum} "
+                    f"actual={row['checksum']}"
+                )
+        except (ValueError, TypeError, KeyError) as exc:
+            return {"side": "rust", "status": "ERROR",
+                    "note": f"MATH_RUST_UNMATCHED_RECEIPT repetition={rep}: {exc}"}
+        samples.append(elapsed)
+    return {"side": "rust", "status": "MEASURED",
+            "binary": str(path), "binary_sha256": digest,
+            "iters": iters, "reps": reps, "ops": expected_ops,
+            "checksum": expected_checksum, "median_s": statistics.median(samples),
+            "note": "paired exact-Q research workload, process wall-clock; "
+                    "not a SENS semantic witness"}
 
 
 def measure_sens(root: Path, iters: int) -> dict:
@@ -146,12 +190,17 @@ def main() -> int:
     parser.add_argument("--iters", type=int, default=200_000)
     parser.add_argument("--reps", type=int, default=7)
     parser.add_argument("--json", default="")
+    parser.add_argument("--rust-binary", default="")
+    parser.add_argument("--require-rust", action="store_true")
     parser.add_argument("--require-all", action="store_true")
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
-
-    rows = [measure_python(ns.iters, ns.reps),
-            measure_rust(root, ns.iters),
+    if ns.iters < 1 or ns.reps < 1:
+        parser.error("--iters and --reps must be positive")
+    python_row = measure_python(ns.iters, ns.reps)
+    rows = [python_row,
+            measure_rust(root, ns.iters, ns.reps, ns.rust_binary,
+                         python_row["checksum"], python_row["ops"]),
             measure_sens(root, ns.iters)]
 
     print("MATH BENCHMARK: SENS vs Rust (exact rationals, same workload)")
@@ -175,6 +224,13 @@ def main() -> int:
             "corpus": CORPUS, "iters": ns.iters, "reps": ns.reps, "rows": rows,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    # A failed comparison is a regression. Missing sides stay UNVERIFIED.
+    if any(row["status"] == "ERROR" for row in rows):
+        print("MATH_BENCH_ERROR matched witness rejected")
+        return 1
+    if ns.require_rust and rows[1]["status"] != "MEASURED":
+        print("MATH_RUST_REQUIRED no verified paired executable")
+        return 1
     if ns.require_all and unver:
         print("MATH_BENCH_INCOMPLETE (some side UNVERIFIED)")
         return 1
