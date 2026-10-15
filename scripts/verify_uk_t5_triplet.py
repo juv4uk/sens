@@ -180,14 +180,15 @@ def canonical_uk_from_words(words: list[str]) -> str:
 
 def project_current_uk(source: str) -> list[str]:
     data = three_pass.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
-    legacy, my, upper = three_pass.build_three_pass_maps(
+    # Only current ratified human source surfaces are allowed for an
+    # Ukrainian canonical projection. Historical SID8 provenance is NOT
+    # permitted to supply executable meaning at this verification boundary.
+    my, upper, _historical_bridge = three_pass.build_three_pass_maps(
         data,
         ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry.rs",
         ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-        ROOT / "contracts/core1-historical-sid-map.lisp",
-        ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     # Ratified D7 keyboard/v2 (width 7, capacity 128, occupancy 128/128) is the
     # single current Text7 authority. The historical
@@ -197,9 +198,9 @@ def project_current_uk(source: str) -> list[str]:
     text7 = three_pass.build_text7(
         data, ROOT / "knowledge/d7-keyboard-v2-ratified.json"
     )
-    resolver = three_pass.Resolver(legacy, my, upper, source_era="auto")
+    resolver = three_pass.Resolver(my, upper)
     visible = three_pass.migrate_file(source, resolver, text7)
-    if (resolver.counts["pass1-sens8"] or resolver.counts["pass3-lisp15"]
+    if (resolver.counts["pass3-lisp15"]
             or resolver.counts["passthrough-head"]
             or resolver.counts["already-exact"]):
         raise ProjectionBlocked("non-ukrainian, historical or unknown source head")
