@@ -66,6 +66,8 @@ def main() -> int:
     parser.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--out", default=LEDGER)
+    parser.add_argument("--plan", default="",
+                        help="write a per-dependency retirement plan (JSON)")
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
 
@@ -93,6 +95,23 @@ def main() -> int:
         print(f"RUST_PROJECT_DEPS_OK no growth ({len(cur_keys)} dependency(ies), "
               "burndown only)")
         return 0
+
+    if ns.plan:
+        plan = {"schema": "sens-rust-project-deps-plan/v1",
+                "goal": "retire every direct Rust->project dependency through the caller-owned "
+                        "Zig ABI (as lib/linter.lisp was, commit 526befd6c8)",
+                "steps_per_dep": [
+                    "1. move the source bytes out of Rust: no include_str!/fs::read of it",
+                    "2. carry them through the caller-owned Zig ABI (opaque bytes + declared length)",
+                    "3. prove byte identity via the Zig corridor, not a Rust-side parse",
+                    "4. run scripts/report_rust_project_deps.py --check: the dep must show as burndown",
+                ],
+                "order": [d["target"] for d in current],
+                "count": len(current)}
+        pp = root / ns.plan
+        pp.parent.mkdir(parents=True, exist_ok=True)
+        pp.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"wrote {ns.plan}: {len(current)} retirement step(s)")
 
     ledger = {"schema": "sens-rust-project-deps/v1",
               "owner_rule": "Rust reaches lib/contract/contracts/knowledge ONLY via the "
