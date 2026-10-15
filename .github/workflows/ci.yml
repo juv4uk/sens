@@ -534,8 +534,9 @@ jobs:
           # Не маскувати чужий RED: запускати власну нативну перевірку
           # незалежно від результату попередніх кроків того самого job.
           echo "test_id=repl-uk-step layer=eval executor=NATIVE_SENS semantic_authority=SENS"
-          cargo build --locked -p sens-cli --bin sens
-          bash scripts/prove-repl-uk-step.sh target/debug/sens
+          # Перший точний meta-eval loader у чинній бібліотеці SENS;
+          # не викликати простий десятковий файловий reader.
+          bash scripts/prove-repl-uk-step.sh
       - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
         shell: bash
         run: |
