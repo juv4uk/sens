@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sens_t5_codec as C  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-ROW = re.compile(r"^\s*\(([01]{1,9})\s+\(укр\s+([^)]+)\)", re.MULTILINE)
+ROW = re.compile(r"^\s*\(([01]{1,9})\s+\(ук\s+[^)]+\)\s+\(укр\s+([^)]+)\)", re.MULTILINE)
 
 
 def load_uk_surfaces() -> dict[str, str]:
