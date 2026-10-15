@@ -37,6 +37,18 @@ class ReleaseVersionAlignmentTests(unittest.TestCase):
         self.assertIn("sens-cli", self.mod.RELEASE_CRATES)
         self.assertIn("sens-wasm", self.mod.RELEASE_CRATES)
 
+    def test_release_yml_runs_mechanical_gates(self) -> None:
+        yml = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        self.assertIn("check-release-version-alignment.py", yml)
+        self.assertIn("check-release-pins.py", yml)
+
+    def test_preflight_yml_runs_mechanical_gates(self) -> None:
+        yml = (
+            ROOT / ".github" / "workflows" / "release-preflight.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("check-release-version-alignment.py", yml)
+        self.assertIn("check-release-pins.py", yml)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
