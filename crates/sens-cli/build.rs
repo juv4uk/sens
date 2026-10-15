@@ -8,6 +8,11 @@ fn main() {
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/f3c/f3c.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport_abi.zig");
+    // Zig is resolved from the explicit ZIG override or from PATH.
+    // Without these triggers Cargo could silently reuse a stale Zig archive
+    // after its compiler selection changes, bypassing the pinned version probe.
+    println!("cargo:rerun-if-env-changed=ZIG");
+    println!("cargo:rerun-if-env-changed=PATH");
     if env::var_os("CARGO_FEATURE_ZIG_TRANSPORT").is_none() {
         return;
     }
