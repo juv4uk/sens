@@ -226,5 +226,53 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
             check_embedded_asset_watches(late, root)
 
 
+    def test_repl_prerequisite_zig_assets_have_live_rebuild_watches(self) -> None:
+        """A changed REPL Lisp source must invalidate the Zig static archive."""
+        source = BUILD.read_text(encoding="utf-8")
+        root = ZIG_ROOT.read_text(encoding="utf-8")
+        # Positive: same existing checker; no second source of policy.
+        check_embedded_asset_watches(source, root)
+        for asset in (
+            "lib/persistent-vector.lisp",
+            "lib/time.lisp",
+            "lib/epistemic.lisp",
+        ):
+            with self.subTest(asset=asset):
+                watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
+                self.assertEqual(source.count(watch), 1, asset)
+                self.assertIn(f'@embedFile("{asset}")', root)
+                # Negative: a missing live watch must fail the entire build gate.
+                mutant = source.replace(watch, "", 1)
+                with self.assertRaisesRegex(
+                    ValueError, "ZIG_CORRIDOR_STALE_ASSET.*missing_or_late_rebuild_watch"
+                ):
+                    check_embedded_asset_watches(mutant, root)
+
+
+
+    def test_f6_fs_source_assets_use_zig_and_live_cargo_watches(self) -> None:
+        root = ZIG_ROOT.read_text(encoding="utf-8")
+        build = BUILD.read_text(encoding="utf-8")
+        check_embedded_asset_watches(build, root)
+        for filename, symbol, adapter in (
+            ("world", "sens_zig_world_bytes_copy", "world_source_bytes"),
+            ("content-store", "sens_zig_content_store_bytes_copy", "content_store_source_bytes"),
+            ("lisp-fs", "sens_zig_lisp_fs_bytes_copy", "lisp_fs_source_bytes"),
+        ):
+            asset = f"lib/{filename}.lisp"
+            watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
+            with self.subTest(asset=asset):
+                self.assertIn(f'@embedFile("{asset}")', root)
+                self.assertIn(f"pub export fn {symbol}(", root)
+                self.assertEqual(build.count(watch), 1)
+                with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_STALE_ASSET"):
+                    check_embedded_asset_watches(build.replace(watch, "", 1), root)
+                for host in ("producer", "consumer"):
+                    src = (ROOT / f"crates/sens-cli/src/bin/wsm-fs-record-{host}.rs").read_text(encoding="utf-8")
+                    self.assertNotIn(f'include_str!("../../../../{asset}")', src)
+                    self.assertIn(f"zig_transport::{adapter}()", src)
+                    self.assertIn(f'("lib/{filename}.lisp", sources[', src)
+
+
 if __name__ == "__main__":
     unittest.main()

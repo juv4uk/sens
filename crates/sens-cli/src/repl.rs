@@ -15,14 +15,46 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
-const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    (
-        "persistent-vector.lisp",
-        include_str!("../../../lib/persistent-vector.lisp"),
-    ),
-    ("time.lisp", include_str!("../../../lib/time.lisp")),
-    ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
-];
+// REPL-local FFI: other CLI binaries acquire no extra dead_code warnings.
+#[cfg(feature = "zig-transport")]
+unsafe extern "C" {
+    fn sens_zig_codec_abi_version() -> u32;
+    fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+}
+#[cfg(feature = "zig-transport")]
+fn repl_zig_source(
+    copy: unsafe extern "C" fn(*mut u8, usize) -> isize, label: &str,
+) -> Result<String, String> {
+    if unsafe { sens_zig_codec_abi_version() } != 2 {
+        return Err(format!("{label}: Zig ABI version mismatch"));
+    }
+    let n = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+    if n <= 0 { return Err(format!("{label}: invalid Zig byte length {n}")); }
+    let len = usize::try_from(n).map_err(|_| format!("{label}: Zig length overflow"))?;
+    if len > 8 * 1024 * 1024 { return Err(format!("{label}: host byte bound exceeded")); }
+    let mut bytes = vec![0u8; len];
+    let got = unsafe { copy(bytes.as_mut_ptr(), len) };
+    if got != n { return Err(format!("{label}: Zig exact copy rejected {got}")); }
+    String::from_utf8(bytes).map_err(|err| format!("{label}: UTF-8 source error {err}"))
+}
+// No Rust include_str! of SENS project source. Zig owns byte transport.
+fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        Ok(vec![
+            ("persistent-vector.lisp", repl_zig_source(sens_zig_repl_persistent_vector_bytes_copy, "ZIG_REPL_PERSISTENT_VECTOR")?),
+            ("time.lisp", repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?),
+            ("epistemic.lisp", repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?),
+        ])
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: REPL prerequisites require Zig transport".into())
+    }
+}
+
 // The persistent map is a separate host-neutral root Zig byte asset.
 fn persistent_map_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -204,15 +236,16 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         let forward_source = forward_surface_source()?;
         let knowledge_source = knowledge_surface_source()?;
         let persistent_map_source = persistent_map_surface_source()?;
+        let prerequisite_sources = surface_prerequisite_sources()?;
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
             .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
             .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
             .chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))
             .chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))
-            .chain(SURFACE_PREREQUISITES.iter().copied());
+            .chain(prerequisite_sources.iter().map(|(name, source)| (*name, source.as_str())));
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
-                sens::load_time_library(&mut session)
+                sens::load_time_library_from_source(&mut session, source)
             } else if matches!(name, "unify.lisp" | "reason.lisp" | "forward.lisp" | "knowledge.lisp" | "persistent-map.lisp") {
                 sens::eval_pinned_reasoning_source(
                     &format!("lib/{name}"), source, &mut session

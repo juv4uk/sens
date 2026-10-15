@@ -166,7 +166,8 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy", "sens_zig_persistent_map_bytes_copy", "sens_zig_world_bytes_copy", "sens_zig_content_store_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy", "sens_zig_persistent_map_bytes_copy", "sens_zig_world_bytes_copy", "sens_zig_content_store_bytes_copy", "sens_zig_lisp_fs_bytes_copy")
+REPL_LOCAL_NAMES = ("sens_zig_repl_persistent_vector_bytes_copy", "sens_zig_repl_time_bytes_copy", "sens_zig_repl_epistemic_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -208,6 +209,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_persistent_map_bytes_copy", "lib/persistent-map.lisp"),
         ("sens_zig_world_bytes_copy", "lib/world.lisp"),
         ("sens_zig_content_store_bytes_copy", "lib/content-store.lisp"),
+        ("sens_zig_lisp_fs_bytes_copy", "lib/lisp-fs.lisp"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
@@ -235,6 +237,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_persistent_map_bytes_copy", "lib/persistent-map.lisp", "persistent_map_asset"),
         ("sens_zig_world_bytes_copy", "lib/world.lisp", "world_asset"),
         ("sens_zig_content_store_bytes_copy", "lib/content-store.lisp", "content_store_asset"),
+        ("sens_zig_lisp_fs_bytes_copy", "lib/lisp-fs.lisp", "lisp_fs_asset"),
     ):
         const_line = f'const {binding} = @embedFile("{asset}");'
         if len(re.findall(r"(?m)^[ \t]*" + re.escape(const_line) + r"[ \t]*$", zig_root)) != 1:
@@ -275,7 +278,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
             entries.setdefault(match.group(1), []).append(
                 " ".join(match.group(2).split())
             )
-        extra = sorted(set(entries) - set(ASSET_NAMES))
+        extra = sorted(set(entries) - set(ASSET_NAMES) - (set(REPL_LOCAL_NAMES) if layer == "asset-zig" else set()))
         if extra:
             fail(layer, f"unreviewed_asset_exports={','.join(extra)}")
         for name in ASSET_NAMES:

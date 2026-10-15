@@ -22,6 +22,10 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
     println!("cargo:rerun-if-changed=../../lib/world.lisp");
     println!("cargo:rerun-if-changed=../../lib/content-store.lisp");
+    println!("cargo:rerun-if-changed=../../lib/lisp-fs.lisp");
+    println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
+    println!("cargo:rerun-if-changed=../../lib/time.lisp");
+    println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");

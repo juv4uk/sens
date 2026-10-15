@@ -333,6 +333,23 @@ pub fn world_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+/// Original F6 filesystem source is byte-exact through Zig, never Rust include.
+pub fn lisp_fs_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_lisp_fs_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 { return Err("ZIG_F6_LISP_FS_CARRIER invalid source length".into()); }
+    let len = usize::try_from(required).map_err(|_| "ZIG_F6_LISP_FS_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 { return Err("ZIG_F6_LISP_FS_CARRIER host byte cap exceeded".into()); }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe { asset_ffi::sens_zig_lisp_fs_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    if copied != required {
+        return Err(format!("ZIG_F6_LISP_FS_CARRIER byte copy rejected: {copied}"));
+    }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],
