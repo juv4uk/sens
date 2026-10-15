@@ -634,6 +634,20 @@ def binary_rewrite(
             )
         return identity
 
+    def resolve_or_migration_error(token: str, *, role: str, offset: int):
+        """Translate historical resolver failures without admitting legacy bits.
+
+        The SENS migration CLI owns its stable BinaryMigrationError interface;
+        SourceResolver owns which exact-domain identity is allowed.
+        """
+        try:
+            return resolver.resolve_head(token)
+        except ValueError as exc:
+            line, column = line_col(source, offset)
+            raise BinaryMigrationError(
+                f"unresolved {role} {token!r} at {line}:{column}: {exc}"
+            ) from exc
+
     def is_bound(name: str) -> bool:
         return name in global_bindings or any(
             name in entry["bindings"] for entry in frames
@@ -825,7 +839,7 @@ def binary_rewrite(
             if is_bound(token) and not re.fullmatch(r"[01]{3,9}", token):
                 emit_text7_atom(token, role="call-head")
             else:
-                resolution = resolver.resolve_head(token)
+                resolution = resolve_or_migration_error(token, role="executable head", offset=start)
                 if resolution.resolved:
                     identity = require_resolved_identity(resolution, token, start)
                     if identity.label == "EMPTY":
@@ -857,7 +871,7 @@ def binary_rewrite(
                     raise BinaryMigrationError(
                         "history-aware SourceResolver is required for SID data migration"
                     )
-                resolution = resolver.resolve_head(token)
+                resolution = resolve_or_migration_error(token, role="legacy SID value", offset=start)
                 if not resolution.resolved:
                     raise BinaryMigrationError(
                         f"unresolved legacy SID value {token!r}"
@@ -877,7 +891,7 @@ def binary_rewrite(
                         "history-aware SourceResolver is required "
                         "for domain coordinates"
                     )
-                resolution = resolver.resolve_head(token)
+                resolution = resolve_or_migration_error(token, role="domain coordinate", offset=start)
                 if not resolution.resolved:
                     raise BinaryMigrationError(
                         f"unresolved domain coordinate {token!r} at "
