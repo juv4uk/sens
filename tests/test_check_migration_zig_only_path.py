@@ -131,6 +131,24 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
         p.write_text(t, encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
+    def test_dry_run_only_zig_verifier_cannot_authorize_write(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "if zig_binary is not None:\n            evidence",
+                     "if not args.write:\n            evidence")
+        self.assertTrue(any("M5:" in msg for msg in self.module.check(self.root)))
+
+    def test_null_zig_verifier_cannot_authorize_write(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "if zig_binary is not None:\n            evidence",
+                     "if zig_binary is None:\n            evidence")
+        self.assertTrue(any("M5:" in msg for msg in self.module.check(self.root)))
+
+    def test_explicit_write_zig_verifier_is_accepted(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "if zig_binary is not None:\n            evidence",
+                     "if args.write and args.zig_codec:\n            evidence")
+        self.assertEqual(self.module.check(self.root), [])
+
     def test_runner_bypassing_driver_is_blocked(self) -> None:
         self._mutate("scripts/migrate-parallel.sh",
                      "scripts/migrate-t5-batch.py", "scripts/sens_t5_codec.py")
