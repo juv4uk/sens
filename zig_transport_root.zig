@@ -77,6 +77,26 @@ test "exact Ukrainian peer source, short copy refuses without writing" {
     try std.testing.expectEqualSlices(u8, ukr_asset[0..ukr_asset.len], &out);
 }
 
+// Transport, never interpretation of canonical Ukrainian identifiers.
+const uk_asset = @embedFile("lib/surface/uk.lisp");
+pub export fn sens_zig_uk_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (uk_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(uk_asset.len);
+    if (capacity < uk_asset.len) return -2;
+    @memcpy(dst[0..uk_asset.len], uk_asset[0..uk_asset.len]);
+    return @intCast(uk_asset.len);
+}
+test "compact Ukrainian bytes copied exactly; short buffer is untouched" {
+    const length = sens_zig_uk_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(uk_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_uk_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [uk_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_uk_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, uk_asset[0..uk_asset.len], &output);
+}
+
 test "contract exact-byte copy and no partial output on a short buffer" {
     const length = sens_zig_contract_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(contract_asset.len)), length);

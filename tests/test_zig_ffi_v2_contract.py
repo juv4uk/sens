@@ -166,7 +166,7 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -198,6 +198,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_contract_bytes_copy", "language-contract.lisp"),
         ("sens_zig_sanskrit_bytes_copy", "lib/surface/sa.lisp"),
         ("sens_zig_ukr_bytes_copy", "lib/surface/ukr.lisp"),
+        ("sens_zig_uk_bytes_copy", "lib/surface/uk.lisp"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:

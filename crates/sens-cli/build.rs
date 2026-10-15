@@ -14,6 +14,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
+    println!("cargo:rerun-if-changed=../../lib/surface/uk.lisp");
     // E1 ABI v2 imports the existing Zig physical reader/writer. Rebuild the
     // static corridor archive when its encoding law or CRC mechanism changes.
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/e1.zig");
