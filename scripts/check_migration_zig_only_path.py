@@ -18,6 +18,9 @@ M6  scripts/zig_codec_bridge.py fails closed: it pins the compiler (0.16.0),
     raises ZigCodecError, refuses to overwrite the built binary, and rejects a
     non-attested binary.
 
+M7  scripts/migrate-parallel.sh (if present) delegates to the canonical driver and
+    never touches the codec directly (no second path).
+
 Exit 0 = MIGRATION_ZIG_ONLY_PATH_OK; exit 1 = MIGRATION_ZIG_ONLY_PATH_BLOCKED.
 """
 from __future__ import annotations
@@ -70,6 +73,18 @@ def check(root: Path) -> list[str]:
     elif verify_at > staged_at:
         problems.append("M5: publish staging (staged.append) precedes the Zig "
                         "certification (verify_t5); a file could be staged uncertified")
+
+    # M7 -- the parallel runner (if present) must go through the canonical driver
+    # and add no second path to a published .sens.
+    runner_path = root / "scripts/migrate-parallel.sh"
+    if runner_path.is_file():
+        runner = runner_path.read_text(encoding="utf-8")
+        if "scripts/migrate-t5-batch.py" not in runner:
+            problems.append("M7: migrate-parallel.sh does not call the canonical driver "
+                            "scripts/migrate-t5-batch.py (a second migration path)")
+        if "zig_codec_bridge" in runner or "sens_t5_codec" in runner:
+            problems.append("M7: migrate-parallel.sh touches the codec directly instead of "
+                            "delegating to the canonical driver (a second path to .sens)")
 
     # M6 -- the bridge itself fails closed.
     if "ZigCodecError" not in bridge:

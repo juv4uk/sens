@@ -61,6 +61,9 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
         (self.root / "scripts").mkdir(parents=True, exist_ok=True)
         (self.root / "scripts/migrate-t5-batch.py").write_text(BATCH_OK, encoding="utf-8")
         (self.root / "scripts/zig_codec_bridge.py").write_text(BRIDGE_OK, encoding="utf-8")
+        (self.root / "scripts/migrate-parallel.sh").write_text(
+            "python3 scripts/migrate-t5-batch.py --out \"$OUT\" --report \"$R\" \"${chunk[@]}\"\n",
+            encoding="utf-8")
         self.module = load_checker()
 
     def tearDown(self) -> None:
@@ -97,6 +100,11 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                       "            staged.append((rel, packed, row))\n"
                       "            zig_codec_bridge.verify_t5(zig_binary, packed)")
         p.write_text(t, encoding="utf-8")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_runner_bypassing_driver_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-parallel.sh",
+                     "scripts/migrate-t5-batch.py", "scripts/sens_t5_codec.py")
         self.assertTrue(self.module.check(self.root))
 
     def test_bridge_without_pin_is_blocked(self) -> None:
