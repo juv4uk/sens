@@ -332,8 +332,10 @@ def run(root, write=False, selected=None):
         # Raw regexes incorrectly attribute generated strings to historical
         # executable W8: e.g. a quoted "(00001001 ...)" source template.
         # Only actual unquoted list heads may establish source-era provenance.
+        # Every exact-eight executable candidate needs an actual parse, even
+        # when a source file contains no historical DEFINE/DEF anchor.
         possible_legacy = bool(re.search(
-            r"\(\s*(?:00001001|00001011)(?=[\s)])", original))
+            r"\(\s*[01]{8}(?=[\s)])", original))
         possible_pinned_d3 = (
             path in PARTIAL_D4_WITH_LEGACY_D3
             and bool(re.search(r"\(\s*(?:00000111|110)(?=[\s)])", original))
@@ -353,9 +355,13 @@ def run(root, write=False, selected=None):
             and bool(active_heads & {"00000111", "110"})
         )
         if not (has_legacy_definition or has_pinned_legacy_d3):
+            # An unmatched 8-bit head may be contemporary D8 or historical W8;
+            # neither a missing DEFINE nor a bit-pattern match proves its era.
+            unproved = sorted(h for h in active_heads if BITS.fullmatch(h))
             report.append({"path": path, "status": "source-era-unproved",
-                           "potential_heads": 0,
-                           "reasons": ["no historical DEFINE/DEF call head"]})
+                           "potential_heads": len(unproved),
+                           "reasons": (["unattributed 8-bit executable heads: " + ", ".join(unproved)]
+                                       if unproved else ["no historical DEFINE/DEF call head"])})
             continue
         if "GENERATED" in original[:360] or "do not hand-edit" in original[:360]:
             report.append({"path": path, "status": "source-era-unproved",
@@ -390,7 +396,8 @@ def run(root, write=False, selected=None):
         "known_legacy_successors": len(mapping),
         "historical_held_cells": len(blocked),
     }
-    return {"schema": "domain_ladder-lisp-source-batch/v1", "summary": summary, "files": report}
+    return {"schema": "domain_ladder-lisp-source-batch/v1", "summary": summary,
+            "semantic_admitted": False, "files": report}
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()

@@ -119,6 +119,22 @@ class BatchSourceTests(unittest.TestCase):
         findings = self.guard.scan_lisp(new, "lib/f.lisp")
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in findings})
 
+    def test_non_define_eight_bit_head_has_visible_unproved_evidence(self):
+        # Historical call-head 01001011 must never disappear simply because
+        # this file has no old DEFINE/DEF. Source-era remains unproved.
+        path = "lib/machine/dispatch/native-first-execute.lisp"
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(len(report["files"]), 1)
+        row = report["files"][0]
+        self.assertEqual(row["path"], path)
+        self.assertNotEqual(row["status"], "admitted")
+        self.assertTrue(
+            "01001011" in " ".join(row["reasons"])
+            or any("parser incomplete" in reason for reason in row["reasons"]),
+            row,
+        )
+        self.assertFalse(report["semantic_admitted"])
+
     def test_generated_and_current_domain_data_are_never_mass_rewritten(self):
         names = {
             "lib/machine/encoding/admitted-iclass-index.lisp",
