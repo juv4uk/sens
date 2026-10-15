@@ -25,6 +25,14 @@ jobs:
         with:
           shared-key: release-preflight
 
+      - name: Release version alignment (gate #1 mechanical)
+        run: |
+          python3 scripts/check-release-version-alignment.py --self-test
+          python3 scripts/check-release-version-alignment.py
+
+      - name: Release toolchain pins (gate #3 mechanical)
+        run: python3 scripts/check-release-pins.py
+
       - name: Release preflight trigger scope negative controls
         run: python3 -m unittest discover -s packaging/tests -p test_release_preflight_scope.py -v
 
@@ -66,14 +74,8 @@ jobs:
           import json, sys
           from pathlib import Path
           data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          # Fail-closed even under python3 -O: assert statements vanish under optimization.
           summary = data["summary"]
           physical = summary["physical_pairs_seen"]
-          # This is a bounded preflight, not the tag-time full-corpus GO gate.
-          # Do not freeze today's zero-admission debt as a permanent invariant:
-          # legitimate, independently evidenced admissions must not make future
-          # progress fail this preflight. The tag workflow separately requires
-          # release_admitted == physical_pairs_seen > 0 on the same exact SHA.
           checks = (
               (data["schema"] == "sens-t5-triplet-inventory/v1", "invalid evidence schema"),
               (data["failed_required"] == [], "required triple witness failed"),
