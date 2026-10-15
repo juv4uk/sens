@@ -201,6 +201,12 @@ jobs:
           echo 'test_id=zig-freestanding-linked-physical-abi layer=transport semantic_authority=SENS executor=zig-0.16'
           bash research/zig-codecs/check_freestanding_link.sh \
             "$RUNNER_TEMP/sens-zig-freestanding"
+          # Executable Rust process ↔ Zig ABI ↔ canonical .lisp/.sens pair,
+          # including exact bytes, physical execution and two negative controls.
+          echo 'test_id=rust-zig-sens-real-file-link layer=transport input=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens semantic_authority=SENS'
+          cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
       - name: Синтаксис усіх YAML-файлів репозиторію
         id: yaml-syntax
         shell: ruby {0}
@@ -502,12 +508,6 @@ jobs:
             e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict \
             -- --exact --nocapture | tee "$RUNNER_TEMP/sens-e1-cli-unit.log"
           grep -Fxq 'test e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict ... ok' "$RUNNER_TEMP/sens-e1-cli-unit.log"
-          # Executable Rust process ↔ Zig ABI ↔ canonical .lisp/.sens pair,
-          # including exact bytes, physical execution and two negative controls.
-          echo 'test_id=rust-zig-sens-real-file-link layer=transport input=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens semantic_authority=SENS'
-          cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
-          grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
-          grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           # Two narrow Zig-physical W7 data tests; SENS alone owns D7 glyphs.
           cargo test --locked -p sens-cli --bin sens-trit \
             d7_zig_cli_boundary_tests:: -- --nocapture | tee "$RUNNER_TEMP/sens-d7-zig-boundary.log"
