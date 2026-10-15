@@ -362,6 +362,7 @@ fn execute() -> Result<(), String> {
             if path.extension().and_then(|ext| ext.to_str()) != Some("txt") {
                 return Err("encode-d7-uk requires an explicit UTF-8 .txt source".into());
             }
+            #[cfg(feature = "zig-transport")]
             let text = fs::read_to_string(path)
                 .map_err(|e| format!("read UTF-8 D7 keyboard text: {e}"))?;
             #[cfg(feature = "zig-transport")]
@@ -384,6 +385,7 @@ fn execute() -> Result<(), String> {
             Ok(())
         }
         "decode-d7-uk" => {
+            #[cfg(feature = "zig-transport")]
             let bytes = read_sens(path)?;
             #[cfg(feature = "zig-transport")]
             let text = {
