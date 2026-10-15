@@ -113,6 +113,33 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
         self.assertIn("test_id=duplicate-source", run.stderr)
         self.assertFalse(self.report.exists())
 
+    def test_dotdot_alias_is_same_physical_lisp_and_no_workers_start(self) -> None:
+        run = self.invoke("valid", "src/a.lisp", "src/../src/a.lisp")
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=duplicate-source", run.stderr)
+        self.assertIn("same_physical_source=", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertFalse(self.report.exists())
+        self.assertFalse(self.output.exists())
+
+    def test_symlink_alias_is_same_physical_lisp_and_no_workers_start(self) -> None:
+        (self.root / "src" / "alias.lisp").symlink_to("a.lisp")
+        run = self.invoke("valid", "src/a.lisp", "src/alias.lisp")
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=duplicate-source", run.stderr)
+        self.assertIn("same_physical_source=", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertFalse(self.report.exists())
+
+    def test_missing_and_nonregular_inputs_block_before_workers(self) -> None:
+        for path in ("src/missing.lisp", "src"):
+            with self.subTest(path=path):
+                run = self.invoke("valid", path)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn("test_id=invalid-source", run.stderr)
+                self.assertNotIn("--- worker", run.stdout)
+                self.assertFalse(self.report.exists())
+
     def test_success_exit_without_report_is_not_a_green_receipt(self) -> None:
         run = self.invoke("missing", "src/a.lisp", "src/b.lisp")
         self.assertNotEqual(run.returncode, 0)
