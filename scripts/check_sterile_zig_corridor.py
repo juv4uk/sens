@@ -540,10 +540,13 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
             or 'let quoted = format!("(quote {contract_source})");' not in main):
         raise CorridorBlocked("CONTRACT_ZIG_ONLY main CLI bypassed Zig carrier or SENS quote")
     ffi = "sens_zig_contract_bytes_copy"
+    contract_host = active(_route_between(
+        rust_corridor, "pub fn contract_source_bytes(", "\nfn require_same_exact_words("
+    ))
     if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
-            or "pub fn contract_source_bytes()" not in host
-            or "let copied = unsafe" not in host
-            or "if copied != required" not in host):
+            or "let copied = unsafe" not in contract_host
+            or "if copied != required" not in contract_host
+            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in contract_host):
         raise CorridorBlocked("CONTRACT_ZIG_ONLY missing checked Rust FFI egress")
     if (root.count('const contract_asset = @embedFile("language-contract.lisp");') != 1
             or f"pub export fn {ffi}(" not in root
