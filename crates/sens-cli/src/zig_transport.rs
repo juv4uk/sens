@@ -27,6 +27,19 @@ unsafe extern "C" {
     ) -> isize;
 }
 
+// Zig writes only into caller-owned buffers: a positive F3C result can
+// still report MORE bytes than capacity. Vec::truncate silently ignores it.
+fn checked_f3c_output_len(len: isize, capacity: usize, operation: &str) -> Result<usize, String> {
+    let written = usize::try_from(len)
+        .map_err(|_| format!("Zig {operation} rejected: code={len}"))?;
+    if written == 0 || written > capacity {
+        return Err(format!(
+            "Zig {operation} invalid ABI length: reported={len} capacity={capacity}"
+        ));
+    }
+    Ok(written)
+}
+
 fn version() -> Result<(), String> {
     // SAFETY: zero-argument pure function from a statically linked Zig library.
     if unsafe { sens_zig_codec_abi_version() } != 2 {
@@ -221,13 +234,11 @@ pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     if len == -3 {
         return Ok(None); // not smaller: T5 remains production
     }
-    if len <= 0 {
-        return Err(format!("Zig F3C pack rejected: code={len}"));
-    }
-    bytes.truncate(len as usize);
-    if bytes.len() >= t5.len() {
+    let written = checked_f3c_output_len(len, bytes.len(), "F3C pack")?;
+    if written >= t5.len() {
         return Err("Zig F3C did not save bytes".into());
     }
+    bytes.truncate(written);
     Ok(Some(bytes))
 }
 
@@ -243,11 +254,31 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
             output.len(),
         )
     };
-    if len <= 0 {
-        return Err(format!("explicit Zig F3C rejected: code={len}"));
-    }
-    output.truncate(len as usize);
+    let written = checked_f3c_output_len(len, output.len(), "F3C unpack")?;
+    output.truncate(written);
     // Zig first, then the existing SENS canonical parser/evaluator.
     validate_t5(&output)?;
     Ok(output)
+}
+
+#[cfg(test)]
+mod f3c_abi_length_tests {
+    use super::checked_f3c_output_len;
+
+    #[test]
+    fn f3c_caller_owned_output_length_accepts_only_written_bytes() {
+        assert_eq!(checked_f3c_output_len(3, 16, "F3C pack").unwrap(), 3);
+        assert_eq!(checked_f3c_output_len(16, 16, "F3C unpack").unwrap(), 16);
+    }
+
+    #[test]
+    fn f3c_rejects_negative_zero_and_overreported_lengths() {
+        for (reported, capacity) in [(-3, 16), (-2, 16), (-1, 16), (0, 16), (17, 16)] {
+            assert!(
+                checked_f3c_output_len(reported, capacity, "F3C unpack").is_err(),
+                "invalid Zig ABI return {reported} must fail closed"
+            );
+        }
+        assert!(checked_f3c_output_len(isize::MAX, 16, "F3C pack").is_err());
+    }
 }

@@ -25,12 +25,35 @@ def check_sterile_ingress(main: str, bridge: str) -> None:
         raise ValueError("ZIG_CORRIDOR_BYPASS direct typed words do not reach pure SENS")
     if "sens_zig_t5_decode_be3(" not in bridge or "sens_zig_codec_abi_version()" not in bridge:
         raise ValueError("ZIG_CORRIDOR_BYPASS ABI v2 not present")
-    # One bounds check for each of the four mechanical returns (T5/F3C).
-    checks = re.findall(
-        r"if len <= 0 \|\| usize::try_from\(len\)\.ok\(\)\.filter\(\|&n\| n <= "
-        r"(?:output|be3|bytes|t5)\.len\(\)\)\.is_none\(\)", bridge)
-    if len(checks) != 4:
-        raise ValueError("ZIG_CORRIDOR_BYPASS Zig ABI returned an unbounded output length")
+    # The four ABI boundaries must enforce exact counts (T5) or bounded
+    # positive counts (F3C), not merely call Vec::truncate on a return.
+    def function(name: str) -> str:
+        anchor = "pub fn " + name + "("
+        if bridge.count(anchor) != 1:
+            raise ValueError("ZIG_CORRIDOR_BYPASS missing or duplicate " + name)
+        tail = bridge.split(anchor, 1)[1]
+        return tail.split("\npub fn ", 1)[0].split("\n#[cfg(test)]", 1)[0]
+
+    encode = function("encode_t5_direct")
+    decode = function("decode_t5_words")
+    pack = function("encode_f3")
+    unpack = function("decode_f3")
+    if ("usize::try_from(len).ok() != Some(bytes.len())" not in encode
+            or "if len < 0" not in encode):
+        raise ValueError("ZIG_CORRIDOR_BYPASS T5 encode length is not exact")
+    if ("written <= 0" not in decode
+            or ".filter(|&n| n <= be3.len())" not in decode
+            or "written % 3 != 0" not in decode):
+        raise ValueError("ZIG_CORRIDOR_BYPASS T5 decode BE3 length unbounded")
+    if ("let written = checked_f3c_output_len(len, bytes.len(), \"F3C pack\")?;" not in pack
+            or "if written >= t5.len()" not in pack):
+        raise ValueError("ZIG_CORRIDOR_BYPASS F3C pack length/size not checked")
+    if 'let written = checked_f3c_output_len(len, output.len(), "F3C unpack")?;' not in unpack:
+        raise ValueError("ZIG_CORRIDOR_BYPASS F3C unpack length not checked")
+    helper = bridge.split("fn checked_f3c_output_len(", 1)
+    if (len(helper) != 2 or "usize::try_from(len)" not in helper[1]
+            or "written == 0 || written > capacity" not in helper[1]):
+        raise ValueError("ZIG_CORRIDOR_BYPASS F3C ABI helper accepts invalid length")
     if "sens::parse_canonical_word_sequence" in bridge:
         raise ValueError("ZIG_CORRIDOR_BYPASS Zig gained SENS semantic authority")
 
@@ -59,8 +82,29 @@ class SterileRustSensCorridor(unittest.TestCase):
 
     def test_negative_zig_return_exceeds_caller_buffer(self):
         bad = self.bridge.replace(
-            "if len <= 0 || usize::try_from(len).ok().filter(|&n| n <= be3.len()).is_none() {",
-            "if len <= 0 {", 1)
+            ".filter(|&n| n <= be3.len())",
+            ".filter(|&n| n > 0)", 1)
+        with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
+            check_sterile_ingress(self.main, bad)
+
+    def test_negative_f3c_pack_accepts_unbounded_abi_length(self):
+        bad = self.bridge.replace(
+            'let written = checked_f3c_output_len(len, bytes.len(), "F3C pack")?;',
+            "let written = len as usize;", 1)
+        with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
+            check_sterile_ingress(self.main, bad)
+
+    def test_negative_f3c_unpack_accepts_unbounded_abi_length(self):
+        bad = self.bridge.replace(
+            'let written = checked_f3c_output_len(len, output.len(), "F3C unpack")?;',
+            "let written = len as usize;", 1)
+        with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
+            check_sterile_ingress(self.main, bad)
+
+    def test_negative_f3c_helper_accepts_overreported_count(self):
+        bad = self.bridge.replace(
+            "written == 0 || written > capacity",
+            "written == 0", 1)
         with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_BYPASS"):
             check_sterile_ingress(self.main, bad)
 
