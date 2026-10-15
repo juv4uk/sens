@@ -282,6 +282,121 @@ def run_audit(root: Path, output: Path) -> dict:
     }
 
 
+
+C_D10_RECEIPT = (
+    "C_ZIG_D10_COORDINATE_ONLY_PASS host=C abi=2 "
+    "d10_golden=3 ordinary_positive=2 negative=6 "
+    "d10_callable=NO semantic_authority=SENS"
+)
+C_D3_FINAL_RECEIPT = (
+    "C_D3_SUBSET_SOURCE_WITNESS_PASS tests=6 host=C rust_linked=false "
+    "semantic_scope=D1+D2+D3 cross_host_parity=NOT_VERIFIED"
+)
+C_D3_FIXTURES = ("retired-d3-cond", "retired-d3-eq", "retired-quote-inert-d3")
+
+
+def verify_c_host_stdout(stdout: str) -> dict:
+    """Fail closed on a no-op C binary, skipped D10 proof or partial fixtures.
+
+    Only verifies the real Zig-linked C process's exact stdout transcript.
+    Source validity, ELF/AR provenance and H2 SENS semantics remain separate.
+    """
+    lines = stdout.splitlines()
+    if not lines or lines[0] != C_D10_RECEIPT or lines[-1] != C_D3_FINAL_RECEIPT:
+        raise ValueError("H1_C_HOST_RECEIPT missing_first_D10_or_final_D3")
+    expected_line_count = 2 + len(C_D3_FIXTURES) * 5
+    if len(lines) != expected_line_count:
+        raise ValueError(
+            f"H1_C_HOST_RECEIPT unexpected_line_count "
+            f"expected={expected_line_count} actual={len(lines)}")
+    at = 1
+    counts = {"d10_golden": 3, "ordinary_positive": 2, "negative": 6,
+              "d3_laws": 0, "d3_negative": 0, "one_bit_mutations": 0}
+    # The C executable publishes each law + mutant in order, then all
+    # one-bit mutation receipts. This is transcript validation, not an oracle.
+    for name in C_D3_FIXTURES:
+        law = f"tests/semantic/{name}-law.bits"
+        mutant = f"tests/semantic/{name}-mutant.bits"
+        for fixture, role in ((law, "law"), (mutant, "mutant")):
+            pattern = rf"C_D3_SUBSET_T5 source={re.escape(fixture)} bytes=([1-9][0-9]*) hex=([0-9a-f]+)"
+            match = re.fullmatch(pattern, lines[at])
+            if match is None or len(match.group(2)) != 2 * int(match.group(1)):
+                raise ValueError(
+                    f"H1_C_HOST_RECEIPT missing_or_malformed_physical "
+                    f"path={fixture} line={at}")
+            byte_count = int(match.group(1))
+            at += 1
+            if role == "law":
+                expected = (f"C_D3_SUBSET_PASS source={fixture} "
+                            f"physical_bytes={byte_count} "
+                            r"exact_be3_bytes=([1-9][0-9]*) result=D1:1")
+                law_match = re.fullmatch(expected, lines[at])
+                if law_match is None or int(law_match.group(1)) % 3 != 0:
+                    raise ValueError(f"H1_C_HOST_RECEIPT law_missing_or_inexact={fixture}")
+                counts["d3_laws"] += 1
+            else:
+                if lines[at] != (f"C_D3_SUBSET_NEGATIVE_PASS source={fixture} "
+                                 "category=NONCALLABLE_HEAD"):
+                    raise ValueError(f"H1_C_HOST_RECEIPT negative_missing={fixture}")
+                counts["d3_negative"] += 1
+            at += 1
+    for name in C_D3_FIXTURES:
+        law = f"tests/semantic/{name}-law.bits"
+        mutant = f"tests/semantic/{name}-mutant.bits"
+        expected = (f"C_D3_SUBSET_MUTATION_PASS source={law} "
+                    f"mutant={mutant} exact_changed_bits=1")
+        if lines[at] != expected:
+            raise ValueError(f"H1_C_HOST_RECEIPT one_bit_mutation_missing={name}")
+        at += 1
+        counts["one_bit_mutations"] += 1
+    if at != len(lines) - 1:
+        raise ValueError("H1_C_HOST_RECEIPT trailing_or_missing_evidence")
+    return counts
+
+
+def c_host_stdout_self_test() -> None:
+    """Receipt mutation probes only; not a fake runtime or semantic GO."""
+    lines = [C_D10_RECEIPT]
+    for name in C_D3_FIXTURES:
+        for role in ("law", "mutant"):
+            fixture = f"tests/semantic/{name}-{role}.bits"
+            lines.append(f"C_D3_SUBSET_T5 source={fixture} bytes=2 hex=a135")
+            if role == "law":
+                lines.append(f"C_D3_SUBSET_PASS source={fixture} "
+                             "physical_bytes=2 exact_be3_bytes=9 result=D1:1")
+            else:
+                lines.append(f"C_D3_SUBSET_NEGATIVE_PASS source={fixture} "
+                             "category=NONCALLABLE_HEAD")
+    for name in C_D3_FIXTURES:
+        lines.append(
+            f"C_D3_SUBSET_MUTATION_PASS "
+            f"source=tests/semantic/{name}-law.bits "
+            f"mutant=tests/semantic/{name}-mutant.bits exact_changed_bits=1")
+    lines.append(C_D3_FINAL_RECEIPT)
+    assert verify_c_host_stdout("\n".join(lines))["d3_negative"] == 3
+    mutants = (
+        lines[1:],                            # old host without D10
+        lines[:-1],                           # early process success
+        [*lines, C_D3_FINAL_RECEIPT],        # duplicate receipt
+        [lines[0].replace("d10_callable=NO", "d10_callable=YES"), *lines[1:]],
+        [*lines[:2], lines[2].replace("result=D1:1", "result=D1:0"), *lines[3:]],
+        [*lines[:3], lines[3].replace("bytes=2", "bytes=3"), *lines[4:]],
+        [*lines[:4], *lines[5:]],             # missing negative witness
+        [*lines[:4], lines[4], *lines[4:]],  # duplicate source witness
+        [*lines[:-2], lines[-2].replace("exact_changed_bits=1", "exact_changed_bits=0"), lines[-1]],
+        [*lines[:-1], "C_D3_SUBSET_FAIL layer=transport", lines[-1]],
+    )
+    for index, mutant in enumerate(mutants):
+        try:
+            verify_c_host_stdout("\n".join(mutant))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                f"H1_C_HOST_RECEIPT_SELF_TEST accepted mutant={index}")
+    print(f"H1_C_HOST_RECEIPT_SELF_TEST_PASS negatives={len(mutants)}")
+
+
 def self_test() -> None:
     sample = "Dynamic section at offset 0x3000 contains 2 entries:\n 0x1 (NEEDED) Shared library: [libc.so.6]"
     assert dynamic_needed(sample) == ["libc.so.6"]
@@ -304,6 +419,7 @@ def self_test() -> None:
         raise AssertionError("Rust-only recipe must fail")
     zig_source_self_test()
     artifact_path_self_test()
+    c_host_stdout_self_test()
     print("H1_PHYSICAL_ARTIFACT_SELF_TEST_PASS")
     print("H1_DEPENDENCY_SELF_TEST_PASS cases=12 (including Zig closure)")
 
@@ -314,16 +430,22 @@ def main() -> int:
     cli.add_argument("--root", type=Path, default=ROOT)
     cli.add_argument("--run", action="store_true")
     cli.add_argument("--self-test", action="store_true")
+    cli.add_argument("--verify-host-stdout", action="store_true",
+                     help="validate real Zig-linked C process stdout from stdin")
     args = cli.parse_args()
     try:
         if args.self_test:
             self_test()
+        if args.verify_host_stdout:
+            receipt = verify_c_host_stdout(sys.stdin.read())
+            print("H1_C_HOST_STDOUT_RECEIPT_PASS " +
+                  " ".join(f"{k}={v}" for k, v in sorted(receipt.items())))
         if args.run:
             if args.out_dir is None:
                 raise ValueError("OUT_DIR_REQUIRED_FOR_ACTUAL_ELF_INSPECTION")
             print(json.dumps(run_audit(args.root, args.out_dir), sort_keys=True))
-        if not args.self_test and not args.run:
-            raise ValueError("CHOOSE_SELF_TEST_OR_RUN")
+        if not args.self_test and not args.run and not args.verify_host_stdout:
+            raise ValueError("CHOOSE_SELF_TEST_OR_RUN_OR_VERIFY_HOST_STDOUT")
         return 0
     except (ValueError, OSError, AssertionError) as exc:
         print("H1_DEPENDENCY_UNVERIFIED " + str(exc), file=sys.stderr)

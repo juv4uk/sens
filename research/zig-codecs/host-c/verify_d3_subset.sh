@@ -42,14 +42,19 @@ for name in retired-d3-cond retired-d3-eq retired-quote-inert-d3; do
     sha256sum "$fixture" | cut -d ' ' -f 1
   done
 done
-"$out/sens-c-host-d3"
-# ldd alone misses statically linked Rust. Require the existing independent
-# ELF/AR/NM receipt, including its negative test, on this EXACT built artifact.
-# This is still bounded H1 evidence, never semantic parity or full static proof.
+# Require independent Python receipt validation of actual Zig-linked C
+# stdout before a successful process exit can count as an H1 runtime witness.
+# Never allow a silent/partial C executable to supply release GO evidence.
 if ! command -v python3 >/dev/null 2>&1; then
   echo "C_D3_SUBSET_UNVERIFIED layer=toolchain missing=python3" >&2
   exit 2
 fi
+c_stdout="$("$out/sens-c-host-d3")"
+printf '%s\n' "$c_stdout"
+printf '%s\n' "$c_stdout" |
+  python3 research/zig-codecs/host-c/verify_h1_dependency_receipt.py --verify-host-stdout
+# ldd alone misses statically linked Rust. Require the independent ELF/AR/NM
+# inspection on this exact C executable + Zig archive, no semantic GO claim.
 python3 research/zig-codecs/host-c/verify_h1_dependency_receipt.py --self-test
 python3 research/zig-codecs/host-c/verify_h1_dependency_receipt.py \
   --out-dir "$out" --run
