@@ -16,6 +16,7 @@ import sys
 import tempfile
 
 import zig_codec_bridge
+import migration_publish_pair
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
@@ -216,14 +217,16 @@ def run(args: argparse.Namespace) -> dict:
                     raise ValueError("existing .sens output: overwrite forbidden")
                 if (repo / rel).read_bytes() != original:
                     raise ValueError("source changed during migration")
-                mig.write_atomic_no_clobber(out / destination, packed)
-                # New reality (#4694): the extensionless 0/1 view is REQUIRED
-                # alongside each .sens -- exact spaced words + one trailing LF.
+                # The binary and exact-bit text view form one publication unit.
+                # An existing view must not strand an orphan .sens; a failed view
+                # write rolls back only the bytes this candidate just created.
+                # T5 bytes have already passed the pinned Zig corridor above.
                 view_bytes = (" ".join(mig.decode_bytes(packed)) + "\n").encode("ascii")
                 view_path = out / destination.with_suffix("")
-                if view_path.exists() or view_path.is_symlink():
-                    raise ValueError("existing extensionless view: overwrite forbidden")
-                mig.write_atomic_no_clobber(view_path, view_bytes)
+                migration_publish_pair.publish_pair(
+                    mig.write_atomic_no_clobber,
+                    out / destination, packed, view_path, view_bytes,
+                )
                 row["view_bytes"] = len(view_bytes)
             except (ValueError, OSError, mig.SensT5Error) as exc:
                 row.update(status="blocked", reason=str(exc))
