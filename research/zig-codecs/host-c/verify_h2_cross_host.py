@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import stat
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -615,6 +616,68 @@ def verify_h1_execution_receipt(
 
 
 
+
+def hash_unaliased_regular_file(target: Path, label: str) -> str:
+    """Hash one opened physical inode through no-symlink directory FDs.
+
+    A pre-read is_symlink() check alone is vulnerable to rename/symlink
+    swaps before read_bytes(). This Linux ELF proof uses openat-style dir_fd
+    operations to pin the inode *during* a bounded-memory SHA256 stream.
+    Caller owns the path and H2 owns its H1 output directory.
+    """
+    if not target.is_absolute() or ".." in target.parts or not target.name:
+        raise AuditFailure(
+            f"test_id=H2_H1_ARTIFACT layer=provenance file={label} "
+            f"expected=canonical_absolute_path actual={target}")
+    flags = ("O_NOFOLLOW", "O_DIRECTORY", "O_CLOEXEC", "O_NONBLOCK")
+    if not all(hasattr(os, flag) for flag in flags):
+        raise AuditFailure(
+            f"test_id=H2_H1_ARTIFACT layer=provenance file={label} "
+            "missing=secure_open_flags")
+    dirfd = None
+    fd = None
+    try:
+        dirfd = os.open(target.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        for part in target.parts[1:-1]:
+            nextfd = os.open(
+                part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
+                dir_fd=dirfd)
+            os.close(dirfd)
+            dirfd = nextfd
+        fd = os.open(
+            target.name,
+            os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK,
+            dir_fd=dirfd)
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 or before.st_size == 0:
+            raise AuditFailure(
+                f"test_id=H2_H1_ARTIFACT layer=provenance file={label} "
+                "expected=unique_nonempty_regular_file actual=mode_or_links")
+        digest = hashlib.sha256()
+        while True:
+            chunk = os.read(fd, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+        after = os.fstat(fd)
+        attributes = ("st_dev", "st_ino", "st_size", "st_mtime_ns",
+                      "st_ctime_ns", "st_nlink")
+        if any(getattr(before, attr) != getattr(after, attr) for attr in attributes):
+            raise AuditFailure(
+                f"test_id=H2_H1_ARTIFACT layer=provenance file={label} "
+                "expected=unchanged_open_inode actual=changed_during_hash")
+        return digest.hexdigest()
+    except OSError as exc:
+        raise AuditFailure(
+            f"test_id=H2_H1_ARTIFACT layer=provenance file={label} "
+            f"expected=unaliased_fd_open actual=errno_{exc.errno}") from exc
+    finally:
+        if fd is not None:
+            os.close(fd)
+        if dirfd is not None:
+            os.close(dirfd)
+
+
 def verify_h1_artifact_bytes(output: Path, h1_proof: dict) -> dict[str, str]:
     """Independently hash the two H1 build outputs selected by H2 itself.
 
@@ -648,7 +711,7 @@ def verify_h1_artifact_bytes(output: Path, h1_proof: dict) -> dict[str, str]:
             raise AuditFailure(
                 f"test_id=H2_H1_ARTIFACT layer=provenance "
                 f"file={filename} expected=valid_reported_SHA actual={expected!r}")
-        actual = sha256(target.read_bytes())
+        actual = hash_unaliased_regular_file(target, filename)
         if actual != expected:
             raise AuditFailure(
                 f"test_id=H2_H1_ARTIFACT layer=provenance "
@@ -693,7 +756,7 @@ def verify_native_host_artifact(
         raise AuditFailure(
             f"test_id=H2_NATIVE_EXECUTOR layer=provenance "
             f"path={target} expected=regular_executable actual=missing_or_nonexecutable")
-    digest = sha256(target.read_bytes())
+    digest = hash_unaliased_regular_file(target, "sens-native-executable")
     if expected_sha256 is not None and digest != expected_sha256:
         raise AuditFailure(
             f"test_id=H2_NATIVE_EXECUTOR layer=provenance "

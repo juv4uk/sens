@@ -5,10 +5,12 @@ These are physical-provenance unit tests. Native Zig 0.16/C + SENS parity
 remains the responsibility of the existing H1/H2 real --run path.
 """
 import hashlib
+import os
 import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "research" / "zig-codecs" / "host-c" / "verify_h2_cross_host.py"
@@ -91,6 +93,54 @@ class H2ActualZigArtifactBytes(unittest.TestCase):
     def test_non_sha_digest_claim_rejected(self):
         bad = dict(self.proof, zig_archive_sha256="yes")
         self.blocked(proof=bad, reason="valid_reported_SHA")
+
+    def test_large_zig_archive_is_streamed_from_open_inode(self):
+        self.archive.write_bytes(b"!<arch>\n" + b"z" * (2 * 1024 * 1024 + 5))
+        self.proof["zig_archive_sha256"] = hashlib.sha256(
+            self.archive.read_bytes()).hexdigest()
+        self.assertEqual(h2.verify_h1_artifact_bytes(self.out, self.proof)[
+            "libsens_zig_transport.a"], self.proof["zig_archive_sha256"])
+
+    def test_hardlinked_c_binary_is_rejected_even_when_sha_matches(self):
+        os.link(self.exe, self.root / "hardlink-c")
+        self.blocked(reason="unique_nonempty_regular_file")
+
+    def test_hardlinked_zig_archive_is_rejected_even_when_sha_matches(self):
+        os.link(self.archive, self.root / "hardlink-zig")
+        self.blocked(reason="unique_nonempty_regular_file")
+
+    def test_fifo_is_not_a_trusted_elf_and_does_not_block_on_open(self):
+        self.exe.unlink()
+        os.mkfifo(self.exe)
+        self.blocked(reason="unique_nonempty_regular_file")
+
+    def test_inode_modified_during_sha_stream_is_rejected(self):
+        original_read = os.read
+        modified = False
+
+        def tamper(fd, count):
+            nonlocal modified
+            chunk = original_read(fd, count)
+            if chunk and not modified:
+                with self.exe.open("ab") as handle:
+                    handle.write(b"changed_during_read")
+                modified = True
+            return chunk
+
+        with mock.patch.object(h2.os, "read", side_effect=tamper):
+            self.blocked(reason="changed_during_hash")
+        self.assertTrue(modified)
+
+    def test_native_host_digest_uses_same_open_inode_guard(self):
+        self.exe.chmod(0o755)
+        target, digest = h2.verify_native_host_artifact(
+            self.root, str(self.exe.relative_to(self.root)))
+        self.assertEqual(target, self.exe)
+        self.assertEqual(digest, self.proof["c_binary_sha256"])
+        os.link(self.exe, self.root / "native-alias")
+        with self.assertRaisesRegex(h2.AuditFailure, "unique_nonempty_regular_file"):
+            h2.verify_native_host_artifact(
+                self.root, str(self.exe.relative_to(self.root)))
 
 
 if __name__ == "__main__":
