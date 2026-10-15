@@ -68,5 +68,37 @@ class RustIsolationTests(unittest.TestCase):
         self.assertTrue(self.module.check(self.root))
 
 
+    def test_test_only_scopes_are_not_production_but_unknown_cfg_is_red(self) -> None:
+        source = (
+            'const FIRST: &str = include_str!("lib/core.lisp");\n'
+            '// #[cfg(test)] mod fake { const X: &str = include_str!("lib/core.lisp"); }\n'
+            'const GHOST: &str = r##"#[cfg(test)] mod fake { include_str!("lib/core.lisp"); }"##;\n'
+            '#[cfg(test)] mod tests {\n'
+            '   fn nested() { let _ = { include_str!("lib/core.lisp") }; }\n'
+            '   fn project_read() { let _ = std::fs::read("lib/core.lisp"); }\n'
+            '}\n'
+            '#[cfg(test)] fn test_only() { let _ = include_bytes!("lib/core.sens"); }\n'
+            '#[cfg(any(test, feature = "production"))] mod uncertain {\n'
+            '  const X: &str = include_str!("lib/core.lisp");\n'
+            '}\n'
+            'const LAST: &[u8] = include_bytes!("lib/core.sens");\n'
+        )
+        (self.root / "crates/sens/src/lib.rs").write_text(
+            source, encoding="utf-8")
+        problems = self.module.check(self.root)
+        self.assertEqual(len(problems), 3, problems)
+        self.assertTrue(all("I1:" in p for p in problems))
+        self.assertTrue(all("lib/core" in p for p in problems))
+
+    def test_live_production_filesystem_read_survives_test_only_mask(self) -> None:
+        (self.root / "crates/sens/src/lib.rs").write_text(
+            '#[cfg(test)] mod tests { let x = fs::read("lib/core.lisp"); }\n'
+            'fn production() { let y = std::fs::read_to_string("lib/core.lisp"); }\n',
+            encoding="utf-8")
+        problems = self.module.check(self.root)
+        self.assertEqual(len(problems), 1, problems)
+        self.assertTrue(problems[0].startswith("I2:"), problems)
+
+
 if __name__ == "__main__":
     unittest.main()

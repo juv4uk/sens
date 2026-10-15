@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#4461: pin true dynamic blockers; redirect declarative identity fields."""
+"""#4461: pin true dynamic empties; redirect declarative identity fields."""
 from __future__ import annotations
 
 import hashlib
@@ -150,7 +150,7 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
             # The source SHA and its dynamic DEFINE/references are pinned in
             # test_four_dynamic_sources_are_real_sha_pinned_executable_bindings.
             # When a predecessor (for example a legacy SID8 successor) becomes
-            # lawfully resolved, the *first* reported blocker can change. Never
+            # lawfully resolved, the *first* reported empty can change. Never
             # confuse that change with approved lexical/dynamic semantics.
             expected_paths = {Path(row["path"]).name for row in self.dynamic}
             self.assertEqual(len(expected_paths), 4)
@@ -168,7 +168,7 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
 
             self.assertEqual(set(observed), expected_paths)
             self.assertFalse(list(folder.rglob("*.sens")),
-                             "a first-blocker change MUST NEVER publish unproved .sens")
+                             "a first-empty change MUST NEVER publish unproved .sens")
 
 
 if __name__ == "__main__":

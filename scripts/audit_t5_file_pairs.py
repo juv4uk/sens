@@ -186,7 +186,7 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             row["physical_status"] = "BLOCKED"
             if row["source_status"] == "NOT_CHECKED":
                 row["source_status"] = "BLOCKED"
-    physical_blockers = sum(row["physical_status"] == "BLOCKED" for row in entries)
+    physical_empties = sum(row["physical_status"] == "BLOCKED" for row in entries)
     pending_oracle = sum(row["source_status"] == "PENDING_ORACLE" for row in entries)
     exact_binary = sum(row["source_status"] == "EXACT_BINARY_SOURCE" for row in entries)
     view_pass = sum(row["view_status"] == "PASS" for row in entries)
@@ -200,8 +200,8 @@ def inspect(root: Path, *, strict_semantic: bool = False,
         "empty_is_not_certification": len(entries) == 0,
         "summary": {
             "sens_files": len(entries),
-            "physical_pass": len(entries) - physical_blockers,
-            "physical_blocked": physical_blockers,
+            "physical_pass": len(entries) - physical_empties,
+            "physical_blocked": physical_empties,
             "exact_binary_source_pairs": exact_binary,
             "pending_oracle": pending_oracle,
             "spaced_view_pass": view_pass,
@@ -210,7 +210,7 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "admitted_executable_semantics": None,
         },
         "status": (
-            "BLOCKED" if (physical_blockers or view_blocked
+            "BLOCKED" if (physical_empties or view_blocked
                           or (require_spaced_view and view_missing)
                           or (strict_semantic and pending_oracle))
             else "NO_FILES" if not entries else

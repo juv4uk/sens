@@ -69,5 +69,5 @@
 - Produces: a bounded claim that four current form families are sufficient for the existing structural CAR witness, not for a complete Lisp runtime.
 
 - [ ] **Step 1: Record the exact dependency trace** `materialize-value -> mov-r64-imm64`, `store-pair-field -> mov-mem-disp8-r64`, `load-pair-field -> mov-r64-mem-disp8`, `return-result -> ret`.
-- [ ] **Step 2: Record explicit blockers for the next growth witness** rather than adding instructions for completeness; conditional control remains a future necessity proof.
+- [ ] **Step 2: Record explicit () for the next growth witness** rather than adding instructions for completeness; conditional control remains a future necessity proof.
 - [ ] **Step 3: Keep #196 open** because one structural lower bound is not yet a complete self-host/runtime minimum.

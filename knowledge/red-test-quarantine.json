@@ -1,5 +1,36 @@
 {
   "schema": "sens-red-v1",
   "policy": "2026-10-13 red-must-speak: no silent skip, no speculative first_bad_sha",
-  "cases": []
+  "cases": [
+    {
+      "test_id": "approved-t5-physical-oracle",
+      "stamp": "REGRESSION",
+      "owner": "SENS migration integrator (#5821/#5830)",
+      "first_seen_at": "2026-10-15T19:45:59Z",
+      "reason": "Agent API drift in approved T5 migration: actual physical oracle remains red with two failed tests and one error; keep the failing test and exact Zig-only physical publishing, do not treat transport evidence as semantic admission.",
+      "ticket": "#5821",
+      "investigation": "2026-10-15 GitHub Actions run 38799460135 step 26 checkout 0f7f47a90af4e4ae0f0da331bc8c4931507da09b: test_approved_t5_transaction.py fails; owner repair candidates #5821/#5830 require verified exact-head native green. Step 63 previously UNCLASSIFIED-RED despite an actual SENS_FAILURE_REPORT. Reproduce: python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v.",
+      "first_bad_sha": "UNRESOLVED"
+    },
+    {
+      "test_id": "zig-migration-current-three-pass-api",
+      "stamp": "REGRESSION",
+      "owner": "SENS migration integrator (#5830)",
+      "first_seen_at": "2026-10-15T20:33:03Z",
+      "reason": "Real migration setup failure: too many values to unpack (expected 2). This is an agent API regression; #5830 contains a candidate fix. This classification does not excuse failure.",
+      "ticket": "#5830",
+      "investigation": "Automatic CI https://github.com/juv4uk/sens/actions/runs/38803497967, step Zig current API: 2 FAIL. Reproduce: python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v. Wrapper emits failure SHA, fixture and first difference; no skip or bypass.",
+      "first_bad_sha": "UNRESOLVED"
+    },
+    {
+      "test_id": "zig-build-environment-watch",
+      "stamp": "REGRESSION",
+      "owner": "SENS Zig transport build integrator (#5842)",
+      "first_seen_at": "2026-10-15T20:46:34Z",
+      "reason": "Zig REPL source asset lib/epistemic.lisp has to invalidate the Cargo-linked Zig static archive. Missing or late rerun-if-changed causes stale source; not a valid SENS semantic PASS.",
+      "ticket": "#5842",
+      "investigation": "Automatic GitHub Actions https://github.com/juv4uk/sens/actions/runs/38804596733 job 116662053378 shows test_every_zig_embedded_asset_invalidates_cargo_archive ERROR ZIG_CORRIDOR_STALE_ASSET. Exact test reproduction: python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v. #5842 adds three explicit rebuild watches; diagnostic wrapper must preserve failing exit status.",
+      "first_bad_sha": "UNRESOLVED"
+    }
+  ]
 }

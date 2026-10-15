@@ -108,7 +108,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )
-        my, upper = mod.build_three_pass_maps(
+        my, upper, _bs = mod.build_three_pass_maps(
             foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
             SEMANTIC_REGISTRY, NECESSARY,
         )
@@ -185,7 +185,7 @@ class ThreePassMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
-        cls.my,cls.upper=mod.build_three_pass_maps(
+        cls.my,cls.upper,_bs=mod.build_three_pass_maps(
             data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY
         )
         cls.text7=mod.build_text7(data,TEXT7)
@@ -269,8 +269,7 @@ class ThreePassMigrationTests(unittest.TestCase):
                     self.migrate(f"({word} x)\n")
 
     def test_d9_full_residency_is_data_not_implicit_callability(self):
-        # Real current D9 catalogue: 512/512 residents do NOT establish
-        # independently admitted executable mechanisms (Contract 11.9).
+        # Exact D9 residency: all 512 data coordinates are not executable mechanisms.
         foundation = mod.load_foundation(FOUNDATION)
         residents = set(foundation["domains"]["D9"]["residents"])
         self.assertEqual(len(residents), 512)
@@ -282,8 +281,6 @@ class ThreePassMigrationTests(unittest.TestCase):
                     mod.MigrationError, "D9 .*відсутній доказ допущеного механізму"
                 ):
                     mod.migrate_file(f"({word} x)\n", resolver, self.text7)
-                # Same nine bits in data position remain exact, never widened
-                # or silently reinterpreted as a callable coordinate.
                 self.assertEqual(
                     mod.migrate_file(f"(100 {word})\n", resolver, self.text7),
                     f"10 100 00 {word} 01\n",

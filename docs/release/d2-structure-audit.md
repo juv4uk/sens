@@ -1,4 +1,4 @@
-# D2 structure audit — release blocker #4160
+# D2 structure audit — release () #4160
 
 **Current authority:** Contract 11.8 / D1–D9  
 **Invariant:** D2 alone owns canonical language structure.

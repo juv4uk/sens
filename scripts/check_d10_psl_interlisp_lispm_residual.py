@@ -45,7 +45,7 @@ def check(j, f, d, pin=True):
         assert r["triage"].startswith("HOLD-")
         assert r["source_verified"] == "MANUAL-ATTESTED"
         assert r["surface_uk"] and r["surface_ukr"]
-        assert r["source_blocker"].startswith("NONE")
+        assert r["source_empty"].startswith("NONE")
         assert r["dedup_basis"] == f"D1-D9 {j['snapshot']['foundation_blob']}; D10 selected {j['snapshot']['selected_blob']}"
         assert r["primary_source_url"].startswith("https://") and r["primary_section"]
         assert r["observable_behavior"] and r["positive_witness_spec"] and r["falsifier_spec"]

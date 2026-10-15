@@ -26,6 +26,7 @@ Exit 0 = RUST_ISOLATED_ONLY_ZIG_OK; exit 1 = RUST_ISOLATED_ONLY_ZIG_BLOCKED (RED
 from __future__ import annotations
 
 import argparse
+import runpy
 import re
 import sys
 from pathlib import Path
@@ -34,6 +35,20 @@ PROJECT_TREES = ("lib/", "contracts/", "knowledge/", "language-contract")
 INCLUDE_RE = re.compile(r'(?P<kind>include_str|include_bytes)!\s*\(\s*"(?P<path>[^"]+)"')
 READ_RE = re.compile(r'(?:std::)?fs::read(?:_to_string)?\s*\(\s*"(?P<path>[^"]+)"')
 PRODUCTION_GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
+
+# The two production-isolation checks must share the SAME lexical Rust scope.
+# Mask only provably test-only items; ambiguous cfg remains live, fail closed.
+# runpy loads the sibling checker by its absolute path even when this module
+# is imported by unittest via spec_from_file_location (no sys.path mutation).
+_LEXICAL = runpy.run_path(str(Path(__file__).with_name("rust_lisp_sens_edges.py")))
+_PRODUCTION_SOURCE = _LEXICAL["_production_source"]
+_CODE_SHAPE = _LEXICAL["_code_shape"]
+
+
+def _live_at(shape: str, position: int, token: str) -> bool:
+    """Reject comment/string ghosts while leaving live Rust edges untouched."""
+    return shape[position:position + len(token)] == token
+
 
 
 def _is_project_path(target: str) -> bool:
@@ -57,13 +72,18 @@ def check(root: Path) -> list[str]:
             if "/tests/" in f"/{rel}" or "/examples/" in f"/{rel}":
                 continue
             scanned += 1
-            src = path.read_text(encoding="utf-8", errors="replace")
+            raw = path.read_text(encoding="utf-8", errors="replace")
+            src = _PRODUCTION_SOURCE(raw)
+            shape = _CODE_SHAPE(src)
             for m in INCLUDE_RE.finditer(src):
-                if _is_project_path(m.group('path')):
+                if (_live_at(shape, m.start(), m.group("kind")) and
+                        _is_project_path(m.group('path'))):
                     problems.append(f"I1: {rel} `{m.group('kind')}!(\"{m.group('path')}\")` -- Rust "
                                     "reaches a project source; only Zig may be reached")
             for m in READ_RE.finditer(src):
-                if _is_project_path(m.group('path')):
+                caller = m.group(0).split("(", 1)[0].strip()
+                if (_live_at(shape, m.start(), caller) and
+                        _is_project_path(m.group('path'))):
                     problems.append(f"I2: {rel} `fs::read(\"{m.group('path')}\")` -- Rust reads a "
                                     "project file; only Zig may be reached")
     if scanned == 0:

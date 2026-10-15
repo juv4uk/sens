@@ -195,7 +195,7 @@
         "#3937",
         "#3938"
       ],
-      "blocker": "D7/Text7 bridge"
+      "()": "D7/Text7 bridge"
     },
     {
       "family": "symbol-name-out",
@@ -216,7 +216,7 @@
         "#3939",
         "#3940"
       ],
-      "blocker": "D7/Text7 bridge"
+      "()": "D7/Text7 bridge"
     },
     {
       "family": "symbol-name-in",
@@ -236,7 +236,7 @@
         "#3939",
         "#3940"
       ],
-      "blocker": "D7/Text7 bridge"
+      "()": "D7/Text7 bridge"
     },
     {
       "family": "indexed-aggregate-construct",

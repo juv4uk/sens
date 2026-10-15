@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Operational CLI contract: real migration, physical bytes, SHA, dry-run, blockers."""
+"""Operational CLI contract: real migration, physical bytes, SHA, dry-run, empties."""
 from __future__ import annotations
 
 import importlib.util
