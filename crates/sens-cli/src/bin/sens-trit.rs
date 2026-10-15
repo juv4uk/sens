@@ -588,6 +588,45 @@ mod e1_cli_mechanism_tests {
     }
 
     #[cfg(feature = "zig-transport")]
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn e1_execution_uses_zig_physical_reader_then_native_sens_d2() {
+        let positive = include_bytes!(
+            "../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens"
+        );
+        let mut s1 = sens::Session::default();
+        let reference = sens::eval_t5_program(positive, &mut s1)
+            .expect("SENS owns the physical T5 semantic witness");
+        let e1 = encode_e1_from_t5(positive).expect("Zig canonical E1 output");
+        let actual = eval_e1_bytes(&e1).expect("Zig E1 ingress then SENS semantic evaluator");
+        assert_eq!(actual.value.as_predicate_bit(), reference.value.as_predicate_bit());
+        assert_eq!(actual.output, reference.output);
+
+        // A forged CRC result is not a semantic D1:NO or an allowed fallback.
+        let mut damaged = e1.clone();
+        *damaged.last_mut().expect("E1 CRC suffix") ^= 1;
+        assert!(eval_e1_bytes(&damaged).is_err());
+
+        let source = include_str!("sens-trit.rs");
+        let start = source.find("fn eval_e1_bytes(").expect("E1 executable ingress");
+        let routine = &source[start..source[start..].find("\n}\n").unwrap() + start];
+        assert!(routine.contains("zig_transport::decode_e1_words(bytes)"));
+        assert!(routine.contains("sens::PhysicalT5Program::from_exact_words(&words)"));
+        assert!(!routine.contains("sens::eval_e1_program("));
+        let arm = source.find("\n        \"eval-e1\" => {\n").expect("E1 command");
+        let route = &source[arm..source[arm..].find("\n        \"encode-f3\" =>").unwrap() + arm];
+        assert!(route.contains("eval_e1_bytes(&e1)?"));
+        assert!(!route.contains("sens::eval_e1_program("));
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn e1_execution_refuses_rust_physical_decoder_without_zig() {
+        let input = [0x53, 0x33, 1, 0, 0xc7, 0xca, 0x15, 0xd8];
+        let error = eval_e1_bytes(&input).expect_err("without Zig E1 must not execute");
+        assert!(error.contains("no Rust fallback"));
+    }
+
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
         let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
