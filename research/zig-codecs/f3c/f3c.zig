@@ -398,10 +398,26 @@ pub fn decode(allocator: Allocator, carrier: []const u8) ![]u8 {
 /// A firmware target must size/place this buffer and verify its own stack.
 pub const ABI_SCRATCH_BYTES: usize = 8 * 1024;
 
+/// Scratch storage is an independent temporary arena. It may not alias the
+/// source (the allocator could overwrite it during parsing) or destination
+/// (copying from scratch into itself is not a safe publication operation).
+/// Source and destination may still alias each other when scratch is separate.
+fn scratchOverlaps(scratch: []const u8, region: []const u8) bool {
+    if (scratch.len == 0 or region.len == 0) return false;
+    const scratch_addr = @intFromPtr(scratch.ptr);
+    const region_addr = @intFromPtr(region.ptr);
+    return if (scratch_addr <= region_addr)
+        region_addr - scratch_addr < scratch.len
+    else
+        scratch_addr - region_addr < region.len;
+}
+
 /// Return null when F3C does not save bytes. No caller-output mutation on
 /// failure, no-saving, or insufficient output capacity. In-place input/output
 /// buffers are supported because the candidate is staged in scratch first.
 pub fn encodeInto(original_t5: []const u8, out: []u8, scratch: []u8) !?usize {
+    if (scratchOverlaps(scratch, original_t5) or scratchOverlaps(scratch, out))
+        return error.ScratchOverlap;
     if (original_t5.len == 0 or original_t5.len > MAX_TINY_T5_BYTES)
         return Error.FrameRange;
     var bounded = std.heap.FixedBufferAllocator.init(scratch);
@@ -414,11 +430,38 @@ pub fn encodeInto(original_t5: []const u8, out: []u8, scratch: []u8) !?usize {
 /// Decode an explicit F3C carrier into caller-owned canonical T5 bytes.
 /// All parsing, canonicality checks and size checks finish before writing.
 pub fn decodeInto(carrier: []const u8, out: []u8, scratch: []u8) !usize {
+    if (scratchOverlaps(scratch, carrier) or scratchOverlaps(scratch, out))
+        return error.ScratchOverlap;
     var bounded = std.heap.FixedBufferAllocator.init(scratch);
     const physical = try decode(bounded.allocator(), carrier);
     if (physical.len > out.len) return error.BufferTooSmall;
     @memcpy(out[0..physical.len], physical);
     return physical.len;
+}
+
+test "F3C scratch disjointness rejects host buffer alias without mutation" {
+    // Host ABIs own the scratch arena. Reject both overlap orientations before
+    // creating an allocator; independently staged source/output may still alias.
+    var scratch: [ABI_SCRATCH_BYTES]u8 = [_]u8{0xa5} ** ABI_SCRATCH_BYTES;
+    const quote_t5 = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    const quote_f3 = [_]u8{ 0xf3, 0x40, 0x60 };
+    var output: [32]u8 = [_]u8{0x75} ** 32;
+
+    // Destination touches scratch: no candidate is allocated or copied.
+    try std.testing.expectError(error.ScratchOverlap,
+        encodeInto(&quote_t5, scratch[4..36], &scratch));
+    try std.testing.expectError(error.ScratchOverlap,
+        decodeInto(&quote_f3, scratch[4..36], &scratch));
+    for (scratch[0..36]) |byte| try std.testing.expectEqual(@as(u8, 0xa5), byte);
+
+    // Source overlaps scratch, including a nonzero offset inside the arena.
+    @memcpy(scratch[11..15], &quote_t5);
+    try std.testing.expectError(error.ScratchOverlap,
+        encodeInto(scratch[11..15], &output, &scratch));
+    @memcpy(scratch[21..24], &quote_f3);
+    try std.testing.expectError(error.ScratchOverlap,
+        decodeInto(scratch[21..24], &output, &scratch));
+    for (output) |byte| try std.testing.expectEqual(@as(u8, 0x75), byte);
 }
 
 test "F3C bounded SRAM adapters match golden quote and nested carriers" {
