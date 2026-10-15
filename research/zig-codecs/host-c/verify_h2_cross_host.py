@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import posixpath
 from pathlib import Path
 import re
 import shutil
@@ -41,6 +42,11 @@ H2_TRACKED_INPUTS = (
     C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI,
     "research/zig-codecs/t5/t5.zig",
     "research/zig-codecs/f3c/f3c.zig",
+    # Zig ABI v2 now imports E1; all transitively compiled Zig sources
+    # must be part of the exact HEAD/index/worktree H2 provenance pin.
+    "research/zig-codecs/transport/e1.zig",
+    "research/zig-codecs/transport/e1_writer.zig",
+    "research/zig-codecs/transport/fields.zig",
     "scripts/sens_t5_codec.py", ".zig-version", *RUST_DRIVERS,
     *(f"tests/semantic/{name}-{role}.bits"
       for name, _, _ in CASES for role in ("law", "mutant")),
@@ -57,6 +63,119 @@ def sha256(raw: bytes) -> str:
 
 def git_blob(raw: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\x00" + raw).hexdigest()
+
+
+def verify_zig_import_closure(
+    root: Path, tracked: tuple[str, ...], entry: str = ZIG_ABI,
+) -> tuple[str, ...]:
+    """Fail closed unless every local Zig import is pinned for both H2 hosts.
+
+    This only checks mechanical source provenance, not SENS semantics or
+    Rust-free linkage. Imports are resolved as repository-relative paths.
+    """
+    pinned = set(tracked)
+    pending = [entry]
+    seen: set[str] = set()
+    while pending:
+        name = pending.pop()
+        if name in seen:
+            continue
+        if name not in pinned:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance "
+                f"missing_tracked_zig_dependency={name}")
+        relative = Path(name)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance invalid_path={name}")
+        path = root
+        for part in relative.parts:
+            path = path / part
+            if path.is_symlink():
+                raise AuditFailure(
+                    f"test_id=H2_ZIG_IMPORT_PIN layer=provenance linked_path={name}")
+        if not path.is_file():
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance missing_source={name}")
+        try:
+            source = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance unreadable_source={name}") from exc
+        seen.add(name)
+        for imported in re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', source):
+            if imported in ("std", "builtin", "root"):
+                continue
+            if not imported.endswith(".zig"):
+                raise AuditFailure(
+                    f"test_id=H2_ZIG_IMPORT_PIN layer=provenance "
+                    f"unsupported_import={imported} source={name}")
+            child = posixpath.normpath(posixpath.join(posixpath.dirname(name), imported))
+            if child == ".." or child.startswith("../") or child.startswith("/"):
+                raise AuditFailure(
+                    f"test_id=H2_ZIG_IMPORT_PIN layer=provenance "
+                    f"escaped_import={imported} source={name}")
+            pending.append(child)
+    return tuple(sorted(seen))
+
+
+def zig_import_closure_self_test() -> None:
+    """One positive DAG plus missing pin, symlink parent and new import."""
+    with tempfile.TemporaryDirectory(prefix="sens-h2-zig-import-") as tmp:
+        root = Path(tmp)
+        zig = root / "zig"
+        (zig / "transport").mkdir(parents=True)
+        (zig / "transport_abi.zig").write_text(
+            'const e1 = @import("transport/e1.zig");\n',
+            encoding="utf-8",
+        )
+        (zig / "transport" / "e1.zig").write_text(
+            'const field = @import("fields.zig");\n',
+            encoding="utf-8",
+        )
+        (zig / "transport" / "fields.zig").write_text(
+            'const std = @import("std");\n',
+            encoding="utf-8",
+        )
+        names = ("zig/transport_abi.zig", "zig/transport/e1.zig", "zig/transport/fields.zig")
+        if set(verify_zig_import_closure(root, names, names[0])) != set(names):
+            raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=complete_DAG actual=incomplete")
+        try:
+            verify_zig_import_closure(root, names[:-1], names[0])
+        except AuditFailure as exc:
+            if "missing_tracked_zig_dependency=" not in str(exc):
+                raise
+        else:
+            raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=missing_pin_REJECT actual=PASS")
+        # A new imported module must never be silently omitted from H2.
+        (zig / "transport" / "e1.zig").write_text(
+            'const next = @import("new.zig");\n',
+            encoding="utf-8",
+        )
+        try:
+            verify_zig_import_closure(root, names, names[0])
+        except AuditFailure as exc:
+            if "missing_tracked_zig_dependency=" not in str(exc):
+                raise
+        else:
+            raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=new_import_REJECT actual=PASS")
+        (zig / "transport" / "e1.zig").write_text(
+            'const field = @import("fields.zig");\n',
+            encoding="utf-8",
+        )
+        (zig / "alias").symlink_to(zig / "transport", target_is_directory=True)
+        (zig / "transport_abi.zig").write_text(
+            'const e1 = @import("alias/e1.zig");\n',
+            encoding="utf-8",
+        )
+        try:
+            verify_zig_import_closure(root, names + ("zig/alias/e1.zig",), names[0])
+        except AuditFailure as exc:
+            if "linked_path=" not in str(exc):
+                raise
+        else:
+            raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=linked_parent_REJECT actual=PASS")
+    print("H2_ZIG_IMPORT_PIN_SELF_TEST_PASS: valid, missing, new, linked-parent")
 
 
 def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
@@ -179,6 +298,7 @@ def inspect_pair(name: str, pos_raw: bytes, neg_raw: bytes, pos_pin: str, neg_pi
 
 
 def preflight(root: Path) -> dict:
+    zig_imports = verify_zig_import_closure(root, H2_TRACKED_INPUTS)
     cases = []
     for name, pos_pin, neg_pin in CASES:
         base = root / "tests" / "semantic"
@@ -208,6 +328,7 @@ def preflight(root: Path) -> dict:
     return {
         "test_id": "H2_SENS_SAME_CORPUS", "status": "SOURCE_PREFLIGHT_PASS",
         "semantic_status": "UNVERIFIED_UNTIL_TWO_HOST_RUN",
+        "zig_import_closure": zig_imports,
         "host_a": "SENS-native-via-Rust", "host_b": "Rust-free-C-through-Zig-ABI-v2",
         "cases": cases,
         "source_sha256": {p: sha256((root / p).read_bytes())
@@ -397,6 +518,7 @@ def main() -> int:
         r = preflight(args.root)
         if args.self_test:
             negative_self_test(args.root)
+            zig_import_closure_self_test()
             git_provenance_self_test()
         if args.run:
             r = run_both(args.root, r, args.sens_bin)
