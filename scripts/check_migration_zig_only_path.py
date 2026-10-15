@@ -167,6 +167,17 @@ def _is_staging_packed(node: ast.AST) -> bool:
     )
 
 
+
+def _writes_packed(target: ast.AST) -> bool:
+    """Detect direct/rebinding and indexed/augmented stores into Zig bytes."""
+    if isinstance(target, ast.Name):
+        return target.id == "packed"
+    if isinstance(target, (ast.Subscript, ast.Attribute)):
+        return _writes_packed(target.value)
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return any(_writes_packed(item) for item in target.elts)
+    return False
+
 def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
     """Conservative source proof of one real Zig byte producer before staging.
 
@@ -181,20 +192,24 @@ def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
         staged = [node for node in live if _is_staging_packed(node)]
         if not staged:
             continue
+        # A carrier minted by Zig is no proof if Python mutates it before
+        # publication. Count *all* AST stores, including +=, :=, and element
+        # writes, not just plain assignments. The one store must be the mint.
         packed_assignments = [
             node for node in live
-            if isinstance(node, (ast.Assign, ast.AnnAssign))
-            and any(
-                isinstance(target, ast.Name) and target.id == "packed"
-                for target in (
-                    node.targets if isinstance(node, ast.Assign) else [node.target]
-                )
+            if (
+                isinstance(node, ast.Assign)
+                and any(_writes_packed(target) for target in node.targets)
+            ) or (
+                isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr))
+                and _writes_packed(node.target)
             )
         ]
         if len(packed_assignments) != 1:
             continue
         mint = packed_assignments[0]
-        if (_is_zig_carry(mint.value)
+        if (isinstance(mint, (ast.Assign, ast.AnnAssign))
+                and _is_zig_carry(mint.value)
                 and mint.lineno < min(s.lineno for s in staged)):
             return True
     return False

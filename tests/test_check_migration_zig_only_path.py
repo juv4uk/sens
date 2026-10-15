@@ -189,6 +189,24 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                      'row["zig_transport"] = evidence\\n            packed = reference_bytes'.replace("\\n", "\n"))
         self.assertTrue(any("M8:" in message for message in self.module.check(self.root)))
 
+    def test_augmented_assignment_corrupting_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = evidence\\n            packed += reference_bytes'.replace("\\n", "\n"))
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
+    def test_indexed_write_to_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = evidence\\n            packed[0] = 0'.replace("\\n", "\n"))
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
+    def test_walrus_rebinding_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = (packed := reference_bytes)')
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
     def test_carry_only_on_dry_run_is_not_release_evidence(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
                      "if zig_binary is not None:\\n            packed".replace("\\n", "\n"),
