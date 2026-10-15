@@ -43,12 +43,16 @@ for name in retired-d3-cond retired-d3-eq retired-quote-inert-d3; do
   done
 done
 "$out/sens-c-host-d3"
-if command -v ldd >/dev/null 2>&1; then
-  if ldd "$out/sens-c-host-d3" | grep -i rust; then
-    echo "C_D3_SUBSET_FAIL layer=dependency category=RUST_IN_C_LINK" >&2
-    exit 1
-  fi
+# ldd alone misses statically linked Rust. Require the existing independent
+# ELF/AR/NM receipt, including its negative test, on this EXACT built artifact.
+# This is still bounded H1 evidence, never semantic parity or full static proof.
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "C_D3_SUBSET_UNVERIFIED layer=toolchain missing=python3" >&2
+  exit 2
 fi
+python3 research/zig-codecs/host-c/verify_h1_dependency_receipt.py --self-test
+python3 research/zig-codecs/host-c/verify_h1_dependency_receipt.py \
+  --out-dir "$out" --run
 printf 'C_D3_SUBSET_RECEIPT zig=%s c_binary_sha256=' "$actual"
 sha256sum "$out/sens-c-host-d3" | cut -d ' ' -f 1
-echo 'C_D3_SUBSET_H1_SOURCE_READY runtime_subset=D1-D3 cross_host_parity=NOT_VERIFIED semantic_authority=SENS'
+echo 'C_D3_SUBSET_H1_SOURCE_READY runtime_subset=D1-D3 dependency_receipt=INSPECTED_NO_RUST_MARKERS full_static_dependency_closure=NOT_VERIFIED cross_host_parity=NOT_VERIFIED semantic_authority=SENS'
