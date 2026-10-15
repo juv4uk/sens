@@ -160,6 +160,35 @@ class ZigBridgeReceiptEvidenceTests(unittest.TestCase):
     def test_exact_zig_physical_receipt_passes_structural_gate(self):
         result = self.simulated_step(self.good_line() + "\n")
         self.assertEqual((result["status"], result["exit"]), ("PASS", 0))
+        parsed = self.mod.verify_zig_bridge_receipt(self.good_line())
+        self.assertEqual(parsed["external_trusted_sha_d10"], "INDEPENDENT_GOLDEN")
+        self.assertEqual(parsed["external_trusted_sha_d1"], "INDEPENDENT_GOLDEN")
+        self.assertEqual(parsed["canonical_d1_to_d2_same_length"],
+                         "REJECTED_WITH_EXTERNAL_PIN")
+
+    def test_stronger_independent_goldens_are_required_not_optional(self):
+        for field, obsolete in (
+            ("external_trusted_sha_d10=INDEPENDENT_GOLDEN",
+             "external_trusted_sha_d10=REQUIRED_WHEN_SUPPLIED"),
+            ("external_trusted_sha_d1=INDEPENDENT_GOLDEN",
+             "external_trusted_sha_d1=REQUIRED_WHEN_SUPPLIED"),
+            ("canonical_d1_to_d2_same_length=REJECTED_WITH_EXTERNAL_PIN",
+             "canonical_d1_to_d2_same_length=NOT_TESTED"),
+        ):
+            with self.subTest(field=field):
+                original = self.good_line()
+                self.assertIn(field, original)
+                for mutant in (original.replace(field, obsolete),
+                               original.replace(" " + field, "")):
+                    self.assertEqual(self.simulated_step(mutant)["status"], "FAIL")
+
+    def test_transport_receipt_cannot_invent_owner_go_or_semantic_admission(self):
+        for forged in ("owner_GO=YES", "release_admitted=YES",
+                       "semantic_verified=YES", "release_tag=l0.42.0"):
+            with self.subTest(field=forged):
+                result = self.simulated_step(self.good_line() + " " + forged)
+                self.assertEqual(result["status"], "FAIL")
+                self.assertIn("unrecognized physical receipt fields", result["detail"])
 
     def test_empty_stdout_exit_zero_is_not_physical_pass(self):
         result = self.simulated_step("")

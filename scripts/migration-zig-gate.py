@@ -55,7 +55,9 @@ BRIDGE_RECEIPT_EXACT = {
     "d10_transport": "ACCEPTED",
     "d10_executable": "REJECTED",
     "overwidth_d15": "REJECTED",
-    "external_trusted_sha_d10": "REQUIRED_WHEN_SUPPLIED",
+    "external_trusted_sha_d10": "INDEPENDENT_GOLDEN",
+    "external_trusted_sha_d1": "INDEPENDENT_GOLDEN",
+    "canonical_d1_to_d2_same_length": "REJECTED_WITH_EXTERNAL_PIN",
     "canonical_d10_to_d5_truncation": "REJECTED_WITH_EXTERNAL_PIN",
     "d1_d2_distinct": "YES",
     "d2_zero_and_one": "YES",
@@ -86,6 +88,12 @@ def verify_zig_bridge_receipt(stdout: str) -> dict[str, str]:
         if not key or not value or key in values:
             raise ValueError(f"empty/duplicate receipt field={key!r}")
         values[key] = value
+    # Reject invented fields (especially owner_GO/release_admitted). A
+    # transport receipt is not a semantic oracle or a release decision.
+    allowed = set(BRIDGE_RECEIPT_EXACT) | set(BRIDGE_RECEIPT_MINIMUM) | {"zig_binary_sha256"}
+    unknown = sorted(set(values) - allowed)
+    if unknown:
+        raise ValueError(f"unrecognized physical receipt fields={unknown!r}")
     for key, expected in BRIDGE_RECEIPT_EXACT.items():
         if values.get(key) != expected:
             raise ValueError(f"field={key} expected={expected} actual={values.get(key)!r}")
@@ -112,6 +120,13 @@ def zig_bridge_receipt_self_test() -> None:
         line.replace("physical_sha256=" + BRIDGE_GOLDEN_SHA256,
                      "physical_sha256=" + "0" * 64),
         line.replace("d10_executable=REJECTED", "d10_executable=ACCEPTED"),
+        line.replace("external_trusted_sha_d10=INDEPENDENT_GOLDEN",
+                     "external_trusted_sha_d10=REQUIRED_WHEN_SUPPLIED"),
+        line.replace("external_trusted_sha_d1=INDEPENDENT_GOLDEN",
+                     "external_trusted_sha_d1=REQUIRED_WHEN_SUPPLIED"),
+        line.replace("canonical_d1_to_d2_same_length=REJECTED_WITH_EXTERNAL_PIN",
+                     "canonical_d1_to_d2_same_length=NOT_TESTED"),
+        line + " owner_GO=YES",
         line.replace("zig_binary_sha256=" + "a" * 64,
                      "zig_binary_sha256=not-a-hash"),
         line + "\n" + line,
@@ -124,7 +139,7 @@ def zig_bridge_receipt_self_test() -> None:
             raise AssertionError(
                 "ZIG_BRIDGE_RECEIPT_SELF_TEST accepted a synthetic mutant"
             )
-    print("MIGRATION_ZIG_RECEIPT_SELF_TEST_PASS negatives=6")
+    print("MIGRATION_ZIG_RECEIPT_SELF_TEST_PASS negatives=10")
 
 
 def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
