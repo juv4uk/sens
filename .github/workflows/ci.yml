@@ -42,7 +42,7 @@ jobs:
           grep -Fxq 'OK' "$RUNNER_TEMP/release-physical-replay.log"
           # A mechanical fail-closed receipt test; SENS remains the semantic authority.
           sha256sum scripts/check-release-admission-ledger.py tests/test_check_release_admission_ledger.py tests/fixtures/migration-d1-cond-cohort/branch.sens
-          python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -k fake_f2_f4_receipts_never_release_admit_real_t5 -v
+          python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -k fake_f2_f4_receipts_never_release_admit_real_t5 -k hardlink_alias_with_identical_t5_bytes_cannot_prove_release_content -v
       - name: Встановити Zig 0.16.0 для типового транспортного кодека
         shell: bash
         run: |
