@@ -179,6 +179,33 @@ def check_trit_e1_ingress(source: str) -> None:
         raise CorridorBlocked("live eval-e1 command bypasses guarded Zig ingress")
 
 
+def check_trit_t5_execution(source: str) -> None:
+    """Live eval/eval-core4 execution may only receive physical T5 from Zig."""
+    route = _route_between(source, "\nfn eval_t5_bytes_core4(",
+                           "\n/// Пояснити негативний результат")
+    off = '#[cfg(not(feature = "zig-transport"))]'
+    on = '#[cfg(feature = "zig-transport")]'
+    if route.count(off) != 1 or route.count(on) != 1:
+        raise CorridorBlocked("sens-trit T5 execution missing exclusive Zig gates")
+    denied, active = route.split(on, 1)
+    if (off not in denied or "no Rust fallback" not in denied
+            or "let _ = (bytes, bootstrap_core);" not in denied):
+        raise CorridorBlocked("sens-trit no-Zig T5 execution must refuse first")
+    if ("zig_transport::decode_t5_words(bytes)?" not in active
+            or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
+            or "program.execute(&mut session)" not in active):
+        raise CorridorBlocked("sens-trit T5 execution bypasses Zig or SENS admission")
+    if ("sens::PhysicalT5Program::decode(bytes)" in route
+            or "sens::decode_ternary_words(bytes)" in route
+            or "sens::eval_t5_program(" in route):
+        raise CorridorBlocked("sens-trit T5 execution contains Rust physical codec")
+    arm = _route_between(source, '\n        "eval" | "eval-core4" => {\n',
+                         '\n        "encode-e1" => {\n')
+    if ('eval_t5_bytes_core4(&bytes, true)?' not in arm
+            or 'eval_t5_bytes(&bytes)?' not in arm):
+        raise CorridorBlocked("live eval/eval-core4 command bypasses Zig-gated execution")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -231,6 +258,8 @@ def check() -> list[str]:
         raise CorridorBlocked("sens-trit.rs does not call zig_transport corridor API")
     check_trit_t5_egress(trit)
     notes.append("sens-trit-zig-only-egress")
+    check_trit_t5_execution(trit)
+    notes.append("sens-trit-zig-only-t5-execution")
     check_trit_e1_egress(trit)
     notes.append("sens-trit-zig-only-e1-egress")
     check_trit_e1_ingress(trit)
