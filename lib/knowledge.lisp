@@ -1,7 +1,8 @@
-;; TEMPORARY #5605 (compatibility reader): #d1:0/#d1:1 disambiguate D1
-;; from numeric 0/1 only in legacy parse(). Canonical binary uses bare bits.
-;; Remove on this loader's proven D1 positional-reader cutover with native
-;; positive/negative witnesses and physical Zig T5 round-trip, not before.
+;; LEGACY_MIGRATION_DEBT #5605 / owner prohibition #5789: old #d1:0/#d1:1
+;; are NOT current SENS literals. Do not introduce any new literal carrier.
+;; The old parse() path is legacy provenance, not permission or language law.
+;; Retire only with positional D1 reader, positive/negative native SENS
+;; witnesses and exact physical Zig T5 round-trip; never numeric substitution.
 ;; knowledge.lisp - A module system for the Lisp Knowledge Representation
 ;; Direct predicates use exact D1:1/D1:0; D3 ATOM only tests actual shapes.
 

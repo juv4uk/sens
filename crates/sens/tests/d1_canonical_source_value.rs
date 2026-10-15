@@ -97,23 +97,20 @@ fn positional_cond_d1_guards_are_bare_binary_words_not_tagged_carriers() {
 }
 
 #[test]
-fn transitional_d1_carrier_is_confined_to_compatibility_reader() {
-    // A blind migration of lib/*.lisp would change D1 predicates to numbers.
+fn canonical_rejects_numeric_and_tagged_literals_but_preserves_d1_words() {
+    // #5789: binary domain identities are NOT unqualified numeric literals.
+    // The historic #d1 textual carrier is forbidden in canonical SENS source.
+    for forbidden in ["2", "42", "-1", "+1", "0.0", "1.0", "#d1:0", "#d1:1"] {
+        assert!(
+            parse_canonical_binary(forbidden).is_err(),
+            "forbidden source literal unexpectedly admitted: {forbidden}"
+        );
+    }
     for bit in ["0", "1"] {
-        let tagged = parse(&format!("#d1:{bit}")).expect("temporary human carrier");
+        let words = parse_canonical_binary(bit).expect("exact one-bit domain word");
         assert!(matches!(
-            &tagged[0].kind,
+            &words[0].kind,
             ExprKind::DomainIdentity(DomainIdentity::D1(_))
         ));
-        let untagged = parse(bit).expect("legacy numeric reader");
-        assert!(matches!(
-            &untagged[0].kind,
-            ExprKind::Number(_, Exactness::Exact)
-        ));
-        assert!(matches!(
-            &parse_canonical_binary(bit).unwrap()[0].kind,
-            ExprKind::DomainIdentity(DomainIdentity::D1(_))
-        ));
-        assert!(parse_canonical_binary(&format!("#d1:{bit}")).is_err());
     }
 }

@@ -1,7 +1,8 @@
-; TEMPORARY #5605 (compatibility reader): #d1:0/#d1:1 only disambiguate
-; exact D1 from numeric 0/1 in the historical parse() route. NOT canonical SENS.
-; Remove only after this lib loader uses the position-aware D1 reader and
-; native positive/negative witnesses plus Zig T5 round-trip are verified.
+; LEGACY_MIGRATION_DEBT #5605 / owner prohibition #5789: old #d1:0/#d1:1
+; are NOT permitted literals in current SENS source. Never add/copy new ones.
+; These pre-existing tokens are quarantined for the historical parse() reader.
+; Retire with a positional D1 loader, positive/negative native SENS witnesses
+; and exact Zig T5 round-trip; no blind substitution with numeric 0/1.
 ; A forward-chaining rule engine (CLIPS-style: working memory of facts +
 ; pattern/action rules), the other half of classic symbolic AI from
 ; `lib/reason.lisp`'s backward-chaining (Prolog-style) engine. Grown natively
