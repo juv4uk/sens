@@ -495,13 +495,17 @@ def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
     scripts = set()
     for ch in spelling:
         cp = ord(ch)
+        if not ch.isalpha():
+            # A non-letter (hyphen, digit, punctuation) is a JOINER, not a script:
+            # śūnya-parīkṣā is all-san, not mixed en+san.
+            continue
         if ("a" <= ch <= "z") or ("A" <= ch <= "Z"):
             scripts.add("en")
         elif 0x0400 <= cp <= 0x052F:
             scripts.add("uk")
         elif 0x0900 <= cp <= 0x097F:
             scripts.add("san")
-        elif ch.isalpha():
+        else:
             if iast_to_devanagari(ch) is not None:
                 scripts.add("san")
             else:
@@ -889,6 +893,14 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
         letrec_names=()
 
         for idx,item in enumerate(node.items):
+            # Documentation is not code: a (doc ...) form carries human docs, not a
+            # machine identity, so it is dropped from the migration (owner 2026-10-15:
+            # "скрипту не потрібні коментарі").
+            if (not quoted and isinstance(item,ListNode) and item.items
+                    and isinstance(item.items[0],Atom) and item.items[0].tok.text=="doc"):
+                if words and words[-1]==D2_SEP:
+                    words.pop()
+                continue
             if idx:
                 words.append(D2_SEP)
 

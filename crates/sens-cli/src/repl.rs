@@ -17,16 +17,26 @@ use std::process;
 
 const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     (
-        "persistent-map.lisp",
-        include_str!("../../../lib/persistent-map.lisp"),
-    ),
-    (
         "persistent-vector.lisp",
         include_str!("../../../lib/persistent-vector.lisp"),
     ),
     ("time.lisp", include_str!("../../../lib/time.lisp")),
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
+// The persistent map is a separate host-neutral root Zig byte asset.
+fn persistent_map_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::persistent_map_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|error| format!("ZIG_PERSISTENT_MAP_REPL UTF-8: {error}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback".into())
+    }
+}
+
 // lib/knowledge.lisp is a host-neutral Zig-owned byte asset, never a Rust embed.
 fn knowledge_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -193,10 +203,12 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         let reason_source = reason_surface_source()?;
         let forward_source = forward_surface_source()?;
         let knowledge_source = knowledge_surface_source()?;
+        let persistent_map_source = persistent_map_surface_source()?;
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
             .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
             .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
             .chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))
+            .chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))
             .chain(SURFACE_PREREQUISITES.iter().copied());
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
@@ -618,6 +630,23 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_linter_carrier_persistent_map_repl_exact_bytes() {
+        let source = persistent_map_surface_source().expect("persistent map via Zig root");
+        let bytes = crate::zig_transport::persistent_map_source_bytes().expect("second Zig byte copy");
+        assert!(!source.is_empty());
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "ZIG_PERSISTENT_MAP_REPL byte parity");
+        println!("ZIG_PERSISTENT_MAP_REPL_PASS test_id=zig-repl-persistent-map layer=transport bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_linter_carrier_persistent_map_no_rust_fallback() {
+        let err = persistent_map_surface_source().expect_err("must not bypass Zig");
+        assert_eq!(err, "RUST_ZIG_ONLY: persistent-map.lisp requires Zig; no Rust source fallback");
     }
 
     #[cfg(feature = "zig-transport")]
