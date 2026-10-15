@@ -66,6 +66,11 @@ class NumericDomainTests(unittest.TestCase):
         p.write_text("fn f(max_width: u8) // max_width = 10 ; D11 experiment\n", encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
+    def test_sid8_era_token_is_blocked(self) -> None:
+        p = self.root / "research/zig-codecs/t5/t5.zig"
+        p.write_text("// max_width = 10 ; SID8 legacy ladder\n", encoding="utf-8")
+        self.assertTrue(self.module.check(self.root))
+
     def test_no_d10_cap_is_blocked(self) -> None:
         p = self.root / "research/zig-codecs/t5/t5.zig"
         p.write_text("fn f() {}\n", encoding="utf-8")

@@ -10,7 +10,7 @@ Authored to the CURRENT reality, not the past:
   unqualified pathway is the *historic* one, not the default;
 - D11 is out: the transport caps at D10 (no 11-bit T5).
 
-Fail-closed N1-N4. Exit 0 = NUMERIC_DOMAIN_EXCLUSIVE_OK; 1 = ..._BLOCKED.
+Fail-closed N1-N5. Exit 0 = NUMERIC_DOMAIN_EXCLUSIVE_OK; 1 = ..._BLOCKED.
 """
 from __future__ import annotations
 
@@ -82,6 +82,19 @@ def check(root: Path) -> list[str]:
             problems.append(f"N4: {rel} mentions an 11-bit/D11 width -- D11 must stay out")
     if not cap_seen:
         problems.append("N4: no transport caps the width at D10 (D11 could leak into T5)")
+
+    # N5 -- the SID8-era is physically impossible: the sterile corridor modules
+    # carry no SID8/Sens8/Function8/W8 marker (legacy is provenance, not the ladder).
+    legacy_re = re.compile(r"SID8|Sens8|Function8|\bW8\b|pre-rebuild")
+    for rel in ("research/zig-codecs/t5/t5.zig", "research/zig-codecs/transport_abi.zig",
+                "research/zig-codecs/f3c/f3c.zig", "research/zig-codecs/transport.zig"):
+        p = root / rel
+        if not p.is_file():
+            continue
+        s = p.read_text(encoding="utf-8")
+        if legacy_re.search(s):
+            problems.append(f"N5: {rel} names a SID8-era token -- legacy is provenance, "
+                            "never the corridor's ladder")
 
     return problems
 
