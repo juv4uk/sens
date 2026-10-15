@@ -18,12 +18,10 @@ sys.modules[SPEC.name]=mod
 SPEC.loader.exec_module(mod)
 
 FOUNDATION=ROOT/"knowledge"/"d1-d9-foundation.json"
-COVERAGE=ROOT/"knowledge"/"sens8-current-coverage-v1.json"
 DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs"
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
 NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
-HISTORICAL=ROOT/"contracts"/"core1-historical-sid-map.lisp"
 TEXT7=ROOT/"knowledge"/"d7-keyboard-v2-ratified.json"
 
 class KeyboardV2Sid8MigrationTests(unittest.TestCase):
@@ -61,23 +59,6 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
         for word in ("aб", "кa", "🙂", "é"):
             with self.subTest(word=word), self.assertRaises(mod.MigrationError):
                 mod.text7_encode(word, self.keyboard, mod.Tok("ATOM", word, 0))
-
-    def test_historical_sid8_car_with_d7_name(self):
-        foundation = mod.load_foundation(FOUNDATION)
-        legacy, my, upper = mod.build_three_pass_maps(
-            foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
-            SEMANTIC_REGISTRY, NECESSARY, HISTORICAL, COVERAGE,
-        )
-        resolver = mod.Resolver(legacy, my, upper, source_era="legacy")
-        original = "(00000101 value)"
-        words = mod.migrate_file(original, resolver, self.keyboard).split()
-        self.assertEqual(words[:3], ["10", "100", "00"])
-        self.assertEqual(words[-1], "01")
-        self.assertEqual(resolver.counts["pass1-sens8"], 1)
-
-
-class D11TestingVocabularyBoundaryTests(unittest.TestCase):
-    """D11 test data must never mint callable successors by shared name."""
 
     def test_all_d11_words_stay_testing_data_not_callable_names(self):
         foundation = json.loads(
@@ -127,11 +108,11 @@ class D11TestingVocabularyBoundaryTests(unittest.TestCase):
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )
-        legacy, my, upper = mod.build_three_pass_maps(
+        my, upper = mod.build_three_pass_maps(
             foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
-            SEMANTIC_REGISTRY, NECESSARY, HISTORICAL, COVERAGE,
+            SEMANTIC_REGISTRY, NECESSARY,
         )
-        for stage, mapping in (("legacy", legacy), ("my", my), ("upper", upper)):
+        for stage, mapping in (("my", my), ("upper", upper)):
             for spelling, identity in mapping.items():
                 if identity is not None:
                     self.assertNotEqual(
@@ -154,7 +135,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         from domain_tables import read_domain_table
 
         current_d8 = {format(n, "08b") for n in range(256)}
-        resolver = mod.Resolver({}, {}, {}, source_era="current",
+        resolver = mod.Resolver({}, {},
                                 admitted_d8=current_d8)
         seen = set()
         admitted = 0
@@ -189,7 +170,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
     def test_structural_empty_and_text_can_be_data_but_not_calls(self):
-        resolver = mod.Resolver({}, {}, {}, source_era="current",
+        resolver = mod.Resolver({}, {},
                                 admitted_d8={"10101000"})
         for code in ("000", "0000000", "1111111",
                      "000000000", "111111111", "0000000000",
@@ -204,16 +185,13 @@ class ThreePassMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
-        cls.legacy,cls.my,cls.upper=mod.build_three_pass_maps(
-            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL,
-            COVERAGE
+        cls.my,cls.upper=mod.build_three_pass_maps(
+            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
-    def migrate(self,source,source_era="legacy"):
-        # Direct unit fixtures are historical unless a test explicitly asks
-        # for current/auto semantics. Production CLI default is tested below.
-        resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era=source_era)
+    def migrate(self,source):
+        resolver=mod.Resolver(self.my,self.upper)
         return mod.migrate_file(source,resolver,self.text7),resolver
 
     def test_empty_list_is_compact_d3_empty(self):
@@ -225,11 +203,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 100 00 "))
         self.assertTrue(out.endswith(" 01\n"))
 
-    def test_pass1_legacy_sid8_car(self):
-        out,resolver=self.migrate("(00000101 x)\n")
-        self.assertTrue(out.startswith("10 100 00 "))
-        self.assertEqual(resolver.counts["pass1-sens8"],1)
-
     def test_pass2_my_lisp_car(self):
         out,resolver=self.migrate("(car x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
@@ -239,11 +212,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,resolver=self.migrate("(atom? x)\n")
         self.assertTrue(out.startswith("10 010 00 "))
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
-
-    def test_pass2_def_normalizes_to_define(self):
-        out,resolver=self.migrate("(def f (lambda (x) x))\n")
-        self.assertTrue(out.startswith("10 0011 00 "))
-        self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
 
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
@@ -264,39 +232,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,resolver=self.migrate("(totally-unknown-function x)\n")
         self.assertEqual(out,"10 totally-unknown-function 00 x 01\n")
         self.assertEqual(resolver.counts["passthrough-head"],1)
-
-    def test_unresolved_sid8_blocks_instead_of_becoming_text(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
-            self.migrate("(11111111 x)\n")
-
-    def test_one_exact_identity_d4_d9_from_audited_legacy(self):
-        for code,bits in (("00101111","1001"),
-                          ("00111010","110011110"),
-                          ("01001011","110101001")):
-            with self.subTest(code=code):
-                out,resolver=self.migrate(f"({code} x)\n")
-                self.assertTrue(out.startswith(f"10 {bits} "),out)
-                self.assertEqual(resolver.counts["pass1-sens8"],1)
-
-    def test_ambiguous_or_compound_audited_successors_fail_closed(self):
-        data=mod.load_foundation(FOUNDATION)
-        approved=mod.parse_audited_legacy_successors(COVERAGE,data)
-        self.assertNotIn("00001010",approved)  # MACRO + DEFINE, not one identity
-        self.assertNotIn("11111111",approved)  # historical unallocated
-
-    def test_old_functions_with_current_successors_move_by_semantic_role(self):
-        cases=[
-            ("(00100001 x)\n","0100","pass1-sens8"),   # NOT
-            ("(00101000 x)\n","000000","pass1-sens8"), # LENGTH
-            ("(00110111 f xs)\n","101000","pass1-sens8"), # MAP
-            ("(00111001 f z xs)\n","101110","pass1-sens8"), # REDUCE
-            ("(10011100 ((x 1)) x)\n","001000","pass1-sens8"), # LET
-            ("(10011101 ((x 1)) x)\n","001001","pass1-sens8"), # LET*
-        ]
-        for source,bits,counter in cases:
-            out,resolver=self.migrate(source)
-            self.assertTrue(out.startswith(f"10 {bits} "),source)
-            self.assertEqual(resolver.counts[counter],1,source)
 
     def test_my_lisp_functions_with_current_successors_are_not_legacy_unmapped(self):
         for source,bits in [
@@ -439,7 +374,6 @@ class ThreePassMigrationTests(unittest.TestCase):
                 "--semantic-generated", str(SEMANTIC_GENERATED),
                 "--semantic-registry", str(SEMANTIC_REGISTRY),
                 "--necessary-forms", str(NECESSARY),
-                "--historical-map", str(HISTORICAL),
                 "--text7", str(TEXT7),
                 "--report", str(report),
             ]
@@ -482,7 +416,6 @@ class ThreePassMigrationTests(unittest.TestCase):
                 "--semantic-generated", str(SEMANTIC_GENERATED),
                 "--semantic-registry", str(SEMANTIC_REGISTRY),
                 "--necessary-forms", str(NECESSARY),
-                "--historical-map", str(HISTORICAL),
                 "--text7", str(TEXT7), "--report", str(report), "--dry-run",
             ], capture_output=True, text=True)
             self.assertEqual(process.returncode, 0, process.stderr)
@@ -510,9 +443,8 @@ class ThreePassMigrationTests(unittest.TestCase):
                 "--semantic-generated", str(SEMANTIC_GENERATED),
                 "--semantic-registry", str(SEMANTIC_REGISTRY),
                 "--necessary-forms", str(NECESSARY),
-                "--historical-map", str(HISTORICAL),
                 "--text7", str(TEXT7), "--report", str(report),
-                "--source-era", "legacy", "--unpaired-only",
+                "--unpaired-only",
             ], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual((out / "old.sens").read_bytes(), already)
@@ -551,7 +483,7 @@ class ThreePassMigrationTests(unittest.TestCase):
     def test_global_define_shadows_builtin_surface_with_bound_text7_frame(self):
         # Pass 2 knows 'car' as D3 CAR, but the source-defined callable must
         # win at its own call site without rewriting the literal D3 code.
-        source="(00001001 car (00001000 () 1))\n(car)\n"
+        source="(0011 car (1000 () 1))\n(car)\n"
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
             mod.text7_encode("car",self.text7,mod.Tok("ATOM","car",0)),
@@ -562,8 +494,8 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
         source="""\
-(00001001 foo
-  (00001000 ()
+(0011 foo
+  (1000 ()
     1))
 (foo)
 """
@@ -592,7 +524,6 @@ class ThreePassMigrationTests(unittest.TestCase):
         # The original machine-block witness needed 17 historical W8 routes.
         # That source has since been migrated to exact D3/D4 code; requiring
         # 17 SID8 hits here would force a regression to retired semantics.
-        self.assertEqual(resolver.counts["pass1-sens8"], 0)
         self.assertGreater(resolver.counts["already-exact"], 0)
         self.assertEqual(source.count("(0011 "), 6)
         self.assertNotIn("(00001001 ", source)
@@ -632,8 +563,8 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
         source="""\
-(00001001 first
-  (00001000 (first)
+(0011 first
+  (1000 (first)
     (first)))
 """
         projection,resolver=self.migrate(source)

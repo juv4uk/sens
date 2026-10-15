@@ -3,7 +3,6 @@
 
 Interpret all historical spellings and eight-bit tokens through audited
 provenance; they are never themselves a current domain or call law.
-Pass 1: owner-audited historical eight-bit call heads -> exact successor, if proven.
 Pass 2: current admitted source surfaces -> corresponding exact-domain words.
 Pass 3: historical Lisp 1–1.5 names -> admitted current D3–D6 resident.
 
@@ -345,46 +344,6 @@ def parse_current_surface_rows(path: Path):
             rows[name]=(bits,f"D{width}")
     return rows
 
-def parse_audited_legacy_successors(path: Path, foundation: dict):
-    """Consume owner-audited SENS8 history; never treat old W8 as current D8.
-
-    Only DIRECT / single-identity DERIVED rows can become old-era successors.
-    Historical code coordinates never grant their own current placement.
-    """
-    data=json.loads(path.read_text(encoding="utf-8"))
-    if data.get("status") != "AUDIT-COMPLETE" or not isinstance(data.get("rows"),list):
-        raise MigrationError("legacy successor coverage is missing audit authority")
-    domains=foundation.get("domains",{})
-    exact=re.compile(r"\b(D[1-9]):([01]{1,9})\b")
-    allowed={"DIRECT-CURRENT-IDENTITY","CURRENT-PROJECTION-DERIVED"}
-    result={}
-    for row in data["rows"]:
-        if not isinstance(row,dict):
-            raise MigrationError("malformed owner-audited legacy successor")
-        if row.get("classification") not in allowed:
-            continue
-        sid=row.get("legacy_code")
-        if not isinstance(sid,str) or re.fullmatch(r"[01]{8}",sid) is None:
-            raise MigrationError("audited historical code is not exactly eight bits")
-        targets=set(exact.findall(row.get("current_target") or ""))
-        # A compound D4+D5, a D6/D8 ambiguity, or no admitted identity
-        # cannot be flattened to a guessed single callable.
-        if len(targets) != 1:
-            continue
-        domain,bits=next(iter(targets))
-        descriptor=domains.get(domain)
-        if descriptor is None:
-            continue
-        if len(bits)!=int(descriptor["width"]):
-            raise MigrationError(f"audited {domain}:{bits} has inconsistent exact width")
-        if bits not in descriptor.get("residents",{}):
-            raise MigrationError(f"audited {domain}:{bits} is not an owner-ratified resident")
-        value=(bits,domain,"audited-sens8-current-coverage")
-        if sid in result and result[sid][:2]!=value[:2]:
-            raise MigrationError(f"conflicting audited historical successor {sid}")
-        result[sid]=value
-    return result
-
 def parse_semantic_rows(path: Path):
     text=path.read_text(encoding="utf-8")
     rows={}
@@ -401,65 +360,18 @@ def parse_semantic_rows(path: Path):
     return rows
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
-                          semantic_registry: Path, necessary_forms: Path,
-                          historical_map: Path|None=None,
-                          legacy_coverage: Path|None=None):
+                          semantic_registry: Path, necessary_forms: Path):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     # Джерело міграції — тільки ратифіковані координати й перевірена
     # таблиця provenance. Видалений Rust-маршрутизатор не є законом мови.
     # Параметри semantic_registry/necessary_forms збережені лише для
     # сумісності наявних викликів інструмента; їхній вміст не читається.
-    proven_legacy={}
-    if legacy_coverage is not None:
-        for byte,ident in parse_audited_legacy_successors(legacy_coverage,data).items():
-            existing=proven_legacy.get(byte)
-            if existing is not None and existing[:2]!=ident[:2]:
-                raise MigrationError(f'conflicting successor for {byte}: {existing} vs {ident}')
-            proven_legacy.setdefault(byte,ident)
     sem_rows=parse_semantic_rows(semantic_generated)
-
-    # A historical byte may gain a successor through semantic-name
-    # equivalence.  Crucially, this is independent of the old byte value:
-    # the old registry spelling/historical name must resolve to one current
-    # owner-ratified D3-D6 label.
-    for byte,surfaces in sem_rows.items():
-        candidates={current[name] for _,name in surfaces if name in current}
-        for _namespace,name in surfaces:
-            by_role=residents.get(normalize_role(name))
-            if by_role is not None:
-                candidates.add(by_role)
-        if len(candidates)==1:
-            ident=next(iter(candidates))
-            proven_legacy.setdefault(byte,(ident[0],ident[1],"semantic-name-successor"))
-
-    # Historical Core1 rows provide independent name evidence for early SIDs,
-    # including rows that have no useful generated surface entry.
-    historical_rows=[]
-    if historical_map is not None:
-        hist_text="\n".join(
-            line.split(";",1)[0]
-            for line in historical_map.read_text(encoding="utf-8").splitlines()
-        )
-        historical_rows=list(HISTORICAL_ROW_RE.finditer(hist_text))
-        for m in historical_rows:
-            sid,my_name,historical,*_rest=m.groups()
-            # Prefer my_name (modern name); historical is only for verification.
-            my_cand=residents.get(normalize_role(my_name))
-            if my_cand is not None:
-                # Modern name resolves; accept it as the authoritative mapping.
-                proven_legacy.setdefault(sid,(my_cand[0],my_cand[1],"historical-name-successor"))
-
-    # Preserve knowledge that an old function existed even when it has no
-    # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
-    legacy={byte:proven_legacy.get(byte) for byte in sorted(set(sem_rows)|set(proven_legacy))}
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
         candidates=set()
-        ident=legacy.get(byte)
-        if ident is not None:
-            candidates.add(ident[:2])
         for _,name in surfaces:
             if name in current:
                 candidates.add(current[name])
@@ -473,26 +385,9 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 if name not in my:
                     my[name]=unique
 
-    # Historical my-lisp spellings are also pass-2 evidence.
-    for m in historical_rows:
-        sid,my_name,historical,*_rest=m.groups()
-        ident=legacy.get(sid)
-        if my_name not in my:
-            my[my_name]=ident[:2] if ident is not None else None
 
     upper={name:ident for name,ident in residents.items()}
-    for m in historical_rows:
-        sid,my_name,historical,*_rest=m.groups()
-        if not any(ch.isalpha() for ch in historical):
-            continue
-        key=historical.upper()
-        ident=legacy.get(sid)
-        candidate=ident[:2] if ident is not None else None
-        # Do not let a similarly-spelled modern resident erase evidence that
-        # this specific historical function lacks a proven successor.
-        upper.setdefault(key,candidate)
-
-    return legacy,my,upper
+    return my,upper
 
 def extract_projection(text: str,name: str):
     start=text.find(f"pub(crate) const {name}")
@@ -580,19 +475,13 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
-    def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None,d9_residents=None):
-        if source_era not in ("auto","legacy","current"):
-            raise ValueError(f"invalid source era {source_era!r}")
-        if source_era=="current" and not admitted_d8:
-            raise MigrationError("current D8 source requires an owner-ratified D8 foundation")
-        self.legacy=legacy
+    def __init__(self,my,upper,admitted_d8=None,d9_residents=None):
         self.my=my
         self.upper=upper
-        self.source_era=source_era
         self.admitted_d8=set(admitted_d8 or ())
         self.d9_residents=set(d9_residents or ())
         self.global_binding_words={}
-        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,
+        self.counts={"already-exact":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
                      "passthrough-head":0}
 
@@ -644,38 +533,21 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # Eight visible bits are historical SID8 here. The old guard blocked
-        # them as "ambiguous W8/D8", but no source in the corpus carries D8,
-        # so there is no live D8 reading to be ambiguous with. Owner: that
-        # check was vacuous -- auto resolves through the historical registry,
-        # exactly as the legacy era does. (Genuinely unmapped words still fail
         # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            if self.source_era=="current":
-                if t not in self.admitted_d8:
-                    raise MigrationError(
-                        f"unratified current D8 executable head {t}",tok
-                    )
+            # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired.
+            # An eight-bit head is NOT resolved through a historical registry and
+            # there is no source-era map. It is executable only as a CURRENT
+            # ratified D8 coordinate; otherwise it needs a current named D3-D6
+            # resident, else it fails closed as a retired SID8-era head.
+            if t in self.admitted_d8:
                 self.counts["already-exact"]+=1
                 return [t],"already-exact"
-            if t not in self.legacy:
-                raise MigrationError(
-                    f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
-                    tok,
-                )
-            ident=self.legacy[t]
-            if ident is None:
-                raise MigrationError(
-                    f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
-                    tok,
-                )
-            if ident[1]=="D3" and ident[0]==D3_EMPTY:
-                raise MigrationError(
-                    f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
-                    tok,
-                )
-            self.counts["pass1-sens8"]+=1
-            return [ident[0]],"pass1-sens8"
+            raise MigrationError(
+                f"retired SID8-era head {t}: no current ratified D8 coordinate and "
+                "no current named D3-D6 resident",
+                tok,
+            )
 
         # D7 є текстовою/фонемною ідентичністю, не викликаною функцією.
         # Для D9 таблиця резидентів сама по собі не доводить виконуваність.
@@ -754,7 +626,7 @@ def collect_global_bindings(forms,resolver=None):
     # through the same owner-ratified D4 identity used by Resolver.head().
     define_heads={"00001001","0011","define","def"}
     if resolver is not None:
-        for table in (resolver.my,resolver.legacy,resolver.upper):
+        for table in (resolver.my,resolver.upper):
             for spelling,identity in table.items():
                 if (isinstance(identity,tuple) and len(identity)>=2
                         and identity[0]=="0011" and identity[1]=="D4"):
@@ -1164,15 +1036,11 @@ def main():
     ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
     ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
-    ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
-    ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
     ap.add_argument("--text7", type=Path, default=REPO_ROOT / "knowledge/d7-keyboard-v2-ratified.json",
                     help="only current owner-ratified D7 keyboard/v2 JSON (128/128); historical .rs projections are rejected")
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
-    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
-                    help="auto = відомий історичний SID8 через таблицю; legacy = явний історичний режим; current = точний ратифікований D8")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1180,20 +1048,17 @@ def main():
         args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
-    if args.source_era=="current" and "D8" not in data.get("current_domains",()):
-        ap.error("--source-era=current requires a foundation ratifying D8")
     admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
-    legacy, my, upper = build_three_pass_maps(
+    my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
-        args.semantic_registry, args.necessary_forms, args.historical_map,
-        args.legacy_coverage
+        args.semantic_registry, args.necessary_forms
     )
     text7 = build_text7(data, args.text7)
     rows = []
     written = 0
     blocked = 0
-    totals = {"already-exact": 0, "pass1-sens8": 0,
+    totals = {"already-exact": 0,
               "pass2-my-lisp": 0, "pass3-lisp15": 0,
               "pass4-text7-global": 0, "passthrough-head": 0}
 
@@ -1225,7 +1090,7 @@ def main():
         rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8, d9_residents)
+        resolver = Resolver(my, upper, admitted_d8, d9_residents)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
@@ -1295,10 +1160,9 @@ def main():
             "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
-        "source_era": args.source_era,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "source_era_law": "eight-bit heads resolve as historical SID8 (no D8 in corpus); legacy maps SID8; current preserves ratified D8",
+        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current ratified D8 coordinate, else a current named D3-D6 resident",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
