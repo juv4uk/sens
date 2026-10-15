@@ -59,6 +59,27 @@ pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7Proje
 }
 
 pub fn render_text7(text: &Text7, layout: Text7Layout) -> Result<String, Text7ProjectionError> {
+    // Human-only IAST display is generated from the same 128 exact W7 cells.
+    // Digraphs and dependent vowel markers cannot be decoded as a single
+    // scalar Sanskrit keyboard code: SaIast render does NOT grant encode.
+    if layout == Text7Layout::SaIast {
+        let mut out = String::new();
+        for (index, &cell) in text.cells().iter().enumerate() {
+            let word = crate::BinarySourceWord::W7(
+                crate::Bit7::new(cell).ok_or(
+                    Text7ProjectionError::UnrenderableCell { layout, index, cell }
+                )?
+            );
+            let identity = crate::DomainIdentity::from_source_word(word);
+            let glyph = crate::semantic_registry::surface_for_domain_identity(
+                identity, "sa"
+            ).ok_or(Text7ProjectionError::UnrenderableCell {
+                layout, index, cell,
+            })?;
+            out.push_str(glyph);
+        }
+        return Ok(out);
+    }
     let mode = current_mode(layout).ok_or(Text7ProjectionError::UnknownSpelling {
         layout, byte_offset: 0,
     })?;
@@ -115,6 +136,18 @@ mod tests {
             assert!(matches!(encode_text7("k", layout),
                 Err(Text7ProjectionError::UnknownSpelling { .. })));
         }
+    }
+
+    #[test]
+    fn iast_renders_exact_d7_cells_without_claiming_ambiguous_inverse() {
+        let cells = Text7::from_cells(vec![75, 107, 69, 101]).unwrap();
+        assert_eq!(render_text7(&cells, Text7Layout::SaIast).unwrap(), "khkā◌ā");
+        assert!(matches!(
+            encode_text7("khkā◌ā", Text7Layout::SaIast),
+            Err(Text7ProjectionError::UnknownSpelling { .. })
+        ));
+        // Original ratified Devanagari v2 codec remains explicitly versioned.
+        assert_eq!(render_text7(&cells, Text7Layout::SaDeva).unwrap(), "खकआा");
     }
 
     #[test]
