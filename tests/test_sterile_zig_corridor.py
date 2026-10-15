@@ -251,6 +251,32 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaisesRegex(blocked, "UK_ZIG_ONLY"):
                     check(altered["repl"], altered["host"], altered["zig"], altered["build"])
 
+    def test_compact_uk_rejects_ignored_zig_byte_copy_mismatch(self) -> None:
+        """Even an unchanged comparison cannot certify bytes if it never rejects."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_uk_surface_zig_only"]
+        blocked = module["CorridorBlocked"]
+        sources = {
+            "repl": (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8"),
+            "host": (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8"),
+            "zig": (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8"),
+            "build": (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8"),
+        }
+        check(sources["repl"], sources["host"], sources["zig"], sources["build"])
+        checked = (
+            'if copied != required { return Err(format!'
+            '("ZIG_UK_CARRIER mismatch: {copied}")); }'
+        )
+        ignored = "if copied != required { /* swallowed mismatch */ }"
+        host = sources["host"]
+        start = host.index("pub fn uk_surface_bytes(")
+        stop = host.index("\n}\n", start)
+        uk_body = host[start:stop]
+        self.assertEqual(uk_body.count(checked), 1, "mutation must hit live UK code")
+        mutated = host[:start] + uk_body.replace(checked, ignored, 1) + host[stop:]
+        with self.assertRaisesRegex(blocked, "UK_ZIG_ONLY"):
+            check(sources["repl"], mutated, sources["zig"], sources["build"])
+
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         self.assertIn("sens_zig_t5_decode_be3", body)

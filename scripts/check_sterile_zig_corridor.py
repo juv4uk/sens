@@ -773,6 +773,23 @@ def check_uk_surface_zig_only(
             or "if copied != required" not in host
             or "Ok(bytes)" not in host):
         raise CorridorBlocked("UK_ZIG_ONLY missing two-call Zig ABI checked copy")
+    # A string/condition appearing in the right function is insufficient:
+    # the live Zig byte-copy result must fail closed BEFORE Ok(bytes).
+    # Tie the checked comparison to the actual UK ABI call so another
+    # asset's validation (or an empty if-branch) cannot satisfy this gate.
+    copy_mismatch_must_return = (
+        r"let\s+copied\s*=\s*unsafe\s*\{\s*"
+        r"asset_ffi::sens_zig_uk_bytes_copy\(\s*bytes\.as_mut_ptr\(\)\s*,"
+        r"\s*bytes\.len\(\)\s*\)\s*\}\s*;\s*"
+        r"if\s+copied\s*!=\s*required\s*\{\s*"
+        r"return\s+Err\s*\(\s*format!\s*\(\s*"
+        r'"ZIG_UK_CARRIER mismatch: \{copied\}"\s*\)\s*\)\s*;\s*\}'
+        r"\s*Ok\s*\(\s*bytes\s*\)"
+    )
+    if re.search(copy_mismatch_must_return, host) is None:
+        raise CorridorBlocked(
+            "UK_ZIG_ONLY unchecked or ignored UK asset byte-copy mismatch"
+        )
     root = active(zig_root)
     if (root.count('const uk_asset = @embedFile("lib/surface/uk.lisp");') != 1
             or f"pub export fn {ffi}(" not in root
