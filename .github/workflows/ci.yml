@@ -1427,3 +1427,18 @@ jobs:
           path: ${{ runner.temp }}/sens-active-migration/
           if-no-files-found: error
           retention-days: 7
+      - name: RUST-ZIG-ONLY — заборона прямих Rust → Lisp/SENS/FASL залежностей
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          # This is a separate mechanical authority boundary, not a SENS semantic verdict.
+          unit_rc=0
+          python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
+          edge_rc=0
+          python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 ]]; then
+            echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
+            exit 1
+          fi
+          echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"

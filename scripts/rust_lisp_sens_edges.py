@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Inventory compile-time Rust → Lisp/SENS edges (include_str!/include_bytes!).
+"""Rust must not embed SENS project sources: only the Zig ABI may bridge hosts.
 
-Structural only: no SENS semantic admission. Answers "which Rust files are
-wired to which .lisp / .sens / .fasl sources at compile time?"
+Mechanical compile-time inventory of include_str!/include_bytes! from tracked
+crates/**/*.rs to .lisp/.sens/.fasl. These are FORBIDDEN direct edges, not
+required dependencies. They remain red until the actual source references
+are migrated away. Do not silently allowlist historical bootstrap files.
 
-Fail-closed rules:
-  R1  every include_str!/include_bytes! target ending in .lisp/.sens/.fasl
-      resolves to an existing path relative to the including .rs file
-  R2  every such target is git-tracked (no phantom untracked embed)
-  R3  pinned critical edges stay present (bootstrap / surface / contract)
+R1: missing targets are errors; R2: untracked targets are errors;
+R3: EVERY direct Rust -> .lisp/.sens/.fasl embed is a blocking isolation error.
+This does not establish runtime / semantic isolation; audit those separately.
 
-Exit 0 = EDGES_OK; exit 1 = EDGES_BLOCKED.
+Exit 0 = EDGES_OK (zero direct embeds); exit 1 = EDGES_BLOCKED.
 """
 from __future__ import annotations
 
@@ -22,28 +22,14 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-SCHEMA = "sens-rust-lisp-sens-edges/v1"
+SCHEMA = "sens-rust-lisp-sens-edges/v2"
 
 INCLUDE_RE = re.compile(
     r"""(?P<kind>include_str|include_bytes)!\s*\(\s*\"(?P<path>(?:\\.|[^\"\\])*)\"\s*\)""",
 )
 SENS_SUFFIXES = (".lisp", ".sens", ".fasl", ".lisp.fasl")
 
-# Compile-time embeds that must not vanish without an explicit cutover.
-CRITICAL_EDGES: tuple[tuple[str, str], ...] = (
-    ("crates/wsm-guard-core/src/lib.rs", "lib/core.lisp"),
-    ("crates/wsm-guard-core/src/lib.rs", "lib/unify.lisp"),
-    ("crates/wsm-guard-core/src/lib.rs", "lib/guard.lisp"),
-    ("crates/sens-wasm/src/lib.rs", "lib/core4.lisp.fasl"),
-    ("crates/sens-wasm/src/lib.rs", "lib/unify.lisp"),
-    ("crates/sens-cli/src/main.rs", "language-contract.lisp"),
-    ("crates/sens-cli/src/main.rs", "lib/linter.lisp"),
-    ("crates/sens-cli/src/repl.rs", "lib/unify.lisp"),
-    ("crates/sens-cli/src/repl.rs", "lib/epistemic.lisp"),
-    ("crates/sens/src/mixed_source.rs", "lib/core4.lisp"),
-    ("crates/sens-lsp/src/guard_knowledge.rs", "knowledge/guard-reference.lisp"),
-)
-
+# No critical embed is grandfathered: even core4 / guard / contract is red.
 
 def git_tracked(root: Path) -> set[str]:
     out = subprocess.check_output(
@@ -89,6 +75,8 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
                 "include_arg": raw,
                 "target": rel_target,
                 "exists": resolved.is_file(),
+                "status": "RED",
+                "violation": "DIRECT_RUST_PROJECT_EMBED",
                 "line": text.count("\n", 0, m.start()) + 1,
             }
         )
@@ -120,28 +108,22 @@ def inventory(root: Path) -> dict:
         if e["rust"] not in by_target[e["target"]]:
             by_target[e["target"]].append(e["rust"])
 
-    critical_missing: list[dict] = []
-    edge_pairs = {(e["rust"], e["target"]) for e in edges}
-    for rust, target in CRITICAL_EDGES:
-        if (rust, target) not in edge_pairs:
-            found = any(
-                e["rust"] == rust and e["target"] == target for e in edges
-            )
-            if not found:
-                critical_missing.append({"rust": rust, "target": target})
+    # Zero is the ONLY acceptable direct-embed count. Historical embeds do not pass.
+    blocked = bool(edges or missing or untracked)
 
-    blocked = bool(missing or untracked or critical_missing)
     return {
         "schema": SCHEMA,
         "edge_count": len(edges),
         "rust_files_with_edges": len(by_rust),
         "unique_targets": len(by_target),
         "edges": edges,
+        "forbidden_edge_count": len(edges),
+        "forbidden_edges": edges,
+        "isolation_rule": "RUST_ZIG_ONLY",
         "by_rust": {k: sorted(v) for k, v in sorted(by_rust.items())},
         "by_target": {k: sorted(v) for k, v in sorted(by_target.items())},
         "missing": missing,
         "untracked_targets": untracked,
-        "critical_missing": critical_missing,
         "verdict": "EDGES_BLOCKED" if blocked else "EDGES_OK",
     }
 
@@ -170,10 +152,18 @@ def main(argv: list[str] | None = None) -> int:
             print("UNTRACKED:")
             for e in data["untracked_targets"]:
                 print(f"  {e['rust']} -> {e['target']}")
-        if data["critical_missing"]:
-            print("CRITICAL_MISSING:")
-            for e in data["critical_missing"]:
-                print(f"  {e['rust']} -> {e['target']}")
+        if data["forbidden_edges"]:
+            print("RUST_ZIG_ONLY_RED: direct Rust embeds of SENS sources are forbidden")
+            for e in data["forbidden_edges"][:30]:
+                print(
+                    f"  DIRECT_RUST_PROJECT_EMBED id=rust-zig-only "
+                    f"layer=transport {e['rust']}:{e['line']} "
+                    f"{e['kind']}! -> {e['target']}"
+                )
+            if len(data["forbidden_edges"]) > 30:
+                print(f"  ... {len(data['forbidden_edges']) - 30} additional forbidden edges; "
+                      "run --by-rust or --json for the complete inventory")
+            print("  REPRO: python3 scripts/rust_lisp_sens_edges.py --by-rust")
         if args.by_rust:
             for rust, targets in data["by_rust"].items():
                 print(f"{rust}")

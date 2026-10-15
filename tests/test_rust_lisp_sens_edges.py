@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Fail-closed: compile-time Rust → Lisp/SENS edges must stay resolved.
+"""Red until Rust has ZERO compile-time project-source embeds.
 
-Owner rule: embedded .lisp/.sens/.fasl paths are a named dependency graph.
-A deleted or untracked target is an unnamed break (S2). No semantic admission.
+No Rust -> .lisp/.sens/.fasl edge is allowed, including historical bootstrap.
+Only the Zig corridor may bridge physical bytes. This test deliberately fails
+on the currently populated repository; the negative fixture tests stay green.
 """
 from __future__ import annotations
 
@@ -28,61 +29,84 @@ class RustLispSensEdgesTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.mod = load_module()
 
-    def test_repo_edges_ok(self) -> None:
+    def test_repository_has_zero_direct_rust_project_edges(self) -> None:
         data = self.mod.inventory(ROOT)
+        examples = [
+            f"{edge['rust']}:{edge['line']} -> {edge['target']}"
+            for edge in data["forbidden_edges"][:20]
+        ]
         self.assertEqual(
-            data["verdict"],
-            "EDGES_OK",
-            f"missing={data['missing']} untracked={data['untracked_targets']} "
-            f"critical={data['critical_missing']}",
+            data["forbidden_edge_count"],
+            0,
+            f"RUST_ZIG_ONLY_RED: {data['forbidden_edge_count']} forbidden Rust->SENS "
+            f"embeds; first examples={examples}; "
+            "repro: python3 scripts/rust_lisp_sens_edges.py --by-rust",
         )
-        self.assertGreater(data["edge_count"], 10)
-        self.assertGreater(data["rust_files_with_edges"], 3)
+        self.assertEqual(data["verdict"], "EDGES_OK")
 
-    def test_critical_bootstrap_edges_present(self) -> None:
+    def test_every_detected_embed_is_red_without_exemptions(self) -> None:
         data = self.mod.inventory(ROOT)
-        pairs = {(e["rust"], e["target"]) for e in data["edges"]}
-        for rust, target in self.mod.CRITICAL_EDGES:
-            self.assertIn(
-                (rust, target),
-                pairs,
-                f"critical embed lost: {rust} → {target}",
-            )
+        self.assertEqual(data["forbidden_edge_count"], len(data["edges"]))
+        self.assertEqual(data["forbidden_edges"], data["edges"])
+        for edge in data["edges"]:
+            self.assertEqual(edge["status"], "RED")
+            self.assertEqual(edge["violation"], "DIRECT_RUST_PROJECT_EMBED")
+            self.assertIn(edge["target"], data["by_rust"][edge["rust"]])
 
-    def test_by_rust_lists_sens_cli_repl_libs(self) -> None:
-        data = self.mod.inventory(ROOT)
-        repl = data["by_rust"].get("crates/sens-cli/src/repl.rs", [])
-        self.assertIn("lib/unify.lisp", repl)
-        self.assertIn("lib/epistemic.lisp", repl)
-
-    def test_negative_missing_include_is_blocked(self) -> None:
+    def test_existing_tracked_embed_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "crates" / "demo" / "src").mkdir(parents=True)
-            rs = root / "crates" / "demo" / "src" / "lib.rs"
-            rs.write_text(
-                'const X: &str = include_str!("../../../lib/does-not-exist.lisp");\n',
+            (root / "crates/demo/src").mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("(001 000)\n", encoding="utf-8")
+            (root / "crates/demo/src/lib.rs").write_text(
+                'const X: &str = include_str!("../../../lib/core.lisp");\n',
                 encoding="utf-8",
             )
-            real_git = self.mod.git_tracked
-
-            def fake_git(r: Path) -> set[str]:
-                return {
-                    "crates/demo/src/lib.rs",
-                    "lib/does-not-exist.lisp",
-                }
-
-            self.mod.git_tracked = fake_git  # type: ignore
+            original = self.mod.git_tracked
+            self.mod.git_tracked = lambda _: {
+                "crates/demo/src/lib.rs", "lib/core.lisp"
+            }
             try:
                 data = self.mod.inventory(root)
             finally:
-                self.mod.git_tracked = real_git  # type: ignore
+                self.mod.git_tracked = original
             self.assertEqual(data["verdict"], "EDGES_BLOCKED")
+            self.assertEqual(data["forbidden_edge_count"], 1)
+            self.assertFalse(data["missing"])
+            self.assertFalse(data["untracked_targets"])
+
+    def test_missing_include_is_also_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "crates/demo/src").mkdir(parents=True)
+            (root / "crates/demo/src/lib.rs").write_text(
+                'const X: &str = include_bytes!("../../../lib/absent.sens");\n',
+                encoding="utf-8",
+            )
+            original = self.mod.git_tracked
+            self.mod.git_tracked = lambda _: {
+                "crates/demo/src/lib.rs", "lib/absent.sens"
+            }
+            try:
+                data = self.mod.inventory(root)
+            finally:
+                self.mod.git_tracked = original
+            self.assertEqual(data["verdict"], "EDGES_BLOCKED")
+            self.assertEqual(data["forbidden_edge_count"], 1)
             self.assertTrue(data["missing"])
 
-    def test_main_exit_zero_on_real_repo(self) -> None:
-        code = self.mod.main(["--root", str(ROOT)])
-        self.assertEqual(code, 0)
+    def test_empty_source_tree_has_no_direct_embeds(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            original = self.mod.git_tracked
+            self.mod.git_tracked = lambda _: set()
+            try:
+                data = self.mod.inventory(root)
+            finally:
+                self.mod.git_tracked = original
+            self.assertEqual(data["verdict"], "EDGES_OK")
+            self.assertEqual(data["forbidden_edge_count"], 0)
 
 
 if __name__ == "__main__":
