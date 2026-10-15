@@ -248,12 +248,12 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
     def test_zig_export_hidden_in_block_comment_does_not_count(self):
         match = re.search(
-            r"(?ms)^pub export fn sens_zig_t5_decode_be3\\(.*?^\\}",
+            r"(?ms)^pub export fn sens_zig_t5_decode_be3\(.*?^\}",
             self.zig,
         )
         self.assertIsNotNone(match)
         original = match.group(0)
-        mutated = self.zig.replace(original, "/*\\n" + original + "\\n*/", 1)
+        mutated = self.zig.replace(original, "/*\n" + original + "\n*/", 1)
         # The historical regex alone would see this ghost signature.
         self.assertIsNotNone(ZIG_DECL.search(mutated))
         with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_t5_decode_be3"):
@@ -261,8 +261,8 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
     def test_rust_version_check_hidden_in_comment_does_not_count(self):
         match = re.search(
-            r"if\\s+unsafe\\s*\\{\\s*sens_zig_codec_abi_version\\(\\)\\s*\\}"
-            r"\\s*!=\\s*2\\b",
+            r"if\s+unsafe\s*\{\s*sens_zig_codec_abi_version\(\)\s*\}"
+            r"\s*!=\s*2\b",
             self.rust,
         )
         self.assertIsNotNone(match)
@@ -272,7 +272,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
     def test_c_header_prototype_hidden_in_line_comment_does_not_count(self):
         match = re.search(
-            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\\([^;]*?;",
+            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\([^;]*?;",
             self.header,
         )
         self.assertIsNotNone(match)
@@ -292,7 +292,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
             check_contract(self.zig, self.rust, mutated)
 
     def test_comment_markers_inside_quoted_string_are_not_comments(self):
-        source = 'const uri = "https://example.test/a/*still-string*/";\\n'
+        source = 'const uri = "https://example.test/a/*still-string*/";\n'
         self.assertEqual(strip_c_comments(source), source)
 
 
