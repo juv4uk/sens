@@ -7,6 +7,7 @@ rewritten. An invalid T5 octet must be rejected rather than silently decoded.
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -103,6 +104,21 @@ def test_zig_output_readback_guard() -> None:
                 raise AssertionError(
                     f"ZIG_OUTPUT_GUARD_FALSE_ACCEPT label={label}"
                 )
+
+        # Regular same-inode aliases are not freshly produced by Zig.
+        alias = root / "hardlink.sens"
+        os.link(physical, alias)
+        try:
+            _read_zig_output(alias, command="synthetic")
+        except ZigCodecError as error:
+            if "ZIG_CODEC_OUTPUT_LINKED" not in str(error):
+                raise AssertionError(f"ZIG_OUTPUT_HARDLINK_WRONG_ERROR {error}") from error
+        else:
+            raise AssertionError("ZIG_OUTPUT_HARDLINK_FALSE_ACCEPT")
+        finally:
+            alias.unlink()
+        if physical.read_bytes() != bytes.fromhex("a1"):
+            raise AssertionError("ZIG_OUTPUT_HARDLINK_SOURCE_CHANGED")
 
 
 def main() -> None:

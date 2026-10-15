@@ -53,6 +53,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # An actual executable source witness: linked Zig must keep runtime
+          # checks ON and track all root-embedded release/migration bytes.
+          # Mutants include ReleaseFast, wrong root, ghost comments, stale asset.
+          echo 'test_id=zig-ffi-releasesafe-build-provenance layer=transport expected=ReleaseSafe semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v
           # D7 owner requested IAST on the human SAN surface. Machine W7 remains
           # 7-bit and reversible historic san/v2 codec remains separately typed.
           echo 'test_id=d7-iast-human-display layer=presentation source=knowledge/d7-keyboard-v2-ratified.json semantic_authority=SENS'
