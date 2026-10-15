@@ -211,6 +211,12 @@ test -s "$CLI_TEMP"
 chmod 755 "$CLI_TEMP"
 # Не замінюємо попередній файл, якщо новий CLI навіть не запускається.
 CLI_VERSION="$("$CLI_TEMP" --version)"
+# Do not replace a working CLI with a runnable asset from another release.
+# The version comes from the downloaded executable, not the asset filename.
+if [ "$CLI_VERSION" != "sens 0.42.0" ]; then
+    echo "RELEASE_VERSION_MISMATCH: очікується sens 0.42.0; отримано: ${CLI_VERSION}" >&2
+    exit 1
+fi
 mv -f "$CLI_TEMP" "$SENS_TARGET"
 trap - EXIT
 # Старе ім'я my-lisp лишається доступним як symlink — зовнішній контракт
