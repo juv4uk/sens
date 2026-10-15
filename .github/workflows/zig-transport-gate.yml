@@ -54,7 +54,6 @@ jobs:
               "check_rust_sens_zig_corridor",
               "check_rust_sens_corridor_coverage",
               "check_corridor_axiom_binding",
-              "report_rust_zig_sens_boundary",
               "check-domain-ladder-identity",
               "migrate-exact-domain-authority",
               "test_zig_codec_bridge",
