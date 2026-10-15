@@ -1,15 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed: Rust\u2194SENS physical wire must use the sterile Zig corridor.
 
-Does not run Zig. Does not admit programs. Audits source contracts only:
-
-  1. sens-cli default features include zig-transport
-  2. zig_transport.rs is FFI-only to sens_zig_* (no local T5 algorithm)
-  3. transport_abi.zig exports encode_be3 + decode_be3 (ABI v2)
-  4. build.rs links transport_abi when CARGO_FEATURE_ZIG_TRANSPORT is set
-  5. sens-trit path-includes the corridor module
-  6. typed reconstruction uses packed_bits + BitN::new (W1..W9)
-
+Does not run Zig. Does not admit programs. Audits source contracts only.
 Owner law: Zig = turnstile, SENS = meaning, Rust = opaque bytes / host.
 """
 from __future__ import annotations
@@ -44,21 +36,34 @@ class CorridorBlocked(ValueError):
     pass
 
 
+def _production_source(source: str) -> str:
+    """Drop #[cfg(test)] modules so string literals in tests cannot fake routes."""
+    marker = "\n#[cfg(test)]"
+    if marker in source:
+        return source.split(marker, 1)[0]
+    return source
+
+
 def _route_between(source: str, begin: str, end: str) -> str:
-    """Extract one mandatory CLI routine, never silently miss or duplicate it."""
-    if source.count(begin) != 1 or source.count(end) != 1:
+    """Extract one mandatory CLI routine, never silently miss or duplicate it.
+
+    Prefer production code so include_str / find("fn \u2026") inside tests cannot
+    double-count a real definition. When end is the test-module boundary,
+    full source is used for the end marker.
+    """
+    prod = _production_source(source)
+    if begin not in prod or prod.count(begin) != 1:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
-    start = source.index(begin) + len(begin)
-    stop = source.index(end, start)
-    return source[start:stop]
+    start = prod.index(begin) + len(begin)
+    haystack = prod if end in prod[start:] else source
+    if end not in haystack[start:]:
+        raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
+    stop = haystack.index(end, start)
+    return haystack[start:stop]
 
 
 def check_main_t5_ingress(source: str) -> None:
-    """Source-level guard only: default physical T5 MUST cross Zig ABI v2.
-
-    A passing pattern is NOT proof of runtime behaviour or of the complete
-    Rust\u2194SENS ecosystem; it rules out this particular CLI regression.
-    """
+    """Source-level guard only: default physical T5 MUST cross Zig ABI v2."""
     if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
         raise CorridorBlocked("sens main lacks default feature-gated Zig bridge")
     ingress = _route_between(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
@@ -81,16 +86,10 @@ def check_main_t5_ingress(source: str) -> None:
     entry = _route_between(source, "fn main() {", "\n#[cfg(test)]")
     if "physical_t5_request" not in entry or "eval_physical_t5" not in entry:
         raise CorridorBlocked("sens main must dispatch physical .sens before Lisp")
-    if "decode_physical_t5_words" not in entry and "eval_physical_t5" not in entry:
-        raise CorridorBlocked("sens .sens command no longer calls guarded Zig ingress")
 
 
 def check_trit_t5_egress(source: str) -> None:
-    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5.
-
-    This is a source-level invariant for ONE production command; the native
-    SENS oracle and physical Zig CI have separate executable receipts.
-    """
+    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5."""
     helper = _route_between(source, "fn admitted_source_words(", "\nfn read_sens(")
     if ("sens::parse_binary_source_words(source)" not in helper
             or "sens::parse_canonical_word_sequence(&words)" not in helper):
@@ -138,11 +137,7 @@ def check_trit_t5_egress(source: str) -> None:
 
 
 def check_trit_e1_egress(source: str) -> None:
-    """One E1 physical export MUST be Zig->SENS-owned admission->Zig.
-
-    Tests the production function only, not Rust reference fixtures.
-    """
-    # End before eval_e1_bytes so its own cfg gates are not double-counted.
+    """One E1 physical export MUST be Zig->SENS-owned admission->Zig."""
     route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn eval_e1_bytes(")
     negative = '#[cfg(not(feature = "zig-transport"))]'
     positive = '#[cfg(feature = "zig-transport")]'
