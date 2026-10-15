@@ -247,7 +247,7 @@ jobs:
       - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
 
       - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@0.4.0
+        uses: jetli/wasm-pack-action@0d096b08b4e5a7de8c28de67e11e945404e9eefa # v0.4.0
         with:
           version: 'v0.15.0'
 

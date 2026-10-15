@@ -119,5 +119,98 @@ class ReleasePinsTests(unittest.TestCase):
             self.assertTrue(any("uses without a ref" in e for e in errors), errors)
 
 
+    def test_central_zig_ci_is_a_release_gating_workflow(self):
+        # Exact-SHA release CI admission relies on this central Zig/SENS job.
+        self.assertIn(".github/workflows/ci.yml", MODULE.RELEASE_GATING_WORKFLOWS)
+
+    def test_central_zig_ci_floating_upload_artifact_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = materialize(
+                Path(tmp), CHANNEL, {w: GOOD_STEP for w in ALL_WORKFLOWS}
+            )
+            central = root / ".github/workflows/ci.yml"
+            central.write_text(
+                GOOD_STEP + "      - name: Save Zig source measurements\n"
+                "        uses: actions/upload-artifact@v4\n",
+                encoding="utf-8",
+            )
+            _, errors = MODULE.check(root)
+            self.assertTrue(
+                any(".github/workflows/ci.yml" in error and
+                    "not pinned to a 40-hex SHA" in error for error in errors),
+                errors,
+            )
+
+    def test_central_zig_ci_exact_v4_6_2_action_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = materialize(
+                Path(tmp), CHANNEL, {w: GOOD_STEP for w in ALL_WORKFLOWS}
+            )
+            central = root / ".github/workflows/ci.yml"
+            central.write_text(
+                GOOD_STEP + "      - name: Save Zig source measurements\n"
+                "        uses: actions/upload-artifact@"
+                "ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2\n",
+                encoding="utf-8",
+            )
+            _, errors = MODULE.check(root)
+            self.assertEqual(errors, [])
+
+    def test_central_zig_ci_rust_toolchain_drift_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = materialize(
+                Path(tmp), CHANNEL, {w: GOOD_STEP for w in ALL_WORKFLOWS}
+            )
+            central = root / ".github/workflows/ci.yml"
+            central.write_text(
+                "      - uses: dtolnay/rust-toolchain@1.98.0\n",
+                encoding="utf-8",
+            )
+            _, errors = MODULE.check(root)
+            self.assertTrue(
+                any(".github/workflows/ci.yml" in error and
+                    "!= pinned channel 1.99.0" in error for error in errors),
+                errors,
+            )
+
+    def test_real_release_wasm_pack_action_is_immutable(self):
+        workflow = (ROOT / ".github/workflows/release.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "uses: jetli/wasm-pack-action@"
+            "0d096b08b4e5a7de8c28de67e11e945404e9eefa", workflow
+        )
+        self.assertNotIn("uses: jetli/wasm-pack-action@0.4.0", workflow)
+
+    def test_release_wasm_pack_tag_mutation_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = materialize(
+                Path(tmp), CHANNEL, {w: GOOD_STEP for w in ALL_WORKFLOWS}
+            )
+            release = root / ".github/workflows/release.yml"
+            release.write_text(
+                GOOD_STEP + "      - uses: jetli/wasm-pack-action@0.4.0\n",
+                encoding="utf-8",
+            )
+            _, errors = MODULE.check(root)
+            self.assertTrue(
+                any(".github/workflows/release.yml" in error and
+                    "not pinned to a 40-hex SHA" in error for error in errors),
+                errors,
+            )
+
+    def test_real_central_zig_ci_actions_are_sha_pinned(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(
+            encoding="utf-8"
+        )
+        action = (
+            "uses: actions/upload-artifact@"
+            "ea165f8d65b6e75b540449e92b4886f43607fa02"
+        )
+        self.assertEqual(workflow.count(action), 2)
+        self.assertNotIn("uses: actions/upload-artifact@v4", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()

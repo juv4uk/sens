@@ -33,8 +33,12 @@ RELEASE_WORKFLOWS = (
 )
 
 # Workflows whose checks are the release gate's REQUIRED_CHECKS
-# (scripts/verify_release_ci.py): an unpinned check weakens the release proof.
+# (scripts/verify_release_ci.py), including the central ci.yml Zig/SENS gate:
+# an unpinned check weakens the release proof.
 RELEASE_GATING_WORKFLOWS = (
+    # This is now the sole automatic Zig/SENS witness. Exact-SHA release
+    # checks are insufficient if its own external actions float by tag.
+    ".github/workflows/ci.yml",
     ".github/workflows/ci-hosted.yml",
     ".github/workflows/important-file-guard.yml",
     ".github/workflows/binary-program-e2e.yml",
