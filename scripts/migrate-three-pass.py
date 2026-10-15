@@ -464,6 +464,7 @@ def iast_to_devanagari(s: str):
     while i<n:
         ch=s[i]
         if ch==" ": out.append(" "); pending=False; i+=1; continue
+        if ch in "-?": out.append(ch); pending=False; i+=1; continue
         if ch=="ṃ": out.append("ं"); i+=1; continue
         if ch=="ḥ": out.append("ः"); i+=1; continue
         m=next((k for k in _IAST_KEYS if s.startswith(k,i)), None)
