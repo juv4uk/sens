@@ -157,3 +157,46 @@ test "typed ladder via public Zig ABI v2, D10 fail closed" {
         abi.sens_zig_t5_encode_be3(&d8, d8.len, &failed, 1));
     try std.testing.expectEqualSlices(u8, &.{ 0xa5, 0xa5, 0xa5 }, &failed);
 }
+
+
+test "corridor carrier mints exact T5 bytes from a trit stream (no width bound)" {
+    // #5812: the carrier is pure mechanics -- a trit stream <-> physical T5
+    // bytes, trit 2 as the word boundary, final byte padded with 2. It never
+    // decides a width, a domain or a name; widths pass through as payload.
+    // Trits here are the spaced-bit view for tests/fixtures/migration-d1-cond-cohort:
+    // "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01".
+    const trits = [_]u8{
+        1, 0, 2, 1, 1, 0, 2, 0, 0, 2, 1, 0, 2, 0, 2, 0, 0, 2, 1, 0, 2, 1, 0, 0,
+        2, 0, 0, 2, 0, 0, 0, 2, 0, 1, 2, 0, 1, 2, 0, 0, 2, 1, 0, 2, 1, 2, 0, 0,
+        2, 1, 2, 0, 1, 2, 0, 1,
+    };
+    const expected = [_]u8{
+        0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1,
+    };
+    const a = std.testing.allocator;
+    const minted = try t5.encodeTritStream(a, &trits);
+    defer a.free(minted);
+    try std.testing.expectEqualSlices(u8, &expected, minted);
+    const back = try t5.decodeTritStream(a, minted);
+    defer a.free(back);
+    try std.testing.expectEqualSlices(u8, &trits, back);
+
+    // Width passes through opaquely: an 11-bit token is still minted, because
+    // the carrier decides no width (the D1..D10 check is a separate guard).
+    const wide = [_]u8{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    const wide_bytes = try t5.encodeTritStream(a, &wide);
+    defer a.free(wide_bytes);
+    try std.testing.expect(wide_bytes.len > 0);
+
+    // The carrier stays mechanical about the wire only: it rejects a non-trit
+    // (>2) on encode, and on decode rejects a leading/consecutive boundary and
+    // a whole padding byte, without inventing domain meaning.
+    try std.testing.expectError(error.InvalidPhysicalByte,
+        t5.encodeTritStream(a, &.{ 0, 3, 1 }));
+    try std.testing.expectError(error.EmptyProgram,
+        t5.encodeTritStream(a, &[_]u8{}));
+    try std.testing.expectError(error.EmptyDomainWord,
+        t5.decodeTritStream(a, &.{0xa2}));
+    try std.testing.expectError(error.InvalidTail,
+        t5.decodeTritStream(a, &.{0xf2}));
+}

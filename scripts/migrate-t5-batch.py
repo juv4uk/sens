@@ -171,10 +171,18 @@ def run(args: argparse.Namespace) -> dict:
             readable = original.decode("utf-8")
             projection = mig.migrate_file(readable, resolver, text7)
             words = mig.parse_words(projection)
-            packed = mig.encode_projection(projection)
-            if mig.decode_bytes(packed) != words:
+            # The Python codec is now ONLY an independent parity control; it
+            # never mints a published .sens. The sterile Zig corridor (#5812)
+            # is the sole source of physical bytes: it carries the typed domain
+            # ladder through mechanically, deciding no width, domain or name.
+            python_packed = mig.encode_projection(projection)
+            if mig.decode_bytes(python_packed) != words:
                 raise ValueError("exact typed T5 word roundtrip failed")
+            packed = python_packed
             if zig_binary is not None:
+                view = " ".join(words) + "\n"
+                packed = zig_codec_bridge.encode_t5(zig_binary, view)
+                zig_codec_bridge.require_parity(packed, python_packed)
                 evidence = zig_codec_bridge.verify_t5(zig_binary, packed)
                 row["zig_transport"] = evidence
             # Disallow use of generated textual bytes as a misleading .sens file.

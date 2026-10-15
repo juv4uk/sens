@@ -16,8 +16,11 @@ def run(args):
     zig_temp = tempfile.TemporaryDirectory() if args.zig_codec else None
     zig_binary = zig_codec_bridge.build_transport(Path(zig_temp.name)) if zig_temp else None
     for rel in paths:
-        packed = mig.encode_projection(projection)
+        python_packed = mig.encode_projection(projection)
+        packed = python_packed
         if zig_binary is not None:
+            packed = zig_codec_bridge.encode_t5(zig_binary, view)
+            zig_codec_bridge.require_parity(packed, python_packed)
             evidence = zig_codec_bridge.verify_t5(zig_binary, packed)
             row["zig_transport"] = evidence
         if args.write:
@@ -100,6 +103,25 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                       "            staged.append((rel, packed, row))\n"
                       "            zig_codec_bridge.verify_t5(zig_binary, packed)")
         p.write_text(t, encoding="utf-8")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_missing_corridor_mint_is_blocked(self) -> None:
+        # The corridor must MINT bytes (#5812), not only certify them.
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "zig_codec_bridge.encode_t5(", "noop_encode(")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_missing_parity_control_is_blocked(self) -> None:
+        # Python must remain a fail-closed parity control, never the byte source.
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "zig_codec_bridge.require_parity(", "noop_parity(")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_python_codec_minting_publish_bytes_is_blocked(self) -> None:
+        # A regression to the legacy path: the publish variable minted in Python.
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "python_packed = mig.encode_projection(",
+                     "packed = mig.encode_projection(")
         self.assertTrue(self.module.check(self.root))
 
     def test_runner_bypassing_driver_is_blocked(self) -> None:

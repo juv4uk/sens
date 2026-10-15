@@ -11,7 +11,19 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from zig_codec_bridge import ZigCodecError, build_transport, verify_t5
+from zig_codec_bridge import (
+    ZigCodecError,
+    build_transport,
+    encode_t5,
+    require_parity,
+    verify_t5,
+)
+
+REPO = Path(__file__).resolve().parents[1]
+# #5812: the corridor MINTS these exact bytes from the extensionless spaced-bit
+# view. Both files are committed fixtures; the .sens sha is pinned independently.
+BRANCH_FIXTURE = REPO / "tests/fixtures/migration-d1-cond-cohort/branch"
+BRANCH_SENS_SHA256 = "6568d9888039c0e33ace2378a39f0201f7d4ed67c71f23a6bb61605353976904"
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
 # These fixture digests are fixed independently of the input under test.
@@ -252,6 +264,51 @@ def main() -> None:
                 "layer=transport expected=reject-ff actual=accepted"
             )
 
+        # --- #5812: the corridor MINTS physical bytes; Python is parity only ---
+        # Byte-exact against the committed corpus fixture (issue verification #2).
+        golden_branch = BRANCH_FIXTURE.with_suffix(".sens").read_bytes()
+        branch_view = BRANCH_FIXTURE.read_text(encoding="ascii")
+        if sha(golden_branch) != BRANCH_SENS_SHA256:
+            raise AssertionError("ZIG_CORRIDOR_MINT_FIXTURE_DRIFT")
+        minted = encode_t5(executable, branch_view)
+        if minted != golden_branch:
+            raise AssertionError(
+                f"ZIG_CORRIDOR_MINT_MISMATCH expected_sha256={sha(golden_branch)} "
+                f"actual_sha256={sha(minted)} actual_hex={minted.hex()}"
+            )
+        # The Python codec agrees exactly and is used only as a parity control.
+        require_parity(minted, golden_branch)
+        try:
+            require_parity(minted, bytes([0x00]))
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_PARITY_MISMATCH" not in str(exc):
+                raise AssertionError(f"wrong parity rejection: {exc}") from exc
+        else:
+            raise AssertionError("ZIG_CODEC_PARITY_MISMATCH_ACCEPTED")
+        # The carrier passes width through as opaque payload (no domain decision):
+        # an 11-bit token IS minted, but the D1..D10 coordinate check fails closed.
+        wide = encode_t5(executable, "11111111111\n")
+        if not wide:
+            raise AssertionError("ZIG_CORRIDOR_DROPPED_WIDTH_PAYLOAD")
+        try:
+            verify_t5(executable, wide)
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_FAILURE" not in str(exc):
+                raise AssertionError(f"wrong overwidth corridor reject: {exc}") from exc
+        else:
+            raise AssertionError("OVERWIDTH_TOKEN_ADMITTED_BY_COORDINATE_CHECK")
+        # Non-[01] byte and an empty view fail closed at the corridor boundary.
+        for label, bad_view in (("bad_char", "10 x2 00\n"), ("empty", "")):
+            try:
+                encode_t5(executable, bad_view)
+            except ZigCodecError as exc:
+                if "ZIG_CODEC_FAILURE" not in str(exc):
+                    raise AssertionError(
+                        f"wrong corridor input reject {label}: {exc}"
+                    ) from exc
+            else:
+                raise AssertionError(f"ZIG_CORRIDOR_ACCEPTED_BAD_VIEW_{label}")
+
         # Negative control: modification AFTER Zig built the executable must
         # invalidate the session receipt before executing any byte fixture.
         with executable.open("ab") as stream:
@@ -273,6 +330,9 @@ def main() -> None:
           "external_trusted_sha_d1=INDEPENDENT_GOLDEN "
           "canonical_d1_to_d2_same_length=REJECTED_WITH_EXTERNAL_PIN "
           "canonical_d10_to_d5_truncation=REJECTED_WITH_EXTERNAL_PIN "
+          "corridor_mints_bytes=YES branch_view_byte_exact=YES "
+          "python_parity_control=REQUIRED overwidth_passthrough=YES "
+          "overwidth_coordinate_check=REJECTED "
           f"zig_binary_sha256={binary_sha} "
           "d1_d2_distinct=YES d2_zero_and_one=YES "
           "canonical_truncation_requires_external_sha=YES "

@@ -153,6 +153,103 @@ pub fn encodeTripletsInto(out: []u8, input: []const u8) WriteError!usize {
     return needed;
 }
 
+/// Чистий носій: потік тритів (0/1 — біти, 2 — межа слова) -> фізичні байти T5.
+/// Це ЛИШЕ механіка носія: ширина й домен не тлумачаться. Довжина бітової
+/// серії між межами проходить наскрізь як непрозорий payload; жодного
+/// мапінгу імен, доменів чи ширин тут немає. Хвіст вирівнюється тритами 2.
+/// Caller owns returned bytes and must free them with the same allocator.
+pub fn encodeTritStream(allocator: std.mem.Allocator, trits: []const u8) ![]u8 {
+    if (trits.len == 0) return Error.EmptyProgram;
+    for (trits) |trit| {
+        if (trit > 2) return Error.InvalidPhysicalByte;
+    }
+    const len = (trits.len + TRITS_PER_BYTE - 1) / TRITS_PER_BYTE;
+    if (len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
+    const out = try allocator.alloc(u8, len);
+    errdefer allocator.free(out);
+
+    var index: usize = 0;
+    var current: u8 = 0;
+    var used: u8 = 0;
+    for (trits) |trit| {
+        current = current * 3 + trit;
+        used += 1;
+        if (used == TRITS_PER_BYTE) {
+            out[index] = current;
+            index += 1;
+            current = 0;
+            used = 0;
+        }
+    }
+    if (used != 0) {
+        while (used != TRITS_PER_BYTE) : (used += 1) current = current * 3 + 2;
+        out[index] = current;
+        index += 1;
+    }
+    std.debug.assert(index == len);
+    return out;
+}
+
+/// Механічний зворотний прохід: фізичні байти T5 -> чистий потік тритів
+/// (0/1 — біти, 2 — межа). Жодного тлумачення ширини чи домену; перевіряється
+/// лише канонічність носія (діапазон байтів 0..242, один трит 2 між словами,
+/// 0..4 термінальних 2). Повертає самі лише корисні трити без хвоста.
+/// Caller owns returned bytes and must free them with the same allocator.
+pub fn decodeTritStream(allocator: std.mem.Allocator, data: []const u8) ![]u8 {
+    if (data.len == 0) return Error.EmptyProgram;
+    if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
+    for (data) |byte| {
+        if (byte >= 243) return Error.InvalidPhysicalByte;
+    }
+
+    var tail: usize = 0;
+    tail_scan: {
+        var i = data.len;
+        while (i > 0) {
+            i -= 1;
+            var byte = data[i];
+            for (0..TRITS_PER_BYTE) |_| {
+                if (byte % 3 != 2) break :tail_scan;
+                tail += 1;
+                byte /= 3;
+            }
+        }
+    }
+    if (tail >= TRITS_PER_BYTE) return Error.InvalidTail;
+    const useful = data.len * TRITS_PER_BYTE - tail;
+
+    const out = try allocator.alloc(u8, useful);
+    errdefer allocator.free(out);
+
+    var written: usize = 0;
+    // Провідний трит 2 був би порожнім словом; дві межі підряд теж.
+    var previous_was_boundary = true;
+    for (data) |raw| {
+        if (written == useful) break;
+        var byte = raw;
+        var digits: [TRITS_PER_BYTE]u8 = undefined;
+        var j: usize = TRITS_PER_BYTE;
+        while (j > 0) {
+            j -= 1;
+            digits[j] = byte % 3;
+            byte /= 3;
+        }
+        for (digits) |digit| {
+            if (written == useful) break;
+            if (digit == 2) {
+                if (previous_was_boundary) return Error.EmptyDomainWord;
+                previous_was_boundary = true;
+            } else {
+                previous_was_boundary = false;
+            }
+            out[written] = digit;
+            written += 1;
+        }
+    }
+    if (previous_was_boundary) return Error.EmptyDomainWord;
+    return out;
+}
+
 /// Allocation-free T5 physical validation for hosted and freestanding
 /// adapters. This checks only the wire (ternary byte range, separator, tail,
 /// declared width), never a function identity, domain meaning, or SENS law.

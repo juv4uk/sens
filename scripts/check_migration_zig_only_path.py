@@ -21,11 +21,21 @@ M6  scripts/zig_codec_bridge.py fails closed: it pins the compiler (0.16.0),
 M7  scripts/migrate-parallel.sh (if present) delegates to the canonical driver and
     never touches the codec directly (no second path).
 
+M8  the corridor MINTS the bytes, not only certifies them (#5812): the batch must
+    call zig_codec_bridge.encode_t5(...) so the physical .sens come from Zig.
+M9  the Python codec is a PARITY CONTROL only: the batch must call
+    zig_codec_bridge.require_parity(...), so a corridor/codec disagreement fails
+    closed instead of silently publishing legacy bytes.
+M10 no second minting path: the publish variable must NOT be assigned directly
+    from the Python codec (`packed = mig.encode_projection(`), which would let
+    the legacy Python codec mint a published .sens again.
+
 Exit 0 = MIGRATION_ZIG_ONLY_PATH_OK; exit 1 = MIGRATION_ZIG_ONLY_PATH_BLOCKED.
 """
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -73,6 +83,26 @@ def check(root: Path) -> list[str]:
     elif verify_at > staged_at:
         problems.append("M5: publish staging (staged.append) precedes the Zig "
                         "certification (verify_t5); a file could be staged uncertified")
+
+    # M8 -- the corridor MINTS the physical bytes, not only certifies them (#5812).
+    if "zig_codec_bridge.encode_t5(" not in batch:
+        problems.append("M8: migrate-t5-batch.py does not call "
+                        "zig_codec_bridge.encode_t5 (Zig certifies but does not MINT "
+                        "the .sens bytes; the legacy Python codec still mints them)")
+
+    # M9 -- the Python codec is a parity control only; any disagreement fails closed.
+    if "zig_codec_bridge.require_parity(" not in batch:
+        problems.append("M9: migrate-t5-batch.py does not call "
+                        "zig_codec_bridge.require_parity (a corridor/Python-codec "
+                        "disagreement would not fail closed)")
+
+    # M10 -- no second minting path: the publish variable must not come straight
+    # from the Python codec (anchored so `python_packed = mig.encode_projection(`
+    # is allowed as the parity control, but `packed = mig.encode_projection(` is not).
+    if re.search(r"(?m)^\s*packed\s*=\s*mig\.encode_projection\(", batch):
+        problems.append("M10: migrate-t5-batch.py assigns the publish variable "
+                        "directly from the Python codec (packed = mig.encode_projection); "
+                        "the legacy codec can mint a published .sens again")
 
     # M7 -- the parallel runner (if present) must go through the canonical driver
     # and add no second path to a published .sens.

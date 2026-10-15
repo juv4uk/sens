@@ -151,6 +151,61 @@ def _require_external_source_sha256(
         )
 
 
+def _first_difference(left: bytes, right: bytes) -> int:
+    for index, (a, b) in enumerate(zip(left, right)):
+        if a != b:
+            return index
+    return min(len(left), len(right))
+
+
+def require_parity(zig_physical: bytes, python_physical: bytes) -> None:
+    """Fail closed unless the corridor bytes equal the Python parity control.
+
+    The Python codec is only an independent control here: it never mints a
+    published .sens (owner rule, #5812). Any difference means the corridor and
+    the legacy codec disagree, so nothing may be published.
+    """
+    if zig_physical == python_physical:
+        return
+    raise ZigCodecError(
+        "ZIG_CODEC_PARITY_MISMATCH "
+        f"zig_sha256={hashlib.sha256(zig_physical).hexdigest()} "
+        f"python_sha256={hashlib.sha256(python_physical).hexdigest()} "
+        f"first_byte={_first_difference(zig_physical, python_physical)} "
+        f"zig_len={len(zig_physical)} python_len={len(python_physical)}"
+    )
+
+
+def encode_t5(
+    binary: Path, view_text: str, *, trusted_source_sha256: str | None = None
+) -> bytes:
+    """Пронести канонічний spaced-bit VIEW крізь стерильний Zig-коридор (#5812).
+
+    This is the ONLY path that MINTS physical .sens bytes from a migration
+    projection: the corridor performs carrier mechanics only (bits/trits <-> T5
+    physical bytes, trit 2 as the word boundary) and passes widths and domains
+    through as an opaque payload. It never decides a width, a domain or a name.
+    The Python codec (`sens_t5_codec`) is retained only as a parity control.
+    The built executable is attested before and after the carry, exactly as in
+    `verify_t5`, so a substituted binary cannot mint a receipt.
+    """
+    binary_digest = _built_executable_digest(binary)
+    with tempfile.TemporaryDirectory(prefix="sens-zig-t5-encode-") as directory:
+        view = Path(directory) / "words.view"
+        out = Path(directory) / "out.sens"
+        view.write_text(view_text, encoding="ascii")
+        _command([str(binary), "t5-transport", str(view), str(out)])
+        if out.is_symlink() or not out.is_file():
+            raise ZigCodecError("ZIG_CODEC_ENCODE_MISSING_OUTPUT")
+        physical = out.read_bytes()
+    if not physical:
+        raise ZigCodecError("ZIG_CODEC_ENCODE_EMPTY_OUTPUT")
+    _require_external_source_sha256(physical, trusted_source_sha256)
+    if _built_executable_digest(binary) != binary_digest:
+        raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_DURING_ENCODE")
+    return physical
+
+
 def verify_t5(
     binary: Path, physical: bytes, *, trusted_source_sha256: str | None = None
 ) -> dict[str, str]:
@@ -170,8 +225,7 @@ def verify_t5(
         if replay != physical:
             a = hashlib.sha256(physical).hexdigest()
             b = hashlib.sha256(replay).hexdigest()
-            offset = next((i for i, (x, y) in enumerate(zip(physical, replay)) if x != y),
-                          min(len(physical), len(replay)))
+            offset = _first_difference(physical, replay)
             raise ZigCodecError(
                 f"ZIG_CODEC_PHYSICAL_MISMATCH layer=transport input_sha256={a} "
                 f"actual_sha256={b} first_byte={offset} "

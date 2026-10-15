@@ -87,6 +87,36 @@ fn verifyCreatedFile(
         return Error.CanonicalRoundtripMismatch;
 }
 
+/// Рендерить extensionless ASCII spaced-bit VIEW у точний потік тритів:
+/// '0' -> біт 0, '1' -> біт 1, серія ASCII-пробілів -> ОДНА межа тр ит 2.
+/// Це ЛИШЕ механіка носія: довжина токена між межами — непрозорий payload,
+/// ніколи не доменна адреса. Жодного рішення про ширину чи D1..D10, жодного
+/// мапінгу імен/доменів — коридор драбину ПРОПУСКАЄ, не знає її.
+fn viewToTrits(allocator: std.mem.Allocator, view: []const u8) ![]u8 {
+    var trits: std.ArrayList(u8) = .empty;
+    errdefer trits.deinit(allocator);
+    var in_word = false;
+    var pending_boundary = false;
+    for (view) |ch| {
+        switch (ch) {
+            '0', '1' => {
+                if (pending_boundary) {
+                    try trits.append(allocator, 2);
+                    pending_boundary = false;
+                }
+                try trits.append(allocator, ch - '0');
+                in_word = true;
+            },
+            ' ', '\t', '\r', '\n' => {
+                if (in_word) pending_boundary = true;
+            },
+            else => return Error.Usage,
+        }
+    }
+    if (trits.items.len == 0) return Error.Usage;
+    return trits.toOwnedSlice(allocator);
+}
+
 fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8) ![]u8 {
     if (std.mem.eql(u8, command, "t5-roundtrip")) {
         const words = try t5.decode(allocator, source);
@@ -133,6 +163,33 @@ pub fn main(init: std.process.Init) !void {
     if (args.len < 3 or args.len > 4) return Error.Usage;
     const command = args[1];
     const source_path = args[2];
+
+    // t5-transport: extensionless ASCII VIEW -> physical .sens. The corridor is
+    // a pure mechanical carrier here; it passes the domain ladder through and
+    // never decides width, domain, name or function.
+    if (std.mem.eql(u8, command, "t5-transport")) {
+        if (args.len != 4) return Error.Usage;
+        const dest_path = args[3];
+        if (std.mem.eql(u8, dest_path, source_path)) return Error.InputEqualsOutput;
+        try requireExtension(dest_path, ".sens");
+        const original = try readFile(allocator, source_path);
+        defer allocator.free(original);
+        const trits = try viewToTrits(allocator, original);
+        defer allocator.free(trits);
+        const output = try t5.encodeTritStream(allocator, trits);
+        defer allocator.free(output);
+        // Точний механічний зворотний прохід носія: той самий потік тритів
+        // без тлумачення ширини/домену. Профіль D1..D10 тут НЕ застосовується.
+        const restored = try t5.decodeTritStream(allocator, output);
+        defer allocator.free(restored);
+        if (!std.mem.eql(u8, restored, trits)) return Error.CanonicalRoundtripMismatch;
+        const cleanup_path = try allocator.dupeZ(u8, dest_path);
+        defer allocator.free(cleanup_path);
+        try writeFileNew(allocator, dest_path, output);
+        try verifyCreatedFile(allocator, dest_path, cleanup_path.ptr, output);
+        return;
+    }
+
     const check_only = std.mem.eql(u8, command, "t5-check") or
         std.mem.eql(u8, command, "t5-coordinates-check") or
         std.mem.eql(u8, command, "f3c-check");
