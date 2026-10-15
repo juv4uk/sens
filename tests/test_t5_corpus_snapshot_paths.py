@@ -6,6 +6,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import importlib.util
 import io
 import json
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -108,6 +109,43 @@ class ExactManifestPaths(unittest.TestCase):
         self.manifest.write_text(json.dumps(content), encoding="utf-8")
         with self.assertRaisesRegex(snapshot.SnapshotError, "invalid-manifest-digest"):
             snapshot.run(self.root, self.names, self.manifest, "check")
+
+
+    def test_strict_git_index_exact_membership_and_missing_or_untracked(self) -> None:
+        self.file(" leading.sens")
+        self.file("#unicode\u2028file.sens", b"\x52")
+        self.file("untracked.sens", b"\x53")
+        subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
+        subprocess.run(
+            ["git", "add", "--", " leading.sens", "#unicode\u2028file.sens"],
+            cwd=self.root, check=True,
+        )
+        self.listing(" leading.sens", "#unicode\u2028file.sens")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(
+                snapshot.run(self.root, self.names, self.manifest, "write",
+                             require_git_index=True), 0,
+            )
+            self.assertEqual(
+                snapshot.run(self.root, self.names, self.manifest, "check",
+                             require_git_index=True), 0,
+            )
+
+        self.listing(" leading.sens")
+        with self.assertRaisesRegex(snapshot.SnapshotError, "git-index-mismatch:missing="):
+            snapshot.run(self.root, self.names, self.manifest, "check",
+                         require_git_index=True)
+        self.listing(" leading.sens", "#unicode\u2028file.sens", "untracked.sens")
+        with self.assertRaisesRegex(snapshot.SnapshotError, "untracked=.*untracked.sens"):
+            snapshot.run(self.root, self.names, self.manifest, "check",
+                         require_git_index=True)
+
+    def test_strict_git_index_requires_repository(self) -> None:
+        self.file("standalone.sens")
+        self.listing("standalone.sens")
+        with self.assertRaisesRegex(snapshot.SnapshotError, "git-index-unavailable"):
+            snapshot.run(self.root, self.names, self.manifest, "write",
+                         require_git_index=True)
 
 
 if __name__ == "__main__":
