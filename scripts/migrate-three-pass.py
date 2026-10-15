@@ -22,8 +22,8 @@ Rules derived from current SENS contract and later owner decisions:
   this script. Historical .rs projection is rejected; no v1 corpus was
   migrated, so no v1-to-v2 conversion prerequisite is needed.
 - Comments are stripped. Unresolved raw names cannot become .sens bytes.
-  The writer currently calls scripts/sens_t5_codec.py; byte parity with
-  the Zig physical codec must be proved independently, not assumed.
+  Python T5 packing is an independent parity reference ONLY. Real .sens
+  bytes are minted by pinned Zig and verified before atomic publication.
 - Output is a physical binary T5 .sens under --out with the same basename
   as its .lisp source. Existing .sens files are never overwritten;
   source .lisp is retained.
@@ -53,6 +53,8 @@ if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 
 from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
+import zig_codec_bridge
+import migration_publish_pair
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
@@ -1075,6 +1077,33 @@ def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
             tmp_name.unlink(missing_ok=True)
 
 
+def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge):
+    """Keep SENS word identities upstream; Zig alone mints physical T5 bytes.
+
+    The Python bytes are a parity witness, NEVER the published carrier. This
+    receipt certifies physical byte integrity only, not SENS semantics.
+    """
+    expected = hashlib.sha256(reference).hexdigest()
+    physical = bridge.carry_t5(
+        binary, projection, trusted_source_sha256=expected,
+    )
+    if physical != reference:
+        offset = next((i for i, (a, b) in enumerate(zip(reference, physical))
+                       if a != b), min(len(reference), len(physical)))
+        raise SensT5Error(
+            "ZIG_CARRY_REFERENCE_MISMATCH layer=transport "
+            f"expected_sha256={expected} "
+            f"actual_sha256={hashlib.sha256(physical).hexdigest()} "
+            f"first_byte={offset}"
+        )
+    receipt = bridge.verify_t5(binary, physical, trusted_source_sha256=expected)
+    if (receipt.get("physical_sha256") != expected or
+            receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256" or
+            not receipt.get("zig_binary_sha256")):
+        raise SensT5Error("ZIG_CARRY_UNATTESTED_RECEIPT layer=transport")
+    return physical, receipt
+
+
 def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
@@ -1148,6 +1177,16 @@ def main():
             else:
                 candidates.append(path)
         paths = candidates
+    # Publish mode always builds pinned Zig; missing Zig cannot silently fall
+    # back to Python. Dry-run remains a read-only mechanical preview.
+    zig_temp = tempfile.TemporaryDirectory(prefix="sens-three-pass-zig-") if not args.dry_run else None
+    zig_binary = None
+    if zig_temp is not None:
+        try:
+            zig_binary = zig_codec_bridge.build_transport(Path(zig_temp.name))
+        except (zig_codec_bridge.ZigCodecError, OSError) as exc:
+            zig_temp.cleanup()
+            ap.error(f"ZIG_CARRY_REQUIRED_FOR_PUBLICATION: {exc}")
     seen_destinations = set()
     for path in paths:
         rel = path.resolve().relative_to(base_root)
@@ -1170,11 +1209,21 @@ def main():
             # Strict physical T5: any historic name, passthrough or unencoded
             # value still visible is a blocker, never a falsely binary file.
             words = parse_words(projection)
-            payload = encode_projection(projection)
-            if decode_bytes(payload) != words:
+            reference = encode_projection(projection)
+            if decode_bytes(reference) != words:
                 raise SensT5Error("byte roundtrip changes source word identities")
-            if not args.dry_run:
-                write_atomic_no_clobber(target, payload)
+            zig_receipt = None
+            if zig_binary is not None:
+                payload, zig_receipt = zig_mint_verified_t5(
+                    projection, reference, zig_binary, zig_codec_bridge,
+                )
+                # The extensionless spaced-bit view is not an executable .sens.
+                migration_publish_pair.publish_pair(
+                    write_atomic_no_clobber, target, payload,
+                    target.with_suffix(""), projection.encode("ascii"),
+                )
+            else:
+                payload = reference  # dry-run only, NEVER published
             for key, value in resolver.counts.items():
                 totals[key] += value
             status = "would-write" if args.dry_run else "written"
@@ -1185,11 +1234,14 @@ def main():
                 "transport_trits": sum(len(word) for word in words) + len(words) - 1,
                 "physical_sha256": hashlib.sha256(payload).hexdigest(),
                 "typed_word_sha256": typed_sha256(words),
+                "semantic_admitted": False,
+                "zig_transport": zig_receipt,
                 "passes": resolver.counts,
             }
             rows.append(row)
             written += 1
-        except (MigrationError, SensT5Error, UnicodeError, OSError) as error:
+        except (MigrationError, SensT5Error, UnicodeError, OSError,
+                ValueError, zig_codec_bridge.ZigCodecError) as error:
             blocked += 1
             row = {
                 "path": str(rel), "output": str(dest),
@@ -1206,6 +1258,8 @@ def main():
             print(f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
                   flush=True)
 
+    if zig_temp is not None:
+        zig_temp.cleanup()
     report = {
         "schema": "sens-three-pass-t5-migration/v3",
         "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
@@ -1227,7 +1281,9 @@ def main():
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current named D3-D6 resident, else it fails closed",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
-        "mode": "dry-run" if args.dry_run else "write-new-only",
+        "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
+        "semantic_admitted": False,
+        "physical_producer": "PYTHON_REFERENCE_ONLY" if args.dry_run else "PINNED_ZIG_T5_CARRY",
         "summary": {
             "files_seen": len(paths),
             "files_skipped_paired": len(skipped_paired),
