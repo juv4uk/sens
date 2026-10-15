@@ -43,9 +43,49 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(owner["occupancy"], 128)
         self.assertEqual(entry["git_blob_sha1"], digest)
         self.assertEqual(entry["previous_pinned_git_blob_sha1"],
-                         "c51ec57ca40ddf585a22ca8cbddab5efb4f11028")
+                         "9c8e3861208384250724688f688d1daba90e2c82")
         self.assertIn(b"(status . owner-ratified)", payload)
         self.assertIn(b"knowledge/d7-keyboard-v2-ratified.json", payload)
+
+
+    def test_d7_iast_manifest_preserves_all_exact_w7_coordinates(self):
+        """Approved human-display refresh is not a new binary/code authority."""
+        import hashlib
+        import json
+        import re
+        from report_original_migration_candidates import (
+            _checked_nonprogram_entry, load_nonprogram_classification,
+        )
+
+        name = "lib/domains/d7.lisp"
+        manifest = json.loads((
+            ROOT / "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
+        ).read_text(encoding="utf-8"))
+        entry = next(e for e in manifest["entries"] if e["path"] == name)
+        source = (ROOT / name).read_bytes()
+        blob = hashlib.sha1(
+            b"blob " + str(len(source)).encode("ascii") + b"\\0" + source
+        ).hexdigest()
+        self.assertEqual(entry["git_blob_sha1"], blob)
+        self.assertEqual(entry["previous_pinned_git_blob_sha1"],
+                         "568bdf3ced54a635c0cd82257fa5f19234dff213")
+        self.assertEqual(entry["domain"], "D7")
+        self.assertEqual(entry["bit_width"], 7)
+        self.assertEqual(entry["expected_rows"], 128)
+        self.assertEqual(entry["projection"], "sens.d7.keyboard/v2")
+        lines = source.decode("utf-8")
+        words = re.findall(r"(?m)^\\s*\\(([01]{7})\\s+\\(ук ", lines)
+        self.assertEqual(len(words), 128)
+        self.assertEqual(set(words), {format(i, "07b") for i in range(128)})
+        self.assertIn("san IAST human notation", lines)
+        reviewed = load_nonprogram_classification(ROOT)
+        self.assertEqual(reviewed[name]["source_class"], "NONPROGRAM_DATA_REVIEWED")
+        self.assertFalse(reviewed[name]["automatic_sens_companion"])
+        self.assertIn("contracts/d7-ratification.lisp", reviewed)
+        for reviewed_source in (name, "contracts/d7-ratification.lisp"):
+            with self.subTest(reviewed_source=reviewed_source):
+                with self.assertRaisesRegex(ValueError, "nonprogram source drift"):
+                    _checked_nonprogram_entry(ROOT, reviewed_source, "0" * 40)
 
     def test_all_2046_exact_domain_coordinates_are_not_assumed_callable(self):
         witness = MOD.verify_full_domain_bitspace(ROOT)
