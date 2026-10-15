@@ -82,6 +82,26 @@ class ReleaseAssetsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "SHA256SUMS mismatch"):
             verify_replay(self.dist, replay, TAG, SHA)
 
+    def test_duplicate_provenance_key_rejected(self):
+        # Root commit and nested asset digest must never select 'last key wins'.
+        prepare(self.dist, TAG, SHA)
+        for key, fake_value in (("commit", "b" * 40), ("sha256", "0" * 64)):
+            with self.subTest(key=key):
+                replay = self.root / f"downloaded-{key}"
+                shutil.copytree(self.dist, replay)
+                provenance = replay / "release-provenance.json"
+                data = provenance.read_text(encoding="utf-8")
+                needle = f'"{key}":'
+                self.assertIn(needle, data)
+                data = data.replace(
+                    needle,
+                    f'"{key}": "{fake_value}",\n    "{key}":',
+                    1,
+                )
+                provenance.write_text(data, encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "duplicate provenance JSON key"):
+                    verify_replay(self.dist, replay, TAG, SHA)
+
     def test_wrong_candidate_sha_rejected(self):
         prepare(self.dist, TAG, SHA)
         with self.assertRaisesRegex(ValueError, "identity mismatch"):

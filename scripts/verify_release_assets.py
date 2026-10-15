@@ -79,6 +79,16 @@ def prepare(root, tag, sha):
     return manifest
 
 
+def _reject_duplicate_json_keys(pairs):
+    """Provenance JSON must have one unambiguous interpretation."""
+    unique = {}
+    for key, value in pairs:
+        if key in unique:
+            raise ValueError(f"RELEASE_BLOCKED: duplicate provenance JSON key {key!r}")
+        unique[key] = value
+    return unique
+
+
 def verify_replay(staged, downloaded, tag, sha):
     staged, downloaded = Path(staged), Path(downloaded)
     _check_sha(sha)
@@ -90,7 +100,12 @@ def verify_replay(staged, downloaded, tag, sha):
     all_names = names | {"release-provenance.json", "SHA256SUMS"}
     _check_files(staged, all_names)
     _check_files(downloaded, all_names)
-    manifest = json.loads(downloaded.joinpath("release-provenance.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        downloaded.joinpath("release-provenance.json").read_text(encoding="utf-8"),
+        object_pairs_hook=_reject_duplicate_json_keys,
+    )
+    if not isinstance(manifest, dict):
+        raise ValueError("RELEASE_BLOCKED: malformed provenance JSON object")
     if (manifest.get("schema") != "sens-release-assets/v1" or
             manifest.get("tag") != tag or manifest.get("commit") != sha or
             manifest.get("contract") != "11.9"):
