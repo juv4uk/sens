@@ -1074,6 +1074,73 @@ def source_files(root: Path):
         if any(part in SKIP_DIRS for part in p.parts): continue
         if p.suffix.lower() in SOURCE_EXTS: yield p
 
+# Owner-reviewed NONPROGRAM data (#4460), not executable SENS.
+# Both path identity AND source Git blob SHA are mandatory for recognition.
+NONPROGRAM_MANIFESTS = (
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
+    ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
+    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
+    ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
+    ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
+)
+
+
+def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> None:
+    """Prevent minting a physical .sens for SHA-reviewed data, not programs."""
+    if source.is_symlink():
+        raise SensT5Error("NONPROGRAM_UNTRUSTED_SYMLINK layer=encode")
+    try:
+        relative = source.resolve(strict=True).relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return  # User-controlled external corpus has no reviewed classification.
+    except OSError as exc:
+        raise SensT5Error(f"NONPROGRAM_SOURCE_UNREADABLE layer=encode {exc}") from exc
+    for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
+        manifest = root / name
+        if not manifest.is_file() or manifest.is_symlink():
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_UNAVAILABLE layer=encode {name}")
+        try:
+            record = json.loads(manifest.read_text(encoding="utf-8"))
+        except (UnicodeError, OSError, ValueError) as exc:
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_INVALID layer=encode {name}: {exc}") from exc
+        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or record.get("issue") != 4460
+                or record.get("automatic_sens_companion") is not False
+                or not isinstance(record.get("entries"), list)
+                or len(record["entries"]) != expected_count):
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_UNTRUSTED layer=encode {name}")
+        for entry in record["entries"]:
+            if not isinstance(entry, dict) or entry.get("path") != relative:
+                continue
+            scoped = (
+                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d[1-9]\.lisp", relative)))
+                or (cohort == "comment-only-loader" and relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"))
+                or (cohort == "isa" and relative.startswith("lib/machine/isa/"))
+                or (cohort == "schema" and relative.startswith(("contracts/", "lib/", "tests/fixtures/")))
+                or (cohort == "evidence" and relative.startswith(("evidence/", "tests/fixtures/")))
+                or (cohort == "expr-record" and relative.startswith("tests/fixtures/"))
+                or (cohort == "knowledge-record" and relative.startswith("knowledge/") and relative.count("/") == 1)
+            )
+            if not scoped:
+                raise SensT5Error(f"NONPROGRAM_REVIEW_SCOPE_INVALID layer=encode source={relative}")
+            pinned = entry.get("git_blob_sha1")
+            if not isinstance(pinned, str) or re.fullmatch("[0-9a-f]{40}", pinned) is None:
+                raise SensT5Error(f"NONPROGRAM_SHA_PIN_INVALID layer=encode source={relative}")
+            data = source.read_bytes()
+            actual = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+            if actual != pinned:
+                raise SensT5Error(
+                    f"NONPROGRAM_SOURCE_SHA_DRIFT layer=encode source={relative} "
+                    f"expected={pinned} actual={actual}"
+                )
+            raise SensT5Error(
+                f"NONPROGRAM_DATA_NOT_EXECUTABLE layer=encode source={relative} "
+                f"cohort={cohort} source_blob_sha={actual}"
+            )
+
+
 def sens_destination(rel: Path) -> Path:
     """НАЗВА.lisp -> НАЗВА.sens у тому самому відносному каталозі."""
     if rel.suffix.lower() != ".lisp":
@@ -1221,6 +1288,9 @@ def main():
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
             seen_destinations.add(dest)
+            # A reviewed DATA source may never acquire an executable carrier.
+            # This check precedes the Zig codec and every filesystem write.
+            reject_reviewed_nonprogram_source(path)
             if target.exists() or target.is_symlink():
                 raise SensT5Error(f"target already exists; not overwriting {dest}")
             source = path.read_text(encoding="utf-8")
