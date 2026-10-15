@@ -255,6 +255,9 @@ class SterileZigCorridorTests(unittest.TestCase):
             encoding="utf-8"
         )
         check(source)
+        start = source.index("fn explain_t5_bytes(")
+        end = source.index("\nfn require_zig_transport(", start)
+        route = source[start:end]
         for old, fake in (
             (
                 "sens::parse_canonical_word_sequence(&words)",
@@ -271,9 +274,10 @@ class SterileZigCorridorTests(unittest.TestCase):
             ),
         ):
             with self.subTest(mutation=old):
-                self.assertIn(old, source)
+                self.assertIn(old, route, "mutate the actual explain function")
+                mutant = source[:start] + route.replace(old, fake, 1) + source[end:]
                 with self.assertRaises(blocked):
-                    check(source.replace(old, fake, 1))
+                    check(mutant)
 
     def test_trit_default_egress_rejects_rust_codec_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
