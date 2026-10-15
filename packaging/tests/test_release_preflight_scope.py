@@ -103,7 +103,7 @@ def require_manual_preflight(source: str) -> None:
     # must run after the optimized native Zig suite in the very same step.
     # A simulated self-test or a comment is not a cross-host proof.
     host_match = re.search(
-        r"(?m)^          " + re.escape(C_HOST_ABI_COMMAND) + r"[ \\t]*$", body,
+        r"(?m)^          " + re.escape(C_HOST_ABI_COMMAND) + r"[ \t]*$", body,
     )
     if host_match is None or host_match.start() <= native_match.end():
         raise AssertionError("RELEASE_BLOCKED: missing live Rust-free C Zig ABI witness")
@@ -260,12 +260,20 @@ class ReleasePreflightScopeTest(unittest.TestCase):
         command = ZIG_RELEASE_SAFE_COMMAND
         full_gate = "python3 scripts/migration-zig-gate.py --require-zig"
         self.assertIn("          " + command, self.workflow)
+        # Swap the actual live commands rather than assuming the native
+        # suite is the last command in this release step. Independent C-host
+        # transport checks may correctly follow it.
         broken = self.workflow.replace(
             "          " + full_gate + "\n",
+            "          __REORDER_FULL_GATE__\n", 1,
+        )
+        broken = broken.replace(
+            "          " + command + "\n",
+            "          " + full_gate + "\n", 1,
+        )
+        broken = broken.replace(
+            "          __REORDER_FULL_GATE__\n",
             "          " + command + "\n", 1,
-        ).replace(
-            "          " + command + "\n\n      - name:",
-            "          " + full_gate + "\n\n      - name:", 1,
         )
         self.assertNotEqual(broken, self.workflow)
         with self.assertRaisesRegex(
