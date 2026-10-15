@@ -78,6 +78,21 @@ pub fn contract_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+/// Opaque Sanskrit REPL source from the root Zig module, without Rust file access.
+pub fn sanskrit_surface_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_sanskrit_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 { return Err("ZIG_SANSKRIT_CARRIER invalid length".into()); }
+    let len = usize::try_from(required).map_err(|_| "ZIG_SANSKRIT_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 { return Err("ZIG_SANSKRIT_CARRIER host byte limit".into()); }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe { asset_ffi::sens_zig_sanskrit_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    if copied != required { return Err(format!("ZIG_SANSKRIT_CARRIER copy mismatch: {copied}")); }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],

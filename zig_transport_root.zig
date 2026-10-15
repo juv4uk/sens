@@ -37,6 +37,26 @@ pub export fn sens_zig_contract_bytes_copy(dst: [*]u8, capacity: usize) isize {
     @memcpy(dst[0..contract_asset.len], contract_asset[0..contract_asset.len]);
     return @intCast(contract_asset.len);
 }
+// SENS owns all Sanskrit surface definitions; Zig only copies the original bytes.
+const sanskrit_asset = @embedFile("lib/surface/sa.lisp");
+pub export fn sens_zig_sanskrit_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (sanskrit_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(sanskrit_asset.len);
+    if (capacity < sanskrit_asset.len) return -2;
+    @memcpy(dst[0..sanskrit_asset.len], sanskrit_asset[0..sanskrit_asset.len]);
+    return @intCast(sanskrit_asset.len);
+}
+test "Sanskrit surface Zig C ABI copies exact bytes and refuses short buffers" {
+    const length = sens_zig_sanskrit_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(sanskrit_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_sanskrit_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var out: [sanskrit_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_sanskrit_bytes_copy(&out, out.len));
+    try std.testing.expectEqualSlices(u8, sanskrit_asset[0..sanskrit_asset.len], &out);
+}
+
 test "contract exact-byte copy and no partial output on a short buffer" {
     const length = sens_zig_contract_bytes_copy(undefined, 0);
     try std.testing.expectEqual(@as(isize, @intCast(contract_asset.len)), length);

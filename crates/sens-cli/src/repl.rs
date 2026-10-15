@@ -33,7 +33,19 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
 ];
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const UKR_SURFACE: &str = include_str!("../../../lib/surface/ukr.lisp");
-const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
+// The original Sanskrit source is Zig-owned opaque bytes, never a Rust embed.
+fn sanskrit_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::sanskrit_surface_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|e| format!("ZIG_SANSKRIT_CARRIER UTF-8 error: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: Sanskrit surface requires Zig; no Rust source fallback".into())
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ReplSurface {
@@ -117,10 +129,17 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 format!("не вдалося завантажити {name}: {}", error.render(source))
             })?;
         }
+        // Keep the same SENS evaluation order; only source transport changes.
+        let sanskrit_source = if surface == ReplSurface::Sanskrit {
+            Some(sanskrit_surface_source()?)
+        } else {
+            None
+        };
         let (name, source) = match surface {
             ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
             ReplSurface::UkrainianFull => ("ukr.lisp", UKR_SURFACE),
-            ReplSurface::Sanskrit => ("sa.lisp", SA_SURFACE),
+            ReplSurface::Sanskrit => ("sa.lisp", sanskrit_source.as_deref()
+                .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
         eval_program(source, &mut session)
@@ -505,6 +524,26 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_sanskrit_surface_preserves_actual_source_bytes() {
+        let source = sanskrit_surface_source().expect("live root Zig C ABI");
+        let bytes = super::zig_transport::sanskrit_surface_bytes()
+            .expect("second Zig ABI byte copy");
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "Sanskrit exact-byte replay");
+        assert!(source.starts_with("; Sanskrit surface"), "expected tracked source");
+        assert!(source.contains("svarūpa"), "source identity/truncation witness");
+        println!("ZIG_SANSKRIT_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_sanskrit_surface_denies_rust_only_loading() {
+        let err = sanskrit_surface_source().expect_err("no direct Rust source fallback");
+        assert!(err.contains("RUST_ZIG_ONLY"), "{err}");
+        assert!(err.contains("no Rust source fallback"), "{err}");
     }
 
     #[test]

@@ -15,6 +15,7 @@ CLI_TOML = ROOT / "crates" / "sens-cli" / "Cargo.toml"
 CORRIDOR = ROOT / "crates" / "sens-cli" / "src" / "zig_transport.rs"
 TRIT = ROOT / "crates" / "sens-cli" / "src" / "bin" / "sens-trit.rs"
 MAIN = ROOT / "crates" / "sens-cli" / "src" / "main.rs"
+REPL = ROOT / "crates" / "sens-cli" / "src" / "repl.rs"
 ABI = ROOT / "research" / "zig-codecs" / "transport_abi.zig"
 BUILD = ROOT / "crates" / "sens-cli" / "build.rs"
 F3C_ZIG = ROOT / "research" / "zig-codecs" / "f3c" / "f3c.zig"
@@ -626,6 +627,59 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
         raise CorridorBlocked("CONTRACT_ZIG_ONLY stale Cargo ABI contract asset")
 
 
+def check_sanskrit_surface_zig_only(
+    repl_source: str, rust_corridor: str, zig_root: str, build: str,
+) -> None:
+    """Sanskrit bytes are Zig-owned; SENS remains the only evaluator."""
+    def active(source: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
+    repl = active(repl_source)
+    if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/sa\.lisp"', repl):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY direct Rust source embed")
+    helper = active(_route_between(
+        repl_source, "fn sanskrit_surface_source(", "\n#[derive(Clone, Copy"
+    ))
+    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
+            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
+            or "super::zig_transport::sanskrit_surface_bytes()?" not in helper
+            or "String::from_utf8(bytes)" not in helper
+            or "RUST_ZIG_ONLY: Sanskrit surface requires Zig; no Rust source fallback" not in helper):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing live Zig or Zigless rejection")
+    loader = active(_route_between(
+        repl_source, "fn build_surface_layer(", "\nstruct ReplState {"
+    ))
+    if ("Some(sanskrit_surface_source()?)" not in loader
+            or "sanskrit_source.as_deref()" not in loader
+            or 'eval_program(source, &mut session)' not in loader):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY REPL must pass Zig bytes to SENS evaluator")
+
+    ffi = "sens_zig_sanskrit_bytes_copy"
+    asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
+    if not asset_path.is_file() or asset_path.is_symlink():
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing separate reviewed Zig asset ABI")
+    ffi_source = active(asset_path.read_text(encoding="utf-8"))
+    if ("pub(super) fn sens_zig_sanskrit_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in ffi_source):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing declared C ABI signature")
+    host = active(_route_between(
+        rust_corridor, "pub fn sanskrit_surface_bytes(", "\nfn require_same_exact_words("
+    ))
+    if (host.count(f"asset_ffi::{ffi}(") != 2
+            or "version()?;" not in host
+            or "if copied != required" not in host
+            or "Ok(bytes)" not in host):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing verified two-call copy")
+    root = active(zig_root)
+    if (root.count('const sanskrit_asset = @embedFile("lib/surface/sa.lisp");') != 1
+            or f"pub export fn {ffi}(" not in root
+            or "if (capacity == 0) return @intCast(sanskrit_asset.len);" not in root
+            or "if (capacity < sanskrit_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..sanskrit_asset.len], sanskrit_asset[0..sanskrit_asset.len]);" not in root):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY incorrect Zig byte carrier or short-buffer refusal")
+    if ('.arg("zig_transport_root.zig")' not in active(build)
+            or "cargo:rerun-if-changed=../../lib/surface/sa.lisp" not in build):
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY stale build asset / different Zig root")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -710,6 +764,12 @@ def check() -> list[str]:
     notes.append("linter-zig-only-byte-carrier")
     check_contract_zig_only(main_source, body, ROOT_ZIG.read_text(encoding="utf-8"), build)
     notes.append("contract-zig-only-byte-carrier")
+    if not REPL.is_file() or REPL.is_symlink():
+        raise CorridorBlocked("SANSKRIT_ZIG_ONLY missing regular REPL source")
+    check_sanskrit_surface_zig_only(
+        REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
+    )
+    notes.append("sanskrit-zig-only-byte-carrier")
     return notes
 
 
