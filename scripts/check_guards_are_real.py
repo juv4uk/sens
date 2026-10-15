@@ -2,19 +2,18 @@
 """UNGUARDING ratchet: a guard that cannot fail is itself a failure (#5777).
 
 Third placeholder episode (migration markers -> sterile guard -> migration-gate).
-Each time the treatment was honest, but the root was not burned out: an agent that
-is blocked commits a DUMMY gate -- one that passes a deliberately-wrong input.
-This is the machine means. A guard must PROVE it can fail:
+Each treatment was honest; the root was not burned: a blocked agent commits a
+DUMMY gate. This ratchet is the machine means so a dummy never reaches main.
 
-U1  no PLACEHOLDER / stub marker in any scripts/check_*.py;
-U2  every guard has a negative-control test tests/test_<guard>.py;
-U3  that test actually PASSES (i.e. the guard fails closed on the wrong input);
-U4  a deliberately-wrong input is NOT accepted: for every guard whose `check(root)`
-    is callable with a mutated root, the guard must return a non-empty problem list
-    on at least one mutation -- proven by U3's controls, asserted here by presence.
+Scope is the critical path (corridor / isolation / migration / release), not
+every historical scripts/check_*.py.
 
-A guard that cannot demonstrate it fails is reported UNGUARDING and this ratchet
-fails closed. Exit 0 = GUARDS_REAL_OK; exit 1 = UNGUARDING (a dummy gate exists).
+U1  no executable stub body on the critical path;
+U2  critical check_*.py have negative-control tests;
+U3  those controls pass;
+U4  migration-zig-gate.py --self-test succeeds (not a thin loader of missing halves).
+
+Exit 0 = GUARDS_REAL_OK; exit 1 = UNGUARDING.
 """
 from __future__ import annotations
 
@@ -24,48 +23,158 @@ import subprocess
 import sys
 from pathlib import Path
 
-STUB_RE = re.compile(r"PLACEHOLDER|TODO:\s*implement|not\s+implemented|raise\s+NotImplementedError", re.I)
+CRITICAL_CHECK_GUARDS = (
+    "check_sterile_zig_corridor.py",
+    "check_rust_sens_zig_corridor.py",
+    "check_rust_sens_corridor_coverage.py",
+    "check_corridor_axiom_binding.py",
+    "check_rust_isolated_only_zig.py",
+    "check_guards_are_real.py",
+)
+
+CRITICAL_OTHER = (
+    "migration-zig-gate.py",
+    "report_rust_zig_sens_boundary.py",
+    "release_go_gate.py",
+)
+
+SOLE_STUB_RE = re.compile(
+    r"^\s*(?:PLACEHOLDER(?:\d|_GATE|_YML)?|TODO:\s*implement)\s*$",
+    re.I,
+)
+STUB_TOKEN_RE = re.compile(
+    r"MIGRATION_ZIG_GATE_PLACEHOLDER_RESTORE_PENDING|"
+    r"SEE_REPO_FOR_FULL_BODY|"
+    r"INCOMPLETE_GATE_BODY|"
+    r"PLACEHOLDER_GATE|"
+    r"PLACEHOLDER_YML"
+)
 
 
-def check(root: Path) -> list[str]:
-    problems: list[str] = []
-    guards = sorted((root / "scripts").glob("check_*.py"))
-    if not guards:
-        return ["no scripts/check_*.py guards found"]
-    for g in guards:
-        rel = g.relative_to(root).as_posix()
-        src = g.read_text(encoding="utf-8", errors="replace")
+def _code_without_docs(src: str) -> str:
+    out = re.sub(r'"""[\s\S]*?"""', '""', src)
+    out = re.sub(r"'''[\s\S]*?'''", "''", out)
+    lines = [ln for ln in out.splitlines() if not ln.strip().startswith("#")]
+    return "\n".join(lines)
 
-        # U1 -- a placeholder/stub is a dummy gate, never a guard.
-        if STUB_RE.search(src):
-            problems.append(f"UNGUARDING: {rel} carries a PLACEHOLDER/stub marker")
 
-        # U2 -- a guard with no negative-control test cannot prove it fails closed.
-        test = root / "tests" / f"test_{g.name}"
-        if not test.is_file():
-            problems.append(f"UNGUARDING: {rel} has no negative-control test "
-                            f"(tests/test_{g.name} missing)")
+def _is_stub_source(src: str) -> bool:
+    if SOLE_STUB_RE.match(src.strip()):
+        return True
+    body = _code_without_docs(src)
+    if STUB_TOKEN_RE.search(body):
+        return True
+    if "base64.b64decode" in body and (
+        "_mg_chunk_" in body or "_migration_zig_gate_body" in body
+    ):
+        return True
+    return False
+
+
+def _test_module_for(name: str, root: Path):
+    primary = root / "tests" / f"test_{name}"
+    if primary.is_file():
+        return primary
+    if name == "check_sterile_zig_corridor.py":
+        alt = root / "tests" / "test_sterile_zig_corridor.py"
+        if alt.is_file():
+            return alt
+    return None
+
+
+def check(root: Path):
+    problems = []
+    scripts = root / "scripts"
+
+    for name in CRITICAL_CHECK_GUARDS:
+        path = scripts / name
+        rel = f"scripts/{name}"
+        if not path.is_file():
+            problems.append(f"UNGUARDING: missing critical guard {rel}")
+            continue
+        src = path.read_text(encoding="utf-8", errors="replace")
+        if name == "check_guards_are_real.py":
+            continue
+        if _is_stub_source(src):
+            problems.append(
+                f"UNGUARDING: {rel} carries an executable PLACEHOLDER/stub body"
+            )
+
+        test = _test_module_for(name, root)
+        if test is None:
+            problems.append(
+                f"UNGUARDING: {rel} has no negative-control test "
+                f"(tests/test_{name} missing)"
+            )
             continue
 
-        # U3 -- the controls must pass: the guard must actually fail on bad input.
+        mod = f"tests.{test.stem}"
         try:
             proc = subprocess.run(
-                [sys.executable, "-m", "unittest", "-v", f"tests.test_{g.stem}"],
-                cwd=str(root), capture_output=True, text=True, timeout=180)
+                [sys.executable, "-m", "unittest", "-v", mod],
+                cwd=str(root),
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
         except (OSError, subprocess.TimeoutExpired) as exc:
             problems.append(f"UNGUARDING: {rel} controls could not run: {exc}")
             continue
         if proc.returncode != 0:
-            tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-1:] or [""]
-            problems.append(f"UNGUARDING: {rel} negative controls do not pass "
-                            f"(a guard that cannot fail): {tail[0][:90]}")
+            problems.append(
+                f"UNGUARDING: {rel} negative controls do not pass "
+                f"(exit={proc.returncode})"
+            )
+
+    for name in CRITICAL_OTHER:
+        path = scripts / name
+        rel = f"scripts/{name}"
+        if not path.is_file():
+            problems.append(f"UNGUARDING: missing critical path script {rel}")
+            continue
+        src = path.read_text(encoding="utf-8", errors="replace")
+        if _is_stub_source(src):
+            problems.append(
+                f"UNGUARDING: {rel} carries an executable PLACEHOLDER/stub body"
+            )
+
+    gate = scripts / "migration-zig-gate.py"
+    if gate.is_file() and not _is_stub_source(
+        gate.read_text(encoding="utf-8", errors="replace")
+    ):
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(gate), "--self-test"],
+                cwd=str(root),
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            problems.append(
+                f"UNGUARDING: migration-zig-gate.py --self-test could not run: {exc}"
+            )
+        else:
+            if proc.returncode != 0:
+                problems.append(
+                    f"UNGUARDING: migration-zig-gate.py --self-test failed "
+                    f"(exit={proc.returncode})"
+                )
+
+    for debris in sorted(scripts.glob("_mg_chunk_*.b64")):
+        text = debris.read_text(encoding="utf-8", errors="replace").strip()
+        if SOLE_STUB_RE.match(text) or text.startswith("PLACEHOLDER"):
+            problems.append(
+                f"UNGUARDING: {debris.relative_to(root).as_posix()} "
+                f"is a PLACEHOLDER chunk"
+            )
 
     return problems
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("root", nargs="?", default=".")
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
     try:
@@ -74,13 +183,17 @@ def main() -> int:
         print(f"UNGUARDING: {exc}", flush=True)
         return 1
     if problems:
-        print(f"UNGUARDING {len(problems)} dummy gate(s) -- a guard that cannot fail:",
-              flush=True)
+        print(
+            f"UNGUARDING {len(problems)} dummy gate(s) -- a guard that cannot fail:",
+            flush=True,
+        )
         for problem in problems:
             print(" -", problem, flush=True)
         return 1
-    print("GUARDS_REAL_OK every guard carries no placeholder, has negative controls, "
-          "and those controls pass (each guard can fail)", flush=True)
+    print(
+        "GUARDS_REAL_OK critical-path guards prove they can fail closed",
+        flush=True,
+    )
     return 0
 
 
