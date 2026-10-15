@@ -191,8 +191,8 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
 
     def test_carry_only_on_dry_run_is_not_release_evidence(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
-                     "if zig_binary is not None:\\n            evidence".replace("\\n", "\n"),
-                     "if not args.write:\\n            evidence".replace("\\n", "\n"))
+                     "if zig_binary is not None:\\n            packed".replace("\\n", "\n"),
+                     "if not args.write:\\n            packed".replace("\\n", "\n"))
         self.assertTrue(any("M8:" in message for message in self.module.check(self.root)))
 
     def test_carry_after_staging_is_not_release_evidence(self) -> None:
