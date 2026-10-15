@@ -149,6 +149,11 @@ jobs:
           # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
           echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
           python3 scripts/migration-zig-gate.py --self-test
+          # Local release-evidence receipts must name an exact CLEAN source SHA.
+          # Synthetic provenance test cannot turn physical or semantic gates green.
+          echo 'test_id=zig-release-corridor-exact-sha-selftest layer=provenance verdict=source-only semantic_authority=SENS'
+          bash -n scripts/corridor_local_evidence.sh
+          bash scripts/corridor_local_evidence.sh --self-test
           # Host-neutral ABI v2 declarations are a blocking part of this one auto-CI.
           # Source-only proof: never upgrades physical or SENS semantic admission.
           echo 'test_id=zig-abi-v2-zig-rust-c-declarations layer=transport verdict=source-only semantic_authority=SENS'
