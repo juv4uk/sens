@@ -192,16 +192,10 @@ def check(root: Path) -> list[str]:
 
     main_rs = root / MAIN_RS
     trit_rs = root / TRIT_RS
-    if main_rs.is_file():
-        main_src = main_rs.read_text(encoding="utf-8")
-        if "zig_transport::decode_t5_words" not in main_src:
-            problems.append(
-                "R6: main.rs must decode physical .sens via zig_transport::decode_t5_words"
-            )
-        if "mod zig_transport" not in main_src:
-            problems.append("R6: main.rs must declare the shared zig_transport module")
+    if main_rs.is_file() and not main_rs.is_symlink():
+        problems.extend(_audit_main_physical_route(main_rs.read_text(encoding="utf-8")))
     else:
-        problems.append(f"R6: missing {MAIN_RS}")
+        problems.append(f"R6: missing or linked {MAIN_RS}")
     if trit_rs.is_file():
         trit_src = trit_rs.read_text(encoding="utf-8")
         if "zig_transport.rs" not in trit_src:
