@@ -525,6 +525,15 @@ jobs:
             -- cargo test --locked -p sens --test ast_exact_domain_transport \
               точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком \
               -- --nocapture
+      - name: "REPL — український Lisp/SENS: живий цикл, D1 закон і однобітний негатив"
+        id: repl-uk-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Уся семантика REPL перебуває у lib/repl-core.lisp.
+          # Цей крок лише викликає вже зібраний SENS; fail-closed.
+          echo "test_id=repl-uk-step layer=eval executor=NATIVE_SENS semantic_authority=SENS"
+          bash scripts/prove-repl-uk-step.sh target/debug/sens
       - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
         shell: bash
         run: |
