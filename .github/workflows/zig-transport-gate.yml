@@ -1,34 +1,9 @@
 name: Zig transport gate
 
 # Mechanical only: purity + pin + optional codec bridge. Not a semantic oracle.
+# Only ci.yml may start automatically; this transport-only gate is manual.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "research/zig-codecs/**"
-      - "scripts/ci_zig_purity.py"
-      - "scripts/migration-zig-gate.py"
-      - "scripts/zig_codec_bridge.py"
-      - "scripts/test_zig_codec_bridge.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/test_migration_zig_gate.py"
-      - "tests/test_t5_physical_python_parity.py"
-      - ".zig-version"
-      - ".github/actions/install-zig/**"
-      - ".github/workflows/zig-transport-gate.yml"
-  pull_request:
-    paths:
-      - "research/zig-codecs/**"
-      - "scripts/ci_zig_purity.py"
-      - "scripts/migration-zig-gate.py"
-      - "scripts/zig_codec_bridge.py"
-      - "scripts/test_zig_codec_bridge.py"
-      - "scripts/sens_t5_codec.py"
-      - "tests/test_migration_zig_gate.py"
-      - "tests/test_t5_physical_python_parity.py"
-      - ".zig-version"
-      - ".github/actions/install-zig/**"
-      - ".github/workflows/zig-transport-gate.yml"
 
 concurrency:
   group: zig-transport-gate-${{ github.workflow }}-${{ github.ref }}
