@@ -120,6 +120,26 @@ def test_zig_output_readback_guard() -> None:
         if physical.read_bytes() != bytes.fromhex("a1"):
             raise AssertionError("ZIG_OUTPUT_HARDLINK_SOURCE_CHANGED")
 
+        # lstat() follows a symlink in a PARENT directory; a one-link
+        # physical result beneath that alias used to pass the inode guard.
+        real_parent = root / "regular-parent"
+        real_parent.mkdir()
+        nested = real_parent / "proof.sens"
+        nested.write_bytes(bytes.fromhex("a1"))
+        if _read_zig_output(nested, command="synthetic") != bytes.fromhex("a1"):
+            raise AssertionError("ZIG_OUTPUT_REGULAR_PARENT_DRIFT")
+        parent_alias = root / "linked-parent"
+        parent_alias.symlink_to(real_parent, target_is_directory=True)
+        try:
+            _read_zig_output(parent_alias / "proof.sens", command="synthetic")
+        except ZigCodecError as error:
+            if "ZIG_CODEC_OUTPUT_LINKED_PARENT" not in str(error):
+                raise AssertionError(f"ZIG_OUTPUT_PARENT_LINK_WRONG_ERROR {error}") from error
+        else:
+            raise AssertionError("ZIG_OUTPUT_PARENT_LINK_FALSE_ACCEPT")
+        if nested.read_bytes() != bytes.fromhex("a1"):
+            raise AssertionError("ZIG_OUTPUT_PARENT_LINK_SOURCE_CHANGED")
+
 
 def main() -> None:
     test_zig_output_readback_guard()

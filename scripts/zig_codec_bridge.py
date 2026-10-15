@@ -152,6 +152,16 @@ def _require_external_source_sha256(
 
 
 
+def _reject_aliased_output_path(path: Path, command: str) -> None:
+    """Output provenance: also refuse symlinked ancestor directories."""
+    try:
+        _reject_linked_path_components(path)
+    except ZigCodecError as error:
+        raise ZigCodecError(
+            f"ZIG_CODEC_OUTPUT_LINKED_PARENT layer=transport command={command}: {error}"
+        ) from error
+
+
 def _read_zig_output(path: Path, *, command: str) -> bytes:
     """Read only this Zig subprocess's regular output; no symlink receipts.
 
@@ -159,6 +169,7 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
     after checks protect against a path being rebound during physical readback.
     This is file provenance, never a semantic SENS verdict.
     """
+    _reject_aliased_output_path(path, command)
     try:
         before = path.lstat()
         if not stat.S_ISREG(before.st_mode):
@@ -178,6 +189,7 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
         raise ZigCodecError(
             f"ZIG_CODEC_OUTPUT_UNREADABLE layer=transport command={command}: {error}"
         ) from error
+    _reject_aliased_output_path(path, command)
     inode = (before.st_dev, before.st_ino)
     if (not stat.S_ISREG(after.st_mode)
             or opened.st_nlink != 1 or after.st_nlink != 1
