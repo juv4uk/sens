@@ -128,6 +128,25 @@ fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
     }
 }
 
+/// Explicit E1 physical ingress: Zig canonical E1 -> exact words ->
+/// SENS-owned D2 admission and execution. No Rust E1 codec fallback.
+fn eval_e1_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = bytes;
+        Err("E1 physical execution requires Zig; no Rust fallback".into())
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        let words = zig_transport::decode_e1_words(bytes)?;
+        let program = sens::PhysicalT5Program::from_exact_words(&words)
+            .map_err(|e| format!("E1 -> SENS canonical D2 rejected: {e}"))?;
+        let mut session = sens::Session::default();
+        program.execute(&mut session)
+            .map_err(|e| format!("E1 -> current SENS evaluator rejected: {e}"))
+    }
+}
+
 fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("senc") {
         return Err("explicit F3 command requires a physical .senc file".into());
@@ -448,9 +467,7 @@ fn execute() -> Result<(), String> {
             // Explicit SENS execution only: CRC/E1 decoding followed by the
             // SAME ratified exact-domain admission/evaluator used by T5.
             let e1 = read_explicit_e1(path)?;
-            let mut session = sens::Session::default();
-            let result = sens::eval_e1_program(&e1, &mut session)
-                .map_err(|e| format!("E1 -> current SENS rejected: {e:?}"))?;
+            let result = eval_e1_bytes(&e1)?;
             for output in result.output { println!("{output}"); }
             println!("{}", result.value);
             Ok(())
