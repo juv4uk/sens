@@ -56,6 +56,11 @@ jobs:
           # Physical T5/F3C/E1 + ELF/archive evidence, never a semantic oracle.
           echo 'test_id=zig-release-c-host-abi-v2 layer=transport semantic_authority=SENS host=C'
           bash research/zig-codecs/host-c/verify.sh
+          # Release corpus parity: real Rust-free C -> pinned Zig ABI v2,
+          # immutable migration fixture bits, exact negative reason and SHA.
+          # --self-test alone is NOT physical evidence; --run is mandatory.
+          echo 'test_id=zig-release-h2-corpus layer=transport host=C semantic_authority=SENS'
+          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run
 
       - name: Upload release GO-gate report
         if: always()
