@@ -182,6 +182,28 @@ def check_trit_e1_egress(source: str) -> None:
         raise CorridorBlocked("sens-trit eval-e1 arm must call Zig-gated eval_e1_bytes")
 
 
+def check_trit_e1_ingress(source: str) -> None:
+    """The live eval-e1 path must decode E1 in Zig and execute only in SENS."""
+    route = _route_between(source, "\nfn eval_e1_bytes(", "\nfn read_explicit_f3(")
+    negative = '#[cfg(not(feature = "zig-transport"))]'
+    positive = '#[cfg(feature = "zig-transport")]'
+    if route.count(negative) != 1 or route.count(positive) != 1:
+        raise CorridorBlocked("E1 ingress missing feature-gated Zig corridor")
+    fail, active = route.split(positive, 1)
+    if negative not in fail or "no Rust fallback" not in fail or "decode_e1_words(" in fail:
+        raise CorridorBlocked("E1 no-Zig branch permits Rust physical fallback")
+    if ("zig_transport::decode_e1_words(bytes)" not in active
+            or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
+            or "program.execute(&mut session)" not in active):
+        raise CorridorBlocked("E1 execution bypasses Zig physical reader or SENS evaluator")
+    if "sens::eval_e1_program(" in route:
+        raise CorridorBlocked("direct Rust E1 codec in execution helper")
+    arm = _route_between(source, '\n        "eval-e1" => {\n',
+                         '\n        "encode-f3" =>')
+    if "eval_e1_bytes(&e1)?" not in arm or "sens::eval_e1_program(" in arm:
+        raise CorridorBlocked("live eval-e1 arm bypasses Zig->SENS helper")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -236,6 +258,12 @@ def check() -> list[str]:
     notes.append("sens-trit-zig-only-egress")
     check_trit_e1_egress(trit)
     notes.append("sens-trit-zig-only-e1-egress")
+    check_trit_e1_ingress(trit)
+    if ("sens_zig_e1_decode_be3" not in body
+            or "pub fn decode_e1_words(" not in body
+            or "pub export fn sens_zig_e1_decode_be3" not in abi):
+        raise CorridorBlocked("E1 Zig ingress export or host ABI client missing")
+    notes.append("sens-trit-zig-only-e1-ingress")
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
