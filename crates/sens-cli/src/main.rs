@@ -695,8 +695,15 @@ mod core_profile_bootstrap_tests {
     #[test]
     fn zig_linter_carrier_transports_real_source_without_rust_embed() {
         let src = linter_source_zig_only().expect("live Zig C ABI must carry linter bytes");
+        let raw = zig_transport::linter_source_bytes()
+            .expect("repeat exact Zig ABI byte copy");
         assert!(!src.is_empty());
-        assert!(parse(&src).is_ok(), "SENS parser, not Zig, owns the source grammar");
+        assert_eq!(src.as_bytes(), raw.as_slice(), "Zig ABI must preserve every source byte");
+        assert!(src.contains("(0011 lint-form-head"), "real linter source, not a stub");
+        // Parsing and execution are distinct SENS-owned admission tests.
+        // Do not turn this transport witness red for an unrelated legacy
+        // mixed-source parser rejection, nor falsely claim semantic PASS.
+        println!("ZIG_LINTER_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", raw.len());
         assert!(!include_str!("main.rs").contains("include_str!(\\\"../../../lib/linter.lisp\\\")"));
     }
 
