@@ -175,3 +175,40 @@ test "ABI v2 T5 encode rejects whole and partial alias without writes" {
         sens_zig_t5_encode_be3(&source_be3, source_be3.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &.{ 0x63, 0x89, 0x06, 0xa1 }, &output);
 }
+
+test "ABI v2 T5 decode rejects partial overlap and accepts adjacent buffers" {
+    // Caller-owned buffers may share one allocation. Every rejected alias
+    // must leave both the T5 source and destination byte-for-byte unchanged.
+    // A merely adjacent destination is safe and must remain accepted.
+    const carrier = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    const expected = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 0, 3, 0, 0, 2, 0, 1 };
+
+    // Destination starts two bytes inside the T5 source.
+    var forward: [32]u8 = .{0x6e} ** 32;
+    @memcpy(forward[0..carrier.len], carrier[0..]);
+    const forward_original = forward;
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_decode_be3(forward[0..].ptr, carrier.len,
+            forward[2..].ptr, forward.len - 2));
+    try std.testing.expectEqualSlices(u8, forward_original[0..], forward[0..]);
+
+    // Source starts inside the 15-byte BE3 destination (the opposite order).
+    var reverse: [32]u8 = .{0x6e} ** 32;
+    @memcpy(reverse[13 .. 13 + carrier.len], carrier[0..]);
+    const reverse_original = reverse;
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_decode_be3(reverse[13..].ptr, carrier.len,
+            reverse[0..].ptr, reverse.len));
+    try std.testing.expectEqualSlices(u8, reverse_original[0..], reverse[0..]);
+
+    // The exact end of source is NOT an overlap; preserve exact domain widths.
+    var adjacent: [32]u8 = .{0x6e} ** 32;
+    @memcpy(adjacent[0..carrier.len], carrier[0..]);
+    try std.testing.expectEqual(@as(isize, expected.len),
+        sens_zig_t5_decode_be3(adjacent[0..].ptr, carrier.len,
+            adjacent[carrier.len..].ptr, adjacent.len - carrier.len));
+    try std.testing.expectEqualSlices(u8, carrier[0..], adjacent[0..carrier.len]);
+    try std.testing.expectEqualSlices(u8, expected[0..],
+        adjacent[carrier.len .. carrier.len + expected.len]);
+    try std.testing.expectEqual(@as(u8, 0x6e), adjacent[carrier.len + expected.len]);
+}
