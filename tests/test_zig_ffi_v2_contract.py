@@ -6,6 +6,8 @@ No new workflow: existing Python discovery may run this focused guard.
 """
 
 import re
+import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -13,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ZIG_PATH = ROOT / "research/zig-codecs/transport_abi.zig"
 RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport.rs"
 C_PATH = ROOT / "research/zig-codecs/host-c/zig_transport_v2.h"
+H2_C_PATH = ROOT / "research/zig-codecs/host-c/h2_t5_dump.c"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
 # these are the eight existing *physical* ABI v2 functions only.
@@ -182,7 +185,68 @@ def check_contract(zig: str, rust: str, header: str) -> None:
         fail("c", "signature_set_differs_from_zig")
 
 
+
+def check_h2_host_contract(source: str) -> None:
+    """Only the canonical Zig v2 header may define H2 C-host declarations."""
+    clean = strip_c_comments(source)
+    if not re.search(r'(?m)^[ \t]*#[ \t]*include[ \t]+"zig_transport_v2\.h"[ \t]*$', clean):
+        fail("h2-c", "missing_canonical_zig_header")
+    if re.search(
+        r"\bextern\s+(?:uint32_t|int|ptrdiff_t)\s+sens_zig_[a-z0-9_]+\s*\(",
+        clean,
+    ):
+        fail("h2-c", "shadow_zig_abi_declaration")
+    if not re.search(
+        r"\bsens_zig_codec_abi_version\(\)\s*!=\s*SENS_ZIG_TRANSPORT_ABI_VERSION\b",
+        clean,
+    ):
+        fail("h2-c", "noncanonical_abi_version_check")
+
+
 class ZigAbiV2DeclarationContractTest(unittest.TestCase):
+    def test_h2_c_host_uses_only_shared_zig_v2_header(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        check_h2_host_contract(source)
+
+    def test_h2_c_host_rejects_shadow_extern_prototype(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source + "\nextern ptrdiff_t sens_zig_t5_encode_be3(" \
+            "const uint8_t *src, size_t len, uint8_t *dst, size_t cap);\n"
+        with self.assertRaisesRegex(ValueError, "shadow_zig_abi_declaration"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_rejects_missing_shared_header(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source.replace(
+            '#include "zig_transport_v2.h"', '#include <stdint.h>', 1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(ValueError, "missing_canonical_zig_header"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_rejects_literal_abi_version(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source.replace(
+            "!= SENS_ZIG_TRANSPORT_ABI_VERSION", "!= 2u", 1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(ValueError, "noncanonical_abi_version_check"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_compiles_c11_with_shared_zig_abi_header(self):
+        compiler = shutil.which("cc")
+        self.assertIsNotNone(compiler, "ZIG_ABI_V2_DRIFT layer=toolchain missing=cc")
+        result = subprocess.run(
+            [compiler, "-std=c11", "-Wall", "-Wextra", "-Werror", "-pedantic",
+             "-fsyntax-only", str(H2_C_PATH)],
+            cwd=ROOT, capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(
+            result.returncode, 0,
+            "ZIG_ABI_V2_DRIFT layer=h2-c reason=compile_shared_abi "
+            f"returncode={result.returncode} stderr={result.stderr}",
+        )
+
     @classmethod
     def setUpClass(cls):
         cls.zig = ZIG_PATH.read_text(encoding="utf-8")

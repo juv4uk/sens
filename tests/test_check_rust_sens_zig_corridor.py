@@ -85,6 +85,44 @@ class CorridorGuardTests(unittest.TestCase):
             any("no Rust-free host" in problem for problem in problems), problems
         )
 
+    def test_c_string_literal_ghost_is_blocked(self) -> None:
+        # A function name inside a string is data, not a Zig transport call.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            '''int main(void) {
+  const char *ghost = "sens_zig_t5_encode_be3(";
+  const char *url = "https://ziglang.org/doc";
+  return sens_zig_codec_abi_version() == 2 ? 0 : 1;
+}
+''',
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("no Rust-free host" in problem for problem in problems), problems
+        )
+
+    def test_c_string_comment_delimiters_do_not_hide_real_call(self) -> None:
+        # Textual /* and */ in C strings cannot consume a live physical call.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            '''#include "zig_transport_v2.h"
+int main(void) {
+  const char *prefix = "/*";
+  const unsigned char input[] = {0};
+  int rc = sens_zig_t5_validate(input, sizeof input);
+  const char *suffix = "*/";
+  return rc == 0 && prefix[0] && suffix[0] ? 0 : 1;
+}
+''',
+            encoding="utf-8",
+        )
+        self.assertEqual(self.module.check(self.root), [])
+
     # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:
         mutate(self.root, "crates/sens-cli/Cargo.toml", 'default = ["zig-transport"]', "default = []")

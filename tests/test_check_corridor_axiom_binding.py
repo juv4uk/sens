@@ -76,5 +76,50 @@ class AxiomBindingTests(unittest.TestCase):
         self.assertTrue(self.module.check(self.root))
 
 
+    def test_duplicate_rule_is_blocked(self) -> None:
+        edit_binding(self.root, lambda d: d["bindings"].append(dict(d["bindings"][0])))
+        self.assertTrue(any("duplicate bindings" in p for p in self.module.check(self.root)))
+
+    def test_unknown_rule_is_blocked(self) -> None:
+        edit_binding(self.root, lambda d: d["bindings"].append({
+            "rule": "R6-fictitious", "guard": "scripts/check_sterile_zig_corridor.py",
+            "axioms": ["G6"], "derivation": "improper extra guard"
+        }))
+        self.assertTrue(any("unknown corridor rule" in p for p in self.module.check(self.root)))
+
+    def test_rule_cannot_point_to_another_existing_guard(self) -> None:
+        edit_binding(self.root, lambda d: d["bindings"][0].update({
+            "guard": "scripts/check_sterile_zig_corridor.py"
+        }))
+        self.assertTrue(any("must use its actual guard" in p for p in self.module.check(self.root)))
+
+    def test_empty_guard_is_blocked(self) -> None:
+        edit_binding(self.root, lambda d: d["bindings"][0].update({"guard": ""}))
+        self.assertTrue(any("must use its actual guard" in p for p in self.module.check(self.root)))
+
+    def test_axiom_source_cannot_be_swapped(self) -> None:
+        edit_binding(self.root, lambda d: d.update({"axioms_doc": "docs/substitute.md"}))
+        (self.root / "docs/substitute.md").write_text("### G6 spoofed\n", encoding="utf-8")
+        self.assertTrue(any("source must be pinned" in p for p in self.module.check(self.root)))
+
+    def test_schema_drift_is_blocked(self) -> None:
+        edit_binding(self.root, lambda d: d.update({"schema": "unstable-fake-schema"}))
+        self.assertTrue(any("schema is not" in p for p in self.module.check(self.root)))
+
+    def test_malformed_bindings_are_blocked(self) -> None:
+        edit_binding(self.root, lambda d: d.update({"bindings": None}))
+        self.assertTrue(any("must be a list" in p for p in self.module.check(self.root)))
+
+    def test_malformed_json_fails_with_named_diagnostic(self) -> None:
+        (self.root / BINDING).write_text("{", encoding="utf-8")
+        # CLI exception handling rather than an uncontrolled traceback.
+        import subprocess
+        result = subprocess.run([sys.executable, str(CHECKER), str(self.root)],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("AXIOM_BINDING_BLOCKED malformed input", result.stdout)
+
+
+
 if __name__ == "__main__":
     unittest.main()
