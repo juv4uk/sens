@@ -135,8 +135,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         from domain_tables import read_domain_table
 
         current_d8 = {format(n, "08b") for n in range(256)}
-        resolver = mod.Resolver({}, {},
-                                admitted_d8=current_d8)
+        resolver = mod.Resolver({}, {})
         seen = set()
         admitted = 0
         rejected = 0
@@ -152,7 +151,9 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                 seen.add(ident)
                 tok = mod.Tok("ATOM", bits, 0)
                 # Domain presence is NOT proof of callable admission.
-                blocked_width = width in (2, 7, 9, 10) or (width == 3 and n == 0)
+                # NEW REALITY: no ratified D8 (knowledge/d8-*.json is SID8/Sens8), so an
+                # eight-bit head is not executable either.
+                blocked_width = width in (2, 7, 8, 9, 10) or (width == 3 and n == 0)
                 if blocked_width:
                     with self.subTest(width=width, index=n):
                         with self.assertRaises(mod.MigrationError):
@@ -164,14 +165,13 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                     self.assertEqual(len(out[0]), width)
                     admitted += 1
         self.assertEqual(len(seen), 2046)  # 2^1 + ... + 2^10
-        self.assertEqual(rejected, 1669)
-        self.assertEqual(admitted, 377)
+        self.assertEqual(rejected, 1669 + (1 << 8))
+        self.assertEqual(admitted, 377 - (1 << 8))
         # D7 and D10 are counted as coordinates, NOT 1152 callable functions.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
     def test_structural_empty_and_text_can_be_data_but_not_calls(self):
-        resolver = mod.Resolver({}, {},
-                                admitted_d8={"10101000"})
+        resolver = mod.Resolver({}, {})
         for code in ("000", "0000000", "1111111",
                      "000000000", "111111111", "0000000000",
                      "1111111111", "00000000000"):
