@@ -1,5 +1,9 @@
 ; Мовна політика екосистеми my-lisp.
 ; Ратифіковано прямою настановою власника 2026-09-07.
+; Уточнення власника 2026-10-15: українська залишається основною мовою;
+; порядок СЕКЦІЙ документації та мовних частин повідомлень Git-комітів:
+; Deutsch → Українська → English. Порядок не змінює пріоритету мов
+; і не поширюється на коментарі коду, задачі, діалоги чи семантику SENS.
 ;
 ; Цей контракт стосується ВСЬОГО людського тексту у власних репозиторіях,
 ; Git, GitHub, CI, релізах, задачах, комітах, повідомленнях агентів та діалозі.
@@ -15,8 +19,10 @@
      (ratified-at . "2026-09-07")
      (text-encoding . utf-8)
      (primary-language . ukrainian)
-     (auxiliary-languages . (english german))
-     (human-facing-order . (ukrainian english german))
+     (auxiliary-languages . (german english))
+     (human-facing-order . (german ukrainian english))
+     (human-facing-order-scope . (human-facing-documentation git-commit-subject-and-body))
+     (human-facing-order-updated-at . "2026-10-15")
      (repository-scope . all-owner-authored-repositories)
      (owner-phrase-all-my-repos . all-owner-authored-repositories)
      (authorship-authority . ../ecosystem/docs/policy/REPOSITORIES-LICENSE-AUDIT.md)
@@ -25,8 +31,10 @@
      (transliterator . scripts/uk-latynka.py)
      (transliteration-role . auxiliary-interoperability-tool)
      (rules .
-       ((ukrainian-first . t)
-        (auxiliary-may-follow-ukrainian . t)
+       ((ukrainian-primary . t)
+        (ukrainian-first-outside-ordered-scope . t)
+        (ordered-presentation-does-not-change-priority . t)
+        (ordered-presentation-allows-language-subsets . t)
         (auxiliary-must-not-replace-ukrainian . t)
         (repository-text-utf8 . t)
         (new-code-comments-ukrainian-cyrillic . t)
@@ -38,7 +46,7 @@
         (identifiers-and-protocol-literals-preserved . t)
         (git-tasks-and-issues-ukrainian-first . t)
         (git-pull-requests-and-reviews-ukrainian-first . t)
-        (git-commit-subject-and-body-ukrainian-first . t)
+        (git-commit-subject-and-body-presentation-order . (german ukrainian english))
         (git-branch-human-names-ukrainian-first . t)
         (all-agent-and-owner-messages-ukrainian-first . t)
         (workflow-job-and-ci-human-labels-ukrainian-first . t)
