@@ -329,8 +329,17 @@ REQUIRED_STEPS = (
 
 def gate_verdict(steps: list[dict], *, self_test: bool, skip_ladder: bool) -> str:
     """Never call a skipped, missing or failed physical Zig proof a PASS."""
-    if any(step["status"] == "FAIL" for step in steps):
+    # A status string does not supersede the process exit. Every real step
+    # records both fields: a nonzero exit must block release even when a
+    # stale or forged wrapper labels that step PASS.
+    if any(step.get("status") == "FAIL" or
+           (type(step.get("exit")) is int and step["exit"] != 0)
+           for step in steps):
         return "FAIL"
+    # Missing, string or bool exit codes are NOT a successful process proof.
+    # This applies to self-tests too, without claiming physical Zig success.
+    if any(type(step.get("exit")) is not int for step in steps):
+        return "INCOMPLETE"
     if self_test:
         return "SELF_TEST_ONLY"
     if skip_ladder:
@@ -344,7 +353,8 @@ def gate_verdict(steps: list[dict], *, self_test: bool, skip_ladder: bool) -> st
 
 def verdict_self_test() -> None:
     """Pure synthetic negatives; they never pretend Zig actually executed."""
-    passing = [{"step": name, "status": "PASS"} for name in REQUIRED_STEPS]
+    passing = [{"step": name, "status": "PASS", "exit": 0}
+               for name in REQUIRED_STEPS]
     assert gate_verdict(passing, self_test=False, skip_ladder=False) == "PASS"
     missing = passing[:-1]
     assert gate_verdict(missing, self_test=False, skip_ladder=False) == "INCOMPLETE"
@@ -376,10 +386,24 @@ def verdict_self_test() -> None:
             for s in passing
         ]
         assert gate_verdict(failed_guard, self_test=False, skip_ladder=False) == "FAIL"
-    skipped = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "SKIP"}]
+    skipped = [*passing[:-1],
+               {"step": REQUIRED_STEPS[-1], "status": "SKIP", "exit": 0}]
     assert gate_verdict(skipped, self_test=False, skip_ladder=False) == "INCOMPLETE"
-    unavailable = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "FAIL"}]
+    unavailable = [*passing[:-1],
+                   {"step": REQUIRED_STEPS[-1], "status": "FAIL", "exit": 1}]
     assert gate_verdict(unavailable, self_test=False, skip_ladder=False) == "FAIL"
+    mismatched_exit = [dict(step) for step in passing]
+    mismatched_exit[-1]["exit"] = 17
+    assert gate_verdict(mismatched_exit, self_test=False,
+                        skip_ladder=False) == "FAIL"
+    missing_exit = [dict(step) for step in passing]
+    del missing_exit[-1]["exit"]
+    assert gate_verdict(missing_exit, self_test=False,
+                        skip_ladder=False) == "INCOMPLETE"
+    boolean_exit = [dict(step) for step in passing]
+    boolean_exit[-1]["exit"] = False
+    assert gate_verdict(boolean_exit, self_test=False,
+                        skip_ladder=False) == "INCOMPLETE"
     assert gate_verdict(passing, self_test=False, skip_ladder=True) == "INCOMPLETE"
     assert gate_verdict(skipped, self_test=True, skip_ladder=True) == "SELF_TEST_ONLY"
     zig_bridge_receipt_self_test()
