@@ -338,6 +338,61 @@ static int witness_zig_f3c_decode_fail_closed(void) {
     return 1;
 }
 
+/* A Rust-free host must not need a separate physical F3C codec to share
+ * or partially overlap caller-owned buffers. Zig stages the entire candidate
+ * before publication; no semantic opcode interpretation occurs in C.
+ */
+static int witness_zig_f3c_shared_buffer_transport(void) {
+    static const uint8_t golden_t5[] = {0x63, 0x89, 0x06, 0xa1};
+    static const uint8_t golden_f3c[] = {0xf3, 0x40, 0x60};
+    static const uint8_t no_saving_t5[] = {0x64};
+    uint8_t shared[32], previous[sizeof shared], untouched[sizeof shared];
+
+    /* Overlap in both directions: input begins inside the destination
+     * for packing, then unpack to a destination beginning inside input. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared + 2, golden_t5, sizeof golden_t5);
+    memcpy(previous, shared, sizeof previous);
+    if (!check_number("f3c-c-host-overlap-pack-length",
+            sens_zig_f3c_pack(shared + 2, sizeof golden_t5,
+                              shared, sizeof shared), sizeof golden_f3c)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-pack-exact",
+                     shared, golden_f3c, sizeof golden_f3c)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-pack-suffix-unchanged",
+                     shared + sizeof golden_f3c, previous + sizeof golden_f3c,
+                     sizeof shared - sizeof golden_f3c)) return 0;
+
+    memcpy(previous, shared, sizeof previous);
+    if (!check_number("f3c-c-host-overlap-unpack-length",
+            sens_zig_f3c_unpack(shared, sizeof golden_f3c,
+                                shared + 1, sizeof shared - 1),
+            sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-unpack-exact",
+                     shared + 1, golden_t5, sizeof golden_t5)) return 0;
+    if (!check_number("f3c-c-host-overlap-unpack-prefix-unchanged",
+                      shared[0], previous[0])) return 0;
+    if (!check_bytes("f3c-c-host-overlap-unpack-suffix-unchanged",
+                     shared + 1 + sizeof golden_t5,
+                     previous + 1 + sizeof golden_t5,
+                     sizeof shared - 1 - sizeof golden_t5)) return 0;
+
+    /* A valid canonical T5 byte without space saving returns -3, NOT a
+     * SENS D1:NO and not a malformed-codec error. Never write on refusal. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(untouched, shared, sizeof untouched);
+    if (!check_number("f3c-c-host-no-saving-status",
+            sens_zig_f3c_pack(no_saving_t5, sizeof no_saving_t5,
+                              shared, sizeof shared), -3)) return 0;
+    if (!check_bytes("f3c-c-host-no-saving-no-write",
+                     shared, untouched, sizeof shared)) return 0;
+    if (!check_number("f3c-c-host-too-small-in-place",
+            sens_zig_f3c_pack(golden_t5, sizeof golden_t5,
+                              shared, 2), -2)) return 0;
+    if (!check_bytes("f3c-c-host-too-small-no-write",
+                     shared, untouched, sizeof shared)) return 0;
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -402,6 +457,7 @@ int main(void) {
     if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
     if (!witness_zig_f3c_invalid_t5_reject()) return 1;
     if (!witness_zig_f3c_decode_fail_closed()) return 1;
+    if (!witness_zig_f3c_shared_buffer_transport()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
