@@ -161,23 +161,27 @@ def check(root: Path) -> list[str]:
 
     host_dir = root / C_HOST_DIR
     if host_dir.is_dir():
-        called_any = False
+        called_physical = False
+        physical_exports = set(exports) - {"sens_zig_codec_abi_version"}
         for host in sorted(host_dir.glob("*.c")):
             src = host.read_text(encoding="utf-8")
+            # C comments are not calls; a comment-only host is no proof.
+            src = re.sub(r"/\*.*?\*/|//[^\n]*", "", src, flags=re.S)
             calls = set(CALL_RE.findall(src))
             if not calls:
                 continue
-            called_any = True
+            if calls & physical_exports:
+                called_physical = True
             rogue = sorted(c for c in calls if c not in set(exports) | {"sens_zig_codec_abi_version"})
             if rogue:
                 problems.append(
                     f"R5: host `{host.name}` calls ops outside the corridor: "
                     + ", ".join(rogue)
                 )
-        if not called_any:
+        if not called_physical:
             problems.append(
-                "R5: no Rust-free host in host-c/*.c calls the corridor "
-                "(host-neutral proof is empty)"
+                "R5: no Rust-free host in host-c/*.c calls a physical Zig transport op "
+                "(version-only and commented calls are not evidence)"
             )
 
     return problems

@@ -66,6 +66,25 @@ class CorridorGuardTests(unittest.TestCase):
     def test_real_corridor_passes(self) -> None:
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_version_only_c_host_and_comment_ghost_is_blocked(self) -> None:
+        # A version getter does not prove that C uses the Zig physical corridor.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  // sens_zig_t5_encode_be3(src, n, dst, cap);
+  /* sens_zig_t5_decode_be3(src, n, dst, cap); */
+  return sens_zig_codec_abi_version() == 2 ? 0 : 1;
+}
+""",
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("no Rust-free host" in problem for problem in problems), problems
+        )
+
     # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:
         mutate(self.root, "crates/sens-cli/Cargo.toml", 'default = ["zig-transport"]', "default = []")
