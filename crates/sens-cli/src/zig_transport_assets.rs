@@ -11,4 +11,5 @@ unsafe extern "C" {
     pub(super) fn sens_zig_islands_manifest_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_uk_docs_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_unify_bytes_copy(output: *mut u8, capacity: usize) -> isize;
+    pub(super) fn sens_zig_reason_bytes_copy(output: *mut u8, capacity: usize) -> isize;
 }

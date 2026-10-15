@@ -164,6 +164,29 @@ test "REPL unify source: exact Zig bytes and short buffer remains untouched" {
     try std.testing.expectEqualSlices(u8, unify_asset[0..unify_asset.len], &output);
 }
 
+// SENS owns unification/reasoning semantics. Zig only copies exact source bytes.
+const reason_asset = @embedFile("lib/reason.lisp");
+pub export fn sens_zig_reason_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (reason_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(reason_asset.len);
+    if (capacity < reason_asset.len) return -2;
+    @memcpy(dst[0..reason_asset.len], reason_asset[0..reason_asset.len]);
+    return @intCast(reason_asset.len);
+}
+
+test "reason SENS source via Zig exact byte ABI; short buffer untouched" {
+    const length = sens_zig_reason_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(reason_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_reason_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var result: [reason_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length,
+        sens_zig_reason_bytes_copy(&result, result.len));
+    try std.testing.expectEqualSlices(u8, reason_asset[0..reason_asset.len], &result);
+}
+
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");

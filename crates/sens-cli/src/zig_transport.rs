@@ -199,6 +199,32 @@ pub fn unify_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+/// lib/reason.lisp source over the sterile Zig byte corridor; no Rust source
+/// embedding and no authority to change SENS identities or execution law.
+pub fn reason_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_reason_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 {
+        return Err("ZIG_REASON_CARRIER invalid source byte length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_REASON_CARRIER source length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_REASON_CARRIER host byte limit exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_reason_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_REASON_CARRIER exact byte copy failed: {copied}"));
+    }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],

@@ -166,7 +166,7 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -202,6 +202,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_islands_manifest_bytes_copy", "packaging/islands-manifest-v1.json"),
         ("sens_zig_uk_docs_bytes_copy", "lib/surface/uk-docs.lisp"),
         ("sens_zig_unify_bytes_copy", "lib/unify.lisp"),
+        ("sens_zig_reason_bytes_copy", "lib/reason.lisp"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
@@ -223,6 +224,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_islands_manifest_bytes_copy", "packaging/islands-manifest-v1.json", "islands_manifest_asset"),
         ("sens_zig_uk_docs_bytes_copy", "lib/surface/uk-docs.lisp", "uk_docs_asset"),
         ("sens_zig_unify_bytes_copy", "lib/unify.lisp", "unify_asset"),
+        ("sens_zig_reason_bytes_copy", "lib/reason.lisp", "reason_asset"),
     ):
         const_line = f'const {binding} = @embedFile("{asset}");'
         if len(re.findall(r"(?m)^[ \t]*" + re.escape(const_line) + r"[ \t]*$", zig_root)) != 1:
@@ -453,6 +455,34 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         )
         self.assertNotEqual(mutant, self.asset_zig)
         with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_unify_bytes_copy"):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
+
+    def test_reason_repl_uses_sterile_zig_only_and_keeps_unify_first(self):
+        source = (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
+        self.assertNotIn('include_str!("../../../lib/reason.lisp")', source)
+        self.assertIn("super::zig_transport::reason_source_bytes()?", source)
+        self.assertIn("let reason_source = reason_surface_source()?;", source)
+        self.assertIn('.chain(std::iter::once(("reason.lisp", reason_source.as_str())))', source)
+        self.assertLess(source.index('std::iter::once(("unify.lisp"'),
+                        source.index('std::iter::once(("reason.lisp"'))
+        self.assertIn("no Rust source fallback", source)
+        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        self.assertIn("cargo:rerun-if-changed=../../lib/reason.lisp", build)
+
+    def test_reason_asset_crosswired_to_different_bytes_rejected(self):
+        old = "@memcpy(dst[0..reason_asset.len], reason_asset[0..reason_asset.len]);"
+        mutant = self.asset_zig.replace(
+            old, "@memcpy(dst[0..reason_asset.len], uk_asset[0..reason_asset.len]);", 1)
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(ValueError, "wrong_copy_body=sens_zig_reason_bytes_copy"):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
+
+    def test_reason_asset_ghost_export_rejected(self):
+        mutant = self.asset_zig.replace(
+            "pub export fn sens_zig_reason_bytes_copy",
+            "fn sens_zig_reason_bytes_copy", 1)
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(ValueError, "missing_copy_body=sens_zig_reason_bytes_copy"):
             check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
     def test_uk_docs_source_stays_inside_sterile_zig_corridor(self):

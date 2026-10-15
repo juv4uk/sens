@@ -16,6 +16,7 @@ fn main() {
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
     println!("cargo:rerun-if-changed=../../lib/unify.lisp");
+    println!("cargo:rerun-if-changed=../../lib/reason.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");

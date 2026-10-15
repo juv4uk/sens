@@ -16,7 +16,6 @@ use std::path::PathBuf;
 use std::process;
 
 const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    ("reason.lisp", include_str!("../../../lib/reason.lisp")),
     ("forward.lisp", include_str!("../../../lib/forward.lisp")),
     ("knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
     (
@@ -40,6 +39,20 @@ fn unify_surface_source() -> Result<String, String> {
     #[cfg(not(feature = "zig-transport"))]
     {
         Err("RUST_ZIG_ONLY: unify.lisp requires Zig; no Rust source fallback".into())
+    }
+}
+
+// lib/reason.lisp comes from Zig as opaque bytes; SENS alone evaluates it.
+fn reason_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::reason_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|e| format!("ZIG_REASON_CARRIER UTF-8: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: reason.lisp requires Zig; no Rust source fallback".into())
     }
 }
 
@@ -152,7 +165,9 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             environment: layer.clone(),
         };
         let unify_source = unify_surface_source()?;
+        let reason_source = reason_surface_source()?;
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
+            .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
             .chain(SURFACE_PREREQUISITES.iter().copied());
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
