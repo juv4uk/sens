@@ -55,6 +55,10 @@ fn main() {
         // Zig ABI reads caller-owned physical bytes: keep optimization AND
         // runtime safety checks at the default Rust-to-Zig ingress.
         .arg("ReleaseSafe")
+        // Zig 0.16 static archives do not bundle compiler-rt by default.
+        // Preserve ReleaseSafe stack probes: provide __zig_probe_stack through
+        // Zig compiler-rt instead of disabling stack checks or inventing a stub.
+        .arg("-fcompiler-rt")
         .arg("-lc")
         .arg("-fPIC")
         .arg(format!("-femit-bin={}", archive.display()))
