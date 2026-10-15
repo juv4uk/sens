@@ -61,7 +61,7 @@ def require_manual_preflight(source: str) -> None:
     for step_name, command in REQUIRED_WORKSPACE_STEPS:
         live = re.search(
             r"(?m)^      - name: " + re.escape(step_name)
-            + r"[ \\t]*\\n        run: " + re.escape(command) + r"[ \\t]*$",
+            + r"[ \t]*\n        run: " + re.escape(command) + r"[ \t]*$",
             source,
         )
         if live is None:
@@ -132,7 +132,7 @@ class ReleasePreflightScopeTest(unittest.TestCase):
             with self.subTest(command=command):
                 broken = self.workflow.replace(command, "echo skipped-release-gate", 1)
                 self.assertNotEqual(broken, self.workflow)
-                with self.assertRaisesRegex(AssertionError, "missing preflight gate"):
+                with self.assertRaisesRegex(AssertionError, "missing live preflight gate"):
                     require_manual_preflight(broken)
 
     def test_negative_guard_rejects_spoofed_or_suppressed_workspace_go(self):
