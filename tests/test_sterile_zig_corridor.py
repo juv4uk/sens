@@ -36,27 +36,22 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("packed_bits", body)
         self.assertNotIn("from_width_bits", body)
 
-
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
-        # Source-hygiene only, no Zig semantic oracle; no repo file mutation.
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
         blocked = module["CorridorBlocked"]
         source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
-        check(source)  # positive: current main retains the Zig-only route
+        check(source)
 
         replacements = (
-            # Default Zig call replaced by an accidental direct Rust codec.
             (
                 "return zig_transport::decode_t5_words(bytes);",
                 "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));",
             ),
-            # An explicit Rust fallback under feature-negative is still a bypass.
             (
                 'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())',
                 'sens::decode_ternary_words(bytes).map_err(|e| format!("{e:?}"))',
             ),
-            # Zig helper exists but the production evaluator bypasses it.
             (
                 "let words = decode_physical_t5_words(bytes)?;",
                 "let words = sens::decode_ternary_words(bytes).unwrap();",
@@ -72,14 +67,11 @@ class SterileZigCorridorTests(unittest.TestCase):
         )
         for old, replacement in replacements:
             with self.subTest(bypass=old):
-                # The same SENS reader can also appear in other unit tests.
-                # Mutate only its FIRST occurrence: the production route.
                 self.assertIn(old, source)
                 with self.assertRaises(blocked):
                     check(source.replace(old, replacement, 1))
 
     def test_trit_default_egress_rejects_rust_codec_mutants(self) -> None:
-        # Mutate only the actual CLI entry, not a quoted copy in a test.
         module = runpy.run_path(str(SCRIPT))
         check = module["check_trit_t5_egress"]
         blocked = module["CorridorBlocked"]
@@ -168,8 +160,8 @@ class SterileZigCorridorTests(unittest.TestCase):
                 'sens::envelope_e1::decode(bytes).unwrap()',
             ),
             (
-                "sens::PhysicalT5Program::from_exact_words(&words)",
-                'sens::PhysicalT5Program::decode(bytes).unwrap()',
+                "let program = sens::PhysicalT5Program::from_exact_words(&words)",
+                "let program = sens::PhysicalT5Program::decode(bytes).unwrap()",
             ),
             (
                 'Err("E1 physical execution requires Zig; no Rust fallback".into())',
