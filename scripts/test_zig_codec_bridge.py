@@ -11,6 +11,9 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from unittest.mock import patch
+
+import zig_codec_bridge as bridge
 
 from zig_codec_bridge import ZigCodecError, build_transport, carry_t5, verify_t5, _read_zig_output
 
@@ -76,6 +79,52 @@ def assert_physical_rejected(executable: Path, name: str, raw: bytes) -> None:
             "expected=physical_reject actual=accepted first_difference=NA "
             "reproduce='python3 scripts/test_zig_codec_bridge.py'"
         )
+
+
+def test_zig_transport_compiles_with_runtime_safety() -> None:
+    """Inspect the REAL build_transport command; reject unsafe profile mutants."""
+    with tempfile.TemporaryDirectory(prefix="sens-zig-release-safe-") as temp:
+        calls: list[list[str]] = []
+
+        def synthesize_binary(argv: list[str]) -> None:
+            calls.append(argv)
+            outputs = [arg.split("=", 1)[1] for arg in argv
+                       if arg.startswith("-femit-bin=")]
+            if len(outputs) != 1:
+                raise AssertionError("ZIG_SAFE_BUILD_NO_EXACT_OUTPUT")
+            Path(outputs[0]).write_bytes(b"synthetic-zig-profile-witness")
+
+        with (patch.object(bridge, "pinned_compiler", return_value="zig-pinned-test"),
+              patch.object(bridge, "_command", side_effect=synthesize_binary)):
+            binary = bridge.build_transport(Path(temp))
+            if not binary.is_file():
+                raise AssertionError("ZIG_SAFE_BUILD_MISSING_OUTPUT")
+        if len(calls) != 1:
+            raise AssertionError("ZIG_SAFE_BUILD_CALL_COUNT")
+        command = calls[0]
+
+        def require_safe(argv: list[str]) -> None:
+            if (argv[:2] != ["zig-pinned-test", "build-exe"]
+                    or argv.count("-O") != 1
+                    or argv[argv.index("-O") + 1] != "ReleaseSafe"
+                    or "-lc" not in argv
+                    or "-fno-stack-check" in argv
+                    or "-fno-runtime-safety" in argv):
+                raise AssertionError("ZIG_SAFE_BUILD_UNSAFE_PROFILE")
+
+        require_safe(command)
+        for label, mutant in (
+            ("release-fast", [("ReleaseFast" if x == "ReleaseSafe" else x) for x in command]),
+            ("remove-optimization", [x for x in command if x != "ReleaseSafe"]),
+            ("disable-stack-check", command + ["-fno-stack-check"]),
+        ):
+            try:
+                require_safe(mutant)
+            except AssertionError as error:
+                if "ZIG_SAFE_BUILD_UNSAFE_PROFILE" not in str(error):
+                    raise
+            else:
+                raise AssertionError(f"ZIG_SAFE_BUILD_MUTANT_ACCEPTED label={label}")
 
 
 def test_zig_output_readback_guard() -> None:
@@ -145,6 +194,7 @@ def test_zig_output_readback_guard() -> None:
 
 
 def main() -> None:
+    test_zig_transport_compiles_with_runtime_safety()
     test_zig_output_readback_guard()
     with tempfile.TemporaryDirectory(prefix="sens-zig-migration-smoke-") as temp:
         executable = build_transport(Path(temp))
