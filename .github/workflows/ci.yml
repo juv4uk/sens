@@ -1443,7 +1443,11 @@ jobs:
           python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
           edge_rc=0
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 ]]; then
+          production_unit_rc=0
+          python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          production_rc=0
+          python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi

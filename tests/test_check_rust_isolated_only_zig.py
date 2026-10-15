@@ -51,10 +51,21 @@ class RustIsolationTests(unittest.TestCase):
             'let m = fs::read_to_string("lib/macro.lisp");\n', encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
-    def test_include_within_crate_passes(self) -> None:
+    def test_include_within_crate_is_forbidden(self) -> None:
         (self.root / "crates/sens/src/lib.rs").write_text(
             'let s = include_str!("embedded.lisp");\n', encoding="utf-8")
-        self.assertEqual(self.module.check(self.root), [])
+        self.assertTrue(self.module.check(self.root))
+
+    def test_include_bytes_sens_is_forbidden(self) -> None:
+        (self.root / "crates/sens/src/lib.rs").write_text(
+            'let s = include_bytes!("../../../tests/fixture.sens");\n',
+            encoding="utf-8")
+        self.assertTrue(self.module.check(self.root))
+
+    def test_std_fs_read_project_sens_is_forbidden(self) -> None:
+        (self.root / "crates/sens/src/lib.rs").write_text(
+            'let s = std::fs::read("lib/binary.sens");\n', encoding="utf-8")
+        self.assertTrue(self.module.check(self.root))
 
 
 if __name__ == "__main__":

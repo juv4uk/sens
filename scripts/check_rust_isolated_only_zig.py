@@ -14,12 +14,12 @@ signal that isolation is not yet done.
 Fail-closed I-rules over the production Rust (crates/*/src/**, crates/*/build.rs;
 tests/examples are not the shipped path):
 
-I1  no `include_str!` of a path that leaves the crate (a `../` escape or a project
-    tree: lib/, language-contract, contracts/, knowledge/).
-I2  no `fs::read` / `fs::read_to_string` of a project path (lib/, contracts/,
-    knowledge/, language-contract).
-I3  the only external interface named is the Zig corridor (`zig_transport` /
-    `sens_zig_*`); reaching a project source directly is a bypass.
+I1  no include_str! OR include_bytes! of .lisp/.sens/.fasl, even inside a crate,
+    and no compile-time embedding of project paths beyond the crate.
+I2  no literal fs::read / fs::read_to_string of project paths or
+    .lisp/.sens/.fasl files.
+A source-pattern guard cannot prove dynamic path flow, Cargo dependency
+boundaries, or semantic callability; those need separate tests.
 
 Exit 0 = RUST_ISOLATED_ONLY_ZIG_OK; exit 1 = RUST_ISOLATED_ONLY_ZIG_BLOCKED (RED).
 """
@@ -31,8 +31,8 @@ import sys
 from pathlib import Path
 
 PROJECT_TREES = ("lib/", "contracts/", "knowledge/", "language-contract")
-INCLUDE_RE = re.compile(r'include_str!\(\s*"([^"]+)"')
-READ_RE = re.compile(r'fs::read(?:_to_string)?\(\s*"([^"]+)"')
+INCLUDE_RE = re.compile(r'(?P<kind>include_str|include_bytes)!\s*\(\s*"(?P<path>[^"]+)"')
+READ_RE = re.compile(r'(?:std::)?fs::read(?:_to_string)?\s*\(\s*"(?P<path>[^"]+)"')
 PRODUCTION_GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
 
 
@@ -40,6 +40,8 @@ def _is_project_path(target: str) -> bool:
     # `.zig-version` is the corridor's own pin, not a project source.
     if target.endswith(".zig-version"):
         return False
+    if target.lower().endswith((".lisp", ".sens", ".fasl")):
+        return True
     if target.startswith("../") or "/../" in target:
         return True
     return any(t in target for t in PROJECT_TREES)
@@ -57,12 +59,12 @@ def check(root: Path) -> list[str]:
             scanned += 1
             src = path.read_text(encoding="utf-8", errors="replace")
             for m in INCLUDE_RE.finditer(src):
-                if _is_project_path(m.group(1)):
-                    problems.append(f"I1: {rel} `include_str!(\"{m.group(1)}\")` -- Rust "
+                if _is_project_path(m.group('path')):
+                    problems.append(f"I1: {rel} `{m.group('kind')}!(\"{m.group('path')}\")` -- Rust "
                                     "reaches a project source; only Zig may be reached")
             for m in READ_RE.finditer(src):
-                if _is_project_path(m.group(1)):
-                    problems.append(f"I2: {rel} `fs::read(\"{m.group(1)}\")` -- Rust reads a "
+                if _is_project_path(m.group('path')):
+                    problems.append(f"I2: {rel} `fs::read(\"{m.group('path')}\")` -- Rust reads a "
                                     "project file; only Zig may be reached")
     if scanned == 0:
         return ["no production Rust sources found under crates/*/src"]
@@ -85,7 +87,7 @@ def main() -> int:
         for problem in problems:
             print(" -", problem, flush=True)
         return 1
-    print("RUST_ISOLATED_ONLY_ZIG_OK Rust is isolated: it reaches only the Zig corridor",
+    print("RUST_ISOLATED_ONLY_ZIG_OK no literal project-source edges found; dynamic paths require further proof",
           flush=True)
     return 0
 

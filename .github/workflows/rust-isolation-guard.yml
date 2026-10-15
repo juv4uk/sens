@@ -10,9 +10,7 @@ name: Rust isolation guard (RED until isolation is done)
 # corridor. The guard's own negative controls stay green regardless.
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  # Automatic enforcement is consolidated into ci.yml (one auto workflow).
   workflow_dispatch:
 
 jobs:
