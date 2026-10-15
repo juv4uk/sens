@@ -178,6 +178,42 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(source.replace(original, bypass, 1))
 
+    def test_live_t5_eval_and_core4_reject_rust_execution_bypass_mutants(self) -> None:
+        """Mutate the *actual* guarded execution routine, never test fixtures."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_t5_execution"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+        check(source)
+        start = source.index("fn eval_t5_bytes_core4(")
+        end = source.index("\n}\n", start) + len("\n}\n")
+        actual_route = source[start:end]
+        mutations = (
+            (
+                "zig_transport::decode_t5_words(bytes)?",
+                "sens::decode_ternary_words(bytes).unwrap()",
+            ),
+            (
+                "sens::PhysicalT5Program::from_exact_words(&words)",
+                "sens::PhysicalT5Program::decode(bytes).unwrap()",
+            ),
+            (
+                'Err("physical T5 execution requires Zig; no Rust fallback".into())',
+                "sens::eval_t5_program(bytes, &mut sens::Session::default()).map_err(|e| format!(\"{e:?}\"))",
+            ),
+        )
+        for original, bypass in mutations:
+            with self.subTest(mutant=original):
+                self.assertIn(original, actual_route, "production routine changed")
+                changed = source[:start] + actual_route.replace(original, bypass, 1) + source[end:]
+                with self.assertRaises(blocked):
+                    check(changed)
+
+        entry = "eval_t5_bytes_core4(&bytes, true)?"
+        self.assertIn(entry, source)
+        with self.assertRaises(blocked):
+            check(source.replace(entry, "sens::eval_t5_program(&bytes, &mut session)?", 1))
+
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
