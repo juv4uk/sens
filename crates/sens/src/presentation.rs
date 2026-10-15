@@ -531,7 +531,7 @@ mod tests {
 
     #[test]
     fn ратифікований_d3_міст_не_дає_w8_довільної_семантики() {
-        let historical_quote = Value::Sid(crate::sens!(00000001));
+        let historical_quote = Value::Sid(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b001).expect("quote"))));
         let current_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
             crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
         ));

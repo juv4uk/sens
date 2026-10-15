@@ -935,7 +935,7 @@ mod tests {
     fn control2_stream_keeps_real_space_and_nested_structure() {
         let frames = vec![
             BinaryFrame::Open,
-            BinaryFrame::Function(crate::sens!(00001100)),
+            BinaryFrame::Function(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("plus")))),
             BinaryFrame::Space,
             BinaryFrame::Number(number("10", "1")),
             BinaryFrame::Space,
