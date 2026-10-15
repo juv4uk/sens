@@ -15,6 +15,10 @@ unsafe extern "C" {
     fn sens_zig_t5_decode_be3(
         input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
     ) -> isize;
+    // E1 physical egress: BE3 exact words, no Rust repr or semantics.
+    fn sens_zig_e1_encode_be3(
+        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+    ) -> isize;
     fn sens_zig_f3c_pack(
         input: *const u8, len: usize, output: *mut u8, capacity: usize
     ) -> isize;
@@ -163,6 +167,44 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
         words.push(word);
     }
     Ok(words)
+}
+
+/// E1 physical byte writer is exclusively Zig; Rust conveys only exact
+/// W1..W9 BE3 triplets admitted by the canonical SENS word reader.
+pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
+    version()?;
+    if words.is_empty() || words.len() > 4096 {
+        return Err("Zig E1 requires 1..4096 exact width/payload words".into());
+    }
+    let be3_capacity = words.len().checked_mul(3)
+        .ok_or("Zig E1 BE3 input capacity overflow")?;
+    let mut be3 = Vec::with_capacity(be3_capacity);
+    for word in words {
+        let width = u8::try_from(word.width())
+            .map_err(|_| "Zig E1 width exceeds BE3 field")?;
+        let bits = word.packed_bits();
+        if width == 0 || width > 9 || (bits as u32) >= (1u32 << width) {
+            return Err(format!("Zig E1 invalid exact-width payload width={width}"));
+        }
+        be3.extend_from_slice(&[width, (bits >> 8) as u8, bits as u8]);
+    }
+    // Conservative upper bound: a one-word RAW block fits 16 bytes per
+    // word; Zig determines the actual canonical E1 byte count.
+    let capacity = words.len().checked_mul(16)
+        .and_then(|n| n.checked_add(16))
+        .ok_or("Zig E1 output capacity overflow")?;
+    let mut output = vec![0u8; capacity];
+    // SAFETY: caller-owned disjoint buffers; Zig validates source and bounds.
+    let written = unsafe {
+        sens_zig_e1_encode_be3(
+            be3.as_ptr(), be3.len(), output.as_mut_ptr(), output.len()
+        )
+    };
+    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= output.len()).is_none() {
+        return Err(format!("Zig E1 physical encode rejected: code={written}"));
+    }
+    output.truncate(written as usize);
+    Ok(output)
 }
 
 /// Фізичне F3C — виключно Zig. ABI -3 означає відсутність виграшу,
