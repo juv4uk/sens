@@ -146,7 +146,7 @@ def check_trit_e1_egress(source: str) -> None:
 
     Tests the production function only, not Rust reference fixtures.
     """
-    route = _route_between(source, "fn encode_e1_from_t5(", "\nfn read_explicit_f3(")
+    route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn read_explicit_f3(")
     negative = '#[cfg(not(feature = "zig-transport"))]'
     positive = '#[cfg(feature = "zig-transport")]'
     if route.count(negative) != 1 or route.count(positive) != 1:
