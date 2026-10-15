@@ -50,16 +50,19 @@ class DomainTableRow:
         return "surface"
 
 
-def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False) -> str | None:
+def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False, d7_iast: bool = False) -> str | None:
     if token == "()":
         return "()" if literal_empty else None
     if d7_surface:
         if token.startswith('"') and token.endswith('"'):
             glyph = json.loads(token)
-            if len(glyph) != 1 or glyph.isalpha():
-                raise ValueError(f"D7 quoted surface must be exactly one non-letter: {token!r}")
+            if not glyph or (len(glyph) != 1 and not d7_iast) or glyph.isalpha():
+                raise ValueError(f"D7 quoted surface must be a non-letter token: {token!r}")
             return glyph
-        if len(token) != 1 or not token.isalpha():
+        # Only the D7 san HUMAN display accepts IAST digraphs like kh.
+        # Exact machine identity is still a seven-bit coordinate, never
+        # a new variable-width machine token.
+        if not token.isalpha() or (len(token) != 1 and not d7_iast):
             raise ValueError(f"invalid unquoted D7 letter: {token!r}")
         return token
     if token.startswith('"') and token.endswith('"'):
@@ -137,7 +140,8 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 bits=bits,
                 uk=decode(uk, literal_empty=literal_empty, d7_surface=expected_width == 7),
                 ukr=decode(ukr, literal_empty=literal_empty, d7_surface=expected_width == 7),
-                san=decode(san, literal_empty=literal_empty, d7_surface=expected_width == 7),
+                san=decode(san, literal_empty=literal_empty, d7_surface=expected_width == 7,
+                           d7_iast=expected_width == 7),
                 en=decode(en, literal_empty=literal_empty, d7_surface=expected_width == 7),
                 lisp=decode(lisp, literal_empty=literal_empty),
                 sym=decode(sym, literal_empty=literal_empty, d7_surface=expected_width == 7),
