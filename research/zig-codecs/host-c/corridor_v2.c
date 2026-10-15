@@ -130,6 +130,38 @@ static int witness_zig_e1_encode_be3(void) {
             sens_zig_e1_encode_be3(source, sizeof source, output, sizeof output),
             (ptrdiff_t)sizeof golden)) return 0;
     if (!check_bytes("e1-canonical-raw-crc", output, golden, sizeof golden)) return 0;
+    uint8_t restored[32];
+    memset(restored, 0x37, sizeof restored);
+    if (!check_number("e1-decode-be3-size",
+            sens_zig_e1_decode_be3(golden, sizeof golden,
+                                   restored, sizeof restored),
+            (ptrdiff_t)sizeof source)) return 0;
+    if (!check_bytes("e1-decode-be3-golden",
+                     restored, source, sizeof source)) return 0;
+    if (!check_number("e1-decode-untouched-suffix",
+            restored[sizeof source], 0x37)) return 0;
+
+    uint8_t damaged[sizeof golden];
+    memcpy(damaged, golden, sizeof golden);
+    damaged[sizeof damaged - 1] ^= 1;  /* CRC negative */
+    memset(restored, 0x37, sizeof restored);
+    if (!check_number("e1-crc-invalid-reject",
+            sens_zig_e1_decode_be3(damaged, sizeof damaged,
+                                   restored, sizeof restored), -1)) return 0;
+    if (!check_number("e1-crc-negative-keeps-output",
+            restored[0], 0x37)) return 0;
+    if (!check_number("e1-decode-short-output",
+            sens_zig_e1_decode_be3(golden, sizeof golden,
+                                   restored, sizeof source - 1), -2)) return 0;
+    if (!check_number("e1-decode-short-keeps-output",
+            restored[0], 0x37)) return 0;
+    uint8_t aliased_decode[64] = {0};
+    memcpy(aliased_decode, golden, sizeof golden);
+    if (!check_number("e1-decode-overlap-reject",
+            sens_zig_e1_decode_be3(aliased_decode, sizeof golden,
+                                   aliased_decode + 2, sizeof aliased_decode - 2), -1)) return 0;
+    if (!check_bytes("e1-decode-reject-keeps-input",
+                     aliased_decode, golden, sizeof golden)) return 0;
     if (!check_number("e1-small-output",
             sens_zig_e1_encode_be3(source, sizeof source,
                                    too_small, sizeof too_small), -2)) return 0;
@@ -150,6 +182,214 @@ static int witness_zig_e1_encode_be3(void) {
                                    aliased, sizeof aliased), -1)) return 0;
     if (!check_bytes("e1-rejected-alias-keeps-input",
                      aliased, source, sizeof source)) return 0;
+    return 1;
+}
+
+/* Rust-free E1 ABI memory-boundary witness: byte ownership only.
+ * Adjacent caller-owned slices are legal; full/shifted alias and a corrupted
+ * CRC must not alter any destination byte. No SENS semantic verdict here.
+ */
+static int witness_zig_e1_decode_buffer_boundaries(void) {
+    static const uint8_t golden[] = {
+        0x53, 0x33, 1, 3, 0, 3, 0x23, 0x20,
+        0x8a, 0x36, 0x20, 0x5d, 0x52
+    };
+    static const uint8_t exact_be3[] = {2, 0, 2, 3, 0, 1, 2, 0, 1};
+    uint8_t shared[64];
+    uint8_t snapshot[sizeof shared];
+    uint8_t corrupt[sizeof golden];
+    uint8_t decoded[32];
+    uint8_t sentinel[sizeof decoded];
+
+    /* Two nonoverlapping slices of the same allocation may cross Zig. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    if (!check_number("e1-decode-adjacent-slices",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared + sizeof golden,
+                                   sizeof shared - sizeof golden),
+            (ptrdiff_t)sizeof exact_be3)) return 0;
+    if (!check_bytes("e1-decode-adjacent-exact-be3",
+                     shared + sizeof golden, exact_be3, sizeof exact_be3)) return 0;
+
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-full-alias-rejected",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared, sizeof shared), -1)) return 0;
+    if (!check_bytes("e1-decode-full-alias-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    /* Two overlap orientations: Zig must reject BEFORE touching memory. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-forward-overlap-rejected",
+            sens_zig_e1_decode_be3(shared, sizeof golden,
+                                   shared + 5, sizeof shared - 5), -1)) return 0;
+    if (!check_bytes("e1-decode-forward-overlap-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared + 5, golden, sizeof golden);
+    memcpy(snapshot, shared, sizeof shared);
+    if (!check_number("e1-decode-reverse-overlap-rejected",
+            sens_zig_e1_decode_be3(shared + 5, sizeof golden,
+                                   shared, sizeof shared), -1)) return 0;
+    if (!check_bytes("e1-decode-reverse-overlap-all-bytes-unchanged",
+                     shared, snapshot, sizeof shared)) return 0;
+
+    memcpy(corrupt, golden, sizeof golden);
+    corrupt[sizeof corrupt - 1] ^= 1u;
+    memset(decoded, 0x49, sizeof decoded);
+    memset(sentinel, 0x49, sizeof sentinel);
+    if (!check_number("e1-decode-crc-bit-mutant-rejected",
+            sens_zig_e1_decode_be3(corrupt, sizeof corrupt,
+                                   decoded, sizeof decoded), -1)) return 0;
+    if (!check_bytes("e1-decode-crc-bit-mutant-no-output-mutation",
+                     decoded, sentinel, sizeof decoded)) return 0;
+    return 1;
+}
+
+/*
+ * F3C pack must reject physically invalid T5 before any framing write.
+ * Same sterile contract as Rust zig_transport::encode_f3 (validate then pack).
+ * No SENS semantic admission — only mechanical byte ownership.
+ */
+static int witness_zig_f3c_invalid_t5_reject(void) {
+    static const uint8_t bad_byte[] = {243};
+    static const uint8_t oversize[17] = {0};
+    uint8_t out[32];
+    uint8_t sentinel[32];
+
+    memset(out, 0x3c, sizeof out);
+    memset(sentinel, 0x3c, sizeof sentinel);
+
+    /* Invalid physical byte: validate rejects, pack must return -1 and leave out. */
+    if (!check_number("f3c-validate-byte243",
+            sens_zig_t5_validate(bad_byte, sizeof bad_byte), -1)) return 0;
+    if (!check_number("f3c-pack-rejects-byte243",
+            sens_zig_f3c_pack(bad_byte, sizeof bad_byte, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-byte243-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    /* Empty source is invalid for F3C pack. */
+    memset(out, 0x3c, sizeof out);
+    if (!check_number("f3c-pack-rejects-empty",
+            sens_zig_f3c_pack(bad_byte, 0, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-empty-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    /* Oversize beyond MAX_TINY_T5_BYTES: reject without write. */
+    memset(out, 0x3c, sizeof out);
+    if (!check_number("f3c-pack-rejects-oversize",
+            sens_zig_f3c_pack(oversize, sizeof oversize, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-oversize-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    return 1;
+}
+
+
+/* Negative controls for Zig F3C ingress from an independent C host.
+ * Every rejection must leave the *whole* caller-owned destination unchanged.
+ * A successful recovery must then pass the very same Zig T5 physical validator
+ * used by Rust, without inferring any SENS callable or semantic identity.
+ */
+static int witness_zig_f3c_decode_fail_closed(void) {
+    static const uint8_t golden_f3c[] = {0xf3, 0x40, 0x60};
+    static const uint8_t golden_t5[] = {0x63, 0x89, 0x06, 0xa1};
+    static const uint8_t invalid_marker[] = {0xf4, 0x40, 0x60};
+    static const uint8_t invalid_short[] = {0xf3};
+    static const uint8_t invalid_program[] = {0xf3, 0x00};
+    const struct {
+        const char *id;
+        const uint8_t *bytes;
+        size_t length;
+    } negatives[] = {
+        {"f3c-unpack-wrong-marker", invalid_marker, sizeof invalid_marker},
+        {"f3c-unpack-truncated", invalid_short, sizeof invalid_short},
+        {"f3c-unpack-invalid-program", invalid_program, sizeof invalid_program},
+    };
+    uint8_t output[32];
+    uint8_t sentinel[sizeof output];
+    memset(sentinel, 0xa6, sizeof sentinel);
+    for (size_t i = 0; i < sizeof negatives / sizeof negatives[0]; ++i) {
+        memcpy(output, sentinel, sizeof output);
+        if (!check_number(negatives[i].id,
+                sens_zig_f3c_unpack(negatives[i].bytes, negatives[i].length,
+                                    output, sizeof output), -1)) return 0;
+        if (!check_bytes(negatives[i].id, output, sentinel, sizeof output)) return 0;
+    }
+    memcpy(output, sentinel, sizeof output);
+    if (!check_number("f3c-unpack-small-output",
+            sens_zig_f3c_unpack(golden_f3c, sizeof golden_f3c,
+                                output, sizeof golden_t5 - 1), -2)) return 0;
+    if (!check_bytes("f3c-unpack-small-output-unchanged", output,
+                     sentinel, sizeof output)) return 0;
+    if (!check_number("f3c-unpack-recovered-length",
+            sens_zig_f3c_unpack(golden_f3c, sizeof golden_f3c,
+                                output, sizeof output), sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-unpack-recovered-exact-t5", output,
+                     golden_t5, sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-unpack-untouched-suffix", output + sizeof golden_t5,
+                     sentinel + sizeof golden_t5,
+                     sizeof output - sizeof golden_t5)) return 0;
+    if (!check_number("f3c-unpack-recovered-zig-t5-validation",
+            sens_zig_t5_validate(output, sizeof golden_t5), 0)) return 0;
+    return 1;
+}
+
+/* A Rust-free host must not need a separate physical F3C codec to share
+ * or partially overlap caller-owned buffers. Zig stages the entire candidate
+ * before publication; no semantic opcode interpretation occurs in C.
+ */
+static int witness_zig_f3c_shared_buffer_transport(void) {
+    static const uint8_t golden_t5[] = {0x63, 0x89, 0x06, 0xa1};
+    static const uint8_t golden_f3c[] = {0xf3, 0x40, 0x60};
+    static const uint8_t no_saving_t5[] = {0x64};
+    uint8_t shared[32], previous[sizeof shared], untouched[sizeof shared];
+
+    /* Overlap in both directions: input begins inside the destination
+     * for packing, then unpack to a destination beginning inside input. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(shared + 2, golden_t5, sizeof golden_t5);
+    memcpy(previous, shared, sizeof previous);
+    if (!check_number("f3c-c-host-overlap-pack-length",
+            sens_zig_f3c_pack(shared + 2, sizeof golden_t5,
+                              shared, sizeof shared), sizeof golden_f3c)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-pack-exact",
+                     shared, golden_f3c, sizeof golden_f3c)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-pack-suffix-unchanged",
+                     shared + sizeof golden_f3c, previous + sizeof golden_f3c,
+                     sizeof shared - sizeof golden_f3c)) return 0;
+
+    memcpy(previous, shared, sizeof previous);
+    if (!check_number("f3c-c-host-overlap-unpack-length",
+            sens_zig_f3c_unpack(shared, sizeof golden_f3c,
+                                shared + 1, sizeof shared - 1),
+            sizeof golden_t5)) return 0;
+    if (!check_bytes("f3c-c-host-overlap-unpack-exact",
+                     shared + 1, golden_t5, sizeof golden_t5)) return 0;
+    if (!check_number("f3c-c-host-overlap-unpack-prefix-unchanged",
+                      shared[0], previous[0])) return 0;
+    if (!check_bytes("f3c-c-host-overlap-unpack-suffix-unchanged",
+                     shared + 1 + sizeof golden_t5,
+                     previous + 1 + sizeof golden_t5,
+                     sizeof shared - 1 - sizeof golden_t5)) return 0;
+
+    /* A valid canonical T5 byte without space saving returns -3, NOT a
+     * SENS D1:NO and not a malformed-codec error. Never write on refusal. */
+    memset(shared, 0x6c, sizeof shared);
+    memcpy(untouched, shared, sizeof untouched);
+    if (!check_number("f3c-c-host-no-saving-status",
+            sens_zig_f3c_pack(no_saving_t5, sizeof no_saving_t5,
+                              shared, sizeof shared), -3)) return 0;
+    if (!check_bytes("f3c-c-host-no-saving-no-write",
+                     shared, untouched, sizeof shared)) return 0;
+    if (!check_number("f3c-c-host-too-small-in-place",
+            sens_zig_f3c_pack(golden_t5, sizeof golden_t5,
+                              shared, 2), -2)) return 0;
+    if (!check_bytes("f3c-c-host-too-small-no-write",
+                     shared, untouched, sizeof shared)) return 0;
     return 1;
 }
 
@@ -214,6 +454,10 @@ int main(void) {
 
     if (!witness_zig_decode_be3()) return 1;
     if (!witness_zig_e1_encode_be3()) return 1;
+    if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
+    if (!witness_zig_f3c_invalid_t5_reject()) return 1;
+    if (!witness_zig_f3c_decode_fail_closed()) return 1;
+    if (!witness_zig_f3c_shared_buffer_transport()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }

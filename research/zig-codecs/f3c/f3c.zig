@@ -219,45 +219,28 @@ fn splitFrame(allocator: Allocator, trits: []const u8) ![]Word {
     return words.toOwnedSlice(allocator);
 }
 
-/// Exact D3-profile form admission: nested heads cannot be forms; QUOTE
-/// operands are data. Does NOT claim this transport is a SENS semantics oracle.
+/// Mechanical bounded structure only: Zig must NOT classify D3
+/// opcodes, arities, QUOTE operands, or callable heads. These are solely
+/// SENS semantic questions, handled after physical decode through ABI v2.
+/// This parser checks balanced D2 brackets, dot placement and nesting only.
 const Parser = struct {
     words: []const Word,
     pos: usize = 0,
 
-    const Head = union(enum) { atom: Word, form };
-
-    fn expression(self: *Parser, data: bool, depth: usize) error{InvalidProgram}!Head {
+    fn expression(self: *Parser, depth: usize) error{InvalidProgram}!void {
         if (self.pos >= self.words.len or depth > 64) return error.InvalidProgram;
         const word = self.words[self.pos];
         if (same(word, 2, 2)) {
             self.pos += 1;
-            try self.list(data, depth + 1);
-            return .form;
+            try self.list(depth + 1);
+            return;
         }
         if (word.width == 2) return error.InvalidProgram;
         self.pos += 1;
-        return .{ .atom = word };
     }
 
-    fn admittedHead(head: Head, argc: usize) bool {
-        return switch (head) {
-            .form => false, // D3Profile
-            .atom => |word| switch (word.width) {
-                3 => switch (word.bits) {
-                    0, 6 => true, // NIL / COND unfixed arity
-                    1, 2, 3, 4 => argc == 1, // QUOTE / ATOM / CDR / CAR
-                    5, 7 => argc == 2, // EQ / CONS
-                    else => false,
-                },
-                else => false,
-            },
-        };
-    }
-
-    fn list(self: *Parser, data: bool, depth: usize) error{InvalidProgram}!void {
+    fn list(self: *Parser, depth: usize) error{InvalidProgram}!void {
         var elements: usize = 0;
-        var head: Head = .form;
         while (self.pos < self.words.len) {
             while (self.pos < self.words.len and same(self.words[self.pos], 2, 0)) {
                 self.pos += 1;
@@ -266,47 +249,32 @@ const Parser = struct {
             const next = self.words[self.pos];
             if (same(next, 2, 1)) {
                 self.pos += 1;
-                if (elements == 0) {
-                    if (!data) return error.InvalidProgram;
-                } else if (!data and !admittedHead(head, elements - 1)) {
-                    return error.InvalidProgram;
-                }
                 return;
             }
-            if (same(next, 2, 3)) { // dotted tail
+            if (same(next, 2, 3)) {
                 if (elements == 0) return error.InvalidProgram;
                 self.pos += 1;
-                const quote_arg = data or switch (head) {
-                    .atom => |h| same(h, 3, 1),
-                    .form => false,
-                };
-                _ = try self.expression(quote_arg, depth + 1);
-                elements += 1;
+                try self.expression(depth + 1);
                 while (self.pos < self.words.len and same(self.words[self.pos], 2, 0)) {
                     self.pos += 1;
                 }
                 if (self.pos >= self.words.len or !same(self.words[self.pos], 2, 1))
                     return error.InvalidProgram;
                 self.pos += 1;
-                if (!data and !admittedHead(head, elements - 1)) return error.InvalidProgram;
                 return;
             }
-            const quote_arg = data or (elements > 0 and switch (head) {
-                .atom => |h| same(h, 3, 1),
-                .form => false,
-            });
-            const node = try self.expression(quote_arg, depth + 1);
-            if (elements == 0) head = node;
+            try self.expression(depth + 1);
             elements += 1;
         }
         return error.InvalidProgram;
     }
 };
 
-fn canonicalProgram(words: []const Word) bool {
-    if (words.len < 3 or !same(words[0], 2, 2)) return false;
+/// Physical F3C shape constraint only, NEVER SENS semantic admission.
+fn canonicalStructure(words: []const Word) bool {
+    if (words.len < 2 or !same(words[0], 2, 2)) return false;
     var parser: Parser = .{ .words = words };
-    _ = parser.expression(false, 0) catch return false;
+    parser.expression(0) catch return false;
     return parser.pos == words.len;
 }
 
@@ -331,7 +299,7 @@ fn encodeFrame(allocator: Allocator, words: []const Word) ![]u8 {
 pub fn encode(allocator: Allocator, original_t5: []const u8) !?[]u8 {
     const words = try t5.decode(allocator, original_t5);
     defer allocator.free(words);
-    if (original_t5.len > MAX_TINY_T5_BYTES or !canonicalProgram(words)) return null;
+    if (original_t5.len > MAX_TINY_T5_BYTES or !canonicalStructure(words)) return null;
     const candidate = encodeFrame(allocator, words) catch |e| switch (e) {
         Error.FrameRange, Error.InvalidFrame => return null,
         else => return e,
@@ -374,7 +342,7 @@ pub fn decode(allocator: Allocator, carrier: []const u8) ![]u8 {
     defer allocator.free(trits);
     const words = try splitFrame(allocator, trits);
     defer allocator.free(words);
-    if (!canonicalProgram(words)) return Error.InvalidProgram;
+    if (!canonicalStructure(words)) return Error.InvalidProgram;
 
     // Physical canonicality demands byte-exact replay after decode.
     const recomposed = try frameTrits(allocator, words);
@@ -502,6 +470,36 @@ test "F3C bounded SRAM rejects errors without touching caller bytes" {
     try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 32), &buffer);
 }
 
+test "F3C mechanical shape must not decide D3 callability" {
+    // The head is a D9 physical word, not a D3 callable function.
+    // Transport preserves width and bits; SENS alone can decide meaning.
+    const opaque_head = [_]Word{
+        .{ .width = 2, .bits = 2 },
+        .{ .width = 9, .bits = 0 },
+        .{ .width = 2, .bits = 0 },
+        .{ .width = 3, .bits = 1 },
+        .{ .width = 2, .bits = 1 },
+    };
+    try std.testing.expect(canonicalStructure(&opaque_head));
+    const carrier = try t5.encode(std.testing.allocator, &opaque_head);
+    defer std.testing.allocator.free(carrier);
+    const restored = try t5.decode(std.testing.allocator, carrier);
+    defer std.testing.allocator.free(restored);
+    try std.testing.expectEqualSlices(Word, &opaque_head, restored);
+
+    const bad_dot = [_]Word{
+        .{ .width = 2, .bits = 2 },
+        .{ .width = 2, .bits = 3 },
+        .{ .width = 2, .bits = 1 },
+    };
+    try std.testing.expect(!canonicalStructure(&bad_dot));
+    const no_close = [_]Word{
+        .{ .width = 2, .bits = 2 },
+        .{ .width = 9, .bits = 0 },
+    };
+    try std.testing.expect(!canonicalStructure(&no_close));
+}
+
 test "F3C physical golden: QUOTE data exact bytes" {
     const a = std.testing.allocator;
     const original = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
@@ -516,7 +514,7 @@ test "F3C physical golden: QUOTE data exact bytes" {
 test "F3C refuses non-saving empty shell and noncanonical physical inputs" {
     const a = std.testing.allocator;
     try std.testing.expect((try encode(a, &.{0x64})) == null);
-    try std.testing.expectError(Error.InvalidProgram, decode(a, &.{ 0xf3, 0x00 }));
+    try std.testing.expectError(Error.NotSmallerThanT5, decode(a, &.{ 0xf3, 0x00 }));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{0xf3}));
     try std.testing.expectError(Error.WrongCarrier, decode(a, &.{ 0xf4, 0x40, 0x60 }));

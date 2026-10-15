@@ -44,6 +44,7 @@ done
 names=(
     sens_zig_free_t5_validate
     sens_zig_free_t5_encode_be3
+    sens_zig_free_t5_decode_be3
     sens_zig_free_f3c_pack
     sens_zig_free_f3c_unpack
     sens_zig_free_crc32

@@ -10,18 +10,108 @@ import argparse
 import hashlib
 import json
 import os
+import posixpath
 from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[3]
 HOST = Path("research/zig-codecs/host-c")
+ZIG_ROOT = "research/zig-codecs"
+ZIG_ENTRY = f"{ZIG_ROOT}/transport_abi.zig"
 INPUTS = (
     HOST / "verify_d3_subset.sh", HOST / "d3_subset.c",
     HOST / "zig_transport_v2.h", Path("research/zig-codecs/transport_abi.zig"),
 )
+
+
+def zig_local_sources(root: Path, entry: str = ZIG_ENTRY) -> dict[str, Path]:
+    """Record every physical Zig source contributing to the H1 ABI build.
+
+    Host-independent byte-source evidence only. This does not establish which
+    object files the linker included, nor grant Zig semantic authority.
+    """
+    pending = [entry]
+    found: dict[str, Path] = {}
+    while pending:
+        name = pending.pop()
+        if name in found:
+            continue
+        if not name.startswith(ZIG_ROOT + "/") or (
+                name.startswith("/") or ".." in Path(name).parts):
+            raise ValueError(f"H1_ZIG_IMPORT_ESCAPE: {name}")
+        source = root
+        for component in Path(name).parts:
+            source = source / component
+            if source.is_symlink():
+                raise ValueError(f"H1_ZIG_LINKED_SOURCE: {name}")
+        if not source.is_file():
+            raise ValueError(f"H1_ZIG_MISSING_SOURCE: {name}")
+        try:
+            content = source.read_text(encoding="utf-8")
+        except (UnicodeError, OSError) as exc:
+            raise ValueError(f"H1_ZIG_UNREADABLE_SOURCE: {name}") from exc
+        found[name] = source
+        imports = re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', content)
+        if len(imports) != len(re.findall(r'@import\s*\(', content)):
+            raise ValueError(f"H1_ZIG_UNRESOLVED_IMPORT: {name}")
+        for imported in imports:
+            if imported in ("std", "builtin", "root"):
+                continue
+            if not imported.endswith(".zig"):
+                raise ValueError(f"H1_ZIG_NONFILE_IMPORT: {name} -> {imported}")
+            child = posixpath.normpath(
+                posixpath.join(posixpath.dirname(name), imported))
+            if not child.startswith(ZIG_ROOT + "/"):
+                raise ValueError(f"H1_ZIG_IMPORT_ESCAPE: {name} -> {imported}")
+            pending.append(child)
+    return dict(sorted(found.items()))
+
+
+def zig_source_self_test() -> None:
+    """Real files: positive import chain and three fail-closed negatives."""
+    with TemporaryDirectory(prefix="sens-h1-zig-deps-") as temp:
+        root = Path(temp)
+        directory = root / ZIG_ROOT
+        (directory / "transport").mkdir(parents=True)
+        entry = directory / "transport_abi.zig"
+        field = directory / "transport" / "fields.zig"
+        entry.write_text('const x = @import("transport/fields.zig");\n',
+                         encoding="utf-8")
+        field.write_text('const std = @import("std");\n', encoding="utf-8")
+        if set(zig_local_sources(root)) != {
+            ZIG_ENTRY, f"{ZIG_ROOT}/transport/fields.zig"
+        }:
+            raise AssertionError("H1_ZIG_IMPORT positive closure incomplete")
+        entry.write_text('const x = @import("transport/absent.zig");\n',
+                         encoding="utf-8")
+        try:
+            zig_local_sources(root)
+        except ValueError as exc:
+            assert "H1_ZIG_MISSING_SOURCE" in str(exc)
+        else:
+            raise AssertionError("H1_ZIG_IMPORT missing dependency accepted")
+        alias = directory / "alias"
+        alias.symlink_to(directory / "transport", target_is_directory=True)
+        entry.write_text('const x = @import("alias/fields.zig");\n',
+                         encoding="utf-8")
+        try:
+            zig_local_sources(root)
+        except ValueError as exc:
+            assert "H1_ZIG_LINKED_SOURCE" in str(exc)
+        else:
+            raise AssertionError("H1_ZIG_IMPORT linked directory accepted")
+        entry.write_text('const x = @import("../../../foreign.zig");\n',
+                         encoding="utf-8")
+        try:
+            zig_local_sources(root)
+        except ValueError as exc:
+            assert "H1_ZIG_IMPORT_ESCAPE" in str(exc)
+        else:
+            raise AssertionError("H1_ZIG_IMPORT outside repository accepted")
 
 
 def digest(path: Path) -> str:
@@ -79,9 +169,76 @@ def command(argv: list[str]) -> str:
 
 
 def artifact(path: Path) -> Path:
-    if path.is_symlink() or not path.is_file():
+    """Accept only a regular physical file with NO symlink path component.
+
+    ELF/archive hashes must refer to the selected binary's actual path:
+    checking only the leaf permits a symlinked build/output directory.
+    """
+    if ".." in path.parts:
+        raise ValueError("NONCANONICAL_ARTIFACT_PATH: " + str(path))
+    absolute = path.absolute()
+    current = Path(absolute.anchor)
+    for component in absolute.parts[1:]:
+        current = current / component
+        if current.is_symlink():
+            raise ValueError("LINKED_ARTIFACT_COMPONENT: " + str(current))
+    if not absolute.is_file():
         raise ValueError("MISSING_OR_SYMLINK_ARTIFACT: " + str(path))
     return path
+
+
+def artifact_path_self_test() -> None:
+    """Same bytes through an alias directory must NEVER authenticate H1."""
+    with TemporaryDirectory(prefix="sens-h1-physical-path-") as tmp:
+        root = Path(tmp)
+        physical = root / "physical"
+        physical.mkdir()
+        binary = physical / "sens-c-host-d3"
+        archive = physical / "libsens_zig_transport.a"
+        binary.write_bytes(bytes.fromhex("63 89 06 a1"))
+        archive.write_bytes(bytes.fromhex("f3 40 60"))
+        assert artifact(binary) == binary
+        assert artifact(archive) == archive
+
+        alias = root / "alias"
+        alias.symlink_to(physical, target_is_directory=True)
+        assert (alias / binary.name).read_bytes() == binary.read_bytes()
+        for name in (binary.name, archive.name):
+            try:
+                artifact(alias / name)
+            except ValueError as exc:
+                if "LINKED_ARTIFACT_COMPONENT" not in str(exc):
+                    raise
+            else:
+                raise AssertionError("H1_LINKED_ARTIFACT_PARENT accepted: " + name)
+
+        leaf = root / "binary-alias"
+        leaf.symlink_to(binary)
+        try:
+            artifact(leaf)
+        except ValueError as exc:
+            if "LINKED_ARTIFACT_COMPONENT" not in str(exc):
+                raise
+        else:
+            raise AssertionError("H1_LINKED_ARTIFACT_LEAF accepted")
+
+        try:
+            artifact(physical / ".." / "physical" / binary.name)
+        except ValueError as exc:
+            if "NONCANONICAL_ARTIFACT_PATH" not in str(exc):
+                raise
+        else:
+            raise AssertionError("H1_NONCANONICAL_ARTIFACT_PATH accepted")
+
+        try:
+            artifact(physical / "missing-archive.a")
+        except ValueError as exc:
+            if "MISSING_OR_SYMLINK_ARTIFACT" not in str(exc):
+                raise
+        else:
+            raise AssertionError("H1_MISSING_ARTIFACT accepted")
+
+
 
 
 def run_audit(root: Path, output: Path) -> dict:
@@ -89,6 +246,9 @@ def run_audit(root: Path, output: Path) -> dict:
         if not shutil.which(tool):
             raise ValueError("MISSING_DEPENDENCY_INSPECTION_TOOL: " + tool)
     paths = {str(p): artifact(root / p) for p in INPUTS}
+    # Hash the ENTIRE local Zig compilation source closure, not only the
+    # transport_abi.zig entrypoint. The C/Zig linker audit remains separate.
+    paths.update(zig_local_sources(root))
     inspect_recipe(paths[str(INPUTS[0])].read_text(encoding="utf-8"))
     executable = artifact(output / "sens-c-host-d3")
     archive = artifact(output / "libsens_zig_transport.a")
@@ -142,7 +302,10 @@ def self_test() -> None:
         assert "H1_BUILD_RECIPE_MISSING" in str(exc)
     else:
         raise AssertionError("Rust-only recipe must fail")
-    print("H1_DEPENDENCY_SELF_TEST_PASS cases=8")
+    zig_source_self_test()
+    artifact_path_self_test()
+    print("H1_PHYSICAL_ARTIFACT_SELF_TEST_PASS")
+    print("H1_DEPENDENCY_SELF_TEST_PASS cases=12 (including Zig closure)")
 
 
 def main() -> int:

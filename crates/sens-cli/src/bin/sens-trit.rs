@@ -128,6 +128,25 @@ fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
     }
 }
 
+/// Explicit E1 physical ingress: Zig canonical E1 -> exact words ->
+/// SENS-owned D2 admission and execution. No Rust E1 codec fallback.
+fn eval_e1_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = bytes;
+        Err("E1 physical execution requires Zig; no Rust fallback".into())
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        let words = zig_transport::decode_e1_words(bytes)?;
+        let program = sens::PhysicalT5Program::from_exact_words(&words)
+            .map_err(|e| format!("E1 -> SENS canonical D2 rejected: {e}"))?;
+        let mut session = sens::Session::default();
+        program.execute(&mut session)
+            .map_err(|e| format!("E1 -> current SENS evaluator rejected: {e}"))
+    }
+}
+
 fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("senc") {
         return Err("explicit F3 command requires a physical .senc file".into());
@@ -240,32 +259,30 @@ fn eval_t5_bytes_core4(
     bytes: &[u8],
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
-    // In the normal build Zig decodes physical T5 to exact-width words.
-    // The SENS-owned D2 reader/evaluator alone determines admissibility.
-    // The Rust physical T5 decoder remains only in the explicit
-    // --no-default-features reference build, never a silent fallback.
-    #[cfg(feature = "zig-transport")]
-    let program = {
-        let words = zig_transport::decode_t5_words(bytes)?;
-        sens::PhysicalT5Program::from_exact_words(&words)
-            .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?
-    };
     #[cfg(not(feature = "zig-transport"))]
-    let program = sens::PhysicalT5Program::decode(bytes).map_err(|e| match e {
-        sens::T5ExecutionError::Transport(error) =>
-            format!("physical T5 decode rejected: {error:?}"),
-        sens::T5ExecutionError::Language(error) =>
-            format!("canonical packed SENS parser rejected: {error}"),
-    })?;
-    let mut session = sens::Session::default();
-    if bootstrap_core {
-        sens::load_core_library(&mut session)
-            .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
+    {
+        // The reference-only build may compare codec fixtures, but cannot
+        // execute a physical program by bypassing the Zig turnstile.
+        // Refuse before parsing, starting a session, or loading Core4.
+        let _ = (bytes, bootstrap_core);
+        Err("physical T5 execution requires Zig; no Rust fallback".into())
     }
-    program.execute(&mut session)
-        .map_err(|e| format!("current SENS evaluator rejected: {e}"))
+    #[cfg(feature = "zig-transport")]
+    {
+        // Zig owns only physical width/payload decoding; SENS owns D2,
+        // all execution and any explicitly requested Core4 bootstrap.
+        let words = zig_transport::decode_t5_words(bytes)?;
+        let program = sens::PhysicalT5Program::from_exact_words(&words)
+            .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?;
+        let mut session = sens::Session::default();
+        if bootstrap_core {
+            sens::load_core_library(&mut session)
+                .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
+        }
+        program.execute(&mut session)
+            .map_err(|e| format!("current SENS evaluator rejected: {e}"))
+    }
 }
-
 /// Пояснити негативний результат без іншого парсера чи текстового fallback.
 /// Первинним рішенням назавжди лишається encode_binary_projection_ternary.
 #[cfg(not(feature = "zig-transport"))]
@@ -448,9 +465,7 @@ fn execute() -> Result<(), String> {
             // Explicit SENS execution only: CRC/E1 decoding followed by the
             // SAME ratified exact-domain admission/evaluator used by T5.
             let e1 = read_explicit_e1(path)?;
-            let mut session = sens::Session::default();
-            let result = sens::eval_e1_program(&e1, &mut session)
-                .map_err(|e| format!("E1 -> current SENS rejected: {e:?}"))?;
+            let result = eval_e1_bytes(&e1)?;
             for output in result.output { println!("{output}"); }
             println!("{}", result.value);
             Ok(())
@@ -571,6 +586,46 @@ mod e1_cli_mechanism_tests {
     }
 
     #[cfg(feature = "zig-transport")]
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn e1_execution_uses_zig_physical_reader_then_native_sens_d2() {
+        let positive = include_bytes!(
+            "../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens"
+        );
+        let mut s1 = sens::Session::default();
+        let reference = sens::eval_t5_program(positive, &mut s1)
+            .expect("SENS owns the physical T5 semantic witness");
+        let e1 = encode_e1_from_t5(positive).expect("Zig canonical E1 output");
+        let actual = eval_e1_bytes(&e1).expect("Zig E1 ingress then SENS semantic evaluator");
+        assert_eq!(actual.value.as_predicate_bit(), reference.value.as_predicate_bit());
+        assert_eq!(actual.output, reference.output);
+
+        // A forged CRC result is not a semantic D1:NO or an allowed fallback.
+        let mut damaged = e1.clone();
+        *damaged.last_mut().expect("E1 CRC suffix") ^= 1;
+        assert!(eval_e1_bytes(&damaged).is_err());
+
+        let source = include_str!("sens-trit.rs");
+        let start = source.find("fn eval_e1_bytes(").expect("E1 executable ingress");
+        let routine = &source[start..source[start..].find("\n}\n").unwrap() + start];
+        assert!(routine.contains("zig_transport::decode_e1_words(bytes)"));
+        assert!(routine.contains("sens::PhysicalT5Program::from_exact_words(&words)"));
+        assert!(!routine.contains("sens::eval_e1_program("));
+        let arm = source.find("\n        \"eval-e1\" => {\n").expect("E1 command");
+        let route = &source[arm..source[arm..].find("\n        \"encode-f3\" =>").unwrap() + arm];
+        assert!(route.contains("eval_e1_bytes(&e1)?"));
+        assert!(!route.contains("sens::eval_e1_program("));
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn e1_execution_refuses_rust_physical_decoder_without_zig() {
+        let input = [0x53, 0x33, 1, 0, 0xc7, 0xca, 0x15, 0xd8];
+        let error = eval_e1_bytes(&input).expect_err("without Zig E1 must not execute");
+        assert!(error.contains("no Rust fallback"));
+    }
+
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
         let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
@@ -609,6 +664,7 @@ mod eval_tests {
         assert!(!USAGE.contains("eval-core path.sens"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
         let bytes = [0xf3, 0x40, 0x60];
@@ -880,6 +936,24 @@ mod eval_tests {
         assert!(zig_transport::decode_t5_words(&[0, 0]).is_err());
     }
 
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn physical_t5_eval_and_explicit_core4_refuse_without_zig() {
+        let bytes = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        for bootstrap_core in [false, true] {
+            let error = eval_t5_bytes_core4(bytes, bootstrap_core)
+                .expect_err("physical T5 cannot execute without Zig");
+            assert!(error.contains("no Rust fallback"), "{error}");
+            // Even malformed physical bytes fail for the SAME missing
+            // corridor; no Rust physical parser or SENS executor is called.
+            let malformed = eval_t5_bytes_core4(&[0xf3], bootstrap_core)
+                .expect_err("no fallback for malformed bytes");
+            assert_eq!(error, malformed);
+        }
+    }
+
     #[test]
     fn physical_eval_path_uses_packed_words_not_visible_text() {
         let source = include_str!("sens-trit.rs");
@@ -895,7 +969,10 @@ mod eval_tests {
             assert!(!zig_branch.contains("sens::PhysicalT5Program::decode(bytes)"));
         }
         #[cfg(not(feature = "zig-transport"))]
-        assert!(route.contains("sens::PhysicalT5Program::decode(bytes)"));
+        {
+            assert!(route.contains("physical T5 execution requires Zig; no Rust fallback"));
+            assert!(!route.contains("sens::PhysicalT5Program::decode(bytes)"));
+        }
         assert!(route.contains("program.execute(&mut session)"));
         assert!(!route.contains("sens::pack_binary_source_words("));
         assert!(!route.contains("sens::parse_canonical_packed_words("));

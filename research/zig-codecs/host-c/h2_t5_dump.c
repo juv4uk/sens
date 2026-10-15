@@ -12,12 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 
-extern uint32_t sens_zig_codec_abi_version(void);
-extern ptrdiff_t sens_zig_t5_encode_be3(
-    const uint8_t *, size_t, uint8_t *, size_t);
-extern ptrdiff_t sens_zig_t5_decode_be3(
-    const uint8_t *, size_t, uint8_t *, size_t);
-extern int sens_zig_t5_validate(const uint8_t *, size_t);
+/* One canonical mechanical Zig ABI v2 declaration source, shared with every C host. */
+#include "zig_transport_v2.h"
 
 #define WORD_CAP 512u
 #define BE3_CAP (3u * WORD_CAP)
@@ -35,7 +31,7 @@ int main(void) {
     size_t used = 0;
     int c;
 
-    if (sens_zig_codec_abi_version() != 2u)
+    if (sens_zig_codec_abi_version() != SENS_ZIG_TRANSPORT_ABI_VERSION)
         return reject("ABI_VERSION");
     while ((c = fgetc(stdin)) != EOF) {
         if (used == sizeof words)

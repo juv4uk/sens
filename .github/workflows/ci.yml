@@ -141,6 +141,14 @@ jobs:
           echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
           python3 scripts/check_sterile_zig_corridor.py
+          # Host-neutral R5 must observe actual C→Zig physical calls, not ghost strings.
+          echo 'test_id=zig-host-neutral-r5-call-site layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+          python3 scripts/check_rust_sens_zig_corridor.py
+          # Host-neutral ABI v2 declarations are a blocking part of this one auto-CI.
+          # Source-only proof: never upgrades physical or SENS semantic admission.
+          echo 'test_id=zig-abi-v2-zig-rust-c-declarations layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py -v
           echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
           zig test research/zig-codecs/domain_ladder.zig
           echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
@@ -149,6 +157,8 @@ jobs:
           zig test research/zig-codecs/domain_sequence.zig
           zig test research/zig-codecs/tests.zig -lc
           zig test research/zig-codecs/transport/e1_writer.zig
+          echo 'test_id=zig-rust-free-c-host-f3c-buffer-parity layer=transport semantic_authority=SENS semantic_verdict=NOT_TESTED'
+          bash research/zig-codecs/host-c/verify.sh
           echo 'test_id=zig-migration-bridge-t5-exact-physical layer=transport semantic_authority=SENS compiler=zig-0.16'
           python3 scripts/test_zig_codec_bridge.py
           # Same focused Zig step, no new workflow: compile and actually link
@@ -498,7 +508,7 @@ jobs:
           if "$bin" eval-e1 "$RUNNER_TEMP/e1-corrupt.e1" > "$RUNNER_TEMP/e1-corrupt.out" 2> "$RUNNER_TEMP/e1-corrupt.err"; then
             echo "::error::E1_CLI_FAIL_OPEN_CORRUPTED_CRC"; exit 1
           fi
-          grep -q 'Integrity' "$RUNNER_TEMP/e1-corrupt.err" || {
+          grep -Fq 'Zig E1 physical decode rejected: code=-1' "$RUNNER_TEMP/e1-corrupt.err" || {
             echo "::error::E1_CLI_REJECTION_UNINFORMATIVE"; exit 1;
           }
           echo 'E1_NATIVE_SENS_CLI_VERDICTS_PASS: positive/mutant differ, T5 matches E1, CRC fails closed'

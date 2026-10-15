@@ -6,12 +6,22 @@ invariants that make the corridor un-bypassable, so a later change cannot turn
 the Rust host into a silent physical codec again:
 
 R1  crates/sens-cli/Cargo.toml: `default` features include `zig-transport`
-R2  crates/sens-cli/build.rs: gated on CARGO_FEATURE_ZIG_TRANSPORT, links Zig
-R3  transport_abi.zig: physical sens_zig_* only; T5/F3C/E1 modules
-R3b If E1 encode is exported, E1 decode must be exported too
-R4  `.zig-version` concrete
-R5  zig_transport.rs: FFI + packed_bits/BitN; E1 encode implies decode
-R6  main.rs and sens-trit route physical T5 through zig_transport
+    (the corridor is ON by default) and the `zig-transport` feature exists.
+R2  crates/sens-cli/build.rs: the Zig transport is gated on
+    CARGO_FEATURE_ZIG_TRANSPORT, links `sens_zig_transport`, compiles
+    research/zig-codecs/transport_abi.zig, and pins/reads `.zig-version`.
+R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
+    functions (T5 + E1 + F3C physical ops), imports ONLY physical codec
+    modules (`std` or t5/ + f3c/ + transport/) and never a registry/host/
+    semantic module, and declares no host `extern`/padded structs.
+R4  `.zig-version` is a concrete X.Y.Z string (not `latest` or a branch).
+R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
+    research/zig-codecs/host-c/zig_transport_v2.h must declare the same
+    physical ops as the Zig ABI (no host-invented ops, no missing ops),
+    the ABI version must match, and every Rust-free host in host-c/*.c
+    must only call corridor ops (no rogue sens_zig_* invents). At least
+    one host must fail-closed reject invalid T5 via F3C pack (...)=-1
+    (same physical contract as Rust zig_transport::encode_f3), and\n    must fail the witness if Zig returns anything other than -1.
 
 Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
@@ -26,22 +36,40 @@ CARGO = "crates/sens-cli/Cargo.toml"
 BUILD = "crates/sens-cli/build.rs"
 ABI = "research/zig-codecs/transport_abi.zig"
 ZIGVER = ".zig-version"
-ZIG_CLIENT = "crates/sens-cli/src/zig_transport.rs"
-MAIN_RS = "crates/sens-cli/src/main.rs"
-TRIT_RS = "crates/sens-cli/src/bin/sens-trit.rs"
+C_HEADER = "research/zig-codecs/host-c/zig_transport_v2.h"
+C_HOST_DIR = "research/zig-codecs/host-c"
 
-ALLOWED_IMPORTS = {
-    "std",
-    "t5/t5.zig",
-    "f3c/f3c.zig",
-    "transport/e1.zig",
-    "transport/e1_writer.zig",
-}
+PHYSICAL_IMPORT_PREFIXES = ("t5/", "f3c/", "transport/")
+FORBIDDEN_IMPORT_RE = re.compile(r"registry|semantic|host|sens", re.I)
 REQUIRED_ABI_EXPORTS = (
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
     "sens_zig_t5_decode_be3",
+    "sens_zig_e1_encode_be3",
+    "sens_zig_e1_decode_be3",
+    "sens_zig_f3c_pack",
+    "sens_zig_f3c_unpack",
 )
+
+EXPORT_RE = re.compile(r"pub export fn\s+([A-Za-z0-9_]+)")
+CALL_RE = re.compile(r"\b(sens_zig_[a-z0-9_]+)\s*\(")
+# Exclude non-code tokens so strings/comments cannot forge C→Zig call evidence.
+C_NONCODE_RE = re.compile(
+    r"""//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'""",
+    re.S,
+)
+
+# Guard against ignored Zig return values and C comma-operator false proofs.
+# check_number must compare the ABI status with -1 and fail the witness on
+# mismatch. C_NONCODE_RE strips comments and string literals before matching.
+F3C_FAIL_CLOSED_RE = re.compile(
+    r"\bif\s*\(\s*!\s*check_number\s*\(\s*[^,;()]{0,160},\s*"
+    r"sens_zig_f3c_pack\s*\([^();]{1,220}\)\s*,\s*-1\s*\)"
+    r"\s*\)\s*return\s+0\s*;"
+)
+
+ZIG_VERSION_RE = re.compile(r"sens_zig_codec_abi_version\(\)\s*u32\s*\{\s*return\s+(\d+)")
+HEADER_VERSION_RE = re.compile(r"SENS_ZIG_TRANSPORT_ABI_VERSION\s*=\s*(\d+)")
 
 
 def check(root: Path) -> list[str]:
@@ -52,6 +80,7 @@ def check(root: Path) -> list[str]:
     abi = (root / ABI).read_text(encoding="utf-8")
     zigver = (root / ZIGVER).read_text(encoding="utf-8").strip()
 
+    # R1 -- corridor is ON by default, feature declared.
     features = re.search(r"\[features\](.*?)(?:\n\[|\Z)", cargo, re.S)
     feat_body = features.group(1) if features else ""
     default_match = re.search(r"^\s*default\s*=\s*\[([^\]]*)\]", feat_body, re.M)
@@ -64,6 +93,7 @@ def check(root: Path) -> list[str]:
     if not re.search(r"^\s*zig-transport\s*=", feat_body, re.M):
         problems.append("R1: `zig-transport` feature is not declared in crates/sens-cli/Cargo.toml")
 
+    # R2 -- build.rs requires the Zig corridor; no silent Rust transport.
     if "CARGO_FEATURE_ZIG_TRANSPORT" not in build:
         problems.append(
             "R2: build.rs does not gate on CARGO_FEATURE_ZIG_TRANSPORT "
@@ -76,7 +106,8 @@ def check(root: Path) -> list[str]:
     if ".zig-version" not in build:
         problems.append("R2: build.rs does not pin/read the repository `.zig-version`")
 
-    exports = re.findall(r"pub export fn\s+([A-Za-z0-9_]+)", abi)
+    # R3 -- the corridor ABI is physical-only and semantics-free.
+    exports = EXPORT_RE.findall(abi)
     if not exports:
         problems.append("R3: transport_abi.zig exports no `pub export fn` (no corridor ABI)")
     for name in exports:
@@ -88,10 +119,17 @@ def check(root: Path) -> list[str]:
         if required not in exports:
             problems.append(f"R3: corridor ABI is missing the physical op `{required}`")
     for imported in re.findall(r'@import\("([^"]+)"\)', abi):
-        if imported not in ALLOWED_IMPORTS:
+        if imported == "std":
+            continue
+        if FORBIDDEN_IMPORT_RE.search(imported):
             problems.append(
-                f"R3: ABI imports `{imported}` -- only physical modules "
-                f"{sorted(ALLOWED_IMPORTS)} may cross the corridor"
+                f"R3: ABI imports `{imported}` -- a semantic/host/registry module "
+                "must not cross the sterile corridor"
+            )
+        elif not any(imported.startswith(p) for p in PHYSICAL_IMPORT_PREFIXES):
+            problems.append(
+                f"R3: ABI imports `{imported}` -- only physical codec modules "
+                f"{list(PHYSICAL_IMPORT_PREFIXES)} may cross the corridor"
             )
     if re.search(r"\bextern\b", abi):
         problems.append(
@@ -99,65 +137,83 @@ def check(root: Path) -> list[str]:
             "caller-owned triplets, no padded host structs"
         )
 
-    if "sens_zig_e1_encode_be3" in exports and "sens_zig_e1_decode_be3" not in exports:
-        problems.append(
-            "R3: E1 encode is exported without sens_zig_e1_decode_be3 "
-            "(Rust must not be the only E1 decoder)"
-        )
-
+    # R4 -- concrete Zig pin.
     if not re.fullmatch(r"\d+\.\d+\.\d+", zigver):
         problems.append(f"R4: `.zig-version` is not a concrete version string: {zigver!r}")
 
-    client_path = root / ZIG_CLIENT
-    if not client_path.is_file() or client_path.is_symlink():
-        problems.append(f"R5: missing regular sterile client {ZIG_CLIENT}")
+    # R5 -- host-neutral: every host crosses the SAME corridor.
+    header_path = root / C_HEADER
+    if not header_path.is_file():
+        problems.append(f"R5: C header `{C_HEADER}` is missing (no host-neutral ABI source)")
     else:
-        client = client_path.read_text(encoding="utf-8")
-        for name in REQUIRED_ABI_EXPORTS:
-            if name not in client:
-                problems.append(f"R5: zig_transport.rs missing FFI binding for {name}")
-        if "packed_bits" not in client or "BinarySourceWord::W1" not in client:
+        header = header_path.read_text(encoding="utf-8")
+        header_ops = set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*\(", header))
+        header_ops |= set(re.findall(r"\b(sens_zig_[a-z0-9_]+)\s*;", header))
+        zig_ops = set(exports)
+        missing_in_header = sorted(zig_ops - header_ops)
+        extra_in_header = sorted(header_ops - zig_ops - {"sens_zig_codec_abi_version"})
+        if "sens_zig_codec_abi_version" in exports and "sens_zig_codec_abi_version" not in header_ops:
+            missing_in_header = sorted(set(missing_in_header) | {"sens_zig_codec_abi_version"})
+        if missing_in_header:
             problems.append(
-                "R5: zig_transport.rs must reconstruct BinarySourceWord via "
-                "packed_bits + BitN::new (W1..W9)"
+                "R5: C header declares fewer ops than the Zig ABI; missing: "
+                + ", ".join(missing_in_header)
             )
-        banned = ("ternary_transport", "PhysicalT5Program", "from_width_bits", "TRITS_BY_BYTE")
-        for token in banned:
-            if token in client:
-                problems.append(
-                    f"R5: zig_transport.rs must not embed local codec marker `{token}`"
-                )
-        if "encode_e1_direct" in client and "decode_e1_words" not in client:
+        if extra_in_header:
             problems.append(
-                "R5: zig_transport.rs exports E1 encode without decode_e1_words"
+                "R5: C header declares ops not in the Zig ABI (host-invented op): "
+                + ", ".join(extra_in_header)
             )
-        if "sens_zig_e1_encode_be3" in client and "sens_zig_e1_decode_be3" not in client:
+        zig_version = ZIG_VERSION_RE.search(abi)
+        hdr_version = HEADER_VERSION_RE.search(header)
+        if not zig_version or not hdr_version:
+            problems.append("R5: corridor ABI version is not declared on both sides (Zig + C header)")
+        elif zig_version.group(1) != hdr_version.group(1):
             problems.append(
-                "R5: zig_transport.rs binds E1 encode FFI without decode FFI"
+                f"R5: ABI version mismatch -- Zig returns {zig_version.group(1)}, "
+                f"C header declares {hdr_version.group(1)}"
             )
 
-    main_rs = root / MAIN_RS
-    trit_rs = root / TRIT_RS
-    if main_rs.is_file():
-        main_src = main_rs.read_text(encoding="utf-8")
-        if "zig_transport::decode_t5_words" not in main_src:
+    host_dir = root / C_HOST_DIR
+    if host_dir.is_dir():
+        called_physical = False
+        physical_exports = set(exports) - {"sens_zig_codec_abi_version"}
+        for host in sorted(host_dir.glob("*.c")):
+            src = host.read_text(encoding="utf-8")
+            src = C_NONCODE_RE.sub(" ", src)
+            calls = set(CALL_RE.findall(src))
+            if not calls:
+                continue
+            if calls & physical_exports:
+                called_physical = True
+            rogue = sorted(c for c in calls if c not in set(exports) | {"sens_zig_codec_abi_version"})
+            if rogue:
+                problems.append(
+                    f"R5: host `{host.name}` calls ops outside the corridor: "
+                    + ", ".join(rogue)
+                )
+        if not called_physical:
             problems.append(
-                "R6: main.rs must decode physical .sens via zig_transport::decode_t5_words"
+                "R5: no Rust-free host in host-c/*.c calls a physical Zig transport op "
+                "(version-only and commented calls are not evidence)"
             )
-        if "mod zig_transport" not in main_src:
-            problems.append("R6: main.rs must declare the shared zig_transport module")
-    else:
-        problems.append(f"R6: missing {MAIN_RS}")
-    if trit_rs.is_file():
-        trit_src = trit_rs.read_text(encoding="utf-8")
-        if "zig_transport.rs" not in trit_src:
-            problems.append("R6: sens-trit.rs must path-include zig_transport.rs")
-        if "zig_transport::" not in trit_src:
-            problems.append("R6: sens-trit.rs must call zig_transport corridor API")
-        if "fn sens_zig_t5_encode_be3" in trit_src:
-            problems.append("R6: sens-trit.rs must not embed local Zig FFI (use shared client)")
-    else:
-        problems.append(f"R6: missing {TRIT_RS}")
+
+        # R5 F3C fail-closed (G6/G7/S2): require the C host to PROPAGATE
+        # the rejected Zig status. In C, a comma operator silently discards
+        # the F3C result: if (sens_zig_f3c_pack(...), -1) is not evidence.
+        # This regex is only structural; a native C+Zig run is still necessary.
+        f3c_invalid_reject = False
+        for host in sorted(host_dir.glob("*.c")):
+            src = C_NONCODE_RE.sub(" ", host.read_text(encoding="utf-8"))
+            if F3C_FAIL_CLOSED_RE.search(src):
+                f3c_invalid_reject = True
+                break
+        if not f3c_invalid_reject:
+            problems.append(
+                "R5: no Rust-free host exercises F3C pack rejection of invalid T5 "
+                "(required: if (!check_number(..., sens_zig_f3c_pack(...), -1)) "
+                "return 0; a comma/ignored result is not evidence)"
+            )
 
     return problems
 
@@ -175,7 +231,7 @@ def main() -> int:
         return 1
     print(
         "CORRIDOR_OK Rust<->SENS crosses only the sterile Zig corridor "
-        "(default zig-transport, no silent fallback, physical-only ABI)"
+        "(default zig-transport, no silent fallback, physical-only ABI, host-neutral)"
     )
     return 0
 

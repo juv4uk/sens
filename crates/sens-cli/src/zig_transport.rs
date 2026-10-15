@@ -64,12 +64,33 @@ pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
+/// Єдина механічна проєкція SENS exact-width слів у caller-owned BE3.
+/// [width, payload-MSB, payload-LSB] — байти ABI, НЕ фізичний T5/E1
+/// і НЕ визначення значення або викличності домену.
+fn exact_words_to_be3(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
+    let capacity = words.len().checked_mul(3)
+        .ok_or("Zig BE3 input length overflow")?;
+    let mut be3 = Vec::with_capacity(capacity);
+    for word in words {
+        let width = u8::try_from(word.width())
+            .map_err(|_| "Zig BE3 width exceeds one-byte ABI range")?;
+        if width == 0 || width > 9 {
+            return Err(format!("Zig BE3 unsupported exact word width={width}"));
+        }
+        let bits = word.packed_bits();
+        if (bits as u32) >= (1u32 << width) {
+            return Err(format!("Zig BE3 payload exceeds declared width={width}"));
+        }
+        be3.extend_from_slice(&[width, (bits >> 8) as u8, bits as u8]);
+    }
+    Ok(be3)
+}
+
 pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
     version()?;
     if words.is_empty() {
         return Err("Zig physical T5 cannot encode an empty record".into());
     }
-    let be3_capacity = words.len().checked_mul(3).ok_or("Zig BE3 input length overflow")?;
     let semantic_trits = words
         .iter()
         .try_fold(0usize, |n, word| n.checked_add(word.width()))
@@ -78,21 +99,7 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
         .checked_add(words.len() - 1)
         .ok_or("Zig T5 separator count overflow")?;
     let physical_capacity = used_trits.checked_add(4).ok_or("Zig T5 byte count overflow")? / 5;
-    let mut be3 = Vec::with_capacity(be3_capacity);
-    for word in words {
-        let width = u8::try_from(word.width()).map_err(|_| "Zig T5 width out of one-byte ABI range")?;
-        if width == 0 || width > 9 {
-            return Err(format!("unsupported program-word width {width}"));
-        }
-        let bits = word.packed_bits();
-        let limit = 1u32 << width;
-        if (bits as u32) >= limit {
-            return Err(format!("payload overflow for width {width}"));
-        }
-        be3.push(width);
-        be3.push((bits >> 8) as u8);
-        be3.push(bits as u8);
-    }
+    let be3 = exact_words_to_be3(words)?;
     let mut bytes = vec![0u8; physical_capacity];
     let len = unsafe {
         sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len())
@@ -167,18 +174,7 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     if words.is_empty() {
         return Err("Zig E1 cannot encode an empty record".into());
     }
-    let mut be3 = Vec::with_capacity(words.len().saturating_mul(3));
-    for word in words {
-        let width = u8::try_from(word.width()).map_err(|_| "Zig E1 width out of one-byte ABI range")?;
-        if width == 0 || width > 9 {
-            return Err(format!("Zig E1 invalid exact-width payload width={width}"));
-        }
-        let bits = word.packed_bits();
-        if (bits as u32) >= (1u32 << width) {
-            return Err(format!("Zig E1 payload overflow width={width}"));
-        }
-        be3.extend_from_slice(&[width, (bits >> 8) as u8, bits as u8]);
-    }
+    let be3 = exact_words_to_be3(words)?;
     let capacity = words
         .len()
         .checked_mul(16)
@@ -192,27 +188,28 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
         return Err(format!("Zig E1 physical encode rejected: code={written}"));
     }
     output.truncate(written as usize);
+    // Transport egress must not publish bytes before Zig independently
+    // restores the same exact SENS coordinates via the existing ABI v2.
+    // No Rust E1 physical encoder/decoder or SENS semantic re-evaluation.
+    let restored = decode_e1_words(&output)?;
+    require_same_exact_words(words, &restored)?;
     Ok(output)
 }
 
 /// Zig is the only physical E1 decoder on the feature-gated CLI ingress.
 pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     version()?;
-    if bytes.is_empty() {
-        return Err("Zig E1 rejected empty physical carrier".into());
+    // The current Zig E1 ABI has a bounded 64 KiB canonical replay window.
+    // E1 REPEAT can encode up to 4096 exact words in a very short frame;
+    // allocating from input byte length loses valid repeated-word programs.
+    if bytes.is_empty() || bytes.len() > 64 * 1024 {
+        return Err("Zig E1 physical frame outside bounded decode window".into());
     }
-    let capacity = bytes.len().saturating_mul(3).max(48);
-    let mut be3 = vec![0u8; capacity];
-    let mut written = unsafe {
+    const MAX_E1_WORDS: usize = 4096;
+    let mut be3 = vec![0u8; MAX_E1_WORDS * 3];
+    let written = unsafe {
         sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
     };
-    if written == -2 {
-        let capacity = bytes.len().saturating_mul(6).max(256);
-        be3 = vec![0u8; capacity];
-        written = unsafe {
-            sens_zig_e1_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
-        };
-    }
     if written <= 0
         || usize::try_from(written)
             .ok()
@@ -250,22 +247,24 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
 
 pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     version()?;
+    // Never report "no saving" for an unvalidated physical carrier.
+    // Even an oversized T5 input must cross the sterile Zig validator.
+    validate_t5(t5)?;
     if t5.len() > 16 {
         return Ok(None);
     }
-    validate_t5(t5)?;
     let mut bytes = vec![0u8; 16];
     let len = unsafe { sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len()) };
     if len == -3 {
         return Ok(None);
     }
-    if len <= 0 {
+    // Fail closed on non-positive, capacity overreport, or non-smaller framing.
+    // Zig may never claim more bytes than the caller-owned buffer.
+    if len <= 0 || usize::try_from(len).ok().filter(|&n| n < t5.len() && n <= bytes.len()).is_none()
+    {
         return Err(format!("Zig F3C pack rejected: code={len}"));
     }
     bytes.truncate(len as usize);
-    if bytes.len() >= t5.len() {
-        return Err("Zig F3C did not save bytes".into());
-    }
     Ok(Some(bytes))
 }
 
@@ -275,7 +274,8 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     let len = unsafe {
         sens_zig_f3c_unpack(carrier.as_ptr(), carrier.len(), output.as_mut_ptr(), output.len())
     };
-    if len <= 0 {
+    // Fail closed on non-positive or capacity overreport before any truncate.
+    if len <= 0 || usize::try_from(len).ok().filter(|&n| n <= output.len()).is_none() {
         return Err(format!("explicit Zig F3C rejected: code={len}"));
     }
     output.truncate(len as usize);
@@ -285,7 +285,7 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_t5_words, encode_t5_direct, require_same_exact_words};
+    use super::{decode_e1_words, decode_f3, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -296,12 +296,142 @@ mod zig_exact_egress_tests {
     }
 
     #[test]
+    fn f3c_no_saving_never_bypasses_zig_t5_physical_validation() {
+        // Nine D9 coordinates need >16 canonical T5 bytes, with leading
+        // zeros intact. Only Zig decides their physical validity.
+        let long_words = words(&["010101000"; 9].join(" "));
+        let long_t5 = encode_t5_direct(&long_words).expect("Zig canonical T5");
+        assert!(long_t5.len() > 16);
+        assert!(encode_f3(&long_t5).expect("valid large Zig T5").is_none());
+
+        // Same length, but an out-of-range ternary byte is NEVER benign
+        // "F3C not smaller": reject it before the length-based decision.
+        let mut corrupt = long_t5.clone();
+        corrupt[0] = 0xf3;
+        let failure = encode_f3(&corrupt).expect_err("invalid large T5 must fail closed");
+        assert!(failure.contains("Zig physical T5 rejected"));
+
+        // Positive tiny F3C stays on Zig's byte-exact physical path.
+        let small = encode_t5_direct(&words("10 001 00 000 01"))
+            .expect("canonical small T5");
+        assert_eq!(small, [0x63, 0x89, 0x06, 0xa1]);
+        let packed = encode_f3(&small)
+            .expect("Zig F3C validation and encode")
+            .expect("tiny F3C should save physical bytes");
+        assert_eq!(packed, [0xf3, 0x40, 0x60]);
+    }
+
+    #[test]
+    fn f3c_pack_unpack_reject_overreported_lengths_contract() {
+        // Production paths must bound Zig-reported counts before truncate.
+        // Source-level contract mirror of the live encode_f3/decode_f3 bodies
+        // (same usize::try_from + capacity filter pattern used by E1).
+        let src = include_str!("zig_transport.rs");
+        let pack = src
+            .split("pub fn encode_f3(")
+            .nth(1)
+            .and_then(|s| s.split("pub fn decode_f3(").next())
+            .expect("encode_f3 route");
+        assert!(
+            pack.contains("usize::try_from(len)")
+                && pack.contains("n <= bytes.len()")
+                && pack.contains("n < t5.len()"),
+            "encode_f3 must reject overreported / non-smaller F3C lengths before truncate"
+        );
+        let unpack = src
+            .split("pub fn decode_f3(")
+            .nth(1)
+            .and_then(|s| s.split("#[cfg(test)]").next())
+            .expect("decode_f3 route");
+        assert!(
+            unpack.contains("usize::try_from(len)")
+                && unpack.contains("n <= output.len()"),
+            "decode_f3 must reject overreported F3C lengths before truncate"
+        );
+
+        // Live golden still round-trips under the stricter bound.
+        let small = encode_t5_direct(&words("10 001 00 000 01")).expect("T5");
+        let packed = encode_f3(&small).expect("pack").expect("saves");
+        assert_eq!(packed, [0xf3, 0x40, 0x60]);
+        let recovered = decode_f3(&packed).expect("unpack validates");
+        assert_eq!(recovered, small);
+    }
+
+    #[test]
+    fn one_mechanical_be3_projection_for_t5_and_e1() {
+        // D1:1, D2:01, D3:001 and D9:010101000 are DISTINCT exact words.
+        let original = words("1 01 001 010101000");
+        let be3 = exact_words_to_be3(&original).expect("single BE3 ABI projection");
+        assert_eq!(be3, [1, 0, 1, 2, 0, 1, 3, 0, 1, 9, 0, 0xa8]);
+        let t5 = encode_t5_direct(&original).expect("Zig physical T5");
+        let e1 = encode_e1_direct(&original).expect("Zig physical E1");
+        require_same_exact_words(&original, &decode_t5_words(&t5).unwrap()).unwrap();
+        require_same_exact_words(&original, &decode_e1_words(&e1).unwrap()).unwrap();
+
+        // Both production egress paths must call ONE helper and must not
+        // separately rebuild BE3 or use Rust physical encoders.
+        let source = include_str!("zig_transport.rs");
+        for name in ["encode_t5_direct", "encode_e1_direct"] {
+            let start = source.find(&format!("pub fn {name}(")).unwrap();
+            let body = &source[start..];
+            let end = body.find("\n}\n").unwrap();
+            let route = &body[..end];
+            assert!(route.contains("exact_words_to_be3(words)?"), "{name}");
+            assert!(!route.contains("be3.push("), "{name}");
+            assert!(!route.contains("be3.extend_from_slice("), "{name}");
+            assert!(!route.contains("sens::encode_ternary_words("), "{name}");
+            assert!(!route.contains("sens::envelope_e1::encode("), "{name}");
+        }
+    }
+
+    #[test]
     fn t5_egress_uses_zig_for_exact_roundtrip() {
         let expected = words("1 01 001 010101000");
         let physical = encode_t5_direct(&expected).expect("Zig T5 encode");
         let recovered = decode_t5_words(&physical).expect("Zig T5 decode");
         require_same_exact_words(&expected, &recovered).unwrap();
         assert_eq!(physical.len(), 4);
+    }
+
+    #[test]
+    fn e1_egress_reenters_only_zig_and_preserves_exact_domain_words() {
+        // W1:1 and W2:01 have the same low payload but different identities.
+        // D9 retains nine physical bits including its leading zero.
+        let source = words("1 01 001 010101000");
+        let frame = encode_e1_direct(&source)
+            .expect("SENS exact words -> Zig E1 encode -> Zig E1 decode");
+        let restored = decode_e1_words(&frame).expect("canonical Zig E1 ingress");
+        require_same_exact_words(&source, &restored)
+            .expect("byte-for-byte exact width and payload preservation");
+        assert_eq!(source.len(), restored.len());
+        assert_eq!(restored.iter().copied().map(sens::BinarySourceWord::width)
+            .collect::<Vec<_>>(), [1, 2, 3, 9]);
+
+        // CRC mutation must fail before any Rust host can admit SENS meaning.
+        let mut damaged = frame.clone();
+        let last = damaged.len() - 1;
+        damaged[last] ^= 1;
+        assert!(decode_e1_words(&damaged).is_err());
+
+        // A carrier can be canonical yet represent the WRONG exact words.
+        // Fail closed on each domain-width, payload and word-count mismatch.
+        assert!(require_same_exact_words(&source, &words("01 01 001 010101000"))
+            .unwrap_err().contains("expected_width=1"));
+        assert!(require_same_exact_words(&source, &words("0 01 001 010101000"))
+            .unwrap_err().contains("index=0"));
+        assert!(require_same_exact_words(&source, &words("1 01 001"))
+            .unwrap_err().contains("word_count"));
+
+        // Scope proof: this production egress has neither Rust E1 codec
+        // nor a silent reference fallback after Zig produces bytes.
+        let code = include_str!("zig_transport.rs");
+        let route = code.split("pub fn encode_e1_direct(").nth(1)
+            .expect("E1 Zig egress")
+            .split("pub fn decode_e1_words(").next().expect("next route");
+        assert!(route.contains("sens_zig_e1_encode_be3("));
+        assert!(route.contains("decode_e1_words(&output)?"));
+        assert!(route.contains("require_same_exact_words(words, &restored)?"));
+        assert!(!route.contains("sens::envelope_e1::encode"));
     }
 
     #[test]

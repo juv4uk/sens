@@ -19,12 +19,10 @@ CHECKER = ROOT / "scripts" / "check_rust_sens_zig_corridor.py"
 CORRIDOR_FILES = (
     "crates/sens-cli/Cargo.toml",
     "crates/sens-cli/build.rs",
-    "crates/sens-cli/src/zig_transport.rs",
-    "crates/sens-cli/src/main.rs",
-    "crates/sens-cli/src/bin/sens-trit.rs",
     "research/zig-codecs/transport_abi.zig",
     ".zig-version",
 )
+HOST_C = "research/zig-codecs/host-c"
 
 
 def load_checker():
@@ -41,6 +39,11 @@ def mirror(dst: Path) -> None:
         target = dst / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / rel, target)
+    host_dir = dst / HOST_C
+    host_dir.mkdir(parents=True, exist_ok=True)
+    for host in (ROOT / HOST_C).glob("*"):
+        if host.is_file():
+            shutil.copyfile(host, host_dir / host.name)
 
 
 def mutate(root: Path, rel: str, old: str, new: str) -> None:
@@ -63,6 +66,140 @@ class CorridorGuardTests(unittest.TestCase):
     def test_real_corridor_passes(self) -> None:
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_version_only_c_host_and_comment_ghost_is_blocked(self) -> None:
+        # A version getter does not prove that C uses the Zig physical corridor.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  // sens_zig_t5_encode_be3(src, n, dst, cap);
+  /* sens_zig_t5_decode_be3(src, n, dst, cap); */
+  return sens_zig_codec_abi_version() == 2 ? 0 : 1;
+}
+""",
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("no Rust-free host" in problem for problem in problems), problems
+        )
+
+    def test_c_string_literal_ghost_is_blocked(self) -> None:
+        # A function name inside a string is data, not a Zig transport call.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            '''int main(void) {
+  const char *ghost = "sens_zig_t5_encode_be3(";
+  const char *url = "https://ziglang.org/doc";
+  return sens_zig_codec_abi_version() == 2 ? 0 : 1;
+}
+''',
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("no Rust-free host" in problem for problem in problems), problems
+        )
+
+    def test_c_string_comment_delimiters_do_not_hide_real_call(self) -> None:
+        # Textual /* and */ in C strings cannot consume a live physical call.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            '''#include "zig_transport_v2.h"
+int main(void) {
+  const char *prefix = "/*";
+  const unsigned char input[] = {0};
+  unsigned char out[4] = {0};
+  int rc = sens_zig_t5_validate(input, sizeof input);
+  if (!check_number("f3c-invalid", sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1))
+    return 0;
+  const char *suffix = "*/";
+  return rc == 0 && prefix[0] && suffix[0] ? 0 : 1;
+}
+''',
+            encoding="utf-8",
+        )
+        self.assertEqual(self.module.check(self.root), [])
+
+    def test_host_without_f3c_invalid_reject_is_blocked(self) -> None:
+        """R5: C host must fail-closed reject invalid T5 via F3C pack (same as Rust)."""
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        # Physical calls present, but no F3C pack expected-reject (-1).
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  uint8_t t5[4] = {0x63, 0x89, 0x06, 0xa1};
+  uint8_t out[16] = {0};
+  sens_zig_t5_validate(t5, 4);
+  sens_zig_f3c_pack(t5, 4, out, 16);
+  return 0;
+}
+""",
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("F3C pack rejection of invalid T5" in p for p in problems),
+            problems,
+        )
+
+    def test_f3c_comma_operator_does_not_prove_rejection(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  uint8_t input[] = {243}, out[16] = {0};
+  sens_zig_t5_validate(input, sizeof input);
+  if (sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1)
+    return 0;
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
+
+    def test_f3c_check_number_without_fail_propagation_is_blocked(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  sens_zig_t5_validate(input, length);
+  check_number("ignored", sens_zig_f3c_pack(input, length, out, cap), -1);
+  return 0;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
+
+    def test_f3c_wrong_error_code_is_blocked(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """int main(void) {
+  sens_zig_t5_validate(input, length);
+  if (!check_number("wrong", sens_zig_f3c_pack(input, length, out, cap), -2))
+    return 0;
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
+
+    # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:
         mutate(self.root, "crates/sens-cli/Cargo.toml", 'default = ["zig-transport"]', "default = []")
         self.assertTrue(self.module.check(self.root))
@@ -81,7 +218,7 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             '@import("t5/t5.zig")',
-            '@import("semantic_registry.zig")',
+            '@import("semantic-registry.zig")',
         )
         self.assertTrue(self.module.check(self.root))
 
@@ -90,30 +227,52 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             "pub export fn sens_zig_codec_abi_version",
-            "pub export fn host_eval_program",
+            "pub export fn host_opcode",
         )
         self.assertTrue(self.module.check(self.root))
 
     def test_unpinned_zig_version_is_blocked(self) -> None:
-        mutate(self.root, ".zig-version", "0.16.0", "latest")
+        (self.root / ".zig-version").write_text("stable\n", encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
-    def test_client_without_packed_bits_is_blocked(self) -> None:
-        path = self.root / "crates/sens-cli/src/zig_transport.rs"
-        text = path.read_text(encoding="utf-8")
-        self.assertIn("packed_bits", text)
-        path.write_text(text.replace("packed_bits", "payload_bits"), encoding="utf-8")
-        self.assertTrue(self.module.check(self.root))
-
-    def test_main_without_zig_decode_is_blocked(self) -> None:
+    # --- R5 (host-neutral: one corridor for all hosts) --------------------
+    def test_header_missing_op_is_blocked(self) -> None:
         mutate(
             self.root,
-            "crates/sens-cli/src/main.rs",
-            "zig_transport::decode_t5_words",
-            "sens::decode_ternary_words_FORBIDDEN",
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "int sens_zig_t5_validate(const uint8_t *src, size_t len);",
+            "/* removed corridor op */",
+        )
+        self.assertTrue(self.module.check(self.root))
+
+    def test_header_extra_op_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "uint32_t sens_zig_codec_abi_version(void);",
+            "uint32_t sens_zig_codec_abi_version(void);\n"
+            "ptrdiff_t sens_zig_bogus(const uint8_t *src, size_t len);",
+        )
+        self.assertTrue(self.module.check(self.root))
+
+    def test_abi_version_mismatch_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "SENS_ZIG_TRANSPORT_ABI_VERSION = 2",
+            "SENS_ZIG_TRANSPORT_ABI_VERSION = 3",
+        )
+        self.assertTrue(self.module.check(self.root))
+
+    def test_host_rogue_op_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "research/zig-codecs/host-c/corridor_v2.c",
+            "sens_zig_codec_abi_version",
+            "sens_zig_fake_version",
         )
         self.assertTrue(self.module.check(self.root))
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()

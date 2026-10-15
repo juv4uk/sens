@@ -103,7 +103,16 @@ def verify_zig_import_closure(
             raise AuditFailure(
                 f"test_id=H2_ZIG_IMPORT_PIN layer=provenance unreadable_source={name}") from exc
         seen.add(name)
-        for imported in re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', source):
+        # A literal-only scanner must not silently declare closure when a
+        # Zig module adds @import(comptime_expression). Either enumerate ALL
+        # imports mechanically or fail closed; H2 has no semantic oracle here.
+        imports = re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', source)
+        calls = len(re.findall(r'@import\s*\(', source))
+        if len(imports) != calls:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance "
+                f"unresolved_import={name} literal={len(imports)} total={calls}")
+        for imported in imports:
             if imported in ("std", "builtin", "root"):
                 continue
             if not imported.endswith(".zig"):
@@ -120,7 +129,7 @@ def verify_zig_import_closure(
 
 
 def zig_import_closure_self_test() -> None:
-    """One positive DAG plus missing pin, symlink parent and new import."""
+    """One positive DAG plus missing/new/dynamic imports and linked parent."""
     with tempfile.TemporaryDirectory(prefix="sens-h2-zig-import-") as tmp:
         root = Path(tmp)
         zig = root / "zig"
@@ -160,6 +169,19 @@ def zig_import_closure_self_test() -> None:
         else:
             raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=new_import_REJECT actual=PASS")
         (zig / "transport" / "e1.zig").write_text(
+            'const known = @import("fields.zig");\n'
+            'const unknown = @import(module_name);\n',
+            encoding="utf-8",
+        )
+        try:
+            verify_zig_import_closure(root, names, names[0])
+        except AuditFailure as exc:
+            if "unresolved_import=" not in str(exc):
+                raise
+        else:
+            raise AuditFailure(
+                "test_id=H2_ZIG_IMPORT_PIN expected=dynamic_import_REJECT actual=PASS")
+        (zig / "transport" / "e1.zig").write_text(
             'const field = @import("fields.zig");\n',
             encoding="utf-8",
         )
@@ -175,7 +197,7 @@ def zig_import_closure_self_test() -> None:
                 raise
         else:
             raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=linked_parent_REJECT actual=PASS")
-    print("H2_ZIG_IMPORT_PIN_SELF_TEST_PASS: valid, missing, new, linked-parent")
+    print("H2_ZIG_IMPORT_PIN_SELF_TEST_PASS: valid, missing, new, dynamic, linked-parent")
 
 
 def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
@@ -198,10 +220,21 @@ def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
     head = git("rev-parse", "--verify", "HEAD")
     pinned = {}
     for name in paths:
-        file = root / name
-        if file.is_symlink() or not file.is_file():
+        relative = Path(name)
+        if relative.is_absolute() or not relative.parts or ".." in relative.parts:
             raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
-                               f"path={name} expected=regular_file actual=missing_or_symlink")
+                               f"path={name} expected=relative_regular_file actual=invalid_path")
+        # The leaf may be regular while a parent redirects outside the
+        # checkout. Matching HEAD/index/blob bytes do NOT justify an alias.
+        file = root
+        for component in relative.parts:
+            file = file / component
+            if file.is_symlink():
+                raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                                   f"path={name} expected=regular_file actual=linked_component")
+        if not file.is_file():
+            raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
+                               f"path={name} expected=regular_file actual=missing_or_nonregular")
         rows = git("ls-files", "--stage", "--", name).splitlines()
         if len(rows) != 1 or "\t" not in rows[0]:
             raise AuditFailure(f"test_id=H2_SOURCE_PIN layer=provenance "
@@ -228,7 +261,7 @@ def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
 
 
 def git_provenance_self_test() -> None:
-    """Four synthetic provenance cases; never a mock semantic evaluator."""
+    """Five synthetic provenance cases; never a mock semantic evaluator."""
     with tempfile.TemporaryDirectory(prefix="sens-h2-pin-") as tmp:
         root = Path(tmp)
         def cmd(*args: str) -> None:
@@ -236,10 +269,15 @@ def git_provenance_self_test() -> None:
         cmd("init", "-q")
         path = root / "input.bits"
         path.write_bytes(b"10 001 00\n")
-        cmd("add", "input.bits")
+        nested = root / "physical" / "program.sens"
+        nested.parent.mkdir()
+        nested.write_bytes(bytes.fromhex("63 89 06 a1"))
+        cmd("add", "input.bits", "physical/program.sens")
         cmd("-c", "user.name=H2", "-c", "user.email=h2@example.invalid",
             "commit", "-qm", "pin")
-        assert verify_git_provenance(root, ("input.bits",))["tracked"]["input.bits"]["git_mode"] == "100644"
+        positive = verify_git_provenance(root, ("input.bits", "physical/program.sens"))
+        assert positive["tracked"]["input.bits"]["git_mode"] == "100644"
+        assert positive["tracked"]["physical/program.sens"]["git_mode"] == "100644"
         path.write_bytes(b"10 001 01\n")
         for label in ("WORKTREE_CHANGED", "INDEX_STAGED"):
             if label == "INDEX_STAGED":
@@ -260,7 +298,25 @@ def git_provenance_self_test() -> None:
                 raise
         else:
             raise AuditFailure("test_id=H2_UNTRACKED expected=REJECT actual=ACCEPT")
-    print("H2_GIT_SOURCE_PIN_SELF_TEST_PASS cases=4")
+        # The tracked physical bytes and Git hashes still match through this
+        # directory alias. A leaf-only symlink guard would incorrectly PASS.
+        physical = root / "physical"
+        physical.rename(root / "relocated")
+        physical.symlink_to(root / "relocated", target_is_directory=True)
+        expected_blob = subprocess.check_output(
+            ["git", "rev-parse", "HEAD:physical/program.sens"],
+            cwd=root, text=True,
+        ).strip()
+        if git_blob((physical / "program.sens").read_bytes()) != expected_blob:
+            raise AuditFailure("test_id=H2_LINKED_PARENT invalid_fixture_blob")
+        try:
+            verify_git_provenance(root, ("physical/program.sens",))
+        except AuditFailure as exc:
+            if "actual=linked_component" not in str(exc):
+                raise
+        else:
+            raise AuditFailure("test_id=H2_LINKED_PARENT expected=REJECT actual=ACCEPT")
+    print("H2_GIT_SOURCE_PIN_SELF_TEST_PASS cases=5")
 
 
 def inspect_pair(name: str, pos_raw: bytes, neg_raw: bytes, pos_pin: str, neg_pin: str) -> dict:
