@@ -260,7 +260,7 @@ def main() -> int:
         steps.append(
             run_step(
                 "check-domain-ladder-identity",
-                [sys.executable, str(SCRIPTS / "check-domain-ladder-identity.py")],
+                [sys.executable, str(SCRIPTS / "check-domain-ladder-identity.py"), "--check"],
             )
         )
 
