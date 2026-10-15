@@ -249,6 +249,8 @@ jobs:
           echo 'test_id=zig-migration-publish-live-route layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_check_migration_zig_only_path.py -v
           python3 scripts/check_migration_zig_only_path.py
+          echo 'test_id=zig-built-binary-unique-inode layer=transport expected=regular-pass-same-SHA-hardlink-fail semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_bridge_physical_binary_paths.py -v
           # Real current API contract: no stale SID8 resolver, no Zig bypass.
           echo 'test_id=zig-migration-current-three-pass-api layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_migration_zig_current_api.py -v
