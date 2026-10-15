@@ -38,6 +38,12 @@ ptrdiff_t sens_zig_t5_encode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
 ptrdiff_t sens_zig_t5_decode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
+/* Exact-word BE3 -> canonical physical E1 RAW/REPEAT + CRC32, Zig-owned.
+ * E1 is an explicit carrier, not .sens, and conveys no callable identity.
+ * Returns physical byte count, -1 invalid/overlap, -2 small output.
+ */
+ptrdiff_t sens_zig_e1_encode_be3(const uint8_t *src, size_t byte_len,
+                                 uint8_t *dst, size_t capacity);
 /* F3C pack returns -3 if tiny framing does not save space, not an error. */
 ptrdiff_t sens_zig_f3c_pack(const uint8_t *src, size_t len,
                              uint8_t *dst, size_t capacity);
