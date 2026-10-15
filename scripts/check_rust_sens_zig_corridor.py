@@ -16,6 +16,11 @@ R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
     module, and declares no `extern`/host struct.
 R4  `.zig-version` is a concrete version string (toolchain identity, not
     semantic authority).
+R5  `crates/sens-cli/src/zig_transport.rs` is the shared sterile client:
+    FFI-only `sens_zig_*`, reconstructs W1..W9 via `packed_bits` + `BitN::new`,
+    never a local T5 algorithm (`ternary_transport` / `from_width_bits`).
+R6  `main.rs` and `sens-trit.rs` route physical T5 through `zig_transport::`
+    under the default feature (no silent Rust physical codec on that path).
 
 The Rust-only build must stay an EXPLICIT `--no-default-features` choice, never
 a silent fallback. Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED with reasons.
@@ -31,6 +36,9 @@ CARGO = "crates/sens-cli/Cargo.toml"
 BUILD = "crates/sens-cli/build.rs"
 ABI = "research/zig-codecs/transport_abi.zig"
 ZIGVER = ".zig-version"
+ZIG_CLIENT = "crates/sens-cli/src/zig_transport.rs"
+MAIN_RS = "crates/sens-cli/src/main.rs"
+TRIT_RS = "crates/sens-cli/src/bin/sens-trit.rs"
 
 ALLOWED_IMPORTS = {"std", "t5/t5.zig", "f3c/f3c.zig"}
 REQUIRED_ABI_EXPORTS = (
@@ -102,31 +110,68 @@ def check(root: Path) -> list[str]:
     if not re.fullmatch(r"\d+\.\d+\.\d+", zigver):
         problems.append(f"R4: `.zig-version` is not a concrete version string: {zigver!r}")
 
+    # R5 -- shared sterile Rust client (one turnstile, no local T5 codec).
+    client_path = root / ZIG_CLIENT
+    if not client_path.is_file() or client_path.is_symlink():
+        problems.append(f"R5: missing regular sterile client {ZIG_CLIENT}")
+    else:
+        client = client_path.read_text(encoding="utf-8")
+        for name in REQUIRED_ABI_EXPORTS:
+            if name not in client:
+                problems.append(f"R5: zig_transport.rs missing FFI binding for {name}")
+        if "packed_bits" not in client or "BinarySourceWord::W1" not in client:
+            problems.append(
+                "R5: zig_transport.rs must reconstruct BinarySourceWord via "
+                "packed_bits + BitN::new (W1..W9)"
+            )
+        banned = ("ternary_transport", "PhysicalT5Program", "from_width_bits", "TRITS_BY_BYTE")
+        for token in banned:
+            if token in client:
+                problems.append(
+                    f"R5: zig_transport.rs must not embed local codec marker `{token}`"
+                )
+
+    # R6 -- production CLI physical path crosses the sterile client only.
+    main_rs = root / MAIN_RS
+    trit_rs = root / TRIT_RS
+    if main_rs.is_file():
+        main_src = main_rs.read_text(encoding="utf-8")
+        if "zig_transport::decode_t5_words" not in main_src:
+            problems.append(
+                "R6: main.rs must decode physical .sens via zig_transport::decode_t5_words"
+            )
+        if "mod zig_transport" not in main_src:
+            problems.append("R6: main.rs must declare the shared zig_transport module")
+    else:
+        problems.append(f"R6: missing {MAIN_RS}")
+    if trit_rs.is_file():
+        trit_src = trit_rs.read_text(encoding="utf-8")
+        if "zig_transport.rs" not in trit_src:
+            problems.append("R6: sens-trit.rs must path-include zig_transport.rs")
+        if "zig_transport::" not in trit_src:
+            problems.append("R6: sens-trit.rs must call zig_transport corridor API")
+        if "fn sens_zig_t5_encode_be3" in trit_src:
+            problems.append("R6: sens-trit.rs must not embed local Zig FFI (use shared client)")
+    else:
+        problems.append(f"R6: missing {TRIT_RS}")
+
     return problems
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("root", nargs="?", default=str(Path(__file__).resolve().parents[1]))
-    ns = parser.parse_args()
-    root = Path(ns.root).resolve()
-    try:
-        problems = check(root)
-    except FileNotFoundError as exc:
-        print(f"CORRIDOR_BLOCKED missing corridor file: {exc}", flush=True)
-        return 1
+    parser.add_argument("root", nargs="?", default=".", type=Path)
+    args = parser.parse_args()
+    root = args.root.resolve()
+    problems = check(root)
     if problems:
-        print(
-            "CORRIDOR_BLOCKED Rust<->SENS link is not confined to the sterile Zig corridor:",
-            flush=True,
-        )
-        for problem in problems:
-            print(" -", problem, flush=True)
+        print("CORRIDOR_BLOCKED:", file=sys.stderr)
+        for item in problems:
+            print(f"  - {item}", file=sys.stderr)
         return 1
     print(
         "CORRIDOR_OK Rust<->SENS crosses only the sterile Zig corridor "
-        "(default zig-transport, no silent fallback, physical-only ABI)",
-        flush=True,
+        "(default zig-transport, no silent fallback, physical-only ABI)"
     )
     return 0
 
