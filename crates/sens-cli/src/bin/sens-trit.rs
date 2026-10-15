@@ -627,6 +627,7 @@ mod e1_cli_mechanism_tests {
         assert!(error.contains("no Rust fallback"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
         let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
