@@ -163,6 +163,28 @@ pub fn evaluate(policy: &str, call: &str) -> Result<String, String> {
 mod tests {
     use super::*;
 
+    #[test]
+    fn zig_static_source_carriers_exact_and_reject_small_buffers() {
+        let carriers: [(&str, ZigSourceCopy); 3] = [
+            ("core", sens_zig_guard_core_source_copy),
+            ("unify", sens_zig_guard_unify_source_copy),
+            ("guard", sens_zig_guard_policy_source_copy),
+        ];
+        for (label, copy) in carriers {
+            let length = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+            assert!(length > 1, "invalid Zig {label} source length={length}");
+            let mut short = [0xa5u8];
+            assert_eq!(unsafe { copy(short.as_mut_ptr(), short.len()) }, -2,
+                "short {label} buffer must be rejected");
+            assert_eq!(short, [0xa5u8], "short {label} buffer was mutated");
+            let first = exact_source_copy(copy, label).expect("Zig exact source");
+            let second = exact_source_copy(copy, label).expect("Zig repeat source");
+            assert!(!first.is_empty(), "{label} source empty");
+            assert_eq!(first.as_bytes(), second.as_bytes(),
+                "{label} source byte transport changed between calls");
+        }
+    }
+
     const ALLOW_POLICY: &str = r#"
       (def guard-evaluate
         (lambda (kind subject evidence)
