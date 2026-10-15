@@ -31,6 +31,30 @@ fn version() -> Result<(), String> {
     Ok(())
 }
 
+/// Check only exact width/payload identity; never infer a callable SENS law.
+/// A canonical physical frame may still carry DIFFERENT words after a codec
+/// regression. The ABI result must retain the original domain coordinates.
+fn require_same_exact_words(
+    expected: &[sens::BinarySourceWord],
+    actual: &[sens::BinarySourceWord],
+) -> Result<(), String> {
+    if expected.len() != actual.len() {
+        return Err(format!(
+            "ZIG_EGRESS_ROUNDTRIP_MISMATCH word_count expected={} actual={}",
+            expected.len(), actual.len()
+        ));
+    }
+    for (index, (left, right)) in expected.iter().zip(actual).enumerate() {
+        if left.width() != right.width() || left.bits() != right.bits() {
+            return Err(format!(
+                "ZIG_EGRESS_ROUNDTRIP_MISMATCH index={index} expected_width={}                  expected_bits={:b} actual_width={} actual_bits={:b}",
+                left.width(), left.bits(), right.width(), right.bits()
+            ));
+        }
+    }
+    Ok(())
+}
+
 pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
     version()?;
     // SAFETY: the borrowed byte slice lives through the synchronous call.
@@ -79,6 +103,10 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     }
     output.truncate(len as usize);
     validate_t5(&output)?;
+    // Both directions use the sterile Zig ABI. No Rust T5 decoder or
+    // semantic registry participates in the physical egress witness.
+    let restored = decode_t5_words(&output)?;
+    require_same_exact_words(words, &restored)?;
     Ok(output)
 }
 
@@ -181,6 +209,30 @@ pub fn decode_f3(bytes: &[u8]) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn zig_egress_exact_width_identity_rejects_mutations() {
+        let expected = sens::parse_binary_source_words("1 01")
+            .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let identical = expected.clone();
+        require_same_exact_words(&expected, &identical).unwrap();
+
+        // Same payload, different domain width: D1:1 is NOT D2:01.
+        let wrong_width = sens::parse_binary_source_words("01 01")
+            .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+        assert!(require_same_exact_words(&expected, &wrong_width)
+            .unwrap_err().contains("index=0"));
+
+        // One flipped binary bit must not survive roundtrip unnoticed.
+        let flipped_bit = sens::parse_binary_source_words("0 01")
+            .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+        assert!(require_same_exact_words(&expected, &flipped_bit)
+            .unwrap_err().contains("index=0"));
+
+        // Neither truncation nor extra words may give a false PASS.
+        assert!(require_same_exact_words(&expected, &identical[..1])
+            .unwrap_err().contains("word_count"));
+    }
 
     #[test]
     fn zig_corridor_t5_parity_is_mechanical_not_a_semantic_oracle() {
