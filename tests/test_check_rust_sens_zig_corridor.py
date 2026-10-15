@@ -216,6 +216,29 @@ int main(void) {
         )
         self.assertTrue(self.module.check(self.root))
 
+    def test_semantic_export_cannot_enter_abi_even_with_matching_c_header(self) -> None:
+        """A matching C prototype does not authorize a new Zig semantic API."""
+        fake = "sens_zig_register_semantics"
+        abi_path = self.root / "research/zig-codecs/transport_abi.zig"
+        abi = abi_path.read_text(encoding="utf-8")
+        abi_path.write_text(
+            abi + f"\npub export fn {fake}() void {{}}\n", encoding="utf-8"
+        )
+        header_path = self.root / "research/zig-codecs/host-c/zig_transport_v2.h"
+        header = header_path.read_text(encoding="utf-8")
+        header_path.write_text(
+            header + f"\nvoid {fake}(void);\n", encoding="utf-8"
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(
+            any(
+                f"R3: ABI export `{fake}` is not an approved ABI v2 physical operation"
+                in failure
+                for failure in failures
+            ),
+            failures,
+        )
+
     def test_unpinned_zig_version_is_blocked(self) -> None:
         (self.root / ".zig-version").write_text("stable\n", encoding="utf-8")
         self.assertTrue(self.module.check(self.root))

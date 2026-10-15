@@ -46,6 +46,15 @@ REQUIRED_ABI_EXPORTS = (
     "sens_zig_f3c_unpack",
 )
 
+# ABI v2 is an *enumerated physical entrypoint surface*, not an open
+# "sens_zig_*" namespace for host-assigned semantic registry functions.
+# Coordinate-only T5 validation is physical D10 carriage, not execution.
+APPROVED_ABI_EXPORTS = frozenset((
+    *REQUIRED_ABI_EXPORTS,
+    "sens_zig_codec_abi_version",
+    "sens_zig_t5_validate_coordinates",
+))
+
 EXPORT_RE = re.compile(r"pub export fn\s+([A-Za-z0-9_]+)")
 CALL_RE = re.compile(r"\b(sens_zig_[a-z0-9_]+)\s*\(")
 # Exclude non-code tokens so strings/comments cannot forge C→Zig call evidence.
@@ -78,9 +87,9 @@ def check(root: Path) -> list[str]:
     if not exports:
         problems.append("R3: transport_abi.zig exports no `pub export fn` (no corridor ABI)")
     for name in exports:
-        if not name.startswith("sens_zig_"):
+        if name not in APPROVED_ABI_EXPORTS:
             problems.append(
-                f"R3: ABI export `{name}` is outside the physical `sens_zig_*` namespace"
+                f"R3: ABI export `{name}` is not an approved ABI v2 physical operation"
             )
     for required in REQUIRED_ABI_EXPORTS:
         if required not in exports:
