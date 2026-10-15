@@ -14,6 +14,8 @@ WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 PUBLISH_JOB = "  release-publish:"
 FINAL_GUARD = "# Revalidate authorization and main immediately before publication:"
 PUBLISH_COMMAND = 'gh release edit "$GITHUB_REF_NAME" --draft=false'
+CI_COMMAND = 'python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"'
+DRAFT_COMMAND = 'gh release create "$GITHUB_REF_NAME" dist/*'
 
 
 def require_final_publication_guard(source: str) -> None:
@@ -46,6 +48,27 @@ def require_final_publication_guard(source: str) -> None:
     if job.count("git fetch --no-tags --depth=1 origin main") < 2:
         raise AssertionError("both initial and final main-SHA checks are required")
 
+    # A successful pre-draft CI check is insufficient: a check can be
+    # rerun or invalidated while artifacts are staged and replayed.
+    # Require an independent exact-SHA check immediately before publication.
+    first_ci_at = job.find(CI_COMMAND)
+    final_ci_at = job.rfind(CI_COMMAND, 0, publish_at)
+    draft_at = job.find(DRAFT_COMMAND)
+    if (
+        first_ci_at < 0
+        or draft_at < 0
+        or final_ci_at == first_ci_at
+        or not (
+            first_ci_at < draft_at < replay_at < checksum_at
+            < final_guard_at < final_fetch_at < final_compare_at
+            < final_go_at < final_ci_at < publish_at
+        )
+    ):
+        raise AssertionError(
+            "final exact-SHA release CI recheck must follow draft replay, "
+            "fresh main and owner GO, directly before public publication"
+        )
+
 
 def require_pinned_artifact_download(job: str) -> None:
     """Reject floating action tags and truncated hashes before publication."""
@@ -74,6 +97,34 @@ class ReleasePublicationGateTest(unittest.TestCase):
         mutated = self.source[:job_start] + job[:guard_at] + job[publish_at:]
         with self.assertRaisesRegex(AssertionError, "fresh main-SHA"):
             require_final_publication_guard(mutated)
+
+    def test_missing_final_exact_sha_ci_recheck_is_rejected(self):
+        job_start = self.source.index(PUBLISH_JOB)
+        job = self.source[job_start:]
+        last_ci_at = job.rfind(CI_COMMAND)
+        self.assertGreater(last_ci_at, job.index(FINAL_GUARD))
+        broken_job = job[:last_ci_at] + job[last_ci_at:].replace(CI_COMMAND, "", 1)
+        with self.assertRaisesRegex(AssertionError, "final exact-SHA release CI recheck"):
+            require_final_publication_guard(self.source[:job_start] + broken_job)
+
+    def test_ci_recheck_moved_to_before_draft_is_rejected(self):
+        job_start = self.source.index(PUBLISH_JOB)
+        job = self.source[job_start:]
+        last_ci_at = job.rfind(CI_COMMAND)
+        self.assertGreater(last_ci_at, job.index(FINAL_GUARD))
+        broken_job = job[:last_ci_at] + job[last_ci_at:].replace(CI_COMMAND, "", 1)
+        broken_job = broken_job.replace(
+            DRAFT_COMMAND, CI_COMMAND + "\n          " + DRAFT_COMMAND, 1
+        )
+        with self.assertRaisesRegex(AssertionError, "final exact-SHA release CI recheck"):
+            require_final_publication_guard(self.source[:job_start] + broken_job)
+
+    def test_missing_pre_draft_ci_check_is_rejected(self):
+        job_start = self.source.index(PUBLISH_JOB)
+        job = self.source[job_start:]
+        broken_job = job.replace(CI_COMMAND, "", 1)
+        with self.assertRaisesRegex(AssertionError, "final exact-SHA release CI recheck"):
+            require_final_publication_guard(self.source[:job_start] + broken_job)
 
     def test_local_tag_driver_requires_every_exact_sha_workflow_and_owner_go(self):
         driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
