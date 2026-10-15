@@ -28,8 +28,8 @@ AXIOM_ID = re.compile(r"^###\s+([GS]\d+)\s", re.M)
 
 # Physical guard provenance, not a second language/semantic registry.
 EXPECTED_RULES = {
-    "R1-corridor-default-on": "scripts/check_rust_sens_zig_corridor.py",
-    "R2-build-requires-zig": "scripts/check_rust_sens_zig_corridor.py",
+    "R1-corridor-default-on": "scripts/check_sterile_zig_corridor.py",
+    "R2-build-requires-zig": "scripts/check_sterile_zig_corridor.py",
     "R3-physical-only-abi": "scripts/check_rust_sens_zig_corridor.py",
     "R4-pinned-corridor-version": "scripts/check_rust_sens_zig_corridor.py",
     "R5-host-neutral": "scripts/check_rust_sens_zig_corridor.py",

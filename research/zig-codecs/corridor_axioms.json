@@ -6,13 +6,13 @@
   "bindings": [
     {
       "rule": "R1-corridor-default-on",
-      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "guard": "scripts/check_sterile_zig_corridor.py",
       "axioms": ["G6", "S2"],
       "derivation": "G6: conformance is defined by observable behavior, not the host's architecture, so the corridor must be the DEFAULT transport, not an optional host-specific path. S2: a silent fallback to a Rust codec would be an unnamed failure."
     },
     {
       "rule": "R2-build-requires-zig",
-      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "guard": "scripts/check_sterile_zig_corridor.py",
       "axioms": ["G6", "S2"],
       "derivation": "G6: the Rust host must not be able to build a conforming CLI without the corridor. S2: build.rs asserts the pinned Zig and fails loudly, never silently reusing a stale transport."
     },

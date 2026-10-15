@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """Guard: the Rust<->SENS link may cross ONLY the sterile Zig corridor (#5777/#5779).
 
-Fail-closed STRUCTURAL checker. It does not run cargo or Zig; it asserts the
-invariants that make the corridor un-bypassable, so a later change cannot turn
-the Rust host into a silent physical codec again:
+Fail-closed STRUCTURAL / HOST-NEUTRAL checker. It does not run cargo or Zig.
+Scope split with scripts/check_sterile_zig_corridor.py (the source-contract
+guard): that guard owns `default=zig-transport`, `build-links-zig`, and the
+Rust/C source routes; THIS guard owns the ABI's own purity, the pin, and
+host-neutral parity. No rule is enforced only here and also there.
 
-R1  crates/sens-cli/Cargo.toml: `default` features include `zig-transport`
-    (the corridor is ON by default) and the `zig-transport` feature exists.
-R2  crates/sens-cli/build.rs: the Zig transport is gated on
-    CARGO_FEATURE_ZIG_TRANSPORT, links `sens_zig_transport`, compiles
-    research/zig-codecs/transport_abi.zig, and pins/reads `.zig-version`.
 R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
     functions (T5 + E1 + F3C physical ops), imports ONLY physical codec
     modules (`std` or t5/ + f3c/ + transport/) and never a registry/host/
@@ -21,7 +18,7 @@ R5  HOST-NEUTRAL: every host crosses the SAME corridor. The C header
     the ABI version must match, and every Rust-free host in host-c/*.c
     must only call corridor ops (no rogue sens_zig_* invents). At least
     one host must fail-closed reject invalid T5 via F3C pack (...)=-1
-    (same physical contract as Rust zig_transport::encode_f3), and\n    must fail the witness if Zig returns anything other than -1.
+    (same physical contract as Rust zig_transport::encode_f3), and must fail the witness if Zig returns anything other than -1.
 
 Exit 0 = CORRIDOR_OK; exit 1 = CORRIDOR_BLOCKED.
 """
@@ -32,8 +29,6 @@ import re
 import sys
 from pathlib import Path
 
-CARGO = "crates/sens-cli/Cargo.toml"
-BUILD = "crates/sens-cli/build.rs"
 ABI = "research/zig-codecs/transport_abi.zig"
 ZIGVER = ".zig-version"
 C_HEADER = "research/zig-codecs/host-c/zig_transport_v2.h"
@@ -75,36 +70,8 @@ HEADER_VERSION_RE = re.compile(r"SENS_ZIG_TRANSPORT_ABI_VERSION\s*=\s*(\d+)")
 def check(root: Path) -> list[str]:
     problems: list[str] = []
 
-    cargo = (root / CARGO).read_text(encoding="utf-8")
-    build = (root / BUILD).read_text(encoding="utf-8")
     abi = (root / ABI).read_text(encoding="utf-8")
     zigver = (root / ZIGVER).read_text(encoding="utf-8").strip()
-
-    # R1 -- corridor is ON by default, feature declared.
-    features = re.search(r"\[features\](.*?)(?:\n\[|\Z)", cargo, re.S)
-    feat_body = features.group(1) if features else ""
-    default_match = re.search(r"^\s*default\s*=\s*\[([^\]]*)\]", feat_body, re.M)
-    default_list = default_match.group(1) if default_match else ""
-    if '"zig-transport"' not in default_list:
-        problems.append(
-            "R1: crates/sens-cli `default` features must include \"zig-transport\" "
-            "(the Zig corridor must be ON by default)"
-        )
-    if not re.search(r"^\s*zig-transport\s*=", feat_body, re.M):
-        problems.append("R1: `zig-transport` feature is not declared in crates/sens-cli/Cargo.toml")
-
-    # R2 -- build.rs requires the Zig corridor; no silent Rust transport.
-    if "CARGO_FEATURE_ZIG_TRANSPORT" not in build:
-        problems.append(
-            "R2: build.rs does not gate on CARGO_FEATURE_ZIG_TRANSPORT "
-            "(the Rust host could bypass the corridor)"
-        )
-    if "sens_zig_transport" not in build:
-        problems.append("R2: build.rs does not link the Zig transport (`sens_zig_transport`)")
-    if "transport_abi.zig" not in build:
-        problems.append("R2: build.rs does not compile research/zig-codecs/transport_abi.zig")
-    if ".zig-version" not in build:
-        problems.append("R2: build.rs does not pin/read the repository `.zig-version`")
 
     # R3 -- the corridor ABI is physical-only and semantics-free.
     exports = EXPORT_RE.findall(abi)
@@ -231,7 +198,7 @@ def main() -> int:
         return 1
     print(
         "CORRIDOR_OK Rust<->SENS crosses only the sterile Zig corridor "
-        "(default zig-transport, no silent fallback, physical-only ABI, host-neutral)"
+        "(physical-only ABI, pinned corridor, host-neutral; default/build are the sterile guard's)"
     )
     return 0
 

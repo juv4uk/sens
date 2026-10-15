@@ -17,8 +17,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "scripts" / "check_rust_sens_zig_corridor.py"
 
 CORRIDOR_FILES = (
-    "crates/sens-cli/Cargo.toml",
-    "crates/sens-cli/build.rs",
     "research/zig-codecs/transport_abi.zig",
     ".zig-version",
 )
@@ -199,20 +197,7 @@ int main(void) {
         problems = self.module.check(self.root)
         self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems), problems)
 
-    # --- R1..R4 (structural corridor) -------------------------------------
-    def test_default_without_zig_transport_is_blocked(self) -> None:
-        mutate(self.root, "crates/sens-cli/Cargo.toml", 'default = ["zig-transport"]', "default = []")
-        self.assertTrue(self.module.check(self.root))
-
-    def test_missing_feature_gate_is_blocked(self) -> None:
-        mutate(
-            self.root,
-            "crates/sens-cli/build.rs",
-            "CARGO_FEATURE_ZIG_TRANSPORT",
-            "CARGO_FEATURE_SOMETHING_ELSE",
-        )
-        self.assertTrue(self.module.check(self.root))
-
+    # --- R3..R4 (ABI purity + pin) ----------------------------------------
     def test_semantic_import_in_abi_is_blocked(self) -> None:
         mutate(
             self.root,
