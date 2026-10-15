@@ -67,7 +67,9 @@ pub fn unpack(raw: []const u8, bit_len: usize, widths: []const u8, dst: []u64) E
         if ((raw[raw.len - 1] & mask) != 0) return error.NonCanonicalTail;
     }
     // Decoding overlapping output words could overwrite unread source bits.
-    if (overlaps(raw, std.mem.sliceAsBytes(dst))) return error.OverlappingBuffers;
+    if (overlaps(raw, std.mem.sliceAsBytes(dst)) or
+        overlaps(widths, std.mem.sliceAsBytes(dst)))
+        return error.OverlappingBuffers;
     var pos: usize = 0;
     for (widths, 0..) |width, i| {
         var word: u64 = 0;
@@ -143,6 +145,15 @@ test "caller-owned field pack and unpack reject aliased bytes before writes" {
     try std.testing.expectError(error.OverlappingBuffers,
         unpack(shared[1..2], 8, &.{ 2, 3, 3 }, destination[0..]));
     try std.testing.expectEqualSlices(u64, &shifted_before, &destination);
+
+    // Declared widths are source metadata, not mutable scratch storage.
+    shared[0] = 2;
+    shared[1] = 3;
+    shared[2] = 3;
+    const widths_before = destination;
+    try std.testing.expectError(error.OverlappingBuffers,
+        unpack(&.{0x47}, 8, shared[0..3], destination[0..]));
+    try std.testing.expectEqualSlices(u64, &widths_before, &destination);
 }
 
 test "truncation, append and one padding bit mutant" {
