@@ -70,6 +70,10 @@ def validate_manifest(manifest):
 
 
 def check_report(record):
+    # JSON scalars and arrays are legal JSON, not diagnostic objects.
+    # Report an informative failure rather than raising AttributeError.
+    if not isinstance(record, dict):
+        return ["invalid:record_type expected=object"]
     errors = []
     for key in FIELDS:
         if key not in record or record[key] in ("", None):
