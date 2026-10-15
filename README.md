@@ -7,7 +7,7 @@
 
 **Експериментальна мова програмування, у якій двійкова координата є частиною семантики.**
 
-<p><a href="https://github.com/juv4uk/sens/releases/latest/download/sens-cli-web.html"><strong>▶ Спробувати SENS у вебі</strong></a></p>
+<p><a href="https://github.com/juv4uk/sens/releases/latest/download/my-lisp-cli-web.html"><strong>▶ Спробувати SENS у вебі</strong></a></p>
 <sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
 
 [![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
