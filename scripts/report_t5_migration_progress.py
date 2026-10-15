@@ -29,8 +29,13 @@ VALID_SOURCE_STATES = {"blocked", "would-write"}
 def _source_name(path: object) -> str:
     if not isinstance(path, str) or not path.endswith(".lisp"):
         raise ValueError(f"invalid source path: {path!r}")
+    # PurePosixPath silently normalizes embedded "//" and "/./"; an audit
+    # must reject such aliases rather than treating them as new Git paths.
+    if ("\x00" in path or "\\" in path or
+            any(part in ("", ".", "..") for part in path.split("/"))):
+        raise ValueError(f"noncanonical source path: {path!r}")
     p = PurePosixPath(path)
-    if p.is_absolute() or ".." in p.parts or "\\" in path or path.startswith("./"):
+    if p.is_absolute() or p.as_posix() != path:
         raise ValueError(f"unsafe source path: {path!r}")
     return path
 
@@ -106,6 +111,14 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
     if set(pair_entries) & set(queue):
         raise ValueError("an original source cannot be paired AND unpaired")
 
+    # A .sens without a tracked same-stem .lisp is an orphan physical
+    # artifact, not evidence of migrated source or runtime semantics.
+    for tracked in tracked_sources:
+        _source_name(tracked)
+    orphan_physical_sens = sorted(
+        row["sens"] for source, row in pair_entries.items()
+        if source not in tracked_sources
+    )
     represented = set(pair_entries) | set(queue)
     missing = sorted(tracked_sources - represented)
     unknown = sorted(represented - tracked_sources)
@@ -126,7 +139,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
                 "source_view_status": p.get("source_status"),
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_blocker": p.get("error") if condition.endswith("BLOCKED")
+                "first_empty": p.get("error") if condition.endswith("BLOCKED")
                                     else "needs independent source/oracle witness",
             })
         else:
@@ -144,7 +157,7 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
                 "source_era_states": u["status"],
                 "semantic_admitted": False,
                 "oracle_witness": None,
-                "first_blocker": u.get("blocker_by_era", {}).get("auto")
+                "first_empty": u.get("empty_by_era", {}).get("auto")
                                  or "mechanical candidate still needs oracle",
             })
 
@@ -166,7 +179,9 @@ def combine(pairs: dict, readiness: dict, tracked_sources: set[str]) -> dict:
             "status_counts": dict(sorted(counts.items())),
             "missing_from_both_audits": len(missing),
             "unexpected_untracked_paths": len(unknown),
+            "orphan_physical_sens_without_tracked_lisp": len(orphan_physical_sens),
         },
+        "orphan_physical_sens_paths": orphan_physical_sens,
         "missing_source_paths": missing,
         "untracked_or_stale_source_paths": unknown,
         "files": ledger,

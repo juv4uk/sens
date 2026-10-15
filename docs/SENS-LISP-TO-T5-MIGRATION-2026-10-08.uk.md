@@ -48,11 +48,11 @@ python3 scripts/migrate-to-sens-codes.py /path/to/approved-corpus \
 
 ## Безпека й CI
 
-- `write-new-only`: будь-який існуючий `name.sens` — blocker. Запис нового файла через атомарне створення без перезапису. Багаторазовий запуск без очищення вихідного mirror не повинен непомітно переписати артефакти.
+- `write-new-only`: будь-який існуючий `name.sens` — (). Запис нового файла через атомарне створення без перезапису. Багаторазовий запуск без очищення вихідного mirror не повинен непомітно переписати артефакти.
 - Фізична тотожність: `T5_decode(T5_encode(words)) == exact typed words`, `T5_encode(T5_decode(bytes)) == bytes`; `typed_sha256` включає довжину КОЖНОГО слова, а `physical_sha256` — байти файла.
 - Окремо перевіряти D2 parse та SENS oracle evaluation parity; Python T5 roundtrip — НЕ повна семантична ратифікація. Не видавати blocked output за готовий `.sens`.
 - Масове переписування `master` через `git rm`, або пуш конвертованих файлів напряму без PR — ЗАБОРОНЕНО. Старий workflow замінено preview artifact без дозволу на write до репозиторію.
-- Розподіляти реальні `.lisp` по взаємовиключних каталогах, один агент — один PR, а файл без доведеного відображення відкладати в blocker ledger.
+- Розподіляти реальні `.lisp` по взаємовиключних каталогах, один агент — один PR, а файл без доведеного відображення відкладати в () ledger.
 
 **Задачі:** [головна #4449](https://github.com/juv4uk/sens/issues/4449); [фізичний T5 #4446](https://github.com/juv4uk/sens/pull/4446); [конвертер #4450](https://github.com/juv4uk/sens/issues/4450); [маніфест #4451](https://github.com/juv4uk/sens/issues/4451); [CI #4452](https://github.com/juv4uk/sens/issues/4452).
 

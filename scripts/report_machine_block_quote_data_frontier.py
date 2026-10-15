@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only, fail-closed historical QUOTE-data blocker census.
+"""Read-only, fail-closed historical QUOTE-data empty census.
 
 Research witness ONLY. No conversion, D7 semantic admission, new D10 slots,
 physical T5 claim, or changes to the source. The historical observable

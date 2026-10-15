@@ -31,7 +31,7 @@ Already accounted in `wsm-os-lisp#74`: MMIO-CAPABILITY, MMIO-READ/WRITE, PCI-CON
 
 ## 3. Семантичні root claims для review — ще НЕ SELECTED
 
-Правило кожного рядка: `width = D10`, `coordinate = null`, `ratified = 0`, `blocked_source = NONE (hardware-motivated, not a proven migration blocker)`; `surface_uk/surface_ukr` — пропозиція, не чинний словник. Наведені очікувані відповіді — **reference vectors**, не виконані SENS/Chez/SWI/Z3 oracle runs. Спочатку довести відмінність від D1–D9 і 636 D10 рядків за поведінкою, потім мінімальний незалежний root, тільки тоді proposal ledger і власникове рішення. Похідність сама по собі не забороняє кандидата; псевдонезалежність забороняє.
+Правило кожного рядка: `width = D10`, `coordinate = null`, `ratified = 0`, `blocked_source = NONE (hardware-motivated, not a proven migration ())`; `surface_uk/surface_ukr` — пропозиція, не чинний словник. Наведені очікувані відповіді — **reference vectors**, не виконані SENS/Chez/SWI/Z3 oracle runs. Спочатку довести відмінність від D1–D9 і 636 D10 рядків за поведінкою, потім мінімальний незалежний root, тільки тоді proposal ledger і власникове рішення. Похідність сама по собі не забороняє кандидата; псевдонезалежність забороняє.
 
 ### HW-01 — unsigned saturating addition
 
@@ -109,7 +109,7 @@ Already accounted in `wsm-os-lisp#74`: MMIO-CAPABILITY, MMIO-READ/WRITE, PCI-CON
 
 ## 6. Immediate coordination
 
-- To `sens#4012` / `sens#4463`: review HW-01..HW-07 for minimal semantics and rank by actual migration blockers (unknown != zero). State owner decision per root: SELECT-RESEARCH / DERIVED / HOLD / REJECT, with oracle attachments.
+- To `sens#4012` / `sens#4463`: review HW-01..HW-07 for minimal semantics and rank by actual migration () (unknown != zero). State owner decision per root: SELECT-RESEARCH / DERIVED / HOLD / REJECT, with oracle attachments.
 - To `wsm-os-lisp#74`: map the hardware matrix to existing device/runtime milestones, do not spawn a shadow D10 registry.
 - To `sens#4896`: GF(2), exact words and fixed-point formulas need mathematical oracle; mutable CAS needs concurrency oracle; no unrelated CLHS/CLOS reseeding.
 - Owner ratifies *after* independent evidence and growth-gate, not after naming these proposals.

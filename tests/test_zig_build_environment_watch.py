@@ -251,25 +251,28 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
 
 
     def test_f6_fs_source_assets_use_zig_and_live_cargo_watches(self) -> None:
-        """F6 source bytes must cross Zig, and every changed asset rebuilds Cargo."""
         root = ZIG_ROOT.read_text(encoding="utf-8")
         build = BUILD.read_text(encoding="utf-8")
         check_embedded_asset_watches(build, root)
-        for symbol, filename in (("world", "world"), ("content_store", "content-store"),
-                                 ("lisp_fs", "lisp-fs")):
+        for filename, symbol, adapter in (
+            ("world", "sens_zig_world_bytes_copy", "world_source_bytes"),
+            ("content-store", "sens_zig_content_store_bytes_copy", "content_store_source_bytes"),
+            ("lisp-fs", "sens_zig_lisp_fs_bytes_copy", "lisp_fs_source_bytes"),
+        ):
             asset = f"lib/{filename}.lisp"
             watch = f'    println!("cargo:rerun-if-changed=../../{asset}");'
             with self.subTest(asset=asset):
                 self.assertIn(f'@embedFile("{asset}")', root)
-                self.assertIn(f"pub export fn sens_zig_f6_{symbol}_bytes_copy(", root)
+                self.assertIn(f"pub export fn {symbol}(", root)
                 self.assertEqual(build.count(watch), 1)
                 with self.assertRaisesRegex(ValueError, "ZIG_CORRIDOR_STALE_ASSET"):
                     check_embedded_asset_watches(build.replace(watch, "", 1), root)
                 for host in ("producer", "consumer"):
                     src = (ROOT / f"crates/sens-cli/src/bin/wsm-fs-record-{host}.rs").read_text(encoding="utf-8")
                     self.assertNotIn(f'include_str!("../../../../{asset}")', src)
-                    self.assertIn(f"zig_transport::f6_{symbol}_source_bytes()", src)
+                    self.assertIn(f"zig_transport::{adapter}()", src)
                     self.assertIn(f'("lib/{filename}.lisp", sources[', src)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,9 +38,9 @@ def _classification(row: dict[str, Any], artifact: dict[str, Any]) -> str:
     return value
 
 
-def _unknown_has_blocker(row: dict[str, Any]) -> bool:
-    blocker = row.get("blocking_issue")
-    return isinstance(blocker, str) and bool(ISSUE_RE.fullmatch(blocker.strip()))
+def _unknown_has_empty(row: dict[str, Any]) -> bool:
+    empty = row.get("blocking_issue")
+    return isinstance(empty, str) and bool(ISSUE_RE.fullmatch(empty.strip()))
 
 
 def summarize(artifact: dict[str, Any]) -> dict[str, Any]:
@@ -54,7 +54,7 @@ def summarize(artifact: dict[str, Any]) -> dict[str, Any]:
             raise CoverageError(f"artifact.rows[{index}] must be an object")
         classification = _classification(raw_row, artifact)
         counts[classification] += 1
-        if classification == "unknown" and not _unknown_has_blocker(raw_row):
+        if classification == "unknown" and not _unknown_has_empty(raw_row):
             raise CoverageError(
                 f"unknown row {raw_row.get('id', index)!r} must carry blocking_issue (#NNN or issue URL)"
             )

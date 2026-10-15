@@ -111,5 +111,5 @@
     ]
   },
   "owner_decision_required": "Before selection: source-grade behavioral dedup vs ALL ratified D1-D9 and selected 635+ D10; classify Core root vs self-hosted composition; owner review. Never assign 10-bit coordinate or change canonical inventory without approved gate.",
-  "migration_note": "Does not migrate any original .lisp; zero physical .sens files produced; unrelated historic execution release blockers remain open."
+  "migration_note": "Does not migrate any original .lisp; zero physical .sens files produced; unrelated historic execution release () remain open."
 }

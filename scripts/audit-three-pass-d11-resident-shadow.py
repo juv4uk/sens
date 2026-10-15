@@ -4,7 +4,7 @@
 This is an observational migration aid, NOT a new semantic contract, codec,
 callability gate, or automatic workflow. A failing --strict result is scoped to
 the D11 test-vocabulary import in the three-pass migrator. The normal run
-reports the finding without creating an unrelated CI blocker.
+reports the finding without creating an unrelated CI empty.
 
 Reproduce:
     python3 scripts/audit-three-pass-d11-resident-shadow.py

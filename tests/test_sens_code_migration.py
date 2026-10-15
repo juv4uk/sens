@@ -179,7 +179,7 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_quoted_symbol_is_admitted_as_quoted_datum(self):
         # Ratified owner law 2026-10-13: quoted data with no place in the
-        # function ladder ("binary") is D2-framed D7 spelling, not a blocker.
+        # function ladder ("binary") is D2-framed D7 spelling, not a empty.
         # Every source bit is preserved; the head stays the exact D3 QUOTE.
         converted, _, _ = self.binary("(QUOTE\n  binary)\n")
         cells = mod.encode_text7_spelling("binary", self.text7)
@@ -220,7 +220,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertTrue(converted.startswith("10 100 00 "))
         self.assertEqual(hits[0].label, "CAR")
 
-    def test_unknown_user_call_head_is_blocker_not_text7(self):
+    def test_unknown_user_call_head_is_empty_not_text7(self):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "unresolved executable head"):
             self.binary("(sqrt-iter x n)\n")
 
@@ -232,7 +232,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertEqual(policy["growth_law"], "width(n) = 24 * 2^n")
         self.assertEqual(policy["ratified_prefix_bits"][:3], [24, 48, 96])
 
-    def test_numeric_literal_is_number_blocker_not_text7_digits(self):
+    def test_numeric_literal_is_number_empty_not_text7_digits(self):
         with self.assertRaisesRegex(
             mod.BinaryMigrationError,
             "ratified Number widths are 24 -> 48 -> 96"
@@ -399,8 +399,8 @@ class SensCodeMigrationTests(unittest.TestCase):
                 self.assertEqual(rows["summary"]["files_written"], 0)
                 self.assertEqual(rows["summary"]["files_blocked"], 1)
                 self.assertTrue(any(
-                    "BATCH_PUBLICATION_BLOCKED" in blocker["reason"]
-                    for row in rows["files"] for blocker in row["blockers"]
+                    "BATCH_PUBLICATION_BLOCKED" in empty["reason"]
+                    for row in rows["files"] for empty in row["empties"]
                 ))
                 self.assertFalse((out / ("a-good" + extension)).exists())
                 self.assertEqual(old_target.read_bytes(), b"preexisting-authority-must-survive")

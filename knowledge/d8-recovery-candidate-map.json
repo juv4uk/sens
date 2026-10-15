@@ -130,7 +130,7 @@
         "crates/sens/src/eval/special_forms/io.rs",
         "crates/sens/tests/mccarthy.rs"
       ],
-      "ratification_blocker": "Current mechanism consumes Value::String; canonical D7 text carrier bridge must be explicit before D8 ratification.",
+      "ratification_empty": "Current mechanism consumes Value::String; canonical D7 text carrier bridge must be explicit before D8 ratification.",
       "reason": "D1-D7 structure does not contain a general parser from text to Lisp data."
     },
     {
@@ -149,7 +149,7 @@
         "crates/sens/src/eval/special_forms/io.rs",
         "crates/sens/src/value.rs"
       ],
-      "ratification_blocker": "Canonical output currently materializes as Value::String; bridge to D7 text identity must be specified.",
+      "ratification_empty": "Canonical output currently materializes as Value::String; bridge to D7 text identity must be specified.",
       "reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary."
     },
     {
@@ -168,7 +168,7 @@
         "crates/sens/src/eval/special_forms/strings.rs",
         "crates/sens/tests/string_first_class.rs"
       ],
-      "ratification_blocker": "Bridge must target canonical D7 text, not Value::String implementation.",
+      "ratification_empty": "Bridge must target canonical D7 text, not Value::String implementation.",
       "reason": "Exact symbol-name observation is distinct from general serialization."
     },
     {
@@ -187,7 +187,7 @@
         "crates/sens/src/eval/special_forms/strings.rs",
         "crates/sens/tests/string_first_class.rs"
       ],
-      "ratification_blocker": "D7 text bridge and distinction from historical interning must remain explicit.",
+      "ratification_empty": "D7 text bridge and distinction from historical interning must remain explicit.",
       "reason": "Can materialize symbol names that are not a single readable token, so it is not derivable from READ alone."
     },
     {

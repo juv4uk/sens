@@ -43,7 +43,7 @@ definite ownership conflicts    55
 experiment-needed               15
 ```
 
-Тому D10 отримує ratification blocker.
+Тому D10 отримує ratification ().
 
 ## Що Core може мати
 

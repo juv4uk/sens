@@ -6,8 +6,7 @@ use std::io::{self, Read};
 
 
 #[cfg(feature = "zig-transport")]
-#[path = "../zig_transport.rs"]
-mod zig_transport;
+use sens_cli::zig_transport;
 
 // A host may request exact SENS source bytes only from the compiled Zig ABI.
 // Zig never decides what these sources mean and no Rust fallback is permitted.
@@ -24,11 +23,11 @@ fn zig_bootstrap_sources() -> Result<[String; 8], String> {
             .map_err(|error| format!("ZIG_F6_KNOWLEDGE_CARRIER invalid UTF-8: {error}"))?;
         let persistent_map = String::from_utf8(zig_transport::persistent_map_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_PERSISTENT_MAP_CARRIER invalid UTF-8: {error}"))?;
-        let world = String::from_utf8(zig_transport::f6_world_source_bytes()?)
+        let world = String::from_utf8(zig_transport::world_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_WORLD_CARRIER invalid UTF-8: {error}"))?;
-        let content_store = String::from_utf8(zig_transport::f6_content_store_source_bytes()?)
+        let content_store = String::from_utf8(zig_transport::content_store_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_CONTENT_STORE_CARRIER invalid UTF-8: {error}"))?;
-        let lisp_fs = String::from_utf8(zig_transport::f6_lisp_fs_source_bytes()?)
+        let lisp_fs = String::from_utf8(zig_transport::lisp_fs_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_LISP_FS_CARRIER invalid UTF-8: {error}"))?;
         Ok([unify, reason, forward, knowledge, persistent_map, world, content_store, lisp_fs])
     }

@@ -38,7 +38,7 @@ PINNED_SCHEMA_METADATA = "lib/function-table-mechanisms.lisp"
 
 # The five pinned service/policy sources were migrated only at D4 DEFINE/LAMBDA
 # heads. Their surviving 8-bit D3 COND forms remain HISTORICAL, not current D8.
-# Do not let removal of the old D4 definition head hide legacy blockers from
+# Do not let removal of the old D4 definition head hide legacy empties from
 # the fail-closed inventory. Revisit this pin only after executable D3 parity.
 PARTIAL_D4_WITH_LEGACY_D3 = {
     "knowledge/guard-reference.lisp",

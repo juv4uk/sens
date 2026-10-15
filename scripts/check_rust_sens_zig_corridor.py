@@ -76,6 +76,53 @@ ZIG_VERSION_RE = re.compile(r"sens_zig_codec_abi_version\(\)\s*u32\s*\{\s*return
 HEADER_VERSION_RE = re.compile(r"SENS_ZIG_TRANSPORT_ABI_VERSION\s*=\s*(\d+)")
 
 
+
+def _live_c_code(source: str) -> str:
+    """Strip C comments/strings and literal preprocessor-inactive branches.
+
+    This is a conservative structural scan, not a compiler or semantic oracle.
+    For unknown #if expressions, keep both branches as possible live code.
+    """
+    source = C_NONCODE_RE.sub(" ", source)
+    stack: list[dict[str, object]] = []
+    visible = True
+    output: list[str] = []
+    for line in source.splitlines(keepends=True):
+        match = re.match(r"^\s*#\s*(if|ifdef|ifndef|elif|else|endif)\b(.*)$", line)
+        if match:
+            op, arg = match.groups()
+            literal = arg.strip() if op in ("if", "elif") else ""
+            predicate = (literal == "1") if literal in ("0", "1") else None
+            if op in ("if", "ifdef", "ifndef"):
+                stack.append({"outer": visible, "known": predicate is not None,
+                              "taken": predicate is True})
+                visible = visible and predicate is not False
+            elif op == "elif" and stack:
+                frame = stack[-1]
+                outer = bool(frame["outer"])
+                if frame["known"]:
+                    if predicate is None:
+                        frame["known"] = False
+                        visible = outer and not bool(frame["taken"])
+                    else:
+                        visible = outer and not bool(frame["taken"]) and predicate
+                        frame["taken"] = bool(frame["taken"]) or predicate
+                else:
+                    visible = outer
+            elif op == "else" and stack:
+                frame = stack[-1]
+                visible = bool(frame["outer"]) and (
+                    not bool(frame["taken"]) if frame["known"] else True
+                )
+                frame["taken"] = True
+            elif op == "endif" and stack:
+                visible = bool(stack.pop()["outer"])
+            output.append("\n")
+            continue
+        output.append(line if visible else "\n")
+    return "".join(output)
+
+
 def check(root: Path) -> list[str]:
     problems: list[str] = []
 
@@ -156,7 +203,7 @@ def check(root: Path) -> list[str]:
         physical_exports = set(exports) - {"sens_zig_codec_abi_version"}
         for host in sorted(host_dir.glob("*.c")):
             src = host.read_text(encoding="utf-8")
-            src = C_NONCODE_RE.sub(" ", src)
+            src = _live_c_code(src)
             calls = set(CALL_RE.findall(src))
             if not calls:
                 continue
@@ -180,7 +227,7 @@ def check(root: Path) -> list[str]:
         # This regex is only structural; a native C+Zig run is still necessary.
         f3c_invalid_reject = False
         for host in sorted(host_dir.glob("*.c")):
-            src = C_NONCODE_RE.sub(" ", host.read_text(encoding="utf-8"))
+            src = _live_c_code(host.read_text(encoding="utf-8"))
             if F3C_FAIL_CLOSED_RE.search(src):
                 f3c_invalid_reject = True
                 break

@@ -11,7 +11,7 @@ mod repl;
 mod swarm;
 mod tcp_repl;
 #[cfg(feature = "zig-transport")]
-mod zig_transport;
+use sens_cli::zig_transport;
 use swarm::{dotted_alist_lookup, oracle_check, oracle_help, run_client, run_tcp_repl_sexpr};
 use tcp_repl::run_tcp_repl;
 
@@ -686,6 +686,17 @@ mod core_profile_bootstrap_tests {
         let physical = zig_transport::encode_t5_direct(&words)
             .expect("only Zig may create physical T5");
         assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
+        // The exact-byte checked Zig adapter is used by sens-trit in
+        // production. Exercise that same adapter in this sens test binary:
+        // it must accept the unchanged carrier and reject one flipped bit.
+        let checked = zig_transport::encode_t5(&words, &physical)
+            .expect("Zig physical carrier matches the admitted exact words");
+        assert_eq!(checked, physical);
+        let mut one_bit_mutant = physical.clone();
+        one_bit_mutant[0] ^= 0b0000_0001;
+        let error = zig_transport::encode_t5(&words, &one_bit_mutant)
+            .expect_err("mutated physical T5 may not match the original words");
+        assert!(error.contains("physical byte"), "unexpected mismatch: {error}");
         let restored = decode_physical_t5_words(&physical)
             .expect("physical T5 re-enters through Zig ABI");
         let expected: Vec<_> = words.iter()

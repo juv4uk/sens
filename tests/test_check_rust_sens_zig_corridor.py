@@ -124,6 +124,70 @@ int main(void) {
         )
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_if_zero_f3c_ghost_is_not_a_live_witness(self) -> None:
+        # A preprocessor-disabled return check is NOT a physical Zig receipt.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  unsigned char bad[] = {243}, out[32] = {0};
+  sens_zig_t5_validate(bad, sizeof bad);
+#if 0
+  if (!check_number("disabled", sens_zig_f3c_pack(bad, sizeof bad, out, sizeof out), -1))
+    return 0;
+#endif
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("F3C pack rejection of invalid T5" in p for p in problems),
+                        problems)
+
+    def test_if_zero_else_live_f3c_proof_is_still_found(self) -> None:
+        # The live #else branch must survive pruning.
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  unsigned char bad[] = {243}, out[32] = {0};
+  sens_zig_t5_validate(bad, sizeof bad);
+#if 0
+  if (!check_number("dead", sens_zig_f3c_pack(bad, sizeof bad, out, sizeof out), -1))
+    return 0;
+#else
+  if (!check_number("live", sens_zig_f3c_pack(bad, sizeof bad, out, sizeof out), -1))
+    return 0;
+#endif
+  return 1;
+}
+""", encoding="utf-8",
+        )
+        self.assertEqual(self.module.check(self.root), [])
+
+    def test_if_zero_ghost_does_not_count_as_c_host_transport(self) -> None:
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+#if 0
+  sens_zig_t5_validate(bytes, len);
+  if (!check_number("ghost", sens_zig_f3c_pack(bytes, len, out, cap), -1))
+    return 0;
+#endif
+  return sens_zig_codec_abi_version() == 2 ? 0 : 1;
+}
+""", encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(any("no Rust-free host" in p for p in problems), problems)
+
     def test_host_without_f3c_invalid_reject_is_blocked(self) -> None:
         """R5: C host must fail-closed reject invalid T5 via F3C pack (same as Rust)."""
         host_dir = self.root / HOST_C

@@ -22,8 +22,8 @@ Rules derived from current SENS contract and later owner decisions:
   this script. Historical .rs projection is rejected; no v1 corpus was
   migrated, so no v1-to-v2 conversion prerequisite is needed.
 - Comments are stripped. Unresolved raw names cannot become .sens bytes.
-  The writer currently calls scripts/sens_t5_codec.py; byte parity with
-  the Zig physical codec must be proved independently, not assumed.
+  Python T5 packing is an independent parity reference ONLY. Real .sens
+  bytes are minted by pinned Zig and verified before atomic publication.
 - Output is a physical binary T5 .sens under --out with the same basename
   as its .lisp source. Existing .sens files are never overwritten;
   source .lisp is retained.
@@ -53,6 +53,8 @@ if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 
 from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
+import zig_codec_bridge
+import migration_publish_pair
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
@@ -590,18 +592,23 @@ class Resolver:
                 raise MigrationError(
                     "D3:000 is EMPTY data, never an executable call head", tok,
                 )
-            if width in (7, 9, 10):
-                if width == 9 and t in self.d9_residents:
-                    # Ratified D9 functions are executable
-                    pass
-                else:
-                    role = {7: "D7 keyboard text/data",
-                            9: "D9 owner residency without a verified callable route",
-                            10: "D10 owner codebook without runtime admission"}[width]
-                    raise MigrationError(
-                        f"exact D{width}:{t} is {role}; executable mechanism required",
-                        tok,
-                    )
+            if width == 7:
+                raise MigrationError(
+                    f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
+                    tok,
+                )
+            if width == 9:
+                # Contract 11.9: ratified residency is not callable mechanism.
+                raise MigrationError(
+                    f"D9 {t}: відсутній доказ допущеного механізму виклику; "
+                    "ратифікована резидентність не є callability",
+                    tok,
+                )
+            if width == 10:
+                raise MigrationError(
+                    f"D10 {t}: ратифікований кодбук не надає runtime admission",
+                    tok,
+                )
             if width > 10:
                 raise MigrationError(
                     f"unqualified {width}-bit call head has no admitted domain mechanism",
@@ -622,26 +629,6 @@ class Resolver:
                 tok,
             )
 
-        # D7 є текстовою/фонемною ідентичністю, не викликаною функцією.
-        # Для D9 таблиця резидентів сама по собі не доводить виконуваність.
-        # Без окремого допущеного механізму забороняємо обидві голови.
-        if len(t) in (7, 9) and set(t) <= set("01"):
-            if len(t) == 7:
-                raise MigrationError(
-                    f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
-                    tok,
-                )
-            # An admitted D9 resident IS the ratified callable route (the earlier
-            # width-9 check already accepted it); only a NON-resident 9-bit head
-            # lacks a proven mechanism. Keep the two checks consistent.
-            if t in self.d9_residents:
-                self.counts["already-exact"]+=1
-                return [t],"already-exact"
-            raise MigrationError(
-                f"D9 {t}: відсутній доказ допущеного механізму виклику",
-                tok,
-            )
-
         # Source-defined global callables shadow human builtin surfaces.
         # Exact binary identities above remain authoritative: only a name
         # that appeared as a proven global DEFINE target takes this route.
@@ -652,7 +639,7 @@ class Resolver:
             return self.global_binding_words[t],"pass4-text7-global"
 
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
-        # the old registry but lacking a current resident is a blocker.
+        # the old registry but lacking a current resident is a empty.
         if t in self.my:
             ident=self.my[t]
             if ident is None:
@@ -1072,6 +1059,93 @@ def source_files(root: Path):
         if any(part in SKIP_DIRS for part in p.parts): continue
         if p.suffix.lower() in SOURCE_EXTS: yield p
 
+# Owner-reviewed NONPROGRAM data (#4460), not executable SENS.
+# Both path identity AND source Git blob SHA are mandatory for recognition.
+NONPROGRAM_MANIFESTS = (
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
+    ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
+    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
+    ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
+    ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
+)
+
+
+NONPROGRAM_MANIFEST_BLOB_SHA = {
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "3a5b4e3ef660109242e9e1562bca4a723f1868ef",
+    "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
+    "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
+    "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "2f07df13cbd31edf76dcf105a2dc6dea922e4af8",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "c83fb0b6a7c12b1a9131d541306ed67ad4b7d620",
+    "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "60f44e5d6e278a7f43c2fe2c02016d314b53c801",
+}
+
+
+def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> None:
+    """Prevent minting a physical .sens for SHA-reviewed data, not programs."""
+    if source.is_symlink():
+        raise SensT5Error("NONPROGRAM_UNTRUSTED_SYMLINK layer=encode")
+    try:
+        relative = source.resolve(strict=True).relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return  # User-controlled external corpus has no reviewed classification.
+    except OSError as exc:
+        raise SensT5Error(f"NONPROGRAM_SOURCE_UNREADABLE layer=encode {exc}") from exc
+    for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
+        manifest = root / name
+        if not manifest.is_file() or manifest.is_symlink():
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_UNAVAILABLE layer=encode {name}")
+        try:
+            contents = manifest.read_bytes()
+            manifest_sha = hashlib.sha1(
+                b"blob " + str(len(contents)).encode("ascii") + b"\0" + contents
+            ).hexdigest()
+            if manifest_sha != NONPROGRAM_MANIFEST_BLOB_SHA[name]:
+                raise SensT5Error(
+                    f"NONPROGRAM_MANIFEST_SHA_DRIFT layer=encode manifest={name} "
+                    f"expected={NONPROGRAM_MANIFEST_BLOB_SHA[name]} actual={manifest_sha}"
+                )
+            record = json.loads(contents.decode("utf-8"))
+        except (UnicodeError, OSError, ValueError) as exc:
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_INVALID layer=encode {name}: {exc}") from exc
+        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or record.get("issue") != 4460
+                or record.get("automatic_sens_companion") is not False
+                or not isinstance(record.get("entries"), list)
+                or len(record["entries"]) != expected_count):
+            raise SensT5Error(f"NONPROGRAM_MANIFEST_UNTRUSTED layer=encode {name}")
+        for entry in record["entries"]:
+            if not isinstance(entry, dict) or entry.get("path") != relative:
+                continue
+            scoped = (
+                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d[1-9]\.lisp", relative)))
+                or (cohort == "comment-only-loader" and relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"))
+                or (cohort == "isa" and relative.startswith("lib/machine/isa/"))
+                or (cohort == "schema" and relative.startswith(("contracts/", "lib/", "tests/fixtures/")))
+                or (cohort == "evidence" and relative.startswith(("evidence/", "tests/fixtures/")))
+                or (cohort == "expr-record" and relative.startswith("tests/fixtures/"))
+                or (cohort == "knowledge-record" and relative.startswith("knowledge/") and relative.count("/") == 1)
+            )
+            if not scoped:
+                raise SensT5Error(f"NONPROGRAM_REVIEW_SCOPE_INVALID layer=encode source={relative}")
+            pinned = entry.get("git_blob_sha1")
+            if not isinstance(pinned, str) or re.fullmatch("[0-9a-f]{40}", pinned) is None:
+                raise SensT5Error(f"NONPROGRAM_SHA_PIN_INVALID layer=encode source={relative}")
+            data = source.read_bytes()
+            actual = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+            if actual != pinned:
+                raise SensT5Error(
+                    f"NONPROGRAM_SOURCE_SHA_DRIFT layer=encode source={relative} "
+                    f"expected={pinned} actual={actual}"
+                )
+            raise SensT5Error(
+                f"NONPROGRAM_DATA_NOT_EXECUTABLE layer=encode source={relative} "
+                f"cohort={cohort} source_blob_sha={actual}"
+            )
+
+
 def sens_destination(rel: Path) -> Path:
     """НАЗВА.lisp -> НАЗВА.sens у тому самому відносному каталозі."""
     if rel.suffix.lower() != ".lisp":
@@ -1097,6 +1171,33 @@ def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
     finally:
         if tmp_name is not None:
             tmp_name.unlink(missing_ok=True)
+
+
+def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge):
+    """Keep SENS word identities upstream; Zig alone mints physical T5 bytes.
+
+    The Python bytes are a parity witness, NEVER the published carrier. This
+    receipt certifies physical byte integrity only, not SENS semantics.
+    """
+    expected = hashlib.sha256(reference).hexdigest()
+    physical = bridge.carry_t5(
+        binary, projection, trusted_source_sha256=expected,
+    )
+    if physical != reference:
+        offset = next((i for i, (a, b) in enumerate(zip(reference, physical))
+                       if a != b), min(len(reference), len(physical)))
+        raise SensT5Error(
+            "ZIG_CARRY_REFERENCE_MISMATCH layer=transport "
+            f"expected_sha256={expected} "
+            f"actual_sha256={hashlib.sha256(physical).hexdigest()} "
+            f"first_byte={offset}"
+        )
+    receipt = bridge.verify_t5(binary, physical, trusted_source_sha256=expected)
+    if (receipt.get("physical_sha256") != expected or
+            receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256" or
+            not receipt.get("zig_binary_sha256")):
+        raise SensT5Error("ZIG_CARRY_UNATTESTED_RECEIPT layer=transport")
+    return physical, receipt
 
 
 def migrate_file(source: str,resolver,text7):
@@ -1172,6 +1273,16 @@ def main():
             else:
                 candidates.append(path)
         paths = candidates
+    # Publish mode always builds pinned Zig; missing Zig cannot silently fall
+    # back to Python. Dry-run remains a read-only mechanical preview.
+    zig_temp = tempfile.TemporaryDirectory(prefix="sens-three-pass-zig-") if not args.dry_run else None
+    zig_binary = None
+    if zig_temp is not None:
+        try:
+            zig_binary = zig_codec_bridge.build_transport(Path(zig_temp.name))
+        except (zig_codec_bridge.ZigCodecError, OSError) as exc:
+            zig_temp.cleanup()
+            ap.error(f"ZIG_CARRY_REQUIRED_FOR_PUBLICATION: {exc}")
     seen_destinations = set()
     for path in paths:
         rel = path.resolve().relative_to(base_root)
@@ -1182,6 +1293,9 @@ def main():
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
             seen_destinations.add(dest)
+            # A reviewed DATA source may never acquire an executable carrier.
+            # This check precedes the Zig codec and every filesystem write.
+            reject_reviewed_nonprogram_source(path)
             if target.exists() or target.is_symlink():
                 raise SensT5Error(f"target already exists; not overwriting {dest}")
             source = path.read_text(encoding="utf-8")
@@ -1192,13 +1306,23 @@ def main():
             finally:
                 signal.alarm(0)
             # Strict physical T5: any historic name, passthrough or unencoded
-            # value still visible is a blocker, never a falsely binary file.
+            # value still visible is a empty, never a falsely binary file.
             words = parse_words(projection)
-            payload = encode_projection(projection)
-            if decode_bytes(payload) != words:
+            reference = encode_projection(projection)
+            if decode_bytes(reference) != words:
                 raise SensT5Error("byte roundtrip changes source word identities")
-            if not args.dry_run:
-                write_atomic_no_clobber(target, payload)
+            zig_receipt = None
+            if zig_binary is not None:
+                payload, zig_receipt = zig_mint_verified_t5(
+                    projection, reference, zig_binary, zig_codec_bridge,
+                )
+                # The extensionless spaced-bit view is not an executable .sens.
+                migration_publish_pair.publish_pair(
+                    write_atomic_no_clobber, target, payload,
+                    target.with_suffix(""), projection.encode("ascii"),
+                )
+            else:
+                payload = reference  # dry-run only, NEVER published
             for key, value in resolver.counts.items():
                 totals[key] += value
             status = "would-write" if args.dry_run else "written"
@@ -1209,11 +1333,14 @@ def main():
                 "transport_trits": sum(len(word) for word in words) + len(words) - 1,
                 "physical_sha256": hashlib.sha256(payload).hexdigest(),
                 "typed_word_sha256": typed_sha256(words),
+                "semantic_admitted": False,
+                "zig_transport": zig_receipt,
                 "passes": resolver.counts,
             }
             rows.append(row)
             written += 1
-        except (MigrationError, SensT5Error, UnicodeError, OSError) as error:
+        except (MigrationError, SensT5Error, UnicodeError, OSError,
+                ValueError, zig_codec_bridge.ZigCodecError) as error:
             blocked += 1
             row = {
                 "path": str(rel), "output": str(dest),
@@ -1230,6 +1357,8 @@ def main():
             print(f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
                   flush=True)
 
+    if zig_temp is not None:
+        zig_temp.cleanup()
     report = {
         "schema": "sens-three-pass-t5-migration/v3",
         "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
@@ -1251,7 +1380,9 @@ def main():
         "skipped_paired_paths": skipped_paired,
         "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current named D3-D6 resident, else it fails closed",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
-        "mode": "dry-run" if args.dry_run else "write-new-only",
+        "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
+        "semantic_admitted": False,
+        "physical_producer": "PYTHON_REFERENCE_ONLY" if args.dry_run else "PINNED_ZIG_T5_CARRY",
         "summary": {
             "files_seen": len(paths),
             "files_skipped_paired": len(skipped_paired),

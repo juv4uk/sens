@@ -86,7 +86,7 @@ def canonical_probe(root: Path, era: str) -> dict:
             "source_era": era,
             "classification": ("MECHANICAL_ONLY_NOT_ADMITTED" if row["status"] == "would-write"
                                else "BLOCKED_WITH_REASON"),
-            "first_blocker": row.get("reason") if row["status"] == "blocked" else None,
+            "first_empty": row.get("reason") if row["status"] == "blocked" else None,
             "first_token": row.get("token"),
             "line": row.get("line"),
             "column": row.get("column"),

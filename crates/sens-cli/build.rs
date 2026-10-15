@@ -20,11 +20,9 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/forward.lisp");
     println!("cargo:rerun-if-changed=../../lib/knowledge.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
-    // F6 sources are embedded by Zig: keep Cargo archive byte-exact on edits.
     println!("cargo:rerun-if-changed=../../lib/world.lisp");
     println!("cargo:rerun-if-changed=../../lib/content-store.lisp");
     println!("cargo:rerun-if-changed=../../lib/lisp-fs.lisp");
-    // REPL prerequisite Zig @embedFile assets must invalidate the linked archive.
     println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
     println!("cargo:rerun-if-changed=../../lib/time.lisp");
     println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
