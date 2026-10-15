@@ -502,11 +502,14 @@ def check_linter_zig_only(
         raise CorridorBlocked("LINTER_ZIG_ONLY CLI bypassed Zig asset ingress or SENS parser")
 
     ffi = "sens_zig_linter_bytes_copy"
+    linter_host = live(_route_between(
+        rust_corridor, "pub fn linter_source_bytes(", "\n/// Exact opaque project contract"
+    ))
     if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
-            or "version()?;" not in host
-            or "let copied = unsafe" not in host
-            or "if copied != required" not in host
-            or "Ok(bytes)" not in host):
+            or "version()?;" not in linter_host
+            or "let copied = unsafe" not in linter_host
+            or "if copied != required" not in linter_host
+            or "Ok(bytes)" not in linter_host):
         raise CorridorBlocked("LINTER_ZIG_ONLY Rust lacks verified Zig ABI byte copy")
 
     if (root.count('const linter_asset = @embedFile("lib/linter.lisp");') != 1
