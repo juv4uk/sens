@@ -1,10 +1,34 @@
 //! Нова реальність: драбина доменів -> фізичні байти через сам Zig-кодек.
-//! Вхід (stdin): рядки "width bits" (десяткові), ширина = ідентичність.
+//! Вхід (stdin): "D2 10" або "2 10"; ширина — лише метадані,
+//! payload — РІВНО стільки двійкових бітів, без десяткового перекодування.
 //! Жодного історичного реєстру, жодного Rust/Python-кодека як оракула.
 //! НЕ виконує програму і НЕ судить семантику: лише транспорт і round-trip.
 const std = @import("std");
 const t5 = @import("../t5/t5.zig");
 const f3c = @import("../f3c/f3c.zig");
+
+// Zig 0.16 removed std.io.getStdIn(). Host-side POSIX read is deliberately
+// isolated HERE, never in the freestanding T5/F3C codec or SENS semantics.
+extern "c" fn read(fd: c_int, buffer: [*]u8, count: usize) isize;
+const MAX_SOURCE_BYTES: usize = 1024 * 1024;
+
+fn stdinSource(allocator: std.mem.Allocator) ![]u8 {
+    const buf = try allocator.alloc(u8, MAX_SOURCE_BYTES + 1);
+    errdefer allocator.free(buf);
+    var count: usize = 0;
+    while (count < buf.len) {
+        const received = read(0, buf[count..].ptr, buf.len - count);
+        if (received < 0) return error.InputReadFailed;
+        if (received == 0) break;
+        count += @intCast(received);
+    }
+    if (count > MAX_SOURCE_BYTES) return error.InputTooLarge;
+    // Return a single caller-owned bounded buffer.
+    const source = try allocator.dupe(u8, buf[0..count]);
+    allocator.free(buf);
+    return source;
+}
+
 
 const Timespec = extern struct { tv_sec: c_long, tv_nsec: c_long };
 extern "c" fn clock_gettime(clock_id: c_int, ts: *Timespec) c_int;
@@ -19,14 +43,12 @@ fn nanoseconds() u64 {
 fn sha256Hex(bytes: []const u8) [64]u8 {
     var digest: [32]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(bytes, &digest, .{});
-    var out: [64]u8 = undefined;
-    _ = std.fmt.bufPrint(&out, "{x}", .{digest}) catch unreachable;
-    return out;
+    return std.fmt.bytesToHex(digest, .lower);
 }
 
 fn parseWords(allocator: std.mem.Allocator, data: []const u8) ![]t5.Word {
-    var list = std.ArrayList(t5.Word).init(allocator);
-    errdefer list.deinit();
+    var list: std.ArrayList(t5.Word) = .empty;
+    errdefer list.deinit(allocator);
     var it = std.mem.splitScalar(u8, data, '\n');
     while (it.next()) |raw| {
         const line = std.mem.trim(u8, raw, " \t\r");
@@ -34,33 +56,40 @@ fn parseWords(allocator: std.mem.Allocator, data: []const u8) ![]t5.Word {
         var cols = std.mem.tokenizeAny(u8, line, " \t");
         const w_str = cols.next() orelse return error.BadLine;
         const b_str = cols.next() orelse return error.BadLine;
-        const width = try std.fmt.parseInt(u8, w_str, 10);
-        const bits = try std.fmt.parseInt(u16, b_str, 10);
+        if (cols.next() != null) return error.BadLine;
+        const width_label = if (std.mem.startsWith(u8, w_str, "D")) w_str[1..] else w_str;
+        // Decimal here denotes the width of a domain, NEVER a payload/code.
+        const width = std.fmt.parseInt(u8, width_label, 10) catch return error.BadWidth;
         if (width == 0 or width > 10) return error.BadWidth;
-        if (bits >= (@as(u32, 1) << @as(u5, @intCast(width)))) return error.BitsOverflow;
-        try list.append(.{ .width = width, .bits = bits });
+        if (b_str.len != width) return error.WidthMismatch;
+        var bits: u16 = 0;
+        for (b_str) |bit| {
+            if (bit != '0' and bit != '1') return error.InvalidBit;
+            bits = (bits << 1) | @as(u16, bit - '0');
+        }
+        try list.append(allocator, .{ .width = width, .bits = bits });
     }
     if (list.items.len == 0) return error.EmptyProgram;
-    return list.toOwnedSlice();
+    return list.toOwnedSlice(allocator);
 }
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
-    const data = try std.io.getStdIn().reader().readAllAlloc(allocator, 1 << 20);
+    const data = try stdinSource(allocator);
     defer allocator.free(data);
     const words = try parseWords(allocator, data);
     defer allocator.free(words);
 
     // 1. T5: кодування через сам Zig-кодек.
-    const t5_bytes = try t5.encode(allocator, words);
+    const t5_bytes = try t5.encodeCoordinates(allocator, words);
     defer allocator.free(t5_bytes);
     const t5_sha = sha256Hex(t5_bytes);
-    std.debug.print("T5 words={d} bytes={d} sha256={s} hex={s}\n", .{
-        words.len, t5_bytes.len, t5_sha[0..16], t5_bytes[0..@min(t5_bytes.len, 24)],
+    std.debug.print("T5 words={d} bytes={d} sha256={s}\n", .{
+        words.len, t5_bytes.len, &t5_sha,
     });
 
     // 2. Round-trip: decode мусить дати ті самі точні слова.
-    const back = try t5.decode(allocator, t5_bytes);
+    const back = try t5.decodeCoordinates(allocator, t5_bytes);
     defer allocator.free(back);
     if (back.len != words.len) return error.RoundtripLength;
     for (back, words) |b, w| {
@@ -69,14 +98,22 @@ pub fn main() !void {
     std.debug.print("T5 roundtrip=EXACT words={d}\n", .{back.len});
 
     // 3. F3C: чи зменшує (opt-in). null = лишити T5.
-    const carrier_opt = try f3c.encode(allocator, t5_bytes);
+    const f3c_ordinary = blk: {
+        for (words) |word| {
+            if (word.width > 9) break :blk false;
+        }
+        break :blk true;
+    };
+    // D10 is a valid physical coordinate, not an F3C/ordinary admission.
+    const carrier_opt = if (f3c_ordinary) try f3c.encode(allocator, t5_bytes) else null;
     if (carrier_opt) |carrier| {
         defer allocator.free(carrier);
         const restored = try f3c.decode(allocator, carrier);
         defer allocator.free(restored);
         const ok = std.mem.eql(u8, restored, t5_bytes);
-        std.debug.print("F3C bytes={d} saves={d} roundtrip={s}\n", .{
-            carrier.len, t5_bytes.len - carrier.len, if (ok) "EXACT" else "MISMATCH",
+        if (!ok) return error.F3CRoundtripMismatch;
+        std.debug.print("F3C bytes={d} saves={d} roundtrip=EXACT\n", .{
+            carrier.len, t5_bytes.len - carrier.len,
         });
     } else {
         std.debug.print("F3C bytes=none (T5 retained)\n", .{});
@@ -86,18 +123,49 @@ pub fn main() !void {
     const reps: usize = 20000;
     var begin = nanoseconds();
     for (0..reps) |_| {
-        const bytes = try t5.encode(allocator, words);
+        const bytes = try t5.encodeCoordinates(allocator, words);
         std.mem.doNotOptimizeAway(bytes);
         allocator.free(bytes);
     }
     const enc_ns = nanoseconds() - begin;
     begin = nanoseconds();
     for (0..reps) |_| {
-        const decoded = try t5.decode(allocator, t5_bytes);
+        const decoded = try t5.decodeCoordinates(allocator, t5_bytes);
         std.mem.doNotOptimizeAway(decoded);
         allocator.free(decoded);
     }
     const dec_ns = nanoseconds() - begin;
     std.debug.print("sample impl=zig op=encode ns_per_op={d} reps={d}\n", .{ enc_ns / reps, reps });
     std.debug.print("sample impl=zig op=decode ns_per_op={d} reps={d}\n", .{ dec_ns / reps, reps });
+}
+
+test "Zig 0.16 stdin ladder tool keeps exact bits, D10 and negatives" {
+    const allocator = std.testing.allocator;
+    const source = try parseWords(allocator,
+        "D2 10\n3 001\n10 0000000001\n");
+    defer allocator.free(source);
+    try std.testing.expectEqual(@as(usize, 3), source.len);
+    try std.testing.expectEqual(@as(u8, 3), source[1].width);
+    try std.testing.expectEqual(@as(u16, 1), source[1].bits);
+    try std.testing.expectEqual(@as(u8, 10), source[2].width);
+    try std.testing.expectEqual(@as(u16, 1), source[2].bits);
+
+    const physical = try t5.encodeCoordinates(allocator, source);
+    defer allocator.free(physical);
+    const roundtrip = try t5.decodeCoordinates(allocator, physical);
+    defer allocator.free(roundtrip);
+    try std.testing.expectEqualSlices(t5.Word, source, roundtrip);
+    try std.testing.expectError(error.UnsupportedDomainWidth,
+        t5.encode(allocator, source));
+
+    try std.testing.expectError(error.BadLine,
+        parseWords(allocator, "2 10 junk\n"));
+    try std.testing.expectError(error.WidthMismatch,
+        parseWords(allocator, "2 1\n"));
+    try std.testing.expectError(error.InvalidBit,
+        parseWords(allocator, "2 1x\n"));
+    try std.testing.expectError(error.BadWidth,
+        parseWords(allocator, "11 00000000000\n"));
+    try std.testing.expectError(error.EmptyProgram,
+        parseWords(allocator, "; only metadata\n"));
 }
