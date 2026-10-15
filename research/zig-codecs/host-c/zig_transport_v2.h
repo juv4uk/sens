@@ -44,6 +44,13 @@ ptrdiff_t sens_zig_t5_decode_be3(const uint8_t *src, size_t byte_len,
  */
 ptrdiff_t sens_zig_e1_encode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
+/* Strict, canonical E1 S3/v1 -> exact BE3 words (physical data only).
+ * On invalid CRC, noncanonical replay, alias or insufficient capacity,
+ * no output bytes are modified. This implementation caps E1 to 64 KiB
+ * per call; such a transport limit grants no semantic identity.
+ */
+ptrdiff_t sens_zig_e1_decode_be3(const uint8_t *src, size_t byte_len,
+                                 uint8_t *dst, size_t capacity);
 /* F3C pack returns -3 if tiny framing does not save space, not an error. */
 ptrdiff_t sens_zig_f3c_pack(const uint8_t *src, size_t len,
                              uint8_t *dst, size_t capacity);
