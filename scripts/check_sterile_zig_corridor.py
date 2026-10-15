@@ -18,6 +18,7 @@ MAIN = ROOT / "crates" / "sens-cli" / "src" / "main.rs"
 ABI = ROOT / "research" / "zig-codecs" / "transport_abi.zig"
 BUILD = ROOT / "crates" / "sens-cli" / "build.rs"
 F3C_ZIG = ROOT / "research" / "zig-codecs" / "f3c" / "f3c.zig"
+ROOT_ZIG = ROOT / "zig_transport_root.zig"
 
 BANNED_IN_CORRIDOR = re.compile(
     r"(?i)\b(ternary_transport|PhysicalT5Program|TRITS_BY_BYTE|"
@@ -469,6 +470,56 @@ def check_zig_f3c_semantic_firewall(source: str) -> None:
         raise CorridorBlocked("F3C_SEMANTIC_FIREWALL physical byte replay removed")
 
 
+def check_linter_zig_only(
+    main_source: str, rust_corridor: str, zig_root: str, build: str,
+) -> None:
+    """Release regression: historical Lisp asset bytes ONLY cross Zig C ABI.
+
+    This is a byte/provenance boundary, NOT SENS parsing, execution or domain
+    admission. Inspect active code rather than comments or test-only witnesses.
+    """
+    def live(source: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(source), flags=re.S)
+
+    main = live(main_source)
+    host = live(rust_corridor)
+    root = live(zig_root)
+    if (re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*linter\.lisp"', main)
+            or re.search(r'(?:fs|std::fs)::read(?:_to_string)?\s*\(\s*"[^"]*linter\.lisp"', main)):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Rust directly embeds or reads project Lisp")
+
+    helper = _route_between(main_source, "fn linter_source_zig_only(", "\nfn main() {")
+    helper = live(helper)
+    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
+            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
+            or "zig_transport::linter_source_bytes()?" not in helper
+            or "String::from_utf8(bytes)" not in helper
+            or "RUST_ZIG_ONLY: linter library requires Zig; no Rust project-source fallback" not in helper
+            or "fs::read" in helper or "include_str!" in helper):
+        raise CorridorBlocked("LINTER_ZIG_ONLY no live Zig-only source byte helper / fail-closed denial")
+    if ('let linter_lib = match linter_source_zig_only()' not in main
+            or "parse(&linter_lib)" not in main):
+        raise CorridorBlocked("LINTER_ZIG_ONLY CLI bypassed Zig asset ingress or SENS parser")
+
+    ffi = "sens_zig_linter_bytes_copy"
+    if (f"fn {ffi}(" not in host or host.count(f"{ffi}(") < 3
+            or "version()?;" not in host
+            or "let copied = unsafe" not in host
+            or "if copied != required" not in host
+            or "Ok(bytes)" not in host):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Rust lacks verified Zig ABI byte copy")
+
+    if (root.count('const linter_asset = @embedFile("lib/linter.lisp");') != 1
+            or f"pub export fn {ffi}(" not in root
+            or "if (capacity == 0) return @intCast(linter_asset.len);" not in root
+            or "if (capacity < linter_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);" not in root):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Zig ABI must copy exact original bytes or reject before writing")
+    if ('.arg("zig_transport_root.zig")' not in live(build)
+            or "cargo:rerun-if-changed=../../lib/linter.lisp" not in build):
+        raise CorridorBlocked("LINTER_ZIG_ONLY Cargo must build root Zig module and rebuild on source change")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -544,8 +595,13 @@ def check() -> list[str]:
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
-    check_main_t5_ingress(MAIN.read_text(encoding="utf-8"))
+    main_source = MAIN.read_text(encoding="utf-8")
+    check_main_t5_ingress(main_source)
     notes.append("sens-cli-main-zig-only-ingress")
+    if not ROOT_ZIG.is_file() or ROOT_ZIG.is_symlink():
+        raise CorridorBlocked("LINTER_ZIG_ONLY missing regular repository-root Zig asset module")
+    check_linter_zig_only(main_source, body, ROOT_ZIG.read_text(encoding="utf-8"), build)
+    notes.append("linter-zig-only-byte-carrier")
     return notes
 
 
