@@ -594,7 +594,7 @@ def self_test():
                 rc = scan(args)
             if rc != 1 or "UNINFORMATIVE-OUTPUT no diagnostic report" not in output.getvalue():
                 raise RuntimeError("missing focal receipt was silently ignored: " + label)
-        report.write_text("[]\\n", encoding="utf-8")
+        report.write_text("[]\n", encoding="utf-8")
         output = io.StringIO()
         with patch.dict(os.environ, focal_env), contextlib.redirect_stdout(output):
             rc = scan(args)
