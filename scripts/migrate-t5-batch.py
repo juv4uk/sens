@@ -183,6 +183,10 @@ def run(args: argparse.Namespace) -> dict:
         try:
             assert_no_links(repo, rel)
             assert_no_links(out, destination)
+            # Reviewed data may not masquerade as a runnable .sens even in
+            # bulk migration. Synthetic external corpora have no such authority.
+            if (repo / mig.NONPROGRAM_MANIFESTS[0][1]).exists():
+                mig.reject_reviewed_nonprogram_source(source, repo)
             if target.exists() or target.is_symlink():
                 raise ValueError("existing .sens output: overwrite forbidden")
             original = source.read_bytes()
