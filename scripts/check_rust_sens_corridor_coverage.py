@@ -153,15 +153,31 @@ def check(root: Path) -> list[str]:
         exempt[name] = entry
 
     crates_dir = root / "crates"
-    if not crates_dir.is_dir():
-        problems.append("no `crates/` directory")
+    if not crates_dir.is_dir() or crates_dir.is_symlink():
+        problems.append("no trustworthy `crates/` directory (missing or symlinked)")
         return problems
 
     used_exemptions: set[str] = set()
-    for crate in sorted(p for p in crates_dir.iterdir() if p.is_dir()):
+    # A symlink can make rglob omit a Rust subtree or follow source bytes
+    # outside the checkout. Neither outcome proves that all SENS edges were
+    # inventoried; no host (including the codec owner) can waive this gate.
+    for crate in sorted(p for p in crates_dir.iterdir() if p.is_dir() or p.is_symlink()):
         rel = f"crates/{crate.name}"
+        if crate.is_symlink():
+            problems.append(f"host `{rel}` is a symlink: Rust source inventory is not closed")
+            continue
+        src_root = crate / "src"
+        if src_root.is_symlink():
+            problems.append(f"host `{rel}` source `{rel}/src` is a symlink")
+            continue
+        if src_root.is_dir():
+            for link in sorted(p for p in src_root.rglob("*") if p.is_symlink()):
+                problems.append(
+                    f"host `{rel}` source `{link.relative_to(root).as_posix()}` "
+                    "is a symlink: Rust source inventory is not closed"
+                )
         if rel == CODEC_OWNER:
-            continue  # the codec owner is allowed to own the physical codec
+            continue  # only physical codec ownership is exempt, not path safety
         sources = _crate_sources(crate)
         # A Zig call in another source file does NOT attest this codec edge.
         # Per-file fail-closed coverage prevents unrelated calls from masking
