@@ -360,7 +360,7 @@ def parse_semantic_rows(path: Path):
     return rows
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
-                          semantic_registry: Path, necessary_forms: Path):
+                          semantic_registry: Path, necessary_forms: Path, admitted_d8=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     # Джерело міграції — тільки ратифіковані координати й перевірена
@@ -378,6 +378,10 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
             by_role=residents.get(normalize_role(name))
             if by_role is not None:
                 candidates.add(by_role)
+        # NEW REALITY: D8 is owner-ratified. An 8-bit registered name resolves to
+        # its current D8 coordinate when that coordinate is admitted.
+        if not candidates and byte in admitted_d8:
+            candidates.add((byte, "D8"))
         unique=next(iter(candidates)) if len(candidates)==1 else None
         for namespace,name in surfaces:
             # Uppercase historical names are reserved for pass 3.
@@ -1031,7 +1035,7 @@ def main():
     ap.add_argument("root", type=Path)
     ap.add_argument("--out", type=Path, required=True,
                     help="окрема вихідна папка; .lisp НЕ змінюється")
-    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d11-foundation.json")
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
     ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
     ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
@@ -1052,7 +1056,7 @@ def main():
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
-        args.semantic_registry, args.necessary_forms
+        args.semantic_registry, args.necessary_forms, admitted_d8
     )
     text7 = build_text7(data, args.text7)
     rows = []
