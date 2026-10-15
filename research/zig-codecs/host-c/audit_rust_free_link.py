@@ -28,7 +28,8 @@ T5 = BASE + "t5/t5.zig"
 F3C = BASE + "f3c/f3c.zig"
 SOURCE_PATHS = (C_FILE, HEADER, DRIVER, ZIG_ABI, T5, F3C, ".zig-version")
 EXPECTED_IMPORTS = {
-    ZIG_ABI: {"std", "t5/t5.zig", "f3c/f3c.zig"},
+    ZIG_ABI: {"std", "t5/t5.zig", "f3c/f3c.zig", "transport/e1.zig",
+              "transport/e1_writer.zig"},
     T5: {"std"},
     F3C: {"std", "../t5/t5.zig"},
 }
