@@ -51,7 +51,9 @@ fn main() {
         .arg("build-lib")
         .arg("zig_transport_root.zig")
         .arg("-O")
-        .arg("ReleaseFast")
+        // Zig ABI reads caller-owned physical bytes: keep optimization AND
+        // runtime safety checks at the default Rust-to-Zig ingress.
+        .arg("ReleaseSafe")
         .arg("-lc")
         .arg("-fPIC")
         .arg(format!("-femit-bin={}", archive.display()))
