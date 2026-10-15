@@ -1320,6 +1320,26 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
+      - name: Rust→project dependency ledger (Zig-only burndown)
+        # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
+        # corridor. This writes the burndown ledger and fails if a NEW direct
+        # dependency appeared -- the set may only shrink.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_rust_project_deps.py . --out "$RUNNER_TEMP/rust-project-deps.json"
+          if [ -f research/rust-project-deps.json ]; then
+            python3 scripts/report_rust_project_deps.py . --check
+          fi
+
+      - name: Upload Rust→project dependency ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-project-deps
+          path: ${{ runner.temp }}/rust-project-deps.json
+          if-no-files-found: warn
+
       - name: UNGUARDING ratchet — жоден guard не може бути муляжем
         # A guard that cannot fail is itself a failure. A placeholder/stub gate, or a
         # guard whose negative controls do not pass, fails here -- so a dummy gate
