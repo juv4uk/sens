@@ -5,7 +5,7 @@
 ;
 ; Migrated: duplicate mutually-exclusive EQ arms removed; NOT(ATOM) guard
 ; replaced by exact two-field D3 COND + D1 ATOM for empty. Fallback uses
-; (010 (001 ())) = D1:1. Width is identity; every bit of domain address valued.
+; #d1:1 is the explicit D1 text projection; canonical SENS carries the one-bit 1.
 
 (0011 mechanism-selector-registry
   (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
@@ -21,7 +21,7 @@
     (110
       ((010 sections) (001 ()))
       ((101 (100 (100 sections)) name) (100 sections))
-      ((010 (001 ()))
+      (#d1:1
        (mechanism-selector-find-section name (011 sections))))))
 
 (0011 mechanism-selector-routes
@@ -34,22 +34,22 @@
     (110
       ((010 rows) (001 no))
       ((101 sid (100 (100 rows))) (001 yes))
-      ((010 (001 ()))
+      (#d1:1
        (mechanism-selector-registry-has-sid? sid (011 rows))))))
 
 (0011 mechanism-selector-find-route
   (0010 (sid executor rows)
     (110
       ((010 rows) (001 ()))
-      ((010 (001 ()))
+      (#d1:1
        ((0010 (row)
           (110
             ((101 sid (100 row))
              (110
                ((101 executor (1001 row)) row)
-               ((010 (001 ()))
+               (#d1:1
                 (mechanism-selector-find-route sid executor (011 rows)))))
-            ((010 (001 ()))
+            (#d1:1
              (mechanism-selector-find-route sid executor (011 rows)))))
         (100 rows))))))
 
@@ -64,12 +64,12 @@
          (001 mechanism-selection-failure)
          (001 sid-not-in-function-table)
          sid))
-      ((010 (001 ()))
+      (#d1:1
        ((0010 (route)
           (110
             ((010 route)
              (1110 (001 mechanism-unavailable) sid executor))
-            ((010 (001 ()))
+            (#d1:1
              (1110 (001 mechanism-selected)
                sid executor (10011 route)))))
         (mechanism-selector-find-route
