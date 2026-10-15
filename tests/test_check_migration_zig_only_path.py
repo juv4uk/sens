@@ -165,6 +165,43 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
 
 
 
+    def test_verify_reference_instead_of_published_zig_bytes_is_blocked(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.verify_t5(zig_binary, packed)",
+            "zig_codec_bridge.verify_t5(zig_binary, reference_bytes)",
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M5:" in message and "verified-packed" in message
+                            for message in failures), failures)
+
+    def test_verify_different_binary_does_not_certify_published_bytes(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.verify_t5(zig_binary, packed)",
+            "zig_codec_bridge.verify_t5(other_binary, packed)",
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M5:" in message for message in failures), failures)
+
+    def test_carry_noncanonical_source_cannot_mint_staged_sens(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.carry_t5(zig_binary, projection)",
+            "zig_codec_bridge.carry_t5(zig_binary, reference_bytes)",
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M8:" in message for message in failures), failures)
+
+    def test_carry_unpinned_binary_cannot_mint_staged_sens(self) -> None:
+        self._mutate(
+            "scripts/migrate-t5-batch.py",
+            "zig_codec_bridge.carry_t5(zig_binary, projection)",
+            "zig_codec_bridge.carry_t5(other_binary, projection)",
+        )
+        failures = self.module.check(self.root)
+        self.assertTrue(any("M8:" in message for message in failures), failures)
+
     def test_python_reference_cannot_mint_published_bytes(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
                      "packed = zig_codec_bridge.carry_t5(zig_binary, projection)",
