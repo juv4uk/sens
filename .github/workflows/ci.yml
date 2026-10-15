@@ -1387,6 +1387,7 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Rust→project dependency ledger (Zig-only burndown)
+        id: rust_project_deps
         # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
         # corridor. This writes the burndown ledger and fails if a NEW direct
         # dependency appeared -- the set may only shrink.
@@ -1399,7 +1400,8 @@ jobs:
           fi
 
       - name: Upload Rust→project dependency ledger
-        if: always()
+        # A skipped producer has no file to upload; failures remain visible.
+        if: ${{ !cancelled() && steps.rust_project_deps.outcome != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: rust-project-deps
@@ -1414,6 +1416,7 @@ jobs:
         run: python3 scripts/check_guards_are_real.py .
 
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        id: release_go_gate
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
         # prints the GO count and names the red gates -- report-only, never greenwashed.
         shell: bash
@@ -1424,7 +1427,7 @@ jobs:
           exit 0
 
       - name: Upload release GO-gate report
-        if: always()
+        if: ${{ !cancelled() && steps.release_go_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: release-go-gate
@@ -1432,6 +1435,7 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — точний Q Rust-свідок, чесний статус SENS
+        id: math_exact_q
         if: ${{ !cancelled() }}
         # Rust runs the same Q corpus/checksum as the host-neutral reference.
         # SENS timing remains UNVERIFIED until an admitted physical .sens fixture exists.
@@ -1445,7 +1449,7 @@ jobs:
             --require-rust --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
-        if: always()
+        if: ${{ !cancelled() && steps.math_exact_q.outcome != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: math-bench-sens-vs-rust
