@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import os
 import re
+import stat
 from pathlib import Path
 import subprocess
 import tempfile
@@ -151,6 +152,37 @@ def _require_external_source_sha256(
 
 
 
+def _read_zig_output(path: Path, *, command: str) -> bytes:
+    """Read only this Zig subprocess's regular output; no symlink receipts.
+
+    The temporary path belongs to this operation. The inode before/opened/
+    after checks protect against a path being rebound during physical readback.
+    This is file provenance, never a semantic SENS verdict.
+    """
+    try:
+        before = path.lstat()
+        if not stat.S_ISREG(before.st_mode):
+            raise ZigCodecError(
+                f"ZIG_CODEC_OUTPUT_NOT_REGULAR layer=transport command={command}"
+            )
+        with path.open("rb") as stream:
+            physical = stream.read()
+            opened = os.fstat(stream.fileno())
+        after = path.lstat()
+    except OSError as error:
+        raise ZigCodecError(
+            f"ZIG_CODEC_OUTPUT_UNREADABLE layer=transport command={command}: {error}"
+        ) from error
+    inode = (before.st_dev, before.st_ino)
+    if (not stat.S_ISREG(after.st_mode)
+            or (opened.st_dev, opened.st_ino) != inode
+            or (after.st_dev, after.st_ino) != inode):
+        raise ZigCodecError(
+            f"ZIG_CODEC_OUTPUT_CHANGED layer=transport command={command}"
+        )
+    return physical
+
+
 def carry_t5(
     binary: Path, canonical_view: str, *,
     trusted_source_sha256: str | None = None,
@@ -171,7 +203,7 @@ def carry_t5(
         output = Path(directory) / "out.sens"
         source.write_bytes(raw_trits)
         _command([str(binary), "t5-carry", str(source), str(output)])
-        physical = output.read_bytes()
+        physical = _read_zig_output(output, command="t5-carry")
     _require_external_source_sha256(physical, trusted_source_sha256)
     if _built_executable_digest(binary) != binary_digest:
         raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_DURING_CARRY")
@@ -192,7 +224,7 @@ def verify_t5(
         # The migration verifier must use the explicit coordinate-only profile.
         _command([str(binary), "t5-coordinates-check", str(source)])
         _command([str(binary), "t5-coordinates-roundtrip", str(source), str(restored)])
-        replay = restored.read_bytes()
+        replay = _read_zig_output(restored, command="t5-coordinates-roundtrip")
         if replay != physical:
             a = hashlib.sha256(physical).hexdigest()
             b = hashlib.sha256(replay).hexdigest()
