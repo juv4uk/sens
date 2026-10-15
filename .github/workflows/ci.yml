@@ -1105,6 +1105,18 @@ jobs:
               --report-file "$report" \
               -- python3 -m unittest discover -s tests -p "$fixture" -v
           done
+      - name: Release admission — фізичний T5 не є семантичним F1–F4 оракулом
+        id: release-ledger-failclosed
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum scripts/check-release-admission-ledger.py tests/test_check_release_admission_ledger.py
+          python3 scripts/ci_failure_contract.py run \
+            --test-id release-admission-no-fake-f1-f4-oracle \
+            --layer encode \
+            --fixture tests/test_check_release_admission_ledger.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_check_release_admission_ledger.py -v
       - name: SID8 broad-source катовер — точні D6 MAP-сайти, історичні літерали не замінено
         id: sid8-broad-source
         shell: bash
