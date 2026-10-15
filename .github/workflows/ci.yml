@@ -221,7 +221,7 @@ jobs:
           # validator; a mere FFI declaration is insufficient evidence.
           # D10 passes coordinate-only, fails ordinary D9 executable ingress.
           echo 'test_id=rust-calls-zig-d10-coordinate-only layer=transport semantic_authority=SENS'
-          cargo test --locked -p sens-cli --bin sens-trit \
+          cargo test --locked -p sens-cli --lib \
             zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 \
             -- --exact --nocapture | tee "$RUNNER_TEMP/zig-d10-rust-host.log"
           grep -Fq 'test zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 ... ok' "$RUNNER_TEMP/zig-d10-rust-host.log"
