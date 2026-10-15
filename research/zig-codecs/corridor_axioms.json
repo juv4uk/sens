@@ -1,0 +1,96 @@
+{
+  "schema": "sens-corridor-axiom-binding/v1",
+  "axioms_doc": "docs/language-core-axioms.md",
+  "owner_rule": "#5777/#5779: the Rust<->SENS link crosses ONLY the sterile Zig corridor.",
+  "note": "Every corridor guard rule is DERIVED from a language-core axiom, not asserted ad hoc. The guard check_corridor_axiom_binding.py fails if a rule is unbound, if a cited axiom id does not exist in docs/language-core-axioms.md, or if a binding lacks a derivation.",
+  "bindings": [
+    {
+      "rule": "R1-corridor-default-on",
+      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "axioms": [
+        "G6",
+        "S2"
+      ],
+      "derivation": "G6: conformance is defined by observable behavior, not the host's architecture, so the corridor must be the DEFAULT transport, not an optional host-specific path. S2: a silent fallback to a Rust codec would be an unnamed failure."
+    },
+    {
+      "rule": "R2-build-requires-zig",
+      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "axioms": [
+        "G6",
+        "S2"
+      ],
+      "derivation": "G6: the Rust host must not be able to build a conforming CLI without the corridor. S2: build.rs asserts the pinned Zig and fails loudly, never silently reusing a stale transport."
+    },
+    {
+      "rule": "R3-physical-only-abi",
+      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "axioms": [
+        "G1",
+        "G5"
+      ],
+      "derivation": "G1: a value's meaning is observable behavior; the corridor carries only the implementation fact (width+payload), never a value's meaning. G5: the corridor lives above the implementation boundary and imports no semantic registry."
+    },
+    {
+      "rule": "R4-pinned-corridor-version",
+      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "axioms": [
+        "S2"
+      ],
+      "derivation": "S2: an unpinned corridor version could drift silently; the version is a named, observable constant."
+    },
+    {
+      "rule": "R5-host-neutral",
+      "guard": "scripts/check_rust_sens_zig_corridor.py",
+      "axioms": [
+        "G6",
+        "G7"
+      ],
+      "derivation": "G6: conformance by observable behavior means every host crosses the SAME corridor. G7: the same expression means the same thing everywhere, so no host may invent its own op."
+    },
+    {
+      "rule": "S1-physical-only-exports",
+      "guard": "scripts/check_sterile_zig_corridor.py",
+      "axioms": [
+        "G1"
+      ],
+      "derivation": "G1: the corridor exports only physical ops; it never assigns semantic identity."
+    },
+    {
+      "rule": "S2-no-semantic-import",
+      "guard": "scripts/check_sterile_zig_corridor.py",
+      "axioms": [
+        "G1",
+        "G5"
+      ],
+      "derivation": "G1/G5: a registry/host/semantic module crossing the corridor would leak a value's meaning into the transport."
+    },
+    {
+      "rule": "S3-no-host-struct",
+      "guard": "scripts/check_sterile_zig_corridor.py",
+      "axioms": [
+        "G1",
+        "G6"
+      ],
+      "derivation": "G1/G6: a padded host struct is a host representation fact; the corridor uses caller-owned triplets so no host layout is observable."
+    },
+    {
+      "rule": "S4-sterility-contract-declared",
+      "guard": "scripts/check_sterile_zig_corridor.py",
+      "axioms": [
+        "S2"
+      ],
+      "derivation": "S2: sterility is a named, declared contract, not an implied assumption."
+    },
+    {
+      "rule": "C1-host-coverage",
+      "guard": "scripts/check_rust_sens_corridor_coverage.py",
+      "axioms": [
+        "G6",
+        "G7",
+        "S2"
+      ],
+      "derivation": "G6/G7: every Rust<->SENS host crosses the one corridor. S2: a bypass must be a named, registered exemption, never a silent path."
+    }
+  ]
+}
