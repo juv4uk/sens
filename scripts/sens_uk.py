@@ -71,8 +71,10 @@ def render_words(words: list[str], surfaces: dict[str, str]) -> str:
             result.append("(")
             frames.append(0)
         elif word == "01":  # D2 close
-            if not frames or frames[-1] != 1:
-                raise C.SensT5Error("unbalanced/empty D2 list; use D3 EMPTY")
+            if not frames:
+                raise C.SensT5Error("unbalanced D2 close with no open list")
+            # frames[-1] == 0 means no items were written: the empty list, which
+            # renders as (); the canonical empty value is 000 (D3 EMPTY).
             frames.pop()
             result.append(")")
         elif word == "00":  # D2 separator
