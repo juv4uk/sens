@@ -158,6 +158,28 @@ def declarations(source: str, language: str) -> dict:
     return {name: found[name][0] for name in EXPECTED}
 
 
+def compiled_c_declarations(header: str) -> dict:
+    """The C preprocessor, not source regex, decides the active Zig ABI surface.
+
+    No library links and no SENS semantic interpretation: this is the
+    physically visible declaration contract under the existing C11 toolchain.
+    """
+    cc = shutil.which("cc")
+    if cc is None:
+        fail("toolchain", "missing_cc_for_preprocessed_abi")
+    try:
+        result = subprocess.run(
+            [cc, "-std=c11", "-E", "-P", "-x", "c", "-"],
+            input=header, text=True, capture_output=True, cwd=ROOT,
+            check=False, timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        fail("toolchain", f"preprocess_unavailable={type(exc).__name__}")
+    if result.returncode != 0:
+        fail("c", f"preprocess_failed_exit={result.returncode} stderr={result.stderr[-800:]}")
+    return declarations(result.stdout, "c")
+
+
 def check_contract(zig: str, rust: str, header: str) -> None:
     zig, rust, header = (strip_c_comments(source) for source in (zig, rust, header))
     if 'unsafe extern "C" {' not in rust:
@@ -252,6 +274,33 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         cls.zig = ZIG_PATH.read_text(encoding="utf-8")
         cls.rust = RUST_PATH.read_text(encoding="utf-8")
         cls.header = C_PATH.read_text(encoding="utf-8")
+
+    def test_preprocessed_c11_abi_matches_zig_and_rejects_if0_ghost(self):
+        """A C prototype hidden under #if 0 must never count as Zig ABI v2."""
+        visible = compiled_c_declarations(self.header)
+        self.assertEqual(visible, declarations(strip_c_comments(self.header), "c"))
+        self.assertEqual(visible, declarations(strip_c_comments(self.zig), "zig"))
+        self.assertEqual(visible, declarations(strip_c_comments(self.rust), "rust"))
+
+        # A source-only regex sees this prototype, but C11 does NOT.
+        match = re.search(
+            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\\([^;]*?;", self.header,
+        )
+        self.assertIsNotNone(match, "canonical C F3C prototype missing")
+        original = match.group(0)
+        mutant = self.header.replace(
+            original, "#if 0\n" + original + "\n#endif", 1,
+        )
+        self.assertNotEqual(mutant, self.header)
+        self.assertEqual(
+            declarations(strip_c_comments(mutant), "c"),
+            declarations(strip_c_comments(self.header), "c"),
+            "precondition: raw source guard must still see ghost declaration",
+        )
+        with self.assertRaisesRegex(
+            ValueError, r"missing_or_duplicate=sens_zig_f3c_unpack",
+        ):
+            compiled_c_declarations(mutant)
 
     def test_current_zig_rust_c_physical_signatures_agree(self):
         check_contract(self.zig, self.rust, self.header)
