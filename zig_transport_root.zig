@@ -121,6 +121,28 @@ test "opaque linter bytes cross Zig without partial writes or semantic registry"
     try std.testing.expectEqualSlices(u8, linter_asset[0..linter_asset.len], &output);
 }
 
+
+// Ukrainian API documentation is a SENS-owned source. Zig only copies bytes.
+const uk_docs_asset = @embedFile("lib/surface/uk-docs.lisp");
+pub export fn sens_zig_uk_docs_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (uk_docs_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(uk_docs_asset.len);
+    if (capacity < uk_docs_asset.len) return -2;
+    @memcpy(dst[0..uk_docs_asset.len], uk_docs_asset[0..uk_docs_asset.len]);
+    return @intCast(uk_docs_asset.len);
+}
+
+test "Ukrainian API docs exact Zig bytes and no partial short-buffer write" {
+    const required = sens_zig_uk_docs_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(uk_docs_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_uk_docs_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [uk_docs_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_uk_docs_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, uk_docs_asset[0..uk_docs_asset.len], &output);
+}
+
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");

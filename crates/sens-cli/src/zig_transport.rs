@@ -150,6 +150,33 @@ pub fn islands_manifest_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+/// SENS-owned Ukrainian API docs cross only root Zig's opaque exact-byte ABI.
+/// No Rust include_str! or native source-file read may bypass the corridor.
+pub fn uk_docs_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_uk_docs_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0
+        )
+    };
+    if required <= 0 {
+        return Err("ZIG_UK_DOCS_CARRIER invalid source length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_UK_DOCS_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_UK_DOCS_CARRIER source exceeds host byte limit".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_uk_docs_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_UK_DOCS_CARRIER byte copy rejected: code={copied}"));
+    }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],
