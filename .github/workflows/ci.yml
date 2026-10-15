@@ -53,6 +53,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Physical bytes must never be overwritten by a JSON receipt.
+          # Host path safety is tested before any Rust/Zig binary is invoked.
+          echo 'test_id=zig-t5-report-no-overwrite layer=transport expected=reject-report-inside-sens-mirror'
+          python3 -m unittest discover -s tests -p test_migrate_t5_batch_path_preflight.py -v
           # Positive: linked Zig 0.16 ABI decodes a real .sens and byte-exact replays it.
           cargo test --locked -p sens-cli --bin sens-trit rust_zig_only_cutover_tests -- --nocapture
           # Negative: without Zig no physical operation may touch a file or select Rust.
