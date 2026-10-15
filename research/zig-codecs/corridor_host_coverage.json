@@ -1,0 +1,13 @@
+{
+  "schema": "sens-rust-sens-corridor-coverage/v1",
+  "owner_rule": "#5777/#5779: the Rust<->SENS link crosses ONLY the sterile Zig corridor.",
+  "codec_owner": "crates/sens",
+  "corridor": "crates/sens-cli (zig_transport / sens_zig_* ABI v2, default feature)",
+  "exemptions": [
+    {
+      "crate": "crates/sens-embed",
+      "reason": "C ABI embedding boundary reaches SENS via sens::encode_binary_frame/decode_binary_frame (the sens crate codec), not the Zig corridor. Migration to the corridor is part of the host-neutral work.",
+      "issue": 5787
+    }
+  ]
+}
