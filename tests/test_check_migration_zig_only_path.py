@@ -402,6 +402,26 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
             self.assertFalse((dest / "d4.sens").exists())
             self.assertFalse((dest / "d4").exists())
 
+            # The parallel/batch producer must not evade the same barrier.
+            bulk = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/migrate-t5-batch.py"),
+                 "lib/domains/d4.lisp", "--root", str(ROOT),
+                 "--out", str(dest / "bulk-out"),
+                 "--report", str(dest / "bulk-report.json")],
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+            self.assertEqual(bulk.returncode, 2, bulk.stdout + bulk.stderr)
+            bulk_report = json.loads(
+                (dest / "bulk-report.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(bulk_report["summary"]["files_blocked"], 1)
+            self.assertEqual(bulk_report["summary"]["files_would_write"], 0)
+            self.assertIn(
+                "NONPROGRAM_DATA_NOT_EXECUTABLE",
+                bulk_report["files"][0]["reason"],
+            )
+            self.assertFalse((dest / "bulk-out/lib/domains/d4.sens").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
