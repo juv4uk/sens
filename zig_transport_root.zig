@@ -209,6 +209,29 @@ test "forward REPL source exact Zig C bytes; short buffer stays unchanged" {
     try std.testing.expectEqualSlices(u8, forward_asset[0..forward_asset.len], &output);
 }
 
+// Original SENS knowledge library; Zig copies bytes and never defines meaning.
+const knowledge_asset = @embedFile("lib/knowledge.lisp");
+pub export fn sens_zig_knowledge_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (knowledge_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(knowledge_asset.len);
+    if (capacity < knowledge_asset.len) return -2;
+    @memcpy(dst[0..knowledge_asset.len], knowledge_asset[0..knowledge_asset.len]);
+    return @intCast(knowledge_asset.len);
+}
+
+test "knowledge SENS source exact Zig C ABI bytes; no-clobber on short buffer" {
+    const length = sens_zig_knowledge_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(knowledge_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_knowledge_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [knowledge_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length,
+        sens_zig_knowledge_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, knowledge_asset[0..knowledge_asset.len], &output);
+}
+
 // Release-islands manifest is opaque distribution data. Zig transports
 // exact checked-in bytes; Rust validates the JSON protocol, not the wire.
 const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");

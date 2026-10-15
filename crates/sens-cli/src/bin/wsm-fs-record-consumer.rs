@@ -11,7 +11,7 @@ mod zig_transport;
 
 // A host may request exact SENS source bytes only from the compiled Zig ABI.
 // Zig never decides what these sources mean and no Rust fallback is permitted.
-fn zig_bootstrap_sources() -> Result<[String; 3], String> {
+fn zig_bootstrap_sources() -> Result<[String; 4], String> {
     #[cfg(feature = "zig-transport")]
     {
         let unify = String::from_utf8(zig_transport::unify_source_bytes()?)
@@ -20,7 +20,9 @@ fn zig_bootstrap_sources() -> Result<[String; 3], String> {
             .map_err(|error| format!("ZIG_F6_REASON_CARRIER invalid UTF-8: {error}"))?;
         let forward = String::from_utf8(zig_transport::forward_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_FORWARD_CARRIER invalid UTF-8: {error}"))?;
-        Ok([unify, reason, forward])
+        let knowledge = String::from_utf8(zig_transport::knowledge_source_bytes()?)
+            .map_err(|error| format!("ZIG_F6_KNOWLEDGE_CARRIER invalid UTF-8: {error}"))?;
+        Ok([unify, reason, forward, knowledge])
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -55,12 +57,12 @@ fn main() {
         ("lib/unify.lisp", sources[0].as_str()),
         ("lib/reason.lisp", sources[1].as_str()),
         ("lib/forward.lisp", sources[2].as_str()),
+        ("lib/knowledge.lisp", sources[3].as_str()),
     ] {
         sens::eval_pinned_reasoning_source(path, source, &mut session)
             .expect("Zig-owned F6 bootstrap source must load in SENS");
     }
     for (path, source) in [
-        ("lib/knowledge.lisp", include_str!("../../../../lib/knowledge.lisp")),
         ("lib/persistent-map.lisp", include_str!("../../../../lib/persistent-map.lisp")),
         ("lib/world.lisp", include_str!("../../../../lib/world.lisp")),
         ("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp")),
