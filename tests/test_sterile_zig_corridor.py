@@ -339,6 +339,25 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("eval_physical_t5", live_main)
         self.assertNotIn("#[cfg(test)]", live_main)
 
+    def test_main_zig_ingress_rejects_comment_only_spoof(self) -> None:
+        """Zig names in comments never prove a Rust -> Zig physical ingress."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_main_t5_ingress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        check(source)  # Positive: the live production Zig return exists.
+        live = "return zig_transport::decode_t5_words(bytes);"
+        self.assertIn(live, source)
+        mutant = source.replace(
+            live,
+            '// return zig_transport::decode_t5_words(bytes);\n'
+            '        return Err("physical bytes never crossed Zig".into());',
+            1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(blocked, "live Zig return"):
+            check(mutant)
+
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
