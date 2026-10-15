@@ -37,8 +37,28 @@ def _binary_sha256(path: Path) -> str:
         raise ZigCodecError(f"ZIG_CODEC_BINARY_UNREADABLE: {error}") from error
 
 
+def _reject_linked_path_components(path: Path) -> None:
+    """Bind the Zig executable to an unaliased physical pathname.
+
+    A symlink parent can resolve to the *same* SHA-attested binary while
+    disguising its physical location. Do this before invoking Zig and
+    before accepting its output. This is provenance, not SENS semantics.
+    """
+    if ".." in path.parts:
+        raise ZigCodecError(f"ZIG_CODEC_BINARY_NONCANONICAL_PATH path={path}")
+    absolute = path.absolute()
+    current = Path(absolute.anchor)
+    for part in absolute.parts[1:]:
+        current = current / part
+        if current.is_symlink():
+            raise ZigCodecError(
+                f"ZIG_CODEC_BINARY_NOT_REGULAR linked_component={current}"
+            )
+
+
 def _built_executable_digest(binary: Path) -> str:
-    # A symlink (even to a valid Zig build) hides the actual run target.
+    # The SHA is necessary but NOT sufficient if a parent aliases the file.
+    _reject_linked_path_components(binary)
     if binary.is_symlink() or not binary.is_file():
         raise ZigCodecError("ZIG_CODEC_BINARY_NOT_REGULAR")
     try:
@@ -92,13 +112,17 @@ def pinned_compiler() -> str:
 
 
 def build_transport(directory: Path) -> Path:
+    binary = directory / "sens-zig-transport"
+    # Refuse a redirected output location before probing the compiler or
+    # executing any build command, including if the binary does not exist.
+    _reject_linked_path_components(binary)
     compiler = pinned_compiler()
     directory.mkdir(parents=True, exist_ok=True)
-    binary = directory / "sens-zig-transport"
     if binary.exists() or binary.is_symlink():
         raise ZigCodecError("ZIG_CODEC_OUTPUT_EXISTS: refusing overwrite")
     _command([compiler, "build-exe", SOURCE, "-O", "ReleaseFast", "-lc",
               f"-femit-bin={binary}"])
+    _reject_linked_path_components(binary)
     if binary.is_symlink() or not binary.is_file():
         raise ZigCodecError("ZIG_CODEC_MISSING_BUILT_BINARY")
     _BUILT_TRANSPORT_DIGESTS[binary.resolve(strict=True)] = _binary_sha256(binary)

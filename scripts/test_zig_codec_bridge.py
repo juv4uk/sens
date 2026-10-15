@@ -118,6 +118,21 @@ def main() -> None:
         else:
             raise AssertionError("ZIG_CODEC_LINKED_BINARY_RECEIPT accepted symlink")
 
+        # Linking a DIRECTORY to the already trusted build leaves both the
+        # ELF bytes and sha256 unchanged. Never accept this alias as provenance.
+        linked_dir = Path(temp) / "linked-build-directory"
+        linked_dir.symlink_to(executable.parent, target_is_directory=True)
+        redirected = linked_dir / executable.name
+        if sha(redirected.read_bytes()) != binary_sha:
+            raise AssertionError("ZIG_CODEC_LINKED_PARENT_TEST_FIXTURE_DRIFT")
+        try:
+            verify_t5(redirected, GOLDEN_T5)
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_BINARY_NOT_REGULAR" not in str(exc):
+                raise AssertionError(f"wrong linked parent rejection: {exc}") from exc
+        else:
+            raise AssertionError("ZIG_CODEC_LINKED_PARENT_RECEIPT accepted symlink parent")
+
         # Distinct widths produce distinct canonical bytes, even with a common
         # low-order value. Physical bytes never imply function callability.
         if bytes.fromhex(GOLDEN_WIDTH_VECTORS["d1_one"]) == bytes.fromhex(
