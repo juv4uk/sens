@@ -12,6 +12,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "research" / "zig-codecs"
@@ -26,6 +27,28 @@ BANNED = {
         r"(?i)\b(?:old|flat)[\s._-]*(?:opcode|registry|dispatch|identity)\b"
     ),
 }
+
+
+class ZigSourceBlocked(ValueError):
+    """Tracked Zig path cannot be trusted as a regular checkout source."""
+
+
+def tracked_source_bytes(root: Path, relative: Path) -> bytes:
+    """Reject missing Zig files and links, including links in parent paths.
+
+    Scanning a link target would inspect bytes not belonging to the tracked
+    Zig source path and could produce a misleading purity PASS.
+    """
+    if relative.is_absolute() or not relative.parts or ".." in relative.parts:
+        raise ZigSourceBlocked("invalid-zig-source-path")
+    source = root
+    for part in relative.parts:
+        source = source / part
+        if source.is_symlink():
+            raise ZigSourceBlocked("linked-zig-source")
+    if not source.is_file():
+        raise ZigSourceBlocked("missing-or-nonregular-zig-source")
+    return source.read_bytes()
 
 
 def scan(path, content):
@@ -53,7 +76,30 @@ def self_test():
                  "// historical Rust comparison using lib/core.lisp",
                  "// physical byte parity, SENS exact-domain semantic tests"):
         assert not scan(path, good), f"unexpected role restriction: {good!r}"
-    print("ZIG_PURITY_SELF_TEST_PASS: retired IDs rejected; imports and language roles unrestricted")
+    # A tracked Zig symlink must never scan external/untracked target bytes.
+    with TemporaryDirectory(prefix="sens-zig-purity-") as temp:
+        root = Path(temp)
+        regular = root / "valid.zig"
+        regular.write_bytes(b"pub const width: u8 = 7;\n")
+        if tracked_source_bytes(root, Path("valid.zig")) != regular.read_bytes():
+            raise AssertionError("normal tracked Zig file became unreadable")
+        (root / "linked.zig").symlink_to(regular)
+        (root / "source-dir").mkdir()
+        (root / "source-dir" / "nested.zig").write_bytes(b"pub const x = 1;\n")
+        (root / "linked-dir").symlink_to(root / "source-dir", target_is_directory=True)
+        for relative, expected in (
+            ("linked.zig", "linked-zig-source"),
+            ("linked-dir/nested.zig", "linked-zig-source"),
+            ("absent.zig", "missing-or-nonregular-zig-source"),
+        ):
+            try:
+                tracked_source_bytes(root, Path(relative))
+            except ZigSourceBlocked as exc:
+                if str(exc) != expected:
+                    raise AssertionError(f"wrong fail-closed reason for {relative}: {exc}") from exc
+            else:
+                raise AssertionError(f"tracked Zig source bypassed fail-closed: {relative}")
+    print("ZIG_PURITY_SELF_TEST_PASS: retired IDs rejected; regular/symlink/missing controls passed")
 
 
 def audit(report_path):
@@ -71,8 +117,19 @@ def audit(report_path):
             "reason": "missing-reference-module", "marker": "",
         })
     for path in scoped:
-        raw_bytes = (ROOT / path).read_bytes()
-        digest.update(path.as_posix().encode("utf-8") + b"\0" + raw_bytes + b"\0")
+        digest.update(path.as_posix().encode("utf-8") + b"\0")
+        try:
+            raw_bytes = tracked_source_bytes(ROOT, path)
+        except (ZigSourceBlocked, OSError) as exc:
+            # Source unavailable: the receipt records a FAIL, not target bytes.
+            digest.update(b"\0")
+            failures.append({
+                "path": str(path), "line": 0,
+                "reason": str(exc) if isinstance(exc, ZigSourceBlocked) else "unreadable-zig-source",
+                "marker": "",
+            })
+            continue
+        digest.update(raw_bytes + b"\0")
         try:
             failures.extend(scan(path, raw_bytes.decode("utf-8")))
         except UnicodeDecodeError:
