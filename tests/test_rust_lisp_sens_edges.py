@@ -56,6 +56,50 @@ class RustLispSensEdgesTests(unittest.TestCase):
         self.assertEqual(data["verdict"], "EDGES_BLOCKED")
         self.assertEqual(self.mod.main(["--root", str(ROOT)]), 1)
 
+    def test_literal_concat_embeds_are_exact_direct_rust_sens_edges(self) -> None:
+        """Compiler expands concat! before embed; split paths must stay RED."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            crate = root / "crates/demo/src"
+            crate.mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("(001)\n", encoding="utf-8")
+            (root / "lib/packed.sens").write_bytes(b"\x00")
+            source = crate / "lib.rs"
+            source.write_text(
+                'const A: &str = include_str!(concat!("../../../lib/", "core.lisp"));\n'
+                'const B: &[u8] = include_bytes!(concat!("../../../lib/", "packed.sens"));\n'
+                'const C: &str = include_str!(concat!("../../../README", ".md"));\n'
+                'const D: &str = include_str!("../../../lib/core.lisp");\n',
+                encoding="utf-8",
+            )
+            edges = self.mod.scan_file(source, root)
+            self.assertEqual(len(edges), 3, edges)
+            self.assertEqual(
+                [(edge["kind"], edge["target"], edge["line"]) for edge in edges],
+                [
+                    ("include_str", "lib/core.lisp", 1),
+                    ("include_bytes", "lib/packed.sens", 2),
+                    ("include_str", "lib/core.lisp", 4),
+                ],
+            )
+            self.assertTrue(all(edge["exists"] for edge in edges))
+            self.assertTrue(all(edge["status"] == "RED" for edge in edges))
+            self.assertTrue(all(edge["violation"] == "DIRECT_RUST_PROJECT_EMBED"
+                                for edge in edges))
+
+    def test_concat_non_sens_asset_remains_unblocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            crate = root / "crates/demo/src"
+            crate.mkdir(parents=True)
+            source = crate / "lib.rs"
+            source.write_text(
+                'const TEXT: &str = include_str!(concat!("../../../README", ".md"));\n',
+                encoding="utf-8",
+            )
+            self.assertEqual(self.mod.scan_file(source, root), [])
+
     def test_empty_production_tree_is_ok(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
