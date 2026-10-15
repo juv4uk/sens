@@ -284,7 +284,14 @@ fn install_root(args: &[String]) -> String {
         .into_owned()
 }
 
-const EMBEDDED_MANIFEST: &str = include_str!("../../../packaging/islands-manifest-v1.json");
+/// Root Zig asset copies the exact release-manifest bytes into caller memory.
+/// No direct Rust project-source embed, no fallback to a different authority.
+fn embedded_manifest_via_zig() -> Result<Manifest, String> {
+    let bytes = crate::zig_transport::islands_manifest_bytes()?;
+    let source = std::str::from_utf8(&bytes)
+        .map_err(|error| format!("ZIG_ISLANDS_MANIFEST_CARRIER invalid UTF-8: {error}"))?;
+    load_manifest_str(source, "zig-root-asset")
+}
 
 // Manifest validation is distribution contract validation only; it cannot mint semantic authority.
 fn load_manifest_str(source: &str, origin: &str) -> Result<Manifest, String> {
@@ -472,7 +479,7 @@ fn load_manifest(args: &[String]) -> Result<Manifest, String> {
         let _ = fs::remove_file(&temporary);
     }
 
-    load_manifest_str(EMBEDDED_MANIFEST, "embedded-default")
+    embedded_manifest_via_zig()
 }
 
 fn requested_keys(manifest: &Manifest, args: &[String]) -> Result<Vec<String>, String> {
@@ -1449,5 +1456,23 @@ pub fn run(args: &[String]) -> Result<String, String> {
             Ok(rows.join("\n"))
         }
         _ => Err(format!("unknown islands command: {command}")),
+    }
+}
+
+#[cfg(test)]
+mod zig_islands_manifest_tests {
+    use super::*;
+
+    #[test]
+    fn root_zig_release_manifest_exact_bytes_and_validated_protocol() {
+        let bytes = crate::zig_transport::islands_manifest_bytes().expect("Zig byte ferry");
+        assert!(!bytes.is_empty(), "empty release JSON is never admitted");
+        let source = std::str::from_utf8(&bytes).expect("manifest must be UTF-8");
+        let parsed = load_manifest_str(source, "zig-root-asset")
+            .expect("only the host validates release manifest protocol");
+        assert_eq!(parsed.protocol, "my-lisp-islands-manifest/1");
+        let via_wrapper = embedded_manifest_via_zig().expect("same Zig source");
+        assert_eq!(via_wrapper.protocol, parsed.protocol);
+        assert_eq!(via_wrapper.islands.len(), parsed.islands.len());
     }
 }
