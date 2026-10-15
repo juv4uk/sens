@@ -246,6 +246,35 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(source.replace(old, replacement, 1))
 
+
+    def test_explain_must_use_typed_words_not_rust_text_reparse(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_explain_typed_word_route"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(
+            encoding="utf-8"
+        )
+        check(source)
+        for old, fake in (
+            (
+                "sens::parse_canonical_word_sequence(&words)",
+                "sens::parse_canonical_binary(&sens::render_ternary_words_vertical(&words))",
+            ),
+            (
+                "zig_transport::decode_t5_words(bytes)",
+                "sens::decode_ternary_words(bytes)",
+            ),
+            (
+                "sens::parse_canonical_word_sequence(&words)",
+                'sens::parse_canonical_word_sequence(&words) /* ignored */;\n'
+                'let _ = sens::render_ternary_words_vertical(&words);',
+            ),
+        ):
+            with self.subTest(mutation=old):
+                self.assertIn(old, source)
+                with self.assertRaises(blocked):
+                    check(source.replace(old, fake, 1))
+
     def test_trit_default_egress_rejects_rust_codec_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_trit_t5_egress"]

@@ -165,6 +165,30 @@ def check_trit_t5_egress(source: str) -> None:
         raise CorridorBlocked("sens-trit companion Rust reference is not explicitly isolated")
 
 
+def check_trit_explain_typed_word_route(source: str) -> None:
+    """The real Zig T5 ingress must feed SENS typed words, never a text reparse."""
+    route = _route_between(
+        source, "fn explain_t5_bytes(", "\n/// Fail before file access"
+    )
+    live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
+    zig_marker = '#[cfg(feature = "zig-transport")]'
+    if live.count(zig_marker) != 1:
+        raise CorridorBlocked("sens-trit explain missing sole Zig physical branch")
+    active = live.split(zig_marker, 1)[1]
+    if "zig_transport::decode_t5_words(bytes)" not in active:
+        raise CorridorBlocked("sens-trit explain bypasses physical Zig T5 ingress")
+    if "sens::parse_canonical_word_sequence(&words)" not in active:
+        raise CorridorBlocked("sens-trit explain does not admit exact SENS words")
+    for forbidden in (
+        "sens::parse_canonical_binary(", "sens::render_ternary_words_vertical(",
+        "sens::decode_ternary_words(", "sens::PhysicalT5Program::decode(",
+    ):
+        if forbidden in live:
+            raise CorridorBlocked(f"sens-trit explain reinterprets T5: {forbidden}")
+    if "no Rust fallback" not in live.split(zig_marker, 1)[0]:
+        raise CorridorBlocked("sens-trit explain must refuse when Zig is missing")
+
+
 def check_trit_e1_egress(source: str) -> None:
     """One E1 physical export MUST be Zig->SENS-owned admission->Zig."""
     route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn eval_e1_bytes(")
@@ -466,6 +490,8 @@ def check() -> list[str]:
         raise CorridorBlocked("sens-trit.rs does not call zig_transport corridor API")
     check_trit_t5_egress(trit)
     notes.append("sens-trit-zig-only-egress")
+    check_trit_explain_typed_word_route(trit)
+    notes.append("sens-trit-zig-typed-explain")
     check_trit_f3_no_rust_fallback(trit)
     notes.append("sens-trit-zig-only-f3c-ingress-egress")
     check_trit_t5_execution(trit)

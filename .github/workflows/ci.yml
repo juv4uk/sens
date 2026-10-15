@@ -149,6 +149,9 @@ jobs:
           cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          # Executable Zig -> BinarySourceWord -> SENS D2 parse; no text round-trip.
+          echo 'test_id=zig-typed-word-explain layer=parse semantic_authority=SENS'
+          cargo test --locked -p sens-cli --bin sens-trit explain_ -- --nocapture
           python3 scripts/ci_zig_purity.py --self-test
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
           # The single auto-CI must audit the real Rust↔Zig source route,

@@ -293,10 +293,9 @@ fn eval_t5_bytes_core4(
             .map_err(|e| format!("current SENS evaluator rejected: {e}"))
     }
 }
-/// Diagnose why a physical packed T5 file fails the existing canonical D2
-/// parser. No second grammar and no implicit program execution: each exact
-/// binary word becomes a line so the existing error renderer's line is the
-/// failed word coordinate in the physical SENS stream.
+/// Diagnose a physical packed T5 file without converting typed words to
+/// textual source. Zig owns T5 bytes; SENS owns D2 structure and diagnostics.
+/// Report virtual packed-word byte spans, NEVER pretend they are file offsets.
 fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
     // Keep physical failures separate from SENS D2 grammar diagnostics:
     // unlike open/decode, explain must see the words before D2 admission.
@@ -309,11 +308,10 @@ fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
     {
         let words = zig_transport::decode_t5_words(bytes)
             .map_err(|e| format!("physical T5 transport rejected: {e}"))?;
-        let projection = sens::render_ternary_words_vertical(&words);
-        sens::parse_canonical_binary(&projection)
+        sens::parse_canonical_word_sequence(&words)
             .map_err(|e| format!(
-                "D2 grammar rejected (one exact typed word per line): {}",
-                e.render(&projection)
+                "D2 grammar rejected (typed words; virtual payload byte span {}..{}): {e}",
+                e.span.start, e.span.end
             ))?;
         Ok(format!(
             "D2 syntax PASS; {} typed words; semantic oracle NOT_VERIFIED",
@@ -843,7 +841,7 @@ mod eval_tests {
         ).expect("physically packed bytes");
         let err = explain_t5_bytes(&trits).expect_err("unbalanced D2 syntax");
         assert!(err.contains("D2 grammar rejected"), "{err}");
-        assert!(err.contains("one exact typed word per line"), "{err}");
+        assert!(err.contains("typed words; virtual payload byte span"), "{err}");
         assert!(!err.contains("D2 syntax PASS"), "{err}");
     }
 
@@ -902,10 +900,13 @@ mod eval_tests {
         let explain_end = source[explain_start..].find("\n}\n").unwrap() + explain_start + 3;
         let explain_body = &source[explain_start..explain_end];
         let feature_branch = explain_body
-            .split("#[cfg(not(feature = \"zig-transport\"))]")
-            .next().unwrap();
+            .split("#[cfg(feature = \"zig-transport\")]")
+            .nth(1).expect("Zig-active explain route");
         assert!(feature_branch.contains("zig_transport::decode_t5_words(bytes)"));
+        assert!(feature_branch.contains("sens::parse_canonical_word_sequence(&words)"));
         assert!(!feature_branch.contains("sens::decode_ternary_words(bytes)"));
+        assert!(!feature_branch.contains("sens::parse_canonical_binary("));
+        assert!(!feature_branch.contains("sens::render_ternary_words_vertical("));
         assert!(explain_body.contains("D2 grammar rejected"));
     }
 
