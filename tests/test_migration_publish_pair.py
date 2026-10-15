@@ -114,5 +114,33 @@ class SameStemPublicationTest(unittest.TestCase):
         self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
         self.assertFalse(self.view.exists())
 
+    def test_successful_writer_with_wrong_bytes_cannot_publish_view(self):
+        # A successful write is insufficient for verified T5 publication.
+        def writes_wrong_bytes(path, data):
+            self.write_new(path, b"wrong" if path == self.carrier else data)
+
+        with self.assertRaisesRegex(OSError, "PAIR_CARRIER_CREATION_UNVERIFIED"):
+            self.publish(writes_wrong_bytes)
+        self.assertEqual(self.carrier.read_bytes(), b"wrong")
+        self.assertFalse(self.view.exists())
+
+    def test_successful_writer_with_symlink_carrier_cannot_publish_view(self):
+        # An alias can contain the same bytes while being a different object.
+        target = self.root / "external"
+        target.write_bytes(self.carrier_bytes)
+
+        def writes_symlink(path, data):
+            if path == self.carrier:
+                path.symlink_to(target)
+            else:
+                self.write_new(path, data)
+
+        with self.assertRaisesRegex(OSError, "PAIR_CARRIER_CREATION_UNVERIFIED"):
+            self.publish(writes_symlink)
+        self.assertTrue(self.carrier.is_symlink())
+        self.assertEqual(target.read_bytes(), self.carrier_bytes)
+        self.assertFalse(self.view.exists())
+
+
 if __name__ == "__main__":
     unittest.main()
