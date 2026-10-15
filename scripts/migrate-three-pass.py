@@ -371,6 +371,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
     # сумісності наявних викликів інструмента; їхній вміст не читається.
     sem_rows=parse_semantic_rows(semantic_generated)
 
+    _bridge_by_sid = {}
     # #2953 / sens8-bridge-proposal-v1: only EXACT-name matches are bridged.
     # A Sens8 name resolves to its ratified-ladder target coordinate.
     _bridge_path = REPO_ROOT / "research" / "sens8-bridge-proposal-v1.json"
@@ -382,6 +383,9 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
             if _name and ":" in _tgt:
                 _dom, _bits = _tgt.split(":", 1)
                 current.setdefault(_name, (_bits, _dom))
+            _sid = _row.get("sid8")
+            if _sid and ":" in _tgt:
+                _bridge_by_sid[_sid] = tuple(_tgt.split(":", 1))
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
@@ -401,7 +405,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
 
 
     upper={name:ident for name,ident in residents.items()}
-    return my,upper
+    return my,upper,_bridge_by_sid
 
 def extract_projection(text: str,name: str):
     start=text.find(f"pub(crate) const {name}")
@@ -541,10 +545,11 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
-    def __init__(self,my,upper,d9_residents=None):
+    def __init__(self,my,upper,d9_residents=None,bridge_by_sid=None):
         self.my=my
         self.upper=upper
         self.d9_residents=set(d9_residents or ())
+        self.bridge_by_sid=dict(bridge_by_sid or {})
         self.global_binding_words={}
         self.counts={"already-exact":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
@@ -599,9 +604,10 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
-            # NEW REALITY (owner, 2026-10-15): there is no D8. An eight-bit head
-            # (SID8/Sens8-era) is not executable; it needs a current named D3-D6
-            # resident, else it fails closed as a retired SID8-era head.
+            _tgt = self.bridge_by_sid.get(t)
+            if _tgt is not None:
+                self.counts["already-exact"]+=1
+                return [ _tgt[1] ],"already-exact"
             raise MigrationError(
                 f"retired SID8-era head {t}: no current named D3-D6 resident",
                 tok,
@@ -1142,7 +1148,7 @@ def main():
     # NOTE: knowledge/d8-*.json is SID8/Sens8, not a domain. It is never wired
     # as one; an eight-bit head is not executable.
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
-    my, upper = build_three_pass_maps(
+    my, upper, bridge_by_sid = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
         args.semantic_registry, args.necessary_forms
     )
@@ -1192,7 +1198,7 @@ def main():
         rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(my, upper, d9_residents)
+        resolver = Resolver(my, upper, d9_residents, bridge_by_sid)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")

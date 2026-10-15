@@ -108,7 +108,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
         foundation = mod.load_foundation(
             ROOT / "knowledge/d1-d11-foundation.json"
         )
-        my, upper = mod.build_three_pass_maps(
+        my, upper, _bs = mod.build_three_pass_maps(
             foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
             SEMANTIC_REGISTRY, NECESSARY,
         )
@@ -185,7 +185,7 @@ class ThreePassMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
-        cls.my,cls.upper=mod.build_three_pass_maps(
+        cls.my,cls.upper,_bs=mod.build_three_pass_maps(
             data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY
         )
         cls.text7=mod.build_text7(data,TEXT7)
