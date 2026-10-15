@@ -90,8 +90,43 @@ pub export fn sens_zig_free_crc32(
     src: [*]const u8, len: u32, output: *u32,
 ) i32 {
     if (len > t5.MAX_PHYSICAL_BYTES) return -1;
+    // CRC is a physical receipt, never permission to mutate source bytes.
+    // The host owns both ranges; reject a result pointer inside the input.
+    if (overlaps(@intFromPtr(src), @as(usize, len),
+        @intFromPtr(output), @sizeOf(u32))) return -1;
     output.* = fields.crc32(src[0..@as(usize, len)]);
     return 0;
+}
+
+
+test "freestanding CRC32 rejects aliased result without changing any physical bit" {
+    // This input is NOT a numerical SENS value: its bytes are opaque carrier
+    // data, and the output u32 is merely a CRC receipt owned by the host.
+    var backing: [3]u32 = .{ 0x11223344, 0x55667788, 0xa5a5a5a5 };
+    const raw = std.mem.sliceAsBytes(backing[0..]);
+    const expected = fields.crc32(raw[0..8]);
+
+    // Adjacent output range is legal, including within one allocation.
+    try std.testing.expectEqual(@as(i32, 0),
+        sens_zig_free_crc32(raw.ptr, 8, &backing[2]));
+    try std.testing.expectEqual(expected, backing[2]);
+
+    const before = backing;
+    // Complete overlap: output overwrites the first four input bytes.
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_crc32(raw.ptr, 8, &backing[0]));
+    for (backing, before) |got, want| try std.testing.expectEqual(want, got);
+
+    // Partial overlap in the opposite direction: the input begins at the
+    // last byte of the output's u32 and continues into the next word.
+    try std.testing.expectEqual(@as(i32, -1),
+        sens_zig_free_crc32(raw[3..].ptr, 2, &backing[0]));
+    for (backing, before) |got, want| try std.testing.expectEqual(want, got);
+
+    // A source size outside the physical bound cannot touch the receipt.
+    try std.testing.expectEqual(@as(i32, -1), sens_zig_free_crc32(
+        raw.ptr, @intCast(t5.MAX_PHYSICAL_BYTES + 1), &backing[2]));
+    for (backing, before) |got, want| try std.testing.expectEqual(want, got);
 }
 
 test "freestanding T5 F3C CRC golden and exact 8-bit word" {
