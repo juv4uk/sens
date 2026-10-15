@@ -14,6 +14,10 @@ fn main() {
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
+    println!("cargo:rerun-if-changed=../../lib/surface/uk.lisp");
+    // Zig embeds this release artifact into the linked archive; a manifest
+    // change must invalidate Cargo's previous Zig build before packaging.
+    println!("cargo:rerun-if-changed=../../packaging/islands-manifest-v1.json");
     // E1 ABI v2 imports the existing Zig physical reader/writer. Rebuild the
     // static corridor archive when its encoding law or CRC mechanism changes.
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport/e1.zig");

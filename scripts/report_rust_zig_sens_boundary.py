@@ -12,8 +12,9 @@ This scans the production Rust and classifies every Rust<->SENS contact:
   filesystem-- reads/writes .lisp or .sens directly;
   bypass    -- a Rust->SENS contact with NO corridor reference in the file.
 
-The map is a REPORT (not a guard): it names what exists so remaining bypasses are
-visible. `--check` fails closed if a `bypass` file exists.
+The map is a REPORT (not a semantic guard): it names remaining contacts.
+`--check` fails closed for both direct and mixed Rust semantic surfaces;
+a Zig token in the same file cannot erase a live direct Rust path.
 
 Writes research/zig-codecs/rust_zig_sens_boundary.json (or --out PATH).
 """
@@ -91,10 +92,19 @@ def main() -> int:
         kinds[c["kind"]] = kinds.get(c["kind"], 0) + 1
     print(f"boundary map: {len(data['contacts'])} contact(s) {kinds}; "
           f"bypasses={len(data['bypasses'])} -> {ns.out}")
-    if ns.check and data["bypasses"]:
+    # The published "bypasses" list is historically direct-only. Keep that
+    # schema for consumers, but never grant --check success to a mixed file:
+    # a Zig transport reference alongside direct Rust SENS evaluation is
+    # still an unresolved bypass. A comment-only Zig token cannot hide it.
+    unresolved = [
+        (contact["path"], contact["kind"])
+        for contact in data["contacts"]
+        if contact["kind"] in ("direct", "mixed")
+    ]
+    if ns.check and unresolved:
         print("BOUNDARY_BYPASS_PRESENT:", flush=True)
-        for b in data["bypasses"]:
-            print(" -", b, flush=True)
+        for path, kind in unresolved:
+            print(f" - {path} kind={kind}", flush=True)
         return 1
     return 0
 

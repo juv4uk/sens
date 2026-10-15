@@ -13,33 +13,12 @@ tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 printf 'NATIVE_SENS_EXECUTOR path=%s version=%s sha256=' "$cli" "$("$cli" --version)"
 sha256sum "$cli"
+# Physical .sens authorship is Zig only; the helper validates D1 mutation position.
+python3 scripts/prepare_h2_zig_t5.py d3 "$tmp"
 for kind in cond eq; do
   id="retired-d3-${kind}"
   pos="tests/semantic/${id}-law.bits"
   neg="tests/semantic/${id}-mutant.bits"
-  python3 - "$kind" "$pos" "$neg" "$tmp" <<'PY'
-from pathlib import Path
-import sys
-sys.path.insert(0, "scripts")
-from sens_t5_codec import parse_words, encode_projection, decode_bytes
-
-kind, pos, neg, target = sys.argv[1:]
-good = parse_words(Path(pos).read_text(encoding="ascii"))
-bad = parse_words(Path(neg).read_text(encoding="ascii"))
-if len(good) != len(bad):
-    raise SystemExit("T5_TRANSPORT_RED: exact word count mismatch")
-diff = [i for i, (a, b) in enumerate(zip(good, bad)) if a != b]
-if diff != [{"cond": 4, "eq": 16}[kind]]:
-    raise SystemExit("T5_TRANSPORT_RED: mutated unexpected exact-domain word")
-if good[diff[0]] != "0" or bad[diff[0]] != "1":
-    raise SystemExit("T5_TRANSPORT_RED: expected exactly one D1 bit change")
-for role, words in (("law", good), ("mutant", bad)):
-    physical = encode_projection(" ".join(words))
-    if decode_bytes(physical) != words:
-        raise SystemExit("T5_TRANSPORT_RED: physical round-trip changed exact widths")
-    Path(target, f"{kind}-{role}.sens").write_bytes(physical)
-print(f"SENS_T5_PHYSICAL id={kind} words={len(good)} width_bits={sum(map(len, good))} mutation=D1:0-to-1 semantic_pass=NOT_INFERRED")
-PY
   printf 'NATIVE_SENS_INPUT id=%s reproduce=%q\n' "$id" "bash scripts/prove-retired-d3-laws.sh $cli"
   sha256sum "$pos" "$neg" "$tmp/$kind-law.sens" "$tmp/$kind-mutant.sens"
   expected="$tmp/$kind.expected"

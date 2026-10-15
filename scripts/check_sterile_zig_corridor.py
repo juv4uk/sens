@@ -711,7 +711,7 @@ def check_ukr_surface_zig_only(
     if "pub(super) fn sens_zig_ukr_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
         raise CorridorBlocked("UKR_ZIG_ONLY missing exact Rust asset FFI declaration")
     host = active(_route_between(
-        rust_corridor, "pub fn ukr_surface_bytes(", "\nfn require_same_exact_words("
+        rust_corridor, "pub fn ukr_surface_bytes(", "\n/// Compact Ukrainian source goes through sterile Zig byte transport only."
     ))
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or "version()?;" not in host
@@ -729,6 +729,57 @@ def check_ukr_surface_zig_only(
     if ('.arg("zig_transport_root.zig")' not in active(build)
             or "cargo:rerun-if-changed=../../lib/surface/ukr.lisp" not in build):
         raise CorridorBlocked("UKR_ZIG_ONLY stale source or wrong Zig module root")
+
+
+def check_uk_surface_zig_only(
+    repl_source: str, rust_corridor: str, zig_root: str, build: str,
+) -> None:
+    """Compact Ukrainian byte ingress is Zig-only; evaluator remains SENS."""
+    def active(s: str) -> str:
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", _production_source(s), flags=re.S)
+    repl = active(repl_source)
+    if re.search(r'include_(?:str|bytes)!\s*\(\s*"[^"]*lib/surface/uk\.lisp"', repl):
+        raise CorridorBlocked("UK_ZIG_ONLY Rust embeds compact Ukrainian surface")
+    helper = active(_route_between(
+        repl_source, "fn uk_surface_source(", "\n// Full Ukrainian source bytes"
+    ))
+    if (helper.count('#[cfg(feature = "zig-transport")]') != 1
+            or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
+            or "super::zig_transport::uk_surface_bytes()?" not in helper
+            or "String::from_utf8(bytes)" not in helper
+            or "RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback" not in helper):
+        raise CorridorBlocked("UK_ZIG_ONLY missing Zig ingress or Zigless refusal")
+    loader = active(_route_between(repl_source, "fn build_surface_layer(", "\nstruct ReplState {"))
+    if ("Some(uk_surface_source()?)" not in loader
+            or "uk_source.as_deref()" not in loader
+            or 'eval_program(source, &mut session)' not in loader):
+        raise CorridorBlocked("UK_ZIG_ONLY REPL bypasses Zig source or SENS evaluator")
+    ffi = "sens_zig_uk_bytes_copy"
+    asset_path = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
+    if not asset_path.is_file() or asset_path.is_symlink():
+        raise CorridorBlocked("UK_ZIG_ONLY missing declared asset ABI file")
+    declared = active(asset_path.read_text(encoding="utf-8"))
+    if "pub(super) fn sens_zig_uk_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
+        raise CorridorBlocked("UK_ZIG_ONLY missing Zig ABI FFI signature")
+    host = active(_route_between(
+        rust_corridor, "pub fn uk_surface_bytes(", "\nfn require_same_exact_words("
+    ))
+    if (host.count(f"asset_ffi::{ffi}(") != 2
+            or "version()?;" not in host
+            or f"{ffi}(bytes.as_mut_ptr(), bytes.len())" not in host
+            or "if copied != required" not in host
+            or "Ok(bytes)" not in host):
+        raise CorridorBlocked("UK_ZIG_ONLY missing two-call Zig ABI checked copy")
+    root = active(zig_root)
+    if (root.count('const uk_asset = @embedFile("lib/surface/uk.lisp");') != 1
+            or f"pub export fn {ffi}(" not in root
+            or "if (capacity == 0) return @intCast(uk_asset.len);" not in root
+            or "if (capacity < uk_asset.len) return -2;" not in root
+            or "@memcpy(dst[0..uk_asset.len], uk_asset[0..uk_asset.len]);" not in root):
+        raise CorridorBlocked("UK_ZIG_ONLY wrong opaque Zig asset or unsafe copy")
+    if ('.arg("zig_transport_root.zig")' not in active(build)
+            or "cargo:rerun-if-changed=../../lib/surface/uk.lisp" not in build):
+        raise CorridorBlocked("UK_ZIG_ONLY missing Cargo asset pin or Zig root")
 
 
 def check() -> list[str]:
@@ -825,6 +876,10 @@ def check() -> list[str]:
         REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
     )
     notes.append("ukr-zig-only-byte-carrier")
+    check_uk_surface_zig_only(
+        REPL.read_text(encoding="utf-8"), body, ROOT_ZIG.read_text(encoding="utf-8"), build
+    )
+    notes.append("uk-zig-only-byte-carrier")
     return notes
 
 

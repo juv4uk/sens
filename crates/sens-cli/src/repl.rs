@@ -31,7 +31,18 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("time.lisp", include_str!("../../../lib/time.lisp")),
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
-const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
+// The compact Ukrainian surface is original source bytes carried only by Zig.
+fn uk_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::uk_surface_bytes()?;
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_UK_CARRIER UTF-8: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: Ukrainian compact surface requires Zig; no Rust source fallback".into())
+    }
+}
 // Full Ukrainian source bytes are transported by Zig; SENS owns their meaning.
 fn ukr_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -142,6 +153,11 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             })?;
         }
         // Keep the same SENS evaluation order; only source transport changes.
+        let uk_source = if surface == ReplSurface::Ukrainian {
+            Some(uk_surface_source()?)
+        } else {
+            None
+        };
         let ukr_source = if surface == ReplSurface::UkrainianFull {
             Some(ukr_surface_source()?)
         } else {
@@ -153,7 +169,8 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
             None
         };
         let (name, source) = match surface {
-            ReplSurface::Ukrainian => ("uk.lisp", UK_SURFACE),
+            ReplSurface::Ukrainian => ("uk.lisp", uk_source.as_deref()
+                .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian compact source")?),
             ReplSurface::UkrainianFull => ("ukr.lisp", ukr_source.as_deref()
                 .ok_or("RUST_ZIG_ONLY: missing Zig Ukrainian full source")?),
             ReplSurface::Sanskrit => ("sa.lisp", sanskrit_source.as_deref()
@@ -542,6 +559,25 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_uk_surface_preserves_original_bytes() {
+        let source = uk_surface_source().expect("root Zig C ABI original Ukrainian surface");
+        let bytes = crate::zig_transport::uk_surface_bytes().expect("second Zig ABI copy");
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "UK surface exact byte identity");
+        assert!(source.starts_with("; Ukrainian surface"), "not canonical source asset");
+        assert!(source.contains("одна семантична реалізація"), "truncated or swapped source");
+        println!("ZIG_UK_CARRIER_PASS bytes={} semantic_admission=NOT_TESTED", bytes.len());
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_uk_surface_rejects_rust_only_loading() {
+        let error = uk_surface_source().expect_err("Zigless Rust cannot read the surface");
+        assert!(error.contains("RUST_ZIG_ONLY"), "{error}");
+        assert!(error.contains("no Rust source fallback"), "{error}");
     }
 
     #[cfg(feature = "zig-transport")]

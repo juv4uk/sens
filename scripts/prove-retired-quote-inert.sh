@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CI_GLUE_NO_SEMANTICS: one native physical T5 self-verdict and its one-bit mutant.
-# Python only packs exact T5 words; native binary SENS owns the verdict.
+# Zig alone creates physical T5; native binary SENS owns the verdict.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 cli="target/debug/sens"
@@ -14,30 +14,8 @@ if [[ ! -x "$cli" ]]; then
 fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-python3 - "$tmp" "$law" "$mutant" <<'PY'
-from pathlib import Path
-import sys
-
-sys.path.insert(0, "scripts")
-from sens_t5_codec import parse_words, encode_projection, decode_bytes
-
-directory, positive_path, negative_path = map(Path, sys.argv[1:])
-p = parse_words(positive_path.read_text(encoding="ascii"))
-n = parse_words(negative_path.read_text(encoding="ascii"))
-if len(p) != len(n):
-    raise SystemExit("T5_TRANSPORT_RED: mutant changed word count")
-changed_indices = [index for index, (a, b) in enumerate(zip(p, n)) if a != b]
-# The only permitted mutation is the first item of the D3-quoted two-element list.
-# This is an exact D2 token position check, NOT a host semantic truth table.
-if changed_indices != [14] or p[11:18] != ["001", "00", "10", "0", "00", "1", "01"] or n[14] != "1":
-    raise SystemExit("T5_TRANSPORT_RED: mutate only first quoted D1 datum")
-for name, words in (("law", p), ("mutant", n)):
-    physical = encode_projection(" ".join(words))
-    if decode_bytes(physical) != words:
-        raise SystemExit("T5_TRANSPORT_RED: codec lost exact word identity")
-    (directory / f"{name}.sens").write_bytes(physical)
-print(f"QUOTE_INERT_T5_READY word_count={len(p)} mutant_changed_words={len(changed_indices)} semantic_pass=NOT_INFERRED")
-PY
+# Only Zig builds the physical T5 .sens bytes; no Python encoder.
+python3 scripts/prepare_h2_zig_t5.py quote "$tmp"
 
 printf 'test_id=%s layer=eval executor=%s version=%s\n' "$id" "$cli" "$("$cli" --version)"
 sha256sum "$cli" "$law" "$mutant" "$tmp/law.sens" "$tmp/mutant.sens"

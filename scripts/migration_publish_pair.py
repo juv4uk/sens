@@ -43,6 +43,16 @@ def publish_pair(
         raise OSError("PAIR_CARRIER_CREATION_UNVERIFIED")
     try:
         write_new(view_path, view)
+        # Re-attest BOTH projections after the second writer has finished:
+        # it may have silently replaced the carrier or written a wrong view.
+        final_carrier = carrier_path.lstat()
+        if (not stat.S_ISREG(final_carrier.st_mode)
+                or (final_carrier.st_dev, final_carrier.st_ino) != (created.st_dev, created.st_ino)
+                or carrier_path.read_bytes() != carrier):
+            raise OSError("PAIR_CARRIER_CHANGED_AFTER_VIEW")
+        final_view = view_path.lstat()
+        if not stat.S_ISREG(final_view.st_mode) or view_path.read_bytes() != view:
+            raise OSError("PAIR_VIEW_CREATION_UNVERIFIED")
     except BaseException:
         try:
             # Do not destroy a replaced/mutated artifact or follow a symlink.

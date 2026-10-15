@@ -166,7 +166,7 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -198,6 +198,8 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_contract_bytes_copy", "language-contract.lisp"),
         ("sens_zig_sanskrit_bytes_copy", "lib/surface/sa.lisp"),
         ("sens_zig_ukr_bytes_copy", "lib/surface/ukr.lisp"),
+        ("sens_zig_uk_bytes_copy", "lib/surface/uk.lisp"),
+        ("sens_zig_islands_manifest_bytes_copy", "packaging/islands-manifest-v1.json"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
@@ -206,6 +208,45 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         # A surviving second call must not hide a deleted first call.
         if rust_transport.count(f"asset_ffi::{name}(") != 2:
             fail("asset-rust", f"missing_opaque_call={name}")
+
+    # Bind each reviewed export to its one source. A declaration-only guard
+    # would miss accidental asset cross-wiring while the ABI stays unchanged.
+    # This is exact-byte transport evidence, never a SENS semantic verdict.
+    for name, asset, binding in (
+        ("sens_zig_linter_bytes_copy", "lib/linter.lisp", "linter_asset"),
+        ("sens_zig_contract_bytes_copy", "language-contract.lisp", "contract_asset"),
+        ("sens_zig_sanskrit_bytes_copy", "lib/surface/sa.lisp", "sanskrit_asset"),
+        ("sens_zig_ukr_bytes_copy", "lib/surface/ukr.lisp", "ukr_asset"),
+        ("sens_zig_uk_bytes_copy", "lib/surface/uk.lisp", "uk_asset"),
+        ("sens_zig_islands_manifest_bytes_copy", "packaging/islands-manifest-v1.json", "islands_manifest_asset"),
+    ):
+        const_line = f'const {binding} = @embedFile("{asset}");'
+        if len(re.findall(r"(?m)^[ \t]*" + re.escape(const_line) + r"[ \t]*$", zig_root)) != 1:
+            fail("asset-zig", f"wrong_asset_binding={name} expected={asset}")
+        pattern = (
+            r"(?ms)^[ \t]*pub export fn " + re.escape(name)
+            + r"\(dst: \[\*\]u8, capacity: usize\) isize \{(?P<body>.*?)^[ \t]*\}"
+        )
+        match = re.search(pattern, zig_root)
+        if match is None:
+            fail("asset-zig", f"missing_copy_body={name}")
+        expected_body = " ".join((
+            f"if ({binding}.len == 0) return -1;",
+            f"if (capacity == 0) return @intCast({binding}.len);",
+            f"if (capacity < {binding}.len) return -2;",
+            f"@memcpy(dst[0..{binding}.len], {binding}[0..{binding}.len]);",
+            f"return @intCast({binding}.len);",
+        ))
+        actual_body = " ".join(match.group("body").split())
+        if actual_body != expected_body:
+            first = next(
+                (i for i, (left, right) in enumerate(zip(expected_body, actual_body))
+                 if left != right),
+                min(len(expected_body), len(actual_body)),
+            )
+            fail("asset-zig", f"wrong_copy_body={name} first_mismatch={first} "
+                 "path=zig_transport_root.zig "
+                 "repro='python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py'")
 
     expected_zig = "dst: [*]u8, capacity: usize"
     expected_rust = "output: *mut u8, capacity: usize"
@@ -411,6 +452,33 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         ).replace("\\n", "\n")
         with self.assertRaisesRegex(ValueError, "unreviewed_asset_exports=sens_zig_unreviewed_bytes_copy"):
             check_root_asset_corridor(mutated, self.asset_rust, self.rust)
+
+    def test_root_asset_cross_wired_release_manifest_is_rejected(self):
+        old = "@memcpy(dst[0..islands_manifest_asset.len], islands_manifest_asset[0..islands_manifest_asset.len]);"
+        mutant = self.asset_zig.replace(
+            old,
+            "@memcpy(dst[0..islands_manifest_asset.len], uk_asset[0..islands_manifest_asset.len]);",
+            1,
+        )
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(
+            ValueError, "wrong_copy_body=sens_zig_islands_manifest_bytes_copy"
+        ):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
+
+    def test_root_asset_manifest_embed_rebound_while_path_still_exists_is_rejected(self):
+        original = 'const islands_manifest_asset = @embedFile("packaging/islands-manifest-v1.json");'
+        mutant = self.asset_zig.replace(
+            original,
+            'const islands_manifest_asset = @embedFile("lib/surface/uk.lisp");\n'
+            'const unused_manifest = @embedFile("packaging/islands-manifest-v1.json");',
+            1,
+        )
+        self.assertNotEqual(mutant, self.asset_zig)
+        with self.assertRaisesRegex(
+            ValueError, "wrong_asset_binding=sens_zig_islands_manifest_bytes_copy"
+        ):
+            check_root_asset_corridor(mutant, self.asset_rust, self.rust)
 
     def test_root_asset_copy_comment_ghost_does_not_count(self):
         mutated = self.asset_rust.replace(
