@@ -12,8 +12,8 @@ R2  crates/sens-cli/build.rs: the Zig transport is gated on
     research/zig-codecs/transport_abi.zig, and pins/reads `.zig-version`.
 R3  research/zig-codecs/transport_abi.zig: exports ONLY physical `sens_zig_*`
     functions (including the T5 ingress/egress), imports ONLY physical modules
-    (`std`, `t5/t5.zig`, `f3c/f3c.zig`) and never a registry/host/semantic
-    module, and declares no `extern`/host struct.
+    (`std`, `t5/t5.zig`, `f3c/f3c.zig`, `transport/e1.zig`, `transport/e1_writer.zig`)
+    and never a registry/host/semantic module, and declares no `extern`/host struct.
 R4  `.zig-version` is a concrete version string (toolchain identity, not
     semantic authority).
 R5  `crates/sens-cli/src/zig_transport.rs` is the shared sterile client:
@@ -40,7 +40,13 @@ ZIG_CLIENT = "crates/sens-cli/src/zig_transport.rs"
 MAIN_RS = "crates/sens-cli/src/main.rs"
 TRIT_RS = "crates/sens-cli/src/bin/sens-trit.rs"
 
-ALLOWED_IMPORTS = {"std", "t5/t5.zig", "f3c/f3c.zig"}
+ALLOWED_IMPORTS = {
+    "std",
+    "t5/t5.zig",
+    "f3c/f3c.zig",
+    "transport/e1.zig",
+    "transport/e1_writer.zig",
+}
 REQUIRED_ABI_EXPORTS = (
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
