@@ -6,11 +6,12 @@ Does NOT invent semantics. Does NOT admit programs. Does NOT write .lisp/.sens.
 Runs the already-contracted mechanical checks the swarm needs before a
 migration batch, in fixed order:
 
-  1. ci_zig_purity          \u2014 no W8/Sens8/SID-8 contamination in *.zig
+  0. zig-pin                 \u2014 .zig-version == 0.16.0 and install-zig default
+  1. ci_zig_purity           \u2014 no W8/Sens8/SID-8 contamination in *.zig
   2. check-domain-ladder-identity \u2014 width=identity on canonical surfaces
   3. migrate-exact-domain authority load \u2014 D3/D4 tables + owner ratification
-  4. test_zig_codec_bridge  \u2014 physical T5 round-trip (optional if Zig absent
-                              unless --require-zig)
+  4. test_zig_codec_bridge   \u2014 physical T5 round-trip (optional if Zig absent
+                              unless --require-zig; skipped under --self-test)
 
 Chronology / ratification history is documented, not re-derived here:
   docs/migration/semantic-chronology-handoff-2026-10-14.uk.md
@@ -64,6 +65,43 @@ def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
     }
 
 
+def check_zig_pin() -> dict:
+    """Fail-closed: repository pin must stay on the transport codec version."""
+    pin_path = ROOT / ".zig-version"
+    if not pin_path.is_file() or pin_path.is_symlink():
+        return {
+            "step": "zig-pin",
+            "status": "FAIL",
+            "exit": 1,
+            "detail": "missing regular .zig-version",
+        }
+    actual = pin_path.read_text(encoding="utf-8").strip()
+    expected = "0.16.0"
+    if actual != expected:
+        return {
+            "step": "zig-pin",
+            "status": "FAIL",
+            "exit": 1,
+            "detail": f"ZIG_PIN_DRIFT expected={expected} actual={actual!r}",
+        }
+    action = ROOT / ".github" / "actions" / "install-zig" / "action.yml"
+    if action.is_file():
+        body = action.read_text(encoding="utf-8")
+        if f'default: "{expected}"' not in body and f"default: '{expected}'" not in body:
+            return {
+                "step": "zig-pin",
+                "status": "FAIL",
+                "exit": 1,
+                "detail": "install-zig action default drift vs .zig-version",
+            }
+    return {
+        "step": "zig-pin",
+        "status": "PASS",
+        "exit": 0,
+        "detail": f"zig-pin={actual}",
+    }
+
+
 def load_exact_domain_authority() -> dict:
     """Import migrate-exact-domain and load owner tables (no write)."""
     path = SCRIPTS / "migrate-exact-domain.py"
@@ -71,11 +109,9 @@ def load_exact_domain_authority() -> dict:
     if spec is None or spec.loader is None:
         raise RuntimeError("cannot load migrate-exact-domain.py")
     mod = importlib.util.module_from_spec(spec)
-    # dataclasses need the module registered before exec_module
     sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
     surfaces, legacy = mod.load_authority(ROOT)
-    # Width axiom: every Identity.bits length equals domain N for DN.
     bad = []
     for key, identity in surfaces.items():
         width = int(identity.domain[1:])
@@ -113,9 +149,19 @@ def main() -> int:
         action="store_true",
         help="Skip heavy check-domain-ladder-identity (still runs purity + authority).",
     )
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Pin + purity + authority only (no Zig binary, no ladder).",
+    )
     args = parser.parse_args()
 
+    if args.self_test:
+        args.skip_ladder_identity = True
+
     steps: list[dict] = []
+
+    steps.append(check_zig_pin())
 
     steps.append(
         run_step(
@@ -134,7 +180,7 @@ def main() -> int:
 
     try:
         steps.append(load_exact_domain_authority())
-    except Exception as err:  # noqa: BLE001 \u2014 surface as step failure
+    except Exception as err:  # noqa: BLE001
         steps.append(
             {
                 "step": "migrate-exact-domain-authority",
@@ -144,10 +190,18 @@ def main() -> int:
             }
         )
 
-    bridge = run_step(
-        "test_zig_codec_bridge",
-        [sys.executable, str(SCRIPTS / "test_zig_codec_bridge.py")],
-    )
+    if args.self_test:
+        bridge = {
+            "step": "test_zig_codec_bridge",
+            "status": "SKIP",
+            "exit": 0,
+            "detail": "self-test skips Zig binary",
+        }
+    else:
+        bridge = run_step(
+            "test_zig_codec_bridge",
+            [sys.executable, str(SCRIPTS / "test_zig_codec_bridge.py")],
+        )
     if bridge["status"] == "FAIL" and not args.require_zig:
         detail = bridge.get("detail", "")
         if "ZIG_CODEC_UNAVAILABLE" in detail or "ZIG_CODEC_VERSION" in detail:
