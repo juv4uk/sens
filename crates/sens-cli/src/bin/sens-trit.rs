@@ -117,8 +117,16 @@ fn encode_e1_from_t5(physical_t5: &[u8]) -> Result<Vec<u8>, String> {
     // Only explicitly selected no-default-features uses Rust T5 reference.
     let words = decode_canonical_t5_words(physical_t5)
         .map_err(|e| format!("SENS canonical T5/D2 rejected: {e}"))?;
-    sens::envelope_e1::encode(&words)
-        .map_err(|e| format!("E1 physical encode rejected: {e:?}"))
+    #[cfg(feature = "zig-transport")]
+    {
+        // Both physical directions cross Zig; SENS owns D2 admission above.
+        return zig_transport::encode_e1_direct(&words);
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = words;
+        Err("E1 physical export requires Zig; no Rust fallback".into())
+    }
 }
 
 fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
@@ -515,6 +523,16 @@ fn main() {
 mod e1_cli_mechanism_tests {
     use super::*;
 
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn e1_export_cannot_bypass_missing_zig_corridor() {
+        let physical = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        let error = encode_e1_from_t5(physical).expect_err("Zig is mandatory for E1 output");
+        assert!(error.contains("no Rust fallback"));
+    }
+
     #[cfg(feature = "zig-transport")]
     #[test]
     fn e1_encoder_uses_zig_t5_ingress_then_sens_d2_without_rust_physical_bypass() {
@@ -549,8 +567,11 @@ mod e1_cli_mechanism_tests {
         assert!(route.contains("decode_canonical_t5_words(physical_t5)"));
         assert!(!route.contains("sens::decode_ternary_program(physical_t5)"));
         assert!(!route.contains("sens::decode_ternary_words(physical_t5)"));
+        assert!(route.contains("zig_transport::encode_e1_direct(&words)"));
+        assert!(!route.contains("sens::envelope_e1::encode(&words)"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn explicit_e1_cli_uses_exact_native_sens_semantic_verdict() {
         let positive = include_bytes!("../../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
