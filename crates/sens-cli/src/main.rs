@@ -652,8 +652,8 @@ mod core_profile_bootstrap_tests {
         // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
         let physical = [0x63, 0x89, 0x06, 0xa1];
         let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
-        let widths: Vec<_> = words.iter().map(sens::BinarySourceWord::width).collect();
-        let bits: Vec<_> = words.iter().map(sens::BinarySourceWord::packed_bits).collect();
+        let widths: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::width).collect();
+        let bits: Vec<_> = words.iter().copied().map(sens::BinarySourceWord::packed_bits).collect();
         assert_eq!(widths, [2, 3, 2, 3, 2]);
         assert_eq!(bits, [2, 1, 0, 0, 1]);
         assert!(sens::parse_canonical_word_sequence(&words).is_ok());
