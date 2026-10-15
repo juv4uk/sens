@@ -58,6 +58,10 @@ jobs:
           echo 'test_id=zig-t5-report-no-overwrite layer=transport expected=reject-report-inside-sens-mirror'
           python3 -m unittest discover -s tests -p test_migrate_t5_batch_path_preflight.py -v
           # Positive: linked Zig 0.16 ABI decodes a real .sens and byte-exact replays it.
+          # Exact GO enabler: SENS D2 → Zig T5 encode/decode → SENS D2.
+          # Rejects raw Rust fixture embedding and legacy Rust T5 parsing.
+          echo 'test_id=zig-rust-sens-physical-unit-no-direct-fixture layer=transport semantic_authority=SENS'
+          cargo test --locked -p sens-cli --bin sens physical_t5_enters_canonical_binary_reader_not_text_lisp -- --nocapture
           cargo test --locked -p sens-cli --bin sens-trit rust_zig_only_cutover_tests -- --nocapture
           # Negative: without Zig no physical operation may touch a file or select Rust.
           cargo test --locked -p sens-cli --bin sens-trit --no-default-features rust_zig_only_cutover_tests -- --nocapture

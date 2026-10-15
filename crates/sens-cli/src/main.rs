@@ -670,18 +670,32 @@ mod core_profile_bootstrap_tests {
         assert!(matches!(physical_t5_request(&flags), Some(Err(_))));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn physical_t5_enters_canonical_binary_reader_not_text_lisp() {
-        let bytes = include_bytes!(
-            "../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        );
-        let source = sens::open_ternary_program(bytes).expect("admitted physical bytes");
-        let forms = sens::parse_canonical_binary(&source).expect("canonical D2 program");
+        // SENS owns exact source words and D2 admission. The Zig turnstile,
+        // rather than a Rust fixture embed or Rust T5 decoder, mints bytes.
+        let source = "10 001 00 000 01";
+        let tokens = sens::parse_binary_source_words(source)
+            .expect("SENS exact binary source");
+        let words: Vec<_> = tokens.into_iter().map(|token| token.word).collect();
+        let forms = sens::parse_canonical_word_sequence(&words)
+            .expect("SENS canonical D2 program");
         assert!(!forms.is_empty());
-        assert!(!source.contains("QUOTE"));
-        assert!(!source.contains("(quote"));
-        // Broken physical/truncated structural programs fail before evaluation.
-        assert!(sens::open_ternary_program(&[0xf3]).is_err());
+
+        let physical = zig_transport::encode_t5_direct(&words)
+            .expect("only Zig may create physical T5");
+        assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
+        let restored = decode_physical_t5_words(&physical)
+            .expect("physical T5 re-enters through Zig ABI");
+        let expected: Vec<_> = words.iter()
+            .map(|word| (word.width(), word.packed_bits())).collect();
+        let observed: Vec<_> = restored.iter()
+            .map(|word| (word.width(), word.packed_bits())).collect();
+        assert_eq!(observed, expected, "exact-width domain identities survive Zig");
+        assert!(sens::parse_canonical_word_sequence(&restored).is_ok());
+        // A malformed physical carrier is rejected before SENS D2 evaluation.
+        assert!(decode_physical_t5_words(&[0xf3]).is_err());
     }
 
     #[cfg(feature = "zig-transport")]
