@@ -65,6 +65,7 @@ import sys
 from pathlib import Path
 
 seen = {}
+seen_inodes = {}
 for raw in sys.argv[1:]:
     try:
         source = Path(raw).resolve(strict=True)
@@ -72,17 +73,24 @@ for raw in sys.argv[1:]:
             raise ValueError("source is not a regular file")
         if source.suffix != ".lisp":
             raise ValueError("source is not a .lisp file")
+        # Different hardlink names have distinct realpaths but identical
+        # physical inode identities. Never dispatch one file twice.
+        info = source.stat()
+        inode = (info.st_dev, info.st_ino)
     except (OSError, RuntimeError, ValueError) as exc:
         raise SystemExit(
             f"ZIG_PARALLEL_BLOCKED test_id=invalid-source layer=transport "
             f"path={raw} reason={type(exc).__name__}:{exc}"
         ) from exc
-    if source in seen:
+    if source in seen or inode in seen_inodes:
+        first = seen.get(source, seen_inodes.get(inode))
         raise SystemExit(
             f"ZIG_PARALLEL_BLOCKED test_id=duplicate-source layer=transport "
-            f"path={raw} first={seen[source]} same_physical_source={source}"
+            f"path={raw} first={first} same_physical_source={source} "
+            f"same_inode={info.st_dev}:{info.st_ino}"
         )
     seen[source] = raw
+    seen_inodes[inode] = raw
 PY
 if (( JOBS > total )); then JOBS=$total; fi
 
