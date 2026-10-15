@@ -21,7 +21,7 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
 
 /// Перший незалежний читач точних слів D1–D9 для поетапного переходу
 /// виконавців. D10 і числова D24+ граматика потребують окремого носія;
-/// жодне невідоме слово не перетворюється на Number або історичний Sens8.
+/// жодне невідоме слово не перетворюється на Number або історичний CoreDomainIdentity.
 ///
 /// Явний публічний вхід для міграції активних споживачів.
 /// Історичний parse() поки відокремлений: дані W8 не стають D8 через
@@ -540,7 +540,7 @@ impl Parser<'_> {
         // This is a direct SID read, not numeric conversion:
         // `00001100` is function SID 00001100; decimal `12` remains a number.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let sid = crate::Sens8::from_exact_bits(token)
+            let sid = crate::CoreDomainIdentity::from_exact_bits(token)
                 .expect("exact eight-bit SID validated above");
             return Ok(Expr {
                 kind: ExprKind::Sid(sid),

@@ -31,7 +31,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, CoreDomainIdentity, Span, Value};
 use crate::CoreDomainIdentity;
 use crate::canonical_reader::text7_binding_key;
 
@@ -50,7 +50,7 @@ pub fn eval_parsed_expressions(
 
 /// Виконати програму, вже зведену `lower_program`.
 /// Мігрувані D3/D4 голови несуть exact domain identity; неперенесені
-/// compatibility-голови ще можуть нести historical Sens8.
+/// compatibility-голови ще можуть нести historical CoreDomainIdentity.
 /// Прив'язати безадресну внутрішню помилку до виконуваної верхньої форми.
 /// Точні діапазони помилок зберігаються; семантика виконання не змінюється.
 fn top_level_error_span(mut error: LanguageError, expression: &Expr) -> LanguageError {
@@ -546,7 +546,7 @@ fn dispatch_domain_call(
 /// функція — лише 1 байт `head_sid`.
 fn dispatch_call(
     head_name: Option<&str>,
-    head_sid: Option<Sens8>,
+    head_sid: Option<CoreDomainIdentity>,
     head_expr: Option<&Expr>,
     arguments: &[Expr],
     environment: &Environment,
@@ -693,7 +693,7 @@ fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> 
     identity.core_operation()
 }
 
-fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
+fn binary_head_sid(expression: &Expr) -> Option<CoreDomainIdentity> {
     let ExprKind::Sid(sid) = expression.kind else {
         return None;
     };

@@ -17,7 +17,7 @@ use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::CoreDomainIdentity;
-use crate::Sens8;
+use crate::CoreDomainIdentity;
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -60,7 +60,7 @@ pub(crate) fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomain
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
-fn head_sid(head: &Expr) -> Option<Sens8> {
+fn head_sid(head: &Expr) -> Option<CoreDomainIdentity> {
     match &head.kind {
         ExprKind::Sid(sid) => Some(*sid),
         ExprKind::Symbol(name) => immutable_surface_sid(name),
@@ -69,7 +69,7 @@ fn head_sid(head: &Expr) -> Option<Sens8> {
 }
 
 /// Написання, що маршрутизується до фіксованого SENS (не окрема identity).
-fn immutable_surface_sid(name: &str) -> Option<Sens8> {
+fn immutable_surface_sid(name: &str) -> Option<CoreDomainIdentity> {
     // Once a surface has an exact domain identity, the legacy byte route is no
     // longer allowed to win. Unmigrated registry rows keep the old path.
     if immutable_surface_domain_identity(name).is_some() {
@@ -89,7 +89,7 @@ fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
 }
 
 /// Сумісна голова W8 одержує закон лише через доказову D3-проєкцію.
-fn historical_head_has_d3_law(sid: Sens8, bits: u8) -> bool {
+fn historical_head_has_d3_law(sid: CoreDomainIdentity, bits: u8) -> bool {
     semantic_registry::compatibility_d3_route_from_ratified_domains(sid)
         .is_some_and(|identity| is_d3(identity, bits))
 }
@@ -144,7 +144,7 @@ fn lower_domain_arguments(
 /// staged lowering inside an already-typed legacy call. This is a compatibility
 /// mechanism only: no W8 word is promoted to current D8 or admitted by payload.
 fn lower_historical_arguments(
-    sid: Sens8,
+    sid: CoreDomainIdentity,
     arguments: &[Expr],
     depth: u32,
     mode: LowerMode,

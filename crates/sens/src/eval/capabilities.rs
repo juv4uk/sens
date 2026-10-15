@@ -13,7 +13,7 @@
 //! a build that never calls the installer cannot reach it.
 
 use super::EvalStep;
-use crate::{Environment, ErrorKind, Expr, LanguageError, Sens8, Span, Value};
+use crate::{Environment, ErrorKind, Expr, LanguageError, CoreDomainIdentity, Span, Value};
 use std::collections::{BTreeMap, HashMap};
 use std::sync::{OnceLock, RwLock};
 
@@ -38,7 +38,7 @@ enum HostHandler {
 /// Host mechanism for one already-existing exact SENS function.
 /// The key is the eight-bit function itself; this registry owns no function meaning.
 pub type SensHostFn =
-    fn(Sens8, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
+    fn(CoreDomainIdentity, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
 #[derive(Clone, Copy)]
 enum CapabilityLookup {
@@ -65,8 +65,8 @@ fn registry() -> &'static RwLock<BTreeMap<String, HostHandler>> {
     REGISTRY.get_or_init(|| RwLock::new(BTreeMap::new()))
 }
 
-fn sens_registry() -> &'static RwLock<HashMap<Sens8, SensHostFn>> {
-    static REGISTRY: OnceLock<RwLock<HashMap<Sens8, SensHostFn>>> = OnceLock::new();
+fn sens_registry() -> &'static RwLock<HashMap<CoreDomainIdentity, SensHostFn>> {
+    static REGISTRY: OnceLock<RwLock<HashMap<CoreDomainIdentity, SensHostFn>>> = OnceLock::new();
     REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
 }
 
@@ -101,7 +101,7 @@ pub fn unregister_capability(name: &str) {
 
 /// Attach a host mechanism to one exact SENS function.
 /// Re-registering replaces only the mechanism; it cannot mint or reinterpret SENS.
-pub fn register_sens_capability(sens: Sens8, handler: SensHostFn) {
+pub fn register_sens_capability(sens: CoreDomainIdentity, handler: SensHostFn) {
     sens_registry()
         .write()
         .expect("SENS capability registry poisoned")
@@ -110,7 +110,7 @@ pub fn register_sens_capability(sens: Sens8, handler: SensHostFn) {
 }
 
 /// Detach a host mechanism without changing the function itself.
-pub fn unregister_sens_capability(sens: Sens8) {
+pub fn unregister_sens_capability(sens: CoreDomainIdentity) {
     if let Ok(mut map) = sens_registry().write() {
         map.remove(&sens);
     }
@@ -196,7 +196,7 @@ pub(crate) fn dispatch_capability(
 /// SENS-owned profile-mechanism admission gate. Registration/storage remain
 /// availability; this function cannot mint callability by itself.
 pub(crate) fn dispatch_sens_capability(
-    sens: Sens8,
+    sens: CoreDomainIdentity,
     arguments: &[Value],
     environment: &Environment,
     span: Span,
@@ -297,7 +297,7 @@ mod honesty_tests {
     }
 
     fn sens_handler(
-        sens: Sens8,
+        sens: CoreDomainIdentity,
         _arguments: &[Value],
         _environment: &Environment,
         _span: Span,

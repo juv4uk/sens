@@ -40,7 +40,7 @@ fn exact_d3_cond_control(value: &Value, span: Span) -> Result<ExactD3CondControl
 
 /// Exact-domain D3:110 COND.
 ///
-/// This path is deliberately separate from historical Sens8/profile COND.
+/// This path is deliberately separate from historical CoreDomainIdentity/profile COND.
 /// It is two-part only and never consults host/Lisp truthiness.
 pub(crate) fn evaluate_domain_cond(
     clauses: &[Expr],

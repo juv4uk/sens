@@ -1,7 +1,7 @@
 use crate::BinaryNumber;
 use crate::domain_numeric::{self, DomainNumericComposition};
 use crate::Value;
-use crate::{Rational, Sens8, Text7};
+use crate::{Rational, CoreDomainIdentity, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
@@ -20,7 +20,7 @@ pub enum BinaryFrame {
     Space,
     Close,
     Open,
-    Function(Sens8),
+    Function(CoreDomainIdentity),
     Domain(DomainIdentity),
     Number(Rational),
     /// Canonical #3022 natural Number. The Rational frame remains compatibility-only.
@@ -419,7 +419,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
             match [t0, t1] {
                 TYPE_FUNCTION => {
                     let packed = reader.read_fixed_u8(8)?;
-                    Ok(BinaryFrame::Function(Sens8::from_packed_byte(packed)))
+                    Ok(BinaryFrame::Function(CoreDomainIdentity::from_packed_byte(packed)))
                 }
                 TYPE_NUMBER => decode_number(reader, frame_start),
                 TYPE_TEXT => decode_text(reader),
@@ -887,7 +887,7 @@ mod tests {
     #[test]
     fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
-            let frame = BinaryFrame::Function(Sens8::from_packed_byte(packed as u8));
+            let frame = BinaryFrame::Function(CoreDomainIdentity::from_packed_byte(packed as u8));
             let encoded = encode_binary_frame(&frame).unwrap();
             assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
             assert_eq!(encoded.len(), 12);

@@ -5,7 +5,7 @@
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
 use crate::canonical_reader::text7_binding_key;
 use crate::semantic_registry;
-use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
+use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, CoreDomainIdentity, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
     collections::HashSet,
@@ -293,7 +293,7 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
     }
 }
 
-fn sid_head(sid: Sens8, environment: &Environment) -> Head {
+fn sid_head(sid: CoreDomainIdentity, environment: &Environment) -> Head {
     // Historical W8 EVAL remains a compatibility mechanism only. Obtain
     // its slot from the Lisp-owned generated registry, not a Rust byte law.
     if semantic_registry::admitted_semantic_id_for_surface("eval") == Some(sid) {

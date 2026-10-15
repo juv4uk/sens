@@ -8,12 +8,12 @@
 //
 //! Generated rows may carry a packed byte as substrate representation of an
 //! already understood Lisp Binary identity. This wrapper converts that byte to
-//! opaque Sens8 immediately; runtime registry APIs never expose decimal IDs.
+//! opaque CoreDomainIdentity immediately; runtime registry APIs never expose decimal IDs.
 
 use std::{collections::HashMap, sync::OnceLock};
 
 use crate::{Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9, CoreDomainIdentity, DomainIdentity};
-use crate::Sens8;
+use crate::CoreDomainIdentity;
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -49,7 +49,7 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 /// Only the historical W8 surface-table slot. This alias is deliberately NOT
 /// called a semantic ID: D3/D4/D5/D6/D8 identities are domain-qualified,
 /// and no W8 payload can be implicitly promoted to a current D8 resident.
-pub(crate) type LegacyRegistrySlot = Sens8;
+pub(crate) type LegacyRegistrySlot = CoreDomainIdentity;
 
 /// Convert only explicit generated D3–D6 coordinates into resident identity.
 ///
@@ -177,7 +177,7 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
 
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
-/// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
+/// This MUST NOT be used to reinterpret historical CoreDomainIdentity calls. Its only
 /// consumer is `bind_language_definition`: a definition discovered through
 /// the compatibility surface registry is bound once into an already-ratified
 /// exact D5 slot. #3062 removes this bootstrap detour.
@@ -283,7 +283,7 @@ fn live_rows() -> &'static [SemanticRow] {
 pub(crate) fn admitted_semantic_ids() -> Vec<LegacyRegistrySlot> {
     live_rows()
         .iter()
-        .map(|row| Sens8::from_packed_byte(row.semantic_id))
+        .map(|row| CoreDomainIdentity::from_packed_byte(row.semantic_id))
         .collect()
 }
 
@@ -309,7 +309,7 @@ fn surface_index() -> &'static HashMap<&'static str, LegacyRegistrySlot> {
         let mut index = HashMap::new();
         for row in live_rows() {
             for surface in row.surfaces {
-                insert_surface_mapping(&mut index, surface.name, Sens8::from_packed_byte(row.semantic_id));
+                insert_surface_mapping(&mut index, surface.name, CoreDomainIdentity::from_packed_byte(row.semantic_id));
             }
         }
         index
@@ -487,7 +487,7 @@ mod exact_d3_compatibility_migration_tests {
             (0b00000101, 0b100u8),
         ] {
             let identity = compatibility_d3_route_from_ratified_domains(
-                Sens8::from_packed_byte(legacy_byte)
+                CoreDomainIdentity::from_packed_byte(legacy_byte)
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), bits);
@@ -498,7 +498,7 @@ mod exact_d3_compatibility_migration_tests {
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
             assert!(compatibility_d3_route_from_ratified_domains(
-                Sens8::from_packed_byte(byte)
+                CoreDomainIdentity::from_packed_byte(byte)
             ).is_none());
         }
     }

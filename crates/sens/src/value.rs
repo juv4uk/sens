@@ -643,7 +643,7 @@ impl Value {
 
     /// Returns the explicit exact-width domain identity carried by this value.
     ///
-    /// A historical W8/Sens8 carrier is not a D8 value and MUST NOT be
+    /// A historical W8/CoreDomainIdentity carrier is not a D8 value and MUST NOT be
     /// converted to one by matching its packed byte. Only the ratified
     /// DomainIdentity variant can pass this boundary.
     /// Вісім бітів без домену не дають виконуваної тотожності D8.

@@ -1,7 +1,7 @@
 //! Evaluator mechanism routing.
 //!
 //! Contract 11 canonical identity is exact domain + exact bits. Historical
-//! Sens8 tables remain a compatibility/backend lane while migrated D3 calls
+//! CoreDomainIdentity tables remain a compatibility/backend lane while migrated D3 calls
 //! route directly from `CoreDomainIdentity` without reconstructing a byte.
 
 use super::{
@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, CoreDomainIdentity, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -20,7 +20,7 @@ pub(crate) enum SidRouteKind {
 
 /// Сумісний transport не містить власної таблиці семантичних ролей.
 /// Координата береться лише з чинної ратифікованої драбини D3.
-pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
+pub(crate) fn route_kind_for_sid(sid: CoreDomainIdentity) -> Option<SidRouteKind> {
     let CoreDomainIdentity::D3(word) =
         semantic_registry::compatibility_d3_route_from_ratified_domains(sid)?
     else {
@@ -35,7 +35,7 @@ pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
 
 /// Optional source/UI routing only. The returned value is the function SID;
 /// no named meaning is materialized.
-pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
+pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<CoreDomainIdentity> {
     let sid = semantic_registry::semantic_id_for_surface(surface)?;
     route_kind_for_sid(sid)?;
     Some(sid)
@@ -77,7 +77,7 @@ pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageE
     Ok(())
 }
 
-fn immutable_surface_error(surface: &str, sid: Sens8, span: Span) -> LanguageError {
+fn immutable_surface_error(surface: &str, sid: CoreDomainIdentity, span: Span) -> LanguageError {
     LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
@@ -87,7 +87,7 @@ fn immutable_surface_error(surface: &str, sid: Sens8, span: Span) -> LanguageErr
     )
 }
 
-pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), LanguageError> {
+pub(crate) fn ensure_bindable_sid(sid: CoreDomainIdentity, span: Span) -> Result<(), LanguageError> {
     Err(LanguageError::new(
         ErrorKind::InvalidForm,
         format!(
@@ -113,7 +113,7 @@ pub(crate) fn immutable_domain_binding_error(
 }
 
 fn exact_args(
-    sid: crate::Sens8,
+    sid: crate::CoreDomainIdentity,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -140,7 +140,7 @@ type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageErr
 /// допущені механізми і перевіряються ПЕРЕД цим маршрутом.
 /// Замість плоского масиву 256 слотів дозволяємо лише явні старі
 /// механізми, які ще мають підтверджених споживачів.
-fn legacy_backend_primitive(sid: Sens8) -> Option<PrimitiveFn> {
+fn legacy_backend_primitive(sid: CoreDomainIdentity) -> Option<PrimitiveFn> {
     match sid.packed_byte() {
         0b00001100 => Some(prim_00001100),
         0b00001101 => Some(prim_00001101),
@@ -264,7 +264,7 @@ pub(crate) enum DomainPrimitiveKind {
 /// Backend-neutral classification of current exact-domain value primitives.
 ///
 /// Exact domain + exact word select an explicit mechanism; this table never
-/// projects a current identity onto historical Sens8/Function8 bytes. The four
+/// projects a current identity onto historical CoreDomainIdentity/Function8 bytes. The four
 /// D9 string operations below are a bounded mechanism cut, not general D9
 /// callability: every other D9 resident remains fail-closed.
 pub(crate) fn domain_primitive_kind(
@@ -607,9 +607,9 @@ pub(crate) fn invoke_domain_identity(
     ))
 }
 
-/// Compatibility/backend mechanism bridge selected by historical Sens8.
+/// Compatibility/backend mechanism bridge selected by historical CoreDomainIdentity.
 pub(crate) fn invoke_semantic_ref(
-    sid: Sens8,
+    sid: CoreDomainIdentity,
     args: &[Value],
     environment: &Environment,
     span: Span,
@@ -661,7 +661,7 @@ pub(crate) fn invoke_semantic_ref(
 }
 
 /// #1455: чи має код примітив Rust.
-pub(crate) fn has_primitive(sid: Sens8) -> bool {
+pub(crate) fn has_primitive(sid: CoreDomainIdentity) -> bool {
     // D3 is protected by the current exact-domain mechanism even when the
     // caller still arrives through a historical, read-only compatibility SID.
     matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall))
@@ -956,7 +956,7 @@ mod exact_domain_primitive_tests {
         ];
         assert_eq!(expected.len(), 45);
         for candidate in 0..=u8::MAX {
-            let routed = legacy_backend_primitive(Sens8::from_packed_byte(candidate)).is_some();
+            let routed = legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(candidate)).is_some();
             assert_eq!(
                 routed,
                 expected.contains(&candidate),
@@ -968,7 +968,7 @@ mod exact_domain_primitive_tests {
         for bits in 0..=7 {
             let exact = d3(bits);
             assert_eq!(exact.width(), 3);
-            assert!(legacy_backend_primitive(Sens8::from_packed_byte(bits)).is_none());
+            assert!(legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(bits)).is_none());
         }
     }
 
@@ -978,7 +978,7 @@ mod exact_domain_primitive_tests {
         // implementation; all current D3 operations use domain laws.
         for old_byte in 2..7 {
             assert!(
-                legacy_backend_primitive(Sens8::from_packed_byte(old_byte)).is_none(),
+                legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(old_byte)).is_none(),
                 "історичний байт D3 не отримує дубльований примітив"
             );
         }

@@ -1,6 +1,6 @@
 use crate::value::{NumericBuffer, Rational};
 use crate::{BinaryNumber, CoreDomainIdentity, DomainIdentity};
-use crate::Sens8;
+use crate::CoreDomainIdentity;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -55,7 +55,7 @@ pub enum ExprKind {
     /// Legacy exact-eight compatibility identity. New canonical Core identity
     /// uses `DomainIdentity`; this variant remains for historical parser,
     /// FASL/wire, and backend paths during #2817 migration.
-    Sid(Sens8),
+    Sid(CoreDomainIdentity),
     /// Canonical exact domain identity across the ratified D1→D9 ladder.
     /// Domain membership does not itself grant callability.
     DomainIdentity(DomainIdentity),
@@ -79,14 +79,14 @@ pub enum ExprKind {
     /// (nur innerhalb von `quote`, oder wo ein Aufrufer es über `read` als
     /// Daten liest).
     Pair(Rc<Expr>, Rc<Expr>),
-    /// Виклик функції СЕНС: функція займає рівно 1 байт (`Sens8`), без
+    /// Виклик функції СЕНС: функція займає рівно 1 байт (`CoreDomainIdentity`), без
     /// тексту імені. Створюється лише `eval::lower` після розбору — з голови
     /// `(00000010 x)` або з написання, яке неможливо перевизначити
     /// (`atom`, `атом?`, `aṇu` ...), тож усі написання однієї функції
     /// дають один і той самий вузол. Парсер цей варіант не породжує.
-    /// SENS call: the function slot is exactly one byte (`Sens8`), no name
+    /// SENS call: the function slot is exactly one byte (`CoreDomainIdentity`), no name
     /// text. Produced only by `eval::lower` after parsing.
-    Call(Sens8, Rc<[Expr]>),
+    Call(CoreDomainIdentity, Rc<[Expr]>),
     /// Canonical lowered call head. Construction of this node does not itself
     /// grant callability: lowering/routing may create it only after the
     /// corresponding domain law admits the identity as callable.
@@ -105,7 +105,7 @@ pub enum ExprKind {
 
 // Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
 // збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
+const _: () = assert!(std::mem::size_of::<CoreDomainIdentity>() == 1);
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and
@@ -358,7 +358,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CoreDomainIdentity::from_packed_byte(value))
             }
             TAG_DOMAIN_IDENTITY => ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?),
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
@@ -717,7 +717,7 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+                ExprKind::Sid(crate::CoreDomainIdentity::from_packed_byte(value))
             }
             TAG_DOMAIN_IDENTITY => {
                 ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?)

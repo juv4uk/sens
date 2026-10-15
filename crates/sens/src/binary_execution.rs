@@ -31,7 +31,7 @@ pub struct PhysicalT5Program {
 impl PhysicalT5Program {
     /// Physical bytes -> exact D1-D9 words -> ratified D2 forms, without
     /// creating any text or parsing human identifier surfaces.
-    /// Never admit a historical Sens8 head from physical bits or from
+    /// Never admit a historical CoreDomainIdentity head from physical bits or from
     /// an accidental compatibility-only symbol in a partially lowered AST.
     pub fn decode(physical: &[u8]) -> Result<Self, T5ExecutionError> {
         let words = decode_ternary_words(physical).map_err(T5ExecutionError::Transport)?;

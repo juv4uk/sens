@@ -88,7 +88,7 @@ struct Limits {
     /// Historical exact-eight compatibility slots. These are intentionally
     /// separate storage so a legacy byte can never collide with a canonical
     /// domain identity merely from its packed payload.
-    legacy_code_slots: HashMap<crate::Sens8, Value>,
+    legacy_code_slots: HashMap<crate::CoreDomainIdentity, Value>,
 }
 
 impl Environment {
@@ -251,9 +251,9 @@ impl Environment {
 
     /// Transitional historical exact-eight compatibility lookup.
     ///
-    /// Kept under the old method name so this slice does not grow Sens8 API
+    /// Kept under the old method name so this slice does not grow CoreDomainIdentity API
     /// surface. New canonical code uses domain_code_slot.
-    pub(crate) fn code_slot(&self, sid: crate::Sens8) -> Option<Value> {
+    pub(crate) fn code_slot(&self, sid: crate::CoreDomainIdentity) -> Option<Value> {
         self.2
             .borrow()
             .legacy_code_slots
@@ -264,7 +264,7 @@ impl Environment {
     /// Transitional historical exact-eight compatibility binding.
     ///
     /// New canonical code uses bind_domain_code_slot_once.
-    pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
+    pub(crate) fn bind_code_slot_once(&self, sid: crate::CoreDomainIdentity, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
         // Historical W8 never shares a keyspace with exact D8.
         match limits.legacy_code_slots.entry(sid) {
@@ -577,10 +577,10 @@ mod tests {
 
     #[test]
     fn historical_w8_slots_never_alias_ratified_d8_even_with_equal_bits() {
-        use crate::{Bit8, CoreD8, Sens8};
+        use crate::{Bit8, CoreD8, CoreDomainIdentity};
 
         let environment = Environment::root();
-        let legacy = Sens8::from_packed_byte(0b1010_1000);
+        let legacy = CoreDomainIdentity::from_packed_byte(0b1010_1000);
         let current = DomainIdentity::D8(CoreD8::from_word(
             Bit8::new(0b1010_1000).expect("точно вісім біт"),
         ));
@@ -604,7 +604,7 @@ mod tests {
     fn all_2046_coordinates_preserve_width_and_both_bind_once_keyspaces() {
         use crate::{
             domain_ladder::DomainCoordinate, BinarySourceWord, Bit1, Bit2, Bit3,
-            Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, Sens8,
+            Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreDomainIdentity,
         };
         use std::collections::HashSet;
 
@@ -669,7 +669,7 @@ mod tests {
         // Every historical W8 byte has a current D8 coordinate with the
         // same low eight payload bits, but MUST NOT alias the current slot.
         for bits in 0u16..256 {
-            let sid = Sens8::from_packed_byte(bits as u8);
+            let sid = CoreDomainIdentity::from_packed_byte(bits as u8);
             let identity = DomainIdentity::from_source_word(
                 BinarySourceWord::W8(Bit8::new(bits as u8).unwrap()));
             let current = environment.domain_code_slot(identity);
