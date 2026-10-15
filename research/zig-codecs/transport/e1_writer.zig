@@ -7,7 +7,7 @@ const e1 = @import("e1.zig");
 const fields = @import("fields.zig");
 
 pub const Word = e1.Word;
-pub const Error = e1.Error || error{InvalidBits};
+pub const Error = e1.Error || error{ InvalidBits, OverlappingBuffers };
 
 /// Caller must provide at least words.len + 1 elements. No hidden allocation.
 pub const Step = struct {
@@ -158,6 +158,17 @@ pub fn encode(words: []const Word, output: []u8, scratch: []Step) Error!usize {
     return size;
 }
 
+/// Distinct caller-owned read/write buffers are mandatory for byte replay.
+/// Comparing a frame with itself after encoding into overlapping memory would
+/// turn a CRC-correct noncanonical alias into a false canonical witness.
+fn slicesOverlap(left: []const u8, right: []const u8) bool {
+    if (left.len == 0 or right.len == 0) return false;
+    const a = @intFromPtr(left.ptr);
+    const b = @intFromPtr(right.ptr);
+    // Differences avoid endpoint addition and usize overflow.
+    return if (a <= b) b - a < left.len else a - b < right.len;
+}
+
 /// Strict physical canonical check: decode → independently plan → byte-replay.
 /// The caller provides ALL storage. A canonical physical carrier can still
 /// contain a SENS semantic-invalid expression; that is NOT this module's call.
@@ -167,6 +178,8 @@ pub fn inspectCanonical(
     scratch: []Step,
     replay: []u8,
 ) Error!usize {
+    // Never overwrite the original before comparing canonical bytes.
+    if (slicesOverlap(frame, replay)) return error.OverlappingBuffers;
     const count = try e1.inspect(frame);
     if (decoded.len < count or scratch.len <= count) return error.BufferTooSmall;
     _ = try e1.unpack(frame, decoded[0..count]);
@@ -195,6 +208,47 @@ test "E1 canonical encode exact cross-implementation RAW physical witness" {
         try std.testing.expectEqual(expected.width, actual.width);
         try std.testing.expectEqual(expected.bits, actual.bits);
     }
+}
+
+test "E1 canonical replay never aliases or overwrites its input" {
+    const words = [_]Word{.{ .width = 1, .bits = 1 }};
+    var physical: [64]u8 = undefined;
+    var scratch: [2]Step = undefined;
+    const len = try encode(&words, &physical, &scratch);
+    var decoded: [1]Word = undefined;
+    var independent: [64]u8 = undefined;
+
+    // Positive control: a distinct replay buffer retains exact physical bytes.
+    try std.testing.expectEqual(@as(usize, 1),
+        try inspectCanonical(physical[0..len], &decoded, &scratch, &independent));
+    try std.testing.expectEqualSlices(u8,
+        physical[0..len], independent[0..len]);
+
+    const before = physical;
+    // Negative controls: full alias and a shifted, partially overlapping slice.
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(physical[0..len], &decoded, &scratch, physical[0..]));
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(physical[0..len], &decoded, &scratch, physical[1..]));
+    try std.testing.expectEqualSlices(u8,
+        before[0..len], physical[0..len]);
+
+    // The specific dangerous case: REPEAT has a valid CRC but is not the
+    // canonical RAW tie for one D1 word. An alias must not erase the witness.
+    const alias_head = [_]u8{ 'S', '3', 1, 1, REPEAT, 1, 1, 0x80 };
+    var alias: [12]u8 = undefined;
+    @memcpy(alias[0..8], &alias_head);
+    const crc = fields.crc32(&alias_head);
+    alias[8] = @intCast(crc >> 24);
+    alias[9] = @intCast((crc >> 16) & 0xff);
+    alias[10] = @intCast((crc >> 8) & 0xff);
+    alias[11] = @intCast(crc & 0xff);
+    try std.testing.expectError(error.NonCanonical,
+        inspectCanonical(&alias, &decoded, &scratch, &independent));
+    const unchanged = alias;
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(&alias, &decoded, &scratch, &alias));
+    try std.testing.expectEqualSlices(u8, &unchanged, &alias);
 }
 
 test "E1 canonical REPEAT and empty source match fixed physical bytes" {
