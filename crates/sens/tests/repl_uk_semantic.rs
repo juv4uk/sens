@@ -11,6 +11,8 @@ const KROK: &str = include_str!("../../../tests/semantic/repl-uk-step-law.lisp")
 const KROK_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-step-mutant.lisp");
 const CYKL: &str = include_str!("../../../tests/semantic/repl-uk-loop-law.lisp");
 const CYKL_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-loop-mutant.lisp");
+const CHERHA: &str = include_str!("../../../tests/semantic/repl-uk-queue-law.lisp");
+const CHERHA_MUTANT: &str = include_str!("../../../tests/semantic/repl-uk-queue-mutant.lisp");
 
 fn session() -> Session {
     let mut session = Session::default();
@@ -28,7 +30,7 @@ fn session() -> Session {
     session
 }
 
-fn prove(positive: &str, mutant: &str, id: &str) {
+fn prove(positive: &str, mutant: &str, id: &str, expected_output_lines: Option<usize>) {
     let mut session = session();
     let law = parse_mixed_exact_domain(positive)
         .unwrap_or_else(|error| panic!(
@@ -40,6 +42,16 @@ fn prove(positive: &str, mutant: &str, id: &str) {
             "test_id={id} layer=eval fixture=positive actual={}",
             error.render(positive)
         ));
+    // Лише кількість фізично опублікованих рядків: результат
+    // та закон збереження стану вирішує сама SENS-програма.
+    if let Some(count) = expected_output_lines {
+        assert_eq!(
+            evidence.output.len(),
+            count,
+            "test_id={id} layer=transport expected_lines={count} actual_lines={} first_diff=output_count",
+            evidence.output.len()
+        );
+    }
     assert_eq!(
         evidence.value.as_predicate_bit(),
         Some(true),
@@ -63,10 +75,17 @@ fn prove(positive: &str, mutant: &str, id: &str) {
 
 #[test]
 fn repl_uk_lisp_state_d1_native_self_verdict() {
-    prove(KROK, KROK_MUTANT, "repl-uk-step");
+    prove(KROK, KROK_MUTANT, "repl-uk-step", None);
 }
 
 #[test]
 fn repl_uk_lisp_text_command_d1_native_self_verdict() {
-    prove(CYKL, CYKL_MUTANT, "repl-uk-loop");
+    prove(CYKL, CYKL_MUTANT, "repl-uk-loop", None);
+}
+
+#[test]
+fn repl_uk_lisp_queue_recovery_and_stop_d1_native_self_verdict() {
+    // Позитивна SENS-програма містить невідоме ім'я посередині,
+    // відновлює значення й відкидає небезпечний рядок після виходу.
+    prove(CHERHA, CHERHA_MUTANT, "repl-uk-queue", Some(3));
 }
