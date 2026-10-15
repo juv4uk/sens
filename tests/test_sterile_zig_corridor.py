@@ -29,6 +29,64 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("f3c-decode-validates-t5", completed.stdout)
         self.assertIn("f3c-bounds-reported-lengths", completed.stdout)
 
+    def test_linter_asset_crosses_only_live_zig_abi_and_rejects_bypass_mutants(self) -> None:
+        """One migrated Rust→SENS edge stays CUT: direct embed never returns."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_linter_zig_only"]
+        blocked = module["CorridorBlocked"]
+        main = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        host = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        zig = (ROOT / "zig_transport_root.zig").read_text(encoding="utf-8")
+        build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        check(main, host, zig, build)  # Live, on-disk positive evidence.
+
+        mutants = (
+            (
+                "main", "let linter_lib = match linter_source_zig_only()",
+                'let linter_lib = include_str!("../../../lib/linter.lisp").to_owned()',
+            ),
+            (
+                "main", "zig_transport::linter_source_bytes()?",
+                'vec![] /* Zig call deleted */',
+            ),
+            (
+                "main",
+                '"RUST_ZIG_ONLY: linter library requires Zig; no Rust project-source fallback"',
+                '"transport=rust-reference"',
+            ),
+            (
+                "host", "if copied != required", "if false /* forged Zig length */",
+            ),
+            (
+                "zig", 'const linter_asset = @embedFile("lib/linter.lisp");',
+                'const linter_asset = @embedFile("lib/core.lisp");',
+            ),
+            (
+                "zig", "if (capacity < linter_asset.len) return -2;",
+                "if (false) return -2; // unchecked write capacity",
+            ),
+            (
+                "zig", "@memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);",
+                "// @memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);",
+            ),
+            (
+                "build", '.arg("zig_transport_root.zig")',
+                '.arg("research/zig-codecs/transport_abi.zig")',
+            ),
+            (
+                "build", 'cargo:rerun-if-changed=../../lib/linter.lisp',
+                'cargo:rerun-if-changed=../../lib/old-linter.lisp',
+            ),
+        )
+        baseline = {"main": main, "host": host, "zig": zig, "build": build}
+        for target, original, forged in mutants:
+            with self.subTest(target=target, original=original):
+                self.assertIn(original, baseline[target], "missing real mutation anchor")
+                changed = dict(baseline)
+                changed[target] = changed[target].replace(original, forged, 1)
+                with self.assertRaisesRegex(blocked, "LINTER_ZIG_ONLY"):
+                    check(changed["main"], changed["host"], changed["zig"], changed["build"])
+
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         self.assertIn("sens_zig_t5_decode_be3", body)
