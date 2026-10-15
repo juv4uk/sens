@@ -27,6 +27,8 @@ REQUIRED_FFI = (
     "sens_zig_t5_validate",
     "sens_zig_t5_encode_be3",
     "sens_zig_t5_decode_be3",
+    "sens_zig_e1_encode_be3",
+    "sens_zig_e1_decode_be3",
     "sens_zig_f3c_pack",
     "sens_zig_f3c_unpack",
 )
@@ -45,12 +47,7 @@ def _production_source(source: str) -> str:
 
 
 def _route_between(source: str, begin: str, end: str) -> str:
-    """Extract one mandatory CLI routine, never silently miss or duplicate it.
-
-    Prefer production code so include_str / find("fn \u2026") inside tests cannot
-    double-count a real definition. When end is the test-module boundary,
-    full source is used for the end marker.
-    """
+    """Extract one mandatory CLI routine, never silently miss or duplicate it."""
     prod = _production_source(source)
     if begin not in prod or prod.count(begin) != 1:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
@@ -118,7 +115,7 @@ def check_trit_t5_egress(source: str) -> None:
     if "verify_companion(&projection, &bytes)" not in rust:
         raise CorridorBlocked("sens-trit encode no longer verifies Zig carrier")
 
-    companion = _route_between(source, "\nfn verify_companion(", "\n/// Run the explicitly")
+    companion = _route_between(source, "fn verify_companion(", "\n/// Run the explicitly")
     required_companion = (
         'let expected_words = admitted_source_words(source)?;',
         'if decoded != expected_words',
