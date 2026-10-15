@@ -1,0 +1,56 @@
+name: Zig transport gate
+
+# Mechanical only: purity + pin + optional codec bridge. Not a semantic oracle.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "research/zig-codecs/**"
+      - "scripts/ci_zig_purity.py"
+      - "scripts/migration-zig-gate.py"
+      - "scripts/zig_codec_bridge.py"
+      - "scripts/test_zig_codec_bridge.py"
+      - "tests/test_migration_zig_gate.py"
+      - ".zig-version"
+      - ".github/actions/install-zig/**"
+      - ".github/workflows/zig-transport-gate.yml"
+  pull_request:
+    paths:
+      - "research/zig-codecs/**"
+      - "scripts/ci_zig_purity.py"
+      - "scripts/migration-zig-gate.py"
+      - "scripts/zig_codec_bridge.py"
+      - "scripts/test_zig_codec_bridge.py"
+      - "tests/test_migration_zig_gate.py"
+      - ".zig-version"
+      - ".github/actions/install-zig/**"
+      - ".github/workflows/zig-transport-gate.yml"
+
+concurrency:
+  group: zig-transport-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migration-zig-gate:
+    name: pin \u00b7 purity \u00b7 T5 bridge
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: ./.github/actions/install-zig
+      - name: Unit tests (no semantic admission)
+        run: python3 -m unittest tests.test_migration_zig_gate -v
+      - name: Migration \u2194 Zig preparation gate (require pinned Zig)
+        run: |
+          set -euo pipefail
+          python3 scripts/migration-zig-gate.py --require-zig --skip-ladder-identity \
+            --report "$RUNNER_TEMP/sens-migration-zig-gate.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "sens-migration-zig-gate.json"
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert data["schema"] == "sens-migration-zig-gate/v1"
+          assert data["verdict"] == "PASS"
+          assert data["zig_pin"] == "0.16.0"
+          print("MIGRATION_ZIG_GATE_CI_PASS")
+          PY
