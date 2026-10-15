@@ -2,6 +2,8 @@
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
 const f3c = @import("f3c/f3c.zig");
+const e1 = @import("transport/e1.zig");
+const e1_writer = @import("transport/e1_writer.zig");
 // ABI v2 uses caller-owned byte triplets; no padded host structs cross the boundary.
 /// ABI v2: the preferred boundary uses explicit [width, payload-MSB, payload-LSB]
 /// per word, NOT a C struct with host-dependent padding/alignment/endianness.
@@ -40,6 +42,76 @@ pub export fn sens_zig_t5_decode_be3(
     const written = t5.decodeTripletsInto(dst[0..capacity], src[0..byte_len])
         catch |err| return if (err == error.BufferTooSmall) -2 else -1;
     return @intCast(written);
+}
+
+/// E1 v1 physical egress through the SAME host-neutral ABI v2.
+/// Source is caller-owned BE3 (width, payload MSB, payload LSB), not a Rust
+/// struct or an executable SENS identity. No allocator crosses the corridor.
+/// Positive return: E1 byte count; -1: invalid/overlap; -2: small output.
+/// E1 uses its already-defined RAW/REPEAT DP, framing, and CRC in Zig.
+pub export fn sens_zig_e1_encode_be3(
+    src: [*]const u8, byte_len: usize, dst: [*]u8, capacity: usize,
+) isize {
+    if (byte_len == 0 or byte_len % 3 != 0) return -1;
+    const count = byte_len / 3;
+    if (count > e1.MAX_WORDS) return -1;
+
+    // Fail closed before writes; a shared host allocation is not an excuse
+    // to corrupt unread width/payload source triplets.
+    const source_addr = @intFromPtr(src);
+    const dest_addr = @intFromPtr(dst);
+    if (capacity > 0 and
+        ((source_addr <= dest_addr and dest_addr - source_addr < byte_len) or
+            (dest_addr < source_addr and source_addr - dest_addr < capacity)))
+        return -1;
+
+    // Zig-local bounded scratch: never expose compiler-specific Step/Word
+    // struct layout across FFI and never allocate from a host allocator.
+    var words: [e1.MAX_WORDS]e1.Word = undefined;
+    var scratch: [e1.MAX_WORDS + 1]e1_writer.Step = undefined;
+    for (0..count) |i| {
+        const at = i * 3;
+        const width = src[at];
+        const bits = (@as(u16, src[at + 1]) << 8) | @as(u16, src[at + 2]);
+        if (width == 0 or width > 9) return -1;
+        if (bits >= (@as(u16, 1) << @as(u4, @intCast(width)))) return -1;
+        words[i] = .{ .width = width, .bits = bits };
+    }
+    const size = e1_writer.encode(words[0..count], dst[0..capacity], scratch[0 .. count + 1])
+        catch |err| return if (err == error.BufferTooSmall) -2 else -1;
+    return @intCast(size);
+}
+
+test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" {
+    const input = [_]u8{ 2, 0, 2, 3, 0, 1, 2, 0, 1 };
+    const expected = [_]u8{ 0x53, 0x33, 1, 3, 0, 3, 0x23, 0x20,
+        0x8a, 0x36, 0x20, 0x5d, 0x52 };
+    var physical: [64]u8 = .{0x5c} ** 64;
+    try std.testing.expectEqual(@as(isize, expected.len),
+        sens_zig_e1_encode_be3(&input, input.len, &physical, physical.len));
+    try std.testing.expectEqualSlices(u8, &expected, physical[0..expected.len]);
+
+    var too_small: [8]u8 = .{0x6d} ** 8;
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_e1_encode_be3(&input, input.len, &too_small, too_small.len));
+    try std.testing.expectEqualSlices(u8, &.{0x6d} ** 8, &too_small);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_encode_be3(&.{ 10, 0, 0 }, 3, &physical, physical.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_encode_be3(&.{ 2, 0, 4 }, 3, &physical, physical.len));
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_encode_be3(&input, input.len - 1, &physical, physical.len));
+
+    var shared: [64]u8 = .{0x3a} ** 64;
+    @memcpy(shared[0..input.len], &input);
+    const before = shared;
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_encode_be3(&shared, input.len, &shared, shared.len));
+    try std.testing.expectEqualSlices(u8, &before, &shared);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_e1_encode_be3(shared[0..].ptr, input.len,
+            shared[input.len - 2 ..].ptr, shared.len - input.len + 2));
+    try std.testing.expectEqualSlices(u8, &before, &shared);
 }
 
 test "ABI v2 Zig is the mechanical T5 ingress and egress without code registry" {
