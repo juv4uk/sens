@@ -259,32 +259,30 @@ fn eval_t5_bytes_core4(
     bytes: &[u8],
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
-    // In the normal build Zig decodes physical T5 to exact-width words.
-    // The SENS-owned D2 reader/evaluator alone determines admissibility.
-    // The Rust physical T5 decoder remains only in the explicit
-    // --no-default-features reference build, never a silent fallback.
-    #[cfg(feature = "zig-transport")]
-    let program = {
-        let words = zig_transport::decode_t5_words(bytes)?;
-        sens::PhysicalT5Program::from_exact_words(&words)
-            .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?
-    };
     #[cfg(not(feature = "zig-transport"))]
-    let program = sens::PhysicalT5Program::decode(bytes).map_err(|e| match e {
-        sens::T5ExecutionError::Transport(error) =>
-            format!("physical T5 decode rejected: {error:?}"),
-        sens::T5ExecutionError::Language(error) =>
-            format!("canonical packed SENS parser rejected: {error}"),
-    })?;
-    let mut session = sens::Session::default();
-    if bootstrap_core {
-        sens::load_core_library(&mut session)
-            .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
+    {
+        // The reference-only build may compare codec fixtures, but cannot
+        // execute a physical program by bypassing the Zig turnstile.
+        // Refuse before parsing, starting a session, or loading Core4.
+        let _ = (bytes, bootstrap_core);
+        Err("physical T5 execution requires Zig; no Rust fallback".into())
     }
-    program.execute(&mut session)
-        .map_err(|e| format!("current SENS evaluator rejected: {e}"))
+    #[cfg(feature = "zig-transport")]
+    {
+        // Zig owns only physical width/payload decoding; SENS owns D2,
+        // all execution and any explicitly requested Core4 bootstrap.
+        let words = zig_transport::decode_t5_words(bytes)?;
+        let program = sens::PhysicalT5Program::from_exact_words(&words)
+            .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?;
+        let mut session = sens::Session::default();
+        if bootstrap_core {
+            sens::load_core_library(&mut session)
+                .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
+        }
+        program.execute(&mut session)
+            .map_err(|e| format!("current SENS evaluator rejected: {e}"))
+    }
 }
-
 /// Пояснити негативний результат без іншого парсера чи текстового fallback.
 /// Первинним рішенням назавжди лишається encode_binary_projection_ternary.
 #[cfg(not(feature = "zig-transport"))]
@@ -666,6 +664,7 @@ mod eval_tests {
         assert!(!USAGE.contains("eval-core path.sens"));
     }
 
+    #[cfg(feature = "zig-transport")]
     #[test]
     fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
         let bytes = [0xf3, 0x40, 0x60];
@@ -937,6 +936,24 @@ mod eval_tests {
         assert!(zig_transport::decode_t5_words(&[0, 0]).is_err());
     }
 
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn physical_t5_eval_and_explicit_core4_refuse_without_zig() {
+        let bytes = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        for bootstrap_core in [false, true] {
+            let error = eval_t5_bytes_core4(bytes, bootstrap_core)
+                .expect_err("physical T5 cannot execute without Zig");
+            assert!(error.contains("no Rust fallback"), "{error}");
+            // Even malformed physical bytes fail for the SAME missing
+            // corridor; no Rust physical parser or SENS executor is called.
+            let malformed = eval_t5_bytes_core4(&[0xf3], bootstrap_core)
+                .expect_err("no fallback for malformed bytes");
+            assert_eq!(error, malformed);
+        }
+    }
+
     #[test]
     fn physical_eval_path_uses_packed_words_not_visible_text() {
         let source = include_str!("sens-trit.rs");
@@ -952,7 +969,10 @@ mod eval_tests {
             assert!(!zig_branch.contains("sens::PhysicalT5Program::decode(bytes)"));
         }
         #[cfg(not(feature = "zig-transport"))]
-        assert!(route.contains("sens::PhysicalT5Program::decode(bytes)"));
+        {
+            assert!(route.contains("physical T5 execution requires Zig; no Rust fallback"));
+            assert!(!route.contains("sens::PhysicalT5Program::decode(bytes)"));
+        }
         assert!(route.contains("program.execute(&mut session)"));
         assert!(!route.contains("sens::pack_binary_source_words("));
         assert!(!route.contains("sens::parse_canonical_packed_words("));
