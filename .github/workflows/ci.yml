@@ -39,6 +39,11 @@ jobs:
           python3 -m unittest discover -s tests -p test_migration_source_scope.py -v 2>&1 | tee "$RUNNER_TEMP/migration-archive-scope.log"
           grep -Fq 'Ran 1 test' "$RUNNER_TEMP/migration-archive-scope.log"
           grep -Fxq 'OK' "$RUNNER_TEMP/migration-archive-scope.log"
+          # Exact Git-path identity and orphan T5 are physical provenance, not admission.
+          echo 'test_id=migration-inventory-git-path-canonical layer=provenance expected=canonical-positive-alias-and-orphan-negative semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_report_t5_migration_progress.py -k test_noncanonical_aliases_rejected_by_source_inventory -k test_orphan_physical_sens_without_source_is_named -v 2>&1 | tee "$RUNNER_TEMP/migration-inventory-canonical.log"
+          grep -Fq 'Ran 2 tests' "$RUNNER_TEMP/migration-inventory-canonical.log"
+          grep -Fxq 'OK' "$RUNNER_TEMP/migration-inventory-canonical.log"
           # One early automated source+filesystem witness: a hardlink to
           # staging cannot impersonate a separately downloaded release asset.
           # -k matches two tests; count is checked to reject accidental zero-test PASS.

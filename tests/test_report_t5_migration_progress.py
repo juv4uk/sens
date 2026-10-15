@@ -116,6 +116,35 @@ class T5ProgressLedgerTests(unittest.TestCase):
             with self.subTest(src=src), self.assertRaises(ValueError):
                 mod._source_name(src)
 
+    def test_noncanonical_aliases_rejected_by_source_inventory(self):
+        self.assertEqual(mod._source_name("lib/one.lisp"), "lib/one.lisp")
+        for source in (
+            "lib//one.lisp", "lib/./one.lisp", "lib/sub/../one.lisp",
+            "lib/\x00one.lisp", "lib\\one.lisp",
+        ):
+            with self.subTest(source=source), self.assertRaises(ValueError):
+                mod._source_name(source)
+        pairs, readiness, tracked = fixtures()
+        with self.assertRaises(ValueError):
+            mod.combine(pairs, readiness, tracked | {"lib//one.lisp"})
+
+    def test_orphan_physical_sens_without_source_is_named(self):
+        pairs, readiness, tracked = fixtures()
+        orphan = copy.deepcopy(pairs["files"][0])
+        orphan["source"] = "lib/orphan.lisp"
+        orphan["sens"] = "lib/orphan.sens"
+        orphan["physical_sha256"] = "5" * 64
+        pairs["files"].append(orphan)
+        pairs["summary"]["sens_files"] = 2
+        pairs["summary"]["physical_pass"] = 2
+        readiness["skipped_existing_sens_pairs"].append("lib/orphan.lisp")
+        report = mod.combine(pairs, readiness, tracked)
+        self.assertEqual(report["status"], "BLOCKED_DISCREPANCY")
+        self.assertEqual(report["orphan_physical_sens_paths"], ["lib/orphan.sens"])
+        self.assertEqual(report["summary"]["orphan_physical_sens_without_tracked_lisp"], 1)
+        self.assertIn("lib/orphan.lisp", report["untracked_or_stale_source_paths"])
+        self.assertEqual(report["summary"]["independently_oracle_certified_from_these_inputs"], 0)
+
     def test_actual_repo_pair_audit_matches_no_implicit_semantic_credit(self):
         # Fast independent, read-only smoke test using already-installed
         # auditor; a physical pass never asserts oracle approval.
