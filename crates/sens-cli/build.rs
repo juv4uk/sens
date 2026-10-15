@@ -8,6 +8,10 @@ fn main() {
     println!("cargo:rerun-if-changed=../../research/zig-codecs/t5/t5.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/f3c/f3c.zig");
     println!("cargo:rerun-if-changed=../../research/zig-codecs/transport_abi.zig");
+    // Cargo's directory dependency watch is recursive (Cargo Book).
+    // Future Zig 0.16 codec imports MUST invalidate the Rust-linked archive,
+    // not only today's hand-listed leaf files. Source bits stay Zig-owned.
+    println!("cargo:rerun-if-changed=../../research/zig-codecs");
     println!("cargo:rerun-if-changed=../../zig_transport_root.zig");
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
