@@ -53,6 +53,45 @@ def check_current_resolver_signature(source: str) -> None:
         )
 
 
+def check_current_three_map_boundary(source: str) -> None:
+    """One current 3-value builder; SID8 bridge must remain inert provenance."""
+    tree = ast.parse(source)
+    assignments = [
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Attribute)
+        and isinstance(node.value.func.value, ast.Name)
+        and node.value.func.value.id == "mig"
+        and node.value.func.attr == "build_three_pass_maps"
+    ]
+    if len(assignments) != 1 or len(assignments[0].targets) != 1:
+        raise ValueError("MIGRATION_MAP_ARITY_RED layer=migration expected=one-current-builder")
+    target = assignments[0].targets[0]
+    names = (
+        [elt.id if isinstance(elt, ast.Name) else None for elt in target.elts]
+        if isinstance(target, ast.Tuple) else []
+    )
+    if names != ["my", "upper", "_historical_bridge_provenance"]:
+        raise ValueError(
+            "MIGRATION_MAP_ARITY_RED layer=migration "
+            f"expected=(my,upper,inert-bridge) actual={names!r}"
+        )
+    # The bridge is a historical diagnostic, NEVER an admitted D8 callable
+    # or an input to Resolver in this current-only Zig physical batch.
+    live_uses = [
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.Name)
+        and node.id == "_historical_bridge_provenance"
+        and isinstance(node.ctx, ast.Load)
+    ]
+    if live_uses:
+        raise ValueError(
+            "MIGRATION_MAP_ARITY_RED layer=migration "
+            "historical SID8 provenance used as a live identity"
+        )
+
+
 class CurrentThreePassZigCorridorTest(unittest.TestCase):
     def call(self, output: Path, report: Path, *options: str):
         return subprocess.run([
@@ -103,6 +142,26 @@ class CurrentThreePassZigCorridorTest(unittest.TestCase):
             with self.subTest(mutation=label):
                 with self.assertRaisesRegex(ValueError, "MIGRATION_RESOLVER_API_RED"):
                     check_current_resolver_signature(mutant)
+
+    def test_current_builder_three_results_do_not_revive_sid8_bridge(self):
+        source = DRIVER.read_text(encoding="utf-8")
+        check_current_three_map_boundary(source)
+        expected = "my, upper, _historical_bridge_provenance = mig.build_three_pass_maps("
+        self.assertEqual(source.count(expected), 1)
+        mutants = {
+            "old-two-map-arity": source.replace(
+                expected, "my, upper = mig.build_three_pass_maps(", 1,
+            ),
+            "bridged-sid8-callability": source.replace(
+                "mig.Resolver(my, upper, d9_residents=d9_residents)",
+                "mig.Resolver(my, upper, d9_residents=d9_residents, "
+                "bridge_by_sid=_historical_bridge_provenance)", 1,
+            ),
+        }
+        for mutation, changed in mutants.items():
+            with self.subTest(mutation=mutation):
+                with self.assertRaisesRegex(ValueError, "MIGRATION_MAP_ARITY_RED"):
+                    check_current_three_map_boundary(changed)
 
     def test_explicit_current_d8_ratification_keeps_dry_run_byte_provenance(self):
         original = (ROOT / INPUT).read_bytes()
