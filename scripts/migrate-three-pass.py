@@ -533,11 +533,14 @@ def text7_encode(spelling: str,candidates,tok: Tok):
         # (reversible) when the raw spelling is not directly on the keyboard.
         if view == "san" and any(chosen.get(g) is None for g in spelling):
             deva = iast_to_devanagari(spelling)
-            if deva is not None and all(chosen.get(g) is not None for g in deva):
+            if deva is not None:
                 spelling = deva
         result = []
         for glyph in spelling:
             bits = chosen.get(glyph)
+            if bits is None and view == "san":
+                # A joiner (-, ?) is not on the san keyboard but is on uk.
+                bits = indexes.get("uk", {}).get(glyph)
             if bits is None:
                 raise MigrationError(
                     f"D7 keyboard/v2 cannot encode {glyph!r} U+{ord(glyph):04X} in {view}",
