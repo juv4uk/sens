@@ -87,6 +87,60 @@ def check_main_t5_ingress(source: str) -> None:
         raise CorridorBlocked("sens .sens command no longer calls guarded Zig ingress")
 
 
+def check_trit_t5_egress(source: str) -> None:
+    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5.
+
+    This is a source-level invariant for ONE production command; the native
+    SENS oracle and physical Zig CI have separate executable receipts.
+    """
+    helper = _route_between(source, "fn admitted_source_words(", "\nfn read_sens(")
+    if ("sens::parse_binary_source_words(source)" not in helper
+            or "sens::parse_canonical_word_sequence(&words)" not in helper):
+        raise CorridorBlocked("sens-trit source admission bypasses SENS exact D2 reader")
+    if ("sens::encode_binary_projection_ternary(" in helper
+            or "sens::decode_ternary_words(" in helper):
+        raise CorridorBlocked("sens-trit exact source helper creates Rust physical T5")
+
+    # Include newlines and indentation to distinguish the actual match arm
+    # from string literals inside regression tests further down the file.
+    encode = _route_between(
+        source, '\n        "encode" => {\n', '\n        "open" | "view" => {\n'
+    )
+    feature = '#[cfg(feature = "zig-transport")]'
+    reference = '#[cfg(not(feature = "zig-transport"))]'
+    if encode.count(feature) != 1 or encode.count(reference) != 1:
+        raise CorridorBlocked("sens-trit encode missing exclusive Zig/reference feature gates")
+    zig, rust = encode.split(reference, 1)
+    required = "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
+    if required not in zig:
+        raise CorridorBlocked("sens-trit default encode bypasses Zig physical T5 egress")
+    for bypass in ("sens::encode_binary_projection_ternary(", "sens::encode_ternary_words(",
+                   "sens::decode_ternary_words(", "PhysicalT5Program::decode("):
+        if bypass in zig:
+            raise CorridorBlocked(f"sens-trit default encode calls Rust codec: {bypass}")
+    if "let bytes = sens::encode_binary_projection_ternary(&projection)" not in rust:
+        raise CorridorBlocked("sens-trit explicit Rust reference encoding lost its feature gate")
+    if "verify_companion(&projection, &bytes)" not in rust:
+        raise CorridorBlocked("sens-trit encode no longer verifies Zig carrier")
+
+    companion = _route_between(source, "fn verify_companion(", "\n/// Run the explicitly")
+    required_companion = (
+        'let expected_words = admitted_source_words(source)?;',
+        'if decoded != expected_words',
+        'zig_transport::encode_t5(&expected_words, binary)',
+    )
+    if any(fragment not in companion for fragment in required_companion):
+        raise CorridorBlocked("sens-trit companion no longer replays Zig bytes and SENS words")
+    if companion.count(reference) < 1:
+        raise CorridorBlocked("sens-trit companion must isolate Rust reference mode")
+    companion_zig, companion_reference = companion.split(reference, 1)
+    if ('let expected_words = admitted_source_words(source)?;' not in companion_zig
+            or "sens::encode_binary_projection_ternary(" in companion_zig):
+        raise CorridorBlocked("sens-trit default companion uses Rust physical T5 instead of SENS")
+    if "let reference = sens::encode_binary_projection_ternary(source)" not in companion_reference:
+        raise CorridorBlocked("sens-trit companion Rust reference is not explicitly isolated")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -135,7 +189,8 @@ def check() -> list[str]:
         raise CorridorBlocked("sens-trit.rs still embeds local Zig FFI")
     if trit.count("zig_transport::") < 1:
         raise CorridorBlocked("sens-trit.rs does not call zig_transport corridor API")
-    notes.append("sens-trit-uses-corridor")
+    check_trit_t5_egress(trit)
+    notes.append("sens-trit-zig-only-egress")
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")

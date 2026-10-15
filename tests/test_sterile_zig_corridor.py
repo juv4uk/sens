@@ -78,6 +78,52 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(source.replace(old, replacement, 1))
 
+    def test_trit_default_egress_rejects_rust_codec_mutants(self) -> None:
+        # Mutate only the actual CLI entry, not a quoted copy in a test.
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_t5_egress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+        check(source)
+
+        replacements = (
+            (
+                "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;",
+                "let bytes = sens::encode_binary_projection_ternary(&projection).unwrap();",
+            ),
+            (
+                "let expected_words = admitted_source_words(source)?;",
+                "let expected_words = zig_transport::decode_t5_words(binary)?;",
+            ),
+            (
+                "zig_transport::encode_t5(&expected_words, binary)",
+                "sens::encode_binary_projection_ternary(source).map_err(|e| format!(\"{e:?}\"))",
+            ),
+            (
+                "sens::parse_binary_source_words(source)",
+                "sens::decode_ternary_words(source.as_bytes())",
+            ),
+        )
+        for old, replacement in replacements:
+            with self.subTest(bypass=old):
+                self.assertIn(old, source, "production mutation anchor missing")
+                with self.assertRaises(blocked):
+                    check(source.replace(old, replacement, 1))
+
+    def test_trit_default_egress_refuses_missing_or_duplicate_production_arm(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_t5_egress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+        anchor = '\n        "encode" => {\n'
+        self.assertIn(anchor, source)
+        for mutant in (
+            source.replace(anchor, '\n        "old_encode" => {\n', 1),
+            source.replace(anchor, anchor + anchor, 1),
+        ):
+            with self.subTest(kind="missing-or-duplicate"), self.assertRaises(blocked):
+                check(mutant)
+
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
