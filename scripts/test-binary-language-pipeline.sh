@@ -137,7 +137,17 @@ cli_source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
 route_start = cli_source.index("fn eval_physical_t5(")
 route_end = cli_source.index("\nfn main()", route_start)
 physical_route = cli_source[route_start:route_end]
-assert "sens::decode_ternary_words(bytes)" in physical_route
+# Zig ABI v2 is the only default physical ingress: Rust cannot decode
+# physical T5 directly, even as an implicit fallback after Zig rejection.
+ingress_start = cli_source.index("fn decode_physical_t5_words(")
+ingress_end = cli_source.index("\nfn eval_physical_t5(", ingress_start)
+ingress = cli_source[ingress_start:ingress_end]
+assert 'return zig_transport::decode_t5_words(bytes);' in ingress
+assert '#[cfg(feature = "zig-transport")]' in ingress
+assert '#[cfg(not(feature = "zig-transport"))]' in ingress
+assert "no Rust fallback" in ingress
+assert "sens::decode_ternary_words(bytes)" not in ingress
+assert "let words = decode_physical_t5_words(bytes)?;" in physical_route
 assert "sens::parse_canonical_word_sequence(&words)" in physical_route
 assert "sens::pack_binary_source_words" not in physical_route
 assert "sens::parse_canonical_packed_words" not in physical_route
