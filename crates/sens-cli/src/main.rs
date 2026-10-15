@@ -10,6 +10,8 @@ mod islands;
 mod repl;
 mod swarm;
 mod tcp_repl;
+#[cfg(feature = "zig-transport")]
+mod zig_transport;
 use swarm::{dotted_alist_lookup, oracle_check, oracle_help, run_client, run_tcp_repl_sexpr};
 use tcp_repl::run_tcp_repl;
 
@@ -134,14 +136,27 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
     Some(Ok(path.as_str()))
 }
 
+/// One sterile physical ingress: Rust-host bytes -> Zig ABI v2 BE3 ->
+/// exact-width SENS words. No Rust-side T5 fallback is permitted for .sens.
+fn decode_physical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        return zig_transport::decode_t5_words(bytes);
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = bytes;
+        Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())
+    }
+}
+
 /// One pure T5 -> canonical binary D2 -> current evaluator route.
 /// Neither human spellings nor an eight-bit compatibility reader participate.
 /// An explicit binary file never gains ambient host capabilities or Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     // Exact-width T5 words feed the canonical D2 reader directly.
     // No ASCII surface, dense re-packing or duplicate bit-unpacking.
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|err| format!("physical T5 transport rejected: {err:?}"))?;
+    let words = decode_physical_t5_words(bytes)?;
     let forms = sens::parse_canonical_word_sequence(&words)
         .map_err(|err| format!("exact packed binary reader rejected: {err}"))?;
 
@@ -628,6 +643,32 @@ mod core_profile_bootstrap_tests {
         assert!(!source.contains("(quote"));
         // Broken physical/truncated structural programs fail before evaluation.
         assert!(sens::open_ternary_program(&[0xf3]).is_err());
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn physical_main_binary_passes_through_zig_abi_v2_before_sens_admission() {
+        // This ordinary T5 carrier holds five exact D2/D3 words.
+        // Zig transports [width, MSB, LSB]; SENS alone judges D2 and eval.
+        let physical = [0x63, 0x89, 0x06, 0xa1];
+        let words = decode_physical_t5_words(&physical).expect("Zig ABI v2 ingress");
+        let widths: Vec<_> = words.iter().map(sens::BinarySourceWord::width).collect();
+        let bits: Vec<_> = words.iter().map(sens::BinarySourceWord::packed_bits).collect();
+        assert_eq!(widths, [2, 3, 2, 3, 2]);
+        assert_eq!(bits, [2, 1, 0, 0, 1]);
+        assert!(sens::parse_canonical_word_sequence(&words).is_ok());
+        // Malformed physical data must fail before even attempting D2 admission.
+        for invalid in [&[0xf3][..], &[0xf2][..], &[0, 0][..]] {
+            assert!(decode_physical_t5_words(invalid).is_err(), "invalid {invalid:?}");
+        }
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn physical_main_refuses_to_bypass_unavailable_zig_transport() {
+        let physical = [0x63, 0x89, 0x06, 0xa1];
+        let error = decode_physical_t5_words(&physical).expect_err("no Zig means no .sens ingress");
+        assert!(error.contains("no Rust fallback"));
     }
 
     #[test]
