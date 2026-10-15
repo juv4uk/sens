@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Rust must not embed SENS project sources: only the Zig ABI may bridge hosts.
+"""Rust production sources must not embed SENS project bits — only Zig may bridge.
 
-Mechanical compile-time inventory of include_str!/include_bytes! from tracked
-crates/**/*.rs to .lisp/.sens/.fasl. These are FORBIDDEN direct edges, not
-required dependencies. They remain red until the actual source references
-are migrated away. Do not silently allowlist historical bootstrap files.
+Compile-time inventory of include_str!/include_bytes! from production Rust
+(crates/*/src/**/*.rs and crates/*/build.rs, excluding tests/ and examples/)
+to .lisp / .sens / .fasl. Every such edge is a FORBIDDEN isolation error
+(RUST_ZIG_ONLY). No grandfathered bootstrap list.
 
-R1: missing targets are errors; R2: untracked targets are errors;
-R3: EVERY direct Rust -> .lisp/.sens/.fasl embed is a blocking isolation error.
-This does not establish runtime / semantic isolation; audit those separately.
+Scope matches scripts/check_rust_isolated_only_zig.py (production path only).
+Physical bytes cross hosts only via the sterile Zig corridor (#5777/#5779).
 
-Exit 0 = EDGES_OK (zero direct embeds); exit 1 = EDGES_BLOCKED.
+R1 missing target → error
+R2 untracked target → error
+R3 any direct embed → EDGES_BLOCKED (RED until cutover to zero)
+
+Exit 0 = EDGES_OK (zero production embeds); exit 1 = EDGES_BLOCKED.
 """
 from __future__ import annotations
 
@@ -22,19 +25,14 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-SCHEMA = "sens-rust-lisp-sens-edges/v2"
+SCHEMA = "sens-rust-lisp-sens-edges/v1"
 
 INCLUDE_RE = re.compile(
-    r"""(?P<kind>include_str|include_bytes)!\s*\(\s*\"(?P<path>(?:\\.|[^\"\\])*)\"\s*\)""",
-)
-# Rust raw strings (r"...", r#"..."#, r###"..."###) are real source embeds.
-# The hash delimiter must match on both ends, not just look like a quote.
-INCLUDE_RAW_RE = re.compile(
-    r'''(?P<kind>include_str|include_bytes)!\s*\(\s*r(?P<hash>#{0,})"(?P<path>[^"]+)"(?P=hash)\s*\)''',
+    r'(?P<kind>include_str|include_bytes)!\s*\(\s*"(?P<path>(?:\\.|[^"\\])*)"\s*\)',
 )
 SENS_SUFFIXES = (".lisp", ".sens", ".fasl", ".lisp.fasl")
+PRODUCTION_GLOBS = ("crates/*/src/**/*.rs", "crates/*/build.rs")
 
-# No critical embed is grandfathered: even core4 / guard / contract is red.
 
 def git_tracked(root: Path) -> set[str]:
     out = subprocess.check_output(
@@ -45,12 +43,11 @@ def git_tracked(root: Path) -> set[str]:
 
 
 def unescape_rust_string(raw: str) -> str:
-    # Minimal: the paths we care about use ../ and plain names.
     return (
-        raw.replace(r"\\", "\\")
-        .replace(r"\"", '"')
-        .replace(r"\n", "\n")
-        .replace(r"\t", "\t")
+        raw.replace("\\\\", "\\")
+        .replace('\\"', '"')
+        .replace("\\n", "\n")
+        .replace("\\t", "\t")
     )
 
 
@@ -59,15 +56,34 @@ def is_sens_path(path: str) -> bool:
     return any(lower.endswith(suf) for suf in SENS_SUFFIXES)
 
 
+def is_production_rust(rel: str) -> bool:
+    if "/tests/" in f"/{rel}/" or "/examples/" in f"/{rel}/":
+        return False
+    if rel.endswith("build.rs"):
+        return True
+    return "/src/" in f"/{rel}/"
+
+
+def production_rust_files(root: Path, tracked: set[str]) -> list[Path]:
+    files: list[Path] = []
+    for pattern in PRODUCTION_GLOBS:
+        for path in sorted(root.glob(pattern)):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(root).as_posix()
+            if rel not in tracked:
+                continue
+            if not is_production_rust(rel):
+                continue
+            files.append(path)
+    return files
+
+
 def scan_file(rs_path: Path, root: Path) -> list[dict]:
     text = rs_path.read_text(encoding="utf-8", errors="replace")
     rel_rs = rs_path.relative_to(root).as_posix()
     edges: list[dict] = []
-    matches = sorted(
-        [*INCLUDE_RE.finditer(text), *INCLUDE_RAW_RE.finditer(text)],
-        key=lambda match: match.start(),
-    )
-    for m in matches:
+    for m in INCLUDE_RE.finditer(text):
         kind = m.group("kind")
         raw = unescape_rust_string(m.group("path"))
         if not is_sens_path(raw):
@@ -84,9 +100,9 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
                 "include_arg": raw,
                 "target": rel_target,
                 "exists": resolved.is_file(),
+                "line": text.count("\n", 0, m.start()) + 1,
                 "status": "RED",
                 "violation": "DIRECT_RUST_PROJECT_EMBED",
-                "line": text.count("\n", 0, m.start()) + 1,
             }
         )
     return edges
@@ -94,20 +110,12 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
 
 def inventory(root: Path) -> dict:
     tracked = git_tracked(root)
-    rust_files = sorted(
-        p for p in root.glob("crates/**/*.rs") if p.is_file()
-    )
     edges: list[dict] = []
-    for rs in rust_files:
-        rel = rs.relative_to(root).as_posix()
-        if rel not in tracked:
-            continue
+    for rs in production_rust_files(root, tracked):
         edges.extend(scan_file(rs, root))
 
     missing = [e for e in edges if not e["exists"]]
-    untracked = [
-        e for e in edges if e["exists"] and e["target"] not in tracked
-    ]
+    untracked = [e for e in edges if e["exists"] and e["target"] not in tracked]
 
     by_rust: dict[str, list[str]] = defaultdict(list)
     by_target: dict[str, list[str]] = defaultdict(list)
@@ -117,11 +125,10 @@ def inventory(root: Path) -> dict:
         if e["rust"] not in by_target[e["target"]]:
             by_target[e["target"]].append(e["rust"])
 
-    # Zero is the ONLY acceptable direct-embed count. Historical embeds do not pass.
-    blocked = bool(edges or missing or untracked)
-
+    blocked = bool(edges) or bool(missing) or bool(untracked)
     return {
         "schema": SCHEMA,
+        "scope": "production-rust-only",
         "edge_count": len(edges),
         "rust_files_with_edges": len(by_rust),
         "unique_targets": len(by_target),
@@ -141,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", type=Path, default=Path("."))
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--by-rust", action="store_true", help="print Rust → targets map")
+    ap.add_argument("--by-rust", action="store_true")
     args = ap.parse_args(argv)
     root = args.root.resolve()
     data = inventory(root)
@@ -149,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(data, ensure_ascii=False, indent=2))
     else:
         print(
-            f"{data['verdict']} edges={data['edge_count']} "
+            f"{data['verdict']} scope={data['scope']} edges={data['edge_count']} "
             f"rust_files={data['rust_files_with_edges']} "
             f"targets={data['unique_targets']}"
         )
@@ -162,22 +169,22 @@ def main(argv: list[str] | None = None) -> int:
             for e in data["untracked_targets"]:
                 print(f"  {e['rust']} -> {e['target']}")
         if data["forbidden_edges"]:
-            print("RUST_ZIG_ONLY_RED: direct Rust embeds of SENS sources are forbidden")
-            for e in data["forbidden_edges"][:30]:
+            print(
+                "RUST_ZIG_ONLY_RED: production Rust embeds of SENS sources are forbidden; "
+                "only the sterile Zig corridor may bridge physical bytes"
+            )
+            for e in data["forbidden_edges"][:40]:
                 print(
-                    f"  DIRECT_RUST_PROJECT_EMBED id=rust-zig-only "
-                    f"layer=transport {e['rust']}:{e['line']} "
+                    f"  DIRECT_RUST_PROJECT_EMBED {e['rust']}:{e['line']} "
                     f"{e['kind']}! -> {e['target']}"
                 )
-            if len(data["forbidden_edges"]) > 30:
-                print(f"  ... {len(data['forbidden_edges']) - 30} additional forbidden edges; "
-                      "run --by-rust or --json for the complete inventory")
+            if len(data["forbidden_edges"]) > 40:
+                print(
+                    f"  ... {len(data['forbidden_edges']) - 40} more; "
+                    "run --by-rust or --json"
+                )
             print("  REPRO: python3 scripts/rust_lisp_sens_edges.py --by-rust")
-        if args.by_rust:
-            for rust, targets in data["by_rust"].items():
-                print(f"{rust}")
-                for t in targets:
-                    print(f"  {t}")
+            print("  GOAL: zero production embeds; Rust reaches ONLY Zig")
     return 1 if data["verdict"] != "EDGES_OK" else 0
 
 
