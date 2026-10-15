@@ -284,3 +284,56 @@ test "ABI v2 T5 decode rejects partial overlap and accepts adjacent buffers" {
         adjacent[carrier.len .. carrier.len + expected.len]);
     try std.testing.expectEqual(@as(u8, 0x6e), adjacent[carrier.len + expected.len]);
 }
+
+test "ABI v2 F3C return codes remain mechanical and never clobber" {
+    // Both Rust and Rust-free C hosts call these exact Zig ABI v2 exports.
+    // A transport error is NOT a SENS D1:NO or semantic rejection.
+    const t5_quote = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
+    const f3_quote = [_]u8{ 0xf3, 0x40, 0x60 };
+    const untouched = [_]u8{0x75} ** 32;
+    var output: [32]u8 = untouched;
+
+    // Refuse publication on insufficient capacity, malformed input, or
+    // a valid ordinary T5 carrier that does not produce an F3C saving.
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_f3c_pack(&t5_quote, t5_quote.len, &output, 2));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_f3c_pack(&.{0xff}, 1, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -3),
+        sens_zig_f3c_pack(&.{0x64}, 1, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+
+    try std.testing.expectEqual(@as(isize, 3),
+        sens_zig_f3c_pack(&t5_quote, t5_quote.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &f3_quote, output[0..f3_quote.len]);
+    try std.testing.expectEqual(@as(u8, 0x75), output[f3_quote.len]);
+
+    // Ingress is also fail-closed: insufficient output or a corrupt marker
+    // must not mutate caller-owned bytes, including a trailing sentinel.
+    output = untouched;
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_f3c_unpack(&f3_quote, f3_quote.len, &output, 3));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_f3c_unpack(&.{ 0xf4, 0x40, 0x60 }, 3, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &untouched, &output);
+    try std.testing.expectEqual(@as(isize, 4),
+        sens_zig_f3c_unpack(&f3_quote, f3_quote.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &t5_quote, output[0..t5_quote.len]);
+    try std.testing.expectEqual(@as(u8, 0x75), output[t5_quote.len]);
+
+    // Legitimate in-place operations remain supported: scratch is internal to
+    // Zig; no Rust/C allocator, struct layout, or SENS truth value crosses.
+    var shared: [32]u8 = untouched;
+    @memcpy(shared[0..t5_quote.len], &t5_quote);
+    try std.testing.expectEqual(@as(isize, 3),
+        sens_zig_f3c_pack(shared[0..].ptr, t5_quote.len,
+            shared[0..].ptr, shared.len));
+    try std.testing.expectEqualSlices(u8, &f3_quote, shared[0..f3_quote.len]);
+    try std.testing.expectEqual(@as(isize, 4),
+        sens_zig_f3c_unpack(shared[0..].ptr, f3_quote.len,
+            shared[0..].ptr, shared.len));
+    try std.testing.expectEqualSlices(u8, &t5_quote, shared[0..t5_quote.len]);
+}
