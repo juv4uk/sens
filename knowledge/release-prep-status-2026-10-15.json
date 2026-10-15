@@ -1,0 +1,49 @@
+{
+  "schema": "sens-release-prep-status/v1",
+  "kind": "mechanical-snapshot-not-go",
+  "candidate_tag": "l0.42.0",
+  "contract_generation": "11.9",
+  "measured_at_utc": "2026-10-15",
+  "tip_sha": "b5e0c01bfa95cf247907a6f381c1e6bf05fadea3",
+  "verdict": "NO-GO",
+  "gates": {
+    "1_version_alignment": {
+      "status": "DONE",
+      "release_crates_version": "0.42.0",
+      "guix": "0.42.0",
+      "install_tag": "l0.42.0"
+    },
+    "2_p0_issues": {
+      "status": "OPEN",
+      "refs": ["#4196", "#5406", "#5408", "#2170"]
+    },
+    "3_toolchain_pins": {
+      "status": "DONE_MECHANICAL",
+      "rust_toolchain_toml": "1.99.0",
+      "check_release_pins": "RELEASE_PINS_PASS channel=1.99.0 workflows=13",
+      "evidence_digests": "UNSET"
+    },
+    "4_candidate_sha_tests_admission": {
+      "status": "BLOCKED",
+      "release_admission_ledger": "MISSING",
+      "ledger_path": "knowledge/release-admission-ledger.json"
+    },
+    "5_platform_assets": {
+      "status": "IN_RELEASE_YML"
+    },
+    "6_atomic_publish": {
+      "status": "DONE",
+      "mechanism": "draft-first + publish-release"
+    },
+    "7_release_evidence": {
+      "status": "NO-GO",
+      "candidate_sha": "UNSET",
+      "owner_authorization": "UNSET"
+    }
+  },
+  "notes": [
+    "Does not invent ledger entries or semantic admission.",
+    "Does not claim GO. Missing ledger fails closed.",
+    "Zig/Rust transport benches are not release gate substitutes."
+  ]
+}
