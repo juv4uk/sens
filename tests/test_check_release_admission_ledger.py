@@ -8,6 +8,7 @@ verified against the real ``.sens`` bytes.
 
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -193,6 +194,44 @@ class ContentTests(unittest.TestCase):
                     ledger([entry(sens="linkdir/nested.sens",
                                   typed_word_sha256=digest, ratified=1)]), root=repo,
                 )
+
+    def test_hardlink_alias_with_identical_t5_bytes_cannot_prove_release_content(self):
+        if not hasattr(os, "link"):
+            self.skipTest("hardlink primitive unavailable on this host")
+        payload = (ROOT / REAL_SENS).read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            repo.mkdir()
+            # Byte-identical independent copy is legitimate physical evidence.
+            independent = repo / "independent.sens"
+            independent.write_bytes(payload)
+            claimed = MODULE.content_sha256(repo, "independent.sens")
+            clean = MODULE.validate_ledger(
+                ledger([entry(sens="independent.sens",
+                              typed_word_sha256=claimed, ratified=1)]),
+                root=repo,
+            )
+            self.assertEqual(clean["content_verified"], 1)
+            self.assertEqual(clean["release_admitted"], 0)
+
+            # The same inode reachable outside the checkout must never pass.
+            outside = base / "outside.sens"
+            outside.write_bytes(payload)
+            linked = repo / "linked.sens"
+            os.link(outside, linked)
+            with self.assertRaisesRegex(MODULE.LedgerBlocked, "hardlink"):
+                MODULE.validate_ledger(
+                    ledger([entry(sens="linked.sens",
+                                  typed_word_sha256=claimed, ratified=1)]),
+                    root=repo,
+                )
+
+            # Internal same-inode aliases must fail, even with correct SHA.
+            internal = repo / "also-linked.sens"
+            os.link(linked, internal)
+            with self.assertRaisesRegex(MODULE.LedgerBlocked, "hardlink"):
+                MODULE.content_sha256(repo, "also-linked.sens")
 
     def test_noncanonical_alias_paths_cannot_duplicate_admission(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -20,7 +20,9 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import re
+import stat
 import sys
 from pathlib import Path
 
@@ -73,7 +75,17 @@ def content_sha256(root: Path, sens: str) -> str:
         resolved = path.resolve(strict=True)
         if not resolved.is_relative_to(repo_root) or not resolved.is_file():
             raise LedgerBlocked(f"{sens}: файл .sens поза дозволеним деревом")
-        words = CODEC.decode_bytes(path.read_bytes())
+        # Verify the actual opened inode, not a path that could be rebound
+        # between the directory check and the content read. A hardlink with
+        # identical physical T5 bytes is still ambiguous release provenance.
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        with os.fdopen(os.open(path, flags), "rb") as stream:
+            inode = os.fstat(stream.fileno())
+            if not stat.S_ISREG(inode.st_mode) or inode.st_nlink != 1:
+                raise LedgerBlocked(
+                    f"{sens}: hardlink або неунікальний regular-file inode не є доказом .sens"
+                )
+            words = CODEC.decode_bytes(stream.read())
     except (OSError, RuntimeError) as exc:
         raise LedgerBlocked(f"{sens}: немає доступного канонічного файла .sens ({exc})") from exc
     except CODEC.SensT5Error as exc:
