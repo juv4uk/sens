@@ -10,6 +10,15 @@ rust_marker() {
     local pattern='(__rust_|rust_eh_personality|rust_alloc|rust_dealloc|rust_realloc|rust_alloc_zeroed|\.rlib($|[^[:alnum:]_])|librust[^[:space:]]*|lib(std|core|alloc)-[[:xdigit:]]+\.(a|so|dylib)|(^|[[:space:]])_?RN[[:alnum:]_]+)'
     [[ "$1" =~ $pattern ]]
 }
+# Only exact, DEFINED linker symbols can attest an ABI v2 export.
+# An archive heading, a similarly named symbol, or an undefined U is no proof.
+has_exact_defined_symbol() {
+    local nm_output="$1" symbol="$2"
+    awk -v wanted="$symbol" '
+        NF >= 3 && $(NF-1) ~ /^[A-Za-z]$/ && $(NF-1) != "U" && $NF == wanted { found=1 }
+        END { exit !found }
+    ' <<< "$nm_output"
+}
 if [[ "${1:-}" == "--self-test" && "$#" -eq 1 ]]; then
     if rust_marker $'libc.so.6\nlibstdc++.so.6\ncrt1.o'; then
         echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=normal-libraries' >&2
@@ -25,7 +34,22 @@ if [[ "${1:-}" == "--self-test" && "$#" -eq 1 ]]; then
         echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=zig-ffi-symbols' >&2
         exit 1
     fi
-    echo 'SENS_C_CORRIDOR_SELFTEST_PASS positive=2 negative=6 full_static_dependency_closure=NOT_VERIFIED'
+    local_symbols=$'0000000000000030 T sens_zig_codec_abi_version\n0000000000000040 T sens_zig_t5_encode_be3'
+    if ! has_exact_defined_symbol "$local_symbols" sens_zig_codec_abi_version ||
+       ! has_exact_defined_symbol "$local_symbols" sens_zig_t5_encode_be3; then
+        echo 'SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=exact-defined-export' >&2
+        exit 1
+    fi
+    for bogus in $'0000000000000040 T fake_sens_zig_t5_encode_be3' \
+                 $'0000000000000040 T sens_zig_t5_encode_be3_fake' \
+                 $'archive_member_sens_zig_t5_encode_be3.o:' \
+                 $'                 U sens_zig_t5_encode_be3'; do
+        if has_exact_defined_symbol "$bogus" sens_zig_t5_encode_be3; then
+            echo "SENS_C_CORRIDOR_SELFTEST_FAIL layer=dependency case=substring-export bogus=$bogus" >&2
+            exit 1
+        fi
+    done
+    echo 'SENS_C_CORRIDOR_SELFTEST_PASS positive=4 negative=10 exact_zig_export=VERIFIED full_static_dependency_closure=NOT_VERIFIED'
     exit 0
 fi
 if [[ "$#" -ne 0 ]]; then
@@ -114,8 +138,8 @@ if ! defined_archive="$(nm -g --defined-only "$archive")"; then
 fi
 # Demand real FFI symbols in the linked Zig archive, not merely declarations.
 for symbol in sens_zig_codec_abi_version sens_zig_t5_encode_be3 sens_zig_t5_decode_be3; do
-    if [[ "$defined_archive" != *"$symbol"* ]]; then
-        echo "SENS_C_CORRIDOR_UNVERIFIED layer=dependency missing_zig_export=$symbol" >&2
+    if ! has_exact_defined_symbol "$defined_archive" "$symbol"; then
+        echo "SENS_C_CORRIDOR_UNVERIFIED layer=dependency missing_exact_zig_export=$symbol" >&2
         exit 2
     fi
 done
