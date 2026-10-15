@@ -141,6 +141,10 @@ jobs:
           echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
           python3 scripts/check_sterile_zig_corridor.py
+          # Host-neutral ABI v2 declarations are a blocking part of this one auto-CI.
+          # Source-only proof: never upgrades physical or SENS semantic admission.
+          echo 'test_id=zig-abi-v2-zig-rust-c-declarations layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py -v
           echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
           zig test research/zig-codecs/domain_ladder.zig
           echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
