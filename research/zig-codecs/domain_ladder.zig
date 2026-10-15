@@ -476,3 +476,109 @@ test "single bit mutants preserve rung and are rejected as another coordinate" {
         }
     }
 }
+
+
+/// Mechanical MSB-first bit view over the owner-ratified width progression.
+/// Borrowed bytes, not a new wire format or a source of SENS semantics.
+/// D1..D10 are exact coordinates; D(24*2^n) is a physical width law.
+/// E3's narrower WIDE_WIDTHS profile does NOT expand by this validation.
+pub const OpaquePhysicalBitsError = error{
+    UnsupportedWidth, WrongByteLength, NonCanonicalTail,
+};
+
+pub fn supportsPhysicalWidth(width: u16) bool {
+    if (width >= 1 and width <= 10) return true;
+    const first = numeric_domains.WIDE_WIDTHS[0];
+    if (width < first or width % first != 0) return false;
+    const multiple = width / first;
+    return (multiple & (multiple - 1)) == 0;
+}
+
+/// Declared width + meaningful bits are inseparable. Storage is caller-owned.
+pub const OpaquePhysicalBits = struct {
+    width: u16,
+    bytes: []const u8,
+
+    pub fn init(width: u16, raw: []const u8) OpaquePhysicalBitsError!OpaquePhysicalBits {
+        if (!supportsPhysicalWidth(width)) return error.UnsupportedWidth;
+        if (raw.len != (@as(usize, width) + 7) / 8) return error.WrongByteLength;
+        const rem = width % 8;
+        if (rem != 0) {
+            const unused: u3 = @intCast(8 - rem);
+            const mask: u8 = (@as(u8, 1) << unused) - 1;
+            if ((raw[raw.len - 1] & mask) != 0) return error.NonCanonicalTail;
+        }
+        return .{ .width = width, .bytes = raw };
+    }
+
+    pub fn same(self: OpaquePhysicalBits, other: OpaquePhysicalBits) bool {
+        return self.width == other.width and std.mem.eql(u8, self.bytes, other.bytes);
+    }
+};
+
+test "opaque physical D1..D10 exhaustive 2046 widths and one-bit tail mutants" {
+    const fields = @import("transport/fields.zig");
+    var count: usize = 0;
+    inline for (1..11) |w| {
+        const Domain = DomainWord(@intCast(w));
+        const byte_len = (w + 7) / 8;
+        for (0..(@as(usize, 1) << w)) |value| {
+            const typed = Domain.init(@intCast(value));
+            const entry = [_]fields.Field{.{
+                .width = @intCast(w), .bits = @intCast(value),
+            }};
+            var encoded: [2]u8 = undefined;
+            try std.testing.expectEqual(@as(usize, w),
+                try fields.pack(encoded[0..byte_len], &entry));
+            const physical = try OpaquePhysicalBits.init(@intCast(w), encoded[0..byte_len]);
+            try std.testing.expectEqual(@as(u16, typed.coordinate().width), physical.width);
+            try std.testing.expect(physical.same(try OpaquePhysicalBits.init(
+                @intCast(w), encoded[0..byte_len])));
+            count += 1;
+        }
+        if (w % 8 != 0) {
+            var bad = [_]u8{0} ** byte_len;
+            bad[byte_len - 1] = 1;
+            try std.testing.expectError(error.NonCanonicalTail,
+                OpaquePhysicalBits.init(@intCast(w), &bad));
+        }
+    }
+    try std.testing.expectEqual(@as(usize, 2046), count);
+    const same_zero = [_]u8{0};
+    const a = try OpaquePhysicalBits.init(1, &same_zero);
+    const b = try OpaquePhysicalBits.init(2, &same_zero);
+    try std.testing.expect(!a.same(b));
+}
+
+test "opaque D24+ keeps declared widths without E3 or math admission" {
+    inline for (numeric_domains.WIDE_WIDTHS) |width| {
+        const D = WideDomainWord(width);
+        const bytes = D.init(1).writeBytes();
+        const view = try OpaquePhysicalBits.init(width, &bytes);
+        try std.testing.expectEqual(@as(usize, D.byte_len), view.bytes.len);
+        try std.testing.expectEqualSlices(u8, &bytes, view.bytes);
+        try std.testing.expectError(error.WrongByteLength,
+            OpaquePhysicalBits.init(width, bytes[1..]));
+        try std.testing.expect(!@hasDecl(D, "toCarrier"));
+    }
+    // D384+ are opaque declared physical bit lengths ONLY; current E3 v3
+    // single-run encoder keeps its existing four-profile restriction.
+    inline for (.{ 384, 768, 1536 }) |width| {
+        const byte_len = width / 8;
+        const zeros = [_]u8{0} ** byte_len;
+        var ones = zeros;
+        ones[byte_len - 1] = 1;
+        const zero = try OpaquePhysicalBits.init(width, &zeros);
+        const one = try OpaquePhysicalBits.init(width, &ones);
+        try std.testing.expectEqual(@as(usize, byte_len), zero.bytes.len);
+        try std.testing.expect(!zero.same(one));
+        try std.testing.expectError(error.WrongByteLength,
+            OpaquePhysicalBits.init(width, zeros[0 .. byte_len - 1]));
+    }
+    for ([_]u16{ 0, 11, 12, 23, 25, 47, 49, 95, 193, 65535 }) |bad| {
+        try std.testing.expectError(error.UnsupportedWidth,
+            OpaquePhysicalBits.init(bad, &.{}));
+    }
+    try std.testing.expectError(error.WrongByteLength,
+        OpaquePhysicalBits.init(24, &.{0}));
+}
