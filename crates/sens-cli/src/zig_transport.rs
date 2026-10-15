@@ -123,6 +123,33 @@ pub fn uk_surface_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+/// Release distribution JSON is copied as opaque bytes from root Zig 0.16.
+/// Rust may validate the manifest protocol but cannot embed project sources.
+pub fn islands_manifest_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_islands_manifest_bytes_copy(
+            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0
+        )
+    };
+    if required <= 0 {
+        return Err("ZIG_ISLANDS_MANIFEST_CARRIER invalid exact byte length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_ISLANDS_MANIFEST_CARRIER byte length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_ISLANDS_MANIFEST_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_islands_manifest_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_ISLANDS_MANIFEST_CARRIER exact copy failed: {copied}"));
+    }
+    Ok(bytes)
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],
