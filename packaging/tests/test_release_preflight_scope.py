@@ -24,6 +24,7 @@ REQUIRED_COMMANDS = tuple(command for _, command in REQUIRED_WORKSPACE_STEPS)
 ALLOWED_EVENTS = frozenset(("workflow_dispatch", "workflow_call"))
 ZIG_RELEASE_SAFE_COMMAND = "zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc"
 C_HOST_ABI_COMMAND = "bash research/zig-codecs/host-c/verify.sh"
+H2_CORPUS_COMMAND = "python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run"
 
 
 def require_manual_preflight(source: str) -> None:
@@ -107,6 +108,18 @@ def require_manual_preflight(source: str) -> None:
     )
     if host_match is None or host_match.start() <= native_match.end():
         raise AssertionError("RELEASE_BLOCKED: missing live Rust-free C Zig ABI witness")
+
+    # A fully optimized native Zig run and a single C ABI example are not
+    # evidence of parity on the owner-pinned six-pair migration corpus.
+    # Require a LIVE full H2 run after C ABI verification in the same step;
+    # --self-test without --run is synthetic and cannot authorize release.
+    h2_match = re.search(
+        r"(?m)^          " + re.escape(H2_CORPUS_COMMAND) + r"[ \t]*$", body,
+    )
+    if h2_match is None or h2_match.start() <= host_match.end():
+        raise AssertionError(
+            "RELEASE_BLOCKED: missing live Zig H2 migration physical corpus"
+        )
 
 
 class ReleasePreflightScopeTest(unittest.TestCase):
@@ -335,6 +348,60 @@ class ReleasePreflightScopeTest(unittest.TestCase):
             AssertionError, "missing live Rust-free C Zig ABI witness",
         ):
             require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_spoofed_h2_physical_migration_corpus(self):
+        live = "          " + H2_CORPUS_COMMAND + "\n"
+        self.assertIn(live, self.workflow)
+        require_manual_preflight(self.workflow)
+        for replacement in (
+            "# " + H2_CORPUS_COMMAND,
+            "echo " + H2_CORPUS_COMMAND,
+            "true # " + H2_CORPUS_COMMAND,
+            H2_CORPUS_COMMAND + " || true",
+            H2_CORPUS_COMMAND + " # ignored",
+            H2_CORPUS_COMMAND.replace(" --self-test --run", " --self-test"),
+            H2_CORPUS_COMMAND.replace(" --self-test --run", " --run=false"),
+            "true",
+        ):
+            with self.subTest(replacement=replacement):
+                forged = self.workflow.replace(live, "          " + replacement + "\n", 1)
+                self.assertNotEqual(forged, self.workflow)
+                with self.assertRaisesRegex(
+                    AssertionError, "missing live Zig H2 migration physical corpus"
+                ):
+                    require_manual_preflight(forged)
+
+    def test_negative_guard_rejects_h2_in_unrelated_step_or_wrong_order(self):
+        live = "          " + H2_CORPUS_COMMAND + "\n"
+        host = "          " + C_HOST_ABI_COMMAND + "\n"
+        marker = "      - name: Upload release GO-gate report\n"
+        for source in (live, host, marker):
+            self.assertIn(source, self.workflow)
+
+        # Even a real physical command in an unrelated YAML step does not
+        # prove the required Zig release corridor ran the migration corpus.
+        extra = (
+            "      - name: Decorative H2 separate check\n"
+            "        run: |\n"
+            "          set -euo pipefail\n"
+            + live + "\n"
+        )
+        misplaced = self.workflow.replace(live, "", 1)
+        misplaced = misplaced.replace(marker, extra + marker, 1)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Zig H2 migration physical corpus"
+        ):
+            require_manual_preflight(misplaced)
+
+        # The independent corpus must follow the compiled C ABI witness,
+        # not be allowed to run before the prerequisite transport contract.
+        reordered = self.workflow.replace(host, "          __SWAP_H2__\n", 1)
+        reordered = reordered.replace(live, host, 1)
+        reordered = reordered.replace("          __SWAP_H2__\n", live, 1)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Zig H2 migration physical corpus"
+        ):
+            require_manual_preflight(reordered)
 
     def test_negative_guard_rejects_floating_event_mapping(self):
         broken = self.workflow.replace(
