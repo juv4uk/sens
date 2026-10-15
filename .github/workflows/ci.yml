@@ -48,6 +48,15 @@ jobs:
           echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
+        id: zig-only-t5-no-fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Positive: linked Zig 0.16 ABI decodes a real .sens and byte-exact replays it.
+          cargo test --locked -p sens-cli --bin sens-trit rust_zig_only_cutover_tests -- --nocapture
+          # Negative: without Zig no physical operation may touch a file or select Rust.
+          cargo test --locked -p sens-cli --bin sens-trit --no-default-features rust_zig_only_cutover_tests -- --nocapture
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash
