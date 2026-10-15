@@ -325,5 +325,83 @@ class StandaloneThreePassZigMintWitness(unittest.TestCase):
         ):
             migrator.zig_mint_verified_t5(projection, reference, binary, bridge)
 
+    def test_reviewed_nonprogram_never_mints_and_source_drift_is_not_ignored(self):
+        """One positive / negative / mutated-source witness for issue #4460."""
+        import json
+        import subprocess
+
+        spec = importlib.util.spec_from_file_location(
+            "three_pass_nonprogram_witness", ROOT / "scripts/migrate-three-pass.py"
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        migrator = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = migrator
+        spec.loader.exec_module(migrator)
+
+        # Positive: ordinary source outside the ratified NONPROGRAM cohort.
+        self.assertIsNone(
+            migrator.reject_reviewed_nonprogram_source(ROOT / "lib/forward.lisp")
+        )
+        for name in ("d1", "d4", "d5", "d6"):
+            with self.subTest(domain=name), self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"
+            ):
+                migrator.reject_reviewed_nonprogram_source(
+                    ROOT / f"lib/domains/{name}.lisp"
+                )
+
+        with tempfile.TemporaryDirectory() as temp:
+            sandbox = Path(temp)
+            (sandbox / "lib/domains").mkdir(parents=True)
+            (sandbox / "knowledge").mkdir()
+            source = sandbox / "lib/domains/d4.lisp"
+            original = (ROOT / "lib/domains/d4.lisp").read_bytes()
+            source.write_bytes(original)
+            for _, manifest, _ in migrator.NONPROGRAM_MANIFESTS:
+                destination = sandbox / manifest
+                destination.write_bytes((ROOT / manifest).read_bytes())
+
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_DATA_NOT_EXECUTABLE"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+
+            # The manifest is a SHA-pinned fact, not an everlasting path veto.
+            source.write_bytes(original + b"; mutated review input\n")
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_SOURCE_SHA_DRIFT"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+            source.write_bytes(original)
+
+            manifest = sandbox / migrator.NONPROGRAM_MANIFESTS[0][1]
+            record = json.loads(manifest.read_text(encoding="utf-8"))
+            record["automatic_sens_companion"] = True
+            manifest.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(
+                migrator.SensT5Error, "NONPROGRAM_MANIFEST_UNTRUSTED"
+            ):
+                migrator.reject_reviewed_nonprogram_source(source, sandbox)
+
+        # Integration: dry-run must be blocked before minting, not just by
+        # the standalone helper. No Zig binary required for dry-run.
+        with tempfile.TemporaryDirectory() as temp:
+            dest = Path(temp)
+            proc = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/migrate-three-pass.py"),
+                 str(ROOT / "lib/domains/d4.lisp"), "--out", str(dest),
+                 "--dry-run", "--report", str(dest / "report.json")],
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+            self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+            report = json.loads((dest / "report.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["summary"]["files_blocked"], 1)
+            self.assertEqual(report["summary"]["files_would_write"], 0)
+            self.assertIn("NONPROGRAM_DATA_NOT_EXECUTABLE", report["files"][0]["reason"])
+            self.assertFalse((dest / "d4.sens").exists())
+            self.assertFalse((dest / "d4").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
