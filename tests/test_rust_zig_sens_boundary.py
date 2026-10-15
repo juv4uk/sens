@@ -110,5 +110,52 @@ class RustZigSensBoundaryTests(unittest.TestCase):
         self.assertEqual(rc, 1, "--check must stay RED while direct bypasses remain")
 
 
+    def test_mixed_zig_token_cannot_hide_direct_rust_semantic_bypass(self) -> None:
+        # Synthetic source is structural evidence ONLY, not executable SENS.
+        # Even a comment mentioning Zig may label a Rust file as "mixed";
+        # release preflight must still see the direct Rust semantic path.
+        import subprocess
+        import sys
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            crate = root / "crates" / "demo" / "src"
+            crate.mkdir(parents=True)
+            source = crate / "lib.rs"
+
+            def verify(content: str) -> tuple[int, dict, str]:
+                source.write_text(content, encoding="utf-8")
+                mapped = self.mod.build_map(root)
+                run = subprocess.run(
+                    [
+                        sys.executable, str(SCRIPT), str(root),
+                        "--out", "boundary.json", "--check",
+                    ],
+                    capture_output=True, text=True, check=False,
+                )
+                return run.returncode, mapped, run.stdout
+
+            rc, report, output = verify(
+                "// zig_transport appears in a comment ONLY\n"
+                "pub fn bypass() { let _ = eval::execute; }\n"
+            )
+            self.assertEqual(report["contacts"][0]["kind"], "mixed")
+            self.assertEqual(report["bypasses"], [])  # legacy direct-only field
+            self.assertEqual(rc, 1, output)
+            self.assertIn("BOUNDARY_BYPASS_PRESENT", output)
+            self.assertIn("kind=mixed", output)
+            self.assertIn("crates/demo/src/lib.rs", output)
+
+            # A real Zig transport reference with NO direct semantic source
+            # is not a structural bypass. SENS owns semantic validity.
+            rc, report, output = verify(
+                "pub fn forward() { let _ = zig_transport::encode; }\n"
+            )
+            self.assertEqual(report["contacts"][0]["kind"], "corridor")
+            self.assertEqual(report["bypasses"], [])
+            self.assertEqual(rc, 0, output)
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
