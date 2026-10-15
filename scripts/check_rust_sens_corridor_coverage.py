@@ -169,7 +169,17 @@ def check(root: Path) -> list[str]:
         unbridged = []
         for source in sources:
             active = _live_rust(source.read_text(encoding="utf-8", errors="replace"))
-            if CODEC_API.search(active) and not CORRIDOR_API.search(active):
+            # A Zig invocation compiled only under cfg(test) cannot
+            # authorize direct production Rust access to physical SENS bytes.
+            # Fail closed when production touches a codec before the first
+            # test-only section but Zig ingress exists only inside that section.
+            test_section = re.search(r"(?m)^\s*#\s*\[\s*cfg\s*\(\s*test\s*\)\s*\]", active)
+            production_prefix = active[:test_section.start()] if test_section else active
+            physical = CODEC_API.search(active) is not None
+            zig_anywhere = CORRIDOR_API.search(active) is not None
+            production_codec = CODEC_API.search(production_prefix) is not None
+            production_zig = CORRIDOR_API.search(production_prefix) is not None
+            if (physical and not zig_anywhere) or (production_codec and not production_zig):
                 unbridged.append(source.relative_to(root).as_posix())
         if not unbridged:
             continue
