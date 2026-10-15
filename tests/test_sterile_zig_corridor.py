@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import subprocess
+import runpy
 import sys
 import unittest
 from pathlib import Path
@@ -34,6 +35,60 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertNotIn("TRITS_BY_BYTE", body)
         self.assertIn("packed_bits", body)
         self.assertNotIn("from_width_bits", body)
+
+
+    def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
+        # Source-hygiene only, no Zig semantic oracle; no repo file mutation.
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_main_t5_ingress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        check(source)  # positive: current main retains the Zig-only route
+
+        replacements = (
+            # Default Zig call replaced by an accidental direct Rust codec.
+            (
+                "return zig_transport::decode_t5_words(bytes);",
+                "return sens::decode_ternary_words(bytes).map_err(|e| format!(\"{e:?}\"));",
+            ),
+            # An explicit Rust fallback under feature-negative is still a bypass.
+            (
+                'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())',
+                'sens::decode_ternary_words(bytes).map_err(|e| format!("{e:?}"))',
+            ),
+            # Zig helper exists but the production evaluator bypasses it.
+            (
+                "let words = decode_physical_t5_words(bytes)?;",
+                "let words = sens::decode_ternary_words(bytes).unwrap();",
+            ),
+            (
+                "sens::parse_canonical_word_sequence(&words)",
+                "sens::parse_canonical_binary(\"not exact words\")",
+            ),
+            (
+                "eval_physical_t5(&bytes)",
+                "sens::decode_ternary_words(&bytes).map(|_| Default::default())",
+            ),
+        )
+        for old, replacement in replacements:
+            with self.subTest(bypass=old):
+                self.assertEqual(source.count(old), 1)
+                with self.assertRaises(blocked):
+                    check(source.replace(old, replacement))
+
+    def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_main_t5_ingress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        for mutant in (
+            source.replace('mod zig_transport;', 'mod untrusted_transport;'),
+            source.replace('fn decode_physical_t5_words(', 'fn bypass_physical_t5_words('),
+            source.replace('fn eval_physical_t5(', 'fn bypass_eval_physical_t5('),
+            source.replace('fn main() {', 'fn other_main() {'),
+        ):
+            with self.subTest(kind="missing-entrypoint"), self.assertRaises(blocked):
+                check(mutant)
 
 
 if __name__ == "__main__":
