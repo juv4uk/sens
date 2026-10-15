@@ -248,6 +248,10 @@ jobs:
           # Only live migration AST calls may certify T5 bytes before publication.
           echo 'test_id=zig-migration-publish-live-route layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_check_migration_zig_only_path.py -v
+          # Ukrainian .lisp and read-only bit view: CURRENT two-map interface,
+          # plus negative proof that removed SID8 source-era modes cannot pass.
+          echo 'test_id=stage-two-current-api layer=presentation expected=auto-roundtrip-and-era-reject semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_stage_two_projections.py -k test_existing_uk_fixture_roundtrips_without_packing -k test_retired_source_eras_cannot_relabel_current_domains -v
           python3 scripts/check_migration_zig_only_path.py
           echo 'test_id=zig-built-binary-unique-inode layer=transport expected=regular-pass-same-SHA-hardlink-fail semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_zig_bridge_physical_binary_paths.py -v
