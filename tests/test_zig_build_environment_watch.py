@@ -62,7 +62,7 @@ def check_embedded_asset_watches(build_source: str, zig_root_source: str) -> Non
 
 
 def check_ffi_release_safety(source: str) -> None:
-    """Default Rust host must link an optimized, safety-checked Zig v0.16 ABI."""
+    """Require ReleaseSafe + bundled Zig 0.16 compiler-rt stack probes."""
     clean = re.sub(r"(?m)^[ \t]*//[^\n]*$", "", source)
     # Check the compiled Zig-root command rather than an inert mention in docs.
     exact = (
@@ -70,6 +70,7 @@ def check_ffi_release_safety(source: str) -> None:
         r'\.arg\("zig_transport_root\.zig"\)\s*'
         r'\.arg\("-O"\)\s*'
         r'\.arg\("ReleaseSafe"\)\s*'
+        r'\.arg\("-fcompiler-rt"\)\s*'
         r'\.arg\("-lc"\)'
     )
     if not re.search(exact, clean):
@@ -114,6 +115,10 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
         mutants = {
             "fast": source.replace('.arg("ReleaseSafe")', '.arg("ReleaseFast")', 1),
             "missing": source.replace('.arg("ReleaseSafe")', '.arg("Debug")', 1),
+            "missing-compiler-rt": source.replace('.arg("-fcompiler-rt")', '', 1),
+            "unbundled-runtime": source.replace('.arg("-fcompiler-rt")', '.arg("-fno-compiler-rt")', 1),
+            "disable-stack-probes": source.replace('.arg("-fcompiler-rt")',
+                                                    '.arg("-fno-stack-check")', 1),
             "no-optimization-flag": source.replace('.arg("-O")', '.arg("-fno-stack-check")', 1),
             "wrong-root": source.replace('.arg("zig_transport_root.zig")',
                                          '.arg("research/zig-codecs/transport_abi.zig")', 1),
@@ -126,7 +131,7 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
 
         # A comment must never impersonate the actual live safety-checked build.
         ghost = source.replace('.arg("ReleaseSafe")', '.arg("ReleaseFast")', 1)
-        ghost += '\n// .arg("build-lib").arg("zig_transport_root.zig").arg("-O").arg("ReleaseSafe").arg("-lc")\n'
+        ghost += '\n// .arg("build-lib").arg("zig_transport_root.zig").arg("-O").arg("ReleaseSafe").arg("-fcompiler-rt").arg("-lc")\n'
         with self.assertRaisesRegex(ValueError, "ZIG_RELEASE_SAFETY_RED"):
             check_ffi_release_safety(ghost)
 
