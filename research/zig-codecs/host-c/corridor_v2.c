@@ -252,6 +252,42 @@ static int witness_zig_e1_decode_buffer_boundaries(void) {
     return 1;
 }
 
+/*
+ * F3C pack must reject physically invalid T5 before any framing write.
+ * Same sterile contract as Rust zig_transport::encode_f3 (validate then pack).
+ * No SENS semantic admission — only mechanical byte ownership.
+ */
+static int witness_zig_f3c_invalid_t5_reject(void) {
+    static const uint8_t bad_byte[] = {243};
+    static const uint8_t oversize[17] = {0};
+    uint8_t out[32];
+    uint8_t sentinel[32];
+
+    memset(out, 0x3c, sizeof out);
+    memset(sentinel, 0x3c, sizeof sentinel);
+
+    /* Invalid physical byte: validate rejects, pack must return -1 and leave out. */
+    if (!check_number("f3c-validate-byte243",
+            sens_zig_t5_validate(bad_byte, sizeof bad_byte), -1)) return 0;
+    if (!check_number("f3c-pack-rejects-byte243",
+            sens_zig_f3c_pack(bad_byte, sizeof bad_byte, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-byte243-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    /* Empty source is invalid for F3C pack. */
+    memset(out, 0x3c, sizeof out);
+    if (!check_number("f3c-pack-rejects-empty",
+            sens_zig_f3c_pack(bad_byte, 0, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-empty-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    /* Oversize beyond MAX_TINY_T5_BYTES: reject without write. */
+    memset(out, 0x3c, sizeof out);
+    if (!check_number("f3c-pack-rejects-oversize",
+            sens_zig_f3c_pack(oversize, sizeof oversize, out, sizeof out), -1)) return 0;
+    if (!check_bytes("f3c-pack-oversize-out-unchanged", out, sentinel, sizeof out)) return 0;
+
+    return 1;
+}
+
 int main(void) {
     /* BE3 is a caller-owned in-process ABI. It is NOT the .sens wire. */
     static const uint8_t words[] = {
@@ -314,6 +350,7 @@ int main(void) {
     if (!witness_zig_decode_be3()) return 1;
     if (!witness_zig_e1_encode_be3()) return 1;
     if (!witness_zig_e1_decode_buffer_boundaries()) return 1;
+    if (!witness_zig_f3c_invalid_t5_reject()) return 1;
     puts("SENS_C_CORRIDOR_PASS abi=2 host=C rust_linked=false transport=T5+F3C+E1 exact_width=true semantic_verdict=NOT_TESTED");
     return 0;
 }
