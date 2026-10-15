@@ -6,6 +6,7 @@ use sens::{eval_pinned_legacy_core_source, eval_pinned_reasoning_source, eval_pa
 
 // Three exact source byte transfers. Zig copies bytes and never decides
 // what a SENS word, Guard policy or executable function means.
+#[cfg(feature = "zig-source")]
 #[link(name = "sens_zig_guard_sources", kind = "static")]
 unsafe extern "C" {
     fn sens_zig_guard_core_source_copy(output: *mut u8, capacity: usize) -> isize;
@@ -13,8 +14,10 @@ unsafe extern "C" {
     fn sens_zig_guard_policy_source_copy(output: *mut u8, capacity: usize) -> isize;
 }
 
+#[cfg(feature = "zig-source")]
 type ZigSourceCopy = unsafe extern "C" fn(*mut u8, usize) -> isize;
 
+#[cfg(feature = "zig-source")]
 fn exact_source_copy(copy: ZigSourceCopy, label: &str) -> Result<String, String> {
     // Size probe: the Zig carrier must not touch a zero-capacity destination.
     let required = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
@@ -37,18 +40,38 @@ fn exact_source_copy(copy: ZigSourceCopy, label: &str) -> Result<String, String>
     String::from_utf8(bytes).map_err(|error| format!("ZIG_GUARD_SOURCE_UTF8 label={label}: {error}"))
 }
 
+#[cfg(feature = "zig-source")]
 fn core_source() -> Result<String, String> {
     exact_source_copy(sens_zig_guard_core_source_copy, "core")
 }
 
+#[cfg(feature = "zig-source")]
 fn unify_source() -> Result<String, String> {
     exact_source_copy(sens_zig_guard_unify_source_copy, "unify")
 }
 
 /// The very same exact Guard bootstrap bytes used by both Guard and CLI.
 /// This is a physical adapter, never a Rust semantic oracle.
+#[cfg(feature = "zig-source")]
 pub fn guard_source() -> Result<String, String> {
     exact_source_copy(sens_zig_guard_policy_source_copy, "guard")
+}
+
+// An explicit no-Zig compatibility build must not secretly load files from
+// the Rust filesystem or claim the source was carried by Zig.
+#[cfg(not(feature = "zig-source"))]
+fn core_source() -> Result<String, String> {
+    Err("RUST_ZIG_ONLY: Guard core source requires Zig byte transport".into())
+}
+
+#[cfg(not(feature = "zig-source"))]
+fn unify_source() -> Result<String, String> {
+    Err("RUST_ZIG_ONLY: Guard unify source requires Zig byte transport".into())
+}
+
+#[cfg(not(feature = "zig-source"))]
+pub fn guard_source() -> Result<String, String> {
+    Err("RUST_ZIG_ONLY: Guard policy source requires Zig byte transport".into())
 }
 
 pub fn load_session() -> Result<Session, String> {
@@ -159,7 +182,7 @@ pub fn evaluate(policy: &str, call: &str) -> Result<String, String> {
     Ok(result.value.to_string())
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "zig-source"))]
 mod tests {
     use super::*;
 
@@ -278,5 +301,20 @@ mod tests {
         let mut session = load_session().unwrap();
         let result = eval_program("(guard-decision? (quote allow))", &mut session);
         assert!(result.is_ok(), "{result:?}");
+    }
+}
+
+#[cfg(all(test, not(feature = "zig-source")))]
+mod no_zig_transport_tests {
+    #[test]
+    fn guard_without_zig_refuses_all_sources_instead_of_falling_back() {
+        for unavailable in [
+            super::core_source(),
+            super::unify_source(),
+            super::guard_source(),
+        ] {
+            let error = unavailable.expect_err("no-Zig guard source may not load");
+            assert!(error.starts_with("RUST_ZIG_ONLY:"), "{error}");
+        }
     }
 }
