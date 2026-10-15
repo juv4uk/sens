@@ -24,7 +24,8 @@ ZIG_ROOT = "research/zig-codecs"
 ZIG_ENTRY = f"{ZIG_ROOT}/transport_abi.zig"
 INPUTS = (
     HOST / "verify_d3_subset.sh", HOST / "d3_subset.c",
-    HOST / "zig_transport_v2.h", Path("research/zig-codecs/transport_abi.zig"),
+    HOST / "zig_transport_v2.h", HOST / "verify_h1_dependency_receipt.py",
+    Path("research/zig-codecs/transport_abi.zig"),
 )
 
 
