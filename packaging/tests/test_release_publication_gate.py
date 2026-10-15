@@ -4,7 +4,10 @@ The guard must execute after the draft has been downloaded and replay-verified,
 because main can advance while platform artifacts are being built or uploaded.
 """
 
+import importlib.util
 import re
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -176,6 +179,47 @@ class ReleasePublicationGateTest(unittest.TestCase):
                 AssertionError, "full immutable SHA"
             ):
                 require_pinned_artifact_download(job.replace(pin.group(), broken))
+
+    def test_release_replay_rejects_self_comparison_and_accepts_downloaded_bytes(self):
+        # Real filesystem fixture: staged==downloaded must never attest replay.
+        # Standalone test lives here because another writer owns
+        # tests/test_verify_release_assets.py at this time.
+        script = ROOT / "scripts" / "verify_release_assets.py"
+        spec = importlib.util.spec_from_file_location(
+            "sens_release_assets_independent_replay", script
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        tag, sha = "l0.42.0", "a" * 40
+
+        with tempfile.TemporaryDirectory() as tmp:
+            staging = Path(tmp) / "staged"
+            staging.mkdir()
+            for name in module._expected(tag):
+                (staging / name).write_bytes(b"release-test-asset:" + name.encode())
+            # Existing release contract requires identical canonical/alias HTML.
+            (staging / "my-lisp-cli-web.html").write_bytes(
+                (staging / "sens-cli-web.html").read_bytes()
+            )
+            module.prepare(staging, tag, sha)
+
+            with self.assertRaisesRegex(ValueError, "independent download directory"):
+                module.verify_replay(staging, staging, tag, sha)
+            with self.assertRaisesRegex(ValueError, "independent download directory"):
+                module.verify_replay(staging, staging / ".." / "staged", tag, sha)
+
+            downloaded = Path(tmp) / "downloaded"
+            shutil.copytree(staging, downloaded)
+            self.assertEqual(
+                module.verify_replay(staging, downloaded, tag, sha),
+                len(module._expected(tag)),
+            )
+            # A *distinct* directory must still refuse corrupted bytes.
+            (downloaded / "install.sh").write_bytes(b"corrupted download")
+            with self.assertRaisesRegex(ValueError, "digest/size mismatch"):
+                module.verify_replay(staging, downloaded, tag, sha)
 
     def test_preflight_is_manual_only_and_keeps_strict_workspace_gates(self):
         preflight = (
