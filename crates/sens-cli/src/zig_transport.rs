@@ -684,6 +684,35 @@ mod zig_exact_egress_tests {
             .expect("test_id=repl-uk-zig-codes layer=transport decode");
         require_same_exact_words(&words, &restored)
             .expect("test_id=repl-uk-zig-codes exact width+payload parity");
+
+        // Відновлені Zig слова — це лише точні ідентичності.
+        // Українська назва приходить з УЖЕ ЧИННОЇ Lisp-owned
+        // D3/D4 таблиці через SENS presentation; жодної LISP/EN
+        // проміжної поверхні та жодної Zig/Rust таблиці значень.
+        let ukrainian = restored
+            .iter()
+            .map(|word| {
+                let id = sens::DomainIdentity::from_source_word(*word);
+                let value = sens::Value::DomainIdentity(id);
+                sens::render_value_for_presentation(
+                    &value, sens::PresentationLanguage::Ukrainian
+                )
+            })
+            .collect::<Vec<_>>();
+        for required in ["як-є", "перше", "сполучити", "функція", "визначити"] {
+            assert!(
+                ukrainian.iter().any(|name| name == required),
+                "test_id=repl-uk-zig-uk-projection layer=present expected={required} actual={ukrainian:?} semantic_authority=SENS"
+            );
+        }
+        assert!(
+            ukrainian.iter().all(|name| !name.starts_with("#<домен")),
+            "test_id=repl-uk-zig-uk-projection unknown D3/D4 output={ukrainian:?}"
+        );
+        println!(
+            "REPL_UK_ZIG_PROJECTION_PASS domain_words={} uk_names={} path=Zig-T5-to-SENS-uk english_intermediate=NO",
+            restored.len(), ukrainian.len()
+        );
         println!(
             "REPL_UK_ZIG_CODES_PASS words={} source_bytes={} physical_bytes={} semantic_authority=SENS",
             words.len(), physical_source.len(), encoded.len()
