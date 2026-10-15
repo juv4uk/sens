@@ -103,7 +103,16 @@ def verify_zig_import_closure(
             raise AuditFailure(
                 f"test_id=H2_ZIG_IMPORT_PIN layer=provenance unreadable_source={name}") from exc
         seen.add(name)
-        for imported in re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', source):
+        # A literal-only scanner must not silently declare closure when a
+        # Zig module adds @import(comptime_expression). Either enumerate ALL
+        # imports mechanically or fail closed; H2 has no semantic oracle here.
+        imports = re.findall(r'@import\s*\(\s*"([^"]+)"\s*\)', source)
+        calls = len(re.findall(r'@import\s*\(', source))
+        if len(imports) != calls:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_IMPORT_PIN layer=provenance "
+                f"unresolved_import={name} literal={len(imports)} total={calls}")
+        for imported in imports:
             if imported in ("std", "builtin", "root"):
                 continue
             if not imported.endswith(".zig"):
@@ -120,7 +129,7 @@ def verify_zig_import_closure(
 
 
 def zig_import_closure_self_test() -> None:
-    """One positive DAG plus missing pin, symlink parent and new import."""
+    """One positive DAG plus missing/new/dynamic imports and linked parent."""
     with tempfile.TemporaryDirectory(prefix="sens-h2-zig-import-") as tmp:
         root = Path(tmp)
         zig = root / "zig"
@@ -160,6 +169,19 @@ def zig_import_closure_self_test() -> None:
         else:
             raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=new_import_REJECT actual=PASS")
         (zig / "transport" / "e1.zig").write_text(
+            'const known = @import("fields.zig");\n'
+            'const unknown = @import(module_name);\n',
+            encoding="utf-8",
+        )
+        try:
+            verify_zig_import_closure(root, names, names[0])
+        except AuditFailure as exc:
+            if "unresolved_import=" not in str(exc):
+                raise
+        else:
+            raise AuditFailure(
+                "test_id=H2_ZIG_IMPORT_PIN expected=dynamic_import_REJECT actual=PASS")
+        (zig / "transport" / "e1.zig").write_text(
             'const field = @import("fields.zig");\n',
             encoding="utf-8",
         )
@@ -175,7 +197,7 @@ def zig_import_closure_self_test() -> None:
                 raise
         else:
             raise AuditFailure("test_id=H2_ZIG_IMPORT_PIN expected=linked_parent_REJECT actual=PASS")
-    print("H2_ZIG_IMPORT_PIN_SELF_TEST_PASS: valid, missing, new, linked-parent")
+    print("H2_ZIG_IMPORT_PIN_SELF_TEST_PASS: valid, missing, new, dynamic, linked-parent")
 
 
 def verify_git_provenance(root: Path, paths: tuple[str, ...]) -> dict:
