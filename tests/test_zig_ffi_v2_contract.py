@@ -6,6 +6,8 @@ No new workflow: existing Python discovery may run this focused guard.
 """
 
 import re
+import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -13,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ZIG_PATH = ROOT / "research/zig-codecs/transport_abi.zig"
 RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport.rs"
 C_PATH = ROOT / "research/zig-codecs/host-c/zig_transport_v2.h"
+H2_C_PATH = ROOT / "research/zig-codecs/host-c/h2_t5_dump.c"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
 # these are the eight existing *physical* ABI v2 functions only.
@@ -182,7 +185,184 @@ def check_contract(zig: str, rust: str, header: str) -> None:
         fail("c", "signature_set_differs_from_zig")
 
 
+
+def check_h2_host_contract(source: str) -> None:
+    """Only the canonical Zig v2 header may define H2 C-host declarations."""
+    clean = strip_c_comments(source)
+    if not re.search(r'(?m)^[ \t]*#[ \t]*include[ \t]+"zig_transport_v2\.h"[ \t]*    @classmethod
+    def setUpClass(cls):
+        cls.zig = ZIG_PATH.read_text(encoding="utf-8")
+        cls.rust = RUST_PATH.read_text(encoding="utf-8")
+        cls.header = C_PATH.read_text(encoding="utf-8")
+
+    def test_current_zig_rust_c_physical_signatures_agree(self):
+        check_contract(self.zig, self.rust, self.header)
+
+    def test_missing_zig_export_is_rejected(self):
+        mutated = self.zig.replace(
+            "pub export fn sens_zig_t5_decode_be3",
+            "fn sens_zig_t5_decode_be3",
+            1,
+        )
+        self.assertNotEqual(mutated, self.zig)
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_t5_decode_be3"):
+            check_contract(mutated, self.rust, self.header)
+
+    def test_missing_rust_ingress_is_rejected(self):
+        mutated = self.rust.replace(
+            "fn sens_zig_e1_decode_be3", "fn no_e1_decode_be3", 1
+        )
+        self.assertNotEqual(mutated, self.rust)
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_e1_decode_be3"):
+            check_contract(self.zig, mutated, self.header)
+
+    def test_wrong_c_ffi_return_type_is_rejected(self):
+        mutated = self.header.replace(
+            "ptrdiff_t sens_zig_f3c_unpack", "int sens_zig_f3c_unpack", 1
+        )
+        self.assertNotEqual(mutated, self.header)
+        with self.assertRaisesRegex(ValueError, "signature=sens_zig_f3c_unpack"):
+            check_contract(self.zig, self.rust, mutated)
+
+    def test_wrong_rust_pointer_constness_is_rejected(self):
+        mutated = self.rust.replace(
+            "input: *const u8, len: usize",
+            "input: *mut u8, len: usize",
+            1,
+        )
+        self.assertNotEqual(mutated, self.rust)
+        with self.assertRaisesRegex(ValueError, "signature=sens_zig_t5_validate"):
+            check_contract(self.zig, mutated, self.header)
+
+    def test_zig_version_drift_is_rejected(self):
+        mutated = self.zig.replace(
+            "sens_zig_codec_abi_version() u32 { return 2; }",
+            "sens_zig_codec_abi_version() u32 { return 3; }",
+            1,
+        )
+        self.assertNotEqual(mutated, self.zig)
+        with self.assertRaisesRegex(ValueError, "version_not_exactly_2"):
+            check_contract(mutated, self.rust, self.header)
+
+    def test_unreviewed_new_zig_export_is_rejected(self):
+        mutated = self.zig + (
+            "\npub export fn sens_zig_unreviewed() u32 { return 2; }\n"
+        )
+        with self.assertRaisesRegex(ValueError, "unreviewed_exports=sens_zig_unreviewed"):
+            check_contract(mutated, self.rust, self.header)
+
+
+    def test_zig_export_hidden_in_block_comment_does_not_count(self):
+        match = re.search(
+            r"(?ms)^pub export fn sens_zig_t5_decode_be3\(.*?^\}",
+            self.zig,
+        )
+        self.assertIsNotNone(match)
+        original = match.group(0)
+        mutated = self.zig.replace(original, "/*\n" + original + "\n*/", 1)
+        # The historical regex alone would see this ghost signature.
+        self.assertIsNotNone(ZIG_DECL.search(mutated))
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_t5_decode_be3"):
+            check_contract(mutated, self.rust, self.header)
+
+    def test_rust_version_check_hidden_in_comment_does_not_count(self):
+        match = re.search(
+            r"if\s+unsafe\s*\{\s*sens_zig_codec_abi_version\(\)\s*\}"
+            r"\s*!=\s*2\b",
+            self.rust,
+        )
+        self.assertIsNotNone(match)
+        mutated = self.rust.replace(match.group(0), "/* " + match.group(0) + " */", 1)
+        with self.assertRaisesRegex(ValueError, "version_check_not_fail_closed"):
+            check_contract(self.zig, mutated, self.header)
+
+    def test_c_header_prototype_hidden_in_line_comment_does_not_count(self):
+        match = re.search(
+            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\([^;]*?;",
+            self.header,
+        )
+        self.assertIsNotNone(match)
+        prototype = match.group(0)
+        # Comment every line so even a multiline declaration is not visible.
+        mutated = self.header.replace(
+            prototype, "".join("// " + line for line in prototype.splitlines(True)), 1,
+        )
+        with self.assertRaisesRegex(ValueError, "missing_or_duplicate=sens_zig_f3c_unpack"):
+            check_contract(self.zig, self.rust, mutated)
+
+    def test_c_header_version_hidden_in_comment_does_not_count(self):
+        marker = "SENS_ZIG_TRANSPORT_ABI_VERSION = 2"
+        self.assertIn(marker, self.header)
+        mutated = self.header.replace(marker, "/* " + marker + " */", 1)
+        with self.assertRaisesRegex(ValueError, "header_version_not_2"):
+            check_contract(self.zig, self.rust, mutated)
+
+    def test_comment_markers_inside_quoted_string_are_not_comments(self):
+        source = 'const uri = "https://example.test/a/*still-string*/";\n'
+        self.assertEqual(strip_c_comments(source), source)
+
+
+
+if __name__ == "__main__":
+    unittest.main()
+, clean):
+        fail("h2-c", "missing_canonical_zig_header")
+    if re.search(
+        r"\bextern\s+(?:uint32_t|int|ptrdiff_t)\s+sens_zig_[a-z0-9_]+\s*\(",
+        clean,
+    ):
+        fail("h2-c", "shadow_zig_abi_declaration")
+    if not re.search(
+        r"\bsens_zig_codec_abi_version\(\)\s*!=\s*SENS_ZIG_TRANSPORT_ABI_VERSION\b",
+        clean,
+    ):
+        fail("h2-c", "noncanonical_abi_version_check")
+
+
 class ZigAbiV2DeclarationContractTest(unittest.TestCase):
+    def test_h2_c_host_uses_only_shared_zig_v2_header(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        check_h2_host_contract(source)
+
+    def test_h2_c_host_rejects_shadow_extern_prototype(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source + "\nextern ptrdiff_t sens_zig_t5_encode_be3(" \
+            "const uint8_t *src, size_t len, uint8_t *dst, size_t cap);\n"
+        with self.assertRaisesRegex(ValueError, "shadow_zig_abi_declaration"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_rejects_missing_shared_header(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source.replace(
+            '#include "zig_transport_v2.h"', '#include <stdint.h>', 1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(ValueError, "missing_canonical_zig_header"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_rejects_literal_abi_version(self):
+        source = H2_C_PATH.read_text(encoding="utf-8")
+        mutant = source.replace(
+            "!= SENS_ZIG_TRANSPORT_ABI_VERSION", "!= 2u", 1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(ValueError, "noncanonical_abi_version_check"):
+            check_h2_host_contract(mutant)
+
+    def test_h2_c_host_compiles_c11_with_shared_zig_abi_header(self):
+        compiler = shutil.which("cc")
+        self.assertIsNotNone(compiler, "ZIG_ABI_V2_DRIFT layer=toolchain missing=cc")
+        result = subprocess.run(
+            [compiler, "-std=c11", "-Wall", "-Wextra", "-Werror", "-pedantic",
+             "-fsyntax-only", str(H2_C_PATH)],
+            cwd=ROOT, capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(
+            result.returncode, 0,
+            "ZIG_ABI_V2_DRIFT layer=h2-c reason=compile_shared_abi "
+            f"returncode={result.returncode} stderr={result.stderr}",
+        )
+
     @classmethod
     def setUpClass(cls):
         cls.zig = ZIG_PATH.read_text(encoding="utf-8")
