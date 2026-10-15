@@ -17,6 +17,7 @@ REQUIRED_COMMANDS = (
     "cargo clippy --locked --workspace --all-targets -- -D warnings",
 )
 ALLOWED_EVENTS = frozenset(("workflow_dispatch", "workflow_call"))
+ZIG_RELEASE_SAFE_COMMAND = "zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc"
 
 
 def require_manual_preflight(source: str) -> None:
@@ -57,8 +58,32 @@ def require_manual_preflight(source: str) -> None:
     # migration bridge. --self-test explicitly skips transport and exits 0,
     # so it can never substitute for the mandatory pre-tag physical proof.
     physical_command = "python3 scripts/migration-zig-gate.py --require-zig"
-    if re.search(r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", source) is None:
+    physical_match = re.search(
+        r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", source
+    )
+    if physical_match is None:
         raise AssertionError("RELEASE_BLOCKED: missing full Zig physical migration gate")
+
+    # The native transport suite must run on the same checked-out release
+    # candidate, in Zig 0.16 ReleaseSafe (optimized WITH runtime safety).
+    # Require a live bare shell command, not a comment/echo/ignored failure,
+    # and run it AFTER the full physical migration gate.
+    step = re.search(
+        r"(?m)^      - name: Sterile Zig corridor .*?\n"
+        r"        run: \|\n(?P<body>(?:          .*\n)*)", source
+    )
+    if step is None:
+        raise AssertionError("RELEASE_BLOCKED: missing executable Zig corridor step")
+    body = step.group("body")
+    native_match = re.search(
+        r"(?m)^          " + re.escape(ZIG_RELEASE_SAFE_COMMAND)
+        + r"[ \t]*$", body,
+    )
+    if (native_match is None or
+            "          set -euo pipefail\n" not in body or
+            body.find(physical_command) < 0 or
+            native_match.start() <= body.find(physical_command)):
+        raise AssertionError("RELEASE_BLOCKED: missing live Zig ReleaseSafe physical suite")
 
 
 class ReleasePreflightScopeTest(unittest.TestCase):
@@ -113,6 +138,48 @@ class ReleasePreflightScopeTest(unittest.TestCase):
                     AssertionError, "missing full Zig physical migration gate"
                 ):
                     require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_missing_or_spoofed_zig_release_safe(self):
+        command = ZIG_RELEASE_SAFE_COMMAND
+        self.assertIn("          " + command + "\n", self.workflow)
+        require_manual_preflight(self.workflow)
+        mutations = (
+            "echo " + command,
+            "# " + command,
+            command + " || true",
+            command + " # ignored",
+            command.replace("ReleaseSafe", "ReleaseFast"),
+            command.replace("ReleaseSafe", "Debug"),
+            "true",
+        )
+        for replacement in mutations:
+            with self.subTest(replacement=replacement):
+                broken = self.workflow.replace(
+                    "          " + command + "\n",
+                    "          " + replacement + "\n", 1,
+                )
+                self.assertNotEqual(broken, self.workflow)
+                with self.assertRaisesRegex(
+                    AssertionError, "missing live Zig ReleaseSafe physical suite"
+                ):
+                    require_manual_preflight(broken)
+
+    def test_negative_guard_rejects_native_suite_before_full_migration(self):
+        command = ZIG_RELEASE_SAFE_COMMAND
+        full_gate = "python3 scripts/migration-zig-gate.py --require-zig"
+        self.assertIn("          " + command, self.workflow)
+        broken = self.workflow.replace(
+            "          " + full_gate + "\n",
+            "          " + command + "\n", 1,
+        ).replace(
+            "          " + command + "\n\n      - name:",
+            "          " + full_gate + "\n\n      - name:", 1,
+        )
+        self.assertNotEqual(broken, self.workflow)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Zig ReleaseSafe physical suite"
+        ):
+            require_manual_preflight(broken)
 
     def test_negative_guard_rejects_floating_event_mapping(self):
         broken = self.workflow.replace(
