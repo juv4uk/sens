@@ -100,6 +100,55 @@ class RustLispSensEdgesTests(unittest.TestCase):
             )
             self.assertEqual(self.mod.scan_file(source, root), [])
 
+    def test_cfg_test_and_literal_ghosts_cannot_change_live_production_edges(self) -> None:
+        """Test-only includes are not production; live includes never disappear."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            crate = root / "crates/demo/src"
+            crate.mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("(001)\n", encoding="utf-8")
+            source = crate / "lib.rs"
+            source.write_text(
+                'const BEFORE: &str = include_str!("../../../lib/core.lisp");\n'
+                '// #[cfg(test)] mod fake { include_str!("../../../lib/core.lisp"); }\n'
+                'const GHOST: &str = r##"#[cfg(test)] mod fake { include_str!("../../../lib/core.lisp"); }"##;\n'
+                '#[cfg(test)] mod tests {\n'
+                '    fn nested() { let _ = { include_str!("../../../lib/core.lisp") }; }\n'
+                '    fn more() { let _ = include_bytes!(concat!("../../../lib/", "core.lisp")); }\n'
+                '}\n'
+                'const AFTER: &str = include_str!("../../../lib/core.lisp");\n',
+                encoding="utf-8",
+            )
+            edges = self.mod.scan_file(source, root)
+            self.assertEqual(
+                [(item["kind"], item["target"], item["line"]) for item in edges],
+                [
+                    ("include_str", "lib/core.lisp", 1),
+                    ("include_str", "lib/core.lisp", 8),
+                ],
+                edges,
+            )
+
+    def test_cfg_condition_not_proven_test_only_remains_red(self) -> None:
+        """An unknown cfg(feature/test) branch may compile in production."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            crate = root / "crates/demo/src"
+            crate.mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("(001)\n", encoding="utf-8")
+            file = crate / "lib.rs"
+            file.write_text(
+                '#[cfg(any(test, feature = "host"))] mod uncertain {\n'
+                '    const BAD: &str = include_str!("../../../../lib/core.lisp");\n'
+                '}\n',
+                encoding="utf-8",
+            )
+            edges = self.mod.scan_file(file, root)
+            self.assertEqual(len(edges), 1, edges)
+            self.assertEqual(edges[0]["status"], "RED")
+
     def test_empty_production_tree_is_ok(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
