@@ -14,6 +14,10 @@ import tempfile
 from zig_codec_bridge import ZigCodecError, build_transport, verify_t5
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
+# These fixture digests are fixed independently of the input under test.
+# A production release must supply its own trusted source digest/provenance.
+GOLDEN_D10_ZERO_SHA256 = "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7"
+GOLDEN_D1_ONE_SHA256 = "8a8950f7623663222542c9469c73be3c4c81bbdf019e2c577590a61f2ce9a157"
 
 # Independently pinned physical vectors. Width is part of each word's identity:
 # D1:1 != D2:01, and D2:00/11 must survive without trimmed leading bits.
@@ -154,7 +158,9 @@ def main() -> None:
             raise AssertionError("D10_COORDINATES_NOT_PRESERVED")
         # Release/migration fail-closed: an EXTERNALLY pinned original D10
         # prevents its valid-but-different one-byte D5 canonical truncation.
-        trusted_d10_sha = sha(d10)
+        trusted_d10_sha = GOLDEN_D10_ZERO_SHA256
+        if sha(d10) != trusted_d10_sha:
+            raise AssertionError("ZIG_D10_INDEPENDENT_SOURCE_GOLDEN_DRIFT")
         pinned = verify_t5(
             executable, d10, trusted_source_sha256=trusted_d10_sha
         )
@@ -174,6 +180,33 @@ def main() -> None:
                 raise AssertionError(f"wrong source-truncation reject: {exc}") from exc
         else:
             raise AssertionError("D10_TO_D5_EXTERNAL_SHA_TRUNCATION_ACCEPTED")
+        # Same-length, differently typed canonical words must not alias.
+        # D1:1 and D2:01 both occupy ONE physical byte, yet remain distinct.
+        d1_one = bytes.fromhex(GOLDEN_WIDTH_VECTORS["d1_one"])
+        d2_one = bytes.fromhex(GOLDEN_WIDTH_VECTORS["d2_zero_one"])
+        if (len(d1_one) != len(d2_one) or d1_one == d2_one or
+                sha(d1_one) != GOLDEN_D1_ONE_SHA256):
+            raise AssertionError("ZIG_D1_D2_INDEPENDENT_WIDTH_GOLDEN_DRIFT")
+        d1_pinned = verify_t5(
+            executable, d1_one, trusted_source_sha256=GOLDEN_D1_ONE_SHA256
+        )
+        if d1_pinned.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256":
+            raise AssertionError("ZIG_D1_EXTERNAL_SOURCE_PIN_NOT_RECORDED")
+        try:
+            verify_t5(
+                missing_zig, d2_one,
+                trusted_source_sha256=GOLDEN_D1_ONE_SHA256,
+            )
+        except ZigCodecError as exc:
+            diagnostic = str(exc)
+            if ("ZIG_CODEC_EXTERNAL_SOURCE_SHA_MISMATCH" not in diagnostic or
+                    f"expected_sha256={GOLDEN_D1_ONE_SHA256}" not in diagnostic or
+                    f"actual_sha256={sha(d2_one)}" not in diagnostic):
+                raise AssertionError(
+                    f"wrong D1-to-D2 same-length source reject: {exc}"
+                ) from exc
+        else:
+            raise AssertionError("D1_TO_D2_SAME_LENGTH_EXTERNAL_SHA_ACCEPTED")
         for label, bad_pin in (
             ("empty", ""), ("short", "0" * 63),
             ("uppercase", "A" * 64), ("nonhex", "g" * 64),
@@ -235,8 +268,10 @@ def main() -> None:
           "first_difference=NONE malformed_ff=REJECTED d10_transport=ACCEPTED "
           "d10_executable=REJECTED overwidth_d15=REJECTED "
           f"width_goldens={len(GOLDEN_WIDTH_VECTORS)} "
-          f"negative_gates={len(NEGATIVE_PHYSICAL) + 10} "
-          "external_trusted_sha_d10=REQUIRED_WHEN_SUPPLIED "
+          f"negative_gates={len(NEGATIVE_PHYSICAL) + 11} "
+          "external_trusted_sha_d10=INDEPENDENT_GOLDEN "
+          "external_trusted_sha_d1=INDEPENDENT_GOLDEN "
+          "canonical_d1_to_d2_same_length=REJECTED_WITH_EXTERNAL_PIN "
           "canonical_d10_to_d5_truncation=REJECTED_WITH_EXTERNAL_PIN "
           f"zig_binary_sha256={binary_sha} "
           "d1_d2_distinct=YES d2_zero_and_one=YES "
