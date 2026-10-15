@@ -33,6 +33,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # One exact-source migration witness runs before physical/host CI.
+          # This does not claim SENS semantics or mint a physical .sens file.
+          echo 'test_id=migration-archived-source-path-canonical layer=provenance expected=one-canonical-nine-rejected semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_migration_source_scope.py -v 2>&1 | tee "$RUNNER_TEMP/migration-archive-scope.log"
+          grep -Fq 'Ran 1 test' "$RUNNER_TEMP/migration-archive-scope.log"
+          grep -Fxq 'OK' "$RUNNER_TEMP/migration-archive-scope.log"
           # One early automated source+filesystem witness: a hardlink to
           # staging cannot impersonate a separately downloaded release asset.
           # -k matches two tests; count is checked to reject accidental zero-test PASS.
