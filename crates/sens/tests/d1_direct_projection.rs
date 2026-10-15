@@ -64,3 +64,41 @@ fn cond_consumes_direct_d1_without_hidden_truthiness() {
         assert_eq!(actual.to_string(), expected);
     }
 }
+
+#[test]
+fn canonical_bare_d1_cond_succeeds_while_mixed_legacy_bare_number_rejects() {
+    // The same D3:110 COND control is an exact W1 bit inside canonical D2
+    // words. This is the already admitted source, not a newly inferred width.
+    // The physical Zig corridor is outside this SENS reader/evaluator test.
+    let canonical = "10 110 00 10 0 00 0 01 00 10 1 00 1 01 01";
+    let ast = parse_canonical_binary(canonical).expect("bare W1 in canonical D2 COND");
+    let canonical_value = eval_parsed_expressions(&ast, &mut Session::default())
+        .expect("canonical D1:0 skips, D1:1 selects").value;
+    assert_eq!(canonical_value.as_predicate_bit(), Some(true));
+
+    // TEMPORARY #5605: a legacy mixed .lisp consumer still requires a
+    // declared D1 boundary. A textual tag must never be copied into the
+    // canonical binary grammar.
+    let tagged = "(110 (#d1:0 #d1:0) (#d1:1 #d1:1))";
+    let tagged_ast = parse_mixed_exact_domain(tagged).expect("legacy carrier syntax");
+    let tagged_value = eval_parsed_expressions(&tagged_ast, &mut Session::default())
+        .expect("temporary bridge preserves exact D1").value;
+    assert_eq!(tagged_value.as_predicate_bit(), Some(true));
+
+    // One purportedly mechanical removal of the two tags changes the
+    // literal's DOMAIN into historical Number, not W1. The reader must not
+    // silently coerce a host number into SENS PredicateBit.
+    let bare_mixed = "(110 (0 0) (1 1))";
+    let bare_ast = parse_mixed_exact_domain(bare_mixed).expect("legacy mixed syntax");
+    let error = eval_parsed_expressions(&bare_ast, &mut Session::default())
+        .expect_err("a legacy Number 0 is not canonical D1:NO");
+    assert_eq!(error.kind, sens::ErrorKind::Type);
+    assert!(
+        error.message.contains("COND expects exact D1:1 / D1:0"),
+        "unexpected non-D1 diagnosis: {}", error.message
+    );
+
+    let redundant = canonical.replacen("10 1 00 1", "10 #d1:1 00 1", 1);
+    assert!(parse_canonical_binary(&redundant).is_err(),
+        "compatibility tag is never canonical grammar");
+}
