@@ -204,6 +204,30 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(source.replace(old, replacement, 1))
 
+    def test_trit_default_egress_comment_only_zig_call_is_not_proof(self) -> None:
+        """A Zig-looking comment cannot replace live default-feature T5 bytes."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_t5_egress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(
+            encoding="utf-8"
+        )
+        check(source)
+        live = (
+            "let bytes = "
+            "zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
+        )
+        self.assertIn(live, source)
+        for commented in ("// " + live, "/* " + live + " */"):
+            with self.subTest(comment=commented[:2]):
+                # Host-owned fake output is NOT a valid replacement for Zig.
+                mutant = source.replace(
+                    live, commented + "\\n            let bytes = Vec::new();", 1
+                )
+                self.assertNotEqual(mutant, source)
+                with self.assertRaisesRegex(blocked, "live Zig physical"):
+                    check(mutant)
+
     def test_trit_default_egress_refuses_missing_or_duplicate_production_arm(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_trit_t5_egress"]
