@@ -304,7 +304,9 @@ test "E1 canonical inspector rejects frame and host workspace aliases" {
     var frame: [64]u8 = undefined;
     var scratch: [2]Step = undefined;
     const len = try encode(&words, &frame, &scratch);
-    var decoded: [1]Word = undefined;
+    // Single E1 frame occupies more bytes than one Word struct; provide
+    // enough mutable storage to exercise source-as-decoded alias safely.
+    var decoded: [16]Word = undefined;
     var replay: [64]u8 = undefined;
 
     // Host points the immutable source frame into the mutable DP scratch.
