@@ -115,7 +115,7 @@ def check_main_t5_ingress(source: str) -> None:
 
 
 def check_trit_t5_egress(source: str) -> None:
-    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5."""
+    """Live SENS exact words -> Zig T5; no Rust physical reference fallback."""
     helper = _route_between(source, "fn admitted_source_words(", "\nfn read_sens(")
     if ("sens::parse_binary_source_words(source)" not in helper
             or "sens::parse_canonical_word_sequence(&words)" not in helper):
@@ -128,47 +128,66 @@ def check_trit_t5_egress(source: str) -> None:
         source, '\n        "encode" => {\n', '\n        "open" | "view" => {\n'
     )
     feature = '#[cfg(feature = "zig-transport")]'
-    reference = '#[cfg(not(feature = "zig-transport"))]'
-    if encode.count(feature) != 1 or encode.count(reference) != 1:
-        raise CorridorBlocked("sens-trit encode missing exclusive Zig/reference feature gates")
-    zig, rust = encode.split(reference, 1)
+    nozig = '#[cfg(not(feature = "zig-transport"))]'
+    if encode.count(feature) != 1 or encode.count(nozig) != 1:
+        raise CorridorBlocked("sens-trit encode missing exclusive Zig/no-Zig feature gates")
+    zig, refused = encode.split(nozig, 1)
     required = "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
-    # Comments are NOT executable Rust; an inactive breadcrumb must not prove
-    # that a real Zig ABI v2 call produced the bytes sent to the SENS CLI.
-    active_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
-    if not re.search(r"(?m)^[ \t]*" + re.escape(required) + r"[ \t]*$", active_zig):
+    live_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
+    if not re.search(r"(?m)^[ \t]*" + re.escape(required) + r"[ \t]*$", live_zig):
         raise CorridorBlocked("sens-trit default encode lacks live Zig physical T5 egress")
+    live_encode = re.sub(r"/\*.*?\*/|//[^\n]*", "", encode, flags=re.S)
     for bypass in ("sens::encode_binary_projection_ternary(", "sens::encode_ternary_words(",
                    "sens::decode_ternary_words(", "PhysicalT5Program::decode("):
-        if bypass in zig:
-            raise CorridorBlocked(f"sens-trit default encode calls Rust codec: {bypass}")
-    if "let bytes = sens::encode_binary_projection_ternary(&projection)" not in rust:
-        raise CorridorBlocked("sens-trit explicit Rust reference encoding lost its feature gate")
-    if "verify_companion(&projection, &bytes)" not in rust:
+        if bypass in live_encode:
+            raise CorridorBlocked(f"sens-trit encode contains Rust physical bypass: {bypass}")
+    if not re.search(
+        r'let bytes\s*=\s*Err::<Vec<u8>, String>\(\s*'
+        r'"RUST_ZIG_ONLY:[^"]*no Rust fallback"\.into\(\)\s*\)\s*\?;',
+        re.sub(r"/\*.*?\*/|//[^\n]*", "", refused, flags=re.S),
+        re.S,
+    ):
+        raise CorridorBlocked("sens-trit no-Zig encode must refuse, never reference-encode")
+    if "verify_companion(&projection, &bytes)" not in refused:
         raise CorridorBlocked("sens-trit encode no longer verifies Zig carrier")
 
     companion = _route_between(source, "fn verify_companion(", "\n/// Run the explicitly")
-    required_companion = (
-        'let expected_words = admitted_source_words(source)?;',
-        'if decoded != expected_words',
-        'zig_transport::encode_t5(&expected_words, binary)',
-    )
-    if any(fragment not in companion for fragment in required_companion):
-        raise CorridorBlocked("sens-trit companion no longer replays Zig bytes and SENS words")
-    if companion.count(reference) < 1:
-        raise CorridorBlocked("sens-trit companion must isolate Rust reference mode")
-    companion_zig, companion_reference = companion.split(reference, 1)
-    if ('let expected_words = admitted_source_words(source)?;' not in companion_zig
-            or "sens::encode_binary_projection_ternary(" in companion_zig):
-        raise CorridorBlocked("sens-trit default companion uses Rust physical T5 instead of SENS")
-    if "let reference = sens::encode_binary_projection_ternary(source)" not in companion_reference:
-        raise CorridorBlocked("sens-trit companion Rust reference is not explicitly isolated")
+    if companion.count(nozig) != 1 or companion.count(feature) != 1:
+        raise CorridorBlocked("sens-trit companion needs exclusive fail-closed Zig gates")
+    denied, zig_companion = companion.split(feature, 1)
+    denied = re.sub(r"/\*.*?\*/|//[^\n]*", "", denied, flags=re.S)
+    zig_companion = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig_companion, flags=re.S)
+    if nozig not in denied or not re.search(
+        r'return Err\("RUST_ZIG_ONLY:[^"]*no Rust fallback"\.into\(\)\)',
+        denied,
+    ):
+        raise CorridorBlocked("sens-trit companion no-Zig path must refuse before parsing")
+    for bypass in ("sens::encode_binary_projection_ternary(",
+                   "sens::decode_ternary_words(", "sens::encode_ternary_words("):
+        if bypass in denied or bypass in zig_companion:
+            raise CorridorBlocked(f"sens-trit companion contains Rust physical bypass: {bypass}")
+    for required_companion in (
+        "let expected_words = admitted_source_words(source)?;",
+        "if decoded != expected_words",
+        "zig_transport::encode_t5(&expected_words, binary)",
+    ):
+        if required_companion not in zig_companion:
+            raise CorridorBlocked("sens-trit companion no longer checks SENS words and Zig bytes")
+
+    # Entry gate must reject a Zig-less command BEFORE filesystem access.
+    gate = _route_between(source, "fn require_zig_transport(", "\nfn execute()")
+    entry = _route_between(source, "fn execute() -> Result<(), String> {", "\nfn main()")
+    if ("RUST_ZIG_ONLY:" not in gate
+            or 'command != "backend"' not in gate
+            or "require_zig_transport(command)?;" not in entry
+            or entry.index("require_zig_transport(command)?;") > entry.index("match command {")):
+        raise CorridorBlocked("sens-trit Zig-less physical CLI must refuse before I/O")
 
 
 def check_trit_explain_typed_word_route(source: str) -> None:
     """The real Zig T5 ingress must feed SENS typed words, never a text reparse."""
     route = _route_between(
-        source, "fn explain_t5_bytes(", "\n/// Fail before file access"
+        source, "fn explain_t5_bytes(", "\nfn require_zig_transport("
     )
     live = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
     zig_marker = '#[cfg(feature = "zig-transport")]'
@@ -238,7 +257,7 @@ def check_trit_e1_ingress(source: str) -> None:
 def check_trit_t5_execution(source: str) -> None:
     """Live eval/eval-core4 execution may only receive physical T5 from Zig."""
     route = _route_between(source, "\nfn eval_t5_bytes_core4(",
-                           "\n/// Пояснити негативний результат")
+                           "\nfn explain_t5_bytes(")
     off = '#[cfg(not(feature = "zig-transport"))]'
     on = '#[cfg(feature = "zig-transport")]'
     if route.count(off) != 1 or route.count(on) != 1:
