@@ -39,15 +39,18 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
             raise D7ProjectionError(f"D7:{bits} callable/coordinate drift")
         n = int(bits, 2)
         expected_glyphs = (
-            (glyphs["uk"], glyphs["uk"], glyphs["san"],
+            (glyphs["uk"], glyphs["uk"], glyphs["iast"],
              glyphs["ascii"], glyphs["uk"])
             if 32 <= n < 127 else (None, None, None, None, None)
         )
         if (row.uk, row.ukr, row.san, row.en, row.sym) != expected_glyphs:
             raise D7ProjectionError(f"D7:{bits} glyph drift")
-    for field in ("ascii", "uk", "san"):
-        if len({item[field] for item in evidence.values()}) != 128:
+    for field in ("ascii", "uk", "san", "iast"):
+        labels = [item[field] for item in evidence.values()]
+        if len(set(labels)) != 128 or any(not isinstance(v, str) or not v for v in labels):
             raise D7ProjectionError(f"D7:{field} ambiguous glyph")
+        if field == "iast" and any(any("\u0900" <= ch <= "\u097f" for ch in v) for v in labels):
+            raise D7ProjectionError("D7:IAST display still contains Devanagari")
     return evidence, by_coordinate
 
 
