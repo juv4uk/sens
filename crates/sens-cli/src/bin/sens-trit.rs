@@ -68,14 +68,18 @@ fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
 /// admission remains the SAME SENS canonical word reader, with no visible
 /// source reconstruction or implicit execution in read-only commands.
 fn decode_canonical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
-    #[cfg(feature = "zig-transport")]
-    let words = zig_transport::decode_t5_words(bytes)?;
     #[cfg(not(feature = "zig-transport"))]
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|e| format!("reference physical T5 rejected: {e:?}"))?;
-    sens::parse_canonical_word_sequence(&words)
-        .map_err(|e| format!("SENS canonical D2 rejected: {e}"))?;
-    Ok(words)
+    {
+        let _ = bytes;
+        Err("RUST_ZIG_ONLY: T5 read requires the Zig corridor; no Rust fallback".into())
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        let words = zig_transport::decode_t5_words(bytes)?;
+        sens::parse_canonical_word_sequence(&words)
+            .map_err(|e| format!("SENS canonical D2 rejected: {e}"))?;
+        Ok(words)
+    }
 }
 
 /// SENS owns exact source words and D2 admission. The host does not create
@@ -94,13 +98,20 @@ fn admitted_source_words(source: &str) -> Result<Vec<sens::BinarySourceWord>, St
 }
 
 fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
-    if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
-        return Err("expected a physical .sens file".into());
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        let _ = path;
+        return Err("RUST_ZIG_ONLY: .sens read requires the Zig corridor; no Rust fallback".into());
     }
-    let bytes = fs::read(path).map_err(|e| format!("read .sens: {e}"))?;
     #[cfg(feature = "zig-transport")]
-    zig_transport::validate_t5(&bytes)?;
-    Ok(bytes)
+    {
+        if path.extension().and_then(|ext| ext.to_str()) != Some("sens") {
+            return Err("expected a physical .sens file".into());
+        }
+        let bytes = fs::read(path).map_err(|e| format!("read .sens: {e}"))?;
+        zig_transport::validate_t5(&bytes)?;
+        Ok(bytes)
+    }
 }
 
 
@@ -212,40 +223,35 @@ fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
 }
 
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
-    // In a Zig-default build no Rust physical encoder supplies the expected
-    // bytes: SENS supplies exact words and Zig decodes/reencodes the carrier.
-    #[cfg(feature = "zig-transport")]
-    let expected_words = admitted_source_words(source)?;
     #[cfg(not(feature = "zig-transport"))]
-    let reference = sens::encode_binary_projection_ternary(source)
-        .map_err(|e| format!("unadmitted .lisp projection: {e:?}"))?;
-    let decoded = decode_canonical_t5_words(binary)
-        .map_err(|e| format!("invalid .sens transport or grammar: {e}"))?;
+    {
+        let _ = (source, binary);
+        return Err("RUST_ZIG_ONLY: companion verification requires Zig; no Rust fallback".into());
+    }
     #[cfg(feature = "zig-transport")]
     {
+        // SENS supplies the admitted exact-width words; Zig owns their physical bytes.
+        let expected_words = admitted_source_words(source)?;
+        let decoded = decode_canonical_t5_words(binary)
+            .map_err(|e| format!("invalid .sens transport or grammar: {e}"))?;
         if decoded != expected_words {
             return Err("paired .lisp/.sens differs in exact domain words".into());
         }
         zig_transport::encode_t5(&expected_words, binary)
             .map_err(|e| format!("Zig physical companion replay rejected: {e}"))?;
+        let semantic_bits = decoded.iter().try_fold(0usize, |n, word|
+            n.checked_add(word.width())
+        ).ok_or("SENS physical accounting length overflow")?;
+        let encoded_trits = semantic_bits.checked_add(decoded.len() - 1)
+            .ok_or("SENS physical accounting separator overflow")?;
+        let physical_trits = binary.len().checked_mul(5)
+            .ok_or("SENS physical accounting carrier overflow")?;
+        let trailing = physical_trits.checked_sub(encoded_trits)
+            .ok_or("SENS physical accounting invalid carrier length")?;
+        println!("VERIFIED {} domain words; binary SENS={} semantic bits; transport={} trits; physical={} bytes; trailing={} trits",
+                 decoded.len(), semantic_bits, encoded_trits, binary.len(), trailing);
+        Ok(())
     }
-    #[cfg(not(feature = "zig-transport"))]
-    if reference != binary {
-        return Err("paired .lisp/.sens differs at the physical byte level".into());
-    }
-    // Purely human accounting after Zig physical validation, never Rust T5 IO.
-    let semantic_bits = decoded.iter().try_fold(0usize, |n, word|
-        n.checked_add(word.width())
-    ).ok_or("SENS physical accounting length overflow")?;
-    let encoded_trits = semantic_bits.checked_add(decoded.len() - 1)
-        .ok_or("SENS physical accounting separator overflow")?;
-    let physical_trits = binary.len().checked_mul(5)
-        .ok_or("SENS physical accounting carrier overflow")?;
-    let trailing = physical_trits.checked_sub(encoded_trits)
-        .ok_or("SENS physical accounting invalid carrier length")?;
-    println!("VERIFIED {} domain words; binary SENS={} semantic bits; transport={} trits; physical={} bytes; trailing={} trits",
-             decoded.len(), semantic_bits, encoded_trits, binary.len(), trailing);
-    Ok(())
 }
 
 /// Run the explicitly requested SENS program on the current capability-free
@@ -287,25 +293,6 @@ fn eval_t5_bytes_core4(
             .map_err(|e| format!("current SENS evaluator rejected: {e}"))
     }
 }
-/// Пояснити негативний результат без іншого парсера чи текстового fallback.
-/// Первинним рішенням назавжди лишається encode_binary_projection_ternary.
-#[cfg(not(feature = "zig-transport"))]
-fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> String {
-    let mut message = format!("encode .lisp projection: {error:?}");
-    let source_error = match &error {
-        sens::TernaryTransportError::InvalidBinaryProjection =>
-            sens::parse_binary_source_words(source).map(|_| ()),
-        sens::TernaryTransportError::InvalidProgramSyntax =>
-            sens::parse_canonical_binary(source).map(|_| ()),
-        _ => return message,
-    };
-    if let Err(detail) = source_error {
-        message.push_str("; ");
-        message.push_str(&detail.render(source));
-    }
-    message
-}
-
 /// Diagnose why a physical packed T5 file fails the existing canonical D2
 /// parser. No second grammar and no implicit program execution: each exact
 /// binary word becomes a line so the existing error renderer's line is the
@@ -313,22 +300,39 @@ fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> S
 fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
     // Keep physical failures separate from SENS D2 grammar diagnostics:
     // unlike open/decode, explain must see the words before D2 admission.
-    #[cfg(feature = "zig-transport")]
-    let words = zig_transport::decode_t5_words(bytes)
-        .map_err(|e| format!("physical T5 transport rejected: {e}"))?;
     #[cfg(not(feature = "zig-transport"))]
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|e| format!("physical T5 transport rejected: {e:?}"))?;
-    let projection = sens::render_ternary_words_vertical(&words);
-    sens::parse_canonical_binary(&projection)
-        .map_err(|e| format!(
-            "D2 grammar rejected (one exact typed word per line): {}",
-            e.render(&projection)
-        ))?;
-    Ok(format!(
-        "D2 syntax PASS; {} typed words; current/historical semantic oracle NOT_VERIFIED",
-        words.len()
-    ))
+    {
+        let _ = bytes;
+        return Err("RUST_ZIG_ONLY: T5 diagnostics require Zig; no Rust fallback".into());
+    }
+    #[cfg(feature = "zig-transport")]
+    {
+        let words = zig_transport::decode_t5_words(bytes)
+            .map_err(|e| format!("physical T5 transport rejected: {e}"))?;
+        let projection = sens::render_ternary_words_vertical(&words);
+        sens::parse_canonical_binary(&projection)
+            .map_err(|e| format!(
+                "D2 grammar rejected (one exact typed word per line): {}",
+                e.render(&projection)
+            ))?;
+        Ok(format!(
+            "D2 syntax PASS; {} typed words; semantic oracle NOT_VERIFIED",
+            words.len()
+        ))
+    }
+}
+
+/// Fail before file access, output creation or language bootstrap when Zig is
+/// unavailable. A Rust-only build is not a second physical SENS backend.
+fn require_zig_transport(command: &str) -> Result<(), String> {
+    #[cfg(not(feature = "zig-transport"))]
+    if command != "backend" {
+        return Err(format!(
+            "RUST_ZIG_ONLY: sens-trit {command} requires Zig; no Rust physical fallback"
+        ));
+    }
+    let _ = command;
+    Ok(())
 }
 
 fn execute() -> Result<(), String> {
@@ -345,13 +349,14 @@ fn execute() -> Result<(), String> {
         _ => return Err(USAGE.into()),
     };
     let path = Path::new(file);
+    require_zig_transport(command)?;
 
     match command {
         "backend" => {
             #[cfg(feature = "zig-transport")]
             println!("transport=zig abi=2 semantic_authority=SENS");
             #[cfg(not(feature = "zig-transport"))]
-            println!("transport=rust-reference semantic_authority=SENS");
+            println!("transport=unavailable zig_required=true semantic_authority=SENS");
             Ok(())
         }
         "encode-d7-uk" => {
@@ -369,8 +374,9 @@ fn execute() -> Result<(), String> {
                 zig_transport::encode_t5_direct(&words)?
             };
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = sens::encode_d7_uk_t5(&text)
-                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
+            let bytes = Err::<Vec<u8>, String>(
+                "RUST_ZIG_ONLY: D7 T5 encoding requires Zig; no Rust fallback".into()
+            )?;
             let output_path = path.with_extension("sens");
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&output_path).map_err(|e| format!("create T5 text record: {e}"))?;
@@ -390,21 +396,23 @@ fn execute() -> Result<(), String> {
                     .map_err(|e| format!("D7 keyboard W7 projection rejected: {e:?}"))?
             };
             #[cfg(not(feature = "zig-transport"))]
-            let text = sens::decode_d7_uk_t5(&bytes)
-                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
+            let text = Err::<String, String>(
+                "RUST_ZIG_ONLY: D7 T5 decoding requires Zig; no Rust fallback".into()
+            )?;
             println!("{text}");
             Ok(())
         }
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            // SENS validates exact words and D2; Zig alone packs the T5 bytes
-            // in production. Rust remains an explicit reference-only mode.
+            // SENS validates exact words and D2; Zig alone packs T5 bytes.
+            // No optional Rust physical encoder exists on this CLI route.
             #[cfg(feature = "zig-transport")]
             let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = sens::encode_binary_projection_ternary(&projection)
-                .map_err(|e| explain_encode_failure(&projection, e))?;
+            let bytes = Err::<Vec<u8>, String>(
+                "RUST_ZIG_ONLY: .lisp projection encoding requires Zig; no Rust fallback".into()
+            )?;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;
@@ -534,6 +542,59 @@ fn main() {
     if let Err(message) = execute() {
         eprintln!("sens-trit: {message}");
         process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod rust_zig_only_cutover_tests {
+    use super::*;
+
+    #[test]
+    fn production_sens_trit_never_calls_rust_physical_codecs() {
+        // Test the entire production section, not just the feature branch.
+        let source = include_str!("sens-trit.rs");
+        let runtime = source.split("#[cfg(test)]").next().unwrap();
+        for forbidden in [
+            "sens::decode_ternary_words(",
+            "sens::encode_binary_projection_ternary(",
+            "sens::encode_d7_uk_t5(",
+            "sens::decode_d7_uk_t5(",
+            "transport=rust-reference",
+        ] {
+            assert!(!runtime.contains(forbidden), "Rust physical bypass: {forbidden}");
+        }
+        assert!(runtime.contains("require_zig_transport(command)?"));
+        assert!(runtime.contains("zig_transport::decode_t5_words(bytes)"));
+        assert!(runtime.contains("zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)"));
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn all_physical_cli_modes_fail_closed_without_zig() {
+        for command in [
+            "encode", "verify", "open", "view", "decode", "explain",
+            "eval", "eval-core4", "encode-d7-uk", "decode-d7-uk",
+            "encode-e1", "eval-e1", "encode-f3", "open-f3", "decode-f3",
+            "eval-f3", "verify-f3-sha256", "eval-f3-sha256",
+        ] {
+            let error = require_zig_transport(command)
+                .expect_err("Zig-less CLI must reject BEFORE accessing files");
+            assert!(error.contains("RUST_ZIG_ONLY"), "{command}: {error}");
+            assert!(error.contains("no Rust physical fallback"));
+        }
+        assert!(require_zig_transport("backend").is_ok());
+        assert!(decode_canonical_t5_words(&[0x63, 0x89, 0x06, 0xa1]).is_err());
+        assert!(read_sens(Path::new("unreadable.sens")).is_err());
+        assert!(verify_companion("10 001 00 000 01", &[0x63, 0x89, 0x06, 0xa1]).is_err());
+        assert!(explain_t5_bytes(&[0x63, 0x89, 0x06, 0xa1]).is_err());
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_transport_is_the_only_admitted_cli_mode() {
+        for command in ["encode", "verify", "open", "eval", "encode-d7-uk", "decode-f3"] {
+            require_zig_transport(command).expect("Zig-enabled CLI admits physical commands");
+        }
     }
 }
 
