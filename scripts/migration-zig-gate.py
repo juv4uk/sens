@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -126,6 +127,48 @@ def check_zig_pin() -> dict:
     }
 
 
+def validate_migration_identities(surfaces: dict, legacy: dict, safe_old: set) -> None:
+    """Verify exact owner coordinates in BOTH migration lanes.
+
+    The migration authority supplies identities; this gate never assigns
+    meaning, adds callable functions, or turns historical SID8 into D8.
+    Historical eight-bit keys are donor provenance, not domain identities.
+    """
+    failures: list[str] = []
+    for lane, mapping in (("surface", surfaces), ("historical", legacy)):
+        if not isinstance(mapping, dict):
+            raise ValueError(f"EXACT_MIGRATION_AUTHORITY lane={lane} expected=mapping")
+        for key, identity in mapping.items():
+            domain = getattr(identity, "domain", None)
+            bits = getattr(identity, "bits", None)
+            label = getattr(identity, "label", None)
+            if not isinstance(key, str) or not key:
+                failures.append(f"{lane}:{key!r} invalid-key")
+            if lane == "historical" and (
+                not isinstance(key, str) or re.fullmatch(r"[01]{8}", key) is None
+            ):
+                failures.append(f"{lane}:{key!r} invalid-8bit-donor-provenance")
+            # This migrator imports owner-ratified D3/D4 heads ONLY.
+            # Widening to D8/D10/D24 is never implicit semantic admission.
+            if domain not in ("D3", "D4"):
+                failures.append(f"{lane}:{key!r} unexpected-domain={domain!r}")
+                continue
+            width = 3 if domain == "D3" else 4
+            if (not isinstance(bits, str) or len(bits) != width
+                    or re.fullmatch(r"[01]+", bits) is None):
+                failures.append(
+                    f"{lane}:{key!r} domain={domain} invalid-exact-bits={bits!r}"
+                )
+            if lane == "historical" and (domain, label) not in safe_old:
+                failures.append(
+                    f"{lane}:{key!r} domain={domain} unratified-donor={label!r}"
+                )
+    if failures:
+        raise ValueError(
+            "EXACT_MIGRATION_AUTHORITY: " + "; ".join(failures[:8])
+        )
+
+
 def load_exact_domain_authority() -> dict:
     """Import migrate-exact-domain and load owner tables (no write)."""
     path = SCRIPTS / "migrate-exact-domain.py"
@@ -136,15 +179,7 @@ def load_exact_domain_authority() -> dict:
     sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
     surfaces, legacy = mod.load_authority(ROOT)
-    bad = []
-    for key, identity in surfaces.items():
-        width = int(identity.domain[1:])
-        if len(identity.bits) != width:
-            bad.append(f"{key}->{identity.domain}:{identity.bits}")
-        if not set(identity.bits) <= {"0", "1"}:
-            bad.append(f"{key}: non-binary bits")
-    if bad:
-        raise ValueError(f"exact-domain authority width axiom broken: {bad[:8]}")
+    validate_migration_identities(surfaces, legacy, mod.SAFE_OLD)
     return {
         "step": "migrate-exact-domain-authority",
         "status": "PASS",
