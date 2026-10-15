@@ -16,6 +16,8 @@ ZIG_PATH = ROOT / "research/zig-codecs/transport_abi.zig"
 RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport.rs"
 C_PATH = ROOT / "research/zig-codecs/host-c/zig_transport_v2.h"
 H2_C_PATH = ROOT / "research/zig-codecs/host-c/h2_t5_dump.c"
+ASSET_ZIG_PATH = ROOT / "zig_transport_root.zig"
+ASSET_RUST_PATH = ROOT / "crates/sens-cli/src/zig_transport_assets.rs"
 
 # No semantic function identities, domain numbers, or host-specific layouts:
 # nine reviewed *physical* ABI v2 functions; D10 validator is coordinate-only.
@@ -160,6 +162,66 @@ def declarations(source: str, language: str) -> dict:
     return {name: found[name][0] for name in EXPECTED}
 
 
+
+# The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
+# inventories exact: adding an unreviewed FFI declaration cannot silently
+# expand the physical nine-function v2 contract.
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy")
+ASSET_ZIG_EXPORT = re.compile(
+    r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
+    r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
+)
+ASSET_RUST_DECL = re.compile(
+    r"(?m)^[ \t]*pub\(super\)[ \t]+fn[ \t]+"
+    r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*->\s*isize\s*;"
+)
+
+
+def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: str) -> None:
+    """Exact external byte-copy signatures without pretending they are ABI v2.
+
+    Does not validate Lisp semantics or classify source/domain identities.
+    Rejects ghost comments, swapped pointer constness, unreviewed exports,
+    missing linkage and Rust-side project-source embedding.
+    """
+    zig_root, rust_assets, rust_transport = (
+        strip_c_comments(source) for source in (zig_root, rust_assets, rust_transport)
+    )
+    if '#[path = "zig_transport_assets.rs"]' not in rust_transport or not re.search(
+        r"(?m)^mod\s+asset_ffi\s*;", rust_transport
+    ):
+        fail("asset-rust", "missing_root_asset_adapter")
+    if 'unsafe extern "C" {' not in rust_assets:
+        fail("asset-rust", "missing_C_linkage")
+    for name, asset in (
+        ("sens_zig_linter_bytes_copy", "lib/linter.lisp"),
+        ("sens_zig_contract_bytes_copy", "language-contract.lisp"),
+    ):
+        expected_embed = f'@embedFile("{asset}")'
+        if expected_embed not in zig_root:
+            fail("asset-zig", f"missing_opaque_embed={asset}")
+        if f"asset_ffi::{name}(" not in rust_transport:
+            fail("asset-rust", f"missing_opaque_call={name}")
+
+    expected_zig = "dst: [*]u8, capacity: usize"
+    expected_rust = "output: *mut u8, capacity: usize"
+    for source, matcher, expected, layer in (
+        (zig_root, ASSET_ZIG_EXPORT, expected_zig, "asset-zig"),
+        (rust_assets, ASSET_RUST_DECL, expected_rust, "asset-rust"),
+    ):
+        entries = {}
+        for match in matcher.finditer(source):
+            entries.setdefault(match.group(1), []).append(
+                " ".join(match.group(2).split())
+            )
+        extra = sorted(set(entries) - set(ASSET_NAMES))
+        if extra:
+            fail(layer, f"unreviewed_asset_exports={','.join(extra)}")
+        for name in ASSET_NAMES:
+            actual = entries.get(name, [])
+            if actual != [expected]:
+                fail(layer, f"asset_signature={name} expected={expected} actual={actual!r}")
+
 def compiled_c_declarations(header: str) -> dict:
     """The C preprocessor, not source regex, decides the active Zig ABI surface.
 
@@ -276,6 +338,8 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         cls.zig = ZIG_PATH.read_text(encoding="utf-8")
         cls.rust = RUST_PATH.read_text(encoding="utf-8")
         cls.header = C_PATH.read_text(encoding="utf-8")
+        cls.asset_zig = ASSET_ZIG_PATH.read_text(encoding="utf-8")
+        cls.asset_rust = ASSET_RUST_PATH.read_text(encoding="utf-8")
 
     def test_preprocessed_c11_abi_matches_zig_and_rejects_if0_ghost(self):
         """A C prototype hidden under #if 0 must never count as Zig ABI v2."""
@@ -306,6 +370,52 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
     def test_current_zig_rust_c_physical_signatures_agree(self):
         check_contract(self.zig, self.rust, self.header)
+
+
+    def test_root_asset_copy_is_separate_from_nine_function_abi_v2(self):
+        check_root_asset_corridor(self.asset_zig, self.asset_rust, self.rust)
+        self.assertEqual(len(EXPECTED), 9)
+        self.assertEqual(set(declarations(strip_c_comments(self.rust), "rust")), set(EXPECTED))
+
+    def test_root_asset_copy_missing_zig_export_is_rejected(self):
+        mutated = self.asset_zig.replace(
+            "pub export fn sens_zig_linter_bytes_copy",
+            "fn sens_zig_linter_bytes_copy", 1,
+        )
+        self.assertNotEqual(mutated, self.asset_zig)
+        with self.assertRaisesRegex(ValueError, "asset_signature=sens_zig_linter_bytes_copy"):
+            check_root_asset_corridor(mutated, self.asset_rust, self.rust)
+
+    def test_root_asset_copy_wrong_rust_pointer_constness_rejected(self):
+        mutated = self.asset_rust.replace("output: *mut u8", "output: *const u8", 1)
+        self.assertNotEqual(mutated, self.asset_rust)
+        with self.assertRaisesRegex(ValueError, "asset_signature=sens_zig_linter_bytes_copy"):
+            check_root_asset_corridor(self.asset_zig, mutated, self.rust)
+
+    def test_root_asset_copy_missing_adapter_use_is_rejected(self):
+        mutated = self.rust.replace(
+            "asset_ffi::sens_zig_contract_bytes_copy(",
+            "sens_zig_contract_bytes_copy(", 1,
+        )
+        self.assertNotEqual(mutated, self.rust)
+        with self.assertRaisesRegex(ValueError, "missing_opaque_call=sens_zig_contract_bytes_copy"):
+            check_root_asset_corridor(self.asset_zig, self.asset_rust, mutated)
+
+    def test_root_asset_copy_unreviewed_extra_export_is_rejected(self):
+        mutated = self.asset_zig + (
+            "\\npub export fn sens_zig_unreviewed_bytes_copy(dst: [*]u8, capacity: usize) isize { return -1; }\\n"
+        ).replace("\\n", "\n")
+        with self.assertRaisesRegex(ValueError, "unreviewed_asset_exports=sens_zig_unreviewed_bytes_copy"):
+            check_root_asset_corridor(mutated, self.asset_rust, self.rust)
+
+    def test_root_asset_copy_comment_ghost_does_not_count(self):
+        mutated = self.asset_rust.replace(
+            "    pub(super) fn sens_zig_linter_bytes_copy",
+            "    // pub(super) fn sens_zig_linter_bytes_copy", 1,
+        )
+        self.assertNotEqual(mutated, self.asset_rust)
+        with self.assertRaisesRegex(ValueError, "asset_signature=sens_zig_linter_bytes_copy"):
+            check_root_asset_corridor(self.asset_zig, mutated, self.rust)
 
     def test_missing_zig_export_is_rejected(self):
         mutated = self.zig.replace(

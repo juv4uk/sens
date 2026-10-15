@@ -2,10 +2,12 @@
 //! Owner law: Zig is the turnstile, not the registry; SENS decides meaning;
 //! Rust holds opaque bytes. No local T5/E1 algorithm lives in this module.
 
+// Root-Zig opaque asset copies are a separate adapter, NOT codec ABI v2.
+#[path = "zig_transport_assets.rs"]
+mod asset_ffi;
+
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
-    fn sens_zig_linter_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    fn sens_zig_contract_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
     // Coordinate-only D1..D10 physical validation; no runnable D10 admission.
     fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;
@@ -43,7 +45,7 @@ fn version() -> Result<(), String> {
 pub fn linter_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        sens_zig_linter_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_linter_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 {
         return Err("ZIG_LINTER_CARRIER invalid source length".into());
@@ -54,7 +56,7 @@ pub fn linter_source_bytes() -> Result<Vec<u8>, String> {
         return Err("ZIG_LINTER_CARRIER source exceeds host byte limit".into());
     }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe { sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    let copied = unsafe { asset_ffi::sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required {
         return Err(format!("ZIG_LINTER_CARRIER byte copy rejected: code={copied}"));
     }
@@ -65,13 +67,13 @@ pub fn linter_source_bytes() -> Result<Vec<u8>, String> {
 pub fn contract_source_bytes() -> Result<Vec<u8>, String> {
     version()?;
     let required = unsafe {
-        sens_zig_contract_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+        asset_ffi::sens_zig_contract_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
     };
     if required <= 0 { return Err("ZIG_CONTRACT_CARRIER invalid length".into()); }
     let len = usize::try_from(required).map_err(|_| "ZIG_CONTRACT_CARRIER overflow")?;
     if len > 8 * 1024 * 1024 { return Err("ZIG_CONTRACT_CARRIER host byte cap".into()); }
     let mut bytes = vec![0u8; len];
-    let copied = unsafe { sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
+    let copied = unsafe { asset_ffi::sens_zig_contract_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };
     if copied != required { return Err(format!("ZIG_CONTRACT_CARRIER mismatch: {copied}")); }
     Ok(bytes)
 }
