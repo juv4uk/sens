@@ -163,20 +163,23 @@ def check(root: Path) -> list[str]:
         if rel == CODEC_OWNER:
             continue  # the codec owner is allowed to own the physical codec
         sources = _crate_sources(crate)
-        live_sources = [_live_rust(p.read_text(encoding="utf-8", errors="replace"))
-                        for p in sources]
-        touches_codec = any(CODEC_API.search(src) for src in live_sources)
-        if not touches_codec:
-            continue
-        on_corridor = any(CORRIDOR_API.search(src) for src in live_sources)
-        if on_corridor:
+        # A Zig call in another source file does NOT attest this codec edge.
+        # Per-file fail-closed coverage prevents unrelated calls from masking
+        # physical SENS bypasses within the same Rust crate.
+        unbridged = []
+        for source in sources:
+            active = _live_rust(source.read_text(encoding="utf-8", errors="replace"))
+            if CODEC_API.search(active) and not CORRIDOR_API.search(active):
+                unbridged.append(source.relative_to(root).as_posix())
+        if not unbridged:
             continue
         entry = exempt.get(rel)
         if entry is None:
-            problems.append(
-                f"host `{rel}` reaches SENS physical bytes without the Zig corridor "
-                "and is not registered in corridor_host_coverage.json"
-            )
+            for path in unbridged:
+                problems.append(
+                    f"host `{rel}` source `{path}` reaches SENS physical bytes "
+                    "without the Zig corridor and is not registered in corridor_host_coverage.json"
+                )
         else:
             used_exemptions.add(rel)
     # A host that migrated to Zig must retire its old bypass record. Stale
