@@ -654,9 +654,17 @@ pub fn load_meta_evaluator_library(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    // This owner-pinned loader admits current D3 heads inside W8 bootstrap
-    // wrappers; ordinary Lisp parse would see those short bits as numbers.
-    let expressions = parse_mixed_exact_domain_time_source("lib/time.lisp", TIME_LIBRARY_SOURCE)?;
+    load_time_library_from_source(session, TIME_LIBRARY_SOURCE)
+}
+
+/// Load caller-supplied time source through the SAME owner-pinned exact-width
+/// reader used by the original loader. Zig transports bytes; SENS interprets.
+pub fn load_time_library_from_source(
+    session: &mut Session,
+    source: &str,
+) -> Result<EvalResult, LanguageError> {
+    // Short D3 heads are domain words, not ordinary Lisp numeric literals.
+    let expressions = parse_mixed_exact_domain_time_source("lib/time.lisp", source)?;
     let result = eval_parsed_expressions(&expressions, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
