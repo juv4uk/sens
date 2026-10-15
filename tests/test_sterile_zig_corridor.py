@@ -27,6 +27,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("STERILE_ZIG_CORRIDOR_PASS", completed.stdout)
         self.assertIn("f3c-validate-before-no-savings", completed.stdout)
         self.assertIn("f3c-decode-validates-t5", completed.stdout)
+        self.assertIn("f3c-bounds-reported-lengths", completed.stdout)
 
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
@@ -46,12 +47,10 @@ class SterileZigCorridorTests(unittest.TestCase):
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         check(body)
 
-        # Drop validation entirely: oversize invalid T5 would report None.
         no_validate = body.replace("validate_t5(t5)?;", "/* bypassed */", 1)
         with self.assertRaises(blocked):
             check(no_validate)
 
-        # Put length gate before validation (classic silent bypass).
         start = body.index("pub fn encode_f3(")
         end = body.index("pub fn decode_f3(")
         route = body[start:end]
@@ -61,7 +60,6 @@ class SterileZigCorridorTests(unittest.TestCase):
             1,
         )
         if swapped == route:
-            # Anchor may vary slightly; force an early length return without validate.
             swapped = route.replace(
                 "validate_t5(t5)?;",
                 "if t5.len() > 16 { return Ok(None); }\n    // mutant moved validate after length",
@@ -89,8 +87,6 @@ class SterileZigCorridorTests(unittest.TestCase):
         with self.assertRaises(blocked):
             check(stripped)
 
-        # A textual mention is not a physical check: errors must propagate
-        # from the recovered Zig carrier, not be discarded or commented out.
         for bypass in (
             "let _ = validate_t5(&output);",
             "validate_t5(&output);",
@@ -105,7 +101,6 @@ class SterileZigCorridorTests(unittest.TestCase):
                 with self.assertRaises(blocked):
                     check(mutant)
 
-        # Validation must apply to the length-trimmed recovered buffer.
         mutant = body.replace(
             "output.truncate(len as usize);\n    validate_t5(&output)?;",
             "validate_t5(&output)?;\n    output.truncate(len as usize);",
@@ -114,6 +109,34 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertNotEqual(mutant, body)
         with self.assertRaises(blocked):
             check(mutant)
+
+    def test_f3c_bounds_reject_overreport_mutants(self) -> None:
+        """encode_f3/decode_f3 must capacity-filter Zig lengths before truncate."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_f3c_bounds_reported_lengths"]
+        blocked = module["CorridorBlocked"]
+        body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        check(body)
+
+        no_bound = body.replace(
+            "usize::try_from(len).ok().filter(|&n| n < t5.len() && n <= bytes.len())",
+            "Some(0usize) /* mutant: no capacity filter */",
+            1,
+        )
+        with self.assertRaises(blocked):
+            check(no_bound)
+
+        no_decode_bound = body.replace(
+            "usize::try_from(len).ok().filter(|&n| n <= output.len())",
+            "Some(0usize) /* mutant: no capacity filter */",
+            1,
+        )
+        with self.assertRaises(blocked):
+            check(no_decode_bound)
+
+        no_cap = body.replace("n <= bytes.len()", "true /* mutant */", 1)
+        with self.assertRaises(blocked):
+            check(no_cap)
 
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
@@ -307,7 +330,6 @@ class SterileZigCorridorTests(unittest.TestCase):
             '    // test-only witness, NEVER a production boundary\n'
             '}\n'
         )
-        # Before this fix the fallback to source (not production) accepted it.
         with self.assertRaises(blocked):
             between(spoof, "fn zig_ingress(", "\nfn next_production_route(")
 
