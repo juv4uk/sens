@@ -43,19 +43,53 @@ GATES = [
 ]
 
 
+# Existing positive terminal receipts emitted by the actual source checkers.
+# Exit 0 alone (empty stub, wrong checker, symlinked replacement) is NOT
+# evidence that the Rust -> Zig -> SENS structural migration guard ran.
+# These are transport/provenance guards, not SENS semantic verdicts.
+SUCCESS_MARKERS = {
+    "scripts/check_sterile_zig_corridor.py": "STERILE_ZIG_CORRIDOR_PASS",
+    "scripts/check_rust_sens_zig_corridor.py": "CORRIDOR_OK",
+    "scripts/check_migration_zig_only_path.py": "MIGRATION_ZIG_ONLY_PATH_OK",
+    "scripts/check_rust_sens_corridor_coverage.py": "COVERAGE_OK",
+    "scripts/check_corridor_axiom_binding.py": "AXIOM_BINDING_OK",
+    "scripts/check_axiom_coverage.py": "AXIOM_COVERAGE_OK",
+    "scripts/check_principle_force.py": "PRINCIPLE_FORCE_OK",
+    "scripts/check_numeric_domain_exclusive.py": "NUMERIC_DOMAIN_EXCLUSIVE_OK",
+    "scripts/check_rust_isolated_only_zig.py": "RUST_ISOLATED_ONLY_ZIG_OK",
+    "scripts/check_rust_lisp_sens_io.py": "RUST_LISP_SENS_IO_OK",
+}
+
+
+def _positive_receipt(output: str, required: str) -> str | None:
+    """Exactly one live terminal token; no blank, duplicate or earlier echo."""
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    matching = [line for line in lines if line.split(maxsplit=1)[0] == required]
+    if len(matching) != 1 or not lines or lines[-1] != matching[0]:
+        return None
+    return matching[0]
+
+
 def run_gate(root: Path, script: str) -> tuple[str, str]:
     path = root / script
-    if not path.is_file():
-        return "UNVERIFIED", "script absent"
+    # A link to an unreviewed program is not the canonical checked-in guard.
+    if (root / "scripts").is_symlink() or path.is_symlink() or not path.is_file():
+        return "UNVERIFIED", "missing regular checker script"
+    marker = SUCCESS_MARKERS[script]
     try:
         proc = subprocess.run([sys.executable, str(path), str(root)],
                               capture_output=True, text=True, timeout=120)
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (OSError, subprocess.TimeoutExpired, UnicodeError) as exc:
         return "UNVERIFIED", f"could not run: {exc}"
-    first = (proc.stdout.strip().splitlines() or ["(no output)"])[0]
-    if proc.returncode == 0:
-        return "GO", first[:90]
-    return "NO-GO", first[:90]
+    lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+    if proc.returncode != 0:
+        details = lines or [line.strip() for line in proc.stderr.splitlines()
+                            if line.strip()]
+        return "NO-GO", (details[0] if details else f"exit={proc.returncode}")[:90]
+    receipt = _positive_receipt(proc.stdout, marker)
+    if receipt is None:
+        return "UNVERIFIED", f"required terminal receipt absent: {marker}"
+    return "GO", receipt[:90]
 
 
 def main() -> int:
