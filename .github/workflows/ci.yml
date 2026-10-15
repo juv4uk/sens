@@ -206,6 +206,10 @@ jobs:
           echo 'test_id=zig-migration-publish-live-route layer=transport verdict=source-only semantic_authority=SENS'
           python3 -m unittest discover -s tests -p test_check_migration_zig_only_path.py -v
           python3 scripts/check_migration_zig_only_path.py
+          # Same-stem .sens + readonly exact-bit view is a single guarded
+          # publication: reject wrong projection names and inode replacement.
+          echo 'test_id=zig-migration-same-stem-inode-rollback layer=transport verdict=filesystem-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_migration_publish_pair.py -v
           # Parallel Zig migration must reject duplicate files and forged worker receipts.
           # Synthetic workers only: never publish .sens or declare SENS semantic GO.
           echo 'test_id=zig-parallel-worker-report-failclosed layer=transport verdict=source-only semantic_authority=SENS'
