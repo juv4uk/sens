@@ -99,7 +99,7 @@ for file in "${files[@]}"; do
   # Українська лишається основною: німецька може стояти перед нею
   # у документації, англійська — після неї. Відсутні мови не вимагаються.
   de_line=$(first_language_heading_line "$file" "deutsch|german")
-  uk_section_line=$(first_language_heading_line "$file" "українська|ukrainian")
+  uk_section_line=$(first_language_heading_line "$file" "Українська|українська|УКРАЇНСЬКА|ukrainian")
   en_line=$(first_language_heading_line "$file" "english")
   uk_line=$(first_real_cyrillic_line "$file")
 
