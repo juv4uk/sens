@@ -49,6 +49,12 @@ class RustZigSensBoundaryTests(unittest.TestCase):
         self.assertIn("#5777", data["owner_rule"])
         self.assertIn("contacts", data)
         self.assertIn("bypasses", data)
+        self.assertIn("unresolved_bypasses", data)
+        self.assertEqual(
+            sorted(c["path"] for c in data["unresolved_bypasses"]),
+            sorted(c["path"] for c in data["contacts"]
+                   if c["kind"] in ("direct", "mixed")),
+        )
         self.assertIn("legend", data)
         for contact in data["contacts"]:
             self.assertIn("path", contact)
@@ -70,6 +76,10 @@ class RustZigSensBoundaryTests(unittest.TestCase):
         fresh_kinds = {c["path"]: c["kind"] for c in fresh["contacts"]}
         self.assertEqual(pub_kinds, fresh_kinds)
         self.assertEqual(sorted(published["bypasses"]), sorted(fresh["bypasses"]))
+        self.assertEqual(
+            sorted(published["unresolved_bypasses"], key=lambda c: c["path"]),
+            sorted(fresh["unresolved_bypasses"], key=lambda c: c["path"]),
+        )
         import hashlib
         for contact in fresh["contacts"]:
             live = (ROOT / contact["path"]).read_bytes()
@@ -141,9 +151,18 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             )
             self.assertEqual(report["contacts"][0]["kind"], "mixed")
             self.assertEqual(report["bypasses"], [])  # legacy direct-only field
+            self.assertEqual(
+                [(c["path"], c["kind"]) for c in report["unresolved_bypasses"]],
+                [("crates/demo/src/lib.rs", "mixed")],
+            )
+            self.assertEqual(
+                report["unresolved_bypasses"][0]["sha256"],
+                self.mod._sha(root, "crates/demo/src/lib.rs"),
+            )
             self.assertEqual(rc, 1, output)
             self.assertIn("BOUNDARY_BYPASS_PRESENT", output)
             self.assertIn("kind=mixed", output)
+            self.assertIn("sha256=", output)
             self.assertIn("crates/demo/src/lib.rs", output)
 
             # A real Zig transport reference with NO direct semantic source
@@ -153,7 +172,20 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             )
             self.assertEqual(report["contacts"][0]["kind"], "corridor")
             self.assertEqual(report["bypasses"], [])
+            self.assertEqual(report["unresolved_bypasses"], [])
             self.assertEqual(rc, 0, output)
+
+            # A real direct source is listed in BOTH compatible fields.
+            rc, report, output = verify(
+                "pub fn bypass() { let _ = eval::execute; }\n"
+            )
+            self.assertEqual(report["contacts"][0]["kind"], "direct")
+            self.assertEqual(report["bypasses"], ["crates/demo/src/lib.rs"])
+            self.assertEqual(
+                [(c["path"], c["kind"]) for c in report["unresolved_bypasses"]],
+                [("crates/demo/src/lib.rs", "direct")],
+            )
+            self.assertEqual(rc, 1, output)
 
 
 

@@ -761,8 +761,11 @@ def check_uk_surface_zig_only(
     declared = active(asset_path.read_text(encoding="utf-8"))
     if "pub(super) fn sens_zig_uk_bytes_copy(output: *mut u8, capacity: usize) -> isize;" not in declared:
         raise CorridorBlocked("UK_ZIG_ONLY missing Zig ABI FFI signature")
+    # Inspect ONLY uk_surface_bytes, not adjacent Zig asset helpers.
+    # A later islands_manifest_bytes() also checks "if copied != required";
+    # that check must not hide a deleted UK-specific byte-count guard.
     host = active(_route_between(
-        rust_corridor, "pub fn uk_surface_bytes(", "\nfn require_same_exact_words("
+        rust_corridor, "pub fn uk_surface_bytes(", "\n}\n"
     ))
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or "version()?;" not in host

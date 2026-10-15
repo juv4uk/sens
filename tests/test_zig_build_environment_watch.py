@@ -48,7 +48,7 @@ def check_embedded_asset_watches(build_source: str, zig_root_source: str) -> Non
     if marker < 0:
         raise ValueError("ZIG_CORRIDOR_STALE_ASSET layer=build missing=feature_switch")
     # A literal source inventory, not a language registry or semantic resolver.
-    assets = set(re.findall(r'@embedFile\\("([^"]+)"\\)', zig_root_source))
+    assets = set(re.findall(r'@embedFile\("([^"]+)"\)', zig_root_source))
     if not assets:
         raise ValueError("ZIG_CORRIDOR_STALE_ASSET layer=build missing=zig_root_assets")
     setup_lines = build_source[:marker].splitlines()
@@ -97,14 +97,14 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
 
         # An added Zig asset must require a new Cargo dependency; old watch
         # inventory cannot silently attest a newer Zig root module.
-        newer_root = root + '\\nconst new_asset = @embedFile("packaging/new-release-asset.bin");\\n'
+        newer_root = root + '\nconst new_asset = @embedFile("packaging/new-release-asset.bin");\n'
         with self.assertRaisesRegex(ValueError, "new-release-asset.bin"):
             check_embedded_asset_watches(source, newer_root)
 
         # Moving the declaration behind the feature return is not sufficient.
         watch = '    println!("cargo:rerun-if-changed=../../packaging/islands-manifest-v1.json");'
         late = source.replace(watch, '', 1).replace(
-            '    let root = PathBuf::from(', watch + '\\n    let root = PathBuf::from(', 1,
+            '    let root = PathBuf::from(', watch + '\n    let root = PathBuf::from(', 1,
         )
         with self.assertRaisesRegex(ValueError, "islands-manifest-v1.json"):
             check_embedded_asset_watches(late, root)

@@ -13,6 +13,8 @@ This scans the production Rust and classifies every Rust<->SENS contact:
   bypass    -- a Rust->SENS contact with NO corridor reference in the file.
 
 The map is a REPORT (not a semantic guard): it names remaining contacts.
+`bypasses` remains direct-only for v1 compatibility. `unresolved_bypasses`
+also reports mixed contacts with exact SHA-256 for release accounting.
 `--check` fails closed for both direct and mixed Rust semantic surfaces;
 a Zig token in the same file cannot erase a live direct Rust path.
 
@@ -63,6 +65,13 @@ def build_map(root: Path) -> dict:
                              "corridor": corridor, "direct_semantic": direct,
                              "filesystem": fs})
     bypasses = [c["path"] for c in contacts if c["kind"] == "direct"]
+    # Preserve the historical direct-only field for v1 consumers. A mixed
+    # Rust source is ALSO unresolved: mentioning Zig cannot erase eval::.
+    # Publish both classes explicitly with exact source hashes for release.
+    unresolved_bypasses = [
+        {"path": c["path"], "kind": c["kind"], "sha256": c["sha256"]}
+        for c in contacts if c["kind"] in ("direct", "mixed")
+    ]
     return {
         "schema": "sens-rust-zig-sens-boundary/v1",
         "owner_rule": "Rust<->SENS crosses ONLY the sterile Zig corridor (#5777/#5779)",
@@ -72,6 +81,7 @@ def build_map(root: Path) -> dict:
                    "filesystem": "reads .lisp/.sens directly"},
         "contacts": contacts,
         "bypasses": bypasses,
+        "unresolved_bypasses": unresolved_bypasses,
     }
 
 
@@ -96,15 +106,12 @@ def main() -> int:
     # schema for consumers, but never grant --check success to a mixed file:
     # a Zig transport reference alongside direct Rust SENS evaluation is
     # still an unresolved bypass. A comment-only Zig token cannot hide it.
-    unresolved = [
-        (contact["path"], contact["kind"])
-        for contact in data["contacts"]
-        if contact["kind"] in ("direct", "mixed")
-    ]
+    unresolved = data["unresolved_bypasses"]
     if ns.check and unresolved:
         print("BOUNDARY_BYPASS_PRESENT:", flush=True)
-        for path, kind in unresolved:
-            print(f" - {path} kind={kind}", flush=True)
+        for contact in unresolved:
+            print(f" - {contact['path']} kind={contact['kind']}"
+                  f" sha256={contact['sha256']}", flush=True)
         return 1
     return 0
 

@@ -136,14 +136,37 @@ def _write_reachable_nodes(root: ast.AST):
 
 
 
+def _is_named(node: ast.AST, name: str) -> bool:
+    return isinstance(node, ast.Name) and node.id == name
+
+
 def _is_zig_carry(node: ast.AST) -> bool:
-    """Match a real Zig bridge call, never a lookalike comment or string."""
+    """Only canonical Zig carry of the exact staged projection is evidence."""
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
         and node.func.attr == "carry_t5"
-        and isinstance(node.func.value, ast.Name)
-        and node.func.value.id == "zig_codec_bridge"
+        and _is_named(node.func.value, "zig_codec_bridge")
+        and len(node.args) == 2
+        and all(keyword.arg == "trusted_source_sha256" for keyword in node.keywords)
+        and len(node.keywords) <= 1
+        and _is_named(node.args[0], "zig_binary")
+        and _is_named(node.args[1], "projection")
+    )
+
+
+def _is_verified_packed(node: ast.AST) -> bool:
+    """The pre-publish verifier must check the SAME Zig-minted packed bytes."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "verify_t5"
+        and _is_named(node.func.value, "zig_codec_bridge")
+        and len(node.args) == 2
+        and _is_named(node.args[0], "zig_binary")
+        and _is_named(node.args[1], "packed")
+        and all(keyword.arg == "trusted_source_sha256" for keyword in node.keywords)
+        and len(node.keywords) <= 1
     )
 
 
@@ -240,12 +263,7 @@ def check_migration_driver_ast(source: str) -> list[str]:
             continue
         write_nodes = list(_write_reachable_nodes(node))
         verified = [
-            n for n in write_nodes
-            if isinstance(n, ast.Call)
-            and isinstance(n.func, ast.Attribute)
-            and n.func.attr == "verify_t5"
-            and isinstance(n.func.value, ast.Name)
-            and n.func.value.id == "zig_codec_bridge"
+            n for n in write_nodes if _is_verified_packed(n)
         ]
         staged = [
             n for n in write_nodes
@@ -259,8 +277,11 @@ def check_migration_driver_ast(source: str) -> list[str]:
             valid_flow = True
     if not valid_flow:
         problems.append(
-            "M5: --write staged.append() lacks a preceding write-reachable "
-            "Zig verify_t5() in the same per-file loop"
+            "M5: layer=transport test_id=migration-zig-verified-packed "
+            "--write staged.append() requires a preceding write-reachable "
+            "zig_codec_bridge.verify_t5(zig_binary, packed) in the same "
+            "per-file loop; repro=python3 -m unittest discover -s tests "
+            "-p test_check_migration_zig_only_path.py -v"
         )
     return problems
 
