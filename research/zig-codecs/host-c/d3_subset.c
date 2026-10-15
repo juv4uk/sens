@@ -230,6 +230,81 @@ static int one_bit_pair(const char *positive, const char *mutant) {
     printf("C_D3_SUBSET_MUTATION_PASS source=%s mutant=%s exact_changed_bits=1\n", positive, mutant);
     return 1;
 }
+
+/* The Zig corridor has two physically distinct T5 width profiles.
+ * Check their real C ABI exports before executing any SENS D3 fixtures.
+ * These are precomputed physical trit witnesses, NOT a C T5 encoder.
+ * No D10 semantic meaning or callability is claimed here.
+ */
+static int verify_zig_d10_coordinate_boundary(void) {
+    static const uint8_t d10_zero[] = {0x00, 0x00};
+    static const uint8_t d10_one[]  = {0x00, 0x01};
+    static const uint8_t d10_max[]  = {0x79, 0x79};
+    static const uint8_t d9[] = {0x51, 0x02};
+    static const uint8_t d1[] = {0xa1};
+    static const uint8_t d11[] = {0x00, 0x00, 0x50};
+    static const uint8_t invalid_byte[] = {0xff};
+    static const uint8_t invalid_tail[] = {0xf2};
+    const struct {
+        const uint8_t *wire;
+        size_t length;
+        const char *name;
+    } d10_cases[] = {
+        {d10_zero, sizeof d10_zero, "zero"},
+        {d10_one, sizeof d10_one, "one"},
+        {d10_max, sizeof d10_max, "max"}
+    };
+    uint8_t dst[6] = {0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a};
+    const uint8_t unchanged[] = {0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a};
+
+    for (size_t i = 0; i < sizeof d10_cases / sizeof d10_cases[0]; ++i) {
+        const uint8_t *wire = d10_cases[i].wire;
+        const size_t size = d10_cases[i].length;
+        /* Same exact physical bytes must be accepted as coordinates only. */
+        if (sens_zig_t5_validate_coordinates(wire, size) != SENS_ZIG_TRANSPORT_OK ||
+            sens_zig_t5_validate(wire, size) != SENS_ZIG_TRANSPORT_INVALID ||
+            sens_zig_t5_decode_be3(wire, size, dst, sizeof dst) != SENS_ZIG_TRANSPORT_INVALID ||
+            memcmp(dst, unchanged, sizeof dst) != 0) {
+            fprintf(stderr,
+                "C_ZIG_D10_BOUNDARY_FAIL layer=transport witness=%s "
+                "expected=coordinate_only actual=wrong_profile_or_modified_output\n",
+                d10_cases[i].name);
+            return 0;
+        }
+    }
+
+    /* Ordinary positive controls: old ABI must keep D1/D9 working. */
+    if (sens_zig_t5_validate(d1, sizeof d1) != SENS_ZIG_TRANSPORT_OK ||
+        sens_zig_t5_validate_coordinates(d1, sizeof d1) != SENS_ZIG_TRANSPORT_OK ||
+        sens_zig_t5_validate(d9, sizeof d9) != SENS_ZIG_TRANSPORT_OK ||
+        sens_zig_t5_validate_coordinates(d9, sizeof d9) != SENS_ZIG_TRANSPORT_OK) {
+        fputs("C_ZIG_D10_BOUNDARY_FAIL layer=transport witness=ordinary_d1_d9\n", stderr);
+        return 0;
+    }
+
+    /* D11 never enters either physical profile, regardless of all-zero bits. */
+    if (sens_zig_t5_validate_coordinates(d11, sizeof d11) != SENS_ZIG_TRANSPORT_INVALID ||
+        sens_zig_t5_validate_coordinates(invalid_byte, sizeof invalid_byte) != SENS_ZIG_TRANSPORT_INVALID ||
+        sens_zig_t5_validate_coordinates(invalid_tail, sizeof invalid_tail) != SENS_ZIG_TRANSPORT_INVALID ||
+        sens_zig_t5_validate_coordinates(d10_zero, 0) != SENS_ZIG_TRANSPORT_INVALID) {
+        fputs("C_ZIG_D10_BOUNDARY_FAIL layer=transport witness=d11_corrupt_empty\n", stderr);
+        return 0;
+    }
+
+    /* BE3 write ingress is ordinary <=D9, even for a valid D10 coordinate. */
+    const uint8_t d10_be3[] = {10, 0, 0};
+    if (sens_zig_t5_encode_be3(d10_be3, sizeof d10_be3, dst, sizeof dst) !=
+            SENS_ZIG_TRANSPORT_INVALID ||
+        memcmp(dst, unchanged, sizeof dst) != 0) {
+        fputs("C_ZIG_D10_BOUNDARY_FAIL layer=transport witness=d10_be3_egress\n", stderr);
+        return 0;
+    }
+    puts("C_ZIG_D10_COORDINATE_ONLY_PASS host=C abi=2 "
+         "d10_golden=3 ordinary_positive=2 negative=6 "
+         "d10_callable=NO semantic_authority=SENS");
+    return 1;
+}
+
 int main(int argc, char **argv) {
     static const char *const cases[][2] = {
         {"tests/semantic/retired-d3-cond-law.bits", "YES"},
@@ -243,6 +318,7 @@ int main(int argc, char **argv) {
     if (sens_zig_codec_abi_version() != SENS_ZIG_TRANSPORT_ABI_VERSION) {
         fputs("C_D3_SUBSET_FAIL layer=transport category=BAD_ABI_VERSION\n", stderr); return 2;
     }
+    if (!verify_zig_d10_coordinate_boundary()) return 1;
     for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
         if (!execute(cases[i][0], cases[i][1])) return 1;
     }
