@@ -17,8 +17,8 @@ GENERATED = ROOT / "crates/sens/src/d7_display_registry_generated.rs"
 
 
 def rust_glyph(value: str) -> str:
-    code = ord(value)
-    if code < 32 or code == 127:
+    code = ord(value) if len(value) == 1 else None
+    if code is not None and (code < 32 or code == 127):
         return '"\\u{' + f"{code:x}" + '}"'
     return json.dumps(value, ensure_ascii=False)
 
@@ -33,10 +33,14 @@ def render() -> str:
     table = doc.get("table")
     if len(rows) != 128 or not isinstance(table, list) or len(table) != 128:
         raise ValueError("D7 v2 requires exactly 128 rows")
-    for surface in ("ascii", "uk", "san"):
+    for surface in ("ascii", "uk", "san", "iast"):
         values = [row[surface] for row in table]
-        if len(set(values)) != 128 or any(len(value) != 1 for value in values):
-            raise ValueError(f"D7 {surface} is not bijective")
+        if len(set(values)) != 128 or any(not isinstance(value, str) or not value for value in values):
+            raise ValueError(f"D7 {surface} has duplicate/empty coordinates")
+        if surface != "iast" and any(len(value) != 1 for value in values):
+            raise ValueError(f"D7 {surface} source codec must remain one-scalar")
+        if surface == "iast" and any(any("\u0900" <= ch <= "\u097f" for ch in value) for value in values):
+            raise ValueError("D7 IAST display contains Devanagari")
     parts = [
         "// GENERATED — DO NOT EDIT BY HAND.",
         "// D7 owner: knowledge/d7-keyboard-v2-ratified.json (128/128).",
@@ -58,11 +62,11 @@ def render() -> str:
         bits = f"{index:07b}"
         if entry["bits"] != bits or row.bits != bits or row.lisp is not None:
             raise ValueError(f"D7:{bits} coordinate/callability drift")
-        visible = (entry["uk"], entry["san"], entry["ascii"])
+        visible = (entry["uk"], entry["iast"], entry["ascii"])
         expected = (None, None, None) if index < 32 or index == 127 else visible
         if (row.uk, row.san, row.en) != expected:
             raise ValueError(f"D7:{bits} domain table drift")
-        uk, san, en = (rust_glyph(entry[key]) for key in ("uk", "san", "ascii"))
+        uk, san, en = (rust_glyph(entry[key]) for key in ("uk", "iast", "ascii"))
         parts.append(
             f"    D7DisplayRow {{ bits: 0b{bits}, uk: Some({uk}), sa: Some({san}), "
             f"en: Some({en}), en_ipa: None }},"
