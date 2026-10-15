@@ -303,6 +303,33 @@ pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+// Mechanical source bytes, not a SENS code or a semantic admission decision.
+fn repl_prerequisite_bytes(
+    copy: unsafe extern "C" fn(*mut u8, usize) -> isize, label: &str,
+) -> Result<Vec<u8>, String> {
+    version()?;
+    let n = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+    if n <= 0 { return Err(format!("{label}: Zig source length {n}")); }
+    let len = usize::try_from(n).map_err(|_| format!("{label}: overflow"))?;
+    if len > 8 * 1024 * 1024 { return Err(format!("{label}: host byte bound")); }
+    let mut result = vec![0u8; len];
+    let copied = unsafe { copy(result.as_mut_ptr(), len) };
+    if copied != n { return Err(format!("{label}: exact Zig copy rejected {copied}")); }
+    Ok(result)
+}
+
+pub fn repl_persistent_vector_source_bytes() -> Result<Vec<u8>, String> {
+    repl_prerequisite_bytes(asset_ffi::sens_zig_repl_persistent_vector_bytes_copy, "ZIG_REPL_PERSISTENT_VECTOR")
+}
+
+pub fn repl_time_source_bytes() -> Result<Vec<u8>, String> {
+    repl_prerequisite_bytes(asset_ffi::sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")
+}
+
+pub fn repl_epistemic_source_bytes() -> Result<Vec<u8>, String> {
+    repl_prerequisite_bytes(asset_ffi::sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],

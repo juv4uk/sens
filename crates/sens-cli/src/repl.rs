@@ -15,14 +15,25 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
-const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    (
-        "persistent-vector.lisp",
-        include_str!("../../../lib/persistent-vector.lisp"),
-    ),
-    ("time.lisp", include_str!("../../../lib/time.lisp")),
-    ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
-];
+// No Rust include_str! of SENS project source. Zig owns byte transport.
+fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        Ok(vec![
+            ("persistent-vector.lisp", String::from_utf8(super::zig_transport::repl_persistent_vector_source_bytes()?)
+                .map_err(|e| format!("ZIG_REPL_PERSISTENT_VECTOR UTF-8: {e}"))?),
+            ("time.lisp", String::from_utf8(super::zig_transport::repl_time_source_bytes()?)
+                .map_err(|e| format!("ZIG_REPL_TIME UTF-8: {e}"))?),
+            ("epistemic.lisp", String::from_utf8(super::zig_transport::repl_epistemic_source_bytes()?)
+                .map_err(|e| format!("ZIG_REPL_EPISTEMIC UTF-8: {e}"))?),
+        ])
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: REPL prerequisites require Zig transport".into())
+    }
+}
+
 // The persistent map is a separate host-neutral root Zig byte asset.
 fn persistent_map_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -204,12 +215,13 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         let forward_source = forward_surface_source()?;
         let knowledge_source = knowledge_surface_source()?;
         let persistent_map_source = persistent_map_surface_source()?;
+        let prerequisite_sources = surface_prerequisite_sources()?;
         let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
             .chain(std::iter::once(("reason.lisp", reason_source.as_str())))
             .chain(std::iter::once(("forward.lisp", forward_source.as_str())))
             .chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))
             .chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))
-            .chain(SURFACE_PREREQUISITES.iter().copied());
+            .chain(prerequisite_sources.iter().map(|(name, source)| (*name, source.as_str())));
         for (name, source) in prerequisites {
             (if name == "time.lisp" {
                 sens::load_time_library(&mut session)

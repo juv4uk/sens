@@ -280,3 +280,64 @@ test "F6 persistent-map carrier: exact Zig bytes and unchanged short buffer" {
         sens_zig_persistent_map_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, persistent_map_asset[0..persistent_map_asset.len], &output);
 }
+
+// Exact REPL prerequisite bytes. Zig copies; SENS decides semantics.
+
+const repl_persistent_vector_asset = @embedFile("lib/persistent-vector.lisp");
+pub export fn sens_zig_repl_persistent_vector_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_persistent_vector_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_persistent_vector_asset.len);
+    if (capacity < repl_persistent_vector_asset.len) return -2;
+    @memcpy(dst[0..repl_persistent_vector_asset.len], repl_persistent_vector_asset[0..repl_persistent_vector_asset.len]);
+    return @intCast(repl_persistent_vector_asset.len);
+}
+test "REPL persistent_vector exact bytes and untouched short buffer" {
+    const length = sens_zig_repl_persistent_vector_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(repl_persistent_vector_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_persistent_vector_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [repl_persistent_vector_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_repl_persistent_vector_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, repl_persistent_vector_asset[0..repl_persistent_vector_asset.len], &full);
+}
+
+
+const repl_time_asset = @embedFile("lib/time.lisp");
+pub export fn sens_zig_repl_time_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_time_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_time_asset.len);
+    if (capacity < repl_time_asset.len) return -2;
+    @memcpy(dst[0..repl_time_asset.len], repl_time_asset[0..repl_time_asset.len]);
+    return @intCast(repl_time_asset.len);
+}
+test "REPL time exact bytes and untouched short buffer" {
+    const length = sens_zig_repl_time_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(repl_time_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_time_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [repl_time_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_repl_time_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, repl_time_asset[0..repl_time_asset.len], &full);
+}
+
+
+const repl_epistemic_asset = @embedFile("lib/epistemic.lisp");
+pub export fn sens_zig_repl_epistemic_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_epistemic_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_epistemic_asset.len);
+    if (capacity < repl_epistemic_asset.len) return -2;
+    @memcpy(dst[0..repl_epistemic_asset.len], repl_epistemic_asset[0..repl_epistemic_asset.len]);
+    return @intCast(repl_epistemic_asset.len);
+}
+test "REPL epistemic exact bytes and untouched short buffer" {
+    const length = sens_zig_repl_epistemic_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(repl_epistemic_asset.len)), length);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_epistemic_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [repl_epistemic_asset.len]u8 = undefined;
+    try std.testing.expectEqual(length, sens_zig_repl_epistemic_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, repl_epistemic_asset[0..repl_epistemic_asset.len], &full);
+}
