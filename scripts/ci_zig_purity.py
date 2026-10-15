@@ -69,13 +69,15 @@ def self_test():
     for bad in ("Sens8", "sid_8", "SID-8", "Function8", "W8",
                 "KernelSid8", "ContaminatedSens8Alias", "Function8Old",
                 "my-lisp", "core1", "flat dispatch"):
-        assert scan(path, bad), f"undetected retired identifier: {bad!r}"
+        if not scan(path, bad):
+            raise AssertionError(f"undetected retired identifier: {bad!r}")
     for good in ('const std = @import("std");',
                  'const evaluator = @import("../../compiler/eval.zig");',
                  "D8:10000000 differs from D9:010000000",
                  "// historical Rust comparison using lib/core.lisp",
                  "// physical byte parity, SENS exact-domain semantic tests"):
-        assert not scan(path, good), f"unexpected role restriction: {good!r}"
+        if scan(path, good):
+            raise AssertionError(f"unexpected role restriction: {good!r}")
     # A tracked Zig symlink must never scan external/untracked target bytes.
     with TemporaryDirectory(prefix="sens-zig-purity-") as temp:
         root = Path(temp)
