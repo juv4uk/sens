@@ -37,6 +37,27 @@ spec.loader.exec_module(mod)
 
 
 class ApprovedT5TransactionTests(unittest.TestCase):
+    def test_current_domain_map_api_is_three_values_and_no_sid8_dispatch(self):
+        """CI_GLUE_NO_SEMANTICS: API alignment, not a callable SENS verdict."""
+        maps = mod.load_engine_maps(ROOT)
+        self.assertEqual(len(maps), 3, "CURRENT_MAP_API_RED expected=my,upper,text7")
+        my, upper, text7 = maps
+        self.assertTrue(my and upper, "CURRENT_MAP_API_RED missing ratified surfaces")
+        self.assertIn("keyboard-v2", text7, "CURRENT_MAP_API_RED D7 v2 missing")
+        live = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            "my, upper, _historical_bridge_provenance = engine.build_three_pass_maps(",
+            live, "CURRENT_MAP_API_RED third return must remain nonauthoritative",
+        )
+        self.assertIn(
+            "engine.Resolver(my, upper, d9_residents=d9_residents)",
+            live, "CURRENT_MAP_API_RED D9 width argument lost",
+        )
+        self.assertNotIn(
+            "engine.Resolver(my, upper, admitted_d8",
+            live, "CURRENT_MAP_API_RED retired D8 positional bridge reintroduced",
+        )
+
     def test_true_rust_d2_rejects_t5_transport_valid_invalid_program(self):
         words = ["01"]  # D2 CLOSE alone is transport-valid, grammar-invalid.
         physical = mod.engine.encode_projection("01\n")
