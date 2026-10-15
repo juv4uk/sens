@@ -1,7 +1,6 @@
 use sens::syntax::Expr;
 use sens::{parse, ExprKind};
 
-const UK_API_DOCS: &str = include_str!("../../../../lib/surface/uk-docs.lisp");
 const HUMAN_SURFACES: [&str; 3] = ["ук", "en", "sa"];
 const FIXED_SURFACES: [&str; 5] = ["en", "ук", "укр", "sa", "sym"];
 
@@ -148,9 +147,23 @@ fn expr_byte_sid(expr: &Expr) -> Option<String> {
     }
 }
 
+fn uk_docs_source_zig_only() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = crate::zig_transport::uk_docs_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|err| format!("ZIG_UK_DOCS_CARRIER invalid UTF-8: {err}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: uk-docs requires Zig; no Rust source fallback".into())
+    }
+}
+
 fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
-    let program = parse(UK_API_DOCS)
-        .map_err(|error| format!("не вдалося прочитати uk-docs.wsm: {}", error.render(UK_API_DOCS)))?;
+    let source = uk_docs_source_zig_only()?;
+    let program = parse(&source)
+        .map_err(|error| format!("не вдалося прочитати uk-docs.wsm: {}", error.render(&source)))?;
     let root = program
         .first()
         .and_then(expr_list)

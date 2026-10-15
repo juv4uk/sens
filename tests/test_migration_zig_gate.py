@@ -259,6 +259,23 @@ class ZigBridgeReceiptEvidenceTests(unittest.TestCase):
                 self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
                 self.assertIn("contradictory Zig bridge receipt", result["detail"])
 
+    def test_stderr_bridge_failure_cannot_be_hidden_by_stdout_pass(self):
+        # A genuine final stdout receipt and zero exit are insufficient when
+        # this same subprocess announces explicit transport failure on stderr.
+        valid = self.good_line() + "\n"
+        clean = self.simulated_step(valid, stderr="ordinary compiler notice\n")
+        self.assertEqual((clean["status"], clean["exit"]), ("PASS", 0))
+        for marker in ("ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"):
+            with self.subTest(marker=marker):
+                result = self.simulated_step(
+                    valid,
+                    stderr=marker + " test_id=zig-migration-bridge-t5-exact-physical\n",
+                    rc=0,
+                )
+                self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
+                self.assertIn("contradictory Zig bridge stderr status=" + marker,
+                              result["detail"])
+
     def test_empty_stdout_exit_zero_is_not_physical_pass(self):
         result = self.simulated_step("")
         self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))

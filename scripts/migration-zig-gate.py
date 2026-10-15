@@ -67,6 +67,15 @@ BRIDGE_RECEIPT_EXACT = {
 BRIDGE_RECEIPT_MINIMUM = {"width_goldens": 9, "negative_gates": 14}
 
 
+def _bridge_failure_marker(stream: str) -> str | None:
+    """Identify an explicit failure without interpreting other diagnostic text."""
+    for line in stream.splitlines():
+        fields = line.strip().split(maxsplit=1)
+        if fields and fields[0] in {"ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"}:
+            return fields[0]
+    return None
+
+
 def verify_zig_bridge_receipt(stdout: str) -> dict[str, str]:
     """Require informative physical proof, never infer it from exit=0.
 
@@ -75,10 +84,9 @@ def verify_zig_bridge_receipt(stdout: str) -> dict[str, str]:
     """
     lines = [line.strip() for line in stdout.splitlines() if line.strip()]
     # A later PASS cannot override an explicit failure from the same process.
-    for line in lines:
-        status = line.split(maxsplit=1)[0]
-        if status in {"ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"}:
-            raise ValueError(f"contradictory Zig bridge receipt status={status}")
+    failed = _bridge_failure_marker(stdout)
+    if failed is not None:
+        raise ValueError(f"contradictory Zig bridge receipt status={failed}")
     markers = [line for line in lines if line.startswith("ZIG_BRIDGE_PASS")]
     if len(markers) != 1 or not lines or markers[0] != lines[-1]:
         raise ValueError("expected exactly one final ZIG_BRIDGE_PASS record")
@@ -119,6 +127,10 @@ def zig_bridge_receipt_self_test() -> None:
               "zig_binary_sha256": "a" * 64}
     line = "ZIG_BRIDGE_PASS " + " ".join(f"{k}={v}" for k, v in values.items())
     assert verify_zig_bridge_receipt(line)["semantic_authority"] == "SENS"
+    # The central --self-test also proves stderr failure markers are recognized.
+    assert _bridge_failure_marker("ordinary compiler notice\n") is None
+    for marker in ("ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"):
+        assert _bridge_failure_marker(marker + " test_id=transport\n") == marker
     for mutant in (
         "",
         "ZIG_BRIDGE_PASS",
@@ -170,6 +182,13 @@ def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
     tail = (completed.stdout or "")[-800:] + (completed.stderr or "")[-400:]
     if name == "test_zig_codec_bridge" and status == "PASS":
         try:
+            # The physical bridge's stderr is part of the same process
+            # evidence. A zero exit + stdout PASS cannot erase its failure.
+            stderr_failed = _bridge_failure_marker(completed.stderr or "")
+            if stderr_failed is not None:
+                raise ValueError(
+                    f"contradictory Zig bridge stderr status={stderr_failed}"
+                )
             verify_zig_bridge_receipt(completed.stdout or "")
         except ValueError as error:
             # A successful process with no exact physical evidence is RED.

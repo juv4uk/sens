@@ -68,7 +68,7 @@ jobs:
         with:
           name: release-go-gate
           path: ${{ runner.temp }}/release-go-gate.json
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Release version alignment (gate #1 mechanical)
         run: |

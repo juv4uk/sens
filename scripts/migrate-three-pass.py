@@ -360,7 +360,7 @@ def parse_semantic_rows(path: Path):
     return rows
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
-                          semantic_registry: Path, necessary_forms: Path, admitted_d8=None):
+                          semantic_registry: Path, necessary_forms: Path):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     # Джерело міграції — тільки ратифіковані координати й перевірена
@@ -390,10 +390,6 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
             by_role=residents.get(normalize_role(name))
             if by_role is not None:
                 candidates.add(by_role)
-        # NEW REALITY: D8 is owner-ratified. An 8-bit registered name resolves to
-        # its current D8 coordinate when that coordinate is admitted.
-        if not candidates and byte in admitted_d8:
-            candidates.add((byte, "D8"))
         unique=next(iter(candidates)) if len(candidates)==1 else None
         for namespace,name in surfaces:
             # Uppercase historical names are reserved for pass 3.
@@ -445,8 +441,51 @@ def _keyboard_v2(projection_path: Path):
     return {"keyboard-v2": indexes}
 
 
+_IAST_CONS = {
+ "k":"क","kh":"ख","g":"ग","gh":"घ","ṅ":"ङ","c":"च","ch":"छ","j":"ज","jh":"झ","ñ":"ञ",
+ "ṭ":"ट","ṭh":"ठ","ḍ":"ड","ḍh":"ढ","ṇ":"ण","t":"त","th":"थ","d":"द","dh":"ध","n":"न",
+ "p":"प","ph":"फ","b":"ब","bh":"भ","m":"म","y":"य","r":"र","l":"ल","v":"व",
+ "ś":"श","ṣ":"ष","s":"स","h":"ह","ḷ":"ळ",
+}
+_IAST_VOW = {"a":"अ","ā":"आ","i":"इ","ī":"ई","u":"उ","ū":"ऊ","ṛ":"ऋ","ṝ":"ॠ",
+             "e":"ए","ai":"ऐ","o":"ओ","au":"औ"}
+_IAST_MATRA = {"a":"","ā":"ा","i":"ि","ī":"ी","u":"ु","ū":"ू","ṛ":"ृ","ṝ":"ॄ",
+               "e":"े","ai":"ै","o":"ो","au":"ौ"}
+_IAST_KEYS = sorted(list(_IAST_CONS)+list(_IAST_VOW)+list(_IAST_MATRA), key=len, reverse=True)
+
+
+def iast_to_devanagari(s: str):
+    """IAST (Sanskrit Latin transliteration) -> Devanagari. None if not IAST."""
+    out=[]; i=0; n=len(s); pending=False
+    while i<n:
+        ch=s[i]
+        if ch==" ": out.append(" "); pending=False; i+=1; continue
+        if ch=="ṃ": out.append("ं"); i+=1; continue
+        if ch=="ḥ": out.append("ः"); i+=1; continue
+        m=next((k for k in _IAST_KEYS if s.startswith(k,i)), None)
+        if m is None: return None
+        if m in _IAST_CONS:
+            if pending: out.append("्")
+            out.append(_IAST_CONS[m]); pending=True
+        elif m in _IAST_VOW:
+            if pending: out.append(_IAST_MATRA[m]); pending=False
+            else: out.append(_IAST_VOW[m])
+        else:
+            if pending: out.append(_IAST_MATRA[m]); pending=False
+            else: out.append(_IAST_VOW.get(m,""))
+        i+=len(m)
+    if pending: out.append("्")
+    return "".join(out)
+
+
 def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
     """Choose a view only if the identifier contains one unambiguous script."""
+    # IAST (Sanskrit Latin transliteration) uses ASCII letters too, so a purely
+    # ASCII identifier stays en; only an IAST-SPECIFIC letter (ā ū ṇ ṣ ...) marks
+    # the whole identifier as the san view.
+    _IAST_SPECIFIC = "āīūṛṝḷḹṃḥṅñṭḍṇśṣ"
+    if spelling and any(ch in _IAST_SPECIFIC for ch in spelling) and iast_to_devanagari(spelling) is not None:
+        return "san"
     scripts = set()
     for ch in spelling:
         cp = ord(ch)
@@ -457,7 +496,10 @@ def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
         elif 0x0900 <= cp <= 0x097F:
             scripts.add("san")
         elif ch.isalpha():
-            raise MigrationError(f"D7 keyboard/v2 unsupported letter {ch!r}", token)
+            if iast_to_devanagari(ch) is not None:
+                scripts.add("san")
+            else:
+                raise MigrationError(f"D7 keyboard/v2 unsupported letter {ch!r}", token)
     if len(scripts) > 1:
         raise MigrationError("D7 keyboard/v2 mixed-script identifier is ambiguous", token)
     return next(iter(scripts), "en")
@@ -478,6 +520,12 @@ def text7_encode(spelling: str,candidates,tok: Tok):
         view = _keyboard_v2_mode(spelling, tok)
         indexes = candidates["keyboard-v2"]
         chosen = indexes[view]
+        # The san view is Devanagari; sources spell san in IAST Latin. Transliterate
+        # (reversible) when the raw spelling is not directly on the keyboard.
+        if view == "san" and any(chosen.get(g) is None for g in spelling):
+            deva = iast_to_devanagari(spelling)
+            if deva is not None and all(chosen.get(g) is not None for g in deva):
+                spelling = deva
         result = []
         for glyph in spelling:
             bits = chosen.get(glyph)
@@ -491,10 +539,9 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
-    def __init__(self,my,upper,admitted_d8=None,d9_residents=None):
+    def __init__(self,my,upper,d9_residents=None):
         self.my=my
         self.upper=upper
-        self.admitted_d8=set(admitted_d8 or ())
         self.d9_residents=set(d9_residents or ())
         self.global_binding_words={}
         self.counts={"already-exact":0,"pass2-my-lisp":0,
@@ -551,14 +598,10 @@ class Resolver:
             return [t],"already-exact"
         # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired.
-            # An eight-bit head is NOT resolved through a historical registry and
-            # there is no source-era map. It is executable only as a CURRENT
-            # ratified D8 coordinate; otherwise it needs a current named D3-D6
+            # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired and
+            # there is NO ratified D8 (knowledge/d8-*.json is SID8/Sens8). An
+            # eight-bit head is not executable; it needs a current named D3-D6
             # resident, else it fails closed as a retired SID8-era head.
-            if t in self.admitted_d8:
-                self.counts["already-exact"]+=1
-                return [t],"already-exact"
             raise MigrationError(
                 f"retired SID8-era head {t}: no current ratified D8 coordinate and "
                 "no current named D3-D6 resident",
@@ -574,6 +617,12 @@ class Resolver:
                     f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
                     tok,
                 )
+            # An admitted D9 resident IS the ratified callable route (the earlier
+            # width-9 check already accepted it); only a NON-resident 9-bit head
+            # lacks a proven mechanism. Keep the two checks consistent.
+            if t in self.d9_residents:
+                self.counts["already-exact"]+=1
+                return [t],"already-exact"
             raise MigrationError(
                 f"D9 {t}: відсутній доказ допущеного механізму виклику",
                 tok,
@@ -1064,11 +1113,12 @@ def main():
         args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
-    admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
+    # NOTE: knowledge/d8-*.json is SID8/Sens8, NOT a ratified D8. It is never
+    # wired as a domain; an eight-bit head is not executable.
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
-        args.semantic_registry, args.necessary_forms, admitted_d8
+        args.semantic_registry, args.necessary_forms
     )
     text7 = build_text7(data, args.text7)
     rows = []
@@ -1106,7 +1156,7 @@ def main():
         rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(my, upper, admitted_d8, d9_residents)
+        resolver = Resolver(my, upper, d9_residents)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")

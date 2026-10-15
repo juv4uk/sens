@@ -70,6 +70,10 @@ def validate_manifest(manifest):
 
 
 def check_report(record):
+    # JSON scalars and arrays are legal JSON, not diagnostic objects.
+    # Report an informative failure rather than raising AttributeError.
+    if not isinstance(record, dict):
+        return ["invalid:record_type expected=object"]
     errors = []
     for key in FIELDS:
         if key not in record or record[key] in ("", None):
@@ -467,6 +471,11 @@ def self_test():
         "observed_at": now().isoformat(), "reproduce": "sens fixture.sens",
         "stamp": "REGRESSION",
     }
+    # Existing automatic ci.yml runs self-test: hostile JSON shapes must
+    # generate informative diagnostics, never unchecked AttributeError.
+    for malformed in ([], None, 17, "ok"):
+        if check_report(malformed) != ["invalid:record_type expected=object"]:
+            raise RuntimeError("non-object diagnostic record accepted or poorly reported")
     if check_report(record):
         raise RuntimeError("valid mechanical report rejected")
     for field in FIELDS:
