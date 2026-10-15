@@ -414,3 +414,33 @@ test "ABI v2 F3C return codes remain mechanical and never clobber" {
             shared[0..].ptr, shared.len));
     try std.testing.expectEqualSlices(u8, &t5_quote, shared[0..t5_quote.len]);
 }
+
+
+test "ABI v2 D7 preserves every seven-bit coordinate without a semantic registry" {
+    // D7 v2 owns 128 EXACT seven-bit identities.  A leading zero is not
+    // removable, and transport cannot interpret the payload as a number.
+    // This is a native Zig physical witness, not 128 semantic admissions.
+    for (0..128) |coordinate| {
+        const be3 = [_]u8{ 7, 0, @intCast(coordinate) };
+        var carrier: [2]u8 = .{0xa5} ** 2;
+        try std.testing.expectEqual(@as(isize, 2),
+            sens_zig_t5_encode_be3(&be3, be3.len, &carrier, carrier.len));
+        try std.testing.expectEqual(@as(c_int, 0),
+            sens_zig_t5_validate(&carrier, carrier.len));
+
+        var restored: [3]u8 = .{0x5a} ** 3;
+        try std.testing.expectEqual(@as(isize, be3.len),
+            sens_zig_t5_decode_be3(&carrier, carrier.len,
+                &restored, restored.len));
+        try std.testing.expectEqualSlices(u8, &be3, &restored);
+    }
+
+    // Two extra bytes would accidentally allow a value outside D7; the
+    // physical corridor must reject it without changing the output buffer.
+    const over_width = [_]u8{ 7, 0, 128 };
+    var untouched: [2]u8 = .{0x6d} ** 2;
+    try std.testing.expectEqual(@as(isize, -1),
+        sens_zig_t5_encode_be3(&over_width, over_width.len,
+            &untouched, untouched.len));
+    try std.testing.expectEqualSlices(u8, &.{ 0x6d, 0x6d }, &untouched);
+}
