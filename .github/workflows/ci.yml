@@ -1442,7 +1442,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CARGO_TARGET_DIR="$PWD/target" cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release
+          CARGO_TARGET_DIR="$PWD/target" cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release --bins
+          python3 -m unittest discover -s tests -p test_bench_math_sens_vs_rust.py -v
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
             --json "$RUNNER_TEMP/math-bench.json"
 

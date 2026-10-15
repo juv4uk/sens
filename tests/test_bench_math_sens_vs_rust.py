@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import tempfile
+from unittest import mock
 import sys
 import unittest
 from pathlib import Path
@@ -49,6 +52,42 @@ class MathBenchTests(unittest.TestCase):
         self.assertEqual(sens["status"], "UNVERIFIED")
         self.assertNotIn("median_s", rust)   # no fabricated number
 
+
+    def test_research_generator_is_never_a_paired_timing_binary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            generator = root / "target/release/core-math-demand-rust"
+            generator.parent.mkdir(parents=True)
+            generator.write_bytes(b"research-generator-not-a-benchmark")
+            result = self.m.measure_rust(root, 10, 2)
+            self.assertEqual(result["status"], "UNVERIFIED")
+            self.assertNotIn("median_s", result)
+
+    def test_paired_rust_receipt_accepts_match_and_blocks_mutants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            binary = root / "target/release/core-math-demand-rust-paired"
+            binary.parent.mkdir(parents=True)
+            binary.write_bytes(b"local-stub-for-receipt-validator")
+            checksum, ops = self.m.workload_python(17)
+            receipt = {"schema": "sens-math-q-rust-side/v1",
+                       "corpus": self.m.CORPUS, "iters": 17, "reps": 3,
+                       "ops": ops, "checksum": str(checksum), "median_s": 0.005}
+            with mock.patch.object(self.m, "_run",
+                                   return_value=(True, json.dumps(receipt))):
+                result = self.m.measure_rust(root, 17, 3)
+            self.assertEqual(result["status"], "MEASURED")
+            self.assertEqual(result["ops"], 51)
+            self.assertEqual(result["checksum"], str(checksum))
+            for mutant in ({"checksum": str(checksum + 1)}, {"iters": 16},
+                           {"median_s": 0.0},
+                           {"corpus": list(reversed(self.m.CORPUS))}):
+                changed = dict(receipt, **mutant)
+                with mock.patch.object(self.m, "_run",
+                                       return_value=(True, json.dumps(changed))):
+                    result = self.m.measure_rust(root, 17, 3)
+                self.assertEqual(result["status"], "ERROR", mutant)
+                self.assertNotIn("median_s", result)
 
 if __name__ == "__main__":
     unittest.main()

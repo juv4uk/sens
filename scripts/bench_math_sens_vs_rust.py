@@ -115,16 +115,52 @@ def measure_python(iters: int, reps: int) -> dict:
                     "binary and not the SENS evaluator"}
 
 
-def measure_rust(root: Path, iters: int) -> dict:
-    for cand in ("target/release/core-math-demand-rust",
-                 "target/debug/core-math-demand-rust"):
-        if (root / cand).is_file():
-            ok, out = _run([str(root / cand)], root)
-            return {"side": "rust", "status": "MEASURED" if ok else "ERROR",
-                    "binary": cand, "output": out}
+def measure_rust(root: Path, iters: int, reps: int = 7) -> dict:
+    """Timed Rust Q reference; the existing research generator is NOT a bench."""
+    for cand in ("target/release/core-math-demand-rust-paired",
+                 "target/debug/core-math-demand-rust-paired"):
+        binary = root / cand
+        if not binary.is_file():
+            continue
+        ok, out = _run([str(binary), "--iters", str(iters),
+                        "--reps", str(reps)], root)
+        if not ok:
+            return {"side": "rust", "status": "ERROR", "binary": cand,
+                    "note": f"Rust paired runner failed: {out}"}
+        try:
+            receipt = json.loads(out)
+            if not isinstance(receipt, dict):
+                raise ValueError("receipt must be a JSON object")
+            if receipt.get("schema") != "sens-math-q-rust-side/v1":
+                raise ValueError("unknown Rust benchmark schema")
+            if receipt.get("corpus") != CORPUS:
+                raise ValueError("Rust corpus differs from independent Python reference")
+            if type(receipt.get("iters")) is not int or receipt["iters"] != iters:
+                raise ValueError("Rust iteration count mismatch")
+            if type(receipt.get("reps")) is not int or receipt["reps"] != reps:
+                raise ValueError("Rust repetition count mismatch")
+            if type(receipt.get("ops")) is not int or receipt["ops"] != 3 * iters:
+                raise ValueError("Rust operation count mismatch")
+            expected_checksum, _ = workload_python(iters)
+            if receipt.get("checksum") != str(expected_checksum):
+                raise ValueError("Rust checksum mismatches independent exact-Q reference")
+            seconds = receipt.get("median_s")
+            if (type(seconds) not in (float, int) or
+                    not math.isfinite(seconds) or seconds <= 0):
+                raise ValueError("Rust median_s must be a positive finite number")
+        except (ValueError, TypeError) as exc:
+            return {"side": "rust", "status": "ERROR", "binary": cand,
+                    "note": f"Invalid Rust paired receipt: {exc}"}
+        import hashlib
+        return {"side": "rust", "status": "MEASURED", "binary": cand,
+                "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+                "iters": iters, "reps": reps, "ops": receipt["ops"],
+                "checksum": receipt["checksum"], "median_s": seconds,
+                "note": "external Rust exact-Q reference; NOT native SENS admission"}
     return {"side": "rust", "status": "UNVERIFIED",
-            "note": "build benchmarks/core-math-demand-rust first "
-                    "(cargo build -p core-math-demand-rust --release)"}
+            "note": "build Rust paired runner via CARGO_TARGET_DIR=\"$PWD/target\" "
+                    "cargo build --manifest-path "
+                    "benchmarks/core-math-demand-rust/Cargo.toml --release --bins"}
 
 
 def measure_sens(root: Path, iters: int) -> dict:
@@ -149,9 +185,11 @@ def main() -> int:
     parser.add_argument("--require-all", action="store_true")
     ns = parser.parse_args()
     root = Path(ns.root).resolve()
+    if ns.iters <= 0 or ns.reps <= 0:
+        parser.error("--iters and --reps must be positive")
 
     rows = [measure_python(ns.iters, ns.reps),
-            measure_rust(root, ns.iters),
+            measure_rust(root, ns.iters, ns.reps),
             measure_sens(root, ns.iters)]
 
     print("MATH BENCHMARK: SENS vs Rust (exact rationals, same workload)")
@@ -175,6 +213,9 @@ def main() -> int:
             "corpus": CORPUS, "iters": ns.iters, "reps": ns.reps, "rows": rows,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    if any(r["status"] == "ERROR" for r in rows):
+        print("MATH_BENCH_INVALID_RECEIPT (a measured side failed verification)")
+        return 1
     if ns.require_all and unver:
         print("MATH_BENCH_INCOMPLETE (some side UNVERIFIED)")
         return 1
