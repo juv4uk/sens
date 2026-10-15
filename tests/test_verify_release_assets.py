@@ -224,5 +224,34 @@ class ReleaseVersionParityTest(unittest.TestCase):
         self.assertIn(f"scripts/release.lisp {version}", release_script)
         self.assertIn(f"Потрібна одна версія: {version}", release_script)
 
+class ReleaseWebDemoLinkTests(unittest.TestCase):
+    """CI_GLUE_NO_SEMANTICS: stable README link across asset renames."""
+
+    def test_readme_latest_page_survives_web_asset_rename(self):
+        import re
+
+        root = Path(__file__).resolve().parents[1]
+        readme = (root / "README.md").read_text(encoding="utf-8")
+        stable = "https://github.com/juv4uk/sens/releases/latest"
+        stale = stable + "/download/my-lisp-cli-web.html"
+
+        def verify_link(content):
+            match = re.search(
+                r'<a href="([^"]+)"><strong>▶ Завантажити вебдемо SENS</strong></a>',
+                content,
+            )
+            self.assertIsNotNone(match, "RELEASE_BLOCKED: web-demo CTA missing")
+            self.assertEqual(
+                match.group(1), stable,
+                "RELEASE_BLOCKED: demo must link to the stable release page",
+            )
+
+        verify_link(readme)
+        mutated = readme.replace(f'href="{stable}"', f'href="{stale}"', 1)
+        self.assertNotEqual(mutated, readme)
+        with self.assertRaises(AssertionError):
+            verify_link(mutated)
+
+
 if __name__ == "__main__":
     unittest.main()
