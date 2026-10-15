@@ -56,16 +56,33 @@ done
 total=${#FILES[@]}
 if (( total == 0 )); then echo "no .lisp sources under: ${PATHS[*]}" >&2; exit 2; fi
 
-# One source may not reach two Zig workers or race a new .sens output.
+# A spelling is not a filesystem identity: .. and symlinks can refer to
+# one input and cause TWO workers to race to publish the same .sens.
+# Resolve every actual path before launching any worker. Preserve original
+# spelling in per-worker reports (the canonical driver owns those labels).
 python3 - "${FILES[@]}" <<'PY'
 import sys
 from pathlib import Path
-seen = set()
+
+seen = {}
 for raw in sys.argv[1:]:
-    name = Path(raw).as_posix()
-    if name in seen:
-        raise SystemExit(f"ZIG_PARALLEL_BLOCKED test_id=duplicate-source layer=transport path={name}")
-    seen.add(name)
+    try:
+        source = Path(raw).resolve(strict=True)
+        if not source.is_file():
+            raise ValueError("source is not a regular file")
+        if source.suffix != ".lisp":
+            raise ValueError("source is not a .lisp file")
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise SystemExit(
+            f"ZIG_PARALLEL_BLOCKED test_id=invalid-source layer=transport "
+            f"path={raw} reason={type(exc).__name__}:{exc}"
+        ) from exc
+    if source in seen:
+        raise SystemExit(
+            f"ZIG_PARALLEL_BLOCKED test_id=duplicate-source layer=transport "
+            f"path={raw} first={seen[source]} same_physical_source={source}"
+        )
+    seen[source] = raw
 PY
 if (( JOBS > total )); then JOBS=$total; fi
 
