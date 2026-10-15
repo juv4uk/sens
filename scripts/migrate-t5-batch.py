@@ -132,8 +132,17 @@ def run(args: argparse.Namespace) -> dict:
     # No source edits, including accidental reports or files under the source tree.
     if out == repo or out.is_relative_to(repo) or report.is_relative_to(repo):
         raise ValueError("output mirror and report must be OUTSIDE source root")
-    if report == out or report.is_dir():
-        raise ValueError("--report must name a JSON file, not the output directory")
+    # The JSON receipt must NOT be anywhere in the binary output mirror.
+    # Otherwise the later atomic stage.replace(report) can overwrite a .sens
+    # just published by Zig, destroying physical exact-width bytes after
+    # their SHA was already recorded in the ledger.
+    if report.is_relative_to(out):
+        raise ValueError(
+            "ZIG_REPORT_OUTPUT_COLLISION layer=transport: "
+            "--report must be OUTSIDE the physical .sens output mirror"
+        )
+    if report.is_dir():
+        raise ValueError("--report must name a JSON file, not a directory")
     if out.is_symlink() or report.is_symlink():
         raise ValueError("symlink output/report is forbidden")
     paths, failures = discover(repo, args.paths)
