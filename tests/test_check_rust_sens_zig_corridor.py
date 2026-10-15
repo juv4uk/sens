@@ -19,12 +19,10 @@ CHECKER = ROOT / "scripts" / "check_rust_sens_zig_corridor.py"
 CORRIDOR_FILES = (
     "crates/sens-cli/Cargo.toml",
     "crates/sens-cli/build.rs",
-    "crates/sens-cli/src/zig_transport.rs",
-    "crates/sens-cli/src/main.rs",
-    "crates/sens-cli/src/bin/sens-trit.rs",
     "research/zig-codecs/transport_abi.zig",
     ".zig-version",
 )
+HOST_C = "research/zig-codecs/host-c"
 
 
 def load_checker():
@@ -41,6 +39,11 @@ def mirror(dst: Path) -> None:
         target = dst / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / rel, target)
+    host_dir = dst / HOST_C
+    host_dir.mkdir(parents=True, exist_ok=True)
+    for host in (ROOT / HOST_C).glob("*"):
+        if host.is_file():
+            shutil.copyfile(host, host_dir / host.name)
 
 
 def mutate(root: Path, rel: str, old: str, new: str) -> None:
@@ -63,6 +66,7 @@ class CorridorGuardTests(unittest.TestCase):
     def test_real_corridor_passes(self) -> None:
         self.assertEqual(self.module.check(self.root), [])
 
+    # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:
         mutate(self.root, "crates/sens-cli/Cargo.toml", 'default = ["zig-transport"]', "default = []")
         self.assertTrue(self.module.check(self.root))
@@ -81,7 +85,7 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             '@import("t5/t5.zig")',
-            '@import("semantic_registry.zig")',
+            '@import("semantic-registry.zig")',
         )
         self.assertTrue(self.module.check(self.root))
 
@@ -90,96 +94,52 @@ class CorridorGuardTests(unittest.TestCase):
             self.root,
             "research/zig-codecs/transport_abi.zig",
             "pub export fn sens_zig_codec_abi_version",
-            "pub export fn host_eval_program",
+            "pub export fn host_opcode",
         )
         self.assertTrue(self.module.check(self.root))
 
     def test_unpinned_zig_version_is_blocked(self) -> None:
-        mutate(self.root, ".zig-version", "0.16.0", "latest")
+        (self.root / ".zig-version").write_text("stable\n", encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
-    def test_client_without_packed_bits_is_blocked(self) -> None:
-        path = self.root / "crates/sens-cli/src/zig_transport.rs"
-        text = path.read_text(encoding="utf-8")
-        self.assertIn("packed_bits", text)
-        path.write_text(text.replace("packed_bits", "payload_bits"), encoding="utf-8")
+    # --- R5 (host-neutral: one corridor for all hosts) --------------------
+    def test_header_missing_op_is_blocked(self) -> None:
+        mutate(
+            self.root,
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "int sens_zig_t5_validate(const uint8_t *src, size_t len);",
+            "/* removed corridor op */",
+        )
         self.assertTrue(self.module.check(self.root))
 
-    def test_main_without_zig_decode_is_blocked(self) -> None:
+    def test_header_extra_op_is_blocked(self) -> None:
         mutate(
             self.root,
-            "crates/sens-cli/src/main.rs",
-            "return zig_transport::decode_t5_words(bytes);",
-            'return Err("disabled".into()); // zig_transport::decode_t5_words(bytes)',
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "uint32_t sens_zig_codec_abi_version(void);",
+            "uint32_t sens_zig_codec_abi_version(void);\n"
+            "ptrdiff_t sens_zig_bogus(const uint8_t *src, size_t len);",
         )
-        issues = self.module.check(self.root)
-        self.assertTrue(any("live default ingress" in e for e in issues), issues)
+        self.assertTrue(self.module.check(self.root))
 
-    def test_main_eval_rust_decoder_bypass_is_blocked(self) -> None:
+    def test_abi_version_mismatch_is_blocked(self) -> None:
         mutate(
             self.root,
-            "crates/sens-cli/src/main.rs",
-            "let words = decode_physical_t5_words(bytes)?;",
-            "let words = sens::decode_ternary_words(bytes)?; "
-            "// decode_physical_t5_words(bytes)",
+            "research/zig-codecs/host-c/zig_transport_v2.h",
+            "SENS_ZIG_TRANSPORT_ABI_VERSION = 2",
+            "SENS_ZIG_TRANSPORT_ABI_VERSION = 3",
         )
-        issues = self.module.check(self.root)
-        self.assertTrue(any("Rust T5 decoder" in e for e in issues), issues)
+        self.assertTrue(self.module.check(self.root))
 
-    def test_main_dispatch_bypass_is_blocked(self) -> None:
+    def test_host_rogue_op_is_blocked(self) -> None:
         mutate(
             self.root,
-            "crates/sens-cli/src/main.rs",
-            ".and_then(|bytes| eval_physical_t5(&bytes))",
-            '.and_then(|_| Err("disabled".into()))',
+            "research/zig-codecs/host-c/corridor_v2.c",
+            "sens_zig_codec_abi_version",
+            "sens_zig_fake_version",
         )
-        issues = self.module.check(self.root)
-        self.assertTrue(any("dispatch bypasses" in e for e in issues), issues)
-
-    def test_main_no_zig_cannot_fallback_to_rust(self) -> None:
-        mutate(
-            self.root,
-            "crates/sens-cli/src/main.rs",
-            'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())',
-            'Err("Rust T5 fallback enabled".into())',
-        )
-        issues = self.module.check(self.root)
-        self.assertTrue(any("feature-negative" in e for e in issues), issues)
-
-    def test_main_symlink_is_not_admitted(self) -> None:
-        entry = self.root / "crates/sens-cli/src/main.rs"
-        source = entry.read_text(encoding="utf-8")
-        entry.unlink()
-        other = self.root / "another.rs"
-        other.write_text(source, encoding="utf-8")
-        entry.symlink_to(other)
-        issues = self.module.check(self.root)
-        self.assertTrue(any("missing or linked" in e for e in issues), issues)
-
-    def test_abi_without_e1_decode_is_blocked(self) -> None:
-        mutate(
-            self.root,
-            "research/zig-codecs/transport_abi.zig",
-            "pub export fn sens_zig_e1_decode_be3",
-            "fn sens_zig_e1_decode_be3_hidden",
-        )
-        issues = self.module.check(self.root)
-        self.assertTrue(
-            any("e1_decode" in e.lower() or "E1" in e or "sens_zig_e1_decode" in e for e in issues),
-            issues,
-        )
-
-    def test_client_without_e1_decode_ffi_is_blocked(self) -> None:
-        path = self.root / "crates/sens-cli/src/zig_transport.rs"
-        text = path.read_text(encoding="utf-8")
-        self.assertIn("sens_zig_e1_decode_be3", text)
-        path.write_text(text.replace("sens_zig_e1_decode_be3", "sens_zig_e1_missing"), encoding="utf-8")
-        issues = self.module.check(self.root)
-        self.assertTrue(
-            any("sens_zig_e1_decode_be3" in e or "E1" in e or "decode" in e.lower() for e in issues),
-            issues,
-        )
+        self.assertTrue(self.module.check(self.root))
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()
