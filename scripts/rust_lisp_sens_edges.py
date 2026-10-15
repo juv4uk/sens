@@ -27,6 +27,11 @@ SCHEMA = "sens-rust-lisp-sens-edges/v2"
 INCLUDE_RE = re.compile(
     r"""(?P<kind>include_str|include_bytes)!\s*\(\s*\"(?P<path>(?:\\.|[^\"\\])*)\"\s*\)""",
 )
+# Rust raw strings (r"...", r#"..."#, r###"..."###) are real source embeds.
+# The hash delimiter must match on both ends, not just look like a quote.
+INCLUDE_RAW_RE = re.compile(
+    r'''(?P<kind>include_str|include_bytes)!\s*\(\s*r(?P<hash>#{0,})"(?P<path>[^"]+)"(?P=hash)\s*\)''',
+)
 SENS_SUFFIXES = (".lisp", ".sens", ".fasl", ".lisp.fasl")
 
 # No critical embed is grandfathered: even core4 / guard / contract is red.
@@ -58,7 +63,11 @@ def scan_file(rs_path: Path, root: Path) -> list[dict]:
     text = rs_path.read_text(encoding="utf-8", errors="replace")
     rel_rs = rs_path.relative_to(root).as_posix()
     edges: list[dict] = []
-    for m in INCLUDE_RE.finditer(text):
+    matches = sorted(
+        [*INCLUDE_RE.finditer(text), *INCLUDE_RAW_RE.finditer(text)],
+        key=lambda match: match.start(),
+    )
+    for m in matches:
         kind = m.group("kind")
         raw = unescape_rust_string(m.group("path"))
         if not is_sens_path(raw):

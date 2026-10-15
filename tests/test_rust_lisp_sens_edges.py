@@ -96,6 +96,28 @@ class RustLispSensEdgesTests(unittest.TestCase):
             self.assertEqual(data["forbidden_edge_count"], 1)
             self.assertTrue(data["missing"])
 
+    def test_raw_string_embeds_are_red_and_other_raw_data_is_not_sens(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "crates/demo/src/lib.rs"
+            source.parent.mkdir(parents=True)
+            (root / "lib").mkdir()
+            (root / "lib/core.lisp").write_text("001 000\n", encoding="utf-8")
+            source.write_text(
+                'const A: &[u8] = include_bytes!(r#"../../../lib/core.lisp"#);\n'
+                'const B: &str = include_str!(r###"../../../lib/core.lisp"###);\n'
+                'const C: &str = include_str!(r"Cargo.toml");\n',
+                encoding="utf-8",
+            )
+            edges = self.mod.scan_file(source, root)
+            self.assertEqual(len(edges), 2, edges)
+            self.assertEqual([edge["line"] for edge in edges], [1, 2])
+            self.assertEqual([edge["kind"] for edge in edges],
+                             ["include_bytes", "include_str"])
+            self.assertEqual([edge["target"] for edge in edges],
+                             ["lib/core.lisp", "lib/core.lisp"])
+            self.assertTrue(all(edge["status"] == "RED" for edge in edges))
+
     def test_empty_source_tree_has_no_direct_embeds(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
