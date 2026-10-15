@@ -6,6 +6,7 @@ establish semantics or certify a Zig compiler/toolchain installation.
 """
 import hashlib
 import importlib.util
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -37,6 +38,33 @@ class ZigBinaryPhysicalPathTests(unittest.TestCase):
 
     def test_regular_attested_file_returns_exact_binary_sha(self):
         self.assertEqual(bridge._built_executable_digest(self.binary), self.digest)
+
+    def test_same_sha_hardlink_of_attested_binary_is_rejected(self):
+        hardlink = self.root / "same-inode-second-name"
+        os.link(self.binary, hardlink)
+        self.assertEqual(hashlib.sha256(hardlink.read_bytes()).hexdigest(),
+                         self.digest)
+        with self.assertRaisesRegex(bridge.ZigCodecError,
+                                    "ZIG_CODEC_BINARY_HARDLINKED nlink=2"):
+            bridge._built_executable_digest(self.binary)
+        hardlink.unlink()
+        self.assertEqual(bridge._built_executable_digest(self.binary),
+                         self.digest)
+
+    def test_newly_built_hardlinked_binary_cannot_be_attested(self):
+        def fake_zig_build(argv):
+            binary_arg = next(arg for arg in argv
+                              if arg.startswith("-femit-bin="))
+            generated = Path(binary_arg.removeprefix("-femit-bin="))
+            generated.write_bytes(self.binary.read_bytes())
+            os.link(generated, generated.with_name("untrusted-second-name"))
+
+        with mock.patch.object(bridge, "pinned_compiler",
+                               return_value="zig"), mock.patch.object(
+                                   bridge, "_command", side_effect=fake_zig_build):
+            with self.assertRaisesRegex(bridge.ZigCodecError,
+                                        "ZIG_CODEC_BINARY_HARDLINKED nlink=2"):
+                bridge.build_transport(self.root / "fresh-build")
 
     def test_alias_parent_to_same_sha_is_rejected(self):
         aliased_binary = self.alias / self.binary.name
