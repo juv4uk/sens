@@ -190,6 +190,18 @@ class ZigBridgeReceiptEvidenceTests(unittest.TestCase):
                 self.assertEqual(result["status"], "FAIL")
                 self.assertIn("unrecognized physical receipt fields", result["detail"])
 
+    def test_bridge_failure_markers_cannot_be_overridden_by_final_pass(self):
+        # One focused negative proof: zero-exit and a valid final receipt
+        # cannot erase an explicit contradictory failure in the same stdout.
+        clean = self.good_line() + "\n"
+        self.assertEqual(self.simulated_step(clean)["status"], "PASS")
+        for marker in ("ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"):
+            with self.subTest(marker=marker):
+                output = marker + " test_id=zig-migration-bridge-t5-exact-physical\n" + clean
+                result = self.simulated_step(output)
+                self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
+                self.assertIn("contradictory Zig bridge receipt", result["detail"])
+
     def test_empty_stdout_exit_zero_is_not_physical_pass(self):
         result = self.simulated_step("")
         self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))

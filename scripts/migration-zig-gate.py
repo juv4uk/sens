@@ -74,6 +74,11 @@ def verify_zig_bridge_receipt(stdout: str) -> dict[str, str]:
     compiler attestation. This gate only checks the already-run Zig proof.
     """
     lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    # A later PASS cannot override an explicit failure from the same process.
+    for line in lines:
+        status = line.split(maxsplit=1)[0]
+        if status in {"ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"}:
+            raise ValueError(f"contradictory Zig bridge receipt status={status}")
     markers = [line for line in lines if line.startswith("ZIG_BRIDGE_PASS")]
     if len(markers) != 1 or not lines or markers[0] != lines[-1]:
         raise ValueError("expected exactly one final ZIG_BRIDGE_PASS record")
@@ -126,6 +131,8 @@ def zig_bridge_receipt_self_test() -> None:
                      "external_trusted_sha_d1=REQUIRED_WHEN_SUPPLIED"),
         line.replace("canonical_d1_to_d2_same_length=REJECTED_WITH_EXTERNAL_PIN",
                      "canonical_d1_to_d2_same_length=NOT_TESTED"),
+        "ZIG_BRIDGE_FAIL test_id=transport\n" + line,
+        "ZIG_BRIDGE_BLOCKED test_id=transport\n" + line,
         line + " owner_GO=YES",
         line.replace("zig_binary_sha256=" + "a" * 64,
                      "zig_binary_sha256=not-a-hash"),
@@ -139,7 +146,7 @@ def zig_bridge_receipt_self_test() -> None:
             raise AssertionError(
                 "ZIG_BRIDGE_RECEIPT_SELF_TEST accepted a synthetic mutant"
             )
-    print("MIGRATION_ZIG_RECEIPT_SELF_TEST_PASS negatives=10")
+    print("MIGRATION_ZIG_RECEIPT_SELF_TEST_PASS negatives=12")
 
 
 def run_step(name: str, argv: list[str], *, cwd: Path = ROOT) -> dict:
