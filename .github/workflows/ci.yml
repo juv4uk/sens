@@ -1371,3 +1371,36 @@ jobs:
           path: ${{ runner.temp }}/sens-active-migration/
           if-no-files-found: error
           retention-days: 7
+      # Одноразовий дослід у чинному єдиному автоматичному workflow.
+      # Без нових job, semantic oracle або автоматичного benchmark sweep.
+      - name: RESEARCH_NON_GATE — Core1 проти Meta-Eval (один хост, точковий вимір)
+        if: ${{ always() && github.event_name == 'push' && contains(github.event.head_commit.message, '[bench-core1-meta-once]') }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          out="$RUNNER_TEMP/core1-meta-benchmark"
+          mkdir -p "$out"
+          printf 'BENCH_SHA=%s\n' "$(git rev-parse HEAD)" | tee "$out/provenance.txt"
+          rustc --version | tee -a "$out/provenance.txt"
+          cargo --version | tee -a "$out/provenance.txt"
+          printf '%s\n' 'RESEARCH_NON_GATE=1; no semantic oracle, no Zig/GC claims' | tee -a "$out/provenance.txt"
+          cargo run --locked --profile ci-meta -p sens --example bench_core1_meta -- --samples 25 --batch 5 --warmup 10 2>&1 | tee "$out/results.txt"
+          rc=${PIPESTATUS[0]}
+          printf 'BENCH_EXIT=%s\n' "$rc" | tee -a "$out/provenance.txt"
+          {
+            echo '### Core1 ↔ Meta-Eval: точковий одноразовий бенчмарк'
+            echo 'Вимірювання на спільному Rust-хості, не семантична ратифікація.'
+            echo '~~~text'
+            cat "$out/provenance.txt"
+            cat "$out/results.txt"
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+      - name: Зберегти результати одноразового Core1 ↔ Meta-Eval
+        if: ${{ always() && github.event_name == 'push' && contains(github.event.head_commit.message, '[bench-core1-meta-once]') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: core1-meta-benchmark-${{ github.sha }}
+          path: ${{ runner.temp }}/core1-meta-benchmark/
+          if-no-files-found: warn
+          retention-days: 7
