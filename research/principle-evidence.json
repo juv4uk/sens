@@ -1,0 +1,98 @@
+{
+  "schema": "sens-principle-evidence/v1",
+  "principles_doc": "docs/language-core-axioms.md",
+  "constitution_script": "scripts/build-constitution.lisp",
+  "conformance": "tests/fixtures/conformance.lisp",
+  "note": "The axioms rest on the project principles (P1-P5). This registry gives every principle MACHINE-CHECKABLE evidence, so no principle is merely declared. Restores the force of principle 5, whose old-technology half (lib/clips-import.lisp) had no evidence at all.",
+  "bindings": [
+    {
+      "principle": 1,
+      "title": "Write about possibilities, not limitations",
+      "evidence": [
+        {
+          "kind": "doc-reference",
+          "text": "Generative axioms"
+        },
+        {
+          "kind": "doc-reference",
+          "text": "Safety axioms"
+        }
+      ]
+    },
+    {
+      "principle": 2,
+      "title": "Be Lisp in the full sense of the word",
+      "evidence": [
+        {
+          "kind": "doc-reference",
+          "text": "homoiconicity"
+        },
+        {
+          "kind": "artifact",
+          "path": "lib/core.lisp"
+        }
+      ]
+    },
+    {
+      "principle": 3,
+      "title": "Build the reasoning machine",
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "lib/unify.lisp"
+        },
+        {
+          "kind": "artifact",
+          "path": "lib/reason.lisp"
+        },
+        {
+          "kind": "fixture",
+          "expr": "(unify (quote (var x)) (quote (f (var x))) (quote ()))"
+        }
+      ]
+    },
+    {
+      "principle": 4,
+      "title": "Cross-platform-ness / universality",
+      "evidence": [
+        {
+          "kind": "doc-reference",
+          "text": "fpga-lisp"
+        },
+        {
+          "kind": "doc-reference",
+          "text": "substrates"
+        }
+      ]
+    },
+    {
+      "principle": 5,
+      "title": "Maximum awareness of today's technology, applied to symbolic AI",
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "lib/clips-import.lisp",
+          "role": "old symbolic-AI import (CLIPS, NASA JSC 1985) held to a standard it never had, via modern tooling"
+        },
+        {
+          "kind": "artifact",
+          "path": "lib/understand.lisp",
+          "role": "text -> structure half of the LLM-as-fuzzy-interface bridge"
+        },
+        {
+          "kind": "artifact",
+          "path": "lib/narrate.lisp",
+          "role": "structure -> text half of the bridge"
+        },
+        {
+          "kind": "fixture",
+          "expr": "(understand (quote (earth is a planet)))"
+        },
+        {
+          "kind": "fixture",
+          "expr": "(narrate-fact (car (understand (quote (earth is a planet)))))"
+        }
+      ]
+    }
+  ]
+}
