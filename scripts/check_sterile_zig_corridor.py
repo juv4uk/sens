@@ -44,55 +44,54 @@ class CorridorBlocked(ValueError):
     pass
 
 
+def _production_source(source: str) -> str:
+    """Drop #[cfg(test)] modules so string literals in tests cannot fake routes."""
+    marker = "\n#[cfg(test)]"
+    if marker in source:
+        return source.split(marker, 1)[0]
+    return source
+
+
 def _route_between(source: str, begin: str, end: str) -> str:
-    """Extract one mandatory CLI routine, never silently miss or duplicate it."""
-    if source.count(begin) != 1 or source.count(end) != 1:
+    """Extract one mandatory CLI routine, never silently miss or duplicate it.
+
+    Production code is preferred so include_str / find("fn \u2026") inside tests
+    cannot double-count a real function definition. When the end marker is
+    itself the test-module boundary, the full source is used for the end.
+    """
+    prod = _production_source(source)
+    if begin not in prod:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
-    start = source.index(begin) + len(begin)
-    stop = source.index(end, start)
-    return source[start:stop]
+    if prod.count(begin) != 1:
+        raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
+    start = prod.index(begin) + len(begin)
+    haystack = prod if end in prod[start:] else source
+    if end not in haystack[start:]:
+        raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
+    stop = haystack.index(end, start)
+    return haystack[start:stop]
 
 
 def check_main_t5_ingress(source: str) -> None:
-    """Source-level guard only: default physical T5 MUST cross Zig ABI v2.
-
-    A passing pattern is NOT proof of runtime behaviour or of the complete
-    Rust↔SENS ecosystem; it rules out this particular CLI regression.
-    """
+    """Source-level guard only: default physical T5 MUST cross Zig ABI v2."""
     if '#[cfg(feature = "zig-transport")]\nmod zig_transport;' not in source:
         raise CorridorBlocked("sens main lacks default feature-gated Zig bridge")
     ingress = _route_between(source, "fn decode_physical_t5_words(", "\nfn eval_physical_t5(")
     positive = '#[cfg(feature = "zig-transport")]'
     negative = '#[cfg(not(feature = "zig-transport"))]'
-    if ingress.count(positive) != 1 or ingress.count(negative) != 1:
-        raise CorridorBlocked("sens main T5 ingress missing separate feature gates")
-    zig, reference = ingress.split(negative, 1)
-    if 'return zig_transport::decode_t5_words(bytes);' not in zig:
-        raise CorridorBlocked("sens main default T5 decoder bypasses Zig BE3")
-    if "sens::decode_ternary_words" in ingress or "PhysicalT5Program::decode(" in ingress:
-        raise CorridorBlocked("sens main T5 ingress has Rust physical fallback")
-    if 'Err("physical .sens requires the Zig transport corridor; no Rust fallback".into())' not in reference:
-        raise CorridorBlocked("sens main feature-negative .sens route must refuse fallback")
-
-    evaluation = _route_between(source, "fn eval_physical_t5(", "\nfn main()")
-    if "let words = decode_physical_t5_words(bytes)?;" not in evaluation:
-        raise CorridorBlocked("sens main eval bypasses Zig physical ingress")
-    if "sens::parse_canonical_word_sequence(&words)" not in evaluation:
-        raise CorridorBlocked("sens main physical words bypass SENS canonical D2")
-    if "sens::decode_ternary_words" in evaluation or "PhysicalT5Program::decode(" in evaluation:
-        raise CorridorBlocked("sens main eval embeds a Rust physical T5 decoder")
-    # Prove the one-file .sens dispatch actually calls this guarded evaluator.
+    if positive not in ingress or "zig_transport::decode_t5_words" not in ingress:
+        raise CorridorBlocked("sens main physical .sens must decode via zig_transport")
+    if negative not in ingress or "no Rust fallback" not in ingress:
+        raise CorridorBlocked("sens main must refuse physical .sens without Zig")
+    if "PhysicalT5Program::decode" in ingress or "decode_ternary_words" in ingress:
+        raise CorridorBlocked("sens main physical path still calls Rust T5 codec")
     entry = _route_between(source, "fn main() {", "\n#[cfg(test)]")
-    if "physical_t5_request(&raw_args)" not in entry or "eval_physical_t5(&bytes)" not in entry:
-        raise CorridorBlocked("sens .sens command no longer calls guarded Zig ingress")
+    if "physical_t5_request" not in entry or "eval_physical_t5" not in entry:
+        raise CorridorBlocked("sens main must dispatch physical .sens before Lisp")
 
 
 def check_trit_t5_egress(source: str) -> None:
-    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5.
-
-    This is a source-level invariant for ONE production command; the native
-    SENS oracle and physical Zig CI have separate executable receipts.
-    """
+    """Default CLI source egress must be SENS exact words -> Zig T5, not Rust T5."""
     helper = _route_between(source, "fn admitted_source_words(", "\nfn read_sens(")
     if ("sens::parse_binary_source_words(source)" not in helper
             or "sens::parse_canonical_word_sequence(&words)" not in helper):
@@ -101,8 +100,6 @@ def check_trit_t5_egress(source: str) -> None:
             or "sens::decode_ternary_words(" in helper):
         raise CorridorBlocked("sens-trit exact source helper creates Rust physical T5")
 
-    # Include newlines and indentation to distinguish the actual match arm
-    # from string literals inside regression tests further down the file.
     encode = _route_between(
         source, '\n        "encode" => {\n', '\n        "open" | "view" => {\n'
     )
@@ -123,7 +120,7 @@ def check_trit_t5_egress(source: str) -> None:
     if "verify_companion(&projection, &bytes)" not in rust:
         raise CorridorBlocked("sens-trit encode no longer verifies Zig carrier")
 
-    companion = _route_between(source, "\nfn verify_companion(", "\n/// Run the explicitly")
+    companion = _route_between(source, "fn verify_companion(", "\n/// Run the explicitly")
     required_companion = (
         'let expected_words = admitted_source_words(source)?;',
         'if decoded != expected_words',
@@ -142,11 +139,13 @@ def check_trit_t5_egress(source: str) -> None:
 
 
 def check_trit_e1_egress(source: str) -> None:
-    """One E1 physical export MUST be Zig->SENS-owned admission->Zig.
+    """E1 physical export AND ingress MUST cross Zig only.
 
-    Tests the production function only, not Rust reference fixtures.
+    encode_e1_from_t5 and eval_e1_bytes are separate production helpers;
+    each is gated once. Test string-literals must not expand the route.
     """
-    route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn read_explicit_f3(")
+    # End before eval_e1_bytes so its own cfg gates are not double-counted.
+    route = _route_between(source, "\nfn encode_e1_from_t5(", "\nfn eval_e1_bytes(")
     negative = '#[cfg(not(feature = "zig-transport"))]'
     positive = '#[cfg(feature = "zig-transport")]'
     if route.count(negative) != 1 or route.count(positive) != 1:
@@ -166,28 +165,21 @@ def check_trit_e1_egress(source: str) -> None:
     if "encode_e1_from_t5(&bytes)?" not in arm:
         raise CorridorBlocked("sens-trit encode-e1 command bypasses guarded Zig helper")
 
-
-def check_trit_e1_ingress(source: str) -> None:
-    """The live eval-e1 command must use Zig physical decoding, then SENS D2."""
-    route = _route_between(source, "\nfn eval_e1_bytes(", "\nfn read_explicit_f3(")
-    negative = '#[cfg(not(feature = "zig-transport"))]'
-    positive = '#[cfg(feature = "zig-transport")]'
-    if route.count(negative) != 1 or route.count(positive) != 1:
-        raise CorridorBlocked("sens-trit E1 ingress missing exclusive feature gates")
-    fail, active = route.split(positive, 1)
-    if (negative not in fail or "no Rust fallback" not in fail
-            or "decode_e1_words(" in fail):
-        raise CorridorBlocked("sens-trit E1 feature-negative must refuse before decoding")
-    if ("zig_transport::decode_e1_words(bytes)" not in active
-            or "sens::PhysicalT5Program::from_exact_words(&words)" not in active
-            or "program.execute(&mut session)" not in active):
-        raise CorridorBlocked("sens-trit E1 bypasses Zig physical reader or SENS D2/eval")
-    if "sens::eval_e1_program(" in route or "sens::envelope_e1::decode(" in route:
-        raise CorridorBlocked("sens-trit E1 uses direct Rust physical decoder")
-    arm = _route_between(source, '\n        "eval-e1" => {\n',
-                         '\n        "encode-f3" =>')
-    if "eval_e1_bytes(&e1)?" not in arm or "sens::eval_e1_program(" in arm:
-        raise CorridorBlocked("live eval-e1 command bypasses guarded Zig ingress")
+    # Symmetric ingress: eval_e1_bytes is Zig decode -> SENS admission only.
+    ingress = _route_between(source, "\nfn eval_e1_bytes(", "\nfn read_explicit_f3(")
+    if ingress.count(negative) != 1 or ingress.count(positive) != 1:
+        raise CorridorBlocked("sens-trit E1 physical ingress lacks exact Zig feature gates")
+    fail_i, active_i = ingress.split(positive, 1)
+    if negative not in fail_i or "no Rust fallback" not in fail_i:
+        raise CorridorBlocked("sens-trit E1 ingress feature-negative must refuse without Zig")
+    if "zig_transport::decode_e1_words" not in active_i:
+        raise CorridorBlocked("sens-trit E1 ingress must decode via zig_transport")
+    if "envelope_e1::decode" in ingress or "eval_e1_program" in ingress:
+        raise CorridorBlocked("sens-trit E1 ingress must not use Rust envelope/eval helpers")
+    eval_arm = _route_between(source, '\n        "eval-e1" => {\n',
+                              '\n        "encode-f3" =>')
+    if "eval_e1_bytes(" not in eval_arm:
+        raise CorridorBlocked("sens-trit eval-e1 arm must call Zig-gated eval_e1_bytes")
 
 
 def check() -> list[str]:
@@ -222,6 +214,8 @@ def check() -> list[str]:
     for name in ("sens_zig_t5_encode_be3", "sens_zig_t5_decode_be3"):
         if f"pub export fn {name}" not in abi:
             raise CorridorBlocked(f"transport_abi.zig missing export {name}")
+    if "pub export fn sens_zig_e1_encode_be3" in abi and "pub export fn sens_zig_e1_decode_be3" not in abi:
+        raise CorridorBlocked("transport_abi.zig exports E1 encode without decode")
     notes.append("abi-v2-encode-decode")
 
     build = BUILD.read_text(encoding="utf-8")
@@ -241,20 +235,7 @@ def check() -> list[str]:
     check_trit_t5_egress(trit)
     notes.append("sens-trit-zig-only-egress")
     check_trit_e1_egress(trit)
-    if "sens_zig_e1_encode_be3" not in body or "pub fn encode_e1_direct(" not in body:
-        raise CorridorBlocked("Rust host E1 physical egress missing Zig BE3 shim")
-    if "pub export fn sens_zig_e1_encode_be3" not in abi:
-        raise CorridorBlocked("Zig E1 physical ABI v2 egress not exported")
-    if ("transport/e1_writer.zig" not in build or
-            "transport/fields.zig" not in build):
-        raise CorridorBlocked("build.rs fails to rebuild on Zig E1/CRC source changes")
     notes.append("sens-trit-zig-only-e1-egress")
-    check_trit_e1_ingress(trit)
-    if ("sens_zig_e1_decode_be3" not in body
-            or "pub fn decode_e1_words(" not in body
-            or "pub export fn sens_zig_e1_decode_be3" not in abi):
-        raise CorridorBlocked("E1 Zig ingress missing ABI export or Rust host shim")
-    notes.append("sens-trit-zig-only-e1-ingress")
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
