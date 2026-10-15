@@ -79,13 +79,15 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
         self.report = self.root / "merged.json"
         self.output = self.root / "out"
 
-    def invoke(self, mode: str, *sources: str) -> subprocess.CompletedProcess[str]:
+    def invoke(self, mode: str, *sources: str,
+               report: Path | None = None) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         env["MOCK_DRIVER_MODE"] = mode
         return subprocess.run(
             ["bash", str(self.root / "scripts/migrate-parallel.sh"),
              "--jobs", "2", "--out", str(self.output),
-             "--report", str(self.report), *sources],
+             "--report", str(report if report is not None else self.report),
+             *sources],
             cwd=self.root, capture_output=True, text=True, timeout=20,
             env=env, check=False,
         )
@@ -99,6 +101,48 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
                          ["src/a.lisp", "src/b.lisp"])
         self.assertEqual(data["summary"]["files_seen"], 2)
         self.assertEqual(data["summary"]["files_admitted"], 2)
+
+    def test_existing_sens_output_never_overwritten_by_merged_json(self) -> None:
+        (self.output / "lib").mkdir(parents=True)
+        protected = self.output / "lib" / "third.sens"
+        original = bytes.fromhex("00ff210300")
+        protected.write_bytes(original)
+        run = self.invoke("valid", "src/a.lisp", "src/b.lisp",
+                          report=protected)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=report-output-collision", run.stderr)
+        self.assertIn("layer=transport", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertEqual(protected.read_bytes(), original)
+        self.assertFalse(self.report.exists())
+
+    def test_future_nested_report_inside_mirror_is_blocked_preflight(self) -> None:
+        nested = self.output / "reports" / "summary.json"
+        run = self.invoke("valid", "src/a.lisp", "src/b.lisp",
+                          report=nested)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=report-output-collision", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertFalse(nested.exists())
+        self.assertFalse(self.output.exists())
+
+    def test_dotdot_and_symlink_report_aliases_cannot_reach_sens(self) -> None:
+        (self.output / "lib").mkdir(parents=True)
+        (self.output / "reports").mkdir()
+        protected = self.output / "lib" / "third.sens"
+        original = b"DO-NOT-OVERWRITE-ZIG-BYTES"
+        protected.write_bytes(original)
+        alias = self.root / "receipt-alias.json"
+        alias.symlink_to(protected)
+        for report in (self.output / "reports" / ".." / "lib" / "third.sens",
+                       alias):
+            with self.subTest(report=str(report)):
+                run = self.invoke("valid", "src/a.lisp", report=report)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn("test_id=report-output-collision", run.stderr)
+                self.assertNotIn("--- worker", run.stdout)
+                self.assertEqual(protected.read_bytes(), original)
+                self.assertFalse(self.report.exists())
 
     def test_duplicate_explicit_path_is_blocked_before_any_worker(self) -> None:
         run = self.invoke("valid", "src/a.lisp", "./src/a.lisp")
