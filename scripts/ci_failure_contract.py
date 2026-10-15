@@ -23,6 +23,36 @@ FIELDS = (
 )
 
 
+# The *existing* central workflow publishes these exact 23 step outcomes.
+# Only when none ran is an absent focal receipt not a failed-test report.
+# A missing/failed/unknown outcome must never satisfy this gate.
+FOCAL_OUTCOME_ENV = (
+    "BUDGET_OUTCOME",
+    "BUILD_OUTCOME",
+    "PACKED_OUTCOME",
+    "SOURCE_OUTCOME",
+    "LAW_OUTCOME",
+    "MUTANT_OUTCOME",
+    "REASON_OUTCOME",
+    "UNIFY_OUTCOME",
+    "CORE2_OUTCOME",
+    "CORE_WIDTH_OUTCOME",
+    "KNOWLEDGE_OUTCOME",
+    "LINTER_OUTCOME",
+    "LINTER_MUTANT_OUTCOME",
+    "CORE_SENTINEL_OUTCOME",
+    "CORE_SENTINEL_MUTANT_OUTCOME",
+    "CORE1_OUTCOME",
+    "QUOTED_OUTCOME",
+    "TCP_OUTCOME",
+    "META_FC_OUTCOME",
+    "SID8_BROAD_OUTCOME",
+    "T5_ORACLE_OUTCOME",
+    "FRAME3_OUTCOME",
+    "MIGRATOR_OUTCOME",
+)
+
+
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
@@ -392,6 +422,15 @@ def scan(args):
         if args.allow_empty:
             print("PASS no failed tests; nothing silently skipped")
             return 0
+        # Non-execution is not a success verdict. All 23 explicit 'skipped'
+        # outcomes are necessary, and only hosted Actions may claim it.
+        # Other red steps (Zig, migration, Rust boundary) stay red.
+        if (
+            os.environ.get("GITHUB_ACTIONS") == "true"
+            and all(os.environ.get(name) == "skipped" for name in FOCAL_OUTCOME_ENV)
+        ):
+            print("FOCAL_DIAGNOSTIC_NOT_APPLICABLE: 23/23 focal checks skipped; no verdict asserted")
+            return 0
         print("UNINFORMATIVE-OUTPUT no diagnostic report")
         return 1
     failures = []
@@ -524,6 +563,44 @@ def self_test():
             rc = scan(args)
         if rc != 1 or "UNCLASSIFIED-RED" not in output.getvalue():
             raise RuntimeError("unclassified RED was reported as PASS")
+    # Positive and hostile controls for central CI when its 23 focal steps
+    # were not selected. Do not hide a real failure or a malformed receipt.
+    from unittest.mock import patch
+
+    focal_env = {"GITHUB_ACTIONS": "true", **{
+        name: "skipped" for name in FOCAL_OUTCOME_ENV
+    }}
+    if len(FOCAL_OUTCOME_ENV) != 23:
+        raise RuntimeError("central focal-step census changed: update exact CI contract")
+    with tempfile.TemporaryDirectory(prefix="sens-focal-nonexecution-") as tmp:
+        report = Path(tmp) / "focal.jsonl"
+        args = argparse.Namespace(
+            report_file=str(report), manifest="knowledge/red-test-quarantine.json",
+            allow_empty=False,
+        )
+        output = io.StringIO()
+        with patch.dict(os.environ, focal_env), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 0 or "FOCAL_DIAGNOSTIC_NOT_APPLICABLE" not in output.getvalue():
+            raise RuntimeError("23 skipped focal steps generated a false red")
+        for label, mutation in (
+            ("actual-failure", {FOCAL_OUTCOME_ENV[0]: "failure"}),
+            ("missing-outcome", {FOCAL_OUTCOME_ENV[0]: ""}),
+            ("unknown-outcome", {FOCAL_OUTCOME_ENV[0]: "cancelled"}),
+            ("non-actions", {"GITHUB_ACTIONS": "false"}),
+        ):
+            output = io.StringIO()
+            with patch.dict(os.environ, {**focal_env, **mutation}), contextlib.redirect_stdout(output):
+                rc = scan(args)
+            if rc != 1 or "UNINFORMATIVE-OUTPUT no diagnostic report" not in output.getvalue():
+                raise RuntimeError("missing focal receipt was silently ignored: " + label)
+        report.write_text("[]\\n", encoding="utf-8")
+        output = io.StringIO()
+        with patch.dict(os.environ, focal_env), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 1 or "invalid:record_type" not in output.getvalue():
+            raise RuntimeError("malformed focal report bypassed shape check in skipped mode")
+    print("FOCAL_NONEXECUTION_RATCHET_PASS: 23 skipped; 5 failing mutants remain blocked")
     for fake in (b"", b"0", b"1", b"1\nextra"):
         if fake != b"1\n" and "byte_offset" not in difference(b"1\n", fake, 0):
             raise RuntimeError("missing first difference")
