@@ -138,6 +138,32 @@ class SterileZigCorridorTests(unittest.TestCase):
         with self.assertRaises(blocked):
             check(no_cap)
 
+    def test_default_zig_build_gate_reversed_or_comment_only_is_blocked(self) -> None:
+        """A default Zig build must never return early or pass via a comment."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_default_zig_build_gate"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
+        real_gate = 'if env::var_os("CARGO_FEATURE_ZIG_TRANSPORT").is_none() {'
+        self.assertIn(real_gate, source)
+        check(source)
+
+        reversed_gate = source.replace(real_gate, real_gate.replace(
+            ".is_none()", ".is_some()"
+        ), 1)
+        bypasses = (
+            reversed_gate,
+            reversed_gate + "\n// " + real_gate + " return; }\n",
+            source.replace(real_gate + "\n        return;", real_gate + "\n        /* no return */", 1),
+        )
+        for mutant in bypasses:
+            with self.subTest(kind=("comment-spoof" if "// " + real_gate in mutant
+                                    else "feature-gate")):
+                self.assertNotEqual(mutant, source)
+                with self.assertRaisesRegex(blocked, "default Zig gate"):
+                    check(mutant)
+
+
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]

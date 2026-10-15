@@ -39,6 +39,25 @@ class CorridorBlocked(ValueError):
     pass
 
 
+def check_default_zig_build_gate(build: str) -> None:
+    """R2: the default Rust host cannot silently return before compiling Zig.
+
+    Inspect active Rust code, not the feature name merely appearing in a
+    comment. This checks one mechanical build route, not SENS semantics.
+    """
+    active = re.sub(r"/\*.*?\*/|//[^\n]*", "", build, flags=re.S)
+    gate = re.compile(
+        r'\bif\s+env::var_os\(\s*"CARGO_FEATURE_ZIG_TRANSPORT"\s*\)'
+        r'\s*\.is_none\(\)\s*\{\s*return\s*;\s*\}',
+        re.S,
+    )
+    if len(gate.findall(active)) != 1:
+        raise CorridorBlocked(
+            "build.rs default Zig gate must skip only when feature is absent "
+            "(CARGO_FEATURE_ZIG_TRANSPORT.is_none); no reversed or comment-only gate"
+        )
+
+
 def _production_source(source: str) -> str:
     """Drop #[cfg(test)] modules so string literals in tests cannot fake routes."""
     marker = "\n#[cfg(test)]"
@@ -402,8 +421,7 @@ def check() -> list[str]:
     build = BUILD.read_text(encoding="utf-8")
     if "transport_abi.zig" not in build:
         raise CorridorBlocked("build.rs does not compile transport_abi.zig")
-    if "CARGO_FEATURE_ZIG_TRANSPORT" not in build:
-        raise CorridorBlocked("build.rs does not gate on zig-transport feature")
+    check_default_zig_build_gate(build)
     notes.append("build-links-zig")
 
     trit = TRIT.read_text(encoding="utf-8")
