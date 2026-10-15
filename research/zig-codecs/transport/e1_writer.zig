@@ -108,6 +108,14 @@ fn writeBits(out: []u8, words: []const Word) void {
 /// Encode raw physical words to E1; requires output and caller-owned DP plan.
 /// No partial output on InvalidBits/TooLarge/BufferTooSmall.
 pub fn encode(words: []const Word, output: []u8, scratch: []Step) Error!usize {
+    // The DP planner writes scratch before encoding; the writer then reads
+    // both words and scratch while writing output. No buffers may alias.
+    const word_bytes = std.mem.sliceAsBytes(words);
+    const scratch_bytes = std.mem.sliceAsBytes(scratch);
+    if (slicesOverlap(word_bytes, scratch_bytes) or
+        slicesOverlap(word_bytes, output) or
+        slicesOverlap(scratch_bytes, output))
+        return error.OverlappingBuffers;
     const size = try plan(words, scratch);
     if (size > e1.MAX_FILE_BYTES) return error.TooLarge;
     if (output.len < size) return error.BufferTooSmall;
@@ -178,8 +186,17 @@ pub fn inspectCanonical(
     scratch: []Step,
     replay: []u8,
 ) Error!usize {
-    // Never overwrite the original before comparing canonical bytes.
-    if (slicesOverlap(frame, replay)) return error.OverlappingBuffers;
+    // Decode and planning also write caller-owned memory. Reject every
+    // frame/output/workspace alias before unpacking or rewriting anything.
+    const decoded_bytes = std.mem.sliceAsBytes(decoded);
+    const scratch_bytes = std.mem.sliceAsBytes(scratch);
+    if (slicesOverlap(frame, replay) or
+        slicesOverlap(frame, decoded_bytes) or
+        slicesOverlap(frame, scratch_bytes) or
+        slicesOverlap(decoded_bytes, scratch_bytes) or
+        slicesOverlap(decoded_bytes, replay) or
+        slicesOverlap(scratch_bytes, replay))
+        return error.OverlappingBuffers;
     const count = try e1.inspect(frame);
     if (decoded.len < count or scratch.len <= count) return error.BufferTooSmall;
     _ = try e1.unpack(frame, decoded[0..count]);
@@ -249,6 +266,65 @@ test "E1 canonical replay never aliases or overwrites its input" {
     try std.testing.expectError(error.OverlappingBuffers,
         inspectCanonical(&alias, &decoded, &scratch, &alias));
     try std.testing.expectEqualSlices(u8, &unchanged, &alias);
+}
+
+test "E1 encoder requires distinct words, scratch and physical destination" {
+    var words: [16]Word = [_]Word{.{ .width = 1, .bits = 1 }} ** 16;
+    const original_words = words;
+    var scratch: [17]Step = undefined;
+
+    // Word bytes are a writable view from a foreign host: no output writes.
+    const word_memory = std.mem.sliceAsBytes(words[0..]);
+    try std.testing.expectError(error.OverlappingBuffers,
+        encode(&words, word_memory, &scratch));
+    for (words, original_words) |actual, original| {
+        try std.testing.expectEqual(original.width, actual.width);
+        try std.testing.expectEqual(original.bits, actual.bits);
+    }
+
+    // Even a one-byte shifted output in the planner's storage is forbidden.
+    const scratch_memory = std.mem.sliceAsBytes(scratch[0..]);
+    @memset(scratch_memory, 0xa5);
+    try std.testing.expectError(error.OverlappingBuffers,
+        encode(&words, scratch_memory[1..], &scratch));
+    for (scratch_memory) |byte| try std.testing.expectEqual(@as(u8, 0xa5), byte);
+
+    // A real independent destination remains byte-exact and roundtrips.
+    var frame: [128]u8 = undefined;
+    const len = try encode(&words, &frame, &scratch);
+    var decoded: [16]Word = undefined;
+    var canonical: [128]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, words.len),
+        try inspectCanonical(frame[0..len], &decoded, &scratch, &canonical));
+    try std.testing.expectEqualSlices(u8, frame[0..len], canonical[0..len]);
+}
+
+test "E1 canonical inspector rejects frame and host workspace aliases" {
+    const words = [_]Word{.{ .width = 1, .bits = 1 }};
+    var frame: [64]u8 = undefined;
+    var scratch: [2]Step = undefined;
+    const len = try encode(&words, &frame, &scratch);
+    var decoded: [1]Word = undefined;
+    var replay: [64]u8 = undefined;
+
+    // Host points the immutable source frame into the mutable DP scratch.
+    const scratch_memory = std.mem.sliceAsBytes(scratch[0..]);
+    @memcpy(scratch_memory[0..len], frame[0..len]);
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(scratch_memory[0..len], &decoded, &scratch, &replay));
+    try std.testing.expectEqualSlices(u8, frame[0..len], scratch_memory[0..len]);
+
+    // A decoded destination may also be aliased as replay scratch. Reject
+    // before unpacking instead of overwriting already decoded words.
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(frame[0..len], &decoded, &scratch,
+            std.mem.sliceAsBytes(decoded[0..])));
+    // Input alias to the decoded words must not change the original bytes.
+    const decoded_bytes = std.mem.sliceAsBytes(decoded[0..]);
+    @memcpy(decoded_bytes[0..len], frame[0..len]);
+    try std.testing.expectError(error.OverlappingBuffers,
+        inspectCanonical(decoded_bytes[0..len], &decoded, &scratch, &replay));
+    try std.testing.expectEqualSlices(u8, frame[0..len], decoded_bytes[0..len]);
 }
 
 test "E1 canonical REPEAT and empty source match fixed physical bytes" {
