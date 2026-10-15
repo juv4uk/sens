@@ -82,6 +82,17 @@ class F6ZigBoundaryTests(unittest.TestCase):
             with self.subTest(file=file), self.assertRaisesRegex(ValueError, "F6_DIRECT_RUST_SOURCE"):
                 check_f6_route(mutation, file)
 
+    def test_persistent_map_direct_rust_embed_cannot_bypass_zig(self) -> None:
+        # A fresh direct Rust source edge remains forbidden even if the
+        # legitimate Zig persistent-map carrier is already present.
+        for file in FILES:
+            source = (ROOT / file).read_text(encoding="utf-8")
+            mutant = source + '\nconst LEAK: &str = include_str!("../../../../lib/persistent-map.lisp");\n'
+            with self.subTest(file=file), self.assertRaisesRegex(
+                ValueError, "F6_DIRECT_RUST_SOURCE"
+            ):
+                check_f6_route(mutant, file)
+
     def test_zig_token_in_comment_cannot_replace_live_source_call(self) -> None:
         for file in FILES:
             source = (ROOT / file).read_text(encoding="utf-8")
