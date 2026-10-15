@@ -100,6 +100,17 @@ def verify_replay(staged, downloaded, tag, sha):
     all_names = names | {"release-provenance.json", "SHA256SUMS"}
     _check_files(staged, all_names)
     _check_files(downloaded, all_names)
+    # Different directory names do not prove an independent download: a
+    # hardlinked artifact has the same inode and bytes as staged output.
+    # Check the entire release receipt, including checksum and provenance.
+    for name in sorted(all_names):
+        staged_stat = (staged / name).stat()
+        downloaded_stat = (downloaded / name).stat()
+        if (staged_stat.st_dev == downloaded_stat.st_dev and
+                staged_stat.st_ino == downloaded_stat.st_ino):
+            raise ValueError(
+                f"RELEASE_BLOCKED: replay asset not independently downloaded: {name}"
+            )
     manifest = json.loads(
         downloaded.joinpath("release-provenance.json").read_text(encoding="utf-8"),
         object_pairs_hook=_reject_duplicate_json_keys,

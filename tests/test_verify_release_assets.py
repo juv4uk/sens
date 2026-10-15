@@ -1,5 +1,6 @@
 """Negative gates for asset completeness, integrity and provenance."""
 
+import os
 import shutil
 import sys
 import tempfile
@@ -34,6 +35,21 @@ class ReleaseAssetsTest(unittest.TestCase):
     def test_complete_success(self):
         prepare(self.dist, TAG, SHA)
         self.assertEqual(verify_replay(self.dist, self.replay(), TAG, SHA), 9)
+
+    def test_hardlinked_download_does_not_prove_independent_replay(self):
+        # A second pathname to the same inode is not a downloaded artifact.
+        # One shared binary or even the checksum receipt invalidates replay.
+        prepare(self.dist, TAG, SHA)
+        for name in ("sens-cli_0.42.0_linux_amd64", "SHA256SUMS"):
+            with self.subTest(asset=name):
+                downloaded = self.root / ("downloaded-hardlinked-" + name)
+                shutil.copytree(self.dist, downloaded)
+                (downloaded / name).unlink()
+                os.link(self.dist / name, downloaded / name)
+                self.assertNotEqual(self.dist.resolve(), downloaded.resolve())
+                self.assertTrue((self.dist / name).samefile(downloaded / name))
+                with self.assertRaisesRegex(ValueError, "not independently downloaded"):
+                    verify_replay(self.dist, downloaded, TAG, SHA)
 
     def test_missing_msi_rejected(self):
         (self.dist / "sens-cli_0.42.0_windows_x64.msi").unlink()

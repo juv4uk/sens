@@ -176,8 +176,7 @@ def run(args: argparse.Namespace) -> dict:
         destination = mig.sens_destination(rel)
         target = out / destination
         row = {"path": rel.as_posix(), "output": destination.as_posix()}
-        resolver = mig.Resolver(my, upper, admitted_d8=admitted_d8,
-                                d9_residents=d9_residents)
+        resolver = mig.Resolver(my, upper, d9_residents=d9_residents)
         readable = ""  # never inherit another source on per-file error
         try:
             assert_no_links(repo, rel)

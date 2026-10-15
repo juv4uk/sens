@@ -74,6 +74,33 @@ class CorridorCoverageTests(unittest.TestCase):
         write_registry(self.root, [])
         self.assertEqual(self.module.check(self.root), [])
 
+    def test_unrelated_zig_file_cannot_hide_direct_codec_route(self) -> None:
+        # One live Zig call elsewhere in a crate is not an authorization for
+        # direct SENS codec access in lib.rs (physical edge must be file-local).
+        write_crate(self.root, "split", "fn f() { sens::decode_binary_frame(&[]); }")
+        (self.root / "crates/split/src/bridge.rs").write_text(
+            "fn g() { zig_transport::decode_t5_words(&[]); }",
+            encoding="utf-8",
+        )
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        self.assertTrue(
+            any("crates/split/src/lib.rs" in error for error in errors),
+            f"test_id=zig-cross-file-bypass layer=transport expected=BLOCKED actual={errors!r}",
+        )
+
+    def test_same_file_live_zig_call_preserves_corridor_admission(self) -> None:
+        write_crate(
+            self.root, "joined",
+            "fn f() { zig_transport::decode_t5_words(&[]); "
+            "sens::decode_binary_frame(&[]); }",
+        )
+        write_registry(self.root, [])
+        self.assertEqual(
+            self.module.check(self.root), [],
+            "test_id=zig-same-file-ingress layer=transport expected=COVERAGE_OK",
+        )
+
     def test_comment_only_zig_reference_does_not_hide_bypass(self) -> None:
         write_crate(
             self.root, "comment", "fn f() { sens::decode_binary_frame(&[]); } "

@@ -376,6 +376,41 @@ mod tests {
         assert!(plus.contains("SYM: +"));
     }
 
+    // Included in the existing automatic CI "zig_linter_carrier" test filter:
+    // this exercises actual Rust -> Zig FFI -> SENS-owned parser, not a mock.
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_linter_carrier_uk_docs_exact_bytes_and_sens_owned_parse() {
+        let bytes = crate::zig_transport::uk_docs_source_bytes()
+            .expect("Zig root ABI must return UK docs bytes");
+        let source = uk_docs_source_zig_only()
+            .expect("Rust must obtain UK docs only through Zig");
+        assert!(!bytes.is_empty(), "Zig must not return an empty asset");
+        assert_eq!(source.as_bytes(), bytes.as_slice(), "every byte must survive Zig ABI");
+        // SENS owns the parser/identities; this is not semantic admission by Zig.
+        let docs = ukrainian_docs().expect("SENS parses Zig-delivered documentation");
+        assert!(docs.iter().any(|doc| doc.identity == "00000001"),
+                "expected exact eight-bit documentation identity");
+        println!(
+            "ZIG_UK_DOCS_CARRIER_PASS test_id=zig-uk-docs-exact-carry \
+             layer=transport bytes={} semantic_authority=SENS \
+             semantic_admission=NOT_TESTED", bytes.len()
+        );
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_linter_carrier_uk_docs_refuses_without_zig() {
+        let error = uk_docs_source_zig_only()
+            .expect_err("Rust must not embed/read the SENS UK docs source");
+        assert!(error.contains("RUST_ZIG_ONLY: uk-docs requires Zig; no Rust source fallback"),
+                "unexpected denial: {error}");
+        println!(
+            "ZIG_UK_DOCS_NO_FALLBACK_PASS test_id=zig-uk-docs-deny-no-zig \
+             layer=transport semantic_authority=SENS"
+        );
+    }
+
     #[test]
     fn core_catalog_is_byte_sid() {
         let output = render_names("core").expect("core catalog");

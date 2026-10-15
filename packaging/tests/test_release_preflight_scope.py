@@ -57,6 +57,16 @@ def require_manual_preflight(source: str) -> None:
     if len(events) != len(set(events)):
         raise AssertionError("RELEASE_BLOCKED: duplicate preflight event")
 
+    # The exact release migration job cannot be conditional or warn-only.
+    job = re.search(r"(?m)^  release-preflight:[ \t]*$", source)
+    if job is None:
+        raise AssertionError("RELEASE_BLOCKED: missing release-preflight job")
+    next_job = re.search(r"(?m)^  [a-zA-Z0-9_-]+:", source[job.end():])
+    job_end = job.end() + next_job.start() if next_job else len(source)
+    job_body = source[job.end():job_end]
+    if re.search(r"(?m)^    (?:if|continue-on-error):", job_body):
+        raise AssertionError("RELEASE_BLOCKED: Zig release job must be unconditional")
+
     # Require an executable step, not a textual token elsewhere in YAML.
     # These are intentionally single-line, unquoted run: commands: no shell
     # wrappers, error suppression, substitutions or release evidence by echo.
@@ -86,6 +96,22 @@ def require_manual_preflight(source: str) -> None:
     if step is None:
         raise AssertionError("RELEASE_BLOCKED: missing executable Zig corridor step")
     body = step.group("body")
+
+    # YAML can put conditional metadata AFTER a block of live shell text.
+    next_step = re.search(r"(?m)^      - ", source[step.end():])
+    step_end = step.end() + next_step.start() if next_step else len(source)
+    step_scope = source[step.start():step_end]
+    if re.search(r"(?m)^        (?:if|continue-on-error):", step_scope):
+        raise AssertionError("RELEASE_BLOCKED: Zig release step must be unconditional")
+
+    # Mandatory strict shell must start first and never relax after.
+    live_lines = [
+        line.strip() for line in body.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if (not live_lines or live_lines[0] != "set -euo pipefail"
+            or any(re.match(r"^set\s+\+", line) for line in live_lines[1:])):
+        raise AssertionError("RELEASE_BLOCKED: Zig release shell must remain strict")
     physical_match = re.search(
         r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", body
     )
@@ -462,6 +488,44 @@ class ReleasePreflightScopeTest(unittest.TestCase):
             AssertionError, "missing live Zig H2 migration physical corpus"
         ):
             require_manual_preflight(reordered)
+
+    def test_zig_release_failclosed_metadata_and_shell_mutants(self):
+        require_manual_preflight(self.workflow)
+        job = "    timeout-minutes: 45\n"
+        shell = "          set -euo pipefail\n"
+        last = "          " + H2_CORPUS_COMMAND + "\n"
+        for anchor in (job, shell, last):
+            self.assertIn(anchor, self.workflow)
+        for inject in ("    if: false\n", "    continue-on-error: true\n"):
+            with self.subTest(job=inject):
+                changed = self.workflow.replace(job, job + inject, 1)
+                with self.assertRaisesRegex(
+                    AssertionError, "Zig release job must be unconditional"
+                ):
+                    require_manual_preflight(changed)
+        for inject in ("        if: false\n",
+                       "        continue-on-error: true\n"):
+            with self.subTest(step=inject):
+                changed = self.workflow.replace(last, last + inject, 1)
+                with self.assertRaisesRegex(
+                    AssertionError, "Zig release step must be unconditional"
+                ):
+                    require_manual_preflight(changed)
+        for inject in ("          set +e\n", "          set +u\n",
+                       "          set +o pipefail\n",
+                       "          set +o errexit\n"):
+            with self.subTest(shell=inject):
+                changed = self.workflow.replace(shell, shell + inject, 1)
+                with self.assertRaisesRegex(
+                    AssertionError, "Zig release shell must remain strict"
+                ):
+                    require_manual_preflight(changed)
+        changed = self.workflow.replace(
+            shell, "          echo bypass\n" + shell, 1)
+        with self.assertRaisesRegex(
+            AssertionError, "Zig release shell must remain strict"
+        ):
+            require_manual_preflight(changed)
 
     def test_negative_guard_rejects_floating_event_mapping(self):
         broken = self.workflow.replace(
