@@ -29,6 +29,30 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("f3c-decode-validates-t5", completed.stdout)
         self.assertIn("f3c-bounds-reported-lengths", completed.stdout)
 
+    def test_single_compiled_zig_transport_module_has_live_feature_guard(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_shared_zig_module"]
+        blocked = module["CorridorBlocked"]
+        trit = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+        library = (ROOT / "crates/sens-cli/src/lib.rs").read_text(encoding="utf-8")
+        check(trit, library)  # Production symbol comes from one linked Rust library.
+        for broken in (
+            trit.replace("use sens_cli::zig_transport;", "mod zig_transport;", 1),
+            trit.replace("use sens_cli::zig_transport;", "// use sens_cli::zig_transport;", 1),
+            trit.replace('#[cfg(feature = "zig-transport")]\nuse sens_cli::zig_transport;',
+                         '#[cfg(test)]\nuse sens_cli::zig_transport;', 1),
+        ):
+            with self.subTest(mutant=broken[:60]), self.assertRaises(blocked):
+                check(broken, library)
+        for broken in (
+            library.replace("pub mod zig_transport;", "mod zig_transport;", 1),
+            library.replace("pub mod zig_transport;", "// pub mod zig_transport;", 1),
+            library.replace('#[cfg(feature = "zig-transport")]\npub mod zig_transport;',
+                            '#[cfg(test)]\npub mod zig_transport;', 1),
+        ):
+            with self.subTest(mutant=broken[:60]), self.assertRaises(blocked):
+                check(trit, broken)
+
     def test_linter_asset_crosses_only_live_zig_abi_and_rejects_bypass_mutants(self) -> None:
         """One migrated Rust→SENS edge stays CUT: direct embed never returns."""
         module = runpy.run_path(str(SCRIPT))
