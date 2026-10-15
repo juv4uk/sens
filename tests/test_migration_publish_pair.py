@@ -21,7 +21,7 @@ class SameStemPublicationTest(unittest.TestCase):
         self.carrier = self.root / "branch.sens"
         self.view = self.root / "branch"
         self.carrier_bytes = bytes.fromhex("6738")
-        self.view_bytes = b"10 110 00\\n"
+        self.view_bytes = b"10 110 00\n"
 
     @staticmethod
     def write_new(path: Path, data: bytes) -> None:
@@ -36,6 +36,7 @@ class SameStemPublicationTest(unittest.TestCase):
         self.publish()
         self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
         self.assertEqual(self.view.read_bytes(), self.view_bytes)
+        self.assertTrue(self.view_bytes.endswith(bytes([10])))
 
     def test_existing_view_blocks_before_any_carrier_publication(self):
         self.view.write_bytes(b"existing")
