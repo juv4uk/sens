@@ -61,6 +61,30 @@ def check_embedded_asset_watches(build_source: str, zig_root_source: str) -> Non
             )
 
 
+def check_recursive_zig_codec_watch(source: str) -> None:
+    """An added transitive Zig module must always invalidate Cargo's archive."""
+    branch = 'if env::var_os("CARGO_FEATURE_ZIG_TRANSPORT").is_none() {'
+    watch = 'println!("cargo:rerun-if-changed=../../research/zig-codecs");'
+    marker = source.find(branch)
+    if marker < 0:
+        raise ValueError("ZIG_CODEC_DEPENDENCY_RED layer=build missing=feature_switch")
+    # A comment, a duplicate, or a watch behind early return is not evidence.
+    active = [line.strip() for line in source[:marker].splitlines()
+              if not line.lstrip().startswith("//")]
+    full = [line.strip() for line in source.splitlines()
+            if not line.lstrip().startswith("//")]
+    if active.count(watch) != 1 or full.count(watch) != 1:
+        raise ValueError(
+            "ZIG_CODEC_DEPENDENCY_RED layer=build "
+            "missing_or_late=recursive_zig_source_tree_watch"
+        )
+    tree = ROOT / "research/zig-codecs"
+    if not tree.is_dir() or not (tree / "transport_abi.zig").is_file():
+        raise ValueError(
+            "ZIG_CODEC_DEPENDENCY_RED layer=build missing=physical_zig_source_tree"
+        )
+
+
 def check_ffi_release_safety(source: str) -> None:
     """Require ReleaseSafe + bundled Zig 0.16 compiler-rt stack probes."""
     clean = re.sub(r"(?m)^[ \t]*//[^\n]*$", "", source)
@@ -134,6 +158,45 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
         ghost += '\n// .arg("build-lib").arg("zig_transport_root.zig").arg("-O").arg("ReleaseSafe").arg("-fcompiler-rt").arg("-lc")\n'
         with self.assertRaisesRegex(ValueError, "ZIG_RELEASE_SAFETY_RED"):
             check_ffi_release_safety(ghost)
+
+    def test_nested_zig_016_codec_imports_invalidate_rust_link(self) -> None:
+        source = BUILD.read_text(encoding="utf-8")
+        check_recursive_zig_codec_watch(source)
+
+        # Cargo Book: directory watch scans the ENTIRE source tree, including
+        # a new transport submodule not yet present in the handwritten list.
+        tree = ROOT / "research/zig-codecs"
+        existing_nested = tree / "transport/e1_writer.zig"
+        future_nested = tree / "transport/submodules/next_physical_codec.zig"
+        self.assertTrue(existing_nested.is_file())
+        self.assertTrue(existing_nested.is_relative_to(tree))
+        self.assertTrue(future_nested.is_relative_to(tree))
+        self.assertNotIn(
+            'cargo:rerun-if-changed=../../research/zig-codecs/transport/submodules/',
+            source,
+        )
+
+        watch = '    println!("cargo:rerun-if-changed=../../research/zig-codecs");'
+        self.assertEqual(source.count(watch), 1)
+        mutations = {
+            "missing": source.replace(watch, "", 1),
+            "duplicate": source.replace(watch, watch + "\n" + watch, 1),
+            "comment-only": source.replace(watch, "    // " + watch.strip(), 1),
+            "wrong-directory": source.replace(
+                watch,
+                watch.replace("/research/zig-codecs", "/research/zig-codecs/t5"),
+                1,
+            ),
+            "after-feature-return": source.replace(watch, "", 1).replace(
+                '    let root = PathBuf::from(',
+                watch + "\n    let root = PathBuf::from(',
+                1,
+            ),
+        }
+        for name, mutant in mutations.items():
+            with self.subTest(mutation=name):
+                with self.assertRaisesRegex(ValueError, "ZIG_CODEC_DEPENDENCY_RED"):
+                    check_recursive_zig_codec_watch(mutant)
 
     def test_every_zig_embedded_asset_invalidates_cargo_archive(self) -> None:
         source = BUILD.read_text(encoding="utf-8")
