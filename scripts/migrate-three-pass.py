@@ -574,18 +574,24 @@ class Resolver:
                 raise MigrationError(
                     "D3:000 is EMPTY data, never an executable call head", tok,
                 )
-            if width in (7, 9, 10):
-                if width == 9 and t in self.d9_residents:
-                    # Ratified D9 functions are executable
-                    pass
-                else:
-                    role = {7: "D7 keyboard text/data",
-                            9: "D9 owner residency without a verified callable route",
-                            10: "D10 owner codebook without runtime admission"}[width]
-                    raise MigrationError(
-                        f"exact D{width}:{t} is {role}; executable mechanism required",
-                        tok,
-                    )
+            if width == 7:
+                raise MigrationError(
+                    f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
+                    tok,
+                )
+            if width == 9:
+                # Contract 11.9: residency is not runtime callability. A full
+                # D9 catalogue must never become an implicit admission list.
+                raise MigrationError(
+                    f"D9 {t}: відсутній доказ допущеного механізму виклику; "
+                    "ратифікована резидентність не є callability",
+                    tok,
+                )
+            if width == 10:
+                raise MigrationError(
+                    f"D10 {t}: ратифікований кодбук не надає runtime admission",
+                    tok,
+                )
             if width > 10:
                 raise MigrationError(
                     f"unqualified {width}-bit call head has no admitted domain mechanism",
@@ -597,31 +603,11 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
-            # NEW REALITY (owner, 2026-10-15): there is no D8. An eight-bit head
-            # (SID8/Sens8-era) is not executable; it needs a current named D3-D6
-            # resident, else it fails closed as a retired SID8-era head.
+            # Core.D8 is ratified, but an anonymous historical eight-bit
+            # head cannot inherit D8 identity or an executable mechanism.
+            # Only independently proved current-domain routing may admit it.
             raise MigrationError(
                 f"retired SID8-era head {t}: no current named D3-D6 resident",
-                tok,
-            )
-
-        # D7 є текстовою/фонемною ідентичністю, не викликаною функцією.
-        # Для D9 таблиця резидентів сама по собі не доводить виконуваність.
-        # Без окремого допущеного механізму забороняємо обидві голови.
-        if len(t) in (7, 9) and set(t) <= set("01"):
-            if len(t) == 7:
-                raise MigrationError(
-                    f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
-                    tok,
-                )
-            # An admitted D9 resident IS the ratified callable route (the earlier
-            # width-9 check already accepted it); only a NON-resident 9-bit head
-            # lacks a proven mechanism. Keep the two checks consistent.
-            if t in self.d9_residents:
-                self.counts["already-exact"]+=1
-                return [t],"already-exact"
-            raise MigrationError(
-                f"D9 {t}: відсутній доказ допущеного механізму виклику",
                 tok,
             )
 
