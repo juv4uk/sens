@@ -157,7 +157,10 @@ def run(args: argparse.Namespace) -> dict:
     d9_residents = set(data["domains"].get("D9", {}).get("residents", {}))
     if source_era == "current" and "D8" not in data.get("current_domains", ()):
         raise ValueError("current D8 source requires owner-ratified D8 foundation")
-    my, upper = mig.build_three_pass_maps(
+    # The current builder also returns historical SID8 bridge PROVENANCE.
+    # This batch deliberately refuses legacy source-era input; the bridge
+    # must never become a current D8 identity or a callable fallback.
+    my, upper, _historical_bridge_provenance = mig.build_three_pass_maps(
         data, INPUTS["domain_surfaces"], INPUTS["semantic_generated"],
         INPUTS["semantic_registry"], INPUTS["necessary_forms"]
     )
