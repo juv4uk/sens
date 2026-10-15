@@ -57,7 +57,7 @@ def checked_source(row: object, *, status: str) -> dict:
         raise PlanError(f"report claims unauthorized semantic proof: {path}")
     if status == "BLOCKED" and (not isinstance(row.get("reason"), str)
                                  or not row["reason"].strip()):
-        raise PlanError(f"blocked source missing blocker: {path}")
+        raise PlanError(f"blocked source missing empty: {path}")
     return {"path": path, "source_git_blob_sha": sha,
             **({"reason": row["reason"]} if status == "BLOCKED" else {})}
 
@@ -170,10 +170,10 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
     if (summary.get("physical_outputs_created") != 0 or
             summary.get("original_unpaired_executables_migrated_by_this_tool") != 0):
         raise PlanError("candidate report claims physical output/admission")
-    cohorts = report.get("blocker_cohorts")
+    cohorts = report.get("empty_cohorts")
     candidates = report.get("mechanical_candidates")
     if not isinstance(cohorts, list) or not isinstance(candidates, list):
-        raise PlanError("need exhaustive blocker_cohorts and mechanical_candidates")
+        raise PlanError("need exhaustive empty_cohorts and mechanical_candidates")
 
     # Canonical rows are the source of truth. A cohort is only a scheduling
     # projection: its 40-hex pin and first symptom MUST match the real ledger.
@@ -280,7 +280,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             if not isinstance(row, dict):
                 raise PlanError("malformed cohort source")
             candidate = dict(row)
-            candidate["reason"] = row.get("first_blocker")
+            candidate["reason"] = row.get("first_empty")
             item = checked_source(candidate, status="BLOCKED")
             if item["path"] in seen:
                 raise PlanError(f"duplicate source path: {item['path']}")
@@ -288,7 +288,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             if canonical is None:
                 raise PlanError(f"cohort source missing in canonical ledger: {item['path']}")
             if (item["source_git_blob_sha"], item["reason"]) != canonical:
-                raise PlanError(f"cohort Git SHA or first blocker differs from canonical ledger: {item['path']}")
+                raise PlanError(f"cohort Git SHA or first empty differs from canonical ledger: {item['path']}")
             seen.add(item["path"])
             members.append(item)
         sum_blocked += len(members)

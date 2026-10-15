@@ -9,7 +9,9 @@ Ratified current D8 began 2026-10-06 (#3960), not in the historical flat era.
 import argparse
 import hashlib
 import json
+import os
 import re
+import stat
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -48,7 +50,29 @@ def tracked_source_bytes(root: Path, relative: Path) -> bytes:
             raise ZigSourceBlocked("linked-zig-source")
     if not source.is_file():
         raise ZigSourceBlocked("missing-or-nonregular-zig-source")
-    return source.read_bytes()
+    before = source.lstat()
+    if not stat.S_ISREG(before.st_mode):
+        raise ZigSourceBlocked("missing-or-nonregular-zig-source")
+    # A hardlink passes is_file() and is_symlink() but aliases bytes that
+    # can be modified through an untracked path. Do not certify that inode.
+    if before.st_nlink != 1:
+        raise ZigSourceBlocked("hardlinked-zig-source")
+    with source.open("rb") as stream:
+        opened = os.fstat(stream.fileno())
+        content = stream.read()
+    after = source.lstat()
+    if source.is_symlink():
+        raise ZigSourceBlocked("linked-zig-source")
+    # Bind the receipt to one unchanged regular inode, not a path swapped
+    # between the symlink preflight and content read.
+    if (not stat.S_ISREG(opened.st_mode) or not stat.S_ISREG(after.st_mode)
+            or (before.st_dev, before.st_ino) != (opened.st_dev, opened.st_ino)
+            or (before.st_dev, before.st_ino) != (after.st_dev, after.st_ino)
+            or before.st_size != len(content) or after.st_size != len(content)
+            or before.st_mtime_ns != after.st_mtime_ns
+            or opened.st_nlink != 1 or after.st_nlink != 1):
+        raise ZigSourceBlocked("changed-zig-source")
+    return content
 
 
 def scan(path, content):
@@ -86,11 +110,15 @@ def self_test():
         if tracked_source_bytes(root, Path("valid.zig")) != regular.read_bytes():
             raise AssertionError("normal tracked Zig file became unreadable")
         (root / "linked.zig").symlink_to(regular)
+        outside = root / "untracked-external-source"
+        outside.write_bytes(b"ContaminatedSens8Alias")
+        (root / "hardlinked.zig").hardlink_to(outside)
         (root / "source-dir").mkdir()
         (root / "source-dir" / "nested.zig").write_bytes(b"pub const x = 1;\n")
         (root / "linked-dir").symlink_to(root / "source-dir", target_is_directory=True)
         for relative, expected in (
             ("linked.zig", "linked-zig-source"),
+            ("hardlinked.zig", "hardlinked-zig-source"),
             ("linked-dir/nested.zig", "linked-zig-source"),
             ("absent.zig", "missing-or-nonregular-zig-source"),
         ):
@@ -101,7 +129,7 @@ def self_test():
                     raise AssertionError(f"wrong fail-closed reason for {relative}: {exc}") from exc
             else:
                 raise AssertionError(f"tracked Zig source bypassed fail-closed: {relative}")
-    print("ZIG_PURITY_SELF_TEST_PASS: retired IDs rejected; regular/symlink/missing controls passed")
+    print("ZIG_PURITY_SELF_TEST_PASS: retired IDs rejected; regular/symlink/hardlink/missing controls passed")
 
 
 def audit(report_path):

@@ -17,8 +17,7 @@ const USAGE: &str =
 // Compiled only in the official Zig-transport build. Rust validates SENS
 // program syntax; Zig owns all physical wire bytes for these commands.
 #[cfg(feature = "zig-transport")]
-#[path = "../zig_transport.rs"]
-mod zig_transport;
+use sens_cli::zig_transport;
 
 fn decode_f3_carrier(bytes: &[u8]) -> Result<Vec<u8>, String> {
     #[cfg(feature = "zig-transport")]

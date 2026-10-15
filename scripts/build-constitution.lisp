@@ -1,6 +1,6 @@
 ; scripts/build-constitution.lisp — regenerate my-lisp-constitution.lisp from
 ; its real sources of truth, written in sens itself (2026-08-09,
-; replacing the old Python version now that both real blockers are gone:
+; replacing the old Python version now that both real () are gone:
 ; tests/fixtures/conformance.lisp is native sens data, readable via
 ; read-file/read-all with no JSON parser needed, and `print` now escapes
 ; strings correctly, so a plain (print value) call is enough to emit

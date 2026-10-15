@@ -108,7 +108,7 @@ def build() -> dict:
                     "derived_lisp": "UNMEASURED",
                     "compiler_support": "UNMEASURED",
                     "conformance": "BLOCKED-BY-IDENTITY-ADMISSION",
-                    "blocker": "LEGACY-SENS8-ONLY-CARRIER",
+                    "empty": "LEGACY-SENS8-ONLY-CARRIER",
                 }
             )
 

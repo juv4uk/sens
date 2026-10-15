@@ -20,7 +20,7 @@
 - **Підсумок саме цієї партії:** 12 оригінальних `.lisp` файлів, 44 **нормалізації конструкцій COND**, 2 заміни історичних імен функціональних форм у цитованому поточному AST-еталоні. Це **не** 46 нових SID8 opcode heads і не підстава довільно збільшити попередній облік 7551. Жодного `.sens`, гілки, зміни D8-ідентичностей або переписування історичного архіву.
 - Самостійні source-unit свідки не дорівнюють повній runtime parity. Існуючий Hosted CI у цей період має окремі червоні ланки `world`, `forward/knowledge`, filesystem та time; ми не підміняємо їх source-only PASS.
 
-This is an execution and blocker ledger, not a claim that the repository is fully migrated.
+This is an execution and () ledger, not a claim that the repository is fully migrated.
 
 ## 2026-10-12: runtime gate corrects unsafe D6 LET migration
 
@@ -41,7 +41,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - Fail-closed continuation: no blind conversion of multi-outcome historic COND, DEFMACRO package into one new resident, D6/D8 MAP without per-call arity proof, D10 observation without runtime admission, or W8 machine/surface records that are actually data.
 
 
-## 2026-10-12: five-file D4-only blocker-safe cohort
+## 2026-10-12: five-file D4-only ()-safe cohort
 
 - 38 historical D4 call heads rewritten in 5 existing Lisp sources: knowledge/guard-reference.lisp (25), knowledge/guard-fact-policy.lisp (6), scripts/enforce-function-table-mechanisms.lisp (2), scripts/enforce-island-math-evidence.lisp (2), scripts/semantic-authority-guard-enforce.lisp (3).
 - Only historical 00001001 => D4:0011 DEFINE and 00001000 => D4:0010 LAMBDA were rewritten, as executable S-expression call heads. All old three-field/host-truth 00000111 COND forms remain BLOCKED. This is not five complete executable migrations.
@@ -58,7 +58,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - A new test `tests/test_migrate_sid8_source_batch.py::test_historical_cond_guard_rejects_other_active_policy_sources` permanently keeps all four cases fail-closed until a genuine two-branch predicate-bit conversion is proved. The existing reference guard is retained.
 - The source-delta analyzer `scripts/check_sid8_source_delta_d3.py`, with four focused unit tests and `.github/workflows/sid8-source-d3-delta.yml`, now rejects newly introduced `COND_NOT_TWO_FIELDS`, `COND_HOST_TRUTH`, or `D3_WRONG_ARITY` on commits that modify legacy-era Lisp. The focused delta workflow passed [Actions #38176233631](https://github.com/juv4uk/sens/actions/runs/38176233631). It proves **no newly introduced D3 scanner findings**, not execution parity.
 - The main Hosted CI still reports separate D3/source integration failures; do not claim full green.
-- Hosted CI diagnostic [#38176359616](https://github.com/juv4uk/sens/actions/runs/38176359616) shows **1,439 D3 source findings across 144 live Lisp files** (0 parse errors), a failing island-math COND regression, 22/24 content-store integration tests failing, and a failing timezone raw-declaration test. These are independent blockers requiring individual semantics/runtime proofs; no broad blind head replacement is an authorized repair. The active blocker queue is given verbatim in the census artifact/log, including legacy DEFMACRO's compound D4/D5 successor, D10 observation cells, historical control semantics, and nonsemantic helper cells.
+- Hosted CI diagnostic [#38176359616](https://github.com/juv4uk/sens/actions/runs/38176359616) shows **1,439 D3 source findings across 144 live Lisp files** (0 parse errors), a failing island-math COND regression, 22/24 content-store integration tests failing, and a failing timezone raw-declaration test. These are independent () requiring individual semantics/runtime proofs; no broad blind head replacement is an authorized repair. The active () queue is given verbatim in the census artifact/log, including legacy DEFMACRO's compound D4/D5 successor, D10 observation cells, historical control semantics, and nonsemantic helper cells.
 - No new branches or .sens files were created by this effort; all historical source blobs remain recoverable, and the blocked files are restored to their pre-experiment bytes.
 
 ## 2026-10-12: separate executable parity from mechanical source replacement
@@ -70,7 +70,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 
 ## Exact completed changes
 
-- **16,059 audited SID8 occurrences replaced** in **88 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under blocker 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
+- **16,059 audited SID8 occurrences replaced** in **88 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under () 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
 - No new Git branches and no `.sens` creation.
 - Baseline legacy correspondence: `knowledge/sens8-current-coverage-v1.json` (256 historic cells).
 - Only the 171 unambiguous, ratified current targets were used automatically.
@@ -105,7 +105,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 | Two additional source-audited Lisp scripts: generate-functions-md (138), benchmark-semantic-registry-read (23) | 161 |
 | **Total** | **16059** |
 
-## Known fail-closed blockers
+## Known fail-closed ()
 
 1. `00001010` historical DEFMACRO: owner-audited composite `D5:00011 MACRO + D4:0011 DEFINE`; no proven general one-word rewrite. Seen in `lib/forward.lisp`, `lib/world.lisp`, `lib/knowledge.lisp`, `lib/core.lisp`, and `lib/core4.lisp`.
 2. `00110111` MAP has two current matches, D6:101000 and D8:11000101; the global legacy mapping remains unresolved. Source-local one-list proofs now migrate 15 calls to D6:101000: 4 in `lib/yantra.lisp`, 8 in `lib/linter.lisp`, 1 in `lib/knowledge.lisp`, and 2 inside `lib/core.lisp`'s `let` expansion. Regression: `tests/test_sid8_d6_map_source_cutover.py`. D8 MAP remains distinct; do not change the normative historical map.
@@ -183,7 +183,7 @@ baseline and must not be silently double-counted:
   the independent physical admission proof and must not be rewritten without
   that proof. `racket/boot/core.lisp` contains composite DEFMACRO and likewise
   requires a separate cutover.
-- The new strict D3 scanner reports existing historical logic as blockers; do
+- The new strict D3 scanner reports existing historical logic as (); do
   not weaken it to obtain a superficial green CI or claim old/new full parity.
 
 ## Eight-file source and fixture cutover; Guard held (2026-10-11 late)

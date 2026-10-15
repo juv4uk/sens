@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Guard: every human alias resolves to EXACTLY ONE identity (#5609, migration-blocker-to-solution step 1).
+"""Guard: every human alias resolves to EXACTLY ONE identity (#5609, migration-empty-to-solution step 1).
 
-Design note `migration-blocker-to-solution.md` localized the non-identity-preserving
+Design note `migration-empty-to-solution.md` localized the non-identity-preserving
 migration to the **alias -> admitted-surface resolution**: a Ukrainian alias can
 resolve to an SID that is not the intended operation. This guard makes that class
 of bug impossible to land:

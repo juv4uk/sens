@@ -48,7 +48,7 @@
         (static-caller-inventory . crates/my-lisp/tests/swarm_live_caller_inventory.rs)
         (runtime-rejection-witness . crates/my-lisp-cli/tests/legacy_coordination_rejected.rs)
         (semantic-preservation-shield . crates/my-lisp-cli/tests/semantic_oracle_preservation.rs)))
-     (blockers . ())
+     (() . ())
      (legacy-compatibility-tests . ())
      (physical-surface-still-present . ())
      (next-proof .

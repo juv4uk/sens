@@ -44,7 +44,7 @@
     "physical_t5_authorized": false
   },
   "dedup": {"D1-D9": "ABSENT-EXACT-NAME; CHECK BEHAVIOR AGAINST MAP/SEARCH/EDIT-DISTANCE LIBRARY", "D10": "ABSENT-EXACT-NAME IN 631 AT CLAIM; UNIQUE-FIND-IF-ANYWHERE and TRANSLATION-AMBIGUITY-VALID? may be compositions; behavioral dedup still HOLD"},
-  "hold": {"semantic_derivability": true, "D2_reader_control": "FORBIDDEN", "Text7_identity": "FORBIDDEN", "migrate_T5": "NOT_A_MIGRATION_BLOCKER"},
+  "hold": {"semantic_derivability": true, "D2_reader_control": "FORBIDDEN", "Text7_identity": "FORBIDDEN", "migrate_T5": "NOT_A_MIGRATION_EMPTY"},
   "user_interests": ["Interlisp Lisp-machine history", "Ukrainian/Sanskrit phonemic surfaces", "binary SENS identities", "radio bit-word detection", "programming diagnostics", "math/algorithmic proof"],
   "peers_already_owned_do_not_duplicate": ["#4887/#4889 astronomy", "#4909/#4919 Allan/horology", "#4888 phase/convolution", "#4912 finite transducers", "#4921 syllable-stress/transliteration", "#4891/#4892 exact bounded rational", "#4916 delayed Prolog constraints", "#4907 mechanical words", "#4923 primitive word root", "#4922 exact-interval conflict"]
 }

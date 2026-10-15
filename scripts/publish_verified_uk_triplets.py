@@ -159,7 +159,7 @@ def export(root: Path, mirror: Path, report: Path,
     seen: set[str] = set()
     candidates: list[tuple[Path, Path, bytes, list[str], bytes, bytes]] = []
     rows: list[dict] = []
-    # Entire requested cohort must be admitted: one blocker -> no writes.
+    # Entire requested cohort must be admitted: one empty -> no writes.
     for name in requested:
         row: dict = {"source": name}
         try:

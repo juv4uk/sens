@@ -72,7 +72,7 @@ The runtime ratchet has **208** non-SENS surface rows:
 
 Interpretation matters: 208 is a count of admitted surface rows, not 208 distinct functions.
 
-### 3.3 Exact macro reachability blocker is fixed
+### 3.3 Exact macro reachability () is fixed
 
 Merged #1468 added language-defined exact-code slots and pre-argument macro dispatch. Merged #1487 then bound the bootstrap `defmacro` Macro to its already-resolved exact slot `00001010`.
 

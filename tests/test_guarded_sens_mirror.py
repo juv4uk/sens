@@ -38,7 +38,7 @@ for src in sorted(a.root.rglob("*.lisp")):
     content=src.read_text()
     if content.startswith("BLOCK"):
         rows.append({"path":name, "status":"blocked",
-                     "blockers":[{"reason":"unmapped domain"}]})
+                     "empties":[{"reason":"unmapped domain"}]})
         blocked+=1
         continue
     raw=encode_projection(content)

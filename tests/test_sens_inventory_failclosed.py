@@ -71,7 +71,7 @@ class FailClosedInventory(unittest.TestCase):
         row = self.inspect()["files"][0]
         self.assertEqual(row["status"], inventory.PHYSICAL_ONLY)
         self.assertEqual(len(row["typed_word_sha256"]), 64)
-        self.assertIn("uk_blocker", row)
+        self.assertIn("uk_empty", row)
         self.assertFalse(row["release_admitted"])
         self.assertEqual(row["independent_execution_oracle"], "NOT_VERIFIED")
 

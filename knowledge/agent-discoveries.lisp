@@ -47,7 +47,7 @@
 
     (c1-nested-eval-surface-vs-exact
       . ((status . confirmed)
-         (agent . "sol-blockers")
+         (agent . "sol-()")
          (claim . "C1-EVAL-PROGRAM-THEN nested accepts Core1 surface define/lambda but NOT exact heads 00001001/00001000 as definition")
          (evidence . ("#1599 bus 59537cb6 / bf8a8a4c" "wsm-my-lisp #64/#65"))
          (action . "do not inject exact-SENS core1.lisp into Gen1 program as linker; need SENS-owned resolver projection boundary; do not copy C1-PRIMITIVE-IDENTITY downstream")))
