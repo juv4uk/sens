@@ -169,39 +169,9 @@ mod exact_t5_cutover_tests {
         assert!(!matches!(exact[0].kind, ExprKind::Call(_, _)));
     }
 
-    /// The FULL truth law is executable binary SENS. The host has no
-    /// ATOM/EQ/COND truth table, only a typed D1 verdict transport.
-    #[test]
-    fn sens_owned_binary_d3_logic_selftest_and_one_bit_falsifier() {
-        let passing = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
-        let falsifier = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
-        let good_words = decode_ternary_words(passing).expect("physical SENS selftest T5");
-        let bad_words = decode_ternary_words(falsifier).expect("physical SENS falsifier T5");
-
-        for (physical, words, visible, expected_verdict) in [
-            (passing.as_slice(), &good_words,
-                include_str!("../../../tests/fixtures/semantic/exact-d3-logic-selftest").trim_end(), true),
-            (falsifier.as_slice(), &bad_words,
-                include_str!("../../../tests/fixtures/semantic/exact-d3-logic-mutant").trim_end(), false),
-        ] {
-            assert_eq!(crate::render_ternary_words_spaced(words), visible);
-            assert_eq!(encode_ternary_words(words).unwrap().as_slice(), physical);
-            let value = eval_t5_program(physical, &mut Session::default())
-                .expect("the binary SENS oracle runs").value;
-            // The entire semantic assertion lives in the executed .sens
-            // program. This checks only its one-bit D1 verdict channel.
-            assert_eq!(value.as_predicate_bit(), Some(expected_verdict));
-        }
-        // The negative program is a one-SEMANTIC-bit mutant, even though
-        // base-3 T5 packing may change multiple physical wire bits.
-        assert_eq!(good_words.len(), bad_words.len());
-        let mutated_bits: u32 = good_words.iter().zip(bad_words.iter())
-            .map(|(a, b)| {
-                assert_eq!(a.width(), b.width(), "domain width cannot mutate");
-                (a.packed_bits() ^ b.packed_bits()).count_ones()
-            }).sum();
-        assert_eq!(mutated_bits, 1, "negative SENS program changes exactly one D1 payload bit");
-    }
+    // SENS-owned positive/negative physical selftest is executed by the
+    // actual Zig-backed sens-trit binary, not embedded as project source
+    // in this Rust core. See rust_zig_sens_file_link.rs in sens-cli/tests/.
 
     /// 2046 are POSSIBLE exact coordinates, not 2046 admitted functions.
     /// Rust checks only the physical transport, never defines semantics.
