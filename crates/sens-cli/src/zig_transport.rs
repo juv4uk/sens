@@ -5,6 +5,8 @@
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
+    // Coordinate-only D1..D10 physical validation; no runnable D10 admission.
+    fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;
     fn sens_zig_t5_encode_be3(
         input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
     ) -> isize;
@@ -60,6 +62,17 @@ pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
     version()?;
     if unsafe { sens_zig_t5_validate(bytes.as_ptr(), bytes.len()) } != 0 {
         return Err("Zig physical T5 rejected; no SENS execution".into());
+    }
+    Ok(())
+}
+
+/// Physical-only D1..D10 coordinate check through the same sterile Zig ABI.
+/// A valid D10 word is data, never an executable SENS function or numeric value.
+/// The ordinary T5 ingest and D1..D9 executable profile are unaffected.
+pub fn validate_t5_coordinates(bytes: &[u8]) -> Result<(), String> {
+    version()?;
+    if unsafe { sens_zig_t5_validate_coordinates(bytes.as_ptr(), bytes.len()) } != 0 {
+        return Err("Zig D1..D10 coordinate-only physical validation rejected".into());
     }
     Ok(())
 }
@@ -285,7 +298,7 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_e1_words, decode_f3, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words};
+    use super::{decode_e1_words, decode_f3, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5, validate_t5_coordinates};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -293,6 +306,27 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
+    }
+
+    #[test]
+    fn coordinate_d10_is_zig_physical_data_not_executable_t5() {
+        // The 10 exact zero bits encode as two T5 bytes. This is a
+        // coordinate-only Zig witness; Rust never decodes their meaning.
+        let d10 = [0x00, 0x00];
+        validate_t5_coordinates(&d10).expect("D10 exact physical coordinate");
+        assert!(validate_t5(&d10).is_err(), "D10 never enters executable D9");
+
+        // D1:1 is valid in both physical profiles.
+        let d1 = [0xa1];
+        validate_t5_coordinates(&d1).expect("D1 coordinate");
+        validate_t5(&d1).expect("D1 ordinary carrier");
+
+        // D11=eleven exact zero bits and canonical tail, or bad trits,
+        // is never accepted as D10 physical data.
+        for invalid in [&[0x00, 0x00, 0x50][..], &[0xff][..], &[][..]] {
+            assert!(validate_t5_coordinates(invalid).is_err(),
+                "invalid D10 coordinate candidate: {invalid:?}");
+        }
     }
 
     #[test]
