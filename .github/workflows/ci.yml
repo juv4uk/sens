@@ -1394,6 +1394,8 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
       - name: Rust→project dependency ledger (Zig-only burndown)
+        # Preserve actual evidence even if an earlier independent gate is RED.
+        if: ${{ !cancelled() }}
         # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
         # corridor. This writes the burndown ledger and fails if a NEW direct
         # dependency appeared -- the set may only shrink.
@@ -1421,6 +1423,8 @@ jobs:
         run: python3 scripts/check_guards_are_real.py .
 
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        # Preserve actual evidence even if an earlier independent gate is RED.
+        if: ${{ !cancelled() }}
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
         # prints the GO count and names the red gates -- report-only, never greenwashed.
         shell: bash
@@ -1439,6 +1443,8 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        # Preserve actual evidence even if an earlier independent gate is RED.
+        if: ${{ !cancelled() }}
         # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
         # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
         shell: bash
