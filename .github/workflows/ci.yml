@@ -1432,6 +1432,9 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        # Run the independent diagnostic even when an earlier Zig/migration
+        # gate fails. It NEVER overrides that failure or triggers another workflow.
+        if: ${{ !cancelled() }}
         # Checked Rust exact-Q witness, identical workload and checksum to the
         # independently executed Python research proxy. Native SENS side remains
         # UNVERIFIED without an admitted physical SENS exact-Q fixture.
