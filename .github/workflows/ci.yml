@@ -153,6 +153,10 @@ jobs:
           # for compatibility-only lib source; no separate workflow.
           echo 'test_id=d1-cond-tag-free-source-boundary layer=reader verdict=focused-test semantic_authority=SENS'
           cargo test --locked -p sens --test d1_canonical_source_value -- --nocapture
+          # Reader #5605: canonical bare W1 succeeds; legacy mixed 0/1 is
+          # still Number, not D1. One positive/negative focused regression.
+          echo 'test_id=d1-reader-legacy-boundary-cond layer=reader verdict=focused-test semantic_authority=SENS'
+          cargo test --locked -p sens --test d1_direct_projection canonical_bare_d1_cond_succeeds_while_mixed_legacy_bare_number_rejects -- --exact --nocapture
           # Canonical D2 COND carries bare W1 0/1, never #d1: in source.
           # Existing SENS-native oracle proves T5 physical round-trip and
           # keeps semantic verdicts inside binary SENS rather than host Rust.
