@@ -1431,15 +1431,17 @@ jobs:
           path: ${{ runner.temp }}/release-go-gate.json
           if-no-files-found: warn
 
-      - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
-        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
-        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+      - name: MATH — точний Q Rust-свідок, чесний статус SENS
+        # Rust runs the same Q corpus/checksum as the host-neutral reference.
+        # SENS timing remains UNVERIFIED until an admitted physical .sens fixture exists.
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p core-math-demand-rust --release
+          cargo test --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --bin paired_exact_q
+          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release --bin paired_exact_q
+          python3 -m unittest discover -s tests -p test_bench_math_sens_vs_rust.py -v
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
-            --json "$RUNNER_TEMP/math-bench.json"
+            --require-rust --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
         if: always()
