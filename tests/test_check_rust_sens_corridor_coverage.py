@@ -101,6 +101,35 @@ class CorridorCoverageTests(unittest.TestCase):
             "test_id=zig-same-file-ingress layer=transport expected=COVERAGE_OK",
         )
 
+    def test_cfg_test_only_zig_call_cannot_hide_production_bypass(self) -> None:
+        # A real Zig invocation in test-only Rust is NOT production FFI.
+        write_crate(
+            self.root, "testghost",
+            "fn physical() { sens::decode_binary_frame(&[]); }\n"
+            "#[cfg(test)]\n"
+            "fn fake_witness() { zig_transport::decode_t5_words(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        errors = self.module.check(self.root)
+        self.assertTrue(
+            any("crates/testghost/src/lib.rs" in error for error in errors),
+            f"test_id=zig-cfg-test-ghost layer=transport expected=BLOCKED actual={errors!r}",
+        )
+
+    def test_production_zig_call_still_proves_source_ingress_with_tests(self) -> None:
+        write_crate(
+            self.root, "realzig",
+            "fn physical() { zig_transport::decode_t5_words(&[]); "
+            "sens::decode_binary_frame(&[]); }\n"
+            "#[cfg(test)]\n"
+            "fn witness() { zig_transport::validate_t5(&[]); }\n",
+        )
+        write_registry(self.root, [])
+        self.assertEqual(
+            self.module.check(self.root), [],
+            "test_id=zig-prod-cfg-test-positive layer=transport expected=COVERAGE_OK",
+        )
+
     def test_comment_only_zig_reference_does_not_hide_bypass(self) -> None:
         write_crate(
             self.root, "comment", "fn f() { sens::decode_binary_frame(&[]); } "
