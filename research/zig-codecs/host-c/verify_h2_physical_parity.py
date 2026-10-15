@@ -323,8 +323,8 @@ def self_test() -> None:
         ("UPPERCASE_SHA", "A" * 40, str(sample_root), b""),
         ("NONHEX_SHA", "g" * 40, str(sample_root), b""),
         ("WRONG_ROOT", sample, "/tmp/other-h2-repository", b""),
-        ("TRACKED_DIRTY", sample, str(sample_root), b" M source.zig\\n"),
-        ("UNTRACKED_DIRTY", sample, str(sample_root), b"?? injected.c\\n"),
+        ("TRACKED_DIRTY", sample, str(sample_root), b" M source.zig\n"),
+        ("UNTRACKED_DIRTY", sample, str(sample_root), b"?? injected.c\n"),
     ):
         if source_snapshot_ok(candidate_sha, candidate_top, candidate_dirty, sample_root):
             raise PhysicalError(
