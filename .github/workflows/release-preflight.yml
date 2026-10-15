@@ -36,6 +36,8 @@ jobs:
           python3 -m unittest tests.test_check_rust_sens_corridor_coverage -v
           python3 scripts/check_corridor_axiom_binding.py .
           python3 -m unittest tests.test_check_corridor_axiom_binding -v
+          python3 scripts/report_rust_zig_sens_boundary.py
+          python3 -m unittest tests.test_rust_zig_sens_boundary -v
           python3 scripts/migration-zig-gate.py --require-zig
           # Zig 0.16 native test suite with release-like optimizations and safety.
           # Full migration proof + native physical test are separate GO inputs.
