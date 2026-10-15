@@ -574,6 +574,12 @@ class Resolver:
                     f"D7 {t}: фонемна/текстова ідентичність не є виконуваною головою",
                     tok,
                 )
+            # An admitted D9 resident IS the ratified callable route (the earlier
+            # width-9 check already accepted it); only a NON-resident 9-bit head
+            # lacks a proven mechanism. Keep the two checks consistent.
+            if t in self.d9_residents:
+                self.counts["already-exact"]+=1
+                return [t],"already-exact"
             raise MigrationError(
                 f"D9 {t}: відсутній доказ допущеного механізму виклику",
                 tok,
