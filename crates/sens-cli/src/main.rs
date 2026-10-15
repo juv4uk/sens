@@ -170,6 +170,20 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
 
+/// Isolated byte carrier. SENS decides how the contents are parsed and executed.
+fn linter_source_zig_only() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = zig_transport::linter_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|e| format!("ZIG_LINTER_CARRIER invalid UTF-8 surface: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: linter library requires Zig; no Rust project-source fallback".into())
+    }
+}
+
 fn main() {
     // Physical .sens is the exact binary entrypoint and needs no legacy
     // bootstrap or ambient host capabilities. Reject extra flags instead of
@@ -472,11 +486,17 @@ fn main() {
             }
             let filename = &args[2];
 
-            // Load linter
-            let linter_lib = include_str!("../../../lib/linter.lisp");
-            if let Ok(linter_ast) = parse(linter_lib) {
+            // Load unchanged bytes only through Zig; SENS retains Lisp semantics.
+            let linter_lib = match linter_source_zig_only() {
+                Ok(source) => source,
+                Err(error) => {
+                    eprintln!("Error loading linter through Zig: {error}");
+                    process::exit(2);
+                }
+            };
+            if let Ok(linter_ast) = parse(&linter_lib) {
                 if let Err(e) = eval_parsed_expressions(&linter_ast, &mut session) {
-                    eprintln!("Error loading linter: {}", e.render(linter_lib));
+                    eprintln!("Error loading linter: {}", e.render(&linter_lib));
                     process::exit(1);
                 }
             } else {
@@ -669,6 +689,23 @@ mod core_profile_bootstrap_tests {
         let physical = [0x63, 0x89, 0x06, 0xa1];
         let error = decode_physical_t5_words(&physical).expect_err("no Zig means no .sens ingress");
         assert!(error.contains("no Rust fallback"));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_linter_carrier_transports_real_source_without_rust_embed() {
+        let src = linter_source_zig_only().expect("live Zig C ABI must carry linter bytes");
+        assert!(!src.is_empty());
+        assert!(parse(&src).is_ok(), "SENS parser, not Zig, owns the source grammar");
+        assert!(!include_str!("main.rs").contains("include_str!(\\\"../../../lib/linter.lisp\\\")"));
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn zig_linter_carrier_refuses_absent_transport_before_lisp_load() {
+        let error = linter_source_zig_only().expect_err("Zig-less Rust must not load SENS linter");
+        assert!(error.contains("RUST_ZIG_ONLY"));
+        assert!(error.contains("no Rust project-source fallback"));
     }
 
     #[test]

@@ -10,6 +10,33 @@ const e1_writer = @import("transport/e1_writer.zig");
 /// This triplet stream is an in-process FFI representation, NEVER .sens wire.
 pub export fn sens_zig_codec_abi_version() u32 { return 2; }
 
+// Opaque checked-in source bytes: Zig carries this asset; it NEVER parses,
+// evaluates, dispatches, or assigns any SENS identity to the contents.
+// Caller owns the output buffer. capacity=0 queries exact byte length.
+// -2 means insufficient space and guarantees zero output bytes written.
+const linter_asset = @embedFile("../../lib/linter.lisp");
+pub export fn sens_zig_linter_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (linter_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(linter_asset.len);
+    if (capacity < linter_asset.len) return -2;
+    @memcpy(dst[0..linter_asset.len], linter_asset[0..linter_asset.len]);
+    return @intCast(linter_asset.len);
+}
+
+test "opaque linter asset crosses Zig ABI without allocations or partial writes" {
+    const required = sens_zig_linter_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(linter_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_linter_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var out: [linter_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_linter_bytes_copy(&out, out.len));
+    try std.testing.expectEqualSlices(u8, linter_asset[0..linter_asset.len], &out);
+}
+
+
 pub export fn sens_zig_t5_validate(src: [*]const u8, len: usize) c_int {
     if (len == 0 or len > t5.MAX_PHYSICAL_BYTES) return -1;
     t5.validatePhysical(src[0..len]) catch return -1;

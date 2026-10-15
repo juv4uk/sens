@@ -57,6 +57,14 @@ jobs:
           cargo test --locked -p sens-cli --bin sens-trit rust_zig_only_cutover_tests -- --nocapture
           # Negative: without Zig no physical operation may touch a file or select Rust.
           cargo test --locked -p sens-cli --bin sens-trit --no-default-features rust_zig_only_cutover_tests -- --nocapture
+      - name: ZIG-MIGRATION — реальний Lisp asset тільки через Zig ABI (без fallback)
+        id: zig-only-linter-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          zig test research/zig-codecs/transport_abi.zig -lc
+          cargo test --locked -p sens-cli --bin sens zig_linter_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens --no-default-features zig_linter_carrier -- --nocapture
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
         id: epistemic-native-physical
         shell: bash
