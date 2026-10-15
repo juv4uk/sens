@@ -43,6 +43,11 @@ def _live_nodes(root: ast.AST):
         return
     yield root
     for child in ast.iter_child_nodes(root):
+        # Defining a local callable does not execute its body. An inert
+        # verify_t5()/carry_t5() is not physical transport evidence.
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef,
+                              ast.Lambda, ast.ClassDef)):
+            continue
         yield from _live_nodes(child)
 
 
@@ -123,6 +128,9 @@ def _write_time_truth(node: ast.AST) -> bool | None:
 def _write_reachable_nodes(root: ast.AST):
     """Only statement paths guaranteed live on the admitted --write route."""
     yield root
+    if isinstance(root, (ast.FunctionDef, ast.AsyncFunctionDef,
+                         ast.Lambda, ast.ClassDef)):
+        return  # Nested callable bodies cannot certify --write.
     if isinstance(root, ast.If):
         condition = _write_time_truth(root.test)
         if condition is None:
@@ -190,6 +198,16 @@ def _is_staging_packed(node: ast.AST) -> bool:
     )
 
 
+def _writes_packed(target: ast.AST) -> bool:
+    """Detect direct/rebinding and indexed/augmented stores into Zig bytes."""
+    if isinstance(target, ast.Name):
+        return target.id == "packed"
+    if isinstance(target, (ast.Subscript, ast.Attribute)):
+        return _writes_packed(target.value)
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return any(_writes_packed(item) for item in target.elts)
+    return False
+
 def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
     """Conservative source proof of one real Zig byte producer before staging.
 
@@ -197,7 +215,7 @@ def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
     packed, or staged reference bytes never establishes release evidence.
     This is AST structural evidence, not a Zig runtime or SENS semantic PASS.
     """
-    for loop in ast.walk(run):
+    for loop in _live_nodes(run):
         if not isinstance(loop, ast.For):
             continue
         live = list(_write_reachable_nodes(loop))
@@ -206,18 +224,19 @@ def _has_zig_mint_on_write(run: ast.FunctionDef) -> bool:
             continue
         packed_assignments = [
             node for node in live
-            if isinstance(node, (ast.Assign, ast.AnnAssign))
-            and any(
-                isinstance(target, ast.Name) and target.id == "packed"
-                for target in (
-                    node.targets if isinstance(node, ast.Assign) else [node.target]
-                )
+            if (
+                isinstance(node, ast.Assign)
+                and any(_writes_packed(target) for target in node.targets)
+            ) or (
+                isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr))
+                and _writes_packed(node.target)
             )
         ]
         if len(packed_assignments) != 1:
             continue
         mint = packed_assignments[0]
-        if (_is_zig_carry(mint.value)
+        if (isinstance(mint, (ast.Assign, ast.AnnAssign))
+                and _is_zig_carry(mint.value)
                 and mint.lineno < min(s.lineno for s in staged)):
             return True
     return False

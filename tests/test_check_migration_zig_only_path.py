@@ -100,6 +100,26 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
         self.assertTrue(any("M3:" in msg or "M5:" in msg
                             for msg in self.module.check(self.root)))
 
+    def test_nested_uninvoked_verifier_is_not_a_receipt(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "evidence = zig_codec_bridge.verify_t5(zig_binary, packed)",
+                     "def never_called():\n"
+                     "                return zig_codec_bridge.verify_t5(zig_binary, packed)\n"
+                     "            evidence = {'unverified': True}")
+        self.assertTrue(any("M3:" in msg or "M5:" in msg
+                            for msg in self.module.check(self.root)))
+
+    def test_nested_uninvoked_mint_cannot_satisfy_m8(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     "packed = zig_codec_bridge.carry_t5(zig_binary, projection)",
+                     "packed = reference_bytes\n"
+                     "            def never_called():\n"
+                     "                for _ in [0]:\n"
+                     "                    packed = zig_codec_bridge.carry_t5(zig_binary, projection)\n"
+                     "                    zig_codec_bridge.verify_t5(zig_binary, packed)\n"
+                     "                    staged.append((rel, destination, original, packed, row))")
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
     def test_write_gate_comment_and_pass_do_not_protect_publication(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
                      "if args.write and not args.zig_codec:\n        return 3",
@@ -242,6 +262,24 @@ class MigrationZigOnlyPathTests(unittest.TestCase):
                      'row["zig_transport"] = evidence',
                      'row["zig_transport"] = evidence\\n            packed = reference_bytes'.replace("\\n", "\n"))
         self.assertTrue(any("M8:" in message for message in self.module.check(self.root)))
+
+    def test_augmented_assignment_corrupting_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = evidence\\n            packed += reference_bytes'.replace("\\n", "\n"))
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
+    def test_indexed_write_to_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = evidence\\n            packed[0] = 0'.replace("\\n", "\n"))
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
+
+    def test_walrus_rebinding_zig_bytes_is_blocked(self) -> None:
+        self._mutate("scripts/migrate-t5-batch.py",
+                     'row["zig_transport"] = evidence',
+                     'row["zig_transport"] = (packed := reference_bytes)')
+        self.assertTrue(any("M8:" in msg for msg in self.module.check(self.root)))
 
     def test_carry_only_on_dry_run_is_not_release_evidence(self) -> None:
         self._mutate("scripts/migrate-t5-batch.py",
