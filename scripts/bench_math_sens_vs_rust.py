@@ -143,6 +143,9 @@ def measure_rust(root: Path, iters: int, reps: int = 7) -> dict:
             except (ValueError, TypeError):
                 return {"side": "rust", "status": "ERROR", "binary": cand,
                         "note": "Rust runner did not return valid JSON"}
+            if not isinstance(result, dict):
+                return {"side": "rust", "status": "ERROR", "binary": cand,
+                        "note": "Rust receipt is not a JSON object"}
             if (result.get("schema") != "sens-paired-exact-q-rust/v1"
                     or type(result.get("iters")) is not int
                     or result["iters"] != iters

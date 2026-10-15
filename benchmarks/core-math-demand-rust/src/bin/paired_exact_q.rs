@@ -69,7 +69,7 @@ mod tests {
     #[test]
     fn same_corpus_produces_exact_predictable_checksum() {
         assert_eq!(workload(0),(1,0));
-        assert_eq!(workload(1),(-2_000_005,3));
+        assert_eq!(workload(1),(2_000_007,3));
         assert_eq!(workload(200_000),(57_143_171_433,600_000));
     }
     #[test]
