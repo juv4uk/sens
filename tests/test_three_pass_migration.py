@@ -213,6 +213,27 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 010 00 "))
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
+    def test_legacy_def_reuses_ratified_d4_and_fails_without_it(self):
+        # The collector already accepts (def ...) as a DEFINE declaration.
+        # Its executable head must use D4:0011, not a retired SID8 slot.
+        source = "(def ident (0010 (x) x))\\n(ident 000)\\n"
+        projection, resolver = self.migrate(source)
+        self.assertTrue(projection.startswith("10 0011 00 "), projection)
+        self.assertEqual(resolver.counts["pass2-my-lisp"], 1)
+        self.assertEqual(resolver.counts["pass4-text7-global"], 1)
+        words = mod.parse_words(projection)
+        self.assertEqual(mod.decode_bytes(mod.encode_projection(projection)), words)
+
+        # The historical spelling alone cannot manufacture D4 or turn a
+        # quoted datum into a callable head; a macro is NOT a synonym.
+        with self.assertRaisesRegex(mod.MigrationError, "LEGACY_DEF_NO_D4_DEFINE"):
+            mod.Resolver({}, {}).head(mod.Tok("ATOM", "def", 0), self.text7)
+        quoted, _ = self.migrate("'def\\n")
+        self.assertTrue(quoted.startswith("10 001 00 "), quoted)
+        self.assertNotEqual(quoted, "10 001 00 0011 01\\n")
+        with self.assertRaisesRegex(mod.MigrationError, "legacy-unmapped.*defmacro"):
+            self.migrate("(defmacro f (x) x)\\n")
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
