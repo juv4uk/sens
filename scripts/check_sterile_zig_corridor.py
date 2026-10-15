@@ -141,6 +141,32 @@ def check_trit_t5_egress(source: str) -> None:
         raise CorridorBlocked("sens-trit companion Rust reference is not explicitly isolated")
 
 
+def check_trit_e1_egress(source: str) -> None:
+    """One E1 physical export MUST be Zig->SENS-owned admission->Zig.
+
+    Tests the production function only, not Rust reference fixtures.
+    """
+    route = _route_between(source, "fn encode_e1_from_t5(", "\nfn read_explicit_f3(")
+    negative = '#[cfg(not(feature = "zig-transport"))]'
+    positive = '#[cfg(feature = "zig-transport")]'
+    if route.count(negative) != 1 or route.count(positive) != 1:
+        raise CorridorBlocked("sens-trit E1 physical export lacks exact Zig feature gates")
+    fail, active = route.split(positive, 1)
+    if negative not in fail or "no Rust fallback" not in fail:
+        raise CorridorBlocked("sens-trit E1 feature-negative must refuse before decoding")
+    if "decode_canonical_t5_words(physical_t5)" in fail:
+        raise CorridorBlocked("sens-trit E1 decodes in Rust before refusing missing Zig")
+    if ("decode_canonical_t5_words(physical_t5)" not in active
+            or "zig_transport::encode_e1_direct(&words)" not in active):
+        raise CorridorBlocked("sens-trit E1 missing Zig ingress or physical egress")
+    if "sens::envelope_e1::encode(" in route or "sens::decode_ternary_words(" in route:
+        raise CorridorBlocked("sens-trit E1 uses direct Rust physical codec")
+    arm = _route_between(source, '\n        "encode-e1" => {\n',
+                         '\n        "eval-e1" => {\n')
+    if "encode_e1_from_t5(&bytes)?" not in arm:
+        raise CorridorBlocked("sens-trit encode-e1 command bypasses guarded Zig helper")
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -191,6 +217,15 @@ def check() -> list[str]:
         raise CorridorBlocked("sens-trit.rs does not call zig_transport corridor API")
     check_trit_t5_egress(trit)
     notes.append("sens-trit-zig-only-egress")
+    check_trit_e1_egress(trit)
+    if "sens_zig_e1_encode_be3" not in body or "pub fn encode_e1_direct(" not in body:
+        raise CorridorBlocked("Rust host E1 physical egress missing Zig BE3 shim")
+    if "pub export fn sens_zig_e1_encode_be3" not in abi:
+        raise CorridorBlocked("Zig E1 physical ABI v2 egress not exported")
+    if ("transport/e1_writer.zig" not in build or
+            "transport/fields.zig" not in build):
+        raise CorridorBlocked("build.rs fails to rebuild on Zig E1/CRC source changes")
+    notes.append("sens-trit-zig-only-e1-egress")
 
     if not MAIN.is_file() or MAIN.is_symlink():
         raise CorridorBlocked("missing regular crates/sens-cli/src/main.rs")
