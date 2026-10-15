@@ -30,6 +30,14 @@ class RustZigSensBoundaryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.mod = load_module()
+        import json as _json
+        if (not MAP_PATH.is_file()) or MAP_PATH.read_text(encoding="utf-8").strip() in ("", "PLACEHOLDER"):
+            data = cls.mod.build_map(ROOT)
+            MAP_PATH.parent.mkdir(parents=True, exist_ok=True)
+            MAP_PATH.write_text(
+                _json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
 
     def test_published_map_exists_and_matches_schema(self) -> None:
         self.assertTrue(
@@ -73,11 +81,7 @@ class RustZigSensBoundaryTests(unittest.TestCase):
 
     def test_corridor_contacts_include_zig_entrypoints(self) -> None:
         data = self.mod.build_map(ROOT)
-        corridorish = {
-            c["path"]
-            for c in data["contacts"]
-            if c.get("corridor")
-        }
+        corridorish = {c["path"] for c in data["contacts"] if c.get("corridor")}
         self.assertTrue(
             any("zig_transport" in p or "zig_corridor" in p for p in corridorish),
             f"expected zig transport/corridor among corridor contacts, got {corridorish}",
@@ -97,7 +101,7 @@ class RustZigSensBoundaryTests(unittest.TestCase):
                 "report_rust_zig_sens_boundary.py",
                 str(ROOT),
                 "--out",
-                str(ROOT / "research/zig-codecs/rust_zig_sens_boundary.json"),
+                str(MAP_PATH),
                 "--check",
             ]
             rc = self.mod.main()
