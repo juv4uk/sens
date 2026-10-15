@@ -608,7 +608,7 @@ def check_contract_zig_only(main_source: str, rust_corridor: str, zig_root: str,
         raise CorridorBlocked("CONTRACT_ZIG_ONLY main CLI bypassed Zig carrier or SENS quote")
     ffi = "sens_zig_contract_bytes_copy"
     contract_host = active(_route_between(
-        rust_corridor, "pub fn contract_source_bytes(", "\nfn require_same_exact_words("
+        rust_corridor, "pub fn contract_source_bytes(", "\n/// Opaque Sanskrit REPL source from the root Zig module"
     ))
     if (host.count(f"asset_ffi::{ffi}(") != 2
             or '#[path = "zig_transport_assets.rs"]' not in host
