@@ -486,9 +486,9 @@ pub const OpaquePhysicalBitsError = error{
     UnsupportedWidth, WrongByteLength, NonCanonicalTail,
 };
 
-pub fn supportsPhysicalWidth(width: u16) bool {
+pub fn supportsPhysicalWidth(width: usize) bool {
     if (width >= 1 and width <= 10) return true;
-    const first = numeric_domains.WIDE_WIDTHS[0];
+    const first: usize = numeric_domains.WIDE_WIDTHS[0];
     if (width < first or width % first != 0) return false;
     const multiple = width / first;
     return (multiple & (multiple - 1)) == 0;
@@ -496,12 +496,14 @@ pub fn supportsPhysicalWidth(width: u16) bool {
 
 /// Declared width + meaningful bits are inseparable. Storage is caller-owned.
 pub const OpaquePhysicalBits = struct {
-    width: u16,
+    width: usize,
     bytes: []const u8,
 
-    pub fn init(width: u16, raw: []const u8) OpaquePhysicalBitsError!OpaquePhysicalBits {
+    pub fn init(width: usize, raw: []const u8) OpaquePhysicalBitsError!OpaquePhysicalBits {
         if (!supportsPhysicalWidth(width)) return error.UnsupportedWidth;
-        if (raw.len != (@as(usize, width) + 7) / 8) return error.WrongByteLength;
+        // Avoid width+7 overflow for very large law-qualified widths.
+        const required = width / 8 + @as(usize, @intFromBool(width % 8 != 0));
+        if (raw.len != required) return error.WrongByteLength;
         const rem = width % 8;
         if (rem != 0) {
             const unused: u3 = @intCast(8 - rem);
@@ -531,7 +533,7 @@ test "opaque physical D1..D10 exhaustive 2046 widths and one-bit tail mutants" {
             try std.testing.expectEqual(@as(usize, w),
                 try fields.pack(encoded[0..byte_len], &entry));
             const physical = try OpaquePhysicalBits.init(@intCast(w), encoded[0..byte_len]);
-            try std.testing.expectEqual(@as(u16, typed.coordinate().width), physical.width);
+            try std.testing.expectEqual(@as(usize, typed.coordinate().width), physical.width);
             try std.testing.expect(physical.same(try OpaquePhysicalBits.init(
                 @intCast(w), encoded[0..byte_len])));
             count += 1;
@@ -563,7 +565,7 @@ test "opaque D24+ keeps declared widths without E3 or math admission" {
     }
     // D384+ are opaque declared physical bit lengths ONLY; current E3 v3
     // single-run encoder keeps its existing four-profile restriction.
-    inline for (.{ 384, 768, 1536 }) |width| {
+    inline for (.{ 384, 768, 1536, 98304, 196608 }) |width| {
         const byte_len = width / 8;
         const zeros = [_]u8{0} ** byte_len;
         var ones = zeros;
@@ -575,10 +577,31 @@ test "opaque D24+ keeps declared widths without E3 or math admission" {
         try std.testing.expectError(error.WrongByteLength,
             OpaquePhysicalBits.init(width, zeros[0 .. byte_len - 1]));
     }
-    for ([_]u16{ 0, 11, 12, 23, 25, 47, 49, 95, 193, 65535 }) |bad| {
+    for ([_]usize{ 0, 11, 12, 23, 25, 47, 49, 95, 193, 65535, std.math.maxInt(usize) }) |bad| {
         try std.testing.expectError(error.UnsupportedWidth,
             OpaquePhysicalBits.init(bad, &.{}));
     }
     try std.testing.expectError(error.WrongByteLength,
         OpaquePhysicalBits.init(24, &.{0}));
+}
+
+
+test "opaque wide physical width does not wrap at u16 boundary or usize ceiling" {
+    // Numeric domain WIDTH law does not stop at 16-bit host metadata.
+    try std.testing.expect(supportsPhysicalWidth(98304));
+    try std.testing.expect(supportsPhysicalWidth(196608));
+    try std.testing.expect(!supportsPhysicalWidth(98305));
+
+    // Compute the highest physical rung representable by this machine's
+    // buffer-length type. No buffer allocation or semantic admission follows.
+    var width: usize = numeric_domains.WIDE_WIDTHS[0];
+    const limit = std.math.maxInt(usize);
+    while (width <= limit / 2) : (width *= 2) {}
+    try std.testing.expect(supportsPhysicalWidth(width));
+    try std.testing.expectError(error.WrongByteLength,
+        OpaquePhysicalBits.init(width, &.{}));
+
+    // Maximal invalid width is rejected without overflowing length arithmetic.
+    try std.testing.expectError(error.UnsupportedWidth,
+        OpaquePhysicalBits.init(limit, &.{}));
 }
