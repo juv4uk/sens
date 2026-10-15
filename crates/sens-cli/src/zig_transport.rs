@@ -1,4 +1,6 @@
 //! Стерильний ABI v2 між SENS та будь-яким хостом для фізичних T5/F3C.
+//! Owner law: Zig is the turnstile, not the registry; SENS decides meaning;
+//! Rust holds opaque bytes. No local T5 algorithm lives in this module.
 //! Zig зберігає ширину, порядок, біти й статус; жодного semantic admission.
 //! Спільний Rust-викликач для `sens` і `sens-trit`, без дубльованого T5 reader.
 
@@ -45,130 +47,93 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     if words.is_empty() {
         return Err("Zig physical T5 cannot encode an empty record".into());
     }
-    let be3_capacity = words.len().checked_mul(3)
+    let be3_capacity = words
+        .len()
+        .checked_mul(3)
         .ok_or("Zig BE3 input length overflow")?;
-    let semantic_trits = words.iter().try_fold(0usize, |n, word|
-        n.checked_add(word.width())
-    ).ok_or("Zig T5 semantic bit count overflow")?;
-    let used_trits = semantic_trits.checked_add(words.len() - 1)
-        .ok_or("Zig T5 separator count overflow")?;
-    let physical_capacity = used_trits.checked_add(4)
-        .ok_or("Zig T5 byte count overflow")? / 5;
     let mut be3 = Vec::with_capacity(be3_capacity);
     for word in words {
-        let width = u8::try_from(word.width())
-            .map_err(|_| "Zig T5 width out of one-byte ABI range")?;
-        let bits = word.packed_bits();
+        let width = word.width();
+        let bits = word.bits();
+        if width == 0 || width > 10 {
+            return Err(format!("unsupported domain width {width}"));
+        }
+        let limit = 1u32 << width;
+        if (bits as u32) >= limit {
+            return Err(format!("payload overflow for width {width}"));
+        }
         be3.push(width);
         be3.push((bits >> 8) as u8);
-        be3.push(bits as u8);
+        be3.push((bits & 0xff) as u8);
     }
-    let mut bytes = vec![0u8; physical_capacity];
-    // SAFETY: Zig ABI v2 reads and writes only caller-owned byte slices.
+    let capacity = be3.len().saturating_mul(2).max(16);
+    let mut output = vec![0u8; capacity];
     let len = unsafe {
-        sens_zig_t5_encode_be3(
-            be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len()
-        )
+        sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), output.as_mut_ptr(), output.len())
     };
-    if len < 0 || usize::try_from(len).ok() != Some(bytes.len()) {
-        return Err(format!("Zig physical T5 encode rejected: code={len}"));
+    if len <= 0 {
+        return Err(format!("Zig T5 encode rejected: code={len}"));
     }
-    Ok(bytes)
+    output.truncate(len as usize);
+    validate_t5(&output)?;
+    Ok(output)
 }
 
-/// Optional mechanical comparison to the existing Rust reference bytes.
-/// The reference never controls the actual produced T5 output buffer.
-pub fn encode_t5(
-    words: &[sens::BinarySourceWord],
-    expected_bytes: &[u8],
-) -> Result<Vec<u8>, String> {
-    let bytes = encode_t5_direct(words)?;
-    if bytes != expected_bytes {
-        return Err("Zig T5 and admitted SENS reference differ at a physical byte".into());
-    }
-    Ok(bytes)
-}
-
-
-/// Zig is the only physical T5 decoder on the feature-gated eval ingress.
-/// ABI v2 carries only [width, MSB, LSB] bytes, never Rust enum layout.
-/// Exact words are subsequently admitted by SENS's existing D2 reader.
 pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
-    // Zig first: physical validation also caps carrier size before allocation.
+    version()?;
     validate_t5(bytes)?;
-    let trits = bytes.len().checked_mul(5)
+    let trits = bytes
+        .len()
+        .checked_mul(5)
         .ok_or("T5 input length overflow")?;
-    let max_words = trits.checked_add(1)
-        .ok_or("T5 word count overflow")? / 2;
-    let capacity = max_words.checked_mul(3)
+    let max_words = trits.checked_add(1).ok_or("T5 word count overflow")? / 2;
+    let capacity = max_words
+        .checked_mul(3)
         .ok_or("T5 BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
-    // SAFETY: caller-owned slices outlive this synchronous Zig v2 ABI.
-    let written = unsafe {
-        sens_zig_t5_decode_be3(
-            bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()
-        )
+    let len = unsafe {
+        sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
     };
-    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= be3.len()).is_none()
-        || written % 3 != 0
-    {
-        return Err(format!("Zig physical T5 decode rejected: code={written}"));
+    if len <= 0 {
+        return Err(format!("Zig T5 decode rejected: code={len}"));
     }
-    be3.truncate(written as usize);
+    if (len as usize) % 3 != 0 {
+        return Err("Zig T5 decode returned non-triplet length".into());
+    }
+    be3.truncate(len as usize);
     let mut words = Vec::with_capacity(be3.len() / 3);
-    for triple in be3.chunks_exact(3) {
-        let width = triple[0];
-        let payload = (u16::from(triple[1]) << 8) | u16::from(triple[2]);
-        // A host integer here is only the bounded carrier of exact bits.
-        // Type + width are preserved; neither assigns a language meaning.
-        if width < 9 && payload > u16::from(u8::MAX) {
-            return Err("Zig BE3 payload exceeds declared narrow width".into());
-        }
-        let low = payload as u8;
-        let word = match width {
-            1 => sens::Bit1::new(low).map(sens::BinarySourceWord::W1),
-            2 => sens::Bit2::new(low).map(sens::BinarySourceWord::W2),
-            3 => sens::Bit3::new(low).map(sens::BinarySourceWord::W3),
-            4 => sens::Bit4::new(low).map(sens::BinarySourceWord::W4),
-            5 => sens::Bit5::new(low).map(sens::BinarySourceWord::W5),
-            6 => sens::Bit6::new(low).map(sens::BinarySourceWord::W6),
-            7 => sens::Bit7::new(low).map(sens::BinarySourceWord::W7),
-            8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
-            9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
-            _ => None,
-        }.ok_or_else(|| format!("Zig BE3 invalid exact word width={width}"))?;
+    for chunk in be3.chunks_exact(3) {
+        let width = chunk[0];
+        let bits = u16::from_be_bytes([chunk[1], chunk[2]]);
+        let word = sens::BinarySourceWord::from_width_bits(width, bits)
+            .map_err(|e| format!("Zig returned inadmissible coordinate: {e:?}"))?;
         words.push(word);
     }
     Ok(words)
 }
 
-pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
+pub fn encode_f3(t5: &[u8]) -> Result<Vec<u8>, String> {
     version()?;
-    if t5.len() > 16 { return Ok(None); }
-    let mut bytes = vec![0u8; 16];
-    // SAFETY: Zig writes at most the provided capacity.
-    let len = unsafe {
-        sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len())
-    };
-    if len == -3 { return Ok(None); } // not smaller: T5 remains production
-    if len <= 0 { return Err(format!("Zig F3C pack rejected: code={len}")); }
+    validate_t5(t5)?;
+    let mut bytes = vec![0u8; t5.len().saturating_add(16).max(32)];
+    let len = unsafe { sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len()) };
+    if len <= 0 {
+        return Err(format!("explicit Zig F3C pack rejected: code={len}"));
+    }
     bytes.truncate(len as usize);
-    if bytes.len() >= t5.len() { return Err("Zig F3C did not save bytes".into()); }
-    Ok(Some(bytes))
+    Ok(bytes)
 }
 
-pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
+pub fn decode_f3(bytes: &[u8]) -> Result<Vec<u8>, String> {
     version()?;
-    let mut output = vec![0u8; 16];
-    // SAFETY: caller owns valid input/output slices until call returns.
+    let mut t5 = vec![0u8; bytes.len().saturating_mul(4).max(32)];
     let len = unsafe {
-        sens_zig_f3c_unpack(
-            carrier.as_ptr(), carrier.len(), output.as_mut_ptr(), output.len()
-        )
+        sens_zig_f3c_unpack(bytes.as_ptr(), bytes.len(), t5.as_mut_ptr(), t5.len())
     };
-    if len <= 0 { return Err(format!("explicit Zig F3C rejected: code={len}")); }
-    output.truncate(len as usize);
-    // Zig first, then the existing SENS canonical parser/evaluator.
-    validate_t5(&output)?;
-    Ok(output)
+    if len <= 0 {
+        return Err(format!("explicit Zig F3C rejected: code={len}"));
+    }
+    t5.truncate(len as usize);
+    validate_t5(&t5)?;
+    Ok(t5)
 }

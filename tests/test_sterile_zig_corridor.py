@@ -26,11 +26,12 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertIn("STERILE_ZIG_CORRIDOR_PASS", completed.stdout)
 
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
-        body = (ROOT / "crates/sens-cli/src/zig_corridor.rs").read_text(encoding="utf-8")
+        body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
         self.assertIn("sens_zig_t5_decode_be3", body)
-        self.assertIn("turnstile", body.lower())
+        self.assertIn("sens_zig_t5_encode_be3", body)
         self.assertNotIn("PhysicalT5Program", body)
         self.assertNotIn("ternary_transport", body)
+        self.assertNotIn("TRITS_BY_BYTE", body)
 
 
 if __name__ == "__main__":
