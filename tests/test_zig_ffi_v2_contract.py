@@ -166,7 +166,7 @@ def declarations(source: str, language: str) -> dict:
 # The two root Zig asset-copy exports are NOT codec ABI v2. Keep both
 # inventories exact: adding an unreviewed FFI declaration cannot silently
 # expand the physical nine-function v2 contract.
-ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy")
+ASSET_NAMES = ("sens_zig_linter_bytes_copy", "sens_zig_contract_bytes_copy", "sens_zig_sanskrit_bytes_copy", "sens_zig_ukr_bytes_copy", "sens_zig_uk_bytes_copy", "sens_zig_islands_manifest_bytes_copy", "sens_zig_uk_docs_bytes_copy", "sens_zig_unify_bytes_copy", "sens_zig_reason_bytes_copy", "sens_zig_forward_bytes_copy", "sens_zig_knowledge_bytes_copy", "sens_zig_persistent_map_bytes_copy")
 ASSET_ZIG_EXPORT = re.compile(
     r"(?m)^[ \t]*pub[ \t]+export[ \t]+fn[ \t]+"
     r"(sens_zig_[a-z0-9_]+)\s*\(([^)]*)\)\s*isize\s*\{"
@@ -205,6 +205,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_reason_bytes_copy", "lib/reason.lisp"),
         ("sens_zig_forward_bytes_copy", "lib/forward.lisp"),
         ("sens_zig_knowledge_bytes_copy", "lib/knowledge.lisp"),
+        ("sens_zig_persistent_map_bytes_copy", "lib/persistent-map.lisp"),
     ):
         expected_embed = f'@embedFile("{asset}")'
         if expected_embed not in zig_root:
@@ -229,6 +230,7 @@ def check_root_asset_corridor(zig_root: str, rust_assets: str, rust_transport: s
         ("sens_zig_reason_bytes_copy", "lib/reason.lisp", "reason_asset"),
         ("sens_zig_forward_bytes_copy", "lib/forward.lisp", "forward_asset"),
         ("sens_zig_knowledge_bytes_copy", "lib/knowledge.lisp", "knowledge_asset"),
+        ("sens_zig_persistent_map_bytes_copy", "lib/persistent-map.lisp", "persistent_map_asset"),
     ):
         const_line = f'const {binding} = @embedFile("{asset}");'
         if len(re.findall(r"(?m)^[ \t]*" + re.escape(const_line) + r"[ \t]*$", zig_root)) != 1:
