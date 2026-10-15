@@ -95,8 +95,8 @@ class CurrentThreePassZigCorridorTest(unittest.TestCase):
             ),
             "fake-comment-call": source.replace(
                 live,
-                "# mig.Resolver(my, upper, d9_residents=d9_residents)\\n"
-                "        mig.Resolver(my, upper, admitted_d8=admitted_d8)", 1,
+                "mig.Resolver(my, upper, admitted_d8=admitted_d8)\\n"
+                "        # mig.Resolver(my, upper, d9_residents=d9_residents)", 1,
             ),
         }
         for label, mutant in mutants.items():
