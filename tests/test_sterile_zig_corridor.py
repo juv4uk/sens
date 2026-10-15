@@ -72,9 +72,11 @@ class SterileZigCorridorTests(unittest.TestCase):
         )
         for old, replacement in replacements:
             with self.subTest(bypass=old):
-                self.assertEqual(source.count(old), 1)
+                # The same SENS reader can also appear in other unit tests.
+                # Mutate only its FIRST occurrence: the production route.
+                self.assertIn(old, source)
                 with self.assertRaises(blocked):
-                    check(source.replace(old, replacement))
+                    check(source.replace(old, replacement, 1))
 
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
