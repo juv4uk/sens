@@ -217,6 +217,14 @@ def run(args: argparse.Namespace) -> dict:
                 if (repo / rel).read_bytes() != original:
                     raise ValueError("source changed during migration")
                 mig.write_atomic_no_clobber(out / destination, packed)
+                # New reality (#4694): the extensionless 0/1 view is REQUIRED
+                # alongside each .sens -- exact spaced words + one trailing LF.
+                view_bytes = (" ".join(mig.decode_bytes(packed)) + "\n").encode("ascii")
+                view_path = out / destination.with_suffix("")
+                if view_path.exists() or view_path.is_symlink():
+                    raise ValueError("existing extensionless view: overwrite forbidden")
+                mig.write_atomic_no_clobber(view_path, view_bytes)
+                row["view_bytes"] = len(view_bytes)
             except (ValueError, OSError, mig.SensT5Error) as exc:
                 row.update(status="blocked", reason=str(exc))
             else:
@@ -272,6 +280,14 @@ def main() -> int:
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()
+    # New reality (#5777/#5779): the Rust<->SENS link crosses ONLY the sterile Zig
+    # corridor. Publishing physical .sens without the pinned-Zig cross-check is a
+    # silent bypass, so --write REQUIRES --zig-codec and fails closed without it.
+    if args.write and not args.zig_codec:
+        print("FATAL migration setup: --write requires --zig-codec "
+              "(physical .sens may not be published without the sterile Zig corridor)",
+              file=sys.stderr)
+        return 3
     try:
         result = run(args)
     except (OSError, ValueError, mig.MigrationError) as exc:

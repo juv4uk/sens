@@ -1280,7 +1280,7 @@ def main():
 
     report = {
         "schema": "sens-three-pass-t5-migration/v3",
-        "naming_law": "SOURCE/name.lisp -> OUT/name.sens; extensionless outputs are forbidden",
+        "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
         "file_format": {
             "suffix": ".sens", "physical": "binary-T5-five-trits-per-byte",
             "language": "D1..D9 exact-width 0/1 words",
