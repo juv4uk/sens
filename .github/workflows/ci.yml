@@ -136,6 +136,11 @@ jobs:
           set -euo pipefail
           python3 scripts/ci_zig_purity.py --self-test
           python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
+          # The single auto-CI must audit the real Rust↔Zig source route,
+          # not just Zig file purity. This is NOT semantic SENS admission.
+          echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
+          python3 scripts/check_sterile_zig_corridor.py
           echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
           zig test research/zig-codecs/domain_ladder.zig
           echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
