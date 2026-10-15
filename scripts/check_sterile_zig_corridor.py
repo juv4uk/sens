@@ -238,6 +238,39 @@ def check_f3c_validate_before_no_savings(body: str) -> None:
         raise CorridorBlocked("encode_f3 must not embed Rust physical T5 codec")
 
 
+def check_f3c_decode_validates_t5(body: str) -> None:
+    """decode_f3 must re-enter Zig T5 validate on recovered bytes.
+
+    Unpacked F3C is still physical T5; without validate the host could admit
+    a corrupted carrier into SENS. Fail closed: validate_t5 after unpack.
+    """
+    prod = _production_source(body)
+    begin = "pub fn decode_f3("
+    if begin not in prod or prod.count(begin) != 1:
+        raise CorridorBlocked("zig_transport.rs missing unique decode_f3")
+    start = prod.index(begin) + len(begin)
+    rest = prod[start:]
+    # bound by next pub fn or cfg(test)
+    stop = len(rest)
+    for m in ("\n#[cfg(test)]", "\npub fn "):
+        i = rest.find(m)
+        if i != -1 and 0 < i < stop:
+            stop = i
+    route = rest[:stop]
+    if "sens_zig_f3c_unpack" not in route:
+        raise CorridorBlocked("decode_f3 must call Zig F3C unpack FFI")
+    if "validate_t5(" not in route:
+        raise CorridorBlocked(
+            "decode_f3 must call validate_t5 on recovered T5 before returning"
+        )
+    unpack_at = route.find("sens_zig_f3c_unpack")
+    val_at = route.find("validate_t5")
+    if val_at == -1 or unpack_at == -1 or val_at < unpack_at:
+        raise CorridorBlocked(
+            "decode_f3 must validate_t5 after Zig F3C unpack, not before"
+        )
+
+
 def check() -> list[str]:
     notes: list[str] = []
     toml = CLI_TOML.read_text(encoding="utf-8")
@@ -268,6 +301,8 @@ def check() -> list[str]:
 
     check_f3c_validate_before_no_savings(body)
     notes.append("f3c-validate-before-no-savings")
+    check_f3c_decode_validates_t5(body)
+    notes.append("f3c-decode-validates-t5")
 
     abi = ABI.read_text(encoding="utf-8")
     for name in ("sens_zig_t5_encode_be3", "sens_zig_t5_decode_be3"):

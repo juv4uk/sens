@@ -26,6 +26,7 @@ class SterileZigCorridorTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertIn("STERILE_ZIG_CORRIDOR_PASS", completed.stdout)
         self.assertIn("f3c-validate-before-no-savings", completed.stdout)
+        self.assertIn("f3c-decode-validates-t5", completed.stdout)
 
     def test_corridor_file_has_no_local_t5_codec(self) -> None:
         body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
@@ -69,6 +70,24 @@ class SterileZigCorridorTests(unittest.TestCase):
         mutant = body[:start] + swapped + body[end:]
         with self.assertRaises(blocked):
             check(mutant)
+
+    def test_f3c_decode_rejects_validate_bypass(self) -> None:
+        """decode_f3 must validate_t5 after unpack; mutants fail closed."""
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_f3c_decode_validates_t5"]
+        blocked = module["CorridorBlocked"]
+        body = (ROOT / "crates/sens-cli/src/zig_transport.rs").read_text(encoding="utf-8")
+        check(body)
+
+        no_validate = body.replace("validate_t5(&output)?;", "/* no validate */", 1)
+        with self.assertRaises(blocked):
+            check(no_validate)
+
+        stripped = body.replace("validate_t5(&output)?;\n", "", 1)
+        if stripped == body:
+            stripped = body.replace("validate_t5(&output)?;", "", 1)
+        with self.assertRaises(blocked):
+            check(stripped)
 
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))

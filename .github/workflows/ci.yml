@@ -498,7 +498,7 @@ jobs:
           if "$bin" eval-e1 "$RUNNER_TEMP/e1-corrupt.e1" > "$RUNNER_TEMP/e1-corrupt.out" 2> "$RUNNER_TEMP/e1-corrupt.err"; then
             echo "::error::E1_CLI_FAIL_OPEN_CORRUPTED_CRC"; exit 1
           fi
-          grep -q 'Integrity' "$RUNNER_TEMP/e1-corrupt.err" || {
+          grep -Fq 'Zig E1 physical decode rejected: code=-1' "$RUNNER_TEMP/e1-corrupt.err" || {
             echo "::error::E1_CLI_REJECTION_UNINFORMATIVE"; exit 1;
           }
           echo 'E1_NATIVE_SENS_CLI_VERDICTS_PASS: positive/mutant differ, T5 matches E1, CRC fails closed'
