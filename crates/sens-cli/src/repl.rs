@@ -530,7 +530,7 @@ mod tests {
     #[test]
     fn zig_sanskrit_surface_preserves_actual_source_bytes() {
         let source = sanskrit_surface_source().expect("live root Zig C ABI");
-        let bytes = super::zig_transport::sanskrit_surface_bytes()
+        let bytes = crate::zig_transport::sanskrit_surface_bytes()
             .expect("second Zig ABI byte copy");
         assert_eq!(source.as_bytes(), bytes.as_slice(), "Sanskrit exact-byte replay");
         assert!(source.starts_with("; Sanskrit surface"), "expected tracked source");
