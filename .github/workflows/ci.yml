@@ -149,6 +149,10 @@ jobs:
           # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
           echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
           python3 scripts/migration-zig-gate.py --self-test
+          # Parallel Zig migration must reject duplicate files and forged worker receipts.
+          # Synthetic workers only: never publish .sens or declare SENS semantic GO.
+          echo 'test_id=zig-parallel-worker-report-failclosed layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_migrate_parallel_fail_closed.py -v
           # Reader #5605: canonical COND has bare D1; #d1 is temporary
           # for compatibility-only lib source; no separate workflow.
           echo 'test_id=d1-cond-tag-free-source-boundary layer=reader verdict=focused-test semantic_authority=SENS'
