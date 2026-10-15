@@ -222,7 +222,7 @@ class SterileZigCorridorTests(unittest.TestCase):
             with self.subTest(comment=commented[:2]):
                 # Host-owned fake output is NOT a valid replacement for Zig.
                 mutant = source.replace(
-                    live, commented + "\\n            let bytes = Vec::new();", 1
+                    live, commented + "\n            let bytes = Vec::new();", 1
                 )
                 self.assertNotEqual(mutant, source)
                 with self.assertRaisesRegex(blocked, "live Zig physical"):

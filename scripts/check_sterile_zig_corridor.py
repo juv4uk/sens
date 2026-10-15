@@ -115,8 +115,8 @@ def check_trit_t5_egress(source: str) -> None:
     required = "let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;"
     # Comments are NOT executable Rust; an inactive breadcrumb must not prove
     # that a real Zig ABI v2 call produced the bytes sent to the SENS CLI.
-    active_zig = re.sub(r"/\\*.*?\\*/|//[^\\n]*", "", zig, flags=re.S)
-    if not re.search(r"(?m)^[ \\t]*" + re.escape(required) + r"[ \\t]*$", active_zig):
+    active_zig = re.sub(r"/\*.*?\*/|//[^\n]*", "", zig, flags=re.S)
+    if not re.search(r"(?m)^[ \t]*" + re.escape(required) + r"[ \t]*$", active_zig):
         raise CorridorBlocked("sens-trit default encode lacks live Zig physical T5 egress")
     for bypass in ("sens::encode_binary_projection_ternary(", "sens::encode_ternary_words(",
                    "sens::decode_ternary_words(", "PhysicalT5Program::decode("):
