@@ -125,6 +125,41 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             self.assertEqual(result["summary"]["files_ready"], 1)
             self.assertEqual(result["summary"]["files_blocked"], 1)
 
+    def test_publication_rejects_missing_zig_without_creating_carrier(self):
+        # A working Rust D2 reader cannot replace the sole Zig physical mint.
+        with tempfile.TemporaryDirectory(prefix="approved-t5-no-zig-") as td:
+            temp = Path(td)
+            manifest = temp / "manifest.json"
+            manifest.write_text(json.dumps({"files": [{"path": REL,
+                "sha256": hashlib.sha256(SOURCE.read_bytes()).hexdigest()}]}))
+            output = temp / "output"
+            result = subprocess.run([
+                sys.executable, str(SCRIPT), str(ROOT), "--manifest", str(manifest),
+                "--out", str(output), "--report", str(temp / "report.json"),
+                "--reader", str(actual_d2_reader()),
+            ], cwd=ROOT, capture_output=True, text=True, timeout=120,
+                env={**os.environ, "ZIG": str(temp / "missing-zig")})
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertFalse(list(output.rglob("*.sens")) if output.exists() else False)
+            receipt = json.loads((temp / "report.json").read_text())
+            self.assertEqual(receipt["summary"]["published"], 0)
+            self.assertIn("ZIG_CODEC_UNAVAILABLE", receipt["files"][-1]["reason"])
+
+    def test_migration_requires_zig_minted_bytes_not_python_reference(self):
+        from unittest import mock
+        maps = mod.load_engine_maps(ROOT)
+        original = SOURCE.read_bytes()
+        with mock.patch.object(mod.bridge, "carry_t5",
+                               side_effect=mod.bridge.ZigCodecError("ZIG_MINT_FAILED")):
+            with self.assertRaisesRegex(mod.bridge.ZigCodecError, "ZIG_MINT_FAILED"):
+                mod.migrate_one(SOURCE, ROOT, maps, original,
+                                zig_binary=Path("provided-attested-binary"))
+        with mock.patch.object(mod.bridge, "carry_t5", return_value=b"wrong"):
+            with self.assertRaisesRegex(mod.engine.SensT5Error,
+                                         "ZIG_MIGRATION_REFERENCE_MISMATCH"):
+                mod.migrate_one(SOURCE, ROOT, maps, original,
+                                zig_binary=Path("provided-attested-binary"))
+
     def test_wrong_sha_and_traversal_are_fail_closed(self):
         with tempfile.TemporaryDirectory(prefix="approved-t5-sha-") as td:
             temp = Path(td)

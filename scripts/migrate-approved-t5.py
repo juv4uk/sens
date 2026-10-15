@@ -37,6 +37,14 @@ engine = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = engine
 spec.loader.exec_module(engine)
 
+BRIDGE_SPEC = importlib.util.spec_from_file_location(
+    "sens_zig_codec_bridge", ROOT / "scripts/zig_codec_bridge.py"
+)
+if BRIDGE_SPEC is None or BRIDGE_SPEC.loader is None:
+    raise RuntimeError("Zig physical transport bridge unavailable")
+bridge = importlib.util.module_from_spec(BRIDGE_SPEC)
+BRIDGE_SPEC.loader.exec_module(bridge)
+
 
 def load_manifest(path: Path, root: Path) -> list[tuple[Path, str | None]]:
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -99,30 +107,34 @@ def source_sha256(source: Path) -> str:
 
 def load_engine_maps(root: Path):
     data = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
-    legacy, my, upper = engine.build_three_pass_maps(
+    my, upper = engine.build_three_pass_maps(
         data,
         root / "crates/sens/src/domain_surface_registry_generated.rs",
         root / "crates/sens/src/semantic_registry_generated.rs",
         root / "crates/sens/src/semantic_registry.rs",
         root / "crates/sens/src/eval/necessary_forms_generated.rs",
-        root / "contracts/core1-historical-sid-map.lisp",
-        root / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = engine.build_text7(
         data, root / "knowledge/d7-keyboard-v2-ratified.json"
     )
-    return legacy, my, upper, text7
+    return my, upper, text7
 
 
-def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *, source_era: str = "auto"):
-    """Migrate ONE immutable source snapshot; never hash/re-read another version."""
-    legacy, my, upper, text7 = maps
+def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *,
+                source_era: str = "auto", zig_binary: Path | None = None):
+    """Migrate one immutable snapshot; only a supplied, attested Zig binary mints write bytes."""
+    my, upper, text7 = maps
+    if source_era == "legacy":
+        raise engine.MigrationError(
+            "HISTORICAL_SOURCE_ERA_DISABLED: no SID8-to-current-D8 projection"
+        )
     # The owner-ratified D8 shares 8 visible bits with historical SID8.
     # Never silently treat current D8 as old SID8. Only explicit legacy
     # provenance may activate the historical successor mapping.
     foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
     admitted_d8 = foundation["domains"].get("D8", {}).get("residents", {})
-    resolver = engine.Resolver(legacy, my, upper, source_era, admitted_d8)
+    d9_residents = foundation["domains"].get("D9", {}).get("residents", {})
+    resolver = engine.Resolver(my, upper, admitted_d8, d9_residents)
     if original is None:
         original = source.read_bytes()
     source_text = original.decode("utf-8")
@@ -135,9 +147,22 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         signal.alarm(0)
 
     words = engine.parse_words(projection)
-    payload = engine.encode_projection(projection)
-    if engine.decode_bytes(payload) != words:
+    # Python encoding is an independent physical parity reference only.
+    # A non-dry-run publisher MUST take its real carrier bytes from Zig.
+    reference = engine.encode_projection(projection)
+    if engine.decode_bytes(reference) != words:
         raise engine.SensT5Error("T5 roundtrip changed typed source words")
+    if zig_binary is None:
+        payload = reference  # preview/reference only; cannot publish
+    else:
+        payload = bridge.carry_t5(
+            zig_binary, projection,
+            trusted_source_sha256=hashlib.sha256(reference).hexdigest(),
+        )
+        if payload != reference:
+            raise engine.SensT5Error(
+                "ZIG_MIGRATION_REFERENCE_MISMATCH: no physical carrier publication"
+            )
 
     rel = source.relative_to(root)
     dest = engine.sens_destination(rel)
@@ -152,6 +177,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
         "semantic_word_count": len(words),
         "passes": resolver.counts,
         "status": "ready",
+        "physical_producer": "ZIG_ATTESTED" if zig_binary is not None else "REFERENCE_PREVIEW_ONLY",
     }
 
 
@@ -243,11 +269,16 @@ def main() -> int:
     staged: list[tuple[Path, bytes]] = []
     source_snapshots: dict[Path, bytes] = {}
     requested = 0
+    zig_temp = None
+    zig_binary = None
 
     try:
         entries = load_manifest(manifest, root)
         requested = len(entries)
         maps = load_engine_maps(root)
+        if not args.dry_run:
+            zig_temp = tempfile.TemporaryDirectory(prefix="sens-approved-zig-mint-")
+            zig_binary = bridge.build_transport(Path(zig_temp.name))
         destinations: set[Path] = set()
 
         for rel, expected_sha in entries:
@@ -277,8 +308,10 @@ def main() -> int:
                     raise engine.SensT5Error(
                         f"source sha256 mismatch: expected {expected_sha}, got {actual_sha}"
                     )
-                dest_path, payload, row = migrate_one(source, root, maps, original,
-                                                      source_era=args.source_era)
+                dest_path, payload, row = migrate_one(
+                    source, root, maps, original,
+                    source_era=args.source_era, zig_binary=zig_binary,
+                )
                 source_snapshots[rel] = original
                 if expected_sha is not None:
                     row["manifest_sha256"] = expected_sha
@@ -292,7 +325,8 @@ def main() -> int:
                 row["semantic_oracle"] = "NOT_VERIFIED"
                 staged.append((dest_path, payload))
                 rows.append(row)
-            except (engine.MigrationError, engine.SensT5Error, UnicodeError, OSError) as exc:
+            except (engine.MigrationError, engine.SensT5Error,
+                    bridge.ZigCodecError, UnicodeError, OSError) as exc:
                 rows.append({
                     "path": rel.as_posix(),
                     "output": dest.as_posix(),
@@ -316,6 +350,9 @@ def main() -> int:
     except Exception as exc:
         rows.append({"status": "error", "reason": str(exc)})
         staged.clear()
+    finally:
+        if zig_temp is not None:
+            zig_temp.cleanup()
 
     ready = sum(row.get("status") == "ready" for row in rows)
     blocked = sum(row.get("status") == "blocked" for row in rows)
