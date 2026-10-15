@@ -6,9 +6,18 @@ pub const Block = struct { offset_bytes: u32, length_bytes: u32 };
 pub const Error = error{
     EmptySchema, InvalidWidth, FieldOverflow, LengthOverflow,
     LengthMismatch, NonCanonicalTail, InvalidBlockMap, IntegrityMismatch,
+    OverlappingBuffers,
 };
 fn bytesForBits(bits: usize) usize {
     return bits / 8 + @as(usize, @intFromBool(bits % 8 != 0));
+}
+// Caller-owned packed bytes must not overlap the structured source/destination.
+// Compare address differences, not sums, to avoid pointer-range overflow.
+fn overlaps(source: []const u8, destination: []const u8) bool {
+    if (source.len == 0 or destination.len == 0) return false;
+    const a = @intFromPtr(source.ptr);
+    const b = @intFromPtr(destination.ptr);
+    return if (a <= b) b - a < source.len else a - b < destination.len;
 }
 pub fn measure(fields: []const Field) Error!usize {
     if (fields.len == 0) return error.EmptySchema;
@@ -26,6 +35,8 @@ pub fn measure(fields: []const Field) Error!usize {
 pub fn pack(out: []u8, fields: []const Field) Error!usize {
     const size = try measure(fields);
     if (out.len != bytesForBits(size)) return error.LengthMismatch;
+    // Without this check @memset can destroy input field widths or payloads.
+    if (overlaps(std.mem.sliceAsBytes(fields), out)) return error.OverlappingBuffers;
     @memset(out, 0);
     var pos: usize = 0;
     for (fields) |field| {
@@ -55,6 +66,8 @@ pub fn unpack(raw: []const u8, bit_len: usize, widths: []const u8, dst: []u64) E
         const mask: u8 = (@as(u8, 1) << unused) - 1;
         if ((raw[raw.len - 1] & mask) != 0) return error.NonCanonicalTail;
     }
+    // Decoding overlapping output words could overwrite unread source bits.
+    if (overlaps(raw, std.mem.sliceAsBytes(dst))) return error.OverlappingBuffers;
     var pos: usize = 0;
     for (widths, 0..) |width, i| {
         var word: u64 = 0;
@@ -101,6 +114,37 @@ test "binary fields exact width and leading zeros" {
     try unpack(&bytes, 8, &.{ 2, 3, 3 }, &decoded);
     try std.testing.expectEqualSlices(u64, &.{ 1, 0, 7 }, &decoded);
 }
+test "caller-owned field pack and unpack reject aliased bytes before writes" {
+    var source = [_]Field{
+        .{ .width = 2, .bits = 1 },
+        .{ .width = 3, .bits = 0 },
+        .{ .width = 3, .bits = 7 },
+    };
+    const original = source;
+    const source_bytes = std.mem.sliceAsBytes(source[0..]);
+    try std.testing.expectError(error.OverlappingBuffers,
+        pack(source_bytes[0..1], source[0..]));
+    for (source, original) |actual, expected| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqual(expected.bits, actual.bits);
+    }
+
+    var destination: [3]u64 = .{ 0xaaaa, 0xbbbb, 0xcccc };
+    const shared = std.mem.sliceAsBytes(destination[0..]);
+    shared[0] = 0x47;
+    const before = destination;
+    try std.testing.expectError(error.OverlappingBuffers,
+        unpack(shared[0..1], 8, &.{ 2, 3, 3 }, destination[0..]));
+    try std.testing.expectEqualSlices(u64, &before, &destination);
+
+    // A one-byte shifted source overlaps a 24-byte output without equal pointers.
+    shared[1] = 0x47;
+    const shifted_before = destination;
+    try std.testing.expectError(error.OverlappingBuffers,
+        unpack(shared[1..2], 8, &.{ 2, 3, 3 }, destination[0..]));
+    try std.testing.expectEqualSlices(u64, &shifted_before, &destination);
+}
+
 test "truncation, append and one padding bit mutant" {
     const fields = [_]Field{.{ .width = 3, .bits = 1 }};
     var bytes: [1]u8 = undefined;
