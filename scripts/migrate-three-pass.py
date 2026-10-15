@@ -891,6 +891,14 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
         letrec_names=()
 
         for idx,item in enumerate(node.items):
+            # Documentation is not code: a (doc ...) form carries human docs, not a
+            # machine identity, so it is dropped from the migration (owner 2026-10-15:
+            # "скрипту не потрібні коментарі").
+            if (not quoted and isinstance(item,ListNode) and item.items
+                    and isinstance(item.items[0],Atom) and item.items[0].tok.text=="doc"):
+                if words and words[-1]==D2_SEP:
+                    words.pop()
+                continue
             if idx:
                 words.append(D2_SEP)
 
