@@ -199,6 +199,9 @@ pub fn inspectCanonical(
         return error.OverlappingBuffers;
     const count = try e1.inspect(frame);
     if (decoded.len < count or scratch.len <= count) return error.BufferTooSmall;
+    // A byte-exact canonical replay must contain at least frame.len bytes.
+    // Reject a short caller-owned replay BEFORE touching decoded or DP scratch.
+    if (replay.len < frame.len) return error.BufferTooSmall;
     _ = try e1.unpack(frame, decoded[0..count]);
     const size = try encode(decoded[0..count], replay, scratch);
     if (!std.mem.eql(u8, frame, replay[0..size])) return error.NonCanonical;
@@ -447,4 +450,41 @@ test "E1 shared exact-width carrier corpus: independent encode and decode" {
         tested += 1;
     }
     try std.testing.expectEqual(@as(usize, 16), tested);
+}
+
+
+test "E1 short replay fails before publishing decoded words or touching DP scratch" {
+    const source = [_]Word{.{ .width = 2, .bits = 1 }};
+    var frame: [64]u8 = undefined;
+    var scratch: [2]Step = undefined;
+    const len = try encode(&source, &frame, &scratch);
+
+    // A real, CRC-valid, canonical physical frame with one byte too little
+    // replay storage must not alter any caller-owned decoded/workspace bytes.
+    var decoded: [1]Word = .{.{ .width = 9, .bits = 0x1ff }};
+    for (&scratch) |*step|
+        step.* = .{ .bytes = 0xdead, .end = 0xbeef, .mode = 0xa5 };
+    const before_scratch = scratch;
+    var replay: [64]u8 = [_]u8{0xa5} ** 64;
+    try std.testing.expect(len > 1);
+    try std.testing.expectError(error.BufferTooSmall,
+        inspectCanonical(frame[0..len], &decoded, &scratch,
+            replay[0 .. len - 1]));
+    try std.testing.expectEqual(@as(u8, 9), decoded[0].width);
+    try std.testing.expectEqual(@as(u16, 0x1ff), decoded[0].bits);
+    for (scratch, before_scratch) |actual, before| {
+        try std.testing.expectEqual(before.bytes, actual.bytes);
+        try std.testing.expectEqual(before.end, actual.end);
+        try std.testing.expectEqual(before.mode, actual.mode);
+    }
+    for (replay) |byte|
+        try std.testing.expectEqual(@as(u8, 0xa5), byte);
+
+    // Positive control: sufficient disjoint replay still validates exact
+    // width+bits without giving this transport any semantic authority.
+    try std.testing.expectEqual(@as(usize, 1),
+        try inspectCanonical(frame[0..len], &decoded, &scratch, &replay));
+    try std.testing.expectEqual(source[0].width, decoded[0].width);
+    try std.testing.expectEqual(source[0].bits, decoded[0].bits);
+    try std.testing.expectEqualSlices(u8, frame[0..len], replay[0..len]);
 }
