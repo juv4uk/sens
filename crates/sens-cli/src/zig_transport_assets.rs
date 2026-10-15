@@ -15,7 +15,4 @@ unsafe extern "C" {
     pub(super) fn sens_zig_forward_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_knowledge_bytes_copy(output: *mut u8, capacity: usize) -> isize;
     pub(super) fn sens_zig_persistent_map_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    pub(super) fn sens_zig_repl_persistent_vector_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    pub(super) fn sens_zig_repl_time_bytes_copy(output: *mut u8, capacity: usize) -> isize;
-    pub(super) fn sens_zig_repl_epistemic_bytes_copy(output: *mut u8, capacity: usize) -> isize;
 }

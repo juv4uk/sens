@@ -15,17 +15,38 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
+// REPL-local FFI: other CLI binaries acquire no extra dead_code warnings.
+#[cfg(feature = "zig-transport")]
+unsafe extern "C" {
+    fn sens_zig_codec_abi_version() -> u32;
+    fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+}
+#[cfg(feature = "zig-transport")]
+fn repl_zig_source(
+    copy: unsafe extern "C" fn(*mut u8, usize) -> isize, label: &str,
+) -> Result<String, String> {
+    if unsafe { sens_zig_codec_abi_version() } != 2 {
+        return Err(format!("{label}: Zig ABI version mismatch"));
+    }
+    let n = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+    if n <= 0 { return Err(format!("{label}: invalid Zig byte length {n}")); }
+    let len = usize::try_from(n).map_err(|_| format!("{label}: Zig length overflow"))?;
+    if len > 8 * 1024 * 1024 { return Err(format!("{label}: host byte bound exceeded")); }
+    let mut bytes = vec![0u8; len];
+    let got = unsafe { copy(bytes.as_mut_ptr(), len) };
+    if got != n { return Err(format!("{label}: Zig exact copy rejected {got}")); }
+    String::from_utf8(bytes).map_err(|err| format!("{label}: UTF-8 source error {err}"))
+}
 // No Rust include_str! of SENS project source. Zig owns byte transport.
 fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String> {
     #[cfg(feature = "zig-transport")]
     {
         Ok(vec![
-            ("persistent-vector.lisp", String::from_utf8(super::zig_transport::repl_persistent_vector_source_bytes()?)
-                .map_err(|e| format!("ZIG_REPL_PERSISTENT_VECTOR UTF-8: {e}"))?),
-            ("time.lisp", String::from_utf8(super::zig_transport::repl_time_source_bytes()?)
-                .map_err(|e| format!("ZIG_REPL_TIME UTF-8: {e}"))?),
-            ("epistemic.lisp", String::from_utf8(super::zig_transport::repl_epistemic_source_bytes()?)
-                .map_err(|e| format!("ZIG_REPL_EPISTEMIC UTF-8: {e}"))?),
+            ("persistent-vector.lisp", repl_zig_source(sens_zig_repl_persistent_vector_bytes_copy, "ZIG_REPL_PERSISTENT_VECTOR")?),
+            ("time.lisp", repl_zig_source(sens_zig_repl_time_bytes_copy, "ZIG_REPL_TIME")?),
+            ("epistemic.lisp", repl_zig_source(sens_zig_repl_epistemic_bytes_copy, "ZIG_REPL_EPISTEMIC")?),
         ])
     }
     #[cfg(not(feature = "zig-transport"))]
