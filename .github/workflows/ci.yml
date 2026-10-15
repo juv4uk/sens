@@ -1432,13 +1432,21 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
-        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
-        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+        # Checked Rust exact-Q witness, identical workload and checksum to the
+        # independently executed Python research proxy. Native SENS side remains
+        # UNVERIFIED without an admitted physical SENS exact-Q fixture.
         shell: bash
         run: |
           set -euo pipefail
-          cargo build -p core-math-demand-rust --release
+          python3 -m unittest discover -s tests -p test_math_paired_rust_runner.py -v
+          rustc --edition=2021 -C opt-level=3 -C overflow-checks=yes \
+            benchmarks/math-exact-q-rust/paired_exact_q.rs \
+            -o "$RUNNER_TEMP/sens-exact-q-rust"
+          python3 scripts/bench_math_sens_vs_rust.py . --iters 19 --reps 1 \
+            --rust-binary "$RUNNER_TEMP/sens-exact-q-rust" --require-rust \
+            --json "$RUNNER_TEMP/math-bench-smoke.json"
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
+            --rust-binary "$RUNNER_TEMP/sens-exact-q-rust" --require-rust \
             --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
