@@ -166,7 +166,25 @@ fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// SENS owns source parsing and D2 admission. Only typed exact words travel
+/// into Zig; no Rust physical T5 encoder participates in default egress.
+#[cfg(feature = "zig-transport")]
+fn source_exact_words(source: &str) -> Result<Vec<sens::BinarySourceWord>, String> {
+    let tokens = sens::parse_binary_source_words(source)
+        .map_err(|e| format!("binary source rejected: {}", e.render(source)))?;
+    let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
+    if words.is_empty() {
+        return Err("empty binary source cannot be a canonical T5 program".into());
+    }
+    sens::parse_canonical_word_sequence(&words)
+        .map_err(|e| format!("SENS canonical D2 rejected: {e}"))?;
+    Ok(words)
+}
+
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
+    #[cfg(feature = "zig-transport")]
+    let canonical = zig_transport::encode_t5_direct(&source_exact_words(source)?)?;
+    #[cfg(not(feature = "zig-transport"))]
     let canonical = sens::encode_binary_projection_ternary(source)
         .map_err(|e| format!("unadmitted .lisp projection: {e:?}"))?;
     // Default CLI: Zig decodes the exact physical words. SENS alone admits D2.
@@ -335,18 +353,13 @@ fn execute() -> Result<(), String> {
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            let reference = sens::encode_binary_projection_ternary(&projection)
-                .map_err(|e| explain_encode_failure(&projection, e))?;
-            // SENS owns the grammar/semantic admission; physical bytes are
-            // produced by Zig in the official zig-transport variant.
+            // Default: SENS D2/exact words -> Zig physical T5. No Rust T5
+            // intermediate and no silent fallback on an ABI failure.
             #[cfg(feature = "zig-transport")]
-            let bytes = {
-                let typed = decode_canonical_t5_words(&reference)
-                    .map_err(|e| format!("canonical T5 words rejected: {e}"))?;
-                zig_transport::encode_t5(&typed, &reference)?
-            };
+            let bytes = zig_transport::encode_t5_direct(&source_exact_words(&projection)?)?;
             #[cfg(not(feature = "zig-transport"))]
-            let bytes = reference;
+            let bytes = sens::encode_binary_projection_ternary(&projection)
+                .map_err(|e| explain_encode_failure(&projection, e))?;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;
@@ -788,8 +801,36 @@ mod eval_tests {
         let start = source.find("\"encode\" => {").expect("CLI encode command");
         let block = &source[start..];
         let route = &block[..block.find("\n        }").expect("encode command closes")];
-        assert!(route.contains("decode_canonical_t5_words(&reference)"));
-        assert!(!route.contains("sens::decode_ternary_words(&reference)"));
+        assert!(route.contains("source_exact_words(&projection)"));
+        assert!(route.contains("zig_transport::encode_t5_direct("));
+        let default_route = route.split("#[cfg(not(feature = \"zig-transport\"))]").next().unwrap();
+        assert!(!default_route.contains("sens::encode_binary_projection_ternary("));
+        assert!(!default_route.contains("sens::decode_ternary_words("));
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_default_egress_has_no_rust_t5_stage_and_rejects_false_companion() {
+        let source = "10 001 00 000 01";
+        let exact = source_exact_words(source).expect("SENS source and D2 admitted");
+        let physical = zig_transport::encode_t5_direct(&exact).expect("Zig T5");
+        assert_eq!(physical, [0x63, 0x89, 0x06, 0xa1]);
+        assert_eq!(zig_transport::decode_t5_words(&physical).unwrap(), exact);
+        verify_companion(source, &physical).expect("same exact words and bytes");
+        assert!(verify_companion("10 001 00 001 01", &physical).is_err());
+        assert!(verify_companion(source, &[0xf3]).is_err());
+        for invalid in ["", "01", "10 001"] {
+            assert!(source_exact_words(invalid).is_err(),
+                "SENS structural rejection before Zig: {invalid}");
+        }
+        let src = include_str!("sens-trit.rs");
+        let begin = src.find("fn verify_companion(").unwrap();
+        let segment = &src[begin..];
+        let function = &segment[..segment.find("\n}\n").unwrap()];
+        let default_path = function
+            .split("#[cfg(not(feature = \"zig-transport\"))]").next().unwrap();
+        assert!(default_path.contains("zig_transport::encode_t5_direct("));
+        assert!(!default_path.contains("sens::encode_binary_projection_ternary("));
     }
 
     #[cfg(feature = "zig-transport")]
