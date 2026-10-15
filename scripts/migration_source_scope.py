@@ -10,9 +10,16 @@ import re
 
 
 def archived_benchmark_source(path: str) -> bool:
-    if not isinstance(path, str) or path.startswith("/") or "\\" in path:
+    if not isinstance(path, str) or not path or path.startswith("/") or "\\" in path or "\0" in path:
         return False
-    parts = PurePosixPath(path).parts
+    # Exact source identity requires canonical raw segments; pathlib would
+    # silently collapse repeated separators, including a forged archive alias.
+    if any(segment in ("", ".", "..") for segment in path.split("/")):
+        return False
+    normalized = PurePosixPath(path)
+    if normalized.as_posix() != path:
+        return False
+    parts = normalized.parts
     return (
         len(parts) == 6
         and parts[:3] == ("benchmarks", "sens-surface", "results")
@@ -20,7 +27,6 @@ def archived_benchmark_source(path: str) -> bool:
         and parts[4] == "programs"
         and parts[5] not in ("", ".", "..")
         and parts[5].endswith(".lisp")
-        and all(p not in (".", "..") for p in path.split("/"))
     )
 
 
