@@ -20,6 +20,10 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/forward.lisp");
     println!("cargo:rerun-if-changed=../../lib/knowledge.lisp");
     println!("cargo:rerun-if-changed=../../lib/persistent-map.lisp");
+    // REPL prerequisite Zig @embedFile assets must invalidate the linked archive.
+    println!("cargo:rerun-if-changed=../../lib/persistent-vector.lisp");
+    println!("cargo:rerun-if-changed=../../lib/time.lisp");
+    println!("cargo:rerun-if-changed=../../lib/epistemic.lisp");
     println!("cargo:rerun-if-changed=../../language-contract.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
