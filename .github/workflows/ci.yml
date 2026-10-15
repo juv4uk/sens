@@ -1405,7 +1405,7 @@ jobs:
 
       - name: Upload Rust→project dependency ledger
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: rust-project-deps
           path: ${{ runner.temp }}/rust-project-deps.json
@@ -1430,7 +1430,7 @@ jobs:
 
       - name: Upload release GO-gate report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: release-go-gate
           path: ${{ runner.temp }}/release-go-gate.json
@@ -1448,7 +1448,7 @@ jobs:
 
       - name: Upload math benchmark (SENS vs Rust)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: math-bench-sens-vs-rust
           path: ${{ runner.temp }}/math-bench.json
@@ -1523,7 +1523,7 @@ jobs:
 
       - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: zig-rust-codec-${{ github.sha }}
           path: |
@@ -1602,7 +1602,7 @@ jobs:
           exit "$rc"
       - name: Зберегти фактичні результати одноразового мігратора
         if: ${{ always() && contains(github.event.head_commit.message, '[migration-apply-once]') }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: sens-active-migration-${{ github.sha }}
           path: ${{ runner.temp }}/sens-active-migration/
@@ -1654,7 +1654,7 @@ jobs:
           echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"
       - name: Зберегти точну карту Rust↔Zig↔SENS для поточного SHA
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 Node24
         with:
           name: sens-rust-zig-boundary-${{ github.sha }}
           path: ${{ runner.temp }}/sens-rust-zig-boundary-${{ github.sha }}.json
