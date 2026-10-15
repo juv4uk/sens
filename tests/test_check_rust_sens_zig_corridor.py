@@ -114,7 +114,11 @@ class CorridorGuardTests(unittest.TestCase):
 int main(void) {
   const char *prefix = "/*";
   const unsigned char input[] = {0};
+  unsigned char out[4] = {0};
   int rc = sens_zig_t5_validate(input, sizeof input);
+  if (sens_zig_f3c_pack(input, sizeof input, out, sizeof out), -1) {
+    return 1;
+  }
   const char *suffix = "*/";
   return rc == 0 && prefix[0] && suffix[0] ? 0 : 1;
 }
@@ -122,6 +126,30 @@ int main(void) {
             encoding="utf-8",
         )
         self.assertEqual(self.module.check(self.root), [])
+
+    def test_host_without_f3c_invalid_reject_is_blocked(self) -> None:
+        """R5: C host must fail-closed reject invalid T5 via F3C pack (same as Rust)."""
+        host_dir = self.root / HOST_C
+        for source in host_dir.glob("*.c"):
+            source.unlink()
+        # Physical calls present, but no F3C pack expected-reject (-1).
+        (host_dir / "corridor_v2.c").write_text(
+            """#include "zig_transport_v2.h"
+int main(void) {
+  uint8_t t5[4] = {0x63, 0x89, 0x06, 0xa1};
+  uint8_t out[16] = {0};
+  sens_zig_t5_validate(t5, 4);
+  sens_zig_f3c_pack(t5, 4, out, 16);
+  return 0;
+}
+""",
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertTrue(
+            any("F3C pack rejection of invalid T5" in p for p in problems),
+            problems,
+        )
 
     # --- R1..R4 (structural corridor) -------------------------------------
     def test_default_without_zig_transport_is_blocked(self) -> None:
