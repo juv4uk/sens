@@ -131,6 +131,39 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
         self.assertNotIn("--- worker", run.stdout)
         self.assertFalse(self.report.exists())
 
+    def test_hardlink_alias_is_one_inode_and_no_workers_start(self) -> None:
+        # Path.resolve() alone does not identify distinct hardlink names.
+        hardlink = self.root / "src" / "hardlink.lisp"
+        try:
+            os.link(self.root / "src" / "a.lisp", hardlink)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"hardlinks unavailable on this host: {exc}")
+        self.assertNotEqual(
+            (self.root / "src" / "a.lisp").resolve(), hardlink.resolve()
+        )
+        run = self.invoke("valid", "src/a.lisp", "src/hardlink.lisp")
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("test_id=duplicate-source", run.stderr)
+        self.assertIn("same_inode=", run.stderr)
+        self.assertNotIn("--- worker", run.stdout)
+        self.assertFalse(self.report.exists())
+        self.assertFalse(self.output.exists())
+
+    def test_separate_inodes_are_allowed_even_with_identical_contents(self) -> None:
+        # Byte equality is NOT file identity, and is not SENS semantics.
+        (self.root / "src/b.lisp").write_bytes(
+            (self.root / "src/a.lisp").read_bytes()
+        )
+        self.assertNotEqual(
+            (self.root / "src/a.lisp").stat().st_ino,
+            (self.root / "src/b.lisp").stat().st_ino,
+        )
+        run = self.invoke("valid", "src/a.lisp", "src/b.lisp")
+        self.assertEqual(run.returncode, 0, run.stderr + run.stdout)
+        receipt = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertEqual(receipt["status"], "COMPLETE")
+        self.assertEqual(receipt["summary"]["files_seen"], 2)
+
     def test_missing_and_nonregular_inputs_block_before_workers(self) -> None:
         for path in ("src/missing.lisp", "src"):
             with self.subTest(path=path):
