@@ -189,7 +189,7 @@ class ZigBuildEnvironmentWatchTest(unittest.TestCase):
             ),
             "after-feature-return": source.replace(watch, "", 1).replace(
                 '    let root = PathBuf::from(',
-                watch + "\n    let root = PathBuf::from(',
+                watch + "\n    let root = PathBuf::from(",
                 1,
             ),
         }
