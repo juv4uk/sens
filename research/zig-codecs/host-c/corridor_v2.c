@@ -130,6 +130,38 @@ static int witness_zig_e1_encode_be3(void) {
             sens_zig_e1_encode_be3(source, sizeof source, output, sizeof output),
             (ptrdiff_t)sizeof golden)) return 0;
     if (!check_bytes("e1-canonical-raw-crc", output, golden, sizeof golden)) return 0;
+    uint8_t restored[32];
+    memset(restored, 0x37, sizeof restored);
+    if (!check_number("e1-decode-be3-size",
+            sens_zig_e1_decode_be3(golden, sizeof golden,
+                                   restored, sizeof restored),
+            (ptrdiff_t)sizeof source)) return 0;
+    if (!check_bytes("e1-decode-be3-golden",
+                     restored, source, sizeof source)) return 0;
+    if (!check_number("e1-decode-untouched-suffix",
+            restored[sizeof source], 0x37)) return 0;
+
+    uint8_t damaged[sizeof golden];
+    memcpy(damaged, golden, sizeof golden);
+    damaged[sizeof damaged - 1] ^= 1;  /* CRC negative */
+    memset(restored, 0x37, sizeof restored);
+    if (!check_number("e1-crc-invalid-reject",
+            sens_zig_e1_decode_be3(damaged, sizeof damaged,
+                                   restored, sizeof restored), -1)) return 0;
+    if (!check_number("e1-crc-negative-keeps-output",
+            restored[0], 0x37)) return 0;
+    if (!check_number("e1-decode-short-output",
+            sens_zig_e1_decode_be3(golden, sizeof golden,
+                                   restored, sizeof source - 1), -2)) return 0;
+    if (!check_number("e1-decode-short-keeps-output",
+            restored[0], 0x37)) return 0;
+    uint8_t aliased_decode[64] = {0};
+    memcpy(aliased_decode, golden, sizeof golden);
+    if (!check_number("e1-decode-overlap-reject",
+            sens_zig_e1_decode_be3(aliased_decode, sizeof golden,
+                                   aliased_decode + 2, sizeof aliased_decode - 2), -1)) return 0;
+    if (!check_bytes("e1-decode-reject-keeps-input",
+                     aliased_decode, golden, sizeof golden)) return 0;
     if (!check_number("e1-small-output",
             sens_zig_e1_encode_be3(source, sizeof source,
                                    too_small, sizeof too_small), -2)) return 0;
