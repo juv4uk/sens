@@ -52,11 +52,18 @@ def _route_between(source: str, begin: str, end: str) -> str:
     if begin not in prod or prod.count(begin) != 1:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
     start = prod.index(begin) + len(begin)
-    haystack = prod if end in prod[start:] else source
-    if end not in haystack[start:]:
+    if end == "\n#[cfg(test)]":
+        # The actual main() route ends immediately before the first test
+        # module. This is the ONLY permitted boundary outside production.
+        if not source[len(prod):].startswith(end):
+            raise CorridorBlocked(f"sens main production/test boundary missing: {begin}")
+        return prod[start:]
+    # Do not fall back to all of 'source': test-only Rust functions or
+    # comment/string fixtures must NEVER close a production Zig route.
+    if end not in prod[start:]:
         raise CorridorBlocked(f"sens main physical route missing/duplicated: {begin}")
-    stop = haystack.index(end, start)
-    return haystack[start:stop]
+    stop = prod.index(end, start)
+    return prod[start:stop]
 
 
 def check_main_t5_ingress(source: str) -> None:

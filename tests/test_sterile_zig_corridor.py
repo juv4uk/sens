@@ -293,6 +293,30 @@ class SterileZigCorridorTests(unittest.TestCase):
         with self.assertRaises(blocked):
             check(source.replace(entry, "sens::eval_t5_program(&bytes, &mut session)?", 1))
 
+    def test_route_cannot_borrow_test_only_closing_function(self) -> None:
+        """A Zig source check must fail if its closing sentinel exists only in cfg(test)."""
+        module = runpy.run_path(str(SCRIPT))
+        between = module["_route_between"]
+        blocked = module["CorridorBlocked"]
+        spoof = (
+            'fn zig_ingress() {\n'
+            '    zig_transport::decode_t5_words(bytes);\n'
+            '}\n'
+            '#[cfg(test)]\n'
+            'fn next_production_route() {\n'
+            '    // test-only witness, NEVER a production boundary\n'
+            '}\n'
+        )
+        # Before this fix the fallback to source (not production) accepted it.
+        with self.assertRaises(blocked):
+            between(spoof, "fn zig_ingress(", "\nfn next_production_route(")
+
+        actual = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+        live_main = between(actual, "fn main() {", "\n#[cfg(test)]")
+        self.assertIn("physical_t5_request", live_main)
+        self.assertIn("eval_physical_t5", live_main)
+        self.assertNotIn("#[cfg(test)]", live_main)
+
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
