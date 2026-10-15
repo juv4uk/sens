@@ -71,12 +71,8 @@ def require_manual_preflight(source: str) -> None:
     # migration bridge. --self-test explicitly skips transport and exits 0,
     # so it can never substitute for the mandatory pre-tag physical proof.
     physical_command = "python3 scripts/migration-zig-gate.py --require-zig"
-    physical_match = re.search(
-        r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", source
-    )
-    if physical_match is None:
-        raise AssertionError("RELEASE_BLOCKED: missing full Zig physical migration gate")
-
+    # The full physical migration command must be LIVE in the SAME named
+    # Zig step as the ReleaseSafe suite, never in an unrelated step or comment.
     # The native transport suite must run on the same checked-out release
     # candidate, in Zig 0.16 ReleaseSafe (optimized WITH runtime safety).
     # Require a live bare shell command, not a comment/echo/ignored failure,
@@ -88,14 +84,18 @@ def require_manual_preflight(source: str) -> None:
     if step is None:
         raise AssertionError("RELEASE_BLOCKED: missing executable Zig corridor step")
     body = step.group("body")
+    physical_match = re.search(
+        r"(?m)^          " + re.escape(physical_command) + r"[ \t]*$", body
+    )
+    if physical_match is None:
+        raise AssertionError("RELEASE_BLOCKED: missing full Zig physical migration gate")
     native_match = re.search(
         r"(?m)^          " + re.escape(ZIG_RELEASE_SAFE_COMMAND)
         + r"[ \t]*$", body,
     )
     if (native_match is None or
             "          set -euo pipefail\n" not in body or
-            body.find(physical_command) < 0 or
-            native_match.start() <= body.find(physical_command)):
+            native_match.start() <= physical_match.end()):
         raise AssertionError("RELEASE_BLOCKED: missing live Zig ReleaseSafe physical suite")
 
 
@@ -184,6 +184,42 @@ class ReleasePreflightScopeTest(unittest.TestCase):
                     AssertionError, "missing full Zig physical migration gate"
                 ):
                     require_manual_preflight(broken)
+
+    def test_zig_migration_in_other_step_is_not_release_evidence(self):
+        command = "python3 scripts/migration-zig-gate.py --require-zig"
+        live = "          " + command + "\n"
+        marker = "      - name: Sterile Zig corridor (Rust↔SENS only via Zig ABI v2)\n"
+        self.assertIn(live, self.workflow)
+        self.assertIn(marker, self.workflow)
+        for spoof in ("# " + command, "echo " + command, "true # " + command):
+            with self.subTest(spoof=spoof):
+                wrong_step = (
+                    "      - name: Unrelated migration command\n"
+                    "        run: |\n"
+                    "          set -euo pipefail\n"
+                    + live + "\n"
+                )
+                broken = self.workflow.replace(live, "          " + spoof + "\n", 1)
+                broken = broken.replace(marker, wrong_step + marker, 1)
+                self.assertNotEqual(broken, self.workflow)
+                self.assertIn(wrong_step, broken)
+                with self.assertRaisesRegex(
+                    AssertionError, "missing full Zig physical migration gate"
+                ):
+                    require_manual_preflight(broken)
+
+    def test_zig_migration_must_run_before_release_safe_suite(self):
+        physical = "          python3 scripts/migration-zig-gate.py --require-zig\n"
+        native = "          " + ZIG_RELEASE_SAFE_COMMAND + "\n"
+        self.assertIn(physical, self.workflow)
+        self.assertIn(native, self.workflow)
+        broken = self.workflow.replace(physical, "          __REORDER__\n", 1)
+        broken = broken.replace(native, physical, 1)
+        broken = broken.replace("          __REORDER__\n", native, 1)
+        with self.assertRaisesRegex(
+            AssertionError, "missing live Zig ReleaseSafe physical suite"
+        ):
+            require_manual_preflight(broken)
 
     def test_negative_guard_rejects_missing_or_spoofed_zig_release_safe(self):
         command = ZIG_RELEASE_SAFE_COMMAND
