@@ -192,6 +192,11 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
         return Err(format!("Zig E1 physical encode rejected: code={written}"));
     }
     output.truncate(written as usize);
+    // Transport egress must not publish bytes before Zig independently
+    // restores the same exact SENS coordinates via the existing ABI v2.
+    // No Rust E1 physical encoder/decoder or SENS semantic re-evaluation.
+    let restored = decode_e1_words(&output)?;
+    require_same_exact_words(words, &restored)?;
     Ok(output)
 }
 
@@ -281,7 +286,7 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_t5_words, encode_t5_direct, require_same_exact_words};
+    use super::{decode_e1_words, decode_t5_words, encode_e1_direct, encode_t5_direct, require_same_exact_words};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -298,6 +303,47 @@ mod zig_exact_egress_tests {
         let recovered = decode_t5_words(&physical).expect("Zig T5 decode");
         require_same_exact_words(&expected, &recovered).unwrap();
         assert_eq!(physical.len(), 4);
+    }
+
+    #[test]
+    fn e1_egress_reenters_only_zig_and_preserves_exact_domain_words() {
+        // W1:1 and W2:01 have the same low payload but different identities.
+        // D9 retains nine physical bits including its leading zero.
+        let source = words("1 01 001 010101000");
+        let frame = encode_e1_direct(&source)
+            .expect("SENS exact words -> Zig E1 encode -> Zig E1 decode");
+        let restored = decode_e1_words(&frame).expect("canonical Zig E1 ingress");
+        require_same_exact_words(&source, &restored)
+            .expect("byte-for-byte exact width and payload preservation");
+        assert_eq!(source.len(), restored.len());
+        assert_eq!(restored.iter().map(sens::BinarySourceWord::width)
+            .collect::<Vec<_>>(), [1, 2, 3, 9]);
+
+        // CRC mutation must fail before any Rust host can admit SENS meaning.
+        let mut damaged = frame.clone();
+        let last = damaged.len() - 1;
+        damaged[last] ^= 1;
+        assert!(decode_e1_words(&damaged).is_err());
+
+        // A carrier can be canonical yet represent the WRONG exact words.
+        // Fail closed on each domain-width, payload and word-count mismatch.
+        assert!(require_same_exact_words(&source, &words("01 01 001 010101000"))
+            .unwrap_err().contains("expected_width=1"));
+        assert!(require_same_exact_words(&source, &words("0 01 001 010101000"))
+            .unwrap_err().contains("index=0"));
+        assert!(require_same_exact_words(&source, &words("1 01 001"))
+            .unwrap_err().contains("word_count"));
+
+        // Scope proof: this production egress has neither Rust E1 codec
+        // nor a silent reference fallback after Zig produces bytes.
+        let code = include_str!("zig_transport.rs");
+        let route = code.split("pub fn encode_e1_direct(").nth(1)
+            .expect("E1 Zig egress")
+            .split("pub fn decode_e1_words(").next().expect("next route");
+        assert!(route.contains("sens_zig_e1_encode_be3("));
+        assert!(route.contains("decode_e1_words(&output)?"));
+        assert!(route.contains("require_same_exact_words(words, &restored)?"));
+        assert!(!route.contains("sens::envelope_e1::encode"));
     }
 
     #[test]
