@@ -1320,6 +1320,13 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
+      - name: UNGUARDING ratchet — жоден guard не може бути муляжем
+        # A guard that cannot fail is itself a failure. A placeholder/stub gate, or a
+        # guard whose negative controls do not pass, fails here -- so a dummy gate
+        # never reaches main.
+        shell: bash
+        run: python3 scripts/check_guards_are_real.py .
+
       - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
         # The release is GO only when every gate passes on ONE SHA (#4196). This step
         # prints the GO count and names the red gates -- report-only, never greenwashed.
