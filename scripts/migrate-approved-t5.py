@@ -131,7 +131,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     # D8 is a current width-qualified domain, never an implicit SID8 replay.
     # The migration adapter carries only current-domain D9 residency metadata;
     # this is not proof that a resident is callable by SENS.
-    foundation = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
+    foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
     d9_residents = set(foundation["domains"].get("D9", {}).get("residents", {}))
     resolver = engine.Resolver(my, upper, d9_residents=d9_residents)
     if original is None:
