@@ -137,6 +137,43 @@ def main() -> None:
             proof["profile"] != "D1-D10_COORDINATES_NOT_EXECUTION"
         ):
             raise AssertionError("D10_COORDINATES_NOT_PRESERVED")
+        # Release/migration fail-closed: an EXTERNALLY pinned original D10
+        # prevents its valid-but-different one-byte D5 canonical truncation.
+        trusted_d10_sha = sha(d10)
+        pinned = verify_t5(
+            executable, d10, trusted_source_sha256=trusted_d10_sha
+        )
+        if pinned.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256":
+            raise AssertionError("ZIG_EXTERNAL_SOURCE_PIN_NOT_RECORDED")
+        if proof.get("source_pin_status") != "NOT_SUPPLIED":
+            raise AssertionError("ZIG_EXTERNAL_SOURCE_PIN_INVENTED")
+        # The missing executable MUST NOT be examined: reject the altered
+        # source before launching or even attesting Zig.
+        missing_zig = Path(temp) / "not-a-zig-binary"
+        try:
+            verify_t5(
+                missing_zig, b"\x00", trusted_source_sha256=trusted_d10_sha
+            )
+        except ZigCodecError as exc:
+            if "ZIG_CODEC_EXTERNAL_SOURCE_SHA_MISMATCH" not in str(exc):
+                raise AssertionError(f"wrong source-truncation reject: {exc}") from exc
+        else:
+            raise AssertionError("D10_TO_D5_EXTERNAL_SHA_TRUNCATION_ACCEPTED")
+        for label, bad_pin in (
+            ("empty", ""), ("short", "0" * 63),
+            ("uppercase", "A" * 64), ("nonhex", "g" * 64),
+        ):
+            try:
+                verify_t5(
+                    missing_zig, d10, trusted_source_sha256=bad_pin
+                )
+            except ZigCodecError as exc:
+                if "ZIG_CODEC_EXTERNAL_SOURCE_SHA_INVALID" not in str(exc):
+                    raise AssertionError(
+                        f"wrong external SHA format rejection {label}: {exc}"
+                    ) from exc
+            else:
+                raise AssertionError(f"EXTERNAL_SOURCE_SHA_{label}_ACCEPTED")
         d10_path = Path(temp) / "d10.sens"
         d10_path.write_bytes(d10)
         runnable = subprocess.run(
@@ -183,7 +220,9 @@ def main() -> None:
           "first_difference=NONE malformed_ff=REJECTED d10_transport=ACCEPTED "
           "d10_executable=REJECTED overwidth_d15=REJECTED "
           f"width_goldens={len(GOLDEN_WIDTH_VECTORS)} "
-          f"negative_gates={len(NEGATIVE_PHYSICAL) + 5} "
+          f"negative_gates={len(NEGATIVE_PHYSICAL) + 10} "
+          "external_trusted_sha_d10=REQUIRED_WHEN_SUPPLIED "
+          "canonical_d10_to_d5_truncation=REJECTED_WITH_EXTERNAL_PIN "
           f"zig_binary_sha256={binary_sha} "
           "d1_d2_distinct=YES d2_zero_and_one=YES "
           "canonical_truncation_requires_external_sha=YES "

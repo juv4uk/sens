@@ -9,7 +9,9 @@ It fails closed on missing/wrong Zig or any byte difference.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -103,7 +105,34 @@ def build_transport(directory: Path) -> Path:
     return binary
 
 
-def verify_t5(binary: Path, physical: bytes) -> dict[str, str]:
+def _require_external_source_sha256(
+    physical: bytes, trusted_source_sha256: str | None
+) -> None:
+    # A caller-trusted digest must originate OUTSIDE the bytes being checked.
+    # T5 can roundtrip a truncated D10 zero as a DIFFERENT canonical D5 zero.
+    if trusted_source_sha256 is None:
+        return
+    if (not isinstance(trusted_source_sha256, str) or
+            re.fullmatch(r"[0-9a-f]{64}", trusted_source_sha256) is None):
+        raise ZigCodecError(
+            "ZIG_CODEC_EXTERNAL_SOURCE_SHA_INVALID layer=transport "
+            "expected=64_lowercase_hex"
+        )
+    actual = hashlib.sha256(physical).hexdigest()
+    if not hmac.compare_digest(actual, trusted_source_sha256):
+        raise ZigCodecError(
+            "ZIG_CODEC_EXTERNAL_SOURCE_SHA_MISMATCH layer=transport "
+            f"expected_sha256={trusted_source_sha256} actual_sha256={actual} "
+            f"actual_bytes={len(physical)}"
+        )
+
+
+def verify_t5(
+    binary: Path, physical: bytes, *, trusted_source_sha256: str | None = None
+) -> dict[str, str]:
+    # Fail BEFORE observing/build attestation or executing Zig; the pin is
+    # externally supplied, not inferred from this candidate physical input.
+    _require_external_source_sha256(physical, trusted_source_sha256)
     binary_digest = _built_executable_digest(binary)
     with tempfile.TemporaryDirectory(prefix="sens-zig-t5-verify-") as directory:
         source = Path(directory) / "input.sens"
@@ -133,4 +162,8 @@ def verify_t5(binary: Path, physical: bytes) -> dict[str, str]:
             "profile": "D1-D10_COORDINATES_NOT_EXECUTION",
             "physical_sha256": hashlib.sha256(physical).hexdigest(),
             "zig_binary_sha256": binary_digest,
+            "source_pin_status": (
+                "MATCHED_CALLER_SUPPLIED_SHA256"
+                if trusted_source_sha256 is not None else "NOT_SUPPLIED"
+            ),
             "verdict": "PHYSICAL_BYTES_IDENTICAL_ONLY"}
