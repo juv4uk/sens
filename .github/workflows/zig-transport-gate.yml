@@ -65,7 +65,7 @@ jobs:
       - name: Migration \u2194 Zig preparation gate (require pinned Zig)
         run: |
           set -euo pipefail
-          python3 scripts/migration-zig-gate.py --require-zig --skip-ladder-identity \
+          python3 scripts/migration-zig-gate.py --require-zig \
             --report "$RUNNER_TEMP/sens-migration-zig-gate.json"
           python3 - <<'PY'
           import json, os, pathlib
@@ -73,6 +73,12 @@ jobs:
           data = json.loads(path.read_text(encoding="utf-8"))
           assert data["schema"] == "sens-migration-zig-gate/v1"
           assert data["verdict"] == "PASS"
+          assert data["transport_verified"] is True
+          assert data["scope"] == "FULL_PHYSICAL_ZIG"
+          assert [s["step"] for s in data["steps"]] == [
+              "zig-pin", "ci_zig_purity", "check-domain-ladder-identity",
+              "migrate-exact-domain-authority", "test_zig_codec_bridge"
+          ]
           assert data["zig_pin"] == "0.16.0"
           print("MIGRATION_ZIG_GATE_CI_PASS")
           PY
