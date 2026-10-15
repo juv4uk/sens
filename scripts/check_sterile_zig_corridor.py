@@ -49,17 +49,17 @@ def check_trit_shared_zig_module(trit: str, library: str) -> None:
     Rust must still use Zig for every physical entry/egress operation.
     """
     def live(text: str) -> str:
-        return re.sub(r"/\\*.*?\\*/|//[^\\n]*", "", text, flags=re.S)
+        return re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.S)
 
     trit_live = live(trit)
     library_live = live(library)
-    route = r'(?m)^\\s*#\\[cfg\\(feature = "zig-transport"\\)\\]\\s*use\\s+sens_cli::zig_transport\\s*;'
-    exposed = r'(?m)^\\s*#\\[cfg\\(feature = "zig-transport"\\)\\]\\s*pub\\s+mod\\s+zig_transport\\s*;'
+    route = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*use\s+sens_cli::zig_transport\s*;'
+    exposed = r'(?m)^\s*#\[cfg\(feature = "zig-transport"\)\]\s*pub\s+mod\s+zig_transport\s*;'
     if len(re.findall(route, trit_live)) != 1:
         raise CorridorBlocked("sens-trit must import the live, feature-gated shared Zig corridor exactly once")
     if len(re.findall(exposed, library_live)) != 1:
         raise CorridorBlocked("sens-cli lib must export exactly one feature-gated Zig corridor")
-    if re.search(r'(?m)^\\s*(?:#\\[path\\s*=.*?\\]\\s*)?mod\\s+zig_transport\\s*;', trit_live):
+    if re.search(r'(?m)^\s*(?:#\[path\s*=.*?\]\s*)?mod\s+zig_transport\s*;', trit_live):
         raise CorridorBlocked("sens-trit must not privately compile a duplicate Zig corridor")
 
 
