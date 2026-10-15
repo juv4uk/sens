@@ -178,3 +178,24 @@
          ((010 entry) (001 ()))
          (#d1:1 (1001 entry))))
      (11100 field (011 reference)))))
+
+; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
+; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
+; Unknown language or wrong role is always rejected.
+(0011 guard-language-allowed?
+  (0010 (language role)
+    (110
+      ((101 language (001 sens))
+       (110 ((101 role (001 semantics)) #d1:1) (#d1:1 #d1:0)))
+      ((101 language (001 lisp))
+       (110 ((101 role (001 semantics)) #d1:1) (#d1:1 #d1:0)))
+      ((101 language (001 zig))
+       (110 ((101 role (001 domain-ladder)) #d1:1) (#d1:1 #d1:0)))
+      ((101 language (001 rust))
+       (110 ((101 role (001 domain-consumer)) #d1:1) (#d1:1 #d1:0)))
+      (#d1:1 #d1:0))))
+
+(0011 guard-language-decision
+  (0010 (language role)
+    (110 ((guard-language-allowed? language role) (001 allow))
+         (#d1:1 (001 reject)))))

@@ -29,6 +29,78 @@ jobs:
           persist-credentials: false
           # HEAD^ is required by the fail-closed D3 source-delta guard.
           fetch-depth: 2
+      - name: "GUARD — лише SENS/Lisp, Zig-драбина і Rust-споживач"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only GitHub CI orchestration uses shell. Project source languages
+          # are a STRICT allowlist over ALL tracked paths, including history.
+          allowed_language_source() {
+            local file="$1" mode="$2"
+            [[ "$mode" == 100644 ]] || return 1
+            case "${file,,}" in
+              *.lisp|*.сенс|*.sens|*.bits) return 0 ;;
+              research/zig-codecs/*.zig|guard_source_root.zig|zig_transport_root.zig) return 0 ;;
+              *.rs) return 0 ;;
+              *.md|*.txt|*.json|*.jsonl|*.csv|*.tsv|*.toml|*.lock|*.yml|*.yaml|*.png|*.ico|*.svg|*.log|*.stderr|*.expected|*.hex|*.b64) return 0 ;;
+              license|license.*|*/license|*/license.*|.gitignore|.gitattributes|.editorconfig|.zig-version) return 0 ;;
+              lib/*|knowledge/*|tests/fixtures/*|tests/oracles/*|tests/semantic/*|examples/migrated/*)
+                case "${file,,}" in *.*) return 1 ;; *) return 0 ;; esac ;;
+            esac
+            return 1
+          }
+          for good in lib/core.lisp lib/core.sens tests/semantic/a.bits \
+            scripts/verify-repo.lisp research/zig-codecs/domain_ladder.zig \
+            zig_transport_root.zig crates/sens/src/lib.rs knowledge/map.json; do
+            allowed_language_source "$good" 100644 || {
+              echo "LANGUAGE_GUARD_SELFTEST_RED positive=$good"; exit 1;
+            }
+          done
+          for bad in scripts/tool.py scripts/tool.sh src/main.c src/native.h \
+            src/main.cpp src/main.js src/main.ts src/main.go src/main.pl \
+            src/main.lua src/main.scm src/main.rkt src/main.clp \
+            src/chip.sv src/foreign.zig extras/custom.newlang lib/code.py; do
+            if allowed_language_source "$bad" 100644; then
+              echo "LANGUAGE_GUARD_SELFTEST_RED negative=$bad"; exit 1
+            fi
+          done
+          if allowed_language_source lib/run 100755; then
+            echo "LANGUAGE_GUARD_SELFTEST_RED executable-bit"; exit 1
+          fi
+          violations=0
+          reviewed=0
+          while IFS= read -r -d "" path; do
+            reviewed=$((reviewed + 1))
+            problem=""
+            if [[ -L "$path" || -x "$path" ]]; then
+              problem="EXECUTABLE_OR_LINKED_SOURCE"
+            elif ! allowed_language_source "$path" 100644; then
+              problem="FORBIDDEN_LANGUAGE_OR_UNKNOWN_SOURCE"
+            else
+              case "${path,,}" in
+                *.lisp|*.rs|*.zig|lib/*|knowledge/*|tests/fixtures/*|tests/oracles/*|tests/semantic/*|examples/migrated/*)
+                  first=""
+                  if [[ -f "$path" ]]; then
+                    IFS= read -r first < "$path" || true
+                    if [[ "$first" == "#!"* ]]; then
+                      problem="FOREIGN_EXECUTABLE_SHEBANG"
+                    fi
+                  fi ;;
+              esac
+            fi
+            if [[ -n "$problem" ]]; then
+              violations=$((violations + 1))
+              if (( violations <= 60 )); then
+                printf "LANGUAGE_GUARD_BLOCKED path=%q reason=%s\n" "$path" "$problem"
+              fi
+            fi
+          done < <(git -c core.quotePath=false ls-files -z)
+          echo "LANGUAGE_GUARD_SUMMARY tracked=$reviewed blocked=$violations allowed=SENS/Lisp,Zig-ladder,Rust-consumer"
+          if (( reviewed == 0 || violations > 0 )); then
+            echo "LANGUAGE_GUARD_RED all unapproved languages blocked, including historical sources" >&2
+            exit 1
+          fi
+          echo "LANGUAGE_GUARD_OK"
       - name: "RELEASE-ADMISSION — точковий негатив F2/F4: байти не є семантичним PASS"
         shell: bash
         run: |
