@@ -41,12 +41,23 @@ EXPECTED_RULES = {
 }
 
 
+def _unique_object_keys(pairs: list[tuple[str, object]]) -> dict:
+    """Reject ambiguous JSON identity at every nesting level, not only at root."""
+    result: dict = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key {key!r} in corridor axiom binding")
+        result[key] = value
+    return result
+
+
 def check(root: Path) -> list[str]:
     problems: list[str] = []
     binding_path = root / BINDING
     if not binding_path.is_file() or binding_path.is_symlink():
         return [f"binding `{BINDING}` is missing or not a regular file"]
-    data = json.loads(binding_path.read_text(encoding="utf-8"))
+    data = json.loads(binding_path.read_text(encoding="utf-8"),
+                      object_pairs_hook=_unique_object_keys)
     if not isinstance(data, dict):
         return ["corridor axiom binding root must be an object"]
     if data.get("schema") != SCHEMA:

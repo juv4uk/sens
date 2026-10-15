@@ -110,6 +110,39 @@ class AxiomBindingTests(unittest.TestCase):
         edit_binding(self.root, lambda d: d.update({"bindings": None}))
         self.assertTrue(any("must be a list" in p for p in self.module.check(self.root)))
 
+    def test_duplicate_root_axiom_source_is_blocked(self) -> None:
+        # Even if the last key names the ratified source, the record has two
+        # competing meanings and must not become an axiom provenance receipt.
+        path = self.root / BINDING
+        raw = path.read_text(encoding="utf-8")
+        self.assertIn('"axioms_doc":', raw)
+        path.write_text(
+            raw.replace('"axioms_doc":', '"axioms_doc": "docs/fake.md", "axioms_doc":', 1),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate JSON key 'axioms_doc'"):
+            self.module.check(self.root)
+
+    def test_duplicate_nested_guard_is_blocked_with_named_cli_diagnostic(self) -> None:
+        import subprocess
+
+        path = self.root / BINDING
+        raw = path.read_text(encoding="utf-8")
+        self.assertIn('"guard":', raw)
+        path.write_text(
+            raw.replace('"guard":', '"guard": "scripts/fake.py", "guard":', 1),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate JSON key 'guard'"):
+            self.module.check(self.root)
+        completed = subprocess.run(
+            [sys.executable, str(CHECKER), str(self.root)],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(completed.returncode, 1)
+        self.assertIn("AXIOM_BINDING_BLOCKED malformed input", completed.stdout)
+        self.assertIn("duplicate JSON key 'guard'", completed.stdout)
+
     def test_malformed_json_fails_with_named_diagnostic(self) -> None:
         (self.root / BINDING).write_text("{", encoding="utf-8")
         # CLI exception handling rather than an uncontrolled traceback.
