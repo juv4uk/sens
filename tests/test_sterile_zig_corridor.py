@@ -89,6 +89,32 @@ class SterileZigCorridorTests(unittest.TestCase):
         with self.assertRaises(blocked):
             check(stripped)
 
+        # A textual mention is not a physical check: errors must propagate
+        # from the recovered Zig carrier, not be discarded or commented out.
+        for bypass in (
+            "let _ = validate_t5(&output);",
+            "validate_t5(&output);",
+            "// validate_t5(&output)?;",
+            "/* validate_t5(&output)?; */",
+            "validate_t5(carrier)?;",
+            "return Ok(output);\n    validate_t5(&output)?;",
+        ):
+            with self.subTest(bypass=bypass):
+                mutant = body.replace("validate_t5(&output)?;", bypass, 1)
+                self.assertNotEqual(mutant, body)
+                with self.assertRaises(blocked):
+                    check(mutant)
+
+        # Validation must apply to the length-trimmed recovered buffer.
+        mutant = body.replace(
+            "output.truncate(len as usize);\n    validate_t5(&output)?;",
+            "validate_t5(&output)?;\n    output.truncate(len as usize);",
+            1,
+        )
+        self.assertNotEqual(mutant, body)
+        with self.assertRaises(blocked):
+            check(mutant)
+
     def test_main_sens_ingress_rejects_real_rust_bypass_mutants(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]

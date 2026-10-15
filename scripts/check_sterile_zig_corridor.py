@@ -257,17 +257,21 @@ def check_f3c_decode_validates_t5(body: str) -> None:
         if i != -1 and 0 < i < stop:
             stop = i
     route = rest[:stop]
-    if "sens_zig_f3c_unpack" not in route:
-        raise CorridorBlocked("decode_f3 must call Zig F3C unpack FFI")
-    if "validate_t5(" not in route:
+    # A token in a comment, ignored Result or wrong-buffer validation is
+    # not a fail-closed physical check. Require the fallible Zig T5 check on
+    # the recovered, length-trimmed bytes before they leave the corridor.
+    active = re.sub(r"/\*.*?\*/|//[^\n]*", "", route, flags=re.S)
+    validation = re.search(
+        r"(?m)^[ \t]*validate_t5[ \t]*\([ \t]*&output[ \t]*\)[ \t]*\?[ \t]*;",
+        active,
+    )
+    unpack_at = active.find("sens_zig_f3c_unpack")
+    truncate_at = active.find("output.truncate(len as usize);")
+    return_at = active.find("Ok(output)")
+    if (validation is None or unpack_at < 0 or truncate_at < 0 or return_at < 0
+            or not (unpack_at < truncate_at < validation.start() < return_at)):
         raise CorridorBlocked(
-            "decode_f3 must call validate_t5 on recovered T5 before returning"
-        )
-    unpack_at = route.find("sens_zig_f3c_unpack")
-    val_at = route.find("validate_t5")
-    if val_at == -1 or unpack_at == -1 or val_at < unpack_at:
-        raise CorridorBlocked(
-            "decode_f3 must validate_t5 after Zig F3C unpack, not before"
+            "decode_f3 must propagate Zig validate_t5(&output)? after unpack/truncate and before return"
         )
 
 
