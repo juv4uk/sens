@@ -14,6 +14,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../research/zig-codecs");
     println!("cargo:rerun-if-changed=../../zig_transport_root.zig");
     // Zig @embedFile holds the linter source: never serve a stale asset in Cargo.
+    println!("cargo:rerun-if-changed=../../lib/repl-core.lisp");
     println!("cargo:rerun-if-changed=../../lib/linter.lisp");
     println!("cargo:rerun-if-changed=../../lib/unify.lisp");
     println!("cargo:rerun-if-changed=../../lib/reason.lisp");
