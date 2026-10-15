@@ -224,10 +224,13 @@ pub fn encode_e1_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
 /// а НЕ невалідність звичайного T5. Немає автоматичного Rust fallback.
 pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     version()?;
+    // Even an ineligible/too-large carrier must first pass the sterile Zig
+    // physical gate. Ok(None) means valid T5 but no F3C savings, NOT
+    // unverified or malformed bytes disguised as a size-based no-op.
+    validate_t5(t5)?;
     if t5.len() > 16 {
         return Ok(None);
     }
-    validate_t5(t5)?;
     let mut bytes = vec![0u8; 16];
     // SAFETY: Zig writes at most the provided capacity.
     let len = unsafe { sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len()) };
@@ -259,6 +262,40 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
     // Zig first, then the existing SENS canonical parser/evaluator.
     validate_t5(&output)?;
     Ok(output)
+}
+
+#[cfg(test)]
+mod f3c_physical_gate_tests {
+    use super::{encode_f3, encode_t5_direct};
+
+    #[test]
+    fn zig_f3c_rejects_invalid_long_t5_before_valid_no_saving() {
+        // Ten separate exact D9 words are physically >16 T5 bytes.
+        // This is a TRANSPORT witness, not SENS D2/executable admission.
+        let projection = "101010101 ".repeat(10);
+        let words = sens::parse_binary_source_words(&projection)
+            .expect("ten current exact-width D9 words")
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        let valid = encode_t5_direct(&words).expect("sterile Zig T5 encoder");
+        assert!(valid.len() > 16);
+        assert!(encode_f3(&valid).expect("canonical long T5").is_none());
+
+        // Previously, this was Ok(None) solely because len > 16: fail-open.
+        let invalid = vec![0xf3u8; valid.len()];
+        let failure = encode_f3(&invalid).expect_err(
+            "invalid physical T5 must not become F3C no-saving"
+        );
+        assert!(failure.contains("Zig physical T5 rejected"), "{failure}");
+
+        // Valid tiny canonical T5 still uses Zig's existing F3C path.
+        let small = [0x63u8, 0x89, 0x06, 0xa1];
+        let compressed = encode_f3(&small)
+            .expect("current short canonical physical T5")
+            .expect("tiny carrier actually saves bytes");
+        assert_eq!(compressed, [0xf3, 0x40, 0x60]);
+    }
 }
 
 #[cfg(test)]
