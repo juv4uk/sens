@@ -10,7 +10,7 @@ use sens_cli::zig_transport;
 
 // A host may request exact SENS source bytes only from the compiled Zig ABI.
 // Zig never decides what these sources mean and no Rust fallback is permitted.
-fn zig_bootstrap_sources() -> Result<[String; 6], String> {
+fn zig_bootstrap_sources() -> Result<[String; 7], String> {
     #[cfg(feature = "zig-transport")]
     {
         let unify = String::from_utf8(zig_transport::unify_source_bytes()?)
@@ -25,7 +25,9 @@ fn zig_bootstrap_sources() -> Result<[String; 6], String> {
             .map_err(|error| format!("ZIG_F6_PERSISTENT_MAP_CARRIER invalid UTF-8: {error}"))?;
         let world = String::from_utf8(zig_transport::world_source_bytes()?)
             .map_err(|error| format!("ZIG_F6_WORLD_CARRIER invalid UTF-8: {error}"))?;
-        Ok([unify, reason, forward, knowledge, persistent_map, world])
+        let content_store = String::from_utf8(zig_transport::content_store_source_bytes()?)
+            .map_err(|error| format!("ZIG_F6_CONTENT_STORE_CARRIER invalid UTF-8: {error}"))?;
+        Ok([unify, reason, forward, knowledge, persistent_map, world, content_store])
     }
     #[cfg(not(feature = "zig-transport"))]
     {
@@ -68,7 +70,7 @@ fn main() {
     for (path, source) in [
         ("lib/persistent-map.lisp", sources[4].as_str()),
         ("lib/world.lisp", sources[5].as_str()),
-        ("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp")),
+        ("lib/content-store.lisp", sources[6].as_str()),
         ("lib/lisp-fs.lisp", include_str!("../../../../lib/lisp-fs.lisp")),
     ] {
         if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {

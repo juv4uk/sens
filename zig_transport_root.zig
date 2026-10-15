@@ -304,3 +304,25 @@ test "F6 World carrier: exact Zig bytes and unchanged short buffer" {
         sens_zig_world_bytes_copy(&output, output.len));
     try std.testing.expectEqualSlices(u8, world_asset[0..world_asset.len], &output);
 }
+
+// F6 Content Store is SENS-owned; Zig transfers opaque bytes only.
+const content_store_asset = @embedFile("lib/content-store.lisp");
+pub export fn sens_zig_content_store_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (content_store_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(content_store_asset.len);
+    if (capacity < content_store_asset.len) return -2;
+    @memcpy(dst[0..content_store_asset.len], content_store_asset[0..content_store_asset.len]);
+    return @intCast(content_store_asset.len);
+}
+test "F6 Content Store exact Zig source and unchanged short buffer" {
+    const required = sens_zig_content_store_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(content_store_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2),
+        sens_zig_content_store_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var output: [content_store_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required,
+        sens_zig_content_store_bytes_copy(&output, output.len));
+    try std.testing.expectEqualSlices(u8, content_store_asset[0..content_store_asset.len], &output);
+}

@@ -781,3 +781,27 @@ mod zig_exact_egress_tests {
             .unwrap_err().contains("word_count expected=2 actual=3"));
     }
 }
+
+/// SENS Content Store source crosses the sterile Zig corridor as exact bytes.
+pub fn content_store_source_bytes() -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe {
+        asset_ffi::sens_zig_content_store_bytes_copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)
+    };
+    if required <= 0 {
+        return Err("ZIG_CONTENT_STORE_CARRIER invalid length".into());
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| "ZIG_CONTENT_STORE_CARRIER length overflow")?;
+    if len > 8 * 1024 * 1024 {
+        return Err("ZIG_CONTENT_STORE_CARRIER host byte cap exceeded".into());
+    }
+    let mut bytes = vec![0u8; len];
+    let copied = unsafe {
+        asset_ffi::sens_zig_content_store_bytes_copy(bytes.as_mut_ptr(), bytes.len())
+    };
+    if copied != required {
+        return Err(format!("ZIG_CONTENT_STORE_CARRIER byte-copy mismatch: {copied}"));
+    }
+    Ok(bytes)
+}
