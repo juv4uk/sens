@@ -83,13 +83,25 @@ if (( total == 0 )); then echo "no .lisp sources under: ${PATHS[*]}" >&2; exit 2
 # one input and cause TWO workers to race to publish the same .sens.
 # Resolve every actual path before launching any worker. Preserve original
 # spelling in per-worker reports (the canonical driver owns those labels).
-python3 - "${FILES[@]}" <<'PY'
+python3 - "$REPORT" "${FILES[@]}" <<'PY'
 import sys
 from pathlib import Path
 
+try:
+    receipt = Path(sys.argv[1]).resolve(strict=False)
+    receipt_stat = receipt.stat()
+    receipt_inode = (receipt_stat.st_dev, receipt_stat.st_ino)
+except FileNotFoundError:
+    receipt_inode = None
+except (OSError, RuntimeError) as exc:
+    raise SystemExit(
+        f"ZIG_PARALLEL_BLOCKED test_id=invalid-report-path "
+        f"layer=transport reason={type(exc).__name__}:{exc}"
+    ) from exc
+
 seen = {}
 seen_inodes = {}
-for raw in sys.argv[1:]:
+for raw in sys.argv[2:]:
     try:
         source = Path(raw).resolve(strict=True)
         if not source.is_file():
@@ -105,6 +117,14 @@ for raw in sys.argv[1:]:
             f"ZIG_PARALLEL_BLOCKED test_id=invalid-source layer=transport "
             f"path={raw} reason={type(exc).__name__}:{exc}"
         ) from exc
+    # A JSON receipt must never replace the exact SENS source it audits.
+    # .resolve() catches aliases/..; st_dev+st_ino also catches hardlinks.
+    if source == receipt or (receipt_inode is not None and inode == receipt_inode):
+        raise SystemExit(
+            f"ZIG_PARALLEL_BLOCKED test_id=report-source-collision "
+            f"layer=transport report={receipt} source={source} "
+            f"same_inode={info.st_dev}:{info.st_ino}"
+        )
     if source in seen or inode in seen_inodes:
         first = seen.get(source, seen_inodes.get(inode))
         raise SystemExit(
