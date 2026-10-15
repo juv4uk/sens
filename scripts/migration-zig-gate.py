@@ -9,9 +9,10 @@ migration batch, in fixed order:
   0. zig-pin                 \u2014 .zig-version == 0.16.0 and install-zig default
   1. ci_zig_purity           \u2014 no W8/Sens8/SID-8 contamination in *.zig
   2. check_sterile_zig_corridor — default Rust↔SENS uses the Zig ABI
-  3. check-domain-ladder-identity \u2014 width=identity on canonical surfaces
-  4. migrate-exact-domain authority load \u2014 D3/D4 tables + owner ratification
-  5. test_zig_codec_bridge   \u2014 REQUIRED physical T5 round-trip; --self-test is NOT a full gate
+  3. check_rust_sens_zig_corridor — R5 host-neutral C↔Zig physical ABI
+  4. check-domain-ladder-identity \u2014 width=identity on canonical surfaces
+  5. migrate-exact-domain authority load \u2014 D3/D4 tables + owner ratification
+  6. test_zig_codec_bridge   \u2014 REQUIRED physical T5 round-trip; --self-test is NOT a full gate
 
 Chronology / ratification history is documented, not re-derived here:
   docs/migration/semantic-chronology-handoff-2026-10-14.uk.md
@@ -159,6 +160,7 @@ REQUIRED_STEPS = (
     "zig-pin",
     "ci_zig_purity",
     "check_sterile_zig_corridor",
+    "check_rust_sens_zig_corridor",
     "check-domain-ladder-identity",
     "migrate-exact-domain-authority",
     "test_zig_codec_bridge",
@@ -195,13 +197,21 @@ def verdict_self_test() -> None:
         for s in passing
     ]
     assert gate_verdict(failed_corridor, self_test=False, skip_ladder=False) == "FAIL"
+    # A Rust-only green preflight cannot hide an absent or red C-host R5.
+    missing_r5 = [s for s in passing if s["step"] != "check_rust_sens_zig_corridor"]
+    assert gate_verdict(missing_r5, self_test=False, skip_ladder=False) == "INCOMPLETE"
+    failed_r5 = [
+        {"step": s["step"], "status": "FAIL" if s["step"] == "check_rust_sens_zig_corridor" else "PASS"}
+        for s in passing
+    ]
+    assert gate_verdict(failed_r5, self_test=False, skip_ladder=False) == "FAIL"
     skipped = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "SKIP"}]
     assert gate_verdict(skipped, self_test=False, skip_ladder=False) == "INCOMPLETE"
     unavailable = [*passing[:-1], {"step": REQUIRED_STEPS[-1], "status": "FAIL"}]
     assert gate_verdict(unavailable, self_test=False, skip_ladder=False) == "FAIL"
     assert gate_verdict(passing, self_test=False, skip_ladder=True) == "INCOMPLETE"
     assert gate_verdict(skipped, self_test=True, skip_ladder=True) == "SELF_TEST_ONLY"
-    print("MIGRATION_ZIG_GATE_VERDICT_SELF_TEST_PASS negative_cases=7")
+    print("MIGRATION_ZIG_GATE_VERDICT_SELF_TEST_PASS negative_cases=9")
 
 
 def main() -> int:
@@ -253,6 +263,15 @@ def main() -> int:
         run_step(
             "check_sterile_zig_corridor",
             [sys.executable, str(SCRIPTS / "check_sterile_zig_corridor.py")],
+        )
+    )
+
+    # R5 is independent host-neutral source evidence, not SENS semantic
+    # admission: a Rust-free C caller must pass the same sterile Zig ABI.
+    steps.append(
+        run_step(
+            "check_rust_sens_zig_corridor",
+            [sys.executable, str(SCRIPTS / "check_rust_sens_zig_corridor.py")],
         )
     )
 
