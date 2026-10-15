@@ -488,7 +488,7 @@ def check_linter_zig_only(
             or re.search(r'(?:fs|std::fs)::read(?:_to_string)?\s*\(\s*"[^"]*linter\.lisp"', main)):
         raise CorridorBlocked("LINTER_ZIG_ONLY Rust directly embeds or reads project Lisp")
 
-    helper = _route_between(main_source, "fn linter_source_zig_only(", "\nfn main() {")
+    helper = _route_between(main_source, "fn linter_source_zig_only(", "\nfn contract_source_zig_only(")
     helper = live(helper)
     if (helper.count('#[cfg(feature = "zig-transport")]') != 1
             or helper.count('#[cfg(not(feature = "zig-transport"))]') != 1
