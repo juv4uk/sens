@@ -148,3 +148,45 @@ test "empty E1 is a valid physical envelope but not semantic admission" {
     try std.testing.expectEqual(@as(usize, 0),
         try decode(bytes[0..len], &out, &tmp, &steps, &replay));
 }
+
+test "E1 maximum 4096 words preserves D8 D9 widths and 4097 fails without publishing" {
+    // Same opaque payload, different contemporary domains: exact width survives
+    // the largest permitted E1 coordinate stream. This is transport, not callability.
+    var source: [e1.MAX_WORDS + 1]ladder.Coordinate = undefined;
+    for (&source, 0..) |*coordinate, i| {
+        coordinate.* = if (i % 2 == 0)
+            fromTyped(8, ladder.D8.init(0b00000001))
+        else
+            fromTyped(9, ladder.D9.init(0b000000001));
+    }
+    try std.testing.expectEqual(source[0].bits, source[1].bits);
+    try std.testing.expect(!source[0].same(source[1]));
+
+    var physical: [8192]u8 = [_]u8{0xa5} ** 8192;
+    var temp: [e1.MAX_WORDS]e1.Word = undefined;
+    var steps: [e1.MAX_WORDS + 1]writer.Step = undefined;
+    // 4097 is outside the admitted physical count; never touch caller output.
+    try std.testing.expectError(error.TooLarge,
+        encode(&source, &physical, &temp, &steps));
+    for (physical) |byte| try std.testing.expectEqual(@as(u8, 0xa5), byte);
+
+    const size = try encode(source[0..e1.MAX_WORDS], &physical, &temp, &steps);
+    try std.testing.expect(size > 0 and size < physical.len);
+    const exact_bytes = physical;
+    try std.testing.expectError(error.BufferTooSmall,
+        encode(source[0..e1.MAX_WORDS], physical[0 .. size - 1], &temp, &steps));
+    try std.testing.expectEqualSlices(u8, &exact_bytes, &physical);
+
+    var restored: [e1.MAX_WORDS]ladder.Coordinate = undefined;
+    var replay: [8192]u8 = undefined;
+    try std.testing.expectEqual(@as(usize, e1.MAX_WORDS),
+        try decode(physical[0..size], &restored, &temp, &steps, &replay));
+    for (source[0..e1.MAX_WORDS], restored) |expected, actual|
+        try std.testing.expect(expected.same(actual));
+    const previous = restored;
+    try std.testing.expectError(error.BufferTooSmall,
+        decode(physical[0..size], restored[0 .. e1.MAX_WORDS - 1],
+            &temp, &steps, &replay));
+    for (previous, restored) |expected, actual|
+        try std.testing.expect(expected.same(actual));
+}
