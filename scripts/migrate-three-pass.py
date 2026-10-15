@@ -526,6 +526,9 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     if "keyboard-v2" in candidates:
         if not spelling:
             raise MigrationError("empty D7 keyboard/v2 identifier", tok)
+        # lisp-symbol-replacement-plan.uk.md: em/en dash and box glyphs used in an
+        # identifier map to keyboard glyphs. Scoped to the identifier path only.
+        spelling = spelling.translate({0x2014: "-", 0x2013: "-", 0x2500: "-", 0x2550: "="})
         view = _keyboard_v2_mode(spelling, tok)
         indexes = candidates["keyboard-v2"]
         chosen = indexes[view]
