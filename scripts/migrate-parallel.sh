@@ -44,6 +44,29 @@ if ! [[ "$JOBS" =~ ^[1-9][0-9]*$ ]]; then echo "--jobs must be >= 1" >&2; exit 2
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Merged JSON is written AFTER the workers. Unlike their temporary receipts,
+# its caller-provided --report path could overwrite a Zig-certified .sens!
+# Resolve links and '..' before dispatch; no worker is allowed to start if
+# the final report would live anywhere inside the physical output mirror.
+python3 - "$OUT" "$REPORT" <<'PY'
+import sys
+from pathlib import Path
+
+try:
+    mirror = Path(sys.argv[1]).resolve(strict=False)
+    receipt = Path(sys.argv[2]).resolve(strict=False)
+except (OSError, RuntimeError) as exc:
+    raise SystemExit(
+        f"ZIG_PARALLEL_BLOCKED test_id=invalid-report-path "
+        f"layer=transport reason={type(exc).__name__}:{exc}"
+    ) from exc
+if receipt == mirror or receipt.is_relative_to(mirror):
+    raise SystemExit(
+        f"ZIG_PARALLEL_BLOCKED test_id=report-output-collision "
+        f"layer=transport report={receipt} mirror={mirror}"
+    )
+PY
+
 # Expand directories to their .lisp files (deterministic order), keep files as-is.
 declare -a FILES=()
 for p in "${PATHS[@]}"; do
