@@ -16,7 +16,6 @@ use std::path::PathBuf;
 use std::process;
 
 const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
-    ("unify.lisp", include_str!("../../../lib/unify.lisp")),
     ("reason.lisp", include_str!("../../../lib/reason.lisp")),
     ("forward.lisp", include_str!("../../../lib/forward.lisp")),
     ("knowledge.lisp", include_str!("../../../lib/knowledge.lisp")),
@@ -31,6 +30,19 @@ const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("time.lisp", include_str!("../../../lib/time.lisp")),
     ("epistemic.lisp", include_str!("../../../lib/epistemic.lisp")),
 ];
+// Джерело уніфікації передається Zig без прямого Rust-завантаження SENS-файлу.
+fn unify_surface_source() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = super::zig_transport::unify_source_bytes()?;
+        String::from_utf8(bytes).map_err(|e| format!("ZIG_UNIFY_CARRIER UTF-8: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: unify.lisp requires Zig; no Rust source fallback".into())
+    }
+}
+
 // The compact Ukrainian surface is original source bytes carried only by Zig.
 fn uk_surface_source() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
@@ -139,10 +151,13 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         let mut session = Session {
             environment: layer.clone(),
         };
-        for (name, source) in SURFACE_PREREQUISITES {
-            (if *name == "time.lisp" {
+        let unify_source = unify_surface_source()?;
+        let prerequisites = std::iter::once(("unify.lisp", unify_source.as_str()))
+            .chain(SURFACE_PREREQUISITES.iter().copied());
+        for (name, source) in prerequisites {
+            (if name == "time.lisp" {
                 sens::load_time_library(&mut session)
-            } else if matches!(*name, "unify.lisp" | "reason.lisp" | "forward.lisp" | "knowledge.lisp" | "persistent-map.lisp") {
+            } else if matches!(name, "unify.lisp" | "reason.lisp" | "forward.lisp" | "knowledge.lisp" | "persistent-map.lisp") {
                 sens::eval_pinned_reasoning_source(
                     &format!("lib/{name}"), source, &mut session
                 )
@@ -559,6 +574,23 @@ mod tests {
             render_repl_reply(&vector, PresentationLanguage::Canonical),
             "#(ALPHA \"beta\")"
         );
+    }
+
+    #[cfg(feature = "zig-transport")]
+    #[test]
+    fn zig_unify_repl_source_matches_opaque_c_abi_bytes() {
+        let source = unify_surface_source().expect("Zig exact lib/unify.lisp bytes");
+        let copied = crate::zig_transport::unify_source_bytes().expect("Zig copied original source");
+        assert_eq!(source.as_bytes(), copied.as_slice(), "ZIG_UNIFY_CARRIER byte parity");
+        assert!(source.starts_with("; A small symbolic-AI primitive"), "wrong unify asset");
+    }
+
+    #[cfg(not(feature = "zig-transport"))]
+    #[test]
+    fn rust_only_repl_rejects_unify_source_bypass() {
+        let error = unify_surface_source().expect_err("no direct Rust SENS source");
+        assert!(error.contains("RUST_ZIG_ONLY"), "{error}");
+        assert!(error.contains("no Rust source fallback"), "{error}");
     }
 
     #[cfg(feature = "zig-transport")]

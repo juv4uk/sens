@@ -53,6 +53,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # An actual executable source witness: linked Zig must keep runtime
+          # checks ON and track all root-embedded release/migration bytes.
+          # Mutants include ReleaseFast, wrong root, ghost comments, stale asset.
+          echo 'test_id=zig-ffi-releasesafe-build-provenance layer=transport expected=ReleaseSafe semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v
           # D7 owner requested IAST on the human SAN surface. Machine W7 remains
           # 7-bit and reversible historic san/v2 codec remains separately typed.
           echo 'test_id=d7-iast-human-display layer=presentation source=knowledge/d7-keyboard-v2-ratified.json semantic_authority=SENS'
@@ -1595,10 +1600,36 @@ jobs:
           python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
           production_unit_rc=0
           python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          # Emit a fresh, exact-commit mechanical receipt OUTSIDE the checkout.
+          # The committed PLACEHOLDER is never silently filled by a unit test.
+          boundary_report_rc=0
+          boundary_receipt="$RUNNER_TEMP/sens-rust-zig-boundary-${GITHUB_SHA}.json"
+          python3 scripts/report_rust_zig_sens_boundary.py --out "$boundary_receipt" || boundary_report_rc=$?
+          if [[ "$boundary_report_rc" -eq 0 ]]; then
+            sha256sum "$boundary_receipt"
+          fi
+          # One source-only positive/negative regression, in this same auto-CI:
+          # direct AND mixed Rust semantic paths remain unresolved even when
+          # a Zig transport token is present. No Rust or Python semantic oracle.
+          boundary_unit_rc=0
+          python3 scripts/ci_failure_contract.py run \
+            --test-id rust-zig-unresolved-boundary-provenance \
+            --layer transport \
+            --fixture scripts/report_rust_zig_sens_boundary.py \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- python3 -m unittest discover -s tests -p test_rust_zig_sens_boundary.py -v || boundary_unit_rc=$?
           production_rc=0
           python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
-          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$boundary_report_rc" -ne 0 || "$boundary_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
             echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
             exit 1
           fi
           echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"
+      - name: Зберегти точну карту Rust↔Zig↔SENS для поточного SHA
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sens-rust-zig-boundary-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-rust-zig-boundary-${{ github.sha }}.json
+          if-no-files-found: error
+          retention-days: 7

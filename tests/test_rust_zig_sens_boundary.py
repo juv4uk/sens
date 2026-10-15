@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Fail-closed: published Rust↔Zig↔SENS boundary map is regenerable evidence (#5779).
+"""Fail-closed exact-SHA Rust↔Zig↔SENS boundary artifact tests (#5779).
 
-The map names every production Rust contact with SENS (corridor / mixed / direct /
-filesystem) and real file+SHA. Direct contacts are BYPASS debt — not greenwashed.
-No semantic SENS admission.
+The tracked JSON marker is NOT a live map. Tests build fresh evidence in a
+temporary directory and MUST NOT rewrite repository files, including on RED.
+This is source/provenance evidence, never native SENS semantic admission.
 """
 from __future__ import annotations
 
@@ -30,25 +30,27 @@ class RustZigSensBoundaryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.mod = load_module()
-        import json as _json
-        if (not MAP_PATH.is_file()) or MAP_PATH.read_text(encoding="utf-8").strip() in ("", "PLACEHOLDER"):
-            data = cls.mod.build_map(ROOT)
-            MAP_PATH.parent.mkdir(parents=True, exist_ok=True)
-            MAP_PATH.write_text(
-                _json.dumps(data, ensure_ascii=False, indent=2) + "\n",
-                encoding="utf-8",
-            )
-
-    def test_published_map_exists_and_matches_schema(self) -> None:
-        self.assertTrue(
-            MAP_PATH.is_file(),
-            "boundary map must be published under research/zig-codecs/",
+        cls.report_dir = tempfile.TemporaryDirectory(prefix="sens-boundary-receipt-")
+        cls.addClassCleanup(cls.report_dir.cleanup)
+        cls.generated_map = Path(cls.report_dir.name) / "boundary.json"
+        cls.generated_map.write_text(
+            json.dumps(cls.mod.build_map(ROOT), ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
         )
-        data = json.loads(MAP_PATH.read_text(encoding="utf-8"))
+
+    def test_generated_map_exists_and_matches_schema(self) -> None:
+        self.assertTrue(self.generated_map.is_file(), "generated receipt is missing")
+        data = json.loads(self.generated_map.read_text(encoding="utf-8"))
         self.assertEqual(data["schema"], "sens-rust-zig-sens-boundary/v1")
         self.assertIn("#5777", data["owner_rule"])
         self.assertIn("contacts", data)
         self.assertIn("bypasses", data)
+        self.assertIn("unresolved_bypasses", data)
+        self.assertEqual(
+            sorted(c["path"] for c in data["unresolved_bypasses"]),
+            sorted(c["path"] for c in data["contacts"]
+                   if c["kind"] in ("direct", "mixed")),
+        )
         self.assertIn("legend", data)
         for contact in data["contacts"]:
             self.assertIn("path", contact)
@@ -56,20 +58,24 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             self.assertIn("sha256", contact)
             self.assertEqual(len(contact["sha256"]), 64)
 
-    def test_regeneration_matches_published_structure(self) -> None:
-        published = json.loads(MAP_PATH.read_text(encoding="utf-8"))
+    def test_regeneration_matches_generated_structure(self) -> None:
+        published = json.loads(self.generated_map.read_text(encoding="utf-8"))
         fresh = self.mod.build_map(ROOT)
         pub_paths = sorted(c["path"] for c in published["contacts"])
         fresh_paths = sorted(c["path"] for c in fresh["contacts"])
         self.assertEqual(
             pub_paths,
             fresh_paths,
-            "published boundary map drifted from live scan — regenerate and commit",
+            "generated boundary receipt drifted from live scan",
         )
         pub_kinds = {c["path"]: c["kind"] for c in published["contacts"]}
         fresh_kinds = {c["path"]: c["kind"] for c in fresh["contacts"]}
         self.assertEqual(pub_kinds, fresh_kinds)
         self.assertEqual(sorted(published["bypasses"]), sorted(fresh["bypasses"]))
+        self.assertEqual(
+            sorted(published["unresolved_bypasses"], key=lambda c: c["path"]),
+            sorted(fresh["unresolved_bypasses"], key=lambda c: c["path"]),
+        )
         import hashlib
         for contact in fresh["contacts"]:
             live = (ROOT / contact["path"]).read_bytes()
@@ -79,6 +85,29 @@ class RustZigSensBoundaryTests(unittest.TestCase):
                 f"stale SHA for {contact['path']}",
             )
 
+    def test_cli_generates_receipt_without_mutating_tracked_marker(self) -> None:
+        import subprocess
+        import sys
+
+        before = MAP_PATH.read_bytes() if MAP_PATH.is_file() else None
+        with tempfile.TemporaryDirectory(prefix="sens-boundary-cli-") as tmp:
+            destination = Path(tmp) / "receipt.json"
+            run = subprocess.run(
+                [sys.executable, str(SCRIPT), str(ROOT),
+                 "--out", str(destination)],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            receipt = json.loads(destination.read_text(encoding="utf-8"))
+            self.assertEqual(receipt, self.mod.build_map(ROOT))
+            self.assertTrue(all(len(c["sha256"]) == 64
+                                for c in receipt["contacts"]))
+        after = MAP_PATH.read_bytes() if MAP_PATH.is_file() else None
+        self.assertEqual(after, before, "test/CLI mutated tracked repository marker")
+        # A placeholder is not publication or release evidence.
+        if before is not None and before.strip() == b"PLACEHOLDER":
+            self.assertNotEqual(before, self.generated_map.read_bytes())
+
     def test_corridor_contacts_include_zig_entrypoints(self) -> None:
         data = self.mod.build_map(ROOT)
         corridorish = {c["path"] for c in data["contacts"] if c.get("corridor")}
@@ -87,13 +116,8 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             f"expected zig transport/corridor among corridor contacts, got {corridorish}",
         )
 
-    def test_check_fails_closed_on_direct_bypass(self) -> None:
+    def test_check_fails_closed_on_any_unresolved_bypass(self) -> None:
         data = self.mod.build_map(ROOT)
-        self.assertGreater(
-            len(data["bypasses"]),
-            0,
-            "expected direct bypass debt until full Zig cutover",
-        )
         import sys
         old = sys.argv[:]
         try:
@@ -101,13 +125,14 @@ class RustZigSensBoundaryTests(unittest.TestCase):
                 "report_rust_zig_sens_boundary.py",
                 str(ROOT),
                 "--out",
-                str(MAP_PATH),
+                str(self.generated_map),
                 "--check",
             ]
             rc = self.mod.main()
         finally:
             sys.argv = old
-        self.assertEqual(rc, 1, "--check must stay RED while direct bypasses remain")
+        self.assertEqual(rc, int(bool(data["unresolved_bypasses"])),
+                         "--check must reflect actual direct/mixed bypass debt")
 
 
     def test_mixed_zig_token_cannot_hide_direct_rust_semantic_bypass(self) -> None:
@@ -141,9 +166,18 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             )
             self.assertEqual(report["contacts"][0]["kind"], "mixed")
             self.assertEqual(report["bypasses"], [])  # legacy direct-only field
+            self.assertEqual(
+                [(c["path"], c["kind"]) for c in report["unresolved_bypasses"]],
+                [("crates/demo/src/lib.rs", "mixed")],
+            )
+            self.assertEqual(
+                report["unresolved_bypasses"][0]["sha256"],
+                self.mod._sha(root, "crates/demo/src/lib.rs"),
+            )
             self.assertEqual(rc, 1, output)
             self.assertIn("BOUNDARY_BYPASS_PRESENT", output)
             self.assertIn("kind=mixed", output)
+            self.assertIn("sha256=", output)
             self.assertIn("crates/demo/src/lib.rs", output)
 
             # A real Zig transport reference with NO direct semantic source
@@ -153,7 +187,20 @@ class RustZigSensBoundaryTests(unittest.TestCase):
             )
             self.assertEqual(report["contacts"][0]["kind"], "corridor")
             self.assertEqual(report["bypasses"], [])
+            self.assertEqual(report["unresolved_bypasses"], [])
             self.assertEqual(rc, 0, output)
+
+            # A real direct source is listed in BOTH compatible fields.
+            rc, report, output = verify(
+                "pub fn bypass() { let _ = eval::execute; }\n"
+            )
+            self.assertEqual(report["contacts"][0]["kind"], "direct")
+            self.assertEqual(report["bypasses"], ["crates/demo/src/lib.rs"])
+            self.assertEqual(
+                [(c["path"], c["kind"]) for c in report["unresolved_bypasses"]],
+                [("crates/demo/src/lib.rs", "direct")],
+            )
+            self.assertEqual(rc, 1, output)
 
 
 

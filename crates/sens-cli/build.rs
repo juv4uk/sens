@@ -15,6 +15,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../lib/surface/sa.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/ukr.lisp");
     println!("cargo:rerun-if-changed=../../lib/surface/uk.lisp");
+    println!("cargo:rerun-if-changed=../../lib/surface/uk-docs.lisp");
     // Zig embeds this release artifact into the linked archive; a manifest
     // change must invalidate Cargo's previous Zig build before packaging.
     println!("cargo:rerun-if-changed=../../packaging/islands-manifest-v1.json");
@@ -51,7 +52,13 @@ fn main() {
         .arg("build-lib")
         .arg("zig_transport_root.zig")
         .arg("-O")
-        .arg("ReleaseFast")
+        // Zig ABI reads caller-owned physical bytes: keep optimization AND
+        // runtime safety checks at the default Rust-to-Zig ingress.
+        .arg("ReleaseSafe")
+        // Zig 0.16 static archives do not bundle compiler-rt by default.
+        // Preserve ReleaseSafe stack probes: provide __zig_probe_stack through
+        // Zig compiler-rt instead of disabling stack checks or inventing a stub.
+        .arg("-fcompiler-rt")
         .arg("-lc")
         .arg("-fPIC")
         .arg(format!("-femit-bin={}", archive.display()))

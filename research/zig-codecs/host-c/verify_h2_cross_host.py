@@ -50,7 +50,8 @@ H2_TRACKED_INPUTS = (
     "research/zig-codecs/transport/e1.zig",
     "research/zig-codecs/transport/e1_writer.zig",
     "research/zig-codecs/transport/fields.zig",
-    "scripts/sens_t5_codec.py", ".zig-version", *RUST_DRIVERS,
+    "scripts/sens_t5_codec.py", "scripts/zig_codec_bridge.py",
+    "scripts/prepare_h2_zig_t5.py", ".zig-version", *RUST_DRIVERS,
     *(f"tests/semantic/{name}-{role}.bits"
       for name, _, _ in CASES for role in ("law", "mutant")),
 )
@@ -472,6 +473,7 @@ def parse_c_physical(stdout: str) -> dict[str, dict]:
 
 def verify_native_physical(stdout: str, physical: dict, files: tuple[tuple[str, str], ...]) -> None:
     """Compare C/Zig actual physical T5 SHA to hashes of native SENS input files."""
+    carrier_executables: set[str] = set()
     for source, suffix in files:
         regex = rf"(?m)^([0-9a-f]{{64}})[ \t]+\S*/{re.escape(suffix)}[ \t]*$"
         hits = re.findall(regex, stdout)
@@ -484,6 +486,29 @@ def verify_native_physical(stdout: str, physical: dict, files: tuple[tuple[str, 
             raise AuditFailure(f"test_id=H2_T5_PARITY layer=transport fixture={source} "
                                f"expected_zig_c_sha256={expected} actual_native_sha256={actual} "
                                "first_diff=unavailable_without_native_raw")
+        # A matching SHA alone could still come from a Python-written T5.
+        # Demand a separate exact proof that the attested Zig carrier minted
+        # this physical file before native SENS evaluated it.
+        prefix = f"ZIG_NATIVE_T5_CARRY source={source} "
+        markers = [line for line in stdout.splitlines() if line.startswith(prefix)]
+        expected_tail = (
+            f"physical_sha256={expected} "
+            f"zig_binary_sha256=([0-9a-f]{{64}}) "
+            "profile=D1-D10_COORDINATES_NOT_EXECUTION semantic_authority=SENS"
+        )
+        match = (re.fullmatch(re.escape(prefix) + expected_tail, markers[0])
+                 if len(markers) == 1 else None)
+        if match is None:
+            raise AuditFailure(
+                f"test_id=H2_ZIG_NATIVE_CARRY layer=transport fixture={source} "
+                f"expected=one_attested_Zig_carry_SHA actual={len(markers)}")
+        carrier_executables.add(match.group(1))
+    # One pinned Zig executable builds each native witness suite; accepting
+    # multiple distinct executable digests would weaken physical provenance.
+    if len(carrier_executables) != 1:
+        raise AuditFailure(
+            "test_id=H2_ZIG_NATIVE_CARRY layer=provenance "
+            "expected=one_Zig_binary_SHA_per_suite actual=mixed_carriers")
 
 def invoke(cmd: list[str], root: Path, marker: str, validator=None,
            env: dict[str, str] | None = None) -> dict:

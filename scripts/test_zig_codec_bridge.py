@@ -7,11 +7,12 @@ rewritten. An invalid T5 octet must be rejected rather than silently decoded.
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 import subprocess
 import tempfile
 
-from zig_codec_bridge import ZigCodecError, build_transport, carry_t5, verify_t5
+from zig_codec_bridge import ZigCodecError, build_transport, carry_t5, verify_t5, _read_zig_output
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
 # These fixture digests are fixed independently of the input under test.
@@ -77,7 +78,51 @@ def assert_physical_rejected(executable: Path, name: str, raw: bytes) -> None:
         )
 
 
+def test_zig_output_readback_guard() -> None:
+    """One transport-only witness: regular accepted; missing/alias rejected."""
+    with tempfile.TemporaryDirectory(prefix="sens-zig-output-guard-") as directory:
+        root = Path(directory)
+        physical = root / "ordinary.sens"
+        physical.write_bytes(bytes.fromhex("a1"))
+        if _read_zig_output(physical, command="synthetic") != bytes.fromhex("a1"):
+            raise AssertionError("ZIG_OUTPUT_READBACK_REGULAR_DRIFT")
+
+        for label, candidate, expected_error in (
+            ("missing", root / "missing.sens", "ZIG_CODEC_OUTPUT_UNREADABLE"),
+            ("symlink", root / "alias.sens", "ZIG_CODEC_OUTPUT_NOT_REGULAR"),
+        ):
+            if label == "symlink":
+                candidate.symlink_to(physical)
+            try:
+                _read_zig_output(candidate, command="synthetic")
+            except ZigCodecError as error:
+                if expected_error not in str(error):
+                    raise AssertionError(
+                        f"ZIG_OUTPUT_GUARD_WRONG_REJECTION label={label} error={error}"
+                    ) from error
+            else:
+                raise AssertionError(
+                    f"ZIG_OUTPUT_GUARD_FALSE_ACCEPT label={label}"
+                )
+
+        # Regular same-inode aliases are not freshly produced by Zig.
+        alias = root / "hardlink.sens"
+        os.link(physical, alias)
+        try:
+            _read_zig_output(alias, command="synthetic")
+        except ZigCodecError as error:
+            if "ZIG_CODEC_OUTPUT_LINKED" not in str(error):
+                raise AssertionError(f"ZIG_OUTPUT_HARDLINK_WRONG_ERROR {error}") from error
+        else:
+            raise AssertionError("ZIG_OUTPUT_HARDLINK_FALSE_ACCEPT")
+        finally:
+            alias.unlink()
+        if physical.read_bytes() != bytes.fromhex("a1"):
+            raise AssertionError("ZIG_OUTPUT_HARDLINK_SOURCE_CHANGED")
+
+
 def main() -> None:
+    test_zig_output_readback_guard()
     with tempfile.TemporaryDirectory(prefix="sens-zig-migration-smoke-") as temp:
         executable = build_transport(Path(temp))
         evidence = verify_t5(executable, GOLDEN_T5)

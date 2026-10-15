@@ -122,6 +122,28 @@ def require_manual_preflight(source: str) -> None:
         )
 
 
+    # The GO gate has to publish its exact machine receipt. Warn-only,
+    # missing, moved or commented-out upload cannot prove a release.
+    receipt_step = "      - name: Upload release GO-gate report\n"
+    if source.count(receipt_step) != 1:
+        raise AssertionError("RELEASE_BLOCKED: missing unique GO-gate artifact step")
+    receipt_body = source.split(receipt_step, 1)[1].split("\n      - name:", 1)[0]
+    required_upload_lines = (
+        "        if: always()",
+        "        uses: actions/upload-artifact@v4",
+        "        with:",
+        "          name: release-go-gate",
+        "          path: ${{ runner.temp }}/release-go-gate.json",
+        "          if-no-files-found: error",
+    )
+    for expected_line in required_upload_lines:
+        if re.search(r"(?m)^" + re.escape(expected_line) + r"$", receipt_body) is None:
+            raise AssertionError(
+                "RELEASE_BLOCKED: missing fail-closed GO-gate artifact evidence: "
+                + expected_line.strip()
+            )
+
+
 class ReleasePreflightScopeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -129,6 +151,44 @@ class ReleasePreflightScopeTest(unittest.TestCase):
 
     def test_current_manual_preflight_keeps_full_release_gates(self):
         require_manual_preflight(self.workflow)
+
+
+    def test_go_gate_report_is_required_and_cannot_be_spoofed(self):
+        expected = "          if-no-files-found: error\n"
+        self.assertIn(expected, self.workflow)
+        live = "      - name: Upload release GO-gate report\n"
+        self.assertIn(live, self.workflow)
+        mutations = (
+            (expected, "          if-no-files-found: warn\n"),
+            (expected, "          if-no-files-found: ignore\n"),
+            (expected, "          # if-no-files-found: error\n"),
+            ("          path: ${{ runner.temp }}/release-go-gate.json\n",
+             "          path: ${{ runner.temp }}/unrelated.json\n"),
+            ("          name: release-go-gate\n",
+             "          name: unrelated-artifact\n"),
+            ("        uses: actions/upload-artifact@v4\n",
+             "        uses: actions/upload-artifact@v5\n"),
+            (live, "      - name: Unrelated upload step\n"),
+        )
+        for before, after in mutations:
+            with self.subTest(mutation=after.strip()):
+                self.assertIn(before, self.workflow)
+                broken = self.workflow.replace(before, after, 1)
+                self.assertNotEqual(broken, self.workflow)
+                with self.assertRaisesRegex(
+                    AssertionError, "GO-gate artifact"
+                ):
+                    require_manual_preflight(broken)
+
+        # The expected option appearing ONLY inside a comment is insufficient.
+        spoof = self.workflow.replace(
+            expected,
+            "          if-no-files-found: warn\n"
+            "          # if-no-files-found: error\n",
+            1,
+        )
+        with self.assertRaisesRegex(AssertionError, "GO-gate artifact"):
+            require_manual_preflight(spoof)
 
     def test_negative_guard_rejects_new_automatic_push_and_pr(self):
         for trigger in ("push", "pull_request", "schedule"):

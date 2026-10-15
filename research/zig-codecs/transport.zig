@@ -34,7 +34,7 @@ fn requireExtension(path: []const u8, ext: []const u8) !void {
     if (!std.mem.endsWith(u8, path, ext)) return Error.WrongExtension;
 }
 
-fn readFile(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
+fn readFile(allocator: std.mem.Allocator, path: []const u8, max_bytes: usize) ![]u8 {
     const zpath = try allocator.dupeZ(u8, path);
     defer allocator.free(zpath);
     const file = fopen(zpath.ptr, "rb") orelse return Error.InputReadFailed;
@@ -42,7 +42,7 @@ fn readFile(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
     if (fseek(file, 0, 2) != 0) return Error.InputReadFailed;
     const end = ftell(file);
     if (end < 0) return Error.InputReadFailed;
-    if (@as(u64, @intCast(end)) > t5.MAX_PHYSICAL_BYTES + 1)
+    if (@as(u64, @intCast(end)) > @as(u64, @intCast(max_bytes)))
         return Error.InputTooLarge;
     if (fseek(file, 0, 0) != 0) return Error.InputReadFailed;
     const bytes = try allocator.alloc(u8, @intCast(end));
@@ -83,7 +83,7 @@ fn verifyCreatedFile(
     expected: []const u8,
 ) !void {
     errdefer _ = remove(cleanup_path);
-    const reopened = try readFile(allocator, path);
+    const reopened = try readFile(allocator, path, t5.MAX_PHYSICAL_BYTES + 1);
     defer allocator.free(reopened);
     if (!std.mem.eql(u8, reopened, expected))
         return Error.CanonicalRoundtripMismatch;
@@ -204,7 +204,13 @@ pub fn main(init: std.process.Init) !void {
     try requireExtension(source_path,
         if (input_is_trits) ".trits" else if (input_is_t5) ".sens" else ".senc");
 
-    const original = try readFile(allocator, source_path);
+    // The trit stream is not yet packed: at most five source trits fit one
+    // physical T5 byte. Do not apply the packed-byte limit to this input.
+    const input_max_bytes = if (input_is_trits)
+        t5.MAX_PHYSICAL_BYTES * 5
+    else
+        t5.MAX_PHYSICAL_BYTES + 1;
+    const original = try readFile(allocator, source_path, input_max_bytes);
     defer allocator.free(original);
     if (check_only) {
         try check(allocator, command, original);
@@ -267,7 +273,7 @@ test "Zig migration output is removed on failed readback, retained only when exa
     try std.testing.expectError(error.CanonicalRoundtripMismatch,
         verifyCreatedFile(allocator, failed, failed_z.ptr, &.{ 0x00 }));
     try std.testing.expectError(error.InputReadFailed,
-        readFile(allocator, failed));
+        readFile(allocator, failed, t5.MAX_PHYSICAL_BYTES + 1));
 
     const passed = try std.fs.path.join(allocator, &.{ parent, "verified.sens" });
     defer allocator.free(passed);
@@ -276,7 +282,7 @@ test "Zig migration output is removed on failed readback, retained only when exa
     const physical = [_]u8{ 0x63, 0x89, 0x06, 0xa1 };
     try writeFileNew(allocator, passed, &physical);
     try verifyCreatedFile(allocator, passed, passed_z.ptr, &physical);
-    const restored = try readFile(allocator, passed);
+    const restored = try readFile(allocator, passed, t5.MAX_PHYSICAL_BYTES + 1);
     defer allocator.free(restored);
     try std.testing.expectEqualSlices(u8, &physical, restored);
     // Exclusive output is never overwritten by a concurrent/second writer.
@@ -306,4 +312,34 @@ test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
     try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "102"));
     try std.testing.expectError(t5.Error.UnsupportedDomainWidth,
         carryTrits(allocator, "00000000000"));
+}
+
+test "Zig migration accepts presegmented trits longer than packed T5 bound" {
+    // A presegmented source is allowed to exceed the size of the physical
+    // carrier it produces. The Zig corridor must not truncate it or call a
+    // host-side packer to bypass the input limit.
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const allocator = std.testing.allocator;
+    const parent = try tmp.dir.realPathFileAlloc(std.testing.io, ".", allocator);
+    defer allocator.free(parent);
+    const input_path = try std.fs.path.join(allocator, &.{ parent, "large.trits" });
+    defer allocator.free(input_path);
+
+    const old_limit = t5.MAX_PHYSICAL_BYTES + 1;
+    const size = old_limit + 2;
+    const presegmented = try allocator.alloc(u8, size);
+    defer allocator.free(presegmented);
+    for (presegmented, 0..) |*byte, i| {
+        // D1:0 separated by physical boundary trit 2. End on payload.
+        byte.* = if (i % 2 == 0) '0' else '2';
+    }
+    try writeFileNew(allocator, input_path, presegmented);
+    try std.testing.expectError(Error.InputTooLarge,
+        readFile(allocator, input_path, old_limit));
+
+    const carried_input = try readFile(allocator, input_path, t5.MAX_PHYSICAL_BYTES * 5);
+    defer allocator.free(carried_input);
+    try std.testing.expectEqualSlices(u8, presegmented, carried_input);
+    try std.testing.expectEqual(@as(u8, '0'), carried_input[carried_input.len - 1]);
 }

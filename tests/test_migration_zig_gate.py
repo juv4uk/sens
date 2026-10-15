@@ -83,7 +83,8 @@ class MigrationZigGateTests(unittest.TestCase):
 
 
     def test_missing_or_failed_host_guards_fail_closed(self) -> None:
-        passing = [{"step": name, "status": "PASS"} for name in self.mod.REQUIRED_STEPS]
+        passing = [{"step": name, "status": "PASS", "exit": 0}
+                   for name in self.mod.REQUIRED_STEPS]
         self.assertEqual(self.mod.gate_verdict(
             passing, self_test=False, skip_ladder=False), "PASS")
         for guard in ("check_rust_sens_corridor_coverage", "check_corridor_axiom_binding"):
@@ -97,6 +98,62 @@ class MigrationZigGateTests(unittest.TestCase):
                         item["status"] = "FAIL"
                 self.assertEqual(self.mod.gate_verdict(
                     negative, self_test=False, skip_ladder=False), "FAIL")
+
+    def test_process_exit_truth_cannot_be_replaced_by_pass_label(self) -> None:
+        # Process evidence is required for release readiness; this synthetic
+        # gate test does NOT execute Zig or establish SENS semantic admission.
+        baseline = [
+            {"step": name, "status": "PASS", "exit": 0}
+            for name in self.mod.REQUIRED_STEPS
+        ]
+        self.assertEqual(
+            self.mod.gate_verdict(
+                baseline, self_test=False, skip_ladder=False
+            ), "PASS",
+        )
+        for guard in ("test_zig_codec_bridge",
+                      "check_sterile_zig_corridor",
+                      "check_rust_sens_zig_corridor"):
+            with self.subTest(guard=guard):
+                for exit_code in (1, 17, -9):
+                    forged = [dict(step) for step in baseline]
+                    next(step for step in forged
+                         if step["step"] == guard)["exit"] = exit_code
+                    self.assertEqual(
+                        self.mod.gate_verdict(
+                            forged, self_test=False, skip_ladder=False
+                        ), "FAIL",
+                        f"forged PASS with exit={exit_code} guard={guard}",
+                    )
+                for bad_exit in (None, "0", False):
+                    invalid = [dict(step) for step in baseline]
+                    next(step for step in invalid
+                         if step["step"] == guard)["exit"] = bad_exit
+                    self.assertEqual(
+                        self.mod.gate_verdict(
+                            invalid, self_test=False, skip_ladder=False
+                        ), "INCOMPLETE",
+                    )
+                missing = [dict(step) for step in baseline]
+                del next(step for step in missing if step["step"] == guard)["exit"]
+                self.assertEqual(
+                    self.mod.gate_verdict(
+                        missing, self_test=False, skip_ladder=False
+                    ), "INCOMPLETE",
+                )
+        self.assertEqual(
+            self.mod.gate_verdict(
+                baseline, self_test=True, skip_ladder=True
+            ), "SELF_TEST_ONLY",
+        )
+        contradictory = [dict(step) for step in baseline]
+        contradictory[-1]["exit"] = 2
+        self.assertEqual(
+            self.mod.gate_verdict(
+                contradictory, self_test=True, skip_ladder=True
+            ), "FAIL",
+        )
+
 
     def test_full_gate_does_not_claim_pass_on_failing_guard(self) -> None:
         # Mocked orchestration, NOT an actual Zig codec or semantic receipt.
@@ -189,6 +246,35 @@ class ZigBridgeReceiptEvidenceTests(unittest.TestCase):
                 result = self.simulated_step(self.good_line() + " " + forged)
                 self.assertEqual(result["status"], "FAIL")
                 self.assertIn("unrecognized physical receipt fields", result["detail"])
+
+    def test_bridge_failure_markers_cannot_be_overridden_by_final_pass(self):
+        # One focused negative proof: zero-exit and a valid final receipt
+        # cannot erase an explicit contradictory failure in the same stdout.
+        clean = self.good_line() + "\n"
+        self.assertEqual(self.simulated_step(clean)["status"], "PASS")
+        for marker in ("ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"):
+            with self.subTest(marker=marker):
+                output = marker + " test_id=zig-migration-bridge-t5-exact-physical\n" + clean
+                result = self.simulated_step(output)
+                self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
+                self.assertIn("contradictory Zig bridge receipt", result["detail"])
+
+    def test_stderr_bridge_failure_cannot_be_hidden_by_stdout_pass(self):
+        # A genuine final stdout receipt and zero exit are insufficient when
+        # this same subprocess announces explicit transport failure on stderr.
+        valid = self.good_line() + "\n"
+        clean = self.simulated_step(valid, stderr="ordinary compiler notice\n")
+        self.assertEqual((clean["status"], clean["exit"]), ("PASS", 0))
+        for marker in ("ZIG_BRIDGE_FAIL", "ZIG_BRIDGE_BLOCKED"):
+            with self.subTest(marker=marker):
+                result = self.simulated_step(
+                    valid,
+                    stderr=marker + " test_id=zig-migration-bridge-t5-exact-physical\n",
+                    rc=0,
+                )
+                self.assertEqual((result["status"], result["exit"]), ("FAIL", 0))
+                self.assertIn("contradictory Zig bridge stderr status=" + marker,
+                              result["detail"])
 
     def test_empty_stdout_exit_zero_is_not_physical_pass(self):
         result = self.simulated_step("")

@@ -53,5 +53,42 @@ class ClassificationVsExpiry(unittest.TestCase):
                 self.assertIn(evidence, result.stdout)
 
 
+
+class DiagnosticReceiptShape(unittest.TestCase):
+    def test_json_non_objects_fail_with_informative_diagnostic(self):
+        # A parseable JSON value is not necessarily a valid record object.
+        with tempfile.TemporaryDirectory() as tmp:
+            report = pathlib.Path(tmp) / "zig-red.jsonl"
+            for record in ("[]", "null", "17", '"ok"'):
+                with self.subTest(record=record):
+                    report.write_text(record + "\n", encoding="utf-8")
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT), "scan",
+                         "--report-file", str(report)],
+                        cwd=ROOT, capture_output=True, text=True, check=False,
+                    )
+                    self.assertEqual(result.returncode, 1,
+                                     result.stdout + result.stderr)
+                    self.assertIn("UNINFORMATIVE-OUTPUT", result.stdout)
+                    self.assertIn("1:invalid:record_type expected=object",
+                                  result.stdout)
+                    self.assertNotIn("Traceback", result.stderr)
+
+    def test_object_record_uses_existing_field_validation(self):
+        # Do not treat a dictionary as a non-object; its missing fields must speak.
+        with tempfile.TemporaryDirectory() as tmp:
+            report = pathlib.Path(tmp) / "zig-red.jsonl"
+            report.write_text("{}\n", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "scan",
+                 "--report-file", str(report)],
+                cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(result.returncode, 1,
+                             result.stdout + result.stderr)
+            self.assertIn("1:missing:test_id", result.stdout)
+            self.assertNotIn("invalid:record_type", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()
