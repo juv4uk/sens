@@ -81,6 +81,57 @@ def _real_write_guard(node: ast.AST) -> bool:
     )
 
 
+def _write_time_truth(node: ast.AST) -> bool | None:
+    """Evaluate only conditions established for --write with mandatory Zig.
+
+    Unknown conditions cannot certify a required physical call. This is a
+    conservative AST source gate, not a full Python control-flow proof.
+    """
+    if _is_arg(node, "write") or _is_arg(node, "zig_codec"):
+        return True
+    if isinstance(node, ast.Name) and node.id == "zig_binary":
+        return None
+    if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+        return node.value
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        inner = _write_time_truth(node.operand)
+        return None if inner is None else not inner
+    if isinstance(node, ast.Compare) and len(node.ops) == 1 and len(node.comparators) == 1:
+        if (isinstance(node.left, ast.Name) and node.left.id == "zig_binary"
+                and isinstance(node.comparators[0], ast.Constant)
+                and node.comparators[0].value is None):
+            if isinstance(node.ops[0], ast.IsNot):
+                return True  # --write requires --zig-codec; build must succeed
+            if isinstance(node.ops[0], ast.Is):
+                return False
+    if isinstance(node, ast.BoolOp):
+        values = [_write_time_truth(value) for value in node.values]
+        if isinstance(node.op, ast.And):
+            if False in values:
+                return False
+            return True if all(value is True for value in values) else None
+        if isinstance(node.op, ast.Or):
+            if True in values:
+                return True
+            return False if all(value is False for value in values) else None
+    return None
+
+
+def _write_reachable_nodes(root: ast.AST):
+    """Only statement paths guaranteed live on the admitted --write route."""
+    yield root
+    if isinstance(root, ast.If):
+        condition = _write_time_truth(root.test)
+        if condition is None:
+            return  # Unknown branch may skip the verifier: not evidence
+        chosen = root.body if condition else root.orelse
+        for statement in chosen:
+            yield from _write_reachable_nodes(statement)
+        return
+    for child in ast.iter_child_nodes(root):
+        yield from _write_reachable_nodes(child)
+
+
 def check_migration_driver_ast(source: str) -> list[str]:
     """Verify actual syntax and placement, not inert Zig-looking substrings."""
     problems: list[str] = []
@@ -105,15 +156,23 @@ def check_migration_driver_ast(source: str) -> list[str]:
         problems.append("M3: no live Zig verify_t5() call in run()")
     if not any(_real_write_guard(node) for node in main.body):
         problems.append("M4: main() lacks active --write/--zig-codec fail-closed exit")
-    # Must verify the candidate before it can enter the very same per-file
-    # publish list. A comment or fake call elsewhere is not a witness.
+    # Prove that the physical Zig call is reachable ON THE WRITE PATH,
+    # before the same file is staged. A dry-run-only call is no receipt.
     valid_flow = False
     for node in _live_nodes(run):
         if not isinstance(node, ast.For):
             continue
-        verified = _bridge_calls(node, "verify_t5")
+        write_nodes = list(_write_reachable_nodes(node))
+        verified = [
+            n for n in write_nodes
+            if isinstance(n, ast.Call)
+            and isinstance(n.func, ast.Attribute)
+            and n.func.attr == "verify_t5"
+            and isinstance(n.func.value, ast.Name)
+            and n.func.value.id == "zig_codec_bridge"
+        ]
         staged = [
-            n for n in _live_nodes(node)
+            n for n in write_nodes
             if isinstance(n, ast.Call)
             and isinstance(n.func, ast.Attribute)
             and n.func.attr == "append"
@@ -123,7 +182,10 @@ def check_migration_driver_ast(source: str) -> list[str]:
         if verified and staged and max(v.lineno for v in verified) < min(v.lineno for v in staged):
             valid_flow = True
     if not valid_flow:
-        problems.append("M5: same-file staged.append() not preceded by live Zig verify_t5()")
+        problems.append(
+            "M5: --write staged.append() lacks a preceding write-reachable "
+            "Zig verify_t5() in the same per-file loop"
+        )
     return problems
 
 

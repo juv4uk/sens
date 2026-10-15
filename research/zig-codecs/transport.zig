@@ -26,6 +26,8 @@ const Error = error{
     InputEqualsOutput,
     NotSmallerThanT5,
     CanonicalRoundtripMismatch,
+    InvalidTrit,
+    InvalidTritBoundary,
 };
 
 fn requireExtension(path: []const u8, ext: []const u8) !void {
@@ -87,7 +89,57 @@ fn verifyCreatedFile(
         return Error.CanonicalRoundtripMismatch;
 }
 
+/// Physical T5 emission from PRE-SEGMENTED, opaque trits.
+/// 0/1 are payload and 2 is solely the physical word boundary.
+/// The upstream SENS projection already supplies each exact boundary.
+/// This function has NO domain registry, name mapping or semantic dispatch.
+fn carryTrits(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
+    if (source.len == 0) return Error.InvalidTritBoundary;
+    if (source.len > t5.MAX_PHYSICAL_BYTES * 5) return Error.InputTooLarge;
+    const out = try allocator.alloc(u8, (source.len + 4) / 5);
+    errdefer allocator.free(out);
+    var index: usize = 0;
+    var value: u8 = 0;
+    var used: u8 = 0;
+    var after_payload = false;
+    for (source) |ch| {
+        if (ch != '0' and ch != '1' and ch != '2') return Error.InvalidTrit;
+        if (ch == '2') {
+            if (!after_payload) return Error.InvalidTritBoundary;
+            after_payload = false;
+        } else {
+            after_payload = true;
+        }
+        value = value * 3 + (ch - '0');
+        used += 1;
+        if (used == 5) {
+            out[index] = value;
+            index += 1;
+            value = 0;
+            used = 0;
+        }
+    }
+    if (!after_payload) return Error.InvalidTritBoundary;
+    while (used != 0) {
+        value = value * 3 + 2;
+        used += 1;
+        if (used == 5) {
+            out[index] = value;
+            index += 1;
+            value = 0;
+            used = 0;
+        }
+    }
+    std.debug.assert(index == out.len);
+    // Physical D1..D10 carrier profile, not callable SENS admission.
+    try t5.validateCoordinatesPhysical(out);
+    return out;
+}
+
 fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8) ![]u8 {
+    if (std.mem.eql(u8, command, "t5-carry")) {
+        return try carryTrits(allocator, source);
+    }
     if (std.mem.eql(u8, command, "t5-roundtrip")) {
         const words = try t5.decode(allocator, source);
         defer allocator.free(words);
@@ -147,8 +199,10 @@ pub fn main(init: std.process.Init) !void {
         std.mem.eql(u8, command, "f3c-pack");
     const input_is_f3c = std.mem.eql(u8, command, "f3c-check") or
         std.mem.eql(u8, command, "f3c-unpack");
-    if (!input_is_t5 and !input_is_f3c) return Error.Usage;
-    try requireExtension(source_path, if (input_is_t5) ".sens" else ".senc");
+    const input_is_trits = std.mem.eql(u8, command, "t5-carry");
+    if (!input_is_t5 and !input_is_f3c and !input_is_trits) return Error.Usage;
+    try requireExtension(source_path,
+        if (input_is_trits) ".trits" else if (input_is_t5) ".sens" else ".senc");
 
     const original = try readFile(allocator, source_path);
     defer allocator.free(original);
@@ -175,6 +229,12 @@ pub fn main(init: std.process.Init) !void {
         defer allocator.free(recompressed);
         if (!std.mem.eql(u8, recompressed, original))
             return Error.CanonicalRoundtripMismatch;
+    } else if (std.mem.eql(u8, command, "t5-carry")) {
+        const words = try t5.decodeCoordinates(allocator, output);
+        defer allocator.free(words);
+        const replay = try t5.encodeCoordinates(allocator, words);
+        defer allocator.free(replay);
+        if (!std.mem.eql(u8, output, replay)) return Error.CanonicalRoundtripMismatch;
     } else if (!std.mem.eql(u8, original, output)) {
         return Error.CanonicalRoundtripMismatch;
     }
@@ -223,4 +283,27 @@ test "Zig migration output is removed on failed readback, retained only when exa
     try std.testing.expectError(error.OutputExistsOrUnavailable,
         writeFileNew(allocator, passed, &.{0xff}));
     try std.testing.expectEqualSlices(u8, &physical, restored);
+}
+
+test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
+    const allocator = std.testing.allocator;
+    const mixed = try carryTrits(allocator, "102110200");
+    defer allocator.free(mixed);
+    try std.testing.expectEqualSlices(u8, &.{ 0x67, 0x38 }, mixed);
+    const d1 = try carryTrits(allocator, "1");
+    defer allocator.free(d1);
+    const d2 = try carryTrits(allocator, "01");
+    defer allocator.free(d2);
+    try std.testing.expectEqualSlices(u8, &.{0xa1}, d1);
+    try std.testing.expectEqualSlices(u8, &.{0x35}, d2);
+    const coordinate = try carryTrits(allocator, "0000000000");
+    defer allocator.free(coordinate);
+    try std.testing.expectEqualSlices(u8, &.{0x00, 0x00}, coordinate);
+    try std.testing.expectError(Error.InvalidTrit, carryTrits(allocator, "10 11"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, ""));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "20"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "1022"));
+    try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "102"));
+    try std.testing.expectError(t5.Error.UnsupportedDomainWidth,
+        carryTrits(allocator, "00000000000"));
 }

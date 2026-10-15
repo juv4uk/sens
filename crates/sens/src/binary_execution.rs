@@ -98,57 +98,6 @@ pub fn eval_t5_program(
 
 
 #[cfg(test)]
-mod e1_exact_word_execution_tests {
-    use super::*;
-    use crate::{decode_ternary_words, encode_ternary_words};
-
-    #[test]
-    fn e1_carrier_executes_existing_sens_binary_self_verdict_and_mutant() {
-        // Both verdicts are computed by the SAME running SENS evaluator,
-        // never by an E1 codec, Rust truth table, or external language name.
-        let good = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-selftest.sens");
-        let bad = include_bytes!("../../../tests/fixtures/semantic/exact-d3-logic-mutant.sens");
-        let mut observed = Vec::new();
-        let mut sources = Vec::new();
-        for (label, t5) in [("positive", good.as_slice()), ("one-bit-mutant", bad.as_slice())] {
-            let words = decode_ternary_words(t5).expect("pinned executable binary SENS T5");
-            let carrier = crate::envelope_e1::encode(&words).expect("E1 physical encode");
-            let restored = crate::envelope_e1::decode(&carrier).expect("E1 canonical replay");
-            assert_eq!(words, restored, "E1 must preserve exact domain widths: {label}");
-            assert_eq!(encode_ternary_words(&restored).unwrap(), t5,
-                       "E1 byte-for-byte source preservation: {label}");
-            let native = eval_t5_program(t5, &mut Session::default())
-                .expect("native SENS binary oracle");
-            let from_e1 = eval_e1_program(&carrier, &mut Session::default())
-                .expect("SENS executes exact words restored from E1");
-            assert_eq!(native.output, from_e1.output, "SENS output parity: {label}");
-            let verdict = from_e1.value.as_predicate_bit()
-                .expect("the SENS binary witness must return its own D1 verdict");
-            assert_eq!(native.value.as_predicate_bit(), Some(verdict),
-                       "SENS D1 verdict parity: {label}");
-            println!("E1_NATIVE_SENS_VERDICT_PASS label={label} D1={}", u8::from(verdict));
-            observed.push(verdict);
-            sources.push(words);
-            let mut corrupt = carrier;
-            *corrupt.last_mut().unwrap() ^= 1;
-            assert!(matches!(
-                eval_e1_program(&corrupt, &mut Session::default()),
-                Err(E1ExecutionError::Transport(
-                    crate::universal_frame3::Frame3Error::Integrity
-                ))
-            ), "CRC mutant cannot reach SENS: {label}");
-        }
-        assert_ne!(observed[0], observed[1], "one-bit mutant changes the SENS verdict");
-        assert_eq!(sources[0].len(), sources[1].len());
-        let changed: u32 = sources[0].iter().zip(&sources[1]).map(|(a, b)| {
-            assert_eq!(a.width(), b.width(), "the domain width cannot change");
-            (a.packed_bits() ^ b.packed_bits()).count_ones()
-        }).sum();
-        assert_eq!(changed, 1, "mutant changes exactly one semantic source bit");
-    }
-}
-
-#[cfg(test)]
 mod exact_t5_cutover_tests {
     use super::*;
     use crate::{encode_ternary_words, parse_binary_source_words, ExprKind};

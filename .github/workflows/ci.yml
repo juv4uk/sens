@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          zig test research/zig-codecs/transport_abi.zig -lc
+          zig test zig_transport_root.zig -lc
           cargo test --locked -p sens-cli --bin sens zig_linter_carrier -- --nocapture
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_linter_carrier -- --nocapture
       - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
@@ -157,6 +157,11 @@ jobs:
           cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
           grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          # Executable Rust host -> Zig E1/T5 -> binary SENS, one-bit and CRC negatives.
+          echo 'test_id=rust-zig-e1-sens-file-link layer=transport input=tests/fixtures/semantic/exact-d3-logic-selftest.sens semantic_authority=SENS'
+          cargo test --locked -p sens-cli --test e1_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'test rust_host_zig_e1_preserves_binary_sens_verdict_and_rejects_corruption ... ok' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'RUST_ZIG_E1_SENS_PASS layer=transport cases=2' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
           # Executable Zig -> BinarySourceWord -> SENS D2 parse; no text round-trip.
           echo 'test_id=zig-typed-word-explain layer=parse semantic_authority=SENS'
           # Native Rust host must actually call the D1..D10 Zig physical
@@ -1315,7 +1320,24 @@ jobs:
           cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
           cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
 
-      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
+      - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        # The release is GO only when every gate passes on ONE SHA (#4196). This step
+        # prints the GO count and names the red gates -- report-only, never greenwashed.
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
+          echo "release-go-gate exit=$?"
+          exit 0
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.json
+          if-no-files-found: warn
+
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
         # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
         # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
@@ -1334,7 +1356,7 @@ jobs:
           path: ${{ runner.temp }}/math-bench.json
           if-no-files-found: warn
 
-
+      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
         if: always()
         shell: bash
         run: |

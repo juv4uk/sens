@@ -30,6 +30,7 @@ CASES = (
 C_SOURCE = "research/zig-codecs/host-c/d3_subset.c"
 C_ABI_HEADER = "research/zig-codecs/host-c/zig_transport_v2.h"
 C_DRIVER = "research/zig-codecs/host-c/verify_d3_subset.sh"
+H1_VERIFIER = "research/zig-codecs/host-c/verify_h1_dependency_receipt.py"
 RUST_DRIVERS = ("scripts/prove-retired-d3-laws.sh", "scripts/prove-retired-quote-inert.sh")
 ZIG_ABI = "research/zig-codecs/transport_abi.zig"
 WORDS = re.compile(rb"^[01 \t\r\n]+$")
@@ -39,7 +40,7 @@ WORDS = re.compile(rb"^[01 \t\r\n]+$")
 # Unrelated dirty worktree files do not block the migration swarm.
 H2_TRACKED_INPUTS = (
     "research/zig-codecs/host-c/verify_h2_cross_host.py",
-    C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI,
+    C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI,
     "research/zig-codecs/t5/t5.zig",
     "research/zig-codecs/f3c/f3c.zig",
     # Zig ABI v2 now imports E1; all transitively compiled Zig sources
@@ -361,7 +362,7 @@ def preflight(root: Path) -> dict:
         cases.append(inspect_pair(
             name, (base / f"{name}-law.bits").read_bytes(),
             (base / f"{name}-mutant.bits").read_bytes(), pos_pin, neg_pin))
-    for path in (C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI, *RUST_DRIVERS):
+    for path in (C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI, *RUST_DRIVERS):
         if not (root / path).is_file():
             raise AuditFailure(f"test_id=H2_SOURCE layer=provenance missing={path}")
     c_src = (root / C_SOURCE).read_text(encoding="utf-8")
@@ -388,7 +389,7 @@ def preflight(root: Path) -> dict:
         "host_a": "SENS-native-via-Rust", "host_b": "Rust-free-C-through-Zig-ABI-v2",
         "cases": cases,
         "source_sha256": {p: sha256((root / p).read_bytes())
-                          for p in (C_SOURCE, C_ABI_HEADER, C_DRIVER, ZIG_ABI, *RUST_DRIVERS)},
+                          for p in (C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI, *RUST_DRIVERS)},
     }
 
 
@@ -498,6 +499,94 @@ def invoke(cmd: list[str], root: Path, marker: str, validator=None) -> dict:
     return record
 
 
+
+# The C host is built and checked by H1, not independently authenticated by
+# seeing a valid C program verdict. The exact SHA of its already-executed
+# binary must agree with the ELF/AR verifier and the Git-pinned source bytes.
+H1_D10 = ("C_ZIG_D10_COORDINATE_ONLY_PASS host=C abi=2 "
+          "d10_golden=3 ordinary_positive=2 negative=6 "
+          "d10_callable=NO semantic_authority=SENS")
+H1_VERIFIED = ("H1_C_HOST_STDOUT_RECEIPT_PASS d10_golden=3 d3_laws=3 "
+               "d3_negative=3 negative=6 one_bit_mutations=3 ordinary_positive=2")
+H1_READY = ("C_D3_SUBSET_H1_SOURCE_READY runtime_subset=D1-D3 "
+            "dependency_receipt=INSPECTED_NO_RUST_MARKERS "
+            "full_static_dependency_closure=NOT_VERIFIED "
+            "cross_host_parity=NOT_VERIFIED semantic_authority=SENS")
+
+
+def verify_h1_execution_receipt(stdout: str, trusted_sources: dict[str, str]) -> dict:
+    """Bind the actual C process, H1 source checker and ELF audit to H2.
+
+    This is mechanical executable/source provenance, NOT callable admission,
+    an extra language evaluator, or a substitute for running both H2 hosts.
+    """
+    lines = stdout.splitlines()
+    for label, marker in (("D10", H1_D10), ("H1_STDOUT", H1_VERIFIED),
+                          ("H1_FINAL", H1_READY)):
+        if lines.count(marker) != 1:
+            raise AuditFailure(
+                f"test_id=H2_H1_CHAIN layer=transport "
+                f"marker={label} expected=one_exact actual={lines.count(marker)}")
+    if not (lines.index(H1_D10) < lines.index(H1_VERIFIED) < lines.index(H1_READY)):
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance actual=out_of_order")
+
+    # H1 --run prints exactly one JSON receipt, after verifying ELF, AR, NM
+    # and the actual Zig build sources, including its own verifier script.
+    json_lines = [line for line in lines if line.startswith("{")]
+    if len(json_lines) != 1:
+        raise AuditFailure(f"test_id=H2_H1_CHAIN layer=provenance "
+                           f"expected=one_H1_ELF_JSON actual={len(json_lines)}")
+    try:
+        audit = json.loads(json_lines[0])
+    except (ValueError, TypeError) as exc:
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance malformed_H1_JSON") from exc
+    if (not isinstance(audit, dict) or
+        audit.get("test_id") != "H1_C_ZIG_ELF_DEPENDENCY_RECEIPT" or
+        audit.get("status") != "INSPECTED_NO_RUST_MARKERS" or
+        audit.get("semantic_conformance_proven") is not False or
+        audit.get("full_static_dependency_closure_proven") is not False):
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance invalid_H1_ELF_status")
+
+    binary_lines = [re.fullmatch(
+        r"C_D3_SUBSET_RECEIPT zig=(\S+) c_binary_sha256=([0-9a-f]{64})", line)
+        for line in lines if line.startswith("C_D3_SUBSET_RECEIPT")]
+    if len(binary_lines) != 1 or binary_lines[0] is None:
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance "
+                           "expected=one_exact_C_binary_SHA")
+    binary_sha = binary_lines[0].group(2)
+    archive_sha = audit.get("zig_archive_sha256")
+    if (audit.get("binary_sha256") != binary_sha or
+            not isinstance(archive_sha, str) or
+            re.fullmatch(r"[0-9a-f]{64}", archive_sha) is None):
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance "
+                           "actual=C_binary_or_Zig_archive_SHA_mismatch")
+
+    sources = audit.get("source_sha256")
+    if not isinstance(sources, dict):
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance missing_H1_source_map")
+    for path in (C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI):
+        expected = trusted_sources.get(path)
+        if (not isinstance(expected, str) or
+            re.fullmatch(r"[0-9a-f]{64}", expected) is None or
+            sources.get(path) != expected):
+            raise AuditFailure(
+                f"test_id=H2_H1_CHAIN layer=provenance "
+                f"source={path} expected_sha256={expected} actual={sources.get(path)}")
+    if not (lines.index(H1_VERIFIED) < lines.index(json_lines[0]) <
+            next(i for i, line in enumerate(lines) if line.startswith("C_D3_SUBSET_RECEIPT")) <
+            lines.index(H1_READY)):
+        raise AuditFailure("test_id=H2_H1_CHAIN layer=provenance "
+                           "actual=H1_ELF_chain_out_of_order")
+    return {
+        "c_binary_sha256": binary_sha,
+        "zig_archive_sha256": archive_sha,
+        "h1_source_sha256": {path: sources[path] for path in
+                             (C_SOURCE, C_ABI_HEADER, C_DRIVER, H1_VERIFIER, ZIG_ABI)},
+        "h1_elf_status": audit["status"],
+        "d10_abi_physical": "COORDINATE_ONLY",
+    }
+
+
 def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     receipt["git_source_pin"] = verify_git_provenance(root, H2_TRACKED_INPUTS)
     for tool in ("zig", "cc", "cargo", "bash"):
@@ -511,14 +600,13 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
     if not exe.is_file():
         raise AuditFailure(f"test_id=H2_RUN layer=executor missing={exe}")
     c_binary_digest: list[str] = []
+    c_h1: list[dict] = []
     c_physical: dict[str, dict] = {}
     def check_c_verdicts(stdout: str) -> None:
         # These are observations from the C process, not Python-authored SENS laws.
-        receipt = re.search(r"^C_D3_SUBSET_RECEIPT zig=\S+ c_binary_sha256=([0-9a-f]{64})$",
-                            stdout, re.MULTILINE)
-        if receipt is None:
-            raise AuditFailure("test_id=H2_C_BINARY layer=dependency missing_binary_sha256")
-        c_binary_digest.append(receipt.group(1))
+        h1 = verify_h1_execution_receipt(stdout, receipt["source_sha256"])
+        c_h1.append(h1)
+        c_binary_digest.append(h1["c_binary_sha256"])
         for name, _, _ in CASES:
             for state, expected in (("law", "C_D3_SUBSET_PASS"),
                                     ("mutant", "C_D3_SUBSET_NEGATIVE_PASS")):
@@ -555,6 +643,7 @@ def run_both(root: Path, receipt: dict, sens_bin: str) -> dict:
         "toolchain": {"zig_version": pinned, "c_compiler": shutil.which("cc")},
         "rust_host_binary_sha256": sha256(exe.read_bytes()),
         "c_host_binary_sha256": c_binary_digest[0],
+        "h1_zig_c_elf_provenance": c_h1[0],
         "physical_t5_sha256": {p: item["sha256"] for p, item in sorted(c_physical.items())},
         "physical_t5_bytes": {p: item["bytes"] for p, item in sorted(c_physical.items())},
         "transport_status": "ZIG_C_AND_NATIVE_SENS_PHYSICAL_SHA256_MATCHED_SIX_OF_SIX",
