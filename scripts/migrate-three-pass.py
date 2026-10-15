@@ -305,7 +305,7 @@ def quoted_ladder_surfaces():
 
 def current_residents(data):
     labels={}
-    for domain in ("D3","D4","D5","D6","D7","D8","D9","D10"):
+    for domain in ("D3","D4","D5","D6","D7","D9","D10"):
         # A foundation ratifies only the domains it declares (e.g. d1-d9 has no
         # D10). Resolve the domains present; a declared-absent domain contributes
         # no residents instead of crashing the whole migration census.
@@ -315,10 +315,10 @@ def current_residents(data):
         for bits,label in desc["residents"].items():
             if domain=="D3" and label=="EMPTY":
                 continue
-            # A label may exist in several domains (MAP in D6 and D8, OPEN/CLOSE/
+            # A label may exist in several domains (e.g. MAP), so do not let one
             # TEXT-DATA likewise). The migration admits call-domains D3-D6, so the
             # LOWEST domain must win: first-wins keeps MAP -> D6 101000 instead of
-            # letting D8 overwrite it, which made en 'map' resolve to a non-D3-D6
+            # overwrite another, which made en 'map' resolve to a non-D3-D6
             # resident and broke every my-lisp head resolution.
             labels.setdefault(str(label).upper(),(bits,domain))
     # D11 is a separate testing-only inventory, never a callable-head or
@@ -596,15 +596,12 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # closed below.) Current D8 stays exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
-            # NEW REALITY (owner, 2026-10-15): the SID8/Sens8 era is retired and
-            # there is NO ratified D8 (knowledge/d8-*.json is SID8/Sens8). An
-            # eight-bit head is not executable; it needs a current named D3-D6
+            # NEW REALITY (owner, 2026-10-15): there is no D8. An eight-bit head
+            # (SID8/Sens8-era) is not executable; it needs a current named D3-D6
             # resident, else it fails closed as a retired SID8-era head.
             raise MigrationError(
-                f"retired SID8-era head {t}: no current ratified D8 coordinate and "
-                "no current named D3-D6 resident",
+                f"retired SID8-era head {t}: no current named D3-D6 resident",
                 tok,
             )
 
@@ -1113,8 +1110,8 @@ def main():
         args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
-    # NOTE: knowledge/d8-*.json is SID8/Sens8, NOT a ratified D8. It is never
-    # wired as a domain; an eight-bit head is not executable.
+    # NOTE: knowledge/d8-*.json is SID8/Sens8, not a domain. It is never wired
+    # as one; an eight-bit head is not executable.
     d9_residents = set(data["domains"].get("D9",{}).get("residents",{}).keys())
     my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
@@ -1228,7 +1225,7 @@ def main():
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current ratified D8 coordinate, else a current named D3-D6 resident",
+        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current named D3-D6 resident, else it fails closed",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
