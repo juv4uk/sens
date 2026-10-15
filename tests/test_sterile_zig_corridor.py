@@ -124,6 +124,37 @@ class SterileZigCorridorTests(unittest.TestCase):
             with self.subTest(kind="missing-or-duplicate"), self.assertRaises(blocked):
                 check(mutant)
 
+    def test_e1_physical_export_blocks_rust_bypass_mutants(self) -> None:
+        module = runpy.run_path(str(SCRIPT))
+        check = module["check_trit_e1_egress"]
+        blocked = module["CorridorBlocked"]
+        source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+        check(source)
+
+        mutations = (
+            (
+                "zig_transport::encode_e1_direct(&words)",
+                "sens::envelope_e1::encode(&words).map_err(|e| format!(\"{e:?}\"))",
+            ),
+            (
+                "decode_canonical_t5_words(physical_t5)",
+                "sens::decode_ternary_words(physical_t5)",
+            ),
+            (
+                'Err("E1 physical export requires Zig; no Rust fallback".into())',
+                'sens::envelope_e1::encode(&[]).map_err(|e| format!("{e:?}"))',
+            ),
+            (
+                "let e1 = encode_e1_from_t5(&bytes)?;",
+                "let e1 = sens::envelope_e1::encode(&[]).unwrap();",
+            ),
+        )
+        for current, bypass in mutations:
+            with self.subTest(mutant=current):
+                self.assertIn(current, source, "missing production mutant anchor")
+                with self.assertRaises(blocked):
+                    check(source.replace(current, bypass, 1))
+
     def test_main_sens_ingress_fails_on_missing_or_duplicate_route(self) -> None:
         module = runpy.run_path(str(SCRIPT))
         check = module["check_main_t5_ingress"]
