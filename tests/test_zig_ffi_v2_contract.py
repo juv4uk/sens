@@ -284,7 +284,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
 
         # A source-only regex sees this prototype, but C11 does NOT.
         match = re.search(
-            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\\([^;]*?;", self.header,
+            r"(?ms)^ptrdiff_t sens_zig_f3c_unpack\([^;]*?;", self.header,
         )
         self.assertIsNotNone(match, "canonical C F3C prototype missing")
         original = match.group(0)
