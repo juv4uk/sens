@@ -85,15 +85,38 @@ def check_zig_pin() -> dict:
             "detail": f"ZIG_PIN_DRIFT expected={expected} actual={actual!r}",
         }
     action = ROOT / ".github" / "actions" / "install-zig" / "action.yml"
-    if action.is_file():
-        body = action.read_text(encoding="utf-8")
-        if f'default: "{expected}"' not in body and f"default: '{expected}'" not in body:
-            return {
-                "step": "zig-pin",
-                "status": "FAIL",
-                "exit": 1,
-                "detail": "install-zig action default drift vs .zig-version",
-            }
+    if not action.is_file() or action.is_symlink():
+        return {
+            "step": "zig-pin",
+            "status": "FAIL",
+            "exit": 1,
+            "detail": "missing regular install-zig action.yml",
+        }
+    # Read only inputs.version.default, not a coincidental token in comments
+    # or some other action input. No YAML dependency is needed for this pin.
+    section = None
+    action_input = None
+    defaults = []
+    for line in action.read_text(encoding="utf-8").splitlines():
+        value = line.strip()
+        if not value or value.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if indent == 0:
+            section = value
+            action_input = None
+        elif section == "inputs:" and indent == 2:
+            action_input = value
+        elif (section == "inputs:" and action_input == "version:"
+              and indent == 4 and value.startswith("default:")):
+            defaults.append(value.split(":", 1)[1].strip().strip("'\\\""))
+    if defaults != [expected]:
+        return {
+            "step": "zig-pin",
+            "status": "FAIL",
+            "exit": 1,
+            "detail": f"install-zig inputs.version.default drift expected={expected} actual={defaults!r}",
+        }
     return {
         "step": "zig-pin",
         "status": "PASS",
@@ -155,6 +178,10 @@ def main() -> int:
         help="Pin + purity + authority only (no Zig binary, no ladder).",
     )
     args = parser.parse_args()
+
+    # Mandatory Zig cannot be skipped by the no-binary self-test.
+    if args.self_test and args.require_zig:
+        parser.error("--self-test cannot satisfy --require-zig")
 
     if args.self_test:
         args.skip_ladder_identity = True
