@@ -149,6 +149,10 @@ jobs:
           # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
           echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
           python3 scripts/migration-zig-gate.py --self-test
+          # Release migration: reject forged or stale Rust-host Zig exemptions.
+          # Source-only guard: physical and semantic admission remain separate.
+          echo 'test_id=zig-host-exemption-registry-negative layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_rust_sens_corridor_coverage.py -v
           # Release GO requires the exact-SHA completed central Zig CI job.
           # Synthetic missing/red/stale check-run controls never assert GO.
           echo 'test_id=release-central-zig-exact-sha-check layer=release-provenance verdict=source-only semantic_authority=SENS'

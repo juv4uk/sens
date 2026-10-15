@@ -32,10 +32,16 @@ def write_crate(root: Path, name: str, body: str) -> None:
     (src / "lib.rs").write_text(body, encoding="utf-8")
 
 
-def write_registry(root: Path, exemptions: list) -> None:
+def write_registry(
+    root: Path, exemptions: list, *,
+    schema: str = "sens-rust-sens-corridor-coverage/v1",
+    codec_owner: str = "crates/sens",
+) -> None:
     path = root / "research" / "zig-codecs" / "corridor_host_coverage.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"schema": "x", "exemptions": exemptions}), encoding="utf-8")
+    path.write_text(json.dumps({
+        "schema": schema, "codec_owner": codec_owner, "exemptions": exemptions,
+    }), encoding="utf-8")
 
 
 class CorridorCoverageTests(unittest.TestCase):
@@ -120,6 +126,77 @@ class CorridorCoverageTests(unittest.TestCase):
         )
         write_registry(self.root, [])
         self.assertEqual(self.module.check(self.root), [])
+
+    def test_duplicate_exception_is_blocked(self) -> None:
+        write_crate(self.root, "known", "fn f(){ sens::decode_binary_frame(&[]); }")
+        entry = {"crate": "crates/known", "reason": "pending Zig migration", "issue": 5787}
+        write_registry(self.root, [entry, dict(entry)])
+        self.assertTrue(any("duplicate exemption" in x for x in self.module.check(self.root)))
+
+    def test_blank_reason_is_not_provenance(self) -> None:
+        write_crate(self.root, "known", "fn f(){ sens::decode_binary_frame(&[]); }")
+        write_registry(self.root, [{"crate": "crates/known", "reason": "  ", "issue": 5787}])
+        self.assertTrue(any("nonblank reason" in x for x in self.module.check(self.root)))
+
+    def test_bool_or_string_issue_is_not_an_issue_number(self) -> None:
+        write_crate(self.root, "known", "fn f(){ sens::decode_binary_frame(&[]); }")
+        for issue in (True, "5787", 0, -1, None):
+            with self.subTest(issue=issue):
+                write_registry(self.root, [
+                    {"crate": "crates/known", "reason": "pending Zig migration", "issue": issue}
+                ])
+                self.assertTrue(any("positive GitHub issue" in x
+                                    for x in self.module.check(self.root)))
+
+    def test_registry_schema_and_owner_drift_are_blocked(self) -> None:
+        (self.root / "crates").mkdir()
+        write_registry(self.root, [], schema="legacy")
+        self.assertTrue(any("schema mismatch" in x for x in self.module.check(self.root)))
+        write_registry(self.root, [], codec_owner="crates/other")
+        self.assertTrue(any("codec_owner mismatch" in x
+                            for x in self.module.check(self.root)))
+
+    def test_stale_exemption_must_be_retired_after_zig_migration(self) -> None:
+        write_crate(self.root, "done", "fn f(){ zig_transport::decode_t5_words(&bytes); }")
+        write_registry(self.root, [
+            {"crate": "crates/done", "reason": "historical bypass", "issue": 5787}
+        ])
+        self.assertTrue(any("stale exemption crates/done" in x
+                            for x in self.module.check(self.root)))
+
+    def test_exemption_for_nonexistent_crate_is_blocked(self) -> None:
+        (self.root / "crates").mkdir()
+        write_registry(self.root, [
+            {"crate": "crates/ghost", "reason": "invented exemption", "issue": 5787}
+        ])
+        self.assertTrue(any("stale exemption crates/ghost" in x
+                            for x in self.module.check(self.root)))
+
+    def test_nonobject_registry_and_malformed_records_fail_closed(self) -> None:
+        (self.root / "crates").mkdir()
+        write_registry(self.root, ["not an object"])
+        self.assertTrue(any("must be an object" in x for x in self.module.check(self.root)))
+        path = self.root / "research" / "zig-codecs" / "corridor_host_coverage.json"
+        path.write_text('{"schema":', encoding="utf-8")
+        self.assertTrue(any("invalid JSON" in x for x in self.module.check(self.root)))
+        path.write_text("[]", encoding="utf-8")
+        self.assertTrue(any("must be a JSON object" in x
+                            for x in self.module.check(self.root)))
+
+    def test_registry_rejects_nonlist_exemptions_and_invalid_path(self) -> None:
+        (self.root / "crates").mkdir()
+        path = self.root / "research" / "zig-codecs" / "corridor_host_coverage.json"
+        write_registry(self.root, [])
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["exemptions"] = {}
+        path.write_text(json.dumps(data), encoding="utf-8")
+        self.assertTrue(any("must be a JSON list" in x
+                            for x in self.module.check(self.root)))
+        write_registry(self.root, [
+            {"crate": "../sens", "reason": "rogue", "issue": 5787}
+        ])
+        self.assertTrue(any("invalid crate path" in x
+                            for x in self.module.check(self.root)))
 
     def test_codec_owner_is_exempt(self) -> None:
         write_crate(self.root, "sens", "fn f() { decode_binary_frame(&[]); }")

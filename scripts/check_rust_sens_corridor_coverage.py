@@ -23,6 +23,8 @@ from pathlib import Path
 
 CODEC_OWNER = "crates/sens"
 REGISTRY = "research/zig-codecs/corridor_host_coverage.json"
+REGISTRY_SCHEMA = "sens-rust-sens-corridor-coverage/v1"
+CRATE_KEY = re.compile(r"crates/[a-z][a-z0-9_-]*\Z")
 
 # Host-side calls into the physical codec surface.
 CODEC_API = re.compile(
@@ -105,17 +107,57 @@ def _crate_sources(crate: Path) -> list[Path]:
 def check(root: Path) -> list[str]:
     problems: list[str] = []
     registry_path = root / REGISTRY
-    if not registry_path.exists():
-        problems.append(f"registry `{REGISTRY}` is missing")
+    if not registry_path.is_file() or registry_path.is_symlink():
+        return [f"registry `{REGISTRY}` is missing or not a regular file"]
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return [f"registry `{REGISTRY}` invalid JSON: {type(exc).__name__}: {exc}"]
+    if not isinstance(registry, dict):
+        return [f"registry `{REGISTRY}` must be a JSON object"]
+    if registry.get("schema") != REGISTRY_SCHEMA:
+        problems.append(
+            f"registry schema mismatch: expected={REGISTRY_SCHEMA!r} "
+            f"actual={registry.get('schema')!r}"
+        )
+    if registry.get("codec_owner") != CODEC_OWNER:
+        problems.append(
+            f"registry codec_owner mismatch: expected={CODEC_OWNER!r} "
+            f"actual={registry.get('codec_owner')!r}"
+        )
+    entries = registry.get("exemptions")
+    if not isinstance(entries, list):
+        problems.append("registry exemptions must be a JSON list")
         return problems
-    registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    exempt = {entry["crate"]: entry for entry in registry.get("exemptions", [])}
+    exempt: dict[str, dict] = {}
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            problems.append(f"registry exemptions[{index}] must be an object")
+            continue
+        name = entry.get("crate")
+        if not isinstance(name, str) or CRATE_KEY.fullmatch(name) is None:
+            problems.append(f"registry exemptions[{index}] invalid crate path={name!r}")
+            continue
+        if name == CODEC_OWNER:
+            problems.append(f"registry exemptions[{index}] cannot exempt codec owner")
+            continue
+        if name in exempt:
+            problems.append(f"registry duplicate exemption for {name}")
+            continue
+        reason = entry.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
+            problems.append(f"registry exemption {name} lacks nonblank reason")
+        issue = entry.get("issue")
+        if type(issue) is not int or issue <= 0:
+            problems.append(f"registry exemption {name} requires a positive GitHub issue number")
+        exempt[name] = entry
 
     crates_dir = root / "crates"
     if not crates_dir.is_dir():
         problems.append("no `crates/` directory")
         return problems
 
+    used_exemptions: set[str] = set()
     for crate in sorted(p for p in crates_dir.iterdir() if p.is_dir()):
         rel = f"crates/{crate.name}"
         if rel == CODEC_OWNER:
@@ -135,8 +177,12 @@ def check(root: Path) -> list[str]:
                 f"host `{rel}` reaches SENS physical bytes without the Zig corridor "
                 "and is not registered in corridor_host_coverage.json"
             )
-        elif not entry.get("reason") or not entry.get("issue"):
-            problems.append(f"host `{rel}` exemption lacks a reason/issue (silent bypass)")
+        else:
+            used_exemptions.add(rel)
+    # A host that migrated to Zig must retire its old bypass record. Stale
+    # exceptions otherwise silently keep a physical Rust bypass authorized.
+    for name in sorted(exempt.keys() - used_exemptions):
+        problems.append(f"registry stale exemption {name}: no active unbridged Rust codec route")
     return problems
 
 
