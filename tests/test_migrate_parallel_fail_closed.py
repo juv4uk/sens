@@ -164,8 +164,22 @@ class ZigParallelWorkerReportTests(unittest.TestCase):
         self.assertEqual(receipt["status"], "COMPLETE")
         self.assertEqual(receipt["summary"]["files_seen"], 2)
 
-    def test_missing_and_nonregular_inputs_block_before_workers(self) -> None:
-        for path in ("src/missing.lisp", "src"):
+    def test_directory_input_expands_only_distinct_lisp_sources(self) -> None:
+        # The documented CLI accepts directories; do not outlaw them to
+        # make a negative test green. This is host path expansion, not SENS.
+        run = self.invoke("valid", "src")
+        self.assertEqual(run.returncode, 0, run.stderr + run.stdout)
+        data = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertEqual(data["status"], "COMPLETE")
+        self.assertEqual([row["path"] for row in data["files"]],
+                         ["src/a.lisp", "src/b.lisp"])
+        self.assertEqual(data["summary"]["files_seen"], 2)
+
+    def test_missing_and_nonlisp_inputs_block_before_workers(self) -> None:
+        (self.root / "src" / "not-source.txt").write_text(
+            "not a binary SENS source", encoding="utf-8"
+        )
+        for path in ("src/missing.lisp", "src/not-source.txt"):
             with self.subTest(path=path):
                 run = self.invoke("valid", path)
                 self.assertNotEqual(run.returncode, 0)
