@@ -53,9 +53,10 @@ EXPORT_RE = re.compile(r"pub export fn\s+([A-Za-z0-9_]+)")
 CALL_RE = re.compile(r"\b(sens_zig_[a-z0-9_]+)\s*\(")
 # Exclude non-code tokens so strings/comments cannot forge C→Zig call evidence.
 C_NONCODE_RE = re.compile(
-    r"""//[^\\n]*|/\\*.*?\\*/|"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*'""",
+    r"""//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'""",
     re.S,
 )
+
 ZIG_VERSION_RE = re.compile(r"sens_zig_codec_abi_version\(\)\s*u32\s*\{\s*return\s+(\d+)")
 HEADER_VERSION_RE = re.compile(r"SENS_ZIG_TRANSPORT_ABI_VERSION\s*=\s*(\d+)")
 
