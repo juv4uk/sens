@@ -34,6 +34,17 @@ fn session() -> Session {
 
 fn prove(positive: &str, mutant: &str, id: &str, expected_output_lines: Option<usize>) {
     let mut session = session();
+    if id == "repl-uk-define-function" {
+        let source = "(репл-форма-функція (прочитати \"()\") (прочитати \"(атом? (як-є ()))\"))";
+        let parsed = parse_mixed_exact_domain(source)
+            .expect("test_id=repl-uk-define-function-inspect layer=parse");
+        let observed = eval_parsed_expressions(&parsed, &mut session)
+            .expect("test_id=repl-uk-define-function-inspect layer=eval");
+        println!(
+            "NATIVE_SENS_OBSERVATION test_id=repl-uk-define-function-inspect actual={}",
+            observed.value
+        );
+    }
     let law = parse_mixed_exact_domain(positive)
         .unwrap_or_else(|error| panic!(
             "test_id={id} layer=parse fixture=positive actual={}",
