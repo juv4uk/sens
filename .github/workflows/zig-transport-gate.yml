@@ -25,6 +25,8 @@ jobs:
           python3 -m unittest tests.test_sterile_zig_corridor -v
           python3 scripts/check_rust_sens_zig_corridor.py .
           python3 -m unittest tests.test_check_rust_sens_zig_corridor -v
+          python3 scripts/check_corridor_axiom_binding.py .
+          python3 -m unittest tests.test_check_corridor_axiom_binding -v
       - name: Zig ABI v2 transport_abi unit tests (T5/F3C/E1 physical)
         run: |
           set -euo pipefail
@@ -46,8 +48,9 @@ jobs:
           assert data["transport_verified"] is True
           assert data["scope"] == "FULL_PHYSICAL_ZIG"
           assert [s["step"] for s in data["steps"]] == [
-              "zig-pin", "ci_zig_purity", "check-domain-ladder-identity",
-              "migrate-exact-domain-authority", "test_zig_codec_bridge"
+              "zig-pin", "ci_zig_purity", "check_sterile_zig_corridor",
+              "check-domain-ladder-identity", "migrate-exact-domain-authority",
+              "test_zig_codec_bridge",
           ]
           assert data["zig_pin"] == "0.16.0"
           print("MIGRATION_ZIG_GATE_CI_PASS")
