@@ -592,7 +592,7 @@ class Resolver:
         self.admitted_d8=set(admitted_d8 or ())
         self.d9_residents=set(d9_residents or ())
         self.global_binding_words={}
-        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,
+        self.counts={"already-exact":0,"pass2-my-lisp":0,
                      "pass3-lisp15":0,"pass4-text7-global":0,
                      "passthrough-head":0}
 
@@ -1181,7 +1181,7 @@ def main():
     rows = []
     written = 0
     blocked = 0
-    totals = {"already-exact": 0, "pass1-sens8": 0,
+    totals = {"already-exact": 0,
               "pass2-my-lisp": 0, "pass3-lisp15": 0,
               "pass4-text7-global": 0, "passthrough-head": 0}
 
