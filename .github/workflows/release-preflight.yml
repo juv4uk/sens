@@ -37,12 +37,29 @@ jobs:
           python3 scripts/check_corridor_axiom_binding.py .
           python3 -m unittest tests.test_check_corridor_axiom_binding -v
           python3 scripts/report_rust_zig_sens_boundary.py
+          python3 scripts/check_migration_zig_only_path.py .
+          python3 -m unittest tests.test_check_migration_zig_only_path -v
+          python3 scripts/check_axiom_coverage.py .
+          python3 -m unittest tests.test_check_axiom_coverage -v
+          python3 scripts/check_principle_force.py .
+          python3 -m unittest tests.test_check_principle_force -v
+          python3 scripts/check_numeric_domain_exclusive.py .
+          python3 -m unittest tests.test_check_numeric_domain_exclusive -v
+          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
           python3 -m unittest tests.test_rust_zig_sens_boundary -v
           python3 scripts/migration-zig-gate.py --require-zig
           # Zig 0.16 native test suite with release-like optimizations and safety.
           # Full migration proof + native physical test are separate GO inputs.
           echo 'test_id=zig-release-safe-corridor layer=transport semantic_authority=SENS compiler=0.16.0'
           zig test research/zig-codecs/tests.zig -O ReleaseSafe -lc
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.json
+          if-no-files-found: warn
 
       - name: Release version alignment (gate #1 mechanical)
         run: |
