@@ -78,6 +78,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # An actual executable source witness: linked Zig must keep runtime
+          # checks ON and track all root-embedded release/migration bytes.
+          # Mutants include ReleaseFast, wrong root, ghost comments, stale asset.
+          echo 'test_id=zig-ffi-releasesafe-build-provenance layer=transport expected=ReleaseSafe semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_build_environment_watch.py -v
           zig test zig_transport_root.zig -lc
           cargo test --locked -p sens-cli --bin sens zig_linter_carrier -- --nocapture
           cargo test --locked -p sens-cli --bin sens --no-default-features zig_linter_carrier -- --nocapture
