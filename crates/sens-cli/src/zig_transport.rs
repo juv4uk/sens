@@ -303,6 +303,41 @@ pub fn persistent_map_source_bytes() -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
+// F6 filesystem carriers: exact transport, bounded allocation, no Rust embedding.
+fn f6_fs_asset_bytes(
+    copy: unsafe extern "C" fn(*mut u8, usize) -> isize,
+    label: &str,
+) -> Result<Vec<u8>, String> {
+    version()?;
+    let required = unsafe { copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0) };
+    if required <= 0 {
+        return Err(format!("{label}: invalid Zig source length {required}"));
+    }
+    let len = usize::try_from(required)
+        .map_err(|_| format!("{label}: Zig source length overflow"))?;
+    if len > 8 * 1024 * 1024 {
+        return Err(format!("{label}: host byte bound exceeded"));
+    }
+    let mut bytes = vec![0u8; len];
+    let actual = unsafe { copy(bytes.as_mut_ptr(), len) };
+    if actual != required {
+        return Err(format!("{label}: Zig exact byte copy rejected {actual}"));
+    }
+    Ok(bytes)
+}
+
+pub fn f6_world_source_bytes() -> Result<Vec<u8>, String> {
+    f6_fs_asset_bytes(asset_ffi::sens_zig_f6_world_bytes_copy, "ZIG_F6_WORLD_CARRIER")
+}
+
+pub fn f6_content_store_source_bytes() -> Result<Vec<u8>, String> {
+    f6_fs_asset_bytes(asset_ffi::sens_zig_f6_content_store_bytes_copy, "ZIG_F6_CONTENT_STORE_CARRIER")
+}
+
+pub fn f6_lisp_fs_source_bytes() -> Result<Vec<u8>, String> {
+    f6_fs_asset_bytes(asset_ffi::sens_zig_f6_lisp_fs_bytes_copy, "ZIG_F6_LISP_FS_CARRIER")
+}
+
 fn require_same_exact_words(
     expected: &[sens::BinarySourceWord],
     actual: &[sens::BinarySourceWord],

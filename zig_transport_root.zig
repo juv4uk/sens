@@ -341,3 +341,62 @@ test "REPL epistemic exact bytes and untouched short buffer" {
     try std.testing.expectEqual(length, sens_zig_repl_epistemic_bytes_copy(&full, full.len));
     try std.testing.expectEqualSlices(u8, repl_epistemic_asset[0..repl_epistemic_asset.len], &full);
 }
+
+// F6 filesystem prerequisites: only byte transport; SENS decides meaning.
+
+const f6_world_asset = @embedFile("lib/world.lisp");
+pub export fn sens_zig_f6_world_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (f6_world_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(f6_world_asset.len);
+    if (capacity < f6_world_asset.len) return -2;
+    @memcpy(dst[0..f6_world_asset.len], f6_world_asset[0..f6_world_asset.len]);
+    return @intCast(f6_world_asset.len);
+}
+test "F6 world exact bytes and unchanged short buffer" {
+    const required = sens_zig_f6_world_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(f6_world_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_f6_world_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [f6_world_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_f6_world_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, f6_world_asset[0..f6_world_asset.len], &full);
+}
+
+const f6_content_store_asset = @embedFile("lib/content-store.lisp");
+pub export fn sens_zig_f6_content_store_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (f6_content_store_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(f6_content_store_asset.len);
+    if (capacity < f6_content_store_asset.len) return -2;
+    @memcpy(dst[0..f6_content_store_asset.len], f6_content_store_asset[0..f6_content_store_asset.len]);
+    return @intCast(f6_content_store_asset.len);
+}
+test "F6 content_store exact bytes and unchanged short buffer" {
+    const required = sens_zig_f6_content_store_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(f6_content_store_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_f6_content_store_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [f6_content_store_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_f6_content_store_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, f6_content_store_asset[0..f6_content_store_asset.len], &full);
+}
+
+const f6_lisp_fs_asset = @embedFile("lib/lisp-fs.lisp");
+pub export fn sens_zig_f6_lisp_fs_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (f6_lisp_fs_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(f6_lisp_fs_asset.len);
+    if (capacity < f6_lisp_fs_asset.len) return -2;
+    @memcpy(dst[0..f6_lisp_fs_asset.len], f6_lisp_fs_asset[0..f6_lisp_fs_asset.len]);
+    return @intCast(f6_lisp_fs_asset.len);
+}
+test "F6 lisp_fs exact bytes and unchanged short buffer" {
+    const required = sens_zig_f6_lisp_fs_bytes_copy(undefined, 0);
+    try std.testing.expectEqual(@as(isize, @intCast(f6_lisp_fs_asset.len)), required);
+    var short: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_f6_lisp_fs_bytes_copy(&short, short.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), short[0]);
+    var full: [f6_lisp_fs_asset.len]u8 = undefined;
+    try std.testing.expectEqual(required, sens_zig_f6_lisp_fs_bytes_copy(&full, full.len));
+    try std.testing.expectEqualSlices(u8, f6_lisp_fs_asset[0..f6_lisp_fs_asset.len], &full);
+}
