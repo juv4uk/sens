@@ -11,7 +11,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from zig_codec_bridge import ZigCodecError, build_transport, verify_t5
+from zig_codec_bridge import ZigCodecError, build_transport, carry_t5, verify_t5
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
 # These fixture digests are fixed independently of the input under test.
@@ -90,6 +90,49 @@ def main() -> None:
                 f"ZIG_BRIDGE_MISMATCH id=zig-migration-bridge-t5-exact-physical "
                 f"layer=transport expected_sha256={expected} actual={evidence}"
             )
+
+        # Physical byte authorship belongs to Zig, not the Python parity oracle.
+        carry_vectors = {
+            "d1_one": ("1" + chr(10), bytes.fromhex("a1")),
+            "d2_01": ("01" + chr(10), bytes.fromhex("35")),
+            "mixed": ("10 110 00" + chr(10), bytes.fromhex("6738")),
+            "d10_coordinate": ("0000000000" + chr(10), bytes.fromhex("0000")),
+        }
+        for label, (view, expected_physical) in carry_vectors.items():
+            actual = carry_t5(executable, view,
+                              trusted_source_sha256=sha(expected_physical))
+            if actual != expected_physical:
+                raise AssertionError(
+                    f"ZIG_CARRY_MISMATCH test_id={label} layer=transport "
+                    f"expected_sha256={sha(expected_physical)} "
+                    f"actual_sha256={sha(actual)} "
+                    "reproduce='python3 scripts/test_zig_codec_bridge.py'"
+                )
+        for malformed in ("", "1", "1" + chr(10) * 2,
+                          "1  01" + chr(10), "1" + chr(9) + "01" + chr(10),
+                          "102" + chr(10)):
+            try:
+                carry_t5(executable, malformed)
+            except ZigCodecError as exc:
+                if "ZIG_CARRY_NONCANONICAL_VIEW" not in str(exc):
+                    raise
+            else:
+                raise AssertionError(f"ZIG_CARRY_INVALID_VIEW_ACCEPTED {malformed!r}")
+        for invalid_trits in (b"1022", b"20", b"00000000000", b"12"):
+            source = Path(temp) / "invalid.trits"
+            output = Path(temp) / "invalid.sens"
+            output.unlink(missing_ok=True)
+            source.write_bytes(invalid_trits)
+            result = subprocess.run(
+                [str(executable), "t5-carry", str(source), str(output)],
+                capture_output=True, text=True, check=False,
+            )
+            if result.returncode == 0 or output.exists():
+                raise AssertionError(
+                    "ZIG_CARRY_FALSE_ACCEPT layer=transport "
+                    f"input_sha256={sha(invalid_trits)} "
+                    f"status={result.returncode} output_exists={output.exists()}"
+                )
         for name, hex_bytes in GOLDEN_WIDTH_VECTORS.items():
             assert_physical_roundtrip(executable, name, bytes.fromhex(hex_bytes))
         for name, hex_bytes in NEGATIVE_PHYSICAL.items():

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Physical Zig 0.16 T5 cross-check for migration; never a SENS semantic oracle.
+"""Zig 0.16 physical carrier and attested migration bridge.
 
-The canonical SENS three-pass migrator still determines the exact typed words.
-This helper only independently validates and replays the generated physical T5
-bytes for declared D1..D10 coordinates (not executable program admission).
-It fails closed on missing/wrong Zig or any byte difference.
+SENS three-pass migration determines exact bit words and the boundaries.
+Zig alone emits physical bytes; Python reference packing is parity-only.
+Neither this module nor Zig grants semantic callability.
 """
 from __future__ import annotations
 
@@ -150,6 +149,33 @@ def _require_external_source_sha256(
             f"actual_bytes={len(physical)}"
         )
 
+
+
+def carry_t5(
+    binary: Path, canonical_view: str, *,
+    trusted_source_sha256: str | None = None,
+) -> bytes:
+    """Zig mints T5 from upstream words; no Python physical writer.
+
+    Word separators are replaced with trit 2 for mechanical carrying only.
+    Every execution uses the exact pinned, SHA-attested Zig binary.
+    """
+    valid_view_pattern = r"[01]+(?: [01]+)*" + chr(10)
+    if (not isinstance(canonical_view, str) or
+            re.fullmatch(valid_view_pattern, canonical_view) is None):
+        raise ZigCodecError("ZIG_CARRY_NONCANONICAL_VIEW layer=transport")
+    binary_digest = _built_executable_digest(binary)
+    raw_trits = canonical_view[:-1].replace(" ", "2").encode("ascii")
+    with tempfile.TemporaryDirectory(prefix="sens-zig-t5-carry-") as directory:
+        source = Path(directory) / "source.trits"
+        output = Path(directory) / "out.sens"
+        source.write_bytes(raw_trits)
+        _command([str(binary), "t5-carry", str(source), str(output)])
+        physical = output.read_bytes()
+    _require_external_source_sha256(physical, trusted_source_sha256)
+    if _built_executable_digest(binary) != binary_digest:
+        raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_DURING_CARRY")
+    return physical
 
 def verify_t5(
     binary: Path, physical: bytes, *, trusted_source_sha256: str | None = None

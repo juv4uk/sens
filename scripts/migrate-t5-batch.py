@@ -2,7 +2,8 @@
 """Safe, explicit file-by-file .lisp -> physical T5 .sens migration.
 
 This is a batch driver, not a competing language implementation: semantic
-conversion is delegated to migrate-three-pass.py and packing to sens_t5_codec.
+conversion is delegated to migrate-three-pass.py. Zig emits published physical
+T5 bytes; Python packing is an independent dry-run/parity reference only.
 Nothing is published unless --write is explicitly requested.
 """
 from __future__ import annotations
@@ -118,6 +119,9 @@ def discover(repo: Path, requested: list[str]) -> tuple[list[Path], list[dict]]:
 
 
 def run(args: argparse.Namespace) -> dict:
+    # Protect direct Python imports as well as the regular CLI entry point.
+    if args.write and not args.zig_codec:
+        raise ValueError("ZIG_CARRY_REQUIRED_FOR_PUBLICATION")
     # Важливо: Path.resolve() приховує symlink в аргументі користувача.
     # Перевіряємо усі компоненти до нормалізації, включно з відносними.
     repo = resolve_without_links(args.root, "source repository")
@@ -172,12 +176,33 @@ def run(args: argparse.Namespace) -> dict:
             readable = original.decode("utf-8")
             projection = mig.migrate_file(readable, resolver, text7)
             words = mig.parse_words(projection)
-            packed = mig.encode_projection(projection)
-            if mig.decode_bytes(packed) != words:
+            # Python is an independent reference, NOT the published byte producer.
+            reference_bytes = mig.encode_projection(projection)
+            if mig.decode_bytes(reference_bytes) != words:
                 raise ValueError("exact typed T5 word roundtrip failed")
             if zig_binary is not None:
-                evidence = zig_codec_bridge.verify_t5(zig_binary, packed)
+                packed = zig_codec_bridge.carry_t5(
+                    zig_binary, projection,
+                    trusted_source_sha256=digest(reference_bytes),
+                )
+                if packed != reference_bytes:
+                    difference = next(
+                        (i for i, (a, b) in enumerate(zip(reference_bytes, packed))
+                         if a != b), min(len(reference_bytes), len(packed))
+                    )
+                    raise ValueError(
+                        "ZIG_CARRY_REFERENCE_MISMATCH layer=transport "
+                        f"expected_sha256={digest(reference_bytes)} "
+                        f"actual_sha256={digest(packed)} first_byte={difference}"
+                    )
+                evidence = zig_codec_bridge.verify_t5(
+                    zig_binary, packed,
+                    trusted_source_sha256=digest(reference_bytes),
+                )
                 row["zig_transport"] = evidence
+            else:
+                # Preview only; --write without Zig fails at both entry points.
+                packed = reference_bytes
             # Disallow use of generated textual bytes as a misleading .sens file.
             if packed == projection.encode("ascii"):
                 raise ValueError("invalid text disguised as physical .sens")
