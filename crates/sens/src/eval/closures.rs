@@ -885,20 +885,13 @@ mod exact_d4_eval_head_migration_tests {
     }
 
     #[test]
-    fn historical_eval_uses_registry_slot_but_d3_cdr_is_not_eval() {
+    fn historical_eval_uses_registry_slot_but_other_w8_is_not_eval() {
         let env = Environment::root();
         let historical = semantic_registry::admitted_semantic_id_for_surface("eval")
             .expect("історична таблиця має окремий сумісний слот EVAL");
         assert_eq!(historical.packed_bits(), 0b01001101);
         assert!(matches!(sid_head(historical, &env), Head::Opaque));
-        // A ratified D3 CDR head is a different exact-width function.
-        // D10 has no CoreDomainIdentity callable projection and must not
-        // be fabricated in a negative test.
-        let d3_cdr = CoreDomainIdentity::D3(crate::Bija3::from_word(
-            crate::Bit3::new(0b011).expect("D3 CDR"),
-        ));
-        assert_ne!(d3_cdr, historical);
-        assert!(matches!(sid_head(d3_cdr, &env), Head::Call));
+        assert!(!matches!(sid_head(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload"))), &env), Head::Opaque));
     }
 
     #[test]

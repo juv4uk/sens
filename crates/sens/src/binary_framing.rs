@@ -1132,7 +1132,7 @@ mod tests {
     #[test]
     fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
         let historical_frames = [
-            BinaryFrame::Function(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"))),
+            BinaryFrame::Function(crate::DomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")))),
             BinaryFrame::Number(number("1", "10")),
             BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
         ];

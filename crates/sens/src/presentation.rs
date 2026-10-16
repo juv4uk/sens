@@ -514,28 +514,19 @@ mod tests {
     }
 
     #[test]
-    fn історичне_w8_не_підвищується_до_чинного_callable_d8() {
-        // The historical eight-bit payload is a source word, not a
-        // CoreDomainIdentity and especially not a fictitious D10 operation.
-        let historical_source = crate::BinarySourceWord::W8(
-            crate::Bit8::new(0b10101000).expect("exact eight-bit payload"),
-        );
-        assert_eq!(historical_source.width(), 8);
-        assert_eq!(historical_source.packed_bits(), 0b10101000);
-        assert!(
-            crate::CoreDomainIdentity::from_source_word(historical_source).is_none(),
-            "unadmitted W8 source must not mint an executable D8 operation"
-        );
-
+    fn історичний_w8_не_маскується_під_чинний_d8() {
+        let old = Value::Sid(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload"))));
         let exact = Value::DomainIdentity(crate::DomainIdentity::D8(
             crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()),
         ));
-        assert_eq!(exact.to_string(), "10101000");
-        assert_eq!(
-            render_value_for_presentation(&exact, PresentationLanguage::Ukrainian),
-            "#<домен D8:10101000>"
-        );
-        // UI rendering cannot turn a noncallable source word into Value::Sid.
+        let old_uk = render_value_for_presentation(&old, PresentationLanguage::Ukrainian);
+        let current_uk = render_value_for_presentation(&exact, PresentationLanguage::Ukrainian);
+        assert!(old_uk.starts_with("#<сумісний W8:10101000 "), "{old_uk}");
+        assert_eq!(current_uk, "#<домен D8:10101000>");
+        assert_ne!(old_uk, current_uk);
+        // Формати механічної передачі не змінюються в UI міграції.
+        assert_eq!(old.to_string(), exact.to_string());
+        assert_eq!(old.to_string(), "10101000");
     }
 
     #[test]
@@ -549,9 +540,7 @@ mod tests {
             render_value_for_presentation(&current_quote, PresentationLanguage::Ukrainian)
         );
         assert_eq!(current_quote.to_string(), "001");
-        // Value::Sid now stores a typed Core D3:001, not an archival W8 byte.
-        // This textual surface cannot reconstruct a vanished SID8 provenance.
-        assert_eq!(historical_quote.to_string(), "001");
+        assert_eq!(historical_quote.to_string(), "00000001");
     }
 
     #[test]

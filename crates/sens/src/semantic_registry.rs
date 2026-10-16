@@ -436,7 +436,7 @@ mod exact_registry_vs_historical_slot_tests {
 
     #[test]
     fn historical_w8_slot_cannot_become_current_d8_round() {
-        let historical: LegacyRegistrySlot = crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"));
+        let historical: LegacyRegistrySlot = crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")));
         let current = DomainIdentity::D8(
             CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
         );
