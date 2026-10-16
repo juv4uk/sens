@@ -1,0 +1,20 @@
+; D8:01100000..01100111 — реальні SENS-виклики і однобітні CAR/CDR мутанти.
+; 8 позитивних і 8 негативних оцінок. Ця фікстура не відкриває D8 direct call-head.
+(list
+  (eq? (р-п-п-п-п-п (cons (cons (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3)) (quote хиба-4)) (quote хиба-5))) (quote ціль))
+  (not? (eq? (car (car (car (car (car (car (cons (cons (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3)) (quote хиба-4)) (quote хиба-5)))))))) (quote ціль)))
+  (eq? (р-п-п-п-п-р (cons (quote хиба-5) (cons (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3)) (quote хиба-4)))) (quote ціль))
+  (not? (eq? (car (car (car (car (car (cdr (cons (quote хиба-5) (cons (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3)) (quote хиба-4))))))))) (quote ціль)))
+  (eq? (р-п-п-п-р-п (cons (cons (quote хиба-4) (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3))) (quote хиба-5))) (quote ціль))
+  (not? (eq? (car (car (car (car (cdr (car (cons (cons (quote хиба-4) (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3))) (quote хиба-5)))))))) (quote ціль)))
+  (eq? (р-п-п-п-р-р (cons (quote хиба-5) (cons (quote хиба-4) (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3))))) (quote ціль))
+  (not? (eq? (car (car (car (car (cdr (cdr (cons (quote хиба-5) (cons (quote хиба-4) (cons (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)) (quote хиба-3)))))))))) (quote ціль)))
+  (eq? (р-п-п-р-п-п (cons (cons (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2))) (quote хиба-4)) (quote хиба-5))) (quote ціль))
+  (not? (eq? (car (car (car (cdr (car (car (cons (cons (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2))) (quote хиба-4)) (quote хиба-5)))))))) (quote ціль)))
+  (eq? (р-п-п-р-п-р (cons (quote хиба-5) (cons (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2))) (quote хиба-4)))) (quote ціль))
+  (not? (eq? (car (car (car (cdr (car (cdr (cons (quote хиба-5) (cons (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2))) (quote хиба-4))))))))) (quote ціль)))
+  (eq? (р-п-п-р-р-п (cons (cons (quote хиба-4) (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)))) (quote хиба-5))) (quote ціль))
+  (not? (eq? (car (car (car (cdr (cdr (car (cons (cons (quote хиба-4) (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)))) (quote хиба-5)))))))) (quote ціль)))
+  (eq? (р-п-п-р-р-р (cons (quote хиба-5) (cons (quote хиба-4) (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2)))))) (quote ціль))
+  (not? (eq? (car (car (car (cdr (cdr (cdr (cons (quote хиба-5) (cons (quote хиба-4) (cons (quote хиба-3) (cons (cons (cons (quote хиба-0) (quote ціль)) (quote хиба-1)) (quote хиба-2))))))))))) (quote ціль)))
+)
