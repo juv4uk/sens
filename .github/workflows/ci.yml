@@ -864,7 +864,7 @@ jobs:
             --layer transport \
             --fixture crates/sens/src/frame3_micro_v5_lambda_app.rs \
             --report-file "$report" \
-            # STAGED-OUT: -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
+            -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
       - name: Reason-index — 2 SENS-owned D4/D5 selector witnesses
         id: reason-selectors
         # Keep following native SENS witnesses running; the final fail-closed
