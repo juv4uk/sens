@@ -135,6 +135,28 @@ jobs:
           fi
           echo "SCAN_NATIVE_PASS laws=8 D6:101111 D8:10111011"
 
+      - name: D8 — чотири похідні SENS закони знака й довжини
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-sign-and-list-length-laws.lisp"
+          negative="tests/semantic/d8-sign-reject-nonnumeric.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "::error::D8_SIGN_LENGTH_NATIVE_RED layer=eval fixture=$fixture expected=ten-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$output" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$output" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_SIGN_LENGTH_DIFF layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if output="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_SIGN_BAD_DOMAIN layer=eval fixture=$negative expected=nonnumeric-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_SIGN_LENGTH_SENS_PASS identities=D8:00010111,D8:11111010,D8:00111110,D8:01001111 laws=10 negative=1"
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
