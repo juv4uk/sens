@@ -1,9 +1,8 @@
 ; SID8 -> D1-D11 function bridge (retire the old 8-bit function space).
-; Exact-name + alias mapping (second->CADR, third->CADDR, invoke->FUNCALL, ...).
 (sid8-to-domain-bridge
   (schema sid8-to-domain-bridge/1)
-  (mapped 176)
-  (separate 6)
+  (mapped 179)
+  (separate 3)
   (map
     (sid8:00000001 -> D3:001  ; quote)
     (sid8:00000010 -> D3:010  ; atom?)
@@ -28,10 +27,13 @@
     (sid8:00010110 -> D9:110111010  ; isqrt)
     (sid8:00010111 -> D6:000010  ; min-list)
     (sid8:00011000 -> D6:000011  ; max-list)
+    (sid8:00011001 -> D6:110111  ; largest-chunk)
     (sid8:00011010 -> D5:11010  ; lessp?)
     (sid8:00011011 -> D5:11011  ; greaterp?)
     (sid8:00011101 -> D6:110100  ; not-greaterp?)
     (sid8:00011110 -> D6:110110  ; not-lessp?)
+    (sid8:00011111 -> D6:110100  ; nondecreasing-from?)
+    (sid8:00100000 -> D6:110110  ; nonincreasing-from?)
     (sid8:00100001 -> D4:0100  ; not?)
     (sid8:00100010 -> D11:00000000101  ; equal?)
     (sid8:00100011 -> D9:110101100  ; symbol?)
@@ -184,10 +186,7 @@
   )
   (separate-list
     (sid8:00001011  ; def  -- separate / needs owner cell)
-    (sid8:00011001  ; largest-chunk  -- separate / needs owner cell)
     (sid8:00011100  ; equalp?  -- separate / needs owner cell)
-    (sid8:00011111  ; nondecreasing-from?  -- separate / needs owner cell)
-    (sid8:00100000  ; nonincreasing-from?  -- separate / needs owner cell)
     (sid8:01000111  ; digit->string  -- separate / needs owner cell)
   )
 )
