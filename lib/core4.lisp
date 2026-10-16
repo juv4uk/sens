@@ -263,12 +263,28 @@
   (0010 (predicate values)
     (filter-onto predicate values (001 ()))))
 
-(0011 reduce
-  (0010 (f acc values)
+; D6:101110 REDUCE / D6:101111 SCAN — fold/prefix-fold, #3368/#3370.
+; D4:0101 NULL owns the empty proper-list base case; never NOT(ATOM).
+; Language-owned definitions; no direct D6 opcode admission implied.
+(0011 згорнути
+  (0010 (операція стан елементи)
     (110
-      ((0100 (010 values)) acc)
-      ((010 values) 
-       (101110 f (f acc (100 values)) (011 values))))))
+      ((0101 елементи) стан)
+      ((010 (001 ()))
+       (згорнути операція (операція стан (100 елементи)) (011 елементи))))))
+
+(0011 reduce згорнути)
+
+(0011 накопичувати
+  (0010 (операція стан елементи)
+    (110
+      ((0101 елементи) (111 стан (001 ())))
+      ((010 (001 ()))
+       (111 стан
+            (накопичувати операція
+              (операція стан (100 елементи))
+              (011 елементи)))))))
+
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
