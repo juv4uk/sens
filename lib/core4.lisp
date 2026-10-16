@@ -1447,6 +1447,24 @@
     ((0010 (обчислено) елементи)
      (відобразити дія елементи))))
 
+; D9:010011100 CANON-LAW-CAR-CONS — D3 projection of pair head.
+; For an atomic witness, EQ(CAR(CONS(a,b)), a) = D1:1.
+; D9:001000110 CANON-LAW-CDR-CONS — D3 projection of pair tail.
+; D9:010000111 CANON-LAW-ATOM-CONS — NOT(ATOM(CONS(a,b))) = D1:1.
+; Owner-ratified names in D9 (#4008); these are derived SENS witnesses,
+; not independent primitive laws and not direct D9 code-call admission.
+(0011 канон-закон-перше-пара
+  (0010 (ліве праве)
+    (101 (100 (111 ліве праве)) ліве)))
+
+(0011 канон-закон-решта-пара
+  (0010 (ліве праве)
+    (101 (011 (111 ліве праве)) праве)))
+
+(0011 канон-закон-атом-пара
+  (0010 (ліве праве)
+    (0100 (010 (111 ліве праве)))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
