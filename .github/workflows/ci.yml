@@ -142,6 +142,21 @@ jobs:
             exit 1
           fi
           echo "D8_DERIVED_SENS_NATIVE_PASS identities=D8:00010110,D8:00001001,D8:00111010,D8:00110110 laws=10 negative=1"
+          # D8 batch2: один SENS-owned тест для MEMBER-IF/EQL/BUTLAST.
+          d8_batch2="tests/semantic/d8-derived-search-batch2.lisp"
+          d8_batch2_expected="(1 1 1 1 1 1 1 1 1 1)"
+          sha256sum "$d8_batch2" lib/core4.lisp target/debug/sens
+          if ! d8_batch2_output="$(target/debug/sens "$d8_batch2" 2>&1)"; then
+            printf '%s\n' "$d8_batch2_output" >&2
+            echo "::error::D8_BATCH2_EXEC_RED layer=eval fixture=$d8_batch2 expected=$d8_batch2_expected actual=execution-error sha=$(git rev-parse HEAD)" >&2
+            exit 1
+          fi
+          d8_batch2_actual="$(printf '%s\n' "$d8_batch2_output" | tail -n 1)"
+          if [[ "$d8_batch2_actual" != "$d8_batch2_expected" ]]; then
+            echo "::error::D8_BATCH2_LAW_DIFF layer=eval fixture=$d8_batch2 expected=$d8_batch2_expected actual=$d8_batch2_actual first_mismatch=d1-vector sha=$(git rev-parse HEAD)" >&2
+            exit 1
+          fi
+          echo "D8_BATCH2_SENS_NATIVE_PASS functions=3 laws=10 direct_d8_callability=false"
       - name: D8 — точні ASSQ та ASSOC-IF (ключ проти значення)
         shell: bash
         run: |
