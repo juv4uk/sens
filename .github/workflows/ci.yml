@@ -101,19 +101,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Працює лише SENS; shell передає файл, SHA та очікувану однобітну відповідь.
+          # Це текстовий .lisp SENS-свідок, НЕ фізичний T5 .sens:
+          # фізичний contract runner не можна примушувати приймати .lisp.
+          # Лише SENS обчислює 28 законів; bash перевіряє байти виводу.
           fixture="tests/semantic/d5-d6-derived-law.lisp"
-          expected="$RUNNER_TEMP/sens-d3-d5-expected-d1.txt"
-          printf '1\n' > "$expected"
-          sha256sum target/debug/sens "$fixture" "$expected" lib/core4.lisp
-          python3 scripts/ci_failure_contract.py run \
-            --test-id sens-d3-d5-direct-selector-acons \
-            --layer eval \
-            --fixture "$fixture" \
-            --expected-file "$expected" \
-            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
-            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
-            -- target/debug/sens "$fixture"
+          read -r source_sha _ < <(sha256sum "$fixture")
+          read -r executable_sha _ < <(sha256sum target/debug/sens)
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          echo "test_id=sens-d3-d5-direct-selector-acons layer=eval source_sha256=$source_sha executor_sha256=$executable_sha expected=D1:1"
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::SENS_D3_D5_EVAL_REJECT id=sens-d3-d5-direct-selector-acons expected=D1:1 actual=EXECUTION_ERROR fixture=$fixture source_sha256=$source_sha executor_sha256=$executable_sha" >&2
+            exit 1
+          fi
+          printf '%s\n' "$observed"
+          actual="${observed##*$'\n'}"
+          if [[ "$actual" != "1" ]]; then
+            echo "::error::SENS_D3_D5_DIFFERENCE id=sens-d3-d5-direct-selector-acons expected=D1:1 actual=$actual fixture=$fixture source_sha256=$source_sha executor_sha256=$executable_sha" >&2
+            exit 1
+          fi
+          echo "SENS_D3_D5_NATIVE_PASS test_id=sens-d3-d5-direct-selector-acons expected=D1:1 actual=$actual source_sha256=$source_sha executor_sha256=$executable_sha"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
