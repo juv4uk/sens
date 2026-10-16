@@ -436,6 +436,21 @@ jobs:
             exit 1
           fi
           echo "D9_CANON_NATIVE_PASS test_id=$test_id exact_domains=D9:010011100,D9:001000110,D9:010000111"
+          fixture="tests/semantic/d9-eq-reflexive-atom-laws.lisp"
+          expected="(1 1 0)"
+          fixture_sha="$(sha256sum "$fixture" | cut -d' ' -f1)"
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "$observed" >&2
+            echo "::error::D9_EQ_ATOM_EXEC_RED test_id=d9-eq-atom layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected actual=execution-error first_diff=execution reproduce='target/debug/sens $fixture'" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::D9_EQ_ATOM_LAW_DIFF test_id=d9-eq-atom layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected actual=$actual first_diff=D1-vector reproduce='target/debug/sens $fixture'" >&2
+            exit 1
+          fi
+          echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+
 
 
 
