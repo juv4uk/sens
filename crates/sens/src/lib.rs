@@ -378,31 +378,20 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
         ));
     }
 
-    let defmacro_semantic_id = semantic_registry::admitted_semantic_id_for_surface("defmacro")
-        .ok_or_else(|| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                "semantic registry must admit the canonical defmacro surface",
-                Span { start: 0, end: 0 },
-            )
-        })?;
-    let admitted = semantic_registry::admitted_surfaces_for_semantic_id(defmacro_semantic_id);
+    // The macro itself was constructed by lib/macro.lisp using admitted
+    // exact-domain forms. Its human spellings are lexical projections only;
+    // the obsolete W8 registry row MUST NOT mint a callable domain/code slot.
+    let admitted = semantic_registry::lexical_peer_spellings_for_documented_name("defmacro");
     if admitted.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "semantic registry identity selected by defmacro must admit at least one surface",
+            "language-defined defmacro has no unambiguous documented surface",
             Span { start: 0, end: 0 },
         ));
     }
     for name in admitted {
         session.environment.define(name, result.value.clone());
     }
-    // Історичний W8 defmacro-slot лишається лише сумісним входом для старих
-    // клієнтів. lib/macro.lisp більше не використовує його як semantic authority:
-    // bootstrap виконується через точні D3/D4 identities.
-    session
-        .environment
-        .bind_code_slot_once(defmacro_semantic_id, result.value.clone());
 
     Ok(result)
 }

@@ -354,6 +354,26 @@ pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<LegacyRegis
     surface_index().get(name).copied()
 }
 
+/// Human-facing lexical aliases of a language-defined macro. A historical
+/// documentation row may identify spellings, never a modern domain coordinate.
+/// Ambiguous aliases fail closed; neither the byte nor a row becomes callable.
+pub(crate) fn lexical_peer_spellings_for_documented_name(name: &str) -> Vec<&'static str> {
+    let mut matched: Option<&SemanticRow> = None;
+    for row in SEMANTIC_ROWS {
+        if row.surfaces.iter().any(|surface| surface.name == name) {
+            if matched.is_some() {
+                return Vec::new();
+            }
+            matched = Some(row);
+        }
+    }
+    let Some(row) = matched else { return Vec::new(); };
+    let mut names: Vec<_> = row.surfaces.iter().map(|surface| surface.name).collect();
+    names.sort_unstable();
+    names.dedup();
+    names
+}
+
 fn stable_surfaces_from_index(
     index: &HashMap<&'static str, LegacyRegistrySlot>,
     semantic_id: LegacyRegistrySlot,
