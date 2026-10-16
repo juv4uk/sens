@@ -1,12 +1,31 @@
 //! #3484 prerequisite probe: exact D4 APPLY/EVAL before D5 EVALQUOTE/FUNCTION.
 //! Research-only; no semantic authority change.
 
-use sens::{eval_parsed_expressions, eval_program, load_core_library, Bit4, CoreD4, CoreDomainIdentity, Expr, ExprKind, Session, Span};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity, Expr, ExprKind, Session, Span};
 
 fn run_exact(bits: u8, args_source: &[&str]) -> Result<String,String> {
     let mut session=Session::default();
     load_core_library(&mut session).map_err(|e| format!("load-core: {e:?}"))?;
     let id=CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits).unwrap()));
+    let mut args=Vec::new();
+    for src in args_source {
+        let mut parsed=sens::parse(src).map_err(|e| format!("parse {src}: {e:?}"))?;
+        if parsed.len()!=1 { return Err(format!("expected one expr for {src}")); }
+        args.push(parsed.remove(0));
+    }
+    let form=Expr{
+        kind:ExprKind::DomainCall(id, args.into()),
+        span:Span{start:0,end:0},
+    };
+    eval_parsed_expressions(&[form], &mut session)
+        .map(|r| r.value.to_string())
+        .map_err(|e| format!("{:?}: {}", e.kind, e.message))
+}
+
+fn run_exact_d3(bits: u8, args_source: &[&str]) -> Result<String,String> {
+    let mut session=Session::default();
+    load_core_library(&mut session).map_err(|e| format!("load-core: {e:?}"))?;
+    let id=CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits).unwrap()));
     let mut args=Vec::new();
     for src in args_source {
         let mut parsed=sens::parse(src).map_err(|e| format!("parse {src}: {e:?}"))?;
@@ -41,6 +60,34 @@ fn print_exact_d4_apply_eval_matrix(){
         ("surface-eval", run_surface("(eval (quote (+ 2 3)))")),
     ];
     for (name,result) in cases { println!("D4-EVAL-APPLY-PROBE {name}={result:?}"); }
+}
+
+#[test]
+fn exact_d4_eval_has_positive_negative_and_payload_collision_witnesses(){
+    assert_eq!(
+        run_exact(0b0001, &["(quote (+ 2 3))"])
+            .expect("exact D4:0001 EVAL must evaluate the quoted SENS expression"),
+        "5",
+        "D4 EVAL must evaluate represented code, not return quoted data"
+    );
+
+    for invalid_args in [
+        Vec::<&str>::new(),
+        vec!["(quote (+ 2 3))", "(quote (+ 4 5))"],
+    ] {
+        let error=run_exact(0b0001, &invalid_args)
+            .expect_err("D4:0001 EVAL requires exactly one expression");
+        assert!(error.contains("Arity"), "wrong error for D4:0001: {error}");
+        assert!(error.contains("D4:0001"), "error lost exact domain: {error}");
+    }
+
+    // Equal payload is not equal identity: D3:001 remains QUOTE/data.
+    assert_eq!(
+        run_exact_d3(0b001, &["(+ 2 3)"])
+            .expect("D3:001 QUOTE must remain a legal exact-domain call"),
+        "(+ 2 3)",
+        "D3:001 must preserve code as data rather than inherit D4:0001 EVAL"
+    );
 }
 
 #[test]
