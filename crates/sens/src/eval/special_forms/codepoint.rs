@@ -132,7 +132,7 @@ mod exact_d24_char_code_tests {
             );
             let back = codepoint_to_string_values(&[observed], Span::default())
                 .expect("exact D24 scalar round-trips");
-            assert!(matches!(back, Value::String(value) if value.as_ref() == source));
+            assert!(matches!(&back, Value::String(value) if value.as_ref() == source));
         }
     }
 
