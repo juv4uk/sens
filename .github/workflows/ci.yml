@@ -105,10 +105,18 @@ jobs:
           # Zig єдиний кодує T5; SENS єдиний приймає граматику та закон.
           law_source="tests/semantic/d3-d5-direct-selector-law.lisp"
           mutant_source="tests/semantic/d3-d5-direct-selector-mutant.lisp"
-          target/debug/sens-trit encode "$law_source"
-          target/debug/sens-trit encode "$mutant_source"
-          law="${law_source%.lisp}.sens"
-          mutant="${mutant_source%.lisp}.sens"
+          # Фізичні виходи не мають забруднювати checkout: H2 вимагає
+          # root_matches=true ТА чистий exact-SHA робочий каталог.
+          physical_dir="$RUNNER_TEMP/sens-d3-d5-physical"
+          mkdir -p "$physical_dir"
+          cp "$law_source" "$physical_dir/law.lisp"
+          cp "$mutant_source" "$physical_dir/mutant.lisp"
+          cmp "$law_source" "$physical_dir/law.lisp"
+          cmp "$mutant_source" "$physical_dir/mutant.lisp"
+          target/debug/sens-trit encode "$physical_dir/law.lisp"
+          target/debug/sens-trit encode "$physical_dir/mutant.lisp"
+          law="$physical_dir/law.sens"
+          mutant="$physical_dir/mutant.sens"
           expected="$RUNNER_TEMP/sens-d3-d5-expected-d1.txt"
           printf '1\n' > "$expected"
           sha256sum target/debug/sens target/debug/sens-trit "$law_source" "$mutant_source" "$law" "$mutant" "$expected"
