@@ -2400,3 +2400,22 @@
 (0011 зменшити-на-1
   (0010 (число)
     (01011 число #d24:000000000000000000000001)))
+
+
+; D6:001010 SUBLIS — canonical ratified Ukrainian SENS tree substitution.
+; Search whole-subtree association first; a matching node is replaced without
+; descending into its descendants. Without a match, atoms stay unchanged
+; and every CONS child is traversed by D3 CAR/CDR, retaining dotted tails.
+; Search uses the existing structural D5 ASSOC/EQUAL law, not a D6 call-head.
+(0011 підставити-пари
+  (0010 (відповідності дерево)
+    ((0010 (пара)
+       (110
+         ((0101 пара)
+          (110
+            ((010 дерево) дерево)
+            (#d1:1
+             (111 (підставити-пари відповідності (100 дерево))
+                  (підставити-пари відповідності (011 дерево))))))
+         (#d1:1 (011 пара))))
+     (знайти-за-ключем дерево відповідності))))
