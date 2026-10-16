@@ -2662,3 +2662,33 @@
 (0011 р-п-р-п-р-р-р
   (0010 (значення)
     (011 (100 (011 (100 (011 (011 (011 значення)))))))))
+
+; D8:01011011 CHAR — character cell at D24 index in a string.
+; D9:110011100 STRING-EMPTY?, D9:110101011 STRING-FIRST and
+; D9:110011101 STRING-REST are existing exact-domain mechanisms.
+; Bounds failure uses a native D3 CAR(()) error, never a false value.
+(0011 символ
+  (0010 (текст індекс)
+    (110
+      ((110011100 текст) (100 (001 ())))
+      ((нуль? індекс) (110101011 текст))
+      (#d1:1
+       (символ
+         (110011101 текст)
+         (зменшити-на-один індекс))))))
+
+; D9:110100010 STRING-LENGTH — D24 codepoint count, no host number.
+(0011 рядок-довжина
+  (0010 (текст)
+    (110
+      ((110011100 текст) #d24:000000000000000000000000)
+      (#d1:1 (збільшити-на-один (рядок-довжина (110011101 текст)))))))
+
+; D9:110101110 IDENTITY — projection of already defined Lisp identity.
+(0011 тотожність identity)
+
+; D9:001110110 CANON-LAW-CDR-IMPROPER: atomic dotted tail survives CONS/CDR.
+; Does not claim a new independent primitive or direct D9 opcode admission.
+(0011 канон-закон-решта-неправильний
+  (0010 (голова атомний-хвіст)
+    (101 (011 (111 голова атомний-хвіст)) атомний-хвіст)))
