@@ -53,9 +53,9 @@ pub mod envelope_e3 {
     pub use crate::frame3_domain::{decode, encode, Error, Word};
 }
 mod program_data;
-mod compiler_role;
-mod compiler_bootstrap;
-mod compiler_language;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_role;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_bootstrap;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_language;
 mod domain_words;
 mod domain_identity;
 pub mod domain_ladder;
@@ -64,8 +64,8 @@ pub use domain_ladder::DomainD10;
 mod domain_owner_generated;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod packed_bits;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod outer_envelope;
-mod binary_framing;
-mod gpu_execution_packet;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_framing;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod gpu_execution_packet;
 mod environment;
 mod error;
 pub(crate) mod eval;
@@ -77,7 +77,7 @@ mod presentation;
 mod source_words;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod source_packing;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod ternary_transport;
-mod binary_execution;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
