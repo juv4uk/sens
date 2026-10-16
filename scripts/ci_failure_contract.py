@@ -646,6 +646,25 @@ def self_test():
             rc = scan(args)
         if rc != 0 or "PASS 23/23 focal steps succeeded" not in output.getvalue():
             raise RuntimeError("23 genuinely successful focal steps rejected")
+        # The modern hosted job has no focal status variables. Only a real
+        # preceding success may allow a missing failure report; all other
+        # outcomes (including missing) remain red.
+        for label, status, allow_empty, acceptable in (
+            ("successful-job", "success", True, True),
+            ("failed-job", "failure", True, False),
+            ("cancelled-job", "cancelled", True, False),
+            ("missing-job-status", None, True, False),
+            ("allow-empty-disabled", "success", False, False),
+        ):
+            args.allow_empty = allow_empty
+            hosted = {"GITHUB_ACTIONS": "true"}
+            if status is not None:
+                hosted["PRIOR_JOB_STATUS"] = status
+            output = io.StringIO()
+            with patch.dict(os.environ, hosted, clear=True), contextlib.redirect_stdout(output):
+                rc = scan(args)
+            if (rc == 0) != acceptable:
+                raise RuntimeError("hosted lean empty-report verdict mismatch: " + label)
         args.allow_empty = False
         report.write_text("[]\n", encoding="utf-8")
         output = io.StringIO()
