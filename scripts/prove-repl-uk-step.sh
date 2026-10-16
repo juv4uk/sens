@@ -39,7 +39,7 @@ if [[ $(grep -Ec '^[[:space:]]*[(]прочитати[)][[:space:]]*[)]?' lib/rep
   exit 1
 fi
 if sed -n '/^(визначити репл-крок-поверхні/,/^(визначити репл-команда-мови?/p' lib/repl-core.lisp |
-   grep -Fq '((текст? форма)'; then
+   grep -F '((текст? форма)' >/dev/null; then
   echo 'REPL_LITERAL_INGRESS_RED reason=implicit-bit-string-to-domain' >&2
   exit 1
 fi
