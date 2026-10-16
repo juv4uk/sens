@@ -205,8 +205,8 @@
 (0011 зворот-до
   (0010 (values acc)
     (110
-      ((0100 (010 values)) acc)
-      ((equal? (010 values) (001 (0)))
+      ((0101 values) acc)
+      ((0100 (0101 values))
        (зворот-до (011 values) (111 (100 values) acc))))))
 
 (0011 reverse-onto зворот-до)
