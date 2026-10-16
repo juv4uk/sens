@@ -425,6 +425,32 @@ jobs:
             exit 1
           fi
           echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
+          # D8:01011011 CHAR + D9:110100010 STRING-LENGTH / 110101110
+          # IDENTITY / 001110110 CDR-IMPROPER: one mixed-domain SENS witness.
+          d8_d9_fixture="tests/semantic/d8-char-d9-length-identity-laws.lisp"
+          d8_d9_negative="tests/semantic/d8-char-out-of-range-negative.lisp"
+          d8_d9_expected="(1 1 1 1 1 1 1 0 0 0)"
+          sha256sum "$d8_d9_fixture" "$d8_d9_negative" lib/core4.lisp target/debug/sens
+          if ! d8_d9_output="$(target/debug/sens "$d8_d9_fixture" 2>&1)"; then
+            echo "::error::D8_D9_CHAR_LENGTH_EXEC_RED layer=eval fixture=$d8_d9_fixture expected=$d8_d9_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d8_d9_fixture'" >&2
+            printf '%s\n' "$d8_d9_output" >&2
+            exit 1
+          fi
+          d8_d9_actual="$(printf '%s\n' "$d8_d9_output" | tail -n 1)"
+          if [[ "$d8_d9_actual" != "$d8_d9_expected" ]]; then
+            echo "::error::D8_D9_CHAR_LENGTH_DIFF layer=eval fixture=$d8_d9_fixture expected=$d8_d9_expected actual=$d8_d9_actual first_diff=D1-vector reproduce='target/debug/sens $d8_d9_fixture'" >&2
+            exit 1
+          fi
+          if d8_d9_bad="$(target/debug/sens "$d8_d9_negative" 2>&1)"; then
+            echo "::error::D8_CHAR_OUT_OF_RANGE_ACCEPTED layer=eval fixture=$d8_d9_negative expected=CAR-NIL-rejection actual=accepted first_diff=negative-exit reproduce='target/debug/sens $d8_d9_negative'" >&2
+            exit 1
+          fi
+          if ! grep -Eiq 'car|pair|пара|D3' <<< "$d8_d9_bad"; then
+            echo "::error::D8_CHAR_OUT_OF_RANGE_UNINFORMATIVE layer=eval fixture=$d8_d9_negative expected=CAR-NIL-rejection actual=$d8_d9_bad first_diff=diagnostic reproduce='target/debug/sens $d8_d9_negative'" >&2
+            exit 1
+          fi
+          echo "D8_D9_CHAR_LENGTH_NATIVE_PASS codes=D8:01011011,D9:110100010,D9:110101110,D9:001110110 positive=7 false-controls=3 error-negative=1"
+
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
