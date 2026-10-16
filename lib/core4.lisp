@@ -714,6 +714,14 @@
   (0010 (p значення)
     (усі? (0010 (x) (0100 (p x))) значення)))
 
+
+; D8:01010111 NOTANY — ратифікована точна координата #3960.
+; Похідний закон: NOTANY(p,xs) = D4:0100 NOT(D6:111100 ANY(p,xs)).
+; Точний D1 PredicateBit, без виклику D8-примітива або нової семантики.
+(0011 жодне-не-задовольняє?
+  (0010 (умова елементи)
+    (хибне? (будь-яке? умова елементи))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
