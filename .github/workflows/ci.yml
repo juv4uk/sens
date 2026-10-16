@@ -360,6 +360,20 @@ jobs:
             exit 1
           fi
           echo "D6_SELECTOR_ORIENTATION_NATIVE_PASS functions=16 positive=16 negative=16 authority=SENS"
+          # D6 точний списковий закон, native SENS; 7 позитивів, 2 негативи.
+          d6_list_fixture="tests/semantic/d6-list-uk-laws.lisp"
+          sha256sum "$d6_list_fixture" lib/core4.lisp target/debug/sens
+          if ! d6_list_observed="$(target/debug/sens "$d6_list_fixture" 2>&1)"; then
+            printf '%s\n' "$d6_list_observed" >&2
+            echo "::error::D6_LIST_UK_EXEC_RED layer=eval fixture=$d6_list_fixture expected=(1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          d6_list_actual="$(printf '%s\n' "$d6_list_observed" | tail -n 1)"
+          if [[ "$d6_list_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_LIST_UK_DIFF layer=eval fixture=$d6_list_fixture expected=(1 1 1 1 1 1 1 1 1) actual=$d6_list_actual" >&2
+            exit 1
+          fi
+          echo "D6_LIST_UK_NATIVE_PASS functions=4 positive=7 negative=2 authority=SENS"
           # D6 lower-law derived functions — execution stays entirely in SENS.
           d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
           sha256sum "$d6_source" lib/core4.lisp target/debug/sens
