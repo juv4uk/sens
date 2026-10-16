@@ -472,6 +472,30 @@ jobs:
             exit 1
           fi
           echo "D8_RIGHT_EDGE_NATIVE_PASS identities=D8:11000001,D8:11000011 laws=6 negative=D1:0 authority=SENS"
+          lower_law=tests/semantic/d8-lower-alias-laws.lisp
+          lower_negative=tests/semantic/d8-lower-alias-negative.lisp
+          sha256sum "$lower_law" "$lower_negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$lower_law" 2>&1)"; then
+            echo "::error::D8_LOWER_ALIASES_RED layer=eval fixture=$lower_law expected=(1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$observed" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1)" ]]; then
+            echo "::error::D8_LOWER_ALIASES_DIFF layer=eval fixture=$lower_law expected=(1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if ! observed="$(target/debug/sens "$lower_negative" 2>&1)"; then
+            echo "::error::D8_LOWER_ALIASES_NEGATIVE_RED layer=eval fixture=$lower_negative expected=D1:0 actual=execution-error" >&2
+            printf '%s\n' "$observed" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "0" ]]; then
+            echo "::error::D8_LOWER_ALIASES_NEGATIVE_RED layer=eval fixture=$lower_negative expected=D1:0 actual=$actual" >&2
+            exit 1
+          fi
+          echo "D8_LOWER_ALIASES_NATIVE_PASS identities=D8:11011010,D8:11100100 laws=4 negative=D1:0 authority=SENS"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
