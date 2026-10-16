@@ -316,12 +316,19 @@
   (0010 (predicate values)
     (filter-onto predicate values (001 ()))))
 
-(0011 reduce
-  (0010 (f acc values)
+; D6:101110 REDUCE: the law is Lisp-owned, not an implicit D6 opcode.
+; D4:0101 NULL ends precisely an empty proper list. D3 CAR/CDR step only a pair.
+; Provenance: knowledge/d6-v2-binary-law-families.json, family f10.
+(0011 згорнути
+  (0010 (операція стан елементи)
     (110
-      ((0100 (010 values)) acc)
-      ((010 values) 
-       (101110 f (f acc (100 values)) (011 values))))))
+      ((0101 елементи) стан)
+      ((010 (001 ()))
+       (згорнути операція
+         (операція стан (100 елементи))
+         (011 елементи))))))
+
+(0011 reduce згорнути)
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
