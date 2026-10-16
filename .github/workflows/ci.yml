@@ -35,6 +35,19 @@ jobs:
           persist-credentials: false
           # HEAD^ is required by the fail-closed D3 source-delta guard.
           fetch-depth: 2
+      - name: "GUARD — warnings are fatal (RUSTFLAGS must keep -D warnings)"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Permanent: no commit may silently drop the fatal-warnings policy.
+          case "${RUSTFLAGS:-}" in
+            *"-D warnings"*) echo "RUSTFLAGS ok: $RUSTFLAGS" ;;
+            *) echo "::error::RUSTFLAGS must contain '-D warnings' (warnings are fatal by owner policy)"; exit 1 ;;
+          esac
+          case "${RUSTDOCFLAGS:-}" in
+            *"-D warnings"*) echo "RUSTDOCFLAGS ok: $RUSTDOCFLAGS" ;;
+            *) echo "::error::RUSTDOCFLAGS must contain '-D warnings'"; exit 1 ;;
+          esac
       - name: "RELEASE-ADMISSION — точковий негатив F2/F4: байти не є семантичним PASS"
         shell: bash
         run: |
@@ -1385,7 +1398,7 @@ jobs:
 
       - name: Upload Rust→project dependency ledger
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        uses: actions/upload-artifact@v4
         with:
           name: rust-project-deps
           path: ${{ runner.temp }}/rust-project-deps.json
@@ -1410,26 +1423,25 @@ jobs:
 
       - name: Upload release GO-gate report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        uses: actions/upload-artifact@v4
         with:
           name: release-go-gate
           path: ${{ runner.temp }}/release-go-gate.json
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
-        # Rust-свідок збирається з окремого Cargo workspace, точний checksum
-        # обов'язковий. Без власної .sens-фікстури SENS = UNVERIFIED, не число.
+        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
+        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml \
-            --bin paired_exact_q --release
+          cargo build -p core-math-demand-rust --release
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
-            --require-rust --json "$RUNNER_TEMP/math-bench.json"
+            --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        uses: actions/upload-artifact@v4
         with:
           name: math-bench-sens-vs-rust
           path: ${{ runner.temp }}/math-bench.json
@@ -1504,7 +1516,7 @@ jobs:
 
       - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: zig-rust-codec-${{ github.sha }}
           path: |
@@ -1583,7 +1595,7 @@ jobs:
           exit "$rc"
       - name: Зберегти фактичні результати одноразового мігратора
         if: ${{ always() && contains(github.event.head_commit.message, '[migration-apply-once]') }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: sens-active-migration-${{ github.sha }}
           path: ${{ runner.temp }}/sens-active-migration/
