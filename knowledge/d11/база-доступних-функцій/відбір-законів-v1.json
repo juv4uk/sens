@@ -71,7 +71,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "DIRECT-SLOT-DEFINITION-CLASS",
@@ -85,7 +87,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
@@ -99,7 +103,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "ENSURE-CLASS",
@@ -113,7 +119,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "FINALIZE-INHERITANCE",
@@ -127,7 +135,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "SHARED-INITIALIZE",
@@ -141,7 +151,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "SLOT-VALUE-USING-CLASS",
@@ -155,7 +167,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "STATUS",
@@ -197,7 +211,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
@@ -211,7 +227,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "RECORD-CONSTRUCTOR",
@@ -225,7 +243,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "WITH-SYNTAX",
@@ -240,7 +260,9 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
     },
     {
       "name": "OCCURS-CHECK",
@@ -8791,5 +8813,14 @@
     "lib/world.lisp": "2da24e2d6f94f0cbe318272adb23bad6b7872146"
   },
   "provenance_update": "3 previous origin-file absences resolved to live definitions in lib/world.lisp. Source migration != new D11 semantic capability.",
-  "expansion_note": "New candidates are law proposals with explicit falsifiers, not native semantics or allocation."
+  "expansion_note": "New candidates are law proposals with explicit falsifiers, not native semantics or allocation.",
+  "external_donor_verification": {
+    "date": "2026-10-16",
+    "primary_standards": [
+      "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "https://franz.com/support/documentation/mop/dictionary.html"
+    ],
+    "note": "Primary semantic law source located for these dossiers. Citation is not execution evidence or D11 admission."
+  }
 }
