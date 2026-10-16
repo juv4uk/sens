@@ -493,6 +493,30 @@ jobs:
             exit 1
           fi
           echo "D8_RIGHT_EDGE_NATIVE_PASS identities=D8:11000001,D8:11000011 laws=6 negative=D1:0 authority=SENS"
+          lower=tests/semantic/d8-lower-alias-laws.lisp
+          lower_negative=tests/semantic/d8-lower-alias-negative.lisp
+          sha256sum "$lower" "$lower_negative" lib/core4.lisp target/debug/sens
+          if ! value="$(target/debug/sens "$lower" 2>&1)"; then
+            echo "::error::D8_LOWER_ALIASES_RED layer=eval fixture=$lower expected=(1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$value" >&2
+            exit 1
+          fi
+          result="$(printf '%s\n' "$value" | tail -n 1)"
+          if [[ "$result" != "(1 1 1 1)" ]]; then
+            echo "::error::D8_LOWER_ALIASES_DIFF layer=eval fixture=$lower expected=(1 1 1 1) actual=$result" >&2
+            exit 1
+          fi
+          if ! value="$(target/debug/sens "$lower_negative" 2>&1)"; then
+            echo "::error::D8_LOWER_ALIASES_NEGATIVE_RED layer=eval fixture=$lower_negative expected=D1:0 actual=execution-error" >&2
+            printf '%s\n' "$value" >&2
+            exit 1
+          fi
+          result="$(printf '%s\n' "$value" | tail -n 1)"
+          if [[ "$result" != "0" ]]; then
+            echo "::error::D8_LOWER_ALIASES_NEGATIVE_RED layer=eval fixture=$lower_negative expected=D1:0 actual=$result" >&2
+            exit 1
+          fi
+          echo "D8_LOWER_ALIASES_NATIVE_PASS identities=D8:11011010,D8:11100100 laws=4 negative=D1:0 authority=SENS"
       - name: D8 — COPY-LIST нативні позитивні й негативний SENS-закон
         shell: bash
         run: |
