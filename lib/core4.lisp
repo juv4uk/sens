@@ -217,6 +217,15 @@
     (зворот-до значення (001 ()))))
 (0011 reverse зворот)
 
+; D5:01000 ZEROP — власний SENS-закон на явно допущених D24+ значеннях.
+; Рівність x = x+x в адитивній групі має місце лише для математичного нуля.
+; D3:101 EQ повертає точний D1, не вводимо нульовий літерал або host predicate.
+(0011 нуль?
+  (0010 (значення)
+    (101 значення (01010 значення значення))))
+
+
+
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
 ; left ++ right in the correct order — two tail-recursive passes instead
