@@ -885,7 +885,7 @@ mod tests {
     #[test]
     fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
-            let frame = BinaryFrame::Function(CoreDomainIdentity::from_packed_byte(packed as u8));
+            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(packed as u8)).expect("exact domain word"));
             let encoded = encode_binary_frame(&frame).unwrap();
             assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
             assert_eq!(encoded.len(), 12);

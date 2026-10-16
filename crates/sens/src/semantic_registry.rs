@@ -441,7 +441,7 @@ mod exact_registry_vs_historical_slot_tests {
             CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
         );
         // Bit-for-bit equality of the mechanical payload is insufficient.
-        assert_eq!(historical.packed_byte() as u16, current.packed_bits());
+        assert_eq!(historical.packed_bits() as u16, current.packed_bits());
         assert_eq!(current.width(), 8);
         assert_eq!(current.to_string(), "10101000");
         // D8 is ratified in the Lisp table but has NO callable source
@@ -541,7 +541,7 @@ mod exact_d3_compatibility_migration_tests {
             (0b00000101, 0b100u8),
         ] {
             let identity = compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_packed_byte(legacy_byte)
+                CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(legacy_byte)).expect("exact domain word")
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), bits);
@@ -552,7 +552,7 @@ mod exact_d3_compatibility_migration_tests {
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
             assert!(compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_packed_byte(byte)
+                CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(byte)).expect("exact domain word")
             ).is_none());
         }
     }

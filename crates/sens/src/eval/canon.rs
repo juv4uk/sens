@@ -956,7 +956,7 @@ mod exact_domain_primitive_tests {
         ];
         assert_eq!(expected.len(), 45);
         for candidate in 0..=u8::MAX {
-            let routed = legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(candidate)).is_some();
+            let routed = legacy_backend_primitive(CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(candidate)).expect("exact domain word")).is_some();
             assert_eq!(
                 routed,
                 expected.contains(&candidate),
@@ -968,7 +968,7 @@ mod exact_domain_primitive_tests {
         for bits in 0..=7 {
             let exact = d3(bits);
             assert_eq!(exact.width(), 3);
-            assert!(legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(bits)).is_none());
+            assert!(legacy_backend_primitive(CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(bits)).expect("exact domain word")).is_none());
         }
     }
 
@@ -978,7 +978,7 @@ mod exact_domain_primitive_tests {
         // implementation; all current D3 operations use domain laws.
         for old_byte in 2..7 {
             assert!(
-                legacy_backend_primitive(CoreDomainIdentity::from_packed_byte(old_byte)).is_none(),
+                legacy_backend_primitive(CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(old_byte)).expect("exact domain word")).is_none(),
                 "історичний байт D3 не отримує дубльований примітив"
             );
         }
