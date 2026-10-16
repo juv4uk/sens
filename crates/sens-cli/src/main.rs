@@ -855,6 +855,7 @@ mod core_profile_bootstrap_tests {
     }
 }
 
+#[allow(dead_code)] // wired by the REPL path once the Zig-only core is admitted
 fn repl_core_source_zig_only() -> Result<String, String> {
     #[cfg(feature = "zig-transport")]
     {
