@@ -489,6 +489,23 @@
     (111 (111 ключ значення) асоціації)))
 
 
+; D6:111100 ANY / D6:111101 ALL — D1-quantifier duality, f14.
+; Source: knowledge/d6-v2-binary-law-families.json; no new primitive.
+; A Lisp definition alone does not admit direct D6 binary callability.
+(0011 будь-яке?
+  (0010 (предикат елементи)
+    (110
+      ((0101 елементи) (0100 (010 (001 ()))))
+      ((предикат (100 елементи)) (010 (001 ())))
+      ((010 (001 ())) (будь-яке? предикат (011 елементи))))))
+
+(0011 усі?
+  (0010 (предикат елементи)
+    (110
+      ((0101 елементи) (010 (001 ())))
+      ((0100 (предикат (100 елементи))) (0100 (010 (001 ()))))
+      ((010 (001 ())) (усі? предикат (011 елементи))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
