@@ -157,6 +157,49 @@ jobs:
             exit 1
           fi
           echo "D8_SIGN_LENGTH_SENS_PASS identities=D8:00010111,D8:11111010,D8:00111110,D8:01001111 laws=10 negative=1"
+      - name: "SENS SUBSEQ — 6 нативних законів і відмова D7 як D24"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-subseq-d24-laws.lisp"
+          negative="tests/semantic/d8-subseq-reject-d7.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          mapfile -t laws < "$fixture"
+          count=0
+          for program in "${laws[@]}"; do
+            if [[ -z "$program" || "$program" == ';'* ]]; then
+              continue
+            fi
+            ((count += 1))
+            case_file="$RUNNER_TEMP/subseq-native-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$program" > "$case_file"
+            sha256sum "$case_file"
+            if ! observed="$(target/debug/sens "$case_file" 2>&1)"; then
+              echo "::error::SUBSEQ_NATIVE_RED test=subseq-$count layer=eval fixture=$case_file expected=1 actual=execution-error command='target/debug/sens $case_file'" >&2
+              printf '%s\n' "$observed" >&2
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::SUBSEQ_LAW_DIFF test=subseq-$count layer=eval fixture=$case_file expected=1 actual=$actual" >&2
+              exit 1
+            fi
+            echo "SUBSEQ_NATIVE_LAW_PASS law=$count"
+          done
+          if [[ "$count" -ne 6 ]]; then
+            echo "::error::SUBSEQ_CENSUS_DIFF expected=6 actual=$count" >&2
+            exit 1
+          fi
+          if error="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::SUBSEQ_D7_MUTANT_SURVIVED layer=eval fixture=$negative expected=D24-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'D24' <<< "$error"; then
+            echo "::error::SUBSEQ_D7_NEGATIVE_UNINFORMATIVE layer=eval fixture=$negative expected=D24-domain-diagnostic actual=$error" >&2
+            exit 1
+          fi
+          echo "SUBSEQ_NATIVE_PASS laws=6 negative=1 identity=D8:00100001"
+
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
