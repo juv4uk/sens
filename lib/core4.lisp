@@ -1465,6 +1465,15 @@
   (0010 (ліве праве)
     (0100 (010 (111 ліве праве)))))
 
+; D9:001110010 CANON-LAW-EQ-REFLEXIVE-ATOM — owner #4008.
+; Atom(x) => EQ(x,x)=D1:1. Pair carrier rejected via CAR(D3:000).
+; Lower D3 laws only; no new D9 call mechanism or independent primitive.
+(0011 канон-закон-рівність-рефлексивний-атом
+  (0010 (значення)
+    (110
+      ((010 значення) (101 значення значення))
+      ((010 (001 ())) (100 (001 ()))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
