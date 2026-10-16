@@ -486,6 +486,29 @@ jobs:
             exit 1
           fi
           echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+          # D9:011010000–011010111: native seven-step selectors, no direct D9 admission.
+          d9_7_fixture="tests/semantic/d9-seven-step-selector-batch-02.lisp"
+          d9_7_negative="tests/semantic/d9-seven-step-selector-nonpair.lisp"
+          sha256sum "$d9_7_fixture" "$d9_7_negative" lib/core4.lisp target/debug/sens
+          if ! d9_7_result="$(target/debug/sens "$d9_7_fixture" 2>&1)"; then
+            echo "::error::D9_SELECTOR_7_EXEC_RED layer=eval fixture=$d9_7_fixture expected=nine-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$d9_7_result" >&2
+            exit 1
+          fi
+          d9_7_actual="$(printf "%s\n" "$d9_7_result" | tail -n 1)"
+          if [[ "$d9_7_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_SELECTOR_7_DIFF layer=eval fixture=$d9_7_fixture expected=(1 1 1 1 1 1 1 1 1) actual=$d9_7_actual first_mismatch=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if d9_7_bad="$(target/debug/sens "$d9_7_negative" 2>&1)"; then
+            echo "::error::D9_SELECTOR_7_NEG_ACCEPTED layer=eval fixture=$d9_7_negative expected=pair-type-refusal actual=accepted reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if [[ "$d9_7_bad" != *"CAR"* && "$d9_7_bad" != *"CDR"* && "$d9_7_bad" != *"pair"* && "$d9_7_bad" != *"пара"* ]]; then
+            echo "::error::D9_SELECTOR_7_WRONG_REFUSAL layer=eval fixture=$d9_7_negative expected=pair-type-refusal actual=$d9_7_bad" >&2
+            exit 1
+          fi
+          echo "D9_SEVEN_STEP_SELECTORS_PASS identities=D9:011010000..011010111 laws=9 nonpair_negative=1"
 
 
 
