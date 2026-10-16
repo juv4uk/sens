@@ -139,10 +139,15 @@ fn expr_string(expr: &Expr) -> Option<&str> {
     }
 }
 
-/// A SENS identity in the docs index is a bare 8-bit token, never text.
-fn expr_byte_sid(expr: &Expr) -> Option<String> {
+/// Historical documentation key, not a modern function identity.
+/// The compatibility reader keeps its exact eight glyphs as inert data.
+fn expr_documentation_key(expr: &Expr) -> Option<String> {
     match &expr.kind {
-        ExprKind::Sid(sid) => Some(sid.to_string()),
+        ExprKind::Symbol(bits)
+            if bits.len() == 8 && bits.bytes().all(|bit| bit == b'0' || bit == b'1') =>
+        {
+            Some(bits.to_string())
+        }
         _ => None,
     }
 }
@@ -190,8 +195,8 @@ fn ukrainian_docs() -> Result<Vec<SurfaceDoc>, String> {
                 category: expr_symbol(&fields[1])
                     .ok_or_else(|| "uk-docs.wsm: category має бути символом".to_string())?
                     .to_string(),
-                identity: expr_byte_sid(&fields[2])
-                    .ok_or_else(|| "uk-docs.wsm: byte SID має бути голими 8 бітами".to_string())?,
+                identity: expr_documentation_key(&fields[2])
+                    .ok_or_else(|| "uk-docs.wsm: історичний документальний ключ повинен мати 8 біт".to_string())?,
                 kind: expr_symbol(&fields[3])
                     .ok_or_else(|| "uk-docs.wsm: kind має бути символом".to_string())?
                     .to_string(),

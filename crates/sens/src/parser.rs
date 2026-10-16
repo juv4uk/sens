@@ -540,8 +540,13 @@ impl Parser<'_> {
         // This is a direct SID read, not numeric conversion:
         // `00001100` is function SID 00001100; decimal `12` remains a number.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            // Width alone never promotes historical source to modern D8.
-            return Err(self.error("unqualified eight-bit function is not an exact domain identity", start, self.cursor));
+            // Compatibility reader: retain historical W8-looking metadata
+            // only as inert textual data. It cannot mint a D8 function or SID.
+            // The exact-domain reader handles modern W8 using its explicit mode.
+            return Ok(Expr {
+                kind: ExprKind::Symbol(Rc::from(token)),
+                span: Span { start, end: self.cursor },
+            });
         }
 
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {
