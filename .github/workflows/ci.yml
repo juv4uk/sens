@@ -389,6 +389,30 @@ jobs:
             exit 1
           fi
           echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
+          # D6:000101 MAPLIST native suffix law and improper-tail rejection.
+          maplist_good="tests/semantic/d6-maplist-signature-law.lisp"
+          maplist_bad="tests/semantic/d6-maplist-improper-tail.lisp"
+          sha256sum "$maplist_good" "$maplist_bad" lib/core4.lisp target/debug/sens
+          if ! maplist_result="$(target/debug/sens "$maplist_good" 2>&1)"; then
+            printf '%s\n' "$maplist_result" >&2
+            echo "::error::D6_MAPLIST_EXEC_RED layer=eval fixture=$maplist_good expected=(1,1,1) actual=execution-error" >&2
+            exit 1
+          fi
+          maplist_value="$(printf '%s\n' "$maplist_result" | tail -n1)"
+          if [[ "$maplist_value" != "(1 1 1)" ]]; then
+            echo "::error::D6_MAPLIST_LAW_DIFF layer=eval fixture=$maplist_good expected=(1,1,1) actual=$maplist_value" >&2
+            exit 1
+          fi
+          if maplist_error="$(target/debug/sens "$maplist_bad" 2>&1)"; then
+            echo "::error::D6_MAPLIST_NEGATIVE_ACCEPTED layer=eval fixture=$maplist_bad expected=CAR-error actual=exit0" >&2
+            exit 1
+          fi
+          if [[ "$maplist_error" != *"car expects a non-empty list"* ]]; then
+            printf '%s\n' "$maplist_error" >&2
+            echo "::error::D6_MAPLIST_WRONG_NEGATIVE layer=eval fixture=$maplist_bad expected=CAR-error actual=other" >&2
+            exit 1
+          fi
+          echo "D6_MAPLIST_NATIVE_PASS laws=3 negative=1 exact=D6:000101"
           # D8 SET/LIST derived: 2 SENS-owned definitions, eight D1 witnesses.
           d8_set_source="tests/semantic/d8-list-difference-adjoin-laws.lisp"
           sha256sum "$d8_set_source" lib/core4.lisp target/debug/sens
