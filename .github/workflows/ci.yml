@@ -218,7 +218,7 @@ jobs:
             --test-id sens-d4-eval-invalid-arity \
             --layer eval \
             --fixture "$d4_eval_negative" \
-            --expect-error-substring "0001: expected /" \
+            --expect-error-substring "D4:0001: expected /" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$d4_eval_negative"
