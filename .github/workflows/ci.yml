@@ -403,6 +403,29 @@ jobs:
           fi
           echo "D8_LISTSTAR_LENGTH_NATIVE_PASS identities=D8:00011101,D8:00111110,D8:01001111 laws=8 negative=1"
 
+      - name: D8 — MAP-ANY, D1 позитив і відмова на чужому предикаті
+        shell: bash
+        run: |
+          set -euo pipefail
+          law="tests/semantic/d8-map-any-lower-laws.lisp"
+          negative="tests/semantic/d8-map-any-reject-non-d1.lisp"
+          sha256sum "$law" "$negative" lib/core4.lisp target/debug/sens
+          if ! actual="$(target/debug/sens "$law" 2>&1)"; then
+            printf '%s\n' "$actual" >&2
+            echo "::error::D8_MAP_ANY_EXEC_RED layer=eval fixture=$law expected=eight-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          last="$(printf '%s\n' "$actual" | tail -n 1)"
+          if [[ "$last" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_MAP_ANY_DIFF layer=eval fixture=$law expected=(1 1 1 1 1 1 1 1) actual=$last" >&2
+            exit 1
+          fi
+          if negative_output="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_MAP_ANY_NON_D1_ACCEPTED layer=eval fixture=$negative expected=PredicateBit-rejection actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_MAP_ANY_NATIVE_PASS identity=D8:01000111 checks=8 negative=1 law=derived-from-D6:111100"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
