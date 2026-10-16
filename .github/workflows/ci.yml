@@ -166,6 +166,1593 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS core_functions=4 numeric_law=1 laws=8 authority=SENS"
+          # Native SENS: перевірка 16 D6 селекторів та 16 негативних мутантів.
+          d6_selector_fixture="tests/semantic/d6-selector-orientation.lisp"
+          sha256sum "$d6_selector_fixture" lib/core4.lisp target/debug/sens
+          if ! d6_selector_output="$(target/debug/sens "$d6_selector_fixture" 2>&1)"; then
+            printf '%s\n' "$d6_selector_output" >&2
+            echo "::error::D6_SELECTOR_ORIENTATION_RED layer=eval fixture=$d6_selector_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d6_selector_output"
+          d6_selector_actual="${d6_selector_output##*
+          # D6 lower-law derived functions — execution stays entirely in SENS.
+          d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
+          sha256sum "$d6_source" lib/core4.lisp target/debug/sens
+          if ! d6_observed="$(target/debug/sens "$d6_source" 2>&1)"; then
+            printf '%s\n' "$d6_observed" >&2
+            echo "::error::D6_RESEARCH_BATCH_01_RED layer=eval fixture=$d6_source expected=nine-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d6_observed"
+          d6_actual="${d6_observed##*$'\n'}"
+          if [[ "$d6_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_RESEARCH_BATCH_01_DIFF layer=eval fixture=$d6_source expected=nine-D1-YES actual=$d6_actual" >&2
+            exit 1
+          fi
+          echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
+
+      - name: D6 — два похідні предикати порядку через точні D5/D4
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_source="tests/semantic/d6-order-derived-laws.lisp"
+          negative_source="tests/semantic/d6-order-reject-non-numeric.lisp"
+          sha256sum "$test_source" "$negative_source" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$test_source" 2>&1)"; then
+            echo "::error::SENS_D6_ORDER_EXECUTOR_RED test=sens-d6-order layer=eval program=$test_source expected=eight-D1-YES actual=execution-error" >&2
+            printf '%s\n' "$observed" >&2
+            exit 1
+          fi
+          actual="${observed##*$'\n'}"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::SENS_D6_ORDER_LAW_DIFF test=sens-d6-order layer=eval program=$test_source expected=(1,1,1,1,1,1,1,1) actual=$actual" >&2
+            exit 1
+          fi
+          if negative="$(target/debug/sens "$negative_source" 2>&1)"; then
+            echo "::error::SENS_D6_ORDER_NEGATIVE_SURVIVED test=sens-d6-order-reject layer=eval program=$negative_source expected=reject-non-D24 actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'D24' <<< "$negative"; then
+            echo "::error::SENS_D6_ORDER_NEGATIVE_UNINFORMATIVE test=sens-d6-order-reject layer=eval program=$negative_source expected=D24-domain-error actual=$negative" >&2
+            exit 1
+          fi
+          echo "SENS_D6_ORDER_NATIVE_PASS identities=D6:110100,D6:110110 checks=8 negative=1 authority=SENS"
+
+      - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
+        id: zig-only-t5-no-fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Physical bytes must never be overwritten by a JSON receipt.
+          # Host path safety is tested before any Rust/Zig binary is invoked.
+          echo 'test_id=zig-t5-report-no-overwrite layer=transport expected=reject-report-inside-sens-mirror'
+          python3 -m unittest discover -s tests -p test_migrate_t5_batch_path_preflight.py -v
+          # Positive: linked Zig 0.16 ABI decodes a real .sens and byte-exact replays it.
+          # Exact GO enabler: SENS D2 → Zig T5 encode/decode → SENS D2.
+          # Rejects raw Rust fixture embedding and legacy Rust T5 parsing.
+          echo 'test_id=zig-rust-sens-physical-unit-no-direct-fixture layer=transport semantic_authority=SENS'
+          cargo test --locked -p sens-cli --bin sens physical_t5_enters_canonical_binary_reader_not_text_lisp -- --nocapture
+          cargo test --locked -p sens-cli --bin sens-trit rust_zig_only_cutover_tests -- --nocapture
+          # Negative: without Zig no physical operation may touch a file or select Rust.
+          cargo test --locked -p sens-cli --bin sens-trit --no-default-features rust_zig_only_cutover_tests -- --nocapture
+      - name: ZIG-MIGRATION — реальний Lisp asset тільки через Zig ABI (без fallback)
+        id: zig-only-linter-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          zig test zig_transport_root.zig -lc
+          cargo test --locked -p sens-cli --bin sens zig_linter_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens --no-default-features zig_linter_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens zig_contract_carrier -- --nocapture
+          cargo test --locked -p sens-cli --bin sens --no-default-features zig_contract_carrier -- --nocapture
+      - name: EPISTEMIC — фізичний T5-закон і однобітний негативний свідок
+        id: epistemic-native-physical
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_bits="tests/semantic/epistemic-eq-d1-law-mutant.bits"
+          physical_dir="$RUNNER_TEMP/epistemic-native-d1"
+          mkdir -p "$physical_dir"
+          cargo build --locked -p sens-cli --bin sens
+          # CI_GLUE_NO_SEMANTICS: only lossless W1..W11→T5 packing.
+          # Semantics belong exclusively to target/debug/sens below.
+          PYTHONPATH=scripts python3 - "$source_bits" "$physical_dir" <<'PY'
+          from pathlib import Path
+          import sys
+          from sens_t5_codec import decode_bytes, encode_words, parse_words
+
+          source = Path(sys.argv[1])
+          directory = Path(sys.argv[2])
+          lines = [line for line in source.read_text(encoding="utf-8").splitlines() if line.strip()]
+          if len(lines) != 2:
+              raise SystemExit("UNINFORMATIVE-INPUT: require one law and one mutant")
+          law, mutant = [parse_words(line) for line in lines]
+          if len(law) != len(mutant):
+              raise SystemExit("UNINFORMATIVE-INPUT: mutation changed the framing")
+          differences = [(a, b) for a, b in zip(law, mutant) if a != b]
+          if differences != [("1", "0")]:
+              raise SystemExit("UNINFORMATIVE-INPUT: mutation must flip exactly one D1 bit")
+          for label, words in (("law", law), ("mutant", mutant)):
+              physical = encode_words(words)
+              if decode_bytes(physical) != words:
+                  raise SystemExit("UNINFORMATIVE-INPUT: T5 round-trip changed word widths")
+              (directory / f"{label}.sens").write_bytes(physical)
+              print(f"T5_TRANSPORT id=epistemic-d3-d1-{label} bytes={len(physical)}")
+          PY
+          printf '1\n' > "$physical_dir/expected-d1"
+          sha256sum target/debug/sens "$source_bits" \
+            "$physical_dir/law.sens" "$physical_dir/mutant.sens" \
+            "$physical_dir/expected-d1"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-native-d3-eq-d1-law \
+            --layer eval \
+            --fixture "$physical_dir/law.sens" \
+            --expected-file "$physical_dir/expected-d1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$physical_dir/law.sens"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-native-d3-eq-d1-mutant \
+            --layer eval \
+            --fixture "$physical_dir/mutant.sens" \
+            --expect-error-substring "domain identity is not callable under its ratified law: D1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$physical_dir/mutant.sens"
+      - name: EPISTEMIC — бінарний D3 EQ/D1 самовердикт і однобітний мутант
+        id: epistemic-d1-exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/epistemic-eq-d1-law-mutant.bits"
+          sha256sum "$fixture" crates/sens/tests/sens_semantic_witnesses.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id epistemic-eq-d1-law-mutant \
+            --layer transport \
+            --fixture "$fixture" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- cargo test --locked -p sens --test sens_semantic_witnesses \
+                 epistemic_d3_eq_d1_law_and_one_bit_mutant -- --exact --nocapture
+          # Targeted source-derived witness; opt-in prevents unrelated CI freezes.
+          if [[ "${{ contains(github.event.head_commit.message, '[epistemic-source-once]') }}" == "true" ]]; then
+            fixture="tests/semantic/epistemic-source-ref-d1-law.lisp"
+            sha256sum "$fixture" lib/epistemic.lisp crates/sens/tests/epistemic_exact_ref_equality.rs
+            python3 scripts/ci_failure_contract.py run \
+              --test-id epistemic-source-ref-d1-one-bit \
+              --layer transport \
+              --fixture "$fixture" \
+              --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+              -- cargo test --locked -p sens --test epistemic_exact_ref_equality \
+                 source_ref_sens_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
+          else
+            echo 'EPISTEMIC_SOURCE_REF_OPT_IN_NOT_REQUESTED'
+          fi
+      - name: Zig — чистота фізичного референсу та точні транспортні тести
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Executable Rust process ↔ Zig ABI ↔ canonical .lisp/.sens pair,
+          # including exact bytes, physical execution and two negative controls.
+          echo 'test_id=rust-zig-sens-real-file-link layer=transport input=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens semantic_authority=SENS'
+          cargo test --locked -p sens-cli --test rust_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          grep -Fq 'test rust_zig_sens_real_file_link_exact_bytes_and_fail_closed ... ok' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          grep -Fq 'RUST_ZIG_SENS_FILE_LINK_PASS layer=transport' "$RUNNER_TEMP/rust-zig-sens-file-link.log"
+          # Executable Rust host -> Zig E1/T5 -> binary SENS, one-bit and CRC negatives.
+          echo 'test_id=rust-zig-e1-sens-file-link layer=transport input=tests/fixtures/semantic/exact-d3-logic-selftest.sens semantic_authority=SENS'
+          cargo test --locked -p sens-cli --test e1_zig_sens_file_link -- --nocapture | tee "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'test rust_host_zig_e1_preserves_binary_sens_verdict_and_rejects_corruption ... ok' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          grep -Fq 'RUST_ZIG_E1_SENS_PASS layer=transport cases=2' "$RUNNER_TEMP/rust-zig-e1-sens-link.log"
+          # Executable Zig -> BinarySourceWord -> SENS D2 parse; no text round-trip.
+          echo 'test_id=zig-typed-word-explain layer=parse semantic_authority=SENS'
+          # Native Rust host must actually call the D1..D10 Zig physical
+          # validator; a mere FFI declaration is insufficient evidence.
+          # D10 passes coordinate-only, fails ordinary D9 executable ingress.
+          echo 'test_id=rust-calls-zig-d10-coordinate-only layer=transport semantic_authority=SENS'
+          cargo test --locked -p sens-cli --lib \
+            zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/zig-d10-rust-host.log"
+          grep -Fq 'test zig_transport::zig_exact_egress_tests::coordinate_d10_is_zig_physical_data_not_executable_t5 ... ok' "$RUNNER_TEMP/zig-d10-rust-host.log"
+          cargo test --locked -p sens-cli --bin sens-trit explain_ -- --nocapture
+          python3 scripts/ci_zig_purity.py --self-test
+          python3 scripts/ci_zig_purity.py --report "$RUNNER_TEMP/sens-zig-purity.json"
+          # Independent Rust-free C→Zig H2 corpus: typed widths, exact bytes,
+          # controlled negative reasons, immutable source provenance.
+          echo 'test_id=zig-h2-c-host-physical-migration layer=transport semantic_authority=SENS profile=D1-D9'
+          python3 research/zig-codecs/host-c/verify_h2_physical_parity.py --self-test --run
+          # The single auto-CI must audit the real Rust↔Zig source route,
+          # not just Zig file purity. This is NOT semantic SENS admission.
+          echo 'test_id=zig-sterile-cli-firewall layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_sterile_zig_corridor.py -v
+          python3 scripts/check_sterile_zig_corridor.py
+          # Host-neutral R5 must observe actual C→Zig physical calls, not ghost strings.
+          echo 'test_id=zig-host-neutral-r5-call-site layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_rust_sens_zig_corridor.py -v
+          python3 scripts/check_rust_sens_zig_corridor.py
+          # Migration preflight MUST reject a missing or failed C-host R5 gate.
+          # Synthetic SELF_TEST_ONLY verdicts are not executable SENS admission.
+          echo 'test_id=zig-migration-r5-preflight-selftest layer=transport verdict=source-only semantic_authority=SENS'
+          python3 scripts/migration-zig-gate.py --self-test
+          # Only live migration AST calls may certify T5 bytes before publication.
+          echo 'test_id=zig-migration-publish-live-route layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_migration_zig_only_path.py -v
+          python3 scripts/check_migration_zig_only_path.py
+          # Parallel Zig migration must reject duplicate files and forged worker receipts.
+          # Synthetic workers only: never publish .sens or declare SENS semantic GO.
+          echo 'test_id=zig-parallel-worker-report-failclosed layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_migrate_parallel_fail_closed.py -v
+          # Reader #5605: canonical COND has bare D1; #d1 is temporary
+          # for compatibility-only lib source; no separate workflow.
+          echo 'test_id=d1-cond-tag-free-source-boundary layer=reader verdict=focused-test semantic_authority=SENS'
+          cargo test --locked -p sens --test d1_canonical_source_value -- --nocapture
+          # Reader #5605: canonical bare W1 succeeds; legacy mixed 0/1 is
+          # still Number, not D1. One positive/negative focused regression.
+          echo 'test_id=d1-reader-legacy-boundary-cond layer=reader verdict=focused-test semantic_authority=SENS'
+          cargo test --locked -p sens --test d1_direct_projection canonical_bare_d1_cond_succeeds_while_mixed_legacy_bare_number_rejects -- --exact --nocapture
+          # Canonical D2 COND carries bare W1 0/1, never #d1: in source.
+          # Existing SENS-native oracle proves T5 physical round-trip and
+          # keeps semantic verdicts inside binary SENS rather than host Rust.
+          echo 'test_id=canonical-positional-d1-cond-roundtrip layer=transport source=tests/oracles/d1-cond-law/proof.lisp semantic_authority=SENS'
+          cargo test --locked -p sens --test binary_sens_d1_cond_oracle -- --nocapture
+          # Release migration: reject forged or stale Rust-host Zig exemptions.
+          # Source-only guard: physical and semantic admission remain separate.
+          echo 'test_id=zig-host-exemption-registry-negative layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_rust_sens_corridor_coverage.py -v
+          # Release GO requires the exact-SHA completed central Zig CI job.
+          # Synthetic missing/red/stale check-run controls never assert GO.
+          echo 'test_id=release-central-zig-exact-sha-check layer=release-provenance verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_verify_release_ci.py -k central_zig_job -v
+          # Axiom→guard provenance must be unambiguous, including nested JSON.
+          # The negative fixture is SOURCE-ONLY; it never grants Zig/SENS GO.
+          echo 'test_id=zig-corridor-axiom-duplicate-key-failclosed layer=provenance verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_check_corridor_axiom_binding.py -v
+          # Local release-evidence receipts must name an exact CLEAN source SHA.
+          # Synthetic provenance test cannot turn physical or semantic gates green.
+          echo 'test_id=zig-release-corridor-exact-sha-selftest layer=provenance verdict=source-only semantic_authority=SENS'
+          bash -n scripts/corridor_local_evidence.sh
+          bash scripts/corridor_local_evidence.sh --self-test
+          # Host-neutral ABI v2 declarations are a blocking part of this one auto-CI.
+          # Source-only proof: never upgrades physical or SENS semantic admission.
+          echo 'test_id=zig-abi-v2-zig-rust-c-declarations layer=transport verdict=source-only semantic_authority=SENS'
+          python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py -v
+          echo 'test_id=zig-clean-domain-ladder-d1-d10 layer=transport semantic_authority=SENS law=exact-width-no-callability'
+          zig test research/zig-codecs/domain_ladder.zig
+          echo 'test_id=zig-domain-ladder-typed-e1 layer=transport semantic_authority=SENS admitted_executable=NO'
+          zig test research/zig-codecs/domain_e1.zig
+          echo 'test_id=zig-mixed-exact-domain-sequence layer=transport semantic_authority=SENS source_rungs=D1-D10'
+          zig test research/zig-codecs/domain_sequence.zig
+          zig test research/zig-codecs/tests.zig -lc
+          zig test research/zig-codecs/transport/e1_writer.zig
+          echo 'test_id=zig-rust-free-c-host-f3c-buffer-parity layer=transport semantic_authority=SENS semantic_verdict=NOT_TESTED'
+          bash research/zig-codecs/host-c/verify.sh
+          echo 'test_id=zig-migration-bridge-t5-exact-physical layer=transport semantic_authority=SENS compiler=zig-0.16'
+          python3 scripts/test_zig_codec_bridge.py
+          # Same focused Zig step, no new workflow: compile and actually link
+          # the five physical ABI exports, then audit ELF/symbols/sections.
+          # ARM Thumb is only a cross-target witness, not an ESP32-S3 proof.
+          echo 'test_id=zig-freestanding-linked-physical-abi layer=transport semantic_authority=SENS executor=zig-0.16'
+          bash research/zig-codecs/check_freestanding_link.sh \
+            "$RUNNER_TEMP/sens-zig-freestanding"
+      - name: Синтаксис усіх YAML-файлів репозиторію
+        id: yaml-syntax
+        shell: ruby {0}
+        run: |
+          require "yaml"
+
+          paths = Dir.glob("**/*.{yml,yaml}", File::FNM_DOTMATCH)
+                     .select { |path| File.file?(path) && !path.split("/").include?(".git") }
+                     .sort
+          failures = []
+
+          paths.each do |path|
+            begin
+              YAML.parse_stream(File.read(path))
+            rescue Psych::Exception => error
+              detail = error.message.lines.first.to_s.strip
+              failures << [path, detail]
+            end
+          end
+
+          puts "YAML_SYNTAX_AUDIT checked=#{paths.length} failed=#{failures.length}"
+          failures.each do |path, detail|
+            puts "YAML_SYNTAX_FAILURE path=#{path} detail=#{detail}"
+            warn "::error file=#{path}::#{detail.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")}"
+          end
+          exit(failures.empty? ? 0 : 1)
+      - name: Міграція — нуль адміністративних HOLD, усі файли доступні для роботи
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CI_GLUE_NO_SEMANTICS: test migration eligibility/provenance only.
+          # A semantic PASS requires independent native physical SENS elsewhere.
+          bash -n scripts/migrate-active-lib-exact.sh
+          python3 tests/test_domain_ladder_source_batch.py BatchSourceTests.test_macro_and_machine_sources_are_assessed_not_name_blocked BatchSourceTests.test_forward_assert_fact_quotes_exact_d3_cons
+          python3 tests/test_migrate_sens.py \
+            OperationalMigrationTests.test_reviewed_paths_can_be_pinned_for_migration_repair \
+            OperationalMigrationTests.test_missing_review_ledger_does_not_freeze_unrelated_work \
+            OperationalMigrationTests.test_historical_snapshot_can_be_inspected_without_path_hold \
+            OperationalMigrationTests.test_mixed_manifest_no_old_classification_veto \
+            OperationalMigrationTests.test_stale_classifier_does_not_veto_genuine_sha_pins
+          python3 tests/test_plan_t5_agent_work.py -v
+      - name: Не допустити жодного іншого автоматичного workflow
+        id: budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci_one_focused_workflow.py
+          python3 scripts/ci_executor_invariant.py
+          python3 scripts/ci_failure_contract.py self-test
+          python3 scripts/check-domain-ladder-identity.py --self-test --check
+          # SENS-ratified prefix ↔ Zig physical profile; not a semantic or runtime oracle.
+          python3 scripts/check-numeric-domain-ratification.py --self-test
+          python3 scripts/check-numeric-domain-ratification.py
+          # Instrumental migration proof, not an alternate semantic oracle.
+          # Failures retain fixture, command and actual output via RED contract.
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          : > "$report"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id exact-domain-migrator-d3-d4 \
+            --layer encode \
+            --fixture tests/test_migrate_exact_domain.py \
+            --report-file "$report" \
+            -- python3 -m unittest discover -s tests -p test_migrate_exact_domain.py -v
+      - name: Мігратор exact-domain — Rust перевіряє лише механічний W8 firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=sens-to-sens-no-w8-as-domain layer=encode executor=rust-mechanical semantic_authority=ratified-domain-index"
+          cargo test --locked -p sens-cli --bin sens-to-sens -- --nocapture
+      - name: CLIPS defrule — адресна перевірка роботи SENS через Rust-транспорт
+        if: always() && github.event_name == 'push' && contains(github.event.head_commit.message, '[clips-defrule-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=clips-defrule-d4-split layer=transport executor=rust-integration-not-native-T5 semantic_authority=SENS"
+          sha256sum lib/clips-import.lisp crates/sens/tests/clips_import.rs crates/sens/src/mixed_source.rs
+          # STAGED-OUT: cargo test --locked -p sens --lib mixed_source::tests::ordinary_mixed_reader_executes_immediately_applied_exact_d4_lambda -- --exact --nocapture
+          # STAGED-OUT: cargo test --locked -p sens --lib mixed_source::tests::clips_source_lifts_only_admitted_d8_symbol_to_string_and_never_quoted_payload -- --exact --nocapture
+          cargo test --locked -p sens --lib domain_identity::tests::d8_symbol_to_string_exact_core_mechanism_excludes_one_bit_neighbor -- --exact --nocapture
+          cargo test --locked -p sens --test clips_import clips_defrule_ -- --nocapture
+          cargo test --locked -p sens --test clips_import clips_deftemplate_applies_inside_defrule_conditions_and_conclusions -- --exact --nocapture
+      - name: LIFE-1 — точковий SENS-закон готовності проєкції й негативні випадки
+        if: always() && github.event_name == 'push' && contains(github.event.head_commit.message, '[life-1-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only the SENS fixture defines expected behavior. Rust loads and observes D1.
+          echo 'test_id=life-1-projection-d3-law layer=transport executor=rust-loader semantic_authority=SENS_fixture'
+          sha256sum lib/life-1-scheduler.lisp tests/fixtures/life-1-exact-d3-semantic.lisp crates/sens/tests/life_1_scheduler.rs
+          cargo test --locked -p sens --test life_1_scheduler -- --nocapture
+
+      - name: ФС — відхилення невідомих та обірваних подій журналу, без D24
+        if: contains(github.event.head_commit.message, '[fs-journal-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CI_GLUE_NO_SEMANTICS: цей Cargo runner лише виконує чинні
+          # SENS-функції через pinned reader. Не називати це native .sens PASS.
+          # Окрема повна фікстура з fs-write залишається активною в Cargo,
+          # але її D6 ADD1(revision=unqualified) є TRANSITIONAL D24 blocker.
+          sha256sum lib/lisp-fs.lisp crates/sens/tests/content_store.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id fs-journal-reject-invalid-events-integration \
+            --layer transport \
+            --fixture crates/sens/tests/content_store.rs \
+            --report-file "$RUNNER_TEMP/sens-fs-journal-red.jsonl" \
+            -- cargo test --locked -p sens --test content_store \
+                 lisp_fs_journal_replay_rejects_ -- --nocapture
+      - name: UTF-8 — 2 структурні SENS D1 вердикти й однобітний негативний контроль
+        if: contains(github.event.head_commit.message, '[utf8-d1-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=utf8-direct-d1-self-verdict layer=transport semantic_authority=SENS executor=rust-transport"
+          sha256sum lib/utf8.lisp tests/semantic/utf8-direct-d1-law.lisp crates/sens/tests/utf8.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id utf8-direct-d1-self-verdict \
+            --layer transport \
+            --fixture tests/semantic/utf8-direct-d1-law.lisp \
+            --report-file "$RUNNER_TEMP/sens-utf8-direct-d1-red.jsonl" \
+            -- cargo test --locked -p sens --test utf8 \
+                 utf8_direct_d1_self_verdict_and_one_bit_mutant -- --exact --nocapture
+      - name: Meta Canon — exact D1 non-atom and one-bit mutant
+        if: contains(github.event.head_commit.message, '[canon-meta-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=meta-canon-nonatom layer=transport semantic_authority=SENS executor=rust-transport"
+          sha256sum lib/meta-eval.lisp crates/sens/tests/canon_immutability_meta.rs tests/semantic/meta-canon-nonatom-d1-law.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id meta-canon-nonatom \
+            --layer transport \
+            --fixture tests/semantic/meta-canon-nonatom-d1-law.lisp \
+            --report-file "$RUNNER_TEMP/sens-meta-canon-nonatom-red.jsonl" \
+            -- cargo test --locked -p sens --test canon_immutability_meta \
+                 meta_canon_nonatom_is_sens_owned -- --exact --nocapture
+      - name: World LCA — SENS self-verdict and one-bit falsifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=world-ancestor-sens-self-verdicts semantic_authority=SENS"
+          sha256sum lib/world.lisp crates/sens/tests/world_ancestor_sens.rs tests/semantic/world-exact-arity-witness.lisp tests/semantic/world-ancestor-d1-law.lisp tests/semantic/world-ancestor-d1-mutant.lisp
+          cargo test --locked -p sens --test world_ancestor_sens -- --nocapture
+      - name: Compiler N0 — SENS D1 proper-list law і однобітний mutant
+        if: contains(github.event.head_commit.message, '[compiler-list-once]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=compiler-program-list-sens-fail-closed layer=transport semantic_authority=SENS"
+          sha256sum lib/compiler-nucleus.lisp crates/sens/tests/compiler_nucleus_sens.rs tests/semantic/compiler-program-list-d1-law.lisp tests/semantic/compiler-program-list-d1-mutant.lisp
+          cargo test --locked -p sens --test compiler_nucleus_sens compiler_program_list_fail_closed_is_sens_owned -- --exact --nocapture
+      - name: D1 source census — direct predicate bits, no wrapper constructors
+        id: source-census
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(sed '/^[[:space:]]*;/d' lib/time.lisp)"
+          true_count="$(printf '%s\n' "$code" | grep -oF '#d1:1' | wc -l | tr -d ' ')"
+          false_count="$(printf '%s\n' "$code" | grep -oF '#d1:0' | wc -l | tr -d ' ')"
+          legacy_true=0
+          legacy_false=0
+          if printf '%s\n' "$code" | grep -Fq '(010 (001 ()))'; then legacy_true=1; fi
+          if printf '%s\n' "$code" | grep -Fq '(101 (001 (0)) (001 (1)))'; then legacy_false=1; fi
+          sha256sum lib/time.lisp
+          printf 'TIME_D1_SOURCE_BITS true=%s false=%s legacy_true=%s legacy_false=%s\n' "$true_count" "$false_count" "$legacy_true" "$legacy_false"
+          test "$true_count" -eq 20
+          test "$false_count" -eq 4
+          test "$legacy_true" -eq 0
+          test "$legacy_false" -eq 0
+      - name: Зібрати тільки механізм виконання SENS
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          : > "$report"
+          : > "$RUNNER_TEMP/sens-native-evidence.jsonl"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id one-sens-transport-build \
+            --layer transport \
+            --fixture tests/semantic/time-d1-predicate-law.sens \
+            --report-file "$report" \
+            -- cargo build --locked -p sens-cli --bin sens --bin sens-trit
+          # Один точковий закон: фізичний exact AST wire/FASL D24 →
+          # виконання SENS D5 → D1 і окремий канонічний NEG/RATIO кадр.
+          # Це НЕ граматика T5, НЕ Python/Rust семантичний оракул.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id d5-exact-q-binary-ast-wire-predicate \
+            --layer transport \
+            --fixture crates/sens/tests/ast_exact_domain_transport.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --test ast_exact_domain_transport \
+              точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_наслідком \
+              -- --nocapture
+      - name: "E1 / T5 / F3C — реальна фізична вартість 16 точних двійкових програм"
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          echo 'test_id=e1-t5-f3c-size-corpus layer=transport authority=SENS benchmark=PHYSICAL_SIZE_ONLY'
+          # Чинний універсальний фізичний E1-свідок має бути виконаний
+          # точно один раз. Ніякого загального cargo test --lib замість звірки.
+          cargo test --locked -p sens --lib \
+            universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/e1-carrier-size.log"
+          grep -Fxq 'test universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix ... ok' "$RUNNER_TEMP/e1-carrier-size.log"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import os
+          import re
+
+          base = Path(os.environ["RUNNER_TEMP"])
+          lines = (base / "e1-carrier-size.log").read_text().splitlines()
+          records = []
+          pattern = re.compile(
+              r"^E1_SIZE_RECORD case=(\w+) words=(\d+) exact_bits=(\d+) "
+              r"e1_bytes=(\d+) t5_bytes=(\d+|NA) f3c_bytes=(\d+|NA)$"
+          )
+          for line in lines:
+              match = pattern.fullmatch(line)
+              if match:
+                  name, count, bits, e1, t5, f3c = match.groups()
+                  records.append({
+                      "case": name, "words": int(count), "exact_bits": int(bits),
+                      "e1_bytes": int(e1),
+                      "t5_bytes": None if t5 == "NA" else int(t5),
+                      "f3c_bytes": None if f3c == "NA" else int(f3c),
+                  })
+          summaries = [line for line in lines if line.startswith("E1_SIZE_SUMMARY ")]
+          if len(records) != 16 or len({r["case"] for r in records}) != 16 or len(summaries) != 1:
+              raise SystemExit(
+                  f"E1_SIZE_UNINFORMATIVE_OUTPUT records={len(records)} "
+                  f"unique={len({r['case'] for r in records})} summaries={len(summaries)}"
+              )
+          summary = dict(token.split("=", 1) for token in summaries[0].split()[1:])
+          comparable = [r for r in records if r["t5_bytes"] is not None]
+          assert int(summary["cases"]) == 16
+          assert int(summary["t5_representable"]) == len(comparable)
+          assert int(summary["f3c_eligible"]) == sum(r["f3c_bytes"] is not None for r in records)
+          assert int(summary["sum_e1_bytes"]) == sum(r["e1_bytes"] for r in records)
+          assert int(summary["sum_t5_comparable_bytes"]) == sum(r["t5_bytes"] for r in comparable)
+          assert int(summary["e1_smaller"]) == sum(r["e1_bytes"] < r["t5_bytes"] for r in comparable)
+          assert int(summary["t5_smaller"]) == sum(r["e1_bytes"] > r["t5_bytes"] for r in comparable)
+          assert int(summary["equal"]) == sum(r["e1_bytes"] == r["t5_bytes"] for r in comparable)
+          assert summary["speed"] == "NOT_MEASURED"
+          assert summary["semantic_authority"] == "SENS"
+          # The 16 E1 byte-parity fixtures do not include an F3C-eligible
+          # program; measure one separately *known* executable tiny F3C case.
+          # Never pad NA entries with zero bytes or add it to the 16-case sum.
+          tiny_pattern = re.compile(
+              r"^E1_F3C_TINY_REFERENCE case=admitted_quote words=(\d+) "
+              r"exact_bits=(\d+) e1_bytes=(\d+) t5_bytes=4 f3c_bytes=3 "
+              r"semantic_authority=SENS$"
+          )
+          tiny = [m for line in lines if (m := tiny_pattern.fullmatch(line))]
+          if len(tiny) != 1:
+              raise SystemExit(f"E1_TINY_F3C_REFERENCE_UNINFORMATIVE matches={len(tiny)}")
+          tiny_record = {
+              "case": "admitted_quote",
+              "words": int(tiny[0].group(1)),
+              "exact_bits": int(tiny[0].group(2)),
+              "e1_bytes": int(tiny[0].group(3)),
+              "t5_bytes": 4,
+              "f3c_bytes": 3,
+              "provenance": "universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix",
+          }
+          assert tiny_record["words"] >= 1 and tiny_record["exact_bits"] >= 1
+          assert tiny_record["e1_bytes"] >= 8
+          corpus = Path("research/zig-codecs/transport/fixtures/e1-v1.bits")
+          evidence = {
+              "schema": "sens-e1-carrier-size/v1",
+              "git_sha": os.environ["GITHUB_SHA"],
+              "corpus_sha256": hashlib.sha256(corpus.read_bytes()).hexdigest(),
+              "measurement": "physical_bytes_only_not_latency",
+              "semantic_authority": "SENS",
+              "e1_default": False,
+              "summary": summary,
+              "records": records,
+              "tiny_f3c_reference": tiny_record,
+          }
+          (base / "e1-carrier-size.json").write_text(
+              json.dumps(evidence, ensure_ascii=False, indent=2) + "\n"
+          )
+          print(
+              f"E1_CARRIER_SIZE_PASS cases={len(records)} "
+              f"t5_comparable={len(comparable)} "
+              f"f3c_eligible={summary['f3c_eligible']} "
+              f"tiny_f3c_bytes=3 tiny_t5_bytes=4 "
+              f"tiny_e1_bytes={tiny_record['e1_bytes']} "
+              f"corpus_sha256={evidence['corpus_sha256']} speed=NOT_MEASURED"
+          )
+          PY
+      - name: "E1 CLI → лише SENS: позитивний D1, однобітний мутант і CRC"
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          cargo test --locked -p sens-cli --bin sens-trit \
+            e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict \
+            -- --exact --nocapture | tee "$RUNNER_TEMP/sens-e1-cli-unit.log"
+          grep -Fxq 'test e1_cli_mechanism_tests::explicit_e1_cli_uses_exact_native_sens_semantic_verdict ... ok' "$RUNNER_TEMP/sens-e1-cli-unit.log"
+          # Two narrow Zig-physical W7 data tests; SENS alone owns D7 glyphs.
+          cargo test --locked -p sens-cli --bin sens-trit \
+            d7_zig_cli_boundary_tests:: -- --nocapture | tee "$RUNNER_TEMP/sens-d7-zig-boundary.log"
+          grep -Fq 'test d7_zig_cli_boundary_tests::keyboard_w7_is_sens_owned_zig_carries_exact_bytes_and_rejects_non_d7 ... ok' "$RUNNER_TEMP/sens-d7-zig-boundary.log"
+          grep -Fq 'test d7_zig_cli_boundary_tests::d7_default_cli_routes_do_not_decode_or_encode_t5_in_rust ... ok' "$RUNNER_TEMP/sens-d7-zig-boundary.log"
+          bin=target/debug/sens-trit
+          "$bin" backend
+          test -x "$bin"
+          for test_case in positive mutant; do
+            if [[ "$test_case" == positive ]]; then
+              fixture=tests/fixtures/semantic/exact-d3-logic-selftest.sens
+            else
+              fixture=tests/fixtures/semantic/exact-d3-logic-mutant.sens
+            fi
+            cp "$fixture" "$RUNNER_TEMP/e1-$test_case.sens"
+            "$bin" encode-e1 "$RUNNER_TEMP/e1-$test_case.sens"
+            test -s "$RUNNER_TEMP/e1-$test_case.e1"
+            "$bin" eval "$RUNNER_TEMP/e1-$test_case.sens" > "$RUNNER_TEMP/e1-$test_case-t5.verdict"
+            "$bin" eval-e1 "$RUNNER_TEMP/e1-$test_case.e1" > "$RUNNER_TEMP/e1-$test_case-e1.verdict"
+            cmp "$RUNNER_TEMP/e1-$test_case-t5.verdict" "$RUNNER_TEMP/e1-$test_case-e1.verdict" || {
+              echo "::error::E1_CLI_SENS_VERDICT_MISMATCH case=$test_case"; exit 1;
+            }
+            echo "E1_NATIVE_SENS_CLI_PASS case=$test_case"
+            sha256sum "$fixture" "$RUNNER_TEMP/e1-$test_case.e1"
+          done
+          if cmp -s "$RUNNER_TEMP/e1-positive-e1.verdict" "$RUNNER_TEMP/e1-mutant-e1.verdict"; then
+            echo "::error::E1_CLI_D1_MUTANT_DID_NOT_CHANGE_SENS_RESULT"; exit 1
+          fi
+          cp "$RUNNER_TEMP/e1-positive.e1" "$RUNNER_TEMP/e1-corrupt.e1"
+          python3 - "$RUNNER_TEMP/e1-corrupt.e1" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          data = bytearray(p.read_bytes())
+          data[-1] ^= 1  # Physical CRC mutant only, never semantic truth.
+          p.write_bytes(data)
+          PY
+          if "$bin" eval-e1 "$RUNNER_TEMP/e1-corrupt.e1" > "$RUNNER_TEMP/e1-corrupt.out" 2> "$RUNNER_TEMP/e1-corrupt.err"; then
+            echo "::error::E1_CLI_FAIL_OPEN_CORRUPTED_CRC"; exit 1
+          fi
+          grep -Fq 'Zig E1 physical decode rejected: code=-1' "$RUNNER_TEMP/e1-corrupt.err" || {
+            echo "::error::E1_CLI_REJECTION_UNINFORMATIVE"; exit 1;
+          }
+          echo 'E1_NATIVE_SENS_CLI_VERDICTS_PASS: positive/mutant differ, T5 matches E1, CRC fails closed'
+          echo 'test_id=e1-native-sens-corpus-eight-laws-and-three-negatives layer=eval authority=binary-SENS'
+          bash -n scripts/test-e1-native-sens-corpus.sh
+          SENS_TRIT_BIN="$PWD/target/debug/sens-trit" \
+            bash scripts/test-e1-native-sens-corpus.sh | tee "$RUNNER_TEMP/sens-e1-native-corpus.log"
+          grep -Eq '^E1_NATIVE_CORPUS_PASS positive=8 native_negative=[0-3] preadmission_negative=[0-3] authority=SENS$' \
+            "$RUNNER_TEMP/sens-e1-native-corpus.log"
+
+
+      - name: Фізичний T5-оракул — справжній sens-trit читає фізичний SENS (не Python-істина)
+        id: t5-oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum target/debug/sens-trit tests/test_approved_t5_transaction.py
+          SENS_TRIT_BIN="$PWD/target/debug/sens-trit" \
+          python3 scripts/ci_failure_contract.py run \
+            --test-id approved-t5-physical-oracle \
+            --layer encode \
+            --fixture tests/test_approved_t5_transaction.py \
+            --report-file "$report" \
+            -- python3 -m unittest discover -s tests -p test_approved_t5_transaction.py -v
+      # Manual, deeper suite has independent witnesses, never an automatic green claim.
+      - name: SENS_NATIVE_T5_CORPUS — 8 власних D1-законів, 3 негативних свідки
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[sens-native-run]'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/test-current-semantic-slice.sh --native-binary-only
+      - name: Core migration — native SENS D4-vs-D8 exact-width law
+        id: core-width-law
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          program="tests/semantic/native-t5/core-d4-vs-d8-width-law.sens"
+          projection="tests/semantic/native-t5/core-d4-vs-d8-width-law.bits"
+          # Python transports bits only. Native SENS decides EQ, COND and D1.
+          PYTHONPATH=scripts python3 - "$projection" "$program" <<'PY'
+          from pathlib import Path
+          import sys
+          from sens_t5_codec import decode_bytes, parse_words
+          if decode_bytes(Path(sys.argv[2]).read_bytes()) != parse_words(Path(sys.argv[1]).read_text(encoding="utf-8")):
+              raise SystemExit("CORE_D4_D8_T5_TRANSPORT_MISMATCH")
+          PY
+          printf '1\n' > "$RUNNER_TEMP/core-d4-vs-d8.expected"
+          sha256sum "$projection" "$program" target/debug/sens lib/core.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core-d4-vs-d8-width-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/core-d4-vs-d8.expected" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: GUARD_ONCE — точний D3:001 проти історичного W8 QUOTE (Rust лише механізм)
+        # Independent proof must run even if an unrelated earlier step is red.
+        # The failing step remains red; do not override its conclusion.
+        if: ${{ !cancelled() && contains(github.event.head_commit.message, '[guard-once]') }}
+        id: guard-once
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=guard-evidence-status-d3-width layer=parse mechanical_only=true semantic_pass=false"
+          sha256sum knowledge/guard-reference.lisp crates/sens-lsp/src/guard_knowledge.rs
+          cargo test --locked -p sens-lsp --lib guard_knowledge::tests:: -- --nocapture
+
+      - name: GUARD_NATIVE_ONCE — двогілковий D3 COND/EQ з D1-самовердиктом і однобітним мутантом
+        # Native binary SENS is the only authority; shell validates transport and verdicts.
+        if: ${{ !cancelled() && contains(github.event.head_commit.message, '[guard-once]') }}
+        id: guard-native-once
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=tests/semantic/native-t5
+          law="$dir/guard-cond-eq-branch-law"
+          mutant="$dir/guard-cond-eq-branch-mutant"
+          echo "test_id=guard-cond-eq-branch layer=eval executor=NATIVE_SENS_ORACLE semantic_authority=SENS"
+          sha256sum "$law.bits" "$law.sens" "$mutant.bits" "$mutant.sens" target/debug/sens target/debug/sens-trit
+          for name in "$law" "$mutant"; do
+            target/debug/sens-trit open "$name.sens" > "$RUNNER_TEMP/$(basename "$name").actual.bits"
+            if ! cmp "$name.bits" "$RUNNER_TEMP/$(basename "$name").actual.bits"; then
+              echo "REGRESSION id=guard-cond-eq-transport layer=transport fixture=$name.sens expected=bits-file actual=roundtrip-mismatch reproduce=target/debug/sens-trit\ open\ $name.sens" >&2
+              exit 1
+            fi
+          done
+          read -ra original < "$law.bits"
+          read -ra changed < "$mutant.bits"
+          test "${#original[@]}" -eq "${#changed[@]}"
+          differences=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            test "${#original[i]}" -eq "${#changed[i]}"
+            for ((j=0; j<${#original[i]}; j++)); do
+              if [[ "${original[i]:j:1}" != "${changed[i]:j:1}" ]]; then
+                differences=$((differences + 1))
+              fi
+            done
+          done
+          if [[ "$differences" -ne 1 ]]; then
+            echo "REGRESSION id=guard-cond-eq-one-bit layer=transport expected=1 actual=$differences fixture=$mutant.bits reproduce=cmp\ $law.bits\ $mutant.bits" >&2
+            exit 1
+          fi
+          for entry in "$law:1" "$mutant:0"; do
+            name="${entry%:*}"
+            expected="${entry##*:}"
+            if ! actual="$(target/debug/sens "$name.sens")"; then
+              echo "REGRESSION id=guard-cond-eq-branch layer=eval fixture=$name.sens expected=D1:$expected actual=execution-error reproduce=target/debug/sens\ $name.sens" >&2
+              exit 1
+            fi
+            if [[ "$actual" != "$expected" ]]; then
+              echo "REGRESSION id=guard-cond-eq-branch layer=eval fixture=$name.sens expected=D1:$expected actual=$actual reproduce=target/debug/sens\ $name.sens" >&2
+              exit 1
+            fi
+            if ! peer="$(target/debug/sens-trit eval "$name.sens")" || [[ "$peer" != "$actual" ]]; then
+              echo "REGRESSION id=guard-cond-eq-peer layer=eval fixture=$name.sens expected=D1:$actual actual=${peer:-error} reproduce=target/debug/sens-trit\ eval\ $name.sens" >&2
+              exit 1
+            fi
+            echo "PASS test_id=guard-cond-eq-branch layer=eval authority=NATIVE_SENS verdict=D1:$actual fixture=$name.sens"
+          done
+          # A single flipped quoted D1 datum turns true EQ into false EQ;
+          # SENS must not execute CAR(nil) until the second clause is selected.
+          lazy="$dir/guard-cond-lazy-car-law"
+          lazy_mutant="$dir/guard-cond-lazy-car-mutant"
+          echo "test_id=guard-cond-lazy-car layer=eval executor=NATIVE_SENS_ORACLE semantic_authority=SENS"
+          sha256sum "$lazy.bits" "$lazy.sens" "$lazy_mutant.bits" "$lazy_mutant.sens"
+          for name in "$lazy" "$lazy_mutant"; do
+            projection="$RUNNER_TEMP/$(basename "$name").actual.bits"
+            target/debug/sens-trit open "$name.sens" > "$projection"
+            if ! cmp "$name.bits" "$projection"; then
+              echo "REGRESSION id=guard-cond-lazy-car-transport layer=transport fixture=$name.sens expected=bits-file actual=roundtrip-mismatch reproduce=target/debug/sens-trit\ open\ $name.sens" >&2
+              exit 1
+            fi
+          done
+          read -ra original < "$lazy.bits"
+          read -ra changed < "$lazy_mutant.bits"
+          if [[ "${#original[@]}" -ne "${#changed[@]}" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-width layer=transport expected=equal-word-count actual=unequal fixture=$lazy_mutant.bits" >&2
+            exit 1
+          fi
+          differences=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${#original[i]}" -ne "${#changed[i]}" ]]; then
+              echo "REGRESSION id=guard-cond-lazy-car-width layer=transport expected=equal-bit-width actual=mismatch word=$i" >&2
+              exit 1
+            fi
+            for ((j=0; j<${#original[i]}; j++)); do
+              if [[ "${original[i]:j:1}" != "${changed[i]:j:1}" ]]; then
+                differences=$((differences + 1))
+              fi
+            done
+          done
+          if [[ "$differences" -ne 1 ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-one-bit layer=transport expected=1 actual=$differences fixture=$lazy_mutant.bits" >&2
+            exit 1
+          fi
+          if ! result="$(target/debug/sens "$lazy.sens")" || [[ "$result" != "1" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-positive layer=eval fixture=$lazy.sens expected=D1:1 actual=${result:-execution-error} reproduce=target/debug/sens\ $lazy.sens" >&2
+            exit 1
+          fi
+          if ! peer="$(target/debug/sens-trit eval "$lazy.sens")" || [[ "$peer" != "$result" ]]; then
+            echo "REGRESSION id=guard-cond-lazy-car-peer layer=eval fixture=$lazy.sens expected=D1:1 actual=${peer:-execution-error}" >&2
+            exit 1
+          fi
+          echo "PASS test_id=guard-cond-lazy-car-positive layer=eval authority=NATIVE_SENS verdict=D1:1"
+          if target/debug/sens "$lazy_mutant.sens" > "$RUNNER_TEMP/guard-lazy-car.stdout" 2> "$RUNNER_TEMP/guard-lazy-car.stderr"; then
+            echo "REGRESSION id=guard-cond-lazy-car-mutant layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=accepted reproduce=target/debug/sens\ $lazy_mutant.sens" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/guard-lazy-car.stderr"; then
+            echo "UNINFORMATIVE-NEGATIVE id=guard-cond-lazy-car-mutant layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=unrelated-error reproduce=target/debug/sens\ $lazy_mutant.sens" >&2
+            cat "$RUNNER_TEMP/guard-lazy-car.stderr" >&2
+            exit 1
+          fi
+          if target/debug/sens-trit eval "$lazy_mutant.sens" > "$RUNNER_TEMP/guard-lazy-car-peer.stdout" 2> "$RUNNER_TEMP/guard-lazy-car-peer.stderr"; then
+            echo "REGRESSION id=guard-cond-lazy-car-mutant-peer layer=eval fixture=$lazy_mutant.sens expected=rejection actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'car expects a non-empty list' "$RUNNER_TEMP/guard-lazy-car-peer.stderr"; then
+            echo "UNINFORMATIVE-NEGATIVE id=guard-cond-lazy-car-mutant-peer layer=eval fixture=$lazy_mutant.sens expected=CAR-nonpair actual=unrelated-error" >&2
+            cat "$RUNNER_TEMP/guard-lazy-car-peer.stderr" >&2
+            exit 1
+          fi
+          echo "PASS test_id=guard-cond-lazy-car-mutant layer=eval authority=NATIVE_SENS verdict=CAR-nonpair bit_mutations=1"
+
+      - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
+        id: packed
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id packed-bits-d1-d10 \
+            --layer transport \
+            --fixture crates/sens/src/packed_bits.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
+          # Mechanical compiler schema gate: SENS owns language meaning;
+          # Rust merely rejects ambiguous duplicate transport fields.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id compiler-artifact-seven-bit-slot-guard \
+            --layer transport \
+            --fixture crates/sens/src/compiler_language.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib compiler_language::tests::whole_program_artifact_verifier_rejects_duplicate_fields_before_execution -- --exact --nocapture
+          cargo test --locked -p sens --lib quote_of_canonical_d3_empty_coordinate_is_structural_nil -- --nocapture
+          cargo test --locked -p sens --lib quote_preserves_nonempty_d3_domain_identity -- --nocapture
+      - name: Презентація зберігає точну ширину D3/D4
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "test_id=presentation-exact-domain-width semantic_authority=domain-ladder"
+          sha256sum crates/sens/src/presentation.rs
+          cargo test --locked -p sens --lib presentation::tests::equal_payload_d3_d4_identities_remain_visibly_distinct -- --exact --nocapture
+      - name: Рамка-3 — Rust-тест точного 5-байтового B/C/S/W механізму (не SENS-оракул)
+        id: frame3-bcsw
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=frame3-bcsw-five-bytes layer=transport executor=rust-integration—not-native-cli semantic_authority=none"
+          sha256sum crates/sens/src/frame3_micro_v5_lambda_app.rs
+          python3 scripts/ci_failure_contract.py run \
+            --test-id frame3-bcsw-five-bytes \
+            --layer transport \
+            --fixture crates/sens/src/frame3_micro_v5_lambda_app.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib frame3_micro_v5_lambda_app::tests::five_byte_bcsw_exact_sens_reduction -- --exact --nocapture
+      - name: Reason-index — 2 SENS-owned D4/D5 selector witnesses
+        id: reason-selectors
+        # Keep following native SENS witnesses running; the final fail-closed
+        # scanner still blocks CI via steps.reason-selectors.outcome on failure.
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          law=tests/semantic/reason-index-width-selectors-law.sens
+          mutant=tests/semantic/reason-index-width-selectors-mutant.sens
+          printf '1\n' > "$RUNNER_TEMP/reason-selectors-law.expected"
+          # Exact D4 one-bit mutation: CADR 1001 -> CAAR 1000.
+          # Current mutant reaches a noncallable D1:0 identity; native SENS
+          # must reject it rather than return the unmutated D1:YES verdict.
+          sha256sum "$law" "$mutant"
+          for kind in law mutant; do
+            source="tests/semantic/reason-index-width-selectors-${kind}.bits"
+            physical="tests/semantic/reason-index-width-selectors-${kind}.sens"
+            tr -s '[:space:]' '\n' < "$source" | sed '/^$/d' > "$RUNNER_TEMP/reason-${kind}-source.words"
+            target/debug/sens-trit open "$physical" | tr -s '[:space:]' '\n' | sed '/^$/d' > "$RUNNER_TEMP/reason-${kind}-physical.words"
+            cmp "$RUNNER_TEMP/reason-${kind}-source.words" "$RUNNER_TEMP/reason-${kind}-physical.words"
+          done
+          mapfile -t original < "$RUNNER_TEMP/reason-law-source.words"
+          mapfile -t changed < "$RUNNER_TEMP/reason-mutant-source.words"
+          test "${#original[@]}" -eq "${#changed[@]}"
+          flips=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${changed[i]}" ]]; then
+              [[ "${original[i]}" == 1001 && "${changed[i]}" == 1000 ]] || {
+                echo "::error::REASON_SELECTOR_MUTANT_NOT_EXACT_D4_CADR_CAAR word=$i"; exit 1;
+              }
+              flips=$((flips + 1))
+            fi
+          done
+          test "$flips" -eq 1 || { echo "::error::REASON_SELECTOR_MUTANT_NOT_ONE_BIT flips=$flips"; exit 1; }
+          echo "REASON_SELECTOR_ONE_BIT_PASS D4:1001->D4:1000 native_T5_words_verified=1"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-reason-index-width-selectors-law \
+            --layer eval \
+            --fixture "$law" \
+            --expected-file "$RUNNER_TEMP/reason-selectors-law.expected" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$law"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-reason-index-width-selectors-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$mutant"
+          # This fallthrough is executed, not a dead-branch proxy.
+          # This current one-bit D1:0 -> D1:1 mutation selects the forbidden
+          # native D1:0 call-head branch. SENS must reject it, not return NIL.
+          if grep -Fq '(010 ())' lib/reason.lisp; then
+            echo '::error::REGRESSION: synthetic D3 ATOM(()) fallback in reason.lisp'
+            exit 1
+          fi
+          grep -Fq '#d1:1' lib/reason.lisp
+          for kind in law mutant; do
+            source="tests/semantic/reason-direct-fallback-d1-${kind}.bits"
+            physical="tests/semantic/reason-direct-fallback-d1-${kind}.sens"
+            tr -s '[:space:]' '\n' < "$source" | sed '/^$/d' > "$RUNNER_TEMP/reason-d1-${kind}-source.words"
+            target/debug/sens-trit open "$physical" | tr -s '[:space:]' '\n' | sed '/^$/d' > "$RUNNER_TEMP/reason-d1-${kind}-physical.words"
+            cmp "$RUNNER_TEMP/reason-d1-${kind}-source.words" "$RUNNER_TEMP/reason-d1-${kind}-physical.words"
+          done
+          original=( $(cat "$RUNNER_TEMP/reason-d1-law-source.words") )
+          changed=( $(cat "$RUNNER_TEMP/reason-d1-mutant-source.words") )
+          test "${#original[@]}" -eq "${#changed[@]}"
+          flips=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${changed[i]}" ]]; then
+              [[ "$i" -eq 18 && "${original[i]}" == 0 && "${changed[i]}" == 1 ]] || { echo "::error::REASON_D1_MUTANT_NOT_CANONICAL index=$i"; exit 1; }
+              flips=$((flips + 1))
+            fi
+          done
+          test "$flips" -eq 1
+          printf '1\n' > "$RUNNER_TEMP/reason-d1.expected"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id reason-direct-fallback-d1-law \
+            --layer eval \
+            --fixture tests/semantic/reason-direct-fallback-d1-law.sens \
+            --expected-file "$RUNNER_TEMP/reason-d1.expected" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens tests/semantic/reason-direct-fallback-d1-law.sens
+          python3 scripts/ci_failure_contract.py run \
+            --test-id reason-direct-fallback-d1-mutant \
+            --layer eval \
+            --fixture tests/semantic/reason-direct-fallback-d1-mutant.sens \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens tests/semantic/reason-direct-fallback-d1-mutant.sens
+      - name: Core2 — SENS-only D3/D8 law and single-bit falsifier
+        id: core2
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          for kind in law mutant; do
+            program="tests/semantic/core2-d3-domain-${kind}.sens"
+            source="tests/semantic/core2-d3-domain-${kind}.bits"
+            expected="$RUNNER_TEMP/core2-d3-${kind}.expected"
+            test_id="sens-core2-d3-domain-${kind}"
+            # Transport integrity only; Python has no semantic expectations.
+            PYTHONPATH=scripts python3 - "$source" "$program" <<'PY'
+          from pathlib import Path
+          import sys
+          from sens_t5_codec import decode_bytes, parse_words
+          source = parse_words(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          physical = decode_bytes(Path(sys.argv[2]).read_bytes())
+          if physical != source:
+              raise SystemExit("CORE2_T5_SOURCE_IDENTITY_BLOCKED")
+          PY
+            sha256sum "$source" "$program"
+            case "$kind" in
+              law) printf '1\n' > "$expected" ;;
+              mutant) printf '0\n' > "$expected" ;;
+              *) exit 2 ;;
+            esac
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "$test_id" \
+              --layer eval \
+              --fixture "$program" \
+              --expected-file "$expected" \
+              --report-file "$report" \
+              --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+              -- target/debug/sens "$program"
+          done
+      - name: Єдиний фізичний SENS-закон — D1:0 пропускає, D1:1 вибирає
+        id: law
+        shell: bash
+        run: |
+          set -euo pipefail
+          program=tests/semantic/time-d1-predicate-law.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-d1"
+          echo "test_id=sens-time-d1-predicate-law layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-time-d1-predicate-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-d1" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+          # Другий SENS self-verdict: D3 ATOM(QUOTE empty) = точний D1:1.
+          program=tests/semantic/quantity-d1-direct-fallback-law.sens
+          echo "test_id=quantity-d1-direct-fallback-law layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id quantity-d1-direct-fallback-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-d1" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: Негативний контроль — безпосередній процес SENS відкидає non-callable
+        id: mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          mutant=tests/semantic/domain-logic-2040/mutant.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=sens-domain-logic-2040-mutant layer=eval executor=target/debug/sens"
+          sha256sum "$mutant"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-domain-logic-2040-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$mutant"
+          mutant=tests/semantic/quantity-d1-direct-fallback-mutant.sens
+          echo "test_id=quantity-d1-direct-fallback-mutant layer=eval semantic_authority=binary-SENS"
+          sha256sum "$mutant"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id quantity-d1-direct-fallback-mutant \
+            --layer eval \
+            --fixture "$mutant" \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$mutant"
+      - name: Лінтер — фізичний T5 закон D4 NULL / D3 ATOM+EQ
+        id: linter-law
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture=tests/semantic/linter-domain-cutover-law.sens
+          printf '1\n' > "$RUNNER_TEMP/linter-law-expected"
+          sha256sum lib/linter.lisp "$fixture" tests/semantic/linter-domain-cutover-law.bits
+          echo "test_id=linter-domain-cutover-law layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id linter-domain-cutover-law \
+            --layer eval \
+            --fixture "$fixture" \
+            --expected-file "$RUNNER_TEMP/linter-law-expected" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$fixture"
+      - name: Лінтер — негативний двійковий T5, D3 EQ відкидає пару
+        id: linter-mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture=tests/semantic/linter-domain-cutover-mutant.sens
+          sha256sum "$fixture" tests/semantic/linter-domain-cutover-mutant.bits
+          echo "test_id=linter-domain-cutover-mutant layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id linter-domain-cutover-mutant \
+            --layer eval \
+            --fixture "$fixture" \
+            --expect-error-substring "eq expects two atoms" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$fixture"
+      - name: Core min-max — нативний D4 NULL закон порожнього результату
+        id: core-sentinel
+        shell: bash
+        run: |
+          set -euo pipefail
+          program=tests/semantic/core-sentinel-null-law.sens
+          printf '1\n' > "$RUNNER_TEMP/core-sentinel-expected"
+          sha256sum lib/core.lisp lib/core4.lisp "$program" tests/semantic/core-sentinel-null-law.bits
+          echo "test_id=core-sentinel-null-law layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core-sentinel-null-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/core-sentinel-expected" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: Core min-max — один біт D1 міняє семантичний вердикт
+        id: core-sentinel-mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          law=tests/semantic/core-sentinel-null-law.bits
+          mutant=tests/semantic/core-sentinel-null-mutant.bits
+          awk '
+            NR==FNR {n=split($0,bits," "); for(i=1;i<=n;i++) baseline[i]=bits[i]; next}
+            {m=split($0,bits," "); if(m!=n) exit 2
+             for(i=1;i<=n;i++) if(bits[i]!=baseline[i]) {
+               if(length(bits[i])!=1 || length(baseline[i])!=1) exit 3
+               if(bits[i]!="0" || baseline[i]!="1") exit 4
+               changed++
+             }
+             if(changed!=1) exit 5
+            }
+            END {if(changed!=1) exit 6}
+          ' "$law" "$mutant"
+          echo 'CI_GLUE_NO_SEMANTICS one D1 bit mutation verified'
+          program=tests/semantic/core-sentinel-null-mutant.sens
+          printf '0\n' > "$RUNNER_TEMP/core-sentinel-mutant-expected"
+          sha256sum "$program" "$mutant"
+          echo "test_id=core-sentinel-null-mutant layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core-sentinel-null-mutant \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/core-sentinel-mutant-expected" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: Двійковий закон арності знань — рівно D3/D4 і точний D1:YES
+        id: knowledge
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Source form is checked mechanically. Actual semantics: native SENS.
+          code="$(sed '/^[[:space:]]*;/d' lib/knowledge.lisp)"
+          if printf '%s\n' "$code" | grep -Fq '(010 (001 (0)))'; then
+            echo '::error::KNOWLEDGE_LEGACY_D1_FALSE'
+            exit 1
+          fi
+          if printf '%s\n' "$code" | grep -Fq '(010 ())'; then
+            echo '::error::KNOWLEDGE_LEGACY_D1_TRUE'
+            exit 1
+          fi
+          grep -Fq '((0101 value) #d1:1)' lib/knowledge.lisp
+          grep -Fq '((010 value) #d1:0)' lib/knowledge.lisp
+          grep -Fq '((010 journal) #d1:0)' lib/knowledge.lisp
+          if sed '/^[[:space:]]*;/d' lib/knowledge.lisp | grep -Fq '(010 (001 ()))'; then
+            echo '::error::KNOWLEDGE_MACRO_LEGACY_D1_TRUE'
+            exit 1
+          fi
+          grep -Fq '(1110 #d1:1' lib/knowledge.lisp
+          program=tests/semantic/knowledge-exact-arity-structure.sens
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-knowledge-d1"
+          echo "test_id=knowledge-exact-arity-structure layer=eval semantic_authority=binary-SENS"
+          sha256sum "$program"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id knowledge-exact-arity-structure \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-knowledge-d1" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: KNOWLEDGE-CONS — D3:111 відмінний від D4:1110 і D8:00000100
+        id: knowledge-cons-width
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Source policy is mechanical only. SENS executes and decides the law.
+          grep -Fq '(1110 (001 111)' lib/knowledge.lisp
+          source=tests/semantic/knowledge-cons-exact-width-law.lisp
+          program=tests/semantic/knowledge-cons-exact-width-law.sens
+          target/debug/sens-trit encode "$source"
+          target/debug/sens-trit verify "$source"
+          sha256sum lib/knowledge.lisp "$source" "$program"
+          printf '1\n' > "$RUNNER_TEMP/expected-knowledge-width-d1"
+          echo 'test_id=knowledge-cons-exact-width-law layer=eval semantic_authority=binary-SENS'
+          python3 scripts/ci_failure_contract.py run \
+            --test-id knowledge-cons-exact-width-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/expected-knowledge-width-d1" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: Core1 — дев'ять селекторних законів перевіряє двійковий SENS і D1-мутант
+        id: core1-selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=tests/fixtures/core1-selectors-semantic
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=core1-selector-9-laws layer=eval semantic_authority=binary-SENS"
+          sha256sum lib/core1.lisp "$base.bits" "$base.sens" "$base-mutant.bits" "$base-mutant.sens"
+          # Лише механічний транспорт: збіг усіх точних бітових слів із T5.
+          target/debug/sens-trit open "$base.sens" > "$RUNNER_TEMP/core1-positive.bits"
+          target/debug/sens-trit open "$base-mutant.sens" > "$RUNNER_TEMP/core1-mutant.bits"
+          cmp "$base.bits" "$RUNNER_TEMP/core1-positive.bits"
+          cmp "$base-mutant.bits" "$RUNNER_TEMP/core1-mutant.bits"
+          mapfile -t original < <(tr '[:space:]' '\n' < "$base.bits" | sed '/^$/d')
+          mapfile -t mutated < <(tr '[:space:]' '\n' < "$base-mutant.bits" | sed '/^$/d')
+          test "${#original[@]}" -eq "${#mutated[@]}"
+          changes=0
+          for ((i=0; i<${#original[@]}; i++)); do
+            if [[ "${original[i]}" != "${mutated[i]}" ]]; then
+              [[ "${original[i]}" == 0 && "${mutated[i]}" == 1 ]] || { echo "::error::CORE1_MUTANT_WIDTH_OR_BIT_VIOLATION word=$i"; exit 1; }
+              changes=$((changes + 1))
+            fi
+          done
+          test "$changes" -eq 1 || { echo "::error::CORE1_MUTANT_NOT_ONE_BIT changed_words=$changes"; exit 1; }
+          printf '1\n' > "$RUNNER_TEMP/core1-expected-yes"
+          printf '0\n' > "$RUNNER_TEMP/core1-expected-no"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core1-selector-9-laws \
+            --layer eval \
+            --fixture "$base.sens" \
+            --expected-file "$RUNNER_TEMP/core1-expected-yes" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$base.sens"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core1-selector-1bit-falsifier \
+            --layer eval \
+            --fixture "$base-mutant.sens" \
+            --expected-file "$RUNNER_TEMP/core1-expected-no" \
+            --report-file "$report" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$base-mutant.sens"
+      - name: CI-клей Python — механічні межі кодування QUOTE/D7 та SLP1 (не semantic oracle)
+        id: quoted-d7
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          for fixture in test_sens_quoted_datum_law.py test_slp1_d7_v2_quote_boundary.py; do
+            echo "test_id=$fixture layer=encode executor=CI_GLUE_NO_SEMANTICS"
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "$fixture" \
+              --layer encode \
+              --fixture "tests/$fixture" \
+              --report-file "$report" \
+              -- python3 -m unittest discover -s tests -p "$fixture" -v
+          done
+      - name: SID8 broad-source катовер — точні D6 MAP-сайти, історичні літерали не замінено
+        id: sid8-broad-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum tests/test_sid8_broad_source_cutover.py
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sid8-broad-source-cutover \
+            --layer encode \
+            --fixture tests/test_sid8_broad_source_cutover.py \
+            --report-file "$report" \
+            -- python3 -m unittest discover -s tests -p test_sid8_broad_source_cutover.py -v
+      - name: Мігратор — немає позитивного дозволу без точної identity, навіть з Python -O
+        id: migrator-optimized
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id migrate-resolver-failclosed-optimized \
+            --layer encode \
+            --fixture scripts/migrate-to-sens-codes.py \
+            --report-file "$report" \
+            -- python3 -O tests/test_migrate_resolver_failclosed.py
+      - name: TCP — Rust інтеграційний тест з викликом SENS-бібліотеки (не окремий native CLI oracle)
+        id: tcp-migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=tcp-binary-d4-law layer=transport executor=rust-integration—not-native-cli"
+          sha256sum tests/fixtures/semantic/tcp-exact-selftest.bits lib/tcp.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id tcp-binary-d4-law \
+            --layer transport \
+            --fixture tests/fixtures/semantic/tcp-exact-selftest.bits \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --test tcp_d1_fallback -- --nocapture
+      - name: META-FC — двійковий D1 self-verdict та однобітний мутант (Rust лише транспорт)
+        id: meta-fc-d1
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          echo "test_id=meta-fc-predicates-d1 layer=transport executor=CI_GLUE_NO_SEMANTICS; SENS owns truth"
+          sha256sum lib/meta-eval-first-class.lisp tests/semantic/meta-fc-predicates-d1-{law,mutant}.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id meta-fc-predicates-d1 \
+            --layer transport \
+            --fixture tests/semantic/meta-fc-predicates-d1-law.lisp \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --test meta_fc_predicate_witness -- --nocapture
+      - name: UNIFY observer — SENS D1/D3/D4/D5/D8 fail-closed law and one-bit mutant
+        id: unify-observe-d1
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Structure-only guards: meaning and verdict remain binary SENS.
+          grep -Fq '(0011 уніфікація-спостереження-стан' lib/unify-observe.lisp
+          if grep -Eq '\((001000|101010000)([[:space:]]|\()' lib/unify-observe.lisp; then
+            echo 'REGRESSION: historical D6/D9 executable head in unify-observe' >&2
+            exit 1
+          fi
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          evidence="$RUNNER_TEMP/sens-native-evidence.jsonl"
+          printf '1\n' > "$RUNNER_TEMP/expected-unify-d1"
+          for program in tests/semantic/unify-observe-d1-fallback-{law,mutant}.sens; do
+            sha256sum "$program"
+          done
+          python3 scripts/ci_failure_contract.py run \
+            --test-id unify-observe-d1-law \
+            --layer eval \
+            --fixture tests/semantic/unify-observe-d1-fallback-law.sens \
+            --expected-file "$RUNNER_TEMP/expected-unify-d1" \
+            --report-file "$report" \
+            --executor-report-file "$evidence" \
+            -- target/debug/sens tests/semantic/unify-observe-d1-fallback-law.sens
+          python3 scripts/ci_failure_contract.py run \
+            --test-id unify-observe-d1-mutant \
+            --layer eval \
+            --fixture tests/semantic/unify-observe-d1-fallback-mutant.sens \
+            --expect-error-substring "not callable" \
+            --report-file "$report" \
+            --executor-report-file "$evidence" \
+            -- target/debug/sens tests/semantic/unify-observe-d1-fallback-mutant.sens
+      - name: Вбудовані перевірки реальності — інформативні гейти, що відповідають чинному main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/run-reality-checks.py
+      - name: Zig ↔ Rust T5 — обов'язковий парний бенчмарк байтового паритету
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          python3 research/zig-codecs/t5/run_paired_bench.py \
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-t5-results"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-t5-results/summary.md"
+      - name: Zig ↔ Rust F3C — обов'язковий парний бенчмарк .senc
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          python3 research/zig-codecs/f3c/run_paired_bench.py \
+            --zig-pin 0.16.0 --pairs 3 --out-dir "$RUNNER_TEMP/zig-rust-f3c-results"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/STATUS"
+          cat "$RUNNER_TEMP/zig-rust-f3c-results/summary.md"
+
+      - name: Rust→project dependency ledger (Zig-only burndown)
+        # Rust must reach lib/contract/contracts/knowledge ONLY via the sterile Zig
+        # corridor. This writes the burndown ledger and fails if a NEW direct
+        # dependency appeared -- the set may only shrink.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_rust_project_deps.py . --out "$RUNNER_TEMP/rust-project-deps.json"
+          if [ -f research/rust-project-deps.json ]; then
+            python3 scripts/report_rust_project_deps.py . --check
+          fi
+
+      - name: Upload Rust→project dependency ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-project-deps
+          path: ${{ runner.temp }}/rust-project-deps.json
+          if-no-files-found: warn
+
+      - name: UNGUARDING ratchet — жоден guard не може бути муляжем
+        # A guard that cannot fail is itself a failure. A placeholder/stub gate, or a
+        # guard whose negative controls do not pass, fails here -- so a dummy gate
+        # never reaches main.
+        shell: bash
+        run: python3 scripts/check_guards_are_real.py .
+
+      - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        # The release is GO only when every gate passes on ONE SHA (#4196). This step
+        # prints the GO count and names the red gates -- report-only, never greenwashed.
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
+          echo "release-go-gate exit=$?"
+          exit 0
+
+      - name: Upload release GO-gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-go-gate
+          path: ${{ runner.temp }}/release-go-gate.json
+          if-no-files-found: warn
+
+      - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
+        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The crate is its own workspace (benchmarks/core-math-demand-rust/Cargo.toml
+          # has [workspace]); -p from the root cannot see it. Build by manifest path.
+          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release
+          python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
+            --json "$RUNNER_TEMP/math-bench.json"
+
+      - name: Upload math benchmark (SENS vs Rust)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-bench-sens-vs-rust
+          path: ${{ runner.temp }}/math-bench.json
+          if-no-files-found: warn
+
+      - name: Обов'язковий evidence gate T5/F3C — SHA, парні samples, status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          sha = os.environ["GITHUB_SHA"]
+          cases = (
+              ("T5", "zig-rust-t5-results",
+               "TRANSPORT_PARITY_VERIFIED; TIMING_EXPLORATORY; SEMANTICS_NOT_TESTED", 240),
+              ("F3C", "zig-rust-f3c-results",
+               "F3C_TRANSPORT_PARITY_VERIFIED; TIMING_EXPLORATORY; SEMANTICS_NOT_TESTED", 120),
+          )
+          errors = []
+          for name, dirname, expected, required_samples in cases:
+              folder = root / dirname
+              required = ("STATUS", "environment.json", "samples.jsonl", "summary.md")
+              missing = [file for file in required if not (folder / file).is_file()
+                         or not (folder / file).stat().st_size]
+              if missing:
+                  errors.append(f"{name} MISSING_EVIDENCE files={missing} at={folder}")
+                  continue
+              status = (folder / "STATUS").read_text().strip()
+              if status != expected:
+                  errors.append(f"{name} BAD_STATUS expected={expected!r} actual={status!r}")
+              try:
+                  meta = json.loads((folder / "environment.json").read_text())
+                  found_sha = meta.get("git_sha")
+                  if found_sha != sha:
+                      errors.append(f"{name} WRONG_COMMIT expected={sha} actual={found_sha}")
+                  versions = (meta.get("zig"), meta.get("zig_version"))
+                  if "0.16.0" not in versions:
+                      errors.append(f"{name} WRONG_ZIG_VERSION actual={versions}")
+                  digests = meta.get("binary_sha256", {})
+                  if sorted(digests) != ["rust", "zig"] or any(
+                      len(value) != 64 for value in digests.values()
+                  ):
+                      errors.append(f"{name} MISSING_BINARY_SHA values={digests!r}")
+                  rows = [json.loads(line) for line in
+                          (folder / "samples.jsonl").read_text().splitlines()]
+                  if len(rows) != required_samples:
+                      errors.append(
+                          f"{name} MISSING_SAMPLES expected={required_samples} actual={len(rows)}"
+                      )
+                  pairs = set(row.get("pair") for row in rows)
+                  impls = set(row.get("impl") for row in rows)
+                  if pairs != {0, 1, 2} or impls != {"zig", "rust"}:
+                      errors.append(f"{name} BROKEN_PAIRING pairs={pairs} impls={impls}")
+                  for row in rows:
+                      if row.get("elapsed_ns", 0) <= 0 or row.get("reps", 0) <= 0:
+                          errors.append(f"{name} INVALID_SAMPLE row={row!r}")
+                          break
+                  print(f"BENCH_EVIDENCE codec={name} commit={sha} samples={len(rows)} "
+                        f"physical_parity={status.split(';')[0]} timings=EXPLORATORY")
+              except (OSError, ValueError, TypeError, KeyError) as exc:
+                  errors.append(f"{name} UNINFORMATIVE_OUTPUT exception={exc}")
+          if errors:
+              for error in errors:
+                  print("::error::BENCH_REQUIRED " + error, flush=True)
+              raise SystemExit(1)
+          print("BENCH_REQUIRED_T5_F3C_PASS: both codecs mandatory; no speed threshold; SENS semantics NOT inferred")
+          PY
+
+      - name: Зберегти сирі Zig↔Rust T5/F3C виміри і SHA
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zig-rust-codec-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/zig-rust-t5-results/
+            ${{ runner.temp }}/zig-rust-f3c-results/
+            ${{ runner.temp }}/sens-zig-purity.json
+            ${{ runner.temp }}/e1-carrier-size.log
+            ${{ runner.temp }}/e1-carrier-size.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Червоний має говорити — валідність діагностики
+        if: always()
+        shell: bash
+        env:
+          BUDGET_OUTCOME: ${{ steps.budget.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          PACKED_OUTCOME: ${{ steps.packed.outcome }}
+          SOURCE_OUTCOME: ${{ steps.source-census.outcome }}
+          LAW_OUTCOME: ${{ steps.law.outcome }}
+          MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
+          REASON_OUTCOME: ${{ steps.reason-selectors.outcome }}
+          UNIFY_OUTCOME: ${{ steps.unify-observe-d1.outcome }}
+          CORE2_OUTCOME: ${{ steps.core2.outcome }}
+          CORE_WIDTH_OUTCOME: ${{ steps.core-width-law.outcome }}
+          KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
+          LINTER_OUTCOME: ${{ steps.linter-law.outcome }}
+          LINTER_MUTANT_OUTCOME: ${{ steps.linter-mutant.outcome }}
+          CORE_SENTINEL_OUTCOME: ${{ steps.core-sentinel.outcome }}
+          CORE_SENTINEL_MUTANT_OUTCOME: ${{ steps.core-sentinel-mutant.outcome }}
+          CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
+          QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
+          TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
+          META_FC_OUTCOME: ${{ steps.meta-fc-d1.outcome }}
+          SID8_BROAD_OUTCOME: ${{ steps.sid8-broad-source.outcome }}
+          T5_ORACLE_OUTCOME: ${{ steps.t5-oracle.outcome }}
+          FRAME3_OUTCOME: ${{ steps.frame3-bcsw.outcome }}
+          MIGRATOR_OUTCOME: ${{ steps.migrator-optimized.outcome }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          # Власник 2026-10-14: обмеження UNINFORMATIVE-EXECUTOR знято —
+          # мова ще не зріла вимагати нативної SENS-паритетності з Rust/Python.
+          # Діагностика нижче лишається; нативні квитанції більше не вимагаються.
+          diagnostic_rc=0
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE_SENTINEL_OUTCOME" == success && "$CORE_SENTINEL_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$META_FC_OUTCOME" == success && "$SID8_BROAD_OUTCOME" == success && "$T5_ORACLE_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
+          else
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
+          fi
+          if [[ "$diagnostic_rc" -ne 0 ]]; then
+            echo "::error::UNINFORMATIVE-EXECUTOR or UNINFORMATIVE-OUTPUT; blocking CI"
+            exit 1
+          fi
+
+      - name: Одноразовий запуск чинного мігратора для active lib (чистий checkout)
+        if: ${{ always() && contains(github.event.head_commit.message, '[migration-apply-once]') }}
+        shell: bash
+        run: |
+          # This is the *existing* migration driver, not a replacement or
+          # additional semantic oracle. No hidden skip or silent PASS.
+          set -uo pipefail
+          out="$RUNNER_TEMP/sens-active-migration"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/base-sha.txt"
+          git status --porcelain=v1 > "$out/status-before.txt"
+          echo "MIGRATION_COMMAND=bash scripts/migrate-active-lib-exact.sh --apply"
+          echo "MIGRATION_SHA=$(git rev-parse HEAD)"
+          timeout 480 bash scripts/migrate-active-lib-exact.sh --apply > "$out/driver.log" 2>&1
+          rc=$?
+          cat "$out/driver.log"
+          git diff --binary > "$out/worktree.patch"
+          git status --porcelain=v1 > "$out/status-after.txt"
+          git diff --stat
+          printf 'MIGRATION_EXIT=%s\nMIGRATION_PATCH_BYTES=%s\n' "$rc" "$(wc -c < "$out/worktree.patch")"
+          exit "$rc"
+      - name: Зберегти фактичні результати одноразового мігратора
+        if: ${{ always() && contains(github.event.head_commit.message, '[migration-apply-once]') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sens-active-migration-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-active-migration/
+          if-no-files-found: error
+          retention-days: 7
+      - name: RUST-ZIG-ONLY — заборона прямих Rust → Lisp/SENS/FASL залежностей
+        # TEMPORARILY DISABLED per owner request 2026-10-16 during Rust↔Lisp migration.
+        # Restore if: always() when the linkage check is ready again.
+        if: ${{ false }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          # This is a separate mechanical authority boundary, not a SENS semantic verdict.
+          unit_rc=0
+          python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
+          edge_rc=0
+          python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
+          production_unit_rc=0
+          python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          production_rc=0
+          python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+            echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
+            exit 1
+          fi
+          echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"
+\n'}"
+          if [[ "$d6_selector_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_SELECTOR_ORIENTATION_DIFF layer=eval fixture=$d6_selector_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d6_selector_actual" >&2
+            exit 1
+          fi
+          echo "D6_SELECTOR_ORIENTATION_NATIVE_PASS functions=16 positive=16 negative=16 authority=SENS"
           # D6 lower-law derived functions — execution stays entirely in SENS.
           d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
           sha256sum "$d6_source" lib/core4.lisp target/debug/sens
