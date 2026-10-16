@@ -209,6 +209,35 @@ jobs:
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
+      - name: D8 — один точковий SENS-контроль трьох мовних партій
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in d8-liststar-length d8-map-any-lower d8-copy-list; do
+            fixture="tests/semantic/${id}-laws.lisp"
+            sha256sum "$fixture" lib/core4.lisp target/debug/sens
+            if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+              printf '%s\n' "$output" >&2
+              echo "::error::D8_BATCH_EXEC_RED id=$id layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=execution-error reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+            actual="$(printf '%s\n' "$output" | tail -n 1)"
+            if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+              echo "::error::D8_BATCH_LAW_DIFF id=$id layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=$actual first_mismatch=D1-vector reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+          done
+          for item in "d8-liststar-length-invalid" "d8-map-any-reject-non-d1" "d8-copy-list-invalid"; do
+            fixture="tests/semantic/${item}.lisp"
+            sha256sum "$fixture"
+            if output="$(target/debug/sens "$fixture" 2>&1)"; then
+              echo "::error::D8_BATCH_NEGATIVE_SURVIVED id=$item layer=eval fixture=$fixture expected=refusal actual=accepted reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+            printf '%s\n' "$output"
+          done
+          echo "D8_NATIVE_BATCH_PASS functions=5 positive=24 negative=3 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000"
+
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
         shell: bash
