@@ -457,3 +457,82 @@
        (C1-WORLD-VALUE
          (C1-WORLD-EVAL WORLD EXPR)))
      (C1-EVAL-PROGRAM FORMS (001 ())))))
+
+; ─────────────────────────────────────────────────────────────────────────────
+; Bootstrap additions: reader + reclamation (the parts a bootstrap cannot omit).
+; Reader: dotted-pair list reader over a token list (no host I/O).
+; Reclamation: McCarthy 1960 free-storage mark/sweep, expressed as exact laws.
+; Both are SENS-owned; no host name interpretation, no Rust/Python backdoor.
+; ─────────────────────────────────────────────────────────────────────────────
+
+(0011 C1-READ
+  (00100 C1-READ
+    (0010 (TOKENS)
+      (110
+        ((101 TOKENS (001 ())) (001 ()))
+        ((101 (100 TOKENS) 010)          ; ATOM token -> the token itself
+         (100 TOKENS))
+        (#d1:1
+         (C1-READ-LIST TOKENS))))))
+
+(0011 C1-READ-LIST
+  (00100 C1-READ-LIST
+    (0010 (TOKENS)
+      (110
+        ((101 TOKENS (001 ())) (001 ()))
+        ((101 (100 TOKENS) 110)          ; DOT token -> dotted tail
+         (100 (011 TOKENS)))
+        (#d1:1
+         (111 (C1-READ (100 TOKENS))
+              (C1-READ-LIST (011 TOKENS))))))))
+
+(0011 C1-RECLAIM
+  (0010 (ROOTS CELLS)
+    (C1-SWEEP (C1-MARK-ALL ROOTS CELLS) CELLS)))
+
+(0011 C1-MARK-ALL
+  (00100 C1-MARK-ALL
+    (0010 (ROOTS CELLS)
+      (110
+        ((101 ROOTS (001 ())) CELLS)
+        (#d1:1
+         (C1-MARK-ALL (011 ROOTS)
+                      (C1-MARK (100 ROOTS) CELLS)))))))
+
+(0011 C1-MARK
+  (00100 C1-MARK
+    (0010 (REF CELLS)
+      (110
+        ((101 REF (001 ())) CELLS)
+        ((101 CELLS (001 ())) CELLS)
+        (#d1:1
+         (C1-MARK-CHILDREN REF (C1-MARK-CELL REF CELLS)))))))
+
+(0011 C1-MARK-CELL
+  (0010 (REF CELLS)
+    (110
+      ((101 (100 (100 CELLS)) REF)          ; head cell reached -> mark it
+       (111 (111 (100 (100 CELLS)) #d1:1) (011 CELLS)))
+      (#d1:1 CELLS))))
+
+(0011 C1-MARK-CHILDREN
+  (0010 (REF CELLS)
+    (110
+      ((101 (100 (100 CELLS)) REF)
+       (C1-MARK (011 (100 CELLS))
+                (C1-MARK (011 (011 (100 CELLS))) CELLS)))
+      (#d1:1 CELLS))))
+
+(0011 C1-SWEEP
+  (00100 C1-SWEEP
+    (0010 (MARKED CELLS)
+      (110
+        ((101 CELLS (001 ())) (001 ()))
+        ((101 (011 (100 CELLS)) #d1:1)   ; marked -> keep
+         (111 (100 CELLS) (C1-SWEEP MARKED (011 CELLS))))
+        (#d1:1                            ; unmarked -> return to free list
+         (C1-SWEEP MARKED (011 CELLS)))))))
+
+(0011 C1-FREE
+  (0010 (CELLS)
+    (C1-SWEEP (001 ()) CELLS)))
