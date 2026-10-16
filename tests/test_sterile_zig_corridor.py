@@ -79,7 +79,11 @@ class SterileZigCorridorTests(unittest.TestCase):
                 '"transport=rust-reference"',
             ),
             (
-                "host", "if copied != required", "if false /* forged Zig length */",
+                "host",
+                "let copied = unsafe { asset_ffi::sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n"
+                "    if copied != required",
+                "let copied = unsafe { asset_ffi::sens_zig_linter_bytes_copy(bytes.as_mut_ptr(), bytes.len()) };\n"
+                "    if false /* forged Zig length */",
             ),
             (
                 "zig", 'const linter_asset = @embedFile("lib/linter.lisp");',
