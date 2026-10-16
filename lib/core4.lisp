@@ -521,6 +521,19 @@
 
 
 
+
+; D6:110100 LEQ, D6:110110 GEQ — похідні точні предикати порядку.
+; Лише доменно-кваліфіковані D24+ значення; D5 GREATERP/LESSP
+; вже примушують правильний числовий домен і дають точний D1.
+; D4:0100 NOT інвертує тільки D1, не створює нової арифметики.
+(0011 не-більше?
+  (0010 (ліве праве)
+    (0100 (11011 ліве праве))))
+
+(0011 не-менше?
+  (0010 (ліве праве)
+    (0100 (11010 ліве праве))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string

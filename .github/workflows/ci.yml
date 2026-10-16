@@ -182,6 +182,33 @@ jobs:
           fi
           echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
 
+      - name: D6 — два похідні предикати порядку через точні D5/D4
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_source="tests/semantic/d6-order-derived-laws.lisp"
+          negative_source="tests/semantic/d6-order-reject-non-numeric.lisp"
+          sha256sum "$test_source" "$negative_source" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$test_source" 2>&1)"; then
+            echo "::error::SENS_D6_ORDER_EXECUTOR_RED test=sens-d6-order layer=eval program=$test_source expected=eight-D1-YES actual=execution-error" >&2
+            printf '%s\n' "$observed" >&2
+            exit 1
+          fi
+          actual="${observed##*$'\n'}"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::SENS_D6_ORDER_LAW_DIFF test=sens-d6-order layer=eval program=$test_source expected=(1,1,1,1,1,1,1,1) actual=$actual" >&2
+            exit 1
+          fi
+          if negative="$(target/debug/sens "$negative_source" 2>&1)"; then
+            echo "::error::SENS_D6_ORDER_NEGATIVE_SURVIVED test=sens-d6-order-reject layer=eval program=$negative_source expected=reject-non-D24 actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq 'D24' <<< "$negative"; then
+            echo "::error::SENS_D6_ORDER_NEGATIVE_UNINFORMATIVE test=sens-d6-order-reject layer=eval program=$negative_source expected=D24-domain-error actual=$negative" >&2
+            exit 1
+          fi
+          echo "SENS_D6_ORDER_NATIVE_PASS identities=D6:110100,D6:110110 checks=8 negative=1 authority=SENS"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
