@@ -536,3 +536,47 @@
 (0011 C1-FREE
   (0010 (CELLS)
     (C1-SWEEP (001 ()) CELLS)))
+
+; ─────────────────────────────────────────────────────────────────────────────
+; Bootstrap additions: arithmetic, delegating to the RATIFIED D5/D6 laws.
+; Numbers are D24+; the functions are D5/D6 (d5-ratification.lisp, d6-ratification.lisp):
+;   D5:01010 PLUS · D5:01011 DIFFERENCE · D5:10110 TIMES · D5:10111 QUOTIENT
+;   D6:001110 ADD1 · D6:001111 SUB1 · D6:010010 NEG · D6:010100 REMAINDER
+; C1-* here are thin SENS wrappers: no new primitive, no host arithmetic.
+; ─────────────────────────────────────────────────────────────────────────────
+
+(0011 C1-PLUS
+  (0010 (A B)
+    (01010 A B)))
+
+(0011 C1-DIFFERENCE
+  (0010 (A B)
+    (01011 A B)))
+
+(0011 C1-TIMES
+  (0010 (A B)
+    (10110 A B)))
+
+(0011 C1-QUOTIENT
+  (0010 (A B)
+    (10111 A B)))
+
+(0011 C1-ADD1
+  (0010 (A)
+    (001110 A)))
+
+(0011 C1-SUB1
+  (0010 (A)
+    (001111 A)))
+
+(0011 C1-NEG
+  (0010 (A)
+    (010010 A)))
+
+(0011 C1-REMAINDER
+  (0010 (A B)
+    (010100 A B)))
+
+(0011 C1-ZEROP
+  (0010 (A)
+    (101 A 0)))
