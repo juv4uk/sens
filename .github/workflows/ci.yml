@@ -493,6 +493,29 @@ jobs:
             exit 1
           fi
           echo "D8_RIGHT_EDGE_NATIVE_PASS identities=D8:11000001,D8:11000011 laws=6 negative=D1:0 authority=SENS"
+      - name: D8 — COPY-LIST нативні позитивні й негативний SENS-закон
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-copy-list-laws.lisp"
+          invalid="tests/semantic/d8-copy-list-invalid.lisp"
+          sha256sum "$fixture" "$invalid" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D8_COPY_LIST_RED id=d8-copy-list layer=eval fixture=$fixture expected=eight-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_COPY_LIST_DIFF id=d8-copy-list layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if observed_bad="$(target/debug/sens "$invalid" 2>&1)"; then
+            echo "::error::D8_COPY_LIST_BAD_MUTANT id=d8-copy-list layer=eval fixture=$invalid expected=non-list-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_COPY_LIST_NATIVE_PASS identity=D8:10100000 laws=8 negative=1 authority=SENS"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
