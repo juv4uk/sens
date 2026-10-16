@@ -139,6 +139,25 @@ jobs:
           fi
           echo "D6_MAPLIST_NATIVE_PASS laws=3 negative=1 exact=D6:000101"
 
+      - name: D8 — правий згорток: некомутативний позитив і негатив у SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-right-fold-laws.lisp"
+          expected="(1 1 1 1)"
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "::error::D8_RIGHT_FOLD_EXECUTOR_RED layer=eval fixture=$fixture expected=$expected actual=execution-error" >&2
+            echo "$observed" >&2
+            exit 1
+          fi
+          actual="$(tail -n 1 <<< "$observed")"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::D8_RIGHT_FOLD_LAW_DIFF layer=eval fixture=$fixture expected=$expected actual=$actual" >&2
+            exit 1
+          fi
+          echo "D8_RIGHT_FOLD_NATIVE_PASS coord=D8:10111001 laws=4 direct_D8_callability=unclaimed"
+
       - name: D8 — чотири похідні SENS закони з D1 позитивом та негативом
         shell: bash
         run: |
