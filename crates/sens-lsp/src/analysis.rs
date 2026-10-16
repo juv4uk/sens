@@ -109,7 +109,10 @@ fn is_quote_head(expr: &Expr) -> bool {
         ExprKind::DomainIdentity(identity) => {
             (identity.width(), identity.packed_bits()) == D3_QUOTE
         }
-        ExprKind::Sid(legacy) => legacy.packed_byte() == 0b0000_0001,
+        ExprKind::Sid(identity) => {
+            // No historical eight-bit payload can establish D3 QUOTE.
+            (identity.width(), u16::from(identity.packed_bits())) == D3_QUOTE
+        },
         ExprKind::Symbol(surface) => surface_domain_coordinate(surface) == Some(D3_QUOTE),
         _ => false,
     }
