@@ -1,5 +1,6 @@
-; Exact SENS definitions for D6 TAKE/DROP/CURRY + ADD1/SUB1 aliases.
-; Insert into lib/core4.lisp after зменшити-на-один (single-writer).
+; D6 TAKE/DROP + ADD1/SUB1 surface aliases for lib/core4.lisp
+; CURRY/SCAN/ZIP/UNZIP already on main (8fc45d7). Apply via
+; scripts/apply-d6-take-drop-curry-batch.py after зменшити-на-один.
 
 (0011 додати-1 збільшити-на-один)
 (0011 відняти-1 зменшити-на-один)
@@ -23,9 +24,3 @@
       ((0100 (0101 xs))
        (відкинути (зменшити-на-один n) (011 xs))))))
 (0011 drop відкинути)
-
-(0011 частково-застосувати
-  (0010 (f a)
-    (0010 (b)
-      (f a b))))
-(0011 curry частково-застосувати)

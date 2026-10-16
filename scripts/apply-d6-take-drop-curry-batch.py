@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Single-writer: apply research/d6-take-drop-curry-batch into lib/core4.lisp."""
+"""Single-writer: apply TAKE/DROP + ADD1/SUB1 aliases into lib/core4.lisp."""
 from __future__ import annotations
 import re
 import sys
