@@ -202,6 +202,12 @@ fn main() {
     // bootstrap or ambient host capabilities. Reject extra flags instead of
     // silently interpreting its bytes as textual Lisp.
     let raw_args: Vec<String> = env::args().collect();
+    // Binary identity metadata must not depend on Lisp library bootstrap.
+    // This reports the actual Cargo-compiled executable's pinned version.
+    if raw_args.len() == 2 && matches!(raw_args[1].as_str(), "--version" | "-V" | "-v") {
+        println!("sens {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
     if let Some(request) = physical_t5_request(&raw_args) {
         let result = match request {
             Ok(filename) => fs::read(filename)
