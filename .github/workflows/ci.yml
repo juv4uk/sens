@@ -162,6 +162,25 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          # Exact D8 PLUSP/MINUSP and two shared D6 LENGTH surfaces.
+          d8_sign="tests/semantic/d8-sign-and-list-length-laws.lisp"
+          d8_bad="tests/semantic/d8-sign-reject-nonnumeric.lisp"
+          sha256sum "$d8_sign" "$d8_bad" lib/core4.lisp target/debug/sens
+          if ! d8_out="$(target/debug/sens "$d8_sign" 2>&1)"; then
+            echo "::error::D8_SIGN_LENGTH_RED layer=eval fixture=$d8_sign expected=ten-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$d8_out" >&2
+            exit 1
+          fi
+          d8_result="$(printf "%s\n" "$d8_out" | tail -n 1)"
+          if [[ "$d8_result" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_SIGN_LENGTH_DIFF layer=eval fixture=$d8_sign expected=(1 1 1 1 1 1 1 1 1 1) actual=$d8_result" >&2
+            exit 1
+          fi
+          if d8_bad_out="$(target/debug/sens "$d8_bad" 2>&1)"; then
+            echo "::error::D8_SIGN_UNEXPECTED_ACCEPT layer=eval fixture=$d8_bad expected=nonnumeric-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
