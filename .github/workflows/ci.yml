@@ -151,21 +151,21 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
-          # Чотири ратифіковані D5 ідентичності: українська SENS-проєкція.
+          # П’ять канонічних D5 функцій: чотири структурні та ZEROP D24+.
           d5_projection="tests/semantic/d5-uk-projection-laws.lisp"
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
           if ! d5_observed="$(target/debug/sens "$d5_projection" 2>&1)"; then
             printf '%s\n' "$d5_observed" >&2
-            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1) actual=execution-error" >&2
+            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d5_observed"
           d5_actual="${d5_observed##*$'\n'}"
-          if [[ "$d5_actual" != "(1 1 1 1 1 1)" ]]; then
-            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1) actual=$d5_actual" >&2
+          if [[ "$d5_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=$d5_actual" >&2
             exit 1
           fi
-          echo "D5_UK_NATIVE_PASS functions=4 laws=6 authority=SENS"
+          echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
 
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
