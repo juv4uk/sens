@@ -829,7 +829,7 @@ mod exact_domain_primitive_tests {
             let error = invoke_domain_identity(d4(0b0001), &arguments, &environment, span)
                 .expect_err("D4:0001 EVAL requires exactly one represented expression");
             assert_eq!(error.kind, ErrorKind::Arity);
-            assert!(error.message.starts_with("0001: expected /"), "{}", error.message);
+            assert!(error.message.starts_with("D4:0001: expected /"), "{}", error.message);
         }
 
         let collision = invoke_domain_identity(
