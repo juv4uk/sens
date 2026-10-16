@@ -240,7 +240,7 @@ pub use gpu_execution_packet::{
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
-pub use sens::{Sens, CoreDomainIdentity};
+pub use sens::Sens;
 pub use source_words::{
     parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
     BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
