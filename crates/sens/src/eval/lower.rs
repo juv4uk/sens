@@ -17,7 +17,6 @@ use super::{canon, necessary_forms};
 use crate::semantic_registry;
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::CoreDomainIdentity;
-use crate::CoreDomainIdentity;
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Eq, PartialEq)]

@@ -10,7 +10,6 @@ use super::{
     special_forms,
 };
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, CoreDomainIdentity, Span, Value};
-use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SidRouteKind {

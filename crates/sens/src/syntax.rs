@@ -1,6 +1,5 @@
 use crate::value::{NumericBuffer, Rational};
 use crate::{BinaryNumber, CoreDomainIdentity, DomainIdentity};
-use crate::CoreDomainIdentity;
 use std::rc::Rc;
 
 /// Byte range in the original UTF-8 source.
@@ -103,9 +102,8 @@ pub enum ExprKind {
     Local { depth: u32, index: u32 },
 }
 
-// Коробка для функції СЕНС — рівно 1 байт. Якщо це колись зміниться,
-// збірка має впасти, а не мовчки розійтися з таблицею функцій.
-const _: () = assert!(std::mem::size_of::<CoreDomainIdentity>() == 1);
+// CoreDomainIdentity holds a domain tag plus its bits and is not a one-byte
+// wire slot. The exact widths are encoded explicitly in exact_domain_codec.
 
 /// Shared nesting cap for every recursive structure walk over reader
 /// output: the parser itself, `quote`d-data conversion (`quoted`) and

@@ -6,7 +6,6 @@ use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quote
 use crate::canonical_reader::text7_binding_key;
 use crate::semantic_registry;
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, CoreDomainIdentity, Span, Value};
-use crate::CoreDomainIdentity;
 use std::{
     collections::HashSet,
     rc::Rc,

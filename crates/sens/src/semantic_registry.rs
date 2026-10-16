@@ -13,7 +13,6 @@
 use std::{collections::HashMap, sync::OnceLock};
 
 use crate::{Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9, CoreDomainIdentity, DomainIdentity};
-use crate::CoreDomainIdentity;
 
 mod generated {
     include!("semantic_registry_generated.rs");
