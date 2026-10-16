@@ -1,0 +1,12 @@
+[package]
+name = "sens-core"
+version = "0.1.0"
+edition = "2021"
+description = "Clean SENS core: the carrier + domain words only, no packing, no reader, no Rust math."
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# zero dependencies on purpose: this is the host-neutral minimal core.
+
+[features]
+default = []
