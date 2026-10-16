@@ -1222,6 +1222,16 @@
   (0010 (значення)
     (100 (011 (011 (011 (011 (011 значення))))))))
 
+; D8:00010011 MAPLIST-right — чинна D8 координата (#3960).
+; Закон #3744: MAPLIST(REVERSE(xs), lambda tail: f(REVERSE(tail))).
+; Похідна SENS-функція на D5:10100 REVERSE і D6:000101 MAPLIST.
+; Прямої D8 callability не надаємо, усі біти збережено.
+(0011 залишки-справа
+  (0010 (значення дія)
+    (відобразити-залишки
+      (зворот значення)
+      (функція (хвіст) (дія (зворот хвіст))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
