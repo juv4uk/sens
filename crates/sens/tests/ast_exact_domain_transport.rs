@@ -55,7 +55,10 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
         expression(ExprKind::Pair(
             std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
             std::rc::Rc::new(expression(ExprKind::Sid(
-                sens::sens!(10101000),
+                sens::CoreDomainIdentity::from_source_word(
+                    sens::BinarySourceWord::W8(Bit8::new(0b10101000).unwrap()),
+                )
+                .expect("historical exact-width source word"),
             ))),
         )),
     ].into()));
