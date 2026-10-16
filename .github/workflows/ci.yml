@@ -165,6 +165,31 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
+          d6_math_law="tests/semantic/d6-add1-sub1-laws.lisp"
+          d6_math_mutant="tests/semantic/d6-add1-sub1-mutant.lisp"
+          sha256sum "$d6_math_law" "$d6_math_mutant" lib/core4.lisp target/debug/sens
+          if ! d6_math_output="$(target/debug/sens "$d6_math_law" 2>&1)"; then
+            echo "::error::D6_ADD_SUB_EXEC_RED layer=eval fixture=$d6_math_law expected=(1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d6_math_output" >&2
+            exit 1
+          fi
+          d6_math_actual="$(printf '%s\n' "$d6_math_output" | tail -n1)"
+          if [[ "$d6_math_actual" != "(1 1 1 1)" ]]; then
+            echo "::error::D6_ADD_SUB_LAW_DIFF layer=eval fixture=$d6_math_law expected=(1 1 1 1) actual=$d6_math_actual" >&2
+            exit 1
+          fi
+          if ! d6_mutant_output="$(target/debug/sens "$d6_math_mutant" 2>&1)"; then
+            echo "::error::D6_ADD_SUB_MUTANT_EXEC_RED layer=eval fixture=$d6_math_mutant expected=(0 0) actual=execution-error" >&2
+            printf '%s\n' "$d6_mutant_output" >&2
+            exit 1
+          fi
+          d6_mutant_actual="$(printf '%s\n' "$d6_mutant_output" | tail -n1)"
+          if [[ "$d6_mutant_actual" != "(0 0)" ]]; then
+            echo "::error::D6_ADD_SUB_MUTANT_ACCEPTED layer=eval fixture=$d6_math_mutant expected=(0 0) actual=$d6_mutant_actual" >&2
+            exit 1
+          fi
+          echo "D6_ADD_SUB_NATIVE_PASS identities=D6:001110,D6:001111 laws=4 mutants=2"
           # D8:00100011 STRING>: SENS-positive and wrong-orientation negative.
           d8_greater_law="tests/semantic/d8-string-greater-laws.lisp"
           d8_greater_mutant="tests/semantic/d8-string-greater-mutant.lisp"
