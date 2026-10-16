@@ -481,21 +481,21 @@ jobs:
             exit 1
           fi
           echo "D8_SELECTOR_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
-          # D8:01101000..01101111 — один native SENS тест, 8 позитивів + 8 однобітних мутантів.
+          # D8:01101000..01110111 — один native SENS тест, 16 позитивів + 16 однобітних мутантів.
           d8_next_fixture="tests/semantic/d8-second8-selector-orientation.lisp"
           sha256sum "$d8_next_fixture" lib/core4.lisp target/debug/sens
           if ! d8_next_observed="$(target/debug/sens "$d8_next_fixture" 2>&1)"; then
             printf '%s\n' "$d8_next_observed" >&2
-            echo "::error::D8_NEXT8_NATIVE_RED layer=eval fixture=$d8_next_fixture expected=16-D1-YES actual=execution-error" >&2
+            echo "::error::D8_NEXT16_NATIVE_RED layer=eval fixture=$d8_next_fixture expected=32-D1-YES actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d8_next_observed"
           d8_next_actual="$(printf '%s\n' "$d8_next_observed" | tail -n 1)"
-          if [[ "$d8_next_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
-            echo "::error::D8_NEXT8_LAW_DIFF layer=eval fixture=$d8_next_fixture expected=16-D1-YES actual=$d8_next_actual" >&2
+          if [[ "$d8_next_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_NEXT16_LAW_DIFF layer=eval fixture=$d8_next_fixture expected=32-D1-YES actual=$d8_next_actual" >&2
             exit 1
           fi
-          echo "D8_NEXT8_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
+          echo "D8_NEXT16_NATIVE_PASS functions=16 positive=16 onebit_negative=16 authority=SENS"
 
       - name: D8 TAKE-right / DROP-right — SENS-позитив і негатив
         shell: bash
@@ -2180,21 +2180,21 @@ jobs:
             exit 1
           fi
           echo "D8_SELECTOR_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
-          # D8:01101000..01101111 — один native SENS тест, 8 позитивів + 8 однобітних мутантів.
+          # D8:01101000..01110111 — один native SENS тест, 16 позитивів + 16 однобітних мутантів.
           d8_next_fixture="tests/semantic/d8-second8-selector-orientation.lisp"
           sha256sum "$d8_next_fixture" lib/core4.lisp target/debug/sens
           if ! d8_next_observed="$(target/debug/sens "$d8_next_fixture" 2>&1)"; then
             printf '%s\n' "$d8_next_observed" >&2
-            echo "::error::D8_NEXT8_NATIVE_RED layer=eval fixture=$d8_next_fixture expected=16-D1-YES actual=execution-error" >&2
+            echo "::error::D8_NEXT16_NATIVE_RED layer=eval fixture=$d8_next_fixture expected=32-D1-YES actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d8_next_observed"
           d8_next_actual="$(printf '%s\n' "$d8_next_observed" | tail -n 1)"
-          if [[ "$d8_next_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
-            echo "::error::D8_NEXT8_LAW_DIFF layer=eval fixture=$d8_next_fixture expected=16-D1-YES actual=$d8_next_actual" >&2
+          if [[ "$d8_next_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_NEXT16_LAW_DIFF layer=eval fixture=$d8_next_fixture expected=32-D1-YES actual=$d8_next_actual" >&2
             exit 1
           fi
-          echo "D8_NEXT8_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
+          echo "D8_NEXT16_NATIVE_PASS functions=16 positive=16 onebit_negative=16 authority=SENS"
 
       - name: D8 TAKE-right / DROP-right — SENS-позитив і негатив
         shell: bash
