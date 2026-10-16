@@ -27,6 +27,7 @@ pub enum BinarySourceWord {
     W7(Bit7),
     W8(Bit8),
     W9(Bit9),
+    W10(crate::DomainD10),
 }
 
 impl BinarySourceWord {
@@ -41,6 +42,7 @@ impl BinarySourceWord {
             Self::W7(_) => Bit7::width(),
             Self::W8(_) => Bit8::width(),
             Self::W9(_) => Bit9::width(),
+            Self::W10(_) => DomainD10::width(),
         }
     }
 
@@ -58,6 +60,7 @@ impl BinarySourceWord {
             Self::W7(word) => word.packed_bits() as u16,
             Self::W8(word) => word.packed_bits() as u16,
             Self::W9(word) => word.packed_bits(),
+            Self::W10(word) => word.packed_bits(),
         }
     }
 
@@ -144,6 +147,7 @@ impl BinarySourceWord {
     pub const fn d9(self) -> Option<crate::CoreD9> {
         match self {
             Self::W9(word) => Some(crate::CoreD9::from_word(word)),
+            Self::W10(word) => Some(crate::DomainD10::from_word(word)),
             _ => None,
         }
     }

@@ -12,7 +12,8 @@
 //! - D8 exact identity is current; a packed transport byte never establishes its domain.
 
 use crate::{
-    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, D7DataWord,
+    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, DomainD10, PredicateBit,
+    Racana2, D7DataWord,
 };
 use std::fmt;
 
@@ -27,6 +28,7 @@ pub enum DomainIdentity {
     D7(D7DataWord),
     D8(CoreD8),
     D9(CoreD9),
+    D10(DomainD10),
 }
 
 impl DomainIdentity {
@@ -49,6 +51,7 @@ impl DomainIdentity {
             Self::D7(value) => value.word().packed_bits() as u16,
             Self::D8(value) => value.word().packed_bits() as u16,
             Self::D9(value) => value.word().packed_bits(),
+            Self::D10(value) => value.packed_bits(),
         }
     }
 
@@ -64,6 +67,8 @@ impl DomainIdentity {
             BinarySourceWord::W7(word) => Self::D7(D7DataWord::from_word(word)),
             BinarySourceWord::W8(word) => Self::D8(CoreD8::from_word(word)),
             BinarySourceWord::W9(word) => Self::D9(CoreD9::from_word(word)),
+            BinarySourceWord::W10(word) => Self::D9(DomainD10::from_word(word)),
+            BinarySourceWord::W10(word) => Self::D10(word),
         }
     }
 
@@ -78,6 +83,7 @@ impl DomainIdentity {
             Self::D7(value) => BinarySourceWord::W7(value.word()),
             Self::D8(value) => BinarySourceWord::W8(value.word()),
             Self::D9(value) => BinarySourceWord::W9(value.word()),
+            Self::D10(value) => BinarySourceWord::W10(value),
         }
     }
 
@@ -113,6 +119,7 @@ impl DomainIdentity {
                 Some(CoreDomainIdentity::D8(value))
             }
             Self::D9(_) => None,
+            Self::D10(_) => None,
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
