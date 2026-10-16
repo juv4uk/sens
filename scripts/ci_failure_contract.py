@@ -120,6 +120,10 @@ def validate_manifest(manifest):
 
 
 def check_report(record):
+    # Fail closed on JSON arrays/scalars before accessing receipt fields.
+    # A malformed diagnostic must remain UNINFORMATIVE-OUTPUT, never crash CI.
+    if not isinstance(record, dict):
+        return ["invalid:record_type"]
     errors = []
     for key in FIELDS:
         if key not in record or record[key] in ("", None):
