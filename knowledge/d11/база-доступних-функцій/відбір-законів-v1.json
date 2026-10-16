@@ -8,10 +8,12 @@
   "counts": {
     "curated": 153,
     "additional_function_shaped": 410,
-    "unique_names": 563,
-    "detailed_law_dossiers": 116,
+    "unique_names": 565,
+    "detailed_law_dossiers": 118,
     "new_domain_codes": 0,
-    "new_callable": 0
+    "new_callable": 0,
+    "archaeology_recovered": 2,
+    "additional_archived_nonfunction_labels": 54
   },
   "pins": {
     "curated": "86415a6e61bc986815a3a5055b877a78d9c7e251",
@@ -22,6 +24,7 @@
     "LIVE_SOURCE_DEFINITION_FOUND": 300,
     "HISTORICAL_DONOR_ONLY": 231,
     "SOURCE_BINDING_ABSENT_AT_ORIGIN": 24,
+    "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE": 2,
     "LIVE_SOURCE_RELOCATED_TO_WORLD": 3,
     "HISTORICAL_WITH_LIBRARY_SOURCE": 4,
     "LIVE_SOURCE_MOVED_TO_CORE": 1
@@ -30,468 +33,105 @@
   "proof_gate": "Native positive+negative, source SHA, exact-domain type, independent law comparison, owner ratification; none of these rows is newly callable.",
   "dossiers": [
     {
-      "name": "NCONC",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Деструктивно змінити CDR останнього cons першого списку, зберігши alias.",
-      "negative_case_uk": "APPEND не змінює CDR старого alias.",
-      "lower_domain_crosswalk": [
-        "D8:11101100:RPLACD",
-        "D4:1111:APPEND"
+      "name": "ACTIVE-VALUE-GET",
+      "source_state": "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE",
+      "source_primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "source_blob_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_row_index": 0,
+      "proposed_law_uk": "Вкладене читання активного значення застосовує GET-обробники від внутрішнього до зовнішнього; за відсутності GET повертає вже розв'язаний localState.",
+      "donor_law_claim_en": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+      "positive_witness_claims": [
+        "Nested stored 10; inner get adds 2, outer get multiplies by 3 -> 36, trace inner:get,outer:get.",
+        "A plain value is read unchanged, and getFn absent returns child-localState result."
       ],
-      "gate": "HOLD_MUTATION",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
+      "negative_falsifier_claims": [
+        "Executing outer get before inner get returns a different result/trace.",
+        "GetLocalStateOnly must not invoke any nested getFn, and must expose immediate nested value."
+      ],
+      "lower_domain_crosswalk": [
+        "D10:0100000000:DEREF",
+        "D10:0100000111:REF-CELL",
+        "D10:0000001111:SLOT-VALUE",
+        "D8:11101011:RPLACA",
+        "D8:11110010:VECTOR-SET!"
+      ],
+      "independent_derivability_challenge": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
+      "gate": "HOLD_LOOPS_NESTED_EFFECTS_POSSIBLY_DERIVED",
+      "required_native_evidence": [
+        "SENS read/write on nested closures and typed cells, no host interpreter",
+        "GET inner-before-outer event trace and explicit raw bypass",
+        "PUT outer-before-inner and no-delegation negative case",
+        "F3 same-observation check against D10 REF-CELL/DEREF/SLOT-VALUE",
+        "owner decision after evidence"
+      ],
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
       "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
+      "ratification": "PENDING"
     },
     {
-      "name": "NREVERSE",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Розвернути список через повторне використання старих cons-клітин.",
-      "negative_case_uk": "Чистий REVERSE не змінює зв'язків старого alias.",
-      "lower_domain_crosswalk": [
-        "D5:10100:REVERSE",
-        "D8:11101100:RPLACD"
+      "name": "ACTIVE-VALUE-PUT",
+      "source_state": "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE",
+      "source_primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "source_blob_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_row_index": 1,
+      "proposed_law_uk": "Вкладений запис активного значення викликає зовнішній PUT-обробник першим і входить у внутрішній лише за явного делегування; за відсутності PUT оновлює лише локальний стан.",
+      "donor_law_claim_en": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+      "positive_witness_claims": [
+        "Nested state 10; put 19 with outer and inner delegating writes -> trace outer:put,inner:put and terminal state 19.",
+        "An outer handler that does not delegate leaves inner state unchanged; absent putFn replaces its own localState."
       ],
-      "gate": "HOLD_MUTATION",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
+      "negative_falsifier_claims": [
+        "Invoking inner put before outer violates nested ordering.",
+        "A putFn that deliberately does not delegate must not trigger inner put; PutLocalStateOnly must suppress nested handlers."
+      ],
+      "lower_domain_crosswalk": [
+        "D10:0100001011:RESET-REF!",
+        "D10:0011111001:SWAP-REF!",
+        "D10:0100000111:REF-CELL",
+        "D8:11101011:RPLACA",
+        "D8:11110010:VECTOR-SET!"
+      ],
+      "independent_derivability_challenge": "Potential closure-based composition; must prove material language-visible difference before ratification.",
+      "gate": "HOLD_LOOPS_NESTED_EFFECTS_POSSIBLY_DERIVED",
+      "required_native_evidence": [
+        "SENS read/write on nested closures and typed cells, no host interpreter",
+        "GET inner-before-outer event trace and explicit raw bypass",
+        "PUT outer-before-inner and no-delegation negative case",
+        "F3 same-observation check against D10 REF-CELL/DEREF/SLOT-VALUE",
+        "owner decision after evidence"
+      ],
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
       "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
+      "ratification": "PENDING"
     },
     {
-      "name": "COMPUTE-APPLICABLE-METHODS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Методи вибираються за спеціалізаторами аргументів і precedence.",
-      "negative_case_uk": "Несумісний метод відкинутий, порядок стабільний.",
-      "lower_domain_crosswalk": [
-        "D10:1010111010:APPLICABLE-METHODS"
-      ],
-      "gate": "HOLD_D10_DUPLICATE",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "DIRECT-SLOT-DEFINITION-CLASS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Метаклас визначає клас прямого слота до узгодження спадкування.",
-      "negative_case_uk": "Прямий та ефективний слоти не плутати.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_MOP",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Ефективний клас слота враховує inherited definitions.",
-      "negative_case_uk": "Inherited override не дорівнює прямому слоту.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_MOP",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "ENSURE-CLASS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Клас створюється або оновлюється у control world.",
-      "negative_case_uk": "Повторне ensure й несумісна зміна мають визначений результат.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_CLASS_STATE",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "FINALIZE-INHERITANCE",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Фіналізація обчислює class precedence та effective slots.",
-      "negative_case_uk": "Циклічне спадкування відхиляється.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_CLASS_STATE",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "SHARED-INITIALIZE",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Initargs заповнюють дозволені слоти в належному порядку.",
-      "negative_case_uk": "Невідоме initarg і повторний default не допускаються мовчки.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_MOP",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "SLOT-VALUE-USING-CLASS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Читання слота виконується через метакласовий dispatch.",
-      "negative_case_uk": "Відсутній slot не стає порожнім CONS.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_MOP",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "STATUS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Спостереження host-параметра має типізовані ключі.",
-      "negative_case_uk": "Невідомий host key не створює мовного значення.",
-      "lower_domain_crosswalk": [
-        "D9:000011001:RESULT-STATUS"
-      ],
-      "gate": "HOLD_HOST",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "SSTATUS",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Зміна дозволеного host-параметра має читатися через STATUS.",
-      "negative_case_uk": "Недозволений ефект мусить fail-closed.",
-      "lower_domain_crosswalk": [
-        "D9:000011001:RESULT-STATUS"
-      ],
-      "gate": "HOLD_HOST",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "RECORD-TYPE-DESCRIPTOR",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "RTD тримає поля, parent, mutability та nominal/generative identity.",
-      "negative_case_uk": "Два generative RTD з однаковими полями різні.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_R6RS",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "RCD з'єднує RTD, parent descriptor та protocol.",
-      "negative_case_uk": "Хибний parent protocol або arity відхиляються.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_R6RS",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "RECORD-CONSTRUCTOR",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Конструктор створює свіжий запис заданого RTD.",
-      "negative_case_uk": "Збіг значень полів не стирає різницю RTD.",
-      "lower_domain_crosswalk": [
-        "D10:1011010101:DEFINE-RECORD-TYPE"
-      ],
-      "gate": "HOLD_R6RS",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "WITH-SYNTAX",
-      "source_state": "HISTORICAL_DONOR_ONLY",
-      "proposed_law_uk": "Syntax binding зберігає lexical identity й hygiene.",
-      "negative_case_uk": "Локальна тінь імені не захоплює вбудований символ.",
-      "lower_domain_crosswalk": [
-        "D10:1100101011:SYNTAX-CASE",
-        "D10:1011110111:DATUM->SYNTAX"
-      ],
-      "gate": "HOLD_HYGIENE",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "OCCURS-CHECK",
+      "name": "ADD-USAGE",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Walk змінної перевіряє її входження в терм.",
-      "negative_case_uk": "x=(a . x) мусить бути відхилено.",
-      "lower_domain_crosswalk": [
-        "D9:101110101:OCCURS-CHECK?",
-        "D10:1011100100:UNIFY-WITH-OCCURS-CHECK"
-      ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "EXTEND-SUBST",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Новий binding додається на початок alist.",
-      "negative_case_uk": "Початкова таблиця не змінюється.",
+      "proposed_law_uk": "Додати usage факт зі збереженням старого provenance.",
+      "negative_case_uk": "Втрата попередніх подій неприпустима.",
       "lower_domain_crosswalk": [
         "D3:111:CONS"
       ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
+      "gate": "DERIVED_PROOF",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
       "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
+      "ratification": "PENDING"
     },
     {
-      "name": "APPLY-SUBST-WALKED",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Recursive walk замінює змінні в усіх парах.",
-      "negative_case_uk": "Цикл не може безконтрольно розгортатись.",
+      "name": "ADVISE",
+      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
+      "proposed_law_uk": "Функція ADVISE має чинне Lisp визначення у lib/world.lisp, а не у старому lib/knowledge.lisp; її контракт має доводитись нативним world-спостереженням.",
+      "negative_case_uk": "Відсутній world/provenance або невалідний перехід не можна тихо приймати як успішний результат.",
       "lower_domain_crosswalk": [
-        "D3:111:CONS",
-        "D3:100:CAR",
-        "D3:011:CDR"
+        "D3:110:COND"
       ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "MY-EVAL",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "SENS-обчислювач читає форму в явно переданому середовищі.",
-      "negative_case_uk": "Інше lexical binding дає інше значення без host fallback.",
-      "lower_domain_crosswalk": [
-        "D4:0001:EVAL",
-        "D10:0101000000:MY-EVAL-PROGRAM"
-      ],
-      "gate": "LIBRARY_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "MY-APPLY",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Closure викликається з правильними параметрами й env.",
-      "negative_case_uk": "Arity error не підмінюється Rust evaluator.",
-      "lower_domain_crosswalk": [
-        "D4:0001:EVAL"
-      ],
-      "gate": "LIBRARY_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "SECOND",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Другий елемент є CAR(CDR(x)).",
-      "negative_case_uk": "Короткий improper list не утворює нового селектора.",
-      "lower_domain_crosswalk": [
-        "D4:1001:CADR"
-      ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "THIRD",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Третій елемент є CAR(CDR(CDR(x))).",
-      "negative_case_uk": "Двоелементний список не має третього.",
-      "lower_domain_crosswalk": [
-        "D5:10011:CADDR"
-      ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "MEMBER?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "MEMBER tail нормалізується до exact D1 predicate.",
-      "negative_case_uk": "Довільний nonempty list не є D1:YES.",
-      "lower_domain_crosswalk": [
-        "D5:11101:MEMBER"
-      ],
-      "gate": "DERIVED_REVIEW",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "ISQRT-STEP",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Крок кореня належить D24+ exact numeric carrier.",
-      "negative_case_uk": "Жодного implicit decimal payload у D11.",
-      "lower_domain_crosswalk": [
-        "D9:110111010:ISQRT"
-      ],
-      "gate": "HOLD_D24",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "VTREE-INSERT",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Persistent AVL вставка не змінює старе дерево.",
-      "negative_case_uk": "Неявні 0/1/-1 у поточній бібліотеці потребують D24 gate.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D24",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
-      "coordinate": null,
-      "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
-    },
-    {
-      "name": "ROTATE-LEFT",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Історична AVL-функція відсутня у поточному lib/persistent-map.lisp.",
-      "negative_case_uk": "Не ратифікувати зі stale snapshot.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_STALE_SOURCE",
+      "gate": "LIBRARY_RELOCATED_NO_NEW_SLOT",
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
@@ -518,14 +158,47 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "HTTP-POST-JSON",
+      "name": "ALIST-REF",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Lisp передає вимогу host transport і приймає типізований результат.",
-      "negative_case_uk": "HTTP failure не розбирається як успішний JSON.",
+      "proposed_law_uk": "Читати ключ з асоціативного списку без небезпечного CDR NIL.",
+      "negative_case_uk": "Absent key не створює підробного запису.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D3:100:CAR",
+        "D3:011:CDR"
       ],
-      "gate": "HOLD_HOST",
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "APPEND-TOOL-RESULTS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Зв'язати результати інструментів із відповідними call IDs.",
+      "negative_case_uk": "Сторонній call ID не приєднується до іншого виклику.",
+      "lower_domain_crosswalk": [
+        "D4:1111:APPEND"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "APPLY-SUBST-WALKED",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Recursive walk замінює змінні в усіх парах.",
+      "negative_case_uk": "Цикл не може безконтрольно розгортатись.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS",
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_REVIEW",
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
@@ -535,21 +208,155 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "ADVISE",
-      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
-      "proposed_law_uk": "Функція ADVISE має чинне Lisp визначення у lib/world.lisp, а не у старому lib/knowledge.lisp; її контракт має доводитись нативним world-спостереженням.",
-      "negative_case_uk": "Відсутній world/provenance або невалідний перехід не можна тихо приймати як успішний результат.",
+      "name": "BASH-TOOL-SCHEMA",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Схема інструмента є даними, не дозволом host execution.",
+      "negative_case_uk": "Правильна схема без allowlist не надає виконання.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_HOST_IO",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLAIM-MARKERS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Описані маркери є проєкцією статусу, а не Core інструкцією.",
+      "negative_case_uk": "Невідомий маркер не стає новою D11 функцією.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-CONS-EACH-ONTO",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Додати усі конвертовані елементи до накопичувача без втрати порядку.",
+      "negative_case_uk": "Порожній ввід не додає жодної клаузи.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_IMPORT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-FACTS->CLAUSES-ONTO",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Перекласти кожен валідний факт у SENS clause форму.",
+      "negative_case_uk": "Факт без обов'язкового предиката не стає клаузою.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_GRAMMAR",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-IMPORT-FORMS-ONTO",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Послідовно перетворити підтримувані CLIPS форми у SENS accumulator.",
+      "negative_case_uk": "Непідтримувану форму не можна відкидати як успіх.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_GRAMMAR",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-SLOT-VALUE-OF",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Вибрати іменований slot із визначеного шаблону CLIPS.",
+      "negative_case_uk": "Відсутній slot не тотожний slot з пустим значенням.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_IMPORT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-STRING-AFTER-LAST-DOUBLE-COLON",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Повернути суфікс після останнього подвійного роздільника CLIPS.",
+      "negative_case_uk": "Одна двокрапка не є подвійним роздільником.",
       "lower_domain_crosswalk": [
         "D3:110:COND"
       ],
-      "gate": "LIBRARY_RELOCATED_NO_NEW_SLOT",
-      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
-      "execution": "UNVERIFIED",
-      "ratification": "PENDING",
+      "gate": "HOLD_D7_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
       "callable": false,
-      "proof_status": "NOT_NATIVE_TESTED",
-      "semantic_distinctness": "UNPROVEN"
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-STRING-EMPTY?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Перевірити порожній текстовий носій D7.",
+      "negative_case_uk": "Рядок із одним пробілом і порожній рядок різні.",
+      "lower_domain_crosswalk": [
+        "D3:101:EQ"
+      ],
+      "gate": "HOLD_D7_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Перевірити префікс подвійної двокрапки в рядку.",
+      "negative_case_uk": "Одна двокрапка повинна повертати D1:NO.",
+      "lower_domain_crosswalk": [
+        "D3:101:EQ"
+      ],
+      "gate": "HOLD_D7_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "CLIPS-SYMBOL-STARTS-WITH-?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Перевірити CLIPS змінний символ за ? у D7 поверхні.",
+      "negative_case_uk": "Звичайний символ без ? не є CLIPS змінною.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D7_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "COMPILER-BITS-EQUAL",
@@ -591,21 +398,102 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "TRUTHY?",
-      "source_state": "LIVE_SOURCE_MOVED_TO_CORE",
-      "proposed_law_uk": "Compatibility truthiness не підміняє D1 predicate.",
-      "negative_case_uk": "Структурне () відмінне від D1:0.",
+      "name": "COMPUTE-APPLICABLE-METHODS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Методи вибираються за спеціалізаторами аргументів і precedence.",
+      "negative_case_uk": "Несумісний метод відкинутий, порядок стабільний.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D10:1010111010:APPLICABLE-METHODS"
       ],
-      "gate": "HOLD_LEGACY",
+      "gate": "HOLD_D10_DUPLICATE",
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
       "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
       "callable": false,
       "proof_status": "NOT_NATIVE_TESTED",
       "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "COUNT-USAGE-LIST",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Скласти кількість usage events лише у D24 числовому домені.",
+      "negative_case_uk": "Порожній та одиничний списки дають різні значення.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D24_COUNT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "COUNT-WITH-ROLE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Порахувати повідомлення обраної ролі із D24-qualified підсумком.",
+      "negative_case_uk": "Інша роль не змінює обраний лічильник.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D24_COUNT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "DIGIT->STRING",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Кваліфіковану цифру відобразити у D7 знак без зміни ідентичності числа.",
+      "negative_case_uk": "Неприпустима цифра чи ширина не проходить.",
+      "lower_domain_crosswalk": [
+        "D9:110111010:ISQRT"
+      ],
+      "gate": "HOLD_D24_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "DIRECT-SLOT-DEFINITION-CLASS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Метаклас визначає клас прямого слота до узгодження спадкування.",
+      "negative_case_uk": "Прямий та ефективний слоти не плутати.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_MOP",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "DISPATCH-TOOL",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Вибрати дозволений інструмент за точною назвою та policy.",
+      "negative_case_uk": "Невідомий інструмент повинен fail-closed.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_HOST_IO",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "DWIM",
@@ -625,60 +513,14 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "DIGIT->STRING",
+      "name": "EFFECTFUL-PRIMITIVES",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Кваліфіковану цифру відобразити у D7 знак без зміни ідентичності числа.",
-      "negative_case_uk": "Неприпустима цифра чи ширина не проходить.",
-      "lower_domain_crosswalk": [
-        "D9:110111010:ISQRT"
-      ],
-      "gate": "HOLD_D24_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "FOURTH",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Четвертий елемент є CAR після трьох CDR правильного списку.",
-      "negative_case_uk": "Триелементний список не має четвертого.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_SELECTOR",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "LARGEST-CHUNK",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Найбільший числовий шматок для рендерингу відбирається в межах кваліфікованої основи.",
-      "negative_case_uk": "Межа основи і провідні нулі не змінюють число.",
-      "lower_domain_crosswalk": [
-        "D9:110111010:ISQRT"
-      ],
-      "gate": "HOLD_D24_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "NONDECREASING-FROM?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Кожні два сусідні кваліфіковані числа задовольняють a≤b.",
-      "negative_case_uk": "Одне спадання дає D1:NO.",
+      "proposed_law_uk": "Перелік effectful операцій є політичними даними лінтера, не новим примітивом.",
+      "negative_case_uk": "Невідома назва без allowlist не набуває прав виконавця.",
       "lower_domain_crosswalk": [
         "D3:110:COND"
       ],
-      "gate": "HOLD_D24_ORDER",
+      "gate": "DATA_NOT_NEW_FUNCTION",
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
@@ -686,49 +528,42 @@
       "ratification": "PENDING"
     },
     {
-      "name": "NONINCREASING-FROM?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Кожні два сусідні кваліфіковані числа задовольняють a≥b.",
-      "negative_case_uk": "Одне зростання дає D1:NO.",
+      "name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Ефективний клас слота враховує inherited definitions.",
+      "negative_case_uk": "Inherited override не дорівнює прямому слоту.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D10:1011010101:DEFINE-RECORD-TYPE"
       ],
-      "gate": "HOLD_D24_ORDER",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
+      "gate": "HOLD_MOP",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
       "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
       "callable": false,
-      "ratification": "PENDING"
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "NUMBER->STRING-ONTO",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Приєднати D7 представлення кваліфікованого числа до накопичувача.",
-      "negative_case_uk": "Знак або нуль не губляться при зворотній проєкції.",
+      "name": "ENSURE-CLASS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Клас створюється або оновлюється у control world.",
+      "negative_case_uk": "Повторне ensure й несумісна зміна мають визначений результат.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D10:1011010101:DEFINE-RECORD-TYPE"
       ],
-      "gate": "HOLD_D24_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
+      "gate": "HOLD_CLASS_STATE",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
       "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
       "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "SQRT-ITER",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Наступна оцінка кореня обчислюється лише над D24+ числом.",
-      "negative_case_uk": "Від'ємний радиканд чи чужий payload не є допустимим числом.",
-      "lower_domain_crosswalk": [
-        "D9:110111010:ISQRT"
-      ],
-      "gate": "HOLD_D24_MATH",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "EPISTEMIC--ALL-REQUIRED-PRESENT?",
@@ -762,55 +597,10 @@
       "ratification": "PENDING"
     },
     {
-      "name": "LOAD-KNOWLEDGE",
+      "name": "EXECUTE-TOOL-CALL",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Завантажувати лише пакет із перевіреним походженням і версією.",
-      "negative_case_uk": "Зламаний envelope не створює валідних фактів.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_WORLD_IO",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "IMPORT-KNOWLEDGE-FILE",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Розділити host читання файла та SENS перевірку вмісту.",
-      "negative_case_uk": "Помилка IO не є успішним імпортом знань.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_MISSING_SOURCE",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "RECEIVE-KNOWLEDGE-PACKAGE",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Перевірити source та version до внесення пакета у світ.",
-      "negative_case_uk": "Неповний пакет не стає порожнім валідним пакетом.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_MISSING_SOURCE",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "SEND-KNOWLEDGE-PACKAGE",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Серіалізувати версійний пакет і передати його через зовнішній transport.",
-      "negative_case_uk": "Неуспішний транспортний exit не є доказом одержання.",
+      "proposed_law_uk": "Тільки транспорт виконує дозволену дію і повертає структурований статус.",
+      "negative_case_uk": "Помилковий exit не є успішним результатом.",
       "lower_domain_crosswalk": [
         "D3:110:COND"
       ],
@@ -822,14 +612,14 @@
       "ratification": "PENDING"
     },
     {
-      "name": "USAGE-OF",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Уживання відновлюються лише з наявного provenance журналу.",
-      "negative_case_uk": "Відсутній event не перетворюється на позитивний лічильник.",
+      "name": "EXPLAIN-PROOF-LIST",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Скласти пояснення для всіх доказових вузлів із збереженням порядку.",
+      "negative_case_uk": "Пропущений dependency вузол спростовує пояснення.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D3:111:CONS"
       ],
-      "gate": "HOLD_STALE_SOURCE",
+      "gate": "DERIVED_PROOF",
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
@@ -837,14 +627,83 @@
       "ratification": "PENDING"
     },
     {
-      "name": "EFFECTFUL-PRIMITIVES",
+      "name": "EXPLAIN-PROOF-NODE",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перелік effectful операцій є політичними даними лінтера, не новим примітивом.",
-      "negative_case_uk": "Невідома назва без allowlist не набуває прав виконавця.",
+      "proposed_law_uk": "Вивести факт разом із відповідними джерелами й переходами.",
+      "negative_case_uk": "Підставлений чужий evidence не повинен бути прийнятий.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D3:111:CONS"
       ],
-      "gate": "DATA_NOT_NEW_FUNCTION",
+      "gate": "DERIVED_PROOF",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "EXTEND-SUBST",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Новий binding додається на початок alist.",
+      "negative_case_uk": "Початкова таблиця не змінюється.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "FINALIZE-INHERITANCE",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Фіналізація обчислює class precedence та effective slots.",
+      "negative_case_uk": "Циклічне спадкування відхиляється.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_CLASS_STATE",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "FIND-ENTRY",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Знайти запис JTMS за ключем у списку.",
+      "negative_case_uk": "Відсутній ключ відрізняється від present-with-empty-value.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR",
+        "D3:101:EQ"
+      ],
+      "gate": "DERIVED_JTMS",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "FOURTH",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Четвертий елемент є CAR після трьох CDR правильного списку.",
+      "negative_case_uk": "Триелементний список не має четвертого.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_SELECTOR",
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
@@ -867,6 +726,207 @@
       "ratification": "PENDING"
     },
     {
+      "name": "HTTP-POST-JSON",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Lisp передає вимогу host transport і приймає типізований результат.",
+      "negative_case_uk": "HTTP failure не розбирається як успішний JSON.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_HOST",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "HTTP-TRANSPORT-BODY",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Повернути поле body транспортного трійника як дані.",
+      "negative_case_uk": "Тіло при неуспішному exit не є валідним JSON успіхом.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_HOST",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "HTTP-TRANSPORT-EXIT",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Повернути поле exit transport трійника.",
+      "negative_case_uk": "Malformed record не створює валідний exit-code.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR"
+      ],
+      "gate": "DERIVED_HOST",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "HTTP-TRANSPORT-STDERR",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Повернути поле stderr окремо від stdout.",
+      "negative_case_uk": "Порожній stdout не означає відсутності помилки.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_HOST",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "IMPORT-KNOWLEDGE-FILE",
+      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "proposed_law_uk": "Розділити host читання файла та SENS перевірку вмісту.",
+      "negative_case_uk": "Помилка IO не є успішним імпортом знань.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_MISSING_SOURCE",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "ISQRT-STEP",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Крок кореня належить D24+ exact numeric carrier.",
+      "negative_case_uk": "Жодного implicit decimal payload у D11.",
+      "lower_domain_crosswalk": [
+        "D9:110111010:ISQRT"
+      ],
+      "gate": "HOLD_D24",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "JSON->MESSAGE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Декодувати перевірену JSON структуру в typed message record.",
+      "negative_case_uk": "Відсутня роль не стає system за замовчуванням.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_D7_JSON",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "JSON->TOOL-CALL",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Декодувати tool-call id/name/args як дані.",
+      "negative_case_uk": "Відсутній ID не надає права запуску.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_D7_JSON",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "JSON-ENCODE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Кодувати valid Lisp дані у JSON за правилами escaping.",
+      "negative_case_uk": "Кавички й зворотні слеші roundtrip без зміни даних.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_D7_JSON",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "JSON-ENCODE-KEY",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Ключ JSON об'єкта є коректно escaped string.",
+      "negative_case_uk": "Неприпустимий ключ не серіалізується як довільна функція.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_D7_JSON",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "JSON-ESCAPE-ONTO",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Символи зберігаються з escaping у вихідному накопичувачі.",
+      "negative_case_uk": "Backslash і quote не руйнують повторне декодування.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_D7_JSON",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "LARGEST-CHUNK",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Найбільший числовий шматок для рендерингу відбирається в межах кваліфікованої основи.",
+      "negative_case_uk": "Межа основи і провідні нулі не змінюють число.",
+      "lower_domain_crosswalk": [
+        "D9:110111010:ISQRT"
+      ],
+      "gate": "HOLD_D24_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "LEGACY-WORLD-TRANSITION-EXPANSION",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Історичну форму переходу атрибутувати source event/status.",
+      "negative_case_uk": "Невідомий event type не приймається автоматично.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_HISTORICAL",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
       "name": "LINT-MAX2",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Порівняти два сумісні явно математичні значення.",
@@ -880,6 +940,185 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "LOAD-KNOWLEDGE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Завантажувати лише пакет із перевіреним походженням і версією.",
+      "negative_case_uk": "Зламаний envelope не створює валідних фактів.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_WORLD_IO",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MAP-APPLY-HEAD",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Застосувати head-функцію до кожного елемента без перестановки.",
+      "negative_case_uk": "На порожньому списку head-функція не запускається.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR",
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_JTMS",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MAP-APPLY-HEAD-JTMS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Відобразити JTMS елементи без втрати dependency refs.",
+      "negative_case_uk": "Загублена justification link руйнує відповідний доказ.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_JTMS",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MAP-PROOFS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Застосувати функцію до кожного proof node без зміни вихідної структури.",
+      "negative_case_uk": "Порожній список не викликає перетворення.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR",
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_PROOF",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MARKERS-CONTAINED?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Перевірити маркери за цілими токенами в даних.",
+      "negative_case_uk": "Частковий підрядок не дорівнює точному маркеру.",
+      "lower_domain_crosswalk": [
+        "D5:11101:MEMBER"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MEMBER?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "MEMBER tail нормалізується до exact D1 predicate.",
+      "negative_case_uk": "Довільний nonempty list не є D1:YES.",
+      "lower_domain_crosswalk": [
+        "D5:11101:MEMBER"
+      ],
+      "gate": "DERIVED_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "MSG-CONTENT",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати content без зміни role і tool calls.",
+      "negative_case_uk": "Tool-only порожній content не скасовує call IDs.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MSG-ROLE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати поле ролі з перевіреного повідомлення.",
+      "negative_case_uk": "Відсутня роль не вважається system.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MSG-TOOL-CALLS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати список викликів з повідомлення.",
+      "negative_case_uk": "Порожній список не запускає інструмент.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "MY-APPLY",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Closure викликається з правильними параметрами й env.",
+      "negative_case_uk": "Arity error не підмінюється Rust evaluator.",
+      "lower_domain_crosswalk": [
+        "D4:0001:EVAL"
+      ],
+      "gate": "LIBRARY_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "MY-EVAL",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "SENS-обчислювач читає форму в явно переданому середовищі.",
+      "negative_case_uk": "Інше lexical binding дає інше значення без host fallback.",
+      "lower_domain_crosswalk": [
+        "D4:0001:EVAL",
+        "D10:0101000000:MY-EVAL-PROGRAM"
+      ],
+      "gate": "LIBRARY_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "MY-EVAL-BODY",
@@ -922,6 +1161,504 @@
         "D3:111:CONS"
       ],
       "gate": "LIBRARY_SEMANTICS",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "NCONC",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Деструктивно змінити CDR останнього cons першого списку, зберігши alias.",
+      "negative_case_uk": "APPEND не змінює CDR старого alias.",
+      "lower_domain_crosswalk": [
+        "D8:11101100:RPLACD",
+        "D4:1111:APPEND"
+      ],
+      "gate": "HOLD_MUTATION",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "NONDECREASING-FROM?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Кожні два сусідні кваліфіковані числа задовольняють a≤b.",
+      "negative_case_uk": "Одне спадання дає D1:NO.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D24_ORDER",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "NONINCREASING-FROM?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Кожні два сусідні кваліфіковані числа задовольняють a≥b.",
+      "negative_case_uk": "Одне зростання дає D1:NO.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D24_ORDER",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "NREVERSE",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Розвернути список через повторне використання старих cons-клітин.",
+      "negative_case_uk": "Чистий REVERSE не змінює зв'язків старого alias.",
+      "lower_domain_crosswalk": [
+        "D5:10100:REVERSE",
+        "D8:11101100:RPLACD"
+      ],
+      "gate": "HOLD_MUTATION",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "NUMBER->STRING-ONTO",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Приєднати D7 представлення кваліфікованого числа до накопичувача.",
+      "negative_case_uk": "Знак або нуль не губляться при зворотній проєкції.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D24_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "OCCURS-CHECK",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Walk змінної перевіряє її входження в терм.",
+      "negative_case_uk": "x=(a . x) мусить бути відхилено.",
+      "lower_domain_crosswalk": [
+        "D9:101110101:OCCURS-CHECK?",
+        "D10:1011100100:UNIFY-WITH-OCCURS-CHECK"
+      ],
+      "gate": "DERIVED_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "PRINT-INDENT",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Відступ у людському звіті не змінює семантику proof.",
+      "negative_case_uk": "Два різні indent не є двома різними фактами.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_PRESENTATION",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "PROVENANCE-LIST",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Зібрати всі source refs без втрат і дублювання поза законом.",
+      "negative_case_uk": "Звичайний рядок без valid source ref не набуває доказового статусу.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "DERIVED_PROOF",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "RECEIVE-KNOWLEDGE-PACKAGE",
+      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "proposed_law_uk": "Перевірити source та version до внесення пакета у світ.",
+      "negative_case_uk": "Неповний пакет не стає порожнім валідним пакетом.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_MISSING_SOURCE",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "RECORD-CONSTRUCTOR",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Конструктор створює свіжий запис заданого RTD.",
+      "negative_case_uk": "Збіг значень полів не стирає різницю RTD.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_R6RS",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "RCD з'єднує RTD, parent descriptor та protocol.",
+      "negative_case_uk": "Хибний parent protocol або arity відхиляються.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_R6RS",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "RECORD-TYPE-DESCRIPTOR",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "RTD тримає поля, parent, mutability та nominal/generative identity.",
+      "negative_case_uk": "Два generative RTD з однаковими полями різні.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_R6RS",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "ROTATE-LEFT",
+      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "proposed_law_uk": "Історична AVL-функція відсутня у поточному lib/persistent-map.lisp.",
+      "negative_case_uk": "Не ратифікувати зі stale snapshot.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "HOLD_STALE_SOURCE",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "SCIENCE-PROPER-LIST?",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Визначити правильний nil-terminated D3 список.",
+      "negative_case_uk": "Dotted tail має бути відхилено.",
+      "lower_domain_crosswalk": [
+        "D3:010:ATOM",
+        "D3:101:EQ",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_STRUCTURE",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "SCIENCE-SEVENTH",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати сьомий член правильного списку через CAR/CDR.",
+      "negative_case_uk": "Шестичленний список не має сьомого.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_SELECTOR",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "SCIENCE-SIXTH",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати шостий член правильного списку через CAR/CDR.",
+      "negative_case_uk": "П'ятичленний список не має шостого.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_SELECTOR",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "SECOND",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Другий елемент є CAR(CDR(x)).",
+      "negative_case_uk": "Короткий improper list не утворює нового селектора.",
+      "lower_domain_crosswalk": [
+        "D4:1001:CADR"
+      ],
+      "gate": "DERIVED_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "SEND-KNOWLEDGE-PACKAGE",
+      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "proposed_law_uk": "Серіалізувати версійний пакет і передати його через зовнішній transport.",
+      "negative_case_uk": "Неуспішний транспортний exit не є доказом одержання.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_HOST_IO",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "SHARED-INITIALIZE",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Initargs заповнюють дозволені слоти в належному порядку.",
+      "negative_case_uk": "Невідоме initarg і повторний default не допускаються мовчки.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_MOP",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "SLOT-VALUE-USING-CLASS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Читання слота виконується через метакласовий dispatch.",
+      "negative_case_uk": "Відсутній slot не стає порожнім CONS.",
+      "lower_domain_crosswalk": [
+        "D10:1011010101:DEFINE-RECORD-TYPE"
+      ],
+      "gate": "HOLD_MOP",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "SQRT-ITER",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Наступна оцінка кореня обчислюється лише над D24+ числом.",
+      "negative_case_uk": "Від'ємний радиканд чи чужий payload не є допустимим числом.",
+      "lower_domain_crosswalk": [
+        "D9:110111010:ISQRT"
+      ],
+      "gate": "HOLD_D24_MATH",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "SSTATUS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Зміна дозволеного host-параметра має читатися через STATUS.",
+      "negative_case_uk": "Недозволений ефект мусить fail-closed.",
+      "lower_domain_crosswalk": [
+        "D9:000011001:RESULT-STATUS"
+      ],
+      "gate": "HOLD_HOST",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "STATUS",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Спостереження host-параметра має типізовані ключі.",
+      "negative_case_uk": "Невідомий host key не створює мовного значення.",
+      "lower_domain_crosswalk": [
+        "D9:000011001:RESULT-STATUS"
+      ],
+      "gate": "HOLD_HOST",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "STRIP-ARTICLE",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Прибирати визначений артикль як повний D7 токен.",
+      "negative_case_uk": "Слово з таким самим префіксом не скорочується.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_D7_TEXT",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "TC-ARGUMENTS",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати аргументи tool call як дані.",
+      "negative_case_uk": "JSON-текст не стає Lisp кодом без мовного закону.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "TC-ID",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати tool-call ID із typed record.",
+      "negative_case_uk": "Відсутній ID не підміняється довільним.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "TC-NAME",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Проєктувати назву інструмента без права виконання.",
+      "negative_case_uk": "Невідома назва не набуває host доступу.",
+      "lower_domain_crosswalk": [
+        "D3:100:CAR",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_TOOLING",
+      "proof_status": "NOT_EXECUTED",
+      "semantic_distinctness": "UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING"
+    },
+    {
+      "name": "THIRD",
+      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
+      "proposed_law_uk": "Третій елемент є CAR(CDR(CDR(x))).",
+      "negative_case_uk": "Двоелементний список не має третього.",
+      "lower_domain_crosswalk": [
+        "D5:10011:CADDR"
+      ],
+      "gate": "DERIVED_REVIEW",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "TRUTHY?",
+      "source_state": "LIVE_SOURCE_MOVED_TO_CORE",
+      "proposed_law_uk": "Compatibility truthiness не підміняє D1 predicate.",
+      "negative_case_uk": "Структурне () відмінне від D1:0.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_LEGACY",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "USAGE-OF",
+      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "proposed_law_uk": "Уживання відновлюються лише з наявного provenance журналу.",
+      "negative_case_uk": "Відсутній event не перетворюється на позитивний лічильник.",
+      "lower_domain_crosswalk": [
+        "D3:110:COND"
+      ],
+      "gate": "HOLD_STALE_SOURCE",
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
@@ -1176,699 +1913,41 @@
       "ratification": "PENDING"
     },
     {
-      "name": "ADD-USAGE",
+      "name": "VTREE-INSERT",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Додати usage факт зі збереженням старого provenance.",
-      "negative_case_uk": "Втрата попередніх подій неприпустима.",
+      "proposed_law_uk": "Persistent AVL вставка не змінює старе дерево.",
+      "negative_case_uk": "Неявні 0/1/-1 у поточній бібліотеці потребують D24 gate.",
       "lower_domain_crosswalk": [
         "D3:111:CONS"
       ],
-      "gate": "DERIVED_PROOF",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
+      "gate": "HOLD_D24",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
       "coordinate": null,
       "callable": false,
-      "ratification": "PENDING"
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
-      "name": "COUNT-USAGE-LIST",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Скласти кількість usage events лише у D24 числовому домені.",
-      "negative_case_uk": "Порожній та одиничний списки дають різні значення.",
+      "name": "WITH-SYNTAX",
+      "source_state": "HISTORICAL_DONOR_ONLY",
+      "proposed_law_uk": "Syntax binding зберігає lexical identity й hygiene.",
+      "negative_case_uk": "Локальна тінь імені не захоплює вбудований символ.",
       "lower_domain_crosswalk": [
-        "D3:110:COND"
+        "D10:1100101011:SYNTAX-CASE",
+        "D10:1011110111:DATUM->SYNTAX"
       ],
-      "gate": "HOLD_D24_COUNT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
+      "gate": "HOLD_HYGIENE",
+      "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
+      "execution": "UNVERIFIED",
+      "ratification": "PENDING",
       "coordinate": null,
+      "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
       "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "EXPLAIN-PROOF-LIST",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Скласти пояснення для всіх доказових вузлів із збереженням порядку.",
-      "negative_case_uk": "Пропущений dependency вузол спростовує пояснення.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_PROOF",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "EXPLAIN-PROOF-NODE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Вивести факт разом із відповідними джерелами й переходами.",
-      "negative_case_uk": "Підставлений чужий evidence не повинен бути прийнятий.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_PROOF",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MAP-PROOFS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Застосувати функцію до кожного proof node без зміни вихідної структури.",
-      "negative_case_uk": "Порожній список не викликає перетворення.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR",
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_PROOF",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "PRINT-INDENT",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Відступ у людському звіті не змінює семантику proof.",
-      "negative_case_uk": "Два різні indent не є двома різними фактами.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_PRESENTATION",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "PROVENANCE-LIST",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Зібрати всі source refs без втрат і дублювання поза законом.",
-      "negative_case_uk": "Звичайний рядок без valid source ref не набуває доказового статусу.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_PROOF",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "SCIENCE-PROPER-LIST?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Визначити правильний nil-terminated D3 список.",
-      "negative_case_uk": "Dotted tail має бути відхилено.",
-      "lower_domain_crosswalk": [
-        "D3:010:ATOM",
-        "D3:101:EQ",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_STRUCTURE",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "SCIENCE-SIXTH",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати шостий член правильного списку через CAR/CDR.",
-      "negative_case_uk": "П'ятичленний список не має шостого.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_SELECTOR",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "SCIENCE-SEVENTH",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати сьомий член правильного списку через CAR/CDR.",
-      "negative_case_uk": "Шестичленний список не має сьомого.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_SELECTOR",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-CONS-EACH-ONTO",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Додати усі конвертовані елементи до накопичувача без втрати порядку.",
-      "negative_case_uk": "Порожній ввід не додає жодної клаузи.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_IMPORT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-FACTS->CLAUSES-ONTO",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перекласти кожен валідний факт у SENS clause форму.",
-      "negative_case_uk": "Факт без обов'язкового предиката не стає клаузою.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_GRAMMAR",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-IMPORT-FORMS-ONTO",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Послідовно перетворити підтримувані CLIPS форми у SENS accumulator.",
-      "negative_case_uk": "Непідтримувану форму не можна відкидати як успіх.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_GRAMMAR",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-SLOT-VALUE-OF",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Вибрати іменований slot із визначеного шаблону CLIPS.",
-      "negative_case_uk": "Відсутній slot не тотожний slot з пустим значенням.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_IMPORT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-STRING-AFTER-LAST-DOUBLE-COLON",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Повернути суфікс після останнього подвійного роздільника CLIPS.",
-      "negative_case_uk": "Одна двокрапка не є подвійним роздільником.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_D7_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-STRING-EMPTY?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перевірити порожній текстовий носій D7.",
-      "negative_case_uk": "Рядок із одним пробілом і порожній рядок різні.",
-      "lower_domain_crosswalk": [
-        "D3:101:EQ"
-      ],
-      "gate": "HOLD_D7_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перевірити префікс подвійної двокрапки в рядку.",
-      "negative_case_uk": "Одна двокрапка повинна повертати D1:NO.",
-      "lower_domain_crosswalk": [
-        "D3:101:EQ"
-      ],
-      "gate": "HOLD_D7_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLIPS-SYMBOL-STARTS-WITH-?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перевірити CLIPS змінний символ за ? у D7 поверхні.",
-      "negative_case_uk": "Звичайний символ без ? не є CLIPS змінною.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_D7_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "FIND-ENTRY",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Знайти запис JTMS за ключем у списку.",
-      "negative_case_uk": "Відсутній ключ відрізняється від present-with-empty-value.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR",
-        "D3:101:EQ"
-      ],
-      "gate": "DERIVED_JTMS",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MAP-APPLY-HEAD",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Застосувати head-функцію до кожного елемента без перестановки.",
-      "negative_case_uk": "На порожньому списку head-функція не запускається.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR",
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_JTMS",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MAP-APPLY-HEAD-JTMS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Відобразити JTMS елементи без втрати dependency refs.",
-      "negative_case_uk": "Загублена justification link руйнує відповідний доказ.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_JTMS",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "ALIST-REF",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Читати ключ з асоціативного списку без небезпечного CDR NIL.",
-      "negative_case_uk": "Absent key не створює підробного запису.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "APPEND-TOOL-RESULTS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Зв'язати результати інструментів із відповідними call IDs.",
-      "negative_case_uk": "Сторонній call ID не приєднується до іншого виклику.",
-      "lower_domain_crosswalk": [
-        "D4:1111:APPEND"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "BASH-TOOL-SCHEMA",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Схема інструмента є даними, не дозволом host execution.",
-      "negative_case_uk": "Правильна схема без allowlist не надає виконання.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_HOST_IO",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "CLAIM-MARKERS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Описані маркери є проєкцією статусу, а не Core інструкцією.",
-      "negative_case_uk": "Невідомий маркер не стає новою D11 функцією.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "COUNT-WITH-ROLE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Порахувати повідомлення обраної ролі із D24-qualified підсумком.",
-      "negative_case_uk": "Інша роль не змінює обраний лічильник.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_D24_COUNT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "DISPATCH-TOOL",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Вибрати дозволений інструмент за точною назвою та policy.",
-      "negative_case_uk": "Невідомий інструмент повинен fail-closed.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_HOST_IO",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "EXECUTE-TOOL-CALL",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Тільки транспорт виконує дозволену дію і повертає структурований статус.",
-      "negative_case_uk": "Помилковий exit не є успішним результатом.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_HOST_IO",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "HTTP-TRANSPORT-BODY",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Повернути поле body транспортного трійника як дані.",
-      "negative_case_uk": "Тіло при неуспішному exit не є валідним JSON успіхом.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_HOST",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "HTTP-TRANSPORT-EXIT",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Повернути поле exit transport трійника.",
-      "negative_case_uk": "Malformed record не створює валідний exit-code.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR"
-      ],
-      "gate": "DERIVED_HOST",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "HTTP-TRANSPORT-STDERR",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Повернути поле stderr окремо від stdout.",
-      "negative_case_uk": "Порожній stdout не означає відсутності помилки.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_HOST",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "JSON->MESSAGE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Декодувати перевірену JSON структуру в typed message record.",
-      "negative_case_uk": "Відсутня роль не стає system за замовчуванням.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D7_JSON",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "JSON->TOOL-CALL",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Декодувати tool-call id/name/args як дані.",
-      "negative_case_uk": "Відсутній ID не надає права запуску.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D7_JSON",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "JSON-ENCODE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Кодувати valid Lisp дані у JSON за правилами escaping.",
-      "negative_case_uk": "Кавички й зворотні слеші roundtrip без зміни даних.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D7_JSON",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "JSON-ENCODE-KEY",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Ключ JSON об'єкта є коректно escaped string.",
-      "negative_case_uk": "Неприпустимий ключ не серіалізується як довільна функція.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D7_JSON",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "JSON-ESCAPE-ONTO",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Символи зберігаються з escaping у вихідному накопичувачі.",
-      "negative_case_uk": "Backslash і quote не руйнують повторне декодування.",
-      "lower_domain_crosswalk": [
-        "D3:111:CONS"
-      ],
-      "gate": "HOLD_D7_JSON",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MARKERS-CONTAINED?",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Перевірити маркери за цілими токенами в даних.",
-      "negative_case_uk": "Частковий підрядок не дорівнює точному маркеру.",
-      "lower_domain_crosswalk": [
-        "D5:11101:MEMBER"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MSG-ROLE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати поле ролі з перевіреного повідомлення.",
-      "negative_case_uk": "Відсутня роль не вважається system.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MSG-CONTENT",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати content без зміни role і tool calls.",
-      "negative_case_uk": "Tool-only порожній content не скасовує call IDs.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "MSG-TOOL-CALLS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати список викликів з повідомлення.",
-      "negative_case_uk": "Порожній список не запускає інструмент.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "TC-ID",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати tool-call ID із typed record.",
-      "negative_case_uk": "Відсутній ID не підміняється довільним.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "TC-NAME",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати назву інструмента без права виконання.",
-      "negative_case_uk": "Невідома назва не набуває host доступу.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "TC-ARGUMENTS",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Проєктувати аргументи tool call як дані.",
-      "negative_case_uk": "JSON-текст не стає Lisp кодом без мовного закону.",
-      "lower_domain_crosswalk": [
-        "D3:100:CAR",
-        "D3:011:CDR"
-      ],
-      "gate": "DERIVED_TOOLING",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "STRIP-ARTICLE",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Прибирати визначений артикль як повний D7 токен.",
-      "negative_case_uk": "Слово з таким самим префіксом не скорочується.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_D7_TEXT",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
-    },
-    {
-      "name": "LEGACY-WORLD-TRANSITION-EXPANSION",
-      "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
-      "proposed_law_uk": "Історичну форму переходу атрибутувати source event/status.",
-      "negative_case_uk": "Невідомий event type не приймається автоматично.",
-      "lower_domain_crosswalk": [
-        "D3:110:COND"
-      ],
-      "gate": "HOLD_HISTORICAL",
-      "proof_status": "NOT_EXECUTED",
-      "semantic_distinctness": "UNPROVEN",
-      "coordinate": null,
-      "callable": false,
-      "ratification": "PENDING"
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "WORLD-APPLY-EVENT",
@@ -1978,6 +2057,40 @@
       "meaning": "UNPROVEN",
       "coordinate": null,
       "callable": false
+    },
+    {
+      "name": "ACTIVE-VALUE-GET",
+      "origin": "ARCHIVED_LOOPS_1983",
+      "family": "historical-active-values",
+      "source": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "source_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_row_index": 0,
+      "surface_uk": "активне-значення-читати",
+      "surface_ukr": "читати-активне-значення",
+      "source_state": "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE",
+      "meaning": "HISTORICAL_LAW_PROPOSED_DISTINCTNESS_UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING",
+      "native_runtime_witness": "NOT_RUN",
+      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle"
+    },
+    {
+      "name": "ACTIVE-VALUE-PUT",
+      "origin": "ARCHIVED_LOOPS_1983",
+      "family": "historical-active-values",
+      "source": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "source_sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_row_index": 1,
+      "surface_uk": "активне-значення-записати!",
+      "surface_ukr": "записати-активне-значення!",
+      "source_state": "ARCHIVED_D10_RESEARCH_NOT_A_MODERN_CALLABLE",
+      "meaning": "HISTORICAL_LAW_PROPOSED_DISTINCTNESS_UNPROVEN",
+      "coordinate": null,
+      "callable": false,
+      "ratification": "PENDING",
+      "native_runtime_witness": "NOT_RUN",
+      "archive_method_limitation": "Archived closure-based ANSI CL example is a derivability challenge, not a SENS or Xerox LOOPS oracle"
     },
     {
       "name": "ADD-EDGE",
@@ -9005,5 +9118,12 @@
     ],
     "note": "Primary semantic law source located for these dossiers. Citation is not execution evidence or D11 admission."
   },
-  "uniform_admission_gate": "All 116 dossiers: coordinate=null, callable=false, native positive+negative evidence absent, owner ratification pending."
+  "uniform_admission_gate": "All dossiers coordinate=null callable=false native positive+negative evidence absent; owner ratification pending.",
+  "archaeological_source_ref": {
+    "path": "knowledge/d11/база-доступних-функцій/археологія-архівів-20261016.json",
+    "blob": "e74202c2a7ab66c444482c95884876fbbebe4880",
+    "archival_receipts": 1042,
+    "unique_history_names": 662,
+    "review_result": "Only two historically named functions absent from current lower + D11 candidate tables; both have historical law and falsifier, no current SENS F2/F3 proof."
+  }
 }
