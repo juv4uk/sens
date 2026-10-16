@@ -105,10 +105,10 @@ jobs:
           sha256sum "$witness" lib/core4.lisp target/debug/sens
           if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
             echo "::error::D6_LISP_BATCH_RED test=d6-maplist-do-while layer=eval program=$witness expected=$expected actual=execution-error" >&2
-            printf '%s\\n' "$observed" >&2
+            printf '%s\n' "$observed" >&2
             exit 1
           fi
-          actual="$(printf '%s\\n' "$observed" | tail -n 1)"
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
           if [[ "$actual" != "$expected" ]]; then
             echo "::error::D6_LISP_BATCH_DIFF test=d6-maplist-do-while layer=eval program=$witness expected=$expected actual=$actual" >&2
             exit 1
