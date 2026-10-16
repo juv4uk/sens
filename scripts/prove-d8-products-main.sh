@@ -25,4 +25,5 @@ check() {
 }
 check d8-zip-orientation tests/semantic/d8-products-swapped-main-laws.lisp '(1 1 0)'
 check d8-notany tests/semantic/d8-notany-main-laws.lisp '(1 0 1)'
-sha256sum tests/semantic/d8-products-swapped-main-laws.lisp tests/semantic/d8-notany-main-laws.lisp lib/core4.lisp "$cli"
+check d8-acons-swapped tests/semantic/d8-acons-swapped-main-laws.lisp '(1 1 0)'
+sha256sum tests/semantic/d8-products-swapped-main-laws.lisp tests/semantic/d8-notany-main-laws.lisp tests/semantic/d8-acons-swapped-main-laws.lisp lib/core4.lisp "$cli"
