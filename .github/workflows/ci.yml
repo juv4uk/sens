@@ -370,22 +370,35 @@ jobs:
             exit 1
           fi
           echo "D8_STRING_GREATER_NATIVE_PASS exact=D8:00100011 positive=3 wrong-order-negative=1"
-          # Exact D8 PLUSP/MINUSP and two shared D6 LENGTH surfaces.
-          d8_sign="tests/semantic/d8-sign-and-list-length-laws.lisp"
-          d8_bad="tests/semantic/d8-sign-reject-nonnumeric.lisp"
-          sha256sum "$d8_sign" "$d8_bad" lib/core4.lisp target/debug/sens
-          if ! d8_out="$(target/debug/sens "$d8_sign" 2>&1)"; then
-            echo "::error::D8_SIGN_LENGTH_RED layer=eval fixture=$d8_sign expected=ten-D1-YES actual=execution-error" >&2
-            printf "%s\n" "$d8_out" >&2
+          # D8 signs and list lengths, ten independently executable SENS laws.
+          d8_fixture="tests/semantic/d8-sign-and-list-length-laws.lisp"
+          d8_negative="tests/semantic/d8-sign-reject-nonnumeric.lisp"
+          sha256sum "$d8_fixture" "$d8_negative" lib/core4.lisp target/debug/sens
+          d8_count=0
+          while IFS= read -r d8_program || [[ -n "$d8_program" ]]; do
+            [[ -z "$d8_program" || "$d8_program" == ";"* ]] && continue
+            ((d8_count += 1))
+            d8_file="$RUNNER_TEMP/d8-sign-$(printf "%02d" "$d8_count").lisp"
+            printf "%s\n" "$d8_program" > "$d8_file"
+            sha256sum "$d8_file"
+            if ! d8_out="$(target/debug/sens "$d8_file" 2>&1)"; then
+              echo "::error::D8_SIGN_EXEC_RED id=d8-sign-law-$d8_count layer=eval fixture=$d8_file expected=D1:1 actual=execution-error command=target/debug/sens" >&2
+              printf "%s\n" "$d8_out" >&2
+              exit 1
+            fi
+            d8_actual="$(printf "%s\n" "$d8_out" | tail -n 1)"
+            if [[ "$d8_actual" != "1" ]]; then
+              echo "::error::D8_SIGN_LAW_DIFF id=d8-sign-law-$d8_count layer=eval fixture=$d8_file expected=D1:1 actual=$d8_actual" >&2
+              exit 1
+            fi
+            echo "D8_SIGN_LAW_PASS law=$d8_count"
+          done < "$d8_fixture"
+          if [[ "$d8_count" != 10 ]]; then
+            echo "::error::D8_SIGN_CENSUS expected=10 actual=$d8_count" >&2
             exit 1
           fi
-          d8_result="$(printf "%s\n" "$d8_out" | tail -n 1)"
-          if [[ "$d8_result" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
-            echo "::error::D8_SIGN_LENGTH_DIFF layer=eval fixture=$d8_sign expected=(1 1 1 1 1 1 1 1 1 1) actual=$d8_result" >&2
-            exit 1
-          fi
-          if d8_bad_out="$(target/debug/sens "$d8_bad" 2>&1)"; then
-            echo "::error::D8_SIGN_UNEXPECTED_ACCEPT layer=eval fixture=$d8_bad expected=nonnumeric-refusal actual=accepted" >&2
+          if d8_bad_out="$(target/debug/sens "$d8_negative" 2>&1)"; then
+            echo "::error::D8_SIGN_BAD_DOMAIN layer=eval fixture=$d8_negative expected=nonnumeric-refusal actual=accepted" >&2
             exit 1
           fi
           echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
