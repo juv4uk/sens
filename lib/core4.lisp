@@ -1321,6 +1321,14 @@
   (0010 (значення)
     (011 (100 (100 (100 (011 (011 (011 значення)))))))))
 
+; D8:00010111 PLUSP / D8:11111010 MINUSP: strict signs on D24+ values.
+; Numeric zero is derived as D5:01011 DIFFERENCE(x,x), never an unqualified literal.
+; These are SENS-owned derived definitions, not direct D8 call-head admission.
+(0011 додатне?
+  (0010 (x) (11010 (01011 x x) x)))
+(0011 від'ємне?
+  (0010 (x) (11010 x (01011 x x))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
