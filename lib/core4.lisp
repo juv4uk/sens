@@ -1881,6 +1881,20 @@
 
 (0011 maplist відобразити-залишки)
 
+; D8:00001011 MAPLIST* — ratified historical capability, exact 8-bit identity.
+; Law: knowledge/d8-ratified.json: map successive proper-list tails, including final ().
+; D6:000101 MAPLIST omits final (); this is a derived SENS definition,
+; not a new direct D8 machine-call admission or a legacy W8 slot.
+(0011 залишки+порожнє
+  (0010 (елементи дія)
+    (110
+      ((0101 елементи)
+       (111 (дія (001 ())) (001 ())))
+      ((010 (001 ()))
+       (111 (дія елементи)
+            (залишки+порожнє (011 елементи) дія))))))
+
+
 (0011 apply-quote-args
   (0010 (m)
     (110
