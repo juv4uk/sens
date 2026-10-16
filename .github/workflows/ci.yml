@@ -188,10 +188,37 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
-          # D4:0001 EVAL: Rust unit exercises the existing eval mechanism.
-          # This is NOT a physical SENS semantic oracle: the focal verifier
-          # only accepts target/debug/sens with the SAME physical .sens fixture.
-          # Preserve the mechanism test without mislabeling its executor.
+          # D4:0001 EVAL — test the exact identity through the physical .sens path.
+          # The Rust unit below tests the mechanism internally; only these two
+          # direct binary receipts count as native SENS semantic evidence.
+          d4_eval_dir="$RUNNER_TEMP/d4-eval"
+          mkdir -p "$d4_eval_dir"
+          cp tests/semantic/d4-eval-value-call-laws.lisp "$d4_eval_dir/value-call.lisp"
+          cp tests/semantic/d4-eval-invalid-arity.lisp "$d4_eval_dir/invalid-arity.lisp"
+          target/debug/sens-trit encode "$d4_eval_dir/value-call.lisp"
+          target/debug/sens-trit encode "$d4_eval_dir/invalid-arity.lisp"
+          d4_eval_positive="$d4_eval_dir/value-call.sens"
+          d4_eval_negative="$d4_eval_dir/invalid-arity.sens"
+          expected_d1="$d4_eval_dir/expected-d1"
+          printf '1\n' > "$expected_d1"
+          sha256sum tests/semantic/d4-eval-value-call-laws.lisp tests/semantic/d4-eval-invalid-arity.lisp "$d4_eval_positive" "$d4_eval_negative" lib/core4.lisp target/debug/sens
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-d4-eval-value-call \
+            --layer eval \
+            --fixture "$d4_eval_positive" \
+            --expected-file "$expected_d1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$d4_eval_positive"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-d4-eval-invalid-arity \
+            --layer eval \
+            --fixture "$d4_eval_negative" \
+            --expect-error-substring "0001: expected /" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$d4_eval_negative"
+          echo "D4_EVAL_PHYSICAL_NATIVE_PASS identity=D4:0001 positive=1 negative=1 executor=target/debug/sens"
           cargo test --locked -p sens --lib exact_d4_eval_runs_represented_code_and_keeps_width_qualified_identity -- --nocapture
           echo "D4_EVAL_MECHANISM_UNIT_PASS identity=D4:0001 executor=Rust-unit semantic_authority=SENS"
           # Чотири ратифіковані D5 ідентичності: українська SENS-проєкція.
