@@ -219,6 +219,40 @@ jobs:
           fi
           echo "SENS_D6_ORDER_NATIVE_PASS identities=D6:110100,D6:110110 checks=8 negative=1 authority=SENS"
 
+      - name: D6 ZIP/UNZIP — нативні D1 закони і однобітний негатив
+        shell: bash
+        run: |
+          set -euo pipefail
+          law=tests/semantic/d6-zip-unzip-laws.lisp
+          mutant=tests/semantic/d6-zip-unzip-mutant.lisp
+          sha256sum "$law" "$mutant" lib/core4.lisp target/debug/sens
+          python3 - "$law" "$mutant" <<'PY_D6'
+          from pathlib import Path
+          import sys
+          a,b=(Path(p).read_text(encoding="utf-8") for p in sys.argv[1:])
+          if len(a)!=len(b) or sum(x!=y for x,y in zip(a,b))!=1:
+              raise SystemExit("D6_ZIP_UNZIP_RED layer=source expected=one-bit-mutant")
+          PY_D6
+          if ! output="$(target/debug/sens "$law" 2>&1)"; then
+            printf '%s\n' "$output" >&2
+            echo "::error::D6_ZIP_UNZIP_RED layer=eval expected=six-D1-YES actual=execution-error"
+            exit 1
+          fi
+          actual="${output##*$'\n'}"
+          if [[ "$actual" != "(1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_ZIP_UNZIP_RED layer=eval expected=(1,1,1,1,1,1) actual=$actual"
+            exit 1
+          fi
+          if negative="$(target/debug/sens "$mutant" 2>&1)"; then
+            echo "::error::D6_ZIP_UNZIP_RED layer=eval expected=D1-noncallable actual=success"
+            exit 1
+          fi
+          if [[ "$negative" != *"domain identity is not callable under its ratified law: D1"* ]]; then
+            printf '%s\n' "$negative" >&2
+            echo "::error::D6_ZIP_UNZIP_RED layer=eval expected=D1-noncallable actual=other-error"
+            exit 1
+          fi
+          echo "D6_ZIP_UNZIP_NATIVE_PASS laws=6 one_bit_negative=REJECTED authority=SENS"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
