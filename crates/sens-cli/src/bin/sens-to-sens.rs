@@ -1,5 +1,5 @@
 use sens::{
-    installed_capabilities, parse, semantic_registry_export, Expr, ExprKind, Sens8,
+    installed_capabilities, parse, semantic_registry_export, CoreDomainIdentity, Expr, ExprKind,
 };
 use std::collections::HashSet;
 use std::env;
@@ -35,24 +35,23 @@ enum HeadKind {
     Other,
 }
 
-fn head_kind(sens: Sens8) -> HeadKind {
-    if sens == sens::sens!(00000001) {
-        HeadKind::Quote
-    } else if sens == sens::sens!(00000111) {
-        HeadKind::Cond
-    } else if sens == sens::sens!(00001000) {
-        HeadKind::Lambda
-    } else if sens == sens::sens!(00001001) || sens == sens::sens!(00001011) {
-        HeadKind::Define
-    } else if sens == sens::sens!(00001010) {
-        HeadKind::Defmacro
-    } else if sens == sens::sens!(10011100) {
-        HeadKind::Let
-    } else if sens == sens::sens!(10011101) {
-        HeadKind::LetStar
-    } else {
-        HeadKind::Other
+fn head_kind(identity: CoreDomainIdentity) -> HeadKind {
+    // Lisp-owned surface tables decide the *exact* domain and bits.
+    // No historical W8, English opcode or bare payload can select a form.
+    for (surface, kind) in [
+        ("як-є", HeadKind::Quote),
+        ("за-умовою", HeadKind::Cond),
+        ("функція", HeadKind::Lambda),
+        ("визначити", HeadKind::Define),
+        ("визначити-макрос", HeadKind::Defmacro),
+        ("нехай", HeadKind::Let),
+        ("нехай*", HeadKind::LetStar),
+    ] {
+        if semantic_registry_export::admitted_core_domain_for_surface(surface) == Some(identity) {
+            return kind;
+        }
     }
+    HeadKind::Other
 }
 
 fn host_capability_names() -> HashSet<String> {
@@ -65,7 +64,7 @@ fn resolve_head<'a>(
     bound: &HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-) -> Option<(Option<&'a str>, Sens8)> {
+) -> Option<(Option<&'a str>, CoreDomainIdentity)> {
     match &head.kind {
         ExprKind::Sid(sens) => Some((None, *sens)),
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
