@@ -1270,6 +1270,13 @@
   (0010 (dividend divisor)
     (1110 (10111 dividend divisor) (00101100 dividend divisor))))
 
+; Похідний D24+ natural-zero test, NOT a D5:01000 direct call.
+; D5:01011 DIFFERENCE(x,x) yields same-domain zero without carry;
+; D3:101 EQ tests admitted atomic identity and returns exact D1.
+(0011 нуль-д24?
+  (0010 (значення)
+    (101 значення (01011 значення значення))))
+
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
 (0011 null?
   (0010 (x)
