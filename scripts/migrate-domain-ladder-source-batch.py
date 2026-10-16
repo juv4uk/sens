@@ -303,8 +303,12 @@ def run(root, write=False, selected=None):
     # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
     reviewed = load_nonprogram_classification(root, selected_paths=selected)
     pinned = reviewed.get(PINNED_SCHEMA_METADATA)
-    if pinned is None or pinned["cohort"] != "schema":
-        raise ValueError("missing independently reviewed schema metadata authority")
+    # A schema pin is mandatory only when that schema is in the source
+    # selection (or this is a full census). It cannot impose a filename HOLD
+    # on unrelated, independently selected Lisp files.
+    if selected is None or PINNED_SCHEMA_METADATA in selected:
+        if pinned is None or pinned["cohort"] != "schema":
+            raise ValueError("missing independently reviewed schema metadata authority")
     proc = subprocess.run(["git", "ls-files", "-z", "--", "*.lisp"],
                           cwd=root, check=True, capture_output=True)
     paths = sorted(p.decode() for p in proc.stdout.split(b"\0") if p)
