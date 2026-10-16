@@ -275,15 +275,20 @@
 
 (0011 reduce згорнути)
 
+; SCAN is a prefix history after each element, without the initial state.
+; #3674 proves last(SCAN)=REDUCE only for nonempty lists. Empty SCAN
+; presentation is unresolved and fails closed, not an invented language law.
 (0011 накопичувати
   (0010 (операція стан елементи)
     (110
-      ((0101 елементи) (111 стан (001 ())))
+      ((0101 елементи) (100 (001 ())))
       ((010 (001 ()))
-       (111 стан
-            (накопичувати операція
-              (операція стан (100 елементи))
-              (011 елементи)))))))
+       ((0010 (наступний)
+          (110
+            ((0101 (011 елементи)) (111 наступний (001 ())))
+            ((010 (001 ())) (111 наступний
+               (накопичувати операція наступний (011 елементи))))))
+        (операція стан (100 елементи)))))))
 
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
