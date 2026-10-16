@@ -149,16 +149,16 @@ jobs:
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
           if ! d5_observed="$(target/debug/sens "$d5_projection" 2>&1)"; then
             printf '%s\n' "$d5_observed" >&2
-            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1) actual=execution-error" >&2
+            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d5_observed"
           d5_actual="${d5_observed##*$'\n'}"
-          if [[ "$d5_actual" != "(1 1 1 1 1 1)" ]]; then
-            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1) actual=$d5_actual" >&2
+          if [[ "$d5_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=$d5_actual" >&2
             exit 1
           fi
-          echo "D5_UK_NATIVE_PASS functions=4 laws=6 authority=SENS"
+          echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
