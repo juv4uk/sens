@@ -428,5 +428,5 @@
      (так (ні))))
  (репл-каталог-з-текстів
    (як-є
-     ("(domain-table/1\\n  (0000000000 (ук немає-можливості) (укр відсутня-можливість-виконання) (san abhāva-sāmarthya) (en missing-capability) (LISP MISSING-CAPABILITY) (sym ()))\\n  (0000000001 (ук перше-значення) (укр перше-значення) (san eka) (en first-value) (LISP FIRST-VALUE) (sym ()))\\n)"))
+     ("(domain-table/1\n  (0000000000 (ук немає-можливості) (укр відсутня-можливість-виконання) (san abhāva-sāmarthya) (en missing-capability) (LISP MISSING-CAPABILITY) (sym ()))\n  (0000000001 (ук перше-значення) (укр перше-значення) (san eka) (en first-value) (LISP FIRST-VALUE) (sym ()))\n)"))
    (як-є (д10))))
