@@ -49,14 +49,6 @@ jobs:
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
 
-      - name: MINHOST — зібрати обрізаний хост із Zig-лінком (нова збірка без хламу)
-        id: minhost-build
-        shell: bash
-        run: |
-          set -euo pipefail
-          # The minimal host: one file + the sterile Zig corridor. Builds independently of the old crate.
-          cargo build -p sens-minhost --features zig-transport
-          cargo build -p sens-minhost
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
