@@ -339,9 +339,16 @@
       ((equal? (010 values) (001 (0)))
        (map-onto f (011 values) (111 (f (100 values)) acc))))))
 
-(0011 map
-  (0010 (f values)
-    (map-onto f values (001 ()))))
+; D6:101000 MAP: native SENS recursion over a proper list.
+; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
+(0011 відобразити
+  (0010 (дія значення)
+    (110
+      ((0101 значення) (001 ()))
+      ((010 (001 ()))
+       (111 (дія (100 значення))
+            (відобразити дія (011 значення)))))))
+(0011 map відобразити)
 
 (0011 filter-onto
   (0010 (predicate values acc)
@@ -355,9 +362,17 @@
            ((not? decision)
             (filter-onto predicate (011 values) acc))))))))
 
-(0011 filter
-  (0010 (predicate values)
-    (filter-onto predicate values (001 ()))))
+; D6:101001 FILTER: predicate must return an exact D1 bit.
+; Retain only the D1:YES heads; empty list returns structural D3:000.
+(0011 відсіяти
+  (0010 (умова значення)
+    (110
+      ((0101 значення) (001 ()))
+      ((умова (100 значення))
+       (111 (100 значення) (відсіяти умова (011 значення))))
+      ((010 (001 ()))
+       (відсіяти умова (011 значення))))))
+(0011 filter відсіяти)
 
 ; D6:101110 REDUCE: the law is Lisp-owned, not an implicit D6 opcode.
 ; D4:0101 NULL ends precisely an empty proper list. D3 CAR/CDR step only a pair.
