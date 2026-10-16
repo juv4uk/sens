@@ -702,6 +702,18 @@
             (111 (100 результат) (001 ()))))
      (розпарувати-пари пари))))
 
+; D8:11110001 = ANY(NOT p), ратифікований добутковий кут.
+; Лише SENS-похідна реалізація на D6:111100 ANY + D4:0100 NOT.
+(0011 є-що-не-задовольняє?
+  (0010 (p значення)
+    (будь-яке? (0010 (x) (0100 (p x))) значення)))
+
+; D8:11110011 = ALL(NOT p), включно з порожнім списком.
+; Лише SENS-похідна реалізація на D6:111101 ALL + D4:0100 NOT.
+(0011 усі-не-задовольняють?
+  (0010 (p значення)
+    (усі? (0010 (x) (0100 (p x))) значення)))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
