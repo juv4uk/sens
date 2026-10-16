@@ -10,15 +10,22 @@ else
   mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMRT)
 fi
 
-# Виявлення української кирилиці. ripgrep (rg) переважно, якщо є;
-# інакше GNU grep -P (rg відсутній у деяких пісочницях агентів, і без
-# фолбеку guard хибно позначав кожен файл як англомовний на таких хостах).
-has_cyrillic() {
-  if command -v rg >/dev/null 2>&1; then
-    rg -q '[А-Яа-яІіЇїЄєҐґ]' "$1"
-  else
-    grep -qP '[А-Яа-яІіЇїЄєҐґ]' "$1"
-  fi
+# Обов'язкова українська — це зміст документа, а не один
+# кириличний символ у заголовку, посиланні чи блоці коду.
+# Це механічний негативний guard, не автоматичний визначник мови.
+has_ukrainian_prose() {
+  awk '
+    /^[[:space:]]*```/ { fenced = !fenced; next }
+    fenced { next }
+    /^[[:space:]]*#{1,6}[[:space:]]/ { next }
+    {
+      line = $0
+      gsub(/\[[^]]*\]\([^)]*\)/, "", line)
+      gsub(/`[^`]*`/, "", line)
+      if (line ~ /[А-Яа-яІіЇїЄєҐґ]/) { found = 1; exit }
+    }
+    END { exit !found }
+  ' "$1"
 }
 
 # Номер першого рядка зі "справжнім" українським контентом -- кирилиця
@@ -70,7 +77,6 @@ failed=0
 for file in "${files[@]}"; do
   [[ -f "$file" ]] || continue
   case "$file" in
-    *.uk.md) continue ;;
     AGENTS.md|README*.md|memory/*.md|docs/*.md|docs/**/*.md|plans/*.md|plans/**/*.md) ;;
     *) continue ;;
   esac
@@ -81,19 +87,20 @@ for file in "${files[@]}"; do
   [[ "$directory" == "$file" ]] && directory=.
   sibling="$directory/$stem.uk.md"
   has_sibling=0
-  [[ -f "$sibling" ]] && has_cyrillic "$sibling" && has_sibling=1
+  [[ -f "$sibling" ]] && has_ukrainian_prose "$sibling" && has_sibling=1
 
-  if ! has_cyrillic "$file"; then
+  if ! has_ukrainian_prose "$file"; then
     if ((has_sibling)); then
       continue # ok -- окремий український sibling-файл несе зміст
     fi
-    printf 'Немає українського змісту в документації: %s (очікується український текст або %s)\n' \
+    printf 'Немає основного українського тексту в документації: %s (потрібен зміст українською або змістовний %s)\n' \
       "$file" "$sibling" >&2
     failed=1
     continue
   fi
 
-  ((has_sibling)) && continue # sibling-форма не має внутрішньої структури для порівняння
+  # Якщо основний файл уже має український зміст, перевіряємо порядок
+  # його секцій навіть за наявності окремого *.uk.md.
 
   # Порядок багатомовних секцій повторює пріоритет мов:
   # українська спочатку, німецька після неї, англійська остання.

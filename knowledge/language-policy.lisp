@@ -3,7 +3,9 @@
 ; Уточнення власника 2026-10-16 замінює порядок секцій від 15.10:
 ; у всіх людських повідомленнях перша українська, друга німецька, третя англійська.
 ; Порядок багатомовних секцій документації та частин повідомлень Git-комітів:
-; Українська → Deutsch → English. Необов'язково використовувати всі три мови.
+; Українська → Deutsch → English. Українська ОБОВ'ЯЗКОВА у кожному
+; людському матеріалі, а німецька й англійська — факультативні переклади.
+; Лише DE/EN без самодостатнього українського змісту не допускаються.
 ; Це не змінює коментарі коду, програмні поверхні чи семантику SENS.
 ;
 ; Цей контракт стосується ВСЬОГО людського тексту у власних репозиторіях,
@@ -20,7 +22,9 @@
      (ratified-at . "2026-09-07")
      (text-encoding . utf-8)
      (primary-language . ukrainian)
+     (mandatory-human-language . ukrainian)
      (auxiliary-languages . (german english))
+     (auxiliary-languages-optional . t)
      (human-facing-order . (ukrainian german english))
      (human-facing-order-scope . (human-facing-documentation git-commit-subject-and-body))
      (human-facing-order-updated-at . "2026-10-16")
@@ -33,6 +37,10 @@
      (transliteration-role . auxiliary-interoperability-tool)
      (rules .
        ((ukrainian-primary . t)
+        (ukrainian-required-in-all-human-facing-material . t)
+        (ukrainian-main-content-self-sufficient . t)
+        (non-ukrainian-only-human-material-forbidden . t)
+        (german-and-english-translations-optional . t)
         (ukrainian-first-outside-ordered-scope . t)
         (ordered-presentation-does-not-change-priority . t)
         (ordered-presentation-allows-language-subsets . t)
@@ -48,6 +56,8 @@
         (git-tasks-and-issues-ukrainian-first . t)
         (git-pull-requests-and-reviews-ukrainian-first . t)
         (git-commit-subject-and-body-presentation-order . (ukrainian german english))
+        (git-commit-subject-ukrainian-required . t)
+        (human-facing-documentation-ukrainian-required . t)
         (git-branch-human-names-ukrainian-first . t)
         (all-agent-and-owner-messages-ukrainian-first . t)
         (workflow-job-and-ci-human-labels-ukrainian-first . t)
@@ -97,4 +107,6 @@
         (guard-tool . uk-latynka)
         (encoding . utf-8)
         (round-trip-check . "python3 scripts/uk-latynka.py self-test")
+        (documentation-language-check . scripts/check-bilingual-docs)
+        (local-git-commit-message-check . githooks/commit-msg)
         (latynka-use . "auxiliary only when an explicit non-Unicode boundary requires ASCII"))))))
