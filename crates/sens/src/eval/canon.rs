@@ -572,6 +572,17 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
+    // Ratified D4:0001 EVAL is a value-call mechanism in its own right.
+    // Dispatch by the exact four-bit domain identity; the historical W8 EVAL
+    // primitive below remains compatibility-only and is never the authority.
+    if matches!(
+        identity,
+        CoreDomainIdentity::D4(word) if word.word().packed_bits() == 0b0001
+    ) {
+        require_exactly_one_d4_argument(0b0001, args, span)?;
+        return special_forms::eval_values(args, environment, span);
+    }
+
     if let Some(result) = invoke_compact_derived_d4(identity, args, span) {
         return result;
     }
@@ -765,6 +776,49 @@ mod exact_domain_primitive_tests {
         CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(bits).expect("D4 word"),
         ))
+    }
+
+    #[test]
+    fn exact_d4_eval_evaluates_represented_sens_expression_without_w8_dispatch() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        let symbol = |name: &str| Value::Symbol(std::rc::Rc::from(name));
+
+        // (car (cons (quote eval-marker) (quote ())))
+        // This observes evaluator behavior across exact D3 calls, not merely
+        // returning a literal unchanged.
+        let expression = Value::list([
+            symbol("car"),
+            Value::list([
+                symbol("cons"),
+                Value::list([symbol("quote"), symbol("eval-marker")]),
+                Value::list([symbol("quote"), Value::Nil]),
+            ]),
+        ]);
+
+        let result = invoke_domain_identity(d4(0b0001), &[expression.clone()], &environment, span)
+            .expect("ratified D4:0001 EVAL must execute a represented expression");
+        assert!(
+            matches!(result, Value::Symbol(ref name) if name.as_ref() == "eval-marker"),
+            "exact D4 EVAL should evaluate the nested D3 expression; got {result}"
+        );
+
+        for invalid_arity in [0usize, 2usize] {
+            let values = vec![Value::Nil; invalid_arity];
+            let error = invoke_domain_identity(d4(0b0001), &values, &environment, span)
+                .expect_err("D4:0001 EVAL has exactly one represented expression");
+            assert_eq!(error.kind, ErrorKind::Arity);
+            assert!(error.message.contains("D4:0001"), "{}", error.message);
+        }
+
+        // D3:001 shares numeric payload 1 with D4:0001 but is QUOTE syntax,
+        // not EVAL. Calling the value mechanism may not cross that boundary.
+        let error = invoke_domain_identity(d3(0b001), &[expression], &environment, span)
+            .expect_err("D3:001 must not inherit D4:0001 EVAL callability");
+        assert!(
+            error.message.contains("no admitted value-call mechanism"),
+            "unexpected D3:001 result: {error}"
+        );
     }
 
     #[test]
