@@ -1136,7 +1136,7 @@ mod fasl_tests {
         };
         assert!(matches!(
             &outer[0].kind,
-            ExprKind::Sid(sid) if *sid == crate::DomainIdentity::D9(crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")))
+            ExprKind::Sid(sid) if *sid == crate::CoreDomainIdentity::D9(crate::CoreD9::from_word(crate::Bit9::new(0b110011111).expect("D9 numeric-buffer-map")))
         ));
         let ExprKind::NumericBuffer(crate::NumericBuffer::I32(values)) = &outer[2].kind else {
             panic!("third argument must stay an i32 buffer");

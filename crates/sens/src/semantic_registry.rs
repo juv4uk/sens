@@ -532,6 +532,7 @@ mod exact_d5_binding_projection_tests {
 #[cfg(test)]
 mod exact_d3_compatibility_migration_tests {
     use super::*;
+    use crate::{BinarySourceWord, Bit8};
 
     #[test]
     fn only_ratified_surfaces_project_historical_quote_cond_car() {
