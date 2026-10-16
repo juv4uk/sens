@@ -460,6 +460,22 @@
                                    (111 body (001 ()))))
                        (001 ())))))))))
 
+; D6:001011 COMPOSE / D6:101101 FLIP — похідні функції, виведені лише з D4 lambda.
+; Координати вже ратифіковані (lib/domains/d6.lisp), механізм — ні
+; (knowledge/d6-mechanism-ledger.json: mechanism_status=MISSING). Визначаємо їх
+; мовою SENS через наявний D4:0010 LAMBDA, без нових координат і без Rust.
+; `скласти-функції f g` → (λ (x) (f (g x))) — права композиція.
+(0011 скласти-функції
+  (0010 (f g)
+    (0010 (x)
+      (f (g x)))))
+
+; `поміняти-аргументи f` → (λ (a b) (f b a)) — зміна порядку двох аргументів.
+(0011 поміняти-аргументи
+  (0010 (f)
+    (0010 (a b)
+      (f b a))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
