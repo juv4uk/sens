@@ -578,6 +578,29 @@ jobs:
           fi
           echo "D8_COPY_LIST_NATIVE_PASS identity=D8:10100000 laws=8 negative=1 authority=SENS"
 
+      - name: D8 — MAPCAN/MAPCON два мовні спискові закони й негатив
+        shell: bash
+        run: |
+          set -euo pipefail
+          good="tests/semantic/d8-mapcan-mapcon-laws.lisp"
+          bad="tests/semantic/d8-mapcan-mapcon-invalid.lisp"
+          sha256sum "$good" "$bad" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$good" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D8_MAPCAN_MAPCON_RED layer=eval fixture=$good expected=8-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_MAPCAN_MAPCON_DIFF layer=eval fixture=$good expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if rejected="$(target/debug/sens "$bad" 2>&1)"; then
+            echo "::error::D8_MAPCAN_MAPCON_NEGATIVE_SURVIVED layer=eval fixture=$bad expected=type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_MAPCAN_MAPCON_NATIVE_PASS identities=D8:10101001,D8:10111000 checks=8 negative=1"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
