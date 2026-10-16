@@ -188,20 +188,24 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
-          # D4:0001 EVAL — test the exact identity through the physical .sens path.
-          # The Rust unit below tests the mechanism internally; only these two
-          # direct binary receipts count as native SENS semantic evidence.
+          # D4:0001 EVAL — exact binary-word source -> physical .sens -> SENS executor.
+          # The input fixture is raw exact-width words, not ordinary symbolic Lisp.
           d4_eval_dir="$RUNNER_TEMP/d4-eval"
           mkdir -p "$d4_eval_dir"
-          cp tests/semantic/d4-eval-value-call-laws.lisp "$d4_eval_dir/value-call.lisp"
-          cp tests/semantic/d4-eval-invalid-arity.lisp "$d4_eval_dir/invalid-arity.lisp"
+          cp tests/semantic/d4-eval-value-call-laws.bits "$d4_eval_dir/value-call.lisp"
+          cp tests/semantic/d4-eval-invalid-arity.bits "$d4_eval_dir/invalid-arity.lisp"
           target/debug/sens-trit encode "$d4_eval_dir/value-call.lisp"
           target/debug/sens-trit encode "$d4_eval_dir/invalid-arity.lisp"
           d4_eval_positive="$d4_eval_dir/value-call.sens"
           d4_eval_negative="$d4_eval_dir/invalid-arity.sens"
           expected_d1="$d4_eval_dir/expected-d1"
           printf '1\n' > "$expected_d1"
-          sha256sum tests/semantic/d4-eval-value-call-laws.lisp tests/semantic/d4-eval-invalid-arity.lisp "$d4_eval_positive" "$d4_eval_negative" lib/core4.lisp target/debug/sens
+          d4_words="$(target/debug/sens-trit open "$d4_eval_positive")"
+          if [[ "$d4_words" != "$(cat tests/semantic/d4-eval-value-call-laws.bits)" ]]; then
+            echo "::error::D4_EVAL_T5_WORD_PARITY layer=transport expected=exact-bits actual=decoded-words" >&2
+            exit 1
+          fi
+          sha256sum tests/semantic/d4-eval-value-call-laws.bits tests/semantic/d4-eval-invalid-arity.bits "$d4_eval_positive" "$d4_eval_negative" lib/core4.lisp target/debug/sens
           python3 scripts/ci_failure_contract.py run \
             --test-id sens-d4-eval-value-call \
             --layer eval \
