@@ -241,6 +241,20 @@ jobs:
             exit 1
           fi
           echo "D6_MINMAX_NATIVE_PASS functions=2 positive=6 negative=2 authority=SENS"
+          # D6:000100 NTH, 5 позитивних і 2 негативні native SENS закони.
+          d6_nth_fixture="tests/semantic/d6-nth-uk-laws.lisp"
+          sha256sum "$d6_nth_fixture" lib/core4.lisp target/debug/sens
+          if ! d6_nth_output="$(target/debug/sens "$d6_nth_fixture" 2>&1)"; then
+            printf '%s\n' "$d6_nth_output" >&2
+            echo "::error::D6_NTH_EXEC_RED layer=eval fixture=$d6_nth_fixture expected=7-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          d6_nth_actual="$(printf '%s\n' "$d6_nth_output" | tail -n 1)"
+          if [[ "$d6_nth_actual" != "(1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_NTH_LAW_DIFF layer=eval fixture=$d6_nth_fixture expected=(1 1 1 1 1 1 1) actual=$d6_nth_actual" >&2
+            exit 1
+          fi
+          echo "D6_NTH_NATIVE_PASS functions=1 positive=5 negative=2 authority=SENS"
           # D8:00001011 MAPLIST* — suffixes plus final NIL, one native test.
           d8_star_law="tests/semantic/d8-maplist-star-laws.lisp"
           d8_star_bad="tests/semantic/d8-maplist-star-bad-tail.lisp"
