@@ -1452,6 +1452,15 @@
   (0010 (ліве праве)
     (equal? ліве праве)))
 
+; D8:10110100 MAPC — застосувати дію до кожного елемента зліва направо.
+; Донор Common Lisp (#2934): результати дії відкидаються, вихідний список
+; повертається незмінним. Мовна композиція з D6:101000 MAP і D4 LAMBDA.
+; Семантика ефекту належить SENS, прямий D8 opcode не відкриваємо.
+(0011 застосувати-до-всіх
+  (0010 (дія елементи)
+    ((0010 (обчислено) елементи)
+     (відобразити дія елементи))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
