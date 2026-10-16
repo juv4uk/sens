@@ -420,6 +420,23 @@ jobs:
             printf '%s\n' "$output"
           done
           echo "D8_NATIVE_BATCH_PASS functions=7 positive=32 negative=6 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000,D8:00000100,D8:11001001"
+          # Three D9 resident laws derived from D3 CAR/CDR/ATOM, one native witness.
+          fixture="tests/semantic/d9-canon-cons-laws.lisp"
+          expected="(1 1 1 0 0 0)"
+          test_id="d9-canon-cons"
+          fixture_sha="$(sha256sum "$fixture" | cut -d' ' -f1)"
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "$observed" >&2
+            echo "::error::D9_CANON_EXEC_RED test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected actual=execution-error first_diff=execution reproduce='target/debug/sens $fixture'" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::D9_CANON_LAW_DIFF test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected actual=$actual first_diff=D1-vector reproduce='target/debug/sens $fixture'" >&2
+            exit 1
+          fi
+          echo "D9_CANON_NATIVE_PASS test_id=$test_id exact_domains=D9:010011100,D9:001000110,D9:010000111"
+
 
 
       - name: "D6/D8 — 48 точкових самосвідків SENS (шість партій)"
