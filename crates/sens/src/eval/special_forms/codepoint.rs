@@ -1,4 +1,4 @@
-use crate::{ErrorKind, Exactness, LanguageError, Span, Value};
+use crate::{BinaryNumber, ErrorKind, Exactness, LanguageError, Span, Value};
 use std::rc::Rc;
 
 /// Minimal runtime bridge from an exact Unicode scalar value to the language's
@@ -56,11 +56,27 @@ pub(crate) fn string_to_codepoint_values(
         return Err(invalid_character_string(span));
     }
 
-    Ok(Value::Number(character as u32 as f64, Exactness::Exact))
+    // D8:11100000 CHAR-CODE has a mathematically exact scalar result.
+    // Admit it as an explicitly domain-qualified D24 natural; do not
+    // manufacture a legacy float/decimal intermediary or coerce D1–D10.
+    let scalar = u32::from(character);
+    let word = (0u32..24)
+        .rev()
+        .map(|shift| ((scalar >> shift) & 1) as u8)
+        .collect::<Vec<_>>();
+    let number = BinaryNumber::from_numeric_domain_bits(24, &word)
+        .expect("Unicode scalar fits ratified exact D24 carrier");
+    Ok(Value::BinaryNumber(number))
 }
 
 fn exact_scalar_value(value: &Value, span: Span) -> Result<u32, LanguageError> {
     let integer = match value {
+        // Canonical result of D8:11100000 CHAR-CODE, exact-width D24.
+        Value::BinaryNumber(bits) if bits.numeric_domain_width() == Some(24) => {
+            bits.as_bits()
+                .iter()
+                .fold(0u32, |scalar, &bit| (scalar << 1) | u32::from(bit))
+        }
         Value::Number(number, Exactness::Exact)
             if number.is_finite() && number.fract() == 0.0 =>
         {
@@ -96,4 +112,53 @@ fn invalid_character_string(span: Span) -> LanguageError {
         "string->codepoint expects exactly one Unicode scalar character · string->codepoint ochikuie rivno odyn skaliarnyi symvol Unicode · string->codepoint erwartet genau ein Unicode-Skalarzeichen",
         span,
     )
+}
+
+#[cfg(test)]
+mod exact_d24_char_code_tests {
+    use super::*;
+
+    #[test]
+    fn char_code_emits_exact_d24_and_roundtrips_unicode() {
+        for source in ["a", "ї", "𐐷"] {
+            let observed = string_to_codepoint_values(
+                &[Value::String(Rc::from(source))],
+                Span::default(),
+            )
+            .expect("one Unicode scalar is admissible");
+            assert!(
+                matches!(&observed, Value::BinaryNumber(bits) if bits.numeric_domain_width() == Some(24)),
+                "CHAR-CODE must retain exact D24 rather than unqualified host Number"
+            );
+            let back = codepoint_to_string_values(&[observed], Span::default())
+                .expect("exact D24 scalar round-trips");
+            assert!(matches!(back, Value::String(value) if value.as_ref() == source));
+        }
+    }
+
+    #[test]
+    fn char_code_rejects_non_scalar_strings() {
+        for source in ["", "ab"] {
+            let result = string_to_codepoint_values(
+                &[Value::String(Rc::from(source))],
+                Span::default(),
+            );
+            assert!(result.is_err());
+        }
+    }
+
+    #[test]
+    fn code_char_rejects_surrogate_even_when_d24_qualified() {
+        let bits = (0u32..24)
+            .rev()
+            .map(|shift| ((0xd800u32 >> shift) & 1) as u8)
+            .collect::<Vec<_>>();
+        let qualified = BinaryNumber::from_numeric_domain_bits(24, &bits)
+            .expect("the carrier exists but is not a Unicode scalar");
+        let result = codepoint_to_string_values(
+            &[Value::BinaryNumber(qualified)],
+            Span::default(),
+        );
+        assert!(result.is_err());
+    }
 }
