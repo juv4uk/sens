@@ -55,8 +55,8 @@ jobs:
         run: |
           set -euo pipefail
           # The minimal host: one file + the sterile Zig corridor. Builds independently of the old crate.
-          cargo build --locked -p sens-minhost --features zig-transport
-          cargo build --locked -p sens-minhost
+          cargo build -p sens-minhost --features zig-transport
+          cargo build -p sens-minhost
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
