@@ -476,6 +476,12 @@
     (0010 (a b)
       (f b a))))
 
+; D6:001101 — ACONS, приєднати пару ключ/значення до асоціацій.
+; Лише два D3:111 CONS; без direct D6 callability.
+(0011 додати-асоціацію
+  (0010 (ключ значення асоціації)
+    (111 (111 ключ значення) асоціації)))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
