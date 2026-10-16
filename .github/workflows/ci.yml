@@ -298,6 +298,31 @@ jobs:
             exit 1
           fi
           echo "D6_NTH_NATIVE_PASS functions=1 positive=5 negative=2 authority=SENS"
+          # D8:00100011 STRING> — закон оберненого порядку, тест і негатив.
+          d8_greater_law="tests/semantic/d8-string-greater-laws.lisp"
+          d8_greater_mutant="tests/semantic/d8-string-greater-mutant.lisp"
+          sha256sum "$d8_greater_law" "$d8_greater_mutant" lib/core4.lisp target/debug/sens
+          if ! d8_greater_out="$(target/debug/sens "$d8_greater_law" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_EXEC_RED layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_out" >&2
+            exit 1
+          fi
+          d8_greater_actual="$(printf '%s\n' "$d8_greater_out" | tail -n 1)"
+          if [[ "$d8_greater_actual" != "(1 1 1)" ]]; then
+            echo "::error::D8_STRING_GREATER_LAW_DIFF layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=$d8_greater_actual" >&2
+            exit 1
+          fi
+          if ! d8_greater_negative="$(target/debug/sens "$d8_greater_mutant" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_NEGATIVE_EXEC_RED layer=eval fixture=$d8_greater_mutant expected=(0) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_negative" >&2
+            exit 1
+          fi
+          d8_greater_neg_actual="$(printf '%s\n' "$d8_greater_negative" | tail -n 1)"
+          if [[ "$d8_greater_neg_actual" != "(0)" ]]; then
+            echo "::error::D8_STRING_GREATER_NEGATIVE_SURVIVED layer=eval fixture=$d8_greater_mutant expected=(0) actual=$d8_greater_neg_actual" >&2
+            exit 1
+          fi
+          echo "D8_STRING_GREATER_NATIVE_PASS coord=D8:00100011 positives=3 negative=1"
           # D8:00001011 MAPLIST* — suffixes plus final NIL, one native test.
           d8_star_law="tests/semantic/d8-maplist-star-laws.lisp"
           d8_star_bad="tests/semantic/d8-maplist-star-bad-tail.lisp"
