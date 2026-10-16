@@ -101,6 +101,40 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: "SENS SCAN — 8 нативних D6/D8 позитивів і негативів"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d6-d8-scan-terminal-laws.lisp"
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          mapfile -t laws < "$fixture"
+          count=0
+          for program in "${laws[@]}"; do
+            if [[ -z "$program" || "$program" == ';'* ]]; then
+              continue
+            fi
+            ((count += 1))
+            case_file="$RUNNER_TEMP/scan-native-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$program" > "$case_file"
+            sha256sum "$case_file"
+            if ! observed="$(target/debug/sens "$case_file" 2>&1)"; then
+              echo "::error::SCAN_NATIVE_RED test=scan-$count layer=eval fixture=$case_file expected=D1:1 actual=execution-error command='target/debug/sens $case_file'" >&2
+              printf '%s\n' "$observed" >&2
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::SCAN_LAW_DIFF test=scan-$count layer=eval fixture=$case_file expected=1 actual=$actual command='target/debug/sens $case_file'" >&2
+              exit 1
+            fi
+            echo "SCAN_NATIVE_LAW_PASS law=$count result=D1:1"
+          done
+          if [[ "$count" -ne 8 ]]; then
+            echo "::error::SCAN_CENSUS_DIFF expected=8 actual=$count" >&2
+            exit 1
+          fi
+          echo "SCAN_NATIVE_PASS laws=8 D6:101111 D8:10111011"
+
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
