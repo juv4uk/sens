@@ -515,7 +515,7 @@ mod tests {
 
     #[test]
     fn історичний_w8_не_маскується_під_чинний_d8() {
-        let old = Value::Sid(crate::sens!(10101000));
+        let old = Value::Sid(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall")));
         let exact = Value::DomainIdentity(crate::DomainIdentity::D8(
             crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()),
         ));

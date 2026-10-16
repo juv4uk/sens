@@ -28,7 +28,7 @@
 /// ```
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct Bits<const N: usize>(u8);
+pub struct Bits<const N: usize>(u16);
 
 pub type Bit1 = Bits<1>;
 pub type Bit2 = Bits<2>;
@@ -44,12 +44,12 @@ impl<const N: usize> Bits<N> {
     ///
     /// Width zero and widths above eight are intentionally unconstructible
     /// through this bounded fast-path carrier.
-    pub const fn new(value: u8) -> Option<Self> {
-        if N == 0 || N > 8 {
+    pub const fn new(value: u16) -> Option<Self> {
+        if N == 0 || N > 16 {
             return None;
         }
 
-        if (value as u16) < (1u16 << N) {
+        if (value as u32) < (1u32 << N) {
             Some(Self(value))
         } else {
             None

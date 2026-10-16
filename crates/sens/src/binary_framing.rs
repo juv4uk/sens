@@ -1134,7 +1134,7 @@ mod tests {
     #[test]
     fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
         let historical_frames = [
-            BinaryFrame::Function(crate::sens!(10101000)),
+            BinaryFrame::Function(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"))),
             BinaryFrame::Number(number("1", "10")),
             BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
         ];

@@ -878,7 +878,7 @@ mod domain_eval_cutover_d3_compatibility {
             assert!(is_d3(identity, bits));
             assert_eq!(identity.width(), 3);
         }
-        for unrelated in [crate::sens!(10101000), crate::sens!(11110111)] {
+        for unrelated in [crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall")), crate::sens!(11110111)] {
             assert!(
                 crate::semantic_registry::compatibility_d3_route_from_ratified_domains(unrelated).is_none(),
                 "невідома W8-комірка не може стати чинним D3/D8"
