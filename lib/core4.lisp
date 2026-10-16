@@ -308,27 +308,9 @@
 
 
 
-; Exact D5 arithmetic surface bindings over existing admitted domain heads.
-; These are Lisp-owned projections, not new coordinates or a D5:01000 call admission.
-(0011 додати
-  (0010 (a b) (01010 a b)))
-(0011 plus додати)
-
-(0011 відняти
-  (0010 (a b) (01011 a b)))
-(0011 difference відняти)
-
-(0011 помножити
-  (0010 (a b) (10110 a b)))
-(0011 times помножити)
-
-(0011 менше?
-  (0010 (a b) (11010 a b)))
-(0011 lessp? менше?)
-
-(0011 більше?
-  (0010 (a b) (11011 a b)))
-(0011 greaterp? більше?)
+; D5 PLUS/DIFFERENCE/TIMES/LESSP/GREATERP already have immutable
+; exact-domain value-call mechanisms. Their canonical surfaces come from
+; lib/domains/d5.lisp; do not rebind those immutable names in Core4.
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
