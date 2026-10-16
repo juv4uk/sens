@@ -1564,7 +1564,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: RUST-ZIG-ONLY — заборона прямих Rust → Lisp/SENS/FASL залежностей
-        if: always()
+        # TEMPORARILY DISABLED per owner request 2026-10-16 during Rust↔Lisp migration.
+        # Restore if: always() when the linkage check is ready again.
+        if: ${{ false }}
         shell: bash
         run: |
           set -uo pipefail
