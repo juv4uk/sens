@@ -772,13 +772,23 @@
 ; ===== D8 derived (COPY-SEQ, MAPQN) =====
 ; copy-seq (копіювати-послідовність)
 (0011 копіювати-послідовність
-  (0010 (s)
-    (1110 s (001 ()))))
+  (0010 (елементи)
+    (110
+      ((0101 елементи) (001 ()))
+      ((010 елементи) (100 (001 ())))
+      (#d1:1
+       (111 (100 елементи)
+            (копіювати-послідовність (011 елементи)))))))
 
-; mapqn (голови-залишків)
+; D8:01001010 MAPQN — evaluate f(CAR tail, CDR tail) at every proper tail.
 (0011 голови-залишків
-  (0010 (f lst)
-    (map (0010 (tail) (100 tail)) (maplist f lst))))
+  (0010 (дія елементи)
+    (110
+      ((0101 елементи) (001 ()))
+      ((010 елементи) (100 (001 ())))
+      (#d1:1
+       (111 (дія (100 елементи) (011 елементи))
+            (голови-залишків дія (011 елементи)))))))
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
