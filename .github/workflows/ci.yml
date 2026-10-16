@@ -292,6 +292,29 @@ jobs:
             exit 1
           fi
           echo "D8_FIND_SOME_NATIVE_PASS identities=D8:11011111,D8:10100101 laws=7 negative=D1:0 authority=SENS"
+      - name: D8 — LIST* і два закони довжини, native SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          law="tests/semantic/d8-liststar-length-laws.lisp"
+          mutant="tests/semantic/d8-liststar-length-invalid.lisp"
+          sha256sum "$law" "$mutant" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$law" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D8_LISTSTAR_LENGTH_EXEC_RED layer=eval fixture=$law expected=eight-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_LISTSTAR_LENGTH_DIFF layer=eval fixture=$law expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if rejected="$(target/debug/sens "$mutant" 2>&1)"; then
+            echo "::error::D8_LISTSTAR_LENGTH_NEGATIVE_SURVIVED layer=eval fixture=$mutant expected=arity-error actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_LISTSTAR_LENGTH_NATIVE_PASS identities=D8:00011101,D8:00111110,D8:01001111 laws=8 negative=1"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
