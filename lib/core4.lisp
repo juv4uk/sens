@@ -553,6 +553,22 @@
         (розпарувати-пари (011 пари)))))))
 
 
+; D8:11100001 ZIP-swapped / D8:11100011 UNZIP-swapped.
+; Закон дослідження #3710: перестановка обох осей зберігає ZIP/UNZIP roundtrip.
+; Це лише похідні SENS-визначення поверх D6:111000/111001, не direct D8 opcode.
+(0011 спарувати-навпаки
+  (0010 (ліві праві)
+    (спарувати-послідовності праві ліві)))
+
+(0011 розпарувати-навпаки
+  (0010 (пари)
+    ((0010 (результат)
+       (111
+         (100 (011 результат))
+         (111 (100 результат) (001 ()))))
+     (розпарувати-пари пари))))
+
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
