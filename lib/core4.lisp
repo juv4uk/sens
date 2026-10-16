@@ -749,17 +749,19 @@
 (0011 string<?
   (0010 (a b)
     (110
-      ; D9 STRING-EMPTY? and D8 CHAR-CODE/D5 LESSP provide exact D1 tests.
+      ; Both empty/one empty: a strict lexical ordering has exact D1 answers.
       ((110011100 a)
        (110
          ((110011100 b) #d1:0)
-         (#d1:1 #d1:1)))
+         ((010 (001 ())) #d1:1)))
       ((110011100 b) #d1:0)
+      ; D8 CHAR-CODE explicitly projects scalar to D24 for D5 LESSP.
       ((11010 (11100000 (110101011 a))
-              (11100000 (110101011 b))) #d1:1)
+              (11100000 (110101011 b)))
+       #d1:1)
       ((101 (110101011 a) (110101011 b))
        (string<? (110011101 a) (110011101 b)))
-      (#d1:1 #d1:0))))
+      ((010 (001 ())) #d1:0))))
 
 
 

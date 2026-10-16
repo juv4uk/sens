@@ -352,11 +352,38 @@ fn invoke_domain_primitive(
                 special_forms::symbol_to_string_values(args, span)
             }
             DomainPrimitiveKind::CharCode => {
-                // The single Unicode scalar bridge already emits exact D24.
-                // Do not coerce it through an unqualified host Number again.
-                builtins::prim_01000101(args, environment, span)
+                // D8:11100000 is the explicit Unicode scalar -> D24 boundary.
+                // Temporary lower helpers may already return D24 or an exact
+                // unqualified scalar; neither escapes this canonical route.
+                let scalar = builtins::prim_01000101(args, environment, span)?;
+                match scalar {
+                    Value::BinaryNumber(numeric)
+                        if numeric.numeric_domain_width() == Some(24) =>
+                    {
+                        Ok(Value::BinaryNumber(numeric))
+                    }
+                    Value::Number(codepoint, crate::Exactness::Exact)
+                        if codepoint.is_finite()
+                            && codepoint.fract() == 0.0
+                            && (0.0..=0x10ffff as f64).contains(&codepoint) =>
+                    {
+                        let scalar = codepoint as u32;
+                        let word = (0u32..24)
+                            .rev()
+                            .map(|shift| ((scalar >> shift) & 1) as u8)
+                            .collect::<Vec<_>>();
+                        let numeric = crate::BinaryNumber::from_numeric_domain_bits(24, &word)
+                            .expect("one Unicode scalar fits exact D24");
+                        Ok(Value::BinaryNumber(numeric))
+                    }
+                    _ => Err(LanguageError::new(
+                        ErrorKind::Type,
+                        "D8 CHAR-CODE must produce one exact D24 Unicode scalar",
+                        span,
+                    )),
+                }
             }
-            DomainPrimitiveKind::Read => {
+                        DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.
                 special_forms::read_values(args, environment, span)
             }
