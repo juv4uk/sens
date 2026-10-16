@@ -8,23 +8,23 @@
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
 
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod bignum;
+mod bignum;
 mod bit9;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_number;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod domain_numeric;
+mod binary_number;
+mod domain_numeric;
 mod bits;
 pub mod d7_keyboard;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod canonical_reader;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod universal_frame3;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_domain;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_grammar;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_semantic;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_small;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_enumerator;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5_lambda;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5_lambda_app;
+mod canonical_reader;
+pub mod universal_frame3;
+pub mod frame3_domain;
+pub mod frame3_grammar;
+pub mod frame3_semantic;
+pub mod frame3_small;
+pub mod frame3_micro;
+pub mod frame3_micro_enumerator;
+pub mod frame3_micro_v5;
+pub mod frame3_micro_v5_lambda;
+pub mod frame3_micro_v5_lambda_app;
 
 
 /// Public names for the self-contained, metadata-heavy transport experiments.
@@ -33,7 +33,7 @@ pub mod d7_keyboard;
 /// with compact Frame3/F3.  The historical module paths remain available for
 /// source compatibility, but new code and documentation should use these names.
 pub mod envelope_e1 {
-// STAGED-OUT re-export removed:     pub use crate::universal_frame3::{
+    pub use crate::universal_frame3::{
         decode, encode, Frame3Decoder as Decoder, Frame3Error as Error,
     };
 }
@@ -41,7 +41,7 @@ pub mod envelope_e1 {
 /// Envelope E2: E1 plus the bounded grammar-rank block mode.
 /// Historical wire/research name: S3/v2.
 pub mod envelope_e2 {
-// STAGED-OUT re-export removed:     pub use crate::universal_frame3::{
+    pub use crate::universal_frame3::{
         decode_v2 as decode, encode_v2 as encode, Frame3Error as Error,
         Frame3V2Decoder as Decoder,
     };
@@ -50,12 +50,12 @@ pub mod envelope_e2 {
 /// Envelope E3: domain-aware self-contained carrier, including explicit D24+.
 /// Historical wire/research name: S3/v3.
 pub mod envelope_e3 {
-// STAGED-OUT re-export removed:     pub use crate::frame3_domain::{decode, encode, Error, Word};
+    pub use crate::frame3_domain::{decode, encode, Error, Word};
 }
 mod program_data;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_role;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_bootstrap;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod compiler_language;
+mod compiler_role;
+mod compiler_bootstrap;
+mod compiler_language;
 mod domain_words;
 mod domain_identity;
 pub mod domain_ladder;
@@ -63,21 +63,21 @@ pub use domain_ladder::DomainD10;
 #[allow(dead_code)]
 mod domain_owner_generated;
 mod packed_bits;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod outer_envelope;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_framing;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod gpu_execution_packet;
+mod outer_envelope;
+mod binary_framing;
+mod gpu_execution_packet;
 mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod parser;
-// STAGED-OUT (not in the runtime; research/REPL owns this): // mod mixed_source;
+mod parser;
+mod mixed_source;
 mod presentation;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod semantic_registry;
+mod semantic_registry;
 mod source_words;
-// STAGED-OUT (not in the runtime; ZIG owns packing): // mod source_packing;
-// STAGED-OUT (not in the runtime; ZIG owns packing): // mod ternary_transport;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_execution;
+mod source_packing;
+mod ternary_transport;
+mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -192,13 +192,13 @@ pub mod semantic_registry_export {
         super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
     }
 }
-// STAGED-OUT (not in the runtime; REPL owns this): // pub mod syntax;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod text7;
+pub mod syntax;
+mod text7;
 mod text7_projection;
 mod value;
 
-// STAGED-OUT re-export removed: pub use binary_number::{BinaryNumber, BinaryNumberError};
-// STAGED-OUT re-export removed: pub use domain_numeric::DomainNumericComposition;
+pub use binary_number::{BinaryNumber, BinaryNumberError};
+pub use domain_numeric::DomainNumericComposition;
 
 /// Host embedding adapter for already-ratified exact same-Dn + - * /
 /// Value operations. Does not introduce any SENS callable identity, opcode,
@@ -209,15 +209,15 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
 
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-// STAGED-OUT re-export removed: pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-// STAGED-OUT re-export removed: pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source, parse_mixed_exact_domain_macro_source, parse_mixed_exact_domain_guard_reference_source};
-// STAGED-OUT re-export removed: pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
-// STAGED-OUT re-export removed: pub use compiler_bootstrap::{
+pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
+pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source, parse_mixed_exact_domain_macro_source, parse_mixed_exact_domain_guard_reference_source};
+pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
+pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
     compiler_evidence_from_canonical_bytes, domain_identity_shape_mechanism,
     domain_identity_shape_or_empty_mechanism,
 };
-// STAGED-OUT re-export removed: pub use compiler_language::{
+pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_program_artifact_from_sens, compiler_program_bootstrap_bundle,
     compiler_program_requests_from_sens, compiler_semantic_input_from_sens,
@@ -226,15 +226,15 @@ pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 };
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, D7DataWord, CoreD8, CoreD9, PredicateBit, Racana2};
-// STAGED-OUT re-export removed: pub use packed_bits::{BitPacker, PackedBitstream};
-// STAGED-OUT re-export removed: pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
-// STAGED-OUT re-export removed: pub use binary_framing::{
+pub use packed_bits::{BitPacker, PackedBitstream};
+pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
+pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     decode_numeric_value_frame, encode_numeric_value_frame,
     decode_packed_numeric_value, encode_packed_numeric_value,
     BinaryFrame, BinaryFrameError,
 };
-// STAGED-OUT re-export removed: pub use gpu_execution_packet::{
+pub use gpu_execution_packet::{
     GpuExecutionPacketError, GpuExecutionPacketV1, GpuOutputRequest,
 };
 pub use environment::{CoreProfile, Environment, Session};
@@ -245,24 +245,24 @@ pub use source_words::{
     parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
     BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
-// STAGED-OUT re-export removed: pub use ternary_transport::{
+pub use ternary_transport::{
     decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,
     encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
     render_ternary_words_vertical, ternary_transport_accounting,
     TernaryTransportAccounting, TernaryTransportError,
     encode_d7_uk_t5, decode_d7_uk_t5, encode_d7_uk_words, decode_d7_uk_words, D7T5Error,
 };
-// STAGED-OUT re-export removed: pub use source_packing::{
+pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
     pack_domain_coordinates, packed_transport_accounting, semantic_source_bits,
     unpack_binary_source_words, unpack_domain_coordinates, PackedTransportAccounting,
 };
-// STAGED-OUT re-export removed: pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
+pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError,
 };
 
-// STAGED-OUT re-export removed: pub use binary_execution::{
+pub use binary_execution::{
     eval_t5_program, eval_e1_program, PhysicalT5Program, T5ExecutionError, E1ExecutionError,
 };
 
@@ -278,16 +278,16 @@ pub use eval::{
     eval_exact_domain_program, eval_program, evaluate as eval_expr, EvalResult,
 };
 pub use eval::lower::lower_program;
-// STAGED-OUT re-export removed: pub use parser::{parse, parse_exact_domain_source};
+pub use parser::{parse, parse_exact_domain_source};
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
     PresentationLanguage,
 };
-// STAGED-OUT re-export removed: pub use syntax::fasl::{
+pub use syntax::fasl::{
     decode_program as fasl_decode_program, encode_program as fasl_encode_program,
 };
-// STAGED-OUT re-export removed: pub use syntax::wire::{
+pub use syntax::wire::{
     decode_program as wire_decode_program, encode_program as wire_encode_program,
 };
 
@@ -863,7 +863,7 @@ pub fn fasl_encode(expressions: &[Expr], source_hash: &[u8; 32]) -> Vec<u8> {
 pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
-// STAGED-OUT re-export removed: pub use syntax::{Exactness, Expr, ExprKind, Span};
+pub use syntax::{Exactness, Expr, ExprKind, Span};
 pub use value::{Closure, NumericBuffer, Rational, Value};
 
 /// Return a half-open, Unicode-scalar-indexed substring with clamped bounds.
