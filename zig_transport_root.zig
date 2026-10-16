@@ -17,6 +17,92 @@ comptime {
     _ = abi.sens_zig_f3c_unpack;
 }
 
+// Неперервна драбина D1–D10 читається без посередницького registry.
+// Ширина вибирає виключно ФАЙЛ. Коди, значення, surface та admission
+// визначає тільки SENS/Lisp після фізичного перенесення оригіналу.
+fn ratifiedDomainSource(width: u8) ?[]const u8 {
+    return switch (width) {
+        1 => @embedFile("lib/domains/d1.lisp"),
+        2 => @embedFile("lib/domains/d2.lisp"),
+        3 => @embedFile("lib/domains/d3.lisp"),
+        4 => @embedFile("lib/domains/d4.lisp"),
+        5 => @embedFile("lib/domains/d5.lisp"),
+        6 => @embedFile("lib/domains/d6.lisp"),
+        7 => @embedFile("lib/domains/d7.lisp"),
+        8 => @embedFile("lib/domains/d8.lisp"),
+        9 => @embedFile("lib/domains/d9.lisp"),
+        10 => @embedFile("lib/domains/d10.lisp"),
+        else => null,
+    };
+}
+
+pub export fn sens_zig_domain_table_bytes_copy(
+    domain_width: u8,
+    dst: [*]u8,
+    capacity: usize,
+) isize {
+    const source_bytes = ratifiedDomainSource(domain_width) orelse return -1;
+    if (source_bytes.len == 0) return -1;
+    if (capacity == 0) return @intCast(source_bytes.len);
+    if (capacity < source_bytes.len) return -2;
+    @memcpy(dst[0..source_bytes.len], source_bytes);
+    return @intCast(source_bytes.len);
+}
+
+test "all ten ratified domain tables travel through Zig unchanged" {
+    inline for (1..11) |ordinal| {
+        const width: u8 = @intCast(ordinal);
+        const original = ratifiedDomainSource(width).?;
+        const size = sens_zig_domain_table_bytes_copy(width, undefined, 0);
+        try std.testing.expectEqual(@as(isize, @intCast(original.len)), size);
+        var guard: [1]u8 = .{0xA5};
+        try std.testing.expectEqual(
+            @as(isize, -2),
+            sens_zig_domain_table_bytes_copy(width, &guard, guard.len),
+        );
+        try std.testing.expectEqual(@as(u8, 0xA5), guard[0]);
+        const output = try std.testing.allocator.alloc(u8, original.len);
+        defer std.testing.allocator.free(output);
+        try std.testing.expectEqual(
+            size,
+            sens_zig_domain_table_bytes_copy(width, output.ptr, output.len),
+        );
+        try std.testing.expectEqualSlices(u8, original, output);
+    }
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(0, undefined, 0),
+    );
+    try std.testing.expectEqual(
+        @as(isize, -1),
+        sens_zig_domain_table_bytes_copy(11, undefined, 0),
+    );
+}
+
+// Український REPL належить SENS. Zig — лише точний носій його джерела;
+// жодного тлумачення назв, семантики чи дозвільних таблиць у Zig.
+const repl_core_asset = @embedFile("lib/repl-core.lisp");
+
+pub export fn sens_zig_repl_core_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (repl_core_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(repl_core_asset.len);
+    if (capacity < repl_core_asset.len) return -2;
+    @memcpy(dst[0..repl_core_asset.len], repl_core_asset[0..repl_core_asset.len]);
+    return @intCast(repl_core_asset.len);
+}
+
+test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouched" {
+    const expected: isize = @intCast(repl_core_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(undefined, 0));
+    var small: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_repl_core_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
+    var exact: [repl_core_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_repl_core_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
+}
+
+
 // A single opaque asset, not a symbol registry. The caller owns memory;
 // capacity=0 queries exact byte length. -2 is fail-closed, no partial write.
 const linter_asset = @embedFile("lib/linter.lisp");
