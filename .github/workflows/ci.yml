@@ -230,6 +230,34 @@ jobs:
           done
           echo "D8_NATIVE_16_PASS functions=4 laws=16 authority=SENS"
 
+      - name: D8 FIND/SOME — один SENS позитивно-негативний тест
+        shell: bash
+        run: |
+          set -euo pipefail
+          law=tests/semantic/d8-find-some-laws.lisp
+          negative=tests/semantic/d8-find-some-negative.lisp
+          sha256sum "$law" "$negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$law" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D8_FIND_SOME_RED layer=eval program=$law expected=(1 1 1 1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_FIND_SOME_DIFF layer=eval program=$law expected=(1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if ! observed="$(target/debug/sens "$negative" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D8_FIND_SOME_NEGATIVE_RED layer=eval program=$negative expected=D1:0 actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "0" ]]; then
+            echo "::error::D8_FIND_SOME_NEGATIVE_RED layer=eval program=$negative expected=D1:0 actual=$actual" >&2
+            exit 1
+          fi
+          echo "D8_FIND_SOME_NATIVE_PASS identities=D8:11011111,D8:10100101 laws=7 negative=D1:0 authority=SENS"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
