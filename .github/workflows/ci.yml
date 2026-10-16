@@ -151,7 +151,7 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
-          # П’ять канонічних D5 функцій: чотири структурні та ZEROP D24+.
+          # Чотири D5 функції та один мовний D24+ закон; прямий D5:01000 не допущено.
           d5_projection="tests/semantic/d5-uk-projection-laws.lisp"
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
           if ! d5_observed="$(target/debug/sens "$d5_projection" 2>&1)"; then
@@ -165,7 +165,7 @@ jobs:
             echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=$d5_actual" >&2
             exit 1
           fi
-          echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          echo "D5_UK_NATIVE_PASS core_functions=4 numeric_law=1 laws=8 authority=SENS"
           # D6 lower-law derived functions — execution stays entirely in SENS.
           d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
           sha256sum "$d6_source" lib/core4.lisp target/debug/sens
