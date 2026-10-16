@@ -72,23 +72,6 @@ pub(crate) fn exact_identity_for_legacy_registry_slot(slot: u8) -> Option<CoreDo
         .and_then(exact_identity_for_row)
 }
 
-/// Opaque lookup key for one historical surface row.
-///
-/// This indexes the Lisp-generated registry only. It is neither a source word
-/// nor authority for a current domain identity.
-pub(crate) fn historical_registry_slot_for_surface(name: &str) -> Option<u8> {
-    let mut matched = None;
-    for row in SEMANTIC_ROWS {
-        if row.surfaces.iter().any(|surface| surface.name == name) {
-            if matched.is_some() {
-                return None;
-            }
-            matched = Some(row.semantic_id);
-        }
-    }
-    matched
-}
-
 pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Option<u8> {
     let mut matched = None;
     for row in SEMANTIC_ROWS {
@@ -105,7 +88,7 @@ pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Op
 /// No W8 slot, packed payload, or name may select the width. Higher domains
 /// require their own generated coordinate authority (never an implicit lift).
 fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
-    use crate::BinarySourceWord;
+    use crate::{BinarySourceWord, Bit8};
     let source = match width {
         3 => BinarySourceWord::W3(Bit3::new(bits)?),
         4 => BinarySourceWord::W4(Bit4::new(bits)?),
@@ -558,7 +541,7 @@ mod exact_d3_compatibility_migration_tests {
             (0b00000101, 0b100u8),
         ] {
             let identity = compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(legacy_byte)).expect("exact domain word")
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), bits);
@@ -569,7 +552,7 @@ mod exact_d3_compatibility_migration_tests {
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
             assert!(compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(byte)).expect("exact domain word")
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(byte).expect("8-bit source word"))).expect("exact domain word")
             ).is_none());
         }
     }

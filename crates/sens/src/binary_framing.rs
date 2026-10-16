@@ -1,7 +1,7 @@
 use crate::BinaryNumber;
 use crate::domain_numeric::{self, DomainNumericComposition};
 use crate::Value;
-use crate::{Rational, CoreDomainIdentity, Text7};
+use crate::{BinarySourceWord, Bit8, Rational, CoreDomainIdentity, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
@@ -883,28 +883,16 @@ mod tests {
     }
 
     #[test]
-    fn all_historical_function8_frames_fail_closed_without_d8_promotion() {
-        // Historical 8-bit function frames are forbidden at this exact
-        // transport boundary. Equal payloads never mint callable D8.
+    fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
-            let payload = packed as u8;
-            let source = crate::BinarySourceWord::W8(
-                crate::Bit8::new(payload).expect("exact W8 payload"),
-            );
-            if let Some(operation) = CoreDomainIdentity::from_source_word(source) {
-                assert!(matches!(
-                    encode_binary_frame(&BinaryFrame::Function(operation)),
-                    Err(BinaryFrameError::LegacyFrameForbidden { index: 0 })
-                ));
-            }
+            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(packed as u8).expect("8-bit source word"))).expect("exact domain word"));
+            let encoded = encode_binary_frame(&frame).unwrap();
+            assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
+            assert_eq!(encoded.len(), 12);
 
-            let mut historical_bits = vec![1, 1, 0, 0];
-            append_fixed_bits(payload, 8, &mut historical_bits);
-            assert_eq!(historical_bits.len(), 12);
-            assert!(matches!(
-                decode_binary_frame(&historical_bits),
-                Err(BinaryFrameError::LegacyFrameForbidden { index: 0 })
-            ));
+            let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
+            assert_eq!(decoded, frame);
+            assert_eq!(consumed, encoded.len());
         }
     }
 
@@ -945,11 +933,7 @@ mod tests {
     fn control2_stream_keeps_real_space_and_nested_structure() {
         let frames = vec![
             BinaryFrame::Open,
-            // Nested control2 framing uses an exact-width domain record,
-            // never the forbidden historical Function8 carrier.
-            BinaryFrame::Domain(crate::DomainIdentity::D5(
-                crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("D5 word")),
-            )),
+            BinaryFrame::Function(crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("plus")))),
             BinaryFrame::Space,
             BinaryFrame::Number(number("10", "1")),
             BinaryFrame::Space,
@@ -1146,10 +1130,9 @@ mod tests {
     }
 
     #[test]
-    fn exact_program_rejects_legacy_numeric_frames_without_breaking_archive_reads() {
-        // Numeric archive forms remain readable; historical Function8 frames
-        // are deliberately rejected in both encoder and decoder.
+    fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
         let historical_frames = [
+            BinaryFrame::Function(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"))),
             BinaryFrame::Number(number("1", "10")),
             BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
         ];
