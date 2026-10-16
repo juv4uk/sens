@@ -447,7 +447,19 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         self.assertIn("super::zig_transport::unify_source_bytes()?", source)
         self.assertIn("let unify_source = unify_surface_source()?;", source)
         self.assertIn('std::iter::once(("unify.lisp", unify_source.as_str()))', source)
-        self.assertIn(".chain(SURFACE_PREREQUISITES.iter().copied())", source)
+        self.assertIn("let prerequisite_sources = surface_prerequisite_sources()?;", source)
+        self.assertIn(
+            ".chain(prerequisite_sources.iter().map(|(name, source)| (*name, source.as_str())))",
+            source,
+        )
+        # Every additional prerequisite must be copied by live Zig FFI,
+        # not implicitly embedded in the Rust REPL.
+        for name, carrier in (
+            ("persistent-vector.lisp", "sens_zig_repl_persistent_vector_bytes_copy"),
+            ("time.lisp", "sens_zig_repl_time_bytes_copy"),
+            ("epistemic.lisp", "sens_zig_repl_epistemic_bytes_copy"),
+        ):
+            self.assertIn(f'("{name}", repl_zig_source({carrier},', source)
         self.assertIn("no Rust source fallback", source)
         build = (ROOT / "crates/sens-cli/build.rs").read_text(encoding="utf-8")
         self.assertIn("cargo:rerun-if-changed=../../lib/unify.lisp", build)
@@ -504,10 +516,12 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
         self.assertIn("super::zig_transport::forward_source_bytes()?", source)
         self.assertIn("let forward_source = forward_surface_source()?;", source)
         self.assertIn('.chain(std::iter::once(("forward.lisp", forward_source.as_str())))', source)
+        self.assertIn('.chain(std::iter::once(("knowledge.lisp", knowledge_source.as_str())))', source)
+        self.assertIn('.chain(std::iter::once(("persistent-map.lisp", persistent_map_source.as_str())))', source)
         for lhs, rhs in (
             ('std::iter::once(("unify.lisp"', 'std::iter::once(("reason.lisp"'),
             ('std::iter::once(("reason.lisp"', 'std::iter::once(("forward.lisp"'),
-            ('std::iter::once(("forward.lisp"', 'SURFACE_PREREQUISITES.iter().copied()'),
+            ('std::iter::once(("forward.lisp"', 'prerequisite_sources.iter().map('),
         ):
             self.assertLess(source.index(lhs), source.index(rhs), "REPL SENS source order changed")
         self.assertIn("RUST_ZIG_ONLY: forward.lisp requires Zig; no Rust source fallback", source)
