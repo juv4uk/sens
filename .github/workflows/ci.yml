@@ -186,6 +186,26 @@ jobs:
           fi
           echo "D8_SELECTOR_NATIVE_PASS functions=56 positive=56 onebit_negative=56 semantic_authority=SENS"
 
+      - name: "D8 — 16 точкових законів SENS для чотирьох функцій"
+        shell: bash
+        run: |
+          set -euo pipefail
+          for source in tests/semantic/d8-list-difference-adjoin-laws.lisp tests/semantic/d8-list-structural-batch.lisp; do
+            sha256sum "$source" lib/core4.lisp target/debug/sens
+            if ! output="$(target/debug/sens "$source" 2>&1)"; then
+              printf '%s\n' "$output" >&2
+              echo "::error::D8_NATIVE_16_EXEC_RED layer=eval fixture=$source expected=eight-D1-YES actual=execution-error" >&2
+              exit 1
+            fi
+            printf '%s\n' "$output"
+            actual="$(printf '%s\n' "$output" | tail -n 1)"
+            if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+              echo "::error::D8_NATIVE_16_LAW_RED layer=eval fixture=$source expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+              exit 1
+            fi
+          done
+          echo "D8_NATIVE_16_PASS functions=4 laws=16 authority=SENS"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
