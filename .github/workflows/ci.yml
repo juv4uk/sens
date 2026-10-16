@@ -96,6 +96,62 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
+        id: sens-d3-d6-t5-laws
+        shell: bash
+        run: |
+          set -euo pipefail
+          # .bits is a visible exact-word witness, not executable textual Lisp.
+          # Runtime .lisp below is only a temporary input to the existing Zig T5 encoder.
+          # Canonical .sens executes in SENS without implicit Core4 or Rust fallback.
+          source="tests/semantic/d3-d6-28-native.bits"
+          physical_dir="$RUNNER_TEMP/sens-d3-d6-28"
+          mkdir -p "$physical_dir"
+          mapfile -t laws < "$source"
+          labels=(d3-car d3-cdr d3-atom-positive d3-atom-negative d3-eq-positive d3-eq-negative d4-caar d4-cadr d4-cdar d4-cddr d4-not-d1-no d4-null-empty d4-null-nonempty d5-cdaar d5-cdadr d5-cddar d5-cdddr d5-caaar d5-caadr d5-cadar d5-caddr d5-onebit-selector-order d6-acons-key d6-acons-value d6-acons-negative-swap d6-compose d6-flip d6-flip-negative)
+          if (( ${#laws[@]} != 28 || ${#labels[@]} != 28 )); then
+            echo "::error::SENS_D3_D6_CENSUS expected=28 actual=${#laws[@]} labels=${#labels[@]}"
+            exit 1
+          fi
+          expected="$physical_dir/expected-d1"
+          printf '1\n' > "$expected"
+          for i in "${!laws[@]}"; do
+            number=$((i+1))
+            test_id="sens-d3-d6-$(printf '%02d' "$number")-${labels[$i]}"
+            case_source="$physical_dir/$(printf '%02d' "$number").lisp"
+            printf '%s\n' "${laws[$i]}" > "$case_source"
+            # SENS exact D2 admission before Zig v2 T5 output. No Python packer.
+            target/debug/sens-trit encode "$case_source"
+            physical="${case_source%.lisp}.sens"
+            actual_words="$(target/debug/sens-trit open "$physical")"
+            if [[ "$actual_words" != "${laws[$i]}" ]]; then
+              echo "::error::SENS_D3_D6_T5_PARITY id=$test_id layer=transport first_mismatch=visible_exact_words"
+              sha256sum "$case_source" "$physical"
+              exit 1
+            fi
+            sha256sum "$case_source" "$physical"
+            python3 scripts/ci_failure_contract.py run \
+              --test-id "$test_id" \
+              --layer eval \
+              --fixture "$physical" \
+              --expected-file "$expected" \
+              --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+              --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+              -- target/debug/sens "$physical"
+          done
+          # Existing one-bit D5 positive→mutant is a separate genuine fail-closed executor law.
+          cp tests/semantic/d3-d5-direct-selector-mutant.lisp "$physical_dir/mutant.lisp"
+          target/debug/sens-trit encode "$physical_dir/mutant.lisp"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-d3-d6-d5-onebit-noncallable \
+            --layer eval \
+            --fixture "$physical_dir/mutant.sens" \
+            --expect-error-substring "domain identity is not callable under its ratified law: D1" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$physical_dir/mutant.sens"
+          echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
