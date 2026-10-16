@@ -92,6 +92,47 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: "D8 COPY-SEQ/MAPQN — 8 нативних законів і негатив типу"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-copyseq-mapqn-laws.lisp"
+          negative="tests/semantic/d8-copyseq-nonlist-negative.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          mapfile -t programs < "$fixture"
+          count=0
+          for program in "${programs[@]}"; do
+            if [[ -z "$program" || "$program" == ';'* ]]; then continue; fi
+            ((count += 1))
+            file="$RUNNER_TEMP/d8-copyqn-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$program" > "$file"
+            sha256sum "$file"
+            if ! observed="$(target/debug/sens "$file" 2>&1)"; then
+              echo "::error::D8_COPYQN_EXEC_RED law=$count layer=eval fixture=$file expected=1 actual=execution-error" >&2
+              printf '%s\n' "$observed" >&2
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D8_COPYQN_LAW_DIFF law=$count layer=eval fixture=$file expected=1 actual=$actual" >&2
+              exit 1
+            fi
+            echo "D8_COPYQN_LAW_PASS law=$count"
+          done
+          if [[ "$count" != 8 ]]; then
+            echo "::error::D8_COPYQN_CENSUS expected=8 actual=$count" >&2
+            exit 1
+          fi
+          if rejected="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_COPYQN_INVALID_ATOM_ACCEPTED layer=eval fixture=$negative expected=CAR-atom-rejection actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'car|atom|pair|пара|атом' <<< "$rejected"; then
+            echo "::error::D8_COPYQN_UNRELATED_NEGATIVE layer=eval fixture=$negative expected=CAR-atom-rejection actual=$rejected" >&2
+            exit 1
+          fi
+          echo "D8_COPYQN_NATIVE_PASS laws=8 negative=1 direct_D8_callability=unclaimed"
+
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
