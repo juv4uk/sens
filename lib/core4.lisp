@@ -1553,6 +1553,20 @@
   (0010 (ліве праве)
     (string<? праве ліве)))
 
+; D8:00000100 PROG1 і D8:11001001 PROG2 — звичайні функції SENS.
+; Виклик обчислює всі аргументи в стандартному порядку перед входом у тіло;
+; далі повертаємо відповідно перший або другий уже обчислений результат.
+; Жодного host-примітива чи нового доменного коду.
+(0011 повернути-перше
+  (0010 (a . tail)
+    a))
+(0011 prog1 повернути-перше)
+
+(0011 повернути-друге
+  (0010 (a b . tail)
+    b))
+(0011 prog2 повернути-друге)
+
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
 ; to the Symbol reconstructed from its canonical text. The atom guard keeps
