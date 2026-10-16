@@ -265,6 +265,30 @@ jobs:
             exit 1
           fi
           echo "D8_MAPLIST_STAR_NATIVE_PASS identity=D8:00001011 laws=4 negative=1 direct_d8_callability=false"
+          # D8:00110000 MAPL — effect-only suffix traversal, original list preserved.
+          d8_mapl_law="tests/semantic/d8-mapl-effect-laws.lisp"
+          d8_mapl_bad="tests/semantic/d8-mapl-effect-negative.lisp"
+          sha256sum "$d8_mapl_law" "$d8_mapl_bad" lib/core4.lisp target/debug/sens
+          if ! d8_mapl_out="$(target/debug/sens "$d8_mapl_law" 2>&1)"; then
+            printf '%s\n' "$d8_mapl_out" >&2
+            echo "::error::D8_MAPL_EXEC_RED layer=eval fixture=$d8_mapl_law expected=(1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          d8_mapl_observed="$(printf '%s\n' "$d8_mapl_out" | tail -n1)"
+          if [[ "$d8_mapl_observed" != "(1 1 1 1)" ]]; then
+            echo "::error::D8_MAPL_LAW_DIFF layer=eval fixture=$d8_mapl_law expected=(1 1 1 1) actual=$d8_mapl_observed first_mismatch=d1-vector" >&2
+            exit 1
+          fi
+          if d8_mapl_bad_out="$(target/debug/sens "$d8_mapl_bad" 2>&1)"; then
+            echo "::error::D8_MAPL_NEG_ACCEPTED layer=eval fixture=$d8_mapl_bad expected=CAR-type-refusal actual=exit0" >&2
+            exit 1
+          fi
+          if [[ "$d8_mapl_bad_out" != *"car expects a non-empty list"* ]]; then
+            printf '%s\n' "$d8_mapl_bad_out" >&2
+            echo "::error::D8_MAPL_WRONG_NEGATIVE layer=eval fixture=$d8_mapl_bad expected=CAR-type-refusal actual=other-failure" >&2
+            exit 1
+          fi
+          echo "D8_MAPL_NATIVE_PASS identity=D8:00110000 laws=4 negative=1 direct_d8_callability=false"
           # D8 56 ратифікованих шестикрокових селекторів: один SENS-оракул + однобітні мутанти.
           d8_selectors="tests/semantic/d8-second8-selector-orientation.lisp"
           sha256sum "$d8_selectors" lib/core4.lisp target/debug/sens
