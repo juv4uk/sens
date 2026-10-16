@@ -22,6 +22,8 @@ unsafe extern "C" {
     fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_meta_registry_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
 #[cfg(feature = "zig-transport")]
 fn repl_zig_source(
@@ -231,6 +233,25 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         let mut session = Session {
             environment: layer.clone(),
         };
+        #[cfg(feature = "zig-transport")]
+        {
+            let registry = repl_zig_source(sens_zig_meta_registry_bytes_copy, "ZIG_SENS_META_REGISTRY")?;
+            let meta_eval = repl_zig_source(sens_zig_meta_eval_bytes_copy, "ZIG_SENS_META_EVAL")?;
+            sens::load_meta_evaluator_library_from_source(&mut session, &registry, &meta_eval)
+                .map_err(|error| {
+                    format!(
+                        "не вдалося завантажити meta-eval/registry: {}",
+                        error.render("lib/meta-eval.lisp")
+                    )
+                })?;
+            let repl_core = crate::zig_transport::repl_core_source_bytes()
+                .and_then(|bytes| String::from_utf8(bytes).map_err(|err| format!("ZIG_SENS_REPL UTF-8: {err}")))?;
+            sens::parse_mixed_exact_domain(&repl_core)
+                .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
+                .map_err(|error| {
+                    format!("не вдалося завантажити repl-core: {}", error.render(&repl_core))
+                })?;
+        }
         let unify_source = unify_surface_source()?;
         let reason_source = reason_surface_source()?;
         let forward_source = forward_surface_source()?;
@@ -250,6 +271,9 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 sens::eval_pinned_reasoning_source(
                     &format!("lib/{name}"), source, &mut session
                 )
+            } else if matches!(name, "persistent-vector.lisp" | "epistemic.lisp") {
+                sens::parse_mixed_exact_domain(source)
+                    .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
             } else {
                 eval_program(source, &mut session)
             }).map_err(|error| {
@@ -281,7 +305,8 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
-        eval_program(source, &mut session)
+        sens::parse_mixed_exact_domain(source)
+            .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
             .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
     }
     Ok(layer)

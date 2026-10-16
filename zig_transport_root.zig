@@ -102,6 +102,51 @@ test "ukrainian SENS REPL source crosses Zig byte-exact, short buffer is untouch
     try std.testing.expectEqualSlices(u8, repl_core_asset[0..repl_core_asset.len], &exact);
 }
 
+// SENS owns the metacircular evaluator (`my-eval-top-form`) and its generated
+// semantic registry. Zig is only the exact byte carrier; no name interpretation,
+// no semantics and no admission tables live here.
+const meta_eval_asset = @embedFile("lib/meta-eval.lisp");
+
+pub export fn sens_zig_meta_eval_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (meta_eval_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(meta_eval_asset.len);
+    if (capacity < meta_eval_asset.len) return -2;
+    @memcpy(dst[0..meta_eval_asset.len], meta_eval_asset[0..meta_eval_asset.len]);
+    return @intCast(meta_eval_asset.len);
+}
+
+test "SENS meta-evaluator source crosses Zig byte-exact, short buffer is untouched" {
+    const expected: isize = @intCast(meta_eval_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_meta_eval_bytes_copy(undefined, 0));
+    var small: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_meta_eval_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
+    var exact: [meta_eval_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_meta_eval_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, meta_eval_asset[0..meta_eval_asset.len], &exact);
+}
+
+const meta_registry_asset = @embedFile("lib/generated/meta-semantic-registry.lisp");
+
+pub export fn sens_zig_meta_registry_bytes_copy(dst: [*]u8, capacity: usize) isize {
+    if (meta_registry_asset.len == 0) return -1;
+    if (capacity == 0) return @intCast(meta_registry_asset.len);
+    if (capacity < meta_registry_asset.len) return -2;
+    @memcpy(dst[0..meta_registry_asset.len], meta_registry_asset[0..meta_registry_asset.len]);
+    return @intCast(meta_registry_asset.len);
+}
+
+test "SENS semantic registry source crosses Zig byte-exact, short buffer is untouched" {
+    const expected: isize = @intCast(meta_registry_asset.len);
+    try std.testing.expectEqual(expected, sens_zig_meta_registry_bytes_copy(undefined, 0));
+    var small: [1]u8 = .{0xA5};
+    try std.testing.expectEqual(@as(isize, -2), sens_zig_meta_registry_bytes_copy(&small, small.len));
+    try std.testing.expectEqual(@as(u8, 0xA5), small[0]);
+    var exact: [meta_registry_asset.len]u8 = undefined;
+    try std.testing.expectEqual(expected, sens_zig_meta_registry_bytes_copy(&exact, exact.len));
+    try std.testing.expectEqualSlices(u8, meta_registry_asset[0..meta_registry_asset.len], &exact);
+}
+
 
 // A single opaque asset, not a symbol registry. The caller owns memory;
 // capacity=0 queries exact byte length. -2 is fail-closed, no partial write.

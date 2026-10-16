@@ -621,13 +621,29 @@ pub fn load_core3_library(session: &mut Session) -> Result<EvalResult, LanguageE
 pub fn load_meta_evaluator_library(
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
+    load_meta_evaluator_library_from_source(
+        session,
+        META_SEMANTIC_REGISTRY_SOURCE,
+        META_EVAL_LIBRARY_SOURCE,
+    )
+}
+
+/// Load caller-supplied registry + metacircular source through the SAME
+/// owner-pinned exact-width readers used by the original loader.
+/// Zig transports bytes; SENS interprets. This keeps the CLI on the sterile
+/// byte corridor instead of Rust `include_str!` project source.
+pub fn load_meta_evaluator_library_from_source(
+    session: &mut Session,
+    registry_source: &str,
+    meta_eval_source: &str,
+) -> Result<EvalResult, LanguageError> {
     // The generated registry carries historical 8-bit SID ids and legacy W8
     // wrappers; the ordinary parser would read a bare id as a Number. Load it
     // with the exact-domain reader (same owner-approved loader family as
     // core/time/meta-eval), not the general parser.
     let registry_forms = mixed_source::parse_mixed_exact_domain_registry_source(
         "lib/generated/meta-semantic-registry.lisp",
-        META_SEMANTIC_REGISTRY_SOURCE,
+        registry_source,
     )?;
     eval_parsed_expressions(&registry_forms, session)?;
     // The metacircular witness now contains exact D3/D4 call heads.
@@ -635,7 +651,7 @@ pub fn load_meta_evaluator_library(
     // stays data, whereas executable binary heads retain domain widths.
     let forms = mixed_source::parse_mixed_exact_domain_meta_source(
         "lib/meta-eval.lisp",
-        META_EVAL_LIBRARY_SOURCE,
+        meta_eval_source,
     )?;
     eval_parsed_expressions(&forms, session)
 }
