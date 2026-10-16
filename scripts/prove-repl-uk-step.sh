@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 # редакційним синтаксисом наших Lisp-джерел. Вихідний текст — ук.
 # Це МЕХАНІЧНИЙ доказ стилю; він не підтверджує семантику або Zig FFI.
 for source in lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; do
-  if sed '/^[[:space:]]*;/d' "$source" | grep -nE '[(][[:space:]]*[01]{3,24}([[:space:]]|[)])'; then
+  if sed '/^[[:space:]]*;/d' "$source" | grep -nE '[(][[:space:]]*[01]{1,24}([[:space:]]|[)])'; then
     printf 'UKRAINIAN_SURFACE_SOURCE_RED file=%s reason=binary-call-head-in-Lisp reproduce=%s\n' "$source" "bash scripts/prove-repl-uk-step.sh" >&2
     exit 1
   fi
@@ -24,8 +24,8 @@ if ! grep -Eq '^[[:space:]]*[(]0[[:space:]]+[(]ук[[:space:]]+ні[)]' lib/doma
   echo 'REPL_D1_PROJECTION_RED reason=ratified-D1-uk-row-mismatch' >&2
   exit 1
 fi
-if grep -nE '#d1:[01]' lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; then
-  echo 'REPL_D1_LITERAL_RED reason=forbidden-D1-textual-compatibility-sigil' >&2
+if grep -nE '#d[1-9][0-9]*:[01]+' lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; then
+  echo 'REPL_DOMAIN_LITERAL_RED reason=forbidden-textual-domain-sigil-D1-through-D10' >&2
   exit 1
 fi
 echo 'REPL_D1_PROJECTION_OK from=lib/domains/d1.lisp names=ні,так'
