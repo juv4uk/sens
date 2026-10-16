@@ -281,6 +281,21 @@ jobs:
           fi
           echo "D6_ZIP_UNZIP_NATIVE_PASS functions=2 laws=5 authority=SENS"
 
+          # D8 перша вісімка селекторів: 8 правильних і 8 однобітних CAR/CDR мутантів.
+          d8_fixture="tests/semantic/d8-first8-selector-orientation.lisp"
+          sha256sum "$d8_fixture" lib/core4.lisp target/debug/sens
+          if ! d8_observed="$(target/debug/sens "$d8_fixture" 2>&1)"; then
+            printf '%s\n' "$d8_observed" >&2
+            echo "::error::D8_SELECTOR_NATIVE_RED layer=eval fixture=$d8_fixture expected=16-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          d8_actual="$(printf '%s\n' "$d8_observed" | tail -n 1)"
+          if [[ "$d8_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_SELECTOR_DIFF layer=eval fixture=$d8_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d8_actual" >&2
+            exit 1
+          fi
+          echo "D8_SELECTOR_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
