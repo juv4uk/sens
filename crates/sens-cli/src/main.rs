@@ -61,6 +61,26 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     Ok((output, surface))
 }
 
+/// Separate mode: evaluate interactive input through the SENS-owned loop
+/// (`lib/repl-core.lisp`: `репл-почати`/`репл-крок` → `обчислити-верхню-форму`)
+/// instead of the native Rust evaluator. This is an additional, opt-in mode;
+/// the default REPL keeps the native evaluator until parity is proven.
+fn extract_sens_loop(args: Vec<String>) -> (Vec<String>, bool) {
+    let mut sens_loop = false;
+    let output = args
+        .into_iter()
+        .filter(|arg| {
+            if arg == "--sens-loop" {
+                sens_loop = true;
+                false
+            } else {
+                true
+            }
+        })
+        .collect();
+    (output, sens_loop)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum CliCore {
     Core3,
@@ -261,6 +281,7 @@ fn main() {
             process::exit(2);
         }
     };
+    let (args, sens_loop) = extract_sens_loop(args);
     let allowed_for_tcp = allowed.clone();
     // Plain `f64`s, not a `Value` — `run_tcp_repl_sexpr` spawns one thread
     // per connection, and `Value`'s `Rc`-based sharing isn't `Send`; each
@@ -422,6 +443,7 @@ fn main() {
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
+            println!("  --sens-loop                  Evaluate REPL input through the SENS-owned loop (repl-core), not the native evaluator");
             println!("  --core=3|4                    Explicitly select Core3 laboratory or default Core4 before evaluation");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
@@ -599,8 +621,8 @@ fn main() {
         }
 
         // `--surface` належить інтерактивному REPL, а не semantics/file execution.
-        if repl_surface != repl::ReplSurface::Core {
-            eprintln!("sens: --surface is available only when starting the interactive REPL");
+        if repl_surface != repl::ReplSurface::Core || sens_loop {
+            eprintln!("sens: --surface / --sens-loop are available only when starting the interactive REPL");
             process::exit(2);
         }
 
@@ -659,7 +681,7 @@ fn main() {
         }
     } else {
         // REPL mode
-        repl::run_repl(session, repl_surface);
+        repl::run_repl(session, repl_surface, sens_loop);
     }
 }
 
