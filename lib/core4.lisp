@@ -308,6 +308,28 @@
 
 
 
+; Exact D5 arithmetic surface bindings over existing admitted domain heads.
+; These are Lisp-owned projections, not new coordinates or a D5:01000 call admission.
+(0011 додати
+  (0010 (a b) (01010 a b)))
+(0011 plus додати)
+
+(0011 відняти
+  (0010 (a b) (01011 a b)))
+(0011 difference відняти)
+
+(0011 помножити
+  (0010 (a b) (10110 a b)))
+(0011 times помножити)
+
+(0011 менше?
+  (0010 (a b) (11010 a b)))
+(0011 lessp? менше?)
+
+(0011 більше?
+  (0010 (a b) (11011 a b)))
+(0011 greaterp? більше?)
+
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
 ; left ++ right in the correct order — two tail-recursive passes instead
@@ -612,6 +634,9 @@
 (0011 відняти-1
   (0010 (значення)
     (01011 значення #d24:000000000000000000000001)))
+
+(0011 add1 додати-1)
+(0011 sub1 відняти-1)
 
 ; ===== D6 derived functions (партія 1: 16 селекторів; партія 2: арифметичні/предикатні похідні) =====
 ; Ратифіковані координати lib/domains/d6.lisp; механізм = SENS-визначення через D3/D4/D5.
