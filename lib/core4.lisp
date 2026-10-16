@@ -687,6 +687,21 @@
       ((010 b) ())
       (#d1:1 (111 (111 (100 a) (100 b)) (спарувати-послідовності (011 a) (011 b)))))))
 
+
+; D8:11100001 ZIP-swapped / D8:11100011 UNZIP-swapped.
+; Ратифіковані координати #3960, product law #3710, без нових opcode.
+; Похідні від D6:111000 і D6:111001. Точні слова не розширюються.
+(0011 спарувати-навпаки
+  (0010 (ліві праві)
+    (спарувати-послідовності праві ліві)))
+
+(0011 розпарувати-навпаки
+  (0010 (пари)
+    ((0010 (результат)
+       (111 (100 (011 результат))
+            (111 (100 результат) (001 ()))))
+     (розпарувати-пари пари))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
