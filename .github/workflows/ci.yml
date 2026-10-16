@@ -185,6 +185,25 @@ jobs:
             exit 1
           fi
           echo "D6_UK_LIBRARY_NATIVE_PASS functions=4 laws=10 direct_D6_callability=unclaimed"
+          # Друга вузька партія RASSOC/DO/WHILE — перевірка семантичних D1-відповідей.
+          d6_second="tests/semantic/d6-uk-batch2-laws.lisp"
+          d6_second_expected="(1 1 1 1 1 1 1)"
+          sha256sum "$d6_second" lib/core4.lisp target/debug/sens
+          if ! d6_second_observed="$(target/debug/sens "$d6_second" 2>&1)"; then
+            printf '%s\n' "$d6_second_observed" >&2
+            echo "::error::D6_SECOND_NATIVE_RED test_id=d6-rassoc-do-while layer=eval fixture=$d6_second expected=$d6_second_expected actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d6_second_observed"
+          d6_second_actual="$(printf '%s\n' "$d6_second_observed" | tail -n 1)"
+          printf '%s\n' "$d6_second_expected" > "$physical_dir/d6-second-expected"
+          printf '%s\n' "$d6_second_actual" > "$physical_dir/d6-second-actual"
+          sha256sum "$physical_dir/d6-second-expected" "$physical_dir/d6-second-actual"
+          if [[ "$d6_second_actual" != "$d6_second_expected" ]]; then
+            echo "::error::D6_SECOND_LAW_DIFF test_id=d6-rassoc-do-while layer=eval fixture=$d6_second expected=$d6_second_expected actual=$d6_second_actual" >&2
+            exit 1
+          fi
+          echo "D6_SECOND_LIBRARY_NATIVE_PASS functions=3 laws=7 direct_D6_callability=unclaimed"
 
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
