@@ -670,6 +670,21 @@
                     (001 ()))))
         (розпарувати-пари (011 пари)))))))
 
+; D8:11100001 ZIP-swapped / D8:11100011 UNZIP-swapped.
+; Ратифіковані точні D8 координати; закон добутку #3710 / #3960.
+; Похідні від D6:111000 ZIP та D6:111001 UNZIP, без нового runtime примітива.
+; Орієнтаційний закон: UNZIP-swapped(ZIP-swapped(xs,ys)) = (xs,ys).
+(0011 спарувати-навпаки
+  (0010 (ліві праві)
+    (спарувати-послідовності праві ліві)))
+
+(0011 розпарувати-навпаки
+  (0010 (пари)
+    ((0010 (результат)
+       (111 (100 (011 результат))
+            (111 (100 результат) (001 ()))))
+     (розпарувати-пари пари))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
