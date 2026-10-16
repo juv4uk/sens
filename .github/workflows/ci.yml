@@ -250,6 +250,20 @@ jobs:
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
           # Чотири D5 функції та один мовний D24+ закон; прямий D5:01000 не допущено.
+          # D5 ратифіковані 3-крокові селектори: SENS позитив і однобітний мутант.
+          d5_selector_fixture="tests/semantic/d5-selector-orientation.lisp"
+          sha256sum "$d5_selector_fixture" lib/core4.lisp target/debug/sens
+          if ! d5_selector_output="$(target/debug/sens "$d5_selector_fixture" 2>&1)"; then
+            printf '%s\n' "$d5_selector_output" >&2
+            echo "::error::D5_SELECTOR_NATIVE_RED layer=eval fixture=$d5_selector_fixture expected=16-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          d5_selector_actual="$(printf '%s\n' "$d5_selector_output" | tail -n 1)"
+          if [[ "$d5_selector_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D5_SELECTOR_DIFF layer=eval fixture=$d5_selector_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d5_selector_actual" >&2
+            exit 1
+          fi
+          echo "D5_SELECTOR_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
           d5_projection="tests/semantic/d5-uk-projection-laws.lisp"
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
           if ! d5_observed="$(target/debug/sens "$d5_projection" 2>&1)"; then
