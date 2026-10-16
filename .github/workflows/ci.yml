@@ -147,6 +147,9 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
+          # Targeted regression: exact D4:0001 EVAL uses the existing SENS value-to-expression mechanism.
+          cargo test --locked -p sens --lib exact_d4_eval_runs_represented_code_and_keeps_width_qualified_identity -- --nocapture
+          echo "D4_EVAL_EXACT_NATIVE_MECHANISM_TEST_PASS identity=D4:0001"
           # Чотири ратифіковані D5 ідентичності: українська SENS-проєкція.
           d5_projection="tests/semantic/d5-uk-projection-laws.lisp"
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
