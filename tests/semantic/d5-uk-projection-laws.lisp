@@ -1,8 +1,5 @@
-; D5:10100 / 11100 / 11101 / 11111 — чотири власні SENS-визначення плюс мовний D24+ закон; D5:01000 direct-call ще не допущений.
-; Людська українська проєкція цього тесту; фізична D5 callability
-; залишається окремою вимогою. Очікується рівно вісім предикатів D1:1.
-; Структурні дані нижче — не коди функцій. Для SUBST окремі D7-атоми.
-; Next batch: research/d5-d6-selector-definitions-batch-2026-10-17.lisp → core4 + laws=10.
+; D5 structural + ZEROP + two pure CAR/CDR selectors (derived, not new laws).
+; Очікується рівно десять предикатів D1:1.
 (list
   (equal? (зворот (list (quote ()) (list (quote ()))))
           (list (list (quote ())) (quote ())))
@@ -17,5 +14,9 @@
           (list (quote змінене) (list (quote змінене))))
   (equal? (зворот (зворот (list (quote ()) (list (quote ())))))
           (list (quote ()) (list (quote ()))))
-  (нуль-д24? #d24:000000000000000000000000)
-  (not? (нуль-д24? #d24:000000000000000000000001)))
+  (нуль? #d24:000000000000000000000000)
+  (not? (нуль? #d24:000000000000000000000001))
+  (equal? (п-р-р (list (quote а) (quote б) (quote в)))
+          (quote в))
+  (equal? (р-п-п (list (list (list (quote в) (quote б)) (quote а))))
+          (quote в)))
