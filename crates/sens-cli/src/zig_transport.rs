@@ -43,35 +43,6 @@ fn version() -> Result<(), String> {
     Ok(())
 }
 
-/// Дослівні байти українського REPL — тільки через root Zig export.
-/// Цей адаптер не аналізує назви, не присвоює коди й не виконує Lisp.
-pub fn repl_core_source_bytes() -> Result<Vec<u8>, String> {
-    version()?;
-    let required = unsafe {
-        asset_ffi::sens_zig_repl_core_bytes_copy(
-            std::ptr::NonNull::<u8>::dangling().as_ptr(), 0
-        )
-    };
-    if required <= 0 {
-        return Err("ZIG_REPL_CORE_CARRIER invalid source length".into());
-    }
-    let len = usize::try_from(required)
-        .map_err(|_| "ZIG_REPL_CORE_CARRIER length overflow")?;
-    if len > 8 * 1024 * 1024 {
-        return Err("ZIG_REPL_CORE_CARRIER host byte cap exceeded".into());
-    }
-    let mut bytes = vec![0u8; len];
-    let copied = unsafe {
-        asset_ffi::sens_zig_repl_core_bytes_copy(bytes.as_mut_ptr(), len)
-    };
-    if copied != required {
-        return Err(format!(
-            "ZIG_REPL_CORE_CARRIER exact copy mismatch expected={required} actual={copied}"
-        ));
-    }
-    Ok(bytes)
-}
-
 /// Механічний інваріант SENS ↔ Zig: кількість, ширина, біти.
 /// Не визначає значення функцій і не замінює SENS-семантичний оракул.
 /// Retrieves opaque source bytes through the sterile Zig C ABI.
@@ -632,91 +603,6 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
-    }
-
-    #[test]
-    fn ukrainian_repl_domain_words_are_consumed_by_zig_without_width_loss() {
-        // Zig alone carries the source. The SENS reader, NOT Rust or Zig,
-        // projects the ratified Ukrainian call-heads to exact domain words.
-        let physical_source = super::repl_core_source_bytes()
-            .expect("test_id=repl-uk-zig-ingress layer=transport");
-        let source = std::str::from_utf8(&physical_source)
-            .expect("test_id=repl-uk-zig-ingress UTF-8 source");
-        let program = sens::parse_mixed_exact_domain(source)
-            .expect("test_id=repl-uk-zig-ingress layer=parse Ukrainian SENS");
-
-        fn visit(expr: &sens::Expr, words: &mut Vec<sens::BinarySourceWord>) {
-            match &expr.kind {
-                sens::ExprKind::List(items) => {
-                    if let Some(head) = items.first() {
-                        if let sens::ExprKind::DomainIdentity(identity) = &head.kind {
-                            if matches!(identity.width(), 3 | 4) {
-                                words.push(identity.source_word());
-                            }
-                        }
-                    }
-                    for item in items.iter() {
-                        visit(item, words);
-                    }
-                }
-                sens::ExprKind::Pair(left, right) => {
-                    visit(left, words);
-                    visit(right, words);
-                }
-                _ => {}
-            }
-        }
-        let mut words = Vec::new();
-        for expr in &program {
-            visit(expr, &mut words);
-        }
-        assert!(words.iter().any(|word| word.width() == 3),
-            "test_id=repl-uk-zig-ingress expected=ratified-D3-head");
-        assert!(words.iter().any(|word| word.width() == 4),
-            "test_id=repl-uk-zig-ingress expected=ratified-D4-head");
-
-        // The physical T5 implementation exists ONLY in Zig. This test
-        // observes Zig's bytes and the SENS-owned identities, never invents
-        // or grants a semantic callability from code width.
-        let encoded = encode_t5_direct(&words)
-            .expect("test_id=repl-uk-zig-codes layer=transport encode");
-        let restored = decode_t5_words(&encoded)
-            .expect("test_id=repl-uk-zig-codes layer=transport decode");
-        require_same_exact_words(&words, &restored)
-            .expect("test_id=repl-uk-zig-codes exact width+payload parity");
-
-        // Відновлені Zig слова — це лише точні ідентичності.
-        // Українська назва приходить з УЖЕ ЧИННОЇ Lisp-owned
-        // D3/D4 таблиці через SENS presentation; жодної LISP/EN
-        // проміжної поверхні та жодної Zig/Rust таблиці значень.
-        let ukrainian = restored
-            .iter()
-            .map(|word| {
-                let id = sens::DomainIdentity::from_source_word(*word);
-                let value = sens::Value::DomainIdentity(id);
-                sens::render_value_for_presentation(
-                    &value, sens::PresentationLanguage::Ukrainian
-                )
-            })
-            .collect::<Vec<_>>();
-        for required in ["як-є", "перше", "сполучити", "функція", "визначити"] {
-            assert!(
-                ukrainian.iter().any(|name| name == required),
-                "test_id=repl-uk-zig-uk-projection layer=present expected={required} actual={ukrainian:?} semantic_authority=SENS"
-            );
-        }
-        assert!(
-            ukrainian.iter().all(|name| !name.starts_with("#<домен")),
-            "test_id=repl-uk-zig-uk-projection unknown D3/D4 output={ukrainian:?}"
-        );
-        println!(
-            "REPL_UK_ZIG_PROJECTION_PASS domain_words={} uk_names={} path=Zig-T5-to-SENS-uk english_intermediate=NO",
-            restored.len(), ukrainian.len()
-        );
-        println!(
-            "REPL_UK_ZIG_CODES_PASS words={} source_bytes={} physical_bytes={} semantic_authority=SENS",
-            words.len(), physical_source.len(), encoded.len()
-        );
     }
 
     #[test]
