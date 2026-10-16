@@ -794,6 +794,16 @@
         (функція (пара) (111 (011 пара) (100 пара)))
         асоціації))))
 
+; D8:11000001 TAKE-right / D8:11000011 DROP-right — похідні закони.
+; Дослідження #3622; тільки композиція D6 TAKE/DROP і D5 REVERSE.
+; Кількість передається як D24+, прямої D8 callability не додається.
+(0011 взяти-справа
+  (0010 (кількість елементи)
+    (зворот (взяти кількість (зворот елементи)))))
+(0011 відкинути-справа
+  (0010 (кількість елементи)
+    (зворот (відкинути кількість (зворот елементи)))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
