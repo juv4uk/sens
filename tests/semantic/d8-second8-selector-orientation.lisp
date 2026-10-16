@@ -1,4 +1,4 @@
-; D8 наступна вісімка 01101000..01101111. 32 positive + 32 one-bit negative.
+; D8 наступна вісімка 01101000..01101111. 40 positive + 40 one-bit negative.
 ; Повне асиметричне дерево: кожний CAR/CDR шлях відрізняється точною ціллю.
 ((lambda (дерево)
   (list
@@ -100,6 +100,31 @@
     ; D8:10000111 CAAADDDR
     (eq? (п-п-п-р-р-р дерево) (quote лист-111000))
     (not? (eq? (cdr (car (car (cdr (cdr (cdr дерево)))))) (quote лист-111000)))
+
+    ; D8:10001000 CAADAAAR — позитив і однобітний мутант.
+    (eq? (п-п-р-п-п-п дерево) (quote лист-000100))
+    (not? (eq? (cdr (car (cdr (car (car (car дерево)))))) (quote лист-000100)))
+    ; D8:10001001 CAADAADR — позитив і однобітний мутант.
+    (eq? (п-п-р-п-п-р дерево) (quote лист-100100))
+    (not? (eq? (cdr (car (cdr (car (car (cdr дерево)))))) (quote лист-100100)))
+    ; D8:10001010 CAADADAR — позитив і однобітний мутант.
+    (eq? (п-п-р-п-р-п дерево) (quote лист-010100))
+    (not? (eq? (cdr (car (cdr (car (cdr (car дерево)))))) (quote лист-010100)))
+    ; D8:10001011 CAADADDR — позитив і однобітний мутант.
+    (eq? (п-п-р-п-р-р дерево) (quote лист-110100))
+    (not? (eq? (cdr (car (cdr (car (cdr (cdr дерево)))))) (quote лист-110100)))
+    ; D8:10001100 CAADDAAR — позитив і однобітний мутант.
+    (eq? (п-п-р-р-п-п дерево) (quote лист-001100))
+    (not? (eq? (cdr (car (cdr (cdr (car (car дерево)))))) (quote лист-001100)))
+    ; D8:10001101 CAADDADR — позитив і однобітний мутант.
+    (eq? (п-п-р-р-п-р дерево) (quote лист-101100))
+    (not? (eq? (cdr (car (cdr (cdr (car (cdr дерево)))))) (quote лист-101100)))
+    ; D8:10001110 CAADDDAR — позитив і однобітний мутант.
+    (eq? (п-п-р-р-р-п дерево) (quote лист-011100))
+    (not? (eq? (cdr (car (cdr (cdr (cdr (car дерево)))))) (quote лист-011100)))
+    ; D8:10001111 CAADDDDR — позитив і однобітний мутант.
+    (eq? (п-п-р-р-р-р дерево) (quote лист-111100))
+    (not? (eq? (cdr (car (cdr (cdr (cdr (cdr дерево)))))) (quote лист-111100)))
 
   ))
   (cons (cons (cons (cons (cons (cons (quote лист-000000) (quote лист-000001)) (cons (quote лист-000010) (quote лист-000011))) (cons (cons (quote лист-000100) (quote лист-000101)) (cons (quote лист-000110) (quote лист-000111)))) (cons (cons (cons (quote лист-001000) (quote лист-001001)) (cons (quote лист-001010) (quote лист-001011))) (cons (cons (quote лист-001100) (quote лист-001101)) (cons (quote лист-001110) (quote лист-001111))))) (cons (cons (cons (cons (quote лист-010000) (quote лист-010001)) (cons (quote лист-010010) (quote лист-010011))) (cons (cons (quote лист-010100) (quote лист-010101)) (cons (quote лист-010110) (quote лист-010111)))) (cons (cons (cons (quote лист-011000) (quote лист-011001)) (cons (quote лист-011010) (quote лист-011011))) (cons (cons (quote лист-011100) (quote лист-011101)) (cons (quote лист-011110) (quote лист-011111)))))) (cons (cons (cons (cons (cons (quote лист-100000) (quote лист-100001)) (cons (quote лист-100010) (quote лист-100011))) (cons (cons (quote лист-100100) (quote лист-100101)) (cons (quote лист-100110) (quote лист-100111)))) (cons (cons (cons (quote лист-101000) (quote лист-101001)) (cons (quote лист-101010) (quote лист-101011))) (cons (cons (quote лист-101100) (quote лист-101101)) (cons (quote лист-101110) (quote лист-101111))))) (cons (cons (cons (cons (quote лист-110000) (quote лист-110001)) (cons (quote лист-110010) (quote лист-110011))) (cons (cons (quote лист-110100) (quote лист-110101)) (cons (quote лист-110110) (quote лист-110111)))) (cons (cons (cons (quote лист-111000) (quote лист-111001)) (cons (quote лист-111010) (quote лист-111011))) (cons (cons (quote лист-111100) (quote лист-111101)) (cons (quote лист-111110) (quote лист-111111))))))))
