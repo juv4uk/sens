@@ -162,6 +162,31 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          # D8:00100011 STRING>: SENS-positive and wrong-orientation negative.
+          d8_greater_law="tests/semantic/d8-string-greater-laws.lisp"
+          d8_greater_mutant="tests/semantic/d8-string-greater-mutant.lisp"
+          sha256sum "$d8_greater_law" "$d8_greater_mutant" lib/core4.lisp target/debug/sens
+          if ! d8_greater_out="$(target/debug/sens "$d8_greater_law" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_EXEC_RED layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_out" >&2
+            exit 1
+          fi
+          d8_greater_observed="$(printf '%s\n' "$d8_greater_out" | tail -n1)"
+          if [[ "$d8_greater_observed" != "(1 1 1)" ]]; then
+            echo "::error::D8_STRING_GREATER_LAW_DIFF layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=$d8_greater_observed" >&2
+            exit 1
+          fi
+          if ! d8_greater_bad_out="$(target/debug/sens "$d8_greater_mutant" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_NEG_EXEC_RED layer=eval fixture=$d8_greater_mutant expected=(0) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_bad_out" >&2
+            exit 1
+          fi
+          d8_greater_bad_actual="$(printf '%s\n' "$d8_greater_bad_out" | tail -n1)"
+          if [[ "$d8_greater_bad_actual" != "(0)" ]]; then
+            echo "::error::D8_STRING_GREATER_NEG_UNDETECTED layer=eval fixture=$d8_greater_mutant expected=(0) actual=$d8_greater_bad_actual" >&2
+            exit 1
+          fi
+          echo "D8_STRING_GREATER_NATIVE_PASS exact=D8:00100011 positive=3 wrong-order-negative=1"
           # Exact D8 PLUSP/MINUSP and two shared D6 LENGTH surfaces.
           d8_sign="tests/semantic/d8-sign-and-list-length-laws.lisp"
           d8_bad="tests/semantic/d8-sign-reject-nonnumeric.lisp"
