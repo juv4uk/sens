@@ -202,11 +202,13 @@
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
+; D5:10101 — структурна хвостова рекурсія: порожній список є
+; базовим випадком. Не підміняти D3:000 жодним предикатним D1:0.
 (0011 зворот-до
   (0010 (values acc)
     (110
-      ((0100 (010 values)) acc)
-      ((equal? (010 values) (001 (0)))
+      ((0101 values) acc)
+      ((0100 (0101 values))
        (зворот-до (011 values) (111 (100 values) acc))))))
 
 (0011 reverse-onto зворот-до)
