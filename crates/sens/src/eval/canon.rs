@@ -356,18 +356,18 @@ fn invoke_domain_primitive(
                 // Temporary lower helpers may already return D24 or an exact
                 // unqualified scalar; neither escapes this canonical route.
                 let scalar = builtins::prim_01000101(args, environment, span)?;
-                match scalar {
+                match &scalar {
                     Value::BinaryNumber(numeric)
                         if numeric.numeric_domain_width() == Some(24) =>
                     {
-                        Ok(Value::BinaryNumber(numeric))
+                        Ok(scalar.clone())
                     }
                     Value::Number(codepoint, crate::Exactness::Exact)
                         if codepoint.is_finite()
                             && codepoint.fract() == 0.0
-                            && (0.0..=0x10ffff as f64).contains(&codepoint) =>
+                            && (0.0..=0x10ffff as f64).contains(codepoint) =>
                     {
-                        let scalar = codepoint as u32;
+                        let scalar = *codepoint as u32;
                         let word = (0u32..24)
                             .rev()
                             .map(|shift| ((scalar >> shift) & 1) as u8)
