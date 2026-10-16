@@ -166,6 +166,21 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          # D6 lower-law derived functions — execution stays entirely in SENS.
+          d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
+          sha256sum "$d6_source" lib/core4.lisp target/debug/sens
+          if ! d6_observed="$(target/debug/sens "$d6_source" 2>&1)"; then
+            printf '%s\n' "$d6_observed" >&2
+            echo "::error::D6_RESEARCH_BATCH_01_RED layer=eval fixture=$d6_source expected=nine-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d6_observed"
+          d6_actual="${d6_observed##*$'\n'}"
+          if [[ "$d6_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_RESEARCH_BATCH_01_DIFF layer=eval fixture=$d6_source expected=nine-D1-YES actual=$d6_actual" >&2
+            exit 1
+          fi
+          echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
 
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
