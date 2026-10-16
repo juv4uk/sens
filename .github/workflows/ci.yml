@@ -257,6 +257,20 @@ jobs:
             exit 1
           fi
           echo "D8_SELECTOR_NATIVE_PASS functions=56 positive=56 onebit_negative=56 semantic_authority=SENS"
+          # D9:011000000..011000111, точні 9-бітні коди, 7 D3 кроків + однобітні негативи.
+          d9_seven="tests/semantic/d9-first8-selector-orientation.lisp"
+          sha256sum "$d9_seven" lib/core4.lisp target/debug/sens
+          if ! d9_result="$(target/debug/sens "$d9_seven" 2>&1)"; then
+            printf '%s\n' "$d9_result" >&2
+            echo "::error::D9_7STEP_NATIVE_RED layer=eval fixture=$d9_seven expected=16-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          d9_actual="$(printf '%s\n' "$d9_result" | tail -n 1)"
+          if [[ "$d9_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_7STEP_LAW_DIFF layer=eval fixture=$d9_seven expected=16-D1-YES actual=$d9_actual" >&2
+            exit 1
+          fi
+          echo "D9_7STEP_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
 
       - name: "D8 — 24 точкових закони SENS для шести функцій"
         shell: bash
