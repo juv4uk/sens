@@ -1,0 +1,16 @@
+[package]
+name = "sens-minhost"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal SENS host: one small file attached to the sterile Zig corridor."
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "sens-minhost"
+path = "src/main.rs"
+
+[dependencies]
+
+[features]
+default = []
+zig-transport = []
