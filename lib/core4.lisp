@@ -1378,6 +1378,12 @@
   (0010 (значення)
     (011 (100 (100 (011 (011 (011 (011 значення)))))))))
 
+; D8:01000111 MAP-ANY — похідна D6:111100 ANY за ратифікованим
+; законом короткого замикання D1; жодного нового D8 primitive.
+(0011 відобразити-доки-істина
+  (0010 (умова елементи)
+    (будь-яке? умова елементи)))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
