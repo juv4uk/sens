@@ -120,10 +120,12 @@ fn exact_args(
     if args.len() == expected {
         return Ok(());
     }
+    let width = sid.width();
+    let qualified_identity = format!("D{width}:{:0width$b}", sid.packed_bits(), width = width);
     Err(LanguageError::new(
         ErrorKind::Arity,
         format!(
-            "{sid}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
+            "{qualified_identity}: expected / ochikuvalosia / erwartet {expected}; received / otrymano / erhalten {}",
             args.len()
         ),
         span,
