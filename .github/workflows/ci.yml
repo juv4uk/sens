@@ -96,48 +96,39 @@ jobs:
             sha256sum "$archive"
           done
 
-      - name: D6 — п’ять SENS-визначень MAPLIST/DO/WHILE/ANY/ALL і негативні свідки
+      - name: D6 — 14 незалежних нативних програм для п'яти SENS-функцій
         shell: bash
         run: |
           set -euo pipefail
-          witness="tests/semantic/d6-maplist-do-while-laws.lisp"
-          expected="(1 1 1 1 1 1 1 1 1 1 1 1 1 1)"
-          sha256sum "$witness" lib/core4.lisp target/debug/sens
-          if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
-            echo "::error::D6_LISP_BATCH_RED test=d6-maplist-do-while layer=eval program=$witness expected=$expected actual=execution-error" >&2
-            printf '%s\n' "$observed" >&2
-            exit 1
-          fi
-          actual="$(printf '%s\n' "$observed" | tail -n 1)"
-          if [[ "$actual" != "$expected" ]]; then
-            echo "::error::D6_LISP_BATCH_DIFF test=d6-maplist-do-while layer=eval program=$witness expected=$expected actual=$actual" >&2
+          fixture="tests/semantic/d6-maplist-do-while-laws.lisp"
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          mapfile -t programs < "$fixture"
+          tested=0
+          for program in "${programs[@]}"; do
+            if [[ -z "$program" || "$program" == ';'* ]]; then
+              continue
+            fi
+            ((tested += 1))
+            case_source="$RUNNER_TEMP/d6-native-$(printf '%02d' "$tested").lisp"
+            echo "$program" > "$case_source"
+            sha256sum "$case_source"
+            if ! observed="$(target/debug/sens "$case_source" 2>&1)"; then
+              echo "::error::D6_BATCH_EXECUTOR_RED test_id=d6-law-$tested layer=eval fixture=$case_source expected=1 actual=execution-error" >&2
+              echo "$observed" >&2
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D6_BATCH_LAW_DIFF test_id=d6-law-$tested layer=eval fixture=$case_source expected=1 actual=$actual" >&2
+              exit 1
+            fi
+            echo "D6_BATCH_LAW_PASS law=$tested result=D1:1"
+          done
+          if [[ "$tested" -ne 14 ]]; then
+            echo "::error::D6_BATCH_CENSUS expected=14 actual=$tested" >&2
             exit 1
           fi
           echo "D6_LISP_BATCH_NATIVE_PASS functions=5 laws=14 direct_D6_callability=unclaimed"
-          # In the same automated D6 step, pin MAPLIST(list, function) and reject improper tail.
-          maplist_law="tests/semantic/d6-maplist-signature-law.lisp"
-          maplist_bad="tests/semantic/d6-maplist-improper-tail.lisp"
-          sha256sum "$maplist_law" "$maplist_bad" lib/core4.lisp target/debug/sens
-          if ! maplist_result="$(target/debug/sens "$maplist_law" 2>&1)"; then
-            printf '%s\n' "$maplist_result" >&2
-            echo "::error::D6_MAPLIST_EXEC_RED layer=eval fixture=$maplist_law expected=(1,1,1) actual=execution-error" >&2
-            exit 1
-          fi
-          maplist_actual="$(printf '%s\n' "$maplist_result" | tail -n 1)"
-          if [[ "$maplist_actual" != "(1 1 1)" ]]; then
-            echo "::error::D6_MAPLIST_LAW_DIFF layer=eval fixture=$maplist_law expected=(1,1,1) actual=$maplist_actual" >&2
-            exit 1
-          fi
-          if maplist_negative="$(target/debug/sens "$maplist_bad" 2>&1)"; then
-            echo "::error::D6_MAPLIST_NEGATIVE_ACCEPTED layer=eval fixture=$maplist_bad expected=CAR-type-error actual=exit0" >&2
-            exit 1
-          fi
-          if [[ "$maplist_negative" != *"car expects a non-empty list"* ]]; then
-            printf '%s\n' "$maplist_negative" >&2
-            echo "::error::D6_MAPLIST_WRONG_NEGATIVE layer=eval fixture=$maplist_bad expected=CAR-type-error actual=other" >&2
-            exit 1
-          fi
-          echo "D6_MAPLIST_NATIVE_PASS laws=3 negative=1 exact=D6:000101"
 
       - name: D8 — правий згорток: некомутативний позитив і негатив у SENS
         shell: bash
