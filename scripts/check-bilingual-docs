@@ -37,7 +37,7 @@ first_real_cyrillic_line() {
   ' "$1"
 }
 
-# Мовні заголовки для перевірки порядку секцій: Deutsch → Українська → English.
+# Мовні заголовки для перевірки порядку секцій: Українська → Deutsch → English.
 # Мова позначається секцією лише тоді, коли є явний markdown-заголовок.
 # Інші документи можуть залишатися україномовними без перекладів.
 first_language_heading_line() {
@@ -95,16 +95,16 @@ for file in "${files[@]}"; do
 
   ((has_sibling)) && continue # sibling-форма не має внутрішньої структури для порівняння
 
-  # Порядок мовних секцій не дорівнює пріоритету мов.
-  # Українська лишається основною: німецька може стояти перед нею
-  # у документації, англійська — після неї. Відсутні мови не вимагаються.
+  # Порядок багатомовних секцій повторює пріоритет мов:
+  # українська спочатку, німецька після неї, англійська остання.
+  # Відсутні переклади не вимагаються.
   de_line=$(first_language_heading_line "$file" "deutsch|german")
   uk_section_line=$(first_language_heading_line "$file" "Українська|українська|УКРАЇНСЬКА|ukrainian")
   en_line=$(first_language_heading_line "$file" "english")
   uk_line=$(first_real_cyrillic_line "$file")
 
-  if [[ -n "$de_line" && -n "$uk_section_line" ]] && (( de_line >= uk_section_line )); then
-    printf 'Порядок мов: Deutsch має передувати Українській: %s (DE:%s UK:%s)\n' "$file" "$de_line" "$uk_section_line" >&2
+  if [[ -n "$de_line" && -n "$uk_section_line" ]] && (( uk_section_line >= de_line )); then
+    printf 'Порядок мов: Українська має передувати Deutsch: %s (UK:%s DE:%s)\n' "$file" "$uk_section_line" "$de_line" >&2
     failed=1
   fi
   if [[ -n "$uk_section_line" && -n "$en_line" ]] && (( uk_section_line >= en_line )); then
@@ -116,42 +116,25 @@ for file in "${files[@]}"; do
     failed=1
   fi
 
-  # За відсутності явного заголовка Української її проза все одно
-  # має бути між німецькою та англійською секціями (якщо є обидві).
-  if [[ -n "$de_line" && -n "$en_line" && -z "$uk_section_line" ]]; then
-    if ! awk -v de="$de_line" -v en="$en_line" '
-      NR > de && NR < en {
-        line = $0
-        gsub(/\[[^]]*\]\([^)]*\)/, "", line)
-        if (line ~ /[А-Яа-яІіЇїЄєҐґ]/) found=1
-      }
-      END { exit !found }
-    ' "$file"; then
-      printf 'Немає українського змісту між Deutsch і English: %s\n' "$file" >&2
-      failed=1
-    fi
-  fi
-
   # Англійська секція не може випереджати весь український зміст.
   if [[ -n "$en_line" ]] && { [[ -z "$uk_line" ]] || (( uk_line >= en_line )); }; then
     printf 'Порядок мов: український зміст має передувати English: %s\n' "$file" >&2
     failed=1
   fi
 
-  # За явної німецької секції український зміст не може весь
-  # передувати їй, якщо окремої секції Української немає.
-  if [[ -n "$de_line" && -z "$uk_section_line" && -n "$uk_line" ]] && (( uk_line < de_line )); then
-    printf 'Порядок мов: Deutsch має передувати українському тексту: %s\n' "$file" >&2
+  # Якщо явної секції Української немає, реальна українська проза
+  # мусить починатися ДО німецької секції.
+  if [[ -n "$de_line" && -z "$uk_section_line" ]] && { [[ -z "$uk_line" ]] || (( uk_line >= de_line )); }; then
+    printf 'Порядок мов: український зміст має передувати Deutsch: %s\n' "$file" >&2
     failed=1
   fi
 
-  # Для неструктурованих текстів зберігаємо старий сигнал слабкої
-  # української присутності, але не вимагаємо її в першій половині,
-  # якщо документ має німецьку секцію на початку.
+  # Для неструктурованих текстів зберігаємо сигнал слабкої
+  # української присутності: первинна українська має бути вже на початку.
   total_lines=$(wc -l < "$file")
   if (( total_lines >= 10 )); then
     uk_line=$(first_real_cyrillic_line "$file")
-    if [[ -z "$de_line" && -n "$uk_line" ]] && (( uk_line * 2 > total_lines )); then
+    if [[ -n "$uk_line" ]] && (( uk_line * 2 > total_lines )); then
       printf 'Ukrainian content only in back half of file: %s (first real Cyrillic at line %s of %s) -- expected Ukrainian-primary prose near the start, per language-policy.lisp\n' \
         "$file" "$uk_line" "$total_lines" >&2
       failed=1
