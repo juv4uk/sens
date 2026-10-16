@@ -1487,6 +1487,13 @@
 
 
 
+; D8:00100011 STRING> — похідний закон текстового порядку з D8:10110001 STRING<.
+; STRING>(a,b) = STRING<(b,a); координата і ширина не змінюються.
+; Власна мовна функція SENS; без прямої D8 callability чи нового host-закону.
+(0011 текст-більший?
+  (0010 (ліве праве)
+    (string<? праве ліве)))
+
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
 ; to the Symbol reconstructed from its canonical text. The atom guard keeps
