@@ -1,0 +1,591 @@
+тип_джерела	назва_донора	ключ_джерела	точне_джерело	статус_джерела	клас_назви	додаткове_бібліотечне_джерело
+D10_ARCHIVE	-	d10.name.00001	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:270	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+SENS_LIBRARY	->	api:->	lib/core4.lisp:macro	UNREVIEWED_SOURCE	OPERATOR_OR_MACRO	
+SENS_LIBRARY	->>	api:->>	lib/core4.lisp:macro	UNREVIEWED_SOURCE	OPERATOR_OR_MACRO	
+D10_ARCHIVE	"""-S"""	d10.name.00002	knowledge/d10-proposal-ledger-symbolic-v3.tsv:245	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""ARGUMENTS"""	d10.name.00003	knowledge/d10-proposal-ledger-symbolic-v3.tsv:231	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""CONTENT"""	d10.name.00004	knowledge/d10-proposal-ledger-symbolic-v3.tsv:233	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""CURL"	d10.name.00005	knowledge/d10-proposal-ledger-symbolic-v3.tsv:279	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""DESCRIPTION"""	d10.name.00006	knowledge/d10-proposal-ledger-symbolic-v3.tsv:237	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""FUNCTION"""	d10.name.00007	knowledge/d10-proposal-ledger-symbolic-v3.tsv:230	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""MESSAGES"""	d10.name.00008	knowledge/d10-proposal-ledger-symbolic-v3.tsv:242	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""PARAMETERS"""	d10.name.00009	knowledge/d10-proposal-ledger-symbolic-v3.tsv:238	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""PROPERTIES"""	d10.name.00010	knowledge/d10-proposal-ledger-symbolic-v3.tsv:239	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""REQUIRED"""	d10.name.00011	knowledge/d10-proposal-ledger-symbolic-v3.tsv:241	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""TOOL_CALL_ID"""	d10.name.00012	knowledge/d10-proposal-ledger-symbolic-v3.tsv:232	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""TOOLS"""	d10.name.00013	knowledge/d10-proposal-ledger-symbolic-v3.tsv:243	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	"""TYPE"""	d10.name.00014	knowledge/d10-proposal-ledger-symbolic-v3.tsv:229	EXCLUDE_NO_WITNESS	TEXT_OR_QUOTE	
+D10_ARCHIVE	*	d10.name.00015	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:286	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	*DEBUG-IO*	d10.name.00016	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2650	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*DEFAULT-PATHNAME-DEFAULTS*	d10.name.00017	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:3195	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*DIMENSION-SCHEMA*	d10.name.00018	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:302	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*dimension-schema*	d10.pending.*dimension-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:159	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*ERROR-OUTPUT*	d10.name.00019	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2675	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+SENS_LIBRARY	*fs-format-version*	api:*FS-FORMAT-VERSION*	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*fs-journal-version*	api:*FS-JOURNAL-VERSION*	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*jtms-memory*	api:*JTMS-MEMORY*	lib/forward.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*justified-memory*	api:*JUSTIFIED-MEMORY*	lib/forward.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*knowledge-journal*	api:*KNOWLEDGE-JOURNAL*	lib/knowledge.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*knowledge-package-version*	api:*KNOWLEDGE-PACKAGE-VERSION*	lib/knowledge.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+D10_ARCHIVE	*QUANTITY-SCHEMA*	d10.name.00020	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:319	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*quantity-schema*	d10.pending.*quantity-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:197	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*QUERY-IO*	d10.name.00021	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2700	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+SENS_LIBRARY	*reason-index-max-predicates*	api:*REASON-INDEX-MAX-PREDICATES*	lib/reason.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*reason-index-schema*	api:*REASON-INDEX-SCHEMA*	lib/reason.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+D10_ARCHIVE	*SCIENCE-SOURCE-SCHEMA*	d10.name.00022	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:336	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*science-source-schema*	d10.pending.*science-source-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:216	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*SCIENTIFIC-CONSTANT-SCHEMA*	d10.name.00023	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:353	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*scientific-constant-schema*	d10.pending.*scientific-constant-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:235	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*STANDARD-INPUT*	d10.name.00024	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2725	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*STANDARD-OUTPUT*	d10.name.00025	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2750	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*TERMINAL-IO*	d10.name.00026	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2800	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*TRACE-OUTPUT*	d10.name.00027	knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json:2775	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	
+D10_ARCHIVE	*TRANSLATION-EVIDENCE-SCHEMA*	d10.name.00028	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:370	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*translation-evidence-schema*	d10.pending.*translation-evidence-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:349	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*TRANSLATION-EVIDENCE*	d10.name.00029	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:387	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*translation-evidence*	d10.pending.*translation-evidence*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:368	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*TRANSLATION-REVIEW-SCHEMA*	d10.name.00030	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:404	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*translation-review-schema*	d10.pending.*translation-review-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:330	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*TRANSLATION-SCHEMA*	d10.name.00031	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:421	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*translation-schema*	d10.pending.*translation-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:311	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/translation.lisp:function
+D10_ARCHIVE	*UNIT-SCHEMA*	d10.name.00032	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:438	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+D10_ARCHIVE	*unit-schema*	d10.pending.*unit-schema*	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:178	HOLD_NO_SEMANTIC_LAW	DATA_SYMBOL	lib/quantity.lisp:function
+SENS_LIBRARY	*usage-counts*	api:*USAGE-COUNTS*	lib/knowledge.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+SENS_LIBRARY	*working-memory*	api:*WORKING-MEMORY*	lib/forward.lisp:function	UNREVIEWED_SOURCE	DATA_SYMBOL	
+D10_ARCHIVE	/	d10.name.00033	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:455	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	+	d10.name.00034	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:471	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	<	d10.name.00035	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:487	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	<=	d10.name.00036	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:503	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	lib/core4.lisp:function
+D10_ARCHIVE	=	d10.name.00037	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:519	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	>	d10.name.00038	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:535	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	
+D10_ARCHIVE	>=	d10.name.00039	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:551	HOLD_NO_SEMANTIC_LAW	OPERATOR_OR_MACRO	lib/core4.lisp:function
+SENS_LIBRARY	зворот-до	api:ЗВОРОТ-ДО	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	спарувати	api:СПАРУВАТИ	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	A-LIST	d10.name.00040	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:567	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ACC	d10.name.00041	knowledge/d10-proposal-ledger-symbolic-v3.tsv:209	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ACCUMULATED	d10.name.00043	knowledge/d10-proposal-ledger-symbolic-v3.tsv:110	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ADD-EDGE	d10.name.00044	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:584	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	add-edge	d10.pending.add-edge	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1790	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ADVANCE	d10.name.00050	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:630	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ALPHA-BETA-SEARCH	d10.name.00071	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:721	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	alpha-beta-search	d10.pending.alpha-beta-search	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1224	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ALPHALESSP	d10.name.00072	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3053	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	apply-quote-args	api:APPLY-QUOTE-ARGS	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	APVAL	d10.name.00087	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:788	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ARGS	d10.name.00088	knowledge/d10-proposal-ledger-symbolic-v3.tsv:212	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ARRAY	d10.name.00089	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:805	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ARRAYCALL	d10.name.00091	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3077	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ASCII	d10.name.00093	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3101	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ASPECT-ANGLE	d10.name.00094	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:822	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	aspect-angle	d10.pending.aspect-angle	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1534	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ASSOCIATION LIST	d10.name.00100	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:855	HOLD_NO_SEMANTIC_LAW	TEXT_OR_QUOTE	
+D10_ARCHIVE	ASTROLOGICAL-CHART-DERIVATION	d10.name.00101	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1428	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ASTROLOGICAL-CHART-DERIVATION	d10.pending.ASTROLOGICAL-CHART-DERIVATION	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1428	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ATTRIB	d10.name.00103	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:889	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	AYANAMSA	d10.name.00110	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:906	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ayanamsa	d10.pending.ayanamsa	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1474	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BACKQUANTIZE	d10.name.00111	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:923	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BECAUSE	d10.name.00113	knowledge/d10-proposal-ledger-symbolic-v3.tsv:142	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BIGP	d10.name.00114	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3125	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BINDINGS	d10.name.00119	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:956	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	bindings	d10.pending.bindings	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:119	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BLOCKED	d10.name.00122	knowledge/d10-proposal-ledger-symbolic-v3.tsv:150	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BOTH-SIDES-HAVE-EVIDENCE	d10.name.00125	knowledge/d10-proposal-ledger-symbolic-v3.tsv:155	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BOUND	d10.name.00126	knowledge/d10-proposal-ledger-symbolic-v3.tsv:148	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	BOUNDED-AUTHORITY-RECIPROCITY	d10.name.00128	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1496	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BOUNDED-AUTHORITY-RECIPROCITY	d10.pending.BOUNDED-AUTHORITY-RECIPROCITY	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1496	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BOUNDED-PATH-SEARCH	d10.name.00129	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1360	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BOUNDED-PATH-SEARCH	d10.pending.BOUNDED-PATH-SEARCH	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1360	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	BROADCAST-STREAM	d10.name.00132	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3149	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	C	d10.name.00136	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1044	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	c	d10.pending.c	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:691	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	CALLSIGN-NORMALIZATION	d10.name.00269	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1394	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CALLSIGN-NORMALIZATION	d10.pending.CALLSIGN-NORMALIZATION	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1394	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CATENATE	d10.name.00275	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3197	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CHARCOUNT	d10.name.00408	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1160	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CL-EVAL	d10.name.00415	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1177	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CLAUSES	d10.name.00429	knowledge/d10-proposal-ledger-symbolic-v3.tsv:104	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CLEARBUFF	d10.name.00435	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1255	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CODEPOINT->STRING	d10.name.00476	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1272	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	COLLECTION	d10.name.00482	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1325	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	COMMON	d10.name.00483	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1358	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-append	api:COMPILER-APPEND	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-artifact-field	api:COMPILER-ARTIFACT-FIELD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-artifact-from-result	api:COMPILER-ARTIFACT-FROM-RESULT	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-at-least-two	api:COMPILER-AT-LEAST-TWO	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-bit-xor	api:COMPILER-BIT-XOR	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-bits-equal	api:COMPILER-BITS-EQUAL	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-compile-program	api:COMPILER-COMPILE-PROGRAM	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-compile-program-artifact	api:COMPILER-COMPILE-PROGRAM-ARTIFACT	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-cond-clauses-valid	api:COMPILER-COND-CLAUSES-VALID	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-d4-law-children	api:COMPILER-D4-LAW-CHILDREN	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-d4-law-first-child	api:COMPILER-D4-LAW-FIRST-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-d4-law-second-child	api:COMPILER-D4-LAW-SECOND-CHILD	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-d4-law-width	api:COMPILER-D4-LAW-WIDTH	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-domain-children	api:COMPILER-DOMAIN-CHILDREN	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-domain-result	api:COMPILER-DOMAIN-RESULT	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-exactly-one	api:COMPILER-EXACTLY-ONE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-exactly-two	api:COMPILER-EXACTLY-TWO	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-false	api:COMPILER-FALSE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-empty-bits	api:COMPILER-LAW-EMPTY-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-l5-atom-bits	api:COMPILER-LAW-L5-ATOM-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-l5-cond-bits	api:COMPILER-LAW-L5-COND-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-l5-head-bits	api:COMPILER-LAW-L5-HEAD-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-l5-spine	api:COMPILER-LAW-L5-SPINE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-width	api:COMPILER-LAW-WIDTH	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-law-xor-mask	api:COMPILER-LAW-XOR-MASK	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-lowering-role-from-l1-l5	api:COMPILER-LOWERING-ROLE-FROM-L1-L5	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-lowering-role-from-l1-l5-bits	api:COMPILER-LOWERING-ROLE-FROM-L1-L5-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-lowering-role-from-laws	api:COMPILER-LOWERING-ROLE-FROM-LAWS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-merge-results	api:COMPILER-MERGE-RESULTS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-program-list	api:COMPILER-PROGRAM-LIST	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-program-node	api:COMPILER-PROGRAM-NODE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-request-from-l1-l5	api:COMPILER-REQUEST-FROM-L1-L5	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-request-from-laws	api:COMPILER-REQUEST-FROM-LAWS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-request-from-role	api:COMPILER-REQUEST-FROM-ROLE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-request-role	api:COMPILER-REQUEST-ROLE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-result-fail	api:COMPILER-RESULT-FAIL	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-result-ok	api:COMPILER-RESULT-OK	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-result-requests	api:COMPILER-RESULT-REQUESTS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-result-success	api:COMPILER-RESULT-SUCCESS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-role-from-d4-bootstrap	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-role-from-d4-bootstrap-bits	api:COMPILER-ROLE-FROM-D4-BOOTSTRAP-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-role-from-l1-l5	api:COMPILER-ROLE-FROM-L1-L5	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-role-from-l1-l5-bits	api:COMPILER-ROLE-FROM-L1-L5-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-role-shape-valid	api:COMPILER-ROLE-SHAPE-VALID	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-shape-bits	api:COMPILER-SHAPE-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-shape-width	api:COMPILER-SHAPE-WIDTH	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-true	api:COMPILER-TRUE	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	compiler-xor-bits	api:COMPILER-XOR-BITS	lib/compiler-nucleus.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	CONC	d10.name.00487	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1410	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CONCAT	d10.name.00488	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1427	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CONCATENATED-STREAM	d10.name.00490	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3269	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CONJ	d10.name.00498	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1443	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CONNECTED-COMPONENTS?	d10.name.00499	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1459	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	connected-components?	d10.pending.connected-components%3F	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1874	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	CONNECTION	d10.name.00500	knowledge/d10-proposal-ledger-symbolic-v3.tsv:119	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CONTAINS?	d10.name.00503	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1492	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	COPY	d10.name.00506	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1530	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	core4-let-parameters	api:CORE4-LET-PARAMETERS	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	core4-let-values	api:CORE4-LET-VALUES	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	CSET	d10.name.00517	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1618	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CSETQ	d10.name.00518	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1635	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CURCHAR	d10.name.00519	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1652	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	CURRENT-DEPTH	d10.name.00520	knowledge/d10-proposal-ledger-symbolic-v3.tsv:198	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	DEBUG	d10.name.00526	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3341	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DECISION	d10.name.00527	knowledge/d10-proposal-ledger-symbolic-v3.tsv:121	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	DEFLIST	d10.name.00535	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1769	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	DEFMACRO	d10.name.00536	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1786	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DEFN	d10.name.00539	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3389	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DELTA-NU-CS	d10.name.00545	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1856	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	delta-nu-cs	d10.pending.delta-nu-cs	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:672	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	DERIVE-LAKARA	d10.name.00550	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1873	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	derive-lakara	d10.pending.derive-lakara	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1623	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DETRANSLIT-LATYNKA	d10.name.00557	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1890	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	detranslit-latynka	d10.pending.detranslit-latynka	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1718	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DEVICE-DESCRIPTOR	d10.name.00558	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1907	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	device-descriptor	d10.pending.device-descriptor	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:2039	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DISPUTED	d10.name.00567	knowledge/d10-proposal-ledger-symbolic-v3.tsv:153	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	DUMP	d10.name.00570	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1924	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	DUMPARRAYS	d10.name.00571	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3437	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	DWIM	d10.name.00572	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1941	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	E	d10.name.00574	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1988	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	e	d10.pending.e	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:729	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	ECHO-STREAM	d10.name.00575	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3461	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ECLIPTIC-TO-EQUATORIAL	d10.name.00578	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2005	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ecliptic-to-equatorial	d10.pending.ecliptic-to-equatorial	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1414	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	EFFACE	d10.name.00579	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2022	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ENDREAD	d10.name.00585	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2039	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ENERGY-OF	d10.name.00587	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2056	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	energy-of	d10.pending.energy-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1954	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	ENTRIES	d10.name.00592	knowledge/d10-proposal-ledger-symbolic-v3.tsv:215	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ERROR1	d10.name.00602	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2213	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	EVALUATE-POSITION	d10.name.00604	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2247	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	evaluate-position	d10.pending.evaluate-position	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1198	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	EVENT	d10.name.00605	knowledge/d10-proposal-ledger-symbolic-v3.tsv:169	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	EXACT-RATIONAL-PHYSICS-CARRIER	d10.name.00611	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1343	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	EXACT-RATIONAL-PHYSICS-CARRIER	d10.pending.EXACT-RATIONAL-PHYSICS-CARRIER	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1343	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	EXCISE	d10.name.00613	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2281	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	FACT	d10.name.00622	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2298	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	fact	d10.pending.fact	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:39	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	FACTS	d10.name.00624	knowledge/d10-proposal-ledger-symbolic-v3.tsv:17	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	FALSE?	d10.name.00626	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2333	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	FIRST	d10.name.00671	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2414	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	FIX	d10.name.00673	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3725	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	FLAG	d10.name.00676	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2447	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	FORMS	d10.name.00687	knowledge/d10-proposal-ledger-symbolic-v3.tsv:28	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	fs-bindings-without	api:FS-BINDINGS-WITHOUT	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	fs-commit-stage?	api:FS-COMMIT-STAGE?	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	fs-d1-no?	api:FS-D1-NO?	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	fs-journal-replay-event	api:FS-JOURNAL-REPLAY-EVENT	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	fs-journal-replay-onto	api:FS-JOURNAL-REPLAY-ONTO	lib/lisp-fs.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	FUZZY-TITLE-MATCH	d10.name.00708	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1193	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	FUZZY-TITLE-MATCH	d10.pending.FUZZY-TITLE-MATCH	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1193	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	GE	d10.name.00709	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3797	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GENERATE-EXPANSION	d10.name.00711	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2601	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	GEOMETRIC-COORDINATE-TRANSFORM	d10.name.00721	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1377	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GEOMETRIC-COORDINATE-TRANSFORM	d10.pending.GEOMETRIC-COORDINATE-TRANSFORM	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1377	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GET_PNAME	d10.name.00723	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3821	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GETCHAR	d10.name.00725	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3845	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GETCHARN	d10.name.00726	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3869	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GOAL	d10.name.00731	knowledge/d10-proposal-ledger-symbolic-v3.tsv:179	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	GRAPH-LINK-SEARCH	d10.name.00732	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1212	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	GRAPH-LINK-SEARCH	d10.pending.GRAPH-LINK-SEARCH	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1212	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	GT	d10.name.00737	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3893	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	GUNA-OF	d10.name.00739	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2730	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	guna-of	d10.pending.guna-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1577	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	H	d10.name.00740	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2747	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	h	d10.pending.h	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:710	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	HART MACRO	d10.name.00742	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2764	HOLD_NO_SEMANTIC_LAW	TEXT_OR_QUOTE	
+D10_ARCHIVE	HEAD	d10.name.00754	knowledge/d10-proposal-ledger-symbolic-v3.tsv:127	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	HELIOCENTRIC-POSITION	d10.name.00755	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2951	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	heliocentric-position	d10.pending.heliocentric-position	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1374	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	INVALID	d10.name.00785	knowledge/d10-proposal-ledger-symbolic-v3.tsv:157	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	INVOKE	d10.name.00787	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3066	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	IO-PORT-READ	d10.name.00789	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3118	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	io-port-read	d10.pending.io-port-read	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1995	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	IO-PORT-WRITE	d10.name.00790	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3135	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	io-port-write	d10.pending.io-port-write	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:2017	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	island-lower-binary	api:ISLAND-LOWER-BINARY	lib/island-lowering.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	island-lowering-add-payload	api:ISLAND-LOWERING-ADD-PAYLOAD	lib/island-lowering.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	island-lowering-append4	api:ISLAND-LOWERING-APPEND4	lib/island-lowering.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	ITEM	d10.name.00797	knowledge/d10-proposal-ledger-symbolic-v3.tsv:125	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ITEMS	d10.name.00798	knowledge/d10-proposal-ledger-symbolic-v3.tsv:217	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	JOURNAL	d10.name.00800	knowledge/d10-proposal-ledger-symbolic-v3.tsv:93	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	JULIAN-DATE	d10.name.00821	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3203	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	julian-date	d10.pending.julian-date	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1354	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	K	d10.name.00824	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3220	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	k	d10.pending.k	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:748	HOLD_NO_SEMANTIC_LAW	SINGLE_SYMBOL	lib/si.lisp:function
+D10_ARCHIVE	K-CD	d10.name.00825	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3237	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	k-cd	d10.pending.k-cd	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:786	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	KNOWLEDGE	d10.name.00828	knowledge/d10-proposal-ledger-symbolic-v3.tsv:205	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	LAP	d10.name.00841	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3254	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	LE	d10.name.00844	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:3989	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	LEMMATIZE-UK	d10.name.00850	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3326	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	lemmatize-uk	d10.pending.lemmatize-uk	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1670	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-dedup-pending	api:LIFE-SCHEDULER-DEDUP-PENDING	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-field	api:LIFE-SCHEDULER-FIELD	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-invocation-key	api:LIFE-SCHEDULER-INVOCATION-KEY	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-key-present?	api:LIFE-SCHEDULER-KEY-PRESENT?	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-pending	api:LIFE-SCHEDULER-PENDING	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-projection-match?	api:LIFE-SCHEDULER-PROJECTION-MATCH?	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-projection-ready?	api:LIFE-SCHEDULER-PROJECTION-READY?	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-quiescence	api:LIFE-SCHEDULER-QUIESCENCE	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-quiescence-state	api:LIFE-SCHEDULER-QUIESCENCE-STATE	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-select-ready	api:LIFE-SCHEDULER-SELECT-READY	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	life-scheduler-state	api:LIFE-SCHEDULER-STATE	lib/life-1-scheduler.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	lint-short-head	api:LINT-SHORT-HEAD	lib/linter.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	LOAD	d10.name.00857	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3376	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	LOADARRAYS	d10.name.00860	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4061	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	LSUBRCALL	d10.name.00870	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4133	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	LT	d10.name.00871	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4157	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	MASTERSCOPE	d10.name.00929	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3761	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	MASTERSCOPE-CALL-RELATION	d10.name.00930	knowledge/d10-historical-candidate-coordinate-queue-v1.json:802	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	MASTERSCOPE-CALL-RELATION	d10.pending.MASTERSCOPE-CALL-RELATION	knowledge/d10-historical-candidate-coordinate-queue-v1.json:802	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	MCTS-BACKPROPAGATE	d10.name.00945	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3800	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	mcts-backpropagate	d10.pending.mcts-backpropagate	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1276	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-select	api:MECHANISM-SELECT	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-find-route	api:MECHANISM-SELECTOR-FIND-ROUTE	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-find-section	api:MECHANISM-SELECTOR-FIND-SECTION	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-metadata	api:MECHANISM-SELECTOR-METADATA	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-registry	api:MECHANISM-SELECTOR-REGISTRY	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-registry-has-sid?	api:MECHANISM-SELECTOR-REGISTRY-HAS-SID?	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-registry-rows	api:MECHANISM-SELECTOR-REGISTRY-ROWS	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	mechanism-selector-routes	api:MECHANISM-SELECTOR-ROUTES	lib/mechanism-selector.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	MEMORY-MAP-OF	d10.name.00950	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3851	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	memory-map-of	d10.pending.memory-map-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1973	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	MKNAM	d10.name.00961	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3945	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	MODULE-JOURNAL-EVENTS-ONTO	d10.name.00964	knowledge/d10-proposal-ledger-symbolic-v3.tsv:92	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	lib/knowledge.lisp:function
+D10_ARCHIVE	MODULE-NAME	d10.name.00967	knowledge/d10-proposal-ledger-symbolic-v3.tsv:103	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	my-apply-group-closure	api:MY-APPLY-GROUP-CLOSURE	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-apply-primitive	api:MY-APPLY-PRIMITIVE	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-arity-error	api:MY-ARITY-ERROR	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-build-dependency-graph-with-names	api:MY-BUILD-DEPENDENCY-GRAPH-WITH-NAMES	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-build-group-env-onto	api:MY-BUILD-GROUP-ENV-ONTO	lib/meta-eval-mutual.lisp:function;lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-binding-error	api:MY-CANON-BINDING-ERROR	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-callable-identity?	api:MY-CANON-CALLABLE-IDENTITY?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-cond-name?	api:MY-CANON-COND-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-identity	api:MY-CANON-IDENTITY	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-name?	api:MY-CANON-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-canon-quote-name?	api:MY-CANON-QUOTE-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-compare-two	api:MY-COMPARE-TWO	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-cond-has-migration-clause?	api:MY-COND-HAS-MIGRATION-CLAUSE?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-def-compat-name?	api:MY-DEF-COMPAT-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-default-binding	api:MY-DEFAULT-BINDING	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-define-name?	api:MY-DEFINE-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-definition-name?	api:MY-DEFINITION-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-defmacro-name?	api:MY-DEFMACRO-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-drop-lambda-def-group	api:MY-DROP-LAMBDA-DEF-GROUP	lib/meta-eval-mutual.lisp:function;lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-ensure-shared-frame	api:MY-ENSURE-SHARED-FRAME	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-env-has-shared-frame?	api:MY-ENV-HAS-SHARED-FRAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-application-result	api:MY-EVAL-APPLICATION-RESULT	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-cond-result	api:MY-EVAL-COND-RESULT	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-cond-result-mode	api:MY-EVAL-COND-RESULT-MODE	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-first-class	api:MY-EVAL-FIRST-CLASS	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-lambda-components	api:MY-EVAL-LAMBDA-COMPONENTS	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-eval-program-with-groups	api:MY-EVAL-PROGRAM-WITH-GROUPS	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-apply	api:MY-FC-APPLY	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-apply-primitive	api:MY-FC-APPLY-PRIMITIVE	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-bind-params	api:MY-FC-BIND-PARAMS	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-closure?	api:MY-FC-CLOSURE?	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-compare-chain	api:MY-FC-COMPARE-CHAIN	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-env-lookup	api:MY-FC-ENV-LOOKUP	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-eval	api:MY-FC-EVAL	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-eval-body	api:MY-FC-EVAL-BODY	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-eval-cond	api:MY-FC-EVAL-COND	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-eval-list	api:MY-FC-EVAL-LIST	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-primitive	api:MY-FC-PRIMITIVE	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-primitive?	api:MY-FC-PRIMITIVE?	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fc-root-env	api:MY-FC-ROOT-ENV	lib/meta-eval-first-class.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fifth	api:MY-FIFTH	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-forms-reference-name?	api:MY-FORMS-REFERENCE-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-fourth	api:MY-FOURTH	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-graph-dependencies	api:MY-GRAPH-DEPENDENCIES	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-graph-dependencies-reach?	api:MY-GRAPH-DEPENDENCIES-REACH?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-apply	api:MY-GROUP-APPLY	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-apply-owned	api:MY-GROUP-APPLY-OWNED	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-eval	api:MY-GROUP-EVAL	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-eval-body	api:MY-GROUP-EVAL-BODY	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-eval-cond	api:MY-GROUP-EVAL-COND	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-eval-list	api:MY-GROUP-EVAL-LIST	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-group-eval-top-form	api:MY-GROUP-EVAL-TOP-FORM	lib/meta-eval-mutual.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-install-group-env-onto	api:MY-INSTALL-GROUP-ENV-ONTO	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-lambda-def-group-error	api:MY-LAMBDA-DEF-GROUP-ERROR	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-lambda-def-names	api:MY-LAMBDA-DEF-NAMES	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-lambda-invalid-form	api:MY-LAMBDA-INVALID-FORM	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-lambda-list-error-pairs	api:MY-LAMBDA-LIST-ERROR-PAIRS	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-lambda-name?	api:MY-LAMBDA-NAME?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-last-lambda-def-name	api:MY-LAST-LAMBDA-DEF-NAME	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-binding-status	api:MY-POSTCORE-BINDING-STATUS	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-build-definitions	api:MY-POSTCORE-BUILD-DEFINITIONS	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-materialize-stable-peers	api:MY-POSTCORE-MATERIALIZE-STABLE-PEERS	lib/core4.lisp:macro	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-missing-peers	api:MY-POSTCORE-MISSING-PEERS	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-peer-group	api:MY-POSTCORE-PEER-GROUP	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-postcore-stable-peer-projection	api:MY-POSTCORE-STABLE-PEER-PROJECTION	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-primitive	api:MY-PRIMITIVE	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-primitive?	api:MY-PRIMITIVE?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-replace-shared-frame	api:MY-REPLACE-SHARED-FRAME	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-result-fail-token	api:MY-RESULT-FAIL-TOKEN	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-result-ok-token	api:MY-RESULT-OK-TOKEN	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-result-value	api:MY-RESULT-VALUE	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-semantic-id?	api:MY-SEMANTIC-ID?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-shared-frame-binding?	api:MY-SHARED-FRAME-BINDING?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-shared-frame-value	api:MY-SHARED-FRAME-VALUE	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-sixth	api:MY-SIXTH	lib/meta-eval-mutual.lisp:function;lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-symbol-member?	api:MY-SYMBOL-MEMBER?	lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	my-take-lambda-def-group	api:MY-TAKE-LAMBDA-DEF-GROUP	lib/meta-eval-mutual.lisp:function;lib/meta-eval.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	N-A	d10.name.01019	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4002	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	n-a	d10.pending.n-a	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:767	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	lib/si.lisp:function
+D10_ARCHIVE	NAKSHATRA-OF	d10.name.01020	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4019	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	nakshatra-of	d10.pending.nakshatra-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1494	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	NEIGHBORS-OF	d10.name.01032	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4053	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	neighbors-of	d10.pending.neighbors-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1811	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	NEW-ENTRIES	d10.name.01033	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4070	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	new-entries	d10.pending.new-entries	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:79	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	NIL?	d10.name.01037	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4087	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	NO-PROOF-FOUND-FOR	d10.name.01040	knowledge/d10-proposal-ledger-symbolic-v3.tsv:143	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	nonempty-string-membership-helper	api:NONEMPTY-STRING-MEMBERSHIP-HELPER	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	not?	api:NOT?	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	null?	api:NULL?	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	NUMBER?	d10.name.01045	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4181	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	NUMOB	d10.name.01047	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4197	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	OBARRAY	d10.name.01048	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4214	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	OPCHAR	d10.name.01056	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4265	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	OPDEFINE	d10.name.01057	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4282	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	ORBITAL-ELEMENTS	d10.name.01061	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4316	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	orbital-elements	d10.pending.orbital-elements	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1394	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	OUTCOME	d10.name.01062	knowledge/d10-proposal-ledger-symbolic-v3.tsv:144	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PACK	d10.name.01064	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4333	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PAYLOAD	d10.name.01082	knowledge/d10-proposal-ledger-symbolic-v3.tsv:160	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PENDULUM-PERIOD	d10.name.01084	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4385	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	pendulum-period	d10.pending.pendulum-period	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1935	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PENDULUM-PHYSICS-PIPELINE	d10.name.01085	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1326	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PENDULUM-PHYSICS-PIPELINE	d10.pending.PENDULUM-PHYSICS-PIPELINE	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1326	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PENDULUM-STEP	d10.name.01086	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4419	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	pendulum-step	d10.pending.pendulum-step	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1916	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PGN-PARSE	d10.name.01088	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4453	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	pgn-parse	d10.pending.pgn-parse	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1328	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PLANET-LONGITUDE	d10.name.01093	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4487	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	planet-longitude	d10.pending.planet-longitude	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1454	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PNAME-VIEW	d10.name.01094	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4504	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	POWER-RANGE-CLASSIFICATION	d10.name.01095	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1411	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	POWER-RANGE-CLASSIFICATION	d10.pending.POWER-RANGE-CLASSIFICATION	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1411	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PR-STR	d10.name.01096	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4538	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PRATYAHARA-MEMBERS	d10.name.01098	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4554	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	pratyahara-members	d10.pending.pratyahara-members	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1554	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PRINTLN	d10.name.01104	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4622	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	PRINTPROP	d10.name.01105	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4638	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PRN	d10.name.01106	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4655	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	process-raw-exit-code	api:PROCESS-RAW-EXIT-CODE	lib/process.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	process-raw-stderr-bytes	api:PROCESS-RAW-STDERR-BYTES	lib/process.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	process-raw-stdout-bytes	api:PROCESS-RAW-STDOUT-BYTES	lib/process.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	PROP	d10.name.01112	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4688	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	prove-goal-accumulate	api:PROVE-GOAL-ACCUMULATE	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	prove-goal-scan	api:PROVE-GOAL-SCAN	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	PUNCH	d10.name.01123	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4726	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PUNCHDEF	d10.name.01124	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4743	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	PUNCHLAP	d10.name.01125	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4760	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	RATIONAL-TO-MASK-AND-BACK	d10.name.01137	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1479	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	RATIONAL-TO-MASK-AND-BACK	d10.pending.RATIONAL-TO-MASK-AND-BACK	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1479	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	READ-MANY	d10.name.01143	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4709	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	READ-STRING	d10.name.01145	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4832	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	READCH	d10.name.01146	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4848	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	READLAP	d10.name.01147	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4865	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	READLINE	d10.name.01148	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4882	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-ensure-index	api:REASON-ENSURE-INDEX	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-add-reversed	api:REASON-INDEX-ADD-REVERSED	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-buckets	api:REASON-INDEX-BUCKETS	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-build-scan	api:REASON-INDEX-BUILD-SCAN	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-candidates	api:REASON-INDEX-CANDIDATES	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-linear	api:REASON-INDEX-LINEAR	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-mode	api:REASON-INDEX-MODE	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-normalize-buckets	api:REASON-INDEX-NORMALIZE-BUCKETS	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index-rules	api:REASON-INDEX-RULES	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-index?	api:REASON-INDEX?	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-make-index	api:REASON-MAKE-INDEX	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-rule-predicate	api:REASON-RULE-PREDICATE	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	reason-term-predicate	api:REASON-TERM-PREDICATE	lib/reason.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	RECLAIM	d10.name.01155	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4898	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	REMFLAG	d10.name.01161	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:4946	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	REST	d10.name.01176	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5118	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	RISE-SET	d10.name.01196	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5151	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	rise-set	d10.pending.rise-set	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1434	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SAMEPNAMEP	d10.name.01208	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4781	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	science-list-length-equals?	api:SCIENCE-LIST-LENGTH-EQUALS?	lib/quantity.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	SEARCH-API-WRAPPER	d10.name.01238	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1231	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SEARCH-API-WRAPPER	d10.pending.SEARCH-API-WRAPPER	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1231	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SEARCH-WEB-ENDPOINT	d10.name.01239	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1250	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SEARCH-WEB-ENDPOINT	d10.pending.SEARCH-WEB-ENDPOINT	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1250	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SELECT	d10.name.01240	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5295	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SET!	d10.name.01246	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4805	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SHORTEST-PATH	d10.name.01248	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5312	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	shortest-path	d10.pending.shortest-path	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1832	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SI:AVOGADRO-CONSTANT	d10.name.01249	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5329	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:avogadro-constant	d10.pending.si%3Aavogadro-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:634	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:BOLTZMANN-CONSTANT	d10.name.01250	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5346	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:boltzmann-constant	d10.pending.si%3Aboltzmann-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:615	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:C	d10.name.01251	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5363	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:c	d10.pending.si%3Ac	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:824	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:CESIUM-FREQUENCY	d10.name.01252	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5380	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:cesium-frequency	d10.pending.si%3Acesium-frequency	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:539	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+SENS_LIBRARY	si:conductance-quantum	api:SI:CONDUCTANCE-QUANTUM	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+D10_ARCHIVE	SI:CONSTANT-VALUE	d10.name.01253	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5397	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:constant-value	d10.pending.si%3Aconstant-value	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:520	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-AVOGADRO-CONSTANT	d10.name.01254	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5414	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-avogadro-constant	d10.pending.si%3Adefining-avogadro-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:482	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-BOLTZMANN-CONSTANT	d10.name.01255	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5431	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-boltzmann-constant	d10.pending.si%3Adefining-boltzmann-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:463	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-CESIUM-FREQUENCY	d10.name.01256	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5448	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-cesium-frequency	d10.pending.si%3Adefining-cesium-frequency	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:387	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-ELEMENTARY-CHARGE	d10.name.01257	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5465	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-elementary-charge	d10.pending.si%3Adefining-elementary-charge	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:444	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-LUMINOUS-EFFICACY	d10.name.01258	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5482	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-luminous-efficacy	d10.pending.si%3Adefining-luminous-efficacy	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:501	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-PLANCK-CONSTANT	d10.name.01259	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5499	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-planck-constant	d10.pending.si%3Adefining-planck-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:425	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DEFINING-SPEED-OF-LIGHT	d10.name.01260	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5516	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:defining-speed-of-light	d10.pending.si%3Adefining-speed-of-light	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:406	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:DELTA-NU-CS	d10.name.01261	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5533	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:delta-nu-cs	d10.pending.si%3Adelta-nu-cs	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:805	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:E	d10.name.01262	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5550	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:e	d10.pending.si%3Ae	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:862	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:ELEMENTARY-CHARGE	d10.name.01263	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5567	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:elementary-charge	d10.pending.si%3Aelementary-charge	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:596	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+SENS_LIBRARY	si:faraday-constant	api:SI:FARADAY-CONSTANT	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+D10_ARCHIVE	SI:H	d10.name.01264	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5584	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:h	d10.pending.si%3Ah	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:843	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+SENS_LIBRARY	si:josephson-constant	api:SI:JOSEPHSON-CONSTANT	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+D10_ARCHIVE	SI:K	d10.name.01265	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5601	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:k	d10.pending.si%3Ak	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:881	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:K-CD	d10.name.01266	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5618	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:k-cd	d10.pending.si%3Ak-cd	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:919	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:LUMINOUS-EFFICACY	d10.name.01267	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5635	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:luminous-efficacy	d10.pending.si%3Aluminous-efficacy	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:653	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+SENS_LIBRARY	si:magnetic-flux-quantum	api:SI:MAGNETIC-FLUX-QUANTUM	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+SENS_LIBRARY	si:molar-gas-constant	api:SI:MOLAR-GAS-CONSTANT	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+SENS_LIBRARY	si:molar-planck-constant	api:SI:MOLAR-PLANCK-CONSTANT	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+D10_ARCHIVE	SI:N-A	d10.name.01268	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5652	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:n-a	d10.pending.si%3An-a	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:900	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:PLANCK-CONSTANT	d10.name.01269	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5669	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:planck-constant	d10.pending.si%3Aplanck-constant	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:577	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	SI:SPEED-OF-LIGHT	d10.name.01270	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5686	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+D10_ARCHIVE	si:speed-of-light	d10.pending.si%3Aspeed-of-light	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:558	HOLD_NO_SEMANTIC_LAW	D24_MATH_REVIEW	lib/si.lisp:function
+SENS_LIBRARY	si:von-klitzing-constant	api:SI:VON-KLITZING-CONSTANT	lib/si-derived.lisp:function	UNREVIEWED_SOURCE	D24_MATH_REVIEW	
+D10_ARCHIVE	SIGNP	d10.name.01272	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4829	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SLURP	d10.name.01279	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5794	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SPEAK	d10.name.01284	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5810	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	SPEAKER-SEGMENTATION-AND-CLUSTERING	d10.name.01285	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1445	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SPEAKER-SEGMENTATION-AND-CLUSTERING	d10.pending.SPEAKER-SEGMENTATION-AND-CLUSTERING	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1445	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SPIT	d10.name.01288	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4877	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STARTREAD	d10.name.01290	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5878	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	STEM-UK	d10.name.01291	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5895	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	stem-uk	d10.pending.stem-uk	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1742	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STR	d10.name.01296	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5912	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STREAM	d10.name.01299	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4901	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STREAM-ERROR	d10.name.01301	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:4949	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STRING->CODEPOINT	d10.name.01306	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5928	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	string-membership-helper	api:STRING-MEMBERSHIP-HELPER	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	string-order-helper	api:STRING-ORDER-HELPER	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	STRING-STREAM	d10.name.01312	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5045	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	STRING?	d10.name.01314	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5982	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	string<?	api:STRING<?	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	STRINGLENGTH	d10.name.01315	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5069	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SUBGRAPH-OF	d10.name.01316	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:5998	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	subgraph-of	d10.pending.subgraph-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1895	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	sublis-pair	api:SUBLIS-PAIR	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	SUBRCALL	d10.name.01317	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5093	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SUBSTR	d10.name.01318	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5117	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SYMBOL	d10.name.01323	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6015	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SYNONYM-STREAM	d10.name.01327	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5141	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	SYNONYM-STREAM-SYMBOL	d10.name.01328	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5165	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TABLESPACE	d10.name.01332	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6120	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TCS	d10.name.01338	knowledge/d10-proposal-ledger-symbolic-v3.tsv:253	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TEMPUS-FUGIT	d10.name.01340	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6153	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TEXT	d10.name.01342	knowledge/d10-proposal-ledger-symbolic-v3.tsv:114	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TIME-LONGITUDE-POLAR-PROJECTION	d10.name.01347	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1462	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TIME-LONGITUDE-POLAR-PROJECTION	d10.pending.TIME-LONGITUDE-POLAR-PROJECTION	knowledge/d10-historical-candidate-coordinate-queue-v1.json:1462	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TIME-MS	d10.name.01348	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6283	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TITHI-OF	d10.name.01353	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6318	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	tithi-of	d10.pending.tithi-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1514	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TOKENIZE-UK	d10.name.01355	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6335	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	tokenize-uk	d10.pending.tokenize-uk	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1646	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TRACE	d10.name.01358	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6369	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TRACESET	d10.name.01359	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6386	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TRANSFORMER	d10.name.01360	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6403	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TRANSLIT-LATYNKA	d10.name.01389	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6420	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	translit-latynka	d10.pending.translit-latynka	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1694	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	TRUE?	d10.name.01390	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6437	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	truthy?	api:TRUTHY?	lib/core4.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	TURN	d10.name.01391	knowledge/d10-proposal-ledger-symbolic-v3.tsv:265	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	TWO-WAY-STREAM	d10.name.01392	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5237	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	UCI-PARSE	d10.name.01397	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6453	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	uci-parse	d10.pending.uci-parse	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1302	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	UNCOMMON	d10.name.01398	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6470	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	UNCOUNT	d10.name.01399	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6487	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	unicode-scalars->string-onto	api:UNICODE-SCALARS->STRING-ONTO	lib/utf8.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	unify-observe	api:UNIFY-OBSERVE	lib/unify-observe.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	UNKNOWN	d10.name.01413	knowledge/d10-proposal-ledger-symbolic-v3.tsv:141	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	UNPACK	d10.name.01415	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6562	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	UNQUOTE	d10.name.01416	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5309	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	UNREAD-CHAR	d10.name.01417	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5333	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	UNSPECIAL	d10.name.01418	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6579	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	UNTRACE	d10.name.01420	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6596	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	UNTRACESET	d10.name.01421	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6613	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+SENS_LIBRARY	utf8-decode-onto	api:UTF8-DECODE-ONTO	lib/utf8.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+SENS_LIBRARY	utf8-encode-string-onto	api:UTF8-ENCODE-STRING-ONTO	lib/utf8.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	VALUE	d10.name.01435	knowledge/d10-proposal-ledger-symbolic-v3.tsv:146	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	VEC	d10.name.01436	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6752	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	VRDDHI-OF	d10.name.01445	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6842	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	vrddhi-of	d10.pending.vrddhi-of	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1600	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	WHOPPER	d10.name.01448	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6877	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	WITH-INPUT-FROM-STRING	d10.name.01451	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5381	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	WITH-OPEN-STREAM	d10.name.01453	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5405	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	WITH-OUTPUT-TO-STRING	d10.name.01454	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5429	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	WITH-REPLY	d10.name.01455	knowledge/d10-proposal-ledger-symbolic-v3.tsv:264	EXCLUDE_NO_WITNESS	FUNCTION_SHAPED	
+D10_ARCHIVE	WORD-EMBEDDING	d10.name.01456	knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:6895	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	word-embedding	d10.pending.word-embedding	knowledge/d10-provisional-candidate-coordinate-queue-v1.json:1766	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+SENS_LIBRARY	world-module-missing?	api:WORLD-MODULE-MISSING?	lib/world.lisp:function	UNREVIEWED_SOURCE	FUNCTION_SHAPED	
+D10_ARCHIVE	WRITE-CHAR	d10.name.01488	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5453	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	WRITE-LINE	d10.name.01490	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5477	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	Y-OR-N-P	d10.name.01494	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5525	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
+D10_ARCHIVE	YES-OR-NO-P	d10.name.01495	knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:5549	HOLD_NO_SEMANTIC_LAW	FUNCTION_SHAPED	
