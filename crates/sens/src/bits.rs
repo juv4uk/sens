@@ -28,7 +28,7 @@
 /// ```
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
-pub struct Bits<const N: usize>(u16);
+pub struct Bits<const N: usize>(u8);
 
 pub type Bit1 = Bits<1>;
 pub type Bit2 = Bits<2>;
@@ -39,27 +39,17 @@ pub type Bit6 = Bits<6>;
 pub type Bit7 = Bits<7>;
 pub type Bit8 = Bits<8>;
 
-/// 9-bit and 10-bit domains share the same carrier: the width is the type.
-pub type Bit9 = Bits<9>;
-pub type Bit10 = Bits<10>;
-
 impl<const N: usize> Bits<N> {
-    /// Exact width carried by this Rust type.
-    pub const WIDTH: usize = N;
-
-    /// Largest exact payload for this width.
-    pub const MAX: u16 = if N == 0 || N > 16 { 0 } else { (1u16 << N) - 1 };
-
     /// Construct a logical word only when both the type width and payload are valid.
     ///
     /// Width zero and widths above eight are intentionally unconstructible
     /// through this bounded fast-path carrier.
-    pub const fn new(value: u16) -> Option<Self> {
-        if N == 0 || N > 16 {
+    pub const fn new(value: u8) -> Option<Self> {
+        if N == 0 || N > 8 {
             return None;
         }
 
-        if (value as u32) < (1u32 << N) {
+        if (value as u16) < (1u16 << N) {
             Some(Self(value))
         } else {
             None
@@ -76,22 +66,22 @@ impl<const N: usize> Bits<N> {
     /// The returned host byte is only a scratch projection; callers must keep
     /// it qualified by this exact `Bits<N>` type and must not use it as a
     /// cross-width semantic identity.
-    pub const fn packed_bits(self) -> u16 {
+    pub const fn packed_bits(self) -> u8 {
         self.0
     }
 
     /// Largest packed payload admitted by this width.
-    pub const fn max_value() -> Option<u16> {
-        if N == 0 || N > 16 {
+    pub const fn max_value() -> Option<u8> {
+        if N == 0 || N > 8 {
             None
         } else {
-            Some((1u16 << N) - 1)
+            Some(((1u16 << N) - 1) as u8)
         }
     }
 
     /// Read one bit by zero-based index from the most-significant side.
     pub const fn bit(self, index: usize) -> Option<bool> {
-        if N == 0 || N > 16 || index >= N {
+        if N == 0 || N > 8 || index >= N {
             return None;
         }
 
