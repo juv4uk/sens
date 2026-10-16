@@ -30,6 +30,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
       - name: "GUARD — warnings are fatal (RUSTFLAGS must keep -D warnings)"
         shell: bash
         run: |
