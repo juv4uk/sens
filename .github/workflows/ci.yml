@@ -142,6 +142,32 @@ jobs:
             exit 1
           fi
           echo "D8_DERIVED_SENS_NATIVE_PASS identities=D8:00010110,D8:00001001,D8:00111010,D8:00110110 laws=10 negative=1"
+      - name: D8 — точні ASSQ та ASSOC-IF (ключ проти значення)
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-association-lookup-laws.lisp"
+          negative="tests/semantic/d8-association-lookup-wrong-predicate.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "::error::D8_ASSOC_NATIVE_RED layer=eval fixture=$fixture expected=seven-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$observed" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_ASSOC_LAW_DIFF layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if err="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_ASSOC_WRONG_PREDICATE id=d8-assoc-if-not-d1 layer=eval fixture=$negative expected=D1-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eq "D3:110 COND|PredicateBit" <<< "$err"; then
+            echo "::error::D8_ASSOC_WRONG_ERROR id=d8-assoc-if-not-d1 layer=eval fixture=$negative expected=D1-diagnostic actual=$err" >&2
+            exit 1
+          fi
+          echo "D8_ASSOC_NATIVE_PASS identities=D8:00111001,D8:00101010 laws=7 negative=1"
       - name: D6 — ліві TAKE/DROP із D24+ лічильником
         shell: bash
         run: |
