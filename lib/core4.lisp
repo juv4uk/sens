@@ -598,6 +598,27 @@
 (0011 не-менше?
   (0010 (a b) (0100 (11010 a b))))
 
+; D6:111000 ZIP / D6:111001 UNZIP; #3370 product constructor/destructor.
+; Evidence: knowledge/d6-v2-binary-law-families.json and #3710 orientation.
+; Equal-length proper-list carrier. Definition != direct D6 code admission.
+(0011 спарувати-послідовності
+  (0010 (ліві праві)
+    (110
+      ((0101 ліві) (001 ()))
+      ((010 (001 ()))
+       (111 (111 (100 ліві) (100 праві))
+            (спарувати-послідовності (011 ліві) (011 праві)))))))
+
+(0011 розпарувати-пари
+  (0010 (пари)
+    (110
+      ((0101 пари) (111 (001 ()) (001 ())))
+      ((010 (001 ()))
+       ((0010 (хвости)
+          (111 (111 (100 (100 пари)) (100 хвости))
+               (111 (011 (100 пари)) (011 хвости))))
+        (розпарувати-пари (011 пари)))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string

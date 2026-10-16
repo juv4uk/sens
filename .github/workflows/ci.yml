@@ -181,6 +181,30 @@ jobs:
             exit 1
           fi
           echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
+          # One native SENS D6 ZIP/UNZIP product witness and negative invalid pair.
+          d6_product="tests/semantic/d6-product-uk-laws.lisp"
+          d6_bad_product="tests/semantic/d6-product-bad-pair.lisp"
+          sha256sum "$d6_product" "$d6_bad_product" lib/core4.lisp target/debug/sens
+          if ! d6_product_raw="$(target/debug/sens "$d6_product" 2>&1)"; then
+            printf '%s\n' "$d6_product_raw" >&2
+            echo "::error::D6_PRODUCT_NATIVE_RED layer=eval fixture=$d6_product expected=(1,1,1) actual=execution-error" >&2
+            exit 1
+          fi
+          d6_product_actual="$(printf '%s\n' "$d6_product_raw" | tail -n 1)"
+          if [[ "$d6_product_actual" != "(1 1 1)" ]]; then
+            echo "::error::D6_PRODUCT_LAW_DIFF layer=eval fixture=$d6_product expected=(1,1,1) actual=$d6_product_actual" >&2
+            exit 1
+          fi
+          if d6_product_err="$(target/debug/sens "$d6_bad_product" 2>&1)"; then
+            echo "::error::D6_PRODUCT_NEGATIVE_ACCEPTED layer=eval fixture=$d6_bad_product expected=CAR-type-error actual=exit0" >&2
+            exit 1
+          fi
+          if [[ "$d6_product_err" != *"car expects a non-empty list"* ]]; then
+            printf '%s\n' "$d6_product_err" >&2
+            echo "::error::D6_PRODUCT_WRONG_ERROR layer=eval fixture=$d6_bad_product expected=CAR-type-error actual=other-failure" >&2
+            exit 1
+          fi
+          echo "D6_PRODUCT_NATIVE_PASS functions=2 laws=3 negative=1 authority=SENS"
 
       - name: D6 — два похідні предикати порядку через точні D5/D4
         shell: bash
