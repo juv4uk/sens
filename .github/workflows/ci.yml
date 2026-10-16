@@ -320,6 +320,34 @@ jobs:
           fi
           echo "D8_SELECTOR_NATIVE_PASS functions=8 positive=8 onebit_negative=8 authority=SENS"
 
+      - name: D8 TAKE-right / DROP-right — SENS-позитив і негатив
+        shell: bash
+        run: |
+          set -euo pipefail
+          positive=tests/semantic/d8-take-drop-right-laws.lisp
+          negative=tests/semantic/d8-take-drop-right-negative.lisp
+          sha256sum "$positive" "$negative" lib/core4.lisp target/debug/sens
+          if ! result="$(target/debug/sens "$positive" 2>&1)"; then
+            echo "::error::D8_RIGHT_EDGE_RED layer=eval fixture=$positive expected=(1 1 1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$result" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$result" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_RIGHT_EDGE_DIFF layer=eval fixture=$positive expected=(1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if ! result="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_RIGHT_EDGE_NEGATIVE_RED layer=eval fixture=$negative expected=D1:0 actual=execution-error" >&2
+            printf '%s\n' "$result" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$result" | tail -n 1)"
+          if [[ "$actual" != "0" ]]; then
+            echo "::error::D8_RIGHT_EDGE_NEGATIVE_RED layer=eval fixture=$negative expected=D1:0 actual=$actual" >&2
+            exit 1
+          fi
+          echo "D8_RIGHT_EDGE_NATIVE_PASS identities=D8:11000001,D8:11000011 laws=6 negative=D1:0 authority=SENS"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
