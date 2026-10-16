@@ -796,19 +796,33 @@ mod exact_domain_primitive_tests {
     fn exact_d4_eval_runs_represented_code_and_keeps_width_qualified_identity() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
-        let represented_sum = Value::list([
-            Value::Symbol("+".into()),
-            Value::Number(2.0, crate::Exactness::Exact),
-            Value::Number(3.0, crate::Exactness::Exact),
+        // A represented (CONS (QUOTE a) (QUOTE ())) expression. This exercises
+        // eval of data into a real D3 value without relying on preloaded host
+        // builtins or on an unqualified numeric operator.
+        let represented_program = Value::list([
+            Value::Symbol("cons".into()),
+            Value::list([
+                Value::Symbol("quote".into()),
+                Value::Symbol("a".into()),
+            ]),
+            Value::list([
+                Value::Symbol("quote".into()),
+                Value::Nil,
+            ]),
         ]);
+
         let result = invoke_domain_identity(
-            d4(0b0001), &[represented_sum.clone()], &environment, span,
-        ).expect("D4:0001 EVAL evaluates one represented SENS expression");
-        assert_eq!(result, Value::Number(5.0, crate::Exactness::Exact));
+            d4(0b0001),
+            &[represented_program.clone()],
+            &environment,
+            span,
+        )
+        .expect("D4:0001 EVAL evaluates one represented SENS expression");
+        assert_eq!(result, Value::list([Value::Symbol("a".into())]));
 
         for arguments in [
             Vec::<Value>::new(),
-            vec![represented_sum.clone(), represented_sum.clone()],
+            vec![represented_program.clone(), represented_program.clone()],
         ] {
             let error = invoke_domain_identity(d4(0b0001), &arguments, &environment, span)
                 .expect_err("D4:0001 EVAL requires exactly one represented expression");
@@ -817,8 +831,12 @@ mod exact_domain_primitive_tests {
         }
 
         let collision = invoke_domain_identity(
-            d3(0b001), &[represented_sum], &environment, span,
-        ).expect_err("D3:001 QUOTE must not inherit D4:0001 EVAL's value-call mechanism");
+            d3(0b001),
+            &[represented_program],
+            &environment,
+            span,
+        )
+        .expect_err("D3:001 QUOTE must not inherit D4:0001 EVAL's value-call mechanism");
         assert!(collision.message.contains("no admitted value-call mechanism"));
     }
 
