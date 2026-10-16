@@ -30,6 +30,21 @@ if grep -nE '#d1:[01]' lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; then
 fi
 echo 'REPL_D1_PROJECTION_OK from=lib/domains/d1.lisp names=ні,так'
 
+# Один справжній READ-loop для всіх шести поверхонь та D1–D10.
+# Ця перевірка суто структурна; семантика доводиться свідками SENS.
+if [[ $(grep -Ec '^[[:space:]]*[(]прочитати[)][[:space:]]*[)]?' lib/repl-core.lisp) != 1 ]] ||
+   ! grep -Fq '(визначити репл-цикл репл-цикл-поверхонь)' lib/repl-core.lisp ||
+   ! grep -Fq '(визначити репл-цикл-доменів репл-запустити-поверхні)' lib/repl-core.lisp; then
+  echo 'REPL_SINGLE_LOOP_RED reason=parallel-reader-loop-or-unchecked-alias' >&2
+  exit 1
+fi
+if sed -n '/^(визначити репл-крок-поверхні/,/^(визначити репл-команда-мови?/p' lib/repl-core.lisp |
+   grep -Fq '((текст? форма)'; then
+  echo 'REPL_LITERAL_INGRESS_RED reason=implicit-bit-string-to-domain' >&2
+  exit 1
+fi
+echo 'REPL_SINGLE_LOOP_OK readers=1 surfaces=ук,укр,san,en,LISP,sym implicit-bit-literals=FORBIDDEN semantic_pass=NOT_INFERRED'
+
 id=repl-uk-native
 reproduce="bash scripts/prove-repl-uk-step.sh"
 for kind in step loop queue define-function; do
