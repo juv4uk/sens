@@ -352,26 +352,9 @@ fn invoke_domain_primitive(
                 special_forms::symbol_to_string_values(args, span)
             }
             DomainPrimitiveKind::CharCode => {
-                // D8:11100000 explicitly projects one Unicode scalar into a
-                // qualified D24 natural word. D5 LESSP/GEQ may then compare
-                // these numeric values without admitting legacy Number, D7
-                // text cells or historical W8 payloads to Core mathematics.
-                // The older string->codepoint host helper stays unqualified.
-                let scalar = builtins::prim_01000101(args, environment, span)?;
-                let Value::Number(codepoint, crate::Exactness::Exact) = scalar else {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        "D8 CHAR-CODE requires an exact Unicode scalar",
-                        span,
-                    ));
-                };
-                let word = (0..24)
-                    .rev()
-                    .map(|shift| ((codepoint as u32 >> shift) & 1) as u8)
-                    .collect::<Vec<_>>();
-                let numeric = crate::BinaryNumber::from_numeric_domain_bits(24, &word)
-                    .expect("Unicode scalar always fits the D24 numeric domain");
-                Ok(Value::BinaryNumber(numeric))
+                // The single Unicode scalar bridge already emits exact D24.
+                // Do not coerce it through an unqualified host Number again.
+                builtins::prim_01000101(args, environment, span)
             }
             DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.
