@@ -8,13 +8,13 @@
 //! wants them (the CLI does; WASM does not). See eval/capabilities.rs.
 
 
-mod bignum;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod bignum;
 mod bit9;
-mod binary_number;
-mod domain_numeric;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_number;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod domain_numeric;
 mod bits;
 pub mod d7_keyboard;
-mod canonical_reader;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod canonical_reader;
 pub mod universal_frame3;
 pub mod frame3_domain;
 pub mod frame3_grammar;
@@ -62,21 +62,21 @@ pub mod domain_ladder;
 pub use domain_ladder::DomainD10;
 #[allow(dead_code)]
 mod domain_owner_generated;
-mod packed_bits;
-mod outer_envelope;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod packed_bits;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod outer_envelope;
 mod binary_framing;
 mod gpu_execution_packet;
 mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
-mod parser;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod parser;
 mod mixed_source;
 mod presentation;
-mod semantic_registry;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod semantic_registry;
 mod source_words;
-mod source_packing;
-mod ternary_transport;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod source_packing;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod ternary_transport;
 mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
@@ -192,8 +192,8 @@ pub mod semantic_registry_export {
         super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
     }
 }
-pub mod syntax;
-mod text7;
+// STAGED-OUT (not in the runtime; REPL owns this): // pub mod syntax;
+// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod text7;
 mod text7_projection;
 mod value;
 
