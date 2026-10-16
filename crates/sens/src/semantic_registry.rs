@@ -88,7 +88,7 @@ pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Op
 /// No W8 slot, packed payload, or name may select the width. Higher domains
 /// require their own generated coordinate authority (never an implicit lift).
 fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
-    use crate::{BinarySourceWord, Bit8};
+    use crate::BinarySourceWord;
     let source = match width {
         3 => BinarySourceWord::W3(Bit3::new(bits)?),
         4 => BinarySourceWord::W4(Bit4::new(bits)?),
@@ -532,7 +532,7 @@ mod exact_d5_binding_projection_tests {
 #[cfg(test)]
 mod exact_d3_compatibility_migration_tests {
     use super::*;
-    use crate::{BinarySourceWord, Bit8};
+    use crate::BinarySourceWord;
 
     #[test]
     fn only_ratified_surfaces_project_historical_quote_cond_car() {
@@ -542,7 +542,7 @@ mod exact_d3_compatibility_migration_tests {
             (0b00000101, 0b100u8),
         ] {
             let identity = compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(crate::Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), bits);
@@ -553,7 +553,7 @@ mod exact_d3_compatibility_migration_tests {
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
             assert!(compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(byte).expect("8-bit source word"))).expect("exact domain word")
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(crate::Bit8::new(byte).expect("8-bit source word"))).expect("exact domain word")
             ).is_none());
         }
     }

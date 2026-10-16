@@ -1,4 +1,4 @@
-use crate::{BinarySourceWord, Bit8, DomainIdentity, Value};
+use crate::{DomainIdentity, Value};
 use std::{cell::RefCell, collections::{hash_map::Entry, HashMap}, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -580,7 +580,7 @@ mod tests {
         use crate::{Bit8, CoreD8, CoreDomainIdentity};
 
         let environment = Environment::root();
-        let legacy = CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(0b1010_1000).expect("8-bit source word"))).expect("exact domain word");
+        let legacy = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(0b1010_1000).expect("8-bit source word"))).expect("exact domain word");
         let current = DomainIdentity::D8(CoreD8::from_word(
             Bit8::new(0b1010_1000).expect("точно вісім біт"),
         ));
@@ -669,9 +669,9 @@ mod tests {
         // Every historical W8 byte has a current D8 coordinate with the
         // same low eight payload bits, but MUST NOT alias the current slot.
         for bits in 0u16..256 {
-            let sid = CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(bits as u8).expect("8-bit source word"))).expect("exact domain word");
+            let sid = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).expect("8-bit source word"))).expect("exact domain word");
             let identity = DomainIdentity::from_source_word(
-                BinarySourceWord::W8(Bit8::new(bits as u8).unwrap()));
+                crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).unwrap()));
             let current = environment.domain_code_slot(identity);
             assert_eq!(environment.code_slot(sid), None,
                 "historical W8 silently lifted to D8 at {bits:08b}");

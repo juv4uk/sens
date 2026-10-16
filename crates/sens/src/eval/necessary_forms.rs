@@ -6,7 +6,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry::{self, LegacyRegistrySlot};
-use crate::{BinarySourceWord, Bit8, CoreDomainIdentity};
+use crate::CoreDomainIdentity;
 #[cfg(test)]
 use crate::{Bit4, CoreD4};
 
@@ -156,7 +156,7 @@ mod exact_d4_necessary_form_migration_tests {
             (0b00001001, 0b0011, NecessaryFormIdentity::Define),
             (0b00001011, 0b0011, NecessaryFormIdentity::Define),
         ] {
-            let legacy = CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word");
+            let legacy = CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word");
             let identity = domain_identity_for_legacy_semantic_id(legacy)
                 .expect("the three admitted compatibility rows have an explicit D4 bridge");
             assert_eq!(identity.width(), 4);
@@ -194,7 +194,7 @@ mod exact_d4_necessary_form_migration_tests {
                 _ => None,
             };
             assert_eq!(
-                identity_for_semantic_id(CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word")),
+                identity_for_semantic_id(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(slot).expect("8-bit source word"))).expect("exact domain word")),
                 expected,
                 "unexpected necessary-form route for historical W8 {slot:08b}",
             );

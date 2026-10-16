@@ -5,6 +5,7 @@
 use crate::{CoreProfile, CoreDomainIdentity};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(dead_code)]
 pub(crate) enum ProfileMechanismRouteKind {
     RegisteredHostMechanism,
 }

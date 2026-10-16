@@ -1,7 +1,7 @@
 use crate::BinaryNumber;
 use crate::domain_numeric::{self, DomainNumericComposition};
 use crate::Value;
-use crate::{BinarySourceWord, Bit8, Rational, CoreDomainIdentity, Text7};
+use crate::{Rational, CoreDomainIdentity, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
@@ -885,7 +885,7 @@ mod tests {
     #[test]
     fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
-            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(packed as u8).expect("8-bit source word"))).expect("exact domain word"));
+            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(crate::BinarySourceWord::W8(crate::Bit8::new(packed as u8).expect("8-bit source word"))).expect("exact domain word"));
             let encoded = encode_binary_frame(&frame).unwrap();
             assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
             assert_eq!(encoded.len(), 12);

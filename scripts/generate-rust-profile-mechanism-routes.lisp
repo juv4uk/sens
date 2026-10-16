@@ -81,6 +81,7 @@
     "// Generator: scripts/generate-rust-profile-mechanism-routes.lisp\n\n"
     "use crate::{CoreProfile, CoreDomainIdentity};\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
+    "#[allow(dead_code)]\n"
     "pub(crate) enum ProfileMechanismRouteKind {\n"
     "    RegisteredHostMechanism,\n"
     "}\n\n"
