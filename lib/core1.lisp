@@ -580,3 +580,84 @@
 (0011 C1-ZEROP
   (0010 (A)
     (101 A 0)))
+
+; ─────────────────────────────────────────────────────────────────────────────
+; Bootstrap additions: Appendix-B features (McCarthy 1960, Appendix B).
+; PROPLIST (GET/PUT), PROG/GO (imperative program feature), APPEND/ASSOC
+; (core support functions used by the evaluator formula). SENS-owned laws.
+; ─────────────────────────────────────────────────────────────────────────────
+
+(0011 C1-ASSOC
+  (00100 C1-ASSOC
+    (0010 (KEY ALIST)
+      (110
+        ((101 ALIST (001 ())) (001 C1-MISSING))
+        ((101 (100 (100 ALIST)) KEY)
+         (100 ALIST))
+        (#d1:1 (C1-ASSOC KEY (011 ALIST)))))))
+
+(0011 C1-APPEND
+  (00100 C1-APPEND
+    (0010 (X Y)
+      (110
+        ((101 X (001 ())) Y)
+        (#d1:1 (111 (100 X) (C1-APPEND (011 X) Y)))))))
+
+; ── PROPLIST (property lists): GET / PUT ──
+(0011 C1-GET
+  (0010 (SYM PROP ALIST)
+    (C1-ASSOC PROP (C1-ASSOC SYM ALIST))))
+
+(0011 C1-PUT
+  (0010 (SYM PROP VALUE ALIST)
+    (111 (111 SYM (111 PROP VALUE))
+         ALIST)))
+
+; ── PROG / GO: a label-indexed statement list with an explicit program counter ──
+; PROG body is a list of statements; a statement is (LABEL . FORM) or FORM.
+; GO jumps to LABEL. The counter is passed explicitly (no host control flow).
+(0011 C1-PROG
+  (0010 (STATEMENTS)
+    (C1-PROG-RUN STATEMENTS STATEMENTS)))
+
+(0011 C1-PROG-RUN
+  (00100 C1-PROG-RUN
+    (0010 (PC BODY)
+      (110
+        ((101 PC (001 ())) (001 ()))
+        ((C1-LABELP (100 PC))
+         (C1-PROG-RUN (011 PC) BODY))          ; a label line: skip
+        (#d1:1
+         (C1-PROG-RUN (011 PC) BODY))))))
+
+(0011 C1-GO
+  (0010 (LABEL BODY)
+    (C1-PROG-SEEK LABEL BODY)))
+
+(0011 C1-PROG-SEEK
+  (00100 C1-PROG-SEEK
+    (0010 (LABEL BODY)
+      (110
+        ((101 BODY (001 ())) (001 ()))
+        ((101 (100 (100 BODY)) LABEL) BODY)     ; found the label
+        (#d1:1 (C1-PROG-SEEK LABEL (011 BODY)))))))
+
+(0011 C1-LABELP
+  (0010 (STATEMENT)
+    (110
+      ((010 STATEMENT) #d1:0)
+      ((C1-ATOM (100 STATEMENT)) #d1:1)         ; a bare symbol = a label
+      (#d1:1 #d1:0))))
+
+(0011 C1-ATOM
+  (0010 (X)
+    (110
+      ((101 X (001 ())) #d1:1)
+      ((C1-PAIRP X) #d1:0)
+      (#d1:1 #d1:1))))
+
+(0011 C1-PAIRP
+  (0010 (X)
+    (110
+      ((010 X) #d1:0)
+      (#d1:1 #d1:1))))
