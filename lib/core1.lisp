@@ -661,3 +661,47 @@
     (110
       ((010 X) #d1:0)
       (#d1:1 #d1:1))))
+
+; ─────────────────────────────────────────────────────────────────────────────
+; Bootstrap addition: the array feature (McCarthy 1960, Appendix B / LISP 1.5).
+; ARRAY creates an array; AREF reads A[i]; ASET writes A[i] <- v.
+; An array is a bounded list; the index is exact D24+ arithmetic (C1-SUB1).
+; No host array; no new primitive. SENS-owned law.
+; ─────────────────────────────────────────────────────────────────────────────
+
+(0011 C1-MAKE-ARRAY
+  (0010 (SIZE)
+    (C1-ARRAY-FILL SIZE (001 ()))))
+
+(0011 C1-ARRAY-FILL
+  (00100 C1-ARRAY-FILL
+    (0010 (SIZE ACC)
+      (110
+        ((101 SIZE 0) ACC)
+        (#d1:1 (C1-ARRAY-FILL (C1-SUB1 SIZE) (111 0 ACC)))))))
+
+(0011 C1-ARRAY
+  (0010 (SIZE)
+    (C1-MAKE-ARRAY SIZE)))
+
+(0011 C1-AREF
+  (00100 C1-AREF
+    (0010 (ARR IDX)
+      (110
+        ((101 IDX 0) (100 ARR))
+        (#d1:1 (C1-AREF (011 ARR) (C1-SUB1 IDX)))))))
+
+(0011 C1-ASET
+  (00100 C1-ASET
+    (0010 (ARR IDX VAL)
+      (110
+        ((101 IDX 0) (111 VAL (011 ARR)))
+        (#d1:1
+         (111 (100 ARR) (C1-ASET (011 ARR) (C1-SUB1 IDX) VAL)))))))
+
+(0011 C1-ARRAYP
+  (0010 (X)
+    (110
+      ((101 X (001 ())) #d1:1)
+      ((C1-PAIRP X) #d1:1)
+      (#d1:1 #d1:0))))
