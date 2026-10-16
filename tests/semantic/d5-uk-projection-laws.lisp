@@ -1,6 +1,5 @@
-; D5 structural + ZEROP + two pure selectors via exact domain call heads.
-; D5:10011 CADDR and D5:01100 CDAAR — compositions of D3 CAR/CDR, not new laws.
-; Очікується рівно десять предикатів D1:1.
+; D5 structural + ZEROP (selectors already covered by d3-d6-28-native.bits).
+; Очікується рівно вісім предикатів D1:1 — CI vector; exact D5 CADDR/CDAAR in 28-law suite.
 (list
   (equal? (зворот (list (quote ()) (list (quote ()))))
           (list (list (quote ())) (quote ())))
@@ -16,8 +15,4 @@
   (equal? (зворот (зворот (list (quote ()) (list (quote ())))))
           (list (quote ()) (list (quote ()))))
   (нуль? #d24:000000000000000000000000)
-  (not? (нуль? #d24:000000000000000000000001))
-  (equal? (10011 (list (quote а) (quote б) (quote в)))
-          (quote в))
-  (equal? (01100 (list (list (list (quote в) (quote б)) (quote а))))
-          (quote в)))
+  (not? (нуль? #d24:000000000000000000000001)))
