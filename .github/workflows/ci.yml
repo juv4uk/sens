@@ -161,16 +161,40 @@ jobs:
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
           if ! d5_observed="$(target/debug/sens "$d5_projection" 2>&1)"; then
             printf '%s\n' "$d5_observed" >&2
-            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=execution-error" >&2
+            echo "::error::D5_UK_NATIVE_RED layer=eval fixture=$d5_projection expected=(1 1 1 1 1 1 1 1) actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d5_observed"
           d5_actual="${d5_observed##*$'\n'}"
           if [[ "$d5_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
-            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1,1,1,1,1,1,1,1) actual=$d5_actual" >&2
+            echo "::error::D5_UK_LAW_DIFF layer=eval fixture=$d5_projection expected=(1 1 1 1 1 1 1 1) actual=$d5_actual" >&2
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
+          # D8:00001011 MAPLIST* — suffixes plus final NIL, one native test.
+          d8_star_law="tests/semantic/d8-maplist-star-laws.lisp"
+          d8_star_bad="tests/semantic/d8-maplist-star-bad-tail.lisp"
+          sha256sum "$d8_star_law" "$d8_star_bad" lib/core4.lisp target/debug/sens
+          if ! d8_star_out="$(target/debug/sens "$d8_star_law" 2>&1)"; then
+            printf '%s\n' "$d8_star_out" >&2
+            echo "::error::D8_MAPLIST_STAR_EXEC_RED layer=eval fixture=$d8_star_law expected=(1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          d8_star_observed="$(printf '%s\n' "$d8_star_out" | tail -n1)"
+          if [[ "$d8_star_observed" != "(1 1 1 1)" ]]; then
+            echo "::error::D8_MAPLIST_STAR_LAW_DIFF layer=eval fixture=$d8_star_law expected=(1 1 1 1) actual=$d8_star_observed first_mismatch=d1-vector" >&2
+            exit 1
+          fi
+          if d8_star_bad_out="$(target/debug/sens "$d8_star_bad" 2>&1)"; then
+            echo "::error::D8_MAPLIST_STAR_NEG_ACCEPTED layer=eval fixture=$d8_star_bad expected=CDR-type-refusal actual=exit0" >&2
+            exit 1
+          fi
+          if [[ "$d8_star_bad_out" != *"cdr expects a non-empty list"* ]]; then
+            printf '%s\n' "$d8_star_bad_out" >&2
+            echo "::error::D8_MAPLIST_STAR_WRONG_NEGATIVE layer=eval fixture=$d8_star_bad expected=CDR-type-refusal actual=other-failure" >&2
+            exit 1
+          fi
+          echo "D8_MAPLIST_STAR_NATIVE_PASS identity=D8:00001011 laws=4 negative=1 direct_d8_callability=false"
           # D8 56 ратифікованих шестикрокових селекторів: один SENS-оракул + однобітні мутанти.
           d8_selectors="tests/semantic/d8-second8-selector-orientation.lisp"
           sha256sum "$d8_selectors" lib/core4.lisp target/debug/sens
