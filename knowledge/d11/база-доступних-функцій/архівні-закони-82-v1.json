@@ -2055,5 +2055,118 @@
         }
       ]
     }
-  ]
+  ],
+  "archive_inventory_crosscheck": {
+    "purpose_uk": "Перевірено великі архівні інвентарі незалежно від раніше зведених 1042 згадок: збіг назви є лише індексом, не семантичною еквівалентністю.",
+    "archived_D10_snapshot_rows": 3327,
+    "archived_D9_snapshot_rows": 649,
+    "individually_new_semantic_names_proven": 0,
+    "source_warnings": [
+      "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+      "FIXP/FLOATP"
+    ],
+    "source_snapshots": [
+      {
+        "path": "research/domain-archive/20261011/pr5022/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "5458cb72ac1584d7e37fe16174ebc306947c2c88",
+        "source_rows": 637,
+        "unique_names": 637,
+        "exact_lower_name_matches": 637,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4891/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "34efd273000e3de8510441764cb59acbb5ab284b",
+        "source_rows": 631,
+        "unique_names": 631,
+        "exact_lower_name_matches": 631,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4883/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "bc1adf570bf3b9486735419d6b4f11f818bede93",
+        "source_rows": 632,
+        "unique_names": 632,
+        "exact_lower_name_matches": 630,
+        "exact_d11_research_name_matches": 2,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4798/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+        "source_rows": 625,
+        "unique_names": 625,
+        "exact_lower_name_matches": 625,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4764/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "425ba5c02f76670bc5637110734ce7fc9c38a56d",
+        "source_rows": 546,
+        "unique_names": 546,
+        "exact_lower_name_matches": 546,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4014/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "ac6f5763ba2c81cba526582af01075a56d728207",
+        "source_rows": 256,
+        "unique_names": 256,
+        "exact_lower_name_matches": 256,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3997/knowledge/d9-v1-semantic-inventory.json",
+        "blob": "c0b298b8701e74ac30a00ba8165072b19caade3e",
+        "source_rows": 512,
+        "unique_names": 512,
+        "exact_lower_name_matches": 512,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3997/knowledge/d9-final-semantic-fill-v1.json",
+        "blob": "b8e6c9da022780c9b205e5d8344889c9687871b4",
+        "source_rows": 137,
+        "unique_names": 137,
+        "exact_lower_name_matches": 137,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3935/knowledge/d8-recovery-candidate-map.json",
+        "blob": "dcff11002dc3f79d146378029e85beeb908b9681",
+        "source_rows": 8,
+        "unique_names": 8,
+        "exact_lower_name_matches": 6,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": [
+          {
+            "label": "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+            "classification": "HISTORICAL_UNRESOLVED_GROUP_LABEL",
+            "historical_field": "unresolved_recovery"
+          },
+          {
+            "label": "FIXP/FLOATP",
+            "classification": "HISTORICAL_UNRESOLVED_GROUP_LABEL",
+            "historical_field": "unresolved_recovery"
+          }
+        ]
+      },
+      {
+        "path": "research/domain-archive/20261011/flavors-restarts-historical/knowledge/d10-flavors-restarts-research-v1.json",
+        "blob": "5aec23038bc8d6e99c5ea49925bb5e37492d4454",
+        "source_rows": 8,
+        "unique_names": 8,
+        "exact_lower_name_matches": 8,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      }
+    ]
+  }
 }
