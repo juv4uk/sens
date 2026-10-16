@@ -1274,6 +1274,13 @@
   (0010 (значення)
     (довжина значення)))
 
+; D8:00010001 NTH-right — ратифікована координата #3960.
+; Закон #3744: NTH-right(i,xs) = D6:000100 NTH(i,D5:10100 REVERSE(xs)).
+; Чиста похідна SENS-функція; D24+ індекс лишається явно кваліфікованим.
+(0011 елемент-справа
+  (0010 (індекс значення)
+    (nth індекс (зворот значення))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
