@@ -430,9 +430,12 @@
    (сполучити
      (зчепити
        "(domain-table/1\n  ("
-       "0000000000"
-       " (ук немає-можливості) (укр відсутня-можливість-виконання) (san abhāva-sāmarthya) (en missing-capability) (LISP MISSING-CAPABILITY) (sym ()))\n  ("
-       "0000000001"
-       " (ук перше-значення) (укр перше-значення) (san eka) (en first-value) (LISP FIRST-VALUE) (sym ()))\n)")
+       (зчепити
+         "0000000000"
+         (зчепити
+           " (ук немає-можливості) (укр відсутня-можливість-виконання) (san abhāva-sāmarthya) (en missing-capability) (LISP MISSING-CAPABILITY) (sym ()))\n  ("
+           (зчепити
+             "0000000001"
+             " (ук перше-значення) (укр перше-значення) (san eka) (en first-value) (LISP FIRST-VALUE) (sym ()))\n)"))))
      (як-є ()))
    (як-є (д10))))
