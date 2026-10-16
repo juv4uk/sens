@@ -9,13 +9,14 @@
     "curated": 153,
     "additional_function_shaped": 410,
     "unique_names": 565,
-    "detailed_law_dossiers": 149,
+    "detailed_law_dossiers": 155,
     "new_domain_codes": 0,
     "new_callable": 0,
     "archaeology_recovered": 2,
     "additional_archived_nonfunction_labels": 54,
     "archival_CLHS_type_or_condition_not_callable": 8,
-    "archived_mal_surfaces_reviewed": 21
+    "archived_mal_surfaces_reviewed": 21,
+    "archived_unattested_source_questions": 6
   },
   "pins": {
     "curated": "86415a6e61bc986815a3a5055b877a78d9c7e251",
@@ -210,6 +211,30 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "BACKQUANTIZE",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Заявлена власна функція splice-expansion: спершу знайти первинне джерело точного написання і фазу розгортання.",
+      "negative_case_uk": "Звичайна поведінка BACKQUOTE/UNQUOTE-SPLICING або MACROEXPAND-1 не доводить окремої функції BACKQUANTIZE.",
+      "lower_domain_crosswalk": [
+        "D6:000110:MACROEXPAND-1"
+      ],
+      "gate": "ARCHIVED_UNATTESTED_SPELLING",
+      "source_ref": {
+        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+        "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "archived_state": "HOLD-UNVERIFIED-SOURCE",
+        "review_source": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+        "review_git_blob": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+        "archival_positive_requirement": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+        "archival_negative": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "BASH-TOOL-SCHEMA",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Схема інструмента є даними, не дозволом host execution.",
@@ -382,6 +407,30 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "COLLECTION",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Заявлене збирання елементів: визначити порядок обходу, кратність і тип результату в оригінальному джерелі.",
+      "negative_case_uk": "Будь-який traversal/list collector не отримує власної D11 функції лише через назву COLLECTION.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS"
+      ],
+      "gate": "ARCHIVED_NO_ORDER_MULTIPLICITY_LAW",
+      "source_ref": {
+        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+        "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "archived_state": "HOLD-UNVERIFIED-SOURCE",
+        "review_source": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+        "review_git_blob": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+        "archival_positive_requirement": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+        "archival_negative": "assert any traversal helper is a novel Core semantic primitive"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "COMPILER-BITS-EQUAL",
@@ -853,6 +902,30 @@
       "ratification": "PENDING"
     },
     {
+      "name": "GENERATE-EXPANSION",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Встановити джерельну різницю між генератором expansion та одноразовим MACROEXPAND-1.",
+      "negative_case_uk": "Якщо результати тотожні на всіх контрприкладах, нова D11 ідентичність не обґрунтована.",
+      "lower_domain_crosswalk": [
+        "D6:000110:MACROEXPAND-1"
+      ],
+      "gate": "ARCHIVED_UNATTESTED_EXPANSION_STAGE",
+      "source_ref": {
+        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+        "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "archived_state": "HOLD-UNVERIFIED-SOURCE",
+        "review_source": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+        "review_git_blob": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+        "archival_positive_requirement": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+        "archival_negative": "mere alias of MACROEXPAND-1 given a new coordinate"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "GET-THRESHOLD",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Лінтер повертає встановлений поріг або явний default.",
@@ -1161,6 +1234,28 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "MASTERSCOPE",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Дослідити package-owned query call graph та зв'язок редактора структур Interlisp-D як зовнішній інструмент.",
+      "negative_case_uk": "Tooling query не є новою мовною формою управління або Core evaluator без окремого закону.",
+      "lower_domain_crosswalk": [
+        "D4:0001:EVAL"
+      ],
+      "gate": "ARCHIVED_INTERLISP_TOOL_PACKAGE",
+      "source_ref": {
+        "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "source_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "review_id": "HIST-GAP-013",
+        "primary_url": "https://interlisp.org/documentation/IRM.pdf",
+        "archived_state": "HOLD-ENVIRONMENT-PACKAGE"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "MASTERSCOPE-CALL-RELATION",
@@ -2031,6 +2126,30 @@
       "callable": false
     },
     {
+      "name": "TABLESPACE",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Встановити різницю між кількістю записів та фізичною місткістю hash table в первинному документі.",
+      "negative_case_uk": "Не приписувати HASH-TABLE-COUNT властивість невикористаної місткості без незалежного свідка.",
+      "lower_domain_crosswalk": [
+        "D10:0000100000:HASH-TABLE-COUNT"
+      ],
+      "gate": "ARCHIVED_UNATTESTED_CAPACITY_LAW",
+      "source_ref": {
+        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+        "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "archived_state": "HOLD-UNVERIFIED-SOURCE",
+        "review_source": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+        "review_git_blob": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+        "archival_positive_requirement": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+        "archival_negative": "merely relabel count as capacity or invent a new Core law without source"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "TC-ARGUMENTS",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Проєктувати аргументи tool call як дані.",
@@ -2480,6 +2599,28 @@
       "callable": false,
       "proof_status": "NOT_NATIVE_TESTED",
       "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "WHOPPER",
+      "source_state": "ARCHIVAL_RESEARCH_PRIMARY_SOURCE_UNVERIFIED",
+      "proposed_law_uk": "Встановити порядок wrapper навколо комбінованого методу Flavors, зокрема передавання управління наступному методу.",
+      "negative_case_uk": "Плутанина wrapper з окремою контролюючою формою поза D2 та порядок around-method є контрприкладом.",
+      "lower_domain_crosswalk": [
+        "D10:1010111100:STANDARD-METHOD-COMBINATION"
+      ],
+      "gate": "ARCHIVED_FLAVORS_METHOD_WRAPPER",
+      "source_ref": {
+        "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "source_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "review_id": "HIST-GAP-015",
+        "primary_url": "https://manuals.plus/m/15ff2561cd4183c1377f8c5613f66c568a38d5fb213b76c4b54974ac1c65e1ac",
+        "archived_state": "HOLD-D2-CONTROL"
+      },
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "WITH-INPUT-FROM-STRING",
@@ -9901,5 +10042,6 @@
       "host_boundary": 2
     },
     "native_verified": 0
-  }
+  },
+  "archival_unattested_note": "Four historical first-spelling claims and two package/control boundary questions are questions, not positive native semantic evidence."
 }
