@@ -75,8 +75,8 @@ mod language_items;
 mod presentation;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod semantic_registry;
 mod source_words;
-mod source_packing;
-mod ternary_transport;
+// STAGED-OUT (not in the runtime; ZIG owns packing): // mod source_packing;
+// STAGED-OUT (not in the runtime; ZIG owns packing): // mod ternary_transport;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
