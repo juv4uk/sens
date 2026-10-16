@@ -96,6 +96,24 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: D3–D5 — нативний SENS-закон та іменовані негативні випадки
+        id: sens-d3-d5-derived-law
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Працює лише SENS; shell передає файл, SHA та очікувану однобітну відповідь.
+          fixture="tests/semantic/d5-d6-derived-law.lisp"
+          expected="$RUNNER_TEMP/sens-d3-d5-expected-d1.txt"
+          printf '1\n' > "$expected"
+          sha256sum target/debug/sens "$fixture" "$expected" lib/core4.lisp
+          python3 scripts/ci_failure_contract.py run \
+            --test-id sens-d3-d5-direct-selector-acons \
+            --layer eval \
+            --fixture "$fixture" \
+            --expected-file "$expected" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- target/debug/sens "$fixture"
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
