@@ -924,6 +924,12 @@
       ((0101 асоціації) (001 ()))
       ((предикат (011 (100 асоціації))) (100 асоціації))
       ((010 (001 ())) (знайти-асоціацію-якщо предикат (011 асоціації))))))
+; D8:11011010 NTHCDR = D6:110001 DROP (lower-domain composition).
+; D8:11100100 EVERY = D6:111101 ALL (strict D1 predicate result).
+; Це мовні поверхні доведених нижчих законів, не нові незалежні примітиви.
+(0011 n-та-решта відкинути)
+(0011 усі-задовольняють? усі?)
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
