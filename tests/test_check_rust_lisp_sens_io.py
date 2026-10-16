@@ -64,6 +64,29 @@ class RustLispSensIoTests(unittest.TestCase):
         p.write_text("let b = fs::read(x); let t = fs::read_to_string(y);\n", encoding="utf-8")
         self.assertTrue(self.module.check(self.root))
 
+    def test_zig_corridor_lisp_bytes_pass(self) -> None:
+        """Opaque .lisp over sterile Zig byte carrier is legal (not read_to_string)."""
+        p = self.root / "crates/sens-cli/src/zig_transport.rs"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            "// lib/linter.lisp exact bytes via Zig ABI; no Rust include_str\n"
+            "fn linter_source_bytes() -> Result<Vec<u8>, String> {\n"
+            "    asset_ffi::sens_zig_linter_bytes_copy(...)\n"
+            "}\n",
+            encoding="utf-8",
+        )
+        problems = self.module.check(self.root)
+        self.assertEqual(problems, [], problems)
+
+    def test_extension_constant_only_passes(self) -> None:
+        p = self.root / "crates/sens/src/source_words.rs"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            'pub const CANONICAL_SOURCE_EXTENSION: &str = ".lisp";\n',
+            encoding="utf-8",
+        )
+        self.assertEqual(self.module.check(self.root), [])
+
 
 if __name__ == "__main__":
     unittest.main()
