@@ -13,6 +13,12 @@ on:
 permissions:
   contents: read
 
+# Warnings are errors: any rustc warning in our own crates fails the build/test.
+# (cargo passes --cap-lints allow to dependencies, so this targets our code.)
+env:
+  RUSTFLAGS: "-D warnings"
+  RUSTDOCFLAGS: "-D warnings"
+
 concurrency:
   # Each commit gets its own slot; GitHub otherwise replaces older PENDING runs.
   group: sens-one-focussed-${{ github.repository }}-${{ github.sha }}
@@ -1411,15 +1417,14 @@ jobs:
           if-no-files-found: warn
 
       - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
-        # Еталон Rust збирається з окремого Cargo workspace; його точний
-        # checksum обов'язковий. SENS без власної .sens-фікстури = UNVERIFIED.
+        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
+        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
         shell: bash
         run: |
           set -euo pipefail
-          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml \
-            --bin paired_exact_q --release
+          cargo build -p core-math-demand-rust --release
           python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
-            --require-rust --json "$RUNNER_TEMP/math-bench.json"
+            --json "$RUNNER_TEMP/math-bench.json"
 
       - name: Upload math benchmark (SENS vs Rust)
         if: always()
