@@ -48,6 +48,14 @@ fn точна_ширина_домену_не_зливається_за_одна�
 
 #[test]
 fn історичний_w8_під_цитатою_не_стає_d8() {
+    // The original historical W8:10101000 has no callable D8 projection.
+    // Do not turn a raw eight-bit source word into a machine function.
+    assert!(
+        sens::CoreDomainIdentity::from_source_word(
+            sens::BinarySourceWord::W8(Bit8::new(0b10101000).unwrap())
+        ).is_none(),
+        "historical unadmitted W8 must not become a D8 operation"
+    );
     let quoted = expression(ExprKind::List(vec![
         expression(ExprKind::DomainIdentity(DomainIdentity::D3(
             Bija3::from_word(Bit3::new(0b001).unwrap()),
@@ -55,10 +63,11 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
         expression(ExprKind::Pair(
             std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
             std::rc::Rc::new(expression(ExprKind::Sid(
-                sens::CoreDomainIdentity::from_source_word(
-                    sens::BinarySourceWord::W8(Bit8::new(0b10101000).unwrap()),
-                )
-                .expect("historical exact-width source word"),
+                // Even an admitted D8 payload is not canonical when carried
+                // inside the historical Sid AST variant.
+                sens::CoreDomainIdentity::D8(
+                    CoreD8::from_word(Bit8::new(0b11100000).unwrap()),
+                ),
             ))),
         )),
     ].into()));
