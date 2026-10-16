@@ -62,7 +62,7 @@ pub mod domain_ladder;
 pub use domain_ladder::DomainD10;
 #[allow(dead_code)]
 mod domain_owner_generated;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod packed_bits;
+mod packed_bits;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod outer_envelope;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_framing;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod gpu_execution_packet;
@@ -75,8 +75,8 @@ mod language_items;
 mod presentation;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod semantic_registry;
 mod source_words;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod source_packing;
-// STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod ternary_transport;
+mod source_packing;
+mod ternary_transport;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
