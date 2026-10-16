@@ -49,6 +49,17 @@ jobs:
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
 
+      - name: SENS-HOST — зібрати справжній хост через піни до Zig
+        id: sens-host-build
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Pins first: the locked Cargo graph and the pinned Zig version.
+          cargo tree --locked -p sens-host >/dev/null 2>&1 || echo "note: locked tree"
+          test "$(cat .zig-version)" = "$("$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version)"
+          # Then build the real host (fs/process/TCP capability layer, depends on sens).
+          cargo build --locked -p sens-host
+
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
