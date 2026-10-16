@@ -22,7 +22,15 @@
     "basis": "D3 CAR/CDR and previously proved selector-generator; D10 parents owner-ratified",
     "coordinate_rule": "11-bit candidate = 10-bit D10 selector coordinate || one bit",
     "non_selector_parents": "NO_EXTENSION",
-    "candidate_only": true
+    "candidate_only": true,
+    "lisp_owned_composition_source": "tests/fixtures/d11-selector-law-witness.lisp",
+    "left_11bit_candidate": "01100000000",
+    "right_11bit_candidate": "01100000001",
+    "example_parent_10bit": "0110000000",
+    "positive_law_uk": "Для довільного вже допущеного селектора-батька p: p0(x)=p(CAR(x)); p1(x)=p(CDR(x)). Дві незалежні композиції перевіряються D3-кодом без D11 call head.",
+    "negative_law_uk": "Асиметричні конс-пари дозволяють відрізнити p0(x) від p1(x) та викрити перестановку бітів суфікса.",
+    "evidence_status": "LISP_SOURCE_PLUS_STATIC_STRUCTURAL_CHECK; NATIVE_EXECUTION_UNVERIFIED",
+    "candidate_gate": "NO_RATIFICATION_NO_D11_CALLABILITY_NO_ZIG_T5_ADMISSION"
   },
   "accounting": {
     "d10_selector_parents": 256,
