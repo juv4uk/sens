@@ -45,5 +45,4 @@
   ; #1422 — profile selection precedes host mechanism lookup.
   ; Mechanical registered-host route for existing SENS function 10101000 under Core3.
   ; Defines no kernel syntax, surface spelling, result law, or host availability.
-  (profile-routes
-    (core3 10101000 registered-host-mechanism)))
+  (profile-routes))

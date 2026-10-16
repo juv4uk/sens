@@ -140,7 +140,8 @@ type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageErr
 /// Замість плоского масиву 256 слотів дозволяємо лише явні старі
 /// механізми, які ще мають підтверджених споживачів.
 fn legacy_backend_primitive(sid: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    match sid.packed_byte() {
+    // The Lisp surface must certify this exact domain before any old host route.
+    match semantic_registry::legacy_slot_for_exact_identity(sid)? {
         0b00001100 => Some(prim_00001100),
         0b00001101 => Some(prim_00001101),
         0b00001110 => Some(prim_00001110),

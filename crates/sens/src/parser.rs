@@ -540,15 +540,8 @@ impl Parser<'_> {
         // This is a direct SID read, not numeric conversion:
         // `00001100` is function SID 00001100; decimal `12` remains a number.
         if token.len() == 8 && token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            let sid = crate::CoreDomainIdentity::from_exact_bits(token)
-                .expect("exact eight-bit SID validated above");
-            return Ok(Expr {
-                kind: ExprKind::Sid(sid),
-                span: Span {
-                    start,
-                    end: self.cursor,
-                },
-            });
+            // Width alone never promotes historical source to modern D8.
+            return Err(self.error("unqualified eight-bit function is not an exact domain identity", start, self.cursor));
         }
 
         let decimal_with_dot = if token.contains(',') && !token.contains('.') {

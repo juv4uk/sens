@@ -113,10 +113,9 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
         BinaryFrame::Space => out.extend_from_slice(&CONTROL_SPACE),
         BinaryFrame::Close => out.extend_from_slice(&CONTROL_CLOSE),
         BinaryFrame::Open => out.extend_from_slice(&CONTROL_OPEN),
-        BinaryFrame::Function(sens) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
-            out.extend_from_slice(&TYPE_FUNCTION);
-            append_fixed_bits(sens.packed_byte(), 8, &mut out);
+        BinaryFrame::Function(_) => {
+            // A historical unqualified W8 function frame is not an exact domain.
+            return Err(BinaryFrameError::LegacyFrameForbidden { index: out.len() });
         }
         BinaryFrame::Domain(identity) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
@@ -418,8 +417,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
             let t1 = reader.read_bit()?;
             match [t0, t1] {
                 TYPE_FUNCTION => {
-                    let packed = reader.read_fixed_u8(8)?;
-                    Ok(BinaryFrame::Function(CoreDomainIdentity::from_packed_byte(packed)))
+                    Err(BinaryFrameError::LegacyFrameForbidden { index: frame_start })
                 }
                 TYPE_NUMBER => decode_number(reader, frame_start),
                 TYPE_TEXT => decode_text(reader),

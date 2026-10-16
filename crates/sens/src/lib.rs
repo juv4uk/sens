@@ -102,18 +102,18 @@ pub mod semantic_registry_export {
     #[doc(hidden)]
     pub trait ProjectionSidInput {
         #[doc(hidden)]
-        fn into_projection_sid(self) -> super::CoreDomainIdentity;
+        fn into_projection_sid(self) -> Option<super::CoreDomainIdentity>;
     }
 
     impl ProjectionSidInput for super::CoreDomainIdentity {
-        fn into_projection_sid(self) -> super::CoreDomainIdentity {
-            self
+        fn into_projection_sid(self) -> Option<super::CoreDomainIdentity> {
+            Some(self)
         }
     }
 
     impl ProjectionSidInput for u8 {
-        fn into_projection_sid(self) -> super::CoreDomainIdentity {
-            super::CoreDomainIdentity::from_packed_byte(self)
+        fn into_projection_sid(self) -> Option<super::CoreDomainIdentity> {
+            super::semantic_registry::exact_identity_for_legacy_registry_slot(self)
         }
     }
 
@@ -122,9 +122,9 @@ pub mod semantic_registry_export {
     pub fn admitted_surfaces_for_semantic_id(
         semantic_id: impl ProjectionSidInput,
     ) -> Vec<SurfaceRow> {
-        super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(
-            semantic_id.into_projection_sid(),
-        )
+        semantic_id.into_projection_sid()
+        .map(super::semantic_registry::admitted_surfaces_with_namespace_for_semantic_id)
+        .unwrap_or_default()
         .into_iter()
         .map(|(namespace, name)| SurfaceRow { namespace, name })
         .collect()
@@ -168,7 +168,7 @@ pub mod semantic_registry_export {
     pub fn admitted_semantic_ids() -> Vec<u8> {
         super::semantic_registry::admitted_semantic_ids()
             .into_iter()
-            .map(super::CoreDomainIdentity::packed_byte)
+            .map(super::CoreDomainIdentity::packed_bits)
             .collect()
     }
 
@@ -177,7 +177,7 @@ pub mod semantic_registry_export {
     /// за кодом), `library` (визначена мовою). `None` — коду нема в таблиці
     /// метаданих (lib/surface/function-signatures.lisp).
     pub fn function_role(semantic_id: impl ProjectionSidInput) -> Option<&'static str> {
-        let sid = semantic_id.into_projection_sid();
+        let sid = semantic_id.into_projection_sid()?;
         match super::language_items::signature_kind(sid)? {
             super::LanguageItemKind::SyntaxForm | super::LanguageItemKind::Macro => Some("syntax"),
             super::LanguageItemKind::Builtin if super::eval::canon::has_primitive(sid) => {
@@ -189,7 +189,9 @@ pub mod semantic_registry_export {
 
     /// Canonical 8-bit textual serialization for provenance/export.
     pub fn semantic_id_bits(semantic_id: impl ProjectionSidInput) -> String {
-        super::semantic_registry::semantic_id_bits(semantic_id.into_projection_sid())
+        semantic_id.into_projection_sid()
+            .map(super::semantic_registry::semantic_id_bits)
+            .unwrap_or_else(|| "UNQUALIFIED-LEGACY-SLOT".to_string())
     }
 }
 pub mod syntax;

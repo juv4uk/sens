@@ -71,7 +71,9 @@ fn semantic_language_items_with(
         // The generated signature table is a HISTORICAL W8 ledger, not a
         // source of current D8 or any other domain identity. It may supply
         // documentation, never the authority for a current operation.
-        let semantic_id = LegacyRegistrySlot::from_packed_byte(row.semantic_id);
+        let Some(semantic_id) = semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) else {
+            continue; // no ratified exact identity, no callable metadata
+        };
         let surfaces = if row.admitted_surfaces {
             admitted_surfaces(semantic_id)
         } else {
@@ -95,7 +97,7 @@ fn semantic_language_items_with(
 pub(crate) fn signature_kind(semantic_id: LegacyRegistrySlot) -> Option<LanguageItemKind> {
     generated::FUNCTION_SIGNATURES
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) == Some(semantic_id))
         .map(|row| row.kind)
 }
 

@@ -100,7 +100,7 @@ fn domain_identity_for_legacy_semantic_id(
     }
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
-        .find(|row| row.semantic_id == legacy.packed_byte())
+        .find(|row| semantic_registry::exact_identity_for_legacy_registry_slot(row.semantic_id) == Some(legacy))
         .map(|row| row.mechanism)?;
     canonical_domain_identity(mechanism)
 }

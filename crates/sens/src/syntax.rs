@@ -254,8 +254,8 @@ pub(crate) mod fasl {
                 }
             }
             ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(TAG_DOMAIN_IDENTITY);
+                super::exact_domain_codec::put(out, (*sid).into());
             }
             ExprKind::DomainIdentity(identity) => {
                 out.push(TAG_DOMAIN_IDENTITY);
@@ -290,8 +290,8 @@ pub(crate) mod fasl {
             ExprKind::Call(sid, arguments) => {
                 out.push(TAG_LIST);
                 put_u32(out, arguments.len() as u32 + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(TAG_DOMAIN_IDENTITY);
+                super::exact_domain_codec::put(out, (*sid).into());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -356,7 +356,7 @@ pub(crate) mod fasl {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::CoreDomainIdentity::from_packed_byte(value))
+                { let _ = value; return None; }
             }
             TAG_DOMAIN_IDENTITY => ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?),
             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
@@ -575,8 +575,8 @@ pub(crate) mod wire {
                 }
             }
             ExprKind::Sid(sid) => {
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(TAG_DOMAIN_IDENTITY);
+                super::exact_domain_codec::put(out, (*sid).into());
             }
             ExprKind::DomainIdentity(identity) => {
                 out.push(TAG_DOMAIN_IDENTITY);
@@ -602,8 +602,8 @@ pub(crate) mod wire {
             }
             ExprKind::Call(sid, arguments) => {
                 put_list_header(out, arguments.len() + 1);
-                out.push(TAG_BINARY);
-                out.push(sid.packed_byte());
+                out.push(TAG_DOMAIN_IDENTITY);
+                super::exact_domain_codec::put(out, (*sid).into());
                 for argument in arguments.iter() {
                     encode_expr(argument, out);
                 }
@@ -715,7 +715,7 @@ pub(crate) mod wire {
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
                 *pos += 1;
-                ExprKind::Sid(crate::CoreDomainIdentity::from_packed_byte(value))
+                { let _ = value; return None; }
             }
             TAG_DOMAIN_IDENTITY => {
                 ExprKind::DomainIdentity(super::exact_domain_codec::get(bytes, pos)?)

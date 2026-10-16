@@ -50,6 +50,39 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 /// and no W8 payload can be implicitly promoted to a current D8 resident.
 pub(crate) type LegacyRegistrySlot = CoreDomainIdentity;
 
+/// A historical surface row cannot supply the width of a modern domain.
+/// Resolve only through non-ambiguous, ratified exact surface records.
+fn exact_identity_for_row(row: &SemanticRow) -> Option<CoreDomainIdentity> {
+    let mut admitted = None;
+    for surface in row.surfaces {
+        let Some(current) = direct_domain_identity_for_surface(surface.name) else {
+            continue;
+        };
+        if admitted.is_some_and(|previous| previous != current) {
+            return None;
+        }
+        admitted = Some(current);
+    }
+    admitted
+}
+
+pub(crate) fn exact_identity_for_legacy_registry_slot(slot: u8) -> Option<CoreDomainIdentity> {
+    SEMANTIC_ROWS.get(usize::from(slot))
+        .filter(|row| row.semantic_id == slot)
+        .and_then(exact_identity_for_row)
+}
+
+pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Option<u8> {
+    let mut matched = None;
+    for row in SEMANTIC_ROWS {
+        if exact_identity_for_row(row) == Some(identity) {
+            if matched.is_some() { return None; }
+            matched = Some(row.semantic_id);
+        }
+    }
+    matched
+}
+
 /// Convert only explicit generated D3–D6 coordinates into resident identity.
 ///
 /// No W8 slot, packed payload, or name may select the width. Higher domains
@@ -137,7 +170,7 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
 pub(crate) fn compatibility_d3_route_from_ratified_domains(
     semantic_id: LegacyRegistrySlot,
 ) -> Option<CoreDomainIdentity> {
-    let packed = semantic_id.packed_byte();
+    let packed = legacy_slot_for_exact_identity(semantic_id)?;
     let row = SEMANTIC_ROWS.get(usize::from(packed))?;
     if row.semantic_id != packed {
         return None;
@@ -282,7 +315,7 @@ fn live_rows() -> &'static [SemanticRow] {
 pub(crate) fn admitted_semantic_ids() -> Vec<LegacyRegistrySlot> {
     live_rows()
         .iter()
-        .map(|row| CoreDomainIdentity::from_packed_byte(row.semantic_id))
+        .filter_map(exact_identity_for_row)
         .collect()
 }
 
@@ -308,7 +341,9 @@ fn surface_index() -> &'static HashMap<&'static str, LegacyRegistrySlot> {
         let mut index = HashMap::new();
         for row in live_rows() {
             for surface in row.surfaces {
-                insert_surface_mapping(&mut index, surface.name, CoreDomainIdentity::from_packed_byte(row.semantic_id));
+                if let Some(identity) = exact_identity_for_row(row) {
+                    insert_surface_mapping(&mut index, surface.name, identity);
+                }
             }
         }
         index
@@ -337,7 +372,7 @@ fn admitted_surfaces_from_rows(
 ) -> Vec<&'static str> {
     let mut surfaces = rows
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| exact_identity_for_row(row) == Some(semantic_id))
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|surface| surface.name))
         .collect::<Vec<_>>();
@@ -366,7 +401,7 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 ) -> Vec<(&'static str, &'static str)> {
     let mut surfaces = live_rows()
         .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
+        .find(|row| exact_identity_for_row(row) == Some(semantic_id))
         .into_iter()
         .flat_map(|row| row.surfaces.iter().map(|s| (s.namespace, s.name)))
         .collect::<Vec<_>>();
