@@ -96,6 +96,50 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: D6 — ліві TAKE/DROP із D24+ лічильником
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture=tests/semantic/d6-take-drop-left-laws.lisp
+          negative=tests/semantic/d6-take-drop-reject-non-numeric.lisp
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+            printf '%s\n' "$output" >&2
+            echo "::error::D6_TAKE_DROP_RED id=d6-left-partition layer=eval fixture=$fixture expected=ten-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$output" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_TAKE_DROP_DIFF id=d6-left-partition layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if err="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D6_TAKE_DROP_BAD_MUTANT id=d6-left-type layer=eval fixture=$negative expected=D24-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Fq D24 <<< "$err"; then
+            echo "::error::D6_TAKE_DROP_BAD_ERROR id=d6-left-type layer=eval fixture=$negative expected=D24-diagnostic actual=$err" >&2
+            exit 1
+          fi
+          echo "D6_TAKE_DROP_NATIVE_PASS identities=D6:110000,D6:110001 laws=10 negative=1 authority=SENS"
+      - name: D8 — два добуткові предикати ANY/ALL із запереченням
+        shell: bash
+        run: |
+          set -euo pipefail
+          d8_fixture="tests/semantic/d8-any-all-not-laws.lisp"
+          sha256sum "$d8_fixture" lib/core4.lisp target/debug/sens
+          if ! d8_observed="$(target/debug/sens "$d8_fixture" 2>&1)"; then
+            printf '%s\n' "$d8_observed" >&2
+            echo "::error::D8_ANY_ALL_NOT_RED layer=eval fixture=$d8_fixture expected=(1 1 1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          d8_actual="$(echo "$d8_observed" | tail -n 1)"
+          if [[ "$d8_actual" != "(1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_ANY_ALL_NOT_DIFF layer=eval fixture=$d8_fixture expected=(1 1 1 1 1 1) actual=$d8_actual" >&2
+            exit 1
+          fi
+          echo "D8_ANY_ALL_NOT_NATIVE_PASS identities=D8:11110001,D8:11110011 positives=3 negatives=3"
+
       - name: D6 — два похідні предикати порядку через точні D5/D4
         shell: bash
         run: |
