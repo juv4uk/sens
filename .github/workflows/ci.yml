@@ -151,6 +151,15 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             -- target/debug/sens "$physical_dir/mutant.sens"
           echo "SENS_D3_D6_NATIVE_28_PASS physical=zig-t5 laws=28 negative=1 semantic_authority=SENS"
+          # Exact-domain evaluator mechanism probe; separate from physical .bits transport laws.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id d4-exact-eval-callability \
+            --layer eval \
+            --fixture crates/sens/tests/d4_eval_apply_probe.rs \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            -- cargo test --locked -p sens --test d4_eval_apply_probe \
+              exact_d4_eval_has_positive_negative_and_payload_collision_witnesses \
+              -- --exact --nocapture
           # Чотири D5 функції та один мовний D24+ закон; прямий D5:01000 не допущено.
           d5_projection="tests/semantic/d5-uk-projection-laws.lisp"
           sha256sum "$d5_projection" lib/core4.lisp target/debug/sens
