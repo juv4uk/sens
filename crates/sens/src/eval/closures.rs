@@ -892,7 +892,7 @@ mod exact_d4_eval_head_migration_tests {
             .expect("історична таблиця має окремий сумісний слот EVAL");
         assert_eq!(historical.packed_byte(), 0b01001101);
         assert!(matches!(sid_head(historical, &env), Head::Opaque));
-        assert!(!matches!(sid_head(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall")), &env), Head::Opaque));
+        assert!(!matches!(sid_head(crate::sens!(10101000), &env), Head::Opaque));
     }
 
     #[test]

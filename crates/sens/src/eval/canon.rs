@@ -244,7 +244,7 @@ fn prim_01001101(
     env: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    exact_args(crate::CoreDomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(0b0001).expect("eval"))), args, 1, span)?;
+    exact_args(crate::sens!(01001101), args, 1, span)?;
     special_forms::eval_values(args, env, span)
 }
 

@@ -1,9 +1,5 @@
-//! ZIG-OWNED: physical bit-packing is the sterile Zig corridor's job (t5/f3c/transport.zig).
-//! Rust is byte-addressed and must NOT pack: Zig hands it already-packed programs.
-//! This module is retained only for the staged removal (#5617/#5609). Do not extend it.
-//! Mechanical bridge from binary source words to the ZIG corridor.
-//! ZIG-OWNED: the physical packing is the sterile Zig corridor's job (zig_transport / transport_abi.zig).
-//! These functions delegate to the Zig ABI; Rust does not pack.
+//! Mechanical bridge from already-tokenized binary source words to the dense
+//! sequential bit packer.
 //!
 //! This module assigns no semantic roles and defines no wire framing. It only
 //! preserves source order while appending each exact-width word into one

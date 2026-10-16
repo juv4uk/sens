@@ -307,7 +307,7 @@ mod honesty_tests {
 
     #[test]
     fn sens_registry_is_keyed_by_exact_identity_without_ordering() {
-        let sens = crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"));
+        let sens = crate::sens!(10101000);
         unregister_sens_capability(sens);
         register_sens_capability(sens, sens_handler);
 

@@ -1,6 +1,3 @@
-//! ZIG-OWNED: physical bit-packing is the sterile Zig corridor's job (t5/f3c/transport.zig).
-//! Rust is byte-addressed and must NOT pack: Zig hands it already-packed programs.
-//! This module is retained only for the staged removal (#5617/#5609). Do not extend it.
 //! Дослідний трійковий ТРАНСПОРТ двійкових слів SENS.
 //!
 //! Це не трійкова семантика: D1..D9 залишаються двійковими.
