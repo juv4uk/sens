@@ -318,25 +318,25 @@ jobs:
           fi
           echo "D9_7STEP_NATIVE_PASS functions=16 positive=16 onebit_negative=16 authority=SENS"
 
-      - name: "D8 — 24 точкових закони SENS для шести функцій"
+      - name: "D8 — 32 точкових закони SENS для восьми функцій"
         shell: bash
         run: |
           set -euo pipefail
-          for source in tests/semantic/d8-list-difference-adjoin-laws.lisp tests/semantic/d8-list-structural-batch.lisp tests/semantic/d8-rassq-until-batch.lisp; do
+          for source in tests/semantic/d8-list-difference-adjoin-laws.lisp tests/semantic/d8-list-structural-batch.lisp tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp; do
             sha256sum "$source" lib/core4.lisp target/debug/sens
             if ! output="$(target/debug/sens "$source" 2>&1)"; then
               printf '%s\n' "$output" >&2
-              echo "::error::D8_NATIVE_24_EXEC_RED layer=eval fixture=$source expected=eight-D1-YES actual=execution-error" >&2
+              echo "::error::D8_NATIVE_32_EXEC_RED layer=eval fixture=$source expected=eight-D1-YES actual=execution-error" >&2
               exit 1
             fi
             printf '%s\n' "$output"
             actual="$(printf '%s\n' "$output" | tail -n 1)"
             if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
-              echo "::error::D8_NATIVE_24_LAW_RED layer=eval fixture=$source expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+              echo "::error::D8_NATIVE_32_LAW_RED layer=eval fixture=$source expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
               exit 1
             fi
           done
-          echo "D8_NATIVE_24_PASS functions=6 laws=24 authority=SENS"
+          echo "D8_NATIVE_32_PASS functions=8 laws=32 authority=SENS"
 
       - name: D8 FIND/SOME — один SENS позитивно-негативний тест
         shell: bash
