@@ -515,7 +515,7 @@ mod tests {
 
     #[test]
     fn історичний_w8_не_маскується_під_чинний_d8() {
-        let old = Value::Sid(crate::sens!(10101000));
+        let old = Value::Sid(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall")));
         let exact = Value::DomainIdentity(crate::DomainIdentity::D8(
             crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()),
         ));
@@ -531,7 +531,7 @@ mod tests {
 
     #[test]
     fn ратифікований_d3_міст_не_дає_w8_довільної_семантики() {
-        let historical_quote = Value::Sid(crate::sens!(00000001));
+        let historical_quote = Value::Sid(crate::CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b001).expect("quote"))));
         let current_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
             crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
         ));

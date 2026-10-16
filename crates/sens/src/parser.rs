@@ -756,7 +756,7 @@ mod tests {
 
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
+            ExprKind::Sid(sid) if sid == crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("plus")))
         ));
 
         assert!(parse("#b-1010").is_err(), "signed canonical Number is not admitted by #3022");
