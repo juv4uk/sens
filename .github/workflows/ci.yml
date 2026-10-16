@@ -165,17 +165,32 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
-          # D6:010011 ABS / модуль — nine SENS laws, exact D24+ operands.
+          # D6:010011 ABS / модуль — nine native SENS laws, exact D24+ operands.
           d6_abs_fixture="tests/semantic/d6-abs-laws.lisp"
           d6_abs_bad="tests/semantic/d6-abs-reject-nonnumeric.lisp"
           sha256sum "$d6_abs_fixture" "$d6_abs_bad" lib/core4.lisp target/debug/sens
           if ! d6_abs_observed="$(target/debug/sens "$d6_abs_fixture" 2>&1)"; then
-            printf '%s\\n' "$d6_abs_observed" >&2
+            printf '%s\n' "$d6_abs_observed" >&2
             echo "::error::D6_ABS_EXEC_RED layer=eval fixture=$d6_abs_fixture expected=9-D1-YES actual=execution-error" >&2
             exit 1
           fi
-          printf '%s\\n' "$d6_abs_observed"
-          d6_abs_actual="${d6_abs_observed##*          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
+          printf '%s\n' "$d6_abs_observed"
+          d6_abs_actual="$(printf '%s\n' "$d6_abs_observed" | tail -n1)"
+          if [[ "$d6_abs_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_ABS_LAW_DIFF layer=eval fixture=$d6_abs_fixture expected=(1 1 1 1 1 1 1 1 1) actual=$d6_abs_actual" >&2
+            exit 1
+          fi
+          if d6_abs_bad_output="$(target/debug/sens "$d6_abs_bad" 2>&1)"; then
+            echo "::error::D6_ABS_ACCEPTED_NONNUMERIC layer=eval fixture=$d6_abs_bad expected=D24-type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d6_abs_bad_output"
+          if ! grep -Eq 'D24\+|numeric|number|comparison' <<< "$d6_abs_bad_output"; then
+            echo "::error::D6_ABS_UNRELATED_NEGATIVE layer=eval fixture=$d6_abs_bad expected=numeric-domain-diagnostic actual=other-error" >&2
+            exit 1
+          fi
+          echo "D6_ABS_NATIVE_PASS identity=D6:010011 positive=9 negative=1 exact_numeric_domain=D24+"
+          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
           d6_math_law="tests/semantic/d6-add1-sub1-laws.lisp"
           d6_math_mutant="tests/semantic/d6-add1-sub1-mutant.lisp"
           sha256sum "$d6_math_law" "$d6_math_mutant" lib/core4.lisp target/debug/sens
