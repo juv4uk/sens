@@ -1,4 +1,4 @@
-use sens::{eval_parsed_expressions, parse, Environment, Session, Value};
+use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Environment, Session, Value};
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -651,7 +651,11 @@ fn main() {
         session.environment.define("*argv*", argv);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse(&source) {
+            // Exact-domain first: a script written in the language's own bit
+            // spellings (0011 DEFINE, 0010 LAMBDA, ...) must read those heads
+            // as domain identities, not as binary numbers. Fall back to the
+            // ordinary reader for scripts that are plain Lisp.
+            Ok(source) => match parse_mixed_exact_domain(&source).or_else(|_| parse(&source)) {
                 Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
                     Ok(result) => {
                         for out in result.output {
