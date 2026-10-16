@@ -1,18 +1,6 @@
-; D5:01000 ZEROP + surface aliases PLUS/DIFFERENCE/TIMES/LESSP/GREATERP.
-; Очікується вісім предикатів D1:1. Exact domain heads only; no new coordinates.
-(0011 нуль?
-  (0010 (значення)
-    (101 значення (01010 значення значення))))
-(0011 додати
-  (0010 (a b) (01010 a b)))
-(0011 відняти
-  (0010 (a b) (01011 a b)))
-(0011 помножити
-  (0010 (a b) (10110 a b)))
-(0011 менше?
-  (0010 (a b) (11010 a b)))
-(0011 більше?
-  (0010 (a b) (11011 a b)))
+; D5:01000 ZEROP + UK arithmetic/order surfaces (source_routable only).
+; No local rebind of immutable D5 domain names; no numeric call-heads.
+; Eight D1:1 witnesses.
 (list
   (нуль? #d24:000000000000000000000000)
   (not? (нуль? #d24:000000000000000000000001))
