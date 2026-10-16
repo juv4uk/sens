@@ -175,7 +175,12 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$d6_selector_output"
-          d6_selector_actual="${d6_selector_output##*
+          d6_selector_actual="$(printf '%s\\n' "$d6_selector_output" | tail -n 1)"
+          if [[ "$d6_selector_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_SELECTOR_ORIENTATION_DIFF layer=eval fixture=$d6_selector_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d6_selector_actual" >&2
+            exit 1
+          fi
+          echo "D6_SELECTOR_ORIENTATION_NATIVE_PASS functions=16 positive=16 negative=16 authority=SENS"
           # D6 lower-law derived functions — execution stays entirely in SENS.
           d6_source="tests/semantic/d6-derived-research-batch-01.lisp"
           sha256sum "$d6_source" lib/core4.lisp target/debug/sens
