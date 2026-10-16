@@ -1365,9 +1365,9 @@
 ; Numeric zero is derived as D5:01011 DIFFERENCE(x,x), never an unqualified literal.
 ; These are SENS-owned derived definitions, not direct D8 call-head admission.
 (0011 додатне?
-  (0010 (x) (11010 (01011 x x) x)))
+  (0010 (x) (менше? (відняти x x) x)))
 (0011 від'ємне?
-  (0010 (x) (11010 x (01011 x x))))
+  (0010 (x) (менше? x (відняти x x))))
 
 ; D9:011001000 CDAADAAAR — D3 CAR/CDR, точна семикрокова композиція.
 (0011 р-п-п-р-п-п-п
