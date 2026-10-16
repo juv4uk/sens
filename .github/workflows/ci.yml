@@ -241,16 +241,16 @@ jobs:
           sha256sum "$d8_swapped" lib/core4.lisp target/debug/sens
           if ! d8_output="$(target/debug/sens "$d8_swapped" 2>&1)"; then
             printf '%s\n' "$d8_output" >&2
-            echo "::error::D8_SWAPPED_NATIVE_RED layer=eval fixture=$d8_swapped expected=six-D1-YES actual=execution-error" >&2
+            echo "::error::D8_SWAPPED_NATIVE_RED layer=eval fixture=$d8_swapped expected=eight-D1-YES actual=execution-error" >&2
             exit 1
           fi
           printf '%s\n' "$d8_output"
           d8_actual="${d8_output##*$'\n'}"
-          if [[ "$d8_actual" != "(1 1 1 1 1 1)" ]]; then
-            echo "::error::D8_SWAPPED_LAW_DIFF layer=eval fixture=$d8_swapped expected=six-D1-YES actual=$d8_actual" >&2
+          if [[ "$d8_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_SWAPPED_LAW_DIFF layer=eval fixture=$d8_swapped expected=eight-D1-YES actual=$d8_actual" >&2
             exit 1
           fi
-          echo "D8_SWAPPED_NATIVE_PASS functions=2 laws=6 direct_callability=unchanged"
+          echo "D8_SWAPPED_NATIVE_PASS functions=3 laws=8 direct_callability=unchanged"
 
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
