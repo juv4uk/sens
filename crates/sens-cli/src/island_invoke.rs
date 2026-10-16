@@ -5,7 +5,7 @@
 //! Kernel names and payloads are data at this boundary, never function identities.
 
 use sens::{
-    register_sens_capability, Environment, ErrorKind, LanguageError, Sens8, Span, Value,
+    register_sens_capability, CoreDomainIdentity, Environment, ErrorKind, LanguageError, Span, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -23,10 +23,11 @@ use wsm_prolog_kernel::{
     LegacyAbiSemanticId as PrologLegacyAbiSemanticId, PrologKernel, PrologQuery, PrologRequest,
 };
 
-const RAW_INVOKE_SENS: Sens8 = sens::sens!(10101000);
+// This is an external kernel's historical ABI field, never a SENS domain ID.
+const FOREIGN_KERNEL_ABI_SLOT: u8 = 0b10101000;
 
 fn language_error(kind: ErrorKind, message: impl Into<String>, span: Span) -> LanguageError {
-    LanguageError::new(kind, format!("10101000: {}", message.into()), span)
+    LanguageError::new(kind, format!("raw island mechanism: {}", message.into()), span)
 }
 
 fn text_argument(value: &Value, role: &str, span: Span) -> Result<String, LanguageError> {
@@ -195,13 +196,11 @@ fn invoke_datalog(payload: &str) -> Result<Vec<u8>, String> {
 }
 
 fn evaluate_raw_invoke(
-    sens: Sens8,
+    _identity: CoreDomainIdentity,
     arguments: &[Value],
     _environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    debug_assert_eq!(sens, RAW_INVOKE_SENS);
-
     if arguments.len() != 2 {
         return Err(language_error(
             ErrorKind::Arity,
@@ -217,11 +216,11 @@ fn evaluate_raw_invoke(
         // Окрема історична ABI-межа: W8 тут не є D8:10101000 ROUND.
         "common-lisp" => (
             "common-lisp",
-            invoke_common_lisp(CommonLispLegacyAbiSemanticId(sens.packed_byte()), &payload),
+            invoke_common_lisp(CommonLispLegacyAbiSemanticId(FOREIGN_KERNEL_ABI_SLOT), &payload),
         ),
         "prolog" => (
             "prolog",
-            invoke_prolog(PrologLegacyAbiSemanticId(sens.packed_byte()), &payload),
+            invoke_prolog(PrologLegacyAbiSemanticId(FOREIGN_KERNEL_ABI_SLOT), &payload),
         ),
         "clips" => ("clips", invoke_clips(&payload)),
         "datalog" => ("datalog", invoke_datalog(&payload)),
@@ -248,5 +247,9 @@ fn evaluate_raw_invoke(
 /// Install availability for exactly one already-admitted SENS function.
 /// This does not select Core3 and cannot make 10101000 callable under Core4.
 pub fn install() {
-    register_sens_capability(RAW_INVOKE_SENS, evaluate_raw_invoke);
+    // The host does not invent callability from the old external W8 ABI.
+    // Only a currently ratified, callable SENS surface may activate this hook.
+    if let Some(identity) = sens::semantic_registry_export::admitted_core_domain_for_surface("raw-invoke") {
+        register_sens_capability(identity, evaluate_raw_invoke);
+    }
 }
