@@ -44,10 +44,11 @@ if sed -n '/^(визначити репл-крок-поверхні/,/^(визн
   exit 1
 fi
 echo 'REPL_SINGLE_LOOP_OK readers=1 surfaces=ук,укр,san,en,LISP,sym implicit-bit-literals=FORBIDDEN semantic_pass=NOT_INFERRED'
-# Старий тестовий alias також не має права піднімати рядок 0/1
-# до доменного коду. Доменне читання тільки через явні команди SENS.
+# Допускається повернути текст як дані без EVAL; заборонено
+# автоматично перетворювати його на доменне слово. Доменний код
+# читається лише через явні мовні команди SENS.
 if sed -n '/^(визначити репл-крок-з-доменами/,/^(визначити репл-доменна-черга/p' lib/repl-core.lisp |
-   grep -Fq '(текст? форма)'; then
+   grep -Eq '[(]репл-(доменний-рядок|читати-слово-з-доменом)[[:space:]]+форма[)]'; then
   echo 'REPL_LEGACY_IMPLICIT_BIT_RED layer=read reason=automatic-literal-domain-lift' >&2
   exit 1
 fi
