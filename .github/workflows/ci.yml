@@ -402,6 +402,29 @@ jobs:
             exit 1
           fi
           echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
+          # D8 CHAR< CHAR> CHAR= STRING=: SENS-owned D1, with a typed negative.
+          d8_char_laws="tests/semantic/d8-character-and-string-equality-laws.lisp"
+          d8_char_bad="tests/semantic/d8-character-invalid-scalar.lisp"
+          sha256sum "$d8_char_laws" "$d8_char_bad" lib/core4.lisp target/debug/sens
+          if ! d8_char_out="$(target/debug/sens "$d8_char_laws" 2>&1)"; then
+            echo "::error::D8_CHAR_COMPARE_EXEC_RED id=d8-char-comparison layer=eval fixture=$d8_char_laws expected=ten-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$d8_char_out" >&2
+            exit 1
+          fi
+          d8_char_actual="$(printf "%s\n" "$d8_char_out" | tail -n 1)"
+          if [[ "$d8_char_actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_CHAR_COMPARE_LAW_DIFF id=d8-char-comparison layer=eval fixture=$d8_char_laws expected=(1 1 1 1 1 1 1 1 1 1) actual=$d8_char_actual first_mismatch=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if d8_char_invalid="$(target/debug/sens "$d8_char_bad" 2>&1)"; then
+            echo "::error::D8_CHAR_COMPARE_NEG_ACCEPTED id=d8-char-scalar layer=eval fixture=$d8_char_bad expected=Unicode-scalar-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$d8_char_invalid" != *"Unicode scalar"* && "$d8_char_invalid" != *"one-character string"* ]]; then
+            echo "::error::D8_CHAR_COMPARE_WRONG_NEGATIVE id=d8-char-scalar layer=eval fixture=$d8_char_bad expected=Unicode-scalar-refusal actual=$d8_char_invalid" >&2
+            exit 1
+          fi
+          echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 

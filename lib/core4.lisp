@@ -2524,3 +2524,31 @@
 (0011 обернене-число
   (0010 (число)
     (обернене число)))
+
+
+; D8:10100001 CHAR< / D8:00100111 CHAR> — Unicode codepoint order.
+; D8:11100000 CHAR-CODE supplies an exact D24 value, D5:11010 LESSP owns order.
+; No direct D8 predicate admission: these are SENS language closures.
+(0011 символ-менший?
+  (0010 (ліве праве)
+    (11010 (11100000 ліве) (11100000 праве))))
+(0011 символ-більший?
+  (0010 (ліве праве)
+    (11010 (11100000 праве) (11100000 ліве))))
+
+; D8:00101000 CHAR= — equality is neither less-than nor greater-than.
+(0011 символ-рівний?
+  (0010 (ліве праве)
+    (110
+      ((символ-менший? ліве праве) #d1:0)
+      ((символ-більший? ліве праве) #d1:0)
+      (#d1:1 #d1:1))))
+
+; D8:00110111 STRING= — lexical equality from both ratified orders.
+; String comparison rejects incompatible non-string operands by its own law.
+(0011 текст-рівний?
+  (0010 (ліве праве)
+    (110
+      ((string<? ліве праве) #d1:0)
+      ((string<? праве ліве) #d1:0)
+      (#d1:1 #d1:1))))
