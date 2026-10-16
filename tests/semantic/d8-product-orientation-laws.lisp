@@ -19,4 +19,12 @@
   (equal? (спарувати-навпаки (quote ()) (quote ())) (quote ()))
   (equal?
     (розпарувати-навпаки (quote ()))
-    (list (quote ()) (quote ()))))
+    (list (quote ()) (quote ())))
+  (equal?
+    (додати-асоціацію-навпаки (quote а) (quote в) (quote ()))
+    (list (cons (quote в) (quote а))))
+  (not?
+    (equal?
+      (додати-асоціацію-навпаки (quote а) (quote в) (quote ()))
+      (list (cons (quote а) (quote в)))))
+)
