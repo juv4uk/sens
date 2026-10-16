@@ -352,13 +352,13 @@ jobs:
           echo "D8_NATIVE_BATCH_PASS functions=7 positive=32 negative=6 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000,D8:00000100,D8:11001001"
 
 
-      - name: "D8 — 24 точкові самосвідки SENS (три партії)"
+      - name: "D6/D8 — 32 точкові самосвідки SENS (чотири партії)"
         shell: bash
         run: |
           set -euo pipefail
           expected="(1 1 1 1 1 1 1 1)"
-          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp; do
-            test_id="sens-d8-$(basename "$fixture" .lisp)"
+          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp; do
+            test_id="sens-$(basename "$fixture" .lisp)"
             fixture_sha="$(sha256sum "$fixture" | cut -d" " -f1)"
             echo "D8_NATIVE_START test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected"
             if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
