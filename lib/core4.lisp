@@ -930,6 +930,16 @@
 (0011 n-та-решта відкинути)
 (0011 усі-задовольняють? усі?)
 
+; D8:10100000 COPY-LIST — поверхнева копія належного списку.
+; D3:111 CONS будує тільки зовнішні клітинки; CAR зберігає вкладені об'єкти.
+; D4:0101 NULL встановлює базовий випадок, без нової семантики в host.
+(0011 копіювати-список
+  (0010 (значення)
+    (110
+      ((0101 значення) (001 ()))
+      ((0100 (0101 значення))
+       (111 (100 значення) (копіювати-список (011 значення)))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
