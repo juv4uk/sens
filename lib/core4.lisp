@@ -1477,6 +1477,29 @@
   (0010 (ліве праве)
     (хибне? (атом? (сполучити ліве праве)))))
 
+
+; === D9 SENS-native verified-coordinate cohort: no D9 opcode admission ===
+; D9:110100101 NUMERIC-EQUALITY. Exact D24+ numeric order is from D5
+; LESSP/GREATERP; mixed widths and unqualified operands reject in D5.
+(0011 числовий-рівність
+  (0010 (лівий правий)
+    (за-умовою
+      ((менше? лівий правий) #d1:0)
+      ((більше? лівий правий) #d1:0)
+      (#d1:1 #d1:1))))
+
+; D9:010000000 CDR-PROPER. Observational equality of the proper list tail.
+; The only construction/deconstruction is ratified D3 CONS/CDR.
+(0011 канон-закон-решта-правильний
+  (0010 (голова хвіст)
+    (однакові? (решта (сполучити голова хвіст)) хвіст)))
+
+; D9:010110001 CDR-DOTTED. EQ on an atomic dotted tail; D3 EQ
+; rejects non-atomic carriers rather than silently inventing identity.
+(0011 канон-закон-решта-крапковий
+  (0010 (голова хвіст)
+    (тотожне? (решта (сполучити голова хвіст)) хвіст)))
+
 ; D9:001110010 CANON-LAW-EQ-REFLEXIVE-ATOM — owner #4008.
 ; Atom(x) => EQ(x,x)=D1:1. Pair carrier rejected via CAR(D3:000).
 ; Lower D3 laws only; no new D9 call mechanism or independent primitive.

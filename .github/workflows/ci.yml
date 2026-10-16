@@ -490,12 +490,12 @@ jobs:
 
 
 
-      - name: "D6/D8 — 64 точкові самосвідки SENS (вісім партій)"
+      - name: "D6/D8/D9 — 72 точкові самосвідки SENS (дев’ять партій)"
         shell: bash
         run: |
           set -euo pipefail
           expected="(1 1 1 1 1 1 1 1)"
-          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp; do
+          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp tests/semantic/d9-numeric-cdr-derived-laws.lisp; do
             test_id="sens-$(basename "$fixture" .lisp)"
             fixture_sha="$(sha256sum "$fixture" | cut -d" " -f1)"
             echo "D8_NATIVE_START test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected"
@@ -512,6 +512,18 @@ jobs:
             fi
             echo "D8_NATIVE_PASS test_id=$test_id authority=SENS"
           done
+          # Exact domain-mismatch failure must not be accepted as false equality.
+          d9_invalid="tests/semantic/d9-numeric-cross-width-negative.lisp"
+          sha256sum "$d9_invalid" lib/core4.lisp target/debug/sens
+          if d9_stderr="$(target/debug/sens "$d9_invalid" 2>&1)"; then
+            echo "::error::D9_NUMERIC_WIDTH_ACCEPTED id=d9-numeric-mixed-width layer=eval fixture=$d9_invalid expected=domain-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$d9_stderr" != *"same-domain numeric values"* ]]; then
+            echo "::error::D9_NUMERIC_WRONG_FAILURE id=d9-numeric-mixed-width layer=eval fixture=$d9_invalid expected=same-domain-refusal actual=$d9_stderr" >&2
+            exit 1
+          fi
+          echo "D9_DERIVED_NEGATIVE_PASS D24-vs-D48 no-implicit-coercion"
 
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
