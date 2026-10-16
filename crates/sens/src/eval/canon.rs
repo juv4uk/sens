@@ -504,6 +504,28 @@ fn require_exactly_one_d4_argument(
     ))
 }
 
+/// Exact D4:0001 EVAL mechanism. The argument arrives as a value; the
+/// existing SENS evaluator converts that represented datum back into an
+/// expression and evaluates it in the current environment. Identity and width
+/// select this route; an equal payload in another domain cannot inherit it.
+fn invoke_d4_eval(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let CoreDomainIdentity::D4(word) = identity else {
+        return None;
+    };
+    if word.word().packed_bits() != 0b0001 {
+        return None;
+    }
+    Some((|| {
+        exact_args(identity, args, 1, span)?;
+        special_forms::eval_values(args, environment, span)
+    })())
+}
+
 fn invoke_compact_derived_d4(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -568,6 +590,9 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
+        return result;
+    }
     if let Some(result) = super::selector_law::invoke(identity, args, span) {
         return result;
     }
@@ -765,6 +790,36 @@ mod exact_domain_primitive_tests {
         CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(bits).expect("D4 word"),
         ))
+    }
+
+    #[test]
+    fn exact_d4_eval_runs_represented_code_and_keeps_width_qualified_identity() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        let represented_sum = Value::list([
+            Value::Symbol("+".into()),
+            Value::Number(2.0, crate::Exactness::Exact),
+            Value::Number(3.0, crate::Exactness::Exact),
+        ]);
+        let result = invoke_domain_identity(
+            d4(0b0001), &[represented_sum.clone()], &environment, span,
+        ).expect("D4:0001 EVAL evaluates one represented SENS expression");
+        assert_eq!(result, Value::Number(5.0, crate::Exactness::Exact));
+
+        for arguments in [
+            Vec::<Value>::new(),
+            vec![represented_sum.clone(), represented_sum.clone()],
+        ] {
+            let error = invoke_domain_identity(d4(0b0001), &arguments, &environment, span)
+                .expect_err("D4:0001 EVAL requires exactly one represented expression");
+            assert_eq!(error.kind, ErrorKind::Arity);
+            assert!(error.message.contains("D4:0001"), "{}", error.message);
+        }
+
+        let collision = invoke_domain_identity(
+            d3(0b001), &[represented_sum], &environment, span,
+        ).expect_err("D3:001 QUOTE must not inherit D4:0001 EVAL's value-call mechanism");
+        assert!(collision.message.contains("no admitted value-call mechanism"));
     }
 
     #[test]
