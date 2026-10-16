@@ -623,6 +623,27 @@
   (0010 (a b)
     (110 ((010 a) b) (#d1:1 (110 ((member? (100 a) b) (об'єднання (011 a) b)) (#d1:1 (111 (100 a) (об'єднання (011 a) b))))))))
 
+
+; ===== D6 derived (партія 4) =====
+; evenp (парне?)
+(0011 парне?
+  (0010 (x) (01000 (mod x 2))))
+; oddp (непарне?)
+(0011 непарне?
+  (0010 (x) (0100 (01000 (mod x 2)))))
+; integerp (ціле?)
+(0011 ціле?
+  (0010 (x) (01001 x)))
+; rationalp (раціональне?)
+(0011 раціональне?
+  (0010 (x) (01001 x)))
+; any (будь-яке?)
+(0011 будь-яке?
+  (0010 (p lst) (0100 (0101 (filter p lst)))))
+; all (усі?)
+(0011 усі?
+  (0010 (p lst) (0101 (filter (0010 (x) (0100 (p x))) lst))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
