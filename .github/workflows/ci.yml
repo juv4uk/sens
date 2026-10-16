@@ -165,7 +165,287 @@ jobs:
             exit 1
           fi
           echo "D5_UK_NATIVE_PASS functions=5 laws=8 authority=SENS"
-          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
+          # D6:010011 ABS / модуль — nine SENS laws, exact D24+ operands.
+          d6_abs_fixture="tests/semantic/d6-abs-laws.lisp"
+          d6_abs_bad="tests/semantic/d6-abs-reject-nonnumeric.lisp"
+          sha256sum "$d6_abs_fixture" "$d6_abs_bad" lib/core4.lisp target/debug/sens
+          if ! d6_abs_observed="$(target/debug/sens "$d6_abs_fixture" 2>&1)"; then
+            printf '%s\\n' "$d6_abs_observed" >&2
+            echo "::error::D6_ABS_EXEC_RED layer=eval fixture=$d6_abs_fixture expected=9-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\\n' "$d6_abs_observed"
+          d6_abs_actual="${d6_abs_observed##*          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
+          d6_math_law="tests/semantic/d6-add1-sub1-laws.lisp"
+          d6_math_mutant="tests/semantic/d6-add1-sub1-mutant.lisp"
+          sha256sum "$d6_math_law" "$d6_math_mutant" lib/core4.lisp target/debug/sens
+          if ! d6_math_output="$(target/debug/sens "$d6_math_law" 2>&1)"; then
+            echo "::error::D6_ADD_SUB_EXEC_RED layer=eval fixture=$d6_math_law expected=(1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d6_math_output" >&2
+            exit 1
+          fi
+          d6_math_actual="$(printf '%s\n' "$d6_math_output" | tail -n1)"
+          if [[ "$d6_math_actual" != "(1 1 1 1)" ]]; then
+            echo "::error::D6_ADD_SUB_LAW_DIFF layer=eval fixture=$d6_math_law expected=(1 1 1 1) actual=$d6_math_actual" >&2
+            exit 1
+          fi
+          if ! d6_mutant_output="$(target/debug/sens "$d6_math_mutant" 2>&1)"; then
+            echo "::error::D6_ADD_SUB_MUTANT_EXEC_RED layer=eval fixture=$d6_math_mutant expected=(0 0) actual=execution-error" >&2
+            printf '%s\n' "$d6_mutant_output" >&2
+            exit 1
+          fi
+          d6_mutant_actual="$(printf '%s\n' "$d6_mutant_output" | tail -n1)"
+          if [[ "$d6_mutant_actual" != "(0 0)" ]]; then
+            echo "::error::D6_ADD_SUB_MUTANT_ACCEPTED layer=eval fixture=$d6_math_mutant expected=(0 0) actual=$d6_mutant_actual" >&2
+            exit 1
+          fi
+          echo "D6_ADD_SUB_NATIVE_PASS identities=D6:001110,D6:001111 laws=4 mutants=2"
+          # Exact D5 arithmetic surfaces + canonical D6 ADD1/SUB1; the fixture has no local definitions.
+          d5_arith="tests/semantic/d5-arith-order-surface-laws.lisp"
+          sha256sum "$d5_arith" lib/core4.lisp target/debug/sens
+          if ! d5_arith_observed="$(target/debug/sens "$d5_arith" 2>&1)"; then
+            printf '%s\n' "$d5_arith_observed" >&2
+            echo "::error::D5_ARITH_SURFACE_NATIVE_RED layer=eval fixture=$d5_arith expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
+            exit 1
+          fi
+          printf '%s\n' "$d5_arith_observed"
+          d5_arith_actual="$(printf '%s\n' "$d5_arith_observed" | tail -n1)"
+          if [[ "$d5_arith_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D5_ARITH_SURFACE_LAW_DIFF layer=eval fixture=$d5_arith expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d5_arith_actual" >&2
+            exit 1
+          fi
+          echo "D5_ARITH_SURFACE_NATIVE_PASS exact=D5:01010,01011,10110,11010,11011+D6:001110,001111 laws=16 wrong-order-negatives=2 authority=SENS"
+          d8_greater_law="tests/semantic/d8-string-greater-laws.lisp"
+          d8_greater_mutant="tests/semantic/d8-string-greater-mutant.lisp"
+          sha256sum "$d8_greater_law" "$d8_greater_mutant" lib/core4.lisp target/debug/sens
+          if ! d8_greater_out="$(target/debug/sens "$d8_greater_law" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_EXEC_RED layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_out" >&2
+            exit 1
+          fi
+          d8_greater_observed="$(printf '%s\n' "$d8_greater_out" | tail -n1)"
+          if [[ "$d8_greater_observed" != "(1 1 1)" ]]; then
+            echo "::error::D8_STRING_GREATER_LAW_DIFF layer=eval fixture=$d8_greater_law expected=(1 1 1) actual=$d8_greater_observed" >&2
+            exit 1
+          fi
+          if ! d8_greater_bad_out="$(target/debug/sens "$d8_greater_mutant" 2>&1)"; then
+            echo "::error::D8_STRING_GREATER_NEG_EXEC_RED layer=eval fixture=$d8_greater_mutant expected=(0) actual=execution-error" >&2
+            printf '%s\n' "$d8_greater_bad_out" >&2
+            exit 1
+          fi
+          d8_greater_bad_actual="$(printf '%s\n' "$d8_greater_bad_out" | tail -n1)"
+          if [[ "$d8_greater_bad_actual" != "(0)" ]]; then
+            echo "::error::D8_STRING_GREATER_NEG_UNDETECTED layer=eval fixture=$d8_greater_mutant expected=(0) actual=$d8_greater_bad_actual" >&2
+            exit 1
+          fi
+          echo "D8_STRING_GREATER_NATIVE_PASS exact=D8:00100011 positive=3 wrong-order-negative=1"
+          # Exact D8 PLUSP/MINUSP and two shared D6 LENGTH surfaces.
+          d8_sign="tests/semantic/d8-sign-and-list-length-laws.lisp"
+          d8_bad="tests/semantic/d8-sign-reject-nonnumeric.lisp"
+          sha256sum "$d8_sign" "$d8_bad" lib/core4.lisp target/debug/sens
+          if ! d8_out="$(target/debug/sens "$d8_sign" 2>&1)"; then
+            echo "::error::D8_SIGN_LENGTH_RED layer=eval fixture=$d8_sign expected=ten-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$d8_out" >&2
+            exit 1
+          fi
+          d8_result="$(printf "%s\n" "$d8_out" | tail -n 1)"
+          if [[ "$d8_result" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_SIGN_LENGTH_DIFF layer=eval fixture=$d8_sign expected=(1 1 1 1 1 1 1 1 1 1) actual=$d8_result" >&2
+            exit 1
+          fi
+          if d8_bad_out="$(target/debug/sens "$d8_bad" 2>&1)"; then
+            echo "::error::D8_SIGN_UNEXPECTED_ACCEPT layer=eval fixture=$d8_bad expected=nonnumeric-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
+
+      # Manual, deeper suite has independent witnesses, never an automatic green claim.
+
+      - name: D8 — один точковий SENS-контроль трьох мовних партій
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in d8-liststar-length d8-map-any-lower d8-copy-list; do
+            fixture="tests/semantic/${id}-laws.lisp"
+            sha256sum "$fixture" lib/core4.lisp target/debug/sens
+            if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+              printf '%s\n' "$output" >&2
+              echo "::error::D8_BATCH_EXEC_RED id=$id layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=execution-error reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+            actual="$(printf '%s\n' "$output" | tail -n 1)"
+            if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+              echo "::error::D8_BATCH_LAW_DIFF id=$id layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=$actual first_mismatch=D1-vector reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+          done
+          for item in "d8-liststar-length-invalid" "d8-map-any-reject-non-d1" "d8-copy-list-invalid"; do
+            fixture="tests/semantic/${item}.lisp"
+            sha256sum "$fixture"
+            if output="$(target/debug/sens "$fixture" 2>&1)"; then
+              echo "::error::D8_BATCH_NEGATIVE_SURVIVED id=$item layer=eval fixture=$fixture expected=refusal actual=accepted reproduce='target/debug/sens $fixture'" >&2
+              exit 1
+            fi
+            printf '%s\n' "$output"
+          done
+          echo "D8_NATIVE_BATCH_PASS functions=5 positive=24 negative=3 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000"
+
+
+      - name: "D8 — 24 точкові самосвідки SENS (три партії)"
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="(1 1 1 1 1 1 1 1)"
+          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp; do
+            test_id="sens-d8-$(basename "$fixture" .lisp)"
+            fixture_sha="$(sha256sum "$fixture" | cut -d" " -f1)"
+            echo "D8_NATIVE_START test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected"
+            if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+              echo "$output" >&2
+              echo "::error::D8_NATIVE_EXEC_RED test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=execution-error reproduce=target/debug/sens:$fixture" >&2
+              exit 1
+            fi
+            actual="$(echo "$output" | tail -n 1)"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "$output" >&2
+              echo "::error::D8_NATIVE_LAW_DIFF test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=$actual reproduce=target/debug/sens:$fixture" >&2
+              exit 1
+            fi
+            echo "D8_NATIVE_PASS test_id=$test_id authority=SENS"
+          done
+
+      - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
+        id: packed
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id packed-bits-d1-d10 \
+            --layer transport \
+            --fixture crates/sens/src/packed_bits.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
+          # Mechanical compiler schema gate: SENS owns language meaning;
+          # Rust merely rejects ambiguous duplicate transport fields.
+          python3 scripts/ci_failure_contract.py run \
+            --test-id compiler-artifact-seven-bit-slot-guard \
+            --layer transport \
+            --fixture crates/sens/src/compiler_language.rs \
+            --report-file "$report" \
+            -- cargo test --locked -p sens --lib compiler_language::tests::whole_program_artifact_verifier_rejects_duplicate_fields_before_execution -- --exact --nocapture
+          cargo test --locked -p sens --lib quote_of_canonical_d3_empty_coordinate_is_structural_nil -- --nocapture
+          cargo test --locked -p sens --lib quote_preserves_nonempty_d3_domain_identity -- --nocapture
+
+      - name: UNGUARDING ratchet — жоден guard не може бути муляжем
+        # A guard that cannot fail is itself a failure. A placeholder/stub gate, or a
+        # guard whose negative controls do not pass, fails here -- so a dummy gate
+        # never reaches main.
+        shell: bash
+        run: python3 scripts/check_guards_are_real.py .
+
+      - name: RELEASE GO-GATE — виконуваний підрахунок GO/NO-GO (коридор + аксіоми)
+        # The release is GO only when every gate passes on ONE SHA (#4196). This step
+        # prints the GO count and names the red gates -- report-only, never greenwashed.
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/release_go_gate.py . --json "$RUNNER_TEMP/release-go-gate.json"
+          echo "release-go-gate exit=$?"
+          exit 0
+
+      - name: MATH — парний бенчмарк точної раціональної арифметики SENS↔Rust
+        # One workload, one law (canonical gcd-reduced Q, add/mul/recip) on the Rust
+        # reference and on the SENS binary; unavailable side = UNVERIFIED, no fake number.
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The crate is its own workspace (benchmarks/core-math-demand-rust/Cargo.toml
+          # has [workspace]); -p from the root cannot see it. Build by manifest path.
+          cargo build --manifest-path benchmarks/core-math-demand-rust/Cargo.toml --release
+          python3 scripts/bench_math_sens_vs_rust.py . --iters 200000 --reps 7 \
+            --json "$RUNNER_TEMP/math-bench.json"
+
+      - name: Червоний має говорити — валідність діагностики
+        if: always()
+        shell: bash
+        env:
+          BUDGET_OUTCOME: ${{ steps.budget.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          PACKED_OUTCOME: ${{ steps.packed.outcome }}
+          SOURCE_OUTCOME: ${{ steps.source-census.outcome }}
+          LAW_OUTCOME: ${{ steps.law.outcome }}
+          MUTANT_OUTCOME: ${{ steps.mutant.outcome }}
+          REASON_OUTCOME: ${{ steps.reason-selectors.outcome }}
+          UNIFY_OUTCOME: ${{ steps.unify-observe-d1.outcome }}
+          CORE2_OUTCOME: ${{ steps.core2.outcome }}
+          CORE_WIDTH_OUTCOME: ${{ steps.core-width-law.outcome }}
+          KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
+          LINTER_OUTCOME: ${{ steps.linter-law.outcome }}
+          LINTER_MUTANT_OUTCOME: ${{ steps.linter-mutant.outcome }}
+          CORE_SENTINEL_OUTCOME: ${{ steps.core-sentinel.outcome }}
+          CORE_SENTINEL_MUTANT_OUTCOME: ${{ steps.core-sentinel-mutant.outcome }}
+          CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
+          QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
+          TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
+          META_FC_OUTCOME: ${{ steps.meta-fc-d1.outcome }}
+          SID8_BROAD_OUTCOME: ${{ steps.sid8-broad-source.outcome }}
+          T5_ORACLE_OUTCOME: ${{ steps.t5-oracle.outcome }}
+          FRAME3_OUTCOME: ${{ steps.frame3-bcsw.outcome }}
+          MIGRATOR_OUTCOME: ${{ steps.migrator-optimized.outcome }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          # Власник 2026-10-14: обмеження UNINFORMATIVE-EXECUTOR знято —
+          # мова ще не зріла вимагати нативної SENS-паритетності з Rust/Python.
+          # Діагностика нижче лишається; нативні квитанції більше не вимагаються.
+          diagnostic_rc=0
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE_SENTINEL_OUTCOME" == success && "$CORE_SENTINEL_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$META_FC_OUTCOME" == success && "$SID8_BROAD_OUTCOME" == success && "$T5_ORACLE_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
+          else
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
+          fi
+          if [[ "$diagnostic_rc" -ne 0 ]]; then
+            echo "::error::UNINFORMATIVE-EXECUTOR or UNINFORMATIVE-OUTPUT; blocking CI"
+            exit 1
+          fi
+
+      - name: RUST-ZIG-ONLY — заборона прямих Rust → Lisp/SENS/FASL залежностей
+        # TEMPORARILY DISABLED per owner request 2026-10-16 during Rust↔Lisp migration.
+        # Restore if: always() when the linkage check is ready again.
+        if: ${{ false }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          # This is a separate mechanical authority boundary, not a SENS semantic verdict.
+          unit_rc=0
+          python3 -m unittest tests.test_rust_lisp_sens_edges -v || unit_rc=$?
+          edge_rc=0
+          python3 scripts/rust_lisp_sens_edges.py || edge_rc=$?
+          production_unit_rc=0
+          python3 -m unittest discover -s tests -p test_check_rust_isolated_only_zig.py -v || production_unit_rc=$?
+          production_rc=0
+          python3 scripts/check_rust_isolated_only_zig.py || production_rc=$?
+          if [[ "$unit_rc" -ne 0 || "$edge_rc" -ne 0 || "$production_unit_rc" -ne 0 || "$production_rc" -ne 0 ]]; then
+            echo "::error::RUST_ZIG_ONLY_RED direct Rust project-source embeds remain"
+            exit 1
+          fi
+          echo "RUST_ZIG_ONLY_OK zero direct Rust project-source embeds"
+\\n'}"
+          if [[ "$d6_abs_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_ABS_LAW_DIFF layer=eval fixture=$d6_abs_fixture expected=(1 1 1 1 1 1 1 1 1) actual=$d6_abs_actual" >&2
+            exit 1
+          fi
+          if d6_abs_bad_output="$(target/debug/sens "$d6_abs_bad" 2>&1)"; then
+            echo "::error::D6_ABS_ACCEPTED_NONNUMERIC layer=eval fixture=$d6_abs_bad expected=D24-type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          printf '%s\\n' "$d6_abs_bad_output"
+          if ! grep -Eq 'D24\\+|numeric|number|comparison' <<< "$d6_abs_bad_output"; then
+            echo "::error::D6_ABS_UNRELATED_NEGATIVE layer=eval fixture=$d6_abs_bad expected=numeric-domain-diagnostic actual=other-error" >&2
+            exit 1
+          fi
+          echo "D6_ABS_NATIVE_PASS identity=D6:010011 positive=9 negative=1 exact_numeric_domain=D24+"          # D6:001110 / D6:001111 — SENS D24+ arithmetic plus one-bit output mutants.
           d6_math_law="tests/semantic/d6-add1-sub1-laws.lisp"
           d6_math_mutant="tests/semantic/d6-add1-sub1-mutant.lisp"
           sha256sum "$d6_math_law" "$d6_math_mutant" lib/core4.lisp target/debug/sens
