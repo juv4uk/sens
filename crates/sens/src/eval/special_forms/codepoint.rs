@@ -1,4 +1,4 @@
-use crate::{BinaryNumber, ErrorKind, Exactness, LanguageError, Span, Value};
+use crate::{ErrorKind, Exactness, LanguageError, Span, Value};
 use std::rc::Rc;
 
 /// Minimal runtime bridge from an exact Unicode scalar value to the language's
@@ -110,6 +110,7 @@ fn invalid_character_string(span: Span) -> LanguageError {
 #[cfg(test)]
 mod exact_d24_char_code_tests {
     use super::*;
+    use crate::BinaryNumber;
 
     #[test]
     fn scalar_bridge_preserves_legacy_shape_and_accepts_exact_d24_inverse() {
