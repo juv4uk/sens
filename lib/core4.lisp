@@ -269,21 +269,16 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(0011 length-onto
-  (0010 (values acc)
-    (110
-      ; D4 NULL checks exactly the end of a proper list. NOT(ATOM) would
-      ; terminate nonempty lists immediately and report every length as 0.
-      ((0101 values) acc)
-      ; Only a cons cell advances the accumulator. An improper nonempty
-      ; tail is not silently counted as an empty list.
-      ((0100 (010 values))
-       (length-onto (011 values) (01010 acc 1))))))
+(0011 довжина-до
+  (0010 (значення акумулятор)
+    (110 ((0101 значення) акумулятор) ((0100 (0101 значення)) (довжина-до (011 значення) (01010 акумулятор #d24:000000000000000000000001))))))
+(0011 length-onto довжина-до)
 
 
-(0011 length
-  (0010 (values)
-    (length-onto values 0)))
+(0011 довжина
+  (0010 (значення)
+    (довжина-до значення #d24:000000000000000000000000)))
+(0011 length довжина)
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
@@ -331,13 +326,10 @@
   (0010 (left right)
     (зворот-до (10100 left) right)))
 
-(0011 map-onto
-  (0010 (f values acc)
-    (110
-      ((0100 (010 values)) (10100 acc))
-      ((010 values)  (001 ()))
-      ((equal? (010 values) (001 (0)))
-       (map-onto f (011 values) (111 (f (100 values)) acc))))))
+(0011 відобразити-до
+  (0010 (дія значення акумулятор)
+    (110 ((0101 значення) (зворот акумулятор)) ((0100 (0101 значення)) (відобразити-до дія (011 значення) (111 (дія (100 значення)) акумулятор))))))
+(0011 map-onto відобразити-до)
 
 ; D6:101000 MAP: native SENS recursion over a proper list.
 ; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
@@ -350,17 +342,10 @@
             (відобразити дія (011 значення)))))))
 (0011 map відобразити)
 
-(0011 filter-onto
-  (0010 (predicate values acc)
-    (110
-      ((0101 values) (10100 acc))
-      ((0100 (010 values))
-       (let ((decision (predicate (100 values))))
-         (110
-           (decision
-            (filter-onto predicate (011 values) (111 (100 values) acc)))
-           ((not? decision)
-            (filter-onto predicate (011 values) acc))))))))
+(0011 відсіяти-до
+  (0010 (предикат значення акумулятор)
+    (110 ((0101 значення) (зворот акумулятор)) ((0100 (0101 значення)) (let ((рішення (предикат (100 значення)))) (110 (рішення (відсіяти-до предикат (011 значення) (111 (100 значення) акумулятор))) ((not? рішення) (відсіяти-до предикат (011 значення) акумулятор))))))))
+(0011 filter-onto відсіяти-до)
 
 ; D6:101001 FILTER: predicate must return an exact D1 bit.
 ; Retain only the D1:YES heads; empty list returns structural D3:000.
