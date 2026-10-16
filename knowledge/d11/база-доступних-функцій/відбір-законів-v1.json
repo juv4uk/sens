@@ -9121,9 +9121,11 @@
   "uniform_admission_gate": "All dossiers coordinate=null callable=false native positive+negative evidence absent; owner ratification pending.",
   "archaeological_source_ref": {
     "path": "knowledge/d11/база-доступних-функцій/археологія-архівів-20261016.json",
-    "blob": "e74202c2a7ab66c444482c95884876fbbebe4880",
+    "blob": "7f14c7ce8906196222475be56d6d021e9c129331",
     "archival_receipts": 1042,
     "unique_history_names": 662,
-    "review_result": "Only two historically named functions absent from current lower + D11 candidate tables; both have historical law and falsifier, no current SENS F2/F3 proof."
+    "review_result": "Only two historically named functions absent from current lower + D11 candidate tables; both have historical law and falsifier, no current SENS F2/F3 proof.",
+    "crosswalk_format": "[name, archive_index, source_row_zero_based, match_class]",
+    "original_evidence": "At archive_index and source_row_zero_based in pinned original path/blob; copied law claims were eliminated to avoid redundant archival bulk."
   }
 }
