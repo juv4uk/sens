@@ -847,6 +847,27 @@
   (0010 (кількість елементи)
     (зворот (відкинути кількість (зворот елементи)))))
 
+
+; D8 derived batch — owner-ratified D8 coordinates, SENS language laws only.
+; D8:00010110 REVAPPEND = D5:10101 REVERSE-ONTO, same closure.
+(0011 розвернути-й-приєднати зворот-до)
+
+; D8:00001001 SUBSETP — every left element belongs to right.
+(0011 підмножина?
+  (0010 (ліві праві)
+    (усі? (0010 (елемент) (значення-у-списку? елемент праві)) ліві)))
+
+; D8:00111010 SET-DIFFERENCE — preserve left order, omit right members.
+(0011 різниця-множин
+  (0010 (ліві праві)
+    (filter (0010 (елемент) (not? (значення-у-списку? елемент праві))) ліві)))
+
+; D8:00110110 ADJOIN — add a missing element at the front.
+(0011 приєднати-якщо-нема
+  (0010 (елемент список)
+    (110
+      ((значення-у-списку? елемент список) список)
+      ((010 (001 ())) (111 елемент список)))))
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string

@@ -96,6 +96,33 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: D8 — чотири похідні SENS закони з D1 позитивом та негативом
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-derived-language-batch-01.lisp"
+          negative="tests/semantic/d8-derived-language-bad-tail.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "::error::D8_DERIVED_NATIVE_RED layer=eval fixture=$fixture expected=ten-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$observed" >&2
+            exit 1
+          fi
+          printf "%s\n" "$observed"
+          actual="$(printf "%s\n" "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_DERIVED_LAW_DIFF layer=eval fixture=$fixture expected=(1 1 1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if err="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D8_DERIVED_BAD_TAIL id=d8-revappend-nonlist layer=eval fixture=$negative expected=D3-CAR-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -iq "car" <<< "$err"; then
+            echo "::error::D8_DERIVED_BAD_ERROR id=d8-revappend-nonlist layer=eval fixture=$negative expected=CAR-diagnostic actual=$err" >&2
+            exit 1
+          fi
+          echo "D8_DERIVED_SENS_NATIVE_PASS identities=D8:00010110,D8:00001001,D8:00111010,D8:00110110 laws=10 negative=1"
       - name: D6 — ліві TAKE/DROP із D24+ лічильником
         shell: bash
         run: |
