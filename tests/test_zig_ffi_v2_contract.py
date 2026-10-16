@@ -343,7 +343,7 @@ def check_root_asset_corridor(
     ):
         fail("asset-rust", "missing_repl_core_carrier")
     shared_start = rust_transport.find("fn opaque_zig_asset(")
-    shared_end = rust_transport.find("\n/// Pure physical handoff", shared_start)
+    shared_end = rust_transport.find("\npub fn repl_core_source_bytes()", shared_start)
     shared = rust_transport[shared_start:shared_end] if shared_start >= 0 and shared_end > shared_start else ""
     if not all(token in shared for token in (
         "version()?;", "copy(std::ptr::NonNull::<u8>::dangling().as_ptr(), 0)",
@@ -351,7 +351,7 @@ def check_root_asset_corridor(
     )):
         fail("asset-rust", "missing_shared_opaque_byte_guard")
     domain_start = rust_transport.find("pub fn domain_table_source_bytes(width: u8)")
-    domain_end = rust_transport.find("\n/// Механічний інваріант", domain_start)
+    domain_end = rust_transport.find("\npub fn linter_source_bytes()", domain_start)
     domain_rust = rust_transport[domain_start:domain_end] if domain_start >= 0 and domain_end > domain_start else ""
     if not all(token in domain_rust for token in (
         "version()?;", "asset_ffi::sens_zig_domain_table_bytes_copy(",
