@@ -743,7 +743,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Повернути щойно прочитаний символ назад у той самий вхідний потік; наступне читання того ж потоку мусить отримати його.",
-      "positive_witness_requirement_uk": "Після READ-CHAR(a), UNREAD-CHAR(a), READ-CHAR мусить знову дати a",
+      "positive_witness_requirement_uk": "Після READ-CHAR зі значенням 'а', успішний UNREAD-CHAR тієї самої 'а' робить наступний READ-CHAR рівним 'а' рівно один раз.",
       "negative_falsifier_uk": "Після READ-CHAR(a), UNREAD-CHAR(a), READ-CHAR мусить знову дати a; підміна b, закритий потік або EOF не утворюють довільного символу.",
       "lower_domain_crosswalk": [
         [
@@ -771,7 +771,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Записати один D7-символ у відкритий записуваний потік без зміни його тотожності як даних.",
-      "positive_witness_requirement_uk": "Запис символу a у string-output створює один a",
+      "positive_witness_requirement_uk": "У дозволений in-memory output-stream записати один D7 символ 'а'; перегляд результату дає єдиний 'а' і зберігає повний символьний код.",
       "negative_falsifier_uk": "Запис символу a у string-output створює один a; запис у input-only або закритий потік має бути відхилений.",
       "lower_domain_crosswalk": [
         [
@@ -799,7 +799,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Записати послідовність символів і один визначений термінатор рядка в потік.",
-      "positive_witness_requirement_uk": "На тих самих символах WRITE-LINE відрізняється від WRITE-STRING саме завершенням рядка",
+      "positive_witness_requirement_uk": "WRITE-LINE для D7 рядка 'аб' дописує 'аб' і рівно один визначений роздільник рядка; WRITE-STRING для 'аб' не додає роздільника.",
       "negative_falsifier_uk": "На тих самих символах WRITE-LINE відрізняється від WRITE-STRING саме завершенням рядка; відсутній термінатор або подвійний є контрприкладом.",
       "lower_domain_crosswalk": [
         [
@@ -827,7 +827,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Перетворити дозволену коротку інтерактивну відповідь на точний D1 PredicateBit за окремою граматикою yes/no.",
-      "positive_witness_requirement_uk": "Невідома відповідь, EOF або transport failure не можуть тихо стати D1:NO",
+      "positive_witness_requirement_uk": "На дозволеному інтерактивному джерелі короткі y та n дають відповідно типізовані D1:YES і D1:NO із явним завершенням введення.",
       "negative_falsifier_uk": "Невідома відповідь, EOF або transport failure не можуть тихо стати D1:NO; interactive host I/O не є мовним оцінювачем.",
       "lower_domain_crosswalk": [
         [
@@ -855,7 +855,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Перевірити повнословну інтерактивну yes/no відповідь, явно відмінну від короткої y/n граматики.",
-      "positive_witness_requirement_uk": "Лексема y сама по собі не задовольняє повнословний протокол",
+      "positive_witness_requirement_uk": "На дозволеному інтерактивному джерелі повні yes та no дають різні точні D1:1 та D1:0 із відмовою для інших токенів.",
       "negative_falsifier_uk": "Лексема y сама по собі не задовольняє повнословний протокол; EOF і закритий потік повертають визначену відмову.",
       "lower_domain_crosswalk": [
         [
@@ -883,7 +883,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Повернути символ, що позначає динамічну змінну-ціль у synonym-stream; це не поточний прив'язаний потік.",
-      "positive_witness_requirement_uk": "Якщо динамічна змінна перев'язана з A на B, SYMBOL залишається тим самим, хоча читання synonym-stream обирає B.",
+      "positive_witness_requirement_uk": "Створити synonym-stream для символу ціль; після переприв'язки ціль A→B функція повертає той самий символ, а читання потоку використовує B.",
       "negative_falsifier_uk": "Якщо динамічна змінна перев'язана з A на B, SYMBOL залишається тим самим, хоча читання synonym-stream обирає B.",
       "lower_domain_crosswalk": [
         [
@@ -906,7 +906,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Виконати Lisp-тіло з наданим відкритим потоком та закрити ресурс при будь-якому виході з динамічного контексту.",
-      "positive_witness_requirement_uk": "Нелокальний вихід або SENS-помилка не можуть залишити потік відкритим",
+      "positive_witness_requirement_uk": "Передати вже відкритий in-memory stream у лексичне тіло; після звичайного повернення та після обумовленого нелокального виходу ресурс закривається рівно один раз.",
       "negative_falsifier_uk": "Нелокальний вихід або SENS-помилка не можуть залишити потік відкритим; pathname lifecycle не тотожний already-open stream.",
       "lower_domain_crosswalk": [
         [
@@ -934,7 +934,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Створити обмежену лексичним обсягом вхідну символьну стрічку з D7 рядка для reader-процедури.",
-      "positive_witness_requirement_uk": "Після читання останнього символу наступне READ-CHAR має типізований EOF, а не звернення до stdin/зовнішнього носія.",
+      "positive_witness_requirement_uk": "Для D7 рядка 'аб' локальний stream повертає 'а','б', потім явний EOF; зовнішній stdin не змінюється.",
       "negative_falsifier_uk": "Після читання останнього символу наступне READ-CHAR має типізований EOF, а не звернення до stdin/зовнішнього носія.",
       "lower_domain_crosswalk": [
         [
@@ -962,7 +962,7 @@
       "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
       "source_primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
       "law_hypothesis_uk": "Зібрати записані всередині області дії D7 символи в результатний рядок, не пишучи в host stdout.",
-      "positive_witness_requirement_uk": "Символи поза локальним потоком не повинні змішатися з результатом",
+      "positive_witness_requirement_uk": "Локальний string-output-stream після послідовного WRITE-STRING 'а' і WRITE-CHAR 'б' повертає D7 рядок 'аб', stdout не змінюється.",
       "negative_falsifier_uk": "Символи поза локальним потоком не повинні змішатися з результатом; нелокальний вихід вимагає коректного закриття.",
       "lower_domain_crosswalk": [
         [
@@ -990,7 +990,7 @@
       "source_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
       "source_primary_url": "https://interlisp.org/history/timeline/",
       "law_hypothesis_uk": "Повернути стабільне відношення викликів із синтаксичного графа з правильним розрізненням зв'язаних та вільних змінних.",
-      "positive_witness_requirement_uk": "Текстове входження назви у QUOTE чи локальна однойменна зв'язана змінна не створюють реального виклику",
+      "positive_witness_requirement_uk": "У графі двох процедур виклик F із G враховується один раз; після незалежної повторної індексації той самий caller set зберігається, а локальна bound-змінна з тим же ім'ям не додає ребро.",
       "negative_falsifier_uk": "Текстове входження назви у QUOTE чи локальна однойменна зв'язана змінна не створюють реального виклику; source reindex не змінює граф.",
       "lower_domain_crosswalk": [
         [
@@ -1021,6 +1021,7 @@
     "owner_ratification": "PENDING",
     "D11_callability": false,
     "Zig_T5_D11": "NOT_ADMITTED",
-    "manual_ci": "NOT_RUN"
+    "manual_ci": "NOT_RUN",
+    "positive_witnesses": "HYPOTHESES_TO_RUN_NOT_EXECUTION_RECEIPTS"
   }
 }
