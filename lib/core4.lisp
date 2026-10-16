@@ -2062,6 +2062,14 @@
 
 (0011 maplist відобразити-залишки)
 
+; D8:00110000 MAPL — exact ratified D8 historical capability.
+; Run the callback over successive nonempty tails for effects; return original list.
+; A Lisp-owned D6:000101 MAPLIST derivation; no direct D8 binary admission.
+(0011 застосувати-до-залишків
+  (0010 (елементи дія)
+    ((0010 (непотрібні-результати) елементи)
+     (відобразити-залишки елементи дія))))
+
 ; D8:00001011 MAPLIST* — ratified historical capability, exact 8-bit identity.
 ; Law: knowledge/d8-ratified.json: map successive proper-list tails, including final ().
 ; D6:000101 MAPLIST omits final (); this is a derived SENS definition,
