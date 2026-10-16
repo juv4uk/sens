@@ -1,0 +1,3632 @@
+{
+  "schema": "sens.d11.selector-seed/v1",
+  "status": "RESEARCH_ONLY_NOT_RATIFIED",
+  "date": "2026-10-16",
+  "domain": "D11",
+  "width": 11,
+  "capacity": 2048,
+  "owner_decision": "PENDING",
+  "source": {
+    "main_sha": "c49a660f8d51af76272434f504461a6c75fe25a2",
+    "parent_domain": "D10",
+    "ratified_parent_surface": "lib/domains/d10.lisp",
+    "parent_git_blob": "71faa77d69aad537a280b0d5a4680579f1506d92",
+    "parent_ratification": "knowledge/d10-owner-whole-domain-ratification-20261012.json",
+    "generator_precedent": "knowledge/d10-selector-seed.json",
+    "d11_testing_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json",
+    "d11_testing_git_blob": "9b4428effaca82629f030c4d168ed585b048aa5f"
+  },
+  "law": {
+    "name": "selector-suffix-extension",
+    "statement_uk": "Для кожного ратифікованого восьмикрокового селектора D10 p утворити два дев'ятикрокових кандидати D11 p0 і p1. Нуль додає A перед R; одиниця додає D перед R. Застосування нового кроку відбувається до батьківського селектора: p0(x)=p(CAR(x)), p1(x)=p(CDR(x)).",
+    "basis": "D3 CAR/CDR and previously proved selector-generator; D10 parents owner-ratified",
+    "coordinate_rule": "11-bit candidate = 10-bit D10 selector coordinate || one bit",
+    "non_selector_parents": "NO_EXTENSION",
+    "candidate_only": true
+  },
+  "accounting": {
+    "d10_selector_parents": 256,
+    "d11_selector_candidates": 512,
+    "unique_11bit_coordinates": 512,
+    "unique_names": 512,
+    "d11_existing_testing_only": 43,
+    "test_coordinate_collisions": 0,
+    "test_name_collisions": 0,
+    "new_ratifed_residents": 0,
+    "callable": 0,
+    "zig_t5_admitted": 0,
+    "remaining_domain_capacity_not_assigned": 1536
+  },
+  "verification": {
+    "positive": "All 512 exact 11-bit words have unique names and no overlap with ratified 43 test coordinates.",
+    "negative": "A 10-bit truncated coordinate is rejected by exact-width invariant.",
+    "semantics": "CONSTRUCTIVE_LAW_ONLY; native SENS execution receipt not yet provided.",
+    "hosted_ci": "NOT_RUN_BY_THIS_TASK"
+  },
+  "rows": [
+    {
+      "coordinate": "01100000000",
+      "semantic_name": "CDAAAAAAAAR",
+      "parent_coordinate": "0110000000",
+      "parent_semantic_name": "CDAAAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100000001",
+      "semantic_name": "CDAAAAAAADR",
+      "parent_coordinate": "0110000000",
+      "parent_semantic_name": "CDAAAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100000010",
+      "semantic_name": "CDAAAAAADAR",
+      "parent_coordinate": "0110000001",
+      "parent_semantic_name": "CDAAAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100000011",
+      "semantic_name": "CDAAAAAADDR",
+      "parent_coordinate": "0110000001",
+      "parent_semantic_name": "CDAAAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100000100",
+      "semantic_name": "CDAAAAADAAR",
+      "parent_coordinate": "0110000010",
+      "parent_semantic_name": "CDAAAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100000101",
+      "semantic_name": "CDAAAAADADR",
+      "parent_coordinate": "0110000010",
+      "parent_semantic_name": "CDAAAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100000110",
+      "semantic_name": "CDAAAAADDAR",
+      "parent_coordinate": "0110000011",
+      "parent_semantic_name": "CDAAAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100000111",
+      "semantic_name": "CDAAAAADDDR",
+      "parent_coordinate": "0110000011",
+      "parent_semantic_name": "CDAAAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100001000",
+      "semantic_name": "CDAAAADAAAR",
+      "parent_coordinate": "0110000100",
+      "parent_semantic_name": "CDAAAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100001001",
+      "semantic_name": "CDAAAADAADR",
+      "parent_coordinate": "0110000100",
+      "parent_semantic_name": "CDAAAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100001010",
+      "semantic_name": "CDAAAADADAR",
+      "parent_coordinate": "0110000101",
+      "parent_semantic_name": "CDAAAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100001011",
+      "semantic_name": "CDAAAADADDR",
+      "parent_coordinate": "0110000101",
+      "parent_semantic_name": "CDAAAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100001100",
+      "semantic_name": "CDAAAADDAAR",
+      "parent_coordinate": "0110000110",
+      "parent_semantic_name": "CDAAAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100001101",
+      "semantic_name": "CDAAAADDADR",
+      "parent_coordinate": "0110000110",
+      "parent_semantic_name": "CDAAAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100001110",
+      "semantic_name": "CDAAAADDDAR",
+      "parent_coordinate": "0110000111",
+      "parent_semantic_name": "CDAAAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100001111",
+      "semantic_name": "CDAAAADDDDR",
+      "parent_coordinate": "0110000111",
+      "parent_semantic_name": "CDAAAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100010000",
+      "semantic_name": "CDAAADAAAAR",
+      "parent_coordinate": "0110001000",
+      "parent_semantic_name": "CDAAADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100010001",
+      "semantic_name": "CDAAADAAADR",
+      "parent_coordinate": "0110001000",
+      "parent_semantic_name": "CDAAADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100010010",
+      "semantic_name": "CDAAADAADAR",
+      "parent_coordinate": "0110001001",
+      "parent_semantic_name": "CDAAADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100010011",
+      "semantic_name": "CDAAADAADDR",
+      "parent_coordinate": "0110001001",
+      "parent_semantic_name": "CDAAADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100010100",
+      "semantic_name": "CDAAADADAAR",
+      "parent_coordinate": "0110001010",
+      "parent_semantic_name": "CDAAADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100010101",
+      "semantic_name": "CDAAADADADR",
+      "parent_coordinate": "0110001010",
+      "parent_semantic_name": "CDAAADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100010110",
+      "semantic_name": "CDAAADADDAR",
+      "parent_coordinate": "0110001011",
+      "parent_semantic_name": "CDAAADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100010111",
+      "semantic_name": "CDAAADADDDR",
+      "parent_coordinate": "0110001011",
+      "parent_semantic_name": "CDAAADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100011000",
+      "semantic_name": "CDAAADDAAAR",
+      "parent_coordinate": "0110001100",
+      "parent_semantic_name": "CDAAADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100011001",
+      "semantic_name": "CDAAADDAADR",
+      "parent_coordinate": "0110001100",
+      "parent_semantic_name": "CDAAADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100011010",
+      "semantic_name": "CDAAADDADAR",
+      "parent_coordinate": "0110001101",
+      "parent_semantic_name": "CDAAADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100011011",
+      "semantic_name": "CDAAADDADDR",
+      "parent_coordinate": "0110001101",
+      "parent_semantic_name": "CDAAADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100011100",
+      "semantic_name": "CDAAADDDAAR",
+      "parent_coordinate": "0110001110",
+      "parent_semantic_name": "CDAAADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100011101",
+      "semantic_name": "CDAAADDDADR",
+      "parent_coordinate": "0110001110",
+      "parent_semantic_name": "CDAAADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100011110",
+      "semantic_name": "CDAAADDDDAR",
+      "parent_coordinate": "0110001111",
+      "parent_semantic_name": "CDAAADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100011111",
+      "semantic_name": "CDAAADDDDDR",
+      "parent_coordinate": "0110001111",
+      "parent_semantic_name": "CDAAADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100100000",
+      "semantic_name": "CDAADAAAAAR",
+      "parent_coordinate": "0110010000",
+      "parent_semantic_name": "CDAADAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100100001",
+      "semantic_name": "CDAADAAAADR",
+      "parent_coordinate": "0110010000",
+      "parent_semantic_name": "CDAADAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100100010",
+      "semantic_name": "CDAADAAADAR",
+      "parent_coordinate": "0110010001",
+      "parent_semantic_name": "CDAADAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100100011",
+      "semantic_name": "CDAADAAADDR",
+      "parent_coordinate": "0110010001",
+      "parent_semantic_name": "CDAADAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100100100",
+      "semantic_name": "CDAADAADAAR",
+      "parent_coordinate": "0110010010",
+      "parent_semantic_name": "CDAADAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100100101",
+      "semantic_name": "CDAADAADADR",
+      "parent_coordinate": "0110010010",
+      "parent_semantic_name": "CDAADAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100100110",
+      "semantic_name": "CDAADAADDAR",
+      "parent_coordinate": "0110010011",
+      "parent_semantic_name": "CDAADAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100100111",
+      "semantic_name": "CDAADAADDDR",
+      "parent_coordinate": "0110010011",
+      "parent_semantic_name": "CDAADAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100101000",
+      "semantic_name": "CDAADADAAAR",
+      "parent_coordinate": "0110010100",
+      "parent_semantic_name": "CDAADADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100101001",
+      "semantic_name": "CDAADADAADR",
+      "parent_coordinate": "0110010100",
+      "parent_semantic_name": "CDAADADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100101010",
+      "semantic_name": "CDAADADADAR",
+      "parent_coordinate": "0110010101",
+      "parent_semantic_name": "CDAADADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100101011",
+      "semantic_name": "CDAADADADDR",
+      "parent_coordinate": "0110010101",
+      "parent_semantic_name": "CDAADADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100101100",
+      "semantic_name": "CDAADADDAAR",
+      "parent_coordinate": "0110010110",
+      "parent_semantic_name": "CDAADADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100101101",
+      "semantic_name": "CDAADADDADR",
+      "parent_coordinate": "0110010110",
+      "parent_semantic_name": "CDAADADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100101110",
+      "semantic_name": "CDAADADDDAR",
+      "parent_coordinate": "0110010111",
+      "parent_semantic_name": "CDAADADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100101111",
+      "semantic_name": "CDAADADDDDR",
+      "parent_coordinate": "0110010111",
+      "parent_semantic_name": "CDAADADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100110000",
+      "semantic_name": "CDAADDAAAAR",
+      "parent_coordinate": "0110011000",
+      "parent_semantic_name": "CDAADDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100110001",
+      "semantic_name": "CDAADDAAADR",
+      "parent_coordinate": "0110011000",
+      "parent_semantic_name": "CDAADDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100110010",
+      "semantic_name": "CDAADDAADAR",
+      "parent_coordinate": "0110011001",
+      "parent_semantic_name": "CDAADDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100110011",
+      "semantic_name": "CDAADDAADDR",
+      "parent_coordinate": "0110011001",
+      "parent_semantic_name": "CDAADDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100110100",
+      "semantic_name": "CDAADDADAAR",
+      "parent_coordinate": "0110011010",
+      "parent_semantic_name": "CDAADDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100110101",
+      "semantic_name": "CDAADDADADR",
+      "parent_coordinate": "0110011010",
+      "parent_semantic_name": "CDAADDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100110110",
+      "semantic_name": "CDAADDADDAR",
+      "parent_coordinate": "0110011011",
+      "parent_semantic_name": "CDAADDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100110111",
+      "semantic_name": "CDAADDADDDR",
+      "parent_coordinate": "0110011011",
+      "parent_semantic_name": "CDAADDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100111000",
+      "semantic_name": "CDAADDDAAAR",
+      "parent_coordinate": "0110011100",
+      "parent_semantic_name": "CDAADDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100111001",
+      "semantic_name": "CDAADDDAADR",
+      "parent_coordinate": "0110011100",
+      "parent_semantic_name": "CDAADDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100111010",
+      "semantic_name": "CDAADDDADAR",
+      "parent_coordinate": "0110011101",
+      "parent_semantic_name": "CDAADDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100111011",
+      "semantic_name": "CDAADDDADDR",
+      "parent_coordinate": "0110011101",
+      "parent_semantic_name": "CDAADDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100111100",
+      "semantic_name": "CDAADDDDAAR",
+      "parent_coordinate": "0110011110",
+      "parent_semantic_name": "CDAADDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100111101",
+      "semantic_name": "CDAADDDDADR",
+      "parent_coordinate": "0110011110",
+      "parent_semantic_name": "CDAADDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01100111110",
+      "semantic_name": "CDAADDDDDAR",
+      "parent_coordinate": "0110011111",
+      "parent_semantic_name": "CDAADDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01100111111",
+      "semantic_name": "CDAADDDDDDR",
+      "parent_coordinate": "0110011111",
+      "parent_semantic_name": "CDAADDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101000000",
+      "semantic_name": "CDADAAAAAAR",
+      "parent_coordinate": "0110100000",
+      "parent_semantic_name": "CDADAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101000001",
+      "semantic_name": "CDADAAAAADR",
+      "parent_coordinate": "0110100000",
+      "parent_semantic_name": "CDADAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101000010",
+      "semantic_name": "CDADAAAADAR",
+      "parent_coordinate": "0110100001",
+      "parent_semantic_name": "CDADAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101000011",
+      "semantic_name": "CDADAAAADDR",
+      "parent_coordinate": "0110100001",
+      "parent_semantic_name": "CDADAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101000100",
+      "semantic_name": "CDADAAADAAR",
+      "parent_coordinate": "0110100010",
+      "parent_semantic_name": "CDADAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101000101",
+      "semantic_name": "CDADAAADADR",
+      "parent_coordinate": "0110100010",
+      "parent_semantic_name": "CDADAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101000110",
+      "semantic_name": "CDADAAADDAR",
+      "parent_coordinate": "0110100011",
+      "parent_semantic_name": "CDADAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101000111",
+      "semantic_name": "CDADAAADDDR",
+      "parent_coordinate": "0110100011",
+      "parent_semantic_name": "CDADAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101001000",
+      "semantic_name": "CDADAADAAAR",
+      "parent_coordinate": "0110100100",
+      "parent_semantic_name": "CDADAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101001001",
+      "semantic_name": "CDADAADAADR",
+      "parent_coordinate": "0110100100",
+      "parent_semantic_name": "CDADAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101001010",
+      "semantic_name": "CDADAADADAR",
+      "parent_coordinate": "0110100101",
+      "parent_semantic_name": "CDADAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101001011",
+      "semantic_name": "CDADAADADDR",
+      "parent_coordinate": "0110100101",
+      "parent_semantic_name": "CDADAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101001100",
+      "semantic_name": "CDADAADDAAR",
+      "parent_coordinate": "0110100110",
+      "parent_semantic_name": "CDADAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101001101",
+      "semantic_name": "CDADAADDADR",
+      "parent_coordinate": "0110100110",
+      "parent_semantic_name": "CDADAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101001110",
+      "semantic_name": "CDADAADDDAR",
+      "parent_coordinate": "0110100111",
+      "parent_semantic_name": "CDADAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101001111",
+      "semantic_name": "CDADAADDDDR",
+      "parent_coordinate": "0110100111",
+      "parent_semantic_name": "CDADAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101010000",
+      "semantic_name": "CDADADAAAAR",
+      "parent_coordinate": "0110101000",
+      "parent_semantic_name": "CDADADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101010001",
+      "semantic_name": "CDADADAAADR",
+      "parent_coordinate": "0110101000",
+      "parent_semantic_name": "CDADADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101010010",
+      "semantic_name": "CDADADAADAR",
+      "parent_coordinate": "0110101001",
+      "parent_semantic_name": "CDADADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101010011",
+      "semantic_name": "CDADADAADDR",
+      "parent_coordinate": "0110101001",
+      "parent_semantic_name": "CDADADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101010100",
+      "semantic_name": "CDADADADAAR",
+      "parent_coordinate": "0110101010",
+      "parent_semantic_name": "CDADADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101010101",
+      "semantic_name": "CDADADADADR",
+      "parent_coordinate": "0110101010",
+      "parent_semantic_name": "CDADADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101010110",
+      "semantic_name": "CDADADADDAR",
+      "parent_coordinate": "0110101011",
+      "parent_semantic_name": "CDADADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101010111",
+      "semantic_name": "CDADADADDDR",
+      "parent_coordinate": "0110101011",
+      "parent_semantic_name": "CDADADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101011000",
+      "semantic_name": "CDADADDAAAR",
+      "parent_coordinate": "0110101100",
+      "parent_semantic_name": "CDADADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101011001",
+      "semantic_name": "CDADADDAADR",
+      "parent_coordinate": "0110101100",
+      "parent_semantic_name": "CDADADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101011010",
+      "semantic_name": "CDADADDADAR",
+      "parent_coordinate": "0110101101",
+      "parent_semantic_name": "CDADADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101011011",
+      "semantic_name": "CDADADDADDR",
+      "parent_coordinate": "0110101101",
+      "parent_semantic_name": "CDADADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101011100",
+      "semantic_name": "CDADADDDAAR",
+      "parent_coordinate": "0110101110",
+      "parent_semantic_name": "CDADADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101011101",
+      "semantic_name": "CDADADDDADR",
+      "parent_coordinate": "0110101110",
+      "parent_semantic_name": "CDADADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101011110",
+      "semantic_name": "CDADADDDDAR",
+      "parent_coordinate": "0110101111",
+      "parent_semantic_name": "CDADADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101011111",
+      "semantic_name": "CDADADDDDDR",
+      "parent_coordinate": "0110101111",
+      "parent_semantic_name": "CDADADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101100000",
+      "semantic_name": "CDADDAAAAAR",
+      "parent_coordinate": "0110110000",
+      "parent_semantic_name": "CDADDAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101100001",
+      "semantic_name": "CDADDAAAADR",
+      "parent_coordinate": "0110110000",
+      "parent_semantic_name": "CDADDAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101100010",
+      "semantic_name": "CDADDAAADAR",
+      "parent_coordinate": "0110110001",
+      "parent_semantic_name": "CDADDAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101100011",
+      "semantic_name": "CDADDAAADDR",
+      "parent_coordinate": "0110110001",
+      "parent_semantic_name": "CDADDAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101100100",
+      "semantic_name": "CDADDAADAAR",
+      "parent_coordinate": "0110110010",
+      "parent_semantic_name": "CDADDAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101100101",
+      "semantic_name": "CDADDAADADR",
+      "parent_coordinate": "0110110010",
+      "parent_semantic_name": "CDADDAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101100110",
+      "semantic_name": "CDADDAADDAR",
+      "parent_coordinate": "0110110011",
+      "parent_semantic_name": "CDADDAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101100111",
+      "semantic_name": "CDADDAADDDR",
+      "parent_coordinate": "0110110011",
+      "parent_semantic_name": "CDADDAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101101000",
+      "semantic_name": "CDADDADAAAR",
+      "parent_coordinate": "0110110100",
+      "parent_semantic_name": "CDADDADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101101001",
+      "semantic_name": "CDADDADAADR",
+      "parent_coordinate": "0110110100",
+      "parent_semantic_name": "CDADDADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101101010",
+      "semantic_name": "CDADDADADAR",
+      "parent_coordinate": "0110110101",
+      "parent_semantic_name": "CDADDADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101101011",
+      "semantic_name": "CDADDADADDR",
+      "parent_coordinate": "0110110101",
+      "parent_semantic_name": "CDADDADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101101100",
+      "semantic_name": "CDADDADDAAR",
+      "parent_coordinate": "0110110110",
+      "parent_semantic_name": "CDADDADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101101101",
+      "semantic_name": "CDADDADDADR",
+      "parent_coordinate": "0110110110",
+      "parent_semantic_name": "CDADDADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101101110",
+      "semantic_name": "CDADDADDDAR",
+      "parent_coordinate": "0110110111",
+      "parent_semantic_name": "CDADDADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101101111",
+      "semantic_name": "CDADDADDDDR",
+      "parent_coordinate": "0110110111",
+      "parent_semantic_name": "CDADDADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101110000",
+      "semantic_name": "CDADDDAAAAR",
+      "parent_coordinate": "0110111000",
+      "parent_semantic_name": "CDADDDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101110001",
+      "semantic_name": "CDADDDAAADR",
+      "parent_coordinate": "0110111000",
+      "parent_semantic_name": "CDADDDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101110010",
+      "semantic_name": "CDADDDAADAR",
+      "parent_coordinate": "0110111001",
+      "parent_semantic_name": "CDADDDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101110011",
+      "semantic_name": "CDADDDAADDR",
+      "parent_coordinate": "0110111001",
+      "parent_semantic_name": "CDADDDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101110100",
+      "semantic_name": "CDADDDADAAR",
+      "parent_coordinate": "0110111010",
+      "parent_semantic_name": "CDADDDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101110101",
+      "semantic_name": "CDADDDADADR",
+      "parent_coordinate": "0110111010",
+      "parent_semantic_name": "CDADDDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101110110",
+      "semantic_name": "CDADDDADDAR",
+      "parent_coordinate": "0110111011",
+      "parent_semantic_name": "CDADDDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101110111",
+      "semantic_name": "CDADDDADDDR",
+      "parent_coordinate": "0110111011",
+      "parent_semantic_name": "CDADDDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101111000",
+      "semantic_name": "CDADDDDAAAR",
+      "parent_coordinate": "0110111100",
+      "parent_semantic_name": "CDADDDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101111001",
+      "semantic_name": "CDADDDDAADR",
+      "parent_coordinate": "0110111100",
+      "parent_semantic_name": "CDADDDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101111010",
+      "semantic_name": "CDADDDDADAR",
+      "parent_coordinate": "0110111101",
+      "parent_semantic_name": "CDADDDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101111011",
+      "semantic_name": "CDADDDDADDR",
+      "parent_coordinate": "0110111101",
+      "parent_semantic_name": "CDADDDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101111100",
+      "semantic_name": "CDADDDDDAAR",
+      "parent_coordinate": "0110111110",
+      "parent_semantic_name": "CDADDDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101111101",
+      "semantic_name": "CDADDDDDADR",
+      "parent_coordinate": "0110111110",
+      "parent_semantic_name": "CDADDDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01101111110",
+      "semantic_name": "CDADDDDDDAR",
+      "parent_coordinate": "0110111111",
+      "parent_semantic_name": "CDADDDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01101111111",
+      "semantic_name": "CDADDDDDDDR",
+      "parent_coordinate": "0110111111",
+      "parent_semantic_name": "CDADDDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110000000",
+      "semantic_name": "CDDAAAAAAAR",
+      "parent_coordinate": "0111000000",
+      "parent_semantic_name": "CDDAAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110000001",
+      "semantic_name": "CDDAAAAAADR",
+      "parent_coordinate": "0111000000",
+      "parent_semantic_name": "CDDAAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110000010",
+      "semantic_name": "CDDAAAAADAR",
+      "parent_coordinate": "0111000001",
+      "parent_semantic_name": "CDDAAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110000011",
+      "semantic_name": "CDDAAAAADDR",
+      "parent_coordinate": "0111000001",
+      "parent_semantic_name": "CDDAAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110000100",
+      "semantic_name": "CDDAAAADAAR",
+      "parent_coordinate": "0111000010",
+      "parent_semantic_name": "CDDAAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110000101",
+      "semantic_name": "CDDAAAADADR",
+      "parent_coordinate": "0111000010",
+      "parent_semantic_name": "CDDAAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110000110",
+      "semantic_name": "CDDAAAADDAR",
+      "parent_coordinate": "0111000011",
+      "parent_semantic_name": "CDDAAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110000111",
+      "semantic_name": "CDDAAAADDDR",
+      "parent_coordinate": "0111000011",
+      "parent_semantic_name": "CDDAAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110001000",
+      "semantic_name": "CDDAAADAAAR",
+      "parent_coordinate": "0111000100",
+      "parent_semantic_name": "CDDAAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110001001",
+      "semantic_name": "CDDAAADAADR",
+      "parent_coordinate": "0111000100",
+      "parent_semantic_name": "CDDAAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110001010",
+      "semantic_name": "CDDAAADADAR",
+      "parent_coordinate": "0111000101",
+      "parent_semantic_name": "CDDAAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110001011",
+      "semantic_name": "CDDAAADADDR",
+      "parent_coordinate": "0111000101",
+      "parent_semantic_name": "CDDAAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110001100",
+      "semantic_name": "CDDAAADDAAR",
+      "parent_coordinate": "0111000110",
+      "parent_semantic_name": "CDDAAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110001101",
+      "semantic_name": "CDDAAADDADR",
+      "parent_coordinate": "0111000110",
+      "parent_semantic_name": "CDDAAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110001110",
+      "semantic_name": "CDDAAADDDAR",
+      "parent_coordinate": "0111000111",
+      "parent_semantic_name": "CDDAAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110001111",
+      "semantic_name": "CDDAAADDDDR",
+      "parent_coordinate": "0111000111",
+      "parent_semantic_name": "CDDAAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110010000",
+      "semantic_name": "CDDAADAAAAR",
+      "parent_coordinate": "0111001000",
+      "parent_semantic_name": "CDDAADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110010001",
+      "semantic_name": "CDDAADAAADR",
+      "parent_coordinate": "0111001000",
+      "parent_semantic_name": "CDDAADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110010010",
+      "semantic_name": "CDDAADAADAR",
+      "parent_coordinate": "0111001001",
+      "parent_semantic_name": "CDDAADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110010011",
+      "semantic_name": "CDDAADAADDR",
+      "parent_coordinate": "0111001001",
+      "parent_semantic_name": "CDDAADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110010100",
+      "semantic_name": "CDDAADADAAR",
+      "parent_coordinate": "0111001010",
+      "parent_semantic_name": "CDDAADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110010101",
+      "semantic_name": "CDDAADADADR",
+      "parent_coordinate": "0111001010",
+      "parent_semantic_name": "CDDAADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110010110",
+      "semantic_name": "CDDAADADDAR",
+      "parent_coordinate": "0111001011",
+      "parent_semantic_name": "CDDAADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110010111",
+      "semantic_name": "CDDAADADDDR",
+      "parent_coordinate": "0111001011",
+      "parent_semantic_name": "CDDAADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110011000",
+      "semantic_name": "CDDAADDAAAR",
+      "parent_coordinate": "0111001100",
+      "parent_semantic_name": "CDDAADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110011001",
+      "semantic_name": "CDDAADDAADR",
+      "parent_coordinate": "0111001100",
+      "parent_semantic_name": "CDDAADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110011010",
+      "semantic_name": "CDDAADDADAR",
+      "parent_coordinate": "0111001101",
+      "parent_semantic_name": "CDDAADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110011011",
+      "semantic_name": "CDDAADDADDR",
+      "parent_coordinate": "0111001101",
+      "parent_semantic_name": "CDDAADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110011100",
+      "semantic_name": "CDDAADDDAAR",
+      "parent_coordinate": "0111001110",
+      "parent_semantic_name": "CDDAADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110011101",
+      "semantic_name": "CDDAADDDADR",
+      "parent_coordinate": "0111001110",
+      "parent_semantic_name": "CDDAADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110011110",
+      "semantic_name": "CDDAADDDDAR",
+      "parent_coordinate": "0111001111",
+      "parent_semantic_name": "CDDAADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110011111",
+      "semantic_name": "CDDAADDDDDR",
+      "parent_coordinate": "0111001111",
+      "parent_semantic_name": "CDDAADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110100000",
+      "semantic_name": "CDDADAAAAAR",
+      "parent_coordinate": "0111010000",
+      "parent_semantic_name": "CDDADAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110100001",
+      "semantic_name": "CDDADAAAADR",
+      "parent_coordinate": "0111010000",
+      "parent_semantic_name": "CDDADAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110100010",
+      "semantic_name": "CDDADAAADAR",
+      "parent_coordinate": "0111010001",
+      "parent_semantic_name": "CDDADAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110100011",
+      "semantic_name": "CDDADAAADDR",
+      "parent_coordinate": "0111010001",
+      "parent_semantic_name": "CDDADAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110100100",
+      "semantic_name": "CDDADAADAAR",
+      "parent_coordinate": "0111010010",
+      "parent_semantic_name": "CDDADAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110100101",
+      "semantic_name": "CDDADAADADR",
+      "parent_coordinate": "0111010010",
+      "parent_semantic_name": "CDDADAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110100110",
+      "semantic_name": "CDDADAADDAR",
+      "parent_coordinate": "0111010011",
+      "parent_semantic_name": "CDDADAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110100111",
+      "semantic_name": "CDDADAADDDR",
+      "parent_coordinate": "0111010011",
+      "parent_semantic_name": "CDDADAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110101000",
+      "semantic_name": "CDDADADAAAR",
+      "parent_coordinate": "0111010100",
+      "parent_semantic_name": "CDDADADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110101001",
+      "semantic_name": "CDDADADAADR",
+      "parent_coordinate": "0111010100",
+      "parent_semantic_name": "CDDADADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110101010",
+      "semantic_name": "CDDADADADAR",
+      "parent_coordinate": "0111010101",
+      "parent_semantic_name": "CDDADADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110101011",
+      "semantic_name": "CDDADADADDR",
+      "parent_coordinate": "0111010101",
+      "parent_semantic_name": "CDDADADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110101100",
+      "semantic_name": "CDDADADDAAR",
+      "parent_coordinate": "0111010110",
+      "parent_semantic_name": "CDDADADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110101101",
+      "semantic_name": "CDDADADDADR",
+      "parent_coordinate": "0111010110",
+      "parent_semantic_name": "CDDADADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110101110",
+      "semantic_name": "CDDADADDDAR",
+      "parent_coordinate": "0111010111",
+      "parent_semantic_name": "CDDADADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110101111",
+      "semantic_name": "CDDADADDDDR",
+      "parent_coordinate": "0111010111",
+      "parent_semantic_name": "CDDADADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110110000",
+      "semantic_name": "CDDADDAAAAR",
+      "parent_coordinate": "0111011000",
+      "parent_semantic_name": "CDDADDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110110001",
+      "semantic_name": "CDDADDAAADR",
+      "parent_coordinate": "0111011000",
+      "parent_semantic_name": "CDDADDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110110010",
+      "semantic_name": "CDDADDAADAR",
+      "parent_coordinate": "0111011001",
+      "parent_semantic_name": "CDDADDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110110011",
+      "semantic_name": "CDDADDAADDR",
+      "parent_coordinate": "0111011001",
+      "parent_semantic_name": "CDDADDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110110100",
+      "semantic_name": "CDDADDADAAR",
+      "parent_coordinate": "0111011010",
+      "parent_semantic_name": "CDDADDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110110101",
+      "semantic_name": "CDDADDADADR",
+      "parent_coordinate": "0111011010",
+      "parent_semantic_name": "CDDADDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110110110",
+      "semantic_name": "CDDADDADDAR",
+      "parent_coordinate": "0111011011",
+      "parent_semantic_name": "CDDADDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110110111",
+      "semantic_name": "CDDADDADDDR",
+      "parent_coordinate": "0111011011",
+      "parent_semantic_name": "CDDADDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110111000",
+      "semantic_name": "CDDADDDAAAR",
+      "parent_coordinate": "0111011100",
+      "parent_semantic_name": "CDDADDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110111001",
+      "semantic_name": "CDDADDDAADR",
+      "parent_coordinate": "0111011100",
+      "parent_semantic_name": "CDDADDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110111010",
+      "semantic_name": "CDDADDDADAR",
+      "parent_coordinate": "0111011101",
+      "parent_semantic_name": "CDDADDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110111011",
+      "semantic_name": "CDDADDDADDR",
+      "parent_coordinate": "0111011101",
+      "parent_semantic_name": "CDDADDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110111100",
+      "semantic_name": "CDDADDDDAAR",
+      "parent_coordinate": "0111011110",
+      "parent_semantic_name": "CDDADDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110111101",
+      "semantic_name": "CDDADDDDADR",
+      "parent_coordinate": "0111011110",
+      "parent_semantic_name": "CDDADDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01110111110",
+      "semantic_name": "CDDADDDDDAR",
+      "parent_coordinate": "0111011111",
+      "parent_semantic_name": "CDDADDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01110111111",
+      "semantic_name": "CDDADDDDDDR",
+      "parent_coordinate": "0111011111",
+      "parent_semantic_name": "CDDADDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111000000",
+      "semantic_name": "CDDDAAAAAAR",
+      "parent_coordinate": "0111100000",
+      "parent_semantic_name": "CDDDAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111000001",
+      "semantic_name": "CDDDAAAAADR",
+      "parent_coordinate": "0111100000",
+      "parent_semantic_name": "CDDDAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111000010",
+      "semantic_name": "CDDDAAAADAR",
+      "parent_coordinate": "0111100001",
+      "parent_semantic_name": "CDDDAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111000011",
+      "semantic_name": "CDDDAAAADDR",
+      "parent_coordinate": "0111100001",
+      "parent_semantic_name": "CDDDAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111000100",
+      "semantic_name": "CDDDAAADAAR",
+      "parent_coordinate": "0111100010",
+      "parent_semantic_name": "CDDDAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111000101",
+      "semantic_name": "CDDDAAADADR",
+      "parent_coordinate": "0111100010",
+      "parent_semantic_name": "CDDDAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111000110",
+      "semantic_name": "CDDDAAADDAR",
+      "parent_coordinate": "0111100011",
+      "parent_semantic_name": "CDDDAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111000111",
+      "semantic_name": "CDDDAAADDDR",
+      "parent_coordinate": "0111100011",
+      "parent_semantic_name": "CDDDAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111001000",
+      "semantic_name": "CDDDAADAAAR",
+      "parent_coordinate": "0111100100",
+      "parent_semantic_name": "CDDDAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111001001",
+      "semantic_name": "CDDDAADAADR",
+      "parent_coordinate": "0111100100",
+      "parent_semantic_name": "CDDDAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111001010",
+      "semantic_name": "CDDDAADADAR",
+      "parent_coordinate": "0111100101",
+      "parent_semantic_name": "CDDDAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111001011",
+      "semantic_name": "CDDDAADADDR",
+      "parent_coordinate": "0111100101",
+      "parent_semantic_name": "CDDDAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111001100",
+      "semantic_name": "CDDDAADDAAR",
+      "parent_coordinate": "0111100110",
+      "parent_semantic_name": "CDDDAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111001101",
+      "semantic_name": "CDDDAADDADR",
+      "parent_coordinate": "0111100110",
+      "parent_semantic_name": "CDDDAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111001110",
+      "semantic_name": "CDDDAADDDAR",
+      "parent_coordinate": "0111100111",
+      "parent_semantic_name": "CDDDAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111001111",
+      "semantic_name": "CDDDAADDDDR",
+      "parent_coordinate": "0111100111",
+      "parent_semantic_name": "CDDDAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111010000",
+      "semantic_name": "CDDDADAAAAR",
+      "parent_coordinate": "0111101000",
+      "parent_semantic_name": "CDDDADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111010001",
+      "semantic_name": "CDDDADAAADR",
+      "parent_coordinate": "0111101000",
+      "parent_semantic_name": "CDDDADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111010010",
+      "semantic_name": "CDDDADAADAR",
+      "parent_coordinate": "0111101001",
+      "parent_semantic_name": "CDDDADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111010011",
+      "semantic_name": "CDDDADAADDR",
+      "parent_coordinate": "0111101001",
+      "parent_semantic_name": "CDDDADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111010100",
+      "semantic_name": "CDDDADADAAR",
+      "parent_coordinate": "0111101010",
+      "parent_semantic_name": "CDDDADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111010101",
+      "semantic_name": "CDDDADADADR",
+      "parent_coordinate": "0111101010",
+      "parent_semantic_name": "CDDDADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111010110",
+      "semantic_name": "CDDDADADDAR",
+      "parent_coordinate": "0111101011",
+      "parent_semantic_name": "CDDDADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111010111",
+      "semantic_name": "CDDDADADDDR",
+      "parent_coordinate": "0111101011",
+      "parent_semantic_name": "CDDDADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111011000",
+      "semantic_name": "CDDDADDAAAR",
+      "parent_coordinate": "0111101100",
+      "parent_semantic_name": "CDDDADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111011001",
+      "semantic_name": "CDDDADDAADR",
+      "parent_coordinate": "0111101100",
+      "parent_semantic_name": "CDDDADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111011010",
+      "semantic_name": "CDDDADDADAR",
+      "parent_coordinate": "0111101101",
+      "parent_semantic_name": "CDDDADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111011011",
+      "semantic_name": "CDDDADDADDR",
+      "parent_coordinate": "0111101101",
+      "parent_semantic_name": "CDDDADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111011100",
+      "semantic_name": "CDDDADDDAAR",
+      "parent_coordinate": "0111101110",
+      "parent_semantic_name": "CDDDADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111011101",
+      "semantic_name": "CDDDADDDADR",
+      "parent_coordinate": "0111101110",
+      "parent_semantic_name": "CDDDADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111011110",
+      "semantic_name": "CDDDADDDDAR",
+      "parent_coordinate": "0111101111",
+      "parent_semantic_name": "CDDDADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111011111",
+      "semantic_name": "CDDDADDDDDR",
+      "parent_coordinate": "0111101111",
+      "parent_semantic_name": "CDDDADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111100000",
+      "semantic_name": "CDDDDAAAAAR",
+      "parent_coordinate": "0111110000",
+      "parent_semantic_name": "CDDDDAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111100001",
+      "semantic_name": "CDDDDAAAADR",
+      "parent_coordinate": "0111110000",
+      "parent_semantic_name": "CDDDDAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111100010",
+      "semantic_name": "CDDDDAAADAR",
+      "parent_coordinate": "0111110001",
+      "parent_semantic_name": "CDDDDAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111100011",
+      "semantic_name": "CDDDDAAADDR",
+      "parent_coordinate": "0111110001",
+      "parent_semantic_name": "CDDDDAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111100100",
+      "semantic_name": "CDDDDAADAAR",
+      "parent_coordinate": "0111110010",
+      "parent_semantic_name": "CDDDDAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111100101",
+      "semantic_name": "CDDDDAADADR",
+      "parent_coordinate": "0111110010",
+      "parent_semantic_name": "CDDDDAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111100110",
+      "semantic_name": "CDDDDAADDAR",
+      "parent_coordinate": "0111110011",
+      "parent_semantic_name": "CDDDDAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111100111",
+      "semantic_name": "CDDDDAADDDR",
+      "parent_coordinate": "0111110011",
+      "parent_semantic_name": "CDDDDAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111101000",
+      "semantic_name": "CDDDDADAAAR",
+      "parent_coordinate": "0111110100",
+      "parent_semantic_name": "CDDDDADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111101001",
+      "semantic_name": "CDDDDADAADR",
+      "parent_coordinate": "0111110100",
+      "parent_semantic_name": "CDDDDADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111101010",
+      "semantic_name": "CDDDDADADAR",
+      "parent_coordinate": "0111110101",
+      "parent_semantic_name": "CDDDDADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111101011",
+      "semantic_name": "CDDDDADADDR",
+      "parent_coordinate": "0111110101",
+      "parent_semantic_name": "CDDDDADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111101100",
+      "semantic_name": "CDDDDADDAAR",
+      "parent_coordinate": "0111110110",
+      "parent_semantic_name": "CDDDDADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111101101",
+      "semantic_name": "CDDDDADDADR",
+      "parent_coordinate": "0111110110",
+      "parent_semantic_name": "CDDDDADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111101110",
+      "semantic_name": "CDDDDADDDAR",
+      "parent_coordinate": "0111110111",
+      "parent_semantic_name": "CDDDDADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111101111",
+      "semantic_name": "CDDDDADDDDR",
+      "parent_coordinate": "0111110111",
+      "parent_semantic_name": "CDDDDADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111110000",
+      "semantic_name": "CDDDDDAAAAR",
+      "parent_coordinate": "0111111000",
+      "parent_semantic_name": "CDDDDDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111110001",
+      "semantic_name": "CDDDDDAAADR",
+      "parent_coordinate": "0111111000",
+      "parent_semantic_name": "CDDDDDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111110010",
+      "semantic_name": "CDDDDDAADAR",
+      "parent_coordinate": "0111111001",
+      "parent_semantic_name": "CDDDDDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111110011",
+      "semantic_name": "CDDDDDAADDR",
+      "parent_coordinate": "0111111001",
+      "parent_semantic_name": "CDDDDDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111110100",
+      "semantic_name": "CDDDDDADAAR",
+      "parent_coordinate": "0111111010",
+      "parent_semantic_name": "CDDDDDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111110101",
+      "semantic_name": "CDDDDDADADR",
+      "parent_coordinate": "0111111010",
+      "parent_semantic_name": "CDDDDDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111110110",
+      "semantic_name": "CDDDDDADDAR",
+      "parent_coordinate": "0111111011",
+      "parent_semantic_name": "CDDDDDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111110111",
+      "semantic_name": "CDDDDDADDDR",
+      "parent_coordinate": "0111111011",
+      "parent_semantic_name": "CDDDDDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111111000",
+      "semantic_name": "CDDDDDDAAAR",
+      "parent_coordinate": "0111111100",
+      "parent_semantic_name": "CDDDDDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111111001",
+      "semantic_name": "CDDDDDDAADR",
+      "parent_coordinate": "0111111100",
+      "parent_semantic_name": "CDDDDDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111111010",
+      "semantic_name": "CDDDDDDADAR",
+      "parent_coordinate": "0111111101",
+      "parent_semantic_name": "CDDDDDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111111011",
+      "semantic_name": "CDDDDDDADDR",
+      "parent_coordinate": "0111111101",
+      "parent_semantic_name": "CDDDDDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111111100",
+      "semantic_name": "CDDDDDDDAAR",
+      "parent_coordinate": "0111111110",
+      "parent_semantic_name": "CDDDDDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111111101",
+      "semantic_name": "CDDDDDDDADR",
+      "parent_coordinate": "0111111110",
+      "parent_semantic_name": "CDDDDDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "01111111110",
+      "semantic_name": "CDDDDDDDDAR",
+      "parent_coordinate": "0111111111",
+      "parent_semantic_name": "CDDDDDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "01111111111",
+      "semantic_name": "CDDDDDDDDDR",
+      "parent_coordinate": "0111111111",
+      "parent_semantic_name": "CDDDDDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000000000",
+      "semantic_name": "CAAAAAAAAAR",
+      "parent_coordinate": "1000000000",
+      "parent_semantic_name": "CAAAAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000000001",
+      "semantic_name": "CAAAAAAAADR",
+      "parent_coordinate": "1000000000",
+      "parent_semantic_name": "CAAAAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000000010",
+      "semantic_name": "CAAAAAAADAR",
+      "parent_coordinate": "1000000001",
+      "parent_semantic_name": "CAAAAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000000011",
+      "semantic_name": "CAAAAAAADDR",
+      "parent_coordinate": "1000000001",
+      "parent_semantic_name": "CAAAAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000000100",
+      "semantic_name": "CAAAAAADAAR",
+      "parent_coordinate": "1000000010",
+      "parent_semantic_name": "CAAAAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000000101",
+      "semantic_name": "CAAAAAADADR",
+      "parent_coordinate": "1000000010",
+      "parent_semantic_name": "CAAAAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000000110",
+      "semantic_name": "CAAAAAADDAR",
+      "parent_coordinate": "1000000011",
+      "parent_semantic_name": "CAAAAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000000111",
+      "semantic_name": "CAAAAAADDDR",
+      "parent_coordinate": "1000000011",
+      "parent_semantic_name": "CAAAAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000001000",
+      "semantic_name": "CAAAAADAAAR",
+      "parent_coordinate": "1000000100",
+      "parent_semantic_name": "CAAAAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000001001",
+      "semantic_name": "CAAAAADAADR",
+      "parent_coordinate": "1000000100",
+      "parent_semantic_name": "CAAAAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000001010",
+      "semantic_name": "CAAAAADADAR",
+      "parent_coordinate": "1000000101",
+      "parent_semantic_name": "CAAAAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000001011",
+      "semantic_name": "CAAAAADADDR",
+      "parent_coordinate": "1000000101",
+      "parent_semantic_name": "CAAAAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000001100",
+      "semantic_name": "CAAAAADDAAR",
+      "parent_coordinate": "1000000110",
+      "parent_semantic_name": "CAAAAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000001101",
+      "semantic_name": "CAAAAADDADR",
+      "parent_coordinate": "1000000110",
+      "parent_semantic_name": "CAAAAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000001110",
+      "semantic_name": "CAAAAADDDAR",
+      "parent_coordinate": "1000000111",
+      "parent_semantic_name": "CAAAAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000001111",
+      "semantic_name": "CAAAAADDDDR",
+      "parent_coordinate": "1000000111",
+      "parent_semantic_name": "CAAAAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000010000",
+      "semantic_name": "CAAAADAAAAR",
+      "parent_coordinate": "1000001000",
+      "parent_semantic_name": "CAAAADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000010001",
+      "semantic_name": "CAAAADAAADR",
+      "parent_coordinate": "1000001000",
+      "parent_semantic_name": "CAAAADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000010010",
+      "semantic_name": "CAAAADAADAR",
+      "parent_coordinate": "1000001001",
+      "parent_semantic_name": "CAAAADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000010011",
+      "semantic_name": "CAAAADAADDR",
+      "parent_coordinate": "1000001001",
+      "parent_semantic_name": "CAAAADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000010100",
+      "semantic_name": "CAAAADADAAR",
+      "parent_coordinate": "1000001010",
+      "parent_semantic_name": "CAAAADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000010101",
+      "semantic_name": "CAAAADADADR",
+      "parent_coordinate": "1000001010",
+      "parent_semantic_name": "CAAAADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000010110",
+      "semantic_name": "CAAAADADDAR",
+      "parent_coordinate": "1000001011",
+      "parent_semantic_name": "CAAAADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000010111",
+      "semantic_name": "CAAAADADDDR",
+      "parent_coordinate": "1000001011",
+      "parent_semantic_name": "CAAAADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000011000",
+      "semantic_name": "CAAAADDAAAR",
+      "parent_coordinate": "1000001100",
+      "parent_semantic_name": "CAAAADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000011001",
+      "semantic_name": "CAAAADDAADR",
+      "parent_coordinate": "1000001100",
+      "parent_semantic_name": "CAAAADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000011010",
+      "semantic_name": "CAAAADDADAR",
+      "parent_coordinate": "1000001101",
+      "parent_semantic_name": "CAAAADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000011011",
+      "semantic_name": "CAAAADDADDR",
+      "parent_coordinate": "1000001101",
+      "parent_semantic_name": "CAAAADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000011100",
+      "semantic_name": "CAAAADDDAAR",
+      "parent_coordinate": "1000001110",
+      "parent_semantic_name": "CAAAADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000011101",
+      "semantic_name": "CAAAADDDADR",
+      "parent_coordinate": "1000001110",
+      "parent_semantic_name": "CAAAADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000011110",
+      "semantic_name": "CAAAADDDDAR",
+      "parent_coordinate": "1000001111",
+      "parent_semantic_name": "CAAAADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000011111",
+      "semantic_name": "CAAAADDDDDR",
+      "parent_coordinate": "1000001111",
+      "parent_semantic_name": "CAAAADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000100000",
+      "semantic_name": "CAAADAAAAAR",
+      "parent_coordinate": "1000010000",
+      "parent_semantic_name": "CAAADAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000100001",
+      "semantic_name": "CAAADAAAADR",
+      "parent_coordinate": "1000010000",
+      "parent_semantic_name": "CAAADAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000100010",
+      "semantic_name": "CAAADAAADAR",
+      "parent_coordinate": "1000010001",
+      "parent_semantic_name": "CAAADAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000100011",
+      "semantic_name": "CAAADAAADDR",
+      "parent_coordinate": "1000010001",
+      "parent_semantic_name": "CAAADAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000100100",
+      "semantic_name": "CAAADAADAAR",
+      "parent_coordinate": "1000010010",
+      "parent_semantic_name": "CAAADAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000100101",
+      "semantic_name": "CAAADAADADR",
+      "parent_coordinate": "1000010010",
+      "parent_semantic_name": "CAAADAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000100110",
+      "semantic_name": "CAAADAADDAR",
+      "parent_coordinate": "1000010011",
+      "parent_semantic_name": "CAAADAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000100111",
+      "semantic_name": "CAAADAADDDR",
+      "parent_coordinate": "1000010011",
+      "parent_semantic_name": "CAAADAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000101000",
+      "semantic_name": "CAAADADAAAR",
+      "parent_coordinate": "1000010100",
+      "parent_semantic_name": "CAAADADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000101001",
+      "semantic_name": "CAAADADAADR",
+      "parent_coordinate": "1000010100",
+      "parent_semantic_name": "CAAADADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000101010",
+      "semantic_name": "CAAADADADAR",
+      "parent_coordinate": "1000010101",
+      "parent_semantic_name": "CAAADADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000101011",
+      "semantic_name": "CAAADADADDR",
+      "parent_coordinate": "1000010101",
+      "parent_semantic_name": "CAAADADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000101100",
+      "semantic_name": "CAAADADDAAR",
+      "parent_coordinate": "1000010110",
+      "parent_semantic_name": "CAAADADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000101101",
+      "semantic_name": "CAAADADDADR",
+      "parent_coordinate": "1000010110",
+      "parent_semantic_name": "CAAADADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000101110",
+      "semantic_name": "CAAADADDDAR",
+      "parent_coordinate": "1000010111",
+      "parent_semantic_name": "CAAADADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000101111",
+      "semantic_name": "CAAADADDDDR",
+      "parent_coordinate": "1000010111",
+      "parent_semantic_name": "CAAADADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000110000",
+      "semantic_name": "CAAADDAAAAR",
+      "parent_coordinate": "1000011000",
+      "parent_semantic_name": "CAAADDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000110001",
+      "semantic_name": "CAAADDAAADR",
+      "parent_coordinate": "1000011000",
+      "parent_semantic_name": "CAAADDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000110010",
+      "semantic_name": "CAAADDAADAR",
+      "parent_coordinate": "1000011001",
+      "parent_semantic_name": "CAAADDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000110011",
+      "semantic_name": "CAAADDAADDR",
+      "parent_coordinate": "1000011001",
+      "parent_semantic_name": "CAAADDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000110100",
+      "semantic_name": "CAAADDADAAR",
+      "parent_coordinate": "1000011010",
+      "parent_semantic_name": "CAAADDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000110101",
+      "semantic_name": "CAAADDADADR",
+      "parent_coordinate": "1000011010",
+      "parent_semantic_name": "CAAADDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000110110",
+      "semantic_name": "CAAADDADDAR",
+      "parent_coordinate": "1000011011",
+      "parent_semantic_name": "CAAADDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000110111",
+      "semantic_name": "CAAADDADDDR",
+      "parent_coordinate": "1000011011",
+      "parent_semantic_name": "CAAADDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000111000",
+      "semantic_name": "CAAADDDAAAR",
+      "parent_coordinate": "1000011100",
+      "parent_semantic_name": "CAAADDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000111001",
+      "semantic_name": "CAAADDDAADR",
+      "parent_coordinate": "1000011100",
+      "parent_semantic_name": "CAAADDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000111010",
+      "semantic_name": "CAAADDDADAR",
+      "parent_coordinate": "1000011101",
+      "parent_semantic_name": "CAAADDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000111011",
+      "semantic_name": "CAAADDDADDR",
+      "parent_coordinate": "1000011101",
+      "parent_semantic_name": "CAAADDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000111100",
+      "semantic_name": "CAAADDDDAAR",
+      "parent_coordinate": "1000011110",
+      "parent_semantic_name": "CAAADDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000111101",
+      "semantic_name": "CAAADDDDADR",
+      "parent_coordinate": "1000011110",
+      "parent_semantic_name": "CAAADDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10000111110",
+      "semantic_name": "CAAADDDDDAR",
+      "parent_coordinate": "1000011111",
+      "parent_semantic_name": "CAAADDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10000111111",
+      "semantic_name": "CAAADDDDDDR",
+      "parent_coordinate": "1000011111",
+      "parent_semantic_name": "CAAADDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001000000",
+      "semantic_name": "CAADAAAAAAR",
+      "parent_coordinate": "1000100000",
+      "parent_semantic_name": "CAADAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001000001",
+      "semantic_name": "CAADAAAAADR",
+      "parent_coordinate": "1000100000",
+      "parent_semantic_name": "CAADAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001000010",
+      "semantic_name": "CAADAAAADAR",
+      "parent_coordinate": "1000100001",
+      "parent_semantic_name": "CAADAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001000011",
+      "semantic_name": "CAADAAAADDR",
+      "parent_coordinate": "1000100001",
+      "parent_semantic_name": "CAADAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001000100",
+      "semantic_name": "CAADAAADAAR",
+      "parent_coordinate": "1000100010",
+      "parent_semantic_name": "CAADAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001000101",
+      "semantic_name": "CAADAAADADR",
+      "parent_coordinate": "1000100010",
+      "parent_semantic_name": "CAADAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001000110",
+      "semantic_name": "CAADAAADDAR",
+      "parent_coordinate": "1000100011",
+      "parent_semantic_name": "CAADAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001000111",
+      "semantic_name": "CAADAAADDDR",
+      "parent_coordinate": "1000100011",
+      "parent_semantic_name": "CAADAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001001000",
+      "semantic_name": "CAADAADAAAR",
+      "parent_coordinate": "1000100100",
+      "parent_semantic_name": "CAADAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001001001",
+      "semantic_name": "CAADAADAADR",
+      "parent_coordinate": "1000100100",
+      "parent_semantic_name": "CAADAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001001010",
+      "semantic_name": "CAADAADADAR",
+      "parent_coordinate": "1000100101",
+      "parent_semantic_name": "CAADAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001001011",
+      "semantic_name": "CAADAADADDR",
+      "parent_coordinate": "1000100101",
+      "parent_semantic_name": "CAADAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001001100",
+      "semantic_name": "CAADAADDAAR",
+      "parent_coordinate": "1000100110",
+      "parent_semantic_name": "CAADAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001001101",
+      "semantic_name": "CAADAADDADR",
+      "parent_coordinate": "1000100110",
+      "parent_semantic_name": "CAADAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001001110",
+      "semantic_name": "CAADAADDDAR",
+      "parent_coordinate": "1000100111",
+      "parent_semantic_name": "CAADAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001001111",
+      "semantic_name": "CAADAADDDDR",
+      "parent_coordinate": "1000100111",
+      "parent_semantic_name": "CAADAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001010000",
+      "semantic_name": "CAADADAAAAR",
+      "parent_coordinate": "1000101000",
+      "parent_semantic_name": "CAADADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001010001",
+      "semantic_name": "CAADADAAADR",
+      "parent_coordinate": "1000101000",
+      "parent_semantic_name": "CAADADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001010010",
+      "semantic_name": "CAADADAADAR",
+      "parent_coordinate": "1000101001",
+      "parent_semantic_name": "CAADADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001010011",
+      "semantic_name": "CAADADAADDR",
+      "parent_coordinate": "1000101001",
+      "parent_semantic_name": "CAADADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001010100",
+      "semantic_name": "CAADADADAAR",
+      "parent_coordinate": "1000101010",
+      "parent_semantic_name": "CAADADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001010101",
+      "semantic_name": "CAADADADADR",
+      "parent_coordinate": "1000101010",
+      "parent_semantic_name": "CAADADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001010110",
+      "semantic_name": "CAADADADDAR",
+      "parent_coordinate": "1000101011",
+      "parent_semantic_name": "CAADADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001010111",
+      "semantic_name": "CAADADADDDR",
+      "parent_coordinate": "1000101011",
+      "parent_semantic_name": "CAADADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001011000",
+      "semantic_name": "CAADADDAAAR",
+      "parent_coordinate": "1000101100",
+      "parent_semantic_name": "CAADADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001011001",
+      "semantic_name": "CAADADDAADR",
+      "parent_coordinate": "1000101100",
+      "parent_semantic_name": "CAADADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001011010",
+      "semantic_name": "CAADADDADAR",
+      "parent_coordinate": "1000101101",
+      "parent_semantic_name": "CAADADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001011011",
+      "semantic_name": "CAADADDADDR",
+      "parent_coordinate": "1000101101",
+      "parent_semantic_name": "CAADADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001011100",
+      "semantic_name": "CAADADDDAAR",
+      "parent_coordinate": "1000101110",
+      "parent_semantic_name": "CAADADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001011101",
+      "semantic_name": "CAADADDDADR",
+      "parent_coordinate": "1000101110",
+      "parent_semantic_name": "CAADADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001011110",
+      "semantic_name": "CAADADDDDAR",
+      "parent_coordinate": "1000101111",
+      "parent_semantic_name": "CAADADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001011111",
+      "semantic_name": "CAADADDDDDR",
+      "parent_coordinate": "1000101111",
+      "parent_semantic_name": "CAADADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001100000",
+      "semantic_name": "CAADDAAAAAR",
+      "parent_coordinate": "1000110000",
+      "parent_semantic_name": "CAADDAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001100001",
+      "semantic_name": "CAADDAAAADR",
+      "parent_coordinate": "1000110000",
+      "parent_semantic_name": "CAADDAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001100010",
+      "semantic_name": "CAADDAAADAR",
+      "parent_coordinate": "1000110001",
+      "parent_semantic_name": "CAADDAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001100011",
+      "semantic_name": "CAADDAAADDR",
+      "parent_coordinate": "1000110001",
+      "parent_semantic_name": "CAADDAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001100100",
+      "semantic_name": "CAADDAADAAR",
+      "parent_coordinate": "1000110010",
+      "parent_semantic_name": "CAADDAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001100101",
+      "semantic_name": "CAADDAADADR",
+      "parent_coordinate": "1000110010",
+      "parent_semantic_name": "CAADDAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001100110",
+      "semantic_name": "CAADDAADDAR",
+      "parent_coordinate": "1000110011",
+      "parent_semantic_name": "CAADDAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001100111",
+      "semantic_name": "CAADDAADDDR",
+      "parent_coordinate": "1000110011",
+      "parent_semantic_name": "CAADDAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001101000",
+      "semantic_name": "CAADDADAAAR",
+      "parent_coordinate": "1000110100",
+      "parent_semantic_name": "CAADDADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001101001",
+      "semantic_name": "CAADDADAADR",
+      "parent_coordinate": "1000110100",
+      "parent_semantic_name": "CAADDADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001101010",
+      "semantic_name": "CAADDADADAR",
+      "parent_coordinate": "1000110101",
+      "parent_semantic_name": "CAADDADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001101011",
+      "semantic_name": "CAADDADADDR",
+      "parent_coordinate": "1000110101",
+      "parent_semantic_name": "CAADDADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001101100",
+      "semantic_name": "CAADDADDAAR",
+      "parent_coordinate": "1000110110",
+      "parent_semantic_name": "CAADDADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001101101",
+      "semantic_name": "CAADDADDADR",
+      "parent_coordinate": "1000110110",
+      "parent_semantic_name": "CAADDADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001101110",
+      "semantic_name": "CAADDADDDAR",
+      "parent_coordinate": "1000110111",
+      "parent_semantic_name": "CAADDADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001101111",
+      "semantic_name": "CAADDADDDDR",
+      "parent_coordinate": "1000110111",
+      "parent_semantic_name": "CAADDADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001110000",
+      "semantic_name": "CAADDDAAAAR",
+      "parent_coordinate": "1000111000",
+      "parent_semantic_name": "CAADDDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001110001",
+      "semantic_name": "CAADDDAAADR",
+      "parent_coordinate": "1000111000",
+      "parent_semantic_name": "CAADDDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001110010",
+      "semantic_name": "CAADDDAADAR",
+      "parent_coordinate": "1000111001",
+      "parent_semantic_name": "CAADDDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001110011",
+      "semantic_name": "CAADDDAADDR",
+      "parent_coordinate": "1000111001",
+      "parent_semantic_name": "CAADDDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001110100",
+      "semantic_name": "CAADDDADAAR",
+      "parent_coordinate": "1000111010",
+      "parent_semantic_name": "CAADDDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001110101",
+      "semantic_name": "CAADDDADADR",
+      "parent_coordinate": "1000111010",
+      "parent_semantic_name": "CAADDDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001110110",
+      "semantic_name": "CAADDDADDAR",
+      "parent_coordinate": "1000111011",
+      "parent_semantic_name": "CAADDDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001110111",
+      "semantic_name": "CAADDDADDDR",
+      "parent_coordinate": "1000111011",
+      "parent_semantic_name": "CAADDDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001111000",
+      "semantic_name": "CAADDDDAAAR",
+      "parent_coordinate": "1000111100",
+      "parent_semantic_name": "CAADDDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001111001",
+      "semantic_name": "CAADDDDAADR",
+      "parent_coordinate": "1000111100",
+      "parent_semantic_name": "CAADDDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001111010",
+      "semantic_name": "CAADDDDADAR",
+      "parent_coordinate": "1000111101",
+      "parent_semantic_name": "CAADDDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001111011",
+      "semantic_name": "CAADDDDADDR",
+      "parent_coordinate": "1000111101",
+      "parent_semantic_name": "CAADDDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001111100",
+      "semantic_name": "CAADDDDDAAR",
+      "parent_coordinate": "1000111110",
+      "parent_semantic_name": "CAADDDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001111101",
+      "semantic_name": "CAADDDDDADR",
+      "parent_coordinate": "1000111110",
+      "parent_semantic_name": "CAADDDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10001111110",
+      "semantic_name": "CAADDDDDDAR",
+      "parent_coordinate": "1000111111",
+      "parent_semantic_name": "CAADDDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10001111111",
+      "semantic_name": "CAADDDDDDDR",
+      "parent_coordinate": "1000111111",
+      "parent_semantic_name": "CAADDDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010000000",
+      "semantic_name": "CADAAAAAAAR",
+      "parent_coordinate": "1001000000",
+      "parent_semantic_name": "CADAAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010000001",
+      "semantic_name": "CADAAAAAADR",
+      "parent_coordinate": "1001000000",
+      "parent_semantic_name": "CADAAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010000010",
+      "semantic_name": "CADAAAAADAR",
+      "parent_coordinate": "1001000001",
+      "parent_semantic_name": "CADAAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010000011",
+      "semantic_name": "CADAAAAADDR",
+      "parent_coordinate": "1001000001",
+      "parent_semantic_name": "CADAAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010000100",
+      "semantic_name": "CADAAAADAAR",
+      "parent_coordinate": "1001000010",
+      "parent_semantic_name": "CADAAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010000101",
+      "semantic_name": "CADAAAADADR",
+      "parent_coordinate": "1001000010",
+      "parent_semantic_name": "CADAAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010000110",
+      "semantic_name": "CADAAAADDAR",
+      "parent_coordinate": "1001000011",
+      "parent_semantic_name": "CADAAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010000111",
+      "semantic_name": "CADAAAADDDR",
+      "parent_coordinate": "1001000011",
+      "parent_semantic_name": "CADAAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010001000",
+      "semantic_name": "CADAAADAAAR",
+      "parent_coordinate": "1001000100",
+      "parent_semantic_name": "CADAAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010001001",
+      "semantic_name": "CADAAADAADR",
+      "parent_coordinate": "1001000100",
+      "parent_semantic_name": "CADAAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010001010",
+      "semantic_name": "CADAAADADAR",
+      "parent_coordinate": "1001000101",
+      "parent_semantic_name": "CADAAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010001011",
+      "semantic_name": "CADAAADADDR",
+      "parent_coordinate": "1001000101",
+      "parent_semantic_name": "CADAAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010001100",
+      "semantic_name": "CADAAADDAAR",
+      "parent_coordinate": "1001000110",
+      "parent_semantic_name": "CADAAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010001101",
+      "semantic_name": "CADAAADDADR",
+      "parent_coordinate": "1001000110",
+      "parent_semantic_name": "CADAAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010001110",
+      "semantic_name": "CADAAADDDAR",
+      "parent_coordinate": "1001000111",
+      "parent_semantic_name": "CADAAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010001111",
+      "semantic_name": "CADAAADDDDR",
+      "parent_coordinate": "1001000111",
+      "parent_semantic_name": "CADAAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010010000",
+      "semantic_name": "CADAADAAAAR",
+      "parent_coordinate": "1001001000",
+      "parent_semantic_name": "CADAADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010010001",
+      "semantic_name": "CADAADAAADR",
+      "parent_coordinate": "1001001000",
+      "parent_semantic_name": "CADAADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010010010",
+      "semantic_name": "CADAADAADAR",
+      "parent_coordinate": "1001001001",
+      "parent_semantic_name": "CADAADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010010011",
+      "semantic_name": "CADAADAADDR",
+      "parent_coordinate": "1001001001",
+      "parent_semantic_name": "CADAADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010010100",
+      "semantic_name": "CADAADADAAR",
+      "parent_coordinate": "1001001010",
+      "parent_semantic_name": "CADAADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010010101",
+      "semantic_name": "CADAADADADR",
+      "parent_coordinate": "1001001010",
+      "parent_semantic_name": "CADAADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010010110",
+      "semantic_name": "CADAADADDAR",
+      "parent_coordinate": "1001001011",
+      "parent_semantic_name": "CADAADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010010111",
+      "semantic_name": "CADAADADDDR",
+      "parent_coordinate": "1001001011",
+      "parent_semantic_name": "CADAADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010011000",
+      "semantic_name": "CADAADDAAAR",
+      "parent_coordinate": "1001001100",
+      "parent_semantic_name": "CADAADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010011001",
+      "semantic_name": "CADAADDAADR",
+      "parent_coordinate": "1001001100",
+      "parent_semantic_name": "CADAADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010011010",
+      "semantic_name": "CADAADDADAR",
+      "parent_coordinate": "1001001101",
+      "parent_semantic_name": "CADAADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010011011",
+      "semantic_name": "CADAADDADDR",
+      "parent_coordinate": "1001001101",
+      "parent_semantic_name": "CADAADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010011100",
+      "semantic_name": "CADAADDDAAR",
+      "parent_coordinate": "1001001110",
+      "parent_semantic_name": "CADAADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010011101",
+      "semantic_name": "CADAADDDADR",
+      "parent_coordinate": "1001001110",
+      "parent_semantic_name": "CADAADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010011110",
+      "semantic_name": "CADAADDDDAR",
+      "parent_coordinate": "1001001111",
+      "parent_semantic_name": "CADAADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010011111",
+      "semantic_name": "CADAADDDDDR",
+      "parent_coordinate": "1001001111",
+      "parent_semantic_name": "CADAADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010100000",
+      "semantic_name": "CADADAAAAAR",
+      "parent_coordinate": "1001010000",
+      "parent_semantic_name": "CADADAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010100001",
+      "semantic_name": "CADADAAAADR",
+      "parent_coordinate": "1001010000",
+      "parent_semantic_name": "CADADAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010100010",
+      "semantic_name": "CADADAAADAR",
+      "parent_coordinate": "1001010001",
+      "parent_semantic_name": "CADADAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010100011",
+      "semantic_name": "CADADAAADDR",
+      "parent_coordinate": "1001010001",
+      "parent_semantic_name": "CADADAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010100100",
+      "semantic_name": "CADADAADAAR",
+      "parent_coordinate": "1001010010",
+      "parent_semantic_name": "CADADAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010100101",
+      "semantic_name": "CADADAADADR",
+      "parent_coordinate": "1001010010",
+      "parent_semantic_name": "CADADAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010100110",
+      "semantic_name": "CADADAADDAR",
+      "parent_coordinate": "1001010011",
+      "parent_semantic_name": "CADADAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010100111",
+      "semantic_name": "CADADAADDDR",
+      "parent_coordinate": "1001010011",
+      "parent_semantic_name": "CADADAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010101000",
+      "semantic_name": "CADADADAAAR",
+      "parent_coordinate": "1001010100",
+      "parent_semantic_name": "CADADADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010101001",
+      "semantic_name": "CADADADAADR",
+      "parent_coordinate": "1001010100",
+      "parent_semantic_name": "CADADADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010101010",
+      "semantic_name": "CADADADADAR",
+      "parent_coordinate": "1001010101",
+      "parent_semantic_name": "CADADADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010101011",
+      "semantic_name": "CADADADADDR",
+      "parent_coordinate": "1001010101",
+      "parent_semantic_name": "CADADADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010101100",
+      "semantic_name": "CADADADDAAR",
+      "parent_coordinate": "1001010110",
+      "parent_semantic_name": "CADADADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010101101",
+      "semantic_name": "CADADADDADR",
+      "parent_coordinate": "1001010110",
+      "parent_semantic_name": "CADADADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010101110",
+      "semantic_name": "CADADADDDAR",
+      "parent_coordinate": "1001010111",
+      "parent_semantic_name": "CADADADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010101111",
+      "semantic_name": "CADADADDDDR",
+      "parent_coordinate": "1001010111",
+      "parent_semantic_name": "CADADADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010110000",
+      "semantic_name": "CADADDAAAAR",
+      "parent_coordinate": "1001011000",
+      "parent_semantic_name": "CADADDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010110001",
+      "semantic_name": "CADADDAAADR",
+      "parent_coordinate": "1001011000",
+      "parent_semantic_name": "CADADDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010110010",
+      "semantic_name": "CADADDAADAR",
+      "parent_coordinate": "1001011001",
+      "parent_semantic_name": "CADADDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010110011",
+      "semantic_name": "CADADDAADDR",
+      "parent_coordinate": "1001011001",
+      "parent_semantic_name": "CADADDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010110100",
+      "semantic_name": "CADADDADAAR",
+      "parent_coordinate": "1001011010",
+      "parent_semantic_name": "CADADDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010110101",
+      "semantic_name": "CADADDADADR",
+      "parent_coordinate": "1001011010",
+      "parent_semantic_name": "CADADDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010110110",
+      "semantic_name": "CADADDADDAR",
+      "parent_coordinate": "1001011011",
+      "parent_semantic_name": "CADADDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010110111",
+      "semantic_name": "CADADDADDDR",
+      "parent_coordinate": "1001011011",
+      "parent_semantic_name": "CADADDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010111000",
+      "semantic_name": "CADADDDAAAR",
+      "parent_coordinate": "1001011100",
+      "parent_semantic_name": "CADADDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010111001",
+      "semantic_name": "CADADDDAADR",
+      "parent_coordinate": "1001011100",
+      "parent_semantic_name": "CADADDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010111010",
+      "semantic_name": "CADADDDADAR",
+      "parent_coordinate": "1001011101",
+      "parent_semantic_name": "CADADDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010111011",
+      "semantic_name": "CADADDDADDR",
+      "parent_coordinate": "1001011101",
+      "parent_semantic_name": "CADADDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010111100",
+      "semantic_name": "CADADDDDAAR",
+      "parent_coordinate": "1001011110",
+      "parent_semantic_name": "CADADDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010111101",
+      "semantic_name": "CADADDDDADR",
+      "parent_coordinate": "1001011110",
+      "parent_semantic_name": "CADADDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10010111110",
+      "semantic_name": "CADADDDDDAR",
+      "parent_coordinate": "1001011111",
+      "parent_semantic_name": "CADADDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10010111111",
+      "semantic_name": "CADADDDDDDR",
+      "parent_coordinate": "1001011111",
+      "parent_semantic_name": "CADADDDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011000000",
+      "semantic_name": "CADDAAAAAAR",
+      "parent_coordinate": "1001100000",
+      "parent_semantic_name": "CADDAAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011000001",
+      "semantic_name": "CADDAAAAADR",
+      "parent_coordinate": "1001100000",
+      "parent_semantic_name": "CADDAAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011000010",
+      "semantic_name": "CADDAAAADAR",
+      "parent_coordinate": "1001100001",
+      "parent_semantic_name": "CADDAAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011000011",
+      "semantic_name": "CADDAAAADDR",
+      "parent_coordinate": "1001100001",
+      "parent_semantic_name": "CADDAAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011000100",
+      "semantic_name": "CADDAAADAAR",
+      "parent_coordinate": "1001100010",
+      "parent_semantic_name": "CADDAAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011000101",
+      "semantic_name": "CADDAAADADR",
+      "parent_coordinate": "1001100010",
+      "parent_semantic_name": "CADDAAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011000110",
+      "semantic_name": "CADDAAADDAR",
+      "parent_coordinate": "1001100011",
+      "parent_semantic_name": "CADDAAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011000111",
+      "semantic_name": "CADDAAADDDR",
+      "parent_coordinate": "1001100011",
+      "parent_semantic_name": "CADDAAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011001000",
+      "semantic_name": "CADDAADAAAR",
+      "parent_coordinate": "1001100100",
+      "parent_semantic_name": "CADDAADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011001001",
+      "semantic_name": "CADDAADAADR",
+      "parent_coordinate": "1001100100",
+      "parent_semantic_name": "CADDAADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011001010",
+      "semantic_name": "CADDAADADAR",
+      "parent_coordinate": "1001100101",
+      "parent_semantic_name": "CADDAADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011001011",
+      "semantic_name": "CADDAADADDR",
+      "parent_coordinate": "1001100101",
+      "parent_semantic_name": "CADDAADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011001100",
+      "semantic_name": "CADDAADDAAR",
+      "parent_coordinate": "1001100110",
+      "parent_semantic_name": "CADDAADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011001101",
+      "semantic_name": "CADDAADDADR",
+      "parent_coordinate": "1001100110",
+      "parent_semantic_name": "CADDAADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011001110",
+      "semantic_name": "CADDAADDDAR",
+      "parent_coordinate": "1001100111",
+      "parent_semantic_name": "CADDAADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011001111",
+      "semantic_name": "CADDAADDDDR",
+      "parent_coordinate": "1001100111",
+      "parent_semantic_name": "CADDAADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011010000",
+      "semantic_name": "CADDADAAAAR",
+      "parent_coordinate": "1001101000",
+      "parent_semantic_name": "CADDADAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011010001",
+      "semantic_name": "CADDADAAADR",
+      "parent_coordinate": "1001101000",
+      "parent_semantic_name": "CADDADAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011010010",
+      "semantic_name": "CADDADAADAR",
+      "parent_coordinate": "1001101001",
+      "parent_semantic_name": "CADDADAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011010011",
+      "semantic_name": "CADDADAADDR",
+      "parent_coordinate": "1001101001",
+      "parent_semantic_name": "CADDADAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011010100",
+      "semantic_name": "CADDADADAAR",
+      "parent_coordinate": "1001101010",
+      "parent_semantic_name": "CADDADADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011010101",
+      "semantic_name": "CADDADADADR",
+      "parent_coordinate": "1001101010",
+      "parent_semantic_name": "CADDADADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011010110",
+      "semantic_name": "CADDADADDAR",
+      "parent_coordinate": "1001101011",
+      "parent_semantic_name": "CADDADADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011010111",
+      "semantic_name": "CADDADADDDR",
+      "parent_coordinate": "1001101011",
+      "parent_semantic_name": "CADDADADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011011000",
+      "semantic_name": "CADDADDAAAR",
+      "parent_coordinate": "1001101100",
+      "parent_semantic_name": "CADDADDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011011001",
+      "semantic_name": "CADDADDAADR",
+      "parent_coordinate": "1001101100",
+      "parent_semantic_name": "CADDADDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011011010",
+      "semantic_name": "CADDADDADAR",
+      "parent_coordinate": "1001101101",
+      "parent_semantic_name": "CADDADDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011011011",
+      "semantic_name": "CADDADDADDR",
+      "parent_coordinate": "1001101101",
+      "parent_semantic_name": "CADDADDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011011100",
+      "semantic_name": "CADDADDDAAR",
+      "parent_coordinate": "1001101110",
+      "parent_semantic_name": "CADDADDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011011101",
+      "semantic_name": "CADDADDDADR",
+      "parent_coordinate": "1001101110",
+      "parent_semantic_name": "CADDADDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011011110",
+      "semantic_name": "CADDADDDDAR",
+      "parent_coordinate": "1001101111",
+      "parent_semantic_name": "CADDADDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011011111",
+      "semantic_name": "CADDADDDDDR",
+      "parent_coordinate": "1001101111",
+      "parent_semantic_name": "CADDADDDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011100000",
+      "semantic_name": "CADDDAAAAAR",
+      "parent_coordinate": "1001110000",
+      "parent_semantic_name": "CADDDAAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011100001",
+      "semantic_name": "CADDDAAAADR",
+      "parent_coordinate": "1001110000",
+      "parent_semantic_name": "CADDDAAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011100010",
+      "semantic_name": "CADDDAAADAR",
+      "parent_coordinate": "1001110001",
+      "parent_semantic_name": "CADDDAAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011100011",
+      "semantic_name": "CADDDAAADDR",
+      "parent_coordinate": "1001110001",
+      "parent_semantic_name": "CADDDAAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011100100",
+      "semantic_name": "CADDDAADAAR",
+      "parent_coordinate": "1001110010",
+      "parent_semantic_name": "CADDDAADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011100101",
+      "semantic_name": "CADDDAADADR",
+      "parent_coordinate": "1001110010",
+      "parent_semantic_name": "CADDDAADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011100110",
+      "semantic_name": "CADDDAADDAR",
+      "parent_coordinate": "1001110011",
+      "parent_semantic_name": "CADDDAADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011100111",
+      "semantic_name": "CADDDAADDDR",
+      "parent_coordinate": "1001110011",
+      "parent_semantic_name": "CADDDAADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011101000",
+      "semantic_name": "CADDDADAAAR",
+      "parent_coordinate": "1001110100",
+      "parent_semantic_name": "CADDDADAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011101001",
+      "semantic_name": "CADDDADAADR",
+      "parent_coordinate": "1001110100",
+      "parent_semantic_name": "CADDDADAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011101010",
+      "semantic_name": "CADDDADADAR",
+      "parent_coordinate": "1001110101",
+      "parent_semantic_name": "CADDDADADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011101011",
+      "semantic_name": "CADDDADADDR",
+      "parent_coordinate": "1001110101",
+      "parent_semantic_name": "CADDDADADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011101100",
+      "semantic_name": "CADDDADDAAR",
+      "parent_coordinate": "1001110110",
+      "parent_semantic_name": "CADDDADDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011101101",
+      "semantic_name": "CADDDADDADR",
+      "parent_coordinate": "1001110110",
+      "parent_semantic_name": "CADDDADDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011101110",
+      "semantic_name": "CADDDADDDAR",
+      "parent_coordinate": "1001110111",
+      "parent_semantic_name": "CADDDADDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011101111",
+      "semantic_name": "CADDDADDDDR",
+      "parent_coordinate": "1001110111",
+      "parent_semantic_name": "CADDDADDDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011110000",
+      "semantic_name": "CADDDDAAAAR",
+      "parent_coordinate": "1001111000",
+      "parent_semantic_name": "CADDDDAAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011110001",
+      "semantic_name": "CADDDDAAADR",
+      "parent_coordinate": "1001111000",
+      "parent_semantic_name": "CADDDDAAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011110010",
+      "semantic_name": "CADDDDAADAR",
+      "parent_coordinate": "1001111001",
+      "parent_semantic_name": "CADDDDAADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011110011",
+      "semantic_name": "CADDDDAADDR",
+      "parent_coordinate": "1001111001",
+      "parent_semantic_name": "CADDDDAADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011110100",
+      "semantic_name": "CADDDDADAAR",
+      "parent_coordinate": "1001111010",
+      "parent_semantic_name": "CADDDDADAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011110101",
+      "semantic_name": "CADDDDADADR",
+      "parent_coordinate": "1001111010",
+      "parent_semantic_name": "CADDDDADAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011110110",
+      "semantic_name": "CADDDDADDAR",
+      "parent_coordinate": "1001111011",
+      "parent_semantic_name": "CADDDDADDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011110111",
+      "semantic_name": "CADDDDADDDR",
+      "parent_coordinate": "1001111011",
+      "parent_semantic_name": "CADDDDADDR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011111000",
+      "semantic_name": "CADDDDDAAAR",
+      "parent_coordinate": "1001111100",
+      "parent_semantic_name": "CADDDDDAAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011111001",
+      "semantic_name": "CADDDDDAADR",
+      "parent_coordinate": "1001111100",
+      "parent_semantic_name": "CADDDDDAAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011111010",
+      "semantic_name": "CADDDDDADAR",
+      "parent_coordinate": "1001111101",
+      "parent_semantic_name": "CADDDDDADR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011111011",
+      "semantic_name": "CADDDDDADDR",
+      "parent_coordinate": "1001111101",
+      "parent_semantic_name": "CADDDDDADR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011111100",
+      "semantic_name": "CADDDDDDAAR",
+      "parent_coordinate": "1001111110",
+      "parent_semantic_name": "CADDDDDDAR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011111101",
+      "semantic_name": "CADDDDDDADR",
+      "parent_coordinate": "1001111110",
+      "parent_semantic_name": "CADDDDDDAR",
+      "extension_bit": "1"
+    },
+    {
+      "coordinate": "10011111110",
+      "semantic_name": "CADDDDDDDAR",
+      "parent_coordinate": "1001111111",
+      "parent_semantic_name": "CADDDDDDDR",
+      "extension_bit": "0"
+    },
+    {
+      "coordinate": "10011111111",
+      "semantic_name": "CADDDDDDDDR",
+      "parent_coordinate": "1001111111",
+      "parent_semantic_name": "CADDDDDDDR",
+      "extension_bit": "1"
+    }
+  ]
+}
