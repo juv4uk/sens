@@ -197,6 +197,20 @@ fn contract_source_zig_only() -> Result<String, String> {
     }
 }
 
+/// Byte-only carrier for SENS REPL core (lib/repl-core.lisp). Zig owns transport.
+fn repl_core_source_zig_only() -> Result<String, String> {
+    #[cfg(feature = "zig-transport")]
+    {
+        let bytes = zig_transport::repl_core_source_bytes()?;
+        String::from_utf8(bytes)
+            .map_err(|e| format!("ZIG_SENS_REPL_CORE UTF-8: {e}"))
+    }
+    #[cfg(not(feature = "zig-transport"))]
+    {
+        Err("RUST_ZIG_ONLY: SENS REPL core requires Zig; no Rust source fallback".into())
+    }
+}
+
 fn main() {
     // Physical .sens is the exact binary entrypoint and needs no legacy
     // bootstrap or ambient host capabilities. Reject extra flags instead of
