@@ -275,6 +275,9 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool
     // and for the SENS-owned `--sens-loop` mode. They load here once; the
     // surface-specific sources below load only for uk/укр/sa.
     if sens_loop || needs_surface {
+        // Used only inside the zig-transport block below; without that feature
+        // this binding is unused and need not be mutable.
+        #[cfg_attr(not(feature = "zig-transport"), allow(unused_mut, unused_variables))]
         let mut session = Session {
             environment: layer.clone(),
         };
