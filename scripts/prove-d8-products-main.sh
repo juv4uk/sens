@@ -28,4 +28,5 @@ check d8-notany tests/semantic/d8-notany-main-laws.lisp '(1 0 1)'
 check d8-acons-swapped tests/semantic/d8-acons-swapped-main-laws.lisp '(1 1 0)'
 check d8-maplist-right tests/semantic/d8-maplist-right-main-laws.lisp '(1 1 0)'
 check d8-nth-right tests/semantic/d8-nth-right-main-laws.lisp '(1 1 0)'
-sha256sum tests/semantic/d8-products-swapped-main-laws.lisp tests/semantic/d8-notany-main-laws.lisp tests/semantic/d8-acons-swapped-main-laws.lisp tests/semantic/d8-maplist-right-main-laws.lisp tests/semantic/d8-nth-right-main-laws.lisp lib/core4.lisp "$cli"
+check d8-position-tree-equ tests/semantic/d8-position-tree-equ-main-laws.lisp '(1 1 1 0 1 0)'
+sha256sum tests/semantic/d8-products-swapped-main-laws.lisp tests/semantic/d8-notany-main-laws.lisp tests/semantic/d8-acons-swapped-main-laws.lisp tests/semantic/d8-maplist-right-main-laws.lisp tests/semantic/d8-nth-right-main-laws.lisp tests/semantic/d8-position-tree-equ-main-laws.lisp lib/core4.lisp "$cli"
