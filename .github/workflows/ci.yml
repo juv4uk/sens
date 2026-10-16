@@ -49,16 +49,33 @@ jobs:
           "$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version
       - uses: dtolnay/rust-toolchain@1.99.0
 
-      - name: SENS-HOST — зібрати справжній хост через піни до Zig
+      - name: RUST↔ZIG — зібрати sens-host і sens-cli з точними пінами
         id: sens-host-build
         shell: bash
         run: |
           set -euo pipefail
-          # Pins first: the locked Cargo graph and the pinned Zig version.
-          cargo tree --locked -p sens-host >/dev/null 2>&1 || echo "note: locked tree"
-          test "$(cat .zig-version)" = "$("$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig" version)"
-          # Then build the real host (fs/process/TCP capability layer, depends on sens).
+          # Pass the already SHA-verified Zig binary explicitly to Cargo build.rs.
+          # The sens-host crate by itself depends only on sens, so it does NOT
+          # exercise the Rust -> Zig static archive link.
+          export ZIG="$RUNNER_TEMP/zig-x86_64-linux-0.16.0/zig"
+          test -x "$ZIG"
+          test "$(cat .zig-version)" = "$("$ZIG" version)"
+          rustc --version | grep -F 'rustc 1.99.0 '
+          cargo tree --locked -p sens-cli >/dev/null
           cargo build --locked -p sens-host
+          # This default Zig-enabled crate invokes build.rs, builds the Zig
+          # physical ABI archive and links it into both executable Rust hosts.
+          cargo build --locked -p sens-cli --features zig-transport --bin sens --bin sens-trit
+          shopt -s nullglob
+          archives=(target/debug/build/sens-cli-*/out/libsens_zig_transport.a)
+          if (( ${#archives[@]} == 0 )); then
+            echo '::error::RUST_ZIG_BUILD_NO_ARCHIVE expected a real Zig static library' >&2
+            exit 1
+          fi
+          for archive in "${archives[@]}"; do
+            test -s "$archive"
+            sha256sum "$archive"
+          done
 
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
