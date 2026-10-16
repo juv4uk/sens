@@ -9,6 +9,7 @@ members = [
     "crates/sens-wasm",
     "crates/swarm-node",
     "crates/sens-host",
+    "crates/sens-minhost",
     "crates/sens-semantic",
     "crates/sens-lsp",
     "crates/wsm-guard-core",
