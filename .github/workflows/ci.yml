@@ -197,16 +197,21 @@ jobs:
           fi
           echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
 
-          # D6 ZIP/UNZIP: 5 exact-SENS LISP witnesses including swapped orientation.
+          # D6 ZIP/UNZIP: п’ять перевірок нативним SENS
           zip_fixture="tests/semantic/d6-zip-unzip-laws.lisp"
           sha256sum "$zip_fixture" lib/core4.lisp target/debug/sens
           if ! zip_observed="$(target/debug/sens "$zip_fixture" 2>&1)"; then
-            printf '%s\n' "$zip_observed" >&2
+            echo "$zip_observed" >&2
             echo "::error::D6_ZIP_UNZIP_NATIVE_RED layer=eval fixture=$zip_fixture expected=five-D1-YES actual=execution-error" >&2
             exit 1
           fi
-          printf '%s\n' "$zip_observed"
-          zip_actual="${zip_observed##*
+          echo "$zip_observed"
+          zip_actual="$(echo "$zip_observed" | tail -n 1)"
+          if [[ "$zip_actual" != "(1 1 1 1 1)" ]]; then
+            echo "::error::D6_ZIP_UNZIP_LAW_DIFF layer=eval fixture=$zip_fixture expected=(1,1,1,1,1) actual=$zip_actual" >&2
+            exit 1
+          fi
+          echo "D6_ZIP_UNZIP_SENS_LISP_PASS functions=2 laws=5 negative=swapped"
 
       - name: D6 — два похідні предикати порядку через точні D5/D4
         shell: bash
