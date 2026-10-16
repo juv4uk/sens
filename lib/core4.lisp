@@ -263,12 +263,19 @@
   (0010 (predicate values)
     (filter-onto predicate values (001 ()))))
 
-(0011 reduce
-  (0010 (f acc values)
+; D6:101110 REDUCE / D6:101111 SCAN — fold/prefix-fold, #3368/#3370.
+; D4:0101 NULL owns the empty proper-list base case; never NOT(ATOM).
+; Language-owned definitions; no direct D6 opcode admission implied.
+(0011 згорнути
+  (0010 (операція стан елементи)
     (110
-      ((0100 (010 values)) acc)
-      ((010 values) 
-       (101110 f (f acc (100 values)) (011 values))))))
+      ((0101 елементи) стан)
+      ((010 (001 ()))
+       (згорнути операція (операція стан (100 елементи)) (011 елементи))))))
+
+(0011 reduce згорнути)
+
+
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -672,10 +679,20 @@
     (0010 (y)
       (f x y))))
 ; scan (накопичувати)
+; SCAN is a prefix history after each element, without the initial state.
+; #3674 proves last(SCAN)=REDUCE only for nonempty lists. Empty SCAN
+; presentation is unresolved and fails closed, not an invented language law.
 (0011 накопичувати
-  (0010 (f acc lst)
-    (110 ((010 lst) ())
-      (#d1:1 (111 acc (накопичувати f (f acc (100 lst)) (011 lst)))))))
+  (0010 (операція стан елементи)
+    (110
+      ((0101 елементи) (100 (001 ())))
+      ((010 (001 ()))
+       ((0010 (наступний)
+          (110
+            ((0101 (011 елементи)) (111 наступний (001 ())))
+            ((010 (001 ())) (111 наступний
+               (накопичувати операція наступний (011 елементи))))))
+        (операція стан (100 елементи)))))))
 ; unzip (розпарувати-пари)
 (0011 розпарувати-пари
   (0010 (ps)

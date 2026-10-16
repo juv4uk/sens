@@ -266,6 +266,30 @@ jobs:
             exit 1
           fi
           echo "D6_RESEARCH_BATCH_01_PASS functions=3 laws=9 semantic_authority=SENS"
+          # D6 REDUCE/SCAN source-owned fold and negative wrong-tail witness.
+          d6_fold="tests/semantic/d6-reduce-scan-uk-laws.lisp"
+          d6_fold_bad="tests/semantic/d6-reduce-scan-bad-tail.lisp"
+          sha256sum "$d6_fold" "$d6_fold_bad" lib/core4.lisp target/debug/sens
+          if ! out="$(target/debug/sens "$d6_fold" 2>&1)"; then
+            printf '%s\n' "$out" >&2
+            echo "::error::D6_FOLD_NATIVE_RED layer=eval fixture=$d6_fold expected=(1,1,1,1,1) actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$out" | tail -n1)"
+          if [[ "$actual" != "(1 1 1 1 1)" ]]; then
+            echo "::error::D6_FOLD_LAW_DIFF layer=eval fixture=$d6_fold expected=(1,1,1,1,1) actual=$actual" >&2
+            exit 1
+          fi
+          if bad_out="$(target/debug/sens "$d6_fold_bad" 2>&1)"; then
+            echo "::error::D6_FOLD_NEGATIVE_ACCEPTED layer=eval fixture=$d6_fold_bad expected=CAR-error actual=exit0" >&2
+            exit 1
+          fi
+          if [[ "$bad_out" != *"car expects a non-empty list"* ]]; then
+            printf '%s\n' "$bad_out" >&2
+            echo "::error::D6_FOLD_WRONG_ERROR layer=eval fixture=$d6_fold_bad expected=CAR-error actual=other" >&2
+            exit 1
+          fi
+          echo "D6_FOLD_NATIVE_PASS functions=2 laws=5 negative=1 authority=SENS"
           # D6:111000 / D6:111001 — ZIP/UNZIP, зворотність і негатив перестановки.
           zip_fixture="tests/semantic/d6-zip-unzip-laws.lisp"
           sha256sum "$zip_fixture" lib/core4.lisp target/debug/sens
