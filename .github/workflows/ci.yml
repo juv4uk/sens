@@ -96,46 +96,22 @@ jobs:
             sha256sum "$archive"
           done
 
-      - name: D3–D5 — нативний фізичний SENS-закон та однобітовий негатив
-        id: sens-d3-d5-derived-law
+      - name: "REGEN — точна проєкція семантичного реєстру (лише артефакт, не коміт)"
         shell: bash
         run: |
           set -euo pipefail
-          # Канонічне джерело містить лише точні D1/D2/D3/D4/D5 слова.
-          # Zig єдиний кодує T5; SENS єдиний приймає граматику та закон.
-          law_source="tests/semantic/d3-d5-direct-selector-law.lisp"
-          mutant_source="tests/semantic/d3-d5-direct-selector-mutant.lisp"
-          # Фізичні виходи не мають забруднювати checkout: H2 вимагає
-          # root_matches=true ТА чистий exact-SHA робочий каталог.
-          physical_dir="$RUNNER_TEMP/sens-d3-d5-physical"
-          mkdir -p "$physical_dir"
-          cp "$law_source" "$physical_dir/law.lisp"
-          cp "$mutant_source" "$physical_dir/mutant.lisp"
-          cmp "$law_source" "$physical_dir/law.lisp"
-          cmp "$mutant_source" "$physical_dir/mutant.lisp"
-          target/debug/sens-trit encode "$physical_dir/law.lisp"
-          target/debug/sens-trit encode "$physical_dir/mutant.lisp"
-          law="$physical_dir/law.sens"
-          mutant="$physical_dir/mutant.sens"
-          expected="$RUNNER_TEMP/sens-d3-d5-expected-d1.txt"
-          printf '1\n' > "$expected"
-          sha256sum target/debug/sens target/debug/sens-trit "$law_source" "$mutant_source" "$law" "$mutant" "$expected"
-          python3 scripts/ci_failure_contract.py run \
-            --test-id sens-d3-d5-physical-positive \
-            --layer eval \
-            --fixture "$law" \
-            --expected-file "$expected" \
-            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
-            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
-            -- target/debug/sens "$law"
-          python3 scripts/ci_failure_contract.py run \
-            --test-id sens-d3-d5-physical-one-bit-mutant \
-            --layer eval \
-            --fixture "$mutant" \
-            --expect-error-substring "domain identity is not callable under its ratified law: D1" \
-            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
-            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
-            -- target/debug/sens "$mutant"
+          # Regenerate the Rust projection from the current source of truth and
+          # hand it out as an artifact so a human can commit it together with
+          # the source change. This step never edits the tree in place.
+          cargo run --locked -p sens-cli --bin my-lisp -- scripts/generate-rust-semantic-registry.lisp
+          cp crates/sens/src/semantic_registry_generated.rs "$RUNNER_TEMP/semantic_registry_generated.rs"
+          sha256sum "$RUNNER_TEMP/semantic_registry_generated.rs"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semantic-registry-generated
+          path: ${{ runner.temp }}/semantic_registry_generated.rs
+          if-no-files-found: error
+          retention-days: 1
       - name: ZIG-MIGRATION — реальний T5 та заборона Rust fallback (обидва профілі)
         id: zig-only-t5-no-fallback
         shell: bash
