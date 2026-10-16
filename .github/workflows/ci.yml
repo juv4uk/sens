@@ -265,7 +265,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for id in d8-liststar-length d8-map-any-lower d8-copy-list; do
+          for id in d8-liststar-length d8-map-any-lower d8-copy-list d8-prog1-prog2; do
             fixture="tests/semantic/${id}-laws.lisp"
             sha256sum "$fixture" lib/core4.lisp target/debug/sens
             if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
@@ -279,7 +279,7 @@ jobs:
               exit 1
             fi
           done
-          for item in "d8-liststar-length-invalid" "d8-map-any-reject-non-d1" "d8-copy-list-invalid"; do
+          for item in "d8-liststar-length-invalid" "d8-map-any-reject-non-d1" "d8-copy-list-invalid" "d8-prog1-invalid-arity" "d8-prog2-invalid-arity" "d8-prog1-evaluates-tail"; do
             fixture="tests/semantic/${item}.lisp"
             sha256sum "$fixture"
             if output="$(target/debug/sens "$fixture" 2>&1)"; then
@@ -288,7 +288,7 @@ jobs:
             fi
             printf '%s\n' "$output"
           done
-          echo "D8_NATIVE_BATCH_PASS functions=5 positive=24 negative=3 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000"
+          echo "D8_NATIVE_BATCH_PASS functions=7 positive=32 negative=6 exact_domains=D8:00011101,D8:00111110,D8:01001111,D8:01000111,D8:10100000,D8:00000100,D8:11001001"
 
 
       - name: "D8 — 24 точкові самосвідки SENS (три партії)"
