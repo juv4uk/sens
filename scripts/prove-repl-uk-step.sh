@@ -17,20 +17,42 @@ for source in lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; do
 done
 echo 'UKRAINIAN_SURFACE_SOURCE_OK machine_heads=0 semantic_pass=NOT_INFERRED'
 
+# Звіряємо назви D1 із ЄДИНОЮ ратифікованою таблицею;
+# заміна слів у тесті сама по собі не призначає нових D1 кодів.
+if ! grep -Eq '^[[:space:]]*[(]0[[:space:]]+[(]ук[[:space:]]+ні[)]' lib/domains/d1.lisp ||
+   ! grep -Eq '^[[:space:]]*[(]1[[:space:]]+[(]ук[[:space:]]+так[)]' lib/domains/d1.lisp; then
+  echo 'REPL_D1_PROJECTION_RED reason=ratified-D1-uk-row-mismatch' >&2
+  exit 1
+fi
+if grep -nE '#d1:[01]' lib/repl-core.lisp tests/semantic/repl-uk-*.lisp; then
+  echo 'REPL_D1_LITERAL_RED reason=forbidden-D1-textual-compatibility-sigil' >&2
+  exit 1
+fi
+echo 'REPL_D1_PROJECTION_OK from=lib/domains/d1.lisp names=ні,так'
+
 id=repl-uk-native
 reproduce="bash scripts/prove-repl-uk-step.sh"
 for kind in step loop queue define-function; do
   law="tests/semantic/repl-uk-${kind}-law.lisp"
   mutant="tests/semantic/repl-uk-${kind}-mutant.lisp"
-  python3 - "$law" "$mutant" <<'PY'
-from pathlib import Path
-import sys
-a, b = (Path(p).read_text(encoding="utf-8") for p in sys.argv[1:])
-changes = [(x, y) for x, y in zip(a, b) if x != y]
-if len(a) != len(b) or changes != [("1", "0")]:
-    raise SystemExit("UNINFORMATIVE-INPUT: require exactly one D1 bit 1->0")
-print("REPL_UK_MUTANT_BIT_PARITY_OK changes=1 semantic_pass=NOT_INFERRED")
-PY
+  # Файли автора містять лише українські імена, а не D1-літерали.
+  # Єдина дозволена мутація тут: одна проєкція D1:так → D1:ні.
+  # Бітову однозначність засвідчує авторитетна таблиця D1 нижче,
+  # а семантичний результат вирішує сам SENS під час нативного тесту.
+  law_text=$(cat "$law")
+  mutant_text=$(cat "$mutant")
+  cursor=0
+  while (( cursor < ${#law_text} && cursor < ${#mutant_text} )) &&
+        [[ "${law_text:cursor:1}" == "${mutant_text:cursor:1}" ]]; do
+    cursor=$((cursor + 1))
+  done
+  if [[ "${law_text:cursor:3}" != "так" ||
+        "${mutant_text:cursor:2}" != "ні" ||
+        "${law_text:$((cursor + 3))}" != "${mutant_text:$((cursor + 2))}" ]]; then
+    echo "UNINFORMATIVE-INPUT: expected exactly one D1:так→ні change $law" >&2
+    exit 1
+  fi
+  echo 'REPL_UK_MUTANT_BIT_PARITY_OK one=D1:так→ні semantic_pass=NOT_INFERRED'
 done
 sha256sum lib/meta-eval.lisp lib/repl-core.lisp \
   tests/semantic/repl-uk-step-law.lisp \
