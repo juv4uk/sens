@@ -1470,9 +1470,9 @@
 ; Lower D3 laws only; no new D9 call mechanism or independent primitive.
 (0011 канон-закон-рівність-рефлексивний-атом
   (0010 (значення)
-    (110
-      ((010 значення) (101 значення значення))
-      ((010 (001 ())) (100 (001 ()))))))
+    (за-умовою
+      ((атом? значення) (тотожне? значення значення))
+      ((атом? (як-є ())) (перше (як-є ()))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
