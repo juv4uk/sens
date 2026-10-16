@@ -9,12 +9,13 @@
     "curated": 153,
     "additional_function_shaped": 410,
     "unique_names": 565,
-    "detailed_law_dossiers": 128,
+    "detailed_law_dossiers": 149,
     "new_domain_codes": 0,
     "new_callable": 0,
     "archaeology_recovered": 2,
     "additional_archived_nonfunction_labels": 54,
-    "archival_CLHS_type_or_condition_not_callable": 8
+    "archival_CLHS_type_or_condition_not_callable": 8,
+    "archived_mal_surfaces_reviewed": 21
   },
   "pins": {
     "curated": "86415a6e61bc986815a3a5055b877a78d9c7e251",
@@ -224,6 +225,29 @@
       "ratification": "PENDING"
     },
     {
+      "name": "CL-EVAL",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Будь-яке обчислення форми має відбуватись під семантикою SENS; цей донор є лише дослідницьким свідченням зовнішнього host-eval.",
+      "negative_case_uk": "Зовнішній Common Lisp eval або Rust eval не є допустимим семантичним fallback.",
+      "lower_domain_crosswalk": [
+        "D4:0001:EVAL"
+      ],
+      "gate": "HOLD_HOST_SEMANTIC_FALLBACK",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 61,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "HOLD-SEMANTIC-REVIEW",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "CLAIM-MARKERS",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Описані маркери є проєкцією статусу, а не Core інструкцією.",
@@ -416,6 +440,76 @@
       "callable": false,
       "proof_status": "NOT_NATIVE_TESTED",
       "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "CONCAT",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Об'єднання послідовностей має зберігати їхній порядок і межі елементів без втрати.",
+      "negative_case_uk": "Перестановка підсписків чи непомічений неправильний хвіст порушує контракт.",
+      "lower_domain_crosswalk": [
+        "D4:1111:APPEND"
+      ],
+      "gate": "DERIVED_SEQUENCE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 26,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "CONJ",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Поведінка залежить від типу колекції: для списку можна додати голову, для вектора — кінець.",
+      "negative_case_uk": "Однакова механічна дія для пари та вектора з різними даними порушує порядок.",
+      "lower_domain_crosswalk": [
+        "D3:111:CONS",
+        "D9:101011101:VEC-CONJ"
+      ],
+      "gate": "DERIVED_TYPE_DISPATCH",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 57,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "CONTAINS?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Наявність ключа перевіряється незалежно від його значення; повертається точний D1 біт.",
+      "negative_case_uk": "Присутній ключ зі значенням D1:NO не повинен вважатись відсутнім.",
+      "lower_domain_crosswalk": [
+        "D9:101100010:MAP-CONTAINS?"
+      ],
+      "gate": "DERIVED_MAP_QUERY",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 50,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "COUNT-USAGE-LIST",
@@ -660,6 +754,29 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "FALSE?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Перевірка саме кваліфікованого біта D1:NO без змішування зі структурним NIL.",
+      "negative_case_uk": "Порожній список або D7 знак '0' не стають автоматично D1:NO.",
+      "lower_domain_crosswalk": [
+        "D1:0:NO"
+      ],
+      "gate": "HOLD_PREDICATE_BRIDGE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 35,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "FINALIZE-INHERITANCE",
       "source_state": "HISTORICAL_DONOR_ONLY",
       "proposed_law_uk": "Фіналізація обчислює class precedence та effective slots.",
@@ -694,6 +811,30 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "FIRST",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Голова непорожнього списку зберігає ідентичність першого елемента.",
+      "negative_case_uk": "Порожній список не породжує довільного нового елемента.",
+      "lower_domain_crosswalk": [
+        "D6:000100:NTH",
+        "D3:100:CAR"
+      ],
+      "gate": "DERIVED_SELECTOR",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 28,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "FOURTH",
@@ -1208,6 +1349,29 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "NIL?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Перевіряється точна структурна порожнеча, результатом є D1 PredicateBit.",
+      "negative_case_uk": "D1:0 не можна прирівнювати до структурного порожнього списку лише через написання.",
+      "lower_domain_crosswalk": [
+        "D4:0101:NULL"
+      ],
+      "gate": "HOLD_PREDICATE_BRIDGE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 33,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "NONDECREASING-FROM?",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Кожні два сусідні кваліфіковані числа задовольняють a≤b.",
@@ -1271,6 +1435,29 @@
       "ratification": "PENDING"
     },
     {
+      "name": "NUMBER?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Числовість є лише явно типізованою властивістю математичного носія.",
+      "negative_case_uk": "Цифра в D7 та бінарна координата домену не підміняють D24 число.",
+      "lower_domain_crosswalk": [
+        "D5:01001:NUMBERP"
+      ],
+      "gate": "HOLD_D24_TYPED_NUMBERS",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 36,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "OCCURS-CHECK",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Walk змінної перевіряє її входження в терм.",
@@ -1289,6 +1476,29 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "PR-STR",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Повинна повернути D7-рядок, який можна без втрати лапок та escaping прочитати назад.",
+      "negative_case_uk": "Рядок із лапками, оберненим слешем або пробілом не можна серіалізувати із втратою символа.",
+      "lower_domain_crosswalk": [
+        "D8:11110100:WRITE-TO-STRING"
+      ],
+      "gate": "DERIVED_PRESENTATION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 6,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "PRINT-INDENT",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Відступ у людському звіті не змінює семантику proof.",
@@ -1304,6 +1514,53 @@
       "ratification": "PENDING"
     },
     {
+      "name": "PRINTLN",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Людський друк має завершити рівно один рядок з очікуваною display-проєкцією.",
+      "negative_case_uk": "Кавички/escaping з readable PRINT не можна мовчки підставляти замість display.",
+      "lower_domain_crosswalk": [
+        "D8:11010110:PRINC",
+        "D8:11011011:PRINT"
+      ],
+      "gate": "DERIVED_PRESENTATION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 5,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "PRN",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Друк читабельної форми має завершитись одним роздільником нового рядка.",
+      "negative_case_uk": "Без доданого newline або з непридатним escaped поданням ця проєкція не тотожна донору.",
+      "lower_domain_crosswalk": [
+        "D8:11011011:PRINT"
+      ],
+      "gate": "DERIVED_PRESENTATION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 4,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "PROVENANCE-LIST",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Зібрати всі source refs без втрат і дублювання поза законом.",
@@ -1317,6 +1574,52 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "READ-STRING",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Точно один datum із D7-рядка має читатись через власний SENS reader, із явним контролем залишку.",
+      "negative_case_uk": "Зайві токени, незакрита форма або помилка типу не стають успішним обчисленням.",
+      "lower_domain_crosswalk": [
+        "D8:11101010:READ"
+      ],
+      "gate": "HOLD_READER_INTEGRATION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 17,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "READLINE",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Typed ingress читає рядок з ознакою EOF, межами фрейму та помилкою відновлення.",
+      "negative_case_uk": "EOF після непорожнього останнього рядка не може створити зайвий рядок; транспорт не обчислює SENS.",
+      "lower_domain_crosswalk": [
+        "D10:1101000110:READ-LINE"
+      ],
+      "gate": "HOLD_TYPED_HOST_INGRESS",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 54,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "HOLD-SEMANTIC-REVIEW",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "RECEIVE-KNOWLEDGE-PACKAGE",
@@ -1389,6 +1692,30 @@
       "callable": false,
       "proof_status": "NOT_NATIVE_TESTED",
       "semantic_distinctness": "UNPROVEN"
+    },
+    {
+      "name": "REST",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Повернути хвіст пари без копіювання або зміни її голови.",
+      "negative_case_uk": "Improper tail не можна мовчки трактувати як proper-list.",
+      "lower_domain_crosswalk": [
+        "D6:110001:DROP",
+        "D3:011:CDR"
+      ],
+      "gate": "DERIVED_SELECTOR",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 29,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "ROTATE-LEFT",
@@ -1527,6 +1854,29 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "SLURP",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Весь вміст файла має потрапити як дані D7 через явний зовнішній read-result.",
+      "negative_case_uk": "Відсутній файл або EOF не підміняється пустим валідним текстом.",
+      "lower_domain_crosswalk": [
+        "D9:110110111:READ-FILE"
+      ],
+      "gate": "HOLD_HOST_IO",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 18,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "SQRT-ITER",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Наступна оцінка кореня обчислюється лише над D24+ числом.",
@@ -1576,6 +1926,53 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "STR",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Проєктування кількох значень з'єднує символьні подання в порядку аргументів.",
+      "negative_case_uk": "Зміна порядку чи readable-escaping замість display змінює результат.",
+      "lower_domain_crosswalk": [
+        "D8:11110100:WRITE-TO-STRING",
+        "D9:110011110:STRING-APPEND"
+      ],
+      "gate": "DERIVED_PRESENTATION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 7,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "STRING?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Кваліфікований символьний носій розпізнається без перетворення тексту на code.",
+      "negative_case_uk": "Символ із тими самими D7 літерами не є рядком.",
+      "lower_domain_crosswalk": [
+        "D9:110100110:STRINGP"
+      ],
+      "gate": "DERIVED_TYPE_PREDICATE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 55,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "STRIP-ARTICLE",
       "source_state": "LIVE_SOURCE_DEFINITION_FOUND",
       "proposed_law_uk": "Прибирати визначений артикль як повний D7 токен.",
@@ -1589,6 +1986,29 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "SYMBOL",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Створювати символ із валідного D7 написання з визначеною normalisation policy.",
+      "negative_case_uk": "Нормалізація не може без договору злити два відмінні імені чи створити ратифіковану функцію.",
+      "lower_domain_crosswalk": [
+        "D8:11101101:STRING->SYMBOL"
+      ],
+      "gate": "DERIVED_SYMBOL_PROJECTION",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 37,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "SYNONYM-STREAM-SYMBOL",
@@ -1676,6 +2096,52 @@
       "semantic_distinctness": "UNPROVEN"
     },
     {
+      "name": "TIME-MS",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Монотонне значення часу допускається лише як явно типізоване зовнішнє спостереження.",
+      "negative_case_uk": "Переведення годинника назад або декодування числа як коду домену не можуть міняти SENS identity.",
+      "lower_domain_crosswalk": [
+        "D9:101111001:MONO-MS"
+      ],
+      "gate": "HOLD_HOST_TIME",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 56,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
+      "name": "TRUE?",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Перевірка саме кваліфікованого біта D1:YES, а не будь-якої truthy форми.",
+      "negative_case_uk": "Довільна непорожня пара чи D7 символ '1' не є D1:YES.",
+      "lower_domain_crosswalk": [
+        "D1:1:YES"
+      ],
+      "gate": "HOLD_PREDICATE_BRIDGE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 34,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
+    },
+    {
       "name": "TRUTHY?",
       "source_state": "LIVE_SOURCE_MOVED_TO_CORE",
       "proposed_law_uk": "Compatibility truthiness не підміняє D1 predicate.",
@@ -1757,6 +2223,29 @@
       "coordinate": null,
       "callable": false,
       "ratification": "PENDING"
+    },
+    {
+      "name": "VEC",
+      "source_state": "ARCHIVAL_MAL_SURFACE_ONLY",
+      "proposed_law_uk": "Перетворення послідовності у вектор зберігає порядок і кожен елемент.",
+      "negative_case_uk": "Два різних сусідніх елементи не можна переставити; типізований вектор не є CONS-списком.",
+      "lower_domain_crosswalk": [
+        "D9:101111011:VEC-FROM-LIST"
+      ],
+      "gate": "DERIVED_SEQUENCE",
+      "source_ref": {
+        "path": "knowledge/d10-crossrepo-mal-v1.json",
+        "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+        "donor_row": 24,
+        "evidence_path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+        "evidence_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14"
+      },
+      "donor_verdict": "CURRENT-OR-DERIVED-PROJECTION",
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN",
+      "ratification": "PENDING",
+      "coordinate": null,
+      "callable": false
     },
     {
       "name": "VEC-FROM-LIST-ONTO",
@@ -9402,5 +9891,15 @@
     "additional_dossiers": 10,
     "typed_nonfunctions": 8,
     "semantic_admission": "NONE"
+  },
+  "archival_mal_source_ref": {
+    "path": "knowledge/d11/база-доступних-функцій/архів-mal-21-перевірок-20261017.json",
+    "git_blob": "7a6f797eaaa8d11f9610e8ebf2eecaf771505f14",
+    "rows": 21,
+    "classes": {
+      "derived_or_projection": 19,
+      "host_boundary": 2
+    },
+    "native_verified": 0
   }
 }
