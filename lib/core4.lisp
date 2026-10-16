@@ -2577,3 +2577,26 @@
       ((string<? ліве праве) #d1:0)
       ((string<? праве ліве) #d1:0)
       (#d1:1 #d1:1))))
+
+
+; D8:10101011 SCALE — exact numeric scaling through ratified D5 TIMES.
+; Both operands retain explicit qualified D24+ numeric carriers.
+(0011 масштабувати
+  (0010 (число коефіцієнт)
+    (помножити число коефіцієнт)))
+
+
+; D8:00000011 REMAP — proper-list specialization by D6:101000 MAP.
+; List-order and D1/structural results belong to SENS, not host iteration.
+(0011 перевідобразити
+  (0010 (дія елементи)
+    (відобразити дія елементи)))
+
+
+; D8:00000001 DOSEQ — proper-list effect iteration, left to right.
+; Native SENS D6 MAP evaluates each application; all mapped values are
+; discarded, and the iteration itself returns canonical D3:000 empty ().
+(0011 для-кожного-елемента
+  (0010 (дія елементи)
+    ((0010 (відкинуті-результати) (001 ()))
+     (відобразити дія елементи))))
