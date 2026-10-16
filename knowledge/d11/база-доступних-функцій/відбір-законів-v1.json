@@ -21,7 +21,8 @@
   "source_state_counts": {
     "LIVE_SOURCE_DEFINITION_FOUND": 300,
     "HISTORICAL_DONOR_ONLY": 231,
-    "SOURCE_BINDING_ABSENT_AT_ORIGIN": 27,
+    "SOURCE_BINDING_ABSENT_AT_ORIGIN": 24,
+    "LIVE_SOURCE_RELOCATED_TO_WORLD": 3,
     "HISTORICAL_WITH_LIBRARY_SOURCE": 4,
     "LIVE_SOURCE_MOVED_TO_CORE": 1
   },
@@ -429,13 +430,13 @@
     },
     {
       "name": "ADVISE",
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
-      "proposed_law_uk": "Назва не має top-level binding у чинному lib/knowledge.lisp.",
-      "negative_case_uk": "Не видавати D11 слот за відсутнім донором.",
+      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
+      "proposed_law_uk": "Функція ADVISE має чинне Lisp визначення у lib/world.lisp, а не у старому lib/knowledge.lisp; її контракт має доводитись нативним world-спостереженням.",
+      "negative_case_uk": "Відсутній world/provenance або невалідний перехід не можна тихо приймати як успішний результат.",
       "lower_domain_crosswalk": [
         "D3:110:COND"
       ],
-      "gate": "HOLD_STALE_SOURCE",
+      "gate": "LIBRARY_RELOCATED_NO_NEW_SLOT",
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
@@ -624,10 +625,15 @@
       "family": "knowledge",
       "source": "lib/knowledge.lisp",
       "origin_ids": [],
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
       "meaning": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "observed_source": {
+        "path": "lib/world.lisp",
+        "blob": "2da24e2d6f94f0cbe318272adb23bad6b7872146",
+        "line": 368
+      }
     },
     {
       "name": "ADVISE-ALL",
@@ -635,10 +641,15 @@
       "family": "knowledge",
       "source": "lib/knowledge.lisp",
       "origin_ids": [],
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
       "meaning": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "observed_source": {
+        "path": "lib/world.lisp",
+        "blob": "2da24e2d6f94f0cbe318272adb23bad6b7872146",
+        "line": 377
+      }
     },
     {
       "name": "AGENT-LOOP",
@@ -3010,10 +3021,15 @@
       "family": "knowledge",
       "source": "lib/knowledge.lisp",
       "origin_ids": [],
-      "source_state": "SOURCE_BINDING_ABSENT_AT_ORIGIN",
+      "source_state": "LIVE_SOURCE_RELOCATED_TO_WORLD",
       "meaning": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "observed_source": {
+        "path": "lib/world.lisp",
+        "blob": "2da24e2d6f94f0cbe318272adb23bad6b7872146",
+        "line": 472
+      }
     },
     {
       "name": "INVALID",
@@ -7576,5 +7592,9 @@
       "coordinate": null,
       "callable": false
     }
-  ]
+  ],
+  "source_pins": {
+    "lib/world.lisp": "2da24e2d6f94f0cbe318272adb23bad6b7872146"
+  },
+  "provenance_update": "3 previous origin-file absences resolved to live definitions in lib/world.lisp. Source migration != new D11 semantic capability."
 }
