@@ -509,6 +509,29 @@ jobs:
             exit 1
           fi
           echo "D9_SEVEN_STEP_SELECTORS_PASS identities=D9:011010000..011010111 laws=9 nonpair_negative=1"
+          # D9:011011000..011011111: second native batch of seven-step selectors.
+          d9_7b="tests/semantic/d9-seven-step-selector-batch-03.lisp"
+          d9_7b_neg="tests/semantic/d9-seven-step-selector-batch-03-nonpair.lisp"
+          sha256sum "$d9_7b" "$d9_7b_neg" lib/core4.lisp target/debug/sens
+          if ! d9_7b_out="$(target/debug/sens "$d9_7b" 2>&1)"; then
+            echo "::error::D9_SELECTOR_7B_EXEC_RED layer=eval fixture=$d9_7b expected=nine-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$d9_7b_out" >&2
+            exit 1
+          fi
+          d9_7b_actual="$(printf "%s\n" "$d9_7b_out" | tail -n 1)"
+          if [[ "$d9_7b_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_SELECTOR_7B_LAW_DIFF layer=eval fixture=$d9_7b expected=(1 1 1 1 1 1 1 1 1) actual=$d9_7b_actual first_mismatch=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if d9_7b_bad="$(target/debug/sens "$d9_7b_neg" 2>&1)"; then
+            echo "::error::D9_SELECTOR_7B_NEG_ACCEPTED layer=eval fixture=$d9_7b_neg expected=pair-type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$d9_7b_bad" != *"CAR"* && "$d9_7b_bad" != *"CDR"* && "$d9_7b_bad" != *"pair"* && "$d9_7b_bad" != *"пара"* ]]; then
+            echo "::error::D9_SELECTOR_7B_WRONG_REFUSAL layer=eval fixture=$d9_7b_neg expected=pair-type-refusal actual=$d9_7b_bad" >&2
+            exit 1
+          fi
+          echo "D9_SEVEN_STEP_SELECTORS_B03_PASS identities=D9:011011000..011011111 laws=9 negative=1"
 
 
 
