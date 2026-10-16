@@ -602,6 +602,17 @@
 
 
 
+; D6:001110 ADD1 / D6:001111 SUB1 — purely derived D24+ arithmetic.
+; D5:01010 PLUS and D5:01011 DIFFERENCE preserve the qualified mathematical carrier.
+; No implied arithmetic on D1-D10 identities, no new direct D6 call admission.
+(0011 додати-1
+  (0010 (значення)
+    (01010 значення #d24:000000000000000000000001)))
+
+(0011 відняти-1
+  (0010 (значення)
+    (01011 значення #d24:000000000000000000000001)))
+
 ; ===== D6 derived functions (партія 1: 16 селекторів; партія 2: арифметичні/предикатні похідні) =====
 ; Ратифіковані координати lib/domains/d6.lisp; механізм = SENS-визначення через D3/D4/D5.
 ; Нових координат не створюємо; одне джерело семантики — SENS.
