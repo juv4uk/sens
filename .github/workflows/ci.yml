@@ -199,7 +199,12 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$d5_arith_observed"
-          d5_arith_actual="${d5_arith_observed##*
+          d5_arith_actual="$(printf '%s\n' "$d5_arith_observed" | tail -n1)"
+          if [[ "$d5_arith_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D5_ARITH_SURFACE_LAW_DIFF layer=eval fixture=$d5_arith expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d5_arith_actual" >&2
+            exit 1
+          fi
+          echo "D5_ARITH_SURFACE_NATIVE_PASS exact=D5:01010,01011,10110,11010,11011+D6:001110,001111 laws=16 wrong-order-negatives=2 authority=SENS"
           d8_greater_law="tests/semantic/d8-string-greater-laws.lisp"
           d8_greater_mutant="tests/semantic/d8-string-greater-mutant.lisp"
           sha256sum "$d8_greater_law" "$d8_greater_mutant" lib/core4.lisp target/debug/sens
