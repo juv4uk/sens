@@ -484,9 +484,6 @@ impl std::fmt::Debug for Builtin {
 /// Dani vykonannia ne zalezhat vid parsera ta predstavlennia u khost-systemi.
 /// Laufzeitdaten sind unabhängig vom Parser und von jeder Host-Darstellung.
 #[derive(Clone, Debug)]
-// STAGED-OUT (target): Rational / BinaryNumber / NumericComposition are the Rust math the SENS
-// REPL will own. They are still in the Value enum because removing them is a type refactor
-// that must compile (cargo). See issue: 'Value without Rust math'.
 pub enum Value {
     Nil,
     Bool(bool),
