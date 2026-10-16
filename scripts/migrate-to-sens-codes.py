@@ -826,7 +826,17 @@ def binary_rewrite(
             if is_bound(token) and not re.fullmatch(r"[01]{3,9}", token):
                 emit_text7_atom(token, role="call-head")
             else:
-                resolution = resolver.resolve_head(token)
+                try:
+                    resolution = resolver.resolve_head(token)
+                except BinaryMigrationError:
+                    raise
+                except ValueError as error:
+                    # NEW REALITY: an eight-bit head is a retired SID8-era head;
+                    # the resolver rejects it with a plain ValueError, but the
+                    # migration must fail closed with its own uniform error.
+                    raise BinaryMigrationError(
+                        f"unresolved executable head {token!r}: {error}"
+                    ) from error
                 if resolution.resolved:
                     identity = require_resolved_identity(resolution, token, start)
                     if identity.label == "EMPTY":
