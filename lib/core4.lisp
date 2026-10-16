@@ -1892,11 +1892,14 @@
 ; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
 ; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
 ; vzhe vyrazhuvani samoiu movoiu.
-(0011 abs
+; D6:010011 ABS / модуль — exact D24+ arithmetic, exact D1 condition.
+; LESSP returns an exact numeric result; EQUAL? projects its 1/0 value to D1.
+(0011 модуль
   (0010 (x)
     (110
-      ((11010 x 0)  (01011 0 x))
-      ((0100 (11010 x 0)) x))))
+      ((equal? (11010 x #d24:000000000000000000000000) #d24:000000000000000000000001) (01011 #d24:000000000000000000000000 x))
+      (#d1:1 x))))
+(0011 abs модуль)
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
