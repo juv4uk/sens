@@ -764,6 +764,18 @@
   (0010 (умова елементи)
     (хибне? (будь-яке? умова елементи))))
 
+
+; D8:00110011 ACONS-SWAPPED — чинна продуктова координата #3960.
+; Закон орієнтації #3741: tau(ACONS(k,v,A)) = ACONS(v,k,tau(A)).
+; tau(pair) = CONS(CDR(pair),CAR(pair)); D6 MAP зберігає порядок alist.
+; Лише мовна похідна функція SENS, не новий D8 primitive.
+(0011 додати-асоціацію-навпаки
+  (0010 (ключ значення асоціації)
+    (додати-асоціацію значення ключ
+      (відобразити
+        (функція (пара) (111 (011 пара) (100 пара)))
+        асоціації))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
