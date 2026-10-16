@@ -6,7 +6,7 @@
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
 use crate::semantic_registry::{self, LegacyRegistrySlot};
-use crate::{BinarySourceWord, CoreDomainIdentity};
+use crate::CoreDomainIdentity;
 #[cfg(test)]
 use crate::{Bit4, CoreD4};
 
@@ -61,8 +61,12 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
         return identity_for_domain_identity(identity).map(|_| identity);
     }
 
-    let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
-    domain_identity_for_legacy_semantic_id(legacy)
+    let slot = semantic_registry::historical_registry_slot_for_surface(name)?;
+    let mechanism = generated::NECESSARY_FORM_DISPATCH
+        .iter()
+        .find(|row| row.semantic_id == slot)
+        .map(|row| row.mechanism)?;
+    canonical_domain_identity(mechanism)
 }
 
 /// Explicit compatibility seam: an admitted historical W8 row may identify
@@ -150,19 +154,11 @@ mod exact_d4_necessary_form_migration_tests {
     }
 
     #[test]
-    fn compatibility_w8_rows_are_explicitly_projected_to_d4() {
-        for (slot, bits, expected) in [
-            (0b00001000, 0b0010, NecessaryFormIdentity::Lambda),
-            (0b00001001, 0b0011, NecessaryFormIdentity::Define),
-            (0b00001011, 0b0011, NecessaryFormIdentity::Define),
-        ] {
-            let legacy = CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(slot)).expect("exact domain word");
-            let identity = domain_identity_for_legacy_semantic_id(legacy)
-                .expect("the three admitted compatibility rows have an explicit D4 bridge");
-            assert_eq!(identity.width(), 4);
-            assert_eq!(identity.packed_bits(), bits);
-            assert_eq!(identity_for_semantic_id(legacy), Some(expected));
-        }
+    fn def_compatibility_surface_projects_to_ratified_d4_define() {
+        let identity = domain_identity_for_symbol("def")
+            .expect("Lisp-generated def form must project to D4 DEFINE");
+        assert_eq!(identity, d4(0b0011));
+        assert_eq!(identity_for_symbol("def"), Some(NecessaryFormIdentity::Define));
     }
 
     #[test]
@@ -186,18 +182,7 @@ mod exact_d4_necessary_form_migration_tests {
     }
 
     #[test]
-    fn every_other_historical_w8_slot_fails_closed() {
-        for slot in 0u8..=u8::MAX {
-            let expected = match slot {
-                0b00001000 => Some(NecessaryFormIdentity::Lambda),
-                0b00001001 | 0b00001011 => Some(NecessaryFormIdentity::Define),
-                _ => None,
-            };
-            assert_eq!(
-                identity_for_semantic_id(CoreDomainIdentity::from_source_word(BinarySourceWord::from_packed_byte(slot)).expect("exact domain word")),
-                expected,
-                "unexpected necessary-form route for historical W8 {slot:08b}",
-            );
-        }
+    fn non_necessary_historical_surface_fails_closed() {
+        assert_eq!(domain_identity_for_symbol("defmacro"), None);
     }
 }

@@ -72,6 +72,23 @@ pub(crate) fn exact_identity_for_legacy_registry_slot(slot: u8) -> Option<CoreDo
         .and_then(exact_identity_for_row)
 }
 
+/// Opaque lookup key for one historical surface row.
+///
+/// This indexes the Lisp-generated registry only. It is neither a source word
+/// nor authority for a current domain identity.
+pub(crate) fn historical_registry_slot_for_surface(name: &str) -> Option<u8> {
+    let mut matched = None;
+    for row in SEMANTIC_ROWS {
+        if row.surfaces.iter().any(|surface| surface.name == name) {
+            if matched.is_some() {
+                return None;
+            }
+            matched = Some(row.semantic_id);
+        }
+    }
+    matched
+}
+
 pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Option<u8> {
     let mut matched = None;
     for row in SEMANTIC_ROWS {

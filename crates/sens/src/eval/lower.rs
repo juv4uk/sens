@@ -45,7 +45,7 @@ fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdenti
     match &head.kind {
         ExprKind::DomainIdentity(identity) => identity.core_operation(),
         ExprKind::Symbol(name) if mode == LowerMode::ExactDomain => {
-            semantic_registry::domain_identity_for_surface(name)
+            immutable_surface_domain_identity(name)
         }
         ExprKind::Symbol(name) => immutable_surface_domain_identity(name),
         _ => None,
@@ -356,13 +356,13 @@ mod exact_lowering_isolation_tests {
     }
 
     #[test]
-    fn historical_def_surface_cannot_steal_exact_d4_binder() {
+    fn exact_def_compatibility_surface_lowers_to_ratified_d4_binder() {
         let current = lower_current("(def x (001 1))");
-        let ExprKind::List(items) = current.kind else {
-            panic!("legacy-only name has no implicit D4 law");
+        let ExprKind::DomainCall(CoreDomainIdentity::D4(word), arguments) = current.kind else {
+            panic!("Lisp-owned def compatibility surface must lower to D4 DEFINE");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Symbol(name) if &**name == "def"));
-        assert!(matches!(&items[2].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
+        assert_eq!(word.word().packed_bits(), 0b0011);
+        assert!(matches!(&arguments[1].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
     }
 
     #[test]

@@ -96,8 +96,9 @@ pub fn eval_program(source: &str, session: &mut Session) -> Result<EvalResult, L
 
 /// Fail closed before the first side effect of an exact-domain program.
 ///
-/// Compatibility-only surface names are not admitted Dn call heads; otherwise
-/// a raw List could reach the evaluator's historical symbol dispatcher.
+/// A compatibility surface may be admitted only when the generated necessary-
+/// form table projects it to a ratified D4 operation; otherwise a raw List
+/// could reach the evaluator's historical symbol dispatcher.
 /// Traversal is iterative and skips D3 quoted data and D4 binder positions.
 pub(crate) fn validate_exact_executable_heads(expressions: &[Expr]) -> Result<(), LanguageError> {
     let mut pending: Vec<&Expr> = expressions.iter().collect();
@@ -114,6 +115,7 @@ pub(crate) fn validate_exact_executable_heads(expressions: &[Expr]) -> Result<()
                 if let Some(Expr { kind: ExprKind::Symbol(head), span }) = items.first() {
                     if crate::semantic_registry::admitted_semantic_id_for_surface(head).is_some()
                         && crate::semantic_registry::domain_identity_for_surface(head).is_none()
+                        && necessary_forms::domain_identity_for_symbol(head).is_none()
                     {
                         return Err(LanguageError::new(
                             ErrorKind::InvalidForm,
@@ -770,14 +772,15 @@ mod exact_domain_program_tests {
     }
 
     #[test]
-    fn exact_execution_rejects_historical_surface_before_any_side_effect() {
+    fn exact_execution_projects_def_compatibility_surface_to_ratified_d4_define() {
         let mut session = Session::bare();
-        let error = eval_exact_domain_program("(def x (001 1))", &mut session)
-            .expect_err("legacy-only def is not ratified D4 DEFINE");
-        assert_eq!(error.kind, ErrorKind::InvalidForm);
-        assert!(error.message.contains("historical-only"), "{}", error.message);
-        assert_eq!(&"(def x (001 1))"[error.span.start..error.span.end], "def");
-        assert!(session.environment.get("x").is_none());
+        let result = eval_exact_domain_program("(def x (001 1))", &mut session)
+            .expect("Lisp-owned def compatibility surface must execute as D4 DEFINE");
+        assert_eq!(result.value.to_string(), "1");
+        assert_eq!(
+            session.environment.get("x").map(|value| value.to_string()),
+            Some("1".to_owned())
+        );
     }
 
     #[test]
