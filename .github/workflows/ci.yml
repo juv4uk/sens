@@ -491,10 +491,12 @@ jobs:
           set -euo pipefail
           export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
           echo 'test_id=e1-t5-f3c-size-corpus layer=transport authority=SENS benchmark=PHYSICAL_SIZE_ONLY'
+          # Чинний універсальний фізичний E1-свідок має бути виконаний
+          # точно один раз. Ніякого загального cargo test --lib замість звірки.
           cargo test --locked -p sens --lib \
-            # STAGED-OUT: universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix \
+            universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix \
             -- --exact --nocapture | tee "$RUNNER_TEMP/e1-carrier-size.log"
-          # STAGED-OUT: grep -Fxq 'test universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix ... ok' "$RUNNER_TEMP/e1-carrier-size.log"
+          grep -Fxq 'test universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix ... ok' "$RUNNER_TEMP/e1-carrier-size.log"
           python3 - <<'PY'
           from pathlib import Path
           import hashlib
@@ -555,7 +557,7 @@ jobs:
               "e1_bytes": int(tiny[0].group(3)),
               "t5_bytes": 4,
               "f3c_bytes": 3,
-              # STAGED-OUT: "provenance": "frame3_small::tests::produce_tiny_f3_only_when_full_file_is_smaller",
+              "provenance": "universal_frame3::tests::e1_t5_f3c_exact_physical_size_matrix",
           }
           assert tiny_record["words"] >= 1 and tiny_record["exact_bits"] >= 1
           assert tiny_record["e1_bytes"] >= 8

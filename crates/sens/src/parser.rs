@@ -693,7 +693,10 @@ mod tests {
     #[test]
     fn exact_reader_does_not_lift_legacy_w8_by_implicit_inference() {
         let old = parse("11110111").expect("історичний читач лишається окремим");
-        assert!(matches!(&old[0].kind, ExprKind::Sid(_)));
+        // Compatibility source text is inert: a matching binary-looking
+        // payload must not mint a Core function or a current D8 identity.
+        assert!(matches!(&old[0].kind, ExprKind::Symbol(name)
+            if name.as_ref() == "11110111"));
 
         let current = parse_exact_domain_source("11110111")
             .expect("поточна D8 тотожність в явному режимі");
@@ -752,9 +755,11 @@ mod tests {
         };
         assert_eq!(number.bits(), "1100");
 
+        // Exact eight-bit-looking source under the compatibility reader
+        // remains text. It is neither decimal Number nor implicit SID8/D8.
         assert!(matches!(
             parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(0b01010).expect("plus")))
+            ExprKind::Symbol(name) if name.as_ref() == "00001100"
         ));
 
         assert!(parse("#b-1010").is_err(), "signed canonical Number is not admitted by #3022");

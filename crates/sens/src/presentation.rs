@@ -514,19 +514,27 @@ mod tests {
     }
 
     #[test]
-    fn історичний_w8_не_маскується_під_чинний_d8() {
-        let old = Value::Sid(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall")));
-        let exact = Value::DomainIdentity(crate::DomainIdentity::D8(
+    fn історичне_w8_не_підвищується_до_чинного_callable_d8() {
+        // Старий восьмибітний запис — джерельне слово, не виконувана
+        // ідентичність Core і не доказ ратифікації сучасного D8.
+        let історичне_слово = crate::BinarySourceWord::W8(
+            crate::Bit8::new(0b10101000).expect("точні вісім бітів"),
+        );
+        assert_eq!(історичне_слово.width(), 8);
+        assert_eq!(історичне_слово.packed_bits(), 0b10101000);
+        assert!(
+            crate::CoreDomainIdentity::from_source_word(історичне_слово).is_none(),
+            "нератифіковане W8 не може ставати виконуваною D8-функцією"
+        );
+
+        let сучасні_дані = Value::DomainIdentity(crate::DomainIdentity::D8(
             crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()),
         ));
-        let old_uk = render_value_for_presentation(&old, PresentationLanguage::Ukrainian);
-        let current_uk = render_value_for_presentation(&exact, PresentationLanguage::Ukrainian);
-        assert!(old_uk.starts_with("#<сумісний W8:10101000 "), "{old_uk}");
-        assert_eq!(current_uk, "#<домен D8:10101000>");
-        assert_ne!(old_uk, current_uk);
-        // Формати механічної передачі не змінюються в UI міграції.
-        assert_eq!(old.to_string(), exact.to_string());
-        assert_eq!(old.to_string(), "10101000");
+        assert_eq!(сучасні_дані.to_string(), "10101000");
+        assert_eq!(
+            render_value_for_presentation(&сучасні_дані, PresentationLanguage::Ukrainian),
+            "#<домен D8:10101000>"
+        );
     }
 
     #[test]
@@ -540,7 +548,8 @@ mod tests {
             render_value_for_presentation(&current_quote, PresentationLanguage::Ukrainian)
         );
         assert_eq!(current_quote.to_string(), "001");
-        assert_eq!(historical_quote.to_string(), "00000001");
+        // D3:001 має рівно три біти; архівний W8 тут не зберігається.
+        assert_eq!(historical_quote.to_string(), "001");
     }
 
     #[test]

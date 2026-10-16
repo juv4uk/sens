@@ -88,7 +88,7 @@ pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Op
 /// No W8 slot, packed payload, or name may select the width. Higher domains
 /// require their own generated coordinate authority (never an implicit lift).
 fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
-    use crate::BinarySourceWord;
+    use crate::{BinarySourceWord, Bit8};
     let source = match width {
         3 => BinarySourceWord::W3(Bit3::new(bits)?),
         4 => BinarySourceWord::W4(Bit4::new(bits)?),
@@ -436,12 +436,12 @@ mod exact_registry_vs_historical_slot_tests {
 
     #[test]
     fn historical_w8_slot_cannot_become_current_d8_round() {
-        let historical: LegacyRegistrySlot = crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"));
+        let historical: LegacyRegistrySlot = crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")));
         let current = DomainIdentity::D8(
             CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
         );
         // Bit-for-bit equality of the mechanical payload is insufficient.
-        assert_eq!(historical.packed_byte() as u16, current.packed_bits());
+        assert_eq!(historical.packed_bits() as u16, current.packed_bits());
         assert_eq!(current.width(), 8);
         assert_eq!(current.to_string(), "10101000");
         // D8 is ratified in the Lisp table but has NO callable source
@@ -532,6 +532,7 @@ mod exact_d5_binding_projection_tests {
 #[cfg(test)]
 mod exact_d3_compatibility_migration_tests {
     use super::*;
+    use crate::{BinarySourceWord, Bit8};
 
     #[test]
     fn only_ratified_surfaces_project_historical_quote_cond_car() {
@@ -541,7 +542,7 @@ mod exact_d3_compatibility_migration_tests {
             (0b00000101, 0b100u8),
         ] {
             let identity = compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_packed_byte(legacy_byte)
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
             assert_eq!(identity.packed_bits(), bits);
@@ -552,7 +553,7 @@ mod exact_d3_compatibility_migration_tests {
     fn unrelated_w8_never_becomes_d3() {
         for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
             assert!(compatibility_d3_route_from_ratified_domains(
-                CoreDomainIdentity::from_packed_byte(byte)
+                CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(byte).expect("8-bit source word"))).expect("exact domain word")
             ).is_none());
         }
     }

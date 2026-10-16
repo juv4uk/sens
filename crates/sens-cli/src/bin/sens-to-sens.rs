@@ -74,8 +74,13 @@ fn resolve_head<'a>(
                 }
                 return None;
             }
-            semantic_registry_export::semantic_id_for_admitted_surface(name)
-                .map(|sens| (Some(name.as_ref()), sens))
+            // Audit an unknown, unbound list head as migration debt.
+            // Never infer a domain from its spelling or old W8 provenance.
+            let admitted = semantic_registry_export::semantic_id_for_admitted_surface(name);
+            if admitted.is_none() {
+                analysis.blocked_unratified += 1;
+            }
+            admitted.map(|sens| (Some(name.as_ref()), sens))
         }
         _ => None,
     }
@@ -664,6 +669,15 @@ mod tests {
         let analysis = analyze(source, &hosts).expect("source parses");
         assert!(analysis.edits.is_empty());
         assert_eq!(analysis.blocked_host_capabilities, 1);
+    }
+
+    #[test]
+    fn unbound_unratified_head_is_blocked_without_minting_a_code() {
+        let source = "(never-ratified-operation x)";
+        let audit = analyze(source, &no_host()).expect("well-formed unratified source");
+        assert_eq!(audit.blocked_unratified, 1, "unknown head remains visible as migration debt");
+        assert!(audit.edits.is_empty(), "an unknown head has no domain code");
+        assert_eq!(rewrite(source), source, "unknown source stays byte-for-byte unchanged");
     }
 
     #[test]

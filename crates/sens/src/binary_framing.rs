@@ -1,7 +1,7 @@
 use crate::BinaryNumber;
 use crate::domain_numeric::{self, DomainNumericComposition};
 use crate::Value;
-use crate::{Rational, CoreDomainIdentity, Text7};
+use crate::{BinarySourceWord, Bit8, Rational, CoreDomainIdentity, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
@@ -885,7 +885,7 @@ mod tests {
     #[test]
     fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
-            let frame = BinaryFrame::Function(CoreDomainIdentity::from_packed_byte(packed as u8));
+            let frame = BinaryFrame::Function(CoreDomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(packed as u8).expect("8-bit source word"))).expect("exact domain word"));
             let encoded = encode_binary_frame(&frame).unwrap();
             assert_eq!(&encoded[..4], &[1, 1, 0, 0]);
             assert_eq!(encoded.len(), 12);
@@ -1132,7 +1132,7 @@ mod tests {
     #[test]
     fn exact_program_rejects_legacy_frames_on_encode_and_decode_without_breaking_archive_reads() {
         let historical_frames = [
-            BinaryFrame::Function(crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"))),
+            BinaryFrame::Function(crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(crate::Bit8::new(0b10101000).expect("legacy W8 payload")))),
             BinaryFrame::Number(number("1", "10")),
             BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
         ];

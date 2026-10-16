@@ -22,6 +22,8 @@ unsafe extern "C" {
     fn sens_zig_repl_persistent_vector_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_time_bytes_copy(dst: *mut u8, cap: usize) -> isize;
     fn sens_zig_repl_epistemic_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_meta_eval_bytes_copy(dst: *mut u8, cap: usize) -> isize;
+    fn sens_zig_meta_registry_bytes_copy(dst: *mut u8, cap: usize) -> isize;
 }
 #[cfg(feature = "zig-transport")]
 fn repl_zig_source(
@@ -53,6 +55,44 @@ fn surface_prerequisite_sources() -> Result<Vec<(&'static str, String)>, String>
     {
         Err("RUST_ZIG_ONLY: REPL prerequisites require Zig transport".into())
     }
+}
+
+// SENS-owned loop state: the meta-environment pair (середовище . остання-форма),
+// owned by lib/repl-core.lisp. The native layer only threads it as one binding;
+// it never interprets the pair. This is the `--sens-loop` mode's only state.
+const SENS_LOOP_STATE: &str = "--sens-loop-стан--";
+
+fn escape_lisp_string(input: &str) -> String {
+    input.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
+/// Initialise the SENS loop from `repl-core` (`репл-почати`).
+fn init_sens_loop(session: &mut Session) -> Result<(), String> {
+    if session.environment.get("репл-крок").is_none() {
+        return Err("SENS-цикл недоступний: lib/repl-core.lisp не завантажено".into());
+    }
+    eval_program(
+        &format!("(визначити {SENS_LOOP_STATE} (репл-почати (як-є ())))"),
+        session,
+    )
+    .map(|_| ())
+    .map_err(|error| {
+        format!(
+            "не вдалося ініціалізувати SENS-цикл: {}",
+            error.render("(репл-почати (як-є ()))")
+        )
+    })
+}
+
+/// One SENS-owned REPL step: thread the meta-environment through
+/// `репл-крок` → `обчислити-верхню-форму`. Returns the SENS value (остання-форма).
+fn sens_loop_step(session: &mut Session, line: &str) -> Result<Value, sens::LanguageError> {
+    let source = format!(
+        "(визначити {SENS_LOOP_STATE} (репл-крок (прочитати \"{}\") {SENS_LOOP_STATE}))",
+        escape_lisp_string(line)
+    );
+    eval_program(&source, session)?;
+    Ok(eval_program(&format!("(решта {SENS_LOOP_STATE})"), session)?.value)
 }
 
 // The persistent map is a separate host-neutral root Zig byte asset.
@@ -225,9 +265,40 @@ fn render_surface_status() -> Result<String, String> {
     surface_catalog::render_status()
 }
 
-fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Environment, String> {
+fn build_surface_layer(base: &Environment, surface: ReplSurface, sens_loop: bool) -> Result<Environment, String> {
     let layer = base.child();
-    if matches!(surface, ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit) {
+    let needs_surface = matches!(
+        surface,
+        ReplSurface::Ukrainian | ReplSurface::UkrainianFull | ReplSurface::Sanskrit
+    );
+    // Meta-eval + registry + repl-core are needed both for surface projection
+    // and for the SENS-owned `--sens-loop` mode. They load here once; the
+    // surface-specific sources below load only for uk/укр/sa.
+    if sens_loop || needs_surface {
+        let mut session = Session {
+            environment: layer.clone(),
+        };
+        #[cfg(feature = "zig-transport")]
+        {
+            let registry = repl_zig_source(sens_zig_meta_registry_bytes_copy, "ZIG_SENS_META_REGISTRY")?;
+            let meta_eval = repl_zig_source(sens_zig_meta_eval_bytes_copy, "ZIG_SENS_META_EVAL")?;
+            sens::load_meta_evaluator_library_from_source(&mut session, &registry, &meta_eval)
+                .map_err(|error| {
+                    format!(
+                        "не вдалося завантажити meta-eval/registry: {}",
+                        error.render("lib/meta-eval.lisp")
+                    )
+                })?;
+            let repl_core = crate::zig_transport::repl_core_source_bytes()
+                .and_then(|bytes| String::from_utf8(bytes).map_err(|err| format!("ZIG_SENS_REPL UTF-8: {err}")))?;
+            sens::parse_mixed_exact_domain(&repl_core)
+                .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
+                .map_err(|error| {
+                    format!("не вдалося завантажити repl-core: {}", error.render(&repl_core))
+                })?;
+        }
+    }
+    if needs_surface {
         let mut session = Session {
             environment: layer.clone(),
         };
@@ -250,6 +321,9 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 sens::eval_pinned_reasoning_source(
                     &format!("lib/{name}"), source, &mut session
                 )
+            } else if matches!(name, "persistent-vector.lisp" | "epistemic.lisp") {
+                sens::parse_mixed_exact_domain(source)
+                    .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
             } else {
                 eval_program(source, &mut session)
             }).map_err(|error| {
@@ -281,7 +355,8 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
                 .ok_or("RUST_ZIG_ONLY: missing Zig Sanskrit source")?),
             ReplSurface::Core | ReplSurface::English => unreachable!(),
         };
-        eval_program(source, &mut session)
+        sens::parse_mixed_exact_domain(source)
+            .and_then(|forms| sens::eval_parsed_expressions(&forms, &mut session))
             .map_err(|error| format!("не вдалося завантажити {name}: {}", error.render(source)))?;
     }
     Ok(layer)
@@ -292,19 +367,24 @@ struct ReplState {
     base_environment: Environment,
     user_environment: Environment,
     surface: ReplSurface,
+    sens_loop: bool,
 }
 
 impl ReplState {
-    fn new(mut session: Session, surface: ReplSurface) -> Result<Self, String> {
+    fn new(mut session: Session, surface: ReplSurface, sens_loop: bool) -> Result<Self, String> {
         let base_environment = session.environment.clone();
-        let surface_environment = build_surface_layer(&base_environment, surface)?;
+        let surface_environment = build_surface_layer(&base_environment, surface, sens_loop)?;
         let user_environment = surface_environment.child();
         session.environment = user_environment.clone();
+        if sens_loop {
+            init_sens_loop(&mut session)?;
+        }
         Ok(Self {
             session,
             base_environment,
             user_environment,
             surface,
+            sens_loop,
         })
     }
 
@@ -312,7 +392,7 @@ impl ReplState {
         if self.surface == surface {
             return Ok(());
         }
-        let surface_environment = build_surface_layer(&self.base_environment, surface)?;
+        let surface_environment = build_surface_layer(&self.base_environment, surface, self.sens_loop)?;
         self.user_environment
             .reparent(surface_environment)
             .map_err(str::to_string)?;
@@ -468,8 +548,8 @@ fn handle_meta_command(line: &str, state: &mut ReplState) -> bool {
     }
 }
 
-pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
-    let mut state = match ReplState::new(session, initial_surface) {
+pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface, sens_loop: bool) {
+    let mut state = match ReplState::new(session, initial_surface, sens_loop) {
         Ok(state) => state,
         Err(error) => {
             eprintln!("Error: could not initialize REPL surface: {error}");
@@ -483,6 +563,9 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
         state.surface.title(),
         state.surface.code()
     );
+    if state.sens_loop {
+        println!("Режим: SENS-цикл (repl-core · обчислити-верхню-форму), не нативний оцінювач.");
+    }
     println!("Символи можна вводити малими літерами; REPL друкує їх ВЕЛИКИМИ.");
     println!("D1 лишається 1/0 у Canon; людські проекції друкуються ВЕЛИКИМИ.");
     println!("Ctrl-C або Ctrl-D — вихід.");
@@ -516,6 +599,24 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
                 }
 
                 if handle_meta_command(line, &mut state) {
+                    continue;
+                }
+
+                if state.sens_loop {
+                    match sens_loop_step(&mut state.session, line) {
+                        Ok(value) => println!(
+                            "{}",
+                            render_repl_reply(&value, state.surface.presentation())
+                        ),
+                        Err(error) => eprintln!(
+                            "{}",
+                            render_error_for_presentation(
+                                &error,
+                                line,
+                                state.surface.presentation()
+                            )
+                        ),
+                    }
                     continue;
                 }
 
@@ -578,7 +679,7 @@ mod tests {
     fn core_state() -> ReplState {
         let mut session = Session::default();
         sens::load_core_library(&mut session).expect("core bootstrap");
-        ReplState::new(session, ReplSurface::Core).expect("REPL state")
+        ReplState::new(session, ReplSurface::Core, false).expect("REPL state")
     }
 
     fn value(state: &mut ReplState, source: &str) -> String {

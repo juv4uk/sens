@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Запустити один раз на клон: активує versioned pre-commit hook
-# (githooks/pre-commit), зокрема check-bilingual-docs.
+# Запустити один раз на клон: активує версіоновані pre-commit та
+# commit-msg hooks (перевірка українського тексту документів і комітів).
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 git config core.hooksPath githooks
-chmod +x githooks/pre-commit scripts/check-bilingual-docs
-echo "OK: core.hooksPath -> githooks (pre-commit тепер запускає check-bilingual-docs)"
+chmod +x githooks/pre-commit githooks/commit-msg scripts/check-bilingual-docs
+echo "Готово: core.hooksPath -> githooks (pre-commit і commit-msg активовані)"

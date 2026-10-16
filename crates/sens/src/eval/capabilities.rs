@@ -36,7 +36,7 @@ enum HostHandler {
 }
 
 /// Host mechanism for one already-existing exact SENS function.
-/// The key is the eight-bit function itself; this registry owns no function meaning.
+/// The key is the exact-domain function identity; this registry owns no function meaning.
 pub type SensHostFn =
     fn(CoreDomainIdentity, &[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
@@ -307,7 +307,15 @@ mod honesty_tests {
 
     #[test]
     fn sens_registry_is_keyed_by_exact_identity_without_ordering() {
-        let sens = crate::DomainIdentity::D10(crate::DomainD10::new(0b0001010111).expect("D10 funcall"));
+        // A mechanism key is an admitted, exact-width Core identity; D10
+        // coordinates have no callable Rust CoreDomainIdentity projection.
+        let sens = CoreDomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(0b0011).expect("D4 DEFINE")),
+        );
+        let same_payload_different_width = CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b011).expect("D3 CDR")),
+        );
+        assert_ne!(sens, same_payload_different_width);
         unregister_sens_capability(sens);
         register_sens_capability(sens, sens_handler);
 
@@ -319,7 +327,7 @@ mod honesty_tests {
         )
         .expect("registered SENS mechanism")
         .expect("mechanism succeeds");
-        assert_eq!(result.to_string(), "10101000");
+        assert_eq!(result.to_string(), "0011");
 
         unregister_sens_capability(sens);
         assert!(dispatch_sens_capability(
