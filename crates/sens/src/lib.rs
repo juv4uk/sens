@@ -15,16 +15,16 @@ mod bit9;
 mod bits;
 pub mod d7_keyboard;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod canonical_reader;
-pub mod universal_frame3;
-pub mod frame3_domain;
-pub mod frame3_grammar;
-pub mod frame3_semantic;
-pub mod frame3_small;
-pub mod frame3_micro;
-pub mod frame3_micro_enumerator;
-pub mod frame3_micro_v5;
-pub mod frame3_micro_v5_lambda;
-pub mod frame3_micro_v5_lambda_app;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod universal_frame3;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_domain;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_grammar;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_semantic;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_small;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_enumerator;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5_lambda;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // pub mod frame3_micro_v5_lambda_app;
 
 
 /// Public names for the self-contained, metadata-heavy transport experiments.
@@ -71,7 +71,7 @@ mod error;
 pub(crate) mod eval;
 mod language_items;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod parser;
-mod mixed_source;
+// STAGED-OUT (not in the runtime; research/REPL owns this): // mod mixed_source;
 mod presentation;
 // STAGED-OUT (not in the runtime; Zig/REPL owns this): // mod semantic_registry;
 mod source_words;
