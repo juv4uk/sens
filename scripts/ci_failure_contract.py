@@ -455,9 +455,17 @@ def scan(args):
                 return 0
             print("UNINFORMATIVE-OUTPUT no diagnostic report for incomplete/failed focal steps")
             return 1
-        if args.allow_empty and os.environ.get("GITHUB_ACTIONS") != "true":
-            print("PASS local empty diagnostic report; no hosted verdict asserted")
-            return 0
+        # The modern main CI has no historical FOCAL_OUTCOME_ENV (those steps
+        # were removed). Its native GitHub job.status is the sole complete
+        # witness of all preceding checks. Honor it on the *empty-success*
+        # branch only; failures still require their diagnostic JSONL receipts.
+        if args.allow_empty:
+            if os.environ.get("GITHUB_ACTIONS") != "true":
+                print("PASS local empty diagnostic report; no hosted verdict asserted")
+                return 0
+            if os.environ.get("PRIOR_JOB_STATUS") == "success":
+                print("PASS current GitHub job.status=success; no failed-test receipts")
+                return 0
         print("UNINFORMATIVE-OUTPUT no diagnostic report")
         return 1
     failures = []
