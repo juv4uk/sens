@@ -42,7 +42,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "NREVERSE",
@@ -57,7 +60,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "COMPUTE-APPLICABLE-METHODS",
@@ -73,7 +79,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "DIRECT-SLOT-DEFINITION-CLASS",
@@ -89,7 +98,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "EFFECTIVE-SLOT-DEFINITION-CLASS",
@@ -105,7 +117,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "ENSURE-CLASS",
@@ -121,7 +136,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "FINALIZE-INHERITANCE",
@@ -137,7 +155,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "SHARED-INITIALIZE",
@@ -153,7 +174,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "SLOT-VALUE-USING-CLASS",
@@ -169,7 +193,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://franz.com/support/documentation/mop/dictionary.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "STATUS",
@@ -183,7 +210,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "SSTATUS",
@@ -197,7 +227,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "RECORD-TYPE-DESCRIPTOR",
@@ -213,7 +246,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "RECORD-CONSTRUCTOR-DESCRIPTOR",
@@ -229,7 +265,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "RECORD-CONSTRUCTOR",
@@ -245,7 +284,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-7.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "WITH-SYNTAX",
@@ -262,7 +304,10 @@
       "ratification": "PENDING",
       "coordinate": null,
       "primary_spec_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
-      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED"
+      "donor_spec_status": "REFERENCE_FOUND_NATIVE_REPLAY_UNVERIFIED",
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "OCCURS-CHECK",
@@ -277,7 +322,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "EXTEND-SUBST",
@@ -291,7 +339,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "APPLY-SUBST-WALKED",
@@ -307,7 +358,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "MY-EVAL",
@@ -322,7 +376,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "MY-APPLY",
@@ -336,7 +393,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "SECOND",
@@ -350,7 +410,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "THIRD",
@@ -364,7 +427,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "MEMBER?",
@@ -378,7 +444,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "ISQRT-STEP",
@@ -392,7 +461,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "VTREE-INSERT",
@@ -406,7 +478,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "ROTATE-LEFT",
@@ -420,7 +495,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "AGENT-LOOP",
@@ -434,7 +512,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "HTTP-POST-JSON",
@@ -448,7 +529,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "ADVISE",
@@ -462,7 +546,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "COMPILER-BITS-EQUAL",
@@ -479,7 +566,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "COMPILER-XOR-BITS",
@@ -495,7 +585,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "TRUTHY?",
@@ -509,7 +602,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "DWIM",
@@ -523,7 +619,10 @@
       "required": "native SENS positive+negative, donor replay, F3 behavioral dedup",
       "execution": "UNVERIFIED",
       "ratification": "PENDING",
-      "coordinate": null
+      "coordinate": null,
+      "callable": false,
+      "proof_status": "NOT_NATIVE_TESTED",
+      "semantic_distinctness": "UNPROVEN"
     },
     {
       "name": "DIGIT->STRING",
@@ -537,7 +636,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "FOURTH",
@@ -552,7 +652,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "LARGEST-CHUNK",
@@ -566,7 +667,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "NONDECREASING-FROM?",
@@ -580,7 +682,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "NONINCREASING-FROM?",
@@ -594,7 +697,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "NUMBER->STRING-ONTO",
@@ -608,7 +712,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "SQRT-ITER",
@@ -622,7 +727,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EPISTEMIC--ALL-REQUIRED-PRESENT?",
@@ -636,7 +742,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EPISTEMIC--CLAIM-REF?",
@@ -651,7 +758,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "LOAD-KNOWLEDGE",
@@ -665,7 +773,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "IMPORT-KNOWLEDGE-FILE",
@@ -679,7 +788,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "RECEIVE-KNOWLEDGE-PACKAGE",
@@ -693,7 +803,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "SEND-KNOWLEDGE-PACKAGE",
@@ -707,7 +818,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "USAGE-OF",
@@ -721,7 +833,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EFFECTFUL-PRIMITIVES",
@@ -735,7 +848,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "GET-THRESHOLD",
@@ -749,7 +863,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "LINT-MAX2",
@@ -763,7 +878,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MY-EVAL-BODY",
@@ -778,7 +894,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MY-EVAL-COND",
@@ -792,7 +909,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MY-EVAL-LIST",
@@ -807,7 +925,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VBALANCE",
@@ -821,7 +940,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VBALANCE-FACTOR",
@@ -835,7 +955,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VEC-FROM-LIST-ONTO",
@@ -849,7 +970,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VEC-TREE",
@@ -864,7 +986,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VHEIGHT-OF",
@@ -878,7 +1001,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VMAKE-BALANCED-NODE",
@@ -892,7 +1016,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VMAX2",
@@ -906,7 +1031,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VNODE-HEIGHT",
@@ -921,7 +1047,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VNODE-INDEX",
@@ -935,7 +1062,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VNODE-LEFT",
@@ -950,7 +1078,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VNODE-RIGHT",
@@ -965,7 +1094,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VNODE-VALUE",
@@ -980,7 +1110,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VROTATE-LEFT",
@@ -994,7 +1125,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VROTATE-RIGHT",
@@ -1008,7 +1140,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VTREE->LIST",
@@ -1024,7 +1157,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "VTREE-GET",
@@ -1038,7 +1172,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "ADD-USAGE",
@@ -1052,7 +1187,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "COUNT-USAGE-LIST",
@@ -1066,7 +1202,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EXPLAIN-PROOF-LIST",
@@ -1080,7 +1217,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EXPLAIN-PROOF-NODE",
@@ -1094,7 +1232,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MAP-PROOFS",
@@ -1110,7 +1249,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "PRINT-INDENT",
@@ -1124,7 +1264,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "PROVENANCE-LIST",
@@ -1138,7 +1279,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "SCIENCE-PROPER-LIST?",
@@ -1154,7 +1296,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "SCIENCE-SIXTH",
@@ -1169,7 +1312,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "SCIENCE-SEVENTH",
@@ -1184,7 +1328,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-CONS-EACH-ONTO",
@@ -1198,7 +1343,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-FACTS->CLAUSES-ONTO",
@@ -1212,7 +1358,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-IMPORT-FORMS-ONTO",
@@ -1226,7 +1373,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-SLOT-VALUE-OF",
@@ -1241,7 +1389,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-STRING-AFTER-LAST-DOUBLE-COLON",
@@ -1255,7 +1404,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-STRING-EMPTY?",
@@ -1269,7 +1419,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-STRING-STARTS-WITH-DOUBLE-COLON?",
@@ -1283,7 +1434,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLIPS-SYMBOL-STARTS-WITH-?",
@@ -1297,7 +1449,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "FIND-ENTRY",
@@ -1313,7 +1466,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MAP-APPLY-HEAD",
@@ -1329,7 +1483,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MAP-APPLY-HEAD-JTMS",
@@ -1343,7 +1498,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "ALIST-REF",
@@ -1358,7 +1514,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "APPEND-TOOL-RESULTS",
@@ -1372,7 +1529,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "BASH-TOOL-SCHEMA",
@@ -1386,7 +1544,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "CLAIM-MARKERS",
@@ -1400,7 +1559,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "COUNT-WITH-ROLE",
@@ -1414,7 +1574,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "DISPATCH-TOOL",
@@ -1428,7 +1589,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "EXECUTE-TOOL-CALL",
@@ -1442,7 +1604,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "HTTP-TRANSPORT-BODY",
@@ -1457,7 +1620,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "HTTP-TRANSPORT-EXIT",
@@ -1471,7 +1635,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "HTTP-TRANSPORT-STDERR",
@@ -1486,7 +1651,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "JSON->MESSAGE",
@@ -1500,7 +1666,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "JSON->TOOL-CALL",
@@ -1514,7 +1681,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "JSON-ENCODE",
@@ -1528,7 +1696,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "JSON-ENCODE-KEY",
@@ -1542,7 +1711,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "JSON-ESCAPE-ONTO",
@@ -1556,7 +1726,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MARKERS-CONTAINED?",
@@ -1570,7 +1741,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MSG-ROLE",
@@ -1585,7 +1757,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MSG-CONTENT",
@@ -1600,7 +1773,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "MSG-TOOL-CALLS",
@@ -1615,7 +1789,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "TC-ID",
@@ -1630,7 +1805,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "TC-NAME",
@@ -1645,7 +1821,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "TC-ARGUMENTS",
@@ -1660,7 +1837,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "STRIP-ARTICLE",
@@ -1674,7 +1852,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "LEGACY-WORLD-TRANSITION-EXPANSION",
@@ -1688,7 +1867,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "WORLD-APPLY-EVENT",
@@ -1702,7 +1882,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     },
     {
       "name": "WORLD-REMOVE-FIRST",
@@ -1717,7 +1898,8 @@
       "proof_status": "NOT_EXECUTED",
       "semantic_distinctness": "UNPROVEN",
       "coordinate": null,
-      "callable": false
+      "callable": false,
+      "ratification": "PENDING"
     }
   ],
   "rows": [
@@ -8822,5 +9004,6 @@
       "https://franz.com/support/documentation/mop/dictionary.html"
     ],
     "note": "Primary semantic law source located for these dossiers. Citation is not execution evidence or D11 admission."
-  }
+  },
+  "uniform_admission_gate": "All 116 dossiers: coordinate=null, callable=false, native positive+negative evidence absent, owner ratification pending."
 }
