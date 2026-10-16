@@ -781,7 +781,9 @@
 ; gcd (нсд)
 (0011 нсд
   (0010 (a b)
-    (110 ((01000 b) a) (#d1:1 (нсд b (mod a b))))))
+    (110
+      ((нуль? b) a)
+      (#d1:1 (нсд b (mod a b))))))
 ; expt (піднести-до-степеня)
 (0011 піднести-до-степеня
   (0010 (b n)
@@ -1711,9 +1713,11 @@
 (0011 largest-chunk
   (0010 (a b chunk mult)
     (110
-      ((11010 a (01010 chunk chunk))  (111 chunk mult))
-      ((0100 (11010 a (01010 chunk chunk)))
-       (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
+      ((менше? a (додати chunk chunk)) (сполучити chunk mult))
+      (#d1:1
+       (largest-chunk a b
+         (додати chunk chunk)
+         (додати mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -1736,19 +1740,18 @@
 (0011 quotient
   (0010 (a b)
     (110
-      ((101 b 0)  (11110110 a b))
-      ((0100 (101 b 0))
-       (110
-         ((11010 a b)  0)
-         ((0100 (11010 a b))
-          (let ((chunk+mult (largest-chunk a b b 1)))
-            (01010 (011 chunk+mult)
-               (quotient (01011 a (100 chunk+mult)) b)))))))))
+      ((нуль? b) (частка a b))
+      ((менше? a b) #d24:000000000000000000000000)
+      (#d1:1
+       (let ((chunk+mult
+               (largest-chunk a b b #d24:000000000000000000000001)))
+         (додати (решта chunk+mult)
+                 (quotient (відняти a (перше chunk+mult)) b)))))))
 
 ; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
 (0011 mod
   (0010 (a b)
-    (01011 a (10110 b (quotient a b)))))
+    (відняти a (помножити b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
