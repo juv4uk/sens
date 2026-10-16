@@ -1,8 +1,8 @@
 ; SID8 -> D1-D11 function bridge (retire the old 8-bit function space).
 (sid8-to-domain-bridge
   (schema sid8-to-domain-bridge/1)
-  (mapped 179)
-  (separate 3)
+  (mapped 180)
+  (separate 2)
   (map
     (sid8:00000001 -> D3:001  ; quote)
     (sid8:00000010 -> D3:010  ; atom?)
@@ -14,6 +14,7 @@
     (sid8:00001000 -> D4:0010  ; lambda)
     (sid8:00001001 -> D4:0011  ; define)
     (sid8:00001010 -> D5:00011  ; defmacro)
+    (sid8:00001011 -> D4:0011  ; def)
     (sid8:00001100 -> D5:01010  ; plus)
     (sid8:00001101 -> D5:01011  ; difference)
     (sid8:00001110 -> D5:10110  ; times)
@@ -185,8 +186,7 @@
     (sid8:10110110 -> D9:110110001  ; answer-eq)
   )
   (separate-list
-    (sid8:00001011  ; def  -- separate / needs owner cell)
-    (sid8:00011100  ; equalp?  -- separate / needs owner cell)
-    (sid8:01000111  ; digit->string  -- separate / needs owner cell)
+    (sid8:00011100  ; equalp?  -- library-defined / needs owner cell)
+    (sid8:01000111  ; digit->string  -- library-defined / needs owner cell)
   )
 )
