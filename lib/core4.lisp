@@ -2877,3 +2877,24 @@
 (0011 р-р-п-р-р-р-р
   (0010 (значення)
     (011 (011 (100 (011 (011 (011 (011 значення)))))))))
+
+
+; D9 four translation-envelope projections, harvested from lib/translation.lisp.
+; Canonical envelope is (translation/1 STATUS KIND SOURCE PAYLOAD), ordinary
+; SENS list data. The external translator grants no semantic admission.
+; Direct D3 CAR/CDR projection; no host registry, no decimal intermediary.
+; D9:000000101 TRANSLATION-STATUS, D9:000101100 TRANSLATION-KIND.
+(0011 переклад-стан
+  (0010 (пропозиція)
+    (100 (011 пропозиція))))
+(0011 переклад-вид
+  (0010 (пропозиція)
+    (100 (011 (011 пропозиція)))))
+
+; D9:000010100 TRANSLATION-SOURCE, D9:000101110 TRANSLATION-PAYLOAD.
+(0011 переклад-джерело
+  (0010 (пропозиція)
+    (100 (011 (011 (011 пропозиція))))))
+(0011 переклад-вміст
+  (0010 (пропозиція)
+    (100 (011 (011 (011 (011 пропозиція)))))))

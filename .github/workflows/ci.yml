@@ -439,6 +439,29 @@ jobs:
             exit 1
           fi
           echo "D9_RESULT_ALGEBRA_NATIVE_PASS identities=9 laws=18 negative=5"
+          # D9 TRANSLATION-{STATUS,KIND,SOURCE,PAYLOAD}: no foreign semantic admission.
+          d9_translation="tests/semantic/d9-translation-envelope-projections.lisp"
+          d9_translation_bad="tests/semantic/d9-translation-envelope-truncated.lisp"
+          sha256sum "$d9_translation" "$d9_translation_bad" lib/core4.lisp target/debug/sens
+          if ! d9_translation_output="$(target/debug/sens "$d9_translation" 2>&1)"; then
+            echo "::error::D9_TRANSLATION_PROJECTION_RED layer=eval fixture=$d9_translation expected=eight-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$d9_translation_output" >&2
+            exit 1
+          fi
+          d9_translation_actual="$(printf "%s\n" "$d9_translation_output" | tail -n 1)"
+          if [[ "$d9_translation_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_TRANSLATION_PROJECTION_DIFF layer=eval fixture=$d9_translation expected=(1 1 1 1 1 1 1 1) actual=$d9_translation_actual first_mismatch=D1-vector" >&2
+            exit 1
+          fi
+          if d9_translation_err="$(target/debug/sens "$d9_translation_bad" 2>&1)"; then
+            echo "::error::D9_TRANSLATION_TRUNCATED_ACCEPTED layer=eval fixture=$d9_translation_bad expected=CAR-nonpair-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$d9_translation_err" != *"car expects"* && "$d9_translation_err" != *"not callable"* ]]; then
+            echo "::error::D9_TRANSLATION_TRUNCATED_WRONG_REFUSAL layer=eval fixture=$d9_translation_bad expected=CAR-nonpair-refusal actual=$d9_translation_err" >&2
+            exit 1
+          fi
+          echo "D9_TRANSLATION_PROJECTION_NATIVE_PASS identities=4 laws=8 negative=5"
           # D8:01011011 CHAR + D9:110100010 STRING-LENGTH / 110101110
           # IDENTITY / 001110110 CDR-IMPROPER: one mixed-domain SENS witness.
           d8_d9_fixture="tests/semantic/d8-char-d9-length-identity-laws.lisp"
