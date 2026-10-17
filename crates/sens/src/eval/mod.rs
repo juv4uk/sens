@@ -516,6 +516,17 @@ fn dispatch_domain_call(
         return evaluate_d5_set_family(identity, arguments, environment, span);
     }
 
+    let domain_identity: crate::DomainIdentity = identity.into();
+    if canon::has_d9_string_mechanism(domain_identity) {
+        let mut values = Vec::with_capacity(arguments.len());
+        for argument in arguments {
+            values.push(evaluate(argument, environment)?);
+        }
+        return canon::invoke_d9_string_mechanism(domain_identity, &values, environment, span)
+            .expect("exact D9 string-mechanism route was checked above")
+            .map(EvalStep::Value);
+    }
+
     if let Some(bound) = environment.domain_code_slot(identity) {
         match &bound {
             Value::Macro(closure) => {
@@ -859,6 +870,26 @@ mod domain_eval_cutover_necessary_forms {
         assert!(necessary_forms::domain_identity_for_symbol("атом?").is_none());
         assert!(necessary_forms::domain_identity_for_symbol("чужий-виклик").is_none());
         assert!(necessary_forms::domain_identity_for_symbol("00001000").is_none());
+    }
+
+    #[test]
+    fn exact_d9_string_mechanism_takes_precedence_over_its_surface_wrapper_slot() {
+        let domain_identity =
+            crate::semantic_registry::d9_binding_identity_for_definition("рядок-порожній?")
+            .expect("ратифікований D9 резидент");
+        let identity = domain_identity
+            .core_operation()
+            .expect("допущений D9 механізм");
+        let (wrapper_args, wrapper_span) = arguments("(функція (текст) \"не викликати\")");
+        let environment = Environment::root();
+        let wrapper = closures::create_lambda(&wrapper_args, &environment, wrapper_span)
+            .expect("тестова поверхнева обгортка");
+        assert!(environment.bind_domain_code_slot_once(domain_identity, wrapper));
+
+        let (args, span) = arguments("(рядок-порожній? \"\")");
+        let result = dispatch_domain_call(identity, &args, &environment, span)
+            .expect("D9 exact mechanism bypasses the surface wrapper slot");
+        assert!(matches!(result, EvalStep::Value(value) if value.as_predicate_bit().is_some()));
     }
 }
 
