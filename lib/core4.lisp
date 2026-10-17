@@ -2615,7 +2615,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (write-to-string n)))
+    (11110100 n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
