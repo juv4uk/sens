@@ -51,9 +51,13 @@ jobs:
         if: ${{ always() }}
         run: python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
 
-      - name: D1–D11 — dry-run проти реальних таблиць без жодного запису
+      - name: D11 селекторні кандидати — точна бітність, похідність і негативні контролі
         if: ${{ always() }}
-        run: python3 scripts/audit_ukrainian_domain_projections.py
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests/test_d11_selector_seed.py -v
+          python3 scripts/check_d11_selector_seed.py
+          python3 scripts/audit_ukrainian_domain_projections.py
 
       - name: SENS-визначення — баланс дужок і дублікати
         if: ${{ always() }}

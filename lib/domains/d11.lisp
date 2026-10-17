@@ -3,6 +3,10 @@
 ; Ratified by owner for binary SENS semantic tests.
 ; Columns: ук → укр → san → en → LISP → sym
 ; Predicate marker: ? in ук/укр/en; Sanskrit marker-free.
+; The separate knowledge/d11-selector-seed.json contains 512 RESEARCH_ONLY_NOT_RATIFIED
+; selector candidates. They are not residents here, are not reserved, and are not callable.
+; Audit exact derivation/collisions with scripts/check_d11_selector_seed.py; keep these 43
+; owner-ratified test entries unchanged unless the owner explicitly ratifies a new scope.
 
 (domain-table/1
   (00000000000 (ук прочитати-файл) (укр прочитати-файл) (san paṭhana-sañcikā) (en read-file) (LISP READ-FILE) (sym ()))
