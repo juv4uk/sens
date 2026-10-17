@@ -1,0 +1,1744 @@
+{
+  "schema": "sens.d11.archaeology-source-crosswalk/v1",
+  "date": "2026-10-16",
+  "status": "PROVENANCE_ONLY_NO_RATIFICATION",
+  "purpose_uk": "Повернути закони й негативні перевірки з архівних гілок без імпорту їхніх старих координат або фальшивих Core-функцій.",
+  "method": {
+    "route": "Only exact uppercase name matching for discovery, never semantic equivalence",
+    "no_auto_coordinate": true,
+    "no_old_slot_import": true,
+    "d8_192_old_occupancy": "Historical geometry falsified; 192 candidates are not current D8 occupancy",
+    "secondary_archive_note": "Other archived D10 inventory branches pr4764/pr4798/pr4883/pr4891/pr5022 examined; only two novel function-shaped names were found, both LOOPS Active Values. Their source is recorded separately."
+  },
+  "counts": {
+    "archival_receipts": 1042,
+    "archival_unique_names": 662,
+    "existing_d11_candidates": 563,
+    "unlisted_labels": 54,
+    "novel_loops_candidates": 2,
+    "ratified_delta": 0,
+    "callable_delta": 0
+  },
+  "archives": [
+    {
+      "id": "hist352",
+      "path": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+      "sha": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+      "total": 352,
+      "lowerNameMatches": 155,
+      "d11NameMatches": 151,
+      "unlisted": 46
+    },
+    {
+      "id": "hist222",
+      "path": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json",
+      "sha": "42362a46d7587e375ed19c156a0b67e40b86939a",
+      "total": 222,
+      "lowerNameMatches": 118,
+      "d11NameMatches": 104,
+      "unlisted": 0
+    },
+    {
+      "id": "hist162",
+      "path": "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+      "sha": "615307670709d8429d8b74daafe8fe24b36960ea",
+      "total": 162,
+      "lowerNameMatches": 112,
+      "d11NameMatches": 42,
+      "unlisted": 8
+    },
+    {
+      "id": "hist80",
+      "path": "knowledge/d10-historical-lisp-residual-intake-20261011.json",
+      "sha": "d48b4e960945af7aa9b5683b0e4a1d2e443c588d",
+      "total": 80,
+      "lowerNameMatches": 15,
+      "d11NameMatches": 65,
+      "unlisted": 0
+    },
+    {
+      "id": "d8d9-history226",
+      "path": "knowledge/historical-d8-unassigned-d9-overflow-provenance-v1.json",
+      "sha": "0f9d46ab1a1cea1f4df5b17c1f61cb1e13d6a4e2",
+      "total": 226,
+      "lowerNameMatches": 218,
+      "d11NameMatches": 8,
+      "unlisted": 0
+    }
+  ],
+  "extra_lexical_classes": {
+    "OPERATOR_ALIAS": 9,
+    "VARIABLE_OR_CONSTANT": 17,
+    "NATURAL_LANGUAGE_LABEL": 2,
+    "SYMBOL_OR_UNIT": 4,
+    "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION": 22
+  },
+  "unlisted_nonadmitted_labels": [
+    {
+      "name": "-",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "*",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "*DEBUG-IO*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          96
+        ]
+      ]
+    },
+    {
+      "name": "*DEFAULT-PATHNAME-DEFAULTS*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          117
+        ]
+      ]
+    },
+    {
+      "name": "*DIMENSION-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "*ERROR-OUTPUT*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          97
+        ]
+      ]
+    },
+    {
+      "name": "*QUANTITY-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "*QUERY-IO*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          98
+        ]
+      ]
+    },
+    {
+      "name": "*SCIENCE-SOURCE-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "*SCIENTIFIC-CONSTANT-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          5
+        ]
+      ]
+    },
+    {
+      "name": "*STANDARD-INPUT*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          99
+        ]
+      ]
+    },
+    {
+      "name": "*STANDARD-OUTPUT*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          100
+        ]
+      ]
+    },
+    {
+      "name": "*TERMINAL-IO*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          102
+        ]
+      ]
+    },
+    {
+      "name": "*TRACE-OUTPUT*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist162",
+          101
+        ]
+      ]
+    },
+    {
+      "name": "*TRANSLATION-EVIDENCE-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          6
+        ]
+      ]
+    },
+    {
+      "name": "*TRANSLATION-EVIDENCE*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          7
+        ]
+      ]
+    },
+    {
+      "name": "*TRANSLATION-REVIEW-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          8
+        ]
+      ]
+    },
+    {
+      "name": "*TRANSLATION-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          9
+        ]
+      ]
+    },
+    {
+      "name": "*UNIT-SCHEMA*",
+      "lexical_class": "VARIABLE_OR_CONSTANT",
+      "source_receipts": [
+        [
+          "hist352",
+          10
+        ]
+      ]
+    },
+    {
+      "name": "/",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          11
+        ]
+      ]
+    },
+    {
+      "name": "+",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          12
+        ]
+      ]
+    },
+    {
+      "name": "<",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          13
+        ]
+      ]
+    },
+    {
+      "name": "<=",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          14
+        ]
+      ]
+    },
+    {
+      "name": "=",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          15
+        ]
+      ]
+    },
+    {
+      "name": ">",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          16
+        ]
+      ]
+    },
+    {
+      "name": ">=",
+      "lexical_class": "OPERATOR_ALIAS",
+      "source_receipts": [
+        [
+          "hist352",
+          17
+        ]
+      ]
+    },
+    {
+      "name": "ASSOCIATION LIST",
+      "lexical_class": "NATURAL_LANGUAGE_LABEL",
+      "source_receipts": [
+        [
+          "hist352",
+          33
+        ]
+      ]
+    },
+    {
+      "name": "C",
+      "lexical_class": "SYMBOL_OR_UNIT",
+      "source_receipts": [
+        [
+          "hist352",
+          43
+        ]
+      ]
+    },
+    {
+      "name": "E",
+      "lexical_class": "SYMBOL_OR_UNIT",
+      "source_receipts": [
+        [
+          "hist352",
+          89
+        ]
+      ]
+    },
+    {
+      "name": "H",
+      "lexical_class": "SYMBOL_OR_UNIT",
+      "source_receipts": [
+        [
+          "hist352",
+          128
+        ]
+      ]
+    },
+    {
+      "name": "HART MACRO",
+      "lexical_class": "NATURAL_LANGUAGE_LABEL",
+      "source_receipts": [
+        [
+          "hist352",
+          129
+        ]
+      ]
+    },
+    {
+      "name": "K",
+      "lexical_class": "SYMBOL_OR_UNIT",
+      "source_receipts": [
+        [
+          "hist352",
+          151
+        ]
+      ]
+    },
+    {
+      "name": "SI:AVOGADRO-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          263
+        ]
+      ]
+    },
+    {
+      "name": "SI:BOLTZMANN-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          264
+        ]
+      ]
+    },
+    {
+      "name": "SI:C",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          265
+        ]
+      ]
+    },
+    {
+      "name": "SI:CESIUM-FREQUENCY",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          266
+        ]
+      ]
+    },
+    {
+      "name": "SI:CONSTANT-VALUE",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          267
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-AVOGADRO-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          268
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-BOLTZMANN-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          269
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-CESIUM-FREQUENCY",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          270
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-ELEMENTARY-CHARGE",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          271
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-LUMINOUS-EFFICACY",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          272
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-PLANCK-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          273
+        ]
+      ]
+    },
+    {
+      "name": "SI:DEFINING-SPEED-OF-LIGHT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          274
+        ]
+      ]
+    },
+    {
+      "name": "SI:DELTA-NU-CS",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          275
+        ]
+      ]
+    },
+    {
+      "name": "SI:E",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          276
+        ]
+      ]
+    },
+    {
+      "name": "SI:ELEMENTARY-CHARGE",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          277
+        ]
+      ]
+    },
+    {
+      "name": "SI:H",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          278
+        ]
+      ]
+    },
+    {
+      "name": "SI:K",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          279
+        ]
+      ]
+    },
+    {
+      "name": "SI:K-CD",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          280
+        ]
+      ]
+    },
+    {
+      "name": "SI:LUMINOUS-EFFICACY",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          281
+        ]
+      ]
+    },
+    {
+      "name": "SI:N-A",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          282
+        ]
+      ]
+    },
+    {
+      "name": "SI:PLANCK-CONSTANT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          283
+        ]
+      ]
+    },
+    {
+      "name": "SI:SPEED-OF-LIGHT",
+      "lexical_class": "D24_SCIENTIFIC_CONSTANT_OR_FUNCTION",
+      "source_receipts": [
+        [
+          "hist352",
+          284
+        ]
+      ]
+    }
+  ],
+  "archival_crosswalk": [
+    ["-",0,0,"X"],
+    ["*",0,1,"X"],
+    ["*DIMENSION-SCHEMA*",0,2,"X"],
+    ["*QUANTITY-SCHEMA*",0,3,"X"],
+    ["*SCIENCE-SOURCE-SCHEMA*",0,4,"X"],
+    ["*SCIENTIFIC-CONSTANT-SCHEMA*",0,5,"X"],
+    ["*TRANSLATION-EVIDENCE-SCHEMA*",0,6,"X"],
+    ["*TRANSLATION-EVIDENCE*",0,7,"X"],
+    ["*TRANSLATION-REVIEW-SCHEMA*",0,8,"X"],
+    ["*TRANSLATION-SCHEMA*",0,9,"X"],
+    ["*UNIT-SCHEMA*",0,10,"X"],
+    ["/",0,11,"X"],
+    ["+",0,12,"X"],
+    ["<",0,13,"X"],
+    ["<=",0,14,"X"],
+    ["=",0,15,"X"],
+    [">",0,16,"X"],
+    [">=",0,17,"X"],
+    ["A-LIST",0,18,"D"],
+    ["ADD-EDGE",0,19,"D"],
+    ["ADD-METHOD",0,20,"L"],
+    ["ADVANCE",0,21,"D"],
+    ["AFFIX-RULE-WORDFORM-GENERATION",0,22,"L"],
+    ["ALLOCATE-INSTANCE",0,23,"L"],
+    ["ALLOCATE-RESOURCE",0,24,"L"],
+    ["ALPHA-BETA-SEARCH",0,25,"D"],
+    ["AND",0,26,"L"],
+    ["APPLY",0,27,"L"],
+    ["APPLY-MOVE",0,28,"L"],
+    ["APVAL",0,29,"D"],
+    ["ARRAY",0,30,"D"],
+    ["ASPECT-ANGLE",0,31,"D"],
+    ["ASSOC",0,32,"L"],
+    ["ASSOCIATION LIST",0,33,"X"],
+    ["ASTROLOGICAL-CHART-DERIVATION",0,34,"D"],
+    ["ATTRIB",0,35,"D"],
+    ["AYANAMSA",0,36,"D"],
+    ["BACKQUANTIZE",0,37,"D"],
+    ["BINDINGS",0,38,"D"],
+    ["BOARD-FROM-FEN",0,39,"L"],
+    ["BOUND-IDENTIFIER=?",0,40,"L"],
+    ["BOUNDED-AUTHORITY-RECIPROCITY",0,41,"D"],
+    ["BOUNDED-PATH-SEARCH",0,42,"D"],
+    ["C",0,43,"X"],
+    ["CALL-NEXT-METHOD",0,44,"L"],
+    ["CALLSIGN-NORMALIZATION",0,45,"D"],
+    ["CANONICAL-UNICODE-NORMALIZE",0,46,"L"],
+    ["CATCH-ALL",0,47,"L"],
+    ["CHARCOUNT",0,48,"D"],
+    ["CL-EVAL",0,49,"D"],
+    ["CLASS-NAME",0,50,"L"],
+    ["CLEAR-RESOURCE",0,51,"L"],
+    ["CLEARBUFF",0,52,"D"],
+    ["CODEPOINT->STRING",0,53,"D"],
+    ["COLLECT-FREE-VARS-LET*",0,54,"L"],
+    ["COLLECT-FREE-VARS-LETREC",0,55,"L"],
+    ["COLLECTION",0,56,"D"],
+    ["COMMON",0,57,"D"],
+    ["COMPILE",0,58,"L"],
+    ["COMPUTE-APPLICABLE-METHODS",0,59,"D"],
+    ["CONC",0,60,"D"],
+    ["CONCAT",0,61,"D"],
+    ["CONJ",0,62,"D"],
+    ["CONNECTED-COMPONENTS?",0,63,"D"],
+    ["CONS",0,64,"L"],
+    ["CONTAINS?",0,65,"D"],
+    ["CONTEXTUAL-TEXT-REWRITE",0,66,"L"],
+    ["COPY",0,67,"D"],
+    ["COPY-RESIDUAL-CONSTRAINTS",0,68,"L"],
+    ["COUNT",0,69,"D"],
+    ["COUNT-LEADING-ZEROS",0,70,"L"],
+    ["CSET",0,71,"D"],
+    ["CSETQ",0,72,"D"],
+    ["CURCHAR",0,73,"D"],
+    ["DATUM->SYNTAX",0,74,"L"],
+    ["DEALLOCATE-RESOURCE",0,75,"L"],
+    ["DEALLOCATE-WHOLE-RESOURCE",0,76,"L"],
+    ["DEFINE-SYNTAX",0,77,"L"],
+    ["DEFLIST",0,78,"D"],
+    ["DEFMACRO",0,79,"D"],
+    ["DEFRESOURCE",0,80,"L"],
+    ["DELAYED-TERM-DISEQUALITY",0,81,"L"],
+    ["DELTA-NU-CS",0,82,"D"],
+    ["DERIVE-LAKARA",0,83,"D"],
+    ["DETRANSLIT-LATYNKA",0,84,"D"],
+    ["DEVICE-DESCRIPTOR",0,85,"D"],
+    ["DUMP",0,86,"D"],
+    ["DWIM",0,87,"D"],
+    ["DYNAMIC-WIND",0,88,"L"],
+    ["E",0,89,"X"],
+    ["ECLIPTIC-TO-EQUATORIAL",0,90,"D"],
+    ["EFFACE",0,91,"D"],
+    ["ENDREAD",0,92,"D"],
+    ["ENERGY-OF",0,93,"D"],
+    ["ENSURE-GENERIC-FUNCTION",0,94,"L"],
+    ["ENV",0,95,"L"],
+    ["ENV-REFLECTION",0,96,"L"],
+    ["EPHEMERIS-TO-STATE-TRANSFORM",0,97,"L"],
+    ["EQUAL",0,98,"L"],
+    ["EQUAL-HASH",0,99,"L"],
+    ["ERROR",0,100,"L"],
+    ["ERROR1",0,101,"D"],
+    ["ERRORSET",0,102,"L"],
+    ["EVALUATE-POSITION",0,103,"D"],
+    ["EXACT-RATIONAL-PHYSICS-CARRIER",0,104,"D"],
+    ["EXCISE",0,105,"D"],
+    ["FACT",0,106,"D"],
+    ["FAILED-SUBST?",0,107,"L"],
+    ["FALSE?",0,108,"D"],
+    ["FEN-FROM-BOARD",0,109,"L"],
+    ["FIND-CLASS",0,110,"L"],
+    ["FIND-ENTRY",0,111,"D"],
+    ["FIRST",0,112,"D"],
+    ["FIXP",0,113,"L"],
+    ["FLAG",0,114,"D"],
+    ["FLOATP",0,115,"L"],
+    ["FREE-IDENTIFIER=?",0,116,"L"],
+    ["FSUBR",0,117,"L"],
+    ["FUNCTION-BASIC-DEFINITION",0,118,"L"],
+    ["FUNCTION-LAMBDA-LIST",0,119,"L"],
+    ["FUZZY-TITLE-MATCH",0,120,"D"],
+    ["GENERATE-EXPANSION",0,121,"D"],
+    ["GENERATE-MOVES",0,122,"L"],
+    ["GENSYM",0,123,"L"],
+    ["GEOMETRIC-COORDINATE-TRANSFORM",0,124,"D"],
+    ["GET",0,125,"L"],
+    ["GRAPH-LINK-SEARCH",0,126,"D"],
+    ["GUNA-OF",0,127,"D"],
+    ["H",0,128,"X"],
+    ["HART MACRO",0,129,"X"],
+    ["HASHTABLE-COPY",0,130,"L"],
+    ["HASHTABLE-EQUIVALENCE-FUNCTION",0,131,"L"],
+    ["HASHTABLE-HASH-FUNCTION",0,132,"L"],
+    ["HASHTABLE-KEYS",0,133,"L"],
+    ["HASHTABLE-MUTABLE?",0,134,"L"],
+    ["HASHTABLE-REF",0,135,"L"],
+    ["HASHTABLE-UPDATE!",0,136,"L"],
+    ["HELIOCENTRIC-POSITION",0,137,"D"],
+    ["IDENTIFIER?",0,138,"L"],
+    ["INTERLISP-RECORD-FIELD-RESOLVE",0,139,"L"],
+    ["INTERNET-TIME-MODE-VALID?",0,140,"L"],
+    ["INTERNET-TIME-RAW->OBSERVATION",0,141,"L"],
+    ["INTERNET-TIME-STRATUM-VALID?",0,142,"L"],
+    ["INVOKE",0,143,"D"],
+    ["INVOKE-RESTART",0,144,"L"],
+    ["IO-PORT-READ",0,145,"D"],
+    ["IO-PORT-WRITE",0,146,"D"],
+    ["IS-CHECK?",0,147,"L"],
+    ["IS-MATE?",0,148,"L"],
+    ["IS-STALEMATE?",0,149,"L"],
+    ["JULIAN-DATE",0,150,"D"],
+    ["K",0,151,"X"],
+    ["K-CD",0,152,"D"],
+    ["LAP",0,153,"D"],
+    ["LEAPFROG-STATE-UPDATE",0,154,"L"],
+    ["LEFTSHIFT",0,155,"L"],
+    ["LEGAL-MOVES?",0,156,"L"],
+    ["LEMMATIZE-UK",0,157,"D"],
+    ["LENGTH",0,158,"L"],
+    ["LIST",0,159,"L"],
+    ["LOAD",0,160,"D"],
+    ["LOCF",0,161,"L"],
+    ["LOGAND",0,162,"L"],
+    ["LOGOR",0,163,"L"],
+    ["LOGXOR",0,164,"L"],
+    ["LONGEST-MATCH-TEXT-MAPPING",0,165,"L"],
+    ["LOOKUP-SUBST",0,166,"L"],
+    ["MAKE-EQ-HASHTABLE",0,167,"L"],
+    ["MAKE-EQV-HASHTABLE",0,168,"L"],
+    ["MAKE-HASHTABLE",0,169,"L"],
+    ["MAKE-PARAMETER",0,170,"L"],
+    ["MAKE-VARIABLE-TRANSFORMER",0,171,"L"],
+    ["MAKE-VECTOR",0,172,"L"],
+    ["MAKNUM",0,173,"L"],
+    ["MAP",0,174,"L"],
+    ["MAP-APPLY-HEAD",0,175,"D"],
+    ["MAP-APPLY-HEAD-JTMS",0,176,"D"],
+    ["MAP-RESOURCE",0,177,"L"],
+    ["MAPCON",0,178,"L"],
+    ["MAPLIST",0,179,"L"],
+    ["MASTERSCOPE",0,180,"D"],
+    ["MASTERSCOPE-CALL-RELATION",0,181,"D"],
+    ["MCTS-BACKPROPAGATE",0,182,"D"],
+    ["MCTS-SELECT",0,183,"L"],
+    ["MEMBER",0,184,"L"],
+    ["MEMORY-MAP-OF",0,185,"D"],
+    ["MESSAGE-UNHANDLED",0,186,"L"],
+    ["METHOD-QUALIFIERS",0,187,"L"],
+    ["MINUSP",0,188,"L"],
+    ["MKNAM",0,189,"D"],
+    ["MULTIPLE-VALUE-PROG1",0,190,"L"],
+    ["MUNKAM",0,191,"L"],
+    ["N-A",0,192,"D"],
+    ["NAKSHATRA-OF",0,193,"D"],
+    ["NCONC",0,194,"D"],
+    ["NEIGHBORS-OF",0,195,"D"],
+    ["NEW-ENTRIES",0,196,"D"],
+    ["NIL?",0,197,"D"],
+    ["NO-APPLICABLE-METHOD",0,198,"L"],
+    ["NO-NEXT-METHOD",0,199,"L"],
+    ["NTH",0,200,"L"],
+    ["NUMBER?",0,201,"D"],
+    ["NUMOB",0,202,"D"],
+    ["OBARRAY",0,203,"D"],
+    ["OBLIST",0,204,"L"],
+    ["ONEP",0,205,"L"],
+    ["OPCHAR",0,206,"D"],
+    ["OPDEFINE",0,207,"D"],
+    ["OR",0,208,"L"],
+    ["ORBITAL-ELEMENTS",0,209,"D"],
+    ["PACK",0,210,"D"],
+    ["PAIR",0,211,"L"],
+    ["PARAMETERIZE",0,212,"L"],
+    ["PENDULUM-PERIOD",0,213,"D"],
+    ["PENDULUM-PHYSICS-PIPELINE",0,214,"D"],
+    ["PENDULUM-STEP",0,215,"D"],
+    ["PERFT",0,216,"L"],
+    ["PGN-PARSE",0,217,"D"],
+    ["PIECE-AT",0,218,"L"],
+    ["PLANET-LONGITUDE",0,219,"D"],
+    ["PNAME-VIEW",0,220,"D"],
+    ["POWER-RANGE-CLASSIFICATION",0,221,"D"],
+    ["PR-STR",0,222,"D"],
+    ["PRATYAHARA-MEMBERS",0,223,"D"],
+    ["PRIN1",0,224,"L"],
+    ["PRINC",0,225,"L"],
+    ["PRINT",0,226,"L"],
+    ["PRINTLN",0,227,"D"],
+    ["PRINTPROP",0,228,"D"],
+    ["PRN",0,229,"D"],
+    ["PROG2",0,230,"L"],
+    ["PROP",0,231,"D"],
+    ["PROVENANCE-CHAIN",0,232,"L"],
+    ["PUNCH",0,233,"D"],
+    ["PUNCHDEF",0,234,"D"],
+    ["PUNCHLAP",0,235,"D"],
+    ["RANKED-FULLTEXT-SEARCH",0,236,"L"],
+    ["RATIONAL-TO-MASK-AND-BACK",0,237,"D"],
+    ["READ",0,238,"L"],
+    ["READ-STRING",0,239,"D"],
+    ["READCH",0,240,"D"],
+    ["READLAP",0,241,"D"],
+    ["READLINE",0,242,"D"],
+    ["RECLAIM",0,243,"D"],
+    ["REINITIALIZE-INSTANCE",0,244,"L"],
+    ["REMFLAG",0,245,"D"],
+    ["RESETFORM",0,246,"L"],
+    ["RESETLST",0,247,"L"],
+    ["RESETSAVE",0,248,"L"],
+    ["RESETVAR",0,249,"L"],
+    ["RESETVARS",0,250,"L"],
+    ["REST",0,251,"D"],
+    ["REVERSE",0,252,"L"],
+    ["RISE-SET",0,253,"D"],
+    ["RPLACA",0,254,"L"],
+    ["RPLACD",0,255,"L"],
+    ["SCIENCE-PROPER-LIST?",0,256,"D"],
+    ["SCIENCE-SEVENTH",0,257,"D"],
+    ["SCIENCE-SIXTH",0,258,"D"],
+    ["SEARCH-API-WRAPPER",0,259,"D"],
+    ["SEARCH-WEB-ENDPOINT",0,260,"D"],
+    ["SELECT",0,261,"D"],
+    ["SHORTEST-PATH",0,262,"D"],
+    ["SI:AVOGADRO-CONSTANT",0,263,"X"],
+    ["SI:BOLTZMANN-CONSTANT",0,264,"X"],
+    ["SI:C",0,265,"X"],
+    ["SI:CESIUM-FREQUENCY",0,266,"X"],
+    ["SI:CONSTANT-VALUE",0,267,"X"],
+    ["SI:DEFINING-AVOGADRO-CONSTANT",0,268,"X"],
+    ["SI:DEFINING-BOLTZMANN-CONSTANT",0,269,"X"],
+    ["SI:DEFINING-CESIUM-FREQUENCY",0,270,"X"],
+    ["SI:DEFINING-ELEMENTARY-CHARGE",0,271,"X"],
+    ["SI:DEFINING-LUMINOUS-EFFICACY",0,272,"X"],
+    ["SI:DEFINING-PLANCK-CONSTANT",0,273,"X"],
+    ["SI:DEFINING-SPEED-OF-LIGHT",0,274,"X"],
+    ["SI:DELTA-NU-CS",0,275,"X"],
+    ["SI:E",0,276,"X"],
+    ["SI:ELEMENTARY-CHARGE",0,277,"X"],
+    ["SI:H",0,278,"X"],
+    ["SI:K",0,279,"X"],
+    ["SI:K-CD",0,280,"X"],
+    ["SI:LUMINOUS-EFFICACY",0,281,"X"],
+    ["SI:N-A",0,282,"X"],
+    ["SI:PLANCK-CONSTANT",0,283,"X"],
+    ["SI:SPEED-OF-LIGHT",0,284,"X"],
+    ["SIGNAL-CONDITION",0,285,"L"],
+    ["SLOT-MISSING",0,286,"L"],
+    ["SLOT-UNBOUND",0,287,"L"],
+    ["SLURP",0,288,"D"],
+    ["SPEAK",0,289,"D"],
+    ["SPEAKER-SEGMENTATION-AND-CLUSTERING",0,290,"D"],
+    ["SPECIAL",0,291,"L"],
+    ["SPECIAL-BINDING",0,292,"L"],
+    ["STARTREAD",0,293,"D"],
+    ["STEM-UK",0,294,"D"],
+    ["STR",0,295,"D"],
+    ["STRING->CODEPOINT",0,296,"D"],
+    ["STRING->SYMBOL",0,297,"L"],
+    ["STRING-CI-HASH",0,298,"L"],
+    ["STRING?",0,299,"D"],
+    ["SUBGRAPH-OF",0,300,"D"],
+    ["SYMBOL",0,301,"D"],
+    ["SYMBOL->STRING",0,302,"L"],
+    ["SYMBOL?",0,303,"L"],
+    ["SYNTAX->DATUM",0,304,"L"],
+    ["SYNTAX-CASE",0,305,"L"],
+    ["SYNTAX-RULES",0,306,"L"],
+    ["TABLESPACE",0,307,"D"],
+    ["TEMPUS-FUGIT",0,308,"D"],
+    ["TERPRI",0,309,"L"],
+    ["THE",0,310,"L"],
+    ["THREAD-CONJUNCTION",0,311,"L"],
+    ["THREAD-CONJUNCTION-BRANCHES",0,312,"L"],
+    ["THROW",0,313,"L"],
+    ["TIME-LONGITUDE-POLAR-PROJECTION",0,314,"D"],
+    ["TIME-MS",0,315,"D"],
+    ["TIMEZONE-RAW->OBSERVATION",0,316,"L"],
+    ["TITHI-OF",0,317,"D"],
+    ["TOKENIZE-UK",0,318,"D"],
+    ["TOPOLOGICAL-SORT",0,319,"L"],
+    ["TRACE",0,320,"D"],
+    ["TRACESET",0,321,"D"],
+    ["TRANSFORMER",0,322,"D"],
+    ["TRANSLIT-LATYNKA",0,323,"D"],
+    ["TRUE?",0,324,"D"],
+    ["UCI-PARSE",0,325,"D"],
+    ["UNCOMMON",0,326,"D"],
+    ["UNCOUNT",0,327,"D"],
+    ["UNIFY-VAR",0,328,"L"],
+    ["UNIFY-WALKED",0,329,"L"],
+    ["UNIFY-WITH-OCCURS-CHECK",0,330,"L"],
+    ["UNPACK",0,331,"D"],
+    ["UNSPECIAL",0,332,"D"],
+    ["UNTRACE",0,333,"D"],
+    ["UNTRACESET",0,334,"D"],
+    ["UNWIND-ALL",0,335,"L"],
+    ["UPDATE-INSTANCE-FOR-DIFFERENT-CLASS",0,336,"L"],
+    ["UPDATE-INSTANCE-FOR-REDEFINED-CLASS",0,337,"L"],
+    ["USING-RESOURCE",0,338,"L"],
+    ["VEC",0,339,"D"],
+    ["VECTOR",0,340,"L"],
+    ["VECTOR-LENGTH",0,341,"L"],
+    ["VECTOR-REF",0,342,"L"],
+    ["VECTOR-SET!",0,343,"L"],
+    ["VRDDHI-OF",0,344,"D"],
+    ["WALK-RESOLVED",0,345,"L"],
+    ["WHOPPER",0,346,"D"],
+    ["WORD-EMBEDDING",0,347,"D"],
+    ["WRAPPED?",0,348,"L"],
+    ["WRAPPER-OF-TYPE?",0,349,"L"],
+    ["WRAPPER-TYPES",0,350,"L"],
+    ["WRITE-TO-STRING",0,351,"L"],
+    ["BACKQUANTIZE",1,0,"D"],
+    ["BOUND-IDENTIFIER=?",1,1,"L"],
+    ["BYTEVECTOR-COPY!",1,2,"L"],
+    ["CALL-WITH-PORT",1,3,"L"],
+    ["CASE-LAMBDA",1,4,"L"],
+    ["CLASS-DIRECT-SLOTS",1,5,"L"],
+    ["CLASS-PRECEDENCE-LIST",1,6,"L"],
+    ["COLLECTION",1,7,"D"],
+    ["COUNT-LEADING-ZEROS",1,8,"L"],
+    ["DEFINE-RECORD-TYPE",1,9,"L"],
+    ["DEFINE-VALUES",1,10,"L"],
+    ["DELAY-FORCE",1,11,"L"],
+    ["EQUAL-HASH",1,12,"L"],
+    ["FREE-IDENTIFIER=?",1,13,"L"],
+    ["GENERATE-EXPANSION",1,14,"D"],
+    ["GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",1,15,"L"],
+    ["GENERIC-FUNCTION-METHODS",1,16,"L"],
+    ["GET-OUTPUT-STREAM-STRING",1,17,"L"],
+    ["GUARD",1,18,"L"],
+    ["HASHTABLE-EQUIVALENCE-FUNCTION",1,19,"L"],
+    ["HASHTABLE-HASH-FUNCTION",1,20,"L"],
+    ["HASHTABLE-KEYS",1,21,"L"],
+    ["HASHTABLE-REF",1,22,"L"],
+    ["HASHTABLE-UPDATE!",1,23,"L"],
+    ["IDENTIFIER?",1,24,"L"],
+    ["LOCF",1,25,"L"],
+    ["MAKE-CONCATENATED-STREAM",1,26,"L"],
+    ["MAKE-EQ-HASHTABLE",1,27,"L"],
+    ["MAKE-EQV-HASHTABLE",1,28,"L"],
+    ["MAKE-HASHTABLE",1,29,"L"],
+    ["MAKE-PROMISE",1,30,"L"],
+    ["MAKE-SYNONYM-STREAM",1,31,"L"],
+    ["MAKE-VARIABLE-TRANSFORMER",1,32,"L"],
+    ["MAKNUM",1,33,"L"],
+    ["MULTIPLE-VALUE-PROG1",1,34,"L"],
+    ["MUNKAM",1,35,"L"],
+    ["PROMISE?",1,36,"L"],
+    ["RAISE-CONTINUABLE",1,37,"L"],
+    ["STRING-CI-HASH",1,38,"L"],
+    ["TABLESPACE",1,39,"D"],
+    ["THE",1,40,"L"],
+    ["WITH-EXCEPTION-HANDLER",1,41,"L"],
+    ["ENOUGH-NAMESTRING",1,42,"L"],
+    ["MERGE-PATHNAMES",1,43,"L"],
+    ["PATHNAME-MATCH-P",1,44,"L"],
+    ["A-LIST",1,45,"D"],
+    ["ADVANCE",1,46,"D"],
+    ["APVAL",1,47,"D"],
+    ["ARRAY",1,48,"D"],
+    ["ATTRIB",1,49,"D"],
+    ["CHARCOUNT",1,50,"D"],
+    ["CLASS-DEFAULT-INITARGS",1,51,"L"],
+    ["CLASS-DIRECT-DEFAULT-INITARGS",1,52,"L"],
+    ["CLASS-DIRECT-SUBCLASSES",1,53,"L"],
+    ["CLASS-DIRECT-SUPERCLASSES",1,54,"L"],
+    ["CLASS-FINALIZED-P",1,55,"L"],
+    ["CLASS-PROTOTYPE",1,56,"L"],
+    ["CLASS-SLOTS",1,57,"L"],
+    ["CLEARBUFF",1,58,"D"],
+    ["COMMON",1,59,"D"],
+    ["CONC",1,60,"D"],
+    ["COPY",1,61,"D"],
+    ["COUNT",1,62,"D"],
+    ["CSET",1,63,"D"],
+    ["CSETQ",1,64,"D"],
+    ["CURCHAR",1,65,"D"],
+    ["DEFLIST",1,66,"D"],
+    ["DUMP",1,67,"D"],
+    ["EFFACE",1,68,"D"],
+    ["ENDREAD",1,69,"D"],
+    ["ENV",1,70,"L"],
+    ["ERROR1",1,71,"D"],
+    ["EXCISE",1,72,"D"],
+    ["FIXP",1,73,"L"],
+    ["FLAG",1,74,"D"],
+    ["FLOATP",1,75,"L"],
+    ["GENERIC-FUNCTION-DECLARATIONS",1,76,"L"],
+    ["GENERIC-FUNCTION-LAMBDA-LIST",1,77,"L"],
+    ["GENERIC-FUNCTION-METHOD-CLASS",1,78,"L"],
+    ["GENERIC-FUNCTION-METHOD-COMBINATION",1,79,"L"],
+    ["GENERIC-FUNCTION-NAME",1,80,"L"],
+    ["LAP",1,81,"D"],
+    ["LEFTSHIFT",1,82,"L"],
+    ["LOAD",1,83,"D"],
+    ["LOGOR",1,84,"L"],
+    ["MKNAM",1,85,"D"],
+    ["NCONC",1,86,"D"],
+    ["NUMOB",1,87,"D"],
+    ["OBARRAY",1,88,"D"],
+    ["OBLIST",1,89,"L"],
+    ["OPCHAR",1,90,"D"],
+    ["OPDEFINE",1,91,"D"],
+    ["PACK",1,92,"D"],
+    ["PNAME-VIEW",1,93,"D"],
+    ["PRINTPROP",1,94,"D"],
+    ["PROP",1,95,"D"],
+    ["PUNCH",1,96,"D"],
+    ["PUNCHDEF",1,97,"D"],
+    ["PUNCHLAP",1,98,"D"],
+    ["READCH",1,99,"D"],
+    ["READLAP",1,100,"D"],
+    ["RECLAIM",1,101,"D"],
+    ["REMFLAG",1,102,"D"],
+    ["SELECT",1,103,"D"],
+    ["SPEAK",1,104,"D"],
+    ["SPECIAL-BINDING",1,105,"L"],
+    ["STARTREAD",1,106,"D"],
+    ["TEMPUS-FUGIT",1,107,"D"],
+    ["TRACE",1,108,"D"],
+    ["TRACESET",1,109,"D"],
+    ["TRANSFORMER",1,110,"D"],
+    ["UNCOMMON",1,111,"D"],
+    ["UNCOUNT",1,112,"D"],
+    ["UNPACK",1,113,"D"],
+    ["UNSPECIAL",1,114,"D"],
+    ["UNTRACE",1,115,"D"],
+    ["UNTRACESET",1,116,"D"],
+    ["ALPHALESSP",1,117,"D"],
+    ["ARRAYCALL",1,118,"D"],
+    ["ASCII",1,119,"D"],
+    ["BIGP",1,120,"D"],
+    ["BROADCAST-STREAM",1,121,"D"],
+    ["BROADCAST-STREAM-STREAMS",1,122,"L"],
+    ["CATENATE",1,123,"D"],
+    ["CLEAR-INPUT",1,124,"L"],
+    ["CLEAR-OUTPUT",1,125,"L"],
+    ["CONCATENATED-STREAM",1,126,"D"],
+    ["CONCATENATED-STREAM-STREAMS",1,127,"L"],
+    ["COS",1,128,"L"],
+    ["DEBUG",1,129,"D"],
+    ["DEFINE-SYNTAX",1,130,"L"],
+    ["DEFN",1,131,"D"],
+    ["DIRECTORY-NAMESTRING",1,132,"L"],
+    ["DUMPARRAYS",1,133,"D"],
+    ["ECHO-STREAM",1,134,"D"],
+    ["ECHO-STREAM-INPUT-STREAM",1,135,"L"],
+    ["ECHO-STREAM-OUTPUT-STREAM",1,136,"L"],
+    ["END-OF-FILE",1,137,"L"],
+    ["FILE-LENGTH",1,138,"L"],
+    ["FILE-NAMESTRING",1,139,"L"],
+    ["FILE-POSITION",1,140,"L"],
+    ["FILE-STREAM",1,141,"L"],
+    ["FILE-STRING-LENGTH",1,142,"L"],
+    ["FINISH-OUTPUT",1,143,"L"],
+    ["FIRST",1,144,"D"],
+    ["FIX",1,145,"D"],
+    ["FORCE-OUTPUT",1,146,"L"],
+    ["FRESH-LINE",1,147,"L"],
+    ["GE",1,148,"D"],
+    ["GET_PNAME",1,149,"D"],
+    ["GETCHAR",1,150,"D"],
+    ["GETCHARN",1,151,"D"],
+    ["GT",1,152,"D"],
+    ["HOST-NAMESTRING",1,153,"L"],
+    ["INPUT-STREAM-P",1,154,"L"],
+    ["INTERACTIVE-STREAM-P",1,155,"L"],
+    ["LE",1,156,"D"],
+    ["LISTEN",1,157,"L"],
+    ["LOAD-LOGICAL-PATHNAME-TRANSLATIONS",1,158,"L"],
+    ["LOADARRAYS",1,159,"D"],
+    ["LOGICAL-PATHNAME",1,160,"L"],
+    ["LOGICAL-PATHNAME-TRANSLATIONS",1,161,"L"],
+    ["LSUBRCALL",1,162,"D"],
+    ["LT",1,163,"D"],
+    ["MAKE-BROADCAST-STREAM",1,164,"L"],
+    ["MAKE-ECHO-STREAM",1,165,"L"],
+    ["MAKE-PATHNAME",1,166,"L"],
+    ["MAKE-STRING-INPUT-STREAM",1,167,"L"],
+    ["MAKE-STRING-OUTPUT-STREAM",1,168,"L"],
+    ["MAKE-TWO-WAY-STREAM",1,169,"L"],
+    ["NAMESTRING",1,170,"L"],
+    ["OPEN-STREAM-P",1,171,"L"],
+    ["OUTPUT-STREAM-P",1,172,"L"],
+    ["PARSE-NAMESTRING",1,173,"L"],
+    ["PATHNAME",1,174,"L"],
+    ["PATHNAME-DEVICE",1,175,"L"],
+    ["PATHNAME-DIRECTORY",1,176,"L"],
+    ["PATHNAME-HOST",1,177,"L"],
+    ["PATHNAME-NAME",1,178,"L"],
+    ["PATHNAME-TYPE",1,179,"L"],
+    ["PATHNAME-VERSION",1,180,"L"],
+    ["PATHNAMEP",1,181,"L"],
+    ["PEEK-CHAR",1,182,"L"],
+    ["RANDOM",1,183,"L"],
+    ["READ-CHAR-NO-HANG",1,184,"L"],
+    ["READ-LINE",1,185,"L"],
+    ["READ-MANY",1,186,"D"],
+    ["READ-SEQUENCE",1,187,"L"],
+    ["REST",1,188,"D"],
+    ["SAMEPNAMEP",1,189,"D"],
+    ["SET!",1,190,"D"],
+    ["SIGNP",1,191,"D"],
+    ["SLURP",1,192,"D"],
+    ["SPIT",1,193,"D"],
+    ["STREAM",1,194,"D"],
+    ["STREAM-ELEMENT-TYPE",1,195,"L"],
+    ["STREAM-ERROR",1,196,"D"],
+    ["STREAM-ERROR-STREAM",1,197,"L"],
+    ["STREAM-EXTERNAL-FORMAT",1,198,"L"],
+    ["STREAMP",1,199,"L"],
+    ["STRING-STREAM",1,200,"D"],
+    ["STRINGLENGTH",1,201,"D"],
+    ["SUBRCALL",1,202,"D"],
+    ["SUBSTR",1,203,"D"],
+    ["SYNONYM-STREAM",1,204,"D"],
+    ["SYNONYM-STREAM-SYMBOL",1,205,"D"],
+    ["TRANSLATE-LOGICAL-PATHNAME",1,206,"L"],
+    ["TRANSLATE-PATHNAME",1,207,"L"],
+    ["TWO-WAY-STREAM",1,208,"D"],
+    ["TWO-WAY-STREAM-INPUT-STREAM",1,209,"L"],
+    ["TWO-WAY-STREAM-OUTPUT-STREAM",1,210,"L"],
+    ["UNQUOTE",1,211,"D"],
+    ["UNREAD-CHAR",1,212,"D"],
+    ["WILD-PATHNAME-P",1,213,"L"],
+    ["WITH-INPUT-FROM-STRING",1,214,"D"],
+    ["WITH-OPEN-STREAM",1,215,"D"],
+    ["WITH-OUTPUT-TO-STRING",1,216,"D"],
+    ["WRITE-CHAR",1,217,"D"],
+    ["WRITE-LINE",1,218,"D"],
+    ["WRITE-SEQUENCE",1,219,"L"],
+    ["Y-OR-N-P",1,220,"D"],
+    ["YES-OR-NO-P",1,221,"D"],
+    ["MAKE-EQ-HASHTABLE",2,0,"L"],
+    ["MAKE-EQV-HASHTABLE",2,1,"L"],
+    ["MAKE-HASHTABLE",2,2,"L"],
+    ["HASHTABLE-REF",2,3,"L"],
+    ["HASHTABLE-UPDATE!",2,4,"L"],
+    ["HASHTABLE-KEYS",2,5,"L"],
+    ["HASHTABLE-HASH-FUNCTION",2,6,"L"],
+    ["HASHTABLE-EQUIVALENCE-FUNCTION",2,7,"L"],
+    ["EQUAL-HASH",2,8,"L"],
+    ["STRING-CI-HASH",2,9,"L"],
+    ["IDENTIFIER?",2,10,"L"],
+    ["BOUND-IDENTIFIER=?",2,11,"L"],
+    ["FREE-IDENTIFIER=?",2,12,"L"],
+    ["SYNTAX->DATUM",2,13,"L"],
+    ["DATUM->SYNTAX",2,14,"L"],
+    ["MAKE-VARIABLE-TRANSFORMER",2,15,"L"],
+    ["DELAY-FORCE",2,16,"L"],
+    ["MAKE-PROMISE",2,17,"L"],
+    ["PROMISE?",2,18,"L"],
+    ["CASE-LAMBDA",2,19,"L"],
+    ["DEFINE-RECORD-TYPE",2,20,"L"],
+    ["RAISE-CONTINUABLE",2,21,"L"],
+    ["BYTEVECTOR-COPY!",2,22,"L"],
+    ["CALL-WITH-PORT",2,23,"L"],
+    ["WITH-EXCEPTION-HANDLER",2,24,"L"],
+    ["DEFINE-VALUES",2,25,"L"],
+    ["GUARD",2,26,"L"],
+    ["CLASS-SLOTS",2,27,"L"],
+    ["CLASS-DIRECT-SLOTS",2,28,"L"],
+    ["CLASS-DEFAULT-INITARGS",2,29,"L"],
+    ["CLASS-DIRECT-DEFAULT-INITARGS",2,30,"L"],
+    ["CLASS-PRECEDENCE-LIST",2,31,"L"],
+    ["CLASS-DIRECT-SUPERCLASSES",2,32,"L"],
+    ["CLASS-DIRECT-SUBCLASSES",2,33,"L"],
+    ["CLASS-FINALIZED-P",2,34,"L"],
+    ["CLASS-PROTOTYPE",2,35,"L"],
+    ["GENERIC-FUNCTION-NAME",2,36,"L"],
+    ["GENERIC-FUNCTION-METHODS",2,37,"L"],
+    ["GENERIC-FUNCTION-LAMBDA-LIST",2,38,"L"],
+    ["GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",2,39,"L"],
+    ["GENERIC-FUNCTION-DECLARATIONS",2,40,"L"],
+    ["GENERIC-FUNCTION-METHOD-CLASS",2,41,"L"],
+    ["GENERIC-FUNCTION-METHOD-COMBINATION",2,42,"L"],
+    ["STREAM",2,43,"D"],
+    ["BROADCAST-STREAM",2,44,"D"],
+    ["CONCATENATED-STREAM",2,45,"D"],
+    ["ECHO-STREAM",2,46,"D"],
+    ["FILE-STREAM",2,47,"L"],
+    ["STRING-STREAM",2,48,"D"],
+    ["SYNONYM-STREAM",2,49,"D"],
+    ["TWO-WAY-STREAM",2,50,"D"],
+    ["INPUT-STREAM-P",2,51,"L"],
+    ["OUTPUT-STREAM-P",2,52,"L"],
+    ["INTERACTIVE-STREAM-P",2,53,"L"],
+    ["OPEN-STREAM-P",2,54,"L"],
+    ["STREAM-ELEMENT-TYPE",2,55,"L"],
+    ["STREAMP",2,56,"L"],
+    ["PEEK-CHAR",2,57,"L"],
+    ["READ-CHAR-NO-HANG",2,58,"L"],
+    ["FRESH-LINE",2,59,"L"],
+    ["UNREAD-CHAR",2,60,"D"],
+    ["WRITE-CHAR",2,61,"D"],
+    ["READ-LINE",2,62,"L"],
+    ["WRITE-LINE",2,63,"D"],
+    ["READ-SEQUENCE",2,64,"L"],
+    ["WRITE-SEQUENCE",2,65,"L"],
+    ["FILE-LENGTH",2,66,"L"],
+    ["FILE-POSITION",2,67,"L"],
+    ["FILE-STRING-LENGTH",2,68,"L"],
+    ["STREAM-EXTERNAL-FORMAT",2,69,"L"],
+    ["LISTEN",2,70,"L"],
+    ["CLEAR-INPUT",2,71,"L"],
+    ["FINISH-OUTPUT",2,72,"L"],
+    ["FORCE-OUTPUT",2,73,"L"],
+    ["CLEAR-OUTPUT",2,74,"L"],
+    ["Y-OR-N-P",2,75,"D"],
+    ["YES-OR-NO-P",2,76,"D"],
+    ["MAKE-SYNONYM-STREAM",2,77,"L"],
+    ["SYNONYM-STREAM-SYMBOL",2,78,"D"],
+    ["BROADCAST-STREAM-STREAMS",2,79,"L"],
+    ["MAKE-BROADCAST-STREAM",2,80,"L"],
+    ["MAKE-TWO-WAY-STREAM",2,81,"L"],
+    ["TWO-WAY-STREAM-INPUT-STREAM",2,82,"L"],
+    ["TWO-WAY-STREAM-OUTPUT-STREAM",2,83,"L"],
+    ["ECHO-STREAM-INPUT-STREAM",2,84,"L"],
+    ["ECHO-STREAM-OUTPUT-STREAM",2,85,"L"],
+    ["MAKE-ECHO-STREAM",2,86,"L"],
+    ["CONCATENATED-STREAM-STREAMS",2,87,"L"],
+    ["MAKE-CONCATENATED-STREAM",2,88,"L"],
+    ["GET-OUTPUT-STREAM-STRING",2,89,"L"],
+    ["MAKE-STRING-INPUT-STREAM",2,90,"L"],
+    ["MAKE-STRING-OUTPUT-STREAM",2,91,"L"],
+    ["STREAM-ERROR-STREAM",2,92,"L"],
+    ["WITH-OPEN-STREAM",2,93,"D"],
+    ["WITH-INPUT-FROM-STRING",2,94,"D"],
+    ["WITH-OUTPUT-TO-STRING",2,95,"D"],
+    ["*DEBUG-IO*",2,96,"X"],
+    ["*ERROR-OUTPUT*",2,97,"X"],
+    ["*QUERY-IO*",2,98,"X"],
+    ["*STANDARD-INPUT*",2,99,"X"],
+    ["*STANDARD-OUTPUT*",2,100,"X"],
+    ["*TRACE-OUTPUT*",2,101,"X"],
+    ["*TERMINAL-IO*",2,102,"X"],
+    ["STREAM-ERROR",2,103,"D"],
+    ["END-OF-FILE",2,104,"L"],
+    ["PATHNAME",2,105,"L"],
+    ["LOGICAL-PATHNAME",2,106,"L"],
+    ["MAKE-PATHNAME",2,107,"L"],
+    ["PATHNAMEP",2,108,"L"],
+    ["PATHNAME-HOST",2,109,"L"],
+    ["PATHNAME-DEVICE",2,110,"L"],
+    ["PATHNAME-DIRECTORY",2,111,"L"],
+    ["PATHNAME-NAME",2,112,"L"],
+    ["PATHNAME-TYPE",2,113,"L"],
+    ["PATHNAME-VERSION",2,114,"L"],
+    ["LOAD-LOGICAL-PATHNAME-TRANSLATIONS",2,115,"L"],
+    ["LOGICAL-PATHNAME-TRANSLATIONS",2,116,"L"],
+    ["*DEFAULT-PATHNAME-DEFAULTS*",2,117,"X"],
+    ["NAMESTRING",2,118,"L"],
+    ["FILE-NAMESTRING",2,119,"L"],
+    ["DIRECTORY-NAMESTRING",2,120,"L"],
+    ["HOST-NAMESTRING",2,121,"L"],
+    ["ENOUGH-NAMESTRING",2,122,"L"],
+    ["PARSE-NAMESTRING",2,123,"L"],
+    ["WILD-PATHNAME-P",2,124,"L"],
+    ["PATHNAME-MATCH-P",2,125,"L"],
+    ["TRANSLATE-LOGICAL-PATHNAME",2,126,"L"],
+    ["TRANSLATE-PATHNAME",2,127,"L"],
+    ["MERGE-PATHNAMES",2,128,"L"],
+    ["PARAMETERIZE",2,129,"L"],
+    ["MAKE-PARAMETER",2,130,"L"],
+    ["SYNTAX-RULES",2,131,"L"],
+    ["SYNTAX-CASE",2,132,"L"],
+    ["DEFINE-SYNTAX",2,133,"L"],
+    ["COMPUTE-APPLICABLE-METHODS",2,134,"D"],
+    ["MASTERSCOPE",2,135,"D"],
+    ["DWIM",2,136,"D"],
+    ["WHOPPER",2,137,"D"],
+    ["SUBRCALL",2,138,"D"],
+    ["LSUBRCALL",2,139,"D"],
+    ["ARRAYCALL",2,140,"D"],
+    ["DUMPARRAYS",2,141,"D"],
+    ["LOADARRAYS",2,142,"D"],
+    ["FIX",2,143,"D"],
+    ["FLOATP",2,144,"L"],
+    ["BIGP",2,145,"D"],
+    ["COS",2,146,"L"],
+    ["RANDOM",2,147,"L"],
+    ["SIGNP",2,148,"D"],
+    ["READ-MANY",2,149,"D"],
+    ["SLURP",2,150,"D"],
+    ["SPIT",2,151,"D"],
+    ["SET!",2,152,"D"],
+    ["UNQUOTE",2,153,"D"],
+    ["FIRST",2,154,"D"],
+    ["REST",2,155,"D"],
+    ["DEBUG",2,156,"D"],
+    ["DEFN",2,157,"D"],
+    ["GE",2,158,"D"],
+    ["LE",2,159,"D"],
+    ["GT",2,160,"D"],
+    ["LT",2,161,"D"],
+    ["A-LIST",3,0,"D"],
+    ["ADVANCE",3,1,"D"],
+    ["APVAL",3,2,"D"],
+    ["ARRAY",3,3,"D"],
+    ["ARRAYCALL",3,4,"D"],
+    ["ATTRIB",3,5,"D"],
+    ["BACKQUANTIZE",3,6,"D"],
+    ["BIGP",3,7,"D"],
+    ["CHARCOUNT",3,8,"D"],
+    ["CLEARBUFF",3,9,"D"],
+    ["COLLECTION",3,10,"D"],
+    ["COMMON",3,11,"D"],
+    ["CONC",3,12,"D"],
+    ["COPY",3,13,"D"],
+    ["COS",3,14,"L"],
+    ["COUNT",3,15,"D"],
+    ["COUNT-LEADING-ZEROS",3,16,"L"],
+    ["CSET",3,17,"D"],
+    ["CSETQ",3,18,"D"],
+    ["CURCHAR",3,19,"D"],
+    ["DEFLIST",3,20,"D"],
+    ["DUMP",3,21,"D"],
+    ["DUMPARRAYS",3,22,"D"],
+    ["EFFACE",3,23,"D"],
+    ["ENDREAD",3,24,"D"],
+    ["ENV",3,25,"L"],
+    ["ERROR1",3,26,"D"],
+    ["EXCISE",3,27,"D"],
+    ["FIX",3,28,"D"],
+    ["FIXP",3,29,"L"],
+    ["FLAG",3,30,"D"],
+    ["FLOATP",3,31,"L"],
+    ["GENERATE-EXPANSION",3,32,"D"],
+    ["LAP",3,33,"D"],
+    ["LEFTSHIFT",3,34,"L"],
+    ["LOAD",3,35,"D"],
+    ["LOADARRAYS",3,36,"D"],
+    ["LOCF",3,37,"L"],
+    ["LOGOR",3,38,"L"],
+    ["LSUBRCALL",3,39,"D"],
+    ["MAKNUM",3,40,"L"],
+    ["MKNAM",3,41,"D"],
+    ["MULTIPLE-VALUE-PROG1",3,42,"L"],
+    ["MUNKAM",3,43,"L"],
+    ["NCONC",3,44,"D"],
+    ["NUMOB",3,45,"D"],
+    ["OBARRAY",3,46,"D"],
+    ["OBLIST",3,47,"L"],
+    ["OPCHAR",3,48,"D"],
+    ["OPDEFINE",3,49,"D"],
+    ["PACK",3,50,"D"],
+    ["PNAME-VIEW",3,51,"D"],
+    ["PRINTPROP",3,52,"D"],
+    ["PROP",3,53,"D"],
+    ["PUNCH",3,54,"D"],
+    ["PUNCHDEF",3,55,"D"],
+    ["PUNCHLAP",3,56,"D"],
+    ["RANDOM",3,57,"L"],
+    ["READCH",3,58,"D"],
+    ["READLAP",3,59,"D"],
+    ["RECLAIM",3,60,"D"],
+    ["REMFLAG",3,61,"D"],
+    ["SELECT",3,62,"D"],
+    ["SIGNP",3,63,"D"],
+    ["SPEAK",3,64,"D"],
+    ["SPECIAL-BINDING",3,65,"L"],
+    ["STARTREAD",3,66,"D"],
+    ["SUBRCALL",3,67,"D"],
+    ["TABLESPACE",3,68,"D"],
+    ["TEMPUS-FUGIT",3,69,"D"],
+    ["THE",3,70,"L"],
+    ["TRACE",3,71,"D"],
+    ["TRACESET",3,72,"D"],
+    ["TRANSFORMER",3,73,"D"],
+    ["UNCOMMON",3,74,"D"],
+    ["UNCOUNT",3,75,"D"],
+    ["UNPACK",3,76,"D"],
+    ["UNSPECIAL",3,77,"D"],
+    ["UNTRACE",3,78,"D"],
+    ["UNTRACESET",3,79,"D"],
+    ["READ",4,0,"L"],
+    ["PRINT",4,1,"L"],
+    ["COMPILE",4,2,"L"],
+    ["COMPILE-FILE",4,3,"L"],
+    ["OPEN",4,4,"L"],
+    ["CLOSE",4,5,"L"],
+    ["WITH-OPEN-FILE",4,6,"L"],
+    ["DRIBBLE",4,7,"L"],
+    ["MAKE-CLOSURE",4,8,"L"],
+    ["CLOSUREP",4,9,"L"],
+    ["VALUES",4,10,"L"],
+    ["VALUES-LIST",4,11,"L"],
+    ["APPLY",4,12,"L"],
+    ["COMPOSE",4,13,"L"],
+    ["PARTIAL",4,14,"L"],
+    ["FFI-CALL",4,15,"L"],
+    ["EXPR",4,16,"L"],
+    ["SPECIAL",4,17,"L"],
+    ["THE",4,18,"L"],
+    ["LOCALLY",4,19,"L"],
+    ["ARGLIST",4,20,"L"],
+    ["&REST",4,21,"L"],
+    ["&OPTIONAL",4,22,"L"],
+    ["&WHOLE",4,23,"L"],
+    ["GENERATE-EXPANSION",4,24,"D"],
+    ["MACRO-FUNCTION",4,25,"L"],
+    ["MACROEXPAND-ALL",4,26,"L"],
+    ["COMPILER-MACRO",4,27,"L"],
+    ["SYMBOL-MACRO",4,28,"L"],
+    ["DEFINE-SYMBOL-MACRO",4,29,"L"],
+    ["DEFINE-COMPILER-MACRO",4,30,"L"],
+    ["BACKQUANTIZE",4,31,"D"],
+    ["NAMED-LAMBDA",4,32,"L"],
+    ["FLAMBDA",4,33,"L"],
+    ["LETREC",4,34,"L"],
+    ["MULTIPLE-VALUE-BIND",4,35,"L"],
+    ["PROG1",4,36,"L"],
+    ["PROG2",4,37,"L"],
+    ["DO*",4,38,"L"],
+    ["LOOP",4,39,"L"],
+    ["DOH",4,40,"L"],
+    ["REPEAT",4,41,"L"],
+    ["DOSEQ",4,42,"L"],
+    ["DOTIMES",4,43,"L"],
+    ["UNTIL",4,44,"L"],
+    ["ALWAYS",4,45,"L"],
+    ["NEVER",4,46,"L"],
+    ["EVERY",4,47,"L"],
+    ["PUSH",4,48,"L"],
+    ["POP",4,49,"L"],
+    ["SET-CAR",4,50,"L"],
+    ["LAST",4,51,"L"],
+    ["SET-CDR",4,52,"L"],
+    ["NTHCDR",4,53,"L"],
+    ["BUTLAST",4,54,"L"],
+    ["REMOVE",4,55,"L"],
+    ["INCF",4,56,"L"],
+    ["DECF",4,57,"L"],
+    ["PUSHNEW",4,58,"L"],
+    ["ROTATE",4,59,"L"],
+    ["DEFCONSTANT",4,60,"L"],
+    ["DEFSTRUCT",4,61,"L"],
+    ["DEFTYPE",4,62,"L"],
+    ["DEFINE-CONDITION",4,63,"L"],
+    ["1+",4,64,"L"],
+    ["1-",4,65,"L"],
+    ["SIGNUM",4,66,"L"],
+    ["MOD",4,67,"L"],
+    ["PLUSP",4,68,"L"],
+    ["MINUSP",4,69,"L"],
+    ["LDB",4,70,"L"],
+    ["MASK-FIELD",4,71,"L"],
+    ["FLOOR",4,72,"L"],
+    ["CEILING",4,73,"L"],
+    ["TRUNCATE",4,74,"L"],
+    ["ROUND",4,75,"L"],
+    ["FLOAT",4,76,"L"],
+    ["RATIONAL",4,77,"L"],
+    ["RATIONALIZE",4,78,"L"],
+    ["COMPLEX",4,79,"L"],
+    ["LOGAND",4,80,"L"],
+    ["LOGIOR",4,81,"L"],
+    ["LOGXOR",4,82,"L"],
+    ["LOGNOT",4,83,"L"],
+    ["SQRT",4,84,"L"],
+    ["EXP",4,85,"L"],
+    ["LOG",4,86,"L"],
+    ["SIN",4,87,"L"],
+    ["ASH",4,88,"L"],
+    ["INTEGER-LENGTH",4,89,"L"],
+    ["ARITHMETIC-SHIFT",4,90,"L"],
+    ["COUNT-LEADING-ZEROS",4,91,"L"],
+    ["CONJUGATE",4,92,"L"],
+    ["SCALE",4,93,"L"],
+    ["REALPART",4,94,"L"],
+    ["IMAGPART",4,95,"L"],
+    ["THROW",4,96,"L"],
+    ["UNWIND-PROTECT",4,97,"L"],
+    ["SIGNAL",4,98,"L"],
+    ["IGNORE-ERROR",4,99,"L"],
+    ["ERROR",4,100,"L"],
+    ["ERROR-IF-NOT-ERROR",4,101,"L"],
+    ["RESTART-BIND",4,102,"L"],
+    ["RESTART-CASE",4,103,"L"],
+    ["PROGV",4,104,"L"],
+    ["FLET",4,105,"L"],
+    ["LABELS",4,106,"L"],
+    ["LOCAL",4,107,"L"],
+    ["HANDLER-CASE",4,108,"L"],
+    ["HANDLER-BIND",4,109,"L"],
+    ["MAKE-CONDITION",4,110,"L"],
+    ["DEHANDLER",4,111,"L"],
+    ["EQL",4,112,"L"],
+    ["EQUAL",4,113,"L"],
+    ["CHAR=",4,114,"L"],
+    ["STRING=",4,115,"L"],
+    ["POSITION",4,116,"L"],
+    ["SORT",4,117,"L"],
+    ["REDUCE",4,118,"L"],
+    ["REMOVE-DUPLICATES",4,119,"L"],
+    ["CHAR<",4,120,"L"],
+    ["STRING<",4,121,"L"],
+    ["MEMBER-IF",4,122,"L"],
+    ["ASSOC-IF",4,123,"L"],
+    ["CHAR>",4,124,"L"],
+    ["STRING>",4,125,"L"],
+    ["FIND",4,126,"L"],
+    ["DELETE",4,127,"L"],
+    ["COPY-LIST",4,128,"L"],
+    ["REVAPPEND",4,129,"L"],
+    ["LIST*",4,130,"L"],
+    ["LIST-LENGTH",4,131,"L"],
+    ["LENGTH-LIST",4,132,"L"],
+    ["BOUNDP",4,133,"L"],
+    ["ELT",4,134,"L"],
+    ["SUBSEQ",4,135,"L"],
+    ["MAPC",4,136,"L"],
+    ["MAPL",4,137,"L"],
+    ["MAPCAN",4,138,"L"],
+    ["DESTRUCTURE-BIND",4,139,"L"],
+    ["AREF",4,140,"L"],
+    ["ROW-MAJOR-AREF",4,141,"L"],
+    ["CHAR",4,142,"L"],
+    ["SCHAR",4,143,"L"],
+    ["LSH",4,144,"L"],
+    ["RSH",4,145,"L"],
+    ["BOOLE",4,146,"L"],
+    ["LOGBITP",4,147,"L"],
+    ["NUMERATOR",4,148,"L"],
+    ["DENOMINATOR",4,149,"L"],
+    ["CANONICALIZE",4,150,"L"],
+    ["LCM",4,151,"L"],
+    ["DIV",4,152,"L"],
+    ["REM",4,153,"L"],
+    ["CHAR-CODE",4,154,"L"],
+    ["CODE-CHAR",4,155,"L"],
+    ["1/",4,156,"L"],
+    ["ASIN",4,157,"L"],
+    ["ACOS",4,158,"L"],
+    ["ATAN",4,159,"L"],
+    ["ASSQ",4,160,"L"],
+    ["RASSQ",4,161,"L"],
+    ["GETPROP",4,162,"L"],
+    ["GET",4,163,"L"],
+    ["VCONS",4,164,"L"],
+    ["TABLERP",4,165,"L"],
+    ["TABLESPACE",4,166,"D"],
+    ["PUTPROP",4,167,"L"],
+    ["SET-DIFFERENCE",4,168,"L"],
+    ["ADJOIN",4,169,"L"],
+    ["SUBSETP",4,170,"L"],
+    ["COLLECTION",4,171,"D"],
+    ["NUNION",4,172,"L"],
+    ["NRECONC",4,173,"L"],
+    ["LDIFF",4,174,"L"],
+    ["TAILP",4,175,"L"],
+    ["MAP-ANY",4,176,"L"],
+    ["MAP",4,177,"L"],
+    ["NOTANY",4,178,"L"],
+    ["SOME",4,179,"L"],
+    ["MAPCON",4,180,"L"],
+    ["MAPLIST*",4,181,"L"],
+    ["MAPQN",4,182,"L"],
+    ["REMAP",4,183,"L"],
+    ["PRIN1",4,184,"L"],
+    ["PRINC",4,185,"L"],
+    ["TERPRI",4,186,"L"],
+    ["TREE-EQU",4,187,"L"],
+    ["COPY-STRUCTURE",4,188,"L"],
+    ["COPY-ARRAY",4,189,"L"],
+    ["VECTOR-COPY",4,190,"L"],
+    ["COPY-SEQ",4,191,"L"],
+    ["COMPILE-FILE",4,192,"L"],
+    ["OPEN",4,193,"L"],
+    ["CLOSE",4,194,"L"],
+    ["WITH-OPEN-FILE",4,195,"L"],
+    ["DRIBBLE",4,196,"L"],
+    ["APPLY",4,197,"L"],
+    ["COMPOSE",4,198,"L"],
+    ["FFI-CALL",4,199,"L"],
+    ["THE",4,200,"L"],
+    ["ARGLIST",4,201,"L"],
+    ["&WHOLE",4,202,"L"],
+    ["GENERATE-EXPANSION",4,203,"D"],
+    ["MACRO-FUNCTION",4,204,"L"],
+    ["COMPILER-MACRO",4,205,"L"],
+    ["SYMBOL-MACRO",4,206,"L"],
+    ["DEFINE-SYMBOL-MACRO",4,207,"L"],
+    ["DEFINE-COMPILER-MACRO",4,208,"L"],
+    ["BACKQUANTIZE",4,209,"D"],
+    ["DEFSTRUCT",4,210,"L"],
+    ["DEFTYPE",4,211,"L"],
+    ["DEFINE-CONDITION",4,212,"L"],
+    ["LDB",4,213,"L"],
+    ["MASK-FIELD",4,214,"L"],
+    ["COUNT-LEADING-ZEROS",4,215,"L"],
+    ["ERROR-IF-NOT-ERROR",4,216,"L"],
+    ["DEHANDLER",4,217,"L"],
+    ["REDUCE",4,218,"L"],
+    ["ROW-MAJOR-AREF",4,219,"L"],
+    ["SCHAR",4,220,"L"],
+    ["BOOLE",4,221,"L"],
+    ["TABLESPACE",4,222,"D"],
+    ["COLLECTION",4,223,"D"],
+    ["NUNION",4,224,"L"],
+    ["NRECONC",4,225,"L"]
+  ],
+  "loops_research_candidates": [
+    {
+      "historical_name": "ACTIVE-VALUE-GET",
+      "surface_uk": "активне-значення-читати",
+      "surface_ukr": "читати-активне-значення",
+      "origin_path": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "origin_git_blob": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "origin_row": 0,
+      "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "primary_section": "5.1, 5.2, 5.5",
+      "proposed_law": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+      "positive_witnesses": [
+        "Nested stored 10; inner get adds 2, outer get multiplies by 3 -> 36, trace inner:get,outer:get.",
+        "A plain value is read unchanged, and getFn absent returns child-localState result."
+      ],
+      "negative_falsifiers": [
+        "Executing outer get before inner get returns a different result/trace.",
+        "GetLocalStateOnly must not invoke any nested getFn, and must expose immediate nested value."
+      ],
+      "nearby_lower_domains": [
+        "D10 DEREF",
+        "D10 REF-CELL",
+        "D10 SLOT-VALUE",
+        "D8 RPLACA",
+        "D8 VECTOR-SET!"
+      ],
+      "derivability_challenge": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
+      "provenance_status": "ARCHIVED_SELECTED_D10_RESEARCH_NO_OWNER_RATIFICATION",
+      "coordinate": null,
+      "callable": false,
+      "ratified": false,
+      "proof": "NATIVE_SENS_EXECUTION_UNVERIFIED"
+    },
+    {
+      "historical_name": "ACTIVE-VALUE-PUT",
+      "surface_uk": "активне-значення-записати!",
+      "surface_ukr": "записати-активне-значення!",
+      "origin_path": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "origin_git_blob": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "origin_row": 1,
+      "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "primary_section": "5.1, 5.2, 5.5",
+      "proposed_law": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+      "positive_witnesses": [
+        "Nested state 10; put 19 with outer and inner delegating writes -> trace outer:put,inner:put and terminal state 19.",
+        "An outer handler that does not delegate leaves inner state unchanged; absent putFn replaces its own localState."
+      ],
+      "negative_falsifiers": [
+        "Invoking inner put before outer violates nested ordering.",
+        "A putFn that deliberately does not delegate must not trigger inner put; PutLocalStateOnly must suppress nested handlers."
+      ],
+      "nearby_lower_domains": [
+        "D10 RESET-REF!",
+        "D10 SWAP-REF!",
+        "D10 REF-CELL",
+        "D8 RPLACA",
+        "D8 VECTOR-SET!"
+      ],
+      "derivability_challenge": "Potential closure-based composition; must prove material language-visible difference before ratification.",
+      "provenance_status": "ARCHIVED_SELECTED_D10_RESEARCH_NO_OWNER_RATIFICATION",
+      "coordinate": null,
+      "callable": false,
+      "ratified": false,
+      "proof": "NATIVE_SENS_EXECUTION_UNVERIFIED"
+    }
+  ],
+  "prohibitions": [
+    "No D11 coordinate assignment",
+    "No automatic D24 scientific names as language functions",
+    "No implicit Zig admission",
+    "Do not infer distinctness or executable proof from a donor model"
+  ],
+  "crosswalk_format": {
+    "row": "[name, archive_index, source_row_zero_based, match_class]",
+    "match_classes": {
+      "L": "exact D1-D10 spelling only",
+      "D": "exact existing D11 research/testing/selector spelling",
+      "X": "unlisted prior to this research"
+    },
+    "source_resolution": "Use archives[archive_index].path and archives[archive_index].sha; row index refers to source's native array ('candidates','new_candidates',or 'rows'). All detailed evidence stays in its original SHA-pinned source, not duplicated here."
+  },
+  "compressed_reason": "1042 donor rows are pointers, not copies: preserve every source occurrence while respecting bit economy. Re-read pinned source for actual law/falsifier."
+}

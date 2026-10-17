@@ -1,0 +1,391 @@
+{
+  "schema": "sens.d11.archived-mal-reduction/v1",
+  "date": "2026-10-17",
+  "status": "RESEARCH_ONLY_NO_COORDINATES",
+  "description_uk": "Витяг 21 ще не деталізованої назви зі схованого донорського каталогу MAL. Кожен опис тесту є пропозицією, а не виконаним доказом SENS. Точне збігання назви не є семантичною рівністю.",
+  "source": {
+    "repository": "juv4uk/sens",
+    "path": "knowledge/d10-crossrepo-mal-v1.json",
+    "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+    "archived_donor_repo": "juv4uk/mal",
+    "donor_path": "impls/common-lisp/src/core.lisp",
+    "source_authority": "NO_RUNTIME_AUTHORITY"
+  },
+  "crosswalk": {
+    "path": "knowledge/d11/база-доступних-функцій/архівні-потоки-і-межі-20261017.json",
+    "git_blob": "33aad6b37a535cb5d43d64163a77cae5f478c989",
+    "row_kind": "D11_UNREVIEWED_NAME",
+    "ledger_path": "knowledge/d11/база-доступних-функцій/відбір-законів-v1.json",
+    "ledger_blob": "3a23e172519f49ff8f9308ef70e87ce2b673f574",
+    "lower_path": "knowledge/d1-d11-foundation.json",
+    "lower_blob": "363ddf6895ea87fabc772ad19e448d63abb343a6"
+  },
+  "counts": {
+    "reviewed": 21,
+    "prior_derivative": 19,
+    "host_review": 2,
+    "new_domain_coordinates": 0,
+    "new_callable_functions": 0,
+    "native_positive_passes": 0,
+    "native_negative_passes": 0
+  },
+  "columns": [
+    "candidate_spelling",
+    "donor_zero_based_row",
+    "archived_decision",
+    "provisional_review_route",
+    "exact_ratified_crosswalk_[domain,bits,name]",
+    "proposed_positive_test_uk_UNVERIFIED",
+    "proposed_negative_falsifier_uk_UNVERIFIED"
+  ],
+  "test_basis": "PROPOSED_ONLY_NOT_EXECUTED",
+  "policy": {
+    "no_legacy_slot_import": true,
+    "no_d11_code_allocation": true,
+    "no_host_semantics": true,
+    "no_auto_ratification": true,
+    "no_equivalence_by_name": true
+  },
+  "rows": [
+    [
+      "PRN",
+      4,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_PRESENTATION",
+      [
+        [
+          "D8",
+          "11011011",
+          "PRINT"
+        ]
+      ],
+      "Друк читабельної форми має завершитись одним роздільником нового рядка.",
+      "Без доданого newline або з непридатним escaped поданням ця проєкція не тотожна донору."
+    ],
+    [
+      "PRINTLN",
+      5,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_PRESENTATION",
+      [
+        [
+          "D8",
+          "11010110",
+          "PRINC"
+        ],
+        [
+          "D8",
+          "11011011",
+          "PRINT"
+        ]
+      ],
+      "Людський друк має завершити рівно один рядок з очікуваною display-проєкцією.",
+      "Кавички/escaping з readable PRINT не можна мовчки підставляти замість display."
+    ],
+    [
+      "PR-STR",
+      6,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_PRESENTATION",
+      [
+        [
+          "D8",
+          "11110100",
+          "WRITE-TO-STRING"
+        ]
+      ],
+      "Повинна повернути D7-рядок, який можна без втрати лапок та escaping прочитати назад.",
+      "Рядок із лапками, оберненим слешем або пробілом не можна серіалізувати із втратою символа."
+    ],
+    [
+      "STR",
+      7,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_PRESENTATION",
+      [
+        [
+          "D8",
+          "11110100",
+          "WRITE-TO-STRING"
+        ],
+        [
+          "D9",
+          "110011110",
+          "STRING-APPEND"
+        ]
+      ],
+      "Проєктування кількох значень з'єднує символьні подання в порядку аргументів.",
+      "Зміна порядку чи readable-escaping замість display змінює результат."
+    ],
+    [
+      "READ-STRING",
+      17,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_READER_INTEGRATION",
+      [
+        [
+          "D8",
+          "11101010",
+          "READ"
+        ]
+      ],
+      "Точно один datum із D7-рядка має читатись через власний SENS reader, із явним контролем залишку.",
+      "Зайві токени, незакрита форма або помилка типу не стають успішним обчисленням."
+    ],
+    [
+      "SLURP",
+      18,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_HOST_IO",
+      [
+        [
+          "D9",
+          "110110111",
+          "READ-FILE"
+        ]
+      ],
+      "Весь вміст файла має потрапити як дані D7 через явний зовнішній read-result.",
+      "Відсутній файл або EOF не підміняється пустим валідним текстом."
+    ],
+    [
+      "VEC",
+      24,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_SEQUENCE",
+      [
+        [
+          "D9",
+          "101111011",
+          "VEC-FROM-LIST"
+        ]
+      ],
+      "Перетворення послідовності у вектор зберігає порядок і кожен елемент.",
+      "Два різних сусідніх елементи не можна переставити; типізований вектор не є CONS-списком."
+    ],
+    [
+      "CONCAT",
+      26,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_SEQUENCE",
+      [
+        [
+          "D4",
+          "1111",
+          "APPEND"
+        ]
+      ],
+      "Об'єднання послідовностей має зберігати їхній порядок і межі елементів без втрати.",
+      "Перестановка підсписків чи непомічений неправильний хвіст порушує контракт."
+    ],
+    [
+      "FIRST",
+      28,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_SELECTOR",
+      [
+        [
+          "D6",
+          "000100",
+          "NTH"
+        ],
+        [
+          "D3",
+          "100",
+          "CAR"
+        ]
+      ],
+      "Голова непорожнього списку зберігає ідентичність першого елемента.",
+      "Порожній список не породжує довільного нового елемента."
+    ],
+    [
+      "REST",
+      29,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_SELECTOR",
+      [
+        [
+          "D6",
+          "110001",
+          "DROP"
+        ],
+        [
+          "D3",
+          "011",
+          "CDR"
+        ]
+      ],
+      "Повернути хвіст пари без копіювання або зміни її голови.",
+      "Improper tail не можна мовчки трактувати як proper-list."
+    ],
+    [
+      "NIL?",
+      33,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_PREDICATE_BRIDGE",
+      [
+        [
+          "D4",
+          "0101",
+          "NULL"
+        ]
+      ],
+      "Перевіряється точна структурна порожнеча, результатом є D1 PredicateBit.",
+      "D1:0 не можна прирівнювати до структурного порожнього списку лише через написання."
+    ],
+    [
+      "TRUE?",
+      34,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_PREDICATE_BRIDGE",
+      [
+        [
+          "D1",
+          "1",
+          "YES"
+        ]
+      ],
+      "Перевірка саме кваліфікованого біта D1:YES, а не будь-якої truthy форми.",
+      "Довільна непорожня пара чи D7 символ '1' не є D1:YES."
+    ],
+    [
+      "FALSE?",
+      35,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_PREDICATE_BRIDGE",
+      [
+        [
+          "D1",
+          "0",
+          "NO"
+        ]
+      ],
+      "Перевірка саме кваліфікованого біта D1:NO без змішування зі структурним NIL.",
+      "Порожній список або D7 знак '0' не стають автоматично D1:NO."
+    ],
+    [
+      "NUMBER?",
+      36,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_D24_TYPED_NUMBERS",
+      [
+        [
+          "D5",
+          "01001",
+          "NUMBERP"
+        ]
+      ],
+      "Числовість є лише явно типізованою властивістю математичного носія.",
+      "Цифра в D7 та бінарна координата домену не підміняють D24 число."
+    ],
+    [
+      "SYMBOL",
+      37,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_SYMBOL_PROJECTION",
+      [
+        [
+          "D8",
+          "11101101",
+          "STRING->SYMBOL"
+        ]
+      ],
+      "Створювати символ із валідного D7 написання з визначеною normalisation policy.",
+      "Нормалізація не може без договору злити два відмінні імені чи створити ратифіковану функцію."
+    ],
+    [
+      "CONTAINS?",
+      50,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_MAP_QUERY",
+      [
+        [
+          "D9",
+          "101100010",
+          "MAP-CONTAINS?"
+        ]
+      ],
+      "Наявність ключа перевіряється незалежно від його значення; повертається точний D1 біт.",
+      "Присутній ключ зі значенням D1:NO не повинен вважатись відсутнім."
+    ],
+    [
+      "READLINE",
+      54,
+      "HOLD-SEMANTIC-REVIEW",
+      "HOLD_TYPED_HOST_INGRESS",
+      [
+        [
+          "D10",
+          "1101000110",
+          "READ-LINE"
+        ]
+      ],
+      "Typed ingress читає рядок з ознакою EOF, межами фрейму та помилкою відновлення.",
+      "EOF після непорожнього останнього рядка не може створити зайвий рядок; транспорт не обчислює SENS."
+    ],
+    [
+      "STRING?",
+      55,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_TYPE_PREDICATE",
+      [
+        [
+          "D9",
+          "110100110",
+          "STRINGP"
+        ]
+      ],
+      "Кваліфікований символьний носій розпізнається без перетворення тексту на code.",
+      "Символ із тими самими D7 літерами не є рядком."
+    ],
+    [
+      "TIME-MS",
+      56,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "HOLD_HOST_TIME",
+      [
+        [
+          "D9",
+          "101111001",
+          "MONO-MS"
+        ]
+      ],
+      "Монотонне значення часу допускається лише як явно типізоване зовнішнє спостереження.",
+      "Переведення годинника назад або декодування числа як коду домену не можуть міняти SENS identity."
+    ],
+    [
+      "CONJ",
+      57,
+      "CURRENT-OR-DERIVED-PROJECTION",
+      "DERIVED_TYPE_DISPATCH",
+      [
+        [
+          "D3",
+          "111",
+          "CONS"
+        ],
+        [
+          "D9",
+          "101011101",
+          "VEC-CONJ"
+        ]
+      ],
+      "Поведінка залежить від типу колекції: для списку можна додати голову, для вектора — кінець.",
+      "Однакова механічна дія для пари та вектора з різними даними порушує порядок."
+    ],
+    [
+      "CL-EVAL",
+      61,
+      "HOLD-SEMANTIC-REVIEW",
+      "HOLD_HOST_SEMANTIC_FALLBACK",
+      [
+        [
+          "D4",
+          "0001",
+          "EVAL"
+        ]
+      ],
+      "Будь-яке обчислення форми має відбуватись під семантикою SENS; цей донор є лише дослідницьким свідченням зовнішнього host-eval.",
+      "Зовнішній Common Lisp eval або Rust eval не є допустимим семантичним fallback."
+    ]
+  ]
+}

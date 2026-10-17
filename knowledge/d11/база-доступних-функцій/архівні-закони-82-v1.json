@@ -1,0 +1,2172 @@
+{
+  "schema": "sens.d11.archived-law-triad-crosswalk/v1",
+  "origin_date": "2026-10-17",
+  "status": "ARCHIVAL_CLAIMS_ONLY_NO_NEW_DOMAIN_AUTHORITY",
+  "intent_uk": "Зібрати з прихованих архівів 82 повні дослідницькі трійки (закон + позитивний приклад + контрприклад), не повторити вже чинні функції D1–D10 і не оголосити дослідницькі свідки виконаними.",
+  "source_pins": {
+    "A": {
+      "path": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json",
+      "blob": "42362a46d7587e375ed19c156a0b67e40b86939a",
+      "total_archive_candidates": 222
+    },
+    "B": {
+      "path": "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+      "blob": "615307670709d8429d8b74daafe8fe24b36960ea",
+      "total_archive_candidates": 162
+    },
+    "lower_domains": {
+      "path": "knowledge/d1-d11-foundation.json",
+      "blob": "363ddf6895ea87fabc772ad19e448d63abb343a6"
+    },
+    "d11_research": {
+      "path": "knowledge/d11/база-доступних-функцій/відбір-законів-v1.json",
+      "blob": "4af1282683db1243723b1e07e17de580a2093d9d"
+    }
+  },
+  "counts": {
+    "historical_triad_receipts": 82,
+    "source_A_claims": 45,
+    "source_B_claims": 37,
+    "unique_donor_spellings": 47,
+    "lower_domain_exact_name_matches": 43,
+    "d11_research_exact_name_matches": 4,
+    "new_d11_coordinates": 0,
+    "new_d11_callable": 0,
+    "native_sens_claims_verified": 0
+  },
+  "evidence_rules": [
+    "A claimed positive example is a donor assertion or proposed test, NEVER a native SENS execution receipt.",
+    "An exact-name crosswalk is a lookup hint, NOT a proof of semantic equivalence or redundancy.",
+    "All lower-domain refs retain their exact bit widths; no decimal intermediate identifiers.",
+    "The four D11 matches remain HOLD; they require independently attested source, SENS positive/negative witness, F3 behavior dedup, explicit owner decision.",
+    "Do not import old D10 provisional coordinates, SID8, or host semantics."
+  ],
+  "rows": [
+    {
+      "donor_name": "BACKQUANTIZE",
+      "lexical_match": "D11_RESEARCH_NAME_MATCH_ONLY",
+      "current_low_domain_words": [],
+      "existing_d11_research_origin": "D10_REJECTED",
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 0,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-UNVERIFIED-SOURCE",
+          "donor_cited_primary": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "claimed_law": "claimed splicing macro behavior; not source-attested by this audit",
+          "claimed_positive": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+          "claimed_negative": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "BOUND-IDENTIFIER=?",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 1,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "claimed_law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+          "claimed_positive": "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?",
+          "claimed_negative": "порівняння лише по рядку імені",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 11,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-15",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.5",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+          "claimed_positive": [
+            "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?"
+          ],
+          "claimed_negative": "порівняння лише по рядку імені"
+        }
+      ]
+    },
+    {
+      "donor_name": "BYTEVECTOR-COPY!",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011010001"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 2,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-EFFECT-DERIVABILITY",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Мутує цільовий байтовий вектор, копіюючи діапазон; якщо джерело і призначення перекриваються, результат як при тимчасовій копії.",
+          "claimed_positive": "У [1,2,3,4] self-copy source [0,3) to at 1 gives [1,1,2,3].",
+          "claimed_negative": "Перекриття читає вже перезаписаний байт і дає [1,1,1,1] або втрачає елементи.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 22,
+          "donor_status": "HOLD-EFFECT-DERIVABILITY",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-007",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "6.9",
+              "review_status": "HOLD-EFFECT-DERIVABILITY"
+            }
+          ],
+          "claimed_law": "Мутує цільовий байтовий вектор, копіюючи діапазон; якщо джерело і призначення перекриваються, результат як при тимчасовій копії.",
+          "claimed_positive": [
+            "У [1,2,3,4] self-copy source [0,3) to at 1 gives [1,1,2,3]."
+          ],
+          "claimed_negative": "Перекриття читає вже перезаписаний байт і дає [1,1,1,1] або втрачає елементи."
+        }
+      ]
+    },
+    {
+      "donor_name": "CALL-WITH-PORT",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 3,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-EFFECT-CONTINUATION",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Нормальне повернення процедури закриває port; лише nonlocal escape не дозволяє безумовно закривати port, якщо захоплене продовження ще може відновити роботу.",
+          "claimed_positive": "Звичайне повернення закриває port рівно один раз та зберігає повернені значення.",
+          "claimed_negative": "Код назавжди закриває port на першому escape, а дозволене повернення у захоплене продовження потребує той самий port.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 23,
+          "donor_status": "HOLD-EFFECT-CONTINUATION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-008",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "6.13.1",
+              "review_status": "HOLD-EFFECT-CONTINUATION"
+            }
+          ],
+          "claimed_law": "Нормальне повернення процедури закриває port; лише nonlocal escape не дозволяє безумовно закривати port, якщо захоплене продовження ще може відновити роботу.",
+          "claimed_positive": [
+            "Звичайне повернення закриває port рівно один раз та зберігає повернені значення."
+          ],
+          "claimed_negative": "Код назавжди закриває port на першому escape, а дозволене повернення у захоплене продовження потребує той самий port."
+        }
+      ]
+    },
+    {
+      "donor_name": "CASE-LAMBDA",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110101"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 4,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Перший підпис аргументів (formals), що приймає арність виклику, визначає гілку процедури; lexical scope.",
+          "claimed_positive": "Визначити дві гілки 1 і 2 аргументи й перевірити відповідний результат; коли перетинаються — вибір першої.",
+          "claimed_negative": "Виклик із жодною відповідною арністю або вибір пізнішої гілки за наявності ранішої відповідної.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 19,
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-004",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "4.2.9",
+              "review_status": "HOLD-D2-SYNTAX"
+            }
+          ],
+          "claimed_law": "Перший підпис аргументів (formals), що приймає арність виклику, визначає гілку процедури; lexical scope.",
+          "claimed_positive": [
+            "Визначити дві гілки 1 і 2 аргументи й перевірити відповідний результат; коли перетинаються — вибір першої."
+          ],
+          "claimed_negative": "Виклик із жодною відповідною арністю або вибір пізнішої гілки за наявності ранішої відповідної."
+        }
+      ]
+    },
+    {
+      "donor_name": "CLASS-DIRECT-SLOTS",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011001101"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 5,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "donor_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "donor_group": "entries",
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_cited_primary": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "claimed_law": "Return only class-declared direct slot-definition metaobjects; exclude inherited slot definitions even though effective CLASS-SLOTS includes them.",
+          "claimed_positive": "Parent P owns slot a; child C declares b: direct C slot names include b but exclude inherited a. | For parent P, its direct slot definitions include a; no-value class has empty direct slot set.",
+          "claimed_negative": "Returning effective inherited slot list as direct class slots.",
+          "source_kind": "generic-function-reader"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 28,
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+              "blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+              "record_id": "mop-reader-class_direct_slots",
+              "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+              "locator": null,
+              "review_status": "REVIEW-SEMANTIC-LAW"
+            }
+          ],
+          "claimed_law": "Return only class-declared direct slot-definition metaobjects; exclude inherited slot definitions even though effective CLASS-SLOTS includes them.",
+          "claimed_positive": [
+            "Parent P owns slot a; child C declares b: direct C slot names include b but exclude inherited a.",
+            "For parent P, its direct slot definitions include a; no-value class has empty direct slot set."
+          ],
+          "claimed_negative": "Returning effective inherited slot list as direct class slots."
+        }
+      ]
+    },
+    {
+      "donor_name": "CLASS-PRECEDENCE-LIST",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011001110"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 6,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "donor_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "donor_group": "entries",
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_cited_primary": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "claimed_law": "For finalized class C, return a linearized list of class metaobjects with C first, T last, each class/superclass exactly once, respecting source-superclass precedence.",
+          "claimed_positive": "Single inheritance child C of P: C precedes P and T, no duplicates. | Distinct parent order influences the computed precedence under compatible local precedence rules.",
+          "claimed_negative": "Returning only direct superclasses, duplicated class objects or alphabetical/sorted order is not class precedence.",
+          "source_kind": "generic-function-reader"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 31,
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+              "blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+              "record_id": "mop-reader-class_precedence_list",
+              "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+              "locator": null,
+              "review_status": "REVIEW-SEMANTIC-LAW"
+            }
+          ],
+          "claimed_law": "For finalized class C, return a linearized list of class metaobjects with C first, T last, each class/superclass exactly once, respecting source-superclass precedence.",
+          "claimed_positive": [
+            "Single inheritance child C of P: C precedes P and T, no duplicates.",
+            "Distinct parent order influences the computed precedence under compatible local precedence rules."
+          ],
+          "claimed_negative": "Returning only direct superclasses, duplicated class objects or alphabetical/sorted order is not class precedence."
+        }
+      ]
+    },
+    {
+      "donor_name": "COLLECTION",
+      "lexical_match": "D11_RESEARCH_NAME_MATCH_ONLY",
+      "current_low_domain_words": [],
+      "existing_d11_research_origin": "D10_REJECTED",
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 7,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-UNVERIFIED-SOURCE",
+          "donor_cited_primary": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "claimed_law": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+          "claimed_positive": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+          "claimed_negative": "assert any traversal helper is a novel Core semantic primitive",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "COUNT-LEADING-ZEROS",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011010100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 8,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-D8-DERIVABILITY",
+          "donor_cited_primary": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "claimed_law": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+          "claimed_positive": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+          "claimed_negative": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "DATUM->SYNTAX",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110111"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 14,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-18",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.6",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "перенесення лексичного контексту шаблонного ідентифікатора на datum",
+          "claimed_positive": [
+            "однаковий datum з різними template-id має різну лексичну прив'язку"
+          ],
+          "claimed_negative": "контекст з template-id губиться та спричиняє небажане захоплення"
+        }
+      ]
+    },
+    {
+      "donor_name": "DEFINE-RECORD-TYPE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011010101"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 9,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Кожне визначення породжує новий тип навіть при однаковому імені/формі, разом із конструктором, предикатом, accessors і mutators.",
+          "claimed_positive": "Два незалежні визначення із однаковими полями розрізняють типи та їхні предикати.",
+          "claimed_negative": "Зливати нові типи лише за схожістю назви/полів або не перевіряти дублікат поля.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 20,
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-005",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "5.5",
+              "review_status": "HOLD-D2-SYNTAX"
+            }
+          ],
+          "claimed_law": "Кожне визначення породжує новий тип навіть при однаковому імені/формі, разом із конструктором, предикатом, accessors і mutators.",
+          "claimed_positive": [
+            "Два незалежні визначення із однаковими полями розрізняють типи та їхні предикати."
+          ],
+          "claimed_negative": "Зливати нові типи лише за схожістю назви/полів або не перевіряти дублікат поля."
+        }
+      ]
+    },
+    {
+      "donor_name": "DEFINE-VALUES",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011111000"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 10,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Зв'язує кілька імен із multiple values одного expression за formals підписом, де дублікати змінних недопустимі.",
+          "claimed_positive": "define-values (x y) із двома значеннями створює два окремих bindings.",
+          "claimed_negative": "Дубль імен допускається або multiple-value arity неправильно спроєктована на одну Lisp-пару.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 25,
+          "donor_status": "HOLD-D2-SYNTAX",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-010",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "5.3.3",
+              "review_status": "HOLD-D2-SYNTAX"
+            }
+          ],
+          "claimed_law": "Зв'язує кілька імен із multiple values одного expression за formals підписом, де дублікати змінних недопустимі.",
+          "claimed_positive": [
+            "define-values (x y) із двома значеннями створює два окремих bindings."
+          ],
+          "claimed_negative": "Дубль імен допускається або multiple-value arity неправильно спроєктована на одну Lisp-пару."
+        }
+      ]
+    },
+    {
+      "donor_name": "DELAY-FORCE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 11,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-DERIVABILITY",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Описує ліниве обчислення ланцюга promise через хвостовий FORCE без необмеженого накопичення відкладених примусових викликів.",
+          "claimed_positive": "Нескінченний фільтр потоку проходить довгий ланцюг відкладених обіцянок без наростання незавершених FORCE-фреймів.",
+          "claimed_negative": "Реалізація нарощує лінійний стек/ланцюг відкладених примусових викликів або обчислює тіло завчасно.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 16,
+          "donor_status": "HOLD-D2-DERIVABILITY",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-001",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "4.2.5",
+              "review_status": "HOLD-D2-DERIVABILITY"
+            }
+          ],
+          "claimed_law": "Описує ліниве обчислення ланцюга promise через хвостовий FORCE без необмеженого накопичення відкладених примусових викликів.",
+          "claimed_positive": [
+            "Нескінченний фільтр потоку проходить довгий ланцюг відкладених обіцянок без наростання незавершених FORCE-фреймів."
+          ],
+          "claimed_negative": "Реалізація нарощує лінійний стек/ланцюг відкладених примусових викликів або обчислює тіло завчасно."
+        }
+      ]
+    },
+    {
+      "donor_name": "ENOUGH-NAMESTRING",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011010111"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 42,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "donor_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "donor_group": "deep_review",
+          "donor_status": "HOLD-IMPLEMENTATION-DEFINED",
+          "donor_cited_primary": null,
+          "claimed_law": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+          "claimed_positive": "Express output for same explicit pathname/default directory without requiring host spelling | Round-trip through parse-namestring + merge with defaults reconstructs same path",
+          "claimed_negative": "Hard-code Unix slash syntax as a universal semantic law.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 122,
+          "donor_status": "HOLD-IMPLEMENTATION-DEFINED | HOLD-IMPLEMENTATION-DEFINED",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+            },
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+            }
+          ],
+          "claimed_law": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+          "claimed_positive": [
+            "Express output for same explicit pathname/default directory without requiring host spelling",
+            "Round-trip through parse-namestring + merge with defaults reconstructs same path"
+          ],
+          "claimed_negative": "Hard-code Unix slash syntax as a universal semantic law."
+        }
+      ]
+    },
+    {
+      "donor_name": "EQUAL-HASH",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011111010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 12,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+          "claimed_positive": "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується",
+          "claimed_negative": "нескінченна рекурсія для циклічної структури",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 8,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-12",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.4",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+          "claimed_positive": [
+            "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується"
+          ],
+          "claimed_negative": "нескінченна рекурсія для циклічної структури"
+        }
+      ]
+    },
+    {
+      "donor_name": "FREE-IDENTIFIER=?",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011111100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 13,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "claimed_law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+          "claimed_positive": "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні",
+          "claimed_negative": "порівняння тільки поверхневого імені",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 12,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-16",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.5",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+          "claimed_positive": [
+            "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні"
+          ],
+          "claimed_negative": "порівняння тільки поверхневого імені"
+        }
+      ]
+    },
+    {
+      "donor_name": "GENERATE-EXPANSION",
+      "lexical_match": "D11_RESEARCH_NAME_MATCH_ONLY",
+      "current_low_domain_words": [],
+      "existing_d11_research_origin": "D10_REJECTED",
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 14,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-UNVERIFIED-SOURCE",
+          "donor_cited_primary": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "claimed_law": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+          "claimed_positive": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+          "claimed_negative": "mere alias of MACROEXPAND-1 given a new coordinate",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011010000"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 15,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "donor_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "donor_group": "entries",
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_cited_primary": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "claimed_law": "Return the permutation of required generic-function parameter names specifying argument precedence for method specificity, not parameter types or method objects.",
+          "claimed_positive": "Generic with two required parameters and an explicitly reversed precedence order returns the reversed symbol sequence. | Order contains each required parameter once and excludes optional/rest parameters.",
+          "claimed_negative": "Return default lambda-list textual order when a distinct explicit precedence order was specified.",
+          "source_kind": "generic-function-reader"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 39,
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+              "blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+              "record_id": "mop-reader-generic_function_argument_precedence_order",
+              "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+              "locator": null,
+              "review_status": "REVIEW-SEMANTIC-LAW"
+            }
+          ],
+          "claimed_law": "Return the permutation of required generic-function parameter names specifying argument precedence for method specificity, not parameter types or method objects.",
+          "claimed_positive": [
+            "Generic with two required parameters and an explicitly reversed precedence order returns the reversed symbol sequence.",
+            "Order contains each required parameter once and excludes optional/rest parameters."
+          ],
+          "claimed_negative": "Return default lambda-list textual order when a distinct explicit precedence order was specified."
+        }
+      ]
+    },
+    {
+      "donor_name": "GENERIC-FUNCTION-METHODS",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011001111"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 16,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "donor_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "donor_group": "entries",
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_cited_primary": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "claimed_law": "Read the set of exact method metaobjects attached to a generic function; adding/removing a method changes membership without invoking any method body.",
+          "claimed_positive": "Generic G with integer and string methods: introspection returns precisely both method metaobjects. | Remove integer method: introspection still returns string method, without deleting generic G.",
+          "claimed_negative": "Confuse applicable-method selection for current arguments with registered method-object membership.",
+          "source_kind": "generic-function-reader"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 37,
+          "donor_status": "REVIEW-SEMANTIC-LAW",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+              "blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+              "record_id": "mop-reader-generic_function_methods",
+              "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+              "locator": null,
+              "review_status": "REVIEW-SEMANTIC-LAW"
+            }
+          ],
+          "claimed_law": "Read the set of exact method metaobjects attached to a generic function; adding/removing a method changes membership without invoking any method body.",
+          "claimed_positive": [
+            "Generic G with integer and string methods: introspection returns precisely both method metaobjects.",
+            "Remove integer method: introspection still returns string method, without deleting generic G."
+          ],
+          "claimed_negative": "Confuse applicable-method selection for current arguments with registered method-object membership."
+        }
+      ]
+    },
+    {
+      "donor_name": "GET-OUTPUT-STREAM-STRING",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011001011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 17,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-streams-census-20261009.json",
+          "donor_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "donor_group": "root_reviews",
+          "donor_status": "HOLD-NEEDS-ORACLE-AND-DEDUP",
+          "donor_cited_primary": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_get-outpu_tream-string.html",
+          "claimed_law": "Return accumulated output and clear pending characters; repeated call without more output returns empty string.",
+          "claimed_positive": "Write 'ab' then first extraction returns 'ab' | Second extraction without new writes returns empty string; after write 'c', next extraction returns 'c'",
+          "claimed_negative": "Second extraction returns 'ab' again or extraction silently closes the stream.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 89,
+          "donor_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-NEEDS-ORACLE-AND-DEDUP",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+              "locator": null,
+              "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+            },
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_get-outpu_tream-string.html",
+              "locator": null,
+              "review_status": "HOLD-NEEDS-ORACLE-AND-DEDUP"
+            }
+          ],
+          "claimed_law": "Return accumulated output and clear pending characters; repeated call without more output returns empty string.",
+          "claimed_positive": [
+            "Write 'ab' then first extraction returns 'ab'",
+            "Second extraction without new writes returns empty string; after write 'c', next extraction returns 'c'"
+          ],
+          "claimed_negative": "Second extraction returns 'ab' again or extraction silently closes the stream."
+        }
+      ]
+    },
+    {
+      "donor_name": "GUARD",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100100000"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 18,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Забезпечує condition matching і вихід до коду обробки, не вводячи ще один незалежний домен керування.",
+          "claimed_positive": "Підходящий guard clause обробляє condition без втрати зв'язків/контексту.",
+          "claimed_negative": "Гілка без збігу приховує первинну умову чи підміняє динамічний handler.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 26,
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-011",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "4.2.7",
+              "review_status": "HOLD-D2-CONTROL"
+            }
+          ],
+          "claimed_law": "Забезпечує condition matching і вихід до коду обробки, не вводячи ще один незалежний домен керування.",
+          "claimed_positive": [
+            "Підходящий guard clause обробляє condition без втрати зв'язків/контексту."
+          ],
+          "claimed_negative": "Гілка без збігу приховує первинну умову чи підміняє динамічний handler."
+        }
+      ]
+    },
+    {
+      "donor_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011111110"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 19,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "повернути функцію еквівалентності, що визначає семантику ключів",
+          "claimed_positive": "eq-словник повертає eq?",
+          "claimed_negative": "повернута функція порівняння має інше відношення",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 7,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-10",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.3",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "повернути функцію еквівалентності, що визначає семантику ключів",
+          "claimed_positive": [
+            "eq-словник повертає eq?"
+          ],
+          "claimed_negative": "повернута функція порівняння має інше відношення"
+        }
+      ]
+    },
+    {
+      "donor_name": "HASHTABLE-HASH-FUNCTION",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011111111"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 20,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+          "claimed_positive": "eq-hashtable має результат #f",
+          "claimed_negative": "повернута довільна внутрішня функція для eq-hashtable",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 6,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-09",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.3",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+          "claimed_positive": [
+            "eq-hashtable має результат #f"
+          ],
+          "claimed_negative": "повернута довільна внутрішня функція для eq-hashtable"
+        }
+      ]
+    },
+    {
+      "donor_name": "HASHTABLE-KEYS",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000000"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 21,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "повернути вектор усіх ключів, порядок стандартом не задано",
+          "claimed_positive": "кількість і множина ключів збігаються зі словником",
+          "claimed_negative": "сортування нав'язується як обов'язкове спостереження",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 5,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-07",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.2",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "повернути вектор усіх ключів, порядок стандартом не задано",
+          "claimed_positive": [
+            "кількість і множина ключів збігаються зі словником"
+          ],
+          "claimed_negative": "сортування нав'язується як обов'язкове спостереження"
+        }
+      ]
+    },
+    {
+      "donor_name": "HASHTABLE-REF",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000001"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 22,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "пошук ключа з явним значенням за відсутності",
+          "claimed_positive": "пошук відсутнього ключа повертає саме переданий default",
+          "claimed_negative": "втрата відмінності між відсутнім та значенням #f",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 3,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-04",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.2",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "пошук ключа з явним значенням за відсутності",
+          "claimed_positive": [
+            "пошук відсутнього ключа повертає саме переданий default"
+          ],
+          "claimed_negative": "втрата відмінності між відсутнім та значенням #f"
+        }
+      ]
+    },
+    {
+      "donor_name": "HASHTABLE-UPDATE!",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011011000"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 23,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+          "claimed_positive": "відсутній ключ створює ключ з proc(default)",
+          "claimed_negative": "процедуру викликають на помилковому нульовому значенні",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 4,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-05",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.2",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+          "claimed_positive": [
+            "відсутній ключ створює ключ з proc(default)"
+          ],
+          "claimed_negative": "процедуру викликають на помилковому нульовому значенні"
+        }
+      ]
+    },
+    {
+      "donor_name": "IDENTIFIER?",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 24,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "claimed_law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+          "claimed_positive": "звичайний datum символ не проходить перевірку identifier?",
+          "claimed_negative": "довільний символ вважається контекстним identifier",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 10,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-14",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.5",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+          "claimed_positive": [
+            "звичайний datum символ не проходить перевірку identifier?"
+          ],
+          "claimed_negative": "довільний символ вважається контекстним identifier"
+        }
+      ]
+    },
+    {
+      "donor_name": "LOCF",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100100011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 25,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-MECHANISM-VS-SEMANTICS",
+          "donor_cited_primary": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "claimed_law": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+          "claimed_positive": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+          "claimed_negative": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-CONCATENATED-STREAM",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011001100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 26,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-streams-census-20261009.json",
+          "donor_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "donor_group": "root_reviews",
+          "donor_status": "HOLD-NEEDS-ORACLE-AND-DEDUP",
+          "donor_cited_primary": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html",
+          "claimed_law": "Read first input stream to EOF, then next; only terminal EOF after all children exhausted; consumption advances constituent cursor.",
+          "claimed_positive": "Concatenate streams yielding 'ab' and 'cd', four successive READ-CHAR results a,b,c,d | With first empty stream and second 'x', first READ-CHAR returns x",
+          "claimed_negative": "Skip unexhausted first stream, interleave streams, or expose EOF before advancing to next.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 88,
+          "donor_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-NEEDS-ORACLE-AND-DEDUP",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+              "locator": null,
+              "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+            },
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html",
+              "locator": null,
+              "review_status": "HOLD-NEEDS-ORACLE-AND-DEDUP"
+            }
+          ],
+          "claimed_law": "Read first input stream to EOF, then next; only terminal EOF after all children exhausted; consumption advances constituent cursor.",
+          "claimed_positive": [
+            "Concatenate streams yielding 'ab' and 'cd', four successive READ-CHAR results a,b,c,d",
+            "With first empty stream and second 'x', first READ-CHAR returns x"
+          ],
+          "claimed_negative": "Skip unexhausted first stream, interleave streams, or expose EOF before advancing to next."
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-EQ-HASHTABLE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 27,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "новий змінюваний словник з тотожністю ключів eq?",
+          "claimed_positive": "два різні, але структурно рівні об'єкти не обов'язково один ключ",
+          "claimed_negative": "словник тихцем порівнює структурною рівністю",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 0,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-01",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.1",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "новий змінюваний словник з тотожністю ключів eq?",
+          "claimed_positive": [
+            "два різні, але структурно рівні об'єкти не обов'язково один ключ"
+          ],
+          "claimed_negative": "словник тихцем порівнює структурною рівністю"
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-EQV-HASHTABLE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 28,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "новий змінюваний словник з порівнянням eqv?",
+          "claimed_positive": "ключі з різною числовою репрезентацією перевіряти за eqv?",
+          "claimed_negative": "вибір порівняння ігнорується",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 1,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-02",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.1",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "новий змінюваний словник з порівнянням eqv?",
+          "claimed_positive": [
+            "ключі з різною числовою репрезентацією перевіряти за eqv?"
+          ],
+          "claimed_negative": "вибір порівняння ігнорується"
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-HASHTABLE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011011001"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 29,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+          "claimed_positive": "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення",
+          "claimed_negative": "несумісні hash/equiv мовчки гарантовано коректні",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 2,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-03",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.1",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+          "claimed_positive": [
+            "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення"
+          ],
+          "claimed_negative": "несумісні hash/equiv мовчки гарантовано коректні"
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-PROMISE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011011010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 30,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-DERIVABILITY",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Перетворює вже обчислене значення на готову обіцянку; якщо аргумент уже promise, повертає його без створення іншого.",
+          "claimed_positive": "make-promise на тому самому promise повертає ту саму ідентичність; force готового значення не виконує його вдруге.",
+          "claimed_negative": "Повторно загортає переданий promise або повторно обчислює передане готове значення.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 17,
+          "donor_status": "HOLD-DERIVABILITY",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-002",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "4.2.5",
+              "review_status": "HOLD-DERIVABILITY"
+            }
+          ],
+          "claimed_law": "Перетворює вже обчислене значення на готову обіцянку; якщо аргумент уже promise, повертає його без створення іншого.",
+          "claimed_positive": [
+            "make-promise на тому самому promise повертає ту саму ідентичність; force готового значення не виконує його вдруге."
+          ],
+          "claimed_negative": "Повторно загортає переданий promise або повторно обчислює передане готове значення."
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-SYNONYM-STREAM",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000101"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 31,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-streams-census-20261009.json",
+          "donor_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "donor_group": "root_reviews",
+          "donor_status": "HOLD-REQUIRES-DYNAMIC-BINDING-ORACLE",
+          "donor_cited_primary": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_make-synonym-stream.html",
+          "claimed_law": "Stream operations dynamically delegate to the stream currently bound to the symbol; rebinding the dynamic variable changes target without reconstructing alias.",
+          "claimed_positive": "Bind variable to input stream '1' and read alias -> 1; alias object identity unchanged | Rebind same variable to another input stream '2' and read same alias -> 2",
+          "claimed_negative": "Alias continues reading original stream after rebinding, or silently treats symbol as a copied stream.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 77,
+          "donor_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-REQUIRES-DYNAMIC-BINDING-ORACLE",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+              "locator": null,
+              "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+            },
+            {
+              "path": "knowledge/d10-clhs-streams-census-20261009.json",
+              "blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+              "record_id": null,
+              "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_make-synonym-stream.html",
+              "locator": null,
+              "review_status": "HOLD-REQUIRES-DYNAMIC-BINDING-ORACLE"
+            }
+          ],
+          "claimed_law": "Stream operations dynamically delegate to the stream currently bound to the symbol; rebinding the dynamic variable changes target without reconstructing alias.",
+          "claimed_positive": [
+            "Bind variable to input stream '1' and read alias -> 1; alias object identity unchanged",
+            "Rebind same variable to another input stream '2' and read same alias -> 2"
+          ],
+          "claimed_negative": "Alias continues reading original stream after rebinding, or silently treats symbol as a copied stream."
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKE-VARIABLE-TRANSFORMER",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100000110"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 32,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "claimed_law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+          "claimed_positive": "ліва частина set! переписується трансформером, а не відхиляється",
+          "claimed_negative": "звичайний transformer помилково отримує право переписати set!",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 15,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-19",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.3",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+          "claimed_positive": [
+            "ліва частина set! переписується трансформером, а не відхиляється"
+          ],
+          "claimed_negative": "звичайний transformer помилково отримує право переписати set!"
+        }
+      ]
+    },
+    {
+      "donor_name": "MAKNUM",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100110011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 33,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-SUBSTRATE-IDENTITY",
+          "donor_cited_primary": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "claimed_law": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+          "claimed_positive": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+          "claimed_negative": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "MERGE-PATHNAMES",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011011011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 43,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "donor_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "donor_group": "deep_review",
+          "donor_status": "HOLD-BEHAVIORAL-REVIEW",
+          "donor_cited_primary": null,
+          "claimed_law": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+          "claimed_positive": "Explicit (:absolute \"science\") base + (:relative \"trial\") filename gives directory (:absolute \"science\" \"trial\") | If pathname specifies name but not type, defaults supply type; existing path name takes precedence",
+          "claimed_negative": "Returning default name when input name supplied or dropping relative directory element.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 128,
+          "donor_status": "REVIEW-PURE-VALUE | HOLD-BEHAVIORAL-REVIEW",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "REVIEW-PURE-VALUE"
+            },
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "HOLD-BEHAVIORAL-REVIEW"
+            }
+          ],
+          "claimed_law": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+          "claimed_positive": [
+            "Explicit (:absolute \"science\") base + (:relative \"trial\") filename gives directory (:absolute \"science\" \"trial\")",
+            "If pathname specifies name but not type, defaults supply type; existing path name takes precedence"
+          ],
+          "claimed_negative": "Returning default name when input name supplied or dropping relative directory element."
+        }
+      ]
+    },
+    {
+      "donor_name": "MULTIPLE-VALUE-PROG1",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011110001"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 34,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_cited_primary": "https://metaspec.dev/s_multiple-value-prog1.html",
+          "claimed_law": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+          "claimed_positive": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+          "claimed_negative": "only primary a retained or final c replaces first values",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "MUNKAM",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100110100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 35,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-SUBSTRATE-IDENTITY",
+          "donor_cited_primary": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "claimed_law": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+          "claimed_positive": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+          "claimed_negative": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "PATHNAME-MATCH-P",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1011011100"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 44,
+          "evidence_index": 1,
+          "donor_source": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "donor_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "donor_group": "deep_review",
+          "donor_status": "HOLD-IMPLEMENTATION-DEFINED",
+          "donor_cited_primary": null,
+          "claimed_law": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+          "claimed_positive": "Nonwild name 'tone' matches :wild name in second argument | First argument wild :name does not match a concrete 'tone' in second argument",
+          "claimed_negative": "Treating pathname-match-p as symmetric or assuming cross-host wildcard syntax.",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 125,
+          "donor_status": "HOLD-IMPLEMENTATION-DEFINED | HOLD-IMPLEMENTATION-DEFINED",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+            },
+            {
+              "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+              "blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+              "record_id": null,
+              "primary_url": null,
+              "locator": null,
+              "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+            }
+          ],
+          "claimed_law": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+          "claimed_positive": [
+            "Nonwild name 'tone' matches :wild name in second argument",
+            "First argument wild :name does not match a concrete 'tone' in second argument"
+          ],
+          "claimed_negative": "Treating pathname-match-p as symmetric or assuming cross-host wildcard syntax."
+        }
+      ]
+    },
+    {
+      "donor_name": "PROMISE?",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100101001"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 36,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-TYPE-DERIVED",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Розпізнає обіцянку, але стандарт допускає реалізаційні варіації щодо спостережуваної відмінності обіцянки від значення.",
+          "claimed_positive": "Порівняти promise? на delay-value, forced promise і plain datum у конкретному стандартизованому профілі.",
+          "claimed_negative": "Вимагати безумовної об'єктної ідентичності promise/вмісту, яку стандарт допускає не розрізняти.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 18,
+          "donor_status": "HOLD-TYPE-DERIVED",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-003",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "4.2.5",
+              "review_status": "HOLD-TYPE-DERIVED"
+            }
+          ],
+          "claimed_law": "Розпізнає обіцянку, але стандарт допускає реалізаційні варіації щодо спостережуваної відмінності обіцянки від значення.",
+          "claimed_positive": [
+            "Порівняти promise? на delay-value, forced promise і plain datum у конкретному стандартизованому профілі."
+          ],
+          "claimed_negative": "Вимагати безумовної об'єктної ідентичності promise/вмісту, яку стандарт допускає не розрізняти."
+        }
+      ]
+    },
+    {
+      "donor_name": "RAISE-CONTINUABLE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100001010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 37,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Динамічний обробник отримує condition; якщо повертає значення, обчислення триває та ці значення стають результатом виклику.",
+          "claimed_positive": "Обробник повертає 42, навколишнє обчислення додає 23 => 65.",
+          "claimed_negative": "Після нормального повернення обробника операція безпідставно кидає вторинний виняток як для non-continuable raise.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 21,
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-006",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "6.11",
+              "review_status": "HOLD-D2-CONTROL"
+            }
+          ],
+          "claimed_law": "Динамічний обробник отримує condition; якщо повертає значення, обчислення триває та ці значення стають результатом виклику.",
+          "claimed_positive": [
+            "Обробник повертає 42, навколишнє обчислення додає 23 => 65."
+          ],
+          "claimed_negative": "Після нормального повернення обробника операція безпідставно кидає вторинний виняток як для non-continuable raise."
+        }
+      ]
+    },
+    {
+      "donor_name": "STRING-CI-HASH",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100010010"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 38,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "donor_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "donor_group": "rows",
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_cited_primary": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "claimed_law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+          "claimed_positive": "ключі, рівні за string-ci=?, мають рівні хеші",
+          "claimed_negative": "рядки, що відрізняються регістром, гарантовано мають різні хеші",
+          "source_kind": null
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 9,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-13",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+              "locator": "13.4",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+          "claimed_positive": [
+            "ключі, рівні за string-ci=?, мають рівні хеші"
+          ],
+          "claimed_negative": "рядки, що відрізняються регістром, гарантовано мають різні хеші"
+        }
+      ]
+    },
+    {
+      "donor_name": "SYNTAX->DATUM",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100010011"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 13,
+          "donor_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "donor_review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+              "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+              "record_id": "R6RS-17",
+              "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+              "locator": "12.6",
+              "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+            }
+          ],
+          "claimed_law": "зняття синтаксичного контексту із синтаксичного об'єкта до звичайних даних",
+          "claimed_positive": [
+            "після конверсії ідентифікатор стає символом без marks/lexical context"
+          ],
+          "claimed_negative": "контекстні мітки потай залишаються семантично активними"
+        }
+      ]
+    },
+    {
+      "donor_name": "TABLESPACE",
+      "lexical_match": "D11_RESEARCH_NAME_MATCH_ONLY",
+      "current_low_domain_words": [],
+      "existing_d11_research_origin": "D10_REJECTED",
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 39,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-UNVERIFIED-SOURCE",
+          "donor_cited_primary": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "claimed_law": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+          "claimed_positive": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+          "claimed_negative": "merely relabel count as capacity or invent a new Core law without source",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "THE",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100110110"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 40,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "donor_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "donor_group": "proposals",
+          "donor_status": "HOLD-D2-TYPE-CONTROL",
+          "donor_cited_primary": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+          "claimed_law": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+          "claimed_positive": "correctly typed two-result expression returns the same two values with declaration in place",
+          "claimed_negative": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+          "source_kind": null
+        }
+      ]
+    },
+    {
+      "donor_name": "WITH-EXCEPTION-HANDLER",
+      "lexical_match": "D1_D10_NAME_MATCH_ONLY",
+      "current_low_domain_words": [
+        [
+          "D10",
+          "1100010111"
+        ]
+      ],
+      "archive_claims": [
+        {
+          "source": "A_BRANCH_222",
+          "source_row": 41,
+          "evidence_index": 0,
+          "donor_source": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "donor_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "donor_group": "rows",
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_cited_primary": "https://standards.scheme.org/r7rs-html5/index.html",
+          "claimed_law": "Встановлює поточний обробник у динамічному середовищі лише на час thunk; вкладені/зовнішні обробники мають коректний порядок.",
+          "claimed_positive": "Внутрішній handler отримує condition усередині свого thunk, після виходу діє зовнішній.",
+          "claimed_negative": "Leak handler за межі динамічної області або статичний lexical lookup замість динамічного.",
+          "source_kind": "PRIMARY-STANDARD"
+        },
+        {
+          "source": "B_EVIDENCE_162",
+          "source_row": 24,
+          "donor_status": "HOLD-D2-CONTROL",
+          "donor_review_class": "SOURCE-NAME-OR-HOLD",
+          "donor_citations": [
+            {
+              "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+              "blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+              "record_id": "R7RS-HIST-009",
+              "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+              "locator": "6.11",
+              "review_status": "HOLD-D2-CONTROL"
+            }
+          ],
+          "claimed_law": "Встановлює поточний обробник у динамічному середовищі лише на час thunk; вкладені/зовнішні обробники мають коректний порядок.",
+          "claimed_positive": [
+            "Внутрішній handler отримує condition усередині свого thunk, після виходу діє зовнішній."
+          ],
+          "claimed_negative": "Leak handler за межі динамічної області або статичний lexical lookup замість динамічного."
+        }
+      ]
+    }
+  ],
+  "archive_inventory_crosscheck": {
+    "purpose_uk": "Перевірено великі архівні інвентарі незалежно від раніше зведених 1042 згадок: збіг назви є лише індексом, не семантичною еквівалентністю.",
+    "archived_D10_snapshot_rows": 3327,
+    "archived_D9_snapshot_rows": 649,
+    "individually_new_semantic_names_proven": 0,
+    "source_warnings": [
+      "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+      "FIXP/FLOATP"
+    ],
+    "source_snapshots": [
+      {
+        "path": "research/domain-archive/20261011/pr5022/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "5458cb72ac1584d7e37fe16174ebc306947c2c88",
+        "source_rows": 637,
+        "unique_names": 637,
+        "exact_lower_name_matches": 637,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4891/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "34efd273000e3de8510441764cb59acbb5ab284b",
+        "source_rows": 631,
+        "unique_names": 631,
+        "exact_lower_name_matches": 631,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4883/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "bc1adf570bf3b9486735419d6b4f11f818bede93",
+        "source_rows": 632,
+        "unique_names": 632,
+        "exact_lower_name_matches": 630,
+        "exact_d11_research_name_matches": 2,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4798/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+        "source_rows": 625,
+        "unique_names": 625,
+        "exact_lower_name_matches": 625,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4764/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "425ba5c02f76670bc5637110734ce7fc9c38a56d",
+        "source_rows": 546,
+        "unique_names": 546,
+        "exact_lower_name_matches": 546,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr4014/knowledge/d10-v1-semantic-inventory.json",
+        "blob": "ac6f5763ba2c81cba526582af01075a56d728207",
+        "source_rows": 256,
+        "unique_names": 256,
+        "exact_lower_name_matches": 256,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3997/knowledge/d9-v1-semantic-inventory.json",
+        "blob": "c0b298b8701e74ac30a00ba8165072b19caade3e",
+        "source_rows": 512,
+        "unique_names": 512,
+        "exact_lower_name_matches": 512,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3997/knowledge/d9-final-semantic-fill-v1.json",
+        "blob": "b8e6c9da022780c9b205e5d8344889c9687871b4",
+        "source_rows": 137,
+        "unique_names": 137,
+        "exact_lower_name_matches": 137,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      },
+      {
+        "path": "research/domain-archive/20261011/pr3935/knowledge/d8-recovery-candidate-map.json",
+        "blob": "dcff11002dc3f79d146378029e85beeb908b9681",
+        "source_rows": 8,
+        "unique_names": 8,
+        "exact_lower_name_matches": 6,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": [
+          {
+            "label": "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+            "classification": "HISTORICAL_UNRESOLVED_GROUP_LABEL",
+            "historical_field": "unresolved_recovery"
+          },
+          {
+            "label": "FIXP/FLOATP",
+            "classification": "HISTORICAL_UNRESOLVED_GROUP_LABEL",
+            "historical_field": "unresolved_recovery"
+          }
+        ]
+      },
+      {
+        "path": "research/domain-archive/20261011/flavors-restarts-historical/knowledge/d10-flavors-restarts-research-v1.json",
+        "blob": "5aec23038bc8d6e99c5ea49925bb5e37492d4454",
+        "source_rows": 8,
+        "unique_names": 8,
+        "exact_lower_name_matches": 8,
+        "exact_d11_research_name_matches": 0,
+        "not_recognized_as_individual_functions": []
+      }
+    ]
+  }
+}
