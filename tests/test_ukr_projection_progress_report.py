@@ -205,8 +205,8 @@ class CliTests(TempTree):
         d = self.tree({"a.lisp": "(x (ук так) (укр так))"})
         _, out_on = self._run(["--root", str(d)])
         _, out_off = self._run(["--root", str(d), "--no-annotation"])
-        self.assertIn("::error::", out_on)
-        self.assertNotIn("::error::", out_off)
+        self.assertIn("::notice::", out_on)
+        self.assertNotIn("::notice::", out_off)
 
     def test_json_report_written(self):
         d = self.tree({"a.lisp": "(x (ук ні) (укр ні-ні))"})
@@ -225,7 +225,7 @@ class CliTests(TempTree):
         })
         rc, out = self._run(["--root", str(d), "--list", "--top", "1"])
         self.assertEqual(rc, 0)
-        self.assertIn("Непереведених файлів: 2", out)
+        self.assertIn("Файлів із різними ук/укр (це не порушення): 2", out)
         self.assertIn("… ще 1", out)
 
 
@@ -242,6 +242,83 @@ class DeterminismTests(TempTree):
         self.assertGreaterEqual(p.pairs_pct, 0.0)
         self.assertLessEqual(p.pairs_pct, 100.0)
 
+
+
+
+class UkrDeclarationTests(TempTree):
+    def test_different_compact_and_full_names_are_correct(self):
+        d = self.tree({"a.lisp": "(001 (ук скорочення) (укр розгорнута-назва))"})
+        audit = mod.audit_declared_ukr(d)
+        self.assertEqual((audit["required"], audit["valid"]), (1, 1))
+        self.assertEqual(audit["issues"], [])
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(mod.main(["--root", str(d), "--min-ukr-pct", "100"]), 0)
+        self.assertNotIn("::error::", output.getvalue())
+
+    def test_missing_full_is_error_with_coordinate_and_line(self):
+        d = self.tree({"lib/domains/d5.lisp": "(11010 (ук менше?) (укр ()))\n"})
+        audit = mod.audit_declared_ukr(d)
+        self.assertEqual((audit["required"], audit["valid"]), (1, 0))
+        self.assertEqual(audit["issues"][0]["key"], "11010")
+        self.assertEqual(audit["issues"][0]["line"], 1)
+        self.assertEqual(audit["issues"][0]["file"], "lib/domains/d5.lisp")
+        self.assertEqual(audit["issues"][0]["reason"], "missing-ukr")
+
+    def test_ukr_only_valid_both_empty_excluded(self):
+        d = self.tree({"a.lisp": "(0 (ук ()) (укр ()))\n(1 (ук ()) (укр повна-назва))"})
+        self.assertEqual((mod.audit_declared_ukr(d)["required"],
+                          mod.audit_declared_ukr(d)["valid"]), (1, 1))
+
+    def test_latin_and_nonkeyboard_symbols_are_reported(self):
+        d = self.tree({"a.lisp": '(0 (ук так) (укр "текст-x<"))'})
+        audit = mod.audit_declared_ukr(d)
+        self.assertEqual(audit["valid"], 0)
+        self.assertIn("U+0078", audit["issues"][0]["reason"])
+        self.assertIn("U+003C", audit["issues"][0]["reason"])
+
+    def test_comment_and_string_pairs_do_not_count(self):
+        d = self.tree({"a.lisp": '; (0 (ук так) (укр latin))\n"(ук ні) (укр latin)"\n(1 (ук так) (укр так))'})
+        self.assertEqual(mod.audit_declared_ukr(d)["required"], 1)
+
+    def test_strict_mode_fails_real_defect_only(self):
+        d = self.tree({"a.lisp": "(0 (ук так) (укр bad))"})
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(mod.main(["--root", str(d), "--min-ukr-pct", "100"]), 1)
+        self.assertIn("::error", output.getvalue())
+
+    def test_empty_input_fails_closed(self):
+        d = self.tree({})
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(mod.main(["--root", str(d), "--min-ukr-pct", "100"]), 1)
+
+    def test_read_only_and_json_determinism(self):
+        d = self.tree({"a.lisp": "(0 (ук одне) (укр повна-назва))"})
+        original = (d / "a.lisp").read_bytes()
+        report = d / "report.json"
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(mod.main(["--root", str(d), "--json", str(report)]), 0)
+        first = report.read_bytes()
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(mod.main(["--root", str(d), "--json", str(report)]), 0)
+        self.assertEqual(first, report.read_bytes())
+        self.assertEqual(original, (d / "a.lisp").read_bytes())
+        self.assertEqual(json.loads(first)["declared_ukr"]["valid"], 1)
+
+    def test_symlink_does_not_escape_root(self):
+        d = self.tree({"a.txt": "(ук так) (укр так)"})
+        (d / "bad.lisp").symlink_to(d / "a.txt")
+        audit = mod.audit_declared_ukr(d)
+        self.assertEqual(audit["issues"][0]["reason"], "symlink-not-allowed")
+
+    def test_readable_quoted_full(self):
+        d = self.tree({"a.lisp": '(0 (ук к) (укр "повна назва"))'})
+        self.assertEqual(mod.audit_declared_ukr(d)["valid"], 1)
+
+    def test_keyboard_contract_matches_domain_guard(self):
+        from tests.test_ukrainian_domain_projection_rules import UKRAINIAN_KEYBOARD_OUTPUTS
+        self.assertEqual(mod.UKRAINIAN_KEYBOARD_OUTPUTS, UKRAINIAN_KEYBOARD_OUTPUTS)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

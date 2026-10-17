@@ -144,7 +144,7 @@ def read_token(text: str, i: int) -> tuple[str | None, int]:
     return (text[i:j] or None), j
 
 
-def iter_pairs(text: str):
+def iter_pairs(text: str, with_line: bool = False):
     """Пари `(ук X) (укр Y)` **у коді**; коментарі та рядки пропускаються.
 
     Рядок, що є *значенням* поверхні (`(ук "к")`), читається токеном; пара, що
@@ -181,7 +181,7 @@ def iter_pairs(text: str):
                     k + 4 >= n or text[k + 4] in " \t\r\n"):
                 tok2, m = read_token(text, k + 4)
                 if tok2 is not None:
-                    yield tok1, tok2
+                    yield (tok1, tok2, text.count("\n", 0, i) + 1) if with_line else (tok1, tok2)
                     i = m
                     continue
             i += 1
@@ -285,6 +285,69 @@ def render(p: Progress) -> str:
     )
 
 
+
+# Output letters from the same Microsoft Ukrainian Enhanced layout as the domain test.
+UKRAINIAN_KEYBOARD_OUTPUTS = set(
+    "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
+    "АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"
+    "0123456789"
+    "'\\-=./!\"№;%:?*()_+,₴ "
+)
+ROW_KEY = re.compile(r"^\s*\(([01]{1,11})\s+")
+
+
+def audit_declared_ukr(root: Path) -> dict:
+    """Перевіряти укр як окрему peer-поверхню; нерівність ук != укр допустима.
+
+    Це read-only перевірка лише ОГОЛОШЕНИХ пар, не доказ усієї міграції
+    викличних форм чи фізичного REPL. Усі знахідки мають шлях/рядок/ключ.
+    """
+    required = valid = 0
+    issues: list[dict] = []
+    for path in iter_lisp_files(root):
+        rel = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            issues.append({"file": rel, "line": 0, "key": None,
+                           "reason": "symlink-not-allowed"})
+            continue
+        try:
+            source = path.read_text(encoding="utf-8")
+        except (UnicodeError, OSError) as exc:
+            issues.append({"file": rel, "line": 0, "key": None,
+                           "reason": f"unreadable:{type(exc).__name__}"})
+            continue
+        source_lines = source.splitlines()
+        for uk, ukr, line in iter_pairs(source, with_line=True):
+            if uk == ukr == "()":
+                continue  # Семантичний об'єкт не має людських поверхонь.
+            required += 1
+            match = ROW_KEY.match(source_lines[line - 1]) if 1 <= line <= len(source_lines) else None
+            key = match.group(1) if match else None
+            reason = None
+            if ukr == "()":
+                reason = "missing-ukr"
+            else:
+                try:
+                    value = json.loads(ukr) if ukr.startswith('"') else ukr
+                    if not isinstance(value, str):
+                        reason = "not-a-string"
+                    else:
+                        chars = sorted({ch for ch in value if ch not in UKRAINIAN_KEYBOARD_OUTPUTS}, key=ord)
+                        if not value or chars:
+                            reason = ("forbidden:" + ",".join(f"U+{ord(ch):04X}" for ch in chars)
+                                      if chars else "empty-ukr")
+                except ValueError:
+                    reason = "invalid-quoted-token"
+            if reason is None:
+                valid += 1
+            else:
+                issues.append({"file": rel, "line": line, "key": key,
+                               "reason": reason, "uk": uk, "ukr": ukr})
+    return {"required": required, "valid": valid,
+            "pct": round(100.0 * valid / required, 1) if required else 0.0,
+            "issues": issues}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -292,6 +355,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", default=None, help="записати JSON-звіт у файл")
     ap.add_argument("--min-pairs-pct", type=float, default=None,
                     help="жорсткий режим: код виходу 1, поки pairs_pct < цього порога")
+    ap.add_argument("--min-ukr-pct", type=float, default=None,
+                    help="жорстка перевірка наявності й допустимих символів оголошених укр")
     ap.add_argument("--list", action="store_true",
                     help="показати файли з непереведеними парами")
     ap.add_argument("--top", type=int, default=0,
@@ -306,16 +371,25 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     progress = measure(root)
+    declaration_audit = audit_declared_ukr(root)
     line = render(progress)
     print(line)
     if not args.no_annotation:
-        print(f"::error::{line}")
+        print(f"::notice::{line}")
 
+    print(f"ОГОЛОШЕНІ УКР: {declaration_audit['valid']}/{declaration_audit['required']} "
+          f"({declaration_audit['pct']}%), порушень={len(declaration_audit['issues'])}; "
+          "це НЕ перевірка всіх викличних форм .lisp")
+    for issue in declaration_audit["issues"]:
+        if not args.no_annotation:
+            key = f" key={issue['key']}" if issue["key"] else ""
+            print(f"::error file={issue['file']},line={issue['line']}::"
+                  f"укр{key} {issue['reason']}")
     if args.list:
         pending = [f for f in progress.files if f.pending]
         pending.sort(key=lambda f: (-f.pending, f.path))
         shown = pending[:args.top] if args.top > 0 else pending
-        print(f"\nНепереведених файлів: {len(pending)}")
+        print(f"\nФайлів із різними ук/укр (це не порушення): {len(pending)}")
         for f in shown:
             print(f"  {f.pending:5} / {f.pairs_total:5}  {f.path}")
         if args.top > 0 and len(pending) > args.top:
@@ -323,6 +397,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.json:
         payload = progress.to_dict()
+        payload["declared_ukr"] = declaration_audit
         payload["pending_files"] = [
             {"path": f.path, "pending": f.pending, "pairs_total": f.pairs_total}
             for f in sorted(progress.files, key=lambda f: f.path) if f.pending
@@ -330,6 +405,16 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.json).write_text(
             json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    if args.min_ukr_pct is not None:
+        if not 0 <= args.min_ukr_pct <= 100:
+            print("::error::--min-ukr-pct має бути від 0 до 100", file=sys.stderr)
+            return 2
+        if (not declaration_audit["required"] or declaration_audit["issues"]
+                or declaration_audit["pct"] < args.min_ukr_pct):
+            print(f"::error::УКР-ОГОЛОШЕННЯ НЕ ПРОЙШЛИ: "
+                  f"{declaration_audit['pct']}% < {args.min_ukr_pct}% або "
+                  f"issues={len(declaration_audit['issues'])}")
+            return 1
     if args.min_pairs_pct is not None and progress.pairs_pct < args.min_pairs_pct:
         print(f"::error::УКР-ПРОЄКЦІЯ НЕ ЗАВЕРШЕНА: {progress.pairs_pct}% < "
               f"порога {args.min_pairs_pct}%; лишилось {progress.pairs_pending} пар "
