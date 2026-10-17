@@ -4207,4 +4207,13 @@
 
 ; Local derived type check used by D9 RESULT-GOAL?, not an admitted
 ; D9:110101100 machine call; language-owned SYMBOL? already exists in Core4.
-(0011 результат-символ? symbol?)
+; Local SENS-only SYMBOL? predicate, borrowed from lib/world.lisp.
+; D8:11110100 serializes an atom; D8:11101101 restores its symbol name.
+; Do not call non-admitted D9:110101100 or missing English compatibility names.
+(0011 результат-символ?
+  (0010 (значення)
+    (110
+      ((0101 значення) #d1:0)
+      ((not? (010 значення)) #d1:0)
+      ((101 значення (11101101 (11110100 значення))) #d1:1)
+      (#d1:1 #d1:0))))
