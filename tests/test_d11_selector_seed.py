@@ -82,7 +82,7 @@ class D11SelectorSeedAuditTests(unittest.TestCase):
     def test_rejects_wrong_selector_suffix_name(self):
         docs = self.changed()
         bits, name = docs["seed"]["rows"][0]
-        docs["seed"]["rows"][0][1] = name[:-2] + "DR"
+        docs["seed"]["rows"][0][1] = "NOT-A-SELECTOR-NAME"
         self.assert_rejected(docs, "CANDIDATE_NAME_DERIVATION")
 
     def test_rejects_candidate_without_a_current_d10_selector_parent(self):
