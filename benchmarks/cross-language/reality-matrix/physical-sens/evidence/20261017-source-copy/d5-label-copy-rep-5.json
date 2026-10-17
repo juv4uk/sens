@@ -1,0 +1,169 @@
+{
+  "schema": "sens-trit-source-vs-python-source/v1",
+  "status": "research-pilot",
+  "claim_scope": "One recursive proper-pair copy workload: current SENS evaluator reads an actual T5 trit-carrier .sens file; CPython executes the matching Python source file. End-to-end fresh subprocess time only.",
+  "not_claimed": [
+    "general language speedup or ranking",
+    "pure evaluator time without process startup",
+    "trit packing/encoding time",
+    "precompiled Python code or saved .pyc comparison"
+  ],
+  "workload": "d5-label-copy",
+  "sens_source_projection": "examples/binary/d5-label-copy.bits",
+  "sens_trit_source_bytes": 66,
+  "sens_exact_domain_word_count": 96,
+  "sens_trit_source_sha256": "42ce3dcd631b2ac9081ea7f3764a50b3bf81f025b3e109793eef2527490b54a5",
+  "python_source": "benchmarks/cross-language/reality-matrix/physical-sens/fixtures/recursive_pair_copy.py",
+  "python_source_bytes": 836,
+  "python_source_sha256": "ff72d75edb19990c64734011d1508efbdca9e0f71d4e6149734d9c8b2b75bee6",
+  "sens_output": "(1 0 ())\n",
+  "python_output": "(1 0 ())\n",
+  "parity": "PASS",
+  "samples": 21,
+  "warmups": 3,
+  "order_seed": 20261022,
+  "pair_orders": [
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "sens",
+      "python"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "python",
+      "sens"
+    ],
+    [
+      "python",
+      "sens"
+    ]
+  ],
+  "sens_wall_ns": [
+    4794738,
+    3528897,
+    4013698,
+    3283869,
+    3033483,
+    3215554,
+    3032144,
+    2973721,
+    3231525,
+    3437707,
+    3795975,
+    3229980,
+    3249042,
+    2933741,
+    2962798,
+    2945076,
+    3293271,
+    2929746,
+    3019912,
+    3852054,
+    4148611
+  ],
+  "python_wall_ns": [
+    24020881,
+    22997905,
+    24480849,
+    29032619,
+    30748021,
+    22843139,
+    25558848,
+    25961836,
+    22168127,
+    23444065,
+    25675592,
+    23009650,
+    23708259,
+    34318547,
+    32248998,
+    22228096,
+    23096805,
+    26603575,
+    25263999,
+    26535746,
+    38179994
+  ],
+  "sens_median_wall_ns": 3231525,
+  "python_median_wall_ns": 25263999,
+  "sens_p95_wall_ns": 4148611,
+  "python_p95_wall_ns": 34318547,
+  "python_over_sens_median_ratio": 7.817980365307402,
+  "sens_trit_cli_sha256": "74b471dd7c01cd89a3a14a5be21a54412f6d5731b3dfa827d6395c914868553e",
+  "git_head": "66c02186a630699be50725a54d72f013c8150066",
+  "cpu": "Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "python_version": "3.12.12",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "timing_boundary": "parent perf_counter_ns around a fresh subprocess; includes interpreter/CLI startup, source-file read, decode/parse/eval, stdout capture and process exit"
+}
