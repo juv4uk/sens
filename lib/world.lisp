@@ -162,7 +162,7 @@
     (110
       ((0101 value) (0101 (001 (0))))
       ((0100 (010 value)) (0101 (001 (0))))
-      ((101 value (11101101 (11110100 value))) (0101 (001 ())))
+      ((101 value (текст-у-символ (значення-у-текст value))) (0101 (001 ())))
       (#d1:1 (0101 (001 (0)))))))
 
 (0011 advice-decision-in-world
@@ -649,7 +649,7 @@
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
 (0011 knowledge-content-address
   (0010 (knowledge)
-    (11110100 knowledge)))
+    (значення-у-текст knowledge)))
 
 (0011 world-address-content
   (0010 (world)
