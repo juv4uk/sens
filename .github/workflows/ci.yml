@@ -683,11 +683,11 @@ jobs:
           tree_expected="(1 0 0)"
           sha256sum "$d10_tree_fixture" lib/core4.lisp target/debug/sens
           if ! tree_observed="$(target/debug/sens "$d10_tree_fixture" 2>&1)"; then
-            printf '%s\\n' "$tree_observed" >&2
+            printf '%s\n' "$tree_observed" >&2
             echo "::error::D10_PAIP_TREE_EXEC_RED id=d10-paip-find-if-anywhere layer=eval fixture=$d10_tree_fixture expected=$tree_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d10_tree_fixture'" >&2
             exit 1
           fi
-          tree_actual="$(printf '%s\\n' "$tree_observed" | tail -n 1)"
+          tree_actual="$(printf '%s\n' "$tree_observed" | tail -n 1)"
           if [[ "$tree_actual" != "$tree_expected" ]]; then
             echo "::error::D10_PAIP_TREE_LAW_DIFF id=d10-paip-find-if-anywhere layer=eval fixture=$d10_tree_fixture expected=$tree_expected actual=$tree_actual first_diff=D1-vector reproduce='target/debug/sens $d10_tree_fixture'" >&2
             exit 1
