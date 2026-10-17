@@ -17,6 +17,46 @@ mod native_exec;
 mod platform;
 mod process_raw;
 
+/// Сире спостереження монотонного лічильника ОС, без часової семантики в Rust.
+///
+/// Зовнішня host-capability `mono-ns` існує окремо від дослідницької
+/// D10:0011110110: реєстрація механізму за назвою НЕ допускає прямий D10 виклик.
+/// Арифметику різниці, одиниці і вимірювання визначають тільки функції SENS.
+/// Дві послідовні відповіді мають один точний D96-носій, не f64/Rational.
+fn observe_monotonic_nanoseconds(
+    arguments: &[(Value, Span)],
+    _environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if !arguments.is_empty() {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            "mono-ns expects exactly zero arguments",
+            span,
+        ));
+    }
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    let nanoseconds = START
+        .get_or_init(std::time::Instant::now)
+        .elapsed()
+        .as_nanos();
+    const WIDTH: usize = 96;
+    if nanoseconds >= (1u128 << WIDTH) {
+        return Err(LanguageError::new(
+            ErrorKind::NumericOverflow,
+            "mono-ns observed nanoseconds exceed D96",
+            span,
+        ));
+    }
+    let bits: Vec<u8> = (0..WIDTH)
+        .rev()
+        .map(|shift| ((nanoseconds >> shift) & 1) as u8)
+        .collect();
+    let exact = sens::BinaryNumber::from_numeric_domain_bits(WIDTH, &bits)
+        .expect("the checked 96-bit monotonic observation is an exact D96 word");
+    Ok(Value::BinaryNumber(exact))
+}
+
 fn denied(operation: &str, detail: impl std::fmt::Display, span: Span) -> LanguageError {
     LanguageError::new(
         ErrorKind::InvalidForm,
@@ -625,6 +665,7 @@ fn evaluate_load(
 }
 
 pub fn install() {
+    register_evaluated_capability("mono-ns", 0, observe_monotonic_nanoseconds);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
     register_evaluated_capability("read-file-utf8-raw", 1, evaluate_read_file_utf8_raw);
@@ -664,10 +705,35 @@ mod install_tests {
     }
 
     #[test]
+    fn mono_ns_is_an_exact_non_decreasing_d96_host_observation() {
+        let env = Environment::root();
+        let span = Span::default();
+        let first = super::observe_monotonic_nanoseconds(&[], &env, span)
+            .expect("installed raw monotonic observation");
+        let second = super::observe_monotonic_nanoseconds(&[], &env, span)
+            .expect("second monotonic observation");
+        let (Value::BinaryNumber(a), Value::BinaryNumber(b)) = (first, second) else {
+            panic!("mono-ns must return D96, never host Rational or float");
+        };
+        assert_eq!(a.numeric_domain_width(), Some(96));
+        assert_eq!(b.numeric_domain_width(), Some(96));
+        assert!(a <= b, "monotonic observations must not move backward");
+
+        let error = super::observe_monotonic_nanoseconds(
+            &[(Value::Nil, span)],
+            &env,
+            span,
+        )
+        .expect_err("wrong arity must fail closed");
+        assert_eq!(error.kind, ErrorKind::Arity);
+    }
+
+    #[test]
     fn install_registers_every_host_form() {
         super::install();
         let installed = sens::installed_capabilities();
         for name in [
+            "mono-ns",
             "read-dir",
             "read-file-bytes",
             "read-file-utf8-raw",
