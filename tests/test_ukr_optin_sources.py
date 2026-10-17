@@ -261,14 +261,16 @@ class OptInUkrMigrationTests(unittest.TestCase):
 
     def test_negative_wrong_alias(self):
         broken = self.ep.replace(
-            "(0011 make-claim створити-структуроване-твердження)",
-            "(0011 make-claim створити-доказ)", 1)
+            "(визначити make-claim створити-структуроване-твердження)",
+            "(визначити make-claim створити-доказ)", 1)
+        self.assertNotEqual(broken, self.ep)
         with self.assertRaisesRegex(AssertionError, "exact-value DEFINE"):
             verify(broken, self.store, self.core, self.domains)
 
     def test_negative_store_falls_back_to_english(self):
         broken = self.store.replace(
-            "(0010 () мапа-порожній)", "(0010 () map-empty)", 1)
+            "(функція () мапа-порожній)", "(функція () map-empty)", 1)
+        self.assertNotEqual(broken, self.store)
         with self.assertRaisesRegex(AssertionError, "чинний SENS peer"):
             verify(self.ep, broken, self.core, self.domains)
 
