@@ -24,7 +24,7 @@
       
       ((0100 (010 values))
        (111 (1110 role (100 values))
-             (перетворити-значення-пролог-на-факти-даталог role (011 values)))))))
+             (перетворити-значення-пролог-на-факти-даталог role (решта values)))))))
 
 (0011 prolog-substitutions-to-datalog-facts
   (0010 (observation)
