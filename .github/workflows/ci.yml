@@ -71,6 +71,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
-          python3 scripts/report_ukr_projection_progress.py
+          # Жорстко: крок червоний, поки не вся .lisp-кодова база на повній проєкції укр.
+          python3 scripts/report_ukr_projection_progress.py --min-pairs-pct 100
 
 

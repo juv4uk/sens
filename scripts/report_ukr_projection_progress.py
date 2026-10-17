@@ -121,6 +121,10 @@ def main() -> int:
         Path(args.json).write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n",
                                    encoding="utf-8")
     if args.min_pairs_pct is not None and m["pairs_pct"] < args.min_pairs_pct:
+        need = m["pairs_total"] - m["pairs_same"]
+        print(f"::error::УКР-ПРОЄКЦІЯ НЕ ЗАВЕРШЕНА: {m['pairs_pct']}% < "
+              f"порога {args.min_pairs_pct}%; лишилось {need} пар ук != укр "
+              f"у {m['files_with_pairs']} файлах")
         return 1
     return 0
 
