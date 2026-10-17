@@ -5523,3 +5523,35 @@
 (0011 сортувати-зірочка
   (0010 (елементи перед?)
     (сортувати-список-за перед? елементи)))
+
+; Відновлення D10 епістемічних законів після втрати під час паралельного
+; оновлення core4. Джерело: коміт fbe630e23b5e, lib/epistemic.lisp.
+; Лише SENS-композиція D3:001 QUOTE, D4:1110 LIST і D4:0011 DEFINE.
+; Ратифіковані координати не означають direct-callability D10.
+; D10:0010010011 MAKE-OBSERVATION.
+(0011 створити-спостереження
+  (0010 (source statement)
+    (1110 (001 observation) (1110 (001 source) source) (1110 (001 statement) statement))))
+
+; D10:0001110110 MAKE-CLAIM.
+(0011 створити-твердження
+  (0010 (statement source review)
+    (1110 (001 claim) (1110 (001 statement) statement) (1110 (001 source) source) (1110 (001 review) review))))
+
+; D10:0010001111 MAKE-EVIDENCE.
+(0011 створити-доказ
+  (0010 (claim-ref method outcome source-ref)
+    (1110 (001 evidence)
+          (1110 (001 claim-ref) claim-ref)
+          (1110 (001 method) method)
+          (1110 (001 outcome) outcome)
+          (1110 (001 source-ref) source-ref))))
+
+; D10:0010000101 MAKE-INTENT.
+(0011 створити-намір
+  (0010 (goal requirements stop-condition produces)
+    (1110 (001 intent)
+          (1110 (001 goal) goal)
+          (1110 (001 requires) requirements)
+          (1110 (001 stop-on) stop-condition)
+          (1110 (001 produces) produces))))
