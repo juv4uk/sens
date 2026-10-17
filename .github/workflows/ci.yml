@@ -49,3 +49,8 @@ jobs:
         if: ${{ always() }}
         run: python3 -m unittest tests/test_ukrainian_domain_projection_migration.py -v
 
+      - name: D1–D11 — dry-run проти реальних таблиць без жодного запису
+        if: ${{ always() }}
+        run: python3 scripts/audit_ukrainian_domain_projections.py
+
+
