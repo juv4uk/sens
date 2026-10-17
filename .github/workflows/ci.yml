@@ -283,6 +283,34 @@ jobs:
           fi
           echo "D8_DIV_NATIVE_PASS exact=D8:11001100 laws=5 negative=1 direct_opcode=unclaimed"
 
+      - name: "D10 — SASSOC та сім ратифікованих en-проєкцій: 12 SENS-законів"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d10-sassoc-projection-laws.lisp"
+          negative="tests/semantic/d10-sassoc-invalid-arity.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
+            echo "::error::D10_SASSOC_EXEC_RED id=d10-sassoc-projection layer=eval fixture=$fixture expected=12-D1-YES actual=execution-error reproduce='target/debug/sens $fixture'" >&2
+            printf '%s\n' "$observed" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          expected="(1 1 1 1 1 1 1 1 1 1 1 1)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::D10_SASSOC_LAW_DIFF id=d10-sassoc-projection layer=eval fixture=$fixture expected=$expected actual=$actual reproduce='target/debug/sens $fixture'" >&2
+            exit 1
+          fi
+          if rejection="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D10_SASSOC_BAD_ARITY_ACCEPTED id=d10-sassoc-negative layer=eval fixture=$negative expected=arity-refusal actual=accepted reproduce='target/debug/sens $negative'" >&2
+            exit 1
+          fi
+          if ! grep -Fq "expected /" <<<"$rejection"; then
+            echo "::error::D10_SASSOC_WRONG_REFUSAL id=d10-sassoc-negative layer=eval fixture=$negative expected=arity-refusal actual=$rejection" >&2
+            exit 1
+          fi
+          echo "D10_SASSOC_PROJECTIONS_NATIVE_PASS functions=1 projections=7 laws=12 negative=1 direct_d10_admission=unclaimed"
+
       - name: "D10 CLIPS — два закони преамбули, 13 фізичних свідків SENS"
         shell: bash
         run: |
