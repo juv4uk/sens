@@ -5069,7 +5069,7 @@
 ; (?name as symbol) -> (var name); D8 SYMBOL->STRING + D9 STRING-REST + D8 STRING->SYMBOL.
 (0011 clips-змінна-терм
   (0010 (символ)
-    (1110 (001 var) (11101101 (110011101 (11101110 символ))))))
+    (1110 (001 var) (текст-у-символ (110011101 (символ-у-текст символ))))))
 
 ; D9:001010101 CLIPS-TEMPLATE-SLOT-ORDER, lib/clips-import.lisp:
 ; lookup atomic template key, return its original slot-order list.
