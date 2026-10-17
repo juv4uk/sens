@@ -94,7 +94,7 @@ def read_forms(source: str):
 def definitions(source: str):
     result = {}
     for form in read_forms(source):
-        if not isinstance(form, list) or len(form) != 3 or form[0] != "0011":
+        if not isinstance(form, list) or len(form) != 3 or form[0] not in ("0011", "визначити"):
             raise AssertionError("кожне верхнє визначення — D4:0011")
         name = form[1]
         if not isinstance(name, str) or name in result:
@@ -106,13 +106,15 @@ def definitions(source: str):
 def restore_call_heads(tree):
     """Обернена зміна ТІЛЬКИ executable head; параметри й quoted data не чіпаємо."""
     if not isinstance(tree, list):
-        return tree
+        return "#d1:0" if tree == "ні" else tree
     if not tree:
         return []
     first = tree[0]
     if first == "001":
         return tree  # quoted data збереглися побайтово за логічною формою
-    head = UNDO.get(first, first) if isinstance(first, str) else restore_call_heads(first)
+    restorations = {**UNDO, "хибне?": "0100", "тотожне?": "101",
+                    "як-є": "001", "функція": "0010"}
+    head = restorations.get(first, first) if isinstance(first, str) else restore_call_heads(first)
     return [head] + [restore_call_heads(arg) for arg in tree[1:]]
 
 
@@ -161,6 +163,25 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
         if f"(0011 {value}\n" not in core and f"(0011 {value} " not in core:
             raise AssertionError(f"{value}: джерельний SENS closure не визначений")
 
+    # Суворий мовний допуск: історична латинська виклична голова НЕ стає
+    # ukr лише тому, що обернена нормалізація дає той самий закон.
+    def heads(expr):
+        if not isinstance(expr, list) or not expr:
+            return set()
+        first = expr[0]
+        if first in ("як-є", "001"):
+            return {first}
+        result = {first} if isinstance(first, str) else heads(first)
+        for child in expr[1:]:
+            result |= heads(child)
+        return result
+
+    live = set()
+    for name in ("supporting-evidence", "intent-capabilities-satisfied?"):
+        live |= heads(epdefs[name])
+    if not set(UNDO).issubset(live) or set(UNDO.values()) & live:
+        raise AssertionError("SENS закон: не вся виклична поверхня стала повною укр")
+
     for name, frozen in (
         ("supporting-evidence", EXPECTED_SUPPORT),
         ("intent-capabilities-satisfied?", EXPECTED_INTENT),
@@ -173,7 +194,7 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
     expected_empty = ["0010", [], "map-empty"]
     if restore_call_heads(storedefs["empty-content-store"])[0:2] != expected_empty[0:2]:
         raise AssertionError("empty-content-store: змінені arity/форма D4 LAMBDA")
-    if storedefs["empty-content-store"] != ["0010", [], "мапа-порожній"]:
+    if storedefs["empty-content-store"] != ["функція", [], "мапа-порожній"]:
         raise AssertionError("порожнє сховище має посилатися на чинний SENS peer")
 
     # Інші історичні входи та shapes сховища лишаються дієвими.
@@ -202,7 +223,7 @@ class OptInUkrMigrationTests(unittest.TestCase):
 
     def test_data_tags_are_not_transliterated(self):
         for spelling in ("(001 digest)", "(001 proof)", "(001 test)",
-                         "(001 observation)", "(001 claim-ref)", "(001 supports)"):
+                         "(001 observation)", "(001 claim-ref)", "(як-є supports)"):
             self.assertIn(spelling, self.ep)
 
     def test_old_english_calls_do_not_remain_in_migrated_laws(self):
@@ -214,8 +235,11 @@ class OptInUkrMigrationTests(unittest.TestCase):
                 return []
             if expr[0] == "001":
                 return []
-            return ([expr[0]] if isinstance(expr[0], str) else []
-                    ) + [s for v in expr[1:] for s in heads(v)]
+            return ([
+                expr[0]
+            ] if isinstance(expr[0], str) else heads(expr[0])) + [
+                s for v in expr[1:] for s in heads(v)
+            ]
         left = set(s for tree in selected for s in heads(tree))
         self.assertTrue(set(UNDO.values()).isdisjoint(left), left)
         self.assertTrue(set(UNDO).issubset(left), left)

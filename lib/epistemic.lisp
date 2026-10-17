@@ -27,8 +27,8 @@
 (0011 make-observation створити-спостереження)
 
 ; D10:0001110110 — компактне ук та повне укр посилаються на той самий SENS closure.
-(0011 створити-структуроване-твердження створити-твердження)
-(0011 make-claim створити-структуроване-твердження)
+(визначити створити-структуроване-твердження створити-твердження)
+(визначити make-claim створити-структуроване-твердження)
 
 (0011 make-evidence створити-доказ)
 
@@ -51,7 +51,7 @@
       (#d1:1 #d1:0))))
 
 ; D10:0010011001 SOURCE-REF? — точна повна українська peer-назва.
-(0011 це-належне-посилання-на-джерело? source-ref?)
+(визначити це-належне-посилання-на-джерело? source-ref?)
 
 (0011 epistemic--claim-ref?
   (0010 (value)
@@ -80,13 +80,13 @@
 (0011 intent-goal (0010 (intent) (1001 (11100 (001 goal) (011 intent)))))
 
 (0011 observation-source (0010 (observation) (1001 (11100 (001 source) (011 observation)))))
-(0011 отримати-джерело-спостереження observation-source)
+(визначити отримати-джерело-спостереження observation-source)
 (0011 observation-statement (0010 (observation) (1001 (11100 (001 statement) (011 observation)))))
 (0011 evidence-claim-ref (0010 (evidence) (1001 (11100 (001 claim-ref) (011 evidence)))))
-(0011 отримати-посилання-доказу-на-твердження evidence-claim-ref)
+(визначити отримати-посилання-доказу-на-твердження evidence-claim-ref)
 (0011 evidence-method (0010 (evidence) (1001 (11100 (001 method) (011 evidence)))))
 (0011 intent-requires (0010 (intent) (1001 (11100 (001 requires) (011 intent)))))
-(0011 отримати-необхідні-можливості-наміру intent-requires)
+(визначити отримати-необхідні-можливості-наміру intent-requires)
 (0011 intent-stop-on (0010 (intent) (1001 (11100 (001 stop-on) (011 intent)))))
 (0011 intent-produces (0010 (intent) (1001 (11100 (001 produces) (011 intent)))))
 
@@ -111,14 +111,14 @@
 (0011 supporting-evidence
   (0010 (evidence claim-ref)
     (110
-      ((0100 (доказ? evidence)) (001 ()))
+      ((хибне? (доказ? evidence)) (як-є ()))
       ((0100 (epistemic--claim-ref? claim-ref)) (001 ()))
-      ((0100 (101 (доказ-підсумок evidence) (001 supports))) (001 ()))
-      ((0100 (епістеміка--рівні-посилання? (отримати-посилання-доказу-на-твердження evidence) claim-ref)) (001 ()))
+      ((хибне? (тотожне? (доказ-підсумок evidence) (як-є supports))) (як-є ()))
+      ((хибне? (епістеміка--рівні-посилання? (отримати-посилання-доказу-на-твердження evidence) claim-ref)) (як-є ()))
       (#d1:1 evidence))))
 
 ; D9:101100001 — той самий retrieval closure, без нової семантики.
-(0011 підтверджувальний-доказ supporting-evidence)
+(визначити підтверджувальний-доказ supporting-evidence)
 
 (0011 epistemic--all-required-present?
   (0010 (requirements effective-capabilities)
@@ -131,9 +131,9 @@
 (0011 intent-capabilities-satisfied?
   (0010 (intent effective-capabilities)
     (110
-      ((0100 (намір? intent)) #d1:0)
+      ((хибне? (намір? intent)) ні)
       (#d1:1
        (epistemic--all-required-present? (отримати-необхідні-можливості-наміру intent) effective-capabilities)))))
 
 ; D10:0001111110 INTENT-CAPABILITIES-SATISFIED? — один мовний закон, дві peer-форми.
-(0011 усі-необхідні-можливості-наміру-забезпечені? intent-capabilities-satisfied?)
+(визначити усі-необхідні-можливості-наміру-забезпечені? intent-capabilities-satisfied?)
