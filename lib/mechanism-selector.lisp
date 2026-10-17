@@ -8,69 +8,69 @@
 ; (010 (001 ())) = D1:1. Width is identity; every bit of domain address valued.
 
 (0011 mechanism-selector-registry
-  (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+  (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
 (0011 mechanism-selector-metadata
-  (100 (110101001 (110110111 "lib/function-table-mechanisms.lisp"))))
+  (перше (110101001 (110110111 "lib/function-table-mechanisms.lisp"))))
 
 (0011 mechanism-selector-registry-rows
   mechanism-selector-registry)
 
 (0011 mechanism-selector-find-section
   (0010 (name sections)
-    (110
-      ((010 sections) (001 ()))
-      ((101 (100 (100 sections)) name) (100 sections))
-      ((010 (001 ()))
-       (mechanism-selector-find-section name (011 sections))))))
+    (за-умовою
+      ((атом? sections) (як-є ()))
+      ((тотожне? (перше (перше sections)) name) (перше sections))
+      ((атом? (як-є ()))
+       (mechanism-selector-find-section name (решта sections))))))
 
 (0011 mechanism-selector-routes
-  (011 (mechanism-selector-find-section
-         (001 rows)
+  (решта (mechanism-selector-find-section
+         (як-є rows)
          mechanism-selector-metadata)))
 
 (0011 mechanism-selector-registry-has-sid?
   (0010 (sid rows)
-    (110
-      ((010 rows) (001 no))
-      ((101 sid (100 (100 rows))) (001 yes))
-      ((010 (001 ()))
-       (mechanism-selector-registry-has-sid? sid (011 rows))))))
+    (за-умовою
+      ((атом? rows) (як-є no))
+      ((тотожне? sid (перше (перше rows))) (як-є yes))
+      ((атом? (як-є ()))
+       (mechanism-selector-registry-has-sid? sid (решта rows))))))
 
 (0011 mechanism-selector-find-route
   (0010 (sid executor rows)
-    (110
-      ((010 rows) (001 ()))
-      ((010 (001 ()))
+    (за-умовою
+      ((атом? rows) (як-є ()))
+      ((атом? (як-є ()))
        ((0010 (row)
-          (110
-            ((101 sid (100 row))
-             (110
-               ((101 executor (1001 row)) row)
-               ((010 (001 ()))
-                (mechanism-selector-find-route sid executor (011 rows)))))
-            ((010 (001 ()))
-             (mechanism-selector-find-route sid executor (011 rows)))))
-        (100 rows))))))
+          (за-умовою
+            ((тотожне? sid (перше row))
+             (за-умовою
+               ((тотожне? executor (друге row)) row)
+               ((атом? (як-є ()))
+                (mechanism-selector-find-route sid executor (решта rows)))))
+            ((атом? (як-є ()))
+             (mechanism-selector-find-route sid executor (решта rows)))))
+        (перше rows))))))
 
 (0011 mechanism-select
   (0010 (sid executor)
-    (110
-      ((101
+    (за-умовою
+      ((тотожне?
          (mechanism-selector-registry-has-sid?
            sid mechanism-selector-registry-rows)
-         (001 no))
-       (1110
-         (001 mechanism-selection-failure)
-         (001 sid-not-in-function-table)
+         (як-є no))
+       (список
+         (як-є mechanism-selection-failure)
+         (як-є sid-not-in-function-table)
          sid))
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        ((0010 (route)
-          (110
-            ((010 route)
-             (1110 (001 mechanism-unavailable) sid executor))
-            ((010 (001 ()))
-             (1110 (001 mechanism-selected)
+          (за-умовою
+            ((атом? route)
+             (список (як-є mechanism-unavailable) sid executor))
+            ((атом? (як-є ()))
+             (список (як-є mechanism-selected)
                sid executor (10011 route)))))
         (mechanism-selector-find-route
           sid executor mechanism-selector-routes))))))

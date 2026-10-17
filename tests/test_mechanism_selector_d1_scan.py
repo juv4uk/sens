@@ -17,6 +17,43 @@ NAMES = (
 )
 
 
+
+
+def _canonicalize_current_heads(node):
+    """Projection-only normalization for the existing legacy mechanical oracle.
+
+    Source of meanings: live D3/D4 uk columns. This test does not admit
+    invocation from residence or emulate the full SENS runtime.
+    """
+    if not isinstance(node, list):
+        return node
+    if not node:
+        return []
+    first = node[0]
+    if isinstance(first, str) and first in {"001", "як-є"}:
+        # QUOTE arguments are data: never lower surface names inside them.
+        return [_canonicalize_current_heads(first), *node[1:]]
+    result = [_canonicalize_current_heads(part) for part in node]
+    if isinstance(result[0], str):
+        result[0] = _CANONICAL_UK_TO_BITS.get(result[0], result[0])
+    return result
+
+
+def _ratified_uk_mapping():
+    root = SOURCE.parents[1] / "lib" / "domains"
+    by_name = {}
+    for width in (3, 4):
+        table = (root / f"d{width}.lisp").read_text(encoding="utf-8")
+        rows = re.findall(r"(?m)^  \(([01]+) \(ук ([^()\s]+)\)", table)
+        for bits, uk in rows:
+            if len(bits) != width or uk in by_name:
+                raise AssertionError(f"ratified projection collision: D{width}:{bits} {uk}")
+            by_name[uk] = bits
+    return by_name
+
+
+_CANONICAL_UK_TO_BITS = _ratified_uk_mapping()
+
 def parse(source):
     tokens = [m.group() for m in TOKEN.finditer(source)
               if not m.group().startswith(";")]
@@ -43,7 +80,7 @@ def parse(source):
     expressions = []
     while pos < len(tokens):
         expressions.append(read())
-    return expressions
+    return [_canonicalize_current_heads(x) for x in expressions]
 
 
 def extract_functions(source):
@@ -182,7 +219,7 @@ class MechanismSelectorWitness(unittest.TestCase):
 
     def test_wrong_fallback_and_inverted_route_are_detected(self):
         bad = self.source.replace(
-            "((010 (001 ()))\n       (mechanism-selector-find-section",
+            "((атом? (як-є ()))\n       (mechanism-selector-find-section",
             "((101 (100 (100 sections)) name)\n       (mechanism-selector-find-section", 1)
         self.assertNotEqual(bad, self.source)
         self.assertNotEqual(
@@ -191,8 +228,8 @@ class MechanismSelectorWitness(unittest.TestCase):
             ["rows", "v"],
         )
         wrong = self.source.replace(
-            "((010 route)\n             (1110",
-            "((0100 (010 route))\n             (1110", 1)
+            "((атом? route)\n             (список",
+            "((хибне? (атом? route))\n             (список", 1)
         self.assertNotEqual(wrong, self.source)
         m = MiniOracle(wrong, {"mechanism-selector-registry-rows": [["00001100", "plus"]],
                                "mechanism-selector-routes": [["00001100", "prolog", "add"]]})
@@ -238,6 +275,31 @@ class MechanismSelectorWitness(unittest.TestCase):
         self.assertEqual(len("10011"), 5)  # D5 CADDR
         self.assertNotIn("0100", heads)  # прибрано хибне D4 NOT(ATOM)
 
+
+
+    def test_ukrainian_projection_maps_to_exact_ratified_identity(self):
+        mapping = _CANONICAL_UK_TO_BITS
+        self.assertEqual(mapping["як-є"], "001")
+        self.assertEqual(mapping["тотожне?"], "101")
+        self.assertEqual(mapping["за-умовою"], "110")
+        self.assertEqual(mapping["друге"], "1001")
+        self.assertEqual(mapping["список"], "1110")
+        self.assertIn("(за-умовою", self.source)
+        self.assertIn("(тотожне?", self.source)
+        self.assertIn("(як-є", self.source)
+        self.assertIn("(список", self.source)
+        # The same source now parses into the old canonical machine identities.
+        self.assertEqual(extract_functions(self.source)["mechanism-select"][0], "0010")
+
+    def test_wrong_ukrainian_identity_does_not_pass_route_law(self):
+        bad = self.source.replace("(тотожне? executor", "(сполучити executor", 1)
+        self.assertNotEqual(bad, self.source)
+        m = MiniOracle(bad, {
+            "mechanism-selector-registry-rows": [["00001100", "plus"]],
+            "mechanism-selector-routes": [["00001100", "prolog", "add"]],
+        })
+        with self.assertRaises(AssertionError):
+            m.call("mechanism-select", ["00001100", "prolog"])
 
 if __name__ == "__main__":
     unittest.main()
