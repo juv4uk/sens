@@ -4247,6 +4247,12 @@
   (0010 (факт підтримки)
     (сполучити факт підтримки)))
 
+; D9:001111011 AXIOM — native historical TMS axiom (fact . NIL).
+; Law from lib/forward.lisp; exact D3 empty is data, no D9 direct opcode.
+(0011 аксіома
+  (0010 (факт)
+    (створити-обґрунтований факт (001 ()))))
+
 
 ; D9:010101011 FACT-OF / D9:010001010 SUPPORTS-OF.
 ; Донор lib/forward.lisp: TMS-запис (fact . supports), не W8 і не масив.
