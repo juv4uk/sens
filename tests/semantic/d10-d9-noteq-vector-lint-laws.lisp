@@ -1,18 +1,11 @@
-; D10 not-equal/vector + D9 dependents/lint — self-DEFINE + 8× D1:1
-(0011 числа-нерівні?
-  (0010 (a b) (not? (equal? a b))))
+; SENS laws for Core4-derived D10/D9 projections: 8 exact D1:YES.
+; VECTOR->LIST / LIST->VECTOR shims below are test-local list-carrier projections only.
 (0011 вектор->список
   (0010 (v) v))
 (0011 список->вектор
   (0010 (xs) xs))
-(0011 зріз-вектора
-  (0010 (v start end)
-    (взяти (відняти end start) (відкинути start v))))
-(0011 список-усіх-значень
-  (0010 (xs) xs))
-(0011 аналіз-розмір довжина)
 (list
-  (числа-нерівні? #d24:000000000000000000000001
+  (numeric-not-equal? #d24:000000000000000000000001
                   #d24:000000000000000000000010)
   (not? (числа-нерівні? #d24:000000000000000000000001
                         #d24:000000000000000000000001))
@@ -20,12 +13,12 @@
           (list (quote a) (quote b)))
   (equal? (список->вектор (list (quote x)))
           (list (quote x)))
-  (equal? (зріз-вектора (list (quote a) (quote b) (quote c))
+  (equal? (vector-slice (list (quote a) (quote b) (quote c))
                         #d24:000000000000000000000001
                         #d24:000000000000000000000011)
           (list (quote b) (quote c)))
-  (equal? (список-усіх-значень (list (quote v)))
+  (equal? (multiple-value-list (list (quote v)))
           (list (quote v)))
-  (equal? (аналіз-розмір (list (quote a) (quote b) (quote c)))
+  (equal? (lint-size (list (quote a) (quote b) (quote c)))
           #d24:000000000000000000000011)
   (equal? (вектор->список (quote ())) (quote ())))

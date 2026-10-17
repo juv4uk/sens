@@ -5989,3 +5989,11 @@
 (0011 numeric-buffer-length числовий-буфер-довжина)
 ; D9:110011100
 (0011 string-empty? рядок-порожній?)
+
+; Research-derived D10/D9 English projections over existing Core4 closures.
+; These are language-level surfaces only; no direct D10 opcode admission.
+; VECTOR-SLICE remains the existing list-carrier projection.
+(0011 numeric-not-equal? числа-нерівні?)
+(0011 vector-slice зріз-вектора)
+(0011 multiple-value-list список-усіх-значень)
+(0011 lint-size аналіз-розмір)
