@@ -367,6 +367,23 @@
       (0010 (елемент) (утворити-список елемент))
       елементи)))
 
+; D10 PAIP/MAL follow-on, language-derived only (no D10 F1-F4 admission).
+; D10:0011001101 LAST1: CAR(last cons) for a nonempty proper list,
+; not the final cons cell. Donor knowledge/d10-crossrepo-paip-v1.json.
+(0011 останній
+  (0010 (елементи)
+    (100 (останній-хвіст елементи))))
+
+; D10:0100001100 LISTP: both NIL and any CONS cell are list-shaped;
+; distinct from PROPER-LIST? and from D3:010 ATOM.
+; Donor knowledge/d10-crossrepo-mal-v1.json.
+(0011 список?
+  (0010 (значення)
+    (110
+      ((0101 значення) #d1:1)
+      ((010 значення) #d1:0)
+      (#d1:1 #d1:1))))
+
 ; D6:101000 MAP: native SENS recursion over a proper list.
 ; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
 (0011 відобразити
