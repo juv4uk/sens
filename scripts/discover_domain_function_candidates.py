@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ("ук", "укр", "san", "en", "LISP", "sym")
 EXPECTED = {n: 1 << n for n in range(1, 11)}
 TEXT_SUFFIXES = {".lisp", ".lsp", ".scm", ".ss", ".sld", ".json", ".jsonl",
-                 ".md", ".rst", ".txt", ".tsv", ".csv", ".py", ".rs", ".c", ".h"}
+                 ".md", ".rst", ".txt", ".tsv", ".csv", ".py", ".rs", ".c", ".h", ".bits"}
 TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9_?!*+/<>=:-]*")
 MAX_RESEARCH_BYTES = 1_000_000
 
@@ -304,12 +304,34 @@ def research_mentions(root: Path, tokens_needed: set[str]) -> dict[str, list[str
     return {token: sorted(paths) for token, paths in hits.items()}
 
 
+def witness_references(root: Path, tokens_needed: set[str]) -> dict[str, list[str]]:
+    """Locate exact-token mentions in existing test/witness sources; this is not a PASS."""
+    hits: dict[str, set[str]] = {}
+    for start in (root / "tests", root / "crates" / "sens" / "tests"):
+        if not start.is_dir():
+            continue
+        for path in sorted(start.rglob("*")):
+            if path.is_symlink() or not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+                continue
+            try:
+                if path.stat().st_size > MAX_RESEARCH_BYTES:
+                    continue
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                continue
+            matched = {match.group(0).casefold() for match in TOKEN.finditer(text)} & tokens_needed
+            for token in matched:
+                hits.setdefault(token, set()).add(path.relative_to(root).as_posix())
+    return {token: sorted(paths) for token, paths in hits.items()}
+
+
 def discover(root: Path, scan_research: bool = True) -> list[dict[str, Any]]:
     maps = load_domain_tables(root)
     definitions = find_active_sens_definitions(root)
     all_rows = [row for d in range(1, 11) for row in maps[d]]
     needed = {alias.casefold() for row in all_rows for alias in aliases(row)}
     hits = research_mentions(root, needed) if scan_research else {}
+    witnesses = witness_references(root, needed)
     result = []
     for row in all_rows:
         domain = row["domain"]
@@ -317,6 +339,7 @@ def discover(root: Path, scan_research: bool = True) -> list[dict[str, Any]]:
         names = aliases(row)
         definitions_here = sorted({p for name in names for p in definitions.get(name.casefold(), [])})
         research_here = sorted({p for name in names for p in hits.get(name.casefold(), [])})
+        witness_here = sorted({p for name in names for p in witnesses.get(name.casefold(), [])})
         gate = ("D10 F1–F4 individually required; whole-codebook ratification is insufficient"
                 if domain == 10 else "exact law + native positive/negative witness + mechanism must be checked")
         result.append({
@@ -326,6 +349,8 @@ def discover(root: Path, scan_research: bool = True) -> list[dict[str, Any]]:
             "object_kind": kind, "function_candidate": candidate,
             "source_definition_paths": definitions_here,
             "research_mention_files": len(research_here), "research_paths": research_here[:5],
+            "witness_reference_files": len(witness_here), "witness_reference_paths": witness_here[:8],
+            "witness_references_are_proofs": False,
             "callability": "NOT_ASSERTED", "evidence_gate": gate,
             "next_step": ("inspect exact law, arity, mechanism, positive/negative native SENS witnesses, and behavioral duplicates"
                           if candidate else "keep object kind; do not promote to an ordinary function call"),
@@ -337,6 +362,7 @@ def discover(root: Path, scan_research: bool = True) -> list[dict[str, Any]]:
 def render_tsv(rows: list[dict[str, Any]]) -> str:
     fields = ["identity", "width", "uk", "ukr", "san", "en", "lisp", "sym", "object_kind",
               "function_candidate", "source_definition_paths", "research_mention_files", "research_paths",
+              "witness_reference_files", "witness_reference_paths", "witness_references_are_proofs",
               "callability", "evidence_gate", "source_table"]
     out = io.StringIO()
     writer = csv.DictWriter(out, fieldnames=fields, delimiter="\t", lineterminator="\n")
@@ -345,6 +371,7 @@ def render_tsv(rows: list[dict[str, Any]]) -> str:
         row = dict(row)
         row["source_definition_paths"] = ";".join(row["source_definition_paths"])
         row["research_paths"] = ";".join(row["research_paths"])
+        row["witness_reference_paths"] = ";".join(row["witness_reference_paths"])
         writer.writerow({field: row.get(field, "") for field in fields})
     return out.getvalue()
 
@@ -356,6 +383,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--format", choices=("json", "tsv"), default="json")
     parser.add_argument("--no-research-scan", action="store_true")
+    parser.add_argument("--candidates-only", action="store_true",
+                        help="drop structural/data/syntax residents from the requested batch")
     args = parser.parse_args(argv)
     if args.limit < 0:
         parser.error("--limit must be >= 0")
@@ -367,6 +396,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.domain:
         domain = int(args.domain[1:])
         rows = [row for row in rows if row["domain"] == domain]
+    if args.candidates_only:
+        rows = [row for row in rows if row["function_candidate"]]
     if args.limit:
         rows = rows[:args.limit]
     if args.format == "tsv":
