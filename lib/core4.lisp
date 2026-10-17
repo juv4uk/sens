@@ -3061,19 +3061,19 @@
   (0010 (рішення)
     (110
       ((0100 (010 рішення)) #d1:0)
-      ((101 рішення (001 allow)) #d1:1)
-      ((101 рішення (001 warn)) #d1:1)
-      ((101 рішення (001 reject)) #d1:1)
-      ((101 рішення (001 unknown)) #d1:1)
+      ((101 рішення (як-є allow)) #d1:1)
+      ((101 рішення (як-є warn)) #d1:1)
+      ((101 рішення (як-є reject)) #d1:1)
+      ((101 рішення (як-є unknown)) #d1:1)
       (#d1:1 #d1:0))))
 (0011 захист-доказ-стан?
   (0010 (стан)
     (110
       ((0100 (010 стан)) #d1:0)
-      ((101 стан (001 confirmed)) #d1:1)
-      ((101 стан (001 partial)) #d1:1)
-      ((101 стан (001 unresolved)) #d1:1)
-      ((101 стан (001 broken)) #d1:1)
+      ((101 стан (як-є confirmed)) #d1:1)
+      ((101 стан (як-є partial)) #d1:1)
+      ((101 стан (як-є unresolved)) #d1:1)
+      ((101 стан (як-є broken)) #d1:1)
       (#d1:1 #d1:0))))
 
 
@@ -3518,6 +3518,34 @@
         (action search-authoritative-external-sources)
         (verify citations-and-access-date))))))
 
+
+; D9:000100100 MAKE-GUARD-FINDING — canonical record from lib/guard.lisp.
+; Explicit allowed decision/evidence status, immutable SENS list fields.
+(0011 створити-захист-висновок
+  (0010 (вхідне-рішення вхідний-доказ-стан предмет стан контракт різниця вплив порада докази)
+    (110
+      ((хибне? (захист-рішення? вхідне-рішення))
+       (список (як-є invalid-guard-decision) вхідне-рішення))
+      ((хибне? (захист-доказ-стан? вхідний-доказ-стан))
+       (список (як-є invalid-evidence-status) вхідний-доказ-стан))
+      (#d1:1
+       (список
+         (як-є guard-finding)
+         (список (як-є schema) (як-є guard/1))
+         (список (як-є decision) вхідне-рішення)
+         (список (як-є evidence-status) вхідний-доказ-стан)
+         (список (як-є subject) предмет)
+         (список (як-є state) стан)
+         (список (як-є contract) контракт)
+         (список (як-є difference) різниця)
+         (список (як-є impact) вплив)
+         (список (як-є guidance) порада)
+         (список (як-є evidence) докази)
+         (список (як-є unknown-routes)
+           (110
+             ((101 вхідне-рішення (як-є unknown))
+              (захист-невідоме-маршрути))
+             (#d1:1 (як-є ())))))))))
 
 ; D9:000000110 GUARD-UNKNOWN — preserve explicit missing evidence,
 ; and classify unknown as a routable epistemic state, not silent reject.
