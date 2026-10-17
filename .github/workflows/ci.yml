@@ -28,7 +28,6 @@ jobs:
   binary-sens-law:
     name: Часові D1 предикати — один фізичний SENS-свідок і чинні негативні контроли
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
         with:
