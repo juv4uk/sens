@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 ZIG_SOURCE = "research/zig-codecs/t5/bench.zig"
 RUST_EXAMPLE = "target/release/examples/zig_t5_matched_bench"
+SENS_EXAMPLE = "target/release/examples/sens_t5_matched_bench"
 
 
 def checked(command: list[str]) -> str:
@@ -91,10 +92,12 @@ def main() -> int:
     checked(["zig", "test", "research/zig-codecs/t5/t5.zig"])
     checked(["cargo", "build", "--locked", "--release", "-p", "sens",
              "--example", "zig_t5_matched_bench"])
+    checked(["cargo", "build", "--locked", "--release", "-p", "sens",
+             "--example", "sens_t5_matched_bench"])
     zig_bin = out / "zig_t5_bench"
     checked(["zig", "build-exe", ZIG_SOURCE, "-O", "ReleaseFast", "-lc",
              f"-femit-bin={zig_bin}"])
-    binaries = {"zig": zig_bin, "rust": ROOT / RUST_EXAMPLE}
+    binaries = {"zig": zig_bin, "rust": ROOT / RUST_EXAMPLE, "sens": ROOT / SENS_EXAMPLE}
     meta["binary_sha256"] = {name: digest(path) for name, path in binaries.items()}
     (out / "environment.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
 
@@ -104,7 +107,7 @@ def main() -> int:
     raw_file = out / "samples.jsonl"
     with raw_file.open("w", encoding="utf-8") as handle:
         for pair in range(args.pairs):
-            order = ["zig", "rust"]
+            order = ["zig", "rust", "sens"]
             rng.shuffle(order)
             paired_fixtures = {}
             paired_bytes = {}
