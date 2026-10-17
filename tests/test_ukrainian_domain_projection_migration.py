@@ -169,10 +169,38 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         (self.root / "knowledge/d7-keyboard-v2-ratified.json").write_text(
             json.dumps(table, ensure_ascii=False), encoding="utf-8"
         )
-        changes, _output = self.run_audit(apply=True)
-        self.assertEqual(len([c for c in changes if c.file.endswith("d7.lisp")]), 3)
-        self.assertIn('(1101101 (ук "ь") (укр "ь")', d7.read_text(encoding="utf-8"))
-        self.assertIn('(sym "ь")', d7.read_text(encoding="utf-8"))
+        original = d7.read_bytes()
+        changes, output = self.run_audit()  # лише dry-run, не source rewrite
+        d7_changes = [c for c in changes if c.file.endswith("d7.lisp")]
+        self.assertEqual(len(d7_changes), 3)
+        self.assertTrue(all(c.after == '"ь"' for c in d7_changes))
+        self.assertIn("D7:1101101", output)
+        self.assertEqual(d7.read_bytes(), original)
+        with self.assertRaisesRegex(ValueError, "D7 лише dry-run"):
+            self.run_audit(apply=True)
+        self.assertEqual(d7.read_bytes(), original)
+
+    def test_d7_apply_refuses_entire_batch_before_d9_write(self):
+        d7 = self.root / "lib/domains/d7.lisp"
+        d7.write_text(
+            "(domain-table/1\n"
+            + row("0000000", "()", "()")
+            + row("1101101", '"&"', '"&"')
+            + ")\n", encoding="utf-8"
+        )
+        table = json.loads(
+            (self.root / "knowledge/d7-keyboard-v2-ratified.json").read_text()
+        )
+        table["table"][int("1101101", 2)]["uk"] = "ь"
+        (self.root / "knowledge/d7-keyboard-v2-ratified.json").write_text(
+            json.dumps(table, ensure_ascii=False), encoding="utf-8"
+        )
+        original_d7, original_d9 = d7.read_bytes(), self.d9.read_bytes()
+        # D9 має чинний точний authority-manifest; D7 все одно блокує batch.
+        with self.assertRaisesRegex(ValueError, "D7 лише dry-run"):
+            self.run_audit(apply=True)
+        self.assertEqual(d7.read_bytes(), original_d7)
+        self.assertEqual(self.d9.read_bytes(), original_d9)
 
 
     def test_valid_but_different_d7_glyph_requires_review(self):

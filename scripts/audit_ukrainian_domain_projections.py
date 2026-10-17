@@ -217,6 +217,15 @@ def execute(root: Path, mapping: Path | None = None, apply: bool = False) -> lis
             f"{item.file} {item.coordinate} column={item.column} "
             f"before={item.before!r} after={item.after!r} authority={item.authority}"
         )
+    # D7 — лише аудит: навіть за порушення розкладки exact W7
+    # не можна переписувати людський символ без рішення власника.
+    # Перевіряємо ДО першого запису, також коли інші домени схвалені.
+    d7_findings = [c for c in changes if len(c.bits) == 7]
+    if d7_findings and apply:
+        raise ValueError(
+            f"D7 лише dry-run; {len(d7_findings)} проєкцій потребують "
+            "окремого рішення власника; нічого не записано"
+        )
     unresolved = [c for c in changes if c.after is None]
     if unresolved and apply:
         raise ValueError(f"{len(unresolved)} неоднозначних замін; нічого не записано")
