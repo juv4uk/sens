@@ -249,10 +249,10 @@ jobs:
             exit 1
           fi
           if number_negative="$(target/debug/sens "$number_bad" 2>&1)"; then
-            echo "::error::D9_NUMBER_TEXT_TYPE_ACCEPTED layer=eval expected=explicit-D24-refusal actual=accepted" >&2
+            echo "::error::D9_NUMBER_TEXT_D1_ACCEPTED layer=eval expected=D1-predicate-refusal actual=accepted" >&2
             exit 1
           fi
-          echo "D9_NUMBER_D24_TEXT_SENS_PASS laws=6 negative=1 scope=integer-D24-only"
+          echo "D9_NUMBER_D24_TEXT_SENS_PASS laws=6 negative=1 scope=D8-WRITE-TO-STRING D24-law=6"
 
       - name: "D9 — реальні визначення TMS, 10 законів SENS"
         shell: bash
