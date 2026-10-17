@@ -678,6 +678,22 @@ jobs:
           printf '%s\n' "$bad"
           echo "D10_PAIP_MAL_SOURCE_NATIVE_PASS functions=2 positive=6 false-controls=2 negative=1 research_only=no-F1-F4-admission"
 
+          # D10 PAIP FIND-IF-ANYWHERE: exact D1 native verdicts, no D10 opcode.
+          d10_tree_fixture="tests/semantic/d10-paip-find-anywhere-laws.lisp"
+          tree_expected="(1 0 0)"
+          sha256sum "$d10_tree_fixture" lib/core4.lisp target/debug/sens
+          if ! tree_observed="$(target/debug/sens "$d10_tree_fixture" 2>&1)"; then
+            printf '%s\\n' "$tree_observed" >&2
+            echo "::error::D10_PAIP_TREE_EXEC_RED id=d10-paip-find-if-anywhere layer=eval fixture=$d10_tree_fixture expected=$tree_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d10_tree_fixture'" >&2
+            exit 1
+          fi
+          tree_actual="$(printf '%s\\n' "$tree_observed" | tail -n 1)"
+          if [[ "$tree_actual" != "$tree_expected" ]]; then
+            echo "::error::D10_PAIP_TREE_LAW_DIFF id=d10-paip-find-if-anywhere layer=eval fixture=$d10_tree_fixture expected=$tree_expected actual=$tree_actual first_diff=D1-vector reproduce='target/debug/sens $d10_tree_fixture'" >&2
+            exit 1
+          fi
+          echo "D10_PAIP_TREE_NATIVE_PASS functions=1 positive=1 false-controls=2 research_only=no-F1-F4-admission"
+
 
           # D9 Canon donor laws from lib/canon.lisp, one native physical SENS witness.
           d9_canon_fixture="$RUNNER_TEMP/d9-canon-quote-cond.lisp"

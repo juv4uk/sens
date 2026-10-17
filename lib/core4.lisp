@@ -384,6 +384,18 @@
       ((010 значення) #d1:0)
       (#d1:1 #d1:1))))
 
+
+; D10 PAIP FIND-IF-ANYWHERE: derived search over atomic leaves.
+; Predicate results are exact D1 bits; traversal is D3 ATOM/CAR/CDR + D4 NULL/COND.
+; Its D10 codebook row remains a research candidate, not direct-call admission.
+(0011 дерево-має-збіг?
+  (0010 (предикат дерево)
+    (110
+      ((0101 дерево) #d1:0)
+      ((010 дерево) (предикат дерево))
+      ((дерево-має-збіг? предикат (100 дерево)) #d1:1)
+      (#d1:1 (дерево-має-збіг? предикат (011 дерево))))))
+
 ; D6:101000 MAP: native SENS recursion over a proper list.
 ; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
 (0011 відобразити
