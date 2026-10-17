@@ -6085,3 +6085,12 @@
   (0010 (fn dest src)
     (відобразити fn src)))
 (0011 map-into відобразити-у)
+
+; D9 exact-surface aliases derived from research/d9-string-vec-conj-batch-2026-10-17.lisp.
+; These use existing Core4 closures; no direct D9 opcode call-admission is implied.
+; vec-conj is only a persistent list-carrier projection, not mutable Vector support.
+(0011 string-first рядок-перший)
+(0011 string-rest рядок-решта)
+(0011 string-prefix? рядок-префікс?)
+(0011 string-contains? рядок-містить?)
+(0011 vec-conj вектор-додати)
