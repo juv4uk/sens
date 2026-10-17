@@ -4380,3 +4380,9 @@
 (0011 п-п-п-р-р-р-р
   (0010 (значення)
     (п-п-п-р-р-р (011 значення))))
+
+; D9:111110000 WORLD-ADDRESS-CONTENT, exact immutable projection from lib/world.lisp.
+; Complete journal plus metadata, independent of parent; structural key, not hash.
+(0011 світ-адреса-вміст
+  (0010 (світ)
+    (список (як-є world-history) (світ-журнал світ) (світ-метадані світ))))
