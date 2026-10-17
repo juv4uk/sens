@@ -324,32 +324,28 @@ jobs:
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
           # 3) Дослідницький D10 не викликається: точний фізичний негатив нижче.
           # Сирий годинник — окремий clock-mono-raw, він перевіряється в кроці 4.
-          # Exact physical call: D2 open + the full ten-bit D10 identity + D2 close.
-          # T5 must preserve the identity; SENS must still refuse unadmitted D10 execution.
-          cp tests/semantic/t5m-bench-time.bits "$RUNNER_TEMP/t5m-sens/time-d10.lisp"
-          d10_source="$RUNNER_TEMP/t5m-sens/time-d10.lisp"
-          if ! encode_out="$(target/debug/sens-trit encode "$d10_source" 2>&1)"; then
-            echo "::error::T5M_D10_MONONS_ENCODE_RED expected=exact-D10-physical-transport actual=$encode_out" >&2
+          # D10:0011110110 залишається точним десятибітним кандидатом.
+          # Нинішній T5 механічно переносить до 9 біт; 10-бітний запис
+          # має відхилитися, а не мовчки обрізатися до D8/W8.
+          d10_source="tests/semantic/t5m-bench-time.bits"
+          sha256sum "$d10_source"
+          if encoded="$(target/debug/sens-trit encode "$d10_source" 2>&1)"; then
+            echo "::error::T5M_D10_T5_BYPASS id=d10-mono-width layer=transport expected=10bit-refusal actual=encoded" >&2
             exit 1
           fi
-          d10_physical="${d10_source%.lisp}.sens"
-          if [[ ! -s "$d10_physical" ]]; then
-            echo "::error::T5M_D10_MONONS_PHYSICAL_MISSING expected=nonempty-sens-file path=$d10_physical" >&2
+          if [[ "$encoded" != *"canonical SENS source word exceeds current 9-bit carrier"* ]]; then
+            echo "::error::T5M_D10_T5_UNRELATED_REFUSAL id=d10-mono-width layer=transport expected=9bit-width-firewall actual=$encoded" >&2
             exit 1
           fi
-          actual_words="$(target/debug/sens-trit open "$d10_physical")"
-          if [[ "$actual_words" != "10 0011110110 01" ]]; then
-            echo "::error::T5M_D10_MONONS_TRANSPORT_DIFF expected='10 0011110110 01' actual=$actual_words" >&2
+          echo "T5M_D10_MONONS_WIDTH_FAIL_CLOSED identity=D10:0011110110 width=10 current_carrier_max=9"
+          # Навіть через текстовий surface не дозволяти обійти D10 admission.
+          d10_named="tests/semantic/t5m-bench-time.lisp"
+          if named_result="$(target/debug/sens "$d10_named" 2>&1)"; then
+            echo "::error::T5M_D10_MONONS_SURFACE_BYPASS layer=eval fixture=$d10_named expected=not-admitted actual=callable" >&2
             exit 1
           fi
-          if d10_out="$(target/debug/sens "$d10_physical" 2>&1)"; then
-            echo "::error::T5M_D10_MONONS_ADMISSION_BYPASS expected=RESIDENT-NOT-CALLABLE identity=D10:0011110110" >&2
-            printf "%s\n" "$d10_out" >&2
-            exit 1
-          fi
-          if ! grep -Eqi 'D10(:|[[:space:]])+0011110110' <<<"$d10_out" ||
-             ! grep -Eqi 'not callable|not admitted|not executable|admission|runtime hold|unadmitted|no admitted' <<<"$d10_out"; then
-            echo "::error::T5M_D10_MONONS_WRONG_NEGATIVE expected=exact-D10-non-admission actual=$d10_out" >&2
+          if [[ "$named_result" != *"unknown symbol"* || "$named_result" != *"mono-ns"* ]]; then
+            echo "::error::T5M_D10_MONONS_SURFACE_WRONG_REFUSAL layer=eval fixture=$d10_named expected=unadmitted-mono-ns actual=$named_result" >&2
             exit 1
           fi
           echo "T5M_D10_MONONS_FAIL_CLOSED identity=D10:0011110110 width=10 status=RESIDENT-NOT-CALLABLE F1=F2=F3=F4=not-admitted"
