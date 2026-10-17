@@ -638,13 +638,30 @@ def self_test():
     import tempfile
     import contextlib
     import io
+    from unittest.mock import patch
+
     with tempfile.TemporaryDirectory(prefix="sens-unclassified-red-") as tmp:
         report = Path(tmp) / "red.jsonl"
-        report.write_text(json.dumps(pending) + "\n", encoding="utf-8")
+        receipt_args = argparse.Namespace(
+            test_id="diagnostic-receipt-self-test",
+            layer="eval",
+            fixture=str(fixture),
+            expected="1",
+            actual="0",
+            reproduce="target/debug/sens tests/semantic/narrate-d3-atom-eq-law.bits",
+            report_file=str(report),
+            manifest="knowledge/red-test-quarantine.json",
+            stderr_tail="",
+            exit_code=0,
+        )
+        with patch.dict(os.environ, {"GITHUB_SHA": "b" * 40}, clear=True):
+            rc = record_diff(receipt_args)
+        if rc != 0 or not report.is_file() or not report.read_text().strip():
+            raise RuntimeError("native failure receipt was not recorded")
         output = io.StringIO()
         args = argparse.Namespace(
             report_file=str(report), manifest="knowledge/red-test-quarantine.json",
-            allow_empty=False,
+            allow_empty=False, validate_only=False,
         )
         with contextlib.redirect_stdout(output):
             rc = scan(args)
@@ -660,7 +677,6 @@ def self_test():
         args.validate_only = False
     # Positive and hostile controls for central CI when its 23 focal steps
     # were not selected. Do not hide a real failure or a malformed receipt.
-    from unittest.mock import patch
 
     focal_env = {"GITHUB_ACTIONS": "true", **{
         name: "skipped" for name in FOCAL_OUTCOME_ENV
