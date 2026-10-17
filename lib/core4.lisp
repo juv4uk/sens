@@ -1044,11 +1044,10 @@
 ; D1 bits stay predicates at the boundary; base-3 math uses D24 trits.
 (0011 т5м-д24-тріт
   (0010 (значення)
+    ; Input is a D1 PredicateBit, so use it as control, never as a number.
     (110
-      ; D1 word is a logical atom, not a numeric D24 input to тотожне?.
-      ((101 значення #d1:0) #d24:000000000000000000000000)
-      ((101 значення #d1:1) #d24:000000000000000000000001)
-      (#d1:1 значення))))
+      (значення #d24:000000000000000000000001)
+      (#d1:1 #d24:000000000000000000000000))))
 
 ; Decoder exposes D1 bits again, not D24 surrogate bits.
 (0011 т5м-біт-д1
