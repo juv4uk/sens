@@ -23,6 +23,8 @@ Rules derived from current SENS contract and later owner decisions:
   and finite decimal fractions as numeric input, lowering them exactly to
   two's-complement D24+ words / reduced adjacent numerator-denominator words. This is
   an explicit migration projection, not a new language/runtime admission.
+  Ukrainian source surfaces `ук` and `укр` use comma as the exact decimal
+  separator only in explicitly selected T5M source mode.
 - #d/#b/#q2 textual forms and bare binary words in numeric-width D24+ still
   require a separate admitted numeric domain/frame and fail closed here.
 - Current D7 keyboard/v2 128/128 is the ONLY text projection admitted by
@@ -190,7 +192,7 @@ def strip_comments(source: str) -> str:
         raise MigrationError("unterminated string")
     return "".join(out)
 
-def tokenize(source: str) -> list[Tok]:
+def tokenize(source: str, *, source_surface="default") -> list[Tok]:
     out=[]
     i=0
     n=len(source)
@@ -222,7 +224,16 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", "'", '"', "`", ","):
+        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", "'", '"', "`"):
+            if source[i] == ",":
+                decimal_comma = (
+                    source_surface in ("ук", "укр")
+                    and i > start and i + 1 < n
+                    and source[i - 1].isascii() and source[i - 1].isdigit()
+                    and source[i + 1].isascii() and source[i + 1].isdigit()
+                )
+                if not decimal_comma:
+                    break
             i+=1
         text=source[start:i]
         if text==".":
@@ -978,11 +989,18 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     if getattr(resolver, "t5m_numeric", False) and re.fullmatch(r"[+-]?\d+", t):
         _, word = numeric_word(int(t, 10))
         return [word]
+    source_surface = getattr(resolver, "source_surface", "default")
+    decimal_pattern = (
+        r"[+-]?(?:\d+,\d+|,\d+)"
+        if source_surface in ("ук", "укр")
+        else r"[+-]?(?:\d+\.\d+|\.\d+)"
+    )
     if (getattr(resolver, "t5m_numeric", False)
-            and re.fullmatch(r"[+-]?(?:\d+\.\d+|\.\d+)", t)):
+            and re.fullmatch(decimal_pattern, t)):
         negative = t.startswith("-")
         unsigned_text = t[1:] if t[:1] in "+-" else t
-        whole, fractional = unsigned_text.split(".", 1)
+        decimal_separator = "," if source_surface in ("ук", "укр") else "."
+        whole, fractional = unsigned_text.split(decimal_separator, 1)
         if len(whole) + len(fractional) > 4096:
             raise MigrationError(
                 "T5M decimal fraction exceeds the 4096-digit exact-conversion limit",
@@ -1003,6 +1021,13 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
         if width > 4 * 1024 * 1024 * 5:
             raise MigrationError("T5M decimal fraction exceeds physical size limit", node.tok)
         return [f"{value % (1 << width):0{width}b}" for value in values]
+    if (getattr(resolver, "t5m_numeric", False)
+            and source_surface in ("ук", "укр")
+            and "," in t and re.fullmatch(r"[+-]?[0-9,]+", t)):
+        raise MigrationError(
+            "Ukrainian T5M decimal requires exactly one comma between digits",
+            node.tok,
+        )
     if (getattr(resolver, "t5m_numeric", False)
             and (NUMERIC_RE.fullmatch(t) or re.fullmatch(
                 r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t
@@ -1441,12 +1466,17 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
     return physical, receipt
 
 
-def migrate_file(source: str,resolver,text7,*,codec="t5"):
+def migrate_file(source: str,resolver,text7,*,codec="t5",source_surface="default"):
     if codec not in ("t5", "t5m"):
         raise MigrationError(f"unsupported physical codec {codec!r}")
+    if source_surface not in ("default", "ук", "укр"):
+        raise MigrationError(f"unsupported source surface {source_surface!r}")
     resolver.t5m_numeric = codec == "t5m"
+    resolver.source_surface = source_surface
     stripped=strip_comments(source)
-    tokens=tokenize(stripped)
+    tokens=tokenize(stripped, source_surface=(
+        source_surface if codec == "t5m" else "default"
+    ))
     forms=Parser(tokens).parse_program()
     resolver.set_global_bindings(collect_global_bindings(forms, resolver), text7)
     all_words=[]
@@ -1474,6 +1504,9 @@ def main():
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--codec", choices=("t5m", "t5"), default="t5m",
                     help="T5M — основний 15-тритовий/24-бітний транспорт; T5 — явний legacy-формат")
+    ap.add_argument("--source-surface", choices=("default", "ук", "укр"),
+                    default="default",
+                    help="проєкція джерела; ук/укр дозволяють десяткову кому в T5M")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1548,7 +1581,10 @@ def main():
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
             try:
-                projection = migrate_file(source, resolver, text7, codec=args.codec)
+                projection = migrate_file(
+                    source, resolver, text7, codec=args.codec,
+                    source_surface=args.source_surface,
+                )
             finally:
                 signal.alarm(0)
             # Strict physical T5: any historic name, passthrough or unencoded
@@ -1626,6 +1662,7 @@ def main():
             "file_eof": "physical byte length; no terminal 22",
             "padding": "T5M: zero through fourteen final trits 2; T5: zero through four final trits 2",
             "ascii_text": False,
+            "source_surface": args.source_surface,
         },
         "passes": {
             "1": "historical 8-bit head -> admitted current successor",

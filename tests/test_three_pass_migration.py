@@ -409,6 +409,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             "1.5": (3, 2),
             "+1.5": (3, 2),
             "2.1564": (5391, 2500),
+            "2.15648": (6739, 3125),
             "-2.1564": (-5391, 2500),
             "-0.5": (-1, 2),
             "0.125": (1, 8),
@@ -437,6 +438,93 @@ class ThreePassMigrationTests(unittest.TestCase):
                 self.assertEqual(words[start:start + len(expected)], expected)
                 packed = mod.encode_t5m_projection(projection)
                 self.assertEqual(mod.decode_t5m_bytes(packed), words)
+
+    def test_t5m_fraction_uses_adjacent_words_and_distinct_numbers_use_d2(self):
+        # 2.15648 is finite decimal input, reduced exactly to 6739/3125.
+        # These literal 24-bit words are independently checked fixtures; T5M
+        # must transport them unchanged rather than reinterpret their meaning.
+        resolver = mod.Resolver({}, {})
+        projection = mod.migrate_file(
+            "(CAR 2.15648)\n", resolver, self.text7, codec="t5m"
+        )
+        expected = [
+            "000000000001101001010011",  # D24 +6739
+            "000000000000110000110101",  # D24 +3125
+        ]
+        words = projection.split()
+        start = next(i for i, word in enumerate(words) if word == expected[0])
+        self.assertEqual(words[start:start + 2], expected)
+        packed = mod.encode_t5m_projection(projection)
+        self.assertEqual(mod.decode_t5m_bytes(packed), words)
+
+        # The ratio 1546/8464 is represented by adjacent D24+ component
+        # words, not by passing a slash token to T5M. Two distinct integers
+        # instead get the structural D2 separator in a Lisp list.
+        numerator = "000000000000011000001010"  # D24 1546
+        denominator = "000000000010000100010000"  # D24 8464
+        ratio_words = [numerator, denominator]
+        self.assertEqual(
+            mod.decode_t5m_bytes(
+                mod.encode_t5m_projection(" ".join(ratio_words))
+            ),
+            ratio_words,
+        )
+        separate_numbers = mod.migrate_file(
+            "(CAR '(1546 8464))\n", mod.Resolver({}, {}),
+            self.text7, codec="t5m",
+        ).split()
+        start = next(i for i, word in enumerate(separate_numbers)
+                     if word == numerator)
+        self.assertEqual(separate_numbers[start:start + 3],
+                         [numerator, "00", denominator])
+
+        # Without an explicit Ukrainian source surface, comma keeps the
+        # Lisp reader's unquote meaning and is not treated as a decimal mark.
+        with self.assertRaisesRegex(
+            mod.MigrationError, "comma/unquote syntax has no admitted migration law"
+        ):
+            mod.migrate_file(
+                "(CAR 2,15648)\n", mod.Resolver({}, {}),
+                self.text7, codec="t5m",
+            )
+
+    def test_t5m_ukrainian_decimal_comma_lowers_exactly_without_changing_unquote(self):
+        expected = [
+            "000000000000100110100011",  # D24 +2467
+            "000000000000001111101000",  # D24 +1000
+        ]
+        for source_surface in ("ук", "укр"):
+            with self.subTest(source_surface=source_surface):
+                projection = mod.migrate_file(
+                    "(CAR 2,467)\n", mod.Resolver({}, {}), self.text7,
+                    codec="t5m", source_surface=source_surface,
+                )
+                words = projection.split()
+                start = next(i for i, word in enumerate(words)
+                             if word == expected[0])
+                self.assertEqual(words[start:start + 2], expected)
+                self.assertEqual(
+                    mod.decode_t5m_bytes(
+                        mod.encode_t5m_projection(projection)
+                    ),
+                    words,
+                )
+
+        # Only an explicitly selected Ukrainian surface gives decimal meaning
+        # to comma-between-digits. Other commas keep the Lisp reader's law.
+        with self.assertRaisesRegex(
+            mod.MigrationError, "comma/unquote syntax has no admitted migration law"
+        ):
+            mod.migrate_file(
+                "(CAR ,x)\n", mod.Resolver({}, {}), self.text7,
+                codec="t5m", source_surface="укр",
+            )
+        with self.assertRaisesRegex(
+            mod.MigrationError, "comma/unquote syntax has no admitted migration law"
+        ):
+            mod.migrate_file(
+                "(CAR 2,467)\n", mod.Resolver({}, {}), self.text7, codec="t5m"
+            )
 
     def test_t5m_decimal_fraction_does_not_accept_unsupported_numeric_syntax(self):
         resolver = mod.Resolver({}, {})
@@ -580,12 +668,37 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_would_write"], 1)
             self.assertEqual(state["summary"]["files_written"], 0)
 
-    def test_main_t5m_mints_exact_decimal_fraction_through_zig(self):
+    def test_cli_dry_run_accepts_ukr_decimal_comma(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
             src = base / "in"
             src.mkdir()
-            (src / "fraction.lisp").write_text("(CAR 2.1564)\n", encoding="utf-8")
+            (src / "fraction.lisp").write_text("(CAR 2,467)\n", encoding="utf-8")
+            out = base / "out"
+            report = base / "report.json"
+            process = subprocess.run([
+                sys.executable, str(SCRIPT), str(src), "--out", str(out),
+                "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY), "--text7", str(TEXT7),
+                "--report", str(report), "--dry-run", "--codec", "t5m",
+                "--source-surface", "укр",
+            ], capture_output=True, text=True)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            state = json.loads(report.read_text())
+            self.assertEqual(state["summary"]["files_would_write"], 1)
+            self.assertEqual(state["summary"]["files_blocked"], 0)
+            self.assertEqual(state["file_format"]["source_surface"], "укр")
+            self.assertFalse(out.exists())
+
+    def test_main_t5m_mints_ukrainian_decimal_comma_fraction_through_zig(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            src = base / "in"
+            src.mkdir()
+            (src / "fraction.lisp").write_text("(CAR 2,467)\n", encoding="utf-8")
             out = base / "out"
             report = base / "report.json"
             args = [
@@ -596,14 +709,14 @@ class ThreePassMigrationTests(unittest.TestCase):
                 "--semantic-registry", str(SEMANTIC_REGISTRY),
                 "--necessary-forms", str(NECESSARY),
                 "--text7", str(TEXT7), "--report", str(report),
-                "--codec", "t5m",
+                "--codec", "t5m", "--source-surface", "укр",
             ]
             process = subprocess.run(args, capture_output=True, text=True)
             self.assertEqual(process.returncode, 0, process.stderr)
             projection = (out / "fraction").read_text(encoding="ascii")
             payload = (out / "fraction.sens").read_bytes()
             words = projection.split()
-            expected_pair = [f"{5391:024b}", f"{2500:024b}"]
+            expected_pair = [f"{2467:024b}", f"{1000:024b}"]
             pair_start = next(
                 index for index, word in enumerate(words)
                 if word == expected_pair[0]
