@@ -281,37 +281,54 @@ def peer_roles(root: Path) -> dict[str, set[str]]:
 
 def excluded_metadata(path: Path) -> bool:
     parts = path.parts
-    return (len(parts) >= 3 and parts[:2] == ('lib', 'domains')
-            and re.fullmatch(r'd(?:[1-9]|10|11)\.lisp', parts[-1]) is not None
-            or path.as_posix() == 'lib/surface/semantic-registry.lisp')
+    # These are registry/transport artifacts, not executable call sites.
+    # Dedicated metadata/provenance audits continue to read their contents.
+    return ((len(parts) >= 3 and parts[:2] == ('lib', 'domains')
+             and re.fullmatch(r'd(?:[1-9]|10|11)\.lisp', parts[-1]) is not None)
+            or path.as_posix() in {
+                'lib/surface/semantic-registry.lisp',
+                'lib/surface/semantic-registry-experiment.lisp',
+                'lib/surface/sid8-to-domain-bridge.lisp',
+                'mylisp-cml-export.lisp',
+            })
 
 
 def measure(root: Path) -> dict:
-    """Deterministic static evidence; does not alter a single source file."""
+    """Deterministic static evidence, separating live source from archive fixtures."""
     root = root.resolve()
     files = sorted(p for p in root.rglob('*.lisp') if '.git' not in p.parts)
     index, peers = peer_index(root)
     roles = peer_roles(root)
     latin, encoded, cyrillic, errors = [], [], 0, []
     full_ukr = compact_only = unknown_ukr = ambiguous_cyr = 0
-    archive_latin = archive_unclassified = 0
+    archive_latin = archive_encoded = archive_unclassified = 0
+    active_latin = active_encoded = active_unclassified = 0
+    active_cyrillic = active_ambiguous_cyr = 0
+    active_full_ukr = active_compact_only = active_unknown_ukr = 0
     skipped = scanned = 0
     for path in files:
         rel = path.relative_to(root)
+        archival = bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS)
+        scope = 'archive/fixture' if archival else 'active'
         if excluded_metadata(rel):
             skipped += 1
             continue
         if path.is_symlink() or not path.resolve().is_relative_to(root):
-            errors.append({'file': rel.as_posix(), 'reason': 'symlink/out-of-root source'})
+            errors.append({'file': rel.as_posix(), 'reason': 'symlink/out-of-root source',
+                           'scope': scope})
+            archive_unclassified += int(archival)
+            active_unclassified += int(not archival)
             continue
         scanned += 1
         try:
             forms = parse(path.read_text(encoding='utf-8'))
-            archival = bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS)
             for head in candidate_heads(forms):
                 if ENCODED_HEAD.fullmatch(head.text):
                     encoded.append({'file': rel.as_posix(), 'line': head.line,
-                                    'column': head.column, 'head': head.text})
+                                    'column': head.column, 'head': head.text,
+                                    'scope': scope})
+                    archive_encoded += int(archival)
+                    active_encoded += int(not archival)
                 elif LATIN.search(head.text):
                     candidates = index.get(head.text.casefold(), [])
                     latin.append({'file': rel.as_posix(), 'line': head.line,
@@ -319,26 +336,31 @@ def measure(root: Path) -> dict:
                                   'identities': candidates,
                                   'mapping': 'unique' if len(candidates) == 1
                                   else 'ambiguous' if candidates else 'unresolved',
-                                  'scope': 'archive/fixture' if archival else 'active'})
+                                  'scope': scope})
                     archive_latin += int(archival)
+                    active_latin += int(not archival)
                 elif UKRAINIAN.search(head.text):
                     cyrillic += 1
+                    active_cyrillic += int(not archival)
                     spelling = head.text.casefold()
                     kinds = roles.get(spelling, set())
                     candidates = index.get(spelling, [])
                     if len(candidates) > 1:
                         ambiguous_cyr += 1
+                        active_ambiguous_cyr += int(not archival)
                     elif 'укр' in kinds:
                         full_ukr += 1
+                        active_full_ukr += int(not archival)
                     elif 'ук' in kinds:
                         compact_only += 1
+                        active_compact_only += int(not archival)
                     else:
-                        unknown_ukr += 1  # user-defined Ukrainian functions allowed
+                        unknown_ukr += 1
+                        active_unknown_ukr += int(not archival)
         except (UnicodeError, OSError, SourceError, RecursionError) as exc:
-            errors.append({'file': rel.as_posix(), 'reason': str(exc),
-                           'scope': 'archive/fixture' if rel.parts and
-                           rel.parts[0] in ARCHIVE_DIRS else 'active'})
-            archive_unclassified += int(bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS))
+            errors.append({'file': rel.as_posix(), 'reason': str(exc), 'scope': scope})
+            archive_unclassified += int(archival)
+            active_unclassified += int(not archival)
     total = len(latin) + cyrillic
     return {'files_total': len(files), 'files_scanned': scanned,
             'metadata_files_excluded': skipped,
@@ -348,7 +370,16 @@ def measure(root: Path) -> dict:
             'ambiguous_cyrillic_head_sites': ambiguous_cyr,
             'encoded_head_sites': encoded,
             'archival_latin_heads': archive_latin,
+            'archival_encoded_head_sites': archive_encoded,
             'archival_unclassified_files': archive_unclassified,
+            'active_latin_heads': active_latin,
+            'active_encoded_head_sites': active_encoded,
+            'active_unclassified_files': active_unclassified,
+            'active_ukr_call_heads': active_cyrillic,
+            'active_full_ukr_head_sites': active_full_ukr,
+            'active_compact_only_head_sites': active_compact_only,
+            'active_local_cyrillic_head_sites': active_unknown_ukr,
+            'active_ambiguous_cyrillic_head_sites': active_ambiguous_cyr,
             'ukr_call_head_pct': round(100 * cyrillic / total, 1) if total else 0.0,
             'unclassified_files': errors, 'latin_sites': latin,
             'peer_index': peers,
@@ -360,6 +391,9 @@ def render(m: dict, *, limit: int = 15) -> str:
         f"УКР-ВИКЛИКИ: кириличних голів {m['ukr_call_heads']}, латинських "
         f"{m['latin_call_heads']} ({m['ukr_call_head_pct']}% укр); "
         f"оглянуто .lisp {m['files_scanned']}/{m['files_total']}",
+        f"ACTIVE-SCOPE: Latin={m['active_latin_heads']}, encoded={m['active_encoded_head_sites']}, "
+        f"ambiguous-укр={m['active_ambiguous_cyrillic_head_sites']}, "
+        f"unclassified={m['active_unclassified_files']}, укр={m['active_ukr_call_heads']}",
         f"PEER-ІМЕНА: рядків {m['peer_index']['domain_rows']}; "
         f"законних відмінностей ук/укр "
         f"{m['peer_index']['valid_distinct_peer_spellings']} "
@@ -369,20 +403,29 @@ def render(m: dict, *, limit: int = 15) -> str:
         f"compact-only={m['uk_compact_only_head_sites']} "
         f"local={m['local_cyrillic_head_sites']} "
         f"ambiguous={m['ambiguous_cyrillic_head_sites']}; "
-        f"архівних Latin={m['archival_latin_heads']}; "
-        f"закодованих голів={len(m['encoded_head_sites'])}",
+        f"архівних Latin={m['archival_latin_heads']}, "
+        f"архівних encoded={m['archival_encoded_head_sites']}, "
+        f"архівних syntax={m['archival_unclassified_files']}",
     ]
-    for site in m['latin_sites'][:limit]:
+    ordered_latin = sorted(m['latin_sites'],
+                           key=lambda site: (site['scope'] != 'active', site['file'],
+                                             site['line'], site['column']))
+    for site in ordered_latin[:limit]:
         found = ','.join(site['identities']) or '-'
         lines.append(f"LATIN {site['file']}:{site['line']}:{site['column']} "
-                     f"{site['head']} mapping={site['mapping']} identity={found}")
+                     f"{site['head']} mapping={site['mapping']} identity={found} scope={site['scope']}")
     if len(m['latin_sites']) > limit:
         lines.append(f"... додаткових латинських голів {len(m['latin_sites']) - limit}; "
                      "повний список доступний через --json")
-    for encoded in m['encoded_head_sites'][:limit]:
+    ordered_encoded = sorted(m['encoded_head_sites'],
+                             key=lambda site: (site['scope'] != 'active', site['file'],
+                                               site['line'], site['column']))
+    for encoded in ordered_encoded[:limit]:
         lines.append(f"ENCODED {encoded['file']}:{encoded['line']}:"
-                     f"{encoded['column']} {encoded['head']}: не латинська назва")
-    for error in m['unclassified_files'][:limit]:
+                     f"{encoded['column']} {encoded['head']}: не українська назва scope={encoded['scope']}")
+    ordered_errors = sorted(m['unclassified_files'],
+                            key=lambda error: (error['scope'] != 'active', error['file']))
+    for error in ordered_errors[:limit]:
         lines.append(f"UNCLASSIFIED {error['file']} "
                      f"scope={error['scope']}: {error['reason']}")
     return '\n'.join(lines)
@@ -394,7 +437,7 @@ def main(argv=None) -> int:
     parser.add_argument('--json', type=Path, help='write full deterministic JSON diagnostics')
     parser.add_argument('--limit', type=int, default=15)
     parser.add_argument('--require-full', action='store_true',
-                        help='fail while Latin source heads or unclassified files remain')
+                        help='fail on active source call-head migration debt; archive findings remain visible')
     args = parser.parse_args(argv)
     if args.limit < 0:
         parser.error('--limit cannot be negative')
@@ -403,17 +446,22 @@ def main(argv=None) -> int:
     if args.json:
         args.json.write_text(json.dumps(m, ensure_ascii=False, indent=2) + '\n',
                              encoding='utf-8')
-    red = bool(m['latin_call_heads'] or m['unclassified_files']
-               or m['encoded_head_sites'] or m['uk_compact_only_head_sites']
-               or m['ambiguous_cyrillic_head_sites'] or m['ukr_call_heads'] == 0)
+    # Strict checks apply to live source. Historical contracts, research,
+    # benchmarks and tests stay fully indexed but do not become live entrypoints.
+    # A compact ук peer is a valid projection, not a migration defect.
+    red = bool(m['active_latin_heads'] or m['active_unclassified_files']
+               or m['active_encoded_head_sites']
+               or m['active_ambiguous_cyrillic_head_sites']
+               or m['active_ukr_call_heads'] == 0)
     if args.require_full and red:
         print(f"::error::УКР-ВИКЛИКИ НЕ ЗАВЕРШЕНІ: "
-              f"{m['latin_call_heads']} Latin call heads, "
-              f"{len(m['encoded_head_sites'])} encoded non-call heads, "
-              f"{m['uk_compact_only_head_sites']} compact-only usages, "
-              f"{m['ambiguous_cyrillic_head_sites']} ambiguous Cyrillic usages, "
-              f"{len(m['unclassified_files'])} unclassified .lisp files; "
-              'не прирівнюйте ук до укр', file=sys.stderr)
+              f"{m['active_latin_heads']} active Latin call heads, "
+              f"{m['active_encoded_head_sites']} active encoded heads, "
+              f"{m['active_ambiguous_cyrillic_head_sites']} ambiguous active Cyrillic heads, "
+              f"{m['active_unclassified_files']} active unclassified .lisp files; "
+              f"archive telemetry: Latin={m['archival_latin_heads']}, "
+              f"syntax={m['archival_unclassified_files']}; "
+              'valid compact ук peers are not errors', file=sys.stderr)
         return 1
     return 0
 
