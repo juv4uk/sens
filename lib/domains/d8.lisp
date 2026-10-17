@@ -225,7 +225,7 @@
   (11010111 (ук зв'язати-обробники-умов) (укр зв'язати-обробники-умов) (san avasthā-pratikriyā-bandha) (en handler-bind) (LISP HANDLER-BIND) (sym ()))
   (11011000 (ук ігнорувати-помилку) (укр ігнорувати-помилку) (san doṣa-upekṣā) (en ignore-error) (LISP IGNORE-ERROR) (sym ()))
   (11011001 (ук побітове-виключне-або) (укр побітове-виключне-або) (san bit-viśeṣa-vikalpa) (en logxor) (LISP LOGXOR) (sym ()))
-  (11011010 (ук n-та-решта) (укр n-та-решта) (san kramāṅka-śeṣa) (en nthcdr) (LISP NTHCDR) (sym ()))
+  (11011010 (ук решта-після-номера) (укр решта-після-заданого-числа-кроків) (san kramāṅka-śeṣa) (en nthcdr) (LISP NTHCDR) (sym ()))
   (11011011 (ук друкувати) (укр друкувати) (san mudraṇa) (en print) (LISP PRINT) (sym ()))
   (11011100 (ук асоціація-решта) (укр знайти-асоціацію-за-рештою) (san śeṣa-saṃbandha-anveṣaṇa) (en rassq) (LISP RASSQ) (sym ()))
   (11011101 (ук поки-не) (укр поки-не) (san yāvat-na) (en until) (LISP UNTIL) (sym ()))
