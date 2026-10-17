@@ -199,3 +199,8 @@
   (0010 (language role)
     (110 ((guard-language-allowed? language role) (001 allow))
          (#d1:1 (001 reject)))))
+
+; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
+; Чинний закон guard-sync-window залишається джерелом семантики;
+; це не host fallback і не direct D9 opcode.
+(0011 захист-синхронізувати-вікно guard-sync-window)
