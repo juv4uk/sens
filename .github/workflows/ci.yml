@@ -563,6 +563,35 @@ jobs:
             exit 1
           fi
           echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+          # D9 Canon donor laws from lib/canon.lisp, one native physical SENS witness.
+          d9_canon_fixture="$RUNNER_TEMP/d9-canon-quote-cond.lisp"
+          cat > "$d9_canon_fixture" <<'SENS_D9_CANON_END'
+          (list
+            (equal? канон-порожній-список (quote ()))
+            (equal? (канон-закон-порожній-список)
+              (list (quote canon-law-result) (quote empty-list) (quote satisfied)))
+            (equal? (канон-закон-цитування-пригнічує-обчислення)
+              (list (quote canon-law-result) (quote quote-suppresses-evaluation) (quote satisfied)))
+            (equal? (канон-закон-умова-перший-збіг-короткий-ланцюг)
+              (list (quote canon-law-result) (quote cond-first-match-short-circuit) (quote satisfied)))
+            (not? (equal? (канон-закон-порожній-список)
+              (list (quote canon-law-result) (quote empty-list) (quote violated))))
+            (equal? (канон-закон-умова-перший-збіг-короткий-ланцюг)
+              (list (quote canon-law-result) (quote empty-list) (quote satisfied))))
+          SENS_D9_CANON_END
+          d9_canon_expected="(1 1 1 1 1 0)"
+          d9_canon_sha="$(sha256sum "$d9_canon_fixture" | cut -d" " -f1)"
+          if ! d9_canon_output="$(target/debug/sens "$d9_canon_fixture" 2>&1)"; then
+            printf "%s\n" "$d9_canon_output" >&2
+            echo "::error::D9_CANON_QUOTE_COND_EXEC_RED id=d9-canon-quote-cond layer=eval fixture=$d9_canon_fixture fixture_sha256=$d9_canon_sha expected=$d9_canon_expected actual=execution-error first_diff=execution reproduce=target/debug/sens:$d9_canon_fixture" >&2
+            exit 1
+          fi
+          d9_canon_actual="$(printf "%s\n" "$d9_canon_output" | tail -n 1)"
+          if [[ "$d9_canon_actual" != "$d9_canon_expected" ]]; then
+            echo "::error::D9_CANON_QUOTE_COND_DIFF id=d9-canon-quote-cond layer=eval fixture=$d9_canon_fixture fixture_sha256=$d9_canon_sha expected=$d9_canon_expected actual=$d9_canon_actual first_diff=D1-vector reproduce=target/debug/sens:$d9_canon_fixture" >&2
+            exit 1
+          fi
+          echo "D9_CANON_QUOTE_COND_NATIVE_PASS identities=D9:001111001,D9:010111011,D9:010111100,D9:010101100 expected=$d9_canon_expected"
           # D9:011010000–011010111: native seven-step selectors, no direct D9 admission.
           d9_7_fixture="tests/semantic/d9-seven-step-selector-batch-02.lisp"
           d9_7_negative="tests/semantic/d9-seven-step-selector-nonpair.lisp"
