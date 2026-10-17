@@ -322,23 +322,8 @@ jobs:
             echo "::error::T5M_SENS_CODEC wrong witness law vector: $witness_out" >&2; exit 1
           fi
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
-          # 3) The legacy root host surface and the exact D10 candidate are distinct.
-          #    (mono-ns) is an existing raw host observation, not evidence that
-          #    D10:0011110110 is callable. Test both paths independently.
-          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time-host.lisp"
-          host_sens="$RUNNER_TEMP/t5m-sens/time-host.lisp"
-          if ! host_out="$(target/debug/sens "$host_sens" 2>&1)"; then
-            echo "::error::T5M_MONONS_HOST_EXEC_RED layer=eval fixture=tests/semantic/t5m-bench-time.lisp expected=integer-host-observation actual=execution-error" >&2
-            printf "%s\n" "$host_out" >&2
-            exit 1
-          fi
-          host_actual="$(printf "%s\n" "$host_out" | tail -n 1)"
-          if ! [[ "$host_actual" =~ ^[0-9]+$ ]]; then
-            echo "::error::T5M_MONONS_HOST_LAW_DIFF expected=integer-host-observation actual=$host_actual" >&2
-            exit 1
-          fi
-          echo "T5M_MONONS_HOST_CAPABILITY_PASS actual=$host_actual scope=ROOT-HOST-OBSERVATION"
-
+          # 3) Дослідницький D10 не викликається: точний фізичний негатив нижче.
+          # Сирий годинник — окремий clock-mono-raw, він перевіряється в кроці 4.
           # Exact physical call: D2 open + the full ten-bit D10 identity + D2 close.
           # T5 must preserve the identity; SENS must still refuse unadmitted D10 execution.
           cp tests/semantic/t5m-bench-time.bits "$RUNNER_TEMP/t5m-sens/time-d10.lisp"
