@@ -3456,3 +3456,38 @@
 (0011 побітове-не
   (0010 (число)
     (відняти (змінити-знак число) #d24:000000000000000000000001)))
+
+
+; D9:000010011 GUARD-REFERENCE-FIELD — tagged reference contains (field value).
+; Match keys via established D5 ASSOC / structural equality; never D9 direct call.
+(0011 захист-еталон-поле
+  (0010 (поле запис)
+    ((0010 (пара)
+       (110
+         ((0101 пара) (001 ()))
+         (#d1:1 (1001 пара))))
+     (знайти-за-ключем поле (011 запис)))))
+
+
+; D9:000001111 PROVENANCE-RULE from canonical (statement goal (source ...) (rule ...) ...).
+(0011 походження-правило
+  (0010 (запис)
+    (захист-еталон-поле (001 rule) (011 запис))))
+
+
+; D9:000010110 PROVENANCE-GOAL is second cell of the canonical record.
+(0011 походження-ціль
+  (0010 (запис)
+    (1001 запис)))
+
+
+; D9:000011100 PROVENANCE-DERIVED-FROM: immutable proof children field.
+(0011 походження-похідний-з
+  (0010 (запис)
+    (захист-еталон-поле (001 derived-from) (011 запис))))
+
+
+; D9:000101001 PROVENANCE-SOURCE: record's explicit evidence source field.
+(0011 походження-джерело
+  (0010 (запис)
+    (захист-еталон-поле (001 source) (011 запис))))
