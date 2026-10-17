@@ -197,6 +197,13 @@ class CliTests(TempTree):
         self.assertIn("НЕ ЗАВЕРШЕНА", out)
         self.assertIn("лишилось 1 пар", out)
 
+    def test_pair_mismatch_is_report_only_without_explicit_threshold(self):
+        d = self.tree({"a.lisp": "(x (ук ні) (укр ні-ні))"})
+        rc, out = self._run(["--root", str(d), "--no-annotation"])
+        self.assertEqual(rc, 0)
+        self.assertIn("0.0%", out)
+        self.assertNotIn("УКР-ПРОЄКЦІЯ НЕ ЗАВЕРШЕНА", out)
+
     def test_exit_2_on_bad_root(self):
         rc, _ = self._run(["--root", "/no/such/dir/xyz"])
         self.assertEqual(rc, 2)
