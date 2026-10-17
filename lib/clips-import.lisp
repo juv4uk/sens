@@ -964,3 +964,15 @@
 (0011 clips-змінна? clips-var?)
 ; D9:101000111
 (0011 clips-перетворити-змінні clips-convert-vars)
+
+; D9: точні 9-бітні ідентичності — lib/domains/d9.lisp.
+; Чинні закони залишаються в SENS-донорі вище, не в Rust чи Zig.
+; Ці DEFINE зв'язують українські поверхні; це не автоматичний D9 opcode.
+; D9:001101010
+(0011 clips-deftemplate-ім'я clips-deftemplate-name)
+; D9:001011110
+(0011 clips-змінна-терм clips-var-term)
+; D9:010001001
+(0011 clips-defrule-клаузи clips-defrule->clauses)
+; D9:010100000
+(0011 clips-форма-клаузи clips-form->clauses)
