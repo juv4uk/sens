@@ -651,12 +651,12 @@
   (функція (knowledge)
     (значення-у-текст knowledge)))
 
-(0011 world-address-content
-  (0010 (world)
-    (1110 (001 world-history)
-          (world-journal world)
-          (world-metadata world))))
+(визначити world-address-content
+  (функція (world)
+    (список (як-є world-history)
+            (world-journal world)
+            (world-metadata world))))
 
-(0011 world-content-address
-  (0010 (world)
+(визначити world-content-address
+  (функція (world)
     (knowledge-content-address (world-address-content world))))
