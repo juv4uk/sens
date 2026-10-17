@@ -95,6 +95,9 @@ jobs:
           # Локальний --require-full залишається доступним і має fail-closed тести.
           # Лексичний звіт не замінює фізичний SENS-eval та не стверджує callability.
           python3 -m unittest tests/test_ukr_callsite_migration.py -v
-          python3 scripts/check_ukr_callsite_migration.py --json "$RUNNER_TEMP/ukr-callsite-migration.json" --limit 25
+          # НАКАЗ ВЛАСНИКА: крок ЧЕРВОНИЙ. Реальний борг — active Latin call heads
+          # (не архів; архів лишається телеметрією). --require-full робить крок
+          # червоним саме на active-борзі й друкує ::error:: із числом.
+          python3 scripts/check_ukr_callsite_migration.py --require-full --json "$RUNNER_TEMP/ukr-callsite-migration.json" --limit 25
 
 
