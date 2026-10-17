@@ -345,6 +345,55 @@ def run(args):
     return 0
 
 
+def record_diff(args):
+    """Persist a failure emitted by an existing native SENS harness.
+
+    The SENS process and verdict remain owned by the caller. This function
+    transports the exact observed expected/actual strings into the normal
+    failure contract so the final CI diagnostic can explain a RED.
+    """
+    manifest = validate_manifest(json.loads(Path(args.manifest).read_text()))
+    fixture = Path(args.fixture)
+    if not fixture.is_file():
+        raise ValueError("failure receipt fixture is absent: " + args.fixture)
+    expected = args.expected.encode("utf-8")
+    actual = args.actual.encode("utf-8")
+    item = next((x for x in manifest["cases"] if x["test_id"] == args.test_id), None)
+    observed = os.environ.get("GITHUB_SHA", "")
+    record = {
+        "test_id": args.test_id,
+        "layer": args.layer,
+        "fixture": args.fixture,
+        "fixture_sha256": digest(fixture.read_bytes()),
+        "expected_sha256": digest(expected),
+        "actual_sha256": digest(actual),
+        "first_difference": difference(expected, actual, args.exit_code),
+        "first_bad_sha": (item or {}).get("first_bad_sha")
+                         or os.environ.get("SENS_FIRST_BAD_SHA", "UNRESOLVED"),
+        "first_observed_bad_sha": observed if SHA.fullmatch(observed) else "UNRESOLVED",
+        "observed_at": now().isoformat(),
+        "reproduce": args.reproduce,
+        "stamp": item["stamp"] if item else "UNCLASSIFIED",
+        "exit_code": args.exit_code,
+        "stderr_tail": args.stderr_tail[-1500:],
+    }
+    if item:
+        for key in ("ticket", "owner", "reason", "first_seen_at", "expires_at", "investigation"):
+            if key in item:
+                record[key] = item[key]
+    errors = check_report(record)
+    print("SENS_FAILURE_REPORT=" + json.dumps(record, ensure_ascii=False, sort_keys=True))
+    with open(args.report_file, "a", encoding="utf-8") as stream:
+        stream.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+    if errors:
+        print("::error::UNINFORMATIVE-OUTPUT test=" + args.test_id + " " + ",".join(errors))
+        return 1
+    print("DIAGNOSTIC_RECEIPT_RECORDED test_id=" + args.test_id +
+          " first_bad_sha=" + str(record["first_bad_sha"]) +
+          " first_observed_bad_sha=" + str(record["first_observed_bad_sha"]))
+    return 0
+
+
 def scan_executors(args):
     """Fail closed if any claimed SENS law lacks a real, hash-bound native receipt."""
     path = Path(args.report_file)
@@ -486,6 +535,14 @@ def scan(args):
     if failures:
         print("UNINFORMATIVE-OUTPUT " + ", ".join(failures))
         return 1
+    # The final always-run workflow step validates diagnostic shape only.
+    # The original failing test step stays RED; this pass must not greenwash it.
+    if getattr(args, "validate_only", False):
+        for item in unclassified:
+            print("DIAGNOSTIC_VALID_BUT_UNCLASSIFIED " + item)
+        print("PASS diagnostic shape for " + str(len(path.read_text().splitlines())) +
+              " failed test(s); upstream test failure remains RED")
+        return 0
     if unclassified:
         for item in unclassified:
             print("::error::UNCLASSIFIED-RED " + item)
@@ -593,6 +650,14 @@ def self_test():
             rc = scan(args)
         if rc != 1 or "UNCLASSIFIED-RED" not in output.getvalue():
             raise RuntimeError("unclassified RED was reported as PASS")
+        args.validate_only = True
+        output = io.StringIO()
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true", "GITHUB_SHA": "b" * 40},
+                        clear=True), contextlib.redirect_stdout(output):
+            rc = scan(args)
+        if rc != 0 or "upstream test failure remains RED" not in output.getvalue():
+            raise RuntimeError("valid diagnostic changed an upstream RED into a secondary diagnostic failure")
+        args.validate_only = False
     # Positive and hostile controls for central CI when its 23 focal steps
     # were not selected. Do not hide a real failure or a malformed receipt.
     from unittest.mock import patch
@@ -737,12 +802,25 @@ def main():
     c.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
     c.add_argument("--report-file", required=True)
     c.add_argument("--allow-empty", action="store_true")
+    c.add_argument("--validate-only", action="store_true",
+                   help="validate receipt shape; preserve the upstream RED verdict")
+    r = sub.add_parser("record-diff")
+    r.add_argument("--test-id", required=True)
+    r.add_argument("--layer", required=True, choices=sorted(LAYER))
+    r.add_argument("--fixture", required=True)
+    r.add_argument("--expected", required=True)
+    r.add_argument("--actual", required=True)
+    r.add_argument("--reproduce", required=True)
+    r.add_argument("--report-file", required=True)
+    r.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
+    r.add_argument("--stderr-tail", default="")
+    r.add_argument("--exit-code", type=int, default=1)
     sub.add_parser("self-test")
     a = sub.add_parser("audit")
     a.add_argument("--manifest", default="knowledge/red-test-quarantine.json")
     args = parser.parse_args()
     try:
-        return {"run": run, "scan": scan, "scan-executors": scan_executors, "audit": audit, "self-test": lambda a: self_test()}[args.action](args)
+        return {"run": run, "record-diff": record_diff, "scan": scan, "scan-executors": scan_executors, "audit": audit, "self-test": lambda a: self_test()}[args.action](args)
     except (OSError, ValueError, RuntimeError) as exc:
         print("UNINFORMATIVE-OUTPUT diagnostic transport error: " + str(exc), file=sys.stderr)
         return 1
