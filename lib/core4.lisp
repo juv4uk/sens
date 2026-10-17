@@ -1920,17 +1920,21 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
-; Integer quotient recurses in Lisp; D5 QUOTIENT is exact rational division.
+; Integer quotient recurses in SENS; D5 QUOTIENT is exact rational division.
+; Consume the (chunk . multiplier) pair as data directly, not through a
+; historical LET macro that can turn a numeric result into a callable head.
+(0011 quotient-from-chunk
+  (0010 (a b chunk-and-multiplier)
+    (додати (решта chunk-and-multiplier)
+            (quotient (відняти a (перше chunk-and-multiplier)) b))))
 (0011 quotient
   (0010 (a b)
     (110
       ((нуль? b) (частка a b))
       ((менше? a b) #d24:000000000000000000000000)
       (#d1:1
-       (let ((chunk+mult
-               (largest-chunk a b b #d24:000000000000000000000001)))
-         (додати (решта chunk+mult)
-                 (quotient (відняти a (перше chunk+mult)) b)))))))
+       (quotient-from-chunk a b
+         (largest-chunk a b b #d24:000000000000000000000001))))))
 
 ; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
 (0011 mod
