@@ -111,7 +111,9 @@ def added_lisp_lines_from_diff(diff: str) -> list[tuple[str, int, str]]:
 def _git_diff(root: Path, base: str | None) -> str:
     command = ["git", "diff", "--no-ext-diff", "--no-renames", "--unified=0"]
     if base:
-        command.extend([f"{base}...HEAD", "--"])
+        # The caller supplies the exact push-before or PR-base snapshot. Use
+        # direct tree comparison: shallow CI checkouts may have no merge-base.
+        command.extend([base, "HEAD", "--"])
     else:
         command.extend(["HEAD", "--"])
     command.append("*.lisp")
@@ -151,7 +153,7 @@ def check(root: Path, base: str | None = None) -> tuple[int, list[tuple[str, Fin
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path.cwd())
-    parser.add_argument("--base", help="Git base SHA/ref; checks base...HEAD additions")
+    parser.add_argument("--base", help="Git base SHA/ref; checks additions from base to HEAD")
     args = parser.parse_args(argv)
     try:
         added_lines, violations = check(args.root, args.base)

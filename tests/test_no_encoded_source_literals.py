@@ -96,6 +96,50 @@ diff --git a/tests/b.lisp b/tests/b.lisp
             self.assertEqual(decimal_result.returncode, 0, decimal_result.stderr)
             self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", decimal_result.stdout)
 
+    def test_repository_gate_checks_base_diff_without_a_merge_base(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
+                check=True,
+            )
+            (root / "base.lisp").write_text("(сума 235)\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "base.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "base"], check=True)
+            base_sha = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], check=True,
+                text=True, encoding="utf-8", stdout=subprocess.PIPE,
+            ).stdout.strip()
+
+            (root / "new.lisp").write_text("(110 x)\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "new.lisp"], check=True)
+            tree = subprocess.run(
+                ["git", "-C", str(root), "write-tree"], check=True,
+                text=True, encoding="utf-8", stdout=subprocess.PIPE,
+            ).stdout.strip()
+            unrelated_head = subprocess.run(
+                ["git", "-C", str(root), "commit-tree", tree, "-m", "unrelated root"],
+                check=True, text=True, encoding="utf-8", stdout=subprocess.PIPE,
+            ).stdout.strip()
+            subprocess.run(
+                ["git", "-C", str(root), "update-ref", "HEAD", unrelated_head],
+                check=True,
+            )
+
+            result = subprocess.run(
+                [
+                    "python3", str(ROOT / "scripts" / "check_no_encoded_source_literals.py"),
+                    "--root", str(root), "--base", base_sha,
+                ],
+                cwd=ROOT, check=False, text=True, encoding="utf-8",
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("new.lisp:1:2", result.stderr)
+            self.assertIn("numeric function/opcode head: 110", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
