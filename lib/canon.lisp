@@ -166,7 +166,7 @@
       ((101
          (110
            (#d1:1 (001 selected))
-           ((never-defined-canon-predicate) (001 forbidden)))
+           ((ніколи-не-визначений-канон-предикат) (001 forbidden)))
          (001 selected))
        (канон-закон-виконаний (001 cond-first-match-short-circuit)))
       (#d1:1
