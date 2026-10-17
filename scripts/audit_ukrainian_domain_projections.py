@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -73,6 +74,8 @@ def keyboard_valid(token: str, width: int) -> bool:
 
 def d7_authority(root: Path) -> dict[str, str]:
     path = root / "knowledge/d7-keyboard-v2-ratified.json"
+    if not path.is_file() or not path.resolve().is_relative_to(root.resolve()):
+        raise ValueError(f"D7 authority поза --root або відсутня: {path}")
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("status") != "owner-ratified" or data.get("width") != 7:
         raise ValueError(f"відсутня ратифікація D7: {path}")
@@ -128,6 +131,8 @@ def audit(
     observed: dict[tuple[str, str, str], str] = {}
     for width in range(1, 12):
         path = root / "lib/domains" / f"d{width}.lisp"
+        if not path.is_file() or not path.resolve().is_relative_to(root):
+            raise ValueError(f"{path}: файл відсутній або виходить за --root")
         before_bytes = path.read_bytes()
         source = before_bytes.decode("utf-8")
         lines: list[str] = []
@@ -155,8 +160,16 @@ def audit(
                 if width == 7:
                     if selection and selection[0] != authority_token:
                         raise ValueError(f"D7 authority-conflict: {bits}/{column}")
-                    target = authority_token
                     authority = "knowledge/d7-keyboard-v2-ratified.json"
+                    if old == authority_token:
+                        target = old
+                    elif not keyboard_valid(old, width):
+                        target = authority_token
+                    else:
+                        # Чинний друкований знак може бути іншою людською
+                        # проєкцією. Його зміна потребує рішення власника.
+                        target = None
+                        authority += " (потрібне уточнення власника)"
                 elif not keyboard_valid(old, width):
                     target = selection[0] if selection else None
                     authority = selection[1] if selection else "НЕОДНОЗНАЧНО"
@@ -211,6 +224,7 @@ def execute(root: Path, mapping: Path | None = None, apply: bool = False) -> lis
             fd, temporary = tempfile.mkstemp(prefix=".uk-projection-", dir=path.parent)
             try:
                 with os.fdopen(fd, "wb") as out:
+                    os.fchmod(out.fileno(), stat.S_IMODE(path.stat().st_mode))
                     out.write(after)
                     out.flush()
                     os.fsync(out.fileno())

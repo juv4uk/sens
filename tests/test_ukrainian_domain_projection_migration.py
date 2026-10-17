@@ -140,7 +140,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         d7.write_text(
             "(domain-table/1\n"
             + row("0000000", "()", "()")
-            + row("1101101", '"&"', '"&"')
+            + row("1101101", '"&"', '"&"').replace("(sym ())", '(sym "&")')
             + ")\n", encoding="utf-8"
         )
         table = json.loads(
@@ -154,6 +154,48 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         self.assertEqual(len([c for c in changes if c.file.endswith("d7.lisp")]), 3)
         self.assertIn('(1101101 (ук "ь") (укр "ь")', d7.read_text(encoding="utf-8"))
         self.assertIn('(sym "ь")', d7.read_text(encoding="utf-8"))
+
+
+    def test_valid_but_different_d7_glyph_requires_review(self):
+        d7 = self.root / "lib/domains/d7.lisp"
+        d7.write_text(
+            "(domain-table/1\n" + row("0000000", "()", "()")
+            + row("1101101", '"а"', '"а"') + ")\n", encoding="utf-8"
+        )
+        table = json.loads(
+            (self.root / "knowledge/d7-keyboard-v2-ratified.json").read_text()
+        )
+        table["table"][int("1101101", 2)]["uk"] = "ь"
+        (self.root / "knowledge/d7-keyboard-v2-ratified.json").write_text(
+            json.dumps(table, ensure_ascii=False), encoding="utf-8"
+        )
+        before = d7.read_bytes()
+        changes, output = self.run_audit()
+        self.assertTrue(any(c.after is None and c.coordinate == "D7:1101101"
+                            for c in changes))
+        self.assertIn("потрібне уточнення власника", output)
+        with self.assertRaisesRegex(ValueError, "неоднозначних"):
+            self.run_audit(apply=True)
+        self.assertEqual(d7.read_bytes(), before)
+
+    def test_apply_preserves_original_file_mode(self):
+        import stat
+        self.d9.chmod(0o644)
+        self.run_audit(apply=True)
+        self.assertEqual(stat.S_IMODE(self.d9.stat().st_mode), 0o644)
+
+    def test_target_symlink_outside_root_refused(self):
+        external = self.root.parent / f"{self.root.name}-out-of-scope.lisp"
+        external.write_text("(external text)\n", encoding="utf-8")
+        self.addCleanup(external.unlink)
+        d5 = self.root / "lib/domains/d5.lisp"
+        d5.unlink()
+        d5.symlink_to(external)
+        before = external.read_bytes()
+        with self.assertRaisesRegex(ValueError, "виходить за --root"):
+            self.run_audit(apply=True)
+        self.assertEqual(external.read_bytes(), before)
+
 
 
 if __name__ == "__main__":
