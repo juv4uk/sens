@@ -25,6 +25,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LATIN = re.compile(r"[A-Za-z]")
 UKRAINIAN = re.compile(r"[А-Яа-яІіЇїЄєҐґ]")
 BIT_WORD = re.compile(r"[01]+\Z")
+ENCODED_HEAD = re.compile(r"#(?:[dD][0-9]+:[01]+|[bB][01]+|[xX][0-9A-Fa-f]+)\Z")
+ARCHIVE_DIRS = {'research', 'knowledge', 'contracts', 'docs', 'benchmarks', 'tests'}
 CELL = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
     r"^\s*\(([01]+)\s+\(ук\s+" + CELL + r"\)\s+\(укр\s+" + CELL
@@ -195,7 +197,8 @@ def candidate_heads(forms: tuple):
             syntax = {'quote', 'quasiquote', 'lambda', 'define', 'defmacro',
                       'let', 'let*', '001', '0010', '0011'}
             if (head not in syntax and not BIT_WORD.fullmatch(head)
-                    and (LATIN.search(head) or UKRAINIAN.search(head))):
+                    and (ENCODED_HEAD.fullmatch(head) or LATIN.search(head)
+                         or UKRAINIAN.search(head))):
                 yield node.values[0]
             # QUOTE / D3:001 is non-executable data; no scanning its contents.
             if head in {'quote', 'як-є', '001'}:
@@ -259,6 +262,23 @@ def peer_index(root: Path) -> tuple[dict[str, list[str]], dict]:
                       'ambiguous_names': sum(len(v) > 1 for v in resolved.values())}
 
 
+def peer_roles(root: Path) -> dict[str, set[str]]:
+    """Classify exact compact/full spellings without equating them."""
+    roles: dict[str, set[str]] = {}
+    for number in range(1, 12):
+        path = root / 'lib' / 'domains' / f'd{number}.lisp'
+        if not path.exists():
+            continue
+        for line in path.read_text(encoding='utf-8').splitlines():
+            m = ROW.fullmatch(line)
+            if m is None or len(m.group(1)) != number:
+                continue
+            for kind, spelling in [('ук', m.group(2)), ('укр', m.group(3))]:
+                if spelling != '()':
+                    roles.setdefault(spelling.casefold(), set()).add(kind)
+    return roles
+
+
 def excluded_metadata(path: Path) -> bool:
     parts = path.parts
     return (len(parts) >= 3 and parts[:2] == ('lib', 'domains')
@@ -271,7 +291,10 @@ def measure(root: Path) -> dict:
     root = root.resolve()
     files = sorted(p for p in root.rglob('*.lisp') if '.git' not in p.parts)
     index, peers = peer_index(root)
-    latin, cyrillic, unknown, errors = [], 0, 0, []
+    roles = peer_roles(root)
+    latin, encoded, cyrillic, errors = [], [], 0, []
+    full_ukr = compact_only = unknown_ukr = ambiguous_cyr = 0
+    archive_latin = archive_unclassified = 0
     skipped = scanned = 0
     for path in files:
         rel = path.relative_to(root)
@@ -284,24 +307,48 @@ def measure(root: Path) -> dict:
         scanned += 1
         try:
             forms = parse(path.read_text(encoding='utf-8'))
+            archival = bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS)
             for head in candidate_heads(forms):
-                if LATIN.search(head.text):
+                if ENCODED_HEAD.fullmatch(head.text):
+                    encoded.append({'file': rel.as_posix(), 'line': head.line,
+                                    'column': head.column, 'head': head.text})
+                elif LATIN.search(head.text):
                     candidates = index.get(head.text.casefold(), [])
                     latin.append({'file': rel.as_posix(), 'line': head.line,
                                   'column': head.column, 'head': head.text,
                                   'identities': candidates,
                                   'mapping': 'unique' if len(candidates) == 1
-                                  else 'ambiguous' if candidates else 'unresolved'})
+                                  else 'ambiguous' if candidates else 'unresolved',
+                                  'scope': 'archive/fixture' if archival else 'active'})
+                    archive_latin += int(archival)
                 elif UKRAINIAN.search(head.text):
                     cyrillic += 1
-                else:
-                    unknown += 1
+                    spelling = head.text.casefold()
+                    kinds = roles.get(spelling, set())
+                    candidates = index.get(spelling, [])
+                    if len(candidates) > 1:
+                        ambiguous_cyr += 1
+                    elif 'укр' in kinds:
+                        full_ukr += 1
+                    elif 'ук' in kinds:
+                        compact_only += 1
+                    else:
+                        unknown_ukr += 1  # user-defined Ukrainian functions allowed
         except (UnicodeError, OSError, SourceError, RecursionError) as exc:
-            errors.append({'file': rel.as_posix(), 'reason': str(exc)})
+            errors.append({'file': rel.as_posix(), 'reason': str(exc),
+                           'scope': 'archive/fixture' if rel.parts and
+                           rel.parts[0] in ARCHIVE_DIRS else 'active'})
+            archive_unclassified += int(bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS))
     total = len(latin) + cyrillic
     return {'files_total': len(files), 'files_scanned': scanned,
             'metadata_files_excluded': skipped,
             'ukr_call_heads': cyrillic, 'latin_call_heads': len(latin),
+            'ukr_full_head_sites': full_ukr, 'uk_compact_only_head_sites': compact_only,
+            'local_cyrillic_head_sites': unknown_ukr,
+            'ambiguous_cyrillic_head_sites': ambiguous_cyr,
+            'encoded_head_sites': encoded,
+            'archival_latin_heads': archive_latin,
+            'archival_unclassified_files': archive_unclassified,
             'ukr_call_head_pct': round(100 * cyrillic / total, 1) if total else 0.0,
             'unclassified_files': errors, 'latin_sites': latin,
             'peer_index': peers,
@@ -318,6 +365,12 @@ def render(m: dict, *, limit: int = 15) -> str:
         f"{m['peer_index']['valid_distinct_peer_spellings']} "
         f"(НЕ помилки міграції); неоднозначних spelling "
         f"{m['peer_index']['ambiguous_names']}",
+        f"УКР-ВИДИ: full={m['ukr_full_head_sites']} "
+        f"compact-only={m['uk_compact_only_head_sites']} "
+        f"local={m['local_cyrillic_head_sites']} "
+        f"ambiguous={m['ambiguous_cyrillic_head_sites']}; "
+        f"архівних Latin={m['archival_latin_heads']}; "
+        f"закодованих голів={len(m['encoded_head_sites'])}",
     ]
     for site in m['latin_sites'][:limit]:
         found = ','.join(site['identities']) or '-'
@@ -326,8 +379,12 @@ def render(m: dict, *, limit: int = 15) -> str:
     if len(m['latin_sites']) > limit:
         lines.append(f"... додаткових латинських голів {len(m['latin_sites']) - limit}; "
                      "повний список доступний через --json")
+    for encoded in m['encoded_head_sites'][:limit]:
+        lines.append(f"ENCODED {encoded['file']}:{encoded['line']}:"
+                     f"{encoded['column']} {encoded['head']}: не латинська назва")
     for error in m['unclassified_files'][:limit]:
-        lines.append(f"UNCLASSIFIED {error['file']}: {error['reason']}")
+        lines.append(f"UNCLASSIFIED {error['file']} "
+                     f"scope={error['scope']}: {error['reason']}")
     return '\n'.join(lines)
 
 
@@ -347,10 +404,14 @@ def main(argv=None) -> int:
         args.json.write_text(json.dumps(m, ensure_ascii=False, indent=2) + '\n',
                              encoding='utf-8')
     red = bool(m['latin_call_heads'] or m['unclassified_files']
-               or m['ukr_call_heads'] == 0)
+               or m['encoded_head_sites'] or m['uk_compact_only_head_sites']
+               or m['ambiguous_cyrillic_head_sites'] or m['ukr_call_heads'] == 0)
     if args.require_full and red:
         print(f"::error::УКР-ВИКЛИКИ НЕ ЗАВЕРШЕНІ: "
               f"{m['latin_call_heads']} Latin call heads, "
+              f"{len(m['encoded_head_sites'])} encoded non-call heads, "
+              f"{m['uk_compact_only_head_sites']} compact-only usages, "
+              f"{m['ambiguous_cyrillic_head_sites']} ambiguous Cyrillic usages, "
               f"{len(m['unclassified_files'])} unclassified .lisp files; "
               'не прирівнюйте ук до укр', file=sys.stderr)
         return 1

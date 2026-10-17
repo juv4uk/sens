@@ -56,7 +56,8 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(m['latin_call_heads'], 1)
         self.assertEqual(m['latin_sites'][0], {
             'file': 'lib/program.lisp', 'line': 3, 'column': 2,
-            'head': 'equal', 'identities': ['D3:101'], 'mapping': 'unique'
+            'head': 'equal', 'identities': ['D3:101'], 'mapping': 'unique',
+            'scope': 'active'
         })
 
     def test_quotes_comments_strings_and_formals_not_false_calls(self):
@@ -147,6 +148,38 @@ class CallsiteAuditTests(unittest.TestCase):
         m = mod.measure(self.root)
         self.assertEqual(len(m['unclassified_files']), 1)
         self.assertIn('symlink', m['unclassified_files'][0]['reason'])
+
+    def test_encoded_head_is_not_mislabeled_as_latin_call(self):
+        self.put('lib/encoded.lisp', '(#d1:1 (українська))\n')
+        m = mod.measure(self.root)
+        self.assertEqual(m['latin_call_heads'], 0)
+        self.assertEqual([x['head'] for x in m['encoded_head_sites']], ['#d1:1'])
+        p = subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
+                            '--require-full'], capture_output=True, text=True)
+        self.assertEqual(p.returncode, 1)
+        self.assertIn('1 encoded non-call heads', p.stderr)
+
+    def test_distinguishes_compact_only_full_and_local_cyrillic(self):
+        self.row(3, '101', 'коротко', 'повна-назва', 'equal')
+        self.put('lib/live.lisp', '(коротко а)\n(повна-назва а)\n(власна-функція а)\n')
+        m = mod.measure(self.root)
+        self.assertEqual(m['ukr_full_head_sites'], 1)
+        self.assertEqual(m['uk_compact_only_head_sites'], 1)
+        self.assertEqual(m['local_cyrillic_head_sites'], 1)
+        self.assertEqual(m['ambiguous_cyrillic_head_sites'], 0)
+        self.assertEqual(m['latin_call_heads'], 0)
+        p = subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
+                            '--require-full'], capture_output=True, text=True)
+        self.assertEqual(p.returncode, 1)
+        self.assertIn('1 compact-only usages', p.stderr)
+
+    def test_archive_latin_is_not_mislabeled_active(self):
+        self.put('research/old.lisp', '(historic-call x)\n')
+        self.put('lib/active.lisp', '(current-call x)\n')
+        m = mod.measure(self.root)
+        self.assertEqual(m['archival_latin_heads'], 1)
+        self.assertEqual([x['scope'] for x in m['latin_sites']],
+                         ['active', 'archive/fixture'])
 
     def test_empty_or_metadata_only_tree_cannot_pass_full_migration(self):
         self.row(3, '101', 'коротко', 'розгорнуте', 'equal')
