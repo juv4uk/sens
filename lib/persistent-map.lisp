@@ -56,3 +56,13 @@
 (0011 внутрішня-мапа-отримати map-get)
 (0011 внутрішня-мапа-містить map-contains?)
 (0011 внутрішня-мапа-список map->list)
+
+; D9 resident projections over the existing immutable map mechanism.
+; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
+; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
+; These wrappers preserve the map's maybe-shaped lookup result and dotted-entry order.
+(0011 внутрішня-мапа-порожній map-empty)
+(0011 мапа-порожній внутрішня-мапа-порожній)
+(0011 мапа-отримати внутрішня-мапа-отримати)
+(0011 мапа-містить? внутрішня-мапа-містить)
+(0011 мапа-список внутрішня-мапа-список)
