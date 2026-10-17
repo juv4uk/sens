@@ -157,13 +157,13 @@
 ; Derived D1 symbol predicate for world module names. This is a Lisp
 ; law over ATOM/NULL/EQ and exact D8 write+string-to-symbol mechanisms,
 ; not a native admission of the unrelated D9:110101100 coordinate.
-(0011 внутрішній-символ?
-  (0010 (value)
-    (110
-      ((0101 value) (0101 (001 (0))))
-      ((0100 (010 value)) (0101 (001 (0))))
-      ((тотожне? value (текст-у-символ (значення-у-текст value))) (порожнє? (як-є ())))
-      (#d1:1 (0101 (001 (0)))))))
+(визначити внутрішній-символ?
+  (функція (value)
+    (за-умовою
+      ((порожній? value) (порожній? (як-є (0))))
+      ((хибне? (атом? value)) (порожній? (як-є (0))))
+      ((тотожне? value (текст-у-символ (значення-у-текст value))) (порожній? (як-є ())))
+      (так (порожній? (як-є (0)))))))
 
 (0011 advice-decision-in-world
   (0010 (world module-name clause)
@@ -647,8 +647,8 @@
 ;; dieselbe Adresse. Die Weltadresse umfasst Journal und Metadaten; der
 ;; Vorgänger wird nicht rekursiv dupliziert. Dies ist ein exakter Schlüssel,
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
-(0011 knowledge-content-address
-  (0010 (knowledge)
+(визначити knowledge-content-address
+  (функція (knowledge)
     (значення-у-текст knowledge)))
 
 (0011 world-address-content
