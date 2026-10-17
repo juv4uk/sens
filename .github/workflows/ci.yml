@@ -637,6 +637,20 @@ jobs:
             exit 1
           fi
           echo "D9_SEVEN_STEP_SELECTORS_B05_PASS identities=D9:011101000..011101111 laws=16 positive=8 mutated=8"
+          # D9:011110000..011110111: eight seven-step selectors with one-bit mutants.
+          d9_six="tests/semantic/d9-seven-step-selector-batch-06.lisp"
+          sha256sum "$d9_six" lib/core4.lisp target/debug/sens
+          if ! d9_six_out="$(target/debug/sens "$d9_six" 2>&1)"; then
+            printf '%s\n' "$d9_six_out" >&2
+            echo "::error::D9_SELECTOR_B06_EXEC_RED id=d9-sel-b06 layer=eval fixture=$d9_six expected=16-D1:YES actual=execution-error reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          d9_six_actual="$(printf '%s\n' "$d9_six_out" | tail -n 1)"
+          if [[ "$d9_six_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_SELECTOR_B06_LAW_DIFF id=d9-sel-b06 layer=eval fixture=$d9_six expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d9_six_actual first_diff=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          echo "D9_SEVEN_STEP_SELECTORS_B06_PASS identities=D9:011110000..011110111 laws=16 positive=8 mutant=8"
 
 
 
