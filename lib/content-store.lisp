@@ -21,7 +21,7 @@
 ;; kanonischen Adresse aus `lib/world.lisp` zu gewöhnlichen my-lisp-Daten.
 
 (0011 empty-content-store
-  (0010 () map-empty))
+  (0010 () мапа-порожній))
 
 (0011 content-store-put
   (0010 (store value)

@@ -26,7 +26,9 @@
 
 (0011 make-observation створити-спостереження)
 
-(0011 make-claim створити-твердження)
+; D10:0001110110 — компактне ук та повне укр посилаються на той самий SENS closure.
+(0011 створити-структуроване-твердження створити-твердження)
+(0011 make-claim створити-структуроване-твердження)
 
 (0011 make-evidence створити-доказ)
 
@@ -47,6 +49,9 @@
       ((101 (100 value) (001 test)) #d1:1)
       ((101 (100 value) (001 observation)) #d1:1)
       (#d1:1 #d1:0))))
+
+; D10:0010011001 SOURCE-REF? — точна повна українська peer-назва.
+(0011 це-належне-посилання-на-джерело? source-ref?)
 
 (0011 epistemic--claim-ref?
   (0010 (value)
@@ -75,10 +80,13 @@
 (0011 intent-goal (0010 (intent) (1001 (11100 (001 goal) (011 intent)))))
 
 (0011 observation-source (0010 (observation) (1001 (11100 (001 source) (011 observation)))))
+(0011 отримати-джерело-спостереження observation-source)
 (0011 observation-statement (0010 (observation) (1001 (11100 (001 statement) (011 observation)))))
 (0011 evidence-claim-ref (0010 (evidence) (1001 (11100 (001 claim-ref) (011 evidence)))))
+(0011 отримати-посилання-доказу-на-твердження evidence-claim-ref)
 (0011 evidence-method (0010 (evidence) (1001 (11100 (001 method) (011 evidence)))))
 (0011 intent-requires (0010 (intent) (1001 (11100 (001 requires) (011 intent)))))
+(0011 отримати-необхідні-можливості-наміру intent-requires)
 (0011 intent-stop-on (0010 (intent) (1001 (11100 (001 stop-on) (011 intent)))))
 (0011 intent-produces (0010 (intent) (1001 (11100 (001 produces) (011 intent)))))
 
@@ -103,11 +111,14 @@
 (0011 supporting-evidence
   (0010 (evidence claim-ref)
     (110
-      ((0100 (evidence? evidence)) (001 ()))
+      ((0100 (доказ? evidence)) (001 ()))
       ((0100 (epistemic--claim-ref? claim-ref)) (001 ()))
-      ((0100 (101 (evidence-outcome evidence) (001 supports))) (001 ()))
-      ((0100 (епістеміка--рівні-посилання? (evidence-claim-ref evidence) claim-ref)) (001 ()))
+      ((0100 (101 (доказ-підсумок evidence) (001 supports))) (001 ()))
+      ((0100 (епістеміка--рівні-посилання? (отримати-посилання-доказу-на-твердження evidence) claim-ref)) (001 ()))
       (#d1:1 evidence))))
+
+; D9:101100001 — той самий retrieval closure, без нової семантики.
+(0011 підтверджувальний-доказ supporting-evidence)
 
 (0011 epistemic--all-required-present?
   (0010 (requirements effective-capabilities)
@@ -120,6 +131,9 @@
 (0011 intent-capabilities-satisfied?
   (0010 (intent effective-capabilities)
     (110
-      ((0100 (intent? intent)) #d1:0)
+      ((0100 (намір? intent)) #d1:0)
       (#d1:1
-       (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
+       (epistemic--all-required-present? (отримати-необхідні-можливості-наміру intent) effective-capabilities)))))
+
+; D10:0001111110 INTENT-CAPABILITIES-SATISFIED? — один мовний закон, дві peer-форми.
+(0011 усі-необхідні-можливості-наміру-забезпечені? intent-capabilities-satisfied?)
