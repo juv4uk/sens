@@ -3203,3 +3203,33 @@
        (зсунути-вправо
          (quotient значення #d24:000000000000000000000010)
          (зменшити-на-один зсув))))))
+
+; D9:111100001 MAKE-WORLD: immutable (world parent journal metadata) record.
+(0011 створити-світ
+  (0010 (батько журнал метадані)
+    (111 (001 world)
+      (111 батько (111 журнал (111 метадані (001 ())))))))
+
+; D9:111001000 EMPTY-WORLD — root world contains three structural D3 NILs.
+(0011 порожній-світ
+  (0010 ()
+    (створити-світ (001 ()) (001 ()) (001 ()))))
+
+; D9:111111000 WORLD-PARENT — second field of immutable world record.
+(0011 світ-батько
+  (0010 (світ) (100 (011 світ))))
+
+; D9:111010100 WORLD-JOURNAL — third field of immutable world record.
+(0011 світ-журнал
+  (0010 (світ) (100 (011 (011 світ)))))
+
+; D9:111000111 WORLD-METADATA — fourth field of immutable world record.
+(0011 світ-метадані
+  (0010 (світ) (100 (011 (011 (011 світ))))))
+
+; D9:111111011 WORLD-RECORD — persistent journal prepend, parent retained.
+(0011 світ-запис
+  (0010 (світ подія)
+    (створити-світ світ
+      (111 подія (світ-журнал світ))
+      (світ-метадані світ))))
