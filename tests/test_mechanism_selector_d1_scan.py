@@ -255,26 +255,35 @@ class MechanismSelectorWitness(unittest.TestCase):
                 )
 
     def test_negative_nine_bit_read_truncation(self):
-        # Викидання старшого біта неприпустиме, навіть якщо W8 має той
-        # самий числовий payload. Це доказ синтаксису, не callability.
-        mutation = self.source.replace("(110101001 ", "(10101001 ", 1)
+        # D9 READ-ALL/READ-FILE are exact current residents, not W8 slots.
+        # Quote/data, parser path, and old positional SID have no authority.
+        table = (SOURCE.parents[1] / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        rows = dict(re.findall(r"(?m)^  \(([01]{9}) \(ук ([^()\s]+)\)", table))
+        self.assertEqual(rows["110101001"], "читати-всі")
+        self.assertEqual(rows["110110111"], "читати-файл")
+        forms = parse(self.source)
+        self.assertEqual(forms[0][2],
+                         ["100", ["читати-всі", ["читати-файл",
+                          '"lib/surface/semantic-registry.lisp"']]])
+        self.assertEqual(forms[1][2],
+                         ["100", ["читати-всі", ["читати-файл",
+                          '"lib/function-table-mechanisms.lisp"']]])
+        mutation = self.source.replace("(читати-всі ", "(10101001 ", 1)
         self.assertNotEqual(mutation, self.source)
-        before = re.findall(r"\\(([01]{8,10})(?=[\\s(])", self.source)
-        after = re.findall(r"\\(([01]{8,10})(?=[\\s(])", mutation)
-        self.assertEqual(before.count("110101001"), 2)
-        self.assertEqual(after.count("110101001"), 1)
-        self.assertIn("10101001", after)
-        self.assertNotIn("10101001", before)
+        mutated = parse(mutation)
+        self.assertEqual(mutated[0][2][1][0], "10101001")
+        self.assertNotEqual(mutated[0][2], forms[0][2])
+        self.assertEqual(len(mutated[0][2][1][0]), 8)  # W8 is not D9
+        self.assertNotIn("(10101001 ", self.source)
 
     def test_d3_d4_d5_d9_operator_widths(self):
         source = self.source
         heads = re.findall(r"\(([01]{3,10})(?=[\s(])", source)
-        self.assertFalse(any(len(w) == 8 for w in heads))
-        self.assertEqual(heads.count("110101001"), 2)  # D9 READ-ALL
-        self.assertEqual(heads.count("110110111"), 2)  # D9 READ-FILE
+        self.assertFalse(any(len(w) in (8, 9) for w in heads))
+        self.assertEqual(source.count("(читати-всі "), 2)
+        self.assertEqual(source.count("(читати-файл "), 2)
         self.assertEqual(len("10011"), 5)  # D5 CADDR
-        self.assertNotIn("0100", heads)  # прибрано хибне D4 NOT(ATOM)
-
+        self.assertNotIn("0100", heads)  # NOT(ATOM) not reintroduced
 
 
     def test_ukrainian_projection_maps_to_exact_ratified_identity(self):

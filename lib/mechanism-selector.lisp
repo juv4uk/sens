@@ -8,10 +8,10 @@
 ; (010 (001 ())) = D1:1. Width is identity; every bit of domain address valued.
 
 (0011 mechanism-selector-registry
-  (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+  (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
 (0011 mechanism-selector-metadata
-  (перше (110101001 (110110111 "lib/function-table-mechanisms.lisp"))))
+  (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
 (0011 mechanism-selector-registry-rows
   mechanism-selector-registry)
