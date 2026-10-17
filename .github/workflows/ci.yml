@@ -129,6 +129,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
           fixture="tests/semantic/d8-copyseq-mapqn-laws.lisp"
           negative="tests/semantic/d8-copyseq-nonlist-negative.lisp"
           sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
@@ -143,25 +144,30 @@ jobs:
             if ! observed="$(target/debug/sens "$file" 2>&1)"; then
               echo "::error::D8_COPYQN_EXEC_RED law=$count layer=eval fixture=$file expected=1 actual=execution-error" >&2
               printf '%s\n' "$observed" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$file" --expected "1" --actual "execution-error" --reproduce "target/debug/sens $file" --report-file "$report" --stderr-tail "$observed"
               exit 1
             fi
             actual="$(tail -n 1 <<< "$observed")"
             if [[ "$actual" != "1" ]]; then
               echo "::error::D8_COPYQN_LAW_DIFF law=$count layer=eval fixture=$file expected=1 actual=$actual" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$file" --expected "1" --actual "$actual" --reproduce "target/debug/sens $file" --report-file "$report" --stderr-tail "$observed"
               exit 1
             fi
             echo "D8_COPYQN_LAW_PASS law=$count"
           done
           if [[ "$count" != 8 ]]; then
             echo "::error::D8_COPYQN_CENSUS expected=8 actual=$count" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-census" --layer eval --fixture "$fixture" --expected "8 programs" --actual "$count programs" --reproduce "sed -n '1,16p' $fixture" --report-file "$report"
             exit 1
           fi
           if rejected="$(target/debug/sens "$negative" 2>&1)"; then
             echo "::error::D8_COPYQN_INVALID_ATOM_ACCEPTED layer=eval fixture=$negative expected=CAR-atom-rejection actual=accepted" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-invalid-atom" --layer eval --fixture "$negative" --expected "CAR-atom-rejection" --actual "accepted" --reproduce "target/debug/sens $negative" --report-file "$report"
             exit 1
           fi
           if ! grep -Eqi 'car|atom|pair|пара|атом' <<< "$rejected"; then
             echo "::error::D8_COPYQN_UNRELATED_NEGATIVE layer=eval fixture=$negative expected=CAR-atom-rejection actual=$rejected" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-invalid-atom" --layer eval --fixture "$negative" --expected "CAR-atom-rejection" --actual "$rejected" --reproduce "target/debug/sens $negative" --report-file "$report" --stderr-tail "$rejected"
             exit 1
           fi
           echo "D8_COPYQN_NATIVE_PASS laws=8 negative=1 direct_D8_callability=unclaimed"
