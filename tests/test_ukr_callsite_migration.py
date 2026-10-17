@@ -189,7 +189,7 @@ class CallsiteAuditTests(unittest.TestCase):
         p = subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
                             '--require-full'], capture_output=True, text=True)
         self.assertEqual(p.returncode, 1)
-        self.assertIn('1 encoded non-call heads', p.stderr)
+        self.assertIn('1 active encoded heads', p.stderr)
 
     def test_distinguishes_compact_only_full_and_local_cyrillic(self):
         self.row(3, '101', 'коротко', 'повна-назва', 'equal')
@@ -202,8 +202,9 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(m['latin_call_heads'], 0)
         p = subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
                             '--require-full'], capture_output=True, text=True)
-        self.assertEqual(p.returncode, 1)
-        self.assertIn('1 compact-only usages', p.stderr)
+        # A valid short Ukrainian peer is not a migration defect.
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertNotIn('::error::', p.stderr)
 
     def test_archive_latin_is_not_mislabeled_active(self):
         self.put('research/old.lisp', '(historic-call x)\n')
@@ -218,7 +219,7 @@ class CallsiteAuditTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
                                  '--require-full'], capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
-        self.assertIn('0 Latin call heads', result.stderr)
+        self.assertIn('0 active Latin call heads', result.stderr)
 
 
 if __name__ == '__main__':
