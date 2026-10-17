@@ -6,7 +6,7 @@
             (quote а)
             (list (cons (quote а) (quote перше))
                   (cons (quote б) (quote друге)))
-            (0010 () (quote немає)))
+            (lambda () (quote немає)))
           (cons (quote а) (quote перше)))
   (equal? (sassoc
             (quote б)
@@ -17,16 +17,16 @@
   (equal? (sassoc
             (quote відсутній)
             (list (cons (quote а) (quote перше)))
-            (0010 () (quote резерв)))
+            (lambda () (quote резерв)))
           (quote резерв))
   (equal? (sassoc
             (quote порожньо) (quote ())
-            (0010 () (quote порожній-резерв)))
+            (lambda () (quote порожній-резерв)))
           (quote порожній-резерв))
   (equal? (sassoc
             (list (quote складений))
             (list (cons (list (quote складений)) (quote структурний-збіг)))
-            (0010 () (quote немає)))
+            (lambda () (quote немає)))
           (cons (list (quote складений)) (quote структурний-збіг)))
   (empty-queue? (quote ()))
   (not? (empty-queue? (quote (а))))
@@ -42,8 +42,8 @@
   (result-proper-list? (quote (а б)))
   (not? (result-proper-list? (cons (quote а) (quote б))))
   (forall-every-candidate-satisfies?
-    (0010 (x) (not? (0101 x)))
+    (lambda (x) (not? (0101 x)))
     (quote (а б)))
   (not? (forall-every-candidate-satisfies?
-          (0010 (x) (0101 x))
+          (lambda (x) (0101 x))
           (quote (а б)))))
