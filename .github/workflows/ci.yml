@@ -462,6 +462,20 @@ jobs:
             exit 1
           fi
           echo "D9_TRANSLATION_PROJECTION_NATIVE_PASS identities=4 laws=8 negative=5"
+          # D9 guard atomic predicates: eight admitted statuses, four negatives.
+          d9_guard="tests/semantic/d9-guard-atom-status-laws.lisp"
+          sha256sum "$d9_guard" lib/core4.lisp target/debug/sens
+          if ! d9_guard_output="$(target/debug/sens "$d9_guard" 2>&1)"; then
+            echo "::error::D9_GUARD_NATIVE_RED id=d9-guard-atom-law layer=eval fixture=$d9_guard expected=twelve-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$d9_guard_output" >&2
+            exit 1
+          fi
+          d9_guard_actual="$(printf "%s\n" "$d9_guard_output" | tail -n 1)"
+          if [[ "$d9_guard_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_GUARD_LAW_DIFF id=d9-guard-atom-law layer=eval fixture=$d9_guard expected=(1 1 1 1 1 1 1 1 1 1 1 1) actual=$d9_guard_actual first_mismatch=D1-vector" >&2
+            exit 1
+          fi
+          echo "D9_GUARD_SENS_NATIVE_PASS identities=D9:000010001,D9:000000000 laws=12 negative=4"
           # D8:01011011 CHAR + D9:110100010 STRING-LENGTH / 110101110
           # IDENTITY / 001110110 CDR-IMPROPER: one mixed-domain SENS witness.
           d8_d9_fixture="tests/semantic/d8-char-d9-length-identity-laws.lisp"

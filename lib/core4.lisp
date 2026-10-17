@@ -2916,3 +2916,27 @@
   (0010 (ділене дільник)
     (відняти ділене
       (помножити дільник (округлити-до-нуля ділене дільник)))))
+
+
+; D9 guard decision/status algebra from lib/guard.lisp.
+; Ratified D9:000010001 GUARD-DECISION? and D9:000000000 GUARD-EVIDENCE-STATUS?
+; Every result is a strict D1 one-bit predicate. Non-atomic decision/status
+; data is rejected by D1:NO rather than sent to D3 EQ on a pair.
+(0011 захист-рішення?
+  (0010 (рішення)
+    (110
+      ((0100 (010 рішення)) #d1:0)
+      ((101 рішення (001 allow)) #d1:1)
+      ((101 рішення (001 warn)) #d1:1)
+      ((101 рішення (001 reject)) #d1:1)
+      ((101 рішення (001 unknown)) #d1:1)
+      (#d1:1 #d1:0))))
+(0011 захист-доказ-стан?
+  (0010 (стан)
+    (110
+      ((0100 (010 стан)) #d1:0)
+      ((101 стан (001 confirmed)) #d1:1)
+      ((101 стан (001 partial)) #d1:1)
+      ((101 стан (001 unresolved)) #d1:1)
+      ((101 стан (001 broken)) #d1:1)
+      (#d1:1 #d1:0))))
