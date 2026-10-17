@@ -492,6 +492,30 @@ jobs:
             exit 1
           fi
           echo "D9_FS_LIST_CONTAINS_SENS_PASS identities=D9:010010110,D9:010100001 laws=9 negative=1 direct-D9-admission=no"
+
+          # Друга партія D9: перевірка SENS-пакетного guard та FS-unbind.
+          fs2_laws="tests/semantic/d9-fs-package-unbind-laws.lisp"
+          fs2_invalid="tests/semantic/d9-fs-package-invalid-arity.lisp"
+          sha256sum "$fs2_laws" "$fs2_invalid" lib/core4.lisp target/debug/sens
+          if ! fs2_output="$(target/debug/sens "$fs2_laws" 2>&1)"; then
+            echo "::error::D9_FS2_EXEC_RED id=d9-fs-package-unbind layer=eval fixture=$fs2_laws expected=nine-D1-YES actual=execution-error reproduce=target/debug/sens:$fs2_laws" >&2
+            printf "%s\n" "$fs2_output" >&2
+            exit 1
+          fi
+          fs2_actual="$(printf "%s\n" "$fs2_output" | tail -n 1)"
+          if [[ "$fs2_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_FS2_LAW_DIFF id=d9-fs-package-unbind layer=eval fixture=$fs2_laws expected='(1 1 1 1 1 1 1 1 1)' actual=$fs2_actual reproduce=target/debug/sens:$fs2_laws" >&2
+            exit 1
+          fi
+          if fs2_error="$(target/debug/sens "$fs2_invalid" 2>&1)"; then
+            echo "::error::D9_FS_PACKAGE_ARITY_BYPASS id=d9-fs-package-arity layer=eval fixture=$fs2_invalid expected=arity-refusal actual=accepted reproduce=target/debug/sens:$fs2_invalid" >&2
+            exit 1
+          fi
+          if ! grep -Eiq 'arity|expected|arguments' <<< "$fs2_error"; then
+            echo "::error::D9_FS_PACKAGE_WRONG_REFUSAL id=d9-fs-package-arity layer=eval fixture=$fs2_invalid expected=arity-refusal actual=$fs2_error reproduce=target/debug/sens:$fs2_invalid" >&2
+            exit 1
+          fi
+          echo "D9_FS_PACKAGE_UNBIND_SENS_PASS identities=D9:010101111,D9:001100000 laws=9 negative=1 direct-D9-admission=no"
       - name: T5M-SENS-CODEC — наш кодек виконується мовою (розмір + round-trip)
         id: sens-t5m-codec
         shell: bash
