@@ -586,6 +586,20 @@ jobs:
             exit 1
           fi
           echo "D9_SEVEN_STEP_SELECTORS_B04_PASS identities=D9:011100000..011100111 laws=16 positive=8 mutated=8"
+          # D9:011101000..011101111 — наступні 8 селекторів і 8 мутантів.
+          d9_7d="tests/semantic/d9-seven-step-selector-batch-05.lisp"
+          sha256sum "$d9_7d" lib/core4.lisp target/debug/sens
+          if ! d9_7d_out="$(target/debug/sens "$d9_7d" 2>&1)"; then
+            printf "%s\n" "$d9_7d_out" >&2
+            echo "::error::D9_SELECTOR_7D_EXEC_RED layer=eval fixture=$d9_7d expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error reproduce=target/debug/sens:$d9_7d" >&2
+            exit 1
+          fi
+          d9_7d_actual="$(printf "%s\n" "$d9_7d_out" | tail -n 1)"
+          if [[ "$d9_7d_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_SELECTOR_7D_LAW_DIFF layer=eval fixture=$d9_7d expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d9_7d_actual first_mismatch=D1-vector reproduce=target/debug/sens:$d9_7d" >&2
+            exit 1
+          fi
+          echo "D9_SEVEN_STEP_SELECTORS_B05_PASS identities=D9:011101000..011101111 laws=16 positive=8 mutated=8"
 
 
 
