@@ -279,5 +279,59 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertIn('0 active Latin call heads', result.stderr)
 
 
+class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
+    """Перевірка проєкції саме виконуваних голів без семантичного Python-оракула."""
+
+    def test_current_d3_d4_authority_and_two_live_libraries(self):
+        root = Path(__file__).resolve().parents[1]
+        peers = (
+            (3, "001", "як-є"),
+            (3, "010", "атом?"),
+            (3, "011", "решта"),
+            (3, "100", "перше"),
+            (3, "101", "тотожне?"),
+            (3, "110", "за-умовою"),
+            (3, "111", "сполучити"),
+            (4, "0010", "функція"),
+            (4, "0100", "хибне?"),
+            (4, "0101", "порожній?"),
+            (4, "1110", "список"),
+        )
+        for width, bits, spelling in peers:
+            with self.subTest(domain=f"D{width}", bits=bits):
+                lines = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8").splitlines()
+                matches = [line for line in lines if line.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(matches), 1)
+                self.assertIn(f"(укр {spelling})", matches[0])
+
+        examples = {
+            "lib/persistent-map.lisp": (
+                "за-умовою", "порожній?", "тотожне?", "сполучити", "перше", "решта",
+            ),
+            "lib/life-1-scheduler.lisp": (
+                "за-умовою", "атом?", "тотожне?", "сполучити", "хибне?", "як-є",
+            ),
+        }
+        for name, required in examples.items():
+            with self.subTest(path=name):
+                src = (root / name).read_text(encoding="utf-8")
+                heads = [x.text for x in mod.candidate_heads(mod.parse(src))]
+                for spelling in required:
+                    self.assertIn(spelling, heads, (name, spelling))
+
+    def test_quote_data_and_exact_d1_are_not_coerced_into_calls(self):
+        root = Path(__file__).resolve().parents[1]
+        map_source = (root / "lib/persistent-map.lisp").read_text(encoding="utf-8")
+        life_source = (root / "lib/life-1-scheduler.lisp").read_text(encoding="utf-8")
+        self.assertIn("(як-є (scheduler-selection none))", life_source)
+        self.assertIn("(як-є producer)", life_source)
+        self.assertIn("#d1:1", map_source)
+        self.assertIn("#d1:0", life_source)
+        sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
+        heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
+        self.assertNotIn("100", heads)
+        self.assertIn("сполучити", heads)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

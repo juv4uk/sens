@@ -23,32 +23,32 @@
 (0011 map-empty (001 ()))
 
 (0011 map-insert
-  (0010 (key value entries)
-    (110
-      ((0101 entries)
-       (1110 (111 key value)))
-      ((101 key (100 (100 entries)))
-       (111 (111 key value) (011 entries)))
+  (функція (key value entries)
+    (за-умовою
+      ((порожній? entries)
+       (список (сполучити key value)))
+      ((тотожне? key (перше (перше entries)))
+       (сполучити (сполучити key value) (решта entries)))
       (#d1:1
-       (111 (100 entries)
-            (map-insert key value (011 entries)))))))
+       (сполучити (перше entries)
+            (map-insert key value (решта entries)))))))
 
 (0011 map-get
-  (0010 (key entries)
-    (110
-      ((0101 entries) (001 ()))
-      ((101 key (100 (100 entries)))
-       (1110 (011 (100 entries))))
+  (функція (key entries)
+    (за-умовою
+      ((порожній? entries) (як-є ()))
+      ((тотожне? key (перше (перше entries)))
+       (список (решта (перше entries))))
       (#d1:1
-       (map-get key (011 entries))))))
+       (map-get key (решта entries))))))
 
 ; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.
 (0011 map-contains?
-  (0010 (key entries)
-    (0100 (010 (map-get key entries)))))
+  (функція (key entries)
+    (хибне? (атом? (map-get key entries)))))
 
 (0011 map->list
-  (0010 (entries) entries))
+  (функція (entries) entries))
 
 ; Приватні Lisp-owned механізми. Назви лишають зовнішній D9 resident
 ; fail-closed: residency сама по собі не створює mechanism.
