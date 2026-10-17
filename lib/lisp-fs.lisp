@@ -550,3 +550,30 @@
 (0011 фс-журнал-додати fs-journal-append)
 ; D9:001111100
 (0011 фс-серіалізувати-журнал fs-serialize-journal)
+
+; D9 canonical Ukrainian SENS aliases for persistent functional FS laws.
+; No unqualified domain conversion, new machine mechanisms or host I/O path.
+; D9:010000010
+(0011 фс-записати fs-write)
+; D9:010110011
+(0011 фс-читати fs-read)
+; D9:001010100
+(0011 фс-об'єкт-адреси fs-object-addresses)
+; D9:010101111
+(0011 фс-пакет-поле fs-package-field)
+; D9:010010111
+(0011 фс-серіалізувати-об'єкт fs-serialize-object)
+; D9:101000110
+(0011 фс-десеріалізувати-об'єкт fs-deserialize-object)
+; D9:010011000
+(0011 фс-серіалізувати-корінь fs-serialize-root)
+; D9:001110011
+(0011 фс-десеріалізувати-корінь fs-deserialize-root)
+; D9:001100100
+(0011 фс-побудувати-об'єкт-сховище fs-build-object-store)
+; D9:010101000
+(0011 фс-відновити-корінь fs-reconstruct-root)
+; D9:001010110
+(0011 фс-зв'язки-з-список fs-bindings-from-list)
+; D9:001100000
+(0011 фс-розв'язати fs-unbind)
