@@ -144,6 +144,25 @@ jobs:
             exit 1
           fi
           echo "D9_UK_PROJECTIONS_PASS functions=4 laws=10 authority=SENS"
+          # D9 D24 NUMBER->STRING: людина бачить проєкцію, арифметика лишається D24.
+          number_laws="tests/semantic/d9-number-d24-text-laws.lisp"
+          number_bad="tests/semantic/d9-number-d24-text-invalid.lisp"
+          sha256sum "$number_laws" "$number_bad" lib/core4.lisp target/debug/sens
+          if ! number_out="$(target/debug/sens "$number_laws" 2>&1)"; then
+            echo "::error::D9_NUMBER_TEXT_EXEC_RED layer=eval expected=six-D1-yes actual=execution-error" >&2
+            printf "%s\n" "$number_out" >&2
+            exit 1
+          fi
+          number_actual="$(printf "%s\n" "$number_out" | tail -n 1)"
+          if [[ "$number_actual" != "(1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_NUMBER_TEXT_LAW_DIFF layer=eval expected=(1 1 1 1 1 1) actual=$number_actual" >&2
+            exit 1
+          fi
+          if number_negative="$(target/debug/sens "$number_bad" 2>&1)"; then
+            echo "::error::D9_NUMBER_TEXT_TYPE_ACCEPTED layer=eval expected=explicit-D24-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D9_NUMBER_D24_TEXT_SENS_PASS laws=6 negative=1 scope=integer-D24-only"
 
       - name: "D9 — реальні визначення TMS, 10 законів SENS"
         shell: bash
