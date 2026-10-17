@@ -3399,3 +3399,35 @@
               ((менше? ліва права) права)
               (#d1:1 ліва))))))))
 (0011 world-depth світ-глибина)
+
+
+; D9 content-store algebra — derived SENS representation from lib/content-store.lisp.
+; Immutable address/value alist: ((address . value) ...), D3:101 atom key identity.
+; The lookup returns a singleton (value) on presence, () on absence;
+; a stored () therefore remains distinguishable from an absent address.
+; These language closures do not grant D9 direct value-call mechanisms.
+; D9:000100001 EMPTY-CONTENT-STORE
+(0011 порожній-вміст-сховище
+  (0010 () (001 ())))
+
+; D9:000010111 CONTENT-STORE-SIZE — D6 LENGTH's exact D24 numeric law.
+(0011 вміст-сховище-розмір
+  (0010 (сховище)
+    (довжина сховище)))
+
+; D9:000100000 CONTENT-STORE-GET — singleton value for found key, () if absent.
+(0011 вміст-сховище-отримати
+  (0010 (сховище адреса)
+    (110
+      ((0101 сховище) (001 ()))
+      ((101 адреса (100 (100 сховище)))
+       (1110 (011 (100 сховище))))
+      (#d1:1 (вміст-сховище-отримати (011 сховище) адреса)))))
+
+; D9:000011110 CONTENT-STORE-CONTAINS? — presence, never value truthiness.
+(0011 вміст-сховище-містить?
+  (0010 (сховище адреса)
+    (110
+      ((0101 сховище) #d1:0)
+      ((101 адреса (100 (100 сховище))) #d1:1)
+      (#d1:1 (вміст-сховище-містить? (011 сховище) адреса)))))

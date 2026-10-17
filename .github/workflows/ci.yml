@@ -477,6 +477,25 @@ jobs:
             exit 1
           fi
           echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
+          # D9 immutable content-store (alist): 10 SENS laws and malformed-store rejection.
+          d9_store="tests/semantic/d9-content-store-projection-laws.lisp"
+          d9_store_bad="tests/semantic/d9-content-store-malformed.lisp"
+          sha256sum "$d9_store" "$d9_store_bad" lib/core4.lisp target/debug/sens
+          if ! store_out="$(target/debug/sens "$d9_store" 2>&1)"; then
+            echo "::error::D9_STORE_NATIVE_RED layer=eval fixture=$d9_store expected=ten-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$store_out" >&2
+            exit 1
+          fi
+          store_observed="$(printf "%s\n" "$store_out" | tail -n 1)"
+          if [[ "$store_observed" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_STORE_LAW_DIFF layer=eval fixture=$d9_store expected=(1 1 1 1 1 1 1 1 1 1) actual=$store_observed first_diff=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if malformed="$(target/debug/sens "$d9_store_bad" 2>&1)"; then
+            echo "::error::D9_STORE_MALFORMED_ACCEPTED layer=eval fixture=$d9_store_bad expected=refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D9_CONTENT_STORE_SENS_PASS identities=D9:000100001,D9:000010111,D9:000100000,D9:000011110 laws=10 negative=1"
           # D9 result-status algebra — native SENS, 9 derived residents, 18 D1 laws.
           d9_outcomes="tests/semantic/d9-result-status-algebra-laws.lisp"
           sha256sum "$d9_outcomes" lib/core4.lisp target/debug/sens
