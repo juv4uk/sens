@@ -329,7 +329,8 @@ jobs:
           zig test research/zig-codecs/t5m.zig --test-filter "T5M transports D1 through D10 exact widths including D10 leading zeros"
           echo "T5M_D10_TRANSPORT_PASS path=research/zig-codecs/t5m.zig exact_width=10 callability=NOT-INFERRED"
 
-          d10_source="tests/semantic/t5m-bench-time.bits"
+          cp tests/semantic/t5m-bench-time.bits "$RUNNER_TEMP/t5m-sens/time-d10.lisp"
+          d10_source="$RUNNER_TEMP/t5m-sens/time-d10.lisp"
           d10_words="$(cat "$d10_source")"
           if [[ "$d10_words" != "10 0011110110 01" ]]; then
             echo "::error::T5M_D10_MONONS_FIXTURE_DRIFT expected='10 0011110110 01' actual=$d10_words" >&2
