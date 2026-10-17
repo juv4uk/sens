@@ -42,8 +42,8 @@
   (result-proper-list? (quote (а б)))
   (not? (result-proper-list? (cons (quote а) (quote б))))
   (forall-every-candidate-satisfies?
-    (lambda (x) (not? (0101 x)))
+    (lambda (x) (not? (null? x)))
     (quote (а б)))
   (not? (forall-every-candidate-satisfies?
-          (lambda (x) (0101 x))
+          (lambda (x) (null? x))
           (quote (а б)))))
