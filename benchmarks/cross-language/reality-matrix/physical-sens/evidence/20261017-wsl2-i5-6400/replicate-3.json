@@ -1,0 +1,220 @@
+{
+  "schema": "sens-physical-d3-native-vs-microcpu-pilot/v1",
+  "repository_head": "5716836903165e24f73014b257be3d9e6a1c3518",
+  "contract_version": "11.9",
+  "cpu": "Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "architecture": "x86_64",
+  "python": "3.12.12",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "zig_version_pin": "0.16.0",
+  "sens_cli_sha256": "6db78d10a624c3b78c295384d94748d8da5920c539e52fa7a694a9006a1e5e5e",
+  "phase_probe_sha256": "e647698bd1b4ab884700d8c0ca8e5a7ea1f85048f931e9bf18947452b94976b9",
+  "samples_per_process": 11,
+  "loops_per_sample": 100,
+  "warmup_samples": 2,
+  "process_replications": 1,
+  "methodology": "Same tracked physical T5 bytes; positive and one-D1-bit negative parity for both engines is checked before any timing. Native SENS full phase is decode+parse+fresh-session+execute; warm is eval over parsed forms in a reused Session. Python full phase is decode+compile+execute; warm is replay of precompiled slots. Different implementations/representations; exploratory implementation-specific D1-D3 pilot, not a language ranking.",
+  "cases": {
+    "d3-selftest-positive": {
+      "path": "tests/fixtures/semantic/d3-selftest.sens",
+      "physical_bytes": 136,
+      "physical_sha256": "3493225aebcf8703667a7b6d13aee1ec0d5f2a4d56b60a8fadcf593a2e1e8413",
+      "expected_result": "1",
+      "parity": {
+        "expected": "1",
+        "native_sens": "1",
+        "python_microcpu": "1",
+        "equal": true
+      },
+      "word_count": 223,
+      "microcpu_slot_count": 108,
+      "native_sens": {
+        "probe_metadata": {
+          "version": "version",
+          "oracle_hex": "31",
+          "words": "223",
+          "t5_bytes": "136"
+        },
+        "full_decode_parse_execute": {
+          "p50": 179336,
+          "p95": 200594,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            179336,
+            176379,
+            186432,
+            188721,
+            175765,
+            177839,
+            181971,
+            170550,
+            183504,
+            178304,
+            200594
+          ]
+        },
+        "warm_eval_hot": {
+          "p50": 10573,
+          "p95": 13508,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            10545,
+            13362,
+            10341,
+            10573,
+            10993,
+            10456,
+            10485,
+            10600,
+            10976,
+            10293,
+            13508
+          ]
+        }
+      },
+      "python_microcpu": {
+        "full_decode_compile_execute": {
+          "p50": 418587,
+          "p95": 522448,
+          "min": 396425,
+          "max": 522448,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            509648,
+            522448,
+            438514,
+            397079,
+            411850,
+            398045,
+            396425,
+            459483,
+            418587,
+            469826,
+            399148
+          ]
+        },
+        "warm_compiled_slot_replay": {
+          "p50": 20073,
+          "p95": 24249,
+          "min": 19424,
+          "max": 24249,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            21948,
+            20256,
+            19673,
+            19826,
+            21585,
+            24249,
+            19458,
+            20248,
+            19424,
+            19681,
+            20073
+          ]
+        }
+      }
+    },
+    "d3-selftest-negative-one-bit": {
+      "path": "tests/fixtures/semantic/d3-selftest-negative.sens",
+      "physical_bytes": 136,
+      "physical_sha256": "a40485cc80c95517780652bdaaafd17a59c5304a8ac2cb9894ae68899e27be35",
+      "expected_result": "0",
+      "parity": {
+        "expected": "0",
+        "native_sens": "0",
+        "python_microcpu": "0",
+        "equal": true
+      },
+      "word_count": 223,
+      "microcpu_slot_count": 108,
+      "native_sens": {
+        "probe_metadata": {
+          "version": "version",
+          "oracle_hex": "30",
+          "words": "223",
+          "t5_bytes": "136"
+        },
+        "full_decode_parse_execute": {
+          "p50": 181115,
+          "p95": 240177,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            203995,
+            171920,
+            240177,
+            169124,
+            204372,
+            189987,
+            175225,
+            169580,
+            179679,
+            181115,
+            213614
+          ]
+        },
+        "warm_eval_hot": {
+          "p50": 10335,
+          "p95": 10862,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            10687,
+            10335,
+            9981,
+            10360,
+            10666,
+            10280,
+            10554,
+            10026,
+            10862,
+            10248,
+            10059
+          ]
+        }
+      },
+      "python_microcpu": {
+        "full_decode_compile_execute": {
+          "p50": 409549,
+          "p95": 421167,
+          "min": 393407,
+          "max": 421167,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            412297,
+            421167,
+            410978,
+            416203,
+            409549,
+            406504,
+            404575,
+            417641,
+            402680,
+            404625,
+            393407
+          ]
+        },
+        "warm_compiled_slot_replay": {
+          "p50": 17152,
+          "p95": 24179,
+          "min": 16101,
+          "max": 24179,
+          "samples": 11,
+          "raw_ns_per_operation": [
+            17224,
+            16883,
+            17174,
+            16981,
+            16608,
+            16735,
+            22969,
+            17152,
+            19127,
+            16101,
+            24179
+          ]
+        }
+      }
+    }
+  }
+}

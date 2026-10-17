@@ -67,6 +67,14 @@ Do not create benchmark-local replacements for evidence that already has an owne
   CPU lane with fail-closed semantic trace/value/output parity before timing.
 - `benchmarks/cross-language/run.py` — reusable phase/statistics discipline, but its
   historical Function8 SENS lane must not be relabeled as current D1-D7 evidence.
+- `physical-sens/` — narrow native-SENS vs Python-µCPU D1-D3 pilot on two identical,
+  tracked physical `.sens` fixtures; its verdict is deliberately `inconclusive`, not a
+  general language ranking. See the [Ukrainian method and limits](physical-sens/README.uk.md).
+
+Українською: [`physical-sens/`](physical-sens/README.uk.md) містить вузький D1–D3
+пілот на однакових фізичних `.sens` байтах для native SENS і дослідного Python µCPU.
+Він доповнює #3680, зберігає parity та сирі виміри, але через різні внутрішні
+подання й локальне середовище не оголошує переможця чи перевагу мови.
 
 Competitor adapters should consume or join these owner outputs. If an owner lane lacks a
 needed metric, extend the owner or record the metric as unavailable; do not synthesize a
