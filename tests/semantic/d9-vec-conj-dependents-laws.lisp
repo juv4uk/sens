@@ -1,12 +1,32 @@
 ; D9:101011101 VEC-CONJ and D9:001011100 DEPENDENTS-OF.
-; Eight D1:YES: list-carrier preservation, ordering, nested element, absent-key
-; and a deliberate wrong-order falsifier. No direct 9-bit call head.
-(list
-  (equal? (вектор-додати (quote ()) (quote а)) (list (quote а)))
-  (equal? (вектор-додати (list (quote а) (quote б)) (quote в)) (list (quote а) (quote б) (quote в)))
-  (equal? (вектор-додати (list (quote а)) (list (quote б) (quote в))) (list (quote а) (list (quote б) (quote в))))
-  (equal? (вектор-список (вектор-додати (list (quote а)) (quote б))) (list (quote а) (quote б)))
-  (not? (equal? (вектор-додати (list (quote а)) (quote б)) (list (quote б) (quote а))))
-  (equal? (залежні-від (quote ключ) (мапа-вставити (quote ключ) (list (quote а) (quote б)) (quote ()))) (list (list (quote а) (quote б))))
-  (equal? (залежні-від (quote відсутній) (мапа-вставити (quote ключ) (quote а) (quote ()))) (quote ()))
-  (equal? (залежні-від (quote ключ) (мапа-вставити (quote ключ) (quote а) (quote ()))) (мапа-отримати (quote ключ) (мапа-вставити (quote ключ) (quote а) (quote ())))))
+; Eight exact D1 YES witnesses: list vector order/nesting and TMS support
+; membership, absent support, multiple dependents, and wrong-order falsifier.
+; Donor: lib/forward.lisp (fact . supports). No direct D9 opcode.
+(список
+  (тотожне? (вектор-додати (як-є ()) (як-є а)) (список (як-є а)))
+  (тотожне? (вектор-додати (список (як-є а) (як-є б)) (як-є в))
+             (список (як-є а) (як-є б) (як-є в)))
+  (тотожне? (вектор-додати (список (як-є а)) (список (як-є б) (як-є в)))
+             (список (як-є а) (список (як-є б) (як-є в))))
+  (тотожне? (вектор-список (вектор-додати (список (як-є а)) (як-є б)))
+             (список (як-є а) (як-є б)))
+  (хибне? (тотожне? (вектор-додати (список (як-є а)) (як-є б))
+                     (список (як-є б) (як-є а))))
+  (тотожне?
+    (залежні-від (як-є джерело)
+      (список
+        (сполучити (як-є похідний) (список (як-є джерело)))
+        (сполучити (як-є незалежний) (список (як-є інше)))))
+    (список (як-є похідний)))
+  (тотожне?
+    (залежні-від (як-є відсутній)
+      (список (сполучити (як-є похідний) (список (як-є джерело)))))
+    (як-є ()))
+  (тотожне?
+    (залежні-від (як-є джерело)
+      (список
+        (сполучити (як-є похідний-а) (список (як-є джерело)))
+        (сполучити (як-є джерело) (список (як-є стороннє)))
+        (сполучити (як-є похідний-б)
+                   (список (як-є стороннє) (як-є джерело)))))
+    (список (як-є похідний-а) (як-є похідний-б))))
