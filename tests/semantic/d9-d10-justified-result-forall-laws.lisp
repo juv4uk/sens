@@ -6,11 +6,11 @@
   (equal? (кількість-результатів (list (quote а) (quote б))) #d24:000000000000000000000010)
   (not? (equal? (кількість-результатів (list (quote а))) #d24:000000000000000000000010))
   (кожен-задовольняє?
-    (0010 (значення) (equal? значення (quote а))) (list (quote а) (quote а)))
+    (функція (значення) (equal? значення (quote а))) (list (quote а) (quote а)))
   (not? (кожен-задовольняє?
-    (0010 (значення) (equal? значення (quote а))) (list (quote а) (quote б))))
+    (функція (значення) (equal? значення (quote а))) (list (quote а) (quote б))))
   (кожен-задовольняє?
-    (0010 (значення) (equal? значення (quote а))) (quote ()))
+    (функція (значення) (equal? значення (quote а))) (quote ()))
   (equal? (додати-нові-обґрунтований (list (quote а)) (list (quote б)))
           (list (quote а) (quote б)))
   (not? (equal? (додати-нові-обґрунтований (list (quote а)) (list (quote б)))
