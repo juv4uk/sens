@@ -602,6 +602,10 @@
     (0010 (a b)
       (f b a))))
 
+; English projections of the already-defined D6 residents; no new semantic laws.
+(0011 compose скласти-функції)
+(0011 flip поміняти-аргументи)
+
 ; D6:001101 — ACONS, приєднати пару ключ/значення до асоціацій.
 ; Лише два D3:111 CONS; без direct D6 callability.
 (0011 додати-асоціацію
