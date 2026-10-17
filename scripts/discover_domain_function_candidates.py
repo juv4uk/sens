@@ -385,6 +385,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-research-scan", action="store_true")
     parser.add_argument("--candidates-only", action="store_true",
                         help="drop structural/data/syntax residents from the requested batch")
+    parser.add_argument("--evidence-first", action="store_true",
+                        help="prioritize candidates with source definitions and existing witness references")
     args = parser.parse_args(argv)
     if args.limit < 0:
         parser.error("--limit must be >= 0")
@@ -398,6 +400,18 @@ def main(argv: list[str] | None = None) -> int:
         rows = [row for row in rows if row["domain"] == domain]
     if args.candidates_only:
         rows = [row for row in rows if row["function_candidate"]]
+    if args.evidence_first:
+        rows = sorted(
+            rows,
+            key=lambda row: (
+                -int(bool(row["source_definition_paths"])),
+                -int(bool(row["witness_reference_paths"])),
+                -row["research_mention_files"],
+                -row["witness_reference_files"],
+                row["domain"],
+                row["bits"],
+            ),
+        )
     if args.limit:
         rows = rows[:args.limit]
     if args.format == "tsv":
