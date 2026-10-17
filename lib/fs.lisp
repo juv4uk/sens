@@ -21,9 +21,9 @@
 (0011 read-file
   (0010 (path)
     ((0010 (decoded)
-      (110
-        ((101 (100 decoded) (001 decoded))
-         (1001 decoded))
+      (за-умовою
+        ((тотожне? (перше decoded) (як-є decoded))
+         (друге decoded))
         (#d1:1
          decoded)))
      (read-file-utf8-raw path))))
@@ -32,7 +32,7 @@
 ; encoding policy belongs to Lisp, host only persists bytes.
 (0011 write-file
   (0010 (path text)
-    (1001 (1110 (write-file-bytes path (utf8-encode-string text)) text))))
+    (друге (список (write-file-bytes path (utf8-encode-string text)) text))))
 
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.

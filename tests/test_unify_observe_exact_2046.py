@@ -54,7 +54,24 @@ def visit(ast):
             yield from visit(item)
 
 
+# Українські call heads не змінюють ратифікованої координати.
+# Таблиця є джерелом значень, а не історичний SID8 або текстова ширина.
+def normalize_operator_heads(ast):
+    if not isinstance(ast, list):
+        return ast
+    items = [normalize_operator_heads(item) for item in ast]
+    if items and isinstance(items[0], str):
+        mappings = {
+            "як-є": "001", "атом?": "010", "решта": "011",
+            "перше": "100", "тотожне?": "101", "за-умовою": "110",
+            "сполучити": "111", "список": "1110",
+        }
+        items[0] = mappings.get(items[0], items[0])
+    return items
+
+
 def validate(forms):
+    forms = normalize_operator_heads(forms)
     if len(forms) != 2:
         raise AssertionError("рівно два D4 визначення")
     if not all(isinstance(f, list) and len(f) == 3 and f[0] == "0011"
@@ -135,9 +152,13 @@ class UnifyObserveExact(unittest.TestCase):
         text = SOURCE.read_text(encoding="utf-8")
         code = text[text.index("(0011 "):]
         opheads = tuple(re.findall(r"\(([01]{3,10})(?=[\s(])", code))
-        self.assertEqual(sum(map(len, OLD_HEADS)), 90)
-        self.assertEqual(sum(map(len, opheads)), 58)
-        self.assertEqual(58 - 90, -32)  # не оцінка фізичного T5
+        self.assertEqual(sum(map(len, OLD_HEADS)), 90)  # незмінна стара механічна база
+        self.assertEqual(opheads, ("0011", "0010", "0011", "0010"))
+        self.assertEqual(sum(map(len, opheads)), 16)
+        # Це лічба джерельних binary heads, а не фізична T5M-метрика.
+        self.assertIn("(за-умовою", code)
+        self.assertIn("(тотожне?", code)
+        self.assertIn("(список", code)
 
     def test_exhaustive_2046_domains_and_six_surfaces(self):
         ids = exact_catalog(all_2046())
@@ -181,6 +202,22 @@ class UnifyObserveExact(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "рівно раз"):
             validate(altered)
 
+
+    def test_current_ukrainian_identity_preserves_original_three_outcomes(self):
+        original = self.forms
+        validate(original)
+        normalized = normalize_operator_heads(original)
+        self.assertEqual(normalized[0][2][2][0], "110")
+        self.assertEqual(normalized[0][2][2][1][0][0], "010")
+        self.assertEqual(normalized[0][2][2][1][1][0], "110")
+        self.assertEqual(normalized[1][2][2][0], HELPER)
+
+    def test_negative_ukrainian_wrong_predicate_changes_law(self):
+        altered = copy.deepcopy(self.forms)
+        # В активному D3 COND другий рівень використовує EQ, не CONS.
+        altered[0][2][2][1][1][1][0][0] = "сполучити"
+        with self.assertRaisesRegex(AssertionError, "3 класи"):
+            validate(altered)
 
 if __name__ == "__main__":
     unittest.main()

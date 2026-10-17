@@ -17,15 +17,15 @@
 
 (0011 уніфікація-спостереження-стан
   (0010 (raw left right substitution)
-    (110
-      ((010 raw)
-       (110
-         ((101 raw (001 fail))
-          (1110 (001 unification-failure) left right substitution))
-         ((010 (001 ()))
-          (1110 (001 unified) raw))))
-      ((010 (001 ()))
-       (1110 (001 unified) raw)))))
+    (за-умовою
+      ((атом? raw)
+       (за-умовою
+         ((тотожне? raw (як-є fail))
+          (список (як-є unification-failure) left right substitution))
+         ((атом? (як-є ()))
+          (список (як-є unified) raw))))
+      ((атом? (як-є ()))
+       (список (як-є unified) raw)))))
 
 (0011 unify-observe
   (0010 (left right substitution)
