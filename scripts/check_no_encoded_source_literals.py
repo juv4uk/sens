@@ -30,6 +30,38 @@ ENCODED_WORD = re.compile(
 NUMBER = r"[+-]?(?:\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)"
 NUMERIC_CALL_HEAD = re.compile(rf"\(\s*({NUMBER})(?=\s|\)|$)")
 
+# Domain-table coordinates are declarative keys, not Lisp call heads.
+# Exemption is limited to complete canonical rows at their exact file width.
+DOMAIN_TABLE_PATH = re.compile(r"^lib/domains/d(?P<width>10|11|[1-9])\.lisp$")
+DOMAIN_TOKEN = r'(?:\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
+DOMAIN_TABLE_ROW = re.compile(
+    r"^\s*\((?P<bits>[01]{1,11})\s+"
+    + rf"\(ук\s+{DOMAIN_TOKEN}\)\s+"
+    + rf"\(укр\s+{DOMAIN_TOKEN}\)\s+"
+    + rf"\(san\s+{DOMAIN_TOKEN}\)\s+"
+    + rf"\(en\s+{DOMAIN_TOKEN}\)\s+"
+    + rf"\(LISP\s+{DOMAIN_TOKEN}\)\s+"
+    + rf"\(sym\s+{DOMAIN_TOKEN}\)\)\s*$"
+)
+
+
+def _is_domain_table_key_head(source: str, path: str | Path | None, offset: int) -> bool:
+    if path is None:
+        return False
+    path_match = DOMAIN_TABLE_PATH.fullmatch(Path(path).as_posix())
+    if path_match is None:
+        return False
+    line_start = source.rfind("\n", 0, offset) + 1
+    line_end = source.find("\n", offset)
+    if line_end < 0:
+        line_end = len(source)
+    row_match = DOMAIN_TABLE_ROW.fullmatch(source[line_start:line_end].rstrip("\r"))
+    return bool(
+        row_match
+        and len(row_match.group("bits")) == int(path_match.group("width"))
+        and line_start + row_match.start("bits") == offset
+    )
+
 
 def _mask_comments_and_strings(source: str) -> str:
     """Keep offsets/newlines while removing comments and string contents."""
@@ -63,7 +95,7 @@ def _mask_comments_and_strings(source: str) -> str:
     return "".join(out)
 
 
-def find_forbidden_literals(source: str) -> list[Finding]:
+def find_forbidden_literals(source: str, path: str | Path | None = None) -> list[Finding]:
     """Find raw typed-wire spellings and numeric call heads in Lisp code.
 
     A decimal number in argument/data position (for example ``(сума 235)``)
@@ -77,6 +109,8 @@ def find_forbidden_literals(source: str) -> list[Finding]:
         findings.append(Finding(line, column, match.group(), "encoded domain/wire word"))
     for match in NUMERIC_CALL_HEAD.finditer(code):
         start = match.start(1)
+        if _is_domain_table_key_head(source, path, start):
+            continue
         line = code.count("\n", 0, start) + 1
         column = start - code.rfind("\n", 0, start)
         findings.append(Finding(line, column, match.group(1), "numeric function/opcode head"))
@@ -144,7 +178,7 @@ def check(root: Path, base: str | None = None) -> tuple[int, list[tuple[str, Fin
     violations: list[tuple[str, Finding]] = []
     for path, added_lines in additions.items():
         source = (root / path).read_text(encoding="utf-8")
-        for finding in find_forbidden_literals(source):
+        for finding in find_forbidden_literals(source, path=path):
             if finding.line in added_lines:
                 violations.append((path, finding))
     return sum(map(len, additions.values())), violations

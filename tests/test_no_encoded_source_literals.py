@@ -35,6 +35,42 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         found = CHECK.find_forbidden_literals("(110 (аргумент))\n")
         self.assertEqual([item.token for item in found], ["110"])
 
+    def test_domain_table_key_exemption_is_exact_and_fail_closed(self):
+        row = (
+            '  (11010 (ук менше?) (укр менше?) (san hīna) '
+            '(en lessp?) (LISP LESSP) (sym "менше?"))\n'
+        )
+        self.assertEqual(CHECK.find_forbidden_literals(row, path="lib/domains/d5.lisp"), [])
+        # The same payload elsewhere is still a forbidden operation head.
+        found = CHECK.find_forbidden_literals(row, path="lib/example.lisp")
+        self.assertEqual([item.token for item in found], ["11010"])
+        # Wrong width, malformed row, or another numeric call is not exempt.
+        wrong_width = row.replace("(11010 ", "(1101 ", 1)
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals(
+                wrong_width, path="lib/domains/d5.lisp"
+            )],
+            ["1101"],
+        )
+        nested_call = row + "(110 x)\n"
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals(
+                nested_call, path="lib/domains/d5.lisp"
+            )],
+            ["110"],
+        )
+
+    def test_domain_table_exemption_never_allows_encoded_wire_words(self):
+        row = (
+            '  (11010 (ук менше?) (укр менше?) (san hīna) '
+            '(en lessp?) (LISP #d5:11010) (sym "менше?"))\n'
+        )
+        found = CHECK.find_forbidden_literals(row, path="lib/domains/d5.lisp")
+        self.assertEqual(
+            [(item.token, item.reason) for item in found],
+            [("#d5:11010", "encoded domain/wire word")],
+        )
+
     def test_comments_and_strings_do_not_create_false_positives(self):
         source = '; приклад (#d1:1) та (110 x)\n(пояснити "#d24:10 (110 x)")\n'
         self.assertEqual(CHECK.find_forbidden_literals(source), [])
@@ -95,6 +131,54 @@ diff --git a/tests/b.lisp b/tests/b.lisp
             decimal_result = run_guard()
             self.assertEqual(decimal_result.returncode, 0, decimal_result.stderr)
             self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", decimal_result.stdout)
+
+    def test_repository_gate_accepts_domain_rows_but_rejects_numeric_calls(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
+                check=True,
+            )
+            domain = root / "lib/domains/d5.lisp"
+            domain.parent.mkdir(parents=True)
+            domain.write_text("(domain-table/1\n)\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "lib/domains/d5.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "base"], check=True)
+            base_sha = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], check=True,
+                text=True, encoding="utf-8", stdout=subprocess.PIPE,
+            ).stdout.strip()
+
+            row = (
+                '  (11010 (ук менше?) (укр менше?) (san hīna) '
+                '(en lessp?) (LISP LESSP) (sym "менше?"))\n'
+            )
+            domain.write_text("(domain-table/1\n" + row + ")\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "lib/domains/d5.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "domain row"], check=True)
+
+            def run_guard():
+                return subprocess.run(
+                    [
+                        "python3", str(ROOT / "scripts" / "check_no_encoded_source_literals.py"),
+                        "--root", str(root), "--base", base_sha,
+                    ],
+                    cwd=ROOT, check=False, text=True, encoding="utf-8",
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
+
+            accepted = run_guard()
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", accepted.stdout)
+
+            domain.write_text(domain.read_text(encoding="utf-8") + "(110 x)\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "lib/domains/d5.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "numeric call regression"], check=True)
+            rejected = run_guard()
+            self.assertEqual(rejected.returncode, 1, rejected.stderr)
+            self.assertIn("numeric function/opcode head: 110", rejected.stderr)
 
     def test_repository_gate_checks_base_diff_without_a_merge_base(self):
         with tempfile.TemporaryDirectory() as temp_dir:
