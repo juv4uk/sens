@@ -2940,3 +2940,12 @@
       ((101 стан (001 unresolved)) #d1:1)
       ((101 стан (001 broken)) #d1:1)
       (#d1:1 #d1:0))))
+
+
+; D8:11111101 PAIR — historical two-sequence pair constructor.
+; Historical Lisp PAIR is recursively derived from CAR/CDR/CONS; the
+; existing D6 ZIP expression has this exact list-of-cons geometry.
+; The new D8 coordinate is an identity/projection, not a direct opcode.
+(0011 пара
+  (0010 (ліві праві)
+    (спарувати-послідовності ліві праві)))
