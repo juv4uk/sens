@@ -1361,6 +1361,37 @@ jobs:
           fi
           echo "D10_PARTITION_IF_NEGATIVE_PASS invalid-D1=1 improper-list=1 research_only=no-F1-F4-admission"
 
+          # D10 PAIP SORT*: narrowed stable sort for proper SENS lists only.
+          # This derives a language helper, not direct D10:0011001011 callability.
+          sort_laws="tests/semantic/d10-paip-sort-list-laws.lisp"
+          sort_bad="tests/semantic/d10-paip-sort-list-invalid-predicate.lisp"
+          sha256sum "$sort_laws" "$sort_bad" lib/core4.lisp target/debug/sens
+          if ! sort_out="$(target/debug/sens "$sort_laws" 2>&1)"; then
+            echo "::error::D10_SORT_LIST_EXEC_RED expected=five-D1-YES-laws actual=execution-error" >&2
+            printf "%s\n" "$sort_out" >&2
+            record_red "d10-paip-sort-list-laws" "$sort_laws" "(1 1 1 1 1)" "execution-error" "$sort_out"
+            exit 1
+          fi
+          sort_actual="$(printf "%s\n" "$sort_out" | tail -n 1)"
+          if [[ "$sort_actual" != "(1 1 1 1 1)" ]]; then
+            echo "::error::D10_SORT_LIST_LAW_DIFF expected='(1 1 1 1 1)' actual=$sort_actual" >&2
+            record_red "d10-paip-sort-list-laws" "$sort_laws" "(1 1 1 1 1)" "$sort_actual" "$sort_out"
+            exit 1
+          fi
+          echo "D10_PAIP_SORT_LIST_NATIVE_PASS laws=5 stable=yes copy=yes D10_opcode_admission=no"
+          if sort_bad_out="$(target/debug/sens "$sort_bad" 2>&1)"; then
+            echo "::error::D10_SORT_LIST_INVALID_PREDICATE_ACCEPTED expected=exact-D1-refusal actual=accepted" >&2
+            record_red "d10-paip-sort-list-invalid-predicate" "$sort_bad" "exact D1 refusal" "accepted"
+            exit 1
+          fi
+          if [[ "$sort_bad_out" != *"D3:110 COND expects exact D1:1 / D1:0"* ]]; then
+            echo "::error::D10_SORT_LIST_WRONG_NEGATIVE expected=exact-D1-COND-refusal actual=$sort_bad_out" >&2
+            record_red "d10-paip-sort-list-invalid-predicate" "$sort_bad" "D3:110 COND expects exact D1:1 / D1:0" "$sort_bad_out" "$sort_bad_out"
+            exit 1
+          fi
+          echo "D10_PAIP_SORT_LIST_NEGATIVE_PASS structural-empty-not-D1 direct-D10-admission=no"
+
+
           canon_file="tests/semantic/d9-canon-record-algebra-laws.lisp"
           canon_bad="tests/semantic/d9-canon-record-truncated-negative.lisp"
           sha256sum "$canon_file" "$canon_bad" lib/core4.lisp target/debug/sens

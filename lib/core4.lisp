@@ -5101,3 +5101,38 @@
       ((0100 (010 (100 форма))) #d1:0)
       ((101 (100 форма) (001 deftemplate)) #d1:1)
       (#d1:1 #d1:0))))
+
+
+; PAIP SORT*: a deliberately list-only derived SENS helper.
+; Donor: juv4uk/paip-lisp@2db2ba99465cadef904e574b20b6981b32ad81df,
+; lisp/auxfns.lisp. The donor's full sequence/key API is broader.
+; These helpers accept a proper list and a strict "comes before" predicate
+; that must return an exact D1 PredicateBit. Processing input left-to-right
+; and placing a new item after equal keys keeps ties stable.
+; This is NOT direct admission of D10:0011001011 SORT*; that row remains research.
+
+(0011 вставити-впорядковано-за
+  (0010 (перед? елемент упорядкований)
+    (110
+      ((порожнє? упорядкований)
+       (сполучити елемент (як-є ())))
+      ((перед? елемент (перше упорядкований))
+       (сполучити елемент упорядкований))
+      (#d1:1
+       (сполучити
+         (перше упорядкований)
+         (вставити-впорядковано-за перед? елемент (решта упорядкований)))))))
+
+(0011 сортувати-список-за-крок
+  (0010 (перед? залишок упорядкований)
+    (110
+      ((порожнє? залишок) упорядкований)
+      (#d1:1
+       (сортувати-список-за-крок
+         перед?
+         (решта залишок)
+         (вставити-впорядковано-за перед? (перше залишок) упорядкований))))))
+
+(0011 сортувати-список-за
+  (0010 (перед? елементи)
+    (сортувати-список-за-крок перед? елементи (як-є ()))))
