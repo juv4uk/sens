@@ -191,3 +191,9 @@
       (1
        (000100111
          (1110 (001 module-not-found) module-name))))))
+
+; D9:000010000 REASON-OBSERVE and D9:000110100 REASON-IN-OBSERVE.
+; Ukrainian SENS bindings to the existing source-owned reasoning laws.
+; No direct D9 machine admission.
+(0011 міркувати-спостерігати reason-observe)
+(0011 міркувати-у-спостерігати reason-in-observe)
