@@ -70,6 +70,13 @@ jobs:
           python3 scripts/check_semantic_registry.py
           python3 scripts/check_alias_identity.py
 
+      - name: D1–D10 — пакетний пошук кандидатів без нового реєстру
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests/test_discover_domain_function_candidates.py -v
+          python3 scripts/discover_domain_function_candidates.py --domain D6 --limit 16 --format tsv --no-research-scan
+
       - name: Код запускається — entry-points, читач і кодек на реальних файлах
         if: ${{ always() }}
         run: python3 -m unittest tests/test_code_runs.py -v
