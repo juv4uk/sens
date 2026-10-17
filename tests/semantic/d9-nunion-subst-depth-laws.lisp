@@ -18,9 +18,9 @@
                 (світ-глибина (011 т))))
             (світ-глибина (100 т)))))))))
 (list
-  (equal? (nunion (list (quote а)) (list (quote б)))
+  (equal? (об'єднання (list (quote а)) (list (quote б)))
           (об'єднання (list (quote а)) (list (quote б))))
-  (equal? (nunion (list (quote а)) (list (quote а)))
+  (equal? (об'єднання (list (quote а)) (list (quote а)))
           (list (quote а)))
   (equal? (застосувати-підстановка (quote нове) (quote старе)
                                    (list (quote старе) (quote x)))

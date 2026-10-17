@@ -30,6 +30,6 @@
           (list (list (quote a) (quote 1))))
   (equal? (вектор-кількість (list (quote a) (quote b) (quote c)))
           #d24:000000000000000000000011)
-  (equal? (вектор-n-тий #d24:000000000000000000000001
+  (equal? (елемент-списку #d24:000000000000000000000001
                         (list (quote a) (quote b) (quote c)))
           (quote b)))
