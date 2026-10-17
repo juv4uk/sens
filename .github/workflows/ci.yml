@@ -244,6 +244,34 @@ jobs:
           fi
           echo "D8_ELTMAPONEP_NATIVE_PASS identities=D8:00000101,D8:11000101,D8:11111011 laws=10 negative=1"
 
+      - name: D9 — FS адреси та CLIPS функції, нативний SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          witness="tests/semantic/d9-fs-clips-derived-laws.lisp"
+          sha256sum "$witness" lib/core4.lisp target/debug/sens
+          if ! output="$(target/debug/sens "$witness" 2>&1)"; then
+            echo "::error::D9_FS_CLIPS_EXEC_RED layer=eval fixture=$witness expected=eight-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$output" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$output" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_FS_CLIPS_LAW_DIFF layer=eval fixture=$witness expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          for negative in tests/semantic/d9-fs-objects-invalid.lisp tests/semantic/d9-clips-var-invalid.lisp; do
+            sha256sum "$negative"
+            if bad="$(target/debug/sens "$negative" 2>&1)"; then
+              echo "::error::D9_FS_CLIPS_NEG_ACCEPTED layer=eval fixture=$negative expected=typed-refusal actual=accepted" >&2
+              exit 1
+            fi
+            if ! grep -Eiq "car|symbol|type|expected" <<< "$bad"; then
+              echo "::error::D9_FS_CLIPS_NEG_WRONG_ERROR layer=eval fixture=$negative expected=type-refusal actual=$bad" >&2
+              exit 1
+            fi
+          done
+          echo "D9_FS_CLIPS_SENS_PASS identities=D9:001010100,D9:001011110,D9:001010101 laws=8 negatives=2"
       - name: T5M-SENS-CODEC — наш кодек виконується мовою (розмір + round-trip)
         id: sens-t5m-codec
         shell: bash
