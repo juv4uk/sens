@@ -4340,3 +4340,43 @@
 ; закон проєкції над D9:101100101 MAP-GET, не host-регістр.
 ; research/d10-d9-noteq-vector-lint-batch-2026-10-17.lisp
 (0011 залежні-від мапа-отримати)
+
+; D9:100001000 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-п-п-п
+  (0010 (значення)
+    (п-п-п-р-п-п (100 значення))))
+
+; D9:100001001 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-п-п-р
+  (0010 (значення)
+    (п-п-п-р-п-п (011 значення))))
+
+; D9:100001010 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-п-р-п
+  (0010 (значення)
+    (п-п-п-р-п-р (100 значення))))
+
+; D9:100001011 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-п-р-р
+  (0010 (значення)
+    (п-п-п-р-п-р (011 значення))))
+
+; D9:100001100 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-р-п-п
+  (0010 (значення)
+    (п-п-п-р-р-п (100 значення))))
+
+; D9:100001101 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-р-п-р
+  (0010 (значення)
+    (п-п-п-р-р-п (011 значення))))
+
+; D9:100001110 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-р-р-п
+  (0010 (значення)
+    (п-п-п-р-р-р (100 значення))))
+
+; D9:100001111 exact seven-step CAR/CDR path, composed over ratified six-step D8.
+(0011 п-п-п-р-р-р-р
+  (0010 (значення)
+    (п-п-п-р-р-р (011 значення))))
