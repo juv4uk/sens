@@ -11,7 +11,7 @@
     (функція (значення) (equal? значення (quote а))) (list (quote а) (quote б))))
   (кожен-задовольняє?
     (функція (значення) (equal? значення (quote а))) (quote ()))
-  (equal? (додати-нові-обґрунтований (list (quote а)) (list (quote б)))
-          (list (quote а) (quote б)))
-  (not? (equal? (додати-нові-обґрунтований (list (quote а)) (list (quote б)))
-                (list (quote а)))))
+  (equal? (додати-нові-обґрунтований (list (створити-обґрунтований (quote а) (list (quote опора-а)))) (list (створити-обґрунтований (quote б) (list (quote опора-б)))))
+          (list (створити-обґрунтований (quote а) (list (quote опора-а))) (створити-обґрунтований (quote б) (list (quote опора-б)))))
+  (not? (equal? (додати-нові-обґрунтований (list (створити-обґрунтований (quote а) (list (quote опора-а)))) (list (створити-обґрунтований (quote б) (list (quote опора-б)))))
+                (list (створити-обґрунтований (quote а) (list (quote опора-а)))))))
