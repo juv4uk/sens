@@ -229,6 +229,23 @@ jobs:
             else
               echo "D9_UK_NUMBER_TEXT_DIAGNOSTIC_RED=$extra" >&2
             fi
+            # Точкові виклики лише реального SENS на RED; Python не виконує семантику.
+            probes=(
+              '(нуль-д24? (довжина (quote (а б))))'
+              '(д24-цифра-у-текст (довжина (quote (а б))))'
+              '(д24-цифри-у-текст (довжина (quote (а б))) "")'
+              '(рядок-додати "2" "")'
+              '(mod (довжина (quote (а б))) #d24:000000000000000000001010)'
+              '(quotient (довжина (quote (а б))) #d24:000000000000000000001010)'
+            )
+            for expression in "${probes[@]}"; do
+              printf '%s\n' "$expression" > "$RUNNER_TEMP/d9-d24-number-probe.lisp"
+              if probe_observed="$(target/debug/sens "$RUNNER_TEMP/d9-d24-number-probe.lisp" 2>&1)"; then
+                echo "D9_D24_NUMBER_PROBE expression=$expression actual=$(tail -n 1 <<< "$probe_observed")" >&2
+              else
+                echo "D9_D24_NUMBER_PROBE_RED expression=$expression actual=$probe_observed" >&2
+              fi
+            done
             echo "::error::D9_UK_PROJECTIONS_DIFF id=d9-uk-four layer=eval fixture=$fixture expected='(1 1 1 1 1 1 1 1 1 1)' actual=$actual" >&2
             python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "$actual" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
             exit 1
