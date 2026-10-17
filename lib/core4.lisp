@@ -4015,6 +4015,20 @@
 ; D9:010010001 ADD-NEW-JUSTIFIED — той самий бездубльовий append-new.
 (0011 додати-нові-обґрунтований додати-нові)
 
+; D10:0010001110 KNOWLEDGE-PROPER-LIST? — harvested from lib/knowledge.lisp.
+; The entire CDR spine must terminate in D3:000, not an arbitrary atom.
+; Exact D1 result, no implicit truthiness or D10 opcode admission.
+(0011 правильний-список-знань?
+  (0010 (значення)
+    (110
+      ((0101 значення) #d1:1)
+      ((010 значення) #d1:0)
+      (#d1:1 (правильний-список-знань? (011 значення))))))
+
+; D10:0010010110 RESULT-PROPER-LIST? — same structural law,
+; independently located in lib/result-status.lisp.
+(0011 правильний-список-результатів? правильний-список-знань?)
+
 ; D10:0000000001 RESULT-COUNT: матеріалізовані результати як правильний список.
 (0011 кількість-результатів довжина)
 
