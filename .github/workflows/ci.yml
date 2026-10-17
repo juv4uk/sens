@@ -993,11 +993,11 @@ jobs:
           set -euo pipefail
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           record_red() {
-            local id="$1" fixture="$2" expected_value="$3" actual_value="$4" stderr_tail="${5:-}"
+            local id="$1" fixture="$2" expected_value="$3" actual_value="$4" stderr_tail="${5:-}" reproduce="${6:-target/debug/sens $2}"
             python3 scripts/ci_failure_contract.py record-diff \
               --test-id "$id" --layer eval --fixture "$fixture" \
               --expected "$expected_value" --actual "$actual_value" \
-              --reproduce "target/debug/sens $fixture" \
+              --reproduce "$reproduce" \
               --report-file "$report" --stderr-tail "$stderr_tail"
           }
           # D9 justified/vec/arglist: independent SENS witness for each of eight laws.
@@ -1009,14 +1009,18 @@ jobs:
             d9_single="$RUNNER_TEMP/d9-justified-$(printf "%02d" "$d9_law_index").lisp"
             printf "%s\n" "$d9_law" > "$d9_single"
             sha256sum "$d9_single"
+            # Hash-bound failure provenance stays in the tracked source, not RUNNER_TEMP.
+            d9_reproduce="grep -v '^;' $d9_law_file | sed '/^$/d' | sed -n '${d9_law_index}p' > /tmp/d9-justified-repro.lisp && target/debug/sens /tmp/d9-justified-repro.lisp"
             if ! d9_actual="$(target/debug/sens "$d9_single" 2>&1)"; then
               echo "::error::D9_JUSTIFIED_CASE_EXEC_RED id=d9-justified-case-$d9_law_index layer=eval fixture=$d9_single expected=D1:1 actual=execution-error reproduce=target/debug/sens" >&2
               printf "%s\n" "$d9_actual" >&2
+              record_red "d9-justified-case-$d9_law_index" "$d9_law_file" "D1:1" "execution-error" "$d9_actual" "$d9_reproduce"
               exit 1
             fi
             d9_value="$(printf "%s\n" "$d9_actual" | tail -n 1)"
             if [[ "$d9_value" != "1" ]]; then
               echo "::error::D9_JUSTIFIED_CASE_LAW_DIFF id=d9-justified-case-$d9_law_index layer=eval fixture=$d9_single expected=D1:1 actual=$d9_value" >&2
+              record_red "d9-justified-case-$d9_law_index" "$d9_law_file" "D1:1" "$d9_value" "$d9_actual" "$d9_reproduce"
               exit 1
             fi
             echo "D9_JUSTIFIED_CASE_PASS law=$d9_law_index"
