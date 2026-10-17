@@ -441,6 +441,27 @@ jobs:
             exit 1
           fi
           echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
+          # D9:110101000 — native SENS substring membership + strict type refusal.
+          d9_substr="tests/semantic/d9-string-contains-laws.lisp"
+          d9_substr_bad="tests/semantic/d9-string-contains-nonstring-negative.lisp"
+          sha256sum "$d9_substr" "$d9_substr_bad" lib/core4.lisp target/debug/sens
+          if ! d9_substr_out="$(target/debug/sens "$d9_substr" 2>&1)"; then
+            echo "::error::D9_STRING_CONTAINS_EXEC_RED id=d9-string-contains layer=eval fixture=$d9_substr expected=(1 1 1 1 1 1 1 1) actual=execution-error reproduce='target/debug/sens $d9_substr'" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id d9-string-contains --layer eval --fixture "$d9_substr" --expected "(1 1 1 1 1 1 1 1)" --actual execution-error --reproduce "target/debug/sens $d9_substr" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$d9_substr_out"
+            printf "%s\n" "$d9_substr_out" >&2
+            exit 1
+          fi
+          d9_substr_actual="$(printf "%s\n" "$d9_substr_out" | tail -n 1)"
+          if [[ "$d9_substr_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_STRING_CONTAINS_DIFF id=d9-string-contains layer=eval fixture=$d9_substr expected=(1 1 1 1 1 1 1 1) actual=$d9_substr_actual" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id d9-string-contains --layer eval --fixture "$d9_substr" --expected "(1 1 1 1 1 1 1 1)" --actual "$d9_substr_actual" --reproduce "target/debug/sens $d9_substr" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$d9_substr_out"
+            exit 1
+          fi
+          if d9_substr_out="$(target/debug/sens "$d9_substr_bad" 2>&1)"; then
+            echo "::error::D9_STRING_CONTAINS_BAD_TYPE id=d9-string-contains-negative layer=eval fixture=$d9_substr_bad expected=type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          echo "D9_STRING_CONTAINS_NATIVE_PASS laws=8 negative=1 exact=D9:110101000"
           # D9:101110011 atom-tree membership / D9:101111110 exact D24 nano->milli.
           report="$RUNNER_TEMP/sens-focal-red.jsonl"
           d9_laws="tests/semantic/d9-contains-atom-milliseconds-laws.lisp"

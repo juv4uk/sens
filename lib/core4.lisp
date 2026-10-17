@@ -4021,3 +4021,15 @@
 ; D10:0001001001 FORALL-EVERY-CANDIDATE-SATISFIES:
 ; точне D1 ALL над предикатом кожного кандидата.
 (0011 кожен-задовольняє? усі-задовольняють?)
+
+
+; D9:110101000 STRING-CONTAINS? — substring search, SENS-owned recursion.
+; D9:110101010 takes (prefix string); both empty and rest are exact D9.
+; Empty needle is included, non-string carriers fail in admitted D9 mechanisms.
+; This is a derived SENS definition, not a new direct D9 value-call mechanism.
+(0011 рядок-містить?
+  (0010 (рядок голка)
+    (110
+      ((110101010 голка рядок) #d1:1)
+      ((110011100 рядок) #d1:0)
+      (#d1:1 (рядок-містить? (110011101 рядок) голка)))))
