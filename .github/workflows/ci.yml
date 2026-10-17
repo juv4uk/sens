@@ -290,6 +290,50 @@ jobs:
           fi
           echo "D9_EPISTEMIC_SENS_PASS functions=4 laws=12 negative=8 direct_d9_callability=unclaimed"
 
+      - name: "D9 STRING-LIST — 10 SENS законів і два негативи"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d9-string-list-derived-laws.lisp"
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum "$fixture" tests/semantic/d9-string-slice-invalid-arity.lisp tests/semantic/d9-string-append-invalid-arity.lisp lib/core4.lisp target/debug/sens
+          count=0
+          while IFS= read -r law || [[ -n "$law" ]]; do
+            [[ -z "$law" || "$law" == ';'* ]] && continue
+            ((count += 1))
+            witness="$RUNNER_TEMP/d9-string-list-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$law" > "$witness"
+            if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
+              echo "::error::D9_STRING_EXEC_RED id=$count layer=eval expected=D1:1 actual=execution-error" >&2
+              printf '%s\n' "$observed" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d9-string-$count" --layer eval --fixture "$fixture" --expected "D1:1" --actual "execution-error" --reproduce "target/debug/sens $witness" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D9_STRING_DIFF id=$count layer=eval expected=1 actual=$actual" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d9-string-$count" --layer eval --fixture "$fixture" --expected "1" --actual "$actual" --reproduce "target/debug/sens $witness" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            echo "D9_STRING_LAW_PASS id=$count"
+          done < "$fixture"
+          if [[ "$count" -ne 10 ]]; then
+            echo "::error::D9_STRING_CENSUS expected=10 actual=$count" >&2
+            exit 1
+          fi
+          for negative in tests/semantic/d9-string-slice-invalid-arity.lisp tests/semantic/d9-string-append-invalid-arity.lisp; do
+            if observed="$(target/debug/sens "$negative" 2>&1)"; then
+              echo "::error::D9_STRING_ARITY_BYPASS fixture=$negative expected=arity-refusal actual=accepted" >&2
+              exit 1
+            fi
+            if ! grep -Eqi 'arity|expected|arguments' <<< "$observed"; then
+              echo "::error::D9_STRING_NEGATIVE_WRONG_KIND fixture=$negative expected=arity-refusal actual=$observed" >&2
+              exit 1
+            fi
+            echo "D9_STRING_NEGATIVE_PASS fixture=$negative"
+          done
+          echo "D9_STRING_SENS_PASS functions=2 surfaces=4 laws=10 negative=2 direct_D9_admission=unclaimed"
+
       - name: "D10 MAP-LAWS — 12 SENS свідків і неповна пара"
         shell: bash
         run: |
