@@ -672,6 +672,21 @@ jobs:
             exit 1
           fi
           echo "D9_MAP_NATIVE_PASS source=Core4 domains=D9:101100011,D9:101100101,D9:101100010,D9:101001100 laws=8 wrong-key-negative=1"
+          d9_vec_fixture="tests/semantic/d9-vector-core4-native-laws.lisp"
+          d9_vec_expected="(1 1 1 0 1 1)"
+          d9_vec_sha="$(sha256sum "$d9_vec_fixture" | cut -d' ' -f1)"
+          if ! d9_vec_output="$(target/debug/sens "$d9_vec_fixture" 2>&1)"; then
+            printf '%s\n' "$d9_vec_output" >&2
+            echo "::error::D9_VEC_EXEC_RED id=d9-vec-list-projection layer=eval fixture=$d9_vec_fixture fixture_sha256=$d9_vec_sha expected=$d9_vec_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d9_vec_fixture'" >&2
+            exit 1
+          fi
+          d9_vec_actual="$(printf '%s\n' "$d9_vec_output" | tail -n 1)"
+          if [[ "$d9_vec_actual" != "$d9_vec_expected" ]]; then
+            echo "::error::D9_VEC_LAW_DIFF id=d9-vec-list-projection layer=eval fixture=$d9_vec_fixture fixture_sha256=$d9_vec_sha expected=$d9_vec_expected actual=$d9_vec_actual first_diff=D1-vector reproduce='target/debug/sens $d9_vec_fixture'" >&2
+            exit 1
+          fi
+          echo "D9_VEC_NATIVE_PASS source=Core4 domains=D9:101101101,D9:101010111,D9:110000010 laws=6 wrong-index-negative=1"
+
 
           # D10 PAIP source-level derivatives: human-readable SENS witness only;
           # no F1-F4 admission or new execution primitive is implied.
