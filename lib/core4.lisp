@@ -328,7 +328,7 @@
 ; Rust-Stack-sicheres append.
 (0011 append
   (0010 (left right)
-    (зворот-до (10100 left) right)))
+    (зворот-до (зворот left) right)))
 
 (0011 відобразити-до
   (0010 (дія значення акумулятор)
