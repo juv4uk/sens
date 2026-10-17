@@ -508,6 +508,28 @@ jobs:
             exit 1
           fi
           echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
+          # D10 MEMQ / SASSQ — eight native SENS EQ/tail/fallback laws.
+          d10_lookup="tests/semantic/d10-memq-sassq-laws.lisp"
+          d10_bad_fallback="tests/semantic/d10-sassq-noncallable-fallback.lisp"
+          d10_bad_eq="tests/semantic/d10-memq-pair-eq-negative.lisp"
+          sha256sum "$d10_lookup" "$d10_bad_fallback" "$d10_bad_eq" lib/core4.lisp target/debug/sens
+          if ! d10_out="$(target/debug/sens "$d10_lookup" 2>&1)"; then
+            echo "::error::D10_EQ_ASSOC_EXEC_RED id=d10-memq-sassq layer=eval fixture=$d10_lookup expected=eight-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$d10_out" >&2
+            exit 1
+          fi
+          d10_actual="$(printf "%s\n" "$d10_out" | tail -n 1)"
+          if [[ "$d10_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D10_EQ_ASSOC_DIFF id=d10-memq-sassq layer=eval fixture=$d10_lookup expected=(1 1 1 1 1 1 1 1) actual=$d10_actual first_mismatch=D1-vector" >&2
+            exit 1
+          fi
+          for bad in "$d10_bad_fallback" "$d10_bad_eq"; do
+            if d10_bad_out="$(target/debug/sens "$bad" 2>&1)"; then
+              echo "::error::D10_EQ_ASSOC_BAD_ACCEPTED id=d10-memq-sassq-negative layer=eval fixture=$bad expected=refusal actual=accepted" >&2
+              exit 1
+            fi
+          done
+          echo "D10_EQ_ASSOC_SENS_PASS identities=D10:0001100010,D10:0001011001 laws=8 negative=2"
           # D8 admitted physical mechanisms, now SENS-owned Ukrainian surfaces.
           d8_mech="tests/semantic/d8-admitted-text-mechanism-laws.lisp"
           d8_mech_bad="tests/semantic/d8-admitted-text-mechanism-bad-scalar.lisp"

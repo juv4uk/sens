@@ -4253,3 +4253,22 @@
 ; D9:101101001 APPLY-SUBST: точна структурна підстановка D5:11111.
 ; research/d9-nunion-subst-depth-batch-2026-10-17.lisp.
 (0011 застосувати-підстановка замінити)
+
+
+; D10:0001100010 MEMQ — original atom-only EQ membership returns matching tail.
+; This is a language-defined D10 surface; no direct D10 call mechanism.
+(0011 входження-eq
+  (0010 (шукане елементи)
+    (110
+      ((0101 елементи) (001 ()))
+      ((101 шукане (100 елементи)) елементи)
+      (#d1:1 (входження-eq шукане (011 елементи))))))
+
+; D10:0001011001 SASSQ — atom-key EQ lookup with zero-arg fallback on miss.
+; Fallthrough callback is invoked only after list exhaustion.
+(0011 асоціація-eq
+  (0010 (ключ асоціації запасна-дія)
+    (110
+      ((0101 асоціації) (запасна-дія))
+      ((101 ключ (100 (100 асоціації))) (100 асоціації))
+      (#d1:1 (асоціація-eq ключ (011 асоціації) запасна-дія)))))
