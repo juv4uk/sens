@@ -6092,3 +6092,14 @@
 (0011 string-prefix? рядок-префікс?)
 (0011 string-contains? рядок-містить?)
 (0011 vec-conj вектор-додати)
+
+; Похідні українські поверхні з чинної ратифікованої драбини.
+; D8:11011010 NTHCDR: рівно N переходів решта через вже визначений DROP.
+; D9:001100011 CLIPS-SLOT-NAME, 001110111 CLIPS-SLOT-NAMES,
+; D9:001100110 CLIPS-DEFTEMPLATE-SLOTS, 010111000 CLIPS-FACT-CLAUSE.
+; Механізм залишається мовним SENS, без нового D8/D9 direct call-head admission.
+(визначити решта-від-позиції відкинути)
+(визначити кліпс-слот-ім'я clips-slot-name)
+(визначити кліпс-слот-імена clips-slot-names)
+(визначити кліпс-визначити-шаблон-слоти clips-deftemplate-slots)
+(визначити кліпс-факт-клауза clips-fact-clause)
