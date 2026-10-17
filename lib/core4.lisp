@@ -613,6 +613,33 @@
       ((010 ()) (знайти-за-ключем key (011 alist))))))
 (0011 assoc знайти-за-ключем)
 
+; Lifted verbatim from research/d9-map-vec-list-batch-2026-10-17.lisp — ratified D9 identity, SENS-owned alist semantics.
+; D9:101100011 MAP-EMPTY
+(0011 мапа-порожній
+  (0010 () (quote ())))
+(0011 map-empty мапа-порожній)
+
+; D9:101100101 MAP-GET — value of assoc pair (cdr)
+(0011 мапа-отримати
+  (0010 (ключ мапа)
+    (110
+      ((0101 (знайти-за-ключем ключ мапа)) (quote ()))
+      ((0100 (0101 (знайти-за-ключем ключ мапа)))
+       (011 (знайти-за-ключем ключ мапа))))))
+(0011 map-get мапа-отримати)
+
+; D9:101100010 MAP-CONTAINS?
+(0011 мапа-містить?
+  (0010 (ключ мапа)
+    (not? (0101 (знайти-за-ключем ключ мапа)))))
+(0011 map-contains? мапа-містить?)
+
+; D9:101001100 MAP->LIST — alist already a list
+(0011 мапа-список
+  (0010 (мапа) мапа))
+(0011 map->list мапа-список)
+
+
 
 ; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
 ; owns the exact-domain binding; English spelling is compatibility-only.
