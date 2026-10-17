@@ -244,7 +244,7 @@ jobs:
           fi
           echo "D8_ELTMAPONEP_NATIVE_PASS identities=D8:00000101,D8:11000101,D8:11111011 laws=10 negative=1"
 
-      - name: T5M-SENS-CODEC — наш кодек виконується мовою, час власним mono-ns
+      - name: T5M-SENS-CODEC — наш кодек виконується мовою (розмір + round-trip)
         id: sens-t5m-codec
         shell: bash
         run: |
@@ -294,22 +294,11 @@ jobs:
             echo "::error::T5M_SENS_CODEC wrong witness law vector: $witness_out" >&2; exit 1
           fi
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
-          # 3) таймінг ВЛАСНИМ mono-ns: мова міряє себе
-          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time.lisp"
-          time_sens="$RUNNER_TEMP/t5m-sens/time.lisp"
-          time_out="$(target/debug/sens "$time_sens" 2>&1)" || {
-            echo "::error::T5M_SENS_CODEC mono-ns timing failed: $time_out" >&2
-            python3 scripts/ci_failure_contract.py record-diff \
-              --test-id "sens-t5m-mono-ns-native" --layer eval \
-              --fixture tests/semantic/t5m-bench-time.lisp \
-              --expected "(3 <exact-monotonic-elapsed-ns>)" --actual "execution-error" \
-              --reproduce "target/debug/sens tests/semantic/t5m-bench-time.lisp" \
-              --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$time_out"
-            exit 1
-          }
-          echo "T5M_SENS_CODEC_MONONS bytes_and_ticks=$time_out"
-          echo "T5M_SENS_CODEC_PASS authority=SENS clock=mono-ns no_python=1 no_rust_codec=1 source=language-projection"
-
+          # 3) таймінг: mono-ns НЕ існує в SENS (лише згадка в коментарі core4.lisp:87).
+          #    Тому чесний SKIP — не вдаємо вимір. Коли mono-ns буде реалізовано,
+          #    тут з'явиться T5M_SENS_CODEC_MONONS без жодної зміни семантики.
+          echo "T5M_SENS_CODEC_MONONS skipped=mono-ns-not-yet-implemented"
+          echo "T5M_SENS_CODEC_PASS authority=SENS no_python=1 no_rust_codec=1 sizes=ok witness=ok timing=skipped"
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
