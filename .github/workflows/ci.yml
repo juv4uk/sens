@@ -177,6 +177,14 @@ jobs:
           fi
           actual="$(printf '%s\n' "$observed" | tail -n 1)"
           if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            # One native SENS diagnostic, not a surrogate Python evaluator.
+            # Shows exact D24-to-text outputs if only serialization diverged.
+            printf '%s\n' '(list (число-рядок (довжина (quote (а б)))) (число-рядок (довжина (quote ()))))' > "$RUNNER_TEMP/d9-number-projection-observed.lisp"
+            if extra="$(target/debug/sens "$RUNNER_TEMP/d9-number-projection-observed.lisp" 2>&1)"; then
+              echo "D9_UK_NUMBER_TEXT_OBSERVED=$(tail -n 1 <<< "$extra")" >&2
+            else
+              echo "D9_UK_NUMBER_TEXT_DIAGNOSTIC_RED=$extra" >&2
+            fi
             echo "::error::D9_UK_PROJECTIONS_DIFF id=d9-uk-four layer=eval fixture=$fixture expected='(1 1 1 1 1 1 1 1 1 1)' actual=$actual" >&2
             python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "$actual" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
             exit 1
