@@ -3911,7 +3911,7 @@
 
 ; D10:0011011000 UNIQUE-FIND-IF-ANYWHERE (PAIP auxfns.lisp@2db2ba9).
 ; Only leaves are tested. Visit CDR before CAR, ADJOIN matching CAR at
-; the front, yielding first-occurrence order without duplicate leaves.
+; the front, yielding last-occurrence order without duplicate leaves.
 ; Optional third list is the donor's found-so-far accumulator.
 (0011 знайти-єдиний-вкладений
   (0010 (умова дерево . попередні)
