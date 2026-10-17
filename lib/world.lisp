@@ -16,35 +16,35 @@
 ;; Vorgänger, und das neue Journal teilt das vollständige alte Journal als
 ;; Cons-Ende. Kein veränderliches Hostobjekt und kein Rust-Primitiv ist nötig.
 
-(0011 make-world
-  (0010 (parent journal metadata)
-    (1110 (001 world) parent journal metadata)))
+(визначити make-world
+  (функція (parent journal metadata)
+    (список (як-є world) parent journal metadata)))
 
-(0011 empty-world
-  (0010 ()
-    (make-world (001 ()) (001 ()) (001 ()))))
+(визначити empty-world
+  (функція ()
+    (make-world (як-є ()) (як-є ()) (як-є ()))))
 
-(0011 world?
-  (0010 (value)
-    (110
-      ((010 value) (010 (001 (0))))
-      ((101 (100 value) (001 world))
-       (110
+(визначити world?
+  (функція (value)
+    (за-умовою
+      ((атом? value) (атом? (як-є (0))))
+      ((тотожне? (перше value) (як-є world))
+       (за-умовою
          ; Exact shape: (world parent journal metadata).
          ; D3 ATOM/CDR tests required tails; D4 NULL rejects an extra field.
          ; No D6 LENGTH, numeric arity literal, or host-side list checker.
-         ((010 (011 value)) (010 (001 (0))))
-         ((010 (011 (011 value))) (010 (001 (0))))
-         ((010 (011 (011 (011 value)))) (010 (001 (0))))
-         ((0101 (011 (011 (011 (011 value))))) (010 ()))
-         (#d1:1 (010 (001 (0))))))
-      (#d1:1 (010 (001 (0)))))))
+         ((атом? (решта value)) (атом? (як-є (0))))
+         ((атом? (решта (решта value))) (атом? (як-є (0))))
+         ((атом? (решта (решта (решта value)))) (атом? (як-є (0))))
+         ((порожній? (решта (решта (решта (решта value))))) (атом? ()))
+         (так (атом? (як-є (0))))))
+      (так (атом? (як-є (0)))))))
 
-(0011 world-parent (0010 (world) (1001 world)))
-(0011 world-journal (0010 (world) (10011 world)))
+(визначити world-parent (функція (world) (друге world)))
+(визначити world-journal (функція (world) (третє world)))
 ; D6:100111 CADDDR has no admitted evaluator mechanism; derive the
 ; same fourth-field projection as exact D5:10011 CADDR after D3:011 CDR.
-(0011 world-metadata (0010 (world) (10011 (011 world))))
+(визначити world-metadata (функція (world) (третє (решта world))))
 
 ;; Events intentionally have the same data shape as `lib/knowledge.lisp`'s
 ;; journal, so a later migration can reuse packages and projections unchanged.
