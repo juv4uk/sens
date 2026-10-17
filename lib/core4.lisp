@@ -3479,7 +3479,7 @@
 ; D9:000001111 PROVENANCE-RULE from canonical (statement goal (source ...) (rule ...) ...).
 (0011 походження-правило
   (0010 (запис)
-    (захист-еталон-поле (як-є rule) (решта (решта запис)))))
+    (захист-еталон-поле (як-є rule) (решта запис))))
 
 
 ; D9:000010110 PROVENANCE-GOAL is second cell of the canonical record.
@@ -3491,13 +3491,13 @@
 ; D9:000011100 PROVENANCE-DERIVED-FROM: immutable proof children field.
 (0011 походження-похідний-з
   (0010 (запис)
-    (захист-еталон-поле (як-є derived-from) (решта (решта запис)))))
+    (захист-еталон-поле (як-є derived-from) (решта запис))))
 
 
 ; D9:000101001 PROVENANCE-SOURCE: record's explicit evidence source field.
 (0011 походження-джерело
   (0010 (запис)
-    (захист-еталон-поле (як-є source) (решта (решта запис)))))
+    (захист-еталон-поле (як-є source) (решта запис))))
 
 
 ; D9:000001000 GUARD-UNKNOWN-ROUTES — exact canonical routing choices from lib/guard.lisp.
