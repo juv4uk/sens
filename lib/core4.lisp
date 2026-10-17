@@ -3463,13 +3463,17 @@
 
 ; D9:000010011 GUARD-REFERENCE-FIELD — tagged reference contains (field value).
 ; Match keys via established D5 ASSOC / structural equality; never D9 direct call.
+; D9:000010011 — SENS-owned direct traversal of the tagged record fields.
+; Avoid anonymous call-head lowering; shape (tag (field value) ...).
+(0011 внутрішнє-поле-у-парах
+  (0010 (поле пари)
+    (110
+      ((0101 пари) (001 ()))
+      ((equal? поле (100 (100 пари))) (1001 (100 пари)))
+      (#d1:1 (внутрішнє-поле-у-парах поле (011 пари))))))
 (0011 захист-еталон-поле
   (0010 (поле запис)
-    ((0010 (пара)
-       (110
-         ((0101 пара) (001 ()))
-         (#d1:1 (1001 пара))))
-     (знайти-за-ключем поле (011 запис)))))
+    (внутрішнє-поле-у-парах поле (011 запис))))
 
 
 ; D9:000001111 PROVENANCE-RULE from canonical (statement goal (source ...) (rule ...) ...).
