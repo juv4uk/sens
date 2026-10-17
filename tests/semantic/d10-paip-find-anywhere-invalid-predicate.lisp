@@ -1,5 +1,5 @@
-; Negative PAIP tree-search witness: structural () is not D1:NO.
-; A predicate returning () must fail when its answer is used as a COND control bit.
+; Negative PAIP tree-search witness: a predicate must return exact D1 even when the tree root is an atom.
+; Structural () is not D1:NO and must not escape the atomic base case.
 (дерево-має-збіг?
   (lambda (елемент) (quote ()))
-  (list (quote яблуко) (quote груша)))
+  (quote яблуко))

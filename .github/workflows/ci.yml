@@ -721,7 +721,7 @@ jobs:
             exit 1
           fi
           if [[ "$tree_negative_output" != *"D3:110 COND expects exact D1:1 / D1:0"* ]]; then
-            echo "::error::D10_PAIP_TREE_WRONG_REFUSAL id=d10-paip-find-anywhere-invalid-predicate layer=eval expected=D3-COND-D1-refusal actual="$tree_negative_output"" >&2
+            printf '::error::D10_PAIP_TREE_WRONG_REFUSAL id=d10-paip-find-anywhere-invalid-predicate layer=eval expected=D3-COND-D1-refusal actual=%s\n' "$tree_negative_output" >&2
             exit 1
           fi
           printf '%s\n' "$tree_negative_output"
