@@ -322,17 +322,49 @@ jobs:
             echo "::error::T5M_SENS_CODEC wrong witness law vector: $witness_out" >&2; exit 1
           fi
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
-          # 3) D10: mono-ns has resident identity but no individual callability admission.
-          #    This is a real negative native SENS witness, not SKIP and not fake timing.
-          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time.lisp"
-          time_sens="$RUNNER_TEMP/t5m-sens/time.lisp"
-          if time_out="$(target/debug/sens "$time_sens" 2>&1)"; then
-            echo "::error::T5M_D10_MONONS_ADMISSION_BYPASS expected=RESIDENT-NOT-CALLABLE identity=D10:0011110110" >&2
-            printf '%s\n' "$time_out" >&2
+          # 3) The legacy root host surface and the exact D10 candidate are distinct.
+          #    (mono-ns) is an existing raw host observation, not evidence that
+          #    D10:0011110110 is callable. Test both paths independently.
+          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time-host.lisp"
+          host_sens="$RUNNER_TEMP/t5m-sens/time-host.lisp"
+          if ! host_out="$(target/debug/sens "$host_sens" 2>&1)"; then
+            echo "::error::T5M_MONONS_HOST_EXEC_RED layer=eval fixture=tests/semantic/t5m-bench-time.lisp expected=integer-host-observation actual=execution-error" >&2
+            printf "%s\\n" "$host_out" >&2
             exit 1
           fi
-          if ! grep -Eqi 'mono-ns' <<<"$time_out" || ! grep -Eqi 'unknown symbol|no admitted callable mechanism|not callable|unadmitted' <<<"$time_out"; then
-            echo "::error::T5M_D10_MONONS_WRONG_NEGATIVE expected=unadmitted D10 surface, actual=$time_out" >&2
+          host_actual="$(printf "%s\\n" "$host_out" | tail -n 1)"
+          if ! [[ "$host_actual" =~ ^[0-9]+$ ]]; then
+            echo "::error::T5M_MONONS_HOST_LAW_DIFF expected=integer-host-observation actual=$host_actual" >&2
+            exit 1
+          fi
+          echo "T5M_MONONS_HOST_CAPABILITY_PASS actual=$host_actual scope=ROOT-HOST-OBSERVATION"
+
+          # Exact physical call: D2 open + the full ten-bit D10 identity + D2 close.
+          # T5 must preserve the identity; SENS must still refuse unadmitted D10 execution.
+          cp tests/semantic/t5m-bench-time.bits "$RUNNER_TEMP/t5m-sens/time-d10.lisp"
+          d10_source="$RUNNER_TEMP/t5m-sens/time-d10.lisp"
+          if ! encode_out="$(target/debug/sens-trit encode "$d10_source" 2>&1)"; then
+            echo "::error::T5M_D10_MONONS_ENCODE_RED expected=exact-D10-physical-transport actual=$encode_out" >&2
+            exit 1
+          fi
+          d10_physical="\${d10_source%.lisp}.sens"
+          if [[ ! -s "$d10_physical" ]]; then
+            echo "::error::T5M_D10_MONONS_PHYSICAL_MISSING expected=nonempty-sens-file path=$d10_physical" >&2
+            exit 1
+          fi
+          actual_words="$(target/debug/sens-trit open "$d10_physical")"
+          if [[ "$actual_words" != "10 0011110110 01" ]]; then
+            echo "::error::T5M_D10_MONONS_TRANSPORT_DIFF expected='10 0011110110 01' actual=$actual_words" >&2
+            exit 1
+          fi
+          if d10_out="$(target/debug/sens "$d10_physical" 2>&1)"; then
+            echo "::error::T5M_D10_MONONS_ADMISSION_BYPASS expected=RESIDENT-NOT-CALLABLE identity=D10:0011110110" >&2
+            printf "%s\\n" "$d10_out" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'D10(:|[[:space:]])+0011110110' <<<"$d10_out" ||
+             ! grep -Eqi 'not callable|not admitted|not executable|admission|runtime hold|unadmitted|no admitted' <<<"$d10_out"; then
+            echo "::error::T5M_D10_MONONS_WRONG_NEGATIVE expected=exact-D10-non-admission actual=$d10_out" >&2
             exit 1
           fi
           echo "T5M_D10_MONONS_FAIL_CLOSED identity=D10:0011110110 width=10 status=RESIDENT-NOT-CALLABLE F1=F2=F3=F4=not-admitted"
