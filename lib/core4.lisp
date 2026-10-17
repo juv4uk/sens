@@ -3716,3 +3716,15 @@
 (0011 світ-модуль-відомий?
   (0010 (світ модуль)
     (хибне? (атом? (світ-модуль-події світ модуль)))))
+
+
+; D9:111010101 WORLD-TELL — a new immutable world with a tell-event.
+; Event identity and order are inherited from lib/world.lisp.
+(0011 світ-повідомити
+  (0010 (світ модуль клауза)
+    (світ-запис світ (список (як-є tell) модуль клауза))))
+
+; D9:111001010 WORLD-RETRACT — record retraction, do not mutate parent.
+(0011 світ-відкликати
+  (0010 (світ модуль клауза)
+    (світ-запис світ (список (як-є retract) модуль клауза))))
