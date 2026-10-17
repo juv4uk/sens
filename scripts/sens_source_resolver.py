@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-"""History-aware source-head resolver for SENS migration.
+"""Розпізнавач джерельних голів SENS із розмежуванням епох.
 
-This module reconstructs the real source transitions recorded in git history:
-
-  current exact-width head (already migrated)
-  -> Pass 1: legacy SID8/Sens8 exact 8-bit head
-  -> Pass 2: my-lisp / admitted human-symbol surface
-  -> Pass 3: historical Lisp I / Lisp 1.5 UPPERCASE name
-
-Resolution never derives a current coordinate from legacy bit shape.  A legacy
-form may reach a current D3-D6 identity only through independently named role /
-surface evidence and the owner-ratified current foundation.
+Чинні D3–D6 identity беруться лише з ратифікованої таблиці та її
+проєкцій. Історичні рядки SID8/Lisp I залишаються походженням
+(діагностикою), не семантичною владою. Восьмибітний голів без
+явного доменного контексту відхиляється; це не новий D8.
 """
 from __future__ import annotations
 
@@ -75,40 +69,6 @@ class Resolution:
 
 def _strip_semicolon_comments(text: str) -> str:
     return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
-
-
-def _norm_label(name: str) -> str:
-    """Normalize a role-like spelling only for label matching, not source class."""
-    value = name.strip()
-    aliases = {
-        "+": "PLUS",
-        "-": "DIFFERENCE",
-        "*": "TIMES",
-        "/": "QUOTIENT",
-        "<": "LESSP",
-        ">": "GREATERP",
-        "NIL": "EMPTY",
-        "EMPTY-LIST": "EMPTY",
-    }
-    if value in aliases:
-        return aliases[value]
-    upper = value.upper()
-    if upper.endswith("?"):
-        upper = upper[:-1]
-    # Historical Lisp commonly uses P suffix where my-lisp used ?.
-    predicate_aliases = {
-        "ATOM": "ATOM",
-        "EQ": "EQ",
-        "NULL": "NULL",
-        "NUMBER": "NUMBERP",
-        "INTEGER": "INTEGERP",
-        "RATIONAL": "RATIONALP",
-        "ZERO": "ZEROP",
-        "EVEN": "EVENP",
-        "ODD": "ODDP",
-        "MEMBER": "MEMBER",
-    }
-    return predicate_aliases.get(upper, upper)
 
 
 def load_historical_rows(path: Path) -> list[HistoricalRow]:
@@ -214,54 +174,8 @@ class SourceResolver:
             spelling: set(ids) for spelling, ids in domain_surfaces.items()
         }
 
-        # Historical my-lisp spellings may name current roles even when the
-        # current projection chose a different English surface (e.g. + -> PLUS).
-        for row in historical_rows:
-            for identity in self._current_candidates_from_names(
-                [row.my_lisp, row.historical]
-            ):
-                self.current_surface.setdefault(row.my_lisp, set()).add(identity)
-
-        # Legacy registry aliases inherit a current role only when that legacy
-        # SID resolves uniquely through named evidence.
-        for sid, fields in registry_sid_fields.items():
-            candidates = self._current_candidates_for_sid_without_registry_aliases(sid)
-            if len(candidates) != 1:
-                continue
-            identity = next(iter(candidates))
-            for _namespace, spelling in fields:
-                self.current_surface.setdefault(spelling, set()).add(identity)
-
-    def _current_candidates_from_names(
-        self, names: Iterable[str]
-    ) -> set[CurrentIdentity]:
-        out: set[CurrentIdentity] = set()
-        for name in names:
-            if not name or name == "()":
-                continue
-            direct = self.domain_surfaces.get(name)
-            if direct:
-                out.update(direct)
-            label = self.current_by_label.get(_norm_label(name))
-            if label is not None:
-                out.add(label)
-        return out
-
-    def _current_candidates_for_sid_without_registry_aliases(
-        self, sid: str
-    ) -> set[CurrentIdentity]:
-        names: list[str] = []
-        for row in self.hist_by_sid.get(sid, []):
-            names.extend([row.my_lisp, row.historical])
-        for namespace, spelling in self.registry_sid_fields.get(sid, []):
-            # English/symbolic names are strongest for role matching; other
-            # languages still resolve through current domain surface tables.
-            if namespace in {"en", "sym", "ук", "укр", "sa"}:
-                names.append(spelling)
-        return self._current_candidates_from_names(names)
-
-    def current_candidates_for_sid(self, sid: str) -> set[CurrentIdentity]:
-        return self._current_candidates_for_sid_without_registry_aliases(sid)
+        # Жодні історичні SID8, мітки чи registry-аліаси не додають
+        # поточних резидентів. Лише канонічні доменні проєкції є authority.
 
     @staticmethod
     def _choose(
@@ -334,12 +248,9 @@ class SourceResolver:
         # PASS 3: historical Lisp I / Lisp 1.5 UPPERCASE surface.
         rows = self.hist_by_upper.get(token)
         if rows is not None:
-            candidates: set[CurrentIdentity] = set()
-            for row in rows:
-                candidates.update(self._current_candidates_from_names(
-                    [row.historical, row.my_lisp]
-                ))
-                candidates.update(self.current_candidates_for_sid(row.sid8))
+            # Поточна identity походить лише з поточної таблиці назв,
+            # навіть якщо старе написання присутнє в історичних рядках.
+            candidates = set(self.current_surface.get(token, set()))
             return self._choose(
                 "lisp1-1.5-uppercase",
                 3,
