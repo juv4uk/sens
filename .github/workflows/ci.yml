@@ -322,34 +322,30 @@ jobs:
             echo "::error::T5M_SENS_CODEC wrong witness law vector: $witness_out" >&2; exit 1
           fi
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
-          # 3) Дослідницький D10 не викликається: точний фізичний негатив нижче.
-          # Сирий годинник — окремий clock-mono-raw, він перевіряється в кроці 4.
-          # D10:0011110110 залишається точним десятибітним кандидатом.
-          # Нинішній T5 механічно переносить до 9 біт; 10-бітний запис
-          # має відхилитися, а не мовчки обрізатися до D8/W8.
+                    # 3) D10 transport and D10 callability are separate contracts.
+          #    The canonical executable source reader is intentionally still D1-D9;
+          #    T5M's mechanical codec may transport a D10 word without admitting it.
+          export PATH="$RUNNER_TEMP/zig-x86_64-linux-0.16.0:$PATH"
+          zig test research/zig-codecs/t5m.zig --test-filter "T5M transports D1 through D10 exact widths including D10 leading zeros"
+          echo "T5M_D10_TRANSPORT_PASS path=research/zig-codecs/t5m.zig exact_width=10 callability=NOT-INFERRED"
+
           d10_source="tests/semantic/t5m-bench-time.bits"
-          sha256sum "$d10_source"
-          if encoded="$(target/debug/sens-trit encode "$d10_source" 2>&1)"; then
-            echo "::error::T5M_D10_T5_BYPASS id=d10-mono-width layer=transport expected=10bit-refusal actual=encoded" >&2
+          d10_words="$(cat "$d10_source")"
+          if [[ "$d10_words" != "10 0011110110 01" ]]; then
+            echo "::error::T5M_D10_MONONS_FIXTURE_DRIFT expected='10 0011110110 01' actual=$d10_words" >&2
             exit 1
           fi
-          if [[ "$encoded" != *"canonical SENS source word exceeds current 9-bit carrier"* ]]; then
-            echo "::error::T5M_D10_T5_UNRELATED_REFUSAL id=d10-mono-width layer=transport expected=9bit-width-firewall actual=$encoded" >&2
+          if d10_out="$(target/debug/sens-trit encode "$d10_source" 2>&1)"; then
+            echo "::error::T5M_D10_SOURCE_ADMISSION_BYPASS expected=current-9-bit-source-reader-refusal identity=D10:0011110110" >&2
+            printf "%s\n" "$d10_out" >&2
             exit 1
           fi
-          echo "T5M_D10_MONONS_WIDTH_FAIL_CLOSED identity=D10:0011110110 width=10 current_carrier_max=9"
-          # Навіть через текстовий surface не дозволяти обійти D10 admission.
-          d10_named="tests/semantic/t5m-bench-time.lisp"
-          if named_result="$(target/debug/sens "$d10_named" 2>&1)"; then
-            echo "::error::T5M_D10_MONONS_SURFACE_BYPASS layer=eval fixture=$d10_named expected=not-admitted actual=callable" >&2
+          if ! grep -Fq "canonical SENS source word exceeds current 9-bit carrier" <<<"$d10_out"; then
+            echo "::error::T5M_D10_SOURCE_WRONG_NEGATIVE expected=canonical-9-bit-reader-boundary actual=$d10_out" >&2
             exit 1
           fi
-          if [[ "$named_result" != *"unknown symbol"* || "$named_result" != *"mono-ns"* ]]; then
-            echo "::error::T5M_D10_MONONS_SURFACE_WRONG_REFUSAL layer=eval fixture=$d10_named expected=unadmitted-mono-ns actual=$named_result" >&2
-            exit 1
-          fi
-          echo "T5M_D10_MONONS_FAIL_CLOSED identity=D10:0011110110 width=10 status=RESIDENT-NOT-CALLABLE F1=F2=F3=F4=not-admitted"
-          # 4) Справжнє спостереження ОС через окремий raw-механізм.
+          echo "T5M_D10_SOURCE_FAIL_CLOSED identity=D10:0011110110 width=10 carrier=MECHANICAL-ONLY runtime-callability=NOT-ADMITTED"
+# 4) Справжнє спостереження ОС через окремий raw-механізм.
           #    clock-mono-raw ≠ D10:0011110110: відмова D10 вище лишається.
           clock_fixture="tests/semantic/t5m-bench-clock-raw.lisp"
           sha256sum "$clock_fixture" target/debug/sens
