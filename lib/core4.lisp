@@ -3504,7 +3504,7 @@
 ; No runtime orchestration; routing remains an immutable SENS value.
 (0011 захист-невідоме-маршрути
   (0010 ()
-    (001
+    (як-є
       (((route ask-agent)
         (when ecosystem-local-or-component-owned)
         (action ask-responsible-live-agent)
@@ -3525,18 +3525,18 @@
 (0011 захист-невідоме
   (0010 (предмет відсутні-докази порада)
     (список
-      (001 guard-finding)
-      (список (001 schema) (001 guard/1))
-      (список (001 decision) (001 unknown))
-      (список (001 evidence-status) (001 unresolved))
-      (список (001 subject) предмет)
-      (список (001 state) (001 not-observed))
-      (список (001 contract) (001 insufficient-evidence))
-      (список (001 difference) відсутні-докази)
-      (список (001 impact) (001 decision-not-earned))
-      (список (001 guidance) порада)
-      (список (001 evidence) (001 ()))
-      (список (001 unknown-routes) (захист-невідоме-маршрути)))))
+      (як-є guard-finding)
+      (список (як-є schema) (як-є guard/1))
+      (список (як-є decision) (як-є unknown))
+      (список (як-є evidence-status) (як-є unresolved))
+      (список (як-є subject) предмет)
+      (список (як-є state) (як-є not-observed))
+      (список (як-є contract) (як-є insufficient-evidence))
+      (список (як-є difference) відсутні-докази)
+      (список (як-є impact) (як-є decision-not-earned))
+      (список (як-є guidance) порада)
+      (список (як-є evidence) (як-є ()))
+      (список (як-є unknown-routes) (захист-невідоме-маршрути)))))
 
 ; D9:010111110 CANON-CONFORMS? — executable exact eleven-law aggregate.
 ; lib/canon.lisp is the semantic donor. Existing D1 property laws are
