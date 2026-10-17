@@ -834,6 +834,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          record_red() {
+            local id="$1" fixture="$2" expected_value="$3" actual_value="$4" stderr_tail="${5:-}"
+            python3 scripts/ci_failure_contract.py record-diff \
+              --test-id "$id" --layer eval --fixture "$fixture" \
+              --expected "$expected_value" --actual "$actual_value" \
+              --reproduce "target/debug/sens $fixture" \
+              --report-file "$report" --stderr-tail "$stderr_tail"
+          }
           expected="(1 1 1 1 1 1 1 1)"
           for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp tests/semantic/d9-numeric-cdr-derived-laws.lisp tests/semantic/d8-scale-remap-doseq-laws.lisp tests/semantic/d8-partial-lcm-mod-laws.lisp tests/semantic/d5-quotient-mod-gcd-laws.lisp tests/semantic/d8-truncate-rem-derived-laws.lisp tests/semantic/d8-pair-recursive-laws.lisp tests/semantic/d8-integer-length-signed-laws.lisp tests/semantic/d8-logbitp-twos-complement-laws.lisp tests/semantic/d6-compose-flip-laws.lisp tests/semantic/d9-translation-review-derived-laws.lisp tests/semantic/d8-ceiling-ash-rsh-d24-laws.lisp tests/semantic/d9-immutable-world-derived-laws.lisp tests/semantic/d8-logand-logior-logxor-d24-laws.lisp tests/semantic/d9-symbolic-surface-contains-atom-laws.lisp tests/semantic/d8-lsh-derived-laws.lisp tests/semantic/d9-append-new-world-depth-laws.lisp tests/semantic/d8-floor-lognot-d24-laws.lisp tests/semantic/d9-provenance-guard-fields-laws.lisp tests/semantic/d9-guard-unknown-routes-laws.lisp tests/semantic/d9-canon-conforms-native-laws.lisp tests/semantic/d6-min-max-variadic-laws.lisp tests/semantic/d9-world-shape-module-events-laws.lisp tests/semantic/d9-world-tell-retract-native-laws.lisp tests/semantic/d9-world-clauses-history-native-laws.lisp; do
             test_id="sens-$(basename "$fixture" .lisp)"
@@ -849,12 +858,14 @@ jobs:
             if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
               echo "$output" >&2
               echo "::error::D8_NATIVE_EXEC_RED test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=execution-error reproduce=target/debug/sens:$fixture" >&2
+              record_red "$test_id" "$fixture" "$expected" "execution-error" "$output"
               exit 1
             fi
             actual="$(echo "$output" | tail -n 1)"
             if [[ "$actual" != "$expected" ]]; then
               echo "$output" >&2
               echo "::error::D8_NATIVE_LAW_DIFF test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=$actual reproduce=target/debug/sens:$fixture" >&2
+              record_red "$test_id" "$fixture" "$expected" "$actual" "$output"
               exit 1
             fi
             echo "D8_NATIVE_PASS test_id=$test_id authority=SENS"
@@ -864,20 +875,24 @@ jobs:
           sha256sum "$d9_invalid" lib/core4.lisp target/debug/sens
           if d9_stderr="$(target/debug/sens "$d9_invalid" 2>&1)"; then
             echo "::error::D9_NUMERIC_WIDTH_ACCEPTED id=d9-numeric-mixed-width layer=eval fixture=$d9_invalid expected=domain-refusal actual=accepted" >&2
+            record_red "d9-numeric-mixed-width" "$d9_invalid" "D24/D48 same-domain numeric refusal" "accepted"
             exit 1
           fi
           if [[ "$d9_stderr" != *"same-domain numeric values"* ]]; then
             echo "::error::D9_NUMERIC_WRONG_FAILURE id=d9-numeric-mixed-width layer=eval fixture=$d9_invalid expected=same-domain-refusal actual=$d9_stderr" >&2
+            record_red "d9-numeric-mixed-width" "$d9_invalid" "same-domain numeric values" "$d9_stderr" "$d9_stderr"
             exit 1
           fi
           echo "D9_DERIVED_NEGATIVE_PASS D24-vs-D48 no-implicit-coercion"
           d8_bad="tests/semantic/d8-truncate-rem-mixed-width-negative.lisp"
           if d8_bad_msg="$(target/debug/sens "$d8_bad" 2>&1)"; then
             echo "::error::D8_REM_WIDTH_ACCEPTED fixture=$d8_bad expected=D24-D48-refusal actual=accepted" >&2
+            record_red "d8-truncate-rem-width" "$d8_bad" "D24/D48 same-domain numeric refusal" "accepted"
             exit 1
           fi
           if [[ "$d8_bad_msg" != *"same-domain numeric values"* ]]; then
             echo "::error::D8_REM_BAD_REFUSAL fixture=$d8_bad expected=D24-D48-refusal actual=$d8_bad_msg" >&2
+            record_red "d8-truncate-rem-width" "$d8_bad" "same-domain numeric values" "$d8_bad_msg" "$d8_bad_msg"
             exit 1
           fi
           echo "D8_TRUNCATE_REM_PASS laws=8 typed_negative=1"
@@ -887,19 +902,23 @@ jobs:
           if ! canon_out="$(target/debug/sens "$canon_file" 2>&1)"; then
             echo "::error::D9_CANON_RECORD_EXEC_RED fixture=$canon_file expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
             printf '%s\n' "$canon_out" >&2
+            record_red "d9-canon-record-algebra-laws" "$canon_file" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "execution-error" "$canon_out"
             exit 1
           fi
           canon_actual="$(printf '%s\n' "$canon_out" | tail -n 1)"
           if [[ "$canon_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
-            echo "::error::D9_CANON_RECORD_LAW_DIFF fixture=$canon_file expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$canon_actual" >&2
+            echo "::error::D9_CANON_RECORD_LAW_DIFF fixture=$canon_file expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$canon_actual" >&2
+            record_red "d9-canon-record-algebra-laws" "$canon_file" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "$canon_actual"
             exit 1
           fi
           if canon_err="$(target/debug/sens "$canon_bad" 2>&1)"; then
             echo "::error::D9_CANON_RECORD_BAD_ACCEPTED fixture=$canon_bad expected=car-nonpair-refusal actual=accepted" >&2
+            record_red "d9-canon-record-truncated-negative" "$canon_bad" "car expects a non-empty list" "accepted"
             exit 1
           fi
           if [[ "$canon_err" != *"car expects a non-empty list"* ]]; then
             echo "::error::D9_CANON_RECORD_BAD_KIND fixture=$canon_bad expected=car-nonpair-refusal actual=$canon_err" >&2
+            record_red "d9-canon-record-truncated-negative" "$canon_bad" "car expects a non-empty list" "$canon_err" "$canon_err"
             exit 1
           fi
           echo "D9_CANON_RECORD_NATIVE_PASS functions=6 laws=14 negative=1"
@@ -973,7 +992,7 @@ jobs:
           if [[ "$PRIOR_JOB_STATUS" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
-            python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
+            python3 scripts/ci_failure_contract.py scan --report-file "$report" --validate-only || diagnostic_rc=$?
           fi
           if [[ "$diagnostic_rc" -ne 0 ]]; then
             echo "::error::UNINFORMATIVE-EXECUTOR or UNINFORMATIVE-OUTPUT; blocking CI"
