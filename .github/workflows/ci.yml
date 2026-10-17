@@ -656,6 +656,28 @@ jobs:
           fi
           printf '%s\n' "$negative_output"
           echo "D10_PAIP_SOURCE_NATIVE_PASS functions=3 positive=8 false-controls=2 negative=1 research_only=no-F1-F4-admission"
+          # D10 research-only LAST1/LISTP, exact output and negative empty LAST1.
+          d10_second="tests/semantic/d10-last1-listp-laws.lisp"
+          d10_second_negative="tests/semantic/d10-last1-empty-negative.lisp"
+          second_expected="(1 1 0 1 1 1 1 0)"
+          sha256sum "$d10_second" "$d10_second_negative" lib/core4.lisp target/debug/sens
+          if ! second_observed="$(target/debug/sens "$d10_second" 2>&1)"; then
+            printf '%s\n' "$second_observed" >&2
+            echo "::error::D10_LAST1_LISTP_EXEC_RED id=d10-paip-mal layer=eval fixture=$d10_second expected=$second_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d10_second'" >&2
+            exit 1
+          fi
+          second_actual="$(printf '%s\n' "$second_observed" | tail -n 1)"
+          if [[ "$second_actual" != "$second_expected" ]]; then
+            echo "::error::D10_LAST1_LISTP_LAW_DIFF id=d10-paip-mal layer=eval fixture=$d10_second expected=$second_expected actual=$second_actual first_diff=D1-vector reproduce='target/debug/sens $d10_second'" >&2
+            exit 1
+          fi
+          if bad="$(target/debug/sens "$d10_second_negative" 2>&1)"; then
+            echo "::error::D10_LAST1_NEGATIVE_SURVIVED id=d10-last1-empty layer=eval fixture=$d10_second_negative expected=CAR-nil-refusal actual=accepted reproduce='target/debug/sens $d10_second_negative'" >&2
+            exit 1
+          fi
+          printf '%s\n' "$bad"
+          echo "D10_PAIP_MAL_SOURCE_NATIVE_PASS functions=2 positive=6 false-controls=2 negative=1 research_only=no-F1-F4-admission"
+
 
           # D9 Canon donor laws from lib/canon.lisp, one native physical SENS witness.
           d9_canon_fixture="$RUNNER_TEMP/d9-canon-quote-cond.lisp"
