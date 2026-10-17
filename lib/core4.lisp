@@ -3828,3 +3828,42 @@
 (0011 числа-нерівні?
   (0010 (ліве праве)
     (not? (числовий-рівність ліве праве))))
+
+
+; D10:0011001000 FIND-ALL (PAIP auxfns.lisp@2db2ba9).
+; Keep every matching list element, preserving order and repetitions.
+; Default D8 EQL identity; optional supplied binary D1 predicate is the
+; language projection of the donor's :test law (no host keyword registry).
+(0011 знайти-усі
+  (0010 (зразок елементи . способи)
+    (110
+      ((0101 способи)
+       (відсіяти
+         (0010 (елемент) (тотожне-значення? зразок елемент))
+         елементи))
+      (#d1:1
+       (відсіяти
+         (0010 (елемент) ((100 способи) зразок елемент))
+         елементи)))))
+
+
+; D10:0011011000 UNIQUE-FIND-IF-ANYWHERE (PAIP auxfns.lisp@2db2ba9).
+; Only leaves are tested. Visit CDR before CAR, ADJOIN matching CAR at
+; the front, yielding first-occurrence order without duplicate leaves.
+; Optional third list is the donor's found-so-far accumulator.
+(0011 знайти-єдиний-вкладений
+  (0010 (умова дерево . попередні)
+    ((0010 (знайдене)
+       (110
+         ((010 дерево)
+          (110
+            ((умова дерево)
+             (приєднати-якщо-нема дерево знайдене))
+            (#d1:1 знайдене)))
+         (#d1:1
+          (знайти-єдиний-вкладений
+            умова (100 дерево)
+            (знайти-єдиний-вкладений умова (011 дерево) знайдене)))))
+     (110
+       ((0101 попередні) (001 ()))
+       (#d1:1 (100 попередні))))))
