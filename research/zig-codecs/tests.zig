@@ -2,6 +2,7 @@
 //! Avoid standalone f3c.zig import escaping its module root.
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
+const t5m = @import("t5m.zig");
 const physical_cycle = @import("physical_cycle.zig");
 const ladder = @import("domain_ladder.zig");
 const ladder_e1 = @import("domain_e1.zig");
@@ -23,6 +24,7 @@ test "import exact-width transport suites" {
     std.debug.assert(freestanding.F3C_SCRATCH_BYTES == 8192);
     std.debug.assert(freestanding.F3C_SUFFIX_ROM_BYTES == 4000);
     _ = t5;
+    _ = t5m;
     _ = physical_cycle;
     _ = ladder;
     _ = ladder_e1;
