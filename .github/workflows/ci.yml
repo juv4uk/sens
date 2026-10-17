@@ -172,6 +172,37 @@ jobs:
           fi
           echo "D8_COPYQN_NATIVE_PASS laws=8 negative=1 direct_D8_callability=unclaimed"
 
+      - name: "D8 PARTIAL/TAILP/PURE-LIST — вісім фізичних SENS законів"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d8-partial-tail-pure-laws.lisp"
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          mapfile -t laws < "$fixture"
+          count=0
+          for law in "${laws[@]}"; do
+            if [[ -z "$law" || "$law" == ';'* ]]; then continue; fi
+            ((count += 1))
+            witness="$RUNNER_TEMP/d8-partial-tail-pure-${count}.lisp"
+            printf '%s\n' "$law" > "$witness"
+            if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
+              echo "::error::D8_PURE_EXEC_RED id=$count layer=eval expected=D1:1 actual=execution-error"
+              printf '%s\n' "$observed" >&2
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D8_PURE_LAW_DIFF id=$count layer=eval expected=1 actual=$actual"
+              exit 1
+            fi
+            echo "D8_PURE_LAW_PASS id=$count"
+          done
+          if [[ "$count" != 8 ]]; then
+            echo "::error::D8_PURE_CENSUS expected=8 actual=$count"
+            exit 1
+          fi
+          echo "D8_PURE_NATIVE_PASS laws=8 destructive_mutation=unclaimed"
+
       - name: "D8 ELT/MAP/ONEP — 10 SENS законів і числовий негатив"
         shell: bash
         run: |
