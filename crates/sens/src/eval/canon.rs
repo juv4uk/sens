@@ -398,6 +398,7 @@ fn invoke_domain_primitive(
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum D9StringPrimitiveKind {
+    Append,
     Empty,
     Rest,
     Prefix,
@@ -409,6 +410,7 @@ fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringP
         return None;
     };
     match word.word().packed_bits() {
+        0b110011110 => Some(D9StringPrimitiveKind::Append),
         0b110011100 => Some(D9StringPrimitiveKind::Empty),
         0b110011101 => Some(D9StringPrimitiveKind::Rest),
         0b110101010 => Some(D9StringPrimitiveKind::Prefix),
@@ -417,7 +419,7 @@ fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringP
     }
 }
 
-/// True only for the four explicit D9 value mechanisms required by the
+/// True only for the five explicit D9 value mechanisms required by the
 /// machine-admission wire checker. This is deliberately outside
 /// CoreDomainIdentity: D9 identity remains universal-domain identity, not Core.
 pub(crate) fn has_d9_string_mechanism(identity: crate::DomainIdentity) -> bool {
@@ -436,7 +438,10 @@ pub(crate) fn invoke_d9_string_mechanism(
     let kind = d9_string_primitive_kind(identity)?;
     Some((|| {
         let expected = match kind {
-            D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Rest | D9StringPrimitiveKind::First => 1,
+            D9StringPrimitiveKind::Append => 2,
+            D9StringPrimitiveKind::Empty
+            | D9StringPrimitiveKind::Rest
+            | D9StringPrimitiveKind::First => 1,
             D9StringPrimitiveKind::Prefix => 2,
         };
         if args.len() != expected {
@@ -447,6 +452,9 @@ pub(crate) fn invoke_d9_string_mechanism(
             ));
         }
         let value = match kind {
+            D9StringPrimitiveKind::Append => {
+                super::special_forms::string_append_values(args, span)?
+            }
             D9StringPrimitiveKind::Empty => {
                 super::builtins::prim_00111100(args, environment, span)?
             }
@@ -618,6 +626,30 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if let CoreDomainIdentity::D9(_) = identity {
+        let domain_identity = crate::DomainIdentity::from(identity);
+        // A concrete language-owned definition bound to this exact D9 identity
+        // takes precedence. Residency alone still grants nothing: the slot is
+        // populated only by an actual callable definition.
+        if let Some(bound) = environment.domain_code_slot(domain_identity) {
+            let result = match &bound {
+                Value::Closure(closure) => Some(closures::apply_values(closure.clone(), args, span)?),
+                Value::Builtin(builtin) => Some((builtin.func)(args, environment, span)?),
+                _ => None,
+            };
+            if let Some(value) = result {
+                return canonicalize_domain_result(identity, value, span);
+            }
+        }
+
+        return invoke_d9_string_mechanism(domain_identity, args, environment, span)
+            .unwrap_or_else(|| Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("D9 identity has no admitted value-call mechanism: {identity}"),
+                span,
+            )));
+    }
+
     if let Some(result) = invoke_d4_eval(identity, args, environment, span) {
         return result;
     }
@@ -821,6 +853,32 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
+    fn exact_d9_definition_slot_is_used_before_static_mechanism_fallback() {
+        fn marker(
+            _args: &[Value],
+            _environment: &Environment,
+            _span: Span,
+        ) -> Result<Value, LanguageError> {
+            Ok(Value::String(std::rc::Rc::from("bound-d9-definition")))
+        }
+
+        let environment = Environment::root();
+        let bits = 0b110011110;
+        let identity = CoreDomainIdentity::D9(crate::CoreD9::from_word(
+            crate::Bit9::new(bits).expect("D9 word"),
+        ));
+        let bound = Value::Builtin(std::rc::Rc::new(crate::value::Builtin {
+            name: "test-d9-definition",
+            func: std::rc::Rc::new(marker),
+        }));
+        assert!(environment.bind_domain_code_slot_once(crate::DomainIdentity::from(identity), bound));
+
+        let result = invoke_domain_identity(identity, &[], &environment, Span::default())
+            .expect("exact D9 slot should be callable");
+        assert!(matches!(result, Value::String(ref value) if value.as_ref() == "bound-d9-definition"));
+    }
+
+    #[test]
     fn exact_d4_eval_runs_represented_code_and_keeps_width_qualified_identity() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
@@ -930,9 +988,32 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn four_ratified_d9_string_operations_have_explicit_exact_domain_mechanisms() {
+    fn five_ratified_d9_string_operations_have_explicit_exact_domain_mechanisms() {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
+
+        let appended = invoke_d9_string_mechanism(
+            d9(0b110011110),
+            &[
+                Value::String(std::rc::Rc::from("core4-")),
+                Value::String(std::rc::Rc::from("probe")),
+            ],
+            &environment,
+            span,
+        )
+        .expect("D9 STRING-APPEND route")
+        .expect("D9 STRING-APPEND value");
+        assert!(matches!(appended, Value::String(ref value) if value.as_ref() == "core4-probe"));
+
+        let append_arity_error = invoke_d9_string_mechanism(
+            d9(0b110011110),
+            &[Value::String(std::rc::Rc::from("one"))],
+            &environment,
+            span,
+        )
+        .expect("D9 STRING-APPEND route")
+        .expect_err("STRING-APPEND has exact binary arity two");
+        assert_eq!(append_arity_error.kind, ErrorKind::Arity);
 
         let empty = invoke_d9_string_mechanism(
             d9(0b110011100),

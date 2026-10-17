@@ -185,7 +185,10 @@ impl GpuExecutionPacketV1 {
 }
 
 fn identity_parts(opcode: CoreDomainIdentity) -> (usize, u8) {
-    (opcode.width(), opcode.packed_bits())
+    (
+        opcode.width(),
+        u8::try_from(opcode.packed_bits()).expect("admitted GPU opcodes fit their one-byte payload"),
+    )
 }
 
 fn decode_admitted_opcode(

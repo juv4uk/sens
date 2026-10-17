@@ -168,7 +168,7 @@ pub mod semantic_registry_export {
     pub fn admitted_semantic_ids() -> Vec<u8> {
         super::semantic_registry::admitted_semantic_ids()
             .into_iter()
-            .map(super::CoreDomainIdentity::packed_bits)
+            .filter_map(|identity| u8::try_from(identity.packed_bits()).ok())
             .collect()
     }
 

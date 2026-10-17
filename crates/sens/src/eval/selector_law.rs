@@ -31,7 +31,7 @@ fn decode(identity: CoreDomainIdentity) -> Option<(Step, u8, usize)> {
         return None;
     }
 
-    let payload = identity.packed_bits();
+    let payload = identity.packed_bits() as u8; // selector routes are bounded to W3–W6 above
     let root = match payload >> (width - 3) {
         0b100 => Step::Car,
         0b011 => Step::Cdr,

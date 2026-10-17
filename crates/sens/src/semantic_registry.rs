@@ -45,9 +45,9 @@ use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
-/// Only the historical W8 surface-table slot. This alias is deliberately NOT
-/// called a semantic ID: D3/D4/D5/D6/D8 identities are domain-qualified,
-/// and no W8 payload can be implicitly promoted to a current D8 resident.
+/// Only the historical W8 surface-table slot. Although the carrier type can
+/// also represent exact admitted D9 operations, this registry lane must stay
+/// W8-only and never reinterpret a D9 identity as a historical slot.
 pub(crate) type LegacyRegistrySlot = CoreDomainIdentity;
 
 /// A historical surface row cannot supply the width of a modern domain.
@@ -55,7 +55,9 @@ pub(crate) type LegacyRegistrySlot = CoreDomainIdentity;
 fn exact_identity_for_row(row: &SemanticRow) -> Option<CoreDomainIdentity> {
     let mut admitted = None;
     for surface in row.surfaces {
-        let Some(current) = direct_domain_identity_for_surface(surface.name) else {
+        let Some(current) = direct_domain_identity_for_surface(surface.name)
+            .filter(|identity| identity.width() <= 8)
+        else {
             continue;
         };
         if admitted.is_some_and(|previous| previous != current) {
@@ -73,6 +75,9 @@ pub(crate) fn exact_identity_for_legacy_registry_slot(slot: u8) -> Option<CoreDo
 }
 
 pub(crate) fn legacy_slot_for_exact_identity(identity: CoreDomainIdentity) -> Option<u8> {
+    if identity.width() > 8 {
+        return None;
+    }
     let mut matched = None;
     for row in SEMANTIC_ROWS {
         if exact_identity_for_row(row) == Some(identity) {
@@ -545,7 +550,7 @@ mod exact_d3_compatibility_migration_tests {
                 CoreDomainIdentity::from_source_word(BinarySourceWord::W8(crate::Bit8::new(legacy_byte).expect("8-bit source word"))).expect("exact domain word")
             ).expect("іменна історична проєкція на ратифікований D3");
             assert_eq!(identity.width(), 3);
-            assert_eq!(identity.packed_bits(), bits);
+            assert_eq!(identity.packed_bits(), u16::from(bits));
         }
     }
 

@@ -81,7 +81,7 @@ fn current_d5_coordinate(resident: &str) -> (usize, u8) {
     )
 }
 
-fn lowered_identity(source: &str) -> (usize, u8) {
+fn lowered_identity(source: &str) -> (usize, u16) {
     let parsed = parse(source).unwrap_or_else(|error| panic!("{source}: {error}"));
     let lowered = lower_program(&parsed);
     let ExprKind::DomainCall(identity, _) = &lowered[0].kind else {

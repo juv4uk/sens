@@ -2,7 +2,7 @@
 //! These tests exercise separately named Lisp-owned AVL closures only.
 use sens::{
     eval_program, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
-    Expr, ExprKind, Session,
+    eval_parsed_expressions, Bit9, CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
 fn session() -> Session {
@@ -14,6 +14,31 @@ fn session() -> Session {
         "lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session
     ).expect("Lisp-owned persistent map bootstrap");
     session
+}
+
+#[test]
+fn exact_d9_string_append_executes_through_the_core_operation_projection() {
+    let call = Expr {
+        kind: ExprKind::List(vec![
+            Expr {
+                kind: ExprKind::DomainIdentity(DomainIdentity::D9(
+                    CoreD9::from_word(Bit9::new(0b110011110).unwrap()),
+                )),
+                span: Span::default(),
+            },
+            Expr { kind: ExprKind::String("sens-".into()), span: Span::default() },
+            Expr { kind: ExprKind::String("d9".into()), span: Span::default() },
+        ].into()),
+        span: Span::default(),
+    };
+    let result = eval_parsed_expressions(&[call], &mut Session::default())
+        .expect("exact D9 STRING-APPEND mechanism");
+    assert!(matches!(result.value, sens::Value::String(ref value) if value.as_ref() == "sens-d9"));
+
+    assert!(matches!(sens::CoreDomainIdentity::from_source_word(
+        sens::BinarySourceWord::W9(Bit9::new(0b110011110).unwrap()),
+    ), Some(sens::CoreDomainIdentity::D9(word))
+        if word.word().packed_bits() == 0b110011110));
 }
 
 #[test]

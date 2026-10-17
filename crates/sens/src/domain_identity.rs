@@ -91,8 +91,9 @@ impl DomainIdentity {
     /// ADD1 і D6:001111 SUB1 admitted під #3394 як LOWER_DOMAIN_COMPOSITION.
     /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
     /// D8 так само OWNER-RATIFIED #3960.
-    /// D9 OWNER-RATIFIED #4008 і матеріалізується як exact identity, але
-    /// callability/mechanism admission лишається окремою і fail-closed.
+    /// D9 OWNER-RATIFIED #4008. Лише п'ять реалізованих string-механізмів
+    /// допускаються як exact D9 Core-operation identity; інша residency
+    /// залишається fail-closed.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
@@ -112,6 +113,10 @@ impl DomainIdentity {
                 // never grants callability to any other D8 coordinate.
                 Some(CoreDomainIdentity::D8(value))
             }
+            Self::D9(value) if matches!(
+                value.word().packed_bits(),
+                0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011
+            ) => Some(CoreDomainIdentity::D9(value)),
             Self::D9(_) => None,
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
@@ -149,6 +154,7 @@ pub enum CoreDomainIdentity {
     D5(CoreD5),
     D6(CoreD6),
     D8(CoreD8),
+    D9(CoreD9),
 }
 
 impl CoreDomainIdentity {
@@ -156,13 +162,14 @@ impl CoreDomainIdentity {
         self.source_word().width()
     }
 
-    pub const fn packed_bits(self) -> u8 {
+    pub const fn packed_bits(self) -> u16 {
         match self {
-            Self::D3(value) => value.word().packed_bits(),
-            Self::D4(value) => value.word().packed_bits(),
-            Self::D5(value) => value.word().packed_bits(),
-            Self::D6(value) => value.word().packed_bits(),
-            Self::D8(value) => value.word().packed_bits(),
+            Self::D3(value) => value.word().packed_bits() as u16,
+            Self::D4(value) => value.word().packed_bits() as u16,
+            Self::D5(value) => value.word().packed_bits() as u16,
+            Self::D6(value) => value.word().packed_bits() as u16,
+            Self::D8(value) => value.word().packed_bits() as u16,
+            Self::D9(value) => value.word().packed_bits(),
         }
     }
 
@@ -177,6 +184,7 @@ impl CoreDomainIdentity {
             Self::D5(value) => BinarySourceWord::W5(value.word()),
             Self::D6(value) => BinarySourceWord::W6(value.word()),
             Self::D8(value) => BinarySourceWord::W8(value.word()),
+            Self::D9(value) => BinarySourceWord::W9(value.word()),
         }
     }
 }
@@ -246,6 +254,9 @@ impl From<CoreD6> for CoreDomainIdentity {
 impl From<CoreD8> for CoreDomainIdentity {
     fn from(value: CoreD8) -> Self { Self::D8(value) }
 }
+impl From<CoreD9> for CoreDomainIdentity {
+    fn from(value: CoreD9) -> Self { Self::D9(value) }
+}
 
 impl From<CoreDomainIdentity> for DomainIdentity {
     fn from(value: CoreDomainIdentity) -> Self {
@@ -255,6 +266,7 @@ impl From<CoreDomainIdentity> for DomainIdentity {
             CoreDomainIdentity::D5(word) => Self::D5(word),
             CoreDomainIdentity::D6(word) => Self::D6(word),
             CoreDomainIdentity::D8(word) => Self::D8(word),
+            CoreDomainIdentity::D9(word) => Self::D9(word),
         }
     }
 }
@@ -326,6 +338,31 @@ mod tests {
         );
         assert!(other_domain.core_operation().is_none(),
             "identical payload in another domain grants no D8 callability");
+    }
+
+    #[test]
+    fn d9_string_append_is_a_core_operation_without_admitting_neighbors() {
+        for raw in [
+            0b110011110, // STRING-APPEND
+            0b110011100, // STRING-EMPTY?
+            0b110011101, // STRING-REST
+            0b110101010, // STRING-PREFIX?
+            0b110101011, // STRING-FIRST
+        ] {
+            let operation = DomainIdentity::from_source_word(
+                BinarySourceWord::W9(Bit9::new(raw).unwrap()),
+            ).core_operation();
+            assert!(matches!(operation, Some(CoreDomainIdentity::D9(word))
+                if word.word().packed_bits() == raw));
+        }
+
+        for raw in [0b110011111, 0b110101001, 0b111011110] {
+            let other = DomainIdentity::from_source_word(
+                BinarySourceWord::W9(Bit9::new(raw).unwrap()),
+            );
+            assert!(other.core_operation().is_none(),
+                "unadmitted D9:{raw:09b} must remain fail-closed");
+        }
     }
 
     #[test]
