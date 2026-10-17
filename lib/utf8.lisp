@@ -273,3 +273,16 @@
 (0011 utf8-encode-string
   (0010 (text)
     (utf8-encode-string-onto text (001 ()))))
+
+; D9 ratified UTF-8 Ukrainian projection; existing SENS Lisp codec is owner.
+; These names do not assert direct D9 opcode callability.
+; D9:000001001
+(0011 utf8-декодувати utf8-decode)
+; D9:000101011
+(0011 utf8-чинний? utf8-valid?)
+; D9:000100010
+(0011 unicode-скаляри-рядок unicode-scalars->string)
+; D9:000001010
+(0011 utf8-декодувати-рядок utf8-decode-string)
+; D9:000010101
+(0011 utf8-кодувати-рядок utf8-encode-string)
