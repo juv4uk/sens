@@ -686,6 +686,21 @@ jobs:
             exit 1
           fi
           echo "D9_VEC_NATIVE_PASS source=Core4 domains=D9:101101101,D9:101010111,D9:110000010 laws=6 wrong-index-negative=1"
+          d9_insert_fixture="tests/semantic/d9-map-insert-native-laws.lisp"
+          d9_insert_expected="(1 1 1 0 1 1 1 1 1)"
+          d9_insert_sha="$(sha256sum "$d9_insert_fixture" | cut -d' ' -f1)"
+          if ! d9_insert_output="$(target/debug/sens "$d9_insert_fixture" 2>&1)"; then
+            printf '%s\n' "$d9_insert_output" >&2
+            echo "::error::D9_MAP_INSERT_EXEC_RED id=d9-map-insert-vec-list layer=eval fixture=$d9_insert_fixture fixture_sha256=$d9_insert_sha expected=$d9_insert_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d9_insert_fixture'" >&2
+            exit 1
+          fi
+          d9_insert_actual="$(printf '%s\n' "$d9_insert_output" | tail -n 1)"
+          if [[ "$d9_insert_actual" != "$d9_insert_expected" ]]; then
+            echo "::error::D9_MAP_INSERT_LAW_DIFF id=d9-map-insert-vec-list layer=eval fixture=$d9_insert_fixture fixture_sha256=$d9_insert_sha expected=$d9_insert_expected actual=$d9_insert_actual first_diff=D1-vector reproduce='target/debug/sens $d9_insert_fixture'" >&2
+            exit 1
+          fi
+          echo "D9_MAP_INSERT_NATIVE_PASS domains=D9:101101110,D9:101011000 laws=9 wrong-old-value-negative=1"
+
 
 
           # D10 PAIP source-level derivatives: human-readable SENS witness only;
