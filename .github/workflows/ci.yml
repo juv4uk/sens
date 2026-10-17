@@ -294,11 +294,21 @@ jobs:
             echo "::error::T5M_SENS_CODEC wrong witness law vector: $witness_out" >&2; exit 1
           fi
           echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
-          # 3) таймінг: mono-ns НЕ існує в SENS (лише згадка в коментарі core4.lisp:87).
-          #    Тому чесний SKIP — не вдаємо вимір. Коли mono-ns буде реалізовано,
-          #    тут з'явиться T5M_SENS_CODEC_MONONS без жодної зміни семантики.
-          echo "T5M_SENS_CODEC_MONONS skipped=mono-ns-not-yet-implemented"
-          echo "T5M_SENS_CODEC_PASS authority=SENS no_python=1 no_rust_codec=1 sizes=ok witness=ok timing=skipped"
+          # 3) D10: mono-ns has resident identity but no individual callability admission.
+          #    This is a real negative native SENS witness, not SKIP and not fake timing.
+          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time.lisp"
+          time_sens="$RUNNER_TEMP/t5m-sens/time.lisp"
+          if time_out="$(target/debug/sens "$time_sens" 2>&1)"; then
+            echo "::error::T5M_D10_MONONS_ADMISSION_BYPASS expected=RESIDENT-NOT-CALLABLE identity=D10:0011110110" >&2
+            printf '%s\n' "$time_out" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'mono-ns' <<<"$time_out" || ! grep -Eqi 'unknown symbol|no admitted callable mechanism|not callable|unadmitted' <<<"$time_out"; then
+            echo "::error::T5M_D10_MONONS_WRONG_NEGATIVE expected=unadmitted D10 surface, actual=$time_out" >&2
+            exit 1
+          fi
+          echo "T5M_D10_MONONS_FAIL_CLOSED identity=D10:0011110110 width=10 status=RESIDENT-NOT-CALLABLE F1=F2=F3=F4=not-admitted"
+          echo "T5M_SENS_CODEC_PASS authority=SENS codec=1 size_laws=6 roundtrip_witnesses=7 clock_callability=negative-proof"
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash

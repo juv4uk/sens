@@ -1,20 +1,9 @@
-; T5M — SENS-тайминг ВЛАСНИМ mono-ns, без Python або host let.
-; Межі часу викликає сам SENS: початок до кодування, кінець після.
-; Ніяких десяткових арифметичних носіїв чи імітації тривалості.
-; D5:01011 DIFFERENCE використовує ратифіковану поверхню «-».
-; D4 DEFINE/LAMBDA в окремому .lisp — українські проєкції «визначити»/«функція».
-; Бібліотечні голови 0011/0010 не є допустимою десятковою програмою для CLI.
-; Це НЕ доказ D24+ придатності сирого годинника: типізований вхід перевіряє CI.
-(визначити т5м-виміряти-кінець
-  (функція (початок байти)
-    (list (довжина байти) (- (mono-ns) початок))))
-
-(визначити т5м-виміряти-старт
-  (функція (початок)
-    (т5м-виміряти-кінець
-      початок
-      (т5м-у-байти
-        (list (list #d1:1 #d1:0 #d1:1)
-              (list #d1:1 #d1:1))))))
-
-(т5м-виміряти-старт (mono-ns))
+; Native negative admission witness for the exact D10 clock candidate.
+; Contract 11.9 ratifies the complete 1024-coordinate D10 codebook, not this
+; candidate's runtime callability. F1 provenance, F2 independent positive and
+; negative witnesses, F3 behavioral deduplication, and F4 physical T5 admission
+; are separate gates. No gate is satisfied by this source comment or catalogue row.
+; Do not route via historical D8:01011010; that current D8 identity is BUTLAST.
+; Exact candidate identity: D10:0011110110 = mono-ns (width ten; no byte truncation).
+; This call intentionally must fail closed until per-row admission is proved.
+(mono-ns)
