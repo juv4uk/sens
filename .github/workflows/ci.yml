@@ -252,6 +252,25 @@ jobs:
           # Наш T5M-кодек (т5м-у-байти / т5м-з-байтів) виконує САМА мова,
           # не Python і не Rust. Таймінг — власним mono-ns усередині SENS.
           mkdir -p "$RUNNER_TEMP/t5m-sens"
+          # Лише нативні SENS проби для точної локалізації збою T5M.
+          # Жодної Python-семантики, підміни результатів або нового workflow.
+          t5m_probes=(
+            '(довжина (т5-тріти-слова (list #d1:1)))'
+            '(довжина (т5-тріти-списку (list (list #d1:1) (list #d1:0))))'
+            '(довжина (т5м-вирівняти (list #d24:000000000000000000000001)))'
+            '(довжина (т5м-три-байти #d24:000000000000000010100001))'
+            '(довжина (т5м-у-байти (list (list #d1:1))))'
+            '(т5м-з-байтів (т5м-у-байти (list (list #d1:1))))'
+          )
+          for n in "${!t5m_probes[@]}"; do
+            printf '%s\n' "${t5m_probes[$n]}" > "$RUNNER_TEMP/t5m-sens/probe.lisp"
+            if ! probe_out="$(target/debug/sens "$RUNNER_TEMP/t5m-sens/probe.lisp" 2>&1)"; then
+              echo "::error::T5M_NATIVE_PROBE_RED stage=$n expr=${t5m_probes[$n]} actual=$probe_out" >&2
+              exit 1
+            fi
+            echo "T5M_NATIVE_PROBE_PASS stage=$n actual=$probe_out"
+          done
+
           # 1) Виконувати нативні функції кодека SENS; зовнішній sens-trit
           #    приймає тільки двійкові слова, а не символьну проєкцію Lisp.
           cp tests/semantic/t5m-bench-sens.lisp "$RUNNER_TEMP/t5m-sens/bench.lisp"
