@@ -4018,9 +4018,17 @@
 ; D10:0000000001 RESULT-COUNT: матеріалізовані результати як правильний список.
 (0011 кількість-результатів довжина)
 
-; D10:0001001001 FORALL-EVERY-CANDIDATE-SATISFIES:
-; точне D1 ALL над предикатом кожного кандидата.
-(0011 кожен-задовольняє? усі-задовольняють?)
+; D10:0001001001 FORALL-EVERY-CANDIDATE-SATISFIES.
+; Native SENS recursion over exact D1 predicate bits: empty=YES,
+; first NO stops; later candidates are evaluated only after preceding YES.
+; The predicate is an evaluated callable value, not a macro/code head.
+(0011 кожен-задовольняє?
+  (0010 (перевірка кандидати)
+    (110
+      ((0101 кандидати) #d1:1)
+      ((перевірка (100 кандидати))
+       (кожен-задовольняє? перевірка (011 кандидати)))
+      (#d1:1 #d1:0))))
 
 
 ; D9:110101000 STRING-CONTAINS? — substring search, SENS-owned recursion.
