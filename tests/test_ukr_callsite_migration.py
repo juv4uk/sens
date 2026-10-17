@@ -80,6 +80,52 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(report['unclassified_files'], [])
         self.assertEqual(report['metadata_files_excluded'], 5)
 
+    def test_canon_d9_witness_calls_exact_ukrainian_surfaces_and_preserves_quoted_tag(self):
+        repo_root = SCRIPT.resolve().parents[1]
+        source = (repo_root / "lib" / "canon.lisp").read_text(encoding="utf-8")
+        forms = mod.parse(source)
+        active_heads = [head.text.casefold() for head in mod.candidate_heads(forms)]
+        migrated = {
+            "canon-law-result", "canon-law-satisfied", "canon-law-violated",
+            "canon-law-status", "canon-conformance-result", "canon-conformance-from",
+            "canon-law-empty-list", "canon-law-atom-cons", "canon-law-car-cons",
+            "canon-law-cdr-cons", "canon-law-eq-reflexive-atom", "canon-law-cdr-dotted",
+            "canon-law-cdr-proper", "canon-law-cdr-improper",
+            "canon-law-quote-suppresses-evaluation",
+            "canon-law-cond-first-match-short-circuit", "canon-law-symbolic-surface",
+        }
+        self.assertEqual(sorted(migrated.intersection(active_heads)), [])
+        self.assertIn("(001 canon-law-result)", source)  # inert result tag, not a call
+        self.assertIn("(0011 canon-law-result", source)  # definition spelling kept as compatibility evidence
+
+        index, _ = mod.peer_index(repo_root)
+        exact = {
+            "канон-закон-результат": "D9:001110101",
+            "канон-закон-виконаний": "D9:101000100",
+            "канон-закон-порушений": "D9:001010111",
+            "канон-закон-стан": "D9:001000010",
+            "канон-відповідність-результат": "D9:010011011",
+            "канон-відповідність-з": "D9:010010100",
+            "канон-порожній-список": "D9:001111001",
+            "канон-закон-порожній-список": "D9:010111011",
+            "канон-закон-атом-пара": "D9:010000111",
+            "канон-закон-перше-пара": "D9:010011100",
+            "канон-закон-решта-пара": "D9:001000110",
+            "канон-закон-рівність-рефлексивний-атом": "D9:001110010",
+            "канон-закон-решта-крапковий": "D9:010110001",
+            "канон-закон-решта-правильний": "D9:010000000",
+            "канон-закон-решта-неправильний": "D9:001110110",
+            "канон-закон-цитування-пригнічує-обчислення": "D9:010111100",
+            "канон-закон-умова-перший-збіг-короткий-ланцюг": "D9:010101100",
+            "канон-закон-символьний-поверхня": "D9:001111000",
+            "канон-відповідає?": "D9:010111110",
+        }
+        for surface, identity in exact.items():
+            self.assertEqual(index.get(surface), [identity], surface)
+        for surface in exact:
+            if surface in active_heads:
+                self.assertIn(surface, exact)
+
     def test_latin_executable_call_has_exact_file_line_and_known_identity(self):
         self.row(3, '101', 'коротко', 'повне', 'equal')
         self.put('lib/program.lisp', '; (equal а б)\n(повне а б)\n(equal а б)\n')
