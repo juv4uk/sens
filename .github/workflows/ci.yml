@@ -144,13 +144,13 @@ jobs:
             if ! observed="$(target/debug/sens "$file" 2>&1)"; then
               echo "::error::D8_COPYQN_EXEC_RED law=$count layer=eval fixture=$file expected=1 actual=execution-error" >&2
               printf '%s\n' "$observed" >&2
-              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$file" --expected "1" --actual "execution-error" --reproduce "target/debug/sens $file" --report-file "$report" --stderr-tail "$observed"
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$fixture" --expected "1" --actual "execution-error" --reproduce "target/debug/sens $file generated-from=$fixture" --report-file "$report" --stderr-tail "$observed"
               exit 1
             fi
             actual="$(tail -n 1 <<< "$observed")"
             if [[ "$actual" != "1" ]]; then
               echo "::error::D8_COPYQN_LAW_DIFF law=$count layer=eval fixture=$file expected=1 actual=$actual" >&2
-              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$file" --expected "1" --actual "$actual" --reproduce "target/debug/sens $file" --report-file "$report" --stderr-tail "$observed"
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d8-copyqn-$count" --layer eval --fixture "$fixture" --expected "1" --actual "$actual" --reproduce "target/debug/sens $file generated-from=$fixture" --report-file "$report" --stderr-tail "$observed"
               exit 1
             fi
             echo "D8_COPYQN_LAW_PASS law=$count"
@@ -442,21 +442,25 @@ jobs:
           fi
           echo "D8_SIGN_LENGTH_SENS_PASS laws=10 negative=1"
           # D9:101110011 atom-tree membership / D9:101111110 exact D24 nano->milli.
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
           d9_laws="tests/semantic/d9-contains-atom-milliseconds-laws.lisp"
           d9_bad="tests/semantic/d9-milliseconds-nonnumeric-negative.lisp"
           sha256sum "$d9_laws" "$d9_bad" lib/core4.lisp target/debug/sens
           if ! d9_out="$(target/debug/sens "$d9_laws" 2>&1)"; then
             echo "::error::D9_TREE_TIME_EXEC_RED id=d9-tree-time layer=eval fixture=$d9_laws expected=10-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-tree-time" --layer eval --fixture "$d9_laws" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "execution-error" --reproduce "target/debug/sens $d9_laws" --report-file "$report" --stderr-tail "$d9_out"
             printf "%s\n" "$d9_out" >&2
             exit 1
           fi
           d9_actual="$(printf "%s\n" "$d9_out" | tail -n 1)"
           if [[ "$d9_actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
             echo "::error::D9_TREE_TIME_LAW_DIFF id=d9-tree-time layer=eval fixture=$d9_laws expected=(1 1 1 1 1 1 1 1 1 1) actual=$d9_actual first_mismatch=D1-vector reproduce=target/debug/sens" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-tree-time" --layer eval --fixture "$d9_laws" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "$d9_actual" --reproduce "target/debug/sens $d9_laws" --report-file "$report" --stderr-tail "$d9_out"
             exit 1
           fi
           if d9_bad_out="$(target/debug/sens "$d9_bad" 2>&1)"; then
             echo "::error::D9_TIME_NEGATIVE_ACCEPT id=d9-time-nonnumeric layer=eval fixture=$d9_bad expected=math-type-refusal actual=accepted" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-time-nonnumeric" --layer eval --fixture "$d9_bad" --expected "math-type-refusal" --actual "accepted" --exit-code 0 --reproduce "target/debug/sens $d9_bad" --report-file "$report"
             exit 1
           fi
           echo "D9_TREE_TIME_NATIVE_PASS identities=D9:101110011,D9:101111110 laws=10 negative=1"
