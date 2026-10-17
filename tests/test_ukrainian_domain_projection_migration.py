@@ -221,7 +221,7 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         self.assertTrue(any(c.after is None and c.coordinate == "D7:1101101"
                             for c in changes))
         self.assertIn("потрібне уточнення власника", output)
-        with self.assertRaisesRegex(ValueError, "неоднозначних"):
+        with self.assertRaisesRegex(ValueError, "D7 лише dry-run"):
             self.run_audit(apply=True)
         self.assertEqual(d7.read_bytes(), before)
 
