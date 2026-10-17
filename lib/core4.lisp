@@ -3547,6 +3547,22 @@
               (захист-невідоме-маршрути))
              (#d1:1 (як-є ())))))))))
 
+; D9:000110110 GUARD-COMPARE — pure SENS projection of lib/guard.lisp.
+; Existing structural EQUAL decides, D9 MAKE-GUARD-FINDING builds the record.
+(0011 захист-порівняти
+  (0010 (предмет очікуване спостережене докази)
+    (110
+      ((equal? очікуване спостережене)
+       (створити-захист-висновок
+         (як-є allow) (як-є confirmed) предмет спостережене очікуване
+         (як-є ()) (як-є invariant-preserved) (як-є no-action) докази))
+      (#d1:1
+       (створити-захист-висновок
+         (як-є warn) (як-є confirmed) предмет спостережене очікуване
+         (список (як-є expected) очікуване (як-є observed) спостережене)
+         (як-є contract-drift)
+         (як-є reconcile-observation-with-contract) докази)))))
+
 ; D9:000000110 GUARD-UNKNOWN — preserve explicit missing evidence,
 ; and classify unknown as a routable epistemic state, not silent reject.
 ; The record layout is ratified from lib/guard.lisp make-guard-finding.
