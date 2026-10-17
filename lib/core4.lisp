@@ -4386,3 +4386,19 @@
 (0011 світ-адреса-вміст
   (0010 (світ)
     (список (як-є world-history) (світ-журнал світ) (світ-метадані світ))))
+
+; D9:111000000 ANSWER-ATOM, lifted D1 answer from lib/core.lisp.
+; Empty list has no atom/pair verdict, atom is (D1:1), pair is (D1:0).
+; Do not quote text digits or coerce D1 values through D7.
+(0011 відповідь-атом
+  (0010 (значення)
+    (за-умовою
+      ((порожнє? значення) (як-є ()))
+      ((атом? значення) (список #d1:1))
+      (#d1:1 (список #d1:0)))))
+
+; D9:110110001 ANSWER-EQ, exactly D3 atomic equality lifted to answer value.
+; Non-atomic carriers inherit the strict D3 EQ rejection.
+(0011 відповідь-рівність
+  (0010 (ліве праве)
+    (список (тотожне? ліве праве))))
