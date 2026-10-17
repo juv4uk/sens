@@ -1,0 +1,832 @@
+{
+  "schema": "sens-physical-d3-paired-fresh-process-wall/v1",
+  "research_status": "RESEARCH_NON_GATE",
+  "measured_at_utc": "2026-10-17T01:29:02+00:00",
+  "repository_head": "8213da2a6593842c3dabd08158852ccc3dd7bfa9",
+  "tracked_worktree_status": "",
+  "contract_version": "11.9",
+  "process_bench_sha256": "357646f43fb97da32e3a23941c0dde37cb10cc414676d117239d000a9873424e",
+  "native_sens_binary_sha256": "6db78d10a624c3b78c295384d94748d8da5920c539e52fa7a694a9006a1e5e5e",
+  "python_executable": "/gnu/store/wrga4n0pddywrvdk28scnybm58sidgdf-python-3.12.12/bin/python3.12",
+  "python_executable_sha256": "5348fb8370987fae9710a1418799296489a04da38bb2404e68d904bb5988c290",
+  "python_version": "Python 3.12.12",
+  "source_sha256": {
+    "process_bench.py": "357646f43fb97da32e3a23941c0dde37cb10cc414676d117239d000a9873424e",
+    "physical_cli.py": "6938518554120343d12c0c29b90ade18535bdba53d91ae4fc042cf150aa664b3",
+    "slot_cpu.py": "a4324513d0b120293cbf0c2c755474c046e207101545f577823d2cea4dbaf50f",
+    "sens_t5_codec.py": "ecbf923f240864374fbe06d553b5101c5d3574f8e58509628851118f2038fc10",
+    "benchmark_helpers_run.py": "5aeddfdac3ced2da75ffd23ee4454aa03a2a17ffc2388523fe14fb2bb1e70bfe"
+  },
+  "cpu": "Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "architecture": "x86_64",
+  "load_average_before_measurement": [
+    1.1220703125,
+    0.853515625,
+    0.8818359375
+  ],
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "reps_per_workload": 21,
+  "warmup_pairs": 3,
+  "measurement_boundary": "Parent monotonic wall clock from immediately before subprocess.run until child exit and stdout/stderr capture. Includes fresh child process creation, runtime/module startup, physical file read, T5 decode, D2/µCPU compile, execution, output capture and exit. Build and pre-timing correctness gate excluded. Warmups make OS file cache warm; cold disk-cache behavior is uncontrolled.",
+  "interpretation": "Descriptive end-to-end comparison of native SENS CLI and the CPython-hosted bounded D1-D3 µCPU on identical physical bytes. The ratio is specific to these implementations, fixtures, host and fresh-process boundary; it is not a language-level speedup.",
+  "cases": {
+    "d3-selftest-positive": {
+      "physical_path": "tests/fixtures/semantic/d3-selftest.sens",
+      "physical_bytes": 136,
+      "physical_sha256": "3493225aebcf8703667a7b6d13aee1ec0d5f2a4d56b60a8fadcf593a2e1e8413",
+      "expected_result": "1",
+      "commands": {
+        "native_sens": [
+          "/tmp/sens-physical-bench-5716836/target/release/sens",
+          "/tmp/sens-physical-bench-5716836/tests/fixtures/semantic/d3-selftest.sens"
+        ],
+        "python_microcpu": [
+          "/gnu/store/wrga4n0pddywrvdk28scnybm58sidgdf-python-3.12.12/bin/python3.12",
+          "/tmp/sens-physical-bench-5716836/benchmarks/microcpu/physical_cli.py",
+          "/tmp/sens-physical-bench-5716836/tests/fixtures/semantic/d3-selftest.sens"
+        ]
+      },
+      "parity": "pass",
+      "correctness_gate_outputs": {
+        "native_sens": "1",
+        "python_microcpu": "1"
+      },
+      "warmup_pairs": 3,
+      "measured_pairs": 21,
+      "native_sens": {
+        "p50_ns": 2996671,
+        "p95_ns": 5674685,
+        "samples_ns": [
+          2610555,
+          4390642,
+          2783522,
+          2610956,
+          3088071,
+          2686932,
+          2555963,
+          2953582,
+          5674685,
+          3046673,
+          3421746,
+          2908088,
+          3148483,
+          3259895,
+          2595472,
+          4007185,
+          8685808,
+          2996671,
+          3930231,
+          2864724,
+          2559034
+        ]
+      },
+      "python_microcpu": {
+        "p50_ns": 122719135,
+        "p95_ns": 186577682,
+        "samples_ns": [
+          107703163,
+          93886164,
+          91910160,
+          97791975,
+          95678979,
+          130176436,
+          116555001,
+          213816974,
+          160166201,
+          170597881,
+          106602908,
+          128228337,
+          129445134,
+          97931743,
+          95704003,
+          122719135,
+          186577682,
+          128464683,
+          128217090,
+          129722063,
+          92629210
+        ]
+      },
+      "python_over_native_p50_ratio": 40.951821204263,
+      "pairs": [
+        {
+          "index": 0,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2610555,
+            "python_microcpu": 107703163
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 1,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 93886164,
+            "native_sens": 4390642
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 2,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2783522,
+            "python_microcpu": 91910160
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 3,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 97791975,
+            "native_sens": 2610956
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 4,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3088071,
+            "python_microcpu": 95678979
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 5,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 130176436,
+            "native_sens": 2686932
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 6,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2555963,
+            "python_microcpu": 116555001
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 7,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 213816974,
+            "native_sens": 2953582
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 8,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 5674685,
+            "python_microcpu": 160166201
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 9,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 170597881,
+            "native_sens": 3046673
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 10,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3421746,
+            "python_microcpu": 106602908
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 11,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 128228337,
+            "native_sens": 2908088
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 12,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3148483,
+            "python_microcpu": 129445134
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 13,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 97931743,
+            "native_sens": 3259895
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 14,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2595472,
+            "python_microcpu": 95704003
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 15,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 122719135,
+            "native_sens": 4007185
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 16,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 8685808,
+            "python_microcpu": 186577682
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 17,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 128464683,
+            "native_sens": 2996671
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 18,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3930231,
+            "python_microcpu": 128217090
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        },
+        {
+          "index": 19,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 129722063,
+            "native_sens": 2864724
+          },
+          "outputs": {
+            "python_microcpu": "1",
+            "native_sens": "1"
+          }
+        },
+        {
+          "index": 20,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2559034,
+            "python_microcpu": 92629210
+          },
+          "outputs": {
+            "native_sens": "1",
+            "python_microcpu": "1"
+          }
+        }
+      ]
+    },
+    "d3-selftest-negative-one-bit": {
+      "physical_path": "tests/fixtures/semantic/d3-selftest-negative.sens",
+      "physical_bytes": 136,
+      "physical_sha256": "a40485cc80c95517780652bdaaafd17a59c5304a8ac2cb9894ae68899e27be35",
+      "expected_result": "0",
+      "commands": {
+        "native_sens": [
+          "/tmp/sens-physical-bench-5716836/target/release/sens",
+          "/tmp/sens-physical-bench-5716836/tests/fixtures/semantic/d3-selftest-negative.sens"
+        ],
+        "python_microcpu": [
+          "/gnu/store/wrga4n0pddywrvdk28scnybm58sidgdf-python-3.12.12/bin/python3.12",
+          "/tmp/sens-physical-bench-5716836/benchmarks/microcpu/physical_cli.py",
+          "/tmp/sens-physical-bench-5716836/tests/fixtures/semantic/d3-selftest-negative.sens"
+        ]
+      },
+      "parity": "pass",
+      "correctness_gate_outputs": {
+        "native_sens": "0",
+        "python_microcpu": "0"
+      },
+      "warmup_pairs": 3,
+      "measured_pairs": 21,
+      "native_sens": {
+        "p50_ns": 3057004,
+        "p95_ns": 5133778,
+        "samples_ns": [
+          6204965,
+          3437428,
+          3471093,
+          2744592,
+          2843183,
+          3660930,
+          2743118,
+          4905553,
+          4278584,
+          5133778,
+          2771572,
+          3195963,
+          3057004,
+          2659201,
+          2577053,
+          2817186,
+          2777515,
+          3141772,
+          2528165,
+          2889817,
+          3474072
+        ]
+      },
+      "python_microcpu": {
+        "p50_ns": 104557695,
+        "p95_ns": 143953984,
+        "samples_ns": [
+          120576199,
+          93489069,
+          96337762,
+          92065523,
+          104557695,
+          98835409,
+          101276664,
+          142717886,
+          116184180,
+          99263909,
+          94800180,
+          108305178,
+          143953984,
+          98385421,
+          109262258,
+          98480994,
+          117519164,
+          109505698,
+          91770178,
+          114255372,
+          169457131
+        ]
+      },
+      "python_over_native_p50_ratio": 34.20266869130691,
+      "pairs": [
+        {
+          "index": 0,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 6204965,
+            "python_microcpu": 120576199
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 1,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 93489069,
+            "native_sens": 3437428
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 2,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3471093,
+            "python_microcpu": 96337762
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 3,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 92065523,
+            "native_sens": 2744592
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 4,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2843183,
+            "python_microcpu": 104557695
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 5,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 98835409,
+            "native_sens": 3660930
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 6,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2743118,
+            "python_microcpu": 101276664
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 7,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 142717886,
+            "native_sens": 4905553
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 8,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 4278584,
+            "python_microcpu": 116184180
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 9,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 99263909,
+            "native_sens": 5133778
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 10,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2771572,
+            "python_microcpu": 94800180
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 11,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 108305178,
+            "native_sens": 3195963
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 12,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3057004,
+            "python_microcpu": 143953984
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 13,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 98385421,
+            "native_sens": 2659201
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 14,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2577053,
+            "python_microcpu": 109262258
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 15,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 98480994,
+            "native_sens": 2817186
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 16,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2777515,
+            "python_microcpu": 117519164
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 17,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 109505698,
+            "native_sens": 3141772
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 18,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 2528165,
+            "python_microcpu": 91770178
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        },
+        {
+          "index": 19,
+          "order": [
+            "python_microcpu",
+            "native_sens"
+          ],
+          "elapsed_ns": {
+            "python_microcpu": 114255372,
+            "native_sens": 2889817
+          },
+          "outputs": {
+            "python_microcpu": "0",
+            "native_sens": "0"
+          }
+        },
+        {
+          "index": 20,
+          "order": [
+            "native_sens",
+            "python_microcpu"
+          ],
+          "elapsed_ns": {
+            "native_sens": 3474072,
+            "python_microcpu": 169457131
+          },
+          "outputs": {
+            "native_sens": "0",
+            "python_microcpu": "0"
+          }
+        }
+      ]
+    }
+  }
+}

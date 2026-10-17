@@ -42,16 +42,19 @@ D1–D3**, а не рейтинг мов і не загальна заява п�
 парні тривалості та порядок кожної пари зберігаються у JSON.
 
 Зібрати один раз ті самі release-бінарники з pinned toolchain, як описано нижче,
-потім виконати три незалежні процесні репліки:
+потім виконати шість незалежних процесних реплік і звести raw JSON:
 
 ```sh
 evidence=benchmarks/cross-language/reality-matrix/physical-sens/evidence/20261017-wsl2-i5-6400
-for run in 1 2 3; do
+for run in 1 2 3 4 5 6; do
   python3 benchmarks/cross-language/reality-matrix/physical-sens/process_bench.py \
     --sens-cli "$PWD/target/release/sens" \
     --reps 21 --warmup 3 \
     --out "$evidence/fresh-process-rep-$run.json"
 done
+python3 benchmarks/cross-language/reality-matrix/physical-sens/aggregate_process.py \
+  "$evidence"/fresh-process-rep-{1,2,3,4,5,6}.json \
+  --out "$evidence/fresh-process-summary.json"
 ```
 
 Для малих 136-байтових fixture запуск runtime є помітною частиною результату —
@@ -128,11 +131,36 @@ CPython `3.12.12`. Збірка native CLI пройшла з pinned Zig; без 
 статистично узагальнений ефект. Для серйозної оцінки потрібні незалежні повтори
 на контрольованому CPU/середовищі та заздалегідь визначені межі фаз.
 
+### Парний запуск процесу до відповіді · 2026-10-17
+
+Окремо від попередніх in-process фаз виконано 6 незалежних запусків runner-а,
+по 21 парному запуску на фікстуру в кожному (126 пар/фікстуру). У кожній парі
+нові процеси native SENS і CPython µCPU читають ті самі tracked фізичні байти;
+порядок сторін чергується. Таймер включає запуск і завершення процесу,
+runtime/module initialization, читання, декодування/µCPU compile, виконання та
+stdout. Кеш файлів ОС прогрівався warmup-парами; холодний диск не вимірювався.
+
+| Фізична фікстура | Пар | Native SENS p50 / p95, ns | Python µCPU p50 / p95, ns | Діапазон Python/native p50 між 6 репліками |
+|---|---:|---:|---:|---:|
+| d3-selftest.sens · SHA-256 3493225aebcf8703667a7b6d13aee1ec0d5f2a4d56b60a8fadcf593a2e1e8413 | 126 | 2,953,236 / 8,685,808 | 115,362,081 / 262,062,532 | 33.92×–82.60× |
+| d3-selftest-negative.sens · SHA-256 a40485cc80c95517780652bdaaafd17a59c5304a8ac2cb9894ae68899e27be35 | 126 | 2,971,060 / 5,577,936 | 104,188,839 / 230,597,617 | 34.11×–40.95× |
+
+Усі 12 пар «фікстура × репліка» пройшли parity `1`/`0`. Це лише описовий
+process-to-result час двох конкретних реалізацій; великий розкид першої
+позитивної репліки збережено в p95 і raw-файлах, а не відкинуто. Значення не
+є мовним speedup, а p50 містить Python interpreter startup, якого немає у
+попередніх in-process вимірах. Сирі пари та provenance збережено в
+evidence/20261017-wsl2-i5-6400/fresh-process-rep-1.json …
+fresh-process-rep-6.json.
+
 Бінарники цього виміру: native `sens` SHA-256
 `6db78d10a624c3b78c295384d94748d8da5920c539e52fa7a694a9006a1e5e5e`; фазовий
 probe SHA-256 `e647698bd1b4ab884700d8c0ca8e5a7ea1f85048f931e9bf18947452b94976b9`.
 
-Raw JSON із трьох незалежних проходів збережений у
+Зведення, яке можна відтворити fail-closed агрегатором, доступне як
+[`fresh-process-summary.json`](evidence/20261017-wsl2-i5-6400/fresh-process-summary.json).
+Відношення pooled p50 становить 39.06× та 35.07× відповідно; це відношення
+двох pooled медіан, не мовний speedup. Raw JSON шести незалежних проходів є в
 [`evidence/20261017-wsl2-i5-6400/`](evidence/20261017-wsl2-i5-6400/).
 Це додатковий вузький evidence до #3680; воно не закриває старі задачі #1413/#1668
 і не стверджує еквівалентність із Python/Lua/Racket загалом.
