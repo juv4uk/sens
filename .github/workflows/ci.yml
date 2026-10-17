@@ -329,10 +329,10 @@ jobs:
           host_sens="$RUNNER_TEMP/t5m-sens/time-host.lisp"
           if ! host_out="$(target/debug/sens "$host_sens" 2>&1)"; then
             echo "::error::T5M_MONONS_HOST_EXEC_RED layer=eval fixture=tests/semantic/t5m-bench-time.lisp expected=integer-host-observation actual=execution-error" >&2
-            printf "%s\\n" "$host_out" >&2
+            printf "%s\n" "$host_out" >&2
             exit 1
           fi
-          host_actual="$(printf "%s\\n" "$host_out" | tail -n 1)"
+          host_actual="$(printf "%s\n" "$host_out" | tail -n 1)"
           if ! [[ "$host_actual" =~ ^[0-9]+$ ]]; then
             echo "::error::T5M_MONONS_HOST_LAW_DIFF expected=integer-host-observation actual=$host_actual" >&2
             exit 1
@@ -347,7 +347,7 @@ jobs:
             echo "::error::T5M_D10_MONONS_ENCODE_RED expected=exact-D10-physical-transport actual=$encode_out" >&2
             exit 1
           fi
-          d10_physical="\${d10_source%.lisp}.sens"
+          d10_physical="${d10_source%.lisp}.sens"
           if [[ ! -s "$d10_physical" ]]; then
             echo "::error::T5M_D10_MONONS_PHYSICAL_MISSING expected=nonempty-sens-file path=$d10_physical" >&2
             exit 1
@@ -359,7 +359,7 @@ jobs:
           fi
           if d10_out="$(target/debug/sens "$d10_physical" 2>&1)"; then
             echo "::error::T5M_D10_MONONS_ADMISSION_BYPASS expected=RESIDENT-NOT-CALLABLE identity=D10:0011110110" >&2
-            printf "%s\\n" "$d10_out" >&2
+            printf "%s\n" "$d10_out" >&2
             exit 1
           fi
           if ! grep -Eqi 'D10(:|[[:space:]])+0011110110' <<<"$d10_out" ||
