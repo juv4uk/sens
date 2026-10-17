@@ -71,7 +71,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
-          # Жорстко: крок червоний, поки не вся .lisp-кодова база на повній проєкції укр.
-          python3 scripts/report_ukr_projection_progress.py --min-pairs-pct 100
+          # Перевіряємо справжні помилки оголошеної укр-проєкції окремо від
+          # історичної метрики збігу короткої і повної назви.
+          # Тимчасовий RED за pairs_pct НЕ є доказом поломки доменів:
+          # після окремого callsite-аудиту його замінить відповідний критерій.
+          python3 scripts/report_ukr_projection_progress.py --min-ukr-pct 100 --min-pairs-pct 100
 
 
