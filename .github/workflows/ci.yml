@@ -37,6 +37,8 @@ jobs:
             base_sha="$PUSH_BEFORE"
           fi
           if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            # A shallow checkout (depth 1) has no HEAD^; deepen just enough.
+            git fetch --no-tags --deepen=2 origin >/dev/null 2>&1 || true
             base_sha="$(git rev-parse HEAD^)"
           fi
           timeout 30s git fetch --no-tags --depth=1 origin "$base_sha"
