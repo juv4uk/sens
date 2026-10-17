@@ -62,16 +62,16 @@
   (0010 (proposal)
     (110
       ((010 proposal) (001 ()))
-      ((101 (knowledge-proper-list? proposal) (001 ())) (001 ()))
+      ((101 (правильно-структурований-список-знань? proposal) (001 ())) (001 ()))
       ((101 (101 (000000 proposal) 5) (001 ())) (001 ()))
       ((101 (110101100 (100 proposal)) (001 ())) (001 ()))
       ((101 (100 proposal) *translation-schema*)
        (110
-         ((101 (translation-status-valid? (translation-status proposal)) (001 ()))
+         ((101 (статус-запису-перекладу-коректний? (переклад-стан proposal)) (001 ()))
           (001 ()))
-         ((101 (translation-kind-valid? (translation-kind proposal)) (001 ()))
+         ((101 (вид-кандидата-перекладу-коректний? (переклад-вид proposal)) (001 ()))
           (001 ()))
-         ((string-membership-helper (translation-source proposal))
+         ((string-membership-helper (переклад-джерело proposal))
           (001 ()))
          (#d1:1 #d1:1)))
       (#d1:1 (001 ())))))
@@ -80,25 +80,25 @@
   (0010 (payload)
     (110
       ((010 payload) (001 ()))
-      ((101 (knowledge-proper-list? payload) (001 ())) (001 ()))
-      (#d1:1 (knowledge-clauses-valid? payload)))))
+      ((101 (правильно-структурований-список-знань? payload) (001 ())) (001 ()))
+      (#d1:1 (клаузи-бази-знань-коректні? payload)))))
 
 (0011 translation-candidate-payload-valid?
   (0010 (kind payload)
     (110
-      ((101 kind (001 clause)) (knowledge-clause-valid? payload))
-      ((101 kind (001 batch)) (translation-batch-valid? payload))
-      ((101 kind (001 query)) (knowledge-goal-valid? payload))
+      ((101 kind (001 clause)) (клауза-бази-знань-коректна? payload))
+      ((101 kind (001 batch)) (пакет-кандидатів-перекладу-коректний? payload))
+      ((101 kind (001 query)) (ціль-бази-знань-коректна? payload))
       (#d1:1 (001 ())))))
 
 (0011 translation-alternatives-valid?
   (0010 (kind alternatives)
     (110
       ((010 alternatives) (001 ()))
-      ((translation-candidate-payload-valid? kind (100 alternatives))
+      ((вміст-кандидата-перекладу-коректний? kind (100 alternatives))
        (110
          ((010 (011 alternatives)) #d1:1)
-         (#d1:1 (translation-alternatives-valid? kind (011 alternatives)))))
+         (#d1:1 (альтернативні-варіанти-перекладу-коректні? kind (011 alternatives)))))
       (#d1:1 (001 ())))))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
@@ -106,9 +106,9 @@
 (0011 translation-ambiguity-valid?
   (0010 (kind payload)
     (110
-      ((101 (knowledge-proper-list? payload) (001 ())) (001 ()))
+      ((101 (правильно-структурований-список-знань? payload) (001 ())) (001 ()))
       ((010 (011 payload)) (001 ()))
-      (#d1:1 (translation-alternatives-valid? kind payload)))))
+      (#d1:1 (альтернативні-варіанти-перекладу-коректні? kind payload)))))
 
 (0011 make-translation-review
   (0010 (status code proposal detail)
@@ -139,14 +139,14 @@
   (0010 (review)
     (110
       ((010 review) (001 ()))
-      ((101 (knowledge-proper-list? review) (001 ())) (001 ()))
+      ((101 (правильно-структурований-список-знань? review) (001 ())) (001 ()))
       ((101 (101 (000000 review) 5) (001 ())) (001 ()))
       ((101 (110101100 (100 review)) (001 ())) (001 ()))
       ((101 (100 review) *translation-review-schema*)
        (110
-         ((101 (translation-review-status-valid? (translation-review-status review)) (001 ()))
+         ((101 (статус-огляду-кандидата-перекладу-коректний? (переклад-перевірка-стан review)) (001 ()))
           (001 ()))
-         ((101 (110101100 (translation-review-code review)) (001 ()))
+         ((101 (110101100 (переклад-перевірка-код review)) (001 ()))
           (001 ()))
          (#d1:1 #d1:1)))
       (#d1:1 (001 ())))))
@@ -155,45 +155,45 @@
   (0010 (proposal decision)
     (110
       ((010 decision)
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 malformed-advice-decision) proposal decision))
       ((101 (110101100 (100 decision)) (001 ()))
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 malformed-advice-decision) proposal decision))
       ((101 (100 decision) (001 accepted))
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 accepted) (001 knowledge-accepted) proposal decision))
       ((101 (100 decision) (001 conflict))
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 knowledge-conflict) proposal decision))
       ((101 (100 decision) (001 rejected))
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 knowledge-rejected) proposal decision))
       (#d1:1
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 malformed-advice-decision) proposal decision)))))
 
 (0011 translation-review-candidate
   (0010 (module-name proposal)
     ((0010 (kind payload)
       (110
-        ((101 (translation-candidate-payload-valid? kind payload) (001 ()))
-         (make-translation-review
+        ((101 (вміст-кандидата-перекладу-коректний? kind payload) (001 ()))
+         (створити-переклад-перевірка
            (001 rejected) (001 invalid-candidate) proposal payload))
         ((101 kind (001 query))
-         (make-translation-review
+         (створити-переклад-перевірка
            (001 accepted) (001 query) proposal payload))
         ((101 kind (001 clause))
-         (translation-review-advice-decision
-           proposal (advice-decision module-name payload)))
+         (рішення-на-основі-огляду-перекладу-й-поради
+           proposal (отримати-рішення-за-порадою module-name payload)))
         ((101 kind (001 batch))
-         (translation-review-advice-decision
-           proposal (advice-all-decision module-name payload)))
+         (рішення-на-основі-огляду-перекладу-й-поради
+           proposal (узагальнене-рішення-за-всіма-порадами module-name payload)))
         (#d1:1
-         (make-translation-review
+         (створити-переклад-перевірка
            (001 rejected) (001 invalid-kind) proposal kind))))
-     (translation-kind proposal)
-     (translation-payload proposal))))
+     (переклад-вид proposal)
+     (переклад-вміст proposal))))
 
 ; `translation-review` is pure with respect to knowledge state. Even a review
 ; classified as accepted has NOT written anything. Admission remains an
@@ -202,36 +202,36 @@
   (0010 (module-name proposal)
     (110
       ((101 (110101100 module-name) (001 ()))
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 invalid-module) proposal module-name))
-      ((101 (translation-envelope-valid? proposal) (001 ()))
-       (make-translation-review
+      ((101 (структура-обгортки-перекладу-коректна? proposal) (001 ()))
+       (створити-переклад-перевірка
          (001 rejected) (001 invalid-translation) proposal proposal))
-      ((101 (translation-status proposal) (001 candidate))
-       (translation-review-candidate module-name proposal))
-      ((101 (translation-status proposal) (001 ambiguous))
+      ((101 (переклад-стан proposal) (001 candidate))
+       (отримати-кандидата-на-огляд-перекладу module-name proposal))
+      ((101 (переклад-стан proposal) (001 ambiguous))
        (110
-         ((translation-ambiguity-valid?
-            (translation-kind proposal) (translation-payload proposal))
-          (make-translation-review
+         ((опис-неоднозначності-перекладу-коректний?
+            (переклад-вид proposal) (переклад-вміст proposal))
+          (створити-переклад-перевірка
             (001 ambiguous) (001 translator-ambiguous)
-            proposal (translation-payload proposal)))
+            proposal (переклад-вміст proposal)))
          (#d1:1
-          (make-translation-review
+          (створити-переклад-перевірка
             (001 rejected) (001 invalid-ambiguity)
-            proposal (translation-payload proposal)))))
-      ((101 (translation-status proposal) (001 rejected))
+            proposal (переклад-вміст proposal)))))
+      ((101 (переклад-стан proposal) (001 rejected))
        (110
-         ((110101100 (translation-payload proposal))
-          (make-translation-review
+         ((110101100 (переклад-вміст proposal))
+          (створити-переклад-перевірка
             (001 rejected) (001 translator-rejected)
-            proposal (translation-payload proposal)))
+            proposal (переклад-вміст proposal)))
          (#d1:1
-          (make-translation-review
+          (створити-переклад-перевірка
             (001 rejected) (001 invalid-rejection)
-            proposal (translation-payload proposal)))))
+            proposal (переклад-вміст proposal)))))
       (#d1:1
-       (make-translation-review
+       (створити-переклад-перевірка
          (001 rejected) (001 invalid-translation) proposal proposal)))))
 
 ; Only accepted knowledge candidates expose an admission payload. Queries are
@@ -240,34 +240,34 @@
 (0011 translation-admittable?
   (0010 (review)
     (110
-      ((101 (translation-review-valid? review) (001 ())) (001 ()))
-      ((101 (translation-review-status review) (001 accepted))
+      ((101 (запис-огляду-перекладу-коректний? review) (001 ())) (001 ()))
+      ((101 (переклад-перевірка-стан review) (001 accepted))
        ((0010 (proposal)
           (110
-            ((101 (translation-envelope-valid? proposal) (001 ())) (001 ()))
-            ((101 (translation-status proposal) (001 candidate))
+            ((101 (структура-обгортки-перекладу-коректна? proposal) (001 ())) (001 ()))
+            ((101 (переклад-стан proposal) (001 candidate))
              (110
-               ((101 (translation-kind proposal) (001 clause)) #d1:1)
-               ((101 (translation-kind proposal) (001 batch)) #d1:1)
+               ((101 (переклад-вид proposal) (001 clause)) #d1:1)
+               ((101 (переклад-вид proposal) (001 batch)) #d1:1)
                (#d1:1 (001 ()))))
             (#d1:1 (001 ()))))
-        (translation-review-proposal review)))
+        (переклад-перевірка-пропозиція review)))
       (#d1:1 (001 ())))))
 
 (0011 translation-admission-payload
   (0010 (review)
     (110
-      ((translation-admittable? review)
-       (translation-payload (translation-review-proposal review)))
+      ((переклад-допустимий? review)
+       (переклад-вміст (переклад-перевірка-пропозиція review)))
       (#d1:1 (001 ())))))
 
 ; Rejected and ambiguous translations are observations, not knowledge.
 (0011 translation-evidence-worthy?
   (0010 (review)
     (110
-      ((101 (translation-review-valid? review) (001 ())) (001 ()))
-      ((101 (translation-review-status review) (001 rejected)) #d1:1)
-      ((101 (translation-review-status review) (001 ambiguous)) #d1:1)
+      ((101 (запис-огляду-перекладу-коректний? review) (001 ())) (001 ()))
+      ((101 (переклад-перевірка-стан review) (001 rejected)) #d1:1)
+      ((101 (переклад-перевірка-стан review) (001 ambiguous)) #d1:1)
       (#d1:1 (001 ())))))
 
 (0011 translation-evidence-entry
@@ -277,15 +277,15 @@
 (0011 translation-evidence-next
   (0010 (review journal)
     (110
-      ((translation-evidence-worthy? review)
-       (111 (translation-evidence-entry review) journal))
+      ((переклад-доказ-вартий? review)
+       (111 (переклад-доказ-запис review) journal))
       (#d1:1 journal))))
 
 (0011 translation-review-with-evidence
   (0010 (module-name proposal journal)
     ((0010 (review)
-       (1110 review (translation-evidence-next review journal)))
-     (translation-review module-name proposal))))
+       (1110 review (переклад-доказ-наступний review journal)))
+     (переклад-перевірка module-name proposal))))
 
 ; Ukrainian D9 projections of the already-owned SENS translation laws.
 ; Identical closures and arity; no new domain codes or host review path.

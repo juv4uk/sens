@@ -83,7 +83,7 @@
          ((101 value (001 ())) 1)
          (1 0)))
       (1
-       (result-proper-list? (011 value))))))
+       (результат-є-правильним-списком? (011 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
@@ -104,9 +104,9 @@
   (0010 (goal)
     (110
       ((010 goal) 0)
-      ((0100 (result-proper-list? goal)) 0)
+      ((0100 (результат-є-правильним-списком? goal)) 0)
       ((0100 (110101100 (100 goal))) 0)
-      ((result-not-head? (100 goal))
+      ((результат-не-є-головою-правила? (100 goal))
        (110
          ((010 (011 goal))
           (110
@@ -122,7 +122,7 @@
   (0010 (goal)
     (110
       ((0100 (000011101 goal)) 0)
-      ((result-not-head? (100 goal)) 1)
+      ((результат-не-є-головою-правила? (100 goal)) 1)
       (1 0))))
 
 (0011 result-opposite-goal
