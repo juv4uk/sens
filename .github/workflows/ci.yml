@@ -272,6 +272,29 @@ jobs:
             fi
           done
           echo "D9_FS_CLIPS_SENS_PASS identities=D9:001010100,D9:001011110,D9:001010101 laws=8 negatives=2"
+          # Нова партія D9: journal append + CLIPS deftemplate predicate.
+          more="tests/semantic/d9-journal-and-deftemplate-laws.lisp"
+          wrong="tests/semantic/d9-journal-append-invalid-arity.lisp"
+          sha256sum "$more" "$wrong"
+          if ! observed="$(target/debug/sens "$more" 2>&1)"; then
+            echo "::error::D9_JOURNAL_TEMPLATE_EXEC_RED layer=eval fixture=$more expected=nine-D1-YES actual=execution-error" >&2
+            printf "%s\n" "$observed" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_JOURNAL_TEMPLATE_LAW_DIFF layer=eval fixture=$more expected=(1 1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if invalid="$(target/debug/sens "$wrong" 2>&1)"; then
+            echo "::error::D9_JOURNAL_ARITY_BYPASS layer=eval fixture=$wrong expected=arity-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eiq "arity|expected|arguments" <<< "$invalid"; then
+            echo "::error::D9_JOURNAL_WRONG_REFUSAL layer=eval fixture=$wrong expected=arity-refusal actual=$invalid" >&2
+            exit 1
+          fi
+          echo "D9_JOURNAL_TEMPLATE_SENS_PASS identities=D9:001011001,D9:010110100 laws=9 negative=1"
       - name: T5M-SENS-CODEC — наш кодек виконується мовою (розмір + round-trip)
         id: sens-t5m-codec
         shell: bash
