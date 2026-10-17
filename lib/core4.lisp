@@ -1796,10 +1796,10 @@
       ((нуль? b) (частка a b))
       ((менше? a b) #d24:000000000000000000000000)
       (#d1:1
-       (let ((chunk+mult
-               (largest-chunk a b b #d24:000000000000000000000001)))
-         (додати (решта chunk+mult)
-                 (quotient (відняти a (перше chunk+mult)) b)))))))
+       ((0010 (chunk+mult)
+          (додати (решта chunk+mult)
+                  (quotient (відняти a (перше chunk+mult)) b)))
+        (largest-chunk a b b #d24:000000000000000000000001))))))
 
 ; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
 (0011 mod
