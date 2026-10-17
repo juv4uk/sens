@@ -1,0 +1,13 @@
+; D9:111110000 WORLD-ADDRESS-CONTENT — eight D1 laws.
+; Exact structure, tag, journal, metadata, parent invariance, negative differences,
+; and one immutable record append. The D9 opcode is not directly admitted.
+(список
+  (equal? (світ-адреса-вміст (порожній-світ)) (як-є (world-history () ())))
+  (тотожне? (перше (світ-адреса-вміст (порожній-світ))) (як-є world-history))
+  (equal? (світ-адреса-вміст (створити-світ (як-є ()) (як-є (ev-a ev-b)) (як-є ()))) (як-є (world-history (ev-a ev-b) ())))
+  (equal? (світ-адреса-вміст (створити-світ (як-є ()) (як-є ()) (як-є (meta)))) (як-є (world-history () (meta))))
+  (equal? (світ-адреса-вміст (створити-світ (як-є parent-a) (як-є (ev-a)) (як-є (meta)))) (світ-адреса-вміст (створити-світ (як-є parent-b) (як-є (ev-a)) (як-є (meta)))))
+  (хибне? (equal? (світ-адреса-вміст (створити-світ (як-є ()) (як-є (ev-a)) (як-є (meta)))) (світ-адреса-вміст (створити-світ (як-є ()) (як-є (ev-b)) (як-є (meta))))))
+  (хибне? (equal? (світ-адреса-вміст (створити-світ (як-є ()) (як-є ()) (як-є (meta-a)))) (світ-адреса-вміст (створити-світ (як-є ()) (як-є ()) (як-є (meta-b))))))
+  (equal? (світ-адреса-вміст (світ-запис (порожній-світ) (як-є (tell module clause)))) (як-є (world-history ((tell module clause)) ())))
+)
