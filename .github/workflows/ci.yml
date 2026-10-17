@@ -918,21 +918,21 @@ jobs:
             else
               expected="(1 1 1 1 1 1 1 1)"
             fi
-            echo "D8_NATIVE_START test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected"
+            echo "SENS_DERIVED_START test_id=$test_id layer=eval fixture=$fixture fixture_sha256=$fixture_sha expected=$expected"
             if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
               echo "$output" >&2
-              echo "::error::D8_NATIVE_EXEC_RED test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=execution-error reproduce=target/debug/sens:$fixture" >&2
+              echo "::error::SENS_DERIVED_EXEC_RED test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=execution-error reproduce=target/debug/sens:$fixture" >&2
               record_red "$test_id" "$fixture" "$expected" "execution-error" "$output"
               exit 1
             fi
             actual="$(echo "$output" | tail -n 1)"
             if [[ "$actual" != "$expected" ]]; then
               echo "$output" >&2
-              echo "::error::D8_NATIVE_LAW_DIFF test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=$actual reproduce=target/debug/sens:$fixture" >&2
+              echo "::error::SENS_DERIVED_LAW_DIFF test_id=$test_id layer=eval fixture=$fixture sha256=$fixture_sha expected=$expected actual=$actual reproduce=target/debug/sens:$fixture" >&2
               record_red "$test_id" "$fixture" "$expected" "$actual" "$output"
               exit 1
             fi
-            echo "D8_NATIVE_PASS test_id=$test_id authority=SENS"
+            echo "SENS_DERIVED_PASS test_id=$test_id authority=SENS"
           done
           # Exact domain-mismatch failure must not be accepted as false equality.
           d9_invalid="tests/semantic/d9-numeric-cross-width-negative.lisp"
