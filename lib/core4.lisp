@@ -547,17 +547,22 @@
 ; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
+; Structural equality must resolve D3 NIL before D3 EQ:
+; () is a list terminator, never an EQ-admissible atom.
+; Exact D1 results, no truthiness or foreign numeric coercion.
 (0011 equal?
   (0010 (a b)
     (110
+      ((0101 a) (0101 b))
+      ((0101 b) #d1:0)
       ((010 a)
        (110
          ((010 b) (101 a b))
-         ((010 ()) (010 (001 (0))))))
-      ((010 b) (010 (001 (0))))
+         (#d1:1 #d1:0)))
+      ((010 b) #d1:0)
       ((equal? (100 a) (100 b))
        (equal? (011 a) (011 b)))
-      ((010 ()) (010 (001 (0)))))))
+      (#d1:1 #d1:0))))
 
 ; D8:11110111 EQUAL — ratified Ukrainian surface for SENS-owned structural equality.
 ; The identity is already admitted; this is a name projection, not a new opcode.
