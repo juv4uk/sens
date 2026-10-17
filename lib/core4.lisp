@@ -335,6 +335,55 @@
     (110 ((0101 значення) (зворот акумулятор)) ((0100 (0101 значення)) (відобразити-до дія (011 значення) (111 (дія (100 значення)) акумулятор))))))
 (0011 map-onto відобразити-до)
 
+; D10 research / PAIP list family: owner codebook coordinates, not F1-F4
+; machine admission. Each definition is native SENS over already-ratified
+; D3 CONS/CAR/CDR, D4 NULL/COND and D5 APPEND. Archive:
+; knowledge/d10-crossrepo-paip-v1.json and lib/domains/d10.lisp.
+; D10:0011010111 MKLIST: () remains (); an atom becomes a singleton;
+; an existing nonempty list is returned unchanged.
+(0011 утворити-список
+  (0010 (значення)
+    (110
+      ((0101 значення) (001 ()))
+      ((010 значення) (111 значення (001 ())))
+      (#d1:1 значення))))
+
+; D10:0011001010 MAPPEND: concatenate callback-produced proper lists
+; in original input order. No destructive append or implicit coercions.
+(0011 відобразити-й-додати
+  (0010 (дія елементи)
+    (110
+      ((0101 елементи) (001 ()))
+      ((010 елементи) (100 (001 ())))
+      (#d1:1
+       (append (дія (100 елементи))
+               (відобразити-й-додати дія (011 елементи)))))))
+
+; D10:0011001110 FLATTEN: PAIP donor specifies exactly ONE level,
+; not an arbitrary recursive tree flatten.
+(0011 сплющити
+  (0010 (елементи)
+    (відобразити-й-додати
+      (0010 (елемент) (утворити-список елемент))
+      елементи)))
+
+; D10 PAIP/MAL follow-on, language-derived only (no D10 F1-F4 admission).
+; D10:0011001101 LAST1: CAR(last cons) for a nonempty proper list,
+; not the final cons cell. Donor knowledge/d10-crossrepo-paip-v1.json.
+(0011 останній
+  (0010 (елементи)
+    (100 (останній-хвіст елементи))))
+
+; D10:0100001100 LISTP: both NIL and any CONS cell are list-shaped;
+; distinct from PROPER-LIST? and from D3:010 ATOM.
+; Donor knowledge/d10-crossrepo-mal-v1.json.
+(0011 список?
+  (0010 (значення)
+    (110
+      ((0101 значення) #d1:1)
+      ((010 значення) #d1:0)
+      (#d1:1 #d1:1))))
+
 ; D6:101000 MAP: native SENS recursion over a proper list.
 ; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
 (0011 відобразити
@@ -3495,9 +3544,12 @@
 
 
 ; D9:000101001 PROVENANCE-SOURCE: record's explicit evidence source field.
+; D9:000101001 PROVENANCE-SOURCE: exact third field in the canonical
+; (statement goal (source value) (rule ...) (derived-from ...)) record.
+; `source` is a data-field label, not a callable/domain surface identity.
 (0011 походження-джерело
   (0010 (запис)
-    (захист-еталон-поле (як-є source) (решта запис))))
+    (п-р (перше (решта (решта запис))))))
 
 
 ; D9:000001000 GUARD-UNKNOWN-ROUTES — exact canonical routing choices from lib/guard.lisp.
@@ -3546,6 +3598,22 @@
              ((101 вхідне-рішення (як-є unknown))
               (захист-невідоме-маршрути))
              (#d1:1 (як-є ())))))))))
+
+; D9:000110110 GUARD-COMPARE — pure SENS projection of lib/guard.lisp.
+; Existing structural EQUAL decides, D9 MAKE-GUARD-FINDING builds the record.
+(0011 захист-порівняти
+  (0010 (предмет очікуване спостережене докази)
+    (110
+      ((equal? очікуване спостережене)
+       (створити-захист-висновок
+         (як-є allow) (як-є confirmed) предмет спостережене очікуване
+         (як-є ()) (як-є invariant-preserved) (як-є no-action) докази))
+      (#d1:1
+       (створити-захист-висновок
+         (як-є warn) (як-є confirmed) предмет спостережене очікуване
+         (список (як-є expected) очікуване (як-є observed) спостережене)
+         (як-є contract-drift)
+         (як-є reconcile-observation-with-contract) докази)))))
 
 ; D9:000000110 GUARD-UNKNOWN — preserve explicit missing evidence,
 ; and classify unknown as a routable epistemic state, not silent reject.
@@ -3607,3 +3675,42 @@
 (0011 найбільше
   (0010 (перше-значення . решта-значень)
     (найбільше-у-списку (сполучити перше-значення решта-значень))))
+
+
+; D9:111111010 WORLD? — exactly (world parent journal metadata),
+; recovered from lib/world.lisp. No mutable host object or host predicate.
+(0011 світ?
+  (0010 (значення)
+    (за-умовою
+      ((атом? значення) #d1:0)
+      ((equal? (перше значення) (як-є world))
+        (за-умовою
+          ((атом? (решта значення)) #d1:0)
+          ((атом? (решта (решта значення))) #d1:0)
+          ((атом? (решта (решта (решта значення)))) #d1:0)
+          (#d1:1 (порожнє?
+            (решта (решта (решта (решта значення))))))))
+      (#d1:1 #d1:0))))
+
+; D9 world donor: filter newest-first tell/retract events by module.
+; Events have the ratified (operation module clause) list form.
+(0011 внутрішні-події-модуля
+  (0010 (модуль події)
+    (за-умовою
+      ((порожнє? події) (як-є ()))
+      ((атом? події) (як-є ()))
+      ((тотожне? (п-р (перше події)) модуль)
+        (сполучити (перше події)
+          (внутрішні-події-модуля модуль (решта події))))
+      (#d1:1 (внутрішні-події-модуля модуль (решта події))))))
+
+; D9:111100100 WORLD-MODULE-EVENTS. Persistent journal is unmodified.
+(0011 світ-модуль-події
+  (0010 (світ модуль)
+    (внутрішні-події-модуля модуль (світ-журнал світ))))
+
+; D9:111100000 WORLD-MODULE-KNOWN? — only a nonempty pair event stream
+; establishes existence; D1:NO is never silently coerced from ().
+(0011 світ-модуль-відомий?
+  (0010 (світ модуль)
+    (хибне? (атом? (світ-модуль-події світ модуль)))))
