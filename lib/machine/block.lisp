@@ -8,26 +8,26 @@
 ; D10:W10 поки не підтримується фізичним T5 (W1..W9).
 ; Публічні імена та поведінка шести функцій збережені без змін.
 
-(0011 machine-block
-  (0010 (forms)
+(визначити machine-block
+  (функція (forms)
     forms))
 
-(0011 machine-block-empty
-  (0010 ()
-    (001 ())))
+(визначити machine-block-empty
+  (функція ()
+    (як-є ())))
 
-(0011 machine-block-one
-  (0010 (form)
-    (1110 form)))
+(визначити machine-block-one
+  (функція (form)
+    (список form)))
 
-(0011 machine-block-append
-  (0010 (block form)
-    (1111 block (1110 form))))
+(визначити machine-block-append
+  (функція (block form)
+    (приєднати block (список form))))
 
-(0011 machine-block-concat
-  (0010 (left right)
-    (1111 left right)))
+(визначити machine-block-concat
+  (функція (left right)
+    (приєднати left right)))
 
-(0011 machine-block-forms
-  (0010 (block)
+(визначити machine-block-forms
+  (функція (block)
     block))
