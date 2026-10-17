@@ -15,29 +15,16 @@
 
 ; UTF-8 predicate verdicts are direct D1 bits: #d1:1 / #d1:0.
 ; Structural () remains data; byte arithmetic remains in its admitted numeric roles.
-(0011 utf8-in-range?
-  (0010 (value low high)
-    (110
-      ((11010 value low)  #d1:0)
-      ((0100 (11010 value low))
-       (110
-         ((0100 (11010 high value))  #d1:1)
-         ((0100 (0100 (11010 high value))) #d1:0))))))
+; The byte boundary requires explicit D24 numeric operands (not D8).
+; Bisection checks only exact natural D24 identity at its leaves by D3 EQ:
+; neither reduced fractions nor unrelated domain words become bytes.
+(0011 utf8-in-range? (0010 (value low high) (110 ((11010 value low) #d1:0) (#d1:1 (110 ((11010 high value) #d1:0) (#d1:1 #d1:1))))))
 
-(0011 utf8-continuation-byte?
-  (0010 (b)
-    (110
-      ((utf8-in-range? b 128 191)  #d1:1)
-      ((0100 (utf8-in-range? b 128 191)) #d1:0))))
+(0011 utf8-continuation-byte? (0010 (b) (utf8-in-range? b #d24:000000000000000010000000 #d24:000000000000000010111111)))
 
-(0011 utf8-byte?
-  (0010 (b)
-    (110
-      ((utf8-in-range? b 0 255) 
-       (110
-         ((101 (00101100 b 1) 0)  #d1:1)
-         ((0100 (101 (00101100 b 1) 0)) #d1:0)))
-      ((0100 (utf8-in-range? b 0 255)) #d1:0))))
+(0011 utf8-byte-natural-member? (0010 (b low step) (110 ((101 step #d24:000000000000000000000001) (110 ((101 b low) #d1:1) (#d1:1 (101 b (01010 low #d24:000000000000000000000001))))) (#d1:1 (110 ((11010 b (01010 low step)) (utf8-byte-natural-member? b low (10111 step #d24:000000000000000000000010))) (#d1:1 (utf8-byte-natural-member? b (01010 low step) (10111 step #d24:000000000000000000000010))))))))
+
+(0011 utf8-byte? (0010 (b) (110 ((utf8-in-range? b #d24:000000000000000000000000 #d24:000000000000000011111111) (utf8-byte-natural-member? b #d24:000000000000000000000000 #d24:000000000000000010000000)) (#d1:1 #d1:0))))
 
 (0011 utf8-all-bytes?
   (0010 (bytes)
