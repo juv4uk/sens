@@ -27,18 +27,18 @@
 (визначити world?
   (функція (value)
     (за-умовою
-      ((атом? value) (атом? (як-є (0))))
+      ((атом? value) ні)
       ((тотожне? (перше value) (як-є world))
        (за-умовою
          ; Exact shape: (world parent journal metadata).
          ; D3 ATOM/CDR tests required tails; D4 NULL rejects an extra field.
          ; No D6 LENGTH, numeric arity literal, or host-side list checker.
-         ((атом? (решта value)) (атом? (як-є (0))))
-         ((атом? (решта (решта value))) (атом? (як-є (0))))
-         ((атом? (решта (решта (решта value)))) (атом? (як-є (0))))
+         ((атом? (решта value)) ні)
+         ((атом? (решта (решта value))) ні)
+         ((атом? (решта (решта (решта value)))) ні)
          ((порожній? (решта (решта (решта (решта value))))) (атом? ()))
-         (так (атом? (як-є (0))))))
-      (так (атом? (як-є (0)))))))
+         (так ні)))
+      (так ні))))
 
 (визначити world-parent (функція (world) (друге world)))
 (визначити world-journal (функція (world) (третє world)))
