@@ -1025,6 +1025,33 @@ jobs:
             echo "::error::D9_JUSTIFIED_CASE_CENSUS expected=8 actual=$d9_law_index" >&2
             exit 1
           fi
+          # D9 TMS selectors: native SENS, positive fact/support/map and empty negative.
+          d9_tms="tests/semantic/d9-tms-fact-support-map-laws.lisp"
+          d9_tms_negative="tests/semantic/d9-tms-fact-empty-negative.lisp"
+          sha256sum "$d9_tms" "$d9_tms_negative" lib/core4.lisp target/debug/sens
+          if ! d9_tms_out="$(target/debug/sens "$d9_tms" 2>&1)"; then
+            printf "%s\n" "$d9_tms_out" >&2
+            echo "::error::D9_TMS_SELECT_EXEC_RED id=d9-tms-selectors layer=eval fixture=$d9_tms expected=eight-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            record_red "d9-tms-selectors" "$d9_tms" "(1 1 1 1 1 1 1 1)" "execution-error" "$d9_tms_out"
+            exit 1
+          fi
+          d9_tms_actual="$(printf "%s\n" "$d9_tms_out" | tail -n 1)"
+          if [[ "$d9_tms_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_TMS_SELECT_LAW_DIFF id=d9-tms-selectors layer=eval fixture=$d9_tms expected=(1 1 1 1 1 1 1 1) actual=$d9_tms_actual" >&2
+            record_red "d9-tms-selectors" "$d9_tms" "(1 1 1 1 1 1 1 1)" "$d9_tms_actual"
+            exit 1
+          fi
+          if d9_tms_bad="$(target/debug/sens "$d9_tms_negative" 2>&1)"; then
+            echo "::error::D9_TMS_EMPTY_ACCEPTED id=d9-tms-empty layer=eval fixture=$d9_tms_negative expected=D3-CAR-refusal actual=accepted" >&2
+            record_red "d9-tms-empty" "$d9_tms_negative" "CAR refusal" "accepted"
+            exit 1
+          fi
+          if [[ "$d9_tms_bad" != *"car expects a non-empty list"* ]]; then
+            echo "::error::D9_TMS_WRONG_NEGATIVE id=d9-tms-empty layer=eval fixture=$d9_tms_negative expected=CAR-type-refusal actual=$d9_tms_bad" >&2
+            record_red "d9-tms-empty" "$d9_tms_negative" "car expects a non-empty list" "$d9_tms_bad" "$d9_tms_bad"
+            exit 1
+          fi
+          echo "D9_TMS_SELECTORS_NATIVE_PASS functions=3 laws=8 negative=1 domain_bits=9"
           expected="(1 1 1 1 1 1 1 1)"
           for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp tests/semantic/d9-numeric-cdr-derived-laws.lisp tests/semantic/d8-scale-remap-doseq-laws.lisp tests/semantic/d8-partial-lcm-mod-laws.lisp tests/semantic/d5-quotient-mod-gcd-laws.lisp tests/semantic/d8-truncate-rem-derived-laws.lisp tests/semantic/d8-pair-recursive-laws.lisp tests/semantic/d8-integer-length-signed-laws.lisp tests/semantic/d8-logbitp-twos-complement-laws.lisp tests/semantic/d6-compose-flip-laws.lisp tests/semantic/d9-translation-review-derived-laws.lisp tests/semantic/d9-translation-evidence-laws.lisp tests/semantic/d9-result-goal-negation-laws.lisp tests/semantic/d8-ceiling-ash-rsh-d24-laws.lisp tests/semantic/d9-immutable-world-derived-laws.lisp tests/semantic/d8-logand-logior-logxor-d24-laws.lisp tests/semantic/d9-symbolic-surface-contains-atom-laws.lisp tests/semantic/d8-lsh-derived-laws.lisp tests/semantic/d9-append-new-world-depth-laws.lisp tests/semantic/d8-floor-lognot-d24-laws.lisp tests/semantic/d9-provenance-guard-fields-laws.lisp tests/semantic/d9-guard-unknown-routes-laws.lisp tests/semantic/d9-canon-conforms-native-laws.lisp tests/semantic/d6-min-max-variadic-laws.lisp tests/semantic/d9-world-shape-module-events-laws.lisp tests/semantic/d9-world-tell-retract-native-laws.lisp tests/semantic/d9-world-clauses-history-native-laws.lisp tests/semantic/d9-d10-justified-numeric-laws.lisp tests/semantic/d9-drop-unsupported-lint-size-laws.lisp tests/semantic/d9-research-derived-five-laws.lisp tests/semantic/d9-tms-fact-identity-laws.lisp tests/semantic/d9-justified-vec-arglist-laws.lisp tests/semantic/d8-nil-structural-equality-native-laws.lisp tests/semantic/d10-paip-find-all-laws.lisp tests/semantic/d10-paip-unique-find-tree-laws.lisp tests/semantic/d10-paip-partition-if-laws.lisp tests/semantic/d9-d10-justified-result-forall-laws.lisp tests/semantic/d10-proper-list-knowledge-result-laws.lisp tests/semantic/d9-world-ancestors-depth-laws.lisp tests/semantic/d9-scientific-constant-status-laws.lisp tests/semantic/d9-scientific-constant-kind-laws.lisp tests/semantic/d6-power-d8-values-d9-subst-laws.lisp tests/semantic/d9-seven-step-selectors-laws.lisp tests/semantic/d9-vec-conj-dependents-laws.lisp tests/semantic/d9-world-address-content-native-laws.lisp tests/semantic/d9-answer-atom-eq-native-laws.lisp tests/semantic/d9-scientific-constant-record-native-laws.lisp tests/semantic/d8-copy-structure-shift-d10-slice-values-laws.lisp; do
             test_id="sens-$(basename "$fixture" .lisp)"
