@@ -122,9 +122,15 @@ class CallsiteAuditTests(unittest.TestCase):
         }
         for surface, identity in exact.items():
             self.assertEqual(index.get(surface), [identity], surface)
-        for surface in exact:
-            if surface in active_heads:
-                self.assertIn(surface, exact)
+        expected_live_heads = {
+            "канон-закон-результат", "канон-закон-виконаний",
+            "канон-закон-порушений", "канон-закон-стан",
+            "канон-відповідність-результат", "канон-відповідність-з",
+            "канон-закон-порожній-список", "канон-закон-атом-пара",
+            "канон-закон-перше-пара", "канон-закон-решта-пара",
+        }
+        self.assertTrue(expected_live_heads.issubset(set(active_heads)),
+                        sorted(expected_live_heads.difference(active_heads)))
 
     def test_latin_executable_call_has_exact_file_line_and_known_identity(self):
         self.row(3, '101', 'коротко', 'повне', 'equal')
