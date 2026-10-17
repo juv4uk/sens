@@ -4350,6 +4350,18 @@
       (#d1:1 #d1:0))))
 
 
+; D9:111101111 SCIENTIFIC-CONSTANT-KIND-VALID?.
+; Ratified D9 kind check from lib/quantity.lisp's two symbolic donor values.
+; Quoted donor tags are data, never executable legacy Function8 names.
+; Malformed pair/kind returns exact D1 NO; no direct D9 call-head admission.
+(0011 науковий-константа-вид-чинний?
+  (0010 (вид)
+    (за-умовою
+      ((хибне? (атом? вид)) #d1:0)
+      ((тотожне? вид (як-є physical-defining)) #d1:1)
+      ((тотожне? вид (як-є physical-derived)) #d1:1)
+      (#d1:1 #d1:0))))
+
 ; Local derived type check used by D9 RESULT-GOAL?, not an admitted
 ; D9:110101100 machine call; language-owned SYMBOL? already exists in Core4.
 ; Local SENS-only SYMBOL? predicate, borrowed from lib/world.lisp.
