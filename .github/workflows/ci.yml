@@ -1463,7 +1463,7 @@ jobs:
             elif [[ "$fixture" == "tests/semantic/d10-proper-list-knowledge-result-laws.lisp" ]]; then
               expected="(1 1 0 0 1 1 0 0)"
             elif [[ "$fixture" == "tests/semantic/d9-seven-step-selectors-laws.lisp" ]]; then
-              expected="(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)"
+              expected="(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)"
             else
               expected="(1 1 1 1 1 1 1 1)"
             fi
