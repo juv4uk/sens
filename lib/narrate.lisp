@@ -196,3 +196,17 @@
          (1 (narrate-invalid-outcome-shape outcome))))
       (1
        (1110 (001 invalid) (001 outcome-tag) (100 outcome))))))
+
+; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
+; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
+; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
+; D9:000011000
+(0011 пояснити-факт narrate-fact)
+; D9:000111000
+(0011 пояснити-виведення narrate-derivation)
+; D9:000011011
+(0011 пояснити-походження narrate-provenance)
+; D9:000000001
+(0011 пояснити-відповідь narrate-answer)
+; D9:000100110
+(0011 пояснити-підсумок narrate-outcome)
