@@ -62,7 +62,7 @@ fn world_ancestor_is_proved_by_native_sens() {
         WORLD_WITNESSES,
         "tests/semantic/world-exact-arity-witness.lisp",
     );
-    assert_eq!(witnessed, 24, "world self-verdict fixture must retain exactly 24 executable SENS assertions");
+    assert_eq!(witnessed, 30, "world self-verdict fixture must retain exactly 30 executable SENS assertions");
 }
 
 #[test]
