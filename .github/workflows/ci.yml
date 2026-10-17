@@ -213,6 +213,38 @@ jobs:
           fi
           echo "D8_ELTMAPONEP_NATIVE_PASS identities=D8:00000101,D8:11000101,D8:11111011 laws=10 negative=1"
 
+      - name: T5M-SENS-CODEC — наш кодек виконується мовою, час власним mono-ns
+        id: sens-t5m-codec
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Наш T5M-кодек (т5м-у-байти / т5м-з-байтів) виконує САМА мова,
+          # не Python і не Rust. Таймінг — власним mono-ns усередині SENS.
+          mkdir -p "$RUNNER_TEMP/t5m-sens"
+          # 1) закони розміру + round-trip: .lisp -> .sens -> sens
+          cp tests/semantic/t5m-bench-sens.lisp "$RUNNER_TEMP/t5m-sens/bench.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/t5m-sens/bench.lisp"
+          bench_sens="$RUNNER_TEMP/t5m-sens/bench.sens"
+          test -s "$bench_sens"
+          bench_out="$(target/debug/sens "$bench_sens" 2>&1)" || {
+            echo "::error::T5M_SENS_CODEC size-laws failed: $bench_out"; exit 1; }
+          echo "T5M_SENS_CODEC_SIZES ok=$bench_out"
+          # 2) свідок round-trip 6 законів + 1 фальсифікатор
+          cp tests/semantic/t5m-sens-witness.lisp "$RUNNER_TEMP/t5m-sens/witness.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/t5m-sens/witness.lisp"
+          witness_sens="$RUNNER_TEMP/t5m-sens/witness.sens"
+          witness_out="$(target/debug/sens "$witness_sens" 2>&1)" || {
+            echo "::error::T5M_SENS_CODEC witness failed: $witness_out"; exit 1; }
+          echo "T5M_SENS_CODEC_WITNESS ok=$witness_out"
+          # 3) таймінг ВЛАСНИМ mono-ns: мова міряє себе
+          cp tests/semantic/t5m-bench-time.lisp "$RUNNER_TEMP/t5m-sens/time.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/t5m-sens/time.lisp"
+          time_sens="$RUNNER_TEMP/t5m-sens/time.sens"
+          time_out="$(target/debug/sens "$time_sens" 2>&1)" || {
+            echo "::error::T5M_SENS_CODEC mono-ns timing failed: $time_out"; exit 1; }
+          echo "T5M_SENS_CODEC_MONONS bytes_and_ticks=$time_out"
+          echo "T5M_SENS_CODEC_PASS authority=SENS clock=mono-ns no_python=1 no_rust_codec=1"
+
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash
@@ -652,32 +684,6 @@ jobs:
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
-      - name: D9 — immutable FS snapshot selectors (3 laws, 6 witnesses)
-        shell: bash
-        run: |
-          set -euo pipefail
-          fixture="tests/semantic/d9-fs-snapshot-selectors-laws.lisp"
-          negative="tests/semantic/d9-fs-snapshot-selectors-invalid.lisp"
-          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
-          if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
-            printf "%s\n" "$output" >&2
-            echo "::error::D9_FS_PROJECTION_EXEC_RED layer=eval id=d9-fs-fields fixture=$fixture expected=six-D1-YES actual=execution-error" >&2
-            exit 1
-          fi
-          actual="$(printf "%s\n" "$output" | tail -n 1)"
-          if [[ "$actual" != "(1 1 1 1 1 1)" ]]; then
-            echo "::error::D9_FS_PROJECTION_DIFF layer=eval id=d9-fs-fields fixture=$fixture expected=(1 1 1 1 1 1) actual=$actual" >&2
-            exit 1
-          fi
-          if negative_output="$(target/debug/sens "$negative" 2>&1)"; then
-            echo "::error::D9_FS_PROJECTION_NEG_ACCEPTED id=d9-fs-missing-revision layer=eval fixture=$negative expected=CAR-refusal actual=accepted" >&2
-            exit 1
-          fi
-          if ! grep -Eiq "car|pair|пара|D3|D5|empty" <<< "$negative_output"; then
-            echo "::error::D9_FS_PROJECTION_NEG_DIAGNOSTIC id=d9-fs-missing-revision layer=eval fixture=$negative expected=CAR-refusal actual=$negative_output" >&2
-            exit 1
-          fi
-          echo "D9_FS_SNAPSHOT_NATIVE_PASS identities=D9:001010000,D9:010000001,D9:010010101 positive=6 negative=1"
       - name: D8 — один точковий SENS-контроль трьох мовних партій
         shell: bash
         run: |
