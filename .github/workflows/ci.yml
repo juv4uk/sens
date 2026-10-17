@@ -634,6 +634,29 @@ jobs:
             exit 1
           fi
           echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+          # D10 PAIP source-level derivatives: human-readable SENS witness only;
+          # no F1-F4 admission or new execution primitive is implied.
+          d10_fixture="tests/semantic/d10-paip-list-laws.lisp"
+          d10_negative="tests/semantic/d10-paip-list-nonlist-negative.lisp"
+          expected="(1 1 1 1 1 1 1 0 0 1)"
+          sha256sum "$d10_fixture" "$d10_negative" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$d10_fixture" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D10_PAIP_EXEC_RED id=d10-paip-list layer=eval fixture=$d10_fixture expected=$expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d10_fixture'" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::D10_PAIP_LAW_DIFF id=d10-paip-list layer=eval fixture=$d10_fixture expected=$expected actual=$actual first_diff=D1-vector reproduce='target/debug/sens $d10_fixture'" >&2
+            exit 1
+          fi
+          if negative_output="$(target/debug/sens "$d10_negative" 2>&1)"; then
+            echo "::error::D10_PAIP_NEGATIVE_SURVIVED id=d10-paip-list-nonlist layer=eval fixture=$d10_negative expected=type-refusal actual=accepted reproduce='target/debug/sens $d10_negative'" >&2
+            exit 1
+          fi
+          printf '%s\n' "$negative_output"
+          echo "D10_PAIP_SOURCE_NATIVE_PASS functions=3 positive=8 false-controls=2 negative=1 research_only=no-F1-F4-admission"
+
           # D9 Canon donor laws from lib/canon.lisp, one native physical SENS witness.
           d9_canon_fixture="$RUNNER_TEMP/d9-canon-quote-cond.lisp"
           cat > "$d9_canon_fixture" <<'SENS_D9_CANON_END'
