@@ -3527,9 +3527,12 @@
 
 
 ; D9:000101001 PROVENANCE-SOURCE: record's explicit evidence source field.
+; D9:000101001 PROVENANCE-SOURCE: exact third field in the canonical
+; (statement goal (source value) (rule ...) (derived-from ...)) record.
+; `source` is a data-field label, not a callable/domain surface identity.
 (0011 походження-джерело
   (0010 (запис)
-    (захист-еталон-поле (як-є source) (решта запис))))
+    (п-р (перше (решта (решта запис))))))
 
 
 ; D9:000001000 GUARD-UNKNOWN-ROUTES — exact canonical routing choices from lib/guard.lisp.
