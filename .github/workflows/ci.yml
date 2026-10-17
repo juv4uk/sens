@@ -125,7 +125,7 @@ jobs:
             sha256sum "$archive"
           done
 
-      - name: "D9 — реальні визначення TMS та сховища, 10 законів SENS"
+      - name: "D9 — реальні визначення TMS, 10 законів SENS"
         shell: bash
         run: |
           set -euo pipefail
@@ -141,7 +141,7 @@ jobs:
             echo "::error::D9_NATIVE_DEFINITION_DIFF id=d9-tms-store layer=eval input=$witness expected=(1 1 1 1 1 1 1 1 1 1) actual=$actual" >&2
             exit 1
           fi
-          echo "D9_NATIVE_DEFINITION_PASS residents=5 projections=6 laws=10 authority=SENS"
+          echo "D9_NATIVE_DEFINITION_PASS residents=4 projections=4 laws=10 authority=SENS"
 
       - name: "D10 MAP-LAWS — 12 SENS свідків і неповна пара"
         shell: bash
