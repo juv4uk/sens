@@ -4272,3 +4272,59 @@
       ((0101 асоціації) (запасна-дія))
       ((101 ключ (100 (100 асоціації))) (100 асоціації))
       (#d1:1 (асоціація-eq ключ (011 асоціації) запасна-дія)))))
+
+; D9:100000000 п-п-п-п-п-п-п — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CAR:100.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-п-п-п
+  (0010 (значення)
+    (п-п-п-п-п-п (100 значення))))
+
+; D9:100000001 п-п-п-п-п-п-р — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CDR:011.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-п-п-р
+  (0010 (значення)
+    (п-п-п-п-п-п (011 значення))))
+
+; D9:100000010 п-п-п-п-п-р-п — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CAR:100.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-п-р-п
+  (0010 (значення)
+    (п-п-п-п-п-р (100 значення))))
+
+; D9:100000011 п-п-п-п-п-р-р — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CDR:011.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-п-р-р
+  (0010 (значення)
+    (п-п-п-п-п-р (011 значення))))
+
+; D9:100000100 п-п-п-п-р-п-п — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CAR:100.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-р-п-п
+  (0010 (значення)
+    (п-п-п-п-р-п (100 значення))))
+
+; D9:100000101 п-п-п-п-р-п-р — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CDR:011.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-р-п-р
+  (0010 (значення)
+    (п-п-п-п-р-п (011 значення))))
+
+; D9:100000110 п-п-п-п-р-р-п — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CAR:100.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-р-р-п
+  (0010 (значення)
+    (п-п-п-п-р-р (100 значення))))
+
+; D9:100000111 п-п-п-п-р-р-р — ratified seven-step selector,
+; composition of proven six-step D8 selector and exact D3 CDR:011.
+; No new direct D9 machine-call mechanism.
+(0011 п-п-п-п-р-р-р
+  (0010 (значення)
+    (п-п-п-п-р-р (011 значення))))
