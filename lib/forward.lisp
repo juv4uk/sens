@@ -1291,3 +1291,22 @@
         ((unify-equal? (000000 merged) (000000 facts))  facts)
         (#d1:1 (run-multi rules merged)))) (append-new (fire-rules-multi rules facts) facts))))
 
+; D9 Ukrainian projections of existing TMS/JTMS language-owned functions.
+; Source: lib/forward.lisp and knowledge/d9-final-semantic-fill-v1.json.
+; Preserve exact ratified coordinates; no new D9 native opcode.
+; D9:010100111
+(0011 відкликати-факт-tms retract-fact-tms)
+; D9:001101100
+(0011 відкликати-факти-tms retract-facts-tms)
+; D9:001100010
+(0011 додати-нові-записи-jtms add-new-entries-jtms)
+; D9:010101101
+(0011 непідтримані-факти unsupported-facts)
+; D9:010111001
+(0011 відкликати-факт-jtms retract-fact-jtms)
+; D9:001011010
+(0011 відкликати-факти-jtms retract-facts-jtms)
+; D9:010000011
+(0011 обрізати-запис prune-entry)
+; D9:010100011
+(0011 обрізати-всі-записи prune-all-entries)
