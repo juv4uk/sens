@@ -332,9 +332,9 @@
   (0010 (fact supports)
     (111 fact supports)))
 
-(0011 fact-of (0010 (entry) (100 entry)))
-(0011 supports-of (0010 (entry) (011 entry)))
-(0011 axiom (0010 (fact) (make-justified fact (001 ()))))
+(визначити fact-of (функція (entry) (перше entry)))
+(визначити supports-of (функція (entry) (решта entry)))
+(визначити axiom (функція (fact) (make-justified fact (як-є ()))))
 
 (0011 map-fact-of
   (0010 (entries)
@@ -493,7 +493,7 @@
 ; Separate globale Variable (`*jtms-memory*`) sowohl von `*working-memory*`
 ; (Schritt 1-5a) als auch von `*justified-memory*` (Schritt 5b, eine
 ; Begründung) — keine frühere Schicht wird berührt oder ersetzt.
-(0011 justifications-of (0010 (entry) (011 entry)))
+(визначити justifications-of (функція (entry) (решта entry)))
 
 (0011 fire-rule-jtms
   (0010 (rule fact)
@@ -660,9 +660,9 @@
 ; gültig für die `(pattern template)`-Regelform aus Schritt 1-5.
 ; `run-jtms-multi!` ist der JTMS-Einstiegspunkt für das gemeinsame Format
 ; `(head cond1 cond2 ...)`.
-(0011 jtms-state-subst (0010 (state) (100 state)))
-(0011 jtms-state-used (0010 (state) (011 state)))
-(0011 jtms-make-state (0010 (bindings used) (111 bindings used)))
+(визначити jtms-state-subst (функція (state) (перше state)))
+(визначити jtms-state-used (функція (state) (решта state)))
+(визначити jtms-make-state (функція (bindings used) (сполучити bindings used)))
 
 (0011 match-plain-condition-jtms
   (0010 (condition facts state)

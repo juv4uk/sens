@@ -83,8 +83,8 @@
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
-(0011 utc-now
-  (0010 ()
+(визначити utc-now
+  (функція ()
     (unix-time-observation->utc (unix-time-now))))
 
 
@@ -155,8 +155,8 @@
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
-(0011 internet-time-sync
-  (0010 (host timeout-ms)
+(визначити internet-time-sync
+  (функція (host timeout-ms)
     (internet-time-raw->observation
       (ntp-query-raw host timeout-ms))))
 
@@ -180,21 +180,21 @@
 ; coarser language-level view, so derive them instead of requiring a second
 ; host clock primitive. For the non-negative monotonic counter, quotient gives
 ; whole elapsed milliseconds (floor toward zero == floor here).
-(0011 milliseconds-from-nanoseconds
-  (0010 (nanoseconds)
+(визначити milliseconds-from-nanoseconds
+  (функція (nanoseconds)
     (quotient nanoseconds #d1000000)))
 
-(0011 mono-ms
-  (0010 ()
+(визначити mono-ms
+  (функція ()
     (milliseconds-from-nanoseconds (mono-ns))))
 
 
 ; Monotonic counters are host observations; deadline arithmetic is language
 ; semantics. Keep a pure pair of helpers so scheduler logic can be tested
 ; without sleeping, then expose convenience wrappers over the host counter.
-(0011 deadline-from
-  (0010 (now-ns delta-ns)
-    (01010 now-ns delta-ns)))
+(визначити deadline-from
+  (функція (now-ns delta-ns)
+    (додати now-ns delta-ns)))
 
 (0011 deadline-reached-at?
   (0010 (now-ns deadline-ns)
@@ -209,14 +209,14 @@
     (deadline-from (mono-ns) delta-ns)))
 
 
-(0011 deadline-reached?
-  (0010 (deadline-ns)
+(визначити deadline-reached?
+  (функція (deadline-ns)
     (deadline-reached-at? (mono-ns) deadline-ns)))
 
 
-(0011 elapsed-ns
-  (0010 (started-ns)
-    (01011 (mono-ns) started-ns)))
+(визначити elapsed-ns
+  (функція (started-ns)
+    (відняти (mono-ns) started-ns)))
 
 
 ; Interpret raw host timezone declarations without performing host I/O here.
