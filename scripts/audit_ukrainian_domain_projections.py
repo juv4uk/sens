@@ -102,7 +102,7 @@ def load_manifest(path: Path | None) -> dict[tuple[str, str, str, str], tuple[st
         domain, bits, col = item["domain"], item["bits"], item["column"]
         before, after, authority = item["before"], item["after"], item["authority"]
         if (domain not in {f"D{i}" for i in range(1, 12)}
-                or not re.fullmatch(r"[01]{int(domain[1:])}", bits)
+                or not re.fullmatch(rf"[01]{{{int(domain[1:])}}}", bits)
                 or col not in COLUMNS or not isinstance(authority, str)
                 or not authority.strip() or not isinstance(before, str)
                 or not isinstance(after, str)):
