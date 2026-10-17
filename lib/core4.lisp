@@ -3494,3 +3494,42 @@
 (0011 походження-джерело
   (0010 (запис)
     (захист-еталон-поле (001 source) (011 запис))))
+
+
+; D9:000001000 GUARD-UNKNOWN-ROUTES — exact canonical routing choices from lib/guard.lisp.
+; No runtime orchestration; routing remains an immutable SENS value.
+(0011 захист-невідоме-маршрути
+  (0010 ()
+    (001
+      (((route ask-agent)
+        (when ecosystem-local-or-component-owned)
+        (action ask-responsible-live-agent)
+        (verify commit-or-artifact-or-direct-source))
+       ((route ask-owner)
+        (when authority-choice-intent-license-or-destructive-scope)
+        (action ask-owner-explicitly)
+        (verify owner-decision-record))
+       ((route research-web)
+        (when external-current-or-primary-source-needed)
+        (action search-authoritative-external-sources)
+        (verify citations-and-access-date))))))
+
+
+; D9:000000110 GUARD-UNKNOWN — preserve explicit missing evidence,
+; and classify unknown as a routable epistemic state, not silent reject.
+; The record layout is ratified from lib/guard.lisp make-guard-finding.
+(0011 захист-невідоме
+  (0010 (предмет відсутні-докази порада)
+    (список
+      (001 guard-finding)
+      (список (001 schema) (001 guard/1))
+      (список (001 decision) (001 unknown))
+      (список (001 evidence-status) (001 unresolved))
+      (список (001 subject) предмет)
+      (список (001 state) (001 not-observed))
+      (список (001 contract) (001 insufficient-evidence))
+      (список (001 difference) відсутні-докази)
+      (список (001 impact) (001 decision-not-earned))
+      (список (001 guidance) порада)
+      (список (001 evidence) (001 ()))
+      (список (001 unknown-routes) (захист-невідоме-маршрути)))))
