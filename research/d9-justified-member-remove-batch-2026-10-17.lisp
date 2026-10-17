@@ -17,9 +17,18 @@
 (0011 додати-нові-обґрунтований додати-нові)
 (0011 add-new-justified додати-нові-обґрунтований)
 
-; D9:000111111 CONTENT-STORE-PUT-WORLD — map-insert
-(0011 вміст-сховище-покласти-світ мапа-вставити)
-(0011 content-store-put-world вміст-сховище-покласти-світ)
+; D9:000111111 CONTENT-STORE-PUT-WORLD: ВИПРАВЛЕНИЙ КОНТРАКТ.
+; Першоджерело lib/content-store.lisp:
+;   (content-store-put-world store world)
+;     = (внутрішня-мапа-вставити
+;          (world-content-address world)
+;          (world-address-content world)
+;          store)
+; Адресу з world обчислює сам закон. Не можна ототожнювати цю
+; функцію з (мапа-вставити ключ значення мапа): відрізняються
+; арність, адресація, тип вхідних даних та спостережувана поведінка.
+; Не додавати хибне DEFINE до core4 чи дубль ратифікованого коду.
+; Точні SENS-визначення та проєкції живуть у lib/content-store.lisp.
 
 ; D9:010101110 DROP-UNSUPPORTED — keep only pairs whose cdr is D1:1
 (0011 відкинути-непідтримані
