@@ -937,3 +937,30 @@
 (0011 clips-import-file
   (0010 (path)
     (clips-import (110101001 (110110111 path)))))
+
+; D9 exact-width Ukrainian projections of native CLIPS S-expression importer.
+; Source laws are the Lisp closures above; no new parser, Rust semantics or opcode.
+; D9:010110100
+(0011 clips-deftemplate-форма? clips-deftemplate-form?)
+; D9:001110111
+(0011 clips-слот-імена clips-slot-names)
+; D9:001100110
+(0011 clips-deftemplate-слоти clips-deftemplate-slots)
+; D9:001010011
+(0011 clips-шаблони-з-форми clips-templates-from-forms)
+; D9:001010101
+(0011 clips-шаблон-слот-порядок clips-template-slot-order)
+; D9:010001111
+(0011 clips-перетворити-шаблон clips-convert-template)
+; D9:010001101
+(0011 clips-перетворити-шаблон-список clips-convert-template-list)
+; D9:010111000
+(0011 clips-факт-клауза clips-fact-clause)
+; D9:001110001
+(0011 clips-факти-клаузи clips-facts->clauses)
+; D9:010010000
+(0011 clips-deffacts-клаузи clips-deffacts->clauses)
+; D9:001110100
+(0011 clips-змінна? clips-var?)
+; D9:101000111
+(0011 clips-перетворити-змінні clips-convert-vars)
