@@ -1,11 +1,6 @@
-; D10 empty-queue/sortcar/map-into/vector-list — self-DEFINE + 8× D1:1
-(0011 черга-порожня?
-  (0010 (q) (порожнє? q)))
-(0011 сортувати-за-першим
-  (0010 (елементи)
-    (сортувати-список-за
-      (0010 (a b) (менше? (перше a) (перше b)))
-      елементи)))
+; D10 empty-queue/sortcar from core4; map-into/vector-list remain
+; test-local research projections (no direct D10 mechanism admission).
+; Eight real SENS D1 witnesses exercise resident definitions.
 (0011 відобразити-у
   (0010 (fn dest src)
     (відобразити fn src)))
