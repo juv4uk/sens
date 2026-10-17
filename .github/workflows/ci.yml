@@ -68,19 +68,19 @@ jobs:
             'https://zig.linus.dev/zig'
             'https://zig.squirl.dev'
           )
-          mapfile -t zig_sources < <(printf '%s\\n' "${community_mirrors[@]}" | shuf)
+          mapfile -t zig_sources < <(printf '%s\n' "${community_mirrors[@]}" | shuf)
           zig_sources+=('https://ziglang.org/download/0.16.0')
           fetched=false
           for source in "${zig_sources[@]}"; do
             rm -f "$archive_path"
-            if ! curl --fail --location --silent --show-error \\
-              --connect-timeout 10 --max-time 60 \\
-              "${source}/${archive_name}?source=sens-github-actions" \\
+            if ! curl --fail --location --silent --show-error \
+              --connect-timeout 10 --max-time 60 \
+              "${source}/${archive_name}?source=sens-github-actions" \
               --output "$archive_path"; then
               echo "::warning::ZIG_0_16_0_DOWNLOAD_FAILED source=$source; trying next source" >&2
               continue
             fi
-            if ! printf '%s  %s\\n' "$expected_sha256" "$archive_path" | sha256sum --check --status; then
+            if ! printf '%s  %s\n' "$expected_sha256" "$archive_path" | sha256sum --check --status; then
               echo "::warning::ZIG_0_16_0_HASH_MISMATCH source=$source; trying next source" >&2
               continue
             fi
