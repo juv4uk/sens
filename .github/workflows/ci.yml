@@ -259,10 +259,10 @@ jobs:
             [[ -z "$law" || "$law" == ';'* ]] && continue
             ((checked += 1))
             witness="$RUNNER_TEMP/d8-div-$checked.lisp"
-            printf '%s\\n' "$law" > "$witness"
+            printf '%s\n' "$law" > "$witness"
             if ! result="$(target/debug/sens "$witness" 2>&1)"; then
               echo "::error::D8_DIV_EXEC_RED id=$checked layer=eval fixture=$fixture expected=D1:1 actual=execution-error" >&2
-              printf '%s\\n' "$result" >&2
+              printf '%s\n' "$result" >&2
               python3 scripts/ci_failure_contract.py record-diff --test-id "d8-div-$checked" --layer eval --fixture "$fixture" --expected "D1:1" --actual "execution-error" --reproduce "target/debug/sens $witness" --report-file "$report" --stderr-tail "$result"
               exit 1
             fi
