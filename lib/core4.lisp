@@ -4033,3 +4033,39 @@
       ((110101010 голка рядок) #d1:1)
       ((110011100 рядок) #d1:0)
       (#d1:1 (рядок-містить? (110011101 рядок) голка)))))
+
+
+; D9:000111011 TRANSLATION-EVIDENCE-WORTHY?.
+; Donor: lib/translation.lisp (rejected|ambiguous valid reviews are
+; evidence; accepted reviews never create a rejection/ambiguity journal).
+; This is pure D3/D4/D5 structure with exact D1 verdicts, not D9 opcode.
+(0011 переклад-доказ-вартий?
+  (0010 (перевірка)
+    (110
+      ((010 перевірка) #d1:0)
+      ((not? (010 (100 перевірка))) #d1:0)
+      ((not? (101 (100 перевірка) (001 translation-review/1))) #d1:0)
+      ((not? (equal? (довжина перевірка) #d24:000000000000000000000101)) #d1:0)
+      ((not? (010 (переклад-перевірка-стан перевірка))) #d1:0)
+      ((not? (010 (переклад-перевірка-код перевірка))) #d1:0)
+      ((101 (переклад-перевірка-стан перевірка) (001 rejected)) #d1:1)
+      ((101 (переклад-перевірка-стан перевірка) (001 ambiguous)) #d1:1)
+      (#d1:1 #d1:0))))
+
+
+; D9:000000011 TRANSLATION-EVIDENCE-ENTRY:
+; exact (translation-evidence/1 REVIEW) pair of SENS list data.
+(0011 переклад-доказ-запис
+  (0010 (перевірка)
+    (111 (001 translation-evidence/1)
+         (111 перевірка (001 ())))))
+
+
+; D9:000001110 TRANSLATION-EVIDENCE-NEXT:
+; immutable journal cons only when the reviewed outcome is worthy.
+(0011 переклад-доказ-наступний
+  (0010 (перевірка журнал)
+    (110
+      ((переклад-доказ-вартий? перевірка)
+       (111 (переклад-доказ-запис перевірка) журнал))
+      (#d1:1 журнал))))
