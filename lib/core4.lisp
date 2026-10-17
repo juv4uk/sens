@@ -3867,3 +3867,16 @@
      (110
        ((0101 попередні) (001 ()))
        (#d1:1 (100 попередні))))))
+
+; D8 admitted mechanism projections; names are Ukrainian surfaces, not new authority.
+; Exact width D8:11100000 -> D24 CHAR-CODE, D8:11101101/11101110 -> names.
+; Mechanisms already exist in SENS evaluator, never re-route via historical SID8.
+(0011 код-символу
+  (0010 (знак)
+    (11100000 знак)))
+(0011 текст-у-символ
+  (0010 (текст)
+    (11101101 текст)))
+(0011 символ-у-текст
+  (0010 (значення)
+    (11101110 значення)))

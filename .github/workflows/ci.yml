@@ -477,6 +477,29 @@ jobs:
             exit 1
           fi
           echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
+          # D8 admitted physical mechanisms, now SENS-owned Ukrainian surfaces.
+          d8_mech="tests/semantic/d8-admitted-text-mechanism-laws.lisp"
+          d8_mech_bad="tests/semantic/d8-admitted-text-mechanism-bad-scalar.lisp"
+          sha256sum "$d8_mech" "$d8_mech_bad" lib/core4.lisp target/debug/sens
+          if ! mech_out="$(target/debug/sens "$d8_mech" 2>&1)"; then
+            echo "::error::D8_MECH_EXEC_RED id=d8-admitted-text-mechanisms layer=eval fixture=$d8_mech expected=seven-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$mech_out" >&2
+            exit 1
+          fi
+          mech_actual="$(printf "%s\n" "$mech_out" | tail -n 1)"
+          if [[ "$mech_actual" != "(1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D8_MECH_LAW_DIFF id=d8-admitted-text-mechanisms layer=eval fixture=$d8_mech expected=(1 1 1 1 1 1 1) actual=$mech_actual first_diff=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          if bad_out="$(target/debug/sens "$d8_mech_bad" 2>&1)"; then
+            echo "::error::D8_MECH_BAD_ACCEPTED id=d8-char-scalar layer=eval fixture=$d8_mech_bad expected=Unicode-scalar-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$bad_out" != *"Unicode scalar"* && "$bad_out" != *"one-character string"* ]]; then
+            echo "::error::D8_MECH_WRONG_NEGATIVE id=d8-char-scalar layer=eval fixture=$d8_mech_bad expected=Unicode-scalar-refusal actual=$bad_out" >&2
+            exit 1
+          fi
+          echo "D8_ADMITTED_TEXT_NATIVE_PASS identities=D8:11100000,D8:11101101,D8:11101110 laws=7 negative=1"
           # D9 immutable content-store (alist): 10 SENS laws and malformed-store rejection.
           d9_store="tests/semantic/d9-content-store-projection-laws.lisp"
           d9_store_bad="tests/semantic/d9-content-store-malformed.lisp"
