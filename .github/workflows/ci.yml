@@ -688,6 +688,31 @@ jobs:
             exit 1
           fi
           echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+          # Exact D9 W9 text mechanisms, surfaced in the language itself.
+          d9_text_fixture="tests/semantic/d9-text-four-surfaces-laws.lisp"
+          d9_text_negative="tests/semantic/d9-text-four-surfaces-negative.lisp"
+          d9_text_expected="(1 0 1 0 1 0 1 0)"
+          sha256sum "$d9_text_fixture" "$d9_text_negative" lib/core4.lisp target/debug/sens
+          if ! d9_text_output="$(target/debug/sens "$d9_text_fixture" 2>&1)"; then
+            printf '%s\n' "$d9_text_output" >&2
+            echo "::error::D9_TEXT_EXEC_RED layer=eval fixture=$d9_text_fixture expected=$d9_text_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d9_text_fixture'" >&2
+            exit 1
+          fi
+          d9_text_actual="$(printf '%s\n' "$d9_text_output" | tail -n 1)"
+          if [[ "$d9_text_actual" != "$d9_text_expected" ]]; then
+            echo "::error::D9_TEXT_LAW_DIFF layer=eval fixture=$d9_text_fixture expected=$d9_text_expected actual=$d9_text_actual first_diff=D1-vector reproduce='target/debug/sens $d9_text_fixture'" >&2
+            exit 1
+          fi
+          if d9_text_bad="$(target/debug/sens "$d9_text_negative" 2>&1)"; then
+            echo "::error::D9_TEXT_TYPE_NEGATIVE_ACCEPTED layer=eval fixture=$d9_text_negative expected=Type-error actual=accepted first_diff=negative-exit reproduce='target/debug/sens $d9_text_negative'" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'string|text|рядок|Zeichen' <<< "$d9_text_bad"; then
+            echo "::error::D9_TEXT_TYPE_UNINFORMATIVE layer=eval fixture=$d9_text_negative expected=string-type-error actual=$d9_text_bad first_diff=diagnostic reproduce='target/debug/sens $d9_text_negative'" >&2
+            exit 1
+          fi
+          echo "D9_TEXT_NATIVE_PASS exact=D9:110011100,D9:110011101,D9:110101010,D9:110101011 laws=8 negative-type=1"
+
           # D9 immutable map semantics are loaded from Core4, never defined by the fixture.
           d9_map_fixture="tests/semantic/d9-map-core4-native-laws.lisp"
           d9_map_expected="(1 1 0 1 1 1 1 1)"
