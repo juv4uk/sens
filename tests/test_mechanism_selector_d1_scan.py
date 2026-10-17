@@ -32,7 +32,7 @@ def _canonicalize_current_heads(node):
     first = node[0]
     if isinstance(first, str) and first in {"001", "як-є"}:
         # QUOTE arguments are data: never lower surface names inside them.
-        return [_canonicalize_current_heads(first), *node[1:]]
+        return [_CANONICAL_UK_TO_BITS.get(first, first), *node[1:]]
     result = [_canonicalize_current_heads(part) for part in node]
     if isinstance(result[0], str):
         result[0] = _CANONICAL_UK_TO_BITS.get(result[0], result[0])
