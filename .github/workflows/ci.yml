@@ -425,6 +425,20 @@ jobs:
             exit 1
           fi
           echo "D8_CHAR_COMPARE_SENS_PASS identities=D8:10100001,D8:00100111,D8:00101000,D8:00110111 laws=10 negative=1"
+          # D9 result-status algebra — native SENS, 9 derived residents, 18 D1 laws.
+          d9_outcomes="tests/semantic/d9-result-status-algebra-laws.lisp"
+          sha256sum "$d9_outcomes" lib/core4.lisp target/debug/sens
+          if ! d9_observed="$(target/debug/sens "$d9_outcomes" 2>&1)"; then
+            echo "::error::D9_RESULT_ALGEBRA_EXEC_RED id=d9-outcome-algebra layer=eval fixture=$d9_outcomes expected=eighteen-D1-YES actual=execution-error reproduce=target/debug/sens" >&2
+            printf "%s\n" "$d9_observed" >&2
+            exit 1
+          fi
+          d9_actual="$(printf "%s\n" "$d9_observed" | tail -n 1)"
+          if [[ "$d9_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_RESULT_ALGEBRA_LAW_DIFF id=d9-outcome-algebra layer=eval fixture=$d9_outcomes expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d9_actual first_mismatch=D1-vector reproduce=target/debug/sens" >&2
+            exit 1
+          fi
+          echo "D9_RESULT_ALGEBRA_NATIVE_PASS identities=9 laws=18 negative=5"
           # D8:01011011 CHAR + D9:110100010 STRING-LENGTH / 110101110
           # IDENTITY / 001110110 CDR-IMPROPER: one mixed-domain SENS witness.
           d8_d9_fixture="tests/semantic/d8-char-d9-length-identity-laws.lisp"

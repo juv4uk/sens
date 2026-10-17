@@ -2780,3 +2780,60 @@
 (0011 р-р-п-п-р-р-р
   (0010 (значення)
     (011 (011 (100 (100 (011 (011 (011 значення)))))))))
+
+
+; D9 canonical reasoning outcomes — ratified exact coordinates, from
+; lib/result-status.lisp (historical research source; only SENS owns meaning).
+; Each result is ordinary D3/D4 list data, never a new host Value variant.
+; Canonical tags are quoted data, not executable English identifiers.
+; D9:000111101 MAKE-PROVED / D9:000110101 MAKE-UNKNOWN.
+(0011 створити-доведений
+  (0010 (твердження докази)
+    (1110 (001 proved) твердження докази)))
+(0011 створити-невідоме
+  (0010 (предмет)
+    (1110 (001 unknown) предмет)))
+
+; D9:001000000 MAKE-PARTIAL / D9:000100111 MAKE-BLOCKED.
+(0011 створити-частковий
+  (0010 (значення межа)
+    (1110 (001 partial) значення межа)))
+(0011 створити-заблокований
+  (0010 (причина)
+    (1110 (001 blocked) причина)))
+
+; D9:000000111 MAKE-DISPUTED / D9:000001101 MAKE-INVALID.
+(0011 створити-спірний
+  (0010 (докази)
+    (1110 (001 disputed) докази)))
+(0011 створити-некоректний
+  (0010 (причина вміст)
+    (1110 (001 invalid) причина вміст)))
+
+; D9:000000100 RESULT-TAGGED? — strict one-bit D1 verdict, not host truthiness.
+; A malformed pair-valued head is not an admitted status atom.
+(0011 результат-позначений?
+  (0010 (результат)
+    (110
+      ((010 результат) #d1:0)
+      ((0100 (010 (100 результат))) #d1:0)
+      ((101 (100 результат) (001 proved)) #d1:1)
+      ((101 (100 результат) (001 unknown)) #d1:1)
+      ((101 (100 результат) (001 partial)) #d1:1)
+      ((101 (100 результат) (001 blocked)) #d1:1)
+      ((101 (100 результат) (001 disputed)) #d1:1)
+      ((101 (100 результат) (001 invalid)) #d1:1)
+      (#d1:1 #d1:0))))
+
+; D9:000011001 RESULT-STATUS / D9:000110010 RESULT-PAYLOAD.
+; Unsupported outcome shapes project to (), as the research donor specifies.
+(0011 результат-стан
+  (0010 (результат)
+    (110
+      ((результат-позначений? результат) (100 результат))
+      (#d1:1 (001 ())))))
+(0011 результат-вміст
+  (0010 (результат)
+    (110
+      ((результат-позначений? результат) (011 результат))
+      (#d1:1 (001 ())))))

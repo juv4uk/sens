@@ -1,0 +1,21 @@
+; D9 SENS result-status algebra: six constructors, three projections, 18 D1 verdicts.
+; Negative cases: unfamiliar tag, scalar input, pair-valued head, invalid projections.
+(list
+  (equal? (результат-стан (створити-доведений (quote факт) (list (quote доказ)))) (quote proved))
+  (equal? (результат-стан (створити-невідоме (quote предмет))) (quote unknown))
+  (equal? (результат-стан (створити-частковий (quote дані) (quote межа))) (quote partial))
+  (equal? (результат-стан (створити-заблокований (quote причина))) (quote blocked))
+  (equal? (результат-стан (створити-спірний (quote конфлікт))) (quote disputed))
+  (equal? (результат-стан (створити-некоректний (quote причина) (quote вміст))) (quote invalid))
+  (equal? (результат-вміст (створити-доведений (quote факт) (list (quote доказ)))) (list (quote факт) (list (quote доказ))))
+  (equal? (результат-вміст (створити-невідоме (quote предмет))) (list (quote предмет)))
+  (equal? (результат-вміст (створити-частковий (quote дані) (quote межа))) (list (quote дані) (quote межа)))
+  (equal? (результат-вміст (створити-заблокований (quote причина))) (list (quote причина)))
+  (equal? (результат-вміст (створити-спірний (quote конфлікт))) (list (quote конфлікт)))
+  (equal? (результат-вміст (створити-некоректний (quote причина) (quote вміст))) (list (quote причина) (quote вміст)))
+  (результат-позначений? (створити-невідоме (quote предмет)))
+  (not? (результат-позначений? (list (quote not-canonical) (quote дані))))
+  (not? (результат-позначений? (quote атом)))
+  (not? (результат-позначений? (list (list (quote unknown)) (quote дані))))
+  (equal? (результат-стан (list (quote not-canonical) (quote дані))) (quote ()))
+  (equal? (результат-вміст (list (quote not-canonical) (quote дані))) (quote ())))
