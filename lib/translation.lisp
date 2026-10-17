@@ -286,3 +286,14 @@
     ((0010 (review)
        (1110 review (translation-evidence-next review journal)))
      (translation-review module-name proposal))))
+
+; Ukrainian D9 projections of the already-owned SENS translation laws.
+; Identical closures and arity; no new domain codes or host review path.
+; D9:000101000
+(0011 переклад-перевірка translation-review)
+; D9:000110111
+(0011 переклад-допустимий? translation-admittable?)
+; D9:000000010
+(0011 переклад-допуск-вміст translation-admission-payload)
+; D9:000010010
+(0011 переклад-перевірка-з-доказ translation-review-with-evidence)
