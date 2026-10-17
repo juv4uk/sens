@@ -719,6 +719,32 @@ jobs:
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
+      - name: D9 — CLIPS pure slot projections and fact-clause laws
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d9-clips-structural-laws.lisp"
+          negative="tests/semantic/d9-clips-structural-invalid.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+            printf "%s\n" "$output" >&2
+            echo "::error::D9_CLIPS_EXEC_RED layer=eval id=d9-clips-struct fixture=$fixture expected=eight-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$output" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_CLIPS_LAW_DIFF layer=eval id=d9-clips-struct fixture=$fixture expected=(1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if negative_out="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D9_CLIPS_NEG_SURVIVED layer=eval id=d9-clips-short-slot fixture=$negative expected=CADR-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eiq "car|pair|пара|D3|D4" <<< "$negative_out"; then
+            echo "::error::D9_CLIPS_WRONG_NEGATIVE layer=eval id=d9-clips-short-slot fixture=$negative expected=CADR-refusal actual=$negative_out" >&2
+            exit 1
+          fi
+          echo "D9_CLIPS_STRUCT_NATIVE_PASS identities=D9:001100011,D9:001110111,D9:001100110,D9:010111000 positive=8 negative=1"
       - name: D8 — один точковий SENS-контроль трьох мовних партій
         shell: bash
         run: |

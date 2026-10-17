@@ -4905,3 +4905,28 @@
 (0011 зняти-з-початку
   (0010 (список)
     (011 список)))
+
+
+; D9 CLIPS semantic projections from lib/clips-import.lisp.
+; D9:001100011 CLIPS-SLOT-NAME; D9:001110111 CLIPS-SLOT-NAMES;
+; D9:001100110 CLIPS-DEFTEMPLATE-SLOTS; D9:010111000 CLIPS-FACT-CLAUSE.
+; Only SENS D3/D4 structural laws; no host parser or direct D9 call admission.
+(0011 clips-слот-ім'я
+  (0010 (поле)
+    (1001 поле)))
+
+(0011 clips-слот-імена
+  (0010 (поля)
+    (110
+      ((0101 поля) (001 ()))
+      (#d1:1
+       (111 (clips-слот-ім'я (100 поля))
+            (clips-слот-імена (011 поля)))))))
+
+(0011 clips-deftemplate-слоти
+  (0010 (форма)
+    (clips-слот-імена (0111 форма))))
+
+(0011 clips-факт-клауза
+  (0010 (факт)
+    (1110 факт)))
