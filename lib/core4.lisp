@@ -1494,7 +1494,7 @@
 ; The only construction/deconstruction is ratified D3 CONS/CDR.
 (0011 канон-закон-решта-правильний
   (0010 (голова хвіст)
-    (однакові? (решта (сполучити голова хвіст)) хвіст)))
+    (equal? (решта (сполучити голова хвіст)) хвіст)))
 
 ; D9:010110001 CDR-DOTTED. EQ on an atomic dotted tail; D3 EQ
 ; rejects non-atomic carriers rather than silently inventing identity.
