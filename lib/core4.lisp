@@ -4217,3 +4217,23 @@
       ((not? (010 значення)) #d1:0)
       ((101 значення (11101101 (11110100 значення))) #d1:1)
       (#d1:1 #d1:0))))
+
+; D9 exact text surfaces: language projections over already admitted W9
+; identities. No new opcode, arithmetic conversion, or D9 registry.
+; D9:110011100 STRING-EMPTY? / D9:110011101 STRING-REST.
+(0011 рядок-порожній?
+  (0010 (текст)
+    (110011100 текст)))
+
+(0011 рядок-решта
+  (0010 (текст)
+    (110011101 текст)))
+
+; D9:110101010 STRING-PREFIX? (prefix first) / D9:110101011 STRING-FIRST.
+(0011 рядок-префікс?
+  (0010 (префікс текст)
+    (110101010 префікс текст)))
+
+(0011 рядок-перший
+  (0010 (текст)
+    (110101011 текст)))
