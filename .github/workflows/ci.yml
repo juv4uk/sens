@@ -371,6 +371,29 @@ jobs:
             exit 1
           fi
           echo "D9_JOURNAL_TEMPLATE_SENS_PASS identities=D9:001011001,D9:010110100 laws=9 negative=1"
+          # Похідні D9 CLIPS NAME/TEMPLATES; один точковий нативний SENS-свідок.
+          clips_laws="tests/semantic/d9-clips-template-registry-laws.lisp"
+          clips_bad="tests/semantic/d9-clips-template-registry-invalid-arity.lisp"
+          sha256sum "$clips_laws" "$clips_bad" lib/core4.lisp target/debug/sens
+          if ! clips_out="$(target/debug/sens "$clips_laws" 2>&1)"; then
+            echo "::error::D9_CLIPS_REGISTRY_EXEC_RED layer=eval expected=eight-D1-yes actual=execution-error" >&2
+            printf "%s\n" "$clips_out" >&2
+            exit 1
+          fi
+          clips_actual="$(printf "%s\n" "$clips_out" | tail -n 1)"
+          if [[ "$clips_actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_CLIPS_REGISTRY_LAW_DIFF layer=eval expected=(1 1 1 1 1 1 1 1) actual=$clips_actual" >&2
+            exit 1
+          fi
+          if clips_invalid="$(target/debug/sens "$clips_bad" 2>&1)"; then
+            echo "::error::D9_CLIPS_REGISTRY_ARITY_ACCEPTED layer=eval expected=arity-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eiq 'arity|expected|arguments' <<< "$clips_invalid"; then
+            echo "::error::D9_CLIPS_REGISTRY_WRONG_NEGATIVE layer=eval expected=arity-refusal actual=$clips_invalid" >&2
+            exit 1
+          fi
+          echo "D9_CLIPS_TEMPLATE_REGISTRY_SENS_PASS identities=D9:001101010,D9:001010011 laws=8 negative=1"
 
           # Партія D9 FS-LIST / FS-CONTAINS?: SENS перевіряє сам себе.
           fs_laws="tests/semantic/d9-fs-list-contains-laws.lisp"
