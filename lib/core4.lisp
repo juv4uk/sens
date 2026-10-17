@@ -490,6 +490,10 @@
        (equal? (011 a) (011 b)))
       ((010 ()) (010 (001 (0)))))))
 
+; D8:11110111 EQUAL — ratified Ukrainian surface for SENS-owned structural equality.
+; The identity is already admitted; this is a name projection, not a new opcode.
+(0011 однакові? equal?)
+
 ; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
 ; D3 COND instead of being coerced through retired host truthiness.
 (0011 not?
