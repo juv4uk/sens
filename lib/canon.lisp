@@ -39,11 +39,11 @@
 
 (0011 canon-law-satisfied
   (0010 (law)
-    (canon-law-result law (001 satisfied))))
+    (канон-закон-результат law (001 satisfied))))
 
 (0011 canon-law-violated
   (0010 (law)
-    (canon-law-result law (001 violated))))
+    (канон-закон-результат law (001 violated))))
 
 (0011 canon-law-status
   (0010 (result)
@@ -63,34 +63,34 @@
 (0011 canon-law-empty-list
   (0010 ()
     (110
-      ((101 canon-empty-list (001 ()))
-       (canon-law-satisfied (001 empty-list)))
+      ((101 канон-порожній-список (001 ()))
+       (канон-закон-виконаний (001 empty-list)))
       (#d1:1
-       (canon-law-violated (001 empty-list))))))
+       (канон-закон-порушений (001 empty-list))))))
 
 (0011 canon-law-atom-cons
   (0010 (x y)
     (110
       ((010 (111 x y))
-       (canon-law-violated (001 atom-cons)))
+       (канон-закон-порушений (001 atom-cons)))
       (#d1:1
-       (canon-law-satisfied (001 atom-cons))))))
+       (канон-закон-виконаний (001 atom-cons))))))
 
 (0011 canon-law-car-cons
   (0010 (x y)
     (110
       ((101 (100 (111 x y)) x)
-       (canon-law-satisfied (001 car-cons)))
+       (канон-закон-виконаний (001 car-cons)))
       (#d1:1
-       (canon-law-violated (001 car-cons))))))
+       (канон-закон-порушений (001 car-cons))))))
 
 (0011 canon-law-cdr-cons
   (0010 (x y)
     (110
       ((101 (011 (111 x y)) y)
-       (canon-law-satisfied (001 cdr-cons)))
+       (канон-закон-виконаний (001 cdr-cons)))
       (#d1:1
-       (canon-law-violated (001 cdr-cons))))))
+       (канон-закон-порушений (001 cdr-cons))))))
 
 (0011 canon-law-eq-reflexive-atom
   (0010 (x)
@@ -98,11 +98,11 @@
       ((010 x)
        (110
          ((101 x x)
-          (canon-law-satisfied (001 eq-reflexive-atom)))
+          (канон-закон-виконаний (001 eq-reflexive-atom)))
          (#d1:1
-          (canon-law-violated (001 eq-reflexive-atom)))))
+          (канон-закон-порушений (001 eq-reflexive-atom)))))
       (#d1:1
-       (canon-law-violated (001 eq-reflexive-atom))))))
+       (канон-закон-порушений (001 eq-reflexive-atom))))))
 
 ; `решта` must be a pair projection, not a human-language "second element".
 (0011 canon-law-cdr-dotted
@@ -111,9 +111,9 @@
       ((101
          (011 (111 (001 кіт) 42))
          42)
-       (canon-law-satisfied (001 cdr-dotted)))
+       (канон-закон-виконаний (001 cdr-dotted)))
       (#d1:1
-       (canon-law-violated (001 cdr-dotted))))))
+       (канон-закон-порушений (001 cdr-dotted))))))
 
 ; EQ перевіряє тотожність допустимих атомів, включно зі структурним ().
 ; Завершення правильного списку доводимо явним EQ з ().
@@ -127,13 +127,13 @@
             ((101
                (011 (011 (011 (001 (1 2 3)))))
                (001 ()))
-             (canon-law-satisfied (001 cdr-proper)))
+             (канон-закон-виконаний (001 cdr-proper)))
             (#d1:1
-             (canon-law-violated (001 cdr-proper)))))
+             (канон-закон-порушений (001 cdr-proper)))))
          (#d1:1
-          (canon-law-violated (001 cdr-proper)))))
+          (канон-закон-порушений (001 cdr-proper)))))
       (#d1:1
-       (canon-law-violated (001 cdr-proper))))))
+       (канон-закон-порушений (001 cdr-proper))))))
 
 ; EQ is atom-only, so the improper tail is checked through atom projections.
 (0011 canon-law-cdr-improper
@@ -142,11 +142,11 @@
       ((101 (100 (011 (001 (1 2 . 3)))) 2)
        (110
          ((101 (011 (011 (001 (1 2 . 3)))) 3)
-          (canon-law-satisfied (001 cdr-improper)))
+          (канон-закон-виконаний (001 cdr-improper)))
          (#d1:1
-          (canon-law-violated (001 cdr-improper)))))
+          (канон-закон-порушений (001 cdr-improper)))))
       (#d1:1
-       (canon-law-violated (001 cdr-improper))))))
+       (канон-закон-порушений (001 cdr-improper))))))
 
 ; Evaluation-control laws: quoted/unselected unknown symbols must never be
 ; evaluated. If a host eagerly evaluates them, execution errors before a law
@@ -156,9 +156,9 @@
     (110
       ((101 (001 never-defined-canon-symbol)
                   (001 never-defined-canon-symbol))
-       (canon-law-satisfied (001 quote-suppresses-evaluation)))
+       (канон-закон-виконаний (001 quote-suppresses-evaluation)))
       (#d1:1
-       (canon-law-violated (001 quote-suppresses-evaluation))))))
+       (канон-закон-порушений (001 quote-suppresses-evaluation))))))
 
 (0011 canon-law-cond-first-match-short-circuit
   (0010 ()
@@ -168,9 +168,9 @@
            (#d1:1 (001 selected))
            ((never-defined-canon-predicate) (001 forbidden)))
          (001 selected))
-       (canon-law-satisfied (001 cond-first-match-short-circuit)))
+       (канон-закон-виконаний (001 cond-first-match-short-circuit)))
       (#d1:1
-       (canon-law-violated (001 cond-first-match-short-circuit))))))
+       (канон-закон-порушений (001 cond-first-match-short-circuit))))))
 
 ; The compact Ukrainian-keyboard surface denotes the same seven operations.
 ; Legacy witness name retained for compatibility; the law now executes
@@ -186,9 +186,9 @@
               ((101 (100 (111 (001 ліве) (001 праве))) (001 ліве))
                (011 (111 (001 ліве) (001 праве)))))))
          (001 праве))
-       (canon-law-satisfied (001 symbolic-surface)))
+       (канон-закон-виконаний (001 symbolic-surface)))
       (#d1:1
-       (canon-law-violated (001 symbolic-surface))))))
+       (канон-закон-порушений (001 symbolic-surface))))))
 
 ; Aggregate explicit law records recursively. The empty list terminates the
 ; result list structurally; it does not mean FALSE.
@@ -198,42 +198,42 @@
       ((010 results)
        (110
          ((101 results (001 ()))
-          (canon-conformance-result (001 satisfied)))
+          (канон-відповідність-результат (001 satisfied)))
          (#d1:1
-          (canon-conformance-result (001 violated)))))
+          (канон-відповідність-результат (001 violated)))))
       (#d1:1
        (110
          ((101
-            (canon-law-status (100 results))
+            (канон-закон-стан (100 results))
             (001 satisfied))
-          (canon-conformance-from (011 results)))
+          (канон-відповідність-з (011 results)))
          (#d1:1
-          (canon-conformance-result (001 violated))))))))
+          (канон-відповідність-результат (001 violated))))))))
 
 ; One language-level explicit conformance record used by runtime observers.
 (0011 canon-conforms?
   (0010 ()
-    (canon-conformance-from
+    (канон-відповідність-з
       (111
-        (canon-law-empty-list)
+        (канон-закон-порожній-список)
         (111
-          (canon-law-atom-cons (001 x) (001 y))
+          (канон-закон-атом-пара (001 x) (001 y))
           (111
-            (canon-law-car-cons (001 x) (001 y))
+            (канон-закон-перше-пара (001 x) (001 y))
             (111
-              (canon-law-cdr-cons (001 x) (001 y))
+              (канон-закон-решта-пара (001 x) (001 y))
               (111
-                (canon-law-eq-reflexive-atom (001 x))
+                (канон-закон-рівність-рефлексивний-атом (001 x))
                 (111
-                  (canon-law-cdr-dotted)
+                  (канон-закон-решта-крапковий)
                   (111
-                    (canon-law-cdr-proper)
+                    (канон-закон-решта-правильний)
                     (111
-                      (canon-law-cdr-improper)
+                      (канон-закон-решта-неправильний)
                       (111
-                        (canon-law-quote-suppresses-evaluation)
+                        (канон-закон-цитування-пригнічує-обчислення)
                         (111
-                          (canon-law-cond-first-match-short-circuit)
+                          (канон-закон-умова-перший-збіг-короткий-ланцюг)
                           (111
-                            (canon-law-symbolic-surface)
+                            (канон-закон-символьний-поверхня)
                             (001 ())))))))))))))))
