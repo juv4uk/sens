@@ -2423,12 +2423,10 @@
 (0011 symbol?
   (0010 (value)
     (110
-      ((010 value)
-       (110
-         ((101 value (string->symbol (write-to-string value)))
-          (010 (001 ())))
-         ((010 ()) #d1:0)))
-      ((010 ()) #d1:0))))
+      ((0101 value) #d1:0)
+      ((0100 (010 value)) #d1:0)
+      ((101 value (11101101 (11110100 value))) #d1:1)
+      (#d1:1 #d1:0))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
