@@ -523,3 +523,30 @@
             ((101 (100 decision) (001 accepted))
              (1110 (001 recovered) candidate-package))
             ((010 ()) (1110 (001 recovered) old-package (001 rejected-candidate)))))))))
+
+; Ratified D9 exact-width FS surfaces; donor closures above own semantics.
+; The file system here is immutable SENS data, not a host syscall or new opcode.
+; D9:001010000
+(0011 фс-об'єкти fs-objects)
+; D9:010000001
+(0011 фс-зв'язки fs-bindings)
+; D9:010010101
+(0011 фс-ревізія fs-revision)
+; D9:001011011
+(0011 фс-порожній fs-empty)
+; D9:010001100
+(0011 фс-корінь-адреса fs-root-address)
+; D9:010010110
+(0011 фс-список fs-list)
+; D9:010100001
+(0011 фс-містить? fs-contains?)
+; D9:010100010
+(0011 фс-об'єкт-пакет fs-object-package)
+; D9:001011111
+(0011 фс-корінь-пакет fs-root-package)
+; D9:001101011
+(0011 фс-журнал-подія fs-journal-event)
+; D9:001011001
+(0011 фс-журнал-додати fs-journal-append)
+; D9:001111100
+(0011 фс-серіалізувати-журнал fs-serialize-journal)
