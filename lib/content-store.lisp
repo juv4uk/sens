@@ -44,3 +44,11 @@
 (0011 content-store-size
   (0010 (store)
     (внутрішня-довжина store)))
+
+; D9:000101101 CONTENT-STORE-PUT and D9:000111111 CONTENT-STORE-PUT-WORLD.
+; Source: knowledge/d9-semantic-layer-harvest-v1.json and this Lisp module.
+; Both take (store value/world); their canonical content address is derived
+; by the existing SENS code. Never alias either to three-argument MAP-INSERT.
+; These are Ukrainian SENS surface bindings, not new D9 native opcodes.
+(0011 вміст-сховище-покласти content-store-put)
+(0011 вміст-сховище-покласти-світ content-store-put-world)
