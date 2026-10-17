@@ -308,7 +308,22 @@ jobs:
             exit 1
           fi
           echo "T5M_D10_MONONS_FAIL_CLOSED identity=D10:0011110110 width=10 status=RESIDENT-NOT-CALLABLE F1=F2=F3=F4=not-admitted"
-          echo "T5M_SENS_CODEC_PASS authority=SENS codec=1 size_laws=6 roundtrip_witnesses=7 clock_callability=negative-proof"
+          # 4) Справжнє спостереження ОС через окремий raw-механізм.
+          #    clock-mono-raw ≠ D10:0011110110: відмова D10 вище лишається.
+          clock_fixture="tests/semantic/t5m-bench-clock-raw.lisp"
+          sha256sum "$clock_fixture" target/debug/sens
+          if ! clock_out="$(target/debug/sens "$clock_fixture" 2>&1)"; then
+            echo "::error::T5M_CLOCK_RAW_EXEC_RED id=t5m-raw-clock layer=eval fixture=$clock_fixture expected=(3,exact-D96-elapsed-ns) actual=execution-error" >&2
+            printf "%s\n" "$clock_out" >&2
+            exit 1
+          fi
+          clock_actual="$(printf "%s\n" "$clock_out" | tail -n 1)"
+          if ! [[ "$clock_actual" =~ ^\(3[[:space:]]+[0-9]+\)$ ]]; then
+            echo "::error::T5M_CLOCK_RAW_LAW_DIFF id=t5m-raw-clock layer=eval fixture=$clock_fixture expected=(3,exact-D96-elapsed-ns) actual=$clock_actual" >&2
+            exit 1
+          fi
+          echo "T5M_CLOCK_RAW_SENS_PASS bytes_and_ticks=$clock_actual domain=D96 D10_direct_admission=NO"
+          echo "T5M_SENS_CODEC_PASS authority=SENS codec=1 size_laws=6 roundtrip_witnesses=7 clock_raw=measured D10_callability=negative-proof"
       - name: D3–D6 — 28 незалежних фізичних SENS-законів через Zig/T5
         id: sens-d3-d6-t5-laws
         shell: bash

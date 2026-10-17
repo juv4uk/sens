@@ -19,7 +19,7 @@ mod process_raw;
 
 /// Сире спостереження монотонного лічильника ОС, без часової семантики в Rust.
 ///
-/// Зовнішня host-capability `mono-ns` існує окремо від дослідницької
+/// Зовнішня host-capability `clock-mono-raw` існує окремо від дослідницької
 /// D10:0011110110: реєстрація механізму за назвою НЕ допускає прямий D10 виклик.
 /// Арифметику різниці, одиниці і вимірювання визначають тільки функції SENS.
 /// Дві послідовні відповіді мають один точний D96-носій, не f64/Rational.
@@ -31,7 +31,7 @@ fn observe_monotonic_nanoseconds(
     if !arguments.is_empty() {
         return Err(LanguageError::new(
             ErrorKind::Arity,
-            "mono-ns expects exactly zero arguments",
+            "clock-mono-raw expects exactly zero arguments",
             span,
         ));
     }
@@ -44,7 +44,7 @@ fn observe_monotonic_nanoseconds(
     if nanoseconds >= (1u128 << WIDTH) {
         return Err(LanguageError::new(
             ErrorKind::NumericOverflow,
-            "mono-ns observed nanoseconds exceed D96",
+            "clock-mono-raw observed nanoseconds exceed D96",
             span,
         ));
     }
@@ -665,7 +665,7 @@ fn evaluate_load(
 }
 
 pub fn install() {
-    register_evaluated_capability("mono-ns", 0, observe_monotonic_nanoseconds);
+    register_evaluated_capability("clock-mono-raw", 0, observe_monotonic_nanoseconds);
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
     register_evaluated_capability("read-file-utf8-raw", 1, evaluate_read_file_utf8_raw);
@@ -733,7 +733,7 @@ mod install_tests {
         super::install();
         let installed = sens::installed_capabilities();
         for name in [
-            "mono-ns",
+            "clock-mono-raw",
             "read-dir",
             "read-file-bytes",
             "read-file-utf8-raw",
