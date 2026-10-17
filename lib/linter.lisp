@@ -269,3 +269,25 @@
                       (1110 (1110 (001 globals-exceeded) globals))))
                 (110 ((11011 (000000 effects) (get-threshold (001 max-effects) thresholds 99999))
                       (1110 (1110 (001 effects-exceeded) effects)))))))))))))
+
+; D9: ratified lint functions harvested from their living SENS/Lisp owners.
+; Exact nine-bit identity = lib/domains/d9.lisp; no new native opcodes.
+; Existing closures carry semantics. Old donor names remain compatibility only.
+; D9:001000111 аналіз-форма-голова
+(0011 аналіз-форма-голова lint-form-head)
+; D9:010011010 аналіз-голова
+(0011 аналіз-голова lint-head)
+; D9:010100100 аналіз-вкладеність
+(0011 аналіз-вкладеність lint-nesting)
+; D9:101000001 аналіз-складність
+(0011 аналіз-складність lint-complexity)
+; D9:010010010 аналіз-ефекти
+(0011 аналіз-ефекти lint-effects)
+; D9:010111111 зібрати-вільні-змінні
+(0011 зібрати-вільні-змінні collect-free-vars)
+; D9:001000011 аналіз-глобальні
+(0011 аналіз-глобальні lint-globals)
+; D9:010001110 аналіз-всі
+(0011 аналіз-всі lint-all)
+; D9:010000110 аналіз-перевірити
+(0011 аналіз-перевірити lint-check)
