@@ -1,0 +1,101 @@
+from __future__ import annotations
+
+import importlib.util
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "no_encoded_source_literals", ROOT / "scripts" / "check_no_encoded_source_literals.py"
+)
+assert SPEC is not None and SPEC.loader is not None
+CHECK = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(CHECK)
+
+
+class EncodedSourceLiteralTests(unittest.TestCase):
+    def test_decimal_human_projection_values_are_allowed(self):
+        self.assertEqual(CHECK.find_forbidden_literals("(сума 235 2.1564)\n"), [])
+
+    def test_lisp_projection_names_are_allowed(self):
+        source = '(cond ((string-empty? "") (not? (string-empty? "а"))) (T NIL))\n'
+        self.assertEqual(CHECK.find_forbidden_literals(source), [])
+
+    def test_typed_domain_wire_words_are_rejected(self):
+        source = "(сума #d24:000000000000000000000010 #d1:1 #b101 #q2:1011/1)\n"
+        found = CHECK.find_forbidden_literals(source)
+        self.assertEqual([item.token for item in found], [
+            "#d24:000000000000000000000010", "#d1:1", "#b101", "#q2:1011/1",
+        ])
+
+    def test_numeric_call_head_is_rejected_as_encoded_operation(self):
+        found = CHECK.find_forbidden_literals("(110 (аргумент))\n")
+        self.assertEqual([item.token for item in found], ["110"])
+
+    def test_comments_and_strings_do_not_create_false_positives(self):
+        source = '; приклад (#d1:1) та (110 x)\n(пояснити "#d24:10 (110 x)")\n'
+        self.assertEqual(CHECK.find_forbidden_literals(source), [])
+
+    def test_diff_parser_checks_every_added_lisp_path(self):
+        diff = """diff --git a/lib/a.lisp b/lib/a.lisp
+--- a/lib/a.lisp
++++ b/lib/a.lisp
+@@ -1,0 +2 @@
++(110 x)
+diff --git a/tests/b.lisp b/tests/b.lisp
+--- a/tests/b.lisp
++++ b/tests/b.lisp
+@@ -0,0 +1 @@
++(сума 235)
+"""
+        rows = CHECK.added_lisp_lines_from_diff(diff)
+        self.assertEqual(rows, [("lib/a.lisp", 2, "(110 x)"), ("tests/b.lisp", 1, "(сума 235)")])
+
+    def test_repository_gate_detects_literal_added_in_any_lisp_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
+            (root / "base.lisp").write_text("(сума 235)\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "base.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "base"], check=True)
+            base_sha = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], check=True,
+                text=True, encoding="utf-8", stdout=subprocess.PIPE,
+            ).stdout.strip()
+
+            def run_guard(*args: str) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    [
+                        "python3", str(ROOT / "scripts" / "check_no_encoded_source_literals.py"),
+                        "--root", str(root), *args,
+                    ],
+                    cwd=ROOT, check=False, text=True, encoding="utf-8",
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
+
+            elsewhere = root / "deep" / "new.lisp"
+            elsewhere.parent.mkdir()
+            elsewhere.write_text("(110 x)\n", encoding="utf-8")
+            untracked_result = run_guard()
+            self.assertEqual(untracked_result.returncode, 1, untracked_result.stderr)
+            self.assertIn("deep/new.lisp:1:2", untracked_result.stderr)
+            self.assertIn("numeric function/opcode head: 110", untracked_result.stderr)
+
+            subprocess.run(["git", "-C", str(root), "add", "deep/new.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "bad literal"], check=True)
+            committed_result = run_guard("--base", base_sha)
+            self.assertEqual(committed_result.returncode, 1, committed_result.stderr)
+
+            elsewhere.write_text("(сума 235 2.1564)\n", encoding="utf-8")
+            decimal_result = run_guard()
+            self.assertEqual(decimal_result.returncode, 0, decimal_result.stderr)
+            self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", decimal_result.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

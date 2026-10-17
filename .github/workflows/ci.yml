@@ -45,6 +45,25 @@ jobs:
             *"-D warnings"*) echo "RUSTDOCFLAGS ok: $RUSTDOCFLAGS" ;;
             *) echo "::error::RUSTDOCFLAGS must contain '-D warnings'"; exit 1 ;;
           esac
+      - name: "HUMAN LISP — сирі доменні слова заборонені в нових проєкціях"
+        shell: bash
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base_sha="$PR_BASE"
+          else
+            base_sha="$PUSH_BEFORE"
+          fi
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            base_sha="$(git rev-parse HEAD^)"
+          fi
+          timeout 30s git fetch --no-tags --depth=1 origin "$base_sha"
+          python3 -m unittest tests/test_no_encoded_source_literals.py -v
+          python3 scripts/check_no_encoded_source_literals.py --base "$base_sha"
       - name: "SENS-DEFINITIONS — визначені функції: баланс, дублі, ратифіковані імена"
         shell: bash
         run: |
