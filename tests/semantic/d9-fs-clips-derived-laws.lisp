@@ -8,9 +8,9 @@
             (list (cons (quote адреса-а) (quote вміст-а))
                   (cons (quote адреса-б) (quote вміст-б))))
           (list (quote адреса-а) (quote адреса-б)))
-  (equal? (clips-змінна-терм (текст-у-символ "?x"))
+  (equal? (clips-змінна-терм (quote ?x))
           (list (quote var) (quote x)))
-  (equal? (clips-змінна-терм (текст-у-символ "?slot"))
+  (equal? (clips-змінна-терм (quote ?slot))
           (list (quote var) (quote slot)))
   (equal? (clips-шаблон-слот-порядок
             (quote персона)
