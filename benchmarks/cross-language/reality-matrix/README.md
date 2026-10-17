@@ -69,12 +69,15 @@ Do not create benchmark-local replacements for evidence that already has an owne
   historical Function8 SENS lane must not be relabeled as current D1-D7 evidence.
 - `physical-sens/` — narrow native-SENS vs Python-µCPU D1-D3 pilot on two identical,
   tracked physical `.sens` fixtures; its verdict is deliberately `inconclusive`, not a
-  general language ranking. See the [Ukrainian method and limits](physical-sens/README.uk.md).
+  general language ranking. Its paired fresh-process wall harness uses the same
+  file-to-result boundary on both sides. See the [Ukrainian method and limits](physical-sens/README.uk.md).
 
 Українською: [`physical-sens/`](physical-sens/README.uk.md) містить вузький D1–D3
 пілот на однакових фізичних `.sens` байтах для native SENS і дослідного Python µCPU.
-Він доповнює #3680, зберігає parity та сирі виміри, але через різні внутрішні
-подання й локальне середовище не оголошує переможця чи перевагу мови.
+Він окремо зберігає фазові дані з різними межами й парні виміри нового процесу
+від того самого фізичного файла до відповіді. Окрема CPython `.py`/`.pyc` load
+оцінка з #1546 лишається історичною, бо порівнювала старий Function8 FASL.
+Докладні межі, числа й обмеження є в українському README цього пілоту.
 
 Competitor adapters should consume or join these owner outputs. If an owner lane lacks a
 needed metric, extend the owner or record the metric as unavailable; do not synthesize a
