@@ -65,7 +65,7 @@ fn render_decoded(forms: &[String]) -> String {
 #[test]
 fn current_structural_surfaces_lower_to_exact_d3_identities() {
     for (source, bits) in [
-        ("(сполучити 2 3)", 0b111u8),
+        ("(сполучити 2 3)", 0b111u16),
         ("(перше '(2 . 3))", 0b100),
         ("(решта '(2 . 3))", 0b011),
     ] {
