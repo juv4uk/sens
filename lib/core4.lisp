@@ -3149,6 +3149,25 @@
           (канон-відповідність-з (решта результати)))
          (#d1:1 (канон-відповідність-результат (як-є violated))))))))
 
+; D9:001111000 CANON-LAW-SYMBOLIC-SURFACE from lib/canon.lisp.
+; Exact D3 ATOM/CAR/CDR/EQ/CONS law, as the already admitted Canon record.
+; It is a D9 language definition, not a new host primitive or opcode.
+(0011 канон-закон-символьний-поверхня
+  (0010 ()
+    (110
+      ((010 (001 атом))
+       (110
+         ((101 (100 (111 (001 ліве) (001 праве))) (001 ліве))
+          (110
+            ((101 (011 (111 (001 ліве) (001 праве))) (001 праве))
+             (канон-запис-закону (001 symbolic-surface) (001 satisfied)))
+            (#d1:1
+             (канон-запис-закону (001 symbolic-surface) (001 violated)))))
+         (#d1:1
+          (канон-запис-закону (001 symbolic-surface) (001 violated)))))
+      (#d1:1
+       (канон-запис-закону (001 symbolic-surface) (001 violated))))))
+
 ; D9:000011010 MAKE-TRANSLATION-REVIEW — ratified review envelope.
 ; Physical SENS D3 CONS builds (translation-review/1 STATUS CODE PROPOSAL DETAIL).
 (0011 створити-переклад-перевірка
