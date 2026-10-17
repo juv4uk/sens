@@ -4187,3 +4187,19 @@
     (110
       ((результат-заперечений-ціль? ціль) (100 (011 ціль)))
       (#d1:1 (111 (001 not?) (111 ціль (001 ())))))))
+; D9:111010010 SCIENTIFIC-CONSTANT-STATUS and D9:111110010 STATUS-VALID?.
+; Exact language donor: lib/quantity.lisp — a seven-slot immutable record
+; (scientific-constant/1 name quantity status kind system source).
+; Status admits exact-by-definition and measured; physical-derived is a KIND,
+; not a third status. All predicate results are strict D1 width-one words.
+(0011 науковий-константа-стан
+  (0010 (константа)
+    (перше (решта (решта (решта константа))))))
+
+(0011 науковий-константа-стан-чинний?
+  (0010 (стан)
+    (за-умовою
+      ((хибне? (атом? стан)) #d1:0)
+      ((тотожне? стан (як-є exact-by-definition)) #d1:1)
+      ((тотожне? стан (як-є measured)) #d1:1)
+      (#d1:1 #d1:0))))
