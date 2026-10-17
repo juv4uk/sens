@@ -2925,11 +2925,14 @@
 ; D9:110111111 DIVMOD. Операнди D24+; результат (частка, остача).
 ; Остача виводиться точно з D5:01011 DIFFERENCE, D5:10110 TIMES і
 ; D5:10111 QUOTIENT. Не викликати неприйнятий D8:00101100 MOD.
+; D9:110111111 DIVMOD — ціла частка і остача, обидві як D24+ числа.
+; D5:10111 є раціональним діленням, тому не годиться за цілу частку.
+; Власний SENS quotient (вище) виконує ціле ділення без host-алгоритму.
 (0011 divmod
   (0010 (dividend divisor)
-    (1110 (10111 dividend divisor)
+    (1110 (quotient dividend divisor)
       (01011 dividend
-        (10110 divisor (10111 dividend divisor))))))
+        (10110 divisor (quotient dividend divisor))))))
 
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
 (0011 null?
