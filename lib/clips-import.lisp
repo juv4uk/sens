@@ -976,3 +976,12 @@
 (0011 clips-defrule-клаузи clips-defrule->clauses)
 ; D9:010100000
 (0011 clips-форма-клаузи clips-form->clauses)
+
+; Українські D9-поверхні. Точні коди — lib/domains/d9.lisp.
+; Виконання належить уже визначеним SENS-функціям, не Rust registry/opcode.
+; D9:001000001
+(0011 clips-імпорт-форми clips-import-forms)
+; D9:001011000
+(0011 clips-імпорт clips-import)
+; D9:001000100
+(0011 clips-імпорт-файл clips-import-file)
