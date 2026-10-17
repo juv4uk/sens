@@ -318,20 +318,21 @@ jobs:
           fi
           echo "D8_DIV_NATIVE_PASS exact=D8:11001100 laws=5 negative=1 direct_opcode=unclaimed"
 
-      - name: "D10 — SASSOC та сім ратифікованих en-проєкцій: 12 SENS-законів"
+      - name: "D10 — SASSOC EQUAL/fallback та сім en-проєкцій: 15 SENS-законів"
         shell: bash
         run: |
           set -euo pipefail
           fixture="tests/semantic/d10-sassoc-projection-laws.lisp"
           negative="tests/semantic/d10-sassoc-invalid-arity.lisp"
-          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          bad_fallback="tests/semantic/d10-sassoc-bad-fallback.lisp"
+          sha256sum "$fixture" "$negative" "$bad_fallback" lib/core4.lisp target/debug/sens
           if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
-            echo "::error::D10_SASSOC_EXEC_RED id=d10-sassoc-projection layer=eval fixture=$fixture expected=12-D1-YES actual=execution-error reproduce='target/debug/sens $fixture'" >&2
+            echo "::error::D10_SASSOC_EXEC_RED id=d10-sassoc-projection layer=eval fixture=$fixture expected=15-D1-YES actual=execution-error reproduce='target/debug/sens $fixture'" >&2
             printf '%s\n' "$observed" >&2
             exit 1
           fi
           actual="$(printf '%s\n' "$observed" | tail -n 1)"
-          expected="(1 1 1 1 1 1 1 1 1 1 1 1)"
+          expected="(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)"
           if [[ "$actual" != "$expected" ]]; then
             echo "::error::D10_SASSOC_LAW_DIFF id=d10-sassoc-projection layer=eval fixture=$fixture expected=$expected actual=$actual reproduce='target/debug/sens $fixture'" >&2
             exit 1
@@ -344,7 +345,11 @@ jobs:
             echo "::error::D10_SASSOC_WRONG_REFUSAL id=d10-sassoc-negative layer=eval fixture=$negative expected=arity-refusal actual=$rejection" >&2
             exit 1
           fi
-          echo "D10_SASSOC_PROJECTIONS_NATIVE_PASS functions=1 projections=7 laws=12 negative=1 direct_d10_admission=unclaimed"
+          if bad_observed="$(target/debug/sens "$bad_fallback" 2>&1)"; then
+            echo "::error::D10_SASSOC_BAD_FALLBACK_ACCEPTED id=d10-sassoc-fallback layer=eval fixture=$bad_fallback expected=noncallable-refusal actual=accepted reproduce='target/debug/sens $bad_fallback'" >&2
+            exit 1
+          fi
+          echo "D10_SASSOC_PROJECTIONS_NATIVE_PASS functions=1 projections=7 laws=15 negative=2 direct_d10_admission=unclaimed"
 
       - name: "D10 CLIPS — два закони преамбули, 13 фізичних свідків SENS"
         shell: bash
