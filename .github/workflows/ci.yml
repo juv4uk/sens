@@ -657,6 +657,22 @@ jobs:
             exit 1
           fi
           echo "D9_EQ_ATOM_NATIVE_PASS exact_domain=D9:001110010"
+          # D9 immutable map semantics are loaded from Core4, never defined by the fixture.
+          d9_map_fixture="tests/semantic/d9-map-core4-native-laws.lisp"
+          d9_map_expected="(1 1 0 1 1 1 1 1)"
+          d9_map_sha="$(sha256sum "$d9_map_fixture" | cut -d' ' -f1)"
+          if ! d9_map_output="$(target/debug/sens "$d9_map_fixture" 2>&1)"; then
+            printf '%s\n' "$d9_map_output" >&2
+            echo "::error::D9_MAP_EXEC_RED id=d9-map-lower-composition layer=eval fixture=$d9_map_fixture fixture_sha256=$d9_map_sha expected=$d9_map_expected actual=execution-error first_diff=execution reproduce='target/debug/sens $d9_map_fixture'" >&2
+            exit 1
+          fi
+          d9_map_actual="$(printf '%s\n' "$d9_map_output" | tail -n 1)"
+          if [[ "$d9_map_actual" != "$d9_map_expected" ]]; then
+            echo "::error::D9_MAP_LAW_DIFF id=d9-map-lower-composition layer=eval fixture=$d9_map_fixture fixture_sha256=$d9_map_sha expected=$d9_map_expected actual=$d9_map_actual first_diff=D1-vector reproduce='target/debug/sens $d9_map_fixture'" >&2
+            exit 1
+          fi
+          echo "D9_MAP_NATIVE_PASS source=Core4 domains=D9:101100011,D9:101100101,D9:101100010,D9:101001100 laws=8 wrong-key-negative=1"
+
           # D10 PAIP source-level derivatives: human-readable SENS witness only;
           # no F1-F4 admission or new execution primitive is implied.
           d10_fixture="tests/semantic/d10-paip-list-laws.lisp"
