@@ -136,24 +136,29 @@ jobs:
           if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
             echo "::error::D10_SASSOC_EXEC_RED id=d10-sassoc-projection layer=eval fixture=$fixture expected=15-D1-YES actual=execution-error reproduce='target/debug/sens $fixture'" >&2
             printf '%s\n' "$observed" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d10-sassoc-execution" --layer eval --fixture "$fixture" --expected "15-D1-YES" --actual "execution-error" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
             exit 1
           fi
           actual="$(printf '%s\n' "$observed" | tail -n 1)"
           expected="(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)"
           if [[ "$actual" != "$expected" ]]; then
             echo "::error::D10_SASSOC_LAW_DIFF id=d10-sassoc-projection layer=eval fixture=$fixture expected=$expected actual=$actual reproduce='target/debug/sens $fixture'" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d10-sassoc-law-vector" --layer eval --fixture "$fixture" --expected "$expected" --actual "$actual" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl"
             exit 1
           fi
           if rejection="$(target/debug/sens "$negative" 2>&1)"; then
             echo "::error::D10_SASSOC_BAD_ARITY_ACCEPTED id=d10-sassoc-negative layer=eval fixture=$negative expected=arity-refusal actual=accepted reproduce='target/debug/sens $negative'" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d10-sassoc-arity" --layer eval --fixture "$negative" --expected "arity-refusal" --actual "accepted" --reproduce "target/debug/sens $negative" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$rejection"
             exit 1
           fi
           if ! grep -Fq "expected /" <<<"$rejection"; then
             echo "::error::D10_SASSOC_WRONG_REFUSAL id=d10-sassoc-negative layer=eval fixture=$negative expected=arity-refusal actual=$rejection" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d10-sassoc-arity-kind" --layer eval --fixture "$negative" --expected "arity-refusal" --actual "unexpected-refusal" --reproduce "target/debug/sens $negative" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$rejection"
             exit 1
           fi
           if bad_observed="$(target/debug/sens "$bad_fallback" 2>&1)"; then
             echo "::error::D10_SASSOC_BAD_FALLBACK_ACCEPTED id=d10-sassoc-fallback layer=eval fixture=$bad_fallback expected=noncallable-refusal actual=accepted reproduce='target/debug/sens $bad_fallback'" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d10-sassoc-fallback" --layer eval --fixture "$bad_fallback" --expected "noncallable-refusal" --actual "accepted" --reproduce "target/debug/sens $bad_fallback" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$bad_observed"
             exit 1
           fi
           echo "D10_SASSOC_PROJECTIONS_NATIVE_PASS functions=1 projections=7 laws=15 negative=2 direct_d10_admission=unclaimed"
