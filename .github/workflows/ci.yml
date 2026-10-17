@@ -66,15 +66,16 @@ jobs:
           python3 scripts/check_semantic_registry.py
           python3 scripts/check_alias_identity.py
 
+      - name: Код запускається — entry-points, читач і кодек на реальних файлах
+        if: ${{ always() }}
+        run: python3 -m unittest tests/test_code_runs.py -v
+
       - name: УКР-ПРОЄКЦІЯ — скільки .lisp уже на повній українській поверхні (червоним)
         if: ${{ always() }}
         run: |
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
-          # Перевіряємо справжні помилки оголошеної укр-проєкції окремо від
-          # історичної метрики збігу короткої і повної назви.
-          # Тимчасовий RED за pairs_pct НЕ є доказом поломки доменів:
-          # після окремого callsite-аудиту його замінить відповідний критерій.
-          python3 scripts/report_ukr_projection_progress.py --min-ukr-pct 100 --min-pairs-pct 100
+          # Жорстко: крок червоний, поки не вся .lisp-кодова база на повній проєкції укр.
+          python3 scripts/report_ukr_projection_progress.py --min-pairs-pct 100
 
 
