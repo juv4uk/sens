@@ -141,13 +141,86 @@ def encode_projection(source: str) -> bytes:
     return encoded
 
 
+def parse_t5m_words(source: str) -> list[str]:
+    """Розбирає T5M-проєкцію у рамці D1–24+: поточний фізичний зріз D1–D10 та D24+."""
+    words = source.split()
+    if not words:
+        raise SensT5Error("empty/unsupported T5M program")
+    from domain_tables import is_number_width
+    for index, word in enumerate(words, 1):
+        if not (1 <= len(word) <= 10 or is_number_width(len(word))) or re.fullmatch(r"[01]+", word) is None:
+            raise SensT5Error(
+                f"word {index}: T5M D1–24+ frame currently supports physical D1–D10 and D24+ widths, "
+                f"got {word[:64]!r}"
+            )
+    return words
+
+
+def encode_t5m_projection(source: str) -> bytes:
+    """Однобайтовий T5M: той самий фізичний потік, із точними словами D24+."""
+    words = parse_t5m_words(source)
+    trits = "2".join(words)
+    trits += "2" * (-len(trits) % 5)
+    if len(trits) // 5 > MAX_FILE_BYTES:
+        raise SensT5Error("physical T5M file exceeds size limit")
+    encoded = bytes(int(trits[i:i + 5], 3) for i in range(0, len(trits), 5))
+    if decode_t5m_bytes(encoded) != words:
+        raise SensT5Error("T5M encode/decode exact word identity failed")
+    return encoded
+
+
+def decode_t5m_bytes(data: bytes) -> list[str]:
+    """Декодує T5M, не вгадуючи семантику чи викличність слів."""
+    if not data:
+        raise SensT5Error("empty physical T5M")
+    if len(data) > MAX_FILE_BYTES:
+        raise SensT5Error("physical T5M file exceeds size limit")
+    words: list[str] = []
+    current: list[str] = []
+    padding = 0
+    for byte in data:
+        if byte >= 243:
+            raise SensT5Error("invalid T5M byte outside 0..242")
+        for trit in TRITS_BY_BYTE[byte]:
+            if trit == 2:
+                if current:
+                    words.append("".join(current))
+                    current.clear()
+                    padding = 1
+                else:
+                    padding += 1
+                if padding >= 5:
+                    raise SensT5Error("more than four terminal T5M padding trits")
+            else:
+                if padding > 1:
+                    raise SensT5Error("noncanonical repeated T5M separator")
+                if padding and not words:
+                    raise SensT5Error("noncanonical leading T5M separator")
+                padding = 0
+                current.append("1" if trit else "0")
+                if len(current) > MAX_FILE_BYTES * 5:
+                    raise SensT5Error("T5M word exceeds physical size limit")
+    if current:
+        words.append("".join(current))
+    if not words:
+        raise SensT5Error("empty/unsupported physical T5M")
+    from domain_tables import is_number_width
+    for index, word in enumerate(words, 1):
+        if not (1 <= len(word) <= 10 or is_number_width(len(word))) or re.fullmatch(r"[01]+", word) is None:
+            raise SensT5Error(f"word {index}: unsupported width in T5M D1–24+ frame: {len(word)}")
+    return words
+
+
 def typed_sha256(words: list[str]) -> str:
     """Включає ширину кожного слова: 0|00 != 000."""
     digest = hashlib.sha256()
     for word in words:
-        if not BITS.fullmatch(word):
+        if re.fullmatch(r"[01]+", word) is None:
             raise SensT5Error("invalid typed word for digest")
-        digest.update(bytes([len(word)]))
+        if len(word) <= 255:
+            digest.update(bytes([len(word)]))
+        else:
+            digest.update(b"\xff" + len(word).to_bytes(4, "big"))
         digest.update(int(word, 2).to_bytes((len(word) + 7) // 8, "big"))
     return digest.hexdigest()
 

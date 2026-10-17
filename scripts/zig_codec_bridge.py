@@ -235,7 +235,7 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
 
 
 def carry_t5(
-    binary: Path, canonical_view: str, *,
+    binary: Path, canonical_view: str, *, codec: str = "t5",
     trusted_source_sha256: str | None = None,
 ) -> bytes:
     """Zig mints T5 from upstream words; no Python physical writer.
@@ -243,6 +243,8 @@ def carry_t5(
     Word separators are replaced with trit 2 for mechanical carrying only.
     Every execution uses the exact pinned, SHA-attested Zig binary.
     """
+    if codec not in ("t5", "t5m"):
+        raise ZigCodecError(f"ZIG_CARRY_UNKNOWN_CODEC layer=transport codec={codec!r}")
     valid_view_pattern = r"[01]+(?: [01]+)*" + chr(10)
     if (not isinstance(canonical_view, str) or
             re.fullmatch(valid_view_pattern, canonical_view) is None):
@@ -253,19 +255,23 @@ def carry_t5(
         source = Path(directory) / "source.trits"
         output = Path(directory) / "out.sens"
         source.write_bytes(raw_trits)
-        _command([str(binary), "t5-carry", str(source), str(output)])
-        physical = _read_zig_output(output, command="t5-carry")
+        command = f"{codec}-carry"
+        _command([str(binary), command, str(source), str(output)])
+        physical = _read_zig_output(output, command=command)
     _require_external_source_sha256(physical, trusted_source_sha256)
     if _built_executable_digest(binary) != binary_digest:
         raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_DURING_CARRY")
     return physical
 
 def verify_t5(
-    binary: Path, physical: bytes, *, trusted_source_sha256: str | None = None
+    binary: Path, physical: bytes, *, codec: str = "t5",
+    trusted_source_sha256: str | None = None
 ) -> dict[str, str]:
     # Fail BEFORE observing/build attestation or executing Zig; the pin is
     # externally supplied, not inferred from this candidate physical input.
     _require_external_source_sha256(physical, trusted_source_sha256)
+    if codec not in ("t5", "t5m"):
+        raise ZigCodecError(f"ZIG_VERIFY_UNKNOWN_CODEC layer=transport codec={codec!r}")
     binary_digest = _built_executable_digest(binary)
     with tempfile.TemporaryDirectory(prefix="sens-zig-t5-verify-") as directory:
         source = Path(directory) / "input.sens"
@@ -273,9 +279,14 @@ def verify_t5(
         source.write_bytes(physical)
         # D10 is valid transport but intentionally rejected by runnable D1..D9.
         # The migration verifier must use the explicit coordinate-only profile.
-        _command([str(binary), "t5-coordinates-check", str(source)])
-        _command([str(binary), "t5-coordinates-roundtrip", str(source), str(restored)])
-        replay = _read_zig_output(restored, command="t5-coordinates-roundtrip")
+        if codec == "t5m":
+            _command([str(binary), "t5m-check", str(source)])
+            roundtrip_command = "t5m-roundtrip"
+        else:
+            _command([str(binary), "t5-coordinates-check", str(source)])
+            roundtrip_command = "t5-coordinates-roundtrip"
+        _command([str(binary), roundtrip_command, str(source), str(restored)])
+        replay = _read_zig_output(restored, command=roundtrip_command)
         if replay != physical:
             a = hashlib.sha256(physical).hexdigest()
             b = hashlib.sha256(replay).hexdigest()
@@ -291,8 +302,9 @@ def verify_t5(
     # substituted binaries from claiming this session's Zig build receipt.
     if _built_executable_digest(binary) != binary_digest:
         raise ZigCodecError("ZIG_CODEC_BINARY_CHANGED_DURING_VERIFY")
-    return {"zig_version": "0.16.0", "codec": "T5",
-            "profile": "D1-D10_COORDINATES_NOT_EXECUTION",
+    return {"zig_version": "0.16.0", "codec": codec.upper(),
+            "profile": ("D1–24+_FRAME_PHYSICAL_SUBSET_D1-D10_AND_D24+_NOT_EXECUTION"
+                        if codec == "t5m" else "D1-D10_COORDINATES_NOT_EXECUTION"),
             "physical_sha256": hashlib.sha256(physical).hexdigest(),
             "zig_binary_sha256": binary_digest,
             "source_pin_status": (
