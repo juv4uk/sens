@@ -1,0 +1,24 @@
+{
+  "schema": "sens-vs-python-derived-summary/v1",
+  "derived_from": "source-copy-raw.json",
+  "method": {
+    "median": "ordinary median",
+    "p95_p99": "nearest rank, rank=ceil(p*n)",
+    "sample_count": 100
+  },
+  "parity": "PASS",
+  "stdout": "(1 0 ())\n",
+  "units": "nanoseconds",
+  "sens": {
+    "p50": 2915426,
+    "p95": 4187602,
+    "p99": 6403657
+  },
+  "python": {
+    "p50": 20413826,
+    "p95": 25695670,
+    "p99": 28871694
+  },
+  "python_over_sens_p50_ratio": 7.002003308949822,
+  "interpretation": "Descriptive end-to-end fresh-process ratio for one workload only; not a pure CPU or general language speed claim."
+}

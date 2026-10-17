@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="240" viewBox="0 0 760 240">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="28" font-family="sans-serif" font-size="18">D5 LABEL COPY — процес до результату — latency (ns)</text>
+<line x1="180" y1="45" x2="180" y2="225" stroke="#ddd"/>
+<text x="180" y="237" text-anchor="middle" font-family="sans-serif" font-size="11">0</text>
+<line x1="450.0" y1="45" x2="450.0" y2="225" stroke="#ddd"/>
+<text x="450.0" y="237" text-anchor="middle" font-family="sans-serif" font-size="11">26509594</text>
+<line x1="720" y1="45" x2="720" y2="225" stroke="#ddd"/>
+<text x="720" y="237" text-anchor="middle" font-family="sans-serif" font-size="11">53019188</text>
+<text x="12" y="65" font-family="sans-serif" font-size="13">SENS T5</text>
+<line x1="205.81826187153226" y1="60" x2="257.2868962082181" y2="60" stroke="#333"/>
+<rect x="208.29356119146902" y="48" width="4.030231847383249" height="24" fill="#7aa6d8" stroke="#234"/>
+<line x1="209.69359017720151" y1="48" x2="209.69359017720151" y2="72" stroke="#900" stroke-width="2"/>
+<text x="12" y="135" font-family="sans-serif" font-size="13">Python .py</text>
+<line x1="368.1727158854262" y1="130" x2="720.0" y2="130" stroke="#333"/>
+<rect x="380.78504597241283" y="118" width="25.905211147330306" height="24" fill="#7aa6d8" stroke="#234"/>
+<line x1="387.91465233303836" y1="118" x2="387.91465233303836" y2="142" stroke="#900" stroke-width="2"/>
+</svg>

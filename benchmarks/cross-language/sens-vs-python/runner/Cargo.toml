@@ -1,0 +1,15 @@
+[package]
+name = "sens-vs-python-bench"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+sens = { path = "../../../../crates/sens" }
+serde_json = "1"
+
+[[test]]
+name = "sens_parity"
+path = "tests/sens_parity.rs"

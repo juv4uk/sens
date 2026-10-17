@@ -1,0 +1,19 @@
+{
+  "schema": "sens-vs-python-separate-memory-observation/v1",
+  "derived_from_run": "source-copy-raw.json",
+  "measurement": "one separate fresh process per implementation under GNU time; not part of timed sample arrays",
+  "units": "KiB",
+  "sens": {
+    "max_RSS": 3028,
+    "command_shape": "/usr/bin/time -f 'max_RSS_KiB=%M' sens-trit eval <physical-T5-file>"
+  },
+  "python": {
+    "max_RSS": 10520,
+    "command_shape": "/usr/bin/time -f 'max_RSS_KiB=%M' python3 -B <Python-source-file>"
+  },
+  "limitations": [
+    "single observation per side",
+    "whole-process peak, not algorithm-only allocation",
+    "not a median or distribution estimate"
+  ]
+}

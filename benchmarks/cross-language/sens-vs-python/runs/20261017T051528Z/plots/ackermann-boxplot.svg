@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="240" viewBox="0 0 760 240">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="28" font-family="sans-serif" font-size="18">ackermann — latency (ns)</text>
+<text x="12" y="65" font-family="sans-serif" font-size="13">SENS</text>
+<line x1="315.8128965785662" y1="60" x2="720.0" y2="60" stroke="#333"/>
+<rect x="326.4662953013173" y="48" width="88.08271428513689" height="24" fill="#7aa6d8" stroke="#234"/>
+<line x1="344.5612847609939" y1="48" x2="344.5612847609939" y2="72" stroke="#900" stroke-width="2"/>
+<text x="12" y="135" font-family="sans-serif" font-size="13">CPython source</text>
+<line x1="185.76552133855475" y1="130" x2="463.93995246251797" y2="130" stroke="#333"/>
+<rect x="185.84473984890087" y="118" width="1" height="24" fill="#7aa6d8" stroke="#234"/>
+<line x1="185.90114883861182" y1="118" x2="185.90114883861182" y2="142" stroke="#900" stroke-width="2"/>
+</svg>

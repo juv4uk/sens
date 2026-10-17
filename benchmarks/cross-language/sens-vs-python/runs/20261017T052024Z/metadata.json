@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "run_id": "20261017T052024Z",
+  "created_utc": "2026-10-17T05:21:15.039157+00:00",
+  "host": {
+    "hostname": "desktop",
+    "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "uname": {
+      "system": "Linux",
+      "node": "desktop",
+      "release": "6.18.33.2-microsoft-standard-WSL2",
+      "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026",
+      "machine": "x86_64",
+      "processor": ""
+    },
+    "architecture": "x86_64",
+    "cpu_model": "Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz",
+    "cpu_count": 4,
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "wsl_release": "6.18.33.2-microsoft-standard-WSL2"
+  },
+  "python": "3.12.12 (main, Jan  1 1970, 00:00:01) [GCC 14.3.0]",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "sens_build_profile": "release",
+  "git": {
+    "commit": "d5141f0287eed1c4a35c16755bd0ce457048c2c5",
+    "branch": "",
+    "dirty": true,
+    "dirty_paths": [
+      "?? benchmarks/cross-language/sens-vs-python/",
+      "?? docs/superpowers/plans/2026-10-17-sens-vs-python.md",
+      "?? docs/superpowers/plans/2026-10-17-sens-vs-python.uk.md"
+    ]
+  },
+  "preflight": "READY \u00b7 no obvious competing heavy workload\nload1=1.16 \u00b7 gpu=NVIDIA GeForce GTX 1050 Ti, 6.1, 1061, 4096, 6",
+  "method": {
+    "warmup_calls": 10,
+    "measured_calls": 100,
+    "percentile_method": "nearest-rank",
+    "timing_scope": "already-loaded callable invocation only",
+    "rss_baseline": "after setup and warmup",
+    "rss_peak": "Linux VmHWM after measurements",
+    "same_host_required": true,
+    "parity_required_before_timing": true,
+    "minimum_passing_workloads_for_overall_conclusion": 3
+  },
+  "sens_semantic_gate": {
+    "implementation": "SENS source / current mixed exact-domain reader and evaluator",
+    "minimum_for_overall_conclusion": 3,
+    "overall_status": "PASS",
+    "passing_workloads": 3,
+    "results": [
+      {
+        "actual": "(4095 31744 32512 32704 32752 2047)",
+        "expected": "(4095 31744 32512 32704 32752 2047)",
+        "parity_gate": "SENS output equals fixed expected value before timing",
+        "status": "PASS",
+        "workload": "binary-trees"
+      },
+      {
+        "actual": "987",
+        "expected": "987",
+        "parity_gate": "SENS output equals fixed expected value before timing",
+        "status": "PASS",
+        "workload": "fib"
+      },
+      {
+        "actual": "61",
+        "expected": "61",
+        "parity_gate": "SENS output equals fixed expected value before timing",
+        "status": "PASS",
+        "workload": "ackermann"
+      },
+      {
+        "reason": "The exact D9 JSON-parse identity is admitted by the exact reader but has no callable Core runtime mechanism; the mixed source spelling is unbound. Do not fall back to the historical W8 JSON builtin or invoke the Rust parser outside SENS evaluation.",
+        "status": "BLOCKED",
+        "workload": "json-parse-serialize"
+      },
+      {
+        "reason": "No evidenced comparable current SENS and CPython numeric semantics/precision contract for the proposed floating-point workload.",
+        "status": "BLOCKED",
+        "workload": "n-body"
+      },
+      {
+        "reason": "No evidenced comparable current SENS and CPython numeric semantics/precision contract for the proposed floating-point workload.",
+        "status": "BLOCKED",
+        "workload": "mandelbrot"
+      },
+      {
+        "reason": "No shared regex engine and behavior contract has been established.",
+        "status": "BLOCKED",
+        "workload": "regex"
+      }
+    ],
+    "runtime_metadata": {
+      "architecture": "x86_64",
+      "os": "linux",
+      "profile": "release"
+    },
+    "schema_version": 1,
+    "timing_started": false
+  },
+  "workloads_manifest_sha256": "2d679bc1b96c7fd22e2c23ea84dbb4a2aacbcff69854979f7870e5484162ccb4",
+  "sens_runner_sha256": "2b6a12bd787507deeb5f6bbc40a33549649518a932dad4c62de5f8a228432ba6",
+  "sens_runner_source_sha256": "0aeb45f67167c25682e6db513f4f6e64f2fe5673dbb16f476c24a7d8b640dc5a",
+  "sens_runner_cargo_manifest_sha256": "db42cf5e9450c321fc01686befe6592107578a57c82f70a496a867e076126e44",
+  "sens_runner_cargo_lock_sha256": "040642129e659000900bf73d65bdb371e63d9837b82eb7e36a080ea9a22434d1",
+  "sens_crate_source_sha256": "d8095847d3aa9139092628b97e4b7ffef31e8989231d658934448102f0696fea",
+  "execution_order": [
+    {
+      "workload": "binary-trees",
+      "implementations": [
+        "SENS",
+        "CPython source"
+      ]
+    },
+    {
+      "workload": "fib",
+      "implementations": [
+        "CPython source",
+        "SENS"
+      ]
+    },
+    {
+      "workload": "ackermann",
+      "implementations": [
+        "SENS",
+        "CPython source"
+      ]
+    }
+  ]
+}

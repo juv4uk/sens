@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "comparison": "SENS source vs CPython source",
+  "run_protocol": {
+    "warmup_calls": 10,
+    "measured_calls": 100,
+    "percentile_method": "nearest-rank",
+    "timing_scope": "already-loaded callable invocation only",
+    "rss_baseline": "after setup and warmup",
+    "rss_peak": "Linux VmHWM after measurements",
+    "same_host_required": true,
+    "parity_required_before_timing": true,
+    "minimum_passing_workloads_for_overall_conclusion": 3
+  },
+  "workloads": [
+    {
+      "id": "binary-trees",
+      "status": "candidate",
+      "parameters": {"N": 10},
+      "sens_setup": "sens/binary-trees.setup.lisp",
+      "sens_call": "sens/binary-trees.call.lisp",
+      "python_callable": "binary_trees_checks",
+      "input": "No external input; the fixed CLBG binary-trees N=10 profile.",
+      "expected_fixture": "../../standard/binary-trees/expected-n10.txt",
+      "expected": [4095, 31744, 32512, 32704, 32752, 2047],
+      "operation": "Construct the stretch tree, churn trees at even depths, traverse and verify checks, and verify the long-lived tree.",
+      "timed_region": "One complete benchmark call with definitions/session loaded beforehand.",
+      "parity": "Before timing, compare all six checks from each implementation to the pinned numeric checks in this manifest; the Python renderer is separately tested byte-for-byte against the official text fixture.",
+      "implementation_boundary": "Default allocator/runtime; no arena, pool, or free-list substitution."
+    },
+    {
+      "id": "fib",
+      "status": "candidate",
+      "parameters": {"N": 16},
+      "sens_setup": "sens/fib.setup.lisp",
+      "sens_call": "sens/fib.call.lisp",
+      "python_callable": "fib",
+      "input": "Integer N=16 from the existing cross-language recursive workload family.",
+      "expected": 987,
+      "operation": "The same naive recursive Fibonacci recurrence in both source languages.",
+      "timed_region": "One function call with definition/session loaded beforehand.",
+      "parity": "Exact integer result equals 987 on both implementations before timing.",
+      "implementation_boundary": "Record interpreter/evaluator/compiler versions; do not substitute iterative Fibonacci."
+    },
+    {
+      "id": "ackermann",
+      "status": "candidate",
+      "parameters": {"m": 3, "n": 3},
+      "sens_setup": "sens/ackermann.setup.lisp",
+      "sens_call": "sens/ackermann.call.lisp",
+      "python_callable": "ackermann",
+      "input": "The same nested Ackermann-Péter recurrence in both source languages.",
+      "expected": 61,
+      "operation": "A(0,n)=n+1; A(m,0)=A(m-1,1); otherwise A(m,n)=A(m-1,A(m,n-1)).",
+      "timed_region": "One function call with definition/session loaded beforehand.",
+      "parity": "Exact integer result equals 61 on both implementations before timing.",
+      "implementation_boundary": "A(3,5) overflows the Rust evaluator stack in the focused debug probe; the initial comparable profile is deliberately N=3 and must be described as small-scale."
+    },
+    {
+      "id": "json-parse-serialize",
+      "status": "blocked",
+      "parameters": {"input_fixture": "fixtures/json-small.json"},
+      "input": "A fixed UTF-8 JSON document stored with this benchmark.",
+      "operation": "Parse the document and serialize the resulting structure back to canonical JSON.",
+      "timed_region": "One full parse-plus-serialize call with program/session loaded beforehand.",
+      "parity": "Compare parsed structure and canonical serialized bytes before timing.",
+      "reason": "The exact D9 JSON-parse identity is admitted by the exact reader but has no callable Core runtime mechanism; the mixed source spelling is unbound. Do not fall back to the historical W8 JSON builtin or invoke the Rust parser outside SENS evaluation.",
+      "evidence": "runner/tests/sens_parity.rs::json_parse_is_blocked_without_an_admitted_d9_call_mechanism"
+    },
+    {
+      "id": "n-body",
+      "status": "blocked",
+      "reason": "No evidenced comparable current SENS and CPython numeric semantics/precision contract for the proposed floating-point workload."
+    },
+    {
+      "id": "mandelbrot",
+      "status": "blocked",
+      "reason": "No evidenced comparable current SENS and CPython numeric semantics/precision contract for the proposed floating-point workload."
+    },
+    {
+      "id": "regex",
+      "status": "blocked",
+      "reason": "No shared regex engine and behavior contract has been established."
+    }
+  ]
+}

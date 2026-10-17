@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="420" viewBox="0 0 760 420">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="28" font-family="sans-serif" font-size="18">binary-trees — latency histogram (ns)</text>
+<text x="30" y="55" fill="#3569a8" font-family="sans-serif">SENS</text>
+<rect x="50" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="84" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="118" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="152" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="186" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="220" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="254" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="288" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="322" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="356" y="370.0" width="12" height="0.0" fill="#3569a8" opacity="0.65"/>
+<rect x="390" y="273.3333333333333" width="12" height="96.66666666666667" fill="#3569a8" opacity="0.65"/>
+<rect x="424" y="283.3333333333333" width="12" height="86.66666666666667" fill="#3569a8" opacity="0.65"/>
+<rect x="458" y="323.3333333333333" width="12" height="46.666666666666664" fill="#3569a8" opacity="0.65"/>
+<rect x="492" y="333.3333333333333" width="12" height="36.666666666666664" fill="#3569a8" opacity="0.65"/>
+<rect x="526" y="356.6666666666667" width="12" height="13.333333333333334" fill="#3569a8" opacity="0.65"/>
+<rect x="560" y="360.0" width="12" height="10.0" fill="#3569a8" opacity="0.65"/>
+<rect x="594" y="353.3333333333333" width="12" height="16.666666666666668" fill="#3569a8" opacity="0.65"/>
+<rect x="628" y="363.3333333333333" width="12" height="6.666666666666667" fill="#3569a8" opacity="0.65"/>
+<rect x="662" y="360.0" width="12" height="10.0" fill="#3569a8" opacity="0.65"/>
+<rect x="696" y="360.0" width="12" height="10.0" fill="#3569a8" opacity="0.65"/>
+<text x="210" y="55" fill="#cf7133" font-family="sans-serif">CPython source</text>
+<rect x="58" y="50.0" width="12" height="320.0" fill="#cf7133" opacity="0.65"/>
+<rect x="92" y="356.6666666666667" width="12" height="13.333333333333334" fill="#cf7133" opacity="0.65"/>
+<rect x="126" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="160" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="194" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="228" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="262" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="296" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="330" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="364" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="398" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="432" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="466" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="500" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="534" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="568" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="602" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="636" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="670" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+<rect x="704" y="370.0" width="12" height="0.0" fill="#cf7133" opacity="0.65"/>
+</svg>
