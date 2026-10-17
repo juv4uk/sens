@@ -76,6 +76,13 @@ jobs:
           set -euo pipefail
           python3 -m unittest tests/test_ukr_projection_progress_report.py -v
           # Жорстко: крок червоний, поки не вся .lisp-кодова база на повній проєкції укр.
-          python3 scripts/report_ukr_projection_progress.py --min-pairs-pct 100
+          # Компактне ук та повне укр — різні peer spellings; їхня рівність
+          # не є вимогою semantic identity чи міграційним критерієм.
+          python3 scripts/report_ukr_projection_progress.py --min-ukr-pct 100
+          # Жорсткий RED тільки за незамінених Latin call heads або
+          # джерел, які статичний читач не зміг класифікувати.
+          # Окремий лексичний доказ НЕ підміняє фізичного SENS-eval.
+          python3 -m unittest tests/test_ukr_callsite_migration.py -v
+          python3 scripts/check_ukr_callsite_migration.py --require-full --limit 25
 
 
