@@ -652,6 +652,32 @@ jobs:
 
       # Manual, deeper suite has independent witnesses, never an automatic green claim.
 
+      - name: D9 — immutable FS snapshot selectors (3 laws, 6 witnesses)
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d9-fs-snapshot-selectors-laws.lisp"
+          negative="tests/semantic/d9-fs-snapshot-selectors-invalid.lisp"
+          sha256sum "$fixture" "$negative" lib/core4.lisp target/debug/sens
+          if ! output="$(target/debug/sens "$fixture" 2>&1)"; then
+            printf "%s\n" "$output" >&2
+            echo "::error::D9_FS_PROJECTION_EXEC_RED layer=eval id=d9-fs-fields fixture=$fixture expected=six-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf "%s\n" "$output" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_FS_PROJECTION_DIFF layer=eval id=d9-fs-fields fixture=$fixture expected=(1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          if negative_output="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D9_FS_PROJECTION_NEG_ACCEPTED id=d9-fs-missing-revision layer=eval fixture=$negative expected=CAR-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eiq "car|pair|пара|D3|D5|empty" <<< "$negative_output"; then
+            echo "::error::D9_FS_PROJECTION_NEG_DIAGNOSTIC id=d9-fs-missing-revision layer=eval fixture=$negative expected=CAR-refusal actual=$negative_output" >&2
+            exit 1
+          fi
+          echo "D9_FS_SNAPSHOT_NATIVE_PASS identities=D9:001010000,D9:010000001,D9:010010101 positive=6 negative=1"
       - name: D8 — один точковий SENS-контроль трьох мовних партій
         shell: bash
         run: |

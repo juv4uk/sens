@@ -1,0 +1,15 @@
+; D9 three ratified immutable filesystem projections — six physical D1 laws.
+(list
+  (equal? (фс-об'єкти (list (quote сховище) (quote відповідності) (quote версія)))
+          (quote сховище))
+  (equal? (фс-зв'язки (list (quote сховище) (quote відповідності) (quote версія)))
+          (quote відповідності))
+  (equal? (фс-ревізія (list (quote сховище) (quote відповідності) (quote версія)))
+          (quote версія))
+  (equal? (фс-об'єкти (list (list (quote а) (quote б))
+                            (list (quote шлях) (quote адреса)) (quote версія)))
+          (list (quote а) (quote б)))
+  (not? (equal? (фс-зв'язки (list (quote сховище) (quote відповідності) (quote версія)))
+                (quote сховище)))
+  (not? (equal? (фс-ревізія (list (quote сховище) (quote відповідності) (quote версія)))
+                (quote відповідності))))
