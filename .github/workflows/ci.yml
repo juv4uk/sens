@@ -168,6 +168,39 @@ jobs:
           fi
           echo "D10_MAP_NATIVE_PASS laws=12 negative=1 direct_D10_opcode=unclaimed"
 
+      - name: "D10 CLIPS — два закони преамбули, 13 фізичних свідків SENS"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d10-clips-preamble-laws.lisp"
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum "$fixture" lib/core4.lisp target/debug/sens
+          count=0
+          while IFS= read -r law || [[ -n "$law" ]]; do
+            [[ -z "$law" || "$law" == ';'* ]] && continue
+            ((count += 1))
+            witness="$RUNNER_TEMP/d10-clips-preamble-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$law" > "$witness"
+            if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
+              echo "::error::D10_CLIPS_PREAMBLE_EXEC_RED law=$count layer=eval expected=1 actual=execution-error" >&2
+              printf '%s\n' "$observed" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d10-clips-preamble-$count" --layer eval --fixture "$fixture" --expected "1" --actual "execution-error" --reproduce "target/debug/sens $witness generated-from=$fixture" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D10_CLIPS_PREAMBLE_LAW_DIFF law=$count layer=eval expected=1 actual=$actual" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d10-clips-preamble-$count" --layer eval --fixture "$fixture" --expected "1" --actual "$actual" --reproduce "target/debug/sens $witness generated-from=$fixture" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            echo "D10_CLIPS_PREAMBLE_PASS law=$count"
+          done < "$fixture"
+          if [[ "$count" != 13 ]]; then
+            echo "::error::D10_CLIPS_PREAMBLE_CENSUS expected=13 actual=$count" >&2
+            exit 1
+          fi
+          echo "D10_CLIPS_PREAMBLE_NATIVE_PASS functions=2 laws=13 direct_D10_callability=unclaimed"
+
       - name: "D10 CLIPS — чотири визначення, 22 фізичні закони SENS"
         shell: bash
         run: |
