@@ -1,0 +1,35 @@
+; D10 sassoc / vector-string / listarray / result-count / proper-list predicates
+; Pure composition. Residency lib/domains/d10.lisp.
+
+; D10:0001100101 SASSOC
+(0011 пошук-асоціації знайти-за-ключем)
+(0011 sassoc пошук-асоціації)
+
+; D10:0000110000 VECTOR->STRING / D10:0000110011 STRING->VECTOR
+(0011 вектор->рядок
+  (0010 (v) v))
+(0011 vector->string вектор->рядок)
+(0011 рядок->вектор
+  (0010 (s) s))
+(0011 string->vector рядок->вектор)
+
+; D10:0001011110 LISTARRAY
+(0011 масив-у-список
+  (0010 (a) a))
+(0011 listarray масив-у-список)
+
+; D10:0000000001 RESULT-COUNT
+(0011 кількість-результатів довжина)
+(0011 result-count кількість-результатів)
+
+; D10:0010001110 KNOWLEDGE-PROPER-LIST?
+(0011 правильний-список-знань? список?)
+(0011 knowledge-proper-list? правильний-список-знань?)
+
+; D10:0010010110 RESULT-PROPER-LIST?
+(0011 правильний-список-результатів? список?)
+(0011 result-proper-list? правильний-список-результатів?)
+
+; D10:0001001001 FORALL-EVERY-CANDIDATE-SATISFIES?
+(0011 кожен-задовольняє? усі-задовольняють?)
+(0011 forall-every-candidate-satisfies? кожен-задовольняє?)
