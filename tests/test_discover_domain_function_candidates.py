@@ -158,8 +158,6 @@ class CandidateDiscoveryTests(unittest.TestCase):
         self.assertEqual(parsed[0]["width"], "6")
         self.assertEqual(parsed[0]["callability"], "NOT_ASSERTED")
 
-    @unittest.skipUnless((ROOT / "lib" / "domains" / "d1.lisp").is_file(),
-                         "repository tables are only available in the full checkout")
     def test_candidates_only_filters_before_batch_limit(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
@@ -168,12 +166,14 @@ class CandidateDiscoveryTests(unittest.TestCase):
                 "--format", "tsv", "--no-research-scan", "--candidates-only",
             ])
         self.assertEqual(status, 0)
-        parsed = list(csv.DictReader(io.StringIO(out.getvalue()), delimiter="\\t"))
+        parsed = list(csv.DictReader(io.StringIO(out.getvalue()), delimiter="\t"))
         self.assertEqual(len(parsed), 1)
         self.assertEqual(parsed[0]["identity"], "D6:000001")
         self.assertEqual(parsed[0]["function_candidate"], "True")
         self.assertEqual(parsed[0]["callability"], "NOT_ASSERTED")
 
+    @unittest.skipUnless((ROOT / "lib" / "domains" / "d1.lisp").is_file(),
+                         "repository tables are only available in the full checkout")
     def test_real_repository_shape_smoke(self):
         maps = MOD.load_domain_tables(ROOT)
         self.assertEqual(sum(len(rows) for rows in maps.values()), 2046)
