@@ -345,7 +345,7 @@ jobs:
             exit 1
           fi
           echo "T5M_D10_SOURCE_FAIL_CLOSED identity=D10:0011110110 width=10 carrier=MECHANICAL-ONLY runtime-callability=NOT-ADMITTED"
-# 4) Справжнє спостереження ОС через окремий raw-механізм.
+          # 4) Справжнє спостереження ОС через окремий raw-механізм.
           #    clock-mono-raw ≠ D10:0011110110: відмова D10 вище лишається.
           clock_fixture="tests/semantic/t5m-bench-clock-raw.lisp"
           sha256sum "$clock_fixture" target/debug/sens
