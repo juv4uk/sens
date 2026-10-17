@@ -698,7 +698,7 @@ jobs:
 
 
 
-      - name: "D5/D6/D8/D9 — 138 точкових самосвідків SENS (сімнадцять партій)"
+      - name: "D5/D6/D8/D9 — 152 точкових самосвідків SENS (Canon-записи)"
         shell: bash
         run: |
           set -euo pipefail
@@ -747,6 +747,29 @@ jobs:
             exit 1
           fi
           echo "D8_TRUNCATE_REM_PASS laws=8 typed_negative=1"
+          canon_file="tests/semantic/d9-canon-record-algebra-laws.lisp"
+          canon_bad="tests/semantic/d9-canon-record-truncated-negative.lisp"
+          sha256sum "$canon_file" "$canon_bad" lib/core4.lisp target/debug/sens
+          if ! canon_out="$(target/debug/sens "$canon_file" 2>&1)"; then
+            echo "::error::D9_CANON_RECORD_EXEC_RED fixture=$canon_file expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$canon_out" >&2
+            exit 1
+          fi
+          canon_actual="$(printf '%s\n' "$canon_out" | tail -n 1)"
+          if [[ "$canon_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_CANON_RECORD_LAW_DIFF fixture=$canon_file expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$canon_actual" >&2
+            exit 1
+          fi
+          if canon_err="$(target/debug/sens "$canon_bad" 2>&1)"; then
+            echo "::error::D9_CANON_RECORD_BAD_ACCEPTED fixture=$canon_bad expected=car-nonpair-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$canon_err" != *"car expects a non-empty list"* ]]; then
+            echo "::error::D9_CANON_RECORD_BAD_KIND fixture=$canon_bad expected=car-nonpair-refusal actual=$canon_err" >&2
+            exit 1
+          fi
+          echo "D9_CANON_RECORD_NATIVE_PASS functions=6 laws=14 negative=1"
+
 
 
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
