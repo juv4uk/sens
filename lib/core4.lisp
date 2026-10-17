@@ -335,6 +335,38 @@
     (110 ((0101 значення) (зворот акумулятор)) ((0100 (0101 значення)) (відобразити-до дія (011 значення) (111 (дія (100 значення)) акумулятор))))))
 (0011 map-onto відобразити-до)
 
+; D10 research / PAIP list family: owner codebook coordinates, not F1-F4
+; machine admission. Each definition is native SENS over already-ratified
+; D3 CONS/CAR/CDR, D4 NULL/COND and D5 APPEND. Archive:
+; knowledge/d10-crossrepo-paip-v1.json and lib/domains/d10.lisp.
+; D10:0011010111 MKLIST: () remains (); an atom becomes a singleton;
+; an existing nonempty list is returned unchanged.
+(0011 утворити-список
+  (0010 (значення)
+    (110
+      ((0101 значення) (001 ()))
+      ((010 значення) (111 значення (001 ())))
+      (#d1:1 значення))))
+
+; D10:0011001010 MAPPEND: concatenate callback-produced proper lists
+; in original input order. No destructive append or implicit coercions.
+(0011 відобразити-й-додати
+  (0010 (дія елементи)
+    (110
+      ((0101 елементи) (001 ()))
+      ((010 елементи) (100 (001 ())))
+      (#d1:1
+       (append (дія (100 елементи))
+               (відобразити-й-додати дія (011 елементи)))))))
+
+; D10:0011001110 FLATTEN: PAIP donor specifies exactly ONE level,
+; not an arbitrary recursive tree flatten.
+(0011 сплющити
+  (0010 (елементи)
+    (відобразити-й-додати
+      (0010 (елемент) (утворити-список елемент))
+      елементи)))
+
 ; D6:101000 MAP: native SENS recursion over a proper list.
 ; D4:0101 NULL ends exactly the empty list; D3:111 CONS preserves order.
 (0011 відобразити
