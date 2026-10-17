@@ -371,6 +371,30 @@ jobs:
             exit 1
           fi
           echo "D9_JOURNAL_TEMPLATE_SENS_PASS identities=D9:001011001,D9:010110100 laws=9 negative=1"
+
+          # Партія D9 FS-LIST / FS-CONTAINS?: SENS перевіряє сам себе.
+          fs_laws="tests/semantic/d9-fs-list-contains-laws.lisp"
+          fs_invalid="tests/semantic/d9-fs-contains-invalid-arity.lisp"
+          sha256sum "$fs_laws" "$fs_invalid" lib/core4.lisp target/debug/sens
+          if ! fs_output="$(target/debug/sens "$fs_laws" 2>&1)"; then
+            echo "::error::D9_FS_LIST_CONTAINS_EXEC_RED id=d9-fs-list-contains layer=eval fixture=$fs_laws expected=nine-D1-YES actual=execution-error reproduce=target/debug/sens:$fs_laws" >&2
+            printf "%s\n" "$fs_output" >&2
+            exit 1
+          fi
+          fs_actual="$(printf "%s\n" "$fs_output" | tail -n 1)"
+          if [[ "$fs_actual" != "(1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_FS_LIST_CONTAINS_LAW_DIFF id=d9-fs-list-contains layer=eval fixture=$fs_laws expected='(1 1 1 1 1 1 1 1 1)' actual=$fs_actual reproduce=target/debug/sens:$fs_laws" >&2
+            exit 1
+          fi
+          if fs_error="$(target/debug/sens "$fs_invalid" 2>&1)"; then
+            echo "::error::D9_FS_CONTAINS_ARITY_BYPASS id=d9-fs-contains-arity layer=eval fixture=$fs_invalid expected=arity-refusal actual=accepted reproduce=target/debug/sens:$fs_invalid" >&2
+            exit 1
+          fi
+          if ! grep -Eiq 'arity|expected|arguments' <<< "$fs_error"; then
+            echo "::error::D9_FS_CONTAINS_WRONG_REFUSAL id=d9-fs-contains-arity layer=eval fixture=$fs_invalid expected=arity-refusal actual=$fs_error reproduce=target/debug/sens:$fs_invalid" >&2
+            exit 1
+          fi
+          echo "D9_FS_LIST_CONTAINS_SENS_PASS identities=D9:010010110,D9:010100001 laws=9 negative=1 direct-D9-admission=no"
       - name: T5M-SENS-CODEC — наш кодек виконується мовою (розмір + round-trip)
         id: sens-t5m-codec
         shell: bash
