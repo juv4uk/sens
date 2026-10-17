@@ -35,7 +35,7 @@ pub const Error = error{
 };
 
 /// Width comes from the typed SENS value, not from its magnitude.
-/// D1..D9 preserve ordinary T5; admitted D24+ widths are numeric words.
+/// D1..D10 preserve ordinary T5 exact-width binary identities; D24+ widths are numeric words.
 pub const Word = struct {
     width: usize,
     bits: []const u8,
@@ -65,7 +65,7 @@ pub const Decoded = struct {
 };
 
 fn supportsWidth(width: usize) bool {
-    return (width >= 1 and width <= 9) or
+    return (width >= 1 and width <= 10) or
         (width >= 24 and domain_ladder.supportsPhysicalWidth(width));
 }
 
@@ -399,9 +399,34 @@ test "T5M admits exact D24 ladder widths and rejects neighboring widths" {
         try std.testing.expectEqualSlices(u8, bits, decoded.words[0].bits);
     }
     const d25 = [_]Word{.{ .width = 25, .bits = "0000000000000000000000001" }};
-    const d10 = [_]Word{.{ .width = 10, .bits = "0000000001" }};
     try std.testing.expectError(Error.UnsupportedDomainWidth, encode(std.testing.allocator, &d25));
-    try std.testing.expectError(Error.UnsupportedDomainWidth, encode(std.testing.allocator, &d10));
+}
+
+
+test "T5M transports D1 through D10 exact widths including D10 leading zeros" {
+    const source = [_]Word{
+        .{ .width = 1, .bits = "1" },
+        .{ .width = 2, .bits = "00" },
+        .{ .width = 3, .bits = "010" },
+        .{ .width = 4, .bits = "0001" },
+        .{ .width = 5, .bits = "00100" },
+        .{ .width = 6, .bits = "000001" },
+        .{ .width = 7, .bits = "0000000" },
+        .{ .width = 8, .bits = "00000101" },
+        .{ .width = 9, .bits = "001011001" },
+        .{ .width = 10, .bits = "0000000001" },
+    };
+    const physical = try encode(std.testing.allocator, &source);
+    defer std.testing.allocator.free(physical);
+    var decoded = try decode(std.testing.allocator, physical);
+    defer decoded.deinit(std.testing.allocator);
+
+    try std.testing.expectEqual(source.len, decoded.words.len);
+    for (source, decoded.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualStrings(expected.bits, actual.bits);
+    }
+    // Transport preserves a 10-bit coordinate but does not admit an executable D10 resident.
 }
 
 test "decoder rejects non-T5 physical bytes and empty words" {
