@@ -19,9 +19,9 @@ Rules derived from current SENS contract and later owner decisions:
   An unrepresentable identifier or unproved historical successor fails closed.
 - Quoted data resolves an admitted ladder identity before D7 text fallback.
 - In default T5 mode, textual numeric spellings retain the historical D7
-  text-data projection. Explicit T5M mode accepts unsigned decimal integers
+  text-data projection. Explicit T5M mode accepts signed decimal integers
   and finite decimal fractions as numeric input, lowering them exactly to
-  D24+ natural words / reduced adjacent numerator-denominator words. This is
+  two's-complement D24+ words / reduced adjacent numerator-denominator words. This is
   an explicit migration projection, not a new language/runtime admission.
 - #d/#b/#q2 textual forms and bare binary words in numeric-width D24+ still
   require a separate admitted numeric domain/frame and fail closed here.
@@ -31,7 +31,7 @@ Rules derived from current SENS contract and later owner decisions:
 - Comments are stripped. Unresolved raw names cannot become .sens bytes.
   Python T5 packing is an independent parity reference ONLY. Real .sens
   bytes are minted by pinned Zig and verified before atomic publication.
-- Output is a physical binary T5 .sens under --out with the same basename
+- Output is a physical binary .sens under --out with the same basename
   as its .lisp source. Existing .sens files are never overwritten;
   source .lisp is retained.
 
@@ -964,21 +964,25 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
-    # Explicit T5M mode treats plain decimal numerals as an input projection
-    # and lowers them exactly into D24+ natural words. Finite decimal fractions
-    # become canonical adjacent numerator/denominator words after gcd reduction;
-    # no host float or D7 digit text is involved.
-    if getattr(resolver, "t5m_numeric", False) and re.fullmatch(r"\d+", t):
-        value = int(t, 10)
+    # Explicit T5M mode lowers decimal projections exactly. Integer words use
+    # two's complement; fractions retain adjacent reduced numerator/denominator
+    # words, with a signed numerator word. No host float or D7 digit text.
+    def numeric_word(value):
         width = 24
-        while value.bit_length() > width:
+        while not (-(1 << (width - 1)) <= value < (1 << (width - 1))):
             width *= 2
         if width > 4 * 1024 * 1024 * 5:
-            raise MigrationError("T5M decimal integer exceeds physical size limit", node.tok)
-        return [f"{value:0{width}b}"]
+            raise MigrationError("T5M decimal number exceeds physical size limit", node.tok)
+        return width, f"{value % (1 << width):0{width}b}"
+
+    if getattr(resolver, "t5m_numeric", False) and re.fullmatch(r"[+-]?\d+", t):
+        _, word = numeric_word(int(t, 10))
+        return [word]
     if (getattr(resolver, "t5m_numeric", False)
-            and re.fullmatch(r"(?:\d+\.\d+|\.\d+)", t)):
-        whole, fractional = t.split(".", 1)
+            and re.fullmatch(r"[+-]?(?:\d+\.\d+|\.\d+)", t)):
+        negative = t.startswith("-")
+        unsigned_text = t[1:] if t[:1] in "+-" else t
+        whole, fractional = unsigned_text.split(".", 1)
         if len(whole) + len(fractional) > 4096:
             raise MigrationError(
                 "T5M decimal fraction exceeds the 4096-digit exact-conversion limit",
@@ -989,20 +993,23 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
         divisor = gcd(numerator, denominator)
         numerator //= divisor
         denominator //= divisor
+        if negative:
+            numerator = -numerator
         values = [numerator] if denominator == 1 else [numerator, denominator]
         width = 24
-        while max(value.bit_length() for value in values) > width:
+        while any(not (-(1 << (width - 1)) <= value < (1 << (width - 1)))
+                  for value in values):
             width *= 2
         if width > 4 * 1024 * 1024 * 5:
             raise MigrationError("T5M decimal fraction exceeds physical size limit", node.tok)
-        return [f"{value:0{width}b}" for value in values]
+        return [f"{value % (1 << width):0{width}b}" for value in values]
     if (getattr(resolver, "t5m_numeric", False)
             and (NUMERIC_RE.fullmatch(t) or re.fullmatch(
                 r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t
             ))):
         raise MigrationError(
-            "T5M accepts unsigned decimal integers or finite decimal fractions only; "
-            "signs, ratios, exponents, and explicit numeric spellings are not lowered",
+            "T5M accepts signed decimal integers or finite decimal fractions only; "
+            "ratios, exponents, and explicit numeric spellings are not lowered",
             node.tok,
         )
     if t in D1_UK_SURFACES:
@@ -1405,7 +1412,7 @@ def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
 
 
 def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge,
-                        *, codec="t5"):
+                        *, codec="t5m"):
     """Keep SENS word identities upstream; Zig alone mints physical T5 bytes.
 
     The Python bytes are a parity witness, NEVER the published carrier. This
@@ -1465,8 +1472,8 @@ def main():
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
-    ap.add_argument("--codec", choices=("t5", "t5m"), default="t5",
-                    help="T5M додає точне decimal→D24+ зниження та фізичне перенесення слів D24+")
+    ap.add_argument("--codec", choices=("t5m", "t5"), default="t5m",
+                    help="T5M — основний 15-тритовий/24-бітний транспорт; T5 — явний legacy-формат")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1609,14 +1616,15 @@ def main():
         "schema": "sens-three-pass-t5-migration/v3",
         "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
         "file_format": {
-            "suffix": ".sens", "physical": f"binary-{args.codec.upper()}-five-trits-per-byte",
+            "suffix": ".sens", "physical": ("binary-T5M-base3-15-trits-per-little-endian-24-bit-group"
+                                                if args.codec == "t5m" else "binary-T5-five-trits-per-byte"),
             "language": ("D1–24+ frame; T5M physical subset: D1–D10 plus exact D24+ numeric words" if args.codec == "t5m"
                          else "currently supported D1..D9 exact-width 0/1 words"),
             "domain_frame": "D1–24+; exact domain laws come from language-contract.lisp",
             "callable_migration_subset": "D3-D6, admitted D8 mechanisms, and exact D9/D10 identities backed by Core4 callable definitions; D11 remains test-only",
             "transport_separator": "logical trit 2 strictly between words",
             "file_eof": "physical byte length; no terminal 22",
-            "padding": "zero through four final trits 2",
+            "padding": "T5M: zero through fourteen final trits 2; T5: zero through four final trits 2",
             "ascii_text": False,
         },
         "passes": {

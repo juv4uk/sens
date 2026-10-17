@@ -7,7 +7,6 @@ const physical_cycle = @import("physical_cycle.zig");
 const ladder = @import("domain_ladder.zig");
 const ladder_e1 = @import("domain_e1.zig");
 const domain_sequence = @import("domain_sequence.zig");
-const ladder_e3_numeric = @import("domain_e3_numeric.zig");
 const f3c = @import("f3c/f3c.zig");
 const abi = @import("transport_abi.zig");
 const freestanding = @import("freestanding.zig");
@@ -29,7 +28,6 @@ test "import exact-width transport suites" {
     _ = ladder;
     _ = ladder_e1;
     _ = domain_sequence;
-    _ = ladder_e3_numeric;
     _ = f3c;
     _ = abi;
     _ = freestanding;

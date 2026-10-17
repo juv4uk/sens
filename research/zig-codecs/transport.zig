@@ -4,6 +4,7 @@
 //! The filesystem adapter is libc-hosted; the codec itself does not do I/O.
 const std = @import("std");
 const t5 = @import("t5/t5.zig");
+const t5m = @import("t5m.zig");
 const f3c = @import("f3c/f3c.zig");
 
 const CFile = opaque {};
@@ -28,6 +29,7 @@ const Error = error{
     CanonicalRoundtripMismatch,
     InvalidTrit,
     InvalidTritBoundary,
+    InvalidT5MWord,
 };
 
 fn requireExtension(path: []const u8, ext: []const u8) !void {
@@ -136,6 +138,32 @@ fn carryTrits(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
     return out;
 }
 
+/// T5M carry consumes exact 0/1 words separated by `2`, then delegates all
+/// physical grouping to the T5M transport. It does not inspect domain meaning.
+fn carryT5M(allocator: std.mem.Allocator, source: []const u8) ![]u8 {
+    if (source.len == 0 or source.len > t5m.MAX_PHYSICAL_BYTES * 5)
+        return Error.InvalidTritBoundary;
+    var count: usize = 1;
+    for (source) |ch| {
+        if (ch == '2') count += 1 else if (ch != '0' and ch != '1') return Error.InvalidTrit;
+    }
+    const words = try allocator.alloc(t5m.Word, count);
+    defer allocator.free(words);
+    var start: usize = 0;
+    var word_index: usize = 0;
+    for (source, 0..) |ch, i| {
+        if (ch == '2') {
+            if (i == start) return Error.InvalidTritBoundary;
+            words[word_index] = .{ .width = i - start, .bits = source[start..i] };
+            word_index += 1;
+            start = i + 1;
+        }
+    }
+    if (start == source.len) return Error.InvalidTritBoundary;
+    words[word_index] = .{ .width = source.len - start, .bits = source[start..] };
+    return t5m.encode(allocator, words);
+}
+
 fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8) ![]u8 {
     if (std.mem.eql(u8, command, "t5-carry")) {
         return try carryTrits(allocator, source);
@@ -144,6 +172,18 @@ fn produce(allocator: std.mem.Allocator, command: []const u8, source: []const u8
         const words = try t5.decode(allocator, source);
         defer allocator.free(words);
         return try t5.encode(allocator, words);
+    }
+    if (std.mem.eql(u8, command, "t5m-carry")) {
+        return try carryT5M(allocator, source);
+    }
+    if (std.mem.eql(u8, command, "t5m-roundtrip")) {
+        var decoded = try t5m.decode(allocator, source);
+        defer decoded.deinit(allocator);
+        const words = try allocator.alloc(t5m.Word, decoded.words.len);
+        defer allocator.free(words);
+        for (decoded.words, 0..) |word, i|
+            words[i] = .{ .width = word.width, .bits = word.bits };
+        return t5m.encode(allocator, words);
     }
     // D10 is a coordinate-only carrier. Decoding it never authorizes execute.
     if (std.mem.eql(u8, command, "t5-coordinates-roundtrip")) {
@@ -166,6 +206,11 @@ fn check(allocator: std.mem.Allocator, command: []const u8, source: []const u8) 
         defer allocator.free(words);
         return;
     }
+    if (std.mem.eql(u8, command, "t5m-check")) {
+        var decoded = try t5m.decode(allocator, source);
+        decoded.deinit(allocator);
+        return;
+    }
     if (std.mem.eql(u8, command, "t5-coordinates-check")) {
         // Explicit D1..D10 physical-only mode, not an SENS execution preflight.
         try t5.validateCoordinatesPhysical(source);
@@ -186,6 +231,7 @@ pub fn main(init: std.process.Init) !void {
     const command = args[1];
     const source_path = args[2];
     const check_only = std.mem.eql(u8, command, "t5-check") or
+        std.mem.eql(u8, command, "t5m-check") or
         std.mem.eql(u8, command, "t5-coordinates-check") or
         std.mem.eql(u8, command, "f3c-check");
     if (check_only and args.len != 3) return Error.Usage;
@@ -197,16 +243,20 @@ pub fn main(init: std.process.Init) !void {
         std.mem.eql(u8, command, "t5-coordinates-check") or
         std.mem.eql(u8, command, "t5-coordinates-roundtrip") or
         std.mem.eql(u8, command, "f3c-pack");
+    const input_is_t5m = std.mem.eql(u8, command, "t5m-check") or
+        std.mem.eql(u8, command, "t5m-roundtrip");
     const input_is_f3c = std.mem.eql(u8, command, "f3c-check") or
         std.mem.eql(u8, command, "f3c-unpack");
     const input_is_trits = std.mem.eql(u8, command, "t5-carry");
-    if (!input_is_t5 and !input_is_f3c and !input_is_trits) return Error.Usage;
-    try requireExtension(source_path,
-        if (input_is_trits) ".trits" else if (input_is_t5) ".sens" else ".senc");
+    if (!input_is_t5 and !input_is_t5m and !input_is_f3c and !input_is_trits and
+        !std.mem.eql(u8, command, "t5m-carry")) return Error.Usage;
+    try requireExtension(source_path, if (input_is_trits or std.mem.eql(u8, command, "t5m-carry"))
+        ".trits"
+    else if (input_is_t5 or input_is_t5m) ".sens" else ".senc");
 
     // The trit stream is not yet packed: at most five source trits fit one
     // physical T5 byte. Do not apply the packed-byte limit to this input.
-    const input_max_bytes = if (input_is_trits)
+    const input_max_bytes = if (input_is_trits or std.mem.eql(u8, command, "t5m-carry"))
         t5.MAX_PHYSICAL_BYTES * 5
     else
         t5.MAX_PHYSICAL_BYTES + 1;
@@ -241,6 +291,16 @@ pub fn main(init: std.process.Init) !void {
         const replay = try t5.encodeCoordinates(allocator, words);
         defer allocator.free(replay);
         if (!std.mem.eql(u8, output, replay)) return Error.CanonicalRoundtripMismatch;
+    } else if (std.mem.eql(u8, command, "t5m-carry")) {
+        var words = try t5m.decode(allocator, output);
+        defer words.deinit(allocator);
+        const replay_words = try allocator.alloc(t5m.Word, words.words.len);
+        defer allocator.free(replay_words);
+        for (words.words, 0..) |word, i|
+            replay_words[i] = .{ .width = word.width, .bits = word.bits };
+        const replay = try t5m.encode(allocator, replay_words);
+        defer allocator.free(replay);
+        if (!std.mem.eql(u8, output, replay)) return Error.CanonicalRoundtripMismatch;
     } else if (!std.mem.eql(u8, original, output)) {
         return Error.CanonicalRoundtripMismatch;
     }
@@ -253,7 +313,6 @@ pub fn main(init: std.process.Init) !void {
     try writeFileNew(allocator, dest_path, output);
     try verifyCreatedFile(allocator, dest_path, cleanup_path.ptr, output);
 }
-
 
 test "Zig migration output is removed on failed readback, retained only when exact" {
     // Zig 0.16 std.testing's isolated directory is owned by this test.
@@ -270,10 +329,8 @@ test "Zig migration output is removed on failed readback, retained only when exa
     defer allocator.free(failed_z);
     try writeFileNew(allocator, failed, &.{ 0x00, 0x00 });
     // Distinct bytes / source provenance cannot become a released artifact.
-    try std.testing.expectError(error.CanonicalRoundtripMismatch,
-        verifyCreatedFile(allocator, failed, failed_z.ptr, &.{ 0x00 }));
-    try std.testing.expectError(error.InputReadFailed,
-        readFile(allocator, failed, t5.MAX_PHYSICAL_BYTES + 1));
+    try std.testing.expectError(error.CanonicalRoundtripMismatch, verifyCreatedFile(allocator, failed, failed_z.ptr, &.{0x00}));
+    try std.testing.expectError(error.InputReadFailed, readFile(allocator, failed, t5.MAX_PHYSICAL_BYTES + 1));
 
     const passed = try std.fs.path.join(allocator, &.{ parent, "verified.sens" });
     defer allocator.free(passed);
@@ -286,8 +343,7 @@ test "Zig migration output is removed on failed readback, retained only when exa
     defer allocator.free(restored);
     try std.testing.expectEqualSlices(u8, &physical, restored);
     // Exclusive output is never overwritten by a concurrent/second writer.
-    try std.testing.expectError(error.OutputExistsOrUnavailable,
-        writeFileNew(allocator, passed, &.{0xff}));
+    try std.testing.expectError(error.OutputExistsOrUnavailable, writeFileNew(allocator, passed, &.{0xff}));
     try std.testing.expectEqualSlices(u8, &physical, restored);
 }
 
@@ -304,14 +360,26 @@ test "Zig opaque trit carry preserves widths and rejects malformed boundaries" {
     try std.testing.expectEqualSlices(u8, &.{0x35}, d2);
     const coordinate = try carryTrits(allocator, "0000000000");
     defer allocator.free(coordinate);
-    try std.testing.expectEqualSlices(u8, &.{0x00, 0x00}, coordinate);
+    try std.testing.expectEqualSlices(u8, &.{ 0x00, 0x00 }, coordinate);
     try std.testing.expectError(Error.InvalidTrit, carryTrits(allocator, "10 11"));
     try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, ""));
     try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "20"));
     try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "1022"));
     try std.testing.expectError(Error.InvalidTritBoundary, carryTrits(allocator, "102"));
-    try std.testing.expectError(t5.Error.UnsupportedDomainWidth,
-        carryTrits(allocator, "00000000000"));
+    try std.testing.expectError(t5.Error.UnsupportedDomainWidth, carryTrits(allocator, "00000000000"));
+}
+
+test "T5M CLI carry routes exact opaque words through 15-trit Zig transport" {
+    const allocator = std.testing.allocator;
+    const encoded = try carryT5M(allocator, "00000000001");
+    defer allocator.free(encoded);
+    try std.testing.expectEqualSlices(u8, &.{ 0xa1, 0x00, 0x00 }, encoded);
+    var decoded = try t5m.decode(allocator, encoded);
+    defer decoded.deinit(allocator);
+    try std.testing.expectEqual(@as(usize, 11), decoded.words[0].width);
+    try std.testing.expectEqualStrings("00000000001", decoded.words[0].bits);
+    try std.testing.expectError(Error.InvalidTritBoundary, carryT5M(allocator, "201"));
+    try std.testing.expectError(Error.InvalidTrit, carryT5M(allocator, "10x"));
 }
 
 test "Zig migration accepts presegmented trits longer than packed T5 bound" {
@@ -335,8 +403,7 @@ test "Zig migration accepts presegmented trits longer than packed T5 bound" {
         byte.* = if (i % 2 == 0) '0' else '2';
     }
     try writeFileNew(allocator, input_path, presegmented);
-    try std.testing.expectError(Error.InputTooLarge,
-        readFile(allocator, input_path, old_limit));
+    try std.testing.expectError(Error.InputTooLarge, readFile(allocator, input_path, old_limit));
 
     const carried_input = try readFile(allocator, input_path, t5.MAX_PHYSICAL_BYTES * 5);
     defer allocator.free(carried_input);

@@ -1,51 +1,31 @@
-//! T5M: ordinary T5 bit/separator stream extended to numeric D24+ words.
-//! Експериментальний транспортний зріз; вимоги перед семантичним прийняттям:
-//! - Не плутати відсутню інтеграцію T5M із відсутньою математикою SENS:
-//!   парсер уже має точні десяткові/раціональні значення, Core — D24+ арифметику.
-//! - На межі T5M виконувати точні двійкові НСД і ділення для канонізації дробу;
-//!   не використовувати f64, десяткове округлення чи втрату значущих бітів.
-//! - Числовий атом Dn зберігає всі n бітів як натуральне число. Знак — окрема
-//!   NEG-композиція, не зарезервований біт усередині Dn.
-//! - Для RATIO вимагати q>0 і gcd(|p|,q)=1; нуль зводити до доменного нуля,
-//!   знаменник 1 — до цілого/NEG, нульовий або від'ємний знаменник відхиляти.
-//! - Зберігати ширини й ідентичності складників; структуру NEG/RATIO декодувати
-//!   однозначно, не виводити її лише з довільного сусідства слів.
-//! - Якщо результат не вміщується, точно розширити D24→D48→… або повернути
-//!   явну помилку; ніколи не обрізати й не округляти. Перевірити round-trip
-//!   десяткових, дробових, від'ємних і граничних значень.
-//! Поточні makeSignedWord/encodeRatio цього набору ще НЕ виконують:
-//! знак займає біт Dn, а НСД/канонізація не реалізовані.
+//! T5M physical transport: 15 logical trits (0/1 bits, 2 word separators)
+//! are ranked in base 3 and stored as one little-endian 24-bit group.
+//! This layer preserves exact word widths and bits; it assigns no semantics.
 const std = @import("std");
 const domain_ladder = @import("domain_ladder.zig");
 
 pub const MAX_PHYSICAL_BYTES: usize = 4 * 1024 * 1024;
-const TRITS_PER_BYTE: usize = 5;
+const TRITS_PER_GROUP: usize = 15;
+const BYTES_PER_GROUP: usize = 3;
+const MAX_GROUP_VALUE: u32 = 14_348_907; // 3^15
 
 pub const Error = error{
     EmptyProgram,
     UnsupportedDomainWidth,
-    InvalidMagnitudeWidth,
     InvalidBinaryDigit,
     InvalidPhysicalByte,
+    InvalidPhysicalGroup,
     InvalidTail,
     EmptyDomainWord,
-    ZeroDenominator,
     TransportTooLarge,
     OutOfMemory,
 };
 
-/// Width comes from the typed SENS value, not from its magnitude.
-/// D1..D10 preserve ordinary T5 exact-width binary identities; D24+ widths are numeric words.
+/// Exact width is supplied by the SENS caller. The transport does not infer
+/// a domain, a numeric type, or callability from the bit count.
 pub const Word = struct {
     width: usize,
     bits: []const u8,
-};
-
-/// A signed D24+ value supplied as its already-converted magnitude bits.
-pub const SignedMagnitude = struct {
-    width: usize,
-    negative: bool,
-    magnitude_bits: []const u8,
 };
 
 pub const DecodedWord = struct {
@@ -65,82 +45,26 @@ pub const Decoded = struct {
 };
 
 fn supportsWidth(width: usize) bool {
-    return (width >= 1 and width <= 10) or
-        (width >= 24 and domain_ladder.supportsPhysicalWidth(width));
+    return width != 0;
 }
 
-/// Build a D24+ sign-magnitude number. The sign occupies the first bit:
-/// 0 is negative, 1 is positive; remaining bits hold the unsigned magnitude.
-pub fn makeSignedWord(
-    allocator: std.mem.Allocator,
-    width: usize,
-    negative: bool,
-    magnitude_bits: []const u8,
-) Error![]u8 {
-    if (width < 24 or !domain_ladder.supportsPhysicalWidth(width)) {
-        return Error.UnsupportedDomainWidth;
-    }
-    if (magnitude_bits.len != width - 1) return Error.InvalidMagnitudeWidth;
-    for (magnitude_bits) |bit| {
-        if (bit != '0' and bit != '1') return Error.InvalidBinaryDigit;
-    }
-
-    const bits = allocator.alloc(u8, width) catch return Error.OutOfMemory;
-    bits[0] = if (negative) '0' else '1';
-    @memcpy(bits[1..], magnitude_bits);
-    return bits;
-}
-
-/// Encode a rational as adjacent signed numerator and denominator words.
-/// Decimal parsing/reduction belongs to the SENS reader/runtime, not T5M.
-pub fn encodeRatio(
-    allocator: std.mem.Allocator,
-    numerator: SignedMagnitude,
-    denominator: SignedMagnitude,
-) Error![]u8 {
-    const numerator_bits = try makeSignedWord(
-        allocator,
-        numerator.width,
-        numerator.negative,
-        numerator.magnitude_bits,
-    );
-    defer allocator.free(numerator_bits);
-
-    const denominator_bits = try makeSignedWord(
-        allocator,
-        denominator.width,
-        denominator.negative,
-        denominator.magnitude_bits,
-    );
-    defer allocator.free(denominator_bits);
-
-    var denominator_nonzero = false;
-    for (denominator_bits[1..]) |bit| {
-        if (bit == '1') denominator_nonzero = true;
-    }
-    if (!denominator_nonzero) return Error.ZeroDenominator;
-
-    const words = [_]Word{
-        .{ .width = numerator.width, .bits = numerator_bits },
-        .{ .width = denominator.width, .bits = denominator_bits },
-    };
-    return encode(allocator, &words);
-}
-
-fn appendDigit(out: []u8, index: *usize, current: *u8, used: *u8, digit: u8) void {
+fn appendDigit(out: []u8, group_index: *usize, current: *u32, used: *u8, digit: u8) void {
     std.debug.assert(digit <= 2);
-    current.* = current.* * 3 + digit;
+    current.* = current.* * 3 + @as(u32, digit);
     used.* += 1;
-    if (used.* == TRITS_PER_BYTE) {
-        out[index.*] = current.*;
-        index.* += 1;
+    if (used.* == TRITS_PER_GROUP) {
+        const offset = group_index.* * BYTES_PER_GROUP;
+        out[offset] = @truncate(current.*);
+        out[offset + 1] = @truncate(current.* >> 8);
+        out[offset + 2] = @truncate(current.* >> 16);
+        group_index.* += 1;
         current.* = 0;
         used.* = 0;
     }
 }
 
-/// Encode the ordinary T5 stream: 0/1 bits and trit 2 between words.
-/// No marker for numeric type is added; the explicit D24+ word width remains.
+/// Encode exact-width binary words; 2 separates words and pads the final group.
+/// No numeric marker or domain meaning is added by T5M.
 pub fn encode(allocator: std.mem.Allocator, words: []const Word) Error![]u8 {
     if (words.len == 0) return Error.EmptyProgram;
 
@@ -148,27 +72,32 @@ pub fn encode(allocator: std.mem.Allocator, words: []const Word) Error![]u8 {
     for (words) |word| {
         if (!supportsWidth(word.width)) return Error.UnsupportedDomainWidth;
         if (word.bits.len != word.width) return Error.UnsupportedDomainWidth;
+        if (word.bits.len == 0) return Error.EmptyDomainWord;
         for (word.bits) |bit| {
             if (bit != '0' and bit != '1') return Error.InvalidBinaryDigit;
         }
         trit_count = std.math.add(usize, trit_count, word.width) catch
             return Error.TransportTooLarge;
     }
-    const trit_budget = MAX_PHYSICAL_BYTES * TRITS_PER_BYTE;
+    const trit_budget = (MAX_PHYSICAL_BYTES / BYTES_PER_GROUP) * TRITS_PER_GROUP;
     if (trit_count > trit_budget) return Error.TransportTooLarge;
-    const byte_len = (trit_count + TRITS_PER_BYTE - 1) / TRITS_PER_BYTE;
+    const padded_trits = std.math.add(usize, trit_count, TRITS_PER_GROUP - 1) catch
+        return Error.TransportTooLarge;
+    const group_count = padded_trits / TRITS_PER_GROUP;
+    const byte_len = std.math.mul(usize, group_count, BYTES_PER_GROUP) catch
+        return Error.TransportTooLarge;
     const out = allocator.alloc(u8, byte_len) catch return Error.OutOfMemory;
     errdefer allocator.free(out);
 
-    var index: usize = 0;
-    var current: u8 = 0;
+    var group_index: usize = 0;
+    var current: u32 = 0;
     var used: u8 = 0;
     for (words, 0..) |word, word_index| {
-        if (word_index != 0) appendDigit(out, &index, &current, &used, 2);
-        for (word.bits) |bit| appendDigit(out, &index, &current, &used, bit - '0');
+        if (word_index != 0) appendDigit(out, &group_index, &current, &used, 2);
+        for (word.bits) |bit| appendDigit(out, &group_index, &current, &used, bit - '0');
     }
-    while (used != 0) appendDigit(out, &index, &current, &used, 2);
-    std.debug.assert(index == byte_len);
+    while (used != 0) appendDigit(out, &group_index, &current, &used, 2);
+    std.debug.assert(group_index == group_count);
     return out;
 }
 
@@ -176,32 +105,33 @@ fn validateWordWidth(width: usize) Error!void {
     if (!supportsWidth(width)) return Error.UnsupportedDomainWidth;
 }
 
-/// Decode ordinary T5 words plus admitted D24+ numeric words, retaining zeros.
-/// Each number carries its sign in its first bit; ratios are adjacent signed
-/// D24+ words, while semantic D2 separates independent numbers.
+/// Decode the mechanical T5M stream, retaining exact leading zeros and widths.
 pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     if (data.len == 0) return Error.EmptyProgram;
     if (data.len > MAX_PHYSICAL_BYTES) return Error.TransportTooLarge;
-    for (data) |byte| {
-        if (byte >= 243) return Error.InvalidPhysicalByte;
-    }
-    const trit_count = std.math.mul(usize, data.len, TRITS_PER_BYTE) catch
+    if (data.len % BYTES_PER_GROUP != 0) return Error.InvalidPhysicalByte;
+    const group_count = data.len / BYTES_PER_GROUP;
+    const trit_count = std.math.mul(usize, group_count, TRITS_PER_GROUP) catch
         return Error.TransportTooLarge;
     const trits = allocator.alloc(u8, trit_count) catch return Error.OutOfMemory;
     defer allocator.free(trits);
-    for (data, 0..) |byte, byte_index| {
-        var value = byte;
-        var place: usize = TRITS_PER_BYTE;
+    for (0..group_count) |group_index| {
+        const offset = group_index * BYTES_PER_GROUP;
+        var value: u32 = @as(u32, data[offset]) |
+            (@as(u32, data[offset + 1]) << 8) |
+            (@as(u32, data[offset + 2]) << 16);
+        if (value >= MAX_GROUP_VALUE) return Error.InvalidPhysicalGroup;
+        var place: usize = TRITS_PER_GROUP;
         while (place > 0) {
             place -= 1;
-            trits[byte_index * TRITS_PER_BYTE + place] = value % 3;
+            trits[group_index * TRITS_PER_GROUP + place] = @intCast(value % 3);
             value /= 3;
         }
     }
 
     var padding: usize = 0;
     while (padding < trits.len and trits[trits.len - padding - 1] == 2) : (padding += 1) {}
-    if (padding >= TRITS_PER_BYTE) return Error.InvalidTail;
+    if (padding >= TRITS_PER_GROUP) return Error.InvalidTail;
     const body_len = trits.len - padding;
     if (body_len == 0) return Error.EmptyDomainWord;
 
@@ -248,10 +178,10 @@ pub fn decode(allocator: std.mem.Allocator, data: []const u8) Error!Decoded {
     return .{ .words = words, .bit_storage = bit_storage };
 }
 
-test "D24 natural uses the ordinary T5 bit-and-separator stream without a marker" {
+test "D24 exact word uses two T5M groups without a numeric marker" {
     const d24_one = "000000000000000000000001";
     const words = [_]Word{.{ .width = 24, .bits = d24_one }};
-    const expected = [_]u8{ 0, 0, 0, 0, 5 };
+    const expected = [_]u8{ 0, 0, 0, 0xb1, 0x05, 0 };
 
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
@@ -265,11 +195,32 @@ test "D24 natural uses the ordinary T5 bit-and-separator stream without a marker
     try std.testing.expect(domain_ladder.supportsPhysicalWidth(decoded.words[0].width));
 }
 
-test "ordinary T5 D1 bytes remain identical" {
+test "T5M D1 bytes use one 15-trit group" {
     const words = [_]Word{.{ .width = 1, .bits = "1" }};
     const encoded = try encode(std.testing.allocator, &words);
     defer std.testing.allocator.free(encoded);
-    try std.testing.expectEqualSlices(u8, &.{0xa1}, encoded);
+    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, encoded);
+}
+
+test "T5M packs one exact word as a 15-trit little-endian group" {
+    const words = [_]Word{.{ .width = 1, .bits = "1" }};
+    const encoded = try encode(std.testing.allocator, &words);
+    defer std.testing.allocator.free(encoded);
+
+    // 1 followed by fourteen padding trits 2, ranked in base 3 then stored LE.
+    try std.testing.expectEqualSlices(u8, &.{ 241, 246, 145 }, encoded);
+}
+
+test "T5M preserves an exact D11 word without admitting its semantics" {
+    const words = [_]Word{.{ .width = 11, .bits = "00000000001" }};
+    const encoded = try encode(std.testing.allocator, &words);
+    defer std.testing.allocator.free(encoded);
+
+    var decoded = try decode(std.testing.allocator, encoded);
+    defer decoded.deinit(std.testing.allocator);
+    try std.testing.expectEqual(@as(usize, 1), decoded.words.len);
+    try std.testing.expectEqual(@as(usize, 11), decoded.words[0].width);
+    try std.testing.expectEqualStrings("00000000001", decoded.words[0].bits);
 }
 
 test "ordinary SENS difference and quotient words compose with D24 operands" {
@@ -295,95 +246,38 @@ test "ordinary SENS difference and quotient words compose with D24 operands" {
     }
 }
 
-test "signed numeric word stores sign first and preserves the full domain width" {
-    var magnitude: [23]u8 = undefined;
-    @memset(&magnitude, '0');
-    magnitude[22] = '1';
+test "T5M transports a caller-formed negative D24 two's-complement word unchanged" {
+    // -5 is already represented as an exact-width D24 two's-complement word.
+    // T5M must preserve those 24 bits, not reinterpret them as sign-magnitude.
+    const negative_five = "111111111111111111111011";
+    const source = [_]Word{.{ .width = 24, .bits = negative_five }};
+    const physical = try encode(std.testing.allocator, &source);
+    defer std.testing.allocator.free(physical);
 
-    const positive = try makeSignedWord(std.testing.allocator, 24, false, &magnitude);
-    defer std.testing.allocator.free(positive);
-    const negative = try makeSignedWord(std.testing.allocator, 24, true, &magnitude);
-    defer std.testing.allocator.free(negative);
-
-    try std.testing.expectEqual(@as(usize, 24), positive.len);
-    try std.testing.expectEqual(@as(u8, '1'), positive[0]);
-    try std.testing.expectEqual(@as(u8, '0'), negative[0]);
-    try std.testing.expectEqualSlices(u8, &magnitude, positive[1..]);
-    try std.testing.expectEqualSlices(u8, &magnitude, negative[1..]);
-}
-
-test "signed numeric word rejects unsupported widths and malformed magnitudes" {
-    const short_magnitude = "00000000000000000000000";
-    try std.testing.expectError(Error.UnsupportedDomainWidth, makeSignedWord(std.testing.allocator, 9, false, short_magnitude));
-    try std.testing.expectError(Error.InvalidMagnitudeWidth, makeSignedWord(std.testing.allocator, 24, false, "1"));
-    try std.testing.expectError(Error.InvalidBinaryDigit, makeSignedWord(std.testing.allocator, 24, false, "0000000000000000000000x"));
-}
-
-test "encodeRatio carries exact 2.1564 as adjacent D24 signed values" {
-    const encoded = try encodeRatio(std.testing.allocator, .{ .width = 24, .negative = false, .magnitude_bits = "00000000001010100001111" }, .{ .width = 24, .negative = false, .magnitude_bits = "00000000000100111000100" });
-    defer std.testing.allocator.free(encoded);
-
-    var decoded = try decode(std.testing.allocator, encoded);
+    var decoded = try decode(std.testing.allocator, physical);
     defer decoded.deinit(std.testing.allocator);
-    try std.testing.expectEqual(@as(usize, 2), decoded.words.len);
     try std.testing.expectEqual(@as(usize, 24), decoded.words[0].width);
-    try std.testing.expectEqualStrings("100000000001010100001111", decoded.words[0].bits);
-    try std.testing.expectEqual(@as(usize, 24), decoded.words[1].width);
-    try std.testing.expectEqualStrings("100000000000100111000100", decoded.words[1].bits);
+    try std.testing.expectEqualStrings(negative_five, decoded.words[0].bits);
 }
 
-test "encodeRatio rejects a zero denominator" {
-    try std.testing.expectError(Error.ZeroDenominator, encodeRatio(std.testing.allocator, .{ .width = 24, .negative = false, .magnitude_bits = "00000000001010100001111" }, .{ .width = 24, .negative = false, .magnitude_bits = "00000000000000000000000" }));
-}
-
-test "D2 separates independent numbers while adjacent D24 words carry a ratio" {
-    var magnitude_one: [23]u8 = undefined;
-    @memset(&magnitude_one, '0');
-    magnitude_one[22] = '1';
-    var magnitude_three: [23]u8 = undefined;
-    @memset(&magnitude_three, '0');
-    magnitude_three[21] = '1';
-    magnitude_three[22] = '1';
-
-    const positive_one = try makeSignedWord(std.testing.allocator, 24, false, &magnitude_one);
-    defer std.testing.allocator.free(positive_one);
-    const negative_one = try makeSignedWord(std.testing.allocator, 24, true, &magnitude_one);
-    defer std.testing.allocator.free(negative_one);
-    const positive_three = try makeSignedWord(std.testing.allocator, 24, false, &magnitude_three);
-    defer std.testing.allocator.free(positive_three);
-    const denominator_three = try makeSignedWord(std.testing.allocator, 24, false, &magnitude_three);
-    defer std.testing.allocator.free(denominator_three);
-
-    const separate_numbers = [_]Word{
-        .{ .width = 24, .bits = positive_one },
-        .{ .width = 2, .bits = "00" }, // semantic D2 separator
-        .{ .width = 24, .bits = positive_three },
+test "T5M transports adjacent D24 words without interpreting ratio semantics" {
+    const source = [_]Word{
+        .{ .width = 24, .bits = "000000000000000001010100" }, // caller-formed numerator
+        .{ .width = 24, .bits = "000000000000000000100111" }, // caller-formed denominator
     };
-    const ratio = [_]Word{
-        .{ .width = 24, .bits = positive_one },
-        .{ .width = 24, .bits = denominator_three }, // positive sign + full-width D24 word
-    };
-    const negative_ratio = [_]Word{
-        .{ .width = 24, .bits = negative_one },
-        .{ .width = 24, .bits = denominator_three },
-    };
+    const physical = try encode(std.testing.allocator, &source);
+    defer std.testing.allocator.free(physical);
 
-    inline for (.{ &separate_numbers, &ratio, &negative_ratio }) |source| {
-        const encoded = try encode(std.testing.allocator, source);
-        defer std.testing.allocator.free(encoded);
-        var decoded = try decode(std.testing.allocator, encoded);
-        defer decoded.deinit(std.testing.allocator);
-        try std.testing.expectEqual(source.len, decoded.words.len);
-        for (source, decoded.words) |expected, actual| {
-            try std.testing.expectEqual(expected.width, actual.width);
-            try std.testing.expectEqualStrings(expected.bits, actual.bits);
-        }
+    var decoded = try decode(std.testing.allocator, physical);
+    defer decoded.deinit(std.testing.allocator);
+    try std.testing.expectEqual(source.len, decoded.words.len);
+    for (source, decoded.words) |expected, actual| {
+        try std.testing.expectEqual(expected.width, actual.width);
+        try std.testing.expectEqualStrings(expected.bits, actual.bits);
     }
-
-    try std.testing.expectEqual(@as(usize, 24), ratio[1].width);
 }
 
-test "T5M admits exact D24 ladder widths and rejects neighboring widths" {
+test "T5M preserves opaque exact widths without interpreting numeric construction" {
     const widths = [_]usize{ 24, 48, 96, 192, 384 };
     for (widths) |width| {
         const bits = try std.testing.allocator.alloc(u8, width);
@@ -398,10 +292,14 @@ test "T5M admits exact D24 ladder widths and rejects neighboring widths" {
         try std.testing.expectEqual(width, decoded.words[0].width);
         try std.testing.expectEqualSlices(u8, bits, decoded.words[0].bits);
     }
-    const d25 = [_]Word{.{ .width = 25, .bits = "0000000000000000000000001" }};
-    try std.testing.expectError(Error.UnsupportedDomainWidth, encode(std.testing.allocator, &d25));
+    const opaque_25 = [_]Word{.{ .width = 25, .bits = "0000000000000000000000001" }};
+    const encoded_25 = try encode(std.testing.allocator, &opaque_25);
+    defer std.testing.allocator.free(encoded_25);
+    var decoded_25 = try decode(std.testing.allocator, encoded_25);
+    defer decoded_25.deinit(std.testing.allocator);
+    try std.testing.expectEqual(@as(usize, 25), decoded_25.words[0].width);
+    try std.testing.expectEqualStrings(opaque_25[0].bits, decoded_25.words[0].bits);
 }
-
 
 test "T5M transports D1 through D10 exact widths including D10 leading zeros" {
     const source = [_]Word{
@@ -429,8 +327,11 @@ test "T5M transports D1 through D10 exact widths including D10 leading zeros" {
     // Transport preserves a 10-bit coordinate but does not admit an executable D10 resident.
 }
 
-test "decoder rejects non-T5 physical bytes and empty words" {
+test "decoder rejects invalid T5M groups, malformed lengths, and empty words" {
     try std.testing.expectError(Error.InvalidPhysicalByte, decode(std.testing.allocator, &.{243}));
-    // Base-3 22000: a separator before any domain word.
-    try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{216}));
+    try std.testing.expectError(Error.InvalidPhysicalGroup, decode(std.testing.allocator, &.{ 255, 255, 255 }));
+    // Base-3 2 followed by fourteen zero trits: a separator before any word.
+    try std.testing.expectError(Error.EmptyDomainWord, decode(std.testing.allocator, &.{ 242, 246, 145 }));
+    // Fifteen trailing trits 2 are not canonical padding for a nonempty word.
+    try std.testing.expectError(Error.InvalidTail, decode(std.testing.allocator, &.{ 106, 242, 218 }));
 }

@@ -1,15 +1,16 @@
-//! Exact arithmetic for mathematical NEG/RATIO compositions over existing D24+
-//! natural atoms. This is a Core VALUE mechanism, NOT a new SENS domain.
+//! Exact arithmetic for signed D24+ integers and exact NEG/RATIO compositions.
+//! This is a Core VALUE mechanism, NOT a new SENS domain. Integer words use
+//! two's complement; fraction components keep private unsigned magnitudes.
 //! Domain identities remain explicit, with no host floats, mixed-domain
 //! coercion, decimal literals, or invented binary semantic opcodes.
 use crate::{BinaryNumber, Value};
 use std::cmp::Ordering;
 
-/// Executable canonical compositions of admitted D24/D48/... natural atoms.
+/// Executable canonical fractions over admitted D24/D48/... numeric domains.
 ///
-/// Both constituent numeric atoms always occupy the exact SAME admitted Dn.
-/// This guarantees unique sign and reduced rational shape *within* that
-/// numeric domain, without taking any of its 2^n natural payloads.
+/// Both unsigned-magnitude constituents retain the exact SAME admitted Dn.
+/// Their sign and reduced rational shape are fraction-composition fields;
+/// they do not reinterpret either component as a signed integer word.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DomainNumericComposition {
     // Private: only canonical() may construct these. Public enum variants
@@ -73,16 +74,17 @@ fn canonical(
     while n.width().max(d.width()) > width {
         width = width.checked_mul(2)?;
     }
-    let n = own_word(n, width)?;
-    if n.is_zero() { return Some(Value::BinaryNumber(n)); }
-    if denominator_is_one {
-        if negative {
-            return Some(Value::NumericComposition(DomainNumericComposition {
-                negative: true, numerator: n, denominator: None,
-            }));
-        }
-        return Some(Value::BinaryNumber(n));
+    if n.is_zero() {
+        return Some(Value::BinaryNumber(
+            BinaryNumber::from_signed_magnitude(minimum_width, false, &n)?,
+        ));
     }
+    if denominator_is_one {
+        return Some(Value::BinaryNumber(
+            BinaryNumber::from_signed_magnitude_growing(width, negative, &n)?,
+        ));
+    }
+    let n = own_word(n, width)?;
     // Only an actual fraction needs a fully qualified Dn denominator.
     let d = own_word(d, width)?;
     Some(Value::NumericComposition(DomainNumericComposition {
@@ -94,7 +96,8 @@ fn ingredients(value: &Value) -> Option<(usize, bool, BinaryNumber, BinaryNumber
     match value {
         Value::BinaryNumber(n) => {
             let width = n.numeric_domain_width()?;
-            Some((width, false, normalized(n), BinaryNumber::one()))
+            let (negative, magnitude) = n.signed_magnitude()?;
+            Some((width, negative, magnitude, BinaryNumber::one()))
         }
         Value::NumericComposition(c) => {
             let width = c.domain_width();
@@ -142,28 +145,6 @@ pub fn is_domain_value(v: &Value) -> bool {
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
-    // Натуральні слова D24+ уже мають доведені власні бітові механізми.
-    // Не проводимо їх через зайві NEG/RATIO gcd та повторне означення Dn.
-    // Допуск SAME-Dn і перенесення Dn -> D(2n) перевіряє BinaryNumber.
-    // Некваліфіковані й змішані Dn мають відхилятися тут, без fallback.
-    if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
-        match operator {
-            "+" => return left.add_admitted_numeric(right).map(Value::BinaryNumber),
-            "*" => return left.mul_admitted_numeric(right).map(Value::BinaryNumber),
-            // A nonnegative natural difference is already a Dn atom.
-            // Reuse the qualified bit mechanism instead of introducing
-            // two unit denominators, cross-products, gcd and a ratio wrapper.
-            // A negative difference still follows the original NEG path.
-            "-" if left.numeric_domain_width().is_some()
-                && left.numeric_domain_width() == right.numeric_domain_width()
-                && left >= right =>
-            {
-                return left.checked_sub_admitted_numeric(right).map(Value::BinaryNumber);
-            }
-            _ => {}
-        }
-    }
-
     // Reject D24/D48 (or non-Dn) BEFORE cloning potentially wide rational
     // constituents into the private calculation.
     let width = shared_numeric_domain_width(lhs, rhs)?;
@@ -207,7 +188,7 @@ pub fn unary(operator: &str, value: &Value) -> Option<Value> {
 /// Exact mathematical signed-rational compare under one explicit Dn.
 /// The semantic identity in Value::eq remains domain-qualified and structural.
 pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
-    // Admitted natural values already carry their exact D24/D48/... identity.
+    // Admitted integer values already carry their exact D24/D48/... identity.
     // Compare their normalized binary magnitudes directly: the generic
     // rational path below allocates four clones and two products needlessly.
     // Domain width is checked BEFORE comparing; equal naked bits in
@@ -217,47 +198,22 @@ pub fn compare(operator: &str, lhs: &Value, rhs: &Value) -> Option<bool> {
         if right.numeric_domain_width() != Some(width) {
             return None;
         }
-        let order = left.cmp(right);
+        let (left_negative, left_magnitude) = left.signed_magnitude()?;
+        let (right_negative, right_magnitude) = right.signed_magnitude()?;
+        let order = match (left_negative, right_negative) {
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            (negative, _) => {
+                let magnitude_order = left_magnitude.cmp(&right_magnitude);
+                if negative { magnitude_order.reverse() } else { magnitude_order }
+            }
+        };
         return Some(match operator {
             "=" => order == Ordering::Equal,
             "<" => order == Ordering::Less,
             ">" => order == Ordering::Greater,
             _ => return None,
         });
-    }
-
-    // A canonical negative Dn composition is smaller than every admitted
-    // natural in the SAME domain, including zero. Do not construct temporary
-    // rational denominators or multiply just to discover opposite signs.
-    // This is a mechanism shortcut over already-ratified binary Dn values.
-    match (lhs, rhs) {
-        (Value::BinaryNumber(natural), Value::NumericComposition(signed))
-            if signed.negative =>
-        {
-            if natural.numeric_domain_width() != Some(signed.domain_width()) {
-                return None;
-            }
-            return Some(match operator {
-                "=" => false,
-                "<" => false,
-                ">" => true,
-                _ => return None,
-            });
-        }
-        (Value::NumericComposition(signed), Value::BinaryNumber(natural))
-            if signed.negative =>
-        {
-            if natural.numeric_domain_width() != Some(signed.domain_width()) {
-                return None;
-            }
-            return Some(match operator {
-                "=" => false,
-                "<" => true,
-                ">" => false,
-                _ => return None,
-            });
-        }
-        _ => {}
     }
 
     // The generic signed/rational comparison needs exact products only after
@@ -291,10 +247,39 @@ mod tests {
         BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
     }
 
+    #[test]
+    fn d24_twos_complement_arithmetic_decodes_sign_before_exact_growth() {
+        let word = |bits: Vec<u8>| Value::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap()
+        );
+        let zero = word(vec![0; 24]);
+        let one = Value::BinaryNumber(d(24, 1));
+        let minus_one = word(vec![1; 24]);
+        let minus_two = word({
+            let mut bits = vec![1; 24];
+            bits[23] = 0;
+            bits
+        });
+        let maximum = word({ let mut bits = vec![1; 24]; bits[0] = 0; bits });
+
+        assert_eq!(compute("-", &zero, &one).unwrap().to_string(), "-1");
+        assert_eq!(compute("+", &minus_one, &one), Some(zero.clone()));
+        assert_eq!(compute("*", &minus_two, &Value::BinaryNumber(d(24, 3))).unwrap().to_string(), "-6");
+
+        let carried = compute("+", &maximum, &one).expect("positive signed overflow widens exactly");
+        assert_eq!(carried.to_string(), "8388608");
+        let Value::BinaryNumber(ref carried_word) = carried else { panic!("integer result") };
+        assert_eq!(carried_word.numeric_domain_width(), Some(48));
+
+        let third = compute("/", &minus_one, &Value::BinaryNumber(d(24, 3)))
+            .expect("existing exact ratio law remains available");
+        assert_eq!(third.to_string(), "-1/3");
+    }
+
     /// Mechanism regression: no numeric-domain widening, textual decimal
     /// intermediary or rational cross-products for two admitted naturals.
     #[test]
-    fn natural_dn_comparison_retains_width_and_order_with_no_rational_bridge() {
+    fn signed_dn_integer_comparison_retains_width_and_order_without_rational_bridge() {
         for width in [24usize, 48, 96, 192] {
             let zero = Value::BinaryNumber(d(width, 0));
             let two = Value::BinaryNumber(d(width, 2));
@@ -312,7 +297,7 @@ mod tests {
                     let actual = compare(operator, left, right);
                     assert_eq!(
                         actual, Some(expected),
-                        "test_id=natural-dn-compare layer=eval domain=D{width} op={operator} expected={expected} actual={actual:?}; reproduce=cargo test -p sens natural_dn_comparison_retains_width_and_order_with_no_rational_bridge"
+                        "test_id=signed-dn-compare layer=eval domain=D{width} op={operator} expected={expected} actual={actual:?}; reproduce=cargo test -p sens signed_dn_integer_comparison_retains_width_and_order_without_rational_bridge"
                     );
                 }
             }
@@ -445,21 +430,17 @@ mod tests {
             assert_eq!(bit_distance, 1, "D{width}: single-bit mutation");
 
             let integer = canonical_parts(false, &two, &one)
-                .expect("unit denominator reduces to admitted natural Dn");
+                .expect("unit denominator reduces to an admitted integer Dn");
             assert_eq!(integer, Value::BinaryNumber(two.clone()),
                 "D{width}: RATIO(2,1) must not survive as an extra tag");
 
             let negative = canonical_parts(true, &two, &one)
                 .expect("negative integer still uses exact Dn");
-            let Value::NumericComposition(ref neg) = negative else {
-                panic!("D{width}: a negative integer has its own composition")
+            let Value::BinaryNumber(ref neg) = negative else {
+                panic!("D{width}: negative integer is a two's-complement Dn word")
             };
-            let (is_negative, numerator, denominator) = neg.as_parts();
-            assert!(is_negative);
-            assert_eq!(neg.domain_width(), width);
-            assert_eq!(numerator.numeric_domain_width(), Some(width));
-            assert!(denominator.is_none(),
-                "D{width}: no unneeded Dn denominator for integer -2");
+            assert_eq!(neg.numeric_domain_width(), Some(width));
+            assert_eq!(neg.to_decimal_string(), "-2");
             assert_eq!(negative.to_string(), "-2");
 
             let ratio = canonical_parts(false, &two, &three)
@@ -565,8 +546,8 @@ mod tests {
         let denominator = denominator.expect("reduced RATIO requires denominator");
         assert_eq!(numerator.numeric_domain_width(),Some(48));
         assert_eq!(denominator.numeric_domain_width(),Some(48));
-        assert_eq!(numerator.to_decimal_string(), (n*n).to_string());
-        assert_eq!(denominator.to_decimal_string(), (den*den).to_string());
+        assert_eq!(numerator.to_unsigned_decimal_string(), (n*n).to_string());
+        assert_eq!(denominator.to_unsigned_decimal_string(), (den*den).to_string());
         assert_eq!(squared.to_string(), format!("{}/{}",n*n,den*den));
         let negated = unary("-",&squared).unwrap();
         assert_eq!(negated.to_string(),format!("-{}/{}",n*n,den*den));
@@ -579,30 +560,32 @@ mod tests {
 
     #[test]
     fn composite_domain_is_not_inferred_and_overflow_retains_all_bits() {
-        let a = Value::BinaryNumber(d(24, (1<<24)-1));
+        let a = Value::BinaryNumber(d(24, (1<<23)-1));
         let b = Value::BinaryNumber(d(24, 2));
         let result = compute("*",&a,&b).unwrap();
         let Value::BinaryNumber(ref bits) = result else { panic!("integer"); };
         assert_eq!(bits.numeric_domain_width(),Some(48));
         let neg = unary("-",&result).unwrap();
-        assert_eq!(neg.to_string(), format!("-{}", ((1u64<<24)-1)*2));
-        let Value::NumericComposition(ref composition) = neg else { panic!("negative"); };
-        assert_eq!(composition.domain_width(),48);
+        assert_eq!(neg.to_string(), format!("-{}", ((1u64<<23)-1)*2));
+        let Value::BinaryNumber(ref negative_integer) = neg else { panic!("signed integer"); };
+        assert_eq!(negative_integer.numeric_domain_width(), Some(48));
         let other = Value::BinaryNumber(d(48,2));
-        assert!(compute("+",&Value::NumericComposition(composition.clone()),&other).is_some());
-        assert!(compute("+",&Value::NumericComposition(composition.clone()),&b).is_none());
-        assert!(compare("=",&Value::NumericComposition(composition.clone()),&b).is_none());
+        assert!(compute("+",&neg,&other).is_some());
+        assert!(compute("+",&neg,&b).is_none());
+        assert!(compare("=",&neg,&b).is_none());
     }
 
     #[test]
     fn one_bit_boundary_diagnostic_preserves_every_domain_bit() {
-        // Незалежний оракул: (2^n - 2) + 1 вміщується в Dn;
-        // (2^n - 1) + 1 = 2^n мусить бути точним D(2n).
+        // Незалежний оракул: (2^(n-1)-2)+1 досягає iN max;
+        // iN max + 1 переходить у наступний Dn без переповнення.
         // Зміна ОДНОГО біта на вході змінює обраний домен результату.
         for width in [24usize, 48, 96, 192] {
             let mut nearly_full = vec![1u8; width];
+            nearly_full[0] = 0;
             nearly_full[width - 1] = 0;
-            let full = vec![1u8; width];
+            let mut maximum_word = vec![1u8; width];
+            maximum_word[0] = 0;
             let mut one = vec![0u8; width];
             one[width - 1] = 1;
             let admitted = |word: &[u8]| {
@@ -612,7 +595,7 @@ mod tests {
                 )
             };
             let almost = admitted(&nearly_full);
-            let maximum = admitted(&full);
+            let maximum = admitted(&maximum_word);
             let unit = admitted(&one);
 
             let fitting = compute("+", &almost, &unit).expect("вміщується в Dn");
@@ -620,15 +603,15 @@ mod tests {
                 panic!("ціле натуральне має залишитися доменним числом")
             };
             assert_eq!(fitted.numeric_domain_width(), Some(width), "D{width}: fit");
-            assert_eq!(fitted.exact_numeric_domain_bits(), Some(full.clone()),
-                "D{width}: усі n бітів суми повинні зберегтися");
+            assert_eq!(fitted.exact_numeric_domain_bits(), Some(maximum_word.clone()),
+                "D{width}: iN максимум має зберегти точні біти");
 
             let crossing = compute("+", &maximum, &unit).expect("точне перенесення");
             let Value::BinaryNumber(carried) = &crossing else {
                 panic!("carry мусить залишитися натуральним числом")
             };
             let mut expected = vec![0u8; 2 * width];
-            expected[width - 1] = 1;
+            expected[width] = 1;
             assert_eq!(carried.numeric_domain_width(), Some(2 * width),
                 "D{width}: не можна обрізати старший біт");
             assert_eq!(carried.exact_numeric_domain_bits(), Some(expected),
@@ -645,7 +628,7 @@ mod tests {
                 panic!("добуток має залишитися точним натуральним словом")
             };
             let mut product_bits = vec![0u8; 2 * width];
-            product_bits[(width - 1)..(2 * width - 1)].fill(1);
+            product_bits[width..(2 * width - 1)].fill(1);
             assert_eq!(product.numeric_domain_width(), Some(2 * width));
             assert_eq!(product.exact_numeric_domain_bits(), Some(product_bits));
 

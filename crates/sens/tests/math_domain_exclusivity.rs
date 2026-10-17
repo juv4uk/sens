@@ -238,16 +238,18 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     );
     session.environment.define(
         "seed",
-        Value::BinaryNumber(
-            BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24])
-                .expect("exact maximum D24 word"),
-        ),
+        Value::BinaryNumber({
+            let mut maximum_positive = vec![1; 24];
+            maximum_positive[0] = 0; // D24 two's-complement maximum: 2^23 - 1
+            BinaryNumber::from_numeric_domain_bits(24, &maximum_positive)
+                .expect("exact maximum positive D24 word")
+        }),
     );
     let carried = eval_program("(довжина-д24-до items seed)", &mut session)
         .expect("Lisp-owned fold must retain carry into D48").value;
-    // D24(max) is 2^24 - 1. Two Lisp-owned ADD1 steps yield 2^24 + 1,
-    // represented losslessly in D48; expecting 2^24 + 2 would be off by one.
-    assert_eq!(carried, numeric(48, (1 << 24) + 1));
+    // D24's positive maximum is 2^23 - 1. Two Lisp-owned ADD1 steps cross
+    // the signed D24 boundary and remain exact in D48.
+    assert_eq!(carried, numeric(48, (1 << 23) + 1));
     
     // An unqualified seed never becomes D24 just because it is called 0.
     session.environment.define(

@@ -351,7 +351,7 @@ fn execute() -> Result<(), String> {
     match command {
         "backend" => {
             #[cfg(feature = "zig-transport")]
-            println!("transport=zig abi=2 semantic_authority=SENS");
+            println!("transport=zig codec=T5M abi=2 semantic_authority=SENS");
             #[cfg(not(feature = "zig-transport"))]
             println!("transport=unavailable zig_required=true semantic_authority=SENS");
             Ok(())

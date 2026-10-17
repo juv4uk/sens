@@ -79,10 +79,11 @@ pub(super) fn invoke(
 mod tests {
     use super::*;
 
-    fn d24(n: u32) -> Value {
+    fn d24(n: i32) -> Value {
         let mut bits = vec![0; 24];
+        let encoded = (i64::from(n) & 0x00ff_ffff) as u32;
         for i in 0..24 {
-            bits[23 - i] = ((n >> i) & 1) as u8;
+            bits[23 - i] = ((encoded >> i) & 1) as u8;
         }
         Value::BinaryNumber(
             BinaryNumber::from_numeric_domain_bits(24, &bits).unwrap()
@@ -90,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn add1_carries_d24_into_d48_and_sub1_uses_ratified_neg_composition() {
+    fn add1_widens_signed_d24_and_sub1_returns_twos_complement_word() {
         let env = Environment::root();
         let add1 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
             crate::Bit6::new(0b001110).unwrap(),
@@ -99,15 +100,15 @@ mod tests {
             crate::Bit6::new(0b001111).unwrap(),
         ));
 
-        // A full D24 natural + 1 cannot wrap or invent an unqualified result.
-        let carried = invoke(add1, &[d24((1 << 24) - 1)], &env, Span::default())
+        // D24 max-positive + 1 widens; all-ones is now D24(-1), not a maximum.
+        let carried = invoke(add1, &[d24((1 << 23) - 1)], &env, Span::default())
             .unwrap().unwrap();
         let Value::BinaryNumber(ref number) = carried else {
             panic!("D24 carry must stay an exact numeric domain word");
         };
         assert_eq!(number.numeric_domain_width(), Some(48));
         let mut next_bits = vec![0; 48];
-        next_bits[23] = 1; // full-width D48 encoding of 2^24
+        next_bits[24] = 1; // full-width D48 encoding of 2^23
         assert_eq!(number.exact_numeric_domain_bits().unwrap(), next_bits);
 
         // After a D24 carry, ADD1 must continue in the new exact D48 domain.
@@ -119,17 +120,16 @@ mod tests {
         };
         assert_eq!(resumed_number.numeric_domain_width(), Some(48));
         let mut advanced_bits = next_bits.clone();
-        advanced_bits[47] = 1; // 2^24 + 1, not a D24 or unqualified literal
+        advanced_bits[47] = 1; // 2^23 + 1, not a D24 or unqualified literal
         assert_eq!(resumed_number.exact_numeric_domain_bits().unwrap(), advanced_bits);
 
-        // 0 - 1 is canonical NEG(D24(1)), not a wrapped 24-bit word
-        // and not a host Rational with unqualified identity.
+        // 0 - 1 is the ordinary D24 two's-complement word for -1.
         let negative = invoke(sub1, &[d24(0)], &env, Span::default())
             .unwrap().unwrap();
-        let Value::NumericComposition(ref composition) = negative else {
-            panic!("D24 SUB1 below zero must return canonical NEG");
+        let Value::BinaryNumber(ref negative_word) = negative else {
+            panic!("D24 SUB1 below zero must return a signed D24 word");
         };
-        assert_eq!(composition.domain_width(), 24);
+        assert_eq!(negative_word.numeric_domain_width(), Some(24));
         assert_eq!(negative.to_string(), "-1");
         assert_eq!(
             invoke(add1, &[negative], &env, Span::default()).unwrap().unwrap(),

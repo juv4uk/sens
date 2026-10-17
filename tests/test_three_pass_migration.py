@@ -390,23 +390,32 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_t5m_mode_lowers_plain_decimal_integer_as_exact_d24_word(self):
         resolver = mod.Resolver({}, {})
-        projection = mod.migrate_file("(CAR 1564)\n", resolver, self.text7, codec="t5m")
-        self.assertIn(f"{1564:024b}", projection.split())
-        self.assertEqual(len(f"{1564:024b}"), 24)
-        for value in (0, 1):
+        def expected_word(value):
+            width = 24
+            while not (-(1 << (width - 1)) <= value < (1 << (width - 1))):
+                width *= 2
+            return width, f"{value % (1 << width):0{width}b}"
+
+        for value in (0, 1, 1564, (1 << 23) - 1, 1 << 23, -1, -(1 << 23), -(1 << 23) - 1):
+            width, expected = expected_word(value)
             low = mod.migrate_file(
                 f"(CAR {value})\n", resolver, self.text7, codec="t5m"
             )
-            self.assertIn(f"{value:024b}", low.split())
+            self.assertIn(expected, low.split())
+            self.assertEqual(len(expected), width)
 
     def test_t5m_decimal_fraction_is_exactly_reduced_to_adjacent_d24_words(self):
         cases = {
             "1.5": (3, 2),
+            "+1.5": (3, 2),
             "2.1564": (5391, 2500),
+            "-2.1564": (-5391, 2500),
+            "-0.5": (-1, 2),
             "0.125": (1, 8),
             "1.50": (3, 2),
             "1.0": (1, 1),
             "0.000": (0, 1),
+            "-0.000": (0, 1),
         }
         for spelling, (numerator, denominator) in cases.items():
             with self.subTest(spelling=spelling):
@@ -414,9 +423,12 @@ class ThreePassMigrationTests(unittest.TestCase):
                 projection = mod.migrate_file(
                     f"(CAR {spelling})\n", resolver, self.text7, codec="t5m"
                 )
-                expected = [f"{numerator:024b}"]
+                width = 24
+                while not (-(1 << (width - 1)) <= numerator < (1 << (width - 1))):
+                    width *= 2
+                expected = [f"{numerator % (1 << width):0{width}b}"]
                 if denominator != 1:
-                    expected.append(f"{denominator:024b}")
+                    expected.append(f"{denominator:0{width}b}")
                 words = projection.split()
                 start = next(
                     index for index, word in enumerate(words)
@@ -428,9 +440,9 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_t5m_decimal_fraction_does_not_accept_unsupported_numeric_syntax(self):
         resolver = mod.Resolver({}, {})
-        for literal in ("-1.5", "+1.5", "1/2", "2e3"):
+        for literal in ("1/2", "2e3", "#d3"):
             with self.subTest(literal=literal), self.assertRaisesRegex(
-                mod.MigrationError, "unsigned decimal integers or finite decimal fractions"
+                mod.MigrationError, "ratios, exponents, and explicit numeric spellings"
             ):
                 mod.migrate_file(f"(CAR {literal})\n", resolver, self.text7, codec="t5m")
 
@@ -519,6 +531,7 @@ class ThreePassMigrationTests(unittest.TestCase):
                 "--necessary-forms", str(NECESSARY),
                 "--text7", str(TEXT7),
                 "--report", str(report),
+                "--codec", "t5",
             ]
             subprocess.run(args, check=True, capture_output=True, text=True)
             self.assertTrue((out / "good.sens").is_file())
@@ -648,7 +661,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             )
             self.assertEqual(done.returncode, 0, done.stderr)
             self.assertEqual((out / "old.sens").read_bytes(),
-                             mod.encode_projection("000"))
+                             mod.encode_t5m_projection("000"))
             report = base / "mirror.report.json"
             self.assertTrue(report.is_file())
             state = json.loads(report.read_text(encoding="utf-8"))

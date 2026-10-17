@@ -84,7 +84,7 @@ def machine_word(number: int, width: int) -> str:
 
 # projection-human: explicit D24+ numeric/UI boundary; never a D1-D10 identity.
 def human_number(word: str, *, domain_width: int) -> int:
-    """Decimal UI output only for an explicitly typed exact D24+ natural.
+    """Decode an explicitly typed exact-width signed D24+ integer.
 
     D1-D10 binary words and D7 text are not mathematical operands.
     This helper never constructs or infers a domain from bare bits.
@@ -93,7 +93,8 @@ def human_number(word: str, *, domain_width: int) -> int:
         raise ValueError(f"D{domain_width} is not a numeric D24+ domain")
     if len(word) != domain_width or any(bit not in "01" for bit in word):
         raise ValueError(f"expected exactly {domain_width} admitted numeric bits")
-    return int(word, 2)
+    unsigned = int(word, 2)
+    return unsigned - (1 << domain_width) if word[0] == "1" else unsigned
 
 
 def number_domains() -> tuple[tuple[str, int], ...]:
@@ -108,10 +109,12 @@ def is_number_width(width: int) -> bool:
 
 
 def number_word(number: int, width: int) -> str:
-    """A numeric object is exact bits + an explicit D24+ domain, never an unqualified number."""
+    """Encode a signed integer as exact two's-complement D24+ bits."""
     if not is_number_width(width):
         raise ValueError(f"{width} is not a D24+ numeric domain width")
-    return machine_word(number, width)
+    if not -(1 << (width - 1)) <= number < (1 << (width - 1)):
+        raise ValueError(f"{number} does not fit signed D{width}")
+    return format(number % (1 << width), f"0{width}b")
 
 
 def read_domain_table(path: Path) -> list[DomainTableRow]:

@@ -146,24 +146,25 @@ def parse_t5m_words(source: str) -> list[str]:
     words = source.split()
     if not words:
         raise SensT5Error("empty/unsupported T5M program")
-    from domain_tables import is_number_width
     for index, word in enumerate(words, 1):
-        if not (1 <= len(word) <= 10 or is_number_width(len(word))) or re.fullmatch(r"[01]+", word) is None:
+        if re.fullmatch(r"[01]+", word) is None:
             raise SensT5Error(
-                f"word {index}: T5M D1–24+ frame currently supports physical D1–D10 and D24+ widths, "
-                f"got {word[:64]!r}"
+                f"word {index}: T5M requires an exact-width binary word, got {word[:64]!r}"
             )
     return words
 
 
 def encode_t5m_projection(source: str) -> bytes:
-    """Однобайтовий T5M: той самий фізичний потік, із точними словами D24+."""
+    """Reference T5M: rank groups of 15 trits into little-endian 24-bit words."""
     words = parse_t5m_words(source)
     trits = "2".join(words)
-    trits += "2" * (-len(trits) % 5)
-    if len(trits) // 5 > MAX_FILE_BYTES:
+    trits += "2" * (-len(trits) % 15)
+    if len(trits) // 15 * 3 > MAX_FILE_BYTES:
         raise SensT5Error("physical T5M file exceeds size limit")
-    encoded = bytes(int(trits[i:i + 5], 3) for i in range(0, len(trits), 5))
+    encoded = b"".join(
+        int(trits[i:i + 15], 3).to_bytes(3, "little")
+        for i in range(0, len(trits), 15)
+    )
     if decode_t5m_bytes(encoded) != words:
         raise SensT5Error("T5M encode/decode exact word identity failed")
     return encoded
@@ -178,10 +179,17 @@ def decode_t5m_bytes(data: bytes) -> list[str]:
     words: list[str] = []
     current: list[str] = []
     padding = 0
-    for byte in data:
-        if byte >= 243:
-            raise SensT5Error("invalid T5M byte outside 0..242")
-        for trit in TRITS_BY_BYTE[byte]:
+    if len(data) % 3:
+        raise SensT5Error("T5M physical length must be a multiple of three bytes")
+    for offset in range(0, len(data), 3):
+        value = int.from_bytes(data[offset:offset + 3], "little")
+        if value >= 3**15:
+            raise SensT5Error("invalid T5M group outside 0..3^15-1")
+        group = [0] * 15
+        for index in range(14, -1, -1):
+            group[index] = value % 3
+            value //= 3
+        for trit in group:
             if trit == 2:
                 if current:
                     words.append("".join(current))
@@ -189,8 +197,8 @@ def decode_t5m_bytes(data: bytes) -> list[str]:
                     padding = 1
                 else:
                     padding += 1
-                if padding >= 5:
-                    raise SensT5Error("more than four terminal T5M padding trits")
+                if padding >= 15:
+                    raise SensT5Error("more than fourteen terminal T5M padding trits")
             else:
                 if padding > 1:
                     raise SensT5Error("noncanonical repeated T5M separator")
@@ -204,10 +212,9 @@ def decode_t5m_bytes(data: bytes) -> list[str]:
         words.append("".join(current))
     if not words:
         raise SensT5Error("empty/unsupported physical T5M")
-    from domain_tables import is_number_width
     for index, word in enumerate(words, 1):
-        if not (1 <= len(word) <= 10 or is_number_width(len(word))) or re.fullmatch(r"[01]+", word) is None:
-            raise SensT5Error(f"word {index}: unsupported width in T5M D1–24+ frame: {len(word)}")
+        if re.fullmatch(r"[01]+", word) is None:
+            raise SensT5Error(f"word {index}: invalid exact-width T5M binary word")
     return words
 
 

@@ -1,8 +1,8 @@
 {
   "schema": "sens-number-width-ladder/v1",
   "status": "owner-ratified",
-  "authority": "2026-10-11 owner: D24/D48/D96/... full peer numeric domains; extend THEIR laws to mathematical NEG and reduced RATIO compositions, never invent signed/rational domains or overwrite their complete natural atom range",
-  "date": "2026-10-11",
+  "authority": "2026-10-18 owner extension: D24+ integer words use two's complement; exact fractions retain the ratified NEG/RATIO composition. The 2026-10-11 extension remains historical where polarity conflicts.",
+  "date": "2026-10-18",
   "semantic_space": "Number",
   "separate_from": [
     "D1-D8",
@@ -40,7 +40,6 @@
     "No same-Dn multiplication/subtraction/division permission implies a new mixed-Dn coercion, n-ary operation, signed/rational Value transport or operation opcode."
   ],
   "not_yet_ratified": [
-    "two's-complement or other polarity encoding",
     "integer versus rational field layout",
     "decimal literal lowering law",
     "mixed-domain implicit coercion and general widening",
@@ -132,5 +131,20 @@
     "legacy_unqualified_number_not_implicitly_admitted": true,
     "physical_t5_program_numeric_composites": "deferred; current ternary transport and D2 physical reader remain D1-D9-only",
     "ast_fasl_wire_expression_composites": "deferred; not a source-literal or new SENS callable"
+  },
+  "current_integer_extension": {
+    "status": "owner-ratified",
+    "date": "2026-10-18",
+    "authority": "Owner decision: D24+ integer words use two's complement; exact fraction composition remains unchanged.",
+    "supersedes_2026_10_11_integer_polarity": true,
+    "supersedes_2026_10_11_integer_word_and_arithmetic_interpretation": true,
+    "scope": "D24, D48, D96, D192, ... exact-width integers; D1-D10 unchanged.",
+    "encoding": "For an exact n-bit Dn word u, value=u when MSB=0 and value=u-2^n when MSB=1.",
+    "range": "-2^(n-1)..2^(n-1)-1",
+    "every_word_has_one_integer": true,
+    "has_negative_zero": false,
+    "same_domain_arithmetic": "Exact + - * / and comparisons; widen to the smallest D24+ rung when the signed result does not fit; never wrap or truncate.",
+    "fractions": "Retain the existing NEG/RATIO composition with explicit sign, unsigned numerator magnitude, positive unsigned denominator magnitude, exact gcd reduction, and existing zero/unit canonicalization.",
+    "t5m": "Opaque exact-width transport only; no numeric interpretation is assigned by the codec."
   }
 }

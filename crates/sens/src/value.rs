@@ -489,10 +489,10 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
-    /// Canonical natural Number: semantic identity is its normalized binary bitstring.
+    /// Legacy unqualified Number or explicit exact-width signed D24+ integer.
     BinaryNumber(BinaryNumber),
-    /// Ratified NEG and reduced RATIO are compositions of existing D24+
-    /// natural atoms, not a new numeric domain or an n-bit scalar word.
+    /// Exact fraction composition over an existing D24+ domain; integer
+    /// operands themselves use signed Dn words, not a NEG wrapper.
     NumericComposition(DomainNumericComposition),
     /// Historical W8 compatibility slot, not a canonical semantic identity.
     ///
@@ -824,8 +824,8 @@ fn render(value: &Value, quote_strings: bool) -> String {
             let (negative, numerator, denominator) = composite.as_parts();
             let prefix = if negative { "-" } else { "" };
             match denominator {
-                Some(d) => format!("{prefix}{}/{}", numerator.to_decimal_string(), d.to_decimal_string()),
-                None => format!("-{}", numerator.to_decimal_string()),
+                Some(d) => format!("{prefix}{}/{}", numerator.to_unsigned_decimal_string(), d.to_unsigned_decimal_string()),
+                None => format!("-{}", numerator.to_unsigned_decimal_string()),
             }
         },
         Value::Sid(sid) => sid.to_string(),

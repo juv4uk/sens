@@ -1,11 +1,12 @@
-//! Canonical variable-width natural Number for #3022.
+//! Exact binary Number carrier for #3022 and signed D24+ numeric values.
 //!
 //! Language identity is the normalized binary bitstring. This type deliberately
 //! carries no decimal spelling, Rational fields, fixed machine width, or host
 //! integer identity. Host vectors are private storage only.
 //!
-//! First live slice: non-negative integers. Signed and rational encodings are
-//! separate later laws under #3021.
+//! Unqualified legacy values retain their canonical unsigned magnitude
+//! projection. Explicit D24+ values interpret their exact-width words as
+//! two's-complement integers; ratio components use private unsigned magnitudes.
 
 use std::{cmp::Ordering, fmt};
 
@@ -131,96 +132,129 @@ impl BinaryNumber {
         Some(out)
     }
 
-    /// Owner-ratified SAME-DOMAIN natural addition, preserving explicit Dn
-    /// on no carry and carrying exact bits into D(2n) on overflow.
-    /// Mixed domains, legacy/qualified mixes, and unadmitted widths fail closed.
-    pub fn add_admitted_numeric(&self, other: &Self) -> Option<Self> {
-        let width = self.numeric_domain_width?;
-        if other.numeric_domain_width != Some(width) {
-            return None;
+    /// Decode a D24+ exact-width word as (negative, unsigned magnitude).
+    /// The returned magnitude is an unqualified mechanism value, not a Dn.
+    pub(crate) fn signed_magnitude(&self) -> Option<(bool, Self)> {
+        let mut word = self.exact_numeric_domain_bits()?;
+        let negative = word[0] == 1;
+        if negative {
+            for bit in &mut word { *bit ^= 1; }
+            let mut carry = 1u8;
+            for bit in word.iter_mut().rev() {
+                let sum = *bit + carry;
+                *bit = sum & 1;
+                carry = sum >> 1;
+                if carry == 0 { break; }
+            }
         }
-        let (out_width, out_bits) = self.add_in_numeric_domain(other, width)?;
-        Self::from_numeric_domain_bits(out_width, &out_bits)
+        Some((negative, Self::normalize(word)))
     }
 
-    /// Same-Dn *natural* multiplication. The exact product of two n-bit
-    /// magnitudes needs at most 2n bits, so Dn or its ratified successor
-    /// D(2n) always has enough capacity. No modulo or host integer fallback.
-    /// This is a mechanism for the Dn arithmetic contract, not an invented
-    /// independent Number domain or signed/rational opcode.
-    pub fn mul_admitted_numeric(&self, other: &Self) -> Option<Self> {
-        let width = self.numeric_domain_width?;
-        if other.numeric_domain_width != Some(width) {
+    /// Encode an exact signed magnitude in Dn, rejecting values outside the
+    /// two's-complement range. Magnitude must be an unsigned mechanism value.
+    pub(crate) fn from_signed_magnitude(
+        width: usize,
+        negative: bool,
+        magnitude: &Self,
+    ) -> Option<Self> {
+        if !Self::is_numeric_domain_width(width) || magnitude.width() > width {
             return None;
         }
-        // Dn admission was already checked above. The magnitude operations
-        // read canonical bits directly; their result is re-admitted below.
-        // No duplicate normalize/clone/decimal bridge on this hot path.
-        let product = self.mul(other);
-        let selected = if product.width() > width {
-            width.checked_mul(2)?
+        let fits = if negative {
+            magnitude.width() < width
+                || (magnitude.width() == width
+                    && magnitude.bits[0] == 1
+                    && magnitude.bits[1..].iter().all(|&bit| bit == 0))
         } else {
-            width
+            magnitude.width() < width
         };
-        if !Self::is_numeric_domain_width(selected) || product.width() > selected {
-            return None;
-        }
-        let mut word = vec![0; selected - product.width()];
-        word.extend_from_slice(product.as_bits());
-        Self::from_numeric_domain_bits(selected, &word)
-    }
+        if !fits { return None; }
 
-    /// Same-Dn exact natural subtraction. A negative answer requires a
-    /// signed NEG composition: return None instead of wrapping around n bits.
-    /// Exact zero and nonnegative difference remain members of the input Dn.
-    pub fn checked_sub_admitted_numeric(&self, other: &Self) -> Option<Self> {
-        let width = self.numeric_domain_width?;
-        if other.numeric_domain_width != Some(width) {
-            return None;
+        let mut word = vec![0; width - magnitude.width()];
+        word.extend_from_slice(magnitude.as_bits());
+        if negative && !magnitude.is_zero() {
+            for bit in &mut word { *bit ^= 1; }
+            let mut carry = 1u8;
+            for bit in word.iter_mut().rev() {
+                let sum = *bit + carry;
+                *bit = sum & 1;
+                carry = sum >> 1;
+                if carry == 0 { break; }
+            }
         }
-        // Both operands have the same exact Dn tag; ordinary bit ordering
-        // and subtraction therefore agree without stripping/rebuilding them.
-        let difference = self.checked_sub(other)?;
-        let mut word = vec![0; width.checked_sub(difference.width())?];
-        word.extend_from_slice(difference.as_bits());
         Self::from_numeric_domain_bits(width, &word)
     }
 
-    /// Dn exact Euclidean quotient + remainder, each remaining a Dn
-    /// natural. A fractional quotient still needs a canonical RATIO
-    /// composition before it can be returned as a language Value.
+    /// Encode a signed result at the smallest admitted rung no narrower than
+    /// `minimum_width`, widening exactly rather than wrapping on overflow.
+    pub(crate) fn from_signed_magnitude_growing(
+        minimum_width: usize,
+        negative: bool,
+        magnitude: &Self,
+    ) -> Option<Self> {
+        let mut width = minimum_width;
+        loop {
+            if let Some(result) = Self::from_signed_magnitude(width, negative, magnitude) {
+                return Some(result);
+            }
+            width = width.checked_mul(2)?;
+        }
+    }
+
+    /// Same-domain signed integer addition. Retains Dn when representable and
+    /// widens exactly to a ratified successor when the signed range is crossed.
+    pub fn add_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        self.compute_admitted_integer(other, "+")
+    }
+
+    /// Same-domain signed integer multiplication, widening without truncation.
+    pub fn mul_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        self.compute_admitted_integer(other, "*")
+    }
+
+    /// Same-domain signed integer subtraction, widening rather than wrapping.
+    pub fn checked_sub_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        self.compute_admitted_integer(other, "-")
+    }
+
+    fn compute_admitted_integer(&self, other: &Self, operator: &str) -> Option<Self> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) { return None; }
+        match crate::domain_numeric::compute(
+            operator,
+            &crate::Value::BinaryNumber(self.clone()),
+            &crate::Value::BinaryNumber(other.clone()),
+        )? {
+            crate::Value::BinaryNumber(ref result) => Some(result.clone()),
+            _ => None,
+        }
+    }
+
+    /// Euclidean quotient and remainder for nonnegative Dn operands.
+    /// Signed language division is handled by the canonical RATIO evaluator;
+    /// this magnitude helper is retained for gcd/component calculations.
     pub fn div_rem_admitted_numeric(&self, other: &Self) -> Option<(Self, Self)> {
         let width = self.numeric_domain_width?;
         if other.numeric_domain_width != Some(width) || other.is_zero() {
             return None;
         }
+        let (left_negative, left_magnitude) = self.signed_magnitude()?;
+        let (right_negative, right_magnitude) = other.signed_magnitude()?;
+        if left_negative || right_negative { return None; }
         // Raw div_rem is intentionally a magnitude mechanism. Explicitly
         // strip tags only inside this private calculation and RE-ADMIT both
         // results into their original Dn at its boundary.
-        let (quotient, remainder) = Self::normalize(self.bits.clone())
-            .div_rem(&Self::normalize(other.bits.clone()))?;
+        let (quotient, remainder) = left_magnitude.div_rem(&right_magnitude)?;
         let admit = |value: Self| -> Option<Self> {
-            let mut word = vec![0; width.checked_sub(value.width())?];
-            word.extend_from_slice(value.as_bits());
-            Self::from_numeric_domain_bits(width, &word)
+            Self::from_signed_magnitude(width, false, &value)
         };
         Some((admit(quotient)?, admit(remainder)?))
     }
 
-    /// A mathematically valid negative difference is a NEG law composition
-    /// of this exact admitted nonzero magnitude. Sign is returned only as
-    /// mechanism metadata: never reinterpret one Dn atom bit as a sign bit.
+    /// Return sign and unsigned magnitude of the signed difference.
     pub fn signed_difference_parts_admitted_numeric(&self, other: &Self) -> Option<(bool, Self)> {
-        let width = self.numeric_domain_width?;
-        if other.numeric_domain_width != Some(width) {
-            return None;
-        }
-        // Same admitted Dn on both sides: tagged comparison is bit ordering.
-        // Avoid cloning two canonical magnitudes merely to compare them.
-        match self.cmp(other) {
-            Ordering::Less => Some((true, other.checked_sub_admitted_numeric(self)?)),
-            _ => Some((false, self.checked_sub_admitted_numeric(other)?)),
-        }
+        let difference = self.checked_sub_admitted_numeric(other)?;
+        difference.signed_magnitude()
     }
 
     pub fn as_bits(&self) -> &[u8] {
@@ -234,16 +268,15 @@ impl BinaryNumber {
             .collect()
     }
 
-    /// Dn mathematical NEG composition can only wrap a NONZERO, explicitly
-    /// domain-qualified natural magnitude. This does not introduce a sign bit,
-    /// new numeric domain, NEG opcode or runtime signed Number representation.
+    /// Every explicitly admitted Dn integer can be negated exactly; the
+    /// minimum two's-complement value widens to the next Dn instead of wrapping.
     pub fn can_be_negated_in_numeric_domain(&self) -> bool {
-        self.numeric_domain_width.is_some() && !self.is_zero()
+        self.numeric_domain_width.is_some()
     }
 
-    /// Normalize *components* for the domain-relative exact RATIO(p,q) law.
-    /// Both arguments must already be qualified D24/D48/... natural atoms;
-    /// q=0 is rejected. gcd(p,q)=1 is enforced by exact binary div_rem.
+    /// Normalize positive *magnitude components* for exact RATIO(p,q).
+    /// Inputs must be same-domain nonnegative D24+ values; q=0 is rejected.
+    /// gcd(p,q)=1 is enforced by exact binary div_rem.
     ///
     /// This returns mechanism-level existing BinaryNumber constituents, NOT
     /// a new host semantic Rational, a language expression, binary opcode or
@@ -259,23 +292,22 @@ impl BinaryNumber {
         if denominator.numeric_domain_width != Some(width) || denominator.is_zero() {
             return None;
         }
+        let (numerator_negative, n) = numerator.signed_magnitude()?;
+        let (denominator_negative, d) = denominator.signed_magnitude()?;
+        if numerator_negative || denominator_negative { return None; }
 
         // Exact gcd uses private unqualified magnitudes only AFTER same-Dn
         // admission. The public result reattaches that very same domain.
-        let n = Self::normalize(numerator.bits.clone());
-        let d = Self::normalize(denominator.bits.clone());
         let divisor = n.gcd(&d);
         let (n_reduced, n_rem) = n.div_rem(&divisor)?;
         let (d_reduced, d_rem) = d.div_rem(&divisor)?;
         if !n_rem.is_zero() || !d_rem.is_zero() {
             return None;
         }
-        let fill = |number: Self, domain_width: usize| -> Option<Self> {
-            let mut exact = vec![0; domain_width.checked_sub(number.width())?];
-            exact.extend_from_slice(number.as_bits());
-            Self::from_numeric_domain_bits(domain_width, &exact)
-        };
-        Some((fill(n_reduced, width)?, fill(d_reduced, width)?))
+        Some((
+            Self::from_signed_magnitude(width, false, &n_reduced)?,
+            Self::from_signed_magnitude(width, false, &d_reduced)?,
+        ))
     }
 
     /// Exact arbitrary-width binary addition. No host numeric value is used.
@@ -431,14 +463,10 @@ impl BinaryNumber {
         Self::is_numeric_domain_width(width) && self.width() <= width
     }
 
-    /// Mechanical realization of the owner-ratified, SAME-DOMAIN natural
-    /// addition law. Both operands are already admitted by their caller as
-    /// Dn; this function neither infers domain membership from bits nor
-    /// creates a second semantic representation.
-    ///
-    /// Exact carry over n bits raises the result to the next domain D(2n).
-    /// Otherwise the result remains in Dn. Returned bits are explicitly
-    /// zero-filled to the selected domain's FULL width (not normalized).
+    /// Mechanical realization of same-domain signed D24+ addition.
+    /// Both operands must carry the same explicit Dn identity. The result
+    /// remains Dn when representable or widens to the next D24+ rung.
+    /// Returned bits retain the selected domain's FULL width.
     /// The (width, bits) pair is a mechanism boundary, not itself a SENS
     /// language value; generic mixed-domain coercion remains unratified.
     /// Both arguments MUST already carry the same explicit Dn identity.
@@ -454,22 +482,32 @@ impl BinaryNumber {
         {
             return None;
         }
-        let sum = self.add(other);
-        let output_width = if sum.width() > input_domain_width {
-            input_domain_width.checked_mul(2)?
-        } else {
-            input_domain_width
-        };
-        let mut exact_domain_bits = vec![0; output_width - sum.width()];
-        exact_domain_bits.extend_from_slice(sum.as_bits());
-        Some((output_width, exact_domain_bits))
+        let result = self.add_admitted_numeric(other)?;
+        let output_width = result.numeric_domain_width?;
+        Some((output_width, result.exact_numeric_domain_bits()?))
     }
 
-    /// Human-facing decimal projection without making a host integer the
-    /// language identity. Repeated decimal digit doubling consumes only bits.
+    /// Human-facing mathematical decimal projection without making a host
+    /// integer the language identity. Explicit Dn words use two's complement;
+    /// unqualified carrier values keep the unsigned magnitude projection.
     pub fn to_decimal_string(&self) -> String {
+        let Some(_) = self.numeric_domain_width else {
+            return self.to_unsigned_decimal_string();
+        };
+        let (negative, magnitude) = self.signed_magnitude().expect("valid Dn width");
+        let decimal = magnitude.to_unsigned_decimal_string();
+        if negative && !magnitude.is_zero() { format!("-{decimal}") } else { decimal }
+    }
+
+    /// Decimal projection of an unsigned bit magnitude, including private
+    /// magnitude carriers inside a NEG/RATIO composition.
+    pub fn to_unsigned_decimal_string(&self) -> String {
+        Self::decimal_from_bits(&self.bits)
+    }
+
+    fn decimal_from_bits(bits: &[u8]) -> String {
         let mut digits = vec![0u8]; // little-endian base-10 mechanism digits
-        for bit in &self.bits {
+        for bit in bits {
             let mut carry = *bit;
             for digit in &mut digits {
                 let value = *digit * 2 + carry;
@@ -519,6 +557,20 @@ impl fmt::Display for BinaryNumber {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d24_twos_complement_words_have_signed_decimal_projection() {
+        let mut minus_five = vec![1u8; 24];
+        minus_five[20..].copy_from_slice(&[1, 0, 1, 1]);
+        let negative = BinaryNumber::from_numeric_domain_bits(24, &minus_five).unwrap();
+        assert_eq!(negative.to_decimal_string(), "-5");
+
+        let mut maximum = vec![1u8; 24];
+        maximum[0] = 0;
+        let positive = BinaryNumber::from_numeric_domain_bits(24, &maximum).unwrap();
+        assert_eq!(positive.to_decimal_string(), "8388607");
+        assert_eq!(BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap().to_decimal_string(), "0");
+    }
 
     #[test]
     fn normalization_has_one_zero_and_no_nonzero_leading_zero() {
@@ -651,17 +703,17 @@ mod tests {
     fn numeric_domain_addition_carries_d24_into_d48_without_truncation() {
         // The number must already carry D24 identity; a width parameter
         // must never admit an old unqualified number after the fact.
-        let max = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
+        let mut max_word = vec![1; 24];
+        max_word[0] = 0;
+        let max = BinaryNumber::from_numeric_domain_bits(24, &max_word).unwrap();
         let (width, exact_bits) = max.add_in_numeric_domain(&max, 24).unwrap();
         assert_eq!(width, 48);
         assert_eq!(exact_bits.len(), 48);
-        assert_eq!(&exact_bits[..23], &[0; 23]);
-        assert_eq!(&exact_bits[23..47], &[1; 24]);
-        assert_eq!(exact_bits[47], 0);
+        assert!(exact_bits[..width - 25].iter().all(|&bit| bit == 0));
         // Mechanism reduction to host integers is strictly an independent
         // oracle; the SENS result remains full exact D48 bits.
-        let magnitude = BinaryNumber::from_bits(exact_bits).unwrap();
-        assert_eq!(magnitude.to_decimal_string(), (2u64 * ((1u64 << 24) - 1)).to_string());
+        let result = BinaryNumber::from_numeric_domain_bits(width, &exact_bits).unwrap();
+        assert_eq!(result.to_decimal_string(), (2u64 * ((1u64 << 23) - 1)).to_string());
 
         // Carry must not trigger promotion when a same-domain sum still fits.
         let mut one_word = vec![0; 24];
@@ -677,13 +729,16 @@ mod tests {
     #[test]
     fn numeric_domain_addition_widens_unbounded_rungs_and_rejects_bad_domains() {
         for width in [24, 48, 96, 192, 384, 768] {
-            let max = BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap();
+            let mut max_word = vec![1; width];
+            max_word[0] = 0;
+            let max = BinaryNumber::from_numeric_domain_bits(width, &max_word).unwrap();
             let (target_width, result) = max.add_in_numeric_domain(&max, width).unwrap();
             assert_eq!(target_width, width * 2);
             assert_eq!(result.len(), target_width);
-            assert_eq!(result.iter().take(width - 1).filter(|&&b| b != 0).count(), 0);
-            assert!(result[(width - 1)..(2 * width - 1)].iter().all(|&bit| bit == 1));
-            assert_eq!(result[2 * width - 1], 0);
+            let mut expected = vec![0; width];
+            expected.extend(std::iter::repeat_n(1, width - 1));
+            expected.push(0);
+            assert_eq!(result, expected);
             assert!(max.fits_ratified_width(width));
         }
         let mut one_word = vec![0; 24];
@@ -750,22 +805,52 @@ mod tests {
     }
 
     #[test]
+    fn admitted_d24_arithmetic_uses_twos_complement_and_widens_signed_overflow() {
+        let admitted = |bits: Vec<u8>| BinaryNumber::from_numeric_domain_bits(bits.len(), &bits).unwrap();
+        let minus_one = admitted(vec![1; 24]);
+        let one = admitted({ let mut bits = vec![0; 24]; bits[23] = 1; bits });
+        let zero = minus_one.add_admitted_numeric(&one).unwrap();
+        assert_eq!(zero.to_decimal_string(), "0");
+        assert_eq!(zero.numeric_domain_width(), Some(24));
+
+        let minus_two = admitted({
+            let mut bits = vec![1; 24];
+            bits[23] = 0;
+            bits
+        });
+        let three = admitted({ let mut bits = vec![0; 24]; bits[22] = 1; bits[23] = 1; bits });
+        assert_eq!(minus_two.mul_admitted_numeric(&three).unwrap().to_decimal_string(), "-6");
+
+        let minimum = admitted({ let mut bits = vec![0; 24]; bits[0] = 1; bits });
+        let below_minimum = minimum.checked_sub_admitted_numeric(&one).unwrap();
+        assert_eq!(below_minimum.numeric_domain_width(), Some(48));
+        assert_eq!(below_minimum.to_decimal_string(), "-8388609");
+    }
+
+    #[test]
     fn admitted_d24_addition_promotes_through_real_domain_qualified_value() {
-        let full = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
-        let sum = full.add_admitted_numeric(&full).unwrap();
-        assert_eq!(sum.numeric_domain_width(), Some(48));
-        let exact = sum.exact_numeric_domain_bits().unwrap();
-        assert_eq!(exact.len(), 48);
-        assert_eq!(&exact[..23], &[0; 23]);
-        assert!(exact[23..47].iter().all(|&b| b == 1));
-        assert_eq!(exact[47], 0);
+        let minus_one_bits = vec![1; 24];
+        let minus_one = BinaryNumber::from_numeric_domain_bits(24, &minus_one_bits).unwrap();
+        let negative_two = minus_one.add_admitted_numeric(&minus_one).unwrap();
+        assert_eq!(negative_two.numeric_domain_width(), Some(24));
+        assert_eq!(negative_two.to_decimal_string(), "-2");
+
+        let mut maximum_positive_bits = vec![1; 24];
+        maximum_positive_bits[0] = 0;
+        let maximum_positive = BinaryNumber::from_numeric_domain_bits(24, &maximum_positive_bits).unwrap();
         let small = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
         let same = small.add_admitted_numeric(&small).unwrap();
         assert_eq!(same.numeric_domain_width(), Some(24));
         assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
-        assert!(full.add_admitted_numeric(&BinaryNumber::one()).is_none());
+        let mut one_bits = vec![0; 24];
+        one_bits[23] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(24, &one_bits).unwrap();
+        let widened = maximum_positive.add_admitted_numeric(&one).unwrap();
+        assert_eq!(widened.numeric_domain_width(), Some(48));
+        assert_eq!(widened.to_decimal_string(), (1i64 << 23).to_string());
+        assert!(maximum_positive.add_admitted_numeric(&BinaryNumber::one()).is_none());
         let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
-        assert!(full.add_admitted_numeric(&another_domain).is_none());
+        assert!(maximum_positive.add_admitted_numeric(&another_domain).is_none());
     }
 
     #[test]
@@ -785,14 +870,16 @@ mod tests {
             assert_eq!(six.mul_admitted_numeric(&two).unwrap(), admitted(width, 12));
             assert_eq!(six.checked_sub_admitted_numeric(&two).unwrap(), admitted(width, 4));
             assert_eq!(six.checked_sub_admitted_numeric(&six).unwrap(), z);
-            assert!(two.checked_sub_admitted_numeric(&six).is_none());
+            assert_eq!(two.checked_sub_admitted_numeric(&six).unwrap().to_decimal_string(), "-4");
             assert_eq!(six.div_rem_admitted_numeric(&two).unwrap(), (admitted(width, 3), z.clone()));
             assert_eq!(one.div_rem_admitted_numeric(&six).unwrap(), (z.clone(), one.clone()));
             assert!(six.div_rem_admitted_numeric(&z).is_none());
-            assert_eq!(six.signed_difference_parts_admitted_numeric(&two).unwrap(), (false, admitted(width,4)));
-            assert_eq!(two.signed_difference_parts_admitted_numeric(&six).unwrap(), (true, admitted(width,4)));
-            assert_eq!(one.signed_difference_parts_admitted_numeric(&one).unwrap(), (false, z.clone()));
-            assert!(!z.can_be_negated_in_numeric_domain());
+            assert_eq!(six.signed_difference_parts_admitted_numeric(&two).unwrap(), (false, BinaryNumber::parse("100").unwrap()));
+            assert_eq!(two.signed_difference_parts_admitted_numeric(&six).unwrap(), (true, BinaryNumber::parse("100").unwrap()));
+            let (negative, magnitude) = one.signed_difference_parts_admitted_numeric(&one).unwrap();
+            assert!(!negative);
+            assert!(magnitude.is_zero());
+            assert!(z.can_be_negated_in_numeric_domain());
         }
         let a24 = admitted(24, 12);
         let b48 = admitted(48, 2);
@@ -806,16 +893,19 @@ mod tests {
     #[test]
     fn full_d24_plus_multiplication_promotes_to_exact_double_width() {
         for width in [24, 48, 96, 192, 384] {
-            let max = BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap();
+            let mut max_word = vec![1; width];
+            max_word[0] = 0;
+            let max = BinaryNumber::from_numeric_domain_bits(width, &max_word).unwrap();
             let product = max.mul_admitted_numeric(&max).unwrap();
             assert_eq!(product.numeric_domain_width(), Some(2*width));
-            assert_eq!(product.width(), 2*width);
+            assert!(product.width() <= 2*width);
             let product_word = product.exact_numeric_domain_bits().unwrap();
             assert_eq!(product_word.len(), 2*width);
-            // (2^n-1)^2 = 2^(2n) - 2^(n+1) + 1
-            let mut expected = vec![0u8; 2*width];
-            expected[..width-1].fill(1);
-            expected[2*width-1] = 1;
+            // Dn's positive maximum is 2^(n-1)-1; compare its exact square.
+            let magnitude = BinaryNumber::from_bits(vec![1; width - 1]).unwrap();
+            let raw_square = magnitude.mul(&magnitude);
+            let mut expected = vec![0u8; 2 * width - raw_square.width()];
+            expected.extend_from_slice(raw_square.as_bits());
             assert_eq!(product_word, expected);
             let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
             assert_eq!(max.mul_admitted_numeric(&zero).unwrap().numeric_domain_width(), Some(width));
@@ -837,7 +927,7 @@ mod tests {
                 assert_eq!(product.to_decimal_string(), (a*b).to_string());
                 assert_eq!(product.numeric_domain_width(), Some(24));
                 assert_eq!(left.checked_sub_admitted_numeric(&right).map(|n|n.to_decimal_string()),
-                    a.checked_sub(b).map(|n|n.to_string()));
+                    Some((a as i64 - b as i64).to_string()));
                 assert_eq!(left.signed_difference_parts_admitted_numeric(&right)
                     .map(|(negative,n)|(negative,n.to_decimal_string())),
                     Some((a<b,a.abs_diff(b).to_string())));
@@ -853,15 +943,23 @@ mod tests {
     }
 
     #[test]
-    fn d24_plus_signed_and_rational_composition_laws_preserve_all_natural_bits() {
+    fn d24_plus_twos_complement_words_preserve_signed_boundaries() {
         for width in [24, 48, 96, 192, 384] {
-            let mut largest = vec![1; width];
-            let full = BinaryNumber::from_numeric_domain_bits(width, &largest).unwrap();
-            assert!(full.can_be_negated_in_numeric_domain());
-            assert_eq!(full.exact_numeric_domain_bits(), Some(std::mem::take(&mut largest)));
+            let all_ones = vec![1; width];
+            let minus_one = BinaryNumber::from_numeric_domain_bits(width, &all_ones).unwrap();
+            assert_eq!(minus_one.to_decimal_string(), "-1");
+            assert!(minus_one.can_be_negated_in_numeric_domain());
+            let mut minimum_bits = vec![0; width];
+            minimum_bits[0] = 1;
+            let minimum = BinaryNumber::from_numeric_domain_bits(width, &minimum_bits).unwrap();
+            let (negative, magnitude) = minimum.signed_magnitude().unwrap();
+            assert!(negative);
+            assert_eq!(magnitude.width(), width);
+            assert_eq!(magnitude.as_bits()[0], 1);
+            assert!(magnitude.as_bits()[1..].iter().all(|&bit| bit == 0));
             let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
-            assert!(!zero.can_be_negated_in_numeric_domain(),
-                "negative zero must canonicalize, not persist as an identity");
+            assert_eq!(zero.to_decimal_string(), "0");
+            assert!(zero.can_be_negated_in_numeric_domain());
         }
         assert!(!BinaryNumber::one().can_be_negated_in_numeric_domain(),
             "unqualified historic Number cannot claim D24 NEG law");

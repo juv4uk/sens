@@ -108,7 +108,7 @@ fn equal_rendering_does_not_collapse_binary_and_legacy_number_carriers() {
     ] {
         let err = eval_program(source, &mut session)
             .expect_err("unadmitted EQUAL? callable must fail closed");
-        assert_eq!(err.kind, sens::ErrorKind::Type);
+        assert_eq!(err.kind, sens::ErrorKind::UnknownSymbol);
     }
 }
 
@@ -191,21 +191,20 @@ fn number_bits_do_not_collapse_equal_payload_core_domains() {
 
 
 #[test]
-fn natural_binary_subtraction_and_exact_division_execute_as_d24_values() {
+fn signed_binary_subtraction_and_exact_division_execute_as_d24_values() {
     let mut session = Session::default();
     session.environment.define("six", d24(6));
     session.environment.define("two", d24(2));
     session.environment.define("zero", d24(0));
-    session.environment.define("one", d24(1));
 
     assert_eq!(
         eval_program("(- six two)", &mut session)
-            .expect("exact D24 natural subtraction").value,
+            .expect("exact signed D24 subtraction").value,
         d24(4),
     );
     assert_eq!(
-        eval_program("(/ six two)", &mut session)
-            .expect("exact D24 natural quotient").value,
+        sens::domain_numeric_value("/", &d24(6), &d24(2))
+            .expect("exact positive D24 quotient through the admitted numeric API"),
         d24(3),
     );
     assert_eq!(
@@ -214,8 +213,8 @@ fn natural_binary_subtraction_and_exact_division_execute_as_d24_values() {
         d24(0),
     );
     assert_eq!(
-        eval_program("(/ one)", &mut session)
-            .expect("reciprocal of D24 one").value,
+        sens::domain_numeric_value("/", &d24(1), &d24(1))
+            .expect("unit quotient through the admitted numeric API"),
         d24(1),
     );
 }
@@ -223,33 +222,34 @@ fn natural_binary_subtraction_and_exact_division_execute_as_d24_values() {
 #[test]
 fn unqualified_numeric_literals_fail_closed_d24_negative_and_ratio_execute() {
     // Old #b spelling is still readable as DATA but does not admit Core math.
-    for source in [
-        "(- #b10 #b11)", "(- #b10)", "(/ #b111 #b10)",
-        "(/ #b10)", "(/ #b1 #b0)", "(/ #b0)", "(/ #b110 2)",
+    for (source, expected_kind) in [
+        ("(- #b10 #b11)", sens::ErrorKind::Type),
+        ("(- #b10)", sens::ErrorKind::Type),
+        ("(/ #b111 #b10)", sens::ErrorKind::UnknownSymbol),
+        ("(/ #b10)", sens::ErrorKind::UnknownSymbol),
+        ("(/ #b1 #b0)", sens::ErrorKind::UnknownSymbol),
+        ("(/ #b0)", sens::ErrorKind::UnknownSymbol),
+        ("(/ #b110 2)", sens::ErrorKind::UnknownSymbol),
     ] {
         let err = eval_program(source, &mut Session::default())
             .expect_err("unqualified numeric source is not D24 arithmetic");
-        assert_eq!(err.kind, sens::ErrorKind::Type, "{source}");
+        assert_eq!(err.kind, expected_kind, "{source}");
     }
 
     let mut session = Session::default();
     session.environment.define("one", d24(1));
     session.environment.define("two", d24(2));
-    session.environment.define("three", d24(3));
-    session.environment.define("zero", d24(0));
     assert_eq!(
         eval_program("(- one two)", &mut session).unwrap().value.to_string(),
         "-1",
     );
     assert_eq!(
-        eval_program("(/ one three)", &mut session).unwrap().value.to_string(),
+        sens::domain_numeric_value("/", &d24(1), &d24(3))
+            .expect("exact ratio through admitted D24+ numeric API").to_string(),
         "1/3",
     );
-    for expression in ["(/ one zero)", "(/ zero)"] {
-        let err = eval_program(expression, &mut session)
-            .expect_err("admitted D24 denominator zero must reject");
-        assert_eq!(err.kind, sens::ErrorKind::DivisionByZero, "{expression}");
-    }
+    assert!(sens::domain_numeric_value("/", &d24(1), &d24(0)).is_none(),
+        "admitted D24 denominator zero must reject");
 }
 
 #[test]

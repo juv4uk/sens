@@ -80,8 +80,8 @@ fn render_uk(value: &Value) -> String {
             let (negative, numerator, denominator) = number.as_parts();
             let sign = if negative { "-" } else { "" };
             match denominator {
-                Some(d) => format!("{sign}{}/{}", numerator.to_decimal_string(), d.to_decimal_string()),
-                None => format!("-{numerator}"),
+                Some(d) => format!("{sign}{}/{}", numerator.to_unsigned_decimal_string(), d.to_unsigned_decimal_string()),
+                None => format!("-{}", numerator.to_unsigned_decimal_string()),
             }
         },
         Value::Sid(sid) => {

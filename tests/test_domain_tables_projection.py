@@ -23,6 +23,18 @@ class BinaryProjection(unittest.TestCase):
                 bits = number_word(number, width)
                 self.assertEqual(human_number(bits, domain_width=width), number)
 
+    def test_signed_d24_boundaries_use_twos_complement(self):
+        self.assertEqual(number_word(-1, 24), "1" * 24)
+        self.assertEqual(human_number("1" * 24, domain_width=24), -1)
+        minimum = -(1 << 23)
+        maximum = (1 << 23) - 1
+        self.assertEqual(human_number(number_word(minimum, 24), domain_width=24), minimum)
+        self.assertEqual(human_number(number_word(maximum, 24), domain_width=24), maximum)
+        with self.assertRaises(ValueError):
+            number_word(1 << 23, 24)
+        with self.assertRaises(ValueError):
+            number_word(-(1 << 23) - 1, 24)
+
     def test_d1_d10_are_not_decimal_operands(self):
         for width, bits in ((1, "1"), (2, "01"), (3, "101"),
                             (7, "0110001"), (8, "10101000"),

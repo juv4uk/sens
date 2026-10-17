@@ -1,4 +1,4 @@
-//! Стерильний ABI v2 між SENS та будь-яким хостом для фізичних T5/F3C/E1.
+//! Стерильний ABI v2 між SENS та будь-яким хостом для фізичних T5M/T5/F3C/E1.
 //! Owner law: Zig is the turnstile, not the registry; SENS decides meaning;
 //! Rust holds opaque bytes. No local T5/E1 algorithm lives in this module.
 
@@ -13,6 +13,13 @@ mod asset_ffi;
 #[link(name = "sens_zig_transport", kind = "static")]
 unsafe extern "C" {
     fn sens_zig_codec_abi_version() -> u32;
+    fn sens_zig_t5m_validate(input: *const u8, len: usize) -> i32;
+    fn sens_zig_t5m_encode_be3(
+        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+    ) -> isize;
+    fn sens_zig_t5m_decode_be3(
+        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+    ) -> isize;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
     // Coordinate-only D1..D10 physical validation; no runnable D10 admission.
     fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;
@@ -434,8 +441,16 @@ fn require_same_exact_words(
 
 pub fn validate_t5(bytes: &[u8]) -> Result<(), String> {
     version()?;
+    if unsafe { sens_zig_t5m_validate(bytes.as_ptr(), bytes.len()) } != 0 {
+        return Err("Zig physical T5M rejected; no SENS execution".into());
+    }
+    Ok(())
+}
+
+fn validate_legacy_t5(bytes: &[u8]) -> Result<(), String> {
+    version()?;
     if unsafe { sens_zig_t5_validate(bytes.as_ptr(), bytes.len()) } != 0 {
-        return Err("Zig physical T5 rejected; no SENS execution".into());
+        return Err("legacy T5 physical carrier rejected".into());
     }
     Ok(())
 }
@@ -485,18 +500,34 @@ pub fn encode_t5_direct(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, Str
     let used_trits = semantic_trits
         .checked_add(words.len() - 1)
         .ok_or("Zig T5 separator count overflow")?;
-    let physical_capacity = used_trits.checked_add(4).ok_or("Zig T5 byte count overflow")? / 5;
+    let groups = used_trits.checked_add(14).ok_or("Zig T5M group count overflow")? / 15;
+    let physical_capacity = groups.checked_mul(3).ok_or("Zig T5M byte count overflow")?;
     let be3 = exact_words_to_be3(words)?;
     let mut bytes = vec![0u8; physical_capacity];
     let len = unsafe {
-        sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len())
+        sens_zig_t5m_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len())
     };
     if len < 0 || usize::try_from(len).ok() != Some(bytes.len()) {
-        return Err(format!("Zig physical T5 encode rejected: code={len}"));
+        return Err(format!("Zig physical T5M encode rejected: code={len}"));
     }
     // Обидва напрями проходять тільки стерильний Zig ABI, без Rust T5 codec.
     let restored = decode_t5_words(&bytes)?;
     require_same_exact_words(words, &restored)?;
+    Ok(bytes)
+}
+
+fn encode_legacy_t5(words: &[sens::BinarySourceWord]) -> Result<Vec<u8>, String> {
+    version()?;
+    if words.is_empty() { return Err("legacy T5 cannot encode empty record".into()); }
+    let trits = words.iter().try_fold(words.len() - 1, |n, word| n.checked_add(word.width()))
+        .ok_or("legacy T5 trit count overflow")?;
+    let capacity = trits.checked_add(4).ok_or("legacy T5 capacity overflow")? / 5;
+    let be3 = exact_words_to_be3(words)?;
+    let mut bytes = vec![0u8; capacity];
+    let written = unsafe { sens_zig_t5_encode_be3(be3.as_ptr(), be3.len(), bytes.as_mut_ptr(), bytes.len()) };
+    if written < 0 || usize::try_from(written).ok() != Some(bytes.len()) {
+        return Err(format!("legacy T5 Zig encode rejected: code={written}"));
+    }
     Ok(bytes)
 }
 
@@ -513,18 +544,21 @@ pub fn encode_t5(
 
 pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
     validate_t5(bytes)?;
-    let trits = bytes.len().checked_mul(5).ok_or("T5 input length overflow")?;
+    if bytes.len() % 3 != 0 {
+        return Err("T5M physical length must be a multiple of three bytes".into());
+    }
+    let trits = (bytes.len() / 3).checked_mul(15).ok_or("T5M input length overflow")?;
     let max_words = trits.checked_add(1).ok_or("T5 word count overflow")? / 2;
     let capacity = max_words.checked_mul(3).ok_or("T5 BE3 capacity overflow")?;
     let mut be3 = vec![0u8; capacity];
     let written = unsafe {
-        sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
+        sens_zig_t5m_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len())
     };
     if written <= 0
         || usize::try_from(written).ok().filter(|&n| n <= be3.len()).is_none()
         || written % 3 != 0
     {
-        return Err(format!("Zig physical T5 decode rejected: code={written}"));
+        return Err(format!("Zig physical T5M decode rejected: code={written}"));
     }
     be3.truncate(written as usize);
     let mut words = Vec::with_capacity(be3.len() / 3);
@@ -551,6 +585,42 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
             _ => None,
         }
         .ok_or_else(|| format!("Zig BE3 invalid exact word width={width}"))?;
+        words.push(word);
+    }
+    Ok(words)
+}
+
+fn decode_legacy_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, String> {
+    validate_legacy_t5(bytes)?;
+    let capacity = bytes.len().checked_mul(5).and_then(|n| n.checked_add(1))
+        .and_then(|n| n.checked_div(2)).and_then(|n| n.checked_mul(3))
+        .ok_or("legacy T5 BE3 capacity overflow")?;
+    let mut be3 = vec![0u8; capacity];
+    let written = unsafe { sens_zig_t5_decode_be3(bytes.as_ptr(), bytes.len(), be3.as_mut_ptr(), be3.len()) };
+    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= be3.len() && n % 3 == 0).is_none() {
+        return Err(format!("legacy T5 Zig decode rejected: code={written}"));
+    }
+    be3.truncate(written as usize);
+    let mut words = Vec::with_capacity(be3.len() / 3);
+    for triple in be3.chunks_exact(3) {
+        let width = triple[0];
+        let payload = (u16::from(triple[1]) << 8) | u16::from(triple[2]);
+        if width < 9 && payload > u16::from(u8::MAX) {
+            return Err("legacy T5 BE3 payload exceeds declared narrow width".into());
+        }
+        let low = payload as u8;
+        let word = match width {
+            1 => sens::Bit1::new(low).map(sens::BinarySourceWord::W1),
+            2 => sens::Bit2::new(low).map(sens::BinarySourceWord::W2),
+            3 => sens::Bit3::new(low).map(sens::BinarySourceWord::W3),
+            4 => sens::Bit4::new(low).map(sens::BinarySourceWord::W4),
+            5 => sens::Bit5::new(low).map(sens::BinarySourceWord::W5),
+            6 => sens::Bit6::new(low).map(sens::BinarySourceWord::W6),
+            7 => sens::Bit7::new(low).map(sens::BinarySourceWord::W7),
+            8 => sens::Bit8::new(low).map(sens::BinarySourceWord::W8),
+            9 => sens::Bit9::new(payload).map(sens::BinarySourceWord::W9),
+            _ => None,
+        }.ok_or_else(|| format!("legacy T5 BE3 invalid exact word width={width}"))?;
         words.push(word);
     }
     Ok(words)
@@ -634,20 +704,21 @@ pub fn decode_e1_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
 
 pub fn encode_f3(t5: &[u8]) -> Result<Option<Vec<u8>>, String> {
     version()?;
-    // Never report "no saving" for an unvalidated physical carrier.
-    // Even an oversized T5 input must cross the sterile Zig validator.
-    validate_t5(t5)?;
-    if t5.len() > 16 {
+    // F3C is the explicit legacy-T5 compact container. Convert the current
+    // T5M words through Zig before asking its legacy physical optimizer.
+    let logical_words = decode_t5_words(t5)?;
+    let legacy = encode_legacy_t5(&logical_words)?;
+    if legacy.len() > 16 {
         return Ok(None);
     }
     let mut bytes = vec![0u8; 16];
-    let len = unsafe { sens_zig_f3c_pack(t5.as_ptr(), t5.len(), bytes.as_mut_ptr(), bytes.len()) };
+    let len = unsafe { sens_zig_f3c_pack(legacy.as_ptr(), legacy.len(), bytes.as_mut_ptr(), bytes.len()) };
     if len == -3 {
         return Ok(None);
     }
     // Fail closed on non-positive, capacity overreport, or non-smaller framing.
     // Zig may never claim more bytes than the caller-owned buffer.
-    if len <= 0 || usize::try_from(len).ok().filter(|&n| n < t5.len() && n <= bytes.len()).is_none()
+    if len <= 0 || usize::try_from(len).ok().filter(|&n| n < legacy.len() && n <= bytes.len()).is_none()
     {
         return Err(format!("Zig F3C pack rejected: code={len}"));
     }
@@ -666,8 +737,8 @@ pub fn decode_f3(carrier: &[u8]) -> Result<Vec<u8>, String> {
         return Err(format!("explicit Zig F3C rejected: code={len}"));
     }
     output.truncate(len as usize);
-    validate_t5(&output)?;
-    Ok(output)
+    let words = decode_legacy_t5_words(&output)?;
+    encode_t5_direct(&words)
 }
 
 #[cfg(test)]
@@ -717,10 +788,12 @@ mod zig_exact_egress_tests {
         validate_t5_coordinates(&d10).expect("D10 exact physical coordinate");
         assert!(validate_t5(&d10).is_err(), "D10 never enters executable D9");
 
-        // D1:1 is valid in both physical profiles.
-        let d1 = [0xa1];
-        validate_t5_coordinates(&d1).expect("D1 coordinate");
-        validate_t5(&d1).expect("D1 ordinary carrier");
+        // T5M is the current .sens wire; the old T5 byte remains an explicit
+        // coordinate-only compatibility witness, not the default decoder.
+        let d1_t5 = [0xa1];
+        validate_t5_coordinates(&d1_t5).expect("legacy T5 D1 coordinate");
+        let d1_t5m = encode_t5_direct(&words("1")).expect("T5M D1 word");
+        validate_t5(&d1_t5m).expect("default T5M carrier");
 
         // D11=eleven exact zero bits and canonical tail, or bad trits,
         // is never accepted as D10 physical data.
@@ -742,9 +815,9 @@ mod zig_exact_egress_tests {
         // Same length, but an out-of-range ternary byte is NEVER benign
         // "F3C not smaller": reject it before the length-based decision.
         let mut corrupt = long_t5.clone();
-        corrupt[0] = 0xf3;
+        corrupt[..3].fill(0xff);
         let failure = encode_f3(&corrupt).expect_err("invalid large T5 must fail closed");
-        assert!(failure.contains("Zig physical T5 rejected"));
+        assert!(failure.contains("Zig physical T5M rejected"));
 
         // Positive tiny F3C stays on Zig's byte-exact physical path.
         let small = encode_t5_direct(&words("10 001 00 000 01"))
@@ -770,7 +843,7 @@ mod zig_exact_egress_tests {
         assert!(
             pack.contains("usize::try_from(len)")
                 && pack.contains("n <= bytes.len()")
-                && pack.contains("n < t5.len()"),
+                && pack.contains("n < legacy.len()"),
             "encode_f3 must reject overreported / non-smaller F3C lengths before truncate"
         );
         let unpack = src
@@ -825,7 +898,7 @@ mod zig_exact_egress_tests {
         let physical = encode_t5_direct(&expected).expect("Zig T5 encode");
         let recovered = decode_t5_words(&physical).expect("Zig T5 decode");
         require_same_exact_words(&expected, &recovered).unwrap();
-        assert_eq!(physical.len(), 4);
+        assert_eq!(physical.len(), 6);
     }
 
     #[test]

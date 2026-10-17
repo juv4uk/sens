@@ -28,8 +28,7 @@ def validate(policy, ratification, lang):
     for n in range(20):
         need(24 * (1 << (n + 1)) == 2 * (24 * (1 << n)), "doubling")
     need("D1-D8" in policy.get("separate_from", []), "function domain boundary")
-    for name in ("two's-complement or other polarity encoding",
-                 "integer versus rational field layout",
+    for name in ("integer versus rational field layout",
                  "decimal literal lowering law",
                  "mixed-domain implicit coercion and general widening",
                  "overflow for other operations beyond same-domain natural ADD/MUL",
@@ -37,14 +36,27 @@ def validate(policy, ratification, lang):
                  "canonical physical NEG/RATIO composition reader and transport and source macro projection"):
         need(name in policy.get("not_yet_ratified", []), "deferred law: " + name)
     need("signedness" not in policy.get("not_yet_ratified", []), "NEG composition law must not be marked wholly deferred")
+    signed = policy.get("current_integer_extension", {})
+    need(signed.get("status") == "owner-ratified", "current signed-integer extension status")
+    need(signed.get("date") == "2026-10-18", "current signed-integer extension date")
+    need(signed.get("supersedes_2026_10_11_integer_polarity") is True,
+         "2026-10-11 unsigned integer polarity must be historical")
+    need(signed.get("supersedes_2026_10_11_integer_word_and_arithmetic_interpretation") is True,
+         "2026-10-11 natural-word interpretation must be historical")
+    need(signed.get("encoding", "").startswith("For an exact n-bit Dn word u"), "two's-complement encoding")
+    need("-2^(n-1)..2^(n-1)-1" in signed.get("range", ""), "signed range")
+    need(signed.get("every_word_has_one_integer") is True, "one integer per Dn word")
+    need(signed.get("has_negative_zero") is False, "no negative zero")
+    need("widen" in signed.get("same_domain_arithmetic", ""), "signed overflow widening")
+    need("unsigned numerator magnitude" in signed.get("fractions", ""),
+         "existing exact fraction composition remains unchanged")
+    need("opaque exact-width transport" in signed.get("t5m", "").lower(), "T5M remains opaque transport")
     extended = policy.get("extended_number_laws", {})
     need(extended.get("status") == "owner-ratified", "extended D24+ laws status")
     need(extended.get("no_new_domains") is True, "new domains forbidden")
-    need(extended.get("no_reserved_natural_bits") is True, "natural Dn atom range must be preserved")
     need(extended.get("no_negative_zero") is True, "negative zero forbidden")
     need(extended.get("denominator_zero_is_error") is True, "denominator zero must fail")
     need(extended.get("rounding_forbidden") is True, "rational rounding forbidden")
-    need("NEG(nonzero Dn magnitude)" in extended.get("sign", ""), "NEG positive magnitude law")
     need("gcd(abs(p),q)=1" in extended.get("rational", ""), "gcd canonical ratio law")
     need("q=1 collapses to integer" in extended.get("rational", ""), "unit denominator law")
     need("p=0 collapses" in extended.get("rational", ""), "zero numerator law")
@@ -73,6 +85,20 @@ def validate(policy, ratification, lang):
         need(full_product < 1<<(2*n), "D(2n) product capacity")
         need(biggest-biggest == 0, "exact subtraction")
         need(biggest == (biggest//3)*3 + (biggest%3), "Euclidean quotient remainder")
+        signed_max = (1 << (n - 1)) - 1
+        signed_min = -(1 << (n - 1))
+        positive_overflow = signed_max + 1
+        negative_overflow = signed_min - 1
+        need(not signed_min <= positive_overflow <= signed_max,
+             "signed positive boundary must exceed Dn")
+        need(not signed_min <= negative_overflow <= signed_max,
+             "signed negative boundary must exceed Dn")
+        successor_min, successor_max = -(1 << (2 * n - 1)), (1 << (2 * n - 1)) - 1
+        need(successor_min <= positive_overflow <= successor_max,
+             "positive boundary must fit the next D24+ rung")
+        need(successor_min <= negative_overflow <= successor_max,
+             "negative boundary must fit the next D24+ rung")
+        need(-1 + 1 == 0, "two's-complement all-ones is negative one")
 
     transport = policy.get("numeric_composition_transport", {})
     need("Core-only" in transport.get("status", ""), "transport is Core-only")
@@ -98,6 +124,7 @@ def validate(policy, ratification, lang):
     need(((1 << 24) - 2) + 1 < (1 << 24), "non-overflow example unexpectedly widened")
     for needle in (
         "(schema . numeric-domains-ratification/1)",
+        "(schema . numeric-d24-signed-extension/1)",
         "(status . owner-ratified)", "(family . numeric)",
         "(rank . peer-of-D1-D9)", "(first-domain . D24)",
         "(initial-width . #d24)", "(next-width . double)",
@@ -114,6 +141,7 @@ def validate(policy, ratification, lang):
     ):
         need(needle in ratification, "contract: " + needle)
     for needle in (
+        "(numeric-domain-current-signed-integer-law-20261018",
         "(numeric-domains-peer-ratified",
         "(numeric-domain-natural-add-carry",
         "(numeric-domain-natural-mul-sub-exact-div",
@@ -253,7 +281,7 @@ def selftest(policy, ratification, lang):
         ({"not_yet_ratified": []}, "deferred law"),
         ({"addition_widening": {"status": "research"}}, "addition promotion status"),
         ({"addition_widening": dict(policy["addition_widening"], no_wraparound=False)}, "addition carry must not wrap"),
-        ({"extended_number_laws": dict(policy["extended_number_laws"], no_reserved_natural_bits=False)}, "natural Dn atom range must be preserved"),
+        ({"current_integer_extension": dict(policy["current_integer_extension"], encoding="unsigned")}, "two's-complement encoding"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], no_negative_zero=False)}, "negative zero forbidden"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], denominator_zero_is_error=False)}, "denominator zero must fail"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], rational="not reduced")}, "gcd canonical ratio law"),

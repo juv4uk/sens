@@ -39,3 +39,16 @@
        (deferred . "physical NEG/RATIO opcode/source-expression/reader and FASL/wire composition encoding, external kernel execution, polarity/two's-complement representation, other-operation overflow policies beyond admitted numeric laws, mixed-domain implicit bridges, decimal lowering")
        (runtime-status . "Core BinaryNumber and evaluator admit same-Dn natural ADD/MUL, nonnegative SUB, exact integer DIV and canonical signed/rational NEG/RATIO Values. Physical composite serialization, text/source macro reification and mixed-domain arithmetic are not admitted.")))
 )
+
+; Чинне уточнення власника 2026-10-18. Форму 2026-10-11 вище збережено як
+; історію; для інтерпретації цілих чисел D24+ цей закон її переважає.
+(
+  (schema . numeric-d24-signed-extension/1)
+  (status . owner-ratified)
+  (owner-decision . "2026-10-18: D24+ integers use fixed-width two's complement; fractions retain existing NEG/RATIO composition")
+  (scope . "D24, D48, D96, D192, ... exact-width integer words only; D1-D10 unchanged")
+  (integer-law . "For exact n-bit Dn word u, value=u when MSB=0, otherwise value=u-2^n; range is -2^(n-1)..2^(n-1)-1. Every word denotes exactly one integer; there is no negative zero.")
+  (arithmetic . "Same-Dn + - * / and comparisons are exact. If an integer result does not fit signed Dn, widen to the smallest allowed D24+ successor that fits. Never wrap, truncate, round, infer domain identity, or coerce mixed Dn operands.")
+  (fraction-law . "Keep the existing exact reduced ratio composition: explicit sign plus unsigned numerator magnitude and positive unsigned denominator magnitude; gcd reduction, denominator zero rejected, zero and denominator one canonicalize as before. Integer two's-complement words do not replace the fraction composition.")
+  (transport . "T5M transports already-formed exact-width words unchanged; it does not assign numeric meaning. Physical NEG/RATIO serialization remains separate.")
+)
