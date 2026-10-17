@@ -437,7 +437,7 @@
     (0010 (bindings body)
   (111
     (111
-      (001 00001000)
+      (001 0010)
       (111
         (core4-let-parameters bindings)
         (111 body (001 ()))))
