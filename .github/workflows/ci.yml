@@ -143,6 +143,48 @@ jobs:
           fi
           echo "D9_NATIVE_DEFINITION_PASS residents=4 projections=4 laws=10 authority=SENS"
 
+      - name: "D10 EPISTEMIC — 12 нативних SENS законів і негатив арності"
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="tests/semantic/d10-epistemic-constructors-laws.lisp"
+          negative="tests/semantic/d10-epistemic-constructors-invalid-arity.lisp"
+          report="$RUNNER_TEMP/sens-focal-red.jsonl"
+          sha256sum "$fixture" "$negative" lib/core4.lisp lib/epistemic.lisp target/debug/sens
+          count=0
+          while IFS= read -r law || [[ -n "$law" ]]; do
+            [[ -z "$law" || "$law" == ';'* ]] && continue
+            ((count += 1))
+            witness="$RUNNER_TEMP/d10-epistemic-$(printf '%02d' "$count").lisp"
+            printf '%s\n' "$law" > "$witness"
+            if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
+              echo "::error::D10_EPISTEMIC_EXEC_RED id=$count layer=eval expected=D1:1 actual=execution-error" >&2
+              printf '%s\n' "$observed" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d10-epistemic-$count" --layer eval --fixture "$fixture" --expected "D1:1" --actual "execution-error" --reproduce "target/debug/sens $witness" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            actual="$(tail -n 1 <<< "$observed")"
+            if [[ "$actual" != "1" ]]; then
+              echo "::error::D10_EPISTEMIC_LAW_DIFF id=$count layer=eval expected=1 actual=$actual" >&2
+              python3 scripts/ci_failure_contract.py record-diff --test-id "d10-epistemic-$count" --layer eval --fixture "$fixture" --expected "1" --actual "$actual" --reproduce "target/debug/sens $witness" --report-file "$report" --stderr-tail "$observed"
+              exit 1
+            fi
+            echo "D10_EPISTEMIC_LAW_PASS id=$count"
+          done < "$fixture"
+          if [[ "$count" -ne 12 ]]; then
+            echo "::error::D10_EPISTEMIC_CENSUS expected=12 actual=$count" >&2
+            exit 1
+          fi
+          if rejected="$(target/debug/sens "$negative" 2>&1)"; then
+            echo "::error::D10_EPISTEMIC_WRONG_ARITY_ACCEPTED expected=arity-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'arity|expected|arguments' <<< "$rejected"; then
+            echo "::error::D10_EPISTEMIC_WRONG_FAILURE expected=arity-refusal actual=$rejected" >&2
+            exit 1
+          fi
+          echo "D10_EPISTEMIC_SENS_PASS functions=4 laws=12 negative=1 direct_d10_callability=unclaimed"
+
       - name: "D10 MAP-LAWS — 12 SENS свідків і неповна пара"
         shell: bash
         run: |

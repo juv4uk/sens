@@ -20,30 +20,17 @@
 ; EQ/ATOM discipline and project accessors. Width is identity.
 
 ; --- Constructors (Spec §6 exact arg order) ---------------------------
+; Точні D10 українські SENS-функції визначено один раз у lib/core4.lisp.
+; Ці історичні англійські поверхні — aliases, не повторні реалізації.
+; D10 resident coordinate не означає допуск машинної інструкції.
 
-(0011 make-observation
-  (0010 (source statement)
-    (1110 (001 observation) (1110 (001 source) source) (1110 (001 statement) statement))))
+(0011 make-observation створити-спостереження)
 
-(0011 make-claim
-  (0010 (statement source review)
-    (1110 (001 claim) (1110 (001 statement) statement) (1110 (001 source) source) (1110 (001 review) review))))
+(0011 make-claim створити-твердження)
 
-(0011 make-evidence
-  (0010 (claim-ref method outcome source-ref)
-    (1110 (001 evidence)
-          (1110 (001 claim-ref) claim-ref)
-          (1110 (001 method) method)
-          (1110 (001 outcome) outcome)
-          (1110 (001 source-ref) source-ref))))
+(0011 make-evidence створити-доказ)
 
-(0011 make-intent
-  (0010 (goal requirements stop-condition produces)
-    (1110 (001 intent)
-          (1110 (001 goal) goal)
-          (1110 (001 requires) requirements)
-          (1110 (001 stop-on) stop-condition)
-          (1110 (001 produces) produces))))
+(0011 make-intent створити-намір)
 
 ; --- Shape predicates ---------------------------------------------------
 ; Exact D1 shape predicates: source-ref?, epistemic--claim-ref?, observation?,

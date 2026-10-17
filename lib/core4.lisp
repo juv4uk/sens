@@ -4614,6 +4614,43 @@
        (додати-нові-обґрунтований
          (011 нові) (111 (100 нові) записи))))))
 
+; D10 — епістемічні конструктори: спостереження, твердження, доказ, намір.
+; Єдиний мовний механізм; англійські імена в lib/epistemic.lisp є aliases.
+; D3:000 = порожні дані, D4:1110 LIST, D4:0010 LAMBDA, D4:0011 DEFINE.
+; Не створюємо хостові типи, побічні ефекти чи runtime-допуск D10.
+
+; D10:0010010011 MAKE-OBSERVATION — ратифікована адреса, не прямий виклик D10.
+; Чинний закон перенесено з lib/epistemic.lisp без зміни форми значення.
+(0011 створити-спостереження
+  (0010 (source statement)
+    (1110 (001 observation) (1110 (001 source) source) (1110 (001 statement) statement))))
+
+; D10:0001110110 MAKE-CLAIM — ратифікована адреса, не прямий виклик D10.
+; Чинний закон перенесено з lib/epistemic.lisp без зміни форми значення.
+(0011 створити-твердження
+  (0010 (statement source review)
+    (1110 (001 claim) (1110 (001 statement) statement) (1110 (001 source) source) (1110 (001 review) review))))
+
+; D10:0010001111 MAKE-EVIDENCE — ратифікована адреса, не прямий виклик D10.
+; Чинний закон перенесено з lib/epistemic.lisp без зміни форми значення.
+(0011 створити-доказ
+  (0010 (claim-ref method outcome source-ref)
+    (1110 (001 evidence)
+          (1110 (001 claim-ref) claim-ref)
+          (1110 (001 method) method)
+          (1110 (001 outcome) outcome)
+          (1110 (001 source-ref) source-ref))))
+
+; D10:0010000101 MAKE-INTENT — ратифікована адреса, не прямий виклик D10.
+; Чинний закон перенесено з lib/epistemic.lisp без зміни форми значення.
+(0011 створити-намір
+  (0010 (goal requirements stop-condition produces)
+    (1110 (001 intent)
+          (1110 (001 goal) goal)
+          (1110 (001 requires) requirements)
+          (1110 (001 stop-on) stop-condition)
+          (1110 (001 produces) produces))))
+
 ; D10:0010001110 KNOWLEDGE-PROPER-LIST? — harvested from lib/knowledge.lisp.
 ; The entire CDR spine must terminate in D3:000, not an arbitrary atom.
 ; Exact D1 result, no implicit truthiness or D10 opcode admission.
