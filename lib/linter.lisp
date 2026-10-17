@@ -265,10 +265,10 @@
               (110 ((11011 complexity (get-threshold (001 max-complexity) thresholds 99999))
                     (1110 (1110 (001 complexity-exceeded) complexity))))
               (1111
-                (110 ((11011 (000000 globals) (get-threshold (001 max-globals) thresholds 99999))
-                      (1110 (1110 (001 globals-exceeded) globals))))
-                (110 ((11011 (000000 effects) (get-threshold (001 max-effects) thresholds 99999))
-                      (1110 (1110 (001 effects-exceeded) effects))))))))))))
+                (за-умовою ((більше? (довжина globals) (get-threshold (як-є max-globals) thresholds 99999))
+                      (список (список (як-є globals-exceeded) globals))))
+                (за-умовою ((більше? (довжина effects) (get-threshold (як-є max-effects) thresholds 99999))
+                      (список (список (як-є effects-exceeded) effects))))))))))))
 
 ; D9: ratified lint functions harvested from their living SENS/Lisp owners.
 ; Exact nine-bit identity = lib/domains/d9.lisp; no new native opcodes.
