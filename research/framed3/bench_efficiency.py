@@ -87,6 +87,15 @@ def candidates(words):
         )
     except tb33.TailError:
         pass
+    try:
+        raw = bytes((adaptive.МІТКА_Т5М,)) + adaptive.кодувати_т5м(words)
+        options["T5M"] = (
+            lambda: bytes((adaptive.МІТКА_Т5М,)) + adaptive.кодувати_т5м(words),
+            lambda b: adaptive.декодувати_т5м(b[1:]),
+            raw,
+        )
+    except adaptive.ПомилкаНосія:
+        pass
     for name, (encode, decode, raw) in options.items():
         if not isinstance(raw, bytes) or encode() != raw or tuple(decode(raw)) != words:
             raise EvidenceError(f"порушено exact-word roundtrip: {name}")
@@ -200,7 +209,7 @@ def main():
             },
             "chosen": selection.профіль, "chosen_bytes": len(selection.дані),
         }
-        for key in ("F3", "Tb33"):
+        for key in ("F3", "Tb33", "T5M"):
             if key not in row["profiles"]:
                 row["profiles"][key] = {"status": "UNSUPPORTED"}
         if not args.check:
