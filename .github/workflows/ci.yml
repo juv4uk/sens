@@ -207,7 +207,7 @@ jobs:
           fi
           echo "D10_SASSOC_PROJECTIONS_NATIVE_PASS functions=1 projections=7 laws=15 negative=2 direct_d10_admission=unclaimed"
 
-      - name: "D9 — чотири українські проєкції, 10 нативних законів"
+      - name: "D9 — три українські проєкції, 8 нативних законів"
         shell: bash
         run: |
           set -euo pipefail
@@ -215,61 +215,29 @@ jobs:
           sha256sum "$fixture" lib/core4.lisp target/debug/sens
           if ! observed="$(target/debug/sens "$fixture" 2>&1)"; then
             printf '%s\n' "$observed" >&2
-            echo "::error::D9_UK_PROJECTIONS_RED id=d9-uk-four layer=eval fixture=$fixture expected=10-D1-YES actual=execution-error" >&2
-            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "execution-error" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
+            echo "::error::D9_UK_PROJECTIONS_RED id=d9-uk-four layer=eval fixture=$fixture expected=8-D1-YES actual=execution-error" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1)" --actual "execution-error" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
             exit 1
           fi
           actual="$(printf '%s\n' "$observed" | tail -n 1)"
-          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
-            # One native SENS diagnostic, not a surrogate Python evaluator.
-            # Shows exact D24-to-text outputs if only serialization diverged.
-            printf '%s\n' '(list (число-рядок (довжина (quote (а б)))) (число-рядок (довжина (quote ()))))' > "$RUNNER_TEMP/d9-number-projection-observed.lisp"
-            if extra="$(target/debug/sens "$RUNNER_TEMP/d9-number-projection-observed.lisp" 2>&1)"; then
-              echo "D9_UK_NUMBER_TEXT_OBSERVED=$(tail -n 1 <<< "$extra")" >&2
-            else
-              echo "D9_UK_NUMBER_TEXT_DIAGNOSTIC_RED=$extra" >&2
-            fi
-            # Точкові виклики лише реального SENS на RED; Python не виконує семантику.
-            probes=(
-              '(нуль-д24? (довжина (quote (а б))))'
-              '(д24-цифра-у-текст (довжина (quote (а б))))'
-              '(д24-цифри-у-текст (довжина (quote (а б))) "")'
-              '(рядок-додати "2" "")'
-              '(mod (довжина (quote (а б))) #d24:000000000000000000001010)'
-              '(quotient (довжина (quote (а б))) #d24:000000000000000000001010)'
-            )
-            for expression in "${probes[@]}"; do
-              printf '%s\n' "$expression" > "$RUNNER_TEMP/d9-d24-number-probe.lisp"
-              if probe_observed="$(target/debug/sens "$RUNNER_TEMP/d9-d24-number-probe.lisp" 2>&1)"; then
-                echo "D9_D24_NUMBER_PROBE expression=$expression actual=$(tail -n 1 <<< "$probe_observed")" >&2
-              else
-                echo "D9_D24_NUMBER_PROBE_RED expression=$expression actual=$probe_observed" >&2
-              fi
-            done
-            echo "::error::D9_UK_PROJECTIONS_DIFF id=d9-uk-four layer=eval fixture=$fixture expected='(1 1 1 1 1 1 1 1 1 1)' actual=$actual" >&2
-            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1 1 1)" --actual "$actual" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_UK_PROJECTIONS_DIFF id=d9-uk-four layer=eval fixture=$fixture expected='(1 1 1 1 1 1 1 1)' actual=$actual" >&2
+            python3 scripts/ci_failure_contract.py record-diff --test-id "d9-uk-four" --layer eval --fixture "$fixture" --expected "(1 1 1 1 1 1 1 1)" --actual "$actual" --reproduce "target/debug/sens $fixture" --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" --stderr-tail "$observed"
             exit 1
           fi
-          echo "D9_UK_PROJECTIONS_PASS functions=4 laws=10 authority=SENS"
-          # D9 D24 NUMBER->STRING: людина бачить проєкцію, арифметика лишається D24.
-          number_laws="tests/semantic/d9-number-d24-text-laws.lisp"
+          echo "D9_UK_PROJECTIONS_PASS functions=3 laws=8 authority=SENS"
+          # D9 NUMBER->STRING лишається fail-closed без точного D24+ wire-закону.
           number_bad="tests/semantic/d9-number-d24-text-invalid.lisp"
-          sha256sum "$number_laws" "$number_bad" lib/core4.lisp target/debug/sens
-          if ! number_out="$(target/debug/sens "$number_laws" 2>&1)"; then
-            echo "::error::D9_NUMBER_TEXT_EXEC_RED layer=eval expected=six-D1-yes actual=execution-error" >&2
-            printf "%s\n" "$number_out" >&2
-            exit 1
-          fi
-          number_actual="$(printf "%s\n" "$number_out" | tail -n 1)"
-          if [[ "$number_actual" != "(1 1 1 1 1 1)" ]]; then
-            echo "::error::D9_NUMBER_TEXT_LAW_DIFF layer=eval expected=(1 1 1 1 1 1) actual=$number_actual" >&2
-            exit 1
-          fi
+          sha256sum "$number_bad" lib/core4.lisp target/debug/sens
           if number_negative="$(target/debug/sens "$number_bad" 2>&1)"; then
-            echo "::error::D9_NUMBER_TEXT_D1_ACCEPTED layer=eval expected=D1-predicate-refusal actual=accepted" >&2
+            echo "::error::D9_NUMBER_TEXT_D24_ACCEPTED layer=eval expected=fail-closed actual=accepted" >&2
             exit 1
           fi
-          echo "D9_NUMBER_D24_TEXT_SENS_PASS laws=6 negative=1 scope=D8-WRITE-TO-STRING D24-law=6"
+          if ! grep -Fq "unknown symbol" <<<"$number_negative"; then
+            echo "::error::D9_NUMBER_TEXT_WRONG_REFUSAL layer=eval expected=unknown-D9-projection actual=$number_negative" >&2
+            exit 1
+          fi
+          echo "D9_NUMBER_D24_TEXT_FAIL_CLOSED_PASS decimal_projection=absent exact_wire=unratified"
 
       - name: "D9 — реальні визначення TMS, 10 законів SENS"
         shell: bash
