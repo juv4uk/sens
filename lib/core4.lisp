@@ -6115,3 +6115,13 @@
 
 ; D9:110111001, ціль визначена вище (bootstrap resolve-time).
 ; D9:110111001 NUMBER->STRING — alias визначається після реалізації D24.
+
+; D10:0011001001 MAP-INTO — pure immutable SENS projection.
+; Research: research/d10-queue-sortcar-mapinto-batch-2026-10-17.lisp.
+; Maps fn over src using existing Core4. dest is intentionally ignored:
+; this is not destructive Common Lisp MAP-INTO semantics and does not
+; assert a distinct vector representation or direct D10 opcode admission.
+(0011 відобразити-у
+  (0010 (fn dest src)
+    (відобразити fn src)))
+(0011 map-into відобразити-у)
