@@ -72,3 +72,21 @@
        (understand-query-relation words))
       (#d1:1
        (001 ())))))
+
+; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
+; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
+; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
+; D9:000001011
+(0011 розібрати-є understand-is)
+; D9:000001100
+(0011 розібрати-відношення understand-relation)
+; D9:000011111
+(0011 розібрати-загальний understand-universal)
+; D9:000110001
+(0011 розібрати understand)
+; D9:000111001
+(0011 розібрати-запит-є understand-query-is)
+; D9:000110000
+(0011 розібрати-запит-відношення understand-query-relation)
+; D9:000101010
+(0011 розібрати-запит understand-query)
