@@ -641,12 +641,12 @@ jobs:
 
 
 
-      - name: "D5/D6/D8/D9 — 98 точкових самосвідків SENS (дванадцять партій)"
+      - name: "D5/D6/D8/D9 — 106 точкових самосвідків SENS (тринадцять партій)"
         shell: bash
         run: |
           set -euo pipefail
           expected="(1 1 1 1 1 1 1 1)"
-          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp tests/semantic/d9-numeric-cdr-derived-laws.lisp tests/semantic/d8-scale-remap-doseq-laws.lisp tests/semantic/d8-partial-lcm-mod-laws.lisp tests/semantic/d5-quotient-mod-gcd-laws.lisp; do
+          for fixture in tests/semantic/d8-rassq-until-batch.lisp tests/semantic/d8-always-never-d1-laws.lisp tests/semantic/d8-d24-one-step-laws.lisp tests/semantic/d6-sublis-tree-laws.lisp tests/semantic/d8-signum-reciprocal-composition-laws.lisp tests/semantic/d8-reciprocal-alias-laws.lisp tests/semantic/d8-repeat-take-drop-subseq-laws.lisp tests/semantic/d6-add1-sub1-uk-laws.lisp tests/semantic/d9-numeric-cdr-derived-laws.lisp tests/semantic/d8-scale-remap-doseq-laws.lisp tests/semantic/d8-partial-lcm-mod-laws.lisp tests/semantic/d5-quotient-mod-gcd-laws.lisp tests/semantic/d8-truncate-rem-derived-laws.lisp; do
             test_id="sens-$(basename "$fixture" .lisp)"
             fixture_sha="$(sha256sum "$fixture" | cut -d" " -f1)"
             if [[ "$fixture" == "tests/semantic/d8-scale-remap-doseq-laws.lisp" ]]; then
@@ -680,6 +680,17 @@ jobs:
             exit 1
           fi
           echo "D9_DERIVED_NEGATIVE_PASS D24-vs-D48 no-implicit-coercion"
+          d8_bad="tests/semantic/d8-truncate-rem-mixed-width-negative.lisp"
+          if d8_bad_msg="$(target/debug/sens "$d8_bad" 2>&1)"; then
+            echo "::error::D8_REM_WIDTH_ACCEPTED fixture=$d8_bad expected=D24-D48-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if [[ "$d8_bad_msg" != *"same-domain numeric values"* ]]; then
+            echo "::error::D8_REM_BAD_REFUSAL fixture=$d8_bad expected=D24-D48-refusal actual=$d8_bad_msg" >&2
+            exit 1
+          fi
+          echo "D8_TRUNCATE_REM_PASS laws=8 typed_negative=1"
+
 
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
         id: packed
