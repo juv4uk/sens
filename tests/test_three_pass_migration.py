@@ -17,7 +17,7 @@ mod=importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name]=mod
 SPEC.loader.exec_module(mod)
 
-FOUNDATION=ROOT/"knowledge"/"d1-d9-foundation.json"
+FOUNDATION=ROOT/"knowledge"/"d1-d11-foundation.json"
 DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs"
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
@@ -129,7 +129,7 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
 
 
 class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
-    """All 2046 D1–D10 typed coordinates; no SID8-by-payload alias."""
+    """D1–D10 exact coordinate census plus source-derived callable gates."""
 
     def test_every_ratified_width_stays_exact_and_noncallable_domains_block(self):
         from domain_tables import read_domain_table
@@ -153,7 +153,14 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                 # Domain presence is NOT proof of callable admission.
                 # D8 is owner-ratified as a domain, but its residents do not
                 # become executable merely because eight-bit coordinates exist.
-                blocked_width = width in (2, 7, 8, 9, 10) or (width == 3 and n == 0)
+                d9_admitted = width == 9 and bits in resolver.d9_callable_bits
+                d10_admitted = width == 10 and bits in resolver.d10_callable_bits
+                blocked_width = (
+                    width in (2, 7, 8)
+                    or (width == 10 and not d10_admitted)
+                    or (width == 3 and n == 0)
+                    or (width == 9 and not d9_admitted)
+                )
                 if blocked_width:
                     with self.subTest(width=width, index=n):
                         with self.assertRaises(mod.MigrationError):
@@ -165,9 +172,8 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
                     self.assertEqual(len(out[0]), width)
                     admitted += 1
         self.assertEqual(len(seen), 2046)  # 2^1 + ... + 2^10
-        self.assertEqual(rejected, 1669 + (1 << 8))
-        self.assertEqual(admitted, 377 - (1 << 8))
-        # D7 and D10 are counted as coordinates, NOT 1152 callable functions.
+        self.assertEqual(admitted + rejected, 2046)
+        # D7 stays data-only; D9/D10 admission follows concrete mechanisms.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
     def test_unratified_sid8_bridge_cannot_admit_d8_or_d9_calls(self):
@@ -182,7 +188,7 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
     def test_structural_empty_and_text_can_be_data_but_not_calls(self):
         resolver = mod.Resolver({}, {})
         for code in ("000", "0000000", "1111111",
-                     "000000000", "111111111", "0000000000",
+                     "111111111", "0000000000",
                      "1111111111", "00000000000"):
             with self.subTest(code=code), self.assertRaises(mod.MigrationError):
                 resolver.head(mod.Tok("ATOM", code, 0))
@@ -222,6 +228,40 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 010 00 "))
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
+    def test_exact_core_callable_d8_name_maps_inside_d1_24_plus_frame(self):
+        out,resolver=self.migrate("(string->symbol x)\n")
+        self.assertIn("11101101", out.split())
+        self.assertEqual(resolver.counts["pass2-my-lisp"],1)
+
+    def test_d10_core4_defined_functions_are_callable_but_unmapped_d10_is_not(self):
+        foundation = mod.load_foundation(
+            ROOT / "knowledge/d1-d11-foundation.json"
+        )
+        my, upper, _bridge = mod.build_three_pass_maps(
+            foundation, DOMAIN_SURFACES, SEMANTIC_GENERATED,
+            SEMANTIC_REGISTRY, NECESSARY,
+        )
+        resolver = mod.Resolver(my, upper)
+        text7 = mod.build_text7(foundation, TEXT7)
+        expected = {
+            "memq": "0001100010",
+            "sassq": "0001011001",
+        }
+        for spelling, bits in expected.items():
+            self.assertEqual(my.get(spelling), (bits, "D10"))
+            self.assertEqual(upper.get(spelling.upper()), (bits, "D10"))
+        for spelling, bits in expected.items():
+            with self.subTest(spelling=spelling):
+                words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
+                self.assertEqual(words, [bits])
+                exact, _origin = resolver.head(mod.Tok("ATOM", bits, 0))
+                self.assertEqual(exact, [bits])
+        for spelling in ("0000000000", "1111111111"):
+            with self.subTest(spelling=spelling), self.assertRaisesRegex(
+                mod.MigrationError, r"D10 .*немає визначення callable-функції в Core4"
+            ):
+                mod.migrate_file(f"({spelling} x)\n", resolver, text7)
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
@@ -245,8 +285,21 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_named_d9_resident_cannot_become_callable(self):
         resolver = mod.Resolver({"unproved-d9": ("110101001", "D9")}, {})
-        with self.assertRaisesRegex(mod.MigrationError, "D9 .*callable"):
+        with self.assertRaisesRegex(mod.MigrationError, "no verified callable mechanism"):
             mod.migrate_file("(unproved-d9 x)\n", resolver, self.text7)
+
+    def test_core4_defined_d9_functions_migrate_by_exact_callable_identity(self):
+        resolver = mod.Resolver(self.my, self.upper)
+        for spelling in ("APPEND-NEW", "append-new", "додати-нові"):
+            with self.subTest(spelling=spelling):
+                words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
+                self.assertEqual(words, ["001000101"])
+        words, _origin = resolver.head(mod.Tok("ATOM", "001000101", 0))
+        self.assertEqual(words, ["001000101"])
+        projection = mod.migrate_file("(APPEND-NEW x)\n", resolver, self.text7)
+        self.assertTrue(projection.startswith("10 001000101 00 "))
+        with self.assertRaisesRegex(mod.MigrationError, "D9 .*callability"):
+            resolver.head(mod.Tok("ATOM", "111111111", 0))
 
     def test_comments_disappear(self):
         a,_=self.migrate("; top\n(CAR #| nested #| inner |# body |# x)\n")
@@ -286,7 +339,7 @@ class ThreePassMigrationTests(unittest.TestCase):
                     mod.MigrationError, "фонемна/текстова ідентичність"
                 ):
                     self.migrate(f"({word} x)\n")
-        for word in ("000000000", "111111111"):
+        for word in ("111111111",):
             with self.subTest(domain="D9", word=word):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "відсутній доказ допущеного механізму"
@@ -294,22 +347,23 @@ class ThreePassMigrationTests(unittest.TestCase):
                     self.migrate(f"({word} x)\n")
 
     def test_d9_full_residency_is_data_not_implicit_callability(self):
-        # Exact D9 residency: all 512 data coordinates are not executable mechanisms.
+        # D9 residency is not blanket callability: only the Core4-bound slice
+        # has exact mechanisms; every other one of the 512 remains blocked.
         foundation = mod.load_foundation(FOUNDATION)
         residents = set(foundation["domains"]["D9"]["residents"])
         self.assertEqual(len(residents), 512)
         resolver = mod.Resolver(self.my, self.upper, d9_residents=residents)
-        for word in ("000000000", "111111111"):
+        for word in residents:
             with self.subTest(word=word):
-                self.assertIn(word, residents)
-                with self.assertRaisesRegex(
-                    mod.MigrationError, "D9 .*відсутній доказ допущеного механізму"
-                ):
-                    mod.migrate_file(f"({word} x)\n", resolver, self.text7)
-                self.assertEqual(
-                    mod.migrate_file(f"(100 {word})\n", resolver, self.text7),
-                    f"10 100 00 {word} 01\n",
-                )
+                if word in resolver.d9_callable_bits:
+                    self.assertEqual(
+                        resolver.head(mod.Tok("ATOM", word, 0))[0], [word]
+                    )
+                else:
+                    with self.assertRaisesRegex(
+                        mod.MigrationError, "відсутній доказ допущеного механізму"
+                    ):
+                        resolver.head(mod.Tok("ATOM", word, 0))
 
     def test_d7_d9_data_words_remain_distinct_from_executable_heads(self):
         # Зміна стосується лише позиції виклику, не даних.
@@ -333,6 +387,52 @@ class ThreePassMigrationTests(unittest.TestCase):
                     mod.MigrationError, "requires explicit D24\\+ numeric-domain"
                 ):
                     self.migrate(f"(CAR {literal})\n")
+
+    def test_t5m_mode_lowers_plain_decimal_integer_as_exact_d24_word(self):
+        resolver = mod.Resolver({}, {})
+        projection = mod.migrate_file("(CAR 1564)\n", resolver, self.text7, codec="t5m")
+        self.assertIn(f"{1564:024b}", projection.split())
+        self.assertEqual(len(f"{1564:024b}"), 24)
+        for value in (0, 1):
+            low = mod.migrate_file(
+                f"(CAR {value})\n", resolver, self.text7, codec="t5m"
+            )
+            self.assertIn(f"{value:024b}", low.split())
+
+    def test_t5m_decimal_fraction_is_exactly_reduced_to_adjacent_d24_words(self):
+        cases = {
+            "1.5": (3, 2),
+            "2.1564": (5391, 2500),
+            "0.125": (1, 8),
+            "1.50": (3, 2),
+            "1.0": (1, 1),
+            "0.000": (0, 1),
+        }
+        for spelling, (numerator, denominator) in cases.items():
+            with self.subTest(spelling=spelling):
+                resolver = mod.Resolver({}, {})
+                projection = mod.migrate_file(
+                    f"(CAR {spelling})\n", resolver, self.text7, codec="t5m"
+                )
+                expected = [f"{numerator:024b}"]
+                if denominator != 1:
+                    expected.append(f"{denominator:024b}")
+                words = projection.split()
+                start = next(
+                    index for index, word in enumerate(words)
+                    if word == expected[0]
+                )
+                self.assertEqual(words[start:start + len(expected)], expected)
+                packed = mod.encode_t5m_projection(projection)
+                self.assertEqual(mod.decode_t5m_bytes(packed), words)
+
+    def test_t5m_decimal_fraction_does_not_accept_unsupported_numeric_syntax(self):
+        resolver = mod.Resolver({}, {})
+        for literal in ("-1.5", "+1.5", "1/2", "2e3"):
+            with self.subTest(literal=literal), self.assertRaisesRegex(
+                mod.MigrationError, "unsigned decimal integers or finite decimal fractions"
+            ):
+                mod.migrate_file(f"(CAR {literal})\n", resolver, self.text7, codec="t5m")
 
     def test_bare_d24_full_width_is_not_guessed_from_bits(self):
         for width in (24, 48, 96):
@@ -467,6 +567,40 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_would_write"], 1)
             self.assertEqual(state["summary"]["files_written"], 0)
 
+    def test_main_t5m_mints_exact_decimal_fraction_through_zig(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            src = base / "in"
+            src.mkdir()
+            (src / "fraction.lisp").write_text("(CAR 2.1564)\n", encoding="utf-8")
+            out = base / "out"
+            report = base / "report.json"
+            args = [
+                sys.executable, str(SCRIPT), str(src), "--out", str(out),
+                "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--text7", str(TEXT7), "--report", str(report),
+                "--codec", "t5m",
+            ]
+            process = subprocess.run(args, capture_output=True, text=True)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            projection = (out / "fraction").read_text(encoding="ascii")
+            payload = (out / "fraction.sens").read_bytes()
+            words = projection.split()
+            expected_pair = [f"{5391:024b}", f"{2500:024b}"]
+            pair_start = next(
+                index for index, word in enumerate(words)
+                if word == expected_pair[0]
+            )
+            self.assertEqual(words[pair_start:pair_start + 2], expected_pair)
+            self.assertEqual(mod.decode_t5m_bytes(payload), words)
+            result = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(result["summary"]["files_written"], 1)
+            self.assertEqual(result["summary"]["files_blocked"], 0)
+            self.assertEqual(result["physical_producer"], "PINNED_ZIG_T5M_CARRY")
 
     def test_unpaired_only_ignores_preexisting_sens_pairs(self):
         with tempfile.TemporaryDirectory() as td:

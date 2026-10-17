@@ -4,7 +4,10 @@
 Interpret all historical spellings and eight-bit tokens through audited
 provenance; they are never themselves a current domain or call law.
 Pass 2: current admitted source surfaces -> corresponding exact-domain words.
-Pass 3: historical Lisp 1–1.5 names -> admitted current D3–D6 resident.
+Pass 3: historical Lisp 1–1.5 names -> admitted current callable resident.
+Within the D1–11 inventory, callability follows concrete Core4 definitions
+and admitted lower-domain mechanisms, not a blanket D10 ban. D11 remains
+test-only data and never enters the callable map.
 
 Rules derived from current SENS contract and later owner decisions:
 - () is D3:000; nonempty list structure uses D2 10/00/11/01
@@ -15,9 +18,13 @@ Rules derived from current SENS contract and later owner decisions:
   admitted. This is NOT permission to call that text as a function.
   An unrepresentable identifier or unproved historical successor fails closed.
 - Quoted data resolves an admitted ladder identity before D7 text fallback.
-- Textual decimal tokens and #d/#b/#q2 textual forms project to D7 data,
-  NOT implicit numerical values. Bare binary words in numeric-width D24+
-  require an explicit admitted numeric domain/frame and fail closed here.
+- In default T5 mode, textual numeric spellings retain the historical D7
+  text-data projection. Explicit T5M mode accepts unsigned decimal integers
+  and finite decimal fractions as numeric input, lowering them exactly to
+  D24+ natural words / reduced adjacent numerator-denominator words. This is
+  an explicit migration projection, not a new language/runtime admission.
+- #d/#b/#q2 textual forms and bare binary words in numeric-width D24+ still
+  require a separate admitted numeric domain/frame and fail closed here.
 - Current D7 keyboard/v2 128/128 is the ONLY text projection admitted by
   this script. Historical .rs projection is rejected; no v1 corpus was
   migrated, so no v1-to-v2 conversion prerequisite is needed.
@@ -41,6 +48,7 @@ from functools import lru_cache
 from dataclasses import dataclass
 import json
 import hashlib
+from math import gcd
 import os
 from pathlib import Path
 import re
@@ -52,7 +60,10 @@ SCRIPTS = str(Path(__file__).resolve().parent)
 if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 
-from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
+from sens_t5_codec import (
+    SensT5Error, decode_bytes, decode_t5m_bytes, encode_projection,
+    encode_t5m_projection, parse_words, parse_t5m_words, typed_sha256,
+)
 import zig_codec_bridge
 import migration_publish_pair
 
@@ -65,6 +76,12 @@ D2_CLOSE="01"
 D2_OPEN="10"
 D2_DOT="11"
 D3_EMPTY="000"
+CORE_OPERATION_D8 = frozenset({
+    "11100000", "11101010", "11101101", "11101110", "11110100",
+})
+CORE_OPERATION_D9 = frozenset({
+    "110011110", "110011100", "110011101", "110101010", "110101011",
+})
 
 NUMERIC_RE = re.compile(
     r"""(?ix)
@@ -317,11 +334,10 @@ def current_residents(data):
         for bits,label in desc["residents"].items():
             if domain=="D3" and label=="EMPTY":
                 continue
-            # A label may exist in several domains (e.g. MAP), so do not let one
-            # TEXT-DATA likewise). The migration admits call-domains D3-D6, so the
-            # LOWEST domain must win: first-wins keeps MAP -> D6 101000 instead of
-            # overwrite another, which made en 'map' resolve to a non-D3-D6
-            # resident and broke every my-lisp head resolution.
+            # A label may exist in several domains (e.g. MAP), so keep the
+            # first/lowest listed identity. This preserves MAP -> D6 101000;
+            # D8/D9 aliases are admitted separately below only with exact
+            # mechanism evidence.
             labels.setdefault(str(label).upper(),(bits,domain))
     # D11 is a separate testing-only inventory, never a callable-head or
     # historical-successor lookup by human spelling. Its 43 typed words remain
@@ -392,6 +408,61 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 if name not in my:
                     my[name]=unique
 
+    # D8 residency is not wholesale callability. Import only the exact five
+    # D8 identities currently admitted by DomainIdentity::core_operation,
+    # using their owner-authored D8 surface rows as source-name provenance.
+    from domain_tables import read_domain_table
+    d8_path = REPO_ROOT / "lib" / "domains" / "d8.lisp"
+    for row in read_domain_table(d8_path):
+        if row.bits not in CORE_OPERATION_D8:
+            continue
+        ident = (row.bits, "D8")
+        for name in (row.uk, row.ukr, row.san, row.en):
+            if not name:
+                continue
+            previous = my.get(name)
+            if previous is None:
+                my[name] = ident
+            elif previous != ident:
+                my[name] = None
+        if row.lisp:
+            previous = residents.get(row.lisp.upper())
+            if previous is None or previous == ident:
+                residents[row.lisp.upper()] = ident
+            else:
+                residents[row.lisp.upper()] = None
+
+    # D9 has a large ratified resident table, but only coordinates with an
+    # actual Core4 callable definition (or one of the exact Rust mechanisms)
+    # are migration-callable. Name/identity evidence comes from the canonical
+    # D9 table; callable evidence is derived from evaluated-shape definitions
+    # in the active Core4 source, matching bind_language_definition's slots.
+    d9_callable = core4_d9_callable_rows()
+    unique_surfaces = quoted_ladder_surfaces()
+    for bits, row in d9_callable.items():
+        ident = (bits, "D9")
+        for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
+            if not name or unique_surfaces.get(name) != frozenset({("D9", bits)}):
+                continue
+            if name == name.upper():
+                residents[name] = ident
+            else:
+                # The exact current domain row resolves stale/ambiguous
+                # historical surface aliases without importing SID8 evidence.
+                my[name] = ident
+
+    # Core4-defined D10 names are callable through their actual language
+    # definitions. Keep admission source-derived: a D10 coordinate without a
+    # matching definition remains non-callable.
+    for bits, row in core4_d10_defined_rows().items():
+        ident = (bits, "D10")
+        for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
+            if not name or unique_surfaces.get(name) != frozenset({("D10", bits)}):
+                continue
+            if name == name.upper():
+                residents.setdefault(name, ident)
+            else:
+                my.setdefault(name, ident)
 
     upper={name:ident for name,ident in residents.items()}
     return my,upper,_bridge_by_sid
@@ -549,6 +620,8 @@ class Resolver:
         self.my=my
         self.upper=upper
         self.d9_residents=set(d9_residents or ())
+        self.d9_callable_bits=frozenset(core4_d9_callable_rows())
+        self.d10_callable_bits=frozenset(core4_d10_defined_rows())
         if bridge_by_sid:
             raise MigrationError("unratified SID8 bridge cannot authorize executable heads")
         self.bridge_by_sid={}
@@ -589,6 +662,9 @@ class Resolver:
                     tok,
                 )
             if width == 9:
+                if t in self.d9_callable_bits:
+                    self.counts["already-exact"] += 1
+                    return [t], "already-exact"
                 # Contract 11.9: ratified residency is not callable mechanism.
                 raise MigrationError(
                     f"D9 {t}: відсутній доказ допущеного механізму виклику; "
@@ -596,10 +672,10 @@ class Resolver:
                     tok,
                 )
             if width == 10:
-                raise MigrationError(
-                    f"D10 {t}: ратифікований кодбук не надає runtime admission",
-                    tok,
-                )
+                if t in self.d10_callable_bits:
+                    self.counts["already-exact"] += 1
+                    return [t], "already-exact"
+                raise MigrationError(f"D10 {t}: немає визначення callable-функції в Core4", tok)
             if width > 10:
                 raise MigrationError(
                     f"unqualified {width}-bit call head has no admitted domain mechanism",
@@ -632,10 +708,19 @@ class Resolver:
             ident=self.my[t]
             if ident is None:
                 raise MigrationError(
-                    f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
+                    f"legacy-unmapped my-lisp function {t!r}: no proven callable identity "
+                    "in the D1–24+ domain frame; residency does not imply callability",
                     tok,
                 )
-            if ident[1] not in ("D3", "D4", "D5", "D6") or len(ident[0]) != int(ident[1][1:]):
+            admitted = (
+                ident[1] in ("D3", "D4", "D5", "D6")
+                and len(ident[0]) == int(ident[1][1:])
+            ) or (ident[1] == "D8" and ident[0] in CORE_OPERATION_D8) or (
+                ident[1] == "D9" and ident[0] in self.d9_callable_bits
+            ) or (
+                ident[1] == "D10" and ident[0] in self.d10_callable_bits
+            )
+            if not admitted:
                 raise MigrationError(
                     f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
                 )
@@ -647,10 +732,19 @@ class Resolver:
             ident=self.upper[t]
             if ident is None:
                 raise MigrationError(
-                    f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
+                    f"legacy-unmapped Lisp 1-1.5 function {t}: no proven callable identity "
+                    "in the D1–24+ domain frame; residency does not imply callability",
                     tok,
                 )
-            if ident[1] not in ("D3", "D4", "D5", "D6") or len(ident[0]) != int(ident[1][1:]):
+            admitted = (
+                ident[1] in ("D3", "D4", "D5", "D6")
+                and len(ident[0]) == int(ident[1][1:])
+            ) or (ident[1] == "D8" and ident[0] in CORE_OPERATION_D8) or (
+                ident[1] == "D9" and ident[0] in self.d9_callable_bits
+            ) or (
+                ident[1] == "D10" and ident[0] in self.d10_callable_bits
+            )
+            if not admitted:
                 raise MigrationError(
                     f"{ident[1]} {ident[0]}: no verified callable mechanism for {t!r}", tok
                 )
@@ -716,6 +810,111 @@ def collect_global_bindings(forms,resolver=None):
     return bindings
 
 
+@lru_cache(maxsize=1)
+def core4_d9_callable_rows():
+    """Exact D9 rows with a concrete Core4 callable binding or Rust mechanism.
+
+    This mirrors the runtime rule: a D9 slot is callable only when an actual
+    closure/builtin is bound to that exact identity. The full D9 resident map
+    is deliberately not used as an admission list.
+    """
+    from domain_tables import read_domain_table
+
+    core4_path = REPO_ROOT / "lib" / "core4.lisp"
+    source = strip_comments(core4_path.read_text(encoding="utf-8"))
+    forms = Parser(tokenize(source)).parse_program()
+    callable_names = set()
+    aliases = []
+    define_heads = {"00001001", "0011", "define", "def"}
+    lambda_heads = {"0010", "lambda", "лямбда"}
+
+    for form in forms:
+        if (not isinstance(form, ListNode) or form.tail is not None
+                or len(form.items) < 3 or not isinstance(form.items[0], Atom)
+                or form.items[0].tok.text not in define_heads):
+            continue
+        target = form.items[1]
+        if isinstance(target, ListNode) and target.items and isinstance(target.items[0], Atom):
+            # Function shorthand: (DEFINE (name args...) body...).
+            callable_names.add(target.items[0].tok.text)
+            continue
+        if not isinstance(target, Atom):
+            continue
+        value = form.items[2]
+        if (isinstance(value, ListNode) and value.items
+                and isinstance(value.items[0], Atom)
+                and value.items[0].tok.text in lambda_heads):
+            callable_names.add(target.tok.text)
+        elif isinstance(value, Atom):
+            # A simple alias is callable only if its target is already known
+            # callable. Iterate to a fixed point for chains of aliases.
+            aliases.append((target.tok.text, value.tok.text))
+
+    changed = True
+    while changed:
+        changed = False
+        for alias, target in aliases:
+            if target in callable_names and alias not in callable_names:
+                callable_names.add(alias)
+                changed = True
+
+    rows = {}
+    for row in read_domain_table(REPO_ROOT / "lib" / "domains" / "d9.lisp"):
+        names = {row.uk, row.ukr, row.san, row.en, row.lisp, row.sym} - {None, "()"}
+        if row.bits in CORE_OPERATION_D9 or names.intersection(callable_names):
+            rows[row.bits] = row
+    return rows
+
+
+@lru_cache(maxsize=1)
+def core4_d10_defined_rows():
+    """Map concrete Core4-defined names to their exact D10 call identities."""
+    from domain_tables import read_domain_table
+
+    source = strip_comments((REPO_ROOT / "lib" / "core4.lisp").read_text(
+        encoding="utf-8"
+    ))
+    forms = Parser(tokenize(source)).parse_program()
+    defined_names = set()
+    aliases = []
+    define_heads = {"00001001", "0011", "define", "def"}
+    lambda_heads = {"0010", "lambda", "лямбда"}
+
+    for form in forms:
+        if (not isinstance(form, ListNode) or form.tail is not None
+                or len(form.items) < 3 or not isinstance(form.items[0], Atom)
+                or form.items[0].tok.text not in define_heads):
+            continue
+        target = form.items[1]
+        if isinstance(target, ListNode) and target.items and isinstance(target.items[0], Atom):
+            defined_names.add(target.items[0].tok.text)
+            continue
+        if not isinstance(target, Atom):
+            continue
+        value = form.items[2]
+        if (isinstance(value, ListNode) and value.items
+                and isinstance(value.items[0], Atom)
+                and value.items[0].tok.text in lambda_heads):
+            defined_names.add(target.tok.text)
+        elif isinstance(value, Atom):
+            aliases.append((target.tok.text, value.tok.text))
+
+    changed = True
+    while changed:
+        changed = False
+        for alias, target in aliases:
+            if target in defined_names and alias not in defined_names:
+                defined_names.add(alias)
+                changed = True
+
+    rows = {}
+    for row in read_domain_table(REPO_ROOT / "lib" / "domains" / "d10.lisp"):
+        names = {row.uk, row.ukr, row.san, row.en, row.lisp, row.sym} - {None, "()"}
+        if names.intersection(defined_names):
+            rows[row.bits] = row
+    return rows
+
+
 def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
     if isinstance(node, Atom):
         # Variadic lambda: bare symbol parameter binds all args as a list.
@@ -763,6 +962,47 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     if len(t)==2 and set(t)<=set("01"):
         raise MigrationError(
             f"D2 word {t} is structural control only; it cannot be ordinary data",
+            node.tok,
+        )
+    # Explicit T5M mode treats plain decimal numerals as an input projection
+    # and lowers them exactly into D24+ natural words. Finite decimal fractions
+    # become canonical adjacent numerator/denominator words after gcd reduction;
+    # no host float or D7 digit text is involved.
+    if getattr(resolver, "t5m_numeric", False) and re.fullmatch(r"\d+", t):
+        value = int(t, 10)
+        width = 24
+        while value.bit_length() > width:
+            width *= 2
+        if width > 4 * 1024 * 1024 * 5:
+            raise MigrationError("T5M decimal integer exceeds physical size limit", node.tok)
+        return [f"{value:0{width}b}"]
+    if (getattr(resolver, "t5m_numeric", False)
+            and re.fullmatch(r"(?:\d+\.\d+|\.\d+)", t)):
+        whole, fractional = t.split(".", 1)
+        if len(whole) + len(fractional) > 4096:
+            raise MigrationError(
+                "T5M decimal fraction exceeds the 4096-digit exact-conversion limit",
+                node.tok,
+            )
+        numerator = int((whole or "0") + fractional, 10)
+        denominator = 10 ** len(fractional)
+        divisor = gcd(numerator, denominator)
+        numerator //= divisor
+        denominator //= divisor
+        values = [numerator] if denominator == 1 else [numerator, denominator]
+        width = 24
+        while max(value.bit_length() for value in values) > width:
+            width *= 2
+        if width > 4 * 1024 * 1024 * 5:
+            raise MigrationError("T5M decimal fraction exceeds physical size limit", node.tok)
+        return [f"{value:0{width}b}" for value in values]
+    if (getattr(resolver, "t5m_numeric", False)
+            and (NUMERIC_RE.fullmatch(t) or re.fullmatch(
+                r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t
+            ))):
+        raise MigrationError(
+            "T5M accepts unsigned decimal integers or finite decimal fractions only; "
+            "signs, ratios, exponents, and explicit numeric spellings are not lowered",
             node.tok,
         )
     if t in D1_UK_SURFACES:
@@ -1164,7 +1404,8 @@ def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
             tmp_name.unlink(missing_ok=True)
 
 
-def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge):
+def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge,
+                        *, codec="t5"):
     """Keep SENS word identities upstream; Zig alone mints physical T5 bytes.
 
     The Python bytes are a parity witness, NEVER the published carrier. This
@@ -1172,7 +1413,7 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
     """
     expected = hashlib.sha256(reference).hexdigest()
     physical = bridge.carry_t5(
-        binary, projection, trusted_source_sha256=expected,
+        binary, projection, codec=codec, trusted_source_sha256=expected,
     )
     if physical != reference:
         offset = next((i for i, (a, b) in enumerate(zip(reference, physical))
@@ -1183,7 +1424,9 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
             f"actual_sha256={hashlib.sha256(physical).hexdigest()} "
             f"first_byte={offset}"
         )
-    receipt = bridge.verify_t5(binary, physical, trusted_source_sha256=expected)
+    receipt = bridge.verify_t5(
+        binary, physical, codec=codec, trusted_source_sha256=expected
+    )
     if (receipt.get("physical_sha256") != expected or
             receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256" or
             not receipt.get("zig_binary_sha256")):
@@ -1191,7 +1434,10 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
     return physical, receipt
 
 
-def migrate_file(source: str,resolver,text7):
+def migrate_file(source: str,resolver,text7,*,codec="t5"):
+    if codec not in ("t5", "t5m"):
+        raise MigrationError(f"unsupported physical codec {codec!r}")
+    resolver.t5m_numeric = codec == "t5m"
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
@@ -1209,7 +1455,7 @@ def main():
     ap.add_argument("root", type=Path)
     ap.add_argument("--out", type=Path, required=True,
                     help="окрема вихідна папка; .lisp НЕ змінюється")
-    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d11-foundation.json")
     ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
     ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
@@ -1219,6 +1465,8 @@ def main():
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
+    ap.add_argument("--codec", choices=("t5", "t5m"), default="t5",
+                    help="T5M додає точне decimal→D24+ зниження та фізичне перенесення слів D24+")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1293,19 +1541,26 @@ def main():
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
             try:
-                projection = migrate_file(source, resolver, text7)
+                projection = migrate_file(source, resolver, text7, codec=args.codec)
             finally:
                 signal.alarm(0)
             # Strict physical T5: any historic name, passthrough or unencoded
             # value still visible is a empty, never a falsely binary file.
-            words = parse_words(projection)
-            reference = encode_projection(projection)
-            if decode_bytes(reference) != words:
+            if args.codec == "t5m":
+                words = parse_t5m_words(projection)
+                reference = encode_t5m_projection(projection)
+                decoded = decode_t5m_bytes(reference)
+            else:
+                words = parse_words(projection)
+                reference = encode_projection(projection)
+                decoded = decode_bytes(reference)
+            if decoded != words:
                 raise SensT5Error("byte roundtrip changes source word identities")
             zig_receipt = None
             if zig_binary is not None:
                 payload, zig_receipt = zig_mint_verified_t5(
                     projection, reference, zig_binary, zig_codec_bridge,
+                    codec=args.codec,
                 )
                 # The extensionless spaced-bit view is not an executable .sens.
                 migration_publish_pair.publish_pair(
@@ -1354,8 +1609,11 @@ def main():
         "schema": "sens-three-pass-t5-migration/v3",
         "naming_law": "SOURCE/name.lisp -> OUT/name.sens; the extensionless 0/1 view (name, spaced bits + one LF) is now REQUIRED alongside each .sens (#4694)",
         "file_format": {
-            "suffix": ".sens", "physical": "binary-T5-five-trits-per-byte",
-            "language": "D1..D9 exact-width 0/1 words",
+            "suffix": ".sens", "physical": f"binary-{args.codec.upper()}-five-trits-per-byte",
+            "language": ("D1–24+ frame; T5M physical subset: D1–D10 plus exact D24+ numeric words" if args.codec == "t5m"
+                         else "currently supported D1..D9 exact-width 0/1 words"),
+            "domain_frame": "D1–24+; exact domain laws come from language-contract.lisp",
+            "callable_migration_subset": "D3-D6, admitted D8 mechanisms, and exact D9/D10 identities backed by Core4 callable definitions; D11 remains test-only",
             "transport_separator": "logical trit 2 strictly between words",
             "file_eof": "physical byte length; no terminal 22",
             "padding": "zero through four final trits 2",
@@ -1364,17 +1622,18 @@ def main():
         "passes": {
             "1": "historical 8-bit head -> admitted current successor",
             "2": "my-lisp / current admitted name -> exact current domain",
-            "3": "Lisp-I/1.5 head -> proven current D3-D6",
+            "3": "Lisp-I/1.5 head -> proven callable identity (D3-D6, admitted D8, concrete Core4-bound D9/D10); D11 remains test-only",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "migration_complete": bool(paths) and blocked == 0,
         "only_unpaired": args.unpaired_only,
         "skipped_paired_paths": skipped_paired,
-        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; an eight-bit head is executable only as a current named D3-D6 resident, else it fails closed",
+        "sid8_law": "SID8/Sens8 retired; no source-era, historical map or legacy coverage is accepted; under the D1–24+ frame, width alone grants neither identity nor callability; this migration requires a named current identity and an admitted call mechanism",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only-zig-minted",
         "semantic_admitted": False,
-        "physical_producer": "PYTHON_REFERENCE_ONLY" if args.dry_run else "PINNED_ZIG_T5_CARRY",
+        "physical_producer": ("PYTHON_REFERENCE_ONLY" if args.dry_run
+                              else f"PINNED_ZIG_{args.codec.upper()}_CARRY"),
         "summary": {
             "files_seen": len(paths),
             "files_skipped_paired": len(skipped_paired),
