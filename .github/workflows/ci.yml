@@ -125,6 +125,24 @@ jobs:
             sha256sum "$archive"
           done
 
+      - name: "D9 — реальні визначення TMS та сховища, 10 законів SENS"
+        shell: bash
+        run: |
+          set -euo pipefail
+          witness="tests/semantic/d9-justified-member-remove-laws.lisp"
+          sha256sum "$witness" lib/core4.lisp target/debug/sens
+          if ! observed="$(target/debug/sens "$witness" 2>&1)"; then
+            printf '%s\n' "$observed" >&2
+            echo "::error::D9_NATIVE_DEFINITION_RED id=d9-tms-store layer=eval input=$witness expected=10-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          actual="$(printf '%s\n' "$observed" | tail -n 1)"
+          if [[ "$actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_NATIVE_DEFINITION_DIFF id=d9-tms-store layer=eval input=$witness expected=(1 1 1 1 1 1 1 1 1 1) actual=$actual" >&2
+            exit 1
+          fi
+          echo "D9_NATIVE_DEFINITION_PASS residents=5 projections=6 laws=10 authority=SENS"
+
       - name: "D10 MAP-LAWS — 12 SENS свідків і неповна пара"
         shell: bash
         run: |
