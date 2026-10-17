@@ -23,7 +23,7 @@ PATHS = {
     "d11_vocabulary": "knowledge/d11-testing-vocabulary-ratified.json",
 }
 DOMAIN_ROW = re.compile(
-    r"^\s*\((?P<bits>[^()\s]+)\s+.*?\(LISP\s+(?P<name>[^()\s]+)\)",
+    r"^[ \t]*\((?P<bits>[^()\s]+)[ \t]+.*?\(LISP[ \t]+(?P<name>[^()\s]+)\)",
     re.MULTILINE,
 )
 
