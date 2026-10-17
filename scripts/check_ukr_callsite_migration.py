@@ -26,7 +26,7 @@ LATIN = re.compile(r"[A-Za-z]")
 UKRAINIAN = re.compile(r"[А-Яа-яІіЇїЄєҐґ]")
 BIT_WORD = re.compile(r"[01]+\Z")
 ENCODED_HEAD = re.compile(r"#(?:[dD][0-9]+:[01]+|[bB][01]+|[xX][0-9A-Fa-f]+)\Z")
-ARCHIVE_DIRS = {'research', 'knowledge', 'contracts', 'docs', 'benchmarks', 'tests'}
+LIVE_SOURCE_DIRS = {'lib', 'examples', 'scripts'}
 CELL = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
     r"^\s*\(([01]+)\s+\(ук\s+" + CELL + r"\)\s+\(укр\s+" + CELL
@@ -173,7 +173,7 @@ def atom(node: object) -> str | None:
 
 
 def candidate_heads(forms: tuple):
-    """Yield possible executable heads; do not confuse formals/data with calls."""
+    """Yield possible executable heads without treating COND tests or data as calls."""
     def walk(node, quasi: int = 0):
         if isinstance(node, Prefix):
             if node.marker in ("'", '#;'):
@@ -200,10 +200,21 @@ def candidate_heads(forms: tuple):
                     and (ENCODED_HEAD.fullmatch(head) or LATIN.search(head)
                          or UKRAINIAN.search(head))):
                 yield node.values[0]
-            # QUOTE / D3:001 is non-executable data; no scanning its contents.
+            # D3 COND clauses are (predicate result) pairs. A typed D1 value
+            # such as #d1:1 in predicate position is a value, not a call head.
+            if head in {'110', 'cond', 'за-умовою'}:
+                for clause in node.values[1:]:
+                    if isinstance(clause, Form) and len(clause.values) >= 2:
+                        yield from walk(clause.values[0])
+                        for result in clause.values[1:]:
+                            yield from walk(result)
+                    else:
+                        yield from walk(clause)
+                return
+            # QUOTE / D3:001 is non-executable data; do not scan its contents.
             if head in {'quote', 'як-є', '001'}:
                 return
-            if head in {'quasiquote'}:
+            if head == 'quasiquote':
                 for child in node.values[1:]:
                     yield from walk(child, quasi + 1)
                 return
@@ -281,10 +292,11 @@ def peer_roles(root: Path) -> dict[str, set[str]]:
 
 def excluded_metadata(path: Path) -> bool:
     parts = path.parts
-    # These are registry/transport artifacts, not executable call sites.
-    # Dedicated metadata/provenance audits continue to read their contents.
+    # Canonical maps, generated projections and compatibility/provenance tables
+    # are read by their dedicated guards; they are not executable callsites.
     return ((len(parts) >= 3 and parts[:2] == ('lib', 'domains')
              and re.fullmatch(r'd(?:[1-9]|10|11)\.lisp', parts[-1]) is not None)
+            or (len(parts) >= 3 and parts[:2] == ('lib', 'generated'))
             or path.as_posix() in {
                 'lib/surface/semantic-registry.lisp',
                 'lib/surface/semantic-registry-experiment.lisp',
@@ -308,7 +320,11 @@ def measure(root: Path) -> dict:
     skipped = scanned = 0
     for path in files:
         rel = path.relative_to(root)
-        archival = bool(rel.parts and rel.parts[0] in ARCHIVE_DIRS)
+        archival = (not rel.parts
+                    or rel.parts[0] not in LIVE_SOURCE_DIRS
+                    or 'tests' in rel.parts
+                    or 'fixtures' in rel.parts
+                    or (rel.parts[0] == 'examples' and 'history' in rel.parts))
         scope = 'archive/fixture' if archival else 'active'
         if excluded_metadata(rel):
             skipped += 1
