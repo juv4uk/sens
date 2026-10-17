@@ -1875,6 +1875,24 @@ jobs:
           fi
           echo "D9_CADA_NATIVE_PASS definitions=8 laws=16 negatives=1 direct_D9=unclaimed"
 
+          # Дослідження translation/knowledge D10, 19 незалежних відповідей D1.
+          d10_status_fixture="tests/semantic/d10-translation-knowledge-status-laws.lisp"
+          sha256sum "$d10_status_fixture" lib/core4.lisp target/debug/sens
+          if ! d10_status_observed="$(target/debug/sens "$d10_status_fixture" 2>&1)"; then
+            echo "::error::D10_STATUS_EXEC_RED id=d10-translation-knowledge layer=eval fixture=$d10_status_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error reproduce=target/debug/sens" >&2
+            printf '%s\n' "$d10_status_observed" >&2
+            record_red "d10-translation-knowledge" "$d10_status_fixture" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "execution-error" "$d10_status_observed"
+            exit 1
+          fi
+          d10_status_actual="$(printf '%s\n' "$d10_status_observed" | tail -n 1)"
+          if [[ "$d10_status_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D10_STATUS_LAW_DIFF id=d10-translation-knowledge layer=eval fixture=$d10_status_fixture expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d10_status_actual first_diff=D1-vector reproduce=target/debug/sens" >&2
+            record_red "d10-translation-knowledge" "$d10_status_fixture" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "$d10_status_actual" "$d10_status_observed"
+            exit 1
+          fi
+          echo "D10_TRANSLATION_STATUS_NATIVE_PASS identities=4 laws=19 authority=SENS direct_opcode=unclaimed"
+
+
 
 
 
