@@ -47,6 +47,38 @@ class CallsiteAuditTests(unittest.TestCase):
         self.assertEqual(idx['коротко'], ['D3:101'])
         self.assertEqual(idx['повне-українське-імя'], ['D3:101'])
         self.assertEqual(idx['equal'], ['D3:101'])
+        command = [sys.executable, str(SCRIPT), '--root', str(self.root), '--require-full']
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(m['active_compact_only_head_sites'], 1)
+
+    def test_archival_latin_and_unparsed_files_are_reported_but_not_a_live_migration_red(self):
+        self.put('lib/app.lisp', '(локальна-функція x)\\n')
+        self.put('research/domain-archive/example.lisp', '(foreign-archive-call x)\\n')
+        self.put('research/domain-archive/broken.lisp', '"unterminated')
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), '--root', str(self.root), '--require-full'],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = mod.measure(self.root)
+        self.assertEqual(report['active_latin_heads'], 0)
+        self.assertEqual(report['active_unclassified_files'], 0)
+        self.assertEqual(report['archival_latin_heads'], 1)
+        self.assertEqual(report['archival_unclassified_files'], 1)
+        self.assertEqual(report['latin_sites'][0]['scope'], 'archive/fixture')
+        self.assertEqual(report['unclassified_files'][0]['scope'], 'archive/fixture')
+
+    def test_historical_registry_bridge_and_generated_export_are_metadata(self):
+        self.row(3, '101', 'коротко', 'повне', 'equal')
+        self.put('lib/surface/semantic-registry.lisp', '((legacy registry\\n')
+        self.put('lib/surface/semantic-registry-experiment.lisp', '((experiment\\n')
+        self.put('lib/surface/sid8-to-domain-bridge.lisp', '((bridge\\n')
+        self.put('mylisp-cml-export.lisp', '"unterminated')
+        report = mod.measure(self.root)
+        self.assertEqual(report['active_unclassified_files'], 0)
+        self.assertEqual(report['unclassified_files'], [])
+        self.assertEqual(report['metadata_files_excluded'], 5)
 
     def test_latin_executable_call_has_exact_file_line_and_known_identity(self):
         self.row(3, '101', 'коротко', 'повне', 'equal')
