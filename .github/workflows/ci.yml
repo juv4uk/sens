@@ -530,7 +530,7 @@ jobs:
             echo "::error::D9_SELECTOR_7_NEG_ACCEPTED layer=eval fixture=$d9_7_negative expected=pair-type-refusal actual=accepted reproduce=target/debug/sens" >&2
             exit 1
           fi
-          if [[ "$d9_7_bad" != *"CAR"* && "$d9_7_bad" != *"CDR"* && "$d9_7_bad" != *"pair"* && "$d9_7_bad" != *"пара"* ]]; then
+          if ! grep -Eqi 'car|cdr|pair|пара' <<< "$d9_7_bad"; then
             echo "::error::D9_SELECTOR_7_WRONG_REFUSAL layer=eval fixture=$d9_7_negative expected=pair-type-refusal actual=$d9_7_bad" >&2
             exit 1
           fi
