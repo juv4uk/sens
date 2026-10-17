@@ -1,4 +1,4 @@
-"""Перевірка символів української проєкції D1–D11."""
+"""Перевірка колонок проєкцій D1–D11 у таблицях .lisp-файлів."""
 from __future__ import annotations
 
 import json
@@ -61,7 +61,82 @@ def projection_value(token: str, domain: str) -> str:
     return value
 
 
+def format_projection_violation(
+    path: str,
+    coordinate: str,
+    line_number: int,
+    projection: str,
+    token: str,
+    value: str,
+) -> str:
+    """Показати точну клітинку таблиці та кожний видимий недозволений символ."""
+    disallowed = sorted(
+        {char for char in value if char.isprintable()} - UKRAINIAN_KEYBOARD_OUTPUTS,
+        key=ord,
+    )
+    rendered = ", ".join(f"U+{ord(char):04X} {char!r}" for char in disallowed)
+    return (
+        f"{path}:{line_number}: {coordinate} projection={projection}; "
+        f"token={token!r}; value={value!r}; поза розкладкою: {rendered}; "
+        "виправ лише цю клітинку проєкції, не ключ та не інші колонки"
+    )
+
+
+def collect_projection_violations(
+    rows: list[tuple[str, int, str, str, str]],
+) -> list[str]:
+    """Повернути всі порушення, не обрізаючи список до кількох прикладів."""
+    findings: list[str] = []
+    for coordinate, line_number, uk, ukr, sym in rows:
+        domain = coordinate.split(":", 1)[0]
+        path = f"lib/domains/d{int(domain[1:])}.lisp"
+        for projection, token in (("ук", uk), ("укр", ukr), ("sym", sym)):
+            value = projection_value(token, domain)
+            disallowed = {
+                char
+                for char in value
+                if char.isprintable() and char not in UKRAINIAN_KEYBOARD_OUTPUTS
+            }
+            if disallowed:
+                findings.append(
+                    format_projection_violation(
+                        path, coordinate, line_number, projection, token, value
+                    )
+                )
+    return findings
+
+
 class UkrainianDomainProjectionRulesTests(unittest.TestCase):
+    def test_diagnostic_names_exact_cell_and_each_forbidden_character(self):
+        finding = format_projection_violation(
+            "lib/domains/d5.lisp",
+            "D5:11010",
+            35,
+            "sym",
+            '"x<"',
+            "x<",
+        )
+
+        self.assertIn("lib/domains/d5.lisp:35", finding)
+        self.assertIn("D5:11010", finding)
+        self.assertIn("projection=sym", finding)
+        self.assertIn('token=\'"x<"\'', finding)
+        self.assertIn("U+003C '<'", finding)
+        self.assertIn("U+0078 'x'", finding)
+        self.assertIn("виправ лише цю клітинку проєкції", finding)
+
+    def test_diagnostic_lists_every_invalid_projection_cell(self):
+        rows = [
+            (f"D5:{key:05b}", key, "x", "x", "x")
+            for key in range(1, 8)
+        ]
+
+        findings = collect_projection_violations(rows)
+
+        self.assertEqual(len(findings), 21)
+        self.assertIn("D5:00001", findings[0])
+        self.assertIn("D5:00111", findings[-1])
+
     def test_d1_through_d11_uk_ukr_and_sym_use_only_ukrainian_keyboard_characters(self):
         rows = read_selected_projection_tokens()
         self.assertTrue(rows, "не знайдено проєкцій ук, укр і sym у D1–D11")
@@ -73,33 +148,14 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
             "сканер має охопити кожен файл доменів D1–D11",
         )
 
-        findings_by_domain: dict[str, list[str]] = {}
-        for coordinate, line_number, uk, ukr, sym in rows:
-            domain = coordinate.split(":", 1)[0]
-            for projection, token in (("ук", uk), ("укр", ukr), ("sym", sym)):
-                value = projection_value(token, domain)
-                disallowed = sorted(
-                    {char for char in value if char.isprintable()} - UKRAINIAN_KEYBOARD_OUTPUTS
-                )
-                if disallowed:
-                    rendered = " ".join(f"U+{ord(char):04X} {char!r}" for char in disallowed)
-                    findings_by_domain.setdefault(domain, []).append(
-                        f"{coordinate} line={line_number} {projection}={value!r}; "
-                        f"поза розкладкою: {rendered}"
-                    )
-
-        if findings_by_domain:
-            diagnostics = []
-            for domain, findings in sorted(
-                findings_by_domain.items(), key=lambda item: int(item[0][1:])
-            ):
-                examples = "\n  ".join(findings[:5])
-                remainder = len(findings) - min(len(findings), 5)
-                suffix = f"\n  … ще {remainder} рядків" if remainder else ""
-                diagnostics.append(f"{domain}: {len(findings)} рядків\n  {examples}{suffix}")
+        findings = collect_projection_violations(rows)
+        if findings:
             self.fail(
-                "символи поза українською клавіатурою в ук/укр/sym:\n"
-                + "\n".join(diagnostics)
+                "Порушення в таблицях D1–D11: розширення .lisp означає "
+                "українську проєкцію укр (тут також перевіряються клітинки ук і sym); "
+                ".sens означає двійкове представлення й цим тестом не перевіряється. "
+                "Кожен рядок указує точну клітинку для виправлення:\n"
+                + "\n".join(findings)
             )
 
 
