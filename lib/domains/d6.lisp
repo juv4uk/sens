@@ -45,7 +45,7 @@
   (100100 (ук п-р-п-п) (укр перше-від-решти-від-першого-від-першого) (san ādi-śeṣa-ādi-ādi) (en cadaar) (LISP CADAAR) (sym ":прпп"))
   (100101 (ук п-р-п-р) (укр перше-від-решти-від-першого-від-решти) (san ādi-śeṣa-ādi-śeṣa) (en cadadr) (LISP CADADR) (sym ":прпр"))
   (100110 (ук п-р-р-п) (укр перше-від-решти-від-решти-від-першого) (san ādi-śeṣa-śeṣa-ādi) (en caddar) (LISP CADDAR) (sym ":пррп"))
-  (100111 (ук п-р-р-р) (укр перше-після-трьох-решт) (san ādi-śeṣa-śeṣa-śeṣa) (en cadddr) (LISP CADDDR) (sym ":пррр"))
+  (100111 (ук четверте) (укр четверте) (san ādi-śeṣa-śeṣa-śeṣa) (en cadddr) (LISP CADDDR) (sym ":пррр"))
   (101000 (ук відобразити) (укр відобразити) (san āvartana) (en map) (LISP MAP) (sym "№м"))
   (101001 (ук відсіяти) (укр відсіяти) (san kalpana) (en filter) (LISP FILTER) (sym "№ф"))
   (101010 (ук відобразити-до) (укр відобразити-до) (san āvartana-saṅkalana) (en map-onto) (LISP MAP-ONTO) (sym "№м+"))
