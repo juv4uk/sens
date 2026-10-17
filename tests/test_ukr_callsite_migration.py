@@ -122,6 +122,11 @@ class CallsiteAuditTests(unittest.TestCase):
         }
         for surface, identity in exact.items():
             self.assertEqual(index.get(surface), [identity], surface)
+        sentinel = "ніколи-не-визначений-канон-предикат"
+        self.assertIn(sentinel, active_heads)
+        self.assertIsNone(index.get(sentinel), "negative sentinel must not gain a D1–D10 identity")
+        self.assertNotIn("never-defined-canon-predicate", source)
+        self.assertIn("(ніколи-не-визначений-канон-предикат)", source)
         expected_live_heads = {
             "канон-закон-результат", "канон-закон-виконаний",
             "канон-закон-порушений", "канон-закон-стан",
