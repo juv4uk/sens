@@ -1542,6 +1542,35 @@ jobs:
           fi
           echo "D9_CANON_RECORD_NATIVE_PASS functions=6 laws=14 negative=1"
 
+          # D9:100100000..100100111 — нові похідні SENS-функції, 16 точних D1-свідків.
+          d9_cada_file="tests/semantic/d9-cada-seven-step-batch-09.lisp"
+          d9_cada_bad="tests/semantic/d9-cada-seven-step-nonpair.lisp"
+          sha256sum "$d9_cada_file" "$d9_cada_bad" lib/core4.lisp target/debug/sens
+          if ! d9_cada_out="$(target/debug/sens "$d9_cada_file" 2>&1)"; then
+            echo "::error::D9_CADA_EXEC_RED id=d9-cada-batch-09 layer=eval expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=execution-error" >&2
+            printf '%s\n' "$d9_cada_out" >&2
+            record_red "d9-cada-batch-09" "$d9_cada_file" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "execution-error" "$d9_cada_out"
+            exit 1
+          fi
+          d9_cada_actual="$(printf '%s\n' "$d9_cada_out" | tail -n 1)"
+          if [[ "$d9_cada_actual" != "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D9_CADA_DIFF id=d9-cada-batch-09 layer=eval expected=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) actual=$d9_cada_actual" >&2
+            record_red "d9-cada-batch-09" "$d9_cada_file" "(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)" "$d9_cada_actual" "$d9_cada_out"
+            exit 1
+          fi
+          if d9_cada_err="$(target/debug/sens "$d9_cada_bad" 2>&1)"; then
+            echo "::error::D9_CADA_NONPAIR_ACCEPTED id=d9-cada-nonpair layer=eval expected=CAR-refusal actual=accepted" >&2
+            record_red "d9-cada-nonpair" "$d9_cada_bad" "car expects a non-empty list" "accepted"
+            exit 1
+          fi
+          if [[ "$d9_cada_err" != *"car expects a non-empty list"* ]]; then
+            echo "::error::D9_CADA_WRONG_REFUSAL id=d9-cada-nonpair layer=eval expected=CAR-refusal actual=$d9_cada_err" >&2
+            record_red "d9-cada-nonpair" "$d9_cada_bad" "car expects a non-empty list" "$d9_cada_err" "$d9_cada_err"
+            exit 1
+          fi
+          echo "D9_CADA_NATIVE_PASS definitions=8 laws=16 negatives=1 direct_D9=unclaimed"
+
+
 
 
       - name: D1–D10 — вичерпна перевірка бітового пакування (без нової семантики)
