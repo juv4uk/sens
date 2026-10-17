@@ -33,7 +33,7 @@ fn lowering_session() -> Session {
     session
 }
 
-fn current_d5_coordinate(resident: &str) -> (usize, u8) {
+fn current_d5_coordinate(resident: &str) -> (usize, u16) {
     let foundation: Value =
         serde_json::from_str(&read("knowledge/d1-d9-foundation.json")).expect("foundation JSON");
 
@@ -56,7 +56,7 @@ fn current_d5_coordinate(resident: &str) -> (usize, u8) {
 
     (
         width,
-        u8::from_str_radix(bits, 2).expect("current D5 PLUS bits"),
+        u16::from_str_radix(bits, 2).expect("current D5 PLUS bits"),
     )
 }
 
