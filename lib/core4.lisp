@@ -1515,6 +1515,55 @@
       ((атом? значення) (тотожне? значення значення))
       ((атом? (як-є ())) (перше (як-є ()))))))
 
+; D9 Canon law harvest from lib/canon.lisp (owner-ratified D9 #4008).
+; D9:001111001 CANON-EMPTY-LIST is structural D3:000, never D1:0.
+; The following D9 laws return the donor's explicit three-field result
+; (canon-law-result law status), not a coerced truth value or a new primitive.
+(0011 канон-порожній-список (001 ()))
+
+(0011 канон-запис-закону
+  (0010 (закон стан-закону)
+    (111 (001 canon-law-result)
+      (111 закон (111 стан-закону (001 ()))))))
+
+; D9:010111011 CANON-LAW-EMPTY-LIST.
+(0011 канон-закон-порожній-список
+  (0010 ()
+    (110
+      ((101 канон-порожній-список (001 ()))
+       (канон-запис-закону (001 empty-list) (001 satisfied)))
+      (#d1:1
+       (канон-запис-закону (001 empty-list) (001 violated))))))
+
+; D9:010111100 CANON-LAW-QUOTE-SUPPRESSES-EVALUATION.
+; Undefined names remain quoted data, never an evaluated lookup.
+(0011 канон-закон-цитування-пригнічує-обчислення
+  (0010 ()
+    (110
+      ((101 (001 never-defined-canon-symbol)
+            (001 never-defined-canon-symbol))
+       (канон-запис-закону
+         (001 quote-suppresses-evaluation) (001 satisfied)))
+      (#d1:1
+       (канон-запис-закону
+         (001 quote-suppresses-evaluation) (001 violated))))))
+
+; D9:010101100 CANON-LAW-COND-FIRST-MATCH-SHORT-CIRCUIT.
+; An unselected undefined test must not execute.
+(0011 канон-закон-умова-перший-збіг-короткий-ланцюг
+  (0010 ()
+    (110
+      ((101
+         (110
+           (#d1:1 (001 selected))
+           ((never-defined-canon-predicate) (001 forbidden)))
+         (001 selected))
+       (канон-запис-закону
+         (001 cond-first-match-short-circuit) (001 satisfied)))
+      (#d1:1
+       (канон-запис-закону
+         (001 cond-first-match-short-circuit) (001 violated))))))
+
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
 ; new Rust primitive: string-first/string-rest already expose a string
