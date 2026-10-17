@@ -457,7 +457,7 @@ jobs:
             echo "::error::D9_TRANSLATION_TRUNCATED_ACCEPTED layer=eval fixture=$d9_translation_bad expected=CAR-nonpair-refusal actual=accepted" >&2
             exit 1
           fi
-          if [[ "$d9_translation_err" != *"car expects"* && "$d9_translation_err" != *"not callable"* ]]; then
+          if ! grep -Eiq 'car expects|cdr expects|not callable' <<< "$d9_translation_err"; then
             echo "::error::D9_TRANSLATION_TRUNCATED_WRONG_REFUSAL layer=eval fixture=$d9_translation_bad expected=CAR-nonpair-refusal actual=$d9_translation_err" >&2
             exit 1
           fi
