@@ -481,6 +481,30 @@ jobs:
             exit 1
           fi
           echo "D6_ADD_SUB_NATIVE_PASS identities=D6:001110,D6:001111 laws=4 mutants=2"
+
+          # D6:110000 TAKE / D6:110001 DROP — exact D24+ zero; native SENS verdicts.
+          d6_take_drop_fixture="tests/semantic/d6-take-drop-left-laws.lisp"
+          d6_take_drop_negative="tests/semantic/d6-take-drop-reject-non-numeric.lisp"
+          sha256sum "$d6_take_drop_fixture" "$d6_take_drop_negative" lib/core4.lisp target/debug/sens
+          if ! d6_take_drop_output="$(target/debug/sens "$d6_take_drop_fixture" 2>&1)"; then
+            printf '%s\\n' "$d6_take_drop_output" >&2
+            echo "::error::D6_TAKE_DROP_EXEC_RED layer=eval fixture=$d6_take_drop_fixture expected=ten-D1-YES actual=execution-error" >&2
+            exit 1
+          fi
+          d6_take_drop_actual="$(printf '%s\\n' "$d6_take_drop_output" | tail -n1)"
+          if [[ "$d6_take_drop_actual" != "(1 1 1 1 1 1 1 1 1 1)" ]]; then
+            echo "::error::D6_TAKE_DROP_LAW_DIFF layer=eval fixture=$d6_take_drop_fixture expected=(1 1 1 1 1 1 1 1 1 1) actual=$d6_take_drop_actual" >&2
+            exit 1
+          fi
+          if d6_take_drop_bad="$(target/debug/sens "$d6_take_drop_negative" 2>&1)"; then
+            echo "::error::D6_TAKE_DROP_ACCEPTED_NONNUMERIC layer=eval fixture=$d6_take_drop_negative expected=D24-type-refusal actual=accepted" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'D24|numeric|number|comparison' <<< "$d6_take_drop_bad"; then
+            echo "::error::D6_TAKE_DROP_UNRELATED_NEGATIVE layer=eval fixture=$d6_take_drop_negative expected=numeric-domain-diagnostic actual=$d6_take_drop_bad" >&2
+            exit 1
+          fi
+          echo "D6_TAKE_DROP_NATIVE_PASS identities=D6:110000,D6:110001 laws=10 negative=1 exact_numeric_domain=D24+"
           # Exact D5 arithmetic surfaces + canonical D6 ADD1/SUB1; the fixture has no local definitions.
           d5_arith="tests/semantic/d5-arith-order-surface-laws.lisp"
           sha256sum "$d5_arith" lib/core4.lisp target/debug/sens
