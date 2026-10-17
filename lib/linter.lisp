@@ -268,7 +268,7 @@
                 (110 ((11011 (000000 globals) (get-threshold (001 max-globals) thresholds 99999))
                       (1110 (1110 (001 globals-exceeded) globals))))
                 (110 ((11011 (000000 effects) (get-threshold (001 max-effects) thresholds 99999))
-                      (1110 (1110 (001 effects-exceeded) effects)))))))))))))
+                      (1110 (1110 (001 effects-exceeded) effects))))))))))))
 
 ; D9: ratified lint functions harvested from their living SENS/Lisp owners.
 ; Exact nine-bit identity = lib/domains/d9.lisp; no new native opcodes.
