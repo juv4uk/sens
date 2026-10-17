@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Fail-closed in-place Lisp migration to ratified D3/D4 call heads.
+"""Міграція Lisp-голів тільки за ратифікованими D3/D4 українськими поверхнями.
 
-A source migration is not a T5 executable/oracle certificate. Historical
-eight-bit words are ambiguous with modern D8 unless source era is proved.
+Старі восьмибітні слоти не визначають поточну identity/викличність.
+T5M — лише транспорт уже сформованих слів.
 """
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 WORD8 = re.compile(r"[01]{8}\Z")
-TARGET = re.compile(r"D([3-9]):([01]{3,9})")
 FIELD = re.compile(r'\((ук|укр|san|en|LISP|sym)\s+("(?:\\.|[^"\\])*"|\(\)|[^()\s]+)\)')
 SAFE_OLD = {
     ("D3", "QUOTE"), ("D3", "ATOM"), ("D3", "EQ"),
@@ -28,6 +27,7 @@ class Identity:
     domain: str
     bits: str
     label: str
+    українська: str
 
 
 @dataclass(frozen=True)
@@ -42,13 +42,8 @@ def load_authority(root: Path = ROOT):
     foundation = json.loads(
         (root / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
     )
-    audit = json.loads(
-        (root / "knowledge/sens8-current-coverage-v1.json").read_text(encoding="utf-8")
-    )
     if foundation.get("status") != "owner-ratified":
         raise ValueError("missing exact-domain owner authority")
-    if audit.get("status") != "AUDIT-COMPLETE" or len(audit.get("rows", [])) != 256:
-        raise ValueError("historical donor audit is incomplete")
 
     surfaces = {}
     ambiguous = set()
@@ -65,7 +60,16 @@ def load_authority(root: Path = ROOT):
             label = residents.get(bits)
             if label is None:
                 raise ValueError(f"owner table drift at {domain}:{bits}")
-            identity = Identity(domain, bits, label)
+            fields = dict(FIELD.findall(tail))
+            raw_ukr = fields.get("укр", "()")
+            if raw_ukr == "()":
+                if label != "EMPTY":
+                    raise ValueError(f"missing Ukrainian projection at {domain}:{bits}")
+                continue
+            українська = json.loads(raw_ukr) if raw_ukr.startswith('"') else raw_ukr
+            if not isinstance(українська, str) or not українська:
+                raise ValueError(f"invalid Ukrainian projection at {domain}:{bits}")
+            identity = Identity(domain, bits, label, українська)
             for _, raw in FIELD.findall(tail):
                 if raw == "()":
                     continue
@@ -80,27 +84,7 @@ def load_authority(root: Path = ROOT):
     if not all(x in surfaces for x in ("car", "quote", "перше", "атом?")):
         raise ValueError("missing owner-ratified D3 surfaces")
 
-    legacy = {}
-    seen = set()
-    for row in audit["rows"]:
-        code = row["legacy_code"]
-        if not WORD8.fullmatch(code) or code in seen:
-            raise ValueError("duplicate/invalid legacy cell")
-        seen.add(code)
-        if row.get("classification") not in {
-            "DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"
-        }:
-            continue
-        targets = TARGET.findall(row.get("current_target") or "")
-        if len(targets) != 1:
-            continue
-        domain, bits = "D" + targets[0][0], targets[0][1]
-        label = foundation["domains"][domain]["residents"].get(bits)
-        if (domain, label) in SAFE_OLD:
-            legacy[code] = Identity(domain, bits, label)
-    if len(seen) != 256:
-        raise ValueError("historical cells missing")
-    return surfaces, legacy
+    return surfaces
 
 
 def reject_shadowed_surfaces(source: str, surfaces) -> None:
@@ -186,15 +170,15 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
         head = node.items[0]
         if isinstance(head, reader.Atom):
             spelling = head.tok.text.casefold()
-            if spelling in {"quote", "як-є", "001", "00000001"}:
+            if spelling in {"quote", "як-є", "001"}:
                 return
             surface = surfaces.get(spelling)
             role = (surface.label if surface is not None else "").upper()
-            if role == "LAMBDA" or spelling in lambda_heads | {"00001000"}:
+            if role == "LAMBDA" or spelling in lambda_heads:
                 if len(node.items) < 2:
                     raise ValueError("BINDING_FORM_BLOCK: LAMBDA без параметрів")
                 guard_parameters(node.items[1], "параметр LAMBDA")
-            if role == "DEFINE" or spelling in define_heads | {"00001001", "def"}:
+            if role == "DEFINE" or spelling in define_heads | {"def"}:
                 if len(node.items) >= 2:
                     target = node.items[1]
                     if isinstance(target, reader.Atom):
@@ -249,7 +233,7 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
         visit(form)
 
 
-def plan(source: str, surfaces, legacy):
+def plan(source: str, surfaces):
     reject_shadowed_surfaces(source, surfaces)
     frames, edits = [], []
     pending_quote = False
@@ -338,12 +322,15 @@ def plan(source: str, surfaces, legacy):
             # Its spelling is datum, not a callable SENS head; otherwise
             # ('car x) or (#'car x) silently becomes ('100 x) / (#'100 x).
             if not frame["quoted"] and not pending_quote:
-                identity = surfaces.get(token.casefold()) or legacy.get(token)
-                if identity and token != identity.bits:
+                if WORD8.fullmatch(token):
+                    raise ValueError(
+                        "UNQUALIFIED_W8_HEAD: старий восьмибітний код не визначає "
+                        "поточну identity; потрібна ратифікована українська назва"
+                    )
+                identity = surfaces.get(token.casefold())
+                if identity and token != identity.українська:
                     edits.append(Edit(start, i, token, identity))
-                if token.casefold() in {"quote", "як-є"} or token in {
-                    "001", "00000001"
-                }:
+                if token.casefold() in {"quote", "як-є"} or token == "001":
                     frame["quote_children"] = True
         pending_quote = False
     if frames:
@@ -368,29 +355,35 @@ def apply_edits(source: str, edits: list[Edit]):
             raise ValueError("overlapping migration edit")
         if source[edit.start:edit.end] != edit.source:
             raise ValueError("source changed since planning")
-        result = result[:edit.start] + edit.identity.bits + result[edit.end:]
+        result = result[:edit.start] + edit.identity.українська + result[edit.end:]
         last = edit.start
     return result
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path)
     parser.add_argument("--write", action="store_true")
-    parser.add_argument("--legacy-source-era-proved", action="store_true")
-    args = parser.parse_args()
-    surfaces, legacy = load_authority()
+    args = parser.parse_args(argv)
+    surfaces = load_authority()
+    staged = []
     for path in args.paths:
         if path.suffix != ".lisp" or not path.is_file() or path.is_symlink():
             raise ValueError(f"not an original regular .lisp source: {path}")
         original = path.read_text(encoding="utf-8")
-        edits = plan(original, surfaces, legacy)
-        if any(WORD8.fullmatch(e.source) for e in edits) and not args.legacy_source_era_proved:
-            raise ValueError(f"{path}: W8 old/current D8 ambiguity; prove source era first")
+        edits = plan(original, surfaces)
         updated = apply_edits(original, edits)
-        print(f"{path}: {len(edits)} exact-domain head replacements")
-        if args.write and updated != original:
-            path.write_text(updated, encoding="utf-8")
+        staged.append((path, original, updated, len(edits)))
+    # Перевірити всю партію до першого запису, навіть якщо --write задано.
+    if args.write:
+        for path, original, _updated, _count in staged:
+            if path.is_symlink() or path.read_text(encoding="utf-8") != original:
+                raise ValueError(f"source changed since planning: {path}")
+        for path, original, updated, _count in staged:
+            if updated != original:
+                path.write_text(updated, encoding="utf-8")
+    for path, _original, _updated, count in staged:
+        print(f"{path}: {count} exact-domain Ukrainian head replacements")
 
 
 if __name__ == "__main__":

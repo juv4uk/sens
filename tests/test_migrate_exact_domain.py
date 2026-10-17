@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,15 +23,17 @@ SPEC.loader.exec_module(mod)
 class ExactDomainMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.surfaces, cls.legacy = mod.load_authority()
+        cls.surfaces = mod.load_authority()
 
     def rewrite(self, source: str) -> str:
-        edits = mod.plan(source, self.surfaces, self.legacy)
+        edits = mod.plan(source, self.surfaces)
         return mod.apply_edits(source, edits)
 
-    def test_current_d3_surfaces_and_legacy_sid_resolve_to_same_successor(self):
-        for source in ("(car x)", "(CAR x)", "(перше x)", "(00000101 x)"):
-            self.assertEqual(self.rewrite(source), "(100 x)", source)
+    def test_current_d3_ratified_ukrainian_projection(self):
+        for source in ("(car x)", "(CAR x)", "(перше x)"):
+            self.assertEqual(self.rewrite(source), "(перше x)", source)
+        self.assertEqual(self.surfaces["перше"].domain, "D3")
+        self.assertEqual(self.surfaces["перше"].bits, "100")
 
     def test_comments_quotes_strings_and_arguments_are_not_migrated(self):
         source = """; (car x)
@@ -41,7 +44,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
         expected = """; (car x)
 '(car x)
 ("car" car)
-(100 (001 car) x)
+(перше (як-є car) x)
 """
         self.assertEqual(self.rewrite(source), expected)
 
@@ -57,28 +60,28 @@ class ExactDomainMigrationTests(unittest.TestCase):
         # A quoted datum blocks only its own head, not an independent call.
         self.assertEqual(
             self.rewrite("('car (car x))"),
-            "('car (100 x))",
+            "('car (перше x))",
         )
         self.assertEqual(
             self.rewrite("(#'car (car x))"),
-            "(#'car (100 x))",
+            "(#'car (перше x))",
         )
 
     def test_already_exact_heads_are_idempotent(self):
-        source = """(100 x)
-(011 (100 x))
+        source = """(перше x)
+(решта (перше x))
 """
         self.assertEqual(self.rewrite(source), source)
-        self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+        self.assertEqual(mod.plan(source, self.surfaces), [])
 
     def test_unbalanced_source_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "unterminated list"):
-            mod.plan("(car x", self.surfaces, self.legacy)
+            mod.plan("(car x", self.surfaces)
 
     def test_unknown_heads_are_left_for_semantic_review(self):
         source = """(user-defined x)
 """
-        self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+        self.assertEqual(mod.plan(source, self.surfaces), [])
 
     def test_shadowed_lambda_parameter_blocks_domain_head_rewrite(self):
         for source in (
@@ -157,11 +160,11 @@ class ExactDomainMigrationTests(unittest.TestCase):
     def test_unshadowed_let_and_quoted_let_remain_safe(self):
         self.assertEqual(
             self.rewrite("(let ((x f)) (car x))"),
-            "(let ((x f)) (100 x))",
+            "(let ((x f)) (перше x))",
         )
         self.assertEqual(
             self.rewrite("'(let ((car f)) (car x)) (car y)"),
-            "'(let ((car f)) (car x)) (100 y)",
+            "'(let ((car f)) (car x)) (перше y)",
         )
 
     def test_quoted_definitions_are_data_not_shadowing(self):
@@ -170,17 +173,44 @@ class ExactDomainMigrationTests(unittest.TestCase):
             "(quote (define car (lambda (x) x))) (car x)",
         ):
             with self.subTest(source=source):
-                self.assertTrue(self.rewrite(source).endswith("(100 x)"))
+                self.assertTrue(self.rewrite(source).endswith("(перше x)"))
 
     def test_unshadowed_lambda_still_migrates_exactly(self):
         self.assertEqual(
             self.rewrite("(lambda (x) (car x))"),
-            "(0010 (x) (100 x))",
+            "(функція (x) (перше x))",
         )
 
-    def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
-        source = "(00100111 evaluator-fallback expression)\n"
-        self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+    def test_unqualified_eight_bit_head_never_infers_d8(self):
+        for source in ("(00100111 evaluator-fallback expression)",
+                       "(00000101 x)", "(00000001 (car x))", "(11110001 x)"):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "UNQUALIFIED_W8_HEAD"):
+                    self.rewrite(source)
+
+    def test_quoted_eight_bit_is_data_not_a_call(self):
+        for source in ("'(00000101 x)", "(як-є (00000101 x))", "('00000101 x)"):
+            self.assertEqual(self.rewrite(source), source)
+
+    def test_batch_preflight_prevents_partial_write(self):
+        with tempfile.TemporaryDirectory() as folder:
+            good, bad = Path(folder) / "good.lisp", Path(folder) / "bad.lisp"
+            good.write_text("(car x)\n", encoding="utf-8")
+            bad.write_text("(00000101 x)\n", encoding="utf-8")
+            mod.main([str(good)])
+            self.assertEqual(good.read_text(encoding="utf-8"), "(car x)\n")
+            with self.assertRaisesRegex(ValueError, "UNQUALIFIED_W8_HEAD"):
+                mod.main(["--write", str(good), str(bad)])
+            self.assertEqual(good.read_text(encoding="utf-8"), "(car x)\n")
+
+    def test_write_is_ukrainian_and_idempotent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "input.lisp"
+            path.write_text("(car (cdr x))\n", encoding="utf-8")
+            mod.main(["--write", str(path)])
+            self.assertEqual(path.read_text(encoding="utf-8"), "(перше (решта x))\n")
+            mod.main(["--write", str(path)])
+            self.assertEqual(path.read_text(encoding="utf-8"), "(перше (решта x))\n")
 
 
 if __name__ == "__main__":
