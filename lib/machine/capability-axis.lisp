@@ -21,8 +21,8 @@
 ; A capability name never mints a semantic identity. Target-specific lowering
 ; remains under lib/machine/lowering/*.
 
-(0011 machine-capability-axis-v3
-  (001
+(визначити machine-capability-axis-v3
+  (як-є
     ((5 8
        ((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary)))
      (5 10
@@ -53,8 +53,8 @@
      (3 3
        ((pair-field-load tail bounded-u64))))))
 
-(0011 machine-capability-target-witnesses-v2
-  (001
+(визначити machine-capability-target-witnesses-v2
+  (як-є
     ((x86-64
        (integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary
          (admitted-form cmp-r64-r64)
@@ -109,52 +109,52 @@
          (admitted-form mov-r64-mem-disp8)
          (lowering x86-lower-cons-cdr-u64-forms))))))
 
-(0011 machine-target-witness-status-v1
-  (001
+(визначити machine-target-witness-status-v1
+  (як-є
     ((x86-64 witnessed)
      (arm64 absent)
      (risc-v absent)
      (fpga absent))))
 
-(0011 machine-capability-find-domain-row
-  (0010 (width bits rows)
-    (110
-      ((010 rows) ())
-      ((101 width (100 (100 rows)))
-       (110
-         ((101 bits (100 (011 (100 rows)))) (100 rows))
+(визначити machine-capability-find-domain-row
+  (функція (width bits rows)
+    (за-умовою
+      ((атом? rows) ())
+      ((тотожне? width (перше (перше rows)))
+       (за-умовою
+         ((тотожне? bits (перше (решта (перше rows)))) (перше rows))
          (#d1:1
           (machine-capability-find-domain-row
-            width bits (011 rows)))))
+            width bits (решта rows)))))
       (#d1:1
        (machine-capability-find-domain-row
-         width bits (011 rows))))))
+         width bits (решта rows))))))
 
 ; Current lookup: explicit width + packed-bits mechanism key only.
-(0011 machine-capabilities-for-domain
-  (0010 (width bits)
-    (110
-      ((010 (machine-capability-find-domain-row
+(визначити machine-capabilities-for-domain
+  (функція (width bits)
+    (за-умовою
+      ((атом? (machine-capability-find-domain-row
                 width bits machine-capability-axis-v3)) ())
       (#d1:1
-       (100 (011 (011
+       (перше (решта (решта
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3))))))))
 
-(0011 machine-capability-find-row
-  (0010 (key rows)
-    (110
-      ((010 rows) ())
-      ((101 key (100 (100 rows))) (100 rows))
+(визначити machine-capability-find-row
+  (функція (key rows)
+    (за-умовою
+      ((атом? rows) ())
+      ((тотожне? key (перше (перше rows))) (перше rows))
       (#d1:1
-       (machine-capability-find-row key (011 rows))))))
+       (machine-capability-find-row key (решта rows))))))
 
-(0011 machine-target-witness-status
-  (0010 (target)
-    (110
-      ((010 (machine-capability-find-row
-                target machine-target-witness-status-v1)) (001 absent))
+(визначити machine-target-witness-status
+  (функція (target)
+    (за-умовою
+      ((атом? (machine-capability-find-row
+                target machine-target-witness-status-v1)) (як-є absent))
       (#d1:1
-       (100 (011
+       (перше (решта
          (machine-capability-find-row
            target machine-target-witness-status-v1)))))))

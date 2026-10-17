@@ -81,6 +81,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
+          python3 -m unittest tests/test_capability_axis_ukr_projection.py -v
           python3 -m unittest tests/test_ukr_optin_sources.py -v
           python3 -m unittest tests/test_code_runs.py -v
 
