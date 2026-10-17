@@ -11,8 +11,8 @@
 ; Semantic witness: tests/fixtures/linter-d1-witness.lisp
 
 ;; Голова форми для розпізнавання.
-(0011 lint-form-head
-  (0010 (ast)
+(визначити lint-form-head
+  (функція (ast)
     (110
       ((010 (011 ast))
        (110
@@ -20,16 +20,16 @@
          ((010 (001 ())) (lint-short-head (100 ast)))))
       ((010 (001 ())) (100 ast)))))
 
-(0011 lint-short-head
-  (0010 (head)
+(визначити lint-short-head
+  (функція (head)
     (110
       ((0100 (010 head)) head)
       ((101 head 001) (001 quote))
       ((101 head 110) (001 cond))
       ((010 (001 ())) head))))
 
-(0011 lint-head
-  (0010 (head)
+(визначити lint-head
+  (функція (head)
     (110
       ((0100 (010 head)) head)
       ((101 head 0011) (001 def))
@@ -40,29 +40,29 @@
       ((101 head 001001) (001 let*))
       ((010 (001 ())) head))))
 
-(0011 lint-max2
-  (0010 (a b)
+(визначити lint-max2
+  (функція (a b)
     (110
       ((11011 a b) a)
       ((010 (001 ())) b))))
 
-(0011 lint-size
-  (0010 (ast)
+(визначити lint-size
+  (функція (ast)
     (110
       ((010 ast) 1)
       ((010 (001 ()))
        (01010 1 (01010 (lint-size (100 ast)) (lint-size (011 ast))))))))
 
-(0011 lint-nesting
-  (0010 (ast)
+(визначити lint-nesting
+  (функція (ast)
     (110
       ((010 ast) 0)
       ((010 (001 ()))
        (lint-max2 (01010 1 (lint-nesting (100 ast)))
                   (lint-nesting (011 ast)))))))
 
-(0011 lint-complexity
-  (0010 (ast)
+(визначити lint-complexity
+  (функція (ast)
     (110
       ((010 ast) 0)
       ((110
@@ -76,11 +76,11 @@
        (01010 (lint-complexity (100 ast))
               (lint-complexity (011 ast)))))))
 
-(0011 effectful-primitives
+(визначити effectful-primitives
   (001 ("print" "write-file" "process-run" "advise" "tell")))
 
-(0011 lint-effects
-  (0010 (ast)
+(визначити lint-effects
+  (функція (ast)
     (110
       ((010 ast) (001 ()))
       ((110101100 (100 ast))
@@ -92,8 +92,8 @@
       ((010 (001 ()))
        (1111 (lint-effects (100 ast)) (lint-effects (011 ast)))))))
 
-(0011 collect-free-vars-let*
-  (0010 (ast bound-vars)
+(визначити collect-free-vars-let*
+  (функція (ast bound-vars)
     (110
       ((0100 (010 (011 ast)))
        (1111 (collect-free-vars (100 ast) bound-vars)
@@ -114,7 +114,7 @@
            ((0101 bindings)
             (collect-free-vars body bound-vars))
            ((010 (001 ()))
-            ((0010 (binding)
+            ((функція (binding)
                (1111
                 (collect-free-vars (1001 binding) bound-vars)
                 (collect-free-vars-let*
@@ -122,8 +122,8 @@
                   (111 (11101110 (100 binding)) bound-vars))))
              (100 bindings)))))))))
 
-(0011 collect-free-vars-letrec
-  (0010 (ast bound-vars)
+(визначити collect-free-vars-letrec
+  (функція (ast bound-vars)
     (110
       ((0100 (010 (011 ast)))
        (1111 (collect-free-vars (100 ast) bound-vars)
@@ -150,8 +150,8 @@
                             bindings))
                (collect-free-vars body new-bound)))))))))
 
-(0011 collect-free-vars
-  (0010 (ast bound-vars)
+(визначити collect-free-vars
+  (функція (ast bound-vars)
     (110
       ((0100 (110111011 (010 ast)))
        (110
@@ -222,33 +222,33 @@
        (1111 (collect-free-vars (100 ast) bound-vars)
              (collect-free-vars (011 ast) bound-vars))))))
 
-(0011 lint-globals
-  (0010 (ast)
+(визначити lint-globals
+  (функція (ast)
     (101110
-      (0010 (unique item)
+      (функція (unique item)
         (110
           ((11101 item unique) unique)
           ((010 (001 ())) (111 item unique))))
       (001 ())
       (collect-free-vars ast (001 ())))))
 
-(0011 lint-all
-  (0010 (ast)
+(визначити lint-all
+  (функція (ast)
     (1110 (1110 (001 size) (lint-size ast))
           (1110 (001 nesting) (lint-nesting ast))
           (1110 (001 complexity) (lint-complexity ast))
           (1110 (001 effects) (lint-effects ast))
           (1110 (001 free-vars) (lint-globals ast)))))
 
-(0011 get-threshold
-  (0010 (key thresholds default)
+(визначити get-threshold
+  (функція (key thresholds default)
     (110
       ((0101 thresholds) default)
       ((11110111 (100 (100 thresholds)) key) (011 (100 thresholds)))
       ((010 (001 ())) (get-threshold key (011 thresholds) default)))))
 
-(0011 lint-check
-  (0010 (ast thresholds)
+(визначити lint-check
+  (функція (ast thresholds)
     (001000 ((metrics (lint-all ast)))
       (001000 ((size (1001 (100 metrics)))
              (nesting (1001 (1001 metrics)))
@@ -274,20 +274,20 @@
 ; Exact nine-bit identity = lib/domains/d9.lisp; no new native opcodes.
 ; Existing closures carry semantics. Old donor names remain compatibility only.
 ; D9:001000111 аналіз-форма-голова
-(0011 аналіз-форма-голова lint-form-head)
+(визначити аналіз-форма-голова lint-form-head)
 ; D9:010011010 аналіз-голова
-(0011 аналіз-голова lint-head)
+(визначити аналіз-голова lint-head)
 ; D9:010100100 аналіз-вкладеність
-(0011 аналіз-вкладеність lint-nesting)
+(визначити аналіз-вкладеність lint-nesting)
 ; D9:101000001 аналіз-складність
-(0011 аналіз-складність lint-complexity)
+(визначити аналіз-складність lint-complexity)
 ; D9:010010010 аналіз-ефекти
-(0011 аналіз-ефекти lint-effects)
+(визначити аналіз-ефекти lint-effects)
 ; D9:010111111 зібрати-вільні-змінні
-(0011 зібрати-вільні-змінні collect-free-vars)
+(визначити зібрати-вільні-змінні collect-free-vars)
 ; D9:001000011 аналіз-глобальні
-(0011 аналіз-глобальні lint-globals)
+(визначити аналіз-глобальні lint-globals)
 ; D9:010001110 аналіз-всі
-(0011 аналіз-всі lint-all)
+(визначити аналіз-всі lint-all)
 ; D9:010000110 аналіз-перевірити
-(0011 аналіз-перевірити lint-check)
+(визначити аналіз-перевірити lint-check)
