@@ -116,6 +116,25 @@ class DomainProjectionMigrationTests(unittest.TestCase):
             self.run_audit(apply=True)
         self.assertEqual(self.d9.read_bytes(), before)
 
+    def test_same_cell_with_different_before_values_is_ambiguous(self):
+        item = json.loads(self.mapping.read_text(encoding="utf-8"))["replacements"][0]
+        self.write_mapping([item, dict(item, before="інша-застаріла-назва", after="інша-назва")])
+        before = self.d9.read_bytes()
+        with self.assertRaisesRegex(ValueError, "неоднозначна"):
+            self.run_audit(apply=True)
+        self.assertEqual(self.d9.read_bytes(), before)
+
+    def test_target_symlink_within_root_refused_without_replacing_link(self):
+        real = self.root / "lib/domains/source-d9.lisp"
+        real.write_bytes(self.d9.read_bytes())
+        self.d9.unlink()
+        self.d9.symlink_to(real)
+        before = real.read_bytes()
+        with self.assertRaisesRegex(ValueError, "посиланням"):
+            self.run_audit(apply=True)
+        self.assertTrue(self.d9.is_symlink())
+        self.assertEqual(real.read_bytes(), before)
+
     def test_unresolved_replacement_refuses_without_writes(self):
         before = self.d9.read_bytes()
         changes, output = self.run_audit(use_mapping=False)

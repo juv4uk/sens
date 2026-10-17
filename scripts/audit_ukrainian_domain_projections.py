@@ -101,6 +101,8 @@ def load_manifest(path: Path | None) -> dict[tuple[str, str, str, str], tuple[st
     if raw.get("schema") != "ukrainian-projection-authority/1":
         raise ValueError("невідомий формат authority-manifest")
     out: dict[tuple[str, str, str, str], tuple[str, str]] = {}
+    # One authority resolution per exact coordinate/column, even across old spellings.
+    claimed_cells: set[tuple[str, str, str]] = set()
     for item in raw["replacements"]:
         domain, bits, col = item["domain"], item["bits"], item["column"]
         before, after, authority = item["before"], item["after"], item["authority"]
@@ -113,8 +115,10 @@ def load_manifest(path: Path | None) -> dict[tuple[str, str, str, str], tuple[st
         if not keyboard_valid(after, len(bits)):
             raise ValueError(f"ціль поза українською клавіатурою: {item!r}")
         key = (domain, bits, col, before)
-        if key in out:
-            raise ValueError(f"неоднозначна/повторна відповідність: {key}")
+        cell = (domain, bits, col)
+        if cell in claimed_cells:
+            raise ValueError(f"неоднозначна/повторна відповідність: {cell}")
+        claimed_cells.add(cell)
         out[key] = (after, authority)
     return out
 
@@ -131,8 +135,9 @@ def audit(
     observed: dict[tuple[str, str, str], str] = {}
     for width in range(1, 12):
         path = root / "lib/domains" / f"d{width}.lisp"
-        if not path.is_file() or not path.resolve().is_relative_to(root):
-            raise ValueError(f"{path}: файл відсутній або виходить за --root")
+        if (not path.is_file() or path.is_symlink()
+                or not path.resolve().is_relative_to(root)):
+            raise ValueError(f"{path}: файл відсутній, є посиланням або виходить за --root")
         before_bytes = path.read_bytes()
         source = before_bytes.decode("utf-8")
         lines: list[str] = []
