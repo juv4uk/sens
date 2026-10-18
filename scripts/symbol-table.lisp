@@ -77,10 +77,10 @@
 (визначити print-table-onto
   (функція (symbols id)
     (за-умовою ((атом? symbols) (як-є ())) ((атом? (як-є ())) ((функція ()
-            (PRINT (список (символ-у-текст (перше symbols)) id))
-            (print-table-onto (решта symbols) (01010 id 1))))))))
+            (друкувати (список (символ-у-текст (перше symbols)) id))
+            (print-table-onto (решта symbols) (додати id 1))))))))
 
-(визначити core-forms (читати-всі (READ-FILE "lib/core4.lisp")))
+(визначити core-forms (читати-всі (читати-файл "lib/core4.lisp")))
 (визначити all-symbols (collect-all-symbols core-forms (як-є ())))
 (визначити sorted-symbols (sort-symbols all-symbols))
 
