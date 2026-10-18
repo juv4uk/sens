@@ -2622,13 +2622,10 @@
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
 (визначити digit->string
-  ; Superseded by number->string's canonical delegation to write-to-string
-  ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
-  ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
-  ; variant — removal is a separate mirrored-surface decision, not a
-  ; silent one.
-  (функція (d)
-    (елемент-списку-за-індексом d (як-є ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+  ; Одна ратифікована операція перетворення числової цифри на текст.
+  ; Вхід тут — результат остачі від ділення на 10 (D24+, цифри 0–9).
+  (функція (цифра)
+    (значення-у-текст цифра)))
 
 (визначити number->string-onto
   (функція (n acc)
