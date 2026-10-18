@@ -113,7 +113,8 @@ def restore_call_heads(tree):
     if first == "001":
         return tree  # quoted data збереглися побайтово за логічною формою
     restorations = {**UNDO, "хибне?": "0100", "тотожне?": "101",
-                    "як-є": "001", "функція": "0010"}
+                    "як-є": "001", "функція": "0010",
+                    "атом?": "010", "решта": "011", "перше": "100", "за-умовою": "110", "сполучити": "111", "застосувати": "0000", "обчислити": "0001", "визначити": "0011", "порожній?": "0101", "решта-першого": "0110", "решта-решти": "0111", "перше-першого": "1000", "друге": "1001", "знайти": "1010", "зв'язати": "1011", "обчислити-умови": "1100", "обчислити-список": "1101", "список": "1110", "приєднати": "1111"}
     head = restorations.get(first, first) if isinstance(first, str) else restore_call_heads(first)
     return [head] + [restore_call_heads(arg) for arg in tree[1:]]
 
@@ -275,9 +276,35 @@ class OptInUkrMigrationTests(unittest.TestCase):
             verify(self.ep, broken, self.core, self.domains)
 
     def test_negative_removing_historical_entrypoint(self):
-        broken = self.ep.replace("(0011 make-observation створити-спостереження)", "", 1)
+        broken = self.ep.replace("(визначити make-observation створити-спостереження)", "", 1)
         with self.assertRaisesRegex(AssertionError, "entrypoint"):
             verify(broken, self.store, self.core, self.domains)
+
+    def test_ratifed_ukrainian_d3_d4_surface_in_both_modules(self):
+        wanted = {"0010": "функція", "0011": "визначити",
+                  "010": "атом?", "011": "решта", "100": "перше",
+                  "101": "тотожне?", "110": "за-умовою",
+                  "0100": "хибне?", "1001": "друге"}
+        for bits, full in wanted.items():
+            table = (ROOT / f"lib/domains/d{len(bits)}.lisp").read_text(encoding="utf-8")
+            rows = [line for line in table.splitlines()
+                    if line.lstrip().startswith(f"({bits} ")]
+            self.assertEqual(len(rows), 1)
+            self.assertIn(f"(укр {full})", rows[0])
+        for source in (self.ep, self.store):
+            parsed = read_forms(source)
+            self.assertTrue(parsed)
+            self.assertTrue(all(form[0] == "визначити" for form in parsed))
+            for bits in wanted:
+                self.assertNotRegex(source, r"\(" + re.escape(bits) + r"(?=[\s(])")
+        self.assertTrue(verify(self.ep, self.store, self.core, self.domains))
+
+    def test_negative_old_raw_head_is_rejected_by_projection_rule(self):
+        old = self.ep.replace("(за-умовою", "(110", 1)
+        self.assertNotEqual(old, self.ep)
+        self.assertRegex(old, r"\(110(?=[\s(])")
+        for bits in ("110", "0011", "0010"):
+            self.assertNotRegex(self.ep, r"\(" + bits + r"(?=[\s(])")
 
     def test_malformed_forms_rejected(self):
         with self.assertRaisesRegex(ValueError, "незакритий"):

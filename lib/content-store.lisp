@@ -20,29 +20,29 @@
 ;; Ein unveränderlicher content-addressed Store ist eine persistente Map von der
 ;; kanonischen Adresse aus `lib/world.lisp` zu gewöhnlichen my-lisp-Daten.
 
-(0011 empty-content-store
+(визначити empty-content-store
   (функція () мапа-порожній))
 
-(0011 content-store-put
-  (0010 (store value)
+(визначити content-store-put
+  (функція (store value)
     (внутрішня-мапа-вставити (knowledge-content-address value) value store)))
 
-(0011 content-store-get
-  (0010 (store address)
+(визначити content-store-get
+  (функція (store address)
     (внутрішня-мапа-отримати address store)))
 
-(0011 content-store-contains?
-  (0010 (store address)
+(визначити content-store-contains?
+  (функція (store address)
     (внутрішня-мапа-містить address store)))
 
-(0011 content-store-put-world
-  (0010 (store world)
+(визначити content-store-put-world
+  (функція (store world)
     (внутрішня-мапа-вставити (world-content-address world)
                 (world-address-content world)
                 store)))
 
-(0011 content-store-size
-  (0010 (store)
+(визначити content-store-size
+  (функція (store)
     (внутрішня-довжина store)))
 
 ; D9:000101101 CONTENT-STORE-PUT and D9:000111111 CONTENT-STORE-PUT-WORLD.
@@ -50,5 +50,5 @@
 ; Both take (store value/world); their canonical content address is derived
 ; by the existing SENS code. Never alias either to three-argument MAP-INSERT.
 ; These are Ukrainian SENS surface bindings, not new D9 native opcodes.
-(0011 вміст-сховище-покласти content-store-put)
-(0011 вміст-сховище-покласти-світ content-store-put-world)
+(визначити вміст-сховище-покласти content-store-put)
+(визначити вміст-сховище-покласти-світ content-store-put-world)

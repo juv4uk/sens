@@ -24,95 +24,95 @@
 ; Ці історичні англійські поверхні — aliases, не повторні реалізації.
 ; D10 resident coordinate не означає допуск машинної інструкції.
 
-(0011 make-observation створити-спостереження)
+(визначити make-observation створити-спостереження)
 
 ; D10:0001110110 — компактне ук та повне укр посилаються на той самий SENS closure.
 (визначити створити-структуроване-твердження створити-твердження)
 (визначити make-claim створити-структуроване-твердження)
 
-(0011 make-evidence створити-доказ)
+(визначити make-evidence створити-доказ)
 
-(0011 make-intent створити-намір)
+(визначити make-intent створити-намір)
 
 ; --- Shape predicates ---------------------------------------------------
 ; Exact D1 shape predicates: source-ref?, epistemic--claim-ref?, observation?,
 ; claim?, evidence?, intent?. Atomic tags are checked before D3:101 EQ.
 
-(0011 source-ref?
-  (0010 (value)
-    (110
-      ((010 value) #d1:0)
-      ((010 (011 value)) #d1:0)
-      ((0100 (010 (100 value))) #d1:0)
-      ((101 (100 value) (001 digest)) #d1:1)
-      ((101 (100 value) (001 proof)) #d1:1)
-      ((101 (100 value) (001 test)) #d1:1)
-      ((101 (100 value) (001 observation)) #d1:1)
+(визначити source-ref?
+  (функція (value)
+    (за-умовою
+      ((атом? value) #d1:0)
+      ((атом? (решта value)) #d1:0)
+      ((хибне? (атом? (перше value))) #d1:0)
+      ((тотожне? (перше value) (001 digest)) #d1:1)
+      ((тотожне? (перше value) (001 proof)) #d1:1)
+      ((тотожне? (перше value) (001 test)) #d1:1)
+      ((тотожне? (перше value) (001 observation)) #d1:1)
       (#d1:1 #d1:0))))
 
 ; D10:0010011001 SOURCE-REF? — точна повна українська peer-назва.
 (визначити це-належне-посилання-на-джерело? source-ref?)
 
-(0011 epistemic--claim-ref?
-  (0010 (value)
-    (110
-      ((010 value) #d1:0)
-      ((010 (011 value)) #d1:0)
-      ((0100 (010 (100 value))) #d1:0)
-      ((101 (100 value) (001 claim-ref)) #d1:1)
+(визначити epistemic--claim-ref?
+  (функція (value)
+    (за-умовою
+      ((атом? value) #d1:0)
+      ((атом? (решта value)) #d1:0)
+      ((хибне? (атом? (перше value))) #d1:0)
+      ((тотожне? (перше value) (001 claim-ref)) #d1:1)
       (#d1:1 #d1:0))))
 
-(0011 observation? спостереження?)
+(визначити observation? спостереження?)
 
-(0011 claim? твердження?)
+(визначити claim? твердження?)
 
-(0011 evidence? доказ?)
+(визначити evidence? доказ?)
 
-(0011 intent? намір?)
+(визначити intent? намір?)
 
 ; --- Accessors ------------------------------------------------------------
 ; Reuse existing project selectors (1001 / 11100) already admitted in Core.
 
-(0011 claim-statement (0010 (claim) (1001 (11100 (001 statement) (011 claim)))))
-(0011 claim-review (0010 (claim) (1001 (11100 (001 review) (011 claim)))))
-(0011 evidence-outcome (0010 (evidence) (1001 (11100 (001 outcome) (011 evidence)))))
-(0011 evidence-source-ref (0010 (evidence) (1001 (11100 (001 source-ref) (011 evidence)))))
-(0011 intent-goal (0010 (intent) (1001 (11100 (001 goal) (011 intent)))))
+(визначити claim-statement (функція (claim) (друге (11100 (001 statement) (решта claim)))))
+(визначити claim-review (функція (claim) (друге (11100 (001 review) (решта claim)))))
+(визначити evidence-outcome (функція (evidence) (друге (11100 (001 outcome) (решта evidence)))))
+(визначити evidence-source-ref (функція (evidence) (друге (11100 (001 source-ref) (решта evidence)))))
+(визначити intent-goal (функція (intent) (друге (11100 (001 goal) (решта intent)))))
 
-(0011 observation-source (0010 (observation) (1001 (11100 (001 source) (011 observation)))))
+(визначити observation-source (функція (observation) (друге (11100 (001 source) (решта observation)))))
 (визначити отримати-джерело-спостереження observation-source)
-(0011 observation-statement (0010 (observation) (1001 (11100 (001 statement) (011 observation)))))
-(0011 evidence-claim-ref (0010 (evidence) (1001 (11100 (001 claim-ref) (011 evidence)))))
+(визначити observation-statement (функція (observation) (друге (11100 (001 statement) (решта observation)))))
+(визначити evidence-claim-ref (функція (evidence) (друге (11100 (001 claim-ref) (решта evidence)))))
 (визначити отримати-посилання-доказу-на-твердження evidence-claim-ref)
-(0011 evidence-method (0010 (evidence) (1001 (11100 (001 method) (011 evidence)))))
-(0011 intent-requires (0010 (intent) (1001 (11100 (001 requires) (011 intent)))))
+(визначити evidence-method (функція (evidence) (друге (11100 (001 method) (решта evidence)))))
+(визначити intent-requires (функція (intent) (друге (11100 (001 requires) (решта intent)))))
 (визначити отримати-необхідні-можливості-наміру intent-requires)
-(0011 intent-stop-on (0010 (intent) (1001 (11100 (001 stop-on) (011 intent)))))
-(0011 intent-produces (0010 (intent) (1001 (11100 (001 produces) (011 intent)))))
+(визначити intent-stop-on (функція (intent) (друге (11100 (001 stop-on) (решта intent)))))
+(визначити intent-produces (функція (intent) (друге (11100 (001 produces) (решта intent)))))
 
 ; --- Narrow relations -------------------------------------------------
 ; Точна структурна рівність посилань — похідна Lisp-функція.
 ; EQ отримує лише атоми, CAR/CDR — лише пари, COND — тільки D1.
 
-(0011 епістеміка--рівні-посилання?
-  (0010 (a b)
-    (110
-      ((010 a)
-       (110
-         ((010 b) (101 a b))
+(визначити епістеміка--рівні-посилання?
+  (функція (a b)
+    (за-умовою
+      ((атом? a)
+       (за-умовою
+         ((атом? b) (тотожне? a b))
          (#d1:1 #d1:0)))
-      ((010 b) #d1:0)
-      ((епістеміка--рівні-посилання? (100 a) (100 b))
-       (епістеміка--рівні-посилання? (011 a) (011 b)))
+      ((атом? b) #d1:0)
+      ((епістеміка--рівні-посилання? (перше a) (перше b))
+       (епістеміка--рівні-посилання? (решта a) (решта b)))
       (#d1:1 #d1:0))))
 
 ; supporting-evidence returns () or the matching evidence record itself
 ; (retrieval, not a collapsed flag). Reuses evidence? / claim-ref helpers.
-(0011 supporting-evidence
-  (0010 (evidence claim-ref)
-    (110
+(визначити supporting-evidence
+  (функція (evidence claim-ref)
+    (за-умовою
       ((хибне? (доказ? evidence)) (як-є ()))
-      ((0100 (epistemic--claim-ref? claim-ref)) (001 ()))
+      ((хибне? (epistemic--claim-ref? claim-ref)) (001 ()))
       ((хибне? (тотожне? (доказ-підсумок evidence) (як-є supports))) (як-є ()))
       ((хибне? (епістеміка--рівні-посилання? (отримати-посилання-доказу-на-твердження evidence) claim-ref)) (як-є ()))
       (#d1:1 evidence))))
@@ -120,17 +120,17 @@
 ; D9:101100001 — той самий retrieval closure, без нової семантики.
 (визначити підтверджувальний-доказ supporting-evidence)
 
-(0011 epistemic--all-required-present?
-  (0010 (requirements effective-capabilities)
-    (110
-      ((010 requirements) #d1:1)
-      ((0100 (11101 (100 requirements) effective-capabilities)) #d1:0)
+(визначити epistemic--all-required-present?
+  (функція (requirements effective-capabilities)
+    (за-умовою
+      ((атом? requirements) #d1:1)
+      ((хибне? (11101 (перше requirements) effective-capabilities)) #d1:0)
       (#d1:1
-       (epistemic--all-required-present? (011 requirements) effective-capabilities)))))
+       (epistemic--all-required-present? (решта requirements) effective-capabilities)))))
 
-(0011 intent-capabilities-satisfied?
-  (0010 (intent effective-capabilities)
-    (110
+(визначити intent-capabilities-satisfied?
+  (функція (intent effective-capabilities)
+    (за-умовою
       ((хибне? (намір? intent)) ні)
       (#d1:1
        (epistemic--all-required-present? (отримати-необхідні-можливості-наміру intent) effective-capabilities)))))
