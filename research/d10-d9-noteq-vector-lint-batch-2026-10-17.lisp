@@ -3,7 +3,7 @@
 
 ; D10:0000000111 NUMERIC-NOT-EQUAL?
 (0011 числа-нерівні?
-  (0010 (a b) (not? (equal? a b))))
+  (0010 (a b) (хибне? (equal? a b))))
 (0011 numeric-not-equal? числа-нерівні?)
 
 ; D10:0000101100 VECTOR->LIST / D10:0000101111 LIST->VECTOR
