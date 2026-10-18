@@ -4,10 +4,10 @@
 ; #1332/#1403: empty-list-ground is not a function mechanism.
 
 (визначити registry
-  (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+  (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
 (визначити metadata
-  (100 (110101001 (110110111 "lib/function-table-mechanisms.lisp"))))
+  (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
 (визначити registry-rows registry)
 
@@ -43,7 +43,7 @@
     (за-умовою
       ((атом? rows) () (як-є no))
       ((атом? rows) (#d0)
-       (001000 ((row (100 rows)))
+       (нехай ((row (перше rows)))
          (за-умовою
            ((тотожне? sid (перше row)) (#d1)
             (за-умовою
@@ -97,7 +97,7 @@
     (за-умовою
       ((атом? rows) () (як-є no))
       ((атом? rows) (#d0)
-       (001000 ((row (100 rows)))
+       (нехай ((row (перше rows)))
          (за-умовою
            ((тотожне? profile (перше row)) (#d1)
             (за-умовою
@@ -113,10 +113,10 @@
       ((атом? rows) ()
        (як-є (function-table-mechanisms-ok)))
       ((атом? rows) (#d0)
-       (001001 ((row (100 rows))
+       (нехай-послідовно ((row (перше rows))
               (profile (перше row))
               (sid (друге row))
-              (mechanism (10011 row)))
+              (mechanism (третє row)))
          (за-умовою
            ((тотожне? (admitted-profile? profile) (як-є no))
             (#d1)
@@ -142,10 +142,10 @@
       ((атом? rows) ()
        (як-є (function-table-mechanisms-ok)))
       ((атом? rows) (#d0)
-       (001001 ((row (100 rows))
+       (нехай-послідовно ((row (перше rows))
               (sid (перше row))
               (executor (друге row))
-              (mechanism (10011 row)))
+              (mechanism (третє row)))
          (за-умовою
            ((тотожне? (admitted-executor? executor) (як-є no))
             (#d1)
@@ -170,9 +170,9 @@
 
 (визначити verdict
   (за-умовою
-    ((11110111 legacy-verdict (001 (function-table-mechanisms-ok)))
+    ((однакові? legacy-verdict (як-є (function-table-mechanisms-ok)))
      (#d1)
      profile-verdict)
     (t legacy-verdict)))
 
-(11011011 verdict)
+(друкувати verdict)
