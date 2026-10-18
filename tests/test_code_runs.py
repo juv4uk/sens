@@ -138,7 +138,7 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             width: {row.bits: row.ukr for row in read_domain_table(
                 ROOT / "lib" / "domains" / f"d{width}.lisp"
             )}
-            for width in (4, 5, 6, 9)
+            for width in (1, 3, 4, 5, 6, 9)
         }
         self.assertEqual(surfaces[4]["0010"], "функція")
         for name, argument, width, bits in self.SELECTORS:
@@ -148,6 +148,48 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             self.assertEqual(source.count(new), 1, f"хибна укр-проєкція {name}")
             self.assertNotIn(old, source)
             source = source.replace(new, old, 1)
+        # Дві додаткові перевірки стану й виду вже перейшли з
+        # канонічних D1/D3/D9 слів на точні українські проєкції.
+        # Відновлюємо їх ДО порівняння з тим самим незмінним Git blob.
+        self.assertEqual(surfaces[1]["1"], "так")
+        self.assertEqual(surfaces[3]["101"], "тотожне?")
+        self.assertEqual(surfaces[3]["001"], "як-є")
+        self.assertEqual(surfaces[9]["110101100"], "символ?")
+        eq, quote, symbol, yes = (
+            surfaces[3]["101"],
+            surfaces[3]["001"],
+            surfaces[9]["110101100"],
+            surfaces[1]["1"],
+        )
+        for name, arg, answer_tokens in (
+            ("translation-status-valid?", "status", ("candidate", "ambiguous", "rejected")),
+            ("translation-kind-valid?", "kind", ("clause", "batch", "query")),
+        ):
+            original = (
+                f"(визначити {name}\n"
+                f"  (функція ({arg})\n"
+                "    (за-умовою\n"
+                f"      ((101 (110101100 {arg}) (001 ())) (001 ()))\n"
+                + "".join(
+                    f"      ((101 {arg} (001 {token})) #d1:1)\n"
+                    for token in answer_tokens
+                )
+                + "      (#d1:1 (001 ())))))"
+            )
+            current = (
+                f"(визначити {name}\n"
+                f"  (функція ({arg})\n"
+                "    (за-умовою\n"
+                f"      (({eq} ({symbol} {arg}) ({quote} ())) ({quote} ()))\n"
+                + "".join(
+                    f"      (({eq} {arg} ({quote} {token})) {yes})\n"
+                    for token in answer_tokens
+                )
+                + f"      ({yes} ({quote} ())))))"
+            )
+            self.assertEqual(source.count(current), 1, name)
+            self.assertNotIn(original, source)
+            source = source.replace(current, original, 1)
         return source
 
     @staticmethod
@@ -164,6 +206,13 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(
             self._git_blob_sha(self._restore_original(source)), self.ORIGINAL_BLOB
         )
+
+    def test_wrong_validator_peer_is_rejected(self):
+        source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
+        self.assertIn("(символ? status)", source)
+        mutated = source.replace("(символ? status)", "(атом? status)", 1)
+        with self.assertRaises(AssertionError):
+            self._restore_original(mutated)
 
     def test_wrong_selector_peer_is_rejected(self):
         source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
