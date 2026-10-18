@@ -69,6 +69,32 @@ class EncodedSourceLiteralTests(unittest.TestCase):
             ["110"],
         )
 
+    def test_legacy_signature_table_keys_are_metadata_not_calls(self):
+        row = (
+            '  (00001100 (kind builtin) (arity (at-least 0)) '
+            '(surfaces stable) (sig "(+ number ...)") (doc "Sum all arguments"))\n'
+        )
+        source = "lib/surface/function-signatures.lisp"
+        self.assertEqual(CHECK.find_forbidden_literals(row, path=source), [])
+        self.assertEqual(
+            [v.token for v in CHECK.find_forbidden_literals(row, path="lib/core.lisp")],
+            ["00001100"],
+        )
+        self.assertEqual(
+            [v.token for v in CHECK.find_forbidden_literals("(00001100 x)\n", path=source)],
+            ["00001100"],
+        )
+        malformed = row.replace("(kind builtin)", "(kind unknown)")
+        self.assertEqual(
+            [v.token for v in CHECK.find_forbidden_literals(malformed, path=source)],
+            ["00001100"],
+        )
+        tagged = row + "(сума #d1:1)\n"
+        self.assertEqual(
+            [v.token for v in CHECK.find_forbidden_literals(tagged, path=source)],
+            ["#d1:1"],
+        )
+
     def test_domain_table_key_exemption_is_exact_and_fail_closed(self):
         row = (
             '  (11010 (ук менше?) (укр менше?) (san hīna) '

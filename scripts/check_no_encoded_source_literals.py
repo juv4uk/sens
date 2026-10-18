@@ -66,6 +66,29 @@ def _is_domain_table_key_head(source: str, path: str | Path | None, offset: int)
     )
 
 
+# Only complete historical signature metadata records (never Lisp calls).
+LEGACY_SIGNATURE_PATH = "lib/surface/function-signatures.lisp"
+LEGACY_SIGNATURE_ROW = re.compile(
+    r'^\s*\((?P<bits>[01]{8})\s+\(kind\s+(?:builtin|syntax|macro)\)\s+'
+    r'(?:\(form\s+(?:lambda|define)\)\s+)?'
+    r'\(arity\s+(?:[0-9]+|\(at-least\s+[0-9]+\)|\(between\s+[0-9]+\s+[0-9]+\))\)\s+'
+    r'\(surfaces\s+(?:stable|admitted)\)\s+'
+    r'\(sig\s+"(?:\\.|[^"\\])*"\)\s+'
+    r'\(doc\s+"(?:\\.|[^"\\])*"\)\)\s*$'
+)
+
+
+def _is_legacy_signature_key(source: str, path: str | Path | None, offset: int) -> bool:
+    if path is None or Path(path).as_posix() != LEGACY_SIGNATURE_PATH:
+        return False
+    line_start = source.rfind("\n", 0, offset) + 1
+    line_end = source.find("\n", offset)
+    if line_end < 0:
+        line_end = len(source)
+    match = LEGACY_SIGNATURE_ROW.fullmatch(source[line_start:line_end].rstrip("\r"))
+    return bool(match and line_start + match.start("bits") == offset)
+
+
 def _mask_comments_and_strings(source: str) -> str:
     """Keep offsets/newlines while removing comments and string contents."""
     out = list(source)
@@ -148,7 +171,8 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         start = match.start(1)
         if start in quoted_numeric_heads:
             continue
-        if _is_domain_table_key_head(source, path, start):
+        if (_is_domain_table_key_head(source, path, start)
+                or _is_legacy_signature_key(source, path, start)):
             continue
         line = code.count("\n", 0, start) + 1
         column = start - code.rfind("\n", 0, start)
