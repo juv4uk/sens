@@ -137,17 +137,17 @@
 (0011 narrate-outcome
   (0010 (outcome)
     (110
-      ((010 outcome) (narrate-invalid-outcome-shape outcome))
-      ((0100 (result-proper-list? outcome))
-       (narrate-invalid-outcome-shape outcome))
+      ((010 outcome) (пояснити-неприпустиму-структуру-результату outcome))
+      ((0100 (результат-є-правильним-списком? outcome))
+       (пояснити-неприпустиму-структуру-результату outcome))
       ((0100 (010 (100 outcome)))
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
       ((0100 (110101100 (100 outcome)))
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
       ((101 (100 outcome) (001 proved))
        (110
-         ((narrate-list-exact-three? outcome) (narrate-proved-outcome outcome))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((narrate-list-exact-three? outcome) (пояснити-результат-із-доказом outcome))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 unknown))
        (110
          ((narrate-list-exact-two? outcome)
@@ -156,7 +156,7 @@
             (001 because)
             (001 no-proof-found-for)
             (1001 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 partial))
        (110
          ((narrate-list-exact-three? outcome)
@@ -166,7 +166,7 @@
             (1001 outcome)
             (001 bound)
             (10011 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 blocked))
        (110
          ((narrate-list-exact-two? outcome)
@@ -174,7 +174,7 @@
             (001 blocked)
             (001 because)
             (1001 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 disputed))
        (110
          ((narrate-list-exact-two? outcome)
@@ -183,7 +183,7 @@
             (001 because)
             (001 both-sides-have-evidence)
             (1001 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 invalid))
        (110
          ((narrate-list-exact-three? outcome)
@@ -193,7 +193,7 @@
             (1001 outcome)
             (001 payload)
             (10011 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         (1 (пояснити-неприпустиму-структуру-результату outcome))))
       (1
        (1110 (001 invalid) (001 outcome-tag) (100 outcome))))))
 
@@ -210,3 +210,11 @@
 (0011 пояснити-відповідь narrate-answer)
 ; D9:000100110
 (0011 пояснити-підсумок narrate-outcome)
+
+; D10 full-ukr peers: exact identity = lib/domains/d10.lisp; DEFINE alias, no new dispatch.
+; D10:0010101110
+(0011 пояснити-неприпустиму-структуру-результату narrate-invalid-outcome-shape)
+; D10:0010010110
+(0011 результат-є-правильним-списком? result-proper-list?)
+; D10:0010101101
+(0011 пояснити-результат-із-доказом narrate-proved-outcome)
