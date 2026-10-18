@@ -6,7 +6,6 @@ use std::path::PathBuf;
 
 use sens::{
     eval_program, load_core_library, load_meta_evaluator_library, parse, Expr, ExprKind, Session,
-    Sens8,
 };
 
 #[derive(Clone)]
@@ -24,6 +23,23 @@ struct D3PredicateBoundaryRow {
     case: String,
     expr: String,
     expected_bit: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+struct HistoricalSid(u16);
+
+fn historical_sid(value: &Expr) -> HistoricalSid {
+    match &value.kind {
+        ExprKind::Symbol(bits) => {
+            let words = sens::parse_binary_source_words(bits)
+                .expect("historical SID spelling must parse as a binary source word");
+            assert_eq!(words.len(), 1, "historical SID must be one binary word");
+            let word = words[0].word;
+            assert_eq!(word.width(), 8, "historical SID must retain exact W8 width");
+            HistoricalSid(word.packed_bits())
+        }
+        other => panic!("historical SID must be a binary source token, got {other:?}"),
+    }
 }
 
 fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
@@ -44,7 +60,7 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
-fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
+fn alist_sid(entries: &[Expr], key: &str) -> Option<HistoricalSid> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
             return None;
@@ -55,10 +71,7 @@ fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
         if &**name != key {
             return None;
         }
-        match &v.kind {
-            ExprKind::Sid(sid) => Some(*sid),
-            other => panic!("{key} must be exact bare Sens8, got {other:?}"),
-        }
+        Some(historical_sid(v))
     })
 }
 
@@ -211,7 +224,7 @@ fn structure_core_rows() -> Vec<WitnessRow> {
                 return None;
             }
             alist_sid(entries, "semantic-id")
-                .expect("every structure-core row must carry exact bare Sens8 identity");
+                .expect("historical structure-core row must retain its opaque SID provenance");
             Some(WitnessRow {
                 source: source[form.span.start..form.span.end].to_string(),
                 expr: alist_str(entries, "expr")?.to_string(),
@@ -811,17 +824,14 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
             ExprKind::Symbol(s) if &**s == "sid-witness"
         ));
 
-        let mut sid: Option<Sens8> = None;
+        let mut sid: Option<HistoricalSid> = None;
         let mut witnesses: Vec<Expr> = Vec::new();
         for field in &fields[1..] {
             match &field.kind {
                 ExprKind::Pair(key, value)
                     if matches!(&key.kind, ExprKind::Symbol(s) if &**s == "sid") =>
                 {
-                    sid = Some(match &value.kind {
-                        ExprKind::Sid(sid) => *sid,
-                        other => panic!("semantic sid must be exact bare Sens8, got {other:?}"),
-                    });
+                    sid = Some(historical_sid(value));
                 }
                 ExprKind::List(items)
                     if !items.is_empty()
@@ -834,7 +844,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
         }
 
         let sid = sid.expect("every semantic witness row needs a SID");
-        assert!(seen_sids.insert(sid), "duplicate SID {sid}");
+        assert!(seen_sids.insert(sid), "duplicate SID {sid:?}");
 
         for witness in witnesses {
             let fields = match witness.kind {
@@ -849,7 +859,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
 
             let mut kernel: Option<String> = None;
             let mut status: Option<String> = None;
-            let mut probe_id: Option<Sens8> = None;
+            let mut probe_id: Option<HistoricalSid> = None;
             let mut evidence_class: Option<String> = None;
             let mut evidence: Option<String> = None;
 
@@ -871,12 +881,7 @@ fn sid_kernel_witness_735_separates_semantic_execution_from_opaque_transport() {
                             }
                         }
                         "probe-id" => {
-                            probe_id = Some(match &value.kind {
-                                ExprKind::Sid(sid) => *sid,
-                                other => panic!(
-                                    "semantic witness probe-id must be exact bare Sens8, got {other:?}"
-                                ),
-                            });
+                            probe_id = Some(historical_sid(value));
                         }
                         "evidence-class" => {
                             if let ExprKind::Symbol(s) = &value.kind {
