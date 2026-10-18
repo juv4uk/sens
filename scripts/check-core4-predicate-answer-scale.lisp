@@ -1,16 +1,16 @@
 ; #1391 — executable witness for the Core4 15-state answer scale.
 
-(0011 pas-contract
+(визначити pas-contract
   (100 (110101001 (110110111 "contracts/core4-predicate-answer-scale.lisp"))))
-(0011 pas-schema (100 pas-contract))
-(0011 pas-sections (011 pas-contract))
+(визначити pas-schema (перше pas-contract))
+(визначити pas-sections (решта pas-contract))
 
-(0011 pas-field
-  (0010 (section name)
+(визначити pas-field
+  (функція (section name)
     (011 (11100 name section))))
 
-(0011 pas-meta (100 pas-sections))
-(0011 pas-no (1001 pas-sections))
+(визначити pas-meta (перше pas-sections))
+(визначити pas-no (друге pas-sections))
 (0011 pas-boundary (10011 pas-sections))
 (0011 pas-yes (100111 pas-sections))
 (0011 pas-algebra (110110101 pas-sections))
@@ -20,70 +20,70 @@
 (0011 pas-predicates (000100 7 pas-sections))
 
 ; Таблиця функцій: рядок (код (en ім'я) (ук …) …).
-(0011 pas-registry
+(визначити pas-registry
   (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
 ; (код ім'я) з контракту -> (код ім'я-з-таблиці-функцій).
-(0011 pas-registry-row
-  (0010 (entry)
-    (1110 (100 entry)
+(визначити pas-registry-row
+  (функція (entry)
+    (список (перше entry)
           (1001 (11100 (001 en) (011 (11100 (100 entry) pas-registry)))))))
 
-(0011 pas-no-levels (pas-field pas-no (001 levels)))
-(0011 pas-yes-levels (pas-field pas-yes (001 levels)))
-(0011 pas-terms (pas-field pas-terminology (001 terms)))
+(визначити pas-no-levels (pas-field pas-no (як-є levels)))
+(визначити pas-yes-levels (pas-field pas-yes (як-є levels)))
+(визначити pas-terms (pas-field pas-terminology (як-є terms)))
 
 ; Рядок рівня: (бітовий-запис ступінь санскрит) -> (ступінь санскрит).
-(0011 pas-grade-and-sanskrit
-  (0010 (level) (011 level)))
+(визначити pas-grade-and-sanskrit
+  (функція (level) (решта level)))
 
 ; Рядок термінів: (ступінь санскрит uk en) -> (ступінь санскрит).
-(0011 pas-term-grade-and-sanskrit
-  (0010 (term) (1110 (100 term) (1001 term))))
+(визначити pas-term-grade-and-sanskrit
+  (функція (term) (список (перше term) (друге term))))
 
-(0011 pas-observed
-  (1110
+(визначити pas-observed
+  (список
     pas-schema
-    (pas-field pas-meta (001 answer-count))
-    (pas-field pas-meta (001 answer-grammar))
-    (pas-field pas-meta (001 sens-function-space))
+    (pas-field pas-meta (як-є answer-count))
+    (pas-field pas-meta (як-є answer-grammar))
+    (pas-field pas-meta (як-є sens-function-space))
     pas-no-levels
-    (pas-field pas-boundary (001 boundary))
-    (pas-field pas-boundary (001 sanskrit))
-    (pas-field pas-boundary (001 direction))
-    (pas-field pas-boundary (001 sens-function))
-    (pas-field pas-boundary (001 convergence-functions))
-    (pas-field pas-boundary (001 function-result))
+    (pas-field pas-boundary (як-є boundary))
+    (pas-field pas-boundary (як-є sanskrit))
+    (pas-field pas-boundary (як-є direction))
+    (pas-field pas-boundary (як-є sens-function))
+    (pas-field pas-boundary (як-є convergence-functions))
+    (pas-field pas-boundary (як-є function-result))
     pas-yes-levels
     (01010 (000000 pas-no-levels) (000000 pas-yes-levels) 1)
-    (pas-field pas-algebra (001 not-law))
-    (pas-field pas-algebra (001 weakening-law))
-    (pas-field pas-algebra (001 boundary-law))
-    (pas-field pas-algebra (001 eighth-bit-law))
-    (pas-field pas-algebra (001 function-convergence-law))
-    (pas-field pas-boundary (001 meaning-uk))
-    (pas-field pas-boundary (001 meaning-en))
-    (pas-field pas-terminology (001 languages))
+    (pas-field pas-algebra (як-є not-law))
+    (pas-field pas-algebra (як-є weakening-law))
+    (pas-field pas-algebra (як-є boundary-law))
+    (pas-field pas-algebra (як-є eighth-bit-law))
+    (pas-field pas-algebra (як-є function-convergence-law))
+    (pas-field pas-boundary (як-є meaning-uk))
+    (pas-field pas-boundary (як-є meaning-en))
+    (pas-field pas-terminology (як-є languages))
     pas-terms
     (11110111 (101000 pas-term-grade-and-sanskrit pas-terms)
             (101000 pas-grade-and-sanskrit pas-no-levels))
     (11110111 (101000 pas-term-grade-and-sanskrit pas-terms)
             (101000 pas-grade-and-sanskrit pas-yes-levels))
-    (pas-field pas-terminology (001 boundary-term))
-    (pas-field pas-algebra (001 truth-order))
-    (pas-field pas-algebra (001 and-law))
-    (pas-field pas-algebra (001 or-law))
-    (pas-field pas-algebra (001 de-morgan-law))
-    (pas-field pas-algebra (001 not-order-law))
-    (pas-field pas-algebra (001 cond-law))
-    (pas-field pas-algebra (001 excluded-middle-law))
-    (pas-field pas-algebra (001 kleene-k3-slice))
-    (pas-field pas-algebra (001 and-or-cond-law))
+    (pas-field pas-terminology (як-є boundary-term))
+    (pas-field pas-algebra (як-є truth-order))
+    (pas-field pas-algebra (як-є and-law))
+    (pas-field pas-algebra (як-є or-law))
+    (pas-field pas-algebra (як-є de-morgan-law))
+    (pas-field pas-algebra (як-є not-order-law))
+    (pas-field pas-algebra (як-є cond-law))
+    (pas-field pas-algebra (як-є excluded-middle-law))
+    (pas-field pas-algebra (як-є kleene-k3-slice))
+    (pas-field pas-algebra (як-є and-or-cond-law))
     pas-carrier
     pas-predicates
     (000000 pas-sections)
     (11110111 (101000 pas-registry-row (pas-field pas-predicates (001 answer-functions)))
-            (pas-field pas-predicates (001 answer-functions)))
+            (pas-field pas-predicates (як-є answer-functions)))
     ; Runtime відповідає рівно так, як записано в проєкціях контракту.
     (11110111 (1110 (111000000 (001 x)) (111000000 (001 (a))) (111000000 (001 ())))
             (101000 second (pas-field pas-predicates (001 atom?))))
@@ -95,13 +95,13 @@
     (11110111 (1110 (101 (001 a) (001 a)) (101 (001 a) (001 b)))
             (101000 second (pas-field pas-predicates (001 eq?))))))
 
-(0011 pas-expected
-  (1110
-    (001 core4-predicate-answer-scale/3)
+(визначити pas-expected
+  (список
+    (як-є core4-predicate-answer-scale/3)
     15
     "0^n | 1^n | (), n=1..7"
-    (001 separate-00000000-through-11111111)
-    (001
+    (як-є separate-00000000-through-11111111)
+    (як-є
       (("0"       1 dṛḍha-niścaya)
        ("00"      2 niścaya)
        ("000"     3 nirṇaya)
@@ -109,13 +109,13 @@
        ("00000"   5 saṃśaya)
        ("000000"  6 aniścaya)
        ("0000000" 7 ajñāta-sīmā)))
-    (001 ())
-    (001 ajñāta)
-    (001 none)
-    (001 none)
+    (як-є ())
+    (як-є ajñāta)
+    (як-є none)
+    (як-є none)
     (001 (00000000 11111111))
-    (001 ())
-    (001
+    (як-є ())
+    (як-є
       (("1"       1 dṛḍha-niścaya)
        ("11"      2 niścaya)
        ("111"     3 nirṇaya)
@@ -124,15 +124,15 @@
        ("111111"  6 aniścaya)
        ("1111111" 7 ajñāta-sīmā)))
     15
-    (001 same-width-bit-inversion)
-    (001 append-same-bit)
-    (001 seven-directed-grades-converge-to-empty-list)
-    (001 belongs-to-sens-function-space)
-    (001 distinct-functions-same-empty-result)
+    (як-є same-width-bit-inversion)
+    (як-є append-same-bit)
+    (як-є seven-directed-grades-converge-to-empty-list)
+    (як-є belongs-to-sens-function-space)
+    (як-є distinct-functions-same-empty-result)
     "невідомо"
     "unknown"
-    (001 (sanskrit uk en))
-    (001
+    (як-є (sanskrit uk en))
+    (як-є
       ((1 dṛḍha-niścaya "тверда певність" "firm certainty")
        (2 niścaya       "певність"        "certainty")
        (3 nirṇaya       "висновок"        "determination")
@@ -142,17 +142,17 @@
        (7 ajñāta-sīmā   "межа невідомого" "edge of the unknown")))
     (001 (1))
     (001 (1))
-    (001 (ajñāta "невідомо" "unknown"))
+    (як-є (ajñāta "невідомо" "unknown"))
     "0 < 00 < 000 < 0000 < 00000 < 000000 < 0000000 < () < 1111111 < 111111 < 11111 < 1111 < 111 < 11 < 1"
-    (001 meet-on-truth-order)
-    (001 join-on-truth-order)
-    (001 or-is-not-of-and-of-nots)
-    (001 order-reversing-involution)
-    (001 exact-structural-match-of-answer)
-    (001 grade-1-only)
-    (001 ((0) () (1)))
-    (001 ratified-2026-09-26)
-    (001
+    (як-є meet-on-truth-order)
+    (як-є join-on-truth-order)
+    (як-є or-is-not-of-and-of-nots)
+    (як-є order-reversing-involution)
+    (як-є exact-structural-match-of-answer)
+    (як-є grade-1-only)
+    (як-є ((0) () (1)))
+    (як-є ratified-2026-09-26)
+    (як-є
       ((carrier . bit-list)
        (bits . (0 1))
        (yes-examples . ((1) (1 1) (1 1 1 1 1 1 1)))
@@ -163,7 +163,7 @@
        (short-bit-symbol-carrier . forbidden)
        (string-carrier . superseded-by-bit-list)
        (number-carrier . forbidden)))
-    (001
+    (як-є
       ((predicate-projection . core4)
        (atom? . ((on-atom (1)) (on-pair (0)) (on-empty-list ())))
        (eq? . ((on-same-atoms (1)) (on-distinct-atoms (0))))
@@ -187,10 +187,10 @@
     (001 (1))
     (001 (1))))
 
-(110
+(за-умовою
   ((11110111 pas-observed pas-expected)
-   (001 (core4-predicate-answer-scale-ok)))
+   (як-є (core4-predicate-answer-scale-ok)))
   ((010 (001 ()))
-   (1110 (001 core4-predicate-answer-scale-mismatch)
+   (список (як-є core4-predicate-answer-scale-mismatch)
          pas-expected
          pas-observed)))
