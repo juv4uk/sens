@@ -15,23 +15,23 @@
 ; спостережуваний провал (аксіома S2): навмисний незв'язаний символ
 ; domain-logic-law-fail -> ненульовий код виходу.
 
-(0011 law-check
-  (0010 (name ok)
-    (110
-      (ok (001 ()))
+(визначити law-check
+  (функція (name ok)
+    (за-умовою
+      (ok (як-є ()))
       (1 (domain-logic-law-fail name)))))
 
-(0011 law-two 2)
+(визначити law-two 2)
 
 ; D3 — пара
-(law-check (001 car-of-cons)      (101 (100 (111 (001 a) (001 b))) (001 a)))
-(law-check (001 cdr-of-cons)      (101 (011 (111 (001 a) (001 b))) (001 b)))
-(law-check (001 atom-of-symbol)   (010 (001 a)))
-(law-check (001 not-atom-of-pair) (0100 (010 (111 (001 a) (001 b)))))
-(law-check (001 eq-reflexive)     (101 (001 a) (001 a)))
-(law-check (001 eq-distinct)      (0100 (101 (001 a) (001 b))))
-(law-check (001 null-of-empty)    (0101 (001 ())))
-(law-check (001 list-car)         (101 (100 (1110 (001 a) (001 b))) (001 a)))
+(law-check (як-є car-of-cons)      (тотожне? (перше (сполучити (як-є a) (як-є b))) (як-є a)))
+(law-check (як-є cdr-of-cons)      (тотожне? (решта (сполучити (як-є a) (як-є b))) (як-є b)))
+(law-check (як-є atom-of-symbol)   (атом? (як-є a)))
+(law-check (як-є not-atom-of-pair) (хибне? (атом? (сполучити (як-є a) (як-є b)))))
+(law-check (як-є eq-reflexive)     (тотожне? (як-є a) (як-є a)))
+(law-check (як-є eq-distinct)      (хибне? (тотожне? (як-є a) (як-є b))))
+(law-check (як-є null-of-empty)    (порожній? (як-є ())))
+(law-check (як-є list-car)         (тотожне? (перше (список (як-є a) (як-є b))) (як-є a)))
 
 ; D5 — порядок і арифметика
 (law-check (001 lessp-2-3)           (11010 2 3))
@@ -42,8 +42,8 @@
 (law-check (001 sum-2-3-not-greater) (0100 (11011 (01010 2 3) 5)))
 
 ; D4 — append
-(law-check (001 append-empty)
-  (101 (100 (1111 (001 ()) (1110 (001 a)))) (001 a)))
+(law-check (як-є append-empty)
+  (тотожне? (перше (приєднати (як-є ()) (список (як-є a)))) (як-є a)))
 
 ; D5 — добуток і частка
 (law-check (001 times-2-3-not-greater) (0100 (11011 (10110 2 3) 6)))
@@ -67,7 +67,7 @@
 (law-check (001 equal-list-self)     (11110111 (1110 (001 a) (001 b)) (1110 (001 a) (001 b))))
 
 ; D9 — читання файла (IO) і ідентичність схеми
-(law-check (001 read-file-schema)
+(law-check (як-є read-file-schema)
   (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))
 
 ; define + посилання на змінну
