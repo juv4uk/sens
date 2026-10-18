@@ -5,17 +5,17 @@
 ; semantic witness. Native/host results may realize meaning but may never
 ; become their own answer key.
 
-(0011 second (0010 (x) (100 (011 x))))
-(0011 third (0010 (x) (100 (011 (011 x)))))
+(визначити second (функція (x) (перше (решта x))))
+(визначити third (функція (x) (перше (решта (решта x)))))
 
-(0011 authority-edges
+(визначити authority-edges
   (110101001 (110110111 "tests/machine-authority-edges.lisp")))
 
-(0011 machine-capability-provenance
+(визначити machine-capability-provenance
   (110101001 (110110111 "lib/machine/capability-provenance.lisp")))
 
-(0011 machine-provenance-required-fields
-  (001
+(визначити machine-provenance-required-fields
+  (як-є
     (name
      semantic-authority
      admitted-form
@@ -24,184 +24,184 @@
      reverse-edge
      independent-semantic-witness)))
 
-(0011 machine-provenance-field-from
-  (0010 (name fields)
-    (110
-      ((010 fields) () (001 missing))
-      ((010 fields) (1) (001 missing))
-      ((010 fields) (0)
+(визначити machine-provenance-field-from
+  (функція (name fields)
+    (за-умовою
+      ((атом? fields) () (як-є missing))
+      ((атом? fields) (1) (як-є missing))
+      ((атом? fields) (0)
        (001000 ((field (100 fields)))
-         (110
-           ((010 field) ()
-            (machine-provenance-field-from name (011 fields)))
-           ((010 field) (1)
-            (machine-provenance-field-from name (011 fields)))
-           ((010 field) (0)
-            (110
-              ((101 (100 field) name) (1)
+         (за-умовою
+           ((атом? field) ()
+            (machine-provenance-field-from name (решта fields)))
+           ((атом? field) (1)
+            (machine-provenance-field-from name (решта fields)))
+           ((атом? field) (0)
+            (за-умовою
+              ((тотожне? (перше field) name) (1)
                (second field))
-              ((101 (100 field) name) (0)
-               (machine-provenance-field-from name (011 fields)))))))))))
+              ((тотожне? (перше field) name) (0)
+               (machine-provenance-field-from name (решта fields)))))))))))
 
-(0011 machine-provenance-field
-  (0010 (name row)
-    (110
-      ((010 row) () (001 missing))
-      ((010 row) (1) (001 missing))
-      ((010 row) (0)
-       (machine-provenance-field-from name (011 row))))))
+(визначити machine-provenance-field
+  (функція (name row)
+    (за-умовою
+      ((атом? row) () (як-є missing))
+      ((атом? row) (1) (як-є missing))
+      ((атом? row) (0)
+       (machine-provenance-field-from name (решта row))))))
 
-(0011 machine-required-fields-state
-  (0010 (required row)
-    (110
-      ((010 required) () (001 complete))
-      ((010 required) (1) (001 malformed))
-      ((010 required) (0)
+(визначити machine-required-fields-state
+  (функція (required row)
+    (за-умовою
+      ((атом? required) () (як-є complete))
+      ((атом? required) (1) (як-є malformed))
+      ((атом? required) (0)
        (001000 ((value (machine-provenance-field (100 required) row)))
-         (110
+         (за-умовою
            ((11110111 value (001 missing)) (1)
-            (001 missing))
+            (як-є missing))
            ((11110111 value (001 missing)) (0)
-            (machine-required-fields-state (011 required) row))))))))
+            (machine-required-fields-state (решта required) row))))))))
 
-(0011 exact-domain-independent-witness-state
-  (0010 (witness)
-    (110
-      ((010 witness) () (001 rejected))
-      ((010 witness) (1) (001 rejected))
-      ((010 witness) (0)
-       (110
-         ((101 (100 witness) (001 exact-domain-expression))
+(визначити exact-domain-independent-witness-state
+  (функція (witness)
+    (за-умовою
+      ((атом? witness) () (як-є rejected))
+      ((атом? witness) (1) (як-є rejected))
+      ((атом? witness) (0)
+       (за-умовою
+         ((тотожне? (перше witness) (як-є exact-domain-expression))
           (1)
-          (001 admitted))
-         ((101 (100 witness) (001 exact-domain-expression))
+          (як-є admitted))
+         ((тотожне? (перше witness) (як-є exact-domain-expression))
           (0)
-          (110
-            ((101 (100 witness) (001 exact-domain-corpus))
+          (за-умовою
+            ((тотожне? (перше witness) (як-є exact-domain-corpus))
              (1)
-             (001 admitted))
-            ((101 (100 witness) (001 exact-domain-corpus))
+             (як-є admitted))
+            ((тотожне? (перше witness) (як-є exact-domain-corpus))
              (0)
-             (001 rejected)))))))))
+             (як-є rejected)))))))))
 
-(0011 allowed-machine-edge-state
-  (0010 (row)
-    (110
-      ((010 row) () (001 denied))
-      ((010 row) (1) (001 denied))
-      ((010 row) (0)
-       (110
-         ((101 (100 row) (001 authority-edge)) (1)
-          (110
-            ((101 (second row) (001 semantic)) (1)
-             (110
-               ((101 (third row) (001 machine)) (1)
-                (001 allowed))
-               ((101 (third row) (001 machine)) (0)
-                (001 denied))))
-            ((101 (second row) (001 semantic)) (0)
-             (001 denied))))
-         ((101 (100 row) (001 authority-edge)) (0)
-          (001 denied)))))))
+(визначити allowed-machine-edge-state
+  (функція (row)
+    (за-умовою
+      ((атом? row) () (як-є denied))
+      ((атом? row) (1) (як-є denied))
+      ((атом? row) (0)
+       (за-умовою
+         ((тотожне? (перше row) (як-є authority-edge)) (1)
+          (за-умовою
+            ((тотожне? (second row) (як-є semantic)) (1)
+             (за-умовою
+               ((тотожне? (third row) (як-є machine)) (1)
+                (як-є allowed))
+               ((тотожне? (third row) (як-є machine)) (0)
+                (як-є denied))))
+            ((тотожне? (second row) (як-є semantic)) (0)
+             (як-є denied))))
+         ((тотожне? (перше row) (як-є authority-edge)) (0)
+          (як-є denied)))))))
 
 ; Deliberately unbound diagnostic symbols make fail-closed violations visible
 ; even when stdout is buffered. CI requires the exact diagnostic name.
-(0011 fail-machine-authority
-  (0010 (row)
+(визначити fail-machine-authority
+  (функція (row)
     (machine-authority-boundary-violation row)))
 
-(0011 fail-machine-hybrid
-  (0010 (row)
+(визначити fail-machine-hybrid
+  (функція (row)
     (machine-semantic-hybrid-violation row)))
 
-(0011 check-machine-edges
-  (0010 (rows)
-    (110
-      ((010 rows) () (001 machine-authority-ok))
-      ((010 rows) (1) (fail-machine-authority rows))
-      ((010 rows) (0)
+(визначити check-machine-edges
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) () (як-є machine-authority-ok))
+      ((атом? rows) (1) (fail-machine-authority rows))
+      ((атом? rows) (0)
        (001000 ((state (allowed-machine-edge-state (100 rows))))
-         (110
-           ((101 state (001 allowed)) (1)
-            (check-machine-edges (011 rows)))
-           ((101 state (001 allowed)) (0)
-            (fail-machine-authority (100 rows)))))))))
+         (за-умовою
+           ((тотожне? state (як-є allowed)) (1)
+            (check-machine-edges (решта rows)))
+           ((тотожне? state (як-є allowed)) (0)
+            (fail-machine-authority (перше rows)))))))))
 
-(0011 machine-provenance-row-safe-state
-  (0010 (row)
-    (110
-      ((010 row) () (001 rejected))
-      ((010 row) (1) (001 rejected))
-      ((010 row) (0)
-       (110
-         ((101 (100 row) (001 capability-provenance)) (1)
+(визначити machine-provenance-row-safe-state
+  (функція (row)
+    (за-умовою
+      ((атом? row) () (як-є rejected))
+      ((атом? row) (1) (як-є rejected))
+      ((атом? row) (0)
+       (за-умовою
+         ((тотожне? (перше row) (як-є capability-provenance)) (1)
           (001000 ((required-state
                   (machine-required-fields-state
                     machine-provenance-required-fields
                     row)))
-            (110
-              ((101 required-state (001 complete)) (1)
+            (за-умовою
+              ((тотожне? required-state (як-є complete)) (1)
                (001001 ((semantic-authority
                         (machine-provenance-field
-                          (001 semantic-authority)
+                          (як-є semantic-authority)
                           row))
                       (reverse-edge
                         (machine-provenance-field
-                          (001 reverse-edge)
+                          (як-є reverse-edge)
                           row))
                       (machine-witness
                         (machine-provenance-field
-                          (001 machine-witness)
+                          (як-є machine-witness)
                           row))
                       (independent-witness
                         (machine-provenance-field
-                          (001 independent-semantic-witness)
+                          (як-є independent-semantic-witness)
                           row))
                       (independent-state
                         (exact-domain-independent-witness-state
                           independent-witness)))
-                 (110
-                   ((101 semantic-authority (001 language-contract.lisp+ratified-domain-laws))
+                 (за-умовою
+                   ((тотожне? semantic-authority (як-є language-contract.lisp+ratified-domain-laws))
                     (1)
-                    (110
-                      ((101 reverse-edge (001 forbidden))
+                    (за-умовою
+                      ((тотожне? reverse-edge (як-є forbidden))
                        (1)
-                       (110
-                         ((101 independent-state (001 admitted))
+                       (за-умовою
+                         ((тотожне? independent-state (як-є admitted))
                           (1)
-                          (110
+                          (за-умовою
                             ((11110111 independent-witness machine-witness)
                              (1)
-                             (001 rejected))
+                             (як-є rejected))
                             ((11110111 independent-witness machine-witness)
                              (0)
-                             (001 admitted))))
-                         ((101 independent-state (001 admitted))
+                             (як-є admitted))))
+                         ((тотожне? independent-state (як-є admitted))
                           (0)
-                          (001 rejected))))
-                      ((101 reverse-edge (001 forbidden))
+                          (як-є rejected))))
+                      ((тотожне? reverse-edge (як-є forbidden))
                        (0)
-                       (001 rejected))))
-                   ((101 semantic-authority (001 language-contract.lisp+ratified-domain-laws))
+                       (як-є rejected))))
+                   ((тотожне? semantic-authority (як-є language-contract.lisp+ratified-domain-laws))
                     (0)
-                    (001 rejected)))))
-              ((101 required-state (001 complete)) (0)
-               (001 rejected)))))
-         ((101 (100 row) (001 capability-provenance)) (0)
-          (001 rejected)))))))
+                    (як-є rejected)))))
+              ((тотожне? required-state (як-є complete)) (0)
+               (як-є rejected)))))
+         ((тотожне? (перше row) (як-є capability-provenance)) (0)
+          (як-є rejected)))))))
 
-(0011 check-machine-capability-provenance
-  (0010 (rows)
-    (110
-      ((010 rows) () (001 machine-anti-hybrid-ok))
-      ((010 rows) (1) (fail-machine-hybrid rows))
-      ((010 rows) (0)
+(визначити check-machine-capability-provenance
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) () (як-є machine-anti-hybrid-ok))
+      ((атом? rows) (1) (fail-machine-hybrid rows))
+      ((атом? rows) (0)
        (001000 ((state (machine-provenance-row-safe-state (100 rows))))
-         (110
-           ((101 state (001 admitted)) (1)
-            (check-machine-capability-provenance (011 rows)))
-           ((101 state (001 admitted)) (0)
-            (fail-machine-hybrid (100 rows)))))))))
+         (за-умовою
+           ((тотожне? state (як-є admitted)) (1)
+            (check-machine-capability-provenance (решта rows)))
+           ((тотожне? state (як-є admitted)) (0)
+            (fail-machine-hybrid (перше rows)))))))))
 
 (check-machine-edges authority-edges)
 (check-machine-capability-provenance machine-capability-provenance)
