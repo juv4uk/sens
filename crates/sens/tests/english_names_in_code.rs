@@ -115,7 +115,7 @@ fn is_table_source(rel: &str) -> bool {
 
 fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
     let header = text.lines().take(24).collect::<Vec<_>>().join("\n").to_lowercase();
-    header.contains("(role research-only)")
+    header.contains("research-only")
         || header.contains("(semantic-authority-change none)")
         || header.contains("inventory only")
         || header.contains("не language-contract")
@@ -801,6 +801,18 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert!(explicit_nonsemantic_lisp_evidence(
         "; Inventory only: mechanism evidence, no semantic authority\n(foo car)"
     ));
+    let red_research_probe = "; #432 research-only RED probe.\n(def pair-value (cons x y))";
+    assert!(explicit_nonsemantic_lisp_evidence(red_research_probe));
+    assert_eq!(
+        classified_kind("docs/research/432/church-pair-car-red.lisp", red_research_probe, "lisp"),
+        "lisp-evidence",
+        "an explicitly labelled research-only witness is evidence, not current executable source",
+    );
+    assert!(ratchet_enforced_kind(classified_kind(
+        "docs/research/new-proof.lisp",
+        "(def pair-value (cons x y))",
+        "lisp",
+    )));
     assert_eq!(
         classified_kind("lib/core1.lisp", "", "lisp-дані"),
         "lisp-дані",

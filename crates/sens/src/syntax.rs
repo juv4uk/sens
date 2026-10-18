@@ -126,7 +126,7 @@ mod exact_domain_codec {
     use crate::{BinarySourceWord, DomainIdentity};
 
     pub(super) fn put(out: &mut Vec<u8>, identity: DomainIdentity) {
-        let width = u8::try_from(identity.width()).expect("D1–D9 has a u8 width");
+        let width = u8::try_from(identity.width()).expect("D1–D10 has a u8 width");
         let bits = identity.packed_bits();
         out.push(width);
         match width {
@@ -134,7 +134,8 @@ mod exact_domain_codec {
                 u8::try_from(bits).expect("D1–D8 payload must not lose high bits"),
             ),
             9 => out.extend_from_slice(&bits.to_le_bytes()),
-            _ => unreachable!("D10 has no DomainIdentity AST admission"),
+            10 => out.extend_from_slice(&bits.to_le_bytes()),
+            _ => unreachable!("unsupported exact domain identity width"),
         }
     }
 
@@ -153,6 +154,12 @@ mod exact_domain_codec {
                 *pos = end;
                 value
             }
+            10 => {
+                let end = pos.checked_add(2)?;
+                let value = u16::from_le_bytes(bytes.get(*pos..end)?.try_into().ok()?);
+                *pos = end;
+                value
+            }
             _ => return None,
         };
         let small = || u8::try_from(bits).ok();
@@ -166,6 +173,7 @@ mod exact_domain_codec {
             7 => BinarySourceWord::W7(crate::Bit7::new(small()?)?),
             8 => BinarySourceWord::W8(crate::Bit8::new(small()?)?),
             9 => BinarySourceWord::W9(crate::Bit9::new(bits)?),
+            10 => return Some(DomainIdentity::from_coordinate(crate::domain_ladder::DomainCoordinate::new(10, bits)?)),
             _ => return None,
         };
         Some(DomainIdentity::from_source_word(source))
@@ -885,12 +893,12 @@ mod wire_tests {
 "#;
 
     #[test]
-    fn d1_d9_shared_fasl_wire_codec_preserves_all_1022_exact_identities() {
-        // All 2+4+...+512 possible bit words, not just representative values.
+    fn d1_d10_shared_fasl_wire_codec_preserves_all_2046_exact_identities() {
+        // All 2+4+...+1024 possible bit words, not just representative values.
         // Residency/callability are NOT inferred by this transport test.
         let hash = [0x4Du8; 32];
         let mut checked = 0usize;
-        for width in 1u8..=9 {
+        for width in 1u8..=10 {
             for bits in 0u16..(1u16 << width) {
                 let mut encoded_word = vec![width];
                 if width <= 8 {
@@ -926,14 +934,14 @@ mod wire_tests {
                 checked += 1;
             }
         }
-        assert_eq!(checked, 1022);
+        assert_eq!(checked, 2046);
     }
 
     #[test]
     fn shared_domain_codec_rejects_extra_high_bits_wrong_widths_and_truncation() {
         for raw in [
             vec![0, 0],
-            vec![10, 0, 0],
+            vec![10, 0, 4],
             vec![11, 0, 0],
             vec![3, 0b0000_1000],
             vec![7, 0b1000_0000],
@@ -953,6 +961,9 @@ mod wire_tests {
         let d8 = super::exact_domain_codec::get(&[8, 0x01], &mut d8_pos).unwrap();
         let d9 = super::exact_domain_codec::get(&[9, 0x01, 0x00], &mut d9_pos).unwrap();
         assert_ne!(d8, d9);
+        let mut d10_pos = 0;
+        let d10 = super::exact_domain_codec::get(&[10, 0x01, 0x00], &mut d10_pos).unwrap();
+        assert_ne!(d9, d10);
     }
 
     #[test]

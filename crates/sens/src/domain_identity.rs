@@ -27,11 +27,17 @@ pub enum DomainIdentity {
     D7(D7DataWord),
     D8(CoreD8),
     D9(CoreD9),
+    /// Exact D10 identity. A callable mechanism is installed only when a
+    /// concrete Core4 definition binds this exact slot in the Environment.
+    D10(crate::DomainD10),
 }
 
 impl DomainIdentity {
     pub const fn width(self) -> usize {
-        self.source_word().width()
+        match self {
+            Self::D10(_) => 10,
+            _ => self.source_word().width(),
+        }
     }
 
     /// Mechanical payload wide enough for every current exact domain.
@@ -49,6 +55,7 @@ impl DomainIdentity {
             Self::D7(value) => value.word().packed_bits() as u16,
             Self::D8(value) => value.word().packed_bits() as u16,
             Self::D9(value) => value.word().packed_bits(),
+            Self::D10(value) => value.packed_bits(),
         }
     }
 
@@ -67,6 +74,20 @@ impl DomainIdentity {
         }
     }
 
+    /// Lift an exact domain-ladder coordinate, including D10, without
+    /// inferring meaning or callability from width.
+    pub fn from_coordinate(coordinate: crate::domain_ladder::DomainCoordinate) -> Self {
+        match coordinate.width() {
+            10 => Self::D10(crate::DomainD10::new(coordinate.bits()).expect("valid D10 coordinate")),
+            1..=9 => Self::from_source_word(coordinate.source_word().expect("D1-D9 coordinate")),
+            _ => panic!("unsupported domain identity coordinate"),
+        }
+    }
+
+    pub const fn coordinate(self) -> crate::domain_ladder::DomainCoordinate {
+        crate::domain_ladder::DomainCoordinate::from_domain_identity(self)
+    }
+
     pub const fn source_word(self) -> BinarySourceWord {
         match self {
             Self::D1(value) => BinarySourceWord::W1(value.word()),
@@ -78,6 +99,7 @@ impl DomainIdentity {
             Self::D7(value) => BinarySourceWord::W7(value.word()),
             Self::D8(value) => BinarySourceWord::W8(value.word()),
             Self::D9(value) => BinarySourceWord::W9(value.word()),
+            Self::D10(_) => panic!("D10 has no D1-D9 BinarySourceWord representation"),
         }
     }
 
@@ -118,7 +140,7 @@ impl DomainIdentity {
                 0b110011110 | 0b110011100 | 0b110011101 | 0b110101010 | 0b110101011
             ) => Some(CoreDomainIdentity::D9(value)),
             Self::D9(_) => None,
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
+            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D10(_) => None,
         }
     }
 }

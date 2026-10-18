@@ -19,8 +19,8 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_with_mode(source, ReaderMode::LegacyCompatibility)
 }
 
-/// Перший незалежний читач точних слів D1–D9 для поетапного переходу
-/// виконавців. D10 і числова D24+ граматика потребують окремого носія;
+/// Незалежний читач точних слів D1–D10 для поетапного переходу
+/// виконавців. Числова D24+ граматика має окремий носій;
 /// жодне невідоме слово не перетворюється на Number або історичний CoreDomainIdentity.
 ///
 /// Явний публічний вхід для міграції активних споживачів.
@@ -451,21 +451,18 @@ impl Parser<'_> {
             if !token.is_empty()
                 && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
             {
-                let words = crate::parse_binary_source_words(token).map_err(|_| {
-                    self.error(
-                        "непідтримана точна ширина; потрібен окремий D10/D24+ носій",
-                        start,
-                        self.cursor,
-                    )
-                })?;
-                let word = words
-                    .first()
-                    .expect("непорожнє точне бінарне слово містить одну тотожність")
-                    .word;
+                let identity = if token.len() == 10 {
+                    let coordinate = crate::domain_ladder::DomainCoordinate::з_видимих_бітів(token)
+                        .ok_or_else(|| self.error("непідтримане точне слово D10", start, self.cursor))?;
+                    crate::DomainIdentity::from_coordinate(coordinate)
+                } else {
+                    let words = crate::parse_binary_source_words(token).map_err(|_| {
+                        self.error("непідтримана точна ширина або невідоме доменне слово", start, self.cursor)
+                    })?;
+                    crate::DomainIdentity::from_source_word(words[0].word)
+                };
                 return Ok(Expr {
-                    kind: ExprKind::DomainIdentity(
-                        crate::DomainIdentity::from_source_word(word),
-                    ),
+                    kind: ExprKind::DomainIdentity(identity),
                     span: Span {
                         start,
                         end: self.cursor,
@@ -728,12 +725,17 @@ mod tests {
 
     #[test]
     fn exact_reader_rejects_unknown_width_and_unqualified_arithmetic() {
-        for source in ["1111111111", "42", "-1", "1/2", "#d10", "#b1010",
+        for source in ["42", "-1", "1/2", "#d10", "#b1010",
                        "#q2:101/1", "010120"] {
             let error = parse_exact_domain_source(source)
                 .expect_err("непідтверджене слово чи число не допускається");
             assert_eq!(error.kind, ErrorKind::Parse, "{source}");
         }
+        assert!(matches!(
+            parse_exact_domain_source("1111111111").unwrap()[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 10 && identity.packed_bits() == 1023
+        ));
         // Старі споживачі зберігають чинний compatibility-контракт.
         assert!(matches!(parse_one("42").kind, ExprKind::Number(_, _)));
     }

@@ -392,6 +392,11 @@
 ; machine admission. Each definition is native SENS over already-ratified
 ; D3 CONS/CAR/CDR, D4 NULL/COND and D5 APPEND. Archive:
 ; knowledge/d10-crossrepo-paip-v1.json and lib/domains/d10.lisp.
+; Runtime boundary (2026-10-18): after Core4 loads, an exact D10 word may
+; invoke only the root closure bound to that coordinate's concrete definition.
+; This is neither a primitive/F1-F4 admission nor callability inferred from width.
+; Межа виконання: точне слово D10 викликає лише реально визначене замикання;
+; ширина та сама наявність координати не створюють функцію.
 ; D10:0011010111 MKLIST: () remains (); an atom becomes a singleton;
 ; an existing nonempty list is returned unchanged.
 (0011 утворити-список
@@ -441,7 +446,8 @@
 ; D10 PAIP FIND-IF-ANYWHERE: derive a tree search from the pinned PAIP law.
 ; PAIP checks ATOM first and applies the predicate to every atom, including ().
 ; Traversal is left-to-right; a successful CAR search short-circuits the CDR.
-; The D10 codebook row remains research-only: this is not direct D10 callability.
+; The D10 codebook row does not create a primitive/opcode; the exact closure
+; route above applies only if this concrete definition is loaded.
 (0011 дерево-має-збіг?
   (0010 (предикат дерево)
     (110

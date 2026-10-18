@@ -8,10 +8,10 @@
  *
  * The caller owns source and destination buffers. BE3 encodes each exact
  * word as [width, payload_hi, payload_lo] (in-process, not .sens wire).
- * The existing T5 encode/decode/ordinary-validate ABI uses D1..D9.
- * A separate D1..D10 coordinate-only validator is available; its success
- * NEVER admits execution, changes SENS semantics, or permits D11.
- * Encoding/decoding executable T5 through the ordinary ABI stays <= D9.
+ * The canonical BE3 executable-reader adapter uses D1..D9. A separate raw
+ * T5M exact-word record adapter preserves any positive width without semantic
+ * admission. A legacy T5 coordinate validator is limited to D1..D10; its
+ * success NEVER admits execution, changes SENS semantics, or permits D11.
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -41,6 +41,19 @@ int sens_zig_t5_validate(const uint8_t *src, size_t len);
  */
 int sens_zig_t5_validate_coordinates(const uint8_t *src, size_t len);
 /* Returns output length in bytes; -1 invalid, -2 capacity insufficient. */
+int sens_zig_t5m_validate(const uint8_t *src, size_t len);
+ptrdiff_t sens_zig_t5m_encode_be3(const uint8_t *src, size_t byte_len,
+                                  uint8_t *dst, size_t capacity);
+ptrdiff_t sens_zig_t5m_decode_be3(const uint8_t *src, size_t byte_len,
+                                  uint8_t *dst, size_t capacity);
+/* Exact T5M records: u32 big-endian width + ASCII '0'/'1' payload bytes.
+ * In-process only; preserves exact widths and grants no SENS callability.
+ * Returns output length, -1 invalid/overlap, -2 capacity insufficient.
+ */
+ptrdiff_t sens_zig_t5m_encode_words(const uint8_t *src, size_t byte_len,
+                                    uint8_t *dst, size_t capacity);
+ptrdiff_t sens_zig_t5m_decode_words(const uint8_t *src, size_t byte_len,
+                                    uint8_t *dst, size_t capacity);
 ptrdiff_t sens_zig_t5_encode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
 ptrdiff_t sens_zig_t5_decode_be3(const uint8_t *src, size_t byte_len,

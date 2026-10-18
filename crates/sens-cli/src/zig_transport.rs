@@ -20,6 +20,12 @@ unsafe extern "C" {
     fn sens_zig_t5m_decode_be3(
         input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
     ) -> isize;
+    fn sens_zig_t5m_encode_words(
+        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+    ) -> isize;
+    fn sens_zig_t5m_decode_words(
+        input: *const u8, byte_len: usize, output: *mut u8, capacity: usize
+    ) -> isize;
     fn sens_zig_t5_validate(input: *const u8, len: usize) -> i32;
     // Coordinate-only D1..D10 physical validation; no runnable D10 admission.
     fn sens_zig_t5_validate_coordinates(input: *const u8, len: usize) -> i32;
@@ -48,6 +54,80 @@ fn version() -> Result<(), String> {
         return Err("Zig codec C ABI version mismatch".into());
     }
     Ok(())
+}
+
+/// Exact-width physical word for the Zig T5M bridge. Bits are ASCII bytes so
+/// this host representation cannot silently narrow a word into an integer.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ExactT5Word {
+    width: usize,
+    bits: Vec<u8>,
+}
+
+impl ExactT5Word {
+    pub fn new(width: usize, bits: Vec<u8>) -> Result<Self, String> {
+        if width == 0 || bits.len() != width || bits.iter().any(|bit| !matches!(bit, b'0' | b'1')) {
+            return Err("exact T5M word requires positive width and exactly that many binary digits".into());
+        }
+        Ok(Self { width, bits })
+    }
+
+    pub fn width(&self) -> usize { self.width }
+    pub fn bits(&self) -> &[u8] { &self.bits }
+}
+
+/// T5M encode through the Zig-owned physical codec without a D1–D9 BE3 limit.
+pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
+    version()?;
+    if words.is_empty() { return Err("Zig T5M cannot encode an empty word sequence".into()); }
+    let trits = words.iter().try_fold(words.len() - 1, |n, word| n.checked_add(word.width))
+        .ok_or("exact T5M trit count overflow")?;
+    let groups = trits.checked_add(14).ok_or("exact T5M group count overflow")? / 15;
+    let physical_capacity = groups.checked_mul(3).ok_or("exact T5M byte count overflow")?;
+    let record_capacity = words.iter().try_fold(0usize, |n, word| n.checked_add(4)?.checked_add(word.width))
+        .ok_or("exact T5M ABI record length overflow")?;
+    let mut records = Vec::with_capacity(record_capacity);
+    for word in words {
+        let width = u32::try_from(word.width).map_err(|_| "exact T5M word exceeds u32 width")?;
+        records.extend_from_slice(&width.to_be_bytes());
+        records.extend_from_slice(&word.bits);
+    }
+    let mut physical = vec![0u8; physical_capacity];
+    let written = unsafe {
+        sens_zig_t5m_encode_words(records.as_ptr(), records.len(), physical.as_mut_ptr(), physical.len())
+    };
+    if written <= 0 || usize::try_from(written).ok() != Some(physical.len()) {
+        return Err(format!("Zig exact T5M encode rejected: code={written}"));
+    }
+    Ok(physical)
+}
+
+/// T5M decode through Zig, preserving arbitrary positive exact widths.
+pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String> {
+    version()?;
+    validate_t5(physical)?;
+    let trits = (physical.len() / 3).checked_mul(15).ok_or("exact T5M trit count overflow")?;
+    let capacity = trits.checked_mul(5).ok_or("exact T5M decoded capacity overflow")?;
+    let mut records = vec![0u8; capacity];
+    let written = unsafe {
+        sens_zig_t5m_decode_words(physical.as_ptr(), physical.len(), records.as_mut_ptr(), records.len())
+    };
+    let len = usize::try_from(written).ok().filter(|&n| n > 0 && n <= records.len())
+        .ok_or_else(|| format!("Zig exact T5M decode rejected: code={written}"))?;
+    records.truncate(len);
+    let mut words = Vec::new();
+    let mut offset = 0usize;
+    while offset < records.len() {
+        if records.len() - offset < 4 { return Err("Zig exact T5M returned truncated width".into()); }
+        let width = u32::from_be_bytes(records[offset..offset + 4].try_into().expect("four-byte width")) as usize;
+        offset += 4;
+        let end = offset.checked_add(width).ok_or("Zig exact T5M width overflow")?;
+        let bits = records.get(offset..end).ok_or("Zig exact T5M returned truncated word")?.to_vec();
+        words.push(ExactT5Word::new(width, bits)?);
+        offset = end;
+    }
+    if words.is_empty() { return Err("Zig exact T5M returned no words".into()); }
+    Ok(words)
 }
 
 // SENS defines REPL/read/identity; these functions carry ONLY untouched bytes.
@@ -778,6 +858,28 @@ mod zig_exact_egress_tests {
             .into_iter()
             .map(|token| token.word)
             .collect()
+    }
+
+    #[test]
+    fn exact_t5m_bridge_preserves_domain_width_including_d5_d8_and_d10_plus() {
+        use super::{decode_t5_exact_words, encode_t5_exact_words, ExactT5Word};
+
+        // Equal payloads are not interchangeable: D5's 00001 must never be
+        // padded into D8's 00000001. Higher D1–24+ words remain opaque here.
+        let source = [
+            ExactT5Word::new(5, b"00001".to_vec()).unwrap(),
+            ExactT5Word::new(8, b"00000001".to_vec()).unwrap(),
+            ExactT5Word::new(10, b"0000000001".to_vec()).unwrap(),
+            ExactT5Word::new(24, b"000000000000000000000001".to_vec()).unwrap(),
+            ExactT5Word::new(48, format!("{}1", "0".repeat(47)).into_bytes()).unwrap(),
+        ];
+
+        let physical = encode_t5_exact_words(&source).expect("Zig T5M exact encode");
+        let restored = decode_t5_exact_words(&physical).expect("Zig T5M exact decode");
+        assert_eq!(restored, source);
+        assert_eq!(restored[0].width(), 5);
+        assert_eq!(restored[1].width(), 8);
+        assert_ne!(restored[0], restored[1]);
     }
 
     #[test]

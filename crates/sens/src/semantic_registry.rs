@@ -38,9 +38,14 @@ mod d9_definition_bindings_generated {
     include!("d9_definition_bindings_generated.rs");
 }
 
+mod d10_definition_bindings_generated {
+    include!("d10_definition_bindings_generated.rs");
+}
+
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use d6_definition_bindings_generated::D6_DEFINITION_BINDINGS;
 use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
+use d10_definition_bindings_generated::D10_DEFINITION_BINDINGS;
 use domain_surface_generated::{DomainSurfaceRow, DOMAIN_SURFACE_ROWS};
 use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
@@ -254,6 +259,17 @@ pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIde
         .map(|row| DomainIdentity::D9(CoreD9::from_word(
             Bit9::new(row.bits).expect("generated D9 binding is exactly nine bits"),
         )))
+}
+
+/// Binding-only D10 lookup. A domain-table name maps to an exact coordinate,
+/// but only evaluation of a concrete root callable populates its runtime slot.
+pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
+    D10_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .map(|row| DomainIdentity::D10(
+            crate::DomainD10::new(row.bits).expect("generated D10 binding is exactly ten bits"),
+        ))
 }
 
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
