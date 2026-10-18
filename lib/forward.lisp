@@ -700,7 +700,7 @@
 
 (визначити match-conditions-jtms
   (функція (conditions facts state)
-    (thread-conjunction conditions state
+    (потік-виконання-кон'юнкція conditions state
       (функція (condition s) (зіставити-одну-умову-правила-система-обґрунтувань condition facts s)))))
 
 (визначити map-apply-head-jtms
@@ -1254,7 +1254,7 @@
 ; matches none of them — rather than recursively searching further rules.
 (визначити match-conditions
   (функція (conditions facts bindings)
-    (thread-conjunction conditions bindings
+    (потік-виконання-кон'юнкція conditions bindings
       (функція (condition s) (зіставити-одну-умову-правила condition facts s)))))
 
 (визначити map-apply-head
@@ -1409,3 +1409,6 @@
 (визначити відкликати-факти-система-обґрунтувань retract-facts-jtms)
 (визначити відкликати-факти-система-істини retract-facts-tms)
 (визначити підтримки-від supports-of)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити потік-виконання-кон'юнкція thread-conjunction)
