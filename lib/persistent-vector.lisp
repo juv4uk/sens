@@ -48,65 +48,65 @@
 ; vector. Each tree node is a 5-element list: (index value height left
 ; right) -- the identical shape lib/persistent-map.lisp's node uses.
 
-(0011 vec-empty (111 0 (001 ())))
-(0011 vec-count (0010 (v) (100 v)))
-(0011 vec-tree (0010 (v) (011 v)))
+(0011 vec-empty (сполучити 0 (як-є ())))
+(0011 vec-count (0010 (v) (перше v)))
+(0011 vec-tree (0010 (v) (решта v)))
 
-(0011 vnode-index (0010 (n) (100 n)))
-(0011 vnode-value (0010 (n) (1001 n)))
-(0011 vnode-height (0010 (n) (10011 n)))
+(0011 vnode-index (0010 (n) (перше n)))
+(0011 vnode-value (0010 (n) (друге n)))
+(0011 vnode-height (0010 (n) (третє n)))
 (0011 vnode-left
   (0010 (node)
-    (10011 (011 node))))
+    (третє (решта node))))
 (0011 vnode-right
   (0010 (node)
-    (10011 (011 (011 node)))))
+    (третє (решта (решта node)))))
 
 (0011 vheight-of
-  (0010 (n) (110 
-                    ((010 n)  0) (#d1:1 (vnode-height n)))))
+  (0010 (n) (за-умовою 
+                    ((атом? n)  0) (#d1:1 (vnode-height n)))))
 
 (0011 vmax2
   (0010 (a b)
-    (110
-      ((11010 a b)  b)
-      ((0100 (11010 a b)) a))))
+    (за-умовою
+      ((менше? a b)  b)
+      ((хибне? (менше? a b)) a))))
 
 (0011 vmake-balanced-node
   (0010 (index value left right)
-    (1110 index value (01010 1 (vmax2 (vheight-of left) (vheight-of right))) left right)))
+    (список index value (додати 1 (vmax2 (vheight-of left) (vheight-of right))) left right)))
 
 (0011 vbalance-factor
-  (0010 (n) (01011 (vheight-of (vnode-left n)) (vheight-of (vnode-right n)))))
+  (0010 (n) (відняти (vheight-of (vnode-left n)) (vheight-of (vnode-right n)))))
 
 (0011 vrotate-left
   (0010 (n)
-    ((0010 (r)
+    ((функція (r)
       (vmake-balanced-node (vnode-index r) (vnode-value r)
         (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-left n) (vnode-left r))
         (vnode-right r))) (vnode-right n))))
 
 (0011 vrotate-right
   (0010 (n)
-    ((0010 (l)
+    ((функція (l)
       (vmake-balanced-node (vnode-index l) (vnode-value l)
         (vnode-left l)
         (vmake-balanced-node (vnode-index n) (vnode-value n) (vnode-right l) (vnode-right n)))) (vnode-left n))))
 
 (0011 vbalance
   (0010 (n)
-    (110
+    (за-умовою
       
-      ((010 n)  n)
-      ((11011 (vbalance-factor n) 1) 
-       (110
-         ((11010 (vbalance-factor (vnode-left n)) 0) 
+      ((атом? n)  n)
+      ((більше? (vbalance-factor n) 1) 
+       (за-умовою
+         ((менше? (vbalance-factor (vnode-left n)) 0) 
           (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
                            (vrotate-left (vnode-left n)) (vnode-right n))))
          (#d1:1 (vrotate-right n))))
-      ((11010 (vbalance-factor n) -1) 
-       (110
-         ((11011 (vbalance-factor (vnode-right n)) 0) 
+      ((менше? (vbalance-factor n) -1) 
+       (за-умовою
+         ((більше? (vbalance-factor (vnode-right n)) 0) 
           (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
                           (vnode-left n) (vrotate-right (vnode-right n)))))
 
@@ -117,12 +117,12 @@
 ; an existing entry at `index`) -- the original tree is untouched.
 (0011 vtree-insert
   (0010 (index value tree)
-    (110
+    (за-умовою
       
-      ((010 tree)  (vmake-balanced-node index value (001 ()) (001 ())))
-      ((101 index (vnode-index tree))
+      ((атом? tree)  (vmake-balanced-node index value (як-є ()) (як-є ())))
+      ((тотожне? index (vnode-index tree))
        (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
-      ((11010 index (vnode-index tree)) 
+      ((менше? index (vnode-index tree)) 
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vtree-insert index value (vnode-left tree))
                    (vnode-right tree))))
@@ -135,11 +135,11 @@
 ; (and therefore the work done) never exceeds ~1.44*log2(count).
 (0011 vtree-get
   (0010 (index tree)
-    (110
+    (за-умовою
       
-      ((010 tree)  (001 ()))
-      ((101 index (vnode-index tree)) (1110 (vnode-value tree)))
-      ((11010 index (vnode-index tree))  (vtree-get index (vnode-left tree)))
+      ((атом? tree)  (як-є ()))
+      ((тотожне? index (vnode-index tree)) (список (vnode-value tree)))
+      ((менше? index (vnode-index tree))  (vtree-get index (vnode-left tree)))
       (#d1:1 (vtree-get index (vnode-right tree))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
@@ -157,8 +157,8 @@
 ; the insert path didn't touch with the original vector.
 (0011 vec-conj
   (0010 (value v)
-    (111 (01010 1 (101010111 v))
-          (vtree-insert (101010111 v) value (vec-tree v)))))
+    (сполучити (додати 1 (вектор-кількість v))
+          (vtree-insert (вектор-кількість v) value (vec-tree v)))))
 
 ; In-order traversal over an index-keyed BST comes back in index order
 ; for free, the same free side effect lib/persistent-map.lisp's map->list
@@ -166,11 +166,11 @@
 ; has no letrec; `def` at top level is how a helper refers to itself.
 (0011 vtree->list
   (0010 (tree)
-    (110
+    (за-умовою
       
-      ((010 tree)  (001 ()))
-      (#d1:1 (1111 (vtree->list (vnode-left tree))
-                 (111 (vnode-value tree)
+      ((атом? tree)  (як-є ()))
+      (#d1:1 (приєднати (vtree->list (vnode-left tree))
+                 (сполучити (vnode-value tree)
                        (vtree->list (vnode-right tree))))))))
 
 (0011 vec->list
@@ -186,10 +186,10 @@
 ; before this file was ever tested, not after.
 (0011 vec-from-list-onto
   (0010 (lst acc)
-    (110
+    (за-умовою
       
-      ((010 lst)  acc)
-      (#d1:1 (vec-from-list-onto (011 lst) (101011101 (100 lst) acc))))))
+      ((атом? lst)  acc)
+      (#d1:1 (vec-from-list-onto (решта lst) (вектор-додати (перше lst) acc))))))
 
 (0011 vec-from-list
   (0010 (lst) (vec-from-list-onto lst vec-empty)))
