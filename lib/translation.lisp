@@ -97,9 +97,9 @@
       ((атом? alternatives) (як-є ()))
       ((вміст-кандидата-перекладу-коректний? kind (перше alternatives))
        (за-умовою
-         ((010 (011 alternatives)) #d1:1)
+         ((атом? (решта alternatives)) так)
          (так (альтернативні-варіанти-перекладу-коректні? kind (решта alternatives)))))
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
 ; alternatives. One alternative is just a candidate; zero is not ambiguity.

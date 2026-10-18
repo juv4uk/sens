@@ -190,7 +190,33 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             self.assertEqual(source.count(current), 1, name)
             self.assertNotIn(original, source)
             source = source.replace(current, original, 1)
+        # Новий вузький зріз: D3 ATOM/CDR/QUOTE + D1 YES тільки у
+        # translation-alternatives-valid?, без зміни числових даних або правил.
+        self.assertEqual(surfaces[3]["010"], "атом?")
+        self.assertEqual(surfaces[3]["011"], "решта")
+        anchor = "(визначити translation-alternatives-valid?\\n".replace("\\n", "\n")
+        end_marker = "\n\n; Ambiguity is evidence only"
+        start = source.index(anchor)
+        end = source.index(end_marker, start)
+        fragment = source[start:end]
+        expected_atom_cdr = f"(({surfaces[3]['010']} ({surfaces[3]['011']} alternatives)) {yes})"
+        previous_atom_cdr = "((010 (011 alternatives)) #d1:1)"
+        expected_else = f"({yes} ({quote} ())))))"
+        previous_else = "(#d1:1 (001 ())))))"
+        self.assertEqual(fragment.count(expected_atom_cdr), 1)
+        self.assertEqual(fragment.count(expected_else), 1)
+        fragment = fragment.replace(expected_atom_cdr, previous_atom_cdr, 1)
+        fragment = fragment.replace(expected_else, previous_else, 1)
+        source = source[:start] + fragment + source[end:]
         return source
+
+    def test_wrong_alternative_selector_peer_is_rejected(self):
+        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
+        correct = "((атом? (решта alternatives)) так)"
+        self.assertEqual(source.count(correct), 1)
+        mutated = source.replace(correct, "((атом? (перше alternatives)) так)", 1)
+        with self.assertRaises(AssertionError):
+            self._restore_original(mutated)
 
     @staticmethod
     def _git_blob_sha(source):
