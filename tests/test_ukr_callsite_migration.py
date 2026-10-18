@@ -669,7 +669,7 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
         self.assertIn("(110 ((101 (001 000) (001 001)) 0)", coverage)
         mutant = parity.replace("(error-class (перше (решта (решта (решта (решта row))))))",
                                 "(error-class (перше (решта (решта (решта row)))))", 1)
-        restored = mutant.replace("(error-class (перше (решта (решта (решта row)))))",
+        restored = mutant.replace("(error-class (перше (решта (решта (решта (решта row))))))",
                                   "(error-class (110110101 row))", 1)
         self.assertNotEqual(self._git_blob(restored),
                             "bc6a7e27a83192d667ba6791e4da4d867ed80971")
