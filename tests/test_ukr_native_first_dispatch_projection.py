@@ -41,7 +41,15 @@ BASELINE = {
 
 
 def undo_ukr_heads(text: str) -> str:
-    return RX.sub(lambda m: "(" + UKR_TO_BITS[m.group(1)], text)
+    restored = RX.sub(lambda m: "(" + UKR_TO_BITS[m.group(1)], text)
+    # Лише історична інверсія для Git SHA, не executable SID8 alias.
+    # D8:01001011=ABS∘RECIP; чинний READ-ALL є D9:110101001.
+    current = "(читати-всі source)"
+    if current in restored:
+        if restored.count(current) != 1:
+            raise ValueError("неоднозначна D9 READ-ALL проєкція")
+        restored = restored.replace(current, "(01001011 source)", 1)
+    return restored
 
 
 def git_blob(data: bytes) -> str:
@@ -71,6 +79,22 @@ class NativeFirstUkrProjection(unittest.TestCase):
                                  (yes, no))
                 count += expected
         self.assertEqual(count, 252)
+
+    def test_current_d9_read_all_and_wrong_d8_peer_negative(self):
+        second = (ROOT / "lib/machine/dispatch/native-first-execute.lisp").read_text()
+        self.assertEqual(second.count("(читати-всі source)"), 1)
+        d9 = (ROOT / "lib/domains/d9.lisp").read_text()
+        d8 = (ROOT / "lib/domains/d8.lisp").read_text()
+        self.assertIn("(110101001 (ук читати-всі) (укр читати-всі)", d9)
+        self.assertIn("(en read-all) (LISP READ-ALL)", d9)
+        self.assertIn("(01001011 (ук модуль-після-обернення)", d8)
+        sha = BASELINE["lib/machine/dispatch/native-first-execute.lisp"][0]
+        self.assertEqual(git_blob(undo_ukr_heads(second).encode()), sha)
+        for wrong in ("(модуль-після-обернення source)",
+                      "(прочитати-усе source)", "(110101001 source)"):
+            mutant = second.replace("(читати-всі source)", wrong, 1)
+            with self.subTest(wrong=wrong):
+                self.assertNotEqual(git_blob(undo_ukr_heads(mutant).encode()), sha)
 
     def test_no_raw_D3_D4_callable_heads_remain(self):
         pattern = r"\((?:001|010|011|100|101|110|111|0001|0010|0011|0101)(?=\s|\))"
