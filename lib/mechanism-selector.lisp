@@ -7,42 +7,42 @@
 ; replaced by exact two-field D3 COND + D1 ATOM for empty. Fallback uses
 ; (010 (001 ())) = D1:1. Width is identity; every bit of domain address valued.
 
-(0011 mechanism-selector-registry
+(визначити mechanism-selector-registry
   (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
-(0011 mechanism-selector-metadata
+(визначити mechanism-selector-metadata
   (перше (читати-всі (читати-файл "lib/function-table-mechanisms.lisp"))))
 
-(0011 mechanism-selector-registry-rows
+(визначити mechanism-selector-registry-rows
   mechanism-selector-registry)
 
-(0011 mechanism-selector-find-section
-  (0010 (name sections)
+(визначити mechanism-selector-find-section
+  (функція (name sections)
     (за-умовою
       ((атом? sections) (як-є ()))
       ((тотожне? (перше (перше sections)) name) (перше sections))
       ((атом? (як-є ()))
        (mechanism-selector-find-section name (решта sections))))))
 
-(0011 mechanism-selector-routes
+(визначити mechanism-selector-routes
   (решта (mechanism-selector-find-section
          (як-є rows)
          mechanism-selector-metadata)))
 
-(0011 mechanism-selector-registry-has-sid?
-  (0010 (sid rows)
+(визначити mechanism-selector-registry-has-sid?
+  (функція (sid rows)
     (за-умовою
       ((атом? rows) (як-є no))
       ((тотожне? sid (перше (перше rows))) (як-є yes))
       ((атом? (як-є ()))
        (mechanism-selector-registry-has-sid? sid (решта rows))))))
 
-(0011 mechanism-selector-find-route
-  (0010 (sid executor rows)
+(визначити mechanism-selector-find-route
+  (функція (sid executor rows)
     (за-умовою
       ((атом? rows) (як-є ()))
       ((атом? (як-є ()))
-       ((0010 (row)
+       ((функція (row)
           (за-умовою
             ((тотожне? sid (перше row))
              (за-умовою
@@ -53,8 +53,8 @@
              (mechanism-selector-find-route sid executor (решта rows)))))
         (перше rows))))))
 
-(0011 mechanism-select
-  (0010 (sid executor)
+(визначити mechanism-select
+  (функція (sid executor)
     (за-умовою
       ((тотожне?
          (mechanism-selector-registry-has-sid?
@@ -65,7 +65,7 @@
          (як-є sid-not-in-function-table)
          sid))
       ((атом? (як-є ()))
-       ((0010 (route)
+       ((функція (route)
           (за-умовою
             ((атом? route)
              (список (як-є mechanism-unavailable) sid executor))
