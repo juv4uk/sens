@@ -27,7 +27,7 @@
     (за-умовою
       ((атом? rows) ())
       ((тотожне? ідентичність (перше (перше rows))) (перше rows))
-      (#d1:1 (compiler-authority-find ідентичність (решта rows))))))
+      (так (compiler-authority-find ідентичність (решта rows))))))
 
 (визначити compiler-nucleus
   (функція (ідентичність authority)
@@ -439,7 +439,7 @@
     (за-умовою
       ((compiler-list-end? tail) (compiler-true ()))
       ((атом? tail) (compiler-false ()))
-      (#d1:1 (compiler-proper-tail? (решта tail))))))
+      (так (compiler-proper-tail? (решта tail))))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
 ; Both mandatory argument cells must be pairs, and all remaining cells must
@@ -449,7 +449,7 @@
     (за-умовою
       ((атом? arguments) (compiler-false ()))
       ((атом? (решта arguments)) (compiler-false ()))
-      (#d1:1 (compiler-proper-tail? (решта (решта arguments)))))))
+      (так (compiler-proper-tail? (решта (решта arguments)))))))
 
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
 (визначити compiler-cond-clauses-valid

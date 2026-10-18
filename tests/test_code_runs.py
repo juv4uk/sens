@@ -583,14 +583,19 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             self.assertIn(f"(en {en})", row[0])
             self.assertIn(f"(LISP {lisp})", row[0])
 
-        for literal in ("#d1:0", "#d1:1", "decompose"):
-            self.assertIn(literal, source)
+        # D1:1 is rendered by its ratified Ukrainian peer; D1:0 is unchanged.
+        self.assertEqual(source.count("#d1:1"), 2)
+        self.assertEqual(source.count("(так "), 3)
+        self.assertIn("#d1:0", source)
+        self.assertIn('(1 (ук так) (укр так)', self.D1.read_text(encoding="utf-8"))
+        self.assertIn("decompose", source)
 
     def test_inverse_projection_recovers_exact_parent_blob_and_head_census(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
+        reverse["так"] = "#d1:1"
         restored, counts, unexpected, forms = self._rewrite_heads(source, reverse)
-        self.assertEqual(counts, self.EXPECTED_INVERSE_COUNTS)
+        self.assertEqual(counts, {**self.EXPECTED_INVERSE_COUNTS, "так": 3})
         self.assertEqual(unexpected, [])
         self.assertEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
         self.assertEqual(forms, 57)
@@ -603,6 +608,7 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         mutant = source.replace("(за-умовою", "(тотожне?", 1)
         self.assertNotEqual(mutant, source)
         reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
+        reverse["так"] = "#d1:1"
         restored, _, _, _ = self._rewrite_heads(mutant, reverse)
         self.assertNotEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
 
