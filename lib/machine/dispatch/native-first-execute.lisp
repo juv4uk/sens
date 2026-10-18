@@ -166,4 +166,4 @@
     (native-first-list-2
       (як-є source-execution)
       (native-first-execute-source-forms
-        (01001011 source)))))
+        (читати-всі source)))))
