@@ -1455,6 +1455,16 @@ def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="defaul
         raise MigrationError(f"unsupported physical codec {codec!r}")
     if source_surface not in ("default", "ук", "укр"):
         raise MigrationError(f"unsupported source surface {source_surface!r}")
+    # The explicit Ukrainian source accepts only the ordinary 0–9 decimal keys.
+    # Python isdecimal()/\\d also accept foreign-script digits; those may not
+    # silently become mathematical D24+ values or D7 keyboard text.
+    if source_surface in ("ук", "укр"):
+        for pos, ch in enumerate(source):
+            if ch.isdecimal() and ch not in "0123456789":
+                raise MigrationError(
+                    f"non-keyboard decimal digit U+{ord(ch):04X} in Ukrainian Lisp source",
+                    Tok("ATOM", ch, pos),
+                )
     resolver.source_surface = source_surface
     stripped=strip_comments(source)
     tokens=tokenize(stripped, source_surface=source_surface)
