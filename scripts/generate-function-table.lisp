@@ -61,7 +61,7 @@
     (за-умовою
       ((атом? rows) (як-є ()))
       
-      ((11110111 (100 (100 rows)) sid) (100 rows))
+      ((однакові? (перше (перше rows)) sid) (перше rows))
       ((атом? (як-є ())) (find-machine-row sid (решта rows))))))
 
 (визначити machine-path
@@ -84,7 +84,7 @@
     (за-умовою
       ((атом? rows) (як-є ()))
       
-      ((11110111 (1001 (100 rows)) sid) (100 rows))
+      ((однакові? (друге (перше rows)) sid) (перше rows))
       ((атом? (як-є ())) (find-historical-row sid (решта rows))))))
 
 (визначити mccarthy-label
@@ -99,11 +99,11 @@
 (визначити surface-word-text
   (функція (word)
     (за-умовою
-      ((11110111 word (001 ())) "()")
+      ((однакові? word (як-є ())) "()")
       ((тотожне? (string-membership-helper word) (class-membership string member))
        word)
       ((тотожне? (string-membership-helper word) (class-membership string nonmember))
-       (11110100 word)))))
+       (значення-у-текст word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe
 ; word must NOT be re-embedded unquoted: a future reader of this
@@ -141,7 +141,7 @@
 
 (визначити surface-usable?
   (функція (word)
-    (0100 (11110111 word (001 ())))))
+    (хибне? (однакові? word (як-є ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
@@ -149,7 +149,7 @@
 ; as arithmetic data merely to reconstruct the same source identity.
 (визначити sid-bits
   (функція (sid)
-    (11110100 sid)))
+    (значення-у-текст sid)))
 
 (визначити formal-stub
   (функція (sid surfaces)
@@ -293,12 +293,12 @@
            ((атом? (як-є ()))
             (друге
               (список
-                (11011011 "function-table markdown projection is stale")
+                (друкувати "function-table markdown projection is stale")
                 (перше (як-є ())))))))
         ((атом? (як-є ()))
          (друге
            (список
-             (11011011 "function-table Lisp projection is stale")
+             (друкувати "function-table Lisp projection is stale")
              (перше (як-є ())))))))))
 
 (за-умовою
