@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Point-wise informative witness: island-math-evidence SID8 + domain bitness.
+"""Перевірка перенесення історичного SID8 PLUS до точної D5 української проєкції.
 
-Axiom: the binary key width IS the domain address.
+Аксіома: старий SID8 і чинний D8 з однаковими бітами — різні сутності.
 Checks:
   1. lib/island-math-evidence.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact SID 00001100 (8-bit) is present as identity coordinate
+  2. SID8:00001100 PLUS зіставлено тільки з ратифікованою D5:01010 додати
   3. Authority / mechanism-source surface paths present
-  4. Four executor witnesses share the same SID without a fifth invent
+  4. Чотири executor-свідки і чотири механізми мають правильну назву додати
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
 Run:
@@ -23,6 +23,9 @@ IME = ROOT / "lib" / "island-math-evidence.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 SID8 = "00001100"
+UKR_HEAD = "додати"
+MECHANISMS = ROOT / "lib" / "function-table-mechanisms.lisp"
+BRIDGE = ROOT / "lib" / "surface" / "sid8-to-domain-bridge.lisp"
 REQUIRED = (
     "island-math-evidence/1",
     "lib/surface/semantic-registry.lisp",
@@ -31,7 +34,7 @@ REQUIRED = (
     "prolog",
     "clips",
     "datalog",
-    SID8,
+    UKR_HEAD,
 )
 
 
@@ -46,20 +49,36 @@ def check_ime() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"island-math-evidence: host truthiness {m.group()!r}")
-    if SID8 not in text:
-        errs.append(f"island-math-evidence: exact SID8 {SID8} missing")
-    # SID must be exactly 8 bits in row form
-    sid_rows = re.findall(r"\((\d{8})\s+(common-lisp|prolog|clips|datalog)", text)
-    if len(sid_rows) != 4:
-        errs.append(f"island-math-evidence: expected 4 executor rows, got {len(sid_rows)}")
-    for sid, _ex in sid_rows:
-        if sid != SID8:
-            errs.append(f"island-math-evidence: non-canonical SID {sid}")
-        if len(sid) != 8:
-            errs.append(f"island-math-evidence: SID width {len(sid)} != 8")
-    for fn in REQUIRED:
-        if fn not in text:
-            errs.append(f"island-math-evidence: required surface missing: {fn}")
+    # Historical SID8:00001100 denotes PLUS. Same raw bits in modern D8
+    # denote a different function, so this check verifies exact D5 ownership.
+    if not BRIDGE.is_file() or not re.search(
+        r"\\(sid8:00001100\\s+->\\s+D5:01010\\b", BRIDGE.read_text(encoding="utf-8")
+    ):
+        errs.append("island-math-evidence: historical PLUS bridge → D5:01010 missing")
+    d5 = ROOT / "lib" / "domains" / "d5.lisp"
+    if not d5.is_file() or not re.search(
+        r"^\\s*\\(01010\\s+\\(ук [^)]*\\)\\s+\\(укр додати\\)",
+        d5.read_text(encoding="utf-8"), re.MULTILINE
+    ):
+        errs.append("island-math-evidence: D5:01010 Ukrainian authority missing")
+
+    islands = {"common-lisp", "prolog", "clips", "datalog"}
+    witnessed = re.findall(
+        r"^\\s*\\(([^()\\s]+)\\s+(common-lisp|prolog|clips|datalog)\\s+execution-witness\\b",
+        text, re.MULTILINE
+    )
+    expected = {(UKR_HEAD, name) for name in islands}
+    if len(witnessed) != 4 or set(witnessed) != expected:
+        errs.append(f"island-math-evidence: D5 add witnesses mismatch: {witnessed!r}")
+    if not MECHANISMS.is_file():
+        errs.append("island-math-evidence: mechanism source missing")
+    else:
+        mechanisms = re.findall(
+            r"^\\s*\\(([^()\\s]+)\\s+(common-lisp|prolog|clips|datalog)\\s+bounded-exact-add\\)",
+            MECHANISMS.read_text(encoding="utf-8"), re.MULTILINE
+        )
+        if len(mechanisms) != 4 or set(mechanisms) != expected:
+            errs.append(f"island-math-evidence: D5 add mechanisms mismatch: {mechanisms!r}")
     return errs
 
 
@@ -87,12 +106,12 @@ def main() -> int:
         all_errs.extend(check_domain(n))
 
     if all_errs:
-        print("ISLAND-MATH-EVIDENCE+BITNESS: BLOCKED", file=sys.stderr)
+        print("ISLAND-MATH-EVIDENCE+BITNESS: FAIL", file=sys.stderr)
         for e in all_errs:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    print("ISLAND-MATH-EVIDENCE: PASS — exact SID8, 4 witnesses, authority surface")
+    print("ISLAND-MATH-EVIDENCE: PASS — historical SID8 PLUS → D5:01010 додати; 4 witness/mechanism routes")
     for n in range(1, 11):
         print(f"D{n}: PASS exact-width {n}-bit, {1 << n}/{1 << n}")
     print("BITNESS: PASS — every domain key width equals domain address")
