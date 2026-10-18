@@ -474,6 +474,18 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
             else:
                 my.setdefault(name, ident)
 
+    # Core4-defined D1..D8 primitives (друге, третє, та, ...) are callable
+    # through their actual language definitions -- mirror of the D10 rule.
+    for bits, w, row in core4_d1_d8_defined_rows():
+        ident = (bits, f"D{w}")
+        for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
+            if not name or unique_surfaces.get(name) != frozenset({(f"D{w}", bits)}):
+                continue
+            if name == name.upper():
+                if residents.get(name) is None: residents[name]=ident
+            else:
+                if my.get(name) is None: my[name]=ident
+
     upper={name:ident for name,ident in residents.items()}
     return my,upper,_bridge_by_sid
 
@@ -632,6 +644,7 @@ class Resolver:
         self.d9_residents=set(d9_residents or ())
         self.d9_callable_bits=frozenset(core4_d9_callable_rows())
         self.d10_callable_bits=frozenset(core4_d10_defined_rows())
+        self.d8_callable_bits=frozenset(bits for bits,w,_row in core4_d1_d8_defined_rows() if w==8)
         if bridge_by_sid:
             raise MigrationError("unratified SID8 bridge cannot authorize executable heads")
         self.bridge_by_sid={}
@@ -729,7 +742,7 @@ class Resolver:
             admitted = (
                 ident[1] in ("D3", "D4", "D5", "D6")
                 and len(ident[0]) == int(ident[1][1:])
-            ) or (ident[1] == "D8" and ident[0] in CORE_OPERATION_D8) or (
+            ) or (ident[1] == "D8" and (ident[0] in CORE_OPERATION_D8 or ident[0] in self.d8_callable_bits)) or (
                 ident[1] == "D9" and ident[0] in self.d9_callable_bits
             ) or (
                 ident[1] == "D10" and ident[0] in self.d10_callable_bits
@@ -753,7 +766,7 @@ class Resolver:
             admitted = (
                 ident[1] in ("D3", "D4", "D5", "D6")
                 and len(ident[0]) == int(ident[1][1:])
-            ) or (ident[1] == "D8" and ident[0] in CORE_OPERATION_D8) or (
+            ) or (ident[1] == "D8" and (ident[0] in CORE_OPERATION_D8 or ident[0] in self.d8_callable_bits)) or (
                 ident[1] == "D9" and ident[0] in self.d9_callable_bits
             ) or (
                 ident[1] == "D10" and ident[0] in self.d10_callable_bits
@@ -926,6 +939,58 @@ def core4_d10_defined_rows():
         names = {row.uk, row.ukr, row.san, row.en, row.lisp, row.sym} - {None, "()"}
         if names.intersection(defined_names):
             rows[row.bits] = row
+    return rows
+
+
+@lru_cache(maxsize=1)
+def core4_d1_d8_defined_rows():
+    """Core4-defined names of D1..D8 primitives (mirror of the D10 rule).
+
+    A D1..D8 coordinate is callable only when core4 actually defines that
+    name. Ratified residency alone never admits a callable mechanism.
+    """
+    from domain_tables import read_domain_table
+
+    source = strip_comments((REPO_ROOT / "lib" / "core4.lisp").read_text(encoding="utf-8"))
+    forms = Parser(tokenize(source)).parse_program()
+    defined_names = set()
+    aliases = []
+    define_heads = {"00001001", "0011", "define", "def", "визначити"}
+    lambda_heads = {"0010", "lambda", "лямбда", "функція"}
+
+    for form in forms:
+        if (not isinstance(form, ListNode) or form.tail is not None
+                or len(form.items) < 3 or not isinstance(form.items[0], Atom)
+                or form.items[0].tok.text not in define_heads):
+            continue
+        target = form.items[1]
+        if isinstance(target, ListNode) and target.items and isinstance(target.items[0], Atom):
+            defined_names.add(target.items[0].tok.text)
+            continue
+        if not isinstance(target, Atom):
+            continue
+        value = form.items[2]
+        if (isinstance(value, ListNode) and value.items
+                and isinstance(value.items[0], Atom)
+                and value.items[0].tok.text in lambda_heads):
+            defined_names.add(target.tok.text)
+        elif isinstance(value, Atom):
+            aliases.append((target.tok.text, value.tok.text))
+
+    changed = True
+    while changed:
+        changed = False
+        for alias, target in aliases:
+            if target in defined_names and alias not in defined_names:
+                defined_names.add(alias)
+                changed = True
+
+    rows = []
+    for w in range(1, 9):
+        for row in read_domain_table(REPO_ROOT / "lib" / "domains" / f"d{w}.lisp"):
+            names = {row.uk, row.ukr, row.san, row.en, row.lisp, row.sym} - {None, "()"}
+            if names.intersection(defined_names):
+                rows.append((row.bits, w, row))
     return rows
 
 
@@ -1313,7 +1378,7 @@ def source_files(root: Path):
 # Owner-reviewed NONPROGRAM data (#4460), not executable SENS.
 # Both path identity AND source Git blob SHA are mandatory for recognition.
 NONPROGRAM_MANIFESTS = (
-    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
@@ -1324,12 +1389,12 @@ NONPROGRAM_MANIFESTS = (
 
 
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "3a0d2ed951f17585897b7efefd12c8748e5c33a8",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "b4d1cd782db748971fd73de08efc898ff35f6ae8",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "91c4498f9f1778b4b87d07d3282ac7b6dc791c1e",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "2f07df13cbd31edf76dcf105a2dc6dea922e4af8",
-    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "c83fb0b6a7c12b1a9131d541306ed67ad4b7d620",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "117e8fa54a0a6bc7746c35602dd88184abdcc7f6",
     "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "60f44e5d6e278a7f43c2fe2c02016d314b53c801",
 }
 
@@ -1371,7 +1436,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             if not isinstance(entry, dict) or entry.get("path") != relative:
                 continue
             scoped = (
-                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\.lisp", relative)))
+                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d[1-9]\.lisp", relative)))
                 or (cohort == "comment-only-loader" and relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"))
                 or (cohort == "isa" and relative.startswith("lib/machine/isa/"))
                 or (cohort == "schema" and relative.startswith(("contracts/", "lib/", "tests/fixtures/")))

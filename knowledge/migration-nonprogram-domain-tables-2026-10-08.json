@@ -1,105 +1,81 @@
 {
-  "schema": "sens-migration-nonprogram-manifest/1",
-  "generated_from_main": "67c1b0c8302f72d044aab68f31cd7dba8481928b",
-  "issue": 4460,
-  "classification": "lisp-data-nonprogram",
-  "cohort": "ratified D1-D10 human-readable domain definition tables plus the D11 testing-only vocabulary table",
-  "reason": "domain-table/1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is only the ratified testing vocabulary. These are DATA, not executable SENS programs.",
-  "automatic_sens_companion": false,
-  "not_executable_programs": true,
-  "not_physical_migration_credit": true,
-  "total_rows": 2089,
-  "entries": [
-    {
-      "path": "lib/domains/d1.lisp",
-      "git_blob_sha1": "6700f6680046e1d610f2ff269407d440ca44c2e3",
-      "domain": "D1",
-      "bit_width": 1,
-      "expected_rows": 2
-    },
-    {
-      "path": "lib/domains/d2.lisp",
-      "git_blob_sha1": "484451cf3c73047158a7886e0874335a9bf8d7f9",
-      "domain": "D2",
-      "bit_width": 2,
-      "expected_rows": 4
-    },
-    {
-      "path": "lib/domains/d3.lisp",
-      "git_blob_sha1": "b3f6be94a48e9a6be9c599d8c8e3181f0f80f4a5",
-      "domain": "D3",
-      "bit_width": 3,
-      "expected_rows": 8,
-      "previous_pinned_git_blob_sha1": "55b837d05a5772a65c89c6c0d5a8305d2db34256"
-    },
-    {
-      "path": "lib/domains/d4.lisp",
-      "git_blob_sha1": "014ea34ca76809d29582205b9d33d3df250cea8c",
-      "domain": "D4",
-      "bit_width": 4,
-      "expected_rows": 16,
-      "previous_pinned_git_blob_sha1": "03bca09faf5a5299384a5413b0a16ba42eb0a741"
-    },
-    {
-      "path": "lib/domains/d5.lisp",
-      "git_blob_sha1": "e9b51804bbe9fc06b021d3ef721114ab06453fab",
-      "domain": "D5",
-      "bit_width": 5,
-      "expected_rows": 32,
-      "previous_pinned_git_blob_sha1": "c186b589e10cafce7817f7bec5eb5adada6a9c09"
-    },
-    {
-      "path": "lib/domains/d6.lisp",
-      "git_blob_sha1": "8bbe713030f173d6048043a4f82d2d55434f254d",
-      "domain": "D6",
-      "bit_width": 6,
-      "expected_rows": 64,
-      "previous_pinned_git_blob_sha1": "b7882a5c06625d1818d69a21d507e41f801332eb"
-    },
-    {
-      "path": "lib/domains/d7.lisp",
-      "git_blob_sha1": "8214807bfb94ec01ee56dcdfefaeb885646fe524",
-      "previous_pinned_git_blob_sha1": "568bdf3ced54a635c0cd82257fa5f19234dff213",
-      "domain": "D7",
-      "bit_width": 7,
-      "expected_rows": 128,
-      "historical_v1_git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726",
-      "projection": "sens.d7.keyboard/v2"
-    },
-    {
-      "path": "lib/domains/d8.lisp",
-      "git_blob_sha1": "0219c78a7f2cf6ab4db3bd2a7b0b360c67b7aac3",
-      "domain": "D8",
-      "bit_width": 8,
-      "expected_rows": 256,
-      "previous_pinned_git_blob_sha1": "97cdd8e8509214468f340492aff71f19da8720b7"
-    },
-    {
-      "path": "lib/domains/d9.lisp",
-      "git_blob_sha1": "38f1e428f150ccb6520abdcbb04c407830fc7fb5",
-      "domain": "D9",
-      "bit_width": 9,
-      "expected_rows": 512,
-      "previous_pinned_git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
-    },
-    {
-      "path": "lib/domains/d10.lisp",
-      "git_blob_sha1": "f1a79e8f02c1a7f3f9c91f2c3eda0b3b9cb19b64",
-      "domain": "D10",
-      "bit_width": 10,
-      "expected_rows": 1024,
-      "role": "whole-domain-catalogue"
-    },
-    {
-      "path": "lib/domains/d11.lisp",
-      "git_blob_sha1": "7e5e1bfd348d2de4f04ba756365524ac78d14949",
-      "domain": "D11",
-      "bit_width": 11,
-      "expected_rows": 43,
-      "role": "testing-only-vocabulary"
-    }
-  ],
-  "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately",
-  "updated_current_d10": "2026-10-12 owner-ratified whole-domain catalogue; residency does not imply callable or physical admission",
-  "updated_current_d11": "2026-10-13 owner-ratified testing vocabulary (43 rows); selector candidates remain research-only, non-callable, and not T5-admitted"
+ "schema": "sens-migration-nonprogram-manifest/1",
+ "generated_from_main": "67c1b0c8302f72d044aab68f31cd7dba8481928b",
+ "issue": 4460,
+ "classification": "lisp-data-nonprogram",
+ "cohort": "ratified D1-D9 human-readable domain definition TABLES",
+ "reason": "domain-table/1 entries declare authoritative function identities and surfaces; they are DATA, not executable SENS call heads",
+ "automatic_sens_companion": false,
+ "not_executable_programs": true,
+ "not_physical_migration_credit": true,
+ "total_rows": 1022,
+ "entries": [
+  {
+   "path": "lib/domains/d1.lisp",
+   "git_blob_sha1": "6700f6680046e1d610f2ff269407d440ca44c2e3",
+   "domain": "D1",
+   "bit_width": 1,
+   "expected_rows": 2
+  },
+  {
+   "path": "lib/domains/d2.lisp",
+   "git_blob_sha1": "484451cf3c73047158a7886e0874335a9bf8d7f9",
+   "domain": "D2",
+   "bit_width": 2,
+   "expected_rows": 4
+  },
+  {
+   "path": "lib/domains/d3.lisp",
+   "git_blob_sha1": "b3f6be94a48e9a6be9c599d8c8e3181f0f80f4a5",
+   "domain": "D3",
+   "bit_width": 3,
+   "expected_rows": 8
+  },
+  {
+   "path": "lib/domains/d4.lisp",
+   "git_blob_sha1": "014ea34ca76809d29582205b9d33d3df250cea8c",
+   "domain": "D4",
+   "bit_width": 4,
+   "expected_rows": 16
+  },
+  {
+   "path": "lib/domains/d5.lisp",
+   "git_blob_sha1": "e9b51804bbe9fc06b021d3ef721114ab06453fab",
+   "domain": "D5",
+   "bit_width": 5,
+   "expected_rows": 32
+  },
+  {
+   "path": "lib/domains/d6.lisp",
+   "git_blob_sha1": "8bbe713030f173d6048043a4f82d2d55434f254d",
+   "domain": "D6",
+   "bit_width": 6,
+   "expected_rows": 64
+  },
+  {
+   "path": "lib/domains/d7.lisp",
+   "git_blob_sha1": "8214807bfb94ec01ee56dcdfefaeb885646fe524",
+   "previous_pinned_git_blob_sha1": "568bdf3ced54a635c0cd82257fa5f19234dff213",
+   "domain": "D7",
+   "bit_width": 7,
+   "expected_rows": 128,
+   "historical_v1_git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726",
+   "projection": "sens.d7.keyboard/v2"
+  },
+  {
+   "path": "lib/domains/d8.lisp",
+   "git_blob_sha1": "0219c78a7f2cf6ab4db3bd2a7b0b360c67b7aac3",
+   "domain": "D8",
+   "bit_width": 8,
+   "expected_rows": 256
+  },
+  {
+   "path": "lib/domains/d9.lisp",
+   "git_blob_sha1": "38f1e428f150ccb6520abdcbb04c407830fc7fb5",
+   "domain": "D9",
+   "bit_width": 9,
+   "expected_rows": 512
+  }
+ ],
+ "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately"
 }
