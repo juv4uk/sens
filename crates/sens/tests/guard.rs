@@ -165,26 +165,29 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
     // Two competing entries for the same topic, neither in the real
     // *guard-reference-directory* -- proves the ranking mechanism itself,
     // independent of any real content.
+    // All evaluation is expressed through the current Ukrainian projections.
+    // The exact D8 equality result (D1 PredicateBit) gates the result: the
+    // directory must still contain both original entries, in their original order.
     let source = r#"
-        (let ((weak (list (quote reference) (list (quote topic) (quote demo))
-                           (list (quote evidence-status) (quote unresolved))
-                           (list (quote summary) "old guess")))
-              (strong (list (quote reference) (list (quote topic) (quote demo))
-                            (list (quote evidence-status) (quote confirmed))
-                            (list (quote summary) "measured and tested"))))
-          (list
-            (guard-reference-field (quote summary) (guard-reference-find (quote demo) (list weak strong)))
-            (guard-reference-field (quote summary) (guard-reference-find (quote demo) (list strong weak)))
-            (length (guard-reference-all (quote demo) (list weak strong)))))
+        (нехай ((слабке (список (як-є reference) (список (як-є topic) (як-є demo))
+                           (список (як-є evidence-status) (як-є unresolved))
+                           (список (як-є summary) "old guess")))
+              (сильне (список (як-є reference) (список (як-є topic) (як-є demo))
+                            (список (як-є evidence-status) (як-є confirmed))
+                            (список (як-є summary) "measured and tested"))))
+          (за-умовою
+            ((однакові?
+               (guard-reference-all (як-є demo) (список слабке сильне))
+               (список слабке сильне))
+             (список
+               (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
+               (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
+            (так (як-є ()))))
     "#;
     let value = eval_guard(source);
     assert!(
         value.contains("\"measured and tested\" \"measured and tested\""),
-        "the confirmed entry must win regardless of file order: {value}"
-    );
-    assert!(
-        value.contains(" 2)"),
-        "both entries must still be present via guard-reference-all, not just the winner: {value}"
+        "the confirmed entry must win regardless of file order, while both entries remain: {value}"
     );
 }
 
