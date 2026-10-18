@@ -5,38 +5,38 @@
 (load "lib/mechanism-selector.lisp")
 (load "lib/core3.lisp")
 
-(0011 c3-plus-sid
-  (semantic-registry-id (001 +)))
+(визначити c3-plus-sid
+  (semantic-registry-id (як-є +)))
 
-(0011 c3-route-ok?
-  (0010 (executor)
+(визначити c3-route-ok?
+  (функція (executor)
     (001000 ((selection (core3-route c3-plus-sid executor)))
-      (110
-        ((0100 (010 selection))
-         (110
-           ((101 (100 selection) (001 mechanism-selected))
-            (001 yes))
-           ((010 (001 ())) (001 no))))
-        ((010 (001 ())) (001 no))))))
+      (за-умовою
+        ((хибне? (атом? selection))
+         (за-умовою
+           ((тотожне? (перше selection) (як-є mechanism-selected))
+            (як-є yes))
+           ((атом? (як-є ())) (як-є no))))
+        ((атом? (як-є ())) (як-є no))))))
 
-(0011 c3-all-routes?
-  (0010 ()
-    (110
-      ((101 (c3-route-ok? (001 common-lisp)) (001 yes))
-       (110
-         ((101 (c3-route-ok? (001 prolog)) (001 yes))
-          (110
-            ((101 (c3-route-ok? (001 clips)) (001 yes))
-             (110
-               ((101 (c3-route-ok? (001 datalog)) (001 yes))
-                (001 yes))
-               ((010 (001 ())) (001 no))))
-            ((010 (001 ())) (001 no))))
-         ((010 (001 ())) (001 no))))
-      ((010 (001 ())) (001 no)))))
+(визначити c3-all-routes?
+  (функція ()
+    (за-умовою
+      ((тотожне? (c3-route-ok? (як-є common-lisp)) (як-є yes))
+       (за-умовою
+         ((тотожне? (c3-route-ok? (як-є prolog)) (як-є yes))
+          (за-умовою
+            ((тотожне? (c3-route-ok? (як-є clips)) (як-є yes))
+             (за-умовою
+               ((тотожне? (c3-route-ok? (як-є datalog)) (як-є yes))
+                (як-є yes))
+               ((атом? (як-є ())) (як-є no))))
+            ((атом? (як-є ())) (як-є no))))
+         ((атом? (як-є ())) (як-є no))))
+      ((атом? (як-є ())) (як-є no)))))
 
-(110
-  ((101 (c3-all-routes?) (001 yes))
-   (001 (core3-profile-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))))
-  ((010 (001 ()))
-   (001 (core3-profile-contract-violation))))
+(за-умовою
+  ((тотожне? (c3-all-routes?) (як-є yes))
+   (як-є (core3-profile-contract-ok (routes 4) (canon-round-trip pending-992) (clips-result available))))
+  ((атом? (як-є ()))
+   (як-є (core3-profile-contract-violation))))

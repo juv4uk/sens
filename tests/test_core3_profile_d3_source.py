@@ -30,22 +30,49 @@ def expected_cutover(source):
     return re.sub(r"\)\s+\(1\)\s*\n", ")\n", rewritten)
 
 
+PROJECTIONS = (
+    ("0011", "визначити", 3),
+    ("0010", "функція", 2),
+    ("110", "за-умовою", 7),
+    ("0100", "хибне?", 1),
+    ("010", "атом?", 8),
+    ("101", "тотожне?", 6),
+    ("100", "перше", 1),
+    ("001", "як-є", 28),
+)
+
+
+def deproject_ukr_heads(source):
+    # Exact inverse of the approved full-ukr source projection. The selected
+    # file's quoted compound result has no numeric heads inside its data.
+    for bits, name, expected_count in PROJECTIONS:
+        pattern = re.compile(re.escape("(") + re.escape(name) + r"(?=\s)")
+        full_count = len(pattern.findall(source))
+        if full_count != expected_count:
+            raise AssertionError(
+                f"unexpected {name} projection count: {full_count}"
+            )
+        source = pattern.sub("(" + bits, source)
+    return source
+
+
 class Core3SourceCutover(unittest.TestCase):
     def test_exact_source_matches_frozen_original_and_only_predicate_law(self):
         old = subprocess.run(["git", "cat-file", "blob", OLD_BLOB],
                              cwd=ROOT, check=True, capture_output=True).stdout.decode()
         current = TARGET.read_text(encoding="utf-8")
-        self.assertEqual(expected_cutover(old), current)
-        self.assertIn("((0100 (010 selection))", current)
-        self.assertEqual(current.count("((010 (001 ()))"), 7)
+        legacy_current = deproject_ukr_heads(current)
+        self.assertEqual(expected_cutover(old), legacy_current)
+        self.assertIn("((0100 (010 selection))", legacy_current)
+        self.assertEqual(legacy_current.count("((010 (001 ()))"), 7)
 
     def test_no_wrong_arity_or_host_truth_in_any_cond(self):
-        current = TARGET.read_text(encoding="utf-8")
+        current = deproject_ukr_heads(TARGET.read_text(encoding="utf-8"))
         findings = mod.scan_lisp(current, "scripts/check-core3-profile-contract.lisp")
         self.assertEqual(findings, [])
 
     def test_negative_controls_detect_host_truth_and_three_field(self):
-        good = TARGET.read_text(encoding="utf-8")
+        good = deproject_ukr_heads(TARGET.read_text(encoding="utf-8"))
         self.assertIn("COND_HOST_TRUTH", {f.rule for f in mod.scan_lisp(
             good.replace("((010 (001 ()))", "(t", 1), "lib/corrupted.lisp")})
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in mod.scan_lisp(
