@@ -41,7 +41,7 @@ def restored_source(source: str) -> str:
     # Повертаємо лише ратифіковані D3-голови в точне старе написання.
     # Ураховуємо будь-який пробіл або перенесення рядка після голови.
     for code, peer, _en, _lisp, _count in D3_MAPPING:
-        source = re.sub(r"\\(" + re.escape(peer) + r"(?=\\s|\\))", "(" + code, source)
+        source = re.sub(r"\(" + re.escape(peer) + r"(?=\s|\))", "(" + code, source)
     for code, peer, _en, _lisp, _count in D4_MAPPING:
         source = source.replace(f"({peer} ", f"({code} ")
     return source
@@ -108,10 +108,10 @@ class CanonD4FullUkrTests(unittest.TestCase):
         code = runnable_text(self.source)
         for bits, peer, _en, _lisp, count in D3_MAPPING:
             with self.subTest(bits=bits):
-                pattern = r"\\(" + re.escape(peer) + r"(?=\\s|\\))"
+                pattern = r"\(" + re.escape(peer) + r"(?=\s|\))"
                 expected = count + (1 if bits == "001" else 0)
                 self.assertEqual(len(re.findall(pattern, code)), expected)
-                self.assertNotRegex(code, r"\\(" + bits + r"(?=\\s|\\))")
+                self.assertNotRegex(code, r"\(" + bits + r"(?=\s|\))")
 
     def test_canon_empty_list_uses_exact_d3_quote_without_wire_literal(self):
         self.assertIn("(визначити canon-empty-list (як-є ()))", self.source)
