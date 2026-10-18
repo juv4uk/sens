@@ -114,8 +114,8 @@ class NarrateUkrPeerTests(unittest.TestCase):
 
     def test_negative_reverting_a_peer_is_caught(self):
         broken = self.src.replace(
-            "(0011 пояснити-результат-із-доказом narrate-proved-outcome)",
-            "(0011 пояснити-щось-інше narrate-proved-outcome)", 1)
+            "(визначити пояснити-результат-із-доказом narrate-proved-outcome)",
+            "(визначити пояснити-щось-інше narrate-proved-outcome)", 1)
         self.assertNotEqual(broken, self.src)
         with self.assertRaises(AssertionError):
             for _bits, historic, full in PEERS:
