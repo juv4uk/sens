@@ -65,9 +65,9 @@
   (функція (remaining)
     (за-умовою
       ((атом? remaining) (як-є ()))
-      ((атом? (як-є ())) ((0010 ()
-            (print-fixture (100 remaining))
-            (print-fixtures (011 remaining))))))))
+      ((атом? (як-є ())) ((функція ()
+            (print-fixture (перше remaining))
+            (print-fixtures (решта remaining))))))))
 
 (print-fixtures fixtures)
 
