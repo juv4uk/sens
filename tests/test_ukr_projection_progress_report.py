@@ -205,8 +205,13 @@ class CliTests(TempTree):
         self.assertNotIn("УКР-ПРОЄКЦІЯ НЕ ЗАВЕРШЕНА", out)
 
     def test_exit_2_on_bad_root(self):
-        rc, _ = self._run(["--root", "/no/such/dir/xyz"])
+        # Capture the deliberate negative failure; do not emit a spurious
+        # GitHub ::error:: annotation from a successful test job.
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            rc, _ = self._run(["--root", "/no/such/dir/xyz"])
         self.assertEqual(rc, 2)
+        self.assertIn("--root не є текою: /no/such/dir/xyz", stderr.getvalue())
 
     def test_annotation_present_by_default_and_suppressed(self):
         d = self.tree({"a.lisp": "(x (ук так) (укр так))"})
