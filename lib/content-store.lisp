@@ -25,7 +25,7 @@
 
 (визначити content-store-put
   (функція (store value)
-    (внутрішня-мапа-вставити (knowledge-content-address value) value store)))
+    (внутрішня-мапа-вставити (знання-вміст-адреса value) value store)))
 
 (визначити content-store-get
   (функція (store address)
@@ -37,8 +37,8 @@
 
 (визначити content-store-put-world
   (функція (store world)
-    (внутрішня-мапа-вставити (world-content-address world)
-                (world-address-content world)
+    (внутрішня-мапа-вставити (знання-вміст-адреса (світ-адреса-вміст world))
+                (світ-адреса-вміст world)
                 store)))
 
 (визначити content-store-size
