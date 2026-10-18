@@ -39,20 +39,20 @@
 (визначити translation-status-valid?
   (функція (status)
     (за-умовою
-      ((101 (110101100 status) (001 ())) (001 ()))
-      ((101 status (001 candidate)) #d1:1)
-      ((101 status (001 ambiguous)) #d1:1)
-      ((101 status (001 rejected)) #d1:1)
-      (#d1:1 (001 ())))))
+      ((тотожне? (символ? status) (як-є ())) (як-є ()))
+      ((тотожне? status (як-є candidate)) так)
+      ((тотожне? status (як-є ambiguous)) так)
+      ((тотожне? status (як-є rejected)) так)
+      (так (як-є ())))))
 
 (визначити translation-kind-valid?
   (функція (kind)
     (за-умовою
-      ((101 (110101100 kind) (001 ())) (001 ()))
-      ((101 kind (001 clause)) #d1:1)
-      ((101 kind (001 batch)) #d1:1)
-      ((101 kind (001 query)) #d1:1)
-      (#d1:1 (001 ())))))
+      ((тотожне? (символ? kind) (як-є ())) (як-є ()))
+      ((тотожне? kind (як-є clause)) так)
+      ((тотожне? kind (як-є batch)) так)
+      ((тотожне? kind (як-є query)) так)
+      (так (як-є ())))))
 
 ; Envelope validation owns only the protocol shell. Payload meaning is checked
 ; separately so a well-shaped translator message containing malformed semantic
