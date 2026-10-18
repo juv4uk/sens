@@ -421,5 +421,192 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
                 self.blob_sha(self.restore(mutant)), self.ORIGINAL_BLOB
             )
 
+
+class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
+    """Exact-width D3/D4 operators use current Ukrainian peers; quoted data stays data."""
+
+    SOURCE = ROOT / "lib" / "compiler-nucleus.lisp"
+    D3 = ROOT / "lib" / "domains" / "d3.lisp"
+    D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    ORIGINAL_BLOB = "a7000108be4ca2a3a2b9961b7f8d70e9dfccdea0"
+    BINARY_TO_UKR = {
+        "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
+        "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
+        "0010": "функція", "0011": "визначити",
+    }
+    EXPECTED_INVERSE_COUNTS = {
+        "як-є": 40, "атом?": 25, "решта": 41, "перше": 34,
+        "тотожне?": 24, "за-умовою": 35, "сполучити": 25,
+        "функція": 57, "визначити": 57,
+    }
+
+    @staticmethod
+    def _rewrite_heads(source: str, mapping: dict[str, str]):
+        tokens = []
+        i = 0
+        while i < len(source):
+            ch = source[i]
+            if ch.isspace():
+                i += 1
+                continue
+            if ch == ";":
+                while i < len(source) and source[i] != "\n":
+                    i += 1
+                continue
+            if ch == '"':
+                start = i
+                i += 1
+                escaped = False
+                while i < len(source):
+                    current = source[i]
+                    i += 1
+                    if escaped:
+                        escaped = False
+                    elif current == "\\":
+                        escaped = True
+                    elif current == '"':
+                        break
+                else:
+                    raise ValueError(f"unclosed string at {start}")
+                tokens.append({"kind": "string", "text": source[start:i],
+                               "start": start, "end": i})
+                continue
+            if ch in "()":
+                tokens.append({"kind": "open" if ch == "(" else "close",
+                               "text": ch, "start": i, "end": i + 1})
+                i += 1
+                continue
+            start = i
+            while (i < len(source) and not source[i].isspace()
+                   and source[i] not in '();"'):
+                i += 1
+            if i == start:
+                i += 1
+                continue
+            tokens.append({"kind": "atom", "text": source[start:i],
+                           "start": start, "end": i})
+
+        cursor = 0
+
+        def parse_expr():
+            nonlocal cursor
+            if cursor >= len(tokens):
+                raise ValueError("unexpected end of source")
+            token = tokens[cursor]
+            if token["kind"] == "close":
+                raise ValueError(f"unexpected close at {token['start']}")
+            if token["kind"] != "open":
+                cursor += 1
+                return {"kind": "atom", "token": token, "items": None}
+            open_token = token
+            cursor += 1
+            items = []
+            while cursor < len(tokens) and tokens[cursor]["kind"] != "close":
+                items.append(parse_expr())
+            if cursor >= len(tokens):
+                raise ValueError(f"unclosed list at {open_token['start']}")
+            cursor += 1
+            return {"kind": "list", "items": items}
+
+        roots = []
+        while cursor < len(tokens):
+            roots.append(parse_expr())
+        edits = []
+        counts = {}
+        unexpected = []
+
+        def visit(node, quoted=False):
+            if node["kind"] != "list":
+                return
+            items = node["items"]
+            head = items[0] if items else None
+            token = head["token"] if head and head["kind"] == "atom" else None
+            head_text = token["text"] if token and token["kind"] == "atom" else None
+            if not quoted and head_text and re.fullmatch(r"[01]{3,4}", head_text):
+                if head_text not in mapping:
+                    unexpected.append(head_text)
+                else:
+                    edits.append((token["start"], token["end"], mapping[head_text]))
+                    counts[head_text] = counts.get(head_text, 0) + 1
+            elif not quoted and head_text in mapping:
+                edits.append((token["start"], token["end"], mapping[head_text]))
+                counts[head_text] = counts.get(head_text, 0) + 1
+            in_quote = head_text in {"001", "як-є"}
+            start_child = 1 if head and head["kind"] == "atom" else 0
+            for child in items[start_child:]:
+                visit(child, quoted or in_quote)
+
+        for root in roots:
+            visit(root)
+        rewritten = source
+        for start, end, replacement in sorted(edits, reverse=True):
+            rewritten = rewritten[:start] + replacement + rewritten[end:]
+        return rewritten, counts, unexpected, len(roots)
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def test_no_active_binary_heads_and_all_peers_are_ratified(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        projected, rewrites, unexpected, _ = self._rewrite_heads(source, self.BINARY_TO_UKR)
+        self.assertEqual(rewrites, {}, "active numeric operator heads remain")
+        self.assertEqual(unexpected, [], "unknown numeric D3/D4 operator head")
+        self.assertEqual(projected, source)
+
+        for bits, peer, en, lisp in (
+            ("001", "як-є", "quote", "QUOTE"),
+            ("010", "атом?", "atom?", "ATOM"),
+            ("011", "решта", "cdr", "CDR"),
+            ("100", "перше", "car", "CAR"),
+            ("101", "тотожне?", "eq?", "EQ"),
+            ("110", "за-умовою", "cond", "COND"),
+            ("111", "сполучити", "cons", "CONS"),
+        ):
+            row = [line for line in self.D3.read_text(encoding="utf-8").splitlines()
+                   if re.match(r"^\s*\(" + bits + r"\s", line)]
+            self.assertEqual(len(row), 1, f"D3:{bits} must have one current row")
+            self.assertIn(f"(укр {peer})", row[0])
+            self.assertIn(f"(en {en})", row[0])
+            self.assertIn(f"(LISP {lisp})", row[0])
+        for bits, peer, en, lisp in (
+            ("0010", "функція", "lambda", "LAMBDA"),
+            ("0011", "визначити", "define", "DEFINE"),
+        ):
+            row = [line for line in self.D4.read_text(encoding="utf-8").splitlines()
+                   if re.match(r"^\s*\(" + bits + r"\s", line)]
+            self.assertEqual(len(row), 1, f"D4:{bits} must have one current row")
+            self.assertIn(f"(укр {peer})", row[0])
+            self.assertIn(f"(en {en})", row[0])
+            self.assertIn(f"(LISP {lisp})", row[0])
+
+        for literal in ("#d1:0", "#d1:1", "decompose"):
+            self.assertIn(literal, source)
+
+    def test_inverse_projection_recovers_exact_parent_blob_and_head_census(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
+        restored, counts, unexpected, forms = self._rewrite_heads(source, reverse)
+        self.assertEqual(counts, self.EXPECTED_INVERSE_COUNTS)
+        self.assertEqual(unexpected, [])
+        self.assertEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+        self.assertEqual(forms, 57)
+        tokens = three_pass.tokenize(three_pass.strip_comments(source))
+        parsed = three_pass.Parser(tokens).parse_program()
+        self.assertEqual(len(parsed), 57)
+
+    def test_wrong_peer_fails_exact_inverse_witness(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace("(за-умовою", "(тотожне?", 1)
+        self.assertNotEqual(mutant, source)
+        reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
+        restored, _, _, _ = self._rewrite_heads(mutant, reverse)
+        self.assertNotEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
