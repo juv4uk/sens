@@ -101,7 +101,7 @@
 
 (визначити symbol-names-from-file
   (функція (path)
-    (top-level-def-names (110101001 (110110111 path)))))
+    (top-level-def-names (читати-всі (читати-файл path)))))
 
 (визначити core-my-symbols
   (symbol-names-from-file "lib/core.lisp"))
@@ -116,7 +116,7 @@
                          (11110101 (110101010 ".lisp" (110100011 name (01011 (110100010 name) 3) (110100010 name)))
                               (0100 (11110111 name "core.lisp"))))
                        entries)))
-      (101000 (0010 (name)
+      (відобразити (функція (name)
              (111 name (symbol-names-from-file (110011110 "lib/" name))))
            relevant))))
 
@@ -143,7 +143,7 @@
 (визначити collect-symbols-leaf
   (функція (form)
     (за-умовою
-      ((110101100 form) (1110 form))
+      ((символ? form) (список form))
       ((атом? form) (як-є ()))
       
       ((атом? (як-є ())) (приєднати (collect-symbols-leaf (перше form)) (collect-symbols-leaf (решта form)))))))
@@ -183,29 +183,29 @@
              ((11110101 (110101100 head) (101 head (001 quote)))
               (як-є ()))
              ((11110101 (110101100 head) (101 head (001 lambda)))
-              (001001 ((params (safe-car (safe-cdr form)))
+              (нехай-послідовно ((params (safe-car (safe-cdr form)))
                      (body (safe-cdr (safe-cdr form)))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (приєднати param-names bound)))
                 (сполучити (як-є %uses-lambda) (collect-heads-each body new-bound))))
              ((11110101 (110101100 head) (101 head (001 let)))
-              (001001 ((bindings (safe-car (safe-cdr form)))
+              (нехай-послідовно ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form))))
-                     (names (101000 (0010 (b) (safe-car b)) bindings))
-                     (value-forms (101000 (0010 (b) (safe-car (safe-cdr b))) bindings))
+                     (names (відобразити (функція (b) (safe-car b)) bindings))
+                     (value-forms (відобразити (функція (b) (safe-car (safe-cdr b))) bindings))
                      (value-deps (collect-heads-each value-forms bound))
                      (new-bound (приєднати names bound))
                      (body-deps (collect-heads body new-bound)))
                 (сполучити (як-є %uses-lambda)
                       (сполучити (як-є %uses-let-family) (приєднати value-deps body-deps)))))
              ((11110101 (110101100 head) (101 head (001 let*)))
-              (001001 ((bindings (safe-car (safe-cdr form)))
+              (нехай-послідовно ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form)))))
                 (сполучити (як-є %uses-lambda)
                       (сполучити (як-є %uses-let-family)
                             (collect-heads-let*-seq bindings body bound)))))
              ((11110101 (110101100 head) (101 head (001 def)))
-              (001001 ((name (safe-car (safe-cdr form)))
+              (нехай-послідовно ((name (safe-car (safe-cdr form)))
                      (value-form (safe-car (safe-cdr (safe-cdr form))))
                      ; def's own name is visible inside its own value-expr:
                      ; the evaluator shares one lexical frame between a def
@@ -217,7 +217,7 @@
                      (new-bound (сполучити name bound)))
                 (collect-heads value-form new-bound)))
              ((11110101 (110101100 head) (101 head (001 defmacro)))
-              (001001 ((params (safe-car (safe-cdr (safe-cdr form))))
+              (нехай-послідовно ((params (safe-car (safe-cdr (safe-cdr form))))
                      (body (safe-cdr (safe-cdr (safe-cdr form))))
                      (param-names (collect-symbols-leaf params))
                      (new-bound (приєднати param-names bound)))
@@ -227,7 +227,7 @@
              ((атом? (як-є ()))
               (001001 ((head-dep (110
                                   ((0100 (110101100 head)) (001 ()))
-                                  ((11101 head bound) (001 ()))
+                                  ((значення-у-списку? head bound) (як-є ()))
                                   ((атом? (як-є ())) (список head))))
                      (head-recurse (за-умовою ((атом? head) (як-є ())) ((атом? (як-є ())) (collect-heads head bound))))
                      (args-deps (collect-heads-each (решта form) bound)))
@@ -277,7 +277,7 @@
     (за-умовою
       ((атом? items) acc)
       
-      ((11101 (100 items) acc) (unique-onto (011 items) acc))
+      ((значення-у-списку? (перше items) acc) (unique-onto (решта items) acc))
       ((атом? (як-є ())) (unique-onto (решта items) (сполучити (перше items) acc))))))
 
 (визначити uniq (функція (items) (unique-onto items (як-є ()))))
@@ -287,17 +287,17 @@
     (за-умовою
       ((атом? tables) (як-є ()))
       
-      ((11101 sym (011 (100 tables))) (100 (100 tables)))
+      ((значення-у-списку? sym (решта (перше tables))) (перше (перше tables)))
       ((атом? (як-є ())) (owning-library sym (решта tables))))))
 
 ; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
 (визначити classify-symbol
   (функція (sym other-tables)
     (за-умовою
-      ((11101 sym core-special-forms) (111 (001 core) (001 ())))
-      ((11101 sym core-builtins) (111 (001 core) (001 ())))
-      ((11101 sym host-capabilities) (111 (001 reasoning-world-or-host) sym))
-      ((11101 sym core-my-symbols) (111 (001 macro-expanded-core) (001 ())))
+      ((значення-у-списку? sym core-special-forms) (сполучити (як-є core) (як-є ())))
+      ((значення-у-списку? sym core-builtins) (сполучити (як-є core) (як-є ())))
+      ((значення-у-списку? sym host-capabilities) (сполучити (як-є reasoning-world-or-host) sym))
+      ((значення-у-списку? sym core-my-symbols) (сполучити (як-є macro-expanded-core) (як-є ())))
       ((010 (001 ())) (001000 ((lib (owning-library sym other-tables)))
            (за-умовою
              ((11110111 lib (001 ())) (111 (001 unknown) (001 ())))
@@ -333,28 +333,28 @@
              (сполучити (як-є buckets) (як-є (core)))
              (сполучити (як-є unknown-symbols) (як-є ()))
              (сполучити (як-є world-host-libraries) (як-є ()))
-             (111 (001 axiom-tagged-s1) (11101 (001 S1) axioms-list))
+             (сполучити (як-є axiom-tagged-s1) (значення-у-списку? (як-є S1) axioms-list))
              (сполучити (як-є note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
       ((атом? (як-є ())) (classify-readable-fixture id expr-str axioms-list other-tables)))))
 
 (визначити classify-readable-fixture
   (функція (id expr-str axioms-list other-tables)
-    (001001 ((parsed-forms (110101001 expr-str))
+    (нехай-послідовно ((parsed-forms (читати-всі expr-str))
            (raw (collect-deps-top parsed-forms))
-           (markers (101001 is-marker? raw))
-           (real-syms (uniq (101001 (0010 (s) (0100 (is-marker? s))) raw)))
-           (classified (101000 (0010 (s) (111 s (classify-symbol s other-tables))) real-syms))
-           (bucket-of (0010 (tag) (101000 (0010 (c) (100 c)) (101001 (0010 (c) (101 (100 (011 c)) tag)) classified))))
+           (markers (відсіяти is-marker? raw))
+           (real-syms (uniq (відсіяти (функція (s) (хибне? (is-marker? s))) raw)))
+           (classified (відобразити (функція (s) (сполучити s (classify-symbol s other-tables))) real-syms))
+           (bucket-of (функція (tag) (відобразити (функція (c) (перше c)) (відсіяти (функція (c) (тотожне? (перше (решта c)) tag)) classified))))
            (unknowns (bucket-of (як-є unknown)))
            (uses-core (11111100 (11101 (001 core) (101000 (0010 (c) (100 (011 c))) classified))
-                          (0100 (110111011 (010 real-syms)))))
-           (uses-macro-core (11101 (001 macro-expanded-core) (101000 (0010 (c) (100 (011 c))) classified)))
-           (uses-world-host (11101 (001 reasoning-world-or-host) (101000 (0010 (c) (100 (011 c))) classified)))
-           (uses-lambda (11101 (001 %uses-lambda) markers))
-           (uses-let-family (11101 (001 %uses-let-family) markers))
-           (uses-strings-reader (101001 (0010 (s) (11101 s strings-reader-subset)) real-syms))
+                          (хибне? (відповідь-не (атом? real-syms)))))
+           (uses-macro-core (значення-у-списку? (як-є macro-expanded-core) (відобразити (функція (c) (перше (решта c))) classified)))
+           (uses-world-host (значення-у-списку? (як-є reasoning-world-or-host) (відобразити (функція (c) (перше (решта c))) classified)))
+           (uses-lambda (значення-у-списку? (як-є %uses-lambda) markers))
+           (uses-let-family (значення-у-списку? (як-є %uses-let-family) markers))
+           (uses-strings-reader (відсіяти (функція (s) (значення-у-списку? s strings-reader-subset)) real-syms))
            (world-host-libraries (uniq (101001 (0010 (x) (0100 (11110111 x (001 ()))))
-                                                (101000 (0010 (c) (011 (011 c))) classified))))
+                                                (відобразити (функція (c) (решта (решта c))) classified))))
            (buckets (101001 (0010 (x) (0100 (11110111 x (001 ()))))
                       (список
                         (за-умовою (uses-core (як-є core)) ((атом? (як-є ())) (як-є ())))
@@ -368,7 +368,7 @@
             (сполучити (як-є buckets) buckets)
             (сполучити (як-є unknown-symbols) unknowns)
             (сполучити (як-є world-host-libraries) world-host-libraries)
-            (111 (001 axiom-tagged-s1) (11101 (001 S1) axioms-list))))))
+            (сполучити (як-є axiom-tagged-s1) (значення-у-списку? (як-є S1) axioms-list))))))
 
 ; ---------------------------------------------------------------------
 ; Fixture pairing (same technique as scripts/oracle-batch.lisp)
@@ -394,10 +394,10 @@
       ((атом? conformance-remaining) (як-є ()))
       
       ((010 (001 ())) (001001 ((invf (100 inventory-remaining))
-                (id (011 (11100 (001 id) (011 invf))))
+                (id (решта (знайти-за-ключем (як-є id) (решта invf))))
                 (conff (перше conformance-remaining))
-                (expr-str (011 (11100 (001 expr) conff)))
-                (axioms-entry (11100 (001 axioms) conff))
+                (expr-str (решта (знайти-за-ключем (як-є expr) conff)))
+                (axioms-entry (знайти-за-ключем (як-є axioms) conff))
                 (axioms-list (за-умовою ((атом? axioms-entry) (як-є ())) ((атом? (як-є ())) (решта axioms-entry))))
                 (record (classify-fixture id expr-str axioms-list other-tables))
                 (emitted (11011011 record)))
