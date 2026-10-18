@@ -316,10 +316,10 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 #[test]
 fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
     let start = GUARD_SOURCE
-        .find("(визначити guard-reference-field\\n")
+        .find("(визначити guard-reference-field\n")
         .expect("the live Ukrainian guard accessor must exist");
     let end = GUARD_SOURCE[start..]
-        .find("\\n(визначити ")
+        .find("\n(визначити ")
         .map(|offset| start + offset)
         .expect("guard-reference-field must remain one bounded definition");
     let source = &GUARD_SOURCE[start..end];

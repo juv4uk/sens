@@ -103,9 +103,9 @@ class GuardProjectionTests(unittest.TestCase):
         migrated = self.text.split("\n" + ALIAS_MARKER, 1)[0]
         # Reverse only local names in the Guard accessor before the existing
         # exact surface inverse restores the pinned original Lisp blob.
-        start = migrated.find("(визначити guard-reference-field\\n")
+        start = migrated.find("(визначити guard-reference-field\n")
         self.assertGreaterEqual(start, 0)
-        end = migrated.find("\\n(визначити ", start + 1)
+        end = migrated.find("\n(визначити ", start + 1)
         self.assertGreater(end, start)
         segment, local_counts = translate(
             migrated[start:end], {},
