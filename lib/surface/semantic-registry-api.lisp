@@ -15,7 +15,7 @@
 
 (визначити semantic-registry-read-source
   (функція (source)
-    (100
+    (перше
       (110101001 source))))
 
 (визначити semantic-registry-read
@@ -33,10 +33,10 @@
 
 (визначити semantic-registry-row-namespaces
   (функція (surfaces)
-    (110
+    (за-умовою
       
-      ((0100 (010 surfaces))
-       (111
+      ((хибне? (атом? surfaces))
+       (сполучити
          (перше (перше surfaces))
          (semantic-registry-row-namespaces
            (решта surfaces)))))))
@@ -56,13 +56,13 @@
 
 (визначити semantic-registry-find-surface
   (функція (namespace surfaces)
-    (110
+    (за-умовою
       
-      ((0100 (010 surfaces))
-       (110
+      ((хибне? (атом? surfaces))
+       (за-умовою
          ((тотожне? namespace (перше (перше surfaces))) 
           (перше surfaces))
-         ((0100 (101 namespace (100 (100 surfaces))))
+         ((хибне? (тотожне? namespace (перше (перше surfaces))))
           (semantic-registry-find-surface namespace (решта surfaces))))))))
 
 (визначити semantic-registry-surface-name
@@ -71,33 +71,33 @@
             (semantic-registry-find-surface
               namespace
               (semantic-registry-row-surfaces row))))
-      (110
+      (за-умовою
         
-        ((0100 (010 entry))
-         (1001 entry))))))
+        ((хибне? (атом? entry))
+         (друге entry))))))
 
 (визначити semantic-registry-find-row
   (функція (sens-ref rows)
-    (110
+    (за-умовою
       
-      ((0100 (010 rows))
-       (110
+      ((хибне? (атом? rows))
+       (за-умовою
          ((11110111 sens-ref (semantic-registry-row-id (100 rows)))
           
           (перше rows))
-         (#d1:1
+         (так
           (semantic-registry-find-row sens-ref (решта rows))))))))
 
 (визначити semantic-registry-find-id-in-namespaces
   (функція (name row namespaces)
-    (110
+    (за-умовою
       
-      ((0100 (010 namespaces))
+      ((хибне? (атом? namespaces))
        (10011100 ((candidate
                (semantic-registry-surface-name
                  (перше namespaces)
                  row)))
-         (110
+         (за-умовою
            ((11110111 name candidate) 
             (semantic-registry-row-id row))
            ((0100 (11110111 name candidate))
@@ -108,20 +108,20 @@
 
 (визначити semantic-registry-id-for-surface
   (функція (name rows)
-    (110
+    (за-умовою
       
-      ((0100 (010 rows))
+      ((хибне? (атом? rows))
        (10011100 ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
                  (перше rows)
                  (як-є (en ук укр sa sym)))))
-         (110
-           ((0100 (010 sens-ref))
+         (за-умовою
+           ((хибне? (атом? sens-ref))
             (semantic-registry-id-for-surface name (решта rows)))
            ((атом? sens-ref) 
             sens-ref)
-           ((0100 (010 sens-ref))
+           ((хибне? (атом? sens-ref))
             (semantic-registry-id-for-surface name (решта rows)))))))))
 
 (визначити semantic-registry-round-trip
