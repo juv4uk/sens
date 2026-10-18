@@ -52,19 +52,19 @@ def check_ime() -> list[str]:
     # Historical SID8:00001100 denotes PLUS. Same raw bits in modern D8
     # denote a different function, so this check verifies exact D5 ownership.
     if not BRIDGE.is_file() or not re.search(
-        r"\\(sid8:00001100\\s+->\\s+D5:01010\\b", BRIDGE.read_text(encoding="utf-8")
+        r"\(sid8:00001100\s+->\s+D5:01010\b", BRIDGE.read_text(encoding="utf-8")
     ):
         errs.append("island-math-evidence: historical PLUS bridge → D5:01010 missing")
     d5 = ROOT / "lib" / "domains" / "d5.lisp"
     if not d5.is_file() or not re.search(
-        r"^\\s*\\(01010\\s+\\(ук [^)]*\\)\\s+\\(укр додати\\)",
+        r"^\s*\(01010\s+\(ук [^)]*\)\s+\(укр додати\)",
         d5.read_text(encoding="utf-8"), re.MULTILINE
     ):
         errs.append("island-math-evidence: D5:01010 Ukrainian authority missing")
 
     islands = {"common-lisp", "prolog", "clips", "datalog"}
     witnessed = re.findall(
-        r"^\\s*\\(([^()\\s]+)\\s+(common-lisp|prolog|clips|datalog)\\s+execution-witness\\b",
+        r"^\s*\(([^()\s]+)\s+(common-lisp|prolog|clips|datalog)\s+execution-witness\b",
         text, re.MULTILINE
     )
     expected = {(UKR_HEAD, name) for name in islands}
@@ -74,7 +74,7 @@ def check_ime() -> list[str]:
         errs.append("island-math-evidence: mechanism source missing")
     else:
         mechanisms = re.findall(
-            r"^\\s*\\(([^()\\s]+)\\s+(common-lisp|prolog|clips|datalog)\\s+bounded-exact-add\\)",
+            r"^\s*\(([^()\s]+)\s+(common-lisp|prolog|clips|datalog)\s+bounded-exact-add\)",
             MECHANISMS.read_text(encoding="utf-8"), re.MULTILINE
         )
         if len(mechanisms) != 4 or set(mechanisms) != expected:
