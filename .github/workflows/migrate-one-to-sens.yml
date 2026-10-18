@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/migrate-one-to-sens.py \
-            lib/surface/ukr-acceptance.lisp \
+            tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --codec t5m --source-surface укр --dry-run > /tmp/one-file-t5-report.json
           python3 - <<'PY'
           import json
