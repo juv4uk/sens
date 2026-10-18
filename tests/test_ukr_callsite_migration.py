@@ -1938,11 +1938,23 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             current = current[:pos] + bits + current[pos + len(peer):]
         return current
 
+    @staticmethod
+    def _restore_prior_domain_logic_print(path, source):
+        """Preserve the pinned historical blob after a later, ratified D8 PRINT projection."""
+        if path != "scripts/check-domain-logic-laws.lisp":
+            return source
+        current = '(друкувати "DOMAIN-LOGIC-LAWS: PASS'
+        historical = '(11011011 "DOMAIN-LOGIC-LAWS: PASS'
+        if source.count(current) != 1:
+            raise AssertionError("Очікуваний точний D8-друк змінено або видалено")
+        return source.replace(current, historical, 1)
+
     def test_source_inverse_restores_exact_pre_migration_git_blobs(self):
         for path, evidence in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
                 restored = self._inverse(source, evidence["edits"])
+                restored = self._restore_prior_domain_logic_print(path, restored)
                 self.assertEqual(self._blob_sha(restored), evidence["sha"])
                 mod.parse(source)
                 mod.parse(restored)
@@ -1954,6 +1966,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
                 old = self._inverse(source, evidence["edits"])
+                old = self._restore_prior_domain_logic_print(path, old)
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
@@ -1968,7 +1981,8 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         # D5/D6/D8/D9 operators are separately admitted; not inferred from width.
         logic = (self.root / "scripts/check-domain-logic-laws.lisp").read_text(encoding="utf-8")
         self.assertIn("(11010 2 3)", logic)
-        self.assertIn('(11011011 "DOMAIN-LOGIC-LAWS:', logic)
+        self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', logic)
+        self.assertNotIn('(11011011 "DOMAIN-LOGIC-LAWS:', logic)
 
     def test_negative_wrong_ukrainian_peer_breaks_exact_witness(self):
         path = "scripts/check-domain-bitness-laws.lisp"
