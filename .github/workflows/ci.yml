@@ -22,6 +22,8 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: ./.github/actions/install-zig
+
       - name: Заборона закодованих літералів у Lisp
         shell: bash
         env:
