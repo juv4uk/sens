@@ -19,168 +19,168 @@
 ; D3:110 condition requires an exact D1 control bit, not quoted D3 empty.
 ; These two predicates return D1:0 on negative branches so callers can
 ; compose them inside D3 COND without historical truthiness.
-(0011 my-group-closure?
-  (0010 (value)
-    (110
-      ((010 value) #d1:0)
-      (#d1:1 (101 (100 value) (001 recursive-group-closure))))))
+(визначити my-group-closure?
+  (функція (value)
+    (за-умовою
+      ((атом? value) ні)
+      (так (тотожне? (перше value) (як-є recursive-group-closure))))))
 
-(0011 my-sixth
-  (0010 (values)
-    (100 (011 (011 (011 (011 (011 values))))))))
+(визначити my-sixth
+  (функція (values)
+    (перше (решта (решта (решта (решта (решта values))))))))
 
-(0011 my-lambda-def-form?
-  (0010 (form)
-    (110
-      ((010 form) #d1:0)
-      ((101 (100 form) (001 def))
-       (my-lambda-form? (10011 form)))
-      (#d1:1 #d1:0))))
+(визначити my-lambda-def-form?
+  (функція (form)
+    (за-умовою
+      ((атом? form) ні)
+      ((тотожне? (перше form) (як-є def))
+       (my-lambda-form? (третє form)))
+      (так ні))))
 
-(0011 my-take-lambda-def-group
-  (0010 (forms)
-    (110
-      ((010 forms) (001 ()))
+(визначити my-take-lambda-def-group
+  (функція (forms)
+    (за-умовою
+      ((атом? forms) (як-є ()))
       ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (111 (100 forms)
-            (my-take-lambda-def-group (011 forms))))
-      (#d1:1 (001 ())))))
+       (сполучити (перше forms)
+            (my-take-lambda-def-group (решта forms))))
+      (так (як-є ())))))
 
-(0011 my-drop-lambda-def-group
-  (0010 (forms)
-    (110
-      ((010 forms) (001 ()))
+(визначити my-drop-lambda-def-group
+  (функція (forms)
+    (за-умовою
+      ((атом? forms) (як-є ()))
       ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       (my-drop-lambda-def-group (011 forms)))
-      (#d1:1 forms))))
+       (my-drop-lambda-def-group (решта forms)))
+      (так forms))))
 
-(0011 my-group-closure-from-def
-  (0010 (form group captured-env)
-    ((0010 (lambda-form) (1110 (001 recursive-group-closure)
-            (1001 form)
-            (1001 lambda-form)
-            (011 (011 lambda-form))
+(визначити my-group-closure-from-def
+  (функція (form group captured-env)
+    ((функція (lambda-form) (список (як-є recursive-group-closure)
+            (друге form)
+            (друге lambda-form)
+            (решта (решта lambda-form))
             group
-            captured-env)) (10011 form))))
+            captured-env)) (третє form))))
 
 ; Build onto the captured environment so later definitions in the same group
 ; appear earlier in the alist, matching same-frame overwrite order.
-(0011 my-build-group-env-onto
-  (0010 (forms group captured-env out)
-    (110
-      ((010 forms) out)
-      (#d1:1
-       ((0010 (form) (my-build-group-env-onto
-           (011 forms)
+(визначити my-build-group-env-onto
+  (функція (forms group captured-env out)
+    (за-умовою
+      ((атом? forms) out)
+      (так
+       ((функція (form) (my-build-group-env-onto
+           (решта forms)
            group
            captured-env
-           (111
-             (111 (1001 form)
+           (сполучити
+             (сполучити (друге form)
                    (my-group-closure-from-def form group captured-env))
-             out))) (100 forms))))))
+             out))) (перше forms))))))
 
-(0011 my-build-group-env
-  (0010 (group captured-env)
+(визначити my-build-group-env
+  (функція (group captured-env)
     (my-build-group-env-onto group group captured-env captured-env)))
 
-(0011 my-apply-group-closure
-  (0010 (fn args)
-    ((0010 (group-env) (my-eval-body
+(визначити my-apply-group-closure
+  (функція (fn args)
+    ((функція (group-env) (my-eval-body
         (my-fourth fn)
         (bind-params
-          (10011 fn)
+          (третє fn)
           args
           group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn)))))
 
 ; Apply wrapper: group closures go through group path; others reuse my-apply.
-(0011 my-group-apply
-  (0010 (fn args)
-    (110
+(визначити my-group-apply
+  (функція (fn args)
+    (за-умовою
       ((це-замикання-рекурсивної-групи? fn) (my-apply-group-closure fn args))
-      (#d1:1 (my-apply fn args)))))
+      (так (my-apply fn args)))))
 
-(0011 my-group-eval-list
-  (0010 (exprs env)
-    (110
-      ((010 exprs) (001 ()))
-      (#d1:1
-       (111 (my-group-eval (100 exprs) env)
-            (my-group-eval-list (011 exprs) env))))))
+(визначити my-group-eval-list
+  (функція (exprs env)
+    (за-умовою
+      ((атом? exprs) (як-є ()))
+      (так
+       (сполучити (my-group-eval (перше exprs) env)
+            (my-group-eval-list (решта exprs) env))))))
 
-(0011 my-group-eval-body
-  (0010 (body env)
-    (110
-      ((010 (011 body)) (my-group-eval (100 body) env))
-      (#d1:1
-       ((0010 ()
-          (my-group-eval (100 body) env)
-          (my-group-eval-body (011 body) env)))))))
+(визначити my-group-eval-body
+  (функція (body env)
+    (за-умовою
+      ((атом? (решта body)) (my-group-eval (перше body) env))
+      (так
+       ((функція ()
+          (my-group-eval (перше body) env)
+          (my-group-eval-body (решта body) env)))))))
 
-(0011 my-group-eval-cond
-  (0010 (clauses env)
-    (110
-      ((010 clauses) (001 ()))
-      ((my-group-eval (100 (100 clauses)) env)
-       (my-group-eval (1001 (100 clauses)) env))
-      (#d1:1 (my-group-eval-cond (011 clauses) env)))))
+(визначити my-group-eval-cond
+  (функція (clauses env)
+    (за-умовою
+      ((атом? clauses) (як-є ()))
+      ((my-group-eval (перше (перше clauses)) env)
+       (my-group-eval (друге (перше clauses)) env))
+      (так (my-group-eval-cond (решта clauses) env)))))
 
-(0011 my-group-apply-owned
-  (0010 (fn args)
-    (110
+(визначити my-group-apply-owned
+  (функція (fn args)
+    (за-умовою
       ((це-замикання-рекурсивної-групи? fn)
-       ((0010 (group-env) (my-group-eval-body
+       ((функція (group-env) (my-group-eval-body
            (my-fourth fn)
            (bind-params (третє fn) args group-env))) (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) (my-sixth fn))))
-      (#d1:1 (my-apply fn args)))))
+      (так (my-apply fn args)))))
 
-(0011 my-group-eval
-  (0010 (expr env)
-    (110
-      ((010 expr) (env-lookup expr env))
-      ((010 (100 expr))
-       (110
-         ((101 (100 expr) (001 quote)) (1001 expr))
-         ((101 (100 expr) (001 cond))
-          (my-group-eval-cond (011 expr) env))
-         ((101 (100 expr) (001 lambda))
-          (1110 (001 closure) (1001 expr) (011 (011 expr)) env))
-         (#d1:1
-          ((0010 (fn) (110
+(визначити my-group-eval
+  (функція (expr env)
+    (за-умовою
+      ((атом? expr) (env-lookup expr env))
+      ((атом? (перше expr))
+       (за-умовою
+         ((тотожне? (перше expr) (як-є quote)) (друге expr))
+         ((тотожне? (перше expr) (як-є cond))
+          (my-group-eval-cond (решта expr) env))
+         ((тотожне? (перше expr) (як-є lambda))
+          (список (як-є closure) (друге expr) (решта (решта expr)) env))
+         (так
+          ((функція (fn) (за-умовою
               ((my-macro? fn)
-               (my-group-eval (my-apply fn (011 expr)) env))
-              (#d1:1
+               (my-group-eval (my-apply fn (решта expr)) env))
+              (так
                (my-group-apply-owned
                  fn
-                 (my-group-eval-list (011 expr) env))))) (my-group-eval (100 expr) env)))))
-      (#d1:1
+                 (my-group-eval-list (решта expr) env))))) (my-group-eval (перше expr) env)))))
+      (так
        (my-group-apply-owned
-         (my-group-eval (100 expr) env)
-         (my-group-eval-list (011 expr) env))))))
+         (my-group-eval (перше expr) env)
+         (my-group-eval-list (решта expr) env))))))
 
-(0011 my-group-eval-top-form
-  (0010 (form env)
-    (110
-      ((010 form) (111 env (my-group-eval form env)))
-      ((101 (100 form) (001 def))
-       ((0010 (value) (111 (111 (111 (1001 form) value) env) value)) (my-group-eval (10011 form) env)))
-      ((101 (100 form) (001 defmacro))
+(визначити my-group-eval-top-form
+  (функція (form env)
+    (за-умовою
+      ((атом? form) (сполучити env (my-group-eval form env)))
+      ((тотожне? (перше form) (як-є def))
+       ((функція (value) (сполучити (сполучити (сполучити (друге form) value) env) value)) (my-group-eval (третє form) env)))
+      ((тотожне? (перше form) (як-є defmacro))
        (my-eval-top-form form env))
-      (#d1:1 (111 env (my-group-eval form env))))))
+      (так (сполучити env (my-group-eval form env))))))
 
-(0011 my-eval-program-with-groups
-  (0010 (forms env)
-    (110
+(визначити my-eval-program-with-groups
+  (функція (forms env)
+    (за-умовою
       ((визначення-лямбди-на-верхньому-рівні? (перше forms))
-       ((0010 (group) ((0010 (rest) ((0010 (group-env) (110
-               ((010 rest) (111 group-env (011 (100 group-env))))
+       ((функція (group) ((функція (rest) ((функція (group-env) (за-умовою
+               ((атом? rest) (сполучити group-env (решта (перше group-env))))
                (так (my-eval-program-with-groups rest group-env)))) (побудувати-лексичні-зв'язки-рекурсивної-групи group env))) (my-drop-lambda-def-group forms))) (my-take-lambda-def-group forms)))
-      (#d1:1
-       ((0010 (result) (110
-           ((010 (011 forms)) result)
-           (#d1:1
+      (так
+       ((функція (result) (за-умовою
+           ((атом? (решта forms)) result)
+           (так
             (my-eval-program-with-groups
-              (011 forms)
-              (100 result))))) (my-group-eval-top-form (100 forms) env))))))
+              (решта forms)
+              (перше result))))) (my-group-eval-top-form (перше forms) env))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити побудувати-лексичні-зв'язки-рекурсивної-групи my-build-group-env)

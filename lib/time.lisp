@@ -6,54 +6,54 @@
 ; but lives in Lisp so we can prove that calendar semantics do not belong to
 ; the host. Scope is non-negative Unix days; utc-now already rejects times
 ; before the Unix epoch.
-(0011 civil-from-days
-  (0010 (days)
-    ((0010 (z)
-      ((0010 (era)
-        ((0010 (doe)
-          ((0010 (yoe)
-            ((0010 (y)
-              ((0010 (doy)
-                ((0010 (mp)
-                  ((0010 (day)
-                    ((0010 (month)
-                      ((0010 (year)
-                        (111 year (111 month (111 day (001 ()))))
+(визначити civil-from-days
+  (функція (days)
+    ((функція (z)
+      ((функція (era)
+        ((функція (doe)
+          ((функція (yoe)
+            ((функція (y)
+              ((функція (doy)
+                ((функція (mp)
+                  ((функція (day)
+                    ((функція (month)
+                      ((функція (year)
+                        (сполучити year (сполучити month (сполучити day (як-є ()))))
                       )
-                        (01010 y (110 ((11010 month 3) 1) (#d1:1 0))))
+                        (додати y (за-умовою ((менше? month 3) 1) (так 0))))
                     )
-                      (01010 mp (110 ((11010 mp #d10) 3) (#d1:1 -9))))
+                      (додати mp (за-умовою ((менше? mp #d10) 3) (так -9))))
                   )
-                    (01010 (01011 doy (quotient (01010 (10110 153 mp) 2) 5)) 1))
+                    (додати (відняти doy (quotient (додати (помножити 153 mp) 2) 5)) 1))
                 )
-                  (quotient (01010 (10110 5 doy) 2) 153))
+                  (quotient (додати (помножити 5 doy) 2) 153))
               )
-                (01011 doe (01010 (10110 365 yoe) (01011 (quotient yoe 4) (quotient yoe #d100)))))
+                (відняти doe (додати (помножити 365 yoe) (відняти (quotient yoe 4) (quotient yoe #d100)))))
             )
-              (01010 yoe (10110 era 400)))
+              (додати yoe (помножити era 400)))
           )
-            (quotient (01011 (01010 doe (quotient doe 36524)) (01010 (quotient doe 1460) (quotient doe 146096))) 365))
+            (quotient (відняти (додати doe (quotient doe 36524)) (додати (quotient doe 1460) (quotient doe 146096))) 365))
         )
-          (01011 z (10110 era 146097)))
+          (відняти z (помножити era 146097)))
       )
         (quotient z 146097))
     )
-      (01010 days 719468))
+      (додати days 719468))
   ))
 
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
 ; calendar semantics.
-(0011 utc-from-unix
-  (0010 (seconds nanosecond)
-    ((0010 (days)
-      ((0010 (day-seconds)
-        ((0010 (civil)
-          ((0010 (hour)
-            ((0010 (minute)
-              ((0010 (second-of-minute)
-                (111 (001 utc) (111 (100 civil) (111 (100 (011 civil)) (111 (100 (011 (011 civil))) (111 hour (111 minute (111 second-of-minute (111 nanosecond (001 ())))))))))
+(визначити utc-from-unix
+  (функція (seconds nanosecond)
+    ((функція (days)
+      ((функція (day-seconds)
+        ((функція (civil)
+          ((функція (hour)
+            ((функція (minute)
+              ((функція (second-of-minute)
+                (сполучити (як-є utc) (сполучити (перше civil) (сполучити (перше (решта civil)) (сполучити (перше (решта (решта civil))) (сполучити hour (сполучити minute (сполучити second-of-minute (сполучити nanosecond (як-є ())))))))))
               )
                 (mod day-seconds 60))
             )
@@ -72,13 +72,13 @@
 ; Minimal wall-clock host capability contract:
 ;   (unix-time-now) -> (unix-time seconds nanosecond)
 ; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
-(0011 unix-time-observation->utc
-  (0010 (observation)
-    (110
-      ((101 (100 observation) (001 unix-time))
+(визначити unix-time-observation->utc
+  (функція (observation)
+    (за-умовою
+      ((тотожне? (перше observation) (як-є unix-time))
        (узгоджений-час-з-юнікс (перше (решта observation)) (перше (решта (решта observation)))))
-      (#d1:1
-       (111 (001 rejected) (111 (001 invalid-unix-time-observation) (001 ()))))))
+      (так
+       (сполучити (як-є rejected) (сполучити (як-є invalid-unix-time-observation) (як-є ()))))))
 )
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
@@ -101,56 +101,56 @@
 ; AND/OR consume only that typed answer. All COND clauses are two-field
 ; (test expression). Predicate constants are direct one-bit values, not
 ; Number 0/1, T/NIL, structural () or rich classifiers used as truth.
-(0011 internet-time-mode-valid?
-  (0010 (mode)
-    (110
-      ((101 mode 4) #d1:1)
-      ((101 mode 5) #d1:1)
-      (#d1:1 #d1:0)))
+(визначити internet-time-mode-valid?
+  (функція (mode)
+    (за-умовою
+      ((тотожне? mode 4) так)
+      ((тотожне? mode 5) так)
+      (так ні)))
 )
 
-(0011 internet-time-stratum-valid?
-  (0010 (stratum)
-    (110
-      ((11011 stratum 0)
-       (110
-         ((11010 stratum 16) #d1:1)
-         (#d1:1 #d1:0)))
-      (#d1:1 #d1:0)))
+(визначити internet-time-stratum-valid?
+  (функція (stratum)
+    (за-умовою
+      ((більше? stratum 0)
+       (за-умовою
+         ((менше? stratum 16) так)
+         (так ні)))
+      (так ні)))
 )
 
-(0011 internet-time-fields->observation
-  (0010 (host mode stratum ntp-seconds fraction)
-    (110
+(визначити internet-time-fields->observation
+  (функція (host mode stratum ntp-seconds fraction)
+    (за-умовою
       ((інтернет-час-режим-припустимий? mode)
-       (110
+       (за-умовою
          ((інтернет-час-рівень-припустимий? stratum)
-          (110
-            ((11010 ntp-seconds 2208988800)
-             (111 (001 rejected) (111 (001 invalid-epoch) (001 ()))))
-            (#d1:1
-             (111 (001 accepted) (111 host (111 (01011 ntp-seconds 2208988800) (111 (quotient (10110 fraction #d1000000000) 4294967296) (001 ()))))))))
-         (#d1:1
-          (111 (001 rejected) (111 (001 invalid-response) (001 ()))))))
-      (#d1:1
-       (111 (001 rejected) (111 (001 invalid-response) (001 ())))))))
+          (за-умовою
+            ((менше? ntp-seconds 2208988800)
+             (сполучити (як-є rejected) (сполучити (як-є invalid-epoch) (як-є ()))))
+            (так
+             (сполучити (як-є accepted) (сполучити host (сполучити (відняти ntp-seconds 2208988800) (сполучити (quotient (помножити fraction #d1000000000) 4294967296) (як-є ()))))))))
+         (так
+          (сполучити (як-є rejected) (сполучити (як-є invalid-response) (як-є ()))))))
+      (так
+       (сполучити (як-є rejected) (сполучити (як-є invalid-response) (як-є ())))))))
 
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
 ; or a transport-level rejection such as (rejected receive-failed).
 ; Lisp owns every protocol interpretation after that raw observation boundary.
-(0011 internet-time-raw->observation
-  (0010 (raw)
-    (110
-      ((101 (100 raw) (001 ntp-fields))
+(визначити internet-time-raw->observation
+  (функція (raw)
+    (за-умовою
+      ((тотожне? (перше raw) (як-є ntp-fields))
        (тлумачити-поля-відповіді-часу
-         (1001 raw)
-         (100 (011 (011 raw)))
-         (100 (011 (011 (011 raw))))
-         (100 (011 (011 (011 (011 raw)))))
-         (100 (011 (011 (011 (011 (011 raw))))))))
-      (#d1:1 raw)))
+         (друге raw)
+         (перше (решта (решта raw)))
+         (перше (решта (решта (решта raw))))
+         (перше (решта (решта (решта (решта raw)))))
+         (перше (решта (решта (решта (решта (решта raw))))))))
+      (так raw)))
 )
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
@@ -162,17 +162,17 @@
 
 
 ; Turning an accepted timestamp into calendar meaning is also language policy.
-(0011 internet-time-observation->utc
-  (0010 (observation)
-    (110
-      ((101 (100 observation) (001 accepted))
-       (111 (001 accepted)
-         (111 (100 (011 observation))
+(визначити internet-time-observation->utc
+  (функція (observation)
+    (за-умовою
+      ((тотожне? (перше observation) (як-є accepted))
+       (сполучити (як-є accepted)
+         (сполучити (перше (решта observation))
            (сполучити (узгоджений-час-з-юнікс
-                  (100 (011 (011 observation)))
-                  (100 (011 (011 (011 observation)))))
-             (001 ())))))
-      (#d1:1 observation))))
+                  (перше (решта (решта observation)))
+                  (перше (решта (решта (решта observation)))))
+             (як-є ())))))
+      (так observation))))
 
 
 
@@ -196,16 +196,16 @@
   (функція (now-ns delta-ns)
     (додати now-ns delta-ns)))
 
-(0011 deadline-reached-at?
-  (0010 (now-ns deadline-ns)
-    (110
-      ((11011 now-ns deadline-ns) #d1:1)
-      ((101 now-ns deadline-ns) #d1:1)
-      (#d1:1 #d1:0)))
+(визначити deadline-reached-at?
+  (функція (now-ns deadline-ns)
+    (за-умовою
+      ((більше? now-ns deadline-ns) так)
+      ((тотожне? now-ns deadline-ns) так)
+      (так ні)))
 )
 
-(0011 deadline-after-ns
-  (0010 (delta-ns)
+(визначити deadline-after-ns
+  (функція (delta-ns)
     (крайній-час-з (mono-ns) delta-ns)))
 
 
@@ -224,96 +224,96 @@
 ;   (timezone-declarations tz-value etc-timezone-value)
 ; where each value is either a non-empty string or (). Lisp owns source
 ; precedence and the public detected/unknown result shape.
-(0011 timezone-declarations->observation
-  (0010 (tz-value etc-timezone-value)
+(визначити timezone-declarations->observation
+  (функція (tz-value etc-timezone-value)
     ; D3 COND is exactly two clauses. First distinguish absent TZ; for a
     ; present TZ, distinguish empty from non-empty in a nested two-clause COND.
-    (110
-      ((101 tz-value (001 ()))
+    (за-умовою
+      ((тотожне? tz-value (як-є ()))
        ; TZ is absent: ETC is the only fallback source.
-       (110
-         ((101 etc-timezone-value (001 ()))
-          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+       (за-умовою
+         ((тотожне? etc-timezone-value (як-є ()))
+          (сполучити (як-є unknown) (сполучити (як-є host-declaration-unavailable) (як-є ())))
          )
-         ((0100 (101 etc-timezone-value (001 ())))
-          (110
-            ((101 etc-timezone-value "")
-             (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+         ((хибне? (тотожне? etc-timezone-value (як-є ())))
+          (за-умовою
+            ((тотожне? etc-timezone-value "")
+             (сполучити (як-є unknown) (сполучити (як-є host-declaration-unavailable) (як-є ())))
             )
-            ((0100 (101 etc-timezone-value ""))
-             (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ()))))
+            ((хибне? (тотожне? etc-timezone-value ""))
+             (сполучити (як-є detected) (сполучити etc-timezone-value (сполучити (як-є etc-timezone) (як-є ()))))
             )
           )
          )
        )
       )
-      ((0100 (101 tz-value (001 ())))
+      ((хибне? (тотожне? tz-value (як-є ())))
        ; TZ is present: empty string still permits the ETC fallback.
-       (110
-         ((101 tz-value "")
-          (110
-            ((101 etc-timezone-value (001 ()))
-             (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+       (за-умовою
+         ((тотожне? tz-value "")
+          (за-умовою
+            ((тотожне? etc-timezone-value (як-є ()))
+             (сполучити (як-є unknown) (сполучити (як-є host-declaration-unavailable) (як-є ())))
             )
-            ((0100 (101 etc-timezone-value (001 ())))
-             (110
-               ((101 etc-timezone-value "")
-                (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+            ((хибне? (тотожне? etc-timezone-value (як-є ())))
+             (за-умовою
+               ((тотожне? etc-timezone-value "")
+                (сполучити (як-є unknown) (сполучити (як-є host-declaration-unavailable) (як-є ())))
                )
-               ((0100 (101 etc-timezone-value ""))
-                (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ()))))
+               ((хибне? (тотожне? etc-timezone-value ""))
+                (сполучити (як-є detected) (сполучити etc-timezone-value (сполучити (як-є etc-timezone) (як-є ()))))
                )
              )
             )
           )
          )
-         ((0100 (101 tz-value ""))
-          (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ()))))
+         ((хибне? (тотожне? tz-value ""))
+          (сполучити (як-є detected) (сполучити tz-value (сполучити (як-є TZ) (як-є ()))))
          )
        )
       )
     )
   )
 )
-(0011 timezone-raw->observation
-  (0010 (raw)
-    (110
-      ((101 (100 raw) (001 timezone-declarations))
+(визначити timezone-raw->observation
+  (функція (raw)
+    (за-умовою
+      ((тотожне? (перше raw) (як-є timezone-declarations))
        (обрати-достовірне-джерело-часового-поясу
-         (100 (011 raw))
-         (100 (011 (011 raw)))))
-      (#d1:1
-       (111 (001 rejected) (111 (001 invalid-timezone-observation) (001 ()))))))
+         (перше (решта raw))
+         (перше (решта (решта raw)))))
+      (так
+       (сполучити (як-є rejected) (сполучити (як-є invalid-timezone-observation) (як-є ()))))))
 )
 
-(0011 timezone-detect
-  (0010 ()
+(визначити timezone-detect
+  (функція ()
     (часовий-пояс-сирий-до-спостереження
       (timezone-declarations-raw))))
 
 
-(0011 timezone-config
-  (0010 (name offset-seconds)
-    (110
+(визначити timezone-config
+  (функція (name offset-seconds)
+    (за-умовою
       ((string? name)
-       (110
-         ((11010 offset-seconds -86400)
-          (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
-         ((11011 offset-seconds 86400)
-          (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
-         (#d1:1
-          (111 (001 accepted) (111 (111 (001 timezone) (111 name (111 offset-seconds (001 ())))) (001 ()))))))
-      (#d1:1
-       (111 (001 rejected) (111 (001 invalid-name) (001 ())))))))
+       (за-умовою
+         ((менше? offset-seconds -86400)
+          (сполучити (як-є rejected) (сполучити (як-є invalid-offset) (як-є ()))))
+         ((більше? offset-seconds 86400)
+          (сполучити (як-є rejected) (сполучити (як-є invalid-offset) (як-є ()))))
+         (так
+          (сполучити (як-є accepted) (сполучити (сполучити (як-є timezone) (сполучити name (сполучити offset-seconds (як-є ())))) (як-є ()))))))
+      (так
+       (сполучити (як-є rejected) (сполучити (як-є invalid-name) (як-є ())))))))
 
 
-(0011 timezone-name
-  (0010 (config)
-    (1001 config)))
+(визначити timezone-name
+  (функція (config)
+    (друге config)))
 
-(0011 timezone-offset-seconds
-  (0010 (config)
-    (10011 config)))
+(визначити timezone-offset-seconds
+  (функція (config)
+    (третє config)))
 
 ; Реєстр містить стабільні поверхні всіх наведених часових функцій.
 ; Після визначення Lisp-замикань load_time_library застосовує чинну механічну

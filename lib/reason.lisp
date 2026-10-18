@@ -10,12 +10,12 @@
 ; distinct predicates so an adversarial unique-predicate corpus cannot turn
 ; index construction into an unbounded O(N^2) walk.
 
-(0011 *reason-index-schema* (001 reason-index/1))
+(визначити *reason-index-schema* (як-є reason-index/1))
 ; 64 структурні комірки-бюджети, без числової арифметики.
 ; Один НОВИЙ предикат споживає одну комірку, повторний — жодної.
 ; Це звичайні цитовані дані (64 порожні списки), не 64 функції.
-(0011 *reason-index-fuel*
-  (001
+(визначити *reason-index-fuel*
+  (як-є
     (() () () () () () () () () () () () () () () ()
      () () () () () () () () () () () () () () () ()
      () () () () () () () () () () () () () () () ()
@@ -26,30 +26,30 @@
 ; D4:1001 CADR, D5:10011 CADDR, D3:011 CDR: no named selector alias.
 ; Canonical index schema: (schema mode original-rules buckets).
 ; D6:100111 CADDDR is ratified data, not silently callable here.
-(0011 reason-index-mode
-  (0010 (index)
-    (1001 index)))
-(0011 reason-index-rules
-  (0010 (index)
-    (10011 index)))
-(0011 reason-index-buckets
-  (0010 (index)
-    (10011 (011 index))))
+(визначити reason-index-mode
+  (функція (index)
+    (друге index)))
+(визначити reason-index-rules
+  (функція (index)
+    (третє index)))
+(визначити reason-index-buckets
+  (функція (index)
+    (третє (решта index))))
 
 ; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
 ; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).
-(0011 reason-index?
-  (0010 (value)
-    (110
-      ((010 value) #d1:0)
-      ((0101 value) #d1:0)
+(визначити reason-index?
+  (функція (value)
+    (за-умовою
+      ((атом? value) ні)
+      ((порожній? value) ні)
       ; An ordinary rule list can start with a compound CAR.
       ; D3 EQ accepts atoms only, so establish ATOM(CAR(value)) first.
-      ((010 (100 value))
-       (110
-         ((101 (100 value) *reason-index-schema*) #d1:1)
-         (#d1:1 #d1:0)))
-      (#d1:1 #d1:0))))
+      ((атом? (перше value))
+       (за-умовою
+         ((тотожне? (перше value) *reason-index-schema*) так)
+         (так ні)))
+      (так ні))))
 
 ; Власний точний D3 пошук кошика: CORE ASSOC у старому профілі
 ; заходить у CAR(CAR ()) на порожньому alist; тут ніколи не робимо CAR
@@ -58,146 +58,146 @@
 ; D4:1000 CAAR = CAR(CAR), D4:0110 CDAR = CDR(CAR).
 ; These are admitted call heads; D7 is text/data only.
 
-(0011 міркування-пошук-кошика
-  (0010 (predicate buckets)
-    (110
-      ((010 buckets) (001 ()))
-      ((010 (100 buckets)) (001 ()))
-      ((010 (1000 buckets))
-       (110
-         ((101 predicate (1000 buckets)) (100 buckets))
-         (#d1:1 (міркування-пошук-кошика predicate (011 buckets)))))
-      (#d1:1 (001 ())))))
+(визначити міркування-пошук-кошика
+  (функція (predicate buckets)
+    (за-умовою
+      ((атом? buckets) (як-є ()))
+      ((атом? (перше buckets)) (як-є ()))
+      ((атом? (перше-першого buckets))
+       (за-умовою
+         ((тотожне? predicate (перше-першого buckets)) (перше buckets))
+         (так (міркування-пошук-кошика predicate (решта buckets)))))
+      (так (як-є ())))))
 
-(0011 reason-index-linear
-  (0010 (rules)
-    (1110 *reason-index-schema* (001 linear) rules (001 ()))))
+(визначити reason-index-linear
+  (функція (rules)
+    (список *reason-index-schema* (як-є linear) rules (як-є ()))))
 
 ; Only ordinary predicate-headed compound terms are safe index keys.
 ; `(var x)` is deliberately excluded: as a logic variable it can unify with
 ; any rule head and must therefore retain the historical full scan.
 ; Власний D3-предикат змінної, без непрозорого SID8 або D9-виклику.
 ; EQ приймає лише атоми: тому спочатку ATOM(term), потім ATOM(CAR(term)).
-(0011 reason-var-form?
-  (0010 (term)
-    (110
-      ((010 term) #d1:0)
-      ((010 (100 term))
-       (110
-         ((101 (100 term) (001 var)) #d1:1)
-         (#d1:1 #d1:0)))
-      (#d1:1 #d1:0))))
+(визначити reason-var-form?
+  (функція (term)
+    (за-умовою
+      ((атом? term) ні)
+      ((атом? (перше term))
+       (за-умовою
+         ((тотожне? (перше term) (як-є var)) так)
+         (так ні)))
+      (так ні))))
 
 ; Невідомі/складені голови залишаються на лінійному шляху.
-(0011 reason-term-predicate
-  (0010 (term)
-    (110
-      ((010 term) (001 ()))
-      ((reason-var-form? term) (001 ()))
-      ((010 (100 term)) (100 term))
-      (#d1:1 (001 ())))))
+(визначити reason-term-predicate
+  (функція (term)
+    (за-умовою
+      ((атом? term) (як-є ()))
+      ((reason-var-form? term) (як-є ()))
+      ((атом? (перше term)) (перше term))
+      (так (як-є ())))))
 
-(0011 reason-rule-predicate
-  (0010 (rule)
-    (110
+(визначити reason-rule-predicate
+  (функція (rule)
+    (за-умовою
       
-      ((010 rule)  (001 ()))
-      (#d1:1 (reason-term-predicate (100 rule))))))
+      ((атом? rule)  (як-є ()))
+      (так (reason-term-predicate (перше rule))))))
 
 ; Buckets accumulate reversed source order. Finite structural fuel bounds the
 ; number of DISTINCT predicates, without unqualified numeric arithmetic.
-(0011 reason-index-add-reversed
-  (0010 (predicate rule buckets)
-    (110
+(визначити reason-index-add-reversed
+  (функція (predicate rule buckets)
+    (за-умовою
       
-      ((010 buckets)  (1110 (1110 predicate rule)))
-      ((101 predicate (1000 buckets))
-       (111
-         (111 predicate (111 rule (0110 buckets)))
-         (011 buckets)))
-      (#d1:1
-       (111
-         (100 buckets)
-         (reason-index-add-reversed predicate rule (011 buckets)))))))
+      ((атом? buckets)  (список (список predicate rule)))
+      ((тотожне? predicate (перше-першого buckets))
+       (сполучити
+         (сполучити predicate (сполучити rule (решта-першого buckets)))
+         (решта buckets)))
+      (так
+       (сполучити
+         (перше buckets)
+         (reason-index-add-reversed predicate rule (решта buckets)))))))
 
-(0011 reason-index-normalize-buckets
-  (0010 (buckets)
-    (110
+(визначити reason-index-normalize-buckets
+  (функція (buckets)
+    (за-умовою
       
-      ((010 buckets)  (001 ()))
-      (#d1:1
-       (111
-         (111 (1000 buckets) (10100 (0110 buckets)))
-         (reason-index-normalize-buckets (011 buckets)))))))
+      ((атом? buckets)  (як-є ()))
+      (так
+       (сполучити
+         (сполучити (перше-першого buckets) (зворот (решта-першого buckets)))
+         (reason-index-normalize-buckets (решта buckets)))))))
 
-(0011 reason-index-build-scan
-  (0010 (remaining original buckets fuel)
-    (110
+(визначити reason-index-build-scan
+  (функція (remaining original buckets fuel)
+    (за-умовою
       
-      ((010 remaining)  (1110
+      ((атом? remaining)  (список
          *reason-index-schema*
-         (001 indexed)
+         (як-є indexed)
          original
          (reason-index-normalize-buckets buckets)))
-      (#d1:1
-       (001000 ((predicate (reason-rule-predicate (100 remaining))))
-         (110
+      (так
+       (нехай ((predicate (reason-rule-predicate (перше remaining))))
+         (за-умовою
            ; One non-indexable head is enough to require the exact historical
            ; scan, because that head may unify with predicates outside a bucket.
-           ((101 predicate (001 ())) (reason-index-linear original))
-           (#d1:1
-            (001000 ((entry (міркування-пошук-кошика predicate buckets)))
-              (110
+           ((тотожне? predicate (як-є ())) (reason-index-linear original))
+           (так
+            (нехай ((entry (міркування-пошук-кошика predicate buckets)))
+              (за-умовою
                 
                 ; Новий ключ: порожній запас => чесний linear fallback.
-                ((010 entry)
-                 (110
-                   ((010 fuel) (reason-index-linear original))
-                   (#d1:1
+                ((атом? entry)
+                 (за-умовою
+                   ((атом? fuel) (reason-index-linear original))
+                   (так
                     (reason-index-build-scan
-                      (011 remaining)
+                      (решта remaining)
                       original
                       (reason-index-add-reversed
-                        predicate (100 remaining) buckets)
-                      (011 fuel)))))
+                        predicate (перше remaining) buckets)
+                      (решта fuel)))))
                 ; Повторений ключ не займає жодного нового біта бюджету.
-                (#d1:1
+                (так
                  (reason-index-build-scan
-                   (011 remaining)
+                   (решта remaining)
                    original
                    (reason-index-add-reversed
-                     predicate (100 remaining) buckets)
+                     predicate (перше remaining) buckets)
                    fuel)))))))))))
 
-(0011 reason-make-index
-  (0010 (rules)
-    (reason-index-build-scan rules rules (001 ()) *reason-index-fuel*)))
+(визначити reason-make-index
+  (функція (rules)
+    (reason-index-build-scan rules rules (як-є ()) *reason-index-fuel*)))
 
-(0011 reason-ensure-index
-  (0010 (rules-or-index)
-    (110
+(визначити reason-ensure-index
+  (функція (rules-or-index)
+    (за-умовою
       ((reason-index? rules-or-index) rules-or-index)
-      (#d1:1 (reason-make-index rules-or-index)))))
+      (так (reason-make-index rules-or-index)))))
 
 ; If indexing is safe, only rules whose head starts with the same predicate
 ; can unify with this goal. Bucket order is exactly source rule order. Any
 ; unsafe goal or disabled index returns every original rule unchanged.
-(0011 reason-index-candidates
-  (0010 (goal rules-or-index)
-    (001000 ((index (reason-ensure-index rules-or-index)))
-      (110
-        ((101 (reason-index-mode index) (001 linear))
+(визначити reason-index-candidates
+  (функція (goal rules-or-index)
+    (нехай ((index (reason-ensure-index rules-or-index)))
+      (за-умовою
+        ((тотожне? (reason-index-mode index) (як-є linear))
          (reason-index-rules index))
-        (#d1:1
-         (001000 ((predicate (reason-term-predicate goal)))
-           (110
-             ((101 predicate (001 ())) (reason-index-rules index))
-             (#d1:1
-              (001000 ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
-                (110
+        (так
+         (нехай ((predicate (reason-term-predicate goal)))
+           (за-умовою
+             ((тотожне? predicate (як-є ())) (reason-index-rules index))
+             (так
+              (нехай ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
+                (за-умовою
                   
-                  ((010 entry)  (001 ()))
-                  (#d1:1 (011 entry))))))))))))
+                  ((атом? entry)  (як-є ()))
+                  (так (решта entry))))))))))))
 
 ; Окремий структурний лічильник перейменування: початкова цитована
 ; одноелементна структура, потім D3:111 CONS(QUOTE (), depth) на кожен рівень.
@@ -207,120 +207,120 @@
 ; may explicitly retain an immutable index snapshot and avoid rebuilding it.
 ; There is no hidden cache or invalidation: an index continues to describe the
 ; exact rule list captured when it was constructed.
-(0011 reason
-  (0010 (goal rules-or-index)
-    (001000 ((index (reason-ensure-index rules-or-index)))
-      (101011011
+(визначити reason
+  (функція (goal rules-or-index)
+    (нехай ((index (reason-ensure-index rules-or-index)))
+      (довести-ціль
         goal
         (reason-index-candidates goal index)
-        (001 ())
+        (як-є ())
         index
-        (001 (()))))))
+        (як-є (()))))))
 
 ; Accumulate one rule's result list onto a reversed global accumulator.
 ; Walking `results` left-to-right and consing each item means `acc` is always
 ; exactly the reverse of every result seen so far.
-(0011 prove-goal-accumulate
-  (0010 (results acc)
-    (110
+(визначити prove-goal-accumulate
+  (функція (results acc)
+    (за-умовою
       
-      ((010 results)  acc)
-      (#d1:1 (prove-goal-accumulate
-           (011 results)
-           (111 (100 results) acc))))))
+      ((атом? results)  acc)
+      (так (prove-goal-accumulate
+           (решта results)
+           (сполучити (перше results) acc))))))
 
 ; Tail-recursive rule scan. `all-rules` may be a plain historical rule list or
 ; a B5 reason-index/1. We normalize it once here; recursive body goals then
 ; reuse the same finite index instead of rebuilding it at every depth.
-(0011 prove-goal
-  (0010 (goal rules bindings all-rules depth)
+(визначити prove-goal
+  (функція (goal rules bindings all-rules depth)
     (prove-goal-scan
       goal
       rules
       bindings
       (reason-ensure-index all-rules)
       depth
-      (001 ()))))
+      (як-є ()))))
 
-(0011 prove-goal-scan
-  (0010 (goal rules bindings all-rules depth acc)
-    (110
+(визначити prove-goal-scan
+  (функція (goal rules bindings all-rules depth acc)
+    (за-умовою
       
-      ((010 rules)  (10100 acc))
-      (#d1:1
-       (001000 ((rule-results
-               (prove-rule goal (100 rules) bindings all-rules depth)))
+      ((атом? rules)  (зворот acc))
+      (так
+       (нехай ((rule-results
+               (prove-rule goal (перше rules) bindings all-rules depth)))
          (prove-goal-scan
            goal
-           (011 rules)
+           (решта rules)
            bindings
            all-rules
            depth
            (prove-goal-accumulate rule-results acc)))))))
 
 ; Recursively rename variables in a term to include the depth counter.
-(0011 rename-vars
-  (0010 (term depth)
-    (110
-      ((010 term) term)
+(визначити rename-vars
+  (функція (term depth)
+    (за-умовою
+      ((атом? term) term)
       ((reason-var-form? term)
-       (1110 (001 var) (111 (1001 term) depth)))
+       (список (як-є var) (сполучити (друге term) depth)))
       (так (сполучити (розрізнити-логічні-змінні-правила-на-глибині (перше term) depth)
                    (розрізнити-логічні-змінні-правила-на-глибині (решта term) depth))))))
 
-(0011 map-proofs
-  (0010 (f lst)
-    (110
+(визначити map-proofs
+  (функція (f lst)
+    (за-умовою
       
-      ((010 lst)  (001 ()))
-      (#d1:1 (111 (f (100 lst)) (map-proofs f (011 lst)))))))
+      ((атом? lst)  (як-є ()))
+      (так (сполучити (f (перше lst)) (map-proofs f (решта lst)))))))
 
 ; Try one rule, then wrap every successful body result in its proof node.
-(0011 prove-rule
-  (0010 (goal rule bindings all-rules depth)
+(визначити prove-rule
+  (функція (goal rule bindings all-rules depth)
     (нехай ((renamed-rule (розрізнити-логічні-змінні-правила-на-глибині rule depth)))
-      (001000 ((new-subst (101010000 goal (100 renamed-rule) bindings)))
-        (110
-          ((failed-subst? new-subst) (001 ()))
-          (#d1:1
-           (001000 ((body-results
-                   (101010001
-                     (011 renamed-rule)
+      (нехай ((new-subst (уніфікувати goal (перше renamed-rule) bindings)))
+        (за-умовою
+          ((failed-subst? new-subst) (як-є ()))
+          (так
+           (нехай ((body-results
+                   (довести-цілі
+                     (решта renamed-rule)
                      new-subst
                      all-rules
-                     (111 (001 ()) depth))))
+                     (сполучити (як-є ()) depth))))
              (map-proofs
-               (0010 (res)
-                 (1110
-                   (100 res)
-                   (1110
-                     (001 proved)
+               (функція (res)
+                 (список
+                   (перше res)
+                   (список
+                     (як-є proved)
                      goal
-                     (100 renamed-rule)
-                     (1001 res))))
+                     (перше renamed-rule)
+                     (друге res))))
                body-results))))))))
 
 ; Prove a conjunction while threading `(subst proofs)` through the shared
 ; conjunction walker from lib/unify.lisp.
-(0011 prove-goals
-  (0010 (goals bindings all-rules depth)
+(визначити prove-goals
+  (функція (goals bindings all-rules depth)
     (thread-conjunction
       goals
-      (1110 bindings (001 ()))
-      (0010 (goal state)
+      (список bindings (як-є ()))
+      (функція (goal state)
         (довести-мету-зі-збереженням-підстановок-та-доказів goal state all-rules depth)))))
 
 ; A body goal, including `(not P)`, is an ordinary reasoning goal. Historical
 ; negation-as-failure fabricated `(proved-not P)` merely because P had no proof.
 ; Under #219/#244 that absence remains Canon 0. Explicit negative evidence may
 ; still prove `(not P)` through an actual rule/fact whose head is `(not P)`.
-(0011 prove-goal-state
-  (0010 (goal state all-rules depth)
-    (001000 ((bindings (100 state))
-          (proofs (1001 state))
+(визначити prove-goal-state
+  (функція (goal state all-rules depth)
+    (нехай ((bindings (перше state))
+          (proofs (друге state))
           (index (reason-ensure-index all-rules)))
       (приєднати-докази-до-кожної-успішної-підстановки
-        (101011011
+        (довести-ціль
           goal
           (reason-index-candidates goal index)
           bindings
@@ -328,146 +328,146 @@
           depth)
         proofs))))
 
-(0011 map-goal-results
-  (0010 (results proofs)
-    (110
+(визначити map-goal-results
+  (функція (results proofs)
+    (за-умовою
       
-      ((010 results)  (001 ()))
-      (#d1:1
-       (111
-         (1110
-           (1000 results)
-           (1111 proofs (1110 (1001 (100 results)))))
+      ((атом? results)  (як-є ()))
+      (так
+       (сполучити
+         (список
+           (перше-першого results)
+           (приєднати proofs (список (друге (перше results)))))
          (приєднати-докази-до-кожної-успішної-підстановки (решта results) proofs))))))
 
-(0011 explain-proof
-  (0010 (proof)
+(визначити explain-proof
+  (функція (proof)
     (explain-proof-node proof 0)))
 
-(0011 explain-proof-node
-  (0010 (node level)
-    (110
-      ((101 (100 node) (001 proved))
-       (001001 ((_2 (11011011 (001 Proved:)))
-              (_3 (11011011 (1001 node)))
-              (_4 (11011011 (001 using)))
-              (_5 (11011011 (001 rule:)))
-              (_6 (11011011 (10011 node))))
-         (explain-proof-list (100111 node) (01010 level 1))))
-      ((101 (100 node) (001 proved-not))
-       (001001 ((_2 (11011011 (001 Proved)))
-              (_3 (11011011 (001 by)))
-              (_4 (11011011 (001 failure:)))
-              (_5 (11011011 (001 not)))
-              (_6 (11011011 (1001 node))))
-         (001 ())))
+(визначити explain-proof-node
+  (функція (node level)
+    (за-умовою
+      ((тотожне? (перше node) (як-є proved))
+       (нехай-послідовно ((_2 (друкувати (як-є Proved:)))
+              (_3 (друкувати (друге node)))
+              (_4 (друкувати (як-є using)))
+              (_5 (друкувати (як-є rule:)))
+              (_6 (друкувати (третє node))))
+         (explain-proof-list (четверте node) (додати level 1))))
+      ((тотожне? (перше node) (як-є proved-not))
+       (нехай-послідовно ((_2 (друкувати (як-є Proved)))
+              (_3 (друкувати (як-є by)))
+              (_4 (друкувати (як-є failure:)))
+              (_5 (друкувати (як-є not)))
+              (_6 (друкувати (друге node))))
+         (як-є ())))
       )))
 
-(0011 explain-proof-list
-  (0010 (nodes level)
-    (110
+(визначити explain-proof-list
+  (функція (nodes level)
+    (за-умовою
       
-      ((010 nodes)  (001 ()))
-      (#d1:1
-       (001001 ((_1 (print-indent level))
-              (_2 (11011011 (001 |-)))
-              (_3 (explain-proof-node (100 nodes) level)))
-         (explain-proof-list (011 nodes) level))))))
+      ((атом? nodes)  (як-є ()))
+      (так
+       (нехай-послідовно ((_1 (print-indent level))
+              (_2 (друкувати (як-є |-)))
+              (_3 (explain-proof-node (перше nodes) level)))
+         (explain-proof-list (решта nodes) level))))))
 
-(0011 print-indent
-  (0010 (level)
-    (110
-      ((101 level 0) (001 ()))
-      (#d1:1
-       (001000 ((_ (11011011 (001 ..))))
-         (print-indent (01011 level 1)))))))
+(визначити print-indent
+  (функція (level)
+    (за-умовою
+      ((тотожне? level 0) (як-є ()))
+      (так
+       (нехай ((_ (друкувати (як-є ..))))
+         (print-indent (відняти level 1)))))))
 
 ; Human-facing compatibility explanation. Structured reasoning outcomes are
 ; provided separately by lib/result-status.lisp / reason-observe.
-(0011 reason-explain
-  (0010 (goal rules)
-    (001000 ((results (101001110 goal rules)))
-      (110
+(визначити reason-explain
+  (функція (goal rules)
+    (нехай ((results (міркувати goal rules)))
+      (за-умовою
         
-        ((010 results)  (001001 ((_1 (11011011 (001 Cannot)))
-                (_2 (11011011 (001 prove:)))
-                (_3 (11011011 goal)))
-           (001 ())))
-        (#d1:1 (101001011 (1001 (100 results))))))))
+        ((атом? results)  (нехай-послідовно ((_1 (друкувати (як-є Cannot)))
+                (_2 (друкувати (як-є prove:)))
+                (_3 (друкувати goal)))
+           (як-є ())))
+        (так (пояснити-доказ (друге (перше results))))))))
 
-(0011 add-usage
-  (0010 (entry alist)
-    (110
+(визначити add-usage
+  (функція (entry alist)
+    (за-умовою
       
-      ((010 alist)  (1110 entry))
-      ((unify-equal? (1000 alist) (100 entry))
-       (111
-         (111
-           (100 entry)
-           (01010 (011 entry) (011 (100 alist))))
-         (011 alist)))
-      (#d1:1 (111 (100 alist) (add-usage entry (011 alist)))))))
+      ((атом? alist)  (список entry))
+      ((unify-equal? (перше-першого alist) (перше entry))
+       (сполучити
+         (сполучити
+           (перше entry)
+           (додати (решта entry) (решта (перше alist))))
+         (решта alist)))
+      (так (сполучити (перше alist) (add-usage entry (решта alist)))))))
 
-(0011 merge-usage
-  (0010 (a b)
-    (110
+(визначити merge-usage
+  (функція (a b)
+    (за-умовою
       
-      ((010 a)  b)
+      ((атом? a)  b)
       (так (підсумувати-лічильники-використання-правил (решта a) (add-usage (перше a) b))))))
 
-(0011 count-usage
-  (0010 (node)
-    (110
-      ((101 (100 node) (001 proved))
+(визначити count-usage
+  (функція (node)
+    (за-умовою
+      ((тотожне? (перше node) (як-є proved))
        (add-usage
-         (111 (10011 node) 1)
-         (count-usage-list (100111 node))))
+         (сполучити (третє node) 1)
+         (count-usage-list (четверте node))))
       )))
 
-(0011 count-usage-list
-  (0010 (nodes)
-    (110
+(визначити count-usage-list
+  (функція (nodes)
+    (за-умовою
       
-      ((010 nodes)  (001 ()))
-      (#d1:1
+      ((атом? nodes)  (як-є ()))
+      (так
        (підсумувати-лічильники-використання-правил
          (порахувати-правила-у-дереві-доказу (перше nodes))
-         (count-usage-list (011 nodes)))))))
+         (count-usage-list (решта nodes)))))))
 
-(0011 source-of
-  (0010 (node)
-    (110
+(визначити source-of
+  (функція (node)
+    (за-умовою
       
-      ((010 (100111 node))  (001 fact))
-      (#d1:1 (001 rule)))))
+      ((атом? (четверте node))  (як-є fact))
+      (так (як-є rule)))))
 
-(0011 provenance
-  (0010 (node)
-    (110
-      ((101 (100 node) (001 proved))
-       (1110
-         (001 statement)
-         (1001 node)
-         (1110 (001 source) (101110000 node))
-         (1110 (001 rule) (10011 node))
-         (1110
-           (001 derived-from)
-           (provenance-list (100111 node)))))
-      (#d1:1
-       (1110
-         (001 statement)
-         (1001 node)
-         (1110 (001 source) (001 not-proved)))))))
+(визначити provenance
+  (функція (node)
+    (за-умовою
+      ((тотожне? (перше node) (як-є proved))
+       (список
+         (як-є statement)
+         (друге node)
+         (список (як-є source) (джерело-від node))
+         (список (як-є rule) (третє node))
+         (список
+           (як-є derived-from)
+           (provenance-list (четверте node)))))
+      (так
+       (список
+         (як-є statement)
+         (друге node)
+         (список (як-є source) (як-є not-proved)))))))
 
-(0011 provenance-list
-  (0010 (nodes)
-    (110
+(визначити provenance-list
+  (функція (nodes)
+    (за-умовою
       
-      ((010 nodes)  (001 ()))
-      (#d1:1
-       (111
-         (101101111 (100 nodes))
-         (provenance-list (011 nodes)))))))
+      ((атом? nodes)  (як-є ()))
+      (так
+       (сполучити
+         (походження (перше nodes))
+         (provenance-list (решта nodes)))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити порахувати-правила-у-дереві-доказу count-usage)
