@@ -95,6 +95,39 @@ def _mask_comments_and_strings(source: str) -> str:
     return "".join(out)
 
 
+def _quoted_data_numeric_head_offsets(code: str) -> set[int]:
+    """The operand of ratified D3 QUOTE is data, not executable call heads.
+
+    Iterate masked source as S-expressions. Each frame tracks whether the
+    current list is quoted, its head and the number of parsed expressions.
+    Only the first operand of QUOTE is data; extra operands do not acquire
+    an exemption. The outer numeric 001 head remains forbidden itself.
+    """
+    quoted: set[int] = set()
+    stack: list[list] = []
+    for match in re.finditer(r"\(|\)|[^\s()]+", code):
+        token = match.group()
+        if token == "(":
+            parent = stack[-1] if stack else None
+            inside_data = bool(parent and (
+                parent[0] or (parent[1] in ("як-є", "001") and parent[2] == 1)
+            ))
+            if parent:
+                parent[2] += 1
+            stack.append([inside_data, None, 0])
+        elif token == ")":
+            if stack:
+                stack.pop()
+        elif stack:
+            frame = stack[-1]
+            if frame[2] == 0:
+                frame[1] = token
+                if frame[0] and re.fullmatch(NUMBER, token):
+                    quoted.add(match.start())
+            frame[2] += 1
+    return quoted
+
+
 def find_forbidden_literals(source: str, path: str | Path | None = None) -> list[Finding]:
     """Find raw typed-wire spellings and numeric call heads in Lisp code.
 
@@ -107,8 +140,11 @@ def find_forbidden_literals(source: str, path: str | Path | None = None) -> list
         line = code.count("\n", 0, match.start()) + 1
         column = match.start() - code.rfind("\n", 0, match.start())
         findings.append(Finding(line, column, match.group(), "encoded domain/wire word"))
+    quoted_numeric_heads = _quoted_data_numeric_head_offsets(code)
     for match in NUMERIC_CALL_HEAD.finditer(code):
         start = match.start(1)
+        if start in quoted_numeric_heads:
+            continue
         if _is_domain_table_key_head(source, path, start):
             continue
         line = code.count("\n", 0, start) + 1

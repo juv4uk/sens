@@ -42,6 +42,33 @@ class EncodedSourceLiteralTests(unittest.TestCase):
         found = CHECK.find_forbidden_literals("(110 (аргумент))\n")
         self.assertEqual([item.token for item in found], ["110"])
 
+    def test_ratified_d3_quote_list_numbers_are_data_not_calls(self):
+        source = (
+            "(визначити x (як-є (1 2 3)))\n"
+            "(визначити y (як-є (1 2 . 3)))\n"
+            "(визначити z (як-є ((110 a) (1 b))))\n"
+        )
+        self.assertEqual(CHECK.find_forbidden_literals(source), [])
+
+    def test_quote_scope_keeps_real_numeric_heads_forbidden(self):
+        source = "(список (як-є (1 2 3)) (110 (аргумент)))\n"
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals(source)],
+            ["110"],
+        )
+        # A legacy numeric QUOTE head is still an executable numeric head.
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals("(001 (1 2 3))\n")],
+            ["001"],
+        )
+        # Only the single QUOTE operand is data, not further invalid operands.
+        self.assertEqual(
+            [item.token for item in CHECK.find_forbidden_literals(
+                "(як-є (1 2 3) (110 unexpected))\n"
+            )],
+            ["110"],
+        )
+
     def test_domain_table_key_exemption_is_exact_and_fail_closed(self):
         row = (
             '  (11010 (ук менше?) (укр менше?) (san hīna) '
