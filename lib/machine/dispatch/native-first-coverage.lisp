@@ -17,7 +17,7 @@
 ;     [(effect <effect-class>)]
 ;     [(error <error-class>)])
 
-(0011 native-first-coverage-ledger
+(визначити native-first-coverage-ledger
   (001
     ((native-coverage
        (class car-cons-u64-literals)

@@ -30,7 +30,7 @@
            (expression (друге row))
            (expected (третє row))
            (effect-class (четверте row))
-           (error-class (110110101 row))
+           (error-class (п'ятий row))
            (evaluator-value (обчислити expression))
            (native-outcome
              (native-first-execute-expression expression))

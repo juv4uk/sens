@@ -617,5 +617,65 @@ class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
         )
 
 
+class NativeFirstUkrProjectionTests(unittest.TestCase):
+    """Current exact-domain spellings, never historical SID8 or T5M admission."""
+
+    @staticmethod
+    def _git_blob(source: str) -> str:
+        import hashlib
+        data = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(data)).encode("ascii")
+                            + b"\0" + data).hexdigest()
+
+    def test_exact_current_ukrainian_peers_and_frozen_inverse(self):
+        root = Path(__file__).resolve().parents[1]
+        for width, bits, spelling in (
+            (4, "0011", "визначити"),
+            (9, "110110101", "п'ятий"),
+        ):
+            with self.subTest(domain=f"D{width}:{bits}"):
+                data = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
+                rows = [r for r in data.splitlines()
+                        if r.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(укр {spelling})", rows[0])
+        parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
+        coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
+        new_p = "(error-class (п'ятий row))"
+        old_p = "(error-class (110110101 row))"
+        new_c = "(визначити native-first-coverage-ledger"
+        old_c = "(0011 native-first-coverage-ledger"
+        self.assertEqual(parity.count(new_p), 1)
+        self.assertEqual(coverage.count(new_c), 1)
+        self.assertEqual(
+            self._git_blob(parity.replace(new_p, old_p, 1)),
+            "bc6a7e27a83192d667ba6791e4da4d867ed80971",
+        )
+        self.assertEqual(
+            self._git_blob(coverage.replace(new_c, old_c, 1)),
+            "7161b6c631d661b5a30d22acc4fd0331ec3e6379",
+        )
+
+    def test_wrong_peer_mutant_and_quoted_native_data(self):
+        root = Path(__file__).resolve().parents[1]
+        parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
+        coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
+        heads = [t.text for t in mod.candidate_heads(mod.parse(parity))]
+        self.assertIn("п'ятий", heads)
+        self.assertNotIn("110110101", heads)
+        self.assertIn("(001\n    ((native-coverage", coverage)
+        self.assertIn("(110 ((101 (001 000) (001 001)) 0)", coverage)
+        mutant = parity.replace("(п'ятий row)", "(четверте row)", 1)
+        restored = mutant.replace("(error-class (четверте row))",
+                                  "(error-class (110110101 row))", 1)
+        self.assertNotEqual(self._git_blob(restored),
+                            "bc6a7e27a83192d667ba6791e4da4d867ed80971")
+        wrong_declaration = coverage.replace(
+            "(визначити native-first-coverage-ledger",
+            "(функція native-first-coverage-ledger", 1,
+        )
+        self.assertNotIn("(визначити native-first-coverage-ledger", wrong_declaration)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
