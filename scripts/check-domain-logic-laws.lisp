@@ -68,7 +68,7 @@
 
 ; D9 — читання файла (IO) і ідентичність схеми
 (law-check (як-є read-file-schema)
-  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))
+  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))
 
 ; define + посилання на змінну
 (law-check (001 define-then-use) (11010 law-two 3))
