@@ -279,8 +279,8 @@
       ((атом? observed) (0)
        (нехай ((observed-path (рядок-додати "scripts/" (перше observed))))
          (за-умовою
-           ((11110111 path observed-path) (1) (001 present))
-           ((11110111 path observed-path) (0)
+           ((однакові? path observed-path) (як-є present))
+           (так
             (repo-tooling-observed-path-state path (решта observed)))))))))
 
 (визначити repo-tooling-stale-path-verdict
@@ -464,11 +464,11 @@
 (визначити repo-tooling-assert-verdict
   (функція (actual expected)
     (за-умовою
-      ((11110111 actual expected) (1)
+      ((однакові? actual expected)
        (список (як-є repo-tooling-selftest-ok)))
-      ((11110111 actual expected) (0)
+      (так
        (нехай ((shown
-               (11011011
+               (друкувати
                  (список
                    (як-є repo-tooling-selftest-failed)
                    actual
@@ -540,9 +540,9 @@
       ((атом? entries) (0)
        (нехай ((name (перше entries)))
          (за-умовою
-           ((11110111 name "tests") (1)
+           ((однакові? name "tests")
             (repo-tooling-observed-scripts (решта entries)))
-           ((11110111 name "tests") (0)
+           (так
             (сполучити name (repo-tooling-observed-scripts (решта entries))))))))))
 
 (визначити repo-tooling-live-forms
