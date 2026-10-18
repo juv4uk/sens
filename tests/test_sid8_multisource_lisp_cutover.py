@@ -142,13 +142,30 @@ class MultisourceDomainCutover(unittest.TestCase):
                     [h for h in heads if re.fullmatch(r"[01]{8}", h)],
                     f"{rel} contains unconverted or ambiguous 8-bit callable heads",
                 )
-                self.assertIn("0011", heads, f"{rel} missing current D4 DEFINE")
+                # D4:0011 та його ратифікована повна укр-назва є
+                # рівноправними spelling одного виклику. Восьмибітні
+                # історичні SID8-голови і далі заборонені.
+                define_heads = {"0011", "визначити"}
+                self.assertTrue(
+                    define_heads.intersection(heads),
+                    f"{rel} missing exact D4 DEFINE head",
+                )
+                if rel in {
+                    "scripts/check-domain-table-readable.lisp",
+                    "scripts/fixtures-for-tier.lisp",
+                }:
+                    self.assertIn("визначити", heads, f"{rel} not on full укр")
+                    self.assertNotIn("0011", heads, f"{rel} stale D4 encoded call")
+
     def test_domain_authority_is_unchanged(self):
         import json
         foundation = json.loads((ROOT / "knowledge/d1-d9-foundation.json").read_text())
         self.assertEqual(foundation["domains"]["D4"]["residents"]["0011"], "DEFINE")
         self.assertEqual(foundation["domains"]["D4"]["residents"]["0010"], "LAMBDA")
         self.assertEqual(foundation["domains"]["D3"]["residents"]["001"], "QUOTE")
+        live_d4 = (ROOT / "lib/domains/d4.lisp").read_text(encoding="utf-8")
+        self.assertIn("(0011 (ук визначити) (укр визначити)", live_d4)
+
 
 if __name__ == "__main__":
     unittest.main()

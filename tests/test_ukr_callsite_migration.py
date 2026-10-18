@@ -1971,5 +1971,431 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             self._inverse(bad, self.PINNED[path]["edits"])
 
 
+
+class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
+    """Source-only: доменна identity і exact inverse, НЕ Python-SENS виконання."""
+
+    PINNED = {
+  "scripts/check-domain-table-readable.lisp": {
+    "sha": "e1c9a89a7338bcd46df4d9a5227b191acb28119d",
+    "edits": [
+      [
+        186,
+        "0011"
+      ],
+      [
+        206,
+        "0010"
+      ],
+      [
+        223,
+        "100"
+      ],
+      [
+        275,
+        "0011"
+      ],
+      [
+        294,
+        "0010"
+      ],
+      [
+        311,
+        "011"
+      ],
+      [
+        325,
+        "0011"
+      ],
+      [
+        348,
+        "0010"
+      ],
+      [
+        381,
+        "100"
+      ],
+      [
+        428,
+        "0011"
+      ],
+      [
+        474,
+        "0011"
+      ],
+      [
+        520,
+        "0011"
+      ],
+      [
+        566,
+        "0011"
+      ],
+      [
+        612,
+        "0011"
+      ],
+      [
+        658,
+        "0011"
+      ],
+      [
+        704,
+        "0011"
+      ],
+      [
+        751,
+        "110"
+      ],
+      [
+        759,
+        "101"
+      ],
+      [
+        764,
+        "100"
+      ],
+      [
+        773,
+        "001"
+      ],
+      [
+        798,
+        "110"
+      ],
+      [
+        848,
+        "110"
+      ],
+      [
+        904,
+        "110"
+      ],
+      [
+        966,
+        "110"
+      ],
+      [
+        1035,
+        "110"
+      ],
+      [
+        1110,
+        "110"
+      ],
+      [
+        1191,
+        "110"
+      ],
+      [
+        1279,
+        "110"
+      ],
+      [
+        1308,
+        "101"
+      ],
+      [
+        1362,
+        "110"
+      ],
+      [
+        1394,
+        "101"
+      ],
+      [
+        1452,
+        "110"
+      ],
+      [
+        1487,
+        "101"
+      ],
+      [
+        1549,
+        "110"
+      ],
+      [
+        1587,
+        "101"
+      ],
+      [
+        1653,
+        "110"
+      ],
+      [
+        1694,
+        "101"
+      ],
+      [
+        1764,
+        "110"
+      ],
+      [
+        1808,
+        "101"
+      ],
+      [
+        1882,
+        "110"
+      ],
+      [
+        1929,
+        "101"
+      ]
+    ],
+    "changed": [
+      5,
+      6,
+      7,
+      11,
+      12,
+      13,
+      15,
+      16,
+      18,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      29,
+      30,
+      31,
+      33,
+      35,
+      37,
+      39,
+      41,
+      43,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58
+    ]
+  },
+  "scripts/fixtures-for-tier.lisp": {
+    "sha": "189cc75ed4f2eaaaf40f58d1730b33ee39bfa179",
+    "edits": [
+      [
+        1179,
+        "0011"
+      ],
+      [
+        1199,
+        "110"
+      ],
+      [
+        1209,
+        "010"
+      ],
+      [
+        1793,
+        "0011"
+      ],
+      [
+        1814,
+        "0010"
+      ],
+      [
+        1870,
+        "0011"
+      ],
+      [
+        1893,
+        "0010"
+      ],
+      [
+        1915,
+        "110"
+      ],
+      [
+        1927,
+        "010"
+      ],
+      [
+        1943,
+        "001"
+      ],
+      [
+        1960,
+        "010"
+      ],
+      [
+        1965,
+        "001"
+      ],
+      [
+        1976,
+        "0010"
+      ],
+      [
+        1997,
+        "110"
+      ],
+      [
+        2017,
+        "101"
+      ],
+      [
+        2036,
+        "100"
+      ],
+      [
+        2124,
+        "010"
+      ],
+      [
+        2129,
+        "001"
+      ],
+      [
+        2139,
+        "001"
+      ],
+      [
+        2178,
+        "011"
+      ]
+    ],
+    "changed": [
+      22,
+      23,
+      24,
+      36,
+      37,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      48,
+      49
+    ]
+  }
+}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.root = Path(__file__).resolve().parents[1]
+        import re
+        row = re.compile(
+            r"^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)"
+        )
+        cls.names = {}
+        for width in (3, 4):
+            contents = (cls.root / f"lib/domains/d{width}.lisp").read_text(
+                encoding="utf-8"
+            )
+            for line in contents.splitlines():
+                matched = row.match(line)
+                if matched and len(matched[1]) == width:
+                    cls.names[matched[1]] = matched[2]
+        cls.assert_authority = (
+            cls.names.get("0011") == "визначити"
+            and cls.names.get("0010") == "функція"
+            and cls.names.get("001") == "як-є"
+            and cls.names.get("100") == "перше"
+        )
+        if not cls.assert_authority:
+            raise AssertionError("Немає ратифікованих exact D3/D4 peers")
+
+    @classmethod
+    def reverse(cls, text, edits):
+        offsets, delta, previous = [], 0, -1
+        for original_offset, old in edits:
+            if original_offset <= previous:
+                raise AssertionError("Порушено порядок exact source offsets")
+            previous = original_offset
+            peer = cls.names.get(old)
+            if peer is None or len(old) not in (3, 4):
+                raise AssertionError(f"Нератифікована координата {old}")
+            offsets.append((original_offset + delta, old, peer))
+            delta += len(peer) - len(old)
+        for offset, bits, peer in reversed(offsets):
+            if text[offset:offset + len(peer)] != peer:
+                raise AssertionError(f"Втрачена українська проєкція {bits} at {offset}")
+            text = text[:offset] + bits + text[offset + len(peer):]
+        return text
+
+    @staticmethod
+    def blob_sha(text):
+        payload = text.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(payload)).encode() + b"\0" + payload
+        ).hexdigest()
+
+    def test_exact_inverse_reconstructs_each_original_git_blob(self):
+        for path, witness in self.PINNED.items():
+            with self.subTest(path=path):
+                current = (self.root / path).read_text(encoding="utf-8")
+                restored = self.reverse(current, witness["edits"])
+                self.assertEqual(self.blob_sha(restored), witness["sha"])
+                mod.parse(restored)
+                mod.parse(current)
+
+    def test_only_verified_code_heads_changed_no_new_encoded_heads(self):
+        import re
+        encoded = re.compile(r"\(\s*[01]+(?=\s|\)|$)|#(?:d\d+:[01]+|b[01]+)")
+        for path, witness in self.PINNED.items():
+            with self.subTest(path=path):
+                source = (self.root / path).read_text(encoding="utf-8")
+                original = self.reverse(source, witness["edits"])
+                before, after = original.splitlines(), source.splitlines()
+                self.assertEqual(len(before), len(after))
+                changed = [
+                    i + 1 for i, (a, b) in enumerate(zip(before, after))
+                    if a != b
+                ]
+                self.assertEqual(changed, witness["changed"])
+                for line in changed:
+                    code = re.sub(
+                        r';[^\n]*|"(?:\\.|[^"\\])*"',
+                        lambda m: " " * len(m.group()),
+                        after[line - 1],
+                    )
+                    self.assertIsNone(encoded.search(code), f"{path}:{line}")
+
+    def test_quoted_data_other_domain_words_and_names_stay_unchanged(self):
+        reader = (self.root / "scripts/check-domain-table-readable.lisp").read_text(
+            encoding="utf-8"
+        )
+        tier = (self.root / "scripts/fixtures-for-tier.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("(визначити load-domain", reader)
+        self.assertIn("(визначити d8", reader)
+        self.assertIn('"00000000"', reader)
+        self.assertIn("(110101001", reader)  # D9 admission не виводиться з бітності
+        self.assertIn("(визначити target-tier", tier)
+        self.assertIn("(визначити print-matching", tier)
+        self.assertIn("(11100 (001 tier) fixture)", tier)  # D5 і цитата незмінні
+        self.assertNotIn("(0011 target-tier", tier)
+
+    def test_negative_wrong_peer_cannot_pass_exact_inverse(self):
+        path = "scripts/check-domain-table-readable.lisp"
+        source = (self.root / path).read_text(encoding="utf-8")
+        mutation = source.replace(
+            "(визначити load-domain", "(функція load-domain", 1
+        )
+        self.assertNotEqual(source, mutation)
+        with self.assertRaises(AssertionError):
+            self.reverse(mutation, self.PINNED[path]["edits"])
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

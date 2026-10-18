@@ -19,9 +19,9 @@
 ; on its own, updated here as soon as the underlying gaps closed instead
 ; of leaving the workaround comment stale.
 
-(0011 target-tier
-  (110
-    ((010 *argv*) (missing-tier-argument))
+(визначити target-tier
+  (за-умовою
+    ((атом? *argv*) (missing-tier-argument))
     ((010 (001 ())) (11101010 (100 *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
@@ -33,19 +33,19 @@
 ; помилки, та сама конвенція, яку вже використовує scripts/release.lisp
 ; для власного випадку відсутнього аргументу.
 
-(0011 fixture-tier
-  (0010 (fixture)
+(визначити fixture-tier
+  (функція (fixture)
     (011 (11100 (001 tier) fixture))))
 
-(0011 print-matching
-  (0010 (remaining)
-    (110
-      ((010 remaining) (001 ()))
-      ((010 (001 ())) ((0010 ()
-            (110
-              ((101 (fixture-tier (100 remaining)) target-tier)
+(визначити print-matching
+  (функція (remaining)
+    (за-умовою
+      ((атом? remaining) (як-є ()))
+      ((атом? (як-є ())) ((функція ()
+            (за-умовою
+              ((тотожне? (fixture-tier (перше remaining)) target-tier)
                (11011011 (100 remaining)))
-              ((010 (001 ())) (001 ())))
-            (print-matching (011 remaining))))))))
+              ((атом? (як-є ())) (як-є ())))
+            (print-matching (решта remaining))))))))
 
 (print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))
