@@ -227,7 +227,8 @@ class UkrainianSemanticAuthorityGuardProjection(unittest.TestCase):
         observed_residuals = defaultdict(list)
         for bits, _start, _end, line in numeric_heads(self.source):
             observed_residuals[line].append(bits)
-        self.assertEqual(dict(observed_residuals), UNPROJECTABLE_HEADS_BY_LINE)
+        self.assertEqual({line: tuple(bits) for line, bits in observed_residuals.items()},
+                         UNPROJECTABLE_HEADS_BY_LINE)
 
     def test_mixed_d6_lines_remain_unmodified_and_fail_closed(self):
         lines = self.source.splitlines()
