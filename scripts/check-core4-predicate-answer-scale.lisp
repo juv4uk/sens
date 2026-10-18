@@ -150,7 +150,7 @@
     (як-є order-reversing-involution)
     (як-є exact-structural-match-of-answer)
     (як-є grade-1-only)
-    (як-є ((0) () (1)))
+    (001 ((0) () (1)))
     (як-є ratified-2026-09-26)
     (як-є
       ((carrier . bit-list)

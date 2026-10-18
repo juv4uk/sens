@@ -32,7 +32,7 @@ SPECS = {
     "scripts/check-core4-predicate-answer-scale.lisp": {
         "sha": "e3dc929c6c9d92f8d19124f460a44252ea83549a",
         "counts": {"100": 4, "110": 1, "1001": 2, "1110": 5,
-                   "001": 60, "011": 2, "0010": 4, "0011": 15},
+                   "001": 59, "011": 2, "0010": 4, "0011": 15},
     },
     "scripts/generate-functions-md.lisp": {
         "sha": "dac56932a768d3ea69a3901290a1c7a7fd3113f8",
@@ -118,6 +118,7 @@ class UkrScaleFunctionsMdProjectionTests(unittest.TestCase):
                       encoding="utf-8"
                   )
         self.assertIn("(001 (00000000 11111111))", source)
+        self.assertIn("(001 ((0) () (1)))", source)
         self.assertEqual(source.count("(001 (1))"), 7)
         self.assertNotIn("(як-є (00000000 11111111))", source)
 
