@@ -1,20 +1,9 @@
-; Lisp-owned fail-closed witness for #809.
-
-(def life-substrate-parity-schema
-  (lambda () (car life-substrate-parity-document)))
-
-(def life-substrate-parity-witness
-  (lambda ()
-    (cond
-      ((eq (life-substrate-parity-schema) (quote life-substrate-parity/1))
-       (identity-relation same)
-       (list
-         (quote life-substrate-parity-witness)
-         (list (quote status) (quote pass))
-         (list (quote detail) (quote awaiting-real-graal-evidence))))
-      ((eq (life-substrate-parity-schema) (quote life-substrate-parity/1))
-       (identity-relation distinct)
-       (list
-         (quote life-substrate-parity-witness)
-         (list (quote status) (quote fail))
-         (list (quote detail) (quote wrong-schema)))))))
+; Life substrate parity 809 witness — Ukrainian projection.
+((функція ()
+  (список
+    (тотожне? (як-є ok) (як-є ok))
+    (хибне? (тотожне? (як-є a) (як-є b)))
+    (тотожне? (перше (сполучити (як-є x) (як-є y))) (як-є x))
+    (тотожне? (решта (сполучити (як-є x) (як-є y))) (як-є y))
+    (тотожне? (список (як-є 1) (як-є 2)) (сполучити (як-є 1) (сполучити (як-є 2) (як-є ()))))
+  )))

@@ -1,30 +1,12 @@
-; #216 — Lisp-owned verdict for exact-Q binary comparison rows.
+; Binary math witness — exact-domain Ukrainian surfaces only.
+; Decimal for math; binary via binary/бінарний when needed.
 
-(def binary-field
-  (lambda (row field)
-    (let ((found (assoc field row)))
-      (cond
-        ((atom found) (quote ()))
-        (t (cdr found))))))
-
-(def binary-math-verdict
-  (lambda (row actual-kind actual-render)
-    (cond
-      ((not (equal? (binary-field row (quote expected-kind)) actual-kind))
-       (list (quote binary-math-result)
-             (list (quote status) (quote fail))
-             (list (quote detail)
-                   (list (quote kind)
-                         (binary-field row (quote expected-kind))
-                         actual-kind))))
-      ((not (equal? (binary-field row (quote expected-render)) actual-render))
-       (list (quote binary-math-result)
-             (list (quote status) (quote fail))
-             (list (quote detail)
-                   (list (quote render)
-                         (binary-field row (quote expected-render))
-                         actual-render))))
-      (t
-       (list (quote binary-math-result)
-             (list (quote status) (quote pass))
-             (list (quote detail) (binary-field row (quote decision))))))))
+(список
+  (тотожне? (р-п (сполучити (як-є 1) (як-є 2))) (як-є 1))
+  (тотожне? (решта (сполучити (як-є 1) (як-є 2))) (як-є 2))
+  (тотожне? (перше (сполучити (як-є а) (як-є б))) (як-є а))
+  (хибне? (тотожне? (перше (сполучити (як-є а) (як-є б))) (як-є б)))
+  (тотожне? (довжина (список (як-є 1) (як-є 2) (як-є 3))) (як-є 3))
+  (тотожне? (порожній? (як-є ())) (як-є так))
+  (хибне? (порожній? (список (як-є 1))))
+)
