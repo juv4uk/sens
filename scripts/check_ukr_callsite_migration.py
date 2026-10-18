@@ -238,6 +238,12 @@ def candidate_heads(forms: tuple):
                 for child in node.values[2:]:
                     yield from walk(child)
                 return
+        # Обчислювана голова теж містить виконуваний код:
+        # ((функція (x) (перше x)) аргумент) не можна пропускати.
+        # Для quote/define/let ранні гілки вище вже зберігають
+        # відмінність між даними, деклараціями та викликами.
+        if isinstance(node.values[0], Form):
+            yield from walk(node.values[0])
         for child in node.values[1:]:
             yield from walk(child)
 
