@@ -33,7 +33,7 @@
   (функція (fs)
     (знання-вміст-адреса
       (список (як-є wsm-fs-root)
-            (fs-bindings fs)))))
+            (фс-зв'язки fs)))))
 
 ; fs-write returns (new-fs content-address). The caller chooses whether to
 ; retain the old root, enabling immutable branching and rollback.
@@ -44,23 +44,23 @@
     (нехай-похідне ((address (знання-вміст-адреса value)))
       (список
         (список
-          (вміст-сховище-покласти (fs-objects fs) value)
-          (внутрішня-мапа-вставити name address (fs-bindings fs))
-          (додати-1 (fs-revision fs)))
+          (вміст-сховище-покласти (фс-об'єкти fs) value)
+          (внутрішня-мапа-вставити name address (фс-зв'язки fs))
+          (додати-1 (фс-ревізія fs)))
         address))))
 
 ; fs-read returns (found value address) or (not-found name).
 ; fs-read повертає (found value address) або (not-found name).
 (визначити fs-read
   (функція (fs name)
-    (нехай-похідне ((binding (внутрішня-мапа-отримати name (fs-bindings fs))))
+    (нехай-похідне ((binding (внутрішня-мапа-отримати name (фс-зв'язки fs))))
       (за-умовою
         ((порожній? binding) (список (як-є not-found) name))
         ((атом? binding)  (список (як-є not-found) name))
         ((атом? ())
           (нехай-похідне ((address (перше binding)))
             (за-умовою
-              ((хибне? (вміст-сховище-містить? (fs-objects fs) address))
+              ((хибне? (вміст-сховище-містить? (фс-об'єкти fs) address))
                (список (як-є not-found) name))
               ((атом? ())
                 ; map-get is a maybe-list, so unwrap exactly once. This
@@ -68,16 +68,16 @@
                 ; map-get повертає maybe-список, тому знімаємо рівно одну
                 ; оболонку й не втрачаємо законно збережений nil.
                 (список (як-є found)
-                      (перше (вміст-сховище-отримати (fs-objects fs) address))
+                      (перше (вміст-сховище-отримати (фс-об'єкти fs) address))
                       address)))))))))
 
 (визначити fs-list
   (функція (fs)
-    (внутрішня-мапа-список (fs-bindings fs))))
+    (внутрішня-мапа-список (фс-зв'язки fs))))
 
 (визначити fs-contains?
   (функція (fs name)
-    (хибне? (атом? (внутрішня-мапа-отримати name (fs-bindings fs))))))
+    (хибне? (атом? (внутрішня-мапа-отримати name (фс-зв'язки fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
@@ -97,9 +97,9 @@
     (список
       (сполучити (як-є format) (як-є wsm-fs-root))
       (сполучити (як-є version) *fs-format-version*)
-      (сполучити (як-є revision) (fs-revision fs))
-      (сполучити (як-є bindings) (внутрішня-мапа-список (fs-bindings fs)))
-      (сполучити (як-є objects) (fs-object-addresses (внутрішня-мапа-список (fs-objects fs)))))))
+      (сполучити (як-є revision) (фс-ревізія fs))
+      (сполучити (як-є bindings) (внутрішня-мапа-список (фс-зв'язки fs)))
+      (сполучити (як-є objects) (фс-об'єкт-адреси (внутрішня-мапа-список (фс-об'єкти fs)))))))
 
 (визначити fs-object-addresses
   (функція (entries)
@@ -107,7 +107,7 @@
       ((порожній? entries) (як-є ()))
       ((хибне? (атом? entries))
        (сполучити (перше (перше entries))
-                 (fs-object-addresses (решта entries)))))))
+                 (фс-об'єкт-адреси (решта entries)))))))
 
 (визначити fs-d1-no?
   (функція (value)
@@ -129,28 +129,28 @@
       ((порожній? (перше (перше package))) (як-є ()))
       ((хибне? (атом? (перше (перше package)))) (як-є ()))
       ((тотожне? name (перше (перше package))) (решта (перше package)))
-      (так (fs-package-field name (решта package))))))
+      (так (фс-пакет-поле name (решта package))))))
 (визначити fs-object-package-decision
   (функція (package)
     (за-умовою
       ((атом? package)
        (список (як-є rejected) (як-є invalid-package)))
       ((fs-d1-no?
-         (тотожне? (fs-package-field (як-є format) package) (як-є wsm-fs-object)))
+         (тотожне? (фс-пакет-поле (як-є format) package) (як-є wsm-fs-object)))
        (список (як-є rejected) (як-є invalid-format)))
       ((fs-d1-no?
-         (fs-journal-version-current? (fs-package-field (як-є version) package)))
+         (fs-journal-version-current? (фс-пакет-поле (як-є version) package)))
        (список (як-є rejected) (як-є unsupported-version)))
       ((fs-d1-no?
-         (тотожне? (fs-package-field (як-є address) package)
-                   (знання-вміст-адреса (fs-package-field (як-є value) package))))
+         (тотожне? (фс-пакет-поле (як-є address) package)
+                   (знання-вміст-адреса (фс-пакет-поле (як-є value) package))))
        (список (як-є rejected) (як-є address-mismatch)))
-      ((тотожне? (fs-package-field (як-є address) package)
-                 (знання-вміст-адреса (fs-package-field (як-є value) package)))
-       (список (як-є accepted) (fs-package-field (як-є value) package))))))
+      ((тотожне? (фс-пакет-поле (як-є address) package)
+                 (знання-вміст-адреса (фс-пакет-поле (як-є value) package)))
+       (список (як-є accepted) (фс-пакет-поле (як-є value) package))))))
 (визначити fs-serialize-object
   (функція (value)
-    (значення-у-текст (fs-object-package value))))
+    (значення-у-текст (фс-об'єкт-пакет value))))
 
 (визначити fs-deserialize-object
   (функція (text)
@@ -174,20 +174,20 @@
       ((атом? package)
        (список (як-є rejected) (як-є invalid-package)))
       ((fs-d1-no?
-         (тотожне? (fs-package-field (як-є format) package) (як-є wsm-fs-root)))
+         (тотожне? (фс-пакет-поле (як-є format) package) (як-є wsm-fs-root)))
        (список (як-є rejected) (як-є invalid-format)))
       ((fs-d1-no?
-         (fs-journal-version-current? (fs-package-field (як-є version) package)))
+         (fs-journal-version-current? (фс-пакет-поле (як-є version) package)))
        (список (як-є rejected) (як-є unsupported-version)))
-      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (як-є bindings) package)))
+      ((fs-d1-no? (внутрішній-правильний-список? (фс-пакет-поле (як-є bindings) package)))
        (список (як-є rejected) (як-є invalid-bindings)))
-      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (як-є objects) package)))
+      ((fs-d1-no? (внутрішній-правильний-список? (фс-пакет-поле (як-є objects) package)))
        (список (як-є rejected) (як-є invalid-objects)))
-      ((внутрішній-правильний-список? (fs-package-field (як-є objects) package))
+      ((внутрішній-правильний-список? (фс-пакет-поле (як-є objects) package))
        (список (як-є accepted) package)))))
 (визначити fs-serialize-root
   (функція (fs)
-    (значення-у-текст (fs-root-package fs))))
+    (значення-у-текст (фс-корінь-пакет fs))))
 
 (визначити fs-deserialize-root
   (функція (text)
@@ -211,7 +211,7 @@
         (нехай-похідне ((decision (рішення-щодо-пакета-об'єкта-файлової-системи (перше packages))))
           (за-умовою
             ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
-            ((атом? ()) (fs-build-object-store
+            ((атом? ()) (фс-побудувати-об'єкт-сховище
                  (решта packages)
                  (вміст-сховище-покласти store (друге decision))))))))))
 
@@ -243,15 +243,15 @@
         ((хибне? (тотожне? (перше root-decision) (як-є accepted))) root-decision)
         ((атом? ())
           (нехай-похідне ((objects-decision
-                  (fs-build-object-store object-packages (порожній-вміст-сховище))))
+                  (фс-побудувати-об'єкт-сховище object-packages (порожній-вміст-сховище))))
             (за-умовою
               ((хибне? (тотожне? (перше objects-decision) (як-є accepted))) objects-decision)
               ((хибне? (усі-адреси-об'єктів-файлової-системи-наявні?
-                      (fs-package-field (як-є objects) root-package)
+                      (фс-пакет-поле (як-є objects) root-package)
                       (друге objects-decision)))
                (список (як-є rejected) (як-є missing-object)))
               ((хибне? (усі-адреси-зв'язувань-у-файловій-системі-наявні?
-                      (fs-package-field (як-є bindings) root-package)
+                      (фс-пакет-поле (як-є bindings) root-package)
                       (друге objects-decision)))
                (список (як-є rejected) (як-є missing-object)))
               ((атом? ())
@@ -259,16 +259,16 @@
                   (як-є accepted)
                   (список
                     (друге objects-decision)
-                    (нехай-похідне ((bindings (fs-package-field (як-є bindings) root-package)))
-                      (fs-bindings-from-list bindings map-empty))
-                    (fs-package-field (як-є revision) root-package)))))))))))
+                    (нехай-похідне ((bindings (фс-пакет-поле (як-є bindings) root-package)))
+                      (фс-зв'язки-з-список bindings map-empty))
+                    (фс-пакет-поле (як-є revision) root-package)))))))))))
 
 (визначити fs-bindings-from-list
   (функція (entries bindings)
     (за-умовою
       
       ((атом? entries)  bindings)
-      ((атом? ()) (fs-bindings-from-list
+      ((атом? ()) (фс-зв'язки-з-список
            (решта entries)
            (внутрішня-мапа-вставити (перше (перше entries)) (решта (перше entries)) bindings))))))
 
@@ -290,23 +290,23 @@
 
 (визначити fs-journal-write-event
   (функція (name value)
-    (fs-journal-event
+    (фс-журнал-подія
       (як-є write)
       (список (сполучити (як-є name) name) (сполучити (як-є value) value)))))
 
 (визначити fs-journal-bind-event
   (функція (name address)
-    (fs-journal-event
+    (фс-журнал-подія
       (як-є bind)
       (список (сполучити (як-є name) name) (сполучити (як-є address) address)))))
 
 (визначити fs-journal-unbind-event
   (функція (name)
-    (fs-journal-event (як-є unbind) (список (сполучити (як-є name) name)))))
+    (фс-журнал-подія (як-є unbind) (список (сполучити (як-є name) name)))))
 
 (визначити fs-journal-root-commit-event
   (функція (root-package)
-    (fs-journal-event
+    (фс-журнал-подія
       (як-є root-commit)
       (список (сполучити (як-є root) root-package)))))
 
@@ -363,32 +363,32 @@
       ((порожній? event) (список (як-є rejected) (як-є invalid-event)))
       ((хибне? (fs-journal-alist? event))
        (список (як-є rejected) (як-є invalid-event)))
-      ((хибне? (тотожне? (fs-package-field (як-є format) event) (як-є wsm-fs-event)))
+      ((хибне? (тотожне? (фс-пакет-поле (як-є format) event) (як-є wsm-fs-event)))
        (список (як-є rejected) (як-є invalid-format)))
-      ((хибне? (fs-journal-version-current? (fs-package-field (як-є version) event)))
+      ((хибне? (fs-journal-version-current? (фс-пакет-поле (як-є version) event)))
        (список (як-є rejected) (як-є unsupported-version)))
-      ((порожній? (fs-package-field (як-є op) event))
+      ((порожній? (фс-пакет-поле (як-є op) event))
        (список (як-є rejected) (як-є missing-operation)))
-      ((тотожне? (fs-package-field (як-є op) event) (як-є write))
+      ((тотожне? (фс-пакет-поле (як-є op) event) (як-є write))
        (за-умовою
          ((хибне? (fs-package-has-field? (як-є name) event))
           (список (як-є rejected) (як-є incomplete-write)))
          ((хибне? (fs-package-has-field? (як-є value) event))
           (список (як-є rejected) (як-є incomplete-write)))
          ((атом? ()) (список (як-є accepted) event))))
-      ((тотожне? (fs-package-field (як-є op) event) (як-є bind))
+      ((тотожне? (фс-пакет-поле (як-є op) event) (як-є bind))
        (за-умовою
          ((хибне? (fs-package-has-field? (як-є name) event))
           (список (як-є rejected) (як-є incomplete-bind)))
          ((хибне? (fs-package-has-field? (як-є address) event))
           (список (як-є rejected) (як-є incomplete-bind)))
          ((атом? ()) (список (як-є accepted) event))))
-      ((тотожне? (fs-package-field (як-є op) event) (як-є unbind))
+      ((тотожне? (фс-пакет-поле (як-є op) event) (як-є unbind))
        (за-умовою
          ((хибне? (fs-package-has-field? (як-є name) event))
           (список (як-є rejected) (як-є incomplete-unbind)))
          ((атом? ()) (список (як-є accepted) event))))
-      ((тотожне? (fs-package-field (як-є op) event) (як-є root-commit))
+      ((тотожне? (фс-пакет-поле (як-є op) event) (як-є root-commit))
        (за-умовою
          ((хибне? (fs-package-has-field? (як-є root) event))
           (список (як-є rejected) (як-є incomplete-root-commit)))
@@ -410,9 +410,9 @@
 (визначити fs-unbind
   (функція (fs name)
     (список
-      (fs-objects fs)
-      (fs-bindings-without (внутрішня-мапа-список (fs-bindings fs)) name map-empty)
-      (додати-1 (fs-revision fs)))))
+      (фс-об'єкти fs)
+      (fs-bindings-without (внутрішня-мапа-список (фс-зв'язки fs)) name map-empty)
+      (додати-1 (фс-ревізія fs)))))
 
 ; Root-commit equivalence over immutable trees, derived from D3
 ; ATOM/EQ/CAR/CDR and D4 NULL; returns exact D1 at every recursion level.
@@ -436,34 +436,34 @@
       (за-умовою
         ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
         ((атом? ())
-          (нехай-похідне ((op (fs-package-field (як-є op) event)))
+          (нехай-похідне ((op (фс-пакет-поле (як-є op) event)))
             (за-умовою
               ((тотожне? op (як-є write))
                (нехай-похідне ((written (fs-write fs
-                                        (fs-package-field (як-є name) event)
-                                        (fs-package-field (як-є value) event))))
+                                        (фс-пакет-поле (як-є name) event)
+                                        (фс-пакет-поле (як-є value) event))))
                  (список (як-є accepted) (перше written))))
               ((тотожне? op (як-є bind))
-               (нехай-похідне ((address (fs-package-field (як-є address) event)))
+               (нехай-похідне ((address (фс-пакет-поле (як-є address) event)))
                  (за-умовою
-                   ((хибне? (вміст-сховище-містить? (fs-objects fs) address))
+                   ((хибне? (вміст-сховище-містить? (фс-об'єкти fs) address))
                     (список (як-є rejected) (як-є missing-object)))
                    ((атом? ())
                      (список
                        (як-є accepted)
                        (список
-                         (fs-objects fs)
-                         (внутрішня-мапа-вставити (fs-package-field (як-є name) event)
+                         (фс-об'єкти fs)
+                         (внутрішня-мапа-вставити (фс-пакет-поле (як-є name) event)
                                      address
-                                     (fs-bindings fs))
-                         (додати-1 (fs-revision fs))))))))
+                                     (фс-зв'язки fs))
+                         (додати-1 (фс-ревізія fs))))))))
               ((тотожне? op (як-є unbind))
                (список (як-є accepted)
-                     (fs-unbind fs (fs-package-field (як-є name) event))))
+                     (фс-розв'язати fs (фс-пакет-поле (як-є name) event))))
               ((тотожне? op (як-є root-commit))
                (за-умовою
-                 ((внутрішня-рівність-структур (fs-root-package fs)
-                           (fs-package-field (як-є root) event))
+                 ((внутрішня-рівність-структур (фс-корінь-пакет fs)
+                           (фс-пакет-поле (як-є root) event))
                   (список (як-є accepted) fs))
                  ((атом? ()) (список (як-є rejected) (як-є root-mismatch)))))
               ((атом? ()) (список (як-є rejected) (як-є unknown-event))))))))))
@@ -481,7 +481,7 @@
 
 (визначити fs-journal-replay
   (функція (journal)
-    (fs-journal-replay-onto journal (fs-empty))))
+    (fs-journal-replay-onto journal (фс-порожній))))
 
 (визначити fs-serialize-journal
   (функція (journal)
@@ -489,7 +489,7 @@
 
 (визначити fs-deserialize-journal
   (функція (text)
-    (fs-journal-replay (прочитати text))))
+    (фс-журнал-повторити (прочитати text))))
 
 ; F4 commit boundary model. Objects and journal may be written first, but a
 ; snapshot becomes visible only when the root-pointer stage completes.
@@ -527,13 +527,13 @@
 ; Ratified D9 exact-width FS surfaces; donor closures above own semantics.
 ; The file system here is immutable SENS data, not a host syscall or new opcode.
 ; D9:001010000
-(визначити фс-об'єкти fs-objects)
+(визначити фс-об'єкти фс-об'єкти)
 ; D9:010000001
-(визначити фс-зв'язки fs-bindings)
+(визначити фс-зв'язки фс-зв'язки)
 ; D9:010010101
-(визначити фс-ревізія fs-revision)
+(визначити фс-ревізія фс-ревізія)
 ; D9:001011011
-(визначити фс-порожній fs-empty)
+(визначити фс-порожній фс-порожній)
 ; D9:010001100
 (визначити фс-корінь-адреса fs-root-address)
 ; D9:010010110
@@ -541,11 +541,11 @@
 ; D9:010100001
 (визначити фс-містить? fs-contains?)
 ; D9:010100010
-(визначити фс-об'єкт-пакет fs-object-package)
+(визначити фс-об'єкт-пакет фс-об'єкт-пакет)
 ; D9:001011111
-(визначити фс-корінь-пакет fs-root-package)
+(визначити фс-корінь-пакет фс-корінь-пакет)
 ; D9:001101011
-(визначити фс-журнал-подія fs-journal-event)
+(визначити фс-журнал-подія фс-журнал-подія)
 ; D9:001011001
 (визначити фс-журнал-додати fs-journal-append)
 ; D9:001111100
@@ -558,9 +558,9 @@
 ; D9:010110011
 (визначити фс-читати fs-read)
 ; D9:001010100
-(визначити фс-об'єкт-адреси fs-object-addresses)
+(визначити фс-об'єкт-адреси фс-об'єкт-адреси)
 ; D9:010101111
-(визначити фс-пакет-поле fs-package-field)
+(визначити фс-пакет-поле фс-пакет-поле)
 ; D9:010010111
 (визначити фс-серіалізувати-об'єкт fs-serialize-object)
 ; D9:101000110
@@ -570,13 +570,13 @@
 ; D9:001110011
 (визначити фс-десеріалізувати-корінь fs-deserialize-root)
 ; D9:001100100
-(визначити фс-побудувати-об'єкт-сховище fs-build-object-store)
+(визначити фс-побудувати-об'єкт-сховище фс-побудувати-об'єкт-сховище)
 ; D9:010101000
 (визначити фс-відновити-корінь fs-reconstruct-root)
 ; D9:001010110
-(визначити фс-зв'язки-з-список fs-bindings-from-list)
+(визначити фс-зв'язки-з-список фс-зв'язки-з-список)
 ; D9:001100000
-(визначити фс-розв'язати fs-unbind)
+(визначити фс-розв'язати фс-розв'язати)
 
 ; D9: точні 9-бітні ідентичності — lib/domains/d9.lisp.
 ; Чинні закони залишаються в SENS-донорі вище, не в Rust чи Zig.
@@ -590,7 +590,7 @@
 ; D9:001100101
 (визначити фс-журнал-корінь-коміт-подія fs-journal-root-commit-event)
 ; D9:010110111
-(визначити фс-журнал-повторити fs-journal-replay)
+(визначити фс-журнал-повторити фс-журнал-повторити)
 ; D9:010111010
 (визначити фс-десеріалізувати-журнал fs-deserialize-journal)
 

@@ -16,7 +16,7 @@
     (за-умовою
       ((атом? (решта ast))
        (за-умовою
-         ((атом? (решта (решта ast))) (lint-head (перше ast)))
+         ((атом? (решта (решта ast))) (аналіз-голова (перше ast)))
          ((атом? (як-є ())) (lint-short-head (перше ast)))))
       ((атом? (як-є ())) (перше ast)))))
 
@@ -58,23 +58,23 @@
     (за-умовою
       ((атом? ast) 0)
       ((атом? (як-є ()))
-       (lint-max2 (додати 1 (lint-nesting (перше ast)))
-                  (lint-nesting (решта ast)))))))
+       (lint-max2 (додати 1 (аналіз-вкладеність (перше ast)))
+                  (аналіз-вкладеність (решта ast)))))))
 
 (визначити lint-complexity
   (функція (ast)
     (за-умовою
       ((атом? ast) 0)
       ((за-умовою
-         ((атом? (lint-form-head ast))
-          (тотожне? (lint-form-head ast) (як-є cond)))
+         ((атом? (аналіз-форма-голова ast))
+          (тотожне? (аналіз-форма-голова ast) (як-є cond)))
          (так ні))
-       (згорнути (функція (acc clause) (додати acc (lint-complexity clause)))
+       (згорнути (функція (acc clause) (додати acc (аналіз-складність clause)))
                (довжина (решта ast))
                (решта ast)))
       ((атом? (як-є ()))
-       (додати (lint-complexity (перше ast))
-              (lint-complexity (решта ast)))))))
+       (додати (аналіз-складність (перше ast))
+              (аналіз-складність (решта ast)))))))
 
 (визначити effectful-primitives
   (як-є ("print" "write-file" "process-run" "advise" "tell")))
@@ -86,37 +86,37 @@
       ((символ? (перше ast))
        (за-умовою
          ((значення-у-списку? (символ-у-текст (перше ast)) effectful-primitives)
-          (сполучити ast (lint-effects (решта ast))))
+          (сполучити ast (аналіз-ефекти (решта ast))))
          ((атом? (як-є ()))
-          (приєднати (lint-effects (перше ast)) (lint-effects (решта ast))))))
+          (приєднати (аналіз-ефекти (перше ast)) (аналіз-ефекти (решта ast))))))
       ((атом? (як-є ()))
-       (приєднати (lint-effects (перше ast)) (lint-effects (решта ast)))))))
+       (приєднати (аналіз-ефекти (перше ast)) (аналіз-ефекти (решта ast)))))))
 
 (визначити collect-free-vars-let*
   (функція (ast bound-vars)
     (за-умовою
       ((хибне? (атом? (решта ast)))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (решта ast))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((хибне? (атом? (решта (решта ast))))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (решта (решта ast)))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (як-є ()))
        (нехай ((bindings (перше (решта ast)))
               (body (перше (решта (решта ast)))))
          (за-умовою
            ((порожній? bindings)
-            (collect-free-vars body bound-vars))
+            (зібрати-вільні-змінні body bound-vars))
            ((атом? (як-є ()))
             ((функція (binding)
                (приєднати
-                (collect-free-vars (друге binding) bound-vars)
+                (зібрати-вільні-змінні (друге binding) bound-vars)
                 (зібрати-вільні-змінні-з-послідовного-зв'язування
                   (список (як-є let*) (решта bindings) body)
                   (сполучити (символ-у-текст (перше binding)) bound-vars))))
@@ -126,17 +126,17 @@
   (функція (ast bound-vars)
     (за-умовою
       ((хибне? (атом? (решта ast)))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (решта ast))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((хибне? (атом? (решта (решта ast))))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (решта (решта ast)))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars)))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars)))
       ((атом? (як-є ()))
        (нехай ((bindings (перше (решта ast)))
               (body (перше (решта (решта ast)))))
@@ -146,9 +146,9 @@
              (приєднати
                (згорнути append (як-є ())
                        (відобразити (функція (b)
-                              (collect-free-vars (друге b) new-bound))
+                              (зібрати-вільні-змінні (друге b) new-bound))
                             bindings))
-               (collect-free-vars body new-bound)))))))))
+               (зібрати-вільні-змінні body new-bound)))))))))
 
 (визначити collect-free-vars
   (функція (ast bound-vars)
@@ -164,10 +164,10 @@
                           "+" "-" "*" "/" "<" ">" "=" "<=" ">=" "print" "read" "eval")))
              (як-є ()))
             ((атом? (як-є ())) (список ast))))))
-      ((однакові? (lint-form-head ast) (як-є quote)) (як-є ()))
-      ((однакові? (lint-form-head ast) (як-є def))
-       (collect-free-vars (перше (решта (решта ast))) bound-vars))
-      ((однакові? (lint-form-head ast) (як-є lambda))
+      ((однакові? (аналіз-форма-голова ast) (як-є quote)) (як-є ()))
+      ((однакові? (аналіз-форма-голова ast) (як-є def))
+       (зібрати-вільні-змінні (перше (решта (решта ast))) bound-vars))
+      ((однакові? (аналіз-форма-голова ast) (як-є lambda))
        (нехай ((params (перше (решта ast)))
               (body (перше (решта (решта ast)))))
          (нехай ((param-names
@@ -175,8 +175,8 @@
                    ((символ? params) (список (символ-у-текст params)))
                    ((атом? (як-є ()))
                     (відобразити (функція (p) (символ-у-текст p)) params)))))
-           (collect-free-vars body (приєднати param-names bound-vars)))))
-      ((однакові? (lint-form-head ast) (як-є defmacro))
+           (зібрати-вільні-змінні body (приєднати param-names bound-vars)))))
+      ((однакові? (аналіз-форма-голова ast) (як-є defmacro))
        (нехай ((params (перше (решта (решта ast))))
               (body (перше (решта (решта (решта ast))))))
          (нехай ((param-names
@@ -184,12 +184,12 @@
                    ((символ? params) (список (символ-у-текст params)))
                    ((атом? (як-є ()))
                     (відобразити (функція (p) (символ-у-текст p)) params)))))
-           (collect-free-vars body (приєднати param-names bound-vars)))))
-      ((однакові? (lint-form-head ast) (як-є let))
+           (зібрати-вільні-змінні body (приєднати param-names bound-vars)))))
+      ((однакові? (аналіз-форма-голова ast) (як-є let))
        (за-умовою
          ((хибне? (відповідь-не (атом? (решта ast))))
-          (приєднати (collect-free-vars (перше ast) bound-vars)
-                (collect-free-vars (решта ast) bound-vars)))
+          (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+                (зібрати-вільні-змінні (решта ast) bound-vars)))
          ((символ? (перше (решта ast)))
           (нехай ((name (символ-у-текст (перше (решта ast))))
                  (bindings (перше (решта (решта ast))))
@@ -200,9 +200,9 @@
                                bound-vars))))
               (приєднати (згорнути append (як-є ())
                            (відобразити (функція (b)
-                                  (collect-free-vars (друге b) bound-vars))
+                                  (зібрати-вільні-змінні (друге b) bound-vars))
                                 bindings))
-                      (collect-free-vars body new-bound)))))
+                      (зібрати-вільні-змінні body new-bound)))))
          ((атом? (як-є ()))
           (нехай ((bindings (перше (решта ast)))
                  (body (перше (решта (решта ast)))))
@@ -211,16 +211,16 @@
                           bound-vars)))
               (приєднати (згорнути append (як-є ())
                            (відобразити (функція (b)
-                                  (collect-free-vars (друге b) bound-vars))
+                                  (зібрати-вільні-змінні (друге b) bound-vars))
                                 bindings))
-                      (collect-free-vars body new-bound)))))))
-      ((однакові? (lint-form-head ast) (як-є let*))
+                      (зібрати-вільні-змінні body new-bound)))))))
+      ((однакові? (аналіз-форма-голова ast) (як-є let*))
        (зібрати-вільні-змінні-з-послідовного-зв'язування ast bound-vars))
-      ((однакові? (lint-form-head ast) (як-є letrec))
+      ((однакові? (аналіз-форма-голова ast) (як-є letrec))
        (зібрати-вільні-змінні-з-рекурсивного-зв'язування ast bound-vars))
       ((атом? (як-є ()))
-       (приєднати (collect-free-vars (перше ast) bound-vars)
-             (collect-free-vars (решта ast) bound-vars))))))
+       (приєднати (зібрати-вільні-змінні (перше ast) bound-vars)
+             (зібрати-вільні-змінні (решта ast) bound-vars))))))
 
 (визначити lint-globals
   (функція (ast)
@@ -230,15 +230,15 @@
           ((значення-у-списку? item unique) unique)
           ((атом? (як-є ())) (сполучити item unique))))
       (як-є ())
-      (collect-free-vars ast (як-є ())))))
+      (зібрати-вільні-змінні ast (як-є ())))))
 
 (визначити lint-all
   (функція (ast)
     (список (список (як-є size) (аналіз-розмір ast))
-          (список (як-є nesting) (lint-nesting ast))
-          (список (як-є complexity) (lint-complexity ast))
-          (список (як-є effects) (lint-effects ast))
-          (список (як-є free-vars) (lint-globals ast)))))
+          (список (як-є nesting) (аналіз-вкладеність ast))
+          (список (як-є complexity) (аналіз-складність ast))
+          (список (як-є effects) (аналіз-ефекти ast))
+          (список (як-є free-vars) (аналіз-глобальні ast)))))
 
 (визначити get-threshold
   (функція (key thresholds default)
@@ -274,19 +274,19 @@
 ; Exact nine-bit identity = lib/domains/d9.lisp; no new native opcodes.
 ; Existing closures carry semantics. Old donor names remain compatibility only.
 ; D9:001000111 аналіз-форма-голова
-(визначити аналіз-форма-голова lint-form-head)
+(визначити аналіз-форма-голова аналіз-форма-голова)
 ; D9:010011010 аналіз-голова
-(визначити аналіз-голова lint-head)
+(визначити аналіз-голова аналіз-голова)
 ; D9:010100100 аналіз-вкладеність
-(визначити аналіз-вкладеність lint-nesting)
+(визначити аналіз-вкладеність аналіз-вкладеність)
 ; D9:101000001 аналіз-складність
-(визначити аналіз-складність lint-complexity)
+(визначити аналіз-складність аналіз-складність)
 ; D9:010010010 аналіз-ефекти
-(визначити аналіз-ефекти lint-effects)
+(визначити аналіз-ефекти аналіз-ефекти)
 ; D9:010111111 зібрати-вільні-змінні
-(визначити зібрати-вільні-змінні collect-free-vars)
+(визначити зібрати-вільні-змінні зібрати-вільні-змінні)
 ; D9:001000011 аналіз-глобальні
-(визначити аналіз-глобальні lint-globals)
+(визначити аналіз-глобальні аналіз-глобальні)
 ; D9:010001110 аналіз-всі
 (визначити аналіз-всі lint-all)
 ; D9:010000110 аналіз-перевірити
