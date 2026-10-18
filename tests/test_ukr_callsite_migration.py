@@ -2403,5 +2403,59 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
             self.reverse(mutation, self.PINNED[path]["edits"])
 
 
+
+class DomainTableReadableUkrMigrationTests(unittest.TestCase):
+    """D1/D6/D8/D9 живі проєкції без W8 і без підміни D24+ арифметики."""
+
+    SOURCE = Path(__file__).resolve().parents[1] / "scripts/check-domain-table-readable.lisp"
+    ORIGINAL_BLOB = "081bd59f4b81c65e1219a079aa7e20863943f28d"
+    PEERS = (
+        (1, "1", "так", 15),
+        (6, "000100", "елемент-списку-за-індексом", 1),
+        (8, "11110100", "значення-у-текст", 1),
+        (9, "110101001", "читати-всі", 1),
+        (9, "110110111", "читати-файл", 1),
+    )
+
+    @classmethod
+    def _undo_exact_heads(cls, source):
+        import hashlib
+        import re
+        for width, bits, ukr, n in reversed(cls.PEERS):
+            pat = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
+            found = list(pat.finditer(source))
+            if len(found) != n:
+                raise AssertionError(f"PEER_COUNT D{width}:{bits} {ukr}: {len(found)} != {n}")
+            source = pat.sub(lambda m: m.group().replace(ukr, bits), source)
+        raw = source.encode("utf-8")
+        digest = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+        if digest != cls.ORIGINAL_BLOB:
+            raise AssertionError(f"INVERSE_GIT_BLOB expected={cls.ORIGINAL_BLOB} actual={digest}")
+        return source
+
+    def test_ratified_peers_preserve_original_git_blob(self):
+        root = Path(__file__).resolve().parents[1]
+        source = self.SOURCE.read_text(encoding="utf-8")
+        for width, bits, ukr, count in self.PEERS:
+            with self.subTest(domain=f"D{width}", bits=bits):
+                rows = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8").splitlines()
+                matches = [line for line in rows if line.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(matches), 1)
+                self.assertIn(f"(укр {ukr})", matches[0])
+                self.assertEqual(source.count("(" + ukr + " "), count)
+        self.assertIn("(000000 (table-rows d1))", source)
+        self.assertNotIn("(довжина (table-rows d1))", source)
+        self._undo_exact_heads(source)
+
+    def test_wrong_d9_peer_does_not_pass_original_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        wrong = source.replace("(читати-всі", "(читати-файл", 1)
+        self.assertNotEqual(wrong, source)
+        with self.assertRaisesRegex(AssertionError, "PEER_COUNT"):
+            self._undo_exact_heads(wrong)
+        self.assertIn('"00000000"', source)
+        self.assertIn("(000000 (table-rows d8))", source)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

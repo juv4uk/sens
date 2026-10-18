@@ -5,8 +5,8 @@
 (визначити load-domain
   (функція (path)
     (перше
-      (110101001
-        (110110111 path)))))
+      (читати-всі
+        (читати-файл path)))))
 
 (визначити table-rows
   (функція (form)
@@ -14,9 +14,9 @@
 
 (визначити first-key-text
   (функція (form)
-    (11110100
+    (значення-у-текст
       (перше
-        (000100 0 (table-rows form))))))
+        (елемент-списку-за-індексом 0 (table-rows form))))))
 
 (визначити d1 (load-domain "lib/domains/d1.lisp"))
 (визначити d2 (load-domain "lib/domains/d2.lisp"))
@@ -57,18 +57,18 @@
                                        (за-умовою
                                          ((тотожне? (first-key-text d8) "00000000")
                                           (11011011 "DOMAIN-TABLE-READ: PASS files=7 rows=382 widths=1..6,8"))
-                                         (1 (domain-table-width-loss-d8))))
-                                      (1 (domain-table-width-loss-d6))))
-                                   (1 (domain-table-width-loss-d5))))
-                                (1 (domain-table-width-loss-d4))))
-                             (1 (domain-table-width-loss-d3))))
-                          (1 (domain-table-width-loss-d2))))
-                       (1 (domain-table-width-loss-d1))))
-                          (1 (domain-table-d8-count-failure))))
-                    (1 (domain-table-d6-count-failure))))
-                 (1 (domain-table-d5-count-failure))))
-              (1 (domain-table-d4-count-failure))))
-           (1 (domain-table-d3-count-failure))))
-        (1 (domain-table-d2-count-failure))))
-     (1 (domain-table-d1-count-failure))))
-  (1 (domain-table-schema-failure)))
+                                         (так (domain-table-width-loss-d8))))
+                                      (так (domain-table-width-loss-d6))))
+                                   (так (domain-table-width-loss-d5))))
+                                (так (domain-table-width-loss-d4))))
+                             (так (domain-table-width-loss-d3))))
+                          (так (domain-table-width-loss-d2))))
+                       (так (domain-table-width-loss-d1))))
+                          (так (domain-table-d8-count-failure))))
+                    (так (domain-table-d6-count-failure))))
+                 (так (domain-table-d5-count-failure))))
+              (так (domain-table-d4-count-failure))))
+           (так (domain-table-d3-count-failure))))
+        (так (domain-table-d2-count-failure))))
+     (так (domain-table-d1-count-failure))))
+  (так (domain-table-schema-failure)))
