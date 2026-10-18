@@ -2351,6 +2351,13 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         if path == "scripts/check-domain-table-readable.lisp":
             return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
         if path == "scripts/fixtures-for-tier.lisp":
+            # The original role was (read (car *argv*)) before SID8:
+            # no W8/SID8 → D8 byte inference.
+            new_read = "    ((010 (001 ())) (прочитати (100 *argv*)))))"
+            old_read = "    ((010 (001 ())) (11101010 (100 *argv*)))))"
+            if source.count(new_read) != 1:
+                raise AssertionError("Втрачена історично доведена D8 READ-голова")
+            source = source.replace(new_read, old_read, 1)
             # Separate D3/D5/D8/D9 executable heads, never infer old SID8
             # from byte equality. These three witnessed lines are reversible.
             exact_lines = (
@@ -2436,6 +2443,8 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         self.assertIn('"00000000"', reader)
         self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
         self.assertIn("(визначити target-tier", tier)
+        self.assertIn("(прочитати (100 *argv*))", tier)
+        self.assertNotIn("(11101010 (100 *argv*))", tier)
         self.assertIn("(визначити print-matching", tier)
         self.assertIn("(решта (знайти-за-ключем (як-є tier) fixture))", tier)
         self.assertIn("(друкувати (перше remaining))", tier)
