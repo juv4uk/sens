@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Перевірки фізичної міграції з української Lisp-проєкції в Zig T5M."""
+"""Перевірки фізичної міграції від доведеного D1/D3 SENS-свідка до Zig T5M."""
 from __future__ import annotations
 
 import hashlib
@@ -26,12 +26,12 @@ def invoke(source: Path, *args: str):
 
 
 class CanonicalOneFileMigration(unittest.TestCase):
-    def test_real_proven_canary_dry_run_does_not_write(self):
+    def test_existing_d1_d3_canary_dry_run_does_not_write(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "branch.sens"
             result = invoke(PROVEN, "--output", str(target), "--dry-run",
-                            "--codec", "t5m", "--source-surface", "укр")
+                            "--codec", "t5m", "--source-surface", "ук")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             state = json.loads(result.stdout)
             self.assertEqual(state["status"], "would-write")
@@ -52,7 +52,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "ukr-acceptance.sens"
             result = invoke(source, "--output", str(target),
-                            "--codec", "t5m", "--source-surface", "укр")
+                            "--codec", "t5m", "--source-surface", "ук")
             self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertIn("STRING_LITERAL_UNADMITTED", report["reason"])
@@ -78,12 +78,12 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertFalse(output.exists())
             self.assertEqual(view.read_bytes(), b"preexisting view\\n")
 
-    def test_real_binary_staging_agrees_with_current_canonical_three_pass(self):
+    def test_d1_d3_binary_staging_agrees_with_current_canonical_three_pass(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "branch.sens"
             result = invoke(PROVEN, "--output", str(output),
-                            "--codec", "t5m", "--source-surface", "укр")
+                            "--codec", "t5m", "--source-surface", "ук")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "written")
@@ -103,14 +103,14 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(report["physical_sha256"], hashlib.sha256(data).hexdigest())
             self.assertIsInstance(report["zig_transport"], dict)
             second = invoke(PROVEN, "--output", str(output),
-                            "--codec", "t5m", "--source-surface", "укр")
+                            "--codec", "t5m", "--source-surface", "ук")
             self.assertNotEqual(second.returncode, 0)
             self.assertIn("refusing overwrite", second.stderr)
             self.assertEqual(output.read_bytes(), data)
             self.assertEqual(view.read_bytes(), expected_view)
         self.assertEqual(PROVEN.read_bytes(), before)
 
-    def test_explicit_refresh_replaces_stale_carrier_and_view_as_a_pair(self):
+    def test_explicit_refresh_replaces_stale_d1_d3_carrier_and_view_pair(self):
         source_before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "branch.sens"
@@ -119,7 +119,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             view.write_bytes(b"stale extensionless view\\n")
 
             result = invoke(PROVEN, "--output", str(output), "--codec", "t5m",
-                            "--source-surface", "укр", "--replace-existing")
+                            "--source-surface", "ук", "--replace-existing")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "replaced")
@@ -134,7 +134,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
 
             physical_after, view_after = output.read_bytes(), view.read_bytes()
             refused = invoke(PROVEN, "--output", str(output), "--codec", "t5m",
-                             "--source-surface", "укр")
+                             "--source-surface", "ук")
             self.assertNotEqual(refused.returncode, 0)
             self.assertIn("refusing overwrite", refused.stderr)
             self.assertEqual(output.read_bytes(), physical_after)
@@ -206,7 +206,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias = Path(td) / "alias.lisp"
             alias.symlink_to(PROVEN)
             before = PROVEN.read_bytes()
-            result = invoke(alias, "--dry-run", "--codec", "t5m", "--source-surface", "укр")
+            result = invoke(alias, "--dry-run", "--codec", "t5m", "--source-surface", "ук")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("source path contains symlink", result.stderr)
             self.assertEqual(PROVEN.read_bytes(), before)
@@ -217,7 +217,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             actual = base / "unrequested.sens"
             alias = base / "requested.sens"
             alias.symlink_to(actual)
-            result = invoke(PROVEN, "--output", str(alias), "--codec", "t5m", "--source-surface", "укр")
+            result = invoke(PROVEN, "--output", str(alias), "--codec", "t5m", "--source-surface", "ук")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertTrue(alias.is_symlink())
@@ -231,7 +231,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias_dir = base / "alias"
             alias_dir.symlink_to(actual_dir, target_is_directory=True)
             result = invoke(PROVEN, "--output", str(alias_dir / "data.sens"),
-                            "--codec", "t5m", "--source-surface", "укр")
+                            "--codec", "t5m", "--source-surface", "ук")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertFalse((actual_dir / "data.sens").exists())
