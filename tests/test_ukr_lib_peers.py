@@ -1,5 +1,12 @@
 """Свідок opt-in міграції lib-модулів на повну SENS укр-поверхню.
 
+Покриття: narrate, time, reason, utf8, meta-eval-mutual, knowledge, forward,
+clips-import, meta-eval, world, lisp-fs, linter, unify, yantra, repl-core,
+unify-observe, surface/uk-{docs,inventory,sa-coverage} та scripts/{build-inventory,
+check-semantic-registry, check-trilingual-surface, profile-read-file-stages,
+profile-proven-byte-readfile-candidate, release, rust-retirement-valve,
+rust-retirement-valve-enforce, symbol-table}.
+
 Дані-driven: для кожного мігрованого модуля перевіряємо, що кожна повна
 укр-назва з таблиці драбини визначена як exact-value DEFINE-аліас на своє
 історичне (en) ім'я, і що історичне ім'я лишається визначеним. Форму
