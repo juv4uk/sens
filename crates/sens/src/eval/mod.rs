@@ -31,6 +31,22 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
+/// Явна runtime-реалізація допущеного D10-слова монотонного годинника.
+/// Завантажувач прив'язує її до одного точного D10 identity; сама резидентність
+/// D10 не робить викличним жодне інше слово.
+pub(crate) fn d10_monotonic_nanoseconds_builtin() -> Value {
+    Value::host_function(std::rc::Rc::new(|args, environment, span| {
+        builtins::monotonic_nanoseconds(args, environment, span)
+    }))
+}
+
+/// Першокласне значення вже допущеного D8:11110100 механізму запису в текст.
+pub(crate) fn d8_write_to_string_builtin() -> Value {
+    Value::host_function(std::rc::Rc::new(|args, environment, span| {
+        special_forms::write_to_string_values(args, environment, span)
+    }))
+}
+
 /// Existing scalar-to-string representation bridge used by the pinned UTF-8
 /// Lisp layer. UTF-8 policy remains in Lisp; this only materializes a scalar.
 pub(crate) fn runtime_codepoint_to_string(

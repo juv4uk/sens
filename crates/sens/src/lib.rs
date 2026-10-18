@@ -541,9 +541,41 @@ fn load_core_library_with_fasl_mode(
         }
     };
 
+    bind_core_runtime_mechanisms(&session.environment);
     bind_missing_stable_surface_peers(&session.environment);
     bind_existing_d9_language_mechanisms(&session.environment);
     Ok(result)
+}
+
+/// Явне допущення механізму для ратифікованого D10-монотонного годинника.
+/// Джерело identity: `lib/domains/d10.lisp`, точне слово `0011110110`.
+/// Це один іменований механізм, а не загальна викличність D10 за резидентністю.
+fn bind_core_runtime_mechanisms(environment: &Environment) {
+    const MONOTONIC_NANOSECONDS_D10: u16 = 0b0011110110;
+    const SURFACE: &str = "монотонний-наносекунди";
+    let identity = DomainIdentity::D10(
+        DomainD10::new(MONOTONIC_NANOSECONDS_D10)
+            .expect("the exact D10 monotonic-nanoseconds coordinate is ten bits"),
+    );
+    let candidate = eval::d10_monotonic_nanoseconds_builtin();
+    if environment.domain_code_slot(identity).is_none() {
+        let _ = environment.bind_domain_code_slot_once(identity, candidate.clone());
+    }
+    let mechanism = environment
+        .domain_code_slot(identity)
+        .unwrap_or(candidate);
+    if environment.get(SURFACE).is_none() {
+        environment.define(SURFACE, mechanism);
+    }
+
+    // D8:11110100 is already an explicitly admitted value-to-text primitive.
+    // Materialize its Ukrainian and compatibility names as one callable value.
+    let write_to_string = eval::d8_write_to_string_builtin();
+    for surface in ["значення-у-текст", "write-to-string"] {
+        if environment.get(surface).is_none() {
+            environment.define(surface, write_to_string.clone());
+        }
+    }
 }
 
 /// Attach only already-existing callable values to their ratified D9 identities.
@@ -1020,6 +1052,44 @@ mod core4_bootstrap_cache_tests {
         assert_eq!(
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
+        );
+    }
+
+    #[test]
+    fn d10_monotonic_nanoseconds_loads_and_invokes_exact_surface() {
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("Core4 bootstrap");
+        load_time_library(&mut session).expect("time library bootstrap");
+
+        let result = eval_program("(монотонний-наносекунди)", &mut session)
+            .expect("exact D10 monotonic-nanoseconds mechanism is callable");
+        let nanoseconds = result
+            .value
+            .to_string()
+            .parse::<i128>()
+            .expect("monotonic clock result is an exact integer");
+        assert!(nanoseconds >= 0);
+
+        let first = eval_program("(gensym \"probe-\")", &mut session)
+            .expect("Core4 gensym calls the D10 clock and D8 text projection");
+        let second = eval_program("(gensym \"probe-\")", &mut session)
+            .expect("Core4 gensym returns another fresh symbol");
+        assert!(matches!(first.value, Value::Symbol(_)));
+        assert!(matches!(second.value, Value::Symbol(_)));
+        assert_ne!(first.value, second.value);
+
+        let unrelated = DomainIdentity::D10(
+            DomainD10::new(0b0000000010).expect("valid unrelated D10 resident"),
+        );
+        assert!(
+            eval::invoke_value(
+                &Value::DomainIdentity(unrelated),
+                &[],
+                &session.environment,
+                Span::default(),
+            )
+            .is_err(),
+            "one explicit D10 mechanism must not make other D10 residents callable"
         );
     }
 

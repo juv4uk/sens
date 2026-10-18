@@ -27,8 +27,9 @@ pub enum DomainIdentity {
     D7(D7DataWord),
     D8(CoreD8),
     D9(CoreD9),
-    /// Exact D10 identity. A callable mechanism is installed only when a
-    /// concrete Core4 definition binds this exact slot in the Environment.
+    /// Exact D10 identity. A callable mechanism requires an explicit,
+    /// exact-word runtime admission (for example, a concrete Core4 definition
+    /// or a narrowly registered native mechanism); residency alone is not enough.
     D10(crate::DomainD10),
 }
 

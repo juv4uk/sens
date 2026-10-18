@@ -83,20 +83,16 @@
                (001 ())))
            (001 ())))))))))
 
-; gensym — my-lisp's defmacro is unhygienic by default (no automatic
-; protection against accidental variable capture; verified live
-; 2026-08-27, see docs/macro-hygiene-2026-08-27.md's own capture demo).
-; This is the "fresh name" tool a macro author reaches for when a name
-; must NOT be visible/capturable at the call site -- built entirely
-; from existing primitives, zero new Rust code, zero new language
-; machinery: mono-ns (monotonic, real-time-independent counter) makes
-; each call's suffix distinct, write-to-string/string-append/
-; string->symbol assemble it into a real symbol. Requires an explicit
-; prefix (no default-prefix convenience yet -- G5: earn that later if
-; a real caller needs it, don't build it speculatively now).
+; gensym — defmacro у my-lisp типово не має автоматичної гігієни й не
+; захищає від випадкового захоплення змінної (перевірено 2026-08-27;
+; приклад є в docs/macro-hygiene-2026-08-27.md). Це засіб створити свіже
+; ім'я, яке неможливо захопити в місці виклику: допущений D10-годинник
+; разом із текстовими й символьними операціями утворює унікальний символ.
+; Префікс обов'язковий; значення за замовчуванням поки не додаємо без
+; реального потребуючого виклику.
 (0011 gensym
   (0010 (prefix)
-    (string->symbol (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
+    (текст-у-символ (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
 
 (0011 pair
   (0010 (left right)
@@ -6132,13 +6128,12 @@
       ((порожнє? (як-є ()))
         (хибне? (порожнє? (як-є ())))))))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+; Завантажувач зв'язує поверхні з допущеними identity і механізмами;
+; нативну назву операції не можна читати як звичайне Lisp-значення.
 (визначити приєднати append)
 (визначити список list)
 (визначити входження-тотожність memq)
-(визначити монотонний-наносекунди mono-ns)
 (визначити хибне? not?)
 (визначити елемент-списку-за-індексом nth)
 (визначити порожній? null?)
 (визначити частка quotient)
-(визначити значення-у-текст write-to-string)

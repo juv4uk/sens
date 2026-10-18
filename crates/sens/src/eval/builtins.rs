@@ -155,10 +155,20 @@ pub(super) fn prim_01001111(args: &[Value], _env: &Environment, _span: Span) -> 
 
 /// mono-ns
 pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 0, span)?;
-        static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
-        let elapsed = START.get_or_init(std::time::Instant::now).elapsed();
-        Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
+    monotonic_nanoseconds(args, _env, span)
+}
+
+/// Спільне фізичне виконання для старого адаптера й явного механізму
+/// D10:0011110110; вибір identity залишається зовні цього helper.
+pub(super) fn monotonic_nanoseconds(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, crate::LanguageError> {
+    exact_args(args, 0, span)?;
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    let elapsed = START.get_or_init(std::time::Instant::now).elapsed();
+    Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
     }
 
 /// unix-time-now
