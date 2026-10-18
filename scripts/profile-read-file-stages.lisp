@@ -31,7 +31,7 @@
 (визначити profile-root (перше (читати-всі profile-text)))
 (визначити profile-after-read-all (монотонний-наносекунди))
 
-(print
+(друкувати
   (список
     (як-є eco-lisp-script-perf/read-file-stages)
     (список (як-є read-file-bytes-ns)

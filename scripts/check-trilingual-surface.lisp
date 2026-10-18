@@ -472,7 +472,7 @@
     (1110 (001 release-parity) tri-release)))
 
 (0011 tri-shown
-  (print tri-report))
+  (друкувати tri-report))
 
 (0011 tri-selected-mode
   (tri-mode *argv*))

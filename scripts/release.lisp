@@ -117,7 +117,7 @@
   (release-run "git" (001 ("status" "--porcelain" "--untracked-files=normal"))) "")
 (release-run "git" (список "tag" release-tag release-head))
 (release-run "timeout" (список "60" "git" "push" "origin" release-tag-ref))
-(PRINT (рядок-додати "Тег опубліковано; очікуй завершення workflow Release: " release-tag))
+(друкувати (рядок-додати "Тег опубліковано; очікуй завершення workflow Release: " release-tag))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити відповідь-не ANSWER-NOT)

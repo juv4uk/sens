@@ -26,7 +26,7 @@
 
 (0011 language-authority-source?
   (0010 (path)
-    (OR
+    (або
       (рядок-префікс? "lib/" path)
       (рядок-префікс? "contracts/" path)
       (exact-text? path "language-contract.lisp")
@@ -110,7 +110,7 @@
                       (t
                        (накопичувати (решта rows)))))))))))))))
 
-(PRINT (накопичувати changed))
+(друкувати (накопичувати changed))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити однакові? EQUAL)

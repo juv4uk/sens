@@ -528,7 +528,7 @@
             ; Non-zero curl exit: a BLOCKED result (result-status.lisp
             ;; convention) carrying the evidence — never an empty body
             ;; fed to json-parse.
-            (t (список 'blocked
+            (так (список 'blocked
                      (рядок-додати "curl exit "
                                     (число-рядок (http-transport-exit r))
                                     (нехай ((e (http-transport-stderr r)))

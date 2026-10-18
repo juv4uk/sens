@@ -43,7 +43,7 @@
 
 (визначити sr-whitespace?
   (функція (ch)
-    (or (sr-same? ch " ")
+    (або (sr-same? ch " ")
         (sr-same? ch "\n")
         (sr-same? ch "\r")
         (sr-same? ch "\t"))))
@@ -75,7 +75,7 @@
               ""
               (sr-flush-token current tokens)
               (як-є ())))
-           ((or (sr-same? ch "(") (sr-same? ch ")"))
+           ((або (sr-same? ch "(") (sr-same? ch ")"))
             (sr-tokenize-onto
               rest
               ""
@@ -194,7 +194,7 @@
 ; live under a human-language surface.
 (визначити sr-letter-codepoint?
   (функція (cp)
-    (or
+    (або
       (sr-between? cp 65 90)
       (sr-between? cp 97 122)
       (sr-between? cp 192 214)
@@ -272,7 +272,7 @@
                       (name (second surface))
                       (status (third surface)))
                  (за-умовою
-                   ((or (хибне? (string? language))
+                   ((або (хибне? (string? language))
                         (хибне? (string? name))
                         (хибне? (string? status)))
                     (sr-fail (список identity "surface-fields-must-be-atoms" surface)))
@@ -283,7 +283,7 @@
                    ((and (sr-same? status "missing")
                          (хибне? (sr-same? name "—")))
                     (sr-fail (список identity language "missing-requires-dash" name)))
-                   ((and (хибне? (or (sr-same? status "missing")
+                   ((and (хибне? (або (sr-same? status "missing")
                                   (sr-same? status "compatibility-only")))
                          (sr-same? name "—"))
                     (sr-fail (список identity language status "requires-name")))
@@ -301,7 +301,7 @@
                       (решта surfaces)
                       (сполучити language entry-languages)
                       (sr-uniq-add language all-surfaces)
-                      (or has-sym (sr-same? language "sym")))))))
+                      (або has-sym (sr-same? language "sym")))))))
               (t
                (sr-fail (список identity "surface-must-have-three-fields" surface)))))
            (t

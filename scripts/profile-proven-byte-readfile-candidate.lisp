@@ -25,7 +25,7 @@
 (визначити proven-byte-profile-root (перше (читати-всі proven-byte-profile-text)))
 (визначити proven-byte-profile-after-read-all (монотонний-наносекунди))
 
-(print
+(друкувати
   (список
     (як-є eco-lisp-script-perf/proven-byte-readfile-candidate)
     (список (як-є read-file-bytes-ns)
