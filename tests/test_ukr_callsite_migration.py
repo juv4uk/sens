@@ -2509,15 +2509,72 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
     @classmethod
     def _head_edits(cls, source):
         offsets = [0]
-        offsets.extend(match.end() for match in re.finditer("\n", source))
+        offsets.extend(match.end() for match in re.finditer("\\n", source))
         edits = []
-        for token in mod.candidate_heads(mod.parse(source)):
-            bits = cls.INVERSE.get(token.text)
-            if bits is not None:
+
+        def walk(node, quasi=0):
+            if isinstance(node, mod.Prefix):
+                if node.marker in ("'", "#;"):
+                    return
+                if node.marker == chr(96):
+                    walk(node.datum, quasi + 1)
+                    return
+                if node.marker in (",", ",@"):
+                    walk(node.datum, max(0, quasi - 1))
+                    return
+                return
+            if not isinstance(node, mod.Form) or not node.values:
+                return
+            head = mod.atom(node.values[0])
+            if quasi:
+                for child in node.values:
+                    walk(child, quasi)
+                return
+            if head in cls.INVERSE:
+                token = node.values[0]
+                bits = cls.INVERSE[head]
                 edits.append({
-                    "bits": bits, "head": token.text,
+                    "bits": bits, "head": head,
                     "offset": offsets[token.line - 1] + token.column - 1,
                 })
+            # Only traverse code-bearing positions. QUOTE payloads and all
+            # ordinary strings/comments remain data, never candidate calls.
+            if head in ("001", "як-є", "quote"):
+                return
+            if head in ("0010", "функція", "lambda"):
+                for child in node.values[2:]:
+                    walk(child)
+                return
+            if head in ("0011", "визначити", "define", "defmacro", "визначити-макрос"):
+                for child in node.values[2:]:
+                    walk(child)
+                return
+            if head in ("110", "за-умовою", "cond"):
+                for clause in node.values[1:]:
+                    if isinstance(clause, mod.Form) and len(clause.values) >= 2:
+                        walk(clause.values[0])
+                        for result in clause.values[1:]:
+                            walk(result)
+                    else:
+                        walk(clause)
+                return
+            # A few retained historical D6 LET forms enclose D9 calls. This
+            # walk verifies those already-projected child heads only; it does
+            # not ratify or enable the enclosing D6 mechanism.
+            if head in ("001000", "001001", "зв'язати", "звʼязати", "let", "let*"):
+                if len(node.values) > 1 and isinstance(node.values[1], mod.Form):
+                    for binding in node.values[1].values:
+                        if isinstance(binding, mod.Form):
+                            for expression in binding.values[1:]:
+                                walk(expression)
+                for child in node.values[2:]:
+                    walk(child)
+                return
+            for child in node.values[1:]:
+                walk(child)
+
+        for form in mod.parse(source):
+            walk(form)
         return edits
 
     @staticmethod
