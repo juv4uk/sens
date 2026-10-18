@@ -2,13 +2,13 @@
 ;; as #<builtin ...>. Run: ./target/release/my-lisp scripts/gen-functions.lisp
 ;; Output: one builtin name per line.
 (визначити builtins
-  (101001
-    (функція (p) (110101010 "#<builtin" (11110100 (решта p))))
-    (11100111)))
+  (відсіяти
+    (функція (p) (рядок-префікс? "#<builtin" (значення-у-текст (решта p))))
+    (відобразити-середовище)))
 
 (визначити emit-pair
   (функція (p)
-    (11010110 (перше p))))
+    (показати (перше p))))
 
 (визначити emit
   (функція (lst)
