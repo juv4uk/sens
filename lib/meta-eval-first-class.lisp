@@ -8,11 +8,11 @@
 ; Two-field COND. Reuses existing project primitives as first-class values.
 ; Width is identity; every bit of the domain address is valued.
 
-(0011 my-fc-primitive
+(визначити my-fc-primitive
   (функція (name)
     (список (як-є primitive) name)))
 
-(0011 my-fc-root-env
+(визначити my-fc-root-env
   (список
     (сполучити (як-є atom) (my-fc-primitive (як-є atom)))
     (сполучити (як-є eq)   (my-fc-primitive (як-є eq)))
@@ -26,72 +26,72 @@
     (сполучити (як-є =)    (my-fc-primitive (як-є =)))
     (сполучити (як-є >)    (my-fc-primitive (як-є >)))))
 
-(0011 my-fc-env-lookup
+(визначити my-fc-env-lookup
   (функція (name ctx)
     (за-умовою
       ((атом? ctx) name)
       ((тотожне? (перше (перше ctx)) name) (решта (перше ctx)))
-      (#d1:1 (my-fc-env-lookup name (011 ctx))))))
+      (так (my-fc-env-lookup name (решта ctx))))))
 
-(0011 my-fc-primitive?
+(визначити my-fc-primitive?
   (функція (value)
     (за-умовою
-      ((010 value) #d1:0)
-      (#d1:1 (101 (100 value) (001 primitive))))))
+      ((атом? value) ні)
+      (так (тотожне? (перше value) (як-є primitive))))))
 
-(0011 my-fc-closure?
+(визначити my-fc-closure?
   (функція (value)
     (за-умовою
-      ((010 value) #d1:0)
-      (#d1:1 (101 (100 value) (001 closure))))))
+      ((атом? value) ні)
+      (так (тотожне? (перше value) (як-є closure))))))
 
-(0011 my-fc-bind-params
+(визначити my-fc-bind-params
   (функція (params args ctx)
     (за-умовою
       ((атом? params) ctx)
-      (#d1:1
+      (так
        (сполучити (сполучити (перше params) (перше args))
             (my-fc-bind-params (решта params) (решта args) ctx))))))
 
-(0011 my-fc-eval-list
+(визначити my-fc-eval-list
   (функція (exprs ctx)
     (за-умовою
       ((атом? exprs) (як-є ()))
-      (#d1:1
+      (так
        (сполучити (my-fc-eval (перше exprs) ctx)
             (my-fc-eval-list (решта exprs) ctx))))))
 
-(0011 my-fc-eval-body
+(визначити my-fc-eval-body
   (функція (body ctx)
     (за-умовою
       ((атом? (решта body)) (my-fc-eval (перше body) ctx))
-      (#d1:1
+      (так
        ((функція ()
           (my-fc-eval (перше body) ctx)
           (my-fc-eval-body (решта body) ctx)))))))
 
-(0011 my-fc-eval-cond
+(визначити my-fc-eval-cond
   (функція (clauses ctx)
     (за-умовою
       ((атом? clauses) (як-є ()))
       ((my-fc-eval (перше (перше clauses)) ctx)
        (my-fc-eval (друге (перше clauses)) ctx))
-      (#d1:1 (my-fc-eval-cond (011 clauses) ctx)))))
+      (так (my-fc-eval-cond (решта clauses) ctx)))))
 
 ; Exact D1 chain: single remaining arg is true; pairwise op then recurse.
-(0011 my-fc-compare-chain
+(визначити my-fc-compare-chain
   (функція (op args)
     (за-умовою
-      ((010 (011 args)) #d1:1)
+      ((атом? (решта args)) так)
       ((за-умовою
          ((101 op (001 <)) (11010 (100 args) (1001 args)))
          ((101 op (001 =)) (11110111 (100 args) (1001 args)))
          ((101 op (001 >)) (11011 (100 args) (1001 args)))
-         (#d1:1 (001 ())))
+         (так (як-є ())))
        (my-fc-compare-chain op (решта args)))
-      (#d1:1 #d1:0))))
+      (так ні))))
 
-(0011 my-fc-apply-primitive
+(визначити my-fc-apply-primitive
   (функція (name args)
     (за-умовою
       ((тотожне? name (як-є atom)) (атом? (перше args)))
@@ -105,9 +105,9 @@
       ((тотожне? name (як-є <)) (my-fc-compare-chain (як-є <) args))
       ((тотожне? name (як-є =)) (my-fc-compare-chain (як-є =) args))
       ((тотожне? name (як-є >)) (my-fc-compare-chain (як-є >) args))
-      (#d1:1 (1110 (001 unknown-primitive) name)))))
+      (так (список (як-є unknown-primitive) name)))))
 
-(0011 my-fc-apply
+(визначити my-fc-apply
   (функція (fn args)
     (за-умовою
       ((my-fc-primitive? fn)
@@ -119,9 +119,9 @@
            (друге fn)
            args
            (перше (решта (решта (решта fn)))))))
-      (#d1:1 (1110 (001 not-callable) fn)))))
+      (так (список (як-є not-callable) fn)))))
 
-(0011 my-fc-eval
+(визначити my-fc-eval
   (функція (expr ctx)
     (за-умовою
       ((атом? expr) (my-fc-env-lookup expr ctx))
@@ -135,11 +135,11 @@
          ; Every ordinary head is resolved through the environment first.
          ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
          ; the root primitive binding without the evaluator special-casing its name.
-         (#d1:1
+         (так
           (my-fc-apply
             (my-fc-eval (перше expr) ctx)
             (my-fc-eval-list (решта expr) ctx)))))
-      (#d1:1
+      (так
        (my-fc-apply
          (my-fc-eval (перше expr) ctx)
          (my-fc-eval-list (решта expr) ctx))))))
@@ -147,6 +147,6 @@
 ; Public experimental entry point. The root primitive environment is explicit
 ; Lisp data, so a future host/runtime only has to preserve the primitive mechanism
 ; identities; lexical resolution itself is owned here.
-(0011 my-eval-first-class
+(визначити my-eval-first-class
   (функція (expr)
     (my-fc-eval expr my-fc-root-env)))

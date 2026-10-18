@@ -5,6 +5,7 @@ These tests use their own temporary roots; they NEVER rewrite project Lisp.
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import subprocess
 import sys
@@ -327,7 +328,9 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertIn("(як-є (scheduler-selection none))", life_source)
         self.assertIn("(як-є producer)", life_source)
         self.assertIn("(так", map_source)
-        self.assertIn("#d1:0", life_source)
+        self.assertNotIn("#d1:0", life_source)
+        self.assertIn("(нехай-послідовно ", life_source)
+        self.assertIn("(так ні)", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
         self.assertNotIn("100", heads)
@@ -374,16 +377,19 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
         self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
         self.assertIn("(тотожне? (перше form) (як-є def))", mutual)
-        self.assertIn("#d1:1", first)
+        self.assertNotIn("#d1:1", first)
+        self.assertNotIn("#d1:0", first)
+        self.assertIn("(так ", first)
         # Поточна ратифікована D1 проєкція: D1:0 = «ні», D1:1 = «так».
-        # Meta-mutual тепер на повному укр, на відміну від ще типізованого first-class.
+        # Meta-mutual і first-class використовують повну ратифіковану D1-проєкцію.
         d1 = (root / "lib/domains/d1.lisp").read_text(encoding="utf-8")
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
         self.assertIn("((атом? value) ні)", mutual)
         self.assertIn("(так (тотожне? (перше value) (як-є recursive-group-closure)))", mutual)
         self.assertNotIn("#d1:0", mutual)
-        self.assertIn("(0011 my-fc-env-lookup", first)
+        self.assertIn("(визначити my-fc-env-lookup", first)
+        self.assertNotIn("(0011 my-fc-env-lookup", first)
         self.assertIn("(визначити my-group-eval", mutual)
         # Negative witness: numeric operator behind QUOTE remains data, not callable.
         sample = "(як-є (100 quoted)) (сполучити (як-є datum) (перше xs))"
@@ -391,6 +397,99 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertNotIn("100", heads)
         self.assertIn("сполучити", heads)
         self.assertIn("перше", heads)
+
+
+    def test_first_class_exact_inverse_original_git_blob(self):
+        """Перевірка точних D1/D3/D4 координат і збереження ВСІХ старих байтів."""
+        src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
+        originals = (
+        (634, "0011"),
+        (712, "0011"),
+        (1362, "0011"),
+        (1517, "#d1:1"),
+        (1547, "011"),
+        (1563, "0011"),
+        (1627, "010"),
+        (1638, "#d1:0"),
+        (1652, "#d1:1"),
+        (1659, "101"),
+        (1664, "100"),
+        (1676, "001"),
+        (1698, "0011"),
+        (1760, "010"),
+        (1771, "#d1:0"),
+        (1785, "#d1:1"),
+        (1792, "101"),
+        (1797, "100"),
+        (1809, "001"),
+        (1829, "0011"),
+        (1930, "#d1:1"),
+        (2065, "0011"),
+        (2163, "#d1:1"),
+        (2273, "0011"),
+        (2397, "#d1:1"),
+        (2516, "0011"),
+        (2715, "#d1:1"),
+        (2739, "011"),
+        (2837, "0011"),
+        (2906, "010"),
+        (2911, "011"),
+        (2922, "#d1:1"),
+        (3137, "#d1:1"),
+        (3144, "001"),
+        (3207, "#d1:1"),
+        (3213, "#d1:0"),
+        (3225, "0011"),
+        (3992, "#d1:1"),
+        (3999, "1110"),
+        (4005, "001"),
+        (4040, "0011"),
+        (4363, "#d1:1"),
+        (4370, "1110"),
+        (4376, "001"),
+        (4404, "0011"),
+        (5142, "#d1:1"),
+        (5271, "#d1:1"),
+        (5603, "0011"),
+        )
+        ratified = {}
+        import re as _re
+        for domain in (1, 3, 4):
+            table = (Path(__file__).resolve().parents[1] / f"lib/domains/d{domain}.lisp").read_text(encoding="utf-8")
+            for match in _re.finditer(r"(?m)^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+\(укр\s+([^\s()]+)\)", table):
+                bits, peer = match.groups()
+                if len(bits) == domain:
+                    ratified[(domain, bits)] = peer
+
+        def undo(source):
+            coords = []
+            delta = 0
+            previous = -1
+            for offset, literal in originals:
+                self.assertGreater(offset, previous)
+                previous = offset
+                bits = literal.split(":")[-1] if literal.startswith("#d1:") else literal
+                peer = ratified[(len(bits), bits)]
+                coords.append((offset + delta, literal, peer))
+                delta += len(peer) - len(literal)
+            for pos, literal, peer in reversed(coords):
+                self.assertEqual(source[pos:pos + len(peer)], peer)
+                source = source[:pos] + literal + source[pos + len(peer):]
+            return source
+
+        def sha_blob(source):
+            body = source.encode("utf-8")
+            return hashlib.sha1(b"blob " + str(len(body)).encode() + b"\x00" + body).hexdigest()
+
+        self.assertEqual(sha_blob(undo(src)), "67c2d9e0e41702ea37d229a8280d60d153dca99d")
+        self.assertIn("(як-є atom)", src)  # цитовані дані лишаються даними
+        self.assertIn("(01010 (100 args) (1001 args))", src)  # D5 без доказу викличності не чіпали
+
+        broken = src.replace("(визначити my-fc-primitive", "(визначити-хибно my-fc-primitive", 1)
+        self.assertNotEqual(broken, src)
+        with self.assertRaises(AssertionError):
+            undo(broken)
+
 
 
 class UnifyUkrDomainProjectionTests(unittest.TestCase):

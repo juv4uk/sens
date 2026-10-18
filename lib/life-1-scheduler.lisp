@@ -28,11 +28,11 @@
       ((атом? ліве)
        (за-умовою
          ((атом? праве) (тотожне? ліве праве))
-         (#d1:1 #d1:0)))
+         (так ні)))
       ((атом? праве) ні)
       ((життя--рівні? (перше ліве) (перше праве))
        (життя--рівні? (решта ліве) (решта праве)))
-      (#d1:1 #d1:0))))
+      (так ні))))
 
 (визначити life-scheduler-field
   (функція (entry field)
@@ -84,7 +84,7 @@
     (за-умовою
       
       ((хибне? (атом? pending))
-       (001001 ((invocation (100 pending))
+       (нехай-послідовно ((invocation (перше pending))
               (key (life-scheduler-invocation-key invocation)))
          (за-умовою
            ((тотожне? (life-scheduler-key-present? key seen-keys) (як-є present))
@@ -117,7 +117,7 @@
 
 (визначити life-scheduler-projection-ready?
   (функція (invocation projections)
-    (001001 ((trigger (life-scheduler-field invocation (001 trigger)))
+    (нехай-послідовно ((trigger (life-scheduler-field invocation (як-є trigger)))
            (provenance-ref-value (life-scheduler-field invocation (як-є provenance-ref))))
       (за-умовою
         

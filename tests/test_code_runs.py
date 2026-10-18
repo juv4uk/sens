@@ -436,9 +436,40 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
     ORIGINAL_BLOB = "a287485556480390e25e80492fdeb4cd933aab54"
+    # Незмінений parent перед другою українською партією.
+    PARENT_BLOB = "6fad8d5e689650c7a70b4000aa3c7104f83f72ff"
+    # Позиції у parent, НЕ байтові/доменно-перетворені десяткові ID.
+    NEW_BATCH_EDITS = (
+        (1031, "#d1:1", "так"),
+        (1037, "#d1:0", "ні"),
+        (1179, "#d1:1", "так"),
+        (1185, "#d1:0", "ні"),
+        (2811, "001001", "нехай-послідовно"),
+        (2832, "100", "перше"),
+        (4039, "001001", "нехай-послідовно"),
+        (4090, "001", "як-є"),
+    )
+
+    @classmethod
+    def undo_recent_batch(cls, source: str) -> str:
+        positions = []
+        shift = 0
+        last = -1
+        for original_pos, old, peer in cls.NEW_BATCH_EDITS:
+            assert original_pos > last, "Порушено порядок точних координат"
+            last = original_pos
+            positions.append((original_pos + shift, old, peer))
+            shift += len(peer) - len(old)
+        for pos, old, peer in reversed(positions):
+            assert source[pos:pos + len(peer)] == peer, (
+                f"Втрачено exact українську проєкцію {old} at {pos}"
+            )
+            source = source[:pos] + old + source[pos + len(peer):]
+        return source
 
     @staticmethod
     def restore(source: str) -> str:
+        source = Life1RemainingUkrProjectionTests.undo_recent_batch(source)
         # 12 верхніх D4 DEFINE і одна точно локалізована гілка D3 ATOM.
         # Другий, раніше вже український ATOM(праве) не зачіпати.
         source = re.sub(r"(?m)^\(визначити(?=\s)", "(0011", source)
@@ -471,14 +502,21 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
         self.assertEqual(src.count("((атом? праве) ні)"), 1)
         self.assertNotRegex(src, r"(?m)^\(0011(?=\s)")
         self.assertNotIn("((010 праве) #d1:0)", src)
-        self.assertEqual(src.count("(001001 "), 2)  # D6 LET* untouched
-        for original_data in ("#d1:0", "#d1:1",
-                              "(як-є (scheduler-selection none))",
+        self.assertEqual(src.count("(нехай-послідовно "), 2)
+        self.assertNotIn("(001001 ", src)
+        self.assertNotRegex(src, r"#d1:[01]")
+        self.assertIn("(так ні)", src)
+        for original_data in ("(як-є (scheduler-selection none))",
                               "(як-є producer)"):
             self.assertIn(original_data, src)
+        d6 = (ROOT / "lib/domains/d6.lisp").read_text(encoding="utf-8")
+        self.assertIn("(001001 (ук нехай*) (укр нехай-послідовно)", d6)
 
     def test_inverse_projection_recovers_original_git_blob(self):
         src = self.SOURCE.read_text(encoding="utf-8")
+        # Друга партія повертає саме parent; стара 12+1 партія — незмінений
+        # історичний еталон ORIGINAL_BLOB, а не новий підставний SHA.
+        self.assertEqual(self.blob_sha(self.undo_recent_batch(src)), self.PARENT_BLOB)
         self.assertEqual(self.blob_sha(self.restore(src)), self.ORIGINAL_BLOB)
 
     def test_wrong_domain_or_wrong_peer_is_rejected(self):
@@ -490,9 +528,12 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
                         "(функція життя--рівні?", 1),
         ):
             self.assertNotEqual(mutant, src)
-            self.assertNotEqual(
-                self.blob_sha(self.restore(mutant)), self.ORIGINAL_BLOB
-            )
+            try:
+                restored_sha = self.blob_sha(self.restore(mutant))
+            except AssertionError:
+                # Порушено конкретний expected peer або його позицію.
+                continue
+            self.assertNotEqual(restored_sha, self.ORIGINAL_BLOB)
 
 
 class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
