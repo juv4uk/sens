@@ -99,7 +99,7 @@
 ; a real caller needs it, don't build it speculatively now).
 (визначити gensym
   (функція (prefix)
-    (string->symbol (110011110 prefix (write-to-string (01011010))))))
+    (текст-у-символ (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
 
 (визначити pair
   (функція (left right)
