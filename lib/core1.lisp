@@ -467,24 +467,24 @@
 
 (визначити C1-READ
   (00100 C1-READ
-    (0010 (TOKENS)
-      (110
-        ((101 TOKENS (001 ())) (001 ()))
-        ((101 (100 TOKENS) 010)          ; ATOM token -> the token itself
-         (100 TOKENS))
+    (функція (TOKENS)
+      (за-умовою
+        ((тотожне? TOKENS (як-є ())) (як-є ()))
+        ((тотожне? (перше TOKENS) 010)          ; ATOM token -> the token itself
+         (перше TOKENS))
         (#d1:1
          (C1-READ-LIST TOKENS))))))
 
 (визначити C1-READ-LIST
   (00100 C1-READ-LIST
-    (0010 (TOKENS)
-      (110
-        ((101 TOKENS (001 ())) (001 ()))
-        ((101 (100 TOKENS) 110)          ; DOT token -> dotted tail
-         (100 (011 TOKENS)))
+    (функція (TOKENS)
+      (за-умовою
+        ((тотожне? TOKENS (як-є ())) (як-є ()))
+        ((тотожне? (перше TOKENS) 110)          ; DOT token -> dotted tail
+         (перше (решта TOKENS)))
         (#d1:1
-         (111 (C1-READ (100 TOKENS))
-              (C1-READ-LIST (011 TOKENS))))))))
+         (сполучити (C1-READ (перше TOKENS))
+              (C1-READ-LIST (решта TOKENS))))))))
 
 (визначити C1-RECLAIM
   (функція (ROOTS CELLS)
@@ -492,19 +492,19 @@
 
 (визначити C1-MARK-ALL
   (00100 C1-MARK-ALL
-    (0010 (ROOTS CELLS)
-      (110
-        ((101 ROOTS (001 ())) CELLS)
+    (функція (ROOTS CELLS)
+      (за-умовою
+        ((тотожне? ROOTS (як-є ())) CELLS)
         (#d1:1
-         (C1-MARK-ALL (011 ROOTS)
-                      (C1-MARK (100 ROOTS) CELLS)))))))
+         (C1-MARK-ALL (решта ROOTS)
+                      (C1-MARK (перше ROOTS) CELLS)))))))
 
 (визначити C1-MARK
   (00100 C1-MARK
-    (0010 (REF CELLS)
-      (110
-        ((101 REF (001 ())) CELLS)
-        ((101 CELLS (001 ())) CELLS)
+    (функція (REF CELLS)
+      (за-умовою
+        ((тотожне? REF (як-є ())) CELLS)
+        ((тотожне? CELLS (як-є ())) CELLS)
         (#d1:1
          (C1-MARK-CHILDREN REF (C1-MARK-CELL REF CELLS)))))))
 
@@ -525,13 +525,13 @@
 
 (визначити C1-SWEEP
   (00100 C1-SWEEP
-    (0010 (MARKED CELLS)
-      (110
-        ((101 CELLS (001 ())) (001 ()))
+    (функція (MARKED CELLS)
+      (за-умовою
+        ((тотожне? CELLS (як-є ())) (як-є ()))
         ((101 (011 (100 CELLS)) #d1:1)   ; marked -> keep
-         (111 (100 CELLS) (C1-SWEEP MARKED (011 CELLS))))
+         (сполучити (перше CELLS) (C1-SWEEP MARKED (решта CELLS))))
         (#d1:1                            ; unmarked -> return to free list
-         (C1-SWEEP MARKED (011 CELLS)))))))
+         (C1-SWEEP MARKED (решта CELLS)))))))
 
 (визначити C1-FREE
   (функція (CELLS)
@@ -589,18 +589,18 @@
 
 (визначити C1-ASSOC
   (00100 C1-ASSOC
-    (0010 (KEY ALIST)
-      (110
-        ((101 ALIST (001 ())) (001 C1-MISSING))
-        ((101 (100 (100 ALIST)) KEY)
-         (100 ALIST))
+    (функція (KEY ALIST)
+      (за-умовою
+        ((тотожне? ALIST (як-є ())) (як-є C1-MISSING))
+        ((тотожне? (перше (перше ALIST)) KEY)
+         (перше ALIST))
         (#d1:1 (C1-ASSOC KEY (011 ALIST)))))))
 
 (визначити C1-APPEND
   (00100 C1-APPEND
-    (0010 (X Y)
-      (110
-        ((101 X (001 ())) Y)
+    (функція (X Y)
+      (за-умовою
+        ((тотожне? X (як-є ())) Y)
         (#d1:1 (111 (100 X) (C1-APPEND (011 X) Y)))))))
 
 ; ── PROPLIST (property lists): GET / PUT ──
@@ -622,13 +622,13 @@
 
 (визначити C1-PROG-RUN
   (00100 C1-PROG-RUN
-    (0010 (PC BODY)
-      (110
-        ((101 PC (001 ())) (001 ()))
-        ((C1-LABELP (100 PC))
-         (C1-PROG-RUN (011 PC) BODY))          ; a label line: skip
+    (функція (PC BODY)
+      (за-умовою
+        ((тотожне? PC (як-є ())) (як-є ()))
+        ((C1-LABELP (перше PC))
+         (C1-PROG-RUN (решта PC) BODY))          ; a label line: skip
         (#d1:1
-         (C1-PROG-RUN (011 PC) BODY))))))
+         (C1-PROG-RUN (решта PC) BODY))))))
 
 (визначити C1-GO
   (функція (LABEL BODY)
@@ -636,10 +636,10 @@
 
 (визначити C1-PROG-SEEK
   (00100 C1-PROG-SEEK
-    (0010 (LABEL BODY)
-      (110
-        ((101 BODY (001 ())) (001 ()))
-        ((101 (100 (100 BODY)) LABEL) BODY)     ; found the label
+    (функція (LABEL BODY)
+      (за-умовою
+        ((тотожне? BODY (як-є ())) (як-є ()))
+        ((тотожне? (перше (перше BODY)) LABEL) BODY)     ; found the label
         (#d1:1 (C1-PROG-SEEK LABEL (011 BODY)))))))
 
 (визначити C1-LABELP
@@ -675,9 +675,9 @@
 
 (визначити C1-ARRAY-FILL
   (00100 C1-ARRAY-FILL
-    (0010 (SIZE ACC)
-      (110
-        ((101 SIZE 0) ACC)
+    (функція (SIZE ACC)
+      (за-умовою
+        ((тотожне? SIZE 0) ACC)
         (#d1:1 (C1-ARRAY-FILL (C1-SUB1 SIZE) (111 0 ACC)))))))
 
 (визначити C1-ARRAY
@@ -686,18 +686,18 @@
 
 (визначити C1-AREF
   (00100 C1-AREF
-    (0010 (ARR IDX)
-      (110
-        ((101 IDX 0) (100 ARR))
+    (функція (ARR IDX)
+      (за-умовою
+        ((тотожне? IDX 0) (перше ARR))
         (#d1:1 (C1-AREF (011 ARR) (C1-SUB1 IDX)))))))
 
 (визначити C1-ASET
   (00100 C1-ASET
-    (0010 (ARR IDX VAL)
-      (110
-        ((101 IDX 0) (111 VAL (011 ARR)))
+    (функція (ARR IDX VAL)
+      (за-умовою
+        ((тотожне? IDX 0) (сполучити VAL (решта ARR)))
         (#d1:1
-         (111 (100 ARR) (C1-ASET (011 ARR) (C1-SUB1 IDX) VAL)))))))
+         (сполучити (перше ARR) (C1-ASET (решта ARR) (C1-SUB1 IDX) VAL)))))))
 
 (визначити C1-ARRAYP
   (функція (X)
