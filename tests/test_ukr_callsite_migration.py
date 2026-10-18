@@ -466,10 +466,15 @@ class UnifyUkrDomainProjectionTests(unittest.TestCase):
     def test_unify_preserves_quoted_data_and_d1_identity(self):
         root = Path(__file__).resolve().parents[1]
         source = (root / "lib/unify.lisp").read_text(encoding="utf-8")
-        self.assertIn("(0011 unify", source)
-        self.assertIn("(0011 unify-walked", source)
-        self.assertIn("#d1:1 #d1:0", source)
-        self.assertIn("(0)", source)
+        self.assertIn("(визначити unify\n", source)
+        self.assertIn("(визначити unify-walked\n", source)
+        self.assertIn("(так ні)", source)
+        self.assertIn("(як-є (ні))", source)
+        active_unify = "\n".join(line.split(";", 1)[0]
+                                 for line in source.splitlines())
+        self.assertNotIn("(0011 unify", active_unify)
+        self.assertNotIn("#d1:1", active_unify)
+        self.assertNotIn("#d1:0", active_unify)
         # Quoted forms carry data; numeric-looking heads inside them are not calls.
         sample = "(як-є (100 quoted)) (сполучити (як-є (0)) (перше xs))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
