@@ -15,6 +15,10 @@ REWRITES = (
     ("(001 ", "(як-є ", 5),        # D3:001 QUOTE
     ("(100 ", "(перше ", 2),       # D3:100 CAR
     ("(01011010)", "(монотонний-наносекунди)", 3),  # SID8 MONO-NS → ratified D10:0011110110
+    ("(110110111 ", "(читати-файл ", 1),  # повна укр-проєкція
+    ("(110101001 ", "(читати-всі ", 1),  # повна укр-проєкція
+    ("(11011011\n", "(друкувати\n", 1),  # повна укр-проєкція
+    ("(01011 ", "(відняти ", 3),  # повна укр-проєкція
 )
 
 
@@ -91,7 +95,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
         self.assertEqual(git_blob_sha(payload), ORIGINAL_BLOB)
         self.assertEqual(paren_depth(restored), 0)
 
-    def test_d8_d9_and_measurement_fields_remain_unchanged(self):
+    def test_historical_d8_d9_and_measurement_fields_restore_unchanged(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = source
         for old, new, _ in reversed(REWRITES):
