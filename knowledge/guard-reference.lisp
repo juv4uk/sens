@@ -976,17 +976,17 @@
 (0011 guard-script
   (0010 (name)
     (нехай ((tool (guard-script-find name *guard-script-directory*)))
-      (00000111
-        ((00000010 tool) () (00100111
+      (за-умовою
+        ((атом? tool) () (список
            (001 tool-missing)
-           (00100111 (001 name) name)
-           (00100111 (001 decision) (001 unknown))
-           (00100111 (001 unknown-routes) (guard-unknown-routes))))
+           (список (як-є name) name)
+           (список (як-є decision) (як-є unknown))
+           (список (як-є unknown-routes) (guard-unknown-routes))))
         ((00000010 tool) (1) (00100111
            (001 tool-missing)
-           (00100111 (001 name) name)
-           (00100111 (001 decision) (001 unknown))
-           (00100111 (001 unknown-routes) (guard-unknown-routes))))
+           (список (як-є name) name)
+           (список (як-є decision) (як-є unknown))
+           (список (як-є unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
 (0011 guard-scripts
@@ -1010,12 +1010,12 @@
 (0011 guard-reference-evidence-status
   (0010 (reference)
     (нехай ((status (guard-reference-field (як-є evidence-status) reference)))
-      (00000111
+      (за-умовою
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((00000010 status) () (001 unresolved))
+        ((атом? status) () (як-є unresolved))
         ((00000010 status) (1) status)
         ((00000010 status) (0) status)))))
 
@@ -1030,15 +1030,15 @@
 
 (0011 guard-reference-stronger
   (0010 (best candidate)
-    (00000111
-      ((00000010 best) () candidate)
+    (за-умовою
+      ((атом? best) () candidate)
       ((00000010 best) (1) candidate)
       (t
        (нехай ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
-         (00000111
-           ((00011011 candidate-strength best-strength) 1 candidate)
-           ((00011011 candidate-strength best-strength) 0 best)))))))
+         (за-умовою
+           ((більше? candidate-strength best-strength) 1 candidate)
+           ((більше? candidate-strength best-strength) 0 best)))))))
 
 (0011 guard-reference-all
   (0010 (topic references)
@@ -1067,23 +1067,23 @@
 (0011 guard-reference
   (0010 (topic)
     (нехай ((reference (guard-reference-find topic *guard-reference-directory*)))
-      (00000111
-        ((00000010 reference) () (00100111
+      (за-умовою
+        ((атом? reference) () (список
            (001 reference-missing)
-           (00100111 (001 schema) (001 guard-reference/1))
-           (00100111 (001 topic) topic)
-           (00100111 (001 decision) (001 unknown))
-           (00100111 (001 evidence-status) (001 unresolved))
-           (00100111 (001 guidance) (001 choose-unknown-route))
-           (00100111 (001 unknown-routes) (guard-unknown-routes))))
+           (список (як-є schema) (як-є guard-reference/1))
+           (список (як-є topic) topic)
+           (список (як-є decision) (як-є unknown))
+           (список (як-є evidence-status) (як-є unresolved))
+           (список (як-є guidance) (як-є choose-unknown-route))
+           (список (як-є unknown-routes) (guard-unknown-routes))))
         ((00000010 reference) (1) (00100111
            (001 reference-missing)
-           (00100111 (001 schema) (001 guard-reference/1))
-           (00100111 (001 topic) topic)
-           (00100111 (001 decision) (001 unknown))
-           (00100111 (001 evidence-status) (001 unresolved))
-           (00100111 (001 guidance) (001 choose-unknown-route))
-           (00100111 (001 unknown-routes) (guard-unknown-routes))))
+           (список (як-є schema) (як-є guard-reference/1))
+           (список (як-є topic) topic)
+           (список (як-є decision) (як-є unknown))
+           (список (як-є evidence-status) (як-є unresolved))
+           (список (як-є guidance) (як-є choose-unknown-route))
+           (список (як-є unknown-routes) (guard-unknown-routes))))
         (t reference)))))
 
 (0011 guard-explain
@@ -1104,8 +1104,8 @@
 
 (0011 guard-topics
   (0010 (references)
-    (00000111
-      ((00000010 references) () (001 ()))
+    (за-умовою
+      ((атом? references) () (як-є ()))
       ((00000010 references) (1) (001 ()))
       (t
        (111
@@ -1124,49 +1124,49 @@
 ; повними записами, і вибір лишається за викликачем.
 (0011 guard-ask
   (0010 (name)
-    (10011101 ((tool (guard-script-find name *guard-script-directory*))
+    (нехай-послідовно ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
-      (00000111
-        ((00000010 tool) () (00000111
-           ((00000010 reference) () (00100111 (001 not-found)
-                  (00100111 (001 query) name)
-                  (00100111 (001 decision) (001 unknown))
-                  (00100111 (001 unknown-routes) (guard-unknown-routes))))
+      (за-умовою
+        ((атом? tool) () (за-умовою
+           ((атом? reference) () (список (як-є not-found)
+                  (список (як-є query) name)
+                  (список (як-є decision) (як-є unknown))
+                  (список (як-є unknown-routes) (guard-unknown-routes))))
            ((00000010 reference) (1) (00100111 (001 not-found)
-                  (00100111 (001 query) name)
-                  (00100111 (001 decision) (001 unknown))
-                  (00100111 (001 unknown-routes) (guard-unknown-routes))))
+                  (список (як-є query) name)
+                  (список (як-є decision) (як-є unknown))
+                  (список (як-є unknown-routes) (guard-unknown-routes))))
            (t
-            (00100111 (001 result)
-                  (00100111 (001 type) (001 reference-topic))
-                  (00100111 (001 source) (001 knowledge/guard-reference.lisp))
-                  (00100111 (001 entry) reference)))))
+            (список (як-є result)
+                  (список (як-є type) (як-є reference-topic))
+                  (список (як-є source) (як-є knowledge/guard-reference.lisp))
+                  (список (як-є entry) reference)))))
         ((00000010 tool) (1) (00000111
-           ((00000010 reference) () (00100111 (001 not-found)
-                  (00100111 (001 query) name)
-                  (00100111 (001 decision) (001 unknown))
-                  (00100111 (001 unknown-routes) (guard-unknown-routes))))
+           ((атом? reference) () (список (як-є not-found)
+                  (список (як-є query) name)
+                  (список (як-є decision) (як-є unknown))
+                  (список (як-є unknown-routes) (guard-unknown-routes))))
            ((00000010 reference) (1) (00100111 (001 not-found)
-                  (00100111 (001 query) name)
-                  (00100111 (001 decision) (001 unknown))
-                  (00100111 (001 unknown-routes) (guard-unknown-routes))))
+                  (список (як-є query) name)
+                  (список (як-є decision) (як-є unknown))
+                  (список (як-є unknown-routes) (guard-unknown-routes))))
            (t
-            (00100111 (001 result)
-                  (00100111 (001 type) (001 reference-topic))
-                  (00100111 (001 source) (001 knowledge/guard-reference.lisp))
-                  (00100111 (001 entry) reference)))))
+            (список (як-є result)
+                  (список (як-є type) (як-є reference-topic))
+                  (список (як-є source) (як-є knowledge/guard-reference.lisp))
+                  (список (як-є entry) reference)))))
         (t
-         (00000111
-           ((00000010 reference) () (00100111 (001 result)
-                  (00100111 (001 type) (001 tool))
-                  (00100111 (001 source) (001 guard-script-directory))
-                  (00100111 (001 entry) tool)))
+         (за-умовою
+           ((атом? reference) () (список (як-є result)
+                  (список (як-є type) (як-є tool))
+                  (список (як-є source) (як-є guard-script-directory))
+                  (список (як-є entry) tool)))
            ((00000010 reference) (1) (00100111 (001 result)
-                  (00100111 (001 type) (001 tool))
-                  (00100111 (001 source) (001 guard-script-directory))
-                  (00100111 (001 entry) tool)))
+                  (список (як-є type) (як-є tool))
+                  (список (як-є source) (як-є guard-script-directory))
+                  (список (як-є entry) tool)))
            (t
-            (00100111 (001 ambiguous)
-                  (00100111 (001 query) name)
-                  (00100111 (001 tool) tool)
-                  (00100111 (001 reference-topic) reference)))))))))
+            (список (як-є ambiguous)
+                  (список (як-є query) name)
+                  (список (як-є tool) tool)
+                  (список (як-є reference-topic) reference)))))))))
