@@ -22,7 +22,7 @@ MIGRATED = ("lib/time.lisp", "lib/reason.lisp", "lib/utf8.lisp",
             "lib/meta-eval-mutual.lisp", "lib/knowledge.lisp", "lib/narrate.lisp",
             "lib/forward.lisp", "lib/clips-import.lisp", "lib/meta-eval.lisp",
             "lib/world.lisp", "lib/lisp-fs.lisp", "lib/linter.lisp",
-            "lib/unify.lisp", "lib/yantra.lisp", "lib/quantity.lisp")
+            "lib/unify.lisp", "lib/yantra.lisp")
 
 
 def load_rows():
