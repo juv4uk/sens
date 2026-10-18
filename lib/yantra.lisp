@@ -49,20 +49,20 @@
 
 (визначити json-escape-char
   (функція (ch)
-    (110
-      ((101 ch "\"") "\\\"")
-      ((101 ch "\\") "\\\\")
-      ((101 ch "\n") "\\n")
-      ((101 ch "\r") "\\r")
-      ((101 ch "\t") "\\t")
-      (#d1:1 ch))))
+    (за-умовою
+      ((тотожне? ch "\"") "\\\"")
+      ((тотожне? ch "\\") "\\\\")
+      ((тотожне? ch "\n") "\\n")
+      ((тотожне? ch "\r") "\\r")
+      ((тотожне? ch "\t") "\\t")
+      (так ch))))
 
 (визначити json-escape-onto
   (функція (s acc)
-    (110
-      ((110011100 s) acc)
-      (#d1:1 (json-escape-onto (110011101 s)
-                           (110011110 acc (json-escape-char (110101011 s))))))))
+    (за-умовою
+      ((рядок-порожній? s) acc)
+      (так (json-escape-onto (рядок-решта s)
+                           (рядок-додати acc (екранувати-знак-формат-обміну-даними (рядок-перший s))))))))
 
 (визначити json-escape
   (функція (s) (json-escape-onto s "")))
@@ -72,23 +72,23 @@
 ; directly instead. Derived here, no new primitive.
 (визначити strcat-onto
   (функція (items acc)
-    (110
+    (за-умовою
       
-      ((010 items)  acc)
-      (#d1:1 (strcat-onto (011 items) (110011110 acc (100 items)))))))
+      ((атом? items)  acc)
+      (так (strcat-onto (решта items) (рядок-додати acc (перше items)))))))
 
 (визначити strcat
   (функція args
     (strcat-onto args "")))
 
 (визначити json-encode-string
-  (0010 (s) (110011110 "\"" (110011110 (json-escape s) "\""))))
+  (функція (s) (рядок-додати "\"" (рядок-додати (екранувати-формат-обміну-даними s) "\""))))
 
 (визначити json-encode-key
   (функція (k)
-    (110
-      ((110101100 k) (json-encode-string (11101110 k)))
-      (#d1:1 (json-encode-string k)))))
+    (за-умовою
+      ((символ? k) (кодувати-рядок-формат-обміну-даними (символ-у-текст k)))
+      (так (кодувати-рядок-формат-обміну-даними k)))))
 
 ; Objects are alists (lists of dotted pairs), arrays are proper lists.
 ; Disambiguation for this protocol's data: a list is an OBJECT iff its
@@ -98,43 +98,43 @@
 ; which a naive "cdr of first entry is atom" test misclassifies as array.
 (визначити json-object?
   (функція (v)
-    (110
+    (за-умовою
       
-      (#d1:1 (001 ()))
+      (так (як-є ()))
       
-      ((010 (100 v))  (001 ()))
+      ((атом? (перше v))  (як-є ()))
       
-      ((010 (100 (100 v)))  t)
+      ((атом? (перше (перше v)))  t)
       )))
 
 (визначити json-encode-value
   (функція (v)
-    (110
+    (за-умовою
       
-      ((010 v)  (110
-         ((101 v t) "true")
-         ((101 v (001 ())) "null")
+      ((атом? v)  (за-умовою
+         ((тотожне? v t) "true")
+         ((тотожне? v (як-є ())) "null")
          ((string-membership-helper v)
           
-          (json-encode-string v))
-         (#d1:1 (11110100 v))))
-      ((json-object? v) (json-encode-object v))
-      (#d1:1 (json-encode-array v)))))
+          (кодувати-рядок-формат-обміну-даними v))
+         (так (значення-у-текст v))))
+      ((об'єкт-формат-обміну-даними? v) (кодувати-об'єкт-формат-обміну-даними v))
+      (так (кодувати-масив-формат-обміну-даними v)))))
 
 (визначити json-encode-object-entries
   (функція (entries acc)
-    (110
+    (за-умовою
       
-      ((010 entries)  acc)
-      (#d1:1 (001000 ((entry (100 entries)))
+      ((атом? entries)  acc)
+      (так (нехай ((entry (перше entries)))
            (json-encode-object-entries
-            (011 entries)
+            (решта entries)
             (strcat acc
-                    (110 ((110011100 acc) "")
-                          (#d1:1 ","))
-                    (json-encode-key (100 entry))
+                    (за-умовою ((рядок-порожній? acc) "")
+                          (так ","))
+                    (json-encode-key (перше entry))
                     ":"
-                    (json-encode-value (011 entry)))))))))
+                    (кодувати-значення-формат-обміну-даними (решта entry)))))))))
 
 (визначити json-encode-object
   (функція (alist)
@@ -142,21 +142,21 @@
 
 (визначити json-encode-array-items
   (функція (items acc)
-    (110
+    (за-умовою
       
-      ((010 items)  acc)
-      (#d1:1 (json-encode-array-items
-          (011 items)
+      ((атом? items)  acc)
+      (так (json-encode-array-items
+          (решта items)
           (strcat acc
-                  (110 ((110011100 acc) "")
-                        (#d1:1 ","))
-                  (json-encode-value (100 items))))))))
+                  (за-умовою ((рядок-порожній? acc) "")
+                        (так ","))
+                  (кодувати-значення-формат-обміну-даними (перше items))))))))
 
 (визначити json-encode-array
   (функція (items)
     (strcat "[" (json-encode-array-items items "") "]")))
 
-(визначити json-encode json-encode-value)
+(визначити json-encode кодувати-значення-формат-обміну-даними)
 
 ; ---------------------------------------------------------------------------
 ; Message / tool-call accessors and JSON -> internal conversion
@@ -168,8 +168,8 @@
 ; loop below only ever distinguishes present-nonempty from everything else.
 (визначити alist-ref
   (функція (key alist)
-    (110
-      ((11100 key alist) (011 (11100 key alist)))
+    (за-умовою
+      ((знайти-за-ключем key alist) (решта (знайти-за-ключем key alist)))
       )))
 
 (визначити msg-role (функція (m) (alist-ref (як-є role) m)))
@@ -185,33 +185,33 @@
 (визначити json-message-content
   (функція (jm)
     ((функція (c)
-      (110
-        ((101 c (001 ())) "")
-        (#d1:1 c)))
+      (за-умовою
+        ((тотожне? c (як-є ())) "")
+        (так c)))
      (alist-ref "content" jm))))
 
 (визначити json->tool-call
   (функція (jtc)
     ((функція (fn)
-      (1110 (111 (001 id) (alist-ref "id" jtc))
-            (111 (001 name) (alist-ref "name" fn))
-            (111 (001 arguments) (alist-ref "arguments" fn))))
+      (список (сполучити (як-є id) (alist-ref "id" jtc))
+            (сполучити (як-є name) (alist-ref "name" fn))
+            (сполучити (як-є arguments) (alist-ref "arguments" fn))))
      (alist-ref "function" jtc))))
 
 (визначити json->message
   (функція (jm)
     ((функція (tcs)
-      (1111 (1110 (111 (001 role) (alist-ref "role" jm))
-                    (111 (001 content) (json-message-content jm)))
-              (110
-                (tcs (1110 (111 (001 tool-calls) (101000 json->tool-call tcs))))
+      (приєднати (список (сполучити (як-є role) (alist-ref "role" jm))
+                    (сполучити (як-є content) (json-message-content jm)))
+              (за-умовою
+                (tcs (список (сполучити (як-є tool-calls) (відобразити json->tool-call tcs))))
                 )))
      (alist-ref "tool_calls" jm))))
 
 (визначити extract-assistant-message
   (функція (response-json)
-    (001001 ((choices (alist-ref "choices" response-json))
-           (choice (100 choices)))
+    (нехай-послідовно ((choices (alist-ref "choices" response-json))
+           (choice (перше choices)))
       (alist-ref "message" choice))))
 
 ; ---------------------------------------------------------------------------
@@ -220,43 +220,43 @@
 
 (визначити encode-tool-call
   (функція (tc)
-    (1110 (111 "id" (tc-id tc))
-          (111 "type" "function")
-          (111 "function" (1110 (111 "name" (tc-name tc))
-                                 (111 "arguments" (tc-arguments tc)))))))
+    (список (сполучити "id" (tc-id tc))
+          (сполучити "type" "function")
+          (сполучити "function" (список (сполучити "name" (tc-name tc))
+                                 (сполучити "arguments" (tc-arguments tc)))))))
 
 (визначити encode-message
   (функція (m)
-    (110
-      ((11110111 (msg-role m) "tool")
-       (1110 (111 "role" "tool")
-             (111 "tool_call_id" (msg-tool-call-id m))
-             (111 "content" (msg-content m))))
-      (#d1:1 (001000 ((tcs (msg-tool-calls m)))
-           (1111 (1110 (111 "role" (msg-role m))
-                         (111 "content" (msg-content m)))
-                   (110 (tcs (1110 (111 "tool_calls" (101000 encode-tool-call tcs))))
+    (за-умовою
+      ((однакові? (msg-role m) "tool")
+       (список (сполучити "role" "tool")
+             (сполучити "tool_call_id" (msg-tool-call-id m))
+             (сполучити "content" (msg-content m))))
+      (так (нехай ((tcs (msg-tool-calls m)))
+           (приєднати (список (сполучити "role" (msg-role m))
+                         (сполучити "content" (msg-content m)))
+                   (за-умовою (tcs (список (сполучити "tool_calls" (відобразити encode-tool-call tcs))))
                          )))))))
 
 (визначити bash-tool-schema
   (функція ()
-    (1110 (111 "type" "function")
-          (111 "function"
-                (1110 (111 "name" "bash")
-                      (111 "description" "Run one bash command; returns combined stdout and stderr.")
-                      (111 "parameters"
-                            (1110 (111 "type" "object")
-                                  (111 "properties"
-                                        (1110 (111 "cmd" (1110 (111 "type" "string")
-                                                                (111 "description" "The bash command to execute")))))
-                                  (111 "required" (1110 "cmd")))))))))
+    (список (сполучити "type" "function")
+          (сполучити "function"
+                (список (сполучити "name" "bash")
+                      (сполучити "description" "Run one bash command; returns combined stdout and stderr.")
+                      (сполучити "parameters"
+                            (список (сполучити "type" "object")
+                                  (сполучити "properties"
+                                        (список (сполучити "cmd" (список (сполучити "type" "string")
+                                                                (сполучити "description" "The bash command to execute")))))
+                                  (сполучити "required" (список "cmd")))))))))
 
 (визначити build-request-body
   (функція (model messages)
     (json-encode
-     (1110 (111 "model" model)
-           (111 "messages" (101000 encode-message messages))
-           (111 "tools" (1110 (bash-tool-schema)))))))
+     (список (сполучити "model" model)
+           (сполучити "messages" (відобразити encode-message messages))
+           (сполучити "tools" (список (bash-tool-schema)))))))
 
 ; ---------------------------------------------------------------------------
 ; Host transport: HTTP POST via the existing allowlisted process-run +
@@ -274,13 +274,13 @@
     ;; opaque json-parse("") crash downstream — the same evidence-losing
     ;; class already fixed in execute-bash. The full triple now flows to
     ;; ollama-complete, which decides.
-    (001000 ((result (110101111 "curl"
-                               (1110 "-s" "-S" "--fail" "--show-error"
+    (нехай ((result (процес-запустити "curl"
+                               (список "-s" "-S" "--fail" "--show-error"
                                      "--max-time" "120"
                                      "-X" "POST"
                                      "-H" "Content-Type: application/json"
                                      "-d" body url))))
-      (1110 (000100 0 result) (000100 1 result) (000100 2 result)))))
+      (список (елемент-списку-за-індексом 0 result) (елемент-списку-за-індексом 1 result) (елемент-списку-за-індексом 2 result)))))
 
 ;; Transport result contract: (exit-code stdout stderr). Exit 0 = body is
 ;; the JSON payload; anything else = a BLOCKED result per the unknown-
@@ -301,17 +301,17 @@
 ; as one that succeeded. Text shape stays LLM-friendly.
 (визначити execute-bash
   (функція (arguments-json)
-    (001001 ((args (110100100 arguments-json))
+    (нехай-послідовно ((args (формат-обміну-даними-розібрати arguments-json))
            (cmd (alist-ref "cmd" args))
-           (result (110101111 "bash" (1110 "-c" cmd)))
-           (exit-code (000100 0 result))
-           (stdout (000100 1 result))
-           (stderr (000100 2 result)))
-      (strcat "[exit-code " (110111001 exit-code)
+           (result (процес-запустити "bash" (список "-c" cmd)))
+           (exit-code (елемент-списку-за-індексом 0 result))
+           (stdout (елемент-списку-за-індексом 1 result))
+           (stderr (елемент-списку-за-індексом 2 result)))
+      (strcat "[exit-code " (число-рядок exit-code)
               "]\n"
               stdout
-              (110 ((110011100 stderr) "")
-                    (#d1:1 (strcat "\n[stderr]\n" stderr)))))))
+              (за-умовою ((рядок-порожній? stderr) "")
+                    (так (strcat "\n[stderr]\n" stderr)))))))
 
 ; number->string-nonneg removed: core.lisp's number->string now renders
 ; every number canonically (FIX-NUMBER-TO-STRING-RATIONAL), so the shim
@@ -319,9 +319,9 @@
 
 (визначити dispatch-tool
   (функція (name arguments-json)
-    (110
-      ((11110111 name "bash") (execute-bash arguments-json))
-      (#d1:1 (110011110 "error: unknown tool: " name)))))
+    (за-умовою
+      ((однакові? name "bash") (execute-bash arguments-json))
+      (так (рядок-додати "error: unknown tool: " name)))))
 
 (визначити execute-tool-call
   (функція (tc)
@@ -332,30 +332,30 @@
 ; call object being executed, so correlation holds by construction.
 (визначити append-tool-results
   (функція (tcs acc)
-    (110
+    (за-умовою
       
-      ((010 tcs)  acc)
-      (#d1:1 (append-tool-results
-          (011 tcs)
-          (1111 acc
-                  (1110 (1110 (111 (001 role) "tool")
-                              (111 (001 tool-call-id) (tc-id (100 tcs)))
-                              (111 (001 content) (execute-tool-call (100 tcs)))))))))))
+      ((атом? tcs)  acc)
+      (так (append-tool-results
+          (решта tcs)
+          (приєднати acc
+                  (список (список (сполучити (як-є role) "tool")
+                              (сполучити (як-є tool-call-id) (tc-id (перше tcs)))
+                              (сполучити (як-є content) (execute-tool-call (перше tcs)))))))))))
 
 ; ---------------------------------------------------------------------------
 ; Completion validation — the key rule.
 ; ---------------------------------------------------------------------------
 
 (визначити claim-markers
-  (001 ("ran " "executed" "command output" "output of the command" "виконав" "виконано")))
+  (як-є ("ran " "executed" "command output" "output of the command" "виконав" "виконано")))
 
 (визначити markers-contained?
   (функція (markers text)
-    (110
+    (за-умовою
       
-      ((010 markers)  (001 ()))
-      ((110101000 (100 markers) text) t)
-      (#d1:1 (markers-contained? (011 markers) text)))))
+      ((атом? markers)  (як-є ()))
+      ((рядок-містить? (перше markers) text) t)
+      (так (markers-contained? (решта markers) text)))))
 
 (визначити claims-execution?
   (функція (text) (markers-contained? claim-markers text)))
@@ -366,11 +366,11 @@
 ; the stricter owned-evidence rule instead.
 (визначити has-tool-result?
   (функція (messages)
-    (110
+    (за-умовою
       
-      ((010 messages)  (001 ()))
-      ((11110111 (msg-role (100 messages)) "tool") t)
-      (#d1:1 (has-tool-result? (011 messages))))))
+      ((атом? messages)  (як-є ()))
+      ((однакові? (msg-role (перше messages)) "tool") t)
+      (так (є-результат-інструмента? (решта messages))))))
 
 ; -----------------------------------------------------------------------
 ; Evidence calculus v1 (Yantra M1). A global "some tool ran at some
@@ -388,22 +388,22 @@
 ; -----------------------------------------------------------------------
 
 (визначити msg-call-ids
-  (0010 (m) (101000 tc-id (msg-tool-calls m))))
+  (функція (m) (відобразити tc-id (msg-tool-calls m))))
 
 (визначити id-in-list?
   (функція (id ids)
-    (110
+    (за-умовою
       
-      ((010 ids)  (001 ()))
-      ((11110111 id (100 ids)) t)
-      (#d1:1 (id-in-list? id (011 ids))))))
+      ((атом? ids)  (як-є ()))
+      ((однакові? id (перше ids)) t)
+      (так (id-in-list? id (решта ids))))))
 
 (визначити all-covered?
   (функція (ids candidates)
-    (110
+    (за-умовою
       
-      ((010 ids)  t)
-      ((id-in-list? (100 ids) candidates) (all-covered? (011 ids) candidates))
+      ((атом? ids)  t)
+      ((id-in-list? (перше ids) candidates) (усі-ідентифікатори-покриті? (решта ids) candidates))
       )))
 
 ; t iff everything BEFORE the final reply ends with
@@ -412,44 +412,44 @@
 ; first - it is the message being validated, never its own evidence.
 (визначити ends-with-owned-tool-results?
   (функція (messages)
-    (110
+    (за-умовою
       
-      ((010 messages)  (001 ()))
-      (#d1:1 (collect-trailing-tools
-          (011 (10100 messages))
-          (001 ()))))))
+      ((атом? messages)  (як-є ()))
+      (так (collect-trailing-tools
+          (решта (зворот messages))
+          (як-є ()))))))
 
 ; walks backwards over a trailing run of tool results, then requires the
 ; assistant message that issued those calls to own every collected id
 (визначити collect-trailing-tools
   (функція (reversed collected)
-    (110
+    (за-умовою
       
-      ((010 reversed)  (001 ()))
-      ((11110111 (msg-role (100 reversed)) "tool")
-       (collect-trailing-tools (011 reversed)
-                               (111 (msg-tool-call-id (100 reversed)) collected)))
-      (#d1:1
+      ((атом? reversed)  (як-є ()))
+      ((однакові? (msg-role (перше reversed)) "tool")
+       (collect-trailing-tools (решта reversed)
+                               (сполучити (msg-tool-call-id (перше reversed)) collected)))
+      (так
        ((функція (issuer)
-         (110
-           ((0100 (11110111 (msg-role issuer) "assistant")) (001 ()))
+         (за-умовою
+           ((хибне? (однакові? (msg-role issuer) "assistant")) (як-є ()))
            
-           ((010 (msg-tool-calls issuer))  (001 ()))
-           (#d1:1 (all-covered? collected (msg-call-ids issuer))))) (100 reversed))))))
+           ((атом? (msg-tool-calls issuer))  (як-є ()))
+           (так (усі-ідентифікатори-покриті? collected (msg-call-ids issuer))))) (перше reversed))))))
 
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
 ; tool calls, directly preceding the reply.
 (визначити valid-final?
   (функція (assistant-msg messages)
-    (110
-      ((claims-execution? (msg-content assistant-msg))
-       (ends-with-owned-tool-results? messages))
-      (#d1:1 t))))
+    (за-умовою
+      ((стверджує-виконання? (msg-content assistant-msg))
+       (завершується-власними-результатами? messages))
+      (так t))))
 
 (визначити invalid-completion-nudge
-  (1110 (111 (001 role) "system")
-        (111 (001 content)
+  (список (сполучити (як-є role) "system")
+        (сполучити (як-є content)
               "Your last reply claimed a command was executed, but no bash tool result exists in this conversation. A textual claim is not evidence of execution. Either call the bash tool for real, or reply without claiming execution.")))
 
 ; ---------------------------------------------------------------------------
@@ -460,44 +460,44 @@
 
 (визначити count-with-role
   (функція (role messages)
-    (110
+    (за-умовою
       
-      ((010 messages)  0)
-      ((11110111 (msg-role (100 messages)) role) (01010 1 (count-with-role role (011 messages))))
-      (#d1:1 (count-with-role role (011 messages))))))
+      ((атом? messages)  0)
+      ((однакові? (msg-role (перше messages)) role) (додати 1 (count-with-role role (решта messages))))
+      (так (count-with-role role (решта messages))))))
 
 (визначити agent-loop
   (функція (complete messages turn)
-    (110
-      ((110110 turn max-turns)
-       (1110 (111 (001 status) (001 max-turns-reached))
-             (111 (001 turn) turn)
-             (111 (001 messages) messages)))
-      (#d1:1
-       (001001 ((assistant-msg (complete messages))
-              (with-reply (1111 messages (1110 assistant-msg)))
+    (за-умовою
+      ((не-менше? turn max-turns)
+       (список (сполучити (як-є status) (як-є max-turns-reached))
+             (сполучити (як-є turn) turn)
+             (сполучити (як-є messages) messages)))
+      (так
+       (нехай-послідовно ((assistant-msg (complete messages))
+              (with-reply (приєднати messages (список assistant-msg)))
               (tcs (msg-tool-calls assistant-msg)))
-         (110
+         (за-умовою
            
-           ((010 tcs)  (110
-              ((valid-final? assistant-msg with-reply)
-               (1110 (111 (001 status) (001 completed))
-                     (111 (001 epistemic-status) (001 hypothesis))
-                     (111 (001 answer) (msg-content assistant-msg))
-                     (111 (001 turn) turn)
-                     (111 (001 messages) with-reply)))
-              (#d1:1 (agent-loop complete
-                             (1111 with-reply (1110 invalid-completion-nudge))
-                             (01010 turn 1)))))
-           (#d1:1 (agent-loop complete
-                          (1111 with-reply (append-tool-results tcs (001 ())))
-                          (01010 turn 1)))))))))
+           ((атом? tcs)  (за-умовою
+              ((припустима-завершальна-відповідь? assistant-msg with-reply)
+               (список (сполучити (як-є status) (як-є completed))
+                     (сполучити (як-є epistemic-status) (як-є hypothesis))
+                     (сполучити (як-є answer) (msg-content assistant-msg))
+                     (сполучити (як-є turn) turn)
+                     (сполучити (як-є messages) with-reply)))
+              (так (agent-loop complete
+                             (приєднати with-reply (список invalid-completion-nudge))
+                             (додати turn 1)))))
+           (так (agent-loop complete
+                          (приєднати with-reply (append-tool-results tcs (як-є ())))
+                          (додати turn 1)))))))))
 
 (визначити run-agent
   (функція (complete system-prompt user-prompt)
     (agent-loop complete
-                (1110 (1110 (111 (001 role) "system") (111 (001 content) system-prompt))
-                      (1110 (111 (001 role) "user") (111 (001 content) user-prompt)))
+                (список (список (сполучити (як-є role) "system") (сполучити (як-є content) system-prompt))
+                      (список (сполучити (як-є role) "user") (сполучити (як-є content) user-prompt)))
                 0)))
 
 ; Result readers
@@ -518,19 +518,34 @@
 
 (визначити ollama-complete
   (функція (messages)
-    (001000 ((r (http-post-json ollama-url
+    (нехай ((r (http-post-json ollama-url
                              (build-request-body ollama-model messages))))
-      (110 ((11110111 (http-transport-exit r) 0) 
+      (за-умовою ((однакові? (http-transport-exit r) 0) 
              (json->message
-              (extract-assistant-message
-               (110100100 (http-transport-body r)))))
-            ((0100 (11110111 (http-transport-exit r) 0))
+              (витягти-відповідь-помічника
+               (формат-обміну-даними-розібрати (http-transport-body r)))))
+            ((хибне? (однакові? (http-transport-exit r) 0))
             ; Non-zero curl exit: a BLOCKED result (result-status.lisp
             ;; convention) carrying the evidence — never an empty body
             ;; fed to json-parse.
-            (t (1110 'blocked
-                     (110011110 "curl exit "
-                                    (110111001 (http-transport-exit r))
-                                    (001000 ((e (http-transport-stderr r)))
-                                      (110 ((110011100 e) "")
-                                            (#d1:1 (110011110 "\n" e))))))))))))
+            (t (список 'blocked
+                     (рядок-додати "curl exit "
+                                    (число-рядок (http-transport-exit r))
+                                    (нехай ((e (http-transport-stderr r)))
+                                      (за-умовою ((рядок-порожній? e) "")
+                                            (так (рядок-додати "\n" e))))))))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити усі-ідентифікатори-покриті? all-covered?)
+(визначити стверджує-виконання? claims-execution?)
+(визначити завершується-власними-результатами? ends-with-owned-tool-results?)
+(визначити витягти-відповідь-помічника extract-assistant-message)
+(визначити є-результат-інструмента? has-tool-result?)
+(визначити кодувати-масив-формат-обміну-даними json-encode-array)
+(визначити кодувати-об'єкт-формат-обміну-даними json-encode-object)
+(визначити кодувати-рядок-формат-обміну-даними json-encode-string)
+(визначити кодувати-значення-формат-обміну-даними json-encode-value)
+(визначити екранувати-формат-обміну-даними json-escape)
+(визначити екранувати-знак-формат-обміну-даними json-escape-char)
+(визначити об'єкт-формат-обміну-даними? json-object?)
+(визначити припустима-завершальна-відповідь? valid-final?)

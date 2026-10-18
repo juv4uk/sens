@@ -18,100 +18,100 @@
 ; W8:00000101/00101111/00110000 — лише архівне походження;
 ; чинний закон: D3:100 CAR, D4:1001 CADR, D5:10011 CADDR.
 ; Функції є похідними SENS-LAMBDA, без історичного byte dispatch.
-(0011 fs-objects
-  (0010 (fs) (100 fs)))
-(0011 fs-bindings
-  (0010 (fs) (1001 fs)))
-(0011 fs-revision
-  (0010 (fs) (10011 fs)))
+(визначити fs-objects
+  (функція (fs) (перше fs)))
+(визначити fs-bindings
+  (функція (fs) (друге fs)))
+(визначити fs-revision
+  (функція (fs) (третє fs)))
 
-(0011 fs-empty
-  (0010 ()
-    (1110 (empty-content-store) map-empty 0)))
+(визначити fs-empty
+  (функція ()
+    (список (empty-content-store) map-empty 0)))
 
-(0011 fs-root-address
-  (0010 (fs)
+(визначити fs-root-address
+  (функція (fs)
     (knowledge-content-address
-      (1110 (001 wsm-fs-root)
+      (список (як-є wsm-fs-root)
             (fs-bindings fs)))))
 
 ; fs-write returns (new-fs content-address). The caller chooses whether to
 ; retain the old root, enabling immutable branching and rollback.
 ; fs-write повертає (new-fs content-address); викликач сам вирішує, чи
 ; зберігати старий корінь, тому branching і rollback лишаються можливими.
-(0011 fs-write
-  (0010 (fs name value)
+(визначити fs-write
+  (функція (fs name value)
     (нехай-похідне ((address (knowledge-content-address value)))
-      (1110
-        (1110
+      (список
+        (список
           (content-store-put (fs-objects fs) value)
           (внутрішня-мапа-вставити name address (fs-bindings fs))
-          (001110 (fs-revision fs)))
+          (додати-1 (fs-revision fs)))
         address))))
 
 ; fs-read returns (found value address) or (not-found name).
 ; fs-read повертає (found value address) або (not-found name).
-(0011 fs-read
-  (0010 (fs name)
+(визначити fs-read
+  (функція (fs name)
     (нехай-похідне ((binding (внутрішня-мапа-отримати name (fs-bindings fs))))
-      (110
-        ((0101 binding) (1110 (001 not-found) name))
-        ((010 binding)  (1110 (001 not-found) name))
-        ((010 ())
-          (нехай-похідне ((address (100 binding)))
-            (110
-              ((0100 (content-store-contains? (fs-objects fs) address))
-               (1110 (001 not-found) name))
-              ((010 ())
+      (за-умовою
+        ((порожній? binding) (список (як-є not-found) name))
+        ((атом? binding)  (список (як-є not-found) name))
+        ((атом? ())
+          (нехай-похідне ((address (перше binding)))
+            (за-умовою
+              ((хибне? (content-store-contains? (fs-objects fs) address))
+               (список (як-є not-found) name))
+              ((атом? ())
                 ; map-get is a maybe-list, so unwrap exactly once. This
                 ; preserves a legitimately stored nil value.
                 ; map-get повертає maybe-список, тому знімаємо рівно одну
                 ; оболонку й не втрачаємо законно збережений nil.
-                (1110 (001 found)
-                      (100 (content-store-get (fs-objects fs) address))
+                (список (як-є found)
+                      (перше (content-store-get (fs-objects fs) address))
                       address)))))))))
 
-(0011 fs-list
-  (0010 (fs)
+(визначити fs-list
+  (функція (fs)
     (внутрішня-мапа-список (fs-bindings fs))))
 
-(0011 fs-contains?
-  (0010 (fs name)
-    (0100 (010 (внутрішня-мапа-отримати name (fs-bindings fs))))))
+(визначити fs-contains?
+  (функція (fs name)
+    (хибне? (атом? (внутрішня-мапа-отримати name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
 ; Версіоновані data-only оболонки є звичайними alist і ніколи не виконуються.
-(0011 *fs-format-version* (001 (0 1)))
+(визначити *fs-format-version* (як-є (ні 1)))
 
-(0011 fs-object-package
-  (0010 (value)
-    (1110
-      (111 (001 format) (001 wsm-fs-object))
-      (111 (001 version) *fs-format-version*)
-      (111 (001 address) (knowledge-content-address value))
-      (111 (001 value) value))))
+(визначити fs-object-package
+  (функція (value)
+    (список
+      (сполучити (як-є format) (як-є wsm-fs-object))
+      (сполучити (як-є version) *fs-format-version*)
+      (сполучити (як-є address) (knowledge-content-address value))
+      (сполучити (як-є value) value))))
 
-(0011 fs-root-package
-  (0010 (fs)
-    (1110
-      (111 (001 format) (001 wsm-fs-root))
-      (111 (001 version) *fs-format-version*)
-      (111 (001 revision) (fs-revision fs))
-      (111 (001 bindings) (внутрішня-мапа-список (fs-bindings fs)))
-      (111 (001 objects) (fs-object-addresses (внутрішня-мапа-список (fs-objects fs)))))))
+(визначити fs-root-package
+  (функція (fs)
+    (список
+      (сполучити (як-є format) (як-є wsm-fs-root))
+      (сполучити (як-є version) *fs-format-version*)
+      (сполучити (як-є revision) (fs-revision fs))
+      (сполучити (як-є bindings) (внутрішня-мапа-список (fs-bindings fs)))
+      (сполучити (як-є objects) (fs-object-addresses (внутрішня-мапа-список (fs-objects fs)))))))
 
-(0011 fs-object-addresses
-  (0010 (entries)
-    (110
-      ((0101 entries) (001 ()))
-      ((0100 (010 entries))
-       (111 (100 (100 entries))
-                 (fs-object-addresses (011 entries)))))))
+(визначити fs-object-addresses
+  (функція (entries)
+    (за-умовою
+      ((порожній? entries) (як-є ()))
+      ((хибне? (атом? entries))
+       (сполучити (перше (перше entries))
+                 (fs-object-addresses (решта entries)))))))
 
-(0011 fs-d1-no?
-  (0010 (value)
-    (0100 value)))
+(визначити fs-d1-no?
+  (функція (value)
+    (хибне? value)))
 
 ; Structural alist lookup derived from D3 pair/atom/EQ and D4 NULL.
 ; D5 ASSOC is not the authority for event-envelope field extraction.
@@ -120,78 +120,78 @@
 ; Селектори застосовуються лише до перевіреного alist-entry.
 ; Некоректні записи ніколи не стають читабельними полями, навіть поза
 ; fs-journal-event-decision. Немає host truth і немає нового D24 механізму.
-(0011 fs-package-field
-  (0010 (name package)
-    (110
-      ((0101 package) (001 ()))
-      ((010 package) (001 ()))
-      ((010 (100 package)) (001 ()))
-      ((0101 (100 (100 package))) (001 ()))
-      ((0100 (010 (100 (100 package)))) (001 ()))
-      ((101 name (100 (100 package))) (011 (100 package)))
-      (#d1:1 (fs-package-field name (011 package))))))
-(0011 fs-object-package-decision
-  (0010 (package)
-    (110
-      ((010 package)
-       (1110 (001 rejected) (001 invalid-package)))
+(визначити fs-package-field
+  (функція (name package)
+    (за-умовою
+      ((порожній? package) (як-є ()))
+      ((атом? package) (як-є ()))
+      ((атом? (перше package)) (як-є ()))
+      ((порожній? (перше (перше package))) (як-є ()))
+      ((хибне? (атом? (перше (перше package)))) (як-є ()))
+      ((тотожне? name (перше (перше package))) (решта (перше package)))
+      (так (fs-package-field name (решта package))))))
+(визначити fs-object-package-decision
+  (функція (package)
+    (за-умовою
+      ((атом? package)
+       (список (як-є rejected) (як-є invalid-package)))
       ((fs-d1-no?
-         (101 (fs-package-field (001 format) package) (001 wsm-fs-object)))
-       (1110 (001 rejected) (001 invalid-format)))
+         (тотожне? (fs-package-field (як-є format) package) (як-є wsm-fs-object)))
+       (список (як-є rejected) (як-є invalid-format)))
       ((fs-d1-no?
-         (fs-journal-version-current? (fs-package-field (001 version) package)))
-       (1110 (001 rejected) (001 unsupported-version)))
+         (fs-journal-version-current? (fs-package-field (як-є version) package)))
+       (список (як-є rejected) (як-є unsupported-version)))
       ((fs-d1-no?
-         (101 (fs-package-field (001 address) package)
-                   (knowledge-content-address (fs-package-field (001 value) package))))
-       (1110 (001 rejected) (001 address-mismatch)))
-      ((101 (fs-package-field (001 address) package)
-                 (knowledge-content-address (fs-package-field (001 value) package)))
-       (1110 (001 accepted) (fs-package-field (001 value) package))))))
-(0011 fs-serialize-object
-  (0010 (value)
-    (11110100 (fs-object-package value))))
+         (тотожне? (fs-package-field (як-є address) package)
+                   (knowledge-content-address (fs-package-field (як-є value) package))))
+       (список (як-є rejected) (як-є address-mismatch)))
+      ((тотожне? (fs-package-field (як-є address) package)
+                 (knowledge-content-address (fs-package-field (як-є value) package)))
+       (список (як-є accepted) (fs-package-field (як-є value) package))))))
+(визначити fs-serialize-object
+  (функція (value)
+    (значення-у-текст (fs-object-package value))))
 
-(0011 fs-deserialize-object
-  (0010 (text)
-    (fs-object-package-decision (11101010 text))))
+(визначити fs-deserialize-object
+  (функція (text)
+    (рішення-щодо-пакета-об'єкта-файлової-системи (прочитати text))))
 
 ; F2 root envelopes validate their own format/version/revision/bindings/objects.
 ; Object-envelope address/value fields do not exist in a root envelope.
 ; The historical knowledge proper-list checker returns host T and cannot
 ; control exact D3 COND. Derive a local D1 proper-list law: NIL is proper,
 ; pair tails recurse, non-NIL atoms are improper.
-(0011 внутрішній-правильний-список?
-  (0010 (value)
-    (110
-      ((0101 value) (0101 (001 ())))
-      ((010 value) (0101 (001 (0))))
-      ((010 ()) (внутрішній-правильний-список? (011 value))))))
+(визначити внутрішній-правильний-список?
+  (функція (value)
+    (за-умовою
+      ((порожній? value) (порожній? (як-є ())))
+      ((атом? value) (порожній? (як-є (ні))))
+      ((атом? ()) (внутрішній-правильний-список? (решта value))))))
 
-(0011 fs-root-package-decision
-  (0010 (package)
-    (110
-      ((010 package)
-       (1110 (001 rejected) (001 invalid-package)))
+(визначити fs-root-package-decision
+  (функція (package)
+    (за-умовою
+      ((атом? package)
+       (список (як-є rejected) (як-є invalid-package)))
       ((fs-d1-no?
-         (101 (fs-package-field (001 format) package) (001 wsm-fs-root)))
-       (1110 (001 rejected) (001 invalid-format)))
+         (тотожне? (fs-package-field (як-є format) package) (як-є wsm-fs-root)))
+       (список (як-є rejected) (як-є invalid-format)))
       ((fs-d1-no?
-         (fs-journal-version-current? (fs-package-field (001 version) package)))
-       (1110 (001 rejected) (001 unsupported-version)))
-      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (001 bindings) package)))
-       (1110 (001 rejected) (001 invalid-bindings)))
-      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (001 objects) package)))
-       (1110 (001 rejected) (001 invalid-objects)))
-      ((внутрішній-правильний-список? (fs-package-field (001 objects) package))
-       (1110 (001 accepted) package)))))
-(0011 fs-serialize-root
-  (0010 (fs)
-    (11110100 (fs-root-package fs))))
+         (fs-journal-version-current? (fs-package-field (як-є version) package)))
+       (список (як-є rejected) (як-є unsupported-version)))
+      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (як-є bindings) package)))
+       (список (як-є rejected) (як-є invalid-bindings)))
+      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (як-є objects) package)))
+       (список (як-є rejected) (як-є invalid-objects)))
+      ((внутрішній-правильний-список? (fs-package-field (як-є objects) package))
+       (список (як-є accepted) package)))))
+(визначити fs-serialize-root
+  (функція (fs)
+    (значення-у-текст (fs-root-package fs))))
 
-(0011 fs-deserialize-root
-  (0010 (text)
-    (fs-root-package-decision (11101010 text))))
+(визначити fs-deserialize-root
+  (функція (text)
+    (рішення-щодо-кореневого-пакета-файлової-системи (прочитати text))))
 
 ; Rebuild an in-memory snapshot from data-only envelopes. No envelope is
 ; evaluated. Missing referenced objects are rejected before a snapshot is
@@ -202,75 +202,75 @@
 ; Terminate ONLY at structural NIL. A nonempty proper list must
 ; validate and insert every package; a non-NIL atom is rejected. The prior
 ; NOT(ATOM packages) branch silently accepted every nonempty list.
-(0011 fs-build-object-store
-  (0010 (packages store)
-    (110
-      ((0101 packages) (1110 (001 accepted) store))
-      ((010 packages) (1110 (001 rejected) (001 invalid-object-packages)))
-      ((010 ())
-        (нехай-похідне ((decision (fs-object-package-decision (100 packages))))
-          (110
-            ((0100 (101 (100 decision) (001 accepted))) decision)
-            ((010 ()) (fs-build-object-store
-                 (011 packages)
-                 (content-store-put store (1001 decision))))))))))
+(визначити fs-build-object-store
+  (функція (packages store)
+    (за-умовою
+      ((порожній? packages) (список (як-є accepted) store))
+      ((атом? packages) (список (як-є rejected) (як-є invalid-object-packages)))
+      ((атом? ())
+        (нехай-похідне ((decision (рішення-щодо-пакета-об'єкта-файлової-системи (перше packages))))
+          (за-умовою
+            ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
+            ((атом? ()) (fs-build-object-store
+                 (решта packages)
+                 (content-store-put store (друге decision))))))))))
 
 ; All-addresses checks are exact D1 folds: NIL returns YES; improper
 ; tails and missing content return NO. No host T, structural EMPTY, or
 ; permissive truth coercion may leave these predicates.
-(0011 fs-all-addresses-present?
-  (0010 (addresses store)
-    (110
-      ((0101 addresses) (0101 (001 ())))
-      ((010 addresses) (0101 (001 (0))))
-      ((0100 (content-store-contains? store (100 addresses)))
-       (0101 (001 (0))))
-      ((010 ()) (fs-all-addresses-present? (011 addresses) store)))))
+(визначити fs-all-addresses-present?
+  (функція (addresses store)
+    (за-умовою
+      ((порожній? addresses) (порожній? (як-є ())))
+      ((атом? addresses) (порожній? (як-є (ні))))
+      ((хибне? (content-store-contains? store (перше addresses)))
+       (порожній? (як-є (ні))))
+      ((атом? ()) (усі-адреси-об'єктів-файлової-системи-наявні? (решта addresses) store)))))
 
-(0011 fs-binding-addresses-present?
-  (0010 (entries store)
-    (110
-      ((0101 entries) (0101 (001 ())))
-      ((010 entries) (0101 (001 (0))))
-      ((0100 (content-store-contains? store (011 (100 entries))))
-       (0101 (001 (0))))
-      ((010 ()) (fs-binding-addresses-present? (011 entries) store)))))
+(визначити fs-binding-addresses-present?
+  (функція (entries store)
+    (за-умовою
+      ((порожній? entries) (порожній? (як-є ())))
+      ((атом? entries) (порожній? (як-є (ні))))
+      ((хибне? (content-store-contains? store (решта (перше entries))))
+       (порожній? (як-є (ні))))
+      ((атом? ()) (усі-адреси-зв'язувань-у-файловій-системі-наявні? (решта entries) store)))))
 
-(0011 fs-reconstruct-root
-  (0010 (root-package object-packages)
-    (нехай-похідне ((root-decision (fs-root-package-decision root-package)))
-      (110
-        ((0100 (101 (100 root-decision) (001 accepted))) root-decision)
-        ((010 ())
+(визначити fs-reconstruct-root
+  (функція (root-package object-packages)
+    (нехай-похідне ((root-decision (рішення-щодо-кореневого-пакета-файлової-системи root-package)))
+      (за-умовою
+        ((хибне? (тотожне? (перше root-decision) (як-є accepted))) root-decision)
+        ((атом? ())
           (нехай-похідне ((objects-decision
                   (fs-build-object-store object-packages (empty-content-store))))
-            (110
-              ((0100 (101 (100 objects-decision) (001 accepted))) objects-decision)
-              ((0100 (fs-all-addresses-present?
-                      (fs-package-field (001 objects) root-package)
-                      (1001 objects-decision)))
-               (1110 (001 rejected) (001 missing-object)))
-              ((0100 (fs-binding-addresses-present?
-                      (fs-package-field (001 bindings) root-package)
-                      (1001 objects-decision)))
-               (1110 (001 rejected) (001 missing-object)))
-              ((010 ())
-                (1110
-                  (001 accepted)
-                  (1110
-                    (1001 objects-decision)
-                    (нехай-похідне ((bindings (fs-package-field (001 bindings) root-package)))
+            (за-умовою
+              ((хибне? (тотожне? (перше objects-decision) (як-є accepted))) objects-decision)
+              ((хибне? (усі-адреси-об'єктів-файлової-системи-наявні?
+                      (fs-package-field (як-є objects) root-package)
+                      (друге objects-decision)))
+               (список (як-є rejected) (як-є missing-object)))
+              ((хибне? (усі-адреси-зв'язувань-у-файловій-системі-наявні?
+                      (fs-package-field (як-є bindings) root-package)
+                      (друге objects-decision)))
+               (список (як-є rejected) (як-є missing-object)))
+              ((атом? ())
+                (список
+                  (як-є accepted)
+                  (список
+                    (друге objects-decision)
+                    (нехай-похідне ((bindings (fs-package-field (як-є bindings) root-package)))
                       (fs-bindings-from-list bindings map-empty))
-                    (fs-package-field (001 revision) root-package)))))))))))
+                    (fs-package-field (як-є revision) root-package)))))))))))
 
-(0011 fs-bindings-from-list
-  (0010 (entries bindings)
-    (110
+(визначити fs-bindings-from-list
+  (функція (entries bindings)
+    (за-умовою
       
-      ((010 entries)  bindings)
-      ((010 ()) (fs-bindings-from-list
-           (011 entries)
-           (внутрішня-мапа-вставити (100 (100 entries)) (011 (100 entries)) bindings))))))
+      ((атом? entries)  bindings)
+      ((атом? ()) (fs-bindings-from-list
+           (решта entries)
+           (внутрішня-мапа-вставити (перше (перше entries)) (решта (перше entries)) bindings))))))
 
 ; F3 journal records are data-only append-only events.  Replay starts from
 ; fs-empty and returns either (accepted fs) or (rejected reason); unknown or
@@ -278,318 +278,324 @@
 ; Журнал F3 — це лише data-only події append-only. Replay починається з
 ; fs-empty і повертає (accepted fs) або (rejected reason); невідомі чи
 ; пошкоджені події не стають частковим станом.
-(0011 *fs-journal-version* (001 (0 1)))
+(визначити *fs-journal-version* (як-є (ні 1)))
 
-(0011 fs-journal-event
-  (0010 (op fields)
-    (111
-      (111 (001 format) (001 wsm-fs-event))
-      (111
-        (111 (001 version) *fs-journal-version*)
-        (111 (111 (001 op) op) fields)))))
+(визначити fs-journal-event
+  (функція (op fields)
+    (сполучити
+      (сполучити (як-є format) (як-є wsm-fs-event))
+      (сполучити
+        (сполучити (як-є version) *fs-journal-version*)
+        (сполучити (сполучити (як-є op) op) fields)))))
 
-(0011 fs-journal-write-event
-  (0010 (name value)
+(визначити fs-journal-write-event
+  (функція (name value)
     (fs-journal-event
-      (001 write)
-      (1110 (111 (001 name) name) (111 (001 value) value)))))
+      (як-є write)
+      (список (сполучити (як-є name) name) (сполучити (як-є value) value)))))
 
-(0011 fs-journal-bind-event
-  (0010 (name address)
+(визначити fs-journal-bind-event
+  (функція (name address)
     (fs-journal-event
-      (001 bind)
-      (1110 (111 (001 name) name) (111 (001 address) address)))))
+      (як-є bind)
+      (список (сполучити (як-є name) name) (сполучити (як-є address) address)))))
 
-(0011 fs-journal-unbind-event
-  (0010 (name)
-    (fs-journal-event (001 unbind) (1110 (111 (001 name) name)))))
+(визначити fs-journal-unbind-event
+  (функція (name)
+    (fs-journal-event (як-є unbind) (список (сполучити (як-є name) name)))))
 
-(0011 fs-journal-root-commit-event
-  (0010 (root-package)
+(визначити fs-journal-root-commit-event
+  (функція (root-package)
     (fs-journal-event
-      (001 root-commit)
-      (1110 (111 (001 root) root-package)))))
+      (як-є root-commit)
+      (список (сполучити (як-є root) root-package)))))
 
-(0011 fs-journal-append
-  (0010 (journal event)
-    (1111 journal (1110 event))))
+(визначити fs-journal-append
+  (функція (journal event)
+    (приєднати journal (список event))))
 
 ; Journal validation is a D1-controlled Lisp derivation, not borrowed D8
 ; EQUAL/AND/OR. Field existence is checked separately from field value so
 ; storing literal EMPTY does not turn a valid WRITE into a missing field.
 ; Exact D1:1/0. Не довіряємо nested CAR без перевірки форми.
-(0011 fs-package-has-field?
-  (0010 (name package)
-    (110
-      ((0101 package) #d1:0)
-      ((010 package) #d1:0)
-      ((010 (100 package)) #d1:0)
-      ((0101 (100 (100 package))) #d1:0)
-      ((0100 (010 (100 (100 package)))) #d1:0)
-      ((101 name (100 (100 package))) #d1:1)
-      (#d1:1 (fs-package-has-field? name (011 package))))))
+(визначити fs-package-has-field?
+  (функція (name package)
+    (за-умовою
+      ((порожній? package) ні)
+      ((атом? package) ні)
+      ((атом? (перше package)) ні)
+      ((порожній? (перше (перше package))) ні)
+      ((хибне? (атом? (перше (перше package)))) ні)
+      ((тотожне? name (перше (перше package))) так)
+      (так (fs-package-has-field? name (решта package))))))
 
 ; F3 uses exactly the two-element atomic version (0 1). The tests are
 ; shape-bounded before CAR/CDR and every branch returns an exact D1 bit.
-(0011 fs-journal-version-current?
-  (0010 (candidate)
-    (110
-      ((010 candidate) (0101 (001 (0))))
-      ((010 (011 candidate)) (0101 (001 (0))))
-      ((0101 (011 (011 candidate)))
-       (110
-         ((101 (100 candidate) (001 0))
-          (101 (100 (011 candidate)) (001 1)))
-         ((010 ()) (0101 (001 (0))))))
-      ((010 ()) (0101 (001 (0)))))))
+(визначити fs-journal-version-current?
+  (функція (candidate)
+    (за-умовою
+      ((атом? candidate) (порожній? (як-є (ні))))
+      ((атом? (решта candidate)) (порожній? (як-є (ні))))
+      ((порожній? (решта (решта candidate)))
+       (за-умовою
+         ((тотожне? (перше candidate) (як-є 0))
+          (тотожне? (перше (решта candidate)) (як-є 1)))
+         ((атом? ()) (порожній? (як-є (ні))))))
+      ((атом? ()) (порожній? (як-є (ні)))))))
 
 ; Структурна форма alist перевіряється ДО селекторів полів.
 ; Пара (ключ . дані), ключ — непорожній атом, значення може бути EMPTY.
 ; D1-вердикт належить самому SENS; ратифікації нової координати немає.
-(0011 fs-journal-alist?
-  (0010 (entries)
-    (110
-      ((0101 entries) #d1:1)
-      ((010 entries) #d1:0)
-      ((010 (100 entries)) #d1:0)
-      ((0101 (100 (100 entries))) #d1:0)
-      ((0100 (010 (100 (100 entries)))) #d1:0)
-      (#d1:1 (fs-journal-alist? (011 entries))))))
+(визначити fs-journal-alist?
+  (функція (entries)
+    (за-умовою
+      ((порожній? entries) так)
+      ((атом? entries) ні)
+      ((атом? (перше entries)) ні)
+      ((порожній? (перше (перше entries))) ні)
+      ((хибне? (атом? (перше (перше entries)))) ні)
+      (так (fs-journal-alist? (решта entries))))))
 
-(0011 fs-journal-event-decision
-  (0010 (event)
-    (110
+(визначити fs-journal-event-decision
+  (функція (event)
+    (за-умовою
       ; Загальний порожній alist коректний як структура, але не як подія.
-      ((0101 event) (1110 (001 rejected) (001 invalid-event)))
-      ((0100 (fs-journal-alist? event))
-       (1110 (001 rejected) (001 invalid-event)))
-      ((0100 (101 (fs-package-field (001 format) event) (001 wsm-fs-event)))
-       (1110 (001 rejected) (001 invalid-format)))
-      ((0100 (fs-journal-version-current? (fs-package-field (001 version) event)))
-       (1110 (001 rejected) (001 unsupported-version)))
-      ((0101 (fs-package-field (001 op) event))
-       (1110 (001 rejected) (001 missing-operation)))
-      ((101 (fs-package-field (001 op) event) (001 write))
-       (110
-         ((0100 (fs-package-has-field? (001 name) event))
-          (1110 (001 rejected) (001 incomplete-write)))
-         ((0100 (fs-package-has-field? (001 value) event))
-          (1110 (001 rejected) (001 incomplete-write)))
-         ((010 ()) (1110 (001 accepted) event))))
-      ((101 (fs-package-field (001 op) event) (001 bind))
-       (110
-         ((0100 (fs-package-has-field? (001 name) event))
-          (1110 (001 rejected) (001 incomplete-bind)))
-         ((0100 (fs-package-has-field? (001 address) event))
-          (1110 (001 rejected) (001 incomplete-bind)))
-         ((010 ()) (1110 (001 accepted) event))))
-      ((101 (fs-package-field (001 op) event) (001 unbind))
-       (110
-         ((0100 (fs-package-has-field? (001 name) event))
-          (1110 (001 rejected) (001 incomplete-unbind)))
-         ((010 ()) (1110 (001 accepted) event))))
-      ((101 (fs-package-field (001 op) event) (001 root-commit))
-       (110
-         ((0100 (fs-package-has-field? (001 root) event))
-          (1110 (001 rejected) (001 incomplete-root-commit)))
-         ((010 ()) (1110 (001 accepted) event))))
-      ((010 ()) (1110 (001 rejected) (001 unknown-event))))))
-(0011 fs-bindings-without
-  (0010 (entries name result)
-    (110
+      ((порожній? event) (список (як-є rejected) (як-є invalid-event)))
+      ((хибне? (fs-journal-alist? event))
+       (список (як-є rejected) (як-є invalid-event)))
+      ((хибне? (тотожне? (fs-package-field (як-є format) event) (як-є wsm-fs-event)))
+       (список (як-є rejected) (як-є invalid-format)))
+      ((хибне? (fs-journal-version-current? (fs-package-field (як-є version) event)))
+       (список (як-є rejected) (як-є unsupported-version)))
+      ((порожній? (fs-package-field (як-є op) event))
+       (список (як-є rejected) (як-є missing-operation)))
+      ((тотожне? (fs-package-field (як-є op) event) (як-є write))
+       (за-умовою
+         ((хибне? (fs-package-has-field? (як-є name) event))
+          (список (як-є rejected) (як-є incomplete-write)))
+         ((хибне? (fs-package-has-field? (як-є value) event))
+          (список (як-є rejected) (як-є incomplete-write)))
+         ((атом? ()) (список (як-є accepted) event))))
+      ((тотожне? (fs-package-field (як-є op) event) (як-є bind))
+       (за-умовою
+         ((хибне? (fs-package-has-field? (як-є name) event))
+          (список (як-є rejected) (як-є incomplete-bind)))
+         ((хибне? (fs-package-has-field? (як-є address) event))
+          (список (як-є rejected) (як-є incomplete-bind)))
+         ((атом? ()) (список (як-є accepted) event))))
+      ((тотожне? (fs-package-field (як-є op) event) (як-є unbind))
+       (за-умовою
+         ((хибне? (fs-package-has-field? (як-є name) event))
+          (список (як-є rejected) (як-є incomplete-unbind)))
+         ((атом? ()) (список (як-є accepted) event))))
+      ((тотожне? (fs-package-field (як-є op) event) (як-є root-commit))
+       (за-умовою
+         ((хибне? (fs-package-has-field? (як-є root) event))
+          (список (як-є rejected) (як-є incomplete-root-commit)))
+         ((атом? ()) (список (як-є accepted) event))))
+      ((атом? ()) (список (як-є rejected) (як-є unknown-event))))))
+(визначити fs-bindings-without
+  (функція (entries name result)
+    (за-умовою
       
-      ((010 entries)  result)
-      ((101 (100 (100 entries)) name)
-       (fs-bindings-without (011 entries) name result))
-      ((010 ())
+      ((атом? entries)  result)
+      ((тотожне? (перше (перше entries)) name)
+       (fs-bindings-without (решта entries) name result))
+      ((атом? ())
         (fs-bindings-without
-          (011 entries)
+          (решта entries)
           name
-          (внутрішня-мапа-вставити (100 (100 entries)) (011 (100 entries)) result))))))
+          (внутрішня-мапа-вставити (перше (перше entries)) (решта (перше entries)) result))))))
 
-(0011 fs-unbind
-  (0010 (fs name)
-    (1110
+(визначити fs-unbind
+  (функція (fs name)
+    (список
       (fs-objects fs)
       (fs-bindings-without (внутрішня-мапа-список (fs-bindings fs)) name map-empty)
-      (001110 (fs-revision fs)))))
+      (додати-1 (fs-revision fs)))))
 
 ; Root-commit equivalence over immutable trees, derived from D3
 ; ATOM/EQ/CAR/CDR and D4 NULL; returns exact D1 at every recursion level.
-(0011 внутрішня-рівність-структур
-  (0010 (left right)
-    (110
-      ((0101 left) (0101 right))
-      ((0101 right) (0101 (001 (0))))
-      ((010 left)
-       (110
-         ((010 right) (101 left right))
-         ((010 ()) (0101 (001 (0))))))
-      ((010 right) (0101 (001 (0))))
-      ((внутрішня-рівність-структур (100 left) (100 right))
-       (внутрішня-рівність-структур (011 left) (011 right)))
-      ((010 ()) (0101 (001 (0)))))))
+(визначити внутрішня-рівність-структур
+  (функція (left right)
+    (за-умовою
+      ((порожній? left) (порожній? right))
+      ((порожній? right) (порожній? (як-є (ні))))
+      ((атом? left)
+       (за-умовою
+         ((атом? right) (тотожне? left right))
+         ((атом? ()) (порожній? (як-є (ні))))))
+      ((атом? right) (порожній? (як-є (ні))))
+      ((внутрішня-рівність-структур (перше left) (перше right))
+       (внутрішня-рівність-структур (решта left) (решта right)))
+      ((атом? ()) (порожній? (як-є (ні)))))))
 
-(0011 fs-journal-replay-event
-  (0010 (fs event)
+(визначити fs-journal-replay-event
+  (функція (fs event)
     (нехай-похідне ((decision (fs-journal-event-decision event)))
-      (110
-        ((0100 (101 (100 decision) (001 accepted))) decision)
-        ((010 ())
-          (нехай-похідне ((op (fs-package-field (001 op) event)))
-            (110
-              ((101 op (001 write))
+      (за-умовою
+        ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
+        ((атом? ())
+          (нехай-похідне ((op (fs-package-field (як-є op) event)))
+            (за-умовою
+              ((тотожне? op (як-є write))
                (нехай-похідне ((written (fs-write fs
-                                        (fs-package-field (001 name) event)
-                                        (fs-package-field (001 value) event))))
-                 (1110 (001 accepted) (100 written))))
-              ((101 op (001 bind))
-               (нехай-похідне ((address (fs-package-field (001 address) event)))
-                 (110
-                   ((0100 (content-store-contains? (fs-objects fs) address))
-                    (1110 (001 rejected) (001 missing-object)))
-                   ((010 ())
-                     (1110
-                       (001 accepted)
-                       (1110
+                                        (fs-package-field (як-є name) event)
+                                        (fs-package-field (як-є value) event))))
+                 (список (як-є accepted) (перше written))))
+              ((тотожне? op (як-є bind))
+               (нехай-похідне ((address (fs-package-field (як-є address) event)))
+                 (за-умовою
+                   ((хибне? (content-store-contains? (fs-objects fs) address))
+                    (список (як-є rejected) (як-є missing-object)))
+                   ((атом? ())
+                     (список
+                       (як-є accepted)
+                       (список
                          (fs-objects fs)
-                         (внутрішня-мапа-вставити (fs-package-field (001 name) event)
+                         (внутрішня-мапа-вставити (fs-package-field (як-є name) event)
                                      address
                                      (fs-bindings fs))
-                         (001110 (fs-revision fs))))))))
-              ((101 op (001 unbind))
-               (1110 (001 accepted)
-                     (fs-unbind fs (fs-package-field (001 name) event))))
-              ((101 op (001 root-commit))
-               (110
+                         (додати-1 (fs-revision fs))))))))
+              ((тотожне? op (як-є unbind))
+               (список (як-є accepted)
+                     (fs-unbind fs (fs-package-field (як-є name) event))))
+              ((тотожне? op (як-є root-commit))
+               (за-умовою
                  ((внутрішня-рівність-структур (fs-root-package fs)
-                           (fs-package-field (001 root) event))
-                  (1110 (001 accepted) fs))
-                 ((010 ()) (1110 (001 rejected) (001 root-mismatch)))))
-              ((010 ()) (1110 (001 rejected) (001 unknown-event))))))))))
+                           (fs-package-field (як-є root) event))
+                  (список (як-є accepted) fs))
+                 ((атом? ()) (список (як-є rejected) (як-є root-mismatch)))))
+              ((атом? ()) (список (як-є rejected) (як-є unknown-event))))))))))
 
-(0011 fs-journal-replay-onto
-  (0010 (journal fs)
-    (110
-      ((0101 journal) (1110 (001 accepted) fs))
-      ((010 journal)  (1110 (001 rejected) (001 invalid-event)))
-      ((010 ())
-        (нехай-похідне ((decision (fs-journal-replay-event fs (100 journal))))
-          (110
-            ((0100 (101 (100 decision) (001 accepted))) decision)
-            ((010 ()) (fs-journal-replay-onto (011 journal) (1001 decision)))))))))
+(визначити fs-journal-replay-onto
+  (функція (journal fs)
+    (за-умовою
+      ((порожній? journal) (список (як-є accepted) fs))
+      ((атом? journal)  (список (як-є rejected) (як-є invalid-event)))
+      ((атом? ())
+        (нехай-похідне ((decision (fs-journal-replay-event fs (перше journal))))
+          (за-умовою
+            ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
+            ((атом? ()) (fs-journal-replay-onto (решта journal) (друге decision)))))))))
 
-(0011 fs-journal-replay
-  (0010 (journal)
+(визначити fs-journal-replay
+  (функція (journal)
     (fs-journal-replay-onto journal (fs-empty))))
 
-(0011 fs-serialize-journal
-  (0010 (journal)
-    (11110100 journal)))
+(визначити fs-serialize-journal
+  (функція (journal)
+    (значення-у-текст journal)))
 
-(0011 fs-deserialize-journal
-  (0010 (text)
-    (fs-journal-replay (11101010 text))))
+(визначити fs-deserialize-journal
+  (функція (text)
+    (fs-journal-replay (прочитати text))))
 
 ; F4 commit boundary model. Objects and journal may be written first, but a
 ; snapshot becomes visible only when the root-pointer stage completes.
 ; Модель межі commit F4. Objects і journal можна записати раніше, але
 ; snapshot стає видимим лише після завершення root-pointer.
 ; Commit-stage membership returns exact D1, never host T or implicit NIL.
-(0011 fs-commit-stage?
-  (0010 (stage)
-    (110
-      ((101 stage (001 objects)) (0101 (001 ())))
-      ((101 stage (001 journal)) (0101 (001 ())))
-      ((101 stage (001 root-pointer)) (0101 (001 ())))
-      ((010 ()) (0101 (001 (0)))))))
-(0011 fs-recover-commit
-  (0010 (old-fs new-fs completed-stage)
-    (110
-      ((0100 (fs-commit-stage? completed-stage))
-       (1110 (001 rejected) (001 unknown-commit-stage)))
-      ((101 completed-stage (001 root-pointer))
-       (1110 (001 recovered) new-fs))
-      ((010 ()) (1110 (001 recovered) old-fs)))))
+(визначити fs-commit-stage?
+  (функція (stage)
+    (за-умовою
+      ((тотожне? stage (як-є objects)) (порожній? (як-є ())))
+      ((тотожне? stage (як-є journal)) (порожній? (як-є ())))
+      ((тотожне? stage (як-є root-pointer)) (порожній? (як-є ())))
+      ((атом? ()) (порожній? (як-є (ні)))))))
+(визначити fs-recover-commit
+  (функція (old-fs new-fs completed-stage)
+    (за-умовою
+      ((хибне? (fs-commit-stage? completed-stage))
+       (список (як-є rejected) (як-є unknown-commit-stage)))
+      ((тотожне? completed-stage (як-є root-pointer))
+       (список (як-є recovered) new-fs))
+      ((атом? ()) (список (як-є recovered) old-fs)))))
 
-(0011 fs-recover-root-package
-  (0010 (old-package candidate-package completed-stage)
-    (110
-      ((0100 (101 completed-stage (001 root-pointer)))
-       (1110 (001 recovered) old-package))
-      ((010 ())
-        (нехай-похідне ((decision (fs-root-package-decision candidate-package)))
-          (110
-            ((101 (100 decision) (001 accepted))
-             (1110 (001 recovered) candidate-package))
-            ((010 ()) (1110 (001 recovered) old-package (001 rejected-candidate)))))))))
+(визначити fs-recover-root-package
+  (функція (old-package candidate-package completed-stage)
+    (за-умовою
+      ((хибне? (тотожне? completed-stage (як-є root-pointer)))
+       (список (як-є recovered) old-package))
+      ((атом? ())
+        (нехай-похідне ((decision (рішення-щодо-кореневого-пакета-файлової-системи candidate-package)))
+          (за-умовою
+            ((тотожне? (перше decision) (як-є accepted))
+             (список (як-є recovered) candidate-package))
+            ((атом? ()) (список (як-є recovered) old-package (як-є rejected-candidate)))))))))
 
 ; Ratified D9 exact-width FS surfaces; donor closures above own semantics.
 ; The file system here is immutable SENS data, not a host syscall or new opcode.
 ; D9:001010000
-(0011 фс-об'єкти fs-objects)
+(визначити фс-об'єкти fs-objects)
 ; D9:010000001
-(0011 фс-зв'язки fs-bindings)
+(визначити фс-зв'язки fs-bindings)
 ; D9:010010101
-(0011 фс-ревізія fs-revision)
+(визначити фс-ревізія fs-revision)
 ; D9:001011011
-(0011 фс-порожній fs-empty)
+(визначити фс-порожній fs-empty)
 ; D9:010001100
-(0011 фс-корінь-адреса fs-root-address)
+(визначити фс-корінь-адреса fs-root-address)
 ; D9:010010110
-(0011 фс-список fs-list)
+(визначити фс-список fs-list)
 ; D9:010100001
-(0011 фс-містить? fs-contains?)
+(визначити фс-містить? fs-contains?)
 ; D9:010100010
-(0011 фс-об'єкт-пакет fs-object-package)
+(визначити фс-об'єкт-пакет fs-object-package)
 ; D9:001011111
-(0011 фс-корінь-пакет fs-root-package)
+(визначити фс-корінь-пакет fs-root-package)
 ; D9:001101011
-(0011 фс-журнал-подія fs-journal-event)
+(визначити фс-журнал-подія fs-journal-event)
 ; D9:001011001
-(0011 фс-журнал-додати fs-journal-append)
+(визначити фс-журнал-додати fs-journal-append)
 ; D9:001111100
-(0011 фс-серіалізувати-журнал fs-serialize-journal)
+(визначити фс-серіалізувати-журнал fs-serialize-journal)
 
 ; D9 canonical Ukrainian SENS aliases for persistent functional FS laws.
 ; No unqualified domain conversion, new machine mechanisms or host I/O path.
 ; D9:010000010
-(0011 фс-записати fs-write)
+(визначити фс-записати fs-write)
 ; D9:010110011
-(0011 фс-читати fs-read)
+(визначити фс-читати fs-read)
 ; D9:001010100
-(0011 фс-об'єкт-адреси fs-object-addresses)
+(визначити фс-об'єкт-адреси fs-object-addresses)
 ; D9:010101111
-(0011 фс-пакет-поле fs-package-field)
+(визначити фс-пакет-поле fs-package-field)
 ; D9:010010111
-(0011 фс-серіалізувати-об'єкт fs-serialize-object)
+(визначити фс-серіалізувати-об'єкт fs-serialize-object)
 ; D9:101000110
-(0011 фс-десеріалізувати-об'єкт fs-deserialize-object)
+(визначити фс-десеріалізувати-об'єкт fs-deserialize-object)
 ; D9:010011000
-(0011 фс-серіалізувати-корінь fs-serialize-root)
+(визначити фс-серіалізувати-корінь fs-serialize-root)
 ; D9:001110011
-(0011 фс-десеріалізувати-корінь fs-deserialize-root)
+(визначити фс-десеріалізувати-корінь fs-deserialize-root)
 ; D9:001100100
-(0011 фс-побудувати-об'єкт-сховище fs-build-object-store)
+(визначити фс-побудувати-об'єкт-сховище fs-build-object-store)
 ; D9:010101000
-(0011 фс-відновити-корінь fs-reconstruct-root)
+(визначити фс-відновити-корінь fs-reconstruct-root)
 ; D9:001010110
-(0011 фс-зв'язки-з-список fs-bindings-from-list)
+(визначити фс-зв'язки-з-список fs-bindings-from-list)
 ; D9:001100000
-(0011 фс-розв'язати fs-unbind)
+(визначити фс-розв'язати fs-unbind)
 
 ; D9: точні 9-бітні ідентичності — lib/domains/d9.lisp.
 ; Чинні закони залишаються в SENS-донорі вище, не в Rust чи Zig.
 ; Ці DEFINE зв'язують українські поверхні; це не автоматичний D9 opcode.
 ; D9:001100111
-(0011 фс-журнал-записати-подія fs-journal-write-event)
+(визначити фс-журнал-записати-подія fs-journal-write-event)
 ; D9:001111111
-(0011 фс-журнал-зв'язати-подія fs-journal-bind-event)
+(визначити фс-журнал-зв'язати-подія fs-journal-bind-event)
 ; D9:001001010
-(0011 фс-журнал-розв'язати-подія fs-journal-unbind-event)
+(визначити фс-журнал-розв'язати-подія fs-journal-unbind-event)
 ; D9:001100101
-(0011 фс-журнал-корінь-коміт-подія fs-journal-root-commit-event)
+(визначити фс-журнал-корінь-коміт-подія fs-journal-root-commit-event)
 ; D9:010110111
-(0011 фс-журнал-повторити fs-journal-replay)
+(визначити фс-журнал-повторити fs-journal-replay)
 ; D9:010111010
-(0011 фс-десеріалізувати-журнал fs-deserialize-journal)
+(визначити фс-десеріалізувати-журнал fs-deserialize-journal)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити усі-адреси-об'єктів-файлової-системи-наявні? fs-all-addresses-present?)
+(визначити усі-адреси-зв'язувань-у-файловій-системі-наявні? fs-binding-addresses-present?)
+(визначити рішення-щодо-пакета-об'єкта-файлової-системи fs-object-package-decision)
+(визначити рішення-щодо-кореневого-пакета-файлової-системи fs-root-package-decision)

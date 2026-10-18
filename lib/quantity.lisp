@@ -104,7 +104,7 @@
       ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
       ((тотожне? (science-list-length-equals? x 3) ні) (як-є ()))
       ((тотожне? (перше x) *quantity-schema*)
-       (unit? (третє x)))
+       (одиниця-виміру? (третє x)))
       (так (як-є ())))))
 
 (визначити quantity-value
@@ -159,11 +159,11 @@
       ((тотожне? (перше x) *scientific-constant-schema*)
        (за-умовою
          ((тотожне? (символ? (друге x)) (як-є ())) (як-є ()))
-         ((тотожне? (quantity? (третє x)) (як-є ())) (як-є ()))
-         ((тотожне? (scientific-constant-status-valid? (четверте x)) (як-є ())) (як-є ()))
-         ((тотожне? (scientific-constant-kind-valid? (п'ятий x)) (як-є ())) (як-є ()))
+         ((тотожне? (величина? (третє x)) (як-є ())) (як-є ()))
+         ((тотожне? (науковий-константа-стан-чинний? (четверте x)) (як-є ())) (як-є ()))
+         ((тотожне? (науковий-константа-вид-чинний? (п'ятий x)) (як-є ())) (як-є ()))
          ((тотожне? (символ? (science-sixth x)) (як-є ())) (як-є ()))
-         ((тотожне? (science-source? (science-seventh x)) (як-є ())) (як-є ()))
+         ((тотожне? (наука-джерело? (science-seventh x)) (як-є ())) (як-є ()))
          (так так)))
       (так (як-є ())))))
 
@@ -175,11 +175,11 @@
 
 (визначити scientific-constant-value
   (функція (constant)
-    (quantity-value (scientific-constant-quantity constant))))
+    (величина-значення (науковий-константа-величина constant))))
 
 (визначити scientific-constant-unit
   (функція (constant)
-    (quantity-unit (scientific-constant-quantity constant))))
+    (величина-одиниця (науковий-константа-величина constant))))
 
 (визначити scientific-constant-status
   (функція (constant) (четверте constant)))
@@ -196,7 +196,7 @@
 (визначити scientific-constant->clauses
   (функція (constant)
     (за-умовою
-      ((тотожне? (scientific-constant? constant) (як-є ())) (як-є ()))
+      ((тотожне? (науковий-константа? constant) (як-є ())) (як-є ()))
       (так
        ((функція (name)
           (список
@@ -226,4 +226,16 @@
                    name
                    (scientific-constant-source constant))))
          )
-         (scientific-constant-name constant))))))
+         (науковий-константа-ім'я constant))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити величина-одиниця quantity-unit)
+(визначити величина-значення quantity-value)
+(визначити величина? quantity?)
+(визначити наука-джерело? science-source?)
+(визначити науковий-константа-вид-чинний? scientific-constant-kind-valid?)
+(визначити науковий-константа-ім'я scientific-constant-name)
+(визначити науковий-константа-величина scientific-constant-quantity)
+(визначити науковий-константа-стан-чинний? scientific-constant-status-valid?)
+(визначити науковий-константа? scientific-constant?)
+(визначити одиниця-виміру? unit?)

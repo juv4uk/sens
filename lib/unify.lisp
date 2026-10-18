@@ -8,86 +8,86 @@
 ;
 ; Logic variables: (var name). occurs-check prevents infinite structures.
 
-(0011 unify-equal?
+(визначити unify-equal?
   (функція (a b)
     (за-умовою
       ((атом? a)
        (за-умовою
          ((атом? b) (тотожне? a b))
-         ((010 (001 ())) (010 (001 (0))))))
-      ((010 b) (010 (001 (0))))
+         ((атом? (як-є ())) (атом? (як-є (ні))))))
+      ((атом? b) (атом? (як-є (ні))))
       ((unify-equal? (перше a) (перше b))
        (unify-equal? (решта a) (решта b)))
-      ((010 (001 ())) (010 (001 (0)))))))
+      ((атом? (як-є ())) (атом? (як-є (ні)))))))
 
-(0011 logic-var
+(визначити logic-var
   (функція (name)
     (список (як-є var) name)))
 
-(0011 var?
+(визначити var?
   (функція (term)
     (за-умовою
-      ((010 term) (010 (001 (0))))
+      ((атом? term) (атом? (як-є (ні))))
       ((атом? (перше term))
        (за-умовою
          ((тотожне? (перше term) (як-є var)) (атом? (як-є ())))
-         ((010 (001 ())) (010 (001 (0))))))
-      ((010 (001 ())) (010 (001 (0)))))))
+         ((атом? (як-є ())) (атом? (як-є (ні))))))
+      ((атом? (як-є ())) (атом? (як-є (ні)))))))
 
-(0011 lookup-subst
+(визначити lookup-subst
   (функція (variable bindings)
     (за-умовою
       ((порожній? bindings) (як-є ()))
       ((unify-equal? variable (перше (перше bindings)))
        (решта (перше bindings)))
       ((атом? (як-є ()))
-       (lookup-subst variable (решта bindings))))))
+       (отримати-значення-з-підстановки variable (решта bindings))))))
 
-(0011 extend-subst
+(визначити extend-subst
   (функція (variable term bindings)
     (сполучити (сполучити variable term) bindings)))
 
-(0011 walk
+(визначити walk
   (функція (term bindings)
-    (walk-resolved (resolve-once term bindings) bindings)))
+    (обійти-розв'язаний (resolve-once term bindings) bindings)))
 
-(0011 resolve-once
+(визначити resolve-once
   (функція (term bindings)
     (за-умовою
-      ((var? term)
-       (001000 ((found (lookup-subst term bindings)))
+      ((змінна? term)
+       (нехай ((found (отримати-значення-з-підстановки term bindings)))
          (за-умовою
            ((порожній? found) term)
            ((атом? (як-є ())) found))))
       ((атом? (як-є ())) term))))
 
-(0011 walk-resolved
+(визначити walk-resolved
   (функція (term bindings)
     (за-умовою
-      ((var? term)
-       (001000 ((found (lookup-subst term bindings)))
+      ((змінна? term)
+       (нехай ((found (отримати-значення-з-підстановки term bindings)))
          (за-умовою
            ((порожній? found) term)
-           ((атом? (як-є ())) (walk-resolved found bindings)))))
+           ((атом? (як-є ())) (обійти-розв'язаний found bindings)))))
       ((атом? (як-є ())) term))))
 
-(0011 unify
+(визначити unify
   (функція (a b bindings)
-    (unify-walked (walk a bindings) (walk b bindings) bindings)))
+    (уніфікувати-обійдений (пройти a bindings) (пройти b bindings) bindings)))
 
-(0011 failed-subst?
+(визначити failed-subst?
   (функція (bindings)
     (за-умовою
       ((атом? bindings) (тотожне? bindings (як-є fail)))
-      (#d1:1 #d1:0))))
+      (так ні))))
 
-(0011 unify-walked
+(визначити unify-walked
   (функція (a b bindings)
     (за-умовою
-      ((failed-subst? bindings) (як-є fail))
+      ((підстановка-позначає-невдачу? bindings) (як-є fail))
       ((unify-equal? a b) bindings)
-      ((var? a) (unify-var a b bindings))
-      ((var? b) (unify-var b a bindings))
+      ((змінна? a) (уніфікувати-змінна a b bindings))
+      ((змінна? b) (уніфікувати-змінна b a bindings))
       ((атом? a)
        (за-умовою
          ((атом? b)
@@ -95,61 +95,75 @@
          ((атом? (як-є ())) (як-є fail))))
       ((атом? b) (як-є fail))
       ((атом? (як-є ()))
-       (001000 ((car-b (unify (100 a) (100 b) bindings)))
+       (нехай ((car-b (уніфікувати (перше a) (перше b) bindings)))
          (за-умовою
-           ((failed-subst? car-b) (як-є fail))
+           ((підстановка-позначає-невдачу? car-b) (як-є fail))
            ((атом? (як-є ()))
-            (unify (решта a) (решта b) car-b))))))))
+            (уніфікувати (решта a) (решта b) car-b))))))))
 
-(0011 occurs-check?
+(визначити occurs-check?
   (функція (variable term bindings)
-    (001000 ((resolved (walk term bindings)))
+    (нехай ((resolved (пройти term bindings)))
       (за-умовою
         ((unify-equal? variable resolved) (атом? (як-є ())))
-        ((var? resolved) (010 (001 (0))))
-        ((010 resolved) (010 (001 (0))))
+        ((змінна? resolved) (атом? (як-є (ні))))
+        ((атом? resolved) (атом? (як-є (ні))))
         ((атом? (як-є ()))
          (за-умовою
-           ((occurs-check? variable (перше resolved) bindings) (атом? (як-є ())))
+           ((входить-перевірити? variable (перше resolved) bindings) (атом? (як-є ())))
            ((атом? (як-є ()))
-            (occurs-check? variable (решта resolved) bindings))))))))
+            (входить-перевірити? variable (решта resolved) bindings))))))))
 
-(0011 occurs-check occurs-check?)
+(визначити occurs-check входить-перевірити?)
 
-(0011 unify-var
+(визначити unify-var
   (функція (variable term bindings)
     (за-умовою
-      ((occurs-check? variable term bindings) (як-є fail))
+      ((входить-перевірити? variable term bindings) (як-є fail))
       ((атом? (як-є ()))
        (extend-subst variable term bindings)))))
 
-(0011 apply-subst
+(визначити apply-subst
   (функція (term bindings)
-    (apply-subst-walked (walk term bindings) bindings)))
+    (apply-subst-walked (пройти term bindings) bindings)))
 
-(0011 apply-subst-walked
+(визначити apply-subst-walked
   (функція (term bindings)
     (за-умовою
       ((атом? term) term)
-      ((var? term) term)
+      ((змінна? term) term)
       ((атом? (як-є ()))
-       (сполучити (apply-subst (перше term) bindings)
-            (apply-subst (решта term) bindings))))))
+       (сполучити (застосувати-підстановка (перше term) bindings)
+            (застосувати-підстановка (решта term) bindings))))))
 
-(0011 thread-conjunction
+(визначити thread-conjunction
   (функція (conditions state try-one)
     (за-умовою
       ((атом? conditions) (список state))
       ((атом? (як-є ()))
-       (thread-conjunction-branches
+       (потік-виконання-кон'юнкція-гілки
          (решта conditions)
          try-one
          (try-one (перше conditions) state))))))
 
-(0011 thread-conjunction-branches
+(визначити thread-conjunction-branches
   (функція (remaining try-one states)
     (за-умовою
       ((атом? states) (як-є ()))
       ((атом? (як-є ()))
-       (приєднати (thread-conjunction remaining (перше states) try-one)
-             (thread-conjunction-branches remaining try-one (решта states)))))))
+       (приєднати (потік-виконання-кон'юнкція remaining (перше states) try-one)
+             (потік-виконання-кон'юнкція-гілки remaining try-one (решта states)))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити застосувати-підстановка apply-subst)
+(визначити підстановка-позначає-невдачу? failed-subst?)
+(визначити отримати-значення-з-підстановки lookup-subst)
+(визначити входить-перевірити? occurs-check?)
+(визначити потік-виконання-кон'юнкція thread-conjunction)
+(визначити потік-виконання-кон'юнкція-гілки thread-conjunction-branches)
+(визначити уніфікувати unify)
+(визначити уніфікувати-змінна unify-var)
+(визначити уніфікувати-обійдений unify-walked)
+(визначити змінна? var?)
+(визначити пройти walk)
+(визначити обійти-розв'язаний walk-resolved)
