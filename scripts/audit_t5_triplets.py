@@ -12,8 +12,8 @@ import json
 from pathlib import Path
 import sys
 
-from audit_t5_file_pairs import inspect as inspect_pairs
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
+from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode)
+from sens_t5_codec import SensT5Error, typed_sha256
 
 SCHEMA = "sens-t5-same-stem-triplet-inventory/v1"
 
@@ -68,8 +68,9 @@ def inspect(root: Path, *, include_untracked: bool = False) -> dict:
             if view.is_symlink():
                 raise ValueError("extensionless view is a symlink")
             physical = path.read_bytes()
-            words = decode_bytes(physical)
-            if encode_words(words) != physical or typed_sha256(words) != row["typed_word_sha256"]:
+            codec = pair["physical_codec"]
+            words = physical_words(physical, codec)
+            if physical_encode(words, codec) != physical or typed_sha256(words) != row["typed_word_sha256"]:
                 raise ValueError("pair audit versus re-encoded typed T5 disagree")
             canonical_view = expected_ascii_view(words)
             row["expected_view_sha256"] = sha256(canonical_view)
@@ -85,7 +86,7 @@ def inspect(root: Path, *, include_untracked: bool = False) -> dict:
                     raise ValueError(
                         "view bytes are not the exact canonical ASCII bit words with one final LF"
                     )
-                if encode_words(actual.decode("ascii")[:-1].split(" ")) != physical:
+                if physical_encode(actual.decode("ascii")[:-1].split(" "), codec) != physical:
                     raise ValueError("view -> canonical physical T5 byte roundtrip failed")
                 row["view_status"] = "VIEW_PASS"
         except (OSError, ValueError, UnicodeError, SensT5Error) as exc:

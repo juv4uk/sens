@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from audit_t5_file_pairs import inspect, main, require_changed_views, split_nul_delimited_paths
-from sens_t5_codec import encode_words
+from sens_t5_codec import encode_words, encode_t5m_projection
 
 
 class AuditT5PairsTests(unittest.TestCase):
@@ -67,6 +67,17 @@ class AuditT5PairsTests(unittest.TestCase):
         self.assertEqual(result["summary"]["pending_oracle"], 1)
         self.assertEqual(result["files"][0]["source_status"], "PENDING_ORACLE")
         self.assertEqual(self.audit(strict=True)["status"], "BLOCKED")
+
+    def test_new_t5m_pair_and_view_use_exact_words_without_false_semantic_credit(self):
+        words = ["10", "0011", "00", "10", "110", "01"]
+        _, binary = self.pair("lib/current", "(визначити х (за-умовою (так так)))\\n", words)
+        binary.write_bytes(encode_t5m_projection(" ".join(words)))
+        binary.with_suffix("").write_text(" ".join(words) + "\\n", encoding="ascii")
+        row = self.audit()["files"][0]
+        self.assertEqual(row["physical_status"], "PASS")
+        self.assertEqual(row["physical_codec"], "t5m")
+        self.assertEqual(row["view_status"], "PASS")
+        self.assertEqual(row["source_status"], "PENDING_ORACLE")
 
     def test_same_stem_does_not_mean_same_bits(self):
         self.pair("lib/different", "0 00\n", ["000"])

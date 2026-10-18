@@ -15,8 +15,8 @@ import subprocess
 import sys
 import tempfile
 
-from audit_t5_file_pairs import inspect as inspect_pairs
-from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+from audit_t5_file_pairs import (inspect as inspect_pairs, physical_words, physical_encode)
+from sens_t5_codec import typed_sha256
 
 SCHEMA = "sens-t5-triplet-inventory/v1"
 GOLDEN = "tests/fixtures/migration-d1-cond-cohort/branch.sens"
@@ -109,10 +109,11 @@ def inspect(root: Path, *, include_untracked: bool = False,
         row["typed_word_count"] = pair["semantic_word_count"]
         try:
             payload = (root / path).read_bytes()
-            words = decode_bytes(payload)
+            codec = pair["physical_codec"]
+            words = physical_words(payload, codec)
             # The base pair auditor has already checked this, but fail-closed
             # on changes to the physical file between its scan and our scan.
-            if encode_words(words) != payload or sha(payload) != pair["physical_sha256"]:
+            if physical_encode(words, codec) != payload or sha(payload) != pair["physical_sha256"]:
                 raise ValueError("T5 bytes drifted during inventory")
             expected = canonical_view(words)
             row["expected_view_sha256"] = sha(expected)
@@ -134,7 +135,7 @@ def inspect(root: Path, *, include_untracked: bool = False,
                     "between words and one final LF; bytes differ from decoded T5"
                 )
                 continue
-            if encode_words(actual[:-1].decode("ascii").split(" ")) != payload:
+            if physical_encode(actual[:-1].decode("ascii").split(" "), codec) != payload:
                 raise ValueError("view to physical T5 byte-roundtrip failed")
             if typed_sha256(actual[:-1].decode("ascii").split(" ")) != pair["typed_word_sha256"]:
                 raise ValueError("exact domain word widths drifted")

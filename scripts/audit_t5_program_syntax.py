@@ -15,8 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from audit_t5_file_pairs import inspect as inspect_physical_pairs
-from sens_t5_codec import decode_bytes
+from audit_t5_file_pairs import inspect as inspect_physical_pairs, physical_words
 
 SCHEMA = "sens-t5-d2-program-syntax-audit/v1"
 
@@ -89,7 +88,7 @@ def audit(root: Path, *, reader: Path,
             continue
         try:
             # independent physical codec says only that trits/widths survive
-            words = decode_bytes(path.read_bytes())
+            words = physical_words(path.read_bytes(), row["physical_codec"])
             result = subprocess.run(
                 [str(reader), "open", str(path)],
                 capture_output=True, check=False,

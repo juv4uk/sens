@@ -14,7 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from sens_t5_codec import SensT5Error, decode_bytes, encode_words, parse_words, typed_sha256
+from sens_t5_codec import (SensT5Error, decode_bytes, encode_words, parse_words,
+                           decode_t5m_bytes, encode_t5m_projection, typed_sha256)
 
 SCHEMA = "sens-t5-file-pair-audit/v1"
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "target", "__pycache__"}
@@ -41,6 +42,61 @@ def candidates(root: Path, include_untracked: bool = False) -> list[Path]:
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def physical_words(data: bytes, codec: str) -> list[str]:
+    """Decode exact words using the identified historical/current carrier."""
+    if codec == "t5m":
+        return decode_t5m_bytes(data)
+    if codec == "t5":
+        return decode_bytes(data)
+    raise SensT5Error("unknown physical codec: " + codec)
+
+
+def physical_encode(words: list[str], codec: str) -> bytes:
+    if codec == "t5m":
+        return encode_t5m_projection(" ".join(words))
+    if codec == "t5":
+        return encode_words(words)
+    raise SensT5Error("unknown physical codec: " + codec)
+
+
+def identify_physical(data: bytes, *, view: bytes | None = None,
+                      source_words: list[str] | None = None) -> tuple[str, list[str]]:
+    """Distinguish T5M from old T5; never silently reinterpret ambiguous bits.
+
+    Exact companion views are physical identity witnesses, not semantic oracles.
+    Source 0/1 words can resolve a genuine old binary-source fixture.
+    """
+    candidates: list[tuple[str, list[str]]] = []
+    failures: list[str] = []
+    for codec in ("t5m", "t5"):
+        try:
+            words = physical_words(data, codec)
+            if physical_encode(words, codec) != data:
+                raise SensT5Error("noncanonical byte roundtrip")
+            candidates.append((codec, words))
+        except ValueError as exc:
+            failures.append(codec + ": " + str(exc))
+    if not candidates:
+        raise SensT5Error("; ".join(failures))
+    if len(candidates) == 1:
+        return candidates[0]
+    if view is not None:
+        matching = [entry for entry in candidates
+                    if (" ".join(entry[1]) + "\n").encode("ascii") == view]
+        if len(matching) == 1:
+            return matching[0]
+    if source_words is not None:
+        matching = [entry for entry in candidates if entry[1] == source_words]
+        if len(matching) == 1:
+            return matching[0]
+    if candidates[0][1] == candidates[1][1]:
+        return candidates[0]
+    raise SensT5Error(
+        "ambiguous T5M/T5 bytes: provide the exact same-stem binary view "
+        "or a binary source to establish word boundaries"
+    )
 
 
 def split_nul_delimited_paths(raw: bytes) -> list[str]:
@@ -118,10 +174,19 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             if not source.is_file():
                 raise ValueError("missing same-stem .lisp source")
             data = file.read_bytes()
-            words = decode_bytes(data)
-            if encode_words(words) != data:
-                raise ValueError("T5 canonical re-encode mismatch")
+            source_bytes = source.read_bytes()
+            try:
+                exact_source_words = parse_words(source_bytes.decode("utf-8"))
+            except (UnicodeError, SensT5Error):
+                exact_source_words = None
+            view_file = root / rel.with_suffix("")
+            candidate_view = (view_file.read_bytes()
+                              if view_file.is_file() and not view_file.is_symlink()
+                              else None)
+            codec_name, words = identify_physical(
+                data, view=candidate_view, source_words=exact_source_words)
             row.update({
+                "physical_codec": codec_name,
                 "physical_status": "PASS",
                 "physical_bytes": len(data),
                 "physical_sha256": _sha(data),
@@ -130,7 +195,6 @@ def inspect(root: Path, *, strict_semantic: bool = False,
                 "semantic_bits": sum(map(len, words)),
                 "interword_trits": len(words) - 1,
             })
-            source_bytes = source.read_bytes()
             row["source_sha256"] = _sha(source_bytes)
             try:
                 source_text = source_bytes.decode("utf-8")
@@ -218,7 +282,7 @@ def inspect(root: Path, *, strict_semantic: bool = False,
         ),
         "files": entries,
         "warning": (
-            "Physical T5 and a source pair do not prove parser/oracle semantics. "
+            "Physical T5M/T5 and a source pair do not prove parser/oracle semantics. "
             "Missing extensionless views are NOT certified unless explicitly "
             "required for a scoped admitted cohort. Symbolic Lisp remains "
             "PENDING_ORACLE; no automatic execution."
