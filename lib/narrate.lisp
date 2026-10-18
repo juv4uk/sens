@@ -19,93 +19,93 @@
 ; All branches return exact D1; list data never acquires numeric truthiness.
 ; NULL is the admitted exact D4 empty-list predicate and returns D1.
 ; It avoids trying to call atom-only EQ on structural ().
-(0011 narrate-proper-list?
-  (0010 (value)
-    (110
-      ((0101 value)
-       1)
-      ((010 value)
-       0)
-      (1
-       (narrate-proper-list? (011 value))))))
+(визначити narrate-proper-list?
+  (функція (value)
+    (за-умовою
+      ((порожній? value)
+       так)
+      ((атом? value)
+       ні)
+      (так
+       (narrate-proper-list? (решта value))))))
 
 ; Structural arity checks return exact D1:YES only at the requested boundary.
 ; Rejecting cases short-circuit before CDR walks; NULL safely recognizes ().
-(0011 narrate-list-exact-two?
-  (0010 (value)
-    (110
-      ((0100 (narrate-proper-list? value))
-       0)
-      ((0101 value)
-       0)
-      ((010 value)
-       0)
-      ((0101 (011 value))
-       0)
-      ((0101 (011 (011 value)))
-       1)
-      (1
-       0))))
+(визначити narrate-list-exact-two?
+  (функція (value)
+    (за-умовою
+      ((хибне? (narrate-proper-list? value))
+       ні)
+      ((порожній? value)
+       ні)
+      ((атом? value)
+       ні)
+      ((порожній? (решта value))
+       ні)
+      ((порожній? (решта (решта value)))
+       так)
+      (так
+       ні))))
 
-(0011 narrate-list-exact-three?
-  (0010 (value)
-    (110
-      ((0100 (narrate-proper-list? value))
-       0)
-      ((0101 value)
-       0)
-      ((010 value)
-       0)
-      ((0101 (011 value))
-       0)
-      ((0101 (011 (011 value)))
-       0)
-      ((0101 (011 (011 (011 value))))
-       1)
-      (1
-       0))))
+(визначити narrate-list-exact-three?
+  (функція (value)
+    (за-умовою
+      ((хибне? (narrate-proper-list? value))
+       ні)
+      ((порожній? value)
+       ні)
+      ((атом? value)
+       ні)
+      ((порожній? (решта value))
+       ні)
+      ((порожній? (решта (решта value)))
+       ні)
+      ((порожній? (решта (решта (решта value))))
+       так)
+      (так
+       ні))))
 
-(0011 narrate-fact
-  (0010 (fact)
-    (110
+(визначити narrate-fact
+  (функція (fact)
+    (за-умовою
       ((narrate-list-exact-two? fact)
-       (1110 (1001 fact) (001 is) (001 a) (100 fact)))
+       (список (друге fact) (як-є is) (як-є a) (перше fact)))
       ((narrate-list-exact-three? fact)
-       (1110 (1001 fact) (100 fact) (10011 fact)))
-      (1 fact))))
+       (список (друге fact) (перше fact) (третє fact)))
+      (так fact))))
 
-(0011 provenance-goal (0010 (prov) (1001 prov)))
-(0011 provenance-source (0010 (prov) (1001 (10011 prov))))
-(0011 provenance-rule (0010 (prov) (1001 (100111 prov))))
+(визначити provenance-goal (функція (prov) (друге prov)))
+(визначити provenance-source (функція (prov) (друге (третє prov))))
+(визначити provenance-rule (функція (prov) (друге (четверте prov))))
 (0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))
 
-(0011 narrate-derivation
-  (0010 (derivations)
-    (110
-      ((010 derivations) (001 ()))
-      ((010 (011 derivations)) (narrate-provenance (100 derivations)))
-      (1
-       (1111 (narrate-provenance (100 derivations))
-         (111 (001 and) (narrate-derivation (011 derivations))))))))
+(визначити narrate-derivation
+  (функція (derivations)
+    (за-умовою
+      ((атом? derivations) (як-є ()))
+      ((атом? (решта derivations)) (narrate-provenance (перше derivations)))
+      (так
+       (приєднати (narrate-provenance (перше derivations))
+         (сполучити (як-є and) (narrate-derivation (решта derivations))))))))
 
-(0011 narrate-provenance
-  (0010 (prov)
-    (110
+(визначити narrate-provenance
+  (функція (prov)
+    (за-умовою
       ((тотожне? (походження-джерело prov) (як-є fact)) (narrate-fact (походження-правило prov)))
-      (1
+      (так
        (приєднати (narrate-fact (походження-правило prov))
          (сполучити (як-є because) (narrate-derivation (походження-похідний-з prov))))))))
 
 ; `narrate-answer` grounds the conclusion with the caller's actual query while
 ; retaining the proof's real premises.
-(0011 narrate-answer
-  (0010 (goal proof)
+(визначити narrate-answer
+  (функція (goal proof)
     (нехай ((derivations (походження-похідний-з (походження proof))))
-      (110
-        ((010 derivations) (narrate-fact goal))
-        (1
-         (1111 (narrate-fact goal)
-           (111 (001 because) (narrate-derivation derivations))))))))
+      (за-умовою
+        ((атом? derivations) (narrate-fact goal))
+        (так
+         (приєднати (narrate-fact goal)
+           (сполучити (як-є because) (narrate-derivation derivations))))))))
 
 ; ----------------------------------------------------------------------
 ; Structured reasoning-outcome presentation (B2)
@@ -117,107 +117,107 @@
 ; `blocked`, and `invalid` can never collapse back into one "cannot prove"
 ; sentence. Reuses result-proper-list? from the migrated result-status surface.
 
-(0011 narrate-proved-outcome
-  (0010 (outcome)
-    (001000 ((statement (1001 outcome))
-          (results (10011 outcome)))
-      (110
-        ((010 results) (1110 (001 proved) statement (001 without-proof-result)))
-        (1
-         (1111
-           (1110 (001 proved))
-           (narrate-answer statement (1001 (100 results)))))))))
+(визначити narrate-proved-outcome
+  (функція (outcome)
+    (нехай ((statement (друге outcome))
+          (results (третє outcome)))
+      (за-умовою
+        ((атом? results) (список (як-є proved) statement (як-є without-proof-result)))
+        (так
+         (приєднати
+           (список (як-є proved))
+           (narrate-answer statement (друге (перше results)))))))))
 
-(0011 narrate-invalid-outcome-shape
-  (0010 (outcome)
-    (1110 (001 invalid) (001 outcome-shape) outcome)))
+(визначити narrate-invalid-outcome-shape
+  (функція (outcome)
+    (список (як-є invalid) (як-є outcome-shape) outcome)))
 
 ; Outcome arity is structural: the exact D3/D4 helpers above own the shape check.
 
-(0011 narrate-outcome
-  (0010 (outcome)
-    (110
+(визначити narrate-outcome
+  (функція (outcome)
+    (за-умовою
       ((атом? outcome) (пояснити-неприпустиму-структуру-результату outcome))
       ((хибне? (результат-є-правильним-списком? outcome))
        (пояснити-неприпустиму-структуру-результату outcome))
-      ((0100 (010 (100 outcome)))
-       (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
+      ((хибне? (атом? (перше outcome)))
+       (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
       ((0100 (110101100 (100 outcome)))
-       (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
-      ((101 (100 outcome) (001 proved))
-       (110
+       (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
+      ((тотожне? (перше outcome) (як-є proved))
+       (за-умовою
          ((narrate-list-exact-three? outcome) (пояснити-результат-із-доказом outcome))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((101 (100 outcome) (001 unknown))
-       (110
+      ((тотожне? (перше outcome) (як-є unknown))
+       (за-умовою
          ((narrate-list-exact-two? outcome)
-          (1110
-            (001 unknown)
-            (001 because)
-            (001 no-proof-found-for)
-            (1001 outcome)))
+          (список
+            (як-є unknown)
+            (як-є because)
+            (як-є no-proof-found-for)
+            (друге outcome)))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((101 (100 outcome) (001 partial))
-       (110
+      ((тотожне? (перше outcome) (як-є partial))
+       (за-умовою
          ((narrate-list-exact-three? outcome)
-          (1110
-            (001 partial)
-            (001 value)
-            (1001 outcome)
-            (001 bound)
-            (10011 outcome)))
+          (список
+            (як-є partial)
+            (як-є value)
+            (друге outcome)
+            (як-є bound)
+            (третє outcome)))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((101 (100 outcome) (001 blocked))
-       (110
+      ((тотожне? (перше outcome) (як-є blocked))
+       (за-умовою
          ((narrate-list-exact-two? outcome)
-          (1110
-            (001 blocked)
-            (001 because)
-            (1001 outcome)))
+          (список
+            (як-є blocked)
+            (як-є because)
+            (друге outcome)))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((101 (100 outcome) (001 disputed))
-       (110
+      ((тотожне? (перше outcome) (як-є disputed))
+       (за-умовою
          ((narrate-list-exact-two? outcome)
-          (1110
-            (001 disputed)
-            (001 because)
-            (001 both-sides-have-evidence)
-            (1001 outcome)))
+          (список
+            (як-є disputed)
+            (як-є because)
+            (як-є both-sides-have-evidence)
+            (друге outcome)))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      ((101 (100 outcome) (001 invalid))
-       (110
+      ((тотожне? (перше outcome) (як-є invalid))
+       (за-умовою
          ((narrate-list-exact-three? outcome)
-          (1110
-            (001 invalid)
-            (001 because)
-            (1001 outcome)
-            (001 payload)
-            (10011 outcome)))
+          (список
+            (як-є invalid)
+            (як-є because)
+            (друге outcome)
+            (як-є payload)
+            (третє outcome)))
          (так (пояснити-неприпустиму-структуру-результату outcome))))
-      (1
-       (1110 (001 invalid) (001 outcome-tag) (100 outcome))))))
+      (так
+       (список (як-є invalid) (як-є outcome-tag) (перше outcome))))))
 
 ; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
 ; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
 ; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
 ; D9:000011000
-(0011 пояснити-факт narrate-fact)
+(визначити пояснити-факт narrate-fact)
 ; D9:000111000
-(0011 пояснити-виведення narrate-derivation)
+(визначити пояснити-виведення narrate-derivation)
 ; D9:000011011
-(0011 пояснити-походження narrate-provenance)
+(визначити пояснити-походження narrate-provenance)
 ; D9:000000001
-(0011 пояснити-відповідь narrate-answer)
+(визначити пояснити-відповідь narrate-answer)
 ; D9:000100110
-(0011 пояснити-підсумок narrate-outcome)
+(визначити пояснити-підсумок narrate-outcome)
 
 ; D10 full-ukr peers: exact identity = lib/domains/d10.lisp; DEFINE alias, no new dispatch.
 ; D10:0010101110
-(0011 пояснити-неприпустиму-структуру-результату narrate-invalid-outcome-shape)
+(визначити пояснити-неприпустиму-структуру-результату narrate-invalid-outcome-shape)
 ; D10:0010010110
-(0011 результат-є-правильним-списком? result-proper-list?)
+(визначити результат-є-правильним-списком? result-proper-list?)
 ; D10:0010101101
-(0011 пояснити-результат-із-доказом narrate-proved-outcome)
+(визначити пояснити-результат-із-доказом narrate-proved-outcome)
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити походження-похідний-з provenance-derived-from)
