@@ -3,117 +3,117 @@
 ; `control-dispatch-document`; semantic expectations live here.
 
 (def cd-field
-  (lambda (entry field)
+  (функція (entry field)
     (let ((found (assoc field entry)))
-      (cond
-        ((atom found) (quote ()))
-        (t (cdr found))))))
+      (за-умовою
+        ((атом? found) (як-є ()))
+        (t (решта found))))))
 
 (def cd-find
-  (lambda (identity entries)
-    (cond
-      ((atom entries) (quote ()))
-      ((equal? (cd-field (car entries) (quote identity)) identity)
-       (car entries))
-      (t (cd-find identity (cdr entries))))))
+  (функція (identity entries)
+    (за-умовою
+      ((атом? entries) (як-є ()))
+      ((equal? (cd-field (перше entries) (як-є identity)) identity)
+       (перше entries))
+      (t (cd-find identity (решта entries))))))
 
 (def cd-entry
-  (lambda (identity)
-    (cd-find identity (cdr control-dispatch-document))))
+  (функція (identity)
+    (cd-find identity (решта control-dispatch-document))))
 
 (def cd-expect
-  (lambda (identity field expected)
+  (функція (identity field expected)
     (let ((entry (cd-entry identity)))
-      (cond
-        ((atom entry) (list (quote missing-entry) identity))
-        ((equal? (cd-field entry field) expected) (quote ()))
+      (за-умовою
+        ((атом? entry) (список (як-є missing-entry) identity))
+        ((equal? (cd-field entry field) expected) (як-є ()))
         (t
-         (list
-           (quote mismatch)
+         (список
+           (як-є mismatch)
            identity
            field
            expected
            (cd-field entry field)))))))
 
 (def cd-first-failure
-  (lambda (checks)
-    (cond
-      ((atom checks) (quote ()))
-      ((atom (car checks)) (cd-first-failure (cdr checks)))
-      (t (car checks)))))
+  (функція (checks)
+    (за-умовою
+      ((атом? checks) (як-є ()))
+      ((атом? (перше checks)) (cd-first-failure (решта checks)))
+      (t (перше checks)))))
 
 (def control-dispatch-contract-witness
-  (lambda ()
+  (функція ()
     (let ((failure
             (cd-first-failure
-              (list
-                (cd-expect (quote canonical-cond)
-                           (quote semantic-id)
+              (список
+                (cd-expect (як-є canonical-cond)
+                           (як-є semantic-id)
                            "0007")
-                (cd-expect (quote canonical-cond)
-                           (quote role)
-                           (quote ordered-dispatch))
-                (cd-expect (quote canonical-cond)
-                           (quote generic-value-coercion)
-                           (quote forbidden))
-                (cd-expect (quote canonical-cond)
-                           (quote nil-as-false)
-                           (quote forbidden))
-                (cd-expect (quote canonical-cond)
-                           (quote host-bool-authority)
-                           (quote forbidden))
+                (cd-expect (як-є canonical-cond)
+                           (як-є role)
+                           (як-є ordered-dispatch))
+                (cd-expect (як-є canonical-cond)
+                           (як-є generic-value-coercion)
+                           (як-є forbidden))
+                (cd-expect (як-є canonical-cond)
+                           (як-є nil-as-false)
+                           (як-є forbidden))
+                (cd-expect (як-є canonical-cond)
+                           (як-є host-bool-authority)
+                           (як-є forbidden))
 
-                (cd-expect (quote exact-q-control)
-                           (quote accepted-domain)
-                           (quote exact-q-decision))
-                (cd-expect (quote exact-q-control)
-                           (quote yes-action)
-                           (quote select))
-                (cd-expect (quote exact-q-control)
-                           (quote no-action)
-                           (quote continue))
+                (cd-expect (як-є exact-q-control)
+                           (як-є accepted-domain)
+                           (як-є exact-q-decision))
+                (cd-expect (як-є exact-q-control)
+                           (як-є yes-action)
+                           (як-є select))
+                (cd-expect (як-є exact-q-control)
+                           (як-є no-action)
+                           (як-є continue))
 
-                (cd-expect (quote structural-control)
-                           (quote implicit-consumption)
-                           (quote forbidden))
-                (cd-expect (quote structural-control)
-                           (quote dispatch)
-                           (quote explicit-match-required))
+                (cd-expect (як-є structural-control)
+                           (як-є implicit-consumption)
+                           (як-є forbidden))
+                (cd-expect (як-є structural-control)
+                           (як-є dispatch)
+                           (як-є explicit-match-required))
 
-                (cd-expect (quote mathematical-result-control)
-                           (quote implicit-consumption)
-                           (quote forbidden))
+                (cd-expect (як-є mathematical-result-control)
+                           (як-є implicit-consumption)
+                           (як-є forbidden))
 
-                (cd-expect (quote reasoning-control)
-                           (quote implicit-consumption)
-                           (quote forbidden))
-                (cd-expect (quote reasoning-control)
-                           (quote dispatch)
-                           (quote explicit-match-required))
+                (cd-expect (як-є reasoning-control)
+                           (як-є implicit-consumption)
+                           (як-є forbidden))
+                (cd-expect (як-є reasoning-control)
+                           (як-є dispatch)
+                           (як-є explicit-match-required))
 
-                (cd-expect (quote no-answer-control)
-                           (quote false-meaning)
-                           (quote forbidden))
-                (cd-expect (quote no-answer-control)
-                           (quote implicit-consumption)
-                           (quote forbidden))
+                (cd-expect (як-є no-answer-control)
+                           (як-є false-meaning)
+                           (як-є forbidden))
+                (cd-expect (як-є no-answer-control)
+                           (як-є implicit-consumption)
+                           (як-є forbidden))
 
                 ; Syntax is deliberately not invented before the semantic
                 ; protocol is stable. #217 may later ratify a matching surface.
-                (cd-expect (quote structural-control)
-                           (quote clause-syntax)
-                           (quote not-yet-ratified))))))
-      (cond
-        ((not (eq (car control-dispatch-document)
-                  (quote control-dispatch-contract/1)))
-         (list (quote control-dispatch-contract-witness)
-               (list (quote status) (quote fail))
-               (list (quote detail) (quote schema))))
-        ((atom failure)
-         (list (quote control-dispatch-contract-witness)
-               (list (quote status) (quote pass))
-               (list (quote detail) (quote explicit-domain-control))))
+                (cd-expect (як-є structural-control)
+                           (як-є clause-syntax)
+                           (як-є not-yet-ratified))))))
+      (за-умовою
+        ((хибне? (тотожне? (перше control-dispatch-document)
+                  (як-є control-dispatch-contract/1)))
+         (список (як-є control-dispatch-contract-witness)
+               (список (як-є status) (як-є fail))
+               (список (як-є detail) (як-є schema))))
+        ((атом? failure)
+         (список (як-є control-dispatch-contract-witness)
+               (список (як-є status) (як-є pass))
+               (список (як-є detail) (як-є explicit-domain-control))))
         (t
-         (list (quote control-dispatch-contract-witness)
-               (list (quote status) (quote fail))
-               (list (quote detail) failure)))))))
+         (список (як-є control-dispatch-contract-witness)
+               (список (як-є status) (як-є fail))
+               (список (як-є detail) failure)))))))
