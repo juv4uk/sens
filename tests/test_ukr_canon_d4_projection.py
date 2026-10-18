@@ -105,6 +105,13 @@ class CanonD4FullUkrTests(unittest.TestCase):
         for old_head in ("(001 x)", "(001 y)", "(001 ())"):
             self.assertNotIn(old_head, runnable_text(self.source))
 
+        # Цитовані десяткові дані зберігають числове значення:
+        # їх не можна перетворювати на предикат D1 «так».
+        for datum in ("(як-є (1 2 3))", "(як-є (1 2 . 3))"):
+            self.assertIn(datum, self.source)
+        for corrupted in ("(як-є (так 2 3))", "(як-є (так 2 . 3))"):
+            self.assertNotIn(corrupted, self.source)
+
     def test_canon_public_entrypoints_survive(self):
         for name in ("canon-empty-list", "canon-law-result",
                      "canon-law-satisfied", "canon-law-violated",
