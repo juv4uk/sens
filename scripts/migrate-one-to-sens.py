@@ -58,19 +58,20 @@ def resolve_without_links(path: Path, role: str) -> Path:
 
 
 def atomic_no_clobber(target: Path, data: bytes) -> None:
+    """Write a verified carrier or view once, without following target links."""
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         mode="wb", prefix=".sens-one-", suffix=".tmp",
         dir=target.parent, delete=False,
     ) as staged:
-        tmp = Path(staged.name)
+        temp = Path(staged.name)
         staged.write(data)
         staged.flush()
         os.fsync(staged.fileno())
     try:
-        os.link(tmp, target)
+        os.link(temp, target)
     finally:
-        tmp.unlink(missing_ok=True)
+        temp.unlink(missing_ok=True)
 
 
 def sha256_file(path: Path) -> str:
@@ -132,7 +133,7 @@ def main() -> int:
     try:
         rel = source.relative_to(ROOT)
     except ValueError as exc:
-        raise SystemExit("BLOCK: source must be inside repository") from exc
+        raise SystemExit("BLOCK: source must be inside the repository") from exc
     output = resolve_without_links(args.output or source.with_suffix(".sens"), "output")
     if output.suffix != ".sens":
         raise SystemExit("BLOCK: target must have .sens extension")
