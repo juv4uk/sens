@@ -181,7 +181,7 @@ def git_blob_sha(path: Path) -> str:
 # manifests (#4460). This overlays the RESEARCH work queue only; it does
 # NOT modify SENS semantics or suppress the raw canonical migration scan.
 NONPROGRAM_MANIFESTS = (
-    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
@@ -255,7 +255,7 @@ def load_nonprogram_classification(root: Path, *, selected_paths: set[str] | Non
                 if any(line.strip() and not line.lstrip().startswith(";") for line in lines):
                     raise ValueError(f"comment-only loader contains executable forms: {path}")
             if cohort == "domain-table" and path not in {
-                    f"lib/domains/d{n}.lisp" for n in range(1, 10)}:
+                    f"lib/domains/d{n}.lisp" for n in range(1, 12)}:
                 raise ValueError(f"mis-scoped domain-table source: {path}")
             if cohort == "isa" and not path.startswith("lib/machine/isa/"):
                 raise ValueError(f"mis-scoped ISA catalogue: {path}")
