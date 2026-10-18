@@ -17,7 +17,9 @@
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import re
 import py_compile
 import subprocess
 import sys
@@ -168,6 +170,98 @@ class PythonSourcesCompileTests(unittest.TestCase):
             except py_compile.PyCompileError as exc:
                 broken.append(f"{path.name}: {exc.msg}")
         self.assertEqual(broken, [], f"не компілюються: {broken}")
+
+
+class CodecUkrProjectionTests(unittest.TestCase):
+    """The D2 codec uses ratified Ukrainian call heads without changing its data."""
+
+    SOURCE = ROOT / "lib" / "codec-d2.lisp"
+    D3 = ROOT / "lib" / "domains" / "d3.lisp"
+    D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    ORIGINAL_BLOB = "79d49cd2e89e657e431872bd1e4c9e85174404c9"
+    HEADS = {
+        "0011": "визначити", "0010": "функція", "001": "як-є",
+        "010": "атом?", "011": "решта", "100": "перше",
+        "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
+    }
+    RESTORE = {surface: bits for bits, surface in HEADS.items()}
+    RESTORE_RE = re.compile(
+        r"[(](" + "|".join(re.escape(surface) for surface in HEADS.values()) + r")(?=\s)"
+    )
+    RAW_RE = re.compile(r"[(](" + "|".join(HEADS.keys()) + r")(?=\s)")
+
+    @staticmethod
+    def git_blob_sha(data: bytes) -> str:
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def restore_heads(self, source: str) -> str:
+        return self.RESTORE_RE.sub(lambda match: "(" + self.RESTORE[match.group(1)], source)
+
+    def assert_ratified(self, table_path: Path, bits: str,
+                        surface: str, english: str, lisp_name: str):
+        table = table_path.read_text(encoding="utf-8")
+        rows = [
+            line for line in table.splitlines()
+            if re.match(rf"^\s*\({re.escape(bits)}\s", line)
+        ]
+        self.assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
+        self.assertIn(f"(укр {surface})", rows[0])
+        self.assertIn(f"(en {english})", rows[0])
+        self.assertIn(f"(LISP {lisp_name})", rows[0])
+
+    def test_codec_d2_uses_exact_ukr_operator_heads(self):
+        for bits, surface, english, name in (
+            ("001", "як-є", "quote", "QUOTE"),
+            ("010", "атом?", "atom?", "ATOM"),
+            ("011", "решта", "cdr", "CDR"),
+            ("100", "перше", "car", "CAR"),
+            ("101", "тотожне?", "eq?", "EQ"),
+            ("110", "за-умовою", "cond", "COND"),
+            ("111", "сполучити", "cons", "CONS"),
+        ):
+            self.assert_ratified(self.D3, bits, surface, english, name)
+        for bits, surface, english, name in (
+            ("0010", "функція", "lambda", "LAMBDA"),
+            ("0011", "визначити", "define", "DEFINE"),
+        ):
+            self.assert_ratified(self.D4, bits, surface, english, name)
+
+        source = self.SOURCE.read_text(encoding="utf-8")
+        self.assertIsNone(self.RAW_RE.search(source), "raw D3/D4 operator heads remain")
+        for surface, count in (
+            ("визначити", 14), ("функція", 11), ("як-є", 21),
+            ("атом?", 5), ("решта", 12), ("перше", 11),
+            ("тотожне?", 13), ("за-умовою", 8), ("сполучити", 11),
+        ):
+            pattern = re.compile(r"[(]" + re.escape(surface) + r"(?=\s)")
+            self.assertEqual(len(pattern.findall(source)), count, surface)
+
+        # Marker labels are D11-projected data and must remain unchanged.
+        for marker in ("d2-open", "d2-close", "d2-sep", "d2-dot"):
+            self.assertIn(marker, source)
+        for alias in ("A", "B", "C", "D", "E", "F", "G", "R", "Q", "S", "U", "P"):
+            self.assertRegex(source, rf"\({re.escape(alias)}(?=\s|\))")
+
+    def test_inverse_projection_restores_every_original_source_byte(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        restored = self.restore_heads(source).encode("utf-8")
+        self.assertEqual(
+            self.git_blob_sha(restored), self.ORIGINAL_BLOB,
+            "inverse head substitution must reconstruct the exact parent Git blob",
+        )
+
+    def test_wrong_ukr_peer_fails_the_inverse_witness(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace("(тотожне? (як-є t)", "(порожнє? (як-є t)", 1)
+        self.assertNotEqual(mutant, source)
+        restored = self.restore_heads(mutant).encode("utf-8")
+        self.assertNotEqual(
+            self.git_blob_sha(restored), self.ORIGINAL_BLOB,
+            "unratified or wrong surface must not pass the inverse witness",
+        )
+
 
 
 if __name__ == "__main__":
