@@ -31,7 +31,7 @@
        (сполучити (сполучити key value) (решта entries)))
       (так
        (сполучити (перше entries)
-            (map-insert key value (решта entries)))))))
+            (внутрішня-мапа-вставити key value (решта entries)))))))
 
 (визначити map-get
   (функція (key entries)
@@ -40,12 +40,12 @@
       ((тотожне? key (перше (перше entries)))
        (список (решта (перше entries))))
       (так
-       (map-get key (решта entries))))))
+       (мапа-отримати key (решта entries))))))
 
 ; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.
 (визначити map-contains?
   (функція (key entries)
-    (хибне? (атом? (map-get key entries)))))
+    (хибне? (атом? (мапа-отримати key entries)))))
 
 (визначити map->list
   (функція (entries) entries))

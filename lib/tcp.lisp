@@ -14,42 +14,42 @@
 ; Preserve historical public behavior: listen on all IPv4 interfaces.
 ; Callers that need an explicit address use tcp-listen-on.
 (визначити tcp-listen-on
-  (функція (address port)
-    (tcp-listen-raw address port)))
+  (функція (вхідна-адреса мережевий-порт)
+    (tcp-listen-raw вхідна-адреса мережевий-порт)))
 
 (визначити tcp-listen
-  (функція (port)
-    (протокол-передавання-слухати-на "0.0.0.0" port)))
+  (функція (мережевий-порт)
+    (протокол-передавання-слухати-на "0.0.0.0" мережевий-порт)))
 
 (визначити tcp-read-bytes->text
-  (функція (bytes)
-    ((функція (decoded)
+  (функція (вхідні-байти)
+    ((функція (декодований-вміст)
        (за-умовою
-         ((тотожне? (перше decoded) (як-є decoded))
-          (друге decoded))
+         ((тотожне? (перше декодований-вміст) (як-є декодований-вміст))
+          (друге декодований-вміст))
          (так
-          decoded)))
-     (кодування-юнікод-8-декодувати-рядок bytes))))
+          декодований-вміст)))
+     (кодування-юнікод-8-декодувати-рядок вхідні-байти))))
 
 (визначити tcp-read
-  (функція (connection)
-    (протокол-передавання-читати-байти-текст (tcp-read-raw connection))))
+  (функція (мережеве-підключення)
+    (протокол-передавання-читати-байти-текст (tcp-read-raw мережеве-підключення))))
 
 (визначити tcp-write-text->bytes
-  (функція (text)
-    (кодування-юнікод-8-кодувати-рядок text)))
+  (функція (вхідний-текст)
+    (кодування-юнікод-8-кодувати-рядок вхідний-текст)))
 
 ; Return the original text after a successful raw write so the public result
 ; remains compatible with the historical tcp-write surface while encoding
 ; policy belongs to Lisp.
 (визначити tcp-write-via-raw
-  (функція (connection text)
-    ((функція (written) text)
-     (tcp-write-raw connection (протокол-передавання-записати-текст-байти text)))))
+  (функція (мережеве-підключення вхідний-текст)
+    ((функція (записано-байтів) вхідний-текст)
+     (tcp-write-raw мережеве-підключення (протокол-передавання-записати-текст-байти вхідний-текст)))))
 
 (визначити tcp-write
-  (функція (connection text)
-    (протокол-передавання-записати-через-сирий connection text)))
+  (функція (мережеве-підключення вхідний-текст)
+    (протокол-передавання-записати-через-сирий мережеве-підключення вхідний-текст)))
 
 ; Stable surface peers are projected by load_tcp_library after the TCP
 ; closures exist. Avoid the retired per-file post-core materializer.
