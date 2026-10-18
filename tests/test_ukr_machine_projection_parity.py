@@ -768,6 +768,24 @@ def invert_projection(text: str, edits: list, authority: dict) -> str:
     return text
 
 
+def undo_current_native_first_parity_selector(path: str, text: str) -> str:
+    """Undo the later, source-only D3 composition before frozen historical inverse.
+
+    The original Git manifest still verifies its exact bytes. This is an
+    additional, explicit step, not an edited legacy expectation or a parser
+    exception. D9:110110101 FIFTH cannot be spelled with the ASCII-apostrophe
+    Ukrainian surface in the current reader; current executable form uses
+    D3 CAR after four D3 CDRs on a five-field parity record.
+    """
+    if path != "lib/machine/dispatch/native-first-parity.lisp":
+        return text
+    current = "(error-class (перше (решта (решта (решта (решта row))))))"
+    previous = "(error-class (110110101 row))"
+    if text.count(current) != 1 or previous in text or "(п'ятий row)" in text:
+        raise AssertionError("Поточний native-first D3-селектор змінився")
+    return text.replace(current, previous, 1)
+
+
 def mask_comments_and_strings(line: str) -> str:
     return re.sub(r'"(?:\\.|[^"\\])*"|;[^\n]*',
                   lambda m: ' ' * len(m[0]), line)
@@ -782,18 +800,28 @@ class MachineUkrMigrationTests(unittest.TestCase):
         for path, evidence in MANIFEST.items():
             with self.subTest(source=path):
                 current = (ROOT / path).read_text(encoding='utf-8')
-                restored = invert_projection(current, evidence['edits'], self.authority)
+                restored = invert_projection(
+                    undo_current_native_first_parity_selector(path, current),
+                    evidence['edits'], self.authority)
                 self.assertEqual(git_blob_sha(restored), evidence['sha'])
 
     def test_new_source_lines_have_no_old_encoded_callable_heads(self):
         for path, evidence in MANIFEST.items():
             with self.subTest(source=path):
                 now = (ROOT / path).read_text(encoding='utf-8')
-                old = invert_projection(now, evidence['edits'], self.authority)
+                old = invert_projection(
+                    undo_current_native_first_parity_selector(path, now),
+                    evidence['edits'], self.authority)
                 a, b = old.splitlines(), now.splitlines()
                 self.assertEqual(len(a), len(b))
                 changed = [n+1 for n, (x, y) in enumerate(zip(a, b)) if x != y]
-                self.assertEqual(changed, evidence['changed_lines'])
+                expected_lines = list(evidence['changed_lines'])
+                if path == 'lib/machine/dispatch/native-first-parity.lisp':
+                    # Exactly one later, D3-defined fifth-field selector on line 33.
+                    self.assertNotIn(33, expected_lines)
+                    expected_lines.append(33)
+                    expected_lines.sort()
+                self.assertEqual(changed, expected_lines)
                 for n in changed:
                     line = mask_comments_and_strings(b[n-1])
                     self.assertIsNone(ENCODED.search(line), f'{path}:{n}')
@@ -807,6 +835,19 @@ class MachineUkrMigrationTests(unittest.TestCase):
         self.assertRegex(core4, r'\((?:0011|визначити)\s+однакові\?\s+equal\?\)')
         parity = (ROOT / 'lib/machine/dispatch/native-first-parity.lisp').read_text(encoding='utf-8')
         self.assertIn('(однакові? evaluator-value expected)', parity)
+
+    def test_later_native_parity_selector_inverse_rejects_wrong_peer(self):
+        path = 'lib/machine/dispatch/native-first-parity.lisp'
+        source = (ROOT / path).read_text(encoding='utf-8')
+        restored = undo_current_native_first_parity_selector(path, source)
+        self.assertIn('(error-class (110110101 row))', restored)
+        mutant = source.replace(
+            '(error-class (перше (решта (решта (решта (решта row))))))',
+            '(error-class (перше (решта (решта (решта row)))))', 1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(AssertionError, 'селектор'):
+            undo_current_native_first_parity_selector(path, mutant)
 
     def test_projections_do_not_change_host_call_names(self):
         proj = (ROOT / 'lib/machine/projection/x86-64.lisp').read_text(encoding='utf-8')
