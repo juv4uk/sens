@@ -425,6 +425,104 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
         data = source.encode("utf-8")
         return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
+    # Зберігаємо два НЕЗАЛЕЖНІ точні preimage:
+    # 1) source ДО лексичного alpha-перейменування (fcd796bf);
+    # 2) давній original blob після обернення D9/D10 peer-call migration.
+    # Новий SHA замість старого не підставляти: це приховало б регресію.
+    KNOWLEDGE_BEFORE_ALPHA_BLOB = "aee397f6b0e25a0a5d2b941249f91ca85ba25504"
+    KNOWLEDGE_ALPHA = {
+        "module-journal-events-onto": (
+            ("назва-модуля", "module-name", 4),
+            ("журнал", "journal", 7),
+            ("накопичувач", "acc", 5),
+        ),
+        "module-journal-events": (
+            ("назва-модуля", "module-name", 2),
+            ("журнал", "journal", 2),
+        ),
+        "module-journal-has-module?": (
+            ("назва-модуля", "module-name", 3),
+            ("журнал", "journal", 4),
+        ),
+        "module-known?": (("назва-модуля", "module-name", 2),),
+        "apply-journal-event": (
+            ("клаузи", "clauses", 4),
+            ("подія", "event", 5),
+        ),
+        "knowledge-symbol?": (("значення", "value", 2),),
+    }
+
+    @classmethod
+    def _reverse_knowledge_alpha(cls, source):
+        """Обернути тільки 6 зв'язаних lambda-областей, не цитати/коментарі."""
+        for name, renames in cls.KNOWLEDGE_ALPHA.items():
+            anchor = f"(визначити {name}\n"
+            if source.count(anchor) != 1:
+                raise AssertionError(f"alpha definition mismatch: {name}")
+            start = source.index(anchor)
+            depth = 0
+            string = escaped = comment = False
+            end = None
+            for index in range(start, len(source)):
+                char = source[index]
+                if comment:
+                    if char == "\n":
+                        comment = False
+                    continue
+                if string:
+                    if escaped:
+                        escaped = False
+                    elif char == "\\":
+                        escaped = True
+                    elif char == '"':
+                        string = False
+                    continue
+                if char == ";":
+                    comment = True
+                elif char == '"':
+                    string = True
+                elif char == "(":
+                    depth += 1
+                elif char == ")":
+                    depth -= 1
+                    if depth == 0:
+                        end = index + 1
+                        break
+                    if depth < 0:
+                        raise AssertionError(f"alpha unbalanced: {name}")
+            if end is None:
+                raise AssertionError(f"alpha unclosed: {name}")
+            form = source[start:end]
+            words = [match.group() for match in TOKEN.finditer(form)
+                     if not match.group().startswith((";", '"'))]
+            reverse = {}
+            for new, old, expected in renames:
+                actual = words.count(new)
+                if actual != expected or old in words:
+                    raise AssertionError(
+                        f"alpha-token mismatch: {name}:{new}, "
+                        f"expected={expected}, actual={actual}"
+                    )
+                reverse[new] = old
+
+            original_form = TOKEN.sub(
+                lambda match: reverse.get(match.group(), match.group())
+                if not match.group().startswith((";", '"')) else match.group(),
+                form,
+            )
+            source = source[:start] + original_form + source[end:]
+        return source
+
+    def test_negative_knowledge_alpha_binder_change_cannot_restore_original_blob(self):
+        source = (self.ROOT / "lib/knowledge.lisp").read_text(encoding="utf-8")
+        broken = source.replace(
+            "(функція (назва-модуля журнал накопичувач)",
+            "(функція (помилкова-назва-модуля журнал накопичувач)", 1
+        )
+        self.assertNotEqual(broken, source)
+        with self.assertRaisesRegex(AssertionError, "alpha-token mismatch"):
+            self._reverse_knowledge_alpha(broken)
+
     def test_exact_d9_d10_ukr_peers_and_inverse_restores_original_blobs(self):
         for domain, bits, english, ukrainian in self.DOMAIN_PEERS:
             with self.subTest(domain=domain, bits=bits, english=english):
@@ -441,6 +539,13 @@ class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
                 source = (self.ROOT / path).read_text(encoding="utf-8")
                 inverse = [(ukrainian, english, count)
                            for english, ukrainian, count in evidence["edits"]]
+                if path == "lib/knowledge.lisp":
+                    source = self._reverse_knowledge_alpha(source)
+                    self.assertEqual(
+                        self._git_blob_sha(source),
+                        self.KNOWLEDGE_BEFORE_ALPHA_BLOB,
+                        "knowledge: lexical alpha-normalization must recover exact prior Git blob",
+                    )
                 restored = self._rewrite_call_heads(source, inverse)
                 self.assertEqual(self._git_blob_sha(restored), evidence["blob"])
 
