@@ -83,14 +83,14 @@
     (за-умовою
       ((атом? rows) () (як-є (semantic-authority-ok)))
       (t
-       (001001 ((row (100 rows))
+       (нехай-послідовно ((row (перше rows))
                (path (друге row)))
           (за-умовою
             ; Crucial asymmetry: do not even inspect host implementation text.
             ((хибне? (language-authority-source? path))
              (накопичувати (решта rows)))
             (t
-             (001000 ((raw-source (READ-FILE path)))
+             (нехай ((raw-source (READ-FILE path)))
                (за-умовою
                  ((хибне? (рядок? raw-source))
                   (список
@@ -99,7 +99,7 @@
                     (як-є unreadable-language-authority-source)
                     "protected Lisp language source must be readable text"))
                  (t
-                  (001000 ((class (violation-class path raw-source)))
+                  (нехай ((class (violation-class path raw-source)))
                     (за-умовою
                       ((тотожне? class (як-є host-to-language-authority-leak))
                        (список
