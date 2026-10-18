@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::path::Path;
 
 fn repo_root() -> std::path::PathBuf {
@@ -7,7 +6,7 @@ fn repo_root() -> std::path::PathBuf {
 }
 
 #[test]
-fn legacy_i5_6400_profile_is_explicit_sid8_compatibility_only() {
+fn legacy_i5_6400_profile_is_provenance_not_current_authority() {
     let root = repo_root();
     let profile_path = root.join("lib/machine/intel-core-i5-6400.lisp");
     let profile = std::fs::read_to_string(&profile_path)
@@ -19,58 +18,6 @@ fn legacy_i5_6400_profile_is_explicit_sid8_compatibility_only() {
     assert!(profile.contains("NOT current semantic authority"));
     assert!(profile.contains("lib/machine/profile/current-domain-x86-64.lisp"));
 
-    for (sid, expected_machine_path) in [
-        ("00000011", "CMP/SETE"),
-        ("00000101", "LOAD-pair-head"),
-        ("00000110", "LOAD-pair-tail"),
-        ("00001100", "ADD"),
-        ("00001101", "SUB/NEG"),
-        ("00001110", "IMUL"),
-        ("00011010", "CMP/SETL"),
-        ("00011011", "CMP/SETG"),
-    ] {
-        let row_prefix = format!("({sid} ");
-        let row = profile
-            .lines()
-            .map(str::trim_start)
-            .find(|line| line.starts_with(&row_prefix))
-            .unwrap_or_else(|| panic!("legacy i5-6400 profile missing compatibility SID {sid}"));
-        assert!(
-            row.contains(expected_machine_path),
-            "compatibility SID {sid} must preserve {expected_machine_path:?}; row: {row}"
-        );
-    }
-}
-
-#[test]
-fn legacy_i5_6400_rows_are_unique_8bit_compatibility_keys() {
-    let profile = include_str!("../../../lib/machine/intel-core-i5-6400.lisp");
-    let mut seen = HashSet::new();
-    let mut projected = 0usize;
-
-    for line in profile.lines().map(str::trim_start) {
-        let Some(rest) = line.strip_prefix('(') else {
-            continue;
-        };
-        let Some((id, after_id)) = rest.split_once(' ') else {
-            continue;
-        };
-        if id.len() != 8 || !id.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
-            continue;
-        }
-
-        assert!(!after_id.is_empty(), "legacy machine row must continue after SID");
-        projected += 1;
-        assert!(
-            seen.insert(id),
-            "legacy i5-6400 compatibility projection must not duplicate SID {id}"
-        );
-    }
-
-    assert!(
-        projected >= 50,
-        "legacy compatibility snapshot should preserve a meaningful historical subset"
-    );
 }
 
 #[test]

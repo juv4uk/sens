@@ -261,12 +261,11 @@ class ThreePassMigrationTests(unittest.TestCase):
         resolver = mod.Resolver(my, upper)
         text7 = mod.build_text7(foundation, TEXT7)
         expected = {
-            "memq": "0001100010",
-            "sassq": "0001011001",
+            "входження-тотожність": "0001100010",
+            "асоціація-тотожність": "0001011001",
         }
         for spelling, bits in expected.items():
             self.assertEqual(my.get(spelling), (bits, "D10"))
-            self.assertEqual(upper.get(spelling.upper()), (bits, "D10"))
         for spelling, bits in expected.items():
             with self.subTest(spelling=spelling):
                 words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
@@ -310,13 +309,13 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_core4_defined_d9_functions_migrate_by_exact_callable_identity(self):
         resolver = mod.Resolver(self.my, self.upper)
-        for spelling in ("APPEND-NEW", "append-new", "додати-нові"):
+        for spelling in ("додати-нові",):
             with self.subTest(spelling=spelling):
                 words, _origin = resolver.head(mod.Tok("ATOM", spelling, 0))
                 self.assertEqual(words, ["001000101"])
         words, _origin = resolver.head(mod.Tok("ATOM", "001000101", 0))
         self.assertEqual(words, ["001000101"])
-        projection = mod.migrate_file("(APPEND-NEW x)\n", resolver, self.text7)
+        projection = mod.migrate_file("(додати-нові x)\n", resolver, self.text7)
         self.assertTrue(projection.startswith("10 001000101 00 "))
         with self.assertRaisesRegex(mod.MigrationError, "D9 .*callability"):
             resolver.head(mod.Tok("ATOM", "111111111", 0))

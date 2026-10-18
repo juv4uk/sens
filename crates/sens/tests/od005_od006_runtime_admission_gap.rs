@@ -1,38 +1,25 @@
-use sens::{parse, ExprKind};
+use sens::{parse_canonical_binary, DomainIdentity, ExprKind};
 
-fn parsed_head(source: &str) -> Vec<sens::Expr> {
-    let expressions = parse(source).expect("source must parse");
+fn parsed_identity(source: &str) -> DomainIdentity {
+    let expressions = parse_canonical_binary(source).expect("canonical source must parse");
     assert_eq!(expressions.len(), 1);
-    expressions
-}
-
-#[test]
-fn od005_od006_owner_coordinates_are_not_yet_direct_sid_tokens() {
-    for source in ["(00111)", "(001111)"] {
-        let expressions = parsed_head(source);
-        let ExprKind::List(items) = &expressions[0].kind else {
-            panic!("{source}: expected list")
-        };
-
-        assert!(
-            !matches!(&items[0].kind, ExprKind::Sid(_)),
-            "{source}: D5/D6 bare owner coordinate must not be reported as admitted SID before exact-width carrier migration"
-        );
-        assert!(
-            matches!(&items[0].kind, ExprKind::Number(_, _) | ExprKind::Rational(_)),
-            "{source}: current reader collision witness should remain numeric until the explicit migration changes it"
-        );
-    }
-}
-
-#[test]
-fn exact_eight_bit_legacy_control_is_still_sid() {
-    let expressions = parsed_head("(00000111)");
-    let ExprKind::List(items) = &expressions[0].kind else {
-        panic!("expected list")
+    let ExprKind::DomainIdentity(identity) = &expressions[0].kind else {
+        panic!("{source}: expected an exact domain identity")
     };
+    *identity
+}
+
+#[test]
+fn od005_od006_owner_coordinates_have_exact_domain_identity() {
+    assert!(matches!(parsed_identity("00111"), DomainIdentity::D5(_)));
+    assert!(matches!(parsed_identity("001111"), DomainIdentity::D6(_)));
+}
+
+#[test]
+fn exact_eight_bit_word_is_current_d8_identity_not_legacy_sid() {
+    let identity = parsed_identity("00000111");
     assert!(
-        matches!(&items[0].kind, ExprKind::Sid(_)),
-        "8-bit legacy control must remain a SID in this transitional audit"
+        matches!(identity, DomainIdentity::D8(_)),
+        "an exact-width word is identified by its current D8 domain, not SID8"
     );
 }

@@ -89,13 +89,286 @@ def load_authority(root: Path = ROOT):
 
 
 def reject_shadowed_surfaces(source, surfaces):
-    """Owner policy: no blockers.
+    """Return exact call-head offsets shadowed by bindings; never stop peers."""
+    import importlib.util
+    import sys
 
-    DEFINE/LAMBDA/LET names with ратифіковані укр-поверхні are intentional.
-    T5M/SENS handles scope. Raw 8-bit call-heads rejected in plan() via
-    UNQUALIFIED_W8_HEAD (historical Sid8/Sens8 must use current ukr projection).
-    """
-    return set()
+    key = "_sens_three_pass_source_reader_for_shadow_guard"
+    reader = sys.modules.get(key)
+    if reader is None:
+        script = ROOT / "scripts/migrate-three-pass.py"
+        spec = importlib.util.spec_from_file_location(key, script)
+        if spec is None or spec.loader is None:
+            raise ValueError("SOURCE_READER_ERROR: немає AST-reader")
+        reader = importlib.util.module_from_spec(spec)
+        sys.modules[key] = reader
+        try:
+            spec.loader.exec_module(reader)
+        except BaseException:
+            sys.modules.pop(key, None)
+            raise
+
+    def mask_comments(text):
+        chars = list(text)
+        i, state, depth = 0, "code", 0
+        while i < len(text):
+            if state == "string":
+                if text[i] == "\\":
+                    i += 2
+                    continue
+                if text[i] == '"':
+                    state = "code"
+                i += 1
+                continue
+            if state == "line":
+                if text[i] == "\n":
+                    state = "code"
+                else:
+                    chars[i] = " "
+                i += 1
+                continue
+            if state == "block":
+                if text.startswith("#|", i):
+                    chars[i:i + 2] = [" ", " "]
+                    depth += 1
+                    i += 2
+                elif text.startswith("|#", i):
+                    chars[i:i + 2] = [" ", " "]
+                    depth -= 1
+                    i += 2
+                    if depth == 0:
+                        state = "code"
+                else:
+                    if text[i] != "\n":
+                        chars[i] = " "
+                    i += 1
+                continue
+            if text[i] == '"':
+                state = "string"
+                i += 1
+            elif text[i] == ";":
+                chars[i] = " "
+                state = "line"
+                i += 1
+            elif text.startswith("#|", i):
+                chars[i:i + 2] = [" ", " "]
+                depth = 1
+                state = "block"
+                i += 2
+            else:
+                i += 1
+        if state == "block":
+            raise ValueError("unterminated block comment")
+        return "".join(chars)
+
+    try:
+        forms = reader.Parser(
+            reader.tokenize(mask_comments(source), source_surface="укр")
+        ).parse_program()
+    except reader.MigrationError as error:
+        raise ValueError(f"AST_PARSE_ERROR: {error}") from error
+
+    shadowed_offsets = set()
+    lambda_heads = {
+        identity.bits for identity in surfaces.values()
+        if identity.domain == "D4" and identity.label.upper() == "LAMBDA"
+    }
+    define_heads = {
+        identity.bits for identity in surfaces.values()
+        if identity.domain == "D4" and identity.label.upper() == "DEFINE"
+    }
+    foundation = json.loads(
+        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+    )
+    if foundation.get("status") != "owner-ratified":
+        raise ValueError("SOURCE_FORM_ERROR: основа доменів не ратифікована")
+    let_heads = {
+        bits for bits, label in foundation["domains"]["D6"]["residents"].items()
+        if label in {"LET", "LET*"}
+    }
+    if len(let_heads) != 2:
+        raise ValueError("SOURCE_FORM_ERROR: координати D6 LET змінилися")
+    lambda_heads |= {"lambda", "функція"}
+    define_heads |= {"define", "визначити", "def"}
+    let_heads |= {"let", "let*"}
+
+    def atom_name(node):
+        return (
+            node.tok.text.casefold()
+            if isinstance(node, reader.Atom) else None
+        )
+
+    def binding_list(node, context):
+        if not isinstance(node, reader.ListNode) or node.tail is not None:
+            raise ValueError(
+                f"SOURCE_FORM_ERROR: {context}: очікувався звичайний список"
+            )
+        return node.items
+
+    def bound_name(node, context):
+        name = atom_name(node)
+        if name is None:
+            raise ValueError(
+                f"SOURCE_FORM_ERROR: {context}: очікувалося атомарне ім'я"
+            )
+        if name in surfaces:
+            shadowed_offsets.add(node.tok.offset)
+            return {name}
+        return set()
+
+    def bound_names(node, context):
+        names = set()
+        for item in binding_list(node, context):
+            names |= bound_name(item, context)
+        return names
+
+    def head_and_args(node):
+        if not isinstance(node, reader.ListNode) or not node.items:
+            return None, []
+        return atom_name(node.items[0]), node.items[1:]
+
+    def global_definition_name(node):
+        name, args = head_and_args(node)
+        surface = surfaces.get(name or "")
+        role = surface.label.upper() if surface is not None else ""
+        if role == "DEFINE" or name in define_heads:
+            if not args:
+                return None
+            target = args[0]
+            if isinstance(target, reader.Atom):
+                return atom_name(target)
+            if isinstance(target, reader.ListNode) and target.items:
+                return atom_name(target.items[0])
+        if name in {"defun", "defmacro"} and args:
+            return atom_name(args[0])
+        return None
+
+    global_names = {
+        name for form in forms
+        if (name := global_definition_name(form)) in surfaces
+    }
+
+    def visit(node, bound):
+        if isinstance(node, reader.Quote):
+            return
+        if not isinstance(node, reader.ListNode) or not node.items:
+            return
+        head = node.items[0]
+        name = atom_name(head)
+        args = node.items[1:]
+        if name is None:
+            for child in node.items:
+                visit(child, bound)
+            return
+
+        if name in bound:
+            shadowed_offsets.add(head.tok.offset)
+            for child in args:
+                visit(child, bound)
+            return
+        if name in {"quote", "як-є", "001"}:
+            return
+
+        surface = surfaces.get(name)
+        role = surface.label.upper() if surface is not None else ""
+        if role == "LAMBDA" or name in lambda_heads:
+            if not args:
+                raise ValueError("SOURCE_FORM_ERROR: LAMBDA без параметрів")
+            local = bound | bound_names(args[0], "параметр LAMBDA")
+            for child in args[1:]:
+                visit(child, local)
+            return
+        if role == "DEFINE" or name in define_heads:
+            if not args:
+                raise ValueError("SOURCE_FORM_ERROR: DEFINE без імені")
+            target = args[0]
+            if isinstance(target, reader.Atom):
+                bound_name(target, "ім'я DEFINE")
+                for child in args[1:]:
+                    visit(child, bound | global_names)
+            elif isinstance(target, reader.ListNode) and target.items:
+                bound_name(target.items[0], "голова DEFINE")
+                params = reader.ListNode(target.items[1:], target.tail, target.tok)
+                local = bound | global_names | bound_names(
+                    params, "параметр DEFINE"
+                )
+                for child in args[1:]:
+                    visit(child, local)
+            else:
+                raise ValueError("SOURCE_FORM_ERROR: некоректний DEFINE")
+            return
+        if name in {"defun", "defmacro"}:
+            if len(args) < 2 or atom_name(args[0]) is None:
+                raise ValueError("SOURCE_FORM_ERROR: некоректне оголошення функції")
+            bound_name(args[0], "ім'я оголошеної функції")
+            local = bound | global_names | bound_names(
+                args[1], "параметр оголошеної функції"
+            )
+            for child in args[2:]:
+                visit(child, local)
+            return
+        if name in let_heads:
+            if not args:
+                raise ValueError("SOURCE_FORM_ERROR: LET без списку зв'язувань")
+            bindings = binding_list(args[0], "LET")
+            local = set(bound)
+            for item in bindings:
+                if isinstance(item, reader.Atom):
+                    local_name = atom_name(item)
+                    initializer = None
+                    bound_name(item, "змінна LET")
+                else:
+                    pair = binding_list(item, "пара LET")
+                    if len(pair) != 2 or atom_name(pair[0]) is None:
+                        raise ValueError("SOURCE_FORM_ERROR: некоректна пара LET")
+                    local_name = atom_name(pair[0])
+                    bound_name(pair[0], "змінна LET")
+                    initializer = pair[1]
+                if name == "let*":
+                    if initializer is not None:
+                        visit(initializer, local)
+                elif initializer is not None:
+                    visit(initializer, bound)
+                if local_name in surfaces:
+                    local.add(local_name)
+            for child in args[1:]:
+                visit(child, local)
+            return
+        if name in {"flet", "labels", "macrolet"}:
+            if not args:
+                raise ValueError(
+                    "SOURCE_FORM_ERROR: локальні функції без декларацій"
+                )
+            declarations = binding_list(args[0], name)
+            signatures = []
+            local_names = set()
+            for declaration in declarations:
+                parts = binding_list(declaration, "локальна функція")
+                if len(parts) < 2 or atom_name(parts[0]) is None:
+                    raise ValueError("SOURCE_FORM_ERROR: некоректна локальна функція")
+                local_name = atom_name(parts[0])
+                bound_name(parts[0], "ім'я локальної функції")
+                if local_name in surfaces:
+                    local_names.add(local_name)
+                params = bound_names(parts[1], "параметр локальної функції")
+                signatures.append((parts[2:], params))
+            for body, params in signatures:
+                function_scope = bound | params
+                if name in {"labels", "macrolet"}:
+                    function_scope |= local_names
+                for child in body:
+                    visit(child, function_scope)
+            body_scope = bound | local_names
+            for child in args[1:]:
+                visit(child, body_scope)
+            return
+
+        for child in args:
+            visit(child, bound)
+
+    for form in forms:
+        visit(form, global_names)
+    return shadowed_offsets
 
 
 def plan(source: str, surfaces):
@@ -173,7 +446,7 @@ def plan(source: str, surfaces):
             i += 1
             continue
         start = i
-        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in "()'\";,:" :
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in ("(", ")", "'", '"', ";", ",", ":"):
             if source.startswith("#|", i):
                 break
             i += 1
@@ -190,7 +463,7 @@ def plan(source: str, surfaces):
                         "поточну identity; потрібна ратифікована українська назва"
                     )
                 identity = surfaces.get(token.casefold())
-                if (identity and token.casefold() not in shadowed
+                if (identity and start not in shadowed
                         and token != identity.українська):
                     edits.append(Edit(start, i, token, identity))
                 if token.casefold() in {"quote", "як-є"} or token == "001":

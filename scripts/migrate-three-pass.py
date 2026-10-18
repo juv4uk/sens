@@ -839,8 +839,8 @@ def core4_d9_callable_rows():
     forms = Parser(tokenize(source)).parse_program()
     callable_names = set()
     aliases = []
-    define_heads = {"00001001", "0011", "define", "def"}
-    lambda_heads = {"0010", "lambda", "лямбда"}
+    define_heads = {"00001001", "0011", "define", "def", "визначити"}
+    lambda_heads = {"0010", "lambda", "лямбда", "функція"}
 
     for form in forms:
         if (not isinstance(form, ListNode) or form.tail is not None
@@ -891,8 +891,8 @@ def core4_d10_defined_rows():
     forms = Parser(tokenize(source)).parse_program()
     defined_names = set()
     aliases = []
-    define_heads = {"00001001", "0011", "define", "def"}
-    lambda_heads = {"0010", "lambda", "лямбда"}
+    define_heads = {"00001001", "0011", "define", "def", "визначити"}
+    lambda_heads = {"0010", "lambda", "лямбда", "функція"}
 
     for form in forms:
         if (not isinstance(form, ListNode) or form.tail is not None

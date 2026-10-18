@@ -88,6 +88,10 @@ class ExactDomainMigrationTests(unittest.TestCase):
             self.rewrite("(lambda (car) (car x))"),
             "(функція (car) (car x))",
         )
+        self.assertEqual(
+            self.rewrite("(lambda (car) (car x)) (car y)"),
+            "(функція (car) (car x)) (перше y)",
+        )
         for source in (
             "(lambda (car) (car x))",
             "(0010 (перше) (перше x))",
