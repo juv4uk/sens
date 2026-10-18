@@ -173,6 +173,94 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             self._restore_original(mutated)
 
 
+class MachineEffectU64UkrProjectionTests(unittest.TestCase):
+    """Точна міграція фізично нейтрального effect: проєкції не змінюють закон."""
+
+    ORIGINAL_BLOB = "f43d225c1baa9457615af127520294c8d5177c34"
+    # Domain+exact bits own meaning. Names are checked against current tables.
+    DOMAIN_PEERS = (
+        (3, "001", "як-є"),
+        (3, "010", "атом?"),
+        (3, "100", "перше"),
+        (3, "110", "за-умовою"),
+        (4, "0010", "функція"),
+        (4, "0011", "визначити"),
+        (4, "1110", "список"),
+        (6, "000000", "довжина"),
+        (6, "001000", "нехай"),
+        (8, "11110100", "значення-у-текст"),
+        (9, "110011100", "рядок-порожній?"),
+        (9, "110011101", "рядок-решта"),
+        (9, "110101010", "рядок-префікс?"),
+        (9, "110101011", "рядок-перший"),
+    )
+
+    @classmethod
+    def _restore_exact_bits(cls, source):
+        by_peer = {peer: bits for _domain, bits, peer in cls.DOMAIN_PEERS}
+        alternatives = "|".join(
+            re.escape(peer) for peer in sorted(by_peer, key=len, reverse=True)
+        )
+        call_head = re.compile(r"\((" + alternatives + r")(?=\s|\)|$)")
+        # These two current, originally Ukrainian ATOM calls precede migration.
+        # They must not be reinterpreted as formerly binary heads.
+        self_host_atom = "(__PRESERVE_PREEXISTING_ATOM__ ())"
+        if source.count("(атом? ())") != 2:
+            raise AssertionError("changed pre-existing ATOM witness")
+        masked = source.replace("(атом? ())", self_host_atom)
+        rows = []
+        for line in masked.splitlines(keepends=True):
+            # D3:000 in quoted data is not an executable numeric call head.
+            # Do not rewrite either these exact source lines or any comments.
+            if line.lstrip().startswith(";") or "(000)" in line:
+                rows.append(line)
+                continue
+            rows.append(call_head.sub(lambda m: "(" + by_peer[m.group(1)], line))
+        return "".join(rows).replace(self_host_atom, "(атом? ())")
+
+    @staticmethod
+    def _git_blob(source):
+        raw = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(raw)).encode() + bytes((0,)) + raw
+        ).hexdigest()
+
+    def test_ukr_exact_domain_peers_and_original_law(self):
+        from domain_tables import read_domain_table
+
+        source = (ROOT / "lib/machine/effects/u64.lisp").read_text(
+            encoding="utf-8"
+        )
+        for width in (3, 4, 6, 8, 9):
+            rows = {
+                row.bits: row.ukr for row in read_domain_table(
+                    ROOT / "lib" / "domains" / f"d{width}.lisp"
+                )
+            }
+            for domain, bits, peer in self.DOMAIN_PEERS:
+                if width == domain:
+                    self.assertEqual(rows[bits], peer)
+        self.assertEqual(source.count("(000)"), 13)
+        self.assertEqual(
+            self._git_blob(self._restore_exact_bits(source)),
+            self.ORIGINAL_BLOB,
+            "українська проєкція змінила не лише викличні голови",
+        )
+
+    def test_wrong_domain_peer_does_not_match_original(self):
+        source = (ROOT / "lib/machine/effects/u64.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("(рядок-перший text)", source)
+        mutant = source.replace(
+            "(рядок-перший text)", "(рядок-решта text)", 1
+        )
+        self.assertNotEqual(
+            self._git_blob(self._restore_exact_bits(mutant)),
+            self.ORIGINAL_BLOB,
+        )
+
+
 class CodecRunsTests(unittest.TestCase):
     """Наш кодек має виконатись на реальних мовних файлах."""
 
