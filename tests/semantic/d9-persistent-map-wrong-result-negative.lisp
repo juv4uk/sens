@@ -2,9 +2,9 @@
 (load "lib/core.lisp")
 (load "lib/persistent-map.lisp")
 (список
-  (equal? (мапа-отримати (quote k)
-      (внутрішня-мапа-вставити (quote k) (quote v) (мапа-порожній)))
-    (список (quote wrong))))
+  (equal? (мапа-отримати (як-є k)
+      (внутрішня-мапа-вставити (як-є k) (як-є v) (мапа-порожній)))
+    (список (як-є wrong))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити список list)
