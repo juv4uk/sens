@@ -1,18 +1,22 @@
-"""Перевірки українських D3/D4 голів файлів, без host-імітації виконання SENS.
+"""Доказова проєкція FS: D1/D4 на повне укр, без Python-SENS evaluator.
 
-Порівнюємо AST з тією самою точною структурою, що була до зміни surface.
-Реальне семантичне виконання лишається за SENS/Rust source-pinned тестами.
+Точний попередній Git blob і семантична S-форма — незалежні свідки.
+Фізичне виконання належить існуючим SENS fixture/CI, не цим unittest.
 """
-from pathlib import Path
+from __future__ import annotations
+
+import hashlib
 import re
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/fs.lisp"
+D1 = ROOT / "lib/domains/d1.lisp"
 D3 = ROOT / "lib/domains/d3.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
+PRE_MIGRATION_BLOB = "59b18e3dfdc10bb33036448dc4d3eb33efefec59"
 
-# Незмінний точний закон двох власних функцій, до заміни лише call surface.
 EXACT_LAW = """
 (0011 read-file
   (0010 (path)
@@ -31,86 +35,130 @@ EXACT_LAW = """
 REQUIRED = {
     "001": "як-є", "100": "перше", "101": "тотожне?",
     "110": "за-умовою", "1001": "друге", "1110": "список",
+    "0010": "функція", "0011": "визначити",
 }
 
+
 def parse(source: str):
-    source = re.sub(r";[^\n]*", "", source)
-    toks = re.findall(r'"(?:\\.|[^"\\])*"|[()]|[^\s()]+', source)
-    pos = 0
+    text = re.sub(r";[^\n]*", "", source)
+    tokens = re.findall(r'"(?:\\.|[^"\\])*"|[()]|[^\s()]+', text)
+    index = 0
+
     def expr():
-        nonlocal pos
-        if pos >= len(toks):
-            raise ValueError("незакрита форма")
-        value = toks[pos]; pos += 1
+        nonlocal index
+        if index >= len(tokens):
+            raise ValueError("незавершена SENS форма")
+        value = tokens[index]
+        index += 1
         if value == ")":
             raise ValueError("зайва )")
         if value != "(":
             return value
         items = []
-        while pos < len(toks) and toks[pos] != ")":
+        while index < len(tokens) and tokens[index] != ")":
             items.append(expr())
-        if pos >= len(toks):
-            raise ValueError("незакрита форма")
-        pos += 1
+        if index >= len(tokens):
+            raise ValueError("незакрита SENS форма")
+        index += 1
         return items
-    out = []
-    while pos < len(toks):
-        out.append(expr())
-    return out
+
+    result = []
+    while index < len(tokens):
+        result.append(expr())
+    return result
 
 
 def old_identity(node):
     if not isinstance(node, list):
-        return node
-    items = [old_identity(item) for item in node]
+        return "#d1:1" if node == "так" else node
+    items = [old_identity(value) for value in node]
     if items and isinstance(items[0], str):
-        reverse = {name: bits for bits, name in REQUIRED.items()}
-        items[0] = reverse.get(items[0], items[0])
+        reversed_peers = {value: key for key, value in REQUIRED.items()}
+        items[0] = reversed_peers.get(items[0], items[0])
     return items
 
 
-def verify(forms):
+def source_to_previous(text: str) -> str:
+    """Обернути тільки ратифіковані слова у коді; коментарі не редагувати."""
+    result = []
+    for line in text.splitlines(keepends=True):
+        if line.lstrip().startswith(";"):
+            result.append(line)
+            continue
+        line = re.sub(r"\(визначити(?=\s)", "(0011", line)
+        line = re.sub(r"\(функція(?=\s)", "(0010", line)
+        line = re.sub(r"\(так(?=\s|$)", "(#d1:1", line)
+        result.append(line)
+    return "".join(result)
+
+
+def git_blob(text: str) -> str:
+    data = text.encode("utf-8")
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+
+
+def verify(source: str) -> None:
+    forms = parse(source)
     if [old_identity(form) for form in forms] != parse(EXACT_LAW):
-        raise AssertionError("FS: змінився точний D3/D4 закон, arity чи quote-data")
-    for form in forms:
-        if form[0] != "0011" or form[2][0] != "0010":
-            raise AssertionError("FS: owner-bound D4 DEFINE/LAMBDA зруйновано")
-    return True
+        raise AssertionError("FS: порушено початковий D1/D3/D4 закон, арність або I/O")
+    if len(forms) != 2 or any(
+        form[0] != "визначити" or form[2][0] != "функція" for form in forms
+    ):
+        raise AssertionError("FS: не повна українська D4:0011/0010 проєкція")
+    if git_blob(source_to_previous(source)) != PRE_MIGRATION_BLOB:
+        raise AssertionError("FS: незворотна правка поза ратифікованими проєкціями")
 
 
 class FsUkrProjectionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.content = SOURCE.read_text(encoding="utf-8")
-        cls.forms = parse(cls.content)
+        cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_current_ratified_ukrainian_spellings(self):
-        for n, table in [(3, D3), (4, D4)]:
-            rows = dict(re.findall(r"(?m)^  \(([01]+) \(ук ([^()\s]+)\)", table.read_text(encoding="utf-8")))
+    def test_ratified_exact_d1_d3_d4(self):
+        self.assertIn("(1 (ук так) (укр так)", D1.read_text(encoding="utf-8"))
+        for domain, path in ((3, D3), (4, D4)):
+            rows = dict(re.findall(
+                r"(?m)^\s*\(([01]+) \(ук [^()]*\) \(укр ([^()\s]+)\)",
+                path.read_text(encoding="utf-8"),
+            ))
             for bits, name in REQUIRED.items():
-                if len(bits) == n:
-                    self.assertEqual(rows[bits], name)
-        self.assertTrue(verify(self.forms))
+                if len(bits) == domain:
+                    self.assertEqual(rows[bits], name, f"D{domain}:{bits}")
 
-    def test_no_unmigrated_old_call_heads(self):
-        code = self.content[self.content.index("(0011 "):]
-        found = re.findall(r"\(([01]{3,9})(?=[\s(])", code)
-        self.assertEqual(found, ["0011", "0010", "0010", "0011", "0010"])
-        self.assertIn("(за-умовою", code)
-        self.assertIn("(тотожне?", code)
+    def test_exact_original_git_blob_and_full_sens_ast(self):
+        verify(self.source)
 
-    def test_negative_wrong_operation_or_fallback(self):
-        mutated = parse(self.content.replace("(тотожне?", "(сполучити", 1))
-        with self.assertRaisesRegex(AssertionError, "змінився точний"):
-            verify(mutated)
-        mutated = parse(self.content.replace("#d1:1", "#d1:0", 1))
-        with self.assertRaisesRegex(AssertionError, "змінився точний"):
-            verify(mutated)
+    def test_no_legacy_numeric_heads_or_d1_literals(self):
+        code = "\n".join(line for line in self.source.splitlines()
+                         if not line.lstrip().startswith(";"))
+        self.assertNotRegex(code, r"\([01]{3,9}(?=\s|\))")
+        self.assertNotIn("#d1:1", code)
+        self.assertEqual(code.count("(визначити "), 2)
+        self.assertEqual(code.count("(функція "), 3)
+        self.assertIn("(так", code)
 
-    def test_negative_bare_eight_bit_identity(self):
-        mutated = parse(self.content.replace("(перше", "(00000101", 1))
-        with self.assertRaisesRegex(AssertionError, "змінився точний"):
-            verify(mutated)
+    def test_host_io_boundary_and_public_names_untouched(self):
+        for literal in ("(визначити read-file", "(визначити write-file",
+                        "(read-file-utf8-raw path)",
+                        "(write-file-bytes path (utf8-encode-string text))"):
+            self.assertIn(literal, self.source)
+        verify(self.source)
+
+    def test_negative_wrong_operation_or_d1_semantics(self):
+        for changed in (
+            self.source.replace("(тотожне?", "(сполучити", 1),
+            self.source.replace("(так", "(ні", 1),
+            self.source.replace("(визначити read-file", "(функція read-file", 1),
+            self.source.replace("read-file-utf8-raw", "read-file-bytes", 1),
+        ):
+            with self.assertRaises(AssertionError):
+                verify(changed)
+
+    def test_negative_wrong_domain_word_or_malformed_file(self):
+        with self.assertRaises(AssertionError):
+            verify(self.source.replace("(перше", "(00000101", 1))
+        with self.assertRaises(ValueError):
+            parse("(визначити read-file (функція (path)")
 
 
 if __name__ == "__main__":

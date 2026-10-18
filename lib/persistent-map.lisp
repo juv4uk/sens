@@ -20,49 +20,49 @@
 ; — D3. D9 map-residents тут не отримують автоматичної callability:
 ; нижні українські імена — Lisp-owned closures.
 
-(0011 map-empty (001 ()))
+(визначити map-empty (як-є ()))
 
-(0011 map-insert
+(визначити map-insert
   (функція (key value entries)
     (за-умовою
       ((порожній? entries)
        (список (сполучити key value)))
       ((тотожне? key (перше (перше entries)))
        (сполучити (сполучити key value) (решта entries)))
-      (#d1:1
+      (так
        (сполучити (перше entries)
             (map-insert key value (решта entries)))))))
 
-(0011 map-get
+(визначити map-get
   (функція (key entries)
     (за-умовою
       ((порожній? entries) (як-є ()))
       ((тотожне? key (перше (перше entries)))
        (список (решта (перше entries))))
-      (#d1:1
+      (так
        (map-get key (решта entries))))))
 
 ; Exact D1 projection: presence is (010 (001 ())) form via NOT of empty get.
-(0011 map-contains?
+(визначити map-contains?
   (функція (key entries)
     (хибне? (атом? (map-get key entries)))))
 
-(0011 map->list
+(визначити map->list
   (функція (entries) entries))
 
 ; Приватні Lisp-owned механізми. Назви лишають зовнішній D9 resident
 ; fail-closed: residency сама по собі не створює mechanism.
-(0011 внутрішня-мапа-вставити map-insert)
-(0011 внутрішня-мапа-отримати map-get)
-(0011 внутрішня-мапа-містить map-contains?)
-(0011 внутрішня-мапа-список map->list)
+(визначити внутрішня-мапа-вставити map-insert)
+(визначити внутрішня-мапа-отримати map-get)
+(визначити внутрішня-мапа-містить map-contains?)
+(визначити внутрішня-мапа-список map->list)
 
 ; D9 resident projections over the existing immutable map mechanism.
 ; Exact identities: MAP-EMPTY D9:101100011; MAP-GET D9:101100101;
 ; MAP-CONTAINS? D9:101100010; MAP->LIST D9:101001100.
 ; These wrappers preserve the map's maybe-shaped lookup result and dotted-entry order.
-(0011 внутрішня-мапа-порожній map-empty)
-(0011 мапа-порожній внутрішня-мапа-порожній)
-(0011 мапа-отримати внутрішня-мапа-отримати)
-(0011 мапа-містить? внутрішня-мапа-містить)
-(0011 мапа-список внутрішня-мапа-список)
+(визначити внутрішня-мапа-порожній map-empty)
+(визначити мапа-порожній внутрішня-мапа-порожній)
+(визначити мапа-отримати внутрішня-мапа-отримати)
+(визначити мапа-містить? внутрішня-мапа-містить)
+(визначити мапа-список внутрішня-мапа-список)
