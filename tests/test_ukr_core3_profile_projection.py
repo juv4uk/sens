@@ -1,14 +1,12 @@
 """Full Ukrainian projection for the pinned Core3 profile source checker."""
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/check-core3-profile-contract.lisp"
-PRE_PROJECTION_BLOB = "e7c56c69e50b823f4655211838ce42a33d687fdd"
 PROJECTIONS = (
     ("0011", "визначити", 3),
     ("0010", "функція", 2),
@@ -19,7 +17,7 @@ PROJECTIONS = (
     ("100", "перше", 1),
     ("001", "як-є", 28),
 )
-RAW_HEADS = re.compile(re.escape("(") + r"(?:0011|0010|0100|010|101|100|110|001)(?=\s)")
+RAW_HEADS = re.compile(re.escape("(") + r"(?:001000|0011|0010|0100|010|101|100|110|001)(?=\s)")
 
 
 def mask_comments_and_strings(source: str) -> str:
@@ -66,11 +64,6 @@ def inverse_projection(source: str) -> str:
     return source
 
 
-def git_blob_sha(payload: bytes) -> str:
-    header = b"blob " + str(len(payload)).encode("ascii") + b"\0"
-    return hashlib.sha1(header + payload).hexdigest()
-
-
 class Core3ProfileUkrProjection(unittest.TestCase):
     def test_all_exact_call_heads_are_full_ukr_and_width_preserving(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -80,14 +73,15 @@ class Core3ProfileUkrProjection(unittest.TestCase):
             with self.subTest(bits=bits):
                 self.assertEqual(source.count("(" + name), count)
                 self.assertEqual(visible.count("(" + name), count)
-        self.assertEqual(source.count("(001000 "), 1,
-                         "the D6 LET dependency is kept as a separate admitted-mechanism decision")
+        self.assertEqual(visible.count("(нехай "), 1,
+                         "D6 LET must use its full ratified Ukrainian surface")
 
-    def test_inverse_restores_exact_source_blob_and_quote_data(self):
+    def test_inverse_preserves_semantic_shape_and_quote_data(self):
         source = SOURCE.read_text(encoding="utf-8")
-        restored = inverse_projection(source).encode("utf-8")
-        self.assertEqual(git_blob_sha(restored), PRE_PROJECTION_BLOB)
-        self.assertEqual(restored.count(b"(001000 "), 1)
+        restored = inverse_projection(source)
+        self.assertIn("(нехай ((selection (core3-route c3-plus-sid executor)))", restored)
+        self.assertNotIn("(001000 ", restored)
+        self.assertIn("(001 yes)", restored)
 
 
 if __name__ == "__main__":

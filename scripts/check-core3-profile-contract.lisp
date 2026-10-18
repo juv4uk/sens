@@ -10,7 +10,7 @@
 
 (визначити c3-route-ok?
   (функція (executor)
-    (001000 ((selection (core3-route c3-plus-sid executor)))
+    (нехай ((selection (core3-route c3-plus-sid executor)))
       (за-умовою
         ((хибне? (атом? selection))
          (за-умовою
