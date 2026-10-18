@@ -2541,7 +2541,8 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
         "scripts/build-constitution.lisp": {
             "blob": "0bbfef8844b7921f7873203d4c976fed2dd72619",
             "counts": {"110": 1, "111": 8, "1110": 19, "11011011": 27, "110101001": 1,
-                       "110110111": 1, "0011": 3, "001": 52, "0010": 2, "010": 2},
+                       "110110111": 1, "0011": 3, "001": 52, "0010": 3, "010": 2,
+                       "100": 1, "011": 1},
         },
         "scripts/generate-rust-evaluator-dispatch.lisp": {
             "blob": "10ba0c9b9a0bc7a0565a1c4b9b74fbea7cbe737d",
