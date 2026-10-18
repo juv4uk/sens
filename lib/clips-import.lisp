@@ -154,30 +154,30 @@
 ; zu kürzen (oder den ganzen Namen, falls kein `::` vorkommt) lässt nackte
 ; und qualifizierte Namen einander finden, ohne `defmodule` wirklich
 ; abzubilden.
-(визначити clips-string-empty? (функція (s) (тотожне? s "")))
+(визначити кліпс-рядок-порожній? (функція (s) (тотожне? s "")))
 
 ; This is a D1 predicate, not a partial search returning NIL on failure.
 ; D3 COND can inspect only the exact one-bit results; empty/short strings,
 ; mismatched first character and mismatched second character are all D1:NO.
-(визначити clips-string-starts-with-double-colon?
+(визначити кліпс-рядок-починається-з-подвійної-двокрапки?
   (функція (s)
     (за-умовою
-      ((clips-string-empty? s) ні)
-      ((clips-string-empty? (рядок-решта s)) ні)
+      ((кліпс-рядок-порожній? s) ні)
+      ((кліпс-рядок-порожній? (рядок-решта s)) ні)
       ((тотожне? (рядок-перший s) ":") (тотожне? (рядок-перший (рядок-решта s)) ":"))
       (так ні))))
 
-(визначити clips-string-after-last-double-colon
+(визначити кліпс-рядок-після-останньої-подвійної-двокрапки
   (функція (s)
     (за-умовою
-      ((clips-string-empty? s) (як-є ()))
-      ((clips-string-starts-with-double-colon? s)
+      ((кліпс-рядок-порожній? s) (як-є ()))
+      ((кліпс-рядок-починається-з-подвійної-двокрапки? s)
        ((функція (after)
           (за-умовою
             ((тотожне? after (як-є ())) (рядок-решта (рядок-решта s)))
             (так after)))
-        (clips-string-after-last-double-colon (рядок-решта (рядок-решта s)))))
-      (так (clips-string-after-last-double-colon (рядок-решта s))))))
+        (кліпс-рядок-після-останньої-подвійної-двокрапки (рядок-решта (рядок-решта s)))))
+      (так (кліпс-рядок-після-останньої-подвійної-двокрапки (рядок-решта s))))))
 
 (визначити clips-strip-module-prefix
   (функція (sym)
@@ -187,7 +187,7 @@
           (за-умовою
             ((тотожне? after (як-є ())) sym)
             (так (текст-у-символ after))))
-        (clips-string-after-last-double-colon (символ-у-текст sym))))
+        (кліпс-рядок-після-останньої-подвійної-двокрапки (символ-у-текст sym))))
       (так sym))))
 
 (визначити clips-deftemplate-name (функція (form) (прибрати-префікс-модуля-кліпс (друге form))))
@@ -256,7 +256,7 @@
 ; derselben "überspringen statt abstürzen"-Politik wie die eigene
 ; atom-Prüfung von clips-lookup-slot-value weiter unten, statt `second`
 ; auf einer Liste ohne cdr abstürzen zu lassen.
-(визначити clips-slot-value-of
+(визначити кліпс-значення-слота
   (функція (slot-form)
     (за-умовою
       
@@ -267,7 +267,7 @@
 ; Коректний слот = (назва значення). У разі складеної назви
 ; пропускаємо запис; голий атом замість слота теж пропускаємо.
 ; Не можна відкидати кожний непорожній список: порівняння
-; тоді недосяжне. Рядки в clips-symbol-starts-with-? і далі D8 EQUAL.
+; тоді недосяжне. Рядки в кліпс-символ-починається-з-питальника? і далі D8 EQUAL.
 
 (визначити clips-lookup-slot-value
   (функція (slot-name slot-forms)
@@ -276,7 +276,7 @@
       ((атом? slot-forms)  (як-є ()))
       ((атом? (перше slot-forms))  (знайти-значення-слота-кліпс slot-name (решта slot-forms)))
       ((хибне? (атом? (перше (перше slot-forms)))) (знайти-значення-слота-кліпс slot-name (решта slot-forms)))
-      ((тотожне? slot-name (перше (перше slot-forms))) (clips-slot-value-of (перше slot-forms)))
+      ((тотожне? slot-name (перше (перше slot-forms))) (кліпс-значення-слота (перше slot-forms)))
       (так (знайти-значення-слота-кліпс slot-name (решта slot-forms))))))
 
 (визначити clips-positional-args
@@ -379,17 +379,17 @@
 ; um einen Frame pro Fakt und lief über. Akkumulator `-onto` + `reverse`,
 ; dieselbe stack-sichere Form, die `lib/core.lisp`s eigene `map`/`filter`
 ; verwenden, hält jeden rekursiven Aufruf hier in Tail-Position.
-(визначити clips-facts->clauses-onto
+(визначити кліпс-факти-у-клаузи-дописати
   (функція (facts templates acc)
     (за-умовою
       ((атом? facts) (зворот acc))
-      (так (clips-facts->clauses-onto
+      (так (кліпс-факти-у-клаузи-дописати
            (решта facts) templates
            (сполучити (кліпс-факт-клауза (кліпс-перетворити-шаблон (перше facts) templates)) acc))))))
 
 (визначити clips-facts->clauses
   (функція (facts templates)
-    (clips-facts->clauses-onto facts templates (як-є ()))))
+    (кліпс-факти-у-клаузи-дописати facts templates (як-є ()))))
 
 ; `(cddr form)` drops `deffacts` and the deffacts block's own name,
 ; leaving just the fact list.
@@ -448,7 +448,7 @@
 ; erwarten.
 ; Guards on `symbol?` first: `term` may be any atom (a CLIPS fact's
 ; argument can just as easily be a number, e.g. `(temperature 98)`), and
-; `symbol->string` (called by `clips-symbol-starts-with-?`) errors on
+; `symbol->string` (called by `кліпс-символ-починається-з-питальника?`) errors on
 ; anything that isn't actually a symbol.
 ; Only atoms may be variable symbols. D1:NO is explicit
 ; for pairs and non-symbol atoms; no historical truthy NIL/UNKNOWN.
@@ -457,13 +457,13 @@
     (за-умовою
       ((атом? term)
        (за-умовою
-         ((символ? term) (clips-symbol-starts-with-? term))
+         ((символ? term) (кліпс-символ-починається-з-питальника? term))
          (так ні)))
       (так ні))))
 
 ; Both projections are atoms, so admitted D3 EQ suffices;
 ; D8 EQUAL is neither needed nor implicitly admitted here.
-(визначити clips-symbol-starts-with-?
+(визначити кліпс-символ-починається-з-питальника?
   (функція (symbol)
     (тотожне? (рядок-перший (символ-у-текст symbol)) (рядок-перший "?_"))))
 
@@ -823,7 +823,7 @@
 ; umgewandelt bekommt.
 ; Each intermediate list is computed once by language-owned derived
 ; functions. No ambiguous computed LAMBDA head or unadmitted LET slot.
-(визначити clips-defrule-clauses-from-parts
+(визначити кліпс-клаузи-правила-з-частин
   (функція (conditions relevant templates)
     (за-умовою
       ((усі-твердження-кліпс? relevant)
@@ -832,16 +832,16 @@
          conditions))
       (так (як-є ())))))
 
-(визначити clips-defrule-clauses-from-split
+(визначити кліпс-клаузи-правила-з-розділу
   (функція (split templates)
-    (clips-defrule-clauses-from-parts
+    (кліпс-клаузи-правила-з-частин
       (кліпс-перетворити-змінні (кліпс-перетворити-шаблон-список (перше split) templates))
       (прибрати-виведення-кліпс (друге split))
       templates)))
 
 (визначити clips-defrule->clauses
   (функція (form templates)
-    (clips-defrule-clauses-from-split
+    (кліпс-клаузи-правила-з-розділу
       (розділити-правило-кліпс (прибрати-преамбулу-кліпс (решта-решти form)))
       templates)))
 
@@ -866,7 +866,7 @@
 ; this deep enough to crash the process outright with a real stack
 ; overflow rather than a graceful error — found the same "verify with a
 ; throwaway debug test" way as every other importer bug this file
-; documents. `clips-cons-each-onto` flattens one form's own clause list
+; documents. `кліпс-сполучити-кожен-дописати` flattens one form's own clause list
 ; onto the running accumulator tail-recursively, so neither loop — across
 ; forms, or across one form's clauses — grows the native stack.
 ; Та сама проблема нехвостового виклику, що й у `clips-facts->clauses`
@@ -876,7 +876,7 @@
 ; deffacts зі 128 фактів) — саме той файл, що вперше виріс достатньо
 ; глибоко, щоб реально впасти зі stack overflow замість коректної
 ; помилки — знайдено тим самим способом "спершу тимчасовий debug-тест",
-; що й усі інші баги імпортера в цьому файлі. `clips-cons-each-onto`
+; що й усі інші баги імпортера в цьому файлі. `кліпс-сполучити-кожен-дописати`
 ; сплющує список clause однієї форми на робочий акумулятор хвостово-
 ; рекурсивно, тож жоден із циклів — ні по формах, ні по clause однієї
 ; форми — не росте нативний стек.
@@ -888,27 +888,27 @@
 ; ließ, um mit einem echten Stack-Overflow abzustürzen statt einen
 ; ordentlichen Fehler zu liefern — gefunden auf demselben Weg "erst ein
 ; Wegwerf-Debug-Test" wie jeder andere Importer-Bug in dieser Datei.
-; `clips-cons-each-onto` glättet die Clause-Liste einer Form tail-rekursiv
+; `кліпс-сполучити-кожен-дописати` glättet die Clause-Liste einer Form tail-rekursiv
 ; auf den laufenden Akkumulator, sodass weder die Schleife über die Formen
 ; noch die über die Clauses einer Form den nativen Stack wachsen lässt.
-(визначити clips-cons-each-onto
+(визначити кліпс-сполучити-кожен-дописати
   (функція (items acc)
     (за-умовою
       
       ((атом? items)  acc)
-      (так (clips-cons-each-onto (решта items) (сполучити (перше items) acc))))))
+      (так (кліпс-сполучити-кожен-дописати (решта items) (сполучити (перше items) acc))))))
 
-(визначити clips-import-forms-onto
+(визначити кліпс-імпорт-форм-дописати
   (функція (forms templates acc)
     (за-умовою
       ((атом? forms) (зворот acc))
-      (так (clips-import-forms-onto
+      (так (кліпс-імпорт-форм-дописати
            (решта forms) templates
-           (clips-cons-each-onto (кліпс-форма-клаузи (перше forms) templates) acc))))))
+           (кліпс-сполучити-кожен-дописати (кліпс-форма-клаузи (перше forms) templates) acc))))))
 
 (визначити clips-import-forms
   (функція (forms templates)
-    (clips-import-forms-onto forms templates (як-є ()))))
+    (кліпс-імпорт-форм-дописати forms templates (як-є ()))))
 
 (визначити clips-import
   (функція (forms)

@@ -12,8 +12,8 @@ SOURCE = ROOT / "lib/clips-import.lisp"
 BAD_GUARD = "((0100 (010 (100 slot-forms))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
 GOOD_GUARD = "((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))"
 SKIP_ATOM = "((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))"
-OLD_EQUAL = "((11110111 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))"
-NEW_EQ = "((101 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))"
+OLD_EQUAL = "((11110111 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
+NEW_EQ = "((101 slot-name (100 (100 slot-forms))) (кліпс-значення-слота (100 slot-forms)))"
 STRING_EQUAL = '(11110111 (110101011 (11101110 symbol)) (110101011 "?_"))'
 
 

@@ -54,11 +54,11 @@ fn clips_double_colon_prefix_is_an_exact_d1_total_predicate() {
     // The SENS library, not Rust, computes all predicates. One removed ':'
     // is the negative witness. Failure must be D1:NO, never the NIL datum.
     for (label, source, expected) in [
-        ("positive", "(clips-string-starts-with-double-colon? \"::sensor\")", "1"),
-        ("one-character-mutant", "(clips-string-starts-with-double-colon? \":sensor\")", "0"),
-        ("non-prefix", "(clips-string-starts-with-double-colon? \"sensor::value\")", "0"),
-        ("empty", "(clips-string-starts-with-double-colon? \"\")", "0"),
-        ("short", "(clips-string-starts-with-double-colon? \":\")", "0"),
+        ("positive", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"::sensor\")", "1"),
+        ("one-character-mutant", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":sensor\")", "0"),
+        ("non-prefix", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"sensor::value\")", "0"),
+        ("empty", "(кліпс-рядок-починається-з-подвійної-двокрапки? \"\")", "0"),
+        ("short", "(кліпс-рядок-починається-з-подвійної-двокрапки? \":\")", "0"),
     ] {
         let actual = eval_import(source);
         assert_eq!(
@@ -100,7 +100,7 @@ fn clips_defrule_exact_pipeline_probes() {
         ),
         (
             "from-parts",
-            "(clips-defrule-clauses-from-parts (quote ((planet (var x)))) (quote ((assert (has-mass ?x)))) (quote ()))",
+            "(кліпс-клаузи-правила-з-частин (quote ((planet (var x)))) (quote ((assert (has-mass ?x)))) (quote ()))",
         ),
         (
             "defrule",
@@ -428,7 +428,7 @@ fn clips_deftemplate_name_is_matched_regardless_of_a_defmodule_qualifier() {
 fn clips_condition_slot_with_no_value_does_not_crash_the_importer() {
     // Regression: a CLIPS condition can name a multislot with no value at
     // all, e.g. `(precursors)`, meaning "match regardless of what's in
-    // this slot". clips-slot-value-of used to assume every slot form has
+    // this slot". кліпс-значення-слота used to assume every slot form has
     // a value part and called `second` unconditionally, crashing with
     // "car expects a non-empty list" the first time a real file used this
     // shorthand.
@@ -521,7 +521,7 @@ fn eval_exact_clips_slot_lookup(source: &str) -> String {
     // Other historical CLIPS importer functions have separate migration
     // blockers and are not dependencies of this purely structural search.
     let full = include_str!("../../../lib/clips-import.lisp");
-    let begin = full.find("(0011 clips-slot-value-of").unwrap();
+    let begin = full.find("(0011 кліпс-значення-слота").unwrap();
     let end = full[begin..]
         .find("(0011 clips-positional-args")
         .map(|relative| begin + relative)
@@ -567,7 +567,7 @@ fn clips_defrule_deftemplate_d1_self_verdict_and_mutant() {
     let library = include_str!("../../../lib/clips-import.lisp");
     let start = library.find("(0011 clips-deftemplate-form?\n")
         .expect("test_id=clips-deftemplate-d1: real production definition exists");
-    let end = library[start..].find("(0011 clips-string-empty?")
+    let end = library[start..].find("(0011 кліпс-рядок-порожній?")
         .map(|offset| start + offset)
         .expect("test_id=clips-deftemplate-d1: next independent definition exists");
     let source = sens::parse_mixed_exact_domain(&library[start..end])
@@ -612,7 +612,7 @@ fn clips_defrule_form_dispatch_d1_self_verdict_and_one_bit_mutant() {
     let source = include_str!("../../../lib/clips-import.lisp");
     let start = source.find("(0011 clips-form->clauses\n")
         .expect("test_id=clips-form-dispatch-d1: real dispatcher exists");
-    let end = source[start..].find("(0011 clips-cons-each-onto\n")
+    let end = source[start..].find("(0011 кліпс-сполучити-кожен-дописати\n")
         .map(|offset| start + offset)
         .expect("test_id=clips-form-dispatch-d1: next source definition exists");
     let functions = parse_mixed_exact_domain(&source[start..end])
