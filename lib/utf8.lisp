@@ -210,7 +210,7 @@
       ((атом? scalars)
        out)
       ((хибне? (атом? scalars))
-       (unicode-scalars->string-onto
+       (юнікод-скаляри-рядок-onto
          (решта scalars)
          (рядок-додати out (символ-за-кодом (перше scalars))))))))
 
