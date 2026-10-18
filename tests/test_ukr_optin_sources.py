@@ -162,10 +162,10 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
     ):
         if epdefs.get(source_name) != same_closure:
             raise AssertionError(f"{source_name}: opt-in peer identity порушено")
-    if "(0011 map-empty мапа-порожній)" not in core:
+    if "(визначити map-empty мапа-порожній)" not in core:
         raise AssertionError("map-empty: core peer identity порушено")
     for value in ("створити-твердження", "доказ-підсумок"):
-        if f"(0011 {value}\n" not in core and f"(0011 {value} " not in core:
+        if f"(визначити {value}\n" not in core and f"(визначити {value} " not in core:
             raise AssertionError(f"{value}: джерельний SENS closure не визначений")
 
     # Суворий мовний допуск: історична латинська виклична голова НЕ стає
