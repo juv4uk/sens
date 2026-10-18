@@ -56,10 +56,10 @@
   (функція (name expected)
     (001000 ((actual (kab-find name kab-rows)))
       (за-умовою
-        ((11110111 actual expected)
+        ((однакові? actual expected)
          (1)
          (як-є ()))
-        ((11110111 actual expected)
+        ((однакові? actual expected)
          (0)
          (список (як-є policy-mismatch) name expected actual))))))
 
@@ -67,10 +67,10 @@
   (функція (kernel-name expected)
     (001000 ((actual (kab-find-kernel kernel-name kab-rows)))
       (за-умовою
-        ((11110111 actual expected)
+        ((однакові? actual expected)
          (1)
          (як-є ()))
-        ((11110111 actual expected)
+        ((однакові? actual expected)
          (0)
          (список (як-є kernel-row-mismatch) kernel-name expected actual))))))
 
