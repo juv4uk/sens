@@ -1,5 +1,7 @@
 """D1-D10 are machine words; only explicit D24+ math can display decimal."""
 import pathlib
+import importlib.util
+import subprocess
 import sys
 import unittest
 
@@ -9,6 +11,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import (  # noqa: E402
     human_number, is_number_width, machine_word, number_domains, number_word,
 )
+
+DOMAIN_GATE_SPEC = importlib.util.spec_from_file_location(
+    "check_domain_tables", ROOT / "scripts/check-domain-tables.py"
+)
+assert DOMAIN_GATE_SPEC and DOMAIN_GATE_SPEC.loader
+DOMAIN_GATE = importlib.util.module_from_spec(DOMAIN_GATE_SPEC)
+DOMAIN_GATE_SPEC.loader.exec_module(DOMAIN_GATE)
 
 
 class BinaryProjection(unittest.TestCase):
@@ -81,6 +90,25 @@ class NumericDomains(unittest.TestCase):
         self.assertEqual(number_word(5, 24), "0" * 21 + "101")
         with self.assertRaises(ValueError):
             number_word(5, 7)
+
+    def test_domain_table_gate_uses_current_d7_rows_not_the_archived_keyboard_map(self):
+        rows = DOMAIN_GATE.validate_d7()
+        self.assertEqual(len(rows), 128)
+        self.assertEqual(
+            (rows[0].bits, rows[0].san, rows[0].en, rows[0].lisp),
+            ("0000000", "क", "k", None),
+        )
+
+    def test_full_domain_gate_accepts_current_ukrainian_selector_names(self):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/check-domain-tables.py")],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("DOMAIN-TABLES: PASS", result.stdout)
 
 
 if __name__ == "__main__":
