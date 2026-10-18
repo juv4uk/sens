@@ -741,6 +741,25 @@ def git_blob_sha(text: str) -> str:
     return hashlib.sha1(b'blob ' + str(len(payload)).encode() + b'\x00' + payload).hexdigest()
 
 
+def undo_current_lexical_binders(path: str, source: str) -> str:
+    """Строго відновити докомітні локальні імена до історичного inverse.
+
+    Це лише α-перейменування. Жоден цитований payload чи виклична голова
+    не змінюється; точний Git blob і число відповідностей перевіряються.
+    """
+    from tests.test_machine_projection_ukr_locals import SOURCE, rewrite_bound_atoms
+    old_sha, forward = SOURCE[path]
+    backward = {new: old for old, new in forward.items()}
+    restored, count = rewrite_bound_atoms(source, backward)
+    expected = {
+        "lib/machine/projection/x86-64.lisp": 27,
+        "lib/machine/dispatch/native-first-parity.lisp": 59,
+    }[path]
+    if count != expected or git_blob_sha(restored) != old_sha:
+        raise AssertionError(f"Лексичний inverse змінив джерело: {path}")
+    return restored
+
+
 def invert_projection(text: str, edits: list, authority: dict) -> str:
     shifts = []
     delta = 0
@@ -801,14 +820,16 @@ class MachineUkrMigrationTests(unittest.TestCase):
             with self.subTest(source=path):
                 current = (ROOT / path).read_text(encoding='utf-8')
                 restored = invert_projection(
-                    undo_current_native_first_parity_selector(path, current),
+                    undo_current_native_first_parity_selector(
+                        path, undo_current_lexical_binders(path, current)),
                     evidence['edits'], self.authority)
                 self.assertEqual(git_blob_sha(restored), evidence['sha'])
 
     def test_new_source_lines_have_no_old_encoded_callable_heads(self):
         for path, evidence in MANIFEST.items():
             with self.subTest(source=path):
-                now = (ROOT / path).read_text(encoding='utf-8')
+                now = undo_current_lexical_binders(
+                    path, (ROOT / path).read_text(encoding='utf-8'))
                 old = invert_projection(
                     undo_current_native_first_parity_selector(path, now),
                     evidence['edits'], self.authority)
@@ -834,11 +855,14 @@ class MachineUkrMigrationTests(unittest.TestCase):
         core4 = (ROOT / 'lib/core4.lisp').read_text(encoding='utf-8')
         self.assertRegex(core4, r'\((?:0011|визначити)\s+однакові\?\s+equal\?\)')
         parity = (ROOT / 'lib/machine/dispatch/native-first-parity.lisp').read_text(encoding='utf-8')
-        self.assertIn('(однакові? evaluator-value expected)', parity)
+        self.assertIn('(однакові? результат-обчислювача очікуване)', parity)
+        self.assertIn('(однакові? evaluator-value expected)',
+                      undo_current_lexical_binders('lib/machine/dispatch/native-first-parity.lisp', parity))
 
     def test_later_native_parity_selector_inverse_rejects_wrong_peer(self):
         path = 'lib/machine/dispatch/native-first-parity.lisp'
-        source = (ROOT / path).read_text(encoding='utf-8')
+        source = undo_current_lexical_binders(
+            path, (ROOT / path).read_text(encoding='utf-8'))
         restored = undo_current_native_first_parity_selector(path, source)
         self.assertIn('(error-class (110110101 row))', restored)
         mutant = source.replace(
@@ -861,7 +885,8 @@ class MachineUkrMigrationTests(unittest.TestCase):
 
     def test_negative_wrong_peer_cannot_pass_inverse(self):
         path = 'lib/machine/projection/x86-64.lisp'
-        text = (ROOT / path).read_text(encoding='utf-8')
+        text = undo_current_lexical_binders(
+            path, (ROOT / path).read_text(encoding='utf-8'))
         mutated = text.replace('(визначити x86-project-machine-effect',
                                '(визначити-невірно x86-project-machine-effect', 1)
         self.assertNotEqual(mutated, text)

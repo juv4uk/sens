@@ -744,6 +744,10 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
                 self.assertEqual(len(rows), 1)
                 self.assertIn(f"(укр {spelling})", rows[0])
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
+        # Незмінні frozen-тести перевіряють оригінальний Git blob після
+        # строгого зворотного α-перейменування (точно 59 входжень).
+        from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
+        parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
         new_p = "(error-class (перше (решта (решта (решта (решта row))))))"
         old_p = "(error-class (110110101 row))"
@@ -763,6 +767,10 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
     def test_wrong_peer_mutant_and_quoted_native_data(self):
         root = Path(__file__).resolve().parents[1]
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
+        # Незмінні frozen-тести перевіряють оригінальний Git blob після
+        # строгого зворотного α-перейменування (точно 59 входжень).
+        from tests.test_ukr_machine_projection_parity import undo_current_lexical_binders
+        parity = undo_current_lexical_binders("lib/machine/dispatch/native-first-parity.lisp", parity)
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
         heads = [t.text for t in mod.candidate_heads(mod.parse(parity))]
         self.assertIn("перше", heads)
