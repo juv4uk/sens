@@ -335,6 +335,91 @@ mod paired {
         }
 
         #[test]
+        fn signed_d24_minimum_widens_to_d48_without_t5m_truncation() {
+            // Owner ratification 2026-10-18: signed two's complement.
+            // -8_388_608 is a valid D24 atom; subtracting +1 needs D48.
+            for (id, input, expected) in [
+                ("sub-min", source("відняти", -8_388_608, 1), "-8388609"),
+                ("mul-min", source("помножити", -8_388_608, 2), "-16777216"),
+                ("sum-negative", source("додати", -8_388_608, -1), "-8388609"),
+            ] {
+                let admitted = qualify(&input).expect("ratified signed D24 words");
+                let words = expected_words(&admitted).expect("exact D5 and D24 structure");
+                assert_eq!(words[2].width, 24, "test_id={id} layer=physical width");
+                assert_eq!(words[2].bits[0], 1, "test_id={id} layer=physical sign");
+                let physical = zig_transport::encode_t5_exact_words(&words)
+                    .expect("Zig must encode all original 24 bits");
+                assert_eq!(zig_transport::decode_t5_exact_words(&physical).unwrap(), words);
+                let value = eval_verified(&input, &physical)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=SENS eval actual={error}"));
+                let Value::BinaryNumber(number) = value else {
+                    panic!("test_id={id} layer=eval expected=integer D48");
+                };
+                assert_eq!(number.numeric_domain_width(), Some(48),
+                    "test_id={id} layer=domain expected=D48");
+                assert_eq!(number.to_decimal_string(), expected,
+                    "test_id={id} layer=integer expected={expected}");
+                assert_eq!(number.exact_numeric_domain_bits().unwrap().len(), 48,
+                    "test_id={id} layer=bits expected_width=48");
+            }
+        }
+
+        #[test]
+        fn existing_d48_operands_survive_real_t5m_and_stay_domain_qualified() {
+            // The exact D48 word is transported by Zig, never converted to a
+            // W8/W9 code, a host integer, or a new D24 identity.
+            let minus_three = format!("{:048b}", (-3_i128) & ((1_i128 << 48) - 1));
+            let two = format!("{:048b}", 2_u8);
+            let source = format!("(помножити #d48:{minus_three} #d48:{two})");
+            let expected = expected_words(&qualify(&source).unwrap()).unwrap();
+            assert_eq!(expected.iter().map(|w| w.width).collect::<Vec<_>>(),
+                vec![2, 5, 48, 48, 2]);
+            let physical = zig_transport::encode_t5_exact_words(&expected).unwrap();
+            assert_eq!(zig_transport::decode_t5_exact_words(&physical).unwrap(), expected);
+            let value = eval_verified(&source, &physical).unwrap();
+            let Value::BinaryNumber(number) = value else {
+                panic!("test_id=d48-negative layer=eval expected=integer D48");
+            };
+            assert_eq!(number.numeric_domain_width(), Some(48));
+            assert_eq!(number.to_decimal_string(), "-6");
+            assert_eq!(number.exact_numeric_domain_bits().unwrap().len(), 48);
+        }
+
+        #[test]
+        fn physical_alias_mutations_in_opcodes_or_widths_are_not_admitted() {
+            let original = source("додати", 1, 2);
+            let words = expected_words(&qualify(&original).unwrap()).unwrap();
+            for (id, mutated) in [
+                ("opcode", {
+                    let mut words = words.clone();
+                    // D5:01010 ADD -> D5:01011 SUB; still valid physical T5M.
+                    words[1].bits[4] ^= 1;
+                    words
+                }),
+                ("width", {
+                    let mut words = words.clone();
+                    // Same unsigned payload at another width is NOT same Dn.
+                    words[2] = ExactT5Word::new(
+                        48, [vec![0; 24], words[2].bits.clone()].concat()
+                    ).unwrap();
+                    words
+                }),
+                ("structure", {
+                    let mut words = words.clone();
+                    words[4].bits = vec![0, 0]; // D2 CLOSE -> SEPARATOR
+                    words
+                }),
+            ] {
+                let physical = zig_transport::encode_t5_exact_words(&mutated)
+                    .expect("mutation stays a physically valid T5M carrier");
+                let failure = eval_verified(&original, &physical)
+                    .expect_err("physical changes must not receive source admission");
+                assert!(failure.starts_with("T5M_PAIR_MISMATCH"),
+                    "test_id={id} layer=admission expected=pair-mismatch actual={failure}");
+            }
+        }
+
+        #[test]
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
                 "(додати 1 2)",
