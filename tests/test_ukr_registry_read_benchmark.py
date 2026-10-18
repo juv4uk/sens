@@ -71,12 +71,13 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
         visible = mask_comments_and_strings(source)
         for old, new, count in REWRITES:
             with self.subTest(old=old):
-                self.assertEqual(source.count(old), count,
-                                 "only these original heads may be represented")
-                self.assertEqual(visible.count(old), count,
-                                 "a replacement target may not come from a comment/string")
+                self.assertEqual(source.count(old), 0,
+                                 "retired binary head remains in the projected source")
+                self.assertEqual(visible.count(old), 0,
+                                 "retired binary head remains in executable source")
                 self.assertEqual(source.count(new), count)
-                self.assertEqual(visible.count(new), count)
+                self.assertEqual(visible.count(new), count,
+                                 "only executable full-ukr heads may be projected")
         self.assertEqual(paren_depth(source), 0)
 
     def test_inverse_restores_the_original_git_blob_byte_exactly(self):
