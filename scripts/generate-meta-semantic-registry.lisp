@@ -10,65 +10,65 @@
 ; a string and is omitted because the reader consumes it as quote syntax.
 ; Every other admitted symbol is projected in registry order.
 
-(0011 surface-word
-  (0010 (surface)
-    (100 (011 surface))))
+(визначити surface-word
+  (функція (surface)
+    (перше (решта surface))))
 
-(0011 surface-namespace
-  (0010 (surface)
-    (100 surface)))
+(визначити surface-namespace
+  (функція (surface)
+    (перше surface)))
 
-(0011 surface-included?
-  (0010 (surface)
-    (110
-      ((010 surface) ())
+(визначити surface-included?
+  (функція (surface)
+    (за-умовою
+      ((атом? surface) ())
       
       ((11110111 (surface-word surface) (001 ())) ())
       ((11110111 (surface-word surface) "'") ())
-      ((010 (001 ())) t))))
+      ((атом? (як-є ())) t))))
 
-(0011 collect-surfaces
-  (0010 (sid surfaces rows)
-    (110
-      ((010 surfaces) rows)
+(визначити collect-surfaces
+  (функція (sid surfaces rows)
+    (за-умовою
+      ((атом? surfaces) rows)
       
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        (001000 ((surface (100 surfaces)))
-         (110
+         (за-умовою
            ((surface-included? surface)
             (collect-surfaces
               sid
-              (011 surfaces)
-              (111
-                (1110
+              (решта surfaces)
+              (сполучити
+                (список
                   (surface-word surface)
                   sid
                   (surface-namespace surface))
                 rows)))
-           ((010 (001 ()))
-            (collect-surfaces sid (011 surfaces) rows))))))))
+           ((атом? (як-є ()))
+            (collect-surfaces sid (решта surfaces) rows))))))))
 
-(0011 collect-entries
-  (0010 (entries rows)
-    (110
-      ((010 entries) rows)
+(визначити collect-entries
+  (функція (entries rows)
+    (за-умовою
+      ((атом? entries) rows)
       
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        (001000 ((entry (100 entries)))
          (collect-entries
-           (011 entries)
-           (collect-surfaces (100 entry) (011 entry) rows)))))))
+           (решта entries)
+           (collect-surfaces (перше entry) (решта entry) rows)))))))
 
-(0011 str+
-  (0010 args
+(визначити str+
+  (функція args
     (101110
-      (0010 (acc part)
+      (функція (acc part)
         (110011110 acc part))
       ""
       args)))
 
-(0011 render-row
-  (0010 (row)
+(визначити render-row
+  (функція (row)
     (str+
       "    ("
       (11110100 (100 row))
@@ -78,16 +78,16 @@
       (11110100 (10011 row))
       "\n")))
 
-(0011 join-rows
-  (0010 (rows)
+(визначити join-rows
+  (функція (rows)
     (101110
-      (0010 (acc row)
+      (функція (acc row)
         (110011110 acc (render-row row)))
       ""
       rows)))
 
-(0011 render-projection
-  (0010 (rows)
+(визначити render-projection
+  (функція (rows)
     (str+
       "; GENERATED FILE — DO NOT EDIT.\n"
       "; Source authority: lib/surface/semantic-registry.lisp\n"
@@ -104,37 +104,37 @@
       "        ((00000010 entry) () (00000001 ()))\n"
       "        ((00000010 entry) (0) (00101111 entry))))))\n")))
 
-(0011 registry-form
+(визначити registry-form
   (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
-(0011 projection-rows
+(визначити projection-rows
   (collect-entries
     registry-form
-    (001 ())))
+    (як-є ())))
 
-(0011 generated
+(визначити generated
   (render-projection projection-rows))
 
-(0011 output-path "lib/generated/meta-semantic-registry.lisp")
+(визначити output-path "lib/generated/meta-semantic-registry.lisp")
 
-(110
-  ((010 *argv*) (1001
-     (1110
+(за-умовою
+  ((атом? *argv*) (друге
+     (список
        (110111100 output-path generated)
        (11011011 "meta semantic registry projection written"))))
   
-  ((101 (100 *argv*) "--check")
+  ((тотожне? (перше *argv*) "--check")
    (001000 ((current (110110111 output-path)))
-     (110
-       ((101 current generated)
+     (за-умовою
+       ((тотожне? current generated)
         (11011011 "meta semantic registry projection is current"))
-       ((010 (001 ()))
-        (1001
-          (1110
+       ((атом? (як-є ()))
+        (друге
+          (список
             (11011011 "meta semantic registry projection is stale")
-            (100 (001 ()))))))))
-  ((010 (001 ()))
-   (1001
-     (1110
+            (перше (як-є ()))))))))
+  ((атом? (як-є ()))
+   (друге
+     (список
        (110111100 output-path generated)
        (11011011 "meta semantic registry projection written")))))

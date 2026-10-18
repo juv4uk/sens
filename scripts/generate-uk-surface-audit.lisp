@@ -19,22 +19,22 @@
 ; Usage from repo root:
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
 
-(0011 str+
+(визначити str+
   (0010 args (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
-(0011 sixth (0010 (xs) (100 (011 (011 (011 (011 (011 xs))))))))
-(0011 seventh (0010 (xs) (100 (011 (011 (011 (011 (011 (011 xs)))))))))
-(0011 eighth (0010 (xs) (100 (011 (011 (011 (011 (011 (011 (011 xs))))))))))
-(0011 ninth (0010 (xs) (100 (011 (011 (011 (011 (011 (011 (011 (011 xs)))))))))))
+(визначити sixth (функція (xs) (перше (решта (решта (решта (решта (решта xs))))))))
+(визначити seventh (функція (xs) (перше (решта (решта (решта (решта (решта (решта xs)))))))))
+(визначити eighth (функція (xs) (перше (решта (решта (решта (решта (решта (решта (решта xs))))))))))
+(визначити ninth (функція (xs) (перше (решта (решта (решта (решта (решта (решта (решта (решта xs)))))))))))
 
-(0011 join-newline-onto
-  (0010 (strings acc)
-    (110
-      ((010 strings) acc)
+(визначити join-newline-onto
+  (функція (strings acc)
+    (за-умовою
+      ((атом? strings) acc)
       
-      ((101 acc "") (join-newline-onto (011 strings) (100 strings)))
-      ((010 (001 ())) (join-newline-onto (011 strings) (str+ acc "\n" (100 strings)))))))
-(0011 join-newline (0010 (strings) (join-newline-onto strings "")))
+      ((тотожне? acc "") (join-newline-onto (решта strings) (перше strings)))
+      ((атом? (як-є ())) (join-newline-onto (решта strings) (str+ acc "\n" (перше strings)))))))
+(визначити join-newline (функція (strings) (join-newline-onto strings "")))
 
 ; Function-table rows have the generated schema ft/2:
 ; (sid-bitstring formal (ук word) (укр word) (en word) (sa word) (sym word) authority)
@@ -44,118 +44,118 @@
 (0011 ft-form (100 (110101001 (110110111 "lib/generated/function-table.lisp"))))
 
 ; The 256-row table also lists every unused code with only () surfaces.
-(0011 surface-empty?
-  (0010 (surface)
-    (110
-      ((101 (1001 surface) (001 ())) t)
-      ((010 (001 ())) (001 ())))))
+(визначити surface-empty?
+  (функція (surface)
+    (за-умовою
+      ((тотожне? (друге surface) (як-є ())) t)
+      ((атом? (як-є ())) (як-є ())))))
 
-(0011 named-row?
-  (0010 (row)
-    (110
+(визначити named-row?
+  (функція (row)
+    (за-умовою
       ((surface-empty? (10011 row))
-       (110
+       (за-умовою
          ((surface-empty? (100111 row))
-          (110
+          (за-умовою
             ((surface-empty? (110110101 row))
-             (110
-               ((surface-empty? (sixth row)) (0100 (surface-empty? (seventh row))))
-               ((010 (001 ())) t)))
-            ((010 (001 ())) t)))
-         ((010 (001 ())) t)))
-      ((010 (001 ())) t))))
+             (за-умовою
+               ((surface-empty? (sixth row)) (хибне? (surface-empty? (seventh row))))
+               ((атом? (як-є ())) t)))
+            ((атом? (як-є ())) t)))
+         ((атом? (як-є ())) t)))
+      ((атом? (як-є ())) t))))
 
-(0011 named-rows
-  (0010 (rows)
-    (110
-      ((010 rows) () (001 ()))
-      ((named-row? (100 rows)) (111 (100 rows) (named-rows (011 rows))))
-      ((010 (001 ())) (named-rows (011 rows))))))
+(визначити named-rows
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) () (як-є ()))
+      ((named-row? (перше rows)) (сполучити (перше rows) (named-rows (решта rows))))
+      ((атом? (як-є ())) (named-rows (решта rows))))))
 
-(0011 ft-rows (named-rows (011 ft-form)))
+(визначити ft-rows (named-rows (решта ft-form)))
 
-(0011 profile-form
+(визначити profile-form
   (100 (110101001 (110110111 "lib/surface/український-профіль-джерела.lisp"))))
 
-(0011 find-section
-  (0010 (name sections)
-    (110
-      ((010 sections) (001 ()))
+(визначити find-section
+  (функція (name sections)
+    (за-умовою
+      ((атом? sections) (як-є ()))
       
       ((11110101 (110111011 (010 (100 sections))) (101 (100 (100 sections)) name))
-       (100 sections))
-      ((010 (001 ())) (find-section name (011 sections))))))
+       (перше sections))
+      ((атом? (як-є ())) (find-section name (решта sections))))))
 
-(0011 candidate-section (find-section (001 назви) (011 profile-form)))
-(0011 candidate-rows
-  (110 ((010 candidate-section) (001 ())) ((010 (001 ())) (011 candidate-section))))
+(визначити candidate-section (find-section (як-є назви) (решта profile-form)))
+(визначити candidate-rows
+  (за-умовою ((атом? candidate-section) (як-є ())) ((атом? (як-є ())) (решта candidate-section))))
 
-(0011 find-candidate-row
-  (0010 (sid rows)
-    (110
-      ((010 rows) (001 ()))
+(визначити find-candidate-row
+  (функція (sid rows)
+    (за-умовою
+      ((атом? rows) (як-є ()))
       
       ((11110111 (100 (100 rows)) sid) (100 rows))
-      ((010 (001 ())) (find-candidate-row sid (011 rows))))))
+      ((атом? (як-є ())) (find-candidate-row sid (решта rows))))))
 
-(0011 surface-word
-  (0010 (surface)
-    (110
-      ((101 (1001 surface) (001 ())) (001 —))
-      ((010 (001 ())) (1001 surface)))))
-(0011 surface-status
-  (0010 (surface)
-    (110
-      ((101 (1001 surface) (001 ())) (001 missing))
-      ((010 (001 ())) (001 stable)))))
+(визначити surface-word
+  (функція (surface)
+    (за-умовою
+      ((тотожне? (друге surface) (як-є ())) (як-є —))
+      ((атом? (як-є ())) (друге surface)))))
+(визначити surface-status
+  (функція (surface)
+    (за-умовою
+      ((тотожне? (друге surface) (як-є ())) (як-є missing))
+      ((атом? (як-є ())) (як-є stable)))))
 
-(0011 missing-surface?
-  (0010 (surface)
+(визначити missing-surface?
+  (функція (surface)
     (11111100 (101 (surface-status surface) (001 missing))
-        (101 (surface-word surface) (001 —)))))
+        (тотожне? (surface-word surface) (як-є —)))))
 
 ; Classification here is intentionally conservative. The audit may report a
 ; candidate, but only an explicit later review may classify it as compact,
 ; ambiguous, etc. We therefore never infer linguistic facts from spelling.
-(0011 audit-class
-  (0010 (uk candidate)
-    (110
-      ((101 (candidate-evidence-status candidate) (001 кандидат-сумісності))
-       (001 compatibility-only))
-      ((missing-surface? uk) (001 needs-research))
-      ((010 candidate) (001 needs-research))
+(визначити audit-class
+  (функція (uk candidate)
+    (за-умовою
+      ((тотожне? (candidate-evidence-status candidate) (як-є кандидат-сумісності))
+       (як-є compatibility-only))
+      ((missing-surface? uk) (як-є needs-research))
+      ((атом? candidate) (як-є needs-research))
       
       ((101 (1001 candidate) (10011 candidate)) (001 full))
-      ((010 (001 ())) (001 needs-research)))))
+      ((атом? (як-є ())) (як-є needs-research)))))
 
-(0011 candidate-full-word
-  (0010 (candidate)
+(визначити candidate-full-word
+  (функція (candidate)
     (110 ((010 candidate) (001 —)) ((010 (001 ())) (10011 candidate)))))
 
-(0011 candidate-evidence-status
-  (0010 (candidate)
+(визначити candidate-evidence-status
+  (функція (candidate)
     (110 ((010 candidate) (001 no-staging-evidence)) ((010 (001 ())) (100111 candidate)))))
 
 ; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
 ; not invent abbreviations while performing an inventory.
-(0011 candidate-compact-word (0010 () (001 —)))
+(визначити candidate-compact-word (функція () (як-є —)))
 
-(0011 ambiguity-status
-  (0010 (candidate)
-    (110 ((010 candidate) (001 needs-research)) ((010 (001 ())) (001 not-yet-assessed)))))
+(визначити ambiguity-status
+  (функція (candidate)
+    (за-умовою ((атом? candidate) (як-є needs-research)) ((атом? (як-є ())) (як-є not-yet-assessed)))))
 
 ; Per-identity status from the staging profile: чинна -> stable,
 ; кандидат-сумісності -> compatibility-only, any other candidate -> candidate.
-(0011 profile-primary-status
-  (0010 (candidate)
-    (110
-      ((010 candidate) () (001 missing))
+(визначити profile-primary-status
+  (функція (candidate)
+    (за-умовою
+      ((атом? candidate) () (як-є missing))
       ((101 (100111 candidate) (001 чинна)) (001 stable))
       ((101 (100111 candidate) (001 кандидат-сумісності)) (001 compatibility-only))
-      ((010 (001 ())) (001 candidate)))))
+      ((атом? (як-є ())) (як-є candidate)))))
 
-(0011 render-row
-  (0010 (row)
+(визначити render-row
+  (функція (row)
     (001001 ((sid (100 row))
            (uk (10011 row))
            (full-authority (100111 row))
@@ -188,29 +188,29 @@
         " (ambiguity " (11110100 ambiguity) ")"
         " (evidence generated-function-table staging-profile))"))))
 
-(0011 count-class
-  (0010 (wanted rows acc)
+(визначити count-class
+  (функція (wanted rows acc)
     (110 ((010 rows) acc) ((010 (001 ())) (001001 ((sid (100 (100 rows)))
               (uk (10011 (100 rows)))
               (candidate (find-candidate-row sid candidate-rows))
               (class (audit-class uk candidate)))
-         (count-class wanted (011 rows)
+         (count-class wanted (решта rows)
            (110 ((101 class wanted) (01010 acc 1))
-                 ((010 (001 ())) acc))))))))
+                 ((атом? (як-є ())) acc))))))))
 
-(0011 count-candidates
-  (0010 (rows acc)
-    (110 ((010 rows) acc) ((010 (001 ())) (count-candidates (011 rows)
+(визначити count-candidates
+  (функція (rows acc)
+    (за-умовою ((атом? rows) acc) ((атом? (як-є ())) (count-candidates (решта rows)
          (110 ((010 (find-candidate-row (100 (100 rows)) candidate-rows)) acc) ((010 (001 ())) (01010 acc 1))))))))
 
 (0011 total (000000 ft-rows))
-(0011 full-count (count-class (001 full) ft-rows 0))
-(0011 compatibility-count (count-class (001 compatibility-only) ft-rows 0))
-(0011 needs-research-count (count-class (001 needs-research) ft-rows 0))
-(0011 candidate-count (count-candidates ft-rows 0))
+(визначити full-count (count-class (як-є full) ft-rows 0))
+(визначити compatibility-count (count-class (як-є compatibility-only) ft-rows 0))
+(визначити needs-research-count (count-class (як-є needs-research) ft-rows 0))
+(визначити candidate-count (count-candidates ft-rows 0))
 
-(0011 header
-  (1110
+(визначити header
+  (список
     "; GENERATED — DO NOT EDIT BY HAND"
     "; Semantic authority: lib/surface/semantic-registry.lisp via lib/generated/function-table.lisp"
     "; Candidate evidence only: lib/surface/український-профіль-джерела.lisp"
@@ -228,7 +228,7 @@
     "  (rows"))
 
 (0011 body (join-newline (1111 header (101000 render-row ft-rows))))
-(0011 output (str+ body "\n  )\n)\n"))
+(визначити output (str+ body "\n  )\n)\n"))
 
 (110111100 "lib/generated/uk-surface-audit.lisp" output)
 (11011011 (str+ "uk-surface-audit: " (110111001 total) " identities written"))
