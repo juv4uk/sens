@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Reject machine/domain word literals newly added to textual Lisp sources.
 
-Decimal values remain valid in the human projection and are lowered by T5M.
+Decimal numerals in the human mathematical Lisp projection are lowered to
+exact D24+ domain words by the source/migration reader (with an explicit
+mathematical role). T5M only physically packs already-formed exact-width words;
+it neither infers domains nor decides semantic callability.
 The gate checks every changed Lisp path in a Git range (or the working-tree
 diff by default), while allowing the repository's pre-existing migration
 corpus to be removed incrementally rather than making unrelated edits fail.
