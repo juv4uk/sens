@@ -1332,5 +1332,62 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
             self._restore_original(mutant)
 
 
+
+class QuantityUkrLocalHelpersTests(unittest.TestCase):
+    """Точна перевірка локальних українських замикань без host-семантики."""
+
+    SOURCE = ROOT / "lib" / "quantity.lisp"
+    ORIGINAL_BLOB = "9baec7d8c33011bb52944cf0cd4cbe63e2910e8c"
+    PAIRS = (
+        ("science-proper-list?", "науковий-список-правильний?", 7),
+        ("science-list-length-equals?", "науковий-список-довжина-дорівнює?", 5),
+        ("science-sixth", "науковий-шостий", 2),
+        ("science-seventh", "науковий-сьомий", 2),
+    )
+    ALIAS_BLOCK = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n"
+
+    @classmethod
+    def restore_original(cls, source):
+        if not source.endswith(cls.ALIAS_BLOCK):
+            raise AssertionError("не вистачає сумісних Lisp-аліасів")
+        body = source[:-len(cls.ALIAS_BLOCK)]
+        for english, ukrainian, calls in cls.PAIRS:
+            definition = "(визначити " + ukrainian
+            actual_calls = body.count("(" + ukrainian)
+            if actual_calls != calls or body.count(definition) != 1:
+                raise AssertionError(
+                    f"порушена точна локальна проєкція {ukrainian}: "
+                    f"виклики {actual_calls} != {calls}"
+                )
+            # Жоден QUOTE, коментар, рядок і математичний операнд не змінено.
+            body = body.replace("(" + ukrainian, "(" + english)
+            body = body.replace(definition, "(визначити " + english)
+        return body
+
+    def test_current_ukrainian_definitions_and_exact_git_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        for english, ukrainian, _ in self.PAIRS:
+            self.assertIn(
+                "(визначити " + english + " " + ukrainian + ")",
+                source,
+            )
+        restored = self.restore_original(source)
+        raw = restored.encode("utf-8")
+        blob = hashlib.sha1(
+            b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw
+        ).hexdigest()
+        self.assertEqual(blob, self.ORIGINAL_BLOB)
+
+    def test_wrong_peer_mutant_cannot_restore_original(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        bad = source.replace(
+            "(науковий-шостий x)",
+            "(науковий-сьомий x)",
+            1,
+        )
+        self.assertNotEqual(source, bad)
+        with self.assertRaisesRegex(AssertionError, "порушена точна"):
+            self.restore_original(bad)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
