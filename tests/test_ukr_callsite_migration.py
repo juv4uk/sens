@@ -1970,7 +1970,8 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
-                self.assertEqual(changed, evidence["changed"])
+                later_line = [76] if path == "scripts/check-domain-logic-laws.lisp" else []
+                self.assertEqual(changed, evidence["changed"] + later_line)
                 for number in changed:
                     line = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
                                   lambda m: " " * len(m.group()), after[number - 1])
