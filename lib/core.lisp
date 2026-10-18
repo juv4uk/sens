@@ -720,12 +720,12 @@
          ((0100 (11010 a b))
           (let ((chunk+mult (largest-chunk a b b 1)))
             (01010 (011 chunk+mult)
-               (quotient (01011 a (100 chunk+mult)) b)))))))))
+               (quotient (відняти a (перше chunk+mult)) b)))))))))
 
 ; The remainder uses the same Lisp-owned integer quotient: a - b * floor(a / b).
 (0011 mod
   (0010 (a b)
-    (01011 a (10110 b (quotient a b)))))
+    (відняти a (помножити b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:

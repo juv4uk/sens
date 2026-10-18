@@ -1007,5 +1007,66 @@ class X86AdmissionLoweringUkrProjectionTests(unittest.TestCase):
         lowering = (root / "lib/machine/lowering/semantic-x86-64.lisp").read_text(encoding="utf-8")
         self.assertIn("(00000010", lowering)
 
+
+class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
+    """Exact Ukrainian D3/D5 call-head projection for the core integer laws."""
+
+    SOURCE = ROOT / "lib" / "core.lisp"
+    ORIGINAL_BLOB = "a45280e231297b81c31ea4c4f77836b50fa07f78"
+    OLD_CHUNK_CALL = "(quotient (01011 a (100 chunk+mult)) b)"
+    UKR_CHUNK_CALL = "(quotient (відняти a (перше chunk+mult)) b)"
+    OLD_REMAINDER_CALL = "(01011 a (10110 b (quotient a b)))"
+    UKR_REMAINDER_CALL = "(відняти a (помножити b (quotient a b)))"
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+        ).hexdigest()
+
+    @classmethod
+    def _restore(cls, source: str) -> str:
+        if source.count(cls.UKR_CHUNK_CALL) != 1:
+            raise AssertionError("D5:01011 / D3:100 projection count drift")
+        if source.count(cls.UKR_REMAINDER_CALL) != 1:
+            raise AssertionError("D5:01011 / D5:10110 projection count drift")
+        return source.replace(cls.UKR_CHUNK_CALL, cls.OLD_CHUNK_CALL, 1).replace(
+            cls.UKR_REMAINDER_CALL, cls.OLD_REMAINDER_CALL, 1
+        )
+
+    def _verify(self, source: str) -> None:
+        restored = self._restore(source)
+        self.assertEqual(
+            self._git_blob_sha(restored),
+            self.ORIGINAL_BLOB,
+            "міграція змінила закон, порядок операндів або сторонні дані",
+        )
+        d3 = (ROOT / "lib" / "domains" / "d3.lisp").read_text(encoding="utf-8")
+        d5 = (ROOT / "lib" / "domains" / "d5.lisp").read_text(encoding="utf-8")
+        self.assertRegex(d3, r"(?m)^  \\(100 \\(ук перше\\) \\(укр перше\\)")
+        for bits, peer in (("01011", "відняти"), ("10110", "помножити")):
+            row = next(line for line in d5.splitlines() if line.lstrip().startswith(f"({bits} "))
+            self.assertIn(f"(укр {peer})", row)
+        self.assertIn(self.UKR_CHUNK_CALL, source)
+        self.assertIn(self.UKR_REMAINDER_CALL, source)
+        self.assertNotIn(self.OLD_CHUNK_CALL, source)
+        self.assertNotIn(self.OLD_REMAINDER_CALL, source)
+
+    def test_exact_ukr_peers_and_inverse_restore_original_core_blob(self):
+        self._verify(self.SOURCE.read_text(encoding="utf-8"))
+
+    def test_wrong_d5_peer_fails_exact_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace(
+            self.UKR_REMAINDER_CALL,
+            "(відняти a (частка b (quotient a b)))",
+            1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(AssertionError, "projection count drift"):
+            self._verify(mutant)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
