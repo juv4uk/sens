@@ -7,12 +7,12 @@
 ; This is deliberately not a general heap or GC ABI yet. The cell exists only
 ; for one native-call-u64-raw invocation and must not escape that call.
 
-(0011 x86-pair-cell-bytes 16)
-(0011 x86-pair-car-offset 0)
-(0011 x86-pair-cdr-offset 8)
+(визначити x86-pair-cell-bytes 16)
+(визначити x86-pair-car-offset 0)
+(визначити x86-pair-cdr-offset 8)
 
-(0011 x86-pair-layout
-  (001
+(визначити x86-pair-layout
+  (як-є
     (machine-pair-layout/1
       (target x86-64)
       (word-bits 64)
