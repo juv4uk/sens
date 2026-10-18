@@ -88,6 +88,7 @@ jobs:
           python3 -m unittest tests/test_ukr_quantity_projection.py -v
           python3 -m unittest tests/test_fs_ukr_projection.py -v
           python3 -m unittest tests/test_ukr_persistent_map_projection.py -v
+          python3 -m unittest tests/test_ukr_mechanism_selector_projection.py -v
           python3 -m unittest tests/test_code_runs.py -v
 
       - name: УКР-ПРОЄКЦІЯ — скільки .lisp уже на повній українській поверхні (червоним)
