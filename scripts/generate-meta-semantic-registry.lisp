@@ -33,7 +33,7 @@
       ((атом? surfaces) rows)
       
       ((атом? (як-є ()))
-       (001000 ((surface (100 surfaces)))
+       (нехай ((surface (перше surfaces)))
          (за-умовою
            ((surface-included? surface)
             (collect-surfaces
@@ -54,16 +54,16 @@
       ((атом? entries) rows)
       
       ((атом? (як-є ()))
-       (001000 ((entry (100 entries)))
+       (нехай ((entry (перше entries)))
          (collect-entries
            (решта entries)
            (collect-surfaces (перше entry) (решта entry) rows)))))))
 
 (визначити str+
   (функція args
-    (101110
+    (згорнути
       (функція (acc part)
-        (110011110 acc part))
+        (рядок-додати acc part))
       ""
       args)))
 
@@ -80,9 +80,9 @@
 
 (визначити join-rows
   (функція (rows)
-    (101110
+    (згорнути
       (функція (acc row)
-        (110011110 acc (render-row row)))
+        (рядок-додати acc (render-row row)))
       ""
       rows)))
 
@@ -95,7 +95,7 @@
       "; Registry surfaces; empty and reader-only apostrophe surfaces omitted.\n\n"
       "(00001001 my-semantic-surface-registry\n"
       "  (00000001 (\n"
-      (join-rows (10100 rows))
+      (join-rows (зворот rows))
       "  )))\n\n"
       "(00001001 my-semantic-id-for-surface\n"
       "  (00001000 (name)\n"
@@ -105,7 +105,7 @@
       "        ((00000010 entry) (0) (00101111 entry))))))\n")))
 
 (визначити registry-form
-  (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+  (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
 (визначити projection-rows
   (collect-entries
@@ -120,21 +120,21 @@
 (за-умовою
   ((атом? *argv*) (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "meta semantic registry projection written"))))
+       (записати-файл output-path generated)
+       (друкувати "meta semantic registry projection written"))))
   
   ((тотожне? (перше *argv*) "--check")
-   (001000 ((current (110110111 output-path)))
+   (нехай ((current (читати-файл output-path)))
      (за-умовою
        ((тотожне? current generated)
-        (11011011 "meta semantic registry projection is current"))
+        (друкувати "meta semantic registry projection is current"))
        ((атом? (як-є ()))
         (друге
           (список
-            (11011011 "meta semantic registry projection is stale")
+            (друкувати "meta semantic registry projection is stale")
             (перше (як-є ()))))))))
   ((атом? (як-є ()))
    (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "meta semantic registry projection written")))))
+       (записати-файл output-path generated)
+       (друкувати "meta semantic registry projection written")))))
