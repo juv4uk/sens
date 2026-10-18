@@ -335,7 +335,7 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 
 
 #[test]
-fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
+fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
     let start = GUARD_SOURCE
         .find("(визначити guard-reference-field\n")
         .expect("the live Ukrainian guard accessor must exist");
@@ -347,7 +347,8 @@ fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
 
     assert!(source.contains("(функція (поле посилання)"));
     assert!(source.contains("(функція (запис)"));
-    assert!(source.contains("(знайти-за-ключем поле (решта посилання))"));
+    assert!(source.contains("(захист-знайти-запис поле (решта посилання))"));
+    assert!(!source.contains("(знайти-за-ключем "));
     assert!(!source.contains("(функція (field reference)"));
     assert!(!source.contains("(функція (entry)"));
     assert!(!source.contains("(друге entry)"));
@@ -368,8 +369,8 @@ fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         widths,
-        [1usize, 3usize, 4usize, 5usize].into_iter().collect(),
-        "guard-reference-field keeps exact D1 truth plus D3 structure, D4 lambda/selector, and D5 lookup"
+        [1usize, 3usize, 4usize].into_iter().collect(),
+        "guard-reference-field keeps D1 truth, D3 structure and exact D4 lambda/selector/NULL"
     );
 }
 
