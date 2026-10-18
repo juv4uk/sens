@@ -8,6 +8,7 @@
 //! байтове/словесне розходження закриває виконання.
 //! Це не standalone T5M interpreter і не фізичний формат результату RATIO.
 //! Вкладені D5-вирази з точними D24+ листками дозволені.
+//! Одномісні D5:01011 і D5:10111 допускаються за чинним законом SENS.
 //!
 //! Виклик: sens-math-t5m encode source.lisp
 //!         sens-math-t5m eval source.lisp
@@ -28,18 +29,24 @@ mod paired {
             ExprKind::BinaryNumber(value) if value.numeric_domain_width().is_some() => Ok(()),
             ExprKind::DomainCall(identity, args)
                 if identity.width() == 5
-                    && matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011)
-                    && args.len() == 2 =>
+                    && matches!(identity.packed_bits(),
+                        0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011)
+                    // Unary DIFFERENCE and QUOTIENT already execute in the
+                    // SENS D5 evaluator. Other D5 math/predicates remain binary.
+                    && (args.len() == 2
+                        || (args.len() == 1
+                            && matches!(identity.packed_bits(), 0b01011 | 0b10111))) =>
             {
-                // When both operands are atomic, their explicitly admitted
-                // Dn identities must agree BEFORE physical encoding.
-                // Nested results are checked again by SENS during evaluation,
-                // because a signed overflow can legitimately widen D24->D48.
-                if let (ExprKind::BinaryNumber(left), ExprKind::BinaryNumber(right)) =
-                    (&args[0].kind, &args[1].kind)
-                {
-                    if left.numeric_domain_width() != right.numeric_domain_width() {
-                        return Err("SENS admission: mixed numeric domains are forbidden".into());
+                // Atomic binary operands must carry the SAME admitted Dn.
+                // Nested results (possibly widened by an earlier operation)
+                // remain SENS evaluator authority, not host coercion.
+                if args.len() == 2 {
+                    if let (ExprKind::BinaryNumber(left), ExprKind::BinaryNumber(right)) =
+                        (&args[0].kind, &args[1].kind)
+                    {
+                        if left.numeric_domain_width() != right.numeric_domain_width() {
+                            return Err("SENS admission: mixed numeric domains are forbidden".into());
+                        }
                     }
                 }
                 for arg in args.iter() { admit(arg, depth + 1)?; }
@@ -294,6 +301,81 @@ mod paired {
             let malformed_pair = zig_transport::encode_t5_exact_words(&changed).unwrap();
             assert!(eval_verified(&nested, &malformed_pair)
                 .unwrap_err().contains("T5M_PAIR_MISMATCH"));
+        }
+
+        #[test]
+        fn unary_d5_negative_and_reciprocal_execute_via_zig_t5m() {
+            // D5 DIFFERENCE (- x) and QUOTIENT (/ x) have existing
+            // same-domain unary Core mechanisms. Zig only carries their words.
+            for (id, head, input, expected, expected_width, is_ratio) in [
+                ("neg-plus-three", "відняти", 3, "-3", 24, false),
+                ("neg-minus-three", "відняти", -3, "3", 24, false),
+                ("neg-d24-min", "відняти", -8_388_608, "8388608", 48, false),
+                ("reciprocal-three", "частка", 3, "1/3", 24, true),
+                ("reciprocal-minus-two", "частка", -2, "-1/2", 24, true),
+                ("reciprocal-one", "частка", 1, "1", 24, false),
+            ] {
+                let source = format!("({head} #d24:{})", bits(input));
+                let admitted = qualify(&source)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=admission {error}"));
+                let words = expected_words(&admitted).unwrap();
+                assert_eq!(words.len(), 4, "test_id={id} layer=D2 expected=unary-call");
+                assert_eq!(words.iter().map(|w| w.width).collect::<Vec<_>>(),
+                    vec![2, 5, 24, 2], "test_id={id} layer=carrier");
+                let physical = zig_transport::encode_t5_exact_words(&words)
+                    .expect("Zig encodes unary exact D5/D24 words");
+                assert_eq!(zig_transport::decode_t5_exact_words(&physical).unwrap(), words);
+                let value = eval_verified(&source, &physical)
+                    .unwrap_or_else(|error| panic!("test_id={id} layer=eval {error}"));
+                assert_eq!(value.to_string(), expected,
+                    "test_id={id} layer=law expected={expected}");
+                if is_ratio {
+                    assert!(matches!(&value, Value::NumericComposition(_)),
+                        "test_id={id} layer=result expected=exact RATIO");
+                } else {
+                    let Value::BinaryNumber(ref word) = value else {
+                        panic!("test_id={id} layer=result expected=integer Dn");
+                    };
+                    assert_eq!(word.numeric_domain_width(), Some(expected_width));
+                }
+            }
+        }
+
+        #[test]
+        fn unary_d5_zero_normalizes_and_zero_reciprocal_fails() {
+            let neg_zero = format!("(відняти #d24:{})", bits(0));
+            let words = expected_words(&qualify(&neg_zero).unwrap()).unwrap();
+            let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let result = eval_verified(&neg_zero, &packed).unwrap();
+            let Value::BinaryNumber(ref number) = result else {
+                panic!("test_id=negative-zero layer=eval expected=D24 zero");
+            };
+            assert_eq!(number.numeric_domain_width(), Some(24));
+            assert_eq!(number.exact_numeric_domain_bits(), Some(vec![0; 24]));
+
+            let zero_reciprocal = format!("(частка #d24:{})", bits(0));
+            let words = expected_words(&qualify(&zero_reciprocal).unwrap()).unwrap();
+            let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let error = eval_verified(&zero_reciprocal, &packed)
+                .expect_err("zero reciprocal is undefined");
+            assert!(error.starts_with("SENS eval:"),
+                "test_id=zero-reciprocal layer=eval actual={error}");
+        }
+
+        #[test]
+        fn unsupported_unary_math_or_wrong_arity_cannot_be_physically_admitted() {
+            for source in [
+                format!("(додати #d24:{})", bits(1)),
+                format!("(помножити #d24:{})", bits(1)),
+                format!("(менше? #d24:{})", bits(1)),
+                format!("(більше? #d24:{})", bits(1)),
+                format!("(частка #d24:{} #d24:{} #d24:{})", bits(1), bits(2), bits(3)),
+                format!("(відняти #d24:{} #d24:{} #d24:{})", bits(1), bits(2), bits(3)),
+                "(частка 2)".to_string(),
+            ] {
+                assert!(qualify(&source).is_err(),
+                    "test_id=arity-admission layer=SENS expected=BLOCK source={source}");
+            }
         }
 
         #[test]
