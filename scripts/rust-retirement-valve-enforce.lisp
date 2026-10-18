@@ -2,7 +2,7 @@
 ; The producer writes a complete named verdict first. This second Lisp process
 ; owns the non-zero failure for forbidden Rust growth.
 
-(визначити verdicts (читати-всі (read-file "tests/rust-retirement-verdict.lisp")))
+(визначити verdicts (читати-всі (читати-файл "tests/rust-retirement-verdict.lisp")))
 (визначити verdict (перше verdicts))
 (визначити verdict-tag (перше verdict))
 
