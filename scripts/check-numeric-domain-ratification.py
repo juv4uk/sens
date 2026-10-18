@@ -98,7 +98,26 @@ def validate(policy, ratification, lang):
              "positive boundary must fit the next D24+ rung")
         need(successor_min <= negative_overflow <= successor_max,
              "negative boundary must fit the next D24+ rung")
-        need(-1 + 1 == 0, "two's-complement all-ones is negative one")
+        # Signed Dn is a two's-complement integer, not the old unsigned
+        # interpretation of the same transport bits. This checks the
+        # owner-ratified bit law; it does NOT execute the SENS math runtime.
+        sign_bit, word_modulus = 1 << (n - 1), 1 << n
+        signed_witnesses = (
+            (0, 0),
+            (1, 1),
+            (sign_bit - 1, signed_max),
+            (sign_bit, signed_min),
+            (word_modulus - 1, -1),
+        )
+        for raw_word, expected_value in signed_witnesses:
+            actual_value = (
+                raw_word if raw_word < sign_bit else raw_word - word_modulus
+            )
+            need(actual_value == expected_value, "D24+ signed word interpretation")
+            need(actual_value % word_modulus == raw_word,
+                 "D24+ two's-complement roundtrip lost exact bits")
+        need(-signed_min > signed_max,
+             "minimum-negative magnitude cannot be positive in the same Dn")
 
     transport = policy.get("numeric_composition_transport", {})
     need("Core-only" in transport.get("status", ""), "transport is Core-only")
