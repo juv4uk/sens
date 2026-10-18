@@ -47,8 +47,8 @@
 ; JSON encoding (pure .lisp; decode is the host primitive, encode never was)
 ; ---------------------------------------------------------------------------
 
-(0011 json-escape-char
-  (0010 (ch)
+(визначити json-escape-char
+  (функція (ch)
     (110
       ((101 ch "\"") "\\\"")
       ((101 ch "\\") "\\\\")
@@ -57,35 +57,35 @@
       ((101 ch "\t") "\\t")
       (#d1:1 ch))))
 
-(0011 json-escape-onto
-  (0010 (s acc)
+(визначити json-escape-onto
+  (функція (s acc)
     (110
       ((110011100 s) acc)
       (#d1:1 (json-escape-onto (110011101 s)
                            (110011110 acc (json-escape-char (110101011 s))))))))
 
-(0011 json-escape
-  (0010 (s) (json-escape-onto s "")))
+(визначити json-escape
+  (функція (s) (json-escape-onto s "")))
 
 ; The kernel's string-append is strictly binary AND a special form, so it
 ; cannot be passed as a function value to reduce — fold over rest args
 ; directly instead. Derived here, no new primitive.
-(0011 strcat-onto
-  (0010 (items acc)
+(визначити strcat-onto
+  (функція (items acc)
     (110
       
       ((010 items)  acc)
       (#d1:1 (strcat-onto (011 items) (110011110 acc (100 items)))))))
 
-(0011 strcat
-  (0010 args
+(визначити strcat
+  (функція args
     (strcat-onto args "")))
 
-(0011 json-encode-string
+(визначити json-encode-string
   (0010 (s) (110011110 "\"" (110011110 (json-escape s) "\""))))
 
-(0011 json-encode-key
-  (0010 (k)
+(визначити json-encode-key
+  (функція (k)
     (110
       ((110101100 k) (json-encode-string (11101110 k)))
       (#d1:1 (json-encode-string k)))))
@@ -96,8 +96,8 @@
 ; contain either scalars or nested structures (whose car is itself a
 ; pair). This survives nested-object values like ("cmd" . (("type" . ...))),
 ; which a naive "cdr of first entry is atom" test misclassifies as array.
-(0011 json-object?
-  (0010 (v)
+(визначити json-object?
+  (функція (v)
     (110
       
       (#d1:1 (001 ()))
@@ -107,8 +107,8 @@
       ((010 (100 (100 v)))  t)
       )))
 
-(0011 json-encode-value
-  (0010 (v)
+(визначити json-encode-value
+  (функція (v)
     (110
       
       ((010 v)  (110
@@ -121,8 +121,8 @@
       ((json-object? v) (json-encode-object v))
       (#d1:1 (json-encode-array v)))))
 
-(0011 json-encode-object-entries
-  (0010 (entries acc)
+(визначити json-encode-object-entries
+  (функція (entries acc)
     (110
       
       ((010 entries)  acc)
@@ -136,12 +136,12 @@
                     ":"
                     (json-encode-value (011 entry)))))))))
 
-(0011 json-encode-object
-  (0010 (alist)
+(визначити json-encode-object
+  (функція (alist)
     (strcat "{" (json-encode-object-entries alist "") "}")))
 
-(0011 json-encode-array-items
-  (0010 (items acc)
+(визначити json-encode-array-items
+  (функція (items acc)
     (110
       
       ((010 items)  acc)
@@ -152,11 +152,11 @@
                         (#d1:1 ","))
                   (json-encode-value (100 items))))))))
 
-(0011 json-encode-array
-  (0010 (items)
+(визначити json-encode-array
+  (функція (items)
     (strcat "[" (json-encode-array-items items "") "]")))
 
-(0011 json-encode json-encode-value)
+(визначити json-encode json-encode-value)
 
 ; ---------------------------------------------------------------------------
 ; Message / tool-call accessors and JSON -> internal conversion
@@ -166,41 +166,41 @@
 ; kernel's cdr fails named on (), so every read goes through this guard.
 ; A genuinely absent key and an explicit nil value both read as () — the
 ; loop below only ever distinguishes present-nonempty from everything else.
-(0011 alist-ref
-  (0010 (key alist)
+(визначити alist-ref
+  (функція (key alist)
     (110
       ((11100 key alist) (011 (11100 key alist)))
       )))
 
-(0011 msg-role (0010 (m) (alist-ref (001 role) m)))
-(0011 msg-content (0010 (m) (alist-ref (001 content) m)))
-(0011 msg-tool-calls (0010 (m) (alist-ref (001 tool-calls) m)))
-(0011 msg-tool-call-id (0010 (m) (alist-ref (001 tool-call-id) m)))
+(визначити msg-role (функція (m) (alist-ref (як-є role) m)))
+(визначити msg-content (функція (m) (alist-ref (як-є content) m)))
+(визначити msg-tool-calls (функція (m) (alist-ref (як-є tool-calls) m)))
+(визначити msg-tool-call-id (функція (m) (alist-ref (як-є tool-call-id) m)))
 
-(0011 tc-id (0010 (tc) (alist-ref (001 id) tc)))
-(0011 tc-name (0010 (tc) (alist-ref (001 name) tc)))
-(0011 tc-arguments (0010 (tc) (alist-ref (001 arguments) tc)))
+(визначити tc-id (функція (tc) (alist-ref (як-є id) tc)))
+(визначити tc-name (функція (tc) (alist-ref (як-є name) tc)))
+(визначити tc-arguments (функція (tc) (alist-ref (як-є arguments) tc)))
 
 ; OpenAI's content field is null when the assistant emits only tool calls.
-(0011 json-message-content
-  (0010 (jm)
-    ((0010 (c)
+(визначити json-message-content
+  (функція (jm)
+    ((функція (c)
       (110
         ((101 c (001 ())) "")
         (#d1:1 c)))
      (alist-ref "content" jm))))
 
-(0011 json->tool-call
-  (0010 (jtc)
-    ((0010 (fn)
+(визначити json->tool-call
+  (функція (jtc)
+    ((функція (fn)
       (1110 (111 (001 id) (alist-ref "id" jtc))
             (111 (001 name) (alist-ref "name" fn))
             (111 (001 arguments) (alist-ref "arguments" fn))))
      (alist-ref "function" jtc))))
 
-(0011 json->message
-  (0010 (jm)
-    ((0010 (tcs)
+(визначити json->message
+  (функція (jm)
+    ((функція (tcs)
       (1111 (1110 (111 (001 role) (alist-ref "role" jm))
                     (111 (001 content) (json-message-content jm)))
               (110
@@ -208,8 +208,8 @@
                 )))
      (alist-ref "tool_calls" jm))))
 
-(0011 extract-assistant-message
-  (0010 (response-json)
+(визначити extract-assistant-message
+  (функція (response-json)
     (001001 ((choices (alist-ref "choices" response-json))
            (choice (100 choices)))
       (alist-ref "message" choice))))
@@ -218,15 +218,15 @@
 ; Request encoding (raw-data builders; one json-encode at the leaf)
 ; ---------------------------------------------------------------------------
 
-(0011 encode-tool-call
-  (0010 (tc)
+(визначити encode-tool-call
+  (функція (tc)
     (1110 (111 "id" (tc-id tc))
           (111 "type" "function")
           (111 "function" (1110 (111 "name" (tc-name tc))
                                  (111 "arguments" (tc-arguments tc)))))))
 
-(0011 encode-message
-  (0010 (m)
+(визначити encode-message
+  (функція (m)
     (110
       ((11110111 (msg-role m) "tool")
        (1110 (111 "role" "tool")
@@ -238,8 +238,8 @@
                    (110 (tcs (1110 (111 "tool_calls" (101000 encode-tool-call tcs))))
                          )))))))
 
-(0011 bash-tool-schema
-  (0010 ()
+(визначити bash-tool-schema
+  (функція ()
     (1110 (111 "type" "function")
           (111 "function"
                 (1110 (111 "name" "bash")
@@ -251,8 +251,8 @@
                                                                 (111 "description" "The bash command to execute")))))
                                   (111 "required" (1110 "cmd")))))))))
 
-(0011 build-request-body
-  (0010 (model messages)
+(визначити build-request-body
+  (функція (model messages)
     (json-encode
      (1110 (111 "model" model)
            (111 "messages" (101000 encode-message messages))
@@ -264,8 +264,8 @@
 ; native http-post primitive is ever adopted.
 ; ---------------------------------------------------------------------------
 
-(0011 http-post-json
-  (0010 (url body)
+(визначити http-post-json
+  (функція (url body)
     ;; --fail: non-2xx yields non-zero exit instead of an error body that
     ;; would be fed to json-parse; --max-time: never hang the agent loop
     ;; on a stuck server; --show-error keeps the reason on stderr.
@@ -288,9 +288,9 @@
 ;; yantra stays standalone): (blocked "curl exit N[\\nstderr]"). Callers
 ;; must branch on this — feeding a blocked result to json-parse was the
 ;; original bug.
-(0011 http-transport-exit (0010 (r) (100 r)))
-(0011 http-transport-body (0010 (r) (100 (011 r))))
-(0011 http-transport-stderr (0010 (r) (100 (011 (011 r)))))
+(визначити http-transport-exit (функція (r) (перше r)))
+(визначити http-transport-body (функція (r) (перше (решта r))))
+(визначити http-transport-stderr (функція (r) (перше (решта (решта r)))))
 
 ; ---------------------------------------------------------------------------
 ; Tool dispatch — one tool: bash. Real execution only.
@@ -299,8 +299,8 @@
 ; The tool result is structured: the exit status is evidence, not a
 ; detail to drop - a command that failed with 127 must not read the same
 ; as one that succeeded. Text shape stays LLM-friendly.
-(0011 execute-bash
-  (0010 (arguments-json)
+(визначити execute-bash
+  (функція (arguments-json)
     (001001 ((args (110100100 arguments-json))
            (cmd (alist-ref "cmd" args))
            (result (110101111 "bash" (1110 "-c" cmd)))
@@ -317,21 +317,21 @@
 ; every number canonically (FIX-NUMBER-TO-STRING-RATIONAL), so the shim
 ; duplicated it — including the killed-by-signal negative case.
 
-(0011 dispatch-tool
-  (0010 (name arguments-json)
+(визначити dispatch-tool
+  (функція (name arguments-json)
     (110
       ((11110111 name "bash") (execute-bash arguments-json))
       (#d1:1 (110011110 "error: unknown tool: " name)))))
 
-(0011 execute-tool-call
-  (0010 (tc)
+(визначити execute-tool-call
+  (функція (tc)
     (dispatch-tool (tc-name tc) (tc-arguments tc))))
 
 ; Executes each tool call and produces the correlated tool-result
 ; messages — the tool_call_id on each result is copied from the very
 ; call object being executed, so correlation holds by construction.
-(0011 append-tool-results
-  (0010 (tcs acc)
+(визначити append-tool-results
+  (функція (tcs acc)
     (110
       
       ((010 tcs)  acc)
@@ -346,26 +346,26 @@
 ; Completion validation — the key rule.
 ; ---------------------------------------------------------------------------
 
-(0011 claim-markers
+(визначити claim-markers
   (001 ("ran " "executed" "command output" "output of the command" "виконав" "виконано")))
 
-(0011 markers-contained?
-  (0010 (markers text)
+(визначити markers-contained?
+  (функція (markers text)
     (110
       
       ((010 markers)  (001 ()))
       ((110101000 (100 markers) text) t)
       (#d1:1 (markers-contained? (011 markers) text)))))
 
-(0011 claims-execution?
-  (0010 (text) (markers-contained? claim-markers text)))
+(визначити claims-execution?
+  (функція (text) (markers-contained? claim-markers text)))
 
 
 ; Does the conversation contain any tool result at all? Coarse - kept
 ; for callers that only need existence; the claim validator below uses
 ; the stricter owned-evidence rule instead.
-(0011 has-tool-result?
-  (0010 (messages)
+(визначити has-tool-result?
+  (функція (messages)
     (110
       
       ((010 messages)  (001 ()))
@@ -387,19 +387,19 @@
 ; breaks the chain and the claim is rejected.
 ; -----------------------------------------------------------------------
 
-(0011 msg-call-ids
+(визначити msg-call-ids
   (0010 (m) (101000 tc-id (msg-tool-calls m))))
 
-(0011 id-in-list?
-  (0010 (id ids)
+(визначити id-in-list?
+  (функція (id ids)
     (110
       
       ((010 ids)  (001 ()))
       ((11110111 id (100 ids)) t)
       (#d1:1 (id-in-list? id (011 ids))))))
 
-(0011 all-covered?
-  (0010 (ids candidates)
+(визначити all-covered?
+  (функція (ids candidates)
     (110
       
       ((010 ids)  t)
@@ -410,8 +410,8 @@
 ; [... assistant(tool-calls) tool* ] where every trailing tool result's
 ; id belongs to that assistant message. The final reply itself is dropped
 ; first - it is the message being validated, never its own evidence.
-(0011 ends-with-owned-tool-results?
-  (0010 (messages)
+(визначити ends-with-owned-tool-results?
+  (функція (messages)
     (110
       
       ((010 messages)  (001 ()))
@@ -421,8 +421,8 @@
 
 ; walks backwards over a trailing run of tool results, then requires the
 ; assistant message that issued those calls to own every collected id
-(0011 collect-trailing-tools
-  (0010 (reversed collected)
+(визначити collect-trailing-tools
+  (функція (reversed collected)
     (110
       
       ((010 reversed)  (001 ()))
@@ -430,7 +430,7 @@
        (collect-trailing-tools (011 reversed)
                                (111 (msg-tool-call-id (100 reversed)) collected)))
       (#d1:1
-       ((0010 (issuer)
+       ((функція (issuer)
          (110
            ((0100 (11110111 (msg-role issuer) "assistant")) (001 ()))
            
@@ -440,14 +440,14 @@
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
 ; tool calls, directly preceding the reply.
-(0011 valid-final?
-  (0010 (assistant-msg messages)
+(визначити valid-final?
+  (функція (assistant-msg messages)
     (110
       ((claims-execution? (msg-content assistant-msg))
        (ends-with-owned-tool-results? messages))
       (#d1:1 t))))
 
-(0011 invalid-completion-nudge
+(визначити invalid-completion-nudge
   (1110 (111 (001 role) "system")
         (111 (001 content)
               "Your last reply claimed a command was executed, but no bash tool result exists in this conversation. A textual claim is not evidence of execution. Either call the bash tool for real, or reply without claiming execution.")))
@@ -456,18 +456,18 @@
 ; Turn loop — hard MAX_TURNS limit, threaded (immutable) agent state.
 ; ---------------------------------------------------------------------------
 
-(0011 max-turns 6)
+(визначити max-turns 6)
 
-(0011 count-with-role
-  (0010 (role messages)
+(визначити count-with-role
+  (функція (role messages)
     (110
       
       ((010 messages)  0)
       ((11110111 (msg-role (100 messages)) role) (01010 1 (count-with-role role (011 messages))))
       (#d1:1 (count-with-role role (011 messages))))))
 
-(0011 agent-loop
-  (0010 (complete messages turn)
+(визначити agent-loop
+  (функція (complete messages turn)
     (110
       ((110110 turn max-turns)
        (1110 (111 (001 status) (001 max-turns-reached))
@@ -493,19 +493,19 @@
                           (1111 with-reply (append-tool-results tcs (001 ())))
                           (01010 turn 1)))))))))
 
-(0011 run-agent
-  (0010 (complete system-prompt user-prompt)
+(визначити run-agent
+  (функція (complete system-prompt user-prompt)
     (agent-loop complete
                 (1110 (1110 (111 (001 role) "system") (111 (001 content) system-prompt))
                       (1110 (111 (001 role) "user") (111 (001 content) user-prompt)))
                 0)))
 
 ; Result readers
-(0011 result-status (0010 (r) (alist-ref (001 status) r)))
-(0011 result-epistemic-status (0010 (r) (alist-ref (001 epistemic-status) r)))
-(0011 result-answer (0010 (r) (alist-ref (001 answer) r)))
-(0011 result-turn (0010 (r) (alist-ref (001 turn) r)))
-(0011 result-messages (0010 (r) (alist-ref (001 messages) r)))
+(визначити result-status (функція (r) (alist-ref (як-є status) r)))
+(визначити result-epistemic-status (функція (r) (alist-ref (як-є epistemic-status) r)))
+(визначити result-answer (функція (r) (alist-ref (як-є answer) r)))
+(визначити result-turn (функція (r) (alist-ref (як-є turn) r)))
+(визначити result-messages (функція (r) (alist-ref (як-є messages) r)))
 
 ; ---------------------------------------------------------------------------
 ; Live Ollama wiring — used only against a running server; tests inject
@@ -513,11 +513,11 @@
 ; deterministically regardless of provider availability.
 ; ---------------------------------------------------------------------------
 
-(0011 ollama-url "http://127.0.0.1:11434/v1/chat/completions")
-(0011 ollama-model "qwen3:4b")
+(визначити ollama-url "http://127.0.0.1:11434/v1/chat/completions")
+(визначити ollama-model "qwen3:4b")
 
-(0011 ollama-complete
-  (0010 (messages)
+(визначити ollama-complete
+  (функція (messages)
     (001000 ((r (http-post-json ollama-url
                              (build-request-body ollama-model messages))))
       (110 ((11110111 (http-transport-exit r) 0) 
