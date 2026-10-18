@@ -62,23 +62,23 @@
 ; erzeugende Fakt, typischerweise mit denselben Variablen, damit
 ; `fire-rule` einsetzen kann, woran `pattern` sie gebunden hat.
 
-(0011 *working-memory* (001 ()))
+(визначити *working-memory* (як-є ()))
 
-(0011 assert-fact!
+(визначити assert-fact!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *working-memory*) (1110 (001 111) fact (001 *working-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *working-memory*) (список (як-є 111) fact (як-є *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
 ; — the new fact this rule application would produce. On failure, returns
 ; `'no-match` rather than `'()` — an empty list would be ambiguous with a
 ; template that legitimately evaluates to `()`.
-(0011 fire-rule
-  (0010 (rule fact)
-    ((0010 (pattern template) ((0010 (bindings) (110
-          ((failed-subst? bindings) (001 no-match))
-          (#d1:1 (101101001 template bindings)))) (101010000 pattern fact (001 ())))) (100 rule) (1001 rule))))
+(визначити fire-rule
+  (функція (rule fact)
+    ((функція (pattern template) ((функція (bindings) (за-умовою
+          ((failed-subst? bindings) (як-є no-match))
+          (так (застосувати-підстановка template bindings)))) (уніфікувати pattern fact (як-є ())))) (перше rule) (друге rule))))
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
@@ -108,24 +108,24 @@
 ; it's whatever `template` was — which may itself be a compound list (e.g.
 ; `(has-mass earth)`) — and `eq` errors on non-atom arguments instead of
 ; just correctly answering "not the no-match atom".
-(0011 fire-rule-on-facts
-  (0010 (rule facts)
-    (110
+(визначити fire-rule-on-facts
+  (функція (rule facts)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      (#d1:1 ((0010 (result) (110
-             ((0100 (010 result)) (110
-                ((101 result (001 no-match)) (fire-rule-on-facts rule (011 facts)))
-                (#d1:1 (111 result (fire-rule-on-facts rule (011 facts))))))
-             ((010 result)  (110
-                ((101 result (001 no-match)) (fire-rule-on-facts rule (011 facts)))
-                (#d1:1 (111 result (fire-rule-on-facts rule (011 facts))))))
-             (#d1:1 (111 result (fire-rule-on-facts rule (011 facts)))))) (fire-rule rule (100 facts)))))))
+      ((атом? facts)  (як-є ()))
+      (так ((функція (result) (за-умовою
+             ((хибне? (атом? result)) (за-умовою
+                ((тотожне? result (як-є no-match)) (fire-rule-on-facts rule (решта facts)))
+                (так (сполучити result (fire-rule-on-facts rule (решта facts))))))
+             ((атом? result)  (за-умовою
+                ((тотожне? result (як-є no-match)) (fire-rule-on-facts rule (решта facts)))
+                (так (сполучити result (fire-rule-on-facts rule (решта facts))))))
+             (так (сполучити result (fire-rule-on-facts rule (решта facts)))))) (fire-rule rule (перше facts)))))))
 
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
-(0011 fire-rule-on-working-memory
-  (0010 (rule)
+(визначити fire-rule-on-working-memory
+  (функція (rule)
     (fire-rule-on-facts rule *working-memory*)))
 
 ; Step 3: apply every rule in a rule set to a fact list (still a single
@@ -146,16 +146,16 @@
 ; selbst mit anderen Regeln abgeglichen). Auf `append` aufgebaut, dieselbe
 ; Fan-out-Form, die `prove-goal` in lib/reason.lisp nutzt, um jede Regel gegen
 ; ein Ziel zu versuchen.
-(0011 fire-rules-on-facts
-  (0010 (rules facts)
-    (110
+(визначити fire-rules-on-facts
+  (функція (rules facts)
+    (за-умовою
       
-      ((010 rules)  (001 ()))
-      (#d1:1 (1111 (fire-rule-on-facts (100 rules) facts)
-                  (fire-rules-on-facts (011 rules) facts))))))
+      ((атом? rules)  (як-є ()))
+      (так (приєднати (fire-rule-on-facts (перше rules) facts)
+                  (fire-rules-on-facts (решта rules) facts))))))
 
-(0011 fire-rules-on-working-memory
-  (0010 (rules)
+(визначити fire-rules-on-working-memory
+  (функція (rules)
     (fire-rules-on-facts rules *working-memory*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
@@ -201,30 +201,30 @@
 ; Structural membership is a derived SENS law over fact data.
 ; Unlike historical D5 MEMBER, it must not call CAR on an empty list,
 ; nor require an unadmitted D8 EQUAL mechanism for compound facts.
-(0011 факт-наявний?
-  (0010 (fact memory)
-    (110
-      ((0101 memory) #d1:0)
-      ((unify-equal? fact (100 memory)) #d1:1)
-      (#d1:1 (факт-наявний? fact (011 memory))))))
+(визначити факт-наявний?
+  (функція (fact memory)
+    (за-умовою
+      ((порожній? memory) ні)
+      ((unify-equal? fact (перше memory)) так)
+      (так (факт-наявний? fact (решта memory))))))
 
-(0011 append-new
-  (0010 (facts wm)
-    (110
-      ((010 facts) wm)
-      ((факт-наявний? (100 facts) wm) (append-new (011 facts) wm))
-      (#d1:1 (append-new (011 facts) (111 (100 facts) wm))))))
+(визначити append-new
+  (функція (facts wm)
+    (за-умовою
+      ((атом? facts) wm)
+      ((факт-наявний? (перше facts) wm) (додати-нові (решта facts) wm))
+      (так (додати-нові (решта facts) (сполучити (перше facts) wm))))))
 
-(0011 run
-  (0010 (rules facts)
-    ((0010 (merged) (110
-        ((unify-equal? (000000 merged) (000000 facts))  facts)
-        (#d1:1 (run rules merged)))) (append-new (fire-rules-on-facts rules facts) facts))))
+(визначити run
+  (функція (rules facts)
+    ((функція (merged) (за-умовою
+        ((unify-equal? (довжина merged) (довжина facts))  facts)
+        (так (run rules merged)))) (додати-нові (fire-rules-on-facts rules facts) facts))))
 
-(0011 assert-facts!
+(визначити assert-facts!
   (make-macro
-    (0010 (facts)
-      (1110 (001 def) (001 *working-memory*) (1110 (001 append-new) facts (001 *working-memory*))))))
+    (функція (facts)
+      (список (як-є def) (як-є *working-memory*) (список (як-є додати-нові) facts (як-є *working-memory*))))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.
@@ -256,18 +256,18 @@
 ; Unterstützungsmenge (`(fakt . unterstützende-fakten)`), damit das
 ; Entfernen einer Unterstützung kaskadieren kann; das ist Schritt 5b, ein
 ; separat abgestimmter Schritt, hier nicht unterstellt.
-(0011 retract-fact
-  (0010 (fact facts)
-    (110
+(визначити retract-fact
+  (функція (fact facts)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      ((unify-equal? fact (100 facts)) (011 facts))
-      (#d1:1 (111 (100 facts) (retract-fact fact (011 facts)))))))
+      ((атом? facts)  (як-є ()))
+      ((unify-equal? fact (перше facts)) (решта facts))
+      (так (сполучити (перше facts) (retract-fact fact (решта facts)))))))
 
-(0011 retract-fact!
+(визначити retract-fact!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *working-memory*) (1110 (001 retract-fact) fact (001 *working-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *working-memory*) (список (як-є retract-fact) fact (як-є *working-memory*))))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -328,122 +328,122 @@
 ; sie zu ersetzen: `*justified-memory*` ist eine von `*working-memory*`
 ; getrennte globale Variable, sodass bestehende Aufrufer von
 ; `run`/`assert-fact!`/`retract-fact!` unberührt bleiben.
-(0011 make-justified
-  (0010 (fact supports)
-    (111 fact supports)))
+(визначити make-justified
+  (функція (fact supports)
+    (сполучити fact supports)))
 
 (визначити fact-of (функція (entry) (перше entry)))
 (визначити supports-of (функція (entry) (решта entry)))
-(визначити axiom (функція (fact) (make-justified fact (як-є ()))))
+(визначити axiom (функція (fact) (створити-обґрунтований fact (як-є ()))))
 
-(0011 map-fact-of
-  (0010 (entries)
-    (110
+(визначити map-fact-of
+  (функція (entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      (#d1:1 (111 (fact-of (100 entries)) (map-fact-of (011 entries)))))))
+      ((атом? entries)  (як-є ()))
+      (так (сполучити (факт-від (перше entries)) (мапа-факт-від (решта entries)))))))
 
 ; Same `fire-rule` as Step 1, but wraps a successful result with the
 ; single supporting fact that produced it.
-(0011 fire-rule-tms
-  (0010 (rule fact)
-    ((0010 (result) (110
-        ((0100 (010 result)) (110
-           ((101 result (001 no-match)) (001 no-match))
-           (#d1:1 (make-justified result (1110 fact)))))
-        ((010 result)  (110
-           ((101 result (001 no-match)) (001 no-match))
-           (#d1:1 (make-justified result (1110 fact)))))
-        (#d1:1 (make-justified result (1110 fact))))) (fire-rule rule fact))))
+(визначити fire-rule-tms
+  (функція (rule fact)
+    ((функція (result) (за-умовою
+        ((хибне? (атом? result)) (за-умовою
+           ((тотожне? result (як-є no-match)) (як-є no-match))
+           (так (створити-обґрунтований result (список fact)))))
+        ((атом? result)  (за-умовою
+           ((тотожне? result (як-є no-match)) (як-є no-match))
+           (так (створити-обґрунтований result (список fact)))))
+        (так (створити-обґрунтований result (список fact))))) (fire-rule rule fact))))
 
-(0011 fire-rule-on-facts-tms
-  (0010 (rule facts)
-    (110
+(визначити fire-rule-on-facts-tms
+  (функція (rule facts)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      (#d1:1 ((0010 (result) (110
-             ((0100 (010 result)) (fire-rule-on-facts-tms rule (011 facts)))
-             ((010 result)  (fire-rule-on-facts-tms rule (011 facts)))
-             (#d1:1 (111 result (fire-rule-on-facts-tms rule (011 facts)))))) (fire-rule-tms rule (100 facts)))))))
+      ((атом? facts)  (як-є ()))
+      (так ((функція (result) (за-умовою
+             ((хибне? (атом? result)) (запустити-правило-на-факти-система-істини rule (решта facts)))
+             ((атом? result)  (запустити-правило-на-факти-система-істини rule (решта facts)))
+             (так (сполучити result (запустити-правило-на-факти-система-істини rule (решта facts)))))) (запустити-правило-система-істини rule (перше facts)))))))
 
-(0011 fire-rules-on-facts-tms
-  (0010 (rules facts)
-    (110
+(визначити fire-rules-on-facts-tms
+  (функція (rules facts)
+    (за-умовою
       
-      ((010 rules)  (001 ()))
-      (#d1:1 (1111 (fire-rule-on-facts-tms (100 rules) facts)
-                  (fire-rules-on-facts-tms (011 rules) facts))))))
+      ((атом? rules)  (як-є ()))
+      (так (приєднати (запустити-правило-на-факти-система-істини (перше rules) facts)
+                  (запустити-правила-на-факти-система-істини (решта rules) facts))))))
 
-(0011 justified-member?
-  (0010 (fact entries)
-    (110
+(визначити justified-member?
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((unify-equal? fact (fact-of (100 entries))) #d1:1)
-      (#d1:1 (justified-member? fact (011 entries))))))
+      ((атом? entries)  (як-є ()))
+      ((unify-equal? fact (факт-від (перше entries))) так)
+      (так (обґрунтований-член? fact (решта entries))))))
 
-(0011 add-new-justified
-  (0010 (new-entries entries)
-    (110
+(визначити add-new-justified
+  (функція (new-entries entries)
+    (за-умовою
       
-      ((010 new-entries)  entries)
-      ((justified-member? (fact-of (100 new-entries)) entries)
-       (add-new-justified (011 new-entries) entries))
-      (#d1:1 (add-new-justified (011 new-entries) (111 (100 new-entries) entries))))))
+      ((атом? new-entries)  entries)
+      ((обґрунтований-член? (факт-від (перше new-entries)) entries)
+       (додати-нові-обґрунтований (решта new-entries) entries))
+      (так (додати-нові-обґрунтований (решта new-entries) (сполучити (перше new-entries) entries))))))
 
 ; The fixpoint loop over justified facts, mirroring `run` from Step 4.
-(0011 run-tms
-  (0010 (rules entries)
-    ((0010 (new-entries) ((0010 (merged) (110
-          ((unify-equal? (000000 merged) (000000 entries))  entries)
-          (#d1:1 (run-tms rules merged)))) (add-new-justified new-entries entries))) (fire-rules-on-facts-tms rules (map-fact-of entries)))))
+(визначити run-tms
+  (функція (rules entries)
+    ((функція (new-entries) ((функція (merged) (за-умовою
+          ((unify-equal? (довжина merged) (довжина entries))  entries)
+          (так (run-tms rules merged)))) (додати-нові-обґрунтований new-entries entries))) (запустити-правила-на-факти-система-істини rules (мапа-факт-від entries)))))
 
-(0011 *justified-memory* (001 ()))
+(визначити *justified-memory* (як-є ()))
 
-(0011 assert-fact-tms!
+(визначити assert-fact-tms!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *justified-memory*) (1110 (001 add-new-justified) (1110 (001 list) (1110 (001 axiom) fact)) (001 *justified-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є list) (список (як-є axiom) fact)) (як-є *justified-memory*))))))
 
-(0011 run-tms!
+(визначити run-tms!
   (make-macro
-    (0010 (rules)
-      (1110 (001 def) (001 *justified-memory*) (1110 (001 run-tms) rules (001 *justified-memory*))))))
+    (функція (rules)
+      (список (як-є def) (як-є *justified-memory*) (список (як-є run-tms) rules (як-є *justified-memory*))))))
 
-(0011 remove-justified
-  (0010 (fact entries)
-    (110
+(визначити remove-justified
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((unify-equal? fact (fact-of (100 entries))) (remove-justified fact (011 entries)))
-      (#d1:1 (111 (100 entries) (remove-justified fact (011 entries)))))))
+      ((атом? entries)  (як-є ()))
+      ((unify-equal? fact (факт-від (перше entries))) (видалити-обґрунтований fact (решта entries)))
+      (так (сполучити (перше entries) (видалити-обґрунтований fact (решта entries)))))))
 
-(0011 dependents-of
-  (0010 (fact entries)
-    (110
+(визначити dependents-of
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((11101 fact (supports-of (100 entries)))
-       (111 (fact-of (100 entries)) (dependents-of fact (011 entries))))
-      (#d1:1 (dependents-of fact (011 entries))))))
+      ((атом? entries)  (як-є ()))
+      ((значення-у-списку? fact (підтримки-від (перше entries)))
+       (сполучити (факт-від (перше entries)) (залежні-від fact (решта entries))))
+      (так (залежні-від fact (решта entries))))))
 
 ; Retracts `fact`, then recursively retracts everything that named it in
 ; their support set — the cascade truth maintenance is for.
-(0011 retract-fact-tms
-  (0010 (fact entries)
-    (retract-facts-tms (dependents-of fact entries) (remove-justified fact entries))))
+(визначити retract-fact-tms
+  (функція (fact entries)
+    (відкликати-факти-система-істини (залежні-від fact entries) (видалити-обґрунтований fact entries))))
 
-(0011 retract-facts-tms
-  (0010 (facts entries)
-    (110
+(визначити retract-facts-tms
+  (функція (facts entries)
+    (за-умовою
       
-      ((010 facts)  entries)
-      (#d1:1 (retract-facts-tms (011 facts) (retract-fact-tms (100 facts) entries))))))
+      ((атом? facts)  entries)
+      (так (відкликати-факти-система-істини (решта facts) (відкликати-факт-система-істини (перше facts) entries))))))
 
-(0011 retract-fact-tms!
+(визначити retract-fact-tms!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *justified-memory*) (1110 (001 retract-fact-tms) fact (001 *justified-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *justified-memory*) (список (як-є відкликати-факт-система-істини) fact (як-є *justified-memory*))))))
 
 ; Step 5c: multiple justifications per fact — the limitation Step 5b
 ; documented and deliberately left open. An entry is now `(fact
@@ -495,95 +495,95 @@
 ; Begründung) — keine frühere Schicht wird berührt oder ersetzt.
 (визначити justifications-of (функція (entry) (решта entry)))
 
-(0011 fire-rule-jtms
-  (0010 (rule fact)
-    ((0010 (result) (110
-        ((0100 (010 result)) (110
-           ((101 result (001 no-match)) (001 no-match))
-           (#d1:1 (1110 result (1110 fact)))))
-        ((010 result)  (110
-           ((101 result (001 no-match)) (001 no-match))
-           (#d1:1 (1110 result (1110 fact)))))
-        (#d1:1 (1110 result (1110 fact))))) (fire-rule rule fact))))
+(визначити fire-rule-jtms
+  (функція (rule fact)
+    ((функція (result) (за-умовою
+        ((хибне? (атом? result)) (за-умовою
+           ((тотожне? result (як-є no-match)) (як-є no-match))
+           (так (список result (список fact)))))
+        ((атом? result)  (за-умовою
+           ((тотожне? result (як-є no-match)) (як-є no-match))
+           (так (список result (список fact)))))
+        (так (список result (список fact))))) (fire-rule rule fact))))
 
-(0011 fire-rule-on-facts-jtms
-  (0010 (rule facts)
-    (110
+(визначити fire-rule-on-facts-jtms
+  (функція (rule facts)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      (#d1:1 ((0010 (result) (110
-             ((0100 (010 result)) (fire-rule-on-facts-jtms rule (011 facts)))
-             ((010 result)  (fire-rule-on-facts-jtms rule (011 facts)))
-             (#d1:1 (111 result (fire-rule-on-facts-jtms rule (011 facts)))))) (fire-rule-jtms rule (100 facts)))))))
+      ((атом? facts)  (як-є ()))
+      (так ((функція (result) (за-умовою
+             ((хибне? (атом? result)) (запустити-правило-на-факти-система-обґрунтувань rule (решта facts)))
+             ((атом? result)  (запустити-правило-на-факти-система-обґрунтувань rule (решта facts)))
+             (так (сполучити result (запустити-правило-на-факти-система-обґрунтувань rule (решта facts)))))) (запустити-правило-система-обґрунтувань rule (перше facts)))))))
 
-(0011 fire-rules-on-facts-jtms
-  (0010 (rules facts)
-    (110
+(визначити fire-rules-on-facts-jtms
+  (функція (rules facts)
+    (за-умовою
       
-      ((010 rules)  (001 ()))
-      (#d1:1 (1111 (fire-rule-on-facts-jtms (100 rules) facts)
-                  (fire-rules-on-facts-jtms (011 rules) facts))))))
+      ((атом? rules)  (як-є ()))
+      (так (приєднати (запустити-правило-на-факти-система-обґрунтувань (перше rules) facts)
+                  (запустити-правила-на-факти-система-обґрунтувань (решта rules) facts))))))
 
-(0011 find-entry
-  (0010 (fact entries)
-    (110
+(визначити find-entry
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((unify-equal? fact (fact-of (100 entries))) (100 entries))
-      (#d1:1 (find-entry fact (011 entries))))))
+      ((атом? entries)  (як-є ()))
+      ((unify-equal? fact (факт-від (перше entries))) (перше entries))
+      (так (find-entry fact (решта entries))))))
 
-(0011 remove-entry-jtms
-  (0010 (fact entries)
-    (110
+(визначити remove-entry-jtms
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((unify-equal? fact (fact-of (100 entries))) (remove-entry-jtms fact (011 entries)))
-      (#d1:1 (111 (100 entries) (remove-entry-jtms fact (011 entries)))))))
+      ((атом? entries)  (як-є ()))
+      ((unify-equal? fact (факт-від (перше entries))) (видалити-запис-система-обґрунтувань fact (решта entries)))
+      (так (сполучити (перше entries) (видалити-запис-система-обґрунтувань fact (решта entries)))))))
 
 ; Folds one new `(fact justification)` pair into `entries`: a brand-new
 ; fact gets a fresh entry; a fact already present gets `justification`
 ; added to its list only if not already there (so re-deriving the same way
 ; twice is a no-op, needed for `run-jtms`'s fixpoint check to terminate).
-(0011 add-justification
-  (0010 (fact justification entries)
-    ((0010 (existing) (110
-        ((0100 (010 existing)) (111 (1110 fact justification) entries))
-        ((010 existing)  (111 (1110 fact justification) entries))
-        ((11101 justification (justifications-of existing)) entries)
-        (#d1:1 (111 (111 fact (111 justification (justifications-of existing)))
-                 (remove-entry-jtms fact entries))))) (find-entry fact entries))))
+(визначити add-justification
+  (функція (fact justification entries)
+    ((функція (existing) (за-умовою
+        ((хибне? (атом? existing)) (сполучити (список fact justification) entries))
+        ((атом? existing)  (сполучити (список fact justification) entries))
+        ((значення-у-списку? justification (обґрунтування-від existing)) entries)
+        (так (сполучити (сполучити fact (сполучити justification (обґрунтування-від existing)))
+                 (видалити-запис-система-обґрунтувань fact entries))))) (find-entry fact entries))))
 
-(0011 add-new-entries-jtms
-  (0010 (new-entries entries)
-    (110
+(визначити add-new-entries-jtms
+  (функція (new-entries entries)
+    (за-умовою
       
-      ((010 new-entries)  entries)
-      (#d1:1 (add-new-entries-jtms
-           (011 new-entries)
-           (add-justification (fact-of (100 new-entries)) (1001 (100 new-entries)) entries))))))
+      ((атом? new-entries)  entries)
+      (так (додати-нові-записи-система-обґрунтувань
+           (решта new-entries)
+           (додати-обґрунтування (факт-від (перше new-entries)) (друге (перше new-entries)) entries))))))
 
 ; The fixpoint loop. Compares the merged result to the input with `equal?`
 ; rather than a length/count check (Step 4's `run` compares lengths) —
 ; `add-justification` can grow an *existing* entry's justification list
 ; without changing the entry count, so counting entries alone would miss
 ; real progress and stop too early.
-(0011 run-jtms
-  (0010 (rules entries)
-    ((0010 (merged) (110
+(визначити run-jtms
+  (функція (rules entries)
+    ((функція (merged) (за-умовою
         ((unify-equal? merged entries) entries)
-        (#d1:1 (run-jtms rules merged)))) (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries))))
+        (так (run-jtms rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-на-факти-система-обґрунтувань rules (мапа-факт-від entries)) entries))))
 
-(0011 *jtms-memory* (001 ()))
+(визначити *jtms-memory* (як-є ()))
 
-(0011 assert-fact-jtms!
+(визначити assert-fact-jtms!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *jtms-memory*) (1110 (001 add-justification) fact (1110 (001 quote) (001 ())) (001 *jtms-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *jtms-memory*) (список (як-є додати-обґрунтування) fact (список (як-є quote) (як-є ())) (як-є *jtms-memory*))))))
 
-(0011 run-jtms!
+(визначити run-jtms!
   (make-macro
-    (0010 (rules)
-      (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms) rules (001 *jtms-memory*))))))
+    (функція (rules)
+      (список (як-є def) (як-є *jtms-memory*) (список (як-є run-jtms) rules (як-є *jtms-memory*))))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -664,136 +664,136 @@
 (визначити jtms-state-used (функція (state) (решта state)))
 (визначити jtms-make-state (функція (bindings used) (сполучити bindings used)))
 
-(0011 match-plain-condition-jtms
-  (0010 (condition facts state)
-    (110
+(визначити match-plain-condition-jtms
+  (функція (condition facts state)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      (#d1:1 ((0010 (s) (110
-             ((failed-subst? s) (match-plain-condition-jtms condition (011 facts) state))
-             (#d1:1 (111 (jtms-make-state s (111 (100 facts) (jtms-state-used state)))
-                       (match-plain-condition-jtms condition (011 facts) state))))) (101010000 condition (100 facts) (jtms-state-subst state)))))))
+      ((атом? facts)  (як-є ()))
+      (так ((функція (s) (за-умовою
+             ((failed-subst? s) (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition (решта facts) state))
+             (так (сполучити (система-обґрунтувань-створити-стан s (сполучити (перше facts) (отримати-використані-факти-зі-стану-система-обґрунтувань state)))
+                       (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition (решта facts) state))))) (уніфікувати condition (перше facts) (отримати-підстановку-зі-стану-система-обґрунтувань state)))))))
 
-(0011 match-or-condition-jtms
-  (0010 (alternatives facts state)
-    (110
+(визначити match-or-condition-jtms
+  (функція (alternatives facts state)
+    (за-умовою
       
-      ((010 alternatives)  (001 ()))
-      (#d1:1 (1111 (match-one-condition-jtms (100 alternatives) facts state)
-                  (match-or-condition-jtms (011 alternatives) facts state))))))
+      ((атом? alternatives)  (як-є ()))
+      (так (приєднати (зіставити-одну-умову-правила-система-обґрунтувань (перше alternatives) facts state)
+                  (зіставити-диз'юнкцію-з-фактами-система-обґрунтувань (решта alternatives) facts state))))))
 
-(0011 match-one-condition-jtms
-  (0010 (condition facts state)
-    (110
-      ((condition-is-not? condition)
-       (110
-         ((0100 (010 (match-condition-against-facts (1001 condition) facts (jtms-state-subst state)))) (1110 state))
-         ((010 (match-condition-against-facts (1001 condition) facts (jtms-state-subst state)))  (1110 state))
+(визначити match-one-condition-jtms
+  (функція (condition facts state)
+    (за-умовою
+      ((умова-має-форму-заперечення? condition)
+       (за-умовою
+         ((хибне? (атом? (зіставити-умову-із-набором-фактів (друге condition) facts (отримати-підстановку-зі-стану-система-обґрунтувань state)))) (список state))
+         ((атом? (зіставити-умову-із-набором-фактів (друге condition) facts (отримати-підстановку-зі-стану-система-обґрунтувань state)))  (список state))
          ))
-      ((condition-is-or? condition) (match-or-condition-jtms (011 condition) facts state))
-      ((condition-is-and? condition) (match-conditions-jtms (011 condition) facts state))
-      ((condition-is-test? condition)
-       (110
-         ((0001 (101101001 (1001 condition) (jtms-state-subst state))) (1110 state))
+      ((умова-має-форму-диз'юнкції? condition) (зіставити-диз'юнкцію-з-фактами-система-обґрунтувань (решта condition) facts state))
+      ((умова-має-форму-кон'юнкції? condition) (зіставити-умови-система-обґрунтувань (решта condition) facts state))
+      ((умова-має-тестову-форму? condition)
+       (за-умовою
+         ((обчислити (застосувати-підстановка (друге condition) (отримати-підстановку-зі-стану-система-обґрунтувань state))) (список state))
          ))
-      (#d1:1 (match-plain-condition-jtms condition facts state)))))
+      (так (зіставити-звичайну-умову-з-фактами-система-обґрунтувань condition facts state)))))
 
-(0011 match-conditions-jtms
-  (0010 (conditions facts state)
+(визначити match-conditions-jtms
+  (функція (conditions facts state)
     (thread-conjunction conditions state
-      (0010 (condition s) (match-one-condition-jtms condition facts s)))))
+      (функція (condition s) (зіставити-одну-умову-правила-система-обґрунтувань condition facts s)))))
 
-(0011 map-apply-head-jtms
-  (0010 (head states)
-    (110
+(визначити map-apply-head-jtms
+  (функція (head states)
+    (за-умовою
       
-      ((010 states)  (001 ()))
-      (#d1:1 (111 (1110 (101101001 head (jtms-state-subst (100 states))) (jtms-state-used (100 states)))
-                (map-apply-head-jtms head (011 states)))))))
+      ((атом? states)  (як-є ()))
+      (так (сполучити (список (застосувати-підстановка head (отримати-підстановку-зі-стану-система-обґрунтувань (перше states))) (отримати-використані-факти-зі-стану-система-обґрунтувань (перше states)))
+                (map-apply-head-jtms head (решта states)))))))
 
-(0011 fire-rule-jtms-multi
-  (0010 (rule facts)
-    (map-apply-head-jtms (100 rule) (match-conditions-jtms (011 rule) facts (jtms-make-state (001 ()) (001 ()))))))
+(визначити fire-rule-jtms-multi
+  (функція (rule facts)
+    (map-apply-head-jtms (перше rule) (зіставити-умови-система-обґрунтувань (решта rule) facts (система-обґрунтувань-створити-стан (як-є ()) (як-є ()))))))
 
-(0011 fire-rules-jtms-multi
-  (0010 (rules facts)
-    (110
+(визначити fire-rules-jtms-multi
+  (функція (rules facts)
+    (за-умовою
       
-      ((010 rules)  (001 ()))
-      (#d1:1 (1111 (fire-rule-jtms-multi (100 rules) facts)
-                  (fire-rules-jtms-multi (011 rules) facts))))))
+      ((атом? rules)  (як-є ()))
+      (так (приєднати (запустити-правило-система-обґрунтувань-мульти (перше rules) facts)
+                  (запустити-правила-система-обґрунтувань-мульти (решта rules) facts))))))
 
-(0011 run-jtms-multi
-  (0010 (rules entries)
-    ((0010 (merged) (110
+(визначити run-jtms-multi
+  (функція (rules entries)
+    ((функція (merged) (за-умовою
         ((unify-equal? merged entries) entries)
-        (#d1:1 (run-jtms-multi rules merged)))) (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries))))
+        (так (run-jtms-multi rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-система-обґрунтувань-мульти rules (мапа-факт-від entries)) entries))))
 
-(0011 run-jtms-multi!
+(визначити run-jtms-multi!
   (make-macro
-    (0010 (rules)
-      (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms-multi) rules (001 *jtms-memory*))))))
+    (функція (rules)
+      (список (як-є def) (як-є *jtms-memory*) (список (як-є run-jtms-multi) rules (як-є *jtms-memory*))))))
 
-(0011 prune-justifications
-  (0010 (fact justifications)
-    (110
+(визначити prune-justifications
+  (функція (fact justifications)
+    (за-умовою
       
-      ((010 justifications)  (001 ()))
-      ((11101 fact (100 justifications)) (prune-justifications fact (011 justifications)))
-      (#d1:1 (111 (100 justifications) (prune-justifications fact (011 justifications)))))))
+      ((атом? justifications)  (як-є ()))
+      ((значення-у-списку? fact (перше justifications)) (обрізати-обґрунтування fact (решта justifications)))
+      (так (сполучити (перше justifications) (обрізати-обґрунтування fact (решта justifications)))))))
 
-(0011 prune-entry
-  (0010 (fact entry)
-    (111 (fact-of entry) (prune-justifications fact (justifications-of entry)))))
+(визначити prune-entry
+  (функція (fact entry)
+    (сполучити (факт-від entry) (обрізати-обґрунтування fact (обґрунтування-від entry)))))
 
-(0011 prune-all-entries
-  (0010 (fact entries)
-    (110
+(визначити prune-all-entries
+  (функція (fact entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      (#d1:1 (111 (prune-entry fact (100 entries)) (prune-all-entries fact (011 entries)))))))
+      ((атом? entries)  (як-є ()))
+      (так (сполучити (prune-entry fact (перше entries)) (prune-all-entries fact (решта entries)))))))
 
-(0011 unsupported-facts
-  (0010 (entries)
-    (110
+(визначити unsupported-facts
+  (функція (entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((0100 (010 (justifications-of (100 entries)))) (111 (fact-of (100 entries)) (unsupported-facts (011 entries))))
-      ((010 (justifications-of (100 entries)))  (111 (fact-of (100 entries)) (unsupported-facts (011 entries))))
-      (#d1:1 (unsupported-facts (011 entries))))))
+      ((атом? entries)  (як-є ()))
+      ((хибне? (атом? (обґрунтування-від (перше entries)))) (сполучити (факт-від (перше entries)) (unsupported-facts (решта entries))))
+      ((атом? (обґрунтування-від (перше entries)))  (сполучити (факт-від (перше entries)) (unsupported-facts (решта entries))))
+      (так (unsupported-facts (решта entries))))))
 
-(0011 drop-unsupported
-  (0010 (entries)
-    (110
+(визначити drop-unsupported
+  (функція (entries)
+    (за-умовою
       
-      ((010 entries)  (001 ()))
-      ((0100 (010 (justifications-of (100 entries)))) (drop-unsupported (011 entries)))
-      ((010 (justifications-of (100 entries)))  (drop-unsupported (011 entries)))
-      (#d1:1 (111 (100 entries) (drop-unsupported (011 entries)))))))
+      ((атом? entries)  (як-є ()))
+      ((хибне? (атом? (обґрунтування-від (перше entries)))) (відкинути-непідтримані (решта entries)))
+      ((атом? (обґрунтування-від (перше entries)))  (відкинути-непідтримані (решта entries)))
+      (так (сполучити (перше entries) (відкинути-непідтримані (решта entries)))))))
 
 ; Removes `fact`'s own entry outright, then prunes every justification-set
 ; elsewhere that named it. Any entry left with zero justification-sets has
 ; lost all support and cascade-retracts in turn — recursively, the same way
 ; Step 5b's single-justification cascade works, just checking "any
 ; justification left" instead of "any support left".
-(0011 retract-fact-jtms
-  (0010 (fact entries)
-    ((0010 (pruned) ((0010 (newly-unsupported remaining) (110
+(визначити retract-fact-jtms
+  (функція (fact entries)
+    ((функція (pruned) ((функція (newly-unsupported remaining) (за-умовою
           
-          ((010 newly-unsupported)  remaining)
-          (#d1:1 (retract-facts-jtms newly-unsupported remaining)))) (unsupported-facts pruned) (drop-unsupported pruned))) (prune-all-entries fact (remove-entry-jtms fact entries)))))
+          ((атом? newly-unsupported)  remaining)
+          (так (відкликати-факти-система-обґрунтувань newly-unsupported remaining)))) (unsupported-facts pruned) (відкинути-непідтримані pruned))) (prune-all-entries fact (видалити-запис-система-обґрунтувань fact entries)))))
 
-(0011 retract-facts-jtms
-  (0010 (facts entries)
-    (110
+(визначити retract-facts-jtms
+  (функція (facts entries)
+    (за-умовою
       
-      ((010 facts)  entries)
-      (#d1:1 (retract-facts-jtms (011 facts) (retract-fact-jtms (100 facts) entries))))))
+      ((атом? facts)  entries)
+      (так (відкликати-факти-система-обґрунтувань (решта facts) (відкликати-факт-система-обґрунтувань (перше facts) entries))))))
 
-(0011 retract-fact-jtms!
+(визначити retract-fact-jtms!
   (make-macro
-    (0010 (fact)
-      (1110 (001 def) (001 *jtms-memory*) (1110 (001 retract-fact-jtms) fact (001 *jtms-memory*))))))
+    (функція (fact)
+      (список (як-є def) (як-є *jtms-memory*) (список (як-є відкликати-факт-система-обґрунтувань) fact (як-є *jtms-memory*))))))
 
 ; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
 ; forward-only `(pattern template)` shape, matched against exactly one
@@ -871,14 +871,14 @@
 ; ersetzt weder die 2-Element-Regel-Schicht aus Schritt 1-5a noch bindet
 ; sie sich in die Truth-Maintenance-Schichten aus Schritt 5b/5c ein — die
 ; bleiben genau, wie sie waren.
-(0011 match-condition-against-facts
-  (0010 (condition facts bindings)
-    (110
+(визначити match-condition-against-facts
+  (функція (condition facts bindings)
+    (за-умовою
       
-      ((010 facts)  (001 ()))
-      (#d1:1 ((0010 (s) (110
-             ((failed-subst? s) (match-condition-against-facts condition (011 facts) bindings))
-             (#d1:1 (111 s (match-condition-against-facts condition (011 facts) bindings))))) (101010000 condition (100 facts) bindings))))))
+      ((атом? facts)  (як-є ()))
+      (так ((функція (s) (за-умовою
+             ((failed-subst? s) (зіставити-умову-із-набором-фактів condition (решта facts) bindings))
+             (так (сполучити s (зіставити-умову-із-набором-фактів condition (решта facts) bindings))))) (уніфікувати condition (перше facts) bindings))))))
 
 ; Step 7: negation as failure — `(not (pattern))` conditions. This is the
 ; capability `lib/clips-import.lisp`'s Step 5 flagged as missing and worked
@@ -909,23 +909,23 @@
 ; läuft unverändert durch.
 ; A negated condition is an exact D1 predicate, never the list (1).
 ; Both tags are atoms; a compound head is not a negation operator.
-(0011 condition-is-not?
-  (0010 (condition)
-    (110
-      ((010 condition) #d1:0)
-      ((0100 (010 (100 condition))) #d1:0)
-      ((101 (100 condition) (001 not?)) #d1:1)
-      ((101 (100 condition) (001 not)) #d1:1)
-      (#d1:1 #d1:0))))
+(визначити condition-is-not?
+  (функція (condition)
+    (за-умовою
+      ((атом? condition) ні)
+      ((хибне? (атом? (перше condition))) ні)
+      ((тотожне? (перше condition) (як-є not?)) так)
+      ((тотожне? (перше condition) (як-є not)) так)
+      (так ні))))
 
 ; Negation-as-failure: keep the original substitution only if no fact
 ; matches the inner condition; a match must produce zero candidates.
-(0011 match-negated-condition
-  (0010 (inner-pattern facts bindings)
-    (110
-      ((010 (match-condition-against-facts inner-pattern facts bindings))
-       (1110 bindings))
-      (#d1:1 (001 ())))))
+(визначити match-negated-condition
+  (функція (inner-pattern facts bindings)
+    (за-умовою
+      ((атом? (зіставити-умову-із-набором-фактів inner-pattern facts bindings))
+       (список bindings))
+      (так (як-є ())))))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
 ; before fixing (not guessed), the same way Step 7's `not` gap was found:
@@ -960,22 +960,22 @@
 ; (Rekursion über `match-one-condition`, sodass eine Alternative selbst
 ; ein `not` oder verschachteltes `or` sein kann), gesammelt werden alle
 ; Substitutionen, die irgendeine davon liefert.
-(0011 condition-is-or?
-  (0010 (condition)
-    (110
+(визначити condition-is-or?
+  (функція (condition)
+    (за-умовою
       
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (101 (100 condition) (001 or)))
-      ((010 (100 condition))  (101 (100 condition) (001 or)))
+      ((атом? condition)  (як-є ()))
+      ((хибне? (атом? (перше condition))) (тотожне? (перше condition) (як-є or)))
+      ((атом? (перше condition))  (тотожне? (перше condition) (як-є or)))
       )))
 
-(0011 match-or-condition
-  (0010 (alternatives facts bindings)
-    (110
+(визначити match-or-condition
+  (функція (alternatives facts bindings)
+    (за-умовою
       
-      ((010 alternatives)  (001 ()))
-      (#d1:1 (1111 (match-one-condition (100 alternatives) facts bindings)
-                  (match-or-condition (011 alternatives) facts bindings))))))
+      ((атом? alternatives)  (як-є ()))
+      (так (приєднати (зіставити-одну-умову-правила (перше alternatives) facts bindings)
+                  (зіставити-умову-логічного-або (решта alternatives) facts bindings))))))
 
 ; Step 11: `(and (pattern1) (pattern2) ...)` conditions — the same bug
 ; class again, found the same way: `(or (and (cat ?x) (small ?x)) (dog
@@ -1015,18 +1015,18 @@
 ; Unterbedingungen identisch fädelt; nicht neu implementiert, nur unter
 ; dem Namen wiederverwendet, den die Dispatch nach Bedingungsposition
 ; erwartet.
-(0011 condition-is-and?
-  (0010 (condition)
-    (110
+(визначити condition-is-and?
+  (функція (condition)
+    (за-умовою
       
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (101 (100 condition) (001 and)))
-      ((010 (100 condition))  (101 (100 condition) (001 and)))
+      ((атом? condition)  (як-є ()))
+      ((хибне? (атом? (перше condition))) (тотожне? (перше condition) (як-є and)))
+      ((атом? (перше condition))  (тотожне? (перше condition) (як-є and)))
       )))
 
-(0011 match-and-condition
-  (0010 (sub-conditions facts bindings)
-    (match-conditions sub-conditions facts bindings)))
+(визначити match-and-condition
+  (функція (sub-conditions facts bindings)
+    (зіставити-умови sub-conditions facts bindings)))
 
 ; Step 12: `(test <expression>)` conditions — the fourth time this same
 ; bug class turned up (verified before fixing, same as `not`/`or`/`and`):
@@ -1071,18 +1071,18 @@
 ; Ausdruck als gewöhnlichen my-lisp-Code aus. Ein wahrer Wert gelingt mit
 ; unveränderter `subst` (keine neuen Bindungen, wie bei `not`); alles
 ; andere schlägt fehl.
-(0011 condition-is-test?
-  (0010 (condition)
-    (110
+(визначити condition-is-test?
+  (функція (condition)
+    (за-умовою
       
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (101 (100 condition) (001 test)))
-      ((010 (100 condition))  (101 (100 condition) (001 test)))
+      ((атом? condition)  (як-є ()))
+      ((хибне? (атом? (перше condition))) (тотожне? (перше condition) (як-є test)))
+      ((атом? (перше condition))  (тотожне? (перше condition) (як-є test)))
       )))
 
-(0011 match-test-condition
-  (0010 (expression bindings)
-    (нехай-похідне ((result (0001 (101101001 expression bindings))))
+(визначити match-test-condition
+  (функція (expression bindings)
+    (нехай-похідне ((result (обчислити (застосувати-підстановка expression bindings))))
       ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
       ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
       ; treated a falsy test as a success. A test condition is falsy when its
@@ -1090,15 +1090,15 @@
       ; keep this faithful for structural truth values too (t, (structural-
       ; relation same/distinct)) without feeding comparison results to cond
       ; as numeric clauses.
-      (110
-        ((unify-equal? result (001 ())) 
-         (001 ()))
-        ((0100 (unify-equal? result (001 ())))
-         (110
+      (за-умовою
+        ((unify-equal? result (як-є ())) 
+         (як-є ()))
+        ((хибне? (unify-equal? result (як-є ())))
+         (за-умовою
            ((unify-equal? result 0) 
-            (001 ()))
-           ((0100 (unify-equal? result 0))
-            (1110 bindings))))))))
+            (як-є ()))
+           ((хибне? (unify-equal? result 0))
+            (список bindings))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
 ; bug as `not`/`or`/`and`/`test` (Steps 7/10-12), found by importing a
@@ -1192,59 +1192,59 @@
 ; sein), dann verlangen, dass jede davon auch `rest-conditions` erfüllt
 ; (`match-conditions`, derselbe Konjunktions-Fädler wie überall hier) —
 ; scheitert auch nur ein Kandidat, scheitert das ganze `forall`.
-(0011 condition-is-exists?
-  (0010 (condition)
-    (110
+(визначити condition-is-exists?
+  (функція (condition)
+    (за-умовою
       
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (101 (100 condition) (001 exists)))
-      ((010 (100 condition))  (101 (100 condition) (001 exists)))
+      ((атом? condition)  (як-є ()))
+      ((хибне? (атом? (перше condition))) (тотожне? (перше condition) (як-є exists)))
+      ((атом? (перше condition))  (тотожне? (перше condition) (як-є exists)))
       )))
 
-(0011 match-exists-condition
-  (0010 (sub-conditions facts bindings)
-    (110
+(визначити match-exists-condition
+  (функція (sub-conditions facts bindings)
+    (за-умовою
       
-      ((010 (match-conditions sub-conditions facts bindings))  (001 ()))
-      (#d1:1 (1110 bindings)))))
+      ((атом? (зіставити-умови sub-conditions facts bindings))  (як-є ()))
+      (так (список bindings)))))
 
-(0011 condition-is-forall?
-  (0010 (condition)
-    (110
+(визначити condition-is-forall?
+  (функція (condition)
+    (за-умовою
       
-      ((010 condition)  (001 ()))
-      ((0100 (010 (100 condition))) (101 (100 condition) (001 forall)))
-      ((010 (100 condition))  (101 (100 condition) (001 forall)))
+      ((атом? condition)  (як-є ()))
+      ((хибне? (атом? (перше condition))) (тотожне? (перше condition) (як-є forall)))
+      ((атом? (перше condition))  (тотожне? (перше condition) (як-є forall)))
       )))
 
-(0011 forall-every-candidate-satisfies?
-  (0010 (candidates rest-conditions facts)
-    (110
+(визначити forall-every-candidate-satisfies?
+  (функція (candidates rest-conditions facts)
+    (за-умовою
       
-      ((010 candidates)  #d1:1)
+      ((атом? candidates)  так)
       
-      ((010 (match-conditions rest-conditions facts (100 candidates)))  (001 ()))
-      (#d1:1 (forall-every-candidate-satisfies? (011 candidates) rest-conditions facts)))))
+      ((атом? (зіставити-умови rest-conditions facts (перше candidates)))  (як-є ()))
+      (так (кожен-кандидат-задовольняє-умову? (решта candidates) rest-conditions facts)))))
 
-(0011 match-forall-condition
-  (0010 (first-condition rest-conditions facts bindings)
-    (110
-      ((forall-every-candidate-satisfies?
-         (match-one-condition first-condition facts bindings) rest-conditions facts)
-       (1110 bindings))
+(визначити match-forall-condition
+  (функція (first-condition rest-conditions facts bindings)
+    (за-умовою
+      ((кожен-кандидат-задовольняє-умову?
+         (зіставити-одну-умову-правила first-condition facts bindings) rest-conditions facts)
+       (список bindings))
       )))
 
-(0011 match-one-condition
-  (0010 (condition facts bindings)
-    (110
-      ((condition-is-not? condition) (match-negated-condition (1001 condition) facts bindings))
-      ((condition-is-or? condition) (match-or-condition (011 condition) facts bindings))
-      ((condition-is-and? condition) (match-and-condition (011 condition) facts bindings))
-      ((condition-is-test? condition) (match-test-condition (1001 condition) bindings))
-      ((condition-is-exists? condition) (match-exists-condition (011 condition) facts bindings))
-      ((condition-is-forall? condition)
-       (match-forall-condition (1001 condition) (011 (011 condition)) facts bindings))
-      (#d1:1 (match-condition-against-facts condition facts bindings)))))
+(визначити match-one-condition
+  (функція (condition facts bindings)
+    (за-умовою
+      ((умова-має-форму-заперечення? condition) (зіставити-заперечену-умову-правила (друге condition) facts bindings))
+      ((умова-має-форму-диз'юнкції? condition) (зіставити-умову-логічного-або (решта condition) facts bindings))
+      ((умова-має-форму-кон'юнкції? condition) (зіставити-умову-кон'юнкції (решта condition) facts bindings))
+      ((умова-має-тестову-форму? condition) (зіставити-тестову-умову (друге condition) bindings))
+      ((умова-має-квантор-існування? condition) (зіставити-умову-існування (решта condition) facts bindings))
+      ((умова-має-загальний-квантор? condition)
+       (зіставити-умову-для-всіх-кандидатів (друге condition) (решта (решта condition)) facts bindings))
+      (так (зіставити-умову-із-набором-фактів condition facts bindings)))))
 
 ; Built directly on `thread-conjunction` (lib/unify.lisp) — the same
 ; conjunction-walking kernel `lib/reason.lisp`'s `prove-goals` threads a
@@ -1252,106 +1252,160 @@
 ; `match-one-condition`: for one condition, either match it against every
 ; fact in the explicit list, or (for `not`) check that its inner pattern
 ; matches none of them — rather than recursively searching further rules.
-(0011 match-conditions
-  (0010 (conditions facts bindings)
+(визначити match-conditions
+  (функція (conditions facts bindings)
     (thread-conjunction conditions bindings
-      (0010 (condition s) (match-one-condition condition facts s)))))
+      (функція (condition s) (зіставити-одну-умову-правила condition facts s)))))
 
-(0011 map-apply-head
-  (0010 (head substs)
-    (110
+(визначити map-apply-head
+  (функція (head substs)
+    (за-умовою
       
-      ((010 substs)  (001 ()))
-      (#d1:1 (111 (101101001 head (100 substs)) (map-apply-head head (011 substs)))))))
+      ((атом? substs)  (як-є ()))
+      (так (сполучити (застосувати-підстановка head (перше substs)) (map-apply-head head (решта substs)))))))
 
 ; Fires a `(head cond1 cond2 ...)` rule against a fact list: finds every
 ; substitution satisfying the whole condition conjunction, and returns one
 ; derived `head` per substitution found (possibly the same fact more than
 ; once, if several substitutions produce it — downstream dedup via
 ; `append-new`/`member?` already handles that, same as Steps 1-5).
-(0011 fire-rule-multi
-  (0010 (rule facts)
-    (110
-      ((010 (011 rule))
-       (map-apply-head (100 rule) (1110 (001 ()))))
-      ((0100 (010 (011 rule)))
-       (map-apply-head (100 rule) (match-conditions (011 rule) facts (001 ())))))))
+(визначити fire-rule-multi
+  (функція (rule facts)
+    (за-умовою
+      ((атом? (решта rule))
+       (map-apply-head (перше rule) (список (як-є ()))))
+      ((хибне? (атом? (решта rule)))
+       (map-apply-head (перше rule) (зіставити-умови (решта rule) facts (як-є ())))))))
 
-(0011 fire-rules-multi
-  (0010 (rules facts)
-    (110
-      ((010 rules) (001 ()))
-      ((0100 (010 rules))
-       (1111 (fire-rule-multi (100 rules) facts)
-                 (fire-rules-multi (011 rules) facts))))))
+(визначити fire-rules-multi
+  (функція (rules facts)
+    (за-умовою
+      ((атом? rules) (як-є ()))
+      ((хибне? (атом? rules))
+       (приєднати (застосувати-одне-правило-до-всіх-збігів (перше rules) facts)
+                 (застосувати-правила-до-всіх-збігів (решта rules) facts))))))
 
-(0011 run-multi
-  (0010 (rules facts)
-    ((0010 (merged) (110
-        ((unify-equal? (000000 merged) (000000 facts))  facts)
-        (#d1:1 (run-multi rules merged)))) (append-new (fire-rules-multi rules facts) facts))))
+(визначити run-multi
+  (функція (rules facts)
+    ((функція (merged) (за-умовою
+        ((unify-equal? (довжина merged) (довжина facts))  facts)
+        (так (run-multi rules merged)))) (додати-нові (застосувати-правила-до-всіх-збігів rules facts) facts))))
 
 ; D9 Ukrainian projections of existing TMS/JTMS language-owned functions.
 ; Source: lib/forward.lisp and knowledge/d9-final-semantic-fill-v1.json.
 ; Preserve exact ratified coordinates; no new D9 native opcode.
 ; D9:010100111
-(0011 відкликати-факт-tms retract-fact-tms)
+(визначити відкликати-факт-tms відкликати-факт-система-істини)
 ; D9:001101100
-(0011 відкликати-факти-tms retract-facts-tms)
+(визначити відкликати-факти-tms відкликати-факти-система-істини)
 ; D9:001100010
-(0011 додати-нові-записи-jtms add-new-entries-jtms)
+(визначити додати-нові-записи-jtms додати-нові-записи-система-обґрунтувань)
 ; D9:010101101
-(0011 непідтримані-факти unsupported-facts)
+(визначити непідтримані-факти unsupported-facts)
 ; D9:010111001
-(0011 відкликати-факт-jtms retract-fact-jtms)
+(визначити відкликати-факт-jtms відкликати-факт-система-обґрунтувань)
 ; D9:001011010
-(0011 відкликати-факти-jtms retract-facts-jtms)
+(визначити відкликати-факти-jtms відкликати-факти-система-обґрунтувань)
 ; D9:010000011
-(0011 обрізати-запис prune-entry)
+(визначити обрізати-запис prune-entry)
 ; D9:010100011
-(0011 обрізати-всі-записи prune-all-entries)
+(визначити обрізати-всі-записи prune-all-entries)
 
 ; Відповідність точним D9-словам визначена в lib/domains/d9.lisp.
 ; Ці проєкції повторно використовують наявні SENS-функції, не створюють
 ; механізмів Zig/Rust або права на прямий виклик D9-бітів.
 ; Прямий висновок — SENS DEFINE поверх уже наявних функцій
 ; D9:101001000
-(0011 запустити-правило fire-rule)
+(визначити запустити-правило fire-rule)
 ; D9:010110000
-(0011 запустити-правило-на-факти fire-rule-on-facts)
+(визначити запустити-правило-на-факти fire-rule-on-facts)
 ; D9:001011101
-(0011 запустити-правило-на-робоча-пам'ять fire-rule-on-working-memory)
+(визначити запустити-правило-на-робоча-пам'ять fire-rule-on-working-memory)
 ; D9:010101010
-(0011 запустити-правила-на-факти fire-rules-on-facts)
+(визначити запустити-правила-на-факти fire-rules-on-facts)
 ; D9:001001100
-(0011 запустити-правила-на-робоча-пам'ять fire-rules-on-working-memory)
+(визначити запустити-правила-на-робоча-пам'ять fire-rules-on-working-memory)
 ; D9:010001011
-(0011 запустити run)
+(визначити запустити run)
 ; D9:001001000
-(0011 відкликати-факт retract-fact)
+(визначити відкликати-факт retract-fact)
 ; TMS — SENS DEFINE поверх уже наявних функцій
 ; D9:010011111
-(0011 запустити-правило-tms fire-rule-tms)
+(визначити запустити-правило-tms запустити-правило-система-істини)
 ; D9:010110101
-(0011 запустити-правило-на-факти-tms fire-rule-on-facts-tms)
+(визначити запустити-правило-на-факти-tms запустити-правило-на-факти-система-істини)
 ; D9:101000010
-(0011 запустити-правила-на-факти-tms fire-rules-on-facts-tms)
+(визначити запустити-правила-на-факти-tms запустити-правила-на-факти-система-істини)
 ; D9:001101000
-(0011 запустити-tms run-tms)
+(визначити запустити-tms run-tms)
 ; JTMS — SENS DEFINE поверх уже наявних функцій
 ; D9:101001001
-(0011 запустити-правило-jtms fire-rule-jtms)
+(визначити запустити-правило-jtms запустити-правило-система-обґрунтувань)
 ; D9:001111110
-(0011 запустити-правило-на-факти-jtms fire-rule-on-facts-jtms)
+(визначити запустити-правило-на-факти-jtms запустити-правило-на-факти-система-обґрунтувань)
 ; D9:001001110
-(0011 запустити-правила-на-факти-jtms fire-rules-on-facts-jtms)
+(визначити запустити-правила-на-факти-jtms запустити-правила-на-факти-система-обґрунтувань)
 ; D9:001101110
-(0011 видалити-запис-jtms remove-entry-jtms)
+(визначити видалити-запис-jtms видалити-запис-система-обґрунтувань)
 ; D9:010000100
-(0011 запустити-jtms run-jtms)
+(визначити запустити-jtms run-jtms)
 ; D9:010000101
-(0011 запустити-правило-jtms-мульти fire-rule-jtms-multi)
+(визначити запустити-правило-jtms-мульти запустити-правило-система-обґрунтувань-мульти)
 ; D9:001001111
-(0011 запустити-правила-jtms-мульти fire-rules-jtms-multi)
+(визначити запустити-правила-jtms-мульти запустити-правила-система-обґрунтувань-мульти)
 ; D9:010110010
-(0011 запустити-jtms-мульти run-jtms-multi)
+(визначити запустити-jtms-мульти run-jtms-multi)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити додати-обґрунтування add-justification)
+(визначити додати-нові-записи-система-обґрунтувань add-new-entries-jtms)
+(визначити додати-нові-обґрунтований add-new-justified)
+(визначити додати-нові append-new)
+(визначити умова-має-форму-кон'юнкції? condition-is-and?)
+(визначити умова-має-квантор-існування? condition-is-exists?)
+(визначити умова-має-загальний-квантор? condition-is-forall?)
+(визначити умова-має-форму-заперечення? condition-is-not?)
+(визначити умова-має-форму-диз'юнкції? condition-is-or?)
+(визначити умова-має-тестову-форму? condition-is-test?)
+(визначити залежні-від dependents-of)
+(визначити відкинути-непідтримані drop-unsupported)
+(визначити факт-від fact-of)
+(визначити запустити-правило-система-обґрунтувань fire-rule-jtms)
+(визначити запустити-правило-система-обґрунтувань-мульти fire-rule-jtms-multi)
+(визначити застосувати-одне-правило-до-всіх-збігів fire-rule-multi)
+(визначити запустити-правило-на-факти-система-обґрунтувань fire-rule-on-facts-jtms)
+(визначити запустити-правило-на-факти-система-істини fire-rule-on-facts-tms)
+(визначити запустити-правило-система-істини fire-rule-tms)
+(визначити запустити-правила-система-обґрунтувань-мульти fire-rules-jtms-multi)
+(визначити застосувати-правила-до-всіх-збігів fire-rules-multi)
+(визначити запустити-правила-на-факти-система-обґрунтувань fire-rules-on-facts-jtms)
+(визначити запустити-правила-на-факти-система-істини fire-rules-on-facts-tms)
+(визначити кожен-кандидат-задовольняє-умову? forall-every-candidate-satisfies?)
+(визначити система-обґрунтувань-створити-стан jtms-make-state)
+(визначити отримати-підстановку-зі-стану-система-обґрунтувань jtms-state-subst)
+(визначити отримати-використані-факти-зі-стану-система-обґрунтувань jtms-state-used)
+(визначити обґрунтування-від justifications-of)
+(визначити обґрунтований-член? justified-member?)
+(визначити створити-обґрунтований make-justified)
+(визначити мапа-факт-від map-fact-of)
+(визначити зіставити-умову-кон'юнкції match-and-condition)
+(визначити зіставити-умову-із-набором-фактів match-condition-against-facts)
+(визначити зіставити-умови match-conditions)
+(визначити зіставити-умови-система-обґрунтувань match-conditions-jtms)
+(визначити зіставити-умову-існування match-exists-condition)
+(визначити зіставити-умову-для-всіх-кандидатів match-forall-condition)
+(визначити зіставити-заперечену-умову-правила match-negated-condition)
+(визначити зіставити-одну-умову-правила match-one-condition)
+(визначити зіставити-одну-умову-правила-система-обґрунтувань match-one-condition-jtms)
+(визначити зіставити-умову-логічного-або match-or-condition)
+(визначити зіставити-диз'юнкцію-з-фактами-система-обґрунтувань match-or-condition-jtms)
+(визначити зіставити-звичайну-умову-з-фактами-система-обґрунтувань match-plain-condition-jtms)
+(визначити зіставити-тестову-умову match-test-condition)
+(визначити обрізати-обґрунтування prune-justifications)
+(визначити видалити-запис-система-обґрунтувань remove-entry-jtms)
+(визначити видалити-обґрунтований remove-justified)
+(визначити відкликати-факт-система-обґрунтувань retract-fact-jtms)
+(визначити відкликати-факт-система-істини retract-fact-tms)
+(визначити відкликати-факти-система-обґрунтувань retract-facts-jtms)
+(визначити відкликати-факти-система-істини retract-facts-tms)
+(визначити підтримки-від supports-of)

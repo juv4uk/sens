@@ -22,7 +22,7 @@
 
 (визначити empty-world
   (функція ()
-    (make-world (як-є ()) (як-є ()) (як-є ()))))
+    (створити-світ (як-є ()) (як-є ()) (як-є ()))))
 
 (визначити world?
   (функція (value)
@@ -52,85 +52,85 @@
 ;; Ereignisse haben absichtlich dieselbe Form wie in `lib/knowledge.lisp`.
 (визначити world-record
   (функція (world event)
-    (make-world world
-                (111 event (world-journal world))
-                (world-metadata world))))
+    (створити-світ world
+                (сполучити event (світ-журнал world))
+                (світ-метадані world))))
 
 (визначити world-tell
   (функція (world module-name clause)
-    (world-record world (1110 (001 tell) module-name clause))))
+    (світ-запис world (список (як-є tell) module-name clause))))
 
 (визначити world-retract
   (функція (world module-name clause)
-    (world-record world (1110 (001 retract) module-name clause))))
+    (світ-запис world (список (як-є retract) module-name clause))))
 
 ; D6 FILTER (101001) has no admitted evaluator mechanism. Select a
 ; module's event records directly by exact D3 atom/pair and D3 EQ on the
 ; atomic module-name field, preserving the original event order.
 (визначити внутрішні-події-модуля
   (функція (module-name events)
-    (110
-      ((0101 events) (001 ()))
-      ((010 events) (001 ()))
-      ((101 (1001 (100 events)) module-name)
-       (111 (100 events) (внутрішні-події-модуля module-name (011 events))))
-      (#d1:1 (внутрішні-події-модуля module-name (011 events))))))
+    (за-умовою
+      ((порожній? events) (як-є ()))
+      ((атом? events) (як-є ()))
+      ((тотожне? (друге (перше events)) module-name)
+       (сполучити (перше events) (внутрішні-події-модуля module-name (решта events))))
+      (так (внутрішні-події-модуля module-name (решта events))))))
 
 (визначити world-module-events
   (функція (world module-name)
-    (внутрішні-події-модуля module-name (world-journal world))))
+    (внутрішні-події-модуля module-name (світ-журнал world))))
 
 ; Retract the first structurally equal clause; both atoms and nested
 ; pairs are compared with the locally-derived exact D1 equality law.
 (визначити world-remove-first
   (функція (value values)
-    (110
-      ((0101 values) (001 ()))
-      ((010 values) (001 ()))
-      ((внутрішня-рівність-версій value (100 values)) (011 values))
-      (#d1:1 (111 (100 values) (world-remove-first value (011 values)))))))
+    (за-умовою
+      ((порожній? values) (як-є ()))
+      ((атом? values) (як-є ()))
+      ((внутрішня-рівність-версій value (перше values)) (решта values))
+      (так (сполучити (перше values) (world-remove-first value (решта values)))))))
 
 (визначити world-apply-event
   (функція (clauses event)
-    (110
-      ((101 (100 event) (001 tell)) (111 (10011 event) clauses))
-      ((101 (100 event) (001 retract))
-       (world-remove-first (10011 event) clauses))
-      (#d1:1 clauses))))
+    (за-умовою
+      ((тотожне? (перше event) (як-є tell)) (сполучити (третє event) clauses))
+      ((тотожне? (перше event) (як-є retract))
+       (world-remove-first (третє event) clauses))
+      (так clauses))))
 
 ; D4 NOT of the D3 ATOM predicate: a module is known only when its
 ; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
 (визначити world-module-known?
   (функція (world module-name)
-    (0100 (010 (world-module-events world module-name)))))
+    (хибне? (атом? (світ-модуль-події world module-name)))))
 
 (визначити world-module-missing?
   (функція (world module-name)
-    (010 (world-module-events world module-name))))
+    (атом? (світ-модуль-події world module-name))))
 
 ; D5 REVERSE and D6 REDUCE are ratified names but cannot be presumed
 ; callable; derive the chronological event fold from D3 list structure.
 (визначити внутрішній-зворот-подій
   (функція (events acc)
-    (110
-      ((0101 events) acc)
-      ((010 events) acc)
-      (#d1:1 (внутрішній-зворот-подій (011 events) (111 (100 events) acc))))))
+    (за-умовою
+      ((порожній? events) acc)
+      ((атом? events) acc)
+      (так (внутрішній-зворот-подій (решта events) (сполучити (перше events) acc))))))
 
 (визначити внутрішнє-згортання-подій
   (функція (events clauses)
-    (110
-      ((0101 events) clauses)
-      ((010 events) clauses)
-      (#d1:1 (внутрішнє-згортання-подій
-                  (011 events)
-                  (world-apply-event clauses (100 events)))))))
+    (за-умовою
+      ((порожній? events) clauses)
+      ((атом? events) clauses)
+      (так (внутрішнє-згортання-подій
+                  (решта events)
+                  (world-apply-event clauses (перше events)))))))
 
 (визначити world-clauses
   (функція (world module-name)
     (внутрішнє-згортання-подій
-      (внутрішній-зворот-подій (world-module-events world module-name) (001 ()))
-      (001 ()))))
+      (внутрішній-зворот-подій (світ-модуль-події world module-name) (як-є ()))
+      (як-є ()))))
 
 ;; Pure reasoning adapters: the answer depends only on the explicit world,
 ;; module, and goal. They deliberately do not inspect `*knowledge-journal*`.
@@ -140,19 +140,19 @@
 ;; Welt, dem Modul und dem Ziel ab; `*knowledge-journal*` wird nicht gelesen.
 (визначити reason-in-world
   (функція (world module-name goal)
-    (110
-      ((world-module-known? world module-name)
-       (101001110 goal (world-clauses world module-name)))
+    (за-умовою
+      ((світ-модуль-відомий? world module-name)
+       (міркувати goal (світ-клаузи world module-name)))
       ((world-module-missing? world module-name)
-       (001 Module-not-found)))))
+       (як-є Module-not-found)))))
 
 (визначити forward-in-world
   (функція (world module-name)
-    (110
-      ((world-module-known? world module-name)
-       (run-multi (world-clauses world module-name) (001 ())))
+    (за-умовою
+      ((світ-модуль-відомий? world module-name)
+       (run-multi (світ-клаузи world module-name) (як-є ())))
       ((world-module-missing? world module-name)
-       (001 Module-not-found)))))
+       (як-є Module-not-found)))))
 
 ; Derived D1 symbol predicate for world module names. This is a Lisp
 ; law over ATOM/NULL/EQ and exact D8 write+string-to-symbol mechanisms,
@@ -160,42 +160,42 @@
 (визначити внутрішній-символ?
   (функція (value)
     (за-умовою
-      ((порожній? value) (порожній? (як-є (0))))
-      ((хибне? (атом? value)) (порожній? (як-є (0))))
+      ((порожній? value) (порожній? (як-є (ні))))
+      ((хибне? (атом? value)) (порожній? (як-є (ні))))
       ((тотожне? value (текст-у-символ (значення-у-текст value))) (порожній? (як-є ())))
-      (так (порожній? (як-є (0)))))))
+      (так (порожній? (як-є (ні)))))))
 
 (визначити advice-decision-in-world
   (функція (world module-name clause)
-    (110
-      ((0100 (внутрішній-символ? module-name))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clause)))
-      ((101 (knowledge-clause-valid? clause) (001 ()))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
-      (#d1:1
-       (нехай-похідне ((opposite (opposite-knowledge-head (100 clause))))
-         (нехай-похідне ((proofs (110
-                         ((world-module-known? world module-name)
+    (за-умовою
+      ((хибне? (внутрішній-символ? module-name))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clause)))
+      ((тотожне? (knowledge-clause-valid? clause) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clause)))
+      (так
+       (нехай-похідне ((opposite (opposite-knowledge-head (перше clause))))
+         (нехай-похідне ((proofs (за-умовою
+                         ((світ-модуль-відомий? world module-name)
                           (reason-in-world world module-name opposite))
                          )))
-           (110
+           (за-умовою
              
-             ((010 proofs)  (1110 (001 accepted)
-                    (1110 (001 module) module-name)
-                    (1110 (001 knowledge) clause)))
-             (#d1:1
-              (1110 (001 conflict)
-                    (1110 (001 new) clause)
-                    (1110 (001 existing) opposite)
-                    (1110 (001 proof) (100 proofs)))))))))))
+             ((атом? proofs)  (список (як-є accepted)
+                    (список (як-є module) module-name)
+                    (список (як-є knowledge) clause)))
+             (так
+              (список (як-є conflict)
+                    (список (як-є new) clause)
+                    (список (як-є existing) opposite)
+                    (список (як-є proof) (перше proofs)))))))))))
 
 (визначити advise-world
   (функція (world module-name clause)
     (нехай-похідне ((decision (advice-decision-in-world world module-name clause)))
-      (110
-        ((101 (100 decision) (001 accepted))
-         (1110 decision (world-tell world module-name clause)))
-        (#d1:1 (1110 decision world))))))
+      (за-умовою
+        ((тотожне? (перше decision) (як-є accepted))
+         (список decision (світ-повідомити world module-name clause)))
+        (так (список decision world))))))
 
 ;; The batch form creates exactly one child world after the whole proposed
 ;; knowledge set validates and proves conflict-free. Proposed rules can support
@@ -206,39 +206,39 @@
 ;; bei einem Fehler kann kein Präfix des Pakets durchsickern.
 (визначити advice-all-decision-in-world
   (функція (world module-name clauses)
-    (110
-      ((0100 (внутрішній-символ? module-name))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clauses)))
+    (за-умовою
+      ((хибне? (внутрішній-символ? module-name))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clauses)))
       
-      ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (001 ()))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (001 ()))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
-      (#d1:1
-       (нехай-похідне ((existing (110
-                         ((world-module-known? world module-name)
-                          (world-clauses world module-name))
+      ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
+      ((тотожне? (knowledge-proper-list? clauses) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
+      ((тотожне? (knowledge-clauses-valid? clauses) (як-є ()))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clauses)))
+      (так
+       (нехай-похідне ((existing (за-умовою
+                         ((світ-модуль-відомий? world module-name)
+                          (світ-клаузи world module-name))
                          )))
          (нехай-похідне ((conflict (advice-batch-conflict
-                           clauses clauses (1111 clauses existing))))
-           (110
+                           clauses clauses (приєднати clauses existing))))
+           (за-умовою
              
-             ((010 conflict)  (1110 (001 accepted)
-                    (1110 (001 module) module-name)
-                    (1110 (001 knowledge) clauses)))
-             (#d1:1
-              (1110 (001 conflict)
-                    (1110 (001 new) (100 conflict))
-                    (1110 (001 existing) (1001 conflict))
-                    (1110 (001 proof) (10011 conflict)))))))))))
+             ((атом? conflict)  (список (як-є accepted)
+                    (список (як-є module) module-name)
+                    (список (як-є knowledge) clauses)))
+             (так
+              (список (як-є conflict)
+                    (список (як-є new) (перше conflict))
+                    (список (як-є existing) (друге conflict))
+                    (список (як-є proof) (третє conflict)))))))))))
 
 (визначити world-tell-all
   (функція (world module-name clauses)
-    (make-world world
-                (1111 (clauses->tell-events module-name clauses)
-                        (world-journal world))
-                (world-metadata world))))
+    (створити-світ world
+                (приєднати (clauses->tell-events module-name clauses)
+                        (світ-журнал world))
+                (світ-метадані world))))
 
 ;; Once `lib/world.lisp` is loaded, the legacy `defmodule` surface becomes a
 ;; thin compatibility wrapper over the explicit World transition. It rebuilds
@@ -261,12 +261,12 @@
 ;; übrigen globalen Writer kann diese Hülle entfallen.
 (визначити defmodule
   (make-macro
-    (0010 (name rules)
-  (1110 (001 def) (001 *knowledge-journal*)
-        (1110 (001 world-journal)
-              (1110 (001 world-tell-all)
-                    (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-                    (1110 (001 quote) name)
+    (функція (name rules)
+  (список (як-є def) (як-є *knowledge-journal*)
+        (список (як-є світ-журнал)
+              (список (як-є світ-повідомити-всі)
+                    (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
+                    (список (як-є quote) name)
                     rules))))))
 
 ;; The other two legacy journal macros follow the same bridge. `tell-knowledge`
@@ -288,35 +288,35 @@
 ;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
 (визначити tell-knowledge
   (make-macro
-    (0010 (module-name rules)
-  (1110 (001 cond)
-        (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
-              (1110 (001 quote) (001 Conflict-detected)))
-        (1110 (001 #d1:1)
-              (1110 (001 def) (001 *knowledge-journal*)
-                    (1110 (001 world-journal)
-                          (1110 (001 world-tell-all)
-                                (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-                                (1110 (001 quote) module-name)
+    (функція (module-name rules)
+  (список (як-є cond)
+        (список (список (як-є check-conflict) (список (як-є quote) module-name) rules)
+              (список (як-є quote) (як-є Conflict-detected)))
+        (список (як-є так)
+              (список (як-є def) (як-є *knowledge-journal*)
+                    (список (як-є світ-журнал)
+                          (список (як-є світ-повідомити-всі)
+                                (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
+                                (список (як-є quote) module-name)
                                 rules))))))))
 
 (визначити retract-knowledge
   (make-macro
-    (0010 (module-name clause)
-  (1110 (001 def) (001 *knowledge-journal*)
-        (1110 (001 world-journal)
-              (1110 (001 world-retract)
-                    (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-                    (1110 (001 quote) module-name)
+    (функція (module-name clause)
+  (список (як-є def) (як-є *knowledge-journal*)
+        (список (як-є світ-журнал)
+              (список (як-є world-retract)
+                    (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
+                    (список (як-є quote) module-name)
                     clause))))))
 
 (визначити advise-all-world
   (функція (world module-name clauses)
     (нехай-похідне ((decision (advice-all-decision-in-world world module-name clauses)))
-      (110
-        ((101 (100 decision) (001 accepted))
-         (1110 decision (world-tell-all world module-name clauses)))
-        (#d1:1 (1110 decision world))))))
+      (за-умовою
+        ((тотожне? (перше decision) (як-є accepted))
+         (список decision (світ-повідомити-всі world module-name clauses)))
+        (так (список decision world))))))
 
 ;; A guarded compatibility transition must be evaluated exactly once. `let`
 ;; cannot hold it because `def` would then update a disposable lambda frame, so
@@ -335,52 +335,52 @@
 ; голий #d1:1 тут передчасно обчислюється, а тоді стає числом 1 при reparse.
 (визначити внутрішній-прийнято-перехід?
   (функція (transition)
-    (101 (1000 transition) (001 accepted))))
+    (тотожне? (перше-першого transition) (як-є accepted))))
 
 ; Тільки похідний SENS-селектор. D3:100 CAR витягає рішення
 ; з (decision world); числовий 00000101 не може бути викликом CAR.
 (визначити внутрішнє-рішення-переходу
   (функція (transition)
-    (100 transition)))
+    (перше transition)))
 
 (визначити legacy-world-transition-expansion
   (функція (transition)
-    (1110 (001 second)
-          (1110 (001 list)
-                (1110 (001 def) (001 *legacy-knowledge-transition*) transition)
-                (1110 (001 cond)
-                      (1110
+    (список (як-є second)
+          (список (як-є list)
+                (список (як-є def) (як-є *legacy-knowledge-transition*) transition)
+                (список (як-є cond)
+                      (список
                         ; Generate a SENS-defined D1 predicate call. Its body
                         ; performs exact D3 EQ / D4 CAAR, not a legacy W8
                         ; equality producing a structural list (1).
-                        (1110 (001 внутрішній-прийнято-перехід?)
-                              (001 *legacy-knowledge-transition*))
-                        (1110 (001 second)
-                              (1110 (001 list)
-                                    (1110 (001 def) (001 *knowledge-journal*)
-                                          (1110 (001 world-journal)
-                                                (1110 (001 second)
-                                                      (001 *legacy-knowledge-transition*))))
-                                    (1110 (001 внутрішнє-рішення-переходу) (001 *legacy-knowledge-transition*)))))
-                      (1110 (001 #d1:1)
-                            (1110 (001 внутрішнє-рішення-переходу) (001 *legacy-knowledge-transition*))))))))
+                        (список (як-є внутрішній-прийнято-перехід?)
+                              (як-є *legacy-knowledge-transition*))
+                        (список (як-є second)
+                              (список (як-є list)
+                                    (список (як-є def) (як-є *knowledge-journal*)
+                                          (список (як-є світ-журнал)
+                                                (список (як-є second)
+                                                      (як-є *legacy-knowledge-transition*))))
+                                    (список (як-є внутрішнє-рішення-переходу) (як-є *legacy-knowledge-transition*)))))
+                      (список (як-є так)
+                            (список (як-є внутрішнє-рішення-переходу) (як-є *legacy-knowledge-transition*))))))))
 
 (визначити advise
   (make-macro
-    (0010 (module-name clause)
+    (функція (module-name clause)
   (legacy-world-transition-expansion
-    (1110 (001 advise-world)
-          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-          (1110 (001 quote) module-name)
+    (список (як-є advise-world)
+          (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
+          (список (як-є quote) module-name)
           clause)))))
 
 (визначити advise-all
   (make-macro
-    (0010 (module-name clauses)
+    (функція (module-name clauses)
   (legacy-world-transition-expansion
-    (1110 (001 advise-all-world)
-          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
-          (1110 (001 quote) module-name)
+    (список (як-є порадити-всі-світ)
+          (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
+          (список (як-є quote) module-name)
           clauses)))))
 
 ;; World interchange reuses the established, versioned `my-lisp-knowledge`
@@ -395,69 +395,69 @@
 ;; delegiert den einzigen Übergang an `advise-all-world`; Daten werden nie evaluiert.
 (визначити make-world-knowledge-package
   (функція (world module-name)
-    (110
-      ((0100 (внутрішній-символ? module-name))
-       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
+    (за-умовою
+      ((хибне? (внутрішній-символ? module-name))
+       (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) module-name)))
       ((world-module-missing? world module-name)
-       (1110 (001 rejected) (1110 (001 reason) (001 Module-not-found)) (1110 (001 input) module-name)))
-      ((world-module-known? world module-name)
-       (нехай-похідне ((clauses (world-clauses world module-name)))
-         (110
+       (список (як-є rejected) (список (як-є reason) (як-є Module-not-found)) (список (як-є input) module-name)))
+      ((світ-модуль-відомий? world module-name)
+       (нехай-похідне ((clauses (світ-клаузи world module-name)))
+         (за-умовою
            
-           ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-           (#d1:1 (make-knowledge-package module-name clauses))))))))
+           ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
+           (так (make-knowledge-package module-name clauses))))))))
 
 ; The knowledge package version is structured data (0 1), not an
 ; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
 (визначити внутрішня-рівність-версій
   (функція (left right)
-    (110
-      ((0101 left) (0101 right))
-      ((0101 right) (0101 (001 (0))))
-      ((010 left)
-       (110
-         ((010 right) (101 left right))
-         (#d1:1 (0101 (001 (0))))))
-      ((010 right) (0101 (001 (0))))
-      ((внутрішня-рівність-версій (100 left) (100 right))
-       (внутрішня-рівність-версій (011 left) (011 right)))
-      (#d1:1 (0101 (001 (0)))))))
+    (за-умовою
+      ((порожній? left) (порожній? right))
+      ((порожній? right) (порожній? (як-є (ні))))
+      ((атом? left)
+       (за-умовою
+         ((атом? right) (тотожне? left right))
+         (так (порожній? (як-є (ні))))))
+      ((атом? right) (порожній? (як-є (ні))))
+      ((внутрішня-рівність-версій (перше left) (перше right))
+       (внутрішня-рівність-версій (решта left) (решта right)))
+      (так (порожній? (як-є (ні)))))))
 
 (визначити import-knowledge-package-world
   (функція (world package)
-    (110
+    (за-умовою
       
-      ((010 package)  (1110 (1110 (001 rejected)
-                   (1110 (001 reason) (001 invalid-package))
-                   (1110 (001 input) package))
+      ((атом? package)  (список (список (як-є rejected)
+                   (список (як-є reason) (як-є invalid-package))
+                   (список (як-є input) package))
              world))
-      ((0100 (knowledge-proper-list? package))
-       (1110 (1110 (001 rejected)
-                   (1110 (001 reason) (001 invalid-package))
-                   (1110 (001 input) package))
+      ((хибне? (knowledge-proper-list? package))
+       (список (список (як-є rejected)
+                   (список (як-є reason) (як-є invalid-package))
+                   (список (як-є input) package))
              world))
-      ((0100 (knowledge-package-entries-valid? package))
-       (1110 (1110 (001 rejected)
-                   (1110 (001 reason) (001 invalid-package))
-                   (1110 (001 input) package))
+      ((хибне? (knowledge-package-entries-valid? package))
+       (список (список (як-є rejected)
+                   (список (як-є reason) (як-є invalid-package))
+                   (список (як-є input) package))
              world))
-      ((101 (knowledge-package-field (001 format) package) (001 my-lisp-knowledge))
-       (110
-         ((внутрішня-рівність-версій (knowledge-package-field (001 version) package)
+      ((тотожне? (knowledge-package-field (як-є format) package) (як-є my-lisp-knowledge))
+       (за-умовою
+         ((внутрішня-рівність-версій (knowledge-package-field (як-є version) package)
                   *knowledge-package-version*)
-          (advise-all-world world
-                            (knowledge-package-field (001 module) package)
-                            (knowledge-package-field (001 clauses) package)))
-         (#d1:1
-          (1110 (1110 (001 rejected)
-                      (1110 (001 reason) (001 unsupported-version))
-                      (1110 (001 version)
-                            (knowledge-package-field (001 version) package)))
+          (порадити-всі-світ world
+                            (knowledge-package-field (як-є module) package)
+                            (knowledge-package-field (як-є clauses) package)))
+         (так
+          (список (список (як-є rejected)
+                      (список (як-є reason) (як-є unsupported-version))
+                      (список (як-є version)
+                            (knowledge-package-field (як-є version) package)))
                 world))))
-      (#d1:1
-       (1110 (1110 (001 rejected)
-                   (1110 (001 reason) (001 invalid-package))
-                   (1110 (001 input) package))
+      (так
+       (список (список (як-є rejected)
+                   (список (як-є reason) (як-є invalid-package))
+                   (список (як-є input) package))
              world)))))
 
 ;; Package import completes the writer migration. The legacy macro delegates
@@ -471,10 +471,10 @@
 ;; ein akzeptiertes Ergebnis bindet das Journal neu.
 (визначити import-knowledge-package
   (make-macro
-    (0010 (package)
+    (функція (package)
   (legacy-world-transition-expansion
-    (1110 (001 import-knowledge-package-world)
-          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+    (список (як-є import-knowledge-package-world)
+          (список (як-є створити-світ) (як-є ()) (як-є *knowledge-journal*) (як-є ()))
           package)))))
 
 ;; History navigation is derived from parent links, not timestamps. Depth is
@@ -493,65 +493,65 @@
 ;; `World-not-ancestor`, bis ein ausdrückliches Merge-Gesetz definiert ist.
 (визначити world-depth
   (функція (world)
-    (110
+    (за-умовою
       
-      ((010 (world-parent world))  0)
-      (#d1:1 (01010 1 (world-depth (world-parent world)))))))
+      ((атом? (світ-батько world))  0)
+      (так (додати 1 (світ-глибина (світ-батько world)))))))
 
 (визначити world-at-depth-from
   (функція (world current-depth target-depth)
-    (110
-      ((101 current-depth target-depth)  world)
-      (#d1:1 (001 World-not-found))
+    (за-умовою
+      ((тотожне? current-depth target-depth)  world)
+      (так (як-є World-not-found))
       
-      ((010 (world-parent world))  (001 World-not-found))
-      (#d1:1 (world-at-depth-from (world-parent world)
-                              (01011 current-depth 1)
+      ((атом? (світ-батько world))  (як-є World-not-found))
+      (так (отримати-світ-на-заданій-глибині-від-поточного (світ-батько world)
+                              (відняти current-depth 1)
                               target-depth)))))
 
 (визначити world-at-depth
   (функція (world target-depth)
-    (110
-      ((11010 target-depth 0)  (001 World-not-found))
-      (#d1:1 (world-at-depth-from world (world-depth world) target-depth)))))
+    (за-умовою
+      ((менше? target-depth 0)  (як-є World-not-found))
+      (так (отримати-світ-на-заданій-глибині-від-поточного world (світ-глибина world) target-depth)))))
 
 (визначити world-journal-prefix
   (функція (journal old-journal)
-    (110
-      ((внутрішня-рівність-версій journal old-journal) (001 ()))
+    (за-умовою
+      ((внутрішня-рівність-версій journal old-journal) (як-є ()))
       
-      ((010 journal)  (001 World-not-ancestor))
-      (#d1:1
-       (нехай-похідне ((rest (world-journal-prefix (011 journal) old-journal)))
-         (110
-           ((world-not-ancestor? rest) rest)
-           (#d1:1 (111 (100 journal) rest))))))))
+      ((атом? journal)  (як-є World-not-ancestor))
+      (так
+       (нехай-похідне ((rest (world-journal-prefix (решта journal) old-journal)))
+         (за-умовою
+           ((цей-світ-не-є-предком-іншого? rest) rest)
+           (так (сполучити (перше journal) rest))))))))
 
 (визначити world-not-ancestor?
   (функція (value)
-    (110
+    (за-умовою
       
-      ((010 value)  (101 value (001 World-not-ancestor)))
+      ((атом? value)  (тотожне? value (як-є World-not-ancestor)))
       )))
 
 (визначити world-diff
   (функція (from to)
-    (110
-      ((внутрішня-рівність-версій from to) (001 ()))
+    (за-умовою
+      ((внутрішня-рівність-версій from to) (як-є ()))
       
-      ((010 (world-parent to))  (001 World-not-ancestor))
-      (#d1:1
-       (нехай-похідне ((earlier (world-diff from (world-parent to))))
-         (110
-           ((world-not-ancestor? earlier) earlier)
-           (#d1:1
+      ((атом? (світ-батько to))  (як-є World-not-ancestor))
+      (так
+       (нехай-похідне ((earlier (світ-різниця from (світ-батько to))))
+         (за-умовою
+           ((цей-світ-не-є-предком-іншого? earlier) earlier)
+           (так
             (нехай-похідне ((transition
                     (world-journal-prefix
-                      (world-journal to)
-                      (world-journal (world-parent to)))))
-              (110
-                ((world-not-ancestor? transition) transition)
-                (#d1:1 (1111 earlier transition)))))))))))
+                      (світ-журнал to)
+                      (світ-журнал (світ-батько to)))))
+              (за-умовою
+                ((цей-світ-не-є-предком-іншого? transition) transition)
+                (так (приєднати earlier transition)))))))))))
 
 ;; Branch comparison stops before merge policy. First align both histories to
 ;; the same absolute depth, then walk parents together until their values are
@@ -570,61 +570,61 @@
 ;; semantische Welt. `world-branch-diff` zeigt Basis und beide Zeitdeltas.
 (визначити world-climb-to-depth
   (функція (world current-depth target-depth)
-    (110
-      ((101 current-depth target-depth)  world)
-      (#d1:1 (world-climb-to-depth (world-parent world)
-                               (01011 current-depth 1)
+    (за-умовою
+      ((тотожне? current-depth target-depth)  world)
+      (так (піднятись-ланцюгом-світу-до-заданої-глибини (світ-батько world)
+                               (відняти current-depth 1)
                                target-depth)))))
 
 (визначити world-common-ancestor-aligned
   (функція (left right)
-    (110
+    (за-умовою
       ((внутрішня-рівність-версій left right) left)
-      ((010 left) (001 World-no-common-ancestor))
-      ((010 right) (001 World-no-common-ancestor))
-      ((010 (world-parent left)) (001 World-no-common-ancestor))
-      ((010 (world-parent right)) (001 World-no-common-ancestor))
-      (#d1:1
-       (world-common-ancestor-aligned (world-parent left)
-                                      (world-parent right))))))
+      ((атом? left) (як-є World-no-common-ancestor))
+      ((атом? right) (як-є World-no-common-ancestor))
+      ((атом? (світ-батько left)) (як-є World-no-common-ancestor))
+      ((атом? (світ-батько right)) (як-є World-no-common-ancestor))
+      (так
+       (вирівняний-спільний-предок-двох-світів (світ-батько left)
+                                      (світ-батько right))))))
 
 ; An ancestor is found by walking immutable parents. Its SENS verdict
 ; is a D1 predicate, never a numeric depth or an historical W8 EQ value.
 (визначити внутрішній-предок-світу?
   (функція (candidate world)
-    (110
-      ((010 world) #d1:0)
-      ((внутрішня-рівність-версій candidate world) #d1:1)
-      ((010 (world-parent world)) #d1:0)
-      (#d1:1
-       (внутрішній-предок-світу? candidate (world-parent world))))))
+    (за-умовою
+      ((атом? world) ні)
+      ((внутрішня-рівність-версій candidate world) так)
+      ((атом? (світ-батько world)) ні)
+      (так
+       (внутрішній-предок-світу? candidate (світ-батько world))))))
 
 ; The first ancestor of left occurring in right's ancestry is the deepest
 ; common world. This is pure SENS structure, independent of D24+ arithmetic.
 (визначити world-common-ancestor
   (функція (left right)
-    (110
-      ((010 left) (001 World-no-common-ancestor))
-      ((010 right) (001 World-no-common-ancestor))
+    (за-умовою
+      ((атом? left) (як-є World-no-common-ancestor))
+      ((атом? right) (як-є World-no-common-ancestor))
       ((внутрішній-предок-світу? left right) left)
-      ((010 (world-parent left)) (001 World-no-common-ancestor))
-      (#d1:1 (world-common-ancestor (world-parent left) right)))))
+      ((атом? (світ-батько left)) (як-є World-no-common-ancestor))
+      (так (світ-спільний-предок (світ-батько left) right)))))
 
 (визначити world-no-common-ancestor?
   (функція (value)
-    (110
-      ((010 value) (101 value (001 World-no-common-ancestor)))
-      (#d1:1 #d1:0))))
+    (за-умовою
+      ((атом? value) (тотожне? value (як-є World-no-common-ancestor)))
+      (так ні))))
 
 (визначити world-branch-diff
   (функція (left right)
-    (нехай-похідне ((base (world-common-ancestor left right)))
-      (110
-        ((world-no-common-ancestor? base) base)
-        (#d1:1
-         (1110 (1110 (001 base) base)
-               (1110 (001 left) (world-diff base left))
-               (1110 (001 right) (world-diff base right))))))))
+    (нехай-похідне ((base (світ-спільний-предок left right)))
+      (за-умовою
+        ((світи-не-мають-спільного-предка? base) base)
+        (так
+         (список (список (як-є base) base)
+               (список (як-є left) (світ-різниця base left))
+               (список (як-є right) (світ-різниця base right))))))))
 
 ;; Content identity starts with a canonical address, not a premature hash
 ;; primitive. `write-to-string` is deterministic and read-back-safe, so equal
@@ -654,9 +654,32 @@
 (визначити world-address-content
   (функція (world)
     (список (як-є world-history)
-            (world-journal world)
-            (world-metadata world))))
+            (світ-журнал world)
+            (світ-метадані world))))
 
 (визначити world-content-address
   (функція (world)
-    (knowledge-content-address (world-address-content world))))
+    (знання-вміст-адреса (світ-адреса-вміст world))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити порадити-всі-світ advise-all-world)
+(визначити знання-вміст-адреса knowledge-content-address)
+(визначити створити-світ make-world)
+(визначити світ-адреса-вміст world-address-content)
+(визначити отримати-світ-на-заданій-глибині-від-поточного world-at-depth-from)
+(визначити світ-клаузи world-clauses)
+(визначити піднятись-ланцюгом-світу-до-заданої-глибини world-climb-to-depth)
+(визначити світ-спільний-предок world-common-ancestor)
+(визначити вирівняний-спільний-предок-двох-світів world-common-ancestor-aligned)
+(визначити світ-глибина world-depth)
+(визначити світ-різниця world-diff)
+(визначити світ-журнал world-journal)
+(визначити світ-метадані world-metadata)
+(визначити світ-модуль-події world-module-events)
+(визначити світ-модуль-відомий? world-module-known?)
+(визначити світи-не-мають-спільного-предка? world-no-common-ancestor?)
+(визначити цей-світ-не-є-предком-іншого? world-not-ancestor?)
+(визначити світ-батько world-parent)
+(визначити світ-запис world-record)
+(визначити світ-повідомити world-tell)
+(визначити світ-повідомити-всі world-tell-all)

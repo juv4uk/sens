@@ -118,13 +118,13 @@
 ; Konvertierung dann einfach nachschlägt — kein `def`-basierter globaler
 ; Zustand nötig. Ein Term, dessen Kopf kein bekannter Template-Name ist,
 ; bleibt unverändert.
-(0011 clips-deftemplate-form?
-  (0010 (form)
-    (110
-      ((010 form) #d1:0)
-      ((0100 (010 (100 form))) #d1:0)
-      ((101 (100 form) (001 deftemplate)) #d1:1)
-      (#d1:1 #d1:0))))
+(визначити clips-deftemplate-form?
+  (функція (form)
+    (за-умовою
+      ((атом? form) ні)
+      ((хибне? (атом? (перше form))) ні)
+      ((тотожне? (перше form) (як-є deftemplate)) так)
+      (так ні))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
 ; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
@@ -154,81 +154,81 @@
 ; zu kürzen (oder den ganzen Namen, falls kein `::` vorkommt) lässt nackte
 ; und qualifizierte Namen einander finden, ohne `defmodule` wirklich
 ; abzubilden.
-(0011 clips-string-empty? (0010 (s) (101 s "")))
+(визначити clips-string-empty? (функція (s) (тотожне? s "")))
 
 ; This is a D1 predicate, not a partial search returning NIL on failure.
 ; D3 COND can inspect only the exact one-bit results; empty/short strings,
 ; mismatched first character and mismatched second character are all D1:NO.
-(0011 clips-string-starts-with-double-colon?
-  (0010 (s)
-    (110
-      ((clips-string-empty? s) #d1:0)
-      ((clips-string-empty? (110011101 s)) #d1:0)
-      ((101 (110101011 s) ":") (101 (110101011 (110011101 s)) ":"))
-      (#d1:1 #d1:0))))
+(визначити clips-string-starts-with-double-colon?
+  (функція (s)
+    (за-умовою
+      ((clips-string-empty? s) ні)
+      ((clips-string-empty? (рядок-решта s)) ні)
+      ((тотожне? (рядок-перший s) ":") (тотожне? (рядок-перший (рядок-решта s)) ":"))
+      (так ні))))
 
-(0011 clips-string-after-last-double-colon
-  (0010 (s)
-    (110
-      ((clips-string-empty? s) (001 ()))
+(визначити clips-string-after-last-double-colon
+  (функція (s)
+    (за-умовою
+      ((clips-string-empty? s) (як-є ()))
       ((clips-string-starts-with-double-colon? s)
-       ((0010 (after)
-          (110
-            ((101 after (001 ())) (110011101 (110011101 s)))
-            (#d1:1 after)))
-        (clips-string-after-last-double-colon (110011101 (110011101 s)))))
-      (#d1:1 (clips-string-after-last-double-colon (110011101 s))))))
+       ((функція (after)
+          (за-умовою
+            ((тотожне? after (як-є ())) (рядок-решта (рядок-решта s)))
+            (так after)))
+        (clips-string-after-last-double-colon (рядок-решта (рядок-решта s)))))
+      (так (clips-string-after-last-double-colon (рядок-решта s))))))
 
-(0011 clips-strip-module-prefix
-  (0010 (sym)
-    (110
-      ((110101100 sym)
-       ((0010 (after)
-          (110
-            ((101 after (001 ())) sym)
-            (#d1:1 (11101101 after))))
-        (clips-string-after-last-double-colon (11101110 sym))))
-      (#d1:1 sym))))
+(визначити clips-strip-module-prefix
+  (функція (sym)
+    (за-умовою
+      ((символ? sym)
+       ((функція (after)
+          (за-умовою
+            ((тотожне? after (як-є ())) sym)
+            (так (текст-у-символ after))))
+        (clips-string-after-last-double-colon (символ-у-текст sym))))
+      (так sym))))
 
-(0011 clips-deftemplate-name (0010 (form) (clips-strip-module-prefix (1001 form))))
+(визначити clips-deftemplate-name (функція (form) (прибрати-префікс-модуля-кліпс (друге form))))
 
-(0011 clips-slot-name (0010 (slot-form) (1001 slot-form)))
+(визначити clips-slot-name (функція (slot-form) (друге slot-form)))
 
-(0011 clips-slot-names
-  (0010 (slot-forms)
-    (110
+(визначити clips-slot-names
+  (функція (slot-forms)
+    (за-умовою
       
-      ((010 slot-forms)  (001 ()))
-      (#d1:1 (111 (clips-slot-name (100 slot-forms)) (clips-slot-names (011 slot-forms)))))))
+      ((атом? slot-forms)  (як-є ()))
+      (так (сполучити (кліпс-слот-ім'я (перше slot-forms)) (кліпс-слот-імена (решта slot-forms)))))))
 
-(0011 clips-deftemplate-slots
-  (0010 (form)
-    (clips-slot-names (0111 form))))
+(визначити clips-deftemplate-slots
+  (функція (form)
+    (кліпс-слот-імена (решта-решти form))))
 
-(0011 clips-templates-from-forms
-  (0010 (forms)
-    (110
+(визначити clips-templates-from-forms
+  (функція (forms)
+    (за-умовою
       
-      ((010 forms)  (001 ()))
-      ((clips-deftemplate-form? (100 forms))
-       (111 (111 (clips-deftemplate-name (100 forms)) (clips-deftemplate-slots (100 forms)))
-             (clips-templates-from-forms (011 forms))))
-      (#d1:1 (clips-templates-from-forms (011 forms))))))
+      ((атом? forms)  (як-є ()))
+      ((кліпс-визначити-шаблон-форма? (перше forms))
+       (сполучити (сполучити (кліпс-визначити-шаблон-ім'я (перше forms)) (кліпс-визначити-шаблон-слоти (перше forms)))
+             (кліпс-шаблони-з-форми (решта forms))))
+      (так (кліпс-шаблони-з-форми (решта forms))))))
 
 ; A template registry is a list of (atomic-name . slot-order) pairs.
 ; This derived lookup needs no D5 ASSOC / D8 EQUAL callable admission.
 ; Empty or malformed entries fail closed as data (), not D1:NO.
-(0011 clips-template-slot-order
-  (0010 (name templates)
-    (110
-      ((0100 (010 name)) (001 ()))
-      ((010 templates) (001 ()))
-      ((010 (100 templates))
-       (clips-template-slot-order name (011 templates)))
-      ((0100 (010 (100 (100 templates))))
-       (clips-template-slot-order name (011 templates)))
-      ((101 name (100 (100 templates))) (011 (100 templates)))
-      (#d1:1 (clips-template-slot-order name (011 templates))))))
+(визначити clips-template-slot-order
+  (функція (name templates)
+    (за-умовою
+      ((хибне? (атом? name)) (як-є ()))
+      ((атом? templates) (як-є ()))
+      ((атом? (перше templates))
+       (кліпс-шаблон-слот-порядок name (решта templates)))
+      ((хибне? (атом? (перше (перше templates))))
+       (кліпс-шаблон-слот-порядок name (решта templates)))
+      ((тотожне? name (перше (перше templates))) (решта (перше templates)))
+      (так (кліпс-шаблон-слот-порядок name (решта templates))))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
 ; `(precursors)` in wine-external.clp's `ask-a-question` rule — CLIPS reads
@@ -256,12 +256,12 @@
 ; derselben "überspringen statt abstürzen"-Politik wie die eigene
 ; atom-Prüfung von clips-lookup-slot-value weiter unten, statt `second`
 ; auf einer Liste ohne cdr abstürzen zu lassen.
-(0011 clips-slot-value-of
-  (0010 (slot-form)
-    (110
+(визначити clips-slot-value-of
+  (функція (slot-form)
+    (за-умовою
       
-      ((010 (011 slot-form))  (001 ()))
-      (#d1:1 (1001 slot-form)))))
+      ((атом? (решта slot-form))  (як-є ()))
+      (так (друге slot-form)))))
 
 ; Точний D3 пошук атомарної назви CLIPS-слота.
 ; Коректний слот = (назва значення). У разі складеної назви
@@ -269,23 +269,23 @@
 ; Не можна відкидати кожний непорожній список: порівняння
 ; тоді недосяжне. Рядки в clips-symbol-starts-with-? і далі D8 EQUAL.
 
-(0011 clips-lookup-slot-value
-  (0010 (slot-name slot-forms)
-    (110
+(визначити clips-lookup-slot-value
+  (функція (slot-name slot-forms)
+    (за-умовою
       
-      ((010 slot-forms)  (001 ()))
-      ((010 (100 slot-forms))  (clips-lookup-slot-value slot-name (011 slot-forms)))
-      ((0100 (010 (100 (100 slot-forms)))) (clips-lookup-slot-value slot-name (011 slot-forms)))
-      ((101 slot-name (100 (100 slot-forms))) (clips-slot-value-of (100 slot-forms)))
-      (#d1:1 (clips-lookup-slot-value slot-name (011 slot-forms))))))
+      ((атом? slot-forms)  (як-є ()))
+      ((атом? (перше slot-forms))  (знайти-значення-слота-кліпс slot-name (решта slot-forms)))
+      ((хибне? (атом? (перше (перше slot-forms)))) (знайти-значення-слота-кліпс slot-name (решта slot-forms)))
+      ((тотожне? slot-name (перше (перше slot-forms))) (clips-slot-value-of (перше slot-forms)))
+      (так (знайти-значення-слота-кліпс slot-name (решта slot-forms))))))
 
-(0011 clips-positional-args
-  (0010 (slot-order slot-forms)
-    (110
+(визначити clips-positional-args
+  (функція (slot-order slot-forms)
+    (за-умовою
       
-      ((010 slot-order)  (001 ()))
-      (#d1:1 (111 (clips-lookup-slot-value (100 slot-order) slot-forms)
-                (clips-positional-args (011 slot-order) slot-forms))))))
+      ((атом? slot-order)  (як-є ()))
+      (так (сполучити (знайти-значення-слота-кліпс (перше slot-order) slot-forms)
+                (позиційні-аргументи-кліпс (решта slot-order) slot-forms))))))
 
 ; Step 13 (fold-in fix, verified before writing — same discipline as
 ; lib/forward.lisp's Steps 10-12): originally recursed through a `not`
@@ -321,45 +321,45 @@
 ; Lehre, die Schritte 10-12 in `lib/forward.lisp` wiederholt lernten: `not`,
 ; `or` und `and` brauchen alle explizite Rekursion, nicht nur `not`.
 ; CLIPS `not` wird zur Sprachnegation `not?` (Prädikat mit `?`, #1444).
-(0011 clips-convert-template
-  (0010 (term templates)
-    (110
+(визначити clips-convert-template
+  (функція (term templates)
+    (за-умовою
       
-      ((010 term)  term)
-      ((0100 (010 (100 term))) (110
-         ((101 (100 term) (001 not)) (1110 (001 not?) (clips-convert-template (1001 term) templates)))
-         ((101 (100 term) (001 or)) (111 (001 or) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         (#d1:1 ((0010 (slot-order)
-              (110
+      ((атом? term)  term)
+      ((хибне? (атом? (перше term))) (за-умовою
+         ((тотожне? (перше term) (як-є not)) (список (як-є not?) (кліпс-перетворити-шаблон (друге term) templates)))
+         ((тотожне? (перше term) (як-є or)) (сполучити (як-є or) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є and)) (сполучити (як-є and) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є exists)) (сполучити (як-є exists) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є forall)) (сполучити (як-є forall) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         (так ((функція (slot-order)
+              (за-умовою
                 
-                ((010 slot-order)  term)
-                (#d1:1 (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
-      ((010 (100 term))  (110
-         ((101 (100 term) (001 not)) (1110 (001 not?) (clips-convert-template (1001 term) templates)))
-         ((101 (100 term) (001 or)) (111 (001 or) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 and)) (111 (001 and) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 exists)) (111 (001 exists) (clips-convert-template-list (011 term) templates)))
-         ((101 (100 term) (001 forall)) (111 (001 forall) (clips-convert-template-list (011 term) templates)))
-         (#d1:1 ((0010 (slot-order)
-              (110
+                ((атом? slot-order)  term)
+                (так (сполучити (перше term) (позиційні-аргументи-кліпс slot-order (решта term)))))) (кліпс-шаблон-слот-порядок (прибрати-префікс-модуля-кліпс (перше term)) templates)))))
+      ((атом? (перше term))  (за-умовою
+         ((тотожне? (перше term) (як-є not)) (список (як-є not?) (кліпс-перетворити-шаблон (друге term) templates)))
+         ((тотожне? (перше term) (як-є or)) (сполучити (як-є or) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є and)) (сполучити (як-є and) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є exists)) (сполучити (як-є exists) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         ((тотожне? (перше term) (як-є forall)) (сполучити (як-є forall) (кліпс-перетворити-шаблон-список (решта term) templates)))
+         (так ((функція (slot-order)
+              (за-умовою
                 
-                ((010 slot-order)  term)
-                (#d1:1 (111 (100 term) (clips-positional-args slot-order (011 term)))))) (clips-template-slot-order (clips-strip-module-prefix (100 term)) templates)))))
-      (#d1:1 term))))
+                ((атом? slot-order)  term)
+                (так (сполучити (перше term) (позиційні-аргументи-кліпс slot-order (решта term)))))) (кліпс-шаблон-слот-порядок (прибрати-префікс-модуля-кліпс (перше term)) templates)))))
+      (так term))))
 
-(0011 clips-convert-template-list
-  (0010 (terms templates)
-    (110
+(визначити clips-convert-template-list
+  (функція (terms templates)
+    (за-умовою
       
-      ((010 terms)  (001 ()))
-      (#d1:1 (111 (clips-convert-template (100 terms) templates)
-                (clips-convert-template-list (011 terms) templates))))))
+      ((атом? terms)  (як-є ()))
+      (так (сполучити (кліпс-перетворити-шаблон (перше terms) templates)
+                (кліпс-перетворити-шаблон-список (решта terms) templates))))))
 
-(0011 clips-fact-clause
-  (0010 (fact) (1110 fact)))
+(визначити clips-fact-clause
+  (функція (fact) (список fact)))
 
 ; `(cons ... (clips-facts->clauses ...))` is not a tail call — for a real
 ; CLIPS file with a big `deffacts` block (`animal-external.clp`'s own
@@ -379,23 +379,23 @@
 ; um einen Frame pro Fakt und lief über. Akkumulator `-onto` + `reverse`,
 ; dieselbe stack-sichere Form, die `lib/core.lisp`s eigene `map`/`filter`
 ; verwenden, hält jeden rekursiven Aufruf hier in Tail-Position.
-(0011 clips-facts->clauses-onto
-  (0010 (facts templates acc)
-    (110
-      ((010 facts) (10100 acc))
-      (#d1:1 (clips-facts->clauses-onto
-           (011 facts) templates
-           (111 (clips-fact-clause (clips-convert-template (100 facts) templates)) acc))))))
+(визначити clips-facts->clauses-onto
+  (функція (facts templates acc)
+    (за-умовою
+      ((атом? facts) (зворот acc))
+      (так (clips-facts->clauses-onto
+           (решта facts) templates
+           (сполучити (кліпс-факт-клауза (кліпс-перетворити-шаблон (перше facts) templates)) acc))))))
 
-(0011 clips-facts->clauses
-  (0010 (facts templates)
-    (clips-facts->clauses-onto facts templates (001 ()))))
+(визначити clips-facts->clauses
+  (функція (facts templates)
+    (clips-facts->clauses-onto facts templates (як-є ()))))
 
 ; `(cddr form)` drops `deffacts` and the deffacts block's own name,
 ; leaving just the fact list.
-(0011 clips-deffacts->clauses
-  (0010 (form templates)
-    (clips-facts->clauses (0111 form) templates)))
+(визначити clips-deffacts->clauses
+  (функція (form templates)
+    (кліпс-факти-клаузи (решта-решти form) templates)))
 
 ; --- Step 2: defrule, with CLIPS's `?x` variable syntax ------------------
 ; CLIPS variables are ordinary symbols to my-lisp's reader (`?x` parses as
@@ -452,52 +452,52 @@
 ; anything that isn't actually a symbol.
 ; Only atoms may be variable symbols. D1:NO is explicit
 ; for pairs and non-symbol atoms; no historical truthy NIL/UNKNOWN.
-(0011 clips-var?
-  (0010 (term)
-    (110
-      ((010 term)
-       (110
-         ((110101100 term) (clips-symbol-starts-with-? term))
-         (#d1:1 #d1:0)))
-      (#d1:1 #d1:0))))
+(визначити clips-var?
+  (функція (term)
+    (за-умовою
+      ((атом? term)
+       (за-умовою
+         ((символ? term) (clips-symbol-starts-with-? term))
+         (так ні)))
+      (так ні))))
 
 ; Both projections are atoms, so admitted D3 EQ suffices;
 ; D8 EQUAL is neither needed nor implicitly admitted here.
-(0011 clips-symbol-starts-with-?
-  (0010 (symbol)
-    (101 (110101011 (11101110 symbol)) (110101011 "?_"))))
+(визначити clips-symbol-starts-with-?
+  (функція (symbol)
+    (тотожне? (рядок-перший (символ-у-текст symbol)) (рядок-перший "?_"))))
 
-(0011 clips-var-term
-  (0010 (symbol)
-    (1110 (001 var) (11101101 (110011101 (11101110 symbol))))))
+(визначити clips-var-term
+  (функція (symbol)
+    (список (як-є var) (текст-у-символ (рядок-решта (символ-у-текст symbol))))))
 
 ; Walks an arbitrary CLIPS term, replacing every `?x`-shaped symbol with
 ; `(var x)` and leaving everything else untouched.
-(0011 clips-convert-vars
-  (0010 (term)
-    (110
-      ((clips-var? term) (clips-var-term term))
+(визначити clips-convert-vars
+  (функція (term)
+    (за-умовою
+      ((кліпс-змінна? term) (кліпс-змінна-терм term))
       
-      ((010 term)  term)
-      (#d1:1 (111 (clips-convert-vars (100 term)) (clips-convert-vars (011 term)))))))
+      ((атом? term)  term)
+      (так (сполучити (кліпс-перетворити-змінні (перше term)) (кліпс-перетворити-змінні (решта term)))))))
 
 ; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
 ; Guards the `=>`-check with `(atom (car body))` first: a condition like
 ; `(planet ?x)` is itself a compound list, and `eq` errors on non-atom
 ; arguments instead of just correctly answering "not the `=>` marker".
-(0011 clips-split-at-arrow
-  (0010 (body)
-    (110
-      ((010 body) (1110 (001 ()) (001 ())))
-      ((010 (100 body))
-       (110
-         ((101 (100 body) (001 =>)) (1110 (001 ()) (011 body)))
-         (#d1:1 ((0010 (rest)
-              (1110 (111 (100 body) (100 rest)) (1001 rest)))
-              (clips-split-at-arrow (011 body))))))
-      (#d1:1 ((0010 (rest)
-           (1110 (111 (100 body) (100 rest)) (1001 rest)))
-           (clips-split-at-arrow (011 body)))))))
+(визначити clips-split-at-arrow
+  (функція (body)
+    (за-умовою
+      ((атом? body) (список (як-є ()) (як-є ())))
+      ((атом? (перше body))
+       (за-умовою
+         ((тотожне? (перше body) (як-є =>)) (список (як-є ()) (решта body)))
+         (так ((функція (rest)
+              (список (сполучити (перше body) (перше rest)) (друге rest)))
+              (розділити-правило-кліпс (решта body))))))
+      (так ((функція (rest)
+           (список (сполучити (перше body) (перше rest)) (друге rest)))
+           (розділити-правило-кліпс (решта body)))))))
 
 ; Step 3: any number of `(assert (...))` forms after `=>`, not just one.
 ; my-lisp's rule format only ever has one head per clause, so N assertions
@@ -535,12 +535,12 @@
 ; dieses Projekt nicht modelliert — dieselbe "überspringen statt
 ; fehlschlagen"-Politik wie bei einer nicht unterstützten Form der obersten
 ; Ebene.
-(0011 clips-assert-form?
-  (0010 (form)
-    (110
-      ((010 form) #d1:0)
-      ((010 (100 form)) (101 (100 form) (001 assert)))
-      (#d1:1 #d1:0))))
+(визначити clips-assert-form?
+  (функція (form)
+    (за-умовою
+      ((атом? form) ні)
+      ((атом? (перше form)) (тотожне? (перше form) (як-є assert)))
+      (так ні))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
 ; rule. Verified before writing this (not guessed): a rule shaped
@@ -601,27 +601,27 @@
 ; über `equal?` verglichen, nicht über Identität adressiert) — eine Regel
 ; mit einem von beiden importiert weiterhin als keine Clauses, statt eine
 ; Semantik zu erraten, die nicht treu dargestellt werden kann.
-(0011 clips-printout-form?
-  (0010 (form)
-    (110
-      ((010 form) #d1:0)
-      ((010 (100 form)) (101 (100 form) (001 printout)))
-      (#d1:1 #d1:0))))
+(визначити clips-printout-form?
+  (функція (form)
+    (за-умовою
+      ((атом? form) ні)
+      ((атом? (перше form)) (тотожне? (перше form) (як-є printout)))
+      (так ні))))
 
-(0011 clips-drop-printouts
-  (0010 (forms)
-    (110
+(визначити clips-drop-printouts
+  (функція (forms)
+    (за-умовою
       
-      ((010 forms)  (001 ()))
-      ((clips-printout-form? (100 forms)) (clips-drop-printouts (011 forms)))
-      (#d1:1 (111 (100 forms) (clips-drop-printouts (011 forms)))))))
+      ((атом? forms)  (як-є ()))
+      ((виведення-кліпс? (перше forms)) (прибрати-виведення-кліпс (решта forms)))
+      (так (сполучити (перше forms) (прибрати-виведення-кліпс (решта forms)))))))
 
-(0011 clips-all-asserts?
-  (0010 (forms)
-    (110
-      ((010 forms) #d1:1)
-      ((clips-assert-form? (100 forms)) (clips-all-asserts? (011 forms)))
-      (#d1:1 #d1:0))))
+(визначити clips-all-asserts?
+  (функція (forms)
+    (за-умовою
+      ((атом? forms) так)
+      ((твердження-кліпс? (перше forms)) (усі-твердження-кліпс? (решта forms)))
+      (так ні))))
 
 ; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
 ; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
@@ -662,20 +662,20 @@
 ; liest *jedes* Fakt-Argument, über alle `assert`-Formen der RHS
 ; `append`-t (eine Regel kann weiterhin mehrere `assert`-Aufrufe haben,
 ; jeder selbst mehrfaktig).
-(0011 clips-assert-conclusions
-  (0010 (forms)
-    (110
+(визначити clips-assert-conclusions
+  (функція (forms)
+    (за-умовою
       
-      ((010 forms)  (001 ()))
-      (#d1:1 (1111 (011 (100 forms)) (clips-assert-conclusions (011 forms)))))))
+      ((атом? forms)  (як-є ()))
+      (так (приєднати (решта (перше forms)) (зібрати-висновки-кліпс (решта forms)))))))
 
-(0011 clips-clauses-for-conclusions
-  (0010 (conclusions conditions)
-    (110
+(визначити clips-clauses-for-conclusions
+  (функція (conclusions conditions)
+    (за-умовою
       
-      ((010 conclusions)  (001 ()))
-      (#d1:1 (111 (111 (clips-convert-vars (100 conclusions)) conditions)
-                (clips-clauses-for-conclusions (011 conclusions) conditions))))))
+      ((атом? conclusions)  (як-є ()))
+      (так (сполучити (сполучити (кліпс-перетворити-змінні (перше conclusions)) conditions)
+                (правила-для-висновків-кліпс (решта conclusions) conditions))))))
 
 ; Step 5 (superseded — history kept, not silently erased): originally
 ; detected CLIPS's `(not (pattern))` conditions and skipped the whole rule,
@@ -775,24 +775,24 @@
 ; optional documentation datum; valid conditions and (declare ...) are pairs.
 ; This is a position-specific SENS structural law, NOT a general stringp.
 ; Do not grant the unadmitted D9:110100110 STRINGP runtime authority.
-(0011 clips-rule-preamble-form?
-  (0010 (form)
-    (110
-      ((010 form)
-       (110
-         ((101 form (001 =>)) #d1:0)
-         (#d1:1 #d1:1)))
-      ((0100 (010 (100 form))) #d1:0)
-      ((101 (100 form) (001 declare)) #d1:1)
-      (#d1:1 #d1:0))))
+(визначити clips-rule-preamble-form?
+  (функція (form)
+    (за-умовою
+      ((атом? form)
+       (за-умовою
+         ((тотожне? form (як-є =>)) ні)
+         (так так)))
+      ((хибне? (атом? (перше form))) ні)
+      ((тотожне? (перше form) (як-є declare)) так)
+      (так ні))))
 
-(0011 clips-strip-rule-preamble
-  (0010 (body)
-    (110
+(визначити clips-strip-rule-preamble
+  (функція (body)
+    (за-умовою
       
-      ((010 body)  body)
-      ((clips-rule-preamble-form? (100 body)) (clips-strip-rule-preamble (011 body)))
-      (#d1:1 body))))
+      ((атом? body)  body)
+      ((преамбула-правила-кліпс? (перше body)) (прибрати-преамбулу-кліпс (решта body)))
+      (так body))))
 
 ; Step 19's `exists`/`forall` guard — skip a whole rule rather than
 ; import one that could never fire — is gone now that `lib/forward.lisp`
@@ -823,26 +823,26 @@
 ; umgewandelt bekommt.
 ; Each intermediate list is computed once by language-owned derived
 ; functions. No ambiguous computed LAMBDA head or unadmitted LET slot.
-(0011 clips-defrule-clauses-from-parts
-  (0010 (conditions relevant templates)
-    (110
-      ((clips-all-asserts? relevant)
-       (clips-clauses-for-conclusions
-         (clips-convert-template-list (clips-assert-conclusions relevant) templates)
+(визначити clips-defrule-clauses-from-parts
+  (функція (conditions relevant templates)
+    (за-умовою
+      ((усі-твердження-кліпс? relevant)
+       (правила-для-висновків-кліпс
+         (кліпс-перетворити-шаблон-список (зібрати-висновки-кліпс relevant) templates)
          conditions))
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
-(0011 clips-defrule-clauses-from-split
-  (0010 (split templates)
+(визначити clips-defrule-clauses-from-split
+  (функція (split templates)
     (clips-defrule-clauses-from-parts
-      (clips-convert-vars (clips-convert-template-list (100 split) templates))
-      (clips-drop-printouts (1001 split))
+      (кліпс-перетворити-змінні (кліпс-перетворити-шаблон-список (перше split) templates))
+      (прибрати-виведення-кліпс (друге split))
       templates)))
 
-(0011 clips-defrule->clauses
-  (0010 (form templates)
+(визначити clips-defrule->clauses
+  (функція (form templates)
     (clips-defrule-clauses-from-split
-      (clips-split-at-arrow (clips-strip-rule-preamble (0111 form)))
+      (розділити-правило-кліпс (прибрати-преамбулу-кліпс (решта-решти form)))
       templates)))
 
 ; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
@@ -850,14 +850,14 @@
 ; partial import of a mixed file still returns whatever it *could*
 ; translate. `deftemplate` itself produces no clauses (it only feeds the
 ; `templates` lookup `clips-import` builds once, up front).
-(0011 clips-form->clauses
-  (0010 (form templates)
-    (110
-      ((010 form) (001 ()))
-      ((0100 (010 (100 form))) (001 ()))
-      ((101 (100 form) (001 deffacts)) (clips-deffacts->clauses form templates))
-      ((101 (100 form) (001 defrule)) (clips-defrule->clauses form templates))
-      (#d1:1 (001 ())))))
+(визначити clips-form->clauses
+  (функція (form templates)
+    (за-умовою
+      ((атом? form) (як-є ()))
+      ((хибне? (атом? (перше form))) (як-є ()))
+      ((тотожне? (перше form) (як-є deffacts)) (кліпс-визначити-факти-клаузи form templates))
+      ((тотожне? (перше form) (як-є defrule)) (кліпс-визначити-правило-клаузи form templates))
+      (так (як-є ())))))
 
 ; Same non-tail-call problem as `clips-facts->clauses` above, one level up:
 ; `(append (clips-form->clauses ...) (clips-import-forms ...))` nests one
@@ -891,28 +891,28 @@
 ; `clips-cons-each-onto` glättet die Clause-Liste einer Form tail-rekursiv
 ; auf den laufenden Akkumulator, sodass weder die Schleife über die Formen
 ; noch die über die Clauses einer Form den nativen Stack wachsen lässt.
-(0011 clips-cons-each-onto
-  (0010 (items acc)
-    (110
+(визначити clips-cons-each-onto
+  (функція (items acc)
+    (за-умовою
       
-      ((010 items)  acc)
-      (#d1:1 (clips-cons-each-onto (011 items) (111 (100 items) acc))))))
+      ((атом? items)  acc)
+      (так (clips-cons-each-onto (решта items) (сполучити (перше items) acc))))))
 
-(0011 clips-import-forms-onto
-  (0010 (forms templates acc)
-    (110
-      ((010 forms) (10100 acc))
-      (#d1:1 (clips-import-forms-onto
-           (011 forms) templates
-           (clips-cons-each-onto (clips-form->clauses (100 forms) templates) acc))))))
+(визначити clips-import-forms-onto
+  (функція (forms templates acc)
+    (за-умовою
+      ((атом? forms) (зворот acc))
+      (так (clips-import-forms-onto
+           (решта forms) templates
+           (clips-cons-each-onto (кліпс-форма-клаузи (перше forms) templates) acc))))))
 
-(0011 clips-import-forms
-  (0010 (forms templates)
-    (clips-import-forms-onto forms templates (001 ()))))
+(визначити clips-import-forms
+  (функція (forms templates)
+    (clips-import-forms-onto forms templates (як-є ()))))
 
-(0011 clips-import
-  (0010 (forms)
-    (clips-import-forms forms (clips-templates-from-forms forms))))
+(визначити clips-import
+  (функція (forms)
+    (кліпс-імпорт-форми forms (кліпс-шаблони-з-форми forms))))
 
 ; Step 4: read a real CLIPS source file off disk and import it — the tool
 ; this whole file exists to build. `read-file` (new Rust primitive, see
@@ -934,54 +934,87 @@
 ; (ebenfalls neu) parst ihn in jede Form der obersten Ebene als Daten — das
 ; Mehrform-Gegenstück zu `read`; `clips-import` erledigt den Rest genau so
 ; wie für ein vom Aufrufer bereitgestelltes Quote-Literal.
-(0011 clips-import-file
-  (0010 (path)
-    (clips-import (110101001 (110110111 path)))))
+(визначити clips-import-file
+  (функція (path)
+    (кліпс-імпорт (читати-всі (читати-файл path)))))
 
 ; D9 exact-width Ukrainian projections of native CLIPS S-expression importer.
 ; Source laws are the Lisp closures above; no new parser, Rust semantics or opcode.
 ; D9:010110100
-(0011 clips-deftemplate-форма? clips-deftemplate-form?)
+(визначити clips-deftemplate-форма? кліпс-визначити-шаблон-форма?)
 ; D9:001110111
-(0011 clips-слот-імена clips-slot-names)
+(визначити clips-слот-імена кліпс-слот-імена)
 ; D9:001100110
-(0011 clips-deftemplate-слоти clips-deftemplate-slots)
+(визначити clips-deftemplate-слоти кліпс-визначити-шаблон-слоти)
 ; D9:001010011
-(0011 clips-шаблони-з-форми clips-templates-from-forms)
+(визначити clips-шаблони-з-форми кліпс-шаблони-з-форми)
 ; D9:001010101
-(0011 clips-шаблон-слот-порядок clips-template-slot-order)
+(визначити clips-шаблон-слот-порядок кліпс-шаблон-слот-порядок)
 ; D9:010001111
-(0011 clips-перетворити-шаблон clips-convert-template)
+(визначити clips-перетворити-шаблон кліпс-перетворити-шаблон)
 ; D9:010001101
-(0011 clips-перетворити-шаблон-список clips-convert-template-list)
+(визначити clips-перетворити-шаблон-список кліпс-перетворити-шаблон-список)
 ; D9:010111000
-(0011 clips-факт-клауза clips-fact-clause)
+(визначити clips-факт-клауза кліпс-факт-клауза)
 ; D9:001110001
-(0011 clips-факти-клаузи clips-facts->clauses)
+(визначити clips-факти-клаузи кліпс-факти-клаузи)
 ; D9:010010000
-(0011 clips-deffacts-клаузи clips-deffacts->clauses)
+(визначити clips-deffacts-клаузи кліпс-визначити-факти-клаузи)
 ; D9:001110100
-(0011 clips-змінна? clips-var?)
+(визначити clips-змінна? кліпс-змінна?)
 ; D9:101000111
-(0011 clips-перетворити-змінні clips-convert-vars)
+(визначити clips-перетворити-змінні кліпс-перетворити-змінні)
 
 ; D9: точні 9-бітні ідентичності — lib/domains/d9.lisp.
 ; Чинні закони залишаються в SENS-донорі вище, не в Rust чи Zig.
 ; Ці DEFINE зв'язують українські поверхні; це не автоматичний D9 opcode.
 ; D9:001101010
-(0011 clips-deftemplate-ім'я clips-deftemplate-name)
+(визначити clips-deftemplate-ім'я кліпс-визначити-шаблон-ім'я)
 ; D9:001011110
-(0011 clips-змінна-терм clips-var-term)
+(визначити clips-змінна-терм кліпс-змінна-терм)
 ; D9:010001001
-(0011 clips-defrule-клаузи clips-defrule->clauses)
+(визначити clips-defrule-клаузи кліпс-визначити-правило-клаузи)
 ; D9:010100000
-(0011 clips-форма-клаузи clips-form->clauses)
+(визначити clips-форма-клаузи кліпс-форма-клаузи)
 
 ; Українські D9-поверхні. Точні коди — lib/domains/d9.lisp.
 ; Виконання належить уже визначеним SENS-функціям, не Rust registry/opcode.
 ; D9:001000001
-(0011 clips-імпорт-форми clips-import-forms)
+(визначити clips-імпорт-форми кліпс-імпорт-форми)
 ; D9:001011000
-(0011 clips-імпорт clips-import)
+(визначити clips-імпорт кліпс-імпорт)
 ; D9:001000100
-(0011 clips-імпорт-файл clips-import-file)
+(визначити clips-імпорт-файл clips-import-file)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити усі-твердження-кліпс? clips-all-asserts?)
+(визначити зібрати-висновки-кліпс clips-assert-conclusions)
+(визначити твердження-кліпс? clips-assert-form?)
+(визначити правила-для-висновків-кліпс clips-clauses-for-conclusions)
+(визначити кліпс-перетворити-шаблон clips-convert-template)
+(визначити кліпс-перетворити-шаблон-список clips-convert-template-list)
+(визначити кліпс-перетворити-змінні clips-convert-vars)
+(визначити кліпс-визначити-факти-клаузи clips-deffacts->clauses)
+(визначити кліпс-визначити-правило-клаузи clips-defrule->clauses)
+(визначити кліпс-визначити-шаблон-форма? clips-deftemplate-form?)
+(визначити кліпс-визначити-шаблон-ім'я clips-deftemplate-name)
+(визначити кліпс-визначити-шаблон-слоти clips-deftemplate-slots)
+(визначити прибрати-виведення-кліпс clips-drop-printouts)
+(визначити кліпс-факт-клауза clips-fact-clause)
+(визначити кліпс-факти-клаузи clips-facts->clauses)
+(визначити кліпс-форма-клаузи clips-form->clauses)
+(визначити кліпс-імпорт clips-import)
+(визначити кліпс-імпорт-форми clips-import-forms)
+(визначити знайти-значення-слота-кліпс clips-lookup-slot-value)
+(визначити позиційні-аргументи-кліпс clips-positional-args)
+(визначити виведення-кліпс? clips-printout-form?)
+(визначити преамбула-правила-кліпс? clips-rule-preamble-form?)
+(визначити кліпс-слот-ім'я clips-slot-name)
+(визначити кліпс-слот-імена clips-slot-names)
+(визначити розділити-правило-кліпс clips-split-at-arrow)
+(визначити прибрати-префікс-модуля-кліпс clips-strip-module-prefix)
+(визначити прибрати-преамбулу-кліпс clips-strip-rule-preamble)
+(визначити кліпс-шаблон-слот-порядок clips-template-slot-order)
+(визначити кліпс-шаблони-з-форми clips-templates-from-forms)
+(визначити кліпс-змінна-терм clips-var-term)
+(визначити кліпс-змінна? clips-var?)
