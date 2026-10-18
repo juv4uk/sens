@@ -47,7 +47,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
 
     def test_existing_target_is_never_overwritten(self):
         before = EXISTING.read_bytes()
-        result = invoke(PROVEN, "--codec", "t5", "--source-surface", "default")
+        result = invoke(PROVEN, "--codec", "t5m", "--source-surface", "укр")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("refusing overwrite", result.stderr)
         self.assertEqual(EXISTING.read_bytes(), before)
@@ -57,7 +57,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             output = Path(td) / "ukr-acceptance.sens"
             view = output.with_suffix("")
             view.write_bytes(b"preexisting view\\n")
-            result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
+            result = invoke(PROVEN, "--output", str(output), "--codec", "t5m", "--source-surface", "укр")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("refusing overwrite", result.stderr)
             self.assertFalse(output.exists())
@@ -105,7 +105,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "unknown-uk-head.sens"
-            result = invoke(source, "--codec", "t5", "--source-surface", "default", "--output", str(target))
+            result = invoke(source, "--codec", "t5m", "--source-surface", "укр", "--output", str(target))
             self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "blocked")
@@ -121,7 +121,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         target = source.with_suffix(".sens")
         source_before = source.read_bytes()
         target_before = target.read_bytes() if target.is_file() else None
-        result = invoke(source, "--dry-run", "--codec", "t5", "--source-surface", "default")
+        result = invoke(source, "--dry-run", "--codec", "t5m", "--source-surface", "укр")
         self.assertNotIn("in-repository publication needs independent",
                          result.stderr)
         self.assertEqual(source.read_bytes(), source_before)
@@ -160,7 +160,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias = Path(td) / "alias.lisp"
             alias.symlink_to(PROVEN)
             before = PROVEN.read_bytes()
-            result = invoke(alias, "--dry-run", "--codec", "t5", "--source-surface", "default")
+            result = invoke(alias, "--dry-run", "--codec", "t5m", "--source-surface", "укр")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("source path contains symlink", result.stderr)
             self.assertEqual(PROVEN.read_bytes(), before)
@@ -171,7 +171,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             actual = base / "unrequested.sens"
             alias = base / "requested.sens"
             alias.symlink_to(actual)
-            result = invoke(PROVEN, "--output", str(alias), "--codec", "t5", "--source-surface", "default")
+            result = invoke(PROVEN, "--output", str(alias), "--codec", "t5m", "--source-surface", "укр")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertTrue(alias.is_symlink())
@@ -185,7 +185,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias_dir = base / "alias"
             alias_dir.symlink_to(actual_dir, target_is_directory=True)
             result = invoke(PROVEN, "--output", str(alias_dir / "data.sens"),
-                            "--codec", "t5", "--source-surface", "default")
+                            "--codec", "t5m", "--source-surface", "укр")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertFalse((actual_dir / "data.sens").exists())
