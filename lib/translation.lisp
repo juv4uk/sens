@@ -28,13 +28,13 @@
   (функція (proposal) (друге proposal)))
 
 (визначити translation-kind
-  (0010 (proposal) (10011 proposal)))
+  (функція (proposal) (третє proposal)))
 
 (визначити translation-source
-  (0010 (proposal) (100111 proposal)))
+  (функція (proposal) (четверте proposal)))
 
 (визначити translation-payload
-  (0010 (proposal) (110110101 proposal)))
+  (функція (proposal) (п'ятий proposal)))
 
 (визначити translation-status-valid?
   (функція (status)
@@ -118,13 +118,13 @@
   (функція (review) (друге review)))
 
 (визначити translation-review-code
-  (0010 (review) (10011 review)))
+  (функція (review) (третє review)))
 
 (визначити translation-review-proposal
-  (0010 (review) (100111 review)))
+  (функція (review) (четверте review)))
 
 (визначити translation-review-detail
-  (0010 (review) (110110101 review)))
+  (функція (review) (п'ятий review)))
 
 (визначити translation-review-status-valid?
   (функція (status)
