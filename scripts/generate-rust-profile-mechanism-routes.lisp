@@ -8,54 +8,54 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp --check
 
-(0011 source-path "lib/function-table-mechanisms.lisp")
-(0011 output-path "crates/sens/src/eval/profile_mechanisms_generated.rs")
+(визначити source-path "lib/function-table-mechanisms.lisp")
+(визначити output-path "crates/sens/src/eval/profile_mechanisms_generated.rs")
 
-(0011 str+
-  (0010 args
+(визначити str+
+  (функція args
     (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
-(0011 metadata
+(визначити metadata
   (100 (110101001 (110110111 source-path))))
 
-(0011 find-section
-  (0010 (name sections)
-    (110
-      ((010 sections) () (001 ()))
-      ((010 sections) (0)
-       (110
-         ((101 (100 (100 sections)) name) (1)
-          (100 sections))
-         ((101 (100 (100 sections)) name) (0)
-          (find-section name (011 sections))))))))
+(визначити find-section
+  (функція (name sections)
+    (за-умовою
+      ((атом? sections) () (як-є ()))
+      ((атом? sections) (0)
+       (за-умовою
+         ((тотожне? (перше (перше sections)) name) (1)
+          (перше sections))
+         ((тотожне? (перше (перше sections)) name) (0)
+          (find-section name (решта sections))))))))
 
-(0011 profile-rows
-  (011 (find-section (001 profile-routes) metadata)))
+(визначити profile-rows
+  (решта (find-section (як-є profile-routes) metadata)))
 
-(0011 rust-profile
-  (0010 (profile)
-    (110
-      ((101 profile (001 core3))
+(визначити rust-profile
+  (функція (profile)
+    (за-умовою
+      ((тотожне? profile (як-є core3))
        (1)
        "CoreProfile::Core3")
-      (t (100 (001 ()))))))
+      (t (перше (як-є ()))))))
 
-(0011 rust-route-kind
-  (0010 (mechanism)
-    (110
-      ((101 mechanism (001 registered-host-mechanism))
+(визначити rust-route-kind
+  (функція (mechanism)
+    (за-умовою
+      ((тотожне? mechanism (як-є registered-host-mechanism))
        (1)
        "ProfileMechanismRouteKind::RegisteredHostMechanism")
-      (t (100 (001 ()))))))
+      (t (перше (як-є ()))))))
 
-(0011 render-row
-  (0010 (row)
+(визначити render-row
+  (функція (row)
     (001001 ((profile (rust-profile (100 row)))
-           (sid (1001 row))
+           (sid (друге row))
            (kind (rust-route-kind (10011 row))))
-      (110
-        ((010 profile) () "")
-        ((010 kind) () "")
+      (за-умовою
+        ((атом? profile) () "")
+        ((атом? kind) () "")
         (t
          (str+
            "    ProfileMechanismRoute { profile: "
@@ -66,15 +66,15 @@
            kind
            " },\n"))))))
 
-(0011 render-rows
-  (0010 (rows)
-    (110
-      ((010 rows) () "")
-      ((010 rows) (0)
-       (str+ (render-row (100 rows))
-             (render-rows (011 rows)))))))
+(визначити render-rows
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) () "")
+      ((атом? rows) (0)
+       (str+ (render-row (перше rows))
+             (render-rows (решта rows)))))))
 
-(0011 header
+(визначити header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/function-table-mechanisms.lisp (profile-routes)\n"
@@ -93,7 +93,7 @@
     "}\n\n"
     "const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[\n"))
 
-(0011 footer
+(визначити footer
   (str+
     "];\n\n"
     "pub(crate) fn profile_mechanism_route(\n"
@@ -106,32 +106,32 @@
     "        .map(|row| row.kind)\n"
     "}\n"))
 
-(0011 generated
+(визначити generated
   (str+ header (render-rows profile-rows) footer))
 
-(110
-  ((010 *argv*)
+(за-умовою
+  ((атом? *argv*)
    ()
-   (1001
-     (1110
+   (друге
+     (список
        (110111100 output-path generated)
        (11011011 "Rust profile mechanism projection written"))))
   ((11110111 (100 *argv*) "--check")
    (1)
    (001000 ((current (110110111 output-path)))
-     (110
+     (за-умовою
        ((11110111 current generated)
         (1)
         (11011011 "Rust profile mechanism projection is current"))
        ((11110111 current generated)
         (0)
-        (1001
-          (1110
+        (друге
+          (список
             (11011011 "Rust profile mechanism projection is stale")
-            (100 (001 ()))))))))
-  ((001 write-projection)
+            (перше (як-є ()))))))))
+  ((як-є write-projection)
    write-projection
-   (1001
-     (1110
+   (друге
+     (список
        (110111100 output-path generated)
        (11011011 "Rust profile mechanism projection written")))))
