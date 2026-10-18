@@ -70,9 +70,9 @@ class AuditT5PairsTests(unittest.TestCase):
 
     def test_new_t5m_pair_and_view_use_exact_words_without_false_semantic_credit(self):
         words = ["10", "0011", "00", "10", "110", "01"]
-        _, binary = self.pair("lib/current", "(визначити х (за-умовою (так так)))\\n", words)
+        _, binary = self.pair("lib/current", "(визначити х (за-умовою (так так)))\n", words)
         binary.write_bytes(encode_t5m_projection(" ".join(words)))
-        binary.with_suffix("").write_text(" ".join(words) + "\\n", encoding="ascii")
+        binary.with_suffix("").write_text(" ".join(words) + "\n", encoding="ascii")
         row = self.audit()["files"][0]
         self.assertEqual(row["physical_status"], "PASS")
         self.assertEqual(row["physical_codec"], "t5m")
