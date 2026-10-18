@@ -11,11 +11,11 @@
 
 (визначити fail
   (функція (message)
-    (друге (список (11011011 (str+ "FAIL: " message)) (перше (як-є ()))))))
+    (друге (список (друкувати (str+ "FAIL: " message)) (перше (як-є ()))))))
 
 (визначити pass
   (функція (name)
-    (11011011 (str+ "ok: " name))))
+    (друкувати (str+ "ok: " name))))
 
 (визначити contains? (функція (text needle) (110101000 needle text)))
 
@@ -31,7 +31,7 @@
 
 (визначити require-needles
   (функція (name path needles)
-    (001000 ((missing (missing-needles (110110111 path) needles)))
+    (нехай ((missing (missing-needles (читати-файл path) needles)))
       (за-умовою
         ((атом? missing) () (pass name))
         ((атом? missing) (ні) (провал (str+ name ": " path " missing " (значення-у-текст missing))))))))
@@ -39,7 +39,7 @@
 (визначити forbid-needle
   (функція (name path needle)
     (за-умовою
-      ((contains? (110110111 path) needle) t
+      ((contains? (читати-файл path) needle) t
        (провал (str+ name ": " path " must not contain " (значення-у-текст needle))))
       (t t t))))
 
@@ -55,7 +55,7 @@
 ; --- public-docs-share-current-project-identity-and-extension ---
 (визначити check-doc-identity
   (функція (path)
-    (001000 ((doc (110110111 path)))
+    (нехай ((doc (читати-файл path)))
       (за-умовою
         ((any-needle? doc (як-є ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
          t
@@ -96,7 +96,7 @@
       ((атом? entries) () t)
       ((атом? entries) (0)
        (001000 ((manifest (str+ "crates/" (перше entries) "/Cargo.toml")))
-         (001000 ((text (110110111 manifest)))
+         (нехай ((text (читати-файл manifest)))
            (за-умовою
              ((contains? text "[package]\nname = \"my-lisp") t
               (провал (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
@@ -115,10 +115,10 @@
 ; Rust шукав без урахування регістру; у документі — «Ratified ADRs» і
 ; «executable conformance» / «Executable conformance».
 (за-умовою
-  ((any-needle? (110110111 "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
+  ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
   (t t (провал "docs/semantic-authority-map.md must mention ratified ADRs")))
 (за-умовою
-  ((any-needle? (110110111 "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
+  ((any-needle? (читати-файл "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
   (t t (провал "docs/semantic-authority-map.md must mention executable conformance")))
 (pass "public-docs-point-to-semantic-authority")
 
@@ -192,7 +192,7 @@
     (110100011 text (01011 (110100010 text) 1) (110100010 text))))
 
 ; Стабільні українські назви з таблиці функцій: ((бітовий-код . назва) ...).
-(визначити registry-rows (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+(визначити registry-rows (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 
 (визначити stable-uk-pairs
   (функція (rows)
@@ -209,12 +209,12 @@
 (визначити stable-uk (stable-uk-pairs registry-rows))
 
 ; Документаційний індекс: (doc категорія КОД вид "сигнатура" "опис"), КОД — голі 8 біт.
-(визначити uk-docs (решта (11100 (як-є docs) (решта (перше (110101001 (110110111 "lib/surface/uk-docs.lisp")))))))
+(визначити uk-docs (решта (знайти-за-ключем (як-є docs) (решта (перше (читати-всі (читати-файл "lib/surface/uk-docs.lisp")))))))
 ; Текстовий запис SENS для перевірок і join: голі 8 біт дають рівно 8 знаків,
 ; а SENS у лапках (текстовий сурогат) — 10, і перевірка його відкидає.
 (визначити doc-id (функція (doc) (11110100 (10011 doc))))
 (визначити doc-kind (функція (doc) (100111 doc)))
-(визначити api-md (110110111 "docs/ukrainian-api.md"))
+(визначити api-md (читати-файл "docs/ukrainian-api.md"))
 
 (визначити uk-name-for
   (функція (id)
@@ -290,7 +290,7 @@
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
-(визначити audit (перше (110101001 (110110111 "lib/surface/uk-name-audit.lisp"))))
+(визначити audit (перше (читати-всі (читати-файл "lib/surface/uk-name-audit.lisp"))))
 (визначити audit-renames (решта (11100 (як-є renames) (решта audit))))
 (визначити reviewed (field (як-є stable-reviewed) audit))
 (визначити renamed (field (як-є renamed) audit))
@@ -306,9 +306,9 @@
   (t t (провал "stable-reviewed мусить дорівнювати renamed+retained")))
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
-(визначити uk-surface (110110111 "lib/surface/uk.lisp"))
+(визначити uk-surface (читати-файл "lib/surface/uk.lisp"))
 (визначити semantic-registry
-  (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+  (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 ; EN surface -> exact SENS, derived from the single semantic registry.
 (визначити registry-sens-for-en
   (функція (name rows)
@@ -416,7 +416,7 @@
 
 (визначити require-no-latin
   (функція (name path)
-    (001000 ((found (latin-in-code (110110111 path) () () "")))
+    (нехай ((found (latin-in-code (читати-файл path) () () "")))
       (за-умовою
         ((110011100 found) (1) (pass name))
         (t t (провал (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
@@ -429,7 +429,7 @@
 ;; ===== Workflow контракту мови — канонічні шляхи .lisp (з xtask) =====
 (визначити check-contract-workflow
   (функція (path)
-    (001000 ((text (110110111 path)))
+    (нехай ((text (читати-файл path)))
       (за-умовою
         ((110101000 "language-contract.my" text) t
          (провал (str+ path " still contains removed path language-contract.my")))
@@ -443,7 +443,7 @@
 (check-contract-workflow ".github/workflows/sync-language-contract.yml")
 (check-contract-workflow ".github/workflows/verify-language-contract.yml")
 
-(11011011 "verify-repo: all checks passed")
+(друкувати "verify-repo: all checks passed")
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити провал fail)
