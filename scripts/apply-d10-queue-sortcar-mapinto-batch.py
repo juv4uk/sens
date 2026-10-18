@@ -9,11 +9,15 @@ root = Path(__file__).resolve().parents[1]
 core = root / "lib/core4.lisp"
 batch = root / "research/d10-queue-sortcar-mapinto-batch-2026-10-17.lisp"
 text = core.read_text(encoding="utf-8")
-if "(0011 черга-порожня?" in text and "(0011 сортувати-за-першим" in text:
+if all(re.search(rf"\((?:0011|визначити)\s+{name}(?=\s|\))", text) for name in ("черга-порожня?", "сортувати-за-першим")):
     print("ALREADY_APPLIED")
     raise SystemExit(0)
 body = batch.read_text(encoding="utf-8")
-body = body[body.find("(0011") :]
+start = re.search(r"(?m)^\((?:0011|визначити)\s+черга-порожня\?", body)
+if start is None:
+    print("BATCH_START_MISSING", file=sys.stderr)
+    raise SystemExit(4)
+body = body[start.start() :]
 m = re.search(r"\(0011 sub1 відняти-1\)\n", text)
 if not m:
     m = re.search(

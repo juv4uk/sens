@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import re
 import subprocess
 import tempfile
 import unittest
@@ -296,3 +298,90 @@ diff --git a/tests/b.lisp b/tests/b.lisp
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class ResearchBatchUkrProjectionTests(unittest.TestCase):
+    """D9/D10 research programs use full Ukrainian peers for exact D3/D4 heads."""
+
+    D10 = ROOT / "research" / "d10-queue-sortcar-mapinto-batch-2026-10-17.lisp"
+    D9 = ROOT / "research" / "d9-map-vec-list-batch-2026-10-17.lisp"
+    D3 = ROOT / "lib" / "domains" / "d3.lisp"
+    D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    D10_ORIGINAL_BLOB = "82cf360da7b2c639f41c206ddc42c7c9f3e2c9b6"
+    D9_ORIGINAL_BLOB = "216e77fb3a52bcb434883c59381958c025e60769"
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        raw = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(raw)).encode("ascii") + bytes((0,)) + raw
+        ).hexdigest()
+
+    def _assert_row(self, path: Path, bits: str, ukr: str, english: str, lisp_name: str):
+        rows = [
+            line for line in path.read_text(encoding="utf-8").splitlines()
+            if re.match(rf"^\s*\({re.escape(bits)}\s", line)
+        ]
+        self.assertEqual(len(rows), 1, f"{bits}: exact-width row must be unique")
+        self.assertIn(f"(укр {ukr})", rows[0])
+        self.assertIn(f"(en {english})", rows[0])
+        self.assertIn(f"(LISP {lisp_name})", rows[0])
+
+    def _restore_d10(self, source: str) -> str:
+        for surface, bits, count in (("визначити", "0011", 12), ("функція", "0010", 6)):
+            pattern = rf"\({re.escape(surface)}(?=\s)"
+            self.assertEqual(len(re.findall(pattern, source)), count, surface)
+            source = re.sub(pattern, "(" + bits, source, count=count)
+        return source
+
+    def _restore_d9(self, source: str) -> str:
+        # Reverse only the newly migrated D4:0100; the existing хибне? call remains unchanged.
+        nested = "((хибне? (порожній? "
+        self.assertEqual(source.count(nested), 1, nested)
+        source = source.replace(nested, "((0100 (порожній? ", 1)
+        for surface, bits, count in (
+            ("визначити", "0011", 14),
+            ("функція", "0010", 5),
+            ("за-умовою", "110", 1),
+            ("порожній?", "0101", 3),
+            ("решта", "011", 1),
+        ):
+            pattern = rf"\({re.escape(surface)}(?=\s)"
+            self.assertEqual(len(re.findall(pattern, source)), count, surface)
+            source = re.sub(pattern, "(" + bits, source, count=count)
+        return source
+
+    def test_d9_d10_heads_match_ratified_tables_and_restore_exact_source(self):
+        for bits, ukr, english, lisp_name in (
+            ("011", "решта", "cdr", "CDR"),
+            ("110", "за-умовою", "cond", "COND"),
+        ):
+            self._assert_row(self.D3, bits, ukr, english, lisp_name)
+        for bits, ukr, english, lisp_name in (
+            ("0011", "визначити", "define", "DEFINE"),
+            ("0010", "функція", "lambda", "LAMBDA"),
+            ("0100", "хибне?", "not?", "NOT"),
+            ("0101", "порожній?", "null?", "NULL"),
+        ):
+            self._assert_row(self.D4, bits, ukr, english, lisp_name)
+
+        for path, inverse, original_blob in (
+            (self.D10, self._restore_d10, self.D10_ORIGINAL_BLOB),
+            (self.D9, self._restore_d9, self.D9_ORIGINAL_BLOB),
+        ):
+            source = path.read_text(encoding="utf-8")
+            self.assertEqual(CHECK.find_forbidden_literals(source, path=str(path.relative_to(ROOT))), [])
+            self.assertEqual(self._git_blob_sha(inverse(source)), original_blob, str(path))
+
+    def test_wrong_full_ukr_peer_fails_exact_inverse(self):
+        source = self.D9.read_text(encoding="utf-8")
+        mutant = source.replace("(порожній? (знайти-за-ключем", "(порожнє? (знайти-за-ключем", 1)
+        self.assertNotEqual(mutant, source)
+        with self.assertRaises(AssertionError):
+            self._restore_d9(mutant)
+
+    def test_batch_consumers_find_projected_or_exact_source_heads(self):
+        for name in ("apply-d10-queue-sortcar-mapinto-batch.py", "apply-d9-map-vec-list-batch.py"):
+            source = (ROOT / "scripts" / name).read_text(encoding="utf-8")
+            self.assertIn("(?:0011|визначити)", source)
+            self.assertNotIn('body.find("(0011")', source)
