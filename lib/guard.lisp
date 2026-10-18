@@ -10,31 +10,31 @@
 ; Predicate results now use direct typed one-bit W1 projections without ATOM/NOT.
 ; Two-field COND only. Width is identity; every bit of the domain address valued.
 
-(0011 guard-decision?
-  (0010 (decision)
-    (110
-      ((101 decision (001 allow)) #d1:1)
-      ((101 decision (001 warn)) #d1:1)
-      ((101 decision (001 reject)) #d1:1)
-      ((101 decision (001 unknown)) #d1:1)
+(визначити захист-рішення?
+  (функція (decision)
+    (за-умовою
+      ((тотожне? decision (як-є allow)) #d1:1)
+      ((тотожне? decision (як-є warn)) #d1:1)
+      ((тотожне? decision (як-є reject)) #d1:1)
+      ((тотожне? decision (як-є unknown)) #d1:1)
       (#d1:1 #d1:0))))
 
-(0011 guard-evidence-status?
-  (0010 (status)
-    (110
-      ((101 status (001 confirmed)) #d1:1)
-      ((101 status (001 partial)) #d1:1)
-      ((101 status (001 unresolved)) #d1:1)
-      ((101 status (001 broken)) #d1:1)
+(визначити захист-доказ-стан?
+  (функція (status)
+    (за-умовою
+      ((тотожне? status (як-є confirmed)) #d1:1)
+      ((тотожне? status (як-є partial)) #d1:1)
+      ((тотожне? status (як-є unresolved)) #d1:1)
+      ((тотожне? status (як-є broken)) #d1:1)
       (#d1:1 #d1:0))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
 ; UNKNOWN — це стан маршрутизації, а не глухий кут. Маршрути розрізняють
 ; розподілене локальне знання, владу власника і зовнішнє дослідження.
-(0011 guard-unknown-routes
-  (0010 ()
-    (001
+(визначити захист-невідоме-маршрути
+  (функція ()
+    (як-є
       (((route ask-agent)
         (when ecosystem-local-or-component-owned)
         (action ask-responsible-live-agent)
@@ -48,46 +48,46 @@
         (action search-authoritative-external-sources)
         (verify citations-and-access-date))))))
 
-(0011 make-guard-finding
-  (0010 (decision evidence-status subject state contract delta impact guidance evidence)
-    (110
-      ((0100 (guard-decision? decision))
-       (1110 (001 invalid-guard-decision) decision))
-      ((0100 (guard-evidence-status? evidence-status))
-       (1110 (001 invalid-evidence-status) evidence-status))
+(визначити створити-захист-висновок
+  (функція (decision evidence-status subject state contract delta impact guidance evidence)
+    (за-умовою
+      ((хибне? (захист-рішення? decision))
+       (список (як-є invalid-guard-decision) decision))
+      ((хибне? (захист-доказ-стан? evidence-status))
+       (список (як-є invalid-evidence-status) evidence-status))
       (#d1:1
-       (1110
-         (001 guard-finding)
-         (1110 (001 schema) (001 guard/1))
-         (1110 (001 decision) decision)
-         (1110 (001 evidence-status) evidence-status)
-         (1110 (001 subject) subject)
-         (1110 (001 state) state)
-         (1110 (001 contract) contract)
-         (1110 (001 difference) delta)
-         (1110 (001 impact) impact)
-         (1110 (001 guidance) guidance)
-         (1110 (001 evidence) evidence)
-         (1110
-           (001 unknown-routes)
-           (110
-             ((101 decision (001 unknown)) (guard-unknown-routes))
-             (#d1:1 (001 ())))))))))
+       (список
+         (як-є guard-finding)
+         (список (як-є schema) (як-є guard/1))
+         (список (як-є decision) decision)
+         (список (як-є evidence-status) evidence-status)
+         (список (як-є subject) subject)
+         (список (як-є state) state)
+         (список (як-є contract) contract)
+         (список (як-є difference) delta)
+         (список (як-є impact) impact)
+         (список (як-є guidance) guidance)
+         (список (як-є evidence) evidence)
+         (список
+           (як-є unknown-routes)
+           (за-умовою
+             ((тотожне? decision (як-є unknown)) (захист-невідоме-маршрути))
+             (#d1:1 (як-є ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
-(0011 guard-unknown
-  (0010 (subject missing-evidence guidance)
-    (make-guard-finding
-      (001 unknown)
-      (001 unresolved)
+(визначити guard-unknown
+  (функція (subject missing-evidence guidance)
+    (створити-захист-висновок
+      (як-є unknown)
+      (як-є unresolved)
       subject
-      (001 not-observed)
-      (001 insufficient-evidence)
+      (як-є not-observed)
+      (як-є insufficient-evidence)
       missing-evidence
-      (001 decision-not-earned)
+      (як-є decision-not-earned)
       guidance
-      (001 ()))))
+      (як-є ()))))
 
 ; Oracle gives expected semantic truth; an observer gives actual truth;
 ; Guard explains the relation without replacing either authority.
@@ -97,31 +97,31 @@
 ; Структурний закон Guard належить двійковому SENS, не Rust і не W8.
 ; D3:010 ATOM, 101 EQ лише для атомів, 100 CAR, 011 CDR, 110 COND.
 ; Повертає рівно D1 PredicateBit; невідомий механізм не допускається.
-(0011 сторожа--рівні?
-  (0010 (ліве праве)
-    (110
-      ((010 ліве)
-       (110
-         ((010 праве) (101 ліве праве))
+(визначити сторожа--рівні?
+  (функція (ліве праве)
+    (за-умовою
+      ((атом? ліве)
+       (за-умовою
+         ((атом? праве) (тотожне? ліве праве))
          (#d1:1 #d1:0)))
-      ((010 праве) #d1:0)
-      ((сторожа--рівні? (100 ліве) (100 праве))
-       (сторожа--рівні? (011 ліве) (011 праве)))
+      ((атом? праве) #d1:0)
+      ((сторожа--рівні? (перше ліве) (перше праве))
+       (сторожа--рівні? (решта ліве) (решта праве)))
       (#d1:1 #d1:0))))
 
-(0011 guard-compare
-  (0010 (subject expected observed evidence)
-    (110
+(визначити guard-compare
+  (функція (subject expected observed evidence)
+    (за-умовою
       ((сторожа--рівні? expected observed)
-       (make-guard-finding
-         (001 allow) (001 confirmed) subject observed expected
-         (001 ()) (001 invariant-preserved) (001 no-action) evidence))
+       (створити-захист-висновок
+         (як-є allow) (як-є confirmed) subject observed expected
+         (як-є ()) (як-є invariant-preserved) (як-є no-action) evidence))
       (#d1:1
-       (make-guard-finding
-         (001 warn) (001 confirmed) subject observed expected
-         (1110 (001 expected) expected (001 observed) observed)
-         (001 contract-drift)
-         (001 reconcile-observation-with-contract)
+       (створити-захист-висновок
+         (як-є warn) (як-є confirmed) subject observed expected
+         (список (як-є expected) expected (як-є observed) observed)
+         (як-є contract-drift)
+         (як-є reconcile-observation-with-contract)
          evidence)))))
 
 ; Synchronization is a guarded transaction: first establish a commit freeze,
@@ -130,77 +130,83 @@
 ; Синхронізація — guarded transaction: спершу freeze комітів, потім sync,
 ; потім запис observed drift і лише після цього відкриття вікна. Це policy,
 ; а не прихований Git lock.
-(0011 guard-sync-window
-  (0010 (commit-state sync-state drift-state evidence)
-    (110
-      ((0100 (101 commit-state (001 frozen)))
-       (make-guard-finding
-         (001 reject) (001 confirmed) (001 ecosystem-sync)
-         commit-state (001 commits-frozen-before-sync)
-         (1110 (001 expected) (001 frozen) (001 observed) commit-state)
-         (001 concurrent-commits-can-create-unrecorded-drift)
-         (001 freeze-commits-before-synchronization)
+(визначити guard-sync-window
+  (функція (commit-state sync-state drift-state evidence)
+    (за-умовою
+      ((хибне? (тотожне? commit-state (як-є frozen)))
+       (створити-захист-висновок
+         (як-є reject) (як-є confirmed) (як-є ecosystem-sync)
+         commit-state (як-є commits-frozen-before-sync)
+         (список (як-є expected) (як-є frozen) (як-є observed) commit-state)
+         (як-є concurrent-commits-can-create-unrecorded-drift)
+         (як-є freeze-commits-before-synchronization)
          evidence))
-      ((0100 (101 sync-state (001 completed)))
-       (make-guard-finding
-         (001 warn) (001 unresolved) (001 ecosystem-sync)
-         sync-state (001 synchronization-completed)
-         (1110 (001 expected) (001 completed) (001 observed) sync-state)
-         (001 drift-cannot-yet-be-classified)
-         (001 complete-sync-and-preserve-logs)
+      ((хибне? (тотожне? sync-state (як-є completed)))
+       (створити-захист-висновок
+         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)
+         sync-state (як-є synchronization-completed)
+         (список (як-є expected) (як-є completed) (як-є observed) sync-state)
+         (як-є drift-cannot-yet-be-classified)
+         (як-є complete-sync-and-preserve-logs)
          evidence))
-      ((0100 (101 drift-state (001 recorded)))
-       (make-guard-finding
-         (001 warn) (001 unresolved) (001 ecosystem-sync)
-         drift-state (001 drift-recorded)
-         (1110 (001 expected) (001 recorded) (001 observed) drift-state)
-         (001 synchronization-result-has-no-drift-record)
-         (001 record-drift-before-unfreezing-commits)
+      ((хибне? (тотожне? drift-state (як-є recorded)))
+       (створити-захист-висновок
+         (як-є warn) (як-є unresolved) (як-є ecosystem-sync)
+         drift-state (як-є drift-recorded)
+         (список (як-є expected) (як-є recorded) (як-є observed) drift-state)
+         (як-є synchronization-result-has-no-drift-record)
+         (як-є record-drift-before-unfreezing-commits)
          evidence))
       (#d1:1
-       (make-guard-finding
-         (001 allow) (001 confirmed) (001 ecosystem-sync)
-         (1110 commit-state sync-state drift-state)
-         (001 freeze-sync-record-unfreeze)
-         (001 ())
-         (001 synchronization-boundary-observed)
-         (001 reopen-commit-window)
+       (створити-захист-висновок
+         (як-є allow) (як-є confirmed) (як-є ecosystem-sync)
+         (список commit-state sync-state drift-state)
+         (як-є freeze-sync-record-unfreeze)
+         (як-є ())
+         (як-є synchronization-boundary-observed)
+         (як-є reopen-commit-window)
          evidence)))))
 
 ; Reference records are ordinary data. The evolving ecosystem directory lives
 ; in knowledge/guard-reference.lisp; these accessors remain generic.
 ; Довідкові записи — звичайні дані. Змінний каталог екосистеми лежить у
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
-(0011 guard-reference-field
-  (0010 (field reference)
-    ((0010 (entry)
-       (110
-         ((010 entry) (001 ()))
-         (#d1:1 (1001 entry))))
-     (11100 field (011 reference)))))
+(визначити guard-reference-field
+  (функція (field reference)
+    ((функція (entry)
+       (за-умовою
+         ((атом? entry) (як-є ()))
+         (#d1:1 (друге entry))))
+     (знайти-за-ключем field (решта reference)))))
 
 ; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
 ; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
 ; Unknown language or wrong role is always rejected.
-(0011 guard-language-allowed?
-  (0010 (language role)
-    (110
-      ((101 language (001 sens))
-       (110 ((101 role (001 semantics)) #d1:1) (#d1:1 #d1:0)))
-      ((101 language (001 lisp))
-       (110 ((101 role (001 semantics)) #d1:1) (#d1:1 #d1:0)))
-      ((101 language (001 zig))
-       (110 ((101 role (001 domain-ladder)) #d1:1) (#d1:1 #d1:0)))
-      ((101 language (001 rust))
-       (110 ((101 role (001 domain-consumer)) #d1:1) (#d1:1 #d1:0)))
+(визначити guard-language-allowed?
+  (функція (language role)
+    (за-умовою
+      ((тотожне? language (як-є sens))
+       (за-умовою ((тотожне? role (як-є semantics)) #d1:1) (#d1:1 #d1:0)))
+      ((тотожне? language (як-є lisp))
+       (за-умовою ((тотожне? role (як-є semantics)) #d1:1) (#d1:1 #d1:0)))
+      ((тотожне? language (як-є zig))
+       (за-умовою ((тотожне? role (як-є domain-ladder)) #d1:1) (#d1:1 #d1:0)))
+      ((тотожне? language (як-є rust))
+       (за-умовою ((тотожне? role (як-є domain-consumer)) #d1:1) (#d1:1 #d1:0)))
       (#d1:1 #d1:0))))
 
-(0011 guard-language-decision
-  (0010 (language role)
-    (110 ((guard-language-allowed? language role) (001 allow))
-         (#d1:1 (001 reject)))))
+(визначити guard-language-decision
+  (функція (language role)
+    (за-умовою ((guard-language-allowed? language role) (як-є allow))
+         (#d1:1 (як-є reject)))))
 
 ; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
 ; Чинний закон guard-sync-window залишається джерелом семантики;
 ; це не host fallback і не direct D9 opcode.
-(0011 захист-синхронізувати-вікно guard-sync-window)
+(визначити захист-синхронізувати-вікно guard-sync-window)
+
+; Історичні викличні поверхні Guard — ті самі closure, без дублювання.
+(визначити guard-decision? захист-рішення?)
+(визначити guard-evidence-status? захист-доказ-стан?)
+(визначити guard-unknown-routes захист-невідоме-маршрути)
+(визначити make-guard-finding створити-захист-висновок)
