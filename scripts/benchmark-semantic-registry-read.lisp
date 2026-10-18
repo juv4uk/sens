@@ -4,11 +4,11 @@
 ; core.lisp's recursive string-length here: on a registry-sized String that is
 ; a separate non-tail recursion benchmark and can overflow the host stack.
 
-(визначити started (01011010))
+(визначити started (монотонний-наносекунди))
 (визначити registry-text (110110111 "lib/surface/semantic-registry.lisp"))
-(визначити after-read (01011010))
+(визначити after-read (монотонний-наносекунди))
 (визначити registry-form (перше (110101001 registry-text)))
-(визначити after-parse (01011010))
+(визначити after-parse (монотонний-наносекунди))
 
 (11011011
   (список (як-є eco-lisp-script-perf/read-semantic-registry)
