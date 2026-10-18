@@ -125,13 +125,32 @@ class CodecRunsTests(unittest.TestCase):
     def test_sens_roundtrips_byte_for_byte(self):
         files = sorted((ROOT / "tests" / "semantic").glob("*.sens"))
         self.assertTrue(files, "немає жодного .sens для перевірки")
+        # Explicit fixture routing: transport is not inferred from payload bytes.
+        t5m_files = {"ukr-d24-existing-functions.sens"}
+        self.assertTrue(t5m_files <= {path.name for path in files},
+                        "втрачено фізичний T5M-свідок")
         for path in files[:40]:
             with self.subTest(sens=path.name):
                 data = path.read_bytes()
-                words = codec.decode_bytes(data)
+                if path.name in t5m_files:
+                    words = codec.decode_t5m_bytes(data)
+                    view = path.with_suffix("").read_text(encoding="utf-8")
+                    self.assertEqual(words, codec.parse_t5m_words(view),
+                                     f"{path.name}: T5M не відповідає точному bit-view")
+                    restored = codec.encode_t5m_projection(" ".join(words))
+                else:
+                    words = codec.decode_bytes(data)
+                    restored = codec.encode_words(words)
                 self.assertTrue(words)
-                self.assertEqual(codec.encode_words(words), data,
+                self.assertEqual(restored, data,
                                  f"{path.name}: decode→encode не відтворив байти")
+
+    def test_t5m_fixture_rejects_truncated_group(self):
+        path = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.sens"
+        data = path.read_bytes()
+        self.assertEqual(len(data) % 3, 0)
+        with self.assertRaisesRegex(codec.SensT5Error, "multiple of three"):
+            codec.decode_t5m_bytes(data[:-1])
 
     def test_extensionless_program_roundtrips(self):
         candidates = [
