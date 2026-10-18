@@ -374,9 +374,16 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
         self.assertIn("(тотожне? (перше form) (як-є def))", mutual)
         self.assertIn("#d1:1", first)
-        self.assertIn("#d1:0", mutual)
+        # Поточна ратифікована D1 проєкція: D1:0 = «ні», D1:1 = «так».
+        # Meta-mutual тепер на повному укр, на відміну від ще типізованого first-class.
+        d1 = (root / "lib/domains/d1.lisp").read_text(encoding="utf-8")
+        self.assertIn("(0 (ук ні) (укр ні)", d1)
+        self.assertIn("(1 (ук так) (укр так)", d1)
+        self.assertIn("((атом? value) ні)", mutual)
+        self.assertIn("(так (тотожне? (перше value) (як-є recursive-group-closure)))", mutual)
+        self.assertNotIn("#d1:0", mutual)
         self.assertIn("(0011 my-fc-env-lookup", first)
-        self.assertIn("(0011 my-group-eval", mutual)
+        self.assertIn("(визначити my-group-eval", mutual)
         # Negative witness: numeric operator behind QUOTE remains data, not callable.
         sample = "(як-є (100 quoted)) (сполучити (як-є datum) (перше xs))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
