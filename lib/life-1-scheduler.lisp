@@ -22,19 +22,19 @@
 ; і жодного ототожнення W8:11110111 з D8:11110111.
 ; D3 ATOM/ EQ/ CAR/ CDR/ COND; відповідь — виключно D1:1 або D1:0.
 ; Порівняння атомів перед викликом D3 EQ, пар — рекурсивно.
-(0011 життя--рівні?
+(визначити життя--рівні?
   (функція (ліве праве)
     (за-умовою
       ((атом? ліве)
        (за-умовою
          ((атом? праве) (тотожне? ліве праве))
          (#d1:1 #d1:0)))
-      ((010 праве) #d1:0)
+      ((атом? праве) #d1:0)
       ((життя--рівні? (перше ліве) (перше праве))
        (життя--рівні? (решта ліве) (решта праве)))
       (#d1:1 #d1:0))))
 
-(0011 life-scheduler-field
+(визначити life-scheduler-field
   (функція (entry field)
     (за-умовою
       
@@ -61,7 +61,7 @@
          (перше rows)))))
          (решта entry))))))
 
-(0011 life-scheduler-invocation-key
+(визначити life-scheduler-invocation-key
   (функція (invocation)
     (список
       (life-scheduler-field invocation (як-є producer))
@@ -69,7 +69,7 @@
       (life-scheduler-field invocation (як-є provenance-ref))
       (life-scheduler-field invocation (як-є semantic-id)))))
 
-(0011 life-scheduler-key-present?
+(визначити life-scheduler-key-present?
   (функція (key keys)
     (за-умовою
       ((атом? keys) (як-є absent))
@@ -79,7 +79,7 @@
          ((хибне? (життя--рівні? key (перше keys)))
           (life-scheduler-key-present? key (решта keys))))))))
 
-(0011 life-scheduler-dedup-pending
+(визначити life-scheduler-dedup-pending
   (функція (pending seen-keys)
     (за-умовою
       
@@ -97,11 +97,11 @@
                     (решта pending)
                     (сполучити key seen-keys))))))))))
 
-(0011 life-scheduler-pending
+(визначити life-scheduler-pending
   (функція (pending)
     (life-scheduler-dedup-pending pending (як-є ()))))
 
-(0011 life-scheduler-projection-match?
+(визначити life-scheduler-projection-match?
   (функція (expected projections)
     (за-умовою
       ((атом? projections) (як-є absent))
@@ -115,7 +115,7 @@
             (life-scheduler-projection-match? expected (решта projections)))))
         (перше projections))))))
 
-(0011 life-scheduler-projection-ready?
+(визначити life-scheduler-projection-ready?
   (функція (invocation projections)
     (001001 ((trigger (life-scheduler-field invocation (001 trigger)))
            (provenance-ref-value (life-scheduler-field invocation (як-є provenance-ref))))
@@ -138,7 +138,7 @@
                 projections))))
           (решта trigger)))))))
 
-(0011 life-scheduler-select-ready
+(визначити life-scheduler-select-ready
   (функція (pending projections)
     (за-умовою
       ((атом? pending)
@@ -160,7 +160,7 @@
             (life-scheduler-select-ready (решта pending) projections))))
         (перше pending))))))
 
-(0011 life-scheduler-quiescence-state
+(визначити life-scheduler-quiescence-state
   (функція (projections lifecycle-state)
     (за-умовою
       ((атом? projections)
@@ -173,14 +173,14 @@
       ((хибне? (атом? projections))
        (як-є (quiescence-state active))))))
 
-(0011 life-scheduler-quiescence
+(визначити life-scheduler-quiescence
   (функція (pending projections lifecycle-state)
     (за-умовою
       ((атом? pending)
        (life-scheduler-quiescence-state projections lifecycle-state))
       ((хибне? (атом? pending))
        (як-є (quiescence-state active))))))
-(0011 life-scheduler-state
+(визначити life-scheduler-state
   (функція (pending projections lifecycle-state)
     (список
       (як-є scheduler-state)

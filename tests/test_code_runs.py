@@ -354,5 +354,70 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
 
 
 
+
+class Life1RemainingUkrProjectionTests(unittest.TestCase):
+    """Перевіряє чинні D3/D4 surface, не робить із Python семантичний SENS."""
+
+    SOURCE = ROOT / "lib" / "life-1-scheduler.lisp"
+    D3 = ROOT / "lib" / "domains" / "d3.lisp"
+    D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    ORIGINAL_BLOB = "a287485556480390e25e80492fdeb4cd933aab54"
+
+    @staticmethod
+    def restore(source: str) -> str:
+        # 12 верхніх D4 DEFINE і одна точно локалізована гілка D3 ATOM.
+        # Другий, раніше вже український ATOM(праве) не зачіпати.
+        source = re.sub(r"(?m)^\(визначити(?=\s)", "(0011", source)
+        return source.replace(
+            "((атом? праве) #d1:0)", "((010 праве) #d1:0)"
+        )
+
+    @staticmethod
+    def blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def test_exact_ratified_ukr_and_thirteen_current_heads(self):
+        d3 = self.D3.read_text(encoding="utf-8").splitlines()
+        d4 = self.D4.read_text(encoding="utf-8").splitlines()
+        atom = [line for line in d3 if re.match(r"^\s*\(010\s", line)]
+        define = [line for line in d4 if re.match(r"^\s*\(0011\s", line)]
+        self.assertEqual(len(atom), 1)
+        self.assertEqual(len(define), 1)
+        self.assertIn("(укр атом?)", atom[0])
+        self.assertIn("(LISP ATOM)", atom[0])
+        self.assertIn("(укр визначити)", define[0])
+        self.assertIn("(LISP DEFINE)", define[0])
+
+        src = self.SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(len(re.findall(r"(?m)^\(визначити(?=\s)", src)), 12)
+        self.assertEqual(src.count("((атом? праве) #d1:0)"), 1)
+        self.assertNotRegex(src, r"(?m)^\(0011(?=\s)")
+        self.assertNotIn("((010 праве) #d1:0)", src)
+        self.assertEqual(src.count("(001001 "), 2)  # D6 LET* untouched
+        for original_data in ("#d1:0", "#d1:1",
+                              "(як-є (scheduler-selection none))",
+                              "(як-є producer)"):
+            self.assertIn(original_data, src)
+
+    def test_inverse_projection_recovers_original_git_blob(self):
+        src = self.SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(self.blob_sha(self.restore(src)), self.ORIGINAL_BLOB)
+
+    def test_wrong_domain_or_wrong_peer_is_rejected(self):
+        src = self.SOURCE.read_text(encoding="utf-8")
+        for mutant in (
+            src.replace("((атом? праве) #d1:0)",
+                        "((сполучити праве) #d1:0)", 1),
+            src.replace("(визначити життя--рівні?",
+                        "(функція життя--рівні?", 1),
+        ):
+            self.assertNotEqual(mutant, src)
+            self.assertNotEqual(
+                self.blob_sha(self.restore(mutant)), self.ORIGINAL_BLOB
+            )
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
