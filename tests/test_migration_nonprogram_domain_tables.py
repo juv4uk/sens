@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""D1–D9 source tables are domain DATA, never guessed executable SENS."""
+"""D1–D11 ratified domain tables are DATA, never executable SENS."""
 import hashlib
 import json
 from pathlib import Path
@@ -24,7 +24,7 @@ def resident_codes(source: str, width: int) -> list[str]:
 
 
 class DomainTableNotExecutableTest(unittest.TestCase):
-    def test_current_d1_d9_data_classification_is_exact_and_immutable(self):
+    def test_current_d1_d11_data_classification_is_exact_and_immutable(self):
         m = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(m["schema"], "sens-migration-nonprogram-manifest/1")
         self.assertEqual(m["issue"], 4460)
@@ -33,13 +33,13 @@ class DomainTableNotExecutableTest(unittest.TestCase):
         self.assertIs(m["not_executable_programs"], True)
         self.assertIs(m["not_physical_migration_credit"], True)
         rows = m["entries"]
-        self.assertEqual(len(rows), 9)
+        self.assertEqual(len(rows), 11)
         self.assertEqual(
             [row["path"] for row in rows],
-            [f"lib/domains/d{n}.lisp" for n in range(1, 10)],
+            [f"lib/domains/d{n}.lisp" for n in range(1, 12)],
         )
         total = 0
-        for n, entry in enumerate(rows, start=1):
+        for n, entry in enumerate(rows[:10], start=1):
             path = ROOT / entry["path"]
             with self.subTest(path=entry["path"]):
                 self.assertEqual(entry["domain"], f"D{n}")
@@ -49,16 +49,16 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                 raw = path.read_bytes()
                 self.assertEqual(git_blob_sha(raw), entry["git_blob_sha1"])
                 self.assertFalse(path.with_suffix(".sens").exists())
-                text = raw.decode("utf-8")
-                # No executable list heads at root; the one root is a table.
+                self.assertFalse(path.with_suffix("").exists())
+                source = raw.decode("utf-8")
                 body = [
-                    line.strip() for line in text.splitlines()
+                    line.strip() for line in source.splitlines()
                     if line.strip() and not line.lstrip().startswith(";")
                 ]
                 self.assertTrue(body, path.as_posix())
                 self.assertEqual(body[0], "(domain-table/1")
                 self.assertEqual(body[-1], ")")
-                codes = resident_codes(text, n)
+                codes = resident_codes(source, n)
                 self.assertEqual(len(codes), entry["expected_rows"])
                 self.assertEqual(len(set(codes)), len(codes))
                 self.assertTrue(all(len(code) == n for code in codes))
@@ -67,18 +67,48 @@ class DomainTableNotExecutableTest(unittest.TestCase):
                     self.assertIn("0101010", codes)
                     self.assertEqual(entry["projection"], "sens.d7.keyboard/v2")
                     self.assertEqual(entry["historical_v1_git_blob_sha1"], "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726")
+                if n == 10:
+                    self.assertEqual(entry["role"], "whole-domain-catalogue")
                 total += len(codes)
+        self.assertEqual(total, 2046)
+
+        # D11 is a 43-row testing vocabulary, NOT a 2048-row callable domain.
+        entry = rows[10]
+        path = ROOT / entry["path"]
+        with self.subTest(path=entry["path"]):
+            self.assertEqual(entry["domain"], "D11")
+            self.assertEqual(entry["bit_width"], 11)
+            self.assertEqual(entry["expected_rows"], 43)
+            self.assertEqual(entry["role"], "testing-only-vocabulary")
+            self.assertFalse(path.is_symlink())
+            self.assertFalse(path.with_suffix(".sens").exists())
+            self.assertFalse(path.with_suffix("").exists())
+            raw = path.read_bytes()
+            self.assertEqual(git_blob_sha(raw), entry["git_blob_sha1"])
+            source = raw.decode("utf-8")
+            body = [
+                line.strip() for line in source.splitlines()
+                if line.strip() and not line.lstrip().startswith(";")
+            ]
+            self.assertEqual(body[0], "(domain-table/1")
+            self.assertEqual(body[-1], ")")
+            codes = resident_codes(source, 11)
+            self.assertEqual(len(codes), 43)
+            self.assertEqual(len(set(codes)), 43)
+            self.assertTrue(all(len(code) == 11 for code in codes))
+        total += len(codes)
         self.assertEqual(total, m["total_rows"])
-        self.assertEqual(total, 1022)
+        self.assertEqual(total, 2089)
 
     def test_no_executable_or_research_paths_are_exempted(self):
         paths = {r["path"] for r in json.loads(MANIFEST.read_text())["entries"]}
         for path in (
             "lib/core1.lisp", "lib/machine/block.lisp",
             "lib/machine/dispatch/native-first.lisp",
-            "benchmarks/arithmetic.lisp", "lib/domains/d10.lisp",
+            "benchmarks/arithmetic.lisp",
         ):
             self.assertNotIn(path, paths)
+
 
 
 if __name__ == "__main__":

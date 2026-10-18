@@ -1313,7 +1313,7 @@ def source_files(root: Path):
 # Owner-reviewed NONPROGRAM data (#4460), not executable SENS.
 # Both path identity AND source Git blob SHA are mandatory for recognition.
 NONPROGRAM_MANIFESTS = (
-    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
@@ -1324,7 +1324,7 @@ NONPROGRAM_MANIFESTS = (
 
 
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "3a5b4e3ef660109242e9e1562bca4a723f1868ef",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "85b4de3e02f61d8b5c21e6d9408a5997fd64dc04",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
     "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
@@ -1371,7 +1371,7 @@ def reject_reviewed_nonprogram_source(source: Path, root: Path = REPO_ROOT) -> N
             if not isinstance(entry, dict) or entry.get("path") != relative:
                 continue
             scoped = (
-                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d[1-9]\.lisp", relative)))
+                (cohort == "domain-table" and bool(re.fullmatch(r"lib/domains/d(?:[1-9]|10|11)\.lisp", relative)))
                 or (cohort == "comment-only-loader" and relative in ("lib/core2.lisp", "lib/surface/ukr.lisp"))
                 or (cohort == "isa" and relative.startswith("lib/machine/isa/"))
                 or (cohort == "schema" and relative.startswith(("contracts/", "lib/", "tests/fixtures/")))

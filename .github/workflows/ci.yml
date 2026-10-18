@@ -55,6 +55,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
+          python3 -m unittest tests/test_migration_nonprogram_domain_tables.py -v
           python3 -m unittest tests/test_d11_selector_seed.py -v
           python3 scripts/check_d11_selector_seed.py
           python3 scripts/audit_ukrainian_domain_projections.py

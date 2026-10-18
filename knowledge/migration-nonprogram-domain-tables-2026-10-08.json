@@ -3,12 +3,12 @@
   "generated_from_main": "67c1b0c8302f72d044aab68f31cd7dba8481928b",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
-  "cohort": "ratified D1-D9 human-readable domain definition TABLES",
-  "reason": "domain-table/1 entries declare authoritative function identities and surfaces; they are DATA, not executable SENS call heads",
+  "cohort": "ratified D1-D10 human-readable domain definition tables plus the D11 testing-only vocabulary table",
+  "reason": "domain-table/1 rows declare authoritative exact-width identities and surfaces; D1-D10 are domain tables and D11 is only the ratified testing vocabulary. These are DATA, not executable SENS programs.",
   "automatic_sens_companion": false,
   "not_executable_programs": true,
   "not_physical_migration_credit": true,
-  "total_rows": 1022,
+  "total_rows": 2089,
   "entries": [
     {
       "path": "lib/domains/d1.lisp",
@@ -75,7 +75,25 @@
       "domain": "D9",
       "bit_width": 9,
       "expected_rows": 512
+    },
+    {
+      "path": "lib/domains/d10.lisp",
+      "git_blob_sha1": "f1a79e8f02c1a7f3f9c91f2c3eda0b3b9cb19b64",
+      "domain": "D10",
+      "bit_width": 10,
+      "expected_rows": 1024,
+      "role": "whole-domain-catalogue"
+    },
+    {
+      "path": "lib/domains/d11.lisp",
+      "git_blob_sha1": "7e5e1bfd348d2de4f04ba756365524ac78d14949",
+      "domain": "D11",
+      "bit_width": 11,
+      "expected_rows": 43,
+      "role": "testing-only-vocabulary"
     }
   ],
-  "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately"
+  "updated_current_d7": "2026-10-13 keyboard/v2 owner-ratified; historical v1 source pinned separately",
+  "updated_current_d10": "2026-10-12 owner-ratified whole-domain catalogue; residency does not imply callable or physical admission",
+  "updated_current_d11": "2026-10-13 owner-ratified testing vocabulary (43 rows); selector candidates remain research-only, non-callable, and not T5-admitted"
 }
