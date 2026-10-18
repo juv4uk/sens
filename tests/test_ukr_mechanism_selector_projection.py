@@ -120,10 +120,10 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         code = uncommented(self.source)
         for english, ukrainian in LOCAL_RENAMES:
             with self.subTest(helper=english):
-                self.assertIn(f"(визначити {ukrainian} ", code)
+                self.assertRegex(code, rf"\(визначити\s+{re.escape(ukrainian)}(?=\s)")
                 self.assertIn(f"(визначити {english} {ukrainian})", self.source)
-                self.assertNotRegex(code, rf"\\({re.escape(english)}(?=\\s)")
-        self.assertEqual(self.source.count("(визначити вибрати-механізм "), 1)
+                self.assertNotRegex(code, rf"\({re.escape(english)}(?=\s)")
+        self.assertEqual(len(re.findall(r"\(визначити\s+вибрати-механізм(?=\s)", self.source)), 1)
 
     def test_original_source_recoverable_byte_for_byte(self):
         reverted = restore_previous_projection(self.source)
