@@ -1398,3 +1398,71 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class ReasonIndexPrivateHelperUkrProjectionTests(unittest.TestCase):
+    """Scoped Ukrainian aliases for Lisp-owned reason-index helpers."""
+
+    SOURCE = ROOT / "lib" / "reason.lisp"
+    ORIGINAL_BLOB = "8f53a2b698e43299ef002603c508e6d4a2f9d9af"
+    ALIAS_BLOCK = "\n\n; Англомовні імена індексу лишаються сумісними входами до тих самих Lisp-значень.\n(визначити reason-index-mode режим-індексу-міркування)\n(визначити reason-index-rules правила-індексу-міркування)\n(визначити reason-index-buckets кошики-індексу-міркування)\n(визначити reason-index-linear лінійний-індекс-міркування)\n(визначити reason-index-build-scan сканувати-індекс-міркування)\n"
+    PAIRS = (
+        ("reason-index-mode", "режим-індексу-міркування", 1),
+        ("reason-index-rules", "правила-індексу-міркування", 2),
+        ("reason-index-buckets", "кошики-індексу-міркування", 1),
+        ("reason-index-linear", "лінійний-індекс-міркування", 2),
+        ("reason-index-build-scan", "сканувати-індекс-міркування", 3),
+    )
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + bytes([0]) + data
+        ).hexdigest()
+
+    @classmethod
+    def _restore(cls, source: str) -> str:
+        if not source.endswith(cls.ALIAS_BLOCK):
+            raise AssertionError("English reason-index compatibility aliases drifted")
+        source = source[:-len(cls.ALIAS_BLOCK)]
+        for english, ukrainian, expected_calls in cls.PAIRS:
+            calls = source.count("(" + ukrainian)
+            if calls != expected_calls:
+                raise AssertionError(
+                    f"projection call count drift: {ukrainian}: {calls}"
+                )
+            source = source.replace("(" + ukrainian, "(" + english)
+            definition = f"(визначити {ukrainian}\\n"
+            if source.count(definition) != 1:
+                raise AssertionError(
+                    f"projection definition count drift: {ukrainian}"
+                )
+            source = source.replace(
+                definition, f"(визначити {english}\\n", 1
+            )
+        return source
+
+    def test_exact_ukr_helpers_preserve_source_and_english_api_aliases(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        for english, ukrainian, expected_calls in self.PAIRS:
+            with self.subTest(helper=english):
+                self.assertEqual(source.count("(" + ukrainian), expected_calls)
+                self.assertIn(f"(визначити {ukrainian}\\n", source)
+                self.assertIn(
+                    f"(визначити {english} {ukrainian})", source
+                )
+                self.assertEqual(source.count("(" + english), 0)
+        restored = self._restore(source)
+        self.assertEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+    def test_wrong_helper_peer_fails_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace(
+            "(режим-індексу-міркування",
+            "(лінійний-індекс-міркування",
+            1,
+        )
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(AssertionError, "projection call count drift"):
+            self._restore(mutant)

@@ -26,13 +26,13 @@
 ; D4:1001 CADR, D5:10011 CADDR, D3:011 CDR: no named selector alias.
 ; Canonical index schema: (schema mode original-rules buckets).
 ; D6:100111 CADDDR is ratified data, not silently callable here.
-(визначити reason-index-mode
+(визначити режим-індексу-міркування
   (функція (початкова-позиція-підрядка)
     (друге початкова-позиція-підрядка)))
-(визначити reason-index-rules
+(визначити правила-індексу-міркування
   (функція (початкова-позиція-підрядка)
     (третє початкова-позиція-підрядка)))
-(визначити reason-index-buckets
+(визначити кошики-індексу-міркування
   (функція (початкова-позиція-підрядка)
     (третє (решта початкова-позиція-підрядка))))
 
@@ -69,7 +69,7 @@
          (так (міркування-пошук-кошика predicate (решта buckets)))))
       (так (як-є ())))))
 
-(визначити reason-index-linear
+(визначити лінійний-індекс-міркування
   (функція (rules)
     (список *reason-index-schema* (як-є linear) rules (як-є ()))))
 
@@ -130,7 +130,7 @@
          (сполучити (перше-першого buckets) (зворот (решта-першого buckets)))
          (reason-index-normalize-buckets (решта buckets)))))))
 
-(визначити reason-index-build-scan
+(визначити сканувати-індекс-міркування
   (функція (remaining original buckets fuel)
     (за-умовою
       
@@ -144,7 +144,7 @@
          (за-умовою
            ; One non-indexable head is enough to require the exact historical
            ; scan, because that head may unify with predicates outside a bucket.
-           ((тотожне? predicate (як-є ())) (reason-index-linear original))
+           ((тотожне? predicate (як-є ())) (лінійний-індекс-міркування original))
            (так
             (нехай ((entry (міркування-пошук-кошика predicate buckets)))
               (за-умовою
@@ -152,9 +152,9 @@
                 ; Новий ключ: порожній запас => чесний linear fallback.
                 ((атом? entry)
                  (за-умовою
-                   ((атом? fuel) (reason-index-linear original))
+                   ((атом? fuel) (лінійний-індекс-міркування original))
                    (так
-                    (reason-index-build-scan
+                    (сканувати-індекс-міркування
                       (решта remaining)
                       original
                       (reason-index-add-reversed
@@ -162,7 +162,7 @@
                       (решта fuel)))))
                 ; Повторений ключ не займає жодного нового біта бюджету.
                 (так
-                 (reason-index-build-scan
+                 (сканувати-індекс-міркування
                    (решта remaining)
                    original
                    (reason-index-add-reversed
@@ -171,7 +171,7 @@
 
 (визначити reason-make-index
   (функція (rules)
-    (reason-index-build-scan rules rules (як-є ()) *reason-index-fuel*)))
+    (сканувати-індекс-міркування rules rules (як-є ()) *reason-index-fuel*)))
 
 (визначити reason-ensure-index
   (функція (rules-or-index)
@@ -186,14 +186,14 @@
   (функція (goal rules-or-index)
     (нехай ((початкова-позиція-підрядка (reason-ensure-index rules-or-index)))
       (за-умовою
-        ((тотожне? (reason-index-mode початкова-позиція-підрядка) (як-є linear))
-         (reason-index-rules початкова-позиція-підрядка))
+        ((тотожне? (режим-індексу-міркування початкова-позиція-підрядка) (як-є linear))
+         (правила-індексу-міркування початкова-позиція-підрядка))
         (так
          (нехай ((predicate (reason-term-predicate goal)))
            (за-умовою
-             ((тотожне? predicate (як-є ())) (reason-index-rules початкова-позиція-підрядка))
+             ((тотожне? predicate (як-є ())) (правила-індексу-міркування початкова-позиція-підрядка))
              (так
-              (нехай ((entry (міркування-пошук-кошика predicate (reason-index-buckets початкова-позиція-підрядка))))
+              (нехай ((entry (міркування-пошук-кошика predicate (кошики-індексу-міркування початкова-позиція-підрядка))))
                 (за-умовою
                   
                   ((атом? entry)  (як-є ()))
@@ -480,3 +480,11 @@
 (визначити підстановка-позначає-невдачу? failed-subst?)
 (визначити початкова-позиція-підрядка index)
 (визначити потік-виконання-кон'юнкція thread-conjunction)
+
+
+; Англомовні імена індексу лишаються сумісними входами до тих самих Lisp-значень.
+(визначити reason-index-mode режим-індексу-міркування)
+(визначити reason-index-rules правила-індексу-міркування)
+(визначити reason-index-buckets кошики-індексу-міркування)
+(визначити reason-index-linear лінійний-індекс-міркування)
+(визначити reason-index-build-scan сканувати-індекс-міркування)
