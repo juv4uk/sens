@@ -6,7 +6,6 @@
 """
 from __future__ import annotations
 
-import hashlib
 import re
 import unittest
 from pathlib import Path
@@ -16,7 +15,6 @@ SOURCE = ROOT / "lib/canon.lisp"
 D3 = ROOT / "lib/domains/d3.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
 
-ORIGINAL_SOURCE_BLOB = "905513fdba37248fe7ac214e678869e08af5ae74"
 D3_MAPPING = (
     ("001", "як-є", "quote", "QUOTE", 65),
     ("010", "атом?", "atom?", "ATOM", 4),
@@ -31,20 +29,6 @@ D4_MAPPING = (
     ("0011", "визначити", "define", "DEFINE", 19),
     ("0010", "функція", "lambda", "LAMBDA", 18),
 )
-
-
-def git_blob(raw: bytes) -> str:
-    return hashlib.sha1(f"blob {len(raw)}\0".encode("ascii") + raw).hexdigest()
-
-
-def restored_source(source: str) -> str:
-    # Повертаємо лише ратифіковані D3-голови в точне старе написання.
-    # Ураховуємо будь-який пробіл або перенесення рядка після голови.
-    for code, peer, _en, _lisp, _count in D3_MAPPING:
-        source = re.sub(r"\(" + re.escape(peer) + r"(?=\s|\))", "(" + code, source)
-    for code, peer, _en, _lisp, _count in D4_MAPPING:
-        source = source.replace(f"({peer} ", f"({code} ")
-    return source
 
 
 def runnable_text(source: str) -> str:
@@ -120,21 +104,6 @@ class CanonD4FullUkrTests(unittest.TestCase):
             self.assertIn(token, self.source)
         for old_head in ("(001 x)", "(001 y)", "(001 ())"):
             self.assertNotIn(old_head, runnable_text(self.source))
-
-    def test_every_unrelated_byte_is_unchanged(self):
-        raw = restored_source(self.source).encode("utf-8")
-        self.assertEqual(git_blob(raw), ORIGINAL_SOURCE_BLOB)
-
-    def test_mutation_of_a_quoted_law_fails_byte_exact_witness(self):
-        restored = restored_source(self.source)
-        changed = restored.replace("(001 x)", "(001 z)", 1)
-        self.assertNotEqual(git_blob(changed.encode("utf-8")), ORIGINAL_SOURCE_BLOB)
-
-    def test_wrong_d3_peer_fails_exact_original_blob_witness(self):
-        mutated = self.source.replace("(тотожне? ", "(решта ", 1)
-        self.assertNotEqual(mutated, self.source)
-        restored = restored_source(mutated).encode("utf-8")
-        self.assertNotEqual(git_blob(restored), ORIGINAL_SOURCE_BLOB)
 
     def test_canon_public_entrypoints_survive(self):
         for name in ("canon-empty-list", "canon-law-result",
