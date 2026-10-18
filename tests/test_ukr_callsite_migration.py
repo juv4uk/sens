@@ -385,5 +385,92 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         self.assertIn("перше", heads)
 
 
+class UnifyUkrDomainProjectionTests(unittest.TestCase):
+    """Current domain spellings; source-only, not a Python semantics evaluator."""
+
+    def test_unify_uses_ratified_d3_d4_ukr_calls(self):
+        root = Path(__file__).resolve().parents[1]
+        required = [
+                  [
+                            "атом?",
+                            28
+                  ],
+                  [
+                            "за-умовою",
+                            20
+                  ],
+                  [
+                            "перше",
+                            11
+                  ],
+                  [
+                            "порожній?",
+                            3
+                  ],
+                  [
+                            "приєднати",
+                            1
+                  ],
+                  [
+                            "решта",
+                            10
+                  ],
+                  [
+                            "список",
+                            2
+                  ],
+                  [
+                            "сполучити",
+                            3
+                  ],
+                  [
+                            "тотожне?",
+                            4
+                  ],
+                  [
+                            "функція",
+                            17
+                  ],
+                  [
+                            "як-є",
+                            29
+                  ]
+        ]
+        source = (root / "lib/unify.lisp").read_text(encoding="utf-8")
+        heads = [node.text for node in mod.candidate_heads(mod.parse(source))]
+        for name, minimum in required:
+            with self.subTest(head=name):
+                self.assertGreaterEqual(heads.count(name), minimum)
+        for width, bits, ukr in (
+            (3, "001", "як-є"), (3, "010", "атом?"),
+            (3, "011", "решта"), (3, "100", "перше"),
+            (3, "101", "тотожне?"), (3, "110", "за-умовою"),
+            (3, "111", "сполучити"), (4, "0010", "функція"),
+            (4, "0100", "хибне?"), (4, "0101", "порожній?"),
+            (4, "1110", "список"), (4, "1111", "приєднати"),
+        ):
+            with self.subTest(domain=width, bits=bits):
+                table = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
+                rows = [line for line in table.splitlines()
+                        if line.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(укр {ukr})", rows[0])
+
+    def test_unify_preserves_quoted_data_and_d1_identity(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "lib/unify.lisp").read_text(encoding="utf-8")
+        self.assertIn("(0011 unify", source)
+        self.assertIn("(0011 unify-walked", source)
+        self.assertIn("#d1:1 #d1:0", source)
+        self.assertIn("(0)", source)
+        # Quoted forms carry data; numeric-looking heads inside them are not calls.
+        sample = "(як-є (100 quoted)) (сполучити (як-є (0)) (перше xs))"
+        heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
+        self.assertNotIn("100", heads)
+        self.assertNotIn("0", heads)
+        self.assertIn("сполучити", heads)
+        self.assertIn("перше", heads)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
