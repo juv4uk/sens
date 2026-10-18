@@ -37,7 +37,8 @@ MIGRATED = ("lib/time.lisp", "lib/reason.lisp", "lib/utf8.lisp",
             "scripts/profile-read-file-stages.lisp",
             "scripts/profile-proven-byte-readfile-candidate.lisp", "scripts/release.lisp",
             "scripts/rust-retirement-valve.lisp", "scripts/rust-retirement-valve-enforce.lisp",
-            "scripts/symbol-table.lisp")
+            "scripts/symbol-table.lisp", "lib/tcp.lisp",
+            "scripts/semantic-authority-guard.lisp")
 
 
 def load_rows():

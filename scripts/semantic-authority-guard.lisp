@@ -9,26 +9,26 @@
 ; semantically derived from Rust implementation artifacts.
 
 (0011 changed
-  (STRING-CONTAINS? (READ-FILE "tests/semantic-authority-changes.lisp")))
+  (рядок-містить? (READ-FILE "tests/semantic-authority-changes.lisp")))
 
 (0011 exact-text?
   (0010 (left right)
     (110
-      ((EQUAL left right) (1) t)
+      ((однакові? left right) (так) t)
       (t t ()))))
 
 (0011 contains-any?
   (0010 (source needles)
     (110
       ((010 needles) () ())
-      ((STRING-CONTAINS? (100 needles) source) t)
+      ((рядок-містить? (перше needles) source) t)
       (t (contains-any? source (011 needles))))))
 
 (0011 language-authority-source?
   (0010 (path)
     (OR
-      (STRING-PREFIX? "lib/" path)
-      (STRING-PREFIX? "contracts/" path)
+      (рядок-префікс? "lib/" path)
+      (рядок-префікс? "contracts/" path)
       (exact-text? path "language-contract.lisp")
       (exact-text? path "my-lisp-constitution.lisp")
       ; Synthetic protected path used only by the guard self-test.
@@ -88,12 +88,12 @@
           (110
             ; Crucial asymmetry: do not even inspect host implementation text.
             ((0100 (language-authority-source? path))
-             (scan (011 rows)))
+             (накопичувати (решта rows)))
             (t
              (001000 ((raw-source (READ-FILE path)))
                (110
-                 ((0100 (STRINGP raw-source))
-                  (LIST
+                 ((хибне? (рядок? raw-source))
+                  (список
                     (001 semantic-authority-violation)
                     path
                     (001 unreadable-language-authority-source)
@@ -102,12 +102,20 @@
                   (001000 ((class (violation-class path raw-source)))
                     (110
                       ((101 class (001 host-to-language-authority-leak))
-                       (LIST
+                       (список
                          (001 semantic-authority-violation)
                          path
                          class
                          "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
                       (t
-                       (scan (011 rows)))))))))))))))
+                       (накопичувати (решта rows)))))))))))))))
 
-(PRINT (scan changed))
+(PRINT (накопичувати changed))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити однакові? EQUAL)
+(визначити список LIST)
+(визначити рядок-містить? STRING-CONTAINS?)
+(визначити рядок-префікс? STRING-PREFIX?)
+(визначити рядок? STRINGP)
+(визначити накопичувати scan)

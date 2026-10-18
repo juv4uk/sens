@@ -615,5 +615,90 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
 
 
 
+class MinimalRuntimeProfileUkrProjectionTests(unittest.TestCase):
+    """Exact D3/D4/D6 callheads use ratified укр peers; profile data stays inert."""
+
+    SOURCE = ROOT / "lib" / "machine" / "profile" / "minimal-runtime-x86-64.lisp"
+    ORIGINAL_BLOB = "6ec6e73e7b32c4f3f2c49f0464d191c606d2e1a2"
+    EXPECTED_OLD_HEAD_COUNTS = {
+        "100": 7, "101": 1, "110": 5, "111": 2, "1110": 23, "1111": 1,
+        "0011": 24, "001": 37, "0010": 21, "010": 9, "011": 8, "001000": 1,
+    }
+
+    def _projection(self):
+        mapping = {}
+        for bits in self.EXPECTED_OLD_HEAD_COUNTS:
+            width = len(bits)
+            self.assertIn(width, (3, 4, 6), f"unexpected exact domain width for {bits}")
+            table = ROOT / "lib" / "domains" / f"d{width}.lisp"
+            rows = [
+                line for line in table.read_text(encoding="utf-8").splitlines()
+                if line.strip().startswith(f"({bits} ")
+            ]
+            self.assertEqual(len(rows), 1, f"exact resident row must be unique: D{width}:{bits}")
+            peer = re.search(r"\(укр\s+([^\s()]+)\)", rows[0])
+            self.assertIsNotNone(peer, f"D{width}:{bits} has no named укр projection")
+            mapping[bits] = peer.group(1)
+        self.assertEqual(
+            len(mapping), len(set(mapping.values())),
+            "this source slice must remain exactly reversible by domain-qualified identities",
+        )
+        return mapping
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def test_profile_has_no_active_binary_callheads_and_uses_ratified_ukr(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mapping = self._projection()
+        projected, counts, unexpected, forms = CompilerNucleusUkrDomainProjectionTests._rewrite_heads(
+            source, mapping
+        )
+        self.assertEqual(counts, {}, "active exact D3/D4/D6 numeric callheads remain")
+        self.assertEqual(unexpected, [], "unmapped active domain callhead")
+        self.assertEqual(projected, source, "profile is not on the ratified укр projection")
+        self.assertEqual(forms, 24)
+        self.assertNotIn("(001000", source, "D6:001000 must use its exact укр peer")
+        for bits, peer in mapping.items():
+            row = [
+                line for line in (ROOT / "lib" / "domains" / f"d{len(bits)}.lisp")
+                .read_text(encoding="utf-8").splitlines()
+                if line.strip().startswith(f"({bits} ")
+            ]
+            self.assertEqual(len(row), 1)
+            self.assertIn(f"(укр {peer})", row[0])
+
+    def test_inverse_projection_restores_exact_original_blob_and_all_139_heads(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mapping = self._projection()
+        reverse = {peer: bits for bits, peer in mapping.items()}
+        self.assertEqual(len(reverse), len(mapping))
+        restored, counts, unexpected, forms = CompilerNucleusUkrDomainProjectionTests._rewrite_heads(
+            source, reverse
+        )
+        self.assertEqual(
+            counts,
+            {mapping[bits]: n for bits, n in self.EXPECTED_OLD_HEAD_COUNTS.items()},
+        )
+        self.assertEqual(unexpected, [])
+        self.assertEqual(forms, 24)
+        self.assertEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+    def test_wrong_domain_peer_fails_the_exact_inverse_witness(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mapping = self._projection()
+        reverse = {peer: bits for bits, peer in mapping.items()}
+        mutant = source.replace("(за-умовою", "(тотожне?", 1)
+        self.assertNotEqual(mutant, source)
+        restored, _, _, _ = CompilerNucleusUkrDomainProjectionTests._rewrite_heads(
+            mutant, reverse
+        )
+        self.assertNotEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

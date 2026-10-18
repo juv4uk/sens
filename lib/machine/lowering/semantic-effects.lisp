@@ -10,25 +10,25 @@
 ;
 ; Generic effect-definition modules must not copy this router.
 
-(0011 machine-effect-current-domain-key?
-  (0010 (width bits expected-width expected-bits)
-    (110
+(визначити machine-effect-current-domain-key?
+  (функція (width bits expected-width expected-bits)
+    (за-умовою
       ((тотожне? width expected-width)
        (тотожне? bits expected-bits))
-      (#d1:1
-       #d1:0))))
+      (так
+       ні))))
 
 ; Current bounded arithmetic mappings. Exact D5 identity remains upstream
 ; semantic authority; this seam only selects already-defined target-neutral
 ; mechanism requests.
-(0011 machine-lower-current-binary-effect
-  (0010 (width bits left right)
-    (110
+(визначити machine-lower-current-binary-effect
+  (функція (width bits left right)
+    (за-умовою
       ((machine-effect-current-domain-key? width bits 5 10)
        (machine-effect-bounded-u64-add left right))
       ((machine-effect-current-domain-key? width bits 5 11)
        (machine-effect-bounded-u64-sub left right))
       ((machine-effect-current-domain-key? width bits 5 22)
        (machine-effect-bounded-u64-mul left right))
-      (#d1:1
-       (001 machine-effect-not-applicable)))))
+      (так
+       (як-є machine-effect-not-applicable)))))

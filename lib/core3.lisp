@@ -13,27 +13,27 @@
 
 ; D3 owns the four-item proper list; no host QUOTE-list constructor.
 ; The order and empty tail are checked by binary SENS, not Python/Rust laws.
-(0011 core3-executors
+(визначити core3-executors
   (сполучити (як-є common-lisp)
     (сполучити (як-є prolog)
       (сполучити (як-є clips)
         (сполучити (як-є datalog)
           (як-є ()))))))
 
-(0011 core3-route
-  (0010 (sid executor)
+(визначити core3-route
+  (функція (sid executor)
     (mechanism-select sid executor)))
 
-(0011 core3-add-routes
-  (0010 (sid)
+(визначити core3-add-routes
+  (функція (sid)
     (список
       (core3-route sid (як-є common-lisp))
       (core3-route sid (як-є prolog))
       (core3-route sid (як-є clips))
       (core3-route sid (як-є datalog)))))
 
-(0011 core3-profile-status
-  (0010 ()
+(визначити core3-profile-status
+  (функція ()
     (як-є
       (core3
         (contract 7 0)

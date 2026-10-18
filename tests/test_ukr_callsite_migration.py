@@ -96,7 +96,8 @@ class CallsiteAuditTests(unittest.TestCase):
         }
         self.assertEqual(sorted(migrated.intersection(active_heads)), [])
         self.assertIn("(001 canon-law-result)", source)  # inert result tag, not a call
-        self.assertIn("(0011 canon-law-result", source)  # definition spelling kept as compatibility evidence
+        self.assertIn("(визначити canon-law-result", source)  # exact D4:0011 full укр, не нова identity
+        self.assertNotIn("(0011 canon-law-result", source)  # колишня coded DEFINE більше не source
 
         index, _ = mod.peer_index(repo_root)
         exact = {
@@ -577,6 +578,42 @@ class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
         self.assertNotEqual(
             next(s for s in d3.splitlines() if s.strip().startswith("(100 (ук ")),
             next(s for s in d3.splitlines() if s.strip().startswith("(011 (ук ")),
+        )
+
+
+
+class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
+    """Один повністю доведений D4-фрагмент активного українського прикладу."""
+
+    def test_guest_list_definition_uses_ratified_full_ukr_d4_forms(self):
+        import hashlib
+
+        root = Path(__file__).resolve().parents[1]
+        path = root / "examples/ukrainian-greeting.lisp"
+        original_bytes = path.read_bytes()
+        source = original_bytes.decode("utf-8")
+        old_form = "(0011 гості (1110 'Олена 'Тарас 'Вова))"
+        new_form = "(визначити гості (список 'Олена 'Тарас 'Вова))"
+
+        self.assertEqual(source.count(new_form), 1)
+        self.assertNotIn(old_form, source)
+        self.assertIn("'Олена 'Тарас 'Вова", source)
+        mod.parse(source)
+
+        for bits, spelling in (("0011", "визначити"), ("1110", "список")):
+            table = (root / "lib/domains/d4.lisp").read_text(encoding="utf-8")
+            rows = [line for line in table.splitlines()
+                    if line.strip().startswith(f"({bits} (ук ")]
+            self.assertEqual(len(rows), 1)
+            self.assertIn(f"(укр {spelling})", rows[0])
+
+        restored = source.replace(new_form, old_form, 1).encode("utf-8")
+        digest = hashlib.sha1(
+            b"blob " + str(len(restored)).encode("ascii") + b"\0" + restored
+        ).hexdigest()
+        self.assertEqual(
+            digest, "0c35ae861fdbed1edbe4fe932b8266dd4b51b869",
+            "після зворотної заміни початковий Git blob має відновлюватися побайтно",
         )
 
 

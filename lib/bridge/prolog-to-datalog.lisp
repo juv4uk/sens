@@ -18,45 +18,45 @@
 ;
 ; Failure is named data, never ()/false.
 
-(0011 prolog-values-to-datalog-facts
-  (0010 (role values)
-    (110
+(визначити prolog-values-to-datalog-facts
+  (функція (role values)
+    (за-умовою
       
-      ((0100 (010 values))
-       (111 (1110 role (100 values))
+      ((хибне? (атом? values))
+       (сполучити (список role (перше values))
              (перетворити-значення-пролог-на-факти-даталог role (решта values)))))))
 
-(0011 prolog-substitutions-to-datalog-facts
-  (0010 (observation)
-    ((0010 (source-ref-row variable-row values-row)
-      (110
-        ((0100 (010 source-ref-row))
-         (1110 (001 projection-failure) (001 missing-source-ref)))
-        ((010 source-ref-row) 
-         (1110 (001 projection-failure) (001 malformed-source-ref)))
-        ((0100 (010 source-ref-row))
-         (110
-           ((0100 (010 variable-row))
-            (1110 (001 projection-failure) (001 missing-variable-role)))
-           ((010 variable-row) 
-            (1110 (001 projection-failure) (001 malformed-variable-role)))
-           ((0100 (010 variable-row))
-            (110
-              ((0100 (010 values-row))
-               (1110 (001 projection-failure) (001 missing-values)))
-              ((010 values-row) 
-               (1110 (001 projection-failure) (001 malformed-values)))
-              ((0100 (010 values-row))
-               (1110
-                 (001 projection-result)
-                 (1110 (001 projection)
-                       (001 prolog-substitutions-to-datalog-facts))
-                 (1110 (001 source-ref)
-                       (100 (011 source-ref-row)))
-                 (1110 (001 facts)
+(визначити prolog-substitutions-to-datalog-facts
+  (функція (observation)
+    ((функція (source-ref-row variable-row values-row)
+      (за-умовою
+        ((хибне? (атом? source-ref-row))
+         (список (як-є projection-failure) (як-є missing-source-ref)))
+        ((атом? source-ref-row) 
+         (список (як-є projection-failure) (як-є malformed-source-ref)))
+        ((хибне? (атом? source-ref-row))
+         (за-умовою
+           ((хибне? (атом? variable-row))
+            (список (як-є projection-failure) (як-є missing-variable-role)))
+           ((атом? variable-row) 
+            (список (як-є projection-failure) (як-є malformed-variable-role)))
+           ((хибне? (атом? variable-row))
+            (за-умовою
+              ((хибне? (атом? values-row))
+               (список (як-є projection-failure) (як-є missing-values)))
+              ((атом? values-row) 
+               (список (як-є projection-failure) (як-є malformed-values)))
+              ((хибне? (атом? values-row))
+               (список
+                 (як-є projection-result)
+                 (список (як-є projection)
+                       (як-є prolog-substitutions-to-datalog-facts))
+                 (список (як-є source-ref)
+                       (перше (решта source-ref-row)))
+                 (список (як-є facts)
                        (перетворити-значення-пролог-на-факти-даталог
-                         (100 (011 variable-row))
-                         (011 values-row)))))))))))
+                         (перше (решта variable-row))
+                         (решта values-row)))))))))))
      (11100 (001 source-ref) (011 observation))
      (11100 (001 variable) (011 observation))
      (11100 (001 values) (011 observation)))))

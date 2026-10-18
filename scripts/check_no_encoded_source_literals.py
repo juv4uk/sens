@@ -142,6 +142,77 @@ def added_lisp_lines_from_diff(diff: str) -> list[tuple[str, int, str]]:
     return rows
 
 
+
+def paired_replacement_lines_from_diff(diff: str) -> dict[tuple[str, int], int]:
+    """Pair old/new lines only within equal-size contiguous Git edit blocks.
+
+    New files, line reflows and unmatched additions are never exempt.
+    """
+    path: str | None = None
+    pairs: dict[tuple[str, int], int] = {}
+    removed: list[int] = []
+    added: list[int] = []
+    old_line = new_line = 0
+    hunk = re.compile(r"^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+    def flush() -> None:
+        if path is not None and len(removed) == len(added):
+            for before, after in zip(removed, added):
+                pairs[(path, after)] = before
+        removed.clear()
+        added.clear()
+
+    for line in diff.splitlines():
+        if line.startswith("diff --git "):
+            flush()
+            path = None
+        elif line.startswith("+++ b/"):
+            flush()
+            path = line[6:] if line[6:].endswith(".lisp") else None
+        elif line.startswith("--- "):
+            continue
+        elif line.startswith("@@"):
+            flush()
+            match = hunk.match(line)
+            if match is None:
+                path = None
+            else:
+                old_line, new_line = map(int, match.groups())
+        elif line.startswith("-"):
+            removed.append(old_line)
+            old_line += 1
+        elif line.startswith("+"):
+            added.append(new_line)
+            new_line += 1
+        elif line.startswith(" "):
+            flush()
+            old_line += 1
+            new_line += 1
+    flush()
+    return pairs
+
+
+def _base_encoded_tokens_by_line(
+    root: Path, base: str | None, path: str,
+) -> dict[int, list[str]]:
+    """Look up actual old CODE tokens, with full string/comment context."""
+    try:
+        previous = subprocess.run(
+            ["git", "show", f"{base or 'HEAD'}:{path}"],
+            cwd=root, check=True, text=True, encoding="utf-8",
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+    except (OSError, UnicodeError, subprocess.CalledProcessError):
+        return {}
+    tokens: dict[int, list[str]] = {}
+    for finding in find_forbidden_literals(previous, path=path):
+        if finding.reason == "encoded domain/wire word":
+            tokens.setdefault(finding.line, []).append(finding.token)
+    return tokens
+
+
+
+
 def _git_diff(root: Path, base: str | None) -> str:
     command = ["git", "diff", "--no-ext-diff", "--no-renames", "--unified=0"]
     if base:
@@ -175,12 +246,40 @@ def check(root: Path, base: str | None = None) -> tuple[int, list[tuple[str, Fin
             raise ValueError(f"cannot read new Lisp source {path}: {error}") from error
         additions[path] = set(range(1, line_count + 1))
 
+    # A projected call head can share a line with an UNCHANGED D24 operand.
+    # Admit only the same ordered code tokens verified in a paired Git-base row.
+    paired = paired_replacement_lines_from_diff(diff)
     violations: list[tuple[str, Finding]] = []
     for path, added_lines in additions.items():
         source = (root / path).read_text(encoding="utf-8")
-        for finding in find_forbidden_literals(source, path=path):
-            if finding.line in added_lines:
-                violations.append((path, finding))
+        findings = find_forbidden_literals(source, path=path)
+        current_encoded: dict[int, list[str]] = {}
+        for item in findings:
+            if item.reason == "encoded domain/wire word":
+                current_encoded.setdefault(item.line, []).append(item.token)
+        needs_base = any(
+            item.line in added_lines
+            and item.reason == "encoded domain/wire word"
+            and (path, item.line) in paired
+            for item in findings
+        )
+        previous_encoded = (
+            _base_encoded_tokens_by_line(root, base, path) if needs_base else {}
+        )
+        for finding in findings:
+            if finding.line not in added_lines:
+                continue
+            old_line = paired.get((path, finding.line))
+            if (
+                finding.reason == "encoded domain/wire word"
+                and old_line is not None
+                and previous_encoded.get(old_line)
+                and previous_encoded[old_line] == current_encoded.get(finding.line)
+            ):
+                # No new typed token: still reject new/changed encoded words,
+                # numeric heads, missing base rows, and multiline quoted data.
+                continue
+            violations.append((path, finding))
     return sum(map(len, additions.values())), violations
 
 

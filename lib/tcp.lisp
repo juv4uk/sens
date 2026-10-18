@@ -19,7 +19,7 @@
 
 (визначити tcp-listen
   (функція (port)
-    (tcp-listen-on "0.0.0.0" port)))
+    (протокол-передавання-слухати-на "0.0.0.0" port)))
 
 (визначити tcp-read-bytes->text
   (функція (bytes)
@@ -29,15 +29,15 @@
           (друге decoded))
          (так
           decoded)))
-     (utf8-decode-string bytes))))
+     (кодування-юнікод-8-декодувати-рядок bytes))))
 
 (визначити tcp-read
   (функція (connection)
-    (tcp-read-bytes->text (tcp-read-raw connection))))
+    (протокол-передавання-читати-байти-текст (tcp-read-raw connection))))
 
 (визначити tcp-write-text->bytes
   (функція (text)
-    (utf8-encode-string text)))
+    (кодування-юнікод-8-кодувати-рядок text)))
 
 ; Return the original text after a successful raw write so the public result
 ; remains compatible with the historical tcp-write surface while encoding
@@ -45,11 +45,19 @@
 (визначити tcp-write-via-raw
   (функція (connection text)
     ((функція (written) text)
-     (tcp-write-raw connection (tcp-write-text->bytes text)))))
+     (tcp-write-raw connection (протокол-передавання-записати-текст-байти text)))))
 
 (визначити tcp-write
   (функція (connection text)
-    (tcp-write-via-raw connection text)))
+    (протокол-передавання-записати-через-сирий connection text)))
 
 ; Stable surface peers are projected by load_tcp_library after the TCP
 ; closures exist. Avoid the retired per-file post-core materializer.
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити протокол-передавання-слухати-на tcp-listen-on)
+(визначити протокол-передавання-читати-байти-текст tcp-read-bytes->text)
+(визначити протокол-передавання-записати-текст-байти tcp-write-text->bytes)
+(визначити протокол-передавання-записати-через-сирий tcp-write-via-raw)
+(визначити кодування-юнікод-8-декодувати-рядок utf8-decode-string)
+(визначити кодування-юнікод-8-кодувати-рядок utf8-encode-string)

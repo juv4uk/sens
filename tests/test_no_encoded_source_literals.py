@@ -132,6 +132,70 @@ diff --git a/tests/b.lisp b/tests/b.lisp
             self.assertEqual(decimal_result.returncode, 0, decimal_result.stderr)
             self.assertIn("SOURCE_ENCODED_LITERAL_GUARD_PASS", decimal_result.stdout)
 
+
+    def test_projected_head_preserves_existing_d24_but_not_new_wire_words(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+            subprocess.run(["git", "-C", str(root), "config",
+                            "user.email", "test@example.invalid"], check=True)
+            path = root / "lib/meta-eval.lisp"
+            path.parent.mkdir(parents=True)
+            zero = "#d24:000000000000000000000000"
+            one = "#d24:000000000000000000000001"
+
+            def commit(message: str, source: str) -> None:
+                path.write_text(source, encoding="utf-8")
+                subprocess.run(["git", "-C", str(root), "add",
+                                "lib/meta-eval.lisp"], check=True)
+                subprocess.run(["git", "-C", str(root), "commit", "-qm", message], check=True)
+
+            commit("base", f"((010 params) {zero})\n")
+            base = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"],
+                check=True, text=True, stdout=subprocess.PIPE,
+            ).stdout.strip()
+            commit("ukr surface", f"((атом? params) {zero})\n")
+            added, findings = CHECK.check(root, base)
+            self.assertEqual(added, 1)
+            self.assertEqual(findings, [], findings)
+
+            commit("new word", f"((атом? params) {zero} {one})\n")
+            _, findings = CHECK.check(root, base)
+            self.assertIn(one, [item.token for _, item in findings])
+
+            commit("mutated word", f"((атом? params) {one})\n")
+            _, findings = CHECK.check(root, base)
+            self.assertIn(one, [item.token for _, item in findings])
+
+            commit("numeric head", f"((110 params) {zero})\n")
+            _, findings = CHECK.check(root, base)
+            self.assertIn("110", [item.token for _, item in findings])
+
+    def test_base_multiline_quoted_token_cannot_exempt_new_code(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+            subprocess.run(["git", "-C", str(root), "config",
+                            "user.email", "test@example.invalid"], check=True)
+            path = root / "source.lisp"
+            token = "#d24:000000000000000000000001"
+            path.write_text(f'(показати "рядок\n{token}")\n', encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "source.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "base"], check=True)
+            base = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"],
+                check=True, text=True, stdout=subprocess.PIPE,
+            ).stdout.strip()
+            path.write_text(f'(показати "рядок")\n(сума {token})\n', encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "source.lisp"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "new code"], check=True)
+            _, findings = CHECK.check(root, base)
+            self.assertIn(token, [item.token for _, item in findings])
+
+
     def test_repository_gate_accepts_domain_rows_but_rejects_numeric_calls(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
