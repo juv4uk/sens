@@ -1,8 +1,9 @@
 ; #1046 — transitional executor metadata subordinate to Canon()/function table.
 ;
-; Migrated: every row key is an exact 8-bit SID coordinate (width = identity).
-; No host truthiness. This file cannot mint semantic identities or define
-; language meaning. Mechanism admission only.
+; Історичні SID8-біти є свідченням міграції, не чинним доменом D8.
+; Історичний SID8:00001100 (PLUS) точно відповідає D5:01010, укр додати.
+; Не переносити за рівністю байта: D8:00001100 означає зменшити-на-1.
+; Цей файл описує механізми, а не ратифікує семантику чи виконуваність.
 ;
 ; Identity authority: lib/surface/semantic-registry.lisp
 ; Every exact function below must already exist in the canonical function table.
@@ -37,11 +38,11 @@
     (відобразити-залишки-з-порожнім evaluator define-form)
     ; Existing function + only. These rows admit executors; they do not define +.
     ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
-    ; Four islands share exact SID 00001100 — bit pattern is the identity.
-    (зменшити-на-1 common-lisp bounded-exact-add)
-    (зменшити-на-1 prolog bounded-exact-add)
-    (зменшити-на-1 clips bounded-exact-add)
-    (зменшити-на-1 datalog bounded-exact-add))
+    ; Чотири острови виконують додавання (SID8:00001100 → D5:01010).
+    (додати common-lisp bounded-exact-add)
+    (додати prolog bounded-exact-add)
+    (додати clips bounded-exact-add)
+    (додати datalog bounded-exact-add))
   ; #1422 — profile selection precedes host mechanism lookup.
   ; Mechanical registered-host route for existing SENS function 10101000 under Core3.
   ; Defines no kernel syntax, surface spelling, result law, or host availability.
