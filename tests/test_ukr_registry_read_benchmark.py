@@ -1,0 +1,108 @@
+"""Exact Ukrainian D3/D4 projection for the semantic-registry read benchmark."""
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "scripts" / "benchmark-semantic-registry-read.lisp"
+ORIGINAL_BLOB = "c5b5e40403efeb8bfd22ab296d088697c3b0c39e"
+# (old exact-width source head, full Ukrainian projection, exact count)
+REWRITES = (
+    ("(0011 ", "(визначити ", 5),  # D4:0011 DEFINE
+    ("(1110 ", "(список ", 5),     # D4:1110 LIST
+    ("(001 ", "(як-є ", 5),        # D3:001 QUOTE
+    ("(100 ", "(перше ", 2),       # D3:100 CAR
+)
+
+
+def git_blob_sha(payload: bytes) -> str:
+    header = b"blob " + str(len(payload)).encode("ascii") + b"\0"
+    return hashlib.sha1(header + payload).hexdigest()
+
+
+def mask_comments_and_strings(source: str) -> str:
+    """Preserve offsets while hiding non-executable comments and strings."""
+    out = list(source)
+    i = 0
+    while i < len(source):
+                if ord(source[i]) == 92:
+            while i < len(source) and source[i] != "\n":
+                out[i] = " "
+                i += 1
+        elif source[i] == '"':
+            out[i] = " "
+            i += 1
+            while i < len(source):
+                if source[i] == "\\\\":
+                    out[i] = " "
+                    if i + 1 < len(source) and source[i + 1] != "\n":
+                        out[i + 1] = " "
+                    i += 2
+                elif source[i] == '"':
+                    out[i] = " "
+                    i += 1
+                    break
+                else:
+                    if source[i] != "\n":
+                        out[i] = " "
+                    i += 1
+        else:
+            i += 1
+    return "".join(out)
+
+
+def paren_depth(source: str) -> int:
+    depth = 0
+    for char in mask_comments_and_strings(source):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth < 0:
+                return depth
+    return depth
+
+
+class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
+    def test_full_ukr_heads_have_exact_ratified_counts(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        visible = mask_comments_and_strings(source)
+        for old, new, count in REWRITES:
+            with self.subTest(old=old):
+                self.assertEqual(source.count(old), count,
+                                 "only these original heads may be represented")
+                self.assertEqual(visible.count(old), count,
+                                 "a replacement target may not come from a comment/string")
+                self.assertEqual(source.count(new), count)
+                self.assertEqual(visible.count(new), count)
+        self.assertEqual(paren_depth(source), 0)
+
+    def test_inverse_restores_the_original_git_blob_byte_exactly(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        restored = source
+        for old, new, count in reversed(REWRITES):
+            self.assertEqual(restored.count(new), count)
+            restored = restored.replace(new, old)
+        payload = restored.encode("utf-8")
+        self.assertEqual(git_blob_sha(payload), ORIGINAL_BLOB)
+        self.assertEqual(paren_depth(restored), 0)
+
+    def test_d8_d9_and_measurement_fields_remain_unchanged(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        restored = source
+        for old, new, _ in reversed(REWRITES):
+            restored = restored.replace(new, old)
+        for token in ("01011010", "110110111", "110101001", "11011011",
+                      "01011 after-read started", "01011 after-parse after-read",
+                      "01011 after-parse started"):
+            self.assertIn(token, restored)
+        self.assertEqual(source.count("(визначити "), 5)
+        self.assertEqual(source.count("(список "), 5)
+        self.assertEqual(source.count("(як-є "), 5)
+        self.assertEqual(source.count("(перше "), 2)
+
+
+if __name__ == "__main__":
+    unittest.main()
