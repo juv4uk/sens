@@ -4,10 +4,44 @@ from pathlib import Path
 import re
 import unittest
 
+# Git blob вихідного активного файла: перевірка незмінності даних/AST.
+BEFORE_PROCESS_BLOB = "93bd6b39ba4097bda0a8c14aaf5ccc73e482ce49"
+EXACT_HEADS = {"001": "як-є", "011": "решта", "100": "перше",
+               "101": "тотожне?", "110": "за-умовою",
+               "0010": "функція", "0011": "визначити",
+               "0100": "хибне?", "1001": "друге",
+               "1110": "список", "10011": "третє"}
+INVERSE_HEADS = {name: bits for bits, name in EXACT_HEADS.items()}
+
+
+def restore_original_source(source: str) -> str:
+    """Повернути лише current-D3/D4/D5 heads і типізовані D1-предикати."""
+    pattern = re.compile(r"\(\s*(" + "|".join(
+        re.escape(name) for name in sorted(INVERSE_HEADS, key=len, reverse=True)
+    ) + r")(?=\s|\)|$)")
+    out = []
+    for line in source.splitlines(keepends=True):
+        if line.lstrip().startswith(";"):
+            out.append(line)
+        else:
+            previous = pattern.sub(
+                lambda m: m.group(0).replace(m.group(1), INVERSE_HEADS[m.group(1)]),
+                line,
+            )
+            out.append(re.sub(r"(?<=\()так(?=\s|\)|$)", "#d1:1", previous))
+    return "".join(out)
+
+
+def source_blob_sha(source: str) -> str:
+    import hashlib
+    data = source.encode("utf-8")
+    return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FILE = ROOT / "lib/process.lisp"
 OLD = "(010 (001 ()))"
-NEW = "#d1:1"
+NEW = "(так"
 
 
 def ast(source: str):
@@ -45,18 +79,18 @@ def domain_count():
 
 
 def audit(source: str):
-    if source.count(NEW) != 5 or OLD in source:
+    if source.count(NEW) != 5 or OLD in source or "#d1:1" in source:
         raise ValueError("five D1 W1 direct constants required")
     # No full-file SHA oracle: a separate ratified D4 migration may legitimately
     # change production bytes. Provenance belongs to Git history and review.
     # Here we guard only exact D1 source and D3 two-branch structure.
     parsed = ast(source)
-    if len(parsed) != 8 or sum(1 for form in parsed if isinstance(form,list) and form and form[0] == "0011") != 7:
+    if len(parsed) != 8 or sum(1 for form in parsed if isinstance(form,list) and form and form[0] == "визначити") != 7:
         raise ValueError("seven process definitions plus quoted trailing data must remain")
     def visit(node):
         if not isinstance(node, list):
             return
-        if node and node[0] == "110":
+        if node and node[0] == "за-умовою":
             for branch in node[1:]:
                 if not isinstance(branch, list) or len(branch) != 2:
                     raise ValueError("only two-part D3:COND clauses admitted")
@@ -64,6 +98,8 @@ def audit(source: str):
             visit(item)
     for row in parsed:
         visit(row)
+    if source_blob_sha(restore_original_source(source)) != BEFORE_PROCESS_BLOB:
+        raise ValueError("порушено тотожність процесної програми/даних")
     return len(source.encode("utf8"))
 
 
@@ -92,20 +128,46 @@ class ProcessDirectD1(unittest.TestCase):
 
     def test_mutations_fail_closed(self):
         for corrupted in (
-            self.source.replace(NEW, "1", 1),
-            self.source.replace(NEW, "0", 1),
-            self.source.replace(NEW, "(001 ())", 1),
-            self.source.replace(NEW, "#d1:0", 1),
+            self.source.replace(NEW, "(1", 1),
+            self.source.replace(NEW, "(0", 1),
+            self.source.replace(NEW, "(як-є ())", 1),
+            self.source.replace(NEW, "(ні", 1),
         ):
             with self.assertRaises(ValueError):
                 audit(corrupted)
 
+    def test_exact_current_domain_surface_and_git_blob_inverse(self):
+        for bits, name in EXACT_HEADS.items():
+            domain = (ROOT / f"lib/domains/d{len(bits)}.lisp").read_text(encoding="utf-8")
+            row = re.compile(
+                rf"(?m)^\s*\({re.escape(bits)}\s+\(ук\s+[^()\s]+\)\s+"
+                rf"\(укр\s+{re.escape(name)}\)"
+            )
+            self.assertRegex(domain, row)
+        self.assertEqual(
+            source_blob_sha(restore_original_source(self.source)),
+            BEFORE_PROCESS_BLOB,
+        )
+        self.assertEqual(self.source.count("(так"), 5)
+        self.assertNotIn("#d1:1", self.source)
+
+    def test_wrong_peer_and_quoted_data_mutants_rejected(self):
+        for broken in (
+            self.source.replace("(друге raw)", "(третє raw)", 1),
+            self.source.replace("(список", "(сполучити", 1),
+            self.source.replace("(як-є process-result)", "(як-є changed)", 1),
+            self.source.replace("(так", "(ні", 1),
+        ):
+            if broken != self.source:
+                with self.assertRaises(ValueError):
+                    audit(broken)
+
     def test_numeric_exit_code_and_structural_nil_unchanged(self):
         data = self.source
-        self.assertRegex(data, r"\(\(101 code \(001 \(\)\)\)\s+-1\)")
+        self.assertRegex(data, r"\(\(тотожне\? code \(як-є \(\)\)\)\s+-1\)")
         self.assertIn("(process-raw-exit-code raw)", data)
         self.assertIn("(utf8-decode-string (process-raw-stderr-bytes raw))", data)
-        self.assertIn("(001 (postcore-materialization-debug skipped))", data)
+        self.assertIn("(як-є (postcore-materialization-debug skipped))", data)
 
 
 if __name__ == "__main__":

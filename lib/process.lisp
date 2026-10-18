@@ -9,74 +9,74 @@
 ; exit observation, and byte capture. This layer owns UTF-8 interpretation.
 ; Load `lib/utf8.lisp` before this file.
 
-(0011 process-raw-exit-code
-  (0010 (raw)
-    (1001 raw)))
+(визначити process-raw-exit-code
+  (функція (raw)
+    (друге raw)))
 
-(0011 process-raw-stdout-bytes
-  (0010 (raw)
-    (10011 raw)))
+(визначити process-raw-stdout-bytes
+  (функція (raw)
+    (третє raw)))
 
-(0011 process-raw-stderr-bytes
-  (0010 (raw)
-    (100 (011 (011 (011 raw))))))
+(визначити process-raw-stderr-bytes
+  (функція (raw)
+    (перше (решта (решта (решта raw))))))
 
-(0011 process-result->text
-  (0010 (raw)
-    (110
-      ((0100 (101 (100 raw) (001 process-result)))
-       (1110 (001 rejected) (001 invalid-process-result)))
-      ((101 (100 raw) (001 process-result))
-       ((0010 (stdout-result stderr-result)
-        (110
-           ((0100 (101 (100 stdout-result) (001 decoded)))
-            (1110 (001 rejected) (001 stdout-invalid-utf8)))
-           ((101 (100 stdout-result) (001 decoded))
-            (110
-              ((0100 (101 (100 stderr-result) (001 decoded)))
-               (1110 (001 rejected) (001 stderr-invalid-utf8)))
-              ((101 (100 stderr-result) (001 decoded))
-               (1110
-                 (001 decoded-process)
+(визначити process-result->text
+  (функція (raw)
+    (за-умовою
+      ((хибне? (тотожне? (перше raw) (як-є process-result)))
+       (список (як-є rejected) (як-є invalid-process-result)))
+      ((тотожне? (перше raw) (як-є process-result))
+       ((функція (stdout-result stderr-result)
+        (за-умовою
+           ((хибне? (тотожне? (перше stdout-result) (як-є decoded)))
+            (список (як-є rejected) (як-є stdout-invalid-utf8)))
+           ((тотожне? (перше stdout-result) (як-є decoded))
+            (за-умовою
+              ((хибне? (тотожне? (перше stderr-result) (як-є decoded)))
+               (список (як-є rejected) (як-є stderr-invalid-utf8)))
+              ((тотожне? (перше stderr-result) (як-є decoded))
+               (список
+                 (як-є decoded-process)
                  (process-raw-exit-code raw)
-                 (1001 stdout-result)
-                 (1001 stderr-result)))
-              (#d1:1
-               (1110 (001 rejected) (001 stderr-invalid-utf8)))))
-           (#d1:1
-            (1110 (001 rejected) (001 stdout-invalid-utf8)))))
+                 (друге stdout-result)
+                 (друге stderr-result)))
+              (так
+               (список (як-є rejected) (як-є stderr-invalid-utf8)))))
+           (так
+            (список (як-є rejected) (як-є stdout-invalid-utf8)))))
        (utf8-decode-string (process-raw-stdout-bytes raw))
        (utf8-decode-string (process-raw-stderr-bytes raw))))
-      (#d1:1
-       (1110 (001 rejected) (001 invalid-process-result))))))
+      (так
+       (список (як-є rejected) (як-є invalid-process-result))))))
 
-(0011 process-run-text
-  (0010 (program args)
+(визначити process-run-text
+  (функція (program args)
     (process-result->text (process-run-raw program args))))
 
 ; Public compatibility surface. Valid UTF-8 preserves the historical
 ; 3-element result shape. Invalid UTF-8 returns explicit rejection.
-(0011 process-public-exit-code
-  (0010 (code)
-    (110
-      ((101 code (001 ())) -1)
-      ((0100 (101 code (001 ()))) code)
-      (#d1:1 -1))))
+(визначити process-public-exit-code
+  (функція (code)
+    (за-умовою
+      ((тотожне? code (як-є ())) -1)
+      ((хибне? (тотожне? code (як-є ()))) code)
+      (так -1))))
 
-(0011 process-run
-  (0010 (program args)
-    ((0010 (result)
-        (110
-        ((101 (100 result) (001 decoded-process))
-         (1110
-           (process-public-exit-code (1001 result))
-           (10011 result)
-           (100 (011 (011 (011 result))))))
-        ((0100 (101 (100 result) (001 decoded-process)))
+(визначити process-run
+  (функція (program args)
+    ((функція (result)
+        (за-умовою
+        ((тотожне? (перше result) (як-є decoded-process))
+         (список
+           (process-public-exit-code (друге result))
+           (третє result)
+           (перше (решта (решта (решта result))))))
+        ((хибне? (тотожне? (перше result) (як-є decoded-process)))
          result)
-        (#d1:1 result)))
+        (так result)))
        (process-run-text program args))))
 
 ; #469: numeric identity only. The registry-derived bootstrap cache decides
 ; whether this post-core closure currently has any additional stable peers.
-(001 (postcore-materialization-debug skipped))
+(як-є (postcore-materialization-debug skipped))
