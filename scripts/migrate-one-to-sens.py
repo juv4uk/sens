@@ -150,6 +150,8 @@ def main() -> int:
         command = [sys.executable, str(MIGRATOR), str(source),
                    "--out", str(stage), "--report", str(report_path),
                    "--codec", args.codec, "--source-surface", args.source_surface]
+        if args.dry_run:
+            command.append("--dry-run")
         process = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
         report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else None
         if process.returncode:
