@@ -64,12 +64,28 @@ def definitions(src: str):
 
 
 def optin_pairs(src: str):
-    """Лише аліаси з доданого інструментом opt-in-блоку."""
-    if MARKER not in src:
-        return []
-    block = src.split(MARKER, 1)[1]
-    return [(m.group(1), m.group(2))
-            for m in re.finditer(r'\(визначити\s+([^\s()]+)\s+([^\s()]+)\)', block)]
+    """Лише суміжні DEFINE-аліаси після кожного opt-in маркера.
+
+    Звичайні визначення та зворотні англомовні compatibility-аліаси
+    після завершення блоку не є ратифікованими назвами колонки укр.
+    """
+    pairs = []
+    in_block = False
+    for line in src.splitlines():
+        if MARKER in line:
+            in_block = True
+            continue
+        if not in_block:
+            continue
+        match = re.fullmatch(
+            r'\s*\(визначити\s+([^\s()]+)\s+([^\s()]+)\)\s*(?:;.*)?',
+            line,
+        )
+        if match:
+            pairs.append((match.group(1), match.group(2)))
+        else:
+            in_block = False
+    return pairs
 
 
 class LibUkrPeerTests(unittest.TestCase):
