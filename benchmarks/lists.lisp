@@ -1,7 +1,7 @@
 ; List benchmark · Benchmark списків · Listen-Benchmark
-(0011 length
-  (0010 (values)
-    (110
-      ((010 values) 0)
-      ((010 (001 ())) (01010 1 (length (011 values)))))))
-(length (001 (radio antenna signal battery display encoder speaker microphone cable clock)))
+(визначити length
+  (функція (values)
+    (за-умовою
+      ((атом? values) 0)
+      ((атом? (як-є ())) (01010 1 (length (решта values)))))))
+(length (як-є (radio antenna signal battery display encoder speaker microphone cable clock)))
