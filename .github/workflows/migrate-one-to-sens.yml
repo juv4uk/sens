@@ -1,4 +1,4 @@
-name: canonical-one-file-T5
+name: canonical-one-file-T5M
 on:
   workflow_dispatch:
 permissions:
@@ -17,19 +17,19 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/migrate-one-to-sens.py \
-            tests/fixtures/migration-multiform-cohort/two-forms.lisp \
-            --source-era legacy --dry-run > /tmp/one-file-t5-report.json
+            lib/surface/ukr-acceptance.lisp \
+            --codec t5m --source-surface укр --dry-run > /tmp/one-file-t5-report.json
           python3 - <<'PY'
           import json
           from pathlib import Path
           r=json.loads(Path("/tmp/one-file-t5-report.json").read_text())
           assert r["status"]=="would-write", r
-          assert r["bytes"]==14, r
+          assert r["bytes"] > 0 and r["bytes"] % 3 == 0, r
           assert r["semantic_parity"]=="NOT_VERIFIED", r
           print(json.dumps({k:r[k] for k in ("status","source","bytes","physical_sha256","semantic_parity")},sort_keys=True))
           PY
       - name: Publish traceable preview report
         uses: actions/upload-artifact@v4
         with:
-          name: one-file-canonical-T5-preview
+          name: one-file-canonical-T5M-preview
           path: /tmp/one-file-t5-report.json
