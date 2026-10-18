@@ -14,7 +14,7 @@ from scripts.sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-one-to-sens.py"
-PROVEN = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
+PROVEN = ROOT / "tests" / "fixtures" / "migration-d1-cond-cohort" / "branch.lisp"
 EXISTING = PROVEN.with_suffix(".sens")
 
 
@@ -29,7 +29,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
     def test_real_proven_canary_dry_run_does_not_write(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "ukr-acceptance.sens"
+            target = Path(td) / "branch.sens"
             result = invoke(PROVEN, "--output", str(target), "--dry-run",
                             "--codec", "t5m", "--source-surface", "укр")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
@@ -45,6 +45,21 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertFalse(target.with_suffix("").exists())
         self.assertEqual(PROVEN.read_bytes(), before)
 
+    def test_unadmitted_string_preserves_real_source_error(self):
+        """Do not silently encode an unrepresentable Lisp string as D3 EMPTY."""
+        source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
+        original = source.read_bytes()
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "ukr-acceptance.sens"
+            result = invoke(source, "--output", str(target),
+                            "--codec", "t5m", "--source-surface", "укр")
+            self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
+            report = json.loads(result.stdout)
+            self.assertIn("STRING_LITERAL_UNADMITTED", report["reason"])
+            self.assertEqual(report["token"], '""')
+            self.assertFalse(target.exists())
+        self.assertEqual(source.read_bytes(), original)
+
     def test_existing_target_is_never_overwritten(self):
         before = EXISTING.read_bytes()
         result = invoke(PROVEN, "--codec", "t5m", "--source-surface", "укр")
@@ -54,7 +69,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
 
     def test_existing_view_does_not_leave_orphan_physical_carrier(self):
         with tempfile.TemporaryDirectory() as td:
-            output = Path(td) / "ukr-acceptance.sens"
+            output = Path(td) / "branch.sens"
             view = output.with_suffix("")
             view.write_bytes(b"preexisting view\\n")
             result = invoke(PROVEN, "--output", str(output), "--codec", "t5m", "--source-surface", "укр")
@@ -66,7 +81,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
     def test_real_binary_staging_agrees_with_current_canonical_three_pass(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            output = Path(td) / "ukr-acceptance.sens"
+            output = Path(td) / "branch.sens"
             result = invoke(PROVEN, "--output", str(output),
                             "--codec", "t5m", "--source-surface", "укр")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
@@ -98,7 +113,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
     def test_explicit_refresh_replaces_stale_carrier_and_view_as_a_pair(self):
         source_before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            output = Path(td) / "ukr-acceptance.sens"
+            output = Path(td) / "branch.sens"
             view = output.with_suffix("")
             output.write_bytes(b"stale physical carrier")
             view.write_bytes(b"stale extensionless view\\n")
