@@ -68,17 +68,27 @@ fn guard_keeps_decision_and_evidence_status_separate() {
 }
 
 #[test]
-fn guard_requires_freeze_sync_drift_record_before_reopening_commits() {
-    let blocked = eval_guard(
-        r#"(guard-sync-window (quote open) (quote completed) (quote recorded)
-             (quote (git sync)))"#,
-    );
-    assert!(blocked.contains("freeze-commits-before-synchronization"));
+fn guard_verifies_sync_and_drift_without_freezing_commits() {
     let ready = eval_guard(
-        r#"(guard-sync-window (quote frozen) (quote completed) (quote recorded)
+        r#"(guard-sync-window (quote open) (quote completed) (quote recorded)
              (quote (git sync drift-log)))"#,
     );
-    assert!(ready.contains("reopen-commit-window"));
+    assert!(ready.contains("(decision allow)"), "{ready}");
+    assert!(ready.contains("continue-independent-commits"), "{ready}");
+
+    let incomplete = eval_guard(
+        r#"(guard-sync-window (quote open) (quote pending) (quote recorded)
+             (quote (git sync)))"#,
+    );
+    assert!(incomplete.contains("(decision warn)"), "{incomplete}");
+    assert!(incomplete.contains("complete-sync-and-preserve-logs"), "{incomplete}");
+
+    let missing_drift = eval_guard(
+        r#"(guard-sync-window (quote open) (quote completed) (quote missing)
+             (quote (git sync)))"#,
+    );
+    assert!(missing_drift.contains("(decision warn)"), "{missing_drift}");
+    assert!(missing_drift.contains("record-drift-and-continue"), "{missing_drift}");
 }
 
 #[test]
