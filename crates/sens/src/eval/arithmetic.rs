@@ -44,12 +44,14 @@ fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError
 }
 
 fn exact_domain_result_width(result: &Value, span: Span) -> Result<usize, LanguageError> {
+    // Resource limits count the admitted full-width Dn result, not its
+    // normalized magnitude. D48:1 still occupies an exact D48 identity.
+    // The same rule applies to reduced fractions with small constituents.
     match result {
-        Value::BinaryNumber(number) => Ok(number.width()),
-        Value::NumericComposition(composition) => {
-            let (_, numerator, denominator) = composition.as_parts();
-            Ok(numerator.width().max(denominator.map_or(0, BinaryNumber::width)))
-        }
+        Value::BinaryNumber(number) => number.numeric_domain_width().ok_or_else(|| {
+            LanguageError::new(ErrorKind::Type, "numeric result lacks explicit Dn", span)
+        }),
+        Value::NumericComposition(composition) => Ok(composition.domain_width()),
         _ => Err(LanguageError::new(ErrorKind::Type, "numeric composite invariant", span)),
     }
 }
@@ -252,6 +254,74 @@ mod qualified_numeric_domain_value_tests {
         let Value::BinaryNumber(ref same) = result else { panic!("D24 result") };
         assert_eq!(same.numeric_domain_width(), Some(24));
         assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
+    }
+
+    #[test]
+    fn numeric_resource_cap_checks_exact_domain_width_not_normalized_magnitude() {
+        let d24_one = in_domain(24, {
+            let mut bits = vec![0; 24];
+            bits[23] = 1;
+            bits
+        });
+        let d48_one = in_domain(48, {
+            let mut bits = vec![0; 48];
+            bits[47] = 1;
+            bits
+        });
+        let environment_23 = Environment::root().with_numeric_bit_limit(23);
+        let environment_24 = Environment::root().with_numeric_bit_limit(24);
+        let environment_48 = Environment::root().with_numeric_bit_limit(48);
+
+        // Even the value one and exact zero occupy their declared D24 word.
+        for operands in [
+            [d24_one.clone(), d24_one.clone()],
+            [in_domain(24, vec![0; 24]), in_domain(24, vec![0; 24])],
+        ] {
+            assert_eq!(
+                arithmetic_on_values("+", &operands, &environment_23, Span::default())
+                    .unwrap_err().kind,
+                ErrorKind::NumericOverflow,
+                "test_id=d24-resource-domain-width layer=resource expected=overflow"
+            );
+            assert!(
+                arithmetic_on_values("+", &operands, &environment_24, Span::default())
+                    .is_ok(),
+                "test_id=d24-resource-equal-cap layer=resource expected=allowed"
+            );
+        }
+
+        // A D48 input never shrinks to D24 simply because its magnitude is 1.
+        let wide_operands = [d48_one.clone(), d48_one];
+        assert_eq!(
+            arithmetic_on_values("+", &wide_operands, &environment_24, Span::default())
+                .unwrap_err().kind,
+            ErrorKind::NumericOverflow,
+            "test_id=d48-resource-width layer=resource expected=overflow"
+        );
+        assert!(
+            arithmetic_on_values("+", &wide_operands, &environment_48, Span::default())
+                .is_ok()
+        );
+
+        // Small reduced fractions also retain their explicit D24 identity.
+        let one = d24_one;
+        let three = in_domain(24, {
+            let mut bits = vec![0; 24];
+            bits[22] = 1;
+            bits[23] = 1;
+            bits
+        });
+        let arguments = [one, three];
+        assert_eq!(
+            division_on_values(&arguments, 2, &environment_23, Span::default())
+                .unwrap_err().kind,
+            ErrorKind::NumericOverflow,
+            "test_id=ratio-resource-domain-width layer=resource expected=overflow"
+        );
+        assert!(
+            division_on_values(&arguments, 2, &environment_24, Span::default())
+                .is_ok()
+        );
     }
 
     #[test]
