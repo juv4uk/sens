@@ -112,6 +112,8 @@ def main() -> int:
     parser.add_argument("source", type=Path)
     parser.add_argument("--output", type=Path, help="same-stem .sens by default")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--replace-existing", action="store_true",
+                        help="refresh an existing same-stem .sens + extensionless view pair")
     parser.add_argument("--codec", choices=("t5m", "t5"), default="t5m")
     parser.add_argument("--source-surface", choices=("default", "ук", "укр"), default="укр")
     args = parser.parse_args()
@@ -128,8 +130,14 @@ def main() -> int:
     if output.suffix != ".sens":
         raise SystemExit("BLOCK: target must have .sens extension")
     view = resolve_without_links(output.with_suffix(""), "view")
+    existing_targets = {}
     for target in (output, view):
-        if (target.exists() or target.is_symlink()) and not args.dry_run:
+        if target.is_symlink():
+            raise SystemExit("BLOCK: target path contains symlink: " + str(target))
+        if target.exists() and not target.is_file():
+            raise SystemExit("BLOCK: target must be a regular file: " + str(target))
+        existing_targets[target] = target.is_file()
+        if existing_targets[target] and not args.replace_existing and not args.dry_run:
             raise SystemExit("BLOCK: target already exists; refusing overwrite: " + str(target))
     if source in (output, view):
         raise SystemExit("BLOCK: source cannot be the target")
@@ -170,6 +178,9 @@ def main() -> int:
                 "status": "would-write", "source": str(rel),
                 "output": str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output),
                 "view": str(view.relative_to(ROOT)) if view.is_relative_to(ROOT) else str(view),
+                "target_action": ("replace-existing-pair" if args.replace_existing else
+                                  "refuse-existing-pair" if any(existing_targets.values()) else
+                                  "create-new-pair"),
                 "codec": args.codec, "source_surface": args.source_surface,
                 "source_sha256": hashlib.sha256(original).hexdigest(),
                 "physical_sha256": row["physical_sha256"],
@@ -202,9 +213,13 @@ def main() -> int:
         if resolve_without_links(args.source, "source") != source:
             raise SystemExit("BLOCK: source path changed during conversion")
         if not args.dry_run:
-            migration_publish_pair.publish_pair(atomic_no_clobber, output, payload, view, visible)
+            if args.replace_existing:
+                migration_publish_pair.replace_pair(output, payload, view, visible)
+            else:
+                migration_publish_pair.publish_pair(atomic_no_clobber, output, payload, view, visible)
         result = {
-            "status": "would-write" if args.dry_run else "written",
+            "status": ("replaced" if args.replace_existing and any(existing_targets.values()) else "written"),
+            "target_action": "replace-existing-pair" if args.replace_existing else "create-new-pair",
             "source": str(rel),
             "output": str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output),
             "view": str(view.relative_to(ROOT)) if view.is_relative_to(ROOT) else str(view),

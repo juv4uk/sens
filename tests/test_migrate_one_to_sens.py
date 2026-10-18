@@ -95,6 +95,37 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(view.read_bytes(), expected_view)
         self.assertEqual(PROVEN.read_bytes(), before)
 
+    def test_explicit_refresh_replaces_stale_carrier_and_view_as_a_pair(self):
+        source_before = PROVEN.read_bytes()
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "ukr-acceptance.sens"
+            view = output.with_suffix("")
+            output.write_bytes(b"stale physical carrier")
+            view.write_bytes(b"stale extensionless view\\n")
+
+            result = invoke(PROVEN, "--output", str(output), "--codec", "t5m",
+                            "--source-surface", "укр", "--replace-existing")
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["status"], "replaced")
+            self.assertEqual(report["target_action"], "replace-existing-pair")
+            words = decode_t5m_bytes(output.read_bytes())
+            self.assertGreater(len(words), 0)
+            self.assertEqual(output.read_bytes(), encode_t5m_projection(" ".join(words) + "\\n"))
+            expected_view = (" ".join(words) + "\\n").encode("ascii")
+            self.assertEqual(view.read_bytes(), expected_view)
+            self.assertNotEqual(output.read_bytes(), b"stale physical carrier")
+            self.assertNotEqual(view.read_bytes(), b"stale extensionless view\\n")
+
+            physical_after, view_after = output.read_bytes(), view.read_bytes()
+            refused = invoke(PROVEN, "--output", str(output), "--codec", "t5m",
+                             "--source-surface", "укр")
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn("refusing overwrite", refused.stderr)
+            self.assertEqual(output.read_bytes(), physical_after)
+            self.assertEqual(view.read_bytes(), view_after)
+        self.assertEqual(PROVEN.read_bytes(), source_before)
+
     def test_unknown_ukrainian_identifiers_are_not_encoded_as_fake_calls(self):
         # A genuinely unknown Ukrainian head must fail closed, never become a
         # fake call or unstructured text. The former fixture

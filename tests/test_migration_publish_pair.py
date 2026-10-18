@@ -5,6 +5,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 PUBLISHER = Path(__file__).resolve().parents[1] / "scripts/migration_publish_pair.py"
 spec = importlib.util.spec_from_file_location("sens_migration_publish_pair", PUBLISHER)
@@ -69,6 +70,42 @@ class SameStemPublicationTest(unittest.TestCase):
             self.publish(fails_carrier)
         self.assertFalse(self.carrier.exists())
         self.assertFalse(self.view.exists())
+
+    def test_replace_pair_refreshes_existing_same_stem_artifacts(self):
+        self.carrier.write_bytes(b"stale carrier")
+        self.view.write_bytes(b"stale view")
+        publisher.replace_pair(self.carrier, self.carrier_bytes, self.view, self.view_bytes)
+        self.assertEqual(self.carrier.read_bytes(), self.carrier_bytes)
+        self.assertEqual(self.view.read_bytes(), self.view_bytes)
+
+    def test_replace_pair_rolls_back_carrier_when_view_replace_fails(self):
+        old_carrier, old_view = b"old carrier", b"old view"
+        self.carrier.write_bytes(old_carrier)
+        self.view.write_bytes(old_view)
+        real_replace = publisher.os.replace
+        calls = 0
+
+        def fail_second_replace(source, target):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected second replace failure")
+            return real_replace(source, target)
+
+        with patch.object(publisher.os, "replace", side_effect=fail_second_replace):
+            with self.assertRaisesRegex(OSError, "injected second replace failure"):
+                publisher.replace_pair(self.carrier, self.carrier_bytes, self.view, self.view_bytes)
+        self.assertEqual(self.carrier.read_bytes(), old_carrier)
+        self.assertEqual(self.view.read_bytes(), old_view)
+
+    def test_replace_pair_rejects_symlink_before_publication(self):
+        target = self.root / "outside"
+        target.write_bytes(b"outside bytes")
+        self.view.symlink_to(target)
+        with self.assertRaisesRegex(ValueError, "PAIR_OUTPUT_SYMLINK"):
+            publisher.replace_pair(self.carrier, self.carrier_bytes, self.view, self.view_bytes)
+        self.assertFalse(self.carrier.exists())
+        self.assertEqual(target.read_bytes(), b"outside bytes")
 
     def test_mutated_carrier_is_not_deleted_on_rollback(self):
         def corrupts_carrier(path, data):

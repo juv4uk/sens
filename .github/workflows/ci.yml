@@ -105,6 +105,8 @@ jobs:
           python3 -m unittest tests/test_ukr_program_symbol_table_projection.py tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_fpga_program_symbol_table_exact_d1_migration -v
           python3 -m unittest tests/test_ukr_core1_bootstrap_projection.py -v
           python3 -m unittest tests/test_code_runs.py -v
+          python3 -m unittest tests/test_migration_publish_pair.py -v
+          python3 -m unittest tests/test_migrate_one_to_sens.py -v
 
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}
