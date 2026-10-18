@@ -8,17 +8,17 @@
 ; numbers 0..255, so this candidate deliberately skips only the redundant
 ; generic byte-domain pass. UTF-8 sequence interpretation remains in Lisp.
 
-(0011 proven-byte-profile-path "lib/surface/semantic-registry.lisp")
+(визначити proven-byte-profile-path "lib/surface/semantic-registry.lisp")
 
 (визначити proven-byte-profile-start (монотонний-наносекунди))
-(0011 proven-byte-profile-bytes (read-file-bytes proven-byte-profile-path))
+(визначити proven-byte-profile-bytes (read-file-bytes proven-byte-profile-path))
 (визначити proven-byte-profile-after-bytes (монотонний-наносекунди))
 
-(0011 proven-byte-profile-decoded
-  (utf8-decode-onto proven-byte-profile-bytes (001 ())))
+(визначити proven-byte-profile-decoded
+  (utf8-decode-onto proven-byte-profile-bytes (як-є ())))
 (визначити proven-byte-profile-after-decode (монотонний-наносекунди))
 
-(0011 proven-byte-profile-text
+(визначити proven-byte-profile-text
   (юнікод-скаляри-рядок (second proven-byte-profile-decoded)))
 (визначити proven-byte-profile-after-string (монотонний-наносекунди))
 
@@ -26,20 +26,20 @@
 (визначити proven-byte-profile-after-read-all (монотонний-наносекунди))
 
 (print
-  (1110
-    (001 eco-lisp-script-perf/proven-byte-readfile-candidate)
-    (1110 (001 read-file-bytes-ns)
-          (01011 proven-byte-profile-after-bytes proven-byte-profile-start))
-    (1110 (001 decode-plus-reverse-ns)
-          (01011 proven-byte-profile-after-decode proven-byte-profile-after-bytes))
-    (1110 (001 string-assembly-ns)
-          (01011 proven-byte-profile-after-string proven-byte-profile-after-decode))
-    (1110 (001 read-all-ns)
-          (01011 proven-byte-profile-after-read-all proven-byte-profile-after-string))
-    (1110 (001 total-ns)
-          (01011 proven-byte-profile-after-read-all proven-byte-profile-start))
-    (1110 (001 decode-tag) (100 proven-byte-profile-decoded))
-    (1110 (001 root) proven-byte-profile-root)))
+  (список
+    (як-є eco-lisp-script-perf/proven-byte-readfile-candidate)
+    (список (як-є read-file-bytes-ns)
+          (відняти proven-byte-profile-after-bytes proven-byte-profile-start))
+    (список (як-є decode-plus-reverse-ns)
+          (відняти proven-byte-profile-after-decode proven-byte-profile-after-bytes))
+    (список (як-є string-assembly-ns)
+          (відняти proven-byte-profile-after-string proven-byte-profile-after-decode))
+    (список (як-є read-all-ns)
+          (відняти proven-byte-profile-after-read-all proven-byte-profile-after-string))
+    (список (як-є total-ns)
+          (відняти proven-byte-profile-after-read-all proven-byte-profile-start))
+    (список (як-є decode-tag) (перше proven-byte-profile-decoded))
+    (список (як-є root) proven-byte-profile-root)))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити монотонний-наносекунди mono-ns)

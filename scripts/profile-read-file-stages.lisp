@@ -6,10 +6,10 @@
 ;   read-file-bytes -> utf8-all-bytes? -> utf8-decode-onto (+ final reverse)
 ;   -> unicode-scalars->string -> read-all
 
-(0011 profile-path "lib/surface/semantic-registry.lisp")
+(визначити profile-path "lib/surface/semantic-registry.lisp")
 
 (визначити profile-start (монотонний-наносекунди))
-(0011 profile-bytes (read-file-bytes profile-path))
+(визначити profile-bytes (read-file-bytes profile-path))
 (визначити profile-after-bytes (монотонний-наносекунди))
 
 ; `utf8-decode` performs this validation pass before decoding. Time it alone.
@@ -19,9 +19,9 @@
 ; The source registry is committed valid UTF-8. Calling the internal decode
 ; worker directly avoids counting validation a second time. This stage includes
 ; scalar accumulation and the worker's final `(reverse out)`.
-(0011 profile-decoded (utf8-decode-onto profile-bytes (001 ())))
+(визначити profile-decoded (utf8-decode-onto profile-bytes (як-є ())))
 (визначити profile-after-decode (монотонний-наносекунди))
-(0011 profile-scalars (second profile-decoded))
+(визначити profile-scalars (second profile-decoded))
 
 ; Materialize the already-decoded Unicode scalar list as one runtime String.
 (визначити profile-text (юнікод-скаляри-рядок profile-scalars))
@@ -32,23 +32,23 @@
 (визначити profile-after-read-all (монотонний-наносекунди))
 
 (print
-  (1110
-    (001 eco-lisp-script-perf/read-file-stages)
-    (1110 (001 read-file-bytes-ns)
-          (01011 profile-after-bytes profile-start))
-    (1110 (001 validation-ns)
-          (01011 profile-after-validation profile-after-bytes))
-    (1110 (001 decode-plus-reverse-ns)
-          (01011 profile-after-decode profile-after-validation))
-    (1110 (001 string-assembly-ns)
-          (01011 profile-after-string profile-after-decode))
-    (1110 (001 read-all-ns)
-          (01011 profile-after-read-all profile-after-string))
-    (1110 (001 total-ns)
-          (01011 profile-after-read-all profile-start))
-    (1110 (001 validation-result) profile-valid)
-    (1110 (001 decode-tag) (100 profile-decoded))
-    (1110 (001 root) profile-root)))
+  (список
+    (як-є eco-lisp-script-perf/read-file-stages)
+    (список (як-є read-file-bytes-ns)
+          (відняти profile-after-bytes profile-start))
+    (список (як-є validation-ns)
+          (відняти profile-after-validation profile-after-bytes))
+    (список (як-є decode-plus-reverse-ns)
+          (відняти profile-after-decode profile-after-validation))
+    (список (як-є string-assembly-ns)
+          (відняти profile-after-string profile-after-decode))
+    (список (як-є read-all-ns)
+          (відняти profile-after-read-all profile-after-string))
+    (список (як-є total-ns)
+          (відняти profile-after-read-all profile-start))
+    (список (як-є validation-result) profile-valid)
+    (список (як-є decode-tag) (перше profile-decoded))
+    (список (як-є root) profile-root)))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити монотонний-наносекунди mono-ns)
