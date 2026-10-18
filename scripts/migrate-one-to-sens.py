@@ -162,6 +162,34 @@ def main() -> int:
                 "token": row.get("token"), "line": row.get("line"), "column": row.get("column"),
             }, ensure_ascii=False, indent=2))
             return 2
+        # Dry-run is a read-only preview: the upstream migrator does not
+        # publish .sens/view files or mint a Zig receipt in this mode.
+        # Report its reference estimate explicitly, without pretending that
+        # a physical carrier or executable proof was produced.
+        if args.dry_run:
+            rows = (report or {}).get("files") or []
+            row = rows[0] if len(rows) == 1 else {}
+            if ((report or {}).get("mode") != "dry-run"
+                    or row.get("status") != "would-write"
+                    or (report or {}).get("summary", {}).get("files_would_write") != 1):
+                raise SystemExit("BLOCK: inconsistent three-pass dry-run receipt")
+            if source.read_bytes() != original:
+                raise SystemExit("BLOCK: source changed during dry-run")
+            print(json.dumps({
+                "status": "would-write", "source": str(rel),
+                "output": str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output),
+                "view": str(view.relative_to(ROOT)) if view.is_relative_to(ROOT) else str(view),
+                "codec": args.codec, "source_surface": args.source_surface,
+                "source_sha256": hashlib.sha256(original).hexdigest(),
+                "physical_sha256": row["physical_sha256"],
+                "typed_word_sha256": row["typed_word_sha256"],
+                "bytes": row["bytes"],
+                "semantic_bits": row["semantic_bits"],
+                "semantic_word_count": row["semantic_word_count"],
+                "physical_producer": "PYTHON_REFERENCE_ONLY",
+                "zig_transport": None, "semantic_parity": "NOT_VERIFIED",
+            }, ensure_ascii=False, indent=2))
+            return 0
         physical_path = stage / rel.with_suffix(".sens").name
         view_path = physical_path.with_suffix("")
         if not physical_path.is_file() or not view_path.is_file():
