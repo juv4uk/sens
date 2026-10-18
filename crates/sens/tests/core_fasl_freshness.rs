@@ -41,11 +41,10 @@ fn committed_core_fasl_matches_current_core_source() {
 #[test]
 fn poslidovni_pryviazky_d6_vykonuiutsia_i_ne_prykhovuiut_nevidome_imia() {
     for source in [
-        "(let* () 7)",
-        "(let* ((x 7)) x)",
-        "(let* ((x 7) (y x)) y)",
+        "(нехай* () 7)",
+        "(нехай* ((x 7)) x)",
+        "(нехай* ((x 7) (y x)) y)",
         "(нехай* ((основа 7) (наслідок основа)) наслідок)",
-        "(let* ((основа 7) (наслідок основа)) наслідок)",
         "(нехай* ((x 7) (y x)) y)",
     ] {
         let mut session = sens::Session::default();
@@ -76,9 +75,9 @@ fn core4_length_terminates_on_exact_d4_null_not_on_nonempty_atom_negation() {
     let mut session = sens::Session::default();
     sens::load_core_library(&mut session).expect("exact current Core4 must load");
     for (source, expected) in [
-        ("(length (001 ()))", "0"),
-        ("(length (001 (7)))", "1"),
-        ("(length (001 (7 6 5 4 3 2 1)))", "7"),
+        ("(довжина (як-є ()))", "0"),
+        ("(довжина (як-є (7)))", "1"),
+        ("(довжина (як-є (7 6 5 4 3 2 1)))", "7"),
     ] {
         let expressions = sens::parse(source).expect("admitted exact D3 QUOTE fixture");
         let outcome = sens::eval_parsed_expressions(&expressions, &mut session)

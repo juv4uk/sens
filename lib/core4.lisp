@@ -535,7 +535,7 @@
 (0011 core4-let-parameters
   (0010 (bindings)
     (110
-      ((010 bindings) (001 ()))
+      ((010 bindings) ())
       ((010 (001 ()))
        (111
          (100 (100 bindings))
@@ -544,22 +544,25 @@
 (0011 core4-let-values
   (0010 (bindings)
     (110
-      ((010 bindings) (001 ()))
+      ((010 bindings) ())
       ((010 (001 ()))
        (111
          (100 (011 (100 bindings)))
          (core4-let-values (011 bindings)))))))
 
-(0011 let
+(0011 нехай
   (make-macro
     (0010 (bindings body)
   (111
     (111
-      (001 0010)
+      (як-є функція)
       (111
         (core4-let-parameters bindings)
-        (111 body (001 ()))))
+        (111 body ())))
     (core4-let-values bindings)))))
+
+; Тимчасове сумісне ім'я для наявних викликів під час переходу поверхні.
+(0011 let нехай)
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -746,7 +749,7 @@
 
 (0011 pairlis спарувати)
 
-(0011 let*
+(0011 нехай*
   (make-macro
     (0010 (bindings body)
   ; D3 ATOM повертає точний D1:1 для порожнього списку прив'язок.
@@ -758,12 +761,15 @@
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
      ; helper as host/compiler semantic authority.
-     (111 (001 let)
+     (111 (як-є нехай)
            (111 (111 (100 bindings) (001 ()))
-                 (111 (111 (001 let*)
+                 (111 (111 (як-є нехай*)
                              (111 (011 bindings)
                                    (111 body (001 ()))))
                        (001 ())))))))))
+
+; Тимчасове сумісне ім'я для наявних викликів під час переходу поверхні.
+(0011 let* нехай*)
 
 ; D6:001011 COMPOSE / D6:101101 FLIP — похідні функції, виведені лише з D4 lambda.
 ; Координати вже ратифіковані (lib/domains/d6.lisp), механізм — ні
@@ -2663,47 +2669,41 @@
   (make-macro
     (0010 forms
   (110
-    
-    ((010 forms) 
-     (110
-       ((0100 (010 (011 forms))) (100 forms))
-       ((010 (011 forms)) 
-        (001001 ((x (100 forms))
+    ((010 forms) (100 forms))
+    ((010 (011 forms)) (100 forms))
+    ((0100 (010 (011 forms)))
+        (нехай* ((x (100 forms))
                (next (100 (011 forms)))
                (rest (011 (011 forms)))
                (step
                  (110
-                   ((0100 (010 next)) (1110 next x))
-                   ((010 next)  (1110 next x))
-                   ((010 next) 
-                    (111 (100 next) (111 x (011 next)))))))
+                   ((0100 (010 next))
+                    (111 (100 next) (111 x (011 next))))
+                   ((010 next) (список next x)))))
           (110
-            ((0100 (010 rest)) step)
-            ((010 rest) 
-             (111 (001 ->) (111 step rest))))))))))))
+            ((010 rest) step)
+            ((0100 (010 rest))
+             (111 (як-є ->) (111 step rest))))))))))
 
 (0011 ->>
   (make-macro
     (0010 forms
   (110
-    
-    ((010 forms) 
-     (110
-       ((0100 (010 (011 forms))) (100 forms))
-       ((010 (011 forms)) 
-        (001001 ((x (100 forms))
+    ((010 forms) (100 forms))
+    ((010 (011 forms)) (100 forms))
+    ((0100 (010 (011 forms)))
+        (нехай* ((x (100 forms))
                (next (100 (011 forms)))
                (rest (011 (011 forms)))
                (step
                  (110
-                   ((0100 (010 next)) (1110 next x))
-                   ((010 next)  (1110 next x))
-                   ((010 next) 
-                    (1111 next (1110 x))))))
+                   ((0100 (010 next))
+                    (приєднати next (список x)))
+                   ((010 next) (список next x)))))
           (110
-            ((0100 (010 rest)) step)
-            ((010 rest) 
-             (111 (001 ->>) (111 step rest))))))))))))
+            ((010 rest) step)
+            ((0100 (010 rest))
+             (111 (як-є ->>) (111 step rest))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -2942,7 +2942,7 @@
 (0011 my-postcore-materialize-stable-peers
   (make-macro
     (0010 args
-  (001001 ((semantic-id (100 args))
+    (нехай* ((semantic-id (100 args))
              (source (1001 args))
              (group (my-postcore-peer-group
                        semantic-id my-postcore-stable-peer-projection)))
