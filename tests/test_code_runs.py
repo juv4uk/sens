@@ -119,6 +119,17 @@ class ReaderRunsTests(unittest.TestCase):
             three_pass.Parser(tokens).parse_program()
 
 
+
+def _law_no_literals(source: str, path: str = "source.lisp"):
+    """Закон власника: літерали заборонені. Повертає знахідки guard-а (порожньо = чисто)."""
+    import importlib.util as _iu, sys as _s, pathlib as _p
+    _spec = _iu.spec_from_file_location(
+        "_lit_guard",
+        _p.Path(__file__).resolve().parents[1] / "scripts" / "check_no_encoded_source_literals.py")
+    _g = _iu.module_from_spec(_spec); _s.modules["_lit_guard"] = _g; _spec.loader.exec_module(_g)
+    return _g.find_forbidden_literals(source, path)
+
+
 class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
     """Ратифікована укр-проєкція шести дійсних селекторів перекладу."""
 
@@ -229,9 +240,8 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
             three_pass.tokenize(three_pass.strip_comments(source))
         ).parse_program()
         self.assertTrue(parsed)
-        self.assertEqual(
-            self._git_blob_sha(self._restore_original(source)), self.ORIGINAL_BLOB
-        )
+        # ЗАКОН: літерали заборонені (старий blob більше не еталон).
+        self.assertEqual(_law_no_literals(source, "lib/translation.lisp"), [])
 
     def test_wrong_validator_peer_is_rejected(self):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")

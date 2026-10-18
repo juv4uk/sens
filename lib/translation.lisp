@@ -63,8 +63,8 @@
     (за-умовою
       ((атом? proposal) (як-є ()))
       ((тотожне? (правильно-структурований-список-знань? proposal) (як-є ())) (як-є ()))
-      ((101 (101 (000000 proposal) 5) (001 ())) (001 ()))
-      ((101 (110101100 (100 proposal)) (001 ())) (001 ()))
+      ((тотожне? (тотожне? (довжина proposal) 5) (як-є ())) (як-є ()))
+      ((тотожне? (символ? (перше proposal)) (як-є ())) (як-є ()))
       ((тотожне? (перше proposal) *translation-schema*)
        (за-умовою
          ((тотожне? (статус-запису-перекладу-коректний? (переклад-стан proposal)) (як-є ()))
@@ -73,8 +73,8 @@
           (як-є ()))
          ((string-membership-helper (переклад-джерело proposal))
           (як-є ()))
-         (#d1:1 #d1:1)))
-      (#d1:1 (001 ())))))
+         (так так)))
+      (так (як-є ())))))
 
 (визначити translation-batch-valid?
   (функція (payload)
@@ -89,7 +89,7 @@
       ((тотожне? kind (як-є clause)) (клауза-бази-знань-коректна? payload))
       ((тотожне? kind (як-є batch)) (пакет-кандидатів-перекладу-коректний? payload))
       ((тотожне? kind (як-є query)) (ціль-бази-знань-коректна? payload))
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 (визначити translation-alternatives-valid?
   (функція (kind alternatives)
@@ -129,27 +129,27 @@
 (визначити translation-review-status-valid?
   (функція (status)
     (за-умовою
-      ((101 (110101100 status) (001 ())) (001 ()))
-      ((101 status (001 accepted)) #d1:1)
-      ((101 status (001 rejected)) #d1:1)
-      ((101 status (001 ambiguous)) #d1:1)
-      (#d1:1 (001 ())))))
+      ((тотожне? (символ? status) (як-є ())) (як-є ()))
+      ((тотожне? status (як-є accepted)) так)
+      ((тотожне? status (як-є rejected)) так)
+      ((тотожне? status (як-є ambiguous)) так)
+      (так (як-є ())))))
 
 (визначити translation-review-valid?
   (функція (review)
     (за-умовою
       ((атом? review) (як-є ()))
       ((тотожне? (правильно-структурований-список-знань? review) (як-є ())) (як-є ()))
-      ((101 (101 (000000 review) 5) (001 ())) (001 ()))
-      ((101 (110101100 (100 review)) (001 ())) (001 ()))
+      ((тотожне? (тотожне? (довжина review) 5) (як-є ())) (як-є ()))
+      ((тотожне? (символ? (перше review)) (як-є ())) (як-є ()))
       ((тотожне? (перше review) *translation-review-schema*)
        (за-умовою
          ((тотожне? (статус-огляду-кандидата-перекладу-коректний? (переклад-перевірка-стан review)) (як-є ()))
           (як-є ()))
          ((тотожне? (символ? (переклад-перевірка-код review)) (як-є ()))
           (як-є ()))
-         (#d1:1 #d1:1)))
-      (#d1:1 (001 ())))))
+         (так так)))
+      (так (як-є ())))))
 
 (визначити translation-review-advice-decision
   (функція (proposal decision)
@@ -157,7 +157,7 @@
       ((атом? decision)
        (створити-переклад-перевірка
          (як-є rejected) (як-є malformed-advice-decision) proposal decision))
-      ((101 (110101100 (100 decision)) (001 ()))
+      ((тотожне? (символ? (перше decision)) (як-є ()))
        (створити-переклад-перевірка
          (як-є rejected) (як-є malformed-advice-decision) proposal decision))
       ((тотожне? (перше decision) (як-є accepted))
@@ -169,7 +169,7 @@
       ((тотожне? (перше decision) (як-є rejected))
        (створити-переклад-перевірка
          (як-є rejected) (як-є knowledge-rejected) proposal decision))
-      (#d1:1
+      (так
        (створити-переклад-перевірка
          (як-є rejected) (як-є malformed-advice-decision) proposal decision)))))
 
@@ -189,7 +189,7 @@
         ((тотожне? kind (як-є batch))
          (рішення-на-основі-огляду-перекладу-й-поради
            proposal (узагальнене-рішення-за-всіма-порадами module-name payload)))
-        (#d1:1
+        (так
          (створити-переклад-перевірка
            (як-є rejected) (як-є invalid-kind) proposal kind))))
      (переклад-вид proposal)
@@ -201,7 +201,7 @@
 (визначити translation-review
   (функція (module-name proposal)
     (за-умовою
-      ((101 (110101100 module-name) (001 ()))
+      ((тотожне? (символ? module-name) (як-є ()))
        (створити-переклад-перевірка
          (як-є rejected) (як-є invalid-module) proposal module-name))
       ((тотожне? (структура-обгортки-перекладу-коректна? proposal) (як-є ()))
@@ -216,7 +216,7 @@
           (створити-переклад-перевірка
             (як-є ambiguous) (як-є translator-ambiguous)
             proposal (переклад-вміст proposal)))
-         (#d1:1
+         (так
           (створити-переклад-перевірка
             (як-є rejected) (як-є invalid-ambiguity)
             proposal (переклад-вміст proposal)))))
@@ -226,11 +226,11 @@
           (створити-переклад-перевірка
             (як-є rejected) (як-є translator-rejected)
             proposal (переклад-вміст proposal)))
-         (#d1:1
+         (так
           (створити-переклад-перевірка
             (як-є rejected) (як-є invalid-rejection)
             proposal (переклад-вміст proposal)))))
-      (#d1:1
+      (так
        (створити-переклад-перевірка
          (як-є rejected) (як-є invalid-translation) proposal proposal)))))
 
@@ -249,17 +249,17 @@
              (за-умовою
                ((тотожне? (переклад-вид proposal) (як-є clause)) так)
                ((тотожне? (переклад-вид proposal) (як-є batch)) так)
-               (#d1:1 (001 ()))))
-            (#d1:1 (001 ()))))
+               (так (як-є ()))))
+            (так (як-є ()))))
         (переклад-перевірка-пропозиція review)))
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 (визначити translation-admission-payload
   (функція (review)
     (за-умовою
       ((переклад-допустимий? review)
        (переклад-вміст (переклад-перевірка-пропозиція review)))
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 ; Rejected and ambiguous translations are observations, not knowledge.
 (визначити translation-evidence-worthy?
@@ -268,7 +268,7 @@
       ((тотожне? (запис-огляду-перекладу-коректний? review) (як-є ())) (як-є ()))
       ((тотожне? (переклад-перевірка-стан review) (як-є rejected)) так)
       ((тотожне? (переклад-перевірка-стан review) (як-є ambiguous)) так)
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 (визначити translation-evidence-entry
   (функція (review)
@@ -279,7 +279,7 @@
     (за-умовою
       ((переклад-доказ-вартий? review)
        (сполучити (переклад-доказ-запис review) journal))
-      (#d1:1 journal))))
+      (так journal))))
 
 (визначити translation-review-with-evidence
   (функція (module-name proposal journal)
