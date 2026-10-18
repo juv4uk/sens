@@ -7,25 +7,25 @@
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
-(0011 encoder-coverage-committed-form
-  (100
-    (110101001
-      (110110111
+(визначити encoder-coverage-committed-form
+  (перше
+    (читати-всі
+      (читати-файл
         "lib/machine/encoding/coverage.lisp"))))
 
-(110
+(за-умовою
   ((encoder-coverage-index-valid?)
-   (110
+   (за-умовою
      ((encoder-coverage-projection-valid?
         encoder-coverage-committed-form)
-      (001
+      (як-є
         (encoder-coverage-check
           (status pass))))
      (encoder-coverage-d1-yes
-      (100 (110101001 "(encoder-coverage-check (status fail) (reason projection-mismatch))")))))
+      (перше (читати-всі "(encoder-coverage-check (status fail) (reason projection-mismatch))")))))
   (encoder-coverage-d1-yes
-   (1110
-     (001 encoder-coverage-check)
-     (001 (status fail))
-     (100 (110101001 "(reason invalid-coverage-input-projection)"))
-     (111 (001 checks) (encoder-coverage-index-checks)))))
+   (список
+     (як-є encoder-coverage-check)
+     (як-є (status fail))
+     (перше (читати-всі "(reason invalid-coverage-input-projection)"))
+     (сполучити (як-є checks) (encoder-coverage-index-checks)))))
