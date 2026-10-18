@@ -16,7 +16,7 @@
 (визначити fourth (функція (x) (перше (решта (решта (решта x))))))
 (визначити fifth (функція (x) (перше (решта (решта (решта (решта x)))))))
 
-(визначити rust-changes (читати-всі (read-file "tests/rust-retirement-changes.lisp")))
+(визначити rust-changes (читати-всі (читати-файл "tests/rust-retirement-changes.lisp")))
 
 (визначити rust-retirement-verdict-for
   (функція (changes)
@@ -24,10 +24,10 @@
       ((атом? changes) (structural-kind empty-list)
        (як-є (rust-retirement-ok)))
       ((атом? changes) (structural-kind pair)
-       (001000 ((change (100 changes)))
-         (001000 ((path (second change)))
-           (001000 ((additions (third change)))
-             (001000 ((status (fifth change)))
+       (нехай ((change (перше changes)))
+         (нехай ((path (second change)))
+           (нехай ((additions (third change)))
+             (нехай ((status (fifth change)))
                (за-умовою
                  ((тотожне? status (як-є new)) (identity-relation same)
                   (список
