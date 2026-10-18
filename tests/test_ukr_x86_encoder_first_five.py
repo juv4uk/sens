@@ -45,7 +45,7 @@ def rollback_only_current_heads(source: str) -> str:
             ROOT / "lib" / "domains" / f"d{width}.lisp"
         )}
         assert rows[bits] == surface, f"D{width}:{bits}: змінився чинний укр peer"
-        pattern = re.compile(r"\\(" + re.escape(surface) + r"(?=\\s|\\))")
+        pattern = re.compile(r"\(" + re.escape(surface) + r"(?=\s|\))")
         matches = pattern.findall(prefix)
         assert len(matches) == expected_count, (
             f"D{width}:{bits}: очікувано {expected_count}, отримано {len(matches)}"
@@ -63,7 +63,7 @@ class UkrX86EncoderFirstFiveTests(unittest.TestCase):
 
     def test_no_old_binary_heads_in_five_migrated_functions(self):
         prefix = ENCODER.read_text(encoding="utf-8").split(BOUNDARY, 1)[0]
-        self.assertNotRegex(prefix, r"\\((?:0011|0010|110|101|001|010)(?=\\s|\\))")
+        self.assertNotRegex(prefix, r"\((?:0011|0010|110|101|001|010)(?=\s|\))")
         # Ці літерали — незмінні існуючі машинні операнди, не доменні ключі.
         self.assertIn("#d10", prefix)
         self.assertIn("#d11", prefix)
