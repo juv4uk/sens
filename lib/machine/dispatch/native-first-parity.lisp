@@ -6,85 +6,85 @@
 ; fallback cannot impersonate native success.
 
 (визначити native-first-parity-pass
-  (функція (name effect-class error-class)
+  (функція (назва клас-ефекту клас-помилки)
     (список
       (як-є native-parity-case)
-      name
+      назва
       (як-є pass)
-      (список (як-є effect) effect-class)
-      (список (як-є error) error-class))))
+      (список (як-є effect) клас-ефекту)
+      (список (як-є error) клас-помилки))))
 
 (визначити native-first-parity-fail
-  (функція (name kind expected actual)
+  (функція (назва різновид очікуване фактичне)
     (список
       (як-є native-parity-case)
-      name
+      назва
       (як-є fail)
-      (список (як-є kind) kind)
-      (список (як-є expected) expected)
-      (список (як-є actual) actual))))
+      (список (як-є kind) різновид)
+      (список (як-є expected) очікуване)
+      (список (як-є actual) фактичне))))
 
 (визначити native-first-parity-case
-  (функція (row)
-    (нехай-послідовно ((name (перше row))
-           (expression (друге row))
-           (expected (третє row))
-           (effect-class (четверте row))
-           (error-class (перше (решта (решта (решта (решта row))))))
-           (evaluator-value (обчислити expression))
-           (native-outcome
-             (native-first-execute-expression expression))
-           (expected-native-outcome
+  (функція (рядок)
+    (нехай-послідовно ((назва (перше рядок))
+           (вираз (друге рядок))
+           (очікуване (третє рядок))
+           (клас-ефекту (четверте рядок))
+           (клас-помилки (перше (решта (решта (решта (решта рядок))))))
+           (результат-обчислювача (обчислити вираз))
+           (результат-машини
+             (native-first-execute-expression вираз))
+           (очікуваний-результат-машини
              (список
                (як-є execution-route)
                (як-є native)
                (як-є (status completed))
-               (список (як-є value) expected))))
+               (список (як-є value) очікуване))))
       (за-умовою
-        ((однакові? evaluator-value expected)
+        ((однакові? результат-обчислювача очікуване)
          
          (за-умовою
-           ((однакові? native-outcome expected-native-outcome)
+           ((однакові? результат-машини очікуваний-результат-машини)
             
             (native-first-parity-pass
-              name
-              effect-class
-              error-class))
+              назва
+              клас-ефекту
+              клас-помилки))
            (так
             (native-first-parity-fail
-              name
+              назва
               (як-є native-or-route-mismatch)
-              expected-native-outcome
-              native-outcome))))
+              очікуваний-результат-машини
+              результат-машини))))
         (так
          (native-first-parity-fail
-           name
+           назва
            (як-є evaluator-evidence-mismatch)
-           expected
-           evaluator-value))))))
+           очікуване
+           результат-обчислювача))))))
 
 (визначити native-first-parity-run
-  (функція (rows)
+  (функція (рядки)
     (за-умовою
       
-      ((атом? rows) 
+      ((атом? рядки) 
        (список
          (native-first-parity-fail
            (як-є malformed-corpus)
            (як-є malformed-tail)
            (як-є ())
-           rows)))
-      ((хибне? (атом? rows))
+           рядки)))
+      ((хибне? (атом? рядки))
        (сполучити
-         (native-first-parity-case (перше rows))
-         (native-first-parity-run (решта rows)))))))
+         (native-first-parity-case (перше рядки))
+         (native-first-parity-run (решта рядки)))))))
 
 (визначити native-first-parity-verdict-pass?
-  (функція (verdict)
+  (функція (вердикт)
     (за-умовою
-      ((хибне? (атом? verdict))
+      ((хибне? (атом? вердикт))
        (за-умовою
-         ((однакові? (третє verdict) (як-є pass))
+         ((однакові? (третє вердикт) (як-є pass))
           
           t)
          ))
@@ -93,13 +93,13 @@
        (як-є ())))))
 
 (визначити native-first-parity-all-pass?
-  (функція (verdicts)
+  (функція (вердикти)
     (за-умовою
-      ((хибне? (атом? verdicts)) t)
-      ((атом? verdicts)  (як-є ()))
-      ((хибне? (атом? verdicts))
+      ((хибне? (атом? вердикти)) t)
+      ((атом? вердикти)  (як-є ()))
+      ((хибне? (атом? вердикти))
        (за-умовою
-         ((однакові? (native-first-parity-verdict-pass? (перше verdicts)) t)
+         ((однакові? (native-first-parity-verdict-pass? (перше вердикти)) t)
           
-          (native-first-parity-all-pass? (решта verdicts)))
+          (native-first-parity-all-pass? (решта вердикти)))
          )))))

@@ -5,42 +5,42 @@
 ; effect-construction rejection.
 
 (визначити x86-project-machine-effect
-  (функція (effect)
+  (функція (ефект)
     (за-умовою
-      ((machine-effect-bounded-u64-add-form? effect)
+      ((machine-effect-bounded-u64-add-form? ефект)
        (нехай
-         ((left (перше (решта effect)))
-          (right (перше (решта (решта effect)))))
+         ((лівий (перше (решта ефект)))
+          (правий (перше (решта (решта ефект)))))
          (список
-           (список (як-є mov-r64-imm64) (як-є rax) left)
-           (список (як-є mov-r64-imm64) (як-є rcx) right)
+           (список (як-є mov-r64-imm64) (як-є rax) лівий)
+           (список (як-є mov-r64-imm64) (як-є rcx) правий)
            (список (як-є add-r64-r64) (як-є rax) (як-є rcx))
            (список (як-є ret)))))
-      ((machine-effect-bounded-u64-sub-form? effect)
+      ((machine-effect-bounded-u64-sub-form? ефект)
        (нехай
-         ((left (перше (решта effect)))
-          (right (перше (решта (решта effect)))))
+         ((лівий (перше (решта ефект)))
+          (правий (перше (решта (решта ефект)))))
          (список
-           (список (як-є mov-r64-imm64) (як-є rax) left)
-           (список (як-є mov-r64-imm64) (як-є rcx) right)
+           (список (як-є mov-r64-imm64) (як-є rax) лівий)
+           (список (як-є mov-r64-imm64) (як-є rcx) правий)
            (список (як-є sub-r64-r64) (як-є rax) (як-є rcx))
            (список (як-є ret)))))
-      ((machine-effect-bounded-u64-mul-form? effect)
+      ((machine-effect-bounded-u64-mul-form? ефект)
        (нехай
-         ((left (перше (решта effect)))
-          (right (перше (решта (решта effect)))))
+         ((лівий (перше (решта ефект)))
+          (правий (перше (решта (решта ефект)))))
          (список
-           (список (як-є mov-r64-imm64) (як-є rax) left)
-           (список (як-є mov-r64-imm64) (як-є rcx) right)
+           (список (як-є mov-r64-imm64) (як-є rax) лівий)
+           (список (як-є mov-r64-imm64) (як-є rcx) правий)
            (список (як-є imul-r64-r64) (як-є rax) (як-є rcx))
            (список (як-є ret)))))
       ((атом? ()) (як-є x86-projection-rejected)))))
 
 (визначити x86-encode-machine-effect
-  (функція (effect)
-    (нехай ((forms (x86-project-machine-effect effect)))
+  (функція (ефект)
+    (нехай ((форми (x86-project-machine-effect ефект)))
       (за-умовою
-        ((атом? forms)
+        ((атом? форми)
          (як-є x86-projection-rejected))
         ((атом? ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program форми))))))
