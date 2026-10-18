@@ -59,6 +59,16 @@ def restore_binary_heads(source: str) -> str:
     return _UKR_HEAD_RE.sub(lambda m: "(" + _UKR_TO_BITS[m.group(1)], source)
 
 
+# Тільки для зворотної перевірки історичного source; не runtime alias.
+# D8:01001011=ABS∘RECIP; D9:110101001=READ-ALL (укр читати-всі).
+def restore_historical_read_all(source: str) -> str:
+    current = "(читати-всі source)"
+    historical = "(01001011 source)"
+    if source.count(current) != 1 or historical in source:
+        raise ValueError("D9 READ-ALL має рівно один чинний український виклик")
+    return source.replace(current, historical, 1)
+
+
 
 # Два часи еталону: поточний перед укр-міграцією та давніший D1 witness.
 # Жоден історичний SHA не змінено; тільки звірені історичні source-deltas.
@@ -91,7 +101,7 @@ def prove_source(source: str):
         raise ValueError("D1 direct-predicate census changed")
     if OLD_YES in source or OLD_NO in source:
         raise ValueError("named call remains")
-    before_ukr = restore_binary_heads(source)
+    before_ukr = restore_historical_read_all(restore_binary_heads(source))
     _assert_current_pre_ukr_blob(before_ukr)
     older = before_ukr.replace("#d1:1", OLD_YES).replace("#d1:0", OLD_NO)
     historical = _historical_before_post_d1_revisions(older).encode("utf-8")
@@ -118,6 +128,25 @@ class DirectD1Bridge(unittest.TestCase):
         self.assertEqual(len(roots), 13)
         print(f"native-first-execute: UTF-8 source bytes {len(old)} -> "
               f"{len(self.source.encode('utf-8'))}")
+
+    def test_exact_d9_read_all_peer_not_legacy_d8_byte(self):
+        source = self.source
+        self.assertEqual(source.count("(читати-всі source)"), 1)
+        self.assertNotIn("(01001011 source)", source)
+        d9 = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        d8 = (ROOT / "lib/domains/d8.lisp").read_text(encoding="utf-8")
+        self.assertIn("(110101001 (ук читати-всі) (укр читати-всі)", d9)
+        self.assertIn("(en read-all) (LISP READ-ALL)", d9)
+        self.assertIn("(01001011 (ук модуль-після-обернення)", d8)
+        self.assertIn("(en abs∘recip)", d8)
+        # Інверсія тільки для SHA давнього файла, без історичного виконання.
+        before = restore_historical_read_all(restore_binary_heads(source))
+        _assert_current_pre_ukr_blob(before)
+        for replacement in ("(модуль-після-обернення source)", "(прочитати-усе source)",
+                            "(110101001 source)", "(01001011 source)"):
+            mutant = source.replace("(читати-всі source)", replacement, 1)
+            with self.subTest(replacement=replacement), self.assertRaises(ValueError):
+                prove_source(mutant)
 
     def test_whole_ladder_2046_exact_width_unique_addresses(self):
         total = 0
