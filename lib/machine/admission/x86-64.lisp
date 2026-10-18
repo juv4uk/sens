@@ -242,7 +242,7 @@
         ((110101010 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
         ((101 0 0) (010 (001 (000))))))
-      (11110100 value))))
+      (значення-у-текст value))))
 (визначити x86-admission-within-inclusive-integer-range?
   (функція (value lower upper)
     ; Contract 11.8: compose admitted D5 strict comparisons with exact D4 NOT.
