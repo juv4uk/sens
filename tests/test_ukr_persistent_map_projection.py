@@ -13,6 +13,41 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/persistent-map.lisp"
 PRE_MIGRATION_BLOB = "149d768862b8719d789297e53e80fad90c9fbfe7"
+POST_D3D4_BLOB = "b6b84716702e7546cb2c0f031524210cb7d7b956"
+
+# Після вже перевіреної D1/D3/D4 проєкції ці три викличні голови
+# перейшли на наявні Lisp-owned українські alias bindings. Не виводимо
+# викличність D9:MAP-INSERT з одного ратифікованого рядка таблиці.
+RECENT_CALLS = (
+    ("(map-insert key value (решта entries))",
+     "(внутрішня-мапа-вставити key value (решта entries))"),
+    ("(map-get key (решта entries))",
+     "(мапа-отримати key (решта entries))"),
+    ("(map-get key entries)",
+     "(мапа-отримати key entries)"),
+)
+
+
+def undo_recent_calls(source: str) -> str:
+    previous = source
+    for old, projected in RECENT_CALLS:
+        if previous.count(projected) != 1:
+            raise AssertionError("MAP: неоднозначний або відсутній поточний український виклик")
+        previous = previous.replace(projected, old, 1)
+    if git_blob(previous) != POST_D3D4_BLOB:
+        raise AssertionError("MAP: нова проєкція змінила байти поза трьома викликами")
+    return previous
+
+
+def apply_recent_calls(source: str) -> str:
+    current = source
+    for old, projected in RECENT_CALLS:
+        if current.count(old) != 1:
+            raise AssertionError("MAP: неможливо точно відтворити три проєкції викликів")
+        current = current.replace(old, projected, 1)
+    return current
+
+
 
 HISTORICAL_DEFS = (
     "map-empty", "map-insert", "map-get", "map-contains?", "map->list",
@@ -25,6 +60,7 @@ PEERS = {1: ("1", "так"), 3: ("001", "як-є"), 4: ("0011", "визначи�
 
 
 def restore_exact_previous(source: str) -> str:
+    source = undo_recent_calls(source)
     restored = []
     for line in source.splitlines(keepends=True):
         if line.lstrip().startswith(";"):
@@ -86,8 +122,9 @@ class PersistentMapUkrTests(unittest.TestCase):
 
     def test_immutable_map_mechanism_and_aliases_unchanged(self):
         for form in (
-            "(map-insert key value (решта entries))",
-            "(map-get key (решта entries))",
+            "(внутрішня-мапа-вставити key value (решта entries))",
+            "(мапа-отримати key (решта entries))",
+            "(мапа-отримати key entries)",
             "(визначити внутрішня-мапа-вставити map-insert)",
             "(визначити мапа-порожній внутрішня-мапа-порожній)",
             "(визначити мапа-отримати внутрішня-мапа-отримати)",
@@ -103,6 +140,10 @@ class PersistentMapUkrTests(unittest.TestCase):
             self.source.replace("(сполучити key value)", "(сполучити value key)", 1),
             self.source.replace("мапа-отримати внутрішня-мапа-отримати",
                                 "мапа-отримати внутрішня-мапа-містить", 1),
+            self.source.replace("(мапа-отримати key entries)",
+                                "(мапа-містить? key entries)", 1),
+            self.source.replace("(внутрішня-мапа-вставити key value",
+                                "(мапа-вставити key value", 1),
         ):
             with self.assertRaises(AssertionError):
                 verify(mutation)
@@ -113,6 +154,7 @@ class PersistentMapUkrTests(unittest.TestCase):
                                  "(визначити map-empty (як-є ()))")
         again = re.sub(r"\(0011(?=\s)", "(визначити", again)
         again = re.sub(r"\(#d1:1(?=\s|$)", "(так", again, flags=re.M)
+        again = apply_recent_calls(again)
         self.assertEqual(again, self.source)
 
 
