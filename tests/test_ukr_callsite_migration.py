@@ -5,6 +5,7 @@ These tests use their own temporary roots; they NEVER rewrite project Lisp.
 from __future__ import annotations
 
 import importlib.util
+from collections import Counter
 import hashlib
 import json
 import re
