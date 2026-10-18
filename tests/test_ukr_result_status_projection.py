@@ -27,7 +27,11 @@ D9_PROVEN = {
     "000111110": "результат-протилежний-ціль",
     "110101100": "символ?",
 }
-D9_UNPROVEN = {"101001110", "101010010", "110000011"}
+D9_CALL_SURFACES = {
+    "101001110": "міркувати",
+    "101010010": "модуль-відомий?",
+    "110000011": "модуль-клаузи-зараз",
+}
 
 
 def source_code(source):
@@ -42,7 +46,7 @@ class ResultStatusProjectionTests(unittest.TestCase):
         for bits, name in D1.items():
             self.assertIn(f"({bits} (ук {name}) (укр {name})",
                           (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8"))
-        for d, peers in {**NATIVE, 9: D9_PROVEN}.items():
+        for d, peers in {**NATIVE, 9: {**D9_PROVEN, **D9_CALL_SURFACES}}.items():
             for bits, ukr in peers.items():
                 with self.subTest(domain=d, bits=bits):
                     self.assertRegex(tables[d], re.compile(
@@ -64,16 +68,22 @@ class ResultStatusProjectionTests(unittest.TestCase):
         code = source_code(SOURCE)
         heads = set(re.findall(r"\(\s*([01]+)(?=[\s()])", code))
         native = {bits for entries in NATIVE.values() for bits in entries}
-        self.assertEqual(heads, D9_UNPROVEN)
-        self.assertFalse(heads & (native | set(D9_PROVEN)))
+        # Historical numeric call-head spellings are not a condition of
+        # correct Ukrainian Lisp: only code-position heads count.
+        self.assertFalse(heads, f"legacy numeric executable heads: {sorted(heads)}")
+        self.assertFalse(heads & (native | set(D9_PROVEN) | set(D9_CALL_SURFACES)))
         self.assertNotRegex(code, r"(?<![\w:#])[01](?![01\w])")
         self.assertIn("так", code)
         self.assertIn("ні", code)
 
-    def test_undemonstrated_d9_calls_fail_closed_not_guessed(self):
+    def test_d9_surfaces_are_exact_ukr_without_claiming_callability(self):
         code = source_code(SOURCE)
-        for bits in D9_UNPROVEN:
-            self.assertRegex(code, r"\(\s*" + bits + r"[\s()]")
+        # Source identity is checkable here; a D9 resident alone does not
+        # demonstrate a native callable mechanism.
+        for bits, ukr in D9_CALL_SURFACES.items():
+            with self.subTest(bits=bits, ukr=ukr):
+                self.assertRegex(code, r"\(\s*" + re.escape(ukr) + r"(?=[\s()])")
+                self.assertNotRegex(code, r"\(\s*" + bits + r"(?=[\s()])")
         self.assertNotIn("D7", SOURCE.splitlines()[0])
 
     def test_legacy_public_definitions_and_data_tags_kept(self):
