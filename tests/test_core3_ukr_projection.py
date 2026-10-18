@@ -101,8 +101,8 @@ def verify(source):
     forms = scan(source)
     if [canonicalize(x, names) for x in forms] != scan(OLD_LAW):
         raise AssertionError("Core3 exact D3/D4 law or quoted data changed")
-    if len(forms) != 4 or any(x[0] != "0011" for x in forms):
-        raise AssertionError("Core3 owner-bound D4 definition lost")
+    if len(forms) != 4 or any(x[0] != "визначити" for x in forms):
+        raise AssertionError("Core3 owner-bound Ukrainian D4 definition lost")
     return True
 
 
@@ -126,6 +126,25 @@ class Core3UkrProjectionTests(unittest.TestCase):
             self.assertNotEqual(mutated, self.source)
             with self.assertRaisesRegex(AssertionError, "law or quoted data"):
                 verify(mutated)
+
+    def test_current_d4_definition_and_lambda_peer_exactness(self):
+        names = projection()
+        self.assertEqual(names["визначити"], "0011")
+        self.assertEqual(names["функція"], "0010")
+        self.assertEqual(self.source.count("(визначити core3-"), 4)
+        self.assertEqual(self.source.count("(функція ("), 3)
+        self.assertTrue(verify(self.source))
+        self.assertNotIn("(0011 core3-", self.source)
+        self.assertNotIn("(0010 (", self.source)
+
+    def test_negative_wrong_d4_peer_breaks_law(self):
+        for corrupted in (
+            self.source.replace("(визначити core3-route", "(функція core3-route", 1),
+            self.source.replace("(функція (sid executor)", "(визначити (sid executor)", 1),
+        ):
+            self.assertNotEqual(corrupted, self.source)
+            with self.assertRaisesRegex(AssertionError, "law or quoted data"):
+                verify(corrupted)
 
     def test_historical_eight_bit_head_never_becomes_d3(self):
         corrupted = self.source.replace("(сполучити", "(00000100", 1)
