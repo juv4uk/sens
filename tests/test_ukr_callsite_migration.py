@@ -618,7 +618,7 @@ class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
 
 
 class NativeFirstUkrProjectionTests(unittest.TestCase):
-    """Current exact-domain spellings, never historical SID8 or T5M admission."""
+    """Reader-safe current D3/D4 projection; D9 identity does not grant admission."""
 
     @staticmethod
     def _git_blob(source: str) -> str:
@@ -641,7 +641,7 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
                 self.assertIn(f"(укр {spelling})", rows[0])
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
-        new_p = "(error-class (п'ятий row))"
+        new_p = "(error-class (перше (решта (решта (решта (решта row))))))"
         old_p = "(error-class (110110101 row))"
         new_c = "(визначити native-first-coverage-ledger"
         old_c = "(0011 native-first-coverage-ledger"
@@ -661,12 +661,15 @@ class NativeFirstUkrProjectionTests(unittest.TestCase):
         parity = (root / "lib/machine/dispatch/native-first-parity.lisp").read_text(encoding="utf-8")
         coverage = (root / "lib/machine/dispatch/native-first-coverage.lisp").read_text(encoding="utf-8")
         heads = [t.text for t in mod.candidate_heads(mod.parse(parity))]
-        self.assertIn("п'ятий", heads)
+        self.assertIn("перше", heads)
+        self.assertGreaterEqual(heads.count("решта"), 4)
+        self.assertNotIn("п", heads)
         self.assertNotIn("110110101", heads)
         self.assertIn("(001\n    ((native-coverage", coverage)
         self.assertIn("(110 ((101 (001 000) (001 001)) 0)", coverage)
-        mutant = parity.replace("(п'ятий row)", "(четверте row)", 1)
-        restored = mutant.replace("(error-class (четверте row))",
+        mutant = parity.replace("(error-class (перше (решта (решта (решта (решта row))))))",
+                                "(error-class (перше (решта (решта (решта row)))))", 1)
+        restored = mutant.replace("(error-class (перше (решта (решта (решта row)))))",
                                   "(error-class (110110101 row))", 1)
         self.assertNotEqual(self._git_blob(restored),
                             "bc6a7e27a83192d667ba6791e4da4d867ed80971")
