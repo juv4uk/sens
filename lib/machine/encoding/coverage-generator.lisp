@@ -6,7 +6,7 @@
 
 (визначити encoder-coverage-str+
   (функція args
-    (101110 (функція (acc s) (110011110 acc s)) "" args)))
+    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
 ; Deep structural equality is Lisp-owned here and is built only from current
@@ -53,7 +53,7 @@
       (encoder-coverage-d1-yes
        (encoder-coverage-binary-length-onto
          (решта values)
-         (01010 count #b1))))))
+         (додати count #b1))))))
 
 (визначити encoder-coverage-binary-length
   (функція (values)
@@ -94,14 +94,14 @@
 (визначити encoder-coverage-concat-round
   (функція (strings acc)
     (за-умовою
-      ((encoder-coverage-empty? strings) (10100 acc))
+      ((encoder-coverage-empty? strings) (зворот acc))
       ((encoder-coverage-empty? (решта strings))
-       (10101 acc (список (перше strings))))
+       (зворот-до acc (список (перше strings))))
       (encoder-coverage-d1-yes
        (encoder-coverage-concat-round
          (решта (решта strings))
          (сполучити
-           (110011110 (перше strings) (друге strings))
+           (рядок-додати (перше strings) (друге strings))
            acc))))))
 
 (визначити encoder-coverage-balanced-concat
@@ -117,18 +117,18 @@
 
 (визначити encoder-coverage-admission-projection-form
   (перше
-    (110101001
-      (110110111
+    (читати-всі
+      (читати-файл
         "lib/machine/encoding/admission-iclass-projection.lisp"))))
 
 (визначити encoder-coverage-projection-head-count
   (друге (друге encoder-coverage-admission-projection-form)))
 
 (визначити encoder-coverage-projection-partial-count
-  (друге (10011 encoder-coverage-admission-projection-form)))
+  (друге (третє encoder-coverage-admission-projection-form)))
 
 (визначити encoder-coverage-projection-orphan-count
-  (друге (100111 encoder-coverage-admission-projection-form)))
+  (друге (четверте encoder-coverage-admission-projection-form)))
 
 (визначити encoder-coverage-partials
   (решта
@@ -141,15 +141,15 @@
 
 (визначити encoder-coverage-legacy-form
   (перше
-    (110101001
-      (110110111
+    (читати-всі
+      (читати-файл
         "knowledge/encoder-coverage-legacy-parity.lisp"))))
 
 (визначити encoder-coverage-legacy-count
   (друге (друге encoder-coverage-legacy-form)))
 
 (визначити encoder-coverage-legacy-successor-count
-  (друге (10011 encoder-coverage-legacy-form)))
+  (друге (третє encoder-coverage-legacy-form)))
 
 (визначити encoder-coverage-legacy-pairs
   (решта (решта (решта encoder-coverage-legacy-form))))
@@ -163,7 +163,7 @@
     (encoder-coverage-all?
       (список
         (encoder-coverage-same? (друге left) (друге right))
-        (encoder-coverage-same? (10011 left) (10011 right))))))
+        (encoder-coverage-same? (третє left) (третє right))))))
 
 (визначити encoder-coverage-not-yet-reason
   (функція (extension)
@@ -197,8 +197,8 @@
 
 (визначити encoder-coverage-render-row
   (функція (row partial)
-    (001001 ((extension (друге row))
-           (iclass (10011 row))
+    (нехай-послідовно ((extension (друге row))
+           (iclass (третє row))
            (status
              (за-умовою
                ((encoder-coverage-empty? partial) (як-є not-yet-implemented))
@@ -210,10 +210,10 @@
                (encoder-coverage-d1-yes encoder-coverage-partial-reason))))
       (encoder-coverage-str+
         "  (coverage\n"
-        "    (iclass " (11110100 iclass) ")\n"
-        "    (extension " (11101110 extension) ")\n"
-        "    (status " (11101110 status) ")\n"
-        "    (reason " (11110100 підстава) "))\n"))))
+        "    (iclass " (значення-у-текст iclass) ")\n"
+        "    (extension " (символ-у-текст extension) ")\n"
+        "    (status " (символ-у-текст status) ")\n"
+        "    (reason " (значення-у-текст підстава) "))\n"))))
 
 ; One tail-recursive ordered-subset merge performs classification,
 ; stale-partial detection, rendering and partial counting.
@@ -224,9 +224,9 @@
       ((encoder-coverage-empty? index-rows)
        (за-умовою
          ((encoder-coverage-empty? partials)
-          (список (10100 rendered) count encoder-coverage-d1-no))
+          (список (зворот rendered) count encoder-coverage-d1-no))
          (encoder-coverage-d1-yes
-          (список (10100 rendered) count encoder-coverage-d1-yes))))
+          (список (зворот rendered) count encoder-coverage-d1-yes))))
       ((encoder-coverage-empty? partials)
        (encoder-coverage-build-onto
          (решта index-rows)
@@ -236,7 +236,7 @@
            rendered)
          count))
       (encoder-coverage-d1-yes
-       (001000 ((index-row (перше index-rows))
+       (нехай ((index-row (перше index-rows))
              (partial-row (перше partials)))
          (за-умовою
            ((encoder-coverage-row-key=? index-row partial-row)
@@ -246,7 +246,7 @@
               (сполучити
                 (encoder-coverage-render-row index-row partial-row)
                 rendered)
-              (01010 count #b1)))
+              (додати count #b1)))
            (encoder-coverage-d1-yes
             (encoder-coverage-build-onto
               (решта index-rows)
@@ -273,8 +273,8 @@
 
 (визначити encoder-coverage-index-form
   (перше
-    (110101001
-      (110110111
+    (читати-всі
+      (читати-файл
         "lib/machine/encoding/admitted-iclass-index.lisp"))))
 
 (визначити encoder-coverage-index-count
@@ -292,7 +292,7 @@
       ((encoder-coverage-empty? partials) encoder-coverage-d1-yes)
       ((encoder-coverage-empty? index-rows) encoder-coverage-d1-no)
       (encoder-coverage-d1-yes
-       (001000 ((index-row (перше index-rows))
+       (нехай ((index-row (перше index-rows))
              (partial-row (перше partials)))
          (за-умовою
            ((encoder-coverage-row-key=? index-row partial-row)
@@ -333,14 +333,14 @@
 (визначити encoder-coverage-index-valid?
   (функція ()
     (encoder-coverage-all?
-      (101000 1001 (encoder-coverage-index-checks)))))
+      (відобразити 1001 (encoder-coverage-index-checks)))))
 
 (визначити encoder-coverage-committed-row-matches?
   (функція (index-row coverage-row partial-row)
     (за-умовою
       ((encoder-coverage-empty? coverage-row) encoder-coverage-d1-no)
       ((encoder-coverage-count=? #b101 coverage-row)
-       (001001 ((expected-status
+       (нехай-послідовно ((expected-status
                 (за-умовою
                   ((encoder-coverage-empty? partial-row) (як-є not-yet-implemented))
                   (encoder-coverage-d1-yes (як-є partial))))
@@ -352,13 +352,13 @@
            (список
              (encoder-coverage-same? (перше coverage-row) (як-є coverage))
              (encoder-coverage-same? (перше (друге coverage-row)) (як-є iclass))
-             (encoder-coverage-same? (друге (друге coverage-row)) (10011 index-row))
-             (encoder-coverage-same? (перше (10011 coverage-row)) (як-є extension))
-             (encoder-coverage-same? (друге (10011 coverage-row)) (друге index-row))
-             (encoder-coverage-same? (перше (100111 coverage-row)) (як-є status))
-             (encoder-coverage-same? (друге (100111 coverage-row)) expected-status)
-             (encoder-coverage-same? (перше (110110101 coverage-row)) (перше (110101001 "reason")))
-             (encoder-coverage-same? (друге (110110101 coverage-row)) expected-reason)))))
+             (encoder-coverage-same? (друге (друге coverage-row)) (третє index-row))
+             (encoder-coverage-same? (перше (третє coverage-row)) (як-є extension))
+             (encoder-coverage-same? (друге (третє coverage-row)) (друге index-row))
+             (encoder-coverage-same? (перше (четверте coverage-row)) (як-є status))
+             (encoder-coverage-same? (друге (четверте coverage-row)) expected-status)
+             (encoder-coverage-same? (перше (перше (решта (решта (решта (решта coverage-row)))))) (перше (читати-всі "reason")))
+             (encoder-coverage-same? (друге (перше (решта (решта (решта (решта coverage-row)))))) expected-reason)))))
       (encoder-coverage-d1-yes encoder-coverage-d1-no))))
 
 (визначити encoder-coverage-projection-rows-valid?
@@ -389,7 +389,7 @@
          (encoder-coverage-d1-yes
           encoder-coverage-d1-no)))
       (encoder-coverage-d1-yes
-       (001000 ((index-row (перше index-rows))
+       (нехай ((index-row (перше index-rows))
              (coverage-row (перше coverage-rows))
              (partial-row (перше partials)))
          (за-умовою
@@ -430,8 +430,8 @@
            (encoder-coverage-same? (перше coverage-form) (як-є x86-encoder-coverage/1))
            (encoder-coverage-same? (перше (друге coverage-form)) (як-є form-count))
            (= (друге (друге coverage-form)) encoder-coverage-form-count)
-           (encoder-coverage-same? (перше (10011 coverage-form)) (як-є partial-count))
-           (= (друге (10011 coverage-form)) encoder-coverage-projection-partial-count)
+           (encoder-coverage-same? (перше (третє coverage-form)) (як-є partial-count))
+           (= (друге (третє coverage-form)) encoder-coverage-projection-partial-count)
            (encoder-coverage-projection-rows-valid?
              encoder-coverage-index-rows
              (решта (решта (решта coverage-form)))
@@ -440,7 +440,7 @@
 
 (визначити encoder-coverage-render
   (функція ()
-    (001001 ((build
+    (нехай-послідовно ((build
              (encoder-coverage-build-onto
                encoder-coverage-index-rows
                encoder-coverage-partials
@@ -448,7 +448,7 @@
                #b0))
            (rendered-rows (перше build))
            (partial-count (друге build))
-           (stale-partial? (10011 build))
+           (stale-partial? (третє build))
            (prelude
              (encoder-coverage-str+
                "; GENERATED by `sens scripts/generate-encoder-coverage.lisp` -- do not hand-edit.\n"
@@ -458,8 +458,8 @@
                "; coverage of every XED operand/addressing form. No silent third status (#176/#604).\n"
                "\n"
                "(x86-encoder-coverage/1\n"
-               "  (form-count " (11110100 encoder-coverage-form-count) ")\n"
-               "  (partial-count " (11110100 partial-count) ")\n")))
+               "  (form-count " (значення-у-текст encoder-coverage-form-count) ")\n"
+               "  (partial-count " (значення-у-текст partial-count) ")\n")))
       (за-умовою
         (stale-partial?
          (як-є ()))

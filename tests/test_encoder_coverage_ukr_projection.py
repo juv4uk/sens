@@ -19,6 +19,28 @@ EXPECTED = {
     "0011": ("визначити", 40), "0010": ("функція", 25),
     "001": ("як-є", 49), "010": ("атом?", 3), "011": ("решта", 40),
 }
+# Додаткові перевірені домени D5/D6/D8/D9 (крім reader-unsafe FIFTH).
+HIGH = {
+    "10011": ("третє", 11),
+    "10100": ("зворот", 3),
+    "10101": ("зворот-до", 1),
+    "100111": ("четверте", 3),
+    "101000": ("відобразити", 1),
+    "101110": ("згорнути", 1),
+    "11101110": ("символ-у-текст", 2),
+    "11110100": ("значення-у-текст", 4),
+    "110011110": ("рядок-додати", 2),
+    "110101001": ("читати-всі", 4),
+    "110110111": ("читати-файл", 3),
+    "01010": ("додати", 2),
+    "001001": ("нехай-послідовно", 3),
+    "001000": ("нехай", 3),
+}
+# D9:110110101 FIFTH: ратифікований рядок має апостроф у друкованій
+# поверхні, яку поточний reader читає як quote; використовуємо точно
+# ту саму композицію D3 CAR(CDR(CDR(CDR(CDR(list))))).
+FIFTH_WITNESS = "(перше (решта (решта (решта (решта coverage-row)))))"
+FIFTH_BINARY = "(110110101 coverage-row)"
 TOKEN = re.compile(r""";[^\n]*|"(?:\\.|[^"\\])*"|[()]|['\x60,]|[^\s()'";\x60,]+""")
 
 
@@ -79,7 +101,7 @@ def call_heads(source):
 
 def ratified():
     result = {}
-    for width in (3, 4):
+    for width in (3, 4, 5, 6, 8, 9):
         src = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
         for line in src.splitlines():
             row = re.match(
@@ -100,23 +122,29 @@ def git_blob(source):
 
 def verify(text):
     authority = ratified()
-    for bits, (name, _) in EXPECTED.items():
+    combined = {**EXPECTED, **HIGH}
+    for bits, (name, _) in combined.items():
         if authority.get(bits) != name:
             raise AssertionError("доменна проєкція змінилася: " + bits)
-    inverse = {name: bits for bits, (name, _) in EXPECTED.items()}
+    if authority.get("110110101") != "п'ятий":
+        raise AssertionError("зміна identity D9 FIFTH")
+    if text.count(FIFTH_WITNESS) != 2:
+        raise AssertionError("втрачено точний D9 FIFTH через D3 CAR/CDR")
+    projected = text.replace(FIFTH_WITNESS, FIFTH_BINARY)
+    inverse = {name: bits for bits, (name, _) in combined.items()}
     edits = []
     census = Counter()
-    for head, start, end in call_heads(text):
-        if head in EXPECTED:
-            raise AssertionError("залишився виконуваний двійковий D3/D4 head: " + head)
+    for head, start, end in call_heads(projected):
+        if head in combined:
+            raise AssertionError("залишився виконуваний двійковий head: " + head)
         if head in inverse:
             bits = inverse[head]
             census[bits] += 1
             edits.append((start, end, bits))
-    target = Counter({b: n for b, (_name, n) in EXPECTED.items()})
+    target = Counter({b: n for b, (_name, n) in combined.items()})
     if census != target:
         raise AssertionError(f"помилка census: {census} != {target}")
-    restored = text
+    restored = projected
     for start, end, bits in reversed(edits):
         restored = restored[:start] + bits + restored[end:]
     if git_blob(restored) != ORIGINAL_BLOB:
@@ -130,11 +158,11 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
         cls.text = PATH.read_text(encoding="utf-8")
 
     def test_exact_272_heads_and_original_blob(self):
-        self.assertEqual(sum(verify(self.text).values()), 272)
+        self.assertEqual(sum(verify(self.text).values()) + 2, 317)
 
     def test_other_domain_heads_and_quoted_data_untouched(self):
-        self.assertIn("(110011110 acc s)", self.text)
-        self.assertIn("(001000 ", self.text)
+        self.assertIn("(рядок-додати acc s)", self.text)
+        self.assertIn("(нехай ", self.text)
         self.assertIn("(як-є encoder-coverage-yes)", self.text)
         verify(self.text)
 
@@ -150,6 +178,12 @@ class EncoderCoverageProjectionTests(unittest.TestCase):
         )
         self.assertNotEqual(broken, self.text)
         with self.assertRaisesRegex(AssertionError, "зміна"):
+            verify(broken)
+
+    def test_wrong_fifth_structural_law_is_detected(self):
+        broken = self.text.replace(FIFTH_WITNESS,
+                                   "(перше (решта (решта (решта coverage-row))))", 1)
+        with self.assertRaisesRegex(AssertionError, "FIFTH"):
             verify(broken)
 
     def test_unbalanced_source_is_rejected(self):
