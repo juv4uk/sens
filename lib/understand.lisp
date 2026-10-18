@@ -46,11 +46,11 @@
     (за-умовою
       ((атом? words) (як-є ()))
       ((тотожне? (перше words) (як-є all))
-       (understand-universal words))
+       (розібрати-загальний words))
       ((тотожне? (друге words) (як-є is))
-       (understand-is words))
+       (розібрати-є words))
       (так
-       (understand-relation words)))))
+       (розібрати-відношення words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`.
 ; Controlled, structural, deterministic: no morphology, no network, no LLM.
@@ -67,9 +67,9 @@
     (за-умовою
       ((атом? words) (як-є ()))
       ((тотожне? (перше words) (як-є is))
-       (understand-query-is words))
+       (розібрати-запит-є words))
       ((тотожне? (перше words) (як-є does))
-       (understand-query-relation words))
+       (розібрати-запит-відношення words))
       (так
        (як-є ())))))
 

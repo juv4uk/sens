@@ -133,6 +133,12 @@ def normalize_current_source_forms(source_forms):
             return ["001"] + deepcopy(node[1:])
         if isinstance(head, str) and head in CURRENT_HEADS:
             return [CURRENT_HEADS[head]] + [lower(x) for x in node[1:]]
+        # Ці D9 людські проєкції викликають вже визначені Lisp closures.
+        # Повертаємо ТІЛЬКИ виконавчі голови, не рядки/цитати/імена визначень.
+        if isinstance(head, str) and head in SOURCE_ALIASES:
+            return [SOURCE_ALIASES[head]] + [lower(x) for x in node[1:]]
+        if isinstance(head, str) and head in SOURCE_ALIASES.values():
+            raise AssertionError("застаріла латинська виклична голова: " + head)
         if isinstance(head, str) and re.fullmatch(r"[01]{3,6}", head):
             raise AssertionError("старий виконавчий бітовий голов лишився: " + head)
         return [lower(x) for x in node]
@@ -255,6 +261,41 @@ class UnderstandExactD3Witness(unittest.TestCase):
                 self.assertEqual(len(matches), 1)
                 self.assertIn(f"(укр {ukr})", matches[0])
         verify_unchanged_laws(self.forms)
+
+    def test_five_current_d9_call_peers_and_negative_old_head(self):
+        # Ратифікована координата + реальна Lisp-closure, не W8→D8.
+        current = {
+            "000001011": "розібрати-є",
+            "000001100": "розібрати-відношення",
+            "000011111": "розібрати-загальний",
+            "000110000": "розібрати-запит-відношення",
+            "000111001": "розібрати-запит-є",
+        }
+        source = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        for bits, ukr in current.items():
+            with self.subTest(bits=bits):
+                rows = [line for line in source.splitlines()
+                        if line.lstrip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(укр {ukr})", rows[0])
+        # Кожна з п'яти голів з'являється рівно в одному виконуваному місці.
+        def heads(node):
+            if not isinstance(node, list):
+                return []
+            return ([node[0]] if node and isinstance(node[0], str) else []
+                    ) + [v for child in node for v in heads(child)]
+        executed = [h for form in self.source_forms[:8] for h in heads(form)]
+        for peer in current.values():
+            self.assertEqual(executed.count(peer), 1, peer)
+        verify_unchanged_laws(self.forms)  # frozen 8 historic digest proofs
+        mutant = deepcopy(self.source_forms)
+        # Навіть одна зворотна латинська голова порушує міграційний контракт.
+        for form in mutant[:8]:
+            if form[1] == "understand":
+                form[2][2][2][1][0] = "understand-universal"
+                break
+        with self.assertRaisesRegex(AssertionError, "застаріла латинська"):
+            normalize_current_source_forms(mutant)
 
     def test_negative_wrong_ukr_function_and_wrong_d1_fallback(self):
         bad_head = deepcopy(self.source_forms)
