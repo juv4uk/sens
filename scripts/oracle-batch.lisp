@@ -22,8 +22,8 @@
 ; resource bound before the oracle ever saw the request. The only local
 ; step needed is quoting expr-str as a WSM string literal for embedding
 ; in the request text.
-(0011 make-request
-  (0010 (expr-str)
+(визначити make-request
+  (функція (expr-str)
     (001000 ((quoted-source (11110100 expr-str)))
       (110011110
         (110011110
@@ -31,8 +31,8 @@
           ") (contract-version (3 0)))")
         "\n"))))
 
-(0011 oracle-eval
-  (0010 (expr-str)
+(визначити oracle-eval
+  (функція (expr-str)
     (001000 ((request (make-request expr-str)))
       (001000 ((socket (tcp-connect "100.113.68.50" 9999)))
         (001000 ((sent (110110011 socket request)))
@@ -40,49 +40,49 @@
             (001000 ((closed (tcp-close socket)))
               (11101010 response))))))))
 
-(0011 emit-result
-  (0010 (id result)
-    (11011011 (1110 (001 oracle-result)
-                 (111 (001 id) id)
-                 (111 (001 result) result)))))
+(визначити emit-result
+  (функція (id result)
+    (11011011 (список (як-є oracle-result)
+                 (сполучити (як-є id) id)
+                 (сполучити (як-є result) result)))))
 
-(0011 fixtures-only
-  (0010 (entries)
-    (110
-      ((010 entries) (001 ()))
+(визначити fixtures-only
+  (функція (entries)
+    (за-умовою
+      ((атом? entries) (як-є ()))
       ; inventory.lisp's own last top-level form is a bare () -- the CLI's
       ; auto-printed final script return value, captured by the shell
       ; redirect that originally generated the file, not a real record.
       ; (car (car entries)) on that entry would car an atom and error, so
       ; skip any non-Pair top-level form defensively instead of assuming
       ; every entry is shaped like a tagged record.
-      ((010 (100 entries)) (fixtures-only (011 entries)))
-      ((010 (001 ())) (110
-           ((101 (100 (100 entries)) (001 fixture))
-            (111 (100 entries) (fixtures-only (011 entries))))
-           ((010 (001 ())) (fixtures-only (011 entries))))))))
+      ((атом? (перше entries)) (fixtures-only (решта entries)))
+      ((атом? (як-є ())) (за-умовою
+           ((тотожне? (перше (перше entries)) (як-є fixture))
+            (сполучити (перше entries) (fixtures-only (решта entries))))
+           ((атом? (як-є ())) (fixtures-only (решта entries))))))))
 
 ; Walk inventory.lisp's (fixture ...) records and conformance.lisp's raw
 ; ((expr . ...) ...) records in lockstep -- same position, same fixture.
-(0011 process-pair
-  (0010 (inventory-remaining conformance-remaining)
-    (110
-      ((010 inventory-remaining) (001 ()))
-      ((010 conformance-remaining) (001 ()))
-      ((010 (001 ()))
-       (001001 ((inventory-fixture (100 inventory-remaining))
-              (id (011 (11100 (001 id) (011 inventory-fixture))))
-              (conformance-fixture (100 conformance-remaining))
-              (expr-str (011 (11100 (001 expr) conformance-fixture)))
+(визначити process-pair
+  (функція (inventory-remaining conformance-remaining)
+    (за-умовою
+      ((атом? inventory-remaining) (як-є ()))
+      ((атом? conformance-remaining) (як-є ()))
+      ((атом? (як-є ()))
+       (001001 ((inventory-fixture (перше inventory-remaining))
+              (id (решта (11100 (як-є id) (решта inventory-fixture))))
+              (conformance-fixture (перше conformance-remaining))
+              (expr-str (решта (11100 (як-є expr) conformance-fixture)))
               (result (oracle-eval expr-str))
               (emitted (emit-result id result)))
-         (process-pair (011 inventory-remaining) (011 conformance-remaining)))))))
+         (process-pair (решта inventory-remaining) (решта conformance-remaining)))))))
 
-(11011011 (111 (001 about) "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
-(11011011 (111 (001 generated) "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
+(11011011 (сполучити (як-є about) "oracle-results.lisp — oracle-eval results for every tests/fixtures/inventory.lisp fixture, via the canonical TCP Oracle :9999, keyed by stable F-ID."))
+(11011011 (сполучити (як-є generated) "Run: my-lisp scripts/oracle-batch.lisp > tests/fixtures/oracle-results.lisp"))
 
 (process-pair
   (fixtures-only (110101001 (110110111 "tests/fixtures/inventory.lisp")))
   (110101001 (110110111 "tests/fixtures/conformance.lisp")))
 
-(001 ())
+(як-є ())
