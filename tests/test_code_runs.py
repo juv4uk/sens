@@ -119,6 +119,60 @@ class ReaderRunsTests(unittest.TestCase):
             three_pass.Parser(tokens).parse_program()
 
 
+class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
+    """Ратифікована укр-проєкція шести дійсних селекторів перекладу."""
+
+    ORIGINAL_BLOB = "c1edb3da644cffb86507d964c9f7474c685c1f76"
+    SELECTORS = (
+        ("translation-kind", "proposal", 5, "10011"),
+        ("translation-source", "proposal", 6, "100111"),
+        ("translation-payload", "proposal", 9, "110110101"),
+        ("translation-review-code", "review", 5, "10011"),
+        ("translation-review-proposal", "review", 6, "100111"),
+        ("translation-review-detail", "review", 9, "110110101"),
+    )
+
+    def _restore_original(self, source):
+        from domain_tables import read_domain_table
+        surfaces = {
+            width: {row.bits: row.ukr for row in read_domain_table(
+                ROOT / "lib" / "domains" / f"d{width}.lisp"
+            )}
+            for width in (4, 5, 6, 9)
+        }
+        self.assertEqual(surfaces[4]["0010"], "функція")
+        for name, argument, width, bits in self.SELECTORS:
+            peer = surfaces[width][bits]
+            new = f"(визначити {name}\\n  (функція ({argument}) ({peer} {argument})))"
+            old = f"(визначити {name}\\n  (0010 ({argument}) ({bits} {argument})))"
+            self.assertEqual(source.count(new), 1, f"хибна укр-проєкція {name}")
+            self.assertNotIn(old, source)
+            source = source.replace(new, old, 1)
+        return source
+
+    @staticmethod
+    def _git_blob_sha(source):
+        raw = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(raw)).encode() + bytes((0,)) + raw).hexdigest()
+
+    def test_ratified_peers_and_exact_inverse_preserve_original(self):
+        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
+        parsed = three_pass.Parser(
+            three_pass.tokenize(three_pass.strip_comments(source))
+        ).parse_program()
+        self.assertTrue(parsed)
+        self.assertEqual(
+            self._git_blob_sha(self._restore_original(source)), self.ORIGINAL_BLOB
+        )
+
+    def test_wrong_selector_peer_is_rejected(self):
+        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
+        self.assertIn("(третє proposal)", source)
+        mutated = source.replace("(третє proposal)", "(четверте proposal)", 1)
+        with self.assertRaises(AssertionError):
+            self._restore_original(mutated)
+
+
 class CodecRunsTests(unittest.TestCase):
     """Наш кодек має виконатись на реальних мовних файлах."""
 
