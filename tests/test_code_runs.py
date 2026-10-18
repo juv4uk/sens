@@ -242,7 +242,7 @@ class CodecUkrProjectionTests(unittest.TestCase):
         for marker in ("d2-open", "d2-close", "d2-sep", "d2-dot"):
             self.assertIn(marker, source)
         for alias in ("A", "B", "C", "D", "E", "F", "G", "R", "Q", "S", "U", "P"):
-            self.assertRegex(source, rf"\({re.escape(alias)}(?=\s|\))")
+            self.assertIn(f"(визначити {alias} ", source)
 
     def test_inverse_projection_restores_every_original_source_byte(self):
         source = self.SOURCE.read_text(encoding="utf-8")
