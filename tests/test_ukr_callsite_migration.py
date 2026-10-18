@@ -333,5 +333,57 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         self.assertIn("сполучити", heads)
 
 
+class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
+    """Source-only peer identities; native SENS law witnesses stay independent."""
+
+    def test_current_d3_d4_peers_in_both_meta_evaluators(self):
+        root = Path(__file__).resolve().parents[1]
+        peers = (
+            (3, "001", "як-є"), (3, "010", "атом?"),
+            (3, "011", "решта"), (3, "100", "перше"),
+            (3, "101", "тотожне?"), (3, "110", "за-умовою"),
+            (3, "111", "сполучити"), (4, "0010", "функція"),
+            (4, "1001", "друге"), (4, "1110", "список"),
+        )
+        for width, bits, ukr in peers:
+            with self.subTest(width=width, bits=bits):
+                table = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
+                row = [ln for ln in table.splitlines() if ln.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(row), 1)
+                self.assertIn(f"(укр {ukr})", row[0])
+
+        examples = {
+            "lib/meta-eval-first-class.lisp": (
+                "сполучити", "як-є", "тотожне?", "перше", "решта", "функція",
+            ),
+            "lib/meta-eval-mutual.lisp": (
+                "за-умовою", "як-є", "тотожне?", "перше", "решта", "функція",
+            ),
+        }
+        for path, required in examples.items():
+            with self.subTest(path=path):
+                src = (root / path).read_text(encoding="utf-8")
+                calls = [node.text for node in mod.candidate_heads(mod.parse(src))]
+                for spelling in required:
+                    self.assertIn(spelling, calls, (path, spelling))
+
+    def test_quoted_code_data_and_explicit_d1_remain_separate(self):
+        root = Path(__file__).resolve().parents[1]
+        first = (root / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
+        mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
+        self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
+        self.assertIn("(тотожне? (перше form) (як-є def))", mutual)
+        self.assertIn("#d1:1", first)
+        self.assertIn("#d1:0", mutual)
+        self.assertIn("(0011 my-fc-env-lookup", first)
+        self.assertIn("(0011 my-group-eval", mutual)
+        # Negative witness: numeric operator behind QUOTE remains data, not callable.
+        sample = "(як-є (100 quoted)) (сполучити (як-є datum) (перше xs))"
+        heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
+        self.assertNotIn("100", heads)
+        self.assertIn("сполучити", heads)
+        self.assertIn("перше", heads)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
