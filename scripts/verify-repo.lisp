@@ -5,77 +5,77 @@
 ; Usage: sens scripts/verify-repo.lisp
 ; Друкує кожну перевірку; за першої ж проблеми — помилка й ненульовий вихід.
 
-(0011 str+
-  (0010 args
+(визначити str+
+  (функція args
     (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
-(0011 fail
-  (0010 (message)
-    (1001 (1110 (11011011 (str+ "FAIL: " message)) (100 (001 ()))))))
+(визначити fail
+  (функція (message)
+    (друге (список (11011011 (str+ "FAIL: " message)) (перше (як-є ()))))))
 
-(0011 pass
-  (0010 (name)
+(визначити pass
+  (функція (name)
     (11011011 (str+ "ok: " name))))
 
-(0011 contains? (0010 (text needle) (110101000 needle text)))
+(визначити contains? (функція (text needle) (110101000 needle text)))
 
 ; Кожна голка з needles має бути в тексті; повертає перелік відсутніх.
-(0011 missing-needles
-  (0010 (text needles)
-    (110
-      ((010 needles) () (001 ()))
-      ((010 needles) (0)
-       (110
-         ((contains? text (100 needles)) t (missing-needles text (011 needles)))
-         (t t (111 (100 needles) (missing-needles text (011 needles)))))))))
+(визначити missing-needles
+  (функція (text needles)
+    (за-умовою
+      ((атом? needles) () (як-є ()))
+      ((атом? needles) (0)
+       (за-умовою
+         ((contains? text (перше needles)) t (missing-needles text (решта needles)))
+         (t t (сполучити (перше needles) (missing-needles text (решта needles)))))))))
 
-(0011 require-needles
-  (0010 (name path needles)
+(визначити require-needles
+  (функція (name path needles)
     (001000 ((missing (missing-needles (110110111 path) needles)))
-      (110
-        ((010 missing) () (pass name))
+      (за-умовою
+        ((атом? missing) () (pass name))
         ((атом? missing) (ні) (провал (str+ name ": " path " missing " (значення-у-текст missing))))))))
 
-(0011 forbid-needle
-  (0010 (name path needle)
-    (110
+(визначити forbid-needle
+  (функція (name path needle)
+    (за-умовою
       ((contains? (110110111 path) needle) t
        (провал (str+ name ": " path " must not contain " (значення-у-текст needle))))
       (t t t))))
 
-(0011 any-needle?
-  (0010 (text needles)
-    (110
-      ((010 needles) () (001 ()))
-      ((010 needles) (0)
-       (110
-         ((contains? text (100 needles)) t t)
-         (t t (any-needle? text (011 needles))))))))
+(визначити any-needle?
+  (функція (text needles)
+    (за-умовою
+      ((атом? needles) () (як-є ()))
+      ((атом? needles) (0)
+       (за-умовою
+         ((contains? text (перше needles)) t t)
+         (t t (any-needle? text (решта needles))))))))
 
 ; --- public-docs-share-current-project-identity-and-extension ---
-(0011 check-doc-identity
-  (0010 (path)
+(визначити check-doc-identity
+  (функція (path)
     (001000 ((doc (110110111 path)))
-      (110
-        ((any-needle? doc (001 ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
+      (за-умовою
+        ((any-needle? doc (як-є ("reference implementation" "reference Rust implementation" "референсна реалізація" "референсна реалізація Rust")))
          t
-         (110
-           ((any-needle? doc (001 ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
+         (за-умовою
+           ((any-needle? doc (як-є ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
             t
             (провал (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
            (t t
-            (110
-              ((any-needle? doc (001 ("канонічне розширення вихідного коду — **`.lisp`**"
+            (за-умовою
+              ((any-needle? doc (як-є ("канонічне розширення вихідного коду — **`.lisp`**"
                                         "Канонічне розширення вихідного коду — **`.lisp`**"
                                         "canonical source extension is **`.lisp`**"
                                         "current canonical source extension is **`.lisp`**")))
                t
-               (110
-                 ((any-needle? doc (001 ("legacy alias" "legacy aliases")))
+               (за-умовою
+                 ((any-needle? doc (як-є ("legacy alias" "legacy aliases")))
                   t
-                  (110
+                  (за-умовою
                     ((contains? doc "`.wsm`") t
-                     (110
+                     (за-умовою
                        ((contains? doc "`.my`") t t)
                        (t t (провал (str+ path ": must name `.my` as a legacy alias")))))
                     (t t (провал (str+ path ": must name `.wsm` as a legacy alias")))))
@@ -90,35 +90,35 @@
 ; --- cargo-workspace-has-no-my-lisp-package-prefix ---
 ; Назва пакета (рядок одразу після `[package]`) з префіксом my-lisp — регресія.
 ; Бінарники з назвою my-lisp (сумісні псевдоніми CLI) — не пакет, їх не чіпаємо.
-(0011 check-manifests
-  (0010 (entries)
-    (110
-      ((010 entries) () t)
-      ((010 entries) (0)
-       (001000 ((manifest (str+ "crates/" (100 entries) "/Cargo.toml")))
+(визначити check-manifests
+  (функція (entries)
+    (за-умовою
+      ((атом? entries) () t)
+      ((атом? entries) (0)
+       (001000 ((manifest (str+ "crates/" (перше entries) "/Cargo.toml")))
          (001000 ((text (110110111 manifest)))
-           (110
+           (за-умовою
              ((contains? text "[package]\nname = \"my-lisp") t
               (провал (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
-             (t t (check-manifests (011 entries))))))))))
+             (t t (check-manifests (решта entries))))))))))
 
 (check-manifests (read-dir "crates"))
 (pass "cargo-workspace-has-no-my-lisp-package-prefix")
 
 ; --- public-docs-point-to-semantic-authority ---
 (require-needles "public-docs-point-to-semantic-authority" "README.md"
-  (001 ("docs/semantic-authority-map.md")))
+  (як-є ("docs/semantic-authority-map.md")))
 (require-needles "public-docs-point-to-semantic-authority" "docs/language-core.md"
-  (001 ("semantic-authority-map.md")))
+  (як-є ("semantic-authority-map.md")))
 (require-needles "public-docs-point-to-semantic-authority" "docs/semantic-authority-map.md"
-  (001 ("language-contract.lisp")))
+  (як-є ("language-contract.lisp")))
 ; Rust шукав без урахування регістру; у документі — «Ratified ADRs» і
 ; «executable conformance» / «Executable conformance».
-(110
-  ((any-needle? (110110111 "docs/semantic-authority-map.md") (001 ("Ratified ADR" "ratified ADR"))) t t)
+(за-умовою
+  ((any-needle? (110110111 "docs/semantic-authority-map.md") (як-є ("Ratified ADR" "ratified ADR"))) t t)
   (t t (провал "docs/semantic-authority-map.md must mention ratified ADRs")))
-(110
-  ((any-needle? (110110111 "docs/semantic-authority-map.md") (001 ("Executable conformance" "executable conformance"))) t t)
+(за-умовою
+  ((any-needle? (110110111 "docs/semantic-authority-map.md") (як-є ("Executable conformance" "executable conformance"))) t t)
   (t t (провал "docs/semantic-authority-map.md must mention executable conformance")))
 (pass "public-docs-point-to-semantic-authority")
 
@@ -127,20 +127,20 @@
 ; примітиви за кодом, тож джерело — таблиця функцій і її метадані.
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "docs/host-semantic-surface.md"
-  (001 ("mono-ns" "unix-time-now"
+  (як-є ("mono-ns" "unix-time-now"
           "`utc-now` | `lib/time.lisp` | derived public clock meaning | HOST REMOVED")))
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/time.lisp"
-  (001 ("mono-ms" "utc-now")))
+  (як-є ("mono-ms" "utc-now")))
 (require-needles "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp"
-  (001 ("(01011011 (kind builtin)")))
+  (як-є ("(01011011 (kind builtin)")))
 (forbid-needle "host-semantic-surface-documentation-tracks-time-ownership"
   "lib/surface/function-signatures.lisp" "(utc-now)")
 
 ; --- agent-onboarding / current-agent-authority / human-migration-doc ---
 (require-needles "agent-onboarding-records-removed-coordination-surface" "AGENTS.md"
-  (001 ("sens :9999" "swarm-node :910x"
+  (як-є ("sens :9999" "swarm-node :910x"
           "Стара coordination surface на `:9999` фізично видалена"
           "мають повертати `unknown op`"
           "knowledge/swarm-legacy-deprecation.lisp"
@@ -149,100 +149,100 @@
   "This is a\n  first-class pattern, not a fallback")
 (require-needles "agent-onboarding-records-removed-coordination-surface"
   "knowledge/swarm-legacy-deprecation.lisp"
-  (001 ("(status . deprecated)" "(physical-status . removed)"
+  (як-є ("(status . deprecated)" "(physical-status . removed)"
           "(runtime-rejection . confirmed)" "(coordination-authority . swarm-node)")))
 (require-needles "human-migration-doc-keeps-semantic-and-coordination-planes-separate"
   "docs/swarm-mesh-v2.md"
-  (001 ("sens :9999" "swarm-node :910x"
+  (як-є ("sens :9999" "swarm-node :910x"
           "no longer the\ncoordination path going forward" "semantic oracle")))
 
 ; --- s2-explicitly-contracts-category-not-error-wording ---
 (require-needles "s2-explicitly-contracts-category-not-error-wording"
   "docs/language-core-axioms.md"
-  (001 ("The wording may differ; the *category* is the contract.")))
+  (як-є ("The wording may differ; the *category* is the contract.")))
 (require-needles "s2-explicitly-contracts-category-not-error-wording"
   "crates/sens/src/error.rs"
-  (001 ("non-contractual: `kind` is what S2 ratifies")))
+  (як-є ("non-contractual: `kind` is what S2 ratifies")))
 
 ; --- Python-перевірки (поки викликаються; перенесення самих скриптів — окремо) ---
-(0011 run-python
-  (0010 (name script args)
-    (001000 ((result (110101111 "python3" (111 script args))))
-      (110
-        ((11110111 (100 result) 0) (1) (pass name))
-        ((11110111 (100 result) 0) (0)
+(визначити run-python
+  (функція (name script args)
+    (001000 ((result (110101111 "python3" (сполучити script args))))
+      (за-умовою
+        ((11110111 (перше result) 0) (1) (pass name))
+        ((11110111 (перше result) 0) (0)
          (провал (str+ name " failed\n" (друге result) (третє result))))))))
 
-(run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (001 ()))
-(run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (001 ("--check")))
-(run-python "semantic-ownership-map-in-sync" "scripts/semantic-ownership.py" (001 ("--check")))
+(run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (як-є ()))
+(run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (як-є ("--check")))
+(run-python "semantic-ownership-map-in-sync" "scripts/semantic-ownership.py" (як-є ("--check")))
 
 ;; ===== Українська документація й розкладка (з xtask verify) =====
 
-(0011 field (0010 (key form) (1001 (11100 key (011 form)))))
+(визначити field (функція (key form) (друге (11100 key (решта form)))))
 
-(0011 count-items
-  (0010 (items)
-    (110
-      ((010 items) () 0)
-      ((010 items) (0) (01010 1 (count-items (011 items)))))))
+(визначити count-items
+  (функція (items)
+    (за-умовою
+      ((атом? items) () 0)
+      ((атом? items) (0) (01010 1 (count-items (решта items)))))))
 
-(0011 last-char
-  (0010 (text)
+(визначити last-char
+  (функція (text)
     (110100011 text (01011 (110100010 text) 1) (110100010 text))))
 
 ; Стабільні українські назви з таблиці функцій: ((бітовий-код . назва) ...).
-(0011 registry-rows (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+(визначити registry-rows (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
-(0011 stable-uk-pairs
-  (0010 (rows)
-    (110
-      ((010 rows) () (001 ()))
-      ((010 rows) (0)
-       (001000 ((name (field (001 ук) (100 rows))))
-         (110
-           ((010 name) (1)
-            (111 (111 (11110100 (100 (100 rows))) (11101110 name))
-                  (stable-uk-pairs (011 rows))))
-           (t t (stable-uk-pairs (011 rows)))))))))
+(визначити stable-uk-pairs
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) () (як-є ()))
+      ((атом? rows) (0)
+       (001000 ((name (field (як-є ук) (перше rows))))
+         (за-умовою
+           ((атом? name) (1)
+            (сполучити (сполучити (11110100 (перше (перше rows))) (11101110 name))
+                  (stable-uk-pairs (решта rows))))
+           (t t (stable-uk-pairs (решта rows)))))))))
 
-(0011 stable-uk (stable-uk-pairs registry-rows))
+(визначити stable-uk (stable-uk-pairs registry-rows))
 
 ; Документаційний індекс: (doc категорія КОД вид "сигнатура" "опис"), КОД — голі 8 біт.
-(0011 uk-docs (011 (11100 (001 docs) (011 (100 (110101001 (110110111 "lib/surface/uk-docs.lisp")))))))
+(визначити uk-docs (решта (11100 (як-є docs) (решта (перше (110101001 (110110111 "lib/surface/uk-docs.lisp")))))))
 ; Текстовий запис SENS для перевірок і join: голі 8 біт дають рівно 8 знаків,
 ; а SENS у лапках (текстовий сурогат) — 10, і перевірка його відкидає.
-(0011 doc-id (0010 (doc) (11110100 (10011 doc))))
-(0011 doc-kind (0010 (doc) (100111 doc)))
-(0011 api-md (110110111 "docs/ukrainian-api.md"))
+(визначити doc-id (функція (doc) (11110100 (10011 doc))))
+(визначити doc-kind (функція (doc) (100111 doc)))
+(визначити api-md (110110111 "docs/ukrainian-api.md"))
 
-(0011 uk-name-for
-  (0010 (id)
+(визначити uk-name-for
+  (функція (id)
     (001000 ((found (11100 id stable-uk)))
-      (110
-        ((010 found) (0) (011 found))
+      (за-умовою
+        ((атом? found) (0) (решта found))
         (t t (провал (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
 
-(0011 all-bits?
-  (0010 (text)
-    (110
+(визначити all-bits?
+  (функція (text)
+    (за-умовою
       ((110011100 text) (1) t)
       ((110101000 (110101011 text) "01") t (all-bits? (110011101 text)))
-      (t t (001 ())))))
+      (t t (як-є ())))))
 
-(0011 check-docs
-  (0010 (docs predicates mutations)
-    (110
-      ((010 docs) ()
-       (110
+(визначити check-docs
+  (функція (docs predicates mutations)
+    (за-умовою
+      ((атом? docs) ()
+       (за-умовою
          ((11010 10 predicates) 1
-          (110
+          (за-умовою
             ((11010 0 mutations) 1 t)
             (t t (провал "публічний каталог мутацій схлопнувся"))))
          (t t (провал "публічний каталог предикатів схлопнувся"))))
-      ((010 docs) (0)
-       (001000 ((id (doc-id (100 docs))) (kind (doc-kind (100 docs))))
-         (110
+      ((атом? docs) (0)
+       (001000 ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
+         (за-умовою
            ((11110111 (110100010 id) 8) (0)
             (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
            ((all-bits? id) () (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
@@ -250,21 +250,21 @@
             (001000 ((uk (uk-name-for id)))
               (001000 ((question (11110111 (last-char uk) "?"))
                     (bang (11110111 (last-char uk) "!"))
-                    (predicate (11110111 kind (001 predicate)))
-                    (mutation (11110111 kind (001 mutation))))
-                (110
+                    (predicate (11110111 kind (як-є predicate)))
+                    (mutation (11110111 kind (як-є mutation))))
+                (за-умовою
                   ((11110111 question predicate) (0)
                    (провал (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
                   ((11110111 bang mutation) (0)
                    (провал (str+ uk ": ! зарезервований для мутації")))
                   (mutation (1)
-                   (110
+                   (за-умовою
                      ((11110111 uk "встановити-елемент-вектора!") (1)
-                      (check-docs (011 docs) predicates (01010 mutations 1)))
+                      (check-docs (решта docs) predicates (01010 mutations 1)))
                      (t t (провал (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
-                   (check-docs (011 docs) (01010 predicates 1) mutations))
-                  (t t (check-docs (011 docs) predicates mutations))))))))))))
+                   (check-docs (решта docs) (01010 predicates 1) mutations))
+                  (t t (check-docs (решта docs) predicates mutations))))))))))))
 
 (check-docs uk-docs 0 0)
 (pass "dokumentatsiinyi-kliuch-ie-tilky-numeric")
@@ -272,81 +272,81 @@
 (pass "znak-oklyku-tochno-vidpovidaie-mutatsii")
 
 ; Усі ID документації є в таблиці; усі задокументовані назви — у Markdown.
-(0011 check-md-rows
-  (0010 (pairs)
-    (110
-      ((010 pairs) () t)
-      ((010 pairs) (0)
-       (001000 ((id (100 (100 pairs))) (uk (011 (100 pairs))))
-         (110
-           ((010 (11100 id (101000 (0010 (doc) (111 (doc-id doc) t)) uk-docs))) ()
-            (check-md-rows (011 pairs)))
-           ((110101000 (str+ "| `" uk "` |") api-md) t (check-md-rows (011 pairs)))
+(визначити check-md-rows
+  (функція (pairs)
+    (за-умовою
+      ((атом? pairs) () t)
+      ((атом? pairs) (0)
+       (001000 ((id (перше (перше pairs))) (uk (решта (перше pairs))))
+         (за-умовою
+           ((атом? (11100 id (101000 (функція (doc) (сполучити (doc-id doc) t)) uk-docs))) ()
+            (check-md-rows (решта pairs)))
+           ((110101000 (str+ "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
            (t t (провал (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
-(110
+(за-умовою
   ((11010 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
   (t t (провал "замало stable UK-назв у таблиці")))
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
-(0011 audit (100 (110101001 (110110111 "lib/surface/uk-name-audit.lisp"))))
-(0011 audit-renames (011 (11100 (001 renames) (011 audit))))
-(0011 reviewed (field (001 stable-reviewed) audit))
-(0011 renamed (field (001 renamed) audit))
-(0011 retained (field (001 retained) audit))
-(110
+(визначити audit (перше (110101001 (110110111 "lib/surface/uk-name-audit.lisp"))))
+(визначити audit-renames (решта (11100 (як-є renames) (решта audit))))
+(визначити reviewed (field (як-є stable-reviewed) audit))
+(визначити renamed (field (як-є renamed) audit))
+(визначити retained (field (як-є retained) audit))
+(за-умовою
   ((11110111 reviewed (01010 renamed retained)) (1)
-   (110
+   (за-умовою
      ((11110111 renamed (count-items audit-renames)) (1)
-      (110
+      (за-умовою
         ((11110111 reviewed (count-items uk-docs)) (1) t)
         (t t (провал "смисловий аудит мусить покривати рівно documented UK-покриття"))))
      (t t (провал "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
   (t t (провал "stable-reviewed мусить дорівнювати renamed+retained")))
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
-(0011 uk-surface (110110111 "lib/surface/uk.lisp"))
-(0011 semantic-registry
-  (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+(визначити uk-surface (110110111 "lib/surface/uk.lisp"))
+(визначити semantic-registry
+  (перше (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 ; EN surface -> exact SENS, derived from the single semantic registry.
-(0011 registry-sens-for-en
-  (0010 (name rows)
-    (110
-      ((010 rows) () ())
-      ((11110111 (field (001 en) (100 rows)) name) (1)
-       (100 (100 rows)))
-      (t t (registry-sens-for-en name (011 rows))))))
+(визначити registry-sens-for-en
+  (функція (name rows)
+    (за-умовою
+      ((атом? rows) () ())
+      ((11110111 (field (як-є en) (перше rows)) name) (1)
+       (перше (перше rows)))
+      (t t (registry-sens-for-en name (решта rows))))))
 
 ; Every audited compatibility alias carries the exact SENS derived above.
 ; This keeps both host primitives and Lisp-owned callables free of runtime EN-name authority.
 
 ; Позиція першого входження marker у s від i; -1 якщо нема.
-(0011 pos-of
-  (0010 (s marker i)
-    (110
+(визначити pos-of
+  (функція (s marker i)
+    (за-умовою
       ((110011100 s) (1) -1)
       ((110101010 marker s) t i)
       (t t (pos-of (110011101 s) marker (01010 i 1))))))
 
-(110
+(за-умовою
   ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
    (провал "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
   (t t t))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
-(0011 check-aliases
-  (0010 (renames)
-    (110
-      ((010 renames) () t)
-      ((010 renames) (0)
-       (001000 ((en-symbol (1001 (100 renames)))
-             (old-symbol (10011 (100 renames)))
+(визначити check-aliases
+  (функція (renames)
+    (за-умовою
+      ((атом? renames) () t)
+      ((атом? renames) (0)
+       (001000 ((en-symbol (друге (перше renames)))
+             (old-symbol (10011 (перше renames)))
              (sens (registry-sens-for-en
-                     (1001 (100 renames))
+                     (друге (перше renames))
                      semantic-registry)))
-         (110
-           ((010 sens) ()
+         (за-умовою
+           ((атом? sens) ()
             (провал
               (str+ "audit EN surface missing from semantic registry: "
                     (11101110 en-symbol))))
@@ -354,7 +354,7 @@
               (str+ "(00001001 " (11101110 old-symbol) " " (11110100 sens) ")")
               uk-surface)
             t
-            (check-aliases (011 renames)))
+            (check-aliases (решта renames)))
            (t t
             (провал
               (str+ "missing exact-SENS compatibility alias (00001001 "
@@ -363,49 +363,49 @@
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
 ; Розкладка: українські назви набираються без латиниці.
-(0011 uk-layout
+(визначити uk-layout
   "абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ0123456789-?!'*")
 
-(0011 typeable?
-  (0010 (text)
-    (110
+(визначити typeable?
+  (функція (text)
+    (за-умовою
       ((110011100 text) (1) t)
       ((110101000 (110101011 text) uk-layout) t (typeable? (110011101 text)))
-      (t t (001 ())))))
+      (t t (як-є ())))))
 
-(0011 check-typeable
-  (0010 (pairs)
-    (110
-      ((010 pairs) () t)
-      ((010 pairs) (0)
-       (110
-         ((typeable? (011 (100 pairs))) t (check-typeable (011 pairs)))
+(визначити check-typeable
+  (функція (pairs)
+    (за-умовою
+      ((атом? pairs) () t)
+      ((атом? pairs) (0)
+       (за-умовою
+         ((typeable? (решта (перше pairs))) t (check-typeable (решта pairs)))
          (t t (провал (str+ "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
 (check-typeable stable-uk)
 (pass "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
-(0011 latin-letter?
-  (0010 (char)
+(визначити latin-letter?
+  (функція (char)
     (001000 ((code (11100000 char)))
-      (110
-        ((11010 code 65) 1 (001 ()))
+      (за-умовою
+        ((11010 code 65) 1 (як-є ()))
         ((11010 code 91) 1 t)
-        ((11010 code 97) 1 (001 ()))
+        ((11010 code 97) 1 (як-є ()))
         ((11010 code 123) 1 t)
-        (t t (001 ()))))))
+        (t t (як-є ()))))))
 
 ; Латинські літери у виконуваному коді: поза рядками й коментарями.
-(0011 latin-in-code
-  (0010 (text in-string in-comment found)
-    (110
+(визначити latin-in-code
+  (функція (text in-string in-comment found)
+    (за-умовою
       ((110011100 text) (1) found)
       (t t
        (001000 ((c (110101011 text)) (rest (110011101 text)))
-         (110
+         (за-умовою
            ((11110111 in-comment t) (1)
-            (latin-in-code rest () (110 ((11110111 c "\n") (1) ()) (t t t)) found))
+            (latin-in-code rest () (за-умовою ((11110111 c "\n") (1) ()) (t t t)) found))
            ((11110111 in-string t) (1)
-            (110
+            (за-умовою
               ((11110111 c "\\") (1) (latin-in-code (110011101 rest) t () found))
               ((11110111 c "\"") (1) (latin-in-code rest () () found))
               (t t (latin-in-code rest t () found))))
@@ -414,10 +414,10 @@
            ((latin-letter? c) t (latin-in-code rest () () (110011110 found c)))
            (t t (latin-in-code rest () () found))))))))
 
-(0011 require-no-latin
-  (0010 (name path)
+(визначити require-no-latin
+  (функція (name path)
     (001000 ((found (latin-in-code (110110111 path) () () "")))
-      (110
+      (за-умовою
         ((110011100 found) (1) (pass name))
         (t t (провал (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
 
@@ -427,17 +427,17 @@
   "tests/fixtures/rivnopravnist-uk.lisp")
 
 ;; ===== Workflow контракту мови — канонічні шляхи .lisp (з xtask) =====
-(0011 check-contract-workflow
-  (0010 (path)
+(визначити check-contract-workflow
+  (функція (path)
     (001000 ((text (110110111 path)))
-      (110
+      (за-умовою
         ((110101000 "language-contract.my" text) t
          (провал (str+ path " still contains removed path language-contract.my")))
         ((110101000 "contracts/my-lisp/lock.my" text) t
          (провал (str+ path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
          (require-needles "contract-workflows-use-canonical-lisp-paths" path
-           (001 ("default: contracts/my-lisp/language-contract.lisp"
+           (як-є ("default: contracts/my-lisp/language-contract.lisp"
                    "default: contracts/my-lisp/lock.lisp"
                    "UPSTREAM_PATH: language-contract.lisp"))))))))
 (check-contract-workflow ".github/workflows/sync-language-contract.yml")
