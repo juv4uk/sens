@@ -422,6 +422,10 @@
             ((хибне? (однакові? (перше a) (перше b)))
              (як-є (ні))))))))))
 
+; D8:11110111 ratified укр surface; mechanism is the existing Lisp-owned equal?.
+; Guard's standalone core bootstrap must bind it without loading all of core4.
+(визначити однакові? equal?)
+
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
 (визначити truthy?
