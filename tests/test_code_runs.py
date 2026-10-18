@@ -1287,7 +1287,7 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
 
     SOURCE = ROOT / "lib" / "utf8.lisp"
     D9 = ROOT / "lib" / "domains" / "d9.lisp"
-    ORIGINAL_BLOB = "5347791a3ead344afa9cb68a4889c478f6999b44"
+    ORIGINAL_BLOB = "90da7b932fc1c89ed562d9ec44f7733808f311d8"
     OLD_HEAD = "(unicode-scalars->string"
     UKR_HEAD = "(юнікод-скаляри-рядок"
 
@@ -1299,9 +1299,12 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
 
     @classmethod
     def _restore_original(cls, source):
-        if source.count(cls.UKR_HEAD) != 1:
+        exact_peer = re.escape(cls.UKR_HEAD) + r"(?=\\s|\\))"
+        matches = list(re.finditer(exact_peer, source))
+        if len(matches) != 1:
             raise AssertionError("D9 Unicode scalar projection count drift")
-        return source.replace(cls.UKR_HEAD, cls.OLD_HEAD, 1)
+        match = matches[0]
+        return source[:match.start()] + cls.OLD_HEAD + source[match.end():]
 
     def test_exact_d9_peer_and_inverse_restore_original_utf8_source(self):
         source = self.SOURCE.read_bytes().decode("utf-8")
@@ -1311,14 +1314,19 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
         self.assertIn("(укр юнікод-скаляри-рядок)", rows[0])
         self.assertIn("(en unicode-scalars->string)", rows[0])
         self.assertIn("(LISP UNICODE-SCALARS->STRING)", rows[0])
-        self.assertEqual(source.count(self.UKR_HEAD), 1)
-        self.assertEqual(source.count(self.OLD_HEAD), 0)
+        # Whole-token checks: the related helper ...-onto is a different name.
+        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\\s|\\))"
+        exact_old = re.escape(self.OLD_HEAD) + r"(?=\\s|\\))"
+        self.assertEqual(len(re.findall(exact_ukr, source)), 1)
+        self.assertEqual(len(re.findall(exact_old, source)), 0)
         restored = self._restore_original(source)
         self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
 
     def test_wrong_d9_peer_is_rejected(self):
         source = self.SOURCE.read_bytes().decode("utf-8")
-        mutant = source.replace(self.UKR_HEAD, "(відкликати-факт", 1)
+        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\\s|\\))"
+        mutant, replacements = re.subn(exact_ukr, "(відкликати-факт", source, count=1)
+        self.assertEqual(replacements, 1)
         self.assertNotEqual(mutant, source)
         with self.assertRaisesRegex(AssertionError, "projection count drift"):
             self._restore_original(mutant)
