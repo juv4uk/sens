@@ -18,7 +18,7 @@
 //! versioned `external-oracle/1` request s-expression ready for an external
 //! Wolfram Language host.
 
-use sens::semantic_registry_export::semantic_id_for_admitted_surface;
+use sens::semantic_registry_export::admitted_core_domain_for_surface;
 use sens::{Exactness, Expr, ExprKind};
 
 // ── Public corpus types ───────────────────────────────────────────────────────
@@ -95,22 +95,23 @@ fn parse_field(line: &str, field: &str) -> Option<String> {
     let marker = format!("({field} . \"");
     let start = line.find(&marker)? + marker.len();
     let rest = &line[start..];
-    // Find the closing `"` that is not preceded by `\`
-    let mut end = 0;
-    let chars: Vec<char> = rest.chars().collect();
-    let mut i = 0;
-    while i < chars.len() {
-        if chars[i] == '\\' {
-            i += 2;
+    // `char_indices` yields UTF-8 byte offsets, which are the offsets required
+    // for slicing `str`; character counts panic on Ukrainian surface text.
+    let mut end = None;
+    let mut escaped = false;
+    for (byte_index, ch) in rest.char_indices() {
+        if escaped {
+            escaped = false;
             continue;
         }
-        if chars[i] == '"' {
-            end = i;
+        if ch == '\\' {
+            escaped = true;
+        } else if ch == '"' {
+            end = Some(byte_index);
             break;
         }
-        i += 1;
     }
-    Some(rest[..end].replace("\\\"", "\""))
+    Some(rest[..end?].replace("\\\"", "\""))
 }
 
 fn parse_id_field(line: &str) -> Option<String> {
@@ -407,29 +408,52 @@ fn translate_call(items: &[Expr]) -> Result<String, Unsupported> {
         return Err(Unsupported::new("external-oracle/non-symbol-head"));
     };
 
-    let semantic_id = semantic_id_for_admitted_surface(surface)
-        .ok_or_else(|| Unsupported::new("external-oracle/unknown-semantic-id"))?;
+    // `divmod` is a Core Lisp library closure, not a directly callable D9
+    // resident. Keep that library operation distinct from D5 `частка` and
+    // never infer D9 callability from residency.
+    let is_core_divmod_library = surface.as_ref() == "divmod";
+    let identity = admitted_core_domain_for_surface(surface);
+    if identity.is_none() && !is_core_divmod_library {
+        return Err(Unsupported::new("external-oracle/unknown-semantic-id"));
+    }
+
+    // External projection follows current callable identities from the domain
+    // ladder. D5 `частка` is exact rational division; it is not integer
+    // quotient-with-remainder. D8 `поділити` residency alone still does not
+    // admit a direct callable route.
+    let add = admitted_core_domain_for_surface("додати");
+    let subtract = admitted_core_domain_for_surface("відняти");
+    let multiply = admitted_core_domain_for_surface("помножити");
+    let exact_divide = admitted_core_domain_for_surface("частка");
 
     let translated = arguments
         .iter()
         .map(translate_expr)
         .collect::<Result<Vec<_>, _>>()?;
 
-    if semantic_id == sens::sens!(00001100) {
+    if is_core_divmod_library {
+        match translated.as_slice() {
+            [dividend, divisor] => Ok(format!(
+                "{{Quotient[{dividend}, {divisor}], Mod[{dividend}, {divisor}]}}"
+            )),
+            _ => Err(Unsupported::new("external-oracle/arity")),
+        }
+    } else if identity == add {
         Ok(format!("Total[{{{}}}]", translated.join(", ")))
-    } else if semantic_id == sens::sens!(00001101) {
+    } else if identity == subtract {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Minus[{only}]")),
             _ => Ok(format!("Fold[Subtract, {{{}}}]", translated.join(", "))),
         }
-    } else if semantic_id == sens::sens!(00001110) {
+    } else if identity == multiply {
         Ok(format!("Times[{}]", translated.join(", ")))
-    } else if semantic_id == sens::sens!(00001111) {
+    } else if identity == exact_divide {
         match translated.as_slice() {
             [] => Err(Unsupported::new("external-oracle/arity")),
             [only] => Ok(format!("Divide[1, {only}]")),
-            _ => Ok(format!("Fold[Divide, {{{}}}]", translated.join(", "))),
+            [dividend, divisor] => Ok(format!("Divide[{dividend}, {divisor}]")),
+            _ => Err(Unsupported::new("external-oracle/arity")),
         }
     } else {
         Err(Unsupported::new("external-oracle/unknown-semantic-id"))
@@ -444,86 +468,93 @@ mod tests {
         export_fixture, load_corpus, render_request, translate_expr, translate_source,
         verify_response, ExportOutcome, VerifyOutcome,
     };
-    use sens::semantic_registry_export::admitted_surfaces_for_semantic_id;
+    use sens::semantic_registry_export::admitted_core_domain_for_surface;
     use sens::{Exactness, Expr, ExprKind, NumericBuffer, Span};
     use std::rc::Rc;
 
     // ── AST translation (regression tests) ───────────────────────────────────
 
     #[test]
-    fn nary_division_preserves_left_fold() {
+    fn d8_division_residency_does_not_create_an_external_callable_route() {
+        assert!(admitted_core_domain_for_surface("поділити").is_none());
         assert_eq!(
-            translate_source("(/ 5 6 8 7)").unwrap(),
-            "Fold[Divide, {5, 6, 8, 7}]"
+            translate_source("(поділити 8 2)").unwrap_err().code,
+            "external-oracle/unknown-semantic-id"
         );
     }
 
     #[test]
-    fn nested_division_remains_structurally_distinct() {
+    fn exact_quotient_and_quotient_remainder_are_distinct_current_operations() {
+        assert!(admitted_core_domain_for_surface("частка").is_some());
         assert_eq!(
-            translate_source("(/ (/ 5 6) (/ 8 7))").unwrap(),
-            "Fold[Divide, {Fold[Divide, {5, 6}], Fold[Divide, {8, 7}]}]"
+            translate_source("(частка 8 3)").unwrap(),
+            "Divide[8, 3]"
+        );
+        assert_eq!(
+            translate_source("(частка (частка (частка 5 6) 8) 7)").unwrap(),
+            "Divide[Divide[Divide[5, 6], 8], 7]"
+        );
+        assert_eq!(
+            translate_source("(divmod 15 5)").unwrap(),
+            "{Quotient[15, 5], Mod[15, 5]}"
+        );
+        assert_eq!(
+            translate_source("(divmod 17 5)").unwrap(),
+            "{Quotient[17, 5], Mod[17, 5]}"
         );
     }
 
     #[test]
     fn addition_uses_total_and_exact_zero_identity() {
-        assert_eq!(translate_source("(+ 1 2 3)").unwrap(), "Total[{1, 2, 3}]");
-        assert_eq!(translate_source("(+)").unwrap(), "Total[{}]");
+        assert_eq!(translate_source("(додати 1 2 3)").unwrap(), "Total[{1, 2, 3}]");
+        assert_eq!(translate_source("(додати)").unwrap(), "Total[{}]");
     }
 
     #[test]
     fn multiplication_uses_times_and_exact_one_identity() {
-        assert_eq!(translate_source("(* 2 3 4)").unwrap(), "Times[2, 3, 4]");
-        assert_eq!(translate_source("(*)").unwrap(), "Times[]");
+        assert_eq!(translate_source("(помножити 2 3 4)").unwrap(), "Times[2, 3, 4]");
+        assert_eq!(translate_source("(помножити)").unwrap(), "Times[]");
     }
 
     #[test]
-    fn unary_subtraction_and_reciprocal_are_explicit() {
-        assert_eq!(translate_source("(- 3)").unwrap(), "Minus[3]");
-        assert_eq!(translate_source("(/ 4)").unwrap(), "Divide[1, 4]");
+    fn unary_subtraction_is_explicit_and_d8_divide_has_no_direct_core_route() {
+        assert_eq!(translate_source("(відняти 3)").unwrap(), "Minus[3]");
+        assert_eq!(
+            translate_source("(поділити 4)").unwrap_err().code,
+            "external-oracle/unknown-semantic-id"
+        );
     }
 
     #[test]
-    fn all_admitted_arithmetic_surfaces_project_by_semantic_identity() {
+    fn current_arithmetic_surfaces_project_by_exact_domain_identity() {
         let cases = [
-            (sens::sens!(00001100), "Total[{8, 2}]"),
-            (sens::sens!(00001101), "Fold[Subtract, {8, 2}]"),
-            (sens::sens!(00001110), "Times[8, 2]"),
-            (sens::sens!(00001111), "Fold[Divide, {8, 2}]"),
+            ("додати", "Total[{8, 2}]"),
+            ("відняти", "Fold[Subtract, {8, 2}]"),
+            ("помножити", "Times[8, 2]"),
         ];
 
-        for (semantic_id, expected) in cases {
-            let surfaces = admitted_surfaces_for_semantic_id(semantic_id);
-            assert!(
-                !surfaces.is_empty(),
-                "semantic identity {semantic_id} must have admitted surfaces"
+        for (canonical_surface, expected) in cases {
+            let semantic_id = admitted_core_domain_for_surface(canonical_surface)
+                .expect("current arithmetic source surface must resolve to its domain identity");
+            assert_eq!(
+                translate_source(&format!("({canonical_surface} 8 2)")).unwrap(),
+                expected,
+            "surface {canonical_surface} must project through current identity {semantic_id}"
             );
-            for surface in surfaces {
-                let source = format!("({} 8 2)", surface.name);
-                assert_eq!(
-                    translate_source(&source).unwrap(),
-                    expected,
-                    "surface {} in namespace {} must project through semantic identity {}",
-                    surface.name,
-                    surface.namespace,
-                    semantic_id
-                );
-            }
         }
     }
 
     #[test]
     fn canonical_binary_number_projects_exactly_without_host_integer_identity() {
-        assert_eq!(translate_source("(+ #b10 #b11)").unwrap(), "Total[{2, 3}]");
+        assert_eq!(translate_source("(додати #b10 #b11)").unwrap(), "Total[{2, 3}]");
         assert_eq!(
-            translate_source("(+ #b1111111111111111111111111111111111111111111111111111111111111111 1)").unwrap(),
+            translate_source("(додати #b1111111111111111111111111111111111111111111111111111111111111111 1)").unwrap(),
             "Total[{18446744073709551615, 1}]"
         );
     }
     #[test]
     fn source_must_contain_exactly_one_top_level_expression() {
-        let error = translate_source("(+ 1 2) (* 3 4)").unwrap_err();
+        let error = translate_source("(додати 1 2) (помножити 3 4)").unwrap_err();
         assert_eq!(error.code, "external-oracle/top-level-arity");
     }
 
@@ -588,6 +619,14 @@ mod tests {
     // ── Corpus loading ────────────────────────────────────────────────────────
 
     #[test]
+    fn parse_field_handles_utf8_surface_text() {
+        assert_eq!(
+            super::parse_field("((expr . \"(частка 8 3)\"))", "expr"),
+            Some("(частка 8 3)".into())
+        );
+    }
+
+    #[test]
     fn corpus_loads_and_target_fixture_is_present() {
         // repo root is two levels up from crates/xtask
         let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
@@ -599,19 +638,20 @@ mod tests {
             "target fixture F-8bc31cae9e7e39b9 must be present"
         );
         let f = target.unwrap();
-        assert_eq!(f.source.trim(), "(/ 5 6 8 7)");
+        assert_eq!(f.source.trim(), "(частка (частка (частка 5 6) 8) 7)");
         assert_eq!(f.expected.as_deref(), Some("5/336"));
         assert!(f.is_s1, "target fixture must be S1");
     }
 
     #[test]
-    fn export_target_fixture_produces_correct_wolfram_query() {
+    fn export_target_fixture_uses_nested_exact_quotient_calls() {
         let repo_root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
         let corpus = load_corpus(repo_root).expect("corpus must load");
         let outcome = export_fixture(&corpus, "F-8bc31cae9e7e39b9");
         assert!(
-            matches!(outcome, ExportOutcome::Request { ref query, .. } if query == "Fold[Divide, {5, 6, 8, 7}]"),
-            "expected Fold[Divide, {{5, 6, 8, 7}}], got {outcome:?}"
+            matches!(outcome, ExportOutcome::Request { ref query, ref expected, .. }
+                if query == "Divide[Divide[Divide[5, 6], 8], 7]" && expected == "5/336"),
+            "current D5 exact-quotient fixture must export without n-ary division, got {outcome:?}"
         );
     }
 
@@ -669,15 +709,15 @@ mod tests {
         let outcome = ExportOutcome::Request {
             fixture_id: "F-8bc31cae9e7e39b9".into(),
             source_digest: "abc123".into(),
-            query: "Fold[Divide, {5, 6, 8, 7}]".into(),
-            expected: "5/336".into(),
+            query: "Divide[5, 6]".into(),
+            expected: "5/6".into(),
         };
         let rendered = render_request(&outcome, (6, 0));
         assert!(rendered.contains("(protocol . external-oracle/1)"));
         assert!(rendered.contains("(fixture-id . \"F-8bc31cae9e7e39b9\")"));
         assert!(rendered.contains("(oracle . wolfram-language)"));
-        assert!(rendered.contains("Fold[Divide, {5, 6, 8, 7}]"));
-        assert!(rendered.contains("5/336"));
+        assert!(rendered.contains("Divide[5, 6]"));
+        assert!(rendered.contains("5/6"));
     }
 
     // ── Verify ────────────────────────────────────────────────────────────────
@@ -686,7 +726,7 @@ mod tests {
     fn verify_pass_when_actual_matches_expected() {
         let corpus = vec![super::CorpusFixture {
             id: "F-test".into(),
-            source: "(/ 5 6 8 7)".into(),
+            source: "(частка (частка (частка 5 6) 8) 7)".into(),
             expected: Some("5/336".into()),
             is_s1: true,
         }];
@@ -700,7 +740,7 @@ mod tests {
     fn verify_mismatch_when_actual_differs() {
         let corpus = vec![super::CorpusFixture {
             id: "F-test".into(),
-            source: "(/ 5 6 8 7)".into(),
+            source: "(частка (частка (частка 5 6) 8) 7)".into(),
             expected: Some("5/336".into()),
             is_s1: true,
         }];
@@ -715,12 +755,12 @@ mod tests {
 
     #[test]
     fn verify_mismatch_proves_two_trees_are_distinct() {
-        // Core regression: (/ 5 6 8 7) and (/ (/ 5 6) (/ 8 7)) have DIFFERENT
+        // Core regression: ((5/6)/8)/7 and (5/6)/(8/7) have DIFFERENT
         // expected values -- Wolfram returning 35/48 for the nested form is correct,
         // not a mismatch for that fixture.
         let corpus = vec![super::CorpusFixture {
             id: "F-nested".into(),
-            source: "(/ (/ 5 6) (/ 8 7))".into(),
+            source: "(частка (частка 5 6) (частка 8 7))".into(),
             expected: Some("35/48".into()),
             is_s1: true,
         }];

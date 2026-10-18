@@ -1450,7 +1450,7 @@ def zig_mint_verified_t5(projection: str, reference: bytes, binary: Path, bridge
     return physical, receipt
 
 
-def migrate_file(source: str,resolver,text7,*,codec="t5",source_surface="default"):
+def migrate_file(source: str,resolver,text7,*,codec="t5m",source_surface="default"):
     if codec not in ("t5", "t5m"):
         raise MigrationError(f"unsupported physical codec {codec!r}")
     if source_surface not in ("default", "ук", "укр"):

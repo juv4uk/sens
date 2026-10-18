@@ -1,4 +1,4 @@
-name: Two explicit SENS codecs - T5 default, F3 tiny
+name: SENS T5M default - explicit small F3 rehearsal
 on:
   workflow_dispatch:
 permissions:

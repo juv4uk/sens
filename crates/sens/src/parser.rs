@@ -385,6 +385,18 @@ impl Parser<'_> {
         }
         let token = &self.source[start..self.cursor];
 
+        // Ukrainian human projection of the D1 predicate values. These are
+        // exact one-bit values (`ні`/`так`), not decimal numeric literals and
+        // not callable domain heads.
+        if self.mode == ReaderMode::ExactDomain {
+            if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(token) {
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span: Span { start, end: self.cursor },
+                });
+            }
+        }
+
         // A lone `.` outside a dotted pair is not an expression (#1696).
         if token == "." {
             return Err(self.error(
@@ -684,6 +696,19 @@ mod tests {
             };
             assert_eq!(identity.width(), source.len(), "{source}");
             assert_eq!(identity.to_string(), source, "{source}");
+        }
+    }
+
+    #[test]
+    fn exact_domain_reader_projects_ukrainian_yes_no_as_d1_values() {
+        for (surface, bits) in [("ні", 0), ("так", 1)] {
+            let forms = parse_exact_domain_source(surface)
+                .expect("українська проєкція D1 має читатися як точне значення");
+            assert!(matches!(
+                forms.as_slice(),
+                [Expr { kind: ExprKind::DomainIdentity(identity), .. }]
+                    if identity.width() == 1 && identity.packed_bits() == bits
+            ), "{surface} має бути значенням D1:{bits}, а не символом чи викличною головою");
         }
     }
 

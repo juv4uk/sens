@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Zig 0.16 physical carrier and attested migration bridge.
 
-SENS three-pass migration determines exact bit words and the boundaries.
-Zig alone emits physical bytes; Python reference packing is parity-only.
-Neither this module nor Zig grants semantic callability.
+T5M is the default physical carrier; legacy T5 is explicit via ``codec="t5"``.
+SENS three-pass migration determines exact bit words and the boundaries. Zig
+alone emits physical bytes; Python reference packing is parity-only. Neither
+this module nor Zig grants semantic callability.
 """
 from __future__ import annotations
 
@@ -235,10 +236,10 @@ def _read_zig_output(path: Path, *, command: str) -> bytes:
 
 
 def carry_t5(
-    binary: Path, canonical_view: str, *, codec: str = "t5",
+    binary: Path, canonical_view: str, *, codec: str = "t5m",
     trusted_source_sha256: str | None = None,
 ) -> bytes:
-    """Zig mints T5 from upstream words; no Python physical writer.
+    """Zig mints the selected carrier (T5M by default) from upstream words.
 
     Word separators are replaced with trit 2 for mechanical carrying only.
     Every execution uses the exact pinned, SHA-attested Zig binary.
@@ -264,7 +265,7 @@ def carry_t5(
     return physical
 
 def verify_t5(
-    binary: Path, physical: bytes, *, codec: str = "t5",
+    binary: Path, physical: bytes, *, codec: str = "t5m",
     trusted_source_sha256: str | None = None
 ) -> dict[str, str]:
     # Fail BEFORE observing/build attestation or executing Zig; the pin is

@@ -42,7 +42,8 @@ path = "src/bin/sens-trit.rs"
 
 [features]
 # Owner decision 2026-10-14: Zig is the DEFAULT physical transport codec.
-# T5 remains the default .sens WIRE FORMAT; F3C remains explicit tiny .senc.
+# T5M is the default physical .sens WIRE FORMAT; legacy T5 is explicit.
+# F3C remains an explicit tiny .senc route.
 # The SENS reader/evaluator alone owns semantics and execution admission.
 default = ["zig-transport"]
 zig-transport = ["wsm-guard-core/zig-source"]

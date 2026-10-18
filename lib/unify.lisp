@@ -114,7 +114,7 @@
            ((атом? (як-є ()))
             (входить-перевірити? variable (решта resolved) bindings))))))))
 
-(визначити occurs-check входить-перевірити?)
+(визначити occurs-check occurs-check?)
 
 (визначити unify-var
   (функція (variable term bindings)

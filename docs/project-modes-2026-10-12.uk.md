@@ -11,7 +11,7 @@ reader/evaluator.
 
 | Режим | Носій | Статус | Вибір | Призначення |
 |---|---|---|---|---|
-| **T5 / General** | `.sens` | production/default | явно за `.sens` / T5 command | загальний канонічний фізичний transport |
+| **T5M / General** | `.sens` | production/default | явно за `.sens` / T5M command | типовий канонічний фізичний transport; legacy T5 — лише явний маршрут |
 | **F3C / Tiny Portable** | `.senc` | production explicit | явно за `.senc` / F3C command; внутрішній marker `0xF3` | самодостатній компактний carrier для дуже малих програм |
 | **F3M / Micro Rank** | `.f3m` | bounded proven/research, не default production | сімейство явно як F3M; конкретний профіль **тільки довжиною** | максимальна щільність для скінченного канонічного каталогу коротких програм |
 | **Envelope E1/E2/E3** | research carriers | research/history | тільки явний research decoder | self-contained metadata/integrity envelopes |
@@ -222,5 +222,5 @@ default project-mode selection.
 
 Це режими **фізичного носія й маршрутизації**, не режими семантики мови.
 Binary domain laws, D2 structure, evaluator і semantic identity лишаються
-спільними. T5 — default/general; F3C — explicit tiny portable; F3M —
+спільними. T5M — default/general; legacy T5 — explicit compatibility; F3C — explicit tiny portable; F3M —
 explicit bounded micro-rank; E1–E3 — research envelopes.

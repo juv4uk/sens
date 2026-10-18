@@ -141,7 +141,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     signal.signal(signal.SIGALRM, engine._timeout_handler)
     signal.alarm(5)
     try:
-        projection = engine.migrate_file(source_text, resolver, text7)
+        projection = engine.migrate_file(source_text, resolver, text7, codec="t5")
     finally:
         signal.alarm(0)
 
@@ -156,6 +156,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     else:
         payload = bridge.carry_t5(
             zig_binary, projection,
+            codec="t5",
             trusted_source_sha256=hashlib.sha256(reference).hexdigest(),
         )
         if payload != reference:

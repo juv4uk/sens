@@ -7,6 +7,7 @@ rewritten. An invalid T5 octet must be rejected rather than silently decoded.
 from __future__ import annotations
 
 import hashlib
+import inspect
 import os
 from pathlib import Path
 import subprocess
@@ -14,8 +15,29 @@ import tempfile
 from unittest.mock import patch
 
 import zig_codec_bridge as bridge
+import sens_t5_codec as t5m_reference
 
-from zig_codec_bridge import ZigCodecError, build_transport, carry_t5, verify_t5, _read_zig_output
+from zig_codec_bridge import (
+    ZigCodecError, build_transport, carry_t5 as _carry_t5,
+    verify_t5 as _verify_t5, _read_zig_output,
+)
+
+
+def carry_t5(*args, **kwargs):
+    """Legacy T5 fixture helper; production bridge defaults to T5M."""
+    kwargs.setdefault("codec", "t5")
+    return _carry_t5(*args, **kwargs)
+
+
+def verify_t5(*args, **kwargs):
+    """Legacy T5 fixture helper; production bridge defaults to T5M."""
+    kwargs.setdefault("codec", "t5")
+    return _verify_t5(*args, **kwargs)
+
+
+def test_default_bridge_codec_is_t5m() -> None:
+    assert inspect.signature(_carry_t5).parameters["codec"].default == "t5m"
+    assert inspect.signature(_verify_t5).parameters["codec"].default == "t5m"
 
 GOLDEN_T5 = bytes.fromhex("638906a1")  # Known canonical T5 bytes for QUOTE.
 # These fixture digests are fixed independently of the input under test.
@@ -194,10 +216,25 @@ def test_zig_output_readback_guard() -> None:
 
 
 def main() -> None:
+    test_default_bridge_codec_is_t5m()
     test_zig_transport_compiles_with_runtime_safety()
     test_zig_output_readback_guard()
     with tempfile.TemporaryDirectory(prefix="sens-zig-migration-smoke-") as temp:
         executable = build_transport(Path(temp))
+        # The unqualified public bridge path must mint and verify T5M bytes.
+        t5m_view = "1\n"
+        t5m_expected = t5m_reference.encode_t5m_projection(t5m_view)
+        t5m_actual = bridge.carry_t5(
+            executable, t5m_view,
+            trusted_source_sha256=sha(t5m_expected),
+        )
+        assert t5m_actual == t5m_expected
+        t5m_receipt = bridge.verify_t5(
+            executable, t5m_actual,
+            trusted_source_sha256=sha(t5m_expected),
+        )
+        assert t5m_receipt["codec"] == "T5M"
+
         evidence = verify_t5(executable, GOLDEN_T5)
         expected = hashlib.sha256(GOLDEN_T5).hexdigest()
         binary_sha = sha(executable.read_bytes())

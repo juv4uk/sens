@@ -12,7 +12,10 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9, CoreDomainIdentity, DomainIdentity};
+use crate::{
+    BinarySourceWord, Bit1, Bit3, Bit4, Bit5, Bit6, Bit9, CoreD5, CoreD6, CoreD9,
+    CoreDomainIdentity, DomainIdentity,
+};
 
 mod generated {
     include!("semantic_registry_generated.rs");
@@ -276,6 +279,25 @@ pub(crate) fn d10_binding_identity_for_definition(name: &str) -> Option<DomainId
 /// exact-width проєкцію. Історичний SID/байт не визначає домен.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     direct_domain_identity_for_surface(name)
+}
+
+/// Resolve Ukrainian D1 predicate literals as values, never callable heads.
+/// The bit and spelling come from the generated projection of `d1.lisp`;
+/// keeping `source_routable = false` still prevents D1 from gaining a call route.
+pub(crate) fn d1_value_for_uk_surface(name: &str) -> Option<DomainIdentity> {
+    let mut matches = DOMAIN_SURFACE_ROWS.iter().filter(|row| {
+        row.width == 1
+            && row
+                .surfaces
+                .iter()
+                .any(|surface| surface.namespace == "uk" && surface.name == name)
+    });
+    let row = matches.next()?;
+    if matches.next().is_some() {
+        return None;
+    }
+    let word = Bit1::new(row.bits)?;
+    Some(DomainIdentity::from_source_word(BinarySourceWord::W1(word)))
 }
 
 /// D7 Ukrainian keyboard projection for the physical T5 text boundary.

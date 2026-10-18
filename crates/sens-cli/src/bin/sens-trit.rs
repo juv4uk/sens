@@ -81,6 +81,15 @@ fn decode_canonical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>
     }
 }
 
+#[cfg(all(test, feature = "zig-transport"))]
+fn eval_t5m_fixture(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    let words = zig_transport::decode_t5_words(bytes)?;
+    let program = sens::PhysicalT5Program::from_exact_words(&words)
+        .map_err(|e| format!("canonical SENS D2/admission rejected: {e}"))?;
+    program.execute(&mut sens::Session::default())
+        .map_err(|e| format!("current SENS evaluator rejected: {e}"))
+}
+
 #[cfg(feature = "zig-transport")]
 fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, String> {
     let words = zig_transport::decode_t5_exact_words(bytes)?;
@@ -412,7 +421,7 @@ fn execute() -> Result<(), String> {
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
-            // SENS validates exact words and D2; Zig alone packs T5 bytes.
+            // SENS validates exact words and D2; Zig alone packs default T5M bytes.
             // No optional Rust physical encoder exists on this CLI route.
             #[cfg(feature = "zig-transport")]
             let bytes = zig_transport::encode_t5_direct(&admitted_source_words(&projection)?)?;
@@ -585,11 +594,20 @@ fn zig_test_fixture(name: &'static str) -> &'static [u8] {
             .join(name);
         let bytes = std::fs::read(&path)
             .unwrap_or_else(|e| panic!("SENS fixture {}: {e}", path.display()));
-        // Default feature: only Zig can interpret the physical T5 framing.
-        // The same bytes then go to the existing SENS-owned semantic oracle.
+        // These tracked vectors are historical T5 fixtures. Convert their
+        // exact words to the current T5M wire in memory; never rewrite them.
         #[cfg(feature = "zig-transport")]
-        zig_transport::decode_t5_words(&bytes)
-            .unwrap_or_else(|e| panic!("Zig physical fixture rejection {name}: {e}"));
+        {
+            let legacy_words = sens::decode_ternary_words(&bytes)
+                .unwrap_or_else(|e| panic!("legacy T5 fixture decode {name}: {e:?}"));
+            let t5m = zig_transport::encode_t5_direct(&legacy_words)
+                .unwrap_or_else(|e| panic!("T5M fixture carry {name}: {e}"));
+            let restored = zig_transport::decode_t5_words(&t5m)
+                .unwrap_or_else(|e| panic!("T5M fixture read {name}: {e}"));
+            assert_eq!(restored, legacy_words, "fixture word identity {name}");
+            t5m
+        }
+        #[cfg(not(feature = "zig-transport"))]
         bytes
     }).as_slice()
 }
@@ -684,9 +702,8 @@ mod e1_cli_mechanism_tests {
                    vec![2, 3, 2, 3, 2]);
 
         // A physically valid T5 carrier may still violate SENS D2 structure.
-        let lone_close = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).unwrap();
+        let lone_close_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let lone_close = zig_transport::encode_t5_direct(&[lone_close_word]).unwrap();
         assert!(encode_e1_from_t5(&lone_close).unwrap_err()
             .contains("SENS canonical D2 rejected"));
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
@@ -712,9 +729,8 @@ mod e1_cli_mechanism_tests {
     #[test]
     fn e1_execution_uses_zig_physical_reader_then_native_sens_d2() {
         let positive = zig_test_fixture("semantic/exact-d3-logic-selftest.sens");
-        let mut s1 = sens::Session::default();
-        let reference = sens::eval_t5_program(positive, &mut s1)
-            .expect("SENS owns the physical T5 semantic witness");
+        let reference = eval_t5m_fixture(positive)
+            .expect("SENS owns semantics after T5M physical ingress");
         let e1 = encode_e1_from_t5(positive).expect("Zig canonical E1 output");
         let actual = eval_e1_bytes(&e1).expect("Zig E1 ingress then SENS semantic evaluator");
         assert_eq!(actual.value.as_predicate_bit(), reference.value.as_predicate_bit());
@@ -752,10 +768,9 @@ mod e1_cli_mechanism_tests {
         let mutant = zig_test_fixture("semantic/exact-d3-logic-mutant.sens");
         for source in [positive, mutant] {
             let packed = encode_e1_from_t5(source).expect("T5->E1 physical encoding");
-            let mut original = sens::Session::default();
             let mut e1_session = sens::Session::default();
-            let from_t5 = sens::eval_t5_program(source, &mut original)
-                .expect("SENS native exact source verdict");
+            let from_t5 = eval_t5m_fixture(source)
+                .expect("SENS native exact T5M source verdict");
             let from_e1 = sens::eval_e1_program(&packed, &mut e1_session)
                 .expect("SENS native verdict after E1 bytes");
             assert_eq!(from_t5.value.as_predicate_bit(),
@@ -808,10 +823,14 @@ mod eval_tests {
     fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
         let bytes = [0xf3, 0x40, 0x60];
         let canonical = sens::frame3_small::decode_explicit_small_f3(&bytes).unwrap();
-        let t5 = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
-        assert_eq!(&canonical, t5);
-        let direct = eval_t5_bytes(t5).unwrap();
-        let framed = eval_t5_bytes(&canonical).unwrap();
+        let legacy_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        let t5 = std::fs::read(legacy_path).unwrap();
+        assert_eq!(canonical.as_slice(), t5.as_slice());
+        let mut direct_session = sens::Session::default();
+        let mut framed_session = sens::Session::default();
+        let direct = sens::eval_t5_program(&t5, &mut direct_session).unwrap();
+        let framed = sens::eval_t5_program(&canonical, &mut framed_session).unwrap();
         assert_eq!(direct.value, framed.value);
         assert_eq!(direct.output, framed.output);
         assert!(sens::decode_ternary_program(&bytes).is_err());
@@ -838,11 +857,10 @@ mod eval_tests {
     #[test]
     fn physical_quote_fixture_preserves_t5_and_exact_d2_structure() {
         let bytes = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
-        let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
+        let words = zig_transport::decode_t5_words(bytes).expect("canonical physical T5M");
         let visible = sens::render_ternary_words_spaced(&words);
         assert_eq!(visible, "10 001 00 000 01");
-        assert_eq!(sens::open_ternary_program(bytes).unwrap(), visible);
-        assert_eq!(sens::encode_binary_projection_ternary(&visible).unwrap(), bytes);
+        assert_eq!(zig_transport::encode_t5_direct(&words).unwrap(), bytes);
 
         let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
         let packed = sens::pack_binary_source_words(&words);
@@ -854,13 +872,13 @@ mod eval_tests {
     #[test]
     fn two_top_level_forms_share_one_physical_file_and_keep_d2_boundaries() {
         let bytes = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
-        let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
+        let words = zig_transport::decode_t5_words(bytes).expect("canonical physical T5M");
         let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
         let packed = sens::pack_binary_source_words(&words);
         let forms = sens::parse_canonical_packed_words(&packed, &widths)
             .expect("two exact D2 forms parse from one packed stream");
         assert_eq!(forms.len(), 2);
-        assert_eq!(sens::encode_ternary_words(&words).unwrap(), bytes);
+        assert_eq!(zig_transport::encode_t5_direct(&words).unwrap(), bytes);
     }
 
     #[test]
@@ -877,9 +895,9 @@ mod eval_tests {
     fn explain_shows_canonical_d2_failure_without_creating_a_second_parser() {
         let words = sens::parse_binary_source_words("10 001")
             .expect("physical words allowed");
-        let trits = sens::encode_ternary_words(
-            &words.into_iter().map(|token| token.word).collect::<Vec<_>>(),
-        ).expect("physically packed bytes");
+        let typed = words.into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let trits = zig_transport::encode_t5_direct(&typed)
+            .expect("physically packed T5M bytes");
         let err = explain_t5_bytes(&trits).expect_err("unbalanced D2 syntax");
         assert!(err.contains("D2 grammar rejected"), "{err}");
         assert!(err.contains("typed words; virtual payload byte span"), "{err}");
@@ -895,9 +913,8 @@ mod eval_tests {
         assert!(explain_t5_bytes(&[0xf3])
             .expect_err("invalid base3 byte")
             .contains("physical T5 transport rejected"));
-        let bad_d2 = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).unwrap();
+        let bad_d2_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let bad_d2 = zig_transport::encode_t5_direct(&[bad_d2_word]).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
     }
 
@@ -918,9 +935,8 @@ mod eval_tests {
 
         // Physically valid, structurally inadmissible: preserve the current
         // SENS D2 diagnostic rather than reporting a physical T5 failure.
-        let lone_close = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).unwrap();
+        let lone_close_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let lone_close = zig_transport::encode_t5_direct(&[lone_close_word]).unwrap();
         assert!(explain_t5_bytes(&lone_close).unwrap_err()
             .contains("D2 grammar rejected"));
 
@@ -958,19 +974,18 @@ mod eval_tests {
             sens::render_ternary_words_vertical(&words),
             "10\n001\n00\n000\n01\n"
         );
-        // Test-only reference: not a runtime fallback in the feature build.
-        assert_eq!(words, sens::decode_ternary_program(carrier).unwrap());
+        assert_eq!(zig_transport::encode_t5_direct(&words).unwrap(), carrier);
 
         let multi = zig_test_fixture("migration-multiform-cohort-main/two-forms.sens");
-        assert_eq!(
-            decode_canonical_t5_words(multi).unwrap(),
-            sens::decode_ternary_program(multi).unwrap()
-        );
+        let multi_words = decode_canonical_t5_words(multi).unwrap();
+        let multi_program = sens::PhysicalT5Program::from_exact_words(&multi_words)
+            .expect("T5M exact words parse through current SENS D2 reader");
+        assert_eq!(multi_program.form_count(), 2);
+        assert_eq!(zig_transport::encode_t5_direct(&multi_words).unwrap(), multi);
 
         // Physical validity must not automatically imply a valid D2 program.
-        let lone_close = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).unwrap();
+        let lone_close_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let lone_close = zig_transport::encode_t5_direct(&[lone_close_word]).unwrap();
         let err = decode_canonical_t5_words(&lone_close).expect_err("invalid D2 close");
         assert!(err.contains("SENS canonical D2 rejected"), "{err}");
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
@@ -997,12 +1012,12 @@ mod eval_tests {
 
     #[cfg(feature = "zig-transport")]
     #[test]
-    fn zig_encode_route_uses_exact_t5_words_without_rust_physical_decoder() {
-        // SENS owns source parsing and D2 admission, Zig owns the T5 bytes.
+    fn zig_encode_route_uses_t5m_by_default_without_rust_physical_decoder() {
+        // SENS owns source parsing and D2 admission, Zig owns default T5M bytes.
         let projection = "10 001 00 000 01";
-        let reference = sens::encode_binary_projection_ternary(projection)
-            .expect("SENS canonical binary source");
-        assert_eq!(&reference, &[0x63, 0x89, 0x06, 0xa1]);
+        let legacy_t5 = sens::encode_binary_projection_ternary(projection)
+            .expect("legacy T5 compatibility reference");
+        assert_eq!(&legacy_t5, &[0x63, 0x89, 0x06, 0xa1]);
         let expected = sens::parse_binary_source_words(projection)
             .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
         let actual = admitted_source_words(projection)
@@ -1011,8 +1026,10 @@ mod eval_tests {
         assert_eq!(actual.iter().map(|w| w.width()).collect::<Vec<_>>(),
                    [2, 3, 2, 3, 2]);
         let zig_bytes = zig_transport::encode_t5_direct(&actual)
-            .expect("Zig sole T5 production encoder");
-        assert_eq!(zig_bytes, reference);
+            .expect("Zig sole default T5M encoder");
+        assert_eq!(zig_bytes, [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91]);
+        assert_ne!(zig_bytes, legacy_t5, "default must no longer emit legacy T5");
+        assert_eq!(zig_transport::decode_t5_words(&zig_bytes).unwrap(), actual);
         verify_companion(projection, &zig_bytes).expect("Zig replay + SENS D2");
         // A one-bit D2-close on its own cannot be published as a program.
         assert!(admitted_source_words("01").unwrap_err().contains("SENS canonical D2"));
@@ -1026,9 +1043,8 @@ mod eval_tests {
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
             assert!(decode_canonical_t5_words(invalid).is_err());
         }
-        let lone_close = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).unwrap();
+        let lone_close_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let lone_close = zig_transport::encode_t5_direct(&[lone_close_word]).unwrap();
         assert!(decode_canonical_t5_words(&lone_close).unwrap_err()
             .contains("SENS canonical D2 rejected"));
 
@@ -1051,18 +1067,20 @@ mod eval_tests {
         let carrier = zig_test_fixture("migration-quote-cohort-main/quote-legacy.sens");
         let actual = zig_transport::decode_t5_words(carrier)
             .expect("Zig physical ingress on admitted binary program");
-        let independent_reference = sens::decode_ternary_words(carrier)
-            .expect("test-only Rust reference, not production fallback");
+        let independent_reference = sens::parse_binary_source_words("10 001 00 000 01")
+            .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
         assert_eq!(actual, independent_reference);
         assert_eq!(actual.iter().map(|w| w.width()).collect::<Vec<_>>(),
                    vec![2, 3, 2, 3, 2]);
         let program = sens::PhysicalT5Program::from_exact_words(&actual)
             .expect("SENS-owned D2 reading, not Zig semantic verdict");
         assert_eq!(program.form_count(), 1);
-        assert_eq!(zig_transport::decode_t5_words(&[0xa1])
-            .unwrap()[0].width(), 1);
-        assert_eq!(zig_transport::decode_t5_words(&[0x35])
-            .unwrap()[0].width(), 2);
+        let d1_word = sens::parse_binary_source_words("1").unwrap()[0].word;
+        let d1_carrier = zig_transport::encode_t5_direct(&[d1_word]).unwrap();
+        assert_eq!(zig_transport::decode_t5_words(&d1_carrier).unwrap()[0].width(), 1);
+        let d2_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let d2_carrier = zig_transport::encode_t5_direct(&[d2_word]).unwrap();
+        assert_eq!(zig_transport::decode_t5_words(&d2_carrier).unwrap()[0].width(), 2);
         assert!(zig_transport::decode_t5_words(&[0xf3]).is_err());
         assert!(zig_transport::decode_t5_words(&[0xf2]).is_err());
         assert!(zig_transport::decode_t5_words(&[0, 0]).is_err());
@@ -1092,8 +1110,8 @@ mod eval_tests {
         let route = &source[start..end];
         #[cfg(feature = "zig-transport")]
         {
-            let zig_branch = route.split("#[cfg(not(feature = \"zig-transport\"))]")
-                .next().expect("Zig ingress block");
+            let zig_branch = route.split("#[cfg(feature = \"zig-transport\")]")
+                .nth(1).expect("Zig ingress block");
             assert!(zig_branch.contains("zig_transport::decode_t5_words(bytes)"));
             assert!(zig_branch.contains("sens::PhysicalT5Program::from_exact_words(&words)"));
             assert!(!zig_branch.contains("sens::PhysicalT5Program::decode(bytes)"));
@@ -1124,8 +1142,9 @@ mod d7_zig_cli_boundary_tests {
         assert!(words.iter().all(|w| w.width() == 7));
         let carrier = zig_transport::encode_t5_direct(&words)
             .expect("Zig-only physical T5 output");
-        // Independent Rust T5 reference is TEST-ONLY, never the primary output.
-        assert_eq!(carrier, sens::encode_d7_uk_t5(text).unwrap());
+        let source_trits = words.iter().map(|word| word.width()).sum::<usize>()
+            + words.len() - 1;
+        assert_eq!(carrier.len(), source_trits.div_ceil(15) * 3);
         let restored = zig_transport::decode_t5_words(&carrier)
             .expect("Zig-only physical T5 ingress");
         assert_eq!(restored, words);
@@ -1133,8 +1152,10 @@ mod d7_zig_cli_boundary_tests {
 
         let error = sens::encode_d7_uk_words("Кі🙂").unwrap_err();
         assert_eq!(error, sens::D7T5Error::UnassignedKeyboardGlyph { byte_offset: 4 });
-        let d2 = zig_transport::decode_t5_words(&[0x35])
-            .expect("valid D2:01 physical, not D7");
+        let d2_word = sens::parse_binary_source_words("01").unwrap()[0].word;
+        let d2_carrier = zig_transport::encode_t5_direct(&[d2_word]).unwrap();
+        let d2 = zig_transport::decode_t5_words(&d2_carrier)
+            .expect("valid D2:01 T5M physical word, not D7");
         assert_eq!(sens::decode_d7_uk_words(&d2), Err(sens::D7T5Error::NonD7Word));
         for invalid in [&[0xf3][..], &[0xf2][..], &[0x00, 0x00][..]] {
             assert!(zig_transport::decode_t5_words(invalid).is_err());

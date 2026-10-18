@@ -52,8 +52,8 @@ def produce(suite: str, out: Path) -> None:
         name, _ = CASES[kind]
         good, bad = checked_words(kind)
         for role, words in (("law", good), ("mutant", bad)):
-            physical = carry_t5(binary, " ".join(words) + "\n")
-            proof = verify_t5(binary, physical)
+            physical = carry_t5(binary, " ".join(words) + "\n", codec="t5")
+            proof = verify_t5(binary, physical, codec="t5")
             digest = hashlib.sha256(physical).hexdigest()
             if (proof.get("profile") != PROFILE or
                     proof.get("zig_version") != "0.16.0" or

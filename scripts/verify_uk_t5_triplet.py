@@ -186,8 +186,6 @@ def project_current_uk(source: str) -> list[str]:
         ROOT / "crates/sens/src/semantic_registry_generated.rs",
         ROOT / "crates/sens/src/semantic_registry.rs",
         ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
-        ROOT / "contracts/core1-historical-sid-map.lisp",
-        ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     # Ratified D7 keyboard/v2 (width 7, capacity 128, occupancy 128/128) is the
     # single current Text7 authority. The historical

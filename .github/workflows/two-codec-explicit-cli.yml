@@ -1,4 +1,4 @@
-name: SENS two-codec explicit tiny F3 CLI, T5 remains default
+name: SENS T5M default with explicit tiny F3 compatibility CLI
 on:
   workflow_dispatch:
 permissions:

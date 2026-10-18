@@ -21,7 +21,7 @@
 ((expr . "(cdr (quote (radio antenna)))") (expected . "(antenna)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(cons (quote radio) (quote (antenna)))") (expected . "(radio antenna)") (tier . 1) (axioms . (G2)) (role . "constitutive") (compiler-corpus . t) (wsm-native . ((status . pending))) (meta-eval . t))
 ((expr . "(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right)))") (expected . "right") (tier . 3) (axioms . ()) (role . "historical-compatibility") (compatibility . historical-truthiness) (note . "Historical surface/migration truthiness only. Contract 11.8 exact D3:110 does not admit structural () as PredicateBit control.") (meta-eval . t))
-((expr . "(/ 5 6 8 7)") (expected . "5/336") (tier . 2) (axioms . (S1)) (compiler-corpus . t) (meta-eval-gap . t) (wsm-native . ((status . pending))))
+((expr . "(частка (частка (частка 5 6) 8) 7)") (expected . "5/336") (tier . 2) (axioms . (S1)) (compiler-corpus . t) (meta-eval-gap . t) (wsm-native . ((status . pending))))
 ((expr . "(+ (/ 1 3) (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(- 1 (/ 1 3))") (expected . "2/3") (tier . 2) (axioms . (S1)))
 ((expr . "(* (/ 2 3) (/ 9 4))") (expected . "3/2") (tier . 2) (axioms . (S1)))

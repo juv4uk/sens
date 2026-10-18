@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 from pathlib import Path
 import sys
 import tempfile
@@ -218,6 +219,12 @@ class ThreePassMigrationTests(unittest.TestCase):
     def migrate(self,source):
         resolver=mod.Resolver(self.my,self.upper)
         return mod.migrate_file(source,resolver,self.text7),resolver
+
+    def test_migrate_file_defaults_to_t5m(self):
+        self.assertEqual(
+            inspect.signature(mod.migrate_file).parameters["codec"].default,
+            "t5m",
+        )
 
     def test_empty_list_is_compact_d3_empty(self):
         out,_=self.migrate("()\n")

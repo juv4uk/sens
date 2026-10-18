@@ -958,7 +958,7 @@ mod zig_exact_egress_tests {
         // Nine D9 coordinates need >16 canonical T5 bytes, with leading
         // zeros intact. Only Zig decides their physical validity.
         let long_words = words(&["010101000"; 9].join(" "));
-        let long_t5 = encode_t5_direct(&long_words).expect("Zig canonical T5");
+        let long_t5 = encode_t5_direct(&long_words).expect("Zig canonical T5M");
         assert!(long_t5.len() > 16);
         assert!(encode_f3(&long_t5).expect("valid large Zig T5").is_none());
 
@@ -971,8 +971,8 @@ mod zig_exact_egress_tests {
 
         // Positive tiny F3C stays on Zig's byte-exact physical path.
         let small = encode_t5_direct(&words("10 001 00 000 01"))
-            .expect("canonical small T5");
-        assert_eq!(small, [0x63, 0x89, 0x06, 0xa1]);
+            .expect("canonical small T5M");
+        assert_eq!(small, [0x6c, 0xb5, 0x59, 0xf1, 0xf6, 0x91]);
         let packed = encode_f3(&small)
             .expect("Zig F3C validation and encode")
             .expect("tiny F3C should save physical bytes");

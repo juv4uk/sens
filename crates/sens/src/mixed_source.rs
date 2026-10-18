@@ -910,6 +910,19 @@ fn lift_expression(
                 span,
             })
         }
+        ExprKind::Symbol(name) if !bound_names.contains(name.as_ref()) => {
+            if let Some(identity) = crate::semantic_registry::d1_value_for_uk_surface(&name) {
+                Ok(Expr {
+                    kind: ExprKind::DomainIdentity(identity),
+                    span,
+                })
+            } else {
+                Ok(Expr {
+                    kind: ExprKind::Symbol(name),
+                    span,
+                })
+            }
+        }
         other => Ok(Expr { kind: other, span }),
     }
 }
@@ -1055,6 +1068,21 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn mixed_human_projection_reads_tak_and_ni_as_d1_values() {
+        for (surface, bits) in [("ні", 0), ("так", 1)] {
+            let parsed = only(
+                parse_mixed_exact_domain(surface)
+                    .expect("людська проєкція D1 має розбиратися як значення"),
+            );
+            assert!(matches!(
+                parsed.kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 1 && identity.packed_bits() == bits
+            ), "{surface} має лишитися значенням D1:{bits}");
+        }
     }
 
     #[test]

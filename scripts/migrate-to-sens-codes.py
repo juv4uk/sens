@@ -1109,7 +1109,8 @@ def main():
                             raise SensT5Error("physical T5 roundtrip changed exact typed words")
                         expected_sha = sha256(reference).hexdigest()
                         physical = zig_codec_bridge.carry_t5(
-                            zig_binary, converted, trusted_source_sha256=expected_sha,
+                            zig_binary, converted, codec="t5",
+                            trusted_source_sha256=expected_sha,
                         )
                         if physical != reference:
                             first = next((i for i, (x, y) in enumerate(zip(reference, physical))
@@ -1119,7 +1120,8 @@ def main():
                                 f"actual_sha256={sha256(physical).hexdigest()} first_byte={first}"
                             )
                         receipt = zig_codec_bridge.verify_t5(
-                            zig_binary, physical, trusted_source_sha256=expected_sha,
+                            zig_binary, physical, codec="t5",
+                            trusted_source_sha256=expected_sha,
                         )
                         if (receipt.get("physical_sha256") != expected_sha
                                 or receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256"

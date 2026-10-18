@@ -192,7 +192,7 @@ def run(args: argparse.Namespace) -> dict:
             original = source.read_bytes()
             row["source_sha256"] = digest(original)
             readable = original.decode("utf-8")
-            projection = mig.migrate_file(readable, resolver, text7)
+            projection = mig.migrate_file(readable, resolver, text7, codec="t5")
             words = mig.parse_words(projection)
             # Python is an independent reference, NOT the published byte producer.
             reference_bytes = mig.encode_projection(projection)
@@ -201,6 +201,7 @@ def run(args: argparse.Namespace) -> dict:
             if zig_binary is not None:
                 packed = zig_codec_bridge.carry_t5(
                     zig_binary, projection,
+                    codec="t5",
                     trusted_source_sha256=digest(reference_bytes),
                 )
                 if packed != reference_bytes:
@@ -215,6 +216,7 @@ def run(args: argparse.Namespace) -> dict:
                     )
                 evidence = zig_codec_bridge.verify_t5(
                     zig_binary, packed,
+                    codec="t5",
                     trusted_source_sha256=digest(reference_bytes),
                 )
                 row["zig_transport"] = evidence
