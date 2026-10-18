@@ -91,16 +91,16 @@
 (0011 narrate-provenance
   (0010 (prov)
     (110
-      ((101 (provenance-source prov) (001 fact)) (narrate-fact (provenance-rule prov)))
+      ((тотожне? (походження-джерело prov) (як-є fact)) (narrate-fact (походження-правило prov)))
       (1
-       (1111 (narrate-fact (provenance-rule prov))
-         (111 (001 because) (narrate-derivation (provenance-derived-from prov))))))))
+       (приєднати (narrate-fact (походження-правило prov))
+         (сполучити (як-є because) (narrate-derivation (походження-похідний-з prov))))))))
 
 ; `narrate-answer` grounds the conclusion with the caller's actual query while
 ; retaining the proof's real premises.
 (0011 narrate-answer
   (0010 (goal proof)
-    (001000 ((derivations (provenance-derived-from (101101111 proof))))
+    (нехай ((derivations (походження-похідний-з (походження proof))))
       (110
         ((010 derivations) (narrate-fact goal))
         (1
@@ -218,3 +218,8 @@
 (0011 результат-є-правильним-списком? result-proper-list?)
 ; D10:0010101101
 (0011 пояснити-результат-із-доказом narrate-proved-outcome)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити походження-похідний-з provenance-derived-from)
+(визначити походження-правило provenance-rule)
+(визначити походження-джерело provenance-source)

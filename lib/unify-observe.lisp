@@ -30,5 +30,8 @@
 (0011 unify-observe
   (0010 (left right substitution)
     (уніфікація-спостереження-стан
-      (unify left right substitution)
+      (уніфікувати left right substitution)
       left right substitution)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити уніфікувати unify)

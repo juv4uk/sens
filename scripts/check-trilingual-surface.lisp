@@ -74,17 +74,17 @@
 
 (0011 tri-field-language
   (0010 (field)
-    (001000 ((special (tri-special-quote-sym-state field)))
+    (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
       (110
-        ((101 special (001 yes)) (identity-relation same) (001 sym))
-        ((101 special (001 yes)) (identity-relation distinct) (100 field))))))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є sym))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (перше field))))))
 
 (0011 tri-field-status
   (0010 (field)
-    (001000 ((special (tri-special-quote-sym-state field)))
+    (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
       (110
-        ((101 special (001 yes)) (identity-relation same) (001 stable))
-        ((101 special (001 yes)) (identity-relation distinct) (third field))))))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є stable))
+        ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (third field))))))
 
 (0011 tri-valid-ordinary-field
   (0010 (field)
@@ -149,9 +149,9 @@
        (tri-fail (001 malformed-field-tail) fields))
       ((010 fields) (structural-kind pair)
        (001001 ((field (100 fields))
-              (special (tri-special-quote-sym-state field)))
+              (спеціальна-змінна (tri-special-quote-sym-state field)))
          (110
-           ((101 special (001 yes)) (identity-relation same)
+           ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same)
             (001000 ((dup (tri-member-state (001 sym) seen)))
               (110
                 ((101 dup (001 present)) (identity-relation same)
@@ -160,7 +160,7 @@
                  (tri-validate-fields
                    (011 fields)
                    (111 (001 sym) seen))))))
-           ((101 special (001 yes)) (identity-relation distinct)
+           ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct)
             (001000 ((valid (tri-valid-ordinary-field field)))
               (001001 ((language (tri-field-language field))
                      (dup (tri-member-state language seen)))
@@ -382,7 +382,7 @@
 
 (0011 tri-registry-form
   (100
-    (read-all
+    (читати-всі
       (read-file "lib/surface/semantic-registry.lisp"))))
 
 (0011 tri-rows
@@ -490,3 +490,7 @@
   ((101 tri-selected-mode (001 require-complete))
    (identity-relation distinct)
    tri-report))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити читати-всі read-all)
+(визначити спеціальна-змінна special)

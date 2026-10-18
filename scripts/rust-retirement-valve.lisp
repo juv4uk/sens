@@ -16,7 +16,7 @@
 (0011 fourth (0010 (x) (100 (011 (011 (011 x))))))
 (0011 fifth (0010 (x) (100 (011 (011 (011 (011 x)))))))
 
-(0011 rust-changes (read-all (read-file "tests/rust-retirement-changes.lisp")))
+(визначити rust-changes (читати-всі (read-file "tests/rust-retirement-changes.lisp")))
 
 (0011 rust-retirement-verdict-for
   (0010 (changes)
@@ -49,3 +49,6 @@
                        "Rust may only shrink; added Rust lines are forbidden. See #299.")))))))))))))
 
 (rust-retirement-verdict-for rust-changes)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити читати-всі read-all)

@@ -33,7 +33,7 @@
 (0011 collect-symbols-onto
   (0010 (expr acc)
     (110
-      ((SYMBOL? expr) (110 ((MEMBER expr acc) acc) ((010 (001 ())) (111 expr acc))))
+      ((символ? expr) (за-умовою ((значення-у-списку? expr acc) acc) ((атом? (як-є ())) (сполучити expr acc))))
       ((010 expr) acc)
       ((010 (001 ())) (collect-symbols-onto (011 expr) (collect-symbols-onto (100 expr) acc))))))
 
@@ -57,9 +57,9 @@
 (0011 insert-sorted-onto
   (0010 (sym before after)
     (110
-      ((010 after) (reverse-onto before (LIST sym)))
-      ((STRING< (SYMBOL->STRING sym) (SYMBOL->STRING (100 after)))
-       (reverse-onto before (111 sym after)))
+      ((атом? after) (зворот-до before (список sym)))
+      ((текст-передує? (символ-у-текст sym) (символ-у-текст (перше after)))
+       (зворот-до before (сполучити sym after)))
       ((010 (001 ())) (insert-sorted-onto sym (111 (100 after) before) (011 after))))))
 
 (0011 insert-sorted
@@ -77,12 +77,21 @@
 (0011 print-table-onto
   (0010 (symbols id)
     (110 ((010 symbols) (001 ())) ((010 (001 ())) ((0010 ()
-            (PRINT (LIST (SYMBOL->STRING (100 symbols)) id))
+            (PRINT (список (символ-у-текст (перше symbols)) id))
             (print-table-onto (011 symbols) (01010 id 1))))))))
 
-(0011 core-forms (READ-ALL (READ-FILE "lib/core4.lisp")))
+(визначити core-forms (читати-всі (READ-FILE "lib/core4.lisp")))
 (0011 all-symbols (collect-all-symbols core-forms (001 ())))
 (0011 sorted-symbols (sort-symbols all-symbols))
 
 (print-table-onto sorted-symbols 0)
-(001 ())
+(як-є ())
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список LIST)
+(визначити значення-у-списку? MEMBER)
+(визначити читати-всі READ-ALL)
+(визначити текст-передує? STRING<)
+(визначити символ-у-текст SYMBOL->STRING)
+(визначити символ? SYMBOL?)
+(визначити зворот-до reverse-onto)

@@ -10,20 +10,20 @@
 
 (0011 proven-byte-profile-path "lib/surface/semantic-registry.lisp")
 
-(0011 proven-byte-profile-start (mono-ns))
+(визначити proven-byte-profile-start (монотонний-наносекунди))
 (0011 proven-byte-profile-bytes (read-file-bytes proven-byte-profile-path))
-(0011 proven-byte-profile-after-bytes (mono-ns))
+(визначити proven-byte-profile-after-bytes (монотонний-наносекунди))
 
 (0011 proven-byte-profile-decoded
   (utf8-decode-onto proven-byte-profile-bytes (001 ())))
-(0011 proven-byte-profile-after-decode (mono-ns))
+(визначити proven-byte-profile-after-decode (монотонний-наносекунди))
 
 (0011 proven-byte-profile-text
-  (unicode-scalars->string (second proven-byte-profile-decoded)))
-(0011 proven-byte-profile-after-string (mono-ns))
+  (юнікод-скаляри-рядок (second proven-byte-profile-decoded)))
+(визначити proven-byte-profile-after-string (монотонний-наносекунди))
 
-(0011 proven-byte-profile-root (100 (read-all proven-byte-profile-text)))
-(0011 proven-byte-profile-after-read-all (mono-ns))
+(визначити proven-byte-profile-root (перше (читати-всі proven-byte-profile-text)))
+(визначити proven-byte-profile-after-read-all (монотонний-наносекунди))
 
 (print
   (1110
@@ -40,3 +40,8 @@
           (01011 proven-byte-profile-after-read-all proven-byte-profile-start))
     (1110 (001 decode-tag) (100 proven-byte-profile-decoded))
     (1110 (001 root) proven-byte-profile-root)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити монотонний-наносекунди mono-ns)
+(визначити читати-всі read-all)
+(визначити юнікод-скаляри-рядок unicode-scalars->string)

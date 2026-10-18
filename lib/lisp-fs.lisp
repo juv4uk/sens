@@ -27,11 +27,11 @@
 
 (визначити fs-empty
   (функція ()
-    (список (empty-content-store) map-empty 0)))
+    (список (порожній-вміст-сховище) map-empty 0)))
 
 (визначити fs-root-address
   (функція (fs)
-    (knowledge-content-address
+    (знання-вміст-адреса
       (список (як-є wsm-fs-root)
             (fs-bindings fs)))))
 
@@ -41,10 +41,10 @@
 ; зберігати старий корінь, тому branching і rollback лишаються можливими.
 (визначити fs-write
   (функція (fs name value)
-    (нехай-похідне ((address (knowledge-content-address value)))
+    (нехай-похідне ((address (знання-вміст-адреса value)))
       (список
         (список
-          (content-store-put (fs-objects fs) value)
+          (вміст-сховище-покласти (fs-objects fs) value)
           (внутрішня-мапа-вставити name address (fs-bindings fs))
           (додати-1 (fs-revision fs)))
         address))))
@@ -60,7 +60,7 @@
         ((атом? ())
           (нехай-похідне ((address (перше binding)))
             (за-умовою
-              ((хибне? (content-store-contains? (fs-objects fs) address))
+              ((хибне? (вміст-сховище-містить? (fs-objects fs) address))
                (список (як-є not-found) name))
               ((атом? ())
                 ; map-get is a maybe-list, so unwrap exactly once. This
@@ -68,7 +68,7 @@
                 ; map-get повертає maybe-список, тому знімаємо рівно одну
                 ; оболонку й не втрачаємо законно збережений nil.
                 (список (як-є found)
-                      (перше (content-store-get (fs-objects fs) address))
+                      (перше (вміст-сховище-отримати (fs-objects fs) address))
                       address)))))))))
 
 (визначити fs-list
@@ -89,7 +89,7 @@
     (список
       (сполучити (як-є format) (як-є wsm-fs-object))
       (сполучити (як-є version) *fs-format-version*)
-      (сполучити (як-є address) (knowledge-content-address value))
+      (сполучити (як-є address) (знання-вміст-адреса value))
       (сполучити (як-є value) value))))
 
 (визначити fs-root-package
@@ -143,10 +143,10 @@
        (список (як-є rejected) (як-є unsupported-version)))
       ((fs-d1-no?
          (тотожне? (fs-package-field (як-є address) package)
-                   (knowledge-content-address (fs-package-field (як-є value) package))))
+                   (знання-вміст-адреса (fs-package-field (як-є value) package))))
        (список (як-є rejected) (як-є address-mismatch)))
       ((тотожне? (fs-package-field (як-є address) package)
-                 (knowledge-content-address (fs-package-field (як-є value) package)))
+                 (знання-вміст-адреса (fs-package-field (як-є value) package)))
        (список (як-є accepted) (fs-package-field (як-є value) package))))))
 (визначити fs-serialize-object
   (функція (value)
@@ -213,7 +213,7 @@
             ((хибне? (тотожне? (перше decision) (як-є accepted))) decision)
             ((атом? ()) (fs-build-object-store
                  (решта packages)
-                 (content-store-put store (друге decision))))))))))
+                 (вміст-сховище-покласти store (друге decision))))))))))
 
 ; All-addresses checks are exact D1 folds: NIL returns YES; improper
 ; tails and missing content return NO. No host T, structural EMPTY, or
@@ -223,7 +223,7 @@
     (за-умовою
       ((порожній? addresses) (порожній? (як-є ())))
       ((атом? addresses) (порожній? (як-є (ні))))
-      ((хибне? (content-store-contains? store (перше addresses)))
+      ((хибне? (вміст-сховище-містить? store (перше addresses)))
        (порожній? (як-є (ні))))
       ((атом? ()) (усі-адреси-об'єктів-файлової-системи-наявні? (решта addresses) store)))))
 
@@ -232,7 +232,7 @@
     (за-умовою
       ((порожній? entries) (порожній? (як-є ())))
       ((атом? entries) (порожній? (як-є (ні))))
-      ((хибне? (content-store-contains? store (решта (перше entries))))
+      ((хибне? (вміст-сховище-містить? store (решта (перше entries))))
        (порожній? (як-є (ні))))
       ((атом? ()) (усі-адреси-зв'язувань-у-файловій-системі-наявні? (решта entries) store)))))
 
@@ -243,7 +243,7 @@
         ((хибне? (тотожне? (перше root-decision) (як-є accepted))) root-decision)
         ((атом? ())
           (нехай-похідне ((objects-decision
-                  (fs-build-object-store object-packages (empty-content-store))))
+                  (fs-build-object-store object-packages (порожній-вміст-сховище))))
             (за-умовою
               ((хибне? (тотожне? (перше objects-decision) (як-є accepted))) objects-decision)
               ((хибне? (усі-адреси-об'єктів-файлової-системи-наявні?
@@ -446,7 +446,7 @@
               ((тотожне? op (як-є bind))
                (нехай-похідне ((address (fs-package-field (як-є address) event)))
                  (за-умовою
-                   ((хибне? (content-store-contains? (fs-objects fs) address))
+                   ((хибне? (вміст-сховище-містить? (fs-objects fs) address))
                     (список (як-є rejected) (як-є missing-object)))
                    ((атом? ())
                      (список
@@ -599,3 +599,10 @@
 (визначити усі-адреси-зв'язувань-у-файловій-системі-наявні? fs-binding-addresses-present?)
 (визначити рішення-щодо-пакета-об'єкта-файлової-системи fs-object-package-decision)
 (визначити рішення-щодо-кореневого-пакета-файлової-системи fs-root-package-decision)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити вміст-сховище-містить? content-store-contains?)
+(визначити вміст-сховище-отримати content-store-get)
+(визначити вміст-сховище-покласти content-store-put)
+(визначити порожній-вміст-сховище empty-content-store)
+(визначити знання-вміст-адреса knowledge-content-address)

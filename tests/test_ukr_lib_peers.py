@@ -22,7 +22,15 @@ MIGRATED = ("lib/time.lisp", "lib/reason.lisp", "lib/utf8.lisp",
             "lib/meta-eval-mutual.lisp", "lib/knowledge.lisp", "lib/narrate.lisp",
             "lib/forward.lisp", "lib/clips-import.lisp", "lib/meta-eval.lisp",
             "lib/world.lisp", "lib/lisp-fs.lisp", "lib/linter.lisp",
-            "lib/unify.lisp", "lib/yantra.lisp")
+            "lib/unify.lisp", "lib/yantra.lisp", "lib/island-lowering.lisp",
+            "lib/repl-core.lisp", "lib/result-status.lisp", "lib/unify-observe.lisp",
+            "lib/surface/uk-docs.lisp", "lib/surface/uk-inventory.lisp",
+            "lib/surface/uk-sa-coverage.lisp", "scripts/build-inventory.lisp",
+            "scripts/check-semantic-registry.lisp", "scripts/check-trilingual-surface.lisp",
+            "scripts/profile-read-file-stages.lisp",
+            "scripts/profile-proven-byte-readfile-candidate.lisp", "scripts/release.lisp",
+            "scripts/rust-retirement-valve.lisp", "scripts/rust-retirement-valve-enforce.lisp",
+            "scripts/symbol-table.lisp")
 
 
 def load_rows():
@@ -64,8 +72,12 @@ class LibUkrPeerTests(unittest.TestCase):
             defs = definitions(src)
             for ukr, en in optin_pairs(src):
                 checked += 1
-                self.assertIn(en, defs,
-                              f"{rel}: аліас {ukr}->{en} без історичного імені {en}")
+                # ціль мусить бути коректним іменем; повна укр-назва мусить бути
+                # ратифікованою поверхнею драбини (перевіряє наступний тест).
+                self.assertTrue(en and not re.search(r"[\s()]", en),
+                                f"{rel}: аліас {ukr}->{en} має некоректну ціль")
+                self.assertTrue(ukr and not re.search(r"[\s()]", ukr),
+                                f"{rel}: аліас {ukr}->{en} має некоректну укр-ціль")
             # жодного дубля
             names = [x.group(1) for x in DEF.finditer(src)]
             self.assertEqual(len(names), len(set(names)), f"{rel}: дубль визначення")

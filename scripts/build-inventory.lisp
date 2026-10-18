@@ -18,7 +18,7 @@
   (0010 (key alist)
     (110 ((010 alist) ()) ((010 (001 ())) (110
            ((101 (1000 alist) key) (100 alist))
-           ((010 (001 ())) (assoc key (011 alist))))))))
+           ((атом? (як-є ())) (знайти-за-ключем key (решта alist))))))))
 
 (0011 assoc-str
   (0010 (key alist)
@@ -147,4 +147,7 @@
 
 (emit-all fixtures)
 
-(001 ())
+(як-є ())
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити знайти-за-ключем assoc)

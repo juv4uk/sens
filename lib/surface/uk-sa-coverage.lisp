@@ -76,22 +76,22 @@
   (entry (predicate numeric-buffer? числовий-буфер? — stable missing "low-level buffer type"))
 
   ;; ── Lists ──────────────────────────────────────────────────
-  (entry (list list список śreṇī stable stable "śreṇī = ordered sequence"))
-  (entry (list length довжина pramāṇa stable stable "pramāṇa = measure/quantity"))
-  (entry (list append приєднати saṅkalana stable stable "saṅkalana = collection; ≠ saṃyuj"))
-  (entry (list reverse зворот viloma stable stable "viloma = reverse order"))
-  (entry (list nth елемент-списку-за-індексом kramāṅka stable stable "kramāṅka = ordinal number"))
-  (entry (list member? значення-у-списку? sambaddha? stable candidate "sam-badh = bind together"))
-  (entry (list assoc знайти-за-ключем saṃbandha stable stable "lookup an association by key"))
-  (entry (list pair пара dvandva stable stable "Pāṇini 2.2.29-34: dvandva samāsa"))
-  (entry (list second друге dvitīya stable stable "ordinal; safe — returns element"))
-  (entry (list third третє tṛtīya stable stable "ordinal"))
-  (entry (list fourth четверте caturtha stable stable "ordinal"))
-  (entry (list fifth п'яте pañcama stable stable "ordinal"))
-  (entry (list caar — — compatibility-only compatibility-only "low-level car/cdr composition"))
-  (entry (list cadr — — compatibility-only compatibility-only "use друге instead"))
-  (entry (list cddr — — compatibility-only compatibility-only "low-level composition"))
-  (entry (list cadddr — — compatibility-only compatibility-only "use четверте instead"))
+  (entry (список список список śreṇī stable stable "śreṇī = ordered sequence"))
+  (entry (список length довжина pramāṇa stable stable "pramāṇa = measure/quantity"))
+  (entry (список append приєднати saṅkalana stable stable "saṅkalana = collection; ≠ saṃyuj"))
+  (entry (список reverse зворот viloma stable stable "viloma = reverse order"))
+  (entry (список nth елемент-списку-за-індексом kramāṅka stable stable "kramāṅka = ordinal number"))
+  (entry (список member? значення-у-списку? sambaddha? stable candidate "sam-badh = bind together"))
+  (entry (список assoc знайти-за-ключем saṃbandha stable stable "lookup an association by key"))
+  (entry (список pair пара dvandva stable stable "Pāṇini 2.2.29-34: dvandva samāsa"))
+  (entry (список second друге dvitīya stable stable "ordinal; safe — returns element"))
+  (entry (список third третє tṛtīya stable stable "ordinal"))
+  (entry (список fourth четверте caturtha stable stable "ordinal"))
+  (entry (список fifth п'яте pañcama stable stable "ordinal"))
+  (entry (список caar — — compatibility-only compatibility-only "low-level car/cdr composition"))
+  (entry (список cadr — — compatibility-only compatibility-only "use друге instead"))
+  (entry (список cddr — — compatibility-only compatibility-only "low-level composition"))
+  (entry (список cadddr — — compatibility-only compatibility-only "use четверте instead"))
 
   ;; ── Higher-order ───────────────────────────────────────────
   (entry (higher-order map відобразити āvartana stable candidate "āvartana = repeated application; candidate — no direct traditional source"))
@@ -124,11 +124,11 @@
   (entry (io env середовище āśraya stable candidate "āśraya = substrate/environment"))
 
   ;; ── Vectors ────────────────────────────────────────────────
-  (entry (vector vector вектор samūha stable candidate "samūha = collection/aggregate"))
-  (entry (vector make-vector створити-вектор samūha-nirmāṇa stable candidate "samūha + nirmāṇa = creation"))
-  (entry (vector vector-length довжина-вектора samūha-pramāṇa stable candidate "samūha + pramāṇa = measure"))
-  (entry (vector vector-ref елемент-вектора samūha-āvartana stable candidate "samūha + āvartana = access"))
-  (entry (vector vector-set! встановити-елемент-вектора! — stable missing "mutation; no SA yet"))
+  (entry (вектор вектор вектор samūha stable candidate "samūha = collection/aggregate"))
+  (entry (вектор make-vector створити-вектор samūha-nirmāṇa stable candidate "samūha + nirmāṇa = creation"))
+  (entry (вектор vector-length довжина-вектора samūha-pramāṇa stable candidate "samūha + pramāṇa = measure"))
+  (entry (вектор vector-ref елемент-вектора samūha-āvartana stable candidate "samūha + āvartana = access"))
+  (entry (вектор vector-set! встановити-елемент-вектора! — stable missing "mutation; no SA yet"))
 
   ;; ── Buffers ───────────────────────────────────────────────
   (entry (buffer i32-buffer — — compatibility-only compatibility-only "low-level FFI"))
@@ -240,3 +240,7 @@
     (usc-uk-percent "100.0%")
     (usc-sa-percent "77.0%")
     (notes "Selected Ukrainian surface complete: 140 stable of 140 translation-eligible names; 21 compatibility-only names are explicitly outside the translation denominator. SA: 124 surface names (36 stable + 88 candidate). Remaining SA gaps: defmacro, lambda, define, min-list, max-list, numeric-buffer?, vector-set!, utc-from-unix, unix-time-observation->utc, internet-time-sync, module-known?, module-clauses-now, and, or, let, let*.")))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити вектор vector)

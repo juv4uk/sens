@@ -38,7 +38,7 @@
 (0011 sr-flush-token
   (0010 (current tokens)
     (110
-      ((string-empty? current) tokens)
+      ((рядок-порожній? current) tokens)
       (t (111 current tokens)))))
 
 (0011 sr-whitespace?
@@ -51,11 +51,11 @@
 (0011 sr-tokenize-onto
   (0010 (text current tokens in-comment)
     (110
-      ((string-empty? text)
+      ((рядок-порожній? text)
        (10100 (sr-flush-token current tokens)))
       (t
-       (001001 ((ch (string-first text))
-              (rest (string-rest text)))
+       (нехай-послідовно ((ch (рядок-перший text))
+              (rest (рядок-решта text)))
          (110
            (in-comment
             (110
@@ -84,7 +84,7 @@
            (t
             (sr-tokenize-onto
               rest
-              (string-append current ch)
+              (рядок-додати current ch)
               tokens
               (001 ())))))))))
 
@@ -154,29 +154,29 @@
 (0011 sr-all-digits?
   (0010 (text)
     (110
-      ((string-empty? text) t)
+      ((рядок-порожній? text) t)
       (t
        (110
-         ((sr-digit? (string-first text))
-          (sr-all-digits? (string-rest text)))
+         ((sr-digit? (рядок-перший text))
+          (sr-all-digits? (рядок-решта text)))
          (t (001 ())))))))
 
 (0011 sr-at-least-four-chars?
   (0010 (text)
     (110
-      ((string-empty? text) (001 ()))
+      ((рядок-порожній? text) (як-є ()))
       (t
-       (001000 ((a (string-rest text)))
+       (нехай ((a (рядок-решта text)))
          (110
-           ((string-empty? a) (001 ()))
+           ((рядок-порожній? a) (як-є ()))
            (t
-            (001000 ((b (string-rest a)))
+            (нехай ((b (рядок-решта a)))
               (110
-                ((string-empty? b) (001 ()))
+                ((рядок-порожній? b) (як-є ()))
                 (t
-                 (001000 ((c (string-rest b)))
+                 (нехай ((c (рядок-решта b)))
                    (110
-                     ((string-empty? c) (001 ()))
+                     ((рядок-порожній? c) (як-є ()))
                      (t t)))))))))))))
 
 (0011 sr-valid-id?
@@ -214,11 +214,11 @@
 (0011 sr-has-letter?
   (0010 (text)
     (110
-      ((string-empty? text) (001 ()))
+      ((рядок-порожній? text) (як-є ()))
       (t
        (110
-         ((sr-letter-codepoint? (string->codepoint (string-first text))) t)
-         (t (sr-has-letter? (string-rest text))))))))
+         ((sr-letter-codepoint? (string->codepoint (рядок-перший text))) t)
+         (t (sr-has-letter? (рядок-решта text))))))))
 
 (0011 sr-status?
   (0010 (status)
@@ -234,19 +234,19 @@
 
 (0011 sr-fail
   (0010 (detail)
-    (001000 ((a (princ "semantic registry error: "))
-          (b (princ (write-to-string detail)))
-          (c (princ "\n")))
+    (нехай ((a (показати "semantic registry error: "))
+          (b (показати (значення-у-текст detail)))
+          (c (показати "\n")))
       ; Deliberately cross a real UnknownSymbol boundary after printing the
       ; diagnostic. The dynamically constructed missing symbol carries the
       ; rejection payload in the error itself, so redirected stdout buffering
       ; cannot erase the useful detail before the non-zero process exit.
       (0001
         (1110
-          (string->symbol
-            (string-append
+          (текст-у-символ
+            (рядок-додати
               "semantic-registry-check-failed:"
-              (write-to-string detail))))))))
+              (значення-у-текст detail))))))))
 
 ; Result: ("ok" updated-all-surfaces has-sym), or sr-fail.
 (0011 sr-validate-surfaces
@@ -360,7 +360,7 @@
       ((010 sorted) (structural-kind atom) (1110 value sorted))
       ((010 sorted) (structural-kind pair)
        (110
-         ((string<? value (100 sorted)) (111 value sorted))
+         ((текст-передує? value (перше sorted)) (сполучити value sorted))
          (t
           (111 (100 sorted)
                 (sr-insert-string value (011 sorted)))))))))
@@ -384,13 +384,13 @@
        (110
          ((010 (011 values)) (structural-kind empty-list) (100 values))
          ((010 (011 values)) (structural-kind atom)
-          (string-append
+          (рядок-додати
             (100 values)
-            (string-append " " (011 values))))
+            (рядок-додати " " (решта values))))
          ((010 (011 values)) (structural-kind pair)
-          (string-append
+          (рядок-додати
             (100 values)
-            (string-append
+            (рядок-додати
               " "
               (sr-join-space (011 values))))))))))
 
@@ -421,24 +421,35 @@
                (identity-count (second result))
                (surface-names (sr-sort-strings (third result) (001 ())))
                (symbolic-count (fourth result))
-               (a (princ
-                    (string-append
+               (a (показати
+                    (рядок-додати
                       "semantic registry: "
-                      (string-append
-                        (number->string identity-count)
+                      (рядок-додати
+                        (число-рядок identity-count)
                         " identities\n"))))
-               (b (princ
-                    (string-append
+               (b (показати
+                    (рядок-додати
                       "surfaces: "
-                      (string-append
+                      (рядок-додати
                         (sr-join-space surface-names)
                         "\n"))))
-               (c (princ
-                    (string-append
+               (c (показати
+                    (рядок-додати
                       "shared symbolic identities: "
-                      (string-append
-                        (number->string symbolic-count)
+                      (рядок-додати
+                        (число-рядок symbolic-count)
                         "\n"))))
-               (d (princ "numeric-only authority: CONFIRMED\n"))
-               (e (princ "meaning-first shape: CONFIRMED\n")))
+               (d (показати "numeric-only authority: CONFIRMED\n"))
+               (e (показати "meaning-first shape: CONFIRMED\n")))
           (001 semantic-registry-ok)))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити число-рядок number->string)
+(визначити показати princ)
+(визначити текст-у-символ string->symbol)
+(визначити рядок-додати string-append)
+(визначити рядок-порожній? string-empty?)
+(визначити рядок-перший string-first)
+(визначити рядок-решта string-rest)
+(визначити текст-передує? string<?)
+(визначити значення-у-текст write-to-string)

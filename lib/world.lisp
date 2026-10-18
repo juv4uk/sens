@@ -150,7 +150,7 @@
   (функція (world module-name)
     (за-умовою
       ((світ-модуль-відомий? world module-name)
-       (run-multi (світ-клаузи world module-name) (як-є ())))
+       (виконати-багатоваріантне-виведення (світ-клаузи world module-name) (як-є ())))
       ((world-module-missing? world module-name)
        (як-є Module-not-found)))))
 
@@ -170,7 +170,7 @@
     (за-умовою
       ((хибне? (внутрішній-символ? module-name))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clause)))
-      ((тотожне? (knowledge-clause-valid? clause) (як-є ()))
+      ((тотожне? (клауза-бази-знань-коректна? clause) (як-є ()))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clause)))
       (так
        (нехай-похідне ((opposite (opposite-knowledge-head (перше clause))))
@@ -211,9 +211,9 @@
        (список (як-є rejected) (список (як-є reason) (як-є invalid-module)) (список (як-є input) clauses)))
       
       ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-      ((тотожне? (knowledge-proper-list? clauses) (як-є ()))
+      ((тотожне? (правильно-структурований-список-знань? clauses) (як-є ()))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-      ((тотожне? (knowledge-clauses-valid? clauses) (як-є ()))
+      ((тотожне? (клаузи-бази-знань-коректні? clauses) (як-є ()))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clauses)))
       (так
        (нехай-похідне ((existing (за-умовою
@@ -236,7 +236,7 @@
 (визначити world-tell-all
   (функція (world module-name clauses)
     (створити-світ world
-                (приєднати (clauses->tell-events module-name clauses)
+                (приєднати (перетворити-клаузи-на-події-повідомлення module-name clauses)
                         (світ-журнал world))
                 (світ-метадані world))))
 
@@ -405,7 +405,7 @@
          (за-умовою
            
            ((атом? clauses)  (список (як-є rejected) (список (як-є reason) (як-є invalid-batch)) (список (як-є input) clauses)))
-           (так (make-knowledge-package module-name clauses))))))))
+           (так (створити-пакет-структурованих-знань module-name clauses))))))))
 
 ; The knowledge package version is structured data (0 1), not an
 ; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
@@ -431,28 +431,28 @@
                    (список (як-є reason) (як-є invalid-package))
                    (список (як-є input) package))
              world))
-      ((хибне? (knowledge-proper-list? package))
+      ((хибне? (правильно-структурований-список-знань? package))
        (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
                    (список (як-є input) package))
              world))
-      ((хибне? (knowledge-package-entries-valid? package))
+      ((хибне? (записи-пакета-знань-коректні? package))
        (список (список (як-є rejected)
                    (список (як-є reason) (як-є invalid-package))
                    (список (як-є input) package))
              world))
-      ((тотожне? (knowledge-package-field (як-є format) package) (як-є my-lisp-knowledge))
+      ((тотожне? (отримати-поле-пакета-знань (як-є format) package) (як-є my-lisp-knowledge))
        (за-умовою
-         ((внутрішня-рівність-версій (knowledge-package-field (як-є version) package)
+         ((внутрішня-рівність-версій (отримати-поле-пакета-знань (як-є version) package)
                   *knowledge-package-version*)
           (порадити-всі-світ world
-                            (knowledge-package-field (як-є module) package)
-                            (knowledge-package-field (як-є clauses) package)))
+                            (отримати-поле-пакета-знань (як-є module) package)
+                            (отримати-поле-пакета-знань (як-є clauses) package)))
          (так
           (список (список (як-є rejected)
                       (список (як-є reason) (як-є unsupported-version))
                       (список (як-є version)
-                            (knowledge-package-field (як-є version) package)))
+                            (отримати-поле-пакета-знань (як-є version) package)))
                 world))))
       (так
        (список (список (як-є rejected)
@@ -683,3 +683,13 @@
 (визначити світ-запис world-record)
 (визначити світ-повідомити world-tell)
 (визначити світ-повідомити-всі world-tell-all)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити перетворити-клаузи-на-події-повідомлення clauses->tell-events)
+(визначити клауза-бази-знань-коректна? knowledge-clause-valid?)
+(визначити клаузи-бази-знань-коректні? knowledge-clauses-valid?)
+(визначити записи-пакета-знань-коректні? knowledge-package-entries-valid?)
+(визначити отримати-поле-пакета-знань knowledge-package-field)
+(визначити правильно-структурований-список-знань? knowledge-proper-list?)
+(визначити створити-пакет-структурованих-знань make-knowledge-package)
+(визначити виконати-багатоваріантне-виведення run-multi)

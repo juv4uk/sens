@@ -11,7 +11,7 @@
      (predicate (public-question-with-domain-owned-result))
      (symbolic-sugar (compact-notation-over-word-first-public-name))))
   (public
-    ((canon (quote atom? eq? cons car cdr cond))
+    ((canon (quote атом? eq? cons car cdr cond))
      (necessary-forms (define lambda))
      (language-macros (defmacro))
      (compatibility-forms (def))
@@ -30,7 +30,7 @@
      ; had gone stale relative to the actual implementation until
      ; corrected.
      (core-library
-       (abs identity binary list not? and or gensym pair second third fourth cadddr fifth
+       (модуль identity binary list not? and or gensym pair second third fourth cadddr fifth
         caar cadr cddr length reverse append map filter reduce let equal? max
         max-list member? min min-list assoc let* nth string<? symbol? quotient mod
         divmod <= >= number->string -> ->> isqrt sqrt
@@ -42,7 +42,7 @@
   (internal
     ((bootstrap (make-macro))
      (core-library
-       (length-onto reverse-onto map-onto filter-onto largest-chunk
+       (довжина-до reverse-onto map-onto filter-onto largest-chunk
         nondecreasing-from? nonincreasing-from? digit->string
         number->string-onto sqrt-iter isqrt-step truthy?
         string-membership-helper string-order-helper nonempty-string-membership-helper
@@ -52,5 +52,10 @@
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
   (public-predicates
-    (atom? eq? < = > numeric-buffer? string<? string? not? equal? member?
+    (атом? eq? < = > numeric-buffer? string<? string? not? equal? member?
      string-empty? string-prefix? string-contains? symbol? null? <= >=)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити модуль abs)
+(визначити атом? atom?)
+(визначити довжина-до length-onto)

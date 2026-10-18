@@ -8,28 +8,28 @@
 
 (0011 profile-path "lib/surface/semantic-registry.lisp")
 
-(0011 profile-start (mono-ns))
+(визначити profile-start (монотонний-наносекунди))
 (0011 profile-bytes (read-file-bytes profile-path))
-(0011 profile-after-bytes (mono-ns))
+(визначити profile-after-bytes (монотонний-наносекунди))
 
 ; `utf8-decode` performs this validation pass before decoding. Time it alone.
-(0011 profile-valid (utf8-all-bytes? profile-bytes))
-(0011 profile-after-validation (mono-ns))
+(визначити profile-valid (усі-елементи-є-байтами-кодування-юнікод-8? profile-bytes))
+(визначити profile-after-validation (монотонний-наносекунди))
 
 ; The source registry is committed valid UTF-8. Calling the internal decode
 ; worker directly avoids counting validation a second time. This stage includes
 ; scalar accumulation and the worker's final `(reverse out)`.
 (0011 profile-decoded (utf8-decode-onto profile-bytes (001 ())))
-(0011 profile-after-decode (mono-ns))
+(визначити profile-after-decode (монотонний-наносекунди))
 (0011 profile-scalars (second profile-decoded))
 
 ; Materialize the already-decoded Unicode scalar list as one runtime String.
-(0011 profile-text (unicode-scalars->string profile-scalars))
-(0011 profile-after-string (mono-ns))
+(визначити profile-text (юнікод-скаляри-рядок profile-scalars))
+(визначити profile-after-string (монотонний-наносекунди))
 
 ; Keep parser cost separate so #333 does not optimize the wrong layer.
-(0011 profile-root (100 (read-all profile-text)))
-(0011 profile-after-read-all (mono-ns))
+(визначити profile-root (перше (читати-всі profile-text)))
+(визначити profile-after-read-all (монотонний-наносекунди))
 
 (print
   (1110
@@ -49,3 +49,9 @@
     (1110 (001 validation-result) profile-valid)
     (1110 (001 decode-tag) (100 profile-decoded))
     (1110 (001 root) profile-root)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити монотонний-наносекунди mono-ns)
+(визначити читати-всі read-all)
+(визначити юнікод-скаляри-рядок unicode-scalars->string)
+(визначити усі-елементи-є-байтами-кодування-юнікод-8? utf8-all-bytes?)

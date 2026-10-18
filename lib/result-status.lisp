@@ -161,9 +161,9 @@
        (створити-некоректний (як-є invalid-goal) goal))
       (так
        (нехай-послідовно ((opposite (результат-протилежний-ціль goal))
-              (index (reason-ensure-index rules-or-index))
-              (positive-results (101001110 goal index))
-              (opposite-results (101001110 opposite index)))
+              (початкова-позиція-підрядка (reason-ensure-index rules-or-index))
+              (positive-results (міркувати goal початкова-позиція-підрядка))
+              (opposite-results (міркувати opposite початкова-позиція-підрядка)))
          (за-умовою
            ((за-умовою
               ((хибне? (атом? positive-results))
@@ -202,3 +202,6 @@
 ; No direct D9 machine admission.
 (визначити міркувати-спостерігати reason-observe)
 (визначити міркувати-у-спостерігати reason-in-observe)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити початкова-позиція-підрядка index)
