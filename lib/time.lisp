@@ -76,7 +76,7 @@
   (0010 (observation)
     (110
       ((101 (100 observation) (001 unix-time))
-       (utc-from-unix (100 (011 observation)) (100 (011 (011 observation)))))
+       (узгоджений-час-з-юнікс (перше (решта observation)) (перше (решта (решта observation)))))
       (#d1:1
        (111 (001 rejected) (111 (001 invalid-unix-time-observation) (001 ()))))))
 )
@@ -85,7 +85,7 @@
 ; the raw Unix observation above.
 (визначити utc-now
   (функція ()
-    (unix-time-observation->utc (unix-time-now))))
+    (юнікс-час-спостереження-узгоджений-час (unix-time-now))))
 
 
 ; Interpret protocol fields from one complete NTP response. Packet I/O and
@@ -122,9 +122,9 @@
 (0011 internet-time-fields->observation
   (0010 (host mode stratum ntp-seconds fraction)
     (110
-      ((internet-time-mode-valid? mode)
+      ((інтернет-час-режим-припустимий? mode)
        (110
-         ((internet-time-stratum-valid? stratum)
+         ((інтернет-час-рівень-припустимий? stratum)
           (110
             ((11010 ntp-seconds 2208988800)
              (111 (001 rejected) (111 (001 invalid-epoch) (001 ()))))
@@ -144,7 +144,7 @@
   (0010 (raw)
     (110
       ((101 (100 raw) (001 ntp-fields))
-       (internet-time-fields->observation
+       (тлумачити-поля-відповіді-часу
          (1001 raw)
          (100 (011 (011 raw)))
          (100 (011 (011 (011 raw))))
@@ -157,7 +157,7 @@
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
 (визначити internet-time-sync
   (функція (host timeout-ms)
-    (internet-time-raw->observation
+    (перетворити-сирі-дані-часу-на-спостереження
       (ntp-query-raw host timeout-ms))))
 
 
@@ -168,7 +168,7 @@
       ((101 (100 observation) (001 accepted))
        (111 (001 accepted)
          (111 (100 (011 observation))
-           (111 (utc-from-unix
+           (сполучити (узгоджений-час-з-юнікс
                   (100 (011 (011 observation)))
                   (100 (011 (011 (011 observation)))))
              (001 ())))))
@@ -186,7 +186,7 @@
 
 (визначити mono-ms
   (функція ()
-    (milliseconds-from-nanoseconds (mono-ns))))
+    (мілісекунди-з-наносекунди (mono-ns))))
 
 
 ; Monotonic counters are host observations; deadline arithmetic is language
@@ -206,12 +206,12 @@
 
 (0011 deadline-after-ns
   (0010 (delta-ns)
-    (deadline-from (mono-ns) delta-ns)))
+    (крайній-час-з (mono-ns) delta-ns)))
 
 
 (визначити deadline-reached?
   (функція (deadline-ns)
-    (deadline-reached-at? (mono-ns) deadline-ns)))
+    (крайній-час-досягнуто-у? (mono-ns) deadline-ns)))
 
 
 (визначити elapsed-ns
@@ -279,7 +279,7 @@
   (0010 (raw)
     (110
       ((101 (100 raw) (001 timezone-declarations))
-       (timezone-declarations->observation
+       (обрати-достовірне-джерело-часового-поясу
          (100 (011 raw))
          (100 (011 (011 raw)))))
       (#d1:1
@@ -288,7 +288,7 @@
 
 (0011 timezone-detect
   (0010 ()
-    (timezone-raw->observation
+    (часовий-пояс-сирий-до-спостереження
       (timezone-declarations-raw))))
 
 
@@ -321,3 +321,16 @@
 ; my-postcore-виклики тут застаріли: їхній шлях зупиняв завантаження,
 ; хоча не створював жодного нового мовного закону. Часова семантика вище
 ; залишається власністю SENS.
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити крайній-час-з deadline-from)
+(визначити крайній-час-досягнуто-у? deadline-reached-at?)
+(визначити тлумачити-поля-відповіді-часу internet-time-fields->observation)
+(визначити інтернет-час-режим-припустимий? internet-time-mode-valid?)
+(визначити перетворити-сирі-дані-часу-на-спостереження internet-time-raw->observation)
+(визначити інтернет-час-рівень-припустимий? internet-time-stratum-valid?)
+(визначити мілісекунди-з-наносекунди milliseconds-from-nanoseconds)
+(визначити обрати-достовірне-джерело-часового-поясу timezone-declarations->observation)
+(визначити часовий-пояс-сирий-до-спостереження timezone-raw->observation)
+(визначити юнікс-час-спостереження-узгоджений-час unix-time-observation->utc)
+(визначити узгоджений-час-з-юнікс utc-from-unix)

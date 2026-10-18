@@ -100,6 +100,7 @@ jobs:
           # Лексичний звіт не замінює фізичний SENS-eval та не стверджує callability.
           python3 -m unittest tests/test_ukr_callsite_migration.py -v
           python3 -m unittest tests/test_ukr_narrate_peers.py -v
+          python3 -m unittest tests/test_ukr_lib_peers.py -v
           # НАКАЗ ВЛАСНИКА: крок ЧЕРВОНИЙ. Реальний борг — active Latin call heads
           # (не архів; архів лишається телеметрією). --require-full робить крок
           # червоним саме на active-борзі й друкує ::error:: із числом.

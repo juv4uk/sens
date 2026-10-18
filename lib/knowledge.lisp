@@ -64,14 +64,14 @@
       (#d1:1
        (111
          (1110 (001 tell) module-name (100 clauses))
-         (clauses->tell-events module-name (011 clauses)))))))
+         (перетворити-клаузи-на-події-повідомлення module-name (решта clauses)))))))
 
 (0011 defmodule
   (make-macro
     (0010 (name rules)
       (1110 (001 def) (001 *knowledge-journal*)
       (1110 (001 append)
-      (1110 (001 clauses->tell-events) (1110 (001 quote) name) rules)
+      (список (як-є перетворити-клаузи-на-події-повідомлення) (список (як-є quote) name) rules)
       (001 *knowledge-journal*))))))
 
 ; Вилучено спадкову SID8-ідентичність 00000100: це НЕ D3 CONS.
@@ -110,7 +110,7 @@
     (110
       ((010 journal) #d1:0)
       ((101 (1001 (100 journal)) module-name) #d1:1)
-      (#d1:1 (module-journal-has-module? module-name (011 journal))))))
+      (так (журнал-містить-записи-модуля? module-name (решта journal))))))
 
 ; One symbol law is owned by Core; do not duplicate historical blank W8 slots.
 (0011 knowledge-symbol?
@@ -119,7 +119,7 @@
 
 (0011 module-known?
   (0010 (module-name)
-    (module-journal-has-module? module-name *knowledge-journal*)))
+    (журнал-містить-записи-модуля? module-name *knowledge-journal*)))
 
 (0011 apply-journal-event
   (0010 (clauses event)
@@ -131,7 +131,7 @@
 (0011 module-clauses-now
   (0010 (module-name)
     (101110 apply-journal-event (001 ())
-            (10100 (module-journal-events module-name *knowledge-journal*)))))
+            (зворот (отримати-події-журналу-окремого-модуля module-name *knowledge-journal*)))))
 
 (0011 load-knowledge
   (make-macro
@@ -159,7 +159,7 @@
              (110
                ((010 proofs) #d1:0)
                (#d1:1 #d1:1)))
-           (101111010 module-name (opposite-knowledge-head head))))
+           (міркувати-у module-name (отримати-протилежну-голову-твердження-знання head))))
         (1000 rules)))
       (#d1:1 #d1:0))))
 
@@ -175,7 +175,7 @@
       (1110 #d1:1
       (1110 (001 def) (001 *knowledge-journal*)
       (1110 (001 append)
-      (1110 (001 clauses->tell-events) (1110 (001 quote) module-name) rules)
+      (список (як-є перетворити-клаузи-на-події-повідомлення) (список (як-є quote) module-name) rules)
       (001 *knowledge-journal*))))))))
 
 ; Валідатори термів і цілей відновлено окремим доказовим зрізом.
@@ -187,7 +187,7 @@
     (110
       ((0101 value) #d1:1)
       ((010 value) #d1:0)
-      (#d1:1 (knowledge-proper-list? (011 value))))))
+      (так (правильно-структурований-список-знань? (решта value))))))
 
 (0011 opposite-knowledge-head
   (0010 (head)
@@ -200,9 +200,9 @@
   (0010 (clause)
     (110
       ((010 clause) #d1:0)
-      ((0100 (knowledge-proper-list? clause)) #d1:0)
-      ((0100 (knowledge-goal-valid? (100 clause))) #d1:0)
-      (#d1:1 (knowledge-goals-valid? (011 clause))))))
+      ((хибне? (правильно-структурований-список-знань? clause)) ні)
+      ((хибне? (ціль-бази-знань-коректна? (перше clause))) ні)
+      (так (цілі-бази-знань-коректні? (решта clause))))))
 
 ;; Точна арність змінної (var ім'я) та заперечення (not?/not goal):
 ;; D3 ATOM/CDR + D4 CADR/NOT, без D6 LENGTH і некваліфікованого числа 2.
@@ -220,8 +220,8 @@
     (110
       ((0101 terms) #d1:1)
       ((010 terms) #d1:0)
-      ((knowledge-term-valid? (100 terms))
-       (knowledge-terms-valid? (011 terms)))
+      ((терм-бази-знань-коректний? (перше terms))
+       (терми-бази-знань-коректні? (решта terms)))
       (#d1:1 #d1:0))))
 
 (0011 knowledge-term-valid?
@@ -237,30 +237,30 @@
             ((010 (011 term)) #d1:0)
             ((010 (011 (011 term))) (knowledge-symbol? (1001 term)))
             (#d1:1 #d1:0)))
-         (#d1:1 (knowledge-terms-valid? term))))
-      (#d1:1 (knowledge-terms-valid? term)))))
+         (так (терми-бази-знань-коректні? term))))
+      (так (терми-бази-знань-коректні? term)))))
 
 (0011 knowledge-goal-valid?
   (0010 (goal)
     (110
       ((010 goal) #d1:0)
-      ((0100 (knowledge-proper-list? goal)) #d1:0)
+      ((хибне? (правильно-структурований-список-знань? goal)) ні)
       ((0100 (knowledge-symbol? (100 goal))) #d1:0)
-      ((knowledge-not-head? (100 goal))
+      ((голова-твердження-знань-заперечена? (перше goal))
        (110
          ; (not? goal) та (not goal) мають мати рівно один аргумент.
          ((010 (011 goal)) #d1:0)
-         ((010 (011 (011 goal))) (knowledge-goal-valid? (1001 goal)))
+         ((атом? (решта (решта goal))) (ціль-бази-знань-коректна? (друге goal)))
          (#d1:1 #d1:0)))
-      (#d1:1 (knowledge-terms-valid? (011 goal))))))
+      (так (терми-бази-знань-коректні? (решта goal))))))
 
 (0011 knowledge-goals-valid?
   (0010 (goals)
     (110
       ((0101 goals) #d1:1)
       ((010 goals) #d1:0)
-      ((knowledge-goal-valid? (100 goals))
-       (knowledge-goals-valid? (011 goals)))
+      ((ціль-бази-знань-коректна? (перше goals))
+       (цілі-бази-знань-коректні? (решта goals)))
       (#d1:1 #d1:0))))
 
 (0011 knowledge-clauses-valid?
@@ -268,8 +268,8 @@
     (110
       ((0101 clauses) #d1:1)
       ((010 clauses) #d1:0)
-      ((knowledge-clause-valid? (100 clauses))
-       (knowledge-clauses-valid? (011 clauses)))
+      ((клауза-бази-знань-коректна? (перше clauses))
+       (клаузи-бази-знань-коректні? (решта clauses)))
       (#d1:1 #d1:0))))
 
 ; Повернено історичний пакетний закон із lib/knowledge.lisp @ 327b51ca,
@@ -286,17 +286,17 @@
       (#d1:1
        ((0010 (head)
           (110
-            ((knowledge-not-head? (100 head))
+            ((голова-твердження-знань-заперечена? (перше head))
              ((0010 (positive)
                 ((0010 (proofs)
                    (110
                      ((0101 proofs)
-                      (advice-negative-head-conflict (011 rules) all-rules))
+                      (суперечність-запереченій-голові-правила (решта rules) all-rules))
                      (#d1:1 (1110 head positive (100 proofs)))))
                  (101001110 positive all-rules)))
               (1001 head)))
             (#d1:1
-             (advice-negative-head-conflict (011 rules) all-rules))))
+             (суперечність-запереченій-голові-правила (решта rules) all-rules))))
         (100 (100 rules)))))))
 
 ; Фіксуємо один з трьох доказів конфлікту: нова клауза, протилежна
@@ -311,7 +311,7 @@
             ((0101 global) (001 ()))
             (#d1:1
              (1110 (100 clauses) (100 global) (10011 global)))))
-        (advice-negative-head-conflict all-rules all-rules)))
+        (суперечність-запереченій-голові-правила all-rules all-rules)))
       ((010 remaining) (001 ()))
       (#d1:1
        ((0010 (opposite)
@@ -322,7 +322,7 @@
                (#d1:1
                 (1110 (100 remaining) opposite (100 proofs)))))
            (101001110 opposite all-rules)))
-        (opposite-knowledge-head (100 (100 remaining))))))))
+        (отримати-протилежну-голову-твердження-знання (перше (перше remaining))))))))
 
 ; Ратифікований D4:1000 = CAR(CAR), D4:0110 = CDR(CAR).
 ; Точна бітність та однобітний негатив: tests/semantic/knowledge-d4-selectors-*.bits.
@@ -331,7 +331,7 @@
     (110
       ((010 package) (001 ()))
       ((101 name (1000 package)) (0110 package))
-      (#d1:1 (knowledge-package-field name (011 package))))))
+      (так (отримати-поле-пакета-знань name (решта package))))))
 
 ; Історичний пакет знань 0.1 відновлений з lib/knowledge.lisp @ 327b51ca1f.
 ; Дані пакета не eval. Назви полів належать цитованим даним, не D7-функціям.
@@ -346,7 +346,7 @@
       ((010 entries) #d1:0)
       ((010 (100 entries)) #d1:0)
       ((knowledge-symbol? (1000 entries))
-       (knowledge-package-entries-valid? (011 entries)))
+       (записи-пакета-знань-коректні? (решта entries)))
       (#d1:1 #d1:0))))
 
 (0011 make-knowledge-package
@@ -355,3 +355,20 @@
           (111 (001 version) *knowledge-package-version*)
           (111 (001 module) module-name)
           (111 (001 clauses) clauses))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити суперечність-запереченій-голові-правила advice-negative-head-conflict)
+(визначити перетворити-клаузи-на-події-повідомлення clauses->tell-events)
+(визначити клауза-бази-знань-коректна? knowledge-clause-valid?)
+(визначити клаузи-бази-знань-коректні? knowledge-clauses-valid?)
+(визначити ціль-бази-знань-коректна? knowledge-goal-valid?)
+(визначити цілі-бази-знань-коректні? knowledge-goals-valid?)
+(визначити голова-твердження-знань-заперечена? knowledge-not-head?)
+(визначити записи-пакета-знань-коректні? knowledge-package-entries-valid?)
+(визначити отримати-поле-пакета-знань knowledge-package-field)
+(визначити правильно-структурований-список-знань? knowledge-proper-list?)
+(визначити терм-бази-знань-коректний? knowledge-term-valid?)
+(визначити терми-бази-знань-коректні? knowledge-terms-valid?)
+(визначити отримати-події-журналу-окремого-модуля module-journal-events)
+(визначити журнал-містить-записи-модуля? module-journal-has-module?)
+(визначити отримати-протилежну-голову-твердження-знання opposite-knowledge-head)

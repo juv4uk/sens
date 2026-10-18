@@ -265,8 +265,8 @@
       ((010 term) term)
       ((reason-var-form? term)
        (1110 (001 var) (111 (1001 term) depth)))
-      (#d1:1 (111 (rename-vars (100 term) depth)
-                   (rename-vars (011 term) depth))))))
+      (так (сполучити (розрізнити-логічні-змінні-правила-на-глибині (перше term) depth)
+                   (розрізнити-логічні-змінні-правила-на-глибині (решта term) depth))))))
 
 (0011 map-proofs
   (0010 (f lst)
@@ -278,7 +278,7 @@
 ; Try one rule, then wrap every successful body result in its proof node.
 (0011 prove-rule
   (0010 (goal rule bindings all-rules depth)
-    (001000 ((renamed-rule (rename-vars rule depth)))
+    (нехай ((renamed-rule (розрізнити-логічні-змінні-правила-на-глибині rule depth)))
       (001000 ((new-subst (101010000 goal (100 renamed-rule) bindings)))
         (110
           ((failed-subst? new-subst) (001 ()))
@@ -308,7 +308,7 @@
       goals
       (1110 bindings (001 ()))
       (0010 (goal state)
-        (prove-goal-state goal state all-rules depth)))))
+        (довести-мету-зі-збереженням-підстановок-та-доказів goal state all-rules depth)))))
 
 ; A body goal, including `(not P)`, is an ordinary reasoning goal. Historical
 ; negation-as-failure fabricated `(proved-not P)` merely because P had no proof.
@@ -319,7 +319,7 @@
     (001000 ((bindings (100 state))
           (proofs (1001 state))
           (index (reason-ensure-index all-rules)))
-      (map-goal-results
+      (приєднати-докази-до-кожної-успішної-підстановки
         (101011011
           goal
           (reason-index-candidates goal index)
@@ -338,7 +338,7 @@
          (1110
            (1000 results)
            (1111 proofs (1110 (1001 (100 results)))))
-         (map-goal-results (011 results) proofs))))))
+         (приєднати-докази-до-кожної-успішної-підстановки (решта results) proofs))))))
 
 (0011 explain-proof
   (0010 (proof)
@@ -413,7 +413,7 @@
     (110
       
       ((010 a)  b)
-      (#d1:1 (merge-usage (011 a) (add-usage (100 a) b))))))
+      (так (підсумувати-лічильники-використання-правил (решта a) (add-usage (перше a) b))))))
 
 (0011 count-usage
   (0010 (node)
@@ -430,8 +430,8 @@
       
       ((010 nodes)  (001 ()))
       (#d1:1
-       (merge-usage
-         (count-usage (100 nodes))
+       (підсумувати-лічильники-використання-правил
+         (порахувати-правила-у-дереві-доказу (перше nodes))
          (count-usage-list (011 nodes)))))))
 
 (0011 source-of
@@ -468,3 +468,10 @@
        (111
          (101101111 (100 nodes))
          (provenance-list (011 nodes)))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити порахувати-правила-у-дереві-доказу count-usage)
+(визначити приєднати-докази-до-кожної-успішної-підстановки map-goal-results)
+(визначити підсумувати-лічильники-використання-правил merge-usage)
+(визначити довести-мету-зі-збереженням-підстановок-та-доказів prove-goal-state)
+(визначити розрізнити-логічні-змінні-правила-на-глибині rename-vars)
