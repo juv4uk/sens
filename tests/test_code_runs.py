@@ -265,36 +265,60 @@ class CodecUkrProjectionTests(unittest.TestCase):
 
 
 class SiDerivedUkrProjectionTests(unittest.TestCase):
-    """Migrate only the ratified D4 DEFINE surface, not SI arithmetic semantics."""
+    """Migrate exact D4/D5/D8 call heads without changing SI arithmetic data."""
 
     SOURCE = ROOT / "lib" / "si-derived.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    D5 = ROOT / "lib" / "domains" / "d5.lisp"
+    D8 = ROOT / "lib" / "domains" / "d8.lisp"
     ORIGINAL_BLOB = "0074e9266a09e24804fb0798723b02a863f5ac66"
 
     @staticmethod
     def git_blob_sha(data: bytes) -> str:
         return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
         ).hexdigest()
 
-    def test_si_derived_uses_ratified_ukr_define_and_preserves_arithmetic(self):
-        table = self.D4.read_text(encoding="utf-8")
+    @staticmethod
+    def assert_ratified(table_path: Path, bits: str,
+                        surface: str, english: str, lisp_name: str):
+        table = table_path.read_text(encoding="utf-8")
         rows = [
             line for line in table.splitlines()
-            if re.match(r"^\s*\(0011\s", line)
+            if re.match(rf"^\\s*\\({re.escape(bits)}\\s", line)
         ]
-        self.assertEqual(len(rows), 1)
-        self.assertIn("(укр визначити)", rows[0])
-        self.assertIn("(en define)", rows[0])
-        self.assertIn("(LISP DEFINE)", rows[0])
+        unittest.TestCase().assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
+        unittest.TestCase().assertIn(f"(укр {surface})", rows[0])
+        unittest.TestCase().assertIn(f"(en {english})", rows[0])
+        unittest.TestCase().assertIn(f"(LISP {lisp_name})", rows[0])
+
+    @staticmethod
+    def restore_heads(source: str) -> str:
+        # Exact inverse of the migrated executable heads. Applying it only to
+        # list-head position leaves comments, strings, rational values and SI
+        # records byte-identical.
+        inverse = {
+            "визначити": "0011",
+            "помножити": "10110",
+            "поділити": "11110110",
+        }
+        pattern = re.compile(
+            r"[(](" + "|".join(re.escape(name) for name in inverse) + r")(?=\\s)"
+        )
+        return pattern.sub(lambda match: "(" + inverse[match.group(1)], source)
+
+    def test_si_derived_uses_ratified_ukr_heads_and_preserves_arithmetic(self):
+        self.assert_ratified(self.D4, "0011", "визначити", "define", "DEFINE")
+        self.assert_ratified(self.D5, "10110", "помножити", "times", "TIMES")
+        self.assert_ratified(self.D8, "11110110", "поділити", "divide", "DIVIDE")
 
         source = self.SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(source.count("(визначити "), 7)
-        self.assertNotIn("(0011 ", source)
-        self.assertEqual(len(re.findall(r"\(10110(?=\s)", source)), 7,
-                         "D5 exact multiplication heads must be unchanged")
-        self.assertEqual(len(re.findall(r"\(11110110(?=\s)", source)), 4,
-                         "unresolved historical division heads must be unchanged")
+        self.assertEqual(len(re.findall(r"\\(визначити(?=\\s)", source)), 7)
+        self.assertEqual(len(re.findall(r"\\(помножити(?=\\s)", source)), 7)
+        self.assertEqual(len(re.findall(r"\\(поділити(?=\\s)", source)), 4)
+        self.assertIsNone(re.search(r"\\((?:0011|10110|11110110)(?=\\s)", source),
+                         "ratified call heads must use their exact Ukrainian projection")
+
         for name in (
             "si:faraday-constant", "si:molar-gas-constant",
             "si:josephson-constant", "si:von-klitzing-constant",
@@ -302,19 +326,29 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
             "si:molar-planck-constant",
         ):
             self.assertIn(f"(визначити {name}", source)
+        # Every exact SI rational and unit literal is retained from the source.
+        baseline = self.restore_heads(source)
+        self.assertEqual(
+            re.findall(r"(?<![\\w])\\d+\\s*/\\s*\\d+", baseline),
+            re.findall(r"(?<![\\w])\\d+\\s*/\\s*\\d+", source),
+            "SI exact rational values must not change during surface migration",
+        )
 
-    def test_inverse_define_projection_restores_all_original_bytes(self):
+    def test_inverse_projection_restores_all_original_bytes(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        restored = re.sub(r"\(визначити(?=\s)", "(0011", source).encode("utf-8")
+        restored = self.restore_heads(source).encode("utf-8")
         self.assertEqual(self.git_blob_sha(restored), self.ORIGINAL_BLOB)
 
-    def test_wrong_define_surface_fails_inverse_witness(self):
+    def test_wrong_ukr_peer_fails_the_inverse_witness(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        mutant = source.replace("(визначити si:faraday-constant",
-                                "(визначити si:invalid-faraday-constant", 1)
+        mutant = source.replace("(помножити si:avogadro-constant",
+                                "(множити-нечинне si:avogadro-constant", 1)
         self.assertNotEqual(mutant, source)
-        restored = re.sub(r"\(визначити(?=\s)", "(0011", mutant).encode("utf-8")
-        self.assertNotEqual(self.git_blob_sha(restored), self.ORIGINAL_BLOB)
+        restored = self.restore_heads(mutant).encode("utf-8")
+        self.assertNotEqual(
+            self.git_blob_sha(restored), self.ORIGINAL_BLOB,
+            "wrong/unratified Ukrainian peer must fail the inverse witness",
+        )
 
 
 
