@@ -32,6 +32,45 @@ D9_REVERSE = {name: bits for bits, name in D9.items()}
 FALSE_EXPR = "(тотожне? (як-є (0)) (як-є (1)))"
 PRE_REPAIR_BLOB = "8ed44251876053a778837c7739427b7c20427026"
 
+# Новий незалежний локальний шар. Він НЕ стає D9/D10 identity:
+# English aliases в кінці файла посилаються на ті самі SENS-замикання.
+LOCAL_QUANTITY_BLOB = "9baec7d8c33011bb52944cf0cd4cbe63e2910e8c"
+LOCAL_HELPERS = (
+    ("science-proper-list?", "науковий-список-правильний?", 7),
+    ("science-list-length-equals?", "науковий-список-довжина-дорівнює?", 5),
+    ("science-sixth", "науковий-шостий", 2),
+    ("science-seventh", "науковий-сьомий", 2),
+)
+LOCAL_ALIASES = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n"
+
+
+def restore_local_helper_layer(source: str) -> str:
+    """Exact source-only inverse; refusal on wrong peer, not semantic evaluation."""
+    if not source.endswith(LOCAL_ALIASES):
+        raise AssertionError("відсутні сумісні локальні аліаси Quantity")
+    body = source[:-len(LOCAL_ALIASES)]
+    for english, ukrainian, calls in LOCAL_HELPERS:
+        if (body.count("(" + ukrainian) != calls
+                or body.count("(визначити " + ukrainian) != 1):
+            raise AssertionError("порушена локальна українська проєкція: " + ukrainian)
+        body = body.replace("(" + ukrainian, "(" + english)
+        body = body.replace("(визначити " + ukrainian, "(визначити " + english)
+    if git_blob(body) != LOCAL_QUANTITY_BLOB:
+        raise AssertionError("оригінальний Git blob локальної проєкції не відновлено")
+    return body
+
+
+def apply_local_helper_layer(source: str) -> str:
+    """Forward receipt, ensuring new live source is independently reconstructible."""
+    body = source
+    for english, ukrainian, calls in LOCAL_HELPERS:
+        if (body.count("(" + english) != calls
+                or body.count("(визначити " + english) != 1):
+            raise AssertionError("порушено зворотну локальну проєкцію: " + english)
+        body = body.replace("(" + english, "(" + ukrainian)
+        body = body.replace("(визначити " + english, "(визначити " + ukrainian)
+    return body + LOCAL_ALIASES
+
 
 def project_heads(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
     """Only first source atom after (. Strings/comments and every other byte copy."""
@@ -152,7 +191,8 @@ class QuantityUkrProjection(unittest.TestCase):
         self.assertIn("(1 (ук так) (укр так)", d1)
 
     def restore_previous(self):
-        expanded, false_count = project_literals(self.source, {"ні": FALSE_EXPR})
+        canonical_local = restore_local_helper_layer(self.source)
+        expanded, false_count = project_literals(canonical_local, {"ні": FALSE_EXPR})
         previous, peer_counts = project_heads(expanded, D9_REVERSE)
         self.assertEqual(false_count, {"ні": 5})
         self.assertEqual(peer_counts, {"символ?": 3, "п'ятий": 2})
@@ -186,7 +226,8 @@ class QuantityUkrProjection(unittest.TestCase):
         again, _ = project_heads(again, D9)
         self.assertEqual(again.count(FALSE_EXPR), 5)
         again = again.replace(FALSE_EXPR, "ні")
-        self.assertEqual(again, self.source)
+        self.assertEqual(again, restore_local_helper_layer(self.source))
+        self.assertEqual(apply_local_helper_layer(again), self.source)
 
     def test_comments_strings_and_quoted_data_unchanged(self):
         synthetic = '; #d1:1 (0011 ignored)\n"(010 not-code) #d1:1"\n(0011 x (001 (0)))\n'
@@ -224,9 +265,18 @@ class QuantityUkrProjection(unittest.TestCase):
     def test_definition_names_remain_historical(self):
         old, _ = project_heads(project_literals(self.restore_previous(), D1_REVERSE)[0], REVERSE)
         definitions_old = re.findall(r"\(0011\s+([^\s()]+)", old)
-        definitions_new = re.findall(r"\(визначити\s+([^\s()]+)", self.source)
+        historical = restore_local_helper_layer(self.source)
+        definitions_new = re.findall(r"\(визначити\s+([^\s()]+)", historical)
         self.assertEqual(definitions_old, definitions_new)
         self.assertEqual(len(definitions_new), 37)
+
+    def test_wrong_local_helper_mutant_fails_strict_inverse(self):
+        bad = self.source.replace(
+            "(науковий-шостий x)", "(науковий-сьомий x)", 1
+        )
+        self.assertNotEqual(bad, self.source)
+        with self.assertRaisesRegex(AssertionError, "порушена локальна"):
+            restore_local_helper_layer(bad)
 
     def test_lisp_delimiters_balanced_without_python_semantics(self):
         code = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"', "", self.source)
