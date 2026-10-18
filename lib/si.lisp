@@ -22,8 +22,8 @@
 ; same unit data is directly admissible to the Advice Taker knowledge grammar.
 ; Unit algebra itself is not claimed here.
 
-(0011 si:defining-cesium-frequency
-  (001
+(визначити si:defining-cesium-frequency
+  (як-є
     (scientific-constant/1 si:cesium-frequency
       (quantity/1 9192631770
         (unit/1
@@ -31,8 +31,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-speed-of-light
-  (001
+(визначити si:defining-speed-of-light
+  (як-є
     (scientific-constant/1 si:speed-of-light
       (quantity/1 299792458
         (unit/1
@@ -41,8 +41,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-planck-constant
-  (001
+(визначити si:defining-planck-constant
+  (як-є
     (scientific-constant/1 si:planck-constant
       (quantity/1
         132521403/200000000000000000000000000000000000000000
@@ -53,8 +53,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-elementary-charge
-  (001
+(визначити si:defining-elementary-charge
+  (як-є
     (scientific-constant/1 si:elementary-charge
       (quantity/1
         801088317/5000000000000000000000000000
@@ -64,8 +64,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-boltzmann-constant
-  (001
+(визначити si:defining-boltzmann-constant
+  (як-є
     (scientific-constant/1 si:boltzmann-constant
       (quantity/1
         1380649/100000000000000000000000000000
@@ -77,8 +77,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-avogadro-constant
-  (001
+(визначити si:defining-avogadro-constant
+  (як-є
     (scientific-constant/1 si:avogadro-constant
       (quantity/1 602214076000000000000000
         (unit/1
@@ -86,8 +86,8 @@
       exact-by-definition physical-defining si
       (science-source/1 bipm-si-brochure-9 2019))))
 
-(0011 si:defining-luminous-efficacy
-  (001
+(визначити si:defining-luminous-efficacy
+  (як-є
     (scientific-constant/1 si:luminous-efficacy
       (quantity/1 683
         (unit/1
@@ -102,32 +102,32 @@
 ; Only the projection is refactored; BIPM SI records remain unchanged.
 ; A scientific-constant/1 record stores its quantity in the third field; a
 ; quantity/1 stores its numeric value in the second field.
-(0011 si:constant-value
-  (0010 (constant)
-    (1001 (10011 constant))))
+(визначити si:constant-value
+  (функція (constant)
+    (друге (третє constant))))
 
 ; Backward-compatible arithmetic surface, derived from the records above.
-(0011 si:cesium-frequency (si:constant-value si:defining-cesium-frequency))
-(0011 si:speed-of-light (si:constant-value si:defining-speed-of-light))
-(0011 si:planck-constant (si:constant-value si:defining-planck-constant))
-(0011 si:elementary-charge (si:constant-value si:defining-elementary-charge))
-(0011 si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))
-(0011 si:avogadro-constant (si:constant-value si:defining-avogadro-constant))
-(0011 si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))
+(визначити si:cesium-frequency (si:constant-value si:defining-cesium-frequency))
+(визначити si:speed-of-light (si:constant-value si:defining-speed-of-light))
+(визначити si:planck-constant (si:constant-value si:defining-planck-constant))
+(визначити si:elementary-charge (si:constant-value si:defining-elementary-charge))
+(визначити si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))
+(визначити si:avogadro-constant (si:constant-value si:defining-avogadro-constant))
+(визначити si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))
 
 ; Transitional compatibility aliases. These are not canonical names and may
 ; be removed once repository callers have migrated to the descriptive surface.
-(0011 delta-nu-cs si:cesium-frequency)
-(0011 c si:speed-of-light)
-(0011 h si:planck-constant)
-(0011 e si:elementary-charge)
-(0011 k si:boltzmann-constant)
-(0011 n-a si:avogadro-constant)
-(0011 k-cd si:luminous-efficacy)
-(0011 si:delta-nu-cs si:cesium-frequency)
-(0011 si:c si:speed-of-light)
-(0011 si:h si:planck-constant)
-(0011 si:e si:elementary-charge)
-(0011 si:k si:boltzmann-constant)
-(0011 si:n-a si:avogadro-constant)
-(0011 si:k-cd si:luminous-efficacy)
+(визначити delta-nu-cs si:cesium-frequency)
+(визначити c si:speed-of-light)
+(визначити h si:planck-constant)
+(визначити e si:elementary-charge)
+(визначити k si:boltzmann-constant)
+(визначити n-a si:avogadro-constant)
+(визначити k-cd si:luminous-efficacy)
+(визначити si:delta-nu-cs si:cesium-frequency)
+(визначити si:c si:speed-of-light)
+(визначити si:h si:planck-constant)
+(визначити si:e si:elementary-charge)
+(визначити si:k si:boltzmann-constant)
+(визначити si:n-a si:avogadro-constant)
+(визначити si:k-cd si:luminous-efficacy)
