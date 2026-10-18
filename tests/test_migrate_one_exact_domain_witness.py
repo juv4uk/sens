@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""2046 typed coordinates / 256 historical cells / independent T5 provenance."""
+"""2046 typed coordinates / 256 historical cells / physical T5 is not semantic admission."""
 import copy
 import hashlib
 import importlib.util
@@ -34,8 +34,7 @@ class ExactDomainWitness(unittest.TestCase):
                 if width < 10:
                     admissible.append(bits)
                 else:
-                    with self.assertRaises(SensT5Error):
-                        encode_words([bits])
+                    self.assertEqual(decode_bytes(encode_words([bits])), [bits])
         self.assertEqual(len(seen), 2046)
         self.assertEqual(len(admissible), 1022)
         owner = json.loads((ROOT / "knowledge/d10-owner-whole-domain-ratification-20261012.json").read_text(encoding="utf-8"))
