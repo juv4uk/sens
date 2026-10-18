@@ -276,34 +276,32 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
     @staticmethod
     def git_blob_sha(data: bytes) -> str:
         return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
         ).hexdigest()
 
-    @staticmethod
-    def assert_ratified(table_path: Path, bits: str,
+    def assert_ratified(self, table_path: Path, bits: str,
                         surface: str, english: str, lisp_name: str):
         table = table_path.read_text(encoding="utf-8")
         rows = [
             line for line in table.splitlines()
-            if re.match(rf"^\\s*\\({re.escape(bits)}\\s", line)
+            if re.match(rf"^\s*\({re.escape(bits)}\s", line)
         ]
-        unittest.TestCase().assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
-        unittest.TestCase().assertIn(f"(укр {surface})", rows[0])
-        unittest.TestCase().assertIn(f"(en {english})", rows[0])
-        unittest.TestCase().assertIn(f"(LISP {lisp_name})", rows[0])
+        self.assertEqual(len(rows), 1, f"{bits}: expected one exact-width row")
+        self.assertIn(f"(укр {surface})", rows[0])
+        self.assertIn(f"(en {english})", rows[0])
+        self.assertIn(f"(LISP {lisp_name})", rows[0])
 
     @staticmethod
     def restore_heads(source: str) -> str:
-        # Exact inverse of the migrated executable heads. Applying it only to
-        # list-head position leaves comments, strings, rational values and SI
-        # records byte-identical.
+        # Exact inverse for executable list heads only. Comments, strings,
+        # numeric values and quoted SI records otherwise remain unchanged.
         inverse = {
             "визначити": "0011",
             "помножити": "10110",
             "поділити": "11110110",
         }
         pattern = re.compile(
-            r"[(](" + "|".join(re.escape(name) for name in inverse) + r")(?=\\s)"
+            r"[(](" + "|".join(re.escape(name) for name in inverse) + r")(?=\s)"
         )
         return pattern.sub(lambda match: "(" + inverse[match.group(1)], source)
 
@@ -313,11 +311,13 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
         self.assert_ratified(self.D8, "11110110", "поділити", "divide", "DIVIDE")
 
         source = self.SOURCE.read_text(encoding="utf-8")
-        self.assertEqual(len(re.findall(r"\\(визначити(?=\\s)", source)), 7)
-        self.assertEqual(len(re.findall(r"\\(помножити(?=\\s)", source)), 7)
-        self.assertEqual(len(re.findall(r"\\(поділити(?=\\s)", source)), 4)
-        self.assertIsNone(re.search(r"\\((?:0011|10110|11110110)(?=\\s)", source),
-                         "ratified call heads must use their exact Ukrainian projection")
+        self.assertEqual(len(re.findall(r"\(визначити(?=\s)", source)), 7)
+        self.assertEqual(len(re.findall(r"\(помножити(?=\s)", source)), 7)
+        self.assertEqual(len(re.findall(r"\(поділити(?=\s)", source)), 4)
+        self.assertIsNone(
+            re.search(r"\((?:0011|10110|11110110)(?=\s)", source),
+            "ratified call heads must use their exact Ukrainian projection",
+        )
 
         for name in (
             "si:faraday-constant", "si:molar-gas-constant",
@@ -326,11 +326,10 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
             "si:molar-planck-constant",
         ):
             self.assertIn(f"(визначити {name}", source)
-        # Every exact SI rational and unit literal is retained from the source.
-        baseline = self.restore_heads(source)
+        restored = self.restore_heads(source)
         self.assertEqual(
-            re.findall(r"(?<![\\w])\\d+\\s*/\\s*\\d+", baseline),
-            re.findall(r"(?<![\\w])\\d+\\s*/\\s*\\d+", source),
+            re.findall(r"(?<![\w])\d+\s*/\s*\d+", restored),
+            re.findall(r"(?<![\w])\d+\s*/\s*\d+", source),
             "SI exact rational values must not change during surface migration",
         )
 
@@ -341,8 +340,11 @@ class SiDerivedUkrProjectionTests(unittest.TestCase):
 
     def test_wrong_ukr_peer_fails_the_inverse_witness(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        mutant = source.replace("(помножити si:avogadro-constant",
-                                "(множити-нечинне si:avogadro-constant", 1)
+        mutant = source.replace(
+            "(помножити si:avogadro-constant",
+            "(множити-нечинне si:avogadro-constant",
+            1,
+        )
         self.assertNotEqual(mutant, source)
         restored = self.restore_heads(mutant).encode("utf-8")
         self.assertNotEqual(
