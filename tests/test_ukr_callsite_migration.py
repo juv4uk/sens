@@ -406,7 +406,13 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
 
     def test_first_class_exact_inverse_original_git_blob(self):
         """Перевірка точних D1/D3/D4 координат і збереження ВСІХ старих байтів."""
-        src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
+        current_src = (Path(__file__).resolve().parents[1] / "lib/meta-eval-first-class.lisp").read_text(encoding="utf-8")
+        # Спершу строго відновлюємо 31 пізнішу поточну D3–D8 укр-проєкцію.
+        # І лише тоді починає діяти старий незмінний D1/D3/D4 receipt нижче.
+        # Таким чином pinned Git blob ніколи не послаблюється.
+        from tests.test_meta_eval_fc_ukr_remaining import reconstruct as undo_latest_projection
+        self.assertIn("(додати (перше args) (друге args))", current_src)
+        src = undo_latest_projection(current_src)
         originals = (
         (634, "0011"),
         (712, "0011"),
