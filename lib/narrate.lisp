@@ -137,8 +137,8 @@
 (0011 narrate-outcome
   (0010 (outcome)
     (110
-      ((010 outcome) (пояснити-неприпустиму-структуру-результату outcome))
-      ((0100 (результат-є-правильним-списком? outcome))
+      ((атом? outcome) (пояснити-неприпустиму-структуру-результату outcome))
+      ((хибне? (результат-є-правильним-списком? outcome))
        (пояснити-неприпустиму-структуру-результату outcome))
       ((0100 (010 (100 outcome)))
        (1110 (001 invalid) (001 outcome-tag) (100 outcome)))
@@ -147,7 +147,7 @@
       ((101 (100 outcome) (001 proved))
        (110
          ((narrate-list-exact-three? outcome) (пояснити-результат-із-доказом outcome))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 unknown))
        (110
          ((narrate-list-exact-two? outcome)
@@ -156,7 +156,7 @@
             (001 because)
             (001 no-proof-found-for)
             (1001 outcome)))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 partial))
        (110
          ((narrate-list-exact-three? outcome)
@@ -166,7 +166,7 @@
             (1001 outcome)
             (001 bound)
             (10011 outcome)))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 blocked))
        (110
          ((narrate-list-exact-two? outcome)
@@ -174,7 +174,7 @@
             (001 blocked)
             (001 because)
             (1001 outcome)))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 disputed))
        (110
          ((narrate-list-exact-two? outcome)
@@ -183,7 +183,7 @@
             (001 because)
             (001 both-sides-have-evidence)
             (1001 outcome)))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       ((101 (100 outcome) (001 invalid))
        (110
          ((narrate-list-exact-three? outcome)
@@ -193,7 +193,7 @@
             (1001 outcome)
             (001 payload)
             (10011 outcome)))
-         (1 (пояснити-неприпустиму-структуру-результату outcome))))
+         (так (пояснити-неприпустиму-структуру-результату outcome))))
       (1
        (1110 (001 invalid) (001 outcome-tag) (100 outcome))))))
 
