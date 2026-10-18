@@ -318,7 +318,7 @@
           ((функція (proofs)
              (за-умовою
                ((порожній? proofs)
-                (advice-batch-conflict clauses (решта remaining) all-rules))
+                (виявити-суперечність-у-групі-порад clauses (решта remaining) all-rules))
                (так
                 (список (перше remaining) opposite (перше proofs)))))
            (міркувати opposite all-rules)))

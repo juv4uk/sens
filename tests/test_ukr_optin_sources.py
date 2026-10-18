@@ -332,5 +332,128 @@ class OptInUkrMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "закривальна"):
             read_forms("())")
 
+
+
+class WorldKnowledgeUkrProjectionBatchTests(unittest.TestCase):
+    """Повна укр-проєкція восьми точних D9/D10 викличних голів."""
+
+    ROOT = Path(__file__).resolve().parents[1]
+    SOURCES = {
+        "lib/world.lisp": {
+            "blob": "4bf077ae35d7d61b96df9244b3334946180ecb94",
+            "edits": [
+                ("opposite-knowledge-head", "отримати-протилежну-голову-твердження-знання", 1),
+                ("reason-in-world", "міркувати-у-світ", 1),
+                ("advice-decision-in-world", "порада-рішення-у-світ", 1),
+                ("advice-batch-conflict", "виявити-суперечність-у-групі-порад", 1),
+                ("advice-all-decision-in-world", "порада-всі-рішення-у-світ", 1),
+                ("world-journal-prefix", "отримати-префікс-журналу-світу", 2),
+            ],
+        },
+        "lib/knowledge.lisp": {
+            "blob": "9fbd3e5acabfede04dfd3ccff3a1e10149684c41",
+            "edits": [("advice-batch-conflict", "виявити-суперечність-у-групі-порад", 1)],
+        },
+    }
+    DOMAIN_PEERS = (
+        (9, "111101001", "reason-in-world", "міркувати-у-світ"),
+        (9, "111000110", "advice-decision-in-world", "порада-рішення-у-світ"),
+        (9, "111011011", "advice-all-decision-in-world", "порада-всі-рішення-у-світ"),
+        (10, "0010000100", "opposite-knowledge-head", "отримати-протилежну-голову-твердження-знання"),
+        (10, "0010001011", "advice-batch-conflict", "виявити-суперечність-у-групі-порад"),
+        (10, "0010100100", "world-journal-prefix", "отримати-префікс-журналу-світу"),
+    )
+
+    @staticmethod
+    def _rewrite_call_heads(source, edits):
+        spans, counts = [], [0] * len(edits)
+        i = 0
+        in_string = escaped = in_comment = False
+        while i < len(source):
+            char = source[i]
+            if in_comment:
+                if char == "\n":
+                    in_comment = False
+                i += 1
+                continue
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                i += 1
+                continue
+            if char == ";":
+                in_comment = True
+                i += 1
+                continue
+            if char == '"':
+                in_string = True
+                i += 1
+                continue
+            if char == "(":
+                start = i + 1
+                while start < len(source) and source[start].isspace():
+                    start += 1
+                found = False
+                for index, (old, new, expected) in enumerate(edits):
+                    end = start + len(old)
+                    if source.startswith(old, start) and end < len(source) and source[end] in ")\t\r\n ":
+                        spans.append((start, end, new))
+                        counts[index] += 1
+                        i = end
+                        found = True
+                        break
+                if not found:
+                    i += 1
+                continue
+            i += 1
+        for index, (_, _, expected) in enumerate(edits):
+            if counts[index] != expected:
+                raise AssertionError(
+                    f"call-head count mismatch for {edits[index][0]}: expected {expected}, got {counts[index]}"
+                )
+        for start, end, replacement in reversed(spans):
+            source = source[:start] + replacement + source[end:]
+        return source
+
+    @staticmethod
+    def _git_blob_sha(source):
+        data = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+
+    def test_exact_d9_d10_ukr_peers_and_inverse_restores_original_blobs(self):
+        for domain, bits, english, ukrainian in self.DOMAIN_PEERS:
+            with self.subTest(domain=domain, bits=bits, english=english):
+                self.assertEqual(len(bits), domain)
+                table = (self.ROOT / f"lib/domains/d{domain}.lisp").read_text(encoding="utf-8")
+                rows = [line for line in table.splitlines()
+                        if re.match(r"^\s*\(" + re.escape(bits) + r"\s", line)]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(en {english})", rows[0])
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+
+        for path, evidence in self.SOURCES.items():
+            with self.subTest(path=path):
+                source = (self.ROOT / path).read_text(encoding="utf-8")
+                inverse = [(ukrainian, english, count)
+                           for english, ukrainian, count in evidence["edits"]]
+                restored = self._rewrite_call_heads(source, inverse)
+                self.assertEqual(self._git_blob_sha(restored), evidence["blob"])
+
+    def test_negative_wrong_domain_peer_cannot_restore_original_blob(self):
+        source = (self.ROOT / "lib/world.lisp").read_text(encoding="utf-8")
+        wrong = source.replace(
+            "(міркувати-у-світ world module-name opposite)",
+            "(порада-рішення-у-світ world module-name opposite)", 1)
+        self.assertNotEqual(wrong, source)
+        inverse = [(ukrainian, english, count)
+                   for english, ukrainian, count in self.SOURCES["lib/world.lisp"]["edits"]]
+        with self.assertRaisesRegex(AssertionError, "call-head count mismatch"):
+            self._rewrite_call_heads(wrong, inverse)
+
+
 if __name__ == "__main__":
     unittest.main()

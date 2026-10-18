@@ -173,10 +173,10 @@
       ((тотожне? (клауза-бази-знань-коректна? clause) (як-є ()))
        (список (як-є rejected) (список (як-є reason) (як-є invalid-clause)) (список (як-є input) clause)))
       (так
-       (нехай-похідне ((opposite (opposite-knowledge-head (перше clause))))
+       (нехай-похідне ((opposite (отримати-протилежну-голову-твердження-знання (перше clause))))
          (нехай-похідне ((proofs (за-умовою
                          ((світ-модуль-відомий? world module-name)
-                          (reason-in-world world module-name opposite))
+                          (міркувати-у-світ world module-name opposite))
                          )))
            (за-умовою
              
@@ -191,7 +191,7 @@
 
 (визначити advise-world
   (функція (world module-name clause)
-    (нехай-похідне ((decision (advice-decision-in-world world module-name clause)))
+    (нехай-похідне ((decision (порада-рішення-у-світ world module-name clause)))
       (за-умовою
         ((тотожне? (перше decision) (як-є accepted))
          (список decision (світ-повідомити world module-name clause)))
@@ -220,7 +220,7 @@
                          ((світ-модуль-відомий? world module-name)
                           (світ-клаузи world module-name))
                          )))
-         (нехай-похідне ((conflict (advice-batch-conflict
+         (нехай-похідне ((conflict (виявити-суперечність-у-групі-порад
                            clauses clauses (приєднати clauses existing))))
            (за-умовою
              
@@ -312,7 +312,7 @@
 
 (визначити advise-all-world
   (функція (world module-name clauses)
-    (нехай-похідне ((decision (advice-all-decision-in-world world module-name clauses)))
+    (нехай-похідне ((decision (порада-всі-рішення-у-світ world module-name clauses)))
       (за-умовою
         ((тотожне? (перше decision) (як-є accepted))
          (список decision (світ-повідомити-всі world module-name clauses)))
@@ -522,7 +522,7 @@
       
       ((атом? journal)  (як-є World-not-ancestor))
       (так
-       (нехай-похідне ((rest (world-journal-prefix (решта journal) old-journal)))
+       (нехай-похідне ((rest (отримати-префікс-журналу-світу (решта journal) old-journal)))
          (за-умовою
            ((цей-світ-не-є-предком-іншого? rest) rest)
            (так (сполучити (перше journal) rest))))))))
@@ -546,7 +546,7 @@
            ((цей-світ-не-є-предком-іншого? earlier) earlier)
            (так
             (нехай-похідне ((transition
-                    (world-journal-prefix
+                    (отримати-префікс-журналу-світу
                       (світ-журнал to)
                       (світ-журнал (світ-батько to)))))
               (за-умовою
