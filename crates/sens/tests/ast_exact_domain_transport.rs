@@ -196,13 +196,28 @@ fn точний_ast_wire_fasl_d24_d5_sens_d1_з_раціональним_нас�
     // Результат точного ділення / та від'ємного віднімання виводиться
     // самим SENS. Лише ПІСЛЯ цього наявний окремий механізм кадрування
     // пакує його біти. Це не граматика фізичного T5 .sens.
-    for (id, program) in [
-        ("ratio-result", quotient("11")),
-        ("negative-result", d5(0b01011, vec![d24("1"), d24("11")])),
-        ("sum-ratio-result", sum("110")),
+    for (id, program, expected_fraction) in [
+        ("ratio-result", quotient("11"), true),
+        ("signed-integer-result", d5(0b01011, vec![d24("1"), d24("11")]), false),
+        ("sum-ratio-result", sum("110"), true),
     ] {
         let result = run(id, program).expect("допущена точна математика");
-        assert!(matches!(&result, Value::NumericComposition(_)), "id={id}");
+        if expected_fraction {
+            assert!(matches!(&result, Value::NumericComposition(_)),
+                "test_id={id} layer=eval expected=canonical-RATIO actual={result:?}");
+        } else {
+            // Ратифікація 18.10.2026: цілі D24+ є знаковими словами
+            // у доповняльному коді. 1 - 3 = -2, а не історична NEG-композиція.
+            let Value::BinaryNumber(ref signed) = result else {
+                panic!("test_id={id} layer=eval expected=signed-D24-integer actual={result:?}");
+            };
+            assert_eq!(signed.numeric_domain_width(), Some(24), "id={id} domain");
+            let mut expected_word = vec![1u8; 24];
+            expected_word[23] = 0;
+            assert_eq!(signed.exact_numeric_domain_bits(), Some(expected_word),
+                "test_id={id} layer=eval expected=exact-D24-minus-two");
+            assert_eq!(signed.to_decimal_string(), "-2", "id={id} human projection");
+        }
         let packed = encode_packed_numeric_value(&result).expect("наявний кадр D24+");
         let recovered = decode_packed_numeric_value(&packed)
             .expect("канонічне відновлення NEG/RATIO");
