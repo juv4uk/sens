@@ -42,6 +42,17 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertIn("refusing overwrite", result.stderr)
         self.assertEqual(EXISTING.read_bytes(), before)
 
+    def test_existing_view_does_not_leave_orphan_physical_carrier(self):
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "two-forms.sens"
+            view = output.with_suffix("")
+            view.write_bytes(b"preexisting view\\n")
+            result = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("refusing overwrite", result.stderr)
+            self.assertFalse(output.exists())
+            self.assertEqual(view.read_bytes(), b"preexisting view\\n")
+
     def test_real_binary_staging_agrees_with_current_canonical_three_pass(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
@@ -54,6 +65,11 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(report["source"], str(PROVEN.relative_to(ROOT)))
             self.assertEqual(report["bytes"], 14)
             self.assertEqual(output.read_bytes(), EXISTING.read_bytes())
+            view = output.with_suffix("")
+            expected_view = (" ".join(report["words"]) + "\n").encode("ascii")
+            self.assertEqual(view.read_bytes(), expected_view)
+            self.assertEqual(report["view"], str(view))
+            self.assertEqual(report["view_sha256"], hashlib.sha256(expected_view).hexdigest())
             self.assertEqual(report["physical_sha256"], hashlib.sha256(output.read_bytes()).hexdigest())
             second = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
             self.assertNotEqual(second.returncode, 0)
