@@ -13,20 +13,20 @@
 (визначити захист-рішення?
   (функція (decision)
     (за-умовою
-      ((тотожне? decision (як-є allow)) #d1:1)
-      ((тотожне? decision (як-є warn)) #d1:1)
-      ((тотожне? decision (як-є reject)) #d1:1)
-      ((тотожне? decision (як-є unknown)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? decision (як-є allow)) так)
+      ((тотожне? decision (як-є warn)) так)
+      ((тотожне? decision (як-є reject)) так)
+      ((тотожне? decision (як-є unknown)) так)
+      (так ні))))
 
 (визначити захист-доказ-стан?
   (функція (status)
     (за-умовою
-      ((тотожне? status (як-є confirmed)) #d1:1)
-      ((тотожне? status (як-є partial)) #d1:1)
-      ((тотожне? status (як-є unresolved)) #d1:1)
-      ((тотожне? status (як-є broken)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? status (як-є confirmed)) так)
+      ((тотожне? status (як-є partial)) так)
+      ((тотожне? status (як-є unresolved)) так)
+      ((тотожне? status (як-є broken)) так)
+      (так ні))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -55,7 +55,7 @@
        (список (як-є invalid-guard-decision) decision))
       ((хибне? (захист-доказ-стан? evidence-status))
        (список (як-є invalid-evidence-status) evidence-status))
-      (#d1:1
+      (так
        (список
          (як-є guard-finding)
          (список (як-є schema) (як-є guard/1))
@@ -72,7 +72,7 @@
            (як-є unknown-routes)
            (за-умовою
              ((тотожне? decision (як-є unknown)) (захист-невідоме-маршрути))
-             (#d1:1 (як-є ())))))))))
+             (так (як-є ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -103,11 +103,11 @@
       ((атом? ліве)
        (за-умовою
          ((атом? праве) (тотожне? ліве праве))
-         (#d1:1 #d1:0)))
-      ((атом? праве) #d1:0)
+         (так ні)))
+      ((атом? праве) ні)
       ((сторожа--рівні? (перше ліве) (перше праве))
        (сторожа--рівні? (решта ліве) (решта праве)))
-      (#d1:1 #d1:0))))
+      (так ні))))
 
 (визначити guard-compare
   (функція (subject expected observed evidence)
@@ -116,7 +116,7 @@
        (створити-захист-висновок
          (як-є allow) (як-є confirmed) subject observed expected
          (як-є ()) (як-є invariant-preserved) (як-є no-action) evidence))
-      (#d1:1
+      (так
        (створити-захист-висновок
          (як-є warn) (як-є confirmed) subject observed expected
          (список (як-є expected) expected (як-є observed) observed)
@@ -157,7 +157,7 @@
          (як-є synchronization-result-has-no-drift-record)
          (як-є record-drift-before-unfreezing-commits)
          evidence))
-      (#d1:1
+      (так
        (створити-захист-висновок
          (як-є allow) (як-є confirmed) (як-є ecosystem-sync)
          (список commit-state sync-state drift-state)
@@ -176,7 +176,7 @@
     ((функція (entry)
        (за-умовою
          ((атом? entry) (як-є ()))
-         (#d1:1 (друге entry))))
+         (так (друге entry))))
      (знайти-за-ключем field (решта reference)))))
 
 ; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
@@ -186,19 +186,19 @@
   (функція (language role)
     (за-умовою
       ((тотожне? language (як-є sens))
-       (за-умовою ((тотожне? role (як-є semantics)) #d1:1) (#d1:1 #d1:0)))
+       (за-умовою ((тотожне? role (як-є semantics)) так) (так ні)))
       ((тотожне? language (як-є lisp))
-       (за-умовою ((тотожне? role (як-є semantics)) #d1:1) (#d1:1 #d1:0)))
+       (за-умовою ((тотожне? role (як-є semantics)) так) (так ні)))
       ((тотожне? language (як-є zig))
-       (за-умовою ((тотожне? role (як-є domain-ladder)) #d1:1) (#d1:1 #d1:0)))
+       (за-умовою ((тотожне? role (як-є domain-ladder)) так) (так ні)))
       ((тотожне? language (як-є rust))
-       (за-умовою ((тотожне? role (як-є domain-consumer)) #d1:1) (#d1:1 #d1:0)))
-      (#d1:1 #d1:0))))
+       (за-умовою ((тотожне? role (як-є domain-consumer)) так) (так ні)))
+      (так ні))))
 
 (визначити guard-language-decision
   (функція (language role)
     (за-умовою ((guard-language-allowed? language role) (як-є allow))
-         (#d1:1 (як-є reject)))))
+         (так (як-є reject)))))
 
 ; D9:000110011 GUARD-SYNC-WINDOW — українська поверхня SENS.
 ; Чинний закон guard-sync-window залишається джерелом семантики;

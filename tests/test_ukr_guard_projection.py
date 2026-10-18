@@ -104,6 +104,7 @@ class GuardProjectionTests(unittest.TestCase):
         native_inverse = {name: bits for table in NATIVE.values()
                           for bits, name in table.items()}
         symbol_inverse = {ukr: en for en, ukr in D9.values()}
+        symbol_inverse.update({"так": "#d1:1", "ні": "#d1:0"})
         restored, counts = translate(migrated, native_inverse, symbol_inverse)
         self.assertTrue(all(counts.get(name, 0) > 0
                             for name in native_inverse))
@@ -133,12 +134,16 @@ class GuardProjectionTests(unittest.TestCase):
                 self.assertEqual(
                     self.text.count(f"(визначити {english} {ukr})"), 1)
 
-    def test_quoted_guard_advice_and_d1_bits_not_changed(self):
+    def test_quoted_guard_advice_and_exact_d1_surfaces(self):
         self.assertIn("((route ask-agent)", self.text)
         self.assertIn("(when ecosystem-local-or-component-owned)", self.text)
         self.assertIn("(verify citations-and-access-date)", self.text)
-        self.assertGreater(self.text.count("#d1:1"), 8)
-        self.assertGreater(self.text.count("#d1:0"), 3)
+        self.assertNotIn("#d1:", self.text)
+        self.assertGreater(len(re.findall(r"\bтак\b", self.text)), 20)
+        self.assertGreater(len(re.findall(r"\bні\b", self.text)), 5)
+        d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
+        self.assertIn("(0 (ук ні) (укр ні)", d1)
+        self.assertIn("(1 (ук так) (укр так)", d1)
 
     def test_no_authority_for_unratified_helpers_was_invented(self):
         for name in ["guard-unknown", "guard-compare", "guard-reference-field",
