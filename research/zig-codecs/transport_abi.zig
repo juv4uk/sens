@@ -96,16 +96,15 @@ pub export fn sens_zig_t5m_decode_be3(
     return @intCast(need);
 }
 
-/// Exact-width T5M ABI records: u32 big-endian width followed by ASCII 0/1
-/// payload bytes. This is only an in-process ABI representation; no domains
-/// are widened, narrowed, or assigned meaning here.
+/// Точні записи T5M: u32 big-endian ширини, далі width байтів зі значенням 0/1.
+/// Це фізичний ABI; доменна identity та викличність тут не визначаються.
 pub export fn sens_zig_t5m_encode_words(
     src: [*]const u8,
     byte_len: usize,
     dst: [*]u8,
     capacity: usize,
 ) isize {
-    if (byte_len == 0 or byte_len > t5m.MAX_PHYSICAL_BYTES * 6) return -1;
+    if (byte_len < 5 or byte_len > t5m.MAX_PHYSICAL_BYTES * 5) return -1;
     const source_addr = @intFromPtr(src);
     const dest_addr = @intFromPtr(dst);
     if (capacity > 0 and
@@ -113,34 +112,41 @@ pub export fn sens_zig_t5m_encode_words(
             (dest_addr < source_addr and source_addr - dest_addr < capacity))) return -1;
 
     var count: usize = 0;
-    var bit_count: usize = 0;
+    var total_bits: usize = 0;
     var offset: usize = 0;
     while (offset < byte_len) {
         if (byte_len - offset < 4) return -1;
-        const width = (@as(usize, src[offset]) << 24) |
-            (@as(usize, src[offset + 1]) << 16) |
-            (@as(usize, src[offset + 2]) << 8) |
-            src[offset + 3];
+        const width_u32 = (@as(u32, src[offset]) << 24) |
+            (@as(u32, src[offset + 1]) << 16) |
+            (@as(u32, src[offset + 2]) << 8) |
+            @as(u32, src[offset + 3]);
+        if (width_u32 == 0) return -1;
+        const width: usize = @intCast(width_u32);
         offset += 4;
-        if (width == 0 or width > byte_len - offset) return -1;
-        for (src[offset .. offset + width]) |bit| if (bit != '0' and bit != '1') return -1;
-        bit_count = std.math.add(usize, bit_count, width) catch return -1;
-        count += 1;
+        if (width > byte_len - offset) return -1;
+        for (src[offset .. offset + width]) |bit| if (bit > 1) return -1;
+        total_bits = std.math.add(usize, total_bits, width) catch return -1;
+        count = std.math.add(usize, count, 1) catch return -1;
         offset += width;
     }
+    if (count == 0 or total_bits > t5m.MAX_PHYSICAL_BYTES * 5) return -1;
     const words = std.heap.page_allocator.alloc(t5m.Word, count) catch return -1;
     defer std.heap.page_allocator.free(words);
-    const storage = std.heap.page_allocator.alloc(u8, bit_count) catch return -1;
+    const storage = std.heap.page_allocator.alloc(u8, total_bits) catch return -1;
     defer std.heap.page_allocator.free(storage);
     offset = 0;
     var cursor: usize = 0;
     for (0..count) |i| {
-        const width = (@as(usize, src[offset]) << 24) |
-            (@as(usize, src[offset + 1]) << 16) |
-            (@as(usize, src[offset + 2]) << 8) |
-            src[offset + 3];
+        const width_u32 = (@as(u32, src[offset]) << 24) |
+            (@as(u32, src[offset + 1]) << 16) |
+            (@as(u32, src[offset + 2]) << 8) |
+            @as(u32, src[offset + 3]);
+        const width: usize = @intCast(width_u32);
         offset += 4;
-        @memcpy(storage[cursor .. cursor + width], src[offset .. offset + width]);
+        const bits = storage[cursor .. cursor + width];
+        for (src[offset .. offset + width], 0..) |bit, bit_index| {
+            bits[bit_index] = if (bit == 0) '0' else '1';
+        }
         words[i] = .{ .width = width, .bits = storage[cursor .. cursor + width] };
         cursor += width;
         offset += width;
@@ -168,7 +174,9 @@ pub export fn sens_zig_t5m_decode_words(
     defer decoded.deinit(std.heap.page_allocator);
     var need: usize = 0;
     for (decoded.words) |word| {
-        need = std.math.add(usize, need, 4 + word.width) catch return -1;
+        const record_len = std.math.add(usize, 4, word.width) catch return -1;
+        need = std.math.add(usize, need, record_len) catch return -1;
+        if (word.width > std.math.maxInt(u32)) return -1;
     }
     if (need > capacity) return -2;
     var offset: usize = 0;
@@ -179,8 +187,10 @@ pub export fn sens_zig_t5m_decode_words(
         dst[offset + 2] = @truncate(width >> 8);
         dst[offset + 3] = @truncate(width);
         offset += 4;
-        @memcpy(dst[offset .. offset + word.width], word.bits);
-        offset += word.width;
+        for (word.bits) |bit| {
+            dst[offset] = bit - '0';
+            offset += 1;
+        }
     }
     return @intCast(need);
 }
@@ -321,7 +331,7 @@ test "ABI v2 D10 coordinates stay separate from ordinary D9 transport" {
     try std.testing.expectEqual(@as(c_int, -1), sens_zig_t5_validate_coordinates(&.{}, 0));
 }
 
-test "T5M exact-word ABI preserves D5 D8 D10 and D24 identities" {
+test "T5M exact-word ABI preserves D5 D8 D10 and D24 widths" {
     var input = std.ArrayList(u8).empty;
     defer input.deinit(std.testing.allocator);
     for ([_][]const u8{
@@ -331,7 +341,7 @@ test "T5M exact-word ABI preserves D5 D8 D10 and D24 identities" {
         var width_bytes: [4]u8 = undefined;
         std.mem.writeInt(u32, &width_bytes, width, .big);
         try input.appendSlice(std.testing.allocator, &width_bytes);
-        try input.appendSlice(std.testing.allocator, bits);
+        for (bits) |bit| try input.append(std.testing.allocator, bit - '0');
     }
     var physical: [24]u8 = undefined;
     const physical_len = sens_zig_t5m_encode_words(input.items.ptr, input.items.len, &physical, physical.len);
@@ -344,14 +354,41 @@ test "T5M exact-word ABI preserves D5 D8 D10 and D24 identities" {
 }
 
 test "T5M exact-word ABI fails closed for malformed records and short capacity" {
-    const malformed = [_]u8{ 0, 0, 0, 5, '0', '0' };
+    const malformed = [_]u8{ 0, 0, 0, 5, 0, 0 };
+    const invalid_bit = [_]u8{ 0, 0, 0, 5, 0, 2, 0, 1, 0 };
     var output = [_]u8{0xaa} ** 8;
     try std.testing.expectEqual(@as(isize, -1), sens_zig_t5m_encode_words(&malformed, malformed.len, &output, output.len));
     try std.testing.expectEqualSlices(u8, &([_]u8{0xaa} ** 8), &output);
+    try std.testing.expectEqual(@as(isize, -1), sens_zig_t5m_encode_words(&invalid_bit, invalid_bit.len, &output, output.len));
+    try std.testing.expectEqualSlices(u8, &([_]u8{0xaa} ** 8), &output);
 
-    const valid = [_]u8{ 0, 0, 0, 1, '1' };
+    const valid = [_]u8{ 0, 0, 0, 1, 1 };
     try std.testing.expectEqual(@as(isize, -2), sens_zig_t5m_encode_words(&valid, valid.len, &output, 1));
     try std.testing.expectEqualSlices(u8, &([_]u8{0xaa} ** 8), &output);
+}
+
+test "T5M exact-word ABI roundtrips variable widths as numeric bits" {
+    const widths = [_]usize{ 5, 8, 10, 11, 12, 14, 24, 48, 96, 192 };
+    var records: [460]u8 = undefined;
+    var cursor: usize = 0;
+    for (widths, 0..) |width, index| {
+        const wide: u32 = @intCast(width);
+        records[cursor] = @truncate(wide >> 24);
+        records[cursor + 1] = @truncate(wide >> 16);
+        records[cursor + 2] = @truncate(wide >> 8);
+        records[cursor + 3] = @truncate(wide);
+        cursor += 4;
+        for (0..width) |bit| records[cursor + bit] = if ((bit + index) % 3 == 0) 1 else 0;
+        cursor += width;
+    }
+
+    var physical: [128]u8 = undefined;
+    const written = sens_zig_t5m_encode_words(&records, records.len, &physical, physical.len);
+    try std.testing.expect(written > 0);
+    var restored: [records.len]u8 = undefined;
+    const decoded = sens_zig_t5m_decode_words(&physical, @intCast(written), &restored, restored.len);
+    try std.testing.expectEqual(@as(isize, records.len), decoded);
+    try std.testing.expectEqualSlices(u8, &records, &restored);
 }
 
 test "E1 ABI v2 Zig exact RAW witness, rejected alias, bad widths and capacity" {

@@ -20,6 +20,11 @@ class EncodedSourceLiteralTests(unittest.TestCase):
     def test_decimal_human_projection_values_are_allowed(self):
         self.assertEqual(CHECK.find_forbidden_literals("(сума 235 2.1564)\n"), [])
 
+    def test_d24_human_projection_fixture_contains_no_encoded_domain_words(self):
+        fixture = ROOT / "tests" / "semantic" / "ukr-d24-existing-functions.lisp"
+        source = fixture.read_text(encoding="utf-8")
+        self.assertEqual(CHECK.find_forbidden_literals(source, path=fixture), [])
+
     def test_lisp_projection_names_are_allowed(self):
         source = '(cond ((string-empty? "") (not? (string-empty? "а"))) (T NIL))\n'
         self.assertEqual(CHECK.find_forbidden_literals(source), [])

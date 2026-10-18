@@ -324,12 +324,12 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertTrue(out.startswith(f"10 {bits} "),source)
             self.assertEqual(resolver.counts["pass2-my-lisp"],1,source)
 
-    def test_d1_head_may_pass_but_d2_head_is_reserved_for_structure(self):
-        out1,resolver1=self.migrate("(1 x)\n")
-        self.assertEqual(out1,"10 1 00 x 01\n")
-        self.assertEqual(resolver1.counts["passthrough-head"],1)
-        with self.assertRaisesRegex(mod.MigrationError,"D2 word 10 is structural control only"):
-            self.migrate("(10 x)\n")
+    def test_decimal_number_in_call_head_is_not_reclassified_as_d2(self):
+        for number in ("1", "10"):
+            with self.subTest(number=number), self.assertRaisesRegex(
+                mod.MigrationError, "D24\\+ numeric value.*not callable"
+            ):
+                self.migrate(f"({number} x)\n")
 
     def test_d7_d9_heads_without_callable_proof_are_blocked(self):
         # Ширина й наявність резидента не надають права виклику.
@@ -372,23 +372,19 @@ class ThreePassMigrationTests(unittest.TestCase):
                 out, _ = self.migrate(f"(100 {word})\n")
                 self.assertEqual(out, f"10 100 00 {word} 01\n")
 
-    def test_d2_words_cannot_survive_as_ordinary_data(self):
-        for word in ("00","01","10","11"):
-            with self.assertRaisesRegex(mod.MigrationError,"structural control only"):
-                self.migrate(f"(CONS {word} x)\n")
+    def test_decimal_human_projection_never_confuses_numbers_with_binary_domain_words(self):
+        # .lisp is the human projection: decimal glyphs are numbers, while
+        # structural D2 controls are generated from Lisp punctuation.
+        for spelling, expected in (("00", 0), ("01", 1), ("10", 10),
+                                   ("11", 11)):
+            with self.subTest(spelling=spelling):
+                projection = mod.migrate_file(
+                    f"(CONS {spelling} x)\n", mod.Resolver(self.my, self.upper),
+                    self.text7,
+                )
+                self.assertIn(f"{expected:024b}", projection.split())
 
-    def test_numeric_literals_are_blocked_until_explicit_d24_admission(self):
-        # Historic human spellings are not D1-D9 function/domain addresses.
-        # An incomplete source cannot silently become physical executable T5.
-        for literal in ("25", "#d25", "#b101", "#q2:1/10", "-3",
-                        "1/2", "1.5", "2e3"):
-            with self.subTest(literal=literal):
-                with self.assertRaisesRegex(
-                    mod.MigrationError, "requires explicit D24\\+ numeric-domain"
-                ):
-                    self.migrate(f"(CAR {literal})\n")
-
-    def test_t5m_mode_lowers_plain_decimal_integer_as_exact_d24_word(self):
+    def test_human_decimal_integer_lowers_as_exact_d24_word(self):
         resolver = mod.Resolver({}, {})
         def expected_word(value):
             width = 24
@@ -396,15 +392,38 @@ class ThreePassMigrationTests(unittest.TestCase):
                 width *= 2
             return width, f"{value % (1 << width):0{width}b}"
 
-        for value in (0, 1, 1564, (1 << 23) - 1, 1 << 23, -1, -(1 << 23), -(1 << 23) - 1):
+        for value in (0, 1, 10, 1564, (1 << 23) - 1, 1 << 23, -1, -(1 << 23), -(1 << 23) - 1):
             width, expected = expected_word(value)
             low = mod.migrate_file(
-                f"(CAR {value})\n", resolver, self.text7, codec="t5m"
+                f"(CAR {value})\n", resolver, self.text7, codec="t5m",
             )
             self.assertIn(expected, low.split())
             self.assertEqual(len(expected), width)
 
-    def test_t5m_decimal_fraction_is_exactly_reduced_to_adjacent_d24_words(self):
+    def test_numeric_admission_is_independent_of_physical_codec_and_decode(self):
+        source = "(CAR 10)\n"
+        t5_projection = mod.migrate_file(
+            source, mod.Resolver({}, {}), self.text7, codec="t5",
+            source_surface="укр",
+        )
+        t5m_projection = mod.migrate_file(
+            source, mod.Resolver({}, {}), self.text7, codec="t5m",
+            source_surface="укр",
+        )
+        self.assertEqual(t5_projection, t5m_projection)
+
+        expected_ten = "000000000000000000001010"
+        self.assertIn(expected_ten, t5m_projection.split())
+        # Physical decode returns the exact semantic words, without assigning
+        # D24+ meaning or re-running decimal-literal lowering.
+        words = t5m_projection.split()
+        decoded_words = mod.decode_t5m_bytes(
+            mod.encode_t5m_projection(t5m_projection)
+        )
+        self.assertEqual(decoded_words, words)
+        self.assertIn(expected_ten, decoded_words)
+
+    def test_human_decimal_fraction_reduces_exactly(self):
         cases = {
             "1.5": (3, 2),
             "+1.5": (3, 2),
@@ -422,7 +441,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.subTest(spelling=spelling):
                 resolver = mod.Resolver({}, {})
                 projection = mod.migrate_file(
-                    f"(CAR {spelling})\n", resolver, self.text7, codec="t5m"
+                    f"(CAR {spelling})\n", resolver, self.text7, codec="t5m",
                 )
                 width = 24
                 while not (-(1 << (width - 1)) <= numerator < (1 << (width - 1))):
@@ -445,7 +464,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         # must transport them unchanged rather than reinterpret their meaning.
         resolver = mod.Resolver({}, {})
         projection = mod.migrate_file(
-            "(CAR 2.15648)\n", resolver, self.text7, codec="t5m"
+            "(CAR 2.15648)\n", resolver, self.text7, codec="t5m",
         )
         expected = [
             "000000000001101001010011",  # D24 +6739
@@ -532,23 +551,34 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.subTest(literal=literal), self.assertRaisesRegex(
                 mod.MigrationError, "ratios, exponents, and explicit numeric spellings"
             ):
-                mod.migrate_file(f"(CAR {literal})\n", resolver, self.text7, codec="t5m")
+                mod.migrate_file(
+                    f"(CAR {literal})\n", resolver, self.text7, codec="t5m",
+                )
 
-    def test_bare_d24_full_width_is_not_guessed_from_bits(self):
+    def test_decimal_zero_is_not_guessed_from_token_width(self):
         for width in (24, 48, 96):
             with self.subTest(width=width):
-                with self.assertRaisesRegex(
-                    mod.MigrationError, "requires explicit D24\\+ numeric-domain"
-                ):
-                    self.migrate(f"(CAR {'0' * width})\n")
+                projection = mod.migrate_file(
+                    f"(CAR {'0' * width})\n", mod.Resolver(self.my, self.upper),
+                    self.text7,
+                )
+                self.assertIn("0" * 24, projection.split())
 
-    def test_d1_predicates_and_binary_domain_codes_are_not_numeric_literals(self):
-        for bit in ("0", "1"):
-            projection, _=self.migrate(f"(CAR {bit})\n")
-            self.assertEqual(projection, f"10 100 00 {bit} 01\n")
-        # A binary D3 identity in a data slot does not infer a numeric 5.
-        projection, _=self.migrate("(CAR 101)\n")
-        self.assertEqual(projection, "10 100 00 101 01\n")
+    def test_numeric_zero_one_and_101_are_d24_values_in_human_projection(self):
+        for spelling, value in (("0", 0), ("1", 1), ("101", 101)):
+            with self.subTest(spelling=spelling):
+                projection = mod.migrate_file(
+                    f"(CAR {spelling})\n", mod.Resolver(self.my, self.upper),
+                    self.text7,
+                )
+                self.assertIn(f"{value:024b}", projection.split())
+
+        for spelling, bits in (("ні", "0"), ("так", "1")):
+            projection = mod.migrate_file(
+                f"(CAR {spelling})\n", mod.Resolver(self.my, self.upper),
+                self.text7, source_surface="укр",
+            )
+            self.assertIn(bits, projection.split())
 
     def test_quote_of_empty_is_quote_plus_000(self):
         out,_=self.migrate("'()\n")

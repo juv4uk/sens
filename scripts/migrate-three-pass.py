@@ -18,15 +18,14 @@ Rules derived from current SENS contract and later owner decisions:
   admitted. This is NOT permission to call that text as a function.
   An unrepresentable identifier or unproved historical successor fails closed.
 - Quoted data resolves an admitted ladder identity before D7 text fallback.
-- In default T5 mode, textual numeric spellings retain the historical D7
-  text-data projection. Explicit T5M mode accepts signed decimal integers
-  and finite decimal fractions as numeric input, lowering them exactly to
-  two's-complement D24+ words / reduced adjacent numerator-denominator words. This is
-  an explicit migration projection, not a new language/runtime admission.
+- Decimal source values in the human Lisp projection lower exactly to D24+
+  words / reduced adjacent numerator-denominator words. This source-semantic
+  projection is independent of the physical T5/T5M codec; T5M only transports
+  the already formed words.
   Ukrainian source surfaces `ук` and `укр` use comma as the exact decimal
-  separator only in explicitly selected T5M source mode.
-- #d/#b/#q2 textual forms and bare binary words in numeric-width D24+ still
-  require a separate admitted numeric domain/frame and fail closed here.
+  separator independently of the selected physical codec.
+- #d/#b/#q2 spellings are not part of the human numeric projection and fail
+  closed; T5M receives only already-formed exact-width words.
 - Current D7 keyboard/v2 128/128 is the ONLY text projection admitted by
   this script. Historical .rs projection is rejected; no v1 corpus was
   migrated, so no v1-to-v2 conversion prerequisite is needed.
@@ -970,40 +969,38 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
     t=node.tok.text
     if t in lexical_env:
         return encode_text7_identifier(t,text7,node.tok)
-    if len(t)==2 and set(t)<=set("01"):
-        raise MigrationError(
-            f"D2 word {t} is structural control only; it cannot be ordinary data",
-            node.tok,
-        )
-    # Explicit T5M mode lowers decimal projections exactly. Integer words use
-    # two's complement; fractions retain adjacent reduced numerator/denominator
-    # words, with a signed numerator word. No host float or D7 digit text.
+    # Input here is the human Lisp projection, not the binary .sens view.
+    # Therefore every decimal numeral is a mathematical D24+ value, including
+    # spellings such as "10" that happen to equal a structural D2 bit word.
+    source_surface = getattr(resolver, "source_surface", "default")
+    # Human decimal projection lowers exactly to D24+ here, independent of the
+    # physical T5/T5M codec.
+    # Integer words use two's complement; fractions retain adjacent reduced
+    # numerator/denominator words. No host float or D7 digit text.
     def numeric_word(value):
         width = 24
         while not (-(1 << (width - 1)) <= value < (1 << (width - 1))):
             width *= 2
         if width > 4 * 1024 * 1024 * 5:
-            raise MigrationError("T5M decimal number exceeds physical size limit", node.tok)
+            raise MigrationError("D24+ integer exceeds the supported exact-width limit", node.tok)
         return width, f"{value % (1 << width):0{width}b}"
 
-    if getattr(resolver, "t5m_numeric", False) and re.fullmatch(r"[+-]?\d+", t):
+    if re.fullmatch(r"[+-]?\d+", t):
         _, word = numeric_word(int(t, 10))
         return [word]
-    source_surface = getattr(resolver, "source_surface", "default")
     decimal_pattern = (
         r"[+-]?(?:\d+,\d+|,\d+)"
         if source_surface in ("ук", "укр")
         else r"[+-]?(?:\d+\.\d+|\.\d+)"
     )
-    if (getattr(resolver, "t5m_numeric", False)
-            and re.fullmatch(decimal_pattern, t)):
+    if re.fullmatch(decimal_pattern, t):
         negative = t.startswith("-")
         unsigned_text = t[1:] if t[:1] in "+-" else t
         decimal_separator = "," if source_surface in ("ук", "укр") else "."
         whole, fractional = unsigned_text.split(decimal_separator, 1)
         if len(whole) + len(fractional) > 4096:
             raise MigrationError(
-                "T5M decimal fraction exceeds the 4096-digit exact-conversion limit",
+                "D24+ decimal fraction exceeds the 4096-digit exact-conversion limit",
                 node.tok,
             )
         numerator = int((whole or "0") + fractional, 10)
@@ -1019,52 +1016,27 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
                   for value in values):
             width *= 2
         if width > 4 * 1024 * 1024 * 5:
-            raise MigrationError("T5M decimal fraction exceeds physical size limit", node.tok)
+            raise MigrationError("D24+ fraction exceeds the supported exact-width limit", node.tok)
         return [f"{value % (1 << width):0{width}b}" for value in values]
-    if (getattr(resolver, "t5m_numeric", False)
-            and source_surface in ("ук", "укр")
+    if (source_surface in ("ук", "укр")
             and "," in t and re.fullmatch(r"[+-]?[0-9,]+", t)):
         raise MigrationError(
-            "Ukrainian T5M decimal requires exactly one comma between digits",
+            "Ukrainian D24+ decimal requires exactly one comma between digits",
             node.tok,
         )
-    if (getattr(resolver, "t5m_numeric", False)
-            and (NUMERIC_RE.fullmatch(t) or re.fullmatch(
+    if (NUMERIC_RE.fullmatch(t) or re.fullmatch(
                 r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t
-            ))):
+            )):
         raise MigrationError(
-            "T5M accepts signed decimal integers or finite decimal fractions only; "
+            "D24+ numeric projection accepts signed decimal integers or finite decimal fractions only; "
             "ratios, exponents, and explicit numeric spellings are not lowered",
             node.tok,
         )
     if t in D1_UK_SURFACES:
         return [D1_UK_SURFACES[t]]
-    # D24/D48/... are qualified numeric domains. A historical decimal, sign,
-    # ratio, #d or #b source token is NOT a raw D1-D9 identity and has no
-    # admitted literal->Dn physical-source lowering. Never transcode a number
-    # into a function address or Text7 glyphs by matching its spelling.
-    # Bare bit words outside 0/1 remain domain addresses, *not* numerals;
-    # exact D24+ payload words also require an explicit domain-bearing envelope.
-    from domain_tables import is_number_width
-    binary_word = bool(re.fullmatch(r"[01]+", t))
-    numeric_width = len(t)
-    domain_width = is_number_width(numeric_width)
-    # Owner rule: the language is binary by default; a *textual* numeral is D7
-    # text, not a number. Mathematical values are explicit D24+ envelopes only.
-    # So a plain decimal source token is admitted as D7 text (no binary<->decimal
-    # redefinition); explicit #d/#b/#q2 and number-width bit words stay blocked.
-    # Owner rule: math is D24+ only. A source numeric token (plain decimal,
-    # #d/#b/#q2 literal) is a textual projection -> D7 text, never a number.
-    # Only a bare 0/1 word whose width IS a numeric D24+ domain is numeric.
-    if (NUMERIC_RE.fullmatch(t) and not binary_word
-            or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)):
-        return encode_text7_identifier(t, text7, node.tok)
-    if binary_word and domain_width:
-        raise MigrationError(
-            "unqualified numeric literal blocked: requires explicit D24+ "
-            "numeric-domain identity and admitted physical encoding",
-            node.tok,
-        )
+    # Human decimal atoms have already been lowered. Binary domain words are
+    # not raw Lisp atoms: parser punctuation emits D2 controls; named human
+    # surfaces resolve admitted D1/D3–D10 identities.
     if quoted:
         # Цитата спершу бере канонічну identity з драбини D1/D3-D10.
         # D2 є структурою; D7 застосовується лише за відсутності збігу.
@@ -1159,6 +1131,18 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                 words.append(D2_SEP)
 
             if idx==0 and not quoted and isinstance(item,Atom):
+                head_text = item.tok.text
+                numeric_head_pattern = (
+                    r"[+-]?(?:\d+,\d+|,\d+)"
+                    if getattr(resolver, "source_surface", "default") in ("ук", "укр")
+                    else r"[+-]?(?:\d+\.\d+|\.\d+)"
+                )
+                if (re.fullmatch(r"[+-]?\d+", head_text)
+                        or re.fullmatch(numeric_head_pattern, head_text)):
+                    raise MigrationError(
+                        "D24+ numeric value is data and is not callable",
+                        item.tok,
+                    )
                 # Lexical source bindings take precedence over global/current
                 # callable surfaces. This is the scalable shadow-safe rule:
                 # source scope, not spelling alone, decides the head.
@@ -1471,12 +1455,9 @@ def migrate_file(source: str,resolver,text7,*,codec="t5",source_surface="default
         raise MigrationError(f"unsupported physical codec {codec!r}")
     if source_surface not in ("default", "ук", "укр"):
         raise MigrationError(f"unsupported source surface {source_surface!r}")
-    resolver.t5m_numeric = codec == "t5m"
     resolver.source_surface = source_surface
     stripped=strip_comments(source)
-    tokens=tokenize(stripped, source_surface=(
-        source_surface if codec == "t5m" else "default"
-    ))
+    tokens=tokenize(stripped, source_surface=source_surface)
     forms=Parser(tokens).parse_program()
     resolver.set_global_bindings(collect_global_bindings(forms, resolver), text7)
     all_words=[]
@@ -1506,7 +1487,7 @@ def main():
                     help="T5M — основний 15-тритовий/24-бітний транспорт; T5 — явний legacy-формат")
     ap.add_argument("--source-surface", choices=("default", "ук", "укр"),
                     default="default",
-                    help="проєкція джерела; ук/укр дозволяють десяткову кому в T5M")
+                    help="людська проєкція джерела; ук/укр дозволяють десяткову кому")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1663,6 +1644,7 @@ def main():
             "padding": "T5M: zero through fourteen final trits 2; T5: zero through four final trits 2",
             "ascii_text": False,
             "source_surface": args.source_surface,
+            "numeric_projection": "human decimal numerals lower to exact D24+ words before physical encoding",
         },
         "passes": {
             "1": "historical 8-bit head -> admitted current successor",

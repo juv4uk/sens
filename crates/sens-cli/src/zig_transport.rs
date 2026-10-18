@@ -56,18 +56,18 @@ fn version() -> Result<(), String> {
     Ok(())
 }
 
-/// Exact-width physical word for the Zig T5M bridge. Bits are ASCII bytes so
-/// this host representation cannot silently narrow a word into an integer.
+/// Exact-width physical word for the Zig T5M bridge. Each bit is one byte
+/// whose value is 0 or 1; it carries no domain identity.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExactT5Word {
-    width: usize,
-    bits: Vec<u8>,
+    pub width: usize,
+    pub bits: Vec<u8>,
 }
 
 impl ExactT5Word {
     pub fn new(width: usize, bits: Vec<u8>) -> Result<Self, String> {
-        if width == 0 || bits.len() != width || bits.iter().any(|bit| !matches!(bit, b'0' | b'1')) {
-            return Err("exact T5M word requires positive width and exactly that many binary digits".into());
+        if width == 0 || bits.len() != width || bits.iter().any(|&bit| bit > 1) {
+            return Err("точне слово T5M потребує додатну ширину й рівно стільки байтів-бітів 0/1".into());
         }
         Ok(Self { width, bits })
     }
@@ -76,17 +76,22 @@ impl ExactT5Word {
     pub fn bits(&self) -> &[u8] { &self.bits }
 }
 
-/// T5M encode through the Zig-owned physical codec without a D1–D9 BE3 limit.
+/// Кодує точні слова через фізичний кодек Zig T5M без стелі BE3 W1–W9.
 pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
     version()?;
     if words.is_empty() { return Err("Zig T5M cannot encode an empty word sequence".into()); }
+    if words.iter().any(|word| word.width == 0 || word.bits.len() != word.width || word.bits.iter().any(|&bit| bit > 1)) {
+        return Err("точне слово T5M має містити рівно width байтів зі значенням 0/1".into());
+    }
     let trits = words.iter().try_fold(words.len() - 1, |n, word| n.checked_add(word.width))
         .ok_or("exact T5M trit count overflow")?;
     let groups = trits.checked_add(14).ok_or("exact T5M group count overflow")? / 15;
     let physical_capacity = groups.checked_mul(3).ok_or("exact T5M byte count overflow")?;
     let record_capacity = words.iter().try_fold(0usize, |n, word| n.checked_add(4)?.checked_add(word.width))
         .ok_or("exact T5M ABI record length overflow")?;
-    let mut records = Vec::with_capacity(record_capacity);
+    let mut records = Vec::new();
+    records.try_reserve_exact(record_capacity)
+        .map_err(|_| "не вдалося виділити буфер записів T5M")?;
     for word in words {
         let width = u32::try_from(word.width).map_err(|_| "exact T5M word exceeds u32 width")?;
         records.extend_from_slice(&width.to_be_bytes());
@@ -96,13 +101,16 @@ pub fn encode_t5_exact_words(words: &[ExactT5Word]) -> Result<Vec<u8>, String> {
     let written = unsafe {
         sens_zig_t5m_encode_words(records.as_ptr(), records.len(), physical.as_mut_ptr(), physical.len())
     };
-    if written <= 0 || usize::try_from(written).ok() != Some(physical.len()) {
+    if written <= 0 || usize::try_from(written).ok().filter(|&n| n <= physical.len()).is_none() {
         return Err(format!("Zig exact T5M encode rejected: code={written}"));
     }
+    physical.truncate(written as usize);
+    let restored = decode_t5_exact_words(&physical)?;
+    if restored != words { return Err("Zig T5M змінив ширину слова або його біти".into()); }
     Ok(physical)
 }
 
-/// T5M decode through Zig, preserving arbitrary positive exact widths.
+/// Декодує T5M через Zig зі збереженням довільних точних додатних ширин.
 pub fn decode_t5_exact_words(physical: &[u8]) -> Result<Vec<ExactT5Word>, String> {
     version()?;
     validate_t5(physical)?;
@@ -638,6 +646,20 @@ pub fn decode_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>, Stri
         || usize::try_from(written).ok().filter(|&n| n <= be3.len()).is_none()
         || written % 3 != 0
     {
+        if let Ok(exact_words) = decode_t5_exact_words(bytes) {
+            let mut widths: Vec<usize> = exact_words
+                .iter()
+                .map(|word| word.width)
+                .filter(|&width| width > 9)
+                .collect();
+            widths.sort_unstable();
+            widths.dedup();
+            if !widths.is_empty() {
+                return Err(format!(
+                    "Фізичне T5M-декодування зберегло точні ширини слів {widths:?}; застарілий адаптер BinarySourceWord приймає лише W1–W9. Ширина не є доменною identity, тому належність до D1–24+ або викличність не виведено"
+                ));
+            }
+        }
         return Err(format!("Zig physical T5M decode rejected: code={written}"));
     }
     be3.truncate(written as usize);
@@ -850,7 +872,7 @@ mod zig_repl_asset_bridge_tests {
 
 #[cfg(test)]
 mod zig_exact_egress_tests {
-    use super::{decode_e1_words, decode_f3, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5, validate_t5_coordinates};
+    use super::{decode_e1_words, decode_f3, decode_t5_exact_words, decode_t5_words, encode_e1_direct, encode_f3, encode_t5_direct, exact_words_to_be3, require_same_exact_words, validate_t5, validate_t5_coordinates};
 
     fn words(source: &str) -> Vec<sens::BinarySourceWord> {
         sens::parse_binary_source_words(source)
@@ -867,11 +889,11 @@ mod zig_exact_egress_tests {
         // Equal payloads are not interchangeable: D5's 00001 must never be
         // padded into D8's 00000001. Higher D1–24+ words remain opaque here.
         let source = [
-            ExactT5Word::new(5, b"00001".to_vec()).unwrap(),
-            ExactT5Word::new(8, b"00000001".to_vec()).unwrap(),
-            ExactT5Word::new(10, b"0000000001".to_vec()).unwrap(),
-            ExactT5Word::new(24, b"000000000000000000000001".to_vec()).unwrap(),
-            ExactT5Word::new(48, format!("{}1", "0".repeat(47)).into_bytes()).unwrap(),
+            ExactT5Word::new(5, vec![0, 0, 0, 0, 1]).unwrap(),
+            ExactT5Word::new(8, vec![0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
+            ExactT5Word::new(10, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).unwrap(),
+            ExactT5Word::new(24, [vec![0; 23], vec![1]].concat()).unwrap(),
+            ExactT5Word::new(48, [vec![0; 47], vec![1]].concat()).unwrap(),
         ];
 
         let physical = encode_t5_exact_words(&source).expect("Zig T5M exact encode");
@@ -880,6 +902,32 @@ mod zig_exact_egress_tests {
         assert_eq!(restored[0].width(), 5);
         assert_eq!(restored[1].width(), 8);
         assert_ne!(restored[0], restored[1]);
+    }
+
+    #[test]
+    fn exact_t5m_decoder_preserves_wide_bits_without_inferring_identity() {
+        let bytes = include_bytes!("../../../tests/semantic/ukr-d24-existing-functions.sens");
+        let decoded = decode_t5_exact_words(bytes).expect("Zig must return numeric exact bits");
+        assert!(decoded.iter().any(|word| word.width == 10));
+        assert!(decoded.iter().any(|word| word.width == 24));
+        assert!(decoded.iter().all(|word| {
+            word.bits.len() == word.width && word.bits.iter().all(|&bit| bit <= 1)
+        }));
+        let error = super::decode_t5_words(bytes).expect_err("legacy W1–W9 adapter fails closed");
+        assert!(error.contains("точні ширини слів [10, 24]"));
+        assert!(error.contains("Ширина не є доменною identity"));
+        assert!(error.contains("належність до D1–24+ або викличність не виведено"));
+    }
+
+    #[test]
+    fn exact_t5m_bridge_roundtrips_variable_width_binary_values() {
+        use super::{decode_t5_exact_words, encode_t5_exact_words, ExactT5Word};
+        let source = [5usize, 8, 10, 11, 12, 14, 24, 48, 96, 192].map(|width| {
+            ExactT5Word::new(width, (0..width).map(|bit| ((bit * 7 + width) % 3 == 0) as u8).collect())
+                .expect("binary T5M source word")
+        });
+        let physical = encode_t5_exact_words(&source).expect("Zig transports exact words");
+        assert_eq!(decode_t5_exact_words(&physical).expect("Zig restores exact words"), source);
     }
 
     #[test]

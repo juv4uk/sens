@@ -58,6 +58,15 @@ ptrdiff_t sens_zig_t5_encode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
 ptrdiff_t sens_zig_t5_decode_be3(const uint8_t *src, size_t byte_len,
                                  uint8_t *dst, size_t capacity);
+/* Точні слова без семантичного допуску: повтор [width:u32 big-endian][width байтів 0/1].
+ * В обох напрямках зберігаються фізична ширина й біти. Ширина не є доменною
+ * identity: належність до D1–24+ та викличність визначає SENS.
+ * Повертає довжину результату; -1 некоректно/перетин, -2 замалий буфер.
+ */
+ptrdiff_t sens_zig_t5m_encode_words(const uint8_t *src, size_t byte_len,
+                                    uint8_t *dst, size_t capacity);
+ptrdiff_t sens_zig_t5m_decode_words(const uint8_t *src, size_t byte_len,
+                                    uint8_t *dst, size_t capacity);
 /* Exact-word BE3 -> canonical physical E1 RAW/REPEAT + CRC32, Zig-owned.
  * E1 is an explicit carrier, not .sens, and conveys no callable identity.
  * Returns physical byte count, -1 invalid/overlap, -2 small output.

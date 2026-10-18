@@ -81,6 +81,14 @@ fn decode_canonical_t5_words(bytes: &[u8]) -> Result<Vec<sens::BinarySourceWord>
     }
 }
 
+#[cfg(feature = "zig-transport")]
+fn render_exact_t5m_words(bytes: &[u8], separator: &str) -> Result<String, String> {
+    let words = zig_transport::decode_t5_exact_words(bytes)?;
+    Ok(words.into_iter().map(|word| {
+        word.bits.into_iter().map(|bit| if bit == 0 { '0' } else { '1' }).collect::<String>()
+    }).collect::<Vec<_>>().join(separator))
+}
+
 /// SENS owns exact source words and D2 admission. The host does not create
 /// physical T5 bytes; it forwards admitted width+bits to Zig ABI v2.
 #[cfg(feature = "zig-transport")]
@@ -420,20 +428,31 @@ fn execute() -> Result<(), String> {
         }
         "open" | "view" => {
             let bytes = read_sens(path)?;
-            let words = decode_canonical_t5_words(&bytes)
-                .map_err(|e| format!("open .sens: {e}"))?;
-            // View is an external projection of exact SENS words; it never
-            // becomes the source consumed by the canonical D2 reader.
-            let human = sens::render_ternary_words_spaced(&words);
+            // Physical inspection retains every T5M word's exact width and
+            // bits; neither width nor this projection grants D1–24+ identity
+            // or callability.
+            #[cfg(feature = "zig-transport")]
+            let human = render_exact_t5m_words(&bytes, " ")?;
+            #[cfg(not(feature = "zig-transport"))]
+            let human = {
+                let words = decode_canonical_t5_words(&bytes)
+                    .map_err(|e| format!("open .sens: {e}"))?;
+                sens::render_ternary_words_spaced(&words)
+            };
             println!("{human}");
             Ok(())
         }
         "decode" => {
             let bytes = read_sens(path)?;
-            let words = decode_canonical_t5_words(&bytes)
-                .map_err(|e| format!("decode .sens: {e}"))?;
-            // Vertical human projection; no Rust physical T5 decoder in Zig build.
-            print!("{}", sens::render_ternary_words_vertical(&words));
+            #[cfg(feature = "zig-transport")]
+            let human = render_exact_t5m_words(&bytes, "\n")?;
+            #[cfg(not(feature = "zig-transport"))]
+            let human = {
+                let words = decode_canonical_t5_words(&bytes)
+                    .map_err(|e| format!("decode .sens: {e}"))?;
+                sens::render_ternary_words_vertical(&words)
+            };
+            print!("{human}");
             Ok(())
         }
         "explain" => {
