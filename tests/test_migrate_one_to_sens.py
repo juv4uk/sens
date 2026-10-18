@@ -28,13 +28,21 @@ def invoke(source: Path, *args: str):
 class CanonicalOneFileMigration(unittest.TestCase):
     def test_real_proven_canary_dry_run_does_not_write(self):
         before = PROVEN.read_bytes()
-        result = invoke(PROVEN, "--dry-run", "--codec", "t5", "--source-surface", "default")
-        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        state = json.loads(result.stdout)
-        self.assertEqual(state["status"], "would-write")
-        self.assertEqual(state["semantic_parity"], "NOT_VERIFIED")
-        self.assertEqual(state["codec"], "t5")
-        self.assertEqual(state["physical_sha256"], hashlib.sha256(encode_t5m_projection(" ".join(state["words"]) + "\n")).hexdigest())
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "ukr-acceptance.sens"
+            result = invoke(PROVEN, "--output", str(target), "--dry-run",
+                            "--codec", "t5m", "--source-surface", "укр")
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            state = json.loads(result.stdout)
+            self.assertEqual(state["status"], "would-write")
+            self.assertEqual(state["codec"], "t5m")
+            self.assertEqual(state["physical_producer"], "PYTHON_REFERENCE_ONLY")
+            self.assertIsNone(state["zig_transport"])
+            self.assertEqual(state["semantic_parity"], "NOT_VERIFIED")
+            self.assertGreater(state["bytes"], 0)
+            self.assertEqual(len(state["physical_sha256"]), 64)
+            self.assertFalse(target.exists())
+            self.assertFalse(target.with_suffix("").exists())
         self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_existing_target_is_never_overwritten(self):
@@ -59,26 +67,32 @@ class CanonicalOneFileMigration(unittest.TestCase):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "ukr-acceptance.sens"
-            result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
+            result = invoke(PROVEN, "--output", str(output),
+                            "--codec", "t5m", "--source-surface", "укр")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "written")
+            self.assertEqual(report["codec"], "t5m")
             self.assertEqual(report["semantic_parity"], "NOT_VERIFIED")
             self.assertEqual(report["source"], str(PROVEN.relative_to(ROOT)))
-            self.assertEqual(report["bytes"], len(output.read_bytes()))
-            self.assertEqual(decode_t5m_bytes(output.read_bytes()), report["words"])
-            self.assertEqual(output.read_bytes(), encode_t5m_projection(" ".join(report["words"]) + "\n"))
-            self.assertTrue(output.with_suffix("").is_file())
-            self.assertEqual(report["view_sha256"], hashlib.sha256(output.with_suffix("").read_bytes()).hexdigest())
+            data = output.read_bytes()
+            words = decode_t5m_bytes(data)
+            self.assertGreater(len(words), 0)
+            self.assertEqual(data, encode_t5m_projection(" ".join(words) + "\n"))
+            self.assertEqual(report["bytes"], len(data))
             view = output.with_suffix("")
-            expected_view = (" ".join(report["words"]) + "\n").encode("ascii")
+            expected_view = (" ".join(words) + "\n").encode("ascii")
             self.assertEqual(view.read_bytes(), expected_view)
             self.assertEqual(report["view"], str(view))
             self.assertEqual(report["view_sha256"], hashlib.sha256(expected_view).hexdigest())
-            self.assertEqual(report["physical_sha256"], hashlib.sha256(output.read_bytes()).hexdigest())
-            second = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
+            self.assertEqual(report["physical_sha256"], hashlib.sha256(data).hexdigest())
+            self.assertIsInstance(report["zig_transport"], dict)
+            second = invoke(PROVEN, "--output", str(output),
+                            "--codec", "t5m", "--source-surface", "укр")
             self.assertNotEqual(second.returncode, 0)
             self.assertIn("refusing overwrite", second.stderr)
+            self.assertEqual(output.read_bytes(), data)
+            self.assertEqual(view.read_bytes(), expected_view)
         self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_unknown_ukrainian_identifiers_are_not_encoded_as_fake_calls(self):
