@@ -264,5 +264,59 @@ class CodecUkrProjectionTests(unittest.TestCase):
 
 
 
+class SiDerivedUkrProjectionTests(unittest.TestCase):
+    """Migrate only the ratified D4 DEFINE surface, not SI arithmetic semantics."""
+
+    SOURCE = ROOT / "lib" / "si-derived.lisp"
+    D4 = ROOT / "lib" / "domains" / "d4.lisp"
+    ORIGINAL_BLOB = "0074e9266a09e24804fb0798723b02a863f5ac66"
+
+    @staticmethod
+    def git_blob_sha(data: bytes) -> str:
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def test_si_derived_uses_ratified_ukr_define_and_preserves_arithmetic(self):
+        table = self.D4.read_text(encoding="utf-8")
+        rows = [
+            line for line in table.splitlines()
+            if re.match(r"^\s*\(0011\s", line)
+        ]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("(укр визначити)", rows[0])
+        self.assertIn("(en define)", rows[0])
+        self.assertIn("(LISP DEFINE)", rows[0])
+
+        source = self.SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(source.count("(визначити "), 7)
+        self.assertNotIn("(0011 ", source)
+        self.assertEqual(len(re.findall(r"\(10110(?=\s)", source)), 7,
+                         "D5 exact multiplication heads must be unchanged")
+        self.assertEqual(len(re.findall(r"\(11110110(?=\s)", source)), 4,
+                         "unresolved historical division heads must be unchanged")
+        for name in (
+            "si:faraday-constant", "si:molar-gas-constant",
+            "si:josephson-constant", "si:von-klitzing-constant",
+            "si:magnetic-flux-quantum", "si:conductance-quantum",
+            "si:molar-planck-constant",
+        ):
+            self.assertIn(f"(визначити {name}", source)
+
+    def test_inverse_define_projection_restores_all_original_bytes(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        restored = re.sub(r"\(визначити(?=\s)", "(0011", source).encode("utf-8")
+        self.assertEqual(self.git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+    def test_wrong_define_surface_fails_inverse_witness(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace("(визначити si:faraday-constant",
+                                "(визначити si:invalid-faraday-constant", 1)
+        self.assertNotEqual(mutant, source)
+        restored = re.sub(r"\(визначити(?=\s)", "(0011", mutant).encode("utf-8")
+        self.assertNotEqual(self.git_blob_sha(restored), self.ORIGINAL_BLOB)
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
