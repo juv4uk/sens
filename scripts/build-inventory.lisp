@@ -14,28 +14,28 @@
 
 ;; ---- Helpers ----
 
-(0011 assoc
-  (0010 (key alist)
-    (110 ((010 alist) ()) ((010 (001 ())) (110
-           ((101 (1000 alist) key) (100 alist))
+(визначити assoc
+  (функція (key alist)
+    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (за-умовою
+           ((тотожне? (перше-першого alist) key) (перше alist))
            ((атом? (як-є ())) (знайти-за-ключем key (решта alist))))))))
 
-(0011 assoc-str
-  (0010 (key alist)
-    (110 ((010 alist) ()) ((010 (001 ())) (110
-           ((101 (1000 alist) key) (011 (100 alist)))
-           ((010 (001 ())) (assoc-str key (011 alist))))))))
+(визначити assoc-str
+  (функція (key alist)
+    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (за-умовою
+           ((тотожне? (перше-першого alist) key) (решта (перше alist)))
+           ((атом? (як-є ())) (assoc-str key (решта alist))))))))
 
-(0011 alist-keys
-  (0010 (alist)
-    (110 ((010 alist) ()) ((010 (001 ())) (111 (1000 alist) (alist-keys (011 alist)))))))
+(визначити alist-keys
+  (функція (alist)
+    (за-умовою ((атом? alist) ()) ((атом? (як-є ())) (сполучити (перше-першого alist) (alist-keys (решта alist)))))))
 
 ;; Unique list (preserve order of first appearance)
-(0011 uniq
-  (0010 (lst)
-    (110 ((010 lst) ()) ((010 (001 ())) (110
+(визначити uniq
+  (функція (lst)
+    (за-умовою ((атом? lst) ()) ((атом? (як-є ())) (за-умовою
            ((11101 (100 lst) (011 lst)) (uniq (011 lst)))
-           ((010 (001 ())) (111 (100 lst) (uniq (011 lst)))))))))
+           ((атом? (як-є ())) (сполучити (перше lst) (uniq (решта lst)))))))))
 
 ;; Structural walk to collect observed-forms
 ;; Rules:
@@ -47,50 +47,50 @@
 ;; - any other list (incl. if, and, or, builtins, user calls) -> record 'application, recurse into all elements
 ;; - atoms (symbols, numbers, strings) -> ignored (not structural forms)
 
-(0011 walk-observed
-  (0010 (v)
+(визначити walk-observed
+  (функція (v)
     (110 ((010 v) ()) ((010 (001 ())) (001000 ((head (100 v)))
-         (110 ((010 head) (110
-              ((101 head (001 quote))
-               (1110 (001 quote)))
-              ((101 head (001 lambda))
-               (111 (001 lambda)
+         (за-умовою ((атом? head) (за-умовою
+              ((тотожне? head (як-є quote))
+               (список (як-є quote)))
+              ((тотожне? head (як-є lambda))
+               (сполучити (як-є lambda)
                      (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
-              ((101 head (001 def))
-               (111 (001 def)
+              ((тотожне? head (як-є def))
+               (сполучити (як-є def)
                      (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
-              ((101 head (001 defmacro))
-               (111 (001 defmacro)
+              ((тотожне? head (як-є defmacro))
+               (сполучити (як-є defmacro)
                      (110 ((010 (0111 v)) ())
-                           ((010 (011 (0111 v))) ())
-                           ((010 (001 ())) (walk-observed (100 (011 (0111 v))))))))
-              ((101 head (001 cond))
-               (111 (001 cond) (walk-cond-clauses (011 v))))
-              ((010 (001 ()))
-               (111 (001 application) (walk-list v))))) ((010 (001 ())) (111 (001 application) (walk-list v)))))))))
+                           ((атом? (решта (решта-решти v))) ())
+                           ((атом? (як-є ())) (walk-observed (перше (решта (решта-решти v))))))))
+              ((тотожне? head (як-є cond))
+               (сполучити (як-є cond) (walk-cond-clauses (решта v))))
+              ((атом? (як-є ()))
+               (сполучити (як-є application) (walk-list v))))) ((атом? (як-є ())) (сполучити (як-є application) (walk-list v)))))))))
 
-(0011 walk-cond-clauses
-  (0010 (clauses)
-    (110 ((010 clauses) ()) ((010 (001 ())) (1111 (walk-observed (1000 clauses))
-                 (1111 (110 ((010 (011 (100 clauses))) ()) ((010 (001 ())) (walk-observed (1001 (100 clauses)))))
-                         (walk-cond-clauses (011 clauses))))))))
+(визначити walk-cond-clauses
+  (функція (clauses)
+    (за-умовою ((атом? clauses) ()) ((атом? (як-є ())) (приєднати (walk-observed (перше-першого clauses))
+                 (приєднати (за-умовою ((атом? (решта (перше clauses))) ()) ((атом? (як-є ())) (walk-observed (друге (перше clauses)))))
+                         (walk-cond-clauses (решта clauses))))))))
 
-(0011 walk-list
-  (0010 (lst)
-    (110 ((010 lst) ()) ((010 (001 ())) (1111 (walk-observed (100 lst))
-                 (walk-list (011 lst)))))))
+(визначити walk-list
+  (функція (lst)
+    (за-умовою ((атом? lst) ()) ((атом? (як-є ())) (приєднати (walk-observed (перше lst))
+                 (walk-list (решта lst)))))))
 
 ;; Parse expr using read-all (canonical), then walk for observed-forms.
 ;; For NumericOverflow fixtures, the parser rejects the literal, so we skip
 ;; reading and return empty observed-forms (honest: no structural forms observed).
-(0011 get-observed-forms
-  (0010 (expr-str error-kind)
-    (110
-      ((101 error-kind "NumericOverflow")
+(визначити get-observed-forms
+  (функція (expr-str error-kind)
+    (за-умовою
+      ((тотожне? error-kind "NumericOverflow")
        ())
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        (001000 ((forms (110101001 expr-str)))
-         (110 ((010 forms) ()) ((010 (001 ())) (uniq (walk-observed (100 forms))))))))))
+         (за-умовою ((атом? forms) ()) ((атом? (як-є ())) (uniq (walk-observed (перше forms))))))))))
 
 ;; Build identity record and compute ID
 ;; Identity includes axioms, not just expr+outcome: two fixtures can share the
@@ -99,46 +99,46 @@
 ;; under G1's general equality and again under S1's numeric exactness) —
 ;; collapsing those into one ID would silently erase which axiom a fixture
 ;; is actually evidence for.
-(0011 compute-id
-  (0010 (expr axioms outcome-kind outcome-value)
+(визначити compute-id
+  (функція (expr axioms outcome-kind outcome-value)
     (001001 ((identity-record (1110 (111 (001 expr) expr)
-                          (111 (001 axioms) axioms)
-                          (111 outcome-kind outcome-value)))
+                          (сполучити (як-є axioms) axioms)
+                          (сполучити outcome-kind outcome-value)))
           (encoded (11110100 identity-record))
           (hash (110011000 encoded)))
       (110011110 "F-" (110100011 hash 0 16)))))
 
 ;; Process one fixture -> emit inventory record
-(0011 emit-fixture
-  (0010 (fixture)
+(визначити emit-fixture
+  (функція (fixture)
     (001001 ((expr (assoc-str (001 expr) fixture))
-          (expected (assoc-str (001 expected) fixture))
-          (error-kind (assoc-str (001 error) fixture))
-          (tier (assoc-str (001 tier) fixture))
-          (axioms (assoc-str (001 axioms) fixture))
-          (requires (assoc-str (001 requires) fixture))
-          (role (assoc-str (001 role) fixture))
-          (note (assoc-str (001 note) fixture))
-          (outcome-kind (110 (expected (001 expected)) ((010 (001 ())) (001 error))))
-          (outcome-value (110 (expected expected) ((010 (001 ())) error-kind)))
+          (expected (assoc-str (як-є expected) fixture))
+          (error-kind (assoc-str (як-є error) fixture))
+          (tier (assoc-str (як-є tier) fixture))
+          (axioms (assoc-str (як-є axioms) fixture))
+          (requires (assoc-str (як-є requires) fixture))
+          (role (assoc-str (як-є role) fixture))
+          (note (assoc-str (як-є note) fixture))
+          (outcome-kind (за-умовою (expected (як-є expected)) ((атом? (як-є ())) (як-є error))))
+          (outcome-value (за-умовою (expected expected) ((атом? (як-є ())) error-kind)))
           (id (compute-id expr axioms outcome-kind outcome-value))
           (observed-forms (get-observed-forms expr error-kind)))
       (11011011 (1110 (001 fixture)
-                   (111 (001 id) id)
-                   (111 (001 tier) tier)
-                   (111 (001 axioms) axioms)
-                   (111 (001 declared-requires) (110 (requires requires) ((010 (001 ())) ())))
-                   (111 (001 observed-forms) observed-forms)
-                   (111 (001 outcome-kind) outcome-kind)
-                   (111 (001 outcome-value) outcome-value)
-                   (111 (001 role) (110 (role role) ((010 (001 ())) ())))
-                   (111 (001 note) (110 (note note) ((010 (001 ())) ()))))))))
+                   (сполучити (як-є id) id)
+                   (сполучити (як-є tier) tier)
+                   (сполучити (як-є axioms) axioms)
+                   (сполучити (як-є declared-requires) (за-умовою (requires requires) ((атом? (як-є ())) ())))
+                   (сполучити (як-є observed-forms) observed-forms)
+                   (сполучити (як-є outcome-kind) outcome-kind)
+                   (сполучити (як-є outcome-value) outcome-value)
+                   (сполучити (як-є role) (за-умовою (role role) ((атом? (як-є ())) ())))
+                   (сполучити (як-є note) (за-умовою (note note) ((атом? (як-є ())) ()))))))))
 
 ;; Emit all fixtures
-(0011 emit-all
-  (0010 (remaining)
+(визначити emit-all
+  (функція (remaining)
     (110 ((010 remaining) (001 ())) ((010 (001 ())) (001000 ((printed (emit-fixture (100 remaining))))
-         (emit-all (011 remaining)))))))
+         (emit-all (решта remaining)))))))
 
 ;; Header
 (11011011 (111 (001 about) "tests/fixtures/inventory.lisp — deterministic index over tests/fixtures/conformance.lisp. Each entry carries a stable content-addressed ID (F-<16hex>), the authoritative tier/axioms/declared-requires, mechanically observed forms from canonical reader walk, and the expected outcome. Generated — do not hand-edit. Run: cargo run -p my-lisp-cli --bin my-lisp -- scripts/build-inventory.lisp > tests/fixtures/inventory.lisp"))
