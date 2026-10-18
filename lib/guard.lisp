@@ -124,23 +124,13 @@
          (як-є reconcile-observation-with-contract)
          evidence)))))
 
-; Synchronization is a guarded transaction: first establish a commit freeze,
-; then perform synchronization, then record observed drift before reopening
-; the window. This is policy guidance, not a hidden Git lock.
-; Синхронізація — guarded transaction: спершу freeze комітів, потім sync,
-; потім запис observed drift і лише після цього відкриття вікна. Це policy,
-; а не прихований Git lock.
+; Synchronization is verified by observed completion and recorded drift.
+; No repository-wide commit freeze or administrative HOLD is required.
+; Синхронізація: спочатку фактичне виконання, потім запис змін.
+; Незалежні коміти не заморожуються; невідоме повертає локальне WARN.
 (визначити guard-sync-window
   (функція (commit-state sync-state drift-state evidence)
     (за-умовою
-      ((хибне? (тотожне? commit-state (як-є frozen)))
-       (створити-захист-висновок
-         (як-є reject) (як-є confirmed) (як-є ecosystem-sync)
-         commit-state (як-є commits-frozen-before-sync)
-         (список (як-є expected) (як-є frozen) (як-є observed) commit-state)
-         (як-є concurrent-commits-can-create-unrecorded-drift)
-         (як-є freeze-commits-before-synchronization)
-         evidence))
       ((хибне? (тотожне? sync-state (як-є completed)))
        (створити-захист-висновок
          (як-є warn) (як-є unresolved) (як-є ecosystem-sync)
@@ -155,16 +145,16 @@
          drift-state (як-є drift-recorded)
          (список (як-є expected) (як-є recorded) (як-є observed) drift-state)
          (як-є synchronization-result-has-no-drift-record)
-         (як-є record-drift-before-unfreezing-commits)
+         (як-є record-drift-and-continue)
          evidence))
       (так
        (створити-захист-висновок
          (як-є allow) (як-є confirmed) (як-є ecosystem-sync)
          (список commit-state sync-state drift-state)
-         (як-є freeze-sync-record-unfreeze)
+         (як-є sync-record-and-continue)
          (як-є ())
          (як-є synchronization-boundary-observed)
-         (як-є reopen-commit-window)
+         (як-є continue-independent-commits)
          evidence)))))
 
 ; Reference records are ordinary data. The evolving ecosystem directory lives
