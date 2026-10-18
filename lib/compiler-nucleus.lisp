@@ -65,7 +65,7 @@
 
 (визначити compiler-false
   (функція (seed)
-    #d1:0))
+    ні))
 
 ; Exact proper-list end is NIL, not every atom. Derive the observation
 ; from the admitted D3 ATOM + atom-only D3 EQ laws. N0's compiler ISA
@@ -74,7 +74,7 @@
   (функція (value)
     (за-умовою
       ((атом? value) (тотожне? value (як-є ())))
-      (#d1:1 (compiler-false ())))))
+      (так (compiler-false ())))))
 
 ; A verified bit sequence is a proper list of D1 atoms. To test the
 ; empty-list terminator, use the ratified ATOM predicate, not EQ over a
@@ -504,7 +504,7 @@
          (сполучити
            (перше (решта (перше clauses)))
            (compiler-cond-child-expressions (решта clauses)))))
-      (#d1:1 ()))))
+      (так ()))))
 
 (визначити compiler-domain-children
   (функція (request arguments)

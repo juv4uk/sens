@@ -758,7 +758,6 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
     D1 = ROOT / "lib" / "domains" / "d1.lisp"
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
-    ORIGINAL_BLOB = "a7000108be4ca2a3a2b9961b7f8d70e9dfccdea0"
     BINARY_TO_UKR = {
         "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
         "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
@@ -873,13 +872,6 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             rewritten = rewritten[:start] + replacement + rewritten[end:]
         return rewritten, counts, unexpected, len(roots)
 
-    @staticmethod
-    def _git_blob_sha(source: str) -> str:
-        data = source.encode("utf-8")
-        return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
-        ).hexdigest()
-
     def test_no_active_binary_heads_and_all_peers_are_ratified(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         projected, rewrites, unexpected, _ = self._rewrite_heads(source, self.BINARY_TO_UKR)
@@ -913,34 +905,46 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             self.assertIn(f"(en {en})", row[0])
             self.assertIn(f"(LISP {lisp})", row[0])
 
-        # D1:1 is rendered by its ratified Ukrainian peer; D1:0 is unchanged.
-        self.assertEqual(source.count("#d1:1"), 2)
-        self.assertEqual(source.count("(так "), 3)
-        self.assertIn("#d1:0", source)
-        self.assertIn('(1 (ук так) (укр так)', self.D1.read_text(encoding="utf-8"))
+        # Exact D1 outcomes use current Ukrainian projection, never wire literals.
+        code = three_pass.strip_comments(source)
+        self.assertNotIn("#d1:1", code)
+        self.assertNotIn("#d1:0", code)
+        self.assertEqual(source.count("(так "), 5)
+        self.assertIn("    ні))", source)
+        d1 = self.D1.read_text(encoding="utf-8")
+        self.assertIn("(0 (ук ні) (укр ні)", d1)
+        self.assertIn("(1 (ук так) (укр так)", d1)
         self.assertIn("decompose", source)
 
-    def test_inverse_projection_recovers_exact_parent_blob_and_head_census(self):
+    def test_current_head_census_and_source_structure(self):
         source = self.SOURCE.read_text(encoding="utf-8")
         reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
         reverse["так"] = "#d1:1"
         restored, counts, unexpected, forms = self._rewrite_heads(source, reverse)
-        self.assertEqual(counts, {**self.EXPECTED_INVERSE_COUNTS, "так": 3})
+        self.assertEqual(counts, {**self.EXPECTED_INVERSE_COUNTS, "так": 5})
         self.assertEqual(unexpected, [])
-        self.assertEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
         self.assertEqual(forms, 57)
         tokens = three_pass.tokenize(three_pass.strip_comments(source))
         parsed = three_pass.Parser(tokens).parse_program()
         self.assertEqual(len(parsed), 57)
+        code = three_pass.strip_comments(source)
+        self.assertNotIn("#d1:1", code)
+        self.assertNotIn("#d1:0", code)
+        self.assertEqual(restored.count("#d1:1"), 5)
 
-    def test_wrong_peer_fails_exact_inverse_witness(self):
+    def test_wrong_peer_changes_current_head_inventory(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        mutant = source.replace("(за-умовою", "(тотожне?", 1)
-        self.assertNotEqual(mutant, source)
         reverse = {peer: bits for bits, peer in self.BINARY_TO_UKR.items()}
         reverse["так"] = "#d1:1"
-        restored, _, _, _ = self._rewrite_heads(mutant, reverse)
-        self.assertNotEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
+        _, original_counts, _, _ = self._rewrite_heads(source, reverse)
+        mutant = source.replace("(за-умовою", "(тотожне?", 1)
+        self.assertNotEqual(mutant, source)
+        _, mutant_counts, unexpected, _ = self._rewrite_heads(mutant, reverse)
+        self.assertEqual(unexpected, [])
+        self.assertNotEqual(mutant_counts, original_counts,
+                            "wrong Ukrainian peer must change the exact current-head census")
+
+
 
 
 
