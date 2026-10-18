@@ -276,7 +276,10 @@ class BatchSourceTests(unittest.TestCase):
                              "перше", "решта", "як-є", "визначити", "функція",
                              "нехай", "нехай-послідовно", "більше?"):
             self.assertIn("(" + current_head, tail)
-        # Ratified D4 identity alone does not establish callable runtime access.\n        self.assertIn("(тотожне? інструменти (як-є ()))", tail)\n        self.assertNotIn("(порожній?", tail)\n        self.assertNotIn("(t ", tail)
+        # Ratified D4 identity alone does not establish callable runtime access.
+        self.assertIn("(тотожне? інструменти (як-є ()))", tail)
+        self.assertNotIn("(порожній?", tail)
+        self.assertNotIn("(t ", tail)
         self.assertNotIn(" (1) ", tail)
         self.assertNotIn(" (0) ", tail)
 
