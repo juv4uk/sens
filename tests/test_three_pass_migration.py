@@ -578,6 +578,17 @@ class ThreePassMigrationTests(unittest.TestCase):
                     f"(CAR {literal})\n", resolver, self.text7, codec="t5m",
                 )
 
+    def test_ukr_source_rejects_nonkeyboard_decimal_digits(self):
+        # No Unicode \d shortcut: mathematical digits in Ukrainian Lisp are 0–9.
+        for spelling in ("١", "١,٢", "２", "५"):
+            with self.subTest(spelling=spelling), self.assertRaisesRegex(
+                mod.MigrationError, "non-keyboard decimal digit"
+            ):
+                mod.migrate_file(
+                    f"(CAR {spelling})\n", mod.Resolver({}, {}), self.text7,
+                    codec="t5m", source_surface="укр",
+                )
+
     def test_decimal_zero_is_not_guessed_from_token_width(self):
         for width in (24, 48, 96):
             with self.subTest(width=width):
