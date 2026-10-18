@@ -1,4 +1,4 @@
 ; D8:00101010 callback returns non-D1 data, exact COND must refuse.
 (знайти-асоціацію-якщо
-  (lambda (x) (quote не-предикат))
-  (list (cons (quote ключ) (quote значення))))
+  (функція (x) (як-є не-предикат))
+  (список (сполучити (як-є ключ) (як-є значення))))

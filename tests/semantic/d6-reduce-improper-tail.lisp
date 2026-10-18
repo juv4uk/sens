@@ -1,3 +1,3 @@
 ; D6:101110 REDUCE must not accept improper nonempty tails as NIL.
-(згорнути (lambda (acc item) (cons item acc))
-  (quote ()) (cons (quote а) (quote обірвано)))
+(згорнути (функція (acc item) (сполучити item acc))
+  (як-є ()) (сполучити (як-є а) (як-є обірвано)))
