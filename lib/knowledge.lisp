@@ -86,47 +86,47 @@
       (як-є *knowledge-journal*))))))
 
 (визначити module-journal-events-onto
-  (функція (module-name journal acc)
+  (функція (назва-модуля журнал накопичувач)
     (за-умовою
-      ((порожній? journal) (зворот acc))
-      ((атом? journal)  (зворот acc))
-      ((тотожне? (друге (перше journal)) module-name)
+      ((порожній? журнал) (зворот накопичувач))
+      ((атом? журнал)  (зворот накопичувач))
+      ((тотожне? (друге (перше журнал)) назва-модуля)
        (module-journal-events-onto
-         module-name
-         (решта journal)
-         (сполучити (перше journal) acc)))
+         назва-модуля
+         (решта журнал)
+         (сполучити (перше журнал) накопичувач)))
       (так
        (module-journal-events-onto
-         module-name
-         (решта journal)
-         acc)))))
+         назва-модуля
+         (решта журнал)
+         накопичувач)))))
 
 (визначити module-journal-events
-  (функція (module-name journal)
-    (module-journal-events-onto module-name journal (як-є ()))))
+  (функція (назва-модуля журнал)
+    (module-journal-events-onto назва-модуля журнал (як-є ()))))
 
 (визначити module-journal-has-module?
-  (функція (module-name journal)
+  (функція (назва-модуля журнал)
     (за-умовою
-      ((атом? journal) ні)
-      ((тотожне? (друге (перше journal)) module-name) так)
-      (так (журнал-містить-записи-модуля? module-name (решта journal))))))
+      ((атом? журнал) ні)
+      ((тотожне? (друге (перше журнал)) назва-модуля) так)
+      (так (журнал-містить-записи-модуля? назва-модуля (решта журнал))))))
 
 ; One symbol law is owned by Core; do not duplicate historical blank W8 slots.
 (визначити knowledge-symbol?
-  (функція (value)
-    (символ? value)))
+  (функція (значення)
+    (символ? значення)))
 
 (визначити module-known?
-  (функція (module-name)
-    (журнал-містить-записи-модуля? module-name *knowledge-journal*)))
+  (функція (назва-модуля)
+    (журнал-містить-записи-модуля? назва-модуля *knowledge-journal*)))
 
 (визначити apply-journal-event
-  (функція (clauses event)
+  (функція (клаузи подія)
     (за-умовою
-      ((тотожне? (перше event) (як-є tell)) (сполучити (третє event) clauses))
-      ((тотожне? (перше event) (як-є retract)) (відкликати-факт (третє event) clauses))
-      (так clauses))))
+      ((тотожне? (перше подія) (як-є tell)) (сполучити (третє подія) клаузи))
+      ((тотожне? (перше подія) (як-є retract)) (відкликати-факт (третє подія) клаузи))
+      (так клаузи))))
 
 (визначити module-clauses-now
   (функція (module-name)
