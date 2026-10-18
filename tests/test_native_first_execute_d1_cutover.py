@@ -33,17 +33,43 @@ def forms(source: str):
     return stack[0]
 
 
+
+# Інверсія лише повних українських викличних голів для історичного D1 SHA.
+# НОРМАТИВНИЙ HISTORIC SHA НЕ ЗМІНЮЄМО.
+_UKR_TO_BITS = {
+    "як-є": "001",
+    "атом?": "010",
+    "решта": "011",
+    "перше": "100",
+    "тотожне?": "101",
+    "за-умовою": "110",
+    "сполучити": "111",
+    "обчислити": "0001",
+    "функція": "0010",
+    "визначити": "0011",
+    "порожній?": "0101",
+}
+_UKR_HEAD_RE = re.compile(
+    r"\((" + "|".join(map(re.escape, sorted(_UKR_TO_BITS, key=len, reverse=True)))
+    + r")(?=\s|\))"
+)
+
+
+def restore_binary_heads(source: str) -> str:
+    return _UKR_HEAD_RE.sub(lambda m: "(" + _UKR_TO_BITS[m.group(1)], source)
+
+
 def prove_source(source: str):
     if (source.count("#d1:1"), source.count("#d1:0")) != (11, 7):
         raise ValueError("D1 direct-predicate census changed")
     if OLD_YES in source or OLD_NO in source:
         raise ValueError("named call remains")
-    historical = source.replace("#d1:1", OLD_YES).replace("#d1:0", OLD_NO).encode("utf-8")
+    historical = restore_binary_heads(source).replace("#d1:1", OLD_YES).replace("#d1:0", OLD_NO).encode("utf-8")
     blob = hashlib.sha1(b"blob " + str(len(historical)).encode() + b"\0" + historical).hexdigest()
     if blob != HISTORIC_GIT_BLOB:
         raise ValueError("unexpected non-D1 historical AST/text drift")
     definitions = forms(source)
-    if len(definitions) != 13 or any(not isinstance(row, list) or row[0] != "0011"
+    if len(definitions) != 13 or any(not isinstance(row, list) or row[0] != "визначити"
                                      for row in definitions):
         raise ValueError("13 machine bridge definitions not preserved")
     names = [row[1] for row in definitions]

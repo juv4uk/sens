@@ -21,149 +21,149 @@
 ;   lib/machine/admission/x86-64.lisp
 ;   lib/machine/dispatch/native-first.lisp
 
-(0011 native-first-list-2
-  (0010 (a b)
-    (111 a (111 b (001 ())))))
+(визначити native-first-list-2
+  (функція (a b)
+    (сполучити a (сполучити b (як-є ())))))
 
-(0011 native-first-list-4
-  (0010 (a b c d)
-    (111 a (111 b (111 c (111 d (001 ())))))))
+(визначити native-first-list-4
+  (функція (a b c d)
+    (сполучити a (сполучити b (сполучити c (сполучити d (як-є ())))))))
 
-(0011 native-first-execution-completed
-  (0010 (route value)
+(визначити native-first-execution-completed
+  (функція (route value)
     (native-first-list-4
-      (001 execution-route)
+      (як-є execution-route)
       route
-      (001 (status completed))
-      (native-first-list-2 (001 value) value))))
+      (як-є (status completed))
+      (native-first-list-2 (як-є value) value))))
 
-(0011 native-first-execution-rejected
-  (0010 (route detail)
+(визначити native-first-execution-rejected
+  (функція (route detail)
     (native-first-list-4
-      (001 execution-route)
+      (як-є execution-route)
       route
-      (001 (status rejected))
-      (native-first-list-2 (001 detail) detail))))
+      (як-є (status rejected))
+      (native-first-list-2 (як-є detail) detail))))
 
-(0011 native-first-proper-list-length-2?
-  (0010 (value)
-    (110
-      ((010 value)
+(визначити native-first-proper-list-length-2?
+  (функція (value)
+    (за-умовою
+      ((атом? value)
        #d1:0)
-      ((010 (011 value))
+      ((атом? (решта value))
        #d1:0)
-      ((0101 (011 (011 value)))
+      ((порожній? (решта (решта value)))
        #d1:1)
       (#d1:1
        #d1:0))))
 
-(0011 native-first-proper-list-length-3?
-  (0010 (value)
-    (110
-      ((010 value)
+(визначити native-first-proper-list-length-3?
+  (функція (value)
+    (за-умовою
+      ((атом? value)
        #d1:0)
-      ((010 (011 value))
+      ((атом? (решта value))
        #d1:0)
-      ((010 (011 (011 value)))
+      ((атом? (решта (решта value)))
        #d1:0)
-      ((101 (011 (011 (011 value))) ())
+      ((тотожне? (решта (решта (решта value))) ())
        #d1:1)
       (#d1:1
        #d1:0))))
 
-(0011 native-first-plan-tag-state
-  (0010 (plan tag)
-    (110
-      ((010 plan)
-       (001 distinct))
-      ((101 (100 plan) tag)
-       (001 same))
+(визначити native-first-plan-tag-state
+  (функція (plan tag)
+    (за-умовою
+      ((атом? plan)
+       (як-є distinct))
+      ((тотожне? (перше plan) tag)
+       (як-є same))
       (#d1:1
-       (001 distinct)))))
+       (як-є distinct)))))
 
-(0011 native-first-execute-native-plan-result
-  (0010 (plan result)
-    (110
-      ((010 result)
-       (native-first-execution-completed (001 native) result))
-      ((101 (100 result) (001 rejected))
-       (native-first-execution-rejected (001 native) result))
+(визначити native-first-execute-native-plan-result
+  (функція (plan result)
+    (за-умовою
+      ((атом? result)
+       (native-first-execution-completed (як-є native) result))
+      ((тотожне? (перше result) (як-є rejected))
+       (native-first-execution-rejected (як-є native) result))
       (#d1:1
-       (native-first-execution-completed (001 native) result)))))
+       (native-first-execution-completed (як-є native) result)))))
 
-(0011 native-first-execute-native-plan
-  (0010 (plan)
+(визначити native-first-execute-native-plan
+  (функція (plan)
     (native-first-execute-native-plan-result
       plan
       (x86-call-admitted-u64
-        (100 (011 plan))
-        (100 (011 (011 plan)))))))
+        (перше (решта plan))
+        (перше (решта (решта plan)))))))
 
-(0011 native-first-execute-plan
-  (0010 (plan)
-    (110
-      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 same))
-       (110
+(визначити native-first-execute-plan
+  (функція (plan)
+    (за-умовою
+      ((тотожне? (native-first-plan-tag-state plan (як-є native-plan)) (як-є same))
+       (за-умовою
          ((native-first-proper-list-length-3? plan)
           (native-first-execute-native-plan plan))
          (#d1:1
           (native-first-execution-rejected
-            (001 native)
-            (native-first-list-2 (001 malformed-native-plan) plan)))))
-      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 distinct))
-       (110
-         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))
-          (110
+            (як-є native)
+            (native-first-list-2 (як-є malformed-native-plan) plan)))))
+      ((тотожне? (native-first-plan-tag-state plan (як-є native-plan)) (як-є distinct))
+       (за-умовою
+         ((тотожне? (native-first-plan-tag-state plan (як-є evaluator-fallback)) (як-є same))
+          (за-умовою
             ((native-first-proper-list-length-2? plan)
              (native-first-execution-completed
-               (001 evaluator)
-               (0001 (100 (011 plan)))))
+               (як-є evaluator)
+               (обчислити (перше (решта plan)))))
             (#d1:1
              (native-first-execution-rejected
-               (001 invalid-plan)
+               (як-є invalid-plan)
                (native-first-list-2
-                 (001 malformed-evaluator-fallback-plan)
+                 (як-є malformed-evaluator-fallback-plan)
                  plan)))))
-         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))
+         ((тотожне? (native-first-plan-tag-state plan (як-є evaluator-fallback)) (як-є distinct))
           (native-first-execution-rejected
-            (001 invalid-plan)
-            (native-first-list-2 (001 unknown-native-first-plan) plan)))
+            (як-є invalid-plan)
+            (native-first-list-2 (як-є unknown-native-first-plan) plan)))
          (#d1:1
           (native-first-execution-rejected
-            (001 invalid-plan)
-            (native-first-list-2 (001 malformed-fallback-tag-state) plan)))))
+            (як-є invalid-plan)
+            (native-first-list-2 (як-є malformed-fallback-tag-state) plan)))))
       (#d1:1
        (native-first-execution-rejected
-         (001 invalid-plan)
-         (native-first-list-2 (001 unknown-native-first-plan) plan))))))
-(0011 native-first-execute-expression
-  (0010 (expression)
+         (як-є invalid-plan)
+         (native-first-list-2 (як-є unknown-native-first-plan) plan))))))
+(визначити native-first-execute-expression
+  (функція (expression)
     (native-first-execute-plan
       (native-first-plan expression))))
 
-(0011 native-first-execute-source-forms
-  (0010 (forms)
-    (110
-      ((010 forms)
-       (110
-         ((101 forms ())
-          (001 ()))
+(визначити native-first-execute-source-forms
+  (функція (forms)
+    (за-умовою
+      ((атом? forms)
+       (за-умовою
+         ((тотожне? forms ())
+          (як-є ()))
          (#d1:1
-          (111
+          (сполучити
             (native-first-execution-rejected
-              (001 evaluator)
+              (як-є evaluator)
               (native-first-list-2
-                (001 malformed-source-form-tail)
+                (як-є malformed-source-form-tail)
                 forms))
-            (001 ())))))
+            (як-є ())))))
       (#d1:1
-       (111
-         (native-first-execute-expression (100 forms))
-         (native-first-execute-source-forms (011 forms)))))))
+       (сполучити
+         (native-first-execute-expression (перше forms))
+         (native-first-execute-source-forms (решта forms)))))))
 
-(0011 native-first-execute-source
-  (0010 (source)
+(визначити native-first-execute-source
+  (функція (source)
     (native-first-list-2
-      (001 source-execution)
+      (як-є source-execution)
       (native-first-execute-source-forms
         (01001011 source)))))

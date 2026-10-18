@@ -35,6 +35,32 @@ def parse(src):
     return stack[0]
 
 
+
+# Інверсія лише повних українських викличних голів для історичного D1 SHA.
+# НОРМАТИВНИЙ HISTORIC SHA НЕ ЗМІНЮЄМО.
+_UKR_TO_BITS = {
+    "як-є": "001",
+    "атом?": "010",
+    "решта": "011",
+    "перше": "100",
+    "тотожне?": "101",
+    "за-умовою": "110",
+    "сполучити": "111",
+    "обчислити": "0001",
+    "функція": "0010",
+    "визначити": "0011",
+    "порожній?": "0101",
+}
+_UKR_HEAD_RE = re.compile(
+    r"\((" + "|".join(map(re.escape, sorted(_UKR_TO_BITS, key=len, reverse=True)))
+    + r")(?=\s|\))"
+)
+
+
+def restore_binary_heads(source: str) -> str:
+    return _UKR_HEAD_RE.sub(lambda m: "(" + _UKR_TO_BITS[m.group(1)], source)
+
+
 def audit(text):
     no_n = text.count(NO)
     yes_n = text.count(YES)  # direct values: no nested D3/D4 constructors
@@ -42,13 +68,13 @@ def audit(text):
         raise ValueError(f"expected 24 independent YES + 6 NO, got {yes_n}+{no_n}")
     if OLD_YES in text or OLD_NO in text:
         raise ValueError("retired named D1 call remains")
-    restored = text.replace(NO, OLD_NO).replace(YES, OLD_YES)
+    restored = restore_binary_heads(text).replace(NO, OLD_NO).replace(YES, OLD_YES)
     raw = restored.encode("utf-8")
     sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
     if sha != HISTORIC_SHA:
         raise ValueError("non-D1 executable bytes changed")
     roots = parse(text)
-    if len(roots) != 17 or any(not isinstance(x, list) or x[0] != "0011" for x in roots):
+    if len(roots) != 17 or any(not isinstance(x, list) or x[0] != "визначити" for x in roots):
         raise ValueError("expected 17 definitions")
     names = [x[1] for x in roots]
     if len(set(names)) != 17 or "native-first-domain-true" not in names or "native-first-domain-false" not in names:
@@ -56,7 +82,7 @@ def audit(text):
     def check(node):
         if not isinstance(node, list):
             return
-        if node and node[0] == "110":
+        if node and node[0] == "за-умовою":
             for clause in node[1:]:
                 if not isinstance(clause, list) or len(clause) != 2:
                     raise ValueError("non two-field D3 COND clause")
