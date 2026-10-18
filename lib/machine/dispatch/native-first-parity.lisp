@@ -5,101 +5,101 @@
 ; expected evidence. Route provenance is part of the observation so evaluator
 ; fallback cannot impersonate native success.
 
-(0011 native-first-parity-pass
-  (0010 (name effect-class error-class)
-    (1110
-      (001 native-parity-case)
+(визначити native-first-parity-pass
+  (функція (name effect-class error-class)
+    (список
+      (як-є native-parity-case)
       name
-      (001 pass)
-      (1110 (001 effect) effect-class)
-      (1110 (001 error) error-class))))
+      (як-є pass)
+      (список (як-є effect) effect-class)
+      (список (як-є error) error-class))))
 
-(0011 native-first-parity-fail
-  (0010 (name kind expected actual)
-    (1110
-      (001 native-parity-case)
+(визначити native-first-parity-fail
+  (функція (name kind expected actual)
+    (список
+      (як-є native-parity-case)
       name
-      (001 fail)
-      (1110 (001 kind) kind)
-      (1110 (001 expected) expected)
-      (1110 (001 actual) actual))))
+      (як-є fail)
+      (список (як-є kind) kind)
+      (список (як-є expected) expected)
+      (список (як-є actual) actual))))
 
-(0011 native-first-parity-case
-  (0010 (row)
-    (001001 ((name (100 row))
-           (expression (1001 row))
-           (expected (10011 row))
-           (effect-class (100111 row))
+(визначити native-first-parity-case
+  (функція (row)
+    (нехай-послідовно ((name (перше row))
+           (expression (друге row))
+           (expected (третє row))
+           (effect-class (четверте row))
            (error-class (110110101 row))
-           (evaluator-value (0001 expression))
+           (evaluator-value (обчислити expression))
            (native-outcome
              (native-first-execute-expression expression))
            (expected-native-outcome
-             (1110
-               (001 execution-route)
-               (001 native)
-               (001 (status completed))
-               (1110 (001 value) expected))))
-      (110
-        ((11110111 evaluator-value expected)
+             (список
+               (як-є execution-route)
+               (як-є native)
+               (як-є (status completed))
+               (список (як-є value) expected))))
+      (за-умовою
+        ((однакові? evaluator-value expected)
          
-         (110
-           ((11110111 native-outcome expected-native-outcome)
+         (за-умовою
+           ((однакові? native-outcome expected-native-outcome)
             
             (native-first-parity-pass
               name
               effect-class
               error-class))
-           (#d1:1
+           (так
             (native-first-parity-fail
               name
-              (001 native-or-route-mismatch)
+              (як-є native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
-        (#d1:1
+        (так
          (native-first-parity-fail
            name
-           (001 evaluator-evidence-mismatch)
+           (як-є evaluator-evidence-mismatch)
            expected
            evaluator-value))))))
 
-(0011 native-first-parity-run
-  (0010 (rows)
-    (110
+(визначити native-first-parity-run
+  (функція (rows)
+    (за-умовою
       
-      ((010 rows) 
-       (1110
+      ((атом? rows) 
+       (список
          (native-first-parity-fail
-           (001 malformed-corpus)
-           (001 malformed-tail)
-           (001 ())
+           (як-є malformed-corpus)
+           (як-є malformed-tail)
+           (як-є ())
            rows)))
-      ((0100 (010 rows))
-       (111
-         (native-first-parity-case (100 rows))
-         (native-first-parity-run (011 rows)))))))
+      ((хибне? (атом? rows))
+       (сполучити
+         (native-first-parity-case (перше rows))
+         (native-first-parity-run (решта rows)))))))
 
-(0011 native-first-parity-verdict-pass?
-  (0010 (verdict)
-    (110
-      ((0100 (010 verdict))
-       (110
-         ((11110111 (10011 verdict) (001 pass))
+(визначити native-first-parity-verdict-pass?
+  (функція (verdict)
+    (за-умовою
+      ((хибне? (атом? verdict))
+       (за-умовою
+         ((однакові? (третє verdict) (як-є pass))
           
           t)
          ))
-      ((001 native-first-parity-verdict-fallback)
+      ((як-є native-first-parity-verdict-fallback)
        
-       (001 ())))))
+       (як-є ())))))
 
-(0011 native-first-parity-all-pass?
-  (0010 (verdicts)
-    (110
-      ((0100 (010 verdicts)) t)
-      ((010 verdicts)  (001 ()))
-      ((0100 (010 verdicts))
-       (110
-         ((11110111 (native-first-parity-verdict-pass? (100 verdicts)) t)
+(визначити native-first-parity-all-pass?
+  (функція (verdicts)
+    (за-умовою
+      ((хибне? (атом? verdicts)) t)
+      ((атом? verdicts)  (як-є ()))
+      ((хибне? (атом? verdicts))
+       (за-умовою
+         ((однакові? (native-first-parity-verdict-pass? (перше verdicts)) t)
           
-          (native-first-parity-all-pass? (011 verdicts)))
+          (native-first-parity-all-pass? (решта verdicts)))
          )))))
