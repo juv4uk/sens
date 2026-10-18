@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = "scripts/semantic-authority-guard.lisp"
 OLD_BLOB_SHA = "d3006a7442065f3e6a1cb5b2ebf9c4e68a336de3"
 PROJECTED_BLOB_SHA = "45f54c7cea67c426af94cc9a096c327ecc3abbaf"
+LATEST_BLOB_SHA = "f9787223dde7b63439445af951d0fd008059161d"
 
 # Exact current full-surface values from the ratified D3/D4 tables.
 PROJECTIONS = {
@@ -75,10 +76,15 @@ MIGRATED_HEADS_BY_LINE = {
     104: ("101", "001"),
     106: ("001",),
 }
-UNPROJECTABLE_HEADS_BY_LINE = {
+NEXT_BATCH_BY_LINE = {
     86: ("001001", "100"),
     93: ("001000",),
     102: ("001000",),
+}
+NEXT_PROJECTIONS = {
+    "001001": "нехай-послідовно",
+    "100": "перше",
+    "001000": "нехай",
 }
 INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
 
@@ -193,6 +199,31 @@ def inverse_projected_heads(source: str) -> str:
     return result
 
 
+def rollback_next_exact_batch(source: str) -> str:
+    """Undo only the later, domain-ratified D3/D6 heads before the older inverse."""
+    lines = source.splitlines(keepends=True)
+    names = set(NEXT_PROJECTIONS.values())
+    for line, bits in NEXT_BATCH_BY_LINE.items():
+        index = line - 1
+        if index >= len(lines):
+            raise AssertionError(f"lost migrated line {line}")
+        found = named_heads(lines[index], names)
+        expected = [NEXT_PROJECTIONS[bit] for bit in bits]
+        if [head[0] for head in found] != expected:
+            raise AssertionError(f"line {line}: expected {expected}, found {[head[0] for head in found]}")
+        current = lines[index]
+        for _name, start, end, _local_line in reversed(found):
+            bit = next((b for b in bits if NEXT_PROJECTIONS[b] == _name), None)
+            if bit is None:
+                raise AssertionError("unratified peer")
+            current = current[:start] + bit + current[end:]
+        lines[index] = current
+    original = "".join(lines)
+    if git_blob_sha(original) != PROJECTED_BLOB_SHA:
+        raise AssertionError("lost exact pre-batch Git blob")
+    return original
+
+
 class UkrainianSemanticAuthorityGuardProjection(unittest.TestCase):
     def setUp(self):
         self.source = (ROOT / SOURCE_PATH).read_text(encoding="utf-8")
@@ -210,11 +241,12 @@ class UkrainianSemanticAuthorityGuardProjection(unittest.TestCase):
                 self.assertIn(f"(укр {surface})", rows[0])
 
     def test_exact_inverse_restores_original_blob(self):
-        self.assertEqual(git_blob_sha(self.source), PROJECTED_BLOB_SHA)
-        restored = inverse_projected_heads(self.source)
+        self.assertEqual(git_blob_sha(self.source), LATEST_BLOB_SHA)
+        previous = rollback_next_exact_batch(self.source)
+        restored = inverse_projected_heads(previous)
         self.assertEqual(git_blob_sha(restored), OLD_BLOB_SHA)
         self.assertEqual(len(restored.splitlines()), len(self.source.splitlines()))
-        self.assertEqual(project_exact_heads(restored), self.source)
+        self.assertEqual(project_exact_heads(restored), previous)
 
     def test_exact_head_counts_and_idempotence(self):
         self.assertEqual(
@@ -227,19 +259,26 @@ class UkrainianSemanticAuthorityGuardProjection(unittest.TestCase):
         observed_residuals = defaultdict(list)
         for bits, _start, _end, line in numeric_heads(self.source):
             observed_residuals[line].append(bits)
-        self.assertEqual({line: tuple(bits) for line, bits in observed_residuals.items()},
-                         UNPROJECTABLE_HEADS_BY_LINE)
+        self.assertEqual(observed_residuals, {})
+        previous = rollback_next_exact_batch(self.source)
+        self.assertEqual(
+            {line: tuple(bits) for line, bits in (
+                (line, [item[0] for item in numeric_heads(previous) if item[3] == line])
+                for line in NEXT_BATCH_BY_LINE
+            )},
+            NEXT_BATCH_BY_LINE,
+        )
 
-    def test_mixed_d6_lines_remain_unmodified_and_fail_closed(self):
+    def test_later_exact_d3_d6_heads_fail_closed_for_wrong_peer(self):
         lines = self.source.splitlines()
-        self.assertIn("(001001 ((row (100 rows))", lines[85])
-        self.assertIn("(001000 ((raw-source", lines[92])
-        self.assertIn("(001000 ((class", lines[101])
-        self.assertEqual(numeric_heads(self.source), [
-            (bits, start, end, line)
-            for bits, start, end, line in numeric_heads(self.source)
-            if line in UNPROJECTABLE_HEADS_BY_LINE
-        ])
+        self.assertIn("(нехай-послідовно ((row (перше rows))", lines[85])
+        self.assertIn("(нехай ((raw-source", lines[92])
+        self.assertIn("(нехай ((class", lines[101])
+        self.assertEqual(numeric_heads(self.source), [])
+        wrong = self.source.replace("(нехай ((raw-source", "(функція ((raw-source", 1)
+        self.assertNotEqual(wrong, self.source)
+        with self.assertRaises(AssertionError):
+            rollback_next_exact_batch(wrong)
 
 
 if __name__ == "__main__":
