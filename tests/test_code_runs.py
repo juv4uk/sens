@@ -902,5 +902,110 @@ class MinimalRuntimeProfileUkrProjectionTests(unittest.TestCase):
         self.assertNotEqual(self._git_blob_sha(restored), self.ORIGINAL_BLOB)
 
 
+class X86AdmissionLoweringUkrProjectionTests(unittest.TestCase):
+    """Статична перевірка точних SENS проєкцій; не Python evaluator."""
+
+    ORIGINAL = {
+        "lib/machine/admission/x86-64.lisp": "a7049c51a6d22c398d1f4f8bc34bfdab9b65658f",
+        "lib/machine/lowering/semantic-x86-64.lisp": "bfbe6aff5d33222666901734d96c9a09ae60462f",
+    }
+    EXPECTED_COUNTS = {
+        "lib/machine/admission/x86-64.lisp": {
+            "100": 7,
+            "101": 11,
+            "110": 30,
+            "111": 1,
+            "1001": 76,
+            "1110": 2,
+            "0011": 18,
+            "001": 212,
+            "0010": 19,
+            "010": 29,
+            "0100": 2,
+            "011": 6,
+            "0101": 2,
+        },
+        "lib/machine/lowering/semantic-x86-64.lisp": {
+            "100": 2,
+            "101": 15,
+            "110": 43,
+            "111": 1,
+            "1110": 82,
+            "0011": 37,
+            "001": 205,
+            "0010": 43,
+            "010": 44,
+            "011": 2,
+        },
+    }
+    PEERS = (
+        (3, "001", "як-є", "quote"),
+        (3, "010", "атом?", "atom?"),
+        (3, "011", "решта", "cdr"),
+        (3, "100", "перше", "car"),
+        (3, "101", "тотожне?", "eq?"),
+        (3, "110", "за-умовою", "cond"),
+        (3, "111", "сполучити", "cons"),
+        (4, "0010", "функція", "lambda"),
+        (4, "0011", "визначити", "define"),
+        (4, "0100", "хибне?", "not?"),
+        (4, "0101", "порожній?", "null?"),
+        (4, "1001", "друге", "cadr"),
+        (4, "1110", "список", "list"),
+    )
+
+    @staticmethod
+    def _blob_sha(text):
+        import hashlib
+        b = text.encode("utf-8")
+        return hashlib.sha1(f"blob {len(b)}\0".encode() + b).hexdigest()
+
+    @classmethod
+    def _restore(cls, source):
+        import re
+        from collections import Counter
+        peers = {name: bits for _, bits, name, _ in cls.PEERS}
+        regex = re.compile(r"(\(\s*)(" + "|".join(re.escape(n) for n in sorted(peers, key=len, reverse=True)) + r")(?=\s|\))")
+        counts = Counter()
+        def undo(match):
+            name = match.group(2)
+            counts[peers[name]] += 1
+            return match.group(1) + peers[name]
+        return regex.sub(undo, source), counts
+
+    def test_domain_identity_and_exact_git_blob_inverse(self):
+        import re
+        root = Path(__file__).resolve().parents[1]
+        for width, bits, ukr, english in self.PEERS:
+            with self.subTest(domain=width, bits=bits):
+                rows = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8").splitlines()
+                matches = [line for line in rows if re.match(rf"^\s*\({bits}\s+\(ук\s+", line)]
+                self.assertEqual(len(matches), 1)
+                self.assertIn(f"(укр {ukr})", matches[0])
+                self.assertIn(f"(en {english})", matches[0])
+                self.assertEqual(len(bits), width)
+                self.assertIsNone(re.search(r"[A-Za-z]", ukr))
+        for path, expected_blob in self.ORIGINAL.items():
+            with self.subTest(path=path):
+                source = (root / path).read_text(encoding="utf-8")
+                restored, counts = self._restore(source)
+                self.assertEqual(dict(counts), self.EXPECTED_COUNTS[path])
+                self.assertEqual(self._blob_sha(restored), expected_blob)
+
+    def test_wrong_peer_fails_inverse_and_historical_machine_data_is_untouched(self):
+        root = Path(__file__).resolve().parents[1]
+        for path, original_blob in self.ORIGINAL.items():
+            with self.subTest(path=path):
+                source = (root / path).read_text(encoding="utf-8")
+                self.assertIn("(за-умовою", source)
+                mutant = source.replace("(за-умовою", "(тотожне?", 1)
+                self.assertNotEqual(mutant, source)
+                restored, _ = self._restore(mutant)
+                self.assertNotEqual(self._blob_sha(restored), original_blob)
+        admission = (root / "lib/machine/admission/x86-64.lisp").read_text(encoding="utf-8")
+        self.assertIn("(000)", admission)
+        lowering = (root / "lib/machine/lowering/semantic-x86-64.lisp").read_text(encoding="utf-8")
+        self.assertIn("(00000010", lowering)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
