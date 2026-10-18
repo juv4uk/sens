@@ -21,6 +21,15 @@ REWRITES = (
     ("(01011 ", "(відняти ", 3),  # повна укр-проєкція
 )
 
+# Лише локальні Lisp-змінні; цитовані поля результату й рядки — незмінні.
+LOCAL_REWRITES = (
+    ("started", "початок", 3),  # локальне ім'я, не домен
+    ("registry-text", "текст-реєстру", 2),  # локальне ім'я, не домен
+    ("after-read", "після-читання", 3),  # локальне ім'я, не домен
+    ("registry-form", "форма-реєстру", 2),  # локальне ім'я, не домен
+    ("after-parse", "після-розбору", 3),  # локальне ім'я, не домен
+)
+
 
 def git_blob_sha(payload: bytes) -> str:
     header = b"blob " + str(len(payload)).encode("ascii") + b"\0"
@@ -74,7 +83,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_full_ukr_heads_have_exact_ratified_counts(self):
         source = SOURCE.read_text(encoding="utf-8")
         visible = mask_comments_and_strings(source)
-        for old, new, count in REWRITES:
+        for old, new, count in (*REWRITES, *LOCAL_REWRITES):
             with self.subTest(old=old):
                 self.assertEqual(source.count(old), 0,
                                  "retired binary head remains in the projected source")
@@ -88,7 +97,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_inverse_restores_the_original_git_blob_byte_exactly(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = source
-        for old, new, count in reversed(REWRITES):
+        for old, new, count in reversed((*REWRITES, *LOCAL_REWRITES)):
             self.assertEqual(restored.count(new), count)
             restored = restored.replace(new, old)
         payload = restored.encode("utf-8")
@@ -98,7 +107,7 @@ class UkrainianRegistryReadBenchmarkTests(unittest.TestCase):
     def test_historical_d8_d9_and_measurement_fields_restore_unchanged(self):
         source = SOURCE.read_text(encoding="utf-8")
         restored = source
-        for old, new, _ in reversed(REWRITES):
+        for old, new, _ in reversed((*REWRITES, *LOCAL_REWRITES)):
             restored = restored.replace(new, old)
         for token in ("01011010", "110110111", "110101001", "11011011",
                       "01011 after-read started", "01011 after-parse after-read",
