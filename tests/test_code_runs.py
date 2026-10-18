@@ -1299,7 +1299,7 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
 
     @classmethod
     def _restore_original(cls, source):
-        exact_peer = re.escape(cls.UKR_HEAD) + r"(?=\\s|\\))"
+        exact_peer = re.escape(cls.UKR_HEAD) + r"(?=\s|\))"
         matches = list(re.finditer(exact_peer, source))
         if len(matches) != 1:
             raise AssertionError("D9 Unicode scalar projection count drift")
@@ -1315,8 +1315,8 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
         self.assertIn("(en unicode-scalars->string)", rows[0])
         self.assertIn("(LISP UNICODE-SCALARS->STRING)", rows[0])
         # Whole-token checks: the related helper ...-onto is a different name.
-        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\\s|\\))"
-        exact_old = re.escape(self.OLD_HEAD) + r"(?=\\s|\\))"
+        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\s|\))"
+        exact_old = re.escape(self.OLD_HEAD) + r"(?=\s|\))"
         self.assertEqual(len(re.findall(exact_ukr, source)), 1)
         self.assertEqual(len(re.findall(exact_old, source)), 0)
         restored = self._restore_original(source)
@@ -1324,7 +1324,7 @@ class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
 
     def test_wrong_d9_peer_is_rejected(self):
         source = self.SOURCE.read_bytes().decode("utf-8")
-        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\\s|\\))"
+        exact_ukr = re.escape(self.UKR_HEAD) + r"(?=\s|\))"
         mutant, replacements = re.subn(exact_ukr, "(відкликати-факт", source, count=1)
         self.assertEqual(replacements, 1)
         self.assertNotEqual(mutant, source)
