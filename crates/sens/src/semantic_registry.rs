@@ -158,7 +158,7 @@ fn build_exact_source_index(rows: &[DomainSurfaceRow]) -> ExactDomainSourceIndex
                 continue;
             }
             insert_exact_source(&mut index.all, surface.name, identity);
-            if surface.namespace == "uk" {
+            if matches!(surface.namespace, "uk" | "ukr") {
                 insert_exact_source(&mut index.uk, surface.name, identity);
             }
         }
@@ -211,7 +211,7 @@ pub(crate) fn compatibility_d3_route_from_ratified_domains(
 
 /// Canonical Ukrainian *source-head* projection, before evaluation.
 ///
-/// Only owner-ratified source-routable uk rows are eligible. This is NOT the
+/// Only owner-ratified source-routable uk/ukr peer rows are eligible. This is NOT the
 /// legacy SID compatibility index: no en alias, old W8, D2 structure, or
 /// unratified D7 binder can become a callable head via this API.
 /// The mixed reader applies it only to executable HEAD positions.
@@ -668,7 +668,7 @@ mod domain_source_projection_anti_collision_tests {
                     Some(expected),
                     "a generated surface lost its exact domain identity"
                 );
-                if surface.namespace == "uk" {
+                if matches!(surface.namespace, "uk" | "ukr") {
                     assert_eq!(index.uk.get(surface.name).copied().flatten(), Some(expected));
                 } else {
                     assert!(!index.uk.contains_key(surface.name));
