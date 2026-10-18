@@ -32,19 +32,19 @@
 ; are ratified stable peers installed directly by the runtime together with
 ; Ukrainian and symbolic spellings. None is defined through another surface.
 ; rūpa = absolute value (candidate — polysemous)
-(0011 rūpa abs)
+(визначити rūpa abs)
 ; alpatara = least (alpa + -tara comparative)
-(0011 alpatara min)
+(визначити alpatara min)
 ; brhattara = greatest (bṛhat + -tara comparative)
-(0011 brhattara max)
+(визначити brhattara max)
 ; avasiṣṭa = remainder (ava-śiṣ; ≠ śeṣa CDR)
-(0011 avasiṣṭa mod)
+(визначити avasiṣṭa mod)
 ; bhāga = quotient (result of division)
-(0011 bhāga quotient)
+(визначити bhāga quotient)
 ; mūla = square root
-(0011 mūla sqrt)
+(визначити mūla sqrt)
 ; sakalamūla = integer square root
-(0011 sakalamūla isqrt)
+(визначити sakalamūla isqrt)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Comparisons (status: candidate)
@@ -53,9 +53,9 @@
 ; ADR-007/008 / 1014–1016: hīna?, adhika? and sama? are ratified
 ; stable peers installed directly by the runtime with UK and symbolic names.
 ; na-adhika = not-greater (compound)
-(0011 na-adhika? <=)
+(визначити na-adhika? <=)
 ; na-hīna = not-lesser (compound)
-(0011 na-hīna? >=)
+(визначити na-hīna? >=)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Predicates (status: candidate)
@@ -63,48 +63,48 @@
 
 ; na = not (universal negation)
 ; tulya = structurally equal (≠ abheda eq, sama =)
-(0011 tulya? equal?)
+(визначити tulya? equal?)
 ; nāman = symbol/name (Pāṇini 1.1.62)
-(0011 nāman? symbol?)
+(визначити nāman? symbol?)
 ; śabda = string/text
-(0011 śabda-hīna? string<?)
+(визначити śabda-hīna? string<?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Lists (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śreṇī = ordered sequence
-(0011 śreṇī list)
+(визначити śreṇī list)
 ; pramāṇa = measure/quantity
-(0011 pramāṇa length)
+(визначити pramāṇa length)
 ; saṅkalana = collection (≠ saṃyuj CONS)
-(0011 saṅkalana append)
+(визначити saṅkalana append)
 ; viloma = reverse order
-(0011 viloma reverse)
+(визначити viloma reverse)
 ; kramāṅka = ordinal number (candidate)
-(0011 kramāṅka nth)
+(визначити kramāṅka nth)
 ; sambaddha = included/bound (candidate)
-(0011 sambaddha? member?)
+(визначити sambaddha? member?)
 ; saṃbandha = relation/connection
-(0011 saṃbandha assoc)
+(визначити saṃbandha assoc)
 ; dvandva = pair (Pāṇini 2.2.29-34)
-(0011 dvandva pair)
+(визначити dvandva pair)
 ; ordinals — safe: return element, not sublist
-(0011 dvitīya second)
-(0011 tṛtīya third)
-(0011 caturtha fourth)
-(0011 pañcama fifth)
+(визначити dvitīya second)
+(визначити tṛtīya third)
+(визначити caturtha fourth)
+(визначити pañcama fifth)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Higher-order (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; āvartana = repeated application (candidate — no direct traditional source)
-(0011 āvartana map)
+(визначити āvartana map)
 ; kalpana = selection/postulation (Mīmāṃsā)
-(0011 kalpana filter)
+(визначити kalpana filter)
 ; saṅgraha = comprehension/collection
-(0011 saṅgraha reduce)
+(визначити saṅgraha reduce)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Strings (status: candidate)
@@ -122,7 +122,7 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svabhāva = own nature/identity (≠ svarūpa QUOTE)
-(0011 svabhāva identity)
+(визначити svabhāva identity)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — I/O (status: candidate)
@@ -146,103 +146,103 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; saṅkhyā-śabda = number-to-word
-(0011 saṅkhyā-śabda number->string)
+(визначити saṅkhyā-śabda number->string)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Time (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kāla = time
-(0011 kāla-adya utc-now)
-(0011 kāla-mono-ms mono-ms)
-(0011 kāla-millisecondāni milliseconds-from-nanoseconds)
+(визначити kāla-adya utc-now)
+(визначити kāla-mono-ms mono-ms)
+(визначити kāla-millisecondāni milliseconds-from-nanoseconds)
 ; deśa-kāla = timezone
-(0011 deśa-kāla-nāma timezone-name)
-(0011 deśa-kāla-jñāna timezone-detect)
-(0011 deśa-kāla-śeṣa timezone-offset-seconds)
+(визначити deśa-kāla-nāma timezone-name)
+(визначити deśa-kāla-jñāna timezone-detect)
+(визначити deśa-kāla-śeṣa timezone-offset-seconds)
 ;avadhi = deadline
-(0011 avadhi-gatā? deadline-reached?)
-(0011 avadhi-gatā-kadā? deadline-reached-at?)
-(0011 avadhi-nirmāṇa deadline-from)
-(0011 avadhi-anantara-ns deadline-after-ns)
-(0011 atīta-ns elapsed-ns)
+(визначити avadhi-gatā? deadline-reached?)
+(визначити avadhi-gatā-kadā? deadline-reached-at?)
+(визначити avadhi-nirmāṇa deadline-from)
+(визначити avadhi-anantara-ns deadline-after-ns)
+(визначити atīta-ns elapsed-ns)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent map (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kośa = repository/map
-(0011 kośa-śūnya map-empty)
-(0011 kośa-grahaṇa map-get)
-(0011 kośa-niveśana map-insert)
-(0011 kośa-sambaddha? map-contains?)
-(0011 kośa-śreṇī map->list)
+(визначити kośa-śūnya map-empty)
+(визначити kośa-grahaṇa map-get)
+(визначити kośa-niveśana map-insert)
+(визначити kośa-sambaddha? map-contains?)
+(визначити kośa-śreṇī map->list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent vector (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(0011 samūha-śūnya vec-empty)
-(0011 samūha-yukti vec-conj)
-(0011 samūha-gaṇana vec-count)
-(0011 samūha-kramāṅka vec-nth)
-(0011 samūha-śreṇī vec->list)
-(0011 śreṇī-samūha vec-from-list)
+(визначити samūha-śūnya vec-empty)
+(визначити samūha-yukti vec-conj)
+(визначити samūha-gaṇana vec-count)
+(визначити samūha-kramāṅka vec-nth)
+(визначити samūha-śreṇī vec->list)
+(визначити śreṇī-samūha vec-from-list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Knowledge/Reasoning (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; jñāna = knowledge
-(0011 jñāna-satya? is-fact?)
-(0011 varṇana describe)
-(0011 jñāna-saṅgraha collect-facts-about)
-(0011 aṇu-sambaddha? contains-atom?)
+(визначити jñāna-satya? is-fact?)
+(визначити varṇana describe)
+(визначити jñāna-saṅgraha collect-facts-about)
+(визначити aṇu-sambaddha? contains-atom?)
 ; abhimukha = forward
-(0011 abhimukha-anumāna forward-in)
+(визначити abhimukha-anumāna forward-in)
 ; anumāna = inference
-(0011 anumāna reason-in)
-(0011 virodha-parīkṣā check-conflict)
+(визначити anumāna reason-in)
+(визначити virodha-parīkṣā check-conflict)
 ; pramāṇa-siddhi = proof
-(0011 siddhi-sādhana prove-goal)
-(0011 siddhi-sādhana-sarva prove-goals)
-(0011 siddhi-vyākhyā explain-proof)
-(0011 siddhi-mūla source-of)
-(0011 utpatti provenance)
-(0011 tarka reason)
-(0011 tarka-vyākhyā reason-explain)
+(визначити siddhi-sādhana prove-goal)
+(визначити siddhi-sādhana-sarva prove-goals)
+(визначити siddhi-vyākhyā explain-proof)
+(визначити siddhi-mūla source-of)
+(визначити utpatti provenance)
+(визначити tarka reason)
+(визначити tarka-vyākhyā reason-explain)
 
 ; Unification
-(0011 ekīkaraṇa unify)
-(0011 tarka-cihna logic-var)
-(0011 cihna? var?)
-(0011 pratyāroha apply-subst)
-(0011 vicāraṇa-gamana walk)
-(0011 parivṛtti-parīkṣā occurs-check)
+(визначити ekīkaraṇa unify)
+(визначити tarka-cihna logic-var)
+(визначити cihna? var?)
+(визначити pratyāroha apply-subst)
+(визначити vicāraṇa-gamana walk)
+(визначити parivṛtti-parīkṣā occurs-check)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Epistemic (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; pratyaya = claim/conviction
-(0011 pratyaya? claim?)
-(0011 pratyaya-vākya claim-statement)
-(0011 pratyaya-parīkṣā claim-review)
+(визначити pratyaya? claim?)
+(визначити pratyaya-vākya claim-statement)
+(визначити pratyaya-parīkṣā claim-review)
 ; pramāṇa = evidence
-(0011 pramāṇa? evidence?)
-(0011 pramāṇa-vidhi evidence-method)
-(0011 pramāṇa-phala evidence-outcome)
+(визначити pramāṇa? evidence?)
+(визначити pramāṇa-vidhi evidence-method)
+(визначити pramāṇa-phala evidence-outcome)
 ; pratyakṣa = observation
-(0011 pratyakṣa? observation?)
-(0011 pratyakṣa-vākya observation-statement)
+(визначити pratyakṣa? observation?)
+(визначити pratyakṣa-vākya observation-statement)
 ; saṅkalpa = intent
-(0011 saṅkalpa? intent?)
-(0011 saṅkalpa-lakṣya intent-goal)
-(0011 sahāya-pramāṇa supporting-evidence)
+(визначити saṅkalpa? intent?)
+(визначити saṅkalpa-lakṣya intent-goal)
+(визначити sahāya-pramāṇa supporting-evidence)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Missing SA fill (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; nāman-nirmāṇa = name generation
-(0011 nāman-nirmāṇa gensym)
+(визначити nāman-nirmāṇa gensym)
