@@ -5,8 +5,8 @@
 ; coverage of every XED operand/addressing form. No silent third status (#176/#604).
 
 (x86-encoder-coverage/1
-  (form-count #b10010011000)
-  (partial-count #b1111010)
+  (form-count 1176)
+  (partial-count 122)
   (coverage
     (iclass "AAA")
     (extension X86-BASE)
