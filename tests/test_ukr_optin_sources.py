@@ -7,6 +7,7 @@ S-expressions, ratified identity, незмінність історичних в
 """
 from __future__ import annotations
 
+import hashlib
 import re
 import unittest
 from pathlib import Path
