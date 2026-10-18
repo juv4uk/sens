@@ -1374,7 +1374,7 @@ class QuantityUkrLocalHelpersTests(unittest.TestCase):
         restored = self.restore_original(source)
         raw = restored.encode("utf-8")
         blob = hashlib.sha1(
-            b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw
+            b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw
         ).hexdigest()
         self.assertEqual(blob, self.ORIGINAL_BLOB)
 
