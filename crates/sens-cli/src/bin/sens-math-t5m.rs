@@ -28,7 +28,7 @@ mod paired {
             ExprKind::BinaryNumber(value) if value.numeric_domain_width().is_some() => Ok(()),
             ExprKind::DomainCall(identity, args)
                 if identity.width() == 5
-                    && matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111)
+                    && matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111 | 0b11010 | 0b11011)
                     && args.len() == 2 =>
             {
                 // When both operands are atomic, their explicitly admitted
@@ -46,7 +46,7 @@ mod paired {
                 Ok(())
             }
             _ => Err(format!(
-                "SENS admission: only qualified D24+ atoms and binary D5 arithmetic calls; actual={:?}",
+                "SENS admission: only qualified D24+ atoms and admitted binary D5 math/predicate calls; actual={:?}",
                 expr.kind
             )),
         }
@@ -294,6 +294,26 @@ mod paired {
             let malformed_pair = zig_transport::encode_t5_exact_words(&changed).unwrap();
             assert!(eval_verified(&nested, &malformed_pair)
                 .unwrap_err().contains("T5M_PAIR_MISMATCH"));
+        }
+
+        #[test]
+        fn signed_d24_comparisons_return_exact_d1_over_physical_t5m() {
+            // D5:11010 LESSP and 11011 GREATERP come from current D5 table.
+            // The D1 predicate is produced by SENS, not decoded from T5M.
+            for (head, left, right, expected) in [
+                ("менше?", -1, 1, true),
+                ("більше?", 1, -1, true),
+                ("менше?", 1, 1, false),
+                ("більше?", -1, 1, false),
+            ] {
+                let source = source(head, left, right);
+                let words = expected_words(&qualify(&source).unwrap()).unwrap();
+                let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+                let value = eval_verified(&source, &physical)
+                    .unwrap_or_else(|error| panic!("test_id={head} layer=eval actual={error}"));
+                assert_eq!(value.as_predicate_bit(), Some(expected),
+                    "test_id={head} layer=semantic expected=D1:{expected}");
+            }
         }
 
         #[test]
