@@ -2467,5 +2467,104 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
         self.assertIn("(000000 (table-rows d8))", source)
 
 
+
+class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
+    """Exact ukr projection of live Lisp generators, pinned to original blobs."""
+    ROOT = Path(__file__).resolve().parents[1]
+    PROJECTIONS = {
+        "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
+        "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
+        "0010": "функція", "0011": "визначити", "1001": "друге", "1110": "список",
+        "11011011": "друкувати", "11110100": "значення-у-текст", "11110111": "однакові?",
+        "110011101": "рядок-решта", "110011110": "рядок-додати", "110101001": "читати-всі",
+        "110101010": "рядок-префікс?", "110101011": "рядок-перший", "110110111": "читати-файл",
+        "110111001": "число-рядок", "110111100": "записати-файл",
+    }
+    INVERSE = {surface: bits for bits, surface in PROJECTIONS.items()}
+    SPECS = {
+        "scripts/build-constitution.lisp": {
+            "blob": "0bbfef8844b7921f7873203d4c976fed2dd72619",
+            "counts": {"110": 1, "111": 8, "1110": 19, "11011011": 27, "110101001": 1,
+                       "110110111": 1, "0011": 3, "001": 52, "0010": 2, "010": 2},
+        },
+        "scripts/generate-rust-evaluator-dispatch.lisp": {
+            "blob": "10ba0c9b9a0bc7a0565a1c4b9b74fbea7cbe737d",
+            "counts": {"100": 8, "110": 7, "111": 1, "1001": 4, "1110": 3, "11011011": 4,
+                       "11110100": 1, "11110111": 3, "110011110": 1, "110101001": 1,
+                       "110110111": 2, "110111100": 2, "0011": 12, "0010": 7, "001": 14,
+                       "011": 5, "010": 11},
+        },
+        "scripts/generate-rust-function-signatures.lisp": {
+            "blob": "9f13458da58e4bfb295488886b39fad9fcff98a0",
+            "counts": {"100": 10, "101": 4, "110": 10, "1001": 6, "1110": 3, "11011011": 4,
+                       "11110100": 3, "11110111": 6, "110011101": 5, "110011110": 2,
+                       "110101001": 1, "110101010": 1, "110101011": 2, "110110111": 3,
+                       "110111001": 1, "110111100": 2, "0011": 15, "0010": 11, "010": 12,
+                       "001": 25, "011": 3},
+        },
+    }
+
+    @classmethod
+    def _head_edits(cls, source):
+        offsets = [0]
+        offsets.extend(match.end() for match in re.finditer("\n", source))
+        edits = []
+        for token in mod.candidate_heads(mod.parse(source)):
+            bits = cls.INVERSE.get(token.text)
+            if bits is not None:
+                edits.append({
+                    "bits": bits, "head": token.text,
+                    "offset": offsets[token.line - 1] + token.column - 1,
+                })
+        return edits
+
+    @staticmethod
+    def _blob_sha(source):
+        payload = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(payload)).encode("ascii") + bytes([0]) + payload
+        ).hexdigest()
+
+    def _assert_source_is_exact_ukr_projection(self, path, source):
+        spec = self.SPECS[path]
+        for bits, surface in self.PROJECTIONS.items():
+            table = (self.ROOT / "lib" / "domains" / f"d{len(bits)}.lisp").read_text(encoding="utf-8")
+            rows = [line for line in table.splitlines() if line.strip().startswith(f"({bits} (ук ")]
+            self.assertEqual(len(rows), 1, f"D{len(bits)}:{bits} owner row must be unique")
+            self.assertIn(f"(укр {surface})", rows[0], f"D{len(bits)}:{bits} must match owner укр")
+        edits = self._head_edits(source)
+        actual = Counter(edit["bits"] for edit in edits)
+        self.assertEqual(dict(actual), spec["counts"], f"{path}: exact-width head census differs")
+        self.assertTrue(edits, f"{path}: expected projected call heads")
+        for edit in edits:
+            self.assertEqual(edit["head"], self.PROJECTIONS[edit["bits"]],
+                             f"{path}: encoded or wrong peer remains")
+        restored = source
+        for edit in sorted(edits, key=lambda item: item["offset"], reverse=True):
+            head, offset, bits = edit["head"], edit["offset"], edit["bits"]
+            self.assertEqual(restored[offset:offset + len(head)], head, f"{path}: offset drift")
+            restored = restored[:offset] + bits + restored[offset + len(head):]
+        self.assertEqual(self._blob_sha(restored), spec["blob"],
+                         f"{path}: reverse projection must restore original Git blob")
+        mod.parse(source)
+        mod.parse(restored)
+        self.assertEqual(len(source.splitlines()), len(restored.splitlines()))
+
+    def test_three_live_generators_use_exact_ukr_projection_and_inverse(self):
+        for path in self.SPECS:
+            with self.subTest(path=path):
+                source = (self.ROOT / path).read_text(encoding="utf-8")
+                self._assert_source_is_exact_ukr_projection(path, source)
+
+    def test_wrong_peer_mutation_is_rejected(self):
+        path = "scripts/build-constitution.lisp"
+        source = (self.ROOT / path).read_text(encoding="utf-8")
+        edits = self._head_edits(source)
+        first = next(edit for edit in edits if edit["bits"] == "0011")
+        wrong = self.PROJECTIONS["0010"]
+        mutated = source[:first["offset"]] + wrong + source[first["offset"] + len(first["head"]):]
+        with self.assertRaises(AssertionError):
+            self._assert_source_is_exact_ukr_projection(path, mutated)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

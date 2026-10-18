@@ -7,68 +7,68 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-evaluator-dispatch.lisp --check
 
-(0011 source-path "lib/surface/function-signatures.lisp")
-(0011 output-path "crates/sens/src/eval/necessary_forms_generated.rs")
+(визначити source-path "lib/surface/function-signatures.lisp")
+(визначити output-path "crates/sens/src/eval/necessary_forms_generated.rs")
 
-(0011 str+
-  (0010 args
-    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
+(визначити str+
+  (функція args
+    (101110 (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ;; Особливі форми — рядки таблиці з полем (form lambda|define).
-(0011 all-rows
-  (100 (110101001 (110110111 source-path))))
+(визначити all-rows
+  (перше (читати-всі (читати-файл source-path))))
 
-(0011 row-form
-  (0010 (row)
-    (1001 (11100 (001 form) (011 row)))))
+(визначити row-form
+  (функція (row)
+    (друге (11100 (як-є form) (решта row)))))
 
-(0011 form-rows
-  (0010 (remaining)
-    (110
-      ((010 remaining)
-       (001 ()))
-      ((010 (001 ()))
-       (110
-         ((010 (11100 (001 form) (011 (100 remaining))))
-          (form-rows (011 remaining)))
-         ((010 (001 ()))
-          (111 (100 remaining) (form-rows (011 remaining)))))))))
+(визначити form-rows
+  (функція (remaining)
+    (за-умовою
+      ((атом? remaining)
+       (як-є ()))
+      ((атом? (як-є ()))
+       (за-умовою
+         ((атом? (11100 (як-є form) (решта (перше remaining))))
+          (form-rows (решта remaining)))
+         ((атом? (як-є ()))
+          (сполучити (перше remaining) (form-rows (решта remaining)))))))))
 
-(0011 rows (form-rows all-rows))
+(визначити rows (form-rows all-rows))
 
-(0011 rust-mechanism
-  (0010 (name)
-    (110
-      ((11110111 name (001 lambda))
+(визначити rust-mechanism
+  (функція (name)
+    (за-умовою
+      ((однакові? name (як-є lambda))
        "NecessaryFormMechanism::Lambda")
-      ((11110111 name (001 define))
+      ((однакові? name (як-є define))
        "NecessaryFormMechanism::Define")
-      ((010 (001 ())) (100 (001 ()))))))
+      ((атом? (як-є ())) (перше (як-є ()))))))
 
-(0011 render-row
-  (0010 (row)
+(визначити render-row
+  (функція (row)
     (001000 ((mechanism (rust-mechanism (row-form row))))
-      (110
-        ((010 mechanism)
-         (100 (001 ())))
-        ((010 (001 ()))
+      (за-умовою
+        ((атом? mechanism)
+         (перше (як-є ())))
+        ((атом? (як-є ()))
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
-           (11110100 (100 row))
+           (значення-у-текст (перше row))
            ", mechanism: "
            mechanism
            " },\n"))))))
 
-(0011 render-rows
-  (0010 (remaining)
-    (110
-      ((010 remaining)
+(визначити render-rows
+  (функція (remaining)
+    (за-умовою
+      ((атом? remaining)
        "")
-      ((010 (001 ()))
-       (str+ (render-row (100 remaining))
-             (render-rows (011 remaining)))))))
+      ((атом? (як-є ()))
+       (str+ (render-row (перше remaining))
+             (render-rows (решта remaining)))))))
 
-(0011 header
+(визначити header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/function-signatures.lisp\n"
@@ -85,27 +85,27 @@
     "}\n\n"
     "pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[\n"))
 
-(0011 generated
+(визначити generated
   (str+ header (render-rows rows) "];\n"))
 
-(110
-  ((010 *argv*)
-   (1001
-     (1110
-       (110111100 output-path generated)
-       (11011011 "Rust evaluator dispatch projection written")))))
+(за-умовою
+  ((атом? *argv*)
+   (друге
+     (список
+       (записати-файл output-path generated)
+       (друкувати "Rust evaluator dispatch projection written")))))
   ((11110111 (100 *argv*) "--check")
-   (001000 ((current (110110111 output-path)))
-     (110
-       ((11110111 current generated)
-        (11011011 "Rust evaluator dispatch projection is current"))
-       ((010 (001 ()))
-        (1001
-          (1110
-            (11011011 "Rust evaluator dispatch projection is stale")
-            (100 (001 ()))))))))
+   (001000 ((current (читати-файл output-path)))
+     (за-умовою
+       ((однакові? current generated)
+        (друкувати "Rust evaluator dispatch projection is current"))
+       ((атом? (як-є ()))
+        (друге
+          (список
+            (друкувати "Rust evaluator dispatch projection is stale")
+            (перше (як-є ()))))))))
   ((010 (001 ()))
-   (1001
-     (1110
-       (110111100 output-path generated)
-       (11011011 "Rust evaluator dispatch projection written"))))
+   (друге
+     (список
+       (записати-файл output-path generated)
+       (друкувати "Rust evaluator dispatch projection written"))))
