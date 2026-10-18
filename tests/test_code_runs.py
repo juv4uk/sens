@@ -1433,13 +1433,13 @@ class ReasonIndexPrivateHelperUkrProjectionTests(unittest.TestCase):
                     f"projection call count drift: {ukrainian}: {calls}"
                 )
             source = source.replace("(" + ukrainian, "(" + english)
-            definition = f"(визначити {ukrainian}\\n"
+            definition = f"(визначити {ukrainian}\n"
             if source.count(definition) != 1:
                 raise AssertionError(
                     f"projection definition count drift: {ukrainian}"
                 )
             source = source.replace(
-                definition, f"(визначити {english}\\n", 1
+                definition, f"(визначити {english}\n", 1
             )
         return source
 
@@ -1448,7 +1448,7 @@ class ReasonIndexPrivateHelperUkrProjectionTests(unittest.TestCase):
         for english, ukrainian, expected_calls in self.PAIRS:
             with self.subTest(helper=english):
                 self.assertEqual(source.count("(" + ukrainian), expected_calls)
-                self.assertIn(f"(визначити {ukrainian}\\n", source)
+                self.assertIn(f"(визначити {ukrainian}\n", source)
                 self.assertIn(
                     f"(визначити {english} {ukrainian})", source
                 )
