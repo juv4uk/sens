@@ -63,7 +63,7 @@
                  (список
                    (як-є island-lowering-failure)
                    (як-є unsupported-selected-mechanism)
-                   sid executor mechanism)))) (100111 selection)))
+                   sid executor mechanism)))) (четверте selection)))
            ((атом? (як-є ()))
             selection))))) (mechanism-select sid executor))))
 

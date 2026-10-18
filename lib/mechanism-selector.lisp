@@ -71,6 +71,6 @@
              (список (як-є mechanism-unavailable) sid executor))
             ((атом? (як-є ()))
              (список (як-є mechanism-selected)
-               sid executor (10011 route)))))
+               sid executor (третє route)))))
         (mechanism-selector-find-route
           sid executor mechanism-selector-routes))))))

@@ -49,6 +49,15 @@ def _ratified_uk_mapping():
             if len(bits) != width or uk in by_name:
                 raise AssertionError(f"ratified projection collision: D{width}:{bits} {uk}")
             by_name[uk] = bits
+    # D5 selector is a current ratified peer, not a historic 8-bit slot.
+    d5 = (root / "d5.lisp").read_text(encoding="utf-8")
+    line = next((x for x in d5.splitlines()
+                 if x.startswith("  (10011 ")), "")
+    if "(укр третє)" not in line or "(LISP CADDR)" not in line:
+        raise AssertionError("D5:10011 ratified CADDR projection drift")
+    if "третє" in by_name:
+        raise AssertionError("ambiguous current selector surface")
+    by_name["третє"] = "10011"
     return by_name
 
 
@@ -282,7 +291,9 @@ class MechanismSelectorWitness(unittest.TestCase):
         self.assertFalse(any(len(w) in (8, 9) for w in heads))
         self.assertEqual(source.count("(читати-всі "), 2)
         self.assertEqual(source.count("(читати-файл "), 2)
-        self.assertEqual(len("10011"), 5)  # D5 CADDR
+        self.assertIn("(третє route)", source)  # current D5:10011 CADDR
+        self.assertNotIn("(10011 route)", source)
+        self.assertEqual(_CANONICAL_UK_TO_BITS["третє"], "10011")
         self.assertNotIn("0100", heads)  # NOT(ATOM) not reintroduced
 
 
@@ -293,12 +304,26 @@ class MechanismSelectorWitness(unittest.TestCase):
         self.assertEqual(mapping["за-умовою"], "110")
         self.assertEqual(mapping["друге"], "1001")
         self.assertEqual(mapping["список"], "1110")
+        self.assertEqual(mapping["третє"], "10011")
         self.assertIn("(за-умовою", self.source)
         self.assertIn("(тотожне?", self.source)
         self.assertIn("(як-є", self.source)
         self.assertIn("(список", self.source)
         # The same source now parses into the old canonical machine identities.
         self.assertEqual(extract_functions(self.source)["mechanism-select"][0], "0010")
+
+    def test_wrong_d5_caddr_peer_is_rejected_by_existing_route_law(self):
+        original = self.source
+        self.assertEqual(original.count("(третє route)"), 1)
+        bad = original.replace("(третє route)", "(друге route)", 1)
+        env = {
+            "mechanism-selector-registry-rows": [["00001100", "plus"]],
+            "mechanism-selector-routes": [["00001100", "prolog", "add"]],
+        }
+        correct = MiniOracle(original, env).call("mechanism-select", ["00001100", "prolog"])
+        self.assertEqual(correct, ["mechanism-selected", "00001100", "prolog", "add"])
+        wrong = MiniOracle(bad, env).call("mechanism-select", ["00001100", "prolog"])
+        self.assertNotEqual(wrong, correct)
 
     def test_wrong_ukrainian_identity_does_not_pass_route_law(self):
         bad = self.source.replace("(тотожне? executor", "(сполучити executor", 1)

@@ -18,6 +18,7 @@ PEERS = {
     "тотожне?": (3, "101"), "за-умовою": (3, "110"),
     "сполучити": (3, "111"), "друге": (4, "1001"),
     "список": (4, "1110"), "рядок-додати": (9, "110011110"),
+    "четверте": (6, "100111"),
 }
 # Frozen pre-migration AST, NOT a SID8 byte/width authority.
 BASELINE = {
@@ -28,7 +29,7 @@ BASELINE = {
   },
   "lib/island-lowering.lisp": {
     "fingerprint": "dcc87879d0c95fa0",
-    "count": 49,
+    "count": 50,
     "forms": 3
   }
 }
@@ -124,7 +125,11 @@ class UkrainianTcpIslandTests(unittest.TestCase):
                 rows = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
                 line = next((s for s in rows.splitlines() if s.startswith(f"  ({bits} ")), None)
                 self.assertIsNotNone(line)
-                self.assertIn(f"(ук {spelling})", line)
+                if spelling == "четверте":
+                    # D6 compact ук=пррр; full укр=четверте is distinct.
+                    self.assertIn("(ук пррр)", line)
+                else:
+                    self.assertIn(f"(ук {spelling})", line)
                 self.assertIn(f"(укр {spelling})", line)
 
     def test_exact_unchanged_ast_and_all_projection_callsites(self):
@@ -138,7 +143,8 @@ class UkrainianTcpIslandTests(unittest.TestCase):
         self.assertIn("#d1:1", data)
         validate("lib/tcp.lisp", data)
         island = (ROOT / "lib/island-lowering.lisp").read_text(encoding="utf-8")
-        self.assertIn("(100111 selection)", island)  # D6 is separate; not D9
+        self.assertIn("(четверте selection)", island)  # exact D6:100111 CADDDR
+        self.assertNotIn("(100111 selection)", island)
         self.assertIn("(рядок-додати", island)
         self.assertEqual(island.count("((функція ("), 4)
         self.assertEqual(island.count("(0010 ("), 3)
@@ -152,6 +158,7 @@ class UkrainianTcpIslandTests(unittest.TestCase):
             original.replace("((функція (selection)", "((сполучити (selection)", 1),
             original.replace("(тотожне?", "(сполучити", 1),
             original.replace("(рядок-додати", "(00000101", 1),
+            original.replace("(четверте selection)", "(третє selection)", 1),
         ]:
             with self.assertRaises(AssertionError):
                 validate(path, changed)
