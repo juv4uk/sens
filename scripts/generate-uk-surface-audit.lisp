@@ -53,11 +53,11 @@
 (визначити named-row?
   (функція (row)
     (за-умовою
-      ((surface-empty? (10011 row))
+      ((surface-empty? (третє row))
        (за-умовою
-         ((surface-empty? (100111 row))
+         ((surface-empty? (четверте row))
           (за-умовою
-            ((surface-empty? (110110101 row))
+            ((surface-empty? (п'ятий row))
              (за-умовою
                ((surface-empty? (sixth row)) (хибне? (surface-empty? (seventh row))))
                ((атом? (як-є ())) t)))
@@ -125,16 +125,16 @@
       ((missing-surface? uk) (як-є needs-research))
       ((атом? candidate) (як-є needs-research))
       
-      ((101 (1001 candidate) (10011 candidate)) (001 full))
+      ((тотожне? (друге candidate) (третє candidate)) (як-є full))
       ((атом? (як-є ())) (як-є needs-research)))))
 
 (визначити candidate-full-word
   (функція (candidate)
-    (110 ((010 candidate) (001 —)) ((010 (001 ())) (10011 candidate)))))
+    (за-умовою ((атом? candidate) (як-є —)) ((атом? (як-є ())) (третє candidate)))))
 
 (визначити candidate-evidence-status
   (функція (candidate)
-    (110 ((010 candidate) (001 no-staging-evidence)) ((010 (001 ())) (100111 candidate)))))
+    (за-умовою ((атом? candidate) (як-є no-staging-evidence)) ((атом? (як-є ())) (четверте candidate)))))
 
 ; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
 ; not invent abbreviations while performing an inventory.
@@ -150,16 +150,16 @@
   (функція (candidate)
     (за-умовою
       ((атом? candidate) () (як-є missing))
-      ((101 (100111 candidate) (001 чинна)) (001 stable))
-      ((101 (100111 candidate) (001 кандидат-сумісності)) (001 compatibility-only))
+      ((тотожне? (четверте candidate) (як-є чинна)) (як-є stable))
+      ((тотожне? (четверте candidate) (як-є кандидат-сумісності)) (як-є compatibility-only))
       ((атом? (як-є ())) (як-є candidate)))))
 
 (визначити render-row
   (функція (row)
-    (001001 ((sid (100 row))
-           (uk (10011 row))
-           (full-authority (100111 row))
-           (en (110110101 row))
+    (нехай-послідовно ((sid (перше row))
+           (uk (третє row))
+           (full-authority (четверте row))
+           (en (п'ятий row))
            (sa (sixth row))
            (sym (seventh row))
            (candidate (find-candidate-row sid candidate-rows))
@@ -190,20 +190,20 @@
 
 (визначити count-class
   (функція (wanted rows acc)
-    (110 ((010 rows) acc) ((010 (001 ())) (001001 ((sid (100 (100 rows)))
-              (uk (10011 (100 rows)))
+    (за-умовою ((атом? rows) acc) ((атом? (як-є ())) (нехай-послідовно ((sid (перше (перше rows)))
+              (uk (третє (перше rows)))
               (candidate (find-candidate-row sid candidate-rows))
               (class (audit-class uk candidate)))
          (count-class wanted (решта rows)
-           (110 ((101 class wanted) (01010 acc 1))
+           (за-умовою ((тотожне? class wanted) (додати acc 1))
                  ((атом? (як-є ())) acc))))))))
 
 (визначити count-candidates
   (функція (rows acc)
     (за-умовою ((атом? rows) acc) ((атом? (як-є ())) (count-candidates (решта rows)
-         (110 ((010 (find-candidate-row (100 (100 rows)) candidate-rows)) acc) ((010 (001 ())) (01010 acc 1))))))))
+         (за-умовою ((атом? (find-candidate-row (перше (перше rows)) candidate-rows)) acc) ((атом? (як-є ())) (додати acc 1))))))))
 
-(0011 total (000000 ft-rows))
+(визначити total (довжина ft-rows))
 (визначити full-count (count-class (як-є full) ft-rows 0))
 (визначити compatibility-count (count-class (як-є compatibility-only) ft-rows 0))
 (визначити needs-research-count (count-class (як-є needs-research) ft-rows 0))
@@ -218,17 +218,17 @@
     "; candidate-full-uk is NOT automatically promoted into authoritative full-uk"
     ""
     "(uk-surface-audit/2"
-    (str+ "  (summary (total " (110111001 total) ")"
-          " (full " (110111001 full-count) ")"
+    (str+ "  (summary (total " (число-рядок total) ")"
+          " (full " (число-рядок full-count) ")"
           " (already-compact 0)"
           " (ambiguous 0)"
-          " (needs-research " (110111001 needs-research-count) ")"
-          " (compatibility-only " (110111001 compatibility-count) ")"
-          " (staging-evidence " (110111001 candidate-count) "))")
+          " (needs-research " (число-рядок needs-research-count) ")"
+          " (compatibility-only " (число-рядок compatibility-count) ")"
+          " (staging-evidence " (число-рядок candidate-count) "))")
     "  (rows"))
 
-(0011 body (join-newline (1111 header (101000 render-row ft-rows))))
+(визначити body (join-newline (приєднати header (відобразити render-row ft-rows))))
 (визначити output (str+ body "\n  )\n)\n"))
 
-(110111100 "lib/generated/uk-surface-audit.lisp" output)
+(записати-файл "lib/generated/uk-surface-audit.lisp" output)
 (друкувати (str+ "uk-surface-audit: " (число-рядок total) " identities written"))
