@@ -23,11 +23,11 @@ ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "lib/machine/encoding/admitted-iclass-index.lisp"
 PROJECTION = ROOT / "lib/machine/encoding/admission-iclass-projection.lisp"
 
-PAIR_RE = re.compile(r'^\s*\(00101110\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
+PAIR_RE = re.compile(r'^\s*\(пара\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
 PARTIAL_RE = re.compile(
     r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
 )
-PARTIAL_COUNT_RE = re.compile(r'^\s*\(partial-pair-count\s+#b([01]+)\)\s*$')
+PARTIAL_COUNT_RE = re.compile(r'^\s*\(partial-pair-count\s+([0-9]+)\)\s*$')
 
 # Admitted forms intentionally not physically executed by the generic owner
 # sweep until they have a dedicated bounded side-effect/control-flow witness.
@@ -74,7 +74,7 @@ def load_projection(path: Path = PROJECTION) -> tuple[dict[tuple[str, str], list
         if count_match:
             if declared_pair_count is not None:
                 raise CensusError("duplicate partial-pair-count in admission projection")
-            declared_pair_count = int(count_match.group(1), 2)
+            declared_pair_count = int(count_match.group(1), 10)
             continue
 
         match = PARTIAL_RE.match(line)
@@ -216,13 +216,14 @@ def build_census(
 
 
 def self_test() -> None:
-    # The generated evidence index is canonical visible-binary Lisp. Protect
-    # the exact owner row grammar so the census cannot silently regress to an
-    # obsolete textual (pair ...) projection and misreport all 1176 rows absent.
-    canonical_pair = PAIR_RE.match('  (00101110 X86-BASE "AAA")')
+    # The generated evidence index uses the ratified Ukrainian `укр` call-head.
+    # Reject the retired encoded SID8 head rather than silently losing 1176 rows.
+    canonical_pair = PAIR_RE.match('  (пара X86-BASE "AAA")')
     assert canonical_pair is not None
     assert canonical_pair.groups() == ("X86-BASE", "AAA")
-    assert PAIR_RE.match('(pair X86-BASE "AAA")') is None
+    assert PAIR_RE.match('(00101110 X86-BASE "AAA")') is None
+    assert PARTIAL_COUNT_RE.match('(partial-pair-count 126)') is not None
+    assert PARTIAL_COUNT_RE.match('(partial-pair-count #b1111110)') is None
     actual_pairs = load_pairs()
     assert len(actual_pairs) == 1176
     assert ("X86-BASE", "AAA") in actual_pairs
