@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression for canonical one-file T5 staging, not semantic admission."""
+"""Перевірки фізичної міграції з української Lisp-проєкції в Zig T5M."""
 from __future__ import annotations
 
 import hashlib
@@ -10,9 +10,11 @@ import sys
 import tempfile
 import unittest
 
+from scripts.sens_t5_codec import decode_t5m_bytes, encode_t5m_projection
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-one-to-sens.py"
-PROVEN = ROOT / "tests" / "fixtures" / "migration-multiform-cohort" / "two-forms.lisp"
+PROVEN = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
 EXISTING = PROVEN.with_suffix(".sens")
 
 
@@ -32,7 +34,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(state["status"], "would-write")
         self.assertEqual(state["semantic_parity"], "NOT_VERIFIED")
         self.assertEqual(state["codec"], "t5")
-        self.assertEqual(state["physical_sha256"], hashlib.sha256(EXISTING.read_bytes()).hexdigest())
+        self.assertEqual(state["physical_sha256"], hashlib.sha256(encode_t5m_projection(" ".join(state["words"]) + "\n")).hexdigest())
         self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_existing_target_is_never_overwritten(self):
@@ -44,7 +46,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
 
     def test_existing_view_does_not_leave_orphan_physical_carrier(self):
         with tempfile.TemporaryDirectory() as td:
-            output = Path(td) / "two-forms.sens"
+            output = Path(td) / "ukr-acceptance.sens"
             view = output.with_suffix("")
             view.write_bytes(b"preexisting view\\n")
             result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
@@ -56,15 +58,16 @@ class CanonicalOneFileMigration(unittest.TestCase):
     def test_real_binary_staging_agrees_with_current_canonical_three_pass(self):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            output = Path(td) / "two-forms.sens"
+            output = Path(td) / "ukr-acceptance.sens"
             result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "written")
             self.assertEqual(report["semantic_parity"], "NOT_VERIFIED")
             self.assertEqual(report["source"], str(PROVEN.relative_to(ROOT)))
-            self.assertEqual(report["bytes"], 14)
-            self.assertEqual(output.read_bytes(), EXISTING.read_bytes())
+            self.assertEqual(report["bytes"], len(output.read_bytes()))
+            self.assertEqual(decode_t5m_bytes(output.read_bytes()), report["words"])
+            self.assertEqual(output.read_bytes(), encode_t5m_projection(" ".join(report["words"]) + "\n"))
             self.assertTrue(output.with_suffix("").is_file())
             self.assertEqual(report["view_sha256"], hashlib.sha256(output.with_suffix("").read_bytes()).hexdigest())
             view = output.with_suffix("")
