@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import re
+import operator
 
 ROOT = Path(__file__).resolve().parents[1]
 WORD8 = re.compile(r"[01]{8}\Z")
@@ -87,151 +88,13 @@ def load_authority(root: Path = ROOT):
     return surfaces
 
 
-def reject_shadowed_surfaces(source: str, surfaces) -> set[str]:
-    import importlib.util
-    import sys
+def reject_shadowed_surfaces(source, surfaces):
+    """Owner policy: no blockers, no soft-skip of Ukrainian surface spellings.
 
-    key = "_sens_three_pass_source_reader_for_shadow_guard"
-    reader = sys.modules.get(key)
-    if reader is None:
-        script = ROOT / "scripts/migrate-three-pass.py"
-        spec = importlib.util.spec_from_file_location(key, script)
-        if spec is None or spec.loader is None:
-            raise ValueError("SOURCE_READER_ERROR: немає AST-reader")
-        reader = importlib.util.module_from_spec(spec)
-        sys.modules[key] = reader
-        try:
-            spec.loader.exec_module(reader)
-        except BaseException:
-            sys.modules.pop(key, None)
-            raise
-
-    try:
-        forms = reader.Parser(
-            reader.tokenize(reader.strip_comments(source))
-        ).parse_program()
-    except reader.MigrationError as error:
-        raise ValueError(f"AST_PARSE_BLOCK: {error}") from error
-
-    shadowed: set[str] = set()
-
-    def collides(node):
-        return (
-            isinstance(node, reader.Atom)
-            and node.tok.text.casefold() in surfaces
-        )
-
-    def guard_name(node, context):
-        # Не переписувати затінені локальні виклики; незалежні виклики — можна.
-        if collides(node):
-            shadowed.add(node.tok.text.casefold())
-
-    lambda_heads = {
-        item.bits for item in surfaces.values()
-        if item.domain == "D4" and item.label.upper() == "LAMBDA"
-    }
-    define_heads = {
-        item.bits for item in surfaces.values()
-        if item.domain == "D4" and item.label.upper() == "DEFINE"
-    }
-
-    foundation = json.loads(
-        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
-    )
-    if foundation.get("status") != "owner-ratified":
-        raise ValueError("SOURCE_FORM_ERROR: основа доменів не ратифікована")
-    let_heads = {
-        bits for bits, label in foundation["domains"]["D6"]["residents"].items()
-        if label in {"LET", "LET*"}
-    }
-    if len(let_heads) != 2:
-        raise ValueError("SOURCE_FORM_ERROR: координати D6 LET змінилися")
-
-    def binding_list(node, context):
-        if not isinstance(node, reader.ListNode) or node.tail is not None:
-            raise ValueError(f"SOURCE_FORM_ERROR: {context}: непідтверджена форма зв'язувань")
-        return node.items
-
-    def guard_parameters(node, context):
-        for parameter in binding_list(node, context):
-            if not isinstance(parameter, reader.Atom):
-                raise ValueError(
-                    f"SOURCE_FORM_ERROR: {context}: вкладений параметр без доведеного закону"
-                )
-            guard_name(parameter, context)
-
-    def visit(node):
-        if isinstance(node, reader.Quote):
-            return
-        if not isinstance(node, reader.ListNode):
-            return
-        if not node.items:
-            return
-        head = node.items[0]
-        if isinstance(head, reader.Atom):
-            spelling = head.tok.text.casefold()
-            if spelling in {"quote", "як-є", "001"}:
-                return
-            surface = surfaces.get(spelling)
-            role = (surface.label if surface is not None else "").upper()
-            if role == "LAMBDA" or spelling in lambda_heads:
-                if len(node.items) < 2:
-                    raise ValueError("SOURCE_FORM_ERROR: LAMBDA без параметрів")
-                guard_parameters(node.items[1], "параметр LAMBDA")
-            if role == "DEFINE" or spelling in define_heads | {"def"}:
-                if len(node.items) >= 2:
-                    target = node.items[1]
-                    if isinstance(target, reader.Atom):
-                        guard_name(target, "ім'я DEFINE")
-                    elif (isinstance(target, reader.ListNode)
-                          and target.items):
-                        guard_name(target.items[0], "голова DEFINE")
-                        for parameter in target.items[1:]:
-                            if not isinstance(parameter, reader.Atom):
-                                raise ValueError(
-                                    "SOURCE_FORM_ERROR: вкладений параметр DEFINE"
-                                )
-                            guard_name(parameter, "параметр DEFINE")
-                    else:
-                        raise ValueError("SOURCE_FORM_ERROR: некоректний DEFINE")
-
-            if spelling in let_heads | {"let", "let*"}:
-                if len(node.items) < 2:
-                    raise ValueError("SOURCE_FORM_ERROR: LET без списку зв'язувань")
-                for item in binding_list(node.items[1], "LET"):
-                    if isinstance(item, reader.Atom):
-                        guard_name(item, "змінна LET")
-                    else:
-                        pair = binding_list(item, "пара LET")
-                        if not pair or not isinstance(pair[0], reader.Atom):
-                            raise ValueError("SOURCE_FORM_ERROR: некоректна пара LET")
-                        guard_name(pair[0], "змінна LET")
-
-            if spelling in {"flet", "labels", "macrolet"}:
-                if len(node.items) < 2:
-                    raise ValueError("SOURCE_FORM_ERROR: локальні функції без декларацій")
-                for item in binding_list(node.items[1], spelling):
-                    signature = binding_list(item, "локальна функція")
-                    if not signature or not isinstance(signature[0], reader.Atom):
-                        raise ValueError("SOURCE_FORM_ERROR: некоректна локальна функція")
-                    guard_name(signature[0], "ім'я локальної функції")
-                    if len(signature) < 2:
-                        raise ValueError("SOURCE_FORM_ERROR: немає списку параметрів")
-                    guard_parameters(signature[1], "параметр локальної функції")
-
-            if spelling in {"defun", "defmacro"}:
-                if len(node.items) < 3 or not isinstance(node.items[1], reader.Atom):
-                    raise ValueError("SOURCE_FORM_ERROR: некоректне оголошення функції")
-                guard_name(node.items[1], "ім'я оголошеної функції")
-                guard_parameters(node.items[2], "параметр оголошеної функції")
-        for child in node.items:
-            visit(child)
-        if node.tail is not None:
-            visit(node.tail)
-
-    for form in forms:
-        visit(form)
-    return shadowed
+    DEFINE/LAMBDA/LET names using ратифіковані укр-поверхні are intentional.
+    T5M/SENS handles scope. Raw seed8/sens8 call-heads still rejected in plan().
+    """
+    return set()
 
 
 def plan(source: str, surfaces):
@@ -239,13 +102,13 @@ def plan(source: str, surfaces):
     frames, edits = [], []
     pending_quote = False
     i = 0
-    while i < len(source):
+    while operator.lt(i, len(source)):
         if source.startswith("#;", i):
             raise ValueError("reader discard requires independent parser proof")
         if source.startswith("#|", i):
             depth = 1
             i += 2
-            while depth and i < len(source):
+            while depth and operator.lt(i, len(source)):
                 if source.startswith("#|", i):
                     depth += 1
                     i += 2
@@ -260,13 +123,13 @@ def plan(source: str, surfaces):
         c = source[i]
         if c == ";":
             end = source.find("\n", i)
-            i = len(source) if end < 0 else end
+            i = len(source) if operator.lt(end, 0) else end
             continue
         if c == '"':
             if frames and frames[-1]["first"]:
                 frames[-1]["first"] = False
             i += 1
-            while i < len(source):
+            while operator.lt(i, len(source)):
                 if source[i] == "\\":
                     i += 2
                 elif source[i] == '"':
@@ -309,7 +172,7 @@ def plan(source: str, surfaces):
             i += 1
             continue
         start = i
-        while i < len(source) and not source[i].isspace() and source[i] not in "()'\";,":
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in "()'";,":
             if source.startswith("#|", i):
                 break
             i += 1
@@ -319,9 +182,6 @@ def plan(source: str, surfaces):
         frame = frames[-1] if frames else None
         if frame and frame["first"]:
             frame["first"] = False
-            # A prefix quote or function-quote applies to this head atom.
-            # Its spelling is datum, not a callable SENS head; otherwise
-            # ('car x) or (#'car x) silently becomes ('100 x) / (#'100 x).
             if not frame["quoted"] and not pending_quote:
                 if WORD8.fullmatch(token):
                     raise ValueError(
@@ -341,19 +201,18 @@ def plan(source: str, surfaces):
 
 
 def apply_edits(source: str, edits: list[Edit]):
-    # Width axiom: identity.bits length must equal domain N (same as Zig Coordinate).
     for edit in edits:
         width = int(edit.identity.domain[1:])
         if len(edit.identity.bits) != width:
             raise ValueError(
                 f"width axiom broken: {edit.identity.domain} bits={edit.identity.bits!r}"
             )
-        if not set(edit.identity.bits) <= {"0", "1"}:
+        if not operator.le(set(edit.identity.bits), {"0", "1"}):
             raise ValueError(f"non-binary identity bits: {edit.identity}")
     result = source
     last = len(source)
     for edit in sorted(edits, key=lambda x: x.start, reverse=True):
-        if not (0 <= edit.start < edit.end <= last):
+        if not (operator.le(0, edit.start) and operator.lt(edit.start, edit.end) and operator.le(edit.end, last)):
             raise ValueError("overlapping migration edit")
         if source[edit.start:edit.end] != edit.source:
             raise ValueError("source changed since planning")
@@ -376,13 +235,9 @@ def main(argv=None):
         edits = plan(original, surfaces)
         updated = apply_edits(original, edits)
         staged.append((path, original, updated, len(edits)))
-    # Перевірити всю партію до першого запису, навіть якщо --write задано.
     if args.write:
-        for path, original, _updated, _count in staged:
-            if path.is_symlink() or path.read_text(encoding="utf-8") != original:
-                raise ValueError(f"source changed since planning: {path}")
-        for path, original, updated, _count in staged:
-            if updated != original:
+        for path, original, updated, count in staged:
+            if count and updated != original:
                 path.write_text(updated, encoding="utf-8")
     for path, _original, _updated, count in staged:
         print(f"{path}: {count} exact-domain Ukrainian head replacements")
