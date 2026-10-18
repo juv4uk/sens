@@ -41,14 +41,14 @@
 (визначити source-ref?
   (функція (value)
     (за-умовою
-      ((атом? value) #d1:0)
-      ((атом? (решта value)) #d1:0)
-      ((хибне? (атом? (перше value))) #d1:0)
-      ((тотожне? (перше value) (001 digest)) #d1:1)
-      ((тотожне? (перше value) (001 proof)) #d1:1)
-      ((тотожне? (перше value) (001 test)) #d1:1)
-      ((тотожне? (перше value) (001 observation)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? value) ні)
+      ((атом? (решта value)) ні)
+      ((хибне? (атом? (перше value))) ні)
+      ((тотожне? (перше value) (як-є digest)) так)
+      ((тотожне? (перше value) (як-є proof)) так)
+      ((тотожне? (перше value) (як-є test)) так)
+      ((тотожне? (перше value) (як-є observation)) так)
+      (так ні))))
 
 ; D10:0010011001 SOURCE-REF? — точна повна українська peer-назва.
 (визначити це-належне-посилання-на-джерело? source-ref?)
@@ -56,11 +56,11 @@
 (визначити epistemic--claim-ref?
   (функція (value)
     (за-умовою
-      ((атом? value) #d1:0)
-      ((атом? (решта value)) #d1:0)
-      ((хибне? (атом? (перше value))) #d1:0)
-      ((тотожне? (перше value) (001 claim-ref)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? value) ні)
+      ((атом? (решта value)) ні)
+      ((хибне? (атом? (перше value))) ні)
+      ((тотожне? (перше value) (як-є claim-ref)) так)
+      (так ні))))
 
 (визначити observation? спостереження?)
 
@@ -73,22 +73,22 @@
 ; --- Accessors ------------------------------------------------------------
 ; Reuse existing project selectors (1001 / 11100) already admitted in Core.
 
-(визначити claim-statement (функція (claim) (друге (11100 (001 statement) (решта claim)))))
-(визначити claim-review (функція (claim) (друге (11100 (001 review) (решта claim)))))
-(визначити evidence-outcome (функція (evidence) (друге (11100 (001 outcome) (решта evidence)))))
-(визначити evidence-source-ref (функція (evidence) (друге (11100 (001 source-ref) (решта evidence)))))
-(визначити intent-goal (функція (intent) (друге (11100 (001 goal) (решта intent)))))
+(визначити claim-statement (функція (claim) (друге (знайти-за-ключем (як-є statement) (решта claim)))))
+(визначити claim-review (функція (claim) (друге (знайти-за-ключем (як-є review) (решта claim)))))
+(визначити evidence-outcome (функція (evidence) (друге (знайти-за-ключем (як-є outcome) (решта evidence)))))
+(визначити evidence-source-ref (функція (evidence) (друге (знайти-за-ключем (як-є source-ref) (решта evidence)))))
+(визначити intent-goal (функція (intent) (друге (знайти-за-ключем (як-є goal) (решта intent)))))
 
-(визначити observation-source (функція (observation) (друге (11100 (001 source) (решта observation)))))
+(визначити observation-source (функція (observation) (друге (знайти-за-ключем (як-є source) (решта observation)))))
 (визначити отримати-джерело-спостереження observation-source)
-(визначити observation-statement (функція (observation) (друге (11100 (001 statement) (решта observation)))))
-(визначити evidence-claim-ref (функція (evidence) (друге (11100 (001 claim-ref) (решта evidence)))))
+(визначити observation-statement (функція (observation) (друге (знайти-за-ключем (як-є statement) (решта observation)))))
+(визначити evidence-claim-ref (функція (evidence) (друге (знайти-за-ключем (як-є claim-ref) (решта evidence)))))
 (визначити отримати-посилання-доказу-на-твердження evidence-claim-ref)
-(визначити evidence-method (функція (evidence) (друге (11100 (001 method) (решта evidence)))))
-(визначити intent-requires (функція (intent) (друге (11100 (001 requires) (решта intent)))))
+(визначити evidence-method (функція (evidence) (друге (знайти-за-ключем (як-є method) (решта evidence)))))
+(визначити intent-requires (функція (intent) (друге (знайти-за-ключем (як-є requires) (решта intent)))))
 (визначити отримати-необхідні-можливості-наміру intent-requires)
-(визначити intent-stop-on (функція (intent) (друге (11100 (001 stop-on) (решта intent)))))
-(визначити intent-produces (функція (intent) (друге (11100 (001 produces) (решта intent)))))
+(визначити intent-stop-on (функція (intent) (друге (знайти-за-ключем (як-є stop-on) (решта intent)))))
+(визначити intent-produces (функція (intent) (друге (знайти-за-ключем (як-є produces) (решта intent)))))
 
 ; --- Narrow relations -------------------------------------------------
 ; Точна структурна рівність посилань — похідна Lisp-функція.
@@ -100,11 +100,11 @@
       ((атом? a)
        (за-умовою
          ((атом? b) (тотожне? a b))
-         (#d1:1 #d1:0)))
-      ((атом? b) #d1:0)
+         (так ні)))
+      ((атом? b) ні)
       ((епістеміка--рівні-посилання? (перше a) (перше b))
        (епістеміка--рівні-посилання? (решта a) (решта b)))
-      (#d1:1 #d1:0))))
+      (так ні))))
 
 ; supporting-evidence returns () or the matching evidence record itself
 ; (retrieval, not a collapsed flag). Reuses evidence? / claim-ref helpers.
@@ -112,10 +112,10 @@
   (функція (evidence claim-ref)
     (за-умовою
       ((хибне? (доказ? evidence)) (як-є ()))
-      ((хибне? (epistemic--claim-ref? claim-ref)) (001 ()))
+      ((хибне? (epistemic--claim-ref? claim-ref)) (як-є ()))
       ((хибне? (тотожне? (доказ-підсумок evidence) (як-є supports))) (як-є ()))
       ((хибне? (епістеміка--рівні-посилання? (отримати-посилання-доказу-на-твердження evidence) claim-ref)) (як-є ()))
-      (#d1:1 evidence))))
+      (так evidence))))
 
 ; D9:101100001 — той самий retrieval closure, без нової семантики.
 (визначити підтверджувальний-доказ supporting-evidence)
@@ -123,16 +123,16 @@
 (визначити epistemic--all-required-present?
   (функція (requirements effective-capabilities)
     (за-умовою
-      ((атом? requirements) #d1:1)
-      ((хибне? (11101 (перше requirements) effective-capabilities)) #d1:0)
-      (#d1:1
+      ((атом? requirements) так)
+      ((хибне? (значення-у-списку? (перше requirements) effective-capabilities)) ні)
+      (так
        (epistemic--all-required-present? (решта requirements) effective-capabilities)))))
 
 (визначити intent-capabilities-satisfied?
   (функція (intent effective-capabilities)
     (за-умовою
       ((хибне? (намір? intent)) ні)
-      (#d1:1
+      (так
        (epistemic--all-required-present? (отримати-необхідні-можливості-наміру intent) effective-capabilities)))))
 
 ; D10:0001111110 INTENT-CAPABILITIES-SATISFIED? — один мовний закон, дві peer-форми.

@@ -114,6 +114,9 @@ def restore_call_heads(tree):
         return tree  # quoted data збереглися побайтово за логічною формою
     restorations = {**UNDO, "хибне?": "0100", "тотожне?": "101",
                     "як-є": "001", "функція": "0010",
+                    "так": "#d1:1",
+                    "знайти-за-ключем": "11100",
+                    "значення-у-списку?": "11101",
                     "атом?": "010", "решта": "011", "перше": "100", "за-умовою": "110", "сполучити": "111", "застосувати": "0000", "обчислити": "0001", "визначити": "0011", "порожній?": "0101", "решта-першого": "0110", "решта-решти": "0111", "перше-першого": "1000", "друге": "1001", "знайти": "1010", "зв'язати": "1011", "обчислити-умови": "1100", "обчислити-список": "1101", "список": "1110", "приєднати": "1111"}
     head = restorations.get(first, first) if isinstance(first, str) else restore_call_heads(first)
     return [head] + [restore_call_heads(arg) for arg in tree[1:]]
@@ -223,8 +226,8 @@ class OptInUkrMigrationTests(unittest.TestCase):
         self.assertTrue(verify(self.ep, self.store, self.core, self.domains))
 
     def test_data_tags_are_not_transliterated(self):
-        for spelling in ("(001 digest)", "(001 proof)", "(001 test)",
-                         "(001 observation)", "(001 claim-ref)", "(як-є supports)"):
+        for spelling in ("(як-є digest)", "(як-є proof)", "(як-є test)",
+                         "(як-є observation)", "(як-є claim-ref)", "(як-є supports)"):
             self.assertIn(spelling, self.ep)
 
     def test_old_english_calls_do_not_remain_in_migrated_laws(self):
@@ -284,27 +287,44 @@ class OptInUkrMigrationTests(unittest.TestCase):
         wanted = {"0010": "функція", "0011": "визначити",
                   "010": "атом?", "011": "решта", "100": "перше",
                   "101": "тотожне?", "110": "за-умовою",
-                  "0100": "хибне?", "1001": "друге"}
+                  "0100": "хибне?", "1001": "друге",
+                  "001": "як-є", "11100": "знайти-за-ключем",
+                  "11101": "значення-у-списку?"}
         for bits, full in wanted.items():
             table = (ROOT / f"lib/domains/d{len(bits)}.lisp").read_text(encoding="utf-8")
             rows = [line for line in table.splitlines()
                     if line.lstrip().startswith(f"({bits} ")]
             self.assertEqual(len(rows), 1)
             self.assertIn(f"(укр {full})", rows[0])
+
+        def executable_heads(node):
+            if not isinstance(node, list) or not node:
+                return []
+            head = node[0]
+            if head in ("001", "як-є"):
+                return [head]  # цитоване тіло — це дані, не виклики
+            found = [head] if isinstance(head, str) else executable_heads(head)
+            for child in node[1:]:
+                found.extend(executable_heads(child))
+            return found
+
         for source in (self.ep, self.store):
             parsed = read_forms(source)
             self.assertTrue(parsed)
             self.assertTrue(all(form[0] == "визначити" for form in parsed))
+            heads = [value for form in parsed for value in executable_heads(form)]
             for bits in wanted:
-                self.assertNotRegex(source, r"\(" + re.escape(bits) + r"(?=[\s(])")
+                self.assertNotIn(bits, heads)
         self.assertTrue(verify(self.ep, self.store, self.core, self.domains))
 
     def test_negative_old_raw_head_is_rejected_by_projection_rule(self):
-        old = self.ep.replace("(за-умовою", "(110", 1)
-        self.assertNotEqual(old, self.ep)
-        self.assertRegex(old, r"\(110(?=[\s(])")
-        for bits in ("110", "0011", "0010"):
-            self.assertNotRegex(self.ep, r"\(" + bits + r"(?=[\s(])")
+        mutated = self.ep.replace("(за-умовою", "(110", 1)
+        self.assertNotEqual(mutated, self.ep)
+        parsed = read_forms(mutated)
+        self.assertTrue(parsed)
+        self.assertRegex(mutated, r"\(110(?=[\s(])")
+        for form in read_forms(self.ep):
+            self.assertEqual(form[0], "визначити")
 
     def test_malformed_forms_rejected(self):
         with self.assertRaisesRegex(ValueError, "незакритий"):
