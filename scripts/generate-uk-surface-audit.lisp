@@ -20,7 +20,7 @@
 ;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-uk-surface-audit.lisp
 
 (визначити str+
-  (0010 args (101110 (0010 (acc s) (110011110 acc s)) "" args)))
+  (функція args (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 (визначити sixth (функція (xs) (перше (решта (решта (решта (решта (решта xs))))))))
 (визначити seventh (функція (xs) (перше (решта (решта (решта (решта (решта (решта xs)))))))))
@@ -41,7 +41,7 @@
 ; A surface is present or missing; ft/2 carries no per-surface status. The
 ; per-identity status (current, candidate, compatibility-only) comes from the
 ; Ukrainian staging profile below.
-(0011 ft-form (100 (110101001 (110110111 "lib/generated/function-table.lisp"))))
+(визначити ft-form (перше (читати-всі (читати-файл "lib/generated/function-table.lisp"))))
 
 ; The 256-row table also lists every unused code with only () surfaces.
 (визначити surface-empty?
@@ -75,7 +75,7 @@
 (визначити ft-rows (named-rows (решта ft-form)))
 
 (визначити profile-form
-  (100 (110101001 (110110111 "lib/surface/український-профіль-джерела.lisp"))))
+  (перше (читати-всі (читати-файл "lib/surface/український-профіль-джерела.lisp"))))
 
 (визначити find-section
   (функція (name sections)
