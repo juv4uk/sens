@@ -55,9 +55,22 @@ def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False,
         return "()" if literal_empty else None
     if d7_surface:
         if token.startswith('"') and token.endswith('"'):
-            glyph = json.loads(token)
-            if not glyph or (len(glyph) != 1 and not d7_iast) or glyph.isalpha():
-                raise ValueError(f"D7 quoted surface must be a non-letter token: {token!r}")
+            try:
+                glyph = json.loads(token)
+            except json.JSONDecodeError:
+                # The canonical D7 S-expression has one literal tab glyph in
+                # its en projection. Preserve that display scalar as written;
+                # do not broadly forgive malformed escape sequences.
+                payload = token[1:-1]
+                if payload != "\t":
+                    raise
+                glyph = payload
+            # A quoted D7 projection is display data, not a machine token:
+            # sanctioned views include Devanagari letters and multi-letter
+            # transliterations such as "kh". Exact identity remains the
+            # seven-bit row key, independent of the projection's spelling.
+            if not glyph:
+                raise ValueError(f"D7 quoted surface must not be empty: {token!r}")
             return glyph
         # Only the D7 san HUMAN display accepts IAST digraphs like kh.
         # Exact machine identity is still a seven-bit coordinate, never

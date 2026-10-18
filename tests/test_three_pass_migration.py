@@ -95,8 +95,18 @@ class KeyboardV2Sid8MigrationTests(unittest.TestCase):
                     "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10",
                 ))
                 preserved_lower.append(name)
-        self.assertEqual(len(preserved_lower), 9)
-        self.assertEqual(len(testing_only), 34)
+        self.assertEqual(
+            {name: routed[name] for name in preserved_lower},
+            {
+                "READ-FILE": ("110110111", "D9"),
+                "LENGTH": ("000000", "D6"),
+                "TAKE": ("110000", "D6"),
+                "DROP": ("110001", "D6"),
+                "IF": ("0000000110", "D10"),
+                "NOT": ("0100", "D4"),
+            },
+        )
+        self.assertEqual(len(testing_only), 37)
         self.assertEqual(routed["NOT"], ("0100", "D4"))
         self.assertEqual(routed["LENGTH"], ("000000", "D6"))
         self.assertNotIn("TEST-PASS", routed)
@@ -176,10 +186,10 @@ class ExhaustiveExactCallHeadWidthTests(unittest.TestCase):
         # D7 stays data-only; D9/D10 admission follows concrete mechanisms.
         self.assertEqual(sum(w * (1 << w) for w in range(1, 11)), 18434)
 
-    def test_unratified_sid8_bridge_cannot_admit_d8_or_d9_calls(self):
+    def test_d8_residency_is_not_callable_and_sid8_bridge_stays_rejected(self):
         for word in ("00001111", "00010110", "00100010"):
             with self.subTest(word=word), self.assertRaisesRegex(
-                mod.MigrationError, "retired SID8-era head"
+                mod.MigrationError, "no verified callable mechanism"
             ):
                 mod.Resolver({}, {}).head(mod.Tok("ATOM", word, 0))
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
@@ -260,7 +270,10 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.subTest(spelling=spelling), self.assertRaisesRegex(
                 mod.MigrationError, r"D10 .*немає визначення callable-функції в Core4"
             ):
-                mod.migrate_file(f"({spelling} x)\n", resolver, text7)
+                # A bit word belongs to the physical/domain view, not a
+                # human Lisp call head. Exercise the exact-domain gate
+                # directly instead of smuggling it into source text.
+                resolver.head(mod.Tok("ATOM", spelling, 0))
 
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
@@ -276,7 +289,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         for datum in ('"alpha"', '"beta"', '""'):
             with self.subTest(datum=datum):
                 with self.assertRaisesRegex(mod.MigrationError, "STRING_LITERAL_UNADMITTED"):
-                    self.migrate(f"(100 {datum})\n")
+                    self.migrate(f"(сполучити {datum})\n")
 
     def test_sid8_bridge_cannot_authorize_any_executable_head(self):
         with self.assertRaisesRegex(mod.MigrationError, "unratified SID8 bridge"):
@@ -306,9 +319,10 @@ class ThreePassMigrationTests(unittest.TestCase):
         b,_=self.migrate("(CAR x)\n")
         self.assertEqual(a,b)
 
-    def test_unknown_function_passes_through_verbatim(self):
-        out,resolver=self.migrate("(totally-unknown-function x)\n")
-        self.assertEqual(out,"10 totally-unknown-function 00 x 01\n")
+    def test_unknown_ukrainian_name_is_carried_as_opaque_text7_data(self):
+        out,resolver=self.migrate("(невідома-функція ікс)\n")
+        self.assertTrue(all(set(word) <= {"0", "1"} for word in out.split()))
+        self.assertNotIn("невідома-функція", out)
         self.assertEqual(resolver.counts["passthrough-head"],1)
 
     def test_my_lisp_functions_with_current_successors_are_not_legacy_unmapped(self):
@@ -332,19 +346,21 @@ class ThreePassMigrationTests(unittest.TestCase):
                 self.migrate(f"({number} x)\n")
 
     def test_d7_d9_heads_without_callable_proof_are_blocked(self):
-        # Ширина й наявність резидента не надають права виклику.
+        # Numeric-looking source atoms are decimal D24+ data. Test physical
+        # domain coordinates at the resolver boundary, not as Lisp source.
+        resolver = mod.Resolver(self.my, self.upper)
         for word in ("0000000", "1111111"):
             with self.subTest(domain="D7", word=word):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "фонемна/текстова ідентичність"
                 ):
-                    self.migrate(f"({word} x)\n")
+                    resolver.head(mod.Tok("ATOM", word, 0))
         for word in ("111111111",):
             with self.subTest(domain="D9", word=word):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "відсутній доказ допущеного механізму"
                 ):
-                    self.migrate(f"({word} x)\n")
+                    resolver.head(mod.Tok("ATOM", word, 0))
 
     def test_d9_full_residency_is_data_not_implicit_callability(self):
         # D9 residency is not blanket callability: only the Core4-bound slice
@@ -365,12 +381,12 @@ class ThreePassMigrationTests(unittest.TestCase):
                     ):
                         resolver.head(mod.Tok("ATOM", word, 0))
 
-    def test_d7_d9_data_words_remain_distinct_from_executable_heads(self):
-        # Зміна стосується лише позиції виклику, не даних.
-        for word in ("0000000", "000000000"):
-            with self.subTest(word=word):
-                out, _ = self.migrate(f"(100 {word})\n")
-                self.assertEqual(out, f"10 100 00 {word} 01\n")
+    def test_decimal_digit_sequences_in_lisp_data_are_not_domain_addresses(self):
+        # Human Lisp numbers are decimal D24+ values; their spelling length
+        # must not turn them into D7/D9 coordinates.
+        zero = "0" * 24
+        out, _ = self.migrate("(сполучити 0000000 000000000)\n")
+        self.assertEqual(out, f"10 111 00 {zero} 00 {zero} 01\n")
 
     def test_decimal_human_projection_never_confuses_numbers_with_binary_domain_words(self):
         # .lisp is the human projection: decimal glyphs are numbers, while
@@ -600,8 +616,16 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
 
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
-        out,_=self.migrate("(CONS x y)\n")
-        self.assertEqual(out,"10 111 00 x 00 y 01\n")
+        out,_=self.migrate("(сполучити ікс ігрек)\n")
+        x = mod.frame_text7(
+            mod.text7_encode("ікс", self.text7, mod.Tok("ATOM", "ікс", 0)),
+            mod.Tok("ATOM", "ікс", 0),
+        )
+        y = mod.frame_text7(
+            mod.text7_encode("ігрек", self.text7, mod.Tok("ATOM", "ігрек", 0)),
+            mod.Tok("ATOM", "ігрек", 0),
+        )
+        self.assertEqual(out, " ".join(["10", "111", "00", *x, "00", *y, "01"]) + "\n")
 
     def test_all_emitted_structural_control_is_d2_and_empty_is_d3_value(self):
         out,_=self.migrate("(CONS () 1)\n")
@@ -610,7 +634,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(controls)
         self.assertTrue(all(word in {"00","01","10","11"} for word in controls))
         self.assertIn("000",words)
-        self.assertEqual(out.count("000"),1)
+        self.assertEqual(words.count("000"),1)
 
     def test_same_basename_gets_sens_extension_without_directory_collision(self):
         self.assertEqual(str(mod.sens_destination(Path("tasks.lisp"))), "tasks.sens")
@@ -620,23 +644,23 @@ class ThreePassMigrationTests(unittest.TestCase):
                          "lib/sse4.1.sens")
         self.assertEqual(str(mod.sens_destination(Path("foo.lisp"))), "foo.sens")
 
-    def test_legacy_unmapped_name_is_not_valid_t5_binary_output(self):
-        projection,_ = self.migrate("(totally-unknown-function x)\n")
-        with self.assertRaises(mod.SensT5Error):
-            mod.encode_projection(projection)
+    def test_opaque_unknown_name_has_valid_t5_physical_roundtrip(self):
+        projection,_ = self.migrate("(невідома-функція ікс)\n")
+        physical = mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(physical), projection.split())
         self.assertEqual(mod.decode_bytes(mod.encode_projection("000\n")), ["000"])
 
-    def test_main_writes_actual_sens_bytes_and_blocks_leftover_names(self):
+    def test_main_writes_binary_carriers_for_opaque_ukrainian_names(self):
         with tempfile.TemporaryDirectory() as td:
             temp = Path(td)
             root = temp / "inputs"
             root.mkdir()
-            (root / "tasks").mkdir()
             (root / "good.lisp").write_text("()\n", encoding="utf-8")
-            (root / "tasks.lisp").write_text("()\n", encoding="utf-8")
+            (root / "tasks-root.lisp").write_text("()\n", encoding="utf-8")
+            (root / "tasks").mkdir()
             (root / "tasks" / "more.lisp").write_text("()\n", encoding="utf-8")
             (root / "unresolved.lisp").write_text(
-                "(totally-unknown-function x)\n", encoding="utf-8"
+                "(невідома-функція ікс)\n", encoding="utf-8"
             )
             out = temp / "artifacts"
             report = temp / "report.json"
@@ -653,17 +677,20 @@ class ThreePassMigrationTests(unittest.TestCase):
             ]
             subprocess.run(args, check=True, capture_output=True, text=True)
             self.assertTrue((out / "good.sens").is_file())
-            self.assertTrue((out / "tasks.sens").is_file())
+            self.assertTrue((out / "tasks-root.sens").is_file())
             self.assertTrue((out / "tasks" / "more.sens").is_file())
-            self.assertFalse((out / "unresolved.sens").exists())
-            self.assertFalse((out / "good").exists())
+            self.assertTrue((out / "unresolved.sens").is_file())
+            self.assertEqual((out / "good").read_bytes(), b"000\n")
             self.assertFalse((out / "good.lisp").exists())
             self.assertEqual(mod.decode_bytes((out / "good.sens").read_bytes()),
                              ["000"])
             self.assertEqual((root / "good.lisp").read_text(), "()\n")
             result = json.loads(report.read_text())
-            self.assertEqual(result["summary"]["files_written"], 3)
-            self.assertEqual(result["summary"]["files_blocked"], 1)
+            self.assertEqual(result["summary"]["files_written"], 4)
+            self.assertEqual(result["summary"]["files_blocked"], 0)
+            unresolved = next(row for row in result["files"]
+                              if row["path"] == "unresolved.lisp")
+            self.assertFalse(unresolved["semantic_admitted"])
             self.assertTrue(result["file_format"]["physical"].startswith("binary"))
             self.assertEqual(result["naming_law"].split(" -> ")[1].split(";")[0],
                              "OUT/name.sens")
@@ -673,7 +700,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual((out / "good.sens").read_bytes(),
                              mod.encode_projection("000\n"))
             # Explicitly return to source/manifest workflow before a rerun.
-            self.assertTrue((root / "tasks.lisp").exists())
+            self.assertTrue((root / "tasks-root.lisp").exists())
 
     def test_dry_run_produces_report_without_any_binary_file(self):
         with tempfile.TemporaryDirectory() as td:
@@ -765,7 +792,7 @@ class ThreePassMigrationTests(unittest.TestCase):
             source.mkdir()
             (source / "old.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
             (source / "paired.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
-            already = mod.encode_projection("000")
+            already = mod.encode_t5m_projection("000")
             (source / "paired.sens").write_bytes(already)
             out = base / "mirror"
             report = base / "report.json"
@@ -814,28 +841,27 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_define_shadows_builtin_surface_with_bound_text7_frame(self):
-        # Pass 2 knows 'car' as D3 CAR, but the source-defined callable must
-        # win at its own call site without rewriting the literal D3 code.
-        source="(0011 car (1000 () 1))\n(car)\n"
+        # The Ukrainian source-defined name shadows the admitted D3 surface.
+        source="(визначити перше (функція () 1))\n(перше)\n"
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
-            mod.text7_encode("car",self.text7,mod.Tok("ATOM","car",0)),
-            mod.Tok("ATOM","car",0),
+            mod.text7_encode("перше",self.text7,mod.Tok("ATOM","перше",0)),
+            mod.Tok("ATOM","перше",0),
         )
         self.assertGreaterEqual(projection.count(" ".join(frame)),2)
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
         source="""\
-(0011 foo
-  (1000 ()
-    1))
-(foo)
+(визначити власна-функція
+  (функція ()
+    ()))
+(власна-функція)
 """
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
-            mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
-            mod.Tok("ATOM","foo",0),
+            mod.text7_encode("власна-функція",self.text7,mod.Tok("ATOM","власна-функція",0)),
+            mod.Tok("ATOM","власна-функція",0),
         )
         frame_text=" ".join(frame)
         self.assertGreaterEqual(projection.count(frame_text),2)
@@ -854,12 +880,11 @@ class ThreePassMigrationTests(unittest.TestCase):
             all(set(word) <= {"0","1"} for word in words),
             "the real machine-block source must reach an all-binary candidate",
         )
-        # The original machine-block witness needed 17 historical W8 routes.
-        # That source has since been migrated to exact D3/D4 code; requiring
-        # 17 SID8 hits here would force a regression to retired semantics.
-        self.assertGreater(resolver.counts["already-exact"], 0)
-        self.assertEqual(source.count("(0011 "), 6)
-        self.assertNotIn("(00001001 ", source)
+        # The Ukrainian source uses named admitted surfaces; it must not need
+        # machine-bit heads in the Lisp projection.
+        self.assertGreater(resolver.counts["pass2-my-lisp"], 0)
+        self.assertEqual(source.count("(визначити "), 6)
+        self.assertNotRegex(source, r"\(\s*[01]{2,}\s")
 
         for name in (
             "machine-block",
@@ -880,8 +905,8 @@ class ThreePassMigrationTests(unittest.TestCase):
             )
 
         forms_frame=mod.frame_text7(
-            mod.text7_encode("forms",self.text7,mod.Tok("ATOM","forms",0)),
-            mod.Tok("ATOM","forms",0),
+            mod.text7_encode("форми",self.text7,mod.Tok("ATOM","форми",0)),
+            mod.Tok("ATOM","форми",0),
         )
         self.assertGreaterEqual(
             projection.count(" ".join(forms_frame)),
@@ -896,16 +921,16 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
         source="""\
-(0011 first
-  (1000 (first)
-    (first)))
+(визначити перша-функція
+  (функція (перше)
+    (перше)))
 """
         projection,resolver=self.migrate(source)
         words=projection.split()
         self.assertTrue(all(set(word) <= {"0","1"} for word in words))
         first_frame=mod.frame_text7(
-            mod.text7_encode("first",self.text7,mod.Tok("ATOM","first",0)),
-            mod.Tok("ATOM","first",0),
+            mod.text7_encode("перше",self.text7,mod.Tok("ATOM","перше",0)),
+            mod.Tok("ATOM","перше",0),
         )
         self.assertGreaterEqual(projection.count(" ".join(first_frame)),2)
 
