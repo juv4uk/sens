@@ -6,111 +6,150 @@
 //! ПРИМІТКА: сама ширина фізичного слова не надає D24-identity.
 //! Домен береться тільки з перевіреного SENS AST парного джерела;
 //! байтове/словесне розходження закриває виконання.
-//! Це не standalone T5M interpreter і не формат для RATIO.
+//! Це не standalone T5M interpreter і не фізичний формат результату RATIO.
+//! Вкладені D5-вирази з точними D24+ листками дозволені.
 //!
 //! Виклик: sens-math-t5m encode source.lisp
 //!         sens-math-t5m eval source.lisp
 
 #[cfg(feature = "zig-transport")]
 mod paired {
-    use sens::{BinaryNumber, CoreDomainIdentity, Expr, ExprKind, Session, Value};
+    use sens::{BinaryNumber, Expr, ExprKind, Session, Value};
     use sens_cli::zig_transport::{self, ExactT5Word};
     use std::{env, fs, fs::OpenOptions, io::Write, path::{Path, PathBuf}};
 
-    struct QualifiedMath {
-        identity: CoreDomainIdentity,
-        arguments: [BinaryNumber; 2],
+    // The physical codec supplies widths and bits, never semantic admission.
+    // D5 heads and D24+ leaf identity are selected by SENS lowering alone.
+    fn admit(expr: &Expr, depth: usize) -> Result<(), String> {
+        if depth > 64 {
+            return Err("SENS admission: nested arithmetic exceeds depth limit".into());
+        }
+        match &expr.kind {
+            ExprKind::BinaryNumber(value) if value.numeric_domain_width().is_some() => Ok(()),
+            ExprKind::DomainCall(identity, args)
+                if identity.width() == 5
+                    && matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111)
+                    && args.len() == 2 =>
+            {
+                for arg in args.iter() { admit(arg, depth + 1)?; }
+                Ok(())
+            }
+            _ => Err(format!(
+                "SENS admission: only qualified D24+ atoms and binary D5 arithmetic calls; actual={:?}",
+                expr.kind
+            )),
+        }
     }
 
-    /// SENS читач і lowering — єдине джерело семантичної координати.
-    /// Строго один бінарний арифметичний виклик; жодних числових coercion.
-    fn qualify(source: &str) -> Result<QualifiedMath, String> {
-        let forms = sens::parse(source)
-            .map_err(|e| format!("SENS reader: {e}"))?;
-        let forms = sens::lower_program(&forms);
-        let [Expr { kind: ExprKind::DomainCall(identity, args), .. }] = forms.as_slice() else {
-            return Err("SENS admission: expected one exact D5 arithmetic call".into());
+    fn qualify(source: &str) -> Result<Expr, String> {
+        let parsed = sens::parse(source).map_err(|e| format!("SENS reader: {e}"))?;
+        let lowered = sens::lower_program(&parsed);
+        let [root] = lowered.as_slice() else {
+            return Err("SENS admission: expected exactly one mathematical form".into());
         };
-        if identity.width() != 5
-            || !matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111)
-        {
-            return Err("SENS admission: no ratified binary D5 arithmetic head".into());
+        if !matches!(root.kind, ExprKind::DomainCall(_, _)) {
+            return Err("SENS admission: bare numeric data is not executable".into());
         }
-        let [Expr { kind: ExprKind::BinaryNumber(left), .. },
-             Expr { kind: ExprKind::BinaryNumber(right), .. }] = args.as_ref() else {
-            return Err("SENS admission: two explicitly D24+-qualified operands required".into());
-        };
-        let Some(width) = left.numeric_domain_width() else {
-            return Err("SENS admission: left operand lacks D24+ identity".into());
-        };
-        if right.numeric_domain_width() != Some(width) {
-            return Err("SENS admission: mixed numeric domains forbidden".into());
-        }
-        Ok(QualifiedMath {
-            identity: *identity,
-            arguments: [left.clone(), right.clone()],
-        })
+        admit(root, 0)?;
+        Ok(root.clone())
     }
 
     fn word(width: usize, bits: Vec<u8>) -> Result<ExactT5Word, String> {
         ExactT5Word::new(width, bits)
     }
 
-    /// D2 open, EXACT admitted D5 head, two EXACT qualified operands, D2 close.
-    /// Zig supplies physical coding only; these widths are word boundaries.
-    fn expected_words(program: &QualifiedMath) -> Result<Vec<ExactT5Word>, String> {
-        let mut words = vec![
-            word(2, vec![1, 0])?,
-            word(5, (0..5).rev()
-                .map(|shift| ((program.identity.packed_bits() >> shift) & 1) as u8)
-                .collect())?,
-        ];
-        for number in &program.arguments {
-            let width = number.numeric_domain_width()
-                .ok_or("SENS admission: unqualified number")?;
-            let bits = number.exact_numeric_domain_bits()
-                .ok_or("SENS admission: missing exact domain word")?;
-            words.push(word(width, bits)?);
+    // Existing D2 OPEN / D5 function / subexpressions / D2 CLOSE.
+    // The T5M word schema and physical encoder remain unchanged.
+    fn append_words(expr: &Expr, out: &mut Vec<ExactT5Word>) -> Result<(), String> {
+        match &expr.kind {
+            ExprKind::BinaryNumber(number) => {
+                let width = number.numeric_domain_width()
+                    .ok_or("SENS admission: unqualified numeric leaf")?;
+                out.push(word(width, number.exact_numeric_domain_bits()
+                    .ok_or("SENS admission: missing numeric exact bits")?)?);
+            }
+            ExprKind::DomainCall(identity, args) => {
+                out.push(word(2, vec![1, 0])?);
+                out.push(word(5, (0..5).rev()
+                    .map(|n| ((identity.packed_bits() >> n) & 1) as u8)
+                    .collect())?);
+                for arg in args.iter() { append_words(arg, out)?; }
+                out.push(word(2, vec![0, 1])?);
+            }
+            _ => return Err("SENS admission: non-numeric AST".into()),
         }
-        words.push(word(2, vec![0, 1])?);
-        Ok(words)
+        Ok(())
+    }
+
+    fn expected_words(root: &Expr) -> Result<Vec<ExactT5Word>, String> {
+        admit(root, 0)?;
+        let mut out = Vec::new();
+        append_words(root, &mut out)?;
+        Ok(out)
+    }
+
+    // Each numeric leaf is reconstructed FROM the actual Zig-restored bits.
+    // The separately-validated source AST grants D5/D24 identity and structure.
+    fn reconstruct(
+        source: &Expr,
+        physical: &[ExactT5Word],
+        cursor: &mut usize,
+    ) -> Result<Expr, String> {
+        let kind = match &source.kind {
+            ExprKind::BinaryNumber(number) => {
+                let width = number.numeric_domain_width()
+                    .ok_or("SENS admission: missing numeric domain")?;
+                let word = physical.get(*cursor)
+                    .ok_or("T5M_PAIR_MISMATCH: numeric leaf absent")?;
+                *cursor += 1;
+                if word.width != width {
+                    return Err("T5M_PAIR_MISMATCH: different domain width".into());
+                }
+                ExprKind::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(width, &word.bits)
+                        .ok_or("SENS admission: invalid exact numeric bits")?
+                )
+            }
+            ExprKind::DomainCall(identity, args) => {
+                if physical.get(*cursor + 1).is_none() {
+                    return Err("T5M_PAIR_MISMATCH: missing call head".into());
+                }
+                *cursor += 2; // D2 OPEN and exact D5 head already compared
+                let mut children = Vec::with_capacity(args.len());
+                for arg in args.iter() {
+                    children.push(reconstruct(arg, physical, cursor)?);
+                }
+                if physical.get(*cursor).is_none() {
+                    return Err("T5M_PAIR_MISMATCH: missing D2 CLOSE".into());
+                }
+                *cursor += 1;
+                ExprKind::DomainCall(*identity, children.into())
+            }
+            _ => return Err("SENS admission: cannot reconstruct this AST".into()),
+        };
+        Ok(Expr { kind, span: source.span })
     }
 
     fn eval_verified(source: &str, physical: &[u8]) -> Result<Value, String> {
-        let admitted = qualify(source)?;
-        let expected = expected_words(&admitted)?;
-        // Zig decodes all physical widths; never use legacy BE3 W1–W9.
-        let actual = zig_transport::decode_t5_exact_words(physical)?;
-        if actual != expected {
+        let qualified = qualify(source)?;
+        let expected = expected_words(&qualified)?;
+        // Only Zig physically encodes or decodes T5M; no W1–W9 truncation.
+        let restored = zig_transport::decode_t5_exact_words(physical)?;
+        if restored != expected {
+            let index = restored.iter().zip(&expected).position(|(a, b)| a != b);
             return Err(format!(
-                "T5M_PAIR_MISMATCH layer=transport expected_words={} actual_words={}; \
-                 source domain admission never follows physical width alone",
-                expected.len(), actual.len()
+                "T5M_PAIR_MISMATCH layer=transport index={index:?} expected_words={} actual_words={}; domain cannot be inferred from width",
+                expected.len(), restored.len()
             ));
         }
-        // Rehydrate from the *restored physical bits*, with numeric-domain
-        // authority carried separately by the verified SENS source AST.
-        let mut arguments = Vec::with_capacity(2);
-        for (source_number, restored) in admitted.arguments.iter().zip(&actual[2..4]) {
-            let domain = source_number.numeric_domain_width()
-                .ok_or("SENS admission: missing source numeric identity")?;
-            if restored.width != domain {
-                return Err("T5M_PAIR_MISMATCH layer=domain width".into());
-            }
-            let numeric = BinaryNumber::from_numeric_domain_bits(domain, &restored.bits)
-                .ok_or("SENS admission: invalid exact numeric word")?;
-            arguments.push(Expr {
-                kind: ExprKind::BinaryNumber(numeric),
-                span: Default::default(),
-            });
+        let mut cursor = 0usize;
+        let expr = reconstruct(&qualified, &restored, &mut cursor)?;
+        if cursor != restored.len() {
+            return Err("T5M_PAIR_MISMATCH: trailing exact physical words".into());
         }
-        let program = [Expr {
-            kind: ExprKind::DomainCall(admitted.identity, arguments.into()),
-            span: Default::default(),
-        }];
-        let result = sens::eval_parsed_expressions(&program, &mut Session::default())
-            .map_err(|e| format!("SENS eval: {e}"))?;
-        Ok(result.value)
+        sens::eval_parsed_expressions(&[expr], &mut Session::default())
+            .map(|result| result.value)
+            .map_err(|e| format!("SENS eval: {e}"))
     }
 
     fn sibling(path: &Path) -> Result<PathBuf, String> {
@@ -215,6 +254,35 @@ mod paired {
                 .expect_err("SENS must reject division by D24 zero");
             assert!(error.contains("SENS eval:"),
                 "test_id=divide-by-zero layer=eval expected=rejection actual={error}");
+        }
+
+        #[test]
+        fn nested_d5_ratios_are_exact_through_zig_t5m_and_sens() {
+            // Three D5 calls (9 control words) plus four D24 leaves.
+            let nested = format!(
+                "(додати {} {})",
+                source("частка", 1, 2),
+                source("частка", 1, 3),
+            );
+            let root = qualify(&nested).expect("ratified nested math");
+            let words = expected_words(&root).unwrap();
+            assert_eq!(words.len(), 13, "three D5 applications and four D24 leaves");
+            let bytes = zig_transport::encode_t5_exact_words(&words).unwrap();
+            assert_eq!(zig_transport::decode_t5_exact_words(&bytes).unwrap(), words);
+            let actual = eval_verified(&nested, &bytes).unwrap();
+            assert!(matches!(actual, Value::NumericComposition(_)),
+                "test_id=ratio-sum layer=eval expected=reduced-RATIO");
+            let expected = sens::eval_program(
+                &source("частка", 5, 6), &mut Session::default()
+            ).expect("independent SENS arithmetic oracle").value;
+            assert_eq!(actual, expected, "test_id=ratio-sum expected=5/6");
+
+            let mut changed = words.clone();
+            let final_number = changed.iter_mut().rfind(|word| word.width == 24).unwrap();
+            final_number.bits[23] ^= 1;
+            let malformed_pair = zig_transport::encode_t5_exact_words(&changed).unwrap();
+            assert!(eval_verified(&nested, &malformed_pair)
+                .unwrap_err().contains("T5M_PAIR_MISMATCH"));
         }
 
         #[test]
