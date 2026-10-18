@@ -1,7 +1,8 @@
 ; #990 — four-island execution evidence subordinate to Canon()/function table.
 ;
-; Migrated: exact 8-bit SID identity (00001100). Width is identity; every bit
-; of the domain address is valued. No host truthiness. Mechanism evidence only.
+; Історичний SID8:00001100 був PLUS, не D8:00001100 (зменшити-на-1).
+; Чинна ратифікована функція додавання: D5:01010, укр додати.
+; Це лише свідчення механізмів, не нова семантична identity.
 ;
 ; Reuses (2000+ surface):
 ;   lib/surface/semantic-registry.lisp (authority),
@@ -16,8 +17,9 @@
 ; ratification remains blocked until law/domain are available from the one
 ; Canon/function-table authority row.
 ;
-; SID 00001100 is an exact 8-bit coordinate: the bit pattern is the identity.
-; Four executor witnesses share that coordinate without inventing a fifth.
+; Чотири історичні executor-свідки SID8:00001100 тепер посилаються на
+; ратифіковану українську проєкцію D5:01010. D8:00001100 — інша функція.
+; Не ототожнювати однакові 8-бітні записи між епохами і доменами.
 
 (
   (schema island-math-evidence/1)
@@ -28,7 +30,7 @@
   (mechanism-source "lib/function-table-mechanisms.lisp")
   (ratification-state blocked-until-canon-law-domain)
   (rows
-    (зменшити-на-1 common-lisp execution-witness "#1042-donor")
-    (зменшити-на-1 prolog execution-witness "#1042-donor")
-    (зменшити-на-1 clips execution-witness "#1042-donor")
-    (зменшити-на-1 datalog execution-witness "#1052-replay+#1042-donor")))
+    (додати common-lisp execution-witness "#1042-donor")
+    (додати prolog execution-witness "#1042-donor")
+    (додати clips execution-witness "#1042-donor")
+    (додати datalog execution-witness "#1052-replay+#1042-donor")))
