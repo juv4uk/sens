@@ -774,6 +774,12 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     bind_existing_d9_language_mechanisms(&session.environment);
     bind_process_tcp_lisp_owned_macros(session)?;
+    if session.environment.get("codepoint->string").is_none() {
+        session.environment.define(
+            "codepoint->string",
+            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
+        );
+    }
     let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&utf8, session)?;
     let process = parse_mixed_exact_domain_process_tcp_source(
@@ -792,6 +798,12 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     bind_existing_d9_language_mechanisms(&session.environment);
     bind_process_tcp_lisp_owned_macros(session)?;
+    if session.environment.get("codepoint->string").is_none() {
+        session.environment.define(
+            "codepoint->string",
+            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
+        );
+    }
     let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&utf8, session)?;
     let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
@@ -807,6 +819,12 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     bind_existing_d9_language_mechanisms(&session.environment);
     bind_process_tcp_lisp_owned_macros(session)?;
+    if session.environment.get("codepoint->string").is_none() {
+        session.environment.define(
+            "codepoint->string",
+            Value::host_function(std::rc::Rc::new(eval::runtime_codepoint_to_string)),
+        );
+    }
     let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
     eval_parsed_expressions(&utf8, session)?;
     let fs = parse_mixed_exact_domain_fs_source("lib/fs.lisp", FS_LIBRARY_SOURCE)?;

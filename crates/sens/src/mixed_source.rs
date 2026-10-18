@@ -11,7 +11,7 @@
 //! This gives active Core migration a mixed symbol + exact-domain path without
 //! teaching the compatibility parser to infer domains from historical bytes.
 
-use crate::syntax::{Expr, ExprKind, Span, MAX_STRUCTURE_DEPTH};
+use crate::syntax::{Exactness, Expr, ExprKind, Span, MAX_STRUCTURE_DEPTH};
 use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError};
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -117,7 +117,22 @@ fn lift_pinned_d8_io(
         return Ok(Expr { kind: ExprKind::List(items), span });
     }
 
-    if matches!(
+    if head_spelling == Some("код-символу") {
+        let word = parse_binary_source_words("11100000")?[0].word;
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+            span: lifted[0].span,
+        };
+    } else if head_spelling == Some("символ-за-кодом") {
+        // CODE-CHAR is not currently an admitted D8 execution mechanism.
+        // Use the existing minimal runtime representation bridge by its
+        // compatibility symbol; it materializes a scalar only and does not
+        // implement UTF-8 policy.
+        lifted[0] = Expr {
+            kind: ExprKind::Symbol(Rc::from("codepoint->string")),
+            span: lifted[0].span,
+        };
+    } else if matches!(
         head_spelling,
         Some("11100000" | "11110100" | "11101010" | "11101101" | "11101110")
     ) {
@@ -424,6 +439,42 @@ fn lift_core_logic_macro_quote_words(
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
 /// D9 heads are materialized only on this pinned path; execution still requires
 /// a concrete callable mechanism previously attached to that exact identity.
+fn lift_pinned_utf8_d9_strings(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned UTF-8 D9 string path exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
+    if items.is_empty() || is_exact_quote(&items[0]) || source_spelling(source, &items[0]) == Some("'") {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+    let mut lifted = items.to_vec();
+    if source_spelling(source, &items[0]) == Some("рядок-додати") {
+        let word = parse_binary_source_words("110011110")?[0].word;
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+            span: items[0].span,
+        };
+    }
+    let skip_binding = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_legacy_w8_macro_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+    for index in 1..lifted.len() {
+        if skip_binding && index == 1 { continue; }
+        lifted[index] = lift_pinned_utf8_d9_strings(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+}
+
 pub fn parse_mixed_exact_domain_utf8_source(
     path: &str,
     source: &str,
@@ -437,8 +488,141 @@ pub fn parse_mixed_exact_domain_utf8_source(
     }
     parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .map(|expr| expr.and_then(|expr| lift_pinned_d9_language_calls(source, expr, 0)))
+        .map(|expr| expr.and_then(|expr| lift_pinned_utf8_d9_strings(source, expr, 0)))
+        .map(|expr| expr.and_then(|expr| expand_pinned_utf8_let_star(source, expr, 0)))
+        .map(|expr| expr.and_then(qualify_pinned_utf8_numbers))
         .collect()
+}
+
+/// Expand the Lisp-owned LET/LET* forms used by the pinned UTF-8 module into
+/// their established D4 lambda applications. This preserves the existing
+/// binding semantics while avoiding runtime macro dispatch on source data.
+fn expand_pinned_utf8_let_star(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned UTF-8 source exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
+    if items.is_empty() { return Ok(Expr { kind: ExprKind::List(items), span }); }
+
+    if is_exact_quote(&items[0]) || source_spelling(source, &items[0]) == Some("'") {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+    if matches!(source_spelling(source, &items[0]), Some("нехай-послідовно" | "нехай")) {
+        if items.len() != 3 {
+            return Err(LanguageError::new(ErrorKind::Parse,
+                "pinned UTF-8 sequential binding expects bindings and one body form", span));
+        }
+        let ExprKind::List(bindings) = &items[1].kind else {
+            return Err(LanguageError::new(ErrorKind::Parse,
+                "pinned UTF-8 sequential binding requires a proper binding list", items[1].span));
+        };
+        let lambda = crate::semantic_registry::exact_uk_callable_for_source_head("функція")
+            .filter(|identity| identity.width() == 4)
+            .ok_or_else(|| LanguageError::new(ErrorKind::Parse,
+                "pinned UTF-8 LET* expansion requires the admitted D4 lambda identity", items[0].span))?;
+        let mut body = expand_pinned_utf8_let_star(source, items[2].clone(), depth + 1)?;
+        for binding in bindings.iter().rev() {
+            let ExprKind::List(parts) = &binding.kind else {
+                return Err(LanguageError::new(ErrorKind::Parse,
+                    "pinned UTF-8 sequential binding entry must be a two-item list", binding.span));
+            };
+            if parts.len() != 2 || !matches!(parts[0].kind, ExprKind::Symbol(_)) {
+                return Err(LanguageError::new(ErrorKind::Parse,
+                    "pinned UTF-8 sequential binding entry must contain a name and value", binding.span));
+            }
+            let name = parts[0].clone();
+            let value = expand_pinned_utf8_let_star(source, parts[1].clone(), depth + 1)?;
+            let parameters = Expr {
+                kind: ExprKind::List(Rc::from(vec![name].into_boxed_slice())),
+                span: binding.span,
+            };
+            let lambda_form = Expr {
+                kind: ExprKind::List(Rc::from(vec![
+                    Expr { kind: ExprKind::DomainIdentity(lambda), span: items[0].span },
+                    parameters,
+                    body,
+                ].into_boxed_slice())),
+                span,
+            };
+            body = Expr {
+                kind: ExprKind::List(Rc::from(vec![lambda_form, value].into_boxed_slice())),
+                span,
+            };
+        }
+        return Ok(body);
+    }
+
+    let mut lifted = items.to_vec();
+    let skip_binding = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_legacy_w8_macro_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+    for index in 1..lifted.len() {
+        if skip_binding && index == 1 { continue; }
+        lifted[index] = expand_pinned_utf8_let_star(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+}
+
+/// UTF-8's byte/scalar arithmetic is explicitly admitted on D24+. This
+/// conversion is confined to the path-pinned UTF-8 source reader; ordinary
+/// readers continue to produce unqualified compatibility numbers. Integer
+/// decimal atoms here are the human source projection of exact D24 words.
+fn qualify_pinned_utf8_numbers(expression: Expr) -> Result<Expr, LanguageError> {
+    let Expr { kind, span } = expression;
+    let kind = match kind {
+        ExprKind::Number(value, Exactness::Exact)
+            if value.is_finite() && value.fract() == 0.0
+                && (-8_388_608.0..=8_388_607.0).contains(&value) =>
+        {
+            utf8_d24_integer(value as i64, span)?
+        }
+        ExprKind::Rational(value) if value.is_integer() => {
+            let integer = value.as_precise_i64().filter(|n| (-8_388_608..=8_388_607).contains(n))
+                .ok_or_else(|| utf8_numeric_error(span))?;
+            utf8_d24_integer(integer, span)?
+        }
+        ExprKind::Number(_, _) | ExprKind::Rational(_) => {
+            return Err(utf8_numeric_error(span));
+        }
+        ExprKind::List(items) => ExprKind::List(Rc::from(
+            items.iter().cloned().map(qualify_pinned_utf8_numbers)
+                .collect::<Result<Vec<_>, _>>()?.into_boxed_slice(),
+        )),
+        ExprKind::Pair(head, tail) => ExprKind::Pair(
+            Rc::new(qualify_pinned_utf8_numbers((*head).clone())?),
+            Rc::new(qualify_pinned_utf8_numbers((*tail).clone())?),
+        ),
+        other => other,
+    };
+    Ok(Expr { kind, span })
+}
+
+fn utf8_d24_integer(value: i64, span: Span) -> Result<ExprKind, LanguageError> {
+    let encoded = (value as u64) & 0x00ff_ffff;
+    let bits = (0..24).rev().map(|shift| ((encoded >> shift) & 1) as u8).collect::<Vec<_>>();
+    let number = crate::BinaryNumber::from_numeric_domain_bits(24, &bits)
+        .ok_or_else(|| utf8_numeric_error(span))?;
+    Ok(ExprKind::BinaryNumber(number))
+}
+
+fn utf8_numeric_error(span: Span) -> LanguageError {
+    LanguageError::new(
+        ErrorKind::Parse,
+        "pinned UTF-8 source requires exact integer values representable in signed D24",
+        span,
+    )
 }
 
 /// Parse only the language-owned filesystem text adapter. Like process/TCP,

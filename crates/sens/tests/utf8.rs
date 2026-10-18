@@ -1,19 +1,91 @@
-use sens::{eval_parsed_expressions, eval_program, load_core_library, load_process_library, parse_mixed_exact_domain_utf8_source, Session};
+use sens::{eval_parsed_expressions, load_core_library, load_process_library, parse_mixed_exact_domain_utf8_source, Session};
 
 fn utf8_session() -> Session {
     let mut session = Session::default();
-    load_core_library(&mut session).unwrap();
-    let source = include_str!("../../../lib/utf8.lisp");
-    let exact = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", source)
-        .expect("UTF-8 current exact-domain source must parse");
-    eval_parsed_expressions(&exact, &mut session)
-        .expect("UTF-8 source must load through its width-preserving reader");
+    load_core_library(&mut session).expect("core library");
+    load_process_library(&mut session)
+        .expect("the canonical loader must install UTF-8 D6 macros before the Lisp layer");
     session
 }
 
 fn eval(source: &str) -> String {
     let mut session = utf8_session();
-    eval_program(source, &mut session).unwrap().value.to_string()
+    eval_in_utf8_context(source, &mut session).to_string()
+}
+
+fn eval_in_utf8_context(source: &str, session: &mut Session) -> sens::Value {
+    let parsed = sens::parse(source)
+        .unwrap_or_else(|error| panic!("UTF-8 test source must parse: {error}"))
+        .into_iter()
+        .map(qualify_test_numeric_atoms)
+        .collect::<Vec<_>>();
+    eval_parsed_expressions(&parsed, session)
+        .unwrap_or_else(|error| panic!("UTF-8 test source must evaluate: {error}"))
+        .value
+}
+
+fn qualify_test_numeric_atoms(expression: sens::Expr) -> sens::Expr {
+    let sens::Expr { kind, span } = expression;
+    let kind = match kind {
+        sens::ExprKind::Number(value, sens::Exactness::Exact)
+            if value.is_finite() && value.fract() == 0.0 => qualify_test_integer(value as i64),
+        sens::ExprKind::Rational(value) if value.is_integer() => {
+            qualify_test_integer(value.as_precise_i64().expect("small test integer"))
+        }
+        sens::ExprKind::List(items) => sens::ExprKind::List(std::rc::Rc::from(
+            items.iter().cloned().map(qualify_test_numeric_atoms).collect::<Vec<_>>().into_boxed_slice(),
+        )),
+        sens::ExprKind::Pair(head, tail) => sens::ExprKind::Pair(
+            std::rc::Rc::new(qualify_test_numeric_atoms((*head).clone())),
+            std::rc::Rc::new(qualify_test_numeric_atoms((*tail).clone())),
+        ),
+        other => other,
+    };
+    sens::Expr { kind, span }
+}
+
+fn qualify_test_integer(value: i64) -> sens::ExprKind {
+    let encoded = (value as u64) & 0x00ff_ffff;
+    let bits = (0..24).rev().map(|shift| ((encoded >> shift) & 1) as u8).collect::<Vec<_>>();
+    sens::ExprKind::BinaryNumber(
+        sens::BinaryNumber::from_numeric_domain_bits(24, &bits).expect("UTF-8 test D24 value"),
+    )
+}
+
+#[test]
+fn utf8_pinned_reader_explicitly_admits_decimal_constants_as_d24() {
+    let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", "255")
+        .expect("the pinned UTF-8 numerical boundary accepts its decimal source value");
+    assert!(matches!(
+        parsed[0].kind,
+        sens::ExprKind::BinaryNumber(ref value) if value.numeric_domain_width() == Some(24)
+    ), "only the UTF-8-pinned source boundary may qualify this value as D24+");
+
+    let ordinary = sens::parse_mixed_exact_domain("255").expect("ordinary source parses");
+    assert!(matches!(
+        ordinary[0].kind,
+        sens::ExprKind::Number(255.0, _)
+    ), "the ordinary reader must retain the unqualified compatibility number");
+
+    let alias = parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp",
+        "(нехай-послідовно ((значення 255)) значення)",
+    )
+    .expect("full Ukrainian projection is admitted on this pinned source path");
+    let sens::ExprKind::List(items) = &alias[0].kind else {
+        panic!("expected expanded lambda application");
+    };
+    assert!(matches!(&items[0].kind, sens::ExprKind::List(_)), "LET* lowers to a lambda application");
+    let compact = parse_mixed_exact_domain_utf8_source(
+        "lib/utf8.lisp", "(нехай* ((значення 255)) значення)",
+    ).expect("compact Ukrainian projection parses");
+    let sens::ExprKind::List(compact_items) = &compact[0].kind else { panic!("expected compact call") };
+    assert!(matches!(&compact_items[0].kind, sens::ExprKind::DomainIdentity(_)), "compact head must project");
+    let mut session = utf8_session();
+    assert_eq!(
+        eval_parsed_expressions(&alias, &mut session).expect("expanded D4 LET* call").value.to_string(),
+        "255",
+    );
 }
 
 #[test]
@@ -32,6 +104,7 @@ fn utf8_decodes_multibyte_scalars_exactly() {
 
 #[test]
 fn utf8_decodes_valid_bytes_to_a_runtime_string_without_lossy_host_policy() {
+    assert_eq!(eval("(unicode-scalars->string (quote (65 162 8364 128512)))"), "\"A¢€😀\"");
     assert_eq!(
         eval("(utf8-decode-string (quote (65 194 162 226 130 172 240 159 152 128)))"),
         "(decoded \"A¢€😀\")"
@@ -211,8 +284,7 @@ fn utf8_helper_returns_exact_d1_predicate_on_boundaries() {
         ("(utf8-two-continuations? 128 191)", true),
         ("(utf8-two-continuations? 128 192)", false),
     ] {
-        let actual = eval_program(source, &mut session)
-            .unwrap_or_else(|e| panic!("{source} failed: {e:?}")).value;
+        let actual = eval_in_utf8_context(source, &mut session);
         assert_eq!(
             actual.as_predicate_bit(), Some(expected),
             "{source}: expected an exact D1 bit, never ordinary Number 0/1"
