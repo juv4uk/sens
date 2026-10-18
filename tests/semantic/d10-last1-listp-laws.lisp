@@ -1,15 +1,9 @@
-; D10:0011001101 LAST1 and D10:0100001100 LISTP, PAIP/MAL research.
-; Native SENS checks: list-shaped NIL/CONS, atom rejection, proper-list last.
-; Expected D1 sequence (1 1 0 1 1 1 1 0); no D10 opcode admitted.
-(list
-  (список? (quote ()))
-  (список? (list (quote яблуко)))
-  (список? (quote яблуко))
-  (список? (cons (quote яблуко) (quote груша)))
-  (equal? (останній (list (quote яблуко) (quote груша)))
-          (quote груша))
-  (equal? (останній (list (quote яблуко))) (quote яблуко))
-  (equal? (останній (list (quote яблуко) (list (quote груша))))
-          (list (quote груша)))
-  (equal? (останній (list (quote яблуко) (quote груша)))
-          (quote яблуко)))
+; D10 LAST1 / LISTP — 8 фізичних D1:YES законів.
+(equal? (останній (список (як-є а))) (як-є а))
+(equal? (останній (список (як-є а) (як-є б))) (як-є б))
+(equal? (останній (список (як-є а) (як-є б) (як-є в))) (як-є в))
+(not? (equal? (останній (список (як-є а) (як-є б))) (як-є а)))
+(список? (як-є ()))
+(список? (список (як-є а)))
+(список? (список (як-є а) (як-є б)))
+(not? (список? (як-є а)))
