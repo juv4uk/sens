@@ -6,61 +6,61 @@
 ; canonical reader would turn lexical ID 0001 into numeric value 1 and erase
 ; the required "at least four digits" evidence.
 
-(0011 sr-same?
-  (0010 (left right)
-    (110
+(визначити sr-same?
+  (функція (left right)
+    (за-умовою
       ((equal? left right) (structural-relation same) t)
-      ((equal? left right) (structural-relation distinct) (001 ())))))
+      ((equal? left right) (structural-relation distinct) (як-є ())))))
 
-(0011 sr-nonempty-list?
-  (0010 (value)
-    (110
-      ((010 value) (structural-kind pair) t)
-      ((010 value) (structural-kind empty-list) (001 ()))
-      ((010 value) (structural-kind atom) (001 ())))))
+(визначити sr-nonempty-list?
+  (функція (value)
+    (за-умовою
+      ((атом? value) (structural-kind pair) t)
+      ((атом? value) (structural-kind empty-list) (як-є ()))
+      ((атом? value) (structural-kind atom) (як-є ())))))
 
-(0011 sr-member?
-  (0010 (value values)
-    (110
-      ((010 values) (structural-kind empty-list) (001 ()))
-      ((010 values) (structural-kind atom) (001 ()))
-      ((010 values) (structural-kind pair)
-       (110
-         ((sr-same? value (100 values)) t)
-         (t (sr-member? value (011 values))))))))
+(визначити sr-member?
+  (функція (value values)
+    (за-умовою
+      ((атом? values) (structural-kind empty-list) (як-є ()))
+      ((атом? values) (structural-kind atom) (як-є ()))
+      ((атом? values) (structural-kind pair)
+       (за-умовою
+         ((sr-same? value (перше values)) t)
+         (t (sr-member? value (решта values))))))))
 
-(0011 sr-uniq-add
-  (0010 (value values)
-    (110
+(визначити sr-uniq-add
+  (функція (value values)
+    (за-умовою
       ((sr-member? value values) values)
-      (t (111 value values)))))
+      (t (сполучити value values)))))
 
-(0011 sr-flush-token
-  (0010 (current tokens)
-    (110
+(визначити sr-flush-token
+  (функція (current tokens)
+    (за-умовою
       ((рядок-порожній? current) tokens)
-      (t (111 current tokens)))))
+      (t (сполучити current tokens)))))
 
-(0011 sr-whitespace?
-  (0010 (ch)
+(визначити sr-whitespace?
+  (функція (ch)
     (or (sr-same? ch " ")
         (sr-same? ch "\n")
         (sr-same? ch "\r")
         (sr-same? ch "\t"))))
 
-(0011 sr-tokenize-onto
-  (0010 (text current tokens in-comment)
-    (110
+(визначити sr-tokenize-onto
+  (функція (text current tokens in-comment)
+    (за-умовою
       ((рядок-порожній? text)
-       (10100 (sr-flush-token current tokens)))
+       (зворот (sr-flush-token current tokens)))
       (t
        (нехай-послідовно ((ch (рядок-перший text))
               (rest (рядок-решта text)))
-         (110
+         (за-умовою
            (in-comment
-            (110
+            (за-умовою
               ((sr-same? ch "\n")
-               (sr-tokenize-onto rest "" tokens (001 ())))
+               (sr-tokenize-onto rest "" tokens (як-є ())))
               (t
                (sr-tokenize-onto rest "" tokens t))))
            ((sr-same? ch ";")
@@ -74,126 +74,126 @@
               rest
               ""
               (sr-flush-token current tokens)
-              (001 ())))
+              (як-є ())))
            ((or (sr-same? ch "(") (sr-same? ch ")"))
             (sr-tokenize-onto
               rest
               ""
-              (111 ch (sr-flush-token current tokens))
-              (001 ())))
+              (сполучити ch (sr-flush-token current tokens))
+              (як-є ())))
            (t
             (sr-tokenize-onto
               rest
               (рядок-додати current ch)
               tokens
-              (001 ())))))))))
+              (як-є ())))))))))
 
-(0011 sr-tokenize
-  (0010 (text)
-    (sr-tokenize-onto text "" (001 ()) (001 ()))))
+(визначити sr-tokenize
+  (функція (text)
+    (sr-tokenize-onto text "" (як-є ()) (як-є ()))))
 
 ; Parse result shapes:
 ;   ("ok" value remaining-tokens)
 ;   ("error" message)
-(0011 sr-parse-list
-  (0010 (tokens acc)
-    (110
-      ((010 tokens) (structural-kind empty-list)
-       (1110 "error" "unclosed-list"))
-      ((010 tokens) (structural-kind atom)
-       (1110 "error" "malformed-token-stream"))
-      ((010 tokens) (structural-kind pair)
-       (110
-         ((sr-same? (100 tokens) ")")
-          (1110 "ok" (10100 acc) (011 tokens)))
+(визначити sr-parse-list
+  (функція (tokens acc)
+    (за-умовою
+      ((атом? tokens) (structural-kind empty-list)
+       (список "error" "unclosed-list"))
+      ((атом? tokens) (structural-kind atom)
+       (список "error" "malformed-token-stream"))
+      ((атом? tokens) (structural-kind pair)
+       (за-умовою
+         ((sr-same? (перше tokens) ")")
+          (список "ok" (зворот acc) (решта tokens)))
          (t
-          (001000 ((parsed (sr-parse-one tokens)))
-            (110
-              ((sr-same? (100 parsed) "error") parsed)
+          (нехай ((parsed (sr-parse-one tokens)))
+            (за-умовою
+              ((sr-same? (перше parsed) "error") parsed)
               (t
                (sr-parse-list
                  (third parsed)
-                 (111 (second parsed) acc)))))))))))
+                 (сполучити (second parsed) acc)))))))))))
 
-(0011 sr-parse-one
-  (0010 (tokens)
-    (110
-      ((010 tokens) (structural-kind empty-list)
-       (1110 "error" "unexpected-eof"))
-      ((010 tokens) (structural-kind atom)
-       (1110 "error" "malformed-token-stream"))
-      ((010 tokens) (structural-kind pair)
-       (001000 ((token (100 tokens)))
-         (110
+(визначити sr-parse-one
+  (функція (tokens)
+    (за-умовою
+      ((атом? tokens) (structural-kind empty-list)
+       (список "error" "unexpected-eof"))
+      ((атом? tokens) (structural-kind atom)
+       (список "error" "malformed-token-stream"))
+      ((атом? tokens) (structural-kind pair)
+       (нехай ((token (перше tokens)))
+         (за-умовою
            ((sr-same? token "(")
-            (sr-parse-list (011 tokens) (001 ())))
+            (sr-parse-list (решта tokens) (як-є ())))
            ((sr-same? token ")")
-            (1110 "error" "unexpected-closing-paren"))
+            (список "error" "unexpected-closing-paren"))
            (t
-            (1110 "ok" token (011 tokens)))))))))
+            (список "ok" token (решта tokens)))))))))
 
-(0011 sr-parse-root
-  (0010 (tokens)
-    (001000 ((parsed (sr-parse-one tokens)))
-      (110
-        ((sr-same? (100 parsed) "error") parsed)
+(визначити sr-parse-root
+  (функція (tokens)
+    (нехай ((parsed (sr-parse-one tokens)))
+      (за-умовою
+        ((sr-same? (перше parsed) "error") parsed)
         (t
-         (001000 ((remaining (third parsed)))
-           (110
-             ((010 remaining) (structural-kind empty-list)
-              (1110 "ok" (second parsed)))
-             ((010 remaining) (structural-kind atom)
-              (1110 "error" "malformed-token-stream"))
-             ((010 remaining) (structural-kind pair)
-              (1110 "error" "extra-top-level-forms")))))))))
+         (нехай ((remaining (third parsed)))
+           (за-умовою
+             ((атом? remaining) (structural-kind empty-list)
+              (список "ok" (second parsed)))
+             ((атом? remaining) (structural-kind atom)
+              (список "error" "malformed-token-stream"))
+             ((атом? remaining) (structural-kind pair)
+              (список "error" "extra-top-level-forms")))))))))
 
-(0011 sr-digit?
-  (0010 (ch)
-    (sr-member? ch (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+(визначити sr-digit?
+  (функція (ch)
+    (sr-member? ch (як-є ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(0011 sr-all-digits?
-  (0010 (text)
-    (110
+(визначити sr-all-digits?
+  (функція (text)
+    (за-умовою
       ((рядок-порожній? text) t)
       (t
-       (110
+       (за-умовою
          ((sr-digit? (рядок-перший text))
           (sr-all-digits? (рядок-решта text)))
-         (t (001 ())))))))
+         (t (як-є ())))))))
 
-(0011 sr-at-least-four-chars?
-  (0010 (text)
-    (110
+(визначити sr-at-least-four-chars?
+  (функція (text)
+    (за-умовою
       ((рядок-порожній? text) (як-є ()))
       (t
        (нехай ((a (рядок-решта text)))
-         (110
+         (за-умовою
            ((рядок-порожній? a) (як-є ()))
            (t
             (нехай ((b (рядок-решта a)))
-              (110
+              (за-умовою
                 ((рядок-порожній? b) (як-є ()))
                 (t
                  (нехай ((c (рядок-решта b)))
-                   (110
+                   (за-умовою
                      ((рядок-порожній? c) (як-є ()))
                      (t t)))))))))))))
 
-(0011 sr-valid-id?
-  (0010 (text)
+(визначити sr-valid-id?
+  (функція (text)
     (and (sr-at-least-four-chars? text)
          (sr-all-digits? text))))
 
-(0011 sr-between?
-  (0010 (value low high)
+(визначити sr-between?
+  (функція (value low high)
     (and (>= value low) (<= value high))))
 
 ; Alphabetic coverage for every current human surface, including Latin
 ; Extended Additional used by Sanskrit transliteration (ṃ/ṇ/ṛ/ṣ), plus common
 ; future scripts. The guarded law is that punctuation-only spellings may not
 ; live under a human-language surface.
-(0011 sr-letter-codepoint?
-  (0010 (cp)
+(визначити sr-letter-codepoint?
+  (функція (cp)
     (or
       (sr-between? cp 65 90)
       (sr-between? cp 97 122)
@@ -211,29 +211,29 @@
       (sr-between? cp 7680 7935)
       (sr-between? cp 19968 40959))))
 
-(0011 sr-has-letter?
-  (0010 (text)
-    (110
+(визначити sr-has-letter?
+  (функція (text)
+    (за-умовою
       ((рядок-порожній? text) (як-є ()))
       (t
-       (110
+       (за-умовою
          ((sr-letter-codepoint? (string->codepoint (рядок-перший text))) t)
          (t (sr-has-letter? (рядок-решта text))))))))
 
-(0011 sr-status?
-  (0010 (status)
+(визначити sr-status?
+  (функція (status)
     (sr-member?
       status
-      (001 ("stable" "candidate" "missing" "compatibility-only")))))
+      (як-є ("stable" "candidate" "missing" "compatibility-only")))))
 
-(0011 sr-first-wave-present?
-  (0010 (languages)
+(визначити sr-first-wave-present?
+  (функція (languages)
     (and (sr-member? "uk" languages)
          (sr-member? "en" languages)
          (sr-member? "sa" languages))))
 
-(0011 sr-fail
-  (0010 (detail)
+(визначити sr-fail
+  (функція (detail)
     (нехай ((a (показати "semantic registry error: "))
           (b (показати (значення-у-текст detail)))
           (c (показати "\n")))
@@ -241,185 +241,185 @@
       ; diagnostic. The dynamically constructed missing symbol carries the
       ; rejection payload in the error itself, so redirected stdout buffering
       ; cannot erase the useful detail before the non-zero process exit.
-      (0001
-        (1110
+      (обчислити
+        (список
           (текст-у-символ
             (рядок-додати
               "semantic-registry-check-failed:"
               (значення-у-текст detail))))))))
 
 ; Result: ("ok" updated-all-surfaces has-sym), or sr-fail.
-(0011 sr-validate-surfaces
-  (0010 (identity surfaces entry-languages all-surfaces has-sym)
-    (110
-      ((010 surfaces) (structural-kind empty-list)
-       (110
+(визначити sr-validate-surfaces
+  (функція (identity surfaces entry-languages all-surfaces has-sym)
+    (за-умовою
+      ((атом? surfaces) (structural-kind empty-list)
+       (за-умовою
          ((sr-first-wave-present? entry-languages)
-          (1110 "ok" all-surfaces has-sym))
+          (список "ok" all-surfaces has-sym))
          (t
           (sr-fail
-            (1110 identity "missing-explicit-first-wave-surface"
+            (список identity "missing-explicit-first-wave-surface"
                   entry-languages)))))
-      ((010 surfaces) (structural-kind atom)
-       (sr-fail (1110 identity "surface-tail-not-list" surfaces)))
-      ((010 surfaces) (structural-kind pair)
-       (001000 ((surface (100 surfaces)))
-         (110
+      ((атом? surfaces) (structural-kind atom)
+       (sr-fail (список identity "surface-tail-not-list" surfaces)))
+      ((атом? surfaces) (structural-kind pair)
+       (нехай ((surface (перше surfaces)))
+         (за-умовою
            ((sr-nonempty-list? surface)
-            (110
-              ((= (000000 surface) 3)
-               (001001 ((language (100 surface))
+            (за-умовою
+              ((= (довжина surface) 3)
+               (нехай-послідовно ((language (перше surface))
                       (name (second surface))
                       (status (third surface)))
-                 (110
-                   ((or (0100 (string? language))
-                        (0100 (string? name))
-                        (0100 (string? status)))
-                    (sr-fail (1110 identity "surface-fields-must-be-atoms" surface)))
+                 (за-умовою
+                   ((or (хибне? (string? language))
+                        (хибне? (string? name))
+                        (хибне? (string? status)))
+                    (sr-fail (список identity "surface-fields-must-be-atoms" surface)))
                    ((sr-member? language entry-languages)
-                    (sr-fail (1110 identity "duplicate-surface" language)))
-                   ((0100 (sr-status? status))
-                    (sr-fail (1110 identity language "unknown-status" status)))
+                    (sr-fail (список identity "duplicate-surface" language)))
+                   ((хибне? (sr-status? status))
+                    (sr-fail (список identity language "unknown-status" status)))
                    ((and (sr-same? status "missing")
-                         (0100 (sr-same? name "—")))
-                    (sr-fail (1110 identity language "missing-requires-dash" name)))
-                   ((and (0100 (or (sr-same? status "missing")
+                         (хибне? (sr-same? name "—")))
+                    (sr-fail (список identity language "missing-requires-dash" name)))
+                   ((and (хибне? (or (sr-same? status "missing")
                                   (sr-same? status "compatibility-only")))
                          (sr-same? name "—"))
-                    (sr-fail (1110 identity language status "requires-name")))
+                    (sr-fail (список identity language status "requires-name")))
                    ((sr-same? name identity)
-                    (sr-fail (1110 identity language "surface-name-equals-id")))
-                   ((and (0100 (sr-same? language "sym"))
-                         (0100 (sr-same? name "—"))
-                         (0100 (sr-has-letter? name)))
+                    (sr-fail (список identity language "surface-name-equals-id")))
+                   ((and (хибне? (sr-same? language "sym"))
+                         (хибне? (sr-same? name "—"))
+                         (хибне? (sr-has-letter? name)))
                     (sr-fail
-                      (1110 identity language
+                      (список identity language
                             "punctuation-belongs-under-sym" name)))
                    (t
                     (sr-validate-surfaces
                       identity
-                      (011 surfaces)
-                      (111 language entry-languages)
+                      (решта surfaces)
+                      (сполучити language entry-languages)
                       (sr-uniq-add language all-surfaces)
                       (or has-sym (sr-same? language "sym")))))))
               (t
-               (sr-fail (1110 identity "surface-must-have-three-fields" surface)))))
+               (sr-fail (список identity "surface-must-have-three-fields" surface)))))
            (t
-            (sr-fail (1110 identity "surface-must-be-list" surface)))))))))
+            (sr-fail (список identity "surface-must-be-list" surface)))))))))
 
-(0011 sr-validate-entries
-  (0010 (entries seen-ids all-surfaces symbolic-count count)
-    (110
-      ((010 entries) (structural-kind empty-list)
-       (110
+(визначити sr-validate-entries
+  (функція (entries seen-ids all-surfaces symbolic-count count)
+    (за-умовою
+      ((атом? entries) (structural-kind empty-list)
+       (за-умовою
          ((= count 0)
-          (sr-fail (1110 "registry-has-no-semantic-identities")))
+          (sr-fail (список "registry-has-no-semantic-identities")))
          (t
-          (1110 "ok" count all-surfaces symbolic-count))))
-      ((010 entries) (structural-kind atom)
-       (sr-fail (1110 "registry-tail-not-list" entries)))
-      ((010 entries) (structural-kind pair)
-       (001000 ((entry (100 entries)))
-         (110
+          (список "ok" count all-surfaces symbolic-count))))
+      ((атом? entries) (structural-kind atom)
+       (sr-fail (список "registry-tail-not-list" entries)))
+      ((атом? entries) (structural-kind pair)
+       (нехай ((entry (перше entries)))
+         (за-умовою
            ((sr-nonempty-list? entry)
-            (110
-              ((>= (000000 entry) 2)
-               (001000 ((identity (100 entry)))
-                 (110
-                   ((0100 (string? identity))
-                    (sr-fail (1110 "semantic-id-must-be-token" identity)))
-                   ((0100 (sr-valid-id? identity))
-                    (sr-fail (1110 "semantic-id-must-be-four-plus-digits" identity)))
+            (за-умовою
+              ((>= (довжина entry) 2)
+               (нехай ((identity (перше entry)))
+                 (за-умовою
+                   ((хибне? (string? identity))
+                    (sr-fail (список "semantic-id-must-be-token" identity)))
+                   ((хибне? (sr-valid-id? identity))
+                    (sr-fail (список "semantic-id-must-be-four-plus-digits" identity)))
                    ((sr-member? identity seen-ids)
-                    (sr-fail (1110 "duplicate-semantic-id" identity)))
+                    (sr-fail (список "duplicate-semantic-id" identity)))
                    (t
-                    (001000 ((surface-result
+                    (нехай ((surface-result
                             (sr-validate-surfaces
                               identity
-                              (011 entry)
-                              (001 ())
+                              (решта entry)
+                              (як-є ())
                               all-surfaces
-                              (001 ()))))
+                              (як-є ()))))
                       (sr-validate-entries
-                        (011 entries)
-                        (111 identity seen-ids)
+                        (решта entries)
+                        (сполучити identity seen-ids)
                         (second surface-result)
-                        (110
-                          ((third surface-result) (01010 symbolic-count 1))
+                        (за-умовою
+                          ((third surface-result) (додати symbolic-count 1))
                           (t symbolic-count))
-                        (01010 count 1)))))))
+                        (додати count 1)))))))
               (t
-               (sr-fail (1110 "malformed-semantic-entry" entry)))))
+               (sr-fail (список "malformed-semantic-entry" entry)))))
            (t
-            (sr-fail (1110 "malformed-semantic-entry" entry)))))))))
+            (sr-fail (список "malformed-semantic-entry" entry)))))))))
 
-(0011 sr-insert-string
-  (0010 (value sorted)
-    (110
-      ((010 sorted) (structural-kind empty-list) (1110 value))
-      ((010 sorted) (structural-kind atom) (1110 value sorted))
-      ((010 sorted) (structural-kind pair)
-       (110
+(визначити sr-insert-string
+  (функція (value sorted)
+    (за-умовою
+      ((атом? sorted) (structural-kind empty-list) (список value))
+      ((атом? sorted) (structural-kind atom) (список value sorted))
+      ((атом? sorted) (structural-kind pair)
+       (за-умовою
          ((текст-передує? value (перше sorted)) (сполучити value sorted))
          (t
-          (111 (100 sorted)
-                (sr-insert-string value (011 sorted)))))))))
+          (сполучити (перше sorted)
+                (sr-insert-string value (решта sorted)))))))))
 
-(0011 sr-sort-strings
-  (0010 (values acc)
-    (110
-      ((010 values) (structural-kind empty-list) acc)
-      ((010 values) (structural-kind atom) (sr-insert-string values acc))
-      ((010 values) (structural-kind pair)
+(визначити sr-sort-strings
+  (функція (values acc)
+    (за-умовою
+      ((атом? values) (structural-kind empty-list) acc)
+      ((атом? values) (structural-kind atom) (sr-insert-string values acc))
+      ((атом? values) (structural-kind pair)
        (sr-sort-strings
-         (011 values)
-         (sr-insert-string (100 values) acc))))))
+         (решта values)
+         (sr-insert-string (перше values) acc))))))
 
-(0011 sr-join-space
-  (0010 (values)
-    (110
-      ((010 values) (structural-kind empty-list) "")
-      ((010 values) (structural-kind atom) values)
-      ((010 values) (structural-kind pair)
-       (110
-         ((010 (011 values)) (structural-kind empty-list) (100 values))
-         ((010 (011 values)) (structural-kind atom)
+(визначити sr-join-space
+  (функція (values)
+    (за-умовою
+      ((атом? values) (structural-kind empty-list) "")
+      ((атом? values) (structural-kind atom) values)
+      ((атом? values) (structural-kind pair)
+       (за-умовою
+         ((атом? (решта values)) (structural-kind empty-list) (перше values))
+         ((атом? (решта values)) (structural-kind atom)
           (рядок-додати
-            (100 values)
+            (перше values)
             (рядок-додати " " (решта values))))
-         ((010 (011 values)) (structural-kind pair)
+         ((атом? (решта values)) (structural-kind pair)
           (рядок-додати
-            (100 values)
+            (перше values)
             (рядок-додати
               " "
-              (sr-join-space (011 values))))))))))
+              (sr-join-space (решта values))))))))))
 
-(0011 sr-source
+(визначити sr-source
   (read-file "lib/surface/semantic-registry.lisp"))
 
-(0011 sr-parsed
+(визначити sr-parsed
   (sr-parse-root (sr-tokenize sr-source)))
 
-(110
-  ((sr-same? (100 sr-parsed) "error")
+(за-умовою
+  ((sr-same? (перше sr-parsed) "error")
    (sr-fail (second sr-parsed)))
   (t
-   (001000 ((root (second sr-parsed)))
-     (110
-       ((0100 (sr-nonempty-list? root))
-        (sr-fail (1110 "registry-root-must-be-list")))
-       ((0100 (sr-same? (100 root) "sr/1"))
-        (sr-fail (1110 "registry-must-start-with-sr/1" (100 root))))
+   (нехай ((root (second sr-parsed)))
+     (за-умовою
+       ((хибне? (sr-nonempty-list? root))
+        (sr-fail (список "registry-root-must-be-list")))
+       ((хибне? (sr-same? (перше root) "sr/1"))
+        (sr-fail (список "registry-must-start-with-sr/1" (перше root))))
        (t
-        (001001 ((result
+        (нехай-послідовно ((result
                  (sr-validate-entries
-                   (011 root)
-                   (001 ())
-                   (001 ())
+                   (решта root)
+                   (як-є ())
+                   (як-є ())
                    0
                    0))
                (identity-count (second result))
-               (surface-names (sr-sort-strings (third result) (001 ())))
+               (surface-names (sr-sort-strings (third result) (як-є ())))
                (symbolic-count (fourth result))
                (a (показати
                     (рядок-додати
@@ -441,7 +441,7 @@
                         "\n"))))
                (d (показати "numeric-only authority: CONFIRMED\n"))
                (e (показати "meaning-first shape: CONFIRMED\n")))
-          (001 semantic-registry-ok)))))))
+          (як-є semantic-registry-ok)))))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити число-рядок number->string)
