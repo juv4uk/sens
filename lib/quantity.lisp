@@ -25,204 +25,204 @@
 ; Reuses science-proper-list?, quantity?, scientific-constant? surface.
 ;
 
-(0011 *dimension-schema* (001 dimension/1))
-(0011 *unit-schema* (001 unit/1))
-(0011 *quantity-schema* (001 quantity/1))
-(0011 *science-source-schema* (001 science-source/1))
-(0011 *scientific-constant-schema* (001 scientific-constant/1))
+(визначити *dimension-schema* (як-є dimension/1))
+(визначити *unit-schema* (як-є unit/1))
+(визначити *quantity-schema* (як-є quantity/1))
+(визначити *science-source-schema* (як-є science-source/1))
+(визначити *scientific-constant-schema* (як-є scientific-constant/1))
 
-(0011 science-proper-list?
-  (0010 (x)
-    (110
-      ((010 x)
-       (101 x (001 ())))
-      (#d1:1
-       (science-proper-list? (011 x))))))
+(визначити science-proper-list?
+  (функція (x)
+    (за-умовою
+      ((атом? x)
+       (тотожне? x (як-є ())))
+      (так
+       (science-proper-list? (решта x))))))
 
-(0011 science-list-length-equals?
-  (0010 (items remaining)
-    (110
-      ((010 items) (101 remaining 0))
-      ((101 remaining 0) (101 (001 (0)) (001 (1))))
-      (#d1:1
-       (science-list-length-equals? (011 items) (01011 remaining 1))))))
+(визначити science-list-length-equals?
+  (функція (items remaining)
+    (за-умовою
+      ((атом? items) (тотожне? remaining 0))
+      ((тотожне? remaining 0) (тотожне? (як-є (0)) (як-є (1))))
+      (так
+       (science-list-length-equals? (решта items) (відняти remaining 1))))))
 
-(0011 science-sixth
-  (0010 (values)
-    (100 (011 (011 (011 (011 (011 values))))))))
+(визначити science-sixth
+  (функція (values)
+    (перше (решта (решта (решта (решта (решта values))))))))
 
-(0011 science-seventh
-  (0010 (values)
-    (100 (011 (011 (011 (011 (011 (011 values)))))))))
+(визначити science-seventh
+  (функція (values)
+    (перше (решта (решта (решта (решта (решта (решта values)))))))))
 
-(0011 make-dimension
-  (0010 (base exponent)
-    (1110 *dimension-schema* base exponent)))
+(визначити make-dimension
+  (функція (base exponent)
+    (список *dimension-schema* base exponent)))
 
-(0011 dimension?
-  (0010 (x)
-    (110
-      ((010 x) (001 ()))
-      ((101 (science-proper-list? x) (001 ())) (001 ()))
-      ((101 (science-list-length-equals? x 3) (101 (001 (0)) (001 (1)))) (001 ()))
-      ((101 (100 x) *dimension-schema*)
-       (110
-         ((101 (110101100 (1001 x)) (001 ())) (001 ()))
-         (#d1:1 #d1:1)))
-      (#d1:1 (001 ())))))
+(визначити dimension?
+  (функція (x)
+    (за-умовою
+      ((атом? x) (як-є ()))
+      ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (перше x) *dimension-schema*)
+       (за-умовою
+         ((тотожне? (110101100 (друге x)) (як-є ())) (як-є ()))
+         (так так)))
+      (так (як-є ())))))
 
-(0011 dimension-base
-  (0010 (dimension) (1001 dimension)))
+(визначити dimension-base
+  (функція (dimension) (друге dimension)))
 
-(0011 dimension-exponent
-  (0010 (dimension) (10011 dimension)))
+(визначити dimension-exponent
+  (функція (dimension) (третє dimension)))
 
-(0011 make-unit
-  (0010 (dimensions)
-    (1110 *unit-schema* dimensions)))
+(визначити make-unit
+  (функція (dimensions)
+    (список *unit-schema* dimensions)))
 
-(0011 unit?
-  (0010 (x)
-    (110
-      ((010 x) (001 ()))
-      ((101 (science-proper-list? x) (001 ())) (001 ()))
-      ((101 (100 x) *unit-schema*)
-       (science-proper-list? (011 x)))
-      (#d1:1 (001 ())))))
+(визначити unit?
+  (функція (x)
+    (за-умовою
+      ((атом? x) (як-є ()))
+      ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
+      ((тотожне? (перше x) *unit-schema*)
+       (science-proper-list? (решта x)))
+      (так (як-є ())))))
 
-(0011 unit-dimensions
-  (0010 (unit) (011 unit)))
+(визначити unit-dimensions
+  (функція (unit) (решта unit)))
 
-(0011 make-quantity
-  (0010 (value unit)
-    (1110 *quantity-schema* value unit)))
+(визначити make-quantity
+  (функція (value unit)
+    (список *quantity-schema* value unit)))
 
-(0011 quantity?
-  (0010 (x)
-    (110
-      ((010 x) (001 ()))
-      ((101 (science-proper-list? x) (001 ())) (001 ()))
-      ((101 (science-list-length-equals? x 3) (101 (001 (0)) (001 (1)))) (001 ()))
-      ((101 (100 x) *quantity-schema*)
-       (unit? (10011 x)))
-      (#d1:1 (001 ())))))
+(визначити quantity?
+  (функція (x)
+    (за-умовою
+      ((атом? x) (як-є ()))
+      ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (перше x) *quantity-schema*)
+       (unit? (третє x)))
+      (так (як-є ())))))
 
-(0011 quantity-value
-  (0010 (quantity) (1001 quantity)))
+(визначити quantity-value
+  (функція (quantity) (друге quantity)))
 
-(0011 quantity-unit
-  (0010 (quantity) (10011 quantity)))
+(визначити quantity-unit
+  (функція (quantity) (третє quantity)))
 
-(0011 make-science-source
-  (0010 (authority edition)
-    (1110 *science-source-schema* authority edition)))
+(визначити make-science-source
+  (функція (authority edition)
+    (список *science-source-schema* authority edition)))
 
-(0011 science-source?
-  (0010 (x)
-    (110
-      ((010 x) (001 ()))
-      ((101 (science-proper-list? x) (001 ())) (001 ()))
-      ((101 (science-list-length-equals? x 3) (101 (001 (0)) (001 (1)))) (001 ()))
-      ((101 (100 x) *science-source-schema*) #d1:1)
-      (#d1:1 (001 ())))))
+(визначити science-source?
+  (функція (x)
+    (за-умовою
+      ((атом? x) (як-є ()))
+      ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (перше x) *science-source-schema*) так)
+      (так (як-є ())))))
 
-(0011 science-source-authority
-  (0010 (source) (1001 source)))
+(визначити science-source-authority
+  (функція (source) (друге source)))
 
-(0011 science-source-edition
-  (0010 (source) (10011 source)))
+(визначити science-source-edition
+  (функція (source) (третє source)))
 
-(0011 scientific-constant-status-valid?
-  (0010 (status)
-    (110
-      ((101 status (001 exact-by-definition)) #d1:1)
-      ((101 status (001 measured)) #d1:1)
-      (#d1:1 (001 ())))))
+(визначити scientific-constant-status-valid?
+  (функція (status)
+    (за-умовою
+      ((тотожне? status (як-є exact-by-definition)) так)
+      ((тотожне? status (як-є measured)) так)
+      (так (як-є ())))))
 
-(0011 scientific-constant-kind-valid?
-  (0010 (kind)
-    (110
-      ((101 kind (001 physical-defining)) #d1:1)
-      ((101 kind (001 physical-derived)) #d1:1)
-      (#d1:1 (001 ())))))
+(визначити scientific-constant-kind-valid?
+  (функція (kind)
+    (за-умовою
+      ((тотожне? kind (як-є physical-defining)) так)
+      ((тотожне? kind (як-є physical-derived)) так)
+      (так (як-є ())))))
 
-(0011 make-scientific-constant
-  (0010 (name quantity status kind system source)
-    (1110 *scientific-constant-schema* name quantity status kind system source)))
+(визначити make-scientific-constant
+  (функція (name quantity status kind system source)
+    (список *scientific-constant-schema* name quantity status kind system source)))
 
-(0011 scientific-constant?
-  (0010 (x)
-    (110
-      ((010 x) (001 ()))
-      ((101 (science-proper-list? x) (001 ())) (001 ()))
-      ((101 (science-list-length-equals? x 7) (101 (001 (0)) (001 (1)))) (001 ()))
-      ((101 (100 x) *scientific-constant-schema*)
-       (110
-         ((101 (110101100 (1001 x)) (001 ())) (001 ()))
-         ((101 (quantity? (10011 x)) (001 ())) (001 ()))
-         ((101 (scientific-constant-status-valid? (100111 x)) (001 ())) (001 ()))
-         ((101 (scientific-constant-kind-valid? (110110101 x)) (001 ())) (001 ()))
-         ((101 (110101100 (science-sixth x)) (001 ())) (001 ()))
-         ((101 (science-source? (science-seventh x)) (001 ())) (001 ()))
-         (#d1:1 #d1:1)))
-      (#d1:1 (001 ())))))
+(визначити scientific-constant?
+  (функція (x)
+    (за-умовою
+      ((атом? x) (як-є ()))
+      ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 7) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (перше x) *scientific-constant-schema*)
+       (за-умовою
+         ((тотожне? (110101100 (друге x)) (як-є ())) (як-є ()))
+         ((тотожне? (quantity? (третє x)) (як-є ())) (як-є ()))
+         ((тотожне? (scientific-constant-status-valid? (четверте x)) (як-є ())) (як-є ()))
+         ((тотожне? (scientific-constant-kind-valid? (110110101 x)) (як-є ())) (як-є ()))
+         ((тотожне? (110101100 (science-sixth x)) (як-є ())) (як-є ()))
+         ((тотожне? (science-source? (science-seventh x)) (як-є ())) (як-є ()))
+         (так так)))
+      (так (як-є ())))))
 
-(0011 scientific-constant-name
-  (0010 (constant) (1001 constant)))
+(визначити scientific-constant-name
+  (функція (constant) (друге constant)))
 
-(0011 scientific-constant-quantity
-  (0010 (constant) (10011 constant)))
+(визначити scientific-constant-quantity
+  (функція (constant) (третє constant)))
 
-(0011 scientific-constant-value
-  (0010 (constant)
+(визначити scientific-constant-value
+  (функція (constant)
     (quantity-value (scientific-constant-quantity constant))))
 
-(0011 scientific-constant-unit
-  (0010 (constant)
+(визначити scientific-constant-unit
+  (функція (constant)
     (quantity-unit (scientific-constant-quantity constant))))
 
-(0011 scientific-constant-status
-  (0010 (constant) (100111 constant)))
+(визначити scientific-constant-status
+  (функція (constant) (четверте constant)))
 
-(0011 scientific-constant-kind
-  (0010 (constant) (110110101 constant)))
+(визначити scientific-constant-kind
+  (функція (constant) (110110101 constant)))
 
-(0011 scientific-constant-system
-  (0010 (constant) (science-sixth constant)))
+(визначити scientific-constant-system
+  (функція (constant) (science-sixth constant)))
 
-(0011 scientific-constant-source
-  (0010 (constant) (science-seventh constant)))
+(визначити scientific-constant-source
+  (функція (constant) (science-seventh constant)))
 
-(0011 scientific-constant->clauses
-  (0010 (constant)
-    (110
-      ((101 (scientific-constant? constant) (001 ())) (001 ()))
-      (#d1:1
-       ((0010 (name)
-          (1110
-           (1110 (1110 (001 scientific-constant) name))
-           (1110
-             (1110 (001 constant-value)
+(визначити scientific-constant->clauses
+  (функція (constant)
+    (за-умовою
+      ((тотожне? (scientific-constant? constant) (як-є ())) (як-є ()))
+      (так
+       ((функція (name)
+          (список
+           (список (список (як-є scientific-constant) name))
+           (список
+             (список (як-є constant-value)
                    name
                    (scientific-constant-value constant)))
-           (1110
-             (1110 (001 constant-unit)
+           (список
+             (список (як-є constant-unit)
                    name
                    (scientific-constant-unit constant)))
-           (1110
-             (1110 (001 constant-status)
+           (список
+             (список (як-є constant-status)
                    name
                    (scientific-constant-status constant)))
-           (1110
-             (1110 (001 constant-kind)
+           (список
+             (список (як-є constant-kind)
                    name
                    (scientific-constant-kind constant)))
-           (1110
-             (1110 (001 constant-system)
+           (список
+             (список (як-є constant-system)
                    name
                    (scientific-constant-system constant)))
-           (1110
-             (1110 (001 constant-source)
+           (список
+             (список (як-є constant-source)
                    name
                    (scientific-constant-source constant))))
          )

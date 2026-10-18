@@ -1,0 +1,206 @@
+"""Quantity: exact D1/D3–D6 ukr source projection, not a Python SENS evaluator."""
+from __future__ import annotations
+
+import hashlib
+import re
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "lib/quantity.lisp"
+BASE_BLOB = "e06af39b35862b3f993009fbcff17e5649fa2d56"
+NATIVE = {
+    3: {"001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
+        "101": "тотожне?", "110": "за-умовою", "111": "сполучити"},
+    4: {"0010": "функція", "0011": "визначити", "0101": "порожній?",
+        "1001": "друге", "1110": "список", "1111": "приєднати"},
+    5: {"01011": "відняти", "10011": "третє"},
+    6: {"001000": "нехай", "100111": "четверте"},
+}
+HEAD_COUNTS = {
+    "100": 7, "101": 34, "110": 12, "1001": 6, "1110": 20,
+    "10011": 6, "100111": 2, "0011": 37, "001": 69, "0010": 33,
+    "010": 7, "011": 15, "01011": 1,
+}
+D1_LITERAL_COUNTS = {"#d1:1": 19}
+MAP = {bits: name for table in NATIVE.values() for bits, name in table.items()}
+REVERSE = {name: bits for bits, name in MAP.items()}
+D1 = {"#d1:1": "так", "#d1:0": "ні"}
+D1_REVERSE = {value: key for key, value in D1.items()}
+
+
+def project_heads(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
+    """Only first source atom after (. Strings/comments and every other byte copy."""
+    chunks: list[str] = []
+    seen: dict[str, int] = {}
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch == ";":
+            j = text.find("\n", i)
+            if j < 0:
+                j = n
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch == '"':
+            j = i + 1
+            while j < n:
+                if text[j] == "\\":
+                    j += 2
+                elif text[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch == "(":
+            chunks.append(ch)
+            i += 1
+            j = i
+            while j < n and text[j].isspace():
+                j += 1
+            chunks.append(text[i:j])
+            if j < n and not (text[j].isspace() or text[j] in '();"\''):
+                k = j
+                while k < n and not (text[k].isspace() or text[k] in '();'):
+                    k += 1
+                word = text[j:k]
+                mapped = mapping.get(word)
+                chunks.append(word if mapped is None else mapped)
+                if mapped is not None:
+                    seen[word] = seen.get(word, 0) + 1
+                i = k
+            else:
+                i = j
+            continue
+        chunks.append(ch)
+        i += 1
+    return "".join(chunks), seen
+
+
+def project_literals(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
+    """Exact atom projection outside strings/comments; quoted (0)/(1) remain data."""
+    chunks: list[str] = []
+    seen: dict[str, int] = {}
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch == ";":
+            j = text.find("\n", i)
+            if j < 0:
+                j = n
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch == '"':
+            j = i + 1
+            while j < n:
+                if text[j] == "\\":
+                    j += 2
+                elif text[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch.isspace() or ch in "();":
+            chunks.append(ch)
+            i += 1
+            continue
+        j = i
+        while j < n and not (text[j].isspace() or text[j] in '();"'):
+            j += 1
+        word = text[i:j]
+        mapped = mapping.get(word)
+        chunks.append(word if mapped is None else mapped)
+        if mapped is not None:
+            seen[word] = seen.get(word, 0) + 1
+        i = j
+    return "".join(chunks), seen
+
+
+def git_blob(text: str) -> str:
+    raw = text.encode("utf-8")
+    return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+
+
+class QuantityUkrProjection(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.source = SOURCE.read_text(encoding="utf-8")
+
+    def test_ratifed_exact_domain_keys(self):
+        self.assertEqual(len(MAP), len(REVERSE), "ambiguous peer inversion")
+        for domain, values in NATIVE.items():
+            table = (ROOT / f"lib/domains/d{domain}.lisp").read_text(encoding="utf-8")
+            for bits, ukr in values.items():
+                with self.subTest(domain=domain, bits=bits):
+                    self.assertRegex(table, re.compile(
+                        r"^\s*\(" + bits + r"\s+\(ук\s+[^()]+\)\s+\(укр\s+"
+                        + re.escape(ukr) + r"\)", re.MULTILINE))
+        d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
+        self.assertIn("(0 (ук ні) (укр ні)", d1)
+        self.assertIn("(1 (ук так) (укр так)", d1)
+
+    def test_exact_original_git_blob_recoverable(self):
+        old_d1, seen_d1 = project_literals(self.source, D1_REVERSE)
+        old, seen = project_heads(old_d1, REVERSE)
+        self.assertEqual(seen, {MAP[bits]: n for bits, n in HEAD_COUNTS.items()})
+        self.assertEqual(seen_d1, {"так": 19})
+        self.assertEqual(git_blob(old), BASE_BLOB)
+
+    def test_no_remaining_claimed_numeric_heads_or_d1_literals(self):
+        same, left = project_heads(self.source, MAP)
+        self.assertEqual(left, {})
+        self.assertEqual(same, self.source)
+        same, left = project_literals(self.source, D1)
+        self.assertEqual(left, {})
+        self.assertEqual(same, self.source)
+
+    def test_two_way_projection_idempotence(self):
+        raw, _ = project_heads(project_literals(self.source, D1_REVERSE)[0], REVERSE)
+        next_source, _ = project_literals(project_heads(raw, MAP)[0], D1)
+        self.assertEqual(next_source, self.source)
+
+    def test_comments_strings_and_quoted_data_unchanged(self):
+        synthetic = '; #d1:1 (0011 ignored)\n"(010 not-code) #d1:1"\n(0011 x (001 (0)))\n'
+        migrated, counts = project_heads(synthetic, MAP)
+        migrated, d1counts = project_literals(migrated, D1)
+        self.assertEqual(counts, {"0011": 1, "001": 1})
+        self.assertEqual(d1counts, {})
+        self.assertIn('; #d1:1 (0011 ignored)', migrated)
+        self.assertIn('"(010 not-code) #d1:1"', migrated)
+        self.assertIn("(визначити x (як-є (0)))", migrated)
+
+    def test_data_tags_d9_unknown_and_d1_structural_bits_preserved(self):
+        self.assertIn("(як-є dimension/1)", self.source)
+        self.assertIn("(як-є scientific-constant)", self.source)
+        self.assertIn("(як-є (0))", self.source)
+        self.assertIn("(як-є (1))", self.source)
+        self.assertIn("(110101100", self.source)
+        self.assertIn("(110110101", self.source)
+        self.assertIn("(так", self.source)
+
+    def test_definition_names_remain_historical(self):
+        old, _ = project_heads(project_literals(self.source, D1_REVERSE)[0], REVERSE)
+        definitions_old = re.findall(r"\(0011\s+([^\s()]+)", old)
+        definitions_new = re.findall(r"\(визначити\s+([^\s()]+)", self.source)
+        self.assertEqual(definitions_old, definitions_new)
+        self.assertEqual(len(definitions_new), 37)
+
+    def test_lisp_delimiters_balanced_without_python_semantics(self):
+        code = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"', "", self.source)
+        depth = 0
+        for char in code:
+            depth += (char == "(") - (char == ")")
+            self.assertGreaterEqual(depth, 0)
+        self.assertEqual(depth, 0)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
