@@ -274,7 +274,7 @@ class BatchSourceTests(unittest.TestCase):
                          "Guard tail must use current two-field Ukrainian forms")
         for current_head in ("за-умовою", "тотожне?", "сполучити",
                              "перше", "решта", "як-є", "визначити", "функція",
-                             "нехай", "нехай-послідовно", "більше?"):
+                             "нехай", "нехай-послідовно"):
             self.assertIn("(" + current_head, tail)
         # Use the ratified Ukrainian D4 NULL projection; never compare () with D3 EQ.
         self.assertIn("(порожній? інструменти)", tail)
@@ -282,6 +282,11 @@ class BatchSourceTests(unittest.TestCase):
         self.assertIn("(порожній? посилання)", tail)
         self.assertIn("(порожній? стан)", tail)
         self.assertIn("(порожній? найкращий)", tail)
+        # Evidence statuses are nominal tags, not arithmetic operands.
+        self.assertNotIn("(більше? сила-кандидата сила-найкращого)", tail)
+        for status in ("confirmed", "partial", "unresolved", "broken"):
+            self.assertIn("(тотожне? стан-найкращого (як-є " + status + "))", tail)
+            self.assertIn("(тотожне? стан-кандидата (як-є " + status + "))", tail)
         self.assertNotIn("(тотожне? (як-є ())", tail)
         self.assertNotIn("(за-умовою ((атом?", tail)
         self.assertNotIn("(t ", tail)
