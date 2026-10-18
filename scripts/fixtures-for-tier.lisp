@@ -35,7 +35,7 @@
 
 (визначити fixture-tier
   (функція (fixture)
-    (011 (11100 (001 tier) fixture))))
+    (решта (знайти-за-ключем (як-є tier) fixture))))
 
 (визначити print-matching
   (функція (remaining)
@@ -44,8 +44,8 @@
       ((атом? (як-є ())) ((функція ()
             (за-умовою
               ((тотожне? (fixture-tier (перше remaining)) target-tier)
-               (11011011 (100 remaining)))
+               (друкувати (перше remaining)))
               ((атом? (як-є ())) (як-є ())))
             (print-matching (решта remaining))))))))
 
-(print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))
+(print-matching (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))
