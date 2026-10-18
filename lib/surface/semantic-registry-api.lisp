@@ -16,12 +16,12 @@
 (визначити semantic-registry-read-source
   (функція (source)
     (перше
-      (110101001 source))))
+      (читати-всі source))))
 
 (визначити semantic-registry-read
   (функція ()
     (semantic-registry-read-source
-      (110110111 semantic-registry-source-path))))
+      (читати-файл semantic-registry-source-path))))
 
 (визначити semantic-registry-rows
   (функція (registry)
@@ -67,7 +67,7 @@
 
 (визначити semantic-registry-surface-name
   (функція (namespace row)
-    (10011100 ((entry
+    (нехай ((entry
             (semantic-registry-find-surface
               namespace
               (semantic-registry-row-surfaces row))))
@@ -82,7 +82,7 @@
       
       ((хибне? (атом? rows))
        (за-умовою
-         ((11110111 sens-ref (semantic-registry-row-id (100 rows)))
+         ((однакові? sens-ref (semantic-registry-row-id (перше rows)))
           
           (перше rows))
          (так
@@ -93,14 +93,14 @@
     (за-умовою
       
       ((хибне? (атом? namespaces))
-       (10011100 ((candidate
+       (нехай ((candidate
                (semantic-registry-surface-name
                  (перше namespaces)
                  row)))
          (за-умовою
-           ((11110111 name candidate) 
+           ((однакові? name candidate) 
             (semantic-registry-row-id row))
-           ((0100 (11110111 name candidate))
+           ((хибне? (однакові? name candidate))
             (semantic-registry-find-id-in-namespaces
               name
               row
@@ -111,7 +111,7 @@
     (за-умовою
       
       ((хибне? (атом? rows))
-       (10011100 ((sens-ref
+       (нехай ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
                  (перше rows)
@@ -126,9 +126,9 @@
 
 (визначити semantic-registry-round-trip
   (функція (sens-ref)
-    (001001 ((printed (write-to-string sens-ref))
+    (нехай-послідовно ((printed (write-to-string sens-ref))
            (forms
-             (110101001 printed)))
+             (читати-всі printed)))
       (перше forms))))
 
 ; Query already-read registry data without re-entering host I/O.
