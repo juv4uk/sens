@@ -39,7 +39,7 @@ def view_from_words(words: list[str]) -> str:
 
 def words_from_view(text: str) -> list[str]:
     """Only single-space 0/1 words followed by exactly one newline."""
-    if re.fullmatch(r"[01]+(?: [01]+)*\\n", text) is None:
+    if re.fullmatch(r"[01]+(?: [01]+)*\n", text) is None:
         raise C.SensT5Error("non-canonical spaced-bit view")
     words = text[:-1].split(" ")
     C.parse_t5m_words(text)
@@ -76,7 +76,7 @@ def main() -> int:
     if ns.cmd == "emit":
         view = emit(pathlib.Path(ns.sens))
         out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.sens).with_suffix("")
-        with out.open("x", encoding="utf-8", newline="\\n") as target:
+        with out.open("x", encoding="utf-8", newline="\n") as target:
             target.write(view)
         print(f"wrote view {out} ({len(view)} bytes)")
         return 0
@@ -88,7 +88,7 @@ def main() -> int:
 
     if ns.cmd == "parse":
         words = words_from_view(pathlib.Path(ns.view).read_text(encoding="utf-8"))
-        data = C.encode_t5m_projection(" ".join(words) + "\\n")
+        data = C.encode_t5m_projection(" ".join(words) + "\n")
         out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.view).with_name(pathlib.Path(ns.view).name + ".sens")
         with out.open("xb") as target:
             target.write(data)
