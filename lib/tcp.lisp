@@ -13,42 +13,42 @@
 
 ; Preserve historical public behavior: listen on all IPv4 interfaces.
 ; Callers that need an explicit address use tcp-listen-on.
-(0011 tcp-listen-on
-  (0010 (address port)
+(визначити tcp-listen-on
+  (функція (address port)
     (tcp-listen-raw address port)))
 
-(0011 tcp-listen
-  (0010 (port)
+(визначити tcp-listen
+  (функція (port)
     (tcp-listen-on "0.0.0.0" port)))
 
-(0011 tcp-read-bytes->text
-  (0010 (bytes)
-    ((0010 (decoded)
+(визначити tcp-read-bytes->text
+  (функція (bytes)
+    ((функція (decoded)
        (за-умовою
          ((тотожне? (перше decoded) (як-є decoded))
           (друге decoded))
-         (#d1:1
+         (так
           decoded)))
      (utf8-decode-string bytes))))
 
-(0011 tcp-read
-  (0010 (connection)
+(визначити tcp-read
+  (функція (connection)
     (tcp-read-bytes->text (tcp-read-raw connection))))
 
-(0011 tcp-write-text->bytes
-  (0010 (text)
+(визначити tcp-write-text->bytes
+  (функція (text)
     (utf8-encode-string text)))
 
 ; Return the original text after a successful raw write so the public result
 ; remains compatible with the historical tcp-write surface while encoding
 ; policy belongs to Lisp.
-(0011 tcp-write-via-raw
-  (0010 (connection text)
-    ((0010 (written) text)
+(визначити tcp-write-via-raw
+  (функція (connection text)
+    ((функція (written) text)
      (tcp-write-raw connection (tcp-write-text->bytes text)))))
 
-(0011 tcp-write
-  (0010 (connection text)
+(визначити tcp-write
+  (функція (connection text)
     (tcp-write-via-raw connection text)))
 
 ; Stable surface peers are projected by load_tcp_library after the TCP
