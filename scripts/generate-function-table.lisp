@@ -34,7 +34,7 @@
 ; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
-(0011 registry-form (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+(визначити registry-form (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
 (визначити registry-rows registry-form)
 ; Historical rows are retained only for migration/provenance consumers.
 ; Their eight-bit coordinates do not create canonical language identity.
@@ -43,7 +43,7 @@
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
 (визначити machine-profile-form
-  (100 (110101001 (110110111 "lib/machine/intel-core-i5-6400.lisp"))))
+  (перше (читати-всі (читати-файл "lib/machine/intel-core-i5-6400.lisp"))))
 
 (визначити find-section
   (функція (name sections)
@@ -66,15 +66,15 @@
 
 (визначити machine-path
   (функція (sid)
-    (001000 ((row (find-machine-row sid machine-rows)))
-      (110 ((010 row) "()") ((010 (001 ())) (10011 row))))))
+    (нехай ((row (find-machine-row sid machine-rows)))
+      (за-умовою ((атом? row) "()") ((атом? (як-є ())) (третє row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
 ; never create an identity: they may only annotate IDs that already exist
 ; in `entries` above. Reverse-authority is forbidden by the contract file
 ; itself -- a historical name never mints a new my-lisp SID.
 (визначити historical-profile-form
-  (100 (110101001 (110110111 "contracts/core1-historical-sid-map.lisp"))))
+  (перше (читати-всі (читати-файл "contracts/core1-historical-sid-map.lisp"))))
 
 (визначити historical-rows
   (решта (find-section (як-є rows) (решта historical-profile-form))))
@@ -89,7 +89,7 @@
 
 (визначити mccarthy-label
   (функція (sid)
-    (001000 ((row (find-historical-row sid historical-rows)))
+    (нехай ((row (find-historical-row sid historical-rows)))
       (110 ((010 row) "()") ((010 (001 ())) (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
@@ -117,7 +117,7 @@
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
 (визначити str+
-  (0010 args (101110 (0010 (acc s) (110011110 acc s)) "" args)))
+  (функція args (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
@@ -153,7 +153,7 @@
 
 (визначити formal-stub
   (функція (sid surfaces)
-    (001001 ((en (get-surface (001 en) surfaces))
+    (нехай-послідовно ((en (get-surface (як-є en) surfaces))
            (ук (get-surface (як-є ук) surfaces))
            (sa (get-surface (як-є sa) surfaces)))
       (за-умовою
@@ -163,7 +163,7 @@
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
-        ((010 (001 ())) (110011110 "identity:" (sid-bits sid)))))))
+        ((атом? (як-є ())) (рядок-додати "identity:" (sid-bits sid)))))))
 
 ; Historical projection intentionally has no 256-row completeness law.
 ; Exact domains grow under their own widths, occupancy maps, and admitted laws.
@@ -187,7 +187,7 @@
 
 (визначити render-wsm-row
   (функція (entry)
-    (001001 ((sid (100 entry))
+    (нехай-послідовно ((sid (перше entry))
            (surfaces (решта entry))
            (ук (get-surface (як-є ук) surfaces))
            (укр (get-surface (як-є укр) surfaces))
@@ -206,7 +206,7 @@
 
 (визначити render-md-row
   (функція (entry)
-    (001001 ((sid (100 entry))
+    (нехай-послідовно ((sid (перше entry))
            (surfaces (решта entry))
            (ук (get-surface (як-є ук) surfaces))
            (укр (get-surface (як-є укр) surfaces))
@@ -235,8 +235,8 @@
     ""
     "(ft/2"))
 
-(0011 wsm-body (join-newline (1111 wsm-header (101000 render-wsm-row entries))))
-(0011 wsm-output (110011110 wsm-body "
+(визначити wsm-body (join-newline (приєднати wsm-header (відобразити render-wsm-row entries))))
+(визначити wsm-output (рядок-додати wsm-body "
 )
 "))
 
@@ -255,8 +255,8 @@
     "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
     "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
-(0011 md-body (join-newline (1111 md-header (101000 render-md-row entries))))
-(0011 md-output (110011110 md-body "
+(визначити md-body (join-newline (приєднати md-header (відобразити render-md-row entries))))
+(визначити md-output (рядок-додати md-body "
 "))
 
 (визначити wsm-output-path "lib/generated/function-table.lisp")
@@ -266,12 +266,12 @@
   (функція ()
     (друге
       (список
-        (110111100 wsm-output-path wsm-output)
-        (110111100 md-output-path md-output)
+        (записати-файл wsm-output-path wsm-output)
+        (записати-файл md-output-path md-output)
         (11011011
           (str+
             "function-table: "
-            (110111001 (000000 entries))
+            (число-рядок (довжина entries))
             " historical projection rows written"))))))
 
 ; The projection payloads and argv selector below are strings, hence atoms.
@@ -279,8 +279,8 @@
 ; This is a source-identity narrowing only; no physical T5 size claim follows.
 (визначити check-projections
   (функція ()
-    (001000 ((current-wsm (110110111 wsm-output-path))
-          (current-md (110110111 md-output-path)))
+    (нехай ((current-wsm (читати-файл wsm-output-path))
+          (current-md (читати-файл md-output-path)))
       (за-умовою
         ((тотожне? current-wsm wsm-output)
          (за-умовою
@@ -288,7 +288,7 @@
             (11011011
               (str+
                 "function-table: "
-                (110111001 (000000 entries))
+                (число-рядок (довжина entries))
                 " historical projection rows current")))
            ((атом? (як-є ()))
             (друге
