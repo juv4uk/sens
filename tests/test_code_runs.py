@@ -1169,5 +1169,90 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
             self._verify(mutant)
 
 
+
+
+class ForwardD9UkrCallsiteProjectionTests(unittest.TestCase):
+    """D9 heads in forward.lisp use exact current Ukrainian domain projections."""
+
+    SOURCE = ROOT / "lib" / "forward.lisp"
+    D9 = ROOT / "lib" / "domains" / "d9.lisp"
+    ORIGINAL_BLOB = "aa37f1a5b627f0343cc2d425056086488067ebe1"
+    CALLS = (
+        (118, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (119, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (121, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (122, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (123, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (123, "101001000", "fire-rule", "запустити-правило"),
+        (129, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (154, "010110000", "fire-rule-on-facts", "запустити-правило-на-факти"),
+        (155, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
+        (159, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
+        (222, "010101010", "fire-rules-on-facts", "запустити-правила-на-факти"),
+        (222, "010001011", "run", "запустити"),
+        (265, "001001000", "retract-fact", "відкликати-факт"),
+        (357, "101001000", "fire-rule", "запустити-правило"),
+        (399, "001101000", "run-tms", "запустити-система-істини"),
+        (507, "101001000", "fire-rule", "запустити-правило"),
+        (574, "010000100", "run-jtms", "запустити-система-обґрунтувань"),
+        (730, "010110010", "run-jtms-multi", "запустити-система-обґрунтувань-мульти"),
+        (754, "010000011", "prune-entry", "обрізати-запис"),
+        (754, "010100011", "prune-all-entries", "обрізати-всі-записи"),
+        (761, "010101101", "unsupported-facts", "непідтримані-факти"),
+        (762, "010101101", "unsupported-facts", "непідтримані-факти"),
+        (763, "010101101", "unsupported-facts", "непідтримані-факти"),
+        (784, "010101101", "unsupported-facts", "непідтримані-факти"),
+        (784, "010100011", "prune-all-entries", "обрізати-всі-записи"),
+    )
+
+    @classmethod
+    def _blob_sha(cls, source):
+        import hashlib
+        raw = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+
+    @classmethod
+    def _restore_original(cls, source):
+        lines = source.splitlines(keepends=True)
+        for line_no, bits, en, ukr in reversed(cls.CALLS):
+            pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
+            index = line_no - 1
+            found = list(pattern.finditer(lines[index]))
+            if len(found) != 1:
+                raise AssertionError(
+                    f"CALLSITE_COUNT D9:{bits} {ukr} line={line_no} actual={len(found)}"
+                )
+            lines[index] = pattern.sub(lambda m: m.group().replace(ukr, en), lines[index], count=1)
+        return "".join(lines)
+
+    def test_ratified_d9_peers_and_exact_forward_inverse(self):
+        source = self.SOURCE.read_bytes().decode("utf-8")
+        table = self.D9.read_bytes().decode("utf-8").splitlines()
+        for bits, en, ukr in sorted({(bits, en, ukr) for _, bits, en, ukr in self.CALLS}):
+            with self.subTest(bits=bits, en=en):
+                rows = [line for line in table if line.lstrip().startswith(f"({bits} ")]
+                self.assertEqual(len(rows), 1, f"D9 row count drift for {bits}")
+                self.assertIn(f"(укр {ukr})", rows[0])
+                self.assertIn(f"(en {en})", rows[0])
+                self.assertIn(f"(LISP {en.upper()})", rows[0])
+        for line_no, bits, en, ukr in self.CALLS:
+            with self.subTest(line=line_no, bits=bits):
+                pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
+                self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1])), 1)
+        restored = self._restore_original(source)
+        self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
+        self.assertEqual(restored, source.replace("", "", 1) if False else restored)
+
+    def test_wrong_d9_peer_is_rejected_by_exact_inverse(self):
+        lines = self.SOURCE.read_bytes().decode("utf-8").splitlines(keepends=True)
+        line_no = 118
+        lines[line_no - 1] = lines[line_no - 1].replace(
+            "(запустити-правило-на-факти", "(відкликати-факт", 1
+        )
+        mutant = "".join(lines)
+        with self.assertRaisesRegex(AssertionError, "CALLSITE_COUNT"):
+            self._restore_original(mutant)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

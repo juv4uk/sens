@@ -115,18 +115,18 @@
       ((атом? facts)  (як-є ()))
       (так ((функція (result) (за-умовою
              ((хибне? (атом? result)) (за-умовою
-                ((тотожне? result (як-є no-match)) (fire-rule-on-facts rule (решта facts)))
-                (так (сполучити result (fire-rule-on-facts rule (решта facts))))))
+                ((тотожне? result (як-є no-match)) (запустити-правило-на-факти rule (решта facts)))
+                (так (сполучити result (запустити-правило-на-факти rule (решта facts))))))
              ((атом? result)  (за-умовою
-                ((тотожне? result (як-є no-match)) (fire-rule-on-facts rule (решта facts)))
-                (так (сполучити result (fire-rule-on-facts rule (решта facts))))))
-             (так (сполучити result (fire-rule-on-facts rule (решта facts)))))) (fire-rule rule (перше facts)))))))
+                ((тотожне? result (як-є no-match)) (запустити-правило-на-факти rule (решта facts)))
+                (так (сполучити result (запустити-правило-на-факти rule (решта facts))))))
+             (так (сполучити result (запустити-правило-на-факти rule (решта facts)))))) (запустити-правило rule (перше facts)))))))
 
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
 (визначити fire-rule-on-working-memory
   (функція (rule)
-    (fire-rule-on-facts rule *working-memory*)))
+    (запустити-правило-на-факти rule *working-memory*)))
 
 ; Step 3: apply every rule in a rule set to a fact list (still a single
 ; pass — no fixpoint loop yet, so a fact produced by one rule isn't itself
@@ -151,12 +151,12 @@
     (за-умовою
       
       ((атом? rules)  (як-є ()))
-      (так (приєднати (fire-rule-on-facts (перше rules) facts)
-                  (fire-rules-on-facts (решта rules) facts))))))
+      (так (приєднати (запустити-правило-на-факти (перше rules) facts)
+                  (запустити-правила-на-факти (решта rules) facts))))))
 
 (визначити fire-rules-on-working-memory
   (функція (rules)
-    (fire-rules-on-facts rules *working-memory*)))
+    (запустити-правила-на-факти rules *working-memory*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
 ; against the current fact list, folding newly produced facts (deduplicated
@@ -219,7 +219,7 @@
   (функція (rules facts)
     ((функція (merged) (за-умовою
         ((unify-equal? (довжина merged) (довжина facts))  facts)
-        (так (run rules merged)))) (додати-нові (fire-rules-on-facts rules facts) facts))))
+        (так (запустити rules merged)))) (додати-нові (запустити-правила-на-факти rules facts) facts))))
 
 (визначити assert-facts!
   (make-macro
@@ -262,7 +262,7 @@
       
       ((атом? facts)  (як-є ()))
       ((unify-equal? fact (перше facts)) (решта facts))
-      (так (сполучити (перше facts) (retract-fact fact (решта facts)))))))
+      (так (сполучити (перше facts) (відкликати-факт fact (решта facts)))))))
 
 (визначити retract-fact!
   (make-macro
@@ -354,7 +354,7 @@
         ((атом? result)  (за-умовою
            ((тотожне? result (як-є no-match)) (як-є no-match))
            (так (створити-обґрунтований result (список fact)))))
-        (так (створити-обґрунтований result (список fact))))) (fire-rule rule fact))))
+        (так (створити-обґрунтований result (список fact))))) (запустити-правило rule fact))))
 
 (визначити fire-rule-on-facts-tms
   (функція (rule facts)
@@ -396,7 +396,7 @@
   (функція (rules entries)
     ((функція (new-entries) ((функція (merged) (за-умовою
           ((unify-equal? (довжина merged) (довжина entries))  entries)
-          (так (run-tms rules merged)))) (додати-нові-обґрунтований new-entries entries))) (запустити-правила-на-факти-система-істини rules (мапа-факт-від entries)))))
+          (так (запустити-система-істини rules merged)))) (додати-нові-обґрунтований new-entries entries))) (запустити-правила-на-факти-система-істини rules (мапа-факт-від entries)))))
 
 (визначити *justified-memory* (як-є ()))
 
@@ -504,7 +504,7 @@
         ((атом? result)  (за-умовою
            ((тотожне? result (як-є no-match)) (як-є no-match))
            (так (список result (список fact)))))
-        (так (список result (список fact))))) (fire-rule rule fact))))
+        (так (список result (список fact))))) (запустити-правило rule fact))))
 
 (визначити fire-rule-on-facts-jtms
   (функція (rule facts)
@@ -571,7 +571,7 @@
   (функція (rules entries)
     ((функція (merged) (за-умовою
         ((unify-equal? merged entries) entries)
-        (так (run-jtms rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-на-факти-система-обґрунтувань rules (мапа-факт-від entries)) entries))))
+        (так (запустити-система-обґрунтувань rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-на-факти-система-обґрунтувань rules (мапа-факт-від entries)) entries))))
 
 (визначити *jtms-memory* (як-є ()))
 
@@ -727,7 +727,7 @@
   (функція (rules entries)
     ((функція (merged) (за-умовою
         ((unify-equal? merged entries) entries)
-        (так (run-jtms-multi rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-система-обґрунтувань-мульти rules (мапа-факт-від entries)) entries))))
+        (так (запустити-система-обґрунтувань-мульти rules merged)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-система-обґрунтувань-мульти rules (мапа-факт-від entries)) entries))))
 
 (визначити run-jtms-multi!
   (make-macro
@@ -751,16 +751,16 @@
     (за-умовою
       
       ((атом? entries)  (як-є ()))
-      (так (сполучити (prune-entry fact (перше entries)) (prune-all-entries fact (решта entries)))))))
+      (так (сполучити (обрізати-запис fact (перше entries)) (обрізати-всі-записи fact (решта entries)))))))
 
 (визначити unsupported-facts
   (функція (entries)
     (за-умовою
       
       ((атом? entries)  (як-є ()))
-      ((хибне? (атом? (обґрунтування-від (перше entries)))) (сполучити (факт-від (перше entries)) (unsupported-facts (решта entries))))
-      ((атом? (обґрунтування-від (перше entries)))  (сполучити (факт-від (перше entries)) (unsupported-facts (решта entries))))
-      (так (unsupported-facts (решта entries))))))
+      ((хибне? (атом? (обґрунтування-від (перше entries)))) (сполучити (факт-від (перше entries)) (непідтримані-факти (решта entries))))
+      ((атом? (обґрунтування-від (перше entries)))  (сполучити (факт-від (перше entries)) (непідтримані-факти (решта entries))))
+      (так (непідтримані-факти (решта entries))))))
 
 (визначити drop-unsupported
   (функція (entries)
@@ -781,7 +781,7 @@
     ((функція (pruned) ((функція (newly-unsupported remaining) (за-умовою
           
           ((атом? newly-unsupported)  remaining)
-          (так (відкликати-факти-система-обґрунтувань newly-unsupported remaining)))) (unsupported-facts pruned) (відкинути-непідтримані pruned))) (prune-all-entries fact (видалити-запис-система-обґрунтувань fact entries)))))
+          (так (відкликати-факти-система-обґрунтувань newly-unsupported remaining)))) (непідтримані-факти pruned) (відкинути-непідтримані pruned))) (обрізати-всі-записи fact (видалити-запис-система-обґрунтувань fact entries)))))
 
 (визначити retract-facts-jtms
   (функція (facts entries)
