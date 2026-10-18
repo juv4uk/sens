@@ -185,20 +185,22 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
     // Exact Ukrainian domain heads only; no unqualified arithmetic count.
     // Structural equality gates output on both original records still present.
     let source = r#"
-        (нехай ((слабке (список (як-є reference) (список (як-є topic) (як-є demo))
-                           (список (як-є evidence-status) (як-є unresolved))
-                           (список (як-є summary) "old guess")))
-              (сильне (список (як-є reference) (список (як-є topic) (як-є demo))
-                            (список (як-є evidence-status) (як-є confirmed))
-                            (список (як-є summary) "measured and tested"))))
-          (за-умовою
-            ((однакові?
-               (guard-reference-all (як-є demo) (список слабке сильне))
-               (список слабке сильне))
-             (список
-               (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
-               (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
-            (так (як-є ()))))
+        (визначити слабке
+          (список (як-є reference) (список (як-є topic) (як-є demo))
+            (список (як-є evidence-status) (як-є unresolved))
+            (список (як-є summary) "old guess")))
+        (визначити сильне
+          (список (як-є reference) (список (як-є topic) (як-є demo))
+            (список (як-є evidence-status) (як-є confirmed))
+            (список (як-є summary) "measured and tested")))
+        (за-умовою
+          ((однакові?
+             (guard-reference-all (як-є demo) (список слабке сильне))
+             (список слабке сильне))
+           (список
+             (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список слабке сильне)))
+             (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
+          (так (як-є ())))
     "#;
     let value = eval_guard_ukr(source);
     assert!(
