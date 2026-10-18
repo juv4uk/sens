@@ -1,61 +1,61 @@
 ; #1391 — executable witness for Core4 logic/SENS boundary.
 
-(0011 pab-contract
-  (100 (110101001 (110110111 "contracts/core4-predicate-answer-boundary.lisp"))))
-(0011 pab-schema (100 pab-contract))
-(0011 pab-sections (011 pab-contract))
+(визначити pab-contract
+  (перше (читати-всі (читати-файл "contracts/core4-predicate-answer-boundary.lisp"))))
+(визначити pab-schema (перше pab-contract))
+(визначити pab-sections (решта pab-contract))
 
-(0011 pab-field
-  (0010 (section name)
-    (011 (11100 name section))))
+(визначити pab-field
+  (функція (section name)
+    (решта (знайти-за-ключем name section))))
 
-(0011 pab-meta (100 pab-sections))
-(0011 pab-no (1001 pab-sections))
-(0011 pab-yes (10011 pab-sections))
-(0011 pab-undirected (100111 pab-sections))
-(0011 pab-function-convergence (110110101 pab-sections))
-(0011 pab-laws (000100 5 pab-sections))
+(визначити pab-meta (перше pab-sections))
+(визначити pab-no (друге pab-sections))
+(визначити pab-yes (третє pab-sections))
+(визначити pab-undirected (четверте pab-sections))
+(визначити pab-function-convergence (п'ятий pab-sections))
+(визначити pab-laws (елемент-списку-за-індексом 5 pab-sections))
 
-(0011 pab-observed
-  (1110
+(визначити pab-observed
+  (список
     pab-schema
-    (pab-field pab-meta (001 answer-count))
-    (pab-field pab-meta (001 sens-function-count))
-    (pab-field pab-meta (001 spaces))
-    (000000 (pab-field pab-no (001 no-path)))
-    (pab-field pab-no (001 converges-to))
-    (000000 (pab-field pab-yes (001 yes-path)))
-    (pab-field pab-yes (001 converges-to))
-    (pab-field pab-undirected (001 undirected-answer))
-    (pab-field pab-function-convergence (001 function-convergence))
-    (pab-field pab-function-convergence (001 function-identities))
-    (pab-field pab-function-convergence (001 result-value))
-    (pab-field pab-laws (001 short-answer-to-sens-function))
-    (pab-field pab-laws (001 sens-function-to-answer))
-    (pab-field pab-laws (001 eighth-bit-in-grading))))
+    (pab-field pab-meta (як-є answer-count))
+    (pab-field pab-meta (як-є sens-function-count))
+    (pab-field pab-meta (як-є spaces))
+    (довжина (pab-field pab-no (як-є no-path)))
+    (pab-field pab-no (як-є converges-to))
+    (довжина (pab-field pab-yes (як-є yes-path)))
+    (pab-field pab-yes (як-є converges-to))
+    (pab-field pab-undirected (як-є undirected-answer))
+    (pab-field pab-function-convergence (як-є function-convergence))
+    (pab-field pab-function-convergence (як-є function-identities))
+    (pab-field pab-function-convergence (як-є result-value))
+    (pab-field pab-laws (як-є short-answer-to-sens-function))
+    (pab-field pab-laws (як-є sens-function-to-answer))
+    (pab-field pab-laws (як-є eighth-bit-in-grading))))
 
-(0011 pab-expected
-  (1110
-    (001 core4-predicate-answer-boundary/4)
+(визначити pab-expected
+  (список
+    (як-є core4-predicate-answer-boundary/4)
     15
     256
-    (001 orthogonal)
+    (як-є orthogonal)
     7
-    (001 ())
+    (як-є ())
     7
-    (001 ())
-    (001 ())
+    (як-є ())
+    (як-є ())
     (001 ((00000000 ()) (11111111 ())))
-    (001 distinct)
-    (001 one-empty-list)
-    (001 forbidden)
-    (001 forbidden)
-    (001 forbidden)))
+    (як-є distinct)
+    (як-є one-empty-list)
+    (як-є forbidden)
+    (як-є forbidden)
+    (як-є forbidden)))
 
-(110
-  ((11110111 pab-observed pab-expected)
-   (001 (core4-predicate-answer-boundary-ok)))
-  ((010 (001 ()))
-   (1110 (001 core4-predicate-answer-boundary-mismatch)
+(за-умовою
+  ((однакові? pab-observed pab-expected)
+   (як-є (core4-predicate-answer-boundary-ok)))
+  ((атом? (як-є ()))
+   (список (як-є core4-predicate-answer-boundary-mismatch)
          pab-expected
          pab-observed)))

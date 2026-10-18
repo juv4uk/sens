@@ -7,487 +7,487 @@
 ; for malformed/duplicate/missing human surfaces. --require-complete keeps
 ; the historical release gate behavior.
 
-(0011 tri-statuses
-  (001 (stable candidate missing compatibility-only)))
+(визначити tri-statuses
+  (як-є (stable candidate missing compatibility-only)))
 
-(0011 tri-human-surfaces
-  (001 (uk en sa)))
+(визначити tri-human-surfaces
+  (як-є (uk en sa)))
 
-(0011 tri-fail
-  (0010 (kind detail)
-    (001000 ((shown
+(визначити tri-fail
+  (функція (kind detail)
+    (нехай ((shown
             (print
-              (1110
-                (001 trilingual-surface-error)
+              (список
+                (як-є trilingual-surface-error)
                 kind
                 detail))))
       ; Intentional unbound diagnostic: file-mode CLI returns non-zero.
       (trilingual-surface-check-failed kind detail))))
 
-(0011 tri-member-state
-  (0010 (value values)
-    (110
-      ((010 values) (structural-kind empty-list) (001 absent))
-      ((010 values) (structural-kind atom) (001 malformed))
-      ((010 values) (structural-kind pair)
-       (110
-         ((equal? value (100 values)) (structural-relation same)
-          (001 present))
-         ((equal? value (100 values)) (structural-relation distinct)
-          (tri-member-state value (011 values))))))))
+(визначити tri-member-state
+  (функція (value values)
+    (за-умовою
+      ((атом? values) (structural-kind empty-list) (як-є absent))
+      ((атом? values) (structural-kind atom) (як-є malformed))
+      ((атом? values) (structural-kind pair)
+       (за-умовою
+         ((equal? value (перше values)) (structural-relation same)
+          (як-є present))
+         ((equal? value (перше values)) (structural-relation distinct)
+          (tri-member-state value (решта values))))))))
 
-(0011 tri-triple-state
-  (0010 (value)
-    (110
-      ((010 value) (structural-kind empty-list) (001 no))
-      ((010 value) (structural-kind atom) (001 no))
-      ((010 value) (structural-kind pair)
-       (001000 ((rest1 (011 value)))
-         (110
-           ((010 rest1) (structural-kind pair)
-            (001000 ((rest2 (011 rest1)))
-              (110
-                ((010 rest2) (structural-kind pair)
-                 (001000 ((rest3 (011 rest2)))
-                   (110
-                     ((010 rest3) (structural-kind empty-list) (001 yes))
-                     ((010 rest3) (structural-kind atom) (001 no))
-                     ((010 rest3) (structural-kind pair) (001 no)))))
-                ((010 rest2) (structural-kind empty-list) (001 no))
-                ((010 rest2) (structural-kind atom) (001 no)))))
-           ((010 rest1) (structural-kind empty-list) (001 no))
-           ((010 rest1) (structural-kind atom) (001 no))))))))
+(визначити tri-triple-state
+  (функція (value)
+    (за-умовою
+      ((атом? value) (structural-kind empty-list) (як-є no))
+      ((атом? value) (structural-kind atom) (як-є no))
+      ((атом? value) (structural-kind pair)
+       (нехай ((rest1 (решта value)))
+         (за-умовою
+           ((атом? rest1) (structural-kind pair)
+            (нехай ((rest2 (решта rest1)))
+              (за-умовою
+                ((атом? rest2) (structural-kind pair)
+                 (нехай ((rest3 (решта rest2)))
+                   (за-умовою
+                     ((атом? rest3) (structural-kind empty-list) (як-є yes))
+                     ((атом? rest3) (structural-kind atom) (як-є no))
+                     ((атом? rest3) (structural-kind pair) (як-є no)))))
+                ((атом? rest2) (structural-kind empty-list) (як-є no))
+                ((атом? rest2) (structural-kind atom) (як-є no)))))
+           ((атом? rest1) (structural-kind empty-list) (як-є no))
+           ((атом? rest1) (structural-kind atom) (як-є no))))))))
 
-(0011 tri-special-quote-sym-state
-  (0010 (field)
-    (110
+(визначити tri-special-quote-sym-state
+  (функція (field)
+    (за-умовою
       ((equal?
          field
-         (1110 (001 sym) (1110 (001 quote) (001 stable))))
+         (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation same)
-       (001 yes))
+       (як-є yes))
       ((equal?
          field
-         (1110 (001 sym) (1110 (001 quote) (001 stable))))
+         (список (як-є sym) (список (як-є quote) (як-є stable))))
        (structural-relation distinct)
-       (001 no)))))
+       (як-є no)))))
 
-(0011 tri-field-language
-  (0010 (field)
+(визначити tri-field-language
+  (функція (field)
     (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
-      (110
+      (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є sym))
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (перше field))))))
 
-(0011 tri-field-status
-  (0010 (field)
+(визначити tri-field-status
+  (функція (field)
     (нехай ((спеціальна-змінна (tri-special-quote-sym-state field)))
-      (110
+      (за-умовою
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same) (як-є stable))
         ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct) (third field))))))
 
-(0011 tri-valid-ordinary-field
-  (0010 (field)
-    (001000 ((shape (tri-triple-state field)))
-      (110
-        ((101 shape (001 yes)) (identity-relation distinct)
-         (tri-fail (001 malformed-surface) field))
-        ((101 shape (001 yes)) (identity-relation same)
-         (001001 ((language (100 field))
+(визначити tri-valid-ordinary-field
+  (функція (field)
+    (нехай ((shape (tri-triple-state field)))
+      (за-умовою
+        ((тотожне? shape (як-є yes)) (identity-relation distinct)
+         (tri-fail (як-є malformed-surface) field))
+        ((тотожне? shape (як-є yes)) (identity-relation same)
+         (нехай-послідовно ((language (перше field))
                 (name (second field))
                 (status (third field)))
-           (110
-             ((010 language) (structural-kind atom)
-              (110
-                ((010 name) (structural-kind atom)
-                 (110
-                   ((010 status) (structural-kind atom)
-                    (001000 ((state (tri-member-state status tri-statuses)))
-                      (110
-                        ((101 state (001 present)) (identity-relation same)
-                         (001 valid))
-                        ((101 state (001 present)) (identity-relation distinct)
-                         (tri-fail (001 unknown-status) field))))
-                   ((010 status) (structural-kind empty-list)
-                    (tri-fail (001 malformed-status) field))
-                   ((010 status) (structural-kind pair)
-                    (tri-fail (001 malformed-status) field))))
-                ((010 name) (structural-kind empty-list)
-                 (tri-fail (001 malformed-name) field))
-                ((010 name) (structural-kind pair)
-                 (tri-fail (001 malformed-name) field))))
-             ((010 language) (structural-kind empty-list)
-              (tri-fail (001 malformed-surface-name) field))
-             ((010 language) (structural-kind pair)
-              (tri-fail (001 malformed-surface-name) field))))))))))
+           (за-умовою
+             ((атом? language) (structural-kind atom)
+              (за-умовою
+                ((атом? name) (structural-kind atom)
+                 (за-умовою
+                   ((атом? status) (structural-kind atom)
+                    (нехай ((state (tri-member-state status tri-statuses)))
+                      (за-умовою
+                        ((тотожне? state (як-є present)) (identity-relation same)
+                         (як-є valid))
+                        ((тотожне? state (як-є present)) (identity-relation distinct)
+                         (tri-fail (як-є unknown-status) field))))
+                   ((атом? status) (structural-kind empty-list)
+                    (tri-fail (як-є malformed-status) field))
+                   ((атом? status) (structural-kind pair)
+                    (tri-fail (як-є malformed-status) field))))
+                ((атом? name) (structural-kind empty-list)
+                 (tri-fail (як-є malformed-name) field))
+                ((атом? name) (structural-kind pair)
+                 (tri-fail (як-є malformed-name) field))))
+             ((атом? language) (structural-kind empty-list)
+              (tri-fail (як-є malformed-surface-name) field))
+             ((атом? language) (structural-kind pair)
+              (tri-fail (як-є malformed-surface-name) field))))))))))
 
-(0011 tri-require-human-surfaces
-  (0010 (seen)
-    (001000 ((uk-state (tri-member-state (001 uk) seen)))
-      (110
-        ((101 uk-state (001 present)) (identity-relation distinct)
-         (tri-fail (001 missing-human-surface) (001 uk)))
-        ((101 uk-state (001 present)) (identity-relation same)
-         (001000 ((en-state (tri-member-state (001 en) seen)))
-           (110
-             ((101 en-state (001 present)) (identity-relation distinct)
-              (tri-fail (001 missing-human-surface) (001 en)))
-             ((101 en-state (001 present)) (identity-relation same)
-              (001000 ((sa-state (tri-member-state (001 sa) seen)))
-                (110
-                  ((101 sa-state (001 present)) (identity-relation distinct)
-                   (tri-fail (001 missing-human-surface) (001 sa)))
-                  ((101 sa-state (001 present)) (identity-relation same)
-                   (001 valid))))))))))))
+(визначити tri-require-human-surfaces
+  (функція (seen)
+    (нехай ((uk-state (tri-member-state (як-є uk) seen)))
+      (за-умовою
+        ((тотожне? uk-state (як-є present)) (identity-relation distinct)
+         (tri-fail (як-є missing-human-surface) (як-є uk)))
+        ((тотожне? uk-state (як-є present)) (identity-relation same)
+         (нехай ((en-state (tri-member-state (як-є en) seen)))
+           (за-умовою
+             ((тотожне? en-state (як-є present)) (identity-relation distinct)
+              (tri-fail (як-є missing-human-surface) (як-є en)))
+             ((тотожне? en-state (як-є present)) (identity-relation same)
+              (нехай ((sa-state (tri-member-state (як-є sa) seen)))
+                (за-умовою
+                  ((тотожне? sa-state (як-є present)) (identity-relation distinct)
+                   (tri-fail (як-є missing-human-surface) (як-є sa)))
+                  ((тотожне? sa-state (як-є present)) (identity-relation same)
+                   (як-є valid))))))))))))
 
-(0011 tri-validate-fields
-  (0010 (fields seen)
-    (110
-      ((010 fields) (structural-kind empty-list)
+(визначити tri-validate-fields
+  (функція (fields seen)
+    (за-умовою
+      ((атом? fields) (structural-kind empty-list)
        (tri-require-human-surfaces seen))
-      ((010 fields) (structural-kind atom)
-       (tri-fail (001 malformed-field-tail) fields))
-      ((010 fields) (structural-kind pair)
-       (001001 ((field (100 fields))
+      ((атом? fields) (structural-kind atom)
+       (tri-fail (як-є malformed-field-tail) fields))
+      ((атом? fields) (structural-kind pair)
+       (нехай-послідовно ((field (перше fields))
               (спеціальна-змінна (tri-special-quote-sym-state field)))
-         (110
+         (за-умовою
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation same)
-            (001000 ((dup (tri-member-state (001 sym) seen)))
-              (110
-                ((101 dup (001 present)) (identity-relation same)
-                 (tri-fail (001 duplicate-surface) (001 sym)))
-                ((101 dup (001 present)) (identity-relation distinct)
+            (нехай ((dup (tri-member-state (як-є sym) seen)))
+              (за-умовою
+                ((тотожне? dup (як-є present)) (identity-relation same)
+                 (tri-fail (як-є duplicate-surface) (як-є sym)))
+                ((тотожне? dup (як-є present)) (identity-relation distinct)
                  (tri-validate-fields
-                   (011 fields)
-                   (111 (001 sym) seen))))))
+                   (решта fields)
+                   (сполучити (як-є sym) seen))))))
            ((тотожне? спеціальна-змінна (як-є yes)) (identity-relation distinct)
-            (001000 ((valid (tri-valid-ordinary-field field)))
-              (001001 ((language (tri-field-language field))
+            (нехай ((valid (tri-valid-ordinary-field field)))
+              (нехай-послідовно ((language (tri-field-language field))
                      (dup (tri-member-state language seen)))
-                (110
-                  ((101 dup (001 present)) (identity-relation same)
-                   (tri-fail (001 duplicate-surface) language))
-                  ((101 dup (001 present)) (identity-relation distinct)
+                (за-умовою
+                  ((тотожне? dup (як-є present)) (identity-relation same)
+                   (tri-fail (як-є duplicate-surface) language))
+                  ((тотожне? dup (як-є present)) (identity-relation distinct)
                    (tri-validate-fields
-                     (011 fields)
-                     (111 language seen)))))))))))))
+                     (решта fields)
+                     (сполучити language seen)))))))))))))
 
-(0011 tri-validate-row
-  (0010 (row)
-    (110
-      ((010 row) (structural-kind empty-list)
-       (tri-fail (001 malformed-entry) row))
-      ((010 row) (structural-kind atom)
-       (tri-fail (001 malformed-entry) row))
-      ((010 row) (structural-kind pair)
-       (001000 ((identity (100 row)))
-         (110
-           ((010 identity) (structural-kind atom)
-            (001000 ((valid (tri-validate-fields (011 row) (001 ()))))
+(визначити tri-validate-row
+  (функція (row)
+    (за-умовою
+      ((атом? row) (structural-kind empty-list)
+       (tri-fail (як-є malformed-entry) row))
+      ((атом? row) (structural-kind atom)
+       (tri-fail (як-є malformed-entry) row))
+      ((атом? row) (structural-kind pair)
+       (нехай ((identity (перше row)))
+         (за-умовою
+           ((атом? identity) (structural-kind atom)
+            (нехай ((valid (tri-validate-fields (решта row) (як-є ()))))
               identity))
-           ((010 identity) (structural-kind empty-list)
-            (tri-fail (001 malformed-identity) row))
-           ((010 identity) (structural-kind pair)
-            (tri-fail (001 malformed-identity) row))))))))
+           ((атом? identity) (structural-kind empty-list)
+            (tri-fail (як-є malformed-identity) row))
+           ((атом? identity) (structural-kind pair)
+            (tri-fail (як-є malformed-identity) row))))))))
 
-(0011 tri-validate-rows
-  (0010 (rows seen-identities)
-    (110
-      ((010 rows) (structural-kind empty-list)
-       (110
-         ((010 seen-identities) (structural-kind empty-list)
-          (tri-fail (001 empty-registry) (001 ())))
-         ((010 seen-identities) (structural-kind pair)
-          (001 valid))
-         ((010 seen-identities) (structural-kind atom)
-          (tri-fail (001 malformed-seen-identities) seen-identities))))
-      ((010 rows) (structural-kind atom)
-       (tri-fail (001 malformed-entry-tail) rows))
-      ((010 rows) (structural-kind pair)
-       (001001 ((identity (tri-validate-row (100 rows)))
+(визначити tri-validate-rows
+  (функція (rows seen-identities)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list)
+       (за-умовою
+         ((атом? seen-identities) (structural-kind empty-list)
+          (tri-fail (як-є empty-registry) (як-є ())))
+         ((атом? seen-identities) (structural-kind pair)
+          (як-є valid))
+         ((атом? seen-identities) (structural-kind atom)
+          (tri-fail (як-є malformed-seen-identities) seen-identities))))
+      ((атом? rows) (structural-kind atom)
+       (tri-fail (як-є malformed-entry-tail) rows))
+      ((атом? rows) (structural-kind pair)
+       (нехай-послідовно ((identity (tri-validate-row (перше rows)))
               (dup (tri-member-state identity seen-identities)))
-         (110
-           ((101 dup (001 present)) (identity-relation same)
-            (tri-fail (001 duplicate-semantic-id) identity))
-           ((101 dup (001 present)) (identity-relation distinct)
+         (за-умовою
+           ((тотожне? dup (як-є present)) (identity-relation same)
+            (tri-fail (як-є duplicate-semantic-id) identity))
+           ((тотожне? dup (як-є present)) (identity-relation distinct)
             (tri-validate-rows
-              (011 rows)
-              (111 identity seen-identities)))))))))
+              (решта rows)
+              (сполучити identity seen-identities)))))))))
 
-(0011 tri-surface-status
-  (0010 (fields wanted)
-    (110
-      ((010 fields) (structural-kind empty-list) (001 ()))
-      ((010 fields) (structural-kind atom) (001 ()))
-      ((010 fields) (structural-kind pair)
-       (001001 ((field (100 fields))
+(визначити tri-surface-status
+  (функція (fields wanted)
+    (за-умовою
+      ((атом? fields) (structural-kind empty-list) (як-є ()))
+      ((атом? fields) (structural-kind atom) (як-є ()))
+      ((атом? fields) (structural-kind pair)
+       (нехай-послідовно ((field (перше fields))
               (language (tri-field-language field)))
-         (110
-           ((101 language wanted) (identity-relation same)
+         (за-умовою
+           ((тотожне? language wanted) (identity-relation same)
             (tri-field-status field))
-           ((101 language wanted) (identity-relation distinct)
-            (tri-surface-status (011 fields) wanted))))))))
+           ((тотожне? language wanted) (identity-relation distinct)
+            (tri-surface-status (решта fields) wanted))))))))
 
-(0011 tri-all-status-state
-  (0010 (fields languages wanted)
-    (110
-      ((010 languages) (structural-kind empty-list) (001 all))
-      ((010 languages) (structural-kind atom) (001 not-all))
-      ((010 languages) (structural-kind pair)
-       (001000 ((current
-               (tri-surface-status fields (100 languages))))
-         (110
-           ((101 current wanted) (identity-relation same)
+(визначити tri-all-status-state
+  (функція (fields languages wanted)
+    (за-умовою
+      ((атом? languages) (structural-kind empty-list) (як-є all))
+      ((атом? languages) (structural-kind atom) (як-є not-all))
+      ((атом? languages) (structural-kind pair)
+       (нехай ((current
+               (tri-surface-status fields (перше languages))))
+         (за-умовою
+           ((тотожне? current wanted) (identity-relation same)
             (tri-all-status-state
               fields
-              (011 languages)
+              (решта languages)
               wanted))
-           ((101 current wanted) (identity-relation distinct)
-            (001 not-all))))))))
+           ((тотожне? current wanted) (identity-relation distinct)
+            (як-є not-all))))))))
 
-(0011 tri-public-kind
-  (0010 (row)
-    (001000 ((state
+(визначити tri-public-kind
+  (функція (row)
+    (нехай ((state
             (tri-all-status-state
-              (011 row)
+              (решта row)
               tri-human-surfaces
-              (001 compatibility-only))))
-      (110
-        ((101 state (001 all)) (identity-relation same)
-         (001 compatibility-only))
-        ((101 state (001 all)) (identity-relation distinct)
-         (001 public))))))
+              (як-є compatibility-only))))
+      (за-умовою
+        ((тотожне? state (як-є all)) (identity-relation same)
+         (як-є compatibility-only))
+        ((тотожне? state (як-є all)) (identity-relation distinct)
+         (як-є public))))))
 
-(0011 tri-stable-kind
-  (0010 (row)
-    (001000 ((state
+(визначити tri-stable-kind
+  (функція (row)
+    (нехай ((state
             (tri-all-status-state
-              (011 row)
+              (решта row)
               tri-human-surfaces
-              (001 stable))))
-      (110
-        ((101 state (001 all)) (identity-relation same)
-         (001 all-stable))
-        ((101 state (001 all)) (identity-relation distinct)
-         (001 not-all-stable))))))
+              (як-є stable))))
+      (за-умовою
+        ((тотожне? state (як-є all)) (identity-relation same)
+         (як-є all-stable))
+        ((тотожне? state (як-є all)) (identity-relation distinct)
+         (як-є not-all-stable))))))
 
-(0011 tri-surface-presence
-  (0010 (fields wanted)
-    (001000 ((value (tri-surface-status fields wanted)))
-      (110
-        ((010 value) (structural-kind empty-list) (001 absent))
-        ((010 value) (structural-kind atom) (001 present))
-        ((010 value) (structural-kind pair) (001 present))))))
+(визначити tri-surface-presence
+  (функція (fields wanted)
+    (нехай ((value (tri-surface-status fields wanted)))
+      (за-умовою
+        ((атом? value) (structural-kind empty-list) (як-є absent))
+        ((атом? value) (structural-kind atom) (як-є present))
+        ((атом? value) (structural-kind pair) (як-є present))))))
 
-(0011 tri-count-status
-  (0010 (rows language wanted acc)
-    (110
-      ((010 rows) (structural-kind empty-list) acc)
-      ((010 rows) (structural-kind atom) acc)
-      ((010 rows) (structural-kind pair)
-       (001000 ((status
-               (tri-surface-status (011 (100 rows)) language)))
-         (110
-           ((101 status wanted) (identity-relation same)
-            (tri-count-status (011 rows) language wanted (01010 acc 1)))
-           ((101 status wanted) (identity-relation distinct)
-            (tri-count-status (011 rows) language wanted acc))))))))
+(визначити tri-count-status
+  (функція (rows language wanted acc)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list) acc)
+      ((атом? rows) (structural-kind atom) acc)
+      ((атом? rows) (structural-kind pair)
+       (нехай ((status
+               (tri-surface-status (решта (перше rows)) language)))
+         (за-умовою
+           ((тотожне? status wanted) (identity-relation same)
+            (tri-count-status (решта rows) language wanted (додати acc 1)))
+           ((тотожне? status wanted) (identity-relation distinct)
+            (tri-count-status (решта rows) language wanted acc))))))))
 
-(0011 tri-count-public
-  (0010 (rows acc)
-    (110
-      ((010 rows) (structural-kind empty-list) acc)
-      ((010 rows) (structural-kind atom) acc)
-      ((010 rows) (structural-kind pair)
-       (001000 ((kind (tri-public-kind (100 rows))))
-         (110
-           ((101 kind (001 public)) (identity-relation same)
-            (tri-count-public (011 rows) (01010 acc 1)))
-           ((101 kind (001 public)) (identity-relation distinct)
-            (tri-count-public (011 rows) acc))))))))
+(визначити tri-count-public
+  (функція (rows acc)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list) acc)
+      ((атом? rows) (structural-kind atom) acc)
+      ((атом? rows) (structural-kind pair)
+       (нехай ((kind (tri-public-kind (перше rows))))
+         (за-умовою
+           ((тотожне? kind (як-є public)) (identity-relation same)
+            (tri-count-public (решта rows) (додати acc 1)))
+           ((тотожне? kind (як-є public)) (identity-relation distinct)
+            (tri-count-public (решта rows) acc))))))))
 
-(0011 tri-count-symbolic
-  (0010 (rows acc)
-    (110
-      ((010 rows) (structural-kind empty-list) acc)
-      ((010 rows) (structural-kind atom) acc)
-      ((010 rows) (structural-kind pair)
-       (001000 ((state
+(визначити tri-count-symbolic
+  (функція (rows acc)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list) acc)
+      ((атом? rows) (structural-kind atom) acc)
+      ((атом? rows) (structural-kind pair)
+       (нехай ((state
                (tri-surface-presence
-                 (011 (100 rows))
-                 (001 sym))))
-         (110
-           ((101 state (001 present)) (identity-relation same)
-            (tri-count-symbolic (011 rows) (01010 acc 1)))
-           ((101 state (001 present)) (identity-relation distinct)
-            (tri-count-symbolic (011 rows) acc))))))))
+                 (решта (перше rows))
+                 (як-є sym))))
+         (за-умовою
+           ((тотожне? state (як-є present)) (identity-relation same)
+            (tri-count-symbolic (решта rows) (додати acc 1)))
+           ((тотожне? state (як-є present)) (identity-relation distinct)
+            (tri-count-symbolic (решта rows) acc))))))))
 
-(0011 tri-count-common-stable
-  (0010 (rows acc)
-    (110
-      ((010 rows) (structural-kind empty-list) acc)
-      ((010 rows) (structural-kind atom) acc)
-      ((010 rows) (structural-kind pair)
-       (001000 ((public (tri-public-kind (100 rows))))
-         (110
-           ((101 public (001 public)) (identity-relation distinct)
-            (tri-count-common-stable (011 rows) acc))
-           ((101 public (001 public)) (identity-relation same)
-            (001000 ((stable (tri-stable-kind (100 rows))))
-              (110
-                ((101 stable (001 all-stable)) (identity-relation same)
-                 (tri-count-common-stable (011 rows) (01010 acc 1)))
-                ((101 stable (001 all-stable)) (identity-relation distinct)
-                 (tri-count-common-stable (011 rows) acc)))))))))))
+(визначити tri-count-common-stable
+  (функція (rows acc)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list) acc)
+      ((атом? rows) (structural-kind atom) acc)
+      ((атом? rows) (structural-kind pair)
+       (нехай ((public (tri-public-kind (перше rows))))
+         (за-умовою
+           ((тотожне? public (як-є public)) (identity-relation distinct)
+            (tri-count-common-stable (решта rows) acc))
+           ((тотожне? public (як-є public)) (identity-relation same)
+            (нехай ((stable (tri-stable-kind (перше rows))))
+              (за-умовою
+                ((тотожне? stable (як-є all-stable)) (identity-relation same)
+                 (tri-count-common-stable (решта rows) (додати acc 1)))
+                ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
+                 (tri-count-common-stable (решта rows) acc)))))))))))
 
-(0011 tri-release-state
-  (0010 (rows)
-    (110
-      ((010 rows) (structural-kind empty-list) (001 confirmed))
-      ((010 rows) (structural-kind atom) (001 open))
-      ((010 rows) (structural-kind pair)
-       (001000 ((public (tri-public-kind (100 rows))))
-         (110
-           ((101 public (001 public)) (identity-relation distinct)
-            (tri-release-state (011 rows)))
-           ((101 public (001 public)) (identity-relation same)
-            (001000 ((stable (tri-stable-kind (100 rows))))
-              (110
-                ((101 stable (001 all-stable)) (identity-relation same)
-                 (tri-release-state (011 rows)))
-                ((101 stable (001 all-stable)) (identity-relation distinct)
-                 (001 open)))))))))))
+(визначити tri-release-state
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list) (як-є confirmed))
+      ((атом? rows) (structural-kind atom) (як-є open))
+      ((атом? rows) (structural-kind pair)
+       (нехай ((public (tri-public-kind (перше rows))))
+         (за-умовою
+           ((тотожне? public (як-є public)) (identity-relation distinct)
+            (tri-release-state (решта rows)))
+           ((тотожне? public (як-є public)) (identity-relation same)
+            (нехай ((stable (tri-stable-kind (перше rows))))
+              (за-умовою
+                ((тотожне? stable (як-є all-stable)) (identity-relation same)
+                 (tri-release-state (решта rows)))
+                ((тотожне? stable (як-є all-stable)) (identity-relation distinct)
+                 (як-є open)))))))))))
 
-(0011 tri-mode
-  (0010 (argv)
-    (110
-      ((010 argv) (structural-kind empty-list) (001 report))
-      ((010 argv) (structural-kind atom)
-       (tri-fail (001 malformed-argv) argv))
-      ((010 argv) (structural-kind pair)
-       (001000 ((rest (011 argv)))
-         (110
-           ((010 rest) (structural-kind empty-list)
-            (110
-              ((equal? (100 argv) "--require-complete")
+(визначити tri-mode
+  (функція (argv)
+    (за-умовою
+      ((атом? argv) (structural-kind empty-list) (як-є report))
+      ((атом? argv) (structural-kind atom)
+       (tri-fail (як-є malformed-argv) argv))
+      ((атом? argv) (structural-kind pair)
+       (нехай ((rest (решта argv)))
+         (за-умовою
+           ((атом? rest) (structural-kind empty-list)
+            (за-умовою
+              ((equal? (перше argv) "--require-complete")
                (structural-relation same)
-               (001 require-complete))
-              ((equal? (100 argv) "--require-complete")
+               (як-є require-complete))
+              ((equal? (перше argv) "--require-complete")
                (structural-relation distinct)
-               (tri-fail (001 unknown-argument) (100 argv)))))
-           ((010 rest) (structural-kind atom)
-            (tri-fail (001 malformed-argv) argv))
-           ((010 rest) (structural-kind pair)
-            (tri-fail (001 too-many-arguments) argv))))))))
+               (tri-fail (як-є unknown-argument) (перше argv)))))
+           ((атом? rest) (structural-kind atom)
+            (tri-fail (як-є malformed-argv) argv))
+           ((атом? rest) (structural-kind pair)
+            (tri-fail (як-є too-many-arguments) argv))))))))
 
-(0011 tri-registry-form
-  (100
+(визначити tri-registry-form
+  (перше
     (читати-всі
       (read-file "lib/surface/semantic-registry.lisp"))))
 
-(0011 tri-rows
-  (110
-    ((010 tri-registry-form) (structural-kind empty-list)
-     (tri-fail (001 malformed-registry-root) tri-registry-form))
-    ((010 tri-registry-form) (structural-kind atom)
-     (tri-fail (001 malformed-registry-root) tri-registry-form))
-    ((010 tri-registry-form) (structural-kind pair)
-     (110
-       ((101 (100 tri-registry-form) (001 sr/1))
+(визначити tri-rows
+  (за-умовою
+    ((атом? tri-registry-form) (structural-kind empty-list)
+     (tri-fail (як-є malformed-registry-root) tri-registry-form))
+    ((атом? tri-registry-form) (structural-kind atom)
+     (tri-fail (як-є malformed-registry-root) tri-registry-form))
+    ((атом? tri-registry-form) (structural-kind pair)
+     (за-умовою
+       ((тотожне? (перше tri-registry-form) (як-є sr/1))
         (identity-relation same)
-        (011 tri-registry-form))
-       ((101 (100 tri-registry-form) (001 sr/1))
+        (решта tri-registry-form))
+       ((тотожне? (перше tri-registry-form) (як-є sr/1))
         (identity-relation distinct)
         (tri-fail
-          (001 malformed-registry-root)
-          (100 tri-registry-form)))))))
+          (як-є malformed-registry-root)
+          (перше tri-registry-form)))))))
 
-(0011 tri-validation
-  (tri-validate-rows tri-rows (001 ())))
+(визначити tri-validation
+  (tri-validate-rows tri-rows (як-є ())))
 
-(0011 tri-public-count
+(визначити tri-public-count
   (tri-count-public tri-rows 0))
 
-(0011 tri-symbolic-count
+(визначити tri-symbolic-count
   (tri-count-symbolic tri-rows 0))
 
-(0011 tri-common-stable-count
+(визначити tri-common-stable-count
   (tri-count-common-stable tri-rows 0))
 
-(0011 tri-release
+(визначити tri-release
   (tri-release-state tri-rows))
 
-(0011 tri-report
-  (1110
-    (001 trilingual-surface-report)
-    (1110 (001 entries) (000000 tri-rows))
-    (1110 (001 public-semantic-identities) tri-public-count)
-    (1110 (001 shared-symbolic-identities) tri-symbolic-count)
-    (1110
-      (001 uk)
-      (1110 (001 stable)
-            (tri-count-status tri-rows (001 uk) (001 stable) 0))
-      (1110 (001 candidate)
-            (tri-count-status tri-rows (001 uk) (001 candidate) 0))
-      (1110 (001 missing)
-            (tri-count-status tri-rows (001 uk) (001 missing) 0))
-      (1110 (001 compatibility-only)
+(визначити tri-report
+  (список
+    (як-є trilingual-surface-report)
+    (список (як-є entries) (довжина tri-rows))
+    (список (як-є public-semantic-identities) tri-public-count)
+    (список (як-є shared-symbolic-identities) tri-symbolic-count)
+    (список
+      (як-є uk)
+      (список (як-є stable)
+            (tri-count-status tri-rows (як-є uk) (як-є stable) 0))
+      (список (як-є candidate)
+            (tri-count-status tri-rows (як-є uk) (як-є candidate) 0))
+      (список (як-є missing)
+            (tri-count-status tri-rows (як-є uk) (як-є missing) 0))
+      (список (як-є compatibility-only)
             (tri-count-status
               tri-rows
-              (001 uk)
-              (001 compatibility-only)
+              (як-є uk)
+              (як-є compatibility-only)
               0)))
-    (1110
-      (001 en)
-      (1110 (001 stable)
-            (tri-count-status tri-rows (001 en) (001 stable) 0))
-      (1110 (001 candidate)
-            (tri-count-status tri-rows (001 en) (001 candidate) 0))
-      (1110 (001 missing)
-            (tri-count-status tri-rows (001 en) (001 missing) 0))
-      (1110 (001 compatibility-only)
+    (список
+      (як-є en)
+      (список (як-є stable)
+            (tri-count-status tri-rows (як-є en) (як-є stable) 0))
+      (список (як-є candidate)
+            (tri-count-status tri-rows (як-є en) (як-є candidate) 0))
+      (список (як-є missing)
+            (tri-count-status tri-rows (як-є en) (як-є missing) 0))
+      (список (як-є compatibility-only)
             (tri-count-status
               tri-rows
-              (001 en)
-              (001 compatibility-only)
+              (як-є en)
+              (як-є compatibility-only)
               0)))
-    (1110
-      (001 sa)
-      (1110 (001 stable)
-            (tri-count-status tri-rows (001 sa) (001 stable) 0))
-      (1110 (001 candidate)
-            (tri-count-status tri-rows (001 sa) (001 candidate) 0))
-      (1110 (001 missing)
-            (tri-count-status tri-rows (001 sa) (001 missing) 0))
-      (1110 (001 compatibility-only)
+    (список
+      (як-є sa)
+      (список (як-є stable)
+            (tri-count-status tri-rows (як-є sa) (як-є stable) 0))
+      (список (як-є candidate)
+            (tri-count-status tri-rows (як-є sa) (як-є candidate) 0))
+      (список (як-є missing)
+            (tri-count-status tri-rows (як-є sa) (як-є missing) 0))
+      (список (як-є compatibility-only)
             (tri-count-status
               tri-rows
-              (001 sa)
-              (001 compatibility-only)
+              (як-є sa)
+              (як-є compatibility-only)
               0)))
-    (1110
-      (001 trilingual-stable-identities)
+    (список
+      (як-є trilingual-stable-identities)
       tri-common-stable-count
       tri-public-count)
-    (1110 (001 release-parity) tri-release)))
+    (список (як-є release-parity) tri-release)))
 
-(0011 tri-shown
+(визначити tri-shown
   (друкувати tri-report))
 
-(0011 tri-selected-mode
+(визначити tri-selected-mode
   (tri-mode *argv*))
 
-(110
-  ((101 tri-selected-mode (001 require-complete))
+(за-умовою
+  ((тотожне? tri-selected-mode (як-є require-complete))
    (identity-relation same)
-   (110
-     ((101 tri-release (001 confirmed))
+   (за-умовою
+     ((тотожне? tri-release (як-є confirmed))
       (identity-relation same)
       tri-report)
-     ((101 tri-release (001 confirmed))
+     ((тотожне? tri-release (як-є confirmed))
       (identity-relation distinct)
-      (tri-fail (001 release-parity-open) tri-report))))
-  ((101 tri-selected-mode (001 require-complete))
+      (tri-fail (як-є release-parity-open) tri-report))))
+  ((тотожне? tri-selected-mode (як-є require-complete))
    (identity-relation distinct)
    tri-report))
 
