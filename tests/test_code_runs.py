@@ -1022,7 +1022,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
     def _git_blob_sha(source: str) -> str:
         data = source.encode("utf-8")
         return hashlib.sha1(
-            b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
         ).hexdigest()
 
     @classmethod
@@ -1044,7 +1044,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         )
         d3 = (ROOT / "lib" / "domains" / "d3.lisp").read_text(encoding="utf-8")
         d5 = (ROOT / "lib" / "domains" / "d5.lisp").read_text(encoding="utf-8")
-        self.assertRegex(d3, r"(?m)^  \\(100 \\(ук перше\\) \\(укр перше\\)")
+        self.assertRegex(d3, r"(?m)^  \(100 \(ук перше\) \(укр перше\)")
         for bits, peer in (("01011", "відняти"), ("10110", "помножити")):
             row = next(line for line in d5.splitlines() if line.lstrip().startswith(f"({bits} "))
             self.assertIn(f"(укр {peer})", row)
