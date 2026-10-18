@@ -6,7 +6,7 @@
 (визначити verdict (перше verdicts))
 
 (за-умовою
-  ((11110111 verdict (як-є (island-math-evidence-ok)))
+  ((однакові? verdict (як-є (island-math-evidence-ok)))
    (як-є island-math-evidence-ok))
   ((атом? (як-є ()))
    (перше (як-є ()))))

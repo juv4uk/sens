@@ -20,6 +20,7 @@ PROJECTIONS = {
     "100": ("перше", 3),
     "101": ("тотожне?", 3),
     "110": ("за-умовою", 3),
+    "11110111": ("однакові?", 8),
 }
 OLD_SHA = {
     "scripts/semantic-authority-guard-enforce.lisp": "09aeeb298e81b7967a01fd4557b1190d89b15214",
@@ -27,9 +28,9 @@ OLD_SHA = {
     "scripts/enforce-function-table-mechanisms.lisp": "94cd3dd8966582ba4a5df95e8a1e800507999438",
 }
 EXPECTED = {
-    "scripts/semantic-authority-guard-enforce.lisp": {"0011": 3, "001": 10, "010": 4, "100": 4, "101": 3, "110": 3},
-    "scripts/enforce-island-math-evidence.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1},
-    "scripts/enforce-function-table-mechanisms.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1},
+    "scripts/semantic-authority-guard-enforce.lisp": {"0011": 3, "001": 10, "010": 4, "100": 4, "101": 3, "110": 3, "11110111": 0},
+    "scripts/enforce-island-math-evidence.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1, "11110111": 1},
+    "scripts/enforce-function-table-mechanisms.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1, "11110111": 1},
 }
 NAMES = {bits: name for bits, (name, _) in PROJECTIONS.items()}
 INVERSE = {name: bits for bits, name in NAMES.items()}
@@ -120,9 +121,9 @@ class UkrainianEnforcementProjection(unittest.TestCase):
             "scripts/semantic-authority-guard-enforce.lisp":
                 ("(як-є semantic-authority-ok)", "(як-є semantic-authority-violation)", "(як-є empty-verdict)"),
             "scripts/enforce-island-math-evidence.lisp":
-                ("(як-є island-math-evidence-ok)", "(11110111 verdict"),
+                ("(як-є island-math-evidence-ok)", "(однакові? verdict"),
             "scripts/enforce-function-table-mechanisms.lisp":
-                ("(як-є function-table-mechanisms-ok)", "(11110111 verdict"),
+                ("(як-є function-table-mechanisms-ok)", "(однакові? verdict"),
         }
         for path, snippets in original_tags.items():
             source = (ROOT / path).read_text(encoding="utf-8")

@@ -6,7 +6,7 @@
 (визначити verdict (перше verdicts))
 
 (за-умовою
-  ((11110111 verdict (як-є (function-table-mechanisms-ok)))
+  ((однакові? verdict (як-є (function-table-mechanisms-ok)))
    (як-є function-table-mechanisms-ok))
   ((атом? (як-є ()))
    (перше (як-є ()))))
