@@ -534,5 +534,51 @@ class UnderstandMapUkrSourceTests(unittest.TestCase):
         self.assertIn("сполучити", observed)
 
 
+class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
+    """Exact Ukrainian spelling, not permission to execute a historical SID8 byte."""
+
+    def test_core1_current_d3_d4_calls_follow_ratified_ukr(self):
+        root = Path(__file__).resolve().parents[1]
+        rows = (
+            (3, "001", "як-є"), (3, "010", "атом?"),
+            (3, "011", "решта"), (3, "100", "перше"),
+            (3, "101", "тотожне?"), (3, "110", "за-умовою"),
+            (3, "111", "сполучити"), (4, "0010", "функція"),
+            (4, "0011", "визначити"), (4, "1001", "друге"),
+        )
+        for width, bits, ukr in rows:
+            with self.subTest(width=width, bits=bits):
+                source = (root / "lib/domains" / f"d{width}.lisp").read_text(encoding="utf-8")
+                authority = [line for line in source.splitlines()
+                             if line.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(authority), 1)
+                self.assertIn(f"(укр {ukr})", authority[0])
+
+        src = (root / "lib/core1.lisp").read_text(encoding="utf-8")
+        heads = [token.text for token in mod.candidate_heads(mod.parse(src))]
+        for ukr in ("визначити", "функція", "за-умовою", "тотожне?", "перше", "як-є"):
+            self.assertIn(ukr, heads)
+        self.assertIn("(визначити C1-SECOND", src)
+        self.assertIn("(функція (X)", src)
+
+    def test_core1_quotes_and_legacy_w8_are_not_assigned_new_identity(self):
+        root = Path(__file__).resolve().parents[1]
+        src = (root / "lib/core1.lisp").read_text(encoding="utf-8")
+        self.assertIn("#d1:0", src)
+        self.assertIn("#d1:1", src)
+        # Under QUOTE, even a binary-looking list head remains inert data.
+        sample = "(як-є (00000101 (100 datum))) (визначити answer (функція (x) (перше x)))"
+        heads = [token.text for token in mod.candidate_heads(mod.parse(sample))]
+        self.assertNotIn("00000101", heads)
+        self.assertNotIn("100", heads)
+        self.assertIn("перше", heads)
+        # Wrong Ukrainian peer: D3 CAR != CDR, even if both have three bits.
+        d3 = (root / "lib/domains/d3.lisp").read_text(encoding="utf-8")
+        self.assertNotEqual(
+            next(s for s in d3.splitlines() if s.strip().startswith("(100 (ук ")),
+            next(s for s in d3.splitlines() if s.strip().startswith("(011 (ук ")),
+        )
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
