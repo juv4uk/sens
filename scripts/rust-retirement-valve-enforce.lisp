@@ -3,18 +3,18 @@
 ; owns the non-zero failure for forbidden Rust growth.
 
 (визначити verdicts (читати-всі (read-file "tests/rust-retirement-verdict.lisp")))
-(0011 verdict (100 verdicts))
-(0011 verdict-tag (100 verdict))
+(визначити verdict (перше verdicts))
+(визначити verdict-tag (перше verdict))
 
-(110
-  ((101 verdict-tag (001 rust-retirement-ok)) (identity-relation same)
-   (001 rust-retirement-ok))
-  ((101 verdict-tag (001 rust-retirement-ok)) (identity-relation distinct)
-   (110
-     ((101 verdict-tag (001 rust-retirement-violation)) (identity-relation same)
-      (100 ()))
-     ((101 verdict-tag (001 rust-retirement-violation)) (identity-relation distinct)
-      (100 ())))))
+(за-умовою
+  ((тотожне? verdict-tag (як-є rust-retirement-ok)) (identity-relation same)
+   (як-є rust-retirement-ok))
+  ((тотожне? verdict-tag (як-є rust-retirement-ok)) (identity-relation distinct)
+   (за-умовою
+     ((тотожне? verdict-tag (як-є rust-retirement-violation)) (identity-relation same)
+      (перше ()))
+     ((тотожне? verdict-tag (як-є rust-retirement-violation)) (identity-relation distinct)
+      (перше ())))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити читати-всі read-all)
