@@ -1136,10 +1136,17 @@ class X86AdmissionLoweringUkrProjectionTests(unittest.TestCase):
 
 
 class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
-    """Exact Ukrainian D3/D5 call-head projection for the core integer laws."""
+    """Exact two-head inverse on top of the later D3/D4-projected core.
+
+    HISTORICAL_PRE_PROJECTION_BLOB records the older pre-Ukrainian source.
+    Commit 14d2dd002829473ce872d84c8eb0b37fd2eb430e later migrated additional
+    ratified D3/D4 heads, so this test must restore the layered baseline below,
+    not pretend to reverse that separate migration.
+    """
 
     SOURCE = ROOT / "lib" / "core.lisp"
-    ORIGINAL_BLOB = "a45280e231297b81c31ea4c4f77836b50fa07f78"
+    HISTORICAL_PRE_PROJECTION_BLOB = "a45280e231297b81c31ea4c4f77836b50fa07f78"
+    LAYERED_BASELINE_BLOB = "5eef8b191012d73afd461d74a47c5bd4d364e34d"
     OLD_CHUNK_CALL = "(quotient (01011 a (100 chunk+mult)) b)"
     UKR_CHUNK_CALL = "(quotient (відняти a (перше chunk+mult)) b)"
     OLD_REMAINDER_CALL = "(01011 a (10110 b (quotient a b)))"
@@ -1166,7 +1173,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         restored = self._restore(source)
         self.assertEqual(
             self._git_blob_sha(restored),
-            self.ORIGINAL_BLOB,
+            self.LAYERED_BASELINE_BLOB,
             "міграція змінила закон, порядок операндів або сторонні дані",
         )
         d3 = (ROOT / "lib" / "domains" / "d3.lisp").read_text(encoding="utf-8")
@@ -1180,7 +1187,7 @@ class CoreIntegerQuotientUkrProjectionTests(unittest.TestCase):
         self.assertNotIn(self.OLD_CHUNK_CALL, source)
         self.assertNotIn(self.OLD_REMAINDER_CALL, source)
 
-    def test_exact_ukr_peers_and_inverse_restore_original_core_blob(self):
+    def test_exact_ukr_peers_and_inverse_restore_layered_parent_blob(self):
         self._verify(self.SOURCE.read_text(encoding="utf-8"))
 
     def test_wrong_d5_peer_fails_exact_inverse(self):
