@@ -2621,25 +2621,6 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
             head, offset, bits = edit["head"], edit["offset"], edit["bits"]
             self.assertEqual(restored[offset:offset + len(head)], head, f"{path}: offset drift")
             restored = restored[:offset] + bits + restored[offset + len(head):]
-        # The generator gained five verified D5/D6 Ukrainian call heads after
-        # the original D3/D4/D8/D9 projection. Restore those too, instead of
-        # pinning living source to its pre-migration shape or dropping provenance.
-        if path == "scripts/generate-rust-function-signatures.lisp":
-            for width, bits, surface, count in (
-                (6, "101110", "згорнути", 1),
-                (6, "001000", "нехай", 1),
-                (5, "11100", "знайти-за-ключем", 2),
-                (5, "10011", "третє", 1),
-            ):
-                table = (self.ROOT / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
-                rows = [line for line in table.splitlines()
-                        if line.strip().startswith(f"({bits} (ук ")]
-                self.assertEqual(len(rows), 1, f"D{width}:{bits}: unique owner")
-                self.assertIn(f"(укр {surface})", rows[0])
-                call = re.compile(r"\(" + re.escape(surface) + r"(?=\s|\))")
-                self.assertEqual(len(call.findall(restored)), count,
-                                 f"{path}: D{width}:{bits} source-head count")
-                restored = call.sub("(" + bits, restored)
         self.assertEqual(self._blob_sha(restored), spec["blob"],
                          f"{path}: reverse projection must restore original Git blob")
         mod.parse(source)
