@@ -1458,45 +1458,45 @@
 ; Canonical #q2 wire is the source of exact integer magnitude here.
 ; Parse numerator bits only after checking the tag and denominator; negative,
 ; fractional, malformed and over-width values fail closed. No Number arithmetic.
-(0011 x86-wire-split-integer
-  (0010 (text bits)
-    (110
-      ((110011100 text) (001 ()))
-      ((110101010 "/" text) (111 bits (110011101 text)))
-      ((110101010 "0" text)
-       (x86-wire-split-integer (110011101 text) (111 0 bits)))
-      ((110101010 "1" text)
-       (x86-wire-split-integer (110011101 text) (111 1 bits)))
-      ((010 ()) (001 ())))))
+(визначити x86-wire-split-integer
+  (функція (text bits)
+    (за-умовою
+      ((рядок-порожній? text) (як-є ()))
+      ((рядок-префікс? "/" text) (сполучити bits (рядок-решта text)))
+      ((рядок-префікс? "0" text)
+       (x86-wire-split-integer (рядок-решта text) (сполучити 0 bits)))
+      ((рядок-префікс? "1" text)
+       (x86-wire-split-integer (рядок-решта text) (сполучити 1 bits)))
+      ((атом? ()) (як-є ())))))
 
-(0011 x86-wire-denominator-one?
-  (0010 (parts)
-    (110
-      ((110101010 "1" (011 parts))
-       (110
-         ((110011100 (110011101 (011 parts))) (010 ()))
-         ((010 ()) (001 ()))))
-      ((010 ()) (001 ())))))
+(визначити x86-wire-denominator-one?
+  (функція (parts)
+    (за-умовою
+      ((рядок-префікс? "1" (решта parts))
+       (за-умовою
+         ((рядок-порожній? (рядок-решта (решта parts))) (атом? ()))
+         ((атом? ()) (як-є ()))))
+      ((атом? ()) (як-є ())))))
 
-(0011 x86-wire-integer-bits
-  (0010 (value)
-    ((0010 (wire)
-       (110
-         ((110101010 "#q2:" wire)
-          ((0010 (parts)
-             (110
-               ((0100 (010 parts))
-                (110
-                  ((0101 (100 parts)) (001 ()))
-                  ((010 ())
-                   (110
-                     ((x86-wire-denominator-one? parts) (100 parts))
-                     ((010 ()) (001 ())))))))
+(визначити x86-wire-integer-bits
+  (функція (value)
+    ((функція (wire)
+       (за-умовою
+         ((рядок-префікс? "#q2:" wire)
+          ((функція (parts)
+             (за-умовою
+               ((хибне? (атом? parts))
+                (за-умовою
+                  ((порожній? (перше parts)) (як-є ()))
+                  ((атом? ())
+                   (за-умовою
+                     ((x86-wire-denominator-one? parts) (перше parts))
+                     ((атом? ()) (як-є ())))))))
            (x86-wire-split-integer
-             (110011101 (110011101 (110011101 (110011101 wire)))
-             (001 ()))))
-         ((010 ()) (001 ()))))
-     (11110100 value))))))
+             (рядок-решта (рядок-решта (рядок-решта (рядок-решта wire)))
+             (як-є ()))))
+         ((атом? ()) (як-є ()))))
+     (значення-у-текст value))))))
 
 ; Exact finite 8-bit decode. The source owns every transition and every byte;
 ; output projection never uses +, mod, division, or a host integer conversion.
