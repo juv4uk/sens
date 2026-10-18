@@ -505,6 +505,19 @@ class UnderstandMapUkrSourceTests(unittest.TestCase):
                 self.assertNotRegex(active, r"\(\s*[01]{3,6}(?=\s|\))")
                 self.assertNotIn("#d1:1", active)
 
+    def test_understand_historical_laws_remain_strict(self):
+        from copy import deepcopy
+        from tests import test_understand_exact_d3_2046 as witness
+        current = witness.read_forms(witness.SOURCE.read_text(encoding="utf-8"))
+        normalized = witness.normalize_current_source_forms(current)
+        self.assertEqual(len(normalized), 8)
+        self.assertEqual(witness.verify_unchanged_laws(normalized), normalized)
+        wrong_peer = deepcopy(current)
+        wrong_peer[0][2][2][1][0][0] = "тотожне?"
+        with self.assertRaisesRegex(AssertionError, "непорожній CAR"):
+            witness.verify_unchanged_laws(
+                witness.normalize_current_source_forms(wrong_peer))
+
     def test_quoted_data_remains_data_and_d1_is_its_own_identity(self):
         root = Path(__file__).resolve().parents[1]
         understand = (root / "lib/understand.lisp").read_text(encoding="utf-8")
