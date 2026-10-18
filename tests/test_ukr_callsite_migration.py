@@ -98,7 +98,7 @@ class CallsiteAuditTests(unittest.TestCase):
             "canon-law-cond-first-match-short-circuit", "canon-law-symbolic-surface",
         }
         self.assertEqual(sorted(migrated.intersection(active_heads)), [])
-        self.assertIn("(001 canon-law-result)", source)  # inert result tag, not a call
+        self.assertIn("(як-є canon-law-result)", source)  # D3:001 українська проєкція; цитований тег, не виклик
         self.assertIn("(визначити canon-law-result", source)  # exact D4:0011 full укр, не нова identity
         self.assertNotIn("(0011 canon-law-result", source)  # колишня coded DEFINE більше не source
 
