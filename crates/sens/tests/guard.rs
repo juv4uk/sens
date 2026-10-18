@@ -3,6 +3,14 @@ use sens::{eval_program, parse_mixed_exact_domain, Expr, ExprKind, Session};
 const GUARD_SOURCE: &str = include_str!("../../../lib/guard.lisp");
 
 fn eval_guard(source: &str) -> String {
+    eval_guard_with_source(source, false)
+}
+
+fn eval_guard_ukr(source: &str) -> String {
+    eval_guard_with_source(source, true)
+}
+
+fn eval_guard_with_source(source: &str, exact_ukr: bool) -> String {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source(
         "lib/core.lisp",
@@ -28,12 +36,21 @@ fn eval_guard(source: &str) -> String {
     )
     .expect("curated Guard directory must parse through its path-pinned data reader");
     sens::eval_parsed_expressions(&reference_forms, &mut session)
-        .expect("legacy quoted Guard directory must remain data, not binary-looking calls");
+        .expect("Guard reference entries remain quoted data and executable helpers use exact heads");
 
-    eval_program(source, &mut session)
-        .unwrap_or_else(|e| panic!("guard evaluation failed: {e}\\nsource: {source}"))
-        .value
-        .to_string()
+    if exact_ukr {
+        let forms = parse_mixed_exact_domain(source)
+            .expect("exact Ukrainian Guard source");
+        sens::eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|e| panic!("exact Ukrainian Guard evaluation failed: {e}\\nsource: {source}"))
+            .value
+            .to_string()
+    } else {
+        eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("guard evaluation failed: {e}\\nsource: {source}"))
+            .value
+            .to_string()
+    }
 }
 
 #[test]
@@ -165,9 +182,8 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
     // Two competing entries for the same topic, neither in the real
     // *guard-reference-directory* -- proves the ranking mechanism itself,
     // independent of any real content.
-    // All evaluation is expressed through the current Ukrainian projections.
-    // The exact D8 equality result (D1 PredicateBit) gates the result: the
-    // directory must still contain both original entries, in their original order.
+    // Exact Ukrainian domain heads only; no unqualified arithmetic count.
+    // Structural equality gates output on both original records still present.
     let source = r#"
         (нехай ((слабке (список (як-є reference) (список (як-є topic) (як-є demo))
                            (список (як-є evidence-status) (як-є unresolved))
@@ -184,7 +200,7 @@ fn a_stronger_evidence_status_outranks_an_older_entry_without_deleting_it() {
                (guard-reference-field (як-є summary) (guard-reference-find (як-є demo) (список сильне слабке)))))
             (так (як-є ()))))
     "#;
-    let value = eval_guard(source);
+    let value = eval_guard_ukr(source);
     assert!(
         value.contains("\"measured and tested\" \"measured and tested\""),
         "the confirmed entry must win regardless of file order, while both entries remain: {value}"
