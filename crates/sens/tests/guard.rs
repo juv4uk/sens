@@ -348,6 +348,7 @@ fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
     assert!(source.contains("(функція (поле посилання)"));
     assert!(source.contains("(функція (запис)"));
     assert!(source.contains("(захист-знайти-запис поле (решта посилання))"));
+    assert!(!source.contains("(знайти-за-ключем "));
     assert!(!source.contains("(функція (field reference)"));
     assert!(!source.contains("(функція (entry)"));
     assert!(!source.contains("(друге entry)"));
@@ -369,7 +370,7 @@ fn guard_reference_field_uses_exact_d1_d3_d4_ukr_surfaces() {
     assert_eq!(
         widths,
         [1usize, 3usize, 4usize].into_iter().collect(),
-        "guard-reference-field keeps exact D1 truth, D3 structure, and D4 lambda/selector"
+        "guard-reference-field keeps D1 truth, D3 structure and exact D4 lambda/selector/NULL"
     );
 }
 
