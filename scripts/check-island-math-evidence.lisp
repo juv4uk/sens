@@ -3,160 +3,160 @@
 ; executor route already admitted by #1046 mechanism metadata. This checker does
 ; not define operation names, meaning, law, domain, or semantic equivalence.
 
-(0011 registry
+(визначити registry
   (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
-(0011 mechanisms
+(визначити mechanisms
   (100 (110101001 (110110111 "lib/function-table-mechanisms.lisp"))))
 
-(0011 evidence
+(визначити evidence
   (100 (110101001 (110110111 "lib/island-math-evidence.lisp"))))
 
-(0011 registry-rows registry)
+(визначити registry-rows registry)
 
-(0011 evidence-sid-bits
-  (0010 (sid)
-    (110
+(визначити evidence-sid-bits
+  (функція (sid)
+    (за-умовою
       ((110100110 sid) sid)
       (1 (11110100 sid)))))
 
-(0011 find-section
-  (0010 (name sections)
-    (110
-      ((101 sections (001 ())) (001 ()))
-      ((101 (010 sections) 0) (110
-         ((101 (100 (100 sections)) name) (100 sections))
-         ((101 (101 (100 (100 sections)) name) 0) (find-section name (011 sections))))))))
+(визначити find-section
+  (функція (name sections)
+    (за-умовою
+      ((тотожне? sections (як-є ())) (як-є ()))
+      ((тотожне? (атом? sections) 0) (за-умовою
+         ((тотожне? (перше (перше sections)) name) (перше sections))
+         ((тотожне? (тотожне? (перше (перше sections)) name) 0) (find-section name (решта sections))))))))
 
-(0011 mechanism-rows
-  (011 (find-section (001 rows) mechanisms)))
+(визначити mechanism-rows
+  (решта (find-section (як-є rows) mechanisms)))
 
-(0011 evidence-rows
-  (011 (find-section (001 rows) evidence)))
+(визначити evidence-rows
+  (решта (find-section (як-є rows) evidence)))
 
-(0011 registry-has-sid?
-  (0010 (sid rows)
-    (110
-      ((101 rows (001 ())) (001 no))
-      ((101 (010 rows) 0) (110
+(визначити registry-has-sid?
+  (функція (sid rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є no))
+      ((тотожне? (атом? rows) 0) (за-умовою
          ((11110111 sid (100 (100 rows))) (001 yes))
          ((101 (11110111 sid (100 (100 rows))) 0) (registry-has-sid? sid (011 rows))))))))
 
-(0011 mechanism-has-route?
-  (0010 (sid executor rows)
-    (110
-      ((101 rows (001 ())) (001 no))
+(визначити mechanism-has-route?
+  (функція (sid executor rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є no))
       ((101 (010 rows) 0) (001000 ((row (100 rows)))
-         (110
+         (за-умовою
            ((11110111 (evidence-sid-bits sid) (evidence-sid-bits (100 row))) (110
               ((101 executor (1001 row)) (001 yes))
               ((101 (101 executor (1001 row)) 0) (mechanism-has-route? sid executor (011 rows)))))
            ((101 (11110111 (evidence-sid-bits sid) (evidence-sid-bits (100 row))) 0) (mechanism-has-route? sid executor (011 rows)))))))))
 
-(0011 evidence-has-route?
-  (0010 (sid executor rows)
-    (110
-      ((101 rows (001 ())) (001 no))
+(визначити evidence-has-route?
+  (функція (sid executor rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є no))
       ((101 (010 rows) 0) (001000 ((row (100 rows)))
-         (110
+         (за-умовою
            ((11110111 sid (100 row)) (110
               ((101 executor (1001 row)) (001 yes))
               ((101 (101 executor (1001 row)) 0) (evidence-has-route? sid executor (011 rows)))))
            ((101 (11110111 sid (100 row)) 0) (evidence-has-route? sid executor (011 rows)))))))))
 
-(0011 admitted-executor?
-  (0010 (executor)
-    (110
-      ((101 executor (001 common-lisp)) (001 yes))
-      ((101 executor (001 prolog)) (001 yes))
-      ((101 executor (001 clips)) (001 yes))
-      ((101 executor (001 datalog)) (001 yes))
+(визначити admitted-executor?
+  (функція (executor)
+    (за-умовою
+      ((тотожне? executor (як-є common-lisp)) (як-є yes))
+      ((тотожне? executor (як-є prolog)) (як-є yes))
+      ((тотожне? executor (як-є clips)) (як-є yes))
+      ((тотожне? executor (як-є datalog)) (як-є yes))
       (1 (001 no)))))
 
-(0011 admitted-status?
-  (0010 (status)
-    (110
-      ((101 status (001 execution-witness)) (001 yes))
+(визначити admitted-status?
+  (функція (status)
+    (за-умовою
+      ((тотожне? status (як-є execution-witness)) (як-є yes))
       (1 (001 no)))))
 
-(0011 forbidden-semantic-symbol?
-  (0010 (value)
-    (110
-      ((101 value (001 ())) (001 no))
-      ((101 (010 value) 0) (001 no))
-      ((010 value) (110
-         ((101 value (001 operation)) (001 yes))
-         ((101 value (001 meaning)) (001 yes))
-         ((101 value (001 law)) (001 yes))
-         ((101 value (001 domain)) (001 yes))
-         ((101 value (001 operand-domain)) (001 yes))
-         ((101 value (001 result-domain)) (001 yes))
+(визначити forbidden-semantic-symbol?
+  (функція (value)
+    (за-умовою
+      ((тотожне? value (як-є ())) (як-є no))
+      ((тотожне? (атом? value) 0) (як-є no))
+      ((атом? value) (за-умовою
+         ((тотожне? value (як-є operation)) (як-є yes))
+         ((тотожне? value (як-є meaning)) (як-є yes))
+         ((тотожне? value (як-є law)) (як-є yes))
+         ((тотожне? value (як-є domain)) (як-є yes))
+         ((тотожне? value (як-є operand-domain)) (як-є yes))
+         ((тотожне? value (як-є result-domain)) (як-є yes))
          (1 (001 no)))))))
 
-(0011 contains-forbidden-semantic-section?
-  (0010 (sections)
-    (110
-      ((101 sections (001 ())) (001 no))
+(визначити contains-forbidden-semantic-section?
+  (функція (sections)
+    (за-умовою
+      ((тотожне? sections (як-є ())) (як-є no))
       ((101 (010 sections) 0) (001000 ((section (100 sections)))
-         (110
-           ((101 (010 section) 0) (110
-              ((101 (forbidden-semantic-symbol? (100 section)) (001 yes)) (001 yes))
+         (за-умовою
+           ((тотожне? (атом? section) 0) (за-умовою
+              ((тотожне? (forbidden-semantic-symbol? (перше section)) (як-є yes)) (як-є yes))
               (1 (contains-forbidden-semantic-section? (011 sections)))))
            (1 (contains-forbidden-semantic-section? (011 sections)))))))))
 
-(0011 validate-rows
-  (0010 (rows)
-    (110
-      ((101 rows (001 ())) (001 (island-math-evidence-ok)))
+(визначити validate-rows
+  (функція (rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є (island-math-evidence-ok)))
       ((101 (010 rows) 0) (001001 ((row (100 rows))
-              (sid (100 row))
+              (sid (перше row))
               (executor (1001 row))
               (status (10011 row))
               (provenance-ref (100111 row)))
-         (110
+         (за-умовою
            ((101 (11110111 (000000 row) 4) 0) (1110 (001 island-math-evidence-violation)
-                  (001 invalid-evidence-row-shape) sid))
+                  (як-є invalid-evidence-row-shape) sid))
            ((101 (110100110 provenance-ref) 0) (1110 (001 island-math-evidence-violation)
-                  (001 provenance-must-be-string) sid executor))
-           ((101 (registry-has-sid? sid registry-rows) (001 no)) (1110 (001 island-math-evidence-violation)
-                  (001 sid-not-in-canon-function-table) sid))
-           ((101 (admitted-executor? executor) (001 no)) (1110 (001 island-math-evidence-violation)
-                  (001 unsupported-executor) sid executor))
-           ((101 (mechanism-has-route? sid executor mechanism-rows) (001 no)) (1110 (001 island-math-evidence-violation)
-                  (001 executor-route-not-admitted-by-canon-projection) sid executor))
-           ((101 (admitted-status? status) (001 no)) (1110 (001 island-math-evidence-violation)
-                  (001 unsupported-status) sid status))
-           ((101 (evidence-has-route? sid executor (011 rows)) (001 yes)) (1110 (001 island-math-evidence-violation)
-                  (001 duplicate-executor-evidence) sid executor))
+                  (як-є provenance-must-be-string) sid executor))
+           ((тотожне? (registry-has-sid? sid registry-rows) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є sid-not-in-canon-function-table) sid))
+           ((тотожне? (admitted-executor? executor) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є unsupported-executor) sid executor))
+           ((тотожне? (mechanism-has-route? sid executor mechanism-rows) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є executor-route-not-admitted-by-canon-projection) sid executor))
+           ((тотожне? (admitted-status? status) (як-є no)) (список (як-є island-math-evidence-violation)
+                  (як-є unsupported-status) sid status))
+           ((тотожне? (evidence-has-route? sid executor (решта rows)) (як-є yes)) (список (як-є island-math-evidence-violation)
+                  (як-є duplicate-executor-evidence) sid executor))
            (1 (validate-rows (011 rows)))))))))
 
-(0011 same-sid?
-  (0010 (sid rows)
-    (110
-      ((101 rows (001 ())) (001 yes))
-      ((101 (010 rows) 0) (110
+(визначити same-sid?
+  (функція (sid rows)
+    (за-умовою
+      ((тотожне? rows (як-є ())) (як-є yes))
+      ((тотожне? (атом? rows) 0) (за-умовою
          ((11110111 sid (100 (100 rows))) (same-sid? sid (011 rows)))
          ((101 (11110111 sid (100 (100 rows))) 0) (001 no)))))))
 
-(0011 four-island-slice?
-  (0010 (sid)
-    (110
-      ((101 (evidence-has-route? sid (001 common-lisp) evidence-rows) (001 no)) (001 no))
-      ((101 (evidence-has-route? sid (001 prolog) evidence-rows) (001 no)) (001 no))
-      ((101 (evidence-has-route? sid (001 clips) evidence-rows) (001 no)) (001 no))
-      ((101 (evidence-has-route? sid (001 datalog) evidence-rows) (001 no)) (001 no))
+(визначити four-island-slice?
+  (функція (sid)
+    (за-умовою
+      ((тотожне? (evidence-has-route? sid (як-є common-lisp) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є prolog) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є clips) evidence-rows) (як-є no)) (як-є no))
+      ((тотожне? (evidence-has-route? sid (як-є datalog) evidence-rows) (як-є no)) (як-є no))
       (1 (001 yes)))))
 
-(0011 row-verdict (validate-rows evidence-rows))
+(визначити row-verdict (validate-rows evidence-rows))
 
-(0011 verdict
-  (110
-    ((101 (contains-forbidden-semantic-section? evidence) (001 yes)) (001 (island-math-evidence-violation semantic-field-forbidden)))
-    ((101 evidence-rows (001 ())) (001 (island-math-evidence-violation empty-evidence)))
+(визначити verdict
+  (за-умовою
+    ((тотожне? (contains-forbidden-semantic-section? evidence) (як-є yes)) (як-є (island-math-evidence-violation semantic-field-forbidden)))
+    ((тотожне? evidence-rows (як-є ())) (як-є (island-math-evidence-violation empty-evidence)))
     ((11110111 row-verdict (001 (island-math-evidence-ok))) (001000 ((target-sid (100 (100 evidence-rows))))
-       (110
-         ((101 (same-sid? target-sid evidence-rows) (001 no)) (001 (island-math-evidence-violation first-slice-must-have-one-sid)))
-         ((101 (four-island-slice? target-sid) (001 no)) (001 (island-math-evidence-violation missing-required-four-island-slice)))
+       (за-умовою
+         ((тотожне? (same-sid? target-sid evidence-rows) (як-є no)) (як-є (island-math-evidence-violation first-slice-must-have-one-sid)))
+         ((тотожне? (four-island-slice? target-sid) (як-є no)) (як-є (island-math-evidence-violation missing-required-four-island-slice)))
          (1 (001 (island-math-evidence-ok))))))
     (1 row-verdict)))
 
