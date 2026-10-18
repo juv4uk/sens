@@ -118,10 +118,10 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertGreater(field_end, field_start)
         current_field = migrated[field_start:field_end]
         self.assertIn("(порожній? запис)", current_field)
-        self.assertIn("(захист-знайти-запис поле (решта посилання))))", current_field)
+        self.assertIn("(захист-знайти-запис поле (решта посилання)))))", current_field)
         old_field = current_field.replace("(порожній? запис)", "(атом? запис)", 1)
         old_field = old_field.replace(
-            "(захист-знайти-запис поле (решта посилання))))",
+            "(захист-знайти-запис поле (решта посилання)))))",
             "(знайти-за-ключем поле (решта посилання)))))", 1
         )
         migrated = migrated[:helper_start] + old_field + migrated[field_end:]
