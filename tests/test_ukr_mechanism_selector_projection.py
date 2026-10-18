@@ -18,9 +18,34 @@ D5 = ROOT / "lib/domains/d5.lisp"
 # Git blob оригіналу перед переходом на укр: НЕ semantic або wire identity.
 ORIGINAL_SOURCE_BLOB = "6a766d43132d44151803c1f473fdc4d7da26457f"
 REPLACEMENTS = (
-    ("0011", "визначити", "define", "DEFINE", 8),
+    ("0011", "визначити", "define", "DEFINE", 12),
     ("0010", "функція", "lambda", "LAMBDA", 6),
 )
+LOCAL_RENAMES = (
+    ("mechanism-selector-find-section", "механізм-знайти-секцію"),
+    ("mechanism-selector-registry-has-sid?", "реєстр-містить-ідентичність?"),
+    ("mechanism-selector-find-route", "механізм-знайти-маршрут"),
+    ("mechanism-select", "вибрати-механізм"),
+)
+COMPATIBILITY_ALIAS_BLOCK = "\n\n; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.\n(визначити mechanism-selector-find-section механізм-знайти-секцію)\n(визначити mechanism-selector-registry-has-sid? реєстр-містить-ідентичність?)\n(визначити mechanism-selector-find-route механізм-знайти-маршрут)\n(визначити mechanism-select вибрати-механізм)\n"
+
+
+def restore_local_helper_names(source: str) -> str:
+    if not source.endswith(COMPATIBILITY_ALIAS_BLOCK):
+        raise AssertionError("compatibility aliases drifted or are missing")
+    source = source[:-len(COMPATIBILITY_ALIAS_BLOCK)]
+    for english, ukrainian in LOCAL_RENAMES:
+        source = source.replace(ukrainian, english)
+    return source
+
+
+def restore_previous_projection(source: str) -> str:
+    source = restore_local_helper_names(source)
+    for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
+        source = source.replace(f"({ukr} ", f"({bits} ")
+    source = source.replace("(третє route)", "(10011 route)")
+    return source
+
 
 
 def git_blob(source: bytes) -> str:
@@ -91,21 +116,24 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         self.assertIn("(en caddr)", rows[0])
         self.assertIn("(LISP CADDR)", rows[0])
 
+    def test_local_helper_names_are_ukrainian_active_heads_and_english_value_aliases(self):
+        code = uncommented(self.source)
+        for english, ukrainian in LOCAL_RENAMES:
+            with self.subTest(helper=english):
+                self.assertIn(f"(визначити {ukrainian} ", code)
+                self.assertIn(f"(визначити {english} {ukrainian})", self.source)
+                self.assertNotRegex(code, rf"\\({re.escape(english)}(?=\\s)")
+        self.assertEqual(self.source.count("(визначити вибрати-механізм "), 1)
+
     def test_original_source_recoverable_byte_for_byte(self):
-        reverted = self.source
-        for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
-            reverted = reverted.replace(f"({ukr} ", f"({bits} ")
-        reverted = reverted.replace("(третє route)", "(10011 route)")
+        reverted = restore_previous_projection(self.source)
         self.assertEqual(git_blob(reverted.encode("utf-8")), ORIGINAL_SOURCE_BLOB,
                          "змінено дані, коментарі, структуру або нецільові голови")
 
     def test_wrong_d5_peer_fails_historical_source_inverse(self):
         wrong = self.source.replace("(третє route)", "(друге route)", 1)
         self.assertNotEqual(wrong, self.source)
-        inverse = wrong
-        for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
-            inverse = inverse.replace(f"({ukr} ", f"({bits} ")
-        inverse = inverse.replace("(третє route)", "(10011 route)")
+        inverse = restore_previous_projection(wrong)
         self.assertNotEqual(git_blob(inverse.encode("utf-8")),
                             ORIGINAL_SOURCE_BLOB)
 
@@ -122,10 +150,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
             self.assertIn(f"(визначити {name}", self.source)
 
     def test_malformed_mutation_is_detected_instead_of_masked(self):
-        reverted = self.source
-        for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
-            reverted = reverted.replace(f"({ukr} ", f"({bits} ")
-        reverted = reverted.replace("(третє route)", "(10011 route)")
+        reverted = restore_previous_projection(self.source)
         tampered = reverted.replace("(як-є rows)", "(як-є other-rows)", 1)
         self.assertNotEqual(git_blob(tampered.encode("utf-8")),
                             ORIGINAL_SOURCE_BLOB)

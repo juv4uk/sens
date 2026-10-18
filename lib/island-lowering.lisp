@@ -65,7 +65,7 @@
                    (як-є unsupported-selected-mechanism)
                    sid executor mechanism)))) (четверте selection)))
            ((атом? (як-є ()))
-            selection))))) (mechanism-select sid executor))))
+            selection))))) (вибрати-механізм sid executor))))
 
 ; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
 (визначити значення-у-текст write-to-string)

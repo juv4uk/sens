@@ -12,6 +12,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
+LOCAL_HELPERS = {"вибрати-механізм": "mechanism-select"}
 PEERS = {
     "функція": (4, "0010"), "як-є": (3, "001"), "атом?": (3, "010"),
     "решта": (3, "011"), "перше": (3, "100"),
@@ -70,7 +71,7 @@ def current_to_exact(node):
         return node
     first = node[0]
     if isinstance(first, str):
-        first = PEERS.get(first, (None, first))[1]
+        first = LOCAL_HELPERS.get(first, PEERS.get(first, (None, first))[1])
     else:
         first = current_to_exact(first)
     if first == "001":  # ratified D3 QUOTE owns data
@@ -145,6 +146,8 @@ class UkrainianTcpIslandTests(unittest.TestCase):
         island = (ROOT / "lib/island-lowering.lisp").read_text(encoding="utf-8")
         self.assertIn("(четверте selection)", island)  # exact D6:100111 CADDDR
         self.assertNotIn("(100111 selection)", island)
+        self.assertIn("(вибрати-механізм sid executor)", island)
+        self.assertNotIn("(mechanism-select sid executor)", island)
         self.assertIn("(рядок-додати", island)
         self.assertEqual(island.count("((функція ("), 4)
         self.assertEqual(island.count("(0010 ("), 3)

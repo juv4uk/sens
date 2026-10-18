@@ -16,28 +16,28 @@
 (визначити mechanism-selector-registry-rows
   mechanism-selector-registry)
 
-(визначити mechanism-selector-find-section
+(визначити механізм-знайти-секцію
   (функція (name sections)
     (за-умовою
       ((атом? sections) (як-є ()))
       ((тотожне? (перше (перше sections)) name) (перше sections))
       ((атом? (як-є ()))
-       (mechanism-selector-find-section name (решта sections))))))
+       (механізм-знайти-секцію name (решта sections))))))
 
 (визначити mechanism-selector-routes
-  (решта (mechanism-selector-find-section
+  (решта (механізм-знайти-секцію
          (як-є rows)
          mechanism-selector-metadata)))
 
-(визначити mechanism-selector-registry-has-sid?
+(визначити реєстр-містить-ідентичність?
   (функція (sid rows)
     (за-умовою
       ((атом? rows) (як-є no))
       ((тотожне? sid (перше (перше rows))) (як-є yes))
       ((атом? (як-є ()))
-       (mechanism-selector-registry-has-sid? sid (решта rows))))))
+       (реєстр-містить-ідентичність? sid (решта rows))))))
 
-(визначити mechanism-selector-find-route
+(визначити механізм-знайти-маршрут
   (функція (sid executor rows)
     (за-умовою
       ((атом? rows) (як-є ()))
@@ -48,16 +48,16 @@
              (за-умовою
                ((тотожне? executor (друге row)) row)
                ((атом? (як-є ()))
-                (mechanism-selector-find-route sid executor (решта rows)))))
+                (механізм-знайти-маршрут sid executor (решта rows)))))
             ((атом? (як-є ()))
-             (mechanism-selector-find-route sid executor (решта rows)))))
+             (механізм-знайти-маршрут sid executor (решта rows)))))
         (перше rows))))))
 
-(визначити mechanism-select
+(визначити вибрати-механізм
   (функція (sid executor)
     (за-умовою
       ((тотожне?
-         (mechanism-selector-registry-has-sid?
+         (реєстр-містить-ідентичність?
            sid mechanism-selector-registry-rows)
          (як-є no))
        (список
@@ -72,5 +72,12 @@
             ((атом? (як-є ()))
              (список (як-є mechanism-selected)
                sid executor (третє route)))))
-        (mechanism-selector-find-route
+        (механізм-знайти-маршрут
           sid executor mechanism-selector-routes))))))
+
+
+; Сумісні англомовні назви залишаються псевдонімами тих самих Lisp-значень.
+(визначити mechanism-selector-find-section механізм-знайти-секцію)
+(визначити mechanism-selector-registry-has-sid? реєстр-містить-ідентичність?)
+(визначити mechanism-selector-find-route механізм-знайти-маршрут)
+(визначити mechanism-select вибрати-механізм)

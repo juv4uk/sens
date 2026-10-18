@@ -15,6 +15,12 @@ NAMES = (
     "mechanism-selector-find-route",
     "mechanism-select",
 )
+LOCAL_NAMES = (
+    "механізм-знайти-секцію",
+    "реєстр-містить-ідентичність?",
+    "механізм-знайти-маршрут",
+    "вибрати-механізм",
+)
 
 
 
@@ -97,7 +103,18 @@ def extract_functions(source):
     for form in parse(source):
         if isinstance(form, list) and len(form) == 3 and form[0] == "0011":
             functions[form[1]] = form[2]
-    return {name: functions[name] for name in NAMES}
+
+    def resolve(name):
+        body = functions[name]
+        seen = set()
+        while isinstance(body, str) and body in functions and body not in seen:
+            seen.add(body)
+            body = functions[body]
+        return body
+
+    # English spellings are compatibility aliases to the same Lisp-owned
+    # closures. Current Ukrainian recursive calls and old callers share bodies.
+    return {name: resolve(name) for name in (*NAMES, *LOCAL_NAMES)}
 
 
 def is_atom(value):
@@ -228,7 +245,7 @@ class MechanismSelectorWitness(unittest.TestCase):
 
     def test_wrong_fallback_and_inverted_route_are_detected(self):
         bad = self.source.replace(
-            "((атом? (як-є ()))\n       (mechanism-selector-find-section",
+            "((атом? (як-є ()))\n       (механізм-знайти-секцію",
             "((101 (100 (100 sections)) name)\n       (mechanism-selector-find-section", 1)
         self.assertNotEqual(bad, self.source)
         self.assertNotEqual(

@@ -22,7 +22,7 @@
 
 (визначити core3-route
   (функція (sid executor)
-    (mechanism-select sid executor)))
+    (вибрати-механізм sid executor)))
 
 (визначити core3-add-routes
   (функція (sid)
