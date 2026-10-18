@@ -273,16 +273,16 @@ fn collect_call_head_coordinates(expr: &Expr, coordinates: &mut Vec<(usize, u16)
 #[test]
 fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
     let start = GUARD_SOURCE
-        .find("(0011 guard-compare")
+        .find("(визначити guard-compare\n")
         .expect("Lisp-owned guard-compare must exist");
     let end = GUARD_SOURCE[start..]
-        .find("\\n(0011 guard-sync-window")
+        .find("\n(визначити guard-sync-window")
         .map(|offset| start + offset)
         .expect("guard-compare definition must end before guard-sync-window");
     let source = &GUARD_SOURCE[start..end];
 
     assert!(!source.contains("(11110111 expected observed)"));
-    assert!(source.contains("(unify-equal? expected observed)"));
+    assert!(source.contains("(сторожа--рівні? expected observed)"));
 
     let parsed = parse_mixed_exact_domain(source)
         .expect("guard-compare must retain exact domain identities");
@@ -298,10 +298,10 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         widths,
-        [3usize, 4usize].into_iter().collect(),
-        "guard-compare may use D3 structure and D4 form only; width is identity"
+        [1usize, 3usize, 4usize].into_iter().collect(),
+        "guard-compare keeps a D1 predicate and exact D3/D4 callable identities"
     );
-    for required in [(3, 0b001), (3, 0b010), (3, 0b110), (4, 0b0010), (4, 0b0011), (4, 0b1110)] {
+    for required in [(1, 0b1), (3, 0b001), (3, 0b110), (4, 0b0010), (4, 0b0011), (4, 0b1110)] {
         assert!(
             coordinates.contains(&required),
             "guard-compare is missing D{}:{:0width$b}",
@@ -347,8 +347,8 @@ fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         widths,
-        [3usize, 4usize, 5usize].into_iter().collect(),
-        "guard-reference-field must keep exact D3 structure, D4 lambda/selector and D5 lookup"
+        [1usize, 3usize, 4usize, 5usize].into_iter().collect(),
+        "guard-reference-field keeps exact D1 truth plus D3 structure, D4 lambda/selector, and D5 lookup"
     );
 }
 
@@ -361,7 +361,7 @@ fn guard_reference_data_reader_is_path_pinned_and_keeps_the_directory_as_data() 
         source,
     )
     .expect("Guard reference data-only entrypoint");
-    assert_eq!(parsed.len(), 1);
+    assert!(parsed.len() > 1, "the directory and its callable lookup definitions remain distinct top-level forms");
     assert!(
         sens::parse_mixed_exact_domain_guard_reference_source("lib/guard.lisp", source).is_err(),
         "the legacy W8 data wrapper must not become a general reader"
