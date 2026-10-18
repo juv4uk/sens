@@ -1,7 +1,7 @@
 ; #990 — fail-closed enforcement of the Lisp-owned island-math evidence verdict.
 
 (визначити verdicts
-  (110101001 (110110111 "tests/island-math-evidence-verdict.lisp")))
+  (читати-всі (читати-файл "tests/island-math-evidence-verdict.lisp")))
 
 (визначити verdict (перше verdicts))
 

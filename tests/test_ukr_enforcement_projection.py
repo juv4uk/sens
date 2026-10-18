@@ -32,6 +32,17 @@ EXPECTED = {
     "scripts/enforce-island-math-evidence.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1, "11110111": 1},
     "scripts/enforce-function-table-mechanisms.lisp": {"0011": 2, "001": 4, "010": 1, "100": 2, "101": 0, "110": 1, "11110111": 1},
 }
+# Поточні D9 resident-и з lib/domains/d9.lisp. Ідентичність не виводимо
+# із історичного SID8 або ширини W8: reader peers мають власний D9 код.
+D9_READERS = {"110101001": "читати-всі", "110110111": "читати-файл"}
+D9_INVERSE = {value: key for key, value in D9_READERS.items()}
+# Git blob-и безпосередньо перед ЦІЄЮ D9 партією, вже після D3/D4 cutover.
+D9_BEFORE_SHA = {
+    "scripts/enforce-island-math-evidence.lisp": "df91dcd10b4be60059feef7705d5aab8876a1f11",
+    "scripts/enforce-function-table-mechanisms.lisp": "cf2de15689cfbb987e7b182690a5adf3308ae6ec",
+    "scripts/semantic-authority-guard-enforce.lisp": "9e47c58902e9785eef852a8e2f52d3cf6a7328ea",
+}
+
 NAMES = {bits: name for bits, (name, _) in PROJECTIONS.items()}
 INVERSE = {name: bits for bits, name in NAMES.items()}
 
@@ -100,9 +111,16 @@ class UkrainianEnforcementProjection(unittest.TestCase):
         for path, old_sha in OLD_SHA.items():
             with self.subTest(path=path):
                 source = (ROOT / path).read_text(encoding="utf-8")
-                inverse = replace_heads(source, INVERSE)
+                # Спочатку повернути 6 нових D9-голів, далі стару перевірену
+                # D3/D4 міграцію. OLD_SHA лишається незмінним.
+                before_d9 = replace_heads(source, D9_INVERSE)
+                self.assertEqual(git_blob_sha(before_d9), D9_BEFORE_SHA[path])
+                inverse = replace_heads(before_d9, INVERSE)
                 self.assertEqual(git_blob_sha(inverse), old_sha)
-                self.assertEqual(replace_heads(inverse, NAMES), source)
+                self.assertEqual(
+                    replace_heads(replace_heads(inverse, NAMES), D9_READERS),
+                    source,
+                )
                 self.assertEqual(source.count("\n"), inverse.count("\n"))
 
     def test_exact_projection_counts(self):
@@ -130,6 +148,33 @@ class UkrainianEnforcementProjection(unittest.TestCase):
             for snippet in snippets:
                 with self.subTest(path=path, text=snippet):
                     self.assertIn(snippet, source)
+
+    def test_d9_readers_current_authority_and_exact_lexical_counts(self):
+        table = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        for bits, ukrainian in D9_READERS.items():
+            with self.subTest(bits=bits):
+                rows = [line for line in table.splitlines()
+                        if re.match(r"\s*\(" + bits + r"\s", line)]
+                self.assertEqual(len(rows), 1)
+                self.assertIn("(укр " + ukrainian + ")", rows[0])
+        for path, old_sha in D9_BEFORE_SHA.items():
+            with self.subTest(path=path):
+                source = (ROOT / path).read_text(encoding="utf-8")
+                self.assertEqual(Counter(item[2] for item in heads(
+                    source, D9_INVERSE)), Counter(D9_READERS.values()))
+                self.assertEqual(heads(source, D9_READERS), [])
+                prior = replace_heads(source, D9_INVERSE)
+                self.assertEqual(git_blob_sha(prior), old_sha)
+                self.assertEqual(replace_heads(prior, D9_READERS), source)
+
+    def test_d9_wrong_peer_mutant_is_detected_without_loosening_old_ledger(self):
+        for path, old_sha in D9_BEFORE_SHA.items():
+            with self.subTest(path=path):
+                source = (ROOT / path).read_text(encoding="utf-8")
+                wrong = source.replace("(читати-файл ", "(читати-всі ", 1)
+                self.assertNotEqual(wrong, source)
+                restored = replace_heads(wrong, D9_INVERSE)
+                self.assertNotEqual(git_blob_sha(restored), old_sha)
 
     def test_comments_and_strings_must_not_be_rewritten(self):
         sample = '; (0011 X)\n" (001 X) " (0011 x)\n(0011 alive)\n'

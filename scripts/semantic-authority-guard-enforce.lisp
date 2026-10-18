@@ -1,5 +1,5 @@
 (визначити verdicts
-  (110101001 (110110111 "tests/semantic-authority-verdict.lisp")))
+  (читати-всі (читати-файл "tests/semantic-authority-verdict.lisp")))
 
 (визначити verdict (перше verdicts))
 
