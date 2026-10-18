@@ -2,19 +2,14 @@
 ; Positive controls fail if REDUCE silently drops either head or tail.
 (список
   (equal?
-    (згорнути (lambda (acc item) (сполучити item acc))
-      (quote ()) (список (quote а) (quote б) (quote в)))
-    (список (quote в) (quote б) (quote а)))
+    (згорнути (функція (acc item) (сполучити item acc))
+      (як-є ()) (список (як-є а) (як-є б) (як-є в)))
+    (список (як-є в) (як-є б) (як-є а)))
   (equal?
-    (згорнути (lambda (acc item) (сполучити item acc))
-      (quote ()) (список (quote а) (quote б)))
-    (список (quote б) (quote а)))
+    (reduce (функція (acc item) (сполучити item acc))
+      (як-є ()) (список (як-є а) (як-є б)))
+    (список (як-є б) (як-є а)))
   (equal?
-    (згорнути (lambda (acc item) (сполучити item acc))
-      (quote а) (quote ()))
-    (quote а)))
-
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити сполучити cons)
-(визначити список list)
-(визначити згорнути reduce)
+    (згорнути (функція (acc item) (сполучити item acc))
+      (як-є а) (як-є ()))
+    (як-є а)))
