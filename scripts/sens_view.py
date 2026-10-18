@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""T5 spaced-bit VIEW generator/checker (#4694 / #4449).
+"""T5M spaced-bit VIEW generator/checker (#4694 / #4449).
 
 Three projections of one admitted program (owner directive 2026-10-09):
   path/name.lisp  — canonical Ukrainian human-readable projection (укр surface)
-  path/name.sens  — physical T5 machine file (exact D1-D9 words; 5 trits/byte)
+  path/name.sens  — physical T5M machine file (exact words; 15 trits/3 bytes)
   path/name       — generated read-only VIEW: exact bit-words [01]+ separated by
                     exactly one space, one trailing newline. No brackets, names,
                     trit '2', headers, comments, width tags or padding.
 
 This tool owns the .sens <-> view edge and proves the reversible identity:
 
-    decode_T5(.sens) -> typed exact-width words -> canonical view(name)
-    parse_view(name) -> encode_T5          -> byte-identical .sens
+    decode_T5M(.sens) -> exact-width words -> canonical view(name)
+    parse_view(name) -> encode_T5M         -> byte-identical .sens
 
 It reuses the repository codec (sens_t5_codec.py); it is not a new codec,
 parser, domain table or semantic oracle. Fail-closed.
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -37,35 +38,32 @@ def view_from_words(words: list[str]) -> str:
 
 
 def words_from_view(text: str) -> list[str]:
-    """Parse a canonical view. Reject anything that is not [01]+ tokens."""
-    stripped = text[:-1] if text.endswith("\n") else text
-    if "\n" in stripped:
-        raise C.SensT5Error("view must be a single line")
-    if stripped == "":
-        raise C.SensT5Error("empty view")
-    words = stripped.split(" ")
-    for w in words:
-        if not C.BITS.fullmatch(w):
-            raise C.SensT5Error(f"non-canonical view token: {w!r}")
+    """Only single-space 0/1 words followed by exactly one newline."""
+    if re.fullmatch(r"[01]+(?: [01]+)*\\n", text) is None:
+        raise C.SensT5Error("non-canonical spaced-bit view")
+    words = text[:-1].split(" ")
+    C.parse_t5m_words(text)
     return words
 
-
 def emit(sens_path: pathlib.Path) -> str:
-    return view_from_words(C.decode_bytes(sens_path.read_bytes()))
+    return view_from_words(C.decode_t5m_bytes(sens_path.read_bytes()))
 
 
 def check(sens_path: pathlib.Path) -> tuple[bool, str]:
-    """Verify decode->view->parse->encode is byte-identical to the .sens."""
+    """Verify both the physical T5M carrier and the existing adjacent view."""
     raw = sens_path.read_bytes()
-    words = C.decode_bytes(raw)
+    words = C.decode_t5m_bytes(raw)
     view = view_from_words(words)
-    reparsed = words_from_view(view)
-    if reparsed != words:
+    if words_from_view(view) != words:
         return False, "view->words mismatch"
-    if C.encode_words(reparsed) != raw:
-        return False, "re-encode not byte-identical"
+    if C.encode_t5m_projection(view) != raw:
+        return False, "T5M re-encode not byte-identical"
+    adjacent = sens_path.with_suffix("")
+    if adjacent.is_symlink() or not adjacent.is_file():
+        return False, "same-stem view missing or linked"
+    if adjacent.read_bytes() != view.encode("ascii"):
+        return False, "same-stem view stale or noncanonical"
     return True, view
-
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -78,7 +76,8 @@ def main() -> int:
     if ns.cmd == "emit":
         view = emit(pathlib.Path(ns.sens))
         out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.sens).with_suffix("")
-        out.write_text(view, encoding="utf-8")
+        with out.open("x", encoding="utf-8", newline="\\n") as target:
+            target.write(view)
         print(f"wrote view {out} ({len(view)} bytes)")
         return 0
 
@@ -89,9 +88,10 @@ def main() -> int:
 
     if ns.cmd == "parse":
         words = words_from_view(pathlib.Path(ns.view).read_text(encoding="utf-8"))
-        data = C.encode_words(words)
-        out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.view).with_suffix(".sens")
-        out.write_bytes(data)
+        data = C.encode_t5m_projection(" ".join(words) + "\\n")
+        out = pathlib.Path(ns.out) if ns.out else pathlib.Path(ns.view).with_name(pathlib.Path(ns.view).name + ".sens")
+        with out.open("xb") as target:
+            target.write(data)
         print(f"wrote .sens {out} ({len(data)} bytes)")
         return 0
 
