@@ -381,6 +381,16 @@ def inverse(text, edits, peers):
     return text
 
 
+PROBE_OLD = "(111 (11011011 (110011110 tag (11110100 value))) value)))"
+PROBE_UKR = "(сполучити (друкувати (рядок-додати tag (значення-у-текст value))) value)))"
+
+
+def reverse_probe_ukr(source):
+    if source.count(PROBE_UKR) != 1:
+        raise AssertionError("Немає єдиної української викличної форми probe")
+    return source.replace(PROBE_UKR, PROBE_OLD, 1)
+
+
 def git_blob(text):
     raw = text.encode("utf-8")
     return hashlib.sha1(
@@ -413,17 +423,17 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
 
     def test_exact_original_git_blob_reconstructed(self):
         source = SOURCE.read_text(encoding="utf-8")
-        restored = inverse(source, PINNED["edits"], self.peers)
+        restored = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         self.assertEqual(git_blob(restored), PINNED["sha"])
 
     def test_changed_lines_have_no_numeric_head(self):
         source = SOURCE.read_text(encoding="utf-8")
-        old = inverse(source, PINNED["edits"], self.peers)
+        old = inverse(reverse_probe_ukr(source), PINNED["edits"], self.peers)
         lines_before, lines_after = old.splitlines(), source.splitlines()
         self.assertEqual(len(lines_before), len(lines_after))
         changed = [i + 1 for i, (before, after) in
                    enumerate(zip(lines_before, lines_after)) if before != after]
-        self.assertEqual(changed, PINNED["changed"])
+        self.assertEqual(changed, sorted([*PINNED["changed"], 45]))
         for line in changed:
             mask = without_string_comments(lines_after[line - 1])
             self.assertIsNone(NUMERIC_HEAD.search(mask), f"line {line}")
@@ -446,7 +456,7 @@ class ProgramSymbolTableUkrProjectionTests(unittest.TestCase):
         )
         self.assertNotEqual(mutated, source)
         with self.assertRaises(AssertionError):
-            inverse(mutated, PINNED["edits"], self.peers)
+            inverse(reverse_probe_ukr(mutated), PINNED["edits"], self.peers)
 
 
 if __name__ == "__main__":
