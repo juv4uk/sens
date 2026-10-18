@@ -697,10 +697,14 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         if len(t)==8 and set(t)<=set("01"):
-            # D8 is modern and distinct from the retired historical SID8 model.
+            # Owner-ratified D8 first existed on 2026-10-06 (#3960).
+            # A raw eight-bit executable head could be older SID8/Sens8 or an
+            # unqualified later spelling; its bytes are never a D8 role proof.
             raise MigrationError(
-                f"D8 {t}: no verified callable mechanism; exact residency "
-                "does not authorize historical SID8 substitution", tok,
+                f"ambiguous eight-bit SID8/Sens8-or-D8 head {t}: "
+                "no verified callable mechanism or source-era proof; "
+                "find the historical function meaning and its full ratified "
+                "укр projection, never map by matching bytes", tok,
             )
 
         # Source-defined global callables shadow human builtin surfaces.
