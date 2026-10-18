@@ -77,7 +77,7 @@
 (визначити provenance-goal (функція (prov) (друге prov)))
 (визначити provenance-source (функція (prov) (друге (третє prov))))
 (визначити provenance-rule (функція (prov) (друге (четверте prov))))
-(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))
+(визначити provenance-derived-from (функція (prov) (друге (п'ятий prov))))
 
 (визначити narrate-derivation
   (функція (derivations)
@@ -142,7 +142,7 @@
        (пояснити-неприпустиму-структуру-результату outcome))
       ((хибне? (атом? (перше outcome)))
        (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
-      ((0100 (110101100 (100 outcome)))
+      ((хибне? (символ? (перше outcome)))
        (список (як-є invalid) (як-є outcome-tag) (перше outcome)))
       ((тотожне? (перше outcome) (як-є proved))
        (за-умовою
