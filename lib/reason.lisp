@@ -27,14 +27,14 @@
 ; Canonical index schema: (schema mode original-rules buckets).
 ; D6:100111 CADDDR is ratified data, not silently callable here.
 (визначити reason-index-mode
-  (функція (index)
-    (друге index)))
+  (функція (початкова-позиція-підрядка)
+    (друге початкова-позиція-підрядка)))
 (визначити reason-index-rules
-  (функція (index)
-    (третє index)))
+  (функція (початкова-позиція-підрядка)
+    (третє початкова-позиція-підрядка)))
 (визначити reason-index-buckets
-  (функція (index)
-    (третє (решта index))))
+  (функція (початкова-позиція-підрядка)
+    (третє (решта початкова-позиція-підрядка))))
 
 ; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
 ; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).
@@ -184,16 +184,16 @@
 ; unsafe goal or disabled index returns every original rule unchanged.
 (визначити reason-index-candidates
   (функція (goal rules-or-index)
-    (нехай ((index (reason-ensure-index rules-or-index)))
+    (нехай ((початкова-позиція-підрядка (reason-ensure-index rules-or-index)))
       (за-умовою
-        ((тотожне? (reason-index-mode index) (як-є linear))
-         (reason-index-rules index))
+        ((тотожне? (reason-index-mode початкова-позиція-підрядка) (як-є linear))
+         (reason-index-rules початкова-позиція-підрядка))
         (так
          (нехай ((predicate (reason-term-predicate goal)))
            (за-умовою
-             ((тотожне? predicate (як-є ())) (reason-index-rules index))
+             ((тотожне? predicate (як-є ())) (reason-index-rules початкова-позиція-підрядка))
              (так
-              (нехай ((entry (міркування-пошук-кошика predicate (reason-index-buckets index))))
+              (нехай ((entry (міркування-пошук-кошика predicate (reason-index-buckets початкова-позиція-підрядка))))
                 (за-умовою
                   
                   ((атом? entry)  (як-є ()))
@@ -209,12 +209,12 @@
 ; exact rule list captured when it was constructed.
 (визначити reason
   (функція (goal rules-or-index)
-    (нехай ((index (reason-ensure-index rules-or-index)))
+    (нехай ((початкова-позиція-підрядка (reason-ensure-index rules-or-index)))
       (довести-ціль
         goal
-        (reason-index-candidates goal index)
+        (reason-index-candidates goal початкова-позиція-підрядка)
         (як-є ())
-        index
+        початкова-позиція-підрядка
         (як-є (()))))))
 
 ; Accumulate one rule's result list onto a reversed global accumulator.
@@ -281,7 +281,7 @@
     (нехай ((renamed-rule (розрізнити-логічні-змінні-правила-на-глибині rule depth)))
       (нехай ((new-subst (уніфікувати goal (перше renamed-rule) bindings)))
         (за-умовою
-          ((failed-subst? new-subst) (як-є ()))
+          ((підстановка-позначає-невдачу? new-subst) (як-є ()))
           (так
            (нехай ((body-results
                    (довести-цілі
@@ -304,7 +304,7 @@
 ; conjunction walker from lib/unify.lisp.
 (визначити prove-goals
   (функція (goals bindings all-rules depth)
-    (thread-conjunction
+    (потік-виконання-кон'юнкція
       goals
       (список bindings (як-є ()))
       (функція (goal state)
@@ -318,13 +318,13 @@
   (функція (goal state all-rules depth)
     (нехай ((bindings (перше state))
           (proofs (друге state))
-          (index (reason-ensure-index all-rules)))
+          (початкова-позиція-підрядка (reason-ensure-index all-rules)))
       (приєднати-докази-до-кожної-успішної-підстановки
         (довести-ціль
           goal
-          (reason-index-candidates goal index)
+          (reason-index-candidates goal початкова-позиція-підрядка)
           bindings
-          index
+          початкова-позиція-підрядка
           depth)
         proofs))))
 
@@ -475,3 +475,8 @@
 (визначити підсумувати-лічильники-використання-правил merge-usage)
 (визначити довести-мету-зі-збереженням-підстановок-та-доказів prove-goal-state)
 (визначити розрізнити-логічні-змінні-правила-на-глибині rename-vars)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити підстановка-позначає-невдачу? failed-subst?)
+(визначити початкова-позиція-підрядка index)
+(визначити потік-виконання-кон'юнкція thread-conjunction)

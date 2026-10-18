@@ -85,7 +85,7 @@
 ; the raw Unix observation above.
 (визначити utc-now
   (функція ()
-    (юнікс-час-спостереження-узгоджений-час (unix-time-now))))
+    (юнікс-час-спостереження-узгоджений-час (юнікс-час-зараз))))
 
 
 ; Interpret protocol fields from one complete NTP response. Packet I/O and
@@ -158,7 +158,7 @@
 (визначити internet-time-sync
   (функція (host timeout-ms)
     (перетворити-сирі-дані-часу-на-спостереження
-      (ntp-query-raw host timeout-ms))))
+      (мережевий-протокол-часу-запит-сирий host timeout-ms))))
 
 
 ; Turning an accepted timestamp into calendar meaning is also language policy.
@@ -186,7 +186,7 @@
 
 (визначити mono-ms
   (функція ()
-    (мілісекунди-з-наносекунди (mono-ns))))
+    (мілісекунди-з-наносекунди (монотонний-наносекунди))))
 
 
 ; Monotonic counters are host observations; deadline arithmetic is language
@@ -206,17 +206,17 @@
 
 (визначити deadline-after-ns
   (функція (delta-ns)
-    (крайній-час-з (mono-ns) delta-ns)))
+    (крайній-час-з (монотонний-наносекунди) delta-ns)))
 
 
 (визначити deadline-reached?
   (функція (deadline-ns)
-    (крайній-час-досягнуто-у? (mono-ns) deadline-ns)))
+    (крайній-час-досягнуто-у? (монотонний-наносекунди) deadline-ns)))
 
 
 (визначити elapsed-ns
   (функція (started-ns)
-    (відняти (mono-ns) started-ns)))
+    (відняти (монотонний-наносекунди) started-ns)))
 
 
 ; Interpret raw host timezone declarations without performing host I/O here.
@@ -289,7 +289,7 @@
 (визначити timezone-detect
   (функція ()
     (часовий-пояс-сирий-до-спостереження
-      (timezone-declarations-raw))))
+      (часовий-пояс-оголошення-сирий))))
 
 
 (визначити timezone-config
@@ -334,3 +334,9 @@
 (визначити часовий-пояс-сирий-до-спостереження timezone-raw->observation)
 (визначити юнікс-час-спостереження-узгоджений-час unix-time-observation->utc)
 (визначити узгоджений-час-з-юнікс utc-from-unix)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити монотонний-наносекунди mono-ns)
+(визначити мережевий-протокол-часу-запит-сирий ntp-query-raw)
+(визначити часовий-пояс-оголошення-сирий timezone-declarations-raw)
+(визначити юнікс-час-зараз unix-time-now)

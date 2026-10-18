@@ -7,7 +7,7 @@
 
 (0011 str+
   (0010 args
-    (reduce (0010 (acc s) (string-append acc s)) "" args)))
+    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 (0011 fail
   (0010 (message)
@@ -34,13 +34,13 @@
     (001000 ((missing (missing-needles (110110111 path) needles)))
       (110
         ((010 missing) () (pass name))
-        ((010 missing) (0) (fail (str+ name ": " path " missing " (11110100 missing))))))))
+        ((атом? missing) (ні) (провал (str+ name ": " path " missing " (значення-у-текст missing))))))))
 
 (0011 forbid-needle
   (0010 (name path needle)
     (110
       ((contains? (110110111 path) needle) t
-       (fail (str+ name ": " path " must not contain " (11110100 needle))))
+       (провал (str+ name ": " path " must not contain " (значення-у-текст needle))))
       (t t t))))
 
 (0011 any-needle?
@@ -62,7 +62,7 @@
          (110
            ((any-needle? doc (001 ("canonical Rust implementation" "канонічна реалізація на Rust" "kanonische Rust-Implementierung")))
             t
-            (fail (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
+            (провал (str+ path ": implementation wording must not imply that Rust itself owns semantics")))
            (t t
             (110
               ((any-needle? doc (001 ("канонічне розширення вихідного коду — **`.lisp`**"
@@ -77,11 +77,11 @@
                     ((contains? doc "`.wsm`") t
                      (110
                        ((contains? doc "`.my`") t t)
-                       (t t (fail (str+ path ": must name `.my` as a legacy alias")))))
-                    (t t (fail (str+ path ": must name `.wsm` as a legacy alias")))))
-                 (t t (fail (str+ path ": must call `.wsm`/`.my` legacy aliases")))))
-              (t t (fail (str+ path ": must state `.lisp` as the canonical extension")))))))
-        (t t (fail (str+ path ": must describe Rust as a reference implementation")))))))
+                       (t t (провал (str+ path ": must name `.my` as a legacy alias")))))
+                    (t t (провал (str+ path ": must name `.wsm` as a legacy alias")))))
+                 (t t (провал (str+ path ": must call `.wsm`/`.my` legacy aliases")))))
+              (t t (провал (str+ path ": must state `.lisp` as the canonical extension")))))))
+        (t t (провал (str+ path ": must describe Rust as a reference implementation")))))))
 
 (check-doc-identity "README.md")
 (check-doc-identity "docs/language-core.md")
@@ -99,7 +99,7 @@
          (001000 ((text (110110111 manifest)))
            (110
              ((contains? text "[package]\nname = \"my-lisp") t
-              (fail (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
+              (провал (str+ "cargo package prefix regression: " manifest " uses my-lisp*")))
              (t t (check-manifests (011 entries))))))))))
 
 (check-manifests (read-dir "crates"))
@@ -116,10 +116,10 @@
 ; «executable conformance» / «Executable conformance».
 (110
   ((any-needle? (110110111 "docs/semantic-authority-map.md") (001 ("Ratified ADR" "ratified ADR"))) t t)
-  (t t (fail "docs/semantic-authority-map.md must mention ratified ADRs")))
+  (t t (провал "docs/semantic-authority-map.md must mention ratified ADRs")))
 (110
   ((any-needle? (110110111 "docs/semantic-authority-map.md") (001 ("Executable conformance" "executable conformance"))) t t)
-  (t t (fail "docs/semantic-authority-map.md must mention executable conformance")))
+  (t t (провал "docs/semantic-authority-map.md must mention executable conformance")))
 (pass "public-docs-point-to-semantic-authority")
 
 ; --- host-semantic-surface-documentation-tracks-time-ownership ---
@@ -171,7 +171,7 @@
       (110
         ((11110111 (100 result) 0) (1) (pass name))
         ((11110111 (100 result) 0) (0)
-         (fail (str+ name " failed\n" (1001 result) (10011 result))))))))
+         (провал (str+ name " failed\n" (друге result) (третє result))))))))
 
 (run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (001 ()))
 (run-python "meta-eval-human-evidence-projection" "scripts/generate-meta-eval-evidence.py" (001 ("--check")))
@@ -221,7 +221,7 @@
     (001000 ((found (11100 id stable-uk)))
       (110
         ((010 found) (0) (011 found))
-        (t t (fail (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
+        (t t (провал (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
 
 (0011 all-bits?
   (0010 (text)
@@ -238,14 +238,14 @@
          ((11010 10 predicates) 1
           (110
             ((11010 0 mutations) 1 t)
-            (t t (fail "публічний каталог мутацій схлопнувся"))))
-         (t t (fail "публічний каталог предикатів схлопнувся"))))
+            (t t (провал "публічний каталог мутацій схлопнувся"))))
+         (t t (провал "публічний каталог предикатів схлопнувся"))))
       ((010 docs) (0)
        (001000 ((id (doc-id (100 docs))) (kind (doc-kind (100 docs))))
          (110
            ((11110111 (110100010 id) 8) (0)
-            (fail (str+ "документаційний join key має бути 8-бітним SID: " id)))
-           ((all-bits? id) () (fail (str+ "документаційний join key має бути 8-бітним SID: " id)))
+            (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
+           ((all-bits? id) () (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
            (t t
             (001000 ((uk (uk-name-for id)))
               (001000 ((question (11110111 (last-char uk) "?"))
@@ -254,14 +254,14 @@
                     (mutation (11110111 kind (001 mutation))))
                 (110
                   ((11110111 question predicate) (0)
-                   (fail (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
+                   (провал (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
                   ((11110111 bang mutation) (0)
-                   (fail (str+ uk ": ! зарезервований для мутації")))
+                   (провал (str+ uk ": ! зарезервований для мутації")))
                   (mutation (1)
                    (110
                      ((11110111 uk "встановити-елемент-вектора!") (1)
                       (check-docs (011 docs) predicates (01010 mutations 1)))
-                     (t t (fail (str+ "несподівана мутація: " uk)))))
+                     (t t (провал (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
                    (check-docs (011 docs) (01010 predicates 1) mutations))
                   (t t (check-docs (011 docs) predicates mutations))))))))))))
@@ -282,11 +282,11 @@
            ((010 (11100 id (101000 (0010 (doc) (111 (doc-id doc) t)) uk-docs))) ()
             (check-md-rows (011 pairs)))
            ((110101000 (str+ "| `" uk "` |") api-md) t (check-md-rows (011 pairs)))
-           (t t (fail (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
+           (t t (провал (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
 (110
   ((11010 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
-  (t t (fail "замало stable UK-назв у таблиці")))
+  (t t (провал "замало stable UK-назв у таблиці")))
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
@@ -301,9 +301,9 @@
      ((11110111 renamed (count-items audit-renames)) (1)
       (110
         ((11110111 reviewed (count-items uk-docs)) (1) t)
-        (t t (fail "смисловий аудит мусить покривати рівно documented UK-покриття"))))
-     (t t (fail "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
-  (t t (fail "stable-reviewed мусить дорівнювати renamed+retained")))
+        (t t (провал "смисловий аудит мусить покривати рівно documented UK-покриття"))))
+     (t t (провал "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
+  (t t (провал "stable-reviewed мусить дорівнювати renamed+retained")))
 (pass "smyslovyi-audyt-summary-zbihaietsia-z-faktychnymy-danymy")
 
 (0011 uk-surface (110110111 "lib/surface/uk.lisp"))
@@ -331,7 +331,7 @@
 
 (110
   ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
-   (fail "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
+   (провал "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
   (t t t))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
 
@@ -347,7 +347,7 @@
                      semantic-registry)))
          (110
            ((010 sens) ()
-            (fail
+            (провал
               (str+ "audit EN surface missing from semantic registry: "
                     (11101110 en-symbol))))
            ((110101000
@@ -356,7 +356,7 @@
             t
             (check-aliases (011 renames)))
            (t t
-            (fail
+            (провал
               (str+ "missing exact-SENS compatibility alias (00001001 "
                     (11101110 old-symbol) " " (11110100 sens) ")")))))))))
 (check-aliases audit-renames)
@@ -380,7 +380,7 @@
       ((010 pairs) (0)
        (110
          ((typeable? (011 (100 pairs))) t (check-typeable (011 pairs)))
-         (t t (fail (str+ "Ukrainian name needs another keyboard layout: " (011 (100 pairs))))))))))
+         (t t (провал (str+ "Ukrainian name needs another keyboard layout: " (решта (перше pairs))))))))))
 (check-typeable stable-uk)
 (pass "every-stable-ukrainian-name-is-typeable-on-the-ukrainian-layout")
 
@@ -419,7 +419,7 @@
     (001000 ((found (latin-in-code (110110111 path) () () "")))
       (110
         ((110011100 found) (1) (pass name))
-        (t t (fail (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
+        (t t (провал (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
 
 (require-no-latin "ukrainian-acceptance-program-code-never-requires-latin-layout"
   "lib/surface/uk-acceptance.lisp")
@@ -432,9 +432,9 @@
     (001000 ((text (110110111 path)))
       (110
         ((110101000 "language-contract.my" text) t
-         (fail (str+ path " still contains removed path language-contract.my")))
+         (провал (str+ path " still contains removed path language-contract.my")))
         ((110101000 "contracts/my-lisp/lock.my" text) t
-         (fail (str+ path " still contains removed path contracts/my-lisp/lock.my")))
+         (провал (str+ path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
          (require-needles "contract-workflows-use-canonical-lisp-paths" path
            (001 ("default: contracts/my-lisp/language-contract.lisp"
@@ -444,3 +444,8 @@
 (check-contract-workflow ".github/workflows/verify-language-contract.yml")
 
 (11011011 "verify-repo: all checks passed")
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити провал fail)
+(визначити згорнути reduce)
+(визначити рядок-додати string-append)

@@ -115,7 +115,7 @@
 ; One symbol law is owned by Core; do not duplicate historical blank W8 slots.
 (визначити knowledge-symbol?
   (функція (value)
-    (symbol? value)))
+    (символ? value)))
 
 (визначити module-known?
   (функція (module-name)
@@ -125,7 +125,7 @@
   (функція (clauses event)
     (за-умовою
       ((тотожне? (перше event) (як-є tell)) (сполучити (третє event) clauses))
-      ((тотожне? (перше event) (як-є retract)) (retract-fact (третє event) clauses))
+      ((тотожне? (перше event) (як-є retract)) (відкликати-факт (третє event) clauses))
       (так clauses))))
 
 (визначити module-clauses-now
@@ -147,7 +147,7 @@
 (визначити forward-in
   (функція (module-name)
     (за-умовою
-      ((модуль-відомий? module-name) (run-multi (модуль-клаузи-зараз module-name) (як-є ())))
+      ((модуль-відомий? module-name) (виконати-багатоваріантне-виведення (модуль-клаузи-зараз module-name) (як-є ())))
       (так (як-є Module-not-found)))))
 
 (визначити check-conflict?
@@ -372,3 +372,8 @@
 (визначити отримати-події-журналу-окремого-модуля module-journal-events)
 (визначити журнал-містить-записи-модуля? module-journal-has-module?)
 (визначити отримати-протилежну-голову-твердження-знання opposite-knowledge-head)
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити відкликати-факт retract-fact)
+(визначити виконати-багатоваріантне-виведення run-multi)
+(визначити символ? symbol?)

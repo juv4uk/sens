@@ -33,8 +33,8 @@
          (island-lowering-append4 "" l " " r))
         ((атом? (як-є ()))
          (як-є ()))))
-      (write-to-string left)
-      (write-to-string right))))
+      (значення-у-текст left)
+      (значення-у-текст right))))
 
 (визначити island-lower-binary
   (функція (sid executor left right)
@@ -66,3 +66,6 @@
                    sid executor mechanism)))) (100111 selection)))
            ((атом? (як-є ()))
             selection))))) (mechanism-select sid executor))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити значення-у-текст write-to-string)
