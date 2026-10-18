@@ -1,20 +1,9 @@
 #!/usr/bin/env python3
-"""Безпечна міграція одного .lisp у фізичний .sens та двійковий перегляд без розширення.
+"""Міграція одного .lisp у парні фізичний T5M .sens та двійковий перегляд.
 
-Приклад:
-    python3 scripts/migrate-one-to-sens.py tests/fixtures/foo.lisp
-
-Правила:
-- працює лише з одним явно названим .lisp;
-- використовує існуючий трипрохідний мігратор + T5 codec;
-- .lisp ніколи не переписується;
-- наявний .sens або файл без розширення ніколи не перезаписується;
-- невідоме/неоднозначне джерело стає BLOCK, а не псевдо-.sens;
-- результат містить source/output SHA256 і typed-word SHA256;
-- --dry-run нічого не записує;
-- джерело обробляє ТІЛЬКИ scripts/migrate-three-pass.py (D1–D9);
-- невизначені символи/рядки не перетворюються в неструктуровані D7 комірки;
-- без незалежного D2+oracle-доказу у git-репозиторій нічого не публікуємо.
+Один вихідний файл -> перевірена Zig/T5M пара .sens + файл без розширення.
+Джерело та наявні артефакти не перезаписуються. --codec t5 для legacy.
+Цей фізичний доказ сам по собі НЕ засвідчує семантику виконання.
 """
 from __future__ import annotations
 
@@ -24,7 +13,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -34,8 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts" / "migrate-three-pass.py"
 CODEC = ROOT / "scripts" / "sens_t5_codec.py"
 sys.path.insert(0, str(ROOT / "scripts"))
-import zig_codec_bridge
-from migration_publish_pair import publish_pair
+import migration_publish_pair
 
 def load_codec():
     spec = importlib.util.spec_from_file_location("sens_t5_codec", CODEC)
@@ -119,6 +106,7 @@ def verify_upstream_t5_witness(report, source_name, words, payload, codec_name, 
         raise ValueError("THREE_PASS_WITNESS: Zig receipt missing/mismatched")
     return expected
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
@@ -128,8 +116,10 @@ def main() -> int:
     parser.add_argument("--source-surface", choices=("default", "ук", "укр"), default="укр")
     args = parser.parse_args()
     source = resolve_without_links(args.source, "source")
-    if source.suffix != ".lisp" or not source.is_file():
-        raise SystemExit("BLOCK: existing .lisp source required")
+    if source.suffix != ".lisp":
+        raise SystemExit("BLOCK: source must have .lisp extension")
+    if not source.is_file():
+        raise SystemExit("BLOCK: source does not exist: " + str(source))
     try:
         rel = source.relative_to(ROOT)
     except ValueError as exc:
@@ -158,6 +148,7 @@ def main() -> int:
             row = ((report or {}).get("files") or [{}])[0]
             print(json.dumps({
                 "status": "blocked", "source": str(rel),
+                "output": str(rel.with_suffix(".sens")), "codec": args.codec,
                 "reason": row.get("reason", process.stderr.strip() or "three-pass failed"),
                 "token": row.get("token"), "line": row.get("line"), "column": row.get("column"),
             }, ensure_ascii=False, indent=2))
@@ -211,7 +202,6 @@ def main() -> int:
         if resolve_without_links(args.source, "source") != source:
             raise SystemExit("BLOCK: source path changed during conversion")
         if not args.dry_run:
-            import migration_publish_pair
             migration_publish_pair.publish_pair(atomic_no_clobber, output, payload, view, visible)
         result = {
             "status": "would-write" if args.dry_run else "written",
@@ -224,6 +214,7 @@ def main() -> int:
             "physical_sha256": proof["physical_sha256"],
             "view_sha256": hashlib.sha256(visible).hexdigest(),
             "typed_word_sha256": proof["typed_word_sha256"],
+            "words": words,
             "bytes": len(payload), "semantic_bits": proof["semantic_bits"],
             "semantic_word_count": proof["semantic_word_count"],
             "zig_transport": report["files"][0]["zig_transport"],
@@ -231,6 +222,7 @@ def main() -> int:
         }
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
