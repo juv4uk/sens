@@ -1254,5 +1254,49 @@ class ForwardD9UkrCallsiteProjectionTests(unittest.TestCase):
             self._restore_original(mutant)
 
 
+
+
+class Utf8UnicodeScalarsUkrProjectionTests(unittest.TestCase):
+    """One exact D9 Unicode-scalar call head in the SENS-owned UTF-8 decoder."""
+
+    SOURCE = ROOT / "lib" / "utf8.lisp"
+    D9 = ROOT / "lib" / "domains" / "d9.lisp"
+    ORIGINAL_BLOB = "5347791a3ead344afa9cb68a4889c478f6999b44"
+    OLD_HEAD = "(unicode-scalars->string"
+    UKR_HEAD = "(юнікод-скаляри-рядок"
+
+    @classmethod
+    def _blob_sha(cls, source):
+        import hashlib
+        raw = source.encode("utf-8")
+        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+
+    @classmethod
+    def _restore_original(cls, source):
+        if source.count(cls.UKR_HEAD) != 1:
+            raise AssertionError("D9 Unicode scalar projection count drift")
+        return source.replace(cls.UKR_HEAD, cls.OLD_HEAD, 1)
+
+    def test_exact_d9_peer_and_inverse_restore_original_utf8_source(self):
+        source = self.SOURCE.read_bytes().decode("utf-8")
+        table = self.D9.read_bytes().decode("utf-8").splitlines()
+        rows = [line for line in table if line.lstrip().startswith("(000100010 ")]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("(укр юнікод-скаляри-рядок)", rows[0])
+        self.assertIn("(en unicode-scalars->string)", rows[0])
+        self.assertIn("(LISP UNICODE-SCALARS->STRING)", rows[0])
+        self.assertEqual(source.count(self.UKR_HEAD), 1)
+        self.assertEqual(source.count(self.OLD_HEAD), 0)
+        restored = self._restore_original(source)
+        self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
+
+    def test_wrong_d9_peer_is_rejected(self):
+        source = self.SOURCE.read_bytes().decode("utf-8")
+        mutant = source.replace(self.UKR_HEAD, "(відкликати-факт", 1)
+        self.assertNotEqual(mutant, source)
+        with self.assertRaisesRegex(AssertionError, "projection count drift"):
+            self._restore_original(mutant)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
