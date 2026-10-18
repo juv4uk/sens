@@ -2320,6 +2320,14 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         if not cls.assert_authority:
             raise AssertionError("Немає ратифікованих exact D3/D4 peers")
 
+    @staticmethod
+    def _pre_last_projection(path, source):
+        # Окремий D1/D6/D8/D9 зріз проходить СВІЙ суворий inverse
+        # перед старим незмінним D3/D4 Git-blob witness.
+        if path == "scripts/check-domain-table-readable.lisp":
+            return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
+        return source
+
     @classmethod
     def reverse(cls, text, edits):
         offsets, delta, previous = [], 0, -1
@@ -2349,7 +2357,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 current = (self.root / path).read_text(encoding="utf-8")
-                restored = self.reverse(current, witness["edits"])
+                restored = self.reverse(self._pre_last_projection(path, current), witness["edits"])
                 self.assertEqual(self.blob_sha(restored), witness["sha"])
                 mod.parse(restored)
                 mod.parse(current)
@@ -2360,8 +2368,8 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         for path, witness in self.PINNED.items():
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
-                original = self.reverse(source, witness["edits"])
-                before, after = original.splitlines(), source.splitlines()
+                original = self.reverse(self._pre_last_projection(path, source), witness["edits"])
+                before, after = original.splitlines(), self._pre_last_projection(path, source).splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [
                     i + 1 for i, (a, b) in enumerate(zip(before, after))
@@ -2386,7 +2394,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         self.assertIn("(визначити load-domain", reader)
         self.assertIn("(визначити d8", reader)
         self.assertIn('"00000000"', reader)
-        self.assertIn("(110101001", reader)  # D9 admission не виводиться з бітності
+        self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
         self.assertIn("(визначити target-tier", tier)
         self.assertIn("(визначити print-matching", tier)
         self.assertIn("(11100 (001 tier) fixture)", tier)  # D5 і цитата незмінні
@@ -2400,7 +2408,7 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         )
         self.assertNotEqual(source, mutation)
         with self.assertRaises(AssertionError):
-            self.reverse(mutation, self.PINNED[path]["edits"])
+            self.reverse(self._pre_last_projection(path, mutation), self.PINNED[path]["edits"])
 
 
 
@@ -2442,7 +2450,9 @@ class DomainTableReadableUkrMigrationTests(unittest.TestCase):
                 matches = [line for line in rows if line.strip().startswith(f"({bits} (ук ")]
                 self.assertEqual(len(matches), 1)
                 self.assertIn(f"(укр {ukr})", matches[0])
-                self.assertEqual(source.count("(" + ukr + " "), count)
+                import re
+                found = re.findall(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))", source)
+                self.assertEqual(len(found), count)
         self.assertIn("(000000 (table-rows d1))", source)
         self.assertNotIn("(довжина (table-rows d1))", source)
         self._undo_exact_heads(source)
