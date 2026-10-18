@@ -59,12 +59,42 @@ def restore_binary_heads(source: str) -> str:
     return _UKR_HEAD_RE.sub(lambda m: "(" + _UKR_TO_BITS[m.group(1)], source)
 
 
+
+# Два часи еталону: поточний перед укр-міграцією та давніший D1 witness.
+# Жоден історичний SHA не змінено; тільки звірені історичні source-deltas.
+PRE_UKR_SOURCE_GIT_BLOB = "64b8fa69d1ecb507da506efb3a6b520d69cebdb8"
+POST_HISTORIC_DELTAS = [
+    ("       (native-first-domain-false ()))\n      ((0101 (011 (011 value)))\n       (native-first-domain-true ()))", "       (native-first-domain-false ()))\n      ((101 (011 (011 value)) ())\n       (native-first-domain-true ()))"),
+    ("         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))\n          (110\n            ((native-first-proper-list-length-2? plan)\n             (native-first-execution-completed\n               (001 evaluator)\n               (0001 (100 (011 plan)))))\n            ((native-first-domain-true ())\n             (native-first-execution-rejected\n               (001 invalid-plan)\n               (native-first-list-2\n                 (001 malformed-evaluator-fallback-plan)\n                 plan)))))\n         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))", "         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))\n          \n         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))"),
+    ("            (001 invalid-plan)\n            (native-first-list-2 (001 unknown-native-first-plan) plan)))\n         ((native-first-domain-true ())", "            (001 invalid-plan)\n            (native-first-list-2 (001 unknown-native-first-plan) plan))\n         ((native-first-domain-true ())"),
+    ("         (001 invalid-plan)\n         (native-first-list-2 (001 unknown-native-first-plan) plan))))))\n(0011 native-first-execute-expression", "         (001 invalid-plan)\n         (native-first-list-2 (001 unknown-native-first-plan) plan))))))))\n\n(0011 native-first-execute-expression"),
+]
+
+
+def _historical_before_post_d1_revisions(text: str) -> str:
+    for actual, archived in POST_HISTORIC_DELTAS:
+        if text.count(actual) != 1:
+            raise ValueError("неоднозначна або зникла законна історична правка")
+        text = text.replace(actual, archived, 1)
+    return text
+
+
+def _assert_current_pre_ukr_blob(text: str) -> None:
+    raw = text.encode("utf-8")
+    blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+    if blob != PRE_UKR_SOURCE_GIT_BLOB:
+        raise ValueError("змінено вихідні байти поза точним D3/D4→укр відображенням")
+
+
 def prove_source(source: str):
     if (source.count("#d1:1"), source.count("#d1:0")) != (11, 7):
         raise ValueError("D1 direct-predicate census changed")
     if OLD_YES in source or OLD_NO in source:
         raise ValueError("named call remains")
-    historical = restore_binary_heads(source).replace("#d1:1", OLD_YES).replace("#d1:0", OLD_NO).encode("utf-8")
+    before_ukr = restore_binary_heads(source)
+    _assert_current_pre_ukr_blob(before_ukr)
+    older = before_ukr.replace("#d1:1", OLD_YES).replace("#d1:0", OLD_NO)
+    historical = _historical_before_post_d1_revisions(older).encode("utf-8")
     blob = hashlib.sha1(b"blob " + str(len(historical)).encode() + b"\0" + historical).hexdigest()
     if blob != HISTORIC_GIT_BLOB:
         raise ValueError("unexpected non-D1 historical AST/text drift")

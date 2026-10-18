@@ -61,6 +61,30 @@ def restore_binary_heads(source: str) -> str:
     return _UKR_HEAD_RE.sub(lambda m: "(" + _UKR_TO_BITS[m.group(1)], source)
 
 
+
+# Два часи еталону: поточний перед укр-міграцією та давніший D1 witness.
+# Жоден історичний SHA не змінено; тільки звірені історичні source-deltas.
+PRE_UKR_SOURCE_GIT_BLOB = "b3411d2514fb9be55dbaf1ed9410fa556991320a"
+POST_HISTORIC_DELTAS = [
+    ("    (110\n      ((0101 (011 rest-after-left))\n       (110", "    (110\n      ((101 (011 rest-after-left) (001 ()))\n       (110"),
+]
+
+
+def _historical_before_post_d1_revisions(text: str) -> str:
+    for actual, archived in POST_HISTORIC_DELTAS:
+        if text.count(actual) != 1:
+            raise ValueError("неоднозначна або зникла законна історична правка")
+        text = text.replace(actual, archived, 1)
+    return text
+
+
+def _assert_current_pre_ukr_blob(text: str) -> None:
+    raw = text.encode("utf-8")
+    blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+    if blob != PRE_UKR_SOURCE_GIT_BLOB:
+        raise ValueError("змінено вихідні байти поза точним D3/D4→укр відображенням")
+
+
 def audit(text):
     no_n = text.count(NO)
     yes_n = text.count(YES)  # direct values: no nested D3/D4 constructors
@@ -68,7 +92,10 @@ def audit(text):
         raise ValueError(f"expected 24 independent YES + 6 NO, got {yes_n}+{no_n}")
     if OLD_YES in text or OLD_NO in text:
         raise ValueError("retired named D1 call remains")
-    restored = restore_binary_heads(text).replace(NO, OLD_NO).replace(YES, OLD_YES)
+    before_ukr = restore_binary_heads(text)
+    _assert_current_pre_ukr_blob(before_ukr)
+    older = before_ukr.replace(NO, OLD_NO).replace(YES, OLD_YES)
+    restored = _historical_before_post_d1_revisions(older)
     raw = restored.encode("utf-8")
     sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
     if sha != HISTORIC_SHA:
