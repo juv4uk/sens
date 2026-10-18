@@ -1238,10 +1238,10 @@ class ForwardD9UkrCallsiteProjectionTests(unittest.TestCase):
         for line_no, bits, en, ukr in self.CALLS:
             with self.subTest(line=line_no, bits=bits):
                 pattern = re.compile(r"\(\s*" + re.escape(ukr) + r"(?=\s|\))")
-                self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1])), 1)
+                found = list(pattern.finditer(source.splitlines()[line_no - 1]))
+                self.assertEqual(len(found), 1)
         restored = self._restore_original(source)
         self.assertEqual(self._blob_sha(restored), self.ORIGINAL_BLOB)
-        self.assertEqual(restored, source.replace("", "", 1) if False else restored)
 
     def test_wrong_d9_peer_is_rejected_by_exact_inverse(self):
         lines = self.SOURCE.read_bytes().decode("utf-8").splitlines(keepends=True)
