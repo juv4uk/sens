@@ -3,14 +3,14 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(0011 identity (0010 (value) value))
+(визначити identity (функція (value) value))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(0011 binary
-  (0010 (width)
-    (1110 (001 binary) width)))
+(визначити binary
+  (функція (width)
+    (список (як-є binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -28,7 +28,7 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(0011 list (0010 args args))
+(визначити list (функція args args))
 
 ; Exact D4:0011 DEFINE + D4:0010 LAMBDA: macro laws from lib/core4.lisp.
 ; D8:00001010 is ratified REPEAT, not legacy SID8 DEFMACRO.
@@ -37,54 +37,54 @@
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
 ; operand is still returned as a value without being reinterpreted as a test.
-(0011 and
+(визначити and
   (make-macro
-    (0010 rest
-  (110
-    ((010 rest) (010 ()))
-    ((010 (011 rest)) (100 rest))
-    ((010 ())
-     (1110 (001 110)
-       (111
-         (111 (100 rest)
-           (111
-             (111 (001 and) (011 rest))
-             (001 ())))
-         (111
-           (111 (001 010)
-             (111 (001 ()) (001 ())))
-           (111
-             (111
-               (001 010)
-               (111
-                 (111 (001 111)
-                   (111 (001 ())
-                     (111 (001 ()) (001 ()))))
-                 (001 ())))
-             (001 ()))))))))))
+    (функція rest
+  (за-умовою
+    ((атом? rest) (атом? ()))
+    ((атом? (решта rest)) (перше rest))
+    ((атом? ())
+     (список (як-є 110)
+       (сполучити
+         (сполучити (перше rest)
+           (сполучити
+             (сполучити (як-є and) (решта rest))
+             (як-є ())))
+         (сполучити
+           (сполучити (як-є 010)
+             (сполучити (як-є ()) (як-є ())))
+           (сполучити
+             (сполучити
+               (як-є 010)
+               (сполучити
+                 (сполучити (як-є 111)
+                   (сполучити (як-є ())
+                     (сполучити (як-є ()) (як-є ()))))
+                 (як-є ())))
+             (як-є ()))))))))))
 
-(0011 or
+(визначити or
   (make-macro
-    (0010 rest
-  (110
-    ((010 rest) (010 (111 () ())))
-    ((010 (011 rest)) (100 rest))
-    ((010 ())
-     (1110 (001 110)
-       (111
-         (111 (100 rest)
-           (111
-             (111 (001 010)
-               (111 (001 ()) (001 ())))
-             (001 ())))
-         (111
-           (111
-             (111 (001 010)
-               (111 (001 ()) (001 ())))
-             (111
-               (111 (001 or) (011 rest))
-               (001 ())))
-           (001 ())))))))))
+    (функція rest
+  (за-умовою
+    ((атом? rest) (атом? (сполучити () ())))
+    ((атом? (решта rest)) (перше rest))
+    ((атом? ())
+     (список (як-є 110)
+       (сполучити
+         (сполучити (перше rest)
+           (сполучити
+             (сполучити (як-є 010)
+               (сполучити (як-є ()) (як-є ())))
+             (як-є ())))
+         (сполучити
+           (сполучити
+             (сполучити (як-є 010)
+               (сполучити (як-є ()) (як-є ())))
+             (сполучити
+               (сполучити (як-є or) (решта rest))
+               (як-є ())))
+           (як-є ())))))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
@@ -97,29 +97,29 @@
 ; string->symbol assemble it into a real symbol. Requires an explicit
 ; prefix (no default-prefix convenience yet -- G5: earn that later if
 ; a real caller needs it, don't build it speculatively now).
-(0011 gensym
-  (0010 (prefix)
+(визначити gensym
+  (функція (prefix)
     (string->symbol (110011110 prefix (write-to-string (01011010))))))
 
-(0011 pair
-  (0010 (left right)
-    (111 left (111 right (001 ())))))
+(визначити pair
+  (функція (left right)
+    (сполучити left (сполучити right (як-є ())))))
 
 ; Ratified exact selectors: D4:1000 CAAR, D4:1001 CADR,
 ; D4:0111 CDDR, D5:10011 CADDR, D6:100111 CADDDR.
 ; Selector law is compiled from domain+bit width, never from English aliases.
 ; D7 is text data and is NOT used for fifth (four CDR steps).
 
-(0011 second
-  (0010 (values)
-    (1001 values)))
+(визначити second
+  (функція (values)
+    (друге values)))
 
-(0011 third
-  (0010 (values)
+(визначити third
+  (функція (values)
     (10011 values)))
 
-(0011 fourth
-  (0010 (values)
+(визначити fourth
+  (функція (values)
     (10011 (011 values))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
@@ -132,7 +132,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.lisp мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(0011 cadddr fourth)
+(визначити cadddr fourth)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -144,19 +144,19 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.lisp,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.lisp — та
 ; сама операція, виписана вручну замість названа.
-(0011 fifth
-  (0010 (values)
-    (100 (011 (011 (011 (011 values)))))))
+(визначити fifth
+  (функція (values)
+    (перше (решта (решта (решта (решта values)))))))
 
-(0011 caar
-  (0010 (values)
-    (1000 values)))
+(визначити caar
+  (функція (values)
+    (перше-першого values)))
 
-(0011 cadr second)
+(визначити cadr second)
 
-(0011 cddr
-  (0010 (values)
-    (0111 values)))
+(визначити cddr
+  (функція (values)
+    (решта-решти values)))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
@@ -186,44 +186,44 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(0011 length-onto
-  (0010 (values acc)
-    (110
+(визначити length-onto
+  (функція (values acc)
+    (за-умовою
       ; D4 NULL checks exactly the end of a proper list. NOT(ATOM) would
       ; terminate nonempty lists immediately and report every length as 0.
-      ((0101 values) acc)
+      ((порожній? values) acc)
       ; Only a cons cell advances the accumulator. An improper nonempty
       ; tail is not silently counted as an empty list.
       ; D5 PLUS accepts qualified D24 values, never an unqualified 1.
-      ((0100 (010 values))
-       (length-onto (011 values)
+      ((хибне? (атом? values))
+       (length-onto (решта values)
          (01010 acc #d24:000000000000000000000001))))))
 
 
-(0011 length
-  (0010 (values)
+(визначити length
+  (функція (values)
     (length-onto values #d24:000000000000000000000000)))
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
 ; D1-controlled reverse: empty ends the fold; a pair advances it.
 ; Structural (0) and historical truth coercion are not valid D3 predicates.
-(0011 зворот-до
-  (0010 (values acc)
-    (110
-      ((0101 values) acc)
-      ((0100 (010 values))
-       (зворот-до (011 values) (111 (100 values) acc))))))
+(визначити зворот-до
+  (функція (values acc)
+    (за-умовою
+      ((порожній? values) acc)
+      ((хибне? (атом? values))
+       (зворот-до (решта values) (сполучити (перше values) acc))))))
 
 ; Internal derived closure for D6:000000 LENGTH when no admitted D6
 ; evaluator mechanism exists. This is a Lisp binding, not D6 dispatch.
-(0011 внутрішня-довжина length)
+(визначити внутрішня-довжина length)
 
-(0011 reverse-onto зворот-до)
+(визначити reverse-onto зворот-до)
 
-(0011 reverse
-  (0010 (values)
-    (зворот-до values (001 ()))))
+(визначити reverse
+  (функція (values)
+    (зворот-до values (як-є ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -239,50 +239,50 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(0011 append
-  (0010 (left right)
+(визначити append
+  (функція (left right)
     (зворот-до (10100 left) right)))
 
 ; MAP is derived in Lisp: D4 NULL detects exactly the empty list,
 ; while D3 ATOM excludes improper non-pair tails. Both produce D1 control
 ; bits; structural (0) / equal? must never act as a COND predicate.
-(0011 map-onto
-  (0010 (f values acc)
-    (110
+(визначити map-onto
+  (функція (f values acc)
+    (за-умовою
       ((0101 values) (10100 acc))
-      ((0100 (010 values))
-       (map-onto f (011 values) (111 (f (100 values)) acc))))))
+      ((хибне? (атом? values))
+       (map-onto f (решта values) (сполучити (f (перше values)) acc))))))
 
-(0011 map
-  (0010 (f values)
-    (map-onto f values (001 ()))))
+(визначити map
+  (функція (f values)
+    (map-onto f values (як-є ()))))
 
-(0011 filter-onto
-  (0010 (predicate values acc)
-    (110
+(визначити filter-onto
+  (функція (predicate values acc)
+    (за-умовою
       ((0100 (010 values)) (10100 acc))
       ((010 values)  (10100 acc))
-      ((010 values) 
-       (let ((decision (predicate (100 values))))
-         (110
+      ((атом? values) 
+       (let ((decision (predicate (перше values))))
+         (за-умовою
            (decision
-            (filter-onto predicate (011 values) (111 (100 values) acc)))
-           ((010 predicate)
-            (filter-onto predicate (011 values) acc))))))))
+            (filter-onto predicate (решта values) (сполучити (перше values) acc)))
+           ((атом? predicate)
+            (filter-onto predicate (решта values) acc))))))))
 
-(0011 filter
-  (0010 (predicate values)
-    (filter-onto predicate values (001 ()))))
+(визначити filter
+  (функція (predicate values)
+    (filter-onto predicate values (як-є ()))))
 
 ; REDUCE: D4:0101 NULL terminates only the empty list.
 ; Previous NOT(ATOM(values)) returned acc on nonempty pairs and CAR'd NIL.
 ; For any improper nonempty atom the ordinary D3 CAR rejects the data.
-(0011 reduce
-  (0010 (f acc values)
-    (110
-      ((0101 values) acc)
+(визначити reduce
+  (функція (f acc values)
+    (за-умовою
+      ((порожній? values) acc)
       (#d1:1
-       (reduce f (f acc (100 values)) (011 values))))))
+       (reduce f (f acc (перше values)) (решта values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -322,7 +322,7 @@
 ; admitted evaluator call mechanism. Until that mechanism is proved, the
 ; existing Lisp-owned map closure is the executable derivation for let.
 ; No invented D6 runtime dispatch or numeric/legacy fallback is introduced.
-(0011 внутрішнє-відображення map)
+(визначити внутрішнє-відображення map)
 ; ЛІХТАР: a bounded macro bridge for legacy Lisp source modules.
 ; A ratified D6 LET identity without an admitted evaluator mechanism is NOT
 ; silently callable. This macro expands a surface call into a fresh lambda
@@ -330,17 +330,17 @@
 ; list and body are syntax, not values or fabricated D6 residents.
 ; (нехай-похідне ((x 7) (y 9)) (00100111 x y)) => (let ((x 7) (y 9)) ...).
 ; Legacy DEFMACRO is a projection: D4 DEFINE + make-macro + D4 LAMBDA.
-(0011 нехай-похідне
+(визначити нехай-похідне
   (make-macro
-    (0010 (bindings body)
-  (111 (001 let)
-    (111 bindings (111 body (001 ())))))))
+    (функція (bindings body)
+  (сполучити (як-є let)
+    (сполучити bindings (сполучити body (як-є ())))))))
 
-(0011 let
+(визначити let
   (make-macro
-    (0010 (bindings body)
-  (111 (1110 (001 0010) (внутрішнє-відображення (0010 (binding) (100 binding)) bindings) body)
-        (внутрішнє-відображення (0010 (binding) (1001 binding)) bindings)))))
+    (функція (bindings body)
+  (сполучити (список (як-є 0010) (внутрішнє-відображення (функція (binding) (перше binding)) bindings) body)
+        (внутрішнє-відображення (функція (binding) (друге binding)) bindings)))))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -377,64 +377,64 @@
 ; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
-(0011 equal?
-  (0010 (a b)
-    (110
-      ((0100 (010 a))
-       (110
-         ((0100 (010 b))
-          (001 (1)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
-       (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
-          (110
-            ((101 a b) 
-             (001 (1)))
-            ((101 a b) 
-             (001 (0)))))
-         ((010 b) 
-          (001 (0)))))
-      ((010 a) 
-       (110
-         ((0100 (010 b))
-          (001 (0)))
-         ((010 b) 
-          (001 (0)))
-         ((010 b) 
-          (110
+(визначити equal?
+  (функція (a b)
+    (за-умовою
+      ((хибне? (атом? a))
+       (за-умовою
+         ((хибне? (атом? b))
+          (як-є (1)))
+         ((атом? b) 
+          (як-є (0)))
+         ((атом? b) 
+          (як-є (0)))))
+      ((атом? a) 
+       (за-умовою
+         ((хибне? (атом? b))
+          (як-є (0)))
+         ((атом? b) 
+          (за-умовою
+            ((тотожне? a b) 
+             (як-є (1)))
+            ((тотожне? a b) 
+             (як-є (0)))))
+         ((атом? b) 
+          (як-є (0)))))
+      ((атом? a) 
+       (за-умовою
+         ((хибне? (атом? b))
+          (як-є (0)))
+         ((атом? b) 
+          (як-є (0)))
+         ((атом? b) 
+          (за-умовою
             ((11110111 (100 a) (100 b)) 
              (11110111 (011 a) (011 b)))
             ((0100 (11110111 (100 a) (100 b)))
-             (001 (0))))))))))
+             (як-є (0))))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
-(0011 truthy?
-  (0010 (value)
-    (110
+(визначити truthy?
+  (функція (value)
+    (за-умовою
       
-      ((010 value) 
-       (110
-         ((101 value 0)  (001 ()))
-         ((0100 (101 value 0)) t)))
-      ((010 value) 
-       (110
+      ((атом? value) 
+       (за-умовою
+         ((тотожне? value 0)  (як-є ()))
+         ((хибне? (тотожне? value 0)) t)))
+      ((атом? value) 
+       (за-умовою
          ((11110111 value (001 (0)))  (001 ()))
          ((11110111 value (001 (0)))  (001 ()))
          ((11110111 value (001 (0)))  (001 ()))
-         ((010 ())  t))))))
+         ((атом? ())  t))))))
 
-(0011 not?
-  (0010 (value)
-    (110
-      ((truthy? value)  (001 ()))
-      ((0100 (truthy? value)) t))))
+(визначити not?
+  (функція (value)
+    (за-умовою
+      ((truthy? value)  (як-є ()))
+      ((хибне? (truthy? value)) t))))
 
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
@@ -453,19 +453,19 @@
 ; спекулятивна прогалина. Узагальнений assoc тут також збігається з
 ; формою, яку lib/meta-eval.lisp's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
-(0011 nth
-  (0010 (i lst)
-    (110
-      ((101 i 0)  (100 lst))
-      ((101 i 0) 
+(визначити nth
+  (функція (i lst)
+    (за-умовою
+      ((тотожне? i 0)  (перше lst))
+      ((тотожне? i 0) 
        (000100 (01011 i 1) (011 lst))))))
 
-(0011 member?
-  (0010 (item lst)
-    (110
+(визначити member?
+  (функція (item lst)
+    (за-умовою
       
-      ((010 lst) 
-       (110
+      ((атом? lst) 
+       (за-умовою
          ((11110111 item (100 lst))  t)
          ((0100 (11110111 item (100 lst)))
           (11101 item (011 lst))))))))
@@ -473,12 +473,12 @@
 ; ASSOC: D4 NULL recognizes only the empty association list.
 ; Unlike D3 ATOM, it must not silently accept an improper atom tail.
 ; Only a nonempty pair may supply the first association and recursive CDR.
-(0011 assoc
-  (0010 (key alist)
-    (110
-      ((0101 alist) (001 ()))
+(визначити assoc
+  (функція (key alist)
+    (за-умовою
+      ((порожній? alist) (як-є ()))
       (#d1:1
-       (110
+       (за-умовою
          ((11110111 key (100 (100 alist))) (100 alist))
          ((0100 (11110111 key (100 (100 alist))))
           (11100 key (011 alist))))))))
@@ -486,36 +486,36 @@
 
 ; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
 ; owns the exact-domain binding; English spelling is compatibility-only.
-(0011 спарувати
-  (0010 (keys values tail)
-    (110
-      ((0100 (010 keys)) tail)
-      ((010 keys) 
-       (111
-         (111 (100 keys) (100 values))
-         (спарувати (011 keys) (011 values) tail))))))
+(визначити спарувати
+  (функція (keys values tail)
+    (за-умовою
+      ((хибне? (атом? keys)) tail)
+      ((атом? keys) 
+       (сполучити
+         (сполучити (перше keys) (перше values))
+         (спарувати (решта keys) (решта values) tail))))))
 
-(0011 pairlis спарувати)
+(визначити pairlis спарувати)
 
-(0011 let*
+(визначити let*
   (make-macro
-    (0010 (bindings body)
-  (110
-    ((010 bindings) body)
-    ((010 (001 ()))
+    (функція (bindings body)
+  (за-умовою
+    ((атом? bindings) body)
+    ((атом? (як-є ()))
      ; Expand directly to ((lambda (name) (let* tail body)) value).
      ; This avoids the unadmitted D6:001000 LET execution path while
      ; retaining the language-owned sequential-binding law.
-     (111
-       (111 (001 0010)
-         (111
-           (111 (100 (100 bindings)) (001 ()))
-           (111
-             (111 (001 let*)
-               (111 (011 bindings)
-                 (111 body (001 ()))))
-             (001 ()))))
-       (111 (1001 (100 bindings)) (001 ()))))))))
+     (сполучити
+       (сполучити (як-є 0010)
+         (сполучити
+           (сполучити (перше (перше bindings)) (як-є ()))
+           (сполучити
+             (сполучити (як-є let*)
+               (сполучити (решта bindings)
+                 (сполучити body (як-є ()))))
+             (як-є ()))))
+       (сполучити (друге (перше bindings)) (як-є ()))))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -536,59 +536,59 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(0011 string-membership-helper
-  (0010 (value)
-    (110
-      ((0100 (010 value))
-       (001 (class-membership string nonmember)))
-      ((010 value) 
-       (110
+(визначити string-membership-helper
+  (функція (value)
+    (за-умовою
+      ((хибне? (атом? value))
+       (як-є (class-membership string nonmember)))
+      ((атом? value) 
+       (за-умовою
          ((101 (110101011 (write-to-string value))
               (110101011 (write-to-string "")))
           
-          (001 (class-membership string member)))
+          (як-є (class-membership string member)))
          ((101 (110101011 (write-to-string value))
               (110101011 (write-to-string "")))
           
-          (001 (class-membership string nonmember)))))
-      ((010 value) 
-       (001 (class-membership string nonmember))))))
+          (як-є (class-membership string nonmember)))))
+      ((атом? value) 
+       (як-є (class-membership string nonmember))))))
 
-(0011 string-order-helper
-  (0010 (left right)
-    (110
+(визначити string-order-helper
+  (функція (left right)
+    (за-умовою
       ((110011100 left) 
-       (110
+       (за-умовою
          ((110011100 right) 
-          (001 (text-order same)))
+          (як-є (text-order same)))
          ((0100 (110011100 right))
-          (001 (text-order before)))))
+          (як-є (text-order before)))))
       ((0100 (110011100 left))
-       (001 (text-order after)))
+       (як-є (text-order after)))
       ((101 (110101011 left) (110101011 right))
        
        (string-order-helper (110011101 left) (110011101 right)))
       ((11010 (11100000 (110101011 left))
           (11100000 (110101011 right)))
        
-       (001 (text-order before)))
+       (як-є (text-order before)))
       ((0100 (11010 (11100000 (110101011 left)) (11100000 (110101011 right))))
-       (001 (text-order after))))))
+       (як-є (text-order after))))))
 
-(0011 nonempty-string-membership-helper
-  (0010 (value)
-    (110
+(визначити nonempty-string-membership-helper
+  (функція (value)
+    (за-умовою
       ((string-membership-helper value)
        
-       (110
+       (за-умовою
          ((0100 (110011100 value))
-          (001 (class-membership string nonempty-member)))
+          (як-є (class-membership string nonempty-member)))
          ((110011100 value)
           
-          (001 (class-membership string member)))))
+          (як-є (class-membership string member)))))
       ((string-membership-helper value)
        
-       (001 (class-membership string nonmember))))))
+       (як-є (class-membership string nonmember))))))
 
 ; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
 ; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
@@ -596,9 +596,9 @@
 ; (00111111), string-rest (01000000) і string->codepoint (01000101). Не-рядок
 ; дає природну помилку Type від string-first; неправильна кількість
 ; аргументів — Arity від прив'язки лямбди.
-(0011 string<?
-  (0010 (a b)
-    (110
+(визначити string<?
+  (функція (a b)
+    (за-умовою
       ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
       ((110011100 b) 
        (1001 (1110 (110011110 a "") (001 ()))))
@@ -620,15 +620,15 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(0011 symbol?
-  (0010 (value)
-    (110
-      ((010 value)
-       (110
-         ((101 value (string->symbol (write-to-string value)))
-          (010 (001 ())))
-         ((010 ()) #d1:0)))
-      ((010 ()) #d1:0))))
+(визначити symbol?
+  (функція (value)
+    (за-умовою
+      ((атом? value)
+       (за-умовою
+         ((тотожне? value (string->symbol (write-to-string value)))
+          (атом? (як-є ())))
+         ((атом? ()) #d1:0)))
+      ((атом? ()) #d1:0))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
@@ -685,9 +685,9 @@
 ; відняти, повторити) — стандартний трюк бінарного довгого ділення,
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
-(0011 largest-chunk
-  (0010 (a b chunk mult)
-    (110
+(визначити largest-chunk
+  (функція (a b chunk mult)
+    (за-умовою
       ((11010 a (01010 chunk chunk))  (111 chunk mult))
       ((0100 (11010 a (01010 chunk chunk)))
        (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
@@ -710,12 +710,12 @@
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
 ; Recurse through this Lisp-owned integer quotient; D5:10111 is exact division, not floor division.
-(0011 quotient
-  (0010 (a b)
-    (110
+(визначити quotient
+  (функція (a b)
+    (за-умовою
       ((101 b 0)  (11110110 a b))
-      ((010 (001 ())) 
-       (110
+      ((атом? (як-є ())) 
+       (за-умовою
          ((11010 a b)  0)
          ((0100 (11010 a b))
           (let ((chunk+mult (largest-chunk a b b 1)))
@@ -723,8 +723,8 @@
                (quotient (відняти a (перше chunk+mult)) b)))))))))
 
 ; The remainder uses the same Lisp-owned integer quotient: a - b * floor(a / b).
-(0011 mod
-  (0010 (a b)
+(визначити mod
+  (функція (a b)
     (відняти a (помножити b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
@@ -732,32 +732,32 @@
 ; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
 ; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
 ; without routing either through generic truthiness.
-(0011 nondecreasing-from?
-  (0010 (current remaining)
-    (110
-      ((0100 (010 remaining)) 1)
+(визначити nondecreasing-from?
+  (функція (current remaining)
+    (за-умовою
+      ((хибне? (атом? remaining)) 1)
       ((11010 current (100 remaining)) 
-       (nondecreasing-from? (100 remaining) (011 remaining)))
+       (nondecreasing-from? (перше remaining) (решта remaining)))
       ((11110111 current (100 remaining)) 
-       (nondecreasing-from? (100 remaining) (011 remaining)))
+       (nondecreasing-from? (перше remaining) (решта remaining)))
       ((0100 (11110111 current (100 remaining))) 0))))
 
-(0011 nonincreasing-from?
-  (0010 (current remaining)
-    (110
-      ((0100 (010 remaining)) 1)
+(визначити nonincreasing-from?
+  (функція (current remaining)
+    (за-умовою
+      ((хибне? (атом? remaining)) 1)
       ((11011 current (100 remaining)) 
-       (nonincreasing-from? (100 remaining) (011 remaining)))
+       (nonincreasing-from? (перше remaining) (решта remaining)))
       ((11110111 current (100 remaining)) 
-       (nonincreasing-from? (100 remaining) (011 remaining)))
+       (nonincreasing-from? (перше remaining) (решта remaining)))
       ((0100 (11110111 current (100 remaining))) 0))))
 
-(0011 <=
-  (0010 (first . remaining)
+(визначити <=
+  (функція (first . remaining)
     (nondecreasing-from? first remaining)))
 
-(0011 >=
-  (0010 (first . remaining)
+(визначити >=
+  (функція (first . remaining)
     (nonincreasing-from? first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
@@ -777,26 +777,26 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(0011 digit->string
+(визначити digit->string
   ; Superseded by number->string's canonical delegation to write-to-string
   ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
-  (0010 (d)
+  (функція (d)
     (000100 d (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(0011 number->string-onto
-  (0010 (n acc)
-    (110
-      ((101 n 0)  acc)
-      ((101 n 0) 
+(визначити number->string-onto
+  (функція (n acc)
+    (за-умовою
+      ((тотожне? n 0)  acc)
+      ((тотожне? n 0) 
        (number->string-onto
          (10111 n #d10)
          (110011110 (01000111 (00101100 n #d10)) acc))))))
 
-(0011 number->string
-  (0010 (n)
+(визначити number->string
+  (функція (n)
     ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
     ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
     ; as themselves, non-integer rationals render REDUCED exactly —
@@ -821,51 +821,51 @@
 ;
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
-(0011 ->
+(визначити ->
   (make-macro
-    (0010 forms
-  (110
+    (функція forms
+  (за-умовою
     
-    ((010 forms) 
-     (110
-       ((0100 (010 (011 forms))) (100 forms))
-       ((010 (011 forms)) 
+    ((атом? forms) 
+     (за-умовою
+       ((хибне? (атом? (решта forms))) (перше forms))
+       ((атом? (решта forms)) 
         (001001 ((x (100 forms))
-               (next (100 (011 forms)))
-               (rest (011 (011 forms)))
+               (next (перше (решта forms)))
+               (rest (решта (решта forms)))
                (step
-                 (110
-                   ((0100 (010 next)) (1110 next x))
-                   ((010 next)  (1110 next x))
-                   ((010 next) 
-                    (111 (100 next) (111 x (011 next)))))))
-          (110
-            ((0100 (010 rest)) step)
-            ((010 rest) 
-             (111 (001 ->) (111 step rest))))))))))))
+                 (за-умовою
+                   ((хибне? (атом? next)) (список next x))
+                   ((атом? next)  (список next x))
+                   ((атом? next) 
+                    (сполучити (перше next) (сполучити x (решта next)))))))
+          (за-умовою
+            ((хибне? (атом? rest)) step)
+            ((атом? rest) 
+             (сполучити (як-є ->) (сполучити step rest))))))))))))
 
-(0011 ->>
+(визначити ->>
   (make-macro
-    (0010 forms
-  (110
+    (функція forms
+  (за-умовою
     
-    ((010 forms) 
-     (110
-       ((0100 (010 (011 forms))) (100 forms))
-       ((010 (011 forms)) 
+    ((атом? forms) 
+     (за-умовою
+       ((хибне? (атом? (решта forms))) (перше forms))
+       ((атом? (решта forms)) 
         (001001 ((x (100 forms))
-               (next (100 (011 forms)))
-               (rest (011 (011 forms)))
+               (next (перше (решта forms)))
+               (rest (решта (решта forms)))
                (step
-                 (110
-                   ((0100 (010 next)) (1110 next x))
-                   ((010 next)  (1110 next x))
-                   ((010 next) 
-                    (1111 next (1110 x))))))
-          (110
-            ((0100 (010 rest)) step)
-            ((010 rest) 
-             (111 (001 ->>) (111 step rest))))))))))))
+                 (за-умовою
+                   ((хибне? (атом? next)) (список next x))
+                   ((атом? next)  (список next x))
+                   ((атом? next) 
+                    (приєднати next (список x))))))
+          (за-умовою
+            ((хибне? (атом? rest)) step)
+            ((атом? rest) 
+             (сполучити (як-є ->>) (сполучити step rest))))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -879,36 +879,36 @@
 ;;                      наближення, дробове — дробовий результат
 ;;                      (S1 inexact promotion). Відʼємний вхід → nil.
 
-(0011 sqrt-iter
-  (0010 (guess x n)
-    (110
+(визначити sqrt-iter
+  (функція (guess x n)
+    (за-умовою
       ((11110111 n 0)  guess)
       ((0100 (11110111 n 0))
        (sqrt-iter (11110110 (01010 guess (11110110 x guess)) 2) x (01011 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
-(0011 isqrt
-  (0010 (n)
-    (110
+(визначити isqrt
+  (функція (n)
+    (за-умовою
       ((11010 n 2)  n)
       ((0100 (11010 n 2))
        (isqrt-step n (10111 n 2))))))
 
-(0011 isqrt-step
-  (0010 (n g)
+(визначити isqrt-step
+  (функція (n g)
     (let ((next (10111 (01010 g (10111 n g)) 2)))
-      (110
+      (за-умовою
         ((11010 next g)  (isqrt-step n next))
         ((0100 (11010 next g)) g)))))
 
-(0011 sqrt
-  (0010 (x)
-    (110
+(визначити sqrt
+  (функція (x)
+    (за-умовою
       ((11010 x 0)  (001 ()))
       ((11110111 x 0)  0)
       ((11110111 x (10111 x 1)) 
        (let ((r (110111010 x)))
-         (110
+         (за-умовою
            ((11110111 (10110 r r) x)  r)
            ((010 ())  (sqrt-iter (11110110 x 2) x 8)))))
       ((010 ())  (sqrt-iter (11110110 x 2.0) x 5)))))
@@ -936,9 +936,9 @@
 ; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
 ; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
 ; vzhe vyrazhuvani samoiu movoiu.
-(0011 abs
-  (0010 (x)
-    (110
+(визначити abs
+  (функція (x)
+    (за-умовою
       ((11010 x 0)  (01011 0 x))
       ((0100 (11010 x 0)) x))))
 
@@ -947,12 +947,12 @@
 ; evaluator's own lambda-binding check -- matching the removed Rust
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
-(0011 min
-  (0010 (first . rest)
+(визначити min
+  (функція (first . rest)
     (000010 (111 first rest))))
 
-(0011 max
-  (0010 (first . rest)
+(визначити max
+  (функція (first . rest)
     (000011 (111 first rest))))
 
 ; Two real bugs found live via oracle testing before this landed, not
@@ -967,31 +967,31 @@
 ;    the base-case branch. `items` itself is safe to test with `atom`
 ;    (it's always a list or (), never itself a bare number), but the
 ;    accumulator tests exact structural EMPTY with D4:0101 NULL.
-(0011 min-list
-  (0010 (items)
-    (110
+(визначити min-list
+  (функція (items)
+    (за-умовою
       
-      ((010 items) 
+      ((атом? items) 
        (let ((rest-min (000010 (011 items))))
-         (110
-           ((0101 rest-min) 
-            (100 items))
-           ((0100 (0101 rest-min))
-            (110
+         (за-умовою
+           ((порожній? rest-min) 
+            (перше items))
+           ((хибне? (порожній? rest-min))
+            (за-умовою
               ((11010 (100 items) rest-min)  (100 items))
               ((0100 (11010 (100 items) rest-min)) rest-min)))))))))
 
-(0011 max-list
-  (0010 (items)
-    (110
+(визначити max-list
+  (функція (items)
+    (за-умовою
       
-      ((010 items) 
+      ((атом? items) 
        (let ((rest-max (000011 (011 items))))
-         (110
-           ((0101 rest-max) 
-            (100 items))
-           ((0100 (0101 rest-max))
-            (110
+         (за-умовою
+           ((порожній? rest-max) 
+            (перше items))
+           ((хибне? (порожній? rest-max))
+            (за-умовою
               ((11011 (100 items) rest-max)  (100 items))
               ((0100 (11011 (100 items) rest-max)) rest-max)))))))))
 
@@ -1005,8 +1005,8 @@
 ; Keep only unique stable spellings from lib/surface/semantic-registry.lisp.
 ; Candidate spellings are deliberately absent and therefore cannot become
 ; executable merely by appearing in documentation.
-(0011 my-postcore-stable-peer-projection
-  (001 (
+(визначити my-postcore-stable-peer-projection
+  (як-є (
     (1079 utc-now поточний-всч)
     (1080 utc-from-unix всч-із-юнікс)
     (1081 unix-time-observation->utc юнікс-спостереження-у-всч)
@@ -1029,147 +1029,147 @@
     (167 write-file записати-файл)
   )))
 
-(0011 my-postcore-peer-group
-  (0010 (semantic-id groups)
-    (110
+(визначити my-postcore-peer-group
+  (функція (semantic-id groups)
+    (за-умовою
       
-      ((010 groups) 
-       (let ((group (100 groups)))
-         (110
-           ((101 semantic-id (100 group)) 
+      ((атом? groups) 
+       (let ((group (перше groups)))
+         (за-умовою
+           ((тотожне? semantic-id (перше group)) 
             group)
-           ((101 semantic-id (100 group)) 
-            (my-postcore-peer-group semantic-id (011 groups)))))))))
+           ((тотожне? semantic-id (перше group)) 
+            (my-postcore-peer-group semantic-id (решта groups)))))))))
 
-(0011 my-postcore-binding-status
-  (0010 (surface bindings)
-    (110
-      ((0100 (010 bindings))
-       (001 absent))
-      ((010 bindings) 
-       (let ((binding (100 bindings)))
-         (110
+(визначити my-postcore-binding-status
+  (функція (surface bindings)
+    (за-умовою
+      ((хибне? (атом? bindings))
+       (як-є absent))
+      ((атом? bindings) 
+       (let ((binding (перше bindings)))
+         (за-умовою
            ((101 (11101110 surface) (100 binding)) 
-            (001 present))
+            (як-є present))
            ((101 (11101110 surface) (100 binding)) 
-            (my-postcore-binding-status surface (011 bindings)))))))))
+            (my-postcore-binding-status surface (решта bindings)))))))))
 
-(0011 my-postcore-missing-peers
-  (0010 (source peers bindings)
-    (110
+(визначити my-postcore-missing-peers
+  (функція (source peers bindings)
+    (за-умовою
       
-      ((010 peers) 
-       (let ((peer (100 peers)))
-         (110
-           ((101 source peer) 
-            (my-postcore-missing-peers source (011 peers) bindings))
-           ((101 source peer) 
-            (110
-              ((101 (my-postcore-binding-status peer bindings) (001 present))
+      ((атом? peers) 
+       (let ((peer (перше peers)))
+         (за-умовою
+           ((тотожне? source peer) 
+            (my-postcore-missing-peers source (решта peers) bindings))
+           ((тотожне? source peer) 
+            (за-умовою
+              ((тотожне? (my-postcore-binding-status peer bindings) (як-є present))
                
-               (my-postcore-missing-peers source (011 peers) bindings))
-              ((101 (my-postcore-binding-status peer bindings) (001 absent))
+               (my-postcore-missing-peers source (решта peers) bindings))
+              ((тотожне? (my-postcore-binding-status peer bindings) (як-є absent))
                
-               (111 peer
+               (сполучити peer
                      (my-postcore-missing-peers
                        source
-                       (011 peers)
+                       (решта peers)
                        bindings)))))))))))
 
 ; Build one expression whose nested DEFINE forms all execute in the caller's
 ; environment. This is why materialization is a macro rather than a function:
 ; an ordinary function would define peers only in its temporary child frame.
-(0011 my-postcore-build-definitions
-  (0010 (source peers)
-    (110
-      ((0100 (010 peers))
+(визначити my-postcore-build-definitions
+  (функція (source peers)
+    (за-умовою
+      ((хибне? (атом? peers))
        source)
-      ((010 peers) 
-       (1110 (001 define)
-             (100 peers)
-             (my-postcore-build-definitions source (011 peers)))))))
+      ((атом? peers) 
+       (список (як-є define)
+             (перше peers)
+             (my-postcore-build-definitions source (решта peers)))))))
 
-(0011 my-postcore-materialize-stable-peers
+(визначити my-postcore-materialize-stable-peers
   (make-macro
-    (0010 args
+    (функція args
   (001001 ((semantic-id (100 args))
-         (source (1001 args))
+         (source (друге args))
          (group
            (my-postcore-peer-group
              semantic-id
              my-postcore-stable-peer-projection)))
-    (110
-      ((0100 (010 group))
+    (за-умовою
+      ((хибне? (атом? group))
        source)
-      ((010 group) 
+      ((атом? group) 
        (my-postcore-build-definitions
          source
          (my-postcore-missing-peers source (011 group) (11100111)))))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
-(0011 divmod
-  (0010 (dividend divisor)
+(визначити divmod
+  (функція (dividend divisor)
     (1110 (10111 dividend divisor) (00101100 dividend divisor))))
 
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
-(0011 null?
-  (0010 (x)
-    (110
-      ((0100 (010 x)) t)
-      ((010 x)  (001 ()))
-      ((010 x)  (001 ())))))
+(визначити null?
+  (функція (x)
+    (за-умовою
+      ((хибне? (атом? x)) t)
+      ((атом? x)  (як-є ()))
+      ((атом? x)  (як-є ())))))
 
-(0011 subst
-  (0010 (x y z)
-    (110
-      ((010 z) 
+(визначити subst
+  (функція (x y z)
+    (за-умовою
+      ((атом? z) 
        (111 (11111 x y (100 z)) (11111 x y (011 z))))
-      ((0100 (010 z))
-       (110
-         ((101 z y)  x)
-         ((0100 (101 z y)) z)))
-      ((010 z) 
-       (110
-         ((101 z y)  x)
-         ((0100 (101 z y)) z))))))
+      ((хибне? (атом? z))
+       (за-умовою
+         ((тотожне? z y)  x)
+         ((хибне? (тотожне? z y)) z)))
+      ((атом? z) 
+       (за-умовою
+         ((тотожне? z y)  x)
+         ((хибне? (тотожне? z y)) z))))))
 
-(0011 sublis-pair
-  (0010 (x z)
-    (110
-      ((0100 (010 x)) z)
-      ((010 x) 
-       (110
-         ((101 (100 (100 x)) z) 
-          (100 (011 (100 x))))
-         ((101 (100 (100 x)) z) 
-          (sublis-pair (011 x) z)))))))
+(визначити sublis-pair
+  (функція (x z)
+    (за-умовою
+      ((хибне? (атом? x)) z)
+      ((атом? x) 
+       (за-умовою
+         ((тотожне? (перше (перше x)) z) 
+          (перше (решта (перше x))))
+         ((тотожне? (перше (перше x)) z) 
+          (sublis-pair (решта x) z)))))))
 
-(0011 sublis
-  (0010 (x y)
-    (110
-      ((010 y) 
+(визначити sublis
+  (функція (x y)
+    (за-умовою
+      ((атом? y) 
        (111 (001010 x (100 y)) (001010 x (011 y))))
-      ((0100 (010 y)) (sublis-pair x y))
-      ((010 y)  (sublis-pair x y)))))
+      ((хибне? (атом? y)) (sublis-pair x y))
+      ((атом? y)  (sublis-pair x y)))))
 
-(0011 maplist
-  (0010 (x f)
-    (110
+(визначити maplist
+  (функція (x f)
+    (за-умовою
       
-      ((010 x) 
+      ((атом? x) 
        (111 (f x) (000101 (011 x) f))))))
 
-(0011 apply-quote-args
-  (0010 (m)
-    (110
+(визначити apply-quote-args
+  (функція (m)
+    (за-умовою
       
-      ((010 m) 
-       (111 (111 (001 001) (111 (100 m) (001 ())))
-                 (apply-quote-args (011 m)))))))
+      ((атом? m) 
+       (сполучити (сполучити (як-є 001) (сполучити (перше m) (як-є ())))
+                 (apply-quote-args (решта m)))))))
 
-(0011 apply
-  (0010 (f args)
-    (0001 (111 f (apply-quote-args args)))))
+(визначити apply
+  (функція (f args)
+    (обчислити (сполучити f (apply-quote-args args)))))
 
 ; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
 ; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
@@ -1178,85 +1178,85 @@
 ; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
 
 ; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
-(0011 answer-not
-  (0010 (a)
-    (110
+(визначити answer-not
+  (функція (a)
+    (за-умовою
       
-      ((010 a) 
-       (111
-         (110
-           ((101 (100 a) 0)  1)
-           ((0100 (101 (100 a) 0)) 0))
+      ((атом? a) 
+       (сполучити
+         (за-умовою
+           ((тотожне? (перше a) 0)  1)
+           ((хибне? (тотожне? (перше a) 0)) 0))
          (110111011 (011 a)))))))
 
 ; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
 ; з двох «так» — довше (слабше); () поглинає «так».
 ; Для двох відповідей одного напряму крок іде по обох списках разом.
-(0011 answer-and
-  (0010 (a b)
-    (110
-      ((0100 (010 a))
-       (110
+(визначити answer-and
+  (функція (a b)
+    (за-умовою
+      ((хибне? (атом? a))
+       (за-умовою
          
-         ((010 b) 
-          (110
-            ((101 (100 b) 0)  b)
-            ((101 (100 b) 0)  (001 ()))))))
-      ((010 a) 
-       (110
-         ((0100 (010 b))
-          (110
-            ((101 (100 a) 0)  a)
-            ((101 (100 a) 0)  (001 ()))))
-         ((010 b) 
-          (110
-            ((101 (100 a) (100 b)) 
-             (110
-               ((101 (100 a) 0)  a)
-               ((0100 (101 (100 a) 0)) b)))
-            ((101 (100 a) (100 b)) 
-             (110
-               ((0100 (010 (011 a)))
-                (110
-                  ((101 (100 a) 0)  a)
-                  ((0100 (101 (100 a) 0)) b)))
-               ((0100 (010 (011 b)))
-                (110
-                  ((101 (100 b) 0)  b)
-                  ((0100 (101 (100 b) 0)) a)))
-               ((010 (011 b)) 
-                (111 (100 a)
+         ((атом? b) 
+          (за-умовою
+            ((тотожне? (перше b) 0)  b)
+            ((тотожне? (перше b) 0)  (як-є ()))))))
+      ((атом? a) 
+       (за-умовою
+         ((хибне? (атом? b))
+          (за-умовою
+            ((тотожне? (перше a) 0)  a)
+            ((тотожне? (перше a) 0)  (як-є ()))))
+         ((атом? b) 
+          (за-умовою
+            ((тотожне? (перше a) (перше b)) 
+             (за-умовою
+               ((тотожне? (перше a) 0)  a)
+               ((хибне? (тотожне? (перше a) 0)) b)))
+            ((тотожне? (перше a) (перше b)) 
+             (за-умовою
+               ((хибне? (атом? (решта a)))
+                (за-умовою
+                  ((тотожне? (перше a) 0)  a)
+                  ((хибне? (тотожне? (перше a) 0)) b)))
+               ((хибне? (атом? (решта b)))
+                (за-умовою
+                  ((тотожне? (перше b) 0)  b)
+                  ((хибне? (тотожне? (перше b) 0)) a)))
+               ((атом? (решта b)) 
+                (сполучити (перше a)
                           (110110100 (011 a) (011 b)))))))))))))
 
 ; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
-(0011 answer-or
-  (0010 (a b)
+(визначити answer-or
+  (функція (a b)
     (110111011 (110110100 (110111011 a) (110111011 b)))))
 
 ; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
 ; тож із семи бітів шкала сходиться в ().
-(0011 answer-weaken
-  (0010 (a)
-    (110
+(визначити answer-weaken
+  (функція (a)
+    (за-умовою
       
-      ((010 a) 
-       (110
+      ((атом? a) 
+       (за-умовою
          ((101 (000000 a) 7)  (001 ()))
          ((101 (000000 a) 7) 
-          (111 (100 a) a)))))))
+          (сполучити (перше a) a)))))))
 
 ; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
 ; вище розрізнення атом/пара.
-(0011 answer-atom
-  (0010 (x)
-    (110
-      ((010 x)  (001 (1)))
-      ((010 x)  (001 (0)))
+(визначити answer-atom
+  (функція (x)
+    (за-умовою
+      ((атом? x)  (як-є (1)))
+      ((атом? x)  (як-є (0)))
       )))
 
 ; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
-(0011 answer-eq
-  (0010 (a b)
-    (110
-      ((101 a b)  (001 (1)))
-      ((101 a b)  (001 (0))))))
+(визначити answer-eq
+  (функція (a b)
+    (за-умовою
+      ((тотожне? a b)  (як-є (1)))
+      ((тотожне? a b)  (як-є (0))))))
