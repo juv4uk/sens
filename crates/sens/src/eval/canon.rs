@@ -766,6 +766,12 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         environment.bind_domain_code_slot_once(identity, value.clone());
     }
 
+    if let Some(identity) = semantic_registry::d10_binding_identity_for_definition(name) {
+        // D10 width/residency is not callability: this exact slot exists only
+        // because a concrete Core4 root callable was evaluated above.
+        environment.bind_domain_code_slot_once(identity, value.clone());
+    }
+
     if let Some(identity) = semantic_registry::d6_binding_identity_for_definition(name) {
         // D6 residency remains separate from execution. Only an actual
         // language-owned callable definition can populate this exact slot.

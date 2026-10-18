@@ -1,6 +1,6 @@
 //! Позитивні й негативні свідки доменного читача ядра, без cfg(test) залежностей.
 
-use sens::{parse, parse_exact_domain_source, DomainIdentity, ErrorKind, Expr, ExprKind};
+use sens::{parse_exact_domain_source, DomainIdentity, ErrorKind, Expr, ExprKind};
 
 fn exact(source: &str) -> Vec<Expr> {
     parse_exact_domain_source(source).expect("точна доменна програма")
@@ -43,14 +43,19 @@ fn точний_читач_зберігає_структуру_цитату_та
 }
 
 #[test]
-fn невідомий_w8_та_ширина_d10_не_стають_d8_чи_числом() {
-    for source in ["10101000", "(10101000 x)", "'10101000", "00000001",
-        "0000000001", "(0000000001 x)"] {
-        let error = parse_exact_domain_source(source).expect_err("W8/D10 BLOCK");
-        assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+fn точний_читач_зберігає_w8_та_d10_ширини_без_згортання() {
+    for source in ["10101000", "00000001"] {
+        let parsed = exact(source);
+        assert!(matches!(parsed[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 8 && identity.packed_bits() == u16::from_str_radix(source, 2).unwrap()));
     }
-    // Транспортне значення W8, прочитане старим API, лишається тільки старим.
-    assert!(matches!(parse("10101000").unwrap()[0].kind, ExprKind::Sid(_)));
+    assert!(matches!(exact("'10101000")[0].kind, ExprKind::List(_)));
+    let d10 = exact("0000000001");
+    assert!(matches!(d10[0].kind, ExprKind::DomainIdentity(identity)
+        if identity.width() == 10 && identity.packed_bits() == 1));
+    assert_ne!(d10[0].kind, ExprKind::DomainIdentity(DomainIdentity::D8(
+        sens::CoreD8::from_word(sens::Bit8::new(1).unwrap())
+    )));
 }
 
 #[test]

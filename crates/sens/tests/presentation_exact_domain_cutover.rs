@@ -8,17 +8,14 @@ use sens::{
 };
 
 #[test]
-fn istorichnyi_quote_maie_lyshe_dovedenu_d3_proiektsiiu() {
-    let old = Value::Sid(sens::sens!(00000001));
+fn exact_d3_quote_projects_through_the_current_ukrainian_surface() {
     let exact = Value::DomainIdentity(DomainIdentity::D3(
         Bija3::from_word(Bit3::new(0b001).unwrap()),
     ));
     assert_eq!(
-        render_value_for_presentation(&old, PresentationLanguage::Ukrainian),
         render_value_for_presentation(&exact, PresentationLanguage::Ukrainian),
+        "як-є",
     );
-    // Доведена людська проєкція — не зміна історичного wire.
-    assert_eq!(old.to_string(), "00000001");
     assert_eq!(exact.to_string(), "001");
 }
 

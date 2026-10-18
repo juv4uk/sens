@@ -2,7 +2,7 @@
 //!
 //! Координата — рівно (ширина, біти). Значення, назви, закони,
 //! допуск до виконання та оракули належать доменним джерелам SENS.
-//! Це НЕ другий реєстр функцій і НЕ дозвіл на виконання D10.
+//! Це НЕ другий реєстр функцій; викличність визначають точні SENS-механізми.
 //!
 //! Аксіома бітності: ширина ключа = адреса домену. D*n* ніколи не
 //! приймає ключ іншої довжини. Рівний packed payload у різних ширинах
@@ -11,8 +11,8 @@
 //! D7: `knowledge/d7-keyboard-v2-ratified.json` — чинні 128/128
 //! семибітних координат даних. Жодна координата не надає callability.
 
-/// Exact 10-bit mechanical carrier, not a resident AST value or a callable
-/// function. No implicit widening/narrowing to D9 or historical Function8.
+/// Exact 10-bit mechanical carrier. It has no implicit widening/narrowing to
+/// D9 or historical Function8; callable slots are installed separately.
 /// The host stores its payload in u16, but only ten bits belong to SENS.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DomainD10 {
@@ -79,6 +79,24 @@ impl DomainCoordinate {
 
     pub const fn bits(self) -> u16 {
         self.bits
+    }
+
+    /// Convert only D1–D9 coordinates into the bounded source enum.
+    /// D10 remains in the full-width identity carrier.
+    pub fn source_word(self) -> Option<crate::BinarySourceWord> {
+        let bits = self.bits as u8;
+        match self.width {
+            1 => crate::Bit1::new(bits).map(crate::BinarySourceWord::W1),
+            2 => crate::Bit2::new(bits).map(crate::BinarySourceWord::W2),
+            3 => crate::Bit3::new(bits).map(crate::BinarySourceWord::W3),
+            4 => crate::Bit4::new(bits).map(crate::BinarySourceWord::W4),
+            5 => crate::Bit5::new(bits).map(crate::BinarySourceWord::W5),
+            6 => crate::Bit6::new(bits).map(crate::BinarySourceWord::W6),
+            7 => crate::Bit7::new(bits).map(crate::BinarySourceWord::W7),
+            8 => crate::Bit8::new(bits).map(crate::BinarySourceWord::W8),
+            9 => crate::Bit9::new(self.bits).map(crate::BinarySourceWord::W9),
+            _ => None,
+        }
     }
 
     /// Точний видимий запис однієї координати без домішування десяткових

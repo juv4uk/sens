@@ -1865,8 +1865,6 @@ rust	crates/sens/tests/machine_capability_axis.rs	cons	1
 rust	crates/sens/tests/machine_capability_axis.rs	eq?	1
 rust	crates/sens/tests/machine_lowering_boundary.rs	mono-ns	1
 rust	crates/sens/tests/macro_derivation.rs	defmacro	5
-rust	crates/sens/tests/macro_generated_heads_1485.rs	and	1
-rust	crates/sens/tests/macro_generated_heads_1485.rs	binary	2
 rust	crates/sens/tests/mccarthy.rs	list	1
 rust	crates/sens/tests/meta_eval_error_kind_parity.rs	car	1
 rust	crates/sens/tests/meta_eval_error_kind_parity.rs	cond	1
@@ -1886,7 +1884,6 @@ rust	crates/sens/tests/semantic_coordinate_law_axis.rs	car	1
 rust	crates/sens/tests/semantic_coordinate_law_axis.rs	cond	1
 rust	crates/sens/tests/semantic_coordinate_law_axis.rs	cons	1
 rust	crates/sens/tests/semantic_coordinate_law_axis.rs	eq?	1
-rust	crates/sens/tests/sens_self_carry_1397.rs	car	1
 rust	crates/sens/tests/string_first_class.rs	codepoint->string	1
 rust	crates/sens/tests/string_first_class.rs	json-parse	1
 rust	crates/sens/tests/string_first_class.rs	sha256-hex	1
@@ -2302,8 +2299,6 @@ rust-lisp	crates/sens/tests/macro_derivation.rs	cons	7
 rust-lisp	crates/sens/tests/macro_derivation.rs	defmacro	3
 rust-lisp	crates/sens/tests/macro_derivation.rs	identity	2
 rust-lisp	crates/sens/tests/macro_derivation.rs	quote	8
-rust-lisp	crates/sens/tests/macro_generated_heads_1485.rs	binary	2
-rust-lisp	crates/sens/tests/macro_generated_heads_1485.rs	quote	1
 rust-lisp	crates/sens/tests/make_macro_first_class.rs	define	4
 rust-lisp	crates/sens/tests/make_macro_first_class.rs	lambda	2
 rust-lisp	crates/sens/tests/make_macro_first_class.rs	quote	1
@@ -2768,10 +2763,6 @@ rust-lisp-дані	crates/sens/tests/forward.rs	and	1
 rust-lisp-дані	crates/sens/tests/forward.rs	or	2
 rust-lisp-дані	crates/sens/tests/knowledge.rs	not?	4
 rust-lisp-дані	crates/sens/tests/macro_derivation.rs	cond	1
-rust-lisp-дані	crates/sens/tests/macro_generated_heads_1485.rs	and	1
-rust-lisp-дані	crates/sens/tests/macro_generated_heads_1485.rs	binary	2
-rust-lisp-дані	crates/sens/tests/macro_generated_heads_1485.rs	let*	1
-rust-lisp-дані	crates/sens/tests/macro_generated_heads_1485.rs	quote	1
 rust-lisp-дані	crates/sens/tests/mccarthy.rs	lambda	2
 rust-lisp-дані	crates/sens/tests/mccarthy.rs	quote	1
 rust-lisp-дані	crates/sens/tests/meta_eval.rs	cond	1

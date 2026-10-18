@@ -65,7 +65,7 @@ fn machine_session() -> Session {
     session
 }
 
-fn current_d5_coordinate(resident: &str) -> (usize, u8) {
+fn current_d5_coordinate(resident: &str) -> (usize, u16) {
     let foundation: Value =
         serde_json::from_str(&read("knowledge/d1-d9-foundation.json")).expect("foundation JSON");
     let d5 = &foundation["domains"]["D5"];
@@ -77,7 +77,7 @@ fn current_d5_coordinate(resident: &str) -> (usize, u8) {
         .unwrap_or_else(|| panic!("current D5 foundation must contain {resident}"));
     (
         width,
-        u8::from_str_radix(bits, 2).expect("current D5 resident bits"),
+        u16::from_str_radix(bits, 2).expect("current D5 resident bits"),
     )
 }
 
