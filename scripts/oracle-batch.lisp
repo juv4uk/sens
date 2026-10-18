@@ -24,7 +24,7 @@
 ; in the request text.
 (визначити make-request
   (функція (expr-str)
-    (001000 ((quoted-source (значення-у-текст expr-str)))
+    (нехай ((quoted-source (значення-у-текст expr-str)))
       (рядок-додати
         (рядок-додати
           (рядок-додати "(request (op oracle-eval) (id \"batch\") (source " quoted-source)
@@ -33,11 +33,11 @@
 
 (визначити oracle-eval
   (функція (expr-str)
-    (001000 ((request (make-request expr-str)))
-      (001000 ((socket (tcp-connect "100.113.68.50" 9999)))
-        (001000 ((sent (протокол-передавання-записати socket request)))
-          (001000 ((response (протокол-передавання-читати socket)))
-            (001000 ((closed (tcp-close socket)))
+    (нехай ((request (make-request expr-str)))
+      (нехай ((socket (tcp-connect "100.113.68.50" 9999)))
+        (нехай ((sent (протокол-передавання-записати socket request)))
+          (нехай ((response (протокол-передавання-читати socket)))
+            (нехай ((closed (tcp-close socket)))
               (прочитати response))))))))
 
 (визначити emit-result
@@ -70,7 +70,7 @@
       ((атом? inventory-remaining) (як-є ()))
       ((атом? conformance-remaining) (як-є ()))
       ((атом? (як-є ()))
-       (001001 ((inventory-fixture (перше inventory-remaining))
+       (нехай-послідовно ((inventory-fixture (перше inventory-remaining))
               (id (решта (знайти-за-ключем (як-є id) (решта inventory-fixture))))
               (conformance-fixture (перше conformance-remaining))
               (expr-str (решта (знайти-за-ключем (як-є expr) conformance-fixture)))
