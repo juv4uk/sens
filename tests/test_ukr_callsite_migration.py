@@ -2350,6 +2350,22 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         # перед старим незмінним D3/D4 Git-blob witness.
         if path == "scripts/check-domain-table-readable.lisp":
             return DomainTableReadableUkrMigrationTests._undo_exact_heads(source)
+        if path == "scripts/fixtures-for-tier.lisp":
+            # Separate D3/D5/D8/D9 executable heads, never infer old SID8
+            # from byte equality. These three witnessed lines are reversible.
+            exact_lines = (
+                ("    (решта (знайти-за-ключем (як-є tier) fixture))))",
+                 "    (011 (11100 (001 tier) fixture))))"),
+                ("               (друкувати (перше remaining)))",
+                 "               (11011011 (100 remaining)))"),
+                ('(print-matching (читати-всі (читати-файл "tests/fixtures/conformance.lisp")))',
+                 '(print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))'),
+            )
+            for live, old in exact_lines:
+                if source.count(live) != 1:
+                    raise AssertionError("Втрачено однозначну ратифіковану укр-викличну голову")
+                source = source.replace(live, old, 1)
+            return source
         return source
 
     @classmethod
@@ -2421,7 +2437,12 @@ class ReaderTierUkrSourceMigrationTests(unittest.TestCase):
         self.assertIn("(читати-всі", reader)  # Чинний D9 peer; викличність незалежна від ширини
         self.assertIn("(визначити target-tier", tier)
         self.assertIn("(визначити print-matching", tier)
-        self.assertIn("(11100 (001 tier) fixture)", tier)  # D5 і цитата незмінні
+        self.assertIn("(решта (знайти-за-ключем (як-є tier) fixture))", tier)
+        self.assertIn("(друкувати (перше remaining))", tier)
+        self.assertIn('(читати-всі (читати-файл "tests/fixtures/conformance.lisp"))', tier)
+        self.assertNotIn("(11100 (001 tier) fixture)", tier)
+        self.assertNotIn("(11011011 (100 remaining))", tier)
+        self.assertNotIn('(110101001 (110110111 "tests/fixtures/conformance.lisp"))', tier)
         self.assertNotIn("(0011 target-tier", tier)
 
     def test_negative_wrong_peer_cannot_pass_exact_inverse(self):
