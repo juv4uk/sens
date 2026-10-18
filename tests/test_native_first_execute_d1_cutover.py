@@ -87,7 +87,7 @@ def _assert_current_pre_ukr_blob(text: str) -> None:
 
 
 def prove_source(source: str):
-    if (source.count("#d1:1"), source.count("#d1:0")) != (11, 7):
+    if (source.count("#d1:1"), source.count("#d1:0")) != (12, 7):
         raise ValueError("D1 direct-predicate census changed")
     if OLD_YES in source or OLD_NO in source:
         raise ValueError("named call remains")

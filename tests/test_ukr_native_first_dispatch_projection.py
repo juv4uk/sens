@@ -35,7 +35,7 @@ BASELINE = {
         "b3411d2514fb9be55dbaf1ed9410fa556991320a", 131, 17, 24, 6
     ),
     "lib/machine/dispatch/native-first-execute.lisp": (
-        "64b8fa69d1ecb507da506efb3a6b520d69cebdb8", 121, 13, 11, 7
+        "64b8fa69d1ecb507da506efb3a6b520d69cebdb8", 121, 13, 12, 7
     ),
 }
 
