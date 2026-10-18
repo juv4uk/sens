@@ -1389,12 +1389,12 @@ NONPROGRAM_MANIFESTS = (
 
 
 NONPROGRAM_MANIFEST_BLOB_SHA = {
-    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "b4d1cd782db748971fd73de08efc898ff35f6ae8",
+    "knowledge/migration-nonprogram-domain-tables-2026-10-08.json": "3a0d2ed951f17585897b7efefd12c8748e5c33a8",
     "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json": "a59eb63f123c2b98ca94fd777c9547e94f66e7d1",
     "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json": "9e77c672054be168d54846a01448d180dd12140a",
-    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "91c4498f9f1778b4b87d07d3282ac7b6dc791c1e",
+    "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json": "621c449ee859db4f29cc94ed4e9ffac9cca5d5f8",
     "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json": "2f07df13cbd31edf76dcf105a2dc6dea922e4af8",
-    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "117e8fa54a0a6bc7746c35602dd88184abdcc7f6",
+    "knowledge/migration-nonprogram-expr-records-2026-10-08.json": "c83fb0b6a7c12b1a9131d541306ed67ad4b7d620",
     "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json": "60f44e5d6e278a7f43c2fe2c02016d314b53c801",
 }
 

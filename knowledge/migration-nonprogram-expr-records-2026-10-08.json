@@ -1,87 +1,87 @@
 {
- "schema": "sens-migration-nonprogram-manifest/1",
- "generated_from_main": "f598706a62ec1991edadc45f410da778a61a6871",
- "source_artifact_run": 37810152645,
- "issue": 4460,
- "classification": "lisp-fixture-record-envelope-not-executable-program",
- "reason": "Top-level entries are (expr . quoted-source) record envelopes; embedded expressions require their own semantic migration/oracle validation; no automatic .sens companion for the wrapper.",
- "automatic_sens_companion": false,
- "embedded_expr_migration_status": "separate-unproven",
- "entries": [
-  {
-   "path": "tests/fixtures/canon-laws-v2-witness.lisp",
-   "git_blob_sha1": "5ea5586f8d82e98dc983080213abbc6ee87447f3"
-  },
-  {
-   "path": "tests/fixtures/canon-zero-v2.lisp",
-   "git_blob_sha1": "dca6806f116ed06687f39c7c3aa0764182e1363f"
-  },
-  {
-   "path": "tests/fixtures/conformance.lisp",
-   "git_blob_sha1": "ef339bfd6bee7ed19c73a93da4e5da753c3e026a"
-  },
-  {
-   "path": "tests/fixtures/exact-q-binary-v1.lisp",
-   "git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd"
-  },
-  {
-   "path": "tests/fixtures/knowledge-clause-kind-v1.lisp",
-   "git_blob_sha1": "289d2fd4475328f7c83866b0e318d2025feb45e4"
-  },
-  {
-   "path": "tests/fixtures/linter.lisp",
-   "git_blob_sha1": "7b15bc3ccab61957781ba00618df3d427b67149c"
-  },
-  {
-   "path": "tests/fixtures/macro-conformance.lisp",
-   "git_blob_sha1": "244042645b4b3a1638a2f9141ce9bd720c164e75"
-  },
-  {
-   "path": "tests/fixtures/mathematical-result-v1.lisp",
-   "git_blob_sha1": "53c08d519af6d8d29ea4108f80b8524977c7f550"
-  },
-  {
-   "path": "tests/fixtures/reason-honesty-v1.lisp",
-   "git_blob_sha1": "b219bac69ab816a7d80c62af31c617b3526656d6"
-  },
-  {
-   "path": "tests/fixtures/reason-module-honesty-v1.lisp",
-   "git_blob_sha1": "5ba3b29db934a39bae3df6000a74af5eb62caac7"
-  },
-  {
-   "path": "tests/fixtures/reason-observe-honesty-v1.lisp",
-   "git_blob_sha1": "0ead29735612a1421264f5d889ccb735da47fdc3"
-  },
-  {
-   "path": "tests/fixtures/structure-core-v1.lisp",
-   "git_blob_sha1": "f1f4cf291a4643f3f5de7bfd97338426a898ee75"
-  },
-  {
-   "path": "tests/fixtures/unification-outcome-v1.lisp",
-   "git_blob_sha1": "7ce560f55311e8d1b944e7d0fee90be1f780e210"
-  }
- ],
- "reviewed_post_snapshot_changes": [
-  {
-   "path": "tests/fixtures/conformance.lisp",
-   "previous_git_blob_sha1": "77441b964c86213ebf923070a9350b0172fb8768",
-   "current_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
-   "reviewed_commit": "d6e0d1dec6b47a728f5c0b728e147b8cae48d70a",
-   "reason": "Only reclassifies the historical Contract 8.0 three-part COND row from active/constitutive expectation to historical-compatibility provenance. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
-  },
-  {
-   "path": "tests/fixtures/exact-q-binary-v1.lisp",
-   "previous_git_blob_sha1": "6189e79606c8b0c925edfb75f36300e2d1982498",
-   "current_git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd",
-   "reviewed_commit": "309813e3ead48b616dd41ba776deb2c68fbd38e6",
-   "reason": "Only appends two historical #216/#1827 exact-Q predicate record envelopes ((= 3 3) integer equality and (< 1 2 3 4) four-term less-than chain) as quoted (expr . source) data. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
-  },
-  {
-   "path": "tests/fixtures/conformance.lisp",
-   "previous_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
-   "current_git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1",
-   "reviewed_commit": "41fe112b71b0e40f51907bf8467fcd163e10abce",
-   "reason": "Owner-requested explicit migration of 19 embedded quoted ATOM/EQ expressions to current exact D3, including a positive/one-bit-mutant binary-SENS pair. Top-level fixture remains a non-executable record envelope, never eligible for automatic physical .sens. Runtime semantic oracle and exact-SHA release CI are still unverified; this is a reviewed source-provenance update, not execution admission."
-  }
- ]
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "f598706a62ec1991edadc45f410da778a61a6871",
+  "source_artifact_run": 37810152645,
+  "issue": 4460,
+  "classification": "lisp-fixture-record-envelope-not-executable-program",
+  "reason": "Top-level entries are (expr . quoted-source) record envelopes; embedded expressions require their own semantic migration/oracle validation; no automatic .sens companion for the wrapper.",
+  "automatic_sens_companion": false,
+  "embedded_expr_migration_status": "separate-unproven",
+  "entries": [
+    {
+      "path": "tests/fixtures/canon-laws-v2-witness.lisp",
+      "git_blob_sha1": "5ea5586f8d82e98dc983080213abbc6ee87447f3"
+    },
+    {
+      "path": "tests/fixtures/canon-zero-v2.lisp",
+      "git_blob_sha1": "dca6806f116ed06687f39c7c3aa0764182e1363f"
+    },
+    {
+      "path": "tests/fixtures/conformance.lisp",
+      "git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1"
+    },
+    {
+      "path": "tests/fixtures/exact-q-binary-v1.lisp",
+      "git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd"
+    },
+    {
+      "path": "tests/fixtures/knowledge-clause-kind-v1.lisp",
+      "git_blob_sha1": "289d2fd4475328f7c83866b0e318d2025feb45e4"
+    },
+    {
+      "path": "tests/fixtures/linter.lisp",
+      "git_blob_sha1": "7b15bc3ccab61957781ba00618df3d427b67149c"
+    },
+    {
+      "path": "tests/fixtures/macro-conformance.lisp",
+      "git_blob_sha1": "244042645b4b3a1638a2f9141ce9bd720c164e75"
+    },
+    {
+      "path": "tests/fixtures/mathematical-result-v1.lisp",
+      "git_blob_sha1": "53c08d519af6d8d29ea4108f80b8524977c7f550"
+    },
+    {
+      "path": "tests/fixtures/reason-honesty-v1.lisp",
+      "git_blob_sha1": "b219bac69ab816a7d80c62af31c617b3526656d6"
+    },
+    {
+      "path": "tests/fixtures/reason-module-honesty-v1.lisp",
+      "git_blob_sha1": "5ba3b29db934a39bae3df6000a74af5eb62caac7"
+    },
+    {
+      "path": "tests/fixtures/reason-observe-honesty-v1.lisp",
+      "git_blob_sha1": "0ead29735612a1421264f5d889ccb735da47fdc3"
+    },
+    {
+      "path": "tests/fixtures/structure-core-v1.lisp",
+      "git_blob_sha1": "f1f4cf291a4643f3f5de7bfd97338426a898ee75"
+    },
+    {
+      "path": "tests/fixtures/unification-outcome-v1.lisp",
+      "git_blob_sha1": "7ce560f55311e8d1b944e7d0fee90be1f780e210"
+    }
+  ],
+  "reviewed_post_snapshot_changes": [
+    {
+      "path": "tests/fixtures/conformance.lisp",
+      "previous_git_blob_sha1": "77441b964c86213ebf923070a9350b0172fb8768",
+      "current_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
+      "reviewed_commit": "d6e0d1dec6b47a728f5c0b728e147b8cae48d70a",
+      "reason": "Only reclassifies the historical Contract 8.0 three-part COND row from active/constitutive expectation to historical-compatibility provenance. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
+    },
+    {
+      "path": "tests/fixtures/exact-q-binary-v1.lisp",
+      "previous_git_blob_sha1": "6189e79606c8b0c925edfb75f36300e2d1982498",
+      "current_git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd",
+      "reviewed_commit": "309813e3ead48b616dd41ba776deb2c68fbd38e6",
+      "reason": "Only appends two historical #216/#1827 exact-Q predicate record envelopes ((= 3 3) integer equality and (< 1 2 3 4) four-term less-than chain) as quoted (expr . source) data. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
+    },
+    {
+      "path": "tests/fixtures/conformance.lisp",
+      "previous_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
+      "current_git_blob_sha1": "2cbc35b399600d15cb24d3f4bea196a4a9cc2af1",
+      "reviewed_commit": "41fe112b71b0e40f51907bf8467fcd163e10abce",
+      "reason": "Owner-requested explicit migration of 19 embedded quoted ATOM/EQ expressions to current exact D3, including a positive/one-bit-mutant binary-SENS pair. Top-level fixture remains a non-executable record envelope, never eligible for automatic physical .sens. Runtime semantic oracle and exact-SHA release CI are still unverified; this is a reviewed source-provenance update, not execution admission."
+    }
+  ]
 }
