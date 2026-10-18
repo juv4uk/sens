@@ -402,7 +402,21 @@
 
 ; D8:11110111 ratified укр surface; mechanism is the existing Lisp-owned equal?.
 ; Guard's standalone core bootstrap must bind it without loading all of core4.
-(визначити однакові? equal?)
+; D8-поверхня «однакові?» повертає точний D1 результат, не список (так)/(ні).
+; Закон реалізовано мовою SENS через ратифіковані структурні операції.
+(визначити однакові?
+  (функція (ліве праве)
+    (за-умовою
+      ((порожній? ліве) (порожній? праве))
+      ((порожній? праве) ні)
+      ((атом? ліве)
+       (за-умовою
+         ((атом? праве) (тотожне? ліве праве))
+         (так ні)))
+      ((атом? праве) ні)
+      ((однакові? (перше ліве) (перше праве))
+       (однакові? (решта ліве) (решта праве)))
+      (так ні))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
