@@ -353,9 +353,9 @@ class CodecUkrProjectionTests(unittest.TestCase):
     }
     LOCAL_RESTORE = {name: old for old, name in LOCAL_NAMES.items()}
     LOCAL_RESTORE_RE = re.compile(
-        r"(?<![\\w!?*+/<>=:_.-])("
+        r"(?<![\w!?*+/<>=:_.-])("
         + "|".join(re.escape(name) for name in LOCAL_RESTORE)
-        + r")(?![\\w!?*+/<>=:_.-])"
+        + r")(?![\w!?*+/<>=:_.-])"
     )
     HEADS = {
         "0011": "визначити", "0010": "функція", "001": "як-є",
@@ -438,9 +438,9 @@ class CodecUkrProjectionTests(unittest.TestCase):
             self.assertIn(f"(визначити {alias} ", source)
         for local_name in self.LOCAL_NAMES.values():
             self.assertIn(f"(визначити {local_name} ", source)
-        executable = "\\n".join(line.split(";", 1)[0] for line in source.splitlines())
+        executable = "\n".join(line.split(";", 1)[0] for line in source.splitlines())
         for alias in self.LOCAL_NAMES:
-            self.assertNotRegex(executable, r"\\(" + re.escape(alias) + r"(?=\\s)")
+            self.assertNotRegex(executable, r"\(" + re.escape(alias) + r"(?=\s)")
 
     def test_inverse_projection_restores_every_original_source_byte(self):
         source = self.SOURCE.read_text(encoding="utf-8")
@@ -454,7 +454,7 @@ class CodecUkrProjectionTests(unittest.TestCase):
         source = self.SOURCE.read_text(encoding="utf-8")
         mutant = source.replace("(тотожне? (як-є t)", "(порожнє? (як-є t)", 1)
         self.assertNotEqual(mutant, source)
-        restored = self.restore_heads(self.restore_local_names(source)).encode("utf-8")
+        restored = self.restore_heads(self.restore_local_names(mutant)).encode("utf-8")
         self.assertNotEqual(
             self.git_blob_sha(restored), self.ORIGINAL_BLOB,
             "unratified or wrong surface must not pass the inverse witness",
