@@ -26,18 +26,18 @@ def invoke(source: Path, *args: str):
 class CanonicalOneFileMigration(unittest.TestCase):
     def test_real_proven_canary_dry_run_does_not_write(self):
         before = PROVEN.read_bytes()
-        result = invoke(PROVEN, "--dry-run", "--source-era", "legacy")
+        result = invoke(PROVEN, "--dry-run", "--codec", "t5", "--source-surface", "default")
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         state = json.loads(result.stdout)
         self.assertEqual(state["status"], "would-write")
         self.assertEqual(state["semantic_parity"], "NOT_VERIFIED")
-        self.assertEqual(state["source_era"], "legacy")
+        self.assertEqual(state["codec"], "t5")
         self.assertEqual(state["physical_sha256"], hashlib.sha256(EXISTING.read_bytes()).hexdigest())
         self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_existing_target_is_never_overwritten(self):
         before = EXISTING.read_bytes()
-        result = invoke(PROVEN, "--source-era", "legacy")
+        result = invoke(PROVEN, "--codec", "t5", "--source-surface", "default")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("refusing overwrite", result.stderr)
         self.assertEqual(EXISTING.read_bytes(), before)
@@ -47,7 +47,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             output = Path(td) / "two-forms.sens"
             view = output.with_suffix("")
             view.write_bytes(b"preexisting view\\n")
-            result = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("refusing overwrite", result.stderr)
             self.assertFalse(output.exists())
@@ -57,7 +57,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "two-forms.sens"
-            result = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            result = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "written")
@@ -65,13 +65,15 @@ class CanonicalOneFileMigration(unittest.TestCase):
             self.assertEqual(report["source"], str(PROVEN.relative_to(ROOT)))
             self.assertEqual(report["bytes"], 14)
             self.assertEqual(output.read_bytes(), EXISTING.read_bytes())
+            self.assertTrue(output.with_suffix("").is_file())
+            self.assertEqual(report["view_sha256"], hashlib.sha256(output.with_suffix("").read_bytes()).hexdigest())
             view = output.with_suffix("")
             expected_view = (" ".join(report["words"]) + "\n").encode("ascii")
             self.assertEqual(view.read_bytes(), expected_view)
             self.assertEqual(report["view"], str(view))
             self.assertEqual(report["view_sha256"], hashlib.sha256(expected_view).hexdigest())
             self.assertEqual(report["physical_sha256"], hashlib.sha256(output.read_bytes()).hexdigest())
-            second = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            second = invoke(PROVEN, "--output", str(output), "--codec", "t5", "--source-surface", "default")
             self.assertNotEqual(second.returncode, 0)
             self.assertIn("refusing overwrite", second.stderr)
         self.assertEqual(PROVEN.read_bytes(), before)
@@ -86,7 +88,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "unknown-uk-head.sens"
-            result = invoke(source, "--source-era", "legacy", "--output", str(target))
+            result = invoke(source, "--codec", "t5", "--source-surface", "default", "--output", str(target))
             self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "blocked")
@@ -102,7 +104,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         target = source.with_suffix(".sens")
         source_before = source.read_bytes()
         target_before = target.read_bytes() if target.is_file() else None
-        result = invoke(source, "--dry-run", "--source-era", "legacy")
+        result = invoke(source, "--dry-run", "--codec", "t5", "--source-surface", "default")
         self.assertNotIn("in-repository publication needs independent",
                          result.stderr)
         self.assertEqual(source.read_bytes(), source_before)
@@ -129,7 +131,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
         report = json.loads(result.stdout)
         self.assertEqual(report["status"], "blocked")
-        self.assertEqual(report["source_era"], "auto")
+        self.assertEqual(report["codec"], "t5m")
         self.assertEqual(report["output"], "lib/surface/peer-identity-acceptance.sens")
         self.assertIn("mixed-script identifier is ambiguous", report["reason"])
         self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
@@ -141,7 +143,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias = Path(td) / "alias.lisp"
             alias.symlink_to(PROVEN)
             before = PROVEN.read_bytes()
-            result = invoke(alias, "--dry-run", "--source-era", "legacy")
+            result = invoke(alias, "--dry-run", "--codec", "t5", "--source-surface", "default")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("source path contains symlink", result.stderr)
             self.assertEqual(PROVEN.read_bytes(), before)
@@ -152,7 +154,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             actual = base / "unrequested.sens"
             alias = base / "requested.sens"
             alias.symlink_to(actual)
-            result = invoke(PROVEN, "--output", str(alias), "--source-era", "legacy")
+            result = invoke(PROVEN, "--output", str(alias), "--codec", "t5", "--source-surface", "default")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertTrue(alias.is_symlink())
@@ -166,7 +168,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
             alias_dir = base / "alias"
             alias_dir.symlink_to(actual_dir, target_is_directory=True)
             result = invoke(PROVEN, "--output", str(alias_dir / "data.sens"),
-                            "--source-era", "legacy")
+                            "--codec", "t5", "--source-surface", "default")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("output path contains symlink", result.stderr)
             self.assertFalse((actual_dir / "data.sens").exists())

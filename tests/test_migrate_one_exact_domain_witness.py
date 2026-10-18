@@ -65,14 +65,20 @@ class ExactDomainWitness(unittest.TestCase):
             "transport_trits": sum(map(len, words)) + len(words)-1,
             "physical_sha256": hashlib.sha256(payload).hexdigest(),
             "typed_word_sha256": typed_sha256(words),
-            "passes": {"pass1-sens8": 1},
+            "passes": {"pass2-my-lisp": 1}, "semantic_admitted": False,
+            "zig_transport": {"physical_sha256": hashlib.sha256(payload).hexdigest(),
+                              "source_pin_status": "MATCHED_CALLER_SUPPLIED_SHA256",
+                              "zig_binary_sha256": "a" * 64},
         }
         report = {"schema": "sens-three-pass-t5-migration/v3",
-                  "source_era": "legacy", "mode": "write-new-only",
+                  "mode": "write-new-only-zig-minted",
+                  "physical_producer": "PINNED_ZIG_T5_CARRY",
+                  "file_format": {"physical": "binary-T5-five-trits-per-byte",
+                                  "source_surface": "default"},
                   "summary": {"files_seen": 1, "files_written": 1, "files_blocked": 0},
                   "files": [row]}
         codec = mod.load_codec()
-        witness = mod.verify_upstream_t5_witness(report, "demo.lisp", "legacy", words, payload, codec)
+        witness = mod.verify_upstream_t5_witness(report, "demo.lisp", words, payload, "t5", codec)
         self.assertEqual(witness["semantic_bits"], 13)
         for field, wrong in (
             ("bytes", len(payload)+1), ("semantic_word_count", len(words)+1),
@@ -85,17 +91,17 @@ class ExactDomainWitness(unittest.TestCase):
                 tampered = copy.deepcopy(report)
                 tampered["files"][0][field] = wrong
                 with self.assertRaisesRegex(ValueError, "THREE_PASS_WITNESS"):
-                    mod.verify_upstream_t5_witness(tampered, "demo.lisp", "legacy", words, payload, codec)
-        for field, wrong in (("schema", "v2"), ("source_era", "current"), ("mode", "dry-run")):
+                    mod.verify_upstream_t5_witness(tampered, "demo.lisp", words, payload, "t5", codec)
+        for field, wrong in (("schema", "v2"), ("physical_producer", "PYTHON_REFERENCE_ONLY"), ("mode", "dry-run")):
             altered = copy.deepcopy(report)
             altered[field] = wrong
             with self.assertRaises(ValueError):
-                mod.verify_upstream_t5_witness(altered, "demo.lisp", "legacy", words, payload, codec)
+                mod.verify_upstream_t5_witness(altered, "demo.lisp", words, payload, "t5", codec)
         for field, wrong in (("files_seen", 2), ("files_written", 0), ("files_blocked", 1)):
             altered = copy.deepcopy(report)
             altered["summary"][field] = wrong
             with self.assertRaises(ValueError):
-                mod.verify_upstream_t5_witness(altered, "demo.lisp", "legacy", words, payload, codec)
+                mod.verify_upstream_t5_witness(altered, "demo.lisp", words, payload, "t5", codec)
 
 
 if __name__ == "__main__":

@@ -81,195 +81,127 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def verify_upstream_t5_witness(report, source_name, source_era, words, payload, codec):
-    """Fail closed if upstream report and independently decoded T5 differ."""
+def verify_upstream_t5_witness(report, source_name, words, payload, codec_name, codec):
+    """Check actual three-pass/Zig witness; not a semantic approval."""
     if not isinstance(report, dict) or report.get("schema") != "sens-three-pass-t5-migration/v3":
         raise ValueError("THREE_PASS_WITNESS: missing v3 report")
-    if report.get("mode") != "write-new-only-zig-minted":
-        raise ValueError("THREE_PASS_WITNESS: unpublished or non-Zig result")
-    if report.get("file_format", {}).get("physical") != "binary-T5M-base3-15-trits-per-little-endian-24-bit-group":
-        raise ValueError("THREE_PASS_WITNESS: unexpected physical codec")
+    if (report.get("mode") != "write-new-only-zig-minted" or
+            report.get("physical_producer") != "PINNED_ZIG_" + codec_name.upper() + "_CARRY"):
+        raise ValueError("THREE_PASS_WITNESS: source not minted by Zig")
+    fmt = report.get("file_format")
+    if not isinstance(fmt, dict) or not str(fmt.get("physical", "")).startswith("binary-" + codec_name.upper() + "-"):
+        raise ValueError("THREE_PASS_WITNESS: physical codec mismatch")
     rows, summary = report.get("files"), report.get("summary")
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(summary, dict):
-        raise ValueError("THREE_PASS_WITNESS: expected exactly one reported source")
-    for key, number in (("files_seen", 1), ("files_written", 1), ("files_blocked", 0)):
-        if type(summary.get(key)) is not int or summary[key] != number:
-            raise ValueError("THREE_PASS_WITNESS: source/accounting mismatch: " + key)
+        raise ValueError("THREE_PASS_WITNESS: expected exactly one source")
+    for key, val in (("files_seen", 1), ("files_written", 1), ("files_blocked", 0)):
+        if type(summary.get(key)) is not int or summary[key] != val:
+            raise ValueError("THREE_PASS_WITNESS: accounting mismatch: " + key)
     row = rows[0]
-    if not isinstance(row, dict):
-        raise ValueError("THREE_PASS_WITNESS: missing result row")
-    name = Path(source_name)
     expected = {
-        "path": name.name,
-        "output": name.with_suffix(".sens").name,
-        "status": "written",
-        "bytes": len(payload),
-        "semantic_word_count": len(words),
-        "semantic_bits": sum(map(len, words)),
+        "path": source_name, "output": str(Path(source_name).with_suffix(".sens")),
+        "status": "written", "bytes": len(payload),
+        "semantic_word_count": len(words), "semantic_bits": sum(map(len, words)),
         "transport_trits": sum(map(len, words)) + len(words) - 1,
         "physical_sha256": hashlib.sha256(payload).hexdigest(),
         "typed_word_sha256": codec.typed_sha256(words),
     }
-    for key, value in expected.items():
-        if type(row.get(key)) is not type(value) or row[key] != value:
-            raise ValueError("THREE_PASS_WITNESS: physical/report mismatch: " + key)
-    if not isinstance(row.get("passes"), dict):
-        raise ValueError("THREE_PASS_WITNESS: missing pass accounting")
+    for key, val in expected.items():
+        if type(row.get(key)) is not type(val) or row[key] != val:
+            raise ValueError("THREE_PASS_WITNESS: receipt mismatch " + key)
+    receipt = row.get("zig_transport")
+    if (not isinstance(row.get("passes"), dict) or row.get("semantic_admitted") is not False or
+            not isinstance(receipt, dict) or
+            receipt.get("physical_sha256") != expected["physical_sha256"] or
+            receipt.get("source_pin_status") != "MATCHED_CALLER_SUPPLIED_SHA256" or
+            not receipt.get("zig_binary_sha256")):
+        raise ValueError("THREE_PASS_WITNESS: Zig receipt missing/mismatched")
     return expected
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path, help="один .lisp у поточному репозиторії")
-    parser.add_argument("--output", type=Path, help="явний target; default = same-stem .sens")
-    parser.add_argument("--dry-run", action="store_true", help="перевірити без запису target")
-    parser.add_argument("--zig-codec", action="store_true",
-                        help="застосувати точний Zig 0.16 T5 побайтовий контроль")
-    parser.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
-                        help="лише позначка джерела у звіті; семантику встановлює чинний трипрохідний мігратор")
-    parser.add_argument("--source-surface", choices=("укр", "ук", "default"), default="укр",
-                        help="людська проєкція; стандарт — повна ратифікована укр")
+    parser.add_argument("source", type=Path)
+    parser.add_argument("--output", type=Path, help="same-stem .sens by default")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--codec", choices=("t5m", "t5"), default="t5m")
+    parser.add_argument("--source-surface", choices=("default", "ук", "укр"), default="укр")
     args = parser.parse_args()
-
     source = resolve_without_links(args.source, "source")
-    if source.suffix.lower() != ".lisp":
-        raise SystemExit("BLOCK: source must have .lisp extension")
+    if source.suffix != ".lisp" or not source.is_file():
+        raise SystemExit("BLOCK: existing .lisp source required")
     try:
         rel = source.relative_to(ROOT)
     except ValueError as exc:
-        raise SystemExit("BLOCK: source must be inside the repository") from exc
-    if not source.is_file():
-        raise SystemExit(f"BLOCK: source does not exist: {rel}")
-
-    requested_output = args.output or source.with_suffix(".sens")
-    output = resolve_without_links(requested_output, "output")
+        raise SystemExit("BLOCK: source must be inside repository") from exc
+    output = resolve_without_links(args.output or source.with_suffix(".sens"), "output")
     if output.suffix != ".sens":
-        raise SystemExit("BLOCK: physical output must end in .sens")
-    view_path = resolve_without_links(output.with_suffix(""), "view")
-    source_hash_before = sha256_file(source)
-
-    if output == source:
-        raise SystemExit("BLOCK: output aliases source")
-    for destination in (output, view_path):
-        if (destination.exists() or destination.is_symlink()) and not args.dry_run:
-            display = str(destination.relative_to(ROOT)) if destination.is_relative_to(ROOT) else str(destination)
-            raise SystemExit(f"BLOCK: target already exists; refusing overwrite: {display}")
-    missing = [str(p.relative_to(ROOT)) for p in [MIGRATOR, CODEC] if not p.exists()]
-    if missing:
-        raise SystemExit("BLOCK: missing migration dependency: " + ", ".join(missing))
-
-    rel_parent = rel.parent
-    with tempfile.TemporaryDirectory(prefix="sens-one-stage-") as td:
-        stage = Path(td) / "source"
-        stage.mkdir(parents=True)
-        staged_source = stage / rel_parent / rel.name
-        staged_source.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, staged_source)
-        stage_out = Path(td) / "out"
-        report = Path(td) / "report.json"
-
-        cmd = [
-            sys.executable, str(MIGRATOR), str(staged_source),
-            "--out", str(stage_out),
-            "--codec", "t5m",
-            "--source-surface", args.source_surface,
-            "--report", str(report),
-        ]
-        completed = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
-        state = json.loads(report.read_text(encoding="utf-8")) if report.exists() else None
-        expected_rel = str(rel.with_suffix(".sens"))
-
-        if completed.returncode != 0:
-            file_rows = (state or {}).get("files") or [{}]
-            evidence = file_rows[0]
-            reason = evidence.get(
-                "reason", completed.stderr.strip() or "canonical three-pass migrator blocked"
-            )
-            # Preserve the actual failing token, rather than turning an
-            # actionable quoted-datum empty into an anonymous rejection.
-            token = evidence.get("token")
-            if isinstance(token, str) and token and token not in reason:
-                reason += f" [token={token}]"
-            print(json.dumps({
-                "status": "blocked",
-                "source": str(rel),
-                "output": expected_rel,
-                "source_era": args.source_era,
-                "reason": reason,
-                "token": token,
-                "line": evidence.get("line"),
-                "column": evidence.get("column"),
-            }, ensure_ascii=False, indent=2))
-            return 2
-
-        generated = stage_out / staged_source.with_suffix(".sens").name
-        if not generated.is_file():
-            print(json.dumps({
-                "status": "blocked",
-                "source": str(rel),
-                "output": expected_rel,
-                "reason": "three-pass migrator produced no same-stem physical .sens",
-            }, ensure_ascii=False, indent=2))
-            return 2
-
-        codec = load_codec()
-        payload = generated.read_bytes()
-        words = codec.decode_t5m_bytes(payload)
-        if not words:
-            raise SystemExit("BLOCK: empty physical program has no canonical view")
-        view_bytes = (" ".join(words) + "\n").encode("ascii")
-        if codec.encode_t5m_projection(" ".join(words) + "\n") != payload:
-            raise SystemExit("BLOCK: generated bytes are not canonical T5M")
-        typed_hash = codec.typed_sha256(words)
-        output_hash = hashlib.sha256(payload).hexdigest()
-
-        try:
-            witness = verify_upstream_t5_witness(
-                state, rel.name, args.source_era, words, payload, codec
-            )
-        except ValueError as exc:
+        raise SystemExit("BLOCK: target must have .sens extension")
+    view = resolve_without_links(output.with_suffix(""), "view")
+    for target in (output, view):
+        if (target.exists() or target.is_symlink()) and not args.dry_run:
+            raise SystemExit("BLOCK: target already exists; refusing overwrite: " + str(target))
+    if source in (output, view):
+        raise SystemExit("BLOCK: source cannot be the target")
+    original = source.read_bytes()
+    with tempfile.TemporaryDirectory(prefix="sens-one-stage-") as temp:
+        stage = Path(temp) / "out"
+        report_path = Path(temp) / "report.json"
+        # Do not clone source to /tmp: preserve its Git path for nonprogram
+        # classification and historical identity in the shared migrator.
+        command = [sys.executable, str(MIGRATOR), str(source),
+                   "--out", str(stage), "--report", str(report_path),
+                   "--codec", args.codec, "--source-surface", args.source_surface]
+        process = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+        report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else None
+        if process.returncode:
+            row = ((report or {}).get("files") or [{}])[0]
             print(json.dumps({
                 "status": "blocked", "source": str(rel),
-                "output": expected_rel, "source_era": args.source_era,
-                "reason": str(exc),
+                "reason": row.get("reason", process.stderr.strip() or "three-pass failed"),
+                "token": row.get("token"), "line": row.get("line"), "column": row.get("column"),
             }, ensure_ascii=False, indent=2))
             return 2
-
+        physical_path = stage / rel.with_suffix(".sens").name
+        view_path = physical_path.with_suffix("")
+        if not physical_path.is_file() or not view_path.is_file():
+            raise SystemExit("BLOCK: missing .sens or extensionless view from three-pass")
+        payload, visible = physical_path.read_bytes(), view_path.read_bytes()
+        codec = load_codec()
+        words = codec.decode_t5m_bytes(payload) if args.codec == "t5m" else codec.decode_bytes(payload)
+        roundtrip = (codec.encode_t5m_projection(" ".join(words)) if args.codec == "t5m"
+                     else codec.encode_words(words))
+        if payload != roundtrip or visible != (" ".join(words) + "\n").encode("ascii"):
+            raise SystemExit("BLOCK: physical/view word identity mismatch")
+        try:
+            proof = verify_upstream_t5_witness(report, rel.name, words, payload, args.codec, codec)
+        except ValueError as exc:
+            print(json.dumps({"status": "blocked", "reason": str(exc)}, ensure_ascii=False))
+            return 2
+        if source.read_bytes() != original:
+            raise SystemExit("BLOCK: source changed during conversion")
+        if resolve_without_links(args.source, "source") != source:
+            raise SystemExit("BLOCK: source path changed during conversion")
+        if not args.dry_run:
+            import migration_publish_pair
+            migration_publish_pair.publish_pair(atomic_no_clobber, output, payload, view, visible)
         result = {
             "status": "would-write" if args.dry_run else "written",
             "source": str(rel),
             "output": str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output),
-            "view": str(view_path.relative_to(ROOT)) if view_path.is_relative_to(ROOT) else str(view_path),
-            "view_sha256": hashlib.sha256(view_bytes).hexdigest(),
-            "source_sha256": source_hash_before,
-            "physical_sha256": output_hash,
-            "typed_word_sha256": typed_hash,
-            "bytes": len(payload),
-            "semantic_bits": witness["semantic_bits"],
-            "transport_trits": witness["transport_trits"],
-            "semantic_word_count": witness["semantic_word_count"],
-            "words": words,
-            "source_era": args.source_era,
+            "view": str(view.relative_to(ROOT)) if view.is_relative_to(ROOT) else str(view),
+            "codec": args.codec,
+            "source_surface": args.source_surface,
+            "source_sha256": hashlib.sha256(original).hexdigest(),
+            "physical_sha256": proof["physical_sha256"],
+            "view_sha256": hashlib.sha256(visible).hexdigest(),
+            "typed_word_sha256": proof["typed_word_sha256"],
+            "bytes": len(payload), "semantic_bits": proof["semantic_bits"],
+            "semantic_word_count": proof["semantic_word_count"],
+            "zig_transport": report["files"][0]["zig_transport"],
             "semantic_parity": "NOT_VERIFIED",
-            "three_pass": (state or {}).get("files", [{}])[0].get("passes", {}),
         }
-
-        if args.zig_codec:
-            with tempfile.TemporaryDirectory(prefix="sens-zig-one-") as ztd:
-                zig_binary = zig_codec_bridge.build_transport(Path(ztd))
-                result["zig_transport"] = zig_codec_bridge.verify_t5(zig_binary, payload, codec="t5m")
-
-        if sha256_file(source) != source_hash_before:
-            raise SystemExit("BLOCK: source changed during migration")
-        if resolve_without_links(args.source, "source") != source:
-            raise SystemExit("BLOCK: source path changed during migration")
-        if resolve_without_links(requested_output, "output") != output:
-            raise SystemExit("BLOCK: output path changed during migration")
-        if not args.dry_run:
-            publish_pair(atomic_no_clobber, output, payload, view_path, view_bytes)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
