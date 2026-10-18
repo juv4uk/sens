@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/mechanism-selector.lisp"
 D4 = ROOT / "lib/domains/d4.lisp"
+D5 = ROOT / "lib/domains/d5.lisp"
 # Git blob оригіналу перед переходом на укр: НЕ semantic або wire identity.
 ORIGINAL_SOURCE_BLOB = "6a766d43132d44151803c1f473fdc4d7da26457f"
 REPLACEMENTS = (
@@ -57,6 +58,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
         cls.table = D4.read_text(encoding="utf-8")
+        cls.table_d5 = D5.read_text(encoding="utf-8")
 
     def test_ratified_peer_spellings_with_domain_width_and_identity(self):
         for bits, ukr, en, lisp, _count in REPLACEMENTS:
@@ -75,20 +77,37 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         for bits, ukr, _en, _lisp, count in REPLACEMENTS:
             self.assertEqual(code.count(f"({ukr} "), count)
             self.assertNotRegex(code, rf"\({bits}(?=\s)")
-        self.assertEqual(self.source.count("(третє "), 0,
-                         "D5 не входить до цього узгодженого write-set")
+        self.assertEqual(code.count("(третє route)"), 1)
+        self.assertNotIn("(10011 route)", code)
 
-    def test_existing_d5_head_remains_exactly_untouched(self):
+    def test_d5_caddr_ukr_projection_is_ratified_and_one_head_only(self):
         code = uncommented(self.source)
-        self.assertEqual(code.count("(10011 route)"), 1)
-        self.assertNotIn("(третє route)", code)
+        self.assertEqual(code.count("(третє route)"), 1)
+        self.assertNotIn("(10011 route)", code)
+        rows = [row for row in self.table_d5.splitlines()
+                if row.startswith("  (10011 ")]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("(укр третє)", rows[0])
+        self.assertIn("(en caddr)", rows[0])
+        self.assertIn("(LISP CADDR)", rows[0])
 
     def test_original_source_recoverable_byte_for_byte(self):
         reverted = self.source
         for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
             reverted = reverted.replace(f"({ukr} ", f"({bits} ")
+        reverted = reverted.replace("(третє route)", "(10011 route)")
         self.assertEqual(git_blob(reverted.encode("utf-8")), ORIGINAL_SOURCE_BLOB,
                          "змінено дані, коментарі, структуру або нецільові голови")
+
+    def test_wrong_d5_peer_fails_historical_source_inverse(self):
+        wrong = self.source.replace("(третє route)", "(друге route)", 1)
+        self.assertNotEqual(wrong, self.source)
+        inverse = wrong
+        for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
+            inverse = inverse.replace(f"({ukr} ", f"({bits} ")
+        inverse = inverse.replace("(третє route)", "(10011 route)")
+        self.assertNotEqual(git_blob(inverse.encode("utf-8")),
+                            ORIGINAL_SOURCE_BLOB)
 
     def test_registry_and_symbolic_sid_values_still_present(self):
         self.assertIn('"lib/surface/semantic-registry.lisp"', self.source)
@@ -106,6 +125,7 @@ class MechanismSelectorFullUkrProjectionTests(unittest.TestCase):
         reverted = self.source
         for bits, ukr, _en, _lisp, _count in REPLACEMENTS:
             reverted = reverted.replace(f"({ukr} ", f"({bits} ")
+        reverted = reverted.replace("(третє route)", "(10011 route)")
         tampered = reverted.replace("(як-є rows)", "(як-є other-rows)", 1)
         self.assertNotEqual(git_blob(tampered.encode("utf-8")),
                             ORIGINAL_SOURCE_BLOB)
