@@ -17,52 +17,52 @@
 
 (0011 island-lowering-append4
   (0010 (a b c d)
-    (110011110 a (110011110 b (110011110 c d)))))
+    (рядок-додати a (рядок-додати b (рядок-додати c d)))))
 
 (0011 island-lowering-add-payload
   (0010 (executor left right)
     ((0010 (l r)
-      (110
-        ((101 executor (001 common-lisp))
+      (за-умовою
+        ((тотожне? executor (як-є common-lisp))
          (island-lowering-append4 "" l " " r))
-        ((101 executor (001 prolog))
+        ((тотожне? executor (як-є prolog))
          (island-lowering-append4 "" l " " r))
-        ((101 executor (001 datalog))
+        ((тотожне? executor (як-є datalog))
          (island-lowering-append4 "" l " " r))
-        ((101 executor (001 clips))
+        ((тотожне? executor (як-є clips))
          (island-lowering-append4 "" l " " r))
-        ((010 (001 ()))
-         (001 ()))))
+        ((атом? (як-є ()))
+         (як-є ()))))
       (write-to-string left)
       (write-to-string right))))
 
 (0011 island-lower-binary
   (0010 (sid executor left right)
-    ((0010 (selection) (110
-        ((010 selection)
-         (1110
-           (001 island-lowering-failure)
-           (001 malformed-selection)
+    ((0010 (selection) (за-умовою
+        ((атом? selection)
+         (список
+           (як-є island-lowering-failure)
+           (як-є malformed-selection)
            sid executor))
-        ((010 (001 ()))
-         (110
-           ((101 (100 selection) (001 mechanism-selected))
-            ((0010 (mechanism) (110
-                ((101 mechanism (001 bounded-exact-add))
-                 ((0010 (payload) (110
-                     ((010 payload)
-                      (1110
-                        (001 island-lowering-failure)
-                        (001 unsupported-executor)
+        ((атом? (як-є ()))
+         (за-умовою
+           ((тотожне? (перше selection) (як-є mechanism-selected))
+            ((0010 (mechanism) (за-умовою
+                ((тотожне? mechanism (як-є bounded-exact-add))
+                 ((0010 (payload) (за-умовою
+                     ((атом? payload)
+                      (список
+                        (як-є island-lowering-failure)
+                        (як-є unsupported-executor)
                         sid executor mechanism))
-                     ((010 (001 ()))
-                      (1110
-                        (001 island-lowering-result)
+                     ((атом? (як-є ()))
+                      (список
+                        (як-є island-lowering-result)
                         sid executor mechanism payload)))) (island-lowering-add-payload executor left right)))
-                ((010 (001 ()))
-                 (1110
-                   (001 island-lowering-failure)
-                   (001 unsupported-selected-mechanism)
+                ((атом? (як-є ()))
+                 (список
+                   (як-є island-lowering-failure)
+                   (як-є unsupported-selected-mechanism)
                    sid executor mechanism)))) (100111 selection)))
-           ((010 (001 ()))
+           ((атом? (як-є ()))
             selection))))) (mechanism-select sid executor))))

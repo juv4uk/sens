@@ -24,9 +24,9 @@
 (0011 tcp-read-bytes->text
   (0010 (bytes)
     ((0010 (decoded)
-       (110
-         ((101 (100 decoded) (001 decoded))
-          (1001 decoded))
+       (за-умовою
+         ((тотожне? (перше decoded) (як-є decoded))
+          (друге decoded))
          (#d1:1
           decoded)))
      (utf8-decode-string bytes))))
