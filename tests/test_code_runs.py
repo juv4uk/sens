@@ -143,8 +143,8 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         self.assertEqual(surfaces[4]["0010"], "функція")
         for name, argument, width, bits in self.SELECTORS:
             peer = surfaces[width][bits]
-            new = f"(визначити {name}\\n  (функція ({argument}) ({peer} {argument})))"
-            old = f"(визначити {name}\\n  (0010 ({argument}) ({bits} {argument})))"
+            new = f"(визначити {name}\n  (функція ({argument}) ({peer} {argument})))"
+            old = f"(визначити {name}\n  (0010 ({argument}) ({bits} {argument})))"
             self.assertEqual(source.count(new), 1, f"хибна укр-проєкція {name}")
             self.assertNotIn(old, source)
             source = source.replace(new, old, 1)
