@@ -17,49 +17,49 @@
 (0011 cam-symbol-written (11110100 cam-symbol))
 (0011 cam-symbol-read (11101010 cam-symbol-written))
 
-(0011 cam-string "00")
+(визначити cam-string "00")
 (0011 cam-string-written (11110100 cam-string))
 (0011 cam-string-read (11101010 cam-string-written))
 
-(0011 cam-sid 00000011)
+(визначити cam-sid 00000011)
 (0011 cam-sid-written (11110100 cam-sid))
 (0011 cam-sid-read (11101010 cam-sid-written))
 
 (0011 cam-binary-descriptor (110110110 2))
 
-(0011 cam-observed
-  (1110
-    (1110 (001 binary-descriptor) cam-binary-descriptor)
-    (1110 (001 symbol-written) cam-symbol-written)
-    (1110 (001 symbol-read) cam-symbol-read)
-    (1110 (001 symbol-roundtrip)
+(визначити cam-observed
+  (список
+    (список (як-є binary-descriptor) cam-binary-descriptor)
+    (список (як-є symbol-written) cam-symbol-written)
+    (список (як-є symbol-read) cam-symbol-read)
+    (список (як-є symbol-roundtrip)
           (11110111 cam-symbol cam-symbol-read))
-    (1110 (001 string-written) cam-string-written)
-    (1110 (001 string-read) cam-string-read)
-    (1110 (001 string-roundtrip)
+    (список (як-є string-written) cam-string-written)
+    (список (як-є string-read) cam-string-read)
+    (список (як-є string-roundtrip)
           (11110111 cam-string cam-string-read))
-    (1110 (001 sid-written) cam-sid-written)
-    (1110 (001 sid-read) cam-sid-read)
-    (1110 (001 sid-roundtrip)
+    (список (як-є sid-written) cam-sid-written)
+    (список (як-є sid-read) cam-sid-read)
+    (список (як-є sid-roundtrip)
           (11110111 cam-sid cam-sid-read))))
 
-(0011 cam-expected
-  (1110
-    (1110 (001 binary-descriptor) (1110 (001 binary) 2))
-    (1110 (001 symbol-written) "00")
-    (1110 (001 symbol-read) 0)
+(визначити cam-expected
+  (список
+    (список (як-є binary-descriptor) (список (як-є binary) 2))
+    (список (як-є symbol-written) "00")
+    (список (як-є symbol-read) 0)
     (1110 (001 symbol-roundtrip) (001 (0)))
-    (1110 (001 string-written) "\"00\"")
-    (1110 (001 string-read) "00")
+    (список (як-є string-written) "\"00\"")
+    (список (як-є string-read) "00")
     (1110 (001 string-roundtrip) (001 (1)))
-    (1110 (001 sid-written) "00000011")
-    (1110 (001 sid-read) 00000011)
+    (список (як-є sid-written) "00000011")
+    (список (як-є sid-read) 00000011)
     (1110 (001 sid-roundtrip) (001 (1)))))
 
-(110
+(за-умовою
   ((11110111 cam-observed cam-expected)
-   (001 (core4-answer-carrier-matrix-ok)))
-  ((010 (001 ()))
-   (1110 (001 core4-answer-carrier-matrix-mismatch)
+   (як-є (core4-answer-carrier-matrix-ok)))
+  ((атом? (як-є ()))
+   (список (як-є core4-answer-carrier-matrix-mismatch)
          cam-expected
          cam-observed)))
