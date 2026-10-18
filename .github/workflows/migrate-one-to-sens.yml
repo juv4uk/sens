@@ -9,11 +9,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Run real one-file canonical three-pass tests
+      - uses: ./.github/actions/install-zig
+      - name: Перевірити справжню Zig/T5M однофайлову міграцію
         run: |
           set -euo pipefail
           python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
-      - name: Show canonical physical canary (read-only, no publication)
+      - name: Перевірити фізичний T5M і читабельні біти без публікації
         run: |
           set -euo pipefail
           python3 scripts/migrate-one-to-sens.py \
