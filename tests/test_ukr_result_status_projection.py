@@ -32,7 +32,7 @@ D9_UNPROVEN = {"101001110", "101010010", "110000011"}
 
 def source_code(source):
     # Ignore comments and quoted strings; preserve executable parentheses.
-    return re.sub(r';[^\\n]*|"(?:\\\\.|[^"\\\\])*"', "", source)
+    return re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"', "", source)
 
 
 class ResultStatusProjectionTests(unittest.TestCase):
@@ -46,8 +46,8 @@ class ResultStatusProjectionTests(unittest.TestCase):
             for bits, ukr in peers.items():
                 with self.subTest(domain=d, bits=bits):
                     self.assertRegex(tables[d], re.compile(
-                        r"^\\s*\\(" + bits + r"\\s+\\(ук [^()]+\\) \\(укр "
-                        + re.escape(ukr) + r"\\)", re.MULTILINE))
+                        r"^\s*\(" + bits + r"\s+\(ук [^()]+\) \(укр "
+                        + re.escape(ukr) + r"\)", re.MULTILINE))
 
     def test_d9_names_have_concrete_source_closure(self):
         core = (ROOT / "lib/core4.lisp").read_text(encoding="utf-8")
@@ -57,23 +57,23 @@ class ResultStatusProjectionTests(unittest.TestCase):
                     self.assertIn("(визначити міркувати-спостерігати reason-observe)",
                                   SOURCE)
                 else:
-                    self.assertRegex(core, r"\\((?:0011|визначити) "
-                                     + re.escape(name) + r"[\\s()]")
+                    self.assertRegex(core, r"\((?:0011|визначити) "
+                                     + re.escape(name) + r"[\s()]")
 
     def test_no_unqualified_d1_or_migrated_numeric_heads(self):
         code = source_code(SOURCE)
-        heads = set(re.findall(r"\\(\\s*([01]+)(?=[\\s()])", code))
+        heads = set(re.findall(r"\(\s*([01]+)(?=[\s()])", code))
         native = {bits for entries in NATIVE.values() for bits in entries}
         self.assertEqual(heads, D9_UNPROVEN)
         self.assertFalse(heads & (native | set(D9_PROVEN)))
-        self.assertNotRegex(code, r"(?<![\\w:#])[01](?![01\\w])")
+        self.assertNotRegex(code, r"(?<![\w:#])[01](?![01\w])")
         self.assertIn("так", code)
         self.assertIn("ні", code)
 
     def test_undemonstrated_d9_calls_fail_closed_not_guessed(self):
         code = source_code(SOURCE)
         for bits in D9_UNPROVEN:
-            self.assertRegex(code, r"\\(\\s*" + bits + r"[\\s()]")
+            self.assertRegex(code, r"\(\s*" + bits + r"[\s()]")
         self.assertNotIn("D7", SOURCE.splitlines()[0])
 
     def test_legacy_public_definitions_and_data_tags_kept(self):
