@@ -1,7 +1,8 @@
 //! Експериментальний, ЯВНО парний вузький зріз математики D5/D24+.
 //!
-//! `name.lisp` містить допущену українську D5-голову та операнди
-//! `#d24:<exact bits>` чи `#d48:<exact bits>`.
+//! `name.lisp` містить українську D5-голову та десяткові цілі операнди.
+//! Адаптер формує exact D24+ до фізичного Zig T5M без host-float.
+//! Історичні tagged D24+ свідки тимчасово залишаються тільки для сумісності.
 //! Фізичний `name.sens` перевозить лише слова через Zig T5M.
 //! ПРИМІТКА: сама ширина фізичного слова не надає D24-identity.
 //! Домен береться тільки з перевіреного SENS AST парного джерела;
@@ -59,6 +60,86 @@ mod paired {
         }
     }
 
+
+    // The source spelling, not a host f64, owns the decimal input digits.
+    fn decimal_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
+        if matches!(&expr.kind, ExprKind::DomainCall(..) | ExprKind::Call(..)
+            | ExprKind::List(..) | ExprKind::Pair(..))
+        {
+            return None;
+        }
+        let token = source.get(expr.span.start..expr.span.end)?;
+        let digits = token.strip_prefix('-').or_else(|| token.strip_prefix('+'))
+            .unwrap_or(token);
+        (!digits.is_empty() && digits.bytes().all(|ch| ch.is_ascii_digit()))
+            .then_some(token)
+    }
+
+    fn decimal_width(value: i128) -> usize {
+        for width in [24usize, 48, 96] {
+            let bound = 1i128 << (width - 1);
+            if value >= -bound && value < bound {
+                return width;
+            }
+        }
+        192
+    }
+
+    fn decimal_word(token: &str, width: usize, span: sens::Span) -> Result<Expr, String> {
+        let value: i128 = token.parse().map_err(|_| {
+            format!("SENS decimal source: integer out of exact input range: {token}")
+        })?;
+        // Two's complement, including sign-extension beyond 128 bits.
+        let bits: Vec<u8> = (0..width).rev().map(|position| {
+            if position >= 128 { u8::from(value.is_negative()) }
+            else { ((value >> position) & 1) as u8 }
+        }).collect();
+        let number = BinaryNumber::from_numeric_domain_bits(width, &bits)
+            .ok_or("SENS decimal source: invalid D24+ signed value")?;
+        Ok(Expr { kind: ExprKind::BinaryNumber(number), span })
+    }
+
+    // This narrow math-source adapter admits decimal integer atoms to D24+.
+    // Only a D5 mathematical call gives them that role. Zig still only packs
+    // exact words; SENS alone executes the domain semantics.
+    fn project_decimal_math(expr: &Expr, source: &str, depth: usize)
+        -> Result<Expr, String>
+    {
+        if depth > 64 {
+            return Err("SENS decimal source: nesting exceeds limit".into());
+        }
+        let ExprKind::DomainCall(identity, args) = &expr.kind else {
+            return Ok(expr.clone());
+        };
+        let mut width = 24usize;
+        let mut decimal = false;
+        let mut tagged = false;
+        for arg in args.iter() {
+            if let Some(token) = decimal_lexeme(arg, source) {
+                let value: i128 = token.parse().map_err(|_| {
+                    format!("SENS decimal source: integer out of exact input range: {token}")
+                })?;
+                width = width.max(decimal_width(value));
+                decimal = true;
+            } else if matches!(&arg.kind,
+                ExprKind::BinaryNumber(number) if number.numeric_domain_width().is_some())
+            {
+                tagged = true;
+            }
+        }
+        if decimal && tagged {
+            return Err("SENS decimal source: do not mix decimal and tagged operands".into());
+        }
+        let mut operands = Vec::with_capacity(args.len());
+        for arg in args.iter() {
+            operands.push(match decimal_lexeme(arg, source) {
+                Some(token) => decimal_word(token, width, arg.span)?,
+                None => project_decimal_math(arg, source, depth + 1)?,
+            });
+        }
+        Ok(Expr { kind: ExprKind::DomainCall(*identity, operands.into()), span: expr.span })
+    }
+
     fn qualify(source: &str) -> Result<Expr, String> {
         let parsed = sens::parse(source).map_err(|e| format!("SENS reader: {e}"))?;
         let lowered = sens::lower_program(&parsed);
@@ -68,8 +149,9 @@ mod paired {
         if !matches!(&root.kind, ExprKind::DomainCall(_, _)) {
             return Err("SENS admission: bare numeric data is not executable".into());
         }
-        admit(root, 0)?;
-        Ok(root.clone())
+        let projected = project_decimal_math(root, source, 0)?;
+        admit(&projected, 0)?;
+        Ok(projected)
     }
 
     fn word(width: usize, bits: Vec<u8>) -> Result<ExactT5Word, String> {
@@ -250,6 +332,35 @@ mod paired {
                 };
                 assert_eq!(number.numeric_domain_width(), Some(expected_width), "id={id}");
                 assert_eq!(number.to_decimal_string(), expected_human, "id={id}");
+            }
+        }
+
+        #[test]
+        fn decimal_ukrainian_lisp_through_physical_zig_t5m_and_sens_math() {
+            for (id, text, input_width, expected) in [
+                ("sum", "(додати 1 2)", 24, "3"),
+                ("negative", "(відняти 1 3)", 24, "-2"),
+                ("signed", "(додати -3 1)", 24, "-2"),
+                ("carry", "(додати 8388607 1)", 24, "8388608"),
+                ("wide", "(додати 8388608 1)", 48, "8388609"),
+                ("product", "(помножити 7 6)", 24, "42"),
+            ] {
+                let words = expected_words(&qualify(text).unwrap()).unwrap();
+                assert_eq!(words[2].width, input_width, "test_id={id} layer=source");
+                let packed = zig_transport::encode_t5_exact_words(&words).unwrap();
+                assert_eq!(zig_transport::decode_t5_exact_words(&packed).unwrap(), words);
+                let got = eval_verified(text, &packed).unwrap();
+                assert_eq!(got.to_string(), expected, "test_id={id} layer=SENS");
+            }
+            for invalid in [
+                "(додати 0,5 2)",
+                "(додати 1e2 2)",
+                "(додати #d24:000000000000000000000001 2)",
+                "(додати 170141183460469231731687303715884105728 1)",
+                "(як-є 1)",
+            ] {
+                assert!(qualify(invalid).is_err(),
+                    "test_id=invalid-math-source layer=SENS actual={invalid}");
             }
         }
 
@@ -504,7 +615,7 @@ mod paired {
         #[test]
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
-                "(додати 1 2)",
+                "(додати 0,5 2)",
                 "(додати #d24:000000000000000000000001 2)",
                 "(додати #d24:000000000000000000000001 #d48:000000000000000000000000000000000000000000000010)",
                 "(quote #d24:000000000000000000000001)",
