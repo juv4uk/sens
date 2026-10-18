@@ -43,7 +43,7 @@
   (функція (items remaining)
     (за-умовою
       ((атом? items) (тотожне? remaining 0))
-      ((тотожне? remaining 0) (тотожне? (як-є (0)) (як-є (1))))
+      ((тотожне? remaining 0) ні)
       (так
        (science-list-length-equals? (решта items) (відняти remaining 1))))))
 
@@ -64,10 +64,10 @@
     (за-умовою
       ((атом? x) (як-є ()))
       ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
-      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) ні) (як-є ()))
       ((тотожне? (перше x) *dimension-schema*)
        (за-умовою
-         ((тотожне? (110101100 (друге x)) (як-є ())) (як-є ()))
+         ((тотожне? (символ? (друге x)) (як-є ())) (як-є ()))
          (так так)))
       (так (як-є ())))))
 
@@ -102,7 +102,7 @@
     (за-умовою
       ((атом? x) (як-є ()))
       ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
-      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) ні) (як-є ()))
       ((тотожне? (перше x) *quantity-schema*)
        (unit? (третє x)))
       (так (як-є ())))))
@@ -122,7 +122,7 @@
     (за-умовою
       ((атом? x) (як-є ()))
       ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
-      ((тотожне? (science-list-length-equals? x 3) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 3) ні) (як-є ()))
       ((тотожне? (перше x) *science-source-schema*) так)
       (так (як-є ())))))
 
@@ -155,14 +155,14 @@
     (за-умовою
       ((атом? x) (як-є ()))
       ((тотожне? (science-proper-list? x) (як-є ())) (як-є ()))
-      ((тотожне? (science-list-length-equals? x 7) (тотожне? (як-є (0)) (як-є (1)))) (як-є ()))
+      ((тотожне? (science-list-length-equals? x 7) ні) (як-є ()))
       ((тотожне? (перше x) *scientific-constant-schema*)
        (за-умовою
-         ((тотожне? (110101100 (друге x)) (як-є ())) (як-є ()))
+         ((тотожне? (символ? (друге x)) (як-є ())) (як-є ()))
          ((тотожне? (quantity? (третє x)) (як-є ())) (як-є ()))
          ((тотожне? (scientific-constant-status-valid? (четверте x)) (як-є ())) (як-є ()))
-         ((тотожне? (scientific-constant-kind-valid? (110110101 x)) (як-є ())) (як-є ()))
-         ((тотожне? (110101100 (science-sixth x)) (як-є ())) (як-є ()))
+         ((тотожне? (scientific-constant-kind-valid? (п'ятий x)) (як-є ())) (як-є ()))
+         ((тотожне? (символ? (science-sixth x)) (як-є ())) (як-є ()))
          ((тотожне? (science-source? (science-seventh x)) (як-є ())) (як-є ()))
          (так так)))
       (так (як-є ())))))
@@ -185,7 +185,7 @@
   (функція (constant) (четверте constant)))
 
 (визначити scientific-constant-kind
-  (функція (constant) (110110101 constant)))
+  (функція (constant) (п'ятий constant)))
 
 (визначити scientific-constant-system
   (функція (constant) (science-sixth constant)))

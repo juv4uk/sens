@@ -27,6 +27,10 @@ MAP = {bits: name for table in NATIVE.values() for bits, name in table.items()}
 REVERSE = {name: bits for bits, name in MAP.items()}
 D1 = {"#d1:1": "так", "#d1:0": "ні"}
 D1_REVERSE = {value: key for key, value in D1.items()}
+D9 = {"110101100": "символ?", "110110101": "п'ятий"}
+D9_REVERSE = {name: bits for bits, name in D9.items()}
+FALSE_EXPR = "(тотожне? (як-є (0)) (як-є (1)))"
+PRE_REPAIR_BLOB = "8ed44251876053a778837c7739427b7c20427026"
 
 
 def project_heads(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
@@ -147,8 +151,17 @@ class QuantityUkrProjection(unittest.TestCase):
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
 
+    def restore_previous(self):
+        expanded, false_count = project_literals(self.source, {"ні": FALSE_EXPR})
+        previous, peer_counts = project_heads(expanded, D9_REVERSE)
+        self.assertEqual(false_count, {"ні": 5})
+        self.assertEqual(peer_counts, {"символ?": 3, "п'ятий": 2})
+        self.assertEqual(git_blob(previous), PRE_REPAIR_BLOB)
+        return previous
+
     def test_exact_original_git_blob_recoverable(self):
-        old_d1, seen_d1 = project_literals(self.source, D1_REVERSE)
+        previous = self.restore_previous()
+        old_d1, seen_d1 = project_literals(previous, D1_REVERSE)
         old, seen = project_heads(old_d1, REVERSE)
         self.assertEqual(seen, {MAP[bits]: n for bits, n in HEAD_COUNTS.items()})
         self.assertEqual(seen_d1, {"так": 19})
@@ -161,11 +174,19 @@ class QuantityUkrProjection(unittest.TestCase):
         same, left = project_literals(self.source, D1)
         self.assertEqual(left, {})
         self.assertEqual(same, self.source)
+        same, left = project_heads(self.source, D9)
+        self.assertEqual(left, {})
+        self.assertEqual(same, self.source)
 
     def test_two_way_projection_idempotence(self):
-        raw, _ = project_heads(project_literals(self.source, D1_REVERSE)[0], REVERSE)
-        next_source, _ = project_literals(project_heads(raw, MAP)[0], D1)
-        self.assertEqual(next_source, self.source)
+        previous = self.restore_previous()
+        raw, _ = project_heads(project_literals(previous, D1_REVERSE)[0], REVERSE)
+        again, _ = project_heads(raw, MAP)
+        again, _ = project_literals(again, D1)
+        again, _ = project_heads(again, D9)
+        self.assertEqual(again.count(FALSE_EXPR), 5)
+        again = again.replace(FALSE_EXPR, "ні")
+        self.assertEqual(again, self.source)
 
     def test_comments_strings_and_quoted_data_unchanged(self):
         synthetic = '; #d1:1 (0011 ignored)\n"(010 not-code) #d1:1"\n(0011 x (001 (0)))\n'
@@ -177,17 +198,31 @@ class QuantityUkrProjection(unittest.TestCase):
         self.assertIn('"(010 not-code) #d1:1"', migrated)
         self.assertIn("(визначити x (як-є (0)))", migrated)
 
-    def test_data_tags_d9_unknown_and_d1_structural_bits_preserved(self):
+    def test_data_tags_d9_and_exact_d1_false(self):
         self.assertIn("(як-є dimension/1)", self.source)
         self.assertIn("(як-є scientific-constant)", self.source)
-        self.assertIn("(як-є (0))", self.source)
-        self.assertIn("(як-є (1))", self.source)
-        self.assertIn("(110101100", self.source)
-        self.assertIn("(110110101", self.source)
+        self.assertNotIn("(як-є (0))", self.source)
+        self.assertNotIn("(як-є (1))", self.source)
+        self.assertNotIn("(110101100", self.source)
+        self.assertNotIn("(110110101", self.source)
+        self.assertIn("(символ?", self.source)
+        self.assertIn("(п'ятий", self.source)
         self.assertIn("(так", self.source)
+        self.assertEqual(project_literals(self.source, {"ні": FALSE_EXPR})[1], {"ні": 5})
+
+    def test_d9_peer_names_have_exact_domain_and_core4_authority(self):
+        table = (ROOT / "lib/domains/d9.lisp").read_text(encoding="utf-8")
+        core = (ROOT / "lib/core4.lisp").read_text(encoding="utf-8")
+        for bits, ukr in D9.items():
+            with self.subTest(bits=bits):
+                self.assertRegex(table, re.compile(
+                    r"^\s*\(" + bits + r"\s+\(ук\s+" + re.escape(ukr)
+                    + r"\)\s+\(укр\s+" + re.escape(ukr) + r"\)", re.MULTILINE))
+                self.assertRegex(core, re.compile(
+                    r"^\(0011\s+" + re.escape(ukr) + r"[\s()]", re.MULTILINE))
 
     def test_definition_names_remain_historical(self):
-        old, _ = project_heads(project_literals(self.source, D1_REVERSE)[0], REVERSE)
+        old, _ = project_heads(project_literals(self.restore_previous(), D1_REVERSE)[0], REVERSE)
         definitions_old = re.findall(r"\(0011\s+([^\s()]+)", old)
         definitions_new = re.findall(r"\(визначити\s+([^\s()]+)", self.source)
         self.assertEqual(definitions_old, definitions_new)
