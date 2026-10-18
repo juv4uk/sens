@@ -197,6 +197,27 @@ mod paired {
         }
 
         #[test]
+        fn t5m_delivers_division_operands_but_sens_alone_creates_exact_ratio() {
+            // D5:10111 is the current owner-ratified QUOTIENT, surface «частка».
+            // The physical T5M words are two D24 integers, never a flat fraction.
+            let source = source("частка", 1, 3);
+            let words = expected_words(&qualify(&source).unwrap()).unwrap();
+            let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let value = eval_verified(&source, &physical)
+                .expect("SENS exact division must form canonical reduced RATIO");
+            assert!(matches!(value, Value::NumericComposition(_)),
+                "test_id=one-third layer=eval expected=canonical-rational");
+
+            let zero_source = source("частка", 1, 0);
+            let zero_words = expected_words(&qualify(&zero_source).unwrap()).unwrap();
+            let zero_physical = zig_transport::encode_t5_exact_words(&zero_words).unwrap();
+            let error = eval_verified(&zero_source, &zero_physical)
+                .expect_err("SENS must reject division by D24 zero");
+            assert!(error.contains("SENS eval:"),
+                "test_id=divide-by-zero layer=eval expected=rejection actual={error}");
+        }
+
+        #[test]
         fn physical_t5m_cannot_invent_numeric_admission_or_mutate_exact_bits() {
             for invalid in [
                 "(додати 1 2)",
