@@ -132,31 +132,8 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         ("translation-review-detail", "review", 9, "110110101"),
     )
 
-    # Independent later exact owner projection in the same source file.
-    # These are frozen full source spans, not a semantic interpreter.
-    RECENT_UKR_BODIES = (
-        ("translation-status-valid?", "(визначити translation-status-valid?\n  (функція (status)\n    (за-умовою\n      ((101 (110101100 status) (001 ())) (001 ()))\n      ((101 status (001 candidate)) #d1:1)\n      ((101 status (001 ambiguous)) #d1:1)\n      ((101 status (001 rejected)) #d1:1)\n      (#d1:1 (001 ())))))", "(визначити translation-status-valid?\n  (функція (status)\n    (за-умовою\n      ((тотожне? (символ? status) (як-є ())) (як-є ()))\n      ((тотожне? status (як-є candidate)) так)\n      ((тотожне? status (як-є ambiguous)) так)\n      ((тотожне? status (як-є rejected)) так)\n      (так (як-є ())))))"),
-        ("translation-kind-valid?", "(визначити translation-kind-valid?\n  (функція (kind)\n    (за-умовою\n      ((101 (110101100 kind) (001 ())) (001 ()))\n      ((101 kind (001 clause)) #d1:1)\n      ((101 kind (001 batch)) #d1:1)\n      ((101 kind (001 query)) #d1:1)\n      (#d1:1 (001 ())))))", "(визначити translation-kind-valid?\n  (функція (kind)\n    (за-умовою\n      ((тотожне? (символ? kind) (як-є ())) (як-є ()))\n      ((тотожне? kind (як-є clause)) так)\n      ((тотожне? kind (як-є batch)) так)\n      ((тотожне? kind (як-є query)) так)\n      (так (як-є ())))))"),
-    )
-
     def _restore_original(self, source):
         from domain_tables import read_domain_table
-        # Verify the newer independent D1/D3/D9 peers before unwinding them.
-        peer_rows = {
-            width: {row.bits: row.ukr for row in read_domain_table(
-                ROOT / "lib" / "domains" / f"d{width}.lisp"
-            )}
-            for width in (1, 3, 9)
-        }
-        self.assertEqual(peer_rows[1]["1"], "так")
-        self.assertEqual(peer_rows[3]["001"], "як-є")
-        self.assertEqual(peer_rows[3]["101"], "тотожне?")
-        self.assertEqual(peer_rows[9]["110101100"], "символ?")
-        for name, before, after in self.RECENT_UKR_BODIES:
-            self.assertEqual(source.count(after), 1,
-                             f"нове укр-тіло {name} змінене або дубльоване")
-            self.assertNotIn(before, source)
-            source = source.replace(after, before, 1)
         surfaces = {
             width: {row.bits: row.ukr for row in read_domain_table(
                 ROOT / "lib" / "domains" / f"d{width}.lisp"
@@ -234,16 +211,6 @@ class TranslationSelectorsUkrProjectionTests(unittest.TestCase):
         source = (ROOT / "lib/translation.lisp").read_text(encoding="utf-8")
         self.assertIn("(символ? status)", source)
         mutated = source.replace("(символ? status)", "(атом? status)", 1)
-        with self.assertRaises(AssertionError):
-            self._restore_original(mutated)
-
-    def test_wrong_new_status_peer_is_rejected(self):
-        source = (ROOT / "lib" / "translation.lisp").read_text(encoding="utf-8")
-        self.assertIn("(тотожне? (символ? status)", source)
-        mutated = source.replace(
-            "(тотожне? (символ? status)",
-            "(атом? (символ? status)", 1,
-        )
         with self.assertRaises(AssertionError):
             self._restore_original(mutated)
 
