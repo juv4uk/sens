@@ -59,9 +59,9 @@
       ((атом? required) (0)
        (нехай ((value (machine-provenance-field (перше required) row)))
          (за-умовою
-           ((однакові? value (як-є missing)) (1)
+           ((однакові? value (як-є missing)) (так)
             (як-є missing))
-           ((однакові? value (як-є missing)) (0)
+           ((однакові? value (як-є missing)) (ні)
             (machine-required-fields-state (решта required) row))))))))
 
 (визначити exact-domain-independent-witness-state
