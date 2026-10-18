@@ -340,6 +340,23 @@ class CodecUkrProjectionTests(unittest.TestCase):
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
     ORIGINAL_BLOB = "79d49cd2e89e657e431872bd1e4c9e85174404c9"
+    OLD_HEADER = "; codec-d2.lisp — компактний кодек (T5 D2-порядок). Однолітерні внутрішні імена."
+    NEW_HEADER = "; codec-d2.lisp — компактний кодек (T5 D2-порядок). Внутрішні функції мають українські імена."
+    LOCAL_NAMES = {
+        "F": "кодек-д2-кодувати-вузол",
+        "G": "кодек-д2-кодувати-послідовність",
+        "R": "кодек-д2-розвернути-до",
+        "Q": "кодек-д2-декодувати-вузол",
+        "S": "кодек-д2-декодувати-послідовність",
+        "U": "кодек-д2-додати-префікс",
+        "P": "кодек-д2-перший-декодований",
+    }
+    LOCAL_RESTORE = {name: old for old, name in LOCAL_NAMES.items()}
+    LOCAL_RESTORE_RE = re.compile(
+        r"(?<![\\w!?*+/<>=:_.-])("
+        + "|".join(re.escape(name) for name in LOCAL_RESTORE)
+        + r")(?![\\w!?*+/<>=:_.-])"
+    )
     HEADS = {
         "0011": "визначити", "0010": "функція", "001": "як-є",
         "010": "атом?", "011": "решта", "100": "перше",
@@ -359,6 +376,20 @@ class CodecUkrProjectionTests(unittest.TestCase):
 
     def restore_heads(self, source: str) -> str:
         return self.RESTORE_RE.sub(lambda match: "(" + self.RESTORE[match.group(1)], source)
+
+    def restore_local_names(self, source: str) -> str:
+        restored_lines = []
+        for line in source.splitlines(keepends=True):
+            if line.startswith(self.NEW_HEADER):
+                line = line.replace(self.NEW_HEADER, self.OLD_HEADER, 1)
+                restored_lines.append(line)
+                continue
+            code, separator, comment = line.partition(";")
+            code = self.LOCAL_RESTORE_RE.sub(
+                lambda match: self.LOCAL_RESTORE[match.group(1)], code
+            )
+            restored_lines.append(code + separator + comment)
+        return "".join(restored_lines)
 
     def assert_ratified(self, table_path: Path, bits: str,
                         surface: str, english: str, lisp_name: str):
@@ -402,12 +433,18 @@ class CodecUkrProjectionTests(unittest.TestCase):
         # Marker labels are D11-projected data and must remain unchanged.
         for marker in ("d2-open", "d2-close", "d2-sep", "d2-dot"):
             self.assertIn(marker, source)
-        for alias in ("A", "B", "C", "D", "E", "F", "G", "R", "Q", "S", "U", "P"):
+        # A–E are compact data-marker bindings; only local helper functions are projected.
+        for alias in ("A", "B", "C", "D", "E"):
             self.assertIn(f"(визначити {alias} ", source)
+        for local_name in self.LOCAL_NAMES.values():
+            self.assertIn(f"(визначити {local_name} ", source)
+        executable = "\\n".join(line.split(";", 1)[0] for line in source.splitlines())
+        for alias in self.LOCAL_NAMES:
+            self.assertNotRegex(executable, r"\\(" + re.escape(alias) + r"(?=\\s)")
 
     def test_inverse_projection_restores_every_original_source_byte(self):
         source = self.SOURCE.read_text(encoding="utf-8")
-        restored = self.restore_heads(source).encode("utf-8")
+        restored = self.restore_heads(self.restore_local_names(source)).encode("utf-8")
         self.assertEqual(
             self.git_blob_sha(restored), self.ORIGINAL_BLOB,
             "inverse head substitution must reconstruct the exact parent Git blob",
@@ -417,12 +454,27 @@ class CodecUkrProjectionTests(unittest.TestCase):
         source = self.SOURCE.read_text(encoding="utf-8")
         mutant = source.replace("(тотожне? (як-є t)", "(порожнє? (як-є t)", 1)
         self.assertNotEqual(mutant, source)
-        restored = self.restore_heads(mutant).encode("utf-8")
+        restored = self.restore_heads(self.restore_local_names(source)).encode("utf-8")
         self.assertNotEqual(
             self.git_blob_sha(restored), self.ORIGINAL_BLOB,
             "unratified or wrong surface must not pass the inverse witness",
         )
 
+
+
+    def test_wrong_local_helper_name_fails_the_inverse_witness(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        mutant = source.replace(
+            f"(визначити {self.LOCAL_NAMES['F']} ",
+            "(визначити кодек-д2-невідома-функція ",
+            1,
+        )
+        self.assertNotEqual(mutant, source)
+        restored = self.restore_heads(self.restore_local_names(mutant)).encode("utf-8")
+        self.assertNotEqual(
+            self.git_blob_sha(restored), self.ORIGINAL_BLOB,
+            "wrong local helper name must not pass the exact source inverse",
+        )
 
 
 class SiDerivedUkrProjectionTests(unittest.TestCase):
