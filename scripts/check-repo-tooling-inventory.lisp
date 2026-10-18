@@ -24,7 +24,7 @@
       ((атом? fields) () (як-є missing))
       ((атом? fields) (1) (як-є missing))
       ((атом? fields) (0)
-       (001000 ((field (100 fields)))
+       (нехай ((field (перше fields)))
          (за-умовою
            ((атом? field) ()
             (repo-tooling-field-from name (решта fields)))
@@ -47,10 +47,10 @@
 (визначити repo-tooling-verdict-ok-state
   (функція (verdict)
     (за-умовою
-      ((11110111 verdict (1110 (001 repo-tooling-ok)))
+      ((однакові? verdict (список (як-є repo-tooling-ok)))
        (1)
        (як-є yes))
-      ((11110111 verdict (1110 (001 repo-tooling-ok)))
+      ((однакові? verdict (список (як-є repo-tooling-ok)))
        (0)
        (як-є no)))))
 
@@ -104,7 +104,7 @@
       ((атом? rows) (1)
        (repo-tooling-violation (як-є malformed-inventory-list) rows))
       ((атом? rows) (0)
-       (001000 ((row-verdict (repo-tooling-row-required-verdict (100 rows))))
+       (нехай ((row-verdict (repo-tooling-row-required-verdict (перше rows))))
          (за-умовою
            ((тотожне? (repo-tooling-verdict-ok-state row-verdict) (як-є yes))
             (1)
@@ -126,17 +126,17 @@
 
 (визначити repo-tooling-row-enum-verdict
   (функція (row)
-    (001001 ((kind (repo-tooling-field (001 kind) row))
+    (нехай-послідовно ((kind (repo-tooling-field (як-є kind) row))
            (language (repo-tooling-field (як-є language) row))
            (lifecycle (repo-tooling-field (як-є lifecycle) row))
            (kind-state (repo-tooling-symbol-admission kind repo-tooling-kinds)))
       (за-умовою
         ((тотожне? kind-state (як-є admitted)) (1)
-         (001000 ((language-state
+         (нехай ((language-state
                  (repo-tooling-symbol-admission language repo-tooling-languages)))
            (за-умовою
              ((тотожне? language-state (як-є admitted)) (1)
-              (001000 ((lifecycle-state
+              (нехай ((lifecycle-state
                       (repo-tooling-symbol-admission lifecycle repo-tooling-lifecycles)))
                 (за-умовою
                   ((тотожне? lifecycle-state (як-є admitted)) (1)
@@ -167,7 +167,7 @@
       ((атом? rows) (1)
        (repo-tooling-violation (як-є malformed-inventory-list) rows))
       ((атом? rows) (0)
-       (001000 ((row-verdict (repo-tooling-row-enum-verdict (100 rows))))
+       (нехай ((row-verdict (repo-tooling-row-enum-verdict (перше rows))))
          (за-умовою
            ((тотожне? (repo-tooling-verdict-ok-state row-verdict) (як-є yes))
             (1)
@@ -178,7 +178,7 @@
 
 (визначити repo-tooling-python-migration-required-state
   (функція (row)
-    (001000 ((language (repo-tooling-field (001 language) row))
+    (нехай ((language (repo-tooling-field (як-є language) row))
           (lifecycle (repo-tooling-field (як-є lifecycle) row)))
       (за-умовою
         ((тотожне? language (як-є python)) (1)
@@ -207,12 +207,12 @@
 
 (визначити repo-tooling-row-python-migration-verdict
   (функція (row)
-    (001000 ((required-state (repo-tooling-python-migration-required-state row)))
+    (нехай ((required-state (repo-tooling-python-migration-required-state row)))
       (за-умовою
         ((тотожне? required-state (як-є not-required)) (1)
          (список (як-є repo-tooling-ok)))
         ((тотожне? required-state (як-є required)) (1)
-         (001001 ((owner (repo-tooling-field (001 migration-issue) row))
+         (нехай-послідовно ((owner (repo-tooling-field (як-є migration-issue) row))
                 (owner-state (repo-tooling-migration-owner-state owner)))
            (за-умовою
              ((тотожне? owner-state (як-є present)) (1)
@@ -229,7 +229,7 @@
       ((атом? rows) (1)
        (repo-tooling-violation (як-є malformed-inventory-list) rows))
       ((атом? rows) (0)
-       (001000 ((row-verdict (repo-tooling-row-python-migration-verdict (100 rows))))
+       (нехай ((row-verdict (repo-tooling-row-python-migration-verdict (перше rows))))
          (за-умовою
            ((тотожне? (repo-tooling-verdict-ok-state row-verdict) (як-є yes))
             (1)
@@ -244,12 +244,12 @@
       ((атом? rows) () (як-є ()))
       ((атом? rows) (1) (як-є ()))
       ((атом? rows) (0)
-       (001000 ((row (100 rows)))
+       (нехай ((row (перше rows)))
          (за-умовою
-           ((11110111 path (repo-tooling-field (001 path) row))
+           ((однакові? path (repo-tooling-field (як-є path) row))
             (1)
             row)
-           ((11110111 path (repo-tooling-field (001 path) row))
+           ((однакові? path (repo-tooling-field (як-є path) row))
             (0)
             (repo-tooling-find-row-by-path path (решта rows)))))))))
 
@@ -260,7 +260,7 @@
       ((атом? rows) (1)
        (repo-tooling-violation (як-є malformed-inventory-list) rows))
       ((атом? rows) (0)
-       (001001 ((row (100 rows))
+       (нехай-послідовно ((row (перше rows))
               (path (repo-tooling-field (як-є path) row))
               (found (repo-tooling-find-row-by-path path (решта rows))))
          (за-умовою
@@ -277,7 +277,7 @@
       ((атом? observed) () (як-є absent))
       ((атом? observed) (1) (як-є malformed))
       ((атом? observed) (0)
-       (001000 ((observed-path (110011110 "scripts/" (100 observed))))
+       (нехай ((observed-path (рядок-додати "scripts/" (перше observed))))
          (за-умовою
            ((11110111 path observed-path) (1) (001 present))
            ((11110111 path observed-path) (0)
@@ -290,7 +290,7 @@
       ((атом? rows) (1)
        (repo-tooling-violation (як-є malformed-inventory-list) rows))
       ((атом? rows) (0)
-       (001001 ((row (100 rows))
+       (нехай-послідовно ((row (перше rows))
               (path (repo-tooling-field (як-є path) row))
               (state (repo-tooling-observed-path-state path observed)))
          (за-умовою
@@ -308,8 +308,8 @@
       ((атом? observed) (1)
        (repo-tooling-violation (як-є malformed-observed-list) observed))
       ((атом? observed) (0)
-       (001001 ((name (100 observed))
-              (path (110011110 "scripts/" name))
+       (нехай-послідовно ((name (перше observed))
+              (path (рядок-додати "scripts/" name))
               (found (repo-tooling-find-row-by-path path rows)))
          (за-умовою
            ((атом? found) ()
@@ -321,19 +321,19 @@
 
 (визначити repo-tooling-verdict-after-required
   (функція (rows observed)
-    (001000 ((enum-verdict (repo-tooling-enum-verdict rows)))
+    (нехай ((enum-verdict (repo-tooling-enum-verdict rows)))
       (за-умовою
         ((тотожне? (repo-tooling-verdict-ok-state enum-verdict) (як-є yes))
          (1)
-         (001000 ((migration-verdict (repo-tooling-python-migration-verdict rows)))
+         (нехай ((migration-verdict (repo-tooling-python-migration-verdict rows)))
            (за-умовою
              ((тотожне? (repo-tooling-verdict-ok-state migration-verdict) (як-є yes))
               (1)
-              (001000 ((duplicate-verdict (repo-tooling-duplicate-path-verdict rows)))
+              (нехай ((duplicate-verdict (repo-tooling-duplicate-path-verdict rows)))
                 (за-умовою
                   ((тотожне? (repo-tooling-verdict-ok-state duplicate-verdict) (як-є yes))
                    (1)
-                   (001000 ((stale-verdict (repo-tooling-stale-path-verdict rows observed)))
+                   (нехай ((stale-verdict (repo-tooling-stale-path-verdict rows observed)))
                      (за-умовою
                        ((тотожне? (repo-tooling-verdict-ok-state stale-verdict) (як-є yes))
                         (1)
@@ -353,7 +353,7 @@
 
 (визначити repo-tooling-verdict
   (функція (rows observed)
-    (001000 ((required-verdict (repo-tooling-required-verdict rows)))
+    (нехай ((required-verdict (repo-tooling-required-verdict rows)))
       (за-умовою
         ((тотожне? (repo-tooling-verdict-ok-state required-verdict) (як-є yes))
          (1)
@@ -467,7 +467,7 @@
       ((11110111 actual expected) (1)
        (список (як-є repo-tooling-selftest-ok)))
       ((11110111 actual expected) (0)
-       (001000 ((shown
+       (нехай ((shown
                (11011011
                  (список
                    (як-є repo-tooling-selftest-failed)
@@ -519,7 +519,7 @@
       ((атом? forms) () (як-є ()))
       ((атом? forms) (1) (як-є ()))
       ((атом? forms) (0)
-       (001000 ((form (100 forms)))
+       (нехай ((form (перше forms)))
          (за-умовою
            ((атом? form) ()
             (repo-tooling-tool-rows (решта forms)))
@@ -538,7 +538,7 @@
       ((атом? entries) () (як-є ()))
       ((атом? entries) (1) (як-є ()))
       ((атом? entries) (0)
-       (001000 ((name (100 entries)))
+       (нехай ((name (перше entries)))
          (за-умовою
            ((11110111 name "tests") (1)
             (repo-tooling-observed-scripts (решта entries)))
@@ -546,7 +546,7 @@
             (сполучити name (repo-tooling-observed-scripts (решта entries))))))))))
 
 (визначити repo-tooling-live-forms
-  (110101001 (110110111 "knowledge/repo-tooling-inventory.lisp")))
+  (читати-всі (читати-файл "knowledge/repo-tooling-inventory.lisp")))
 
 (визначити repo-tooling-live-rows
   (repo-tooling-tool-rows repo-tooling-live-forms))
@@ -557,7 +557,7 @@
 (визначити repo-tooling-live-verdict
   (repo-tooling-verdict repo-tooling-live-rows repo-tooling-live-observed))
 
-(11011011 repo-tooling-live-verdict)
+(друкувати repo-tooling-live-verdict)
 
 (repo-tooling-assert-verdict
   repo-tooling-live-verdict
