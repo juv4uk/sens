@@ -31,6 +31,17 @@ mod paired {
                     && matches!(identity.packed_bits(), 0b01010 | 0b01011 | 0b10110 | 0b10111)
                     && args.len() == 2 =>
             {
+                // When both operands are atomic, their explicitly admitted
+                // Dn identities must agree BEFORE physical encoding.
+                // Nested results are checked again by SENS during evaluation,
+                // because a signed overflow can legitimately widen D24->D48.
+                if let (ExprKind::BinaryNumber(left), ExprKind::BinaryNumber(right)) =
+                    (&args[0].kind, &args[1].kind)
+                {
+                    if left.numeric_domain_width() != right.numeric_domain_width() {
+                        return Err("SENS admission: mixed numeric domains are forbidden".into());
+                    }
+                }
                 for arg in args.iter() { admit(arg, depth + 1)?; }
                 Ok(())
             }
@@ -47,7 +58,7 @@ mod paired {
         let [root] = lowered.as_slice() else {
             return Err("SENS admission: expected exactly one mathematical form".into());
         };
-        if !matches!(root.kind, ExprKind::DomainCall(_, _)) {
+        if !matches!(&root.kind, ExprKind::DomainCall(_, _)) {
             return Err("SENS admission: bare numeric data is not executable".into());
         }
         admit(root, 0)?;
@@ -283,6 +294,24 @@ mod paired {
             let malformed_pair = zig_transport::encode_t5_exact_words(&changed).unwrap();
             assert!(eval_verified(&nested, &malformed_pair)
                 .unwrap_err().contains("T5M_PAIR_MISMATCH"));
+        }
+
+        #[test]
+        fn nested_mixed_domains_must_fail_during_sens_evaluation() {
+            // Input leaves themselves are qualified. The inner ADD widens
+            // to D48, so outer D24 + D48 has no admitted mixed-domain law.
+            let source = format!(
+                "(додати {} #d24:{})",
+                source("додати", 8_388_607, 1),
+                bits(1),
+            );
+            let root = qualify(&source).expect("source words each qualified");
+            let words = expected_words(&root).expect("physical structure is valid");
+            let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
+            let error = eval_verified(&source, &physical)
+                .expect_err("SENS may never silently coerce D48 to D24");
+            assert!(error.starts_with("SENS eval:"),
+                "test_id=nested-mixed-width layer=eval expected=rejection actual={error}");
         }
 
         #[test]
