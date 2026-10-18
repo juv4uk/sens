@@ -426,6 +426,7 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
     """Exact-width D3/D4 operators use current Ukrainian peers; quoted data stays data."""
 
     SOURCE = ROOT / "lib" / "compiler-nucleus.lisp"
+    D1 = ROOT / "lib" / "domains" / "d1.lisp"
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
     ORIGINAL_BLOB = "a7000108be4ca2a3a2b9961b7f8d70e9dfccdea0"
