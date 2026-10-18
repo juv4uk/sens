@@ -2,191 +2,191 @@
 ; Host tooling may mechanically inspect files, but the admitted direction and
 ; forbidden reverse authority are owned here.
 
-(0011 second (0010 (x) (100 (011 x))))
-(0011 third (0010 (x) (100 (011 (011 x)))))
-(0011 fourth (0010 (x) (100 (011 (011 (011 x))))))
+(визначити second (функція (x) (перше (решта x))))
+(визначити third (функція (x) (перше (решта (решта x)))))
+(визначити fourth (функція (x) (перше (решта (решта (решта x))))))
 
-(0011 kab-contract
-  (100
+(визначити kab-contract
+  (перше
     (110101001
       (110110111 "contracts/kernel-abi-transport-boundary.lisp"))))
 
-(0011 kab-rows (011 kab-contract))
+(визначити kab-rows (решта kab-contract))
 
-(0011 kab-find
-  (0010 (name rows)
-    (110
-      ((010 rows)
+(визначити kab-find
+  (функція (name rows)
+    (за-умовою
+      ((атом? rows)
        ()
-       (001 ()))
-      ((010 rows)
+       (як-є ()))
+      ((атом? rows)
        (0)
-       (110
-         ((101 (100 (100 rows)) name)
+       (за-умовою
+         ((тотожне? (перше (перше rows)) name)
           (1)
-          (100 rows))
-         ((101 (100 (100 rows)) name)
+          (перше rows))
+         ((тотожне? (перше (перше rows)) name)
           (0)
-          (kab-find name (011 rows))))))))
+          (kab-find name (решта rows))))))))
 
-(0011 kab-find-kernel
-  (0010 (kernel-name rows)
-    (110
-      ((010 rows)
+(визначити kab-find-kernel
+  (функція (kernel-name rows)
+    (за-умовою
+      ((атом? rows)
        ()
-       (001 ()))
-      ((010 rows)
+       (як-є ()))
+      ((атом? rows)
        (0)
        (001000 ((row (100 rows)))
-         (110
-           ((101 (100 row) (001 kernel))
+         (за-умовою
+           ((тотожне? (перше row) (як-є kernel))
             (1)
-            (110
-              ((101 (second row) kernel-name)
+            (за-умовою
+              ((тотожне? (second row) kernel-name)
                (1)
                row)
-              ((101 (second row) kernel-name)
+              ((тотожне? (second row) kernel-name)
                (0)
-               (kab-find-kernel kernel-name (011 rows)))))
-           ((101 (100 row) (001 kernel))
+               (kab-find-kernel kernel-name (решта rows)))))
+           ((тотожне? (перше row) (як-є kernel))
             (0)
-            (kab-find-kernel kernel-name (011 rows)))))))))
+            (kab-find-kernel kernel-name (решта rows)))))))))
 
-(0011 kab-row-check
-  (0010 (name expected)
+(визначити kab-row-check
+  (функція (name expected)
     (001000 ((actual (kab-find name kab-rows)))
-      (110
+      (за-умовою
         ((11110111 actual expected)
          (1)
-         (001 ()))
+         (як-є ()))
         ((11110111 actual expected)
          (0)
-         (1110 (001 policy-mismatch) name expected actual))))))
+         (список (як-є policy-mismatch) name expected actual))))))
 
-(0011 kab-kernel-row-check
-  (0010 (kernel-name expected)
+(визначити kab-kernel-row-check
+  (функція (kernel-name expected)
     (001000 ((actual (kab-find-kernel kernel-name kab-rows)))
-      (110
+      (за-умовою
         ((11110111 actual expected)
          (1)
-         (001 ()))
+         (як-є ()))
         ((11110111 actual expected)
          (0)
-         (1110 (001 kernel-row-mismatch) kernel-name expected actual))))))
+         (список (як-є kernel-row-mismatch) kernel-name expected actual))))))
 
-(0011 kab-first-failure
-  (0010 (checks)
-    (110
-      ((010 checks)
+(визначити kab-first-failure
+  (функція (checks)
+    (за-умовою
+      ((атом? checks)
        ()
-       (001 ()))
-      ((010 (100 checks))
+       (як-є ()))
+      ((атом? (перше checks))
        ()
-       (kab-first-failure (011 checks)))
-      ((010 (100 checks))
+       (kab-first-failure (решта checks)))
+      ((атом? (перше checks))
        (0)
-       (100 checks))
-      ((010 (100 checks))
+       (перше checks))
+      ((атом? (перше checks))
        (1)
-       (100 checks)))))
+       (перше checks)))))
 
-(0011 kab-verdict
-  (0010 ()
+(визначити kab-verdict
+  (функція ()
     (001000 ((failure
             (kab-first-failure
-              (1110
+              (список
                 (kab-row-check
-                  (001 owner)
-                  (001 (owner sens)))
+                  (як-є owner)
+                  (як-є (owner sens)))
                 (kab-row-check
-                  (001 language-identity-type)
-                  (001 (language-identity-type CoreDomainIdentity)))
+                  (як-є language-identity-type)
+                  (як-є (language-identity-type CoreDomainIdentity)))
                 (kab-row-check
-                  (001 shared-abi-type)
-                  (001 (shared-abi-type WsmKernelRequest)))
+                  (як-є shared-abi-type)
+                  (як-є (shared-abi-type WsmKernelRequest)))
                 (kab-row-check
-                  (001 shared-abi-field)
-                  (001 (shared-abi-field semantic_id)))
+                  (як-є shared-abi-field)
+                  (як-є (shared-abi-field semantic_id)))
                 (kab-row-check
-                  (001 shared-abi-storage)
-                  (001 (shared-abi-storage opaque-u8)))
+                  (як-є shared-abi-storage)
+                  (як-є (shared-abi-storage opaque-u8)))
                 (kab-row-check
-                  (001 kernel-wrapper-type)
-                  (001 (kernel-wrapper-type LegacyAbiSemanticId)))
+                  (як-є kernel-wrapper-type)
+                  (як-є (kernel-wrapper-type LegacyAbiSemanticId)))
                 (kab-row-check
-                  (001 kernel-wrapper-role)
-                  (001 (kernel-wrapper-role transport-coordinate-only)))
+                  (як-є kernel-wrapper-role)
+                  (як-є (kernel-wrapper-role transport-coordinate-only)))
                 (kab-row-check
-                  (001 wrapper-language-type-equivalence)
-                  (001 (wrapper-language-type-equivalence forbidden)))
+                  (як-є wrapper-language-type-equivalence)
+                  (як-є (wrapper-language-type-equivalence forbidden)))
                 (kab-row-check
-                  (001 kernel-to-language-authority)
-                  (001 (kernel-to-language-authority forbidden)))
+                  (як-є kernel-to-language-authority)
+                  (як-є (kernel-to-language-authority forbidden)))
                 (kab-row-check
-                  (001 kernel-may-query-semantic-registry)
-                  (001 (kernel-may-query-semantic-registry forbidden)))
+                  (як-є kernel-may-query-semantic-registry)
+                  (як-є (kernel-may-query-semantic-registry forbidden)))
                 (kab-row-check
-                  (001 kernel-may-import-language-identity-type)
-                  (001 (kernel-may-import-language-identity-type forbidden)))
+                  (як-є kernel-may-import-language-identity-type)
+                  (як-є (kernel-may-import-language-identity-type forbidden)))
                 (kab-row-check
-                  (001 kernel-may-mint-semantic-identity)
-                  (001 (kernel-may-mint-semantic-identity forbidden)))
+                  (як-є kernel-may-mint-semantic-identity)
+                  (як-є (kernel-may-mint-semantic-identity forbidden)))
                 (kab-row-check
-                  (001 reverse-direction)
-                  (001
+                  (як-є reverse-direction)
+                  (як-є
                     (reverse-direction
                       kernel-transport-to-language-meaning
                       forbidden)))
                 (kab-row-check
-                  (001 native-result-role)
-                  (001 (native-result-role observation-only)))
+                  (як-є native-result-role)
+                  (як-є (native-result-role observation-only)))
                 (kab-row-check
-                  (001 shared-abi-source)
-                  (001
+                  (як-є shared-abi-source)
+                  (як-є
                     (shared-abi-source
                       "crates/wsm-kernel-c-abi/src/lib.rs"
                       "crates/wsm-kernel-c-abi/Cargo.toml")))
                 (kab-kernel-row-check
-                  (001 common-lisp)
-                  (001
+                  (як-є common-lisp)
+                  (як-є
                     (kernel common-lisp
                       "crates/wsm-common-lisp-kernel/src/lib.rs"
                       "crates/wsm-common-lisp-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (001 prolog)
-                  (001
+                  (як-є prolog)
+                  (як-є
                     (kernel prolog
                       "crates/wsm-prolog-kernel/src/lib.rs"
                       "crates/wsm-prolog-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (001 clips)
-                  (001
+                  (як-є clips)
+                  (як-є
                     (kernel clips
                       "crates/wsm-clips-kernel/src/lib.rs"
                       "crates/wsm-clips-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (001 datalog)
-                  (001
+                  (як-є datalog)
+                  (як-є
                     (kernel datalog
                       "crates/wsm-datalog-kernel/src/lib.rs"
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
-      (110
-        ((010 failure)
+      (за-умовою
+        ((атом? failure)
          ()
-         (001
+         (як-є
            (kernel-abi-transport-boundary-ok
              (kernels 4)
              (language-type CoreDomainIdentity)
              (abi-wrapper LegacyAbiSemanticId))))
-        ((010 failure)
+        ((атом? failure)
          (0)
-         (1110
-           (001 kernel-abi-transport-boundary-violation)
+         (список
+           (як-є kernel-abi-transport-boundary-violation)
            failure))
-        ((010 failure)
+        ((атом? failure)
          (1)
-         (1110
-           (001 kernel-abi-transport-boundary-violation)
+         (список
+           (як-є kernel-abi-transport-boundary-violation)
            failure))))))
 
 (kab-verdict)
