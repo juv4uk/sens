@@ -27,7 +27,7 @@ def mask_comments_and_strings(source: str) -> str:
     out = list(source)
     i = 0
     while i < len(source):
-                if ord(source[i]) == 92:
+        if source[i] == ";":
             while i < len(source) and source[i] != "\n":
                 out[i] = " "
                 i += 1
@@ -35,7 +35,7 @@ def mask_comments_and_strings(source: str) -> str:
             out[i] = " "
             i += 1
             while i < len(source):
-                if source[i] == "\\\\":
+                if ord(source[i]) == 92:
                     out[i] = " "
                     if i + 1 < len(source) and source[i + 1] != "\n":
                         out[i + 1] = " "
