@@ -219,12 +219,16 @@ class SourceResolver:
                     evidence=("owner-ratified exact-domain word",),
                 )
 
-        # NEW REALITY (owner, 2026-10-15): SID8/Sens8 retired. An eight-bit head
-        # is NOT resolved through a historical SID8/Sens8 registry.
+        # D8 was owner-ratified only on 2026-10-06 (#3960).
+        # Earlier eight-bit executable heads belong to historical W8/SID8/Sens8,
+        # NOT to D8 merely because the payload has eight bits. A modern raw W8
+        # token is likewise ambiguous without an explicit source-era proof.
         if re.fullmatch(r"[01]{8}", token):
             raise ValueError(
-                f"retired SID8-era head {token}: no current ratified D8 coordinate and "
-                "no current named D3-D6 resident"
+                f"retired SID8-era head {token}: ambiguous eight-bit source; "
+                "modern D8 residency does not prove historical function identity "
+                "or runtime callability. Resolve the original function role by "
+                "historical provenance, then use its ratified full укр surface"
             )
 
         # PASS 2: exact my-lisp / admitted surface spelling.  This is
