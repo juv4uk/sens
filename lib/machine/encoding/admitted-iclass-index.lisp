@@ -2,7 +2,7 @@
 ; Compact #175 evidence projection: no status, opcode, semantic ID, or policy.
 
 (x86-admitted-iclass-index/2
-  (pair-count #b10010011000)
+  (pair-count 1176)
   (пара X86-BASE "AAA")
   (пара X86-BASE "AAD")
   (пара X86-BASE "AAM")

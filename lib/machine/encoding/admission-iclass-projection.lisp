@@ -4,9 +4,9 @@
 ; it does NOT claim every XED operand/addressing form is implemented.
 
 (x86-admission-iclass-projection/1
-  (admission-head-count #b10111110)
-  (partial-pair-count #b1111110)
-  (orphan-count #b0)
+  (admission-head-count 190)
+  (partial-pair-count 126)
+  (orphan-count 0)
   (partial X86-BASE "ADD" (heads add-r64-r64 add-r64-imm32))
   (partial SSE2 "ADDSD" (heads addsd-xmm-xmm))
   (partial AES-NI "AESDEC" (heads aesdec-xmm-xmm aesdec-xmm-mem-disp8))
