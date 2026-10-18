@@ -27,20 +27,20 @@
     (за-умовою
       ((string-membership-helper value)
        (class-membership string member)
-       (11110100 value))
+       (значення-у-текст value))
       ((string-membership-helper value)
        (class-membership string nonmember)
-       (11110100 (11101110 value))))))
+       (значення-у-текст (символ-у-текст value))))))
 
 
 (визначити render-surface
   (функція (entry)
-    (001000 ((name (1001 entry)))
+    (нехай ((name (друге entry)))
       (за-умовою
-        ((11110111 name (001 ()))
+        ((однакові? name (як-є ()))
          (1)
          "")
-        ((11110111 name (001 ()))
+        ((однакові? name (як-є ()))
          (0)
          (str+
            "SemanticSurface { namespace: "
@@ -65,7 +65,7 @@
   (функція (row)
     (str+
       "    SemanticRow { semantic_id: 0b"
-      (11110100 (100 row))
+      (значення-у-текст (перше row))
       ", surfaces: &["
       (render-surfaces (решта row))
       "] },\n")))
@@ -113,24 +113,24 @@
    ()
    (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "Rust semantic registry projection written"))))
-  ((11110111 (100 *argv*) "--check")
+       (записати-файл output-path generated)
+       (друкувати "Rust semantic registry projection written"))))
+  ((однакові? (перше *argv*) "--check")
    (1)
-   (001000 ((current (110110111 output-path)))
+   (нехай ((current (читати-файл output-path)))
      (за-умовою
-       ((11110111 current generated)
+       ((однакові? current generated)
         (1)
-        (11011011 "Rust semantic registry projection is current"))
-       ((11110111 current generated)
+        (друкувати "Rust semantic registry projection is current"))
+       ((однакові? current generated)
         (0)
         (друге
           (список
-            (11011011 "Rust semantic registry projection is stale")
+            (друкувати "Rust semantic registry projection is stale")
             (перше (як-є ()))))))))
   ((як-є write-projection)
    write-projection
    (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "Rust semantic registry projection written")))))
+       (записати-файл output-path generated)
+       (друкувати "Rust semantic registry projection written")))))
