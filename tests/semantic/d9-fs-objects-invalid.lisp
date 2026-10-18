@@ -1,2 +1,2 @@
 ; FS entry must have a pair carrier, not a symbol.
-(фс-об'єкт-адреси (list (quote пошкоджений)))
+(фс-об'єкт-адреси (список (як-є пошкоджений)))
