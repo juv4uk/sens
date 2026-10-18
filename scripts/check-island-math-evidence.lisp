@@ -49,8 +49,8 @@
       ((101 (010 rows) 0) (001000 ((row (100 rows)))
          (за-умовою
            ((11110111 (evidence-sid-bits sid) (evidence-sid-bits (100 row))) (110
-              ((101 executor (1001 row)) (001 yes))
-              ((101 (101 executor (1001 row)) 0) (mechanism-has-route? sid executor (011 rows)))))
+              ((тотожне? executor (друге row)) (як-є yes))
+              ((тотожне? (тотожне? executor (друге row)) 0) (mechanism-has-route? sid executor (решта rows)))))
            ((101 (11110111 (evidence-sid-bits sid) (evidence-sid-bits (100 row))) 0) (mechanism-has-route? sid executor (011 rows)))))))))
 
 (визначити evidence-has-route?
@@ -60,8 +60,8 @@
       ((101 (010 rows) 0) (001000 ((row (100 rows)))
          (за-умовою
            ((11110111 sid (100 row)) (110
-              ((101 executor (1001 row)) (001 yes))
-              ((101 (101 executor (1001 row)) 0) (evidence-has-route? sid executor (011 rows)))))
+              ((тотожне? executor (друге row)) (як-є yes))
+              ((тотожне? (тотожне? executor (друге row)) 0) (evidence-has-route? sid executor (решта rows)))))
            ((101 (11110111 sid (100 row)) 0) (evidence-has-route? sid executor (011 rows)))))))))
 
 (визначити admitted-executor?
@@ -110,7 +110,7 @@
       ((тотожне? rows (як-є ())) (як-є (island-math-evidence-ok)))
       ((101 (010 rows) 0) (001001 ((row (100 rows))
               (sid (перше row))
-              (executor (1001 row))
+              (executor (друге row))
               (status (10011 row))
               (provenance-ref (100111 row)))
          (за-умовою

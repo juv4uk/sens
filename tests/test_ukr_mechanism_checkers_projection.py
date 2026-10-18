@@ -13,13 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_KEYS = {
     "001", "010", "011", "100", "101", "110", "111",
-    "0010", "0011", "0100", "0101", "1110", "1111",
+    "0010", "0011", "0100", "0101", "1001", "1110", "1111",
 }
 EXPECTED_PROJECTIONS = {
     "001": "як-є", "010": "атом?", "011": "решта", "100": "перше",
     "101": "тотожне?", "110": "за-умовою", "111": "сполучити",
     "0010": "функція", "0011": "визначити", "0100": "хибне?",
-    "0101": "порожній?", "1110": "список", "1111": "приєднати",
+    "0101": "порожній?", "1001": "друге", "1110": "список", "1111": "приєднати",
 }
 SOURCE_BLOBS = {
     "scripts/check-function-table-mechanisms.lisp": "f36ea7f4544038759c3808e5537aadf4a296e9ea",
@@ -27,12 +27,12 @@ SOURCE_BLOBS = {
 }
 EXPECTED_COUNTS = {
     "scripts/check-function-table-mechanisms.lisp": {
-        "100": 15, "101": 33, "110": 19, "1110": 8, "0011": 18,
-        "011": 12, "001": 71, "010": 12, "0010": 10,
+        "100": 15, "101": 37, "110": 19, "1110": 8, "0011": 18,
+        "011": 12, "001": 73, "010": 12, "0010": 10, "1001": 6,
     },
     "scripts/check-island-math-evidence.lisp": {
-        "100": 7, "101": 41, "110": 23, "1110": 5, "001": 80,
-        "0011": 20, "0010": 12, "010": 6, "011": 4,
+        "100": 7, "101": 47, "110": 23, "1110": 5, "001": 82,
+        "0011": 20, "0010": 12, "010": 6, "011": 6, "1001": 5,
     },
 }
 TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
@@ -223,6 +223,25 @@ class UkrainianMechanismCheckerProjectionTests(unittest.TestCase):
                 repaired, _ = _transform(mutant)
                 self.assertEqual(repaired, current)
 
+
+    def test_d4_cadr_residual_batch_is_idempotent_and_byte_reversible(self):
+        # D4:1001 CADR was formerly outside the test's permitted key set.
+        # Same exact ratified identity, full Ukrainian projection = друге.
+        for path, expected in (
+            ("scripts/check-island-math-evidence.lisp", 5),
+            ("scripts/check-function-table-mechanisms.lisp", 6),
+        ):
+            with self.subTest(path=path):
+                current = (ROOT / path).read_text(encoding="utf-8")
+                original, inverse_counts = _transform(current, inverse=True)
+                projected, forward_counts = _transform(original)
+                self.assertEqual(projected, current)
+                self.assertEqual(inverse_counts.get("друге"), expected)
+                self.assertEqual(forward_counts.get("1001"), expected)
+                self.assertEqual(_transform(current)[0], current)
+                self.assertEqual(_git_blob_sha(original), SOURCE_BLOBS[path])
+                self.assertEqual(len(_parse(original)), len(_parse(current)))
+                self.assertEqual(len(original.splitlines()), len(current.splitlines()))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

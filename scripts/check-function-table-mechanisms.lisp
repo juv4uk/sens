@@ -47,8 +47,8 @@
          (за-умовою
            ((тотожне? sid (перше row)) (#d1)
             (за-умовою
-              ((101 executor (1001 row)) (#d1) (001 yes))
-              ((101 executor (1001 row)) (#d0)
+              ((тотожне? executor (друге row)) (#d1) (як-є yes))
+              ((тотожне? executor (друге row)) (#d0)
                (metadata-has-route? sid executor (решта rows)))))
            ((тотожне? sid (перше row)) (#d0)
             (metadata-has-route? sid executor (решта rows)))))))))
@@ -101,8 +101,8 @@
          (за-умовою
            ((тотожне? profile (перше row)) (#d1)
             (за-умовою
-              ((101 sid (1001 row)) (#d1) (001 yes))
-              ((101 sid (1001 row)) (#d0)
+              ((тотожне? sid (друге row)) (#d1) (як-є yes))
+              ((тотожне? sid (друге row)) (#d0)
                (profile-has-route? profile sid (решта rows)))))
            ((тотожне? profile (перше row)) (#d0)
             (profile-has-route? profile sid (решта rows)))))))))
@@ -115,7 +115,7 @@
       ((атом? rows) (#d0)
        (001001 ((row (100 rows))
               (profile (перше row))
-              (sid (1001 row))
+              (sid (друге row))
               (mechanism (10011 row)))
          (за-умовою
            ((тотожне? (admitted-profile? profile) (як-є no))
@@ -144,7 +144,7 @@
       ((атом? rows) (#d0)
        (001001 ((row (100 rows))
               (sid (перше row))
-              (executor (1001 row))
+              (executor (друге row))
               (mechanism (10011 row)))
          (за-умовою
            ((тотожне? (admitted-executor? executor) (як-є no))
