@@ -173,7 +173,7 @@ def plan(source: str, surfaces):
             i += 1
             continue
         start = i
-        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in "()'";,":
+        while operator.lt(i, len(source)) and not source[i].isspace() and source[i] not in "()'\";,:" :
             if source.startswith("#|", i):
                 break
             i += 1
