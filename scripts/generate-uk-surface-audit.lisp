@@ -82,7 +82,7 @@
     (за-умовою
       ((атом? sections) (як-є ()))
       
-      ((11110101 (110111011 (010 (100 sections))) (101 (100 (100 sections)) name))
+      ((та (відповідь-не (атом? (перше sections))) (тотожне? (перше (перше sections)) name))
        (перше sections))
       ((атом? (як-є ())) (find-section name (решта sections))))))
 
@@ -95,7 +95,7 @@
     (за-умовою
       ((атом? rows) (як-є ()))
       
-      ((11110111 (100 (100 rows)) sid) (100 rows))
+      ((однакові? (перше (перше rows)) sid) (перше rows))
       ((атом? (як-є ())) (find-candidate-row sid (решта rows))))))
 
 (визначити surface-word
@@ -111,7 +111,7 @@
 
 (визначити missing-surface?
   (функція (surface)
-    (11111100 (101 (surface-status surface) (001 missing))
+    (або (тотожне? (surface-status surface) (як-є missing))
         (тотожне? (surface-word surface) (як-є —)))))
 
 ; Classification here is intentionally conservative. The audit may report a
@@ -169,23 +169,23 @@
            (candidate-status (candidate-evidence-status candidate))
            (ambiguity (ambiguity-status candidate)))
       (str+
-        "  (row " (11110100 sid)
-        " (current-uk " (11110100 (surface-word uk)) " "
-                         (11110100 (surface-status uk)) ")"
-        " (authoritative-full-uk " (11110100 (surface-word full-authority)) " "
-                                  (11110100 (surface-status full-authority)) ")"
-        " (en " (11110100 (surface-word en)) " "
-                 (11110100 (surface-status en)) ")"
-        " (sa " (11110100 (surface-word sa)) " "
-                 (11110100 (surface-status sa)) ")"
-        " (sym " (11110100 (surface-word sym)) " "
-                  (11110100 (surface-status sym)) ")"
-        " (primary-status " (11110100 primary) ")"
-        " (class " (11110100 class) ")"
-        " (candidate-full-uk " (11110100 candidate-full) ")"
-        " (candidate-full-status " (11110100 candidate-status) ")"
-        " (candidate-compact-uk " (11110100 (candidate-compact-word)) ")"
-        " (ambiguity " (11110100 ambiguity) ")"
+        "  (row " (значення-у-текст sid)
+        " (current-uk " (значення-у-текст (surface-word uk)) " "
+                         (значення-у-текст (surface-status uk)) ")"
+        " (authoritative-full-uk " (значення-у-текст (surface-word full-authority)) " "
+                                  (значення-у-текст (surface-status full-authority)) ")"
+        " (en " (значення-у-текст (surface-word en)) " "
+                 (значення-у-текст (surface-status en)) ")"
+        " (sa " (значення-у-текст (surface-word sa)) " "
+                 (значення-у-текст (surface-status sa)) ")"
+        " (sym " (значення-у-текст (surface-word sym)) " "
+                  (значення-у-текст (surface-status sym)) ")"
+        " (primary-status " (значення-у-текст primary) ")"
+        " (class " (значення-у-текст class) ")"
+        " (candidate-full-uk " (значення-у-текст candidate-full) ")"
+        " (candidate-full-status " (значення-у-текст candidate-status) ")"
+        " (candidate-compact-uk " (значення-у-текст (candidate-compact-word)) ")"
+        " (ambiguity " (значення-у-текст ambiguity) ")"
         " (evidence generated-function-table staging-profile))"))))
 
 (визначити count-class
@@ -231,4 +231,4 @@
 (визначити output (str+ body "\n  )\n)\n"))
 
 (110111100 "lib/generated/uk-surface-audit.lisp" output)
-(11011011 (str+ "uk-surface-audit: " (110111001 total) " identities written"))
+(друкувати (str+ "uk-surface-audit: " (число-рядок total) " identities written"))
