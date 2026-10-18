@@ -500,9 +500,12 @@ class LegacyD3GuardTests(unittest.TestCase):
         self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 1)
         self.assertNotIn("COND_HOST_TRUTH", rules)
 
-        exact = "((010 lst) acc)"
+        # D3:010 має ратифіковану повну укр-проєкцію «атом?».
+        # Негативний тест трьохпольового COND залишаємо активним.
+        exact = "((атом? lst) acc)"
         self.assertIn(exact, source)
-        reverted = source.replace(exact, "((010 lst) (1) acc)", 1)
+        self.assertIn("(визначити reverse-acc", source)
+        reverted = source.replace(exact, "((атом? lst) (1) acc)", 1)
         self.assertGreater(
             [f.rule for f in MODULE.scan_lisp(reverted, path)].count(
                 "COND_NOT_TWO_FIELDS"

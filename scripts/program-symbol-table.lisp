@@ -3,7 +3,7 @@
 ;;   my-lisp scripts/program-symbol-table.lisp bootstrap_add_demo.asm fpga/asm/constants.inc
 ;; Вивід: count, потім "<id> <name>" на рядок.
 
-(0011 nil-marker (001 ()))
+(визначити nil-marker (як-є ()))
 
 (0011 pos-of (0010 (s marker i) (110 ((110011100 s) -1) ((110101010 marker s) i) ((010 (001 ())) (pos-of (110011101 s) marker (01010 i 1))))))
 
@@ -11,7 +11,7 @@
 
 (0011 slice-from (0010 (s i) (110100011 s i (110100010 s))))
 
-(0011 digit? (0010 (c) (has "0123456789" c)))
+(визначити digit? (функція (c) (has "0123456789" c)))
 
 (0011 skip-ws (0010 (s) (110 ((110101010 " " s) (skip-ws (slice-from s 1))) ((010 (001 ())) s))))
 
@@ -21,10 +21,10 @@
 
 (0011 split-lines (0010 (s) (110 ((11110111 (pos-of s "\n" 0) -1) (111 s (001 ()))) ((11110111 0 0) (111 (110100011 s 0 (pos-of s "\n" 0)) (split-lines (slice-from s (01010 1 (pos-of s "\n" 0)))))))))
 
-(0011 reverse-acc (0010 (lst acc) (110 ((010 lst) acc)
-                                          ((010 (001 ())) (reverse-acc (011 lst) (111 (100 lst) acc))))))
+(визначити reverse-acc (функція (lst acc) (за-умовою ((атом? lst) acc)
+                                          ((атом? (як-є ())) (reverse-acc (решта lst) (сполучити (перше lst) acc))))))
 
-(0011 count-lst (0010 (lst) (110 ((010 lst) 0)
+(визначити count-lst (функція (lst) (за-умовою ((атом? lst) 0)
                                     ((010 (001 ())) (01010 1 (count-lst (011 lst)))))))
 
 (0011 asm-id (0010 (line) (110 ((has line "LOADSYM") (word-digits (slice-from line (01010 2 (pos-of line ", " 0))) 0)) ((010 (001 ())) ""))))
@@ -33,41 +33,41 @@
 
 (0011 keep-pair (0010 (id name acc) (110 ((110011100 id) acc) ((110011100 name) acc) ((010 (001 ())) (111 (111 id name) acc)))))
 
-(0011 process-asm-line (0010 (line acc) (keep-pair (asm-id line) (asm-name line) acc)))
+(визначити process-asm-line (функція (line acc) (keep-pair (asm-id line) (asm-name line) acc)))
 
-(0011 process-lines-asm (0010 (lines acc) (110 ((010 lines) acc)
-                                                  ((010 (001 ())) (process-lines-asm (011 lines) (process-asm-line (100 lines) acc))))))
+(визначити process-lines-asm (функція (lines acc) (за-умовою ((атом? lines) acc)
+                                                  ((атом? (як-є ())) (process-lines-asm (решта lines) (process-asm-line (перше lines) acc))))))
 
-(0011 inc-name (0010 (line) (word-nonspace (slice-from line 12) 0)))
+(визначити inc-name (функція (line) (word-nonspace (slice-from line 12) 0)))
 
-(0011 probe
-  (0010 (tag value)
+(визначити probe
+  (функція (tag value)
     (111 (11011011 (110011110 tag (11110100 value))) value)))
 
-(0011 inc-id
-  (0010 (line)
+(визначити inc-id
+  (функція (line)
     (001000 ((name (probe "name=" (inc-name line))))
       (001000 ((tail (probe "tail=" (skip-ws (slice-from line (01010 12 (110100010 name))) 0))))
         (word-digits tail 0)))))
 
-(0011 process-define-line (0010 (line acc) (keep-pair (inc-id line) (inc-name line) acc)))
+(визначити process-define-line (функція (line acc) (keep-pair (inc-id line) (inc-name line) acc)))
 
-(0011 process-lines-inc (0010 (lines acc) (110 ((010 lines) acc)
-                                                  ((010 (001 ())) (process-lines-inc (011 lines) (process-define-line (100 lines) acc))))))
+(визначити process-lines-inc (функція (lines acc) (за-умовою ((атом? lines) acc)
+                                                  ((атом? (як-є ())) (process-lines-inc (решта lines) (process-define-line (перше lines) acc))))))
 
 (0011 str-eq? (0010 (a b) (110 ((110101010 a b) (110101010 b a)) ((010 (001 ())) nil-marker))))
 
-(0011 id-in-base? (0010 (id base) (110 ((010 base) nil-marker)
-                                          ((str-eq? id (100 (100 base))) t-marker) ((010 (001 ())) (id-in-base? id (011 base))))))
+(визначити id-in-base? (функція (id base) (за-умовою ((атом? base) nil-marker)
+                                          ((str-eq? id (перше (перше base))) t-marker) ((атом? (як-є ())) (id-in-base? id (решта base))))))
 
-(0011 merge-pair (0010 (pair base) (110 ((id-in-base? (100 pair) base) base) ((010 (001 ())) (111 pair base)))))
+(визначити merge-pair (функція (pair base) (за-умовою ((id-in-base? (перше pair) base) base) ((атом? (як-є ())) (сполучити pair base)))))
 
-(0011 merge-all (0010 (pairs base) (110 ((010 pairs) base)
-                                           ((010 (001 ())) (merge-all (011 pairs) (merge-pair (100 pairs) base))))))
+(визначити merge-all (функція (pairs base) (за-умовою ((атом? pairs) base)
+                                           ((атом? (як-є ())) (merge-all (решта pairs) (merge-pair (перше pairs) base))))))
 
-(0011 emit-all (0010 (lst) (110 ((010 lst) (001 ()))
+(визначити emit-all (функція (lst) (за-умовою ((атом? lst) (як-є ()))
                                    (t (111 (11011011 (110011110 (110011110 (100 (100 lst)) " ") (011 (100 lst))))) (emit-all (011 lst))))))
 
 (0011 main (0010 (asm-path inc-path) (001000 ((asm-pairs (reverse-acc (process-lines-asm (split-lines (110110111 asm-path)) (001 ())) (001 ())))) (001000 ((inc-pairs (reverse-acc (process-lines-inc (split-lines (110110111 inc-path)) (001 ())) (001 ())))) (001000 ((merged (merge-all inc-pairs asm-pairs))) (111 (count-lst merged) (emit-all merged)))))))
 
-(main (100 *argv*) (100 (011 *argv*)))
+(main (перше *argv*) (перше (решта *argv*)))

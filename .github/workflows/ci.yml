@@ -99,6 +99,7 @@ jobs:
           python3 -m unittest tests/test_ukr_core3_profile_projection.py -v
           python3 -m unittest tests/test_ukr_mechanism_checkers_projection.py -v
           python3 -m unittest tests/test_ukr_semantic_authority_guard_projection.py -v
+          python3 -m unittest tests/test_ukr_program_symbol_table_projection.py tests.test_d3_legacy_logic_guard.LegacyD3GuardTests.test_fpga_program_symbol_table_exact_d1_migration -v
           python3 -m unittest tests/test_code_runs.py -v
 
       - name: УКР-ПРОЄКЦІЯ — скільки .lisp уже на повній українській поверхні (червоним)
