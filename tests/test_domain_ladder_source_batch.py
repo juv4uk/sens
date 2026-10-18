@@ -272,11 +272,11 @@ class BatchSourceTests(unittest.TestCase):
             self.assertNotIn(retired, live_heads)
         self.assertEqual(self.guard.scan_lisp(tail, path), [],
                          "Guard tail must use current two-field Ukrainian forms")
-        for current_head in ("за-умовою", "порожній?", "тотожне?", "сполучити",
+        for current_head in ("за-умовою", "тотожне?", "сполучити",
                              "перше", "решта", "як-є", "визначити", "функція",
                              "нехай", "нехай-послідовно", "більше?"):
             self.assertIn("(" + current_head, tail)
-        self.assertNotIn("(t ", tail)
+        # Ratified D4 identity alone does not establish callable runtime access.\n        self.assertIn("(тотожне? інструменти (як-є ()))", tail)\n        self.assertNotIn("(порожній?", tail)\n        self.assertNotIn("(t ", tail)
         self.assertNotIn(" (1) ", tail)
         self.assertNotIn(" (0) ", tail)
 
