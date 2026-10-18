@@ -90,6 +90,8 @@ jobs:
           python3 -m unittest tests/test_ukr_persistent_map_projection.py -v
           python3 -m unittest tests/test_ukr_mechanism_selector_projection.py -v
           python3 -m unittest tests/test_ukr_canon_d4_projection.py -v
+          python3 -m unittest tests.test_domain_ladder_source_batch.BatchSourceTests.test_guard_reference_uses_ukrainian_heads_without_filename_hold -v
+          cargo test --locked -p sens --test guard
           python3 -m unittest tests/test_ukr_macro_bridge_unify_effects.py -v
           python3 -m unittest tests/test_ukr_machine_projection_parity.py -v
           python3 -m unittest tests/test_native_first_exact_d1_cutover.py -v

@@ -259,31 +259,31 @@ class BatchSourceTests(unittest.TestCase):
             "No global W8 interpretation for legitimate D8 source",
         )
 
-    def test_historical_cond_guard_rejects_other_active_policy_sources(self):
-        # Executable historical COND clauses may carry a third explicit
-        # expected-result field or a host T fallback. Replacing just the
-        # eight-bit head with D3:110 would change semantics at runtime.
-        # Fail closed until a source-specific two-branch D1/D3 oracle exists.
-        paths = (
-            "knowledge/guard-reference.lisp",
-        )
-        for path in paths:
-            with self.subTest(path=path):
-                report = MOD.run(ROOT, False, {path})
-                self.assertEqual(report["summary"]["admitted_files"], 0)
-                self.assertEqual(report["summary"]["blocked_files"], 1)
-                # Exact D4 heads have been substituted, but the old
-                # three-field/host-truth D3 semantics are intentionally
-                # still present, and never declared fully migrated.
-                self.assertIn(path, MOD.PARTIAL_D4_WITH_LEGACY_D3)
-                row = report["files"][0]
-                self.assertEqual(row["status"], "blocked")
-                self.assertTrue(
-                    any("COND_HOST_TRUTH" in reason
-                        or "COND_NOT_TWO_FIELDS" in reason
-                        for reason in row["reasons"]),
-                    f"{path}: missing D3 semantic empty {row['reasons']}",
-                )
+    def test_guard_reference_uses_ukrainian_heads_without_filename_hold(self):
+        path = "knowledge/guard-reference.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        start = source.index("(визначити guard-script-find")
+        tail = source[start:]
+
+        # Current source is checked by its executable syntax, not a path hold.
+        live_heads = MOD.executable_call_heads(tail, self.guard)
+        for retired in ("00000010", "00100111", "00000111", "00000001",
+                        "00011011", "10011101"):
+            self.assertNotIn(retired, live_heads)
+        self.assertEqual(self.guard.scan_lisp(tail, path), [],
+                         "Guard tail must use current two-field Ukrainian forms")
+        for current_head in ("за-умовою", "порожній?", "тотожне?", "сполучити",
+                             "перше", "решта", "як-є", "визначити", "функція",
+                             "нехай", "нехай-послідовно", "більше?"):
+            self.assertIn("(" + current_head, tail)
+        self.assertNotIn("(t ", tail)
+        self.assertNotIn(" (1) ", tail)
+        self.assertNotIn(" (0) ", tail)
+
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["scanned"], 1)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertNotIn(path, MOD.PARTIAL_D4_WITH_LEGACY_D3)
 
     def test_fact_policy_has_exact_D1_D3_but_no_unsupported_source_admission(self):
         path = "knowledge/guard-fact-policy.lisp"

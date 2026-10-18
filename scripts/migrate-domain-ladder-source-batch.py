@@ -41,7 +41,7 @@ PINNED_SCHEMA_METADATA = "lib/function-table-mechanisms.lisp"
 # Do not let removal of the old D4 definition head hide legacy empties from
 # the fail-closed inventory. Revisit this pin only after executable D3 parity.
 PARTIAL_D4_WITH_LEGACY_D3 = {
-    "knowledge/guard-reference.lisp",
+    # Два активні джерела ще мають старі COND; Guard уже перейшов на чинну укр-проєкцію.
     "knowledge/guard-fact-policy.lisp",
     "scripts/semantic-authority-guard-enforce.lisp",
 }

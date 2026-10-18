@@ -8,8 +8,8 @@
 ; завершення. Це навігаційне знання, а не копія контрактів. Шляхи відносні до
 ; репозиторію, якщо не починаються з ../.
 
-(0011 *guard-reference-directory*
-  (001
+(визначити *guard-reference-directory*
+  (як-є
     ((reference
        (topic language-policy)
        (summary "Українська — первинна мова в усіх авторських репозиторіях власника; кодові коментарі — українською кирилицею в UTF-8; англійська й німецька — допоміжні. CORE-RULE tier (CRITICAL, ALL_AGENTS) з 2026-09-08: знання політики саме по собі не гарантує дотримання — перевіряти мову свідомо до першого речення нової прози, не покладатися на звичку (реальний зрив і виправлення задокументовані в ecosystem/memory/CORE-RULE-ukrainian-first.md). Ecosystem-wide audit 2026-09-08 знайшов борг у 12 з 19 перевірених репозиторіїв (ecosystem/memory/LANGUAGE-DEBT-REGISTRY-2026-09-08.md); за прямою настановою власника кожен із них тепер має задачу BILINGUAL-DOCUMENTATION-AUDIT (priority 9.0) у своєму tasks.lisp, з конкретним context, не generic-описом -- claim-able через звичайний swarm цикл, не масове автоматичне виправлення. СТРУКТУРНА ЗАГОРОЖА (2026-09-08, після другого зриву цього самого правила в тій самій сесії): scripts/check-bilingual-docs тепер підключений -- pre-commit hook (git config core.hooksPath githooks, живо перевірено -- блокує реальний англомовний коміт) і CI (.github/workflows/bilingual-docs-check.yml), не лише перевірка присутності кирилиці, а порядок/обсяг української прози відносно секції English. Пілот на ecosystem+my-lisp; не покриває код-коментарі -- відомий, названий пробіл")
@@ -821,8 +821,8 @@
 ; the command. `risk` and `verify` tell an agent what must be checked afterward.
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
-(0011 *guard-script-directory*
-  (001
+(визначити *guard-script-directory*
+  (як-є
     ((tool
        (name oracle-check)
        (summary "Безпечна перевірка синтаксису WSM без виконання · Parse-only WSM preflight without evaluation")
@@ -965,37 +965,32 @@
         (verify (exit-0-clean no-forbidden-teleology no-paraphrase-drift))))))
 
 
-(0011 guard-script-find
-  (0010 (name tools)
-    (110
-      ((010 tools) (001 ()))
-      
-      ((101 (guard-reference-field (001 name) (100 tools)) name) (100 tools))
-      ((010 (001 ())) (guard-script-find name (011 tools))))))
+(визначити guard-script-find
+  (функція (назва інструменти)
+    (за-умовою
+      ((порожній? інструменти) (як-є ()))
+      ((тотожне? (guard-reference-field (як-є name) (перше інструменти)) назва)
+       (перше інструменти))
+      (так (guard-script-find назва (решта інструменти))))))
 
-(0011 guard-script
-  (0010 (name)
-    (нехай ((tool (guard-script-find name *guard-script-directory*)))
+(визначити guard-script
+  (функція (назва)
+    (нехай ((інструмент (guard-script-find назва *guard-script-directory*)))
       (за-умовою
-        ((атом? tool) () (список
-           (001 tool-missing)
-           (список (як-є name) name)
+        ((порожній? інструмент)
+         (список (як-є tool-missing)
+           (список (як-є name) назва)
            (список (як-є decision) (як-є unknown))
            (список (як-є unknown-routes) (guard-unknown-routes))))
-        ((00000010 tool) (1) (00100111
-           (001 tool-missing)
-           (список (як-є name) name)
-           (список (як-є decision) (як-є unknown))
-           (список (як-є unknown-routes) (guard-unknown-routes))))
-        (t tool)))))
+        (так інструмент)))))
 
-(0011 guard-scripts
-  (0010 (tools)
-    (110
-      ((010 tools) (001 ()))
-      
-      ((010 (001 ())) (111 (guard-reference-field (001 name) (100 tools))
-               (guard-scripts (011 tools)))))))
+(визначити guard-scripts
+  (функція (інструменти)
+    (за-умовою
+      ((порожній? інструменти) (як-є ()))
+      (так (сполучити
+        (guard-reference-field (як-є name) (перше інструменти))
+        (guard-scripts (решта інструменти)))))))
 
 ; A topic may have more than one (reference ...) entry. Adding a stronger
 ; answer never deletes or rejects the older one -- it stays in the
@@ -1007,110 +1002,86 @@
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
-(0011 guard-reference-evidence-status
-  (0010 (reference)
-    (нехай ((status (guard-reference-field (як-є evidence-status) reference)))
+(визначити guard-reference-evidence-status
+  (функція (посилання)
+    (нехай ((стан (guard-reference-field (як-є evidence-status) посилання)))
       (за-умовою
-        ; A missing field and a found bare-symbol value (e.g. `confirmed`)
-        ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
-        ; them apart. Only the empty list means "missing"; any other atom is
-        ; a real found status and must be returned as-is.
-        ((атом? status) () (як-є unresolved))
-        ((00000010 status) (1) status)
-        ((00000010 status) (0) status)))))
+        ((порожній? стан) (як-є unresolved))
+        (так стан)))))
 
-(0011 guard-evidence-status-strength
-  (0010 (status)
-    (110
-      ((101 status (001 confirmed)) 4)
-      ((101 status (001 partial)) 3)
-      ((101 status (001 unresolved)) 2)
-      ((101 status (001 broken)) 1)
-      ((010 (001 ())) 0))))
-
-(0011 guard-reference-stronger
-  (0010 (best candidate)
+(визначити guard-evidence-status-strength
+  (функція (стан)
     (за-умовою
-      ((атом? best) () candidate)
-      ((00000010 best) (1) candidate)
-      (t
-       (нехай ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
-             (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
-         (за-умовою
-           ((більше? candidate-strength best-strength) 1 candidate)
-           ((більше? candidate-strength best-strength) 0 best)))))))
+      ((тотожне? стан (як-є confirmed)) 4)
+      ((тотожне? стан (як-є partial)) 3)
+      ((тотожне? стан (як-є unresolved)) 2)
+      ((тотожне? стан (як-є broken)) 1)
+      (так 0))))
 
-(0011 guard-reference-all
-  (0010 (topic references)
-    (110
-      ((010 references) (001 ()))
-      
-      ((101 (guard-reference-field (001 topic) (100 references)) topic)
-       (111 (100 references) (guard-reference-all topic (011 references))))
-      ((010 (001 ())) (guard-reference-all topic (011 references))))))
+(визначити guard-reference-stronger
+  (функція (найкращий кандидат)
+    (за-умовою
+      ((порожній? найкращий) кандидат)
+      (так (нехай-послідовно
+        ((сила-найкращого (guard-evidence-status-strength (guard-reference-evidence-status найкращий)))
+         (сила-кандидата (guard-evidence-status-strength (guard-reference-evidence-status кандидат))))
+        (за-умовою
+          ((більше? сила-кандидата сила-найкращого) кандидат)
+          (так найкращий)))))))
 
-(0011 guard-reference-find-strongest
-  (0010 (topic references best)
-    (110
-      ((010 references) best)
-      
-      ((101 (guard-reference-field (001 topic) (100 references)) topic)
-       (guard-reference-find-strongest
-         topic (011 references)
-         (guard-reference-stronger best (100 references))))
-      ((010 (001 ())) (guard-reference-find-strongest topic (011 references) best)))))
+(визначити guard-reference-all
+  (функція (тема посилання)
+    (за-умовою
+      ((порожній? посилання) (як-є ()))
+      ((тотожне? (guard-reference-field (як-є topic) (перше посилання)) тема)
+       (сполучити (перше посилання) (guard-reference-all тема (решта посилання))))
+      (так (guard-reference-all тема (решта посилання))))))
 
-(0011 guard-reference-find
-  (0010 (topic references)
-    (guard-reference-find-strongest topic references (001 ()))))
+(визначити guard-reference-find-strongest
+  (функція (тема посилання найкращий)
+    (за-умовою
+      ((порожній? посилання) найкращий)
+      ((тотожне? (guard-reference-field (як-є topic) (перше посилання)) тема)
+       (guard-reference-find-strongest тема (решта посилання)
+         (guard-reference-stronger найкращий (перше посилання))))
+      (так (guard-reference-find-strongest тема (решта посилання) найкращий)))))
 
-(0011 guard-reference
-  (0010 (topic)
-    (нехай ((reference (guard-reference-find topic *guard-reference-directory*)))
+(визначити guard-reference-find
+  (функція (тема посилання)
+    (guard-reference-find-strongest тема посилання (як-є ()))))
+
+(визначити guard-reference
+  (функція (тема)
+    (нехай ((посилання (guard-reference-find тема *guard-reference-directory*)))
       (за-умовою
-        ((атом? reference) () (список
-           (001 reference-missing)
-           (список (як-є schema) (як-є guard-reference/1))
-           (список (як-є topic) topic)
+        ((порожній? посилання)
+         (список (як-є reference-missing)
+           (список (як-є schema) (як-є guard/1))
+           (список (як-є topic) тема)
            (список (як-є decision) (як-є unknown))
            (список (як-є evidence-status) (як-є unresolved))
            (список (як-є guidance) (як-є choose-unknown-route))
            (список (як-є unknown-routes) (guard-unknown-routes))))
-        ((00000010 reference) (1) (00100111
-           (001 reference-missing)
-           (список (як-є schema) (як-є guard-reference/1))
-           (список (як-є topic) topic)
-           (список (як-є decision) (як-є unknown))
-           (список (як-є evidence-status) (як-є unresolved))
-           (список (як-є guidance) (як-є choose-unknown-route))
-           (список (як-є unknown-routes) (guard-unknown-routes))))
-        (t reference)))))
+        (так посилання)))))
 
-(0011 guard-explain
-  (0010 (topic)
-    (guard-reference-field (001 summary) (guard-reference topic))))
+(визначити guard-explain
+  (функція (тема) (guard-reference-field (як-є summary) (guard-reference тема))))
 
-(0011 guard-how-to
-  (0010 (topic)
-    (guard-reference-field (001 how-to) (guard-reference topic))))
+(визначити guard-how-to
+  (функція (тема) (guard-reference-field (як-є how-to) (guard-reference тема))))
 
-(0011 guard-authority
-  (0010 (topic)
-    (guard-reference-field (001 authority) (guard-reference topic))))
+(визначити guard-authority
+  (функція (тема) (guard-reference-field (як-є authority) (guard-reference тема))))
 
-(0011 guard-verify
-  (0010 (topic)
-    (guard-reference-field (001 verify) (guard-reference topic))))
+(визначити guard-verify
+  (функція (тема) (guard-reference-field (як-є verify) (guard-reference тема))))
 
-(0011 guard-topics
-  (0010 (references)
+(визначити guard-topics
+  (функція (посилання)
     (за-умовою
-      ((атом? references) () (як-є ()))
-      ((00000010 references) (1) (001 ()))
-      (t
-       (111
-         (guard-reference-field (001 topic) (100 references))
-         (guard-topics (011 references)))))))
+      ((порожній? посилання) (як-є ()))
+      (так (сполучити (guard-reference-field (як-є topic) (перше посилання))
+        (guard-topics (решта посилання)))))))
 
 ; One canonical entry point for a cold agent: "ask Guard" without needing
 ; to know whether the answer lives in the tool directory or the reference
@@ -1122,51 +1093,31 @@
 ; довідковій директорії. Ніколи мовчки не надає перевагу одному з них --
 ; ім'я, знайдене в обох, повертається позначеним `ambiguous` з обома
 ; повними записами, і вибір лишається за викликачем.
-(0011 guard-ask
-  (0010 (name)
-    (нехай-послідовно ((tool (guard-script-find name *guard-script-directory*))
-           (reference (guard-reference-find name *guard-reference-directory*)))
+(визначити guard-ask
+  (функція (назва)
+    (нехай-послідовно
+      ((інструмент (guard-script-find назва *guard-script-directory*))
+       (посилання (guard-reference-find назва *guard-reference-directory*)))
       (за-умовою
-        ((атом? tool) () (за-умовою
-           ((атом? reference) () (список (як-є not-found)
-                  (список (як-є query) name)
-                  (список (як-є decision) (як-є unknown))
-                  (список (як-є unknown-routes) (guard-unknown-routes))))
-           ((00000010 reference) (1) (00100111 (001 not-found)
-                  (список (як-є query) name)
-                  (список (як-є decision) (як-є unknown))
-                  (список (як-є unknown-routes) (guard-unknown-routes))))
-           (t
-            (список (як-є result)
-                  (список (як-є type) (як-є reference-topic))
-                  (список (як-є source) (як-є knowledge/guard-reference.lisp))
-                  (список (як-є entry) reference)))))
-        ((00000010 tool) (1) (00000111
-           ((атом? reference) () (список (як-є not-found)
-                  (список (як-є query) name)
-                  (список (як-є decision) (як-є unknown))
-                  (список (як-є unknown-routes) (guard-unknown-routes))))
-           ((00000010 reference) (1) (00100111 (001 not-found)
-                  (список (як-є query) name)
-                  (список (як-є decision) (як-є unknown))
-                  (список (як-є unknown-routes) (guard-unknown-routes))))
-           (t
-            (список (як-є result)
-                  (список (як-є type) (як-є reference-topic))
-                  (список (як-є source) (як-є knowledge/guard-reference.lisp))
-                  (список (як-є entry) reference)))))
-        (t
+        ((порожній? інструмент)
          (за-умовою
-           ((атом? reference) () (список (як-є result)
-                  (список (як-є type) (як-є tool))
-                  (список (як-є source) (як-є guard-script-directory))
-                  (список (як-є entry) tool)))
-           ((00000010 reference) (1) (00100111 (001 result)
-                  (список (як-є type) (як-є tool))
-                  (список (як-є source) (як-є guard-script-directory))
-                  (список (як-є entry) tool)))
-           (t
-            (список (як-є ambiguous)
-                  (список (як-є query) name)
-                  (список (як-є tool) tool)
-                  (список (як-є reference-topic) reference)))))))))
+           ((порожній? посилання)
+            (список (як-є not-found)
+              (список (як-є query) назва)
+              (список (як-є decision) (як-є unknown))
+              (список (як-є unknown-routes) (guard-unknown-routes))))
+           (так (список (як-є result)
+             (список (як-є type) (як-є reference-topic))
+             (список (як-є source) (як-є knowledge/guard-reference.lisp))
+             (список (як-є entry) посилання)))))
+        (так
+         (за-умовою
+           ((порожній? посилання)
+            (список (як-є result)
+              (список (як-є type) (як-є tool))
+              (список (як-є source) (як-є guard-script-directory))
+              (список (як-є entry) інструмент)))
+           (так (список (як-є ambiguous)
+             (список (як-є query) назва)
+             (список (як-є tool) інструмент)
+             (список (як-є reference-topic) посилання)))))))))
