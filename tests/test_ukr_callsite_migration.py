@@ -2576,7 +2576,7 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
             # A few retained historical D6 LET forms enclose D9 calls. This
             # walk verifies those already-projected child heads only; it does
             # not ratify or enable the enclosing D6 mechanism.
-            if head in ("001000", "001001", "зв'язати", "звʼязати", "let", "let*"):
+            if head in ("001000", "001001", "нехай", "нехай-послідовно", "зв'язати", "звʼязати", "let", "let*"):
                 if len(node.values) > 1 and isinstance(node.values[1], mod.Form):
                     for binding in node.values[1].values:
                         if isinstance(binding, mod.Form):
