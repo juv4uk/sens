@@ -26,16 +26,16 @@
   (retirement-issue 1046)
   (rows
     ; Core evaluator forms — exact 8-bit coordinates
-    (для-кожного-елемента evaluator quote-form)
-    (завершити-рядок evaluator atom-primitive)
-    (перевідобразити evaluator eq-primitive)
-    (послідовність-повернути-перше evaluator cons-primitive)
-    (елемент-за-індексом evaluator car-primitive)
-    (позиція-першого-збігу evaluator cdr-primitive)
-    (видалити-на-місці! evaluator cond-form)
-    (тотожне-значення? evaluator lambda-form)
-    (підмножина? evaluator define-form)
-    (відобразити-залишки-з-порожнім evaluator define-form)
+    (як-є evaluator quote-form)
+    (атом? evaluator atom-primitive)
+    (тотожне? evaluator eq-primitive)
+    (сполучити evaluator cons-primitive)
+    (перше evaluator car-primitive)
+    (решта evaluator cdr-primitive)
+    (за-умовою evaluator cond-form)
+    (функція evaluator lambda-form)
+    (визначити evaluator define-form)
+    (визначити evaluator define-form)
     ; Existing function + only. These rows admit executors; they do not define +.
     ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
     ; Чотири острови виконують додавання (SID8:00001100 → D5:01010).
