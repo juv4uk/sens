@@ -17,7 +17,7 @@
   (функція (name)
     (друкувати (str+ "ok: " name))))
 
-(визначити contains? (функція (text needle) (110101000 needle text)))
+(визначити contains? (функція (text needle) (рядок-містить? needle text)))
 
 ; Кожна голка з needles має бути в тексті; повертає перелік відсутніх.
 (визначити missing-needles
@@ -95,7 +95,7 @@
     (за-умовою
       ((атом? entries) () t)
       ((атом? entries) (0)
-       (001000 ((manifest (str+ "crates/" (перше entries) "/Cargo.toml")))
+       (нехай ((manifest (str+ "crates/" (перше entries) "/Cargo.toml")))
          (нехай ((text (читати-файл manifest)))
            (за-умовою
              ((contains? text "[package]\nname = \"my-lisp") t
@@ -167,7 +167,7 @@
 ; --- Python-перевірки (поки викликаються; перенесення самих скриптів — окремо) ---
 (визначити run-python
   (функція (name script args)
-    (001000 ((result (110101111 "python3" (сполучити script args))))
+    (нехай ((result (процес-запустити "python3" (сполучити script args))))
       (за-умовою
         ((11110111 (перше result) 0) (1) (pass name))
         ((11110111 (перше result) 0) (0)
@@ -179,7 +179,7 @@
 
 ;; ===== Українська документація й розкладка (з xtask verify) =====
 
-(визначити field (функція (key form) (друге (11100 key (решта form)))))
+(визначити field (функція (key form) (друге (знайти-за-ключем key (решта form)))))
 
 (визначити count-items
   (функція (items)
@@ -189,7 +189,7 @@
 
 (визначити last-char
   (функція (text)
-    (110100011 text (01011 (110100010 text) 1) (110100010 text))))
+    (рядок-зріз text (відняти (рядок-довжина text) 1) (рядок-довжина text))))
 
 ; Стабільні українські назви з таблиці функцій: ((бітовий-код . назва) ...).
 (визначити registry-rows (перше (читати-всі (читати-файл "lib/surface/semantic-registry.lisp"))))
@@ -199,7 +199,7 @@
     (за-умовою
       ((атом? rows) () (як-є ()))
       ((атом? rows) (0)
-       (001000 ((name (field (як-є ук) (перше rows))))
+       (нехай ((name (field (як-є ук) (перше rows))))
          (за-умовою
            ((атом? name) (1)
             (сполучити (сполучити (11110100 (перше (перше rows))) (11101110 name))
@@ -213,12 +213,12 @@
 ; Текстовий запис SENS для перевірок і join: голі 8 біт дають рівно 8 знаків,
 ; а SENS у лапках (текстовий сурогат) — 10, і перевірка його відкидає.
 (визначити doc-id (функція (doc) (11110100 (10011 doc))))
-(визначити doc-kind (функція (doc) (100111 doc)))
+(визначити doc-kind (функція (doc) (четверте doc)))
 (визначити api-md (читати-файл "docs/ukrainian-api.md"))
 
 (визначити uk-name-for
   (функція (id)
-    (001000 ((found (11100 id stable-uk)))
+    (нехай ((found (знайти-за-ключем id stable-uk)))
       (за-умовою
         ((атом? found) (0) (решта found))
         (t t (провал (str+ "документаційний ID " id " не має stable UK projection у registry")))))))
@@ -227,7 +227,7 @@
   (функція (text)
     (за-умовою
       ((110011100 text) (1) t)
-      ((110101000 (110101011 text) "01") t (all-bits? (110011101 text)))
+      ((рядок-містить? (рядок-перший text) "01") t (all-bits? (рядок-решта text)))
       (t t (як-є ())))))
 
 (визначити check-docs
@@ -235,19 +235,19 @@
     (за-умовою
       ((атом? docs) ()
        (за-умовою
-         ((11010 10 predicates) 1
+         ((менше? 10 predicates) 1
           (за-умовою
-            ((11010 0 mutations) 1 t)
+            ((менше? 0 mutations) 1 t)
             (t t (провал "публічний каталог мутацій схлопнувся"))))
          (t t (провал "публічний каталог предикатів схлопнувся"))))
       ((атом? docs) (0)
-       (001000 ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
+       (нехай ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
          (за-умовою
            ((11110111 (110100010 id) 8) (0)
             (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
            ((all-bits? id) () (провал (str+ "документаційний join key має бути 8-бітним SID: " id)))
            (t t
-            (001000 ((uk (uk-name-for id)))
+            (нехай ((uk (uk-name-for id)))
               (001000 ((question (11110111 (last-char uk) "?"))
                     (bang (11110111 (last-char uk) "!"))
                     (predicate (11110111 kind (як-є predicate)))
@@ -260,10 +260,10 @@
                   (mutation (1)
                    (за-умовою
                      ((11110111 uk "встановити-елемент-вектора!") (1)
-                      (check-docs (решта docs) predicates (01010 mutations 1)))
+                      (check-docs (решта docs) predicates (додати mutations 1)))
                      (t t (провал (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
-                   (check-docs (решта docs) (01010 predicates 1) mutations))
+                   (check-docs (решта docs) (додати predicates 1) mutations))
                   (t t (check-docs (решта docs) predicates mutations))))))))))))
 
 (check-docs uk-docs 0 0)
@@ -277,21 +277,21 @@
     (за-умовою
       ((атом? pairs) () t)
       ((атом? pairs) (0)
-       (001000 ((id (перше (перше pairs))) (uk (решта (перше pairs))))
+       (нехай ((id (перше (перше pairs))) (uk (решта (перше pairs))))
          (за-умовою
-           ((атом? (11100 id (101000 (функція (doc) (сполучити (doc-id doc) t)) uk-docs))) ()
+           ((атом? (знайти-за-ключем id (відобразити (функція (doc) (сполучити (doc-id doc) t)) uk-docs))) ()
             (check-md-rows (решта pairs)))
-           ((110101000 (str+ "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
+           ((рядок-містить? (str+ "| `" uk "` |") api-md) t (check-md-rows (решта pairs)))
            (t t (провал (str+ "публічне українське ім'я відсутнє у Markdown-довіднику: " uk)))))))))
 
 (за-умовою
-  ((11010 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
+  ((менше? 50 (count-items stable-uk)) 1 (check-md-rows stable-uk))
   (t t (провал "замало stable UK-назв у таблиці")))
 (pass "vsi-stable-ukrainski-nazvy-maiut-numeric-zapys-u-dovidnyku")
 
 ; Смисловий аудит назв: підсумок збігається з даними.
 (визначити audit (перше (читати-всі (читати-файл "lib/surface/uk-name-audit.lisp"))))
-(визначити audit-renames (решта (11100 (як-є renames) (решта audit))))
+(визначити audit-renames (решта (знайти-за-ключем (як-є renames) (решта audit))))
 (визначити reviewed (field (як-є stable-reviewed) audit))
 (визначити renamed (field (як-є renamed) audit))
 (визначити retained (field (як-є retained) audit))
@@ -326,8 +326,8 @@
   (функція (s marker i)
     (за-умовою
       ((110011100 s) (1) -1)
-      ((110101010 marker s) t i)
-      (t t (pos-of (110011101 s) marker (01010 i 1))))))
+      ((рядок-префікс? marker s) t i)
+      (t t (pos-of (рядок-решта s) marker (додати i 1))))))
 
 (за-умовою
   ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
@@ -340,8 +340,8 @@
     (за-умовою
       ((атом? renames) () t)
       ((атом? renames) (0)
-       (001000 ((en-symbol (друге (перше renames)))
-             (old-symbol (10011 (перше renames)))
+       (нехай ((en-symbol (друге (перше renames)))
+             (old-symbol (третє (перше renames)))
              (sens (registry-sens-for-en
                      (друге (перше renames))
                      semantic-registry)))
@@ -370,7 +370,7 @@
   (функція (text)
     (за-умовою
       ((110011100 text) (1) t)
-      ((110101000 (110101011 text) uk-layout) t (typeable? (110011101 text)))
+      ((рядок-містить? (рядок-перший text) uk-layout) t (typeable? (рядок-решта text)))
       (t t (як-є ())))))
 
 (визначити check-typeable
@@ -388,10 +388,10 @@
   (функція (char)
     (001000 ((code (11100000 char)))
       (за-умовою
-        ((11010 code 65) 1 (як-є ()))
-        ((11010 code 91) 1 t)
-        ((11010 code 97) 1 (як-є ()))
-        ((11010 code 123) 1 t)
+        ((менше? code 65) 1 (як-є ()))
+        ((менше? code 91) 1 t)
+        ((менше? code 97) 1 (як-є ()))
+        ((менше? code 123) 1 t)
         (t t (як-є ()))))))
 
 ; Латинські літери у виконуваному коді: поза рядками й коментарями.
@@ -400,7 +400,7 @@
     (за-умовою
       ((110011100 text) (1) found)
       (t t
-       (001000 ((c (110101011 text)) (rest (110011101 text)))
+       (нехай ((c (рядок-перший text)) (rest (рядок-решта text)))
          (за-умовою
            ((11110111 in-comment t) (1)
             (latin-in-code rest () (за-умовою ((11110111 c "\n") (1) ()) (t t t)) found))
@@ -411,7 +411,7 @@
               (t t (latin-in-code rest t () found))))
            ((11110111 c ";") (1) (latin-in-code rest () t found))
            ((11110111 c "\"") (1) (latin-in-code rest t () found))
-           ((latin-letter? c) t (latin-in-code rest () () (110011110 found c)))
+           ((latin-letter? c) t (latin-in-code rest () () (рядок-додати found c)))
            (t t (latin-in-code rest () () found))))))))
 
 (визначити require-no-latin
@@ -431,9 +431,9 @@
   (функція (path)
     (нехай ((text (читати-файл path)))
       (за-умовою
-        ((110101000 "language-contract.my" text) t
+        ((рядок-містить? "language-contract.my" text) t
          (провал (str+ path " still contains removed path language-contract.my")))
-        ((110101000 "contracts/my-lisp/lock.my" text) t
+        ((рядок-містить? "contracts/my-lisp/lock.my" text) t
          (провал (str+ path " still contains removed path contracts/my-lisp/lock.my")))
         (t t
          (require-needles "contract-workflows-use-canonical-lisp-paths" path
