@@ -377,9 +377,14 @@ class MetaEvaluatorUkrProjectionTests(unittest.TestCase):
         mutual = (root / "lib/meta-eval-mutual.lisp").read_text(encoding="utf-8")
         self.assertIn("(сполучити (як-є atom) (my-fc-primitive (як-є atom)))", first)
         self.assertIn("(тотожне? (перше form) (як-є def))", mutual)
-        self.assertNotIn("#d1:1", first)
-        self.assertNotIn("#d1:0", first)
-        self.assertIn("(так ", first)
+        # Джерело зберігає історичний #d1:1 у коментарі; заборона діє
+        # лише для виконуваного SENS-коду, а не для provenance.
+        active_first = "\n".join(
+            line.split(";", 1)[0] for line in first.splitlines()
+        )
+        self.assertNotIn("#d1:1", active_first)
+        self.assertNotIn("#d1:0", active_first)
+        self.assertIn("(так ", active_first)
         # Поточна ратифікована D1 проєкція: D1:0 = «ні», D1:1 = «так».
         # Meta-mutual і first-class використовують повну ратифіковану D1-проєкцію.
         d1 = (root / "lib/domains/d1.lisp").read_text(encoding="utf-8")
