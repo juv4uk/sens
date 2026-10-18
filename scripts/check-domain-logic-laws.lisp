@@ -73,4 +73,4 @@
 ; define + посилання на змінну
 (law-check (001 define-then-use) (11010 law-two 3))
 
-(11011011 "DOMAIN-LOGIC-LAWS: PASS d3=8 d5=7 d6=7 d8=1 define=1")
+(друкувати "DOMAIN-LOGIC-LAWS: PASS d3=8 d5=7 d6=7 d8=1 define=1")
