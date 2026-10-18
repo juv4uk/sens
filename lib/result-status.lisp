@@ -1,3 +1,8 @@
+; SOURCE UKR: лише ратифіковані D1/D3–D6 і підтверджені D9 peer-виклики.
+; Три D9 без доказу викличного укр closure збережені як точні бітові голови:
+; 101001110 (reason), 101010010 (module-known?), 110000011 (module-clauses-now).
+; Код висновків, теги цитованих даних і історичні публічні назви незмінні.
+
 ; result-status.lisp — canonical data-only reasoning outcome algebra.
 ; This module adds no exception mechanism and no new runtime Value variant.
 ; Ordinary `reason` / `reason-in` keep their historical return values for
@@ -24,75 +29,75 @@
 ; callable D9-or-lower resident stay named and fail closed rather than being
 ; guessed into D7/D10 or a historical W8 slot.
 
-(0011 make-proved
-  (0010 (statement results)
-    (1110 (001 proved) statement results)))
+(визначити make-proved
+  (функція (statement results)
+    (список (як-є proved) statement results)))
 
-(0011 make-unknown
-  (0010 (subject)
-    (1110 (001 unknown) subject)))
+(визначити make-unknown
+  (функція (subject)
+    (список (як-є unknown) subject)))
 
-(0011 make-partial
-  (0010 (value bound)
-    (1110 (001 partial) value bound)))
+(визначити make-partial
+  (функція (value bound)
+    (список (як-є partial) value bound)))
 
-(0011 make-blocked
-  (0010 (reason)
-    (1110 (001 blocked) reason)))
+(визначити make-blocked
+  (функція (reason)
+    (список (як-є blocked) reason)))
 
-(0011 make-disputed
-  (0010 (evidence)
-    (1110 (001 disputed) evidence)))
+(визначити make-disputed
+  (функція (evidence)
+    (список (як-є disputed) evidence)))
 
-(0011 make-invalid
-  (0010 (reason payload)
-    (1110 (001 invalid) reason payload)))
+(визначити make-invalid
+  (функція (reason payload)
+    (список (як-є invalid) reason payload)))
 
-(0011 result-tagged?
-  (0010 (result)
-    (110
-      ((010 result) 0)
-      ((101 (100 result) (001 proved)) 1)
-      ((101 (100 result) (001 unknown)) 1)
-      ((101 (100 result) (001 partial)) 1)
-      ((101 (100 result) (001 blocked)) 1)
-      ((101 (100 result) (001 disputed)) 1)
-      ((101 (100 result) (001 invalid)) 1)
-      (1 0))))
+(визначити result-tagged?
+  (функція (result)
+    (за-умовою
+      ((атом? result) ні)
+      ((тотожне? (перше result) (як-є proved)) так)
+      ((тотожне? (перше result) (як-є unknown)) так)
+      ((тотожне? (перше result) (як-є partial)) так)
+      ((тотожне? (перше result) (як-є blocked)) так)
+      ((тотожне? (перше result) (як-є disputed)) так)
+      ((тотожне? (перше result) (як-є invalid)) так)
+      (так ні))))
 
-(0011 result-status
-  (0010 (result)
-    (110
-      ((000000100 result) (100 result))
-      (1 (001 ())))))
+(визначити result-status
+  (функція (result)
+    (за-умовою
+      ((результат-позначений? result) (перше result))
+      (так (як-є ())))))
 
-(0011 result-payload
-  (0010 (result)
-    (110
-      ((000000100 result) (011 result))
-      (1 (001 ())))))
+(визначити result-payload
+  (функція (result)
+    (за-умовою
+      ((результат-позначений? result) (решта result))
+      (так (як-є ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
 ; passed to it merely to ask whether that pair is `()`.
-(0011 result-proper-list?
-  (0010 (value)
-    (110
-      ((010 value)
-       (110
-         ((101 value (001 ())) 1)
-         (1 0)))
-      (1
+(визначити result-proper-list?
+  (функція (value)
+    (за-умовою
+      ((атом? value)
+       (за-умовою
+         ((тотожне? value (як-є ())) так)
+         (так ні)))
+      (так
        (результат-є-правильним-списком? (решта value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
-(0011 result-not-head?
-  (0010 (head)
-    (110
-      ((101 head (001 not?)) 1)
-      ((101 head (001 not)) 1)
-      (1 0))))
+(визначити result-not-head?
+  (функція (head)
+    (за-умовою
+      ((тотожне? head (як-є not?)) так)
+      ((тотожне? head (як-є not)) так)
+      (так ні))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -100,36 +105,36 @@
 ; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
 ; Arity check uses exact D3 ATOM/CDR + D4 selector; no W8 / D6 LENGTH.
-(0011 result-goal?
-  (0010 (goal)
-    (110
-      ((010 goal) 0)
-      ((хибне? (результат-є-правильним-списком? goal)) 0)
-      ((0100 (110101100 (100 goal))) 0)
+(визначити result-goal?
+  (функція (goal)
+    (за-умовою
+      ((атом? goal) ні)
+      ((хибне? (результат-є-правильним-списком? goal)) ні)
+      ((хибне? (символ? (перше goal))) ні)
       ((результат-не-є-головою-правила? (перше goal))
-       (110
-         ((010 (011 goal))
-          (110
-            ((010 (0111 goal)) (000011101 (1001 goal)))
-            (1 0)))
-         (1 0)))
-      (1 1))))
+       (за-умовою
+         ((атом? (решта goal))
+          (за-умовою
+            ((атом? (решта-решти goal)) (результат-ціль? (друге goal)))
+            (так ні)))
+         (так ні)))
+      (так так))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
 ; every other goal gets wrapped in `not?`.
-(0011 result-negated-goal?
-  (0010 (goal)
-    (110
-      ((0100 (000011101 goal)) 0)
-      ((результат-не-є-головою-правила? (перше goal)) 1)
-      (1 0))))
+(визначити result-negated-goal?
+  (функція (goal)
+    (за-умовою
+      ((хибне? (результат-ціль? goal)) ні)
+      ((результат-не-є-головою-правила? (перше goal)) так)
+      (так ні))))
 
-(0011 result-opposite-goal
-  (0010 (goal)
-    (110
-      ((000111010 goal) (1001 goal))
-      (1 (1110 (001 not?) goal)))))
+(визначити result-opposite-goal
+  (функція (goal)
+    (за-умовою
+      ((результат-заперечений-ціль? goal) (друге goal))
+      (так (список (як-є not?) goal)))))
 
 ; Both positive and opposite queries use the already-ratified exact D9:101001110
 ; REASON entry, sharing one immutable reason-index. This removes two legacy
@@ -149,51 +154,51 @@
 ; repeated-query callers may retain the prepared index themselves. There is no
 ; hidden cache or invalidation policy: a retained index continues to represent
 ; the exact rules captured when it was built.
-(0011 reason-observe
-  (0010 (goal rules-or-index)
-    (110
-      ((0100 (000011101 goal))
-       (000001101 (001 invalid-goal) goal))
-      (1
-       (001001 ((opposite (000111110 goal))
+(визначити reason-observe
+  (функція (goal rules-or-index)
+    (за-умовою
+      ((хибне? (результат-ціль? goal))
+       (створити-некоректний (як-є invalid-goal) goal))
+      (так
+       (нехай-послідовно ((opposite (результат-протилежний-ціль goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results (101001110 goal index))
               (opposite-results (101001110 opposite index)))
-         (110
-           ((110
-              ((0100 (010 positive-results))
-               (0100 (010 opposite-results)))
-              (1 0))
-            (000000111
-              (1110
-                (000111101 goal positive-results)
-                (000111101 opposite opposite-results))))
-           ((0100 (010 positive-results))
-            (000111101 goal positive-results))
-           ((0100 (010 opposite-results))
-            (000111101 opposite opposite-results))
-           (1 (001 ()))))))))
+         (за-умовою
+           ((за-умовою
+              ((хибне? (атом? positive-results))
+               (хибне? (атом? opposite-results)))
+              (так ні))
+            (створити-спірний
+              (список
+                (створити-доведений goal positive-results)
+                (створити-доведений opposite opposite-results))))
+           ((хибне? (атом? positive-results))
+            (створити-доведений goal positive-results))
+           ((хибне? (атом? opposite-results))
+            (створити-доведений opposite opposite-results))
+           (так (як-є ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
 ; well-formed module name is absent after scanning the concrete append-only
 ; knowledge journal, that absence is already established: reasoning is blocked
 ; by a known missing precondition rather than epistemically `unknown`.
-(0011 reason-in-observe
-  (0010 (module-name goal)
-    (110
-      ((0100 (110101100 module-name))
-       (000001101 (001 invalid-module) module-name))
-      ((0100 (000011101 goal))
-       (000001101 (001 invalid-goal) goal))
+(визначити reason-in-observe
+  (функція (module-name goal)
+    (за-умовою
+      ((хибне? (символ? module-name))
+       (створити-некоректний (як-є invalid-module) module-name))
+      ((хибне? (результат-ціль? goal))
+       (створити-некоректний (як-є invalid-goal) goal))
       ((101010010 module-name)
-       (000010000 goal (110000011 module-name)))
-      (1
-       (000100111
-         (1110 (001 module-not-found) module-name))))))
+       (міркувати-спостерігати goal (110000011 module-name)))
+      (так
+       (створити-заблокований
+         (список (як-є module-not-found) module-name))))))
 
 ; D9:000010000 REASON-OBSERVE and D9:000110100 REASON-IN-OBSERVE.
 ; Ukrainian SENS bindings to the existing source-owned reasoning laws.
 ; No direct D9 machine admission.
-(0011 міркувати-спостерігати reason-observe)
-(0011 міркувати-у-спостерігати reason-in-observe)
+(визначити міркувати-спостерігати reason-observe)
+(визначити міркувати-у-спостерігати reason-in-observe)
