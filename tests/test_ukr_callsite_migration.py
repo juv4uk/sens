@@ -1939,10 +1939,15 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         return current
 
     @staticmethod
-    def _restore_prior_domain_logic_print(path, source):
-        """Preserve the pinned historical blob after a later, ratified D8 PRINT projection."""
+    def _restore_prior_domain_logic_calls(path, source):
+        """Preserve the pinned Git blob after separately verified D3/D9 and D8 migrations."""
         if path != "scripts/check-domain-logic-laws.lisp":
             return source
+        new_schema = '  (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))'
+        old_schema = '  (101 (100 (110101001 (110110111 "lib/domains/d1.lisp"))) (001 domain-table/1)))'
+        if source.count(new_schema) != 1:
+            raise AssertionError("Точна D3/D9 форма read-file-schema не збігається")
+        source = source.replace(new_schema, old_schema, 1)
         current = '(друкувати "DOMAIN-LOGIC-LAWS: PASS'
         historical = '(11011011 "DOMAIN-LOGIC-LAWS: PASS'
         if source.count(current) != 1:
@@ -1954,7 +1959,7 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
                 restored = self._inverse(source, evidence["edits"])
-                restored = self._restore_prior_domain_logic_print(path, restored)
+                restored = self._restore_prior_domain_logic_calls(path, restored)
                 self.assertEqual(self._blob_sha(restored), evidence["sha"])
                 mod.parse(source)
                 mod.parse(restored)
@@ -1966,11 +1971,11 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
             with self.subTest(path=path):
                 source = (self.root / path).read_text(encoding="utf-8")
                 old = self._inverse(source, evidence["edits"])
-                old = self._restore_prior_domain_logic_print(path, old)
+                old = self._restore_prior_domain_logic_calls(path, old)
                 before, after = old.splitlines(), source.splitlines()
                 self.assertEqual(len(before), len(after))
                 changed = [i + 1 for i, (a, b) in enumerate(zip(before, after)) if a != b]
-                later_line = [76] if path == "scripts/check-domain-logic-laws.lisp" else []
+                later_line = [71, 76] if path == "scripts/check-domain-logic-laws.lisp" else []
                 self.assertEqual(changed, evidence["changed"] + later_line)
                 for number in changed:
                     line = re.sub(r';[^\n]*|"(?:\\.|[^"\\])*"',
@@ -1982,6 +1987,8 @@ class DomainLawScriptsUkrProjectionWitnessTests(unittest.TestCase):
         # D5/D6/D8/D9 operators are separately admitted; not inferred from width.
         logic = (self.root / "scripts/check-domain-logic-laws.lisp").read_text(encoding="utf-8")
         self.assertIn("(11010 2 3)", logic)
+        self.assertIn('(тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp")))', logic)
+        self.assertNotIn('(101 (100 (110101001 (110110111 "lib/domains/d1.lisp")))', logic)
         self.assertIn('(друкувати "DOMAIN-LOGIC-LAWS:', logic)
         self.assertNotIn('(11011011 "DOMAIN-LOGIC-LAWS:', logic)
 
