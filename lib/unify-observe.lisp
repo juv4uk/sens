@@ -15,8 +15,8 @@
 ;
 ; Binary self-witness: tests/fixtures/unify-observe-d1-witness.lisp
 
-(0011 уніфікація-спостереження-стан
-  (0010 (raw left right substitution)
+(визначити уніфікація-спостереження-стан
+  (функція (raw left right substitution)
     (за-умовою
       ((атом? raw)
        (за-умовою
@@ -27,8 +27,8 @@
       ((атом? (як-є ()))
        (список (як-є unified) raw)))))
 
-(0011 unify-observe
-  (0010 (left right substitution)
+(визначити unify-observe
+  (функція (left right substitution)
     (уніфікація-спостереження-стан
       (уніфікувати left right substitution)
       left right substitution)))
