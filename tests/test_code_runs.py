@@ -359,6 +359,7 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
     """Перевіряє чинні D3/D4 surface, не робить із Python семантичний SENS."""
 
     SOURCE = ROOT / "lib" / "life-1-scheduler.lisp"
+    D1 = ROOT / "lib" / "domains" / "d1.lisp"
     D3 = ROOT / "lib" / "domains" / "d3.lisp"
     D4 = ROOT / "lib" / "domains" / "d4.lisp"
     ORIGINAL_BLOB = "a287485556480390e25e80492fdeb4cd933aab54"
@@ -369,7 +370,7 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
         # Другий, раніше вже український ATOM(праве) не зачіпати.
         source = re.sub(r"(?m)^\(визначити(?=\s)", "(0011", source)
         return source.replace(
-            "((атом? праве) #d1:0)", "((010 праве) #d1:0)"
+            "((атом? праве) ні)", "((010 праве) #d1:0)"
         )
 
     @staticmethod
@@ -390,10 +391,11 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
         self.assertIn("(LISP ATOM)", atom[0])
         self.assertIn("(укр визначити)", define[0])
         self.assertIn("(LISP DEFINE)", define[0])
+        self.assertIn("(0 (ук ні) (укр ні)", self.D1.read_text(encoding="utf-8"))
 
         src = self.SOURCE.read_text(encoding="utf-8")
         self.assertEqual(len(re.findall(r"(?m)^\(визначити(?=\s)", src)), 12)
-        self.assertEqual(src.count("((атом? праве) #d1:0)"), 1)
+        self.assertEqual(src.count("((атом? праве) ні)"), 1)
         self.assertNotRegex(src, r"(?m)^\(0011(?=\s)")
         self.assertNotIn("((010 праве) #d1:0)", src)
         self.assertEqual(src.count("(001001 "), 2)  # D6 LET* untouched
@@ -409,8 +411,8 @@ class Life1RemainingUkrProjectionTests(unittest.TestCase):
     def test_wrong_domain_or_wrong_peer_is_rejected(self):
         src = self.SOURCE.read_text(encoding="utf-8")
         for mutant in (
-            src.replace("((атом? праве) #d1:0)",
-                        "((сполучити праве) #d1:0)", 1),
+            src.replace("((атом? праве) ні)",
+                        "((сполучити праве) ні)", 1),
             src.replace("(визначити життя--рівні?",
                         "(функція життя--рівні?", 1),
         ):
