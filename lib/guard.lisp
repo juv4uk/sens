@@ -192,7 +192,7 @@
        (за-умовою
          ((порожній? запис) (як-є ()))
          (так (друге запис))))
-     (захист-знайти-запис поле (решта посилання))))
+     (захист-знайти-запис поле (решта посилання)))))
 
 ; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
 ; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.
