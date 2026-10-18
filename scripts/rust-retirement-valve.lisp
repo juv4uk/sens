@@ -11,38 +11,38 @@
 ;
 ; Active #299 rule: Lisp may grow; Rust may only shrink.
 
-(0011 second (0010 (x) (100 (011 x))))
-(0011 third (0010 (x) (100 (011 (011 x)))))
-(0011 fourth (0010 (x) (100 (011 (011 (011 x))))))
-(0011 fifth (0010 (x) (100 (011 (011 (011 (011 x)))))))
+(визначити second (функція (x) (перше (решта x))))
+(визначити third (функція (x) (перше (решта (решта x)))))
+(визначити fourth (функція (x) (перше (решта (решта (решта x))))))
+(визначити fifth (функція (x) (перше (решта (решта (решта (решта x)))))))
 
 (визначити rust-changes (читати-всі (read-file "tests/rust-retirement-changes.lisp")))
 
-(0011 rust-retirement-verdict-for
-  (0010 (changes)
-    (110
-      ((010 changes) (structural-kind empty-list)
-       (001 (rust-retirement-ok)))
-      ((010 changes) (structural-kind pair)
+(визначити rust-retirement-verdict-for
+  (функція (changes)
+    (за-умовою
+      ((атом? changes) (structural-kind empty-list)
+       (як-є (rust-retirement-ok)))
+      ((атом? changes) (structural-kind pair)
        (001000 ((change (100 changes)))
          (001000 ((path (second change)))
            (001000 ((additions (third change)))
              (001000 ((status (fifth change)))
-               (110
-                 ((101 status (001 new)) (identity-relation same)
-                  (1110
-                    (001 rust-retirement-violation)
+               (за-умовою
+                 ((тотожне? status (як-є new)) (identity-relation same)
+                  (список
+                    (як-є rust-retirement-violation)
                     path
                     additions
                     status
                     "New Rust paths are forbidden during retirement. See #299."))
-                 ((101 status (001 new)) (identity-relation distinct)
-                  (110
+                 ((тотожне? status (як-є new)) (identity-relation distinct)
+                  (за-умовою
                     ((= additions 0) 1
-                     (rust-retirement-verdict-for (011 changes)))
+                     (rust-retirement-verdict-for (решта changes)))
                     ((= additions 0) 0
-                     (1110
-                       (001 rust-retirement-violation)
+                     (список
+                       (як-є rust-retirement-violation)
                        path
                        additions
                        status
