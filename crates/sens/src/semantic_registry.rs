@@ -154,7 +154,7 @@ fn build_exact_source_index(rows: &[DomainSurfaceRow]) -> ExactDomainSourceIndex
     for row in rows.iter().filter(|row| row.source_routable) {
         let identity = exact_domain_resident_from_projection(row.width, row.bits);
         for surface in row.surfaces.iter() {
-            if !matches!(surface.namespace, "uk" | "sa" | "en") {
+            if !matches!(surface.namespace, "uk" | "ukr" | "sa" | "en") {
                 continue;
             }
             insert_exact_source(&mut index.all, surface.name, identity);
@@ -659,7 +659,7 @@ mod domain_source_projection_anti_collision_tests {
             assert_eq!(expected.width(), usize::from(row.width));
             assert_eq!(expected.packed_bits(), u16::from(row.bits));
             for surface in row.surfaces.iter() {
-                if !matches!(surface.namespace, "uk" | "sa" | "en") {
+                if !matches!(surface.namespace, "uk" | "ukr" | "sa" | "en") {
                     continue;
                 }
                 surfaces_checked += 1;

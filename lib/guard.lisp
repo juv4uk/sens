@@ -172,12 +172,12 @@
 ; Довідкові записи — звичайні дані. Змінний каталог екосистеми лежить у
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
 (визначити guard-reference-field
-  (функція (field reference)
-    ((функція (entry)
+  (функція (поле посилання)
+    ((функція (запис)
        (за-умовою
-         ((атом? entry) (як-є ()))
-         (так (друге entry))))
-     (знайти-за-ключем field (решта reference)))))
+         ((атом? запис) (як-є ()))
+         (так (друге запис))))
+     (знайти-за-ключем поле (решта посилання)))))
 
 ; --- OWNER LANGUAGE FIREWALL 2026-10-16 ---
 ; SENS Lisp owns semantics. Zig handles domain-ladder codes. Rust consumes them.

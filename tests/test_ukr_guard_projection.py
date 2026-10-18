@@ -101,6 +101,18 @@ class GuardProjectionTests(unittest.TestCase):
     def test_exact_original_program_is_recoverable(self):
         self.assertEqual(self.text.count(ALIAS_MARKER), 1)
         migrated = self.text.split("\n" + ALIAS_MARKER, 1)[0]
+        # Reverse only local names in the Guard accessor before the existing
+        # exact surface inverse restores the pinned original Lisp blob.
+        start = migrated.find("(визначити guard-reference-field\\n")
+        self.assertGreaterEqual(start, 0)
+        end = migrated.find("\\n(визначити ", start + 1)
+        self.assertGreater(end, start)
+        segment, local_counts = translate(
+            migrated[start:end], {},
+            {"поле": "field", "посилання": "reference", "запис": "entry"},
+        )
+        self.assertEqual(local_counts, {"поле": 2, "посилання": 2, "запис": 3})
+        migrated = migrated[:start] + segment + migrated[end:]
         native_inverse = {name: bits for table in NATIVE.values()
                           for bits, name in table.items()}
         symbol_inverse = {ukr: en for en, ukr in D9.values()}
@@ -120,6 +132,15 @@ class GuardProjectionTests(unittest.TestCase):
         native_bits = {bit for table in NATIVE.values() for bit in table}
         remaining = set(re.findall(r"\(\s*([01]+)(?=[\s(])", masked))
         self.assertTrue(native_bits.isdisjoint(remaining), remaining)
+        start = self.text.find("(визначити guard-reference-field\\n")
+        self.assertGreaterEqual(start, 0)
+        end = self.text.find("\\n(визначити ", start + 1)
+        self.assertGreater(end, start)
+        guard_field = self.text[start:end]
+        self.assertIn("(функція (поле посилання)", guard_field)
+        self.assertIn("(функція (запис)", guard_field)
+        for old_binding in ("(функція (field reference)", "(функція (entry)", "(друге entry)"):
+            self.assertNotIn(old_binding, guard_field)
         for table in NATIVE.values():
             for ukr in table.values():
                 self.assertIn("(" + ukr, self.text)

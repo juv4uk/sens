@@ -17,14 +17,14 @@ DISPLAY_ONLY = {("D2", machine_word(n, 2)) for n in range(4)} | {("D3", "000")}
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"D1-D5-SURFACE-GUARD: FAIL: {message}")
+    raise SystemExit(f"D1-D6-SURFACE-GUARD: FAIL: {message}")
 
 
 def parse_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for row in read_domain_tables(SOURCES):
-        if row.en is None or row.uk is None or row.san is None:
-            fail(f"{row.domain}:{row.bits}: en/uk/san must be present")
+        if row.en is None or row.uk is None or row.ukr is None or row.san is None:
+            fail(f"{row.domain}:{row.bits}: en/uk/ukr/san must be present")
         rows.append(
             {
                 "domain": row.domain,
@@ -32,6 +32,7 @@ def parse_rows() -> list[dict[str, str]]:
                 "role": row.role,
                 "en": row.en,
                 "uk": row.uk,
+                "ukr": row.ukr,
                 "sa": row.san,
             }
         )
@@ -76,6 +77,11 @@ def render_generated(rows: list[dict[str, str]]) -> str:
                 + rust_string(row["uk"])
                 + " }",
                 "DomainSurfaceName { namespace: "
+                + rust_string("ukr")
+                + ", name: "
+                + rust_string(row["ukr"])
+                + " }",
+                "DomainSurfaceName { namespace: "
                 + rust_string("sa")
                 + ", name: "
                 + rust_string(row["sa"])
@@ -110,7 +116,7 @@ def validate(rows: list[dict[str, str]]) -> None:
         if actual_bits != expected_bits:
             fail(f"{domain}: table is not complete exact-width coverage")
 
-    for language in ("uk", "sa"):
+    for language in ("uk", "ukr", "sa"):
         seen: dict[str, tuple[str, str]] = {}
         for row in rows:
             spelling = row[language]
@@ -122,11 +128,13 @@ def validate(rows: list[dict[str, str]]) -> None:
 
     for row in rows:
         key = (row["domain"], row["bits"])
-        if key == ("D3", "000") and any(row[name] != "()" for name in ("en", "uk", "sa")):
+        if key == ("D3", "000") and any(row[name] != "()" for name in ("en", "uk", "ukr", "sa")):
             fail("D3:000 must project literally as () in every language")
         if row["role"] == "predicate":
             if not row["uk"].endswith("?"):
                 fail(f"{key}: predicate UK surface must end in ?")
+            if not row["ukr"].endswith("?"):
+                fail(f"{key}: predicate full UKR surface must end in ?")
             if not row["en"].endswith("?"):
                 fail(f"{key}: predicate EN surface must end in ?")
             if row["sa"].endswith("?"):
@@ -165,7 +173,7 @@ def main() -> int:
         )
 
     print("D1-D6-SURFACE-GUARD: PASS")
-    print("rows=126 source=lib/domains/d1..d6 uk+san exact-domain")
+    print("rows=126 source=lib/domains/d1..d6 uk+ukr+san exact-domain")
     return 0
 
 

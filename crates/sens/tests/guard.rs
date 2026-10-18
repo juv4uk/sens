@@ -314,23 +314,29 @@ fn guard_compare_uses_only_exact_d3_d4_heads_and_no_w8_equal() {
 
 
 #[test]
-fn guard_reference_field_uses_only_exact_d3_d4_structure() {
-    assert!(!GUARD_SOURCE.contains("(001000 "));
-    assert!(!GUARD_SOURCE.contains("(11100 "));
-    assert!(GUARD_SOURCE.contains("(guard-reference-field-onto field (011 reference))"));
-    assert!(GUARD_SOURCE.contains("(101 field (100 (100 entries)))"));
-    assert!(GUARD_SOURCE.contains("(0101 entries)"));
-    assert!(!GUARD_SOURCE.contains("(assoc field"));
-    assert!(!GUARD_SOURCE.contains("(11110111"));
+fn guard_reference_field_uses_exact_d3_d4_d5_ukr_surfaces() {
     let start = GUARD_SOURCE
-        .find("(0011 guard-reference-field")
-        .expect("Lisp-owned guard-reference-field must exist");
+        .find("(визначити guard-reference-field\\n")
+        .expect("the live Ukrainian guard accessor must exist");
     let end = GUARD_SOURCE[start..]
-        .find("\\n(0011 ")
+        .find("\\n(визначити ")
         .map(|offset| start + offset)
-        .expect("guard-reference-field must be a bounded definition");
-    let parsed = parse_mixed_exact_domain(&GUARD_SOURCE[start..end])
-        .expect("guard-reference-field must parse with exact widths");
+        .expect("guard-reference-field must remain one bounded definition");
+    let source = &GUARD_SOURCE[start..end];
+
+    assert!(source.contains("(функція (поле посилання)"));
+    assert!(source.contains("(функція (запис)"));
+    assert!(source.contains("(знайти-за-ключем поле (решта посилання))"));
+    assert!(!source.contains("(функція (field reference)"));
+    assert!(!source.contains("(функція (entry)"));
+    assert!(!source.contains("(друге entry)"));
+    assert!(!source.contains("(assoc "));
+    for old_head in ["(001000 ", "(11100 ", "(011 ", "(101 ", "(100 ", "(0101 ", "(0011 ", "(0010 ", "(010 ", "(110 ", "(111 ", "(11110111 "] {
+        assert!(!source.contains(old_head), "retired numeric head remains: {old_head}");
+    }
+
+    let parsed = parse_mixed_exact_domain(source)
+        .expect("full укр surfaces must lower to exact domain identities");
     let mut coordinates = Vec::new();
     collect_call_head_coordinates(&parsed[0], &mut coordinates);
     coordinates.sort_unstable();
@@ -341,8 +347,8 @@ fn guard_reference_field_uses_only_exact_d3_d4_structure() {
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(
         widths,
-        [3usize, 4usize].into_iter().collect(),
-        "guard-reference-field should use only D3 list operations and D4 lambda/selectors"
+        [3usize, 4usize, 5usize].into_iter().collect(),
+        "guard-reference-field must keep exact D3 structure, D4 lambda/selector and D5 lookup"
     );
 }
 
