@@ -21,64 +21,64 @@
 ; tests/semantic/machine-effect-d3-false-{law,mutant}.{bits,sens}.
 ; No W8->D8 reinterpretation, no new primitive, no arithmetic-law change.
 
-(0011 machine-effect-wire-denominator-one?
-  (0010 (text)
-    (110
+(визначити machine-effect-wire-denominator-one?
+  (функція (text)
+    (за-умовою
       ((110011100 text) (010 (001 (000))))
-      ((тотожне? (110101011 text) "/")
-       (001000 ((rest (110011101 text)))
-         (110
+      ((тотожне? (рядок-перший text) "/")
+       (нехай ((rest (рядок-решта text)))
+         (за-умовою
            ((110011100 rest) (010 (001 (000))))
-           ((тотожне? (110101011 rest) "1")
-            (110
-              ((110011100 (110011101 rest)) (010 (001 ())))
+           ((тотожне? (рядок-перший rest) "1")
+            (за-умовою
+              ((рядок-порожній? (рядок-решта rest)) (атом? (як-є ())))
               ((010 (001 ())) (010 (001 (000))))))
            ((010 (001 ())) (010 (001 (000)))))))
-      ((010 (001 ()))
-       (machine-effect-wire-denominator-one? (110011101 text))))))
+      ((атом? (як-є ()))
+       (machine-effect-wire-denominator-one? (рядок-решта text))))))
 
-(0011 machine-effect-exact-integer?
-  (0010 (value)
-    (001000 ((wire (11110100 value)))
-      (110
-        ((110101010 "#q2:" wire)
+(визначити machine-effect-exact-integer?
+  (функція (value)
+    (нехай ((wire (значення-у-текст value)))
+      (за-умовою
+        ((рядок-префікс? "#q2:" wire)
          (machine-effect-wire-denominator-one? wire))
         ((010 (001 ())) (010 (001 (000))))))))
 
-(0011 machine-effect-within-inclusive-integer-range?
-  (0010 (value lower upper)
-    (110
+(визначити machine-effect-within-inclusive-integer-range?
+  (функція (value lower upper)
+    (за-умовою
       ((менше? value lower) (менше? 1 0))
       ((менше? upper value) (менше? 1 0))
       ((атом? ()) (менше? 0 1)))))
 
-(0011 machine-effect-u32-carrier?
-  (0010 (value)
-    (110
+(визначити machine-effect-u32-carrier?
+  (функція (value)
+    (за-умовою
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 4294967295))
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        (010 (001 (000)))))))
 
-(0011 machine-effect-bounded-u64-add-form?
-  (0010 (effect)
-    (110
+(визначити machine-effect-bounded-u64-add-form?
+  (функція (effect)
+    (за-умовою
       ((010 effect) (010 (001 (000))))
-      ((тотожне? (000000 effect) 3)
-       (тотожне? (100 effect) (001 bounded-u64-add)))
-      ((010 (001 ()))
+      ((тотожне? (довжина effect) 3)
+       (тотожне? (перше effect) (як-є bounded-u64-add)))
+      ((атом? (як-є ()))
        (010 (001 (000)))))))
 
-(0011 machine-effect-bounded-u64-add
-  (0010 (left right)
-    (110
+(визначити machine-effect-bounded-u64-add
+  (функція (left right)
+    (за-умовою
       ((machine-effect-u32-carrier? left)
-       (110
+       (за-умовою
          ((machine-effect-u32-carrier? right)
-          (1110 (001 bounded-u64-add) left right))
-         ((010 (001 ())) (001 machine-effect-rejected))))
-      ((010 (001 ())) (001 machine-effect-rejected)))))
+          (список (як-є bounded-u64-add) left right))
+         ((атом? (як-є ())) (як-є machine-effect-rejected))))
+      ((атом? (як-є ())) (як-є machine-effect-rejected)))))
 
 ; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
 ;
@@ -89,56 +89,56 @@
 ; No target, ISA, register, flag, encoding, surface spelling, or domain
 ; coordinate belongs in this generic effect-definition module.
 
-(0011 machine-effect-u64-carrier?
-  (0010 (value)
-    (110
+(визначити machine-effect-u64-carrier?
+  (функція (value)
+    (за-умовою
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      ((010 (001 ()))
+      ((атом? (як-є ()))
        (010 (001 (000)))))))
 
-(0011 machine-effect-bounded-u64-sub-form?
-  (0010 (effect)
-    (110
+(визначити machine-effect-bounded-u64-sub-form?
+  (функція (effect)
+    (за-умовою
       ((010 effect) (010 (001 (000))))
-      ((тотожне? (000000 effect) 3)
-       (тотожне? (100 effect) (001 bounded-u64-sub)))
-      ((010 (001 ()))
+      ((тотожне? (довжина effect) 3)
+       (тотожне? (перше effect) (як-є bounded-u64-sub)))
+      ((атом? (як-є ()))
        (010 (001 (000)))))))
 
-(0011 machine-effect-bounded-u64-mul-form?
-  (0010 (effect)
-    (110
+(визначити machine-effect-bounded-u64-mul-form?
+  (функція (effect)
+    (за-умовою
       ((010 effect) (010 (001 (000))))
-      ((тотожне? (000000 effect) 3)
-       (тотожне? (100 effect) (001 bounded-u64-mul)))
-      ((010 (001 ()))
+      ((тотожне? (довжина effect) 3)
+       (тотожне? (перше effect) (як-є bounded-u64-mul)))
+      ((атом? (як-є ()))
        (010 (001 (000)))))))
 
 ; Застосовувати лише точні предикати D5/D6 як тести D3 COND.
 ; Історичні W8 числові порівняння не є D1 PredicateBit.
-(0011 machine-effect-bounded-u64-sub
-  (0010 (left right)
-    (110
+(визначити machine-effect-bounded-u64-sub
+  (функція (left right)
+    (за-умовою
       ((machine-effect-u64-carrier? left)
-       (110
+       (за-умовою
          ((machine-effect-u64-carrier? right)
-          (110
+          (за-умовою
             ((менше? left right)
-             (001 machine-effect-rejected))
+             (як-є machine-effect-rejected))
             ((атом? ())
-             (1110 (001 bounded-u64-sub) left right))))
-         ((010 (001 ())) (001 machine-effect-rejected))))
-      ((010 (001 ())) (001 machine-effect-rejected)))))
+             (список (як-є bounded-u64-sub) left right))))
+         ((атом? (як-є ())) (як-є machine-effect-rejected))))
+      ((атом? (як-є ())) (як-є machine-effect-rejected)))))
 
-(0011 machine-effect-bounded-u64-mul
-  (0010 (left right)
-    (110
+(визначити machine-effect-bounded-u64-mul
+  (функція (left right)
+    (за-умовою
       ((machine-effect-u32-carrier? left)
-       (110
+       (за-умовою
          ((machine-effect-u32-carrier? right)
-          (1110 (001 bounded-u64-mul) left right))
-         ((010 (001 ())) (001 machine-effect-rejected))))
-      ((010 (001 ())) (001 machine-effect-rejected)))))
+          (список (як-є bounded-u64-mul) left right))
+         ((атом? (як-є ())) (як-є machine-effect-rejected))))
+      ((атом? (як-є ())) (як-є machine-effect-rejected)))))
 
