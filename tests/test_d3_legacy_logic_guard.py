@@ -513,7 +513,7 @@ class LegacyD3GuardTests(unittest.TestCase):
             rules.count("COND_NOT_TWO_FIELDS"),
         )
 
-        fallback = "((010 (001 ())) (reverse-acc"
+        fallback = "((атом? (як-є ())) (reverse-acc"
         self.assertIn(fallback, source)
         reverted = source.replace(fallback, "(t (reverse-acc", 1)
         self.assertIn(
