@@ -3,7 +3,7 @@
 
 ; D10:0011000010 EMPTY-QUEUE?
 (0011 черга-порожня?
-  (0010 (q) (порожнє? q)))
+  (0010 (q) (порожній? q)))
 (0011 empty-queue? черга-порожня?)
 
 ; D10:0001110011 SORTCAR — sort by CAR via stable list sort

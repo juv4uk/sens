@@ -4,21 +4,21 @@
   (0010 (v) v))
 (0011 список->вектор
   (0010 (xs) xs))
-(list
+(список
   (numeric-not-equal? #d24:000000000000000000000001
                   #d24:000000000000000000000010)
-  (not? (числа-нерівні? #d24:000000000000000000000001
+  (хибне? (числа-нерівні? #d24:000000000000000000000001
                         #d24:000000000000000000000001))
-  (equal? (вектор->список (list (quote a) (quote b)))
-          (list (quote a) (quote b)))
-  (equal? (список->вектор (list (quote x)))
-          (list (quote x)))
-  (equal? (vector-slice (list (quote a) (quote b) (quote c))
+  (equal? (вектор->список (список (як-є a) (як-є b)))
+          (список (як-є a) (як-є b)))
+  (equal? (список->вектор (список (як-є x)))
+          (список (як-є x)))
+  (equal? (vector-slice (список (як-є a) (як-є b) (як-є c))
                         #d24:000000000000000000000001
                         #d24:000000000000000000000011)
-          (list (quote b) (quote c)))
-  (equal? (multiple-value-list (list (quote v)))
-          (list (quote v)))
-  (equal? (lint-size (list (quote a) (quote b) (quote c)))
+          (список (як-є b) (як-є c)))
+  (equal? (multiple-value-list (список (як-є v)))
+          (список (як-є v)))
+  (equal? (lint-size (список (як-є a) (як-є b) (як-є c)))
           #d24:000000000000000000000011)
-  (equal? (вектор->список (quote ())) (quote ())))
+  (equal? (вектор->список (як-є ())) (як-є ())))
