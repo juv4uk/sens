@@ -35,37 +35,37 @@
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
 (0011 registry-form (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
-(0011 registry-rows registry-form)
+(визначити registry-rows registry-form)
 ; Historical rows are retained only for migration/provenance consumers.
 ; Their eight-bit coordinates do not create canonical language identity.
-(0011 entries registry-rows)
+(визначити entries registry-rows)
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
-(0011 machine-profile-form
+(визначити machine-profile-form
   (100 (110101001 (110110111 "lib/machine/intel-core-i5-6400.lisp"))))
 
-(0011 find-section
-  (0010 (name sections)
-    (110
-      ((010 sections) (001 ()))
+(визначити find-section
+  (функція (name sections)
+    (за-умовою
+      ((атом? sections) (як-є ()))
       
-      ((101 (100 (100 sections)) name) (100 sections))
-      ((010 (001 ())) (find-section name (011 sections))))))
+      ((тотожне? (перше (перше sections)) name) (перше sections))
+      ((атом? (як-є ())) (find-section name (решта sections))))))
 
-(0011 machine-rows
-  (011 (find-section (001 rows) (011 machine-profile-form))))
+(визначити machine-rows
+  (решта (find-section (як-є rows) (решта machine-profile-form))))
 
-(0011 find-machine-row
-  (0010 (sid rows)
-    (110
-      ((010 rows) (001 ()))
+(визначити find-machine-row
+  (функція (sid rows)
+    (за-умовою
+      ((атом? rows) (як-є ()))
       
       ((11110111 (100 (100 rows)) sid) (100 rows))
-      ((010 (001 ())) (find-machine-row sid (011 rows))))))
+      ((атом? (як-є ())) (find-machine-row sid (решта rows))))))
 
-(0011 machine-path
-  (0010 (sid)
+(визначити machine-path
+  (функція (sid)
     (001000 ((row (find-machine-row sid machine-rows)))
       (110 ((010 row) "()") ((010 (001 ())) (10011 row))))))
 
@@ -73,22 +73,22 @@
 ; never create an identity: they may only annotate IDs that already exist
 ; in `entries` above. Reverse-authority is forbidden by the contract file
 ; itself -- a historical name never mints a new my-lisp SID.
-(0011 historical-profile-form
+(визначити historical-profile-form
   (100 (110101001 (110110111 "contracts/core1-historical-sid-map.lisp"))))
 
-(0011 historical-rows
-  (011 (find-section (001 rows) (011 historical-profile-form))))
+(визначити historical-rows
+  (решта (find-section (як-є rows) (решта historical-profile-form))))
 
-(0011 find-historical-row
-  (0010 (sid rows)
-    (110
-      ((010 rows) (001 ()))
+(визначити find-historical-row
+  (функція (sid rows)
+    (за-умовою
+      ((атом? rows) (як-є ()))
       
       ((11110111 (1001 (100 rows)) sid) (100 rows))
-      ((010 (001 ())) (find-historical-row sid (011 rows))))))
+      ((атом? (як-є ())) (find-historical-row sid (решта rows))))))
 
-(0011 mccarthy-label
-  (0010 (sid)
+(визначити mccarthy-label
+  (функція (sid)
     (001000 ((row (find-historical-row sid historical-rows)))
       (110 ((010 row) "()") ((010 (001 ())) (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
 
@@ -96,13 +96,13 @@
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
 ; apostrophe case above is already a plain string. For prose contexts
 ; (the human .md table) the bare apostrophe is fine either way.
-(0011 surface-word-text
-  (0010 (word)
-    (110
+(визначити surface-word-text
+  (функція (word)
+    (за-умовою
       ((11110111 word (001 ())) "()")
-      ((101 (string-membership-helper word) (class-membership string member))
+      ((тотожне? (string-membership-helper word) (class-membership string member))
        word)
-      ((101 (string-membership-helper word) (class-membership string nonmember))
+      ((тотожне? (string-membership-helper word) (class-membership string nonmember))
        (11110100 word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe
@@ -112,51 +112,51 @@
 ; already does exactly the right thing per Value type -- a String gets
 ; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
 ; just write-to-string directly, named for what it's used for here.
-(0011 surface-word-wsm-text write-to-string)
+(визначити surface-word-wsm-text write-to-string)
 
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
-(0011 str+
+(визначити str+
   (0010 args (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
 ; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
-(0011 find-surface
-  (0010 (lang surfaces)
-    (110
-      ((010 surfaces) (001 ()))
+(визначити find-surface
+  (функція (lang surfaces)
+    (за-умовою
+      ((атом? surfaces) (як-є ()))
       
-      ((101 (100 (100 surfaces)) lang) (100 surfaces))
-      ((010 (001 ())) (find-surface lang (011 surfaces))))))
+      ((тотожне? (перше (перше surfaces)) lang) (перше surfaces))
+      ((атом? (як-є ())) (find-surface lang (решта surfaces))))))
 
-(0011 surface-word
-  (0010 (surface-entry)
-    (110 ((010 surface-entry) (001 ())) ((010 (001 ())) (100 (011 surface-entry))))))
+(визначити surface-word
+  (функція (surface-entry)
+    (за-умовою ((атом? surface-entry) (як-є ())) ((атом? (як-є ())) (перше (решта surface-entry))))))
 
-(0011 get-surface
-  (0010 (lang surfaces)
+(визначити get-surface
+  (функція (lang surfaces)
     (surface-word (find-surface lang surfaces))))
 
-(0011 surface-usable?
-  (0010 (word)
+(визначити surface-usable?
+  (функція (word)
     (0100 (11110111 word (001 ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
 ; preserves the exact spelling including leading zeroes; do not reinterpret it
 ; as arithmetic data merely to reconstruct the same source identity.
-(0011 sid-bits
-  (0010 (sid)
+(визначити sid-bits
+  (функція (sid)
     (11110100 sid)))
 
-(0011 formal-stub
-  (0010 (sid surfaces)
+(визначити formal-stub
+  (функція (sid surfaces)
     (001001 ((en (get-surface (001 en) surfaces))
-           (ук (get-surface (001 ук) surfaces))
-           (sa (get-surface (001 sa) surfaces)))
-      (110
+           (ук (get-surface (як-є ук) surfaces))
+           (sa (get-surface (як-є sa) surfaces)))
+      (за-умовою
         ((surface-usable? en)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
         ((surface-usable? ук)
@@ -174,26 +174,26 @@
 ; is not tail-recursive (the recursive call sits inside str+'s argument
 ; list, not in tail position) and overflows the host stack well before
 ; this registry's complete row set.
-(0011 join-newline-onto
-  (0010 (strings acc)
-    (110
-      ((010 strings) acc)
+(визначити join-newline-onto
+  (функція (strings acc)
+    (за-умовою
+      ((атом? strings) acc)
       
-      ((101 acc "") (join-newline-onto (011 strings) (100 strings)))
-      ((010 (001 ())) (join-newline-onto (011 strings) (str+ acc "
-" (100 strings)))))))
+      ((тотожне? acc "") (join-newline-onto (решта strings) (перше strings)))
+      ((атом? (як-є ())) (join-newline-onto (решта strings) (str+ acc "
+" (перше strings)))))))
 
-(0011 join-newline (0010 (strings) (join-newline-onto strings "")))
+(визначити join-newline (функція (strings) (join-newline-onto strings "")))
 
-(0011 render-wsm-row
-  (0010 (entry)
+(визначити render-wsm-row
+  (функція (entry)
     (001001 ((sid (100 entry))
-           (surfaces (011 entry))
-           (ук (get-surface (001 ук) surfaces))
-           (укр (get-surface (001 укр) surfaces))
-           (en (get-surface (001 en) surfaces))
-           (sa (get-surface (001 sa) surfaces))
-           (sym (get-surface (001 sym) surfaces))
+           (surfaces (решта entry))
+           (ук (get-surface (як-є ук) surfaces))
+           (укр (get-surface (як-є укр) surfaces))
+           (en (get-surface (як-є en) surfaces))
+           (sa (get-surface (як-є sa) surfaces))
+           (sym (get-surface (як-є sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
         "  (" (sid-bits sid) " " formal
@@ -204,15 +204,15 @@
         " (sym " (surface-word-wsm-text sym) ")"
         " my-lisp)"))))
 
-(0011 render-md-row
-  (0010 (entry)
+(визначити render-md-row
+  (функція (entry)
     (001001 ((sid (100 entry))
-           (surfaces (011 entry))
-           (ук (get-surface (001 ук) surfaces))
-           (укр (get-surface (001 укр) surfaces))
-           (en (get-surface (001 en) surfaces))
-           (sa (get-surface (001 sa) surfaces))
-           (sym (get-surface (001 sym) surfaces)))
+           (surfaces (решта entry))
+           (ук (get-surface (як-є ук) surfaces))
+           (укр (get-surface (як-є укр) surfaces))
+           (en (get-surface (як-є en) surfaces))
+           (sa (get-surface (як-є sa) surfaces))
+           (sym (get-surface (як-є sym) surfaces)))
       (str+
         "| `" (sid-bits sid) "` | " (surface-word-text ук)
         " | " (surface-word-text укр)
@@ -222,8 +222,8 @@
         " | " (machine-path sid)
         " | " (mccarthy-label sid) " |"))))
 
-(0011 wsm-header
-  (1110
+(визначити wsm-header
+  (список
     "; GENERATED — DO NOT EDIT BY HAND"
     "; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY"
     "; Donor: lib/surface/semantic-registry.lisp"
@@ -240,8 +240,8 @@
 )
 "))
 
-(0011 md-header
-  (1110
+(визначити md-header
+  (список
     "# Function table (generated projection)"
     ""
     "**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table."
@@ -259,13 +259,13 @@
 (0011 md-output (110011110 md-body "
 "))
 
-(0011 wsm-output-path "lib/generated/function-table.lisp")
-(0011 md-output-path "docs/generated/function-table.md")
+(визначити wsm-output-path "lib/generated/function-table.lisp")
+(визначити md-output-path "docs/generated/function-table.md")
 
-(0011 write-projections
-  (0010 ()
-    (1001
-      (1110
+(визначити write-projections
+  (функція ()
+    (друге
+      (список
         (110111100 wsm-output-path wsm-output)
         (110111100 md-output-path md-output)
         (11011011
@@ -277,34 +277,34 @@
 ; The projection payloads and argv selector below are strings, hence atoms.
 ; Use exact D3:101 EQ (3 bits), not the wider D8:11110111 structural EQUAL.
 ; This is a source-identity narrowing only; no physical T5 size claim follows.
-(0011 check-projections
-  (0010 ()
+(визначити check-projections
+  (функція ()
     (001000 ((current-wsm (110110111 wsm-output-path))
           (current-md (110110111 md-output-path)))
-      (110
-        ((101 current-wsm wsm-output)
-         (110
-           ((101 current-md md-output)
+      (за-умовою
+        ((тотожне? current-wsm wsm-output)
+         (за-умовою
+           ((тотожне? current-md md-output)
             (11011011
               (str+
                 "function-table: "
                 (110111001 (000000 entries))
                 " historical projection rows current")))
-           ((010 (001 ()))
-            (1001
-              (1110
+           ((атом? (як-є ()))
+            (друге
+              (список
                 (11011011 "function-table markdown projection is stale")
-                (100 (001 ())))))))
-        ((010 (001 ()))
-         (1001
-           (1110
+                (перше (як-є ())))))))
+        ((атом? (як-є ()))
+         (друге
+           (список
              (11011011 "function-table Lisp projection is stale")
-             (100 (001 ())))))))))
+             (перше (як-є ())))))))))
 
-(110
-  ((010 *argv*)
+(за-умовою
+  ((атом? *argv*)
    (write-projections))
-  ((101 (100 *argv*) "--check")
+  ((тотожне? (перше *argv*) "--check")
    (check-projections))
-  ((010 (001 ()))
+  ((атом? (як-є ()))
    (write-projections)))
