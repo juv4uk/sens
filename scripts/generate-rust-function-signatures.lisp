@@ -10,7 +10,7 @@
 
 (визначити str+
   (функція args
-    (101110 (функція (acc s) (рядок-додати acc s)) "" args)))
+    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ; Rust arity fields are machine projection, not human number presentation.
 ; number->string deliberately returns the canonical #q2:<bits>/1 wire.
@@ -27,7 +27,7 @@
 
 (визначити render-rust-nat
   (функція (n)
-    (001000 ((wire (число-рядок n)))
+    (нехай ((wire (число-рядок n)))
       (за-умовою
         ((рядок-префікс? "#q2:" wire)
          (str+
@@ -41,12 +41,12 @@
 
 (визначити field
   (функція (key row)
-    (друге (11100 key (решта row)))))
+    (друге (знайти-за-ключем key (решта row)))))
 
 (визначити has-field?
   (функція (key row)
     (за-умовою
-      ((атом? (11100 key (решта row))) (як-є ()))
+      ((атом? (знайти-за-ключем key (решта row))) (як-є ()))
       ((атом? (як-є ())) t))))
 
 (визначити render-kind
@@ -68,7 +68,7 @@
           (str+ "Arity::AtLeast(" (render-rust-nat (друге arity)) ")"))
          ((однакові? (перше arity) (як-є between))
           (str+ "Arity::Between { min: " (render-rust-nat (друге arity))
-                ", max: " (render-rust-nat (10011 arity)) " }"))
+                ", max: " (render-rust-nat (третє arity)) " }"))
          ((атом? (як-є ())) (перше (як-є ()))))))))
 
 (визначити render-admitted
