@@ -2,64 +2,64 @@
 ; The scheduler coordinates references only. It never interprets producer payloads.
 
 (def blackboard-key-seen?
-  (lambda (key keys)
-    (cond
-      ((atom keys) (structural-kind empty-list) (quote no))
-      ((atom keys) (structural-kind pair)
-       (cond
-         ((equal? key (car keys)) (structural-relation same) (quote yes))
-         ((equal? key (car keys)) (structural-relation distinct)
-          (blackboard-key-seen? key (cdr keys))))))))
+  (функція (key keys)
+    (за-умовою
+      ((атом? keys) (structural-kind empty-list) (як-є no))
+      ((атом? keys) (structural-kind pair)
+       (за-умовою
+         ((equal? key (перше keys)) (structural-relation same) (як-є yes))
+         ((equal? key (перше keys)) (structural-relation distinct)
+          (blackboard-key-seen? key (решта keys))))))))
 
 (def blackboard-enqueue
-  (lambda (activation seen queue)
+  (функція (activation seen queue)
     (let ((key (second activation)))
-      (cond
-        ((eq (blackboard-key-seen? key seen) (quote yes))
+      (за-умовою
+        ((тотожне? (blackboard-key-seen? key seen) (як-є yes))
          (identity-relation same)
-         (list seen queue))
-        ((eq (blackboard-key-seen? key seen) (quote no))
+         (список seen queue))
+        ((тотожне? (blackboard-key-seen? key seen) (як-є no))
          (identity-relation same)
-         (list
-           (cons key seen)
-           (append queue (list activation))))))))
+         (список
+           (сполучити key seen)
+           (приєднати queue (список activation))))))))
 
 (def blackboard-run-790
-  (lambda ()
+  (функція ()
     (let* (
       (a1
-        (quote
+        (як-є
           (activation
             (prolog p17 datalog)
             (observation-ref prolog p17)
             (consumer datalog)
             (provenance user-query q1))))
       (a1-repeat
-        (quote
+        (як-є
           (activation
             (prolog p17 datalog)
             (observation-ref prolog p17)
             (consumer datalog)
             (provenance user-query q1))))
       (a2
-        (quote
+        (як-є
           (activation
             (clips c9 lisp-observer)
             (observation-ref clips c9)
             (consumer lisp-observer)
             (provenance rule-fire r4))))
-      (s1 (blackboard-enqueue a1 (quote ()) (quote ())))
-      (s2 (blackboard-enqueue a1-repeat (car s1) (second s1)))
-      (s3 (blackboard-enqueue a2 (car s2) (second s2)))
+      (s1 (blackboard-enqueue a1 (як-є ()) (як-є ())))
+      (s2 (blackboard-enqueue a1-repeat (перше s1) (second s1)))
+      (s3 (blackboard-enqueue a2 (перше s2) (second s2)))
       (queue (second s3)))
-      (cond
-        ((equal? queue (list a1 a2))
+      (за-умовою
+        ((equal? queue (список a1 a2))
          (structural-relation same)
-         (quote
+         (як-є
            (blackboard-790-witness
              (status pass)
              (coordination references-only)
              (duplicate-activation suppressed))))
-        (t (car (quote ())))))))
+        (t (перше (як-є ())))))))
 
 (blackboard-run-790)

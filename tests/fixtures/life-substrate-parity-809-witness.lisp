@@ -1,9 +1,20 @@
-; Life substrate parity 809 witness — Ukrainian projection.
-((функція ()
-  (список
-    (тотожне? (як-є ok) (як-є ok))
-    (хибне? (тотожне? (як-є a) (як-є b)))
-    (тотожне? (перше (сполучити (як-є x) (як-є y))) (як-є x))
-    (тотожне? (решта (сполучити (як-є x) (як-є y))) (як-є y))
-    (тотожне? (список (як-є 1) (як-є 2)) (сполучити (як-є 1) (сполучити (як-є 2) (як-є ()))))
-  )))
+; Lisp-owned fail-closed witness for #809.
+
+(def life-substrate-parity-schema
+  (функція () (перше life-substrate-parity-document)))
+
+(def life-substrate-parity-witness
+  (функція ()
+    (за-умовою
+      ((тотожне? (life-substrate-parity-schema) (як-є life-substrate-parity/1))
+       (identity-relation same)
+       (список
+         (як-є life-substrate-parity-witness)
+         (список (як-є status) (як-є pass))
+         (список (як-є detail) (як-є awaiting-real-graal-evidence))))
+      ((тотожне? (life-substrate-parity-schema) (як-є life-substrate-parity/1))
+       (identity-relation distinct)
+       (список
+         (як-є life-substrate-parity-witness)
+         (список (як-є status) (як-є fail))
+         (список (як-є detail) (як-є wrong-schema)))))))
