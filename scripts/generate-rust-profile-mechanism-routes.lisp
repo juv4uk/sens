@@ -13,10 +13,10 @@
 
 (визначити str+
   (функція args
-    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
+    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 (визначити metadata
-  (100 (110101001 (110110111 source-path))))
+  (перше (читати-всі (читати-файл source-path))))
 
 (визначити find-section
   (функція (name sections)
@@ -50,9 +50,9 @@
 
 (визначити render-row
   (функція (row)
-    (001001 ((profile (rust-profile (100 row)))
+    (нехай-послідовно ((profile (rust-profile (перше row)))
            (sid (друге row))
-           (kind (rust-route-kind (10011 row))))
+           (kind (rust-route-kind (третє row))))
       (за-умовою
         ((атом? profile) () "")
         ((атом? kind) () "")
@@ -61,7 +61,7 @@
            "    ProfileMechanismRoute { profile: "
            profile
            ", sens: crate::sens!("
-           (11110100 sid)
+           (значення-у-текст sid)
            "), kind: "
            kind
            " },\n"))))))
@@ -114,24 +114,24 @@
    ()
    (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "Rust profile mechanism projection written"))))
-  ((11110111 (100 *argv*) "--check")
+       (записати-файл output-path generated)
+       (друкувати "Rust profile mechanism projection written"))))
+  ((однакові? (перше *argv*) "--check")
    (1)
-   (001000 ((current (110110111 output-path)))
+   (нехай ((current (читати-файл output-path)))
      (за-умовою
-       ((11110111 current generated)
+       ((однакові? current generated)
         (1)
-        (11011011 "Rust profile mechanism projection is current"))
-       ((11110111 current generated)
+        (друкувати "Rust profile mechanism projection is current"))
+       ((однакові? current generated)
         (0)
         (друге
           (список
-            (11011011 "Rust profile mechanism projection is stale")
+            (друкувати "Rust profile mechanism projection is stale")
             (перше (як-є ()))))))))
   ((як-є write-projection)
    write-projection
    (друге
      (список
-       (110111100 output-path generated)
-       (11011011 "Rust profile mechanism projection written")))))
+       (записати-файл output-path generated)
+       (друкувати "Rust profile mechanism projection written")))))
