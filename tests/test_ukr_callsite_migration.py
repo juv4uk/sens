@@ -2626,6 +2626,11 @@ class ConstitutionAndRustGeneratorUkrProjectionTests(unittest.TestCase):
                 for child in node.values[2:]:
                     walk(child)
                 return
+            # A computed operator is executable code too. In particular,
+            # ((функція (...) body) args) must visit the lambda form and its
+            # body; skipping node.values[0] loses exact-domain evidence.
+            if isinstance(node.values[0], mod.Form):
+                walk(node.values[0])
             for child in node.values[1:]:
                 walk(child)
 
