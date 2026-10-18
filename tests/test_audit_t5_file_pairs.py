@@ -69,10 +69,14 @@ class AuditT5PairsTests(unittest.TestCase):
         self.assertEqual(self.audit(strict=True)["status"], "BLOCKED")
 
     def test_new_t5m_pair_and_view_use_exact_words_without_false_semantic_credit(self):
-        words = ["10", "0011", "00", "10", "110", "01"]
-        _, binary = self.pair("lib/current", "(визначити х (за-умовою (так так)))\n", words)
-        binary.write_bytes(encode_t5m_projection(" ".join(words)))
-        binary.with_suffix("").write_text(" ".join(words) + "\n", encoding="ascii")
+        # Reuse a real canonical Ukrainian Lisp/T5 witness, repacked as T5M.
+        fixture = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+        source = (fixture / "branch.lisp").read_text(encoding="utf-8")
+        canonical = (fixture / "branch").read_text(encoding="ascii")
+        words = canonical.rstrip("\n").split(" ")
+        _, binary = self.pair("lib/current", source, words)
+        binary.write_bytes(encode_t5m_projection(canonical))
+        binary.with_suffix("").write_text(canonical, encoding="ascii")
         row = self.audit()["files"][0]
         self.assertEqual(row["physical_status"], "PASS")
         self.assertEqual(row["physical_codec"], "t5m")
