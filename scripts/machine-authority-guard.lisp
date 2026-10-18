@@ -9,10 +9,10 @@
 (визначити third (функція (x) (перше (решта (решта x)))))
 
 (визначити authority-edges
-  (110101001 (110110111 "tests/machine-authority-edges.lisp")))
+  (читати-всі (читати-файл "tests/machine-authority-edges.lisp")))
 
 (визначити machine-capability-provenance
-  (110101001 (110110111 "lib/machine/capability-provenance.lisp")))
+  (читати-всі (читати-файл "lib/machine/capability-provenance.lisp")))
 
 (визначити machine-provenance-required-fields
   (як-є
@@ -30,7 +30,7 @@
       ((атом? fields) () (як-є missing))
       ((атом? fields) (1) (як-є missing))
       ((атом? fields) (0)
-       (001000 ((field (100 fields)))
+       (нехай ((field (перше fields)))
          (за-умовою
            ((атом? field) ()
             (machine-provenance-field-from name (решта fields)))
@@ -57,11 +57,11 @@
       ((атом? required) () (як-є complete))
       ((атом? required) (1) (як-є malformed))
       ((атом? required) (0)
-       (001000 ((value (machine-provenance-field (100 required) row)))
+       (нехай ((value (machine-provenance-field (перше required) row)))
          (за-умовою
-           ((11110111 value (001 missing)) (1)
+           ((однакові? value (як-є missing)) (1)
             (як-є missing))
-           ((11110111 value (001 missing)) (0)
+           ((однакові? value (як-є missing)) (0)
             (machine-required-fields-state (решта required) row))))))))
 
 (визначити exact-domain-independent-witness-state
@@ -120,7 +120,7 @@
       ((атом? rows) () (як-є machine-authority-ok))
       ((атом? rows) (1) (fail-machine-authority rows))
       ((атом? rows) (0)
-       (001000 ((state (allowed-machine-edge-state (100 rows))))
+       (нехай ((state (allowed-machine-edge-state (перше rows))))
          (за-умовою
            ((тотожне? state (як-є allowed)) (1)
             (check-machine-edges (решта rows)))
@@ -135,13 +135,13 @@
       ((атом? row) (0)
        (за-умовою
          ((тотожне? (перше row) (як-є capability-provenance)) (1)
-          (001000 ((required-state
+          (нехай ((required-state
                   (machine-required-fields-state
                     machine-provenance-required-fields
                     row)))
             (за-умовою
               ((тотожне? required-state (як-є complete)) (1)
-               (001001 ((semantic-authority
+               (нехай-послідовно ((semantic-authority
                         (machine-provenance-field
                           (як-є semantic-authority)
                           row))
@@ -170,10 +170,10 @@
                          ((тотожне? independent-state (як-є admitted))
                           (1)
                           (за-умовою
-                            ((11110111 independent-witness machine-witness)
+                            ((однакові? independent-witness machine-witness)
                              (1)
                              (як-є rejected))
-                            ((11110111 independent-witness machine-witness)
+                            ((однакові? independent-witness machine-witness)
                              (0)
                              (як-є admitted))))
                          ((тотожне? independent-state (як-є admitted))
@@ -196,7 +196,7 @@
       ((атом? rows) () (як-є machine-anti-hybrid-ok))
       ((атом? rows) (1) (fail-machine-hybrid rows))
       ((атом? rows) (0)
-       (001000 ((state (machine-provenance-row-safe-state (100 rows))))
+       (нехай ((state (machine-provenance-row-safe-state (перше rows))))
          (за-умовою
            ((тотожне? state (як-є admitted)) (1)
             (check-machine-capability-provenance (решта rows)))
