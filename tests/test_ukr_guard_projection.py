@@ -132,9 +132,9 @@ class GuardProjectionTests(unittest.TestCase):
         native_bits = {bit for table in NATIVE.values() for bit in table}
         remaining = set(re.findall(r"\(\s*([01]+)(?=[\s(])", masked))
         self.assertTrue(native_bits.isdisjoint(remaining), remaining)
-        start = self.text.find("(визначити guard-reference-field\\n")
+        start = self.text.find("(визначити guard-reference-field\n")
         self.assertGreaterEqual(start, 0)
-        end = self.text.find("\\n(визначити ", start + 1)
+        end = self.text.find("\n(визначити ", start + 1)
         self.assertGreater(end, start)
         guard_field = self.text[start:end]
         self.assertIn("(функція (поле посилання)", guard_field)
