@@ -260,7 +260,7 @@ class QuantityUkrProjection(unittest.TestCase):
                     r"^\s*\(" + bits + r"\s+\(ук\s+" + re.escape(ukr)
                     + r"\)\s+\(укр\s+" + re.escape(ukr) + r"\)", re.MULTILINE))
                 self.assertRegex(core, re.compile(
-                    r"^\(0011\s+" + re.escape(ukr) + r"[\s()]", re.MULTILINE))
+                    r"^\(визначити\s+" + re.escape(ukr) + r"[\s()]", re.MULTILINE))
 
     def test_definition_names_remain_historical(self):
         old, _ = project_heads(project_literals(self.restore_previous(), D1_REVERSE)[0], REVERSE)
