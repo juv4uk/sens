@@ -21,7 +21,7 @@
 
 (0011 island-lowering-add-payload
   (0010 (executor left right)
-    ((0010 (l r)
+    ((функція (l r)
       (за-умовою
         ((тотожне? executor (як-є common-lisp))
          (island-lowering-append4 "" l " " r))
@@ -38,7 +38,7 @@
 
 (0011 island-lower-binary
   (0010 (sid executor left right)
-    ((0010 (selection) (за-умовою
+    ((функція (selection) (за-умовою
         ((атом? selection)
          (список
            (як-є island-lowering-failure)
@@ -47,9 +47,9 @@
         ((атом? (як-є ()))
          (за-умовою
            ((тотожне? (перше selection) (як-є mechanism-selected))
-            ((0010 (mechanism) (за-умовою
+            ((функція (mechanism) (за-умовою
                 ((тотожне? mechanism (як-є bounded-exact-add))
-                 ((0010 (payload) (за-умовою
+                 ((функція (payload) (за-умовою
                      ((атом? payload)
                       (список
                         (як-є island-lowering-failure)

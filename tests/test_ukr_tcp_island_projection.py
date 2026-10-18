@@ -13,7 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();]+')
 PEERS = {
-    "як-є": (3, "001"), "атом?": (3, "010"),
+    "функція": (4, "0010"), "як-є": (3, "001"), "атом?": (3, "010"),
     "решта": (3, "011"), "перше": (3, "100"),
     "тотожне?": (3, "101"), "за-умовою": (3, "110"),
     "сполучити": (3, "111"), "друге": (4, "1001"),
@@ -28,7 +28,7 @@ BASELINE = {
   },
   "lib/island-lowering.lisp": {
     "fingerprint": "dcc87879d0c95fa0",
-    "count": 45,
+    "count": 49,
     "forms": 3
   }
 }
@@ -140,6 +140,8 @@ class UkrainianTcpIslandTests(unittest.TestCase):
         island = (ROOT / "lib/island-lowering.lisp").read_text(encoding="utf-8")
         self.assertIn("(100111 selection)", island)  # D6 is separate; not D9
         self.assertIn("(рядок-додати", island)
+        self.assertEqual(island.count("((функція ("), 4)
+        self.assertEqual(island.count("(0010 ("), 3)
         validate("lib/island-lowering.lisp", island)
 
     def test_negative_wrong_current_operation_or_domain(self):
@@ -147,6 +149,7 @@ class UkrainianTcpIslandTests(unittest.TestCase):
         original = (ROOT / path).read_text(encoding="utf-8")
         for changed in [
             original.replace("(рядок-додати", "(сполучити", 1),
+            original.replace("((функція (selection)", "((сполучити (selection)", 1),
             original.replace("(тотожне?", "(сполучити", 1),
             original.replace("(рядок-додати", "(00000101", 1),
         ]:
