@@ -1,3 +1,3 @@
 ; D10 MEMQ: EQ is only admitted on atoms, no pair structural equality.
-(memq (list (quote а))
-  (list (list (quote а))))
+(memq (список (як-є а))
+  (список (список (як-є а))))
