@@ -276,9 +276,14 @@ class BatchSourceTests(unittest.TestCase):
                              "перше", "решта", "як-є", "визначити", "функція",
                              "нехай", "нехай-послідовно", "більше?"):
             self.assertIn("(" + current_head, tail)
-        # Ratified D4 identity alone does not establish callable runtime access.
-        self.assertIn("(тотожне? інструменти (як-є ()))", tail)
-        self.assertNotIn("(порожній?", tail)
+        # Use the ratified Ukrainian D4 NULL projection; never compare () with D3 EQ.
+        self.assertIn("(порожній? інструменти)", tail)
+        self.assertIn("(порожній? інструмент)", tail)
+        self.assertIn("(порожній? посилання)", tail)
+        self.assertIn("(порожній? стан)", tail)
+        self.assertIn("(порожній? найкращий)", tail)
+        self.assertNotIn("(тотожне? (як-є ())", tail)
+        self.assertNotIn("(за-умовою ((атом?", tail)
         self.assertNotIn("(t ", tail)
         self.assertNotIn(" (1) ", tail)
         self.assertNotIn(" (0) ", tail)
