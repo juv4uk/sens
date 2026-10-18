@@ -15,12 +15,12 @@
 ; Migrated: two-field COND only; empty/fallback via exact D1 forms.
 ; Width is identity; every bit of the domain address is valued.
 
-(0011 island-lowering-append4
-  (0010 (a b c d)
+(визначити island-lowering-append4
+  (функція (a b c d)
     (рядок-додати a (рядок-додати b (рядок-додати c d)))))
 
-(0011 island-lowering-add-payload
-  (0010 (executor left right)
+(визначити island-lowering-add-payload
+  (функція (executor left right)
     ((функція (l r)
       (за-умовою
         ((тотожне? executor (як-є common-lisp))
@@ -36,8 +36,8 @@
       (write-to-string left)
       (write-to-string right))))
 
-(0011 island-lower-binary
-  (0010 (sid executor left right)
+(визначити island-lower-binary
+  (функція (sid executor left right)
     ((функція (selection) (за-умовою
         ((атом? selection)
          (список
