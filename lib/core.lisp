@@ -5,6 +5,13 @@
 
 (визначити identity (функція (value) value))
 
+; D4:0101 NULL `порожній?`: Lisp-owned механізм, D3:101 EQ до порожнього списку.
+; Не перейменовувати історичний SID8 і не вводити машинних літералів.
+(визначити порожній?
+  (функція (значення)
+    (тотожне? значення (як-є ()))))
+
+
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
