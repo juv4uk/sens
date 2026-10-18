@@ -101,6 +101,31 @@ class GuardProjectionTests(unittest.TestCase):
     def test_exact_original_program_is_recoverable(self):
         self.assertEqual(self.text.count(ALIAS_MARKER), 1)
         migrated = self.text.split("\n" + ALIAS_MARKER, 1)[0]
+        # Inverse only the witnessed SENS-owned Guard accessor rewrite.
+        # The additional helper is real executable Lisp, not quoted advice;
+        # verify its law-bearing call heads before reconstructing the old blob.
+        helper_start = migrated.find(
+            "; Запис поля шукається структурно в Lisp, без невизначеного host/lookup маршруту.\n"
+        )
+        self.assertGreaterEqual(helper_start, 0)
+        field_start = migrated.find("(визначити guard-reference-field\n", helper_start)
+        self.assertGreater(field_start, helper_start)
+        helper = migrated[helper_start:field_start]
+        self.assertIn("(визначити захист-знайти-запис\n", helper)
+        self.assertIn("((порожній? записи) (як-є ()))", helper)
+        self.assertIn("((сторожа--рівні? ключ (перше запис)) запис)", helper)
+        field_end = migrated.find("\n; --- OWNER LANGUAGE FIREWALL", field_start)
+        self.assertGreater(field_end, field_start)
+        current_field = migrated[field_start:field_end]
+        self.assertIn("(порожній? запис)", current_field)
+        self.assertIn("(захист-знайти-запис поле (решта посилання))))", current_field)
+        old_field = current_field.replace("(порожній? запис)", "(атом? запис)", 1)
+        old_field = old_field.replace(
+            "(захист-знайти-запис поле (решта посилання))))",
+            "(знайти-за-ключем поле (решта посилання)))))", 1
+        )
+        migrated = migrated[:helper_start] + old_field + migrated[field_end:]
+
         # Reverse only local names in the Guard accessor before the existing
         # exact surface inverse restores the pinned original Lisp blob.
         start = migrated.find("(визначити guard-reference-field\n")
@@ -141,9 +166,16 @@ class GuardProjectionTests(unittest.TestCase):
         self.assertIn("(функція (запис)", guard_field)
         for old_binding in ("(функція (field reference)", "(функція (entry)", "(друге entry)"):
             self.assertNotIn(old_binding, guard_field)
+        # The current Lisp law recursively finds a field; the old D5 helper
+        # remains ratified but is no longer a required call in this source.
+        self.assertIn("(визначити захист-знайти-запис\n", self.text)
+        self.assertIn("(захист-знайти-запис поле (решта посилання))", guard_field)
+        self.assertIn("((сторожа--рівні? ключ (перше запис)) запис)", self.text)
+        self.assertNotIn("(знайти-за-ключем ", self.text)
         for table in NATIVE.values():
             for ukr in table.values():
-                self.assertIn("(" + ukr, self.text)
+                if ukr != "знайти-за-ключем":
+                    self.assertIn("(" + ukr, self.text)
 
     def test_english_names_only_in_explicit_compatibility_aliases(self):
         migrated = self.text.split("\n" + ALIAS_MARKER, 1)[0]
