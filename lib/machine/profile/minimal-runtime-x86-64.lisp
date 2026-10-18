@@ -12,8 +12,8 @@
 ; None is a full allocator, GC, label resolver, calling convention, compiler,
 ; or self-hosting claim.
 
-(0011 x86-minimal-structural-car-dependencies
-  (001
+(визначити x86-minimal-structural-car-dependencies
+  (як-є
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
@@ -31,8 +31,8 @@
        required-for-minimal-runtime
        "return the bounded result through the host ABI"))))
 
-(0011 x86-minimal-eq-cond-dependencies
-  (001
+(визначити x86-minimal-eq-cond-dependencies
+  (як-є
     ((materialize-value
        mov-r64-imm64
        required-for-minimal-runtime
@@ -50,8 +50,8 @@
        required-for-minimal-runtime
        "return the selected bounded result through the guest ABI"))))
 
-(0011 x86-minimal-eq-cond-car-cons-dependencies
-  (001
+(визначити x86-minimal-eq-cond-car-cons-dependencies
+  (як-є
     ((materialize-values
        mov-r64-imm64
        required-for-minimal-runtime
@@ -77,155 +77,155 @@
        required-for-minimal-runtime
        "return the selected structural result through the guest ABI"))))
 
-(0011 x86-minimal-family-member?
-  (0010 (family families)
-    (110
+(визначити x86-minimal-family-member?
+  (функція (family families)
+    (за-умовою
       
-      ((010 families)  ())
-      ((101 family (100 families)) t)
-      ((010 ()) (x86-minimal-family-member? family (011 families))))))
+      ((атом? families)  ())
+      ((тотожне? family (перше families)) t)
+      ((атом? ()) (x86-minimal-family-member? family (решта families))))))
 
-(0011 x86-minimal-unique-form-families
-  (0010 (forms seen)
-    (110
+(визначити x86-minimal-unique-form-families
+  (функція (forms seen)
+    (за-умовою
       
-      ((010 forms)  seen)
-      ((010 ())
-       (001000 ((family (100 (100 forms))))
-         (110
+      ((атом? forms)  seen)
+      ((атом? ())
+       (нехай ((family (перше (перше forms))))
+         (за-умовою
            ((x86-minimal-family-member? family seen)
-            (x86-minimal-unique-form-families (011 forms) seen))
-           ((010 ())
+            (x86-minimal-unique-form-families (решта forms) seen))
+           ((атом? ())
             (x86-minimal-unique-form-families
-              (011 forms)
-              (1111 seen (1110 family))))))))))
+              (решта forms)
+              (приєднати seen (список family))))))))))
 
-(0011 x86-minimal-row-second
-  (0010 (row)
-    (100 (011 row))))
+(визначити x86-minimal-row-second
+  (функція (row)
+    (перше (решта row))))
 
-(0011 x86-minimal-row-third
-  (0010 (row)
-    (100 (011 (011 row)))))
+(визначити x86-minimal-row-third
+  (функція (row)
+    (перше (решта (решта row)))))
 
-(0011 x86-minimal-map-row-second
-  (0010 (rows)
-    (110
+(визначити x86-minimal-map-row-second
+  (функція (rows)
+    (за-умовою
       
-      ((010 rows)  (001 ()))
-      ((010 ())
-       (111
-         (x86-minimal-row-second (100 rows))
-         (x86-minimal-map-row-second (011 rows)))))))
+      ((атом? rows)  (як-є ()))
+      ((атом? ())
+       (сполучити
+         (x86-minimal-row-second (перше rows))
+         (x86-minimal-map-row-second (решта rows)))))))
 
-(0011 x86-minimal-map-row-third
-  (0010 (rows)
-    (110
+(визначити x86-minimal-map-row-third
+  (функція (rows)
+    (за-умовою
       
-      ((010 rows)  (001 ()))
-      ((010 ())
-       (111
-         (x86-minimal-row-third (100 rows))
-         (x86-minimal-map-row-third (011 rows)))))))
+      ((атом? rows)  (як-є ()))
+      ((атом? ())
+       (сполучити
+         (x86-minimal-row-third (перше rows))
+         (x86-minimal-map-row-third (решта rows)))))))
 
-(0011 x86-minimal-structural-car-forms
-  (0010 (left right)
+(визначити x86-minimal-structural-car-forms
+  (функція (left right)
     (x86-lower-cons-car-u64-forms left right)))
 
-(0011 x86-minimal-structural-car-observed-families
-  (0010 (left right)
+(визначити x86-minimal-structural-car-observed-families
+  (функція (left right)
     (x86-minimal-unique-form-families
       (x86-minimal-structural-car-forms left right)
-      (001 ()))))
+      (як-є ()))))
 
-(0011 x86-minimal-structural-car-dependency-families
-  (0010 ()
+(визначити x86-minimal-structural-car-dependency-families
+  (функція ()
     (x86-minimal-map-row-second x86-minimal-structural-car-dependencies)))
 
-(0011 x86-minimal-structural-car-dependency-classes
-  (0010 ()
+(визначити x86-minimal-structural-car-dependency-classes
+  (функція ()
     (x86-minimal-map-row-third x86-minimal-structural-car-dependencies)))
 
-(0011 x86-minimal-structural-car-profile
-  (0010 (left right)
-    (1110
-      (1110 (001 witness) (001 bounded-car-cons-u64))
-      (1110 (001 forms) (x86-minimal-structural-car-forms left right))
-      (1110
-        (001 observed-families)
+(визначити x86-minimal-structural-car-profile
+  (функція (left right)
+    (список
+      (список (як-є witness) (як-є bounded-car-cons-u64))
+      (список (як-є forms) (x86-minimal-structural-car-forms left right))
+      (список
+        (як-є observed-families)
         (x86-minimal-structural-car-observed-families left right))
-      (1110 (001 dependencies) x86-minimal-structural-car-dependencies)
-      (1110 (001 arena-lifetime) (001 native-call))
-      (1110 (001 escape) (001 forbidden))
-      (1110 (001 claim) (001 bounded-structural-lower-bound)))))
+      (список (як-є dependencies) x86-minimal-structural-car-dependencies)
+      (список (як-є arena-lifetime) (як-є native-call))
+      (список (як-є escape) (як-є forbidden))
+      (список (як-є claim) (як-є bounded-structural-lower-bound)))))
 
-(0011 x86-minimal-eq-cond-forms
-  (0010 (left right then-value else-value)
+(визначити x86-minimal-eq-cond-forms
+  (функція (left right then-value else-value)
     (x86-lower-eq-cond-u64-forms left right then-value else-value)))
 
-(0011 x86-minimal-eq-cond-observed-families
-  (0010 (left right then-value else-value)
+(визначити x86-minimal-eq-cond-observed-families
+  (функція (left right then-value else-value)
     (x86-minimal-unique-form-families
       (x86-minimal-eq-cond-forms left right then-value else-value)
-      (001 ()))))
+      (як-є ()))))
 
-(0011 x86-minimal-eq-cond-dependency-families
-  (0010 ()
+(визначити x86-minimal-eq-cond-dependency-families
+  (функція ()
     (x86-minimal-map-row-second x86-minimal-eq-cond-dependencies)))
 
-(0011 x86-minimal-eq-cond-dependency-classes
-  (0010 ()
+(визначити x86-minimal-eq-cond-dependency-classes
+  (функція ()
     (x86-minimal-map-row-third x86-minimal-eq-cond-dependencies)))
 
-(0011 x86-minimal-eq-cond-profile
-  (0010 (left right then-value else-value)
-    (1110
-      (1110 (001 witness) (001 bounded-eq-cond-u64))
-      (1110
-        (001 forms)
+(визначити x86-minimal-eq-cond-profile
+  (функція (left right then-value else-value)
+    (список
+      (список (як-є witness) (як-є bounded-eq-cond-u64))
+      (список
+        (як-є forms)
         (x86-minimal-eq-cond-forms left right then-value else-value))
-      (1110
-        (001 observed-families)
+      (список
+        (як-є observed-families)
         (x86-minimal-eq-cond-observed-families
           left right then-value else-value))
-      (1110 (001 dependencies) x86-minimal-eq-cond-dependencies)
-      (1110 (001 claim) (001 bounded-conditional-growth-lower-bound)))))
+      (список (як-є dependencies) x86-minimal-eq-cond-dependencies)
+      (список (як-є claim) (як-є bounded-conditional-growth-lower-bound)))))
 
-(0011 x86-minimal-eq-cond-car-cons-forms
-  (0010 (left right then-car then-cdr else-car else-cdr)
+(визначити x86-minimal-eq-cond-car-cons-forms
+  (функція (left right then-car then-cdr else-car else-cdr)
     (x86-lower-eq-cond-car-cons-u64-forms
       left right then-car then-cdr else-car else-cdr)))
 
-(0011 x86-minimal-eq-cond-car-cons-observed-families
-  (0010 (left right then-car then-cdr else-car else-cdr)
+(визначити x86-minimal-eq-cond-car-cons-observed-families
+  (функція (left right then-car then-cdr else-car else-cdr)
     (x86-minimal-unique-form-families
       (x86-minimal-eq-cond-car-cons-forms
         left right then-car then-cdr else-car else-cdr)
-      (001 ()))))
+      (як-є ()))))
 
-(0011 x86-minimal-eq-cond-car-cons-dependency-families
-  (0010 ()
+(визначити x86-minimal-eq-cond-car-cons-dependency-families
+  (функція ()
     (x86-minimal-map-row-second x86-minimal-eq-cond-car-cons-dependencies)))
 
-(0011 x86-minimal-eq-cond-car-cons-dependency-classes
-  (0010 ()
+(визначити x86-minimal-eq-cond-car-cons-dependency-classes
+  (функція ()
     (x86-minimal-map-row-third x86-minimal-eq-cond-car-cons-dependencies)))
 
-(0011 x86-minimal-eq-cond-car-cons-profile
-  (0010 (left right then-car then-cdr else-car else-cdr)
-    (1110
-      (1110 (001 witness) (001 bounded-eq-cond-car-cons-u64))
-      (1110
-        (001 forms)
+(визначити x86-minimal-eq-cond-car-cons-profile
+  (функція (left right then-car then-cdr else-car else-cdr)
+    (список
+      (список (як-є witness) (як-є bounded-eq-cond-car-cons-u64))
+      (список
+        (як-є forms)
         (x86-minimal-eq-cond-car-cons-forms
           left right then-car then-cdr else-car else-cdr))
-      (1110
-        (001 observed-families)
+      (список
+        (як-є observed-families)
         (x86-minimal-eq-cond-car-cons-observed-families
           left right then-car then-cdr else-car else-cdr))
-      (1110 (001 dependencies) x86-minimal-eq-cond-car-cons-dependencies)
-      (1110 (001 arena-lifetime) (001 native-call))
-      (1110 (001 escape) (001 forbidden))
-      (1110
-        (001 claim)
-        (001 bounded-conditional-structural-composition-lower-bound)))))
+      (список (як-є dependencies) x86-minimal-eq-cond-car-cons-dependencies)
+      (список (як-є arena-lifetime) (як-є native-call))
+      (список (як-є escape) (як-є forbidden))
+      (список
+        (як-є claim)
+        (як-є bounded-conditional-structural-composition-lower-bound)))))
