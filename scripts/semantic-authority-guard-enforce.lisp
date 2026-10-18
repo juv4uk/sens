@@ -1,20 +1,20 @@
-(0011 verdicts
+(визначити verdicts
   (110101001 (110110111 "tests/semantic-authority-verdict.lisp")))
 
-(0011 verdict (100 verdicts))
+(визначити verdict (перше verdicts))
 
-(0011 verdict-tag
-  (110
-    ((010 verdict)
-     (110
-       ((101 verdict (001 ())) (001 empty-verdict))
-       ((010 (001 ())) verdict)))
-    ((010 (001 ())) (100 verdict))))
+(визначити verdict-tag
+  (за-умовою
+    ((атом? verdict)
+     (за-умовою
+       ((тотожне? verdict (як-є ())) (як-є empty-verdict))
+       ((атом? (як-є ())) verdict)))
+    ((атом? (як-є ())) (перше verdict))))
 
-(110
-  ((101 verdict-tag (001 semantic-authority-ok))
-   (001 semantic-authority-ok))
-  ((101 verdict-tag (001 semantic-authority-violation))
-   (100 (001 ())))
-  ((010 (001 ()))
-   (100 (001 ()))))
+(за-умовою
+  ((тотожне? verdict-tag (як-є semantic-authority-ok))
+   (як-є semantic-authority-ok))
+  ((тотожне? verdict-tag (як-є semantic-authority-violation))
+   (перше (як-є ())))
+  ((атом? (як-є ()))
+   (перше (як-є ()))))
