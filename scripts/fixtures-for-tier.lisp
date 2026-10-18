@@ -22,7 +22,7 @@
 (визначити target-tier
   (за-умовою
     ((атом? *argv*) (missing-tier-argument))
-    ((010 (001 ())) (11101010 (100 *argv*)))))
+    ((010 (001 ())) (прочитати (100 *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
 ; named ErrorKind::UnknownSymbol (S2), not an invented ad-hoc error
