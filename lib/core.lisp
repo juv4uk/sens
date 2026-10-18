@@ -383,44 +383,22 @@
 ; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
 ; structurally. `equal?` is the structural/deep-equality counterpart, built
 ; on top of `eq` and `atom` rather than replacing them. Its answer is the
-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
+; Returns exact PredicateBit D1 `так` or `ні`, never a quoted list.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
 (визначити equal?
   (функція (a b)
     (за-умовою
-      ((хибне? (атом? a))
+      ((порожній? a) (порожній? b))
+      ((порожній? b) ні)
+      ((атом? a)
        (за-умовою
-         ((хибне? (атом? b))
-          (як-є (так)))
-         ((атом? b) 
-          (як-є (ні)))
-         ((атом? b) 
-          (як-є (ні)))))
-      ((атом? a) 
-       (за-умовою
-         ((хибне? (атом? b))
-          (як-є (ні)))
-         ((атом? b) 
-          (за-умовою
-            ((тотожне? a b) 
-             (як-є (так)))
-            ((тотожне? a b) 
-             (як-є (ні)))))
-         ((атом? b) 
-          (як-є (ні)))))
-      ((атом? a) 
-       (за-умовою
-         ((хибне? (атом? b))
-          (як-є (ні)))
-         ((атом? b) 
-          (як-є (ні)))
-         ((атом? b) 
-          (за-умовою
-            ((однакові? (перше a) (перше b)) 
-             (однакові? (решта a) (решта b)))
-            ((хибне? (однакові? (перше a) (перше b)))
-             (як-є (ні))))))))))
+         ((атом? b) (тотожне? a b))
+         (так ні)))
+      ((атом? b) ні)
+      ((equal? (перше a) (перше b))
+       (equal? (решта a) (решта b)))
+      (так ні))))
 
 ; D8:11110111 ratified укр surface; mechanism is the existing Lisp-owned equal?.
 ; Guard's standalone core bootstrap must bind it without loading all of core4.
