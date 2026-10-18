@@ -22,26 +22,26 @@
   (schema function-table-mechanisms/1)
   (authority "lib/surface/semantic-registry.lisp")
   (lifecycle transitional)
-  (retirement-issue #b10000010110)
+  (retirement-issue 1046)
   (rows
     ; Core evaluator forms — exact 8-bit coordinates
-    (00000001 evaluator quote-form)
-    (00000010 evaluator atom-primitive)
-    (00000011 evaluator eq-primitive)
-    (00000100 evaluator cons-primitive)
-    (00000101 evaluator car-primitive)
-    (00000110 evaluator cdr-primitive)
-    (00000111 evaluator cond-form)
-    (00001000 evaluator lambda-form)
-    (00001001 evaluator define-form)
-    (00001011 evaluator define-form)
+    (для-кожного-елемента evaluator quote-form)
+    (завершити-рядок evaluator atom-primitive)
+    (перевідобразити evaluator eq-primitive)
+    (послідовність-повернути-перше evaluator cons-primitive)
+    (елемент-за-індексом evaluator car-primitive)
+    (позиція-першого-збігу evaluator cdr-primitive)
+    (видалити-на-місці! evaluator cond-form)
+    (тотожне-значення? evaluator lambda-form)
+    (підмножина? evaluator define-form)
+    (відобразити-залишки-з-порожнім evaluator define-form)
     ; Existing function + only. These rows admit executors; they do not define +.
     ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
     ; Four islands share exact SID 00001100 — bit pattern is the identity.
-    (00001100 common-lisp bounded-exact-add)
-    (00001100 prolog bounded-exact-add)
-    (00001100 clips bounded-exact-add)
-    (00001100 datalog bounded-exact-add))
+    (зменшити-на-1 common-lisp bounded-exact-add)
+    (зменшити-на-1 prolog bounded-exact-add)
+    (зменшити-на-1 clips bounded-exact-add)
+    (зменшити-на-1 datalog bounded-exact-add))
   ; #1422 — profile selection precedes host mechanism lookup.
   ; Mechanical registered-host route for existing SENS function 10101000 under Core3.
   ; Defines no kernel syntax, surface spelling, result law, or host availability.

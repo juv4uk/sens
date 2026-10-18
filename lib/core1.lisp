@@ -59,11 +59,11 @@
 
 (визначити C1-THIRD
   (функція (X)
-    (10011 X)))
+    (третє X)))
 
 (визначити C1-FOURTH
   (функція (X)
-    (10011 (011 X))))
+    (третє (решта X))))
 
 (визначити C1-MAKE-ERROR
   (функція (KIND DETAIL)
@@ -74,9 +74,9 @@
 (визначити C1-ERRORP
   (функція (VALUE)
     (за-умовою
-      ((010 VALUE) #d1:0)
-      ((101 (100 VALUE) (001 C1-ERROR)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? VALUE) ні)
+      ((тотожне? (перше VALUE) (як-є C1-ERROR)) так)
+      (так ні))))
 
 (визначити C1-MAKE-FOUND
   (функція (VALUE)
@@ -86,41 +86,41 @@
 (визначити C1-FOUNDP
   (функція (VALUE)
     (за-умовою
-      ((010 VALUE) #d1:0)
-      ((101 (100 VALUE) (001 C1-FOUND)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? VALUE) ні)
+      ((тотожне? (перше VALUE) (як-є C1-FOUND)) так)
+      (так ні))))
 
 (визначити C1-FOUND-VALUE
   (функція (VALUE)
     (друге VALUE)))
 
 (визначити C1-LOOKUP-IN
-  (00100 C1-LOOKUP-IN
-    (0010 (NAME ENV)
-      (110
-        ((101 ENV (001 ())) (001 C1-MISSING))
-        ((101 (100 (100 ENV)) NAME)
-         (C1-MAKE-FOUND (011 (100 ENV))))
-        (#d1:1
-         (C1-LOOKUP-IN NAME (011 ENV)))))))
+  (мітка C1-LOOKUP-IN
+    (функція (NAME ENV)
+      (за-умовою
+        ((тотожне? ENV (як-є ())) (як-є C1-MISSING))
+        ((тотожне? (перше (перше ENV)) NAME)
+         (C1-MAKE-FOUND (решта (перше ENV))))
+        (так
+         (C1-LOOKUP-IN NAME (решта ENV)))))))
 
 (визначити C1-ADMITTED-SID-VALUEP
   (функція (VALUE)
     (за-умовою
-      ((101 VALUE 001) #d1:1)
-      ((101 VALUE 010) #d1:1)
-      ((101 VALUE 101) #d1:1)
-      ((101 VALUE 111) #d1:1)
-      ((101 VALUE 100) #d1:1)
-      ((101 VALUE 011) #d1:1)
-      ((101 VALUE 110) #d1:1)
-      ((101 VALUE 0010) #d1:1)
-      ((101 VALUE 0011) #d1:1)
-      ((101 VALUE 01010) #d1:1)
-      ((101 VALUE 01011) #d1:1)
-      ((101 VALUE 0100) #d1:1)
-      ((101 VALUE 1110) #d1:1)
-      (#d1:1 (001 ())))))
+      ((тотожне? VALUE 001) так)
+      ((тотожне? VALUE 010) так)
+      ((тотожне? VALUE 101) так)
+      ((тотожне? VALUE 111) так)
+      ((тотожне? VALUE 100) так)
+      ((тотожне? VALUE 011) так)
+      ((тотожне? VALUE 110) так)
+      ((тотожне? VALUE 0010) так)
+      ((тотожне? VALUE 0011) так)
+      ((тотожне? VALUE 01010) так)
+      ((тотожне? VALUE 01011) так)
+      ((тотожне? VALUE 0100) так)
+      ((тотожне? VALUE 1110) так)
+      (так (як-є ())))))
 
 (визначити C1-PRIMITIVE-IDENTITY
   (функція (NAME)
@@ -146,7 +146,7 @@
       ((тотожне? NAME (як-є list)) 1110)
       ((тотожне? NAME (як-є NOT))  0100)
       ((тотожне? NAME (як-є not))  0100)
-      (#d1:1 (001 ())))))
+      (так (як-є ())))))
 
 (визначити C1-DEFAULT
   (функція (NAME)
@@ -154,7 +154,7 @@
        (за-умовою
          ((тотожне? IDENTITY (як-є ()))
           (C1-MAKE-ERROR (як-є UNBOUND) NAME))
-         (#d1:1 IDENTITY)))
+         (так IDENTITY)))
      (C1-PRIMITIVE-IDENTITY NAME))))
 
 (визначити C1-LOOKUP
@@ -162,51 +162,51 @@
     ((функція (LOCAL)
        (за-умовою
          ((C1-FOUNDP LOCAL) (C1-FOUND-VALUE LOCAL))
-         (#d1:1
+         (так
           ((функція (TOP)
              (за-умовою
                ((C1-FOUNDP TOP) (C1-FOUND-VALUE TOP))
-               (#d1:1 (C1-DEFAULT NAME))))
+               (так (C1-DEFAULT NAME))))
            (C1-LOOKUP-IN NAME GLOBAL)))))
      (C1-LOOKUP-IN NAME ENV))))
 
 (визначити C1-FUNARGP
   (функція (VALUE)
     (за-умовою
-      ((010 VALUE) #d1:0)
-      ((101 (100 VALUE) (001 FUNARG)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? VALUE) ні)
+      ((тотожне? (перше VALUE) (як-є FUNARG)) так)
+      (так ні))))
 
 (визначити C1-ONE-ARGP
   (функція (ARGS)
     (за-умовою
-      ((010 ARGS) #d1:0)
-      ((101 (011 ARGS) (001 ())) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? ARGS) ні)
+      ((тотожне? (решта ARGS) (як-є ())) так)
+      (так ні))))
 
 (визначити C1-TWO-ARGP
   (функція (ARGS)
     (за-умовою
-      ((010 ARGS) #d1:0)
-      ((010 (011 ARGS)) #d1:0)
-      ((101 (011 (011 ARGS)) (001 ())) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? ARGS) ні)
+      ((атом? (решта ARGS)) ні)
+      ((тотожне? (решта (решта ARGS)) (як-є ())) так)
+      (так ні))))
 
 (визначити C1-BIND
-  (00100 C1-BIND
-    (0010 (PARAMS ARGS ENV)
-      (110
-        ((101 PARAMS (001 ()))
-         (110
-           ((101 ARGS (001 ())) ENV)
-           (#d1:1 (C1-MAKE-ERROR (001 ARITY) (001 TOO-MANY-ARGUMENTS)))))
-        ((101 ARGS (001 ()))
-         (C1-MAKE-ERROR (001 ARITY) (001 TOO-FEW-ARGUMENTS)))
-        (#d1:1
+  (мітка C1-BIND
+    (функція (PARAMS ARGS ENV)
+      (за-умовою
+        ((тотожне? PARAMS (як-є ()))
+         (за-умовою
+           ((тотожне? ARGS (як-є ())) ENV)
+           (так (C1-MAKE-ERROR (як-є ARITY) (як-є TOO-MANY-ARGUMENTS)))))
+        ((тотожне? ARGS (як-є ()))
+         (C1-MAKE-ERROR (як-є ARITY) (як-є TOO-FEW-ARGUMENTS)))
+        (так
          (C1-BIND
-           (011 PARAMS)
-           (011 ARGS)
-           (111 (111 (100 PARAMS) (100 ARGS)) ENV)))))))
+           (решта PARAMS)
+           (решта ARGS)
+           (сполучити (сполучити (перше PARAMS) (перше ARGS)) ENV)))))))
 
 (визначити C1-APPLY-PRIMITIVE
   (функція (SID ARGS)
@@ -216,76 +216,76 @@
        (за-умовою
          ((C1-ONE-ARGP ARGS)
           (за-умовою
-            ((101 (100 ARGS) (001 ())) #d1:1)
-            (#d1:1 (001 ()))))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+            ((тотожне? (перше ARGS) (як-є ())) так)
+            (так (як-є ()))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
       ((тотожне? SID 010)
        (за-умовою
          ((C1-ONE-ARGP ARGS) (атом? (перше ARGS)))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
       ((тотожне? SID 101)
        (за-умовою
          ((C1-TWO-ARGP ARGS) (тотожне? (перше ARGS) (перше (решта ARGS))))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
       ((тотожне? SID 111)
        (за-умовою
          ((C1-TWO-ARGP ARGS) (сполучити (перше ARGS) (перше (решта ARGS))))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
       ((тотожне? SID 100)
        (за-умовою
          ((C1-ONE-ARGP ARGS)
           (за-умовою
             ((атом? (перше ARGS))
              (C1-MAKE-ERROR (як-є TYPE) (як-є CAR-REQUIRES-PAIR)))
-            (#d1:1 (100 (100 ARGS)))))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
+            (так (перше (перше ARGS)))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
       ((тотожне? SID 011)
        (за-умовою
          ((C1-ONE-ARGP ARGS)
           (за-умовою
             ((атом? (перше ARGS))
              (C1-MAKE-ERROR (як-є TYPE) (як-є CDR-REQUIRES-PAIR)))
-            (#d1:1 (011 (100 ARGS)))))
-         (#d1:1 (C1-MAKE-ERROR (001 ARITY) SID))))
-      (#d1:1
+            (так (решта (перше ARGS)))))
+         (так (C1-MAKE-ERROR (як-є ARITY) SID))))
+      (так
        (C1-MAKE-ERROR (як-є UNSUPPORTED-PRIMITIVE) SID)))))
 
 (визначити C1-EVLIS
-  (00100 C1-EVLIS
-    (0010 (FORMS ENV GLOBAL)
-      (110
-        ((101 FORMS (001 ())) (001 ()))
-        (#d1:1
-         ((0010 (FIRST)
-            (110
+  (мітка C1-EVLIS
+    (функція (FORMS ENV GLOBAL)
+      (за-умовою
+        ((тотожне? FORMS (як-є ())) (як-є ()))
+        (так
+         ((функція (FIRST)
+            (за-умовою
               ((C1-ERRORP FIRST) FIRST)
-              (#d1:1
-               ((0010 (REST)
-                  (110
+              (так
+               ((функція (REST)
+                  (за-умовою
                     ((C1-ERRORP REST) REST)
-                    (#d1:1 (111 FIRST REST))))
-                (C1-EVLIS (011 FORMS) ENV GLOBAL)))))
-          (C1-EVAL (100 FORMS) ENV GLOBAL)))))))
+                    (так (сполучити FIRST REST))))
+                (C1-EVLIS (решта FORMS) ENV GLOBAL)))))
+          (C1-EVAL (перше FORMS) ENV GLOBAL)))))))
 
 (визначити C1-EVCON
-  (00100 C1-EVCON
-    (0010 (CLAUSES ENV GLOBAL)
-      (110
-        ((101 CLAUSES (001 ()))
-         (C1-MAKE-ERROR (001 UNSATISFIED-CONDITIONAL) (001 ())))
-        (#d1:1
-         ((0010 (TEST-VALUE)
-            (110
+  (мітка C1-EVCON
+    (функція (CLAUSES ENV GLOBAL)
+      (за-умовою
+        ((тотожне? CLAUSES (як-є ()))
+         (C1-MAKE-ERROR (як-є UNSATISFIED-CONDITIONAL) (як-є ())))
+        (так
+         ((функція (TEST-VALUE)
+            (за-умовою
               ((C1-ERRORP TEST-VALUE) TEST-VALUE)
-              ((101 TEST-VALUE (001 ()))
-               (C1-EVCON (011 CLAUSES) ENV GLOBAL))
-              (#d1:1
+              ((тотожне? TEST-VALUE (як-є ()))
+               (C1-EVCON (решта CLAUSES) ENV GLOBAL))
+              (так
                (C1-EVAL
-                 (1001 (100 CLAUSES))
+                 (друге (перше CLAUSES))
                  ENV
                  GLOBAL))))
           (C1-EVAL
-            (100 (100 CLAUSES))
+            (перше (перше CLAUSES))
             ENV
             GLOBAL)))))))
 
@@ -297,97 +297,97 @@
        (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-IDENTITY FN) ARGS))
       ((C1-FUNARGP FN)
        (FN ARGS GLOBAL))
-      (#d1:1
+      (так
        (C1-MAKE-ERROR (як-є NOT-CALLABLE) FN)))))
 
 (визначити C1-QUOTE-NAMEP
   (функція (NAME)
     (за-умовою
-      ((101 NAME 001) #d1:1)
-      ((101 NAME (001 QUOTE)) #d1:1)
-      ((101 NAME (001 quote)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? NAME 001) так)
+      ((тотожне? NAME (як-є QUOTE)) так)
+      ((тотожне? NAME (як-є quote)) так)
+      (так ні))))
 
 (визначити C1-COND-NAMEP
   (функція (NAME)
     (за-умовою
-      ((101 NAME 110) #d1:1)
-      ((101 NAME (001 COND)) #d1:1)
-      ((101 NAME (001 cond)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? NAME 110) так)
+      ((тотожне? NAME (як-є COND)) так)
+      ((тотожне? NAME (як-є cond)) так)
+      (так ні))))
 
 (визначити C1-LAMBDA-NAMEP
   (функція (NAME)
     (за-умовою
-      ((101 NAME 0010) #d1:1)
-      ((101 NAME (001 LAMBDA)) #d1:1)
-      ((101 NAME (001 lambda)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? NAME 0010) так)
+      ((тотожне? NAME (як-є LAMBDA)) так)
+      ((тотожне? NAME (як-є lambda)) так)
+      (так ні))))
 
 (визначити C1-DEFINE-NAMEP
   (функція (NAME)
     (за-умовою
-      ((101 NAME 0011) #d1:1)
-      ((101 NAME (001 DEFINE)) #d1:1)
-      ((101 NAME (001 define)) #d1:1)
-      ((101 NAME (001 def)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? NAME 0011) так)
+      ((тотожне? NAME (як-є DEFINE)) так)
+      ((тотожне? NAME (як-є define)) так)
+      ((тотожне? NAME (як-є def)) так)
+      (так ні))))
 
 (визначити C1-LABEL-NAMEP
   (функція (NAME)
     (за-умовою
-      ((101 NAME 00100) #d1:1)
-      ((101 NAME (001 LABEL)) #d1:1)
-      ((101 NAME (001 label)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? NAME 00100) так)
+      ((тотожне? NAME (як-є LABEL)) так)
+      ((тотожне? NAME (як-є label)) так)
+      (так ні))))
 
 (визначити C1-EVAL
-  (00100 C1-EVAL
-    (0010 (EXPR ENV GLOBAL)
-      (110
-        ((010 EXPR)
-         (110
-           ((101 EXPR (001 ())) (001 ()))
-           ((101 EXPR (001 nil)) (001 ()))
-           ((101 EXPR (001 t)) #d1:1)
+  (мітка C1-EVAL
+    (функція (EXPR ENV GLOBAL)
+      (за-умовою
+        ((атом? EXPR)
+         (за-умовою
+           ((тотожне? EXPR (як-є ())) (як-є ()))
+           ((тотожне? EXPR (як-є nil)) (як-є ()))
+           ((тотожне? EXPR (як-є t)) так)
            ((C1-ADMITTED-SID-VALUEP EXPR) EXPR)
-           (#d1:1 (C1-LOOKUP EXPR ENV GLOBAL))))
-        ((C1-QUOTE-NAMEP (100 EXPR))
-         (1001 EXPR))
-        ((C1-COND-NAMEP (100 EXPR))
-         (C1-EVCON (011 EXPR) ENV GLOBAL))
-        ((C1-LABEL-NAMEP (100 EXPR))
-         (C1-EVAL (10011 EXPR) ENV GLOBAL))
-        ((C1-LAMBDA-NAMEP (100 EXPR))
-         (00001
-           (0010 (ARGS GLOBAL-AT-CALL)
-             ((0010 (BOUND)
-                (110
+           (так (C1-LOOKUP EXPR ENV GLOBAL))))
+        ((C1-QUOTE-NAMEP (перше EXPR))
+         (друге EXPR))
+        ((C1-COND-NAMEP (перше EXPR))
+         (C1-EVCON (решта EXPR) ENV GLOBAL))
+        ((C1-LABEL-NAMEP (перше EXPR))
+         (C1-EVAL (третє EXPR) ENV GLOBAL))
+        ((C1-LAMBDA-NAMEP (перше EXPR))
+         (функція-значення
+           (функція (ARGS GLOBAL-AT-CALL)
+             ((функція (BOUND)
+                (за-умовою
                   ((C1-ERRORP BOUND) BOUND)
-                  (#d1:1
+                  (так
                    (C1-EVAL
-                     (10011 EXPR)
+                     (третє EXPR)
                      BOUND
                      GLOBAL-AT-CALL))))
               (C1-BIND
-                (1001 EXPR)
+                (друге EXPR)
                 ARGS
                 ENV)))))
-        ((C1-DEFINE-NAMEP (100 EXPR))
+        ((C1-DEFINE-NAMEP (перше EXPR))
          (C1-MAKE-ERROR
-           (001 INVALID-FORM)
-           (001 DEFINE-IS-TOP-LEVEL-ONLY)))
-        (#d1:1
-         ((0010 (FN)
-            (110
+           (як-є INVALID-FORM)
+           (як-є DEFINE-IS-TOP-LEVEL-ONLY)))
+        (так
+         ((функція (FN)
+            (за-умовою
               ((C1-ERRORP FN) FN)
-              (#d1:1
-               ((0010 (ARGS)
-                  (110
+              (так
+               ((функція (ARGS)
+                  (за-умовою
                     ((C1-ERRORP ARGS) ARGS)
-                    (#d1:1 (C1-APPLY FN ARGS GLOBAL))))
-                (C1-EVLIS (011 EXPR) ENV GLOBAL)))))
-          (C1-EVAL (100 EXPR) ENV GLOBAL)))))))
+                    (так (C1-APPLY FN ARGS GLOBAL))))
+                (C1-EVLIS (решта EXPR) ENV GLOBAL)))))
+          (C1-EVAL (перше EXPR) ENV GLOBAL)))))))
 
 (визначити C1-MAKE-WORLD
   (функція (VALUE GLOBAL)
@@ -401,49 +401,49 @@
 
 (визначити C1-WORLD-GLOBAL
   (функція (WORLD)
-    (10011 WORLD)))
+    (третє WORLD)))
 
 (визначити C1-DEFINITIONP
   (функція (FORM)
     (за-умовою
-      ((010 FORM) #d1:0)
-      ((C1-DEFINE-NAMEP (100 FORM)) #d1:1)
-      (#d1:1 #d1:0))))
+      ((атом? FORM) ні)
+      ((C1-DEFINE-NAMEP (перше FORM)) так)
+      (так ні))))
 
 (визначити C1-EVAL-PROGRAM
-  (00100 C1-EVAL-PROGRAM
-    (0010 (FORMS GLOBAL)
-      (110
-        ((101 FORMS (001 ()))
-         (C1-MAKE-WORLD (001 ()) GLOBAL))
-        ((C1-DEFINITIONP (100 FORMS))
-         ((0010 (FORM)
-            ((0010 (VALUE)
-               (110
+  (мітка C1-EVAL-PROGRAM
+    (функція (FORMS GLOBAL)
+      (за-умовою
+        ((тотожне? FORMS (як-є ()))
+         (C1-MAKE-WORLD (як-є ()) GLOBAL))
+        ((C1-DEFINITIONP (перше FORMS))
+         ((функція (FORM)
+            ((функція (VALUE)
+               (за-умовою
                  ((C1-ERRORP VALUE)
                   (C1-MAKE-WORLD VALUE GLOBAL))
-                 (#d1:1
+                 (так
                   (C1-EVAL-PROGRAM
-                    (011 FORMS)
-                    (111
-                      (111 (1001 FORM) VALUE)
+                    (решта FORMS)
+                    (сполучити
+                      (сполучити (друге FORM) VALUE)
                       GLOBAL)))))
-             (C1-EVAL (10011 FORM) (001 ()) GLOBAL)))
-          (100 FORMS)))
-        ((101 (011 FORMS) (001 ()))
+             (C1-EVAL (третє FORM) (як-є ()) GLOBAL)))
+          (перше FORMS)))
+        ((тотожне? (решта FORMS) (як-є ()))
          (C1-MAKE-WORLD
-           (C1-EVAL (100 FORMS) (001 ()) GLOBAL)
+           (C1-EVAL (перше FORMS) (як-є ()) GLOBAL)
            GLOBAL))
-        (#d1:1
-         ((0010 (VALUE)
-            (110
+        (так
+         ((функція (VALUE)
+            (за-умовою
               ((C1-ERRORP VALUE)
                (C1-MAKE-WORLD VALUE GLOBAL))
-              (#d1:1
+              (так
                (C1-EVAL-PROGRAM
-                 (011 FORMS)
+                 (решта FORMS)
                  GLOBAL))))
-          (C1-EVAL (100 FORMS) (001 ()) GLOBAL)))))))
+          (C1-EVAL (перше FORMS) (як-є ()) GLOBAL)))))))
 
 (визначити C1-WORLD-EVAL
   (функція (WORLD EXPR)
@@ -466,23 +466,23 @@
 ; ─────────────────────────────────────────────────────────────────────────────
 
 (визначити C1-READ
-  (00100 C1-READ
+  (мітка C1-READ
     (функція (TOKENS)
       (за-умовою
         ((тотожне? TOKENS (як-є ())) (як-є ()))
         ((тотожне? (перше TOKENS) 010)          ; ATOM token -> the token itself
          (перше TOKENS))
-        (#d1:1
+        (так
          (C1-READ-LIST TOKENS))))))
 
 (визначити C1-READ-LIST
-  (00100 C1-READ-LIST
+  (мітка C1-READ-LIST
     (функція (TOKENS)
       (за-умовою
         ((тотожне? TOKENS (як-є ())) (як-є ()))
         ((тотожне? (перше TOKENS) 110)          ; DOT token -> dotted tail
          (перше (решта TOKENS)))
-        (#d1:1
+        (так
          (сполучити (C1-READ (перше TOKENS))
               (C1-READ-LIST (решта TOKENS))))))))
 
@@ -491,29 +491,29 @@
     (C1-SWEEP (C1-MARK-ALL ROOTS CELLS) CELLS)))
 
 (визначити C1-MARK-ALL
-  (00100 C1-MARK-ALL
+  (мітка C1-MARK-ALL
     (функція (ROOTS CELLS)
       (за-умовою
         ((тотожне? ROOTS (як-є ())) CELLS)
-        (#d1:1
+        (так
          (C1-MARK-ALL (решта ROOTS)
                       (C1-MARK (перше ROOTS) CELLS)))))))
 
 (визначити C1-MARK
-  (00100 C1-MARK
+  (мітка C1-MARK
     (функція (REF CELLS)
       (за-умовою
         ((тотожне? REF (як-є ())) CELLS)
         ((тотожне? CELLS (як-є ())) CELLS)
-        (#d1:1
+        (так
          (C1-MARK-CHILDREN REF (C1-MARK-CELL REF CELLS)))))))
 
 (визначити C1-MARK-CELL
   (функція (REF CELLS)
     (за-умовою
       ((тотожне? (перше (перше CELLS)) REF)          ; head cell reached -> mark it
-       (111 (111 (100 (100 CELLS)) #d1:1) (011 CELLS)))
-      (#d1:1 CELLS))))
+       (сполучити (сполучити (перше (перше CELLS)) так) (решта CELLS)))
+      (так CELLS))))
 
 (визначити C1-MARK-CHILDREN
   (функція (REF CELLS)
@@ -521,16 +521,16 @@
       ((тотожне? (перше (перше CELLS)) REF)
        (C1-MARK (решта (перше CELLS))
                 (C1-MARK (решта (решта (перше CELLS))) CELLS)))
-      (#d1:1 CELLS))))
+      (так CELLS))))
 
 (визначити C1-SWEEP
-  (00100 C1-SWEEP
+  (мітка C1-SWEEP
     (функція (MARKED CELLS)
       (за-умовою
         ((тотожне? CELLS (як-є ())) (як-є ()))
-        ((101 (011 (100 CELLS)) #d1:1)   ; marked -> keep
+        ((тотожне? (решта (перше CELLS)) так)   ; marked -> keep
          (сполучити (перше CELLS) (C1-SWEEP MARKED (решта CELLS))))
-        (#d1:1                            ; unmarked -> return to free list
+        (так                            ; unmarked -> return to free list
          (C1-SWEEP MARKED (решта CELLS)))))))
 
 (визначити C1-FREE
@@ -547,35 +547,35 @@
 
 (визначити C1-PLUS
   (функція (A B)
-    (01010 A B)))
+    (додати A B)))
 
 (визначити C1-DIFFERENCE
   (функція (A B)
-    (01011 A B)))
+    (відняти A B)))
 
 (визначити C1-TIMES
   (функція (A B)
-    (10110 A B)))
+    (помножити A B)))
 
 (визначити C1-QUOTIENT
   (функція (A B)
-    (10111 A B)))
+    (частка A B)))
 
 (визначити C1-ADD1
   (функція (A)
-    (001110 A)))
+    (додати-1 A)))
 
 (визначити C1-SUB1
   (функція (A)
-    (001111 A)))
+    (відняти-1 A)))
 
 (визначити C1-NEG
   (функція (A)
-    (010010 A)))
+    (змінити-знак A)))
 
 (визначити C1-REMAINDER
   (функція (A B)
-    (010100 A B)))
+    (остача A B)))
 
 (визначити C1-ZEROP
   (функція (A)
@@ -588,20 +588,20 @@
 ; ─────────────────────────────────────────────────────────────────────────────
 
 (визначити C1-ASSOC
-  (00100 C1-ASSOC
+  (мітка C1-ASSOC
     (функція (KEY ALIST)
       (за-умовою
         ((тотожне? ALIST (як-є ())) (як-є C1-MISSING))
         ((тотожне? (перше (перше ALIST)) KEY)
          (перше ALIST))
-        (#d1:1 (C1-ASSOC KEY (011 ALIST)))))))
+        (так (C1-ASSOC KEY (решта ALIST)))))))
 
 (визначити C1-APPEND
-  (00100 C1-APPEND
+  (мітка C1-APPEND
     (функція (X Y)
       (за-умовою
         ((тотожне? X (як-є ())) Y)
-        (#d1:1 (111 (100 X) (C1-APPEND (011 X) Y)))))))
+        (так (сполучити (перше X) (C1-APPEND (решта X) Y)))))))
 
 ; ── PROPLIST (property lists): GET / PUT ──
 (визначити C1-GET
@@ -621,13 +621,13 @@
     (C1-PROG-RUN STATEMENTS STATEMENTS)))
 
 (визначити C1-PROG-RUN
-  (00100 C1-PROG-RUN
+  (мітка C1-PROG-RUN
     (функція (PC BODY)
       (за-умовою
         ((тотожне? PC (як-є ())) (як-є ()))
         ((C1-LABELP (перше PC))
          (C1-PROG-RUN (решта PC) BODY))          ; a label line: skip
-        (#d1:1
+        (так
          (C1-PROG-RUN (решта PC) BODY))))))
 
 (визначити C1-GO
@@ -635,32 +635,32 @@
     (C1-PROG-SEEK LABEL BODY)))
 
 (визначити C1-PROG-SEEK
-  (00100 C1-PROG-SEEK
+  (мітка C1-PROG-SEEK
     (функція (LABEL BODY)
       (за-умовою
         ((тотожне? BODY (як-є ())) (як-є ()))
         ((тотожне? (перше (перше BODY)) LABEL) BODY)     ; found the label
-        (#d1:1 (C1-PROG-SEEK LABEL (011 BODY)))))))
+        (так (C1-PROG-SEEK LABEL (решта BODY)))))))
 
 (визначити C1-LABELP
   (функція (STATEMENT)
     (за-умовою
-      ((010 STATEMENT) #d1:0)
-      ((C1-ATOM (100 STATEMENT)) #d1:1)         ; a bare symbol = a label
-      (#d1:1 #d1:0))))
+      ((атом? STATEMENT) ні)
+      ((C1-ATOM (перше STATEMENT)) так)         ; a bare symbol = a label
+      (так ні))))
 
 (визначити C1-ATOM
   (функція (X)
     (за-умовою
-      ((101 X (001 ())) #d1:1)
-      ((C1-PAIRP X) #d1:0)
-      (#d1:1 #d1:1))))
+      ((тотожне? X (як-є ())) так)
+      ((C1-PAIRP X) ні)
+      (так так))))
 
 (визначити C1-PAIRP
   (функція (X)
     (за-умовою
-      ((010 X) #d1:0)
-      (#d1:1 #d1:1))))
+      ((атом? X) ні)
+      (так так))))
 
 ; ─────────────────────────────────────────────────────────────────────────────
 ; Bootstrap addition: the array feature (McCarthy 1960, Appendix B / LISP 1.5).
@@ -674,34 +674,34 @@
     (C1-ARRAY-FILL SIZE (як-є ()))))
 
 (визначити C1-ARRAY-FILL
-  (00100 C1-ARRAY-FILL
+  (мітка C1-ARRAY-FILL
     (функція (SIZE ACC)
       (за-умовою
         ((тотожне? SIZE 0) ACC)
-        (#d1:1 (C1-ARRAY-FILL (C1-SUB1 SIZE) (111 0 ACC)))))))
+        (так (C1-ARRAY-FILL (C1-SUB1 SIZE) (сполучити 0 ACC)))))))
 
 (визначити C1-ARRAY
   (функція (SIZE)
     (C1-MAKE-ARRAY SIZE)))
 
 (визначити C1-AREF
-  (00100 C1-AREF
+  (мітка C1-AREF
     (функція (ARR IDX)
       (за-умовою
         ((тотожне? IDX 0) (перше ARR))
-        (#d1:1 (C1-AREF (011 ARR) (C1-SUB1 IDX)))))))
+        (так (C1-AREF (решта ARR) (C1-SUB1 IDX)))))))
 
 (визначити C1-ASET
-  (00100 C1-ASET
+  (мітка C1-ASET
     (функція (ARR IDX VAL)
       (за-умовою
         ((тотожне? IDX 0) (сполучити VAL (решта ARR)))
-        (#d1:1
+        (так
          (сполучити (перше ARR) (C1-ASET (решта ARR) (C1-SUB1 IDX) VAL)))))))
 
 (визначити C1-ARRAYP
   (функція (X)
     (за-умовою
-      ((101 X (001 ())) #d1:1)
-      ((C1-PAIRP X) #d1:1)
-      (#d1:1 #d1:0))))
+      ((тотожне? X (як-є ())) так)
+      ((C1-PAIRP X) так)
+      (так ні))))

@@ -73,7 +73,7 @@ def defs_in(text: str) -> list[tuple[str, int, str]]:
     out: list[tuple[str, int, str]] = []
     i = 0
     while i < len(lines):
-        m = re.match(r"\(0011\s+(\S+)", lines[i])
+        m = re.match(r"\((?:0011|визначити)\s+(\S+)", lines[i])
         if not m:
             i += 1
             continue

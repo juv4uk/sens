@@ -162,8 +162,8 @@
       (так
        (нехай-послідовно ((opposite (результат-протилежний-ціль goal))
               (index (reason-ensure-index rules-or-index))
-              (positive-results (101001110 goal index))
-              (opposite-results (101001110 opposite index)))
+              (positive-results (міркувати goal index))
+              (opposite-results (міркувати opposite index)))
          (за-умовою
            ((за-умовою
               ((хибне? (атом? positive-results))
@@ -191,8 +191,8 @@
        (створити-некоректний (як-є invalid-module) module-name))
       ((хибне? (результат-ціль? goal))
        (створити-некоректний (як-є invalid-goal) goal))
-      ((101010010 module-name)
-       (міркувати-спостерігати goal (110000011 module-name)))
+      ((модуль-відомий? module-name)
+       (міркувати-спостерігати goal (модуль-клаузи-зараз module-name)))
       (так
        (створити-заблокований
          (список (як-є module-not-found) module-name))))))
