@@ -4,7 +4,7 @@
     (111
       (111 ключ (111 значення (001 ())))
       (відсіяти
-        (0010 (пара) (not? (equal? (100 пара) ключ)))
+        (функція (пара) (хибне? (equal? (перше пара) ключ)))
         мапа))))
 (0011 вектор-список
   (0010 (вектор) вектор))
@@ -18,20 +18,24 @@
        (011 (знайти-за-ключем ключ мапа))))))
 (0011 вміст-сховище-містить?
   (0010 (ключ мапа)
-    (not? (0101 (знайти-за-ключем ключ мапа)))))
-(list
-  (equal? (вектор-список (list (quote a) (quote b)))
-          (list (quote a) (quote b)))
+    (хибне? (порожній? (знайти-за-ключем ключ мапа)))))
+(список
+  (equal? (вектор-список (список (quote a) (quote b)))
+          (список (quote a) (quote b)))
   (equal? (порожній-вміст-сховище) (quote ()))
   (equal? (мапа-вставити (quote k) (quote v) (quote ()))
-          (list (list (quote k) (quote v))))
+          (список (список (quote k) (quote v))))
   (equal? (мапа-вставити (quote k) (quote v2)
-                         (list (list (quote k) (quote v1))))
-          (list (list (quote k) (quote v2))))
+                         (список (список (quote k) (quote v1))))
+          (список (список (quote k) (quote v2))))
   (вміст-сховище-містить? (quote k)
-                          (list (list (quote k) (quote v))))
-  (not? (вміст-сховище-містить? (quote z) (quote ())))
+                          (список (список (quote k) (quote v))))
+  (хибне? (вміст-сховище-містить? (quote z) (quote ())))
   (equal? (вміст-сховище-отримати (quote k)
-                                  (list (list (quote k) (quote v))))
-          (list (quote v)))
+                                  (список (список (quote k) (quote v))))
+          (список (quote v)))
   (equal? (вектор-список (quote ())) (quote ())))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

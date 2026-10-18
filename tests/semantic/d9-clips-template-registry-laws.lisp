@@ -1,6 +1,6 @@
 ; Вісім нативних D1-законів D9 CLIPS з lib/clips-import.lisp.
 ; Два D9 resident-слова, без прямого допуску їх як машинних opcode.
-(list
+(список
   (equal? (clips-deftemplate-ім'я (quote (deftemplate читання (slot датчик))))
           (quote читання))
   (equal? (clips-шаблони-з-форми (quote ())) (quote ()))
@@ -34,3 +34,6 @@
       (quote (((deftemplate) помилкове)
               (deftemplate робоче (slot дані)))))
     (quote ((робоче дані)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)

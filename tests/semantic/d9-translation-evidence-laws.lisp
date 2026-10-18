@@ -2,18 +2,18 @@
 ; Donor lib/translation.lisp: rejected/ambiguous observations enter a
 ; durable journal; accepted knowledge is not a rejection entry.
 ; Eight D1:YES witnesses; malformed schema and accepted status are negatives.
-(list
+(список
   (переклад-доказ-вартий?
     (створити-переклад-перевірка
       (як-є rejected) (як-є invalid) (як-є пропозиція) (як-є ())))
   (переклад-доказ-вартий?
     (створити-переклад-перевірка
       (як-є ambiguous) (як-є multiple) (як-є пропозиція) (як-є ())))
-  (not? (переклад-доказ-вартий?
+  (хибне? (переклад-доказ-вартий?
     (створити-переклад-перевірка
       (як-є accepted) (як-є admitted) (як-є пропозиція) (як-є ()))))
-  (not? (переклад-доказ-вартий? (як-є ())))
-  (not? (переклад-доказ-вартий?
+  (хибне? (переклад-доказ-вартий? (як-є ())))
+  (хибне? (переклад-доказ-вартий?
     (список (як-є other-review/1) (як-є rejected)
             (як-є invalid) (як-є пропозиція) (як-є ()))))
   (equal?
@@ -37,3 +37,7 @@
         (як-є accepted) (як-є admitted) (як-є пропозиція) (як-є ()))
       (як-є (попередній-доказ)))
     (як-є (попередній-доказ))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

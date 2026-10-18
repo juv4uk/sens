@@ -23,3 +23,6 @@
 (хибне? (усі-твердження-clips? (як-є ((assert (один)) (retract (два))))))
 (хибне? (усі-твердження-clips? (як-є ((printout повідомлення)))))
 (однакові? (прибрати-виведення-clips (як-є ((assert (один)) (printout б) (assert (два)) (printout в) (retract (три))))) (як-є ((assert (один)) (assert (два)) (retract (три)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити хибне? not?)

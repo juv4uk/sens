@@ -2,13 +2,16 @@
 ; Positive: every element is a pair (ATOM returns D1:0).
 ; Negative: one atom witnesses ANY=true so NOTANY=false.
 ; Empty: NOTANY(ATOM, ()) = D1:1 (vacuous predicate).
-(list
+(список
   (жодне-не-задовольняє?
     (функція (х) (атом? х))
-    (list (list (quote пара-а)) (list (quote пара-б))))
+    (список (список (quote пара-а)) (список (quote пара-б))))
   (жодне-не-задовольняє?
     (функція (х) (атом? х))
-    (list (quote атом-а) (list (quote пара-б))))
+    (список (quote атом-а) (список (quote пара-б))))
   (жодне-не-задовольняє?
     (функція (х) (атом? х))
-    (list)))
+    (список)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)

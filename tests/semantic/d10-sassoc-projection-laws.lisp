@@ -1,49 +1,62 @@
 ; 15 фізичних D1-законів D10:0001100101 SASSOC та сімох en-проєкцій.
 ; SASSOC = MacLisp EQUAL + нульаргументна запасна дія (не ASSOC/2).
 ; Тільки процес SENS оцінює ці закони; зовнішні скрипти не визначають семантики.
-(list
+(список
   (equal? (пошук-асоціації
             (quote а)
-            (list (cons (quote а) (quote перше))
-                  (cons (quote б) (quote друге)))
+            (список (сполучити (quote а) (quote перше))
+                  (сполучити (quote б) (quote друге)))
             (lambda () (quote немає)))
-          (cons (quote а) (quote перше)))
-  (equal? (sassoc
+          (сполучити (quote а) (quote перше)))
+  (equal? (пошук-асоціації
             (quote б)
-            (list (cons (quote а) (quote перше))
-                  (cons (quote б) (quote друге)))
+            (список (сполучити (quote а) (quote перше))
+                  (сполучити (quote б) (quote друге)))
             (quote не-викликати))
-          (cons (quote б) (quote друге)))
-  (equal? (sassoc
+          (сполучити (quote б) (quote друге)))
+  (equal? (пошук-асоціації
             (quote відсутній)
-            (list (cons (quote а) (quote перше)))
+            (список (сполучити (quote а) (quote перше)))
             (lambda () (quote резерв)))
           (quote резерв))
-  (equal? (sassoc
+  (equal? (пошук-асоціації
             (quote порожньо) (quote ())
             (lambda () (quote порожній-резерв)))
           (quote порожній-резерв))
-  (equal? (sassoc
-            (list (quote складений))
-            (list (cons (list (quote складений)) (quote структурний-збіг)))
+  (equal? (пошук-асоціації
+            (список (quote складений))
+            (список (сполучити (список (quote складений)) (quote структурний-збіг)))
             (lambda () (quote немає)))
-          (cons (list (quote складений)) (quote структурний-збіг)))
-  (empty-queue? (quote ()))
-  (not? (empty-queue? (quote (а))))
-  (equal? (sortcar
-            (list (list (довжина (quote (а б))) (quote друге))
-                  (list (довжина (quote (а))) (quote перше))))
-          (list (list (довжина (quote (а))) (quote перше))
-                (list (довжина (quote (а б))) (quote друге))))
-  (equal? (result-count (quote (а б)))
+          (сполучити (список (quote складений)) (quote структурний-збіг)))
+  (перевірити-чи-черга-порожня? (quote ()))
+  (хибне? (перевірити-чи-черга-порожня? (quote (а))))
+  (equal? (сортувати-за-першим
+            (список (список (довжина (quote (а б))) (quote друге))
+                  (список (довжина (quote (а))) (quote перше))))
+          (список (список (довжина (quote (а))) (quote перше))
+                (список (довжина (quote (а б))) (quote друге))))
+  (equal? (кількість-результатів-спостереження (quote (а б)))
           (довжина (quote (а б))))
-  (knowledge-proper-list? (quote (а б)))
-  (not? (knowledge-proper-list? (cons (quote а) (quote б))))
-  (result-proper-list? (quote (а б)))
-  (not? (result-proper-list? (cons (quote а) (quote б))))
-  (forall-every-candidate-satisfies?
-    (lambda (x) (not? (null? x)))
+  (правильно-структурований-список-знань? (quote (а б)))
+  (хибне? (правильно-структурований-список-знань? (сполучити (quote а) (quote б))))
+  (результат-є-правильним-списком? (quote (а б)))
+  (хибне? (результат-є-правильним-списком? (сполучити (quote а) (quote б))))
+  (кожен-кандидат-задовольняє-умову?
+    (lambda (x) (хибне? (порожній? x)))
     (quote (а б)))
-  (not? (forall-every-candidate-satisfies?
-          (lambda (x) (null? x))
+  (хибне? (кожен-кандидат-задовольняє-умову?
+          (lambda (x) (порожній? x))
           (quote (а б)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)
+(визначити перевірити-чи-черга-порожня? empty-queue?)
+(визначити кожен-кандидат-задовольняє-умову? forall-every-candidate-satisfies?)
+(визначити правильно-структурований-список-знань? knowledge-proper-list?)
+(визначити список list)
+(визначити хибне? not?)
+(визначити порожній? null?)
+(визначити кількість-результатів-спостереження result-count)
+(визначити результат-є-правильним-списком? result-proper-list?)
+(визначити пошук-асоціації sassoc)
+(визначити сортувати-за-першим sortcar)

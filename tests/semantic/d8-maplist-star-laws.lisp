@@ -1,19 +1,23 @@
 ; D8:00001011 MAPLIST* native SENS witnesses, final empty suffix is observable.
 ; No direct D8 opcode admission is asserted.
-(list
+(список
   (equal?
     (залишки+порожнє (quote ()) (lambda (хвіст) хвіст))
-    (list (quote ())))
+    (список (quote ())))
   (equal?
-    (залишки+порожнє (list (quote ())) (lambda (хвіст) хвіст))
-    (list (list (quote ())) (quote ())))
+    (залишки+порожнє (список (quote ())) (lambda (хвіст) хвіст))
+    (список (список (quote ())) (quote ())))
   (equal?
-    (залишки+порожнє (list (quote ()) (list (quote ())))
+    (залишки+порожнє (список (quote ()) (список (quote ())))
       (lambda (хвіст) хвіст))
-    (list (list (quote ()) (list (quote ())))
-          (list (list (quote ())))
+    (список (список (quote ()) (список (quote ())))
+          (список (список (quote ())))
           (quote ())))
-  (not?
+  (хибне?
     (equal?
-      (залишки+порожнє (list (quote ())) (lambda (хвіст) хвіст))
-      (відобразити-залишки (list (quote ())) (lambda (хвіст) хвіст)))))
+      (залишки+порожнє (список (quote ())) (lambda (хвіст) хвіст))
+      (відобразити-залишки (список (quote ())) (lambda (хвіст) хвіст)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

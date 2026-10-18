@@ -1,23 +1,23 @@
 ; D9:101101110 MAP-INSERT, 101011000 VEC->LIST from live Core4.
 ; Immutable overwrite replaces existing key; no duplicate keys are retained.
 ; D1 vector (1 1 1 0 1 1 1 1 1), bit 4 is an intentional old-value negative.
-(list
+(список
   (equal?
     (мапа-отримати (quote k)
       (мапа-вставити (quote k) (quote v) (мапа-порожній)))
-    (list (quote v)))
+    (список (quote v)))
   (мапа-містить? (quote k)
     (мапа-вставити (quote k) (quote v) (мапа-порожній)))
   (equal?
     (мапа-отримати (quote k)
       (мапа-вставити (quote k) (quote нове)
         (мапа-вставити (quote k) (quote старе) (мапа-порожній))))
-    (list (quote нове)))
+    (список (quote нове)))
   (equal?
     (мапа-отримати (quote k)
       (мапа-вставити (quote k) (quote нове)
         (мапа-вставити (quote k) (quote старе) (мапа-порожній))))
-    (list (quote старе)))
+    (список (quote старе)))
   (equal?
     (довжина (мапа-список
       (мапа-вставити (quote k) (quote нове)
@@ -29,6 +29,11 @@
   (мапа-містить? (quote q)
     (мапа-вставити (quote q) (quote b)
       (мапа-вставити (quote k) (quote a) (мапа-порожній))))
-  (equal? (вектор-список (list (quote a) (quote b)))
-          (list (quote a) (quote b)))
-  (equal? (vec->list (vec-empty)) (quote ())))
+  (equal? (вектор-список (список (quote a) (quote b)))
+          (список (quote a) (quote b)))
+  (equal? (вектор-список (вектор-порожній)) (quote ())))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити вектор-список vec->list)
+(визначити вектор-порожній vec-empty)

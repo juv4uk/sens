@@ -2,23 +2,26 @@
 ; Exact codes: 010010011 / 101000000 / 101111011 / 110001111 / 110011010.
 ; No local DEFINE: these laws must exercise lib/core4.lisp, not test stubs.
 ; The list-backed vector/arglist model is not D9 machine admission.
-(list
-  (equal? (вектор-з-список (list (quote а) (quote б)))
-          (list (quote а) (quote б)))
+(список
+  (equal? (вектор-з-список (список (quote а) (quote б)))
+          (список (quote а) (quote б)))
   (порожнє? (вектор-з-список (quote ())))
-  (equal? (аргументи (list (quote х) (quote у)))
-          (list (quote х) (quote у)))
+  (equal? (аргументи (список (quote х) (quote у)))
+          (список (quote х) (quote у)))
   (порожнє? (аргументи (quote ())))
-  (equal? (числовий-буфер-довжина (list (quote а) (quote б)))
+  (equal? (числовий-буфер-довжина (список (quote а) (quote б)))
           #d24:000000000000000000000010)
   (equal? (числовий-буфер-довжина (quote ()))
           #d24:000000000000000000000000)
   (equal? (обґрунтування-від
             (quote ключ)
             (додати-обґрунтування
-              (quote ключ) (list (quote доказ)) (quote ())))
-          (list (list (quote доказ))))
+              (quote ключ) (список (quote доказ)) (quote ())))
+          (список (список (quote доказ))))
   (порожнє? (обґрунтування-від
                (quote відсутній)
                (додати-обґрунтування
-                 (quote ключ) (list (quote доказ)) (quote ())))))
+                 (quote ключ) (список (quote доказ)) (quote ())))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)

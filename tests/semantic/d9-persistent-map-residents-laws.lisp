@@ -4,22 +4,27 @@
 ; The source mechanism returns () or (value), and stores ordered dotted entries.
 (load "lib/core.lisp")
 (load "lib/persistent-map.lisp")
-(list
+(список
   (equal? (мапа-порожній) (quote ()))
   (equal? (мапа-отримати (quote k)
       (внутрішня-мапа-вставити (quote k) (quote v) (мапа-порожній)))
-    (list (quote v)))
+    (список (quote v)))
   (equal? (мапа-отримати (quote missing) (мапа-порожній)) (quote ()))
   (мапа-містить? (quote k)
     (внутрішня-мапа-вставити (quote k) (quote v) (мапа-порожній)))
-  (not? (мапа-містить? (quote missing) (мапа-порожній)))
+  (хибне? (мапа-містить? (quote missing) (мапа-порожній)))
   (equal? (мапа-список
       (внутрішня-мапа-вставити (quote k) (quote v) (мапа-порожній)))
-    (list (cons (quote k) (quote v))))
+    (список (сполучити (quote k) (quote v))))
   (equal? (мапа-отримати (quote k)
       (внутрішня-мапа-вставити (quote k) (quote ()) (мапа-порожній)))
-    (list (quote ())))
+    (список (quote ())))
   (equal? (мапа-список
       (внутрішня-мапа-вставити (quote k) (quote v2)
         (внутрішня-мапа-вставити (quote k) (quote v1) (мапа-порожній))))
-    (list (cons (quote k) (quote v2)))))
+    (список (сполучити (quote k) (quote v2)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)
+(визначити список list)
+(визначити хибне? not?)

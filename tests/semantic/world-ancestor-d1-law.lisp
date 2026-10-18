@@ -6,14 +6,19 @@
   ((101
     (101
       (внутрішня-рівність-версій
-        (world-common-ancestor
-          (world-tell
-            (world-tell (empty-world) (001 astronomy) (001 (planet earth)))
+        (світ-спільний-предок
+          (світ-повідомити
+            (світ-повідомити (порожній-світ) (як-є astronomy) (як-є (planet earth)))
             (001 biology)
             (001 (living earth)))
-          (world-tell (empty-world) (001 astronomy) (001 (planet earth))))
-        (world-tell (empty-world) (001 astronomy) (001 (planet earth))))
+          (світ-повідомити (порожній-світ) (як-є astronomy) (як-є (planet earth))))
+        (світ-повідомити (порожній-світ) (як-є astronomy) (як-є (planet earth))))
       #d1:1)
     #d1:1)
    #d1:1)
   (#d1:1 (#d1:0)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити порожній-світ empty-world)
+(визначити світ-спільний-предок world-common-ancestor)
+(визначити світ-повідомити world-tell)

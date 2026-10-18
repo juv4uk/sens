@@ -2,14 +2,17 @@
 ; Канонічні коди: D9:101011010, D9:101110111, D9:101010110, D9:101101100.
 ; Змінений тег, стан або пропущене поле повинні дати D1:NO.
 (спостереження? (створити-спостереження (quote телескоп) (quote зоря)))
-(not? (спостереження? (створити-твердження (quote зоря) (quote телескоп) (quote reviewed))))
-(not? (спостереження? (quote (observation))))
+(хибне? (спостереження? (створити-твердження (quote зоря) (quote телескоп) (quote reviewed))))
+(хибне? (спостереження? (quote (observation))))
 (твердження? (створити-твердження (quote зоря) (quote телескоп) (quote reviewed)))
-(not? (твердження? (створити-спостереження (quote телескоп) (quote зоря))))
-(not? (твердження? (quote (claim (statement зоря) (source телескоп) (review невідомо)))))
+(хибне? (твердження? (створити-спостереження (quote телескоп) (quote зоря))))
+(хибне? (твердження? (quote (claim (statement зоря) (source телескоп) (review невідомо)))))
 (доказ? (створити-доказ (quote посилання) (quote вимір) (quote supports) (quote дайджест)))
-(not? (доказ? (створити-намір (quote ціль) (quote ()) (quote стоп) (quote результат))))
-(not? (доказ? (quote (evidence (claim-ref посилання) (method вимір) (outcome невідомо) (source-ref дайджест)))))
+(хибне? (доказ? (створити-намір (quote ціль) (quote ()) (quote стоп) (quote результат))))
+(хибне? (доказ? (quote (evidence (claim-ref посилання) (method вимір) (outcome невідомо) (source-ref дайджест)))))
 (намір? (створити-намір (quote ціль) (quote ()) (quote стоп) (quote результат)))
-(not? (намір? (створити-доказ (quote посилання) (quote вимір) (quote supports) (quote дайджест))))
-(not? (намір? (quote (intent (goal ціль) (requires ()) (stop-on стоп)))))
+(хибне? (намір? (створити-доказ (quote посилання) (quote вимір) (quote supports) (quote дайджест))))
+(хибне? (намір? (quote (intent (goal ціль) (requires ()) (stop-on стоп)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити хибне? not?)

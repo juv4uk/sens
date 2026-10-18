@@ -2,18 +2,22 @@
 ; Each non-comment line is one native form: case index is its source order.
 ; Live functions come from lib/meta-eval.lisp. No host truth table.
 ; case=1 quoted-reference-is-inert
-(110 ((101 (my-form-references-name? (001 (001 target)) (001 target)) #d1:0) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є (як-є target)) (як-є target)) ні) так) (так (ні)))
 ; case=2 unquoted-reference-is-visible
-(110 ((101 (my-form-references-name? (001 target) (001 target)) #d1:1) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є target) (як-є target)) так) так) (так (ні)))
 ; case=3 lambda-binder-shadows
-(110 ((101 (my-form-references-name? (001 (0010 (target) target)) (001 target)) #d1:0) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є (функція (target) target)) (як-є target)) ні) так) (так (ні)))
 ; case=4 other-binder-leaves-free-reference
-(110 ((101 (my-form-references-name? (001 (0010 (other) target)) (001 target)) #d1:1) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є (функція (other) target)) (як-є target)) так) так) (так (ні)))
 ; case=5 quoted-datum-inside-lambda-is-inert
-(110 ((101 (my-form-references-name? (001 (0010 (other) (001 target))) (001 target)) #d1:0) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? (як-є (функція (other) (як-є target))) (як-є target)) ні) так) (так (ні)))
 ; case=6 defined-lambda-binder-shadows
-(110 ((101 (my-lambda-def-references-name? (001 (0011 fn (0010 (target) target))) (001 target)) #d1:0) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (визначення-посилається-на-ім'я? (як-є (визначити fn (функція (target) target))) (як-є target)) ні) так) (так (ні)))
 ; case=7 defined-lambda-free-reference
-(110 ((101 (my-lambda-def-references-name? (001 (0011 fn (0010 (other) target))) (001 target)) #d1:1) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (визначення-посилається-на-ім'я? (як-є (визначити fn (функція (other) target))) (як-є target)) так) так) (так (ні)))
 ; case=8 defined-lambda-quoted-reference-is-inert
-(110 ((101 (my-lambda-def-references-name? (001 (0011 fn (0010 (other) (001 target)))) (001 target)) #d1:0) #d1:1) (#d1:1 (#d1:0)))
+(за-умовою ((тотожне? (визначення-посилається-на-ім'я? (як-є (визначити fn (функція (other) (як-є target)))) (як-є target)) ні) так) (так (ні)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити вільне-посилання-у-формі-з-урахуванням-цитат-та-затінення? my-form-references-name?)
+(визначити визначення-посилається-на-ім'я? my-lambda-def-references-name?)

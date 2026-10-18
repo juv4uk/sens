@@ -1,7 +1,7 @@
 ; D9 translation-review record, extracted from lib/translation.lisp.
 ; Ratified fields D9:000011010, 000111100, 000100011, 000100101, 000101111.
 ; Eight D1:YES witnesses, including negative controls for field swapping.
-(list
+(список
   (тотожне?
     (переклад-перевірка-стан
       (створити-переклад-перевірка
@@ -32,15 +32,19 @@
       (створити-переклад-перевірка
         (як-є rejected) (як-є invalid) (як-є запит) (як-є ())))
     (як-є rejected))
-  (not?
+  (хибне?
     (тотожне?
       (переклад-перевірка-код
         (створити-переклад-перевірка
           (як-є accepted) (як-є admitted) (як-є пропозиція) (як-є ())))
       (як-є accepted)))
-  (not?
+  (хибне?
     (тотожне?
       (переклад-перевірка-стан
         (створити-переклад-перевірка
           (як-є rejected) (як-є invalid) (як-є запит) (як-є ())))
       (як-є accepted))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

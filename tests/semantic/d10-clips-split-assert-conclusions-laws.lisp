@@ -1,6 +1,6 @@
 ; D10 CLIPS — 10 фізичних D1-законів split-at-arrow + assert-conclusions.
 ; Лише похідні функції SENS: не прямий допуск D10 opcode.
-(list
+(список
   (equal? (розділити-правило-clips (quote ()))
           (quote (() ())))
   (equal? (розділити-правило-clips
@@ -31,3 +31,6 @@
             (quote ((assert (факт-а))
                     (assert (факт-б) (факт-в)))))
           (quote ((факт-а) (факт-б) (факт-в)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)

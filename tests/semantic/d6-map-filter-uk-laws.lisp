@@ -4,14 +4,19 @@
   (0010 (x) (111 (quote м) x)))
 (0011 проба-відсіяти
   (0010 (x) (101 x (quote б))))
-(list
-  (equal? (відобразити проба-відобразити (list (quote а) (quote б)))
-          (list (cons (quote м) (quote а)) (cons (quote м) (quote б))))
-  (not? (equal? (відобразити проба-відобразити (list (quote а) (quote б)))
-                (list (cons (quote м) (quote б)) (cons (quote м) (quote а)))))
-  (equal? (відсіяти проба-відсіяти (list (quote а) (quote б) (quote в)))
-          (list (quote б)))
-  (not? (equal? (відсіяти проба-відсіяти (list (quote а) (quote б) (quote в)))
-                (list (quote а))))
+(список
+  (equal? (відобразити проба-відобразити (список (quote а) (quote б)))
+          (список (сполучити (quote м) (quote а)) (сполучити (quote м) (quote б))))
+  (хибне? (equal? (відобразити проба-відобразити (список (quote а) (quote б)))
+                (список (сполучити (quote м) (quote б)) (сполучити (quote м) (quote а)))))
+  (equal? (відсіяти проба-відсіяти (список (quote а) (quote б) (quote в)))
+          (список (quote б)))
+  (хибне? (equal? (відсіяти проба-відсіяти (список (quote а) (quote б) (quote в)))
+                (список (quote а))))
   (equal? (відобразити проба-відобразити (quote ())) (quote ()))
   (equal? (відсіяти проба-відсіяти (quote ())) (quote ())))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)
+(визначити список list)
+(визначити хибне? not?)

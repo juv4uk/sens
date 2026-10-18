@@ -34,4 +34,7 @@
     (not? (eq? (перше-решта-решта-перше дерево) (quote є)))
     (eq? (пррр дерево) (quote к))
     (not? (eq? (четверте дерево) (quote є)))))
- (cons (cons (cons (cons (quote а) (quote б)) (cons (quote в) (quote г))) (cons (cons (quote ґ) (quote д)) (cons (quote е) (quote є)))) (cons (cons (cons (quote ж) (quote з)) (cons (quote и) (quote і))) (cons (cons (quote ї) (quote й)) (cons (quote к) (quote л))))))
+ (сполучити (сполучити (сполучити (сполучити (quote а) (quote б)) (сполучити (quote в) (quote г))) (сполучити (сполучити (quote ґ) (quote д)) (сполучити (quote е) (quote є)))) (сполучити (сполучити (сполучити (quote ж) (quote з)) (сполучити (quote и) (quote і))) (сполучити (сполучити (quote ї) (quote й)) (сполучити (quote к) (quote л))))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)

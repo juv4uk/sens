@@ -16,20 +16,24 @@
       ((0101 xs) xs)
       ((0100 (0101 xs))
        (відкинути (зменшити-на-один n) (011 xs))))))
-(list
+(список
   (equal? (взяти #d24:000000000000000000000010
-                 (list (quote а) (quote б) (quote в)))
-          (list (quote а) (quote б)))
+                 (список (quote а) (quote б) (quote в)))
+          (список (quote а) (quote б)))
   (equal? (взяти #d24:000000000000000000000000
-                 (list (quote а)))
+                 (список (quote а)))
           (quote ()))
   (equal? (відкинути #d24:000000000000000000000001
-                     (list (quote а) (quote б) (quote в)))
-          (list (quote б) (quote в)))
+                     (список (quote а) (quote б) (quote в)))
+          (список (quote б) (quote в)))
   (equal? (відкинути #d24:000000000000000000000000
-                     (list (quote а)))
-          (list (quote а)))
-  (equal? ((частково-застосувати cons (quote x)) (quote ()))
-          (cons (quote x) (quote ())))
+                     (список (quote а)))
+          (список (quote а)))
+  (equal? ((частково-застосувати сполучити (quote x)) (quote ()))
+          (сполучити (quote x) (quote ())))
   (equal? (збільшити-на-один #d24:000000000000000000000001)
           #d24:000000000000000000000010))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)
+(визначити список list)

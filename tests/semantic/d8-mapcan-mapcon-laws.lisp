@@ -1,28 +1,33 @@
 ; D8:10101001 MAPCAN і D8:10111000 MAPCON — 8 D1-свідків.
 ; Різниця: MAPCAN передає елемент; MAPCON передає цілий поточний хвіст.
-(list
-  (null? (відобразити-й-склеїти (lambda (x) (list x)) (quote ())))
-  (null? (залишки+склеїти (lambda (хвіст) (list хвіст)) (quote ())))
+(список
+  (порожній? (відобразити-й-склеїти (lambda (x) (список x)) (quote ())))
+  (порожній? (залишки+склеїти (lambda (хвіст) (список хвіст)) (quote ())))
   (equal? (відобразити-й-склеїти
-            (lambda (x) (list x))
-            (list (quote а) (quote б)))
-          (list (quote а) (quote б)))
+            (lambda (x) (список x))
+            (список (quote а) (quote б)))
+          (список (quote а) (quote б)))
   (equal? (відобразити-й-склеїти
-            (lambda (x) (list x x))
-            (list (quote а) (quote б)))
-          (list (quote а) (quote а) (quote б) (quote б)))
-  (null? (відобразити-й-склеїти
+            (lambda (x) (список x x))
+            (список (quote а) (quote б)))
+          (список (quote а) (quote а) (quote б) (quote б)))
+  (порожній? (відобразити-й-склеїти
             (lambda (x) (quote ()))
-            (list (quote а) (quote б))))
+            (список (quote а) (quote б))))
   (equal? (залишки+склеїти
-            (lambda (хвіст) (list хвіст))
-            (list (quote а) (quote б)))
-          (list (list (quote а) (quote б)) (list (quote б))))
-  (not? (equal? (залишки+склеїти
-                  (lambda (хвіст) (list хвіст))
-                  (list (quote а) (quote б)))
-                (list (list (quote б)) (list (quote а) (quote б)))))
-  (not? (equal? (відобразити-й-склеїти
-                  (lambda (x) (list x))
-                  (list (quote а) (quote б)))
-                (list (quote б) (quote а)))))
+            (lambda (хвіст) (список хвіст))
+            (список (quote а) (quote б)))
+          (список (список (quote а) (quote б)) (список (quote б))))
+  (хибне? (equal? (залишки+склеїти
+                  (lambda (хвіст) (список хвіст))
+                  (список (quote а) (quote б)))
+                (список (список (quote б)) (список (quote а) (quote б)))))
+  (хибне? (equal? (відобразити-й-склеїти
+                  (lambda (x) (список x))
+                  (список (quote а) (quote б)))
+                (список (quote б) (quote а)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)
+(визначити порожній? null?)

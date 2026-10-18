@@ -5,11 +5,14 @@
 ; In the mixed reader explicit #d1:0/1 preserve exact ONE-BIT identity.
 ; The final program flips only the expected D1 bit (1 -> 0) of the first.
 (110
-  ((101 (clips-deftemplate-form? (001 (deftemplate reading (slot sensor)))) #d1:1) #d1:1)
+  ((тотожне? (кліпс-визначити-шаблон-форма? (як-є (deftemplate reading (slot sensor)))) так) так)
   (#d1:1 (#d1:0)))
 (110
-  ((101 (clips-deftemplate-form? (001 (deffacts init (planet earth)))) #d1:0) #d1:1)
+  ((тотожне? (кліпс-визначити-шаблон-форма? (як-є (deffacts init (planet earth)))) ні) так)
   (#d1:1 (#d1:0)))
 (110
-  ((101 (clips-deftemplate-form? (001 (deftemplate reading (slot sensor)))) #d1:0) #d1:1)
+  ((тотожне? (кліпс-визначити-шаблон-форма? (як-є (deftemplate reading (slot sensor)))) ні) так)
   (#d1:1 (#d1:0)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити кліпс-визначити-шаблон-форма? clips-deftemplate-form?)

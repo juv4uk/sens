@@ -1,22 +1,25 @@
 ; D8:00010011 MAPLIST-right. Law #3744; exact result (1 1 0).
 ; Positive: asymmetric three-element left prefixes in longest-first order.
 ; Positive empty list; negative: reversing only source omits callback conjugation.
-(list
+(список
   (equal?
     (залишки-справа
-      (list (quote а) (quote б) (quote в))
+      (список (quote а) (quote б) (quote в))
       (функція (хвіст) хвіст))
-    (list
-      (list (quote а) (quote б) (quote в))
-      (list (quote а) (quote б))
-      (list (quote а))))
+    (список
+      (список (quote а) (quote б) (quote в))
+      (список (quote а) (quote б))
+      (список (quote а))))
   (equal?
-    (залишки-справа (list) (функція (хвіст) хвіст))
-    (list))
+    (залишки-справа (список) (функція (хвіст) хвіст))
+    (список))
   (equal?
     (залишки-справа
-      (list (quote а) (quote б))
+      (список (quote а) (quote б))
       (функція (хвіст) хвіст))
     (відобразити-залишки
-      (зворот (list (quote а) (quote б)))
+      (зворот (список (quote а) (quote б)))
       (функція (хвіст) хвіст))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)

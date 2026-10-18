@@ -13,3 +13,6 @@
 (однакові? (прибрати-преамбулу-clips (як-є (=> (assert (has-mass ?x))))) (як-є (=> (assert (has-mass ?x)))))
 (однакові? (прибрати-преамбулу-clips (як-є (опис додатково (declare (salience)) (planet ?x)))) (як-є ((planet ?x))))
 (однакові? (прибрати-преамбулу-clips (як-є (((nested-head) факт) => (assert (ok))))) (як-є (((nested-head) факт) => (assert (ok)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити хибне? not?)

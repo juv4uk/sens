@@ -1,25 +1,29 @@
 ; D8:11000001 / D8:11000011, фізичні SENS-проєкції.
 ; Шість D1 законів, кількість — явно доменно-кваліфікований D24.
-(list
+(список
   (equal?
     (взяти-справа #d24:000000000000000000000010
-      (list (quote а) (quote б) (quote в)))
-    (list (quote б) (quote в)))
+      (список (quote а) (quote б) (quote в)))
+    (список (quote б) (quote в)))
   (equal?
     (відкинути-справа #d24:000000000000000000000010
-      (list (quote а) (quote б) (quote в)))
-    (list (quote а)))
-  (null?
+      (список (quote а) (quote б) (quote в)))
+    (список (quote а)))
+  (порожній?
     (взяти-справа #d24:000000000000000000000000
-      (list (quote а) (quote б))))
+      (список (quote а) (quote б))))
   (equal?
     (відкинути-справа #d24:000000000000000000000000
-      (list (quote а) (quote б)))
-    (list (quote а) (quote б)))
+      (список (quote а) (quote б)))
+    (список (quote а) (quote б)))
   (equal?
     (взяти-справа #d24:000000000000000000000100
-      (list (quote а) (quote б)))
-    (list (quote а) (quote б)))
-  (null?
+      (список (quote а) (quote б)))
+    (список (quote а) (quote б)))
+  (порожній?
     (відкинути-справа #d24:000000000000000000000100
-      (list (quote а) (quote б)))))
+      (список (quote а) (quote б)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити порожній? null?)

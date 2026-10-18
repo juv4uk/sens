@@ -1,17 +1,22 @@
 ; D8:10100010 / 01011111 — вісім SENS-власних D1-законів.
-(list
-  (null? (прибрати-дублікати (quote ())))
-  (equal? (прибрати-дублікати (list (quote а) (quote б) (quote а) (quote в)))
-          (list (quote б) (quote а) (quote в)))
-  (equal? (прибрати-дублікати (list (quote а) (quote а) (quote а)))
-          (list (quote а)))
-  (equal? (прибрати-дублікати (list (quote а) (quote б)))
-          (list (quote а) (quote б)))
+(список
+  (порожній? (прибрати-дублікати (quote ())))
+  (equal? (прибрати-дублікати (список (quote а) (quote б) (quote а) (quote в)))
+          (список (quote б) (quote а) (quote в)))
+  (equal? (прибрати-дублікати (список (quote а) (quote а) (quote а)))
+          (список (quote а)))
+  (equal? (прибрати-дублікати (список (quote а) (quote б)))
+          (список (quote а) (quote б)))
   (equal? (прибрати-дублікати
-           (прибрати-дублікати (list (quote а) (quote б) (quote а))))
-          (прибрати-дублікати (list (quote а) (quote б) (quote а))))
-  (null? (останній-хвіст (quote ())))
-  (equal? (останній-хвіст (list (quote а) (quote б) (quote в)))
-          (list (quote в)))
-  (not? (equal? (останній-хвіст (list (quote а) (quote б)))
-                (list (quote а)))))
+           (прибрати-дублікати (список (quote а) (quote б) (quote а))))
+          (прибрати-дублікати (список (quote а) (quote б) (quote а))))
+  (порожній? (останній-хвіст (quote ())))
+  (equal? (останній-хвіст (список (quote а) (quote б) (quote в)))
+          (список (quote в)))
+  (хибне? (equal? (останній-хвіст (список (quote а) (quote б)))
+                (список (quote а)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)
+(визначити порожній? null?)

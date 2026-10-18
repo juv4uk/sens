@@ -1,18 +1,23 @@
 ; D5 structural + ZEROP (selectors already covered by d3-d6-28-native.bits).
 ; Очікується рівно вісім предикатів D1:1 — CI vector; exact D5 CADDR/CDAAR in 28-law suite.
-(list
-  (equal? (зворот (list (quote ()) (list (quote ()))))
-          (list (list (quote ())) (quote ())))
-  (значення-у-списку? (quote ()) (list (quote ())))
-  (not? (значення-у-списку?
-          (list (quote ())) (list (quote ()))))
+(список
+  (equal? (зворот (список (quote ()) (список (quote ()))))
+          (список (список (quote ())) (quote ())))
+  (значення-у-списку? (quote ()) (список (quote ())))
+  (хибне? (значення-у-списку?
+          (список (quote ())) (список (quote ()))))
   (equal? (знайти-за-ключем (quote ())
-            (list (cons (quote ()) (list (quote ())))))
-          (cons (quote ()) (list (quote ()))))
+            (список (сполучити (quote ()) (список (quote ())))))
+          (сполучити (quote ()) (список (quote ()))))
   (equal? (замінити (quote змінене) (quote попереднє)
-            (list (quote попереднє) (list (quote попереднє))))
-          (list (quote змінене) (list (quote змінене))))
-  (equal? (зворот (зворот (list (quote ()) (list (quote ())))))
-          (list (quote ()) (list (quote ()))))
+            (список (quote попереднє) (список (quote попереднє))))
+          (список (quote змінене) (список (quote змінене))))
+  (equal? (зворот (зворот (список (quote ()) (список (quote ())))))
+          (список (quote ()) (список (quote ()))))
   (нуль-д24? #d24:000000000000000000000000)
   (not? (нуль-д24? #d24:000000000000000000000001)))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити сполучити cons)
+(визначити список list)
+(визначити хибне? not?)

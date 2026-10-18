@@ -1,6 +1,6 @@
 ; D9 exact world records from lib/world.lisp, eight D1 YES laws.
 ; Parent is immutable, journal prepend is persistent and shares old tail.
-(list
+(список
   (equal?
     (створити-світ (як-є ()) (як-є ()) (як-є ()))
     (як-є (world () () ())))
@@ -25,8 +25,12 @@
     (світ-батько
       (світ-запис (порожній-світ) (як-є факт)))
     (порожній-світ))
-  (not?
+  (хибне?
     (equal?
       (світ-журнал
         (світ-запис (порожній-світ) (як-є факт)))
       (як-є ()))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

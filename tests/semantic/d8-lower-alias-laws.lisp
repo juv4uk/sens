@@ -1,17 +1,22 @@
 ; D8:11011010 NTHCDR та D8:11100100 EVERY — нижчодоменні похідні.
 ; Чотири позитивні нативні D1-свідки, без прямого D8 виклику.
-(list
+(список
   (equal?
     (n-та-решта #d24:000000000000000000000001
-      (list (quote а) (quote б) (quote в)))
-    (list (quote б) (quote в)))
-  (null?
+      (список (quote а) (quote б) (quote в)))
+    (список (quote б) (quote в)))
+  (порожній?
     (n-та-решта #d24:000000000000000000000100
-      (list (quote а) (quote б))))
+      (список (quote а) (quote б))))
   (усі-задовольняють?
     (lambda (x) (equal? x (quote так)))
-    (list (quote так) (quote так)))
-  (not?
+    (список (quote так) (quote так)))
+  (хибне?
     (усі-задовольняють?
       (lambda (x) (equal? x (quote так)))
-      (list (quote так) (quote ні)))))
+      (список (quote так) (quote ні)))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)
+(визначити порожній? null?)

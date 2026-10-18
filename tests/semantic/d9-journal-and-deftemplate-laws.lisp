@@ -1,16 +1,20 @@
 ; Додаткові дев'ять незалежних SENS D1 свідків D9/FS та CLIPS.
-(list
+(список
   (equal? (фс-журнал-додати (quote ()) (quote подія-а))
-          (list (quote подія-а)))
-  (equal? (фс-журнал-додати (list (quote подія-а)) (quote подія-б))
-          (list (quote подія-а) (quote подія-б)))
-  (equal? (фс-журнал-додати (list (quote подія-а) (quote подія-б))
+          (список (quote подія-а)))
+  (equal? (фс-журнал-додати (список (quote подія-а)) (quote подія-б))
+          (список (quote подія-а) (quote подія-б)))
+  (equal? (фс-журнал-додати (список (quote подія-а) (quote подія-б))
                             (quote подія-в))
-          (list (quote подія-а) (quote подія-б) (quote подія-в)))
-  (equal? (фс-журнал-додати (quote ()) (list (quote write) (quote документ)))
-          (list (list (quote write) (quote документ))))
+          (список (quote подія-а) (quote подія-б) (quote подія-в)))
+  (equal? (фс-журнал-додати (quote ()) (список (quote write) (quote документ)))
+          (список (список (quote write) (quote документ))))
   (clips-deftemplate-форма? (quote (deftemplate питання)))
-  (not? (clips-deftemplate-форма? (quote (deffacts питання))))
-  (not? (clips-deftemplate-форма? (quote ())))
-  (not? (clips-deftemplate-форма? (quote ((deftemplate) питання))))
-  (not? (clips-deftemplate-форма? (quote не-форма))))
+  (хибне? (clips-deftemplate-форма? (quote (deffacts питання))))
+  (хибне? (clips-deftemplate-форма? (quote ())))
+  (хибне? (clips-deftemplate-форма? (quote ((deftemplate) питання))))
+  (хибне? (clips-deftemplate-форма? (quote не-форма))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)

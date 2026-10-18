@@ -5,23 +5,28 @@
   (0010 (v) v))
 (0011 список->вектор
   (0010 (xs) xs))
-(list
+(список
   (черга-порожня? (як-є ()))
-  (not? (черга-порожня? (list (quote a))))
+  (хибне? (черга-порожня? (список (quote a))))
   (equal? (сортувати-за-першим
             (list (list #d24:000000000000000000000010 (quote b))
                   (list #d24:000000000000000000000001 (quote a))))
           (list (list #d24:000000000000000000000001 (quote a))
                 (list #d24:000000000000000000000010 (quote b))))
-  (equal? (map-into
+  (equal? (відобразити-у
             (lambda (x) x)
             (як-є ())
-            (list (quote a) (quote b)))
-          (list (quote a) (quote b)))
-  (equal? (вектор->список (list (quote x)))
-          (list (quote x)))
-  (equal? (список->вектор (list (quote y)))
-          (list (quote y)))
+            (список (quote a) (quote b)))
+          (список (quote a) (quote b)))
+  (equal? (вектор->список (список (quote x)))
+          (список (quote x)))
+  (equal? (список->вектор (список (quote y)))
+          (список (quote y)))
   (equal? (вектор->список (як-є ()))
           (як-є ()))
   (черга-порожня? (список->вектор (як-є ()))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити відобразити-у map-into)
+(визначити хибне? not?)

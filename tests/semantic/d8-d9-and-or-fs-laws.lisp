@@ -8,7 +8,7 @@
   (0010 () (quote ())))
 (0011 фс-містить?
   (0010 (ключ мапа)
-    (not? (0101 (знайти-за-ключем ключ мапа)))))
+    (хибне? (порожній? (знайти-за-ключем ключ мапа)))))
 (0011 фс-список
   (0010 (fs) fs))
 (0011 мапа-факт-від
@@ -17,14 +17,18 @@
       ((0101 (знайти-за-ключем ключ мапа)) (quote ()))
       ((0100 (0101 (знайти-за-ключем ключ мапа)))
        (011 (знайти-за-ключем ключ мапа))))))
-(list
+(список
   (та (equal? (quote a) (quote a)) (equal? (quote b) (quote b)))
-  (not? (та (equal? (quote a) (quote a)) (equal? (quote a) (quote b))))
+  (хибне? (та (equal? (quote a) (quote a)) (equal? (quote a) (quote b))))
   (або (equal? (quote a) (quote b)) (equal? (quote a) (quote a)))
   (equal? (поділити #d24:000000000000000000001000
                     #d24:000000000000000000000010)
           #d24:000000000000000000000100)
-  (equal? (значення-списком (list (quote x))) (list (quote x)))
+  (equal? (значення-списком (список (quote x))) (список (quote x)))
   (equal? (фс-порожній) (quote ()))
-  (фс-містить? (quote k) (list (list (quote k) (quote v))))
-  (equal? (фс-список (list (quote a))) (list (quote a))))
+  (фс-містить? (quote k) (список (список (quote k) (quote v))))
+  (equal? (фс-список (список (quote a))) (список (quote a))))
+
+; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
+(визначити список list)
+(визначити хибне? not?)
