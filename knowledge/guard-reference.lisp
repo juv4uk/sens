@@ -975,7 +975,7 @@
 
 (0011 guard-script
   (0010 (name)
-    (10011100 ((tool (guard-script-find name *guard-script-directory*)))
+    (нехай ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
         ((00000010 tool) () (00100111
            (001 tool-missing)
@@ -1009,7 +1009,7 @@
 ; entry is deleted.
 (0011 guard-reference-evidence-status
   (0010 (reference)
-    (10011100 ((status (guard-reference-field (001 evidence-status) reference)))
+    (нехай ((status (guard-reference-field (як-є evidence-status) reference)))
       (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
@@ -1034,7 +1034,7 @@
       ((00000010 best) () candidate)
       ((00000010 best) (1) candidate)
       (t
-       (10011100 ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
+       (нехай ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
          (00000111
            ((00011011 candidate-strength best-strength) 1 candidate)
@@ -1066,7 +1066,7 @@
 
 (0011 guard-reference
   (0010 (topic)
-    (10011100 ((reference (guard-reference-find topic *guard-reference-directory*)))
+    (нехай ((reference (guard-reference-find topic *guard-reference-directory*)))
       (00000111
         ((00000010 reference) () (00100111
            (001 reference-missing)
