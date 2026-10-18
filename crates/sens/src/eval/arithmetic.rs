@@ -3,7 +3,7 @@
 //! admitted arithmetic operands. The legacy value projection helper remains
 //! only for independent non-mathematical readers (e.g. JSON).
 use crate::domain_numeric;
-use crate::{BinaryNumber, Environment, ErrorKind, Exactness, LanguageError, Rational, Span, Value};
+use crate::{Environment, ErrorKind, Exactness, LanguageError, Rational, Span, Value};
 
 /// Legacy data/presentation bridge, NOT a mathematical operand admission.
 /// Existing JSON decoding uses this conversion independently of Core math.
@@ -173,6 +173,7 @@ pub(super) fn comparison_on_values(
 #[cfg(test)]
 mod qualified_numeric_domain_value_tests {
     use super::*;
+    use crate::BinaryNumber;
 
     #[test]
     fn binary_code_domains_and_unqualified_numbers_are_never_math_operands() {

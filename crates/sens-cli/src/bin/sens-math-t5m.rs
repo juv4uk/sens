@@ -238,7 +238,7 @@ mod paired {
                 assert_eq!(words, restored, "id={id} layer=transport");
                 let result = eval_verified(&source, &physical)
                     .unwrap_or_else(|error| panic!("id={id} layer=eval {error}"));
-                let Value::BinaryNumber(number) = result else {
+                let Value::BinaryNumber(ref number) = result else {
                     panic!("id={id} layer=eval expected=D{expected_width}");
                 };
                 assert_eq!(number.numeric_domain_width(), Some(expected_width), "id={id}");
@@ -250,10 +250,10 @@ mod paired {
         fn t5m_delivers_division_operands_but_sens_alone_creates_exact_ratio() {
             // D5:10111 is the current owner-ratified QUOTIENT, surface «частка».
             // The physical T5M words are two D24 integers, never a flat fraction.
-            let source = source("частка", 1, 3);
-            let words = expected_words(&qualify(&source).unwrap()).unwrap();
+            let source_expr = source("частка", 1, 3);
+            let words = expected_words(&qualify(&source_expr).unwrap()).unwrap();
             let physical = zig_transport::encode_t5_exact_words(&words).unwrap();
-            let value = eval_verified(&source, &physical)
+            let value = eval_verified(&source_expr, &physical)
                 .expect("SENS exact division must form canonical reduced RATIO");
             assert!(matches!(value, Value::NumericComposition(_)),
                 "test_id=one-third layer=eval expected=canonical-rational");
@@ -352,7 +352,7 @@ mod paired {
                 assert_eq!(zig_transport::decode_t5_exact_words(&physical).unwrap(), words);
                 let value = eval_verified(&input, &physical)
                     .unwrap_or_else(|error| panic!("test_id={id} layer=SENS eval actual={error}"));
-                let Value::BinaryNumber(number) = value else {
+                let Value::BinaryNumber(ref number) = value else {
                     panic!("test_id={id} layer=eval expected=integer D48");
                 };
                 assert_eq!(number.numeric_domain_width(), Some(48),
@@ -377,7 +377,7 @@ mod paired {
             let physical = zig_transport::encode_t5_exact_words(&expected).unwrap();
             assert_eq!(zig_transport::decode_t5_exact_words(&physical).unwrap(), expected);
             let value = eval_verified(&source, &physical).unwrap();
-            let Value::BinaryNumber(number) = value else {
+            let Value::BinaryNumber(ref number) = value else {
                 panic!("test_id=d48-negative layer=eval expected=integer D48");
             };
             assert_eq!(number.numeric_domain_width(), Some(48));
