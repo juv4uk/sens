@@ -12,7 +12,7 @@
 
 (визначити str+
   (функція args
-    (101110 (функція (acc s) (рядок-додати acc s)) "" args)))
+    (згорнути (функція (acc s) (рядок-додати acc s)) "" args)))
 
 ;; Особливі форми — рядки таблиці з полем (form lambda|define).
 (визначити all-rows
@@ -20,7 +20,7 @@
 
 (визначити row-form
   (функція (row)
-    (друге (11100 (як-є form) (решта row)))))
+    (друге (знайти-за-ключем (як-є form) (решта row)))))
 
 (визначити form-rows
   (функція (remaining)
@@ -29,7 +29,7 @@
        (як-є ()))
       ((атом? (як-є ()))
        (за-умовою
-         ((атом? (11100 (як-є form) (решта (перше remaining))))
+         ((атом? (знайти-за-ключем (як-є form) (решта (перше remaining))))
           (form-rows (решта remaining)))
          ((атом? (як-є ()))
           (сполучити (перше remaining) (form-rows (решта remaining)))))))))
@@ -47,7 +47,7 @@
 
 (визначити render-row
   (функція (row)
-    (001000 ((mechanism (rust-mechanism (row-form row))))
+    (нехай ((mechanism (rust-mechanism (row-form row))))
       (за-умовою
         ((атом? mechanism)
          (перше (як-є ())))
@@ -95,7 +95,7 @@
        (записати-файл output-path generated)
        (друкувати "Rust evaluator dispatch projection written")))))
   ((11110111 (100 *argv*) "--check")
-   (001000 ((current (читати-файл output-path)))
+   (нехай ((current (читати-файл output-path)))
      (за-умовою
        ((однакові? current generated)
         (друкувати "Rust evaluator dispatch projection is current"))
