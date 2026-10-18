@@ -20,73 +20,73 @@
 ;   (is X a Y)   / (is X an Y) / (is X Y)  -> goal:  (Y X)
 ;   (does X V Y)                           -> goal:  (V X Y)
 
-(0011 strip-article
-  (0010 (words)
-    (110
-      ((010 words) (001 ()))
-      ((101 (100 words) (001 a)) (011 words))
-      ((101 (100 words) (001 an)) (011 words))
-      (#d1:1 words))))
+(визначити strip-article
+  (функція (words)
+    (за-умовою
+      ((атом? words) (як-є ()))
+      ((тотожне? (перше words) (як-є a)) (решта words))
+      ((тотожне? (перше words) (як-є an)) (решта words))
+      (так words))))
 
-(0011 understand-is
-  (0010 (words)
-    (1110 (1110 (100 (strip-article (0111 words))) (100 words)))))
+(визначити understand-is
+  (функція (words)
+    (список (список (перше (strip-article (решта-решти words))) (перше words)))))
 
-(0011 understand-relation
-  (0010 (words)
-    (1110 (1110 (1001 words) (100 words) (10011 words)))))
+(визначити understand-relation
+  (функція (words)
+    (список (список (друге words) (перше words) (третє words)))))
 
-(0011 understand-universal
-  (0010 (words)
-    (1110 (1110 (001 has) (1110 (001 var) (001 w)) (100111 words))
-          (1110 (1001 words) (1110 (001 var) (001 w))))))
+(визначити understand-universal
+  (функція (words)
+    (список (список (як-є has) (список (як-є var) (як-є w)) (четверте words))
+          (список (друге words) (список (як-є var) (як-є w))))))
 
-(0011 understand
-  (0010 (words)
-    (110
-      ((010 words) (001 ()))
-      ((101 (100 words) (001 all))
+(визначити understand
+  (функція (words)
+    (за-умовою
+      ((атом? words) (як-є ()))
+      ((тотожне? (перше words) (як-є all))
        (understand-universal words))
-      ((101 (1001 words) (001 is))
+      ((тотожне? (друге words) (як-є is))
        (understand-is words))
-      (#d1:1
+      (так
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`.
 ; Controlled, structural, deterministic: no morphology, no network, no LLM.
-(0011 understand-query-is
-  (0010 (words)
-    (1110 (100 (strip-article (0111 words))) (1001 words))))
+(визначити understand-query-is
+  (функція (words)
+    (список (перше (strip-article (решта-решти words))) (друге words))))
 
-(0011 understand-query-relation
-  (0010 (words)
-    (1110 (10011 words) (1001 words) (100111 words))))
+(визначити understand-query-relation
+  (функція (words)
+    (список (третє words) (друге words) (четверте words))))
 
-(0011 understand-query
-  (0010 (words)
-    (110
-      ((010 words) (001 ()))
-      ((101 (100 words) (001 is))
+(визначити understand-query
+  (функція (words)
+    (за-умовою
+      ((атом? words) (як-є ()))
+      ((тотожне? (перше words) (як-є is))
        (understand-query-is words))
-      ((101 (100 words) (001 does))
+      ((тотожне? (перше words) (як-є does))
        (understand-query-relation words))
-      (#d1:1
-       (001 ())))))
+      (так
+       (як-є ())))))
 
 ; D9 Ukrainian callable projections. Names/codes: lib/domains/d9.lisp;
 ; source laws: knowledge/d9-semantic-layer-harvest-v1.json.
 ; SENS DEFINE aliases existing Lisp closures; NO new native D9 dispatch.
 ; D9:000001011
-(0011 розібрати-є understand-is)
+(визначити розібрати-є understand-is)
 ; D9:000001100
-(0011 розібрати-відношення understand-relation)
+(визначити розібрати-відношення understand-relation)
 ; D9:000011111
-(0011 розібрати-загальний understand-universal)
+(визначити розібрати-загальний understand-universal)
 ; D9:000110001
-(0011 розібрати understand)
+(визначити розібрати understand)
 ; D9:000111001
-(0011 розібрати-запит-є understand-query-is)
+(визначити розібрати-запит-є understand-query-is)
 ; D9:000110000
-(0011 розібрати-запит-відношення understand-query-relation)
+(визначити розібрати-запит-відношення understand-query-relation)
 ; D9:000101010
-(0011 розібрати-запит understand-query)
+(визначити розібрати-запит understand-query)

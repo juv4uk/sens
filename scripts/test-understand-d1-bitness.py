@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/understand.lisp has no bare host truthiness (t / T / NIL)
-  2. Exact D1:1 form (010 (001 ())) is present as fallback
+  2. Every one of 3 unconditional COND branches uses exact D1:1 ‘так’
   3. Key surface present (understand / understand-query / strip-article)
   4. Pairs with narrate (structure<->text bridge)
   5. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
@@ -24,7 +24,7 @@ UND = ROOT / "lib" / "understand.lisp"
 NAR = ROOT / "lib" / "narrate.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = re.compile(r"(?m)^\s*\(так(?=\s|\))")
 REQUIRED = (
     "strip-article",
     "understand-is",
@@ -48,8 +48,12 @@ def check_understand() -> list[str]:
         if line.lstrip().startswith(";"):
             continue
         errs.append(f"understand: host truthiness {m.group()!r} at offset {m.start()}")
-    if D1_TRUE not in text:
-        errs.append("understand: exact D1:1 form (010 (001 ())) missing")
+    true_guards = D1_TRUE.findall(text)
+    if len(true_guards) != 3:
+        errs.append(f"understand: expected 3 ratified D1:YES так guards, got {len(true_guards)}")
+    d1 = (ROOT / "lib" / "domains" / "d1.lisp").read_text(encoding="utf-8")
+    if "(1 (ук так) (укр так)" not in d1:
+        errs.append("understand: current D1:YES domain authority missing")
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"understand: required surface missing: {fn}")

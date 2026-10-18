@@ -85,6 +85,60 @@ def digest(node):
     return f"{h:016x}"
 
 
+
+# Chosen CURRENT `укр` peers of executable D1/D3/D4/D5/D6 operators.
+# These spellings are checked independently against each exact-width table.
+CURRENT_HEADS = {
+    "як-є": "001", "атом?": "010", "решта": "011",
+    "перше": "100", "тотожне?": "101",
+    "за-умовою": "110", "сполучити": "111",
+    "функція": "0010", "визначити": "0011",
+    "хибне?": "0100", "порожній?": "0101",
+    "решта-решти": "0111", "друге": "1001",
+    "список": "1110", "третє": "10011", "четверте": "100111",
+}
+SOURCE_ALIASES = {
+    "розібрати-є": "understand-is",
+    "розібрати-відношення": "understand-relation",
+    "розібрати-загальний": "understand-universal",
+    "розібрати": "understand",
+    "розібрати-запит-є": "understand-query-is",
+    "розібрати-запит-відношення": "understand-query-relation",
+    "розібрати-запит": "understand-query",
+}
+
+
+def normalize_current_source_forms(source_forms):
+    """Strict inverse ONLY for canonical operator positions; QUOTE data is opaque."""
+    if len(source_forms) != len(FROZEN) + len(SOURCE_ALIASES):
+        raise AssertionError("8 чинних законів + 7 українських D9-аліасів очікуються")
+    definitions = source_forms[:len(FROZEN)]
+    aliases = source_forms[len(FROZEN):]
+    if {row[1] for row in definitions} != set(FROZEN):
+        raise AssertionError("втрачений чи дубльований основний закон")
+    if any(not isinstance(row, list) or len(row) != 3
+           or row[0] != "визначити" for row in aliases):
+        raise AssertionError("неправильна форма D9-аліаса")
+    if {tuple(row[1:]) for row in aliases} != set(SOURCE_ALIASES.items()):
+        raise AssertionError("змінена чинна D9-проєкція/прив'язка")
+
+    def lower(node):
+        if isinstance(node, str):
+            return {"так": "#d1:1", "ні": "#d1:0"}.get(node, node)
+        if not node:
+            return []
+        head = node[0]
+        if head == "як-є":
+            # Do NOT touch data under QUOTE.
+            return ["001"] + deepcopy(node[1:])
+        if isinstance(head, str) and head in CURRENT_HEADS:
+            return [CURRENT_HEADS[head]] + [lower(x) for x in node[1:]]
+        if isinstance(head, str) and re.fullmatch(r"[01]{3,6}", head):
+            raise AssertionError("старий виконавчий бітовий голов лишився: " + head)
+        return [lower(x) for x in node]
+    return [lower(node) for node in definitions]
+
+
 def verify_unchanged_laws(forms):
     if len(forms) != 8:
         raise AssertionError("кількість основних функцій змінилася")
@@ -107,6 +161,13 @@ def verify_unchanged_laws(forms):
             if not clauses or clauses[0] != [["010", "words"], ["001", []]]:
                 raise AssertionError("непорожній CAR до точного D3 ATOM")
             lam[2].pop(1)
+            # Historical frozen hash predates exact D1. The original
+            # tautological ATOM(empty) is reconstructed for digest ONLY;
+            # executable source must be the current ratified D1:YES.
+            fallback = lam[2][-1]
+            if not (isinstance(fallback, list) and fallback[0] == "#d1:1"):
+                raise AssertionError("відсутній точний D1:YES у COND")
+            fallback[0] = ["010", ["001", []]]
         if name in LET_REDUCED:
             # Незалежна beta-редукція історичного D6 LET з frozen main:
             # обидва binding-вирази чисті та кожен параметр вжито лише раз.
@@ -173,7 +234,41 @@ def verify_catalog(records):
 class UnderstandExactD3Witness(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.forms = read_forms(SOURCE.read_text(encoding="utf-8"))
+        cls.source_forms = read_forms(SOURCE.read_text(encoding="utf-8"))
+        cls.forms = normalize_current_source_forms(cls.source_forms)
+
+    def test_source_is_current_ukrainian_with_exact_domain_peers(self):
+        rows = ((3, "001", "як-є"), (3, "010", "атом?"),
+                (3, "011", "решта"), (3, "100", "перше"),
+                (3, "101", "тотожне?"), (3, "110", "за-умовою"),
+                (3, "111", "сполучити"), (4, "0010", "функція"),
+                (4, "0011", "визначити"), (4, "0100", "хибне?"),
+                (4, "0101", "порожній?"), (4, "0111", "решта-решти"),
+                (4, "1001", "друге"), (4, "1110", "список"),
+                (5, "10011", "третє"), (6, "100111", "четверте"),
+                (1, "1", "так"))
+        for width, bits, ukr in rows:
+            with self.subTest(domain=width, bits=bits):
+                source = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
+                matches = [line for line in source.splitlines()
+                           if line.strip().startswith(f"({bits} (ук ")]
+                self.assertEqual(len(matches), 1)
+                self.assertIn(f"(укр {ukr})", matches[0])
+        verify_unchanged_laws(self.forms)
+
+    def test_negative_wrong_ukr_function_and_wrong_d1_fallback(self):
+        bad_head = deepcopy(self.source_forms)
+        bad_head[0][2][2][1][0][0] = "тотожне?"
+        with self.assertRaisesRegex(AssertionError, "непорожній CAR"):
+            verify_unchanged_laws(normalize_current_source_forms(bad_head))
+        bad_d1 = deepcopy(self.source_forms)
+        bad_d1[0][2][2][-1][0] = "ні"
+        with self.assertRaisesRegex(AssertionError, "точний D1:YES"):
+            verify_unchanged_laws(normalize_current_source_forms(bad_d1))
+        bad_legacy = deepcopy(self.source_forms)
+        bad_legacy[0][0] = "0011"
+        with self.assertRaisesRegex(AssertionError, "старий виконавчий"):
+            normalize_current_source_forms(bad_legacy)
 
     def test_all_eight_functions_preserve_original_laws(self):
         verify_unchanged_laws(self.forms)

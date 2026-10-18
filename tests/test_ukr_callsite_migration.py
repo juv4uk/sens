@@ -325,7 +325,7 @@ class PersistentMapLifeUkrWitnessTests(unittest.TestCase):
         life_source = (root / "lib/life-1-scheduler.lisp").read_text(encoding="utf-8")
         self.assertIn("(як-є (scheduler-selection none))", life_source)
         self.assertIn("(як-є producer)", life_source)
-        self.assertIn("#d1:1", map_source)
+        self.assertIn("(так", map_source)
         self.assertIn("#d1:0", life_source)
         sample = "(як-є (100 цитоване)) (сполучити (як-є ліве) (як-є ()))"
         heads = [x.text for x in mod.candidate_heads(mod.parse(sample))]
@@ -477,6 +477,43 @@ class UnifyUkrDomainProjectionTests(unittest.TestCase):
         self.assertNotIn("0", heads)
         self.assertIn("сполучити", heads)
         self.assertIn("перше", heads)
+
+
+class UnderstandMapUkrSourceTests(unittest.TestCase):
+    """Реальні джерела: ратифіковані голови, без приглушення негативів."""
+
+    def test_both_active_modules_have_only_named_ukr_execution_heads(self):
+        root = Path(__file__).resolve().parents[1]
+        for file, required, definitions in (
+            ("lib/understand.lisp", ("визначити", "функція", "атом?",
+                                      "решта-решти", "третє", "четверте"), 15),
+            ("lib/persistent-map.lisp", ("визначити", "функція",
+                                         "за-умовою", "тотожне?", "так"), 14),
+        ):
+            with self.subTest(file=file):
+                source = (root / file).read_text(encoding="utf-8")
+                mod.parse(source)  # failure propagates; no synthetic SENS evaluator
+                active = "\n".join(line.split(";", 1)[0] for line in source.splitlines())
+                self.assertEqual(active.count("(визначити "), definitions)
+                for name in required:
+                    self.assertIn(name, active)
+                self.assertNotRegex(active, r"\(\s*[01]{3,6}(?=\s|\))")
+                self.assertNotIn("#d1:1", active)
+
+    def test_quoted_data_remains_data_and_d1_is_its_own_identity(self):
+        root = Path(__file__).resolve().parents[1]
+        understand = (root / "lib/understand.lisp").read_text(encoding="utf-8")
+        mapped = (root / "lib/persistent-map.lisp").read_text(encoding="utf-8")
+        self.assertIn("(як-є has)", understand)
+        self.assertIn("(як-є var)", understand)
+        self.assertIn("(визначити map-empty (як-є ()))", mapped)
+        self.assertEqual(len([line for line in understand.splitlines()
+                              if line.strip().startswith("(так")]), 3)
+        self.assertIn("(1 (ук так) (укр так)", (root / "lib/domains/d1.lisp").read_text(encoding="utf-8"))
+        sample = "(як-є (100 protected-data)) (сполучити (як-є a) (як-є ()))"
+        observed = [t.text for t in mod.candidate_heads(mod.parse(sample))]
+        self.assertNotIn("100", observed)
+        self.assertIn("сполучити", observed)
 
 
 if __name__ == '__main__':
