@@ -8,8 +8,8 @@
 
 (визначити kab-contract
   (перше
-    (110101001
-      (110110111 "contracts/kernel-abi-transport-boundary.lisp"))))
+    (читати-всі
+      (читати-файл "contracts/kernel-abi-transport-boundary.lisp"))))
 
 (визначити kab-rows (решта kab-contract))
 
@@ -37,7 +37,7 @@
        (як-є ()))
       ((атом? rows)
        (0)
-       (001000 ((row (100 rows)))
+       (нехай ((row (перше rows)))
          (за-умовою
            ((тотожне? (перше row) (як-є kernel))
             (1)
@@ -54,7 +54,7 @@
 
 (визначити kab-row-check
   (функція (name expected)
-    (001000 ((actual (kab-find name kab-rows)))
+    (нехай ((actual (kab-find name kab-rows)))
       (за-умовою
         ((однакові? actual expected)
          (1)
@@ -65,7 +65,7 @@
 
 (визначити kab-kernel-row-check
   (функція (kernel-name expected)
-    (001000 ((actual (kab-find-kernel kernel-name kab-rows)))
+    (нехай ((actual (kab-find-kernel kernel-name kab-rows)))
       (за-умовою
         ((однакові? actual expected)
          (1)
@@ -92,7 +92,7 @@
 
 (визначити kab-verdict
   (функція ()
-    (001000 ((failure
+    (нехай ((failure
             (kab-first-failure
               (список
                 (kab-row-check
