@@ -30,16 +30,16 @@
 ; is this file's own tooling's job, not this script's — the format here is
 ; deliberately plain data, not pre-formatted assembly.
 
-(0011 collect-symbols-onto
-  (0010 (expr acc)
-    (110
+(визначити collect-symbols-onto
+  (функція (expr acc)
+    (за-умовою
       ((символ? expr) (за-умовою ((значення-у-списку? expr acc) acc) ((атом? (як-є ())) (сполучити expr acc))))
-      ((010 expr) acc)
-      ((010 (001 ())) (collect-symbols-onto (011 expr) (collect-symbols-onto (100 expr) acc))))))
+      ((атом? expr) acc)
+      ((атом? (як-є ())) (collect-symbols-onto (решта expr) (collect-symbols-onto (перше expr) acc))))))
 
-(0011 collect-all-symbols
-  (0010 (forms acc)
-    (110 ((010 forms) acc) ((010 (001 ())) (collect-all-symbols (011 forms) (collect-symbols-onto (100 forms) acc))))))
+(визначити collect-all-symbols
+  (функція (forms acc)
+    (за-умовою ((атом? forms) acc) ((атом? (як-є ())) (collect-all-symbols (решта forms) (collect-symbols-onto (перше forms) acc))))))
 
 ; Tail-recursive on purpose, not the more obvious `(cons (car sorted)
 ; (insert-sorted sym (cdr sorted)))`: that shape's real Rust-stack depth
@@ -54,35 +54,35 @@
 ; елементах під час написання цього файлу — той самий клас багу, від
 ; якого захищає власна -onto-конвенція проєкту. Розбиває список на
 ; before/after навколо точки вставки замість вкладеного cons.
-(0011 insert-sorted-onto
-  (0010 (sym before after)
-    (110
+(визначити insert-sorted-onto
+  (функція (sym before after)
+    (за-умовою
       ((атом? after) (зворот-до before (список sym)))
       ((текст-передує? (символ-у-текст sym) (символ-у-текст (перше after)))
        (зворот-до before (сполучити sym after)))
-      ((010 (001 ())) (insert-sorted-onto sym (111 (100 after) before) (011 after))))))
+      ((атом? (як-є ())) (insert-sorted-onto sym (сполучити (перше after) before) (решта after))))))
 
-(0011 insert-sorted
-  (0010 (sym sorted)
-    (insert-sorted-onto sym (001 ()) sorted)))
+(визначити insert-sorted
+  (функція (sym sorted)
+    (insert-sorted-onto sym (як-є ()) sorted)))
 
-(0011 sort-symbols-onto
-  (0010 (remaining sorted)
-    (110 ((010 remaining) sorted) ((010 (001 ())) (sort-symbols-onto (011 remaining) (insert-sorted (100 remaining) sorted))))))
+(визначити sort-symbols-onto
+  (функція (remaining sorted)
+    (за-умовою ((атом? remaining) sorted) ((атом? (як-є ())) (sort-symbols-onto (решта remaining) (insert-sorted (перше remaining) sorted))))))
 
-(0011 sort-symbols
-  (0010 (symbols)
-    (sort-symbols-onto symbols (001 ()))))
+(визначити sort-symbols
+  (функція (symbols)
+    (sort-symbols-onto symbols (як-є ()))))
 
-(0011 print-table-onto
-  (0010 (symbols id)
-    (110 ((010 symbols) (001 ())) ((010 (001 ())) ((0010 ()
+(визначити print-table-onto
+  (функція (symbols id)
+    (за-умовою ((атом? symbols) (як-є ())) ((атом? (як-є ())) ((функція ()
             (PRINT (список (символ-у-текст (перше symbols)) id))
-            (print-table-onto (011 symbols) (01010 id 1))))))))
+            (print-table-onto (решта symbols) (01010 id 1))))))))
 
 (визначити core-forms (читати-всі (READ-FILE "lib/core4.lisp")))
-(0011 all-symbols (collect-all-symbols core-forms (001 ())))
-(0011 sorted-symbols (sort-symbols all-symbols))
+(визначити all-symbols (collect-all-symbols core-forms (як-є ())))
+(визначити sorted-symbols (sort-symbols all-symbols))
 
 (print-table-onto sorted-symbols 0)
 (як-є ())
