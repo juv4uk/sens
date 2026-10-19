@@ -44,11 +44,11 @@ class RequiredChecksTests(unittest.TestCase):
         self.assertIn("workflow_dispatch", workflow["on"])
         self.assertEqual(
             workflow["concurrency"]["group"],
-            "${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}",
+            "${{ github.workflow }}-${{ github.run_id }}",
         )
         self.assertEqual(
             workflow["concurrency"]["cancel-in-progress"],
-            "${{ github.event_name != 'workflow_dispatch' }}",
+            "false",
         )
 
         for job_id in ("runtime-shards", "lisp-guards", "lisp-surface"):
