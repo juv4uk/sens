@@ -1,2 +1,2 @@
-; D9 FACT-OF does not silently accept the empty structural carrier.
+; Негативне свідчення: вибір факту не приймає порожню структуру як звичайний факт.
 (факт-від (як-є ()))
