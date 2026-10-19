@@ -45,7 +45,7 @@ class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
                 )
                 self.assertNotRegex(
                     source,
-                    rf"(?m)^\(визначити\s+{re.escape(english)}(?=\s|\n)",
+                    rf"(?m)^\(визначити\s+{re.escape(english)}\s+(?=\(функція|\(як-є)",
                     f"{english}: English must not remain primary",
                 )
                 self.assertIn(f"(визначити {english} {ukrainian})", source)
