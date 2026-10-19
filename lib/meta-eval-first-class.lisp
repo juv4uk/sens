@@ -9,8 +9,8 @@
 ; Width is identity; every bit of the domain address is valued.
 
 (визначити my-fc-primitive
-  (функція (name)
-    (список (як-є primitive) name)))
+  (функція (назва)
+    (список (як-є primitive) назва)))
 
 (визначити my-fc-root-env
   (список
@@ -27,126 +27,126 @@
     (сполучити (як-є >)    (my-fc-primitive (як-є >)))))
 
 (визначити my-fc-env-lookup
-  (функція (name ctx)
+  (функція (назва оточення)
     (за-умовою
-      ((атом? ctx) name)
-      ((тотожне? (перше (перше ctx)) name) (решта (перше ctx)))
-      (так (my-fc-env-lookup name (решта ctx))))))
+      ((атом? оточення) назва)
+      ((тотожне? (перше (перше оточення)) назва) (решта (перше оточення)))
+      (так (my-fc-env-lookup назва (решта оточення))))))
 
 (визначити my-fc-primitive?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є primitive))))))
+      ((атом? значення) ні)
+      (так (тотожне? (перше значення) (як-є primitive))))))
 
 (визначити my-fc-closure?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value) ні)
-      (так (тотожне? (перше value) (як-є closure))))))
+      ((атом? значення) ні)
+      (так (тотожне? (перше значення) (як-є closure))))))
 
 (визначити my-fc-bind-params
-  (функція (params args ctx)
+  (функція (параметри аргументи оточення)
     (за-умовою
-      ((атом? params) ctx)
+      ((атом? параметри) оточення)
       (так
-       (сполучити (сполучити (перше params) (перше args))
-            (my-fc-bind-params (решта params) (решта args) ctx))))))
+       (сполучити (сполучити (перше параметри) (перше аргументи))
+            (my-fc-bind-params (решта параметри) (решта аргументи) оточення))))))
 
 (визначити my-fc-eval-list
-  (функція (exprs ctx)
+  (функція (вирази оточення)
     (за-умовою
-      ((атом? exprs) (як-є ()))
+      ((атом? вирази) (як-є ()))
       (так
-       (сполучити (my-fc-eval (перше exprs) ctx)
-            (my-fc-eval-list (решта exprs) ctx))))))
+       (сполучити (my-fc-eval (перше вирази) оточення)
+            (my-fc-eval-list (решта вирази) оточення))))))
 
 (визначити my-fc-eval-body
-  (функція (body ctx)
+  (функція (тіло оточення)
     (за-умовою
-      ((атом? (решта body)) (my-fc-eval (перше body) ctx))
+      ((атом? (решта тіло)) (my-fc-eval (перше тіло) оточення))
       (так
        ((функція ()
-          (my-fc-eval (перше body) ctx)
-          (my-fc-eval-body (решта body) ctx)))))))
+          (my-fc-eval (перше тіло) оточення)
+          (my-fc-eval-body (решта тіло) оточення)))))))
 
 (визначити my-fc-eval-cond
-  (функція (clauses ctx)
+  (функція (умови оточення)
     (за-умовою
-      ((атом? clauses) (як-є ()))
-      ((my-fc-eval (перше (перше clauses)) ctx)
-       (my-fc-eval (друге (перше clauses)) ctx))
-      (так (my-fc-eval-cond (решта clauses) ctx)))))
+      ((атом? умови) (як-є ()))
+      ((my-fc-eval (перше (перше умови)) оточення)
+       (my-fc-eval (друге (перше умови)) оточення))
+      (так (my-fc-eval-cond (решта умови) оточення)))))
 
 ; Exact D1 chain: single remaining arg is true; pairwise op then recurse.
 (визначити my-fc-compare-chain
-  (функція (op args)
+  (функція (оператор аргументи)
     (за-умовою
-      ((атом? (решта args)) так)
+      ((атом? (решта аргументи)) так)
       ((за-умовою
-         ((тотожне? op (як-є <)) (менше? (перше args) (друге args)))
-         ((тотожне? op (як-є =)) (однакові? (перше args) (друге args)))
-         ((тотожне? op (як-є >)) (більше? (перше args) (друге args)))
+         ((тотожне? оператор (як-є <)) (менше? (перше аргументи) (друге аргументи)))
+         ((тотожне? оператор (як-є =)) (однакові? (перше аргументи) (друге аргументи)))
+         ((тотожне? оператор (як-є >)) (більше? (перше аргументи) (друге аргументи)))
          (так (як-є ())))
-       (my-fc-compare-chain op (решта args)))
+       (my-fc-compare-chain оператор (решта аргументи)))
       (так ні))))
 
 (визначити my-fc-apply-primitive
-  (функція (name args)
+  (функція (назва аргументи)
     (за-умовою
-      ((тотожне? name (як-є atom)) (атом? (перше args)))
-      ((тотожне? name (як-є eq)) (тотожне? (перше args) (друге args)))
-      ((тотожне? name (як-є car)) (перше (перше args)))
-      ((тотожне? name (як-є cdr)) (решта (перше args)))
-      ((тотожне? name (як-є cons)) (сполучити (перше args) (друге args)))
-      ((тотожне? name (як-є +)) (додати (перше args) (друге args)))
-      ((тотожне? name (як-є -)) (відняти (перше args) (друге args)))
-      ((тотожне? name (як-є *)) (помножити (перше args) (друге args)))
-      ((тотожне? name (як-є <)) (my-fc-compare-chain (як-є <) args))
-      ((тотожне? name (як-є =)) (my-fc-compare-chain (як-є =) args))
-      ((тотожне? name (як-є >)) (my-fc-compare-chain (як-є >) args))
-      (так (список (як-є unknown-primitive) name)))))
+      ((тотожне? назва (як-є atom)) (атом? (перше аргументи)))
+      ((тотожне? назва (як-є eq)) (тотожне? (перше аргументи) (друге аргументи)))
+      ((тотожне? назва (як-є car)) (перше (перше аргументи)))
+      ((тотожне? назва (як-є cdr)) (решта (перше аргументи)))
+      ((тотожне? назва (як-є cons)) (сполучити (перше аргументи) (друге аргументи)))
+      ((тотожне? назва (як-є +)) (додати (перше аргументи) (друге аргументи)))
+      ((тотожне? назва (як-є -)) (відняти (перше аргументи) (друге аргументи)))
+      ((тотожне? назва (як-є *)) (помножити (перше аргументи) (друге аргументи)))
+      ((тотожне? назва (як-є <)) (my-fc-compare-chain (як-є <) аргументи))
+      ((тотожне? назва (як-є =)) (my-fc-compare-chain (як-є =) аргументи))
+      ((тотожне? назва (як-є >)) (my-fc-compare-chain (як-є >) аргументи))
+      (так (список (як-є unknown-primitive) назва)))))
 
 (визначити my-fc-apply
-  (функція (fn args)
+  (функція (виклична-функція аргументи)
     (за-умовою
-      ((my-fc-primitive? fn)
-       (my-fc-apply-primitive (друге fn) args))
-      ((my-fc-closure? fn)
+      ((my-fc-primitive? виклична-функція)
+       (my-fc-apply-primitive (друге виклична-функція) аргументи))
+      ((my-fc-closure? виклична-функція)
        (my-fc-eval-body
-         (третє fn)
+         (третє виклична-функція)
          (my-fc-bind-params
-           (друге fn)
-           args
-           (перше (решта (решта (решта fn)))))))
-      (так (список (як-є not-callable) fn)))))
+           (друге виклична-функція)
+           аргументи
+           (перше (решта (решта (решта виклична-функція)))))))
+      (так (список (як-є not-callable) виклична-функція)))))
 
 (визначити my-fc-eval
-  (функція (expr ctx)
+  (функція (вираз оточення)
     (за-умовою
-      ((атом? expr) (my-fc-env-lookup expr ctx))
-      ((атом? (перше expr))
+      ((атом? вираз) (my-fc-env-lookup вираз оточення))
+      ((атом? (перше вираз))
        (за-умовою
          ; Syntax-only forms remain syntax. They are intentionally not values.
-         ((тотожне? (перше expr) (як-є quote)) (друге expr))
-         ((тотожне? (перше expr) (як-є cond)) (my-fc-eval-cond (решта expr) ctx))
-         ((тотожне? (перше expr) (як-є lambda))
-          (список (як-є closure) (друге expr) (решта (решта expr)) ctx))
+         ((тотожне? (перше вираз) (як-є quote)) (друге вираз))
+         ((тотожне? (перше вираз) (як-є cond)) (my-fc-eval-cond (решта вираз) оточення))
+         ((тотожне? (перше вираз) (як-є lambda))
+          (список (як-є closure) (друге вираз) (решта (решта вираз)) оточення))
          ; Every ordinary head is resolved through the environment first.
          ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
          ; the root primitive binding without the evaluator special-casing its name.
          (так
           (my-fc-apply
-            (my-fc-eval (перше expr) ctx)
-            (my-fc-eval-list (решта expr) ctx)))))
+            (my-fc-eval (перше вираз) оточення)
+            (my-fc-eval-list (решта вираз) оточення)))))
       (так
        (my-fc-apply
-         (my-fc-eval (перше expr) ctx)
-         (my-fc-eval-list (решта expr) ctx))))))
+         (my-fc-eval (перше вираз) оточення)
+         (my-fc-eval-list (решта вираз) оточення))))))
 
 ; Public experimental entry point. The root primitive environment is explicit
 ; Lisp data, so a future host/runtime only has to preserve the primitive mechanism
 ; identities; lexical resolution itself is owned here.
 (визначити my-eval-first-class
-  (функція (expr)
-    (my-fc-eval expr my-fc-root-env)))
+  (функція (вираз)
+    (my-fc-eval вираз my-fc-root-env)))
