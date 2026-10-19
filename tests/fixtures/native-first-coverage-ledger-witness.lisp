@@ -266,7 +266,7 @@
 (0011 native-first-coverage-count-status
   (0010 (status)
     (native-first-coverage-count-status-onto
-      native-first-coverage-ledger
+      журнал-нативного-покриття
       status
       0)))
 
@@ -305,11 +305,11 @@
                 (1110
                   native-first-coverage-dispatch-independent-state
                   (native-first-coverage-all-valid-state
-                    native-first-coverage-ledger)
+                    журнал-нативного-покриття)
                   (native-first-coverage-expected-authority-state
-                    native-first-coverage-ledger)
+                    журнал-нативного-покриття)
                   (native-first-coverage-check
-                    (000000 native-first-coverage-ledger)
+                    (000000 журнал-нативного-покриття)
                     6)
                   (native-first-coverage-check native-count 1)
                   (native-first-coverage-check fallback-count 2)
@@ -328,7 +328,7 @@
              (001 native-first-coverage-ledger-witness)
              (001 (status fail))
              (1110 (001 rows)
-                   (000000 native-first-coverage-ledger))
+                   (000000 журнал-нативного-покриття))
              (1110 (001 native) native-count)
              (1110 (001 fallback) fallback-count)
              (1110 (001 blocked) blocked-count))))))))
