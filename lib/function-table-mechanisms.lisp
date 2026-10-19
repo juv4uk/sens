@@ -17,7 +17,7 @@
 ; #1332/#1403: () is a structural value outside the 256-function space.
 ; Function 00000000 therefore has no empty-list-ground route here.
 ;
-; SID bit patterns below are DomainIdentity coordinates, not host integers.
+; Викличні голови нижче — чинні ратифіковані D3/D4/D5 поверхні `укр`.
 
 (
   (schema function-table-mechanisms/1)
@@ -25,7 +25,7 @@
   (lifecycle transitional)
   (retirement-issue 1046)
   (rows
-    ; Core evaluator forms — exact 8-bit coordinates
+    ; Форми evaluator: точні ратифіковані D3/D4 координати
     (як-є evaluator quote-form)
     (атом? evaluator atom-primitive)
     (тотожне? evaluator eq-primitive)
@@ -35,7 +35,8 @@
     (за-умовою evaluator cond-form)
     (функція evaluator lambda-form)
     (визначити evaluator define-form)
-    (визначити evaluator define-form)
+    ; SID8:00001001 і SID8:00001011 мали історичну позначку define-form.
+    ; У сучасній D4:0011 — один закон і один маршрут визначити.
     ; Existing function + only. These rows admit executors; they do not define +.
     ; Evidence donors: #988/#1042; Datalog execution replay: #1052.
     ; Чотири острови виконують додавання (SID8:00001100 → D5:01010).
