@@ -347,6 +347,52 @@ def measure(root: Path) -> Progress:
     )
 
 
+def additional_non_ukr_heads(forms: tuple, calls) -> list:
+    """Урахувати синтаксис і сирі голови, пропущені звичайним callsite scan.
+
+    DEFINE/LAMBDA/QUOTE є виконуваними формами, навіть якщо це не
+    звичайні функціональні виклики. Цитовані дані та параметри LAMBDA
+    не вважаються викликами. Не призначаємо історичним бітам нові D8-коди.
+    """
+    english_syntax = {"define", "def", "defmacro", "lambda",
+                      "quote", "quasiquote", "let", "let*"}
+    found = []
+
+    def walk(node):
+        if isinstance(node, calls.Prefix):
+            if node.marker in ("'", "#;"):
+                return
+            if node.marker == chr(96):
+                return  # квазіцитування без виконуваного розгортання
+            walk(node.datum)
+            return
+        if not isinstance(node, calls.Form) or not node.values:
+            return
+
+        head = calls.atom(node.values[0])
+        if head is not None and (head in english_syntax
+                                 or calls.BIT_WORD.fullmatch(head)
+                                 or calls.ENCODED_HEAD.fullmatch(head)):
+            found.append(node.values[0])
+
+        if head in ("як-є", "quote", "001"):
+            return
+        if head in ("функція", "lambda", "0010"):
+            children = node.values[2:]
+        elif head in ("визначити", "define", "def", "0011"):
+            children = node.values[2:]
+        else:
+            children = node.values[1:]
+            if isinstance(node.values[0], calls.Form):
+                walk(node.values[0])
+        for child in children:
+            walk(child)
+
+    for form in forms:
+        walk(form)
+    return found
+
+
 def audit_executable_ukr_files(root: Path) -> dict:
     """Статична файлова метрика за викличними головами, а не за згадкою кирилиці.
 
@@ -374,11 +420,14 @@ def audit_executable_ukr_files(root: Path) -> dict:
             continue
 
         reason = None
+        failure_site = None
         try:
             if path.is_symlink() or not path.resolve().is_relative_to(root):
                 raise calls.SourceError("symlink/out-of-root source")
             forms = calls.parse(path.read_text(encoding="utf-8"))
             heads = list(calls.candidate_heads(forms))
+            heads.extend(additional_non_ukr_heads(forms, calls))
+            heads.sort(key=lambda token: (token.line, token.column))
             if not heads:
                 without_heads += 1
                 continue
@@ -400,13 +449,19 @@ def audit_executable_ukr_files(root: Path) -> dict:
                 elif "ук" in kinds and "укр" not in kinds:
                     reason = "compact-instead-of-full-ukr"
                 if reason:
+                    failure_site = head
                     break
         except (UnicodeError, OSError, calls.SourceError, RecursionError) as exc:
             eligible += 1
             unclassified += 1
             reason = "unreadable-or-unparsed: " + str(exc)
         if reason:
-            pending_files.append({"path": rel.as_posix(), "reason": reason})
+            finding = {"path": rel.as_posix(), "reason": reason}
+            if failure_site is not None:
+                finding.update({"line": failure_site.line,
+                                "column": failure_site.column,
+                                "head": failure_site.text})
+            pending_files.append(finding)
         else:
             converted += 1
 
@@ -566,7 +621,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\nАктивних виконуваних .lisp ще не на повній укр: {len(incomplete)}")
         shown_ukr = incomplete[:args.top] if args.top > 0 else incomplete
         for item in shown_ukr:
-            print(f"  {item['path']}: {item['reason']}")
+            location = f":{item['line']}:{item['column']}" if "line" in item else ""
+            name = f" ({item['head']})" if "head" in item else ""
+            print(f"  {item['path']}{location}: {item['reason']}{name}")
         if args.top > 0 and len(incomplete) > args.top:
             print(f"  … ще {len(incomplete) - args.top}")
 
