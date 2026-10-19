@@ -196,23 +196,23 @@
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
 (визначити довжина-до
-  (функція (values acc)
+  (функція (значення накопичувач)
     (за-умовою
       ; D4 NULL checks exactly the end of a proper list. NOT(ATOM) would
       ; terminate nonempty lists immediately and report every length as 0.
-      ((порожній? values) acc)
+      ((порожній? значення) накопичувач)
       ; Only a cons cell advances the accumulator. An improper nonempty
       ; tail is not silently counted as an empty list.
       ; D5 PLUS accepts qualified D24 values, never an unqualified 1.
-      ((хибне? (атом? values))
-       (довжина-до (решта values)
-         (додати acc 1))))))
+      ((хибне? (атом? значення))
+       (довжина-до (решта значення)
+         (додати накопичувач 1))))))
 (визначити length-onto довжина-до)
 
 
 (визначити length
-  (функція (values)
-    (довжина-до values 0)))
+  (функція (значення)
+    (довжина-до значення 0)))
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
@@ -257,44 +257,44 @@
 ; while D3 ATOM excludes improper non-pair tails. Both produce D1 control
 ; bits; structural (0) / equal? must never act as a COND predicate.
 (визначити відобразити-до
-  (функція (f values acc)
+  (функція (дія значення накопичувач)
     (за-умовою
-      ((порожній? values) (зворот acc))
-      ((хибне? (атом? values))
-       (відобразити-до f (решта values) (сполучити (f (перше values)) acc))))))
+      ((порожній? значення) (зворот накопичувач))
+      ((хибне? (атом? значення))
+       (відобразити-до дія (решта значення) (сполучити (дія (перше значення)) накопичувач))))))
 (визначити map-onto відобразити-до)
 
 (визначити map
-  (функція (f values)
-    (відобразити-до f values (як-є ()))))
+  (функція (дія значення)
+    (відобразити-до дія значення (як-є ()))))
 
 (визначити відсіяти-до
-  (функція (predicate values acc)
+  (функція (перевірка значення накопичувач)
     (за-умовою
-      ((хибне? (атом? values)) (зворот acc))
-      ((атом? values)  (зворот acc))
-      ((атом? values) 
-       (нехай ((decision (predicate (перше values))))
+      ((хибне? (атом? значення)) (зворот накопичувач))
+      ((атом? значення)  (зворот накопичувач))
+      ((атом? значення) 
+       (нехай ((рішення (перевірка (перше значення))))
          (за-умовою
-           (decision
-            (відсіяти-до predicate (решта values) (сполучити (перше values) acc)))
-           ((атом? predicate)
-            (відсіяти-до predicate (решта values) acc))))))))
+           (рішення
+            (відсіяти-до перевірка (решта значення) (сполучити (перше значення) накопичувач)))
+           ((атом? перевірка)
+            (відсіяти-до перевірка (решта значення) накопичувач))))))))
 (визначити filter-onto відсіяти-до)
 
 (визначити filter
-  (функція (predicate values)
-    (відсіяти-до predicate values (як-є ()))))
+  (функція (перевірка значення)
+    (відсіяти-до перевірка значення (як-є ()))))
 
 ; REDUCE: D4:0101 NULL terminates only the empty list.
 ; Previous NOT(ATOM(values)) returned acc on nonempty pairs and CAR'd NIL.
 ; For any improper nonempty atom the ordinary D3 CAR rejects the data.
 (визначити згорнути
-  (функція (f acc values)
+  (функція (дія накопичувач значення)
     (за-умовою
-      ((порожній? values) acc)
+      ((порожній? значення) накопичувач)
       (так
-       (згорнути f (f acc (перше values)) (решта values))))))
+       (згорнути дія (дія накопичувач (перше значення)) (решта значення))))))
 (визначити reduce згорнути)
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
