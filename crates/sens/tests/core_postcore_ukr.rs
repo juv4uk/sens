@@ -83,11 +83,11 @@ fn core_nth_member_follow_current_d6_d5_semantics() {
     );
     assert_eq!(
         execute(&mut session, "(значення-у-списку? (як-є б) (як-є (а б)))"),
-        execute(&mut session, "так")
+        execute(&mut session, "(атом? (як-є а))")
     );
     assert_eq!(
         execute(&mut session, "(значення-у-списку? (як-є в) (як-є (а б)))"),
-        execute(&mut session, "ні")
+        execute(&mut session, "(тотожне? (як-є а) (як-є б))")
     );
 }
 
@@ -116,8 +116,7 @@ fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
 // а не Python/Rust реалізація семантики тіл LAMBDA.
 #[test]
 fn meta_eval_body_result_observes_last_form_and_early_failure() {
-    let mut session = Session::default();
-    sens::load_core_library(&mut session).expect("дійсний SENS Core");
+    let mut session = core_session();
     sens::load_meta_evaluator_library(&mut session).expect("дійсний SENS MetaEval");
 
     // До виправлення перша форма помилково ставала остаточним результатом.
@@ -135,6 +134,6 @@ fn meta_eval_body_result_observes_last_form_and_early_failure() {
             &mut session,
             "(це-результат-невдалого-обчислення? (обчислити-послідовне-тіло-з-раннім-збоєм (як-є (невідоме-імя 2)) (як-є ())))"
         ),
-        execute(&mut session, "так")
+        execute(&mut session, "(атом? (як-є а))")
     );
 }
