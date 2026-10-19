@@ -105,7 +105,7 @@ nonincreasing-from?
 digit->string
 ```
 
-Вони лишаються implementation helpers.
+Вони лишаються implementation helpers. Історичне registry-ім'я `digit->string` у цьому аудиті збережено як джерельну назву; чинне внутрішнє зв'язування в Core та дзеркалі bootstrap — `взяти-десятковий-символ`. Воно не додає мешканця D1–D10.
 
 ## HOLD
 

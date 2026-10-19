@@ -83,6 +83,7 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             ("класифікувати-непорожність-рядка", "nonempty-string-membership-helper"),
             ("знайти-пару-підстановки", "sublis-pair"),
             ("підготувати-цитовані-аргументи", "apply-quote-args"),
+            ("взяти-десятковий-символ", "digit->string"),
             ("знайти-найбільший-блок-частки", "largest-chunk"),
             ("перевірити-неспадання-значень?", "nondecreasing-from?"),
             ("перевірити-незростання-значень?", "nonincreasing-from?"),
@@ -122,6 +123,18 @@ class CoreUkrPrimaryProjectionTests(unittest.TestCase):
             with self.subTest(inventory=legacy):
                 self.assertIn(ukrainian, inventory)
                 self.assertNotIn(legacy, inventory)
+
+        with self.subTest(file="racket/boot/core.lisp", migration="decimal-symbol helper"):
+            racket_core = source("racket/boot/core.lisp")
+            self.assertIn("(0011 взяти-десятковий-символ", racket_core)
+            self.assertIn("(взяти-десятковий-символ ", racket_core)
+            self.assertNotIn("(0011 digit->string", racket_core)
+            self.assertNotIn("(digit->string ", racket_core)
+
+        dependency_classifier = source("scripts/build-dependency-classification.lisp")
+        with self.subTest(file="scripts/build-dependency-classification.lisp", migration="decimal-symbol helper"):
+            self.assertIn("взяти-десятковий-символ", dependency_classifier)
+            self.assertNotIn("digit->string", dependency_classifier)
 
         # Exact keys and full Ukrainian labels come from their owning domains.
         # In particular, D6:100111's label "четверте" is only a projection;

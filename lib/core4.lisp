@@ -2643,7 +2643,7 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(визначити digit->string
+(визначити взяти-десятковий-символ
   ; Superseded by number->string's canonical delegation to write-to-string
   ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
@@ -2659,7 +2659,7 @@
       ((тотожне? число-аргумент 0) 
        (number->string-onto
          (частка число-аргумент 10)
-         (рядок-додати (digit->string (модульна-остача число-аргумент 10)) накопичувач))))))
+         (рядок-додати (взяти-десятковий-символ (модульна-остача число-аргумент 10)) накопичувач))))))
 
 (визначити число-рядок
   (функція (число-аргумент)

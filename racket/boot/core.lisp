@@ -543,7 +543,7 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(0011 digit->string
+(0011 взяти-десятковий-символ
   (0010 (d)
     (nth d (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
@@ -551,7 +551,7 @@
   (0010 (n acc)
     (110
       ((101 n 0) acc)
-      (t (number->string-onto (quotient n 10) (110011110 (digit->string (mod n 10)) acc))))))
+      (t (number->string-onto (quotient n 10) (110011110 (взяти-десятковий-символ (mod n 10)) acc))))))
 
 (0011 number->string
   (0010 (n)

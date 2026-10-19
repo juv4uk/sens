@@ -306,7 +306,7 @@
       "decision": "INTERNAL-HELPER",
       "selected_d9_candidate": false,
       "source_file": "lib/core.lisp",
-      "source_binding": "digit->string",
+      "source_binding": "взяти-десятковий-символ",
       "relation_class": "INTERNAL",
       "behavior": "internal number-rendering helper used by NUMBER->STRING",
       "lower_identity": null,

@@ -83,7 +83,7 @@ for registry_name, current_binding in (
     ("largest-chunk", "знайти-найбільший-блок-частки"),
     ("nondecreasing-from?", "перевірити-неспадання-значень?"),
     ("nonincreasing-from?", "перевірити-незростання-значень?"),
-    ("digit->string", "digit->string"),
+    ("digit->string", "взяти-десятковий-символ"),
 ):
     assert by_name[registry_name]["decision"]=="INTERNAL-HELPER"
     assert current_binding in uk_inventory
