@@ -63,12 +63,12 @@
 ; erzeugende Fakt, typischerweise mit denselben Variablen, damit
 ; `fire-rule` einsetzen kann, woran `pattern` sie gebunden hat.
 
-(визначити *working-memory* (як-є ()))
+(визначити *робоча-пам'ять* (як-є ()))
 
 (визначити ствердити-факт!
   (макрос
     (функція (факт)
-      (список (як-є визначити) (як-є *working-memory*) (список (як-є сполучити) факт (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є сполучити) факт (як-є *робоча-пам'ять*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
@@ -91,7 +91,7 @@
 
 ; Step 2: apply one rule to every fact in a list, collecting the new facts
 ; it produces. Still just one rule (not the whole rule set) and still no
-; assertion back into `*working-memory*` or fixpoint looping — this stays a
+; assertion back into `*робоча-пам'ять*` or fixpoint looping — this stays a
 ; pure function over an explicit fact list, same shape as `count-usage-list`
 ; in `lib/reason.lisp`. `no-match` results are silently dropped, same as a
 ; failed match dropping out of `prove-goal`'s search in the backward-chaining
@@ -99,14 +99,14 @@
 ;
 ; Крок 2: застосувати одне правило до кожного факту в списку, зібравши нові
 ; факти, які воно породжує. Досі лише одне правило (не весь набір правил) і
-; досі без запису назад у `*working-memory*` чи fixpoint-циклу — це чиста
+; досі без запису назад у `*робоча-пам'ять*` чи fixpoint-циклу — це чиста
 ; функція над явним списком фактів, той самий підхід, що й `count-usage-list`
 ; у `lib/reason.lisp`. Результати `no-match` мовчки відкидаються, так само як
 ; невдале зіставлення випадає з пошуку `prove-goal` у backward-chaining рушії.
 ;
 ; Schritt 2: eine Regel auf jeden Fakt einer Liste anwenden und die dabei
 ; erzeugten neuen Fakten sammeln. Immer noch nur eine Regel (nicht das ganze
-; Regelwerk) und immer noch keine Rückschreibung in `*working-memory*` oder
+; Regelwerk) und immer noch keine Rückschreibung in `*робоча-пам'ять*` oder
 ; Fixpunkt-Schleife — dies bleibt eine reine Funktion über eine explizite
 ; Faktenliste, dieselbe Form wie `count-usage-list` in `lib/reason.lisp`.
 ; `no-match`-Ergebnisse werden stillschweigend verworfen, genau wie ein
@@ -141,7 +141,7 @@
 ; requiring the caller to pass it explicitly.
 (визначити запустити-правило-на-робоча-пам'ять
   (функція (правило-для-робочої-памяті)
-    (запустити-правило-на-факти правило-для-робочої-памяті *working-memory*)))
+    (запустити-правило-на-факти правило-для-робочої-памяті *робоча-пам'ять*)))
 
 ; Step 3: apply every rule in a rule set to a fact list (still a single
 ; pass — no fixpoint loop yet, so a fact produced by one rule isn't itself
@@ -171,7 +171,7 @@
 
 (визначити запустити-правила-на-робоча-пам'ять
   (функція (правила-робочої-пам'яті)
-    (запустити-правила-на-факти правила-робочої-пам'яті *working-memory*)))
+    (запустити-правила-на-факти правила-робочої-пам'яті *робоча-пам'ять*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
 ; against the current fact list, folding newly produced facts (deduplicated
@@ -179,12 +179,12 @@
 ; adds nothing new.
 ;
 ; `run` is a *pure function* returning the final fact list — it does not
-; itself assert into `*working-memory*`. Same reason `count-usage` accumulates
+; itself assert into `*робоча-пам'ять*`. Same reason `count-usage` accumulates
 ; instead of mutating in lib/reason.lisp: `run` is a `lambda`, and `def` (the
 ; only mutation my-lisp has) only ever mutates the frame it runs in, so a
 ; loop body cannot durably update a global one iteration at a time. To sync
 ; the result back, call `assert-facts!` yourself at the top level:
-; `(assert-facts! (run rules *working-memory*))`.
+; `(assert-facts! (run rules *робоча-пам'ять*))`.
 ;
 ; Крок 4: `run` — fixpoint-цикл. Повторно застосовує весь набір правил до
 ; поточного списку фактів, вкладаючи новоутворені факти (дедуплікація через
@@ -192,12 +192,12 @@
 ; нічого нового.
 ;
 ; `run` — *чиста функція*, що повертає фінальний список фактів — сама вона
-; не записує в `*working-memory*`. Та сама причина, що й акумуляція в
+; не записує в `*робоча-пам'ять*`. Та сама причина, що й акумуляція в
 ; `count-usage` у lib/reason.lisp замість мутації: `run` — це `lambda`, а
 ; `def` (єдина мутація в my-lisp) мутує лише той фрейм, у якому виконується,
 ; тож тіло циклу не може стійко оновлювати глобальний стан по одній
 ; ітерації. Щоб синхронізувати результат назад, виклич `assert-facts!` сам
-; на верхньому рівні: `(assert-facts! (run rules *working-memory*))`.
+; на верхньому рівні: `(assert-facts! (run rules *робоча-пам'ять*))`.
 ;
 ; Schritt 4: `run` — die Fixpunkt-Schleife. Wendet wiederholt das ganze
 ; Regelwerk auf die aktuelle Faktenliste an und faltet neu erzeugte Fakten
@@ -205,13 +205,13 @@
 ; diese Liste ein, bis ein Durchlauf nichts Neues mehr hinzufügt.
 ;
 ; `run` ist eine *reine Funktion*, die die endgültige Faktenliste
-; zurückgibt — sie schreibt selbst nicht in `*working-memory*`. Derselbe
+; zurückgibt — sie schreibt selbst nicht in `*робоча-пам'ять*`. Derselbe
 ; Grund wie die Akkumulation in `count-usage` in lib/reason.lisp statt
 ; Mutation: `run` ist eine `lambda`, und `def` (die einzige Mutation in
 ; my-lisp) mutiert nur den Frame, in dem es läuft, daher kann der
 ; Schleifenkörper nicht Schritt für Schritt dauerhaft einen globalen Zustand
 ; aktualisieren. Um das Ergebnis zurückzusynchronisieren, ruf `assert-facts!`
-; selbst auf oberster Ebene auf: `(assert-facts! (run rules *working-memory*))`.
+; selbst auf oberster Ebene auf: `(assert-facts! (run rules *робоча-пам'ять*))`.
 
 ; Structural membership is a derived SENS law over fact data.
 ; Unlike historical D5 MEMBER, it must not call CAR on an empty list,
@@ -245,7 +245,7 @@
 (визначити ствердити-факти!
   (макрос
     (функція (факти)
-      (список (як-є визначити) (як-є *working-memory*) (список (як-є додати-нові) факти (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є додати-нові) факти (як-є *робоча-пам'ять*))))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.
@@ -288,7 +288,7 @@
 (визначити відкликати-факт!
   (макрос
     (функція (поточний-факт)
-      (список (як-є визначити) (як-є *working-memory*) (список (як-є відкликати-факт) поточний-факт (як-є *working-memory*))))))
+      (список (як-є визначити) (як-є *робоча-пам'ять*) (список (як-є відкликати-факт) поточний-факт (як-є *робоча-пам'ять*))))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -306,7 +306,7 @@
 ; fact is a further step, not assumed here.
 ;
 ; Lives alongside the Step 1-5a plain-fact functions rather than replacing
-; them: `*justified-memory*` is a separate global from `*working-memory*`,
+; them: `*обґрунтована-пам'ять*` is a separate global from `*робоча-пам'ять*`,
 ; so existing callers of `run`/`assert-fact!`/`retract-fact!` are unaffected.
 ;
 ; Крок 5b: справжня (хоч і мінімальна) система підтримки істинності. *Факт з
@@ -325,7 +325,7 @@
 ; факт — окремий подальший крок, тут не мається на увазі.
 ;
 ; Існує поряд із функціями Кроку 1-5a для простих фактів, не замінюючи їх:
-; `*justified-memory*` — окрема глобальна змінна від `*working-memory*`, тож
+; `*обґрунтована-пам'ять*` — окрема глобальна змінна від `*робоча-пам'ять*`, тож
 ; наявні виклики `run`/`assert-fact!`/`retract-fact!` не зачіпаються.
 ;
 ; Schritt 5b: ein echtes (wenn auch minimales) Truth-Maintenance-System. Ein
@@ -346,7 +346,7 @@
 ; Begründungen pro Fakt ist ein weiterer, hier nicht unterstellter Schritt.
 ;
 ; Existiert neben den Funktionen für einfache Fakten aus Schritt 1-5a, ohne
-; sie zu ersetzen: `*justified-memory*` ist eine von `*working-memory*`
+; sie zu ersetzen: `*обґрунтована-пам'ять*` ist eine von `*робоча-пам'ять*`
 ; getrennte globale Variable, sodass bestehende Aufrufer von
 ; `run`/`assert-fact!`/`retract-fact!` unberührt bleiben.
 (визначити створити-обґрунтований
@@ -425,17 +425,17 @@
           ((однакові? (довжина об'єднані-записи) (довжина поточні-записи))  поточні-записи)
           (так (запустити-система-істини поточні-правила об'єднані-записи)))) (додати-нові-обґрунтований нові-записи поточні-записи))) (запустити-правила-на-факти-система-істини поточні-правила (мапа-факт-від поточні-записи)))))
 
-(визначити *justified-memory* (як-є ()))
+(визначити *обґрунтована-пам'ять* (як-є ()))
 
 (визначити ствердити-факт-система-істини!
   (макрос
     (функція (поточний-факт)
-      (список (як-є визначити) (як-є *justified-memory*) (список (як-є додати-нові-обґрунтований) (список (як-є список) (список (як-є аксіома) поточний-факт)) (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *обґрунтована-пам'ять*) (список (як-є додати-нові-обґрунтований) (список (як-є список) (список (як-є аксіома) поточний-факт)) (як-є *обґрунтована-пам'ять*))))))
 
 (визначити запустити-система-істини!
   (макрос
     (функція (поточні-правила)
-      (список (як-є визначити) (як-є *justified-memory*) (список (як-є запустити-система-істини) поточні-правила (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *обґрунтована-пам'ять*) (список (як-є запустити-система-істини) поточні-правила (як-є *обґрунтована-пам'ять*))))))
 
 (визначити видалити-обґрунтований
   (функція (поточний-факт поточні-записи)
@@ -470,7 +470,7 @@
 (визначити відкликати-факт-система-істини!
   (макрос
     (функція (поточний-факт)
-      (список (як-є визначити) (як-є *justified-memory*) (список (як-є відкликати-факт-система-істини) поточний-факт (як-є *justified-memory*))))))
+      (список (як-є визначити) (як-є *обґрунтована-пам'ять*) (список (як-є відкликати-факт-система-істини) поточний-факт (як-є *обґрунтована-пам'ять*))))))
 
 ; Step 5c: multiple justifications per fact — the limitation Step 5b
 ; documented and deliberately left open. An entry is now `(fact
@@ -484,8 +484,8 @@
 ; independent justification (e.g. also asserted directly, or derivable
 ; another way) stays.
 ;
-; Separate global (`*jtms-memory*`) from both `*working-memory*` (Step
-; 1-5a) and `*justified-memory*` (Step 5b, single-justification) — neither
+; Separate global (`*пам'ять-обґрунтувань*`) from both `*робоча-пам'ять*` (Step
+; 1-5a) and `*обґрунтована-пам'ять*` (Step 5b, single-justification) — neither
 ; earlier layer is touched or replaced.
 ;
 ; Крок 5c: множинні обґрунтування на факт — обмеження, задокументоване й
@@ -500,8 +500,8 @@
 ; незалежним обґрунтуванням (напр. також заявлений напряму, або виведений
 ; іншим шляхом) лишається.
 ;
-; Окрема глобальна (`*jtms-memory*`) від `*working-memory*` (Крок 1-5a) і
-; `*justified-memory*` (Крок 5b, одне обґрунтування) — жоден з попередніх
+; Окрема глобальна (`*пам'ять-обґрунтувань*`) від `*робоча-пам'ять*` (Крок 1-5a) і
+; `*обґрунтована-пам'ять*` (Крок 5b, одне обґрунтування) — жоден з попередніх
 ; шарів не чіпається й не замінюється.
 ;
 ; Schritt 5c: mehrere Begründungen pro Fakt — die in Schritt 5b dokumentierte
@@ -517,8 +517,8 @@
 ; unabhängigen Begründung (z. B. auch direkt behauptet oder anders
 ; ableitbar) bleibt erhalten.
 ;
-; Separate globale Variable (`*jtms-memory*`) sowohl von `*working-memory*`
-; (Schritt 1-5a) als auch von `*justified-memory*` (Schritt 5b, eine
+; Separate globale Variable (`*пам'ять-обґрунтувань*`) sowohl von `*робоча-пам'ять*`
+; (Schritt 1-5a) als auch von `*обґрунтована-пам'ять*` (Schritt 5b, eine
 ; Begründung) — keine frühere Schicht wird berührt oder ersetzt.
 (визначити обґрунтування-від (функція (поточний-запис) (решта поточний-запис)))
 
@@ -605,17 +605,17 @@
         ((однакові? об'єднані-записи поточні-записи) поточні-записи)
         (так (запустити-система-обґрунтувань поточні-правила об'єднані-записи)))) (додати-нові-записи-система-обґрунтувань (запустити-правила-на-факти-система-обґрунтувань поточні-правила (мапа-факт-від поточні-записи)) поточні-записи))))
 
-(визначити *jtms-memory* (як-є ()))
+(визначити *пам'ять-обґрунтувань* (як-є ()))
 
 (визначити ствердити-факт-система-обґрунтувань!
   (макрос
     (функція (поточний-факт)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є додати-обґрунтування) поточний-факт (список (як-є як-є) (як-є ())) (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є додати-обґрунтування) поточний-факт (список (як-є як-є) (як-є ())) (як-є *пам'ять-обґрунтувань*))))))
 
 (визначити запустити-система-обґрунтувань!
   (макрос
     (функція (поточні-правила)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є запустити-система-обґрунтувань) поточні-правила (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є запустити-система-обґрунтувань) поточні-правила (як-є *пам'ять-обґрунтувань*))))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -764,7 +764,7 @@
 (визначити запустити-система-обґрунтувань-мульти!
   (макрос
     (функція (поточні-правила)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є запустити-система-обґрунтувань-мульти) поточні-правила (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є запустити-система-обґрунтувань-мульти) поточні-правила (як-є *пам'ять-обґрунтувань*))))))
 
 (визначити обрізати-обґрунтування
   (функція (поточний-факт список-обґрунтувань)
@@ -825,7 +825,7 @@
 (визначити відкликати-факт-система-обґрунтувань!
   (макрос
     (функція (поточний-факт)
-      (список (як-є визначити) (як-є *jtms-memory*) (список (як-є відкликати-факт-система-обґрунтувань) поточний-факт (як-є *jtms-memory*))))))
+      (список (як-є визначити) (як-є *пам'ять-обґрунтувань*) (список (як-є відкликати-факт-система-обґрунтувань) поточний-факт (як-є *пам'ять-обґрунтувань*))))))
 
 ; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
 ; forward-only `(pattern template)` shape, matched against exactly one

@@ -107,7 +107,7 @@ fn eight_bit_heads(source: &str) -> Vec<String> {
 }
 
 #[test]
-fn forward_macro_cutover_is_exact_width_and_bit_neutral() {
+fn forward_macro_cutover_uses_native_d5() {
     let heads = eight_bit_heads(FORWARD);
     assert!(
         heads.is_empty(),
@@ -116,6 +116,7 @@ fn forward_macro_cutover_is_exact_width_and_bit_neutral() {
 
     assert_eq!(FORWARD.matches("(як-є визначити)").count(), MIGRATED_MACROS.len());
     assert!(!FORWARD.contains("(як-є def)"), "legacy def macro expansion forbidden");
+    assert!(!FORWARD.contains("(make-macro"), "старий макроконструктор відсутній");
     for name in MIGRATED_MACROS {
         let define = format!("(визначити {name}\n  (макрос\n    (функція ");
         assert!(
@@ -125,7 +126,7 @@ fn forward_macro_cutover_is_exact_width_and_bit_neutral() {
     }
 
     assert!(
-        !FORWARD.contains("(make-macro"),
+        !FORWARD.contains("(макрос"),
         "у виконуваному джерелі не може залишатися застарілий конструктор"
     );
 }
@@ -146,9 +147,9 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     let mut session = session();
     // Реальний SENS-виклик: стан змінюється D4 DEFINE, потім відкликається.
     eval(&mut session, "(ствердити-факт! (як-є альфа))");
-    assert_eq!(eval(&mut session, "*working-memory*"), "(альфа)");
+    assert_eq!(eval(&mut session, "*робоча-пам'ять*"), "(альфа)");
     eval(&mut session, "(відкликати-факт! (як-є альфа))");
-    assert_eq!(eval(&mut session, "*working-memory*"), "()");
+    assert_eq!(eval(&mut session, "*робоча-пам'ять*"), "()");
 
     for source in [
         "(ствердити-факт! (як-є альфа))",
@@ -170,7 +171,7 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
     assert_eq!(
         eval(
             &mut session,
-            "(list *working-memory* *justified-memory* *jtms-memory*)",
+            "(list *робоча-пам'ять* *обґрунтована-пам'ять* *пам'ять-обґрунтувань*)",
         ),
         "(() () ())",
         "all three mutable reasoning memories must return to empty after bounded assert/run/retract"
