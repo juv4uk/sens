@@ -15,8 +15,8 @@
       ((тотожне? actual expected) actual)
       ((атом? (як-є ()))
        ((функція ()
-          (PRINT label)
-          (PRINT actual)
+          (друкувати label)
+          (друкувати actual)
           (release-preflight-failed)))))))
 
 (визначити release-run
@@ -55,12 +55,12 @@
       ; Never create an implicit commit while preparing an exact-SHA release.
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
-      (PRINT "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
+      (друкувати "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
       (release-preflight-failed))))
   ((атом? (як-є ()))
    ((функція ()
-      (PRINT "Не вдалося визначити стан regenerated FASL")
-      (PRINT release-fasl-diff-status)
+      (друкувати "Не вдалося визначити стан regenerated FASL")
+      (друкувати release-fasl-diff-status)
       (release-preflight-failed)))))
 (release-run "timeout" (як-є ("60" "git" "fetch" "origin" "main")))
 (визначити release-head (release-run "git" (як-є ("log" "-1" "--pretty=format:%H" "HEAD"))))
@@ -74,9 +74,9 @@
       ((атом? (як-є ()))
        ((функція ()
           (release-require (перше paths)
-            (STRING-CONTAINS?
+            (рядок-містить?
               (рядок-додати "version = \"" (рядок-додати release-version "\""))
-              (READ-FILE (перше paths))) t)
+              (читати-файл (перше paths))) t)
           (release-check-manifests (решта paths))))))))
 
 (release-check-manifests
