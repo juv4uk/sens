@@ -1378,7 +1378,7 @@ def source_files(root: Path):
 # Owner-reviewed NONPROGRAM data (#4460), not executable SENS.
 # Both path identity AND source Git blob SHA are mandatory for recognition.
 NONPROGRAM_MANIFESTS = (
-    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 11),
     ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
