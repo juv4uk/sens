@@ -719,7 +719,7 @@
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
 ; Recurse through this Lisp-owned integer quotient; D5:10111 is exact division, not floor division.
-(визначити quotient
+(визначити частка
   (функція (a b)
     (за-умовою
       ((тотожне? b 0)  (поділити a b))
@@ -729,12 +729,14 @@
          ((хибне? (менше? a b))
           (нехай ((chunk+mult (largest-chunk a b b 1)))
             (додати (решта chunk+mult)
-               (quotient (відняти a (перше chunk+mult)) b)))))))))
+               (частка (відняти a (перше chunk+mult)) b)))))))))
+(визначити quotient частка)
 
 ; The remainder uses the same Lisp-owned integer quotient: a - b * floor(a / b).
-(визначити mod
+(визначити модульна-остача
   (функція (a b)
-    (відняти a (помножити b (quotient a b)))))
+    (відняти a (помножити b (частка a b)))))
+(визначити mod модульна-остача)
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
