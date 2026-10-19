@@ -1,15 +1,23 @@
 # Документація SENS
 
-Це коротка карта **актуальної** документації. Датовані матеріали в `docs/research/` і `docs/archive/` зберігають історію дослідження, але не переважають чинний контракт.
+Це навігація до **чинних джерел**, а не дубль контракту. Нормативна семантика належить ратифікованим законам і доменам; реалізаційні новини не змінюють її. Матеріали з датою, зокрема звіт від 12.10.2026, — зріз на вказаний день, **не** статус сьогоднішнього CI. Датовані матеріали в `docs/research/` та `docs/archive/` лишаються історією.
 
 ## Почати звідси
 
-1. [`../README.md`](../README.md) — огляд проєкту.
-2. [`../language-contract.lisp`](../language-contract.lisp) — машинна конституція, Contract 11.9 (D10 whole-domain ratified; D24+ numeric ratified; D10 T5 gated).
-3. [`domain-paradigm.uk.md`](domain-paradigm.uk.md) — домени, закони й генеративний ріст.
-4. [`language-core.md`](language-core.md) — технічна exact-domain модель.
-5. [`semantic-authority-map.md`](semantic-authority-map.md) — що має семантичну владу.
-6. [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — актуальний зведений стан D10, Nano-SENS, бенчмарк-лабораторії та фізичних кодеків.
+1. [`../CURRENT.md`](../CURRENT.md) — поточна влада й перевірений стан реалізації 19.10.2026; джерело для розв'язання суперечностей.
+2. [`../README.md`](../README.md) — короткий огляд, запуск і відмінність `.lisp` / `.sens` / видимого бітового перегляду.
+3. [`../language-contract.lisp`](../language-contract.lisp) — Contract 11.9, власницький доменний закон; не замінюється GitHub Actions.
+4. [`domain-paradigm.uk.md`](domain-paradigm.uk.md), [`language-core.md`](language-core.md), [`semantic-authority-map.md`](semantic-authority-map.md) — домени, фізичні носії, межі семантичної влади.
+5. [`SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md`](SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md) — чинні уточнення до пофайлової міграції та історичні сценарії, які необхідно звіряти з кодом.
+6. [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — **архівний за датою** звіт про D10, Nano-SENS та фізичні кодеки, не поточна обіцянка готовності.
+
+## Практична межа станом на 19.10.2026
+
+- `*.lisp`: повні людські викличні голови `укр` із ратифікованих таблиць, українська клавіатурна поверхня, звичайні десяткові математичні числа. Сирі `#d/#b/#q2`, бітові виклики та SID8 у новому виконуваному коді не допускаються.
+- `crates/sens/src/source_projection.rs`: уже наявне **точне зниження десяткових цілих** у D24/D48/D96/D192 для обраного українського режиму; не плутати з повною реалізацією дробового source reader.
+- `*.sens`: справжні T5M-байти; `name` без розширення поруч із `name.lisp` / `name.sens` — лише похідний видимий бітовий перегляд, що не створює іншої семантики.
+- Відображення SID8/Sens8 на ратифіковану драбину перевіряється через **історичну роль**, не рівність 8 бітів з D8. Усі заперечення мають бути локальними з командою відтворення.
+- [Центральний CI](../.github/workflows/ci.yml): GitHub-hosted Ubuntu 24.04; попередні push-запуски наразі скасовуються — це точний стан YAML, не доказ правильності такої політики.
 
 ## Канонічні human tables
 
@@ -24,11 +32,13 @@
 - `../lib/domains/d7.lisp`
 - `../lib/domains/d8.lisp`
 - `../lib/domains/d9.lisp`
+- `../lib/domains/d10.lisp`
+- `../lib/domains/d11.lisp` — лише 43 тестові ратифіковані ідентичності; 512 selector-кандидатів — дослідження, не callable Core.
 - `../knowledge/d10-v18-semantic-inventory.json` — повний 1024/1024 каталог D10; окремий акт цілісної ратифікації: `../knowledge/d10-owner-whole-domain-ratification-20261012.json`.
 
 D10 ratification — нормативне рішення над повним каталогом, але не свідчення, що кожний закон independently verified або що D10 допущений до T5/physical runtime.
 
-Колонки: `ук → укр → san → en → LISP → sym`.
+Колонки: `ук → укр → san → en → LISP → sym` (у виконуваному людському `.lisp` викличні голови беруться з **повної** `укр`, не компактної `ук`).
 
 **Чинна D7 — keyboard/v2, 128/128** семибітових текстових координат (ратифікація власника 13.10.2026): [`knowledge/d7-keyboard-v2-ratified.json`](../knowledge/d7-keyboard-v2-ratified.json), [`lib/domains/d7.lisp`](../lib/domains/d7.lisp). Координати `0100001` і `0101010` були зарезервовані **тільки в історичній звуковій v1 (126/128)**. **За D7 v1 нічого не встигли мігрувати**, тому нові програми використовують чинну D7 v2 без будь-якої процедури v1→v2 або додаткового міграційного блокування. D7 — дані/текст, не числа й не callable Core. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008; нормативна машинна карта — [`knowledge/d9-ratified.json`](../knowledge/d9-ratified.json), людська — [`lib/domains/d9.lisp`](../lib/domains/d9.lisp).
 
@@ -44,7 +54,7 @@ D10 ratification — нормативне рішення над повним к�
 
 ## Бенчмарк-лабораторія та поточні докази
 
-- [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — робоча картина і правила інтерпретації результатів.
+- [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — **датований звіт на 12.10**, не поточний вердикт усього CI.
 - [`../benchmarks/README.md`](../benchmarks/README.md) — **згенерований** індекс зареєстрованих стендів та окрема таблиця support-exemptions; не редагувати вручну.
 - [`../evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json) — повний sweep 54/54 зі збереженими чотирма FAIL, без оголошення глобального green.
 - [`../benchmarks/support-exemptions.json`](../benchmarks/support-exemptions.json) + [`../benchmarks/support-exemptions.schema.json`](../benchmarks/support-exemptions.schema.json) — явно перевірені support-каталоги, які не є benchmark stands; `scripts/benchmark_registry.py --coverage` показує решту backfill debt #4172, а `--strict` лишається фінальним воротом.

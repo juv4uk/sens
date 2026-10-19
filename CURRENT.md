@@ -4,6 +4,17 @@
 
 This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosystem/issues/5): **one active truth, many preserved histories**. Read this first. Historical material may explain how SENS arrived here, but it cannot override current contract and executable evidence.
 
+## Перевірений стан реалізації · 19.10.2026
+
+Цей розділ описує **виявлений код**, а не змінює Contract 11.9 чи власницьку ратифікацію. Відділяти нормативну владу нижче від фактичного стану конкретних entrypoints.
+
+- **D11 існує як окремий тестовий домен:** [`lib/domains/d11.lisp`](lib/domains/d11.lisp) містить 43 точні 11-бітні тестові ідентичності з [`knowledge/d11-testing-vocabulary-ratified.json`](knowledge/d11-testing-vocabulary-ratified.json). Окремі 512 кандидатів селекторів — **RESEARCH_ONLY_NOT_RATIFIED**, не callable resident-слоти й не продовження Core D1–D10.
+- **Десяткові цілі у людському source більше не суцільна прогалина:** [`crates/sens/src/source_projection.rs`](crates/sens/src/source_projection.rs) реалізує явно обрану українську проєкцію знакових десяткових цілих у exact D24/D48/D96/D192. Пов'язані D5-математичні дерева використовують спільну потрібну ширину; overflow за `i128` — явна помилка. [SENS CLI](crates/sens-cli/src/main.rs) і [українська literate-інтеграція](crates/sens-literate/src/lib.rs) викликають відповідний шлях. Це не доказ повної реалізації десяткової коми/довільних дробових літералів; для дробів перевіряти конкретний admitted закон та еталонний свідок.
+- **Поверхня і файли:** нові виконувані `*.lisp` — повні `укр` викличні голови, українські клавіатурні символи й звичайні десяткові математичні значення, без `#d`/`#b`/`#q2` чи машинних голів. Фізичний `*.sens` містить байти T5M, а однойменний файл **без розширення** — лише похідний видимий exact-bit перегляд. Довести source→exact domain→physical→decoded identity та, окремо, SENS execution parity.
+- **Історичний D8 не вигадується:** SID8/Sens8/Function8 перенести за датованою семантикою і відповідною новою `укр`-проєкцією; однакові 8 бітів не дають D8-ідентичності.
+- **CI і ранери:** чинний [`.github/workflows/ci.yml`](.github/workflows/ci.yml) працює на GitHub-hosted `ubuntu-24.04` та **наразі скасовує попередні push-запуски** того самого ref через `cancel-in-progress`. Це опис наявного YAML, не рекомендація скасовувати перевірки. Не заявляти глобального зеленого статусу без поточного SHA і фактичних logs.
+- **Обсяг змін:** виправляти конкретні дефекти без самовільних HOLD/FREEZE; не розмножувати workflow чи формальні тести. [README](README.md) — поточний огляд, [docs/README.md](docs/README.md) — маршрутизатор; звіт від 12.10.2026 — **датований історичний зріз**.
+
 <!-- OWNER-UKR-DECIMAL-T5M-20261018 -->
 ## Власницьке уточнення · 18.10.2026: український Lisp → точні домени → T5M
 

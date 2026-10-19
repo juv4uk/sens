@@ -1,30 +1,18 @@
-# My-Lisp Status
+# SENS — стан виконання (19.10.2026)
 
-## Current milestone
+Це **коротка карта роботи**, а не окремий семантичний контракт і не автоматична декларація зеленого CI. Чинна влада: [`CURRENT.md`](CURRENT.md), [`language-contract.lisp`](language-contract.lisp), [`lib/domains/`](lib/domains/). Поточні результати визначати за точним SHA й реальним виконанням.
 
-Self-hosting boundary and semantic core completion.
+## Уже є у main
 
-## DONE
+- Ратифіковані D1–D10 (D10 як каталог 1024/1024; його resident callability та фізичне виконання не випливають із заповненості таблиці). D7 v2 — клавіатурні дані; D11 — **43 тестові ідентичності**, не новий callable Core.
+- Українські людські викличні імена беруться з повної колонки `укр`. [`source_projection.rs`](crates/sens/src/source_projection.rs) переводить звичайні знакові десяткові **цілі** в exact D24+ для явно українських точок входу; у зв'язаному D5 математичному дереві ширина узгоджується.
+- `.sens` — фізичне T5M-подання; `.lisp` — людська поверхня. Однойменний файл без розширення — похідний перегляд exact-bit слів, не третя мова. Zig — механічний транспортний коридор, не джерело законів.
+- Центральний [CI](.github/workflows/ci.yml) налаштований на GitHub-hosted Ubuntu 24.04; поточна політика `cancel-in-progress` для push описується в YAML.
 
-- Canonical language contract foundation
-- Semantic evaluator work
-- Environment semantics witnesses
-- Mutual recursion groundwork
+## Вимагає конкретного доказу / наступного виправлення
 
-## IN PROGRESS
+- Повні дробові десяткові літерали, інші типи чисел поза підтриманим source-проєктором, та всі шляхи, які ще обминають потрібну exact-domain/transport межу.
+- Повна, пофайлова міграція активного `*.lisp` на `укр`, історичних SID8/Sens8 викликів і відповідних фізичних T5M-пар; автоматичний бітовий roundtrip не замінює семантичного oracle.
+- Доведений фізичний runtime admission окремих функцій (особливо D10), перевірка фактичного актуального CI/логів, а не повторне оголошення старих PASS/FAIL.
 
-- Move evaluation logic toward My-Lisp level
-- Reduce Rust semantic responsibility
-- Expand executable language contracts
-
-## NEXT
-
-1. Self-hosted evaluator milestone
-2. Macro system completion
-3. Standard library migration from runtime primitives
-4. Contract-driven regression tests
-5. Prepare abstract machine boundary for future VM/FPGA experiments
-
-## Design principle
-
-Rust provides mechanism. My-Lisp defines meaning.
+**Робочий принцип:** маленьке виправлення → реальний SENS-виклик і позитивний/негативний свідок → потрібне вимірювання; локальний дефект не заморожує весь проєкт. Технічні деталі: [README](README.md) · [документація](docs/README.md) · [провенанс міграції](docs/migration-semantic-provenance-2026-10-14.uk.md).
