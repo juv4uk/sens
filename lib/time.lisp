@@ -47,7 +47,7 @@
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
 ; calendar semantics.
-(визначити utc-from-unix
+(визначити узгоджений-час-з-юнікс
   (функція (секунди-юнікс наносекунди)
     ((функція (дні)
       ((функція (секунди-доби)
@@ -74,7 +74,7 @@
 ; Minimal wall-clock host capability contract:
 ;   (unix-time-now) -> (unix-time seconds nanosecond)
 ; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
-(визначити unix-time-observation->utc
+(визначити юнікс-час-спостереження-узгоджений-час
   (функція (observation)
     (за-умовою
       ((тотожне? (перше observation) (як-є unix-time))
@@ -85,7 +85,7 @@
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
-(визначити utc-now
+(визначити узгоджений-час-зараз
   (функція ()
     (юнікс-час-спостереження-узгоджений-час (юнікс-час-зараз))))
 
@@ -157,7 +157,7 @@
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
-(визначити internet-time-sync
+(визначити інтернет-час-синхронізувати
   (функція (host timeout-ms)
     (перетворити-сирі-дані-часу-на-спостереження
       (мережевий-протокол-часу-запит-сирий host timeout-ms))))
@@ -182,11 +182,11 @@
 ; coarser language-level view, so derive them instead of requiring a second
 ; host clock primitive. For the non-negative monotonic counter, quotient gives
 ; whole elapsed milliseconds (floor toward zero == floor here).
-(визначити milliseconds-from-nanoseconds
+(визначити мілісекунди-з-наносекунди
   (функція (nanoseconds)
     (частка nanoseconds 1000000)))
 
-(визначити mono-ms
+(визначити монотонний-мс
   (функція ()
     (мілісекунди-з-наносекунди (монотонний-наносекунди))))
 
@@ -194,11 +194,11 @@
 ; Monotonic counters are host observations; deadline arithmetic is language
 ; semantics. Keep a pure pair of helpers so scheduler logic can be tested
 ; without sleeping, then expose convenience wrappers over the host counter.
-(визначити deadline-from
+(визначити крайній-час-з
   (функція (now-ns delta-ns)
     (додати now-ns delta-ns)))
 
-(визначити deadline-reached-at?
+(визначити крайній-час-досягнуто-у?
   (функція (now-ns deadline-ns)
     (за-умовою
       ((більше? now-ns deadline-ns) так)
@@ -206,17 +206,17 @@
       (так ні)))
 )
 
-(визначити deadline-after-ns
+(визначити крайній-час-після-нс
   (функція (delta-ns)
     (крайній-час-з (монотонний-наносекунди) delta-ns)))
 
 
-(визначити deadline-reached?
+(визначити крайній-час-досягнуто?
   (функція (deadline-ns)
     (крайній-час-досягнуто-у? (монотонний-наносекунди) deadline-ns)))
 
 
-(визначити elapsed-ns
+(визначити минуло-нс
   (функція (started-ns)
     (відняти (монотонний-наносекунди) started-ns)))
 
@@ -288,7 +288,7 @@
        (сполучити (як-є rejected) (сполучити (як-є invalid-timezone-observation) (як-є ()))))))
 )
 
-(визначити timezone-detect
+(визначити часовий-пояс-визначити
   (функція ()
     (часовий-пояс-сирий-до-спостереження
       (часовий-пояс-оголошення-сирий))))
@@ -309,11 +309,11 @@
        (сполучити (як-є rejected) (сполучити (як-є invalid-name) (як-є ())))))))
 
 
-(визначити timezone-name
+(визначити часовий-пояс-ім'я
   (функція (config)
     (друге config)))
 
-(визначити timezone-offset-seconds
+(визначити часовий-пояс-зсув-секунди
   (функція (config)
     (третє config)))
 
@@ -325,11 +325,6 @@
 ; залишається власністю SENS.
 
 ; Монотонний D10-механізм задає bootstrap; тут лишаються окремі raw host wrappers.
-(визначити крайній-час-з deadline-from)
-(визначити крайній-час-досягнуто-у? deadline-reached-at?)
-(визначити мілісекунди-з-наносекунди milliseconds-from-nanoseconds)
-(визначити юнікс-час-спостереження-узгоджений-час unix-time-observation->utc)
-(визначити узгоджений-час-з-юнікс utc-from-unix)
 
 ; Окремі D10-обгортки raw host операцій; іншим резидентам ці механізми
 ; не передаються лише через сусідство в таблиці домену.
