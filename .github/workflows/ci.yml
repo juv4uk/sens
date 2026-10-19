@@ -2,8 +2,9 @@ name: SENS — перевірки поверхні Lisp
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,7 @@ concurrency:
 jobs:
   runtime-shards:
     name: Реальне виконання — частина ${{ matrix.shard }}
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
@@ -114,6 +116,7 @@ jobs:
 
   lisp-guards:
     name: Українська проєкція та заборона сирих літералів
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     # Усі push/PR/manual перевірки — лише GitHub-hosted Ubuntu.
     # Не маршрутизувати код на персональний self-hosted runner.
     runs-on: ubuntu-24.04
@@ -343,7 +346,7 @@ jobs:
 
   lisp-surface:
     name: Українська проєкція та заборона сирих літералів
-    if: always()
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     needs: [lisp-guards, runtime-shards]
     runs-on: ubuntu-24.04
     steps:

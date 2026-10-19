@@ -33,6 +33,19 @@ def materialize(root: Path, workflows: dict[str, str], verify: str = VERIFY) -> 
 
 
 class RequiredChecksTests(unittest.TestCase):
+    def test_central_ci_triggers_only_for_main(self):
+        workflow_path = ROOT / ".github" / "workflows" / "ci.yml"
+        workflow = MODULE.yaml.load(
+            workflow_path.read_text(encoding="utf-8"),
+            Loader=MODULE.yaml.BaseLoader,
+        )
+        self.assertEqual(workflow["on"]["push"]["branches"], ["main"])
+        self.assertEqual(workflow["on"]["pull_request"]["branches"], ["main"])
+        self.assertIn("workflow_dispatch", workflow["on"])
+
+        for job_id in ("runtime-shards", "lisp-guards", "lisp-surface"):
+            self.assertIn("github.ref == 'refs/heads/main'", workflow["jobs"][job_id]["if"])
+
     def test_name_and_job_id_both_resolve(self):
         body = (
             "jobs:\n"
