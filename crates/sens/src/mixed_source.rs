@@ -370,24 +370,6 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
     parse_mixed_source(source, true)
 }
 
-/// Current Core library entry point. The source is already ratified Ukrainian
-/// Lisp, so use the exact-domain reader with no W8 wrapper or quoted-bit
-/// reinterpretation. The historical function name is temporarily retained only
-/// while call sites are moved to the common reader.
-pub fn parse_mixed_exact_domain_legacy_core_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
-    if path != "lib/core.lisp" {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "Core library source must be the current lib/core.lisp",
-            Span::default(),
-        ));
-    }
-    parse_mixed_exact_domain(source)
-}
-
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
 /// D9 heads are materialized only on this pinned path; execution still requires
 /// a concrete callable mechanism previously attached to that exact identity.
@@ -2227,21 +2209,12 @@ mod tests {
     #[test]
     fn core_macro_code_names_are_ordinary_quoted_ukrainian_data() {
         let source = "(як-є функція)";
-        let exact = only(
-            parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
-                .expect("current Core uses the ordinary exact-domain reader"),
-        );
-        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary source parse"));
-        assert_eq!(exact, ordinary, "the Core entry point must not retype quoted data");
+        let exact = only(parse_mixed_exact_domain(source).expect("generic exact-domain source parse"));
         let ExprKind::List(quote) = &exact.kind else { panic!("QUOTE"); };
         assert!(matches!(&quote[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
         assert!(matches!(&quote[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "функція"));
-
-        assert!(parse_mixed_exact_domain_legacy_core_source(
-            "lib/not-core.lisp", source
-        ).is_err());
     }
 
     #[test]
