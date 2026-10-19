@@ -1,8 +1,9 @@
-; LEGACY_MIGRATION_DEBT #5605 / owner prohibition #5789: old #d1:0/#d1:1
-; are NOT permitted literals in current SENS source. Never add/copy new ones.
-; These pre-existing tokens are quarantined for the historical parse() reader.
-; Retire with a positional D1 loader, positive/negative native SENS witnesses
-; and exact Zig T5 round-trip; no blind substitution with numeric 0/1.
+; Чинний Forward: точні ратифіковані D1–D10 і повна українська проєкція.
+; Старі SID8/Sens8 та закодовані #d1:0/#d1:1 — тільки історія Git, не режим
+; виконання і не карантин активних вихідних файлів. D1 так/ні — предикати,
+; десяткові математичні значення — D24+; T5M фізично пакує їх окремо.
+; Deutsch: Kein historischer Byte-Fallback; die Sprache bleibt in SENS.
+; English: No legacy byte execution; exact domains own current behavior.
 ; A forward-chaining rule engine (CLIPS-style: working memory of facts +
 ; pattern/action rules), the other half of classic symbolic AI from
 ; `lib/reason.lisp`'s backward-chaining (Prolog-style) engine. Grown natively
@@ -76,7 +77,7 @@
 ; template that legitimately evaluates to `()`.
 ; Мовні зв'язування: правило/факт → шаблон/зразок → зв'язування.
 ; Стан середовища та маркер невдачі no-match не змінюються.
-(визначити fire-rule
+(визначити запустити-правило
   (функція (правило факт)
     ((функція (шаблон зразок)
        ((функція (зв'язування)
@@ -116,7 +117,7 @@
 ; it's whatever `template` was — which may itself be a compound list (e.g.
 ; `(has-mass earth)`) — and `eq` errors on non-atom arguments instead of
 ; just correctly answering "not the no-match atom".
-(визначити fire-rule-on-facts
+(визначити запустити-правило-на-факти
   (функція (правило факти)
     (за-умовою
       ((атом? факти) (як-є ()))
@@ -138,7 +139,7 @@
         (запустити-правило правило (перше факти)))))))
 ; Convenience wrapper reading the current global working memory rather than
 ; requiring the caller to pass it explicitly.
-(визначити fire-rule-on-working-memory
+(визначити запустити-правило-на-робоча-пам'ять
   (функція (правило-для-робочої-памяті)
     (запустити-правило-на-факти правило-для-робочої-памяті *working-memory*)))
 
@@ -160,7 +161,7 @@
 ; selbst mit anderen Regeln abgeglichen). Auf `append` aufgebaut, dieselbe
 ; Fan-out-Form, die `prove-goal` in lib/reason.lisp nutzt, um jede Regel gegen
 ; ein Ziel zu versuchen.
-(визначити fire-rules-on-facts
+(визначити запустити-правила-на-факти
   (функція (правила-для-фактів факти-для-правил)
     (за-умовою
       
@@ -168,9 +169,9 @@
       (так (приєднати (запустити-правило-на-факти (перше правила-для-фактів) факти-для-правил)
                   (запустити-правила-на-факти (решта правила-для-фактів) факти-для-правил))))))
 
-(визначити fire-rules-on-working-memory
-  (функція (правила-робочої-памяті)
-    (запустити-правила-на-факти правила-робочої-памяті *working-memory*)))
+(визначити запустити-правила-на-робоча-пам'ять
+  (функція (правила-робочої-пам'яті)
+    (запустити-правила-на-факти правила-робочої-пам'яті *working-memory*)))
 
 ; Step 4: `run` — the fixpoint loop. Repeatedly fires the whole rule set
 ; against the current fact list, folding newly produced facts (deduplicated
@@ -1404,20 +1405,9 @@
 ; D9:010100011
 (визначити обрізати-всі-записи prune-all-entries)
 
-; Відповідність точним D9-словам визначена в lib/domains/d9.lisp.
-; Ці проєкції повторно використовують наявні SENS-функції, не створюють
-; механізмів Zig/Rust або права на прямий виклик D9-бітів.
-; Прямий висновок — SENS DEFINE поверх уже наявних функцій
-; D9:101001000
-(визначити запустити-правило fire-rule)
-; D9:010110000
-(визначити запустити-правило-на-факти fire-rule-on-facts)
-; D9:001011101
-(визначити запустити-правило-на-робоча-пам'ять fire-rule-on-working-memory)
-; D9:010101010
-(визначити запустити-правила-на-факти fire-rules-on-facts)
-; D9:001001100
-(визначити запустити-правила-на-робоча-пам'ять fire-rules-on-working-memory)
+; П'ять базових операцій прямого виведення визначені вище під повними
+; ратифікованими іменами укр. Англійських визначень-дублів немає.
+; Точні D9-ідентичності та ширина залишаються в lib/domains/d9.lisp.
 ; D9:010001011
 ; D9:001001000
 (визначити відкликати-факт retract-fact)

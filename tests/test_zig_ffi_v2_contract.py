@@ -271,13 +271,12 @@ def check_root_asset_corridor(
                  "repro='python3 -m unittest discover -s tests -p test_zig_ffi_v2_contract.py'")
 
 
-    # Exact-width domain table source and three SENS-owned source files are
+    # Exact-width domain table source and two active SENS-owned source files are
     # separately reviewed byte carriers, not new codec ABI-v2 functions.
     # In particular, domain_table has an extra physical width parameter.
     reviewed_sources = (
         ("sens_zig_repl_core_bytes_copy", "lib/repl-core.lisp", "repl_core_asset"),
         ("sens_zig_meta_eval_bytes_copy", "lib/meta-eval.lisp", "meta_eval_asset"),
-        ("sens_zig_meta_registry_bytes_copy", "lib/generated/meta-semantic-registry.lisp", "meta_registry_asset"),
     )
     for name, asset, binding in reviewed_sources:
         const = f'const {binding} = @embedFile("{asset}");'
@@ -363,7 +362,7 @@ def check_root_asset_corridor(
         (ROOT / "crates/sens-cli/src/repl.rs").read_text(encoding="utf-8")
         if repl_source is None else repl_source
     )
-    for name in ("sens_zig_meta_eval_bytes_copy", "sens_zig_meta_registry_bytes_copy"):
+    for name in ("sens_zig_meta_eval_bytes_copy",):
         if repl_source.count(f"fn {name}(dst: *mut u8, cap: usize) -> isize;") != 1:
             fail("repl-rust", f"missing_meta_ffi={name}")
         if repl_source.count(f"repl_zig_source({name},") != 1:
@@ -398,7 +397,6 @@ def check_root_asset_corridor(
             {
                 "sens_zig_repl_core_bytes_copy": expected_zig,
                 "sens_zig_meta_eval_bytes_copy": expected_zig,
-                "sens_zig_meta_registry_bytes_copy": expected_zig,
                 domain_name: "domain_width: u8, dst: [*]u8, capacity: usize,",
             } if layer == "asset-zig" else {
                 "sens_zig_repl_core_bytes_copy": expected_rust,
@@ -757,7 +755,7 @@ class ZigAbiV2DeclarationContractTest(unittest.TestCase):
     def test_sens_repl_meta_wrong_byte_asset_is_rejected(self):
         needle = "@memcpy(dst[0..meta_eval_asset.len], meta_eval_asset[0..meta_eval_asset.len]);"
         mutant = self.asset_zig.replace(
-            needle, "@memcpy(dst[0..meta_eval_asset.len], meta_registry_asset[0..meta_eval_asset.len]);", 1
+            needle, "@memcpy(dst[0..meta_eval_asset.len], repl_core_asset[0..meta_eval_asset.len]);", 1
         )
         self.assertNotEqual(mutant, self.asset_zig)
         with self.assertRaisesRegex(ValueError, "wrong_copy_body=sens_zig_meta_eval_bytes_copy"):

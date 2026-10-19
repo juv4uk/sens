@@ -57,9 +57,9 @@ fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
     for (program, expected) in [
         ("(module-journal-events (quote example) (quote ()))", "()"),
         ("(module-journal-events (quote example) (quote ((tell example (fact a)))))", "((tell example (fact a)))"),
-        ("(fire-rule (quote ((fact a) (derived a))) (quote (fact a)))", "(derived a)"),
-        ("(fire-rule (quote ((fact a) (derived a))) (quote (fact b)))", "no-match"),
-        ("(fire-rule-on-facts (quote ((fact a) (derived a))) (quote ()))", "()"),
+        ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact a)))", "(derived a)"),
+        ("(запустити-правило (як-є ((fact a) (derived a))) (як-є (fact b)))", "no-match"),
+        ("(запустити-правило-на-факти (як-є ((fact a) (derived a))) (як-є ()))", "()"),
     ] {
         assert_eq!(observed(program), expected, "current reasoning behavior changed: {program}");
     }

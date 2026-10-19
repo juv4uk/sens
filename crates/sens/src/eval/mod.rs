@@ -116,7 +116,9 @@ pub fn eval_parsed_expressions_incremental(
 }
 
 pub fn eval_program(source: &str, session: &mut Session) -> Result<EvalResult, LanguageError> {
-    let expressions = parse(source)?;
+    let parsed = parse(source)?;
+    let expressions =
+        crate::source_projection::project_ukr_decimal_integer_literals(&parsed, source)?;
     eval_parsed_expressions(&expressions, session)
 }
 

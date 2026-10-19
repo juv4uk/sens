@@ -50,15 +50,15 @@ fn exact_machine_block_preserves_nine_historical_observations() {
         .expect("визначення мають виконуватися з точними доменами");
 
     let cases = [
-        ("(machine-block-empty)", "()"),
-        ("(machine-block-one (quote (mov r1 r2)))", "((mov r1 r2))"),
-        ("(machine-block-append (quote ((mov r1 r2) (branch L1))) (quote ret))", "((mov r1 r2) (branch L1) ret)"),
-        ("(machine-block-concat (quote ((mov r1 r2) (branch L1))) (quote ((label L2))))", "((mov r1 r2) (branch L1) (label L2))"),
-        ("(machine-block-forms (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
-        ("(machine-block (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
-        ("(machine-block-append (quote ()) (quote nop))", "(nop)"),
-        ("(machine-block-concat (quote ()) (quote ((mov r1 r2))))", "((mov r1 r2))"),
-        ("(machine-block-concat (quote ((mov r1 r2))) (quote ()))", "((mov r1 r2))"),
+        ("(порожній-машинний-блок)", "()"),
+        ("(блок-з-однієї-форми (quote (mov r1 r2)))", "((mov r1 r2))"),
+        ("(додати-форму-до-блоку (quote ((mov r1 r2) (branch L1))) (quote ret))", "((mov r1 r2) (branch L1) ret)"),
+        ("(поєднати-машинні-блоки (quote ((mov r1 r2) (branch L1))) (quote ((label L2))))", "((mov r1 r2) (branch L1) (label L2))"),
+        ("(форми-машинного-блоку (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
+        ("(машинний-блок (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
+        ("(додати-форму-до-блоку (quote ()) (quote nop))", "(nop)"),
+        ("(поєднати-машинні-блоки (quote ()) (quote ((mov r1 r2))))", "((mov r1 r2))"),
+        ("(поєднати-машинні-блоки (quote ((mov r1 r2))) (quote ()))", "((mov r1 r2))"),
     ];
     for (program, expected) in cases {
         let actual = eval_program(program, &mut session)

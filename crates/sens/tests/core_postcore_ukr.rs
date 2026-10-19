@@ -110,3 +110,31 @@ fn core_sublis_and_maplist_execute_in_sens_without_host_oracle() {
         execute(&mut session, "(як-є (а б))")
     );
 }
+
+
+// D10:0101100100: запускається справжній метаобчислювач SENS,
+// а не Python/Rust реалізація семантики тіл LAMBDA.
+#[test]
+fn meta_eval_body_result_observes_last_form_and_early_failure() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("дійсний SENS Core");
+    sens::load_meta_evaluator_library(&mut session).expect("дійсний SENS MetaEval");
+
+    // До виправлення перша форма помилково ставала остаточним результатом.
+    assert_eq!(
+        execute(
+            &mut session,
+            "(решта (обчислити-послідовне-тіло-з-раннім-збоєм (як-є (1 2)) (як-є ())))"
+        ),
+        "2"
+    );
+
+    // Перша помилка припиняє обчислення, не повертаючи успіх наступної форми.
+    assert_eq!(
+        execute(
+            &mut session,
+            "(це-результат-невдалого-обчислення? (обчислити-послідовне-тіло-з-раннім-збоєм (як-є (невідоме-імя 2)) (як-є ())))"
+        ),
+        execute(&mut session, "так")
+    );
+}

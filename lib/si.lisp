@@ -1,63 +1,54 @@
-; lib/si.lisp — 7 BIPM SI defining constants as exact scientific data
-; 7 визначальних констант SI (BIPM 2019) як точні Lisp-дані
+; Визначальні константи Міжнародної системи одиниць SI.
+; Джерело: BIPM, SI Brochure, дев'яте видання (2019).
 ;
-; Reference: BIPM SI Brochure (9th edition, 2019)
-;
-; Each defining constant has one authoritative finite-data record:
-;
-;   (scientific-constant/1 NAME
-;     (quantity/1 VALUE
-;       (unit/1 (dimension/1 BASE EXPONENT) ...))
-;     exact-by-definition physical-defining si
-;     (science-source/1 bipm-si-brochure-9 2019))
-;
-; Authoritative records live under the regular `si:defining-*` surface. The
-; established numeric names remain backward-compatible arithmetic views, but
-; their values are extracted from those records rather than duplicated as a
-; second authority. lib/quantity.lisp provides the general validators/accessors;
-; this file itself remains standalone-loadable and derives numeric views using
-; only car/cdr.
-;
-; Every base dimension is a named `(dimension/1 BASE EXPONENT)` term so the
-; same unit data is directly admissible to the Advice Taker knowledge grammar.
-; Unit algebra itself is not claimed here.
+; Єдине джерело кожного значення — структурований запис константи.
+; Числові проєкції нижче читають ці записи, а не повторюють значення.
+; Позначки scientific-constant/1, quantity/1, unit/1, dimension/1 і
+; science-source/1 — поля усталеного формату наукових даних, а не
+; викличні голови мови. Розмірності та походження даних зберігаються.
+; Десяткові числа інтерпретує арифметика D24+; T5M відповідає
+; виключно за фізичне пакування. Перехідних псевдонімів SID8/Sens8 немає.
 
-; Точний запис SI складається мовою SENS. Значення (зокрема частки) обчислюється
-; D24+ арифметикою до включення у скінченні дані; reader-літералів виду N/D немає.
+; Форма запису:
+; (scientific-constant/1 ІМ'Я (quantity/1 ЗНАЧЕННЯ ОДИНИЦЯ)
+;   exact-by-definition physical-defining si
+;   (science-source/1 bipm-si-brochure-9 2019))
 (визначити сі:створити-запис-константи
   (функція (ім'я значення одиниця)
-    (сполучити (як-є scientific-constant/1)
-      (сполучити ім'я
+    (сполучити
+      (як-є scientific-constant/1)
+      (сполучити
+        ім'я
         (сполучити
-          (сполучити (як-є quantity/1)
-            (сполучити значення
+          (сполучити
+            (як-є quantity/1)
+            (сполучити
+              значення
               (сполучити одиниця (як-є ()))))
-          (сполучити (як-є exact-by-definition)
-            (сполучити (як-є physical-defining)
-              (сполучити (як-є si)
-                (сполучити
-                  (як-є (science-source/1 bipm-si-brochure-9 2019))
-                  (як-є ()))))))))))
+          (як-є
+            (exact-by-definition
+              physical-defining
+              si
+              (science-source/1 bipm-si-brochure-9 2019))))))))
 
+; Частота надтонкого переходу цезію-133, Гц.
 (визначити si:defining-cesium-frequency
-  (як-є
-    (scientific-constant/1 si:cesium-frequency
-      (quantity/1 9192631770
-        (unit/1
-          (dimension/1 second -1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (сі:створити-запис-константи
+    (як-є si:cesium-frequency)
+    9192631770
+    (як-є (unit/1 (dimension/1 second -1)))))
 
+; Швидкість світла у вакуумі, м/с.
 (визначити si:defining-speed-of-light
-  (як-є
-    (scientific-constant/1 si:speed-of-light
-      (quantity/1 299792458
-        (unit/1
-          (dimension/1 metre 1)
-          (dimension/1 second -1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (сі:створити-запис-константи
+    (як-є si:speed-of-light)
+    299792458
+    (як-є
+      (unit/1
+        (dimension/1 metre 1)
+        (dimension/1 second -1)))))
 
+; Стала Планка, Дж·с: точне раціональне значення.
 (визначити si:defining-planck-constant
   (сі:створити-запис-константи
     (як-є si:planck-constant)
@@ -68,6 +59,7 @@
         (dimension/1 metre 2)
         (dimension/1 second -1)))))
 
+; Елементарний електричний заряд, Кл.
 (визначити si:defining-elementary-charge
   (сі:створити-запис-константи
     (як-є si:elementary-charge)
@@ -77,6 +69,7 @@
         (dimension/1 ampere 1)
         (dimension/1 second 1)))))
 
+; Стала Больцмана, Дж/К.
 (визначити si:defining-boltzmann-constant
   (сі:створити-запис-константи
     (як-є si:boltzmann-constant)
@@ -88,36 +81,32 @@
         (dimension/1 second -2)
         (dimension/1 kelvin -1)))))
 
+; Стала Авогадро, моль⁻¹.
 (визначити si:defining-avogadro-constant
-  (як-є
-    (scientific-constant/1 si:avogadro-constant
-      (quantity/1 602214076000000000000000
-        (unit/1
-          (dimension/1 mole -1)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (сі:створити-запис-константи
+    (як-є si:avogadro-constant)
+    602214076000000000000000
+    (як-є (unit/1 (dimension/1 mole -1)))))
 
+; Світлова ефективність випромінювання частотою 540 ТГц, лм/Вт.
 (визначити si:defining-luminous-efficacy
-  (як-є
-    (scientific-constant/1 si:luminous-efficacy
-      (quantity/1 683
-        (unit/1
-          (dimension/1 candela 1)
-          (dimension/1 kilogram -1)
-          (dimension/1 metre -2)
-          (dimension/1 second 3)))
-      exact-by-definition physical-defining si
-      (science-source/1 bipm-si-brochure-9 2019))))
+  (сі:створити-запис-константи
+    (як-є si:luminous-efficacy)
+    683
+    (як-є
+      (unit/1
+        (dimension/1 candela 1)
+        (dimension/1 kilogram -1)
+        (dimension/1 metre -2)
+        (dimension/1 second 3)))))
 
-; Exact D5:10011 CADDR followed by D4:1001 CADR.
-; Only the projection is refactored; BIPM SI records remain unchanged.
-; A scientific-constant/1 record stores its quantity in the third field; a
-; quantity/1 stores its numeric value in the second field.
+; Індексний закон: значення — друге поле вкладеної кількості,
+; сама кількість — третє поле запису наукової константи.
 (визначити сі:значення-константи
   (функція (наукова-константа)
     (друге (третє наукова-константа))))
 
-; Backward-compatible arithmetic surface, derived from the records above.
+; Числові поверхні для чинних споживачів. Вони не є копіями даних.
 (визначити si:cesium-frequency (сі:значення-константи si:defining-cesium-frequency))
 (визначити si:speed-of-light (сі:значення-константи si:defining-speed-of-light))
 (визначити si:planck-constant (сі:значення-константи si:defining-planck-constant))
@@ -125,20 +114,3 @@
 (визначити si:boltzmann-constant (сі:значення-константи si:defining-boltzmann-constant))
 (визначити si:avogadro-constant (сі:значення-константи si:defining-avogadro-constant))
 (визначити si:luminous-efficacy (сі:значення-константи si:defining-luminous-efficacy))
-
-; Transitional compatibility aliases. These are not canonical names and may
-; be removed once repository callers have migrated to the descriptive surface.
-(визначити delta-nu-cs si:cesium-frequency)
-(визначити c si:speed-of-light)
-(визначити h si:planck-constant)
-(визначити e si:elementary-charge)
-(визначити k si:boltzmann-constant)
-(визначити n-a si:avogadro-constant)
-(визначити k-cd si:luminous-efficacy)
-(визначити si:delta-nu-cs si:cesium-frequency)
-(визначити si:c si:speed-of-light)
-(визначити si:h si:planck-constant)
-(визначити si:e si:elementary-charge)
-(визначити si:k si:boltzmann-constant)
-(визначити si:n-a si:avogadro-constant)
-(визначити si:k-cd si:luminous-efficacy)

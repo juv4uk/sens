@@ -24,6 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from domain_tables import read_domain_table
 
+# Тільки ІСТОРИЧНЕ свідчення: цей Git commit передує фізичному вилученню
+# SID8-реєстру з main. Данні використовує ВИКЛЮЧНО одноразовий мігратор.
+# Жодних поточних runtime alias/dispatch чи відновлення lib/surface/bridge.
+HISTORICAL_BRIDGE_COMMIT = "364c20e89429962928ea39027651f2bb47875aa0"
+HISTORICAL_BRIDGE_BLOB = "2c776a6947dacc88b312eacff89f4f7d66ed7813"
+HISTORICAL_BRIDGE_PATH = "lib/surface/sid8-to-domain-bridge.lisp"
+
 BRIDGE_ROW = re.compile(
     r"^\s*\(sid8:([01]{8})\s+->\s+(D(?:[1-9]|10|11)):([01]+)\)\s*(?:;.*)?$",
     re.MULTILINE,
@@ -58,7 +65,13 @@ def mapping():
     d9 = set(engine.CORE_OPERATION_D9) | set(engine.core4_d9_callable_rows())
     d10 = set(engine.core4_d10_defined_rows())
     result, withheld = {}, {}
-    bridge = (ROOT / "lib/surface/sid8-to-domain-bridge.lisp").read_text(encoding="utf-8")
+    # Історичний ledger більше НЕ є активним lib-файлом. Читати точний
+    # Git-об'єкт після перевірки SHA, не створюючи мостів сумісності.
+    revision = f"{HISTORICAL_BRIDGE_COMMIT}:{HISTORICAL_BRIDGE_PATH}"
+    blob = git("rev-parse", revision).strip()
+    if blob != HISTORICAL_BRIDGE_BLOB:
+        raise ValueError(f"історичний SID8-ledger змінив Git blob: {blob}")
+    bridge = git("show", revision)
     for old, dom, bits in BRIDGE_ROW.findall(bridge):
         if old in result or old in withheld:
             raise ValueError(f"повтор старого W8: {old}")

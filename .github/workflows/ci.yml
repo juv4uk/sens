@@ -7,12 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Кожне виконання перевіряє свій незмінний SHA; нові push не можуть
+# скасувати чи витіснити старий run з тієї самої branch-concurrency групи.
+# Один targeted workflow на коміт, без автоматичних дублювань.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  group: ${{ github.workflow }}-${{ github.sha }}
   cancel-in-progress: false
-  # За GitHub Actions 2026 default queue=single все ще скасовує попередній pending.
-  # queue=max зберігає до 100 точних SHA у спільній послідовній черзі.
-  queue: max
 
 permissions:
   contents: read
@@ -54,6 +54,8 @@ jobs:
           set -euo pipefail
           case "$SHARD" in
             1)
+              # Ранній справжній SENS свідок: Forward, TMS, JTMS — до незалежних CI-шарів.
+              cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
               cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
@@ -64,7 +66,6 @@ jobs:
               cargo test --locked -p sens --test guard
           # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
           cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
-              cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
               cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
@@ -161,6 +162,9 @@ jobs:
           output="$RUNNER_TEMP/sid8-ukr-migration"
           mkdir -p "$output"
           timeout 90s git fetch --no-tags --depth=1 origin "$historical_sha"
+          # Фізично вилучений SID8 ledger потрібен лише для Git provenance
+          # мігратора, не для будь-якого runtime, parser або executor.
+          timeout 90s git fetch --no-tags --depth=1 origin 364c20e89429962928ea39027651f2bb47875aa0
           set +e
           python3 scripts/migrate-legacy-w8-ukr.py lib/ \
             --source-ref "$historical_sha" --write --report "$output/report.json"

@@ -32,11 +32,11 @@ fn execute(source: &str) -> String {
 #[test]
 fn compound_plan_tag_does_not_reach_atom_only_d3_eq() {
     assert_eq!(
-        execute("(native-first-plan-tag-state (як-є ((невідомий-тег) вміст)) (як-є native-plan))"),
+        execute("(нативний-стан-мітки-плану (як-є ((невідомий-тег) вміст)) (як-є native-plan))"),
         "distinct",
     );
     assert_eq!(
-        execute("(native-first-plan-tag-state (як-є (native-plan вміст)) (як-є native-plan))"),
+        execute("(нативний-стан-мітки-плану (як-є (native-plan вміст)) (як-є native-plan))"),
         "same",
     );
 }
@@ -64,7 +64,7 @@ fn overlong_plan_is_not_a_three_element_list() {
 
 #[test]
 fn compound_tag_rejects_plan_without_executing_fallback() {
-    let actual = execute("(native-first-execute-plan (як-є ((невідомий-тег) вміст)))");
+    let actual = execute("(нативне-виконати-план (як-є ((невідомий-тег) вміст)))");
     assert!(
         actual.starts_with("(execution-route invalid-plan (status rejected)"),
         "некоректний план має відхилятися в SENS, а не падати на D3 EQ: {actual}"
