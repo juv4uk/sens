@@ -397,7 +397,7 @@ mod tests {
             let mut guard = slot.borrow_mut();
             let state = guard.as_mut().expect("initialized web session");
             assert_eq!(state.surface, WebSurface::UkrainianFull);
-            let full = eval_program("(порожній-текст? \"\")", &mut state.session.clone())
+            let full = eval_program("(порожній-текст? \"\")", &mut state.session)
                 .expect("full Ukrainian call head works by default");
             assert_eq!(full.value.to_string(), "(1)");
         });
