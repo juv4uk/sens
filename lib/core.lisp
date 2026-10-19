@@ -272,7 +272,7 @@
       ((хибне? (атом? values)) (зворот acc))
       ((атом? values)  (зворот acc))
       ((атом? values) 
-       (let ((decision (predicate (перше values))))
+       (нехай ((decision (predicate (перше values))))
          (за-умовою
            (decision
             (filter-onto predicate (решта values) (сполучити (перше values) acc)))
@@ -723,7 +723,7 @@
        (за-умовою
          ((менше? a b)  0)
          ((хибне? (менше? a b))
-          (let ((chunk+mult (largest-chunk a b b 1)))
+          (нехай ((chunk+mult (largest-chunk a b b 1)))
             (додати (решта chunk+mult)
                (quotient (відняти a (перше chunk+mult)) b)))))))))
 
@@ -901,7 +901,7 @@
 
 (визначити isqrt-step
   (функція (n g)
-    (let ((next (частка (додати g (частка n g)) 2)))
+    (нехай ((next (частка (додати g (частка n g)) 2)))
       (за-умовою
         ((менше? next g)  (isqrt-step n next))
         ((хибне? (менше? next g)) g)))))
@@ -912,7 +912,7 @@
       ((менше? x 0)  (як-є ()))
       ((однакові? x 0)  0)
       ((однакові? x (частка x 1)) 
-       (let ((r (цілий-корінь x)))
+       (нехай ((r (цілий-корінь x)))
          (за-умовою
            ((однакові? (помножити r r) x)  r)
            ((атом? ())  (sqrt-iter (поділити x 2) x 8)))))
@@ -977,7 +977,7 @@
     (за-умовою
       
       ((атом? items) 
-       (let ((rest-min (найменше-у-списку (решта items))))
+       (нехай ((rest-min (найменше-у-списку (решта items))))
          (за-умовою
            ((порожній? rest-min) 
             (перше items))
@@ -991,7 +991,7 @@
     (за-умовою
       
       ((атом? items) 
-       (let ((rest-max (найбільше-у-списку (решта items))))
+       (нехай ((rest-max (найбільше-у-списку (решта items))))
          (за-умовою
            ((порожній? rest-max) 
             (перше items))
@@ -1039,7 +1039,7 @@
     (за-умовою
       
       ((атом? groups) 
-       (let ((group (перше groups)))
+       (нехай ((group (перше groups)))
          (за-умовою
            ((тотожне? semantic-id (перше group)) 
             group)
@@ -1052,7 +1052,7 @@
       ((хибне? (атом? bindings))
        (як-є absent))
       ((атом? bindings) 
-       (let ((binding (перше bindings)))
+       (нехай ((binding (перше bindings)))
          (за-умовою
            ((тотожне? (символ-у-текст surface) (перше binding)) 
             (як-є present))
@@ -1064,7 +1064,7 @@
     (за-умовою
       
       ((атом? peers) 
-       (let ((peer (перше peers)))
+       (нехай ((peer (перше peers)))
          (за-умовою
            ((тотожне? source peer) 
             (my-postcore-missing-peers source (решта peers) bindings))
