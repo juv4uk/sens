@@ -42,13 +42,57 @@ LOCAL_HELPERS = (
     ("science-seventh", "науковий-сьомий", 2),
 )
 LOCAL_ALIASES = "\n; Українські локальні імена є тими самими Lisp-замиканнями.\n; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.\n; Це не нові D9/D10 identity, не новий механізм і не D24+ математика.\n(визначити science-proper-list? науковий-список-правильний?)\n(визначити science-list-length-equals? науковий-список-довжина-дорівнює?)\n(визначити science-sixth науковий-шостий)\n(визначити science-seventh науковий-сьомий)\n"
-
+PUBLIC_PROJECTIONS = (
+    ("make-dimension", "створити-розмірність", "111001100"),
+    ("dimension?", "розмірність?", "111010000"),
+    ("dimension-base", "розмірність-основа", "111101100"),
+    ("dimension-exponent", "розмірність-показник", "111001101"),
+    ("make-unit", "створити-одиниця", "111010001"),
+    ("unit?", "одиниця-виміру?", "111000011"),
+    ("unit-dimensions", "одиниця-розмірності", "111011100"),
+    ("make-quantity", "створити-величина", "111001111"),
+    ("quantity?", "величина?", "111000101"),
+    ("quantity-value", "величина-значення", "111101000"),
+    ("quantity-unit", "величина-одиниця", "111111001"),
+    ("make-science-source", "створити-наука-джерело", "111110101"),
+    ("science-source?", "наука-джерело?", "111011101"),
+    ("scientific-constant-status-valid?", "науковий-константа-стан-чинний?", "111110010"),
+    ("scientific-constant-kind-valid?", "науковий-константа-вид-чинний?", "111101111"),
+    ("make-scientific-constant", "створити-науковий-константа", "111101110"),
+    ("scientific-constant?", "науковий-константа?", "111111110"),
+    ("scientific-constant-name", "науковий-константа-ім'я", "111000010"),
+    ("scientific-constant-quantity", "науковий-константа-величина", "111101101"),
+    ("scientific-constant-value", "науковий-константа-значення", "111010111"),
+    ("scientific-constant-unit", "науковий-константа-одиниця", "111011001"),
+    ("scientific-constant-status", "науковий-константа-стан", "111010010"),
+    ("scientific-constant-kind", "науковий-константа-вид", "111001001"),
+    ("scientific-constant-system", "науковий-константа-система", "111111101"),
+    ("scientific-constant-source", "науковий-константа-джерело", "111110110"),
+    ("scientific-constant->clauses", "науковий-константа-клаузи", "111100111"),
+)
+PUBLIC_ALIAS_BLOCK = (
+    "; Повні українські назви — первинні визначення за точними проєкціями D9.\\n"
+    "; Англійські назви — лише сумісні псевдоніми тих самих Lisp-замикань.\\n"
+    "; Ключі залишаються в lib/domains/d9.lisp; цей файл не вводить бінарних call-heads.\\n"
+    + "\\n".join(
+        f"(визначити {english} {ukrainian})"
+        for english, ukrainian, _bits in PUBLIC_PROJECTIONS
+    )
+)
+PUBLIC_ALIASES = "\\n" + PUBLIC_ALIAS_BLOCK + "\\n"
 
 def restore_local_helper_layer(source: str) -> str:
-    """Exact source-only inverse; refusal on wrong peer, not semantic evaluation."""
+    """Точний обернений прохід проєкцій; читача чи обчислювача не запускає."""
     if not source.endswith(LOCAL_ALIASES):
         raise AssertionError("відсутні сумісні локальні аліаси Quantity")
     body = source[:-len(LOCAL_ALIASES)]
+    if not body.endswith(PUBLIC_ALIASES):
+        raise AssertionError("відсутні сумісні псевдоніми основних функцій Quantity")
+    body = body[:-len(PUBLIC_ALIASES)]
+    inverse = {ukrainian: english for english, ukrainian, _bits in PUBLIC_PROJECTIONS}
+    body, restored_public = project_public_names(body, inverse)
+    if set(restored_public) != set(inverse):
+        raise AssertionError("не вдалося точно відновити всі первинні назви Quantity")
     for english, ukrainian, calls in LOCAL_HELPERS:
         if (body.count("(" + ukrainian) != calls
                 or body.count("(визначити " + ukrainian) != 1):
@@ -61,7 +105,7 @@ def restore_local_helper_layer(source: str) -> str:
 
 
 def apply_local_helper_layer(source: str) -> str:
-    """Forward receipt, ensuring new live source is independently reconstructible."""
+    """Прямий прохід від історичного тіла до чинних назв та сумісних імен."""
     body = source
     for english, ukrainian, calls in LOCAL_HELPERS:
         if (body.count("(" + english) != calls
@@ -69,7 +113,11 @@ def apply_local_helper_layer(source: str) -> str:
             raise AssertionError("порушено зворотну локальну проєкцію: " + english)
         body = body.replace("(" + english, "(" + ukrainian)
         body = body.replace("(визначити " + english, "(визначити " + ukrainian)
-    return body + LOCAL_ALIASES
+    forward = {english: ukrainian for english, ukrainian, _bits in PUBLIC_PROJECTIONS}
+    body, projected_public = project_public_names(body, forward)
+    if set(projected_public) != set(forward):
+        raise AssertionError("не вдалося точно застосувати всі первинні назви Quantity")
+    return body + PUBLIC_ALIASES + LOCAL_ALIASES
 
 
 def project_heads(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
@@ -167,6 +215,80 @@ def project_literals(text: str, mapping: dict[str, str]) -> tuple[str, dict[str,
     return "".join(chunks), seen
 
 
+def project_public_names(text: str, mapping: dict[str, str]) -> tuple[str, dict[str, int]]:
+    """Project only callable heads and DEFINE targets; comments/data/strings copy verbatim."""
+    chunks: list[str] = []
+    seen: dict[str, int] = {}
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch == ";":
+            j = text.find("\\n", i)
+            if j < 0:
+                j = n
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch == '"':
+            j = i + 1
+            while j < n:
+                if text[j] == "\\\\":
+                    j += 2
+                elif text[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            chunks.append(text[i:j])
+            i = j
+            continue
+        if ch != "(":
+            chunks.append(ch)
+            i += 1
+            continue
+
+        chunks.append(ch)
+        i += 1
+        j = i
+        while j < n and text[j].isspace():
+            j += 1
+        chunks.append(text[i:j])
+        i = j
+        if i >= n or text[i] in '();"' :
+            continue
+
+        k = i + 1
+        while k < n and not (text[k].isspace() or text[k] in '();"'):
+            k += 1
+        head = text[i:k]
+        mapped = mapping.get(head)
+        chunks.append(head if mapped is None else mapped)
+        if mapped is not None:
+            seen[head] = seen.get(head, 0) + 1
+        i = k
+
+        if head != "визначити":
+            continue
+
+        j = i
+        while j < n and text[j].isspace():
+            j += 1
+        chunks.append(text[i:j])
+        i = j
+        if i >= n or text[i] in '();"' :
+            continue
+        k = i + 1
+        while k < n and not (text[k].isspace() or text[k] in '();"'):
+            k += 1
+        name = text[i:k]
+        renamed = mapping.get(name)
+        chunks.append(name if renamed is None else renamed)
+        if renamed is not None:
+            seen[name] = seen.get(name, 0) + 1
+        i = k
+    return "".join(chunks), seen
+
+
 def git_blob(text: str) -> str:
     raw = text.encode("utf-8")
     return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
@@ -189,6 +311,30 @@ class QuantityUkrProjection(unittest.TestCase):
         d1 = (ROOT / "lib/domains/d1.lisp").read_text(encoding="utf-8")
         self.assertIn("(0 (ук ні) (укр ні)", d1)
         self.assertIn("(1 (ук так) (укр так)", d1)
+
+    def test_public_quantity_names_match_ratified_d9_keys(self):
+        source = self.source
+        d9 = read = (ROOT / "lib" / "domains" / "d9.lisp").read_text(encoding="utf-8")
+        for english, ukrainian, bits in PUBLIC_PROJECTIONS:
+            with self.subTest(english=english, bits=bits):
+                self.assertEqual(len(bits), 9, f"D9 key has wrong width: {bits}")
+                rows = [
+                    line for line in d9.splitlines()
+                    if line.lstrip().startswith(f"({bits} ")
+                ]
+                self.assertEqual(len(rows), 1, f"D9 must contain one exact row for {bits}")
+                self.assertIn(f"(en {english})", rows[0])
+                self.assertIn(f"(укр {ukrainian})", rows[0])
+                self.assertRegex(
+                    source,
+                    rf"(?m)^\\(визначити\\s+{re.escape(ukrainian)}(?=\\s|\\))",
+                )
+                self.assertIn(f"(визначити {english} {ukrainian})", source)
+                self.assertNotRegex(
+                    source,
+                    rf"(?m)^\\s*\\({bits}(?:\\s|\\))",
+                    "укр source must not make a D9 coordinate directly callable",
+                )
 
     def restore_previous(self):
         canonical_local = restore_local_helper_layer(self.source)
