@@ -23,6 +23,8 @@ class PinnedZigWindowsSetupTests(unittest.TestCase):
         self.assertIn("$asset.tarball -ne $expectedUri", SCRIPT)
         self.assertIn("Get-FileHash -LiteralPath $archive -Algorithm SHA256", SCRIPT)
         self.assertIn("$actualHash -ne $expectedHash", SCRIPT)
+        self.assertIn("$indexHash -ne $expectedHash", SCRIPT)
+        self.assertIn("68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e", SCRIPT)
         self.assertIn("Expand-Archive -LiteralPath $archive", SCRIPT)
 
     def test_only_pinned_zig_is_passed_to_child_command(self):
