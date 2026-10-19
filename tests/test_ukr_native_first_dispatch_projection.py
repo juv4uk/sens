@@ -16,7 +16,7 @@ D4 = ROOT / "lib/domains/d4.lisp"
 
 
 def active_lisp(source: str) -> str:
-    """Blank comments and strings before checking executable syntax."""
+    """Blank comments and string payloads before checking executable syntax."""
     output = []
     for line in source.splitlines():
         visible = []
@@ -29,7 +29,7 @@ def active_lisp(source: str) -> str:
                 visible.append(" ")
                 if escaped:
                     escaped = False
-                elif char == "\\\\":
+                elif char == "\\":
                     escaped = True
                 elif char == '"':
                     in_string = False
@@ -39,7 +39,7 @@ def active_lisp(source: str) -> str:
             else:
                 visible.append(char)
         output.append("".join(visible))
-    return "\\n".join(output)
+    return "\n".join(output)
 
 
 class NativeFirstUkrProjection(unittest.TestCase):
@@ -57,12 +57,12 @@ class NativeFirstUkrProjection(unittest.TestCase):
                 with self.subTest(domain=path.name, bits=bits, name=name):
                     self.assertRegex(
                         table,
-                        rf"(?m)^\\s*\\({bits}\\s+\\(ук\\s+[^()]+\\)\\s+\\(укр\\s+{re.escape(name)}\\)",
+                        rf"(?m)^\s*\({bits}\s+\(ук\s+[^()]+\)\s+\(укр\s+{re.escape(name)}\)",
                     )
 
     def test_active_native_first_sources_have_no_executable_bit_heads_or_tags(self):
-        raw_head = re.compile(r"\\(\\s*(?:001|010|011|100|101|110|111|0001|0010|0011|0101)(?=\\s|\\))")
-        forbidden_tag = re.compile(r"#(?:d\\d+:[01]+|b[01]+|q2)")
+        raw_head = re.compile(r"\(\s*(?:001|010|011|100|101|110|111|0001|0010|0011|0101)(?=\s|\))")
+        forbidden_tag = re.compile(r"#(?:d\d+:[01]+|b[01]+|q2)")
         for path in FILES:
             source = path.read_text(encoding="utf-8")
             code = active_lisp(source)
