@@ -371,7 +371,7 @@ def reject_shadowed_surfaces(source, surfaces):
     return shadowed_offsets
 
 
-def plan(source: str, surfaces):
+def plan(source: str, surfaces, *, legacy_heads=None, unresolved=None):
     shadowed = reject_shadowed_surfaces(source, surfaces)
     frames, edits = [], []
     pending_quote = False
@@ -458,10 +458,22 @@ def plan(source: str, surfaces):
             frame["first"] = False
             if not frame["quoted"] and not pending_quote:
                 if WORD8.fullmatch(token):
-                    raise ValueError(
-                        "UNQUALIFIED_W8_HEAD: старий восьмибітний код не визначає "
-                        "поточну identity; потрібна ратифікована українська назва"
-                    )
+                    if legacy_heads is None:
+                        raise ValueError(
+                            "UNQUALIFIED_W8_HEAD: 8 біт — не автоматично D8; "
+                            "потрібне історичне походження"
+                        )
+                    identity = legacy_heads.get(token)
+                    if identity is not None:
+                        edits.append(Edit(start, i, token, identity))
+                        if identity.domain == "D3" and identity.bits == "001":
+                            frame["quote_children"] = True
+                    elif unresolved is not None:
+                        unresolved.append((start, token))
+                    else:
+                        raise ValueError(f"SID8/Sens8 {token}: немає доведеного наступника")
+                    pending_quote = False
+                    continue
                 identity = surfaces.get(token.casefold())
                 if (identity and start not in shadowed
                         and token != identity.українська):
