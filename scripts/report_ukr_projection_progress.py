@@ -37,17 +37,11 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import re
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-
-# Спільний аналізатор викликів доступний і у CLI, і при імпорті тестами.
-SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -232,12 +226,6 @@ class Progress:
     pairs_same: int = 0
     files_ukrainian: int = 0
     files: list[FileReport] = field(default_factory=list)
-    active_executable_files: int = 0
-    active_files_without_latin_heads: int = 0
-    active_ukr_head_sites: int = 0
-    active_latin_head_sites: int = 0
-    active_encoded_head_sites: int = 0
-    active_unreadable_files: int = 0
 
     @property
     def pairs_pct(self) -> float:
@@ -251,25 +239,12 @@ class Progress:
     def pairs_pending(self) -> int:
         return self.pairs_total - self.pairs_same
 
-    @property
-    def active_files_pct(self) -> float:
-        return (round(100.0 * self.active_files_without_latin_heads /
-                      self.active_executable_files, 1)
-                if self.active_executable_files else 0.0)
-
-    @property
-    def active_heads_pct(self) -> float:
-        total = self.active_ukr_head_sites + self.active_latin_head_sites
-        return round(100.0 * self.active_ukr_head_sites / total, 1) if total else 0.0
-
     def to_dict(self) -> dict:
         d = asdict(self)
         d.pop("files", None)
         d["pairs_pct"] = self.pairs_pct
         d["files_pct"] = self.files_pct
         d["pairs_pending"] = self.pairs_pending
-        d["active_files_pct"] = self.active_files_pct
-        d["active_heads_pct"] = self.active_heads_pct
         return d
 
 
@@ -277,25 +252,8 @@ def iter_lisp_files(root: Path) -> list[Path]:
     return sorted(p for p in root.rglob("*.lisp") if ".git" not in p.parts)
 
 
-def _callsite_audit():
-    """Reuse the existing source parser; do not invent a second lexical oracle."""
-    name = "_sens_ukr_callsite_report"
-    if name in sys.modules:
-        return sys.modules[name]
-    spec = importlib.util.spec_from_file_location(
-        name, Path(__file__).with_name("check_ukr_callsite_migration.py"))
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Немає чинного аудитора викличних голів")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 def measure(root: Path) -> Progress:
     files: list[FileReport] = []
-    audit = _callsite_audit()
-    live_count = live_clean = live_ukr = live_latin = live_encoded = live_bad = 0
     for path in iter_lisp_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
         pairs = [(a, b) for a, b in iter_pairs(text)]
@@ -307,30 +265,6 @@ def measure(root: Path) -> Progress:
             pairs_same=same,
             ukrainian_code=has_ukrainian,
         ))
-        rel = path.relative_to(root)
-        archival = (not rel.parts or rel.parts[0] not in audit.LIVE_SOURCE_DIRS
-                    or 'tests' in rel.parts or 'fixtures' in rel.parts
-                    or (rel.parts[0] == 'examples' and 'history' in rel.parts))
-        if archival or audit.excluded_metadata(rel):
-            continue
-        live_count += 1
-        if path.is_symlink() or not path.resolve().is_relative_to(root):
-            live_bad += 1
-            continue
-        try:
-            heads = list(audit.candidate_heads(audit.parse(text)))
-        except (audit.SourceError, RecursionError, UnicodeError):
-            live_bad += 1
-            continue
-        latin = sum(bool(audit.LATIN.search(head.text)) for head in heads)
-        encoded = sum(bool(audit.ENCODED_HEAD.fullmatch(head.text)) for head in heads)
-        ukr = sum(bool(audit.UKRAINIAN.search(head.text)) for head in heads)
-        live_latin += latin
-        live_encoded += encoded
-        live_ukr += ukr
-        # Purely lexical completion, NOT proof of executable SENS semantics.
-        if ukr and not latin and not encoded:
-            live_clean += 1
     return Progress(
         lisp_files=len(files),
         files_with_pairs=sum(1 for f in files if f.pairs_total),
@@ -338,12 +272,6 @@ def measure(root: Path) -> Progress:
         pairs_same=sum(f.pairs_same for f in files),
         files_ukrainian=sum(1 for f in files if f.ukrainian_code),
         files=files,
-        active_executable_files=live_count,
-        active_files_without_latin_heads=live_clean,
-        active_ukr_head_sites=live_ukr,
-        active_latin_head_sites=live_latin,
-        active_encoded_head_sites=live_encoded,
-        active_unreadable_files=live_bad,
     )
 
 
@@ -430,20 +358,11 @@ def render(p: Progress, executable_ukr: dict | None = None) -> str:
         f"{p.pairs_same}/{p.pairs_total} ({p.pairs_pct}%) "
         f"у {p.files_with_pairs} файлах; "
         f".lisp-файлів з укр-поверхнею {p.files_ukrainian}/{p.lisp_files} "
-        f"({p.files_pct}% — лише наявність кирилиці, НЕ завершення); "
-        f"активні .lisp без латинських викличних голів "
-        f"{p.active_files_without_latin_heads}/{p.active_executable_files} "
-        f"({p.active_files_pct}%, лексично); "
-        f"активні українські викличні голови "
-        f"{p.active_ukr_head_sites}/"
-        f"{p.active_ukr_head_sites + p.active_latin_head_sites} "
-        f"({p.active_heads_pct}%); "
-        f"сирих кодів={p.active_encoded_head_sites}, "
-        f"непрочитаних={p.active_unreadable_files}"
+        f"({p.files_pct}%)"
     )
     if executable_ukr is None:
         return legacy
-    return (f"УКР-ПРОГРЕС виконуваних .lisp: "
+    return (f"УКР-ПРОГРЕС виконуваних .lisp (лексично, без PASS): "
             f"{executable_ukr['full_ukr_files']}/{executable_ukr['eligible_files']} "
             f"({executable_ukr['files_pct']}%) повністю укр за викличними "
             f"головами; незчитаних={executable_ukr['unclassified_files']}; "
@@ -513,95 +432,6 @@ def audit_declared_ukr(root: Path) -> dict:
             "issues": issues}
 
 
-
-def audit_executable_ukr_files(root: Path) -> dict:
-    """Окрема лексична метрика *активних виконуваних файлів*, не семантичний PASS.
-
-    Враховує виконувані викличні голови, а не наявність довільної кирилиці.
-    Цитати, рядки, формальні параметри, таблиці доменів і архіви відкидає
-    спільний статичний аналізатор. Синтаксична помилка НЕ стає готовим файлом.
-    Локальні кириличні голови припустимі, але їх показуємо окремо, тому що
-    вони самі собою не доводять ратифікації чи успішного SENS-виконання.
-    """
-    import check_ukr_callsite_migration as audit
-
-    roles = audit.peer_roles(root)
-    names, _ = audit.peer_index(root)
-    counted = completed = pending = unparsed = local_heads = 0
-    full_heads = compact_heads = latin_heads = encoded_heads = ambiguous_heads = 0
-    observations: list[dict] = []
-    for path in iter_lisp_files(root):
-        rel = path.relative_to(root)
-        if (not rel.parts or rel.parts[0] not in audit.LIVE_SOURCE_DIRS
-                or "tests" in rel.parts or "fixtures" in rel.parts
-                or (rel.parts[0] == "examples" and "history" in rel.parts)
-                or audit.excluded_metadata(rel)):
-            continue
-        reasons: dict[str, int] = {
-            "latin": 0, "encoded": 0, "compact_only": 0, "ambiguous": 0
-        }
-        seen = 0
-        try:
-            if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
-                raise audit.SourceError("symlink/out-of-root source")
-            forms = audit.parse(path.read_text(encoding="utf-8"))
-            for head in audit.candidate_heads(forms):
-                spelling = head.text
-                seen += 1
-                if audit.ENCODED_HEAD.fullmatch(spelling):
-                    reasons["encoded"] += 1
-                    encoded_heads += 1
-                elif audit.LATIN.search(spelling):
-                    reasons["latin"] += 1
-                    latin_heads += 1
-                elif audit.UKRAINIAN.search(spelling):
-                    kinds = roles.get(spelling.casefold(), set())
-                    candidates = names.get(spelling.casefold(), [])
-                    if len(candidates) > 1:
-                        reasons["ambiguous"] += 1
-                        ambiguous_heads += 1
-                    elif "укр" in kinds:
-                        full_heads += 1
-                    elif "ук" in kinds:
-                        reasons["compact_only"] += 1
-                        compact_heads += 1
-                    else:
-                        local_heads += 1
-        except (audit.SourceError, UnicodeError, OSError, RecursionError) as exc:
-            unparsed += 1
-            observations.append({"path": rel.as_posix(),
-                                 "status": "unclassified", "reason": str(exc)})
-            continue
-        if not seen:
-            continue  # файл без виявлених викликів: не збільшує знаменник
-        counted += 1
-        if any(reasons.values()):
-            pending += 1
-            observations.append({"path": rel.as_posix(), "status": "pending",
-                                 "heads": seen, "reasons": reasons})
-        else:
-            completed += 1
-    return {
-        "scope": "active-executable-call-heads",
-        "files_with_calls": counted,
-        "files_without_detected_legacy_heads": completed,
-        "files_with_detected_legacy_heads": pending,
-        "unclassified_files": unparsed,
-        "files_pct": round(100.0 * completed / (counted + unparsed), 2)
-                     if counted + unparsed else 0.0,
-        "known_full_ukr_head_sites": full_heads,
-        "compact_only_head_sites": compact_heads,
-        "latin_head_sites": latin_heads,
-        "encoded_head_sites": encoded_heads,
-        "ambiguous_head_sites": ambiguous_heads,
-        "local_cyrillic_head_sites": local_heads,
-        "pending_files": observations,
-        "limitations": ("Лексична перевірка: не доводить виконання SENS, "
-                        "ратифікацію локальних імен, арність, T5M або "
-                        "невиявлені сканером голі бітові голови.")
-    }
-
-
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -626,23 +456,12 @@ def main(argv: list[str] | None = None) -> int:
 
     progress = measure(root)
     declaration_audit = audit_declared_ukr(root)
-    executable = audit_executable_ukr_files(root)
     executable_ukr = audit_executable_ukr_files(root)
     line = render(progress, executable_ukr)
     print(line)
     if not args.no_annotation:
         print(f"::notice::{line}")
 
-    print("УКР-ВИКОНУВАНІ ФАЙЛИ (лексична оцінка, НЕ SENS PASS): "
-          f"{executable['files_without_detected_legacy_heads']}/"
-          f"{executable['files_with_calls'] + executable['unclassified_files']} "
-          f"({executable['files_pct']}%); "
-          f"неперенесені={executable['files_with_detected_legacy_heads']}, "
-          f"нерозібрані={executable['unclassified_files']}; "
-          f"латинських голів={executable['latin_head_sites']}, "
-          f"скорочених={executable['compact_only_head_sites']}, "
-          f"кодованих={executable['encoded_head_sites']}, "
-          f"неоднозначних={executable['ambiguous_head_sites']}")
     print(f"ОГОЛОШЕНІ УКР: {declaration_audit['valid']}/{declaration_audit['required']} "
           f"({declaration_audit['pct']}%), порушень={len(declaration_audit['issues'])}; "
           "це НЕ перевірка всіх викличних форм .lisp")
@@ -660,17 +479,6 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {f.pending:5} / {f.pairs_total:5}  {f.path}")
         if args.top > 0 and len(pending) > args.top:
             print(f"  … ще {len(pending) - args.top}")
-
-        invalid = executable["pending_files"]
-        print(f"\nАктивних виконуваних файлів для ручного розгляду: {len(invalid)}")
-        for item in (invalid[:args.top] if args.top > 0 else invalid):
-            if item["status"] == "pending":
-                details = ", ".join(f"{k}={v}" for k, v in item["reasons"].items() if v)
-            else:
-                details = "не розібрано: " + item["reason"]
-            print(f"  {item['path']} — {details}")
-        if args.top > 0 and len(invalid) > args.top:
-            print(f"  … ще {len(invalid) - args.top}")
         incomplete = executable_ukr["pending_files"]
         print(f"\nАктивних виконуваних .lisp ще не на повній укр: {len(incomplete)}")
         shown_ukr = incomplete[:args.top] if args.top > 0 else incomplete
@@ -682,7 +490,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         payload = progress.to_dict()
         payload["declared_ukr"] = declaration_audit
-        payload["executable_ukr_files"] = executable
         payload["executable_ukr"] = executable_ukr
         payload["pending_files"] = [
             {"path": f.path, "pending": f.pending, "pairs_total": f.pairs_total}
