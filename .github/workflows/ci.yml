@@ -10,13 +10,6 @@ on:
 permissions:
   contents: read
 
-# Кожен запуск зберігаємо до завершення: нові push не скасовують попередні.
-# Черга concurrency зберігає до 100 очікуваних запусків.
-concurrency:
-  group: sens-lisp-surface-${{ github.repository }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: false
-  queue: max
-
 jobs:
   runtime-shards:
     name: Реальне виконання — частина ${{ matrix.shard }}
