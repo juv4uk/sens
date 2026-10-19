@@ -596,6 +596,9 @@ def main(argv: list[str] | None = None) -> int:
     executable_ukr = audit_executable_ukr_files(root)
     line = render(progress, executable_ukr)
     print(line)
+    print("ПОЯСНЕННЯ: 50% файлів з кирилицею НЕ означає 50% повної міграції; "
+          "ук та укр можуть законно відрізнятися. "
+          "Фактичний прогрес виконуваних голів див. у звіті УКР-ВИКЛИКИ.")
     if not args.no_annotation:
         print(f"::notice::{line}")
 
