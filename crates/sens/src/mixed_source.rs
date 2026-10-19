@@ -4,8 +4,9 @@
 //! bounded to executable list heads:
 //! - exact 3/4/5/6-bit heads become DomainIdentity;
 //! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
-//! - exact 8-bit heads remain the ordinary parser's compatibility path except for pinned machine D8 I/O;
-//! - four D9 string heads are lifted only in the two source-pinned machine wire paths: admission and encoding;
+//! - exact 8-bit heads remain the compatibility path except in readers pinned to admitted D8 mechanisms;
+//! - approved path-pinned readers lift exact D9 words; Ukrainian D9 string heads
+//!   additionally require both an explicit projection allowlist and a concrete mechanism;
 //! - non-head and quoted data keep the ordinary parser's interpretation.
 //!
 //! This gives active Core migration a mixed symbol + exact-domain path without
@@ -119,6 +120,21 @@ fn lift_pinned_d8_io(
 
     if head_spelling == Some("код-символу") {
         let word = parse_binary_source_words("11100000")?[0].word;
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+            span: lifted[0].span,
+        };
+    } else if matches!(
+        head_spelling,
+        Some("текст-у-символ" | "символ-у-текст" | "значення-у-текст")
+    ) {
+        let bits = match head_spelling.expect("matched an admitted Ukrainian D8 surface") {
+            "текст-у-символ" => "11101101",
+            "символ-у-текст" => "11101110",
+            "значення-у-текст" => "11110100",
+            _ => unreachable!("surface was matched above"),
+        };
+        let word = parse_binary_source_words(bits)?[0].word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
             span: lifted[0].span,
@@ -244,10 +260,17 @@ fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
         .collect()
 }
 
-/// Migrate only explicitly pinned reasoning modules. W8 syntax containers
-/// remain compatible while their executable D3 call heads retain exact width.
-/// This is NOT a general license to reinterpret W8 data or older Lisp files.
+/// Migrate only explicitly pinned sources. W8 syntax containers remain
+/// compatible while approved exact D9 mechanisms are lifted from their
+/// Ukrainian projection. D9 residency alone never grants callability.
 fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+    const UKRAINIAN_D9_MECHANISMS: [&str; 5] = [
+        "рядок-додати",
+        "рядок-порожній?",
+        "рядок-решта",
+        "рядок-префікс?",
+        "рядок-перший",
+    ];
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(ErrorKind::Parse, "pinned D9 reasoning source exceeds structure depth", expression.span));
     }
@@ -267,6 +290,15 @@ fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> 
             return Err(LanguageError::new(ErrorKind::Parse, "nine-bit reasoning head must be D9", lifted[0].span));
         }
         lifted[0] = Expr { kind: ExprKind::DomainIdentity(identity), span: lifted[0].span };
+    } else if spelling.is_some_and(|name| UKRAINIAN_D9_MECHANISMS.contains(&name)) {
+        if let Some(identity) = spelling
+            .and_then(crate::semantic_registry::d9_binding_identity_for_definition)
+            .filter(|identity| crate::eval::canon::has_d9_string_mechanism(*identity))
+        {
+            // The source projection and concrete mechanism must both agree.
+            // D9 residency alone never promotes an arbitrary surface to a call.
+            lifted[0] = Expr { kind: ExprKind::DomainIdentity(identity), span: lifted[0].span };
+        }
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
         lifted[0] = lift_pinned_d9_language_calls(source, lifted[0].clone(), depth + 1)?;
     }
@@ -1270,6 +1302,61 @@ mod tests {
     }
 
     #[test]
+    fn core4_pinned_d9_ukrainian_mechanism_head_lifts_inside_its_wrapper() {
+        let source = "(визначити рядок-порожній? (функція (текст) (рядок-порожній? текст)))";
+        let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
+            .expect("Core4's explicit D9 mechanism projection is admitted");
+        let ExprKind::List(definition) = &expressions[0].kind else { panic!("definition"); };
+        assert!(matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == "рядок-порожній?"),
+            "the definition target remains a surface binding");
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+        let ExprKind::List(body_call) = &lambda[2].kind else { panic!("body call"); };
+        assert!(matches!(
+            &body_call[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 9 && identity.packed_bits() == 0b110011100
+        ), "the explicitly admitted D9 mechanism head must bypass its same-spelled wrapper");
+
+        for (head, source) in [
+            ("string-empty?", "(string-empty? text)"),
+            ("рядок-довжина", "(рядок-довжина text)"),
+        ] {
+            let parsed = only(
+                parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
+                    .expect("non-admitted heads remain ordinary source"),
+            );
+            let ExprKind::List(call) = parsed.kind else { panic!("call"); };
+            assert!(matches!(&call[0].kind, ExprKind::Symbol(name) if name.as_ref() == head),
+                "{head} must not be promoted by D9 residency or an English projection");
+        }
+    }
+
+    #[test]
+    fn core4_pinned_ukrainian_d8_string_mechanism_heads_lift_exactly() {
+        for (surface, bits) in [
+            ("текст-у-символ", 0b11101101),
+            ("символ-у-текст", 0b11101110),
+            ("значення-у-текст", 0b11110100),
+        ] {
+            let source = format!(
+                "(визначити {surface} (функція (текст) ({surface} текст)))"
+            );
+            let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", &source)
+                .expect("Core4 may use already-admitted D8 string mechanisms");
+            let ExprKind::List(definition) = &expressions[0].kind else { panic!("definition"); };
+            assert!(matches!(&definition[1].kind, ExprKind::Symbol(name) if name.as_ref() == surface),
+                "the definition target remains a surface binding");
+            let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+            let ExprKind::List(body_call) = &lambda[2].kind else { panic!("body call"); };
+            assert!(matches!(
+                &body_call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 8 && identity.packed_bits() == bits
+            ), "{surface} must select only its exact D8 identity");
+        }
+    }
+
+    #[test]
     fn clips_source_lifts_only_admitted_d8_symbol_to_string_and_never_quoted_payload() {
         let literal = "(11101110 (001 word))";
         let exact = only(
@@ -1400,7 +1487,8 @@ mod tests {
         let parsed = parse_mixed_exact_domain_machine_source("lib/machine/dispatch/macro-probe.lisp", source)
             .expect("W8 macro bodies are executable while their binders remain data");
         let ExprKind::List(defmacro) = &parsed[0].kind else { panic!("macro"); };
-        assert!(matches!(&defmacro[0].kind, ExprKind::Sid(_)));
+        assert!(!matches!(&defmacro[0].kind, ExprKind::DomainIdentity(_)),
+            "an unratified eight-bit wrapper must not acquire a current domain identity");
         let ExprKind::List(params) = &defmacro[2].kind else { panic!("macro parameter data"); };
         assert!(matches!(&params[0].kind, ExprKind::Symbol(_)));
         let ExprKind::List(cond) = &defmacro[3].kind else { panic!("macro body"); };
@@ -1673,20 +1761,13 @@ mod tests {
     }
 
     #[test]
-    fn exact8_head_remains_compatibility_only() {
+    fn exact8_head_stays_opaque_to_current_domain_identity() {
         let expression =
             only(parse_mixed_exact_domain("(00000001 x)").expect("mixed parse"));
-        let span = expression.span;
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(_)));
-
-        let lowered = only(lower_program(&[Expr {
-            kind: ExprKind::List(items),
-            span,
-        }]));
-        assert!(matches!(lowered.kind, ExprKind::Call(_, _)));
+        assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)));
     }
 
     #[test]
@@ -1738,7 +1819,7 @@ mod tests {
         let ExprKind::List(outer) = &parsed[0].kind else {
             panic!("expected outer legacy list");
         };
-        assert!(matches!(&outer[0].kind, ExprKind::Sid(_)));
+        assert!(!matches!(&outer[0].kind, ExprKind::DomainIdentity(_)));
         let ExprKind::List(quoted) = &outer[1].kind else {
             panic!("expected quoted list data");
         };
@@ -1959,8 +2040,8 @@ mod tests {
 
         let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
         let ExprKind::List(quote_form) = &quoted_clause[0].kind else { panic!("quote form"); };
-        assert!(matches!(&quote_form[0].kind, ExprKind::Sid(_)),
-            "historical W8 quote remains a quote form");
+        assert!(!matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified eight-bit quote spelling stays opaque, not a current identity");
         let ExprKind::List(quoted_data) = &quote_form[1].kind else { panic!("quoted data"); };
         assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
             "0100 under W8 QUOTE is data and is not promoted to a callable identity");
@@ -2038,8 +2119,8 @@ mod tests {
 
         let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
         let ExprKind::List(quoted_test) = &quoted_clause[0].kind else { panic!("quoted test"); };
-        assert!(matches!(&quoted_test[0].kind, ExprKind::Sid(_)),
-            "historical quote stays a quote form");
+        assert!(!matches!(&quoted_test[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified quote spelling stays opaque, not a current identity");
         let ExprKind::List(quoted_data) = &quoted_test[1].kind else { panic!("quoted data"); };
         assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
             "quoted data must not be lifted as executable code");
@@ -2083,8 +2164,8 @@ mod tests {
         let ExprKind::List(quote_form) = &definition_body(&quoted).kind else {
             panic!("quote form");
         };
-        assert!(matches!(&quote_form[0].kind, ExprKind::Sid(_)),
-            "W8 QUOTE keeps its compatibility identity and payload opaque");
+        assert!(!matches!(&quote_form[0].kind, ExprKind::DomainIdentity(_)),
+            "unratified quote spelling stays opaque and keeps its payload as data");
         let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quote payload"); };
         assert!(matches!(&payload[0].kind, ExprKind::Number(value, _) if *value == 100.0),
             "quoted 100 remains a number, never a callable D3 head");
