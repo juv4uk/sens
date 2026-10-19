@@ -117,18 +117,16 @@ fn forward_macro_cutover_is_exact_width_and_bit_neutral() {
     assert_eq!(FORWARD.matches("(як-є визначити)").count(), MIGRATED_MACROS.len());
     assert!(!FORWARD.contains("(як-є def)"), "legacy def macro expansion forbidden");
     for name in MIGRATED_MACROS {
-        let define = format!("(визначити {name}\n  (make-macro\n    (функція ");
+        let define = format!("(визначити {name}\n  (макрос\n    (функція ");
         assert!(
             FORWARD.contains(&define),
-            "{name} must be D4 DEFINE -> make-macro -> D4 LAMBDA"
+            "{name} must be D4 DEFINE -> D5 МАКРОС -> D4 ФУНКЦІЯ"
         );
     }
 
-    let legacy_identity_bits = MIGRATED_MACROS.len() * 8;
-    let exact_domain_identity_bits = MIGRATED_MACROS.len() * (4 + 4);
-    assert_eq!(
-        exact_domain_identity_bits, legacy_identity_bits,
-        "macro cutover must remove the legacy plane without increasing identity-bit cost"
+    assert!(
+        !FORWARD.contains("(make-macro"),
+        "у виконуваному джерелі не може залишатися застарілий конструктор"
     );
 }
 
