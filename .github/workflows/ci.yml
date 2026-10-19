@@ -56,6 +56,7 @@ jobs:
               # Точна D5 арифметика, похідні SI та індексація правил у справжньому SENS.
               cargo test --locked -p sens --test sens_exact_rational_division --test si_names --test reason_index -- --nocapture
               cargo test --locked -p sens --test yantra yantra_json_object_predicate_is_actual_d1_behavior -- --nocapture
+              cargo test --locked -p sens --test yantra yantra_message_and_tool_accessors_execute_with_ukrainian_bindings -- --nocapture
               cargo test --locked -p sens --test guard
           # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
           cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
