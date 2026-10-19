@@ -14,9 +14,9 @@
         "lib/machine/encoding/coverage.lisp"))))
 
 (за-умовою
-  ((encoder-coverage-index-valid?)
+  ((покриття-кодувальника-індекс-коректний?)
    (за-умовою
-     ((encoder-coverage-projection-valid?
+     ((покриття-кодувальника-проєкція-коректна?
         encoder-coverage-committed-form)
       (як-є
         (encoder-coverage-check
@@ -28,4 +28,4 @@
      (як-є encoder-coverage-check)
      (як-є (status fail))
      (перше (читати-всі "(reason invalid-coverage-input-projection)"))
-     (сполучити (як-є checks) (encoder-coverage-index-checks)))))
+     (сполучити (як-є checks) (покриття-кодувальника-перевірки-індексу)))))

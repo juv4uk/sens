@@ -12,6 +12,53 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "lib/machine/encoding/coverage-generator.lisp"
 ORIGINAL_BLOB = "65f99d80597d047c8a0380b1200f110ecafc7891"
+# Зворотне лише для статичного історичного Git receipt; не runtime alias.
+LOCAL_UKR_NAMES = {
+    "покриття-кодувальника-поєднати-рядки": "encoder-coverage-str+",
+    "покриття-кодувальника-тотожні-атоми?": "encoder-coverage-atom-same?",
+    "покриття-кодувальника-тотожні-структури?": "encoder-coverage-same?",
+    "покриття-кодувальника-порожній-список?": "encoder-coverage-empty?",
+    "покриття-кодувальника-порахувати-до": "encoder-coverage-binary-length-onto",
+    "покриття-кодувальника-кількість-елементів": "encoder-coverage-binary-length",
+    "покриття-кодувальника-кількість-збігається?": "encoder-coverage-count=?",
+    "покриття-кодувальника-усі-підтверджені?": "encoder-coverage-all?",
+    "покриття-кодувальника-тотожні-пари?": "encoder-coverage-pair=?",
+    "покриття-кодувальника-містить-елемент?": "encoder-coverage-member?",
+    "покриття-кодувальника-коло-поєднання": "encoder-coverage-concat-round",
+    "покриття-кодувальника-збалансоване-поєднання": "encoder-coverage-balanced-concat",
+    "покриття-кодувальника-форма-проєкції-допусків": "encoder-coverage-admission-projection-form",
+    "покриття-кодувальника-кількість-голів-проєкції": "encoder-coverage-projection-head-count",
+    "покриття-кодувальника-кількість-часткових": "encoder-coverage-projection-partial-count",
+    "покриття-кодувальника-кількість-сиріт": "encoder-coverage-projection-orphan-count",
+    "покриття-кодувальника-часткові-записи": "encoder-coverage-partials",
+    "покриття-кодувальника-підстава-частковості": "encoder-coverage-partial-reason",
+    "покриття-кодувальника-історична-форма": "encoder-coverage-legacy-form",
+    "покриття-кодувальника-історична-кількість": "encoder-coverage-legacy-count",
+    "покриття-кодувальника-історична-кількість-наступників": "encoder-coverage-legacy-successor-count",
+    "покриття-кодувальника-історичні-пари": "encoder-coverage-legacy-pairs",
+    "покриття-кодувальника-рівні-ключі-рядків?": "encoder-coverage-row-key=?",
+    "покриття-кодувальника-підстава-відсутності": "encoder-coverage-not-yet-reason",
+    "покриття-кодувальника-сформувати-рядок": "encoder-coverage-render-row",
+    "покриття-кодувальника-побудувати-до": "encoder-coverage-build-onto",
+    "покриття-кодувальника-унікальний-індекс?": "encoder-coverage-index-unique?",
+    "покриття-кодувальника-форма-індексу": "encoder-coverage-index-form",
+    "покриття-кодувальника-кількість-індексу": "encoder-coverage-index-count",
+    "покриття-кодувальника-рядки-індексу": "encoder-coverage-index-rows",
+    "покриття-кодувальника-кількість-форм": "encoder-coverage-form-count",
+    "покриття-кодувальника-часткові-коректні?": "encoder-coverage-partials-valid?",
+    "покриття-кодувальника-перевірки-індексу": "encoder-coverage-index-checks",
+    "покриття-кодувальника-індекс-коректний?": "encoder-coverage-index-valid?",
+    "покриття-кодувальника-збігається-збережений-рядок?": "encoder-coverage-committed-row-matches?",
+    "покриття-кодувальника-рядки-проєкції-коректні?": "encoder-coverage-projection-rows-valid?",
+    "покриття-кодувальника-проєкція-коректна?": "encoder-coverage-projection-valid?",
+    "покриття-кодувальника-сформувати-звіт": "encoder-coverage-render",
+}
+
+def historical_local_names(source):
+    for ukrainian, historical in sorted(LOCAL_UKR_NAMES.items(), key=lambda row: -len(row[0])):
+        source = source.replace(ukrainian, historical)
+    return source
+
 EXPECTED = {
     "100": ("перше", 36), "101": ("тотожне?", 3),
     "110": ("за-умовою", 28), "111": ("сполучити", 4),
@@ -131,6 +178,9 @@ def verify(text):
     if text.count(FIFTH_WITNESS) != 2:
         raise AssertionError("втрачено точний D9 FIFTH через D3 CAR/CDR")
     projected = text.replace(FIFTH_WITNESS, FIFTH_BINARY)
+    # Історичний receipt перевіряє AST після оборотного перейменування
+    # локальних назв; цитовані дані та числові закони залишаються тими самими.
+    projected = historical_local_names(projected)
     # Історичний Git receipt стосується стану до українізації локальних
     # параметрів. Відновлюємо виключно alpha-перейменування першої функції;
     # це не runtime alias, семантику SENS визначає сам evaluator.

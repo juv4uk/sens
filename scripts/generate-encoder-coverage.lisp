@@ -3,17 +3,17 @@
 (load "lib/machine/encoding/coverage-generator.lisp")
 
 (за-умовою
-  ((encoder-coverage-index-valid?)
+  ((покриття-кодувальника-індекс-коректний?)
    ((функція ()
       (записати-файл
         "lib/machine/encoding/coverage.lisp"
-        (encoder-coverage-render))
+        (покриття-кодувальника-сформувати-звіт))
       (друкувати
         (список
           (як-є encoder-coverage-generate)
           (як-є (status written))
-          (список (як-є forms) encoder-coverage-form-count)
-          (список (як-є partial) (довжина encoder-coverage-partials)))))))
+          (список (як-є forms) покриття-кодувальника-кількість-форм)
+          (список (як-є partial) (довжина покриття-кодувальника-часткові-записи)))))))
   (так
    (друкувати
      (перше (читати-всі "(encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection))")))))
