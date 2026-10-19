@@ -848,7 +848,7 @@
              (як-є unadmitted-machine-form)
              (x86-first-unadmitted-form forms))))))
 
-(визначити x86-call-admitted-u64
+(визначити викликати-допущену-машинну-програму
   (функція (forms arena-bytes)
     (за-умовою
       ((x86-admitted-program? forms)

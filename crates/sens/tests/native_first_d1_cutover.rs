@@ -36,7 +36,7 @@ fn ratified_ukr_d1_values_are_direct_predicate_bits() {
 fn real_native_first_classifier_still_rejects_unlowerable_forms() {
     let mut s = session();
     for argument in ["(як-є ())", "(як-є (symbol))"] {
-        let source = format!("(native-first-plan {argument})");
+        let source = format!("(класифікувати-нативний-вираз {argument})");
         let value = eval(&mut s, &source).expect("native-first evaluation for unsupported form");
         assert!(value.to_string().starts_with("(evaluator-fallback "),
             "{source} must use evaluator-fallback; got {value}");
@@ -50,8 +50,8 @@ fn real_native_first_classifier_handles_atomic_and_compound_heads() {
     // а не бути відкинута до зіставлення викличної голови.
     // Складену голову не можна подавати до D3 EQ (порівнює лише атоми).
     for source in [
-        "(native-first-plan (як-є (перше 1)))",
-        "(native-first-plan (як-є ((функція (значення) значення) 1)))",
+        "(класифікувати-нативний-вираз (як-є (перше 1)))",
+        "(класифікувати-нативний-вираз (як-є ((функція (значення) значення) 1)))",
     ] {
         let value = eval(&mut s, source)
             .expect("SENS classifier must not apply D3 EQ to a pair head");
@@ -66,7 +66,7 @@ fn real_native_first_classifier_handles_atomic_and_compound_heads() {
 fn dotted_tail_is_not_a_valid_single_argument_car_plan() {
     let mut s = session();
     // Це реальна Lisp-структура, прочитана SENS, а не текстовий підрахунок.
-    let source = "(native-first-plan (як-є (перше (сполучити 2 3) . зайвий-хвіст)))";
+    let source = "(класифікувати-нативний-вираз (як-є (перше (сполучити 2 3) . зайвий-хвіст)))";
     let result = eval(&mut s, source).expect("SENS має відхилити dotted CAR до x86");
     assert!(
         result.to_string().starts_with("(evaluator-fallback "),

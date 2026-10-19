@@ -40,15 +40,15 @@ fn canonical_machine_gateway_rejects_raw_bytes_register_bypass_and_truncation_be
 
     for (request, expected) in [
         (
-            "(x86-call-admitted-u64 (quote (15 11)) 0)",
+            "(викликати-допущену-машинну-програму (quote (15 11)) 0)",
             "(rejected unadmitted-machine-form 15)",
         ),
         (
-            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rbx 1))) 0)",
+            "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rbx 1))) 0)",
             "(rejected unadmitted-machine-form (mov-r64-imm64 rbx 1))",
         ),
         (
-            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax))) 0)",
+            "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rax))) 0)",
             "(rejected unadmitted-machine-form (mov-r64-imm64 rax))",
         ),
     ] {

@@ -117,7 +117,7 @@
            (jmp-rel32 -100))))
       (72 141 67 10 15 132 232 3 0 0 233 156 255 255 255))
      ((native sete-equal)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 10)
@@ -128,7 +128,7 @@
         0)
       1)
      ((native sete-not-equal)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 20)
@@ -139,7 +139,7 @@
         0)
       0)
      ((native imul-product)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 7)
            (mov-r64-imm64 rbx 6)
@@ -148,7 +148,7 @@
         0)
       42)
      ((native idiv-quotient)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 100)
            (cqo)
@@ -158,7 +158,7 @@
         0)
       14)
      ((native cmove-taken)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 99)
@@ -168,7 +168,7 @@
         0)
       99)
      ((native cmove-not-taken)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 99)
@@ -226,7 +226,7 @@
       (x86-admitted-instruction? (quote (tzcnt-r64-r64 rax rbx)))
       t)
      ((native popcnt-22)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 22)
            (popcnt-r64-r64 rax rax)
@@ -234,7 +234,7 @@
         0)
       3)
      ((native tzcnt-24)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 24)
            (tzcnt-r64-r64 rax rax)
@@ -242,7 +242,7 @@
         0)
       3)
      ((native bts-set-bit-5)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((xor-r64-r64 rax rax)
            (bts-r64-imm8 rax 5)
@@ -250,7 +250,7 @@
         0)
       32)
      ((native btr-clear-bit-5)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 32)
            (btr-r64-imm8 rax 5)
@@ -258,7 +258,7 @@
         0)
       0)
      ((native btc-flip-bit-3)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((xor-r64-r64 rax rax)
            (btc-r64-imm8 rax 3)
@@ -266,7 +266,7 @@
         0)
       8)
      ((native test-imm32-odd)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 5)
            (test-r64-imm32 rax 1)
@@ -276,7 +276,7 @@
         0)
       1)
      ((native test-imm32-even)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 4)
            (test-r64-imm32 rax 1)
@@ -361,7 +361,7 @@
       (x86-admitted-instruction? (quote (rep-movsq)))
       t)
      ((native bsf-16)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rbx 16)
            (bsf-r64-r64 rax rbx)
@@ -369,7 +369,7 @@
         0)
       4)
      ((native bsr-255)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rbx 255)
            (bsr-r64-r64 rax rbx)
@@ -377,7 +377,7 @@
         0)
       7)
      ((native rol-1-by-4)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 1)
            (rol-r64-imm8 rax 4)
@@ -385,7 +385,7 @@
         0)
       16)
      ((native ror-16-by-4)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 16)
            (ror-r64-imm8 rax 4)
@@ -393,7 +393,7 @@
         0)
       1)
      ((native xchg-rax-rbx)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 20)
@@ -402,7 +402,7 @@
         0)
       20)
      ((native bswap-double)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 12345678)
            (bswap-r64 rax)
@@ -411,7 +411,7 @@
         0)
       12345678)
      ((native arena-rep-stosq)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-r64 rsi rdi)
            (mov-r64-imm64 rax 42)
@@ -423,7 +423,7 @@
         64)
       42)
      ((native arena-rep-movsq)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-r64 rbx rdi)
            (mov-r64-imm64 rax 999)
@@ -716,7 +716,7 @@
       (x86-admitted-instruction? (quote (movq-xmm-r64 xmm0 rax)))
       t)
      ((native float-arithmetic-int-conversion)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 5)
            (mov-r64-imm64 rbx 9)
@@ -728,7 +728,7 @@
         0)
       45)
      ((native float-sqrt)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 144)
            (cvtsi2sd-xmm-r64 xmm0 rax)
@@ -738,7 +738,7 @@
         0)
       12)
      ((native float-max)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 25)
@@ -750,7 +750,7 @@
         0)
       25)
      ((native float-ucomisd-compare)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 20)
@@ -763,7 +763,7 @@
         0)
       1)
      ((native float-movq-bitcast-add)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 1073741824)
            (shl-r64-imm8 rax 32)
@@ -775,7 +775,7 @@
         0)
       1074790400)
      ((native cmpxchg-success)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 10)
            (mov-r64-imm64 rbx 10)
@@ -786,7 +786,7 @@
         0)
       99)
      ((native cmpxchg-failure)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((mov-r64-imm64 rax 5)
            (mov-r64-imm64 rbx 10)
@@ -796,7 +796,7 @@
         0)
       10)
      ((native rdtsc-monotonic)
-      (x86-call-admitted-u64
+      (викликати-допущену-машинну-програму
         (quote
           ((rdtsc)
            (shl-r64-imm8 rdx 32)

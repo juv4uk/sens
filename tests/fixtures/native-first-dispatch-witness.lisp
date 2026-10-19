@@ -19,23 +19,23 @@
 
 (список
   (native-first-witness-check
-    (native-first-plan (як-є (перше (сполучити 2 3))))
+    (класифікувати-нативний-вираз (як-є (перше (сполучити 2 3))))
     (список
       (як-є native-plan)
       (x86-lower-cons-car-u64-forms 2 3)
       x86-pair-cell-bytes))
   (native-first-witness-check
-    (native-first-plan (як-є (+ 2 3)))
+    (класифікувати-нативний-вираз (як-є (+ 2 3)))
     (як-є (evaluator-fallback (+ 2 3))))
   (native-first-witness-check
-    (native-first-plan (як-є (перше (сполучити (+ 1 1) 3))))
+    (класифікувати-нативний-вираз (як-є (перше (сполучити (+ 1 1) 3))))
     (як-є (evaluator-fallback (перше (сполучити (+ 1 1) 3)))))
   (native-first-witness-check
-    (native-first-plan (як-є (перше (сполучити -1 3))))
+    (класифікувати-нативний-вираз (як-є (перше (сполучити -1 3))))
     (як-є (evaluator-fallback (перше (сполучити -1 3)))))
   (native-first-witness-check
-    (native-first-plan (як-є radio))
+    (класифікувати-нативний-вираз (як-є radio))
     (як-є (evaluator-fallback radio)))
   (native-first-witness-check
-    (native-first-plan (як-є (перше . radio)))
+    (класифікувати-нативний-вираз (як-є (перше . radio)))
     (як-є (evaluator-fallback (перше . radio)))))

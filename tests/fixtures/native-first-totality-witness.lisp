@@ -13,11 +13,11 @@
   (функція (expression)
     (за-умовою
       ((однакові?
-         (native-first-plan expression)
+         (класифікувати-нативний-вираз expression)
          (список (як-є evaluator-fallback) expression))
        (як-є pass))
       ((однакові?
-         (native-first-plan expression)
+         (класифікувати-нативний-вираз expression)
          (список (як-є evaluator-fallback) expression))
        (як-є fail)))))
 

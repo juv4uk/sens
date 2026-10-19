@@ -161,7 +161,7 @@
 
 (0011 machine-native
   (0010 (forms)
-    (x86-call-admitted-u64 forms 0)))
+    (викликати-допущену-машинну-програму forms 0)))
 
 (0011 machine-current-gpr-native-rows
   (0010 ()

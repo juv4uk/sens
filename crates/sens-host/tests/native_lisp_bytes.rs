@@ -180,7 +180,7 @@ fn unadmitted_ud2_form_is_rejected_before_host_executor() {
     let _restore = RestoreHostCapabilities;
 
     let result = eval_program(
-        "(x86-call-admitted-u64 (quote ((ud2))) 0)",
+        "(викликати-допущену-машинну-програму (quote ((ud2))) 0)",
         &mut session,
     )
     .expect("unadmitted machine form must be a Lisp-level named rejection");
@@ -219,7 +219,7 @@ fn negative_mov_r64_imm64_is_admitted_but_fails_closed_at_the_real_host_boundary
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
     let result = eval_program(
-        "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax -1) (ret))) 0)",
+        "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rax -1) (ret))) 0)",
         &mut session,
     );
 
@@ -249,7 +249,7 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     );
 
     let add = eval_program(
-        "(x86-call-admitted-u64 (x86-lower-add-u64-forms 2 3) 0)",
+        "(викликати-допущену-машинну-програму (x86-lower-add-u64-forms 2 3) 0)",
         &mut session,
     )
     .expect("admitted semantic ADD forms must execute through the canonical gateway");
@@ -259,12 +259,12 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
-        "(x86-call-admitted-u64 (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("CONS+CAR lowering must pass through admission before host execution");
     let native_cdr = eval_program(
-        "(x86-call-admitted-u64 (x86-lower-cons-cdr-u64-forms 2 3) x86-pair-cell-bytes)",
+        "(викликати-допущену-машинну-програму (x86-lower-cons-cdr-u64-forms 2 3) x86-pair-cell-bytes)",
         &mut session,
     )
     .expect("CONS+CDR lowering must pass through admission before host execution");
@@ -659,7 +659,7 @@ fn jcc_actually_branches_on_real_hardware_for_equal_and_ordering_conditions() {
     // flag test genuinely reflects the CMP result on real i5-6400 silicon.
     let mut run = |jcc: &str, a: i64, b: i64| -> String {
         let source = format!(
-            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax {a}) (mov-r64-imm64 rcx {b}) (cmp-r64-r64 rax rcx) ({jcc}-rel8 10) (mov-r64-imm64 rax 999) (ret))) 0)"
+            "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rax {a}) (mov-r64-imm64 rcx {b}) (cmp-r64-r64 rax rcx) ({jcc}-rel8 10) (mov-r64-imm64 rax 999) (ret))) 0)"
         );
         eval_program(&source, &mut session)
             .expect("real hardware must execute the admitted program")
@@ -709,7 +709,7 @@ fn jmp_actually_branches_unconditionally_on_real_hardware_regardless_of_flags() 
     // regardless of what CMP just set); mov rax,999; ret.
     let mut run = |a: i64, b: i64| -> String {
         let source = format!(
-            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax {a}) (mov-r64-imm64 rcx {b}) (cmp-r64-r64 rax rcx) (jmp-rel8 10) (mov-r64-imm64 rax 999) (ret))) 0)"
+            "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rax {a}) (mov-r64-imm64 rcx {b}) (cmp-r64-r64 rax rcx) (jmp-rel8 10) (mov-r64-imm64 rax 999) (ret))) 0)"
         );
         eval_program(&source, &mut session)
             .expect("real hardware must execute the admitted program")

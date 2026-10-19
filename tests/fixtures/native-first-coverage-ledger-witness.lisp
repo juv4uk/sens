@@ -54,7 +54,7 @@
 (0011 native-first-coverage-fallback-plan-state
   (0010 (expression)
     (native-first-coverage-check
-      (native-first-plan expression)
+      (класифікувати-нативний-вираз expression)
       (1110 (001 evaluator-fallback) expression))))
 
 (0011 native-first-coverage-native-plan-state
@@ -100,7 +100,7 @@
              (native-first-coverage-field
                (001 evidence)
                row))
-           (plan (native-first-plan expression))
+           (plan (класифікувати-нативний-вираз expression))
            (outcome
              (нативне-виконати-вираз expression))
            (parity

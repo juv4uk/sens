@@ -12,12 +12,12 @@
 (00001001 machine-representation-semantic-reference (00001100 2 3))
 
 (00001001 machine-representation-primary
-  (x86-call-admitted-u64
+  (викликати-допущену-машинну-програму
     (x86-lower-add-u64-forms 2 3)
     0))
 
 (00001001 machine-representation-alternate
-  (x86-call-admitted-u64
+  (викликати-допущену-машинну-програму
     (00000001
       ((mov-r64-imm64 rax 2)
        (mov-r64-imm64 r8 3)

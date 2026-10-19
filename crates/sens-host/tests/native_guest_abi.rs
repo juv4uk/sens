@@ -36,7 +36,7 @@ fn execute_clobbering_guest(register: &str) {
     let mut session = machine_session();
 
     let source = format!(
-        "(x86-call-admitted-u64 (quote ((mov-r64-imm64 {register} 42) (mov-r64-imm64 rax 7) (ret))) 0)"
+        "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 {register} 42) (mov-r64-imm64 rax 7) (ret))) 0)"
     );
     let result = eval_program(&source, &mut session)
         .unwrap_or_else(|error| panic!("admitted guest clobbering {register} must return safely: {error}"));
@@ -57,7 +57,7 @@ fn execute_arena_guest_clobbering(register: &str) {
     // through RDI, clobber the selected register, load the stored value back
     // through RDI into RAX, then return it.
     let source = format!(
-        "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 11) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 {register} 42) (mov-r64-mem-disp8 rax rdi 0) (ret))) 16)"
+        "(викликати-допущену-машинну-програму (quote ((mov-r64-imm64 rax 11) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 {register} 42) (mov-r64-mem-disp8 rax rdi 0) (ret))) 16)"
     );
     let result = eval_program(&source, &mut session).unwrap_or_else(|error| {
         panic!("arena guest clobbering {register} must preserve RDI arena entry: {error}")

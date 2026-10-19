@@ -1,7 +1,7 @@
 ; #508 — machine-readable native-first coverage ledger.
 ;
 ; Diagnostic/projection data only. This file is NOT a semantic registry and
-; MUST NOT participate in native-first-plan dispatch. The classifier remains
+; MUST NOT participate in класифікувати-нативний-вираз dispatch. The classifier remains
 ; the execution-routing authority; this ledger only records observed coverage
 ; classes, explicit fallback reasons, and concrete missing prerequisites.
 ;

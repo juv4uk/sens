@@ -220,7 +220,7 @@
 ; No pair predicate or tag rule is duplicated in this machine layer.
 (визначити x86-call-semantic-car-u64
   (функція (pair-value)
-    (x86-call-admitted-u64
+    (викликати-допущену-машинну-програму
       (x86-lower-cons-car-u64-forms
         (перше pair-value)
         (решта pair-value))
