@@ -24,19 +24,19 @@
 (визначити *translation-evidence-schema* (як-є translation-evidence/1))
 (визначити *translation-evidence* (як-є ()))
 
-(визначити translation-status
+(визначити переклад-стан
   (функція (proposal) (друге proposal)))
 
-(визначити translation-kind
+(визначити переклад-вид
   (функція (proposal) (третє proposal)))
 
-(визначити translation-source
+(визначити переклад-джерело
   (функція (proposal) (четверте proposal)))
 
-(визначити translation-payload
+(визначити переклад-вміст
   (функція (proposal) (п'ятий proposal)))
 
-(визначити translation-status-valid?
+(визначити статус-запису-перекладу-коректний?
   (функція (status)
     (за-умовою
       ((тотожне? (символ? status) (як-є ())) (як-є ()))
@@ -45,7 +45,7 @@
       ((тотожне? status (як-є rejected)) так)
       (так (як-є ())))))
 
-(визначити translation-kind-valid?
+(визначити вид-кандидата-перекладу-коректний?
   (функція (kind)
     (за-умовою
       ((тотожне? (символ? kind) (як-є ())) (як-є ()))
@@ -58,7 +58,7 @@
 ; separately so a well-shaped translator message containing malformed semantic
 ; data can be named `invalid-candidate` instead of collapsing into a generic
 ; transport/envelope failure.
-(визначити translation-envelope-valid?
+(визначити структура-обгортки-перекладу-коректна?
   (функція (proposal)
     (за-умовою
       ((атом? proposal) (як-є ()))
@@ -76,14 +76,14 @@
          (так так)))
       (так (як-є ())))))
 
-(визначити translation-batch-valid?
+(визначити пакет-кандидатів-перекладу-коректний?
   (функція (payload)
     (за-умовою
       ((атом? payload) (як-є ()))
       ((тотожне? (правильно-структурований-список-знань? payload) (як-є ())) (як-є ()))
       (так (клаузи-бази-знань-коректні? payload)))))
 
-(визначити translation-candidate-payload-valid?
+(визначити вміст-кандидата-перекладу-коректний?
   (функція (kind payload)
     (за-умовою
       ((тотожне? kind (як-є clause)) (клауза-бази-знань-коректна? payload))
@@ -91,7 +91,7 @@
       ((тотожне? kind (як-є query)) (ціль-бази-знань-коректна? payload))
       (так (як-є ())))))
 
-(визначити translation-alternatives-valid?
+(визначити альтернативні-варіанти-перекладу-коректні?
   (функція (kind alternatives)
     (за-умовою
       ((атом? alternatives) (як-є ()))
@@ -103,30 +103,30 @@
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
 ; alternatives. One alternative is just a candidate; zero is not ambiguity.
-(визначити translation-ambiguity-valid?
+(визначити опис-неоднозначності-перекладу-коректний?
   (функція (kind payload)
     (за-умовою
       ((тотожне? (правильно-структурований-список-знань? payload) (як-є ())) (як-є ()))
       ((атом? (решта payload)) (як-є ()))
       (так (альтернативні-варіанти-перекладу-коректні? kind payload)))))
 
-(визначити make-translation-review
+(визначити створити-переклад-перевірка
   (функція (status code proposal detail)
     (список *translation-review-schema* status code proposal detail)))
 
-(визначити translation-review-status
+(визначити переклад-перевірка-стан
   (функція (review) (друге review)))
 
-(визначити translation-review-code
+(визначити переклад-перевірка-код
   (функція (review) (третє review)))
 
-(визначити translation-review-proposal
+(визначити переклад-перевірка-пропозиція
   (функція (review) (четверте review)))
 
-(визначити translation-review-detail
+(визначити переклад-перевірка-деталь
   (функція (review) (п'ятий review)))
 
-(визначити translation-review-status-valid?
+(визначити статус-огляду-кандидата-перекладу-коректний?
   (функція (status)
     (за-умовою
       ((тотожне? (символ? status) (як-є ())) (як-є ()))
@@ -135,7 +135,7 @@
       ((тотожне? status (як-є ambiguous)) так)
       (так (як-є ())))))
 
-(визначити translation-review-valid?
+(визначити запис-огляду-перекладу-коректний?
   (функція (review)
     (за-умовою
       ((атом? review) (як-є ()))
@@ -151,7 +151,7 @@
          (так так)))
       (так (як-є ())))))
 
-(визначити translation-review-advice-decision
+(визначити рішення-на-основі-огляду-перекладу-й-поради
   (функція (proposal decision)
     (за-умовою
       ((атом? decision)
@@ -173,7 +173,7 @@
        (створити-переклад-перевірка
          (як-є rejected) (як-є malformed-advice-decision) proposal decision)))))
 
-(визначити translation-review-candidate
+(визначити отримати-кандидата-на-огляд-перекладу
   (функція (module-name proposal)
     ((функція (kind payload)
       (за-умовою
@@ -198,7 +198,7 @@
 ; `translation-review` is pure with respect to knowledge state. Even a review
 ; classified as accepted has NOT written anything. Admission remains an
 ; explicit later call to `advise` or `advise-all` by the Lisp/embedding layer.
-(визначити translation-review
+(визначити переклад-перевірка
   (функція (module-name proposal)
     (за-умовою
       ((тотожне? (символ? module-name) (як-є ()))
@@ -237,7 +237,7 @@
 ; Only accepted knowledge candidates expose an admission payload. Queries are
 ; accepted questions, not knowledge writes. Rejected/ambiguous reviews cannot
 ; accidentally be fed to advise through this helper.
-(визначити translation-admittable?
+(визначити переклад-допустимий?
   (функція (review)
     (за-умовою
       ((тотожне? (запис-огляду-перекладу-коректний? review) (як-є ())) (як-є ()))
@@ -254,7 +254,7 @@
         (переклад-перевірка-пропозиція review)))
       (так (як-є ())))))
 
-(визначити translation-admission-payload
+(визначити переклад-допуск-вміст
   (функція (review)
     (за-умовою
       ((переклад-допустимий? review)
@@ -262,7 +262,7 @@
       (так (як-є ())))))
 
 ; Rejected and ambiguous translations are observations, not knowledge.
-(визначити translation-evidence-worthy?
+(визначити переклад-доказ-вартий?
   (функція (review)
     (за-умовою
       ((тотожне? (запис-огляду-перекладу-коректний? review) (як-є ())) (як-є ()))
@@ -270,30 +270,50 @@
       ((тотожне? (переклад-перевірка-стан review) (як-є ambiguous)) так)
       (так (як-є ())))))
 
-(визначити translation-evidence-entry
+(визначити переклад-доказ-запис
   (функція (review)
     (список *translation-evidence-schema* review)))
 
-(визначити translation-evidence-next
+(визначити переклад-доказ-наступний
   (функція (review journal)
     (за-умовою
       ((переклад-доказ-вартий? review)
        (сполучити (переклад-доказ-запис review) journal))
       (так journal))))
 
-(визначити translation-review-with-evidence
+(визначити переклад-перевірка-з-доказ
   (функція (module-name proposal journal)
     ((функція (review)
        (список review (переклад-доказ-наступний review journal)))
      (переклад-перевірка module-name proposal))))
 
-; Ukrainian D9 projections of the already-owned SENS translation laws.
-; Identical closures and arity; no new domain codes or host review path.
-; D9:000101000
-(визначити переклад-перевірка translation-review)
-; D9:000110111
-(визначити переклад-допустимий? translation-admittable?)
-; D9:000000010
-(визначити переклад-допуск-вміст translation-admission-payload)
-; D9:000010010
-(визначити переклад-перевірка-з-доказ translation-review-with-evidence)
+; Повні українські назви — первинні визначення за точними проєкціями D9/D10.
+; Англійські назви нижче лише посилаються на ті самі Lisp-замикання.
+; Це не робить координати доменів самостійними викличними головами.
+(визначити translation-status переклад-стан)
+(визначити translation-kind переклад-вид)
+(визначити translation-source переклад-джерело)
+(визначити translation-payload переклад-вміст)
+(визначити translation-status-valid? статус-запису-перекладу-коректний?)
+(визначити translation-kind-valid? вид-кандидата-перекладу-коректний?)
+(визначити translation-envelope-valid? структура-обгортки-перекладу-коректна?)
+(визначити translation-batch-valid? пакет-кандидатів-перекладу-коректний?)
+(визначити translation-candidate-payload-valid? вміст-кандидата-перекладу-коректний?)
+(визначити translation-alternatives-valid? альтернативні-варіанти-перекладу-коректні?)
+(визначити translation-ambiguity-valid? опис-неоднозначності-перекладу-коректний?)
+(визначити make-translation-review створити-переклад-перевірка)
+(визначити translation-review-status переклад-перевірка-стан)
+(визначити translation-review-code переклад-перевірка-код)
+(визначити translation-review-proposal переклад-перевірка-пропозиція)
+(визначити translation-review-detail переклад-перевірка-деталь)
+(визначити translation-review-status-valid? статус-огляду-кандидата-перекладу-коректний?)
+(визначити translation-review-valid? запис-огляду-перекладу-коректний?)
+(визначити translation-review-advice-decision рішення-на-основі-огляду-перекладу-й-поради)
+(визначити translation-review-candidate отримати-кандидата-на-огляд-перекладу)
+(визначити translation-review переклад-перевірка)
+(визначити translation-admittable? переклад-допустимий?)
+(визначити translation-admission-payload переклад-допуск-вміст)
+(визначити translation-evidence-worthy? переклад-доказ-вартий?)
+(визначити translation-evidence-entry переклад-доказ-запис)
+(визначити translation-evidence-next переклад-доказ-наступний)
+(визначити translation-review-with-evidence переклад-перевірка-з-доказ)
