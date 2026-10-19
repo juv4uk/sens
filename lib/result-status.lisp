@@ -30,73 +30,73 @@
 ; guessed into D7/D10 or a historical W8 slot.
 
 (визначити make-proved
-  (функція (statement results)
-    (список (як-є proved) statement results)))
+  (функція (твердження результати)
+    (список (як-є proved) твердження результати)))
 
 (визначити make-unknown
-  (функція (subject)
-    (список (як-є unknown) subject)))
+  (функція (предмет)
+    (список (як-є unknown) предмет)))
 
 (визначити make-partial
-  (функція (value bound)
-    (список (як-є partial) value bound)))
+  (функція (значення межа)
+    (список (як-є partial) значення межа)))
 
 (визначити make-blocked
-  (функція (reason)
-    (список (як-є blocked) reason)))
+  (функція (причина)
+    (список (як-є blocked) причина)))
 
 (визначити make-disputed
-  (функція (evidence)
-    (список (як-є disputed) evidence)))
+  (функція (доказ)
+    (список (як-є disputed) доказ)))
 
 (визначити make-invalid
-  (функція (reason payload)
-    (список (як-є invalid) reason payload)))
+  (функція (причина вміст)
+    (список (як-є invalid) причина вміст)))
 
 (визначити result-tagged?
-  (функція (result)
+  (функція (результат)
     (за-умовою
-      ((атом? result) ні)
-      ((тотожне? (перше result) (як-є proved)) так)
-      ((тотожне? (перше result) (як-є unknown)) так)
-      ((тотожне? (перше result) (як-є partial)) так)
-      ((тотожне? (перше result) (як-є blocked)) так)
-      ((тотожне? (перше result) (як-є disputed)) так)
-      ((тотожне? (перше result) (як-є invalid)) так)
+      ((атом? результат) ні)
+      ((тотожне? (перше результат) (як-є proved)) так)
+      ((тотожне? (перше результат) (як-є unknown)) так)
+      ((тотожне? (перше результат) (як-є partial)) так)
+      ((тотожне? (перше результат) (як-є blocked)) так)
+      ((тотожне? (перше результат) (як-є disputed)) так)
+      ((тотожне? (перше результат) (як-є invalid)) так)
       (так ні))))
 
 (визначити result-status
-  (функція (result)
+  (функція (результат)
     (за-умовою
-      ((результат-позначений? result) (перше result))
+      ((результат-позначений? результат) (перше результат))
       (так (як-є ())))))
 
 (визначити result-payload
-  (функція (result)
+  (функція (результат)
     (за-умовою
-      ((результат-позначений? result) (решта result))
+      ((результат-позначений? результат) (решта результат))
       (так (як-є ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
 ; passed to it merely to ask whether that pair is `()`.
 (визначити result-proper-list?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((атом? value)
+      ((атом? значення)
        (за-умовою
-         ((тотожне? value (як-є ())) так)
+         ((тотожне? значення (як-є ())) так)
          (так ні)))
       (так
-       (результат-є-правильним-списком? (решта value))))))
+       (результат-є-правильним-списком? (решта значення))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
 (визначити result-not-head?
-  (функція (head)
+  (функція (голова)
     (за-умовою
-      ((тотожне? head (як-є not?)) так)
-      ((тотожне? head (як-є not)) так)
+      ((тотожне? голова (як-є not?)) так)
+      ((тотожне? голова (як-є not)) так)
       (так ні))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
@@ -106,16 +106,16 @@
 ; logical `unknown`.
 ; Arity check uses exact D3 ATOM/CDR + D4 selector; no W8 / D6 LENGTH.
 (визначити result-goal?
-  (функція (goal)
+  (функція (ціль)
     (за-умовою
-      ((атом? goal) ні)
-      ((хибне? (результат-є-правильним-списком? goal)) ні)
-      ((хибне? (символ? (перше goal))) ні)
-      ((результат-не-є-головою-правила? (перше goal))
+      ((атом? ціль) ні)
+      ((хибне? (результат-є-правильним-списком? ціль)) ні)
+      ((хибне? (символ? (перше ціль))) ні)
+      ((результат-не-є-головою-правила? (перше ціль))
        (за-умовою
-         ((атом? (решта goal))
+         ((атом? (решта ціль))
           (за-умовою
-            ((атом? (решта-решти goal)) (результат-ціль? (друге goal)))
+            ((атом? (решта-решти ціль)) (результат-ціль? (друге ціль)))
             (так ні)))
          (так ні)))
       (так так))))
@@ -124,17 +124,17 @@
 ; A well-shaped top-level negative query asks about its positive counterpart;
 ; every other goal gets wrapped in `not?`.
 (визначити result-negated-goal?
-  (функція (goal)
+  (функція (ціль)
     (за-умовою
-      ((хибне? (результат-ціль? goal)) ні)
-      ((результат-не-є-головою-правила? (перше goal)) так)
+      ((хибне? (результат-ціль? ціль)) ні)
+      ((результат-не-є-головою-правила? (перше ціль)) так)
       (так ні))))
 
 (визначити result-opposite-goal
-  (функція (goal)
+  (функція (ціль)
     (за-умовою
-      ((результат-заперечений-ціль? goal) (друге goal))
-      (так (список (як-є not?) goal)))))
+      ((результат-заперечений-ціль? ціль) (друге ціль))
+      (так (список (як-є not?) ціль)))))
 
 ; Both positive and opposite queries use the already-ratified exact D9:101001110
 ; REASON entry, sharing one immutable reason-index. This removes two legacy
@@ -155,28 +155,28 @@
 ; hidden cache or invalidation policy: a retained index continues to represent
 ; the exact rules captured when it was built.
 (визначити reason-observe
-  (функція (goal rules-or-index)
+  (функція (ціль правила-або-індекс)
     (за-умовою
-      ((хибне? (результат-ціль? goal))
-       (створити-некоректний (як-є invalid-goal) goal))
+      ((хибне? (результат-ціль? ціль))
+       (створити-некоректний (як-є invalid-goal) ціль))
       (так
-       (нехай-послідовно ((opposite (результат-протилежний-ціль goal))
-              (index (reason-ensure-index rules-or-index))
-              (positive-results (міркувати goal index))
-              (opposite-results (міркувати opposite index)))
+       (нехай-послідовно ((протилежне (результат-протилежний-ціль ціль))
+              (індекс (reason-ensure-index правила-або-індекс))
+              (позитивні-результати (міркувати ціль індекс))
+              (протилежні-результати (міркувати протилежне індекс)))
          (за-умовою
            ((за-умовою
-              ((хибне? (атом? positive-results))
-               (хибне? (атом? opposite-results)))
+              ((хибне? (атом? позитивні-результати))
+               (хибне? (атом? протилежні-результати)))
               (так ні))
             (створити-спірний
               (список
-                (створити-доведений goal positive-results)
-                (створити-доведений opposite opposite-results))))
-           ((хибне? (атом? positive-results))
-            (створити-доведений goal positive-results))
-           ((хибне? (атом? opposite-results))
-            (створити-доведений opposite opposite-results))
+                (створити-доведений ціль позитивні-результати)
+                (створити-доведений протилежне протилежні-результати))))
+           ((хибне? (атом? позитивні-результати))
+            (створити-доведений ціль позитивні-результати))
+           ((хибне? (атом? протилежні-результати))
+            (створити-доведений протилежне протилежні-результати))
            (так (як-є ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
@@ -185,17 +185,17 @@
 ; knowledge journal, that absence is already established: reasoning is blocked
 ; by a known missing precondition rather than epistemically `unknown`.
 (визначити reason-in-observe
-  (функція (module-name goal)
+  (функція (назва-модуля ціль)
     (за-умовою
-      ((хибне? (символ? module-name))
-       (створити-некоректний (як-є invalid-module) module-name))
-      ((хибне? (результат-ціль? goal))
-       (створити-некоректний (як-є invalid-goal) goal))
-      ((модуль-відомий? module-name)
-       (міркувати-спостерігати goal (модуль-клаузи-зараз module-name)))
+      ((хибне? (символ? назва-модуля))
+       (створити-некоректний (як-є invalid-module) назва-модуля))
+      ((хибне? (результат-ціль? ціль))
+       (створити-некоректний (як-є invalid-goal) ціль))
+      ((модуль-відомий? назва-модуля)
+       (міркувати-спостерігати ціль (модуль-клаузи-зараз назва-модуля)))
       (так
        (створити-заблокований
-         (список (як-є module-not-found) module-name))))))
+         (список (як-є module-not-found) назва-модуля))))))
 
 ; D9:000010000 REASON-OBSERVE and D9:000110100 REASON-IN-OBSERVE.
 ; Ukrainian SENS bindings to the existing source-owned reasoning laws.
