@@ -19,7 +19,7 @@
 (визначити proven-byte-profile-after-decode (монотонний-наносекунди))
 
 (визначити proven-byte-profile-text
-  (юнікод-скаляри-рядок (second proven-byte-profile-decoded)))
+  (юнікод-скаляри-рядок (друге proven-byte-profile-decoded)))
 (визначити proven-byte-profile-after-string (монотонний-наносекунди))
 
 (визначити proven-byte-profile-root (перше (читати-всі proven-byte-profile-text)))
