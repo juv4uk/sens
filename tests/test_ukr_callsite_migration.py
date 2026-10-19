@@ -694,38 +694,53 @@ class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
 
 
 class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
-    """Один повністю доведений D4-фрагмент активного українського прикладу."""
+    """Український виконуваний приклад: цілісні форми та ратифіковані назви."""
 
-    def test_guest_list_definition_uses_ratified_full_ukr_d4_forms(self):
-        import hashlib
-
+    def test_greeting_uses_full_keyboard_surface_and_ratified_heads(self):
         root = Path(__file__).resolve().parents[1]
         path = root / "examples/ukrainian-greeting.lisp"
-        original_bytes = path.read_bytes()
-        source = original_bytes.decode("utf-8")
-        old_form = "(0011 гості (1110 'Олена 'Тарас 'Вова))"
-        new_form = "(визначити гості (список 'Олена 'Тарас 'Вова))"
+        source = path.read_text(encoding="utf-8")
+        forms = mod.parse(source)
 
-        self.assertEqual(source.count(new_form), 1)
-        self.assertNotIn(old_form, source)
-        self.assertIn("'Олена 'Тарас 'Вова", source)
-        mod.parse(source)
+        self.assertEqual(len(forms), 5)
+        self.assertIn("(визначити привітання", source)
+        self.assertIn("(визначити гості", source)
+        self.assertIn("(список 'Олена 'Тарас 'Вова)", source)
+        self.assertEqual(source.count("(друкувати"), 3)
+        self.assertIn("(значення-у-текст (перше гості))", source)
+        self.assertIn("(значення-у-текст (атом? (перше гості)))", source)
+        self.assertNotRegex(source, r"\\(\\s*[01]{2,10}(?=\\s|\\))")
 
-        for bits, spelling in (("0011", "визначити"), ("1110", "список")):
-            table = (root / "lib/domains/d4.lisp").read_text(encoding="utf-8")
-            rows = [line for line in table.splitlines()
-                    if line.strip().startswith(f"({bits} (ук ")]
-            self.assertEqual(len(rows), 1)
-            self.assertIn(f"(укр {spelling})", rows[0])
-
-        restored = source.replace(new_form, old_form, 1).encode("utf-8")
-        digest = hashlib.sha1(
-            b"blob " + str(len(restored)).encode("ascii") + b"\0" + restored
-        ).hexdigest()
-        self.assertEqual(
-            digest, "0c35ae861fdbed1edbe4fe932b8266dd4b51b869",
-            "після зворотної заміни початковий Git blob має відновлюватися побайтно",
+        from scripts.report_ukr_projection_progress import (
+            UKRAINIAN_KEYBOARD_OUTPUTS,
         )
+
+        self.assertTrue(source.strip())
+        self.assertFalse(
+            {char for char in source if char not in UKRAINIAN_KEYBOARD_OUTPUTS
+             and char not in "\\n\\r\\t"}
+        )
+
+        expected = (
+            (3, "010", "атом?"),
+            (3, "100", "перше"),
+            (4, "0010", "функція"),
+            (4, "0011", "визначити"),
+            (4, "1110", "список"),
+            (8, "11011011", "друкувати"),
+            (8, "11110100", "значення-у-текст"),
+            (9, "110011110", "рядок-додати"),
+        )
+        for width, bits, spelling in expected:
+            table = (root / f"lib/domains/d{width}.lisp").read_text(
+                encoding="utf-8"
+            )
+            row = next(
+                row for row in table.splitlines()
+                if row.strip().startswith(f"({bits} (ук ")
+            )
+            self.assertIn(f"(укр {spelling})", row)
+
 
 
 class NativeFirstUkrProjectionTests(unittest.TestCase):
