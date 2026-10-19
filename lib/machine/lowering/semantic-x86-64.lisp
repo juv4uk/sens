@@ -246,9 +246,9 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 4294967295))
-            ((атом? ()) (як-є ()))))
-         ((атом? ()) (як-є ()))))
-      ((атом? ()) (як-є ())))))
+            (так (як-є ()))))
+         (так (як-є ()))))
+      (так (як-є ())))))
 
 (визначити x86-current-d5-difference-u64-safe?
   (функція (left right)
@@ -266,11 +266,11 @@
                 ; Exact D1 controls stay distinct from numeric 0/1 and host truth.
                 (за-умовою
                   ((хибне? (менше? left right)) так)
-                  ((атом? ()) (як-є ()))))
-               ((атом? ()) (як-є ()))))
-            ((атом? ()) (як-є ()))))
-         ((атом? ()) (як-є ()))))
-      ((атом? ()) (як-є ())))))
+                  (так (як-є ()))))
+               (так (як-є ()))))
+            (так (як-є ()))))
+         (так (як-є ()))))
+      (так (як-є ())))))
 
 ; #4068 width-safe machine key helper. Width and packed bits are separate
 ; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
@@ -280,7 +280,7 @@
     (за-умовою
       ((тотожне? width expected-width)
        (тотожне? bits expected-bits))
-      ((атом? ()) (як-є ())))))
+      (так (як-є ())))))
 
 (визначити x86-lower-current-binary-u64-forms
   (функція (width bits left right)
@@ -289,18 +289,18 @@
        (за-умовою
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
-         ((атом? ()) (як-є exact-d5-fallback-required))))
+         (так (як-є exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 11)
        (за-умовою
          ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
-         ((атом? ()) (як-є exact-d5-fallback-required))))
+         (так (як-є exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 22)
        (за-умовою
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
-         ((атом? ()) (як-є exact-d5-fallback-required))))
-      ((атом? ())
+         (так (як-є exact-d5-fallback-required))))
+      (так
        (як-є unsupported-current-domain-binary-u64)))))
 
 (визначити x86-encode-current-binary-u64
@@ -311,7 +311,7 @@
          (як-є unsupported-current-domain-binary-u64))
         ((тотожне? forms (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program forms))))
       (x86-lower-current-binary-u64-forms
                     width bits left right))))
@@ -326,7 +326,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551614))
-      ((атом? ()) (як-є ())))))
+      (так (як-є ())))))
 
 (визначити x86-current-d6-sub1-u64-safe?
   (функція (value)
@@ -334,7 +334,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 1 18446744073709551615))
-      ((атом? ()) (як-є ())))))
+      (так (як-є ())))))
 
 (визначити x86-lower-current-d6-unary-u64-forms
   (функція (width bits value)
@@ -343,13 +343,13 @@
        (за-умовою
          ((x86-current-d6-add1-u64-safe? value)
           (x86-lower-add-u64-forms value 1))
-         ((атом? ()) (як-є exact-d6-fallback-required))))
+         (так (як-є exact-d6-fallback-required))))
       ((x86-current-domain-key? width bits 6 15)
        (за-умовою
          ((x86-current-d6-sub1-u64-safe? value)
           (x86-lower-difference-u64-forms value 1))
-         ((атом? ()) (як-є exact-d6-fallback-required))))
-      ((атом? ())
+         (так (як-є exact-d6-fallback-required))))
+      (так
        (як-є unsupported-current-domain-d6-unary-u64)))))
 
 (визначити x86-encode-current-d6-unary-u64
@@ -359,7 +359,7 @@
          (як-є unsupported-current-domain-d6-unary-u64))
         ((тотожне? forms (як-є exact-d6-fallback-required))
          (як-є exact-d6-fallback-required))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program forms)))) (x86-lower-current-d6-unary-u64-forms
                     width bits value))))
 
@@ -380,10 +380,10 @@
                ((x86-admission-within-inclusive-integer-range?
                   right 1 9223372036854775807)
                 (тотожне? left right))
-               ((атом? ()) (як-є ()))))
-            ((атом? ()) (як-є ()))))
-         ((атом? ()) (як-є ()))))
-      ((атом? ()) (як-є ())))))
+               (так (як-є ()))))
+            (так (як-є ()))))
+         (так (як-є ()))))
+      (так (як-є ())))))
 
 (визначити x86-lower-current-quotient-i64-forms
   (функція (width bits left right)
@@ -392,8 +392,8 @@
        (за-умовою
          ((x86-current-d5-quotient-i64-equal-safe? left right)
           (x86-lower-quotient-i64-equal-forms left right))
-         ((атом? ()) (як-є exact-d5-fallback-required))))
-      ((атом? ()) (як-є unsupported-current-domain-quotient-i64)))))
+         (так (як-є exact-d5-fallback-required))))
+      (так (як-є unsupported-current-domain-quotient-i64)))))
 
 (визначити x86-encode-current-quotient-i64
   (функція (width bits left right)
@@ -402,7 +402,7 @@
          (як-є unsupported-current-domain-quotient-i64))
         ((тотожне? forms (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program forms)))) (x86-lower-current-quotient-i64-forms
                     width bits left right))))
 
@@ -422,9 +422,9 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 9223372036854775807))
-            ((атом? ()) (як-є ()))))
-         ((атом? ()) (як-є ()))))
-      ((атом? ()) (як-є ())))))
+            (так (як-є ()))))
+         (так (як-є ()))))
+      (так (як-є ())))))
 
 (визначити x86-lower-order-i64-forms
   (функція (width bits left right)
@@ -447,9 +447,9 @@
             (список (як-є setg-r8) (як-є al))
             (список (як-є movzx-r64-r8) (як-є rax) (як-є al))
             (список (як-є ret))))
-         ((атом? ())
+         (так
           (як-є unsupported-current-domain-order-i64))))
-      ((атом? ())
+      (так
        (як-є exact-d5-fallback-required)))))
 
 (визначити x86-encode-current-order-bit
@@ -459,7 +459,7 @@
          (як-є unsupported-current-domain-order-i64))
         ((тотожне? forms (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program forms)))) (x86-lower-order-i64-forms width bits left right))))
 
 ; #4064/#4068 exact D5:01000 ZEROP bounded machine proof.
@@ -473,7 +473,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      ((атом? ()) (як-є ())))))
+      (так (як-є ())))))
 
 (визначити x86-lower-zerop-u64-forms
   (функція (value)
@@ -492,8 +492,8 @@
        (за-умовою
          ((x86-current-d5-zerop-u64-safe? value)
           (x86-lower-zerop-u64-forms value))
-         ((атом? ()) (як-є exact-d5-fallback-required))))
-      ((атом? ())
+         (так (як-є exact-d5-fallback-required))))
+      (так
        (як-є unsupported-current-domain-zerop-u64)))))
 
 (визначити x86-encode-current-zerop-bit
@@ -503,7 +503,7 @@
          (як-є unsupported-current-domain-zerop-u64))
         ((тотожне? forms (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program forms)))) (x86-lower-current-zerop-u64-forms width bits value))))
 
 ; #3996 exact-domain structural D3 dispatcher.
@@ -518,7 +518,7 @@
        (x86-lower-cons-car-u64-forms left right))
       ((x86-current-domain-key? width bits 3 3)
        (x86-lower-cons-cdr-u64-forms left right))
-      ((атом? ())
+      (так
        (як-є unsupported-current-domain-structural-u64)))))
 
 (визначити x86-encode-current-structural-u64
@@ -526,7 +526,7 @@
     ((функція (forms) (за-умовою
         ((тотожне? forms (як-є unsupported-current-domain-structural-u64))
          (як-є unsupported-current-domain-structural-u64))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-structural-u64-forms
                     width bits left right))))
 
@@ -544,9 +544,9 @@
          ((x86-current-domain-key? cond-width cond-bits 3 6)
           (x86-lower-eq-cond-u64-forms
             left right then-value else-value))
-         ((атом? ())
+         (так
           (як-є unsupported-current-domain-eq-cond-u64))))
-      ((атом? ())
+      (так
        (як-є unsupported-current-domain-eq-cond-u64)))))
 
 (визначити x86-encode-current-eq-cond-u64
@@ -555,7 +555,7 @@
     ((функція (forms) (за-умовою
         ((тотожне? forms (як-є unsupported-current-domain-eq-cond-u64))
          (як-є unsupported-current-domain-eq-cond-u64))
-        ((атом? ())
+        (так
          (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-eq-cond-u64-forms
               eq-width eq-bits cond-width cond-bits
               left right then-value else-value))))
