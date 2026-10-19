@@ -27,7 +27,7 @@
                (001 (reachable a))
                parity-rules
                (001 ())
-               (reason-index-linear parity-rules)
+               (лінійний-індекс-міркування parity-rules)
                0))
            (parity-relation (11110111 indexed linear))
 
@@ -35,7 +35,7 @@
              (001
                (((seed a))
                 ((reachable (var x)) (seed (var x))))))
-           (prepared (reason-make-index old-rules))
+           (prepared (побудувати-індекс-міркування old-rules))
            (newer-rules
              (1111 old-rules (001 (((later yes))))))
            (snapshot-relation
@@ -64,7 +64,7 @@
                goal
                recursive-rules
                (001 ())
-               (reason-index-linear recursive-rules)
+               (лінійний-індекс-міркування recursive-rules)
                0))
            (recursive-relation (11110111 recursive-indexed recursive-linear))
            (negation-relation
@@ -74,7 +74,7 @@
                  (001 (safe alice))
                  recursive-rules
                  (001 ())
-                 (reason-index-linear recursive-rules)
+                 (лінійний-індекс-міркування recursive-rules)
                  0))))
       (110
         (parity-relation (1)
