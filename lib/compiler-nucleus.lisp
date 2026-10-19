@@ -30,8 +30,8 @@
       (так (знайти-авторитет-компілятора ідентичність (решта рядки-для-пошуку-авторитету))))))
 
 (визначити compiler-nucleus
-  (функція (ідентичність authority)
-    (знайти-авторитет-компілятора ідентичність authority)))
+  (функція (ідентичність джерело-авторитету)
+    (знайти-авторитет-компілятора ідентичність джерело-авторитету)))
 
 
 ; Representation-only bootstrap seam for #3808.
@@ -153,77 +153,77 @@
 ; structure.  The three spine roles are read by ordered position; their duals
 ; are obtained with the one L4 XOR law.  No raw D3 coordinate is embedded here.
 (визначити compiler-role-from-l1-l5-bits
-  (функція (seed bits law)
+  (функція (початковий-код біти-координати закон-домену)
     (за-умовою
-      ((бітові-послідовності-однакові? seed bits (біти-голови-остова-л5-компілятора law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (біти-голови-остова-л5-компілятора закон-домену))
        (як-є selector-head))
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (біти-голови-остова-л5-компілятора law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (біти-голови-остова-л5-компілятора закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є selector-tail))
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (compiler-law-empty-bits law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (compiler-law-empty-bits закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є pair-construct))
-      ((істина-компілятора seed) ()))))
+      ((істина-компілятора початковий-код) ()))))
 
 ; Full D3 lowering closure for self-hosting.  It deliberately has a separate
 ; name so the already-merged three-role execution API remains stable.
 (визначити compiler-lowering-role-from-l1-l5-bits
-  (функція (seed bits law)
+  (функція (початковий-код біти-координати закон-домену)
     (за-умовою
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (біти-умови-остова-л5-компілятора law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (біти-умови-остова-л5-компілятора закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є quote-form))
-      ((бітові-послідовності-однакові? seed bits (біти-атома-остова-л5-компілятора law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (біти-атома-остова-л5-компілятора закон-домену))
        (як-є atom-predicate))
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (біти-голови-остова-л5-компілятора law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (біти-голови-остова-л5-компілятора закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є selector-tail))
-      ((бітові-послідовності-однакові? seed bits (біти-голови-остова-л5-компілятора law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (біти-голови-остова-л5-компілятора закон-домену))
        (як-є selector-head))
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (біти-атома-остова-л5-компілятора law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (біти-атома-остова-л5-компілятора закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є atom-equality))
-      ((бітові-послідовності-однакові? seed bits (біти-умови-остова-л5-компілятора law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (біти-умови-остова-л5-компілятора закон-домену))
        (як-є cond-form))
       ((бітові-послідовності-однакові?
-         seed bits
+         початковий-код біти-координати
          (виключне-або-бітових-послідовностей-компілятора
-           seed
-           (compiler-law-empty-bits law)
-           (compiler-law-xor-mask law)))
+           початковий-код
+           (compiler-law-empty-bits закон-домену)
+           (compiler-law-xor-mask закон-домену)))
        (як-є pair-construct))
-      ((істина-компілятора seed) ()))))
+      ((істина-компілятора початковий-код) ()))))
 
 (визначити compiler-role-from-l1-l5
-  (функція (decompose ідентичність law)
+  (функція (розкласти-ідентичність ідентичність закон-домену)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-law-width law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-law-width закон-домену))
        (compiler-role-from-l1-l5-bits
          ідентичність
-         (compiler-shape-bits (decompose ідентичність))
-         law))
+         (compiler-shape-bits (розкласти-ідентичність ідентичність))
+         закон-домену))
       ((істина-компілятора ідентичність) ()))))
 
 
@@ -238,68 +238,68 @@
 ; The compiler's present lowering law does not yet admit D5 calls.
 ; The domain width remains part of the callable identity; no D6/D7 alias.
 (визначити compiler-d4-law-width
-  (функція (law)
-    (перше law)))
+  (функція (закон-домену)
+    (перше закон-домену)))
 
 (визначити compiler-d4-law-children
-  (функція (law)
-    (перше (решта (решта law)))))
+  (функція (закон-домену)
+    (перше (решта (решта закон-домену)))))
 
 (визначити compiler-d4-law-first-child
-  (функція (law)
-    (перше (compiler-d4-law-children law))))
+  (функція (закон-домену)
+    (перше (compiler-d4-law-children закон-домену))))
 
 (визначити compiler-d4-law-second-child
-  (функція (law)
-    (перше (решта (compiler-d4-law-children law)))))
+  (функція (закон-домену)
+    (перше (решта (compiler-d4-law-children закон-домену)))))
 
 (визначити compiler-role-from-d4-bootstrap-bits
-  (функція (seed bits law)
+  (функція (початковий-код біти-координати закон-домену)
     (за-умовою
-      ((бітові-послідовності-однакові? seed bits (compiler-d4-law-first-child law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (compiler-d4-law-first-child закон-домену))
        (як-є lambda-form))
-      ((бітові-послідовності-однакові? seed bits (compiler-d4-law-second-child law))
+      ((бітові-послідовності-однакові? початковий-код біти-координати (compiler-d4-law-second-child закон-домену))
        (як-є define-form))
-      ((істина-компілятора seed) ()))))
+      ((істина-компілятора початковий-код) ()))))
 
 (визначити compiler-role-from-d4-bootstrap
-  (функція (decompose ідентичність law)
+  (функція (розкласти-ідентичність ідентичність закон-домену)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-d4-law-width law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-d4-law-width закон-домену))
        (compiler-role-from-d4-bootstrap-bits
          ідентичність
-         (compiler-shape-bits (decompose ідентичність))
-         law))
+         (compiler-shape-bits (розкласти-ідентичність ідентичність))
+         закон-домену))
       ((істина-компілятора ідентичність) ()))))
 
 ; One production role query for the whole current compiler nucleus.  Domain
 ; width selects which already-ratified structural law is applicable; neither
 ; the host nor this function infers meaning from an equal packed payload.
 (визначити compiler-lowering-role-from-l1-l5
-  (функція (decompose ідентичність law)
+  (функція (розкласти-ідентичність ідентичність закон-домену)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-law-width law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-law-width закон-домену))
        (compiler-lowering-role-from-l1-l5-bits
          ідентичність
-         (compiler-shape-bits (decompose ідентичність))
-         law))
+         (compiler-shape-bits (розкласти-ідентичність ідентичність))
+         закон-домену))
       ((істина-компілятора ідентичність) ()))))
 
 (визначити compiler-lowering-role-from-laws
-  (функція (decompose ідентичність d3-law d4-law)
+  (функція (розкласти-ідентичність ідентичність закон-д3 закон-д4)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-law-width d3-law))
-       (compiler-lowering-role-from-l1-l5 decompose ідентичність d3-law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-law-width закон-д3))
+       (compiler-lowering-role-from-l1-l5 розкласти-ідентичність ідентичність закон-д3))
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-d4-law-width d4-law))
-       (compiler-role-from-d4-bootstrap decompose ідентичність d4-law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-d4-law-width закон-д4))
+       (compiler-role-from-d4-bootstrap розкласти-ідентичність ідентичність закон-д4))
       ((істина-компілятора ідентичність) ()))))
 
 
@@ -312,25 +312,25 @@
 ; Empty role is NIL, which is itself an atom in this language. Test
 ; exact equality with () before emitting a compiler request.
 (визначити compiler-request-from-role
-  (функція (seed ідентичність role proof-ref походження)
+  (функція (початковий-код ідентичність роль-виконання посилання-на-доказ походження)
     (за-умовою
-      ((тотожне? role ()) ())
-      ((істина-компілятора seed)
+      ((тотожне? роль-виконання ()) ())
+      ((істина-компілятора початковий-код)
        (сполучити
          ідентичність
          (сполучити
-           role
+           роль-виконання
            (сполучити
-             proof-ref
+             посилання-на-доказ
              (сполучити походження ()))))))))
 
 (визначити compiler-request-from-l1-l5
-  (функція (decompose ідентичність law proof-ref походження)
+  (функція (розкласти-ідентичність ідентичність закон-домену посилання-на-доказ походження)
     (compiler-request-from-role
       ідентичність
       ідентичність
-      (compiler-role-from-l1-l5 decompose ідентичність law)
-      proof-ref
+      (compiler-role-from-l1-l5 розкласти-ідентичність ідентичність закон-домену)
+      посилання-на-доказ
       походження)))
 
 
@@ -347,25 +347,25 @@
 ; subtree.  Backend lowering/installation remains outside this program.
 
 (визначити compiler-request-from-laws
-  (функція (decompose ідентичність d3-law d4-law d3-proof d4-proof походження)
+  (функція (розкласти-ідентичність ідентичність закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-law-width d3-law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-law-width закон-д3))
        (compiler-request-from-role
          ідентичність
          ідентичність
-         (compiler-lowering-role-from-l1-l5 decompose ідентичність d3-law)
-         d3-proof
+         (compiler-lowering-role-from-l1-l5 розкласти-ідентичність ідентичність закон-д3)
+         доказ-д3
          походження))
       ((тотожне?
-         (compiler-shape-width (decompose ідентичність))
-         (compiler-d4-law-width d4-law))
+         (compiler-shape-width (розкласти-ідентичність ідентичність))
+         (compiler-d4-law-width закон-д4))
        (compiler-request-from-role
          ідентичність
          ідентичність
-         (compiler-role-from-d4-bootstrap decompose ідентичність d4-law)
-         d4-proof
+         (compiler-role-from-d4-bootstrap розкласти-ідентичність ідентичність закон-д4)
+         доказ-д4
          походження))
       ((істина-компілятора ідентичність) ()))))
 
@@ -462,29 +462,29 @@
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
 (визначити compiler-role-shape-valid
-  (функція (request arguments)
+  (функція (запит-компіляції аргументи-форми)
     (за-умовою
-      ((атом? request) (хиба-компілятора ()))
-      ((тотожне? (compiler-request-role request) (як-є quote-form))
-       (compiler-exactly-one arguments))
-      ((тотожне? (compiler-request-role request) (як-є atom-predicate))
-       (compiler-exactly-one arguments))
-      ((тотожне? (compiler-request-role request) (як-є selector-tail))
-       (compiler-exactly-one arguments))
-      ((тотожне? (compiler-request-role request) (як-є selector-head))
-       (compiler-exactly-one arguments))
-      ((тотожне? (compiler-request-role request) (як-є atom-equality))
-       (compiler-exactly-two arguments))
-      ((тотожне? (compiler-request-role request) (як-є pair-construct))
-       (compiler-exactly-two arguments))
-      ((тотожне? (compiler-request-role request) (як-є lambda-form))
-       (compiler-at-least-two arguments))
-      ((тотожне? (compiler-request-role request) (як-є define-form))
-       (compiler-exactly-two arguments))
-      ((тотожне? (compiler-request-role request) (як-є cond-form))
+      ((атом? запит-компіляції) (хиба-компілятора ()))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є quote-form))
+       (compiler-exactly-one аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є atom-predicate))
+       (compiler-exactly-one аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є selector-tail))
+       (compiler-exactly-one аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є selector-head))
+       (compiler-exactly-one аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є atom-equality))
+       (compiler-exactly-two аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є pair-construct))
+       (compiler-exactly-two аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є lambda-form))
+       (compiler-at-least-two аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є define-form))
+       (compiler-exactly-two аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є cond-form))
        (за-умовою
-         ((атом? arguments) (хиба-компілятора ()))
-         ((істина-компілятора ()) (compiler-cond-clauses-valid arguments))))
+         ((атом? аргументи-форми) (хиба-компілятора ()))
+         ((істина-компілятора ()) (compiler-cond-clauses-valid аргументи-форми))))
       ((істина-компілятора ()) (хиба-компілятора ())))))
 
 ; Program traversal policy is semantic and therefore SENS-owned.
@@ -495,42 +495,42 @@
 ; predicate, result, then the remaining clauses. D3 handles the traversal;
 ; no new domain coordinate or callable slot is created.
 (визначити compiler-cond-child-expressions
-  (функція (clauses)
+  (функція (гілки-умов)
     (за-умовою
-      ((атом? clauses) ())
-      ((compiler-exactly-two (перше clauses))
+      ((атом? гілки-умов) ())
+      ((compiler-exactly-two (перше гілки-умов))
        (сполучити
-         (перше (перше clauses))
+         (перше (перше гілки-умов))
          (сполучити
-           (перше (решта (перше clauses)))
-           (compiler-cond-child-expressions (решта clauses)))))
+           (перше (решта (перше гілки-умов)))
+           (compiler-cond-child-expressions (решта гілки-умов)))))
       (так ()))))
 
 (визначити compiler-domain-children
-  (функція (request arguments)
+  (функція (запит-компіляції аргументи-форми)
     (за-умовою
-      ((атом? request) ())
-      ((тотожне? (compiler-request-role request) (як-є quote-form)) ())
-      ((тотожне? (compiler-request-role request) (як-є lambda-form))
-       (решта arguments))
-      ((тотожне? (compiler-request-role request) (як-є define-form))
-       (решта arguments))
-      ((тотожне? (compiler-request-role request) (як-є cond-form))
-       (compiler-cond-child-expressions arguments))
-      ((істина-компілятора ()) arguments))))
+      ((атом? запит-компіляції) ())
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є quote-form)) ())
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є lambda-form))
+       (решта аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є define-form))
+       (решта аргументи-форми))
+      ((тотожне? (compiler-request-role запит-компіляції) (як-є cond-form))
+       (compiler-cond-child-expressions аргументи-форми))
+      ((істина-компілятора ()) аргументи-форми))))
 
 (визначити compiler-domain-result
   (функція
-    (request arguments child-result)
+    (запит-компіляції аргументи-форми результат-нащадків)
     (за-умовою
-      ((атом? request) (compiler-result-fail))
-      ((compiler-role-shape-valid request arguments)
+      ((атом? запит-компіляції) (compiler-result-fail))
+      ((compiler-role-shape-valid запит-компіляції аргументи-форми)
        (за-умовою
-         ((compiler-result-success child-result)
+         ((compiler-result-success результат-нащадків)
           (compiler-result-ok
             (сполучити
-              request
-              (compiler-result-requests child-result))))
+              запит-компіляції
+              (compiler-result-requests результат-нащадків))))
          ((істина-компілятора ()) (compiler-result-fail))))
       ((істина-компілятора ()) (compiler-result-fail)))))
 
@@ -538,131 +538,131 @@
 ; not by the number of sibling forms. The accumulator stores requests reversed.
 ; Request selection and failure remain entirely SENS-owned.
 (визначити compiler-reverse-onto
-  (функція (items accumulator)
+  (функція (елементи накопичувач)
     (за-умовою
-      ((атом? items) accumulator)
+      ((атом? елементи) накопичувач)
       ((істина-компілятора ())
        (compiler-reverse-onto
-         (решта items)
-         (сполучити (перше items) accumulator))))))
+         (решта елементи)
+         (сполучити (перше елементи) накопичувач))))))
 
 (визначити compiler-program-list-continue
   (функція
-    (shape-or-empty decompose node-result remaining d3-law d4-law d3-proof d4-proof походження accumulator)
+    (форма-або-порожнє розкласти-ідентичність результат-вузла решта-вузлів закон-д3 закон-д4 доказ-д3 доказ-д4 походження накопичувач)
     (за-умовою
-      ((compiler-result-success node-result)
+      ((compiler-result-success результат-вузла)
        (compiler-program-list-acc
-         shape-or-empty
-         decompose
-         remaining
-         d3-law
-         d4-law
-         d3-proof
-         d4-proof
+         форма-або-порожнє
+         розкласти-ідентичність
+         решта-вузлів
+         закон-д3
+         закон-д4
+         доказ-д3
+         доказ-д4
          походження
          (compiler-reverse-onto
-           (compiler-result-requests node-result)
-           accumulator)))
+           (compiler-result-requests результат-вузла)
+           накопичувач)))
       ((істина-компілятора ()) (compiler-result-fail)))))
 
 (визначити compiler-program-list-acc
   (функція
-    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження accumulator)
+    (форма-або-порожнє розкласти-ідентичність вузли закон-д3 закон-д4 доказ-д3 доказ-д4 походження накопичувач)
     (за-умовою
-      ((compiler-list-end? nodes)
-       (compiler-result-ok (compiler-reverse-onto accumulator ())))
-      ((атом? nodes) (compiler-result-fail))
+      ((compiler-list-end? вузли)
+       (compiler-result-ok (compiler-reverse-onto накопичувач ())))
+      ((атом? вузли) (compiler-result-fail))
       ((істина-компілятора ())
        (compiler-program-list-continue
-         shape-or-empty
-         decompose
+         форма-або-порожнє
+         розкласти-ідентичність
          (compiler-program-node
-           shape-or-empty
-           decompose
-           (перше nodes)
-           d3-law
-           d4-law
-           d3-proof
-           d4-proof
+           форма-або-порожнє
+           розкласти-ідентичність
+           (перше вузли)
+           закон-д3
+           закон-д4
+           доказ-д3
+           доказ-д4
            походження)
-         (решта nodes)
-         d3-law
-         d4-law
-         d3-proof
-         d4-proof
+         (решта вузли)
+         закон-д3
+         закон-д4
+         доказ-д3
+         доказ-д4
          походження
-         accumulator)))))
+         накопичувач)))))
 
 (визначити compiler-program-list
   (функція
-    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження)
+    (форма-або-порожнє розкласти-ідентичність вузли закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
     (compiler-program-list-acc
-      shape-or-empty
-      decompose
-      nodes
-      d3-law
-      d4-law
-      d3-proof
-      d4-proof
+      форма-або-порожнє
+      розкласти-ідентичність
+      вузли
+      закон-д3
+      закон-д4
+      доказ-д3
+      доказ-д4
       походження
       ())))
 
 (визначити compiler-program-node
   (функція
-    (shape-or-empty decompose node d3-law d4-law d3-proof d4-proof походження)
+    (форма-або-порожнє розкласти-ідентичність вузол закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
     (за-умовою
-      ((атом? node) (compiler-result-ok ()))
-      ((атом? (shape-or-empty (перше node)))
+      ((атом? вузол) (compiler-result-ok ()))
+      ((атом? (форма-або-порожнє (перше вузол)))
        (compiler-program-list
-         shape-or-empty
-         decompose
-         node
-         d3-law
-         d4-law
-         d3-proof
-         d4-proof
+         форма-або-порожнє
+         розкласти-ідентичність
+         вузол
+         закон-д3
+         закон-д4
+         доказ-д3
+         доказ-д4
          походження))
       ((істина-компілятора ())
        (compiler-domain-result
          (compiler-request-from-laws
-           decompose
-           (перше node)
-           d3-law
-           d4-law
-           d3-proof
-           d4-proof
+           розкласти-ідентичність
+           (перше вузол)
+           закон-д3
+           закон-д4
+           доказ-д3
+           доказ-д4
            походження)
-         (решта node)
+         (решта вузол)
          (compiler-program-list
-           shape-or-empty
-           decompose
+           форма-або-порожнє
+           розкласти-ідентичність
            (compiler-domain-children
              (compiler-request-from-laws
-               decompose
-               (перше node)
-               d3-law
-               d4-law
-               d3-proof
-               d4-proof
+               розкласти-ідентичність
+               (перше вузол)
+               закон-д3
+               закон-д4
+               доказ-д3
+               доказ-д4
                походження)
-             (решта node))
-           d3-law
-           d4-law
-           d3-proof
-           d4-proof
+             (решта вузол))
+           закон-д3
+           закон-д4
+           доказ-д3
+           доказ-д4
            походження))))))
 
 (визначити compiler-compile-program
   (функція
-    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof походження)
+    (форма-або-порожнє розкласти-ідентичність програма закон-д3 закон-д4 доказ-д3 доказ-д4 походження)
     (compiler-program-list
-      shape-or-empty
-      decompose
-      program
-      d3-law
-      d4-law
-      d3-proof
-      d4-proof
+      форма-або-порожнє
+      розкласти-ідентичність
+      програма
+      закон-д3
+      закон-д4
+      доказ-д3
+      доказ-д4
       походження)))
 
 
@@ -678,14 +678,14 @@
 ; the whole backend-neutral artifact. The digest mechanism owns no identity
 ; meaning, role/proof routing or backend policy.
 (визначити compiler-artifact-field
-  (функція (name value)
-    (сполучити name (сполучити value ()))))
+  (функція (назва-поля значення-поля)
+    (сполучити назва-поля (сполучити значення-поля ()))))
 
 (визначити compiler-artifact-from-result
   (функція
-    (digest program-wire-sha256 artifact-provenance result)
+    (відбиток ша256-пакованої-програми походження-артефакту результат-компіляції)
     (за-умовою
-      ((compiler-result-success result)
+      ((compiler-result-success результат-компіляції)
        (сполучити
          (як-є compiler-compilation-artifact/1)
          (сполучити
@@ -695,19 +695,19 @@
            (сполучити
              (compiler-artifact-field
                (як-є program-wire-sha256)
-               program-wire-sha256)
+               ша256-пакованої-програми)
              (сполучити
                (compiler-artifact-field
                  (як-є semantic-requests-sha256)
-                 (digest (compiler-result-requests result)))
+                 (відбиток (compiler-result-requests результат-компіляції)))
                (сполучити
                  (compiler-artifact-field
                    (як-є authority-provenance)
-                   artifact-provenance)
+                   походження-артефакту)
                  (сполучити
                    (compiler-artifact-field
                      (як-є semantic-requests)
-                     (compiler-result-requests result))
+                     (compiler-result-requests результат-компіляції))
                    (сполучити
                      (compiler-artifact-field
                        (як-є required-capabilities)
@@ -723,7 +723,7 @@
          (сполучити
            (compiler-artifact-field
              (як-є program-wire-sha256)
-             program-wire-sha256)
+             ша256-пакованої-програми)
            (сполучити
              (compiler-artifact-field
                (як-є error)
@@ -732,17 +732,17 @@
 
 (визначити compiler-compile-program-artifact
   (функція
-    (shape-or-empty decompose digest program d3-law d4-law d3-proof d4-proof request-provenance artifact-provenance program-wire-sha256)
+    (форма-або-порожнє розкласти-ідентичність відбиток програма закон-д3 закон-д4 доказ-д3 доказ-д4 походження-запиту походження-артефакту ша256-пакованої-програми)
     (compiler-artifact-from-result
-      digest
-      program-wire-sha256
-      artifact-provenance
+      відбиток
+      ша256-пакованої-програми
+      походження-артефакту
       (compiler-compile-program
-        shape-or-empty
-        decompose
-        program
-        d3-law
-        d4-law
-        d3-proof
-        d4-proof
-        request-provenance))))
+        форма-або-порожнє
+        розкласти-ідентичність
+        програма
+        закон-д3
+        закон-д4
+        доказ-д3
+        доказ-д4
+        походження-запиту))))
