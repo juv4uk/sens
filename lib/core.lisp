@@ -3,7 +3,7 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(визначити identity (функція (значення) значення))
+(визначити тотожність (функція (значення) значення))
 
 ; D4:0101 NULL `порожній?`: Lisp-owned механізм, D3:101 EQ до порожнього списку.
 ; Не перейменовувати історичний SID8 і не вводити машинних літералів.
@@ -106,7 +106,7 @@
 ; string->symbol assemble it into a real symbol. Requires an explicit
 ; prefix (no default-prefix convenience yet -- G5: earn that later if
 ; a real caller needs it, don't build it speculatively now).
-(визначити gensym
+(визначити створити-символ
   (функція (prefix)
     (текст-у-символ (рядок-додати prefix (значення-у-текст (монотонний-наносекунди))))))
 
@@ -806,7 +806,7 @@
          (частка n 10)
          (рядок-додати (відобразити-доки-істина (модульна-остача n 10)) acc))))))
 
-(визначити number->string
+(визначити число-рядок
   (функція (n)
     ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
     ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
@@ -898,7 +898,7 @@
        (sqrt-iter (поділити (додати guess (поділити x guess)) 2) x (відняти n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
-(визначити isqrt
+(визначити цілий-корінь
   (функція (n)
     (за-умовою
       ((менше? n 2)  n)
@@ -912,7 +912,7 @@
         ((менше? next g)  (isqrt-step n next))
         ((хибне? (менше? next g)) g)))))
 
-(визначити sqrt
+(визначити корінь
   (функція (x)
     (за-умовою
       ((менше? x 0)  (як-є ()))
@@ -1279,3 +1279,10 @@
 (визначити answer-weaken відповідь-послабити)
 (визначити answer-atom відповідь-атом)
 (визначити answer-eq відповідь-рівність)
+
+; Історичні зовнішні імена збережено тільки як посилання на ті самі D8/D9 Lisp-значення.
+(визначити identity тотожність)
+(визначити gensym створити-символ)
+(визначити number->string число-рядок)
+(визначити isqrt цілий-корінь)
+(визначити sqrt корінь)
