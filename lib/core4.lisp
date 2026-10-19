@@ -119,9 +119,7 @@
 
 (визначити second друге)
 
-(визначити third
-  (функція (значення)
-    (третє значення)))
+; Англійський сумісний alias додається після ратифікованого українського визначення третє.
 
 (визначити четверте
   (функція (значення-аргументів)
@@ -255,6 +253,7 @@
 (визначити cadar п-р-п)
 (визначити третє п-р-р)
 (визначити caddr п-р-р)
+(визначити third третє)
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
