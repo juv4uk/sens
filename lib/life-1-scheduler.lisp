@@ -34,160 +34,160 @@
        (життя--рівні? (решта ліве) (решта праве)))
       (так ні))))
 
-(визначити life-scheduler-field
-  (функція (entry field)
+(визначити життя-поле-запису
+  (функція (запис поле)
     (за-умовою
       
-      ((хибне? (атом? entry))
-       ((функція (rows)
+      ((хибне? (атом? запис))
+       ((функція (рядки)
          (за-умовою
            
-           ((хибне? (атом? rows))
-            ((функція (row)
+           ((хибне? (атом? рядки))
+            ((функція (рядок)
          (за-умовою
                 
-                ((атом? row) 
-                 (life-scheduler-field
-                   (сполучити (перше entry) (решта rows))
-                   field))
-                ((хибне? (атом? row))
+                ((атом? рядок) 
+                 (життя-поле-запису
+                   (сполучити (перше запис) (решта рядки))
+                   поле))
+                ((хибне? (атом? рядок))
                  (за-умовою
-                   ((життя--рівні? field (перше row)) 
-                    (перше (решта row)))
-                   ((хибне? (життя--рівні? field (перше row)))
-                    (life-scheduler-field
-                      (сполучити (перше entry) (решта rows))
-                      field))))))
-         (перше rows)))))
-         (решта entry))))))
+                   ((життя--рівні? поле (перше рядок)) 
+                    (перше (решта рядок)))
+                   ((хибне? (життя--рівні? поле (перше рядок)))
+                    (життя-поле-запису
+                      (сполучити (перше запис) (решта рядки))
+                      поле))))))
+         (перше рядки)))))
+         (решта запис))))))
 
-(визначити life-scheduler-invocation-key
-  (функція (invocation)
+(визначити життя-ключ-виклику
+  (функція (виклик)
     (список
-      (life-scheduler-field invocation (як-є producer))
-      (life-scheduler-field invocation (як-є trigger))
-      (life-scheduler-field invocation (як-є provenance-ref))
-      (life-scheduler-field invocation (як-є semantic-id)))))
+      (життя-поле-запису виклик (як-є producer))
+      (життя-поле-запису виклик (як-є умова-запуску))
+      (життя-поле-запису виклик (як-є provenance-ref))
+      (життя-поле-запису виклик (як-є semantic-id)))))
 
-(визначити life-scheduler-key-present?
-  (функція (key keys)
+(визначити життя-ключ-присутній?
+  (функція (ключ ключі)
     (за-умовою
-      ((атом? keys) (як-є absent))
-      ((хибне? (атом? keys))
+      ((атом? ключі) (як-є absent))
+      ((хибне? (атом? ключі))
        (за-умовою
-         ((життя--рівні? key (перше keys))  (як-є present))
-         ((хибне? (життя--рівні? key (перше keys)))
-          (life-scheduler-key-present? key (решта keys))))))))
+         ((життя--рівні? ключ (перше ключі))  (як-є present))
+         ((хибне? (життя--рівні? ключ (перше ключі)))
+          (життя-ключ-присутній? ключ (решта ключі))))))))
 
-(визначити life-scheduler-dedup-pending
-  (функція (pending seen-keys)
+(визначити життя-очікування-без-повторів
+  (функція (очікування відомі-ключі)
     (за-умовою
       
-      ((хибне? (атом? pending))
-       (нехай-послідовно ((invocation (перше pending))
-              (key (life-scheduler-invocation-key invocation)))
+      ((хибне? (атом? очікування))
+       (нехай-послідовно ((виклик (перше очікування))
+              (ключ (життя-ключ-виклику виклик)))
          (за-умовою
-           ((тотожне? (life-scheduler-key-present? key seen-keys) (як-є present))
+           ((тотожне? (життя-ключ-присутній? ключ відомі-ключі) (як-є present))
             
-            (life-scheduler-dedup-pending (решта pending) seen-keys))
-           ((тотожне? (life-scheduler-key-present? key seen-keys) (як-є absent))
+            (життя-очікування-без-повторів (решта очікування) відомі-ключі))
+           ((тотожне? (життя-ключ-присутній? ключ відомі-ключі) (як-є absent))
             
-            (сполучити invocation
-                  (life-scheduler-dedup-pending
-                    (решта pending)
-                    (сполучити key seen-keys))))))))))
+            (сполучити виклик
+                  (життя-очікування-без-повторів
+                    (решта очікування)
+                    (сполучити ключ відомі-ключі))))))))))
 
-(визначити life-scheduler-pending
-  (функція (pending)
-    (life-scheduler-dedup-pending pending (як-є ()))))
+(визначити життя-очікування
+  (функція (очікування)
+    (життя-очікування-без-повторів очікування (як-є ()))))
 
-(визначити life-scheduler-projection-match?
-  (функція (expected projections)
+(визначити життя-збіг-проєкції?
+  (функція (очікувана-проєкція проєкції)
     (за-умовою
-      ((атом? projections) (як-є absent))
-      ((хибне? (атом? projections))
-       ((функція (projection)
+      ((атом? проєкції) (як-є absent))
+      ((хибне? (атом? проєкції))
+       ((функція (проєкція)
          (за-умовою
-           ((життя--рівні? expected projection)
+           ((життя--рівні? очікувана-проєкція проєкція)
             
             (як-є present))
-           ((хибне? (життя--рівні? expected projection))
-            (life-scheduler-projection-match? expected (решта projections)))))
-        (перше projections))))))
+           ((хибне? (життя--рівні? очікувана-проєкція проєкція))
+            (життя-збіг-проєкції? очікувана-проєкція (решта проєкції)))))
+        (перше проєкції))))))
 
-(визначити life-scheduler-projection-ready?
-  (функція (invocation projections)
-    (нехай-послідовно ((trigger (life-scheduler-field invocation (як-є trigger)))
-           (provenance-ref-value (life-scheduler-field invocation (як-є provenance-ref))))
+(визначити життя-проєкція-готова?
+  (функція (виклик проєкції)
+    (нехай-послідовно ((умова-запуску (життя-поле-запису виклик (як-є умова-запуску)))
+           (джерело-походження (життя-поле-запису виклик (як-є provenance-ref))))
       (за-умовою
         
-        ((атом? trigger) 
+        ((атом? умова-запуску) 
          (як-є absent))
-        ((хибне? (атом? trigger))
-         ((функція (tail)
+        ((хибне? (атом? умова-запуску))
+         ((функція (залишок)
            (за-умовою
              
-             ((атом? tail) 
+             ((атом? залишок) 
               (як-є absent))
-             ((хибне? (атом? tail))
-              (life-scheduler-projection-match?
+             ((хибне? (атом? залишок))
+              (життя-збіг-проєкції?
                 (список
                   (як-є projection-ready)
-                  (перше tail)
-                  provenance-ref-value)
-                projections))))
-          (решта trigger)))))))
+                  (перше залишок)
+                  джерело-походження)
+                проєкції))))
+          (решта умова-запуску)))))))
 
-(визначити life-scheduler-select-ready
-  (функція (pending projections)
+(визначити життя-обрати-готове
+  (функція (очікування проєкції)
     (за-умовою
-      ((атом? pending)
+      ((атом? очікування)
        (як-є (scheduler-selection none)))
-      ((хибне? (атом? pending))
-       ((функція (invocation)
+      ((хибне? (атом? очікування))
+       ((функція (виклик)
          (за-умовою
-           ((тотожне? (life-scheduler-projection-ready? invocation projections)
+           ((тотожне? (життя-проєкція-готова? виклик проєкції)
                 (як-є present))
             
             (список
               (як-є scheduler-selection)
               (як-є ready)
-              invocation
-              (решта pending)))
-           ((тотожне? (life-scheduler-projection-ready? invocation projections)
+              виклик
+              (решта очікування)))
+           ((тотожне? (життя-проєкція-готова? виклик проєкції)
                 (як-є absent))
             
-            (life-scheduler-select-ready (решта pending) projections))))
-        (перше pending))))))
+            (життя-обрати-готове (решта очікування) проєкції))))
+        (перше очікування))))))
 
-(визначити life-scheduler-quiescence-state
-  (функція (projections lifecycle-state)
+(визначити життя-стан-спокою
+  (функція (проєкції стан-життєвого-циклу)
     (за-умовою
-      ((атом? projections)
+      ((атом? проєкції)
        (за-умовою
-         ((тотожне? lifecycle-state (як-є no-transition-required))
+         ((тотожне? стан-життєвого-циклу (як-є no-transition-required))
           
           (як-є (quiescence-state quiescent)))
-         ((хибне? (тотожне? lifecycle-state (як-є no-transition-required)))
+         ((хибне? (тотожне? стан-життєвого-циклу (як-є no-transition-required)))
           (як-є (quiescence-state active)))))
-      ((хибне? (атом? projections))
+      ((хибне? (атом? проєкції))
        (як-є (quiescence-state active))))))
 
-(визначити life-scheduler-quiescence
-  (функція (pending projections lifecycle-state)
+(визначити життя-спокій
+  (функція (очікування проєкції стан-життєвого-циклу)
     (за-умовою
-      ((атом? pending)
-       (life-scheduler-quiescence-state projections lifecycle-state))
-      ((хибне? (атом? pending))
+      ((атом? очікування)
+       (життя-стан-спокою проєкції стан-життєвого-циклу))
+      ((хибне? (атом? очікування))
        (як-є (quiescence-state active))))))
-(визначити life-scheduler-state
-  (функція (pending projections lifecycle-state)
+(визначити життя-стан-планувальника
+  (функція (очікування проєкції стан-життєвого-циклу)
     (список
       (як-є scheduler-state)
-      (список (як-є pending) (life-scheduler-pending pending))
-      (список (як-є projections) projections)
-      (список (як-є lifecycle) lifecycle-state)
-      (life-scheduler-quiescence
-        (life-scheduler-pending pending)
-        projections
-        lifecycle-state))))
+      (список (як-є очікування) (життя-очікування очікування))
+      (список (як-є проєкції) проєкції)
+      (список (як-є lifecycle) стан-життєвого-циклу)
+      (життя-спокій
+        (життя-очікування очікування)
+        проєкції
+        стан-життєвого-циклу))))
