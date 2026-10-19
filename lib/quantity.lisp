@@ -55,11 +55,11 @@
   (функція (values)
     (перше (решта (решта (решта (решта (решта (решта values)))))))))
 
-(визначити make-dimension
+(визначити створити-розмірність
   (функція (base exponent)
     (список *dimension-schema* base exponent)))
 
-(визначити dimension?
+(визначити розмірність?
   (функція (x)
     (за-умовою
       ((атом? x) (як-є ()))
@@ -71,17 +71,17 @@
          (так так)))
       (так (як-є ())))))
 
-(визначити dimension-base
+(визначити розмірність-основа
   (функція (dimension) (друге dimension)))
 
-(визначити dimension-exponent
+(визначити розмірність-показник
   (функція (dimension) (третє dimension)))
 
-(визначити make-unit
+(визначити створити-одиниця
   (функція (dimensions)
     (список *unit-schema* dimensions)))
 
-(визначити unit?
+(визначити одиниця-виміру?
   (функція (x)
     (за-умовою
       ((атом? x) (як-є ()))
@@ -90,34 +90,34 @@
        (науковий-список-правильний? (решта x)))
       (так (як-є ())))))
 
-(визначити unit-dimensions
+(визначити одиниця-розмірності
   (функція (unit) (решта unit)))
 
-(визначити make-quantity
+(визначити створити-величина
   (функція (value unit)
     (список *quantity-schema* value unit)))
 
-(визначити quantity?
+(визначити величина?
   (функція (x)
     (за-умовою
       ((атом? x) (як-є ()))
       ((тотожне? (науковий-список-правильний? x) (як-є ())) (як-є ()))
       ((тотожне? (науковий-список-довжина-дорівнює? x 3) ні) (як-є ()))
       ((тотожне? (перше x) *quantity-schema*)
-       (unit? (третє x)))
+       (одиниця-виміру? (третє x)))
       (так (як-є ())))))
 
-(визначити quantity-value
+(визначити величина-значення
   (функція (quantity) (друге quantity)))
 
-(визначити quantity-unit
+(визначити величина-одиниця
   (функція (quantity) (третє quantity)))
 
-(визначити make-science-source
+(визначити створити-наука-джерело
   (функція (authority edition)
     (список *science-source-schema* authority edition)))
 
-(визначити science-source?
+(визначити наука-джерело?
   (функція (x)
     (за-умовою
       ((атом? x) (як-є ()))
@@ -132,25 +132,25 @@
 (визначити science-source-edition
   (функція (source) (третє source)))
 
-(визначити scientific-constant-status-valid?
+(визначити науковий-константа-стан-чинний?
   (функція (status)
     (за-умовою
       ((тотожне? status (як-є exact-by-definition)) так)
       ((тотожне? status (як-є measured)) так)
       (так (як-є ())))))
 
-(визначити scientific-constant-kind-valid?
+(визначити науковий-константа-вид-чинний?
   (функція (kind)
     (за-умовою
       ((тотожне? kind (як-є physical-defining)) так)
       ((тотожне? kind (як-є physical-derived)) так)
       (так (як-є ())))))
 
-(визначити make-scientific-constant
+(визначити створити-науковий-константа
   (функція (name quantity status kind system source)
     (список *scientific-constant-schema* name quantity status kind system source)))
 
-(визначити scientific-constant?
+(визначити науковий-константа?
   (функція (x)
     (за-умовою
       ((атом? x) (як-є ()))
@@ -159,44 +159,44 @@
       ((тотожне? (перше x) *scientific-constant-schema*)
        (за-умовою
          ((тотожне? (символ? (друге x)) (як-є ())) (як-є ()))
-         ((тотожне? (quantity? (третє x)) (як-є ())) (як-є ()))
-         ((тотожне? (scientific-constant-status-valid? (четверте x)) (як-є ())) (як-є ()))
-         ((тотожне? (scientific-constant-kind-valid? (п'ятий x)) (як-є ())) (як-є ()))
+         ((тотожне? (величина? (третє x)) (як-є ())) (як-є ()))
+         ((тотожне? (науковий-константа-стан-чинний? (четверте x)) (як-є ())) (як-є ()))
+         ((тотожне? (науковий-константа-вид-чинний? (п'ятий x)) (як-є ())) (як-є ()))
          ((тотожне? (символ? (науковий-шостий x)) (як-є ())) (як-є ()))
-         ((тотожне? (science-source? (науковий-сьомий x)) (як-є ())) (як-є ()))
+         ((тотожне? (наука-джерело? (науковий-сьомий x)) (як-є ())) (як-є ()))
          (так так)))
       (так (як-є ())))))
 
-(визначити scientific-constant-name
+(визначити науковий-константа-ім'я
   (функція (constant) (друге constant)))
 
-(визначити scientific-constant-quantity
+(визначити науковий-константа-величина
   (функція (constant) (третє constant)))
 
-(визначити scientific-constant-value
+(визначити науковий-константа-значення
   (функція (constant)
-    (quantity-value (scientific-constant-quantity constant))))
+    (величина-значення (науковий-константа-величина constant))))
 
-(визначити scientific-constant-unit
+(визначити науковий-константа-одиниця
   (функція (constant)
-    (quantity-unit (scientific-constant-quantity constant))))
+    (величина-одиниця (науковий-константа-величина constant))))
 
-(визначити scientific-constant-status
+(визначити науковий-константа-стан
   (функція (constant) (четверте constant)))
 
-(визначити scientific-constant-kind
+(визначити науковий-константа-вид
   (функція (constant) (п'ятий constant)))
 
-(визначити scientific-constant-system
+(визначити науковий-константа-система
   (функція (constant) (науковий-шостий constant)))
 
-(визначити scientific-constant-source
+(визначити науковий-константа-джерело
   (функція (constant) (науковий-сьомий constant)))
 
-(визначити scientific-constant->clauses
+(визначити науковий-константа-клаузи
   (функція (constant)
     (за-умовою
-      ((тотожне? (scientific-constant? constant) (як-є ())) (як-є ()))
+      ((тотожне? (науковий-константа? constant) (як-є ())) (як-є ()))
       (так
        ((функція (name)
           (список
@@ -204,29 +204,59 @@
            (список
              (список (як-є constant-value)
                    name
-                   (scientific-constant-value constant)))
+                   (науковий-константа-значення constant)))
            (список
              (список (як-є constant-unit)
                    name
-                   (scientific-constant-unit constant)))
+                   (науковий-константа-одиниця constant)))
            (список
              (список (як-є constant-status)
                    name
-                   (scientific-constant-status constant)))
+                   (науковий-константа-стан constant)))
            (список
              (список (як-є constant-kind)
                    name
-                   (scientific-constant-kind constant)))
+                   (науковий-константа-вид constant)))
            (список
              (список (як-є constant-system)
                    name
-                   (scientific-constant-system constant)))
+                   (науковий-константа-система constant)))
            (список
              (список (як-є constant-source)
                    name
-                   (scientific-constant-source constant))))
+                   (науковий-константа-джерело constant))))
          )
-         (scientific-constant-name constant))))))
+         (науковий-константа-ім'я constant))))))
+
+; Повні українські назви — первинні визначення за точними проєкціями D9.
+; Англійські назви — лише сумісні псевдоніми тих самих Lisp-замикань.
+; Ключі залишаються в lib/domains/d9.lisp; цей файл не вводить бінарних call-heads.
+(визначити make-dimension створити-розмірність)
+(визначити dimension? розмірність?)
+(визначити dimension-base розмірність-основа)
+(визначити dimension-exponent розмірність-показник)
+(визначити make-unit створити-одиниця)
+(визначити unit? одиниця-виміру?)
+(визначити unit-dimensions одиниця-розмірності)
+(визначити make-quantity створити-величина)
+(визначити quantity? величина?)
+(визначити quantity-value величина-значення)
+(визначити quantity-unit величина-одиниця)
+(визначити make-science-source створити-наука-джерело)
+(визначити science-source? наука-джерело?)
+(визначити scientific-constant-status-valid? науковий-константа-стан-чинний?)
+(визначити scientific-constant-kind-valid? науковий-константа-вид-чинний?)
+(визначити make-scientific-constant створити-науковий-константа)
+(визначити scientific-constant? науковий-константа?)
+(визначити scientific-constant-name науковий-константа-ім'я)
+(визначити scientific-constant-quantity науковий-константа-величина)
+(визначити scientific-constant-value науковий-константа-значення)
+(визначити scientific-constant-unit науковий-константа-одиниця)
+(визначити scientific-constant-status науковий-константа-стан)
+(визначити scientific-constant-kind науковий-константа-вид)
+(визначити scientific-constant-system науковий-константа-система)
+(визначити scientific-constant-source науковий-константа-джерело)
+(визначити scientific-constant->clauses науковий-константа-клаузи)
 
 ; Українські локальні імена є тими самими Lisp-замиканнями.
 ; Старі імена лишаються сумісними проєкціями для зовнішніх споживачів.
