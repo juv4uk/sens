@@ -2,7 +2,7 @@
 
 (def binary-field
   (функція (row field)
-    (let ((found (assoc field row)))
+    (let ((found (знайти-за-ключем field row)))
       (за-умовою
         ((атом? found) (як-є ()))
         (t (решта found))))))

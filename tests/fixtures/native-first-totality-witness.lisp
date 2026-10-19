@@ -1,5 +1,6 @@
 ; #626 — total native-first classifier witness for pair-headed applications.
-; Unsupported expression data must fall back unchanged, never violate atom-only eq.
+; Unsupported expression data must fall back unchanged.
+; Ukrainian projection: Sid8/Sens8 → D3/D4/D8.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -8,22 +9,20 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load "lib/machine/dispatch/native-first.lisp")
 
-(0011 native-first-totality-check
-  (0010 (expression)
-    (110
-      ((11110111
+(визначити native-first-totality-check
+  (функція (expression)
+    (за-умовою
+      ((однакові?
          (native-first-plan expression)
-         (1110 (001 evaluator-fallback) expression))
-       (1)
-       (001 pass))
-      ((11110111
+         (список (як-є evaluator-fallback) expression))
+       (як-є pass))
+      ((однакові?
          (native-first-plan expression)
-         (1110 (001 evaluator-fallback) expression))
-       (0)
-       (001 fail)))))
+         (список (як-є evaluator-fallback) expression))
+       (як-є fail)))))
 
-(1110
+(список
   (native-first-totality-check
-    (001 ((lambda (x) (+ x 1)) 41)))
+    (як-є ((функція (x) (+ x 1)) 41)))
   (native-first-totality-check
-    (001 (car ((lambda (x) x) 1)))))
+    (як-є (перше ((функція (x) x) 1)))))

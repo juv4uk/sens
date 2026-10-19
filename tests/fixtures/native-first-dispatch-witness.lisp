@@ -1,5 +1,6 @@
 ; #505 — native-first classification witness.
 ; Lisp owns the routing decision. This fixture never executes raw machine code.
+; Ukrainian projection: Sid8/Sens8 heads → D3/D4/D8 surfaces.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/x86-64.lisp")
@@ -8,33 +9,33 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load "lib/machine/dispatch/native-first.lisp")
 
-(0011 native-first-witness-check
-  (0010 (actual expected)
-    (110
-      ((11110111 actual expected) (1) (001 pass))
-      ((001 native-first-witness-fallback)
+(визначити native-first-witness-check
+  (функція (actual expected)
+    (за-умовою
+      ((однакові? actual expected) (як-є pass))
+      ((як-є native-first-witness-fallback)
        native-first-witness-fallback
-       (1110 (001 fail) actual expected)))))
+       (список (як-є fail) actual expected)))))
 
-(1110
+(список
   (native-first-witness-check
-    (native-first-plan (001 (car (cons 2 3))))
-    (1110
-      (001 native-plan)
+    (native-first-plan (як-є (перше (сполучити 2 3))))
+    (список
+      (як-є native-plan)
       (x86-lower-cons-car-u64-forms 2 3)
       x86-pair-cell-bytes))
   (native-first-witness-check
-    (native-first-plan (001 (+ 2 3)))
-    (001 (evaluator-fallback (+ 2 3))))
+    (native-first-plan (як-є (+ 2 3)))
+    (як-є (evaluator-fallback (+ 2 3))))
   (native-first-witness-check
-    (native-first-plan (001 (car (cons (+ 1 1) 3))))
-    (001 (evaluator-fallback (car (cons (+ 1 1) 3)))))
+    (native-first-plan (як-є (перше (сполучити (+ 1 1) 3))))
+    (як-є (evaluator-fallback (перше (сполучити (+ 1 1) 3)))))
   (native-first-witness-check
-    (native-first-plan (001 (car (cons -1 3))))
-    (001 (evaluator-fallback (car (cons -1 3)))))
+    (native-first-plan (як-є (перше (сполучити -1 3))))
+    (як-є (evaluator-fallback (перше (сполучити -1 3)))))
   (native-first-witness-check
-    (native-first-plan (001 radio))
-    (001 (evaluator-fallback radio)))
+    (native-first-plan (як-є radio))
+    (як-є (evaluator-fallback radio)))
   (native-first-witness-check
-    (native-first-plan (001 (car . radio)))
-    (001 (evaluator-fallback (car . radio)))))
+    (native-first-plan (як-є (перше . radio)))
+    (як-є (evaluator-fallback (перше . radio)))))
