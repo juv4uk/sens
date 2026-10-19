@@ -5,8 +5,7 @@ use sens::{
 
 fn session() -> Session {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source(
-        "lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session,
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session,
     ).expect("канонічний Core має завантажуватись власним точним reader");
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
