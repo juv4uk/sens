@@ -110,7 +110,7 @@ si:planck-constant
 ```
 
 but they are now derived from the corresponding records through
-`si:constant-value`. The source does not repeat a second literal numeric
+`сі:значення-константи`. The source does not repeat a second literal numeric
 binding for those public names. This is the single-authority claim proved by
 the regression test.
 

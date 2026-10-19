@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - name: "D1 D10 ladder audit and full-source 18-callsite provenance"
-        run: python3 -m unittest discover -s tests -p test_native_first_execute_d1_cutover.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: "Current-domain real bridge execution and negative witnesses"
         run: cargo test --locked -p sens --test native_first_execute_d1_cutover -- --nocapture

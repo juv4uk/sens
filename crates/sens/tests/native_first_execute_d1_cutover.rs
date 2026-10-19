@@ -21,13 +21,14 @@ fn session() -> Session {
 }
 #[test]
 fn exact_d1_words_not_synthetic_predicate_calls() {
-    for (source, expected) in [("#d1:1", true), ("#d1:0", false)] {
-        let ast = parse(source).expect("compatibility reader D1 projection");
+    for (source, expected) in [("так", true), ("ні", false)] {
+        let ast = parse_mixed_exact_domain_machine_source(PATH, source)
+            .expect("чинний точнодоменний reader D1 проєкції");
         assert!(matches!(&ast[0].kind, ExprKind::DomainIdentity(DomainIdentity::D1(_))));
         let mut s = Session::default();
         assert_eq!(eval(&mut s, source).unwrap().as_predicate_bit(), Some(expected));
     }
-    for source in ["0", "1", "(001 ())"] {
+    for source in ["0", "1", "(як-є ())"] {
         let parsed = parse(source).unwrap();
         assert!(
             !matches!(&parsed[0].kind, ExprKind::DomainIdentity(DomainIdentity::D1(_))),
@@ -39,14 +40,14 @@ fn exact_d1_words_not_synthetic_predicate_calls() {
 fn real_bridge_accepts_both_d1_answers_and_keeps_short_circuit() {
     let mut s = session();
     for (p, result) in [
-        ("#d1:1", "selected"),
-        ("#d1:0", "fallback"),
+        ("так", "selected"),
+        ("ні", "fallback"),
     ] {
-        let source = format!("(110 ({p} (001 selected)) (#d1:1 (001 fallback)))");
+        let source = format!("(за-умовою ({p} (як-є selected)) (так (як-є fallback)))");
         assert_eq!(eval(&mut s, &source).unwrap().to_string(), result);
     }
     assert_eq!(
-        eval(&mut s, "(110 (#d1:1 (001 selected)) (#d1:1 (non-existent-operation)))")
+        eval(&mut s, "(за-умовою (так (як-є selected)) (так (non-existent-operation)))")
             .expect("unreached branch must not execute").to_string(),
         "selected"
     );
@@ -55,12 +56,12 @@ fn real_bridge_accepts_both_d1_answers_and_keeps_short_circuit() {
 fn bridge_maintains_explicit_outcome_shapes_without_cpu() {
     let mut s = session();
     let completed = eval(&mut s,
-        "(native-first-execution-completed (001 evaluator) (001 success))")
+        "(native-first-execution-completed (як-є evaluator) (як-є success))")
         .expect("route envelope construction");
     assert!(completed.to_string().contains("execution-route"));
     assert!(completed.to_string().contains("completed"));
     let rejected = eval(&mut s,
-        "(native-first-execution-rejected (001 native) (001 denied))")
+        "(native-first-execution-rejected (як-є native) (як-є denied))")
         .expect("native rejection is data, not hidden evaluator fallback");
     assert!(rejected.to_string().contains("rejected"));
     assert!(rejected.to_string().contains("denied"));
@@ -68,11 +69,36 @@ fn bridge_maintains_explicit_outcome_shapes_without_cpu() {
 #[test]
 fn invalid_predicate_types_and_binder_mismatch_fail_closed() {
     let mut s = session();
-    let error = eval(&mut s, "(110 ((001 ()) (001 false)) (#d1:1 (001 fallback)))")
+    let error = eval(&mut s, "(за-умовою ((як-є ()) (як-є false)) (так (як-є fallback)))")
         .expect_err("empty structure is not logical NO");
     assert_eq!(error.kind, ErrorKind::Type);
-    let error = eval(&mut s, "(0100 (001 ()))")
+    let error = eval(&mut s, "(хибне? (як-є ()))")
         .expect_err("NOT must reject structural nil");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(parse_mixed_exact_domain_machine_source("lib/not-machine.lisp", SOURCE).is_err());
+}
+
+
+#[test]
+fn ukrainian_lambda_bindings_preserve_plan_and_tag_semantics() {
+    // Справжній SENS evaluator: позитивні/негативні маршрути D3 EQ/ATOM
+    // та варіанти списку; цитовані теги не перейменовуються лексичним binder.
+    let mut s = session();
+    for (source, expected) in [
+        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є native-plan))", "same"),
+        ("(native-first-plan-tag-state (як-є (native-plan 8 9)) (як-є evaluator-fallback))", "distinct"),
+        ("(native-first-plan-tag-state (як-є ((native-plan) 8 9)) (як-є native-plan))", "distinct"),
+        ("(native-first-plan-tag-state (як-є ()) (як-є native-plan))", "distinct"),
+    ] {
+        let actual = eval(&mut s, source).expect("SENS D3 comparison must execute");
+        assert_eq!(actual.to_string(), expected, "{source}");
+    }
+    for (source, expected) in [
+        ("(native-first-proper-list-length-2? (як-є (one two)))", true),
+        ("(native-first-proper-list-length-2? (як-є (one two three)))", false),
+        ("(native-first-proper-list-length-2? (як-є ()))", false),
+    ] {
+        let actual = eval(&mut s, source).expect("SENS list shape law must execute");
+        assert_eq!(actual.as_predicate_bit(), Some(expected), "{source}");
+    }
 }

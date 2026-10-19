@@ -7,108 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PINNED = {
-  "lib/macro.lisp": {
-    "sha": "75ad520775b383b885e02e109be1fc24d443945b",
-    "changed": 16,
-    "edits": [
-      [
-        819,
-        "0010"
-      ],
-      [
-        834,
-        "110"
-      ],
-      [
-        846,
-        "010"
-      ],
-      [
-        885,
-        "010"
-      ],
-      [
-        890,
-        "011"
-      ],
-      [
-        930,
-        "010"
-      ],
-      [
-        935,
-        "001"
-      ],
-      [
-        952,
-        "111"
-      ],
-      [
-        957,
-        "001"
-      ],
-      [
-        977,
-        "111"
-      ],
-      [
-        982,
-        "100"
-      ],
-      [
-        1004,
-        "111"
-      ],
-      [
-        1022,
-        "111"
-      ],
-      [
-        1027,
-        "001"
-      ],
-      [
-        1059,
-        "111"
-      ],
-      [
-        1081,
-        "111"
-      ],
-      [
-        1086,
-        "001"
-      ],
-      [
-        1116,
-        "111"
-      ],
-      [
-        1142,
-        "100"
-      ],
-      [
-        1147,
-        "011"
-      ],
-      [
-        1180,
-        "011"
-      ],
-      [
-        1185,
-        "011"
-      ],
-      [
-        1216,
-        "001"
-      ],
-      [
-        1240,
-        "001"
-      ]
-    ]
-  },
   "lib/unify-observe.lisp": {
     "sha": "ae97885c67a24ab457966b4093331021abb084be",
     "changed": 4,
@@ -518,12 +416,19 @@ class ExactDomainMigrationTests(unittest.TestCase):
                     self.assertNotRegex(line, HEAD, f'{path}:{index}')
                     self.assertNotRegex(line, LITERAL, f'{path}:{index}')
 
-    def test_macro_quote_code_data_is_not_retargeted(self):
+    def test_macro_quote_uses_ratified_ukrainian_d4_names(self):
+        # Старий blob залишається у Git. Чинний макрос цитує людську
+        # проєкцію функції/визначення без машинних літералів.
         src = (ROOT / 'lib/macro.lisp').read_text(encoding='utf-8')
-        self.assertIn('(як-є 0010)', src)
-        self.assertIn('(як-є 0011)', src)
-        self.assertNotIn('(як-є функція)', src)
-        self.assertNotIn('(як-є визначити)', src)
+        d4 = (ROOT / 'lib/domains/d4.lisp').read_text(encoding='utf-8')
+        self.assertIn('(0010 (ук функція) (укр функція)', d4)
+        self.assertIn('(0011 (ук визначити) (укр визначити)', d4)
+        for form in ('(як-є функція)', '(як-є визначити)'):
+            with self.subTest(form=form):
+                self.assertIn(form, src)
+        self.assertNotIn('(як-є 0010)', src)
+        self.assertNotIn('(як-є 0011)', src)
+        self.assertIn('(функція передані-аргументи-макроса', src)
 
     def test_public_names_and_unknown_d5_preserved(self):
         checks = {

@@ -30,14 +30,14 @@ fn eval(session: &mut Session, source: &str) -> String {
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
-      (def rules
-        (quote
+      (визначити rules
+        (як-є
           (((p first))
            ((q irrelevant))
            ((p second))
            ((r irrelevant))
            ((p third)))))
-      (reason-index-candidates (quote (p target)) (reason-make-index rules))
+      (reason-index-candidates (як-є (p target)) (reason-make-index rules))
     "#;
     assert_eq!(
         eval(&mut s, source),
@@ -51,9 +51,9 @@ fn variable_goal_falls_back_to_every_rule() {
     // Довжина як некваліфіковане число нині не є D24+ арифметикою.
     // Перевіряємо сильніший інваріант: усі правила + первісний порядок.
     let source = r#"
-      (def rules (quote (((p one)) ((q two)) ((r three)))))
+      (визначити rules (як-є (((p one)) ((q two)) ((r three)))))
       (reason-index-candidates
-        (quote (var x))
+        (як-є (var x))
         (reason-make-index rules))
     "#;
     assert_eq!(
@@ -66,8 +66,8 @@ fn variable_goal_falls_back_to_every_rule() {
 fn variable_rule_head_disables_index_instead_of_changing_unification() {
     let mut s = session();
     let source = r#"
-      (def rules
-        (quote
+      (визначити rules
+        (як-є
           (((p one))
            ((var whole-head))
            ((q two)))))
@@ -79,7 +79,7 @@ fn variable_rule_head_disables_index_instead_of_changing_unification() {
 #[test]
 fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     let mut s = session();
-    let mut source = String::from("(reason-index-mode (reason-make-index (quote (");
+    let mut source = String::from("(reason-index-mode (reason-make-index (як-є (");
     for i in 0..65 {
         source.push_str(&format!("((pred{i} value))"));
     }
@@ -107,17 +107,22 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
         "SENS primitive law must produce exact D1:YES"
     );
 
-    // These are mechanical invariants over production source, not a host
-    // truth table: prove EQ cannot see a pair and each helper keeps its width.
-    let reason_source = include_str!("../../../lib/reason.lisp");
-    let rs = reason_source.find("(0011 reason-index?").expect("reason-index? exists");
-    let re = reason_source[rs..].find("(0011 reason-index-linear").expect("reason-index? ends").saturating_add(rs);
-    let body = &reason_source[rs..re];
-    let empty_guard = body.find("((0101 value)").expect("D4 NULL guard");
-    let car_atom_guard = body.find("((010 (100 value))").expect("D3 ATOM(CAR) guard");
-    let eq_call = body.find("((101 (100 value) *reason-index-schema*)").expect("D3 EQ call");
-    assert!(empty_guard < car_atom_guard && car_atom_guard < eq_call,
-        "D4 NULL and D3 ATOM(CAR) must guard D3 EQ, in that order");
+    // Поведінка D3 EQ перевіряється справжнім SENS evaluator, а не
+    // пошуком історичних 8-бітних текстових шаблонів у сучасному джерелі.
+    // Складена голова не може потрапити до атомарного D3 EQ.
+    for (source, expected) in [
+        ("(індекс-міркування? (як-є ()))", false),
+        ("(індекс-міркування? (як-є ((складена-голова) запис)))", false),
+        ("(індекс-міркування? (як-є (reason-index/1 indexed ())))", true),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("реальна перевірка індекс-міркування?: {error}; джерело: {source}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "D3 ATOM має захистити EQ від складеної голови: {source}"
+        );
+    }
 
     let narration_source = include_str!("../../../lib/narrate.lisp");
     let hs = narration_source.find("(визначити список-завершується-порожнім?").expect("D3/D4 helpers exist");
@@ -188,13 +193,13 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
 fn reason_index_builder_diagnostic_first_failing_stage() {
     let mut s = session();
     let probes = [
-        ("(reason-term-predicate (quote (p a)))", "p"),
-        ("(reason-rule-predicate (quote ((p a))))", "p"),
-        ("(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
-        ("(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
-        ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
+        ("(предикат-терма-міркування (як-є (p a)))", "p"),
+        ("(предикат-правила-міркування (як-є ((p a))))", "p"),
+        ("(додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ()))", "((p ((p a))))"),
+        ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ())))", "((p ((p a))))"),
+        ("(reason-index-build-scan (як-є ()) (як-є ()) (як-є ()) *reason-index-fuel*)",
          "(reason-index/1 indexed () ())"),
-        ("(reason-make-index (quote (((p a)))))",
+        ("(reason-make-index (як-є (((p a)))))",
          "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
     ];
     for (probe, expected) in probes {

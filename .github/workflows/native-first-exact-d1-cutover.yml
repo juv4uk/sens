@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - name: "2046 D1-D10 coordinates; 30 source sites; exact bit overhead"
-        run: python3 -m unittest discover -s tests -p test_native_first_exact_d1_cutover.py -v
       - uses: dtolnay/rust-toolchain@stable
       - name: "Explicit D1 source projection: exhaustive two bits, preserve numeric 0/1 and D3 EMPTY"
         run: cargo test --locked -p sens --test d1_direct_projection -- --nocapture

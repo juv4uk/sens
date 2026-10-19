@@ -47,7 +47,7 @@
 ; JSON encoding (pure .lisp; decode is the host primitive, encode never was)
 ; ---------------------------------------------------------------------------
 
-(визначити json-escape-char
+(визначити екранувати-знак-формат-обміну-даними
   (функція (знак)
     (за-умовою
       ((тотожне? знак "\"") "\\\"")
@@ -64,8 +64,8 @@
       (так (json-escape-onto (рядок-решта вхідний-текст)
                            (рядок-додати накопичений-текст (екранувати-знак-формат-обміну-даними (рядок-перший вхідний-текст))))))))
 
-(визначити json-escape
-  (функція (s) (json-escape-onto s "")))
+(визначити екранувати-формат-обміну-даними
+  (функція (вхідний-текст) (json-escape-onto вхідний-текст "")))
 
 ; The kernel's string-append is strictly binary AND a special form, so it
 ; cannot be passed as a function value to reduce — fold over rest args
@@ -81,7 +81,7 @@
   (функція частини-тексту
     (strcat-onto частини-тексту "")))
 
-(визначити json-encode-string
+(визначити кодувати-рядок-формат-обміну-даними
   (функція (рядок-для-кодування) (рядок-додати "\"" (рядок-додати (екранувати-формат-обміну-даними рядок-для-кодування) "\""))))
 
 (визначити json-encode-key
@@ -100,14 +100,14 @@
 ; Безумовна гілка мусить бути останньою, інакше всі структури стають «ні».
 ; Це мовна функція: наявність імені в D10 не надає автоматичної виконуваності.
 (визначити об'єкт-формат-обміну-даними?
-  (функція (значення)
+  (функція (перевірювана-структура)
     (за-умовою
-      ((атом? значення) ні)
-      ((атом? (перше значення)) ні)
-      ((атом? (перше (перше значення))) так)
+      ((атом? перевірювана-структура) ні)
+      ((атом? (перше перевірювана-структура)) ні)
+      ((атом? (перше (перше перевірювана-структура))) так)
       (так ні))))
 
-(визначити json-encode-value
+(визначити кодувати-значення-формат-обміну-даними
   (функція (значення-для-кодування)
     (за-умовою
       
@@ -136,9 +136,9 @@
                     ":"
                     (кодувати-значення-формат-обміну-даними (решта поточний-запис)))))))))
 
-(визначити json-encode-object
-  (функція (alist)
-    (strcat "{" (json-encode-object-entries alist "") "}")))
+(визначити кодувати-об'єкт-формат-обміну-даними
+  (функція (пари-об'єкта)
+    (strcat "{" (json-encode-object-entries пари-об'єкта "") "}")))
 
 (визначити json-encode-array-items
   (функція (елементи-масиву накопичений-рядок)
@@ -152,11 +152,10 @@
                         (так ","))
                   (кодувати-значення-формат-обміну-даними (перше елементи-масиву))))))))
 
-(визначити json-encode-array
-  (функція (items)
-    (strcat "[" (json-encode-array-items items "") "]")))
+(визначити кодувати-масив-формат-обміну-даними
+  (функція (елементи-масиву)
+    (strcat "[" (json-encode-array-items елементи-масиву "") "]")))
 
-(визначити json-encode кодувати-значення-формат-обміну-даними)
 
 ; ---------------------------------------------------------------------------
 ; Message / tool-call accessors and JSON -> internal conversion
@@ -167,22 +166,22 @@
 ; A genuinely absent key and an explicit nil value both read as () — the
 ; loop below only ever distinguishes present-nonempty from everything else.
 (визначити alist-ref
-  (функція (key alist)
+  (функція (ключ пари-списку)
     (за-умовою
-      ((знайти-за-ключем key alist) (решта (знайти-за-ключем key alist)))
+      ((знайти-за-ключем ключ пари-списку) (решта (знайти-за-ключем ключ пари-списку)))
       )))
 
-(визначити msg-role (функція (m) (alist-ref (як-є role) m)))
-(визначити msg-content (функція (m) (alist-ref (як-є content) m)))
-(визначити msg-tool-calls (функція (m) (alist-ref (як-є tool-calls) m)))
-(визначити msg-tool-call-id (функція (m) (alist-ref (як-є tool-call-id) m)))
+(визначити msg-role (функція (повідомлення) (alist-ref (як-є role) повідомлення)))
+(визначити msg-content (функція (повідомлення) (alist-ref (як-є content) повідомлення)))
+(визначити msg-tool-calls (функція (повідомлення) (alist-ref (як-є tool-calls) повідомлення)))
+(визначити msg-tool-call-id (функція (повідомлення) (alist-ref (як-є tool-call-id) повідомлення)))
 
-(визначити tc-id (функція (tc) (alist-ref (як-є id) tc)))
-(визначити tc-name (функція (tc) (alist-ref (як-є name) tc)))
-(визначити tc-arguments (функція (tc) (alist-ref (як-є arguments) tc)))
+(визначити tc-id (функція (виклик-інструмента) (alist-ref (як-є id) виклик-інструмента)))
+(визначити tc-name (функція (виклик-інструмента) (alist-ref (як-є name) виклик-інструмента)))
+(визначити tc-arguments (функція (виклик-інструмента) (alist-ref (як-є arguments) виклик-інструмента)))
 
 ; OpenAI's content field is null when the assistant emits only tool calls.
-(визначити json-message-content
+(визначити зміст-повідомлення-формат-обміну-даними
   (функція (jm)
     ((функція (c)
       (за-умовою
@@ -190,7 +189,7 @@
         (так c)))
      (alist-ref "content" jm))))
 
-(визначити json->tool-call
+(визначити виклик-інструмента-з-формат-обміну-даними
   (функція (jtc)
     ((функція (fn)
       (список (сполучити (як-є id) (alist-ref "id" jtc))
@@ -198,7 +197,7 @@
             (сполучити (як-є arguments) (alist-ref "arguments" fn))))
      (alist-ref "function" jtc))))
 
-(визначити json->message
+(визначити повідомлення-з-формат-обміну-даними
   (функція (jm)
     ((функція (tcs)
       (приєднати (список (сполучити (як-є role) (alist-ref "role" jm))
@@ -208,7 +207,7 @@
                 )))
      (alist-ref "tool_calls" jm))))
 
-(визначити extract-assistant-message
+(визначити витягти-відповідь-помічника
   (функція (response-json)
     (нехай-послідовно ((choices (alist-ref "choices" response-json))
            (choice (перше choices)))
@@ -218,14 +217,14 @@
 ; Request encoding (raw-data builders; one json-encode at the leaf)
 ; ---------------------------------------------------------------------------
 
-(визначити encode-tool-call
+(визначити кодувати-виклик-інструмента
   (функція (tc)
     (список (сполучити "id" (tc-id tc))
           (сполучити "type" "function")
           (сполучити "function" (список (сполучити "name" (tc-name tc))
                                  (сполучити "arguments" (tc-arguments tc)))))))
 
-(визначити encode-message
+(визначити кодувати-повідомлення
   (функція (m)
     (за-умовою
       ((однакові? (msg-role m) "tool")
@@ -235,7 +234,7 @@
       (так (нехай ((tcs (msg-tool-calls m)))
            (приєднати (список (сполучити "role" (msg-role m))
                          (сполучити "content" (msg-content m)))
-                   (за-умовою (tcs (список (сполучити "tool_calls" (відобразити encode-tool-call tcs))))
+                   (за-умовою (tcs (список (сполучити "tool_calls" (відобразити кодувати-виклик-інструмента tcs))))
                          )))))))
 
 (визначити bash-tool-schema
@@ -251,9 +250,9 @@
                                                                 (сполучити "description" "The bash command to execute")))))
                                   (сполучити "required" (список "cmd")))))))))
 
-(визначити build-request-body
+(визначити створити-тіло-запиту
   (функція (model messages)
-    (json-encode
+    (кодувати-значення-формат-обміну-даними
      (список (сполучити "model" model)
            (сполучити "messages" (відобразити encode-message messages))
            (сполучити "tools" (список (bash-tool-schema)))))))
@@ -357,14 +356,14 @@
       ((рядок-містить? (перше markers) text) так)
       (так (markers-contained? (решта markers) text)))))
 
-(визначити claims-execution?
+(визначити стверджує-виконання?
   (функція (text) (markers-contained? claim-markers text)))
 
 
 ; Does the conversation contain any tool result at all? Coarse - kept
 ; for callers that only need existence; the claim validator below uses
 ; the stricter owned-evidence rule instead.
-(визначити has-tool-result?
+(визначити є-результат-інструмента?
   (функція (messages)
     (за-умовою
       
@@ -398,7 +397,7 @@
       ((однакові? id (перше ids)) так)
       (так (id-in-list? id (решта ids))))))
 
-(визначити all-covered?
+(визначити усі-ідентифікатори-покриті?
   (функція (ids candidates)
     (за-умовою
       
@@ -410,7 +409,7 @@
 ; [... assistant(tool-calls) tool* ] where every trailing tool result's
 ; id belongs to that assistant message. The final reply itself is dropped
 ; first - it is the message being validated, never its own evidence.
-(визначити ends-with-owned-tool-results?
+(визначити завершується-власними-результатами?
   (функція (messages)
     (за-умовою
       
@@ -440,7 +439,7 @@
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
 ; tool calls, directly preceding the reply.
-(визначити valid-final?
+(визначити припустима-завершальна-відповідь?
   (функція (assistant-msg messages)
     (за-умовою
       ((стверджує-виконання? (msg-content assistant-msg))
@@ -535,30 +534,12 @@
                                       (за-умовою ((рядок-порожній? e) "")
                                             (так (рядок-додати "\n" e))))))))))))
 
-; opt-in повна укр-поверхня: exact identity = lib/domains/d*.lisp; DEFINE-аліас, без нової диспетчеризації.
-(визначити усі-ідентифікатори-покриті? all-covered?)
-(визначити стверджує-виконання? claims-execution?)
-(визначити завершується-власними-результатами? ends-with-owned-tool-results?)
-(визначити витягти-відповідь-помічника extract-assistant-message)
-(визначити є-результат-інструмента? has-tool-result?)
-(визначити кодувати-масив-формат-обміну-даними json-encode-array)
-(визначити кодувати-об'єкт-формат-обміну-даними json-encode-object)
-(визначити кодувати-рядок-формат-обміну-даними json-encode-string)
-(визначити кодувати-значення-формат-обміну-даними json-encode-value)
-(визначити екранувати-формат-обміну-даними json-escape)
-(визначити екранувати-знак-формат-обміну-даними json-escape-char)
-(визначити припустима-завершальна-відповідь? valid-final?)
+; Функції нижче визначені безпосередньо за чинною повною проєкцією укр.
 
 ; Повні ратифіковані D10-проєкції чинних Lisp-функцій, не нові машинні інструкції.
 ; D10:0100010110
-(визначити зміст-повідомлення-формат-обміну-даними json-message-content)
 ; D10:0100011000
-(визначити повідомлення-з-формат-обміну-даними json->message)
 ; D10:0100010111
-(визначити виклик-інструмента-з-формат-обміну-даними json->tool-call)
 ; D10:0100011010
-(визначити кодувати-виклик-інструмента encode-tool-call)
 ; D10:0100011011
-(визначити кодувати-повідомлення encode-message)
 ; D10:0100011100
-(визначити створити-тіло-запиту build-request-body)

@@ -80,6 +80,10 @@ fn exact_rational_values_remain_unchanged_after_structuring() {
         eval_science("si:avogadro-constant"),
         "602214076000000000000000"
     );
+    assert_eq!(
+        eval_science("(сі:значення-константи si:defining-speed-of-light)"),
+        "299792458"
+    );
 }
 
 #[test]
@@ -146,13 +150,13 @@ fn si_source_does_not_reintroduce_a_second_literal_authority_for_numeric_views()
     }
 
     for derived in [
-        "si:cesium-frequency (si:constant-value si:defining-cesium-frequency))",
-        "si:speed-of-light (si:constant-value si:defining-speed-of-light))",
-        "si:planck-constant (si:constant-value si:defining-planck-constant))",
-        "si:elementary-charge (si:constant-value si:defining-elementary-charge))",
-        "si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))",
-        "si:avogadro-constant (si:constant-value si:defining-avogadro-constant))",
-        "si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))",
+        "si:cesium-frequency (сі:значення-константи si:defining-cesium-frequency))",
+        "si:speed-of-light (сі:значення-константи si:defining-speed-of-light))",
+        "si:planck-constant (сі:значення-константи si:defining-planck-constant))",
+        "si:elementary-charge (сі:значення-константи si:defining-elementary-charge))",
+        "si:boltzmann-constant (сі:значення-константи si:defining-boltzmann-constant))",
+        "si:avogadro-constant (сі:значення-константи si:defining-avogadro-constant))",
+        "si:luminous-efficacy (сі:значення-константи si:defining-luminous-efficacy))",
     ] {
         assert!(si_defines(si, derived), "missing derived SI numeric view: {derived}");
     }

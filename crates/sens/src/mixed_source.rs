@@ -370,24 +370,6 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
     parse_mixed_source(source, true)
 }
 
-/// Current Core library entry point. The source is already ratified Ukrainian
-/// Lisp, so use the exact-domain reader with no W8 wrapper or quoted-bit
-/// reinterpretation. The historical function name is temporarily retained only
-/// while call sites are moved to the common reader.
-pub fn parse_mixed_exact_domain_legacy_core_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
-    if path != "lib/core.lisp" {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "Core library source must be the current lib/core.lisp",
-            Span::default(),
-        ));
-    }
-    parse_mixed_exact_domain(source)
-}
-
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
 /// D9 heads are materialized only on this pinned path; execution still requires
 /// a concrete callable mechanism previously attached to that exact identity.
@@ -1254,31 +1236,29 @@ mod tests {
     }
 
     #[test]
-    fn core4_logic_macro_code_head_retains_d3_width_without_retyping_ordinary_data() {
-        // Reader/transport witness only. Semantic AND/OR truth remains owned
-        // by the existing SENS execution path in bootstrap_order.
-        let macro_source = "(0011 and (0010 rest (001 110)))";
-        let forms = parse_mixed_exact_domain_core_source("lib/core4.lisp", macro_source)
-            .expect("pinned Core4 macro reader");
-        let ExprKind::List(definition) = &forms[0].kind else { panic!("D4 DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("D4 LAMBDA"); };
-        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("D3 QUOTE"); };
+    fn core4_ukr_macro_data_stays_opaque_while_executable_d3_is_exact() {
+        // Ім'я D3 у цитаті — дані. У виконуваній позиції воно має
+        // точну D3:110, без історичного восьмибітного підйому макроса.
+        let source = "(визначити макро-дані (функція (умови) (як-є за-умовою))) \
+                      (за-умовою ((атом? (як-є ())) так))";
+        let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
+            .expect("український Core4 reader");
+        assert_eq!(expressions.len(), 2);
+        let ExprKind::List(definition) = &expressions[0].kind else { panic!("D4 визначити"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("D4 функція"); };
+        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("D3 як-є"); };
         assert!(matches!(
             &quoted[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "за-умовою"
+        ), "цитоване ім'я не стає викличною координатою");
+
+        let ExprKind::List(call) = &expressions[1].kind else { panic!("D3 виклик"); };
+        assert!(matches!(
+            &call[0].kind,
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 3 && identity.packed_bits() == 0b110
-        ), "quoted executable COND must be exactly D3:110");
-
-        // Identical spelling outside a logic-macro code template is quoted
-        // data, never an implicitly callable domain identity.
-        let data_source = "(0011 datum (0010 () (001 110)))";
-        let ordinary = parse_mixed_exact_domain_core_source("lib/core4.lisp", data_source)
-            .expect("ordinary quote is still accepted");
-        let ExprKind::List(definition) = &ordinary[0].kind else { panic!("DEFINE"); };
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
-        let ExprKind::List(quoted) = &lambda[2].kind else { panic!("QUOTE"); };
-        assert!(!matches!(&quoted[1].kind, ExprKind::DomainIdentity(_)));
-        assert!(parse_mixed_exact_domain_core_source("lib/untrusted.lisp", macro_source).is_err());
+        ), "виконувана голова має бути D3:110, а не історичним W8");
+        assert!(parse_mixed_exact_domain_core_source("lib/untrusted.lisp", source).is_err());
     }
 
     #[test]
@@ -2229,21 +2209,12 @@ mod tests {
     #[test]
     fn core_macro_code_names_are_ordinary_quoted_ukrainian_data() {
         let source = "(як-є функція)";
-        let exact = only(
-            parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
-                .expect("current Core uses the ordinary exact-domain reader"),
-        );
-        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary source parse"));
-        assert_eq!(exact, ordinary, "the Core entry point must not retype quoted data");
+        let exact = only(parse_mixed_exact_domain(source).expect("generic exact-domain source parse"));
         let ExprKind::List(quote) = &exact.kind else { panic!("QUOTE"); };
         assert!(matches!(&quote[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
         assert!(matches!(&quote[1].kind,
             ExprKind::Symbol(name) if name.as_ref() == "функція"));
-
-        assert!(parse_mixed_exact_domain_legacy_core_source(
-            "lib/not-core.lisp", source
-        ).is_err());
     }
 
     #[test]

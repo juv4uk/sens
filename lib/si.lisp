@@ -113,18 +113,18 @@
 ; Only the projection is refactored; BIPM SI records remain unchanged.
 ; A scientific-constant/1 record stores its quantity in the third field; a
 ; quantity/1 stores its numeric value in the second field.
-(визначити si:constant-value
+(визначити сі:значення-константи
   (функція (наукова-константа)
     (друге (третє наукова-константа))))
 
 ; Backward-compatible arithmetic surface, derived from the records above.
-(визначити si:cesium-frequency (si:constant-value si:defining-cesium-frequency))
-(визначити si:speed-of-light (si:constant-value si:defining-speed-of-light))
-(визначити si:planck-constant (si:constant-value si:defining-planck-constant))
-(визначити si:elementary-charge (si:constant-value si:defining-elementary-charge))
-(визначити si:boltzmann-constant (si:constant-value si:defining-boltzmann-constant))
-(визначити si:avogadro-constant (si:constant-value si:defining-avogadro-constant))
-(визначити si:luminous-efficacy (si:constant-value si:defining-luminous-efficacy))
+(визначити si:cesium-frequency (сі:значення-константи si:defining-cesium-frequency))
+(визначити si:speed-of-light (сі:значення-константи si:defining-speed-of-light))
+(визначити si:planck-constant (сі:значення-константи si:defining-planck-constant))
+(визначити si:elementary-charge (сі:значення-константи si:defining-elementary-charge))
+(визначити si:boltzmann-constant (сі:значення-константи si:defining-boltzmann-constant))
+(визначити si:avogadro-constant (сі:значення-константи si:defining-avogadro-constant))
+(визначити si:luminous-efficacy (сі:значення-константи si:defining-luminous-efficacy))
 
 ; Transitional compatibility aliases. These are not canonical names and may
 ; be removed once repository callers have migrated to the descriptive surface.
