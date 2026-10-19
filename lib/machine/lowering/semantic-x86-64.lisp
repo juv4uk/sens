@@ -65,15 +65,15 @@
 ; branch assembler, or compiler policy. It returns structured forms only;
 ; closed admission remains the sole path to bytes.
 (визначити x86-lower-eq-cond-u64-forms
-  (функція (left right then-value else-value)
+  (функція (лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
-      (список (як-є mov-r64-imm64) (як-є rcx) right)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
+      (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд)
       (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є jnz-rel8) 11)
-      (список (як-є mov-r64-imm64) (як-є rax) then-value)
+      (список (як-є mov-r64-imm64) (як-є rax) значення-якщо-так)
       (список (як-є ret))
-      (список (як-є mov-r64-imm64) (як-є rax) else-value)
+      (список (як-є mov-r64-imm64) (як-є rax) значення-якщо-ні)
       (список (як-є ret)))))
 
 ; #196 conditional+structural composition helper. Each branch constructs one
@@ -82,20 +82,20 @@
 ; admission is exercised by semantic composition rather than by an ISA-only
 ; witness. RAX remains the guest ABI result register.
 (визначити x86-lower-bounded-car-cons-u64-arm-forms
-  (функція (left right left-register right-register)
+  (функція (лівий-операнд правий-операнд лівий-регістр правий-регістр)
     (список
-      (список (як-є mov-r64-imm64) left-register left)
+      (список (як-є mov-r64-imm64) лівий-регістр лівий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
         x86-pair-car-offset
-        left-register)
-      (список (як-є mov-r64-imm64) right-register right)
+        лівий-регістр)
+      (список (як-є mov-r64-imm64) правий-регістр правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
         x86-pair-cdr-offset
-        right-register)
+        правий-регістр)
       (список
         (як-є mov-r64-mem-disp8)
         (як-є rax)
@@ -109,18 +109,18 @@
 ; each arm returns directly. No label resolver, register allocator, GC, or
 ; general recursive expression lowering is claimed here.
 (визначити x86-lower-eq-cond-car-cons-u64-forms
-  (функція (left right then-car then-cdr else-car else-cdr)
+  (функція (лівий-операнд правий-операнд перше-якщо-так решта-якщо-так перше-якщо-ні решта-якщо-ні)
     (приєднати
       (список
-        (список (як-є mov-r64-imm64) (як-є rax) left)
-        (список (як-є mov-r64-imm64) (як-є rcx) right)
+        (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
+        (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд)
         (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
         (список (як-є jnz-rel8) 33))
       (приєднати
         (x86-lower-bounded-car-cons-u64-arm-forms
-          then-car then-cdr (як-є r8) (як-є r9))
+          перше-якщо-так решта-якщо-так (як-є r8) (як-є r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
-          else-car else-cdr (як-є r10) (як-є r11))))))
+          перше-якщо-ні решта-якщо-ні (як-є r10) (як-є r11))))))
 
 ; Bounded structural witness for semantic identities 00000100/00000101/00000110.
 ; The host contributes only a raw writable arena pointer in RDI. Lisp owns
@@ -132,15 +132,15 @@
 ; already escape native code: pair-x86-64.lisp fixes lifetime=native-call and
 ; escape=forbidden for this proof slice.
 (визначити x86-lower-bounded-pair-store-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
         x86-pair-car-offset
         (як-є rax))
-      (список (як-є mov-r64-imm64) (як-є rax) right)
+      (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
@@ -151,8 +151,8 @@
 ; Do not place the bare function designator in value position: the strict
 ; source path must make callability explicit and preserve structured forms.
 (визначити x86-lower-bounded-pair-store-u64-instructions
-  (функція (left right)
-    (x86-lower-bounded-pair-store-u64-forms left right)))
+  (функція (лівий-операнд правий-операнд)
+    (x86-lower-bounded-pair-store-u64-forms лівий-операнд правий-операнд)))
 
 ; Append only the finite structured machine-form lists using current D3
 ; primitives. Do not route this boundary through Core4's deferred legacy
@@ -169,15 +169,15 @@
 ; keep failing closed until their predicate adapter is migrated. This narrow
 ; witness should not depend on an unfinished generic traversal path.
 (визначити x86-lower-cons-car-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
         x86-pair-car-offset
         (як-є rax))
-      (список (як-є mov-r64-imm64) (як-є rax) right)
+      (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
@@ -191,15 +191,15 @@
       (список (як-є ret)))))
 
 (визначити x86-lower-cons-cdr-u64-forms
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) left)
+      (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
         x86-pair-car-offset
         (як-є rax))
-      (список (як-є mov-r64-imm64) (як-є rax) right)
+      (список (як-є mov-r64-imm64) (як-є rax) правий-операнд)
       (список
         (як-є mov-mem-disp8-r64)
         (як-є rdi)
@@ -219,11 +219,11 @@
 ; machine forms, pass closed admission, and enter the semantics-blind host.
 ; No pair predicate or tag rule is duplicated in this machine layer.
 (визначити x86-call-semantic-car-u64
-  (функція (pair-value)
+  (функція (значення-пари)
     (викликати-допущену-машинну-програму
       (x86-lower-cons-car-u64-forms
-        (перше pair-value)
-        (решта pair-value))
+        (перше значення-пари)
+        (решта значення-пари))
       x86-pair-cell-bytes)))
 
 
@@ -236,36 +236,36 @@
 ; Anything outside those proved rectangles fails closed to the exact Lisp/Q
 ; fallback. Historical SID8 values and human spellings never participate.
 (визначити x86-current-d5-u32-inputs?
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-admission-exact-integer? left)
+      ((x86-admission-exact-integer? лівий-операнд)
        (за-умовою
          ((x86-admission-within-inclusive-integer-range?
-            left 0 4294967295)
+            лівий-операнд 0 4294967295)
           (за-умовою
-            ((x86-admission-exact-integer? right)
+            ((x86-admission-exact-integer? правий-операнд)
              (x86-admission-within-inclusive-integer-range?
-               right 0 4294967295))
+               правий-операнд 0 4294967295))
             (так (як-є ()))))
          (так (як-є ()))))
       (так (як-є ())))))
 
 (визначити x86-current-d5-difference-u64-safe?
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-admission-exact-integer? left)
+      ((x86-admission-exact-integer? лівий-операнд)
        (за-умовою
          ((x86-admission-within-inclusive-integer-range?
-            left 0 18446744073709551615)
+            лівий-операнд 0 18446744073709551615)
           (за-умовою
-            ((x86-admission-exact-integer? right)
+            ((x86-admission-exact-integer? правий-операнд)
              (за-умовою
                ((x86-admission-within-inclusive-integer-range?
-                  right 0 18446744073709551615)
+                  правий-операнд 0 18446744073709551615)
                 ; Inclusive order is derived from admitted D5 LESSP + D4 NOT.
                 ; Exact D1 controls stay distinct from numeric 0/1 and host truth.
                 (за-умовою
-                  ((хибне? (менше? left right)) так)
+                  ((хибне? (менше? лівий-операнд правий-операнд)) так)
                   (так (як-є ()))))
                (так (як-є ()))))
             (так (як-є ()))))
@@ -276,135 +276,135 @@
 ; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
 ; consulted.
 (визначити x86-current-domain-key?
-  (функція (width bits expected-width expected-bits)
+  (функція (ширина-домену біти-домену очікувана-ширина очікувані-біти)
     (за-умовою
-      ((тотожне? width expected-width)
-       (тотожне? bits expected-bits))
+      ((тотожне? ширина-домену очікувана-ширина)
+       (тотожне? біти-домену очікувані-біти))
       (так (як-є ())))))
 
 (визначити x86-lower-current-binary-u64-forms
-  (функція (width bits left right)
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-current-domain-key? width bits 5 10)
+      ((x86-current-domain-key? ширина-домену біти-домену 5 10)
        (за-умовою
-         ((x86-current-d5-u32-inputs? left right)
-          (x86-lower-add-u64-forms left right))
+         ((x86-current-d5-u32-inputs? лівий-операнд правий-операнд)
+          (x86-lower-add-u64-forms лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
-      ((x86-current-domain-key? width bits 5 11)
+      ((x86-current-domain-key? ширина-домену біти-домену 5 11)
        (за-умовою
-         ((x86-current-d5-difference-u64-safe? left right)
-          (x86-lower-difference-u64-forms left right))
+         ((x86-current-d5-difference-u64-safe? лівий-операнд правий-операнд)
+          (x86-lower-difference-u64-forms лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
-      ((x86-current-domain-key? width bits 5 22)
+      ((x86-current-domain-key? ширина-домену біти-домену 5 22)
        (за-умовою
-         ((x86-current-d5-u32-inputs? left right)
-          (x86-lower-times-u64-forms left right))
+         ((x86-current-d5-u32-inputs? лівий-операнд правий-операнд)
+          (x86-lower-times-u64-forms лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
       (так
        (як-є unsupported-current-domain-binary-u64)))))
 
 (визначити x86-encode-current-binary-u64
-  (функція (width bits left right)
-    ((функція (forms)
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
+    ((функція (машинні-форми)
        (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-binary-u64))
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-binary-u64))
          (як-є unsupported-current-domain-binary-u64))
-        ((тотожне? forms (як-є exact-d5-fallback-required))
+        ((тотожне? машинні-форми (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
         (так
-         (x86-encode-admitted-program forms))))
+         (x86-encode-admitted-program машинні-форми))))
       (x86-lower-current-binary-u64-forms
-                    width bits left right))))
+                    ширина-домену біти-домену лівий-операнд правий-операнд))))
 
 ; #4063 exact D6 ADD1/SUB1 bounded fast paths.
 ; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
 ; D5 PLUS/DIFFERENCE with exact integer 1. This machine slice reuses the same
 ; admitted ADD/SUB forms and adds no arithmetic meaning of its own.
 (визначити x86-current-d6-add1-u64-safe?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((x86-admission-exact-integer? value)
+      ((x86-admission-exact-integer? значення)
        (x86-admission-within-inclusive-integer-range?
-         value 0 18446744073709551614))
+         значення 0 18446744073709551614))
       (так (як-є ())))))
 
 (визначити x86-current-d6-sub1-u64-safe?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((x86-admission-exact-integer? value)
+      ((x86-admission-exact-integer? значення)
        (x86-admission-within-inclusive-integer-range?
-         value 1 18446744073709551615))
+         значення 1 18446744073709551615))
       (так (як-є ())))))
 
 (визначити x86-lower-current-d6-unary-u64-forms
-  (функція (width bits value)
+  (функція (ширина-домену біти-домену значення)
     (за-умовою
-      ((x86-current-domain-key? width bits 6 14)
+      ((x86-current-domain-key? ширина-домену біти-домену 6 14)
        (за-умовою
-         ((x86-current-d6-add1-u64-safe? value)
-          (x86-lower-add-u64-forms value 1))
+         ((x86-current-d6-add1-u64-safe? значення)
+          (x86-lower-add-u64-forms значення 1))
          (так (як-є exact-d6-fallback-required))))
-      ((x86-current-domain-key? width bits 6 15)
+      ((x86-current-domain-key? ширина-домену біти-домену 6 15)
        (за-умовою
-         ((x86-current-d6-sub1-u64-safe? value)
-          (x86-lower-difference-u64-forms value 1))
+         ((x86-current-d6-sub1-u64-safe? значення)
+          (x86-lower-difference-u64-forms значення 1))
          (так (як-є exact-d6-fallback-required))))
       (так
        (як-є unsupported-current-domain-d6-unary-u64)))))
 
 (визначити x86-encode-current-d6-unary-u64
-  (функція (width bits value)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-d6-unary-u64))
+  (функція (ширина-домену біти-домену значення)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-d6-unary-u64))
          (як-є unsupported-current-domain-d6-unary-u64))
-        ((тотожне? forms (як-є exact-d6-fallback-required))
+        ((тотожне? машинні-форми (як-є exact-d6-fallback-required))
          (як-є exact-d6-fallback-required))
         (так
-         (x86-encode-admitted-program forms)))) (x86-lower-current-d6-unary-u64-forms
-                    width bits value))))
+         (x86-encode-admitted-program машинні-форми)))) (x86-lower-current-d6-unary-u64-forms
+                    ширина-домену біти-домену значення))))
 
 ; #4017 exact D5:10111 QUOTIENT bounded dispatcher.
 ; Only equal positive exact integers inside signed i64 enter IDIV. This is a
 ; proof slice, not a claim of general integer division. All non-equal,
 ; rational, zero, negative or out-of-range cases remain exact Lisp/Q fallback.
 (визначити x86-current-d5-quotient-i64-equal-safe?
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-admission-exact-integer? left)
+      ((x86-admission-exact-integer? лівий-операнд)
        (за-умовою
          ((x86-admission-within-inclusive-integer-range?
-            left 1 9223372036854775807)
+            лівий-операнд 1 9223372036854775807)
           (за-умовою
-            ((x86-admission-exact-integer? right)
+            ((x86-admission-exact-integer? правий-операнд)
              (за-умовою
                ((x86-admission-within-inclusive-integer-range?
-                  right 1 9223372036854775807)
-                (тотожне? left right))
+                  правий-операнд 1 9223372036854775807)
+                (тотожне? лівий-операнд правий-операнд))
                (так (як-є ()))))
             (так (як-є ()))))
          (так (як-є ()))))
       (так (як-є ())))))
 
 (визначити x86-lower-current-quotient-i64-forms
-  (функція (width bits left right)
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-current-domain-key? width bits 5 23)
+      ((x86-current-domain-key? ширина-домену біти-домену 5 23)
        (за-умовою
-         ((x86-current-d5-quotient-i64-equal-safe? left right)
-          (x86-lower-quotient-i64-equal-forms left right))
+         ((x86-current-d5-quotient-i64-equal-safe? лівий-операнд правий-операнд)
+          (x86-lower-quotient-i64-equal-forms лівий-операнд правий-операнд))
          (так (як-є exact-d5-fallback-required))))
       (так (як-є unsupported-current-domain-quotient-i64)))))
 
 (визначити x86-encode-current-quotient-i64
-  (функція (width bits left right)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-quotient-i64))
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-quotient-i64))
          (як-є unsupported-current-domain-quotient-i64))
-        ((тотожне? forms (як-є exact-d5-fallback-required))
+        ((тотожне? машинні-форми (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
         (так
-         (x86-encode-admitted-program forms)))) (x86-lower-current-quotient-i64-forms
-                    width bits left right))))
+         (x86-encode-admitted-program машинні-форми)))) (x86-lower-current-quotient-i64-forms
+                    ширина-домену біти-домену лівий-операнд правий-операнд))))
 
 ; #4018 exact D5 order-predicate machine proof.
 ; These forms intentionally produce only an INTERNAL machine bit in RAX.
@@ -412,37 +412,37 @@
 ; language-visible result boundary remains the existing D5 -> D1
 ; canonicalization in Rust.
 (визначити x86-current-d5-order-i63-safe?
-  (функція (left right)
+  (функція (лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-admission-exact-integer? left)
+      ((x86-admission-exact-integer? лівий-операнд)
        (за-умовою
          ((x86-admission-within-inclusive-integer-range?
-            left 0 9223372036854775807)
+            лівий-операнд 0 9223372036854775807)
           (за-умовою
-            ((x86-admission-exact-integer? right)
+            ((x86-admission-exact-integer? правий-операнд)
              (x86-admission-within-inclusive-integer-range?
-               right 0 9223372036854775807))
+               правий-операнд 0 9223372036854775807))
             (так (як-є ()))))
          (так (як-є ()))))
       (так (як-є ())))))
 
 (визначити x86-lower-order-i64-forms
-  (функція (width bits left right)
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-current-d5-order-i63-safe? left right)
+      ((x86-current-d5-order-i63-safe? лівий-операнд правий-операнд)
        (за-умовою
-         ((x86-current-domain-key? width bits 5 26)
+         ((x86-current-domain-key? ширина-домену біти-домену 5 26)
           (список
-            (список (як-є mov-r64-imm64) (як-є rax) left)
-            (список (як-є mov-r64-imm64) (як-є rcx) right)
+            (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
+            (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд)
             (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
             (список (як-є setl-r8) (як-є al))
             (список (як-є movzx-r64-r8) (як-є rax) (як-є al))
             (список (як-є ret))))
-         ((x86-current-domain-key? width bits 5 27)
+         ((x86-current-domain-key? ширина-домену біти-домену 5 27)
           (список
-            (список (як-є mov-r64-imm64) (як-є rax) left)
-            (список (як-є mov-r64-imm64) (як-є rcx) right)
+            (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
+            (список (як-є mov-r64-imm64) (як-є rcx) правий-операнд)
             (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
             (список (як-є setg-r8) (як-є al))
             (список (як-є movzx-r64-r8) (як-є rax) (як-є al))
@@ -453,14 +453,14 @@
        (як-є exact-d5-fallback-required)))))
 
 (визначити x86-encode-current-order-bit
-  (функція (width bits left right)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-order-i64))
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-order-i64))
          (як-є unsupported-current-domain-order-i64))
-        ((тотожне? forms (як-є exact-d5-fallback-required))
+        ((тотожне? машинні-форми (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
         (так
-         (x86-encode-admitted-program forms)))) (x86-lower-order-i64-forms width bits left right))))
+         (x86-encode-admitted-program машинні-форми)))) (x86-lower-order-i64-forms ширина-домену біти-домену лівий-операнд правий-операнд))))
 
 ; #4064/#4068 exact D5:01000 ZEROP bounded machine proof.
 ; Full ZEROP semantics include the historical epsilon policy for rational
@@ -468,17 +468,17 @@
 ; nonnegative u64 integers. The emitted 0/1 remains INTERNAL machine data;
 ; language-visible result remains exact D1.
 (визначити x86-current-d5-zerop-u64-safe?
-  (функція (value)
+  (функція (значення)
     (за-умовою
-      ((x86-admission-exact-integer? value)
+      ((x86-admission-exact-integer? значення)
        (x86-admission-within-inclusive-integer-range?
-         value 0 18446744073709551615))
+         значення 0 18446744073709551615))
       (так (як-є ())))))
 
 (визначити x86-lower-zerop-u64-forms
-  (функція (value)
+  (функція (значення)
     (список
-      (список (як-є mov-r64-imm64) (як-є rax) value)
+      (список (як-є mov-r64-imm64) (як-є rax) значення)
       (список (як-є mov-r64-imm64) (як-є rcx) 0)
       (список (як-є cmp-r64-r64) (як-є rax) (як-є rcx))
       (список (як-є sete-r8) (як-є al))
@@ -486,49 +486,49 @@
       (список (як-є ret)))))
 
 (визначити x86-lower-current-zerop-u64-forms
-  (функція (width bits value)
+  (функція (ширина-домену біти-домену значення)
     (за-умовою
-      ((x86-current-domain-key? width bits 5 8)
+      ((x86-current-domain-key? ширина-домену біти-домену 5 8)
        (за-умовою
-         ((x86-current-d5-zerop-u64-safe? value)
-          (x86-lower-zerop-u64-forms value))
+         ((x86-current-d5-zerop-u64-safe? значення)
+          (x86-lower-zerop-u64-forms значення))
          (так (як-є exact-d5-fallback-required))))
       (так
        (як-є unsupported-current-domain-zerop-u64)))))
 
 (визначити x86-encode-current-zerop-bit
-  (функція (width bits value)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-zerop-u64))
+  (функція (ширина-домену біти-домену значення)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-zerop-u64))
          (як-є unsupported-current-domain-zerop-u64))
-        ((тотожне? forms (як-є exact-d5-fallback-required))
+        ((тотожне? машинні-форми (як-є exact-d5-fallback-required))
          (як-є exact-d5-fallback-required))
         (так
-         (x86-encode-admitted-program forms)))) (x86-lower-current-zerop-u64-forms width bits value))))
+         (x86-encode-admitted-program машинні-форми)))) (x86-lower-current-zerop-u64-forms ширина-домену біти-домену значення))))
 
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
 ; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
 (визначити x86-lower-current-structural-u64-forms
-  (функція (width bits left right)
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
     (за-умовою
-      ((x86-current-domain-key? width bits 3 7)
-       (x86-lower-bounded-pair-store-u64-forms left right))
-      ((x86-current-domain-key? width bits 3 4)
-       (x86-lower-cons-car-u64-forms left right))
-      ((x86-current-domain-key? width bits 3 3)
-       (x86-lower-cons-cdr-u64-forms left right))
+      ((x86-current-domain-key? ширина-домену біти-домену 3 7)
+       (x86-lower-bounded-pair-store-u64-forms лівий-операнд правий-операнд))
+      ((x86-current-domain-key? ширина-домену біти-домену 3 4)
+       (x86-lower-cons-car-u64-forms лівий-операнд правий-операнд))
+      ((x86-current-domain-key? ширина-домену біти-домену 3 3)
+       (x86-lower-cons-cdr-u64-forms лівий-операнд правий-операнд))
       (так
        (як-є unsupported-current-domain-structural-u64)))))
 
 (визначити x86-encode-current-structural-u64
-  (функція (width bits left right)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-structural-u64))
+  (функція (ширина-домену біти-домену лівий-операнд правий-операнд)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-structural-u64))
          (як-є unsupported-current-domain-structural-u64))
         (так
-         (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-structural-u64-forms
-                    width bits left right))))
+         (x86-encode-admitted-program-or-reject машинні-форми)))) (x86-lower-current-structural-u64-forms
+                    ширина-домену біти-домену лівий-операнд правий-операнд))))
 
 ; #4000 exact-domain bounded composition for current D3 EQ + COND.
 ; This route intentionally does not expose an independent numeric-boolean EQ
@@ -537,13 +537,13 @@
 ; to current D3 law.
 (визначити x86-lower-current-eq-cond-u64-forms
   (функція
-    (eq-width eq-bits cond-width cond-bits left right then-value else-value)
+    (ширина-тотожності біти-тотожності ширина-умови біти-умови лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні)
     (за-умовою
-      ((x86-current-domain-key? eq-width eq-bits 3 5)
+      ((x86-current-domain-key? ширина-тотожності біти-тотожності 3 5)
        (за-умовою
-         ((x86-current-domain-key? cond-width cond-bits 3 6)
+         ((x86-current-domain-key? ширина-умови біти-умови 3 6)
           (x86-lower-eq-cond-u64-forms
-            left right then-value else-value))
+            лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні))
          (так
           (як-є unsupported-current-domain-eq-cond-u64))))
       (так
@@ -551,13 +551,13 @@
 
 (визначити x86-encode-current-eq-cond-u64
   (функція
-    (eq-width eq-bits cond-width cond-bits left right then-value else-value)
-    ((функція (forms) (за-умовою
-        ((тотожне? forms (як-є unsupported-current-domain-eq-cond-u64))
+    (ширина-тотожності біти-тотожності ширина-умови біти-умови лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні)
+    ((функція (машинні-форми) (за-умовою
+        ((тотожне? машинні-форми (як-є unsupported-current-domain-eq-cond-u64))
          (як-є unsupported-current-domain-eq-cond-u64))
         (так
-         (x86-encode-admitted-program-or-reject forms)))) (x86-lower-current-eq-cond-u64-forms
-              eq-width eq-bits cond-width cond-bits
-              left right then-value else-value))))
+         (x86-encode-admitted-program-or-reject машинні-форми)))) (x86-lower-current-eq-cond-u64-forms
+              ширина-тотожності біти-тотожності ширина-умови біти-умови
+              лівий-операнд правий-операнд значення-якщо-так значення-якщо-ні))))
 
 
