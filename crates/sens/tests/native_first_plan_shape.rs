@@ -1,20 +1,32 @@
 //! Справжнє виконання SENS для структури native-first-планів.
 //! Ці перевірки не симулюють evaluator: джерело Lisp завантажується через SENS.
 
-use sens::{eval_program, load_core_library, Session};
+use sens::{
+    eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 
-fn execute(source: &str) -> String {
+fn execute_current_sens(path: &str, library: &str, source: &str) -> String {
     let mut session = Session::default();
     load_core_library(&mut session).expect("базова бібліотека SENS завантажується");
-    eval_program(
-        include_str!("../../../lib/machine/dispatch/native-first-execute.lisp"),
-        &mut session,
-    )
-    .expect("native-first execute Lisp завантажується");
-    eval_program(source, &mut session)
+    let definitions = parse_mixed_exact_domain_machine_source(path, library)
+        .expect("чинний точнодоменний reader має прочитати бібліотеку");
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("чинний SENS evaluator має завантажити Lisp визначення");
+    let expression = parse_mixed_exact_domain_machine_source(path, source)
+        .expect("чинний точнодоменний reader має прочитати виконувану форму");
+    eval_parsed_expressions(&expression, &mut session)
         .unwrap_or_else(|error| panic!("помилка SENS evaluator: {error}; джерело: {source}"))
         .value
         .to_string()
+}
+
+fn execute(source: &str) -> String {
+    execute_current_sens(
+        "lib/machine/dispatch/native-first-execute.lisp",
+        include_str!("../../../lib/machine/dispatch/native-first-execute.lisp"),
+        source,
+    )
 }
 
 #[test]
@@ -80,19 +92,13 @@ fn malformed_native_result_tag_rejects_in_native_route() {
 }
 
 
-/// Цей SENS-код виконується в evaluator, а не моделюється Rust-логікою.
+/// Окремий завантажуваний SENS модуль точних доменних ключів.
 fn execute_domain_key(source: &str) -> String {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("базова бібліотека SENS завантажується");
-    eval_program(
+    execute_current_sens(
+        "lib/machine/dispatch/native-first.lisp",
         include_str!("../../../lib/machine/dispatch/native-first.lisp"),
-        &mut session,
+        source,
     )
-    .expect("класифікатор native-first завантажується через SENS");
-    eval_program(source, &mut session)
-        .unwrap_or_else(|error| panic!("помилка SENS ключа D3: {error}; джерело: {source}"))
-        .value
-        .to_string()
 }
 
 #[test]
