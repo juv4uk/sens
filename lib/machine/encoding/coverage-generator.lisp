@@ -44,8 +44,8 @@
   (функція (value)
     (encoder-coverage-same? value (як-є ()))))
 
-; Cardinality stays in canonical BinaryNumber from the first cell to the last.
-; No ordinary Number -> BinaryNumber coercion exists or is needed.
+; Кількість елементів — математичне десяткове число D24+ від першої комірки.
+; У вихідній програмі звичайні 0, 1 та 5; фізичне T5M-пакування належить Zig.
 (визначити encoder-coverage-binary-length-onto
   (функція (values count)
     (за-умовою
@@ -53,11 +53,11 @@
       (encoder-coverage-d1-yes
        (encoder-coverage-binary-length-onto
          (решта values)
-         (додати count #b1))))))
+         (додати count 1))))))
 
 (визначити encoder-coverage-binary-length
   (функція (values)
-    (encoder-coverage-binary-length-onto values #b0)))
+    (encoder-coverage-binary-length-onto values 0)))
 
 (визначити encoder-coverage-count=?
   (функція (binary-count values)
@@ -246,7 +246,7 @@
               (сполучити
                 (encoder-coverage-render-row index-row partial-row)
                 rendered)
-              (додати count #b1)))
+              (додати count 1)))
            (encoder-coverage-d1-yes
             (encoder-coverage-build-onto
               (решта index-rows)
@@ -318,7 +318,7 @@
       (список (як-є projection-count)
         (encoder-coverage-count=? encoder-coverage-projection-partial-count encoder-coverage-partials))
       (список (як-є projection-orphan-zero)
-        (= encoder-coverage-projection-orphan-count #b0))
+        (= encoder-coverage-projection-orphan-count 0))
       (список (як-є projection-subset)
         (encoder-coverage-partials-valid? encoder-coverage-index-rows encoder-coverage-partials))
       (список (як-є legacy-head)
@@ -339,7 +339,7 @@
   (функція (index-row coverage-row partial-row)
     (за-умовою
       ((encoder-coverage-empty? coverage-row) encoder-coverage-d1-no)
-      ((encoder-coverage-count=? #b101 coverage-row)
+      ((encoder-coverage-count=? 5 coverage-row)
        (нехай-послідовно ((expected-status
                 (за-умовою
                   ((encoder-coverage-empty? partial-row) (як-є not-yet-implemented))
@@ -445,7 +445,7 @@
                encoder-coverage-index-rows
                encoder-coverage-partials
                (як-є ())
-               #b0))
+               0))
            (rendered-rows (перше build))
            (partial-count (друге build))
            (stale-partial? (третє build))
