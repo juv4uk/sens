@@ -48,7 +48,7 @@
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
 ; operand is still returned as a value without being reinterpreted as a test.
-(визначити and
+(визначити та
   (make-macro
     (функція rest
   (за-умовою
@@ -74,7 +74,7 @@
                  (як-є ())))
              (як-є ()))))))))))
 
-(визначити or
+(визначити або
   (make-macro
     (функція rest
   (за-умовою
@@ -96,6 +96,10 @@
                (сполучити (як-є or) (решта rest))
                (як-є ())))
            (як-є ())))))))))
+
+; Сумісні англійські імена не є первинними D8 визначеннями.
+(визначити and та)
+(визначити or або)
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
