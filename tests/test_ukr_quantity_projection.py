@@ -214,11 +214,13 @@ def restore_local_helper_layer(source: str) -> str:
     if not body.endswith(PUBLIC_ALIASES):
         raise AssertionError("відсутні сумісні псевдоніми основних функцій Quantity")
     body = body[:-len(PUBLIC_ALIASES)]
+    # Local binders belong to the Ukrainian primary definitions; undo them
+    # before the public-name inverse changes those definition heads to English.
+    body = restore_quantity_formals(body)
     inverse = {ukrainian: english for english, ukrainian, _bits in PUBLIC_PROJECTIONS}
     body, restored_public = project_public_names(body, inverse)
     if set(restored_public) != set(inverse):
         raise AssertionError("не вдалося точно відновити всі первинні назви Quantity")
-    body = restore_quantity_formals(body)
     for english, ukrainian, calls in LOCAL_HELPERS:
         if (body.count("(" + ukrainian) != calls
                 or body.count("(визначити " + ukrainian) != 1):
