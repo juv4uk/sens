@@ -48,7 +48,8 @@ class RequiredChecksTests(unittest.TestCase):
         )
         self.assertEqual(
             workflow["concurrency"]["cancel-in-progress"],
-            "${{ github.event_name != 'workflow_dispatch' }}",
+            "false",
+            "попередній exact-SHA GitHub-hosted запуск не можна скасовувати новим push",
         )
 
         for job_id in ("runtime-shards", "lisp-guards", "lisp-surface"):
