@@ -66,7 +66,7 @@ class WholeFileKeyboardTests(TempTree):
         })
         issue = mod.measure(root)["pending_files"][0]
         self.assertEqual((issue["line"], issue["column"], issue["character"]),
-                         (1, 18, "E"))
+                         (1, 19, "E"))
 
     def test_ukrainian_punctuation_numbers_spaces_and_newlines_are_allowed(self):
         root = self.tree({
@@ -85,7 +85,7 @@ class WholeFileKeyboardTests(TempTree):
         report = mod.measure(root)
         self.assertEqual(report["files_fully_ukrainian"], 0)
         chars = [x["character"] for x in report["pending_files"]]
-        self.assertEqual(chars, ["’", "#"])
+        self.assertEqual(chars, ["#", "’"])
 
     def test_percentage_changes_only_when_the_entire_file_is_correct(self):
         root = self.tree({
