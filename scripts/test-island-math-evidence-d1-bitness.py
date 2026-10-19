@@ -25,7 +25,7 @@ HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 SID8 = "00001100"
 UKR_HEAD = "додати"
 MECHANISMS = ROOT / "lib" / "function-table-mechanisms.lisp"
-BRIDGE = ROOT / "lib" / "surface" / "sid8-to-domain-bridge.lisp"
+HISTORY = ROOT / "docs" / "research" / "sid8-to-domain-bridge-archive.uk.md"
 REQUIRED = (
     "island-math-evidence/1",
     "lib/surface/semantic-registry.lisp",
@@ -51,10 +51,10 @@ def check_ime() -> list[str]:
         errs.append(f"island-math-evidence: host truthiness {m.group()!r}")
     # Historical SID8:00001100 denotes PLUS. Same raw bits in modern D8
     # denote a different function, so this check verifies exact D5 ownership.
-    if not BRIDGE.is_file() or not re.search(
-        r"\(sid8:00001100\s+->\s+D5:01010\b", BRIDGE.read_text(encoding="utf-8")
+    if not HISTORY.is_file() or not re.search(
+        r"\(sid8:00001100\s+->\s+D5:01010\b", HISTORY.read_text(encoding="utf-8")
     ):
-        errs.append("island-math-evidence: historical PLUS bridge → D5:01010 missing")
+        errs.append("island-math-evidence: historical SID8 PLUS evidence → D5:01010 missing")
     d5 = ROOT / "lib" / "domains" / "d5.lisp"
     if not d5.is_file() or not re.search(
         r"^\s*\(01010\s+\(ук [^)]*\)\s+\(укр додати\)",

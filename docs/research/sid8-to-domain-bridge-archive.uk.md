@@ -1,3 +1,17 @@
+# Історичне свідчення SID8 → доменні координати (архів, не runtime)
+
+Це копія вилученого з `lib/surface` історичного зіставлення SID8. Вона потрібна лише для
+датованого доведення походження колишніх операцій. Відповідності **не визначають**
+чинні семантичні закони, виконуваність D11 чи перетворення SID8/Sens8 у D8.
+Чинна влада — ратифіковані `lib/domains/d1.lisp` … `d10.lisp` і точна ширина бітів.
+Ніколи не завантажувати цей документ як Lisp-програму чи таблицю маршрутизації.
+
+Deutsch: Historischer Herkunftsnachweis; keine Laufzeitbrücke oder D11-Ausführungszusage.
+English: Historical provenance only; not a runtime bridge or a D11 callability grant.
+
+Історичне джерело: Git-blob `2c776a6947dacc88b312eacff89f4f7d66ed7813`, збережений тут без зміни.
+
+```lisp
 ; SID8 -> D1-D11 function bridge (retire the old 8-bit function space).
 (sid8-to-domain-bridge
   (schema sid8-to-domain-bridge/1)
@@ -190,3 +204,4 @@
     (sid8:01000111)  ; digit->string  -- library-defined / needs owner cell
   )
 )
+```
