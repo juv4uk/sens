@@ -324,7 +324,7 @@ mod tests {
         crate::load_core_library(&mut session).expect("Core library loads");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
             .expect("exact D5 quotient evaluates");
-        let crate::Value::NumericComposition(composition) = result.value else {
+        let crate::Value::NumericComposition(composition) = &result.value else {
             panic!("D5:10111 must produce an exact RATIO composition");
         };
         let (_, numerator, denominator) = composition.as_parts();
@@ -345,7 +345,7 @@ mod tests {
         crate::load_core_library(&mut session).expect("Core library loads");
         let result = crate::eval_parsed_expressions(&projected, &mut session)
             .expect("exact D5 nested arithmetic evaluates");
-        let crate::Value::NumericComposition(composition) = result.value else {
+        let crate::Value::NumericComposition(composition) = &result.value else {
             panic!("D5 arithmetic must produce an exact RATIO composition");
         };
         let (_, numerator, denominator) = composition.as_parts();
