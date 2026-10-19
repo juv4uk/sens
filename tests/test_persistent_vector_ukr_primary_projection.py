@@ -83,7 +83,7 @@ class PersistentVectorUkrPrimaryProjectionTests(unittest.TestCase):
         for helper in ("vtree-insert", "vtree-get", "vtree->list", "vnode-index", "vrotate-left"):
             with self.subTest(helper=helper):
                 self.assertRegex(source, rf"(?m)^\(визначити\s+{re.escape(helper)}\s")
-        self.assertIn("Exact 9-bit identities", source)
+        self.assertIn("Точні 9-бітні ідентичності", source)
         self.assertNotIn("(визначити 168 ", source)
         self.assertNotIn("(binary 9)", source)
 

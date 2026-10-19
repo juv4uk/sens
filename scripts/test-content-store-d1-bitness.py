@@ -22,18 +22,34 @@ CS = ROOT / "lib" / "content-store.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
 REQUIRED = (
+    "порожній-вміст-сховище",
+    "вміст-сховище-покласти",
+    "вміст-сховище-отримати",
+    "вміст-сховище-містить?",
+    "вміст-сховище-покласти-світ",
+    "вміст-сховище-розмір",
     "empty-content-store",
     "content-store-put",
     "content-store-get",
     "content-store-contains?",
     "content-store-put-world",
     "content-store-size",
-    "map-empty",
+    "мапа-порожній",
     "внутрішня-мапа-вставити",
     "внутрішня-мапа-отримати",
     "внутрішня-мапа-містить",
-    "knowledge-content-address",
-    "world-content-address",
+    "внутрішня-довжина",
+    "знання-вміст-адреса",
+    "світ-адреса-вміст",
+)
+
+D9_PEERS = (
+    ("000100001", "empty-content-store", "порожній-вміст-сховище"),
+    ("000101101", "content-store-put", "вміст-сховище-покласти"),
+    ("000100000", "content-store-get", "вміст-сховище-отримати"),
+    ("000011110", "content-store-contains?", "вміст-сховище-містить?"),
+    ("000111111", "content-store-put-world", "вміст-сховище-покласти-світ"),
+    ("000010111", "content-store-size", "вміст-сховище-розмір"),
 )
 
 
@@ -51,6 +67,38 @@ def check_cs() -> list[str]:
     for fn in REQUIRED:
         if fn not in text:
             errs.append(f"content-store: required surface missing: {fn}")
+
+    d9_path = ROOT / "lib" / "domains" / "d9.lisp"
+    if not d9_path.is_file():
+        return errs + ["D9: missing"]
+    d9 = d9_path.read_text(encoding="utf-8")
+    for bits, english, ukrainian in D9_PEERS:
+        if len(bits) != 9:
+            errs.append(f"D9:{bits}: address width must be 9")
+            continue
+        rows = [line for line in d9.splitlines()
+                if line.lstrip().startswith(f"({bits} ")]
+        if len(rows) != 1:
+            errs.append(f"D9:{bits}: expected one ratified row, got {len(rows)}")
+            continue
+        if f"(en {english})" not in rows[0] or f"(укр {ukrainian})" not in rows[0]:
+            errs.append(f"D9:{bits}: English/full-укр projection mismatch for {english}")
+        primary = re.findall(
+            rf"(?m)^\(визначити\s+{re.escape(ukrainian)}(?=\s|\))", text
+        )
+        if len(primary) != 1:
+            errs.append(f"content-store: expected exactly one primary definition {ukrainian}")
+        if f"(визначити {english} {ukrainian})" not in text:
+            errs.append(f"content-store: compatibility entrypoint {english} must alias {ukrainian}")
+
+    active = "\n".join(
+        line for line in text.splitlines() if not line.lstrip().startswith(";")
+    )
+    for name in ("store", "value", "address", "world"):
+        if re.search(rf"(?<![\w?-]){name}(?![\w?-])", active):
+            errs.append(f"content-store: untranslated local token remains: {name}")
+    if re.search(r"(?m)^\s*\([01]{3,10}(?=\s|\))", active):
+        errs.append("content-store: raw binary call-head detected")
     return errs
 
 

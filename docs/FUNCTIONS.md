@@ -20,9 +20,9 @@
 
 `clips-all-asserts?`, `clips-assert-conclusions`, `clips-assert-form?`, `clips-clauses-for-conclusions`, `кліпс-сполучити-кожен-дописати`, `clips-convert-template`, `clips-convert-template-list`, `clips-convert-vars`, `clips-deffacts->clauses`, `clips-defrule->clauses`, `clips-deftemplate-form?`, `clips-deftemplate-name`, `clips-deftemplate-slots`, `clips-drop-printouts`, `clips-fact-clause`, `clips-facts->clauses`, `кліпс-факти-у-клаузи-дописати`, `clips-form->clauses`, `clips-import`, `clips-import-file`, `clips-import-forms`, `кліпс-імпорт-форм-дописати`, `clips-lookup-slot-value`, `clips-positional-args`, `clips-printout-form?`, `clips-rule-preamble-form?`, `clips-slot-name`, `clips-slot-names`, `кліпс-значення-слота`, `clips-split-at-arrow`, `кліпс-рядок-після-останньої-подвійної-двокрапки`, `кліпс-рядок-порожній?`, `кліпс-рядок-починається-з-подвійної-двокрапки?`, `clips-strip-module-prefix`, `clips-strip-rule-preamble`, `кліпс-символ-починається-з-питальника?`, `clips-template-slot-order`, `clips-templates-from-forms`, `clips-var-term`, `clips-var?`
 
-### content-store.lisp (6)
+### content-store.lisp (12)
 
-`content-store-contains?`, `content-store-get`, `content-store-put`, `content-store-put-world`, `content-store-size`, `empty-content-store`
+`вміст-сховище-містить?`, `content-store-contains?`, `вміст-сховище-отримати`, `content-store-get`, `вміст-сховище-покласти`, `content-store-put`, `вміст-сховище-покласти-світ`, `content-store-put-world`, `вміст-сховище-розмір`, `content-store-size`, `порожній-вміст-сховище`, `empty-content-store`
 
 ### core.lisp (57)
 

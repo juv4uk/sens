@@ -62,6 +62,23 @@ PEERS = (
     (9, "101100011", "map-empty", "мапа-порожній"),
 )
 
+STORE_D9_PEERS = (
+    ("000100001", "empty-content-store", "порожній-вміст-сховище"),
+    ("000101101", "content-store-put", "вміст-сховище-покласти"),
+    ("000100000", "content-store-get", "вміст-сховище-отримати"),
+    ("000011110", "content-store-contains?", "вміст-сховище-містить?"),
+    ("000111111", "content-store-put-world", "вміст-сховище-покласти-світ"),
+    ("000010111", "content-store-size", "вміст-сховище-розмір"),
+)
+STORE_FORMAL_INVERSE = {
+    "сховище": "store",
+    "значення": "value",
+    "адреса": "address",
+    "світ": "world",
+}
+STORE_FORMAL_BASE_BLOB = "16b04f65124ad7f794b22aa7c2f9acc98afced60"
+
+
 
 def read_forms(source: str):
     words = [m.group() for m in TOKEN.finditer(source)
@@ -102,6 +119,23 @@ def definitions(source: str):
             raise AssertionError("дубль або неправильне ім'я DEFINE")
         result[name] = form[2]
     return result
+
+
+def restore_store_formals(source: str) -> str:
+    """Invert only bound local-name changes; comments and string data stay byte-exact."""
+    def restore(match: re.Match[str]) -> str:
+        token = match.group()
+        if token.startswith((";", '"')) or token in ("(", ")"):
+            return token
+        return STORE_FORMAL_INVERSE.get(token, token)
+    return TOKEN.sub(restore, source)
+
+
+def store_git_blob_sha(source: str) -> str:
+    data = source.encode("utf-8")
+    return hashlib.sha1(
+        b"blob " + str(len(data)).encode("ascii") + b"\x00" + data
+    ).hexdigest()
 
 
 # Alpha-проєкція є лише перейменуванням зв'язаних імен у двох чинних законах.
@@ -211,6 +245,29 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
         if actual != golden:
             raise AssertionError(f"{name}: після peer normalization змінився SENS закон")
 
+    expected_formals = {
+        "порожній-вміст-сховище": [],
+        "вміст-сховище-покласти": ["сховище", "значення"],
+        "вміст-сховище-отримати": ["сховище", "адреса"],
+        "вміст-сховище-містить?": ["сховище", "адреса"],
+        "вміст-сховище-покласти-світ": ["сховище", "світ"],
+        "вміст-сховище-розмір": ["сховище"],
+    }
+    for bits, english, full in STORE_D9_PEERS:
+        rows = [line.strip() for line in domains[9].splitlines()
+                if line.lstrip().startswith(f"({bits} ")]
+        if len(bits) != 9 or len(rows) != 1:
+            raise AssertionError(f"D9:{bits}: missing/duplicate exact-width identity")
+        if f"(en {english})" not in rows[0] or f"(укр {full})" not in rows[0]:
+            raise AssertionError(f"D9:{bits}: content-store peer spelling/identity drift")
+        if storedefs.get(english) != full:
+            raise AssertionError(f"{english}: historical entrypoint must alias {full}")
+        form = storedefs.get(full)
+        if not isinstance(form, list) or len(form) != 3 or form[0] != "функція":
+            raise AssertionError(f"{full}: primary entrypoint must retain its function body")
+        if form[1] != expected_formals[full]:
+            raise AssertionError(f"{full}: local parameter projection drift")
+
     if storedefs.get("порожній-вміст-сховище") != ["функція", [], "мапа-порожній"]:
         raise AssertionError("порожнє сховище має посилатися на чинний SENS peer")
     if storedefs.get("empty-content-store") != "порожній-вміст-сховище":
@@ -225,6 +282,9 @@ def verify(ep: str, store: str, core: str, domains: dict[int, str]):
         raise AssertionError("content-store-put: сумісний вхід має вести до первинного укр-замикання")
     if storedefs.get("content-store-put-world") != "вміст-сховище-покласти-світ":
         raise AssertionError("content-store-put-world: сумісний вхід має вести до первинного укр-замикання")
+    restored_store = restore_store_formals(store)
+    if store_git_blob_sha(restored_store) != STORE_FORMAL_BASE_BLOB:
+        raise AssertionError("content-store: changed bytes outside the bound Ukrainian local-name projection")
     return True
 
 
