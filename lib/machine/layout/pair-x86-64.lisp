@@ -1,26 +1,33 @@
-; Lisp-owned x86-64 pair representation contract for the first native proof slice.
+; Контракт x86-64 представлення пари для першого нативного доказу.
+; Господар володіє лише сирим виділенням пам'яті та межею виклику.
+; Lisp-зниження володіє зсувами полів і тому володіє load/store,
+; які інтерпретують арену як комірку пари.
 ;
-; The host owns only raw memory allocation and the call boundary. Lisp-authored
-; machine lowering owns these field offsets and therefore owns the loads/stores
-; that interpret the arena as a pair cell.
-;
-; This is deliberately not a general heap or GC ABI yet. The cell exists only
-; for one native-call-u64-raw invocation and must not escape that call.
+; Це навмисно ще не загальна купа чи GC ABI. Комірка існує лише
+; на час одного native-call-u64-raw і не має залишати цей виклик.
 
-(визначити x86-pair-cell-bytes 16)
-(визначити x86-pair-car-offset 0)
-(визначити x86-pair-cdr-offset 8)
+(визначити x86-пара-байти-комірки 16)
+(визначити x86-пара-перше-зсув 0)
+(визначити x86-пара-решта-зсув 8)
 
-(визначити x86-pair-layout
+; Технічні імена зсувів для машинного lowering і наявних свідків.
+; Це ті самі значення, не окремий ABI і не Latin call-head.
+(визначити x86-pair-cell-bytes x86-пара-байти-комірки)
+(визначити x86-pair-car-offset x86-пара-перше-зсув)
+(визначити x86-pair-cdr-offset x86-пара-решта-зсув)
+
+(визначити x86-пара-розклад
   (як-є
     (machine-pair-layout/1
       (target x86-64)
       (word-bits 64)
       (cell-bytes 16)
       (fields
-        ((car (offset-bytes 0) (width-bits 64))
-         (cdr (offset-bytes 8) (width-bits 64))))
+        ((перше (offset-bytes 0) (width-bits 64))
+         (решта (offset-bytes 8) (width-bits 64))))
       (arena-argument-register rdi)
       (allocation raw-host-arena)
       (lifetime native-call)
       (escape forbidden))))
+
+(визначити x86-pair-layout x86-пара-розклад)
