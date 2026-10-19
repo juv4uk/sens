@@ -19,6 +19,11 @@ OLD_DERIVED = "(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov)
 NEW_DERIVED = "(визначити provenance-derived-from (функція (prov) (друге (п'ятий prov))))"
 OLD_SYMBOL_CHECK = "((0100 (110101100 (100 outcome)))"
 NEW_SYMBOL_CHECK = "((хибне? (символ? (перше outcome)))"
+LOCAL_CURRENT_TO_HISTORY = {
+    "список-завершується-порожнім?": "narrate-proper-list?",
+    "список-із-рівно-двох-елементів?": "narrate-list-exact-two?",
+    "список-із-рівно-трьох-елементів?": "narrate-list-exact-three?",
+}
 
 IDENTITIES = (
     (3, "100", "перше"),
@@ -29,6 +34,17 @@ IDENTITIES = (
     (9, "110110101", "п'ятий"),
     (9, "110101100", "символ?"),
 )
+
+
+def restore_local_helper_names(source: str) -> str:
+    """Invert only active code symbols; comments and strings are data."""
+    token = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();"]+|\s+|.')
+    def restore(match: re.Match[str]) -> str:
+        value = match.group()
+        if value.startswith(";") or value.startswith('"') or value.isspace() or value in ("(", ")"):
+            return value
+        return LOCAL_CURRENT_TO_HISTORY.get(value, value)
+    return token.sub(restore, source)
 
 
 def _git_blob(source: str) -> str:
@@ -44,6 +60,7 @@ def verify(source: str) -> None:
     original = source.replace(NEW_DERIVED, OLD_DERIVED).replace(
         NEW_SYMBOL_CHECK, OLD_SYMBOL_CHECK
     )
+    original = restore_local_helper_names(original)
     if _git_blob(original) != BASE_BLOB:
         raise AssertionError("змінено щось, крім двох ратифікованих callsite")
     parsed = definitions(source)

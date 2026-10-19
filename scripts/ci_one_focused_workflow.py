@@ -86,19 +86,19 @@ def verify_migration_source_shapes():
         active = "\n".join(
             line for line in source.splitlines() if not line.lstrip().startswith(";")
         )
-        start = active.find("(0011 narrate-proper-list?")
-        end = active.find("(0011 narrate-fact", start)
+        start = active.find("(визначити список-завершується-порожнім?")
+        end = active.find("(визначити пояснити-факт", start)
         if start < 0 or end < 0:
             errors.append("narrate.lisp: cannot isolate structural arity helpers")
         else:
             helpers = active[start:end]
             required = (
-                "(0011 narrate-proper-list?",
-                "(0011 narrate-list-exact-two?",
-                "(0011 narrate-list-exact-three?",
-                "((010 value)",
-                "((0101 value)",
-                "(011 value)",
+                "(визначити список-завершується-порожнім?",
+                "(визначити список-із-рівно-двох-елементів?",
+                "(визначити список-із-рівно-трьох-елементів?",
+                "((атом? значення)",
+                "((порожній? значення)",
+                "(решта значення)",
             )
             for token in required:
                 if token not in helpers:
@@ -107,7 +107,7 @@ def verify_migration_source_shapes():
                 errors.append("narrate.lisp: D6 LENGTH or D8 EQUAL returned to arity helpers")
             if "#d1:" in helpers:
                 errors.append("narrate.lisp: compatibility D1 projection used instead of raw one-bit words")
-        if "(0011 narrate-outcome-arity?" in active:
+        if "(визначити narrate-outcome-arity?" in active:
             errors.append("narrate.lisp: legacy arity function still present")
     except OSError as exc:
         errors.append(f"narrate.lisp: {exc}")

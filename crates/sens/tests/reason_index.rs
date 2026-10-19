@@ -121,8 +121,8 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
         "D4 NULL and D3 ATOM(CAR) must guard D3 EQ, in that order");
 
     let narration_source = include_str!("../../../lib/narrate.lisp");
-    let hs = narration_source.find("(0011 narrate-proper-list?").expect("D3/D4 helpers exist");
-    let he = narration_source[hs..].find("(0011 narrate-fact").expect("helper span ends").saturating_add(hs);
+    let hs = narration_source.find("(визначити список-завершується-порожнім?").expect("D3/D4 helpers exist");
+    let he = narration_source[hs..].find("(визначити пояснити-факт").expect("helper span ends").saturating_add(hs);
     let helper_source = &narration_source[hs..he];
     let helper_forms = parse_exact_domain_source(helper_source)
         .expect("arity helpers must retain exact-domain identities");

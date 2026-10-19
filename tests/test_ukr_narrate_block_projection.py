@@ -20,10 +20,7 @@ SOURCES = {
 # за схожими бітами. Залишкові D4 супутники цих самих рядків також
 # навмисно незмінні, щоб source-literal guard не отримав нових raw голів.
 REMAINING_EXACT_HEADS = {
-    "lib/narrate.lisp": Counter({
-        "0011": 1, "0010": 1, "1001": 1,
-        "110110101": 1, "0100": 1, "110101100": 1, "100": 1,
-    }),
+    "lib/narrate.lisp": Counter(),
     "lib/machine/block-exact.lisp": Counter(),
 }
 REQUIRED = {
@@ -37,6 +34,12 @@ REQUIRED = {
     5: {"10011": "третє"},
     6: {"001000": "нехай", "100111": "четверте"},
 }
+LOCAL_HISTORY = {
+    "список-завершується-порожнім?": "narrate-proper-list?",
+    "список-із-рівно-двох-елементів?": "narrate-list-exact-two?",
+    "список-із-рівно-трьох-елементів?": "narrate-list-exact-three?",
+}
+
 DOMAIN_ROW = re.compile(
     r"^\s*\(([01]+)\s+\(ук\s+[^()]*\)\s+"
     r"\(укр\s+([^\s()]+)\)"
@@ -137,6 +140,8 @@ def normalized(node, names: dict[str, str], quoted: bool = False) -> str:
     if isinstance(node, str):
         if not quoted and node in ("так", "ні"):
             return names[node]
+        if not quoted:
+            return LOCAL_HISTORY.get(node, node)
         return node
     if not node:
         return "()"
@@ -146,6 +151,8 @@ def normalized(node, names: dict[str, str], quoted: bool = False) -> str:
         bits = names[head]
         if len(bits) in (1, 3, 4, 5, 6):
             head = bits
+    elif not quoted and head in LOCAL_HISTORY:
+        head = LOCAL_HISTORY[head]
     next_quoted = quoted or (raw_head in ("001", "як-є") and not quoted)
     children = []
     for index, child in enumerate(node):
@@ -184,6 +191,18 @@ def numeric_heads(tree: list) -> Counter:
 
 
 class UkrainianNarrateBlockProjectionTests(unittest.TestCase):
+    def test_local_structural_helpers_use_full_ukr_names(self):
+        source = (ROOT / "lib/narrate.lisp").read_text(encoding="utf-8")
+        active = "\n".join(
+            line for line in source.splitlines()
+            if not line.lstrip().startswith(";")
+        )
+        for current, history in LOCAL_HISTORY.items():
+            with self.subTest(helper=current):
+                self.assertIn(f"(визначити {current}", active)
+                self.assertIn(f"({current} ", active)
+                self.assertNotIn(history, active)
+
     @classmethod
     def setUpClass(cls):
         cls.index = projection_index()
