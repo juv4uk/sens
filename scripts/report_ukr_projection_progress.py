@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Звіт: скільки .lisp-коду вже на повній українській проєкції `укр`.
+"""Звіт про українську проєкцію SENS: окремо словник і активні виклики.
 
-Що міряємо
-----------
-`укр` — повна українська peer surface
-(docs/superpowers/plans/2026-09-13-full-uk-cyrillic-surface.md). Доменні
-таблиці й семантичний реєстр несуть пари `(ук …) (укр …)`: коротку й повну
-форми одного об'єкта. Пара вважається **переведеною на проєкцію `укр`**, коли
-обидві форми збігаються (`ук == укр`).
+Основний показник прогресу — `executable_ukr.files_pct`: частка активних
+виконуваних .lisp-файлів, усі розпізнані викличні голови яких належать
+українській клавіатурі і, якщо це ім'я ратифікованого домену, повній
+колонці «укр». Незчитаний файл є незавершеним. Історичні тексти, цитовані
+дані, таблиці доменів та записи без викличних голів не збільшують знаменник.
+Це статичний показник, НЕ доказ SENS eval, семантичної еквівалентності чи T5M.
 
-Дві метрики:
-  * `pairs_pct`  — частка пар `ук == укр` серед усіх пар у коді (головна);
-  * `files_pct`  — частка .lisp-файлів, у *коді* яких є український
-                   ідентифікатор (кирилиця), тобто файл зачеплений міграцією.
+Додаткова історична телеметрія:
+  * `pairs_pct`  — буквальна однаковість `(ук X)` і `(укр Y)`; різні
+                   коректні короткі/повні назви НЕ є проблемою міграції;
+  * `files_pct`  — частка всіх .lisp із хоча б одним кириличним токеном
+                   поза рядками й коментарями; НЕ частка завершених файлів.
 
 Точність
 --------
@@ -23,7 +23,7 @@
 Поведінка
 ---------
 Детерміновано, лише читання, без мережі. За замовчуванням друкує людський
-рядок і червону анотацію GitHub (`::error::`). `--min-pairs-pct N` робить крок
+рядок і інформаційну анотацію GitHub (`::notice::`). `--min-pairs-pct N` робить крок
 жорстким: код виходу 1, поки частка < N. `--list` показує, що саме лишилось.
 
 Коди виходу: 0 — успіх; 1 — нижче `--min-pairs-pct`; 2 — помилка аргументів.
@@ -275,14 +275,98 @@ def measure(root: Path) -> Progress:
     )
 
 
-def render(p: Progress) -> str:
-    return (
+def audit_executable_ukr_files(root: Path) -> dict:
+    """Статична файлова метрика за викличними головами, а не за згадкою кирилиці.
+
+    Використовує ТУ САМУ структуру reader/heads, що й чинний
+    check_ukr_callsite_migration.py; не додає власного Lisp-інтерпретатора.
+    Незчитане активне джерело не може отримати статус повної проєкції.
+    """
+    scripts = str(ROOT / "scripts")
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    import check_ukr_callsite_migration as calls
+
+    root = root.resolve()
+    index, authority = calls.peer_index(root)
+    roles = calls.peer_roles(root)
+    eligible = converted = unclassified = without_heads = excluded = 0
+    pending_files: list[dict] = []
+    for path in iter_lisp_files(root):
+        rel = path.relative_to(root)
+        if (not rel.parts or rel.parts[0] not in calls.LIVE_SOURCE_DIRS
+                or "tests" in rel.parts or "fixtures" in rel.parts
+                or (rel.parts[0] == "examples" and "history" in rel.parts)
+                or calls.excluded_metadata(rel)):
+            excluded += 1
+            continue
+
+        reason = None
+        try:
+            if path.is_symlink() or not path.resolve().is_relative_to(root):
+                raise calls.SourceError("symlink/out-of-root source")
+            forms = calls.parse(path.read_text(encoding="utf-8"))
+            heads = list(calls.candidate_heads(forms))
+            if not heads:
+                without_heads += 1
+                continue
+            eligible += 1
+            for head in heads:
+                name = head.text
+                spelling = name.casefold()
+                identities = index.get(spelling, ())
+                kinds = roles.get(spelling, set())
+                if calls.ENCODED_HEAD.fullmatch(name) or calls.BIT_WORD.fullmatch(name):
+                    reason = "encoded-or-bit-head"
+                elif calls.LATIN.search(name):
+                    reason = "latin-call-head"
+                elif not calls.UKRAINIAN.search(name) or any(
+                        char not in UKRAINIAN_KEYBOARD_OUTPUTS for char in name):
+                    reason = "non-ukrainian-keyboard-head"
+                elif len(identities) > 1:
+                    reason = "ambiguous-ratified-name"
+                elif "ук" in kinds and "укр" not in kinds:
+                    reason = "compact-instead-of-full-ukr"
+                if reason:
+                    break
+        except (UnicodeError, OSError, calls.SourceError, RecursionError) as exc:
+            eligible += 1
+            unclassified += 1
+            reason = "unreadable-or-unparsed: " + str(exc)
+        if reason:
+            pending_files.append({"path": rel.as_posix(), "reason": reason})
+        else:
+            converted += 1
+
+    return {
+        "eligible_files": eligible,
+        "full_ukr_files": converted,
+        "pending_files_count": eligible - converted,
+        "files_pct": round(100.0 * converted / eligible, 1) if eligible else 0.0,
+        "unclassified_files": unclassified,
+        "without_executable_heads_excluded": without_heads,
+        "archives_and_metadata_excluded": excluded,
+        "authority_rows": authority["domain_rows"],
+        "pending_files": pending_files,
+        "evidence": "static call-head classification, not SENS runtime parity",
+    }
+
+
+def render(p: Progress, executable_ukr: dict | None = None) -> str:
+    legacy = (
         f"УКР-ПРОЄКЦІЯ .lisp: поверхневі пари ук==укр "
         f"{p.pairs_same}/{p.pairs_total} ({p.pairs_pct}%) "
         f"у {p.files_with_pairs} файлах; "
         f".lisp-файлів з укр-поверхнею {p.files_ukrainian}/{p.lisp_files} "
         f"({p.files_pct}%)"
     )
+    if executable_ukr is None:
+        return legacy
+    return (f"УКР-ПРОГРЕС виконуваних .lisp: "
+            f"{executable_ukr['full_ukr_files']}/{executable_ukr['eligible_files']} "
+            f"({executable_ukr['files_pct']}%) повністю укр за викличними "
+            f"головами; незчитаних={executable_ukr['unclassified_files']}; "
+            + legacy)
 
 
 
@@ -372,7 +456,8 @@ def main(argv: list[str] | None = None) -> int:
 
     progress = measure(root)
     declaration_audit = audit_declared_ukr(root)
-    line = render(progress)
+    executable_ukr = audit_executable_ukr_files(root)
+    line = render(progress, executable_ukr)
     print(line)
     if not args.no_annotation:
         print(f"::notice::{line}")
@@ -394,10 +479,18 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {f.pending:5} / {f.pairs_total:5}  {f.path}")
         if args.top > 0 and len(pending) > args.top:
             print(f"  … ще {len(pending) - args.top}")
+        incomplete = executable_ukr["pending_files"]
+        print(f"\nАктивних виконуваних .lisp ще не на повній укр: {len(incomplete)}")
+        shown_ukr = incomplete[:args.top] if args.top > 0 else incomplete
+        for item in shown_ukr:
+            print(f"  {item['path']}: {item['reason']}")
+        if args.top > 0 and len(incomplete) > args.top:
+            print(f"  … ще {len(incomplete) - args.top}")
 
     if args.json:
         payload = progress.to_dict()
         payload["declared_ukr"] = declaration_audit
+        payload["executable_ukr"] = executable_ukr
         payload["pending_files"] = [
             {"path": f.path, "pending": f.pending, "pairs_total": f.pairs_total}
             for f in sorted(progress.files, key=lambda f: f.path) if f.pending
