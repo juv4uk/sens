@@ -117,14 +117,6 @@
 ; This block never matches CAR/CONS by spelling and never relies on a raw W3
 ; source token whose leading zero/width could be lost by the ordinary reader.
 
-(визначити native-first-domain-true
-  (функція (seed)
-    (атом? seed)))
-
-(визначити native-first-domain-false
-  (функція (seed)
-    (атом? (сполучити seed ()))))
-
 ; Доменною шириною та формою керує SENS. Пошкоджені списки
 ; відхиляються до D3 CAR/CDR/EQ: жодного часткового збігу бітів.
 (визначити нативна-форма-трибітного-ключа?
