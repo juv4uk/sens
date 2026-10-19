@@ -343,6 +343,11 @@ def measure(root: Path) -> dict:
                            'scope': scope})
             archive_unclassified += int(archival)
             active_unclassified += int(not archival)
+            if not archival:
+                # Неможливий для читання активний файл — незавершений,
+                # не викреслюємо його зі знаменника задля високого %.
+                active_files_with_calls += 1
+                active_files_no_ratified_ukr += 1
             continue
         scanned += 1
         try:
@@ -405,6 +410,9 @@ def measure(root: Path) -> dict:
             errors.append({'file': rel.as_posix(), 'reason': str(exc), 'scope': scope})
             archive_unclassified += int(archival)
             active_unclassified += int(not archival)
+            if not archival:
+                active_files_with_calls += 1
+                active_files_no_ratified_ukr += 1
     total = len(latin) + cyrillic
     return {'files_total': len(files), 'files_scanned': scanned,
             'metadata_files_excluded': skipped,
