@@ -79,7 +79,7 @@ fn generated_law_data_and_nucleus_keep_role_ownership_separate() {
     }
 
     assert!(
-        NUCLEUS.contains("compiler-role-from-l1-l5"),
+        NUCLEUS.contains("роль-компілятора-за-л1-л5"),
         "SENS nucleus must retain the executable role law"
     );
     assert!(

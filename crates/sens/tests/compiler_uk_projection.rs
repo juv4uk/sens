@@ -87,3 +87,54 @@ fn український_приклад_піднімає_лише_ратифі�
     assert!(matches!(&цитата[0].kind, ExprKind::DomainIdentity(id)
         if id.width() == 3 && id.packed_bits() == 0b001));
 }
+
+#[test]
+fn compiler_nucleus_uses_ukrainian_callable_heads() {
+    let names = [
+        ("compiler-nucleus", "ядро-компілятора"),
+        ("compiler-domain-shape", "форма-домену-компілятора"),
+        ("compiler-list-end?", "кінець-списку-компілятора?"),
+        ("compiler-role-from-l1-l5-bits", "роль-компілятора-за-бітами-л1-л5"),
+        ("compiler-lowering-role-from-l1-l5-bits", "роль-пониження-компілятора-за-бітами-л1-л5"),
+        ("compiler-role-from-l1-l5", "роль-компілятора-за-л1-л5"),
+        ("compiler-lowering-role-from-l1-l5", "роль-пониження-компілятора-за-л1-л5"),
+        ("compiler-lowering-role-from-laws", "роль-пониження-компілятора-за-законами"),
+        ("compiler-request-from-role", "запит-компілятора-за-роллю"),
+        ("compiler-request-from-l1-l5", "запит-компілятора-за-л1-л5"),
+        ("compiler-request-from-laws", "запит-компілятора-за-законами"),
+        ("compiler-merge-results", "об'єднати-результати-компілятора"),
+        ("compiler-request-role", "роль-запиту-компілятора"),
+        ("compiler-exactly-one", "рівно-один-аргумент-компілятора"),
+        ("compiler-exactly-two", "рівно-два-аргументи-компілятора"),
+        ("compiler-proper-tail?", "правильний-хвіст-компілятора?"),
+        ("compiler-at-least-two", "щонайменше-два-аргументи-компілятора"),
+        ("compiler-cond-clauses-valid", "клаузи-умов-компілятора-чинні?"),
+        ("compiler-role-shape-valid", "форма-ролі-компілятора-чинна?"),
+        ("compiler-domain-children", "дочірні-форми-домену-компілятора"),
+        ("compiler-domain-result", "результат-домену-компілятора"),
+        ("compiler-program-node", "вузол-програми-компілятора"),
+        ("compiler-program-list", "список-програми-компілятора"),
+        ("compiler-compile-program", "скомпілювати-програму-компілятора"),
+        ("compiler-artifact-field", "поле-артефакту-компілятора"),
+        ("compiler-artifact-from-result", "артефакт-компілятора-за-результатом"),
+        ("compiler-compile-program-artifact", "скомпілювати-артефакт-програми-компілятора"),
+    ];
+    for (legacy, ukr) in names {
+        assert!(
+            !ДЖЕРЕЛО.contains(&format!("(визначити {legacy}")),
+            "старе визначення лишилось у compiler-nucleus: {legacy}"
+        );
+        assert!(
+            !ДЖЕРЕЛО.contains(&format!("({legacy} ")),
+            "старий викличний заголовок лишився в compiler-nucleus: {legacy}"
+        );
+        assert!(
+            ДЖЕРЕЛО.contains(&format!("(визначити {ukr}")),
+            "українське первинне визначення відсутнє: {ukr}"
+        );
+    }
+    // Versioned schema symbols remain data, not executable call heads.
+    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-artifact/1)"));
+    assert!(ДЖЕРЕЛО.contains("(як-є compiler-compilation-error/1)"));
+    assert!(ДЖЕРЕЛО.contains("(як-є compiler-program-rejected)"));
+}

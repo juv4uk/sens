@@ -48,7 +48,7 @@ fn compiler_export_emits_full_sens_owned_d3_d4_closure() {
     assert!(stdout.contains("(domain . D3) (bits . 010)"));
     assert!(stdout.contains("(domain . D4) (bits . 0010)"));
     assert!(stdout.contains(
-        "(authority-ref . \"lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws\")"
+        "(authority-ref . \"lib/compiler-nucleus.lisp:роль-пониження-компілятора-за-законами\")"
     ));
     assert!(stdout.contains(
         "(proof-ref . \"contracts/bija3-l1-l5-ratification.lisp\")"

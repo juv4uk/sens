@@ -24,7 +24,7 @@ const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleu
 const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
 
 pub const COMPILER_ROLE_LAW_REF: &str =
-    "lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws";
+    "lib/compiler-nucleus.lisp:роль-пониження-компілятора-за-законами";
 pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
@@ -535,7 +535,7 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
     Expr {
         kind: ExprKind::List(Rc::from(
             vec![
-                symbol("compiler-lowering-role-from-laws"),
+                symbol("роль-пониження-компілятора-за-законами"),
                 symbol(SHAPE_MECHANISM_NAME),
                 Expr {
                     kind: ExprKind::DomainIdentity(exact_identity),
@@ -554,7 +554,7 @@ fn compiler_program_call() -> Expr {
     Expr {
         kind: ExprKind::List(Rc::from(
             vec![
-                symbol("compiler-compile-program"),
+                symbol("скомпілювати-програму-компілятора"),
                 symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
                 symbol(SHAPE_MECHANISM_NAME),
                 symbol(PROGRAM_VALUE_NAME),
@@ -580,7 +580,7 @@ fn compiler_program_artifact_call() -> Expr {
     Expr {
         kind: ExprKind::List(Rc::from(
             vec![
-                symbol("compiler-compile-program-artifact"),
+                symbol("скомпілювати-артефакт-програми-компілятора"),
                 symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
                 symbol(SHAPE_MECHANISM_NAME),
                 symbol(VALUE_DIGEST_MECHANISM_NAME),

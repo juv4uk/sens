@@ -160,7 +160,7 @@ fn provenance_value(law: &LawProjection) -> Value {
 
 fn request(identity: DomainIdentity) -> Expr {
     list(vec![
-        symbol("compiler-request-from-l1-l5"),
+        symbol("запит-компілятора-за-л1-л5"),
         symbol(MECHANISM_NAME),
         domain(identity),
         symbol(LAW_NAME),

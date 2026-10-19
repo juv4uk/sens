@@ -84,7 +84,7 @@ fn authority_projection() -> Expr {
 
 fn call_nucleus(identity: DomainIdentity) -> Expr {
     list(vec![
-        symbol("compiler-nucleus"),
+        symbol("ядро-компілятора"),
         domain(identity),
         quote(authority_projection()),
     ])

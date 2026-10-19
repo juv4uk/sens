@@ -41,7 +41,7 @@ fn domain(identity: DomainIdentity) -> Expr {
 
 fn call_shape(identity: DomainIdentity) -> Expr {
     list(vec![
-        symbol("compiler-domain-shape"),
+        symbol("форма-домену-компілятора"),
         symbol(MECHANISM_NAME),
         domain(identity),
     ])
@@ -131,7 +131,7 @@ fn d8_can_be_decomposed_mechanically_without_becoming_semantically_admitted() {
 fn non_domain_value_fails_named_type_error() {
     let mut session = session();
     let bad = list(vec![
-        symbol("compiler-domain-shape"),
+        symbol("форма-домену-компілятора"),
         symbol(MECHANISM_NAME),
         Expr {
             kind: ExprKind::Number(4.0, Exactness::Exact),

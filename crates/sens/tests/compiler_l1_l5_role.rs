@@ -126,7 +126,7 @@ fn law_value() -> Value {
 
 fn call_role(identity: DomainIdentity) -> Expr {
     list(vec![
-        symbol("compiler-role-from-l1-l5"),
+        symbol("роль-компілятора-за-л1-л5"),
         symbol(MECHANISM_NAME),
         domain(identity),
         symbol(LAW_NAME),
@@ -149,7 +149,7 @@ fn session() -> Session {
 fn d3_empty_identity_decomposes_to_exact_shape() {
     let mut session = session();
     let expression = list(vec![
-        symbol("compiler-domain-shape"),
+        symbol("форма-домену-компілятора"),
         symbol(MECHANISM_NAME),
         domain(d3(0)),
     ]);

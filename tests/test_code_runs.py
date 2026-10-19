@@ -792,6 +792,33 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         "compiler-reverse-onto": "компілятор-зворот-до",
         "compiler-program-list-continue": "компілятор-продовжити-список-програми",
         "compiler-program-list-acc": "компілятор-список-програми-з-накопичувачем",
+        "compiler-nucleus": "ядро-компілятора",
+        "compiler-domain-shape": "форма-домену-компілятора",
+        "compiler-list-end?": "кінець-списку-компілятора?",
+        "compiler-role-from-l1-l5-bits": "роль-компілятора-за-бітами-л1-л5",
+        "compiler-lowering-role-from-l1-l5-bits": "роль-пониження-компілятора-за-бітами-л1-л5",
+        "compiler-role-from-l1-l5": "роль-компілятора-за-л1-л5",
+        "compiler-lowering-role-from-l1-l5": "роль-пониження-компілятора-за-л1-л5",
+        "compiler-lowering-role-from-laws": "роль-пониження-компілятора-за-законами",
+        "compiler-request-from-role": "запит-компілятора-за-роллю",
+        "compiler-request-from-l1-l5": "запит-компілятора-за-л1-л5",
+        "compiler-request-from-laws": "запит-компілятора-за-законами",
+        "compiler-merge-results": "об'єднати-результати-компілятора",
+        "compiler-request-role": "роль-запиту-компілятора",
+        "compiler-exactly-one": "рівно-один-аргумент-компілятора",
+        "compiler-exactly-two": "рівно-два-аргументи-компілятора",
+        "compiler-proper-tail?": "правильний-хвіст-компілятора?",
+        "compiler-at-least-two": "щонайменше-два-аргументи-компілятора",
+        "compiler-cond-clauses-valid": "клаузи-умов-компілятора-чинні?",
+        "compiler-role-shape-valid": "форма-ролі-компілятора-чинна?",
+        "compiler-domain-children": "дочірні-форми-домену-компілятора",
+        "compiler-domain-result": "результат-домену-компілятора",
+        "compiler-program-node": "вузол-програми-компілятора",
+        "compiler-program-list": "список-програми-компілятора",
+        "compiler-compile-program": "скомпілювати-програму-компілятора",
+        "compiler-artifact-field": "поле-артефакту-компілятора",
+        "compiler-artifact-from-result": "артефакт-компілятора-за-результатом",
+        "compiler-compile-program-artifact": "скомпілювати-артефакт-програми-компілятора",
     }
     LOCAL_FORMALS_UKR = {
         "compiler-authority-find": {
@@ -1058,12 +1085,12 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         self.assertIn("(визначити істина-компілятора", source)
         self.assertIn("(визначити хиба-компілятора", source)
         self.assertIn("(визначити бітові-послідовності-однакові?", source)
-        self.assertIn("(визначити compiler-nucleus", source)
-        self.assertIn("(визначити compiler-domain-shape", source)
+        self.assertIn("(визначити ядро-компілятора", source)
+        self.assertIn("(визначити форма-домену-компілятора", source)
         self.assertIn("(визначити компілятор-ширина-закону-д4", source)
         self.assertNotIn("(визначити compiler-d4-law-width", source)
         self.assertIn("(визначити компілятор-роль-основи-д4-за-бітами", source)
-        self.assertIn("(визначити compiler-lowering-role-from-laws", source)
+        self.assertIn("(визначити роль-пониження-компілятора-за-законами", source)
 
         inverse_helpers = {ukr: old for old, ukr in self.LOCAL_HELPERS_UKR.items()}
         inverse_formals = {
@@ -1075,16 +1102,16 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         # залишається незмінним і так само ловить сторонні зміни закону.
         newer_formals = {
             # Exact inverse of each currently migrated local/formal spelling.
-            "compiler-nucleus": {"джерело-авторитету": "authority"},
-            "compiler-domain-shape": {"розкласти": "decompose"},
-            "compiler-list-end?": {"значення": "value"},
-            "compiler-role-from-l1-l5-bits": {
+            "ядро-компілятора": {"джерело-авторитету": "authority"},
+            "форма-домену-компілятора": {"розкласти": "decompose"},
+            "кінець-списку-компілятора?": {"значення": "value"},
+            "роль-компілятора-за-бітами-л1-л5": {
                 "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
             },
-            "compiler-lowering-role-from-l1-l5-bits": {
+            "роль-пониження-компілятора-за-бітами-л1-л5": {
                 "початковий-код": "seed", "біти-координати": "bits", "закон-домену": "law",
             },
-            "compiler-role-from-l1-l5": {
+            "роль-компілятора-за-л1-л5": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
             },
             "компілятор-ширина-закону-д4": {"закон-домену": "law"},
@@ -1110,20 +1137,20 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
                 "вузли": "nodes", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof", "накопичувач": "accumulator",
             },
-            "compiler-lowering-role-from-l1-l5": {
+            "роль-пониження-компілятора-за-л1-л5": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
             },
-            "compiler-lowering-role-from-laws": {
+            "роль-пониження-компілятора-за-законами": {
                 "розкласти-ідентичність": "decompose", "закон-д3": "d3-law", "закон-д4": "d4-law",
             },
-            "compiler-request-from-role": {
+            "запит-компілятора-за-роллю": {
                 "початковий-код": "seed", "роль-виконання": "role", "посилання-на-доказ": "proof-ref",
             },
-            "compiler-request-from-l1-l5": {
+            "запит-компілятора-за-л1-л5": {
                 "розкласти-ідентичність": "decompose", "закон-домену": "law",
                 "посилання-на-доказ": "proof-ref",
             },
-            "compiler-request-from-laws": {
+            "запит-компілятора-за-законами": {
                 "розкласти-ідентичність": "decompose", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
             },
@@ -1136,40 +1163,40 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             "компілятор-результат-успішний?": {"результат": "result"},
             "компілятор-запити-результату": {"результат": "result"},
             "компілятор-приєднати": {"лівий": "left", "правий": "right"},
-            "compiler-merge-results": {"лівий": "left", "правий": "right"},
-            "compiler-exactly-one": {"аргументи": "arguments"},
-            "compiler-exactly-two": {"аргументи": "arguments"},
-            "compiler-proper-tail?": {"хвіст": "tail"},
-            "compiler-at-least-two": {"аргументи": "arguments"},
-            "compiler-request-role": {"запит": "request"},
-            "compiler-cond-clauses-valid": {"клаузи": "clauses"},
-            "compiler-role-shape-valid": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
-            "compiler-domain-children": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
-            "compiler-domain-result": {
+            "об'єднати-результати-компілятора": {"лівий": "left", "правий": "right"},
+            "рівно-один-аргумент-компілятора": {"аргументи": "arguments"},
+            "рівно-два-аргументи-компілятора": {"аргументи": "arguments"},
+            "правильний-хвіст-компілятора?": {"хвіст": "tail"},
+            "щонайменше-два-аргументи-компілятора": {"аргументи": "arguments"},
+            "роль-запиту-компілятора": {"запит": "request"},
+            "клаузи-умов-компілятора-чинні?": {"клаузи": "clauses"},
+            "форма-ролі-компілятора-чинна?": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
+            "дочірні-форми-домену-компілятора": {"запит-компіляції": "request", "аргументи-форми": "arguments"},
+            "результат-домену-компілятора": {
                 "запит-компіляції": "request", "аргументи-форми": "arguments",
                 "результат-нащадків": "child-result",
             },
-            "compiler-program-list": {
+            "список-програми-компілятора": {
                 "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
                 "вузли": "nodes", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
             },
-            "compiler-program-node": {
+            "вузол-програми-компілятора": {
                 "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
                 "вузол": "node", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
             },
-            "compiler-compile-program": {
+            "скомпілювати-програму-компілятора": {
                 "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
                 "програма": "program", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof",
             },
-            "compiler-artifact-field": {"назва-поля": "name", "значення-поля": "value"},
-            "compiler-artifact-from-result": {
+            "поле-артефакту-компілятора": {"назва-поля": "name", "значення-поля": "value"},
+            "артефакт-компілятора-за-результатом": {
                 "відбиток": "digest", "ша256-пакованої-програми": "program-wire-sha256",
                 "походження-артефакту": "artifact-provenance", "результат-компіляції": "result",
             },
-            "compiler-compile-program-artifact": {
+            "скомпілювати-артефакт-програми-компілятора": {
                 "форма-або-порожнє": "shape-or-empty", "розкласти-ідентичність": "decompose",
                 "відбиток": "digest", "програма": "program", "закон-д3": "d3-law", "закон-д4": "d4-law",
                 "доказ-д3": "d3-proof", "доказ-д4": "d4-proof", "походження-запиту": "request-provenance",
