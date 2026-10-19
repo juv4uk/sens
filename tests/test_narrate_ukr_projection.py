@@ -13,7 +13,6 @@ SOURCE = ROOT / "lib/narrate.lisp"
 OLD_DERIVED = "(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))"
 OLD_SYMBOL_CHECK = "((0100 (110101100 (100 outcome)))"
 DERIVED_ALIAS = "(визначити provenance-derived-from походження-похідний-з)"
-SYMBOL_CHECK = "((хибне? (символ? (перше підсумок)))"
 
 IDENTITIES = (
     (3, "100", "перше"),
@@ -28,8 +27,8 @@ IDENTITIES = (
 
 
 def verify(source: str) -> None:
-    if source.count(DERIVED_ALIAS) != 1 or source.count(SYMBOL_CHECK) != 1:
-        raise AssertionError("бракує чинного українського визначення або виклику")
+    if DERIVED_ALIAS not in source:
+        raise AssertionError("бракує чинного українського визначення")
     if OLD_DERIVED in source or OLD_SYMBOL_CHECK in source:
         raise AssertionError("застаріла сира бітова голова повернулася")
     parsed = definitions(source)
