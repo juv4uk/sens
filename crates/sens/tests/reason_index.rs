@@ -37,7 +37,7 @@ fn indexed_bucket_preserves_source_rule_order_exactly() {
            ((p second))
            ((r irrelevant))
            ((p third)))))
-      (reason-index-candidates (як-є (p target)) (reason-make-index rules))
+      (кандидати-індексу-міркування (як-є (p target)) (побудувати-індекс-міркування rules))
     "#;
     assert_eq!(
         eval(&mut s, source),
@@ -52,9 +52,9 @@ fn variable_goal_falls_back_to_every_rule() {
     // Перевіряємо сильніший інваріант: усі правила + первісний порядок.
     let source = r#"
       (визначити rules (як-є (((p one)) ((q two)) ((r three)))))
-      (reason-index-candidates
+      (кандидати-індексу-міркування
         (як-є (var x))
-        (reason-make-index rules))
+        (побудувати-індекс-міркування rules))
     "#;
     assert_eq!(
         eval(&mut s, source),
@@ -71,7 +71,7 @@ fn variable_rule_head_disables_index_instead_of_changing_unification() {
           (((p one))
            ((var whole-head))
            ((q two)))))
-      (reason-index-mode (reason-make-index rules))
+      (режим-індексу-міркування (побудувати-індекс-міркування rules))
     "#;
     assert_eq!(eval(&mut s, source), "linear");
 }
@@ -79,7 +79,7 @@ fn variable_rule_head_disables_index_instead_of_changing_unification() {
 #[test]
 fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     let mut s = session();
-    let mut source = String::from("(reason-index-mode (reason-make-index (як-є (");
+    let mut source = String::from("(режим-індексу-міркування (побудувати-індекс-міркування (як-є (");
     for i in 0..65 {
         source.push_str(&format!("((pred{i} value))"));
     }
@@ -207,9 +207,9 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
         ("(предикат-правила-міркування (як-є ((p a))))", "p"),
         ("(додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ()))", "((p ((p a))))"),
         ("(упорядкувати-кошики-індексу-міркування (додати-правило-до-оберненого-індексу (як-є p) (як-є ((p a))) (як-є ())))", "((p ((p a))))"),
-        ("(reason-index-build-scan (як-є ()) (як-є ()) (як-є ()) *reason-index-fuel*)",
+        ("(сканувати-індекс-міркування (як-є ()) (як-є ()) (як-є ()) *паливо-індексу-міркування*)",
          "(reason-index/1 indexed () ())"),
-        ("(reason-make-index (як-є (((p a)))))",
+        ("(побудувати-індекс-міркування (як-є (((p a)))))",
          "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
     ];
     for (probe, expected) in probes {
