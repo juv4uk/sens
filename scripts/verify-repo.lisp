@@ -169,8 +169,8 @@
   (функція (name script args)
     (нехай ((result (процес-запустити "python3" (сполучити script args))))
       (за-умовою
-        ((11110111 (перше result) 0) (1) (pass name))
-        ((11110111 (перше result) 0) (0)
+        ((однакові? (перше result) 0) (1) (pass name))
+        ((однакові? (перше result) 0) (0)
          (повідомити-про-помилку-репозиторію (str+ name " failed\n" (друге result) (третє result))))))))
 
 (run-python "meta-eval-evidence-matrix" "scripts/check-meta-eval-evidence.py" (як-є ()))
@@ -185,7 +185,7 @@
   (функція (items)
     (за-умовою
       ((атом? items) () 0)
-      ((атом? items) (0) (01010 1 (count-items (решта items)))))))
+      ((атом? items) (0) (додати 1 (count-items (решта items)))))))
 
 (визначити last-char
   (функція (text)
@@ -202,7 +202,7 @@
        (нехай ((name (field (як-є ук) (перше rows))))
          (за-умовою
            ((атом? name) (1)
-            (сполучити (сполучити (11110100 (перше (перше rows))) (11101110 name))
+            (сполучити (сполучити (значення-у-текст (перше (перше rows))) (символ-у-текст name))
                   (stable-uk-pairs (решта rows))))
            (t t (stable-uk-pairs (решта rows)))))))))
 
@@ -212,7 +212,7 @@
 (визначити uk-docs (решта (знайти-за-ключем (як-є docs) (решта (перше (читати-всі (читати-файл "lib/surface/uk-docs.lisp")))))))
 ; Текстовий запис SENS для перевірок і join: голі 8 біт дають рівно 8 знаків,
 ; а SENS у лапках (текстовий сурогат) — 10, і перевірка його відкидає.
-(визначити doc-id (функція (doc) (11110100 (10011 doc))))
+(визначити doc-id (функція (doc) (значення-у-текст (третє doc))))
 (визначити doc-kind (функція (doc) (четверте doc)))
 (визначити api-md (читати-файл "docs/ukrainian-api.md"))
 
@@ -226,7 +226,7 @@
 (визначити all-bits?
   (функція (text)
     (за-умовою
-      ((110011100 text) (1) t)
+      ((рядок-порожній? text) (1) t)
       ((рядок-містить? (рядок-перший text) "01") t (all-bits? (рядок-решта text)))
       (t t (як-є ())))))
 
@@ -243,23 +243,23 @@
       ((атом? docs) (0)
        (нехай ((id (doc-id (перше docs))) (kind (doc-kind (перше docs))))
          (за-умовою
-           ((11110111 (110100010 id) 8) (0)
+           ((однакові? (рядок-довжина id) 8) (0)
             (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
            ((all-bits? id) () (повідомити-про-помилку-репозиторію (str+ "документаційний join key має бути 8-бітним SID: " id)))
            (t t
             (нехай ((uk (uk-name-for id)))
-              (001000 ((question (11110111 (last-char uk) "?"))
-                    (bang (11110111 (last-char uk) "!"))
-                    (predicate (11110111 kind (як-є predicate)))
-                    (mutation (11110111 kind (як-є mutation))))
+              (нехай ((question (однакові? (last-char uk) "?"))
+                    (bang (однакові? (last-char uk) "!"))
+                    (predicate (однакові? kind (як-є predicate)))
+                    (mutation (однакові? kind (як-є mutation))))
                 (за-умовою
-                  ((11110111 question predicate) (0)
+                  ((однакові? question predicate) (0)
                    (повідомити-про-помилку-репозиторію (str+ "українська назва " uk ": знак ? і predicate мусять збігатися")))
-                  ((11110111 bang mutation) (0)
+                  ((однакові? bang mutation) (0)
                    (повідомити-про-помилку-репозиторію (str+ uk ": ! зарезервований для мутації")))
                   (mutation (1)
                    (за-умовою
-                     ((11110111 uk "встановити-елемент-вектора!") (1)
+                     ((однакові? uk "встановити-елемент-вектора!") (1)
                       (check-docs (решта docs) predicates (додати mutations 1)))
                      (t t (повідомити-про-помилку-репозиторію (str+ "несподівана мутація: " uk)))))
                   (predicate (1)
@@ -296,11 +296,11 @@
 (визначити renamed (field (як-є renamed) audit))
 (визначити retained (field (як-є retained) audit))
 (за-умовою
-  ((11110111 reviewed (01010 renamed retained)) (1)
+  ((однакові? reviewed (додати renamed retained)) (1)
    (за-умовою
-     ((11110111 renamed (count-items audit-renames)) (1)
+     ((однакові? renamed (count-items audit-renames)) (1)
       (за-умовою
-        ((11110111 reviewed (count-items uk-docs)) (1) t)
+        ((однакові? reviewed (count-items uk-docs)) (1) t)
         (t t (повідомити-про-помилку-репозиторію "смисловий аудит мусить покривати рівно documented UK-покриття"))))
      (t t (повідомити-про-помилку-репозиторію "(renamed N) розійшовся з фактичною кількістю (rename ...)"))))
   (t t (повідомити-про-помилку-репозиторію "stable-reviewed мусить дорівнювати renamed+retained")))
@@ -314,7 +314,7 @@
   (функція (name rows)
     (за-умовою
       ((атом? rows) () ())
-      ((11110111 (field (як-є en) (перше rows)) name) (1)
+      ((однакові? (field (як-є en) (перше rows)) name) (1)
        (перше (перше rows)))
       (t t (registry-sens-for-en name (решта rows))))))
 
@@ -325,12 +325,12 @@
 (визначити pos-of
   (функція (s marker i)
     (за-умовою
-      ((110011100 s) (1) -1)
+      ((рядок-порожній? s) (1) -1)
       ((рядок-префікс? marker s) t i)
       (t t (pos-of (рядок-решта s) marker (додати i 1))))))
 
 (за-умовою
-  ((11010 (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
+  ((менше? (pos-of uk-surface "(00001001 середовище env)" 0) 0) t
    (повідомити-про-помилку-репозиторію "uk.lisp: (00001001 середовище env) мусить бути лише в реєстрі, не в поверхні"))
   (t t t))
 (pass "seredovyshche-ne-maie-povtornoho-surface-binding")
@@ -349,16 +349,16 @@
            ((атом? sens) ()
             (повідомити-про-помилку-репозиторію
               (str+ "audit EN surface missing from semantic registry: "
-                    (11101110 en-symbol))))
-           ((110101000
-              (str+ "(00001001 " (11101110 old-symbol) " " (11110100 sens) ")")
+                    (символ-у-текст en-symbol))))
+           ((рядок-містить?
+              (str+ "(00001001 " (символ-у-текст old-symbol) " " (значення-у-текст sens) ")")
               uk-surface)
             t
             (check-aliases (решта renames)))
            (t t
             (повідомити-про-помилку-репозиторію
               (str+ "missing exact-SENS compatibility alias (00001001 "
-                    (11101110 old-symbol) " " (11110100 sens) ")")))))))))
+                    (символ-у-текст old-symbol) " " (значення-у-текст sens) ")")))))))))
 (check-aliases audit-renames)
 (pass "stari-nazvy-smystovoho-audytu-lyshaiutsia-aliasamy-sumisnosti")
 
@@ -369,7 +369,7 @@
 (визначити typeable?
   (функція (text)
     (за-умовою
-      ((110011100 text) (1) t)
+      ((рядок-порожній? text) (1) t)
       ((рядок-містить? (рядок-перший text) uk-layout) t (typeable? (рядок-решта text)))
       (t t (як-є ())))))
 
@@ -386,7 +386,7 @@
 
 (визначити latin-letter?
   (функція (char)
-    (001000 ((code (11100000 char)))
+    (нехай ((code (код-символу char)))
       (за-умовою
         ((менше? code 65) 1 (як-є ()))
         ((менше? code 91) 1 t)
@@ -398,19 +398,19 @@
 (визначити latin-in-code
   (функція (text in-string in-comment found)
     (за-умовою
-      ((110011100 text) (1) found)
+      ((рядок-порожній? text) (1) found)
       (t t
        (нехай ((c (рядок-перший text)) (rest (рядок-решта text)))
          (за-умовою
-           ((11110111 in-comment t) (1)
-            (latin-in-code rest () (за-умовою ((11110111 c "\n") (1) ()) (t t t)) found))
-           ((11110111 in-string t) (1)
+           ((однакові? in-comment t) (1)
+            (latin-in-code rest () (за-умовою ((однакові? c "\n") (1) ()) (t t t)) found))
+           ((однакові? in-string t) (1)
             (за-умовою
-              ((11110111 c "\\") (1) (latin-in-code (110011101 rest) t () found))
-              ((11110111 c "\"") (1) (latin-in-code rest () () found))
+              ((однакові? c "\\") (1) (latin-in-code (рядок-решта rest) t () found))
+              ((однакові? c "\"") (1) (latin-in-code rest () () found))
               (t t (latin-in-code rest t () found))))
-           ((11110111 c ";") (1) (latin-in-code rest () t found))
-           ((11110111 c "\"") (1) (latin-in-code rest t () found))
+           ((однакові? c ";") (1) (latin-in-code rest () t found))
+           ((однакові? c "\"") (1) (latin-in-code rest t () found))
            ((latin-letter? c) t (latin-in-code rest () () (рядок-додати found c)))
            (t t (latin-in-code rest () () found))))))))
 
@@ -418,7 +418,7 @@
   (функція (name path)
     (нехай ((found (latin-in-code (читати-файл path) () () "")))
       (за-умовою
-        ((110011100 found) (1) (pass name))
+        ((рядок-порожній? found) (1) (pass name))
         (t t (повідомити-про-помилку-репозиторію (str+ name ": латинські літери у виконуваному коді " path ": " found)))))))
 
 (require-no-latin "ukrainian-acceptance-program-code-never-requires-latin-layout"
