@@ -428,7 +428,9 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 self.assertIn(form, src)
         self.assertNotIn('(як-є 0010)', src)
         self.assertNotIn('(як-є 0011)', src)
-        self.assertIn('(функція передані-аргументи-макроса', src)
+        self.assertIn('(функція (назва-макроса параметри-макроса . тіла-макроса)', src)
+        self.assertIn('(побудувати-тіло-макроса параметри-макроса тіла-макроса)', src)
+        self.assertIn('(побудувати-макровизначення', src)
 
     def test_public_names_and_unknown_d5_preserved(self):
         checks = {
