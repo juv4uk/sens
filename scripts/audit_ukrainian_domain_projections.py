@@ -13,6 +13,7 @@ import os
 import re
 import stat
 import tempfile
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -85,7 +86,14 @@ def d7_authority(root: Path) -> dict[str, str]:
         bits, value = entry["bits"], entry["uk"]
         if not re.fullmatch(r"[01]{7}", bits) or bits in authority:
             raise ValueError(f"неоднозначний D7 код: {bits}")
-        token = "()" if not value.isprintable() else json.dumps(value, ensure_ascii=False)
+        if not value.isprintable():
+            token = "()"
+        elif len(value) == 1 and unicodedata.category(value).startswith("L"):
+            # Domain tables write alphabetic projection glyphs as bare Lisp
+            # symbols; punctuation and digit glyphs remain quoted data.
+            token = value
+        else:
+            token = json.dumps(value, ensure_ascii=False)
         if not keyboard_valid(token, 7):
             raise ValueError(f"неприпустимий ратифікований D7 символ: {bits}")
         authority[bits] = token

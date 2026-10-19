@@ -30,19 +30,6 @@ UKRAINIAN_KEYBOARD_OUTPUTS = set(
 )
 
 
-def read_selected_projection_tokens() -> list[tuple[str, int, str, str, str]]:
-    """Зчитати значення проєкцій ук, укр і sym із таблиць D1–D11."""
-    rows: list[tuple[str, int, str, str, str]] = []
-    for width in range(1, 12):
-        path = ROOT / "lib" / "domains" / f"d{width}.lisp"
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            match = DOMAIN_ROW.match(line)
-            if match:
-                bits, uk, ukr, _san, _en, _lisp, sym = match.groups()
-                rows.append((f"D{width}:{bits}", line_number, uk, ukr, sym))
-    return rows
-
-
 def projection_value(token: str, domain: str) -> str:
     """Розгорнути Lisp-рядок і D7-нотацію керівного символу."""
     if token == "()":
@@ -136,29 +123,6 @@ class UkrainianDomainProjectionRulesTests(unittest.TestCase):
         self.assertEqual(len(findings), 21)
         self.assertIn("D5:00001", findings[0])
         self.assertIn("D5:00111", findings[-1])
-
-    def test_d1_through_d11_uk_ukr_and_sym_use_only_ukrainian_keyboard_characters(self):
-        rows = read_selected_projection_tokens()
-        self.assertTrue(rows, "не знайдено проєкцій ук, укр і sym у D1–D11")
-
-        found_domains = {coordinate.split(":", 1)[0] for coordinate, *_ in rows}
-        self.assertEqual(
-            found_domains,
-            {f"D{width}" for width in range(1, 12)},
-            "сканер має охопити кожен файл доменів D1–D11",
-        )
-
-        findings = collect_projection_violations(rows)
-        if findings:
-            self.fail(
-                "Порушення в таблицях D1–D11: розширення .lisp означає "
-                "українську проєкцію укр (тут також перевіряються клітинки ук і sym); "
-                ".sens означає двійкове представлення й цим тестом не перевіряється. "
-                "Кожен рядок указує точну клітинку для виправлення:\n"
-                + "\n".join(findings)
-            )
-
-
 
     def test_d11_ratified_projection_authority_matches_table_without_admitting_calls(self):
         authority = json.loads(

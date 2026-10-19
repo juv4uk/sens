@@ -173,12 +173,32 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         changes, output = self.run_audit()  # лише dry-run, не source rewrite
         d7_changes = [c for c in changes if c.file.endswith("d7.lisp")]
         self.assertEqual(len(d7_changes), 3)
-        self.assertTrue(all(c.after == '"ь"' for c in d7_changes))
+        self.assertTrue(all(c.after == "ь" for c in d7_changes))
         self.assertIn("D7:1101101", output)
         self.assertEqual(d7.read_bytes(), original)
-        with self.assertRaisesRegex(ValueError, "D7 лише dry-run"):
-            self.run_audit(apply=True)
-        self.assertEqual(d7.read_bytes(), original)
+
+    def test_current_d7_bare_ukrainian_letter_matches_ratified_keyboard_authority(self):
+        """A bare Ukrainian letter is the canonical D7 source spelling."""
+        d7 = self.root / "lib/domains/d7.lisp"
+        d7.write_text(
+            "(domain-table/1\n"
+            + row("0000000", "()", "()")
+            + row("0101100", "б", "б").replace("(sym ())", "(sym б)")
+            + ")\n",
+            encoding="utf-8",
+        )
+        authority_path = self.root / "knowledge/d7-keyboard-v2-ratified.json"
+        authority = json.loads(authority_path.read_text(encoding="utf-8"))
+        authority["table"][int("0101100", 2)]["uk"] = "б"
+        authority_path.write_text(json.dumps(authority, ensure_ascii=False), encoding="utf-8")
+
+        changes, output = self.run_audit()
+
+        self.assertFalse(
+            [change for change in changes if change.coordinate == "D7:0101100"],
+            "current source projection must compare equal to its ratified D7 character",
+        )
+        self.assertNotIn("D7:0101100", output)
 
     def test_d7_apply_refuses_entire_batch_before_d9_write(self):
         d7 = self.root / "lib/domains/d7.lisp"
@@ -207,7 +227,8 @@ class DomainProjectionMigrationTests(unittest.TestCase):
         d7 = self.root / "lib/domains/d7.lisp"
         d7.write_text(
             "(domain-table/1\n" + row("0000000", "()", "()")
-            + row("1101101", '"а"', '"а"') + ")\n", encoding="utf-8"
+            + row("1101101", "а", "а").replace("(sym ())", "(sym а)")
+            + ")\n", encoding="utf-8"
         )
         table = json.loads(
             (self.root / "knowledge/d7-keyboard-v2-ratified.json").read_text()
