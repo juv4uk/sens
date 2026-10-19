@@ -178,3 +178,24 @@ fn migrated_macros_drive_plain_tms_and_jtms_state_transitions() {
         "all three mutable reasoning memories must return to empty after bounded assert/run/retract"
     );
 }
+
+#[test]
+fn ratified_d9_macro_heads_execute_the_same_sens_laws() {
+    // Перевіряємо результат самого SENS evaluator, а не лексичну наявність імен.
+    // Англійський запис тут — лише контроль того самого наявного Lisp-замикання.
+    let mut session = session();
+    for (old_name, ukr, arguments) in [
+        ("axiom", "аксіома", "(як-є факт)"),
+        ("run-tms", "запустити-система-істини", "(як-є ()) (як-є ())"),
+        ("run-jtms", "запустити-система-обґрунтувань", "(як-є ()) (як-є ())"),
+        (
+            "run-jtms-multi",
+            "запустити-система-обґрунтувань-мульти",
+            "(як-є ()) (як-є ())",
+        ),
+    ] {
+        let existing_law = eval(&mut session, &format!("({old_name} {arguments})"));
+        let ratified = eval(&mut session, &format!("({ukr} {arguments})"));
+        assert_eq!(ratified, existing_law, "D9 українська проєкція {ukr} змінила закон");
+    }
+}
