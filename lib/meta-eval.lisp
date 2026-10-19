@@ -535,7 +535,7 @@
             (сполучити (перше params) seen)))))
       ((атом? ()) (список (як-є non-symbol-parameter) (перше params))))))
 
-(визначити my-lambda-list-error
+(визначити перевірити-параметри-лямбди
   (функція (params)
     (за-умовою
       
@@ -557,7 +557,7 @@
 
 (визначити my-make-closure
   (функція (params body env-ref)
-    (нехай ((problem (my-lambda-list-error params)))
+    (нехай ((problem (перевірити-параметри-лямбди params)))
       (за-умовою
         
         ((атом? problem)  (список (як-є closure) params body env-ref))
@@ -573,7 +573,7 @@
       ((атом? forms)  (як-є ()))
       ((атом? ())
        (нехай ((problem
-               (my-lambda-list-error (друге (третє (перше forms))))))
+               (перевірити-параметри-лямбди (друге (третє (перше forms))))))
          (за-умовою
            
            ((атом? problem)  (my-lambda-def-group-error (решта forms)))
@@ -738,7 +738,7 @@
                    (створити-замикання-взаєморекурсивної-групи form group captured-env))
              out)))))))
 
-(визначити my-build-group-env
+(визначити побудувати-лексичні-зв'язки-рекурсивної-групи
   (функція (group captured-env)
     (my-build-group-env-onto group group captured-env captured-env)))
 
@@ -761,7 +761,7 @@
              (створити-замикання-взаєморекурсивної-групи form group captured-env)
              out)))))))
 
-(визначити my-install-group-env
+(визначити встановити-взаєморекурсивні-замикання
   (функція (group captured-env)
     (my-install-group-env-onto group group captured-env captured-env)))
 
@@ -817,7 +817,7 @@
                     (my-sixth fn)
                     caller-env)))
             (нехай ((group-env
-                    (my-build-group-env (my-fifth fn) captured)))
+                    (побудувати-лексичні-зв'язки-рекурсивної-групи (my-fifth fn) captured)))
               (обчислити-послідовне-тіло-з-раннім-збоєм
                 (my-fourth fn)
                 (зв'язати-аргументи-з-лямбда-параметрами
@@ -903,7 +903,7 @@
          ((my-canon-cond-name? (перше expr))
           (my-eval-cond-result (решта expr) env-ref))
          ((my-lambda-name? (перше expr))
-          (нехай ((problem (my-lambda-list-error (друге expr))))
+          (нехай ((problem (перевірити-параметри-лямбди (друге expr))))
             (за-умовою
               
               ((атом? problem)  (власний-результат-успіх
@@ -922,7 +922,7 @@
          ((my-canon-cond-name? (перше expr))
           (my-eval-cond-result (решта expr) env-ref))
          ((my-lambda-name? (перше expr))
-          (нехай ((problem (my-lambda-list-error (друге expr))))
+          (нехай ((problem (перевірити-параметри-лямбди (друге expr))))
             (за-умовою
               
               ((атом? problem)  (власний-результат-успіх
@@ -948,7 +948,7 @@
 ; direct calls without a marker retain the historical plain-alist behavior.
 ;
 ; Contract 6 rejects Canon definition names before value construction.
-(визначити my-eval-top-form
+(визначити обчислити-форму-та-оновити-оточення
   (функція (form env-ref)
     (за-умовою
       ((атом? form)  (сполучити env-ref (my-eval form env-ref)))
@@ -960,7 +960,7 @@
           (нехай ((value-form (третє form)))
             (за-умовою
               ((перевірити-форму-лямбда? value-form)
-               (нехай ((problem (my-lambda-list-error (друге value-form))))
+               (нехай ((problem (перевірити-параметри-лямбди (друге value-form))))
                  (за-умовою
                    
                    ((атом? problem)  (нехай ((value
@@ -1079,7 +1079,7 @@
            (залежності-визначення-серед-кандидатів (перше forms) names))
          (my-build-dependency-graph-with-names (решта forms) names))))))
 
-(визначити my-build-dependency-graph
+(визначити побудувати-граф-залежностей-визначень
   (функція (forms)
     (нехай ((names (my-lambda-def-names forms)))
       (my-build-dependency-graph-with-names forms names))))
@@ -1182,13 +1182,13 @@
              ; A singleton stays on the ordinary top-level path. That path
              ; already gives self-recursive definitions a finite
              ; recursive-closure without falsely inventing a group.
-             ((хибне? (атом? (решта component-names))) (нехай ((result (my-eval-top-form (перше forms) env-ref)))
+             ((хибне? (атом? (решта component-names))) (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) env-ref)))
                 (my-eval-lambda-components
                   (решта forms)
                   graph
                   (перше result)
                   final-name)))
-             ((атом? (решта component-names))  (нехай ((result (my-eval-top-form (перше forms) env-ref)))
+             ((атом? (решта component-names))  (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) env-ref)))
                 (my-eval-lambda-components
                   (решта forms)
                   graph
@@ -1197,16 +1197,16 @@
              ((атом? ())
               (нехай ((component
                       (відібрати-визначення-іменованої-групи forms component-names)))
-                (нехай ((group-env (my-install-group-env component env-ref)))
+                (нехай ((group-env (встановити-взаєморекурсивні-замикання component env-ref)))
                   (my-eval-lambda-components
                     (вилучити-з-блоку-визначення-заданих-імен forms component-names)
                     graph
                     group-env
                     final-name)))))))))))
 
-(визначити my-eval-lambda-block
+(визначити обчислити-блок-взаємних-визначень
   (функція (forms env-ref)
-    (нехай ((graph (my-build-dependency-graph forms))
+    (нехай ((graph (побудувати-граф-залежностей-визначень forms))
           (final-name (my-last-lambda-def-name forms)))
       (my-eval-lambda-components forms graph env-ref final-name))))
 
@@ -1235,7 +1235,7 @@
                   
                   ((атом? problem)  (нехай ((rest (my-drop-lambda-def-group forms)))
                      (нехай ((block-result
-                             (my-eval-lambda-block block program-env)))
+                             (обчислити-блок-взаємних-визначень block program-env)))
                        (за-умовою
                          
                          ((атом? rest)  block-result)
@@ -1248,7 +1248,7 @@
                      program-env
                      (my-lambda-invalid-form problem)))))))
            ((атом? ())
-            (нехай ((result (my-eval-top-form (перше forms) program-env)))
+            (нехай ((result (обчислити-форму-та-оновити-оточення (перше forms) program-env)))
               (за-умовою
                 
                 ((атом? (решта forms))  result)
@@ -1295,3 +1295,12 @@
 (визначити імена-сильно-зв'язаної-компоненти my-scc-names)
 (визначити відібрати-визначення-іменованої-групи my-select-defs-by-names)
 (визначити визначити-невирішене-ім'я-в-оточенні? my-unresolved-name?)
+
+; Сумісні назви попередніх викликачів. Це посилання на чинні Lisp-замикання D10/укр,
+; не нові коди, функції, механізми чи окремий спосіб виконання.
+(визначити my-lambda-list-error перевірити-параметри-лямбди)
+(визначити my-build-group-env побудувати-лексичні-зв'язки-рекурсивної-групи)
+(визначити my-eval-top-form обчислити-форму-та-оновити-оточення)
+(визначити my-install-group-env встановити-взаєморекурсивні-замикання)
+(визначити my-build-dependency-graph побудувати-граф-залежностей-визначень)
+(визначити my-eval-lambda-block обчислити-блок-взаємних-визначень)
