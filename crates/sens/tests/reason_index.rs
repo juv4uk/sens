@@ -107,17 +107,22 @@ fn binary_sens_migration_witness_checks_atom_eq_and_domain_boundaries() {
         "SENS primitive law must produce exact D1:YES"
     );
 
-    // These are mechanical invariants over production source, not a host
-    // truth table: prove EQ cannot see a pair and each helper keeps its width.
-    let reason_source = include_str!("../../../lib/reason.lisp");
-    let rs = reason_source.find("(0011 reason-index?").expect("reason-index? exists");
-    let re = reason_source[rs..].find("(0011 reason-index-linear").expect("reason-index? ends").saturating_add(rs);
-    let body = &reason_source[rs..re];
-    let empty_guard = body.find("((0101 value)").expect("D4 NULL guard");
-    let car_atom_guard = body.find("((010 (100 value))").expect("D3 ATOM(CAR) guard");
-    let eq_call = body.find("((101 (100 value) *reason-index-schema*)").expect("D3 EQ call");
-    assert!(empty_guard < car_atom_guard && car_atom_guard < eq_call,
-        "D4 NULL and D3 ATOM(CAR) must guard D3 EQ, in that order");
+    // Поведінка D3 EQ перевіряється справжнім SENS evaluator, а не
+    // пошуком історичних 8-бітних текстових шаблонів у сучасному джерелі.
+    // Складена голова не може потрапити до атомарного D3 EQ.
+    for (source, expected) in [
+        ("(reason-index? (як-є ()))", false),
+        ("(reason-index? (як-є ((складена-голова) запис)))", false),
+        ("(reason-index? (як-є (reason-index/1 indexed ())))", true),
+    ] {
+        let result = eval_program(source, &mut s)
+            .unwrap_or_else(|error| panic!("реальна перевірка reason-index?: {error}; джерело: {source}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "D3 ATOM має захистити EQ від складеної голови: {source}"
+        );
+    }
 
     let narration_source = include_str!("../../../lib/narrate.lisp");
     let hs = narration_source.find("(визначити список-завершується-порожнім?").expect("D3/D4 helpers exist");
