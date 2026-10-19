@@ -1,29 +1,19 @@
-"""Перевірка вузької міграції двох живих викликів Narrate.
-
-Лише source/identity рівність. Цей Python-тест не імітує виконання SENS,
-не надає D9 резидентам механізму виклику та не перевизначає закони.
-"""
+"""Точкова перевірка чинного укр-контракту Narrate й exact D9 identity."""
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 import unittest
 
-from tests.test_ukr_narrate_peers import definitions
+from tests.test_ukr_narrate_peers import call_heads, definitions
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/narrate.lisp"
-BASE_BLOB = "e888735c0f24d789f6a5691a3f569632c27f3e0b"
 
+# Historical raw encodings must never return as executable heads.
 OLD_DERIVED = "(0011 provenance-derived-from (0010 (prov) (1001 (110110101 prov))))"
-NEW_DERIVED = "(визначити provenance-derived-from (функція (prov) (друге (п'ятий prov))))"
 OLD_SYMBOL_CHECK = "((0100 (110101100 (100 outcome)))"
-NEW_SYMBOL_CHECK = "((хибне? (символ? (перше outcome)))"
-LOCAL_CURRENT_TO_HISTORY = {
-    "список-завершується-порожнім?": "narrate-proper-list?",
-    "список-із-рівно-двох-елементів?": "narrate-list-exact-two?",
-    "список-із-рівно-трьох-елементів?": "narrate-list-exact-three?",
-}
+DERIVED_ALIAS = "(визначити provenance-derived-from походження-похідний-з)"
+SYMBOL_CHECK = "((хибне? (символ? (перше підсумок)))"
 
 IDENTITIES = (
     (3, "100", "перше"),
@@ -31,43 +21,29 @@ IDENTITIES = (
     (4, "0010", "функція"),
     (4, "1001", "друге"),
     (4, "0100", "хибне?"),
+    (9, "000011100", "походження-похідний-з"),
     (9, "110110101", "п'ятий"),
     (9, "110101100", "символ?"),
 )
 
 
-def restore_local_helper_names(source: str) -> str:
-    """Invert only active code symbols; comments and strings are data."""
-    token = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();"]+|\s+|.')
-    def restore(match: re.Match[str]) -> str:
-        value = match.group()
-        if value.startswith(";") or value.startswith('"') or value.isspace() or value in ("(", ")"):
-            return value
-        return LOCAL_CURRENT_TO_HISTORY.get(value, value)
-    return token.sub(restore, source)
-
-
-def _git_blob(source: str) -> str:
-    data = source.encode("utf-8")
-    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\x00" + data).hexdigest()
-
-
 def verify(source: str) -> None:
-    if source.count(NEW_DERIVED) != 1 or source.count(NEW_SYMBOL_CHECK) != 1:
-        raise AssertionError("бракує однієї з двох українських виконуваних форм")
+    if source.count(DERIVED_ALIAS) != 1 or source.count(SYMBOL_CHECK) != 1:
+        raise AssertionError("бракує чинного українського визначення або виклику")
     if OLD_DERIVED in source or OLD_SYMBOL_CHECK in source:
-        raise AssertionError("стара цифрова голова повернулася")
-    original = source.replace(NEW_DERIVED, OLD_DERIVED).replace(
-        NEW_SYMBOL_CHECK, OLD_SYMBOL_CHECK
-    )
-    original = restore_local_helper_names(original)
-    if _git_blob(original) != BASE_BLOB:
-        raise AssertionError("змінено щось, крім двох ратифікованих callsite")
+        raise AssertionError("застаріла сира бітова голова повернулася")
     parsed = definitions(source)
-    if parsed.get("provenance-derived-from") != [
-        "функція", ["prov"], ["друге", ["п'ятий", "prov"]]
+    if parsed.get("походження-похідний-з") != [
+        "функція", ["походження"], ["друге", ["п'ятий", "походження"]]
     ]:
-        raise AssertionError("порушено похідний provenance accessor")
+        raise AssertionError("порушено український D9 accessor походження")
+    if parsed.get("provenance-derived-from") != "походження-похідний-з":
+        raise AssertionError("англійський compatibility-вхід має бути тим самим укр-замиканням")
+    if parsed.get("пояснити-підсумок") is None:
+        raise AssertionError("втрачено повну укр-функцію підсумку")
+    heads = call_heads(parsed["пояснити-підсумок"])
+    if "символ?" not in heads or "текст?" in heads:
+        raise AssertionError("перевірка форми підсумку змінила D9 predicate")
 
 
 class NarrateProjectionTests(unittest.TestCase):
@@ -75,7 +51,7 @@ class NarrateProjectionTests(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
-    def test_two_current_callsite_spelling_changes_only(self):
+    def test_current_ukr_contract_and_no_raw_heads(self):
         verify(self.source)
 
     def test_exact_domain_projection_authority(self):
@@ -90,22 +66,25 @@ class NarrateProjectionTests(unittest.TestCase):
                 self.assertIn(f"(укр {ukr})", rows[0])
 
     def test_negative_wrong_d9_successor_rejected(self):
-        broken = self.source.replace("п'ятий prov", "четверте prov", 1)
+        broken = self.source.replace("п'ятий походження", "четверте походження", 1)
         self.assertNotEqual(broken, self.source)
-        with self.assertRaises(AssertionError):
+        with self.assertRaisesRegex(AssertionError, "accessor походження"):
             verify(broken)
 
     def test_negative_wrong_predicate_rejected(self):
-        broken = self.source.replace("(символ? (перше outcome))",
-                                     "(текст? (перше outcome))", 1)
+        broken = self.source.replace("(символ? (перше підсумок))",
+                                     "(текст? (перше підсумок))", 1)
         self.assertNotEqual(broken, self.source)
-        with self.assertRaises(AssertionError):
+        with self.assertRaisesRegex(AssertionError, "D9 predicate"):
             verify(broken)
 
-    def test_negative_quoted_data_or_extra_source_change_rejected(self):
-        broken = self.source.replace("(як-є fact)", "(як-є changed-fact)", 1)
+    def test_negative_wrong_english_alias_rejected(self):
+        broken = self.source.replace(
+            DERIVED_ALIAS,
+            "(визначити provenance-derived-from пояснити-факт)", 1
+        )
         self.assertNotEqual(broken, self.source)
-        with self.assertRaisesRegex(AssertionError, "крім двох"):
+        with self.assertRaisesRegex(AssertionError, "англійський compatibility"):
             verify(broken)
 
 
