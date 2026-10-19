@@ -52,7 +52,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "ukr-acceptance.sens"
             result = invoke(source, "--output", str(target),
-                            "--codec", "t5m", "--source-surface", "ук")
+                            "--codec", "t5m", "--source-surface", "ук", "--dry-run")
             self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertIn("STRING_LITERAL_UNADMITTED", report["reason"])
