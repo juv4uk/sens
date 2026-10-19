@@ -19,7 +19,7 @@
 
 (визначити load-domain
   (функція (path)
-    (011 (100 (110101001 (110110111 path))))))
+    (решта (перше (читати-всі (читати-файл path))))))
 
 ; Побудова унарного свідка потужності: кожна комірка = (001 0).
 ; Жоден 0 усередині QUOTE не є D24 числом або виконуваною функцією.
@@ -94,7 +94,7 @@
 (визначити d10 (load-domain "lib/domains/d10.lisp"))
 (визначити d11 (load-domain "lib/domains/d11.lisp"))
 
-(0011 w1 (001 (0)))
+(визначити w1 (як-є (0)))
 (визначити w2 (witness-double w1))
 (визначити w3 (witness-double w2))
 (визначити w4 (witness-double w3))
@@ -162,4 +162,4 @@
    (як-є ()))
   ((атом? (як-є ())) (domain-bitness-negative-fail)))
 
-(11011011 "DOMAIN-BITNESS-LAWS: PASS D1..D10 capacity; D11 sparse=43; D3 unique exact-width addresses; fixed-capacity interior-duplicate mutant rejected by SENS")
+(друкувати "DOMAIN-BITNESS-LAWS: PASS D1..D10 capacity; D11 sparse=43; D3 unique exact-width addresses; fixed-capacity interior-duplicate mutant rejected by SENS")
