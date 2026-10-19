@@ -948,24 +948,27 @@
 ; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
 ; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
 ; vzhe vyrazhuvani samoiu movoiu.
-(визначити abs
+(визначити модуль
   (функція (x)
     (за-умовою
       ((менше? x 0)  (відняти 0 x))
       ((хибне? (менше? x 0)) x))))
+(визначити abs модуль)
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
 ; evaluator's own lambda-binding check -- matching the removed Rust
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
-(визначити min
+(визначити найменше
   (функція (перший-аргумент . решта-аргументів)
     (найменше-у-списку (сполучити перший-аргумент решта-аргументів))))
+(визначити min найменше)
 
-(визначити max
+(визначити найбільше
   (функція (перший-аргумент . решта-аргументів)
     (найбільше-у-списку (сполучити перший-аргумент решта-аргументів))))
+(визначити max найбільше)
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -979,7 +982,7 @@
 ;    the base-case branch. `items` itself is safe to test with `atom`
 ;    (it's always a list or (), never itself a bare number), but the
 ;    accumulator tests exact structural EMPTY with D4:0101 NULL.
-(визначити min-list
+(визначити найменше-у-списку
   (функція (items)
     (за-умовою
       
@@ -992,8 +995,9 @@
             (за-умовою
               ((менше? (перше items) rest-min)  (перше items))
               ((хибне? (менше? (перше items) rest-min)) rest-min)))))))))
+(визначити min-list найменше-у-списку)
 
-(визначити max-list
+(визначити найбільше-у-списку
   (функція (items)
     (за-умовою
       
@@ -1006,6 +1010,7 @@
             (за-умовою
               ((більше? (перше items) rest-max)  (перше items))
               ((хибне? (більше? (перше items) rest-max)) rest-max)))))))))
+(визначити max-list найбільше-у-списку)
 
 ; #469 — post-core stable peer materialization.
 ;
