@@ -78,12 +78,22 @@ class PythonEntrypointsRunTests(unittest.TestCase):
         p = self._assert_runs("scripts/report_ukr_projection_progress.py", "--no-annotation")
         self.assertIn("УКР-ПРОЄКЦІЯ", p.stdout)
 
-    def test_ukr_projection_report_hard_mode_is_red(self):
-        # поріг 100 недосяжний зараз -> крок мусить бути червоним (rc=1)
-        p = run_entrypoint("scripts/report_ukr_projection_progress.py",
-                           "--min-pairs-pct", "100", "--no-annotation")
-        self.assertEqual(p.returncode, 1)
-        self.assertIn("НЕ ЗАВЕРШЕНА", p.stdout)
+    def test_ukr_projection_report_counts_complete_files_not_partial_names(self):
+        # Повноцінний файл містить тільки доступні символи; латиниця
+        # навіть у коментарі робить другий файл незавершеним.
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "український.lisp").write_text(
+                "(визначити число 1)\\n; український коментар\\n", encoding="utf-8")
+            (root / "незавершений.lisp").write_text(
+                "(визначити число 1)\\n; English\\n", encoding="utf-8")
+            p = run_entrypoint("scripts/report_ukr_projection_progress.py",
+                               "--root", directory, "--no-annotation")
+            self.assertEqual(p.returncode, 0)
+            self.assertEqual(
+                p.stdout.strip(),
+                "УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — 1/2 (50.0%)")
 
     def test_ukr_projection_report_bad_root_is_usage_error(self):
         p = run_entrypoint("scripts/report_ukr_projection_progress.py", "--root", "/no/such/dir")

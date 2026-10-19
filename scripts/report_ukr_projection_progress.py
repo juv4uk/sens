@@ -6,7 +6,7 @@
 пробіли та переводи рядків перевіряються так само, як виконуваний код.
 Жодні каталоги (зокрема історичні) не вилучаються зі знаменника.
 Неправильний UTF-8, недоступний файл і символ поза розкладкою не
-зараховуються. Порожній файл формально задовольняє вимогу «кожен символ».
+зараховуються. Порожні файли і файли лише з пробільними символами не є завершеними програмами.
 Ця метрика не стверджує семантичної правильності чи працездатності SENS.
 
 Використання:
@@ -47,18 +47,18 @@ class Unfinished:
 @dataclass(frozen=True)
 class Progress:
     total_lisp_files: int
-    full_ukr_files: int
-    unfinished: tuple[Unfinished, ...]
+    fully_ukrainian_files: int
+    pending: tuple[Unfinished, ...]
 
     @property
-    def percentage(self) -> float:
-        return round(self.full_ukr_files * 100 / self.total_lisp_files, 1) if self.total_lisp_files else 0.0
+    def percent(self) -> float:
+        return round(self.fully_ukrainian_files * 100 / self.total_lisp_files, 1) if self.total_lisp_files else 0.0
 
     def to_dict(self) -> dict:
         return {
             "total_lisp_files": self.total_lisp_files,
-            "full_ukr_files": self.full_ukr_files,
-            "percentage": self.percentage,
+            "fully_ukrainian_files": self.fully_ukrainian_files,
+            "percent": self.percent,
         }
 
 
@@ -78,6 +78,8 @@ def examine_file(path: Path) -> str | None:
         source = path.read_bytes().decode("utf-8", errors="strict")
     except (OSError, UnicodeError) as exc:
         return f"непрочитаний файл або неправильний UTF-8: {type(exc).__name__}"
+    if not source.strip():
+        return "порожній файл або лише пробіли"
     for offset, char in enumerate(source):
         if char not in ALLOWED:
             line = source.count("\n", 0, offset) + 1
@@ -91,22 +93,22 @@ def measure(root: Path) -> Progress:
     if not root.is_dir():
         raise NotADirectoryError(root)
     files = iter_lisp_files(root)
-    unfinished = []
+    pending = []
     for path in files:
         reason = examine_file(path)
         if reason is not None:
-            unfinished.append(Unfinished(path.relative_to(root).as_posix(), reason))
+            pending.append(Unfinished(path.relative_to(root).as_posix(), reason))
     return Progress(
         total_lisp_files=len(files),
-        full_ukr_files=len(files) - len(unfinished),
-        unfinished=tuple(unfinished),
+        fully_ukrainian_files=len(files) - len(pending),
+        pending=tuple(pending),
     )
 
 
 def render(progress: Progress) -> str:
-    return (f"УКР-ПРОЄКЦІЯ .lisp: повністю українські файли "
-            f"{progress.full_ukr_files}/{progress.total_lisp_files} "
-            f"({progress.percentage:.1f}%)")
+    return (f"УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — "
+            f"{progress.fully_ukrainian_files}/{progress.total_lisp_files} "
+            f"({progress.percent:.1f}%)")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -137,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::notice::{message}")
 
     if args.list:
-        pending = progress.unfinished
+        pending = progress.pending
         shown = pending[:args.top] if args.top else pending
         for item in shown:
             print(f"{item.path}: {item.reason}")
