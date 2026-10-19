@@ -1888,8 +1888,15 @@ class PersistentVectorLocalNamesUkrProjectionTests(unittest.TestCase):
         )
         self.assertEqual(roots, 23)
         self.assertEqual(functions, 22)
-        self.assertTrue(all(name in inverse_counts
-                            for forms in inverse_formals.values() for name in forms.values()))
+        self.assertTrue(all(
+            name in inverse_counts
+            for formals in self.FORMALS_UKR.values() for name in formals.values()
+        ))
+        self.assertTrue(all(
+            name in inverse_counts
+            for forms in self.NESTED_FORMALS_UKR.values()
+            for nested_formals in forms for name in nested_formals.values()
+        ))
         self.assertEqual(self._blob_sha(restored), self.ORIGINAL_SOURCE_BLOB)
 
         projected, forward_counts, per_function, functions2, roots2 = self._rewrite(
