@@ -1037,6 +1037,22 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             self.LOCAL_HELPERS_UKR[fn]: {ukr: old for old, ukr in pairs.items()}
             for fn, pairs in self.LOCAL_FORMALS_UKR.items()
         }
+        # Додаткова alpha-міграція компілятора змінює лише зв'язані імена.
+        # Відновлюємо їх через наявний scope-aware AST-прохід; старий SHA
+        # залишається незмінним і так само ловить сторонні зміни закону.
+        newer_formals = {
+            "compiler-domain-shape": {"розкласти": "decompose"},
+            "compiler-list-end?": {"значення": "value"},
+            "compiler-shape-width": {"форма": "shape"},
+            "compiler-shape-bits": {"форма": "shape"},
+            "compiler-law-width": {"закон": "law"},
+            "compiler-law-empty-bits": {"закон": "law"},
+            "compiler-law-xor-mask": {"закон": "law"},
+        }
+        for name, bindings in newer_formals.items():
+            inverse_helpers[name] = name
+            inverse_formals[name] = bindings
+
         restored, counts, unclassified, forms = self._rewrite_heads(
             source, {}, inverse_helpers, inverse_formals
         )
