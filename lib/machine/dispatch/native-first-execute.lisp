@@ -22,64 +22,64 @@
 ;   lib/machine/dispatch/native-first.lisp
 
 (визначити native-first-list-2
-  (функція (a b)
-    (сполучити a (сполучити b (як-є ())))))
+  (функція (перший-елемент другий-елемент)
+    (сполучити перший-елемент (сполучити другий-елемент (як-є ())))))
 
 (визначити нативний-список-чотирьох
-  (функція (a b c d)
-    (сполучити a (сполучити b (сполучити c (сполучити d (як-є ())))))))
+  (функція (перший-елемент другий-елемент третій-елемент четвертий-елемент)
+    (сполучити перший-елемент (сполучити другий-елемент (сполучити третій-елемент (сполучити четвертий-елемент (як-є ())))))))
 
 (визначити native-first-execution-completed
-  (функція (route value)
+  (функція (маршрут-виконання значення-відповіді)
     (нативний-список-чотирьох
       (як-є execution-route)
-      route
+      маршрут-виконання
       (як-є (status completed))
-      (native-first-list-2 (як-є value) value))))
+      (native-first-list-2 (як-є value) значення-відповіді))))
 
 (визначити native-first-execution-rejected
-  (функція (route detail)
+  (функція (маршрут-виконання подробиці-відмови)
     (нативний-список-чотирьох
       (як-є execution-route)
-      route
+      маршрут-виконання
       (як-є (status rejected))
-      (native-first-list-2 (як-є detail) detail))))
+      (native-first-list-2 (як-є detail) подробиці-відмови))))
 
 (визначити native-first-proper-list-length-2?
-  (функція (value)
+  (функція (значення-відповіді)
     (за-умовою
-      ((атом? value)
+      ((атом? значення-відповіді)
        ні)
-      ((атом? (решта value))
+      ((атом? (решта значення-відповіді))
        ні)
-      ((порожній? (решта (решта value)))
+      ((порожній? (решта (решта значення-відповіді)))
        так)
       (так
        ні))))
 
 (визначити нативний-список-трьох-елементів?
-  (функція (value)
+  (функція (значення-відповіді)
     (за-умовою
-      ((атом? value)
+      ((атом? значення-відповіді)
        ні)
-      ((атом? (решта value))
+      ((атом? (решта значення-відповіді))
        ні)
-      ((атом? (решта (решта value)))
+      ((атом? (решта (решта значення-відповіді)))
        ні)
-      ((порожній? (решта (решта (решта value))))
+      ((порожній? (решта (решта (решта значення-відповіді))))
        так)
       (так
        ні))))
 
 (визначити native-first-plan-tag-state
-  (функція (plan tag)
+  (функція (план-виконання мітка-плану)
     (за-умовою
-      ((атом? plan)
+      ((атом? план-виконання)
        (як-є distinct))
       ; D3 EQ порівнює атоми; складена голова — некоректний тег плану.
-      ((атом? (перше plan))
+      ((атом? (перше план-виконання))
        (за-умовою
-         ((тотожне? (перше plan) tag)
+         ((тотожне? (перше план-виконання) мітка-плану)
           (як-є same))
          (так
           (як-є distinct))))
@@ -87,79 +87,79 @@
        (як-є distinct)))))
 
 (визначити нативне-виконання-результат-плану
-  (функція (plan result)
+  (функція (план-виконання результат-виконання)
     (за-умовою
-      ((атом? result)
-       (native-first-execution-completed (як-є native) result))
+      ((атом? результат-виконання)
+       (native-first-execution-completed (як-є native) результат-виконання))
       ; Некоректний складений тег не можна подавати у D3 EQ.
       ; Це помилка native-результату, а не дозвіл на evaluator-fallback.
-      ((атом? (перше result))
+      ((атом? (перше результат-виконання))
        (за-умовою
-         ((тотожне? (перше result) (як-є rejected))
-          (native-first-execution-rejected (як-є native) result))
+         ((тотожне? (перше результат-виконання) (як-є rejected))
+          (native-first-execution-rejected (як-є native) результат-виконання))
          (так
-          (native-first-execution-completed (як-є native) result))))
+          (native-first-execution-completed (як-є native) результат-виконання))))
       (так
        (native-first-execution-rejected
          (як-є native)
-         (native-first-list-2 (як-є malformed-native-result) result))))))
+         (native-first-list-2 (як-є malformed-native-result) результат-виконання))))))
 
 (визначити нативне-виконання-плану
-  (функція (plan)
+  (функція (план-виконання)
     (нативне-виконання-результат-плану
-      plan
+      план-виконання
       (x86-call-admitted-u64
-        (перше (решта plan))
-        (перше (решта (решта plan)))))))
+        (перше (решта план-виконання))
+        (перше (решта (решта план-виконання)))))))
 
 (визначити native-first-execute-plan
-  (функція (plan)
+  (функція (план-виконання)
     (за-умовою
-      ((тотожне? (native-first-plan-tag-state plan (як-є native-plan)) (як-є same))
+      ((тотожне? (native-first-plan-tag-state план-виконання (як-є native-plan)) (як-є same))
        (за-умовою
-         ((нативний-список-трьох-елементів? plan)
-          (нативне-виконання-плану plan))
+         ((нативний-список-трьох-елементів? план-виконання)
+          (нативне-виконання-плану план-виконання))
          (так
           (native-first-execution-rejected
             (як-є native)
-            (native-first-list-2 (як-є malformed-native-plan) plan)))))
-      ((тотожне? (native-first-plan-tag-state plan (як-є native-plan)) (як-є distinct))
+            (native-first-list-2 (як-є malformed-native-plan) план-виконання)))))
+      ((тотожне? (native-first-plan-tag-state план-виконання (як-є native-plan)) (як-є distinct))
        (за-умовою
-         ((тотожне? (native-first-plan-tag-state plan (як-є evaluator-fallback)) (як-є same))
+         ((тотожне? (native-first-plan-tag-state план-виконання (як-є evaluator-fallback)) (як-є same))
           (за-умовою
-            ((native-first-proper-list-length-2? plan)
+            ((native-first-proper-list-length-2? план-виконання)
              (native-first-execution-completed
                (як-є evaluator)
-               (обчислити (перше (решта plan)))))
+               (обчислити (перше (решта план-виконання)))))
             (так
              (native-first-execution-rejected
                (як-є invalid-plan)
                (native-first-list-2
                  (як-є malformed-evaluator-fallback-plan)
-                 plan)))))
-         ((тотожне? (native-first-plan-tag-state plan (як-є evaluator-fallback)) (як-є distinct))
+                 план-виконання)))))
+         ((тотожне? (native-first-plan-tag-state план-виконання (як-є evaluator-fallback)) (як-є distinct))
           (native-first-execution-rejected
             (як-є invalid-plan)
-            (native-first-list-2 (як-є unknown-native-first-plan) plan)))
+            (native-first-list-2 (як-є unknown-native-first-plan) план-виконання)))
          (так
           (native-first-execution-rejected
             (як-є invalid-plan)
-            (native-first-list-2 (як-є malformed-fallback-tag-state) plan)))))
+            (native-first-list-2 (як-є malformed-fallback-tag-state) план-виконання)))))
       (так
        (native-first-execution-rejected
          (як-є invalid-plan)
-         (native-first-list-2 (як-є unknown-native-first-plan) plan))))))
+         (native-first-list-2 (як-є unknown-native-first-plan) план-виконання))))))
 (визначити native-first-execute-expression
-  (функція (expression)
+  (функція (вираз-джерела)
     (native-first-execute-plan
-      (native-first-plan expression))))
+      (native-first-plan вираз-джерела))))
 
 (визначити native-first-execute-source-forms
-  (функція (forms)
+  (функція (форми-джерела)
     (за-умовою
-      ((атом? forms)
+      ((атом? форми-джерела)
        (за-умовою
-         ((тотожне? forms ())
+         ((тотожне? форми-джерела ())
           (як-є ()))
          (так
           (сполучити
@@ -167,16 +167,16 @@
               (як-є evaluator)
               (native-first-list-2
                 (як-є malformed-source-form-tail)
-                forms))
+                форми-джерела))
             (як-є ())))))
       (так
        (сполучити
-         (native-first-execute-expression (перше forms))
-         (native-first-execute-source-forms (решта forms)))))))
+         (native-first-execute-expression (перше форми-джерела))
+         (native-first-execute-source-forms (решта форми-джерела)))))))
 
 (визначити native-first-execute-source
-  (функція (source)
+  (функція (текст-джерела)
     (native-first-list-2
       (як-є source-execution)
       (native-first-execute-source-forms
-        (читати-всі source)))))
+        (читати-всі текст-джерела)))))
