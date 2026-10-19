@@ -55,6 +55,7 @@ jobs:
           case "$SHARD" in
             1)
               # Ранній справжній SENS свідок: Forward, TMS, JTMS — до незалежних CI-шарів.
+              cargo test --locked -p sens --test macro_derivation -- --nocapture
               cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration compound_success_bypasses_atom_only_eq_and_skips_atomic_no_match -- --exact --nocapture
               # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
               cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
