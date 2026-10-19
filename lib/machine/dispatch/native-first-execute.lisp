@@ -25,13 +25,13 @@
   (функція (a b)
     (сполучити a (сполучити b (як-є ())))))
 
-(визначити native-first-list-4
+(визначити нативний-список-чотирьох
   (функція (a b c d)
     (сполучити a (сполучити b (сполучити c (сполучити d (як-є ())))))))
 
 (визначити native-first-execution-completed
   (функція (route value)
-    (native-first-list-4
+    (нативний-список-чотирьох
       (як-є execution-route)
       route
       (як-є (status completed))
@@ -39,7 +39,7 @@
 
 (визначити native-first-execution-rejected
   (функція (route detail)
-    (native-first-list-4
+    (нативний-список-чотирьох
       (як-є execution-route)
       route
       (як-є (status rejected))
@@ -57,7 +57,7 @@
       (так
        ні))))
 
-(визначити native-first-proper-list-length-3?
+(визначити нативний-список-трьох-елементів?
   (функція (value)
     (за-умовою
       ((атом? value)
@@ -86,7 +86,7 @@
       (так
        (як-є distinct)))))
 
-(визначити native-first-execute-native-plan-result
+(визначити нативне-виконання-результат-плану
   (функція (plan result)
     (за-умовою
       ((атом? result)
@@ -104,9 +104,9 @@
          (як-є native)
          (native-first-list-2 (як-є malformed-native-result) result))))))
 
-(визначити native-first-execute-native-plan
+(визначити нативне-виконання-плану
   (функція (plan)
-    (native-first-execute-native-plan-result
+    (нативне-виконання-результат-плану
       plan
       (x86-call-admitted-u64
         (перше (решта plan))
@@ -117,8 +117,8 @@
     (за-умовою
       ((тотожне? (native-first-plan-tag-state plan (як-є native-plan)) (як-є same))
        (за-умовою
-         ((native-first-proper-list-length-3? plan)
-          (native-first-execute-native-plan plan))
+         ((нативний-список-трьох-елементів? plan)
+          (нативне-виконання-плану plan))
          (так
           (native-first-execution-rejected
             (як-є native)
