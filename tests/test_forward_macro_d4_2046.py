@@ -254,13 +254,13 @@ class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
     def _blob_sha(source):
         import hashlib
         raw = source.encode("utf-8")
-        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw).hexdigest()
+        return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
 
     @classmethod
     def _restore_original(cls, source):
         lines = source.splitlines(keepends=True)
         for line_no, bits, en, ukr in cls.CALLS:
-            pattern = re.compile(r"\\(\\s*\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+            pattern = re.compile(r"\(\s*\(\s*" + re.escape(ukr) + r"(?=\s|\))")
             index = line_no - 1
             found = list(pattern.finditer(lines[index]))
             if len(found) != 1:
@@ -283,7 +283,7 @@ class ForwardD10UkrCallsiteProjectionTests(unittest.TestCase):
 
         for line_no, bits, en, ukr in self.CALLS:
             with self.subTest(line=line_no, bits=bits):
-                pattern = re.compile(r"\\(\\s*\\(\\s*" + re.escape(ukr) + r"(?=\\s|\\))")
+                pattern = re.compile(r"\(\s*\(\s*" + re.escape(ukr) + r"(?=\s|\))")
                 self.assertEqual(len(list(pattern.finditer(source.splitlines()[line_no - 1]))), 1)
 
         restored = self._restore_original(source)
