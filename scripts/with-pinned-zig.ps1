@@ -49,15 +49,24 @@ if ($installedVersion -ne $version) {
     if ($asset.tarball -ne $expectedUri) {
         throw "Unexpected official Zig archive URI '$($asset.tarball)'; refusing to download."
     }
-    $expectedHash = ([string]$asset.shasum).ToLowerInvariant()
-    if ($expectedHash -notmatch '^[0-9a-f]{64}$') {
-        throw "Official Zig index did not provide a valid SHA-256 for $version."
+    # Pin the exact Windows artifact digest here as well as the Zig version.
+    # Update this allowlist only with an intentional repository toolchain change.
+    $pinnedHashes = @{
+        "0.16.0" = "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e"
+    }
+    if (-not $pinnedHashes.ContainsKey($version)) {
+        throw "No repository-pinned Windows x86_64 SHA-256 for Zig $version; update this script with the toolchain pin."
+    }
+    $expectedHash = $pinnedHashes[$version].ToLowerInvariant()
+    $indexHash = ([string]$asset.shasum).ToLowerInvariant()
+    if ($indexHash -ne $expectedHash) {
+        throw "Official Zig index digest differs from the repository pin for $version."
     }
 
     $archive = Join-Path $env:TEMP "sens-zig-$version-$PID.zip"
     $extractRoot = Join-Path $env:TEMP "sens-zig-extract-$PID"
     try {
-        Invoke-WebRequest -Uri $expectedUri -OutFile $archive
+        Invoke-WebRequest -UseBasicParsing -Uri $expectedUri -OutFile $archive
         $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($actualHash -ne $expectedHash) {
             throw "Zig archive SHA-256 mismatch: expected $expectedHash, got $actualHash."
