@@ -1,10 +1,12 @@
-; #604 migration-only witness. This is not coverage authority.
-; It freezes the last 32-row Rust partial projection and proves that every
-; legacy partial pair survives inside the derived Lisp-owned 122-pair projection.
+; #604 — історичні свідчення покриття, не семантичний реєстр функцій.
+; Усі 32 історичні пари мають залишатися в чинній проєкції зі 126 пар.
+; Лічильники записано десятково для точної D24+ семантики.
+; Deutsch: Historische 32 Paare gegen die aktuelle Projektion mit 126 Paaren prüfen.
+; English: Preserve 32 historic pairs in the current 126-pair projection.
 
 (encoder-coverage-legacy-parity/1
-  (legacy-pair-count #b100000)
-  (successor-pair-count #b1111010)
+  (legacy-pair-count 32)
+  (successor-pair-count 126)
   (legacy X86-BASE "ADD")
   (legacy X86-BASE "AND")
   (legacy X86-BASE "CMP")
