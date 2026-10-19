@@ -1,7 +1,7 @@
 //! Native SENS executes its own self-verdicts; Rust only loads source and observes D1/error receipts.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source,
+    eval_parsed_expressions, eval_core_library_source,
     eval_pinned_reasoning_source, parse_mixed_exact_domain, Session,
 };
 
@@ -14,9 +14,7 @@ const ANCESTOR_MUTANT: &str =
 
 fn world_session() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("pinned Core must load before the actual SENS World");
