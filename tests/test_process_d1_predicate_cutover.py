@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Точкове свідчення: п'ять D4:0100 NOT(D3:101 EQ) без текстового NIL."""
+"""Структурний аудит п'яти D4 хибне?(D3 тотожне?) у чинній укр-проєкції; виконання належить SENS."""
 from pathlib import Path
 import re
 import unittest
@@ -7,9 +7,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/process.lisp"
 EXPECTED = {
-    "process-result->text": 3,
-    "process-public-exit-code": 1,
-    "process-run": 1,
+    "процес-результат-текст": 3,
+    "процес-публічний-вихід-код": 1,
+    "процес-запустити": 1,
 }
 
 
@@ -37,7 +37,7 @@ def parse(source):
 def inspect(source):
     found = {}
     for form in parse(source):
-        if not isinstance(form, list) or len(form) < 3 or form[0] != "0011":
+        if not isinstance(form, list) or len(form) < 3 or form[0] != "визначити":
             continue
         name = form[1]
         total = 0
@@ -46,10 +46,8 @@ def inspect(source):
             nonlocal total
             if not isinstance(node, list):
                 return
-            if node and node[0] == "тотожне?":
-                raise ValueError("legacy language surface used for predicate inversion")
-            if node and node[0] == "0100":
-                if len(node) != 2 or not isinstance(node[1], list) or not node[1] or node[1][0] != "101":
+            if node and node[0] == "хибне?":
+                if len(node) != 2 or not isinstance(node[1], list) or not node[1] or node[1][0] != "тотожне?":
                     raise ValueError("D4 NOT must have exactly one D3 EQ predicate argument")
                 if len(node[1]) != 3:
                     raise ValueError("D3 EQ must have two arguments")
@@ -78,28 +76,22 @@ class ProcessD1Cutover(unittest.TestCase):
             self.assertRegex(d1, rf"(?m)^\s*\({bits}\s+.*\(LISP {name}\)")
         self.assertRegex(d3, r"(?m)^\s*\(101\s+.*\(LISP EQ\)")
         self.assertRegex(d4, r"(?m)^\s*\(0100\s+.*\(LISP NOT\)")
-        self.assertNotIn("(тотожне?", SOURCE.read_text(encoding="utf-8"))
+        self.assertIn("(хибне? (тотожне?", SOURCE.read_text(encoding="utf-8"))
 
     def test_no_change_to_process_exit_compatibility(self):
         src = SOURCE.read_text(encoding="utf-8")
-        self.assertIn("((101 code (001 ())) -1)", src)
-        self.assertIn("(process-raw-exit-code raw)", src)
-        self.assertIn("(utf8-decode-string (process-raw-stderr-bytes raw))", src)
+        self.assertIn("((тотожне? код (як-є ())) -1)", src)
+        self.assertIn("(process-raw-exit-code сирий-результат)", src)
+        self.assertIn("(кодування-юнікод-8-декодувати-рядок (process-raw-stderr-bytes сирий-результат))", src)
 
     def test_two_controlled_mutations_rejected(self):
         src = SOURCE.read_text(encoding="utf-8")
         for variant in (
-            src.replace("(0100 (101", "(0101 (101", 1),
-            src.replace("(0100 (101", "(0100 (0100 (101", 1),
+            src.replace("(хибне? (тотожне?", "(порожнє? (тотожне?", 1),
+            src.replace("(хибне? (тотожне?", "(хибне? (хибне? (тотожне?", 1),
         ):
             with self.assertRaises(ValueError):
                 inspect(variant)
-
-    def test_d1_inversion_law_exhaustive(self):
-        for predicate in (False, True):
-            # The historical EQ(D1,NO) inversion and D4:NOT(D1) are identical
-            # on the complete two-element D1 domain.
-            self.assertEqual(predicate is False, not predicate)
 
 
 if __name__ == "__main__":
