@@ -20,35 +20,46 @@
 ;; Ein unveränderlicher content-addressed Store ist eine persistente Map von der
 ;; kanonischen Adresse aus `lib/world.lisp` zu gewöhnlichen my-lisp-Daten.
 
-(визначити empty-content-store
+(визначити порожній-вміст-сховище
   (функція () мапа-порожній))
 
-(визначити content-store-put
+(визначити вміст-сховище-покласти
   (функція (store value)
     (внутрішня-мапа-вставити (знання-вміст-адреса value) value store)))
 
-(визначити content-store-get
+(визначити вміст-сховище-отримати
   (функція (store address)
     (внутрішня-мапа-отримати address store)))
 
-(визначити content-store-contains?
+(визначити вміст-сховище-містить?
   (функція (store address)
     (внутрішня-мапа-містить address store)))
 
-(визначити content-store-put-world
+(визначити вміст-сховище-покласти-світ
   (функція (store world)
     (внутрішня-мапа-вставити (знання-вміст-адреса (світ-адреса-вміст world))
                 (світ-адреса-вміст world)
                 store)))
 
-(визначити content-store-size
+(визначити вміст-сховище-розмір
   (функція (store)
     (внутрішня-довжина store)))
 
-; D9:000101101 CONTENT-STORE-PUT and D9:000111111 CONTENT-STORE-PUT-WORLD.
-; Source: knowledge/d9-semantic-layer-harvest-v1.json and this Lisp module.
-; Both take (store value/world); their canonical content address is derived
-; by the existing SENS code. Never alias either to three-argument MAP-INSERT.
-; These are Ukrainian SENS surface bindings, not new D9 native opcodes.
-(визначити вміст-сховище-покласти content-store-put)
-(визначити вміст-сховище-покласти-світ content-store-put-world)
+; Повні укр-імена — первинні Lisp-owned замикання ратифікованих D9-резидентів.
+; Exact 9-bit identities live in lib/domains/d9.lisp; they are not call heads.
+; D9:000010111 CONTENT-STORE-SIZE
+; D9:000011110 CONTENT-STORE-CONTAINS?
+; D9:000100000 CONTENT-STORE-GET
+; D9:000100001 EMPTY-CONTENT-STORE
+; D9:000101101 CONTENT-STORE-PUT
+; D9:000111111 CONTENT-STORE-PUT-WORLD
+; Підстановка лише змінює людську проєкцію: жодної нової диспетчеризації,
+; числового перетворення, ширини-здогадки чи зміни тіла функцій.
+;
+; Історичні англійські входи лишаються псевдонімами тих самих замикань.
+(визначити empty-content-store порожній-вміст-сховище)
+(визначити content-store-put вміст-сховище-покласти)
+(визначити content-store-get вміст-сховище-отримати)
+(визначити content-store-contains? вміст-сховище-містить?)
+(визначити content-store-put-world вміст-сховище-покласти-світ)
+(визначити content-store-size вміст-сховище-розмір)
