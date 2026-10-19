@@ -1,24 +1,22 @@
-; #508 — machine-readable native-first coverage ledger.
+; Журнал фактичного покриття нативного виконання SENS.
 ;
-; Diagnostic/projection data only. This file is NOT a semantic registry and
-; MUST NOT participate in класифікувати-нативний-вираз dispatch. The classifier remains
-; the execution-routing authority; this ledger only records observed coverage
-; classes, explicit fallback reasons, and concrete missing prerequisites.
+; Це лише цитовані діагностичні дані: вони не визначають семантики,
+; не створюють нативного маршруту й не підтверджують допуск самі собою.
+; Маршрут вибирає справжній класифікатор SENS; незалежний свідок
+; перевіряє результат і точно зберігає відмову та її передумову.
 ;
-; Each row:
-;   (native-coverage
-;     (class <diagnostic-class>)
-;     (representative <expression-data>)
-;     (status native-supported|fallback-required|blocked-runtime-prerequisite)
-;     (reason <bounded-reason>)
-;     (evidence <witness-name>)
-;     [(prerequisite <concrete-prerequisite>)]
-;     [(expected <independent-expected-value>)]
-;     [(effect <effect-class>)]
-;     [(error <error-class>)])
+; Єдині виконувані голови файла — ратифіковані D4 «визначити»
+; і D3 «як-є». Історичну виконавчу голову 001 фізично вилучено.
+; Представницькі форми також записані сучасною українською проєкцією,
+; але залишаються даними всередині одного цитованого журналу.
+;
+; Поля native-coverage, class, representative, status, reason,
+; evidence, expected, effect, error, prerequisite є атомами
+; чинного протоколу споживача, а не викликами.
+; Шість випадків: один native, два fallback, три blocked.
 
-(визначити native-first-coverage-ledger
-  (001
+(визначити журнал-нативного-покриття
+  (як-є
     ((native-coverage
        (class car-cons-u64-literals)
        (representative (перше (сполучити 2 3)))
@@ -31,7 +29,7 @@
 
      (native-coverage
        (class general-application)
-       (representative (+ 2 3))
+       (representative (додати 2 3))
        (status fallback-required)
        (reason no-native-plan-for-general-application)
        (evidence native-first-dispatch-witness))
@@ -53,7 +51,7 @@
 
      (native-coverage
        (class lambda-application)
-       (representative ((функція (x) (+ x 1)) 41))
+       (representative ((функція (аргумент) (додати аргумент 1)) 41))
        (status blocked-runtime-prerequisite)
        (reason user-callable-native-path-needs-closure-abi)
        (evidence native-first-dispatch-witness)
@@ -61,7 +59,10 @@
 
      (native-coverage
        (class general-control-flow)
-       (representative (110 ((101 (001 000) (001 001)) 0) ((010 (001 000)) 1)))
+       (representative
+         (за-умовою
+           ((тотожне? (як-є ні) (як-є так)) 0)
+           ((атом? (як-є ())) 1)))
        (status blocked-runtime-prerequisite)
        (reason source-control-native-path-needs-label-graph)
        (evidence native-first-dispatch-witness)
