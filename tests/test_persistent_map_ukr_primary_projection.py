@@ -37,7 +37,7 @@ class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
 
                 self.assertEqual(
                     len(re.findall(
-                        rf"(?m)^\\(визначити\\s+{re.escape(ukrainian)}(?=\\s|\\))",
+                        rf"(?m)^\(визначити\s+{re.escape(ukrainian)}(?=\s|\))",
                         source,
                     )),
                     1,
@@ -45,7 +45,7 @@ class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
                 )
                 self.assertNotRegex(
                     source,
-                    rf"(?m)^\\(визначити\\s+{re.escape(english)}(?=\\s|\\n)",
+                    rf"(?m)^\(визначити\s+{re.escape(english)}(?=\s|\n)",
                     f"{english}: English must not remain primary",
                 )
                 self.assertIn(f"(визначити {english} {ukrainian})", source)
@@ -63,7 +63,7 @@ class PersistentMapUkrPrimaryProjectionTests(unittest.TestCase):
         for _english, _ukrainian, bits in TARGETS:
             self.assertNotRegex(
                 source,
-                rf"(?m)^\\s*\\({bits}(?:\\s|\\))",
+                rf"(?m)^\s*\({bits}(?:\s|\))",
                 "source must not introduce a raw D9 binary call-head",
             )
 
