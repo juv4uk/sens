@@ -203,11 +203,34 @@ fn required_width_in_math_tree(
     Ok(width)
 }
 
+fn is_quoted_source_form(expr: &Expr, source: &str) -> bool {
+    let ExprKind::List(items) = &expr.kind else {
+        return false;
+    };
+    let Some(head) = items.first() else {
+        return false;
+    };
+    if matches!(&head.kind, ExprKind::DomainIdentity(identity)
+        if identity.width() == 3 && identity.packed_bits() == 0b001)
+    {
+        return true;
+    }
+    matches!(&head.kind, ExprKind::Symbol(name)
+        if matches!(name.as_ref(), "як-є" | "quote" | "'"))
+        || source.get(head.span.start..head.span.end)
+            .is_some_and(|spelling| spelling == "001" || spelling == "'")
+}
+
 fn project_expr(
     expr: &Expr,
     source: &str,
     inherited_math_width: Option<usize>,
 ) -> Result<Expr, LanguageError> {
+    // Quoted forms are syntax/data. Their contents may include decimal digits,
+    // domain-shaped atoms, or source code; projection must preserve every one.
+    if is_quoted_source_form(expr, source) {
+        return Ok(expr.clone());
+    }
     if let Some(token) = integer_lexeme(expr, source) {
         let width = match inherited_math_width {
             Some(width) => width.max(integer_width(token, expr.span)?),
@@ -352,20 +375,15 @@ mod tests {
     }
 
     #[test]
-    fn integer_projection_recurses_into_nested_and_quoted_source_data() {
+    fn quoted_source_data_keeps_decimal_atoms_and_nested_code_unchanged() {
         let source = "(як-є (сполучити 2 (сполучити -3 (як-є ()))))";
         let parsed = crate::parse(source).expect("source parses");
         let projected = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect("integer data is exactly projected");
-        fn count_words(expr: &Expr) -> usize {
-            match &expr.kind {
-                ExprKind::BinaryNumber(_) => 1,
-                ExprKind::List(items) => items.iter().map(count_words).sum(),
-                ExprKind::Pair(car, cdr) => count_words(car) + count_words(cdr),
-                _ => 0,
-            }
-        }
-        assert_eq!(projected.iter().map(count_words).sum::<usize>(), 2);
+            .expect("quoted source data remains opaque");
+        assert_eq!(projected, parsed, "projection must not recurse beneath QUOTE");
+        let ExprKind::List(outer) = &projected[0].kind else { panic!("outer QUOTE"); };
+        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted list data"); };
+        assert!(matches!(&data[1].kind, ExprKind::Number(value, _) if *value == 2.0));
     }
 
     #[test]
