@@ -156,6 +156,62 @@ class FileMetricTests(TempTree):
         self.assertEqual(p.files_pct, 0.0)
 
 
+class KeyboardFileCoverageTests(TempTree):
+    def test_whole_file_and_source_code_are_separate_counts(self):
+        root = self.tree({
+            "lib/суцільний.lisp": "(визначити число 125)\n; українською\n",
+            "lib/коментар.lisp": "(визначити число 125)\n; TODO\n",
+            "lib/рядок.lisp": '(визначити слово "English text")\n',
+            "lib/змінна.lisp": "(визначити legacy 125)\n",
+            "lib/порожній.lisp": "\n  ",
+        })
+        progress = mod.measure(root)
+        self.assertEqual(progress.lisp_files, 5)
+        self.assertEqual(progress.files_keyboard_only, 1)
+        self.assertEqual(progress.keyboard_files_pct, 20.0)
+        self.assertEqual(progress.files_code_keyboard_only, 3)
+        self.assertEqual(progress.code_keyboard_files_pct, 60.0)
+        self.assertEqual(progress.active_executable_files, 5)
+        self.assertEqual(progress.active_files_keyboard_only, 1)
+        self.assertEqual(progress.active_files_code_keyboard_only, 3)
+        self.assertEqual(progress.active_code_keyboard_files_pct, 60.0)
+        self.assertIn("увесь файл 1/5 (20.0%)", mod.render(progress))
+        self.assertIn("код без коментарів і рядків 3/5 (60.0%)",
+                      mod.render(progress))
+        self.assertEqual(
+            next(f for f in progress.files if f.path.endswith("/коментар.lisp"))
+            .first_illegal_keyboard_char, "T")
+
+        report = root / "coverage.json"
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = mod.main(["--root", str(root), "--json", str(report),
+                           "--list", "--top", "1", "--no-annotation"])
+        self.assertEqual(rc, 0)
+        payload = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual(payload["files_keyboard_only"], 1)
+        self.assertEqual(payload["files_code_keyboard_only"], 3)
+        self.assertEqual(len(payload["keyboard_pending_files"]), 4)
+        self.assertIn(".lisp НЕ повністю з української клавіатури: 4",
+                      out.getvalue())
+
+    def test_nested_comments_do_not_count_as_program_code(self):
+        root = self.tree({
+            "lib/блок.lisp": "(визначити число 1)\n#| TODO #| English |# |#\n",
+        })
+        progress = mod.measure(root)
+        self.assertEqual(progress.files_keyboard_only, 0)
+        self.assertEqual(progress.files_code_keyboard_only, 1)
+
+    def test_bad_utf8_is_not_silently_treated_as_ukrainian(self):
+        root = self.tree({"lib/зіпсований.lisp": "(визначити число 1)\n"})
+        (root / "lib/зіпсований.lisp").write_bytes(b"\xff")
+        progress = mod.measure(root)
+        self.assertEqual(progress.files_keyboard_only, 0)
+        self.assertEqual(progress.files_code_keyboard_only, 0)
+        self.assertEqual(progress.active_unreadable_files, 1)
+
+
 class FullUkrFileProgressTests(TempTree):
     def test_full_ukr_file_percentage_moves_when_compact_call_becomes_full(self):
         # Обидва файли вже містять кирилицю: стара files_pct = 100%,
