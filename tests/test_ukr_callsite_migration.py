@@ -696,35 +696,66 @@ class Core1D3D4UkrSourceProjectionTests(unittest.TestCase):
 class UkrainianGreetingFullSurfaceTests(unittest.TestCase):
     """Один повністю доведений D4-фрагмент активного українського прикладу."""
 
-    def test_guest_list_definition_uses_ratified_full_ukr_d4_forms(self):
+    REWRITES = (
+        (
+            "(\u0432\u0438\u0437\u043d\u0430\u0447\u0438\u0442\u0438 \u043f\u0440\u0438\u0432\u0456\u0442\u0430\u043d\u043d\u044f (\u0444\u0443\u043d\u043a\u0446\u0456\u044f (\u0456\u043c'\u044f) (\u0440\u044f\u0434\u043e\u043a-\u0434\u043e\u0434\u0430\u0442\u0438 (\u0440\u044f\u0434\u043e\u043a-\u0434\u043e\u0434\u0430\u0442\u0438 \"\u041f\u0440\u0438\u0432\u0456\u0442, \" \u0456\u043c'\u044f) \"!\")))",
+            "(0011 \u043f\u0440\u0438\u0432\u0456\u0442\u0430\u043d\u043d\u044f (0010 (\u0456\u043c'\u044f) (110011110 (110011110 \"\u041f\u0440\u0438\u0432\u0456\u0442, \" \u0456\u043c'\u044f) \"!\")))",
+        ),
+        (
+            "(\u0432\u0438\u0437\u043d\u0430\u0447\u0438\u0442\u0438 \u0433\u043e\u0441\u0442\u0456 (\u0441\u043f\u0438\u0441\u043e\u043a '\u041e\u043b\u0435\u043d\u0430 '\u0422\u0430\u0440\u0430\u0441 '\u0412\u043e\u0432\u0430))",
+            "(0011 \u0433\u043e\u0441\u0442\u0456 (1110 '\u041e\u043b\u0435\u043d\u0430 '\u0422\u0430\u0440\u0430\u0441 '\u0412\u043e\u0432\u0430))",
+        ),
+        (
+            "(\u0434\u0440\u0443\u043a\u0443\u0432\u0430\u0442\u0438 (\u043f\u0440\u0438\u0432\u0456\u0442\u0430\u043d\u043d\u044f \"\u0434\u0440\u0443\u0436\u0435\"))",
+            "(11011011 (\u043f\u0440\u0438\u0432\u0456\u0442\u0430\u043d\u043d\u044f \"\u0434\u0440\u0443\u0436\u0435\"))",
+        ),
+        (
+            "(\u0434\u0440\u0443\u043a\u0443\u0432\u0430\u0442\u0438 (\u0440\u044f\u0434\u043e\u043a-\u0434\u043e\u0434\u0430\u0442\u0438 \"\u041f\u0435\u0440\u0448\u0438\u0439 \u0433\u0456\u0441\u0442\u044c \u2014 \" (\u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f-\u0443-\u0442\u0435\u043a\u0441\u0442 (\u043f\u0435\u0440\u0448\u0435 \u0433\u043e\u0441\u0442\u0456))))",
+            "(11011011 (110011110 \"\u041f\u0435\u0440\u0448\u0438\u0439 \u0433\u0456\u0441\u0442\u044c \u2014 \" (\u0443-\u0442\u0435\u043a\u0441\u0442 (100 \u0433\u043e\u0441\u0442\u0456))))",
+        ),
+        (
+            "(\u0434\u0440\u0443\u043a\u0443\u0432\u0430\u0442\u0438 (\u0440\u044f\u0434\u043e\u043a-\u0434\u043e\u0434\u0430\u0442\u0438 \"\u0426\u0435 \u0430\u0442\u043e\u043c? \" (\u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f-\u0443-\u0442\u0435\u043a\u0441\u0442 (\u0430\u0442\u043e\u043c? (\u043f\u0435\u0440\u0448\u0435 \u0433\u043e\u0441\u0442\u0456)))))",
+            "(11011011 (110011110 \"\u0426\u0435 \u0430\u0442\u043e\u043c? \" (\u0443-\u0442\u0435\u043a\u0441\u0442 (010 (100 \u0433\u043e\u0441\u0442\u0456)))))",
+        ),
+    )
+    SURFACES = (
+        (4, "0011", "\u0432\u0438\u0437\u043d\u0430\u0447\u0438\u0442\u0438"), (4, "0010", "\u0444\u0443\u043d\u043a\u0446\u0456\u044f"),
+        (4, "1110", "\u0441\u043f\u0438\u0441\u043e\u043a"), (9, "110011110", "\u0440\u044f\u0434\u043e\u043a-\u0434\u043e\u0434\u0430\u0442\u0438"),
+        (8, "11011011", "\u0434\u0440\u0443\u043a\u0443\u0432\u0430\u0442\u0438"), (8, "11110100", "\u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f-\u0443-\u0442\u0435\u043a\u0441\u0442"),
+        (3, "100", "\u043f\u0435\u0440\u0448\u0435"), (3, "010", "\u0430\u0442\u043e\u043c?"),
+    )
+
+    def test_full_ukrainian_projection_and_exact_inverse(self):
         import hashlib
 
         root = Path(__file__).resolve().parents[1]
-        path = root / "examples/ukrainian-greeting.lisp"
-        original_bytes = path.read_bytes()
-        source = original_bytes.decode("utf-8")
-        old_form = "(0011 гості (1110 'Олена 'Тарас 'Вова))"
-        new_form = "(визначити гості (список 'Олена 'Тарас 'Вова))"
+        source = (root / "examples/ukrainian-greeting.lisp").read_text(encoding="utf-8")
 
-        self.assertEqual(source.count(new_form), 1)
-        self.assertNotIn(old_form, source)
-        self.assertIn("'Олена 'Тарас 'Вова", source)
+        for new_form, old_form in self.REWRITES:
+            with self.subTest(new=new_form[:44]):
+                self.assertEqual(source.count(new_form), 1)
+                self.assertNotIn(old_form, source)
+        self.assertIn("'\u041e\u043b\u0435\u043d\u0430 '\u0422\u0430\u0440\u0430\u0441 '\u0412\u043e\u0432\u0430", source)
         mod.parse(source)
 
-        for bits, spelling in (("0011", "визначити"), ("1110", "список")):
-            table = (root / "lib/domains/d4.lisp").read_text(encoding="utf-8")
-            rows = [line for line in table.splitlines()
-                    if line.strip().startswith(f"({bits} (ук ")]
-            self.assertEqual(len(rows), 1)
-            self.assertIn(f"(укр {spelling})", rows[0])
+        for width, bits, spelling in self.SURFACES:
+            with self.subTest(domain=width, bits=bits):
+                table = (root / "lib" / "domains" / f"d{width}.lisp").read_text(encoding="utf-8")
+                rows = [line for line in table.splitlines()
+                        if line.strip().startswith(f"({bits} (\u0443\u043a ")]
+                self.assertEqual(len(rows), 1)
+                self.assertIn(f"(\u0443\u043a\u0440 {spelling})", rows[0])
 
-        restored = source.replace(new_form, old_form, 1).encode("utf-8")
+        restored = source
+        for new_form, old_form in self.REWRITES:
+            restored = restored.replace(new_form, old_form, 1)
+        data = restored.encode("utf-8")
         digest = hashlib.sha1(
-            b"blob " + str(len(restored)).encode("ascii") + b"\0" + restored
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
         ).hexdigest()
         self.assertEqual(
             digest, "0c35ae861fdbed1edbe4fe932b8266dd4b51b869",
-            "після зворотної заміни початковий Git blob має відновлюватися побайтно",
+            "\u043f\u0456\u0441\u043b\u044f \u0437\u0432\u043e\u0440\u043e\u0442\u043d\u043e\u0457 \u0437\u0430\u043c\u0456\u043d\u0438 \u043f\u043e\u0447\u0430\u0442\u043a\u043e\u0432\u0438\u0439 Git blob \u043c\u0430\u0454 \u0432\u0456\u0434\u043d\u043e\u0432\u043b\u044e\u0432\u0430\u0442\u0438\u0441\u044f \u043f\u043e\u0431\u0430\u0439\u0442\u043d\u043e",
         )
 
 
