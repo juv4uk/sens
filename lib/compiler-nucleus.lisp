@@ -22,16 +22,16 @@
 ; exact-domain identities.  The focused guard lowers this file before execution
 ; and rejects any historical Sid/Call node.
 
-(визначити compiler-authority-find
-  (функція (ідентичність rows)
+(визначити знайти-авторитет-компілятора
+  (функція (ідентичність рядки-для-пошуку-авторитету)
     (за-умовою
-      ((атом? rows) ())
-      ((тотожне? ідентичність (перше (перше rows))) (перше rows))
-      (так (compiler-authority-find ідентичність (решта rows))))))
+      ((атом? рядки-для-пошуку-авторитету) ())
+      ((тотожне? ідентичність (перше (перше рядки-для-пошуку-авторитету))) (перше рядки-для-пошуку-авторитету))
+      (так (знайти-авторитет-компілятора ідентичність (решта рядки-для-пошуку-авторитету))))))
 
 (визначити compiler-nucleus
   (функція (ідентичність authority)
-    (compiler-authority-find ідентичність authority)))
+    (знайти-авторитет-компілятора ідентичність authority)))
 
 
 ; Representation-only bootstrap seam for #3808.
@@ -59,12 +59,12 @@
 ;
 ; DECOMPOSE is the representation-only mechanism from #3808.
 
-(визначити compiler-true
-  (функція (seed)
-    (атом? seed)))
+(визначити істина-компілятора
+  (функція (насіння-локального-компілятора)
+    (атом? насіння-локального-компілятора)))
 
-(визначити compiler-false
-  (функція (seed)
+(визначити хиба-компілятора
+  (функція (насіння-локального-компілятора)
     ні))
 
 ; Exact proper-list end is NIL, not every atom. Derive the observation
@@ -74,41 +74,41 @@
   (функція (value)
     (за-умовою
       ((атом? value) (тотожне? value (як-є ())))
-      (так (compiler-false ())))))
+      (так (хиба-компілятора ())))))
 
 ; A verified bit sequence is a proper list of D1 atoms. To test the
 ; empty-list terminator, use the ratified ATOM predicate, not EQ over a
 ; non-atomic pair: exact D3 EQ admits two ATOMS, not a list-versus-NIL.
-(визначити compiler-bits-equal
-  (функція (seed left right)
+(визначити бітові-послідовності-однакові?
+  (функція (насіння-локального-компілятора послідовність-бітів-зліва послідовність-бітів-справа)
     (за-умовою
-      ((атом? left) (атом? right))
-      ((атом? right) (compiler-false seed))
-      ((тотожне? (перше left) (перше right))
-       (compiler-bits-equal seed (решта left) (решта right)))
-      ((compiler-true seed) (compiler-false seed)))))
+      ((атом? послідовність-бітів-зліва) (атом? послідовність-бітів-справа))
+      ((атом? послідовність-бітів-справа) (хиба-компілятора насіння-локального-компілятора))
+      ((тотожне? (перше послідовність-бітів-зліва) (перше послідовність-бітів-справа))
+       (бітові-послідовності-однакові? насіння-локального-компілятора (решта послідовність-бітів-зліва) (решта послідовність-бітів-справа)))
+      ((істина-компілятора насіння-локального-компілятора) (хиба-компілятора насіння-локального-компілятора)))))
 
-(визначити compiler-bit-xor
-  (функція (seed left right)
+(визначити виключне-або-одного-біту-компілятора
+  (функція (насіння-локального-компілятора біт-зліва-компілятора біт-справа-компілятора)
     (за-умовою
-      (left
+      (біт-зліва-компілятора
        (за-умовою
-         (right (compiler-false seed))
-         ((compiler-true seed) (compiler-true seed))))
-      ((compiler-true seed)
+         (біт-справа-компілятора (хиба-компілятора насіння-локального-компілятора))
+         ((істина-компілятора насіння-локального-компілятора) (істина-компілятора насіння-локального-компілятора))))
+      ((істина-компілятора насіння-локального-компілятора)
        (за-умовою
-         (right (compiler-true seed))
-         ((compiler-true seed) (compiler-false seed)))))))
+         (біт-справа-компілятора (істина-компілятора насіння-локального-компілятора))
+         ((істина-компілятора насіння-локального-компілятора) (хиба-компілятора насіння-локального-компілятора)))))))
 
-(визначити compiler-xor-bits
-  (функція (seed left right)
+(визначити виключне-або-бітових-послідовностей-компілятора
+  (функція (насіння-локального-компілятора послідовність-бітів-зліва послідовність-бітів-справа)
     (за-умовою
-      ((атом? left) ())
-      ((атом? right) ())
-      ((compiler-true seed)
+      ((атом? послідовність-бітів-зліва) ())
+      ((атом? послідовність-бітів-справа) ())
+      ((істина-компілятора насіння-локального-компілятора)
        (сполучити
-         (compiler-bit-xor seed (перше left) (перше right))
-         (compiler-xor-bits seed (решта left) (решта right)))))))
+         (виключне-або-одного-біту-компілятора насіння-локального-компілятора (перше послідовність-бітів-зліва) (перше послідовність-бітів-справа))
+         (виключне-або-бітових-послідовностей-компілятора насіння-локального-компілятора (решта послідовність-бітів-зліва) (решта послідовність-бітів-справа)))))))
 
 ; Exact selectors: D4:1001 CADR, D5:10011 CADDR.
 ; D6 is ratified but these longer selectors lack executable admission;
@@ -133,21 +133,21 @@
   (функція (law)
     (перше (решта (решта law)))))
 
-(визначити compiler-law-l5-spine
-  (функція (law)
-    (перше (решта (решта (решта law))))))
+(визначити остов-закону-л5-компілятора
+  (функція (закон-остова-л5-компілятора)
+    (перше (решта (решта (решта закон-остова-л5-компілятора))))))
 
-(визначити compiler-law-l5-atom-bits
-  (функція (law)
-    (перше (решта (compiler-law-l5-spine law)))))
+(визначити біти-атома-остова-л5-компілятора
+  (функція (закон-бітів-атома-л5-компілятора)
+    (перше (решта (остов-закону-л5-компілятора закон-бітів-атома-л5-компілятора)))))
 
-(визначити compiler-law-l5-head-bits
-  (функція (law)
-    (перше (решта (решта (compiler-law-l5-spine law))))))
+(визначити біти-голови-остова-л5-компілятора
+  (функція (закон-бітів-голови-л5-компілятора)
+    (перше (решта (решта (остов-закону-л5-компілятора закон-бітів-голови-л5-компілятора))))))
 
-(визначити compiler-law-l5-cond-bits
-  (функція (law)
-    (перше (решта (решта (решта (compiler-law-l5-spine law)))))))
+(визначити біти-умови-остова-л5-компілятора
+  (функція (закон-бітів-умови-л5-компілятора)
+    (перше (решта (решта (решта (остов-закону-л5-компілятора закон-бітів-умови-л5-компілятора)))))))
 
 ; Full D3 compiler closure is derived only from the ratified L1/L4/L5
 ; structure.  The three spine roles are read by ordered position; their duals
@@ -155,64 +155,64 @@
 (визначити compiler-role-from-l1-l5-bits
   (функція (seed bits law)
     (за-умовою
-      ((compiler-bits-equal seed bits (compiler-law-l5-head-bits law))
+      ((бітові-послідовності-однакові? seed bits (біти-голови-остова-л5-компілятора law))
        (як-є selector-head))
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
-           (compiler-law-l5-head-bits law)
+           (біти-голови-остова-л5-компілятора law)
            (compiler-law-xor-mask law)))
        (як-є selector-tail))
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
            (compiler-law-empty-bits law)
            (compiler-law-xor-mask law)))
        (як-є pair-construct))
-      ((compiler-true seed) ()))))
+      ((істина-компілятора seed) ()))))
 
 ; Full D3 lowering closure for self-hosting.  It deliberately has a separate
 ; name so the already-merged three-role execution API remains stable.
 (визначити compiler-lowering-role-from-l1-l5-bits
   (функція (seed bits law)
     (за-умовою
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
-           (compiler-law-l5-cond-bits law)
+           (біти-умови-остова-л5-компілятора law)
            (compiler-law-xor-mask law)))
        (як-є quote-form))
-      ((compiler-bits-equal seed bits (compiler-law-l5-atom-bits law))
+      ((бітові-послідовності-однакові? seed bits (біти-атома-остова-л5-компілятора law))
        (як-є atom-predicate))
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
-           (compiler-law-l5-head-bits law)
+           (біти-голови-остова-л5-компілятора law)
            (compiler-law-xor-mask law)))
        (як-є selector-tail))
-      ((compiler-bits-equal seed bits (compiler-law-l5-head-bits law))
+      ((бітові-послідовності-однакові? seed bits (біти-голови-остова-л5-компілятора law))
        (як-є selector-head))
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
-           (compiler-law-l5-atom-bits law)
+           (біти-атома-остова-л5-компілятора law)
            (compiler-law-xor-mask law)))
        (як-є atom-equality))
-      ((compiler-bits-equal seed bits (compiler-law-l5-cond-bits law))
+      ((бітові-послідовності-однакові? seed bits (біти-умови-остова-л5-компілятора law))
        (як-є cond-form))
-      ((compiler-bits-equal
+      ((бітові-послідовності-однакові?
          seed bits
-         (compiler-xor-bits
+         (виключне-або-бітових-послідовностей-компілятора
            seed
            (compiler-law-empty-bits law)
            (compiler-law-xor-mask law)))
        (як-є pair-construct))
-      ((compiler-true seed) ()))))
+      ((істина-компілятора seed) ()))))
 
 (визначити compiler-role-from-l1-l5
   (функція (decompose ідентичність law)
@@ -224,7 +224,7 @@
          ідентичність
          (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true ідентичність) ()))))
+      ((істина-компілятора ідентичність) ()))))
 
 
 ; #3824 — D4 bootstrap-role derivation from the ordered owner-ratified fibre.
@@ -256,11 +256,11 @@
 (визначити compiler-role-from-d4-bootstrap-bits
   (функція (seed bits law)
     (за-умовою
-      ((compiler-bits-equal seed bits (compiler-d4-law-first-child law))
+      ((бітові-послідовності-однакові? seed bits (compiler-d4-law-first-child law))
        (як-є lambda-form))
-      ((compiler-bits-equal seed bits (compiler-d4-law-second-child law))
+      ((бітові-послідовності-однакові? seed bits (compiler-d4-law-second-child law))
        (як-є define-form))
-      ((compiler-true seed) ()))))
+      ((істина-компілятора seed) ()))))
 
 (визначити compiler-role-from-d4-bootstrap
   (функція (decompose ідентичність law)
@@ -272,7 +272,7 @@
          ідентичність
          (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true ідентичність) ()))))
+      ((істина-компілятора ідентичність) ()))))
 
 ; One production role query for the whole current compiler nucleus.  Domain
 ; width selects which already-ratified structural law is applicable; neither
@@ -287,7 +287,7 @@
          ідентичність
          (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true ідентичність) ()))))
+      ((істина-компілятора ідентичність) ()))))
 
 (визначити compiler-lowering-role-from-laws
   (функція (decompose ідентичність d3-law d4-law)
@@ -300,7 +300,7 @@
          (compiler-shape-width (decompose ідентичність))
          (compiler-d4-law-width d4-law))
        (compiler-role-from-d4-bootstrap decompose ідентичність d4-law))
-      ((compiler-true ідентичність) ()))))
+      ((істина-компілятора ідентичність) ()))))
 
 
 ; #3810 — production request cutover.
@@ -315,7 +315,7 @@
   (функція (seed ідентичність role proof-ref походження)
     (за-умовою
       ((тотожне? role ()) ())
-      ((compiler-true seed)
+      ((істина-компілятора seed)
        (сполучити
          ідентичність
          (сполучити
@@ -367,15 +367,15 @@
          (compiler-role-from-d4-bootstrap decompose ідентичність d4-law)
          d4-proof
          походження))
-      ((compiler-true ідентичність) ()))))
+      ((істина-компілятора ідентичність) ()))))
 
 (визначити compiler-result-ok
   (функція (requests)
-    (сполучити (compiler-true ()) requests)))
+    (сполучити (істина-компілятора ()) requests)))
 
 (визначити compiler-result-fail
   (функція ()
-    (сполучити (compiler-false ()) ())))
+    (сполучити (хиба-компілятора ()) ())))
 
 (визначити compiler-result-success
   (функція (result)
@@ -389,7 +389,7 @@
   (функція (left right)
     (за-умовою
       ((атом? left) right)
-      ((compiler-true ())
+      ((істина-компілятора ())
        (сполучити
          (перше left)
          (compiler-append (решта left) right))))))
@@ -404,8 +404,8 @@
             (compiler-append
               (compiler-result-requests left)
               (compiler-result-requests right))))
-         ((compiler-true ()) (compiler-result-fail))))
-      ((compiler-true ()) (compiler-result-fail)))))
+         ((істина-компілятора ()) (compiler-result-fail))))
+      ((істина-компілятора ()) (compiler-result-fail)))))
 
 (визначити compiler-request-role
   (функція (request)
@@ -419,17 +419,17 @@
 (визначити compiler-exactly-one
   (функція (arguments)
     (за-умовою
-      ((атом? arguments) (compiler-false ()))
-      ((compiler-list-end? (решта arguments)) (compiler-true ()))
-      ((compiler-true ()) (compiler-false ())))))
+      ((атом? arguments) (хиба-компілятора ()))
+      ((compiler-list-end? (решта arguments)) (істина-компілятора ()))
+      ((істина-компілятора ()) (хиба-компілятора ())))))
 
 (визначити compiler-exactly-two
   (функція (arguments)
     (за-умовою
-      ((атом? arguments) (compiler-false ()))
-      ((атом? (решта arguments)) (compiler-false ()))
-      ((compiler-list-end? (решта (решта arguments))) (compiler-true ()))
-      ((compiler-true ()) (compiler-false ())))))
+      ((атом? arguments) (хиба-компілятора ()))
+      ((атом? (решта arguments)) (хиба-компілятора ()))
+      ((compiler-list-end? (решта (решта arguments))) (істина-компілятора ()))
+      ((істина-компілятора ()) (хиба-компілятора ())))))
 
 ; Proper variadic tails: only the exact EMPTY terminates a list.
 ; D3 ATOM detects a malformed nonempty atom; EQ sees EMPTY only after ATOM.
@@ -437,8 +437,8 @@
 (визначити compiler-proper-tail?
   (функція (tail)
     (за-умовою
-      ((compiler-list-end? tail) (compiler-true ()))
-      ((атом? tail) (compiler-false ()))
+      ((compiler-list-end? tail) (істина-компілятора ()))
+      ((атом? tail) (хиба-компілятора ()))
       (так (compiler-proper-tail? (решта tail))))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
@@ -447,24 +447,24 @@
 (визначити compiler-at-least-two
   (функція (arguments)
     (за-умовою
-      ((атом? arguments) (compiler-false ()))
-      ((атом? (решта arguments)) (compiler-false ()))
+      ((атом? arguments) (хиба-компілятора ()))
+      ((атом? (решта arguments)) (хиба-компілятора ()))
       (так (compiler-proper-tail? (решта (решта arguments)))))))
 
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
 (визначити compiler-cond-clauses-valid
   (функція (clauses)
     (за-умовою
-      ((compiler-list-end? clauses) (compiler-true ()))
-      ((атом? clauses) (compiler-false ()))
+      ((compiler-list-end? clauses) (істина-компілятора ()))
+      ((атом? clauses) (хиба-компілятора ()))
       ((compiler-exactly-two (перше clauses))
        (compiler-cond-clauses-valid (решта clauses)))
-      ((compiler-true ()) (compiler-false ())))))
+      ((істина-компілятора ()) (хиба-компілятора ())))))
 
 (визначити compiler-role-shape-valid
   (функція (request arguments)
     (за-умовою
-      ((атом? request) (compiler-false ()))
+      ((атом? request) (хиба-компілятора ()))
       ((тотожне? (compiler-request-role request) (як-є quote-form))
        (compiler-exactly-one arguments))
       ((тотожне? (compiler-request-role request) (як-є atom-predicate))
@@ -483,9 +483,9 @@
        (compiler-exactly-two arguments))
       ((тотожне? (compiler-request-role request) (як-є cond-form))
        (за-умовою
-         ((атом? arguments) (compiler-false ()))
-         ((compiler-true ()) (compiler-cond-clauses-valid arguments))))
-      ((compiler-true ()) (compiler-false ())))))
+         ((атом? arguments) (хиба-компілятора ()))
+         ((істина-компілятора ()) (compiler-cond-clauses-valid arguments))))
+      ((істина-компілятора ()) (хиба-компілятора ())))))
 
 ; Program traversal policy is semantic and therefore SENS-owned.
 ; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
@@ -517,7 +517,7 @@
        (решта arguments))
       ((тотожне? (compiler-request-role request) (як-є cond-form))
        (compiler-cond-child-expressions arguments))
-      ((compiler-true ()) arguments))))
+      ((істина-компілятора ()) arguments))))
 
 (визначити compiler-domain-result
   (функція
@@ -531,8 +531,8 @@
             (сполучити
               request
               (compiler-result-requests child-result))))
-         ((compiler-true ()) (compiler-result-fail))))
-      ((compiler-true ()) (compiler-result-fail)))))
+         ((істина-компілятора ()) (compiler-result-fail))))
+      ((істина-компілятора ()) (compiler-result-fail)))))
 
 ; Tail-position list traversal keeps stack bounded by expression nesting,
 ; not by the number of sibling forms. The accumulator stores requests reversed.
@@ -541,7 +541,7 @@
   (функція (items accumulator)
     (за-умовою
       ((атом? items) accumulator)
-      ((compiler-true ())
+      ((істина-компілятора ())
        (compiler-reverse-onto
          (решта items)
          (сполучити (перше items) accumulator))))))
@@ -563,7 +563,7 @@
          (compiler-reverse-onto
            (compiler-result-requests node-result)
            accumulator)))
-      ((compiler-true ()) (compiler-result-fail)))))
+      ((істина-компілятора ()) (compiler-result-fail)))))
 
 (визначити compiler-program-list-acc
   (функція
@@ -572,7 +572,7 @@
       ((compiler-list-end? nodes)
        (compiler-result-ok (compiler-reverse-onto accumulator ())))
       ((атом? nodes) (compiler-result-fail))
-      ((compiler-true ())
+      ((істина-компілятора ())
        (compiler-program-list-continue
          shape-or-empty
          decompose
@@ -622,7 +622,7 @@
          d3-proof
          d4-proof
          походження))
-      ((compiler-true ())
+      ((істина-компілятора ())
        (compiler-domain-result
          (compiler-request-from-laws
            decompose
@@ -717,7 +717,7 @@
                          (як-є artifact-status)
                          (як-є canonical-backend-neutral))
                        ())))))))))
-      ((compiler-true ())
+      ((істина-компілятора ())
        (сполучити
          (як-є compiler-compilation-error/1)
          (сполучити

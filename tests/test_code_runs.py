@@ -751,9 +751,60 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         "тотожне?": 24, "за-умовою": 35, "сполучити": 25,
         "функція": 57, "визначити": 57,
     }
+    LOCAL_HELPERS_UKR = {
+        "compiler-authority-find": "знайти-авторитет-компілятора",
+        "compiler-true": "істина-компілятора",
+        "compiler-false": "хиба-компілятора",
+        "compiler-bits-equal": "бітові-послідовності-однакові?",
+        "compiler-bit-xor": "виключне-або-одного-біту-компілятора",
+        "compiler-xor-bits": "виключне-або-бітових-послідовностей-компілятора",
+        "compiler-law-l5-spine": "остов-закону-л5-компілятора",
+        "compiler-law-l5-atom-bits": "біти-атома-остова-л5-компілятора",
+        "compiler-law-l5-head-bits": "біти-голови-остова-л5-компілятора",
+        "compiler-law-l5-cond-bits": "біти-умови-остова-л5-компілятора",
+    }
+    LOCAL_FORMALS_UKR = {
+        "compiler-authority-find": {
+            "rows": "рядки-для-пошуку-авторитету",
+        },
+        "compiler-true": {
+            "seed": "насіння-локального-компілятора",
+        },
+        "compiler-false": {
+            "seed": "насіння-локального-компілятора",
+        },
+        "compiler-bits-equal": {
+            "seed": "насіння-локального-компілятора",
+            "left": "послідовність-бітів-зліва",
+            "right": "послідовність-бітів-справа",
+        },
+        "compiler-bit-xor": {
+            "seed": "насіння-локального-компілятора",
+            "left": "біт-зліва-компілятора",
+            "right": "біт-справа-компілятора",
+        },
+        "compiler-xor-bits": {
+            "seed": "насіння-локального-компілятора",
+            "left": "послідовність-бітів-зліва",
+            "right": "послідовність-бітів-справа",
+        },
+        "compiler-law-l5-spine": {
+            "law": "закон-остова-л5-компілятора",
+        },
+        "compiler-law-l5-atom-bits": {
+            "law": "закон-бітів-атома-л5-компілятора",
+        },
+        "compiler-law-l5-head-bits": {
+            "law": "закон-бітів-голови-л5-компілятора",
+        },
+        "compiler-law-l5-cond-bits": {
+            "law": "закон-бітів-умови-л5-компілятора",
+        },
+    }
+    CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION = "f4ae59d3ce0ddf77b71ddf101b18f3faf0ee7272"
 
     @staticmethod
-    def _rewrite_heads(source: str, mapping: dict[str, str]):
+    def _rewrite_heads(source: str, mapping: dict[str, str], local_mapping: dict[str, str] | None = None, formal_mapping: dict[str, dict[str, str]] | None = None):
         tokens = []
         i = 0
         while i < len(source):
@@ -827,13 +878,24 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         counts = {}
         unexpected = []
 
-        def visit(node, quoted=False):
+        def visit(node, quoted=False, bound_mapping=None):
             if node["kind"] != "list":
+                if (not quoted and node["kind"] == "atom" and bound_mapping
+                        and node["token"]["text"] in bound_mapping):
+                    token = node["token"]
+                    edits.append((token["start"], token["end"], bound_mapping[token["text"]]))
+                    counts[token["text"]] = counts.get(token["text"], 0) + 1
                 return
             items = node["items"]
             head = items[0] if items else None
             token = head["token"] if head and head["kind"] == "atom" else None
             head_text = token["text"] if token and token["kind"] == "atom" else None
+            if not quoted and bound_mapping and head_text in bound_mapping and token:
+                edits.append((token["start"], token["end"], bound_mapping[head_text]))
+                counts[head_text] = counts.get(head_text, 0) + 1
+            if not quoted and local_mapping and head_text in local_mapping and token:
+                edits.append((token["start"], token["end"], local_mapping[head_text]))
+                counts[head_text] = counts.get(head_text, 0) + 1
             if not quoted and head_text and re.fullmatch(r"[01]{3,4}", head_text):
                 if head_text not in mapping:
                     unexpected.append(head_text)
@@ -843,10 +905,36 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
             elif not quoted and head_text in mapping:
                 edits.append((token["start"], token["end"], mapping[head_text]))
                 counts[head_text] = counts.get(head_text, 0) + 1
+            if (not quoted and head_text == "визначити" and len(items) > 2
+                    and items[1]["kind"] == "atom" and local_mapping and formal_mapping):
+                old_function = items[1]["token"]["text"]
+                if old_function in local_mapping:
+                    name_token = items[1]["token"]
+                    edits.append((name_token["start"], name_token["end"], local_mapping[old_function]))
+                    counts[old_function] = counts.get(old_function, 0) + 1
+                if old_function in formal_mapping and items[2]["kind"] == "list":
+                    fn_items = items[2]["items"]
+                    if (len(fn_items) > 1 and fn_items[0]["kind"] == "atom"
+                            and fn_items[0]["token"]["text"] == "функція"
+                            and fn_items[1]["kind"] == "list"):
+                        scope = {}
+                        for parameter in fn_items[1]["items"]:
+                            if parameter["kind"] == "atom":
+                                old_param = parameter["token"]["text"]
+                                if old_param in formal_mapping[old_function]:
+                                    new_param = formal_mapping[old_function][old_param]
+                                    scope[old_param] = new_param
+                                    edits.append((parameter["token"]["start"], parameter["token"]["end"], new_param))
+                                    counts[old_param] = counts.get(old_param, 0) + 1
+                        for child in fn_items[2:]:
+                            visit(child, False, scope)
+                        for child in items[3:]:
+                            visit(child, False, bound_mapping)
+                        return
             in_quote = head_text in {"001", "як-є"}
             start_child = 1 if head and head["kind"] == "atom" else 0
             for child in items[start_child:]:
-                visit(child, quoted or in_quote)
+                visit(child, quoted or in_quote, bound_mapping)
 
         for root in roots:
             visit(root)
@@ -926,6 +1014,51 @@ class CompilerNucleusUkrDomainProjectionTests(unittest.TestCase):
         self.assertEqual(unexpected, [])
         self.assertNotEqual(mutant_counts, original_counts,
                             "wrong Ukrainian peer must change the exact current-head census")
+
+    @staticmethod
+    def _git_blob_sha(source: str) -> str:
+        data = source.encode("utf-8")
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+
+    def test_private_helpers_and_formals_use_full_ukr_projection_with_exact_inverse(self):
+        source = self.SOURCE.read_text(encoding="utf-8")
+        projected, counts, unexpected, forms = self._rewrite_heads(
+            source, {}, self.LOCAL_HELPERS_UKR, self.LOCAL_FORMALS_UKR
+        )
+        self.assertEqual(unexpected, [])
+        self.assertEqual(forms, 57)
+        self.assertTrue(all(name in counts for name in self.LOCAL_HELPERS_UKR), counts)
+        self.assertTrue(all(name in counts for name in
+                            {key for pair in self.LOCAL_FORMALS_UKR.values() for key in pair}), counts)
+        self.assertIn("(визначити compiler-nucleus", projected)
+        self.assertIn("(визначити compiler-domain-shape", projected)
+        self.assertIn("(визначити compiler-lowering-role-from-laws", projected)
+
+        inverse_helpers = {ukr: old for old, ukr in self.LOCAL_HELPERS_UKR.items()}
+        inverse_formals = {
+            self.LOCAL_HELPERS_UKR[fn]: {ukr: old for old, ukr in pairs.items()}
+            for fn, pairs in self.LOCAL_FORMALS_UKR.items()
+        }
+        restored, _, inverse_unclassified, _ = self._rewrite_heads(
+            projected, {}, inverse_helpers, inverse_formals
+        )
+        self.assertEqual(inverse_unclassified, [])
+        self.assertEqual(self._git_blob_sha(restored),
+                         self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION,
+                         "local helper projection must restore exact pre-migration Git blob")
+
+        mutant = projected.replace(
+            "(визначити знайти-авторитет-компілятора",
+            "(визначити хиба-компілятора", 1
+        )
+        wrong, _, wrong_unclassified, _ = self._rewrite_heads(
+            mutant, {}, inverse_helpers, inverse_formals
+        )
+        self.assertEqual(wrong_unclassified, [])
+        self.assertNotEqual(self._git_blob_sha(wrong),
+                            self.CURRENT_SOURCE_BLOB_BEFORE_LOCAL_PROJECTION)
 
 
 
