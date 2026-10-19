@@ -127,6 +127,14 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
     Ok((output, core))
 }
 
+/// Людська українська .lisp-проєкція належить SENS, а не GUI/TUI.
+ /// Звичайні десяткові операнди набувають точного домену D24+ перед
+ /// обчисленням. Фізичний .sens іде окремим T5M шляхом, без цього reader.
+fn parse_human_lisp_file(source: &str) -> Result<Vec<sens::Expr>, sens::LanguageError> {
+    let parsed = parse(source)?;
+    sens::source_projection::project_ukr_decimal_integer_literals(&parsed, source)
+}
+
 fn bootstrap_core(
     session: &mut Session,
     core: CliCore,
@@ -658,7 +666,7 @@ fn main() {
         session.environment.define("*argv*", argv);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse(&source) {
+            Ok(source) => match parse_human_lisp_file(&source) {
                 Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
                     Ok(result) => {
                         for out in result.output {
@@ -696,6 +704,30 @@ fn main() {
 #[cfg(test)]
 mod core_profile_bootstrap_tests {
     use super::*;
+
+    #[test]
+    fn human_lisp_file_uses_d24_source_projection_in_real_core_evaluation() {
+        let source = "(додати 2 3)\n(додати 4 5)\n";
+        let parsed = parse_human_lisp_file(source).expect("десяткове .lisp джерело");
+        let mut session = Session { environment: Environment::root() };
+        bootstrap_core(&mut session, CliCore::Core4).expect("той самий Core4, що у CLI");
+        let result = eval_parsed_expressions(&parsed, &mut session)
+            .expect("самі визначення SENS обчислюють людські числа");
+        assert_eq!(result.value.to_string(), "9");
+    }
+
+    #[test]
+    fn file_mode_uses_human_decimal_source_not_legacy_encoded_literals() {
+        let parsed = parse_human_lisp_file("(додати -2 5)").expect("підписаний десятковий операнд");
+        let sens::ExprKind::List(items) = &parsed[0].kind else {
+            panic!("очікувано один виклик D5");
+        };
+        let digits: Vec<_> = items.iter().filter_map(|item| match &item.kind {
+            sens::ExprKind::BinaryNumber(number) => Some(number.to_decimal_string()),
+            _ => None,
+        }).collect();
+        assert_eq!(digits, ["-2", "5"]);
+    }
 
     #[test]
     fn implicit_ukrainian_repl_default_does_not_reject_file_mode() {
