@@ -9,7 +9,7 @@
 //! that contains their value. Within one connected D5 numeric expression tree,
 //! all source integer leaves receive the same widest required domain. This
 //! prevents an expression such as `(додати 8388608 1)` from mixing D48 and D24.
-//! Values outside i128 fail by a named NumericOverflow, never through float.
+//! Values are converted digit-by-digit and fail only beyond signed D192, never through a host integer or float.
 
 use crate::syntax::{Expr, ExprKind, Span};
 use crate::{BinaryNumber, ErrorKind, LanguageError};
@@ -50,52 +50,104 @@ fn integer_lexeme<'a>(expr: &Expr, source: &'a str) -> Option<&'a str> {
         .then_some(token)
 }
 
-fn numeric_domain_width(value: i128) -> usize {
-    for width in [24usize, 48, 96] {
-        let bound = 1i128 << (width - 1);
-        if value >= -bound && value < bound {
-            return width;
+/// Convert decimal digits to a magnitude bit vector without routing through
+/// a host integer type. The source domain, not i128/u64, owns the width.
+fn decimal_magnitude_bits(token: &str, span: Span) -> Result<(bool, Vec<u8>), LanguageError> {
+    let (negative, digits) = if let Some(rest) = token.strip_prefix('-') {
+        (true, rest)
+    } else if let Some(rest) = token.strip_prefix('+') {
+        (false, rest)
+    } else {
+        (false, token)
+    };
+    if digits.is_empty() || !digits.bytes().all(|byte| byte.is_ascii_digit()) {
+        return Err(LanguageError::new(
+            ErrorKind::NumericOverflow,
+            format!("invalid Ukrainian decimal integer source token: {token}"),
+            span,
+        ));
+    }
+
+    let mut decimal: Vec<u8> = digits.bytes().map(|byte| byte - b'0').collect();
+    while decimal.len() > 1 && decimal[0] == 0 {
+        decimal.remove(0);
+    }
+    let mut reversed_bits = Vec::new();
+    while decimal.iter().any(|digit| *digit != 0) {
+        let mut carry = 0u8;
+        for digit in &mut decimal {
+            let value = carry * 10 + *digit;
+            *digit = value / 2;
+            carry = value % 2;
+        }
+        reversed_bits.push(carry);
+        while decimal.len() > 1 && decimal[0] == 0 {
+            decimal.remove(0);
         }
     }
-    192
+    if reversed_bits.is_empty() {
+        reversed_bits.push(0);
+    }
+    reversed_bits.reverse();
+    Ok((negative, reversed_bits))
+}
+
+fn magnitude_fits_signed_width(negative: bool, magnitude: &[u8], width: usize) -> bool {
+    if magnitude.len() < width {
+        return true;
+    }
+    negative
+        && magnitude.len() == width
+        && magnitude[0] == 1
+        && magnitude[1..].iter().all(|bit| *bit == 0)
 }
 
 fn integer_width(token: &str, span: Span) -> Result<usize, LanguageError> {
-    let value: i128 = token.parse().map_err(|_| {
-        LanguageError::new(
-            ErrorKind::NumericOverflow,
-            format!("Ukrainian decimal integer exceeds the exact source range: {token}"),
-            span,
-        )
-    })?;
-    Ok(numeric_domain_width(value))
+    let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
+    [24usize, 48, 96, 192]
+        .into_iter()
+        .find(|width| magnitude_fits_signed_width(negative, &magnitude, *width))
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::NumericOverflow,
+                format!("Ukrainian decimal integer exceeds the exact D192 source range: {token}"),
+                span,
+            )
+        })
 }
 
-fn project_integer(token: &str, span: Span, width: usize) -> Result<Expr, LanguageError> {
-    let value: i128 = token.parse().map_err(|_| {
-        LanguageError::new(
-            ErrorKind::NumericOverflow,
-            format!("Ukrainian decimal integer exceeds the exact source range: {token}"),
-            span,
-        )
-    })?;
-    let width = width.max(numeric_domain_width(value));
-    // Two's complement, including sign-extension for D192 values. Never shift
-    // a host integer by 128 or more; those upper bits are explicit sign bits.
-    let bits: Vec<u8> = (0..width)
-        .rev()
-        .map(|position| {
-            if position >= 128 {
-                u8::from(value.is_negative())
-            } else {
-                ((value >> position) & 1) as u8
+fn project_integer(token: &str, span: Span, inherited_width: usize) -> Result<Expr, LanguageError> {
+    let (negative, magnitude) = decimal_magnitude_bits(token, span)?;
+    let required_width = integer_width(token, span)?;
+    let width = inherited_width.max(required_width);
+    let mut bits = vec![0u8; width];
+    for (index, bit) in magnitude.iter().rev().enumerate() {
+        if index >= width {
+            return Err(LanguageError::new(
+                ErrorKind::NumericOverflow,
+                format!("Ukrainian decimal integer exceeds selected D{width} width: {token}"),
+                span,
+            ));
+        }
+        bits[width - 1 - index] = *bit;
+    }
+    if negative {
+        // Exact two's complement is constructed in the selected domain width.
+        for bit in &mut bits {
+            *bit ^= 1;
+        }
+        for bit in bits.iter_mut().rev() {
+            if *bit == 0 {
+                *bit = 1;
+                break;
             }
-        })
-        .collect();
+            *bit = 0;
+        }
+    }
     let number = BinaryNumber::from_numeric_domain_bits(width, &bits).ok_or_else(|| {
         LanguageError::new(
             ErrorKind::NumericOverflow,
-            "could not construct exact D24+ source integer",
+            format!("could not construct exact D{width} source integer"),
             span,
         )
     })?;
@@ -296,11 +348,41 @@ mod tests {
     }
 
     #[test]
-    fn integer_projection_fails_named_beyond_the_supported_exact_source_range() {
+    fn source_integers_above_i128_use_exact_d192_words_without_float_round_trip() {
         let source = "(додати 170141183460469231731687303715884105728 1)";
-        let parsed = crate::parse(source).expect("reader preserves large integer atom");
-        let error = project_ukr_decimal_integer_literals(&parsed, source)
-            .expect_err("overflow cannot silently remain an unqualified host number");
+        let parsed = crate::parse(source).expect("reader preserves a large decimal atom");
+        let projected = project_ukr_decimal_integer_literals(&parsed, source)
+            .expect("2^127 is a valid signed D192 source integer");
+        let ExprKind::List(items) = &projected[0].kind else {
+            panic!("expected one D5 arithmetic form")
+        };
+        let ExprKind::BinaryNumber(value) = &items[1].kind else {
+            panic!("large decimal operand must become an exact binary-domain word")
+        };
+        assert_eq!(value.numeric_domain_width(), Some(192));
+        assert_eq!(value.to_decimal_string(), "170141183460469231731687303715884105728");
+    }
+
+    #[test]
+    fn signed_d192_boundary_is_exact_and_positive_overflow_fails_named() {
+        let minimum = "-3138550867693340381917894711603833208051177722232017256448";
+        let source = format!("(додати {minimum} 1)");
+        let parsed = crate::parse(&source).expect("reader preserves the signed decimal boundary");
+        let projected = project_ukr_decimal_integer_literals(&parsed, &source)
+            .expect("-2^191 is representable by signed D192");
+        let ExprKind::List(items) = &projected[0].kind else {
+            panic!("expected one arithmetic form")
+        };
+        let ExprKind::BinaryNumber(value) = &items[1].kind else {
+            panic!("expected exact D192 operand")
+        };
+        assert_eq!(value.numeric_domain_width(), Some(192));
+        assert_eq!(value.to_decimal_string(), minimum);
+
+        let positive_overflow = format!("(додати {} 1)", minimum.trim_start_matches('-'));
+        let parsed = crate::parse(&positive_overflow).expect("positive boundary reader");
+        let error = project_ukr_decimal_integer_literals(&parsed, &positive_overflow)
+            .expect_err("positive 2^191 exceeds signed D192");
         assert_eq!(error.kind, ErrorKind::NumericOverflow);
     }
 
