@@ -34,43 +34,43 @@
 (law-check (як-є list-car)         (тотожне? (перше (список (як-є a) (як-є b))) (як-є a)))
 
 ; D5 — порядок і арифметика
-(law-check (001 lessp-2-3)           (11010 2 3))
-(law-check (001 greaterp-3-2)        (11011 3 2))
-(law-check (001 not-lessp-3-2)       (0100 (11010 3 2)))
-(law-check (001 not-greaterp-2-3)    (0100 (11011 2 3)))
-(law-check (001 sum-2-3-not-less)    (0100 (11010 (01010 2 3) 5)))
-(law-check (001 sum-2-3-not-greater) (0100 (11011 (01010 2 3) 5)))
+(law-check (як-є lessp-2-3)           (менше? 2 3))
+(law-check (як-є greaterp-3-2)        (більше? 3 2))
+(law-check (як-є not-lessp-3-2)       (хибне? (менше? 3 2)))
+(law-check (як-є not-greaterp-2-3)    (хибне? (більше? 2 3)))
+(law-check (як-є sum-2-3-not-less)    (хибне? (менше? (додати 2 3) 5)))
+(law-check (як-є sum-2-3-not-greater) (хибне? (більше? (додати 2 3) 5)))
 
 ; D4 — append
 (law-check (як-є append-empty)
   (тотожне? (перше (приєднати (як-є ()) (список (як-є a)))) (як-є a)))
 
 ; D5 — добуток і частка
-(law-check (001 times-2-3-not-greater) (0100 (11011 (10110 2 3) 6)))
-(law-check (001 quotient-6-2-not-less) (0100 (11010 (10111 6 2) 3)))
+(law-check (як-є times-2-3-not-greater) (хибне? (більше? (помножити 2 3) 6)))
+(law-check (як-є quotient-6-2-not-less) (хибне? (менше? (частка 6 2) 3)))
 
 ; D5 — членство у списку
-(law-check (001 member-found) (11101 (001 a) (1110 (001 a) (001 b))))
+(law-check (як-є member-found) (значення-у-списку? (як-є a) (список (як-є a) (як-є b))))
 
 ; D6 — відображення й згортання
-(law-check (001 map-head-not-less)    (0100 (11010 (100 (101000 (0010 (x) (01010 x 1)) (1110 2 3))) 3)))
-(law-check (001 map-head-not-greater) (0100 (11011 (100 (101000 (0010 (x) (01010 x 1)) (1110 2 3))) 3)))
-(law-check (001 reduce-sum-not-less)    (0100 (11010 (101110 01010 0 (1110 2 3)) 5)))
-(law-check (001 reduce-sum-not-greater) (0100 (11011 (101110 01010 0 (1110 2 3)) 5)))
+(law-check (як-є map-head-not-less)    (хибне? (менше? (перше (відобразити (функція (x) (додати x 1)) (список 2 3))) 3)))
+(law-check (як-є map-head-not-greater) (хибне? (більше? (перше (відобразити (функція (x) (додати x 1)) (список 2 3))) 3)))
+(law-check (як-є reduce-sum-not-less)    (хибне? (менше? (згорнути 01010 0 (список 2 3)) 5)))
+(law-check (як-є reduce-sum-not-greater) (хибне? (більше? (згорнути 01010 0 (список 2 3)) 5)))
 
 ; D6 — зв'язування й довжина
-(law-check (001 let-sum-not-less)    (0100 (11010 (001000 ((x 2) (y 3)) (01010 x y)) 5)))
-(law-check (001 let-sum-not-greater) (0100 (11011 (001000 ((x 2) (y 3)) (01010 x y)) 5)))
-(law-check (001 length-of-list-2)    (11010 1 (000000 (1110 (001 a) (001 b)))))
+(law-check (як-є let-sum-not-less)    (хибне? (менше? (нехай ((x 2) (y 3)) (додати x y)) 5)))
+(law-check (як-є let-sum-not-greater) (хибне? (більше? (нехай ((x 2) (y 3)) (додати x y)) 5)))
+(law-check (як-є length-of-list-2)    (менше? 1 (довжина (список (як-є a) (як-є b)))))
 
 ; D8 — структурна рівність
-(law-check (001 equal-list-self)     (11110111 (1110 (001 a) (001 b)) (1110 (001 a) (001 b))))
+(law-check (як-є equal-list-self)     (однакові? (список (як-є a) (як-є b)) (список (як-є a) (як-є b))))
 
 ; D9 — читання файла (IO) і ідентичність схеми
 (law-check (як-є read-file-schema)
   (тотожне? (перше (читати-всі (читати-файл "lib/domains/d1.lisp"))) (як-є domain-table/1)))
 
 ; define + посилання на змінну
-(law-check (001 define-then-use) (11010 law-two 3))
+(law-check (як-є define-then-use) (менше? law-two 3))
 
 (друкувати "DOMAIN-LOGIC-LAWS: PASS d3=8 d5=7 d6=7 d8=1 define=1")
