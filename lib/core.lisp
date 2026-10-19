@@ -3,7 +3,7 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(визначити identity (функція (value) value))
+(визначити identity (функція (значення) значення))
 
 ; D4:0101 NULL `порожній?`: Lisp-owned механізм, D3:101 EQ до порожнього списку.
 ; Не перейменовувати історичний SID8 і не вводити машинних літералів.
@@ -18,8 +18,8 @@
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
 (визначити binary
-  (функція (width)
-    (список (як-є binary) width)))
+  (функція (ширина)
+    (список (як-є binary) ширина)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
