@@ -2,32 +2,32 @@
 ; The host transports contracts/control-dispatch-contract.lisp into
 ; `control-dispatch-document`; semantic expectations live here.
 
-(def cd-field
+(визначити cd-field
   (функція (entry field)
-    (let ((found (assoc field entry)))
+    (нехай ((found (знайти-за-ключем field entry)))
       (за-умовою
         ((атом? found) (як-є ()))
-        (t (решта found))))))
+        (так (решта found))))))
 
-(def cd-find
+(визначити cd-find
   (функція (identity entries)
     (за-умовою
       ((атом? entries) (як-є ()))
-      ((equal? (cd-field (перше entries) (як-є identity)) identity)
+      ((однакові? (cd-field (перше entries) (як-є identity)) identity)
        (перше entries))
-      (t (cd-find identity (решта entries))))))
+      (так (cd-find identity (решта entries))))))
 
-(def cd-entry
+(визначити cd-entry
   (функція (identity)
     (cd-find identity (решта control-dispatch-document))))
 
-(def cd-expect
+(визначити cd-expect
   (функція (identity field expected)
-    (let ((entry (cd-entry identity)))
+    (нехай ((entry (cd-entry identity)))
       (за-умовою
         ((атом? entry) (список (як-є missing-entry) identity))
-        ((equal? (cd-field entry field) expected) (як-є ()))
-        (t
+        ((однакові? (cd-field entry field) expected) (як-є ()))
+        (так
          (список
            (як-є mismatch)
            identity
@@ -35,16 +35,16 @@
            expected
            (cd-field entry field)))))))
 
-(def cd-first-failure
+(визначити cd-first-failure
   (функція (checks)
     (за-умовою
       ((атом? checks) (як-є ()))
       ((атом? (перше checks)) (cd-first-failure (решта checks)))
-      (t (перше checks)))))
+      (так (перше checks)))))
 
-(def control-dispatch-contract-witness
+(визначити control-dispatch-contract-witness
   (функція ()
-    (let ((failure
+    (нехай ((failure
             (cd-first-failure
               (список
                 (cd-expect (як-є canonical-cond)
@@ -113,7 +113,7 @@
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є pass))
                (список (як-є detail) (як-є explicit-domain-control))))
-        (t
+        (так
          (список (як-є control-dispatch-contract-witness)
                (список (як-є status) (як-є fail))
                (список (як-є detail) failure)))))))
