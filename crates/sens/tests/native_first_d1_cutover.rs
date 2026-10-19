@@ -50,6 +50,25 @@ fn real_native_first_classifier_still_rejects_unlowerable_forms() {
 }
 
 #[test]
+fn real_native_first_classifier_handles_atomic_and_compound_heads() {
+    let mut s = session();
+    // Атомарна голова D3 CAR із непридатним аргументом має відступити,
+    // а не бути відкинута до зіставлення викличної голови.
+    // Складену голову не можна подавати до D3 EQ (порівнює лише атоми).
+    for source in [
+        "(native-first-plan (як-є (перше 1)))",
+        "(native-first-plan (як-є ((функція (значення) значення) 1)))",
+    ] {
+        let value = eval(&mut s, source)
+            .expect("SENS classifier must not apply D3 EQ to a pair head");
+        assert!(
+            value.to_string().starts_with("(evaluator-fallback "),
+            "{source} must preserve evaluator fallback; got {value}"
+        );
+    }
+}
+
+#[test]
 fn no_coercion_from_empty_list_or_numeric_one_into_d1() {
     let mut s = session();
     for source in ["(0100 (001 ()))", "(0100 1)"] {

@@ -2,7 +2,7 @@ use sens::{eval_program, Session};
 
 fn eval_store(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
@@ -19,7 +19,7 @@ fn eval_store(source: &str) -> String {
 
 fn eval_store_fixture(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
@@ -40,7 +40,7 @@ fn eval_store_fixture(source: &str) -> String {
 
 fn eval_store_error(source: &str) -> String {
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
@@ -513,9 +513,7 @@ fn lisp_fs_journal_replay_rejects_malformed_field_entries_sens_owned() {
     // Semantic cases/branches are SENS code in the fixture, not Rust logic.
     // Rust only runs the pre-existing pinned library chain and observes output.
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     ).expect("ratified core loader");
     for (path, source) in [

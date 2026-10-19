@@ -2,23 +2,22 @@ name: SENS — перевірки поверхні Lisp
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
 
-# Кожен запуск зберігаємо до завершення: нові push не скасовують попередні.
-# Черга concurrency зберігає до 100 очікуваних запусків.
-concurrency:
-  group: sens-lisp-surface-${{ github.repository }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: false
-  queue: max
-
 jobs:
   runtime-shards:
     name: Реальне виконання — частина ${{ matrix.shard }}
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
@@ -54,7 +53,10 @@ jobs:
             1)
               # SENS reader/evaluator: позитивні й негативні native-first плани (#5872).
               cargo test --locked -p sens --test native_first_plan_shape -- --nocapture
+              cargo test --locked -p sens --test yantra yantra_json_object_predicate_is_actual_d1_behavior -- --nocapture
               cargo test --locked -p sens --test guard
+          # Реальний SENS macro/DEFINE: 10 розгортань D4, не Python-оракул.
+          cargo test --locked -p sens --test forward_exact_macro_migration -- --nocapture
               cargo test --locked -p sens --lib source_projection::tests:: -- --nocapture
               cargo test --locked -p sens --lib ratified_d9_string_surface_tests:: -- --nocapture
               cargo test --locked -p sens-cli --test physical_core4_sequence_cli --test physical_bare_session_cli --test uk_surface_audit_projection
@@ -112,6 +114,7 @@ jobs:
 
   lisp-guards:
     name: Українська проєкція та заборона сирих літералів
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     # Усі push/PR/manual перевірки — лише GitHub-hosted Ubuntu.
     # Не маршрутизувати код на персональний self-hosted runner.
     runs-on: ubuntu-24.04
@@ -263,6 +266,10 @@ jobs:
           python3 -m unittest tests/test_discover_domain_function_candidates.py -v
           python3 scripts/discover_domain_function_candidates.py --domain D6 --limit 16 --format tsv --no-research-scan --candidates-only --evidence-first
 
+      - name: Реальна SENS-семантика post-core зв'язувань (#5871)
+        if: ${{ always() }}
+        run: cargo test --locked -p sens --test core_postcore_ukr -- --nocapture
+
       - name: УКР-ПРОЄКЦІЯ — аудит поступової міграції .lisp (без глобального стопу)
         if: ${{ always() }}
         run: |
@@ -337,7 +344,7 @@ jobs:
 
   lisp-surface:
     name: Українська проєкція та заборона сирих літералів
-    if: always()
+    if: always() && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     needs: [lisp-guards, runtime-shards]
     runs-on: ubuntu-24.04
     steps:

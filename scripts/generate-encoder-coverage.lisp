@@ -14,6 +14,6 @@
           (як-є (status written))
           (список (як-є forms) encoder-coverage-form-count)
           (список (як-є partial) (довжина encoder-coverage-partials)))))))
-  (encoder-coverage-d1-yes
+  (так
    (друкувати
      (перше (читати-всі "(encoder-coverage-generate (status rejected) (reason invalid-coverage-input-projection))")))))

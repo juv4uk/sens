@@ -6,7 +6,7 @@
 //! expected result value, or duplicate language law.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source,
+    eval_parsed_expressions, eval_core_library_source,
     parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
@@ -31,9 +31,7 @@ fn result_status_exact_d1_binary_self_verdict() {
     );
 
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("mechanical Core loader must admit current source");

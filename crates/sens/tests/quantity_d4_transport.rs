@@ -3,7 +3,7 @@
 //! Власне твердження й fail-closed-мутант — у tests/semantic/*.bits.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source,
+    eval_parsed_expressions, eval_core_library_source,
     parse_canonical_binary, parse_mixed_exact_domain_reasoning_source, Session,
 };
 
@@ -39,7 +39,7 @@ fn quantity_d4_binary_sens_owns_the_semantic_verdict() {
     // The migrated library must still be loadable under the existing Core
     // implementation; this is a transport smoke test, not a semantic oracle.
     let mut session = Session::default();
-    eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session)
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session)
         .expect("чинний Core не завантажився");
     let parsed = parse_mixed_exact_domain_reasoning_source("lib/quantity.lisp", SOURCE)
         .expect("наявний reader не прийняв бібліотеку");

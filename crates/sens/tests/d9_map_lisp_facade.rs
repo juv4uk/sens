@@ -1,14 +1,13 @@
 //! D9 map coordinates without admitted mechanisms must remain fail-closed.
 //! These tests exercise separately named Lisp-owned AVL closures only.
 use sens::{
-    eval_program, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    eval_program, eval_core_library_source, eval_pinned_reasoning_source,
     eval_parsed_expressions, Bit9, CoreD9, DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
 fn session() -> Session {
     let mut session = Session::default();
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut session
     ).expect("derived core bootstrap");
     eval_pinned_reasoning_source(
         "lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session

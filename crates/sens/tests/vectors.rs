@@ -22,6 +22,22 @@ fn eval_err(source: &str) -> ErrorKind {
 }
 
 #[test]
+fn d6_filter_onto_retains_matches_in_order_with_real_sens_eval() {
+    // Перевірка не сканує текст: справжній evaluator завантажує lib/core.lisp,
+    // викликає D6 відсіяти та перевіряє обидві гілки точного D1.
+    let matches = "(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є (а б в б)))";
+    assert_eq!(eval_source(matches), "(б б)");
+    assert_eq!(
+        eval_source("(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є (а в)))"),
+        "()"
+    );
+    assert_eq!(
+        eval_source("(відсіяти (функція (елемент) (тотожне? елемент (як-є б))) (як-є ()))"),
+        "()"
+    );
+}
+
+#[test]
 fn vector_literal_and_ref() {
     assert_eq!(eval_source("(vector-ref (vector 10 20 30) 0)"), "10");
     assert_eq!(eval_source("(vector-ref (vector 10 20 30) 2)"), "30");

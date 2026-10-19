@@ -7,7 +7,7 @@
 ; Reuses (2000+ surface):
 ;   si:avogadro-constant, si:elementary-charge, si:boltzmann-constant,
 ;   si:planck-constant (lib/si.lisp defining records),
-;   exact multiply (10110) and exact divide (11110110).
+;   exact multiply (D5:10110) and exact rational quotient (D5:10111).
 ;
 ; No decimal approximations are stored here. Every value below is an exact
 ; Rational expression over exact SI defining constants from lib/si.lisp.
@@ -32,25 +32,25 @@
 ; Josephson constant: K_J = 2e / h
 ; Exact: 21362355120000000000000 / 44173801 Hz V^-1
 (визначити si:josephson-constant
-  (поділити (помножити 2 si:elementary-charge)
+  (частка (помножити 2 si:elementary-charge)
      si:planck-constant))
 
 ; von Klitzing constant: R_K = h / e^2
 ; Exact: 5521725125000000000000 / 213914163877964163 ohm
 (визначити si:von-klitzing-constant
-  (поділити si:planck-constant
+  (частка si:planck-constant
      (помножити si:elementary-charge si:elementary-charge)))
 
 ; Magnetic flux quantum: Phi_0 = h / (2e)
 ; Exact: 44173801 / 21362355120000000000000 Wb
 (визначити si:magnetic-flux-quantum
-  (поділити si:planck-constant
+  (частка si:planck-constant
      (помножити 2 si:elementary-charge)))
 
 ; Conductance quantum: G_0 = 2e^2 / h
 ; Exact: 213914163877964163 / 2760862562500000000000 S
 (визначити si:conductance-quantum
-  (поділити (помножити 2 si:elementary-charge si:elementary-charge)
+  (частка (помножити 2 si:elementary-charge si:elementary-charge)
      si:planck-constant))
 
 ; Molar Planck constant: N_A * h

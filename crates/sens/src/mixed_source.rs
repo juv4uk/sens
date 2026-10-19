@@ -370,9 +370,10 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
     parse_mixed_source(source, true)
 }
 
-/// Read only the frozen legacy library core with exact D3-D6 callable heads.
-/// This library (lib/core.lisp) is distinct from the canonical Core4/FASL
-/// bootstrap. W8 macro/define syntax and quoted templates remain data.
+/// Current Core library entry point. The source is already ratified Ukrainian
+/// Lisp, so use the exact-domain reader with no W8 wrapper or quoted-bit
+/// reinterpretation. The historical function name is temporarily retained only
+/// while call sites are moved to the common reader.
 pub fn parse_mixed_exact_domain_legacy_core_source(
     path: &str,
     source: &str,
@@ -380,92 +381,11 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
     if path != "lib/core.lisp" {
         return Err(LanguageError::new(
             ErrorKind::Parse,
-            "legacy core exact-domain reader is restricted to lib/core.lisp",
+            "Core library source must be the current lib/core.lisp",
             Span::default(),
         ));
     }
-    // Preserve the pinned D4 LAMBDA/DEFINE code-data bridge.
-    // Only the two existing language-owned AND/OR macro definitions also
-    // construct D3 COND/ATOM/CONS as executable code-data. Never infer D3
-    // identity from a quoted number elsewhere in Core or ordinary source.
-    parse_mixed_pinned_d8_io(source)?
-        .into_iter()
-        .map(|expr| {
-            let logic_macro = is_pinned_logic_macro_definition(source, &expr);
-            let expr = lift_macro_bootstrap_code_data(source, expr, 0)?;
-            if logic_macro {
-                lift_core_logic_macro_quote_words(source, expr, 0)
-            } else {
-                Ok(expr)
-            }
-        })
-        .collect()
-}
-
-/// Admit code-data retagging only inside an exact D4 DEFINE named AND/OR
-/// in the two pinned Core source eras. Ordinary quoted numbers are opaque.
-fn is_pinned_logic_macro_definition(source: &str, expression: &Expr) -> bool {
-    matches!(
-        &expression.kind,
-        ExprKind::List(parts)
-            if parts.len() >= 3
-                && source_spelling(source, &parts[0]) == Some("0011")
-                && matches!(
-                    source_spelling(source, &parts[1]),
-                    Some("and" | "or")
-                )
-    )
-}
-
-/// Preserve precisely the D3 identity of the executable code heads built
-/// inside Core's existing AND/OR macro templates. Their quoted head words
-/// are *code*, not numeric or D7 textual data. No other quote is retyped.
-fn lift_core_logic_macro_quote_words(
-    source: &str,
-    expression: Expr,
-    depth: u32,
-) -> Result<Expr, LanguageError> {
-    if depth > MAX_STRUCTURE_DEPTH {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "core logic macro code-data exceeds the exact-domain depth bound",
-            expression.span,
-        ));
-    }
-    let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else {
-        return Ok(Expr { kind, span });
-    };
-    if items.is_empty() {
-        return Ok(Expr { kind: ExprKind::List(items), span });
-    }
-
-    let mut lifted = items.to_vec();
-    if is_exact_quote(&lifted[0]) || is_legacy_w8_quote_head(source, &lifted[0]) {
-        if lifted.len() == 2 && is_exact_quote(&lifted[0]) {
-            if let Some(spelling @ ("110" | "010" | "111")) =
-                source_spelling(source, &lifted[1])
-            {
-                let parsed = parse_binary_source_words(spelling)?;
-                let word = parsed[0].word;
-                lifted[1] = Expr {
-                    kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-                    span: lifted[1].span,
-                };
-            }
-        }
-        return Ok(Expr {
-            kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
-            span,
-        });
-    }
-    for child in &mut lifted {
-        *child = lift_core_logic_macro_quote_words(source, child.clone(), depth + 1)?;
-    }
-    Ok(Expr {
-        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
-        span,
-    })
+    parse_mixed_exact_domain(source)
 }
 
 /// Parse only the language-owned UTF-8 module through the exact-domain reader.
@@ -676,57 +596,6 @@ pub fn parse_mixed_exact_domain_fs_source(
         .collect()
 }
 
-fn lift_macro_bootstrap_code_data(
-    source: &str,
-    expression: Expr,
-    depth: u32,
-) -> Result<Expr, LanguageError> {
-    if depth > MAX_STRUCTURE_DEPTH {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "macro bootstrap source exceeds structure depth",
-            expression.span,
-        ));
-    }
-
-    let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else {
-        return Ok(Expr { kind, span });
-    };
-    if items.is_empty() {
-        return Ok(Expr { kind: ExprKind::List(items), span });
-    }
-
-    let mut lifted = items.to_vec();
-    if is_exact_quote(&lifted[0]) {
-        if lifted.len() == 2 {
-            if let Some(spelling @ ("0010" | "0011")) = source_spelling(source, &lifted[1]) {
-                let words = parse_binary_source_words(spelling)?;
-                let word = words
-                    .first()
-                    .expect("one exact D4 macro-template identity")
-                    .word;
-                lifted[1] = Expr {
-                    kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
-                    span: lifted[1].span,
-                };
-            }
-        }
-        return Ok(Expr {
-            kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
-            span,
-        });
-    }
-
-    for item in &mut lifted {
-        *item = lift_macro_bootstrap_code_data(source, item.clone(), depth + 1)?;
-    }
-    Ok(Expr {
-        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
-        span,
-    })
-}
-
 /// Parse the process/TCP Lisp-owned adapters with exact current-domain call heads.
 /// This exception is path-bound to these two source files; ordinary source must
 /// never infer semantic width from short numeric-looking literals. QUOTE keeps
@@ -808,16 +677,11 @@ pub fn parse_mixed_exact_domain_core_source(
         .into_iter()
         .map(|expr| lift_pinned_d8_io(source, expr, 0))
         .collect::<Result<Vec<_>, _>>()?;
+    // Цитовані українські імена залишаються даними: побітовий
+    // адаптер макросів уже фізично вилучено з runtime.
     parsed
         .into_iter()
-        .map(|expr| {
-            let expr = lift_pinned_d9_language_calls(source, expr, 0)?;
-            if is_pinned_logic_macro_definition(source, &expr) {
-                lift_core_logic_macro_quote_words(source, expr, 0)
-            } else {
-                Ok(expr)
-            }
-        })
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
         .collect()
 }
 
@@ -2363,30 +2227,23 @@ mod tests {
     }
 
     #[test]
-    fn legacy_core_quote_code_template_preserves_d4_without_widening_ordinary_quote() {
-        // A macro builds executable LAMBDA code; its quoted D4 coordinate
-        // must be transported as DomainIdentity, never the host number 10.
-        let source = "(001 0010)";
-        let pinned = only(
+    fn core_macro_code_names_are_ordinary_quoted_ukrainian_data() {
+        let source = "(як-є функція)";
+        let exact = only(
             parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
-                .expect("only pinned core may type its macro code template"),
+                .expect("current Core uses the ordinary exact-domain reader"),
         );
-        let ExprKind::List(pinned_quote) = &pinned.kind else { panic!("pinned QUOTE"); };
-        assert!(matches!(&pinned_quote[1].kind, ExprKind::DomainIdentity(id)
-            if id.width() == 4 && id.packed_bits() == 0b0010));
+        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary source parse"));
+        assert_eq!(exact, ordinary, "the Core entry point must not retype quoted data");
+        let ExprKind::List(quote) = &exact.kind else { panic!("QUOTE"); };
+        assert!(matches!(&quote[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
+        assert!(matches!(&quote[1].kind,
+            ExprKind::Symbol(name) if name.as_ref() == "функція"));
 
-        // No global inference: the same quoted token outside this pinned
-        // source is ordinary data, not a freshly admitted operation.
-        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary quoted data"));
-        let ExprKind::List(ordinary_quote) = &ordinary.kind else { panic!("ordinary QUOTE"); };
-        assert!(!matches!(&ordinary_quote[1].kind, ExprKind::DomainIdentity(_)));
-
-        let nested = only(parse_mixed_exact_domain_legacy_core_source(
-            "lib/core.lisp", "(001 (0010))").expect("nested quote data"));
-        let ExprKind::List(outer) = &nested.kind else { panic!("outer QUOTE"); };
-        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted list"); };
-        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
-        assert!(parse_mixed_exact_domain_legacy_core_source("lib/not-core.lisp", source).is_err());
+        assert!(parse_mixed_exact_domain_legacy_core_source(
+            "lib/not-core.lisp", source
+        ).is_err());
     }
 
     #[test]

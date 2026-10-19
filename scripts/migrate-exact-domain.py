@@ -186,11 +186,16 @@ def reject_shadowed_surfaces(source, surfaces):
         bits for bits, label in foundation["domains"]["D6"]["residents"].items()
         if label in {"LET", "LET*"}
     }
-    if len(let_heads) != 2:
+    let_star_heads = {
+        bits for bits, label in foundation["domains"]["D6"]["residents"].items()
+        if label == "LET*"
+    }
+    if len(let_heads) != 2 or len(let_star_heads) != 1:
         raise ValueError("SOURCE_FORM_ERROR: координати D6 LET змінилися")
     lambda_heads |= {"lambda", "функція"}
     define_heads |= {"define", "визначити", "def"}
-    let_heads |= {"let", "let*"}
+    let_heads |= {"let", "let*", "нехай", "нехай*", "нехай-послідовно"}
+    let_star_heads |= {"let*", "нехай*", "нехай-послідовно"}
 
     def atom_name(node):
         return (
@@ -336,7 +341,7 @@ def reject_shadowed_surfaces(source, surfaces):
                     local_name = atom_name(pair[0])
                     bound_name(pair[0], "змінна LET")
                     initializer = pair[1]
-                if name == "let*":
+                if name in let_star_heads:
                     if initializer is not None:
                         visit(initializer, local)
                 elif initializer is not None:

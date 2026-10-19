@@ -12,12 +12,7 @@
 ; Deep structural equality is Lisp-owned here and is built only from current
 ; exact D3 laws: ATOM classifies pair-vs-atom and EQ compares admitted atoms.
 ; Historical deep-equality carriers do not cross into the authority path.
-(визначити encoder-coverage-d1-yes
-  (тотожне? (як-є encoder-coverage-yes) (як-є encoder-coverage-yes)))
-
-(визначити encoder-coverage-d1-no
-  (тотожне? (як-є encoder-coverage-yes) (як-є encoder-coverage-no)))
-
+; Власні D1:0/D1:1 проєкції — ні та так; EQ-маркери не потрібні.
 (визначити encoder-coverage-atom-same?
   (функція (left right)
     (тотожне? left right)))
@@ -29,14 +24,14 @@
        (за-умовою
          ((атом? right)
           (encoder-coverage-atom-same? left right))
-         (encoder-coverage-d1-yes
-          encoder-coverage-d1-no)))
+         (так
+          ні)))
       ((атом? right)
-       encoder-coverage-d1-no)
+       ні)
       ((encoder-coverage-same? (перше left) (перше right))
        (encoder-coverage-same? (решта left) (решта right)))
-      (encoder-coverage-d1-yes
-       encoder-coverage-d1-no))))
+      (так
+       ні))))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
@@ -47,22 +42,22 @@
 ; Кількість елементів — математичне десяткове число D24+ від першої комірки.
 ; У вихідній програмі звичайні 0, 1 та 5; фізичне T5M-пакування належить Zig.
 (визначити encoder-coverage-binary-length-onto
-  (функція (values count)
+  (функція (елементи кількість)
     (за-умовою
-      ((encoder-coverage-empty? values) count)
-      (encoder-coverage-d1-yes
+      ((encoder-coverage-empty? елементи) кількість)
+      (так
        (encoder-coverage-binary-length-onto
-         (решта values)
-         (додати count 1))))))
+         (решта елементи)
+         (додати кількість 1))))))
 
 (визначити encoder-coverage-binary-length
-  (функція (values)
-    (encoder-coverage-binary-length-onto values 0)))
+  (функція (елементи)
+    (encoder-coverage-binary-length-onto елементи 0)))
 
 (визначити encoder-coverage-count=?
-  (функція (binary-count values)
-    (= binary-count
-       (encoder-coverage-binary-length values))))
+  (функція (двійкова-кількість елементи)
+    (= двійкова-кількість
+       (encoder-coverage-binary-length елементи))))
 
 
 ; Conjunction over already-admitted predicate answers. Structural EMPTY is
@@ -71,23 +66,23 @@
   (функція (answers)
     (за-умовою
       ((encoder-coverage-empty? answers)
-       encoder-coverage-d1-yes)
+       так)
       ((перше answers)
        (encoder-coverage-all? (решта answers)))
-      (encoder-coverage-d1-yes
-       encoder-coverage-d1-no))))
+      (так
+       ні))))
 
 (визначити encoder-coverage-pair=?
   (функція (left right)
     (encoder-coverage-same? left right)))
 (визначити encoder-coverage-member?
-  (функція (item values)
+  (функція (елемент елементи)
     (за-умовою
-      ((encoder-coverage-empty? values) encoder-coverage-d1-no)
-      ((encoder-coverage-same? item (перше values))
-       encoder-coverage-d1-yes)
-      (encoder-coverage-d1-yes
-       (encoder-coverage-member? item (решта values))))))
+      ((encoder-coverage-empty? елементи) ні)
+      ((encoder-coverage-same? елемент (перше елементи))
+       так)
+      (так
+       (encoder-coverage-member? елемент (решта елементи))))))
 
 ; Pairwise rounds form a rope-like balanced concatenation tree. This avoids
 ; copying an ever-growing ~200 KB accumulator once per emitted coverage row.
@@ -97,7 +92,7 @@
       ((encoder-coverage-empty? strings) (зворот acc))
       ((encoder-coverage-empty? (решта strings))
        (зворот-до acc (список (перше strings))))
-      (encoder-coverage-d1-yes
+      (так
        (encoder-coverage-concat-round
          (решта (решта strings))
          (сполучити
@@ -109,7 +104,7 @@
     (за-умовою
       ((encoder-coverage-empty? strings) "")
       ((encoder-coverage-empty? (решта strings)) (перше strings))
-      (encoder-coverage-d1-yes
+      (так
        (encoder-coverage-balanced-concat
          (encoder-coverage-concat-round
            strings
@@ -192,7 +187,7 @@
        "cache-management opcode encoding not yet implemented")
       ((encoder-coverage-same? extension (як-є X86-64))
        "long-mode-specific BASE forms pending family-by-family rollout")
-      (encoder-coverage-d1-yes
+      (так
        "remaining BASE forms pending family-by-family rollout"))))
 
 (визначити encoder-coverage-render-row
@@ -202,12 +197,12 @@
            (status
              (за-умовою
                ((encoder-coverage-empty? partial) (як-є not-yet-implemented))
-               (encoder-coverage-d1-yes (як-є partial))))
+               (так (як-є partial))))
            (підстава
              (за-умовою
                ((encoder-coverage-empty? partial)
                 (encoder-coverage-not-yet-reason extension))
-               (encoder-coverage-d1-yes encoder-coverage-partial-reason))))
+               (так encoder-coverage-partial-reason))))
       (encoder-coverage-str+
         "  (coverage\n"
         "    (iclass " (значення-у-текст iclass) ")\n"
@@ -224,9 +219,9 @@
       ((encoder-coverage-empty? index-rows)
        (за-умовою
          ((encoder-coverage-empty? partials)
-          (список (зворот rendered) count encoder-coverage-d1-no))
-         (encoder-coverage-d1-yes
-          (список (зворот rendered) count encoder-coverage-d1-yes))))
+          (список (зворот rendered) count ні))
+         (так
+          (список (зворот rendered) count так))))
       ((encoder-coverage-empty? partials)
        (encoder-coverage-build-onto
          (решта index-rows)
@@ -235,7 +230,7 @@
            (encoder-coverage-render-row (перше index-rows) (як-є ()))
            rendered)
          count))
-      (encoder-coverage-d1-yes
+      (так
        (нехай ((index-row (перше index-rows))
              (partial-row (перше partials)))
          (за-умовою
@@ -247,7 +242,7 @@
                 (encoder-coverage-render-row index-row partial-row)
                 rendered)
               (додати count 1)))
-           (encoder-coverage-d1-yes
+           (так
             (encoder-coverage-build-onto
               (решта index-rows)
               partials
@@ -259,14 +254,14 @@
 (визначити encoder-coverage-index-unique?
   (функція (rows previous)
     (за-умовою
-      ((encoder-coverage-empty? rows) encoder-coverage-d1-yes)
+      ((encoder-coverage-empty? rows) так)
       ((encoder-coverage-empty? previous)
        (encoder-coverage-index-unique?
          (решта rows)
          (перше rows)))
       ((encoder-coverage-row-key=? (перше rows) previous)
-       encoder-coverage-d1-no)
-      (encoder-coverage-d1-yes
+       ні)
+      (так
        (encoder-coverage-index-unique?
          (решта rows)
          (перше rows))))))
@@ -289,9 +284,9 @@
 (визначити encoder-coverage-partials-valid?
   (функція (index-rows partials)
     (за-умовою
-      ((encoder-coverage-empty? partials) encoder-coverage-d1-yes)
-      ((encoder-coverage-empty? index-rows) encoder-coverage-d1-no)
-      (encoder-coverage-d1-yes
+      ((encoder-coverage-empty? partials) так)
+      ((encoder-coverage-empty? index-rows) ні)
+      (так
        (нехай ((index-row (перше index-rows))
              (partial-row (перше partials)))
          (за-умовою
@@ -299,7 +294,7 @@
             (encoder-coverage-partials-valid?
               (решта index-rows)
               (решта partials)))
-           (encoder-coverage-d1-yes
+           (так
             (encoder-coverage-partials-valid?
               (решта index-rows)
               partials))))))))
@@ -340,16 +335,16 @@
 (визначити encoder-coverage-committed-row-matches?
   (функція (index-row coverage-row partial-row)
     (за-умовою
-      ((encoder-coverage-empty? coverage-row) encoder-coverage-d1-no)
+      ((encoder-coverage-empty? coverage-row) ні)
       ((encoder-coverage-count=? 5 coverage-row)
        (нехай-послідовно ((expected-status
                 (за-умовою
                   ((encoder-coverage-empty? partial-row) (як-є not-yet-implemented))
-                  (encoder-coverage-d1-yes (як-є partial))))
+                  (так (як-є partial))))
               (expected-reason
                 (за-умовою
                   ((encoder-coverage-empty? partial-row) (encoder-coverage-not-yet-reason (друге index-row)))
-                  (encoder-coverage-d1-yes encoder-coverage-partial-reason))))
+                  (так encoder-coverage-partial-reason))))
          (encoder-coverage-all?
            (список
              (encoder-coverage-same? (перше coverage-row) (як-є coverage))
@@ -361,7 +356,7 @@
              (encoder-coverage-same? (друге (четверте coverage-row)) expected-status)
              (encoder-coverage-same? (перше (перше (решта (решта (решта (решта coverage-row)))))) (перше (читати-всі "reason")))
              (encoder-coverage-same? (друге (перше (решта (решта (решта (решта coverage-row)))))) expected-reason)))))
-      (encoder-coverage-d1-yes encoder-coverage-d1-no))))
+      (так ні))))
 
 (визначити encoder-coverage-projection-rows-valid?
   (функція (index-rows coverage-rows partials)
@@ -371,13 +366,13 @@
          ((encoder-coverage-empty? coverage-rows)
           (за-умовою
             ((encoder-coverage-empty? partials)
-             encoder-coverage-d1-yes)
-            (encoder-coverage-d1-yes
-             encoder-coverage-d1-no)))
-         (encoder-coverage-d1-yes
-          encoder-coverage-d1-no)))
+             так)
+            (так
+             ні)))
+         (так
+          ні)))
       ((encoder-coverage-empty? coverage-rows)
-       encoder-coverage-d1-no)
+       ні)
       ((encoder-coverage-empty? partials)
        (за-умовою
          ((encoder-coverage-committed-row-matches?
@@ -388,9 +383,9 @@
             (решта index-rows)
             (решта coverage-rows)
             partials))
-         (encoder-coverage-d1-yes
-          encoder-coverage-d1-no)))
-      (encoder-coverage-d1-yes
+         (так
+          ні)))
+      (так
        (нехай ((index-row (перше index-rows))
              (coverage-row (перше coverage-rows))
              (partial-row (перше partials)))
@@ -405,9 +400,9 @@
                  (решта index-rows)
                  (решта coverage-rows)
                  (решта partials)))
-              (encoder-coverage-d1-yes
-               encoder-coverage-d1-no)))
-           (encoder-coverage-d1-yes
+              (так
+               ні)))
+           (так
             (за-умовою
               ((encoder-coverage-committed-row-matches?
                  index-row
@@ -417,13 +412,13 @@
                  (решта index-rows)
                  (решта coverage-rows)
                  partials))
-              (encoder-coverage-d1-yes
-               encoder-coverage-d1-no)))))))))
+              (так
+               ні)))))))))
 
 (визначити encoder-coverage-projection-valid?
   (функція (coverage-form)
     (за-умовою
-      ((encoder-coverage-empty? coverage-form) encoder-coverage-d1-no)
+      ((encoder-coverage-empty? coverage-form) ні)
       ((encoder-coverage-count=?
          encoder-coverage-index-count
          (решта (решта (решта coverage-form))))
@@ -438,7 +433,7 @@
              encoder-coverage-index-rows
              (решта (решта (решта coverage-form)))
              encoder-coverage-partials))))
-      (encoder-coverage-d1-yes encoder-coverage-d1-no))))
+      (так ні))))
 
 (визначити encoder-coverage-render
   (функція ()
@@ -465,7 +460,7 @@
       (за-умовою
         (stale-partial?
          (як-є ()))
-        (encoder-coverage-d1-yes
+        (так
          (encoder-coverage-str+
            prelude
            (encoder-coverage-balanced-concat rendered-rows)

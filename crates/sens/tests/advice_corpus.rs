@@ -3,7 +3,7 @@
 //! The cases are chosen for distinct failure/derivation modes, not fixture count.
 
 use sens::{
-    eval_parsed_expressions, eval_pinned_legacy_core_source, eval_pinned_reasoning_source,
+    eval_parsed_expressions, eval_core_library_source, eval_pinned_reasoning_source,
     parse_exact_domain_source, parse_mixed_exact_domain, Session,
 };
 
@@ -11,9 +11,7 @@ fn eval_advice_corpus(source: &str) -> String {
     let mut session = Session::default();
     // Legacy eval_program treats bare 0011 as an arithmetic literal. The
     // repository-pinned Core reader keeps the original D4 DEFINE identity.
-    eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     )
     .expect("pinned exact-width SENS core bootstrap");

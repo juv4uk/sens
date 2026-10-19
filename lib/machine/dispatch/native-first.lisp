@@ -10,39 +10,39 @@
 ;   lib/machine/operands/x86-64.lisp
 ;   lib/machine/lowering/semantic-x86-64.lisp
 
-(визначити native-first-fallback
+(визначити нативний-повернути-до-обчислювача
   (функція (expression)
     (сполучити (як-є evaluator-fallback)
          (сполучити expression (як-є ())))))
 
-(визначити native-first-native-plan
+(визначити нативний-скласти-план
   (функція (forms arena-bytes)
     (сполучити (як-є native-plan)
          (сполучити forms
               (сполучити arena-bytes (як-є ()))))))
 
-(визначити native-first-plan-car-cons-u64
+(визначити нативний-план-перше-сполучити
   (функція (expression cons-expression)
     (за-умовою
       ((атом? (решта cons-expression))
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       (так
-       (native-first-plan-car-cons-u64-rest-left
+       (нативний-план-пари-ліва-частина
          expression
          (решта cons-expression))))))
 
-(визначити native-first-plan-car-cons-u64-rest-left
+(визначити нативний-план-пари-ліва-частина
   (функція (expression cons-arguments)
     (за-умовою
       ((атом? (решта cons-arguments))
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       (так
-       (native-first-plan-car-cons-u64-rest-right
+       (нативний-план-пари-права-частина
          expression
          cons-arguments
          (решта cons-arguments))))))
 
-(визначити native-first-plan-car-cons-u64-rest-right
+(визначити нативний-план-пари-права-частина
   (функція (expression cons-arguments rest-after-left)
     (за-умовою
       ((порожній? (решта rest-after-left))
@@ -50,61 +50,61 @@
          ((тотожне? (перше (x86-as-u64-imm (перше cons-arguments))) (як-є u64-imm))
           (за-умовою
             ((тотожне? (перше (x86-as-u64-imm (перше rest-after-left))) (як-є u64-imm))
-             (native-first-native-plan
+             (нативний-скласти-план
                (x86-lower-cons-car-u64-forms
                  (x86-u64-imm-value (x86-as-u64-imm (перше cons-arguments)))
                  (x86-u64-imm-value (x86-as-u64-imm (перше rest-after-left))))
                x86-pair-cell-bytes))
             (так
-             (native-first-fallback expression))))
+             (нативний-повернути-до-обчислювача expression))))
          (так
-          (native-first-fallback expression))))
+          (нативний-повернути-до-обчислювача expression))))
       (так
-       (native-first-fallback expression)))))
+       (нативний-повернути-до-обчислювача expression)))))
 
-(визначити native-first-plan-car-argument
+(визначити нативний-план-першого-аргументу
   (функція (expression argument)
     (за-умовою
       ((атом? argument)
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       (так
        (за-умовою
-         ((атом? (перше argument))
-          (native-first-fallback expression))
+         ((хибне? (атом? (перше argument)))
+          (нативний-повернути-до-обчислювача expression))
          (так
           (за-умовою
             ((тотожне? (перше argument) (як-є сполучити))
-             (native-first-plan-car-cons-u64 expression argument))
+             (нативний-план-перше-сполучити expression argument))
             (так
-             (native-first-fallback expression)))))))))
+             (нативний-повернути-до-обчислювача expression)))))))))
 
-(визначити native-first-plan-car
+(визначити нативний-план-першого
   (функція (expression)
     (за-умовою
       ((атом? (решта expression))
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       (так
        (за-умовою
          ((атом? (решта (решта expression)))
-          (native-first-plan-car-argument expression (перше (решта expression))))
+          (нативний-план-першого-аргументу expression (перше (решта expression))))
          (так
-          (native-first-fallback expression)))))))
+          (нативний-повернути-до-обчислювача expression)))))))
 
 (визначити native-first-plan
   (функція (expression)
     (за-умовою
       ((атом? expression)
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       (так
        (за-умовою
-         ((атом? (перше expression))
-          (native-first-fallback expression))
+         ((хибне? (атом? (перше expression)))
+          (нативний-повернути-до-обчислювача expression))
          (так
           (за-умовою
             ((тотожне? (перше expression) (як-є перше))
-             (native-first-plan-car expression))
+             (нативний-план-першого expression))
             (так
-             (native-first-fallback expression)))))))))
+             (нативний-повернути-до-обчислювача expression)))))))))
 
 ; #4081 — exact-domain native-first classifier.
 ;
@@ -125,81 +125,87 @@
   (функція (seed)
     (атом? (сполучити seed ()))))
 
-(визначити native-first-domain-key3-shape?
-  (функція (shape bit0 bit1 bit2)
+; Доменною шириною та формою керує SENS. Пошкоджені списки
+; відхиляються до D3 CAR/CDR/EQ: жодного часткового збігу бітів.
+(визначити нативна-форма-трибітного-ключа?
+  (функція (форма-доменного-ключа біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний)
     (за-умовою
-      ((атом? shape)
-       ні)
-      ((тотожне? (перше shape) 3)
-       (native-first-domain-key3-bits?
-         (перше (решта shape))
-         bit0 bit1 bit2))
-      (так
-       ні))))
-
-(визначити native-first-domain-key3-bits?
-  (функція (bits bit0 bit1 bit2)
-    (за-умовою
-      ((тотожне? (перше bits) bit0)
+      ((атом? форма-доменного-ключа) ні)
+      ((атом? (решта форма-доменного-ключа)) ні)
+      ((порожній? (решта (решта форма-доменного-ключа)))
        (за-умовою
-         ((тотожне? (перше (решта bits)) bit1)
-          (тотожне?
-            (перше (решта (решта bits)))
-            bit2))
-         (так
-          ні)))
-      (так
-       ні))))
+         ((тотожне? (перше форма-доменного-ключа) 3)
+          (нативні-біти-трибітного-ключа?
+            (перше (решта форма-доменного-ключа))
+            біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний))
+         (так ні)))
+      (так ні))))
 
-(визначити native-first-domain-d3-car?
+(визначити нативні-біти-трибітного-ключа?
+  (функція (біти-ключа-д3 біт-перший-очікуваний біт-другий-очікуваний біт-третій-очікуваний)
+    (за-умовою
+      ((атом? біти-ключа-д3) ні)
+      ((атом? (решта біти-ключа-д3)) ні)
+      ((атом? (решта (решта біти-ключа-д3))) ні)
+      ((порожній? (решта (решта (решта біти-ключа-д3))))
+       (за-умовою
+         ((тотожне? (перше біти-ключа-д3) біт-перший-очікуваний)
+          (за-умовою
+            ((тотожне? (перше (решта біти-ключа-д3)) біт-другий-очікуваний)
+             (тотожне? (перше (решта (решта біти-ключа-д3))) біт-третій-очікуваний))
+            (так ні)))
+         (так ні)))
+      (так ні))))
+
+(визначити нативний-домен-перше?
   (функція (shape-or-empty value)
-    (native-first-domain-key3-shape?
+    (нативна-форма-трибітного-ключа?
       (shape-or-empty value)
       так
       ні
       ні)))
 
-(визначити native-first-domain-d3-cons?
+(визначити нативний-домен-сполучити?
   (функція (shape-or-empty value)
-    (native-first-domain-key3-shape?
+    (нативна-форма-трибітного-ключа?
       (shape-or-empty value)
       так
       так
       так)))
 
-(визначити native-first-plan-domain-cons-argument
+(визначити нативний-план-доменного-сполучення
   (функція (shape-or-empty expression argument)
     (за-умовою
       ((атом? argument)
-       (native-first-fallback expression))
-      ((native-first-domain-d3-cons? shape-or-empty (перше argument))
-       (native-first-plan-car-cons-u64 expression argument))
+       (нативний-повернути-до-обчислювача expression))
+      ((нативний-домен-сполучити? shape-or-empty (перше argument))
+       (нативний-план-перше-сполучити expression argument))
       (так
-       (native-first-fallback expression)))))
+       (нативний-повернути-до-обчислювача expression)))))
 
-(визначити native-first-plan-domain-car
+(визначити нативний-план-доменного-першого
   (функція (shape-or-empty expression)
     (за-умовою
       ((атом? (решта expression))
-       (native-first-fallback expression))
+       (нативний-повернути-до-обчислювача expression))
       ((атом? (решта (решта expression)))
        (за-умовою
          ((тотожне? (решта (решта expression)) ())
-          (native-first-plan-domain-cons-argument
+          (нативний-план-доменного-сполучення
             shape-or-empty
             expression
             (перше (решта expression))))
          (так
-          (native-first-fallback expression))))
+          (нативний-повернути-до-обчислювача expression))))
       (так
-       (native-first-fallback expression)))))
+       (нативний-повернути-до-обчислювача expression)))))
 
 (визначити native-first-plan-domain
   (функція (shape-or-empty expression)
     (за-умовою
       ((атом? expression)
-       (native-first-fallback expression))
-      ((native-first-domain-d3-car? shape-or-empty (перше expression))
-       (native-first-plan-domain-car shape-or-empty expression))
+       (нативний-повернути-до-обчислювача expression))
+      ((нативний-домен-перше? shape-or-empty (перше expression))
+       (нативний-план-доменного-першого shape-or-empty expression))
       (так
-       (native-first-fallback expression)))))
+       (нативний-повернути-до-обчислювача expression)))))

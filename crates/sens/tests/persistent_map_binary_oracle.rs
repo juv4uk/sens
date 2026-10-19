@@ -11,9 +11,7 @@ fn verdict(binary: &str) -> bool {
     let forms = parse_canonical_binary(binary).expect("canonical exact-domain SENS");
     assert_eq!(forms.len(), 1, "one SENS-owned logical verdict");
     let mut session = Session::default();
-    sens::eval_pinned_legacy_core_source(
-        "lib/core.lisp",
-        include_str!("../../../lib/core.lisp"),
+    sens::eval_core_library_source(include_str!("../../../lib/core.lisp"),
         &mut session,
     ).expect("ratified bootstrap");
     sens::eval_pinned_reasoning_source(
