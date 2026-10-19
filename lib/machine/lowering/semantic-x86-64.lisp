@@ -168,7 +168,7 @@
 ; traversals currently consume graded relation answers as COND control and must
 ; keep failing closed until their predicate adapter is migrated. This narrow
 ; witness should not depend on an unfinished generic traversal path.
-(визначити x86-lower-cons-car-u64-forms
+(визначити знизити-складену-пару-до-машинних-форм
   (функція (лівий-операнд правий-операнд)
     (список
       (список (як-є mov-r64-imm64) (як-є rax) лівий-операнд)
@@ -189,6 +189,8 @@
         (як-є rdi)
         x86-pair-car-offset)
       (список (як-є ret)))))
+
+(визначити x86-lower-cons-car-u64-forms знизити-складену-пару-до-машинних-форм)
 
 (визначити x86-lower-cons-cdr-u64-forms
   (функція (лівий-операнд правий-операнд)

@@ -250,16 +250,20 @@
          ((атом? ()) (x86-machine-operand-rejection (як-є u64-imm) value))))
       ((атом? ()) (x86-machine-operand-rejection (як-є u64-imm) value)))))
 
-(визначити x86-as-u64-imm
+(визначити типізувати-беззнаковий-машинний-операнд
   (функція (operand)
     (за-умовою
       ((x86-machine-rejected? operand) operand)
       ((x86-u64-imm? operand) operand)
       ((атом? ()) (x86-u64-imm operand)))))
 
-(визначити x86-u64-imm-value
+(визначити x86-as-u64-imm типізувати-беззнаковий-машинний-операнд)
+
+(визначити значення-беззнакового-машинного-операнда
   (функція (operand)
     (друге operand)))
+
+(визначити x86-u64-imm-value значення-беззнакового-машинного-операнда)
 
 (визначити x86-disp8?
   (функція (operand)
