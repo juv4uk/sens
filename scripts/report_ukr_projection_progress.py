@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
-"""Підрахунок повністю українських файлів .lisp у репозиторії SENS.
+"""Кількість .lisp, які ПОВНІСТЮ набираються українською розкладкою.
 
-Файл зараховується лише тоді, коли КОЖЕН символ його вмісту можна
-надрукувати українською клавіатурою: у коді, коментарях, рядках,
-цитованих даних і поза ними. Пробіл, Tab і Enter дозволені.
-Не зараховуються порожні файли, файли лише з пробільних символів,
-пошкоджений UTF-8 і символічні посилання.
+Перевіряється весь вміст кожного файла без винятків: код, коментарі, текстові
+рядки, пробіли та розділові знаки. Латинська літера навіть у коментарі означає,
+що файл не відповідає вимозі. Порожні, непрочитані файли та символьні посилання
+не зараховуються до завершених.
 
-Враховуються всі .lisp у дереві, включно з історичними джерелами,
-таблицями доменів і тестами. Викличні голови та пари ук/укр НЕ
-впливають на цей показник. Це перевірка символів, не семантики SENS.
+Це суто звіт (без блокування міграції та перевірки виконання SENS).
 
-Використання:
-  python3 scripts/report_ukr_projection_progress.py
-  python3 scripts/report_ukr_projection_progress.py --list --top 10
-  python3 scripts/report_ukr_projection_progress.py --json ukr-files.json
+    python3 scripts/report_ukr_projection_progress.py
+    python3 scripts/report_ukr_projection_progress.py --list --top 20
+    python3 scripts/report_ukr_projection_progress.py --json /tmp/ukr-files.json
 """
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Ратифікований у репозиторії набір символів української розкладки
-# (Microsoft Ukrainian Enhanced). Додатково дозволені клавіші
-# Enter і Tab; CR/LF підтримують обидва поширені формати рядків.
-UKRAINIAN_KEYBOARD_OUTPUTS = frozenset(
+# Фізично доступні символи української розкладки Ukrainian (Enhanced).
+# Узгоджено з UKRAINIAN_KEYBOARD_OUTPUTS у check_ukr_callsite_migration.py.
+UKRAINIAN_KEYBOARD_OUTPUTS = set(
     "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
     "АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"
     "0123456789"
@@ -38,115 +32,110 @@ UKRAINIAN_KEYBOARD_OUTPUTS = frozenset(
 )
 
 
-@dataclass(frozen=True)
-class IncompleteFile:
-    path: str
-    reason: str
-
-
-@dataclass(frozen=True)
-class Progress:
-    total_lisp_files: int
-    fully_ukrainian_files: int
-    pending: tuple[IncompleteFile, ...] = field(default_factory=tuple)
-
-    @property
-    def percent(self) -> float:
-        return round(
-            100 * self.fully_ukrainian_files / self.total_lisp_files, 1
-        ) if self.total_lisp_files else 0.0
-
-    def to_dict(self) -> dict:
-        # JSON містить ЛИШЕ замовлену метрику й її знаменник.
-        return {
-            "fully_ukrainian_files": self.fully_ukrainian_files,
-            "total_lisp_files": self.total_lisp_files,
-            "percent": self.percent,
-        }
-
-
 def iter_lisp_files(root: Path) -> list[Path]:
-    """Усі .lisp незалежно від призначення; .git — не код репозиторію."""
+    """Усі .lisp у дереві, незалежно від каталогу й призначення файла."""
     return sorted(
-        path for path in root.rglob("*.lisp")
-        if ".git" not in path.relative_to(root).parts
+        (p for p in root.rglob("*.lisp")
+         if ".git" not in p.relative_to(root).parts),
+        key=lambda p: p.relative_to(root).as_posix(),
     )
 
 
-def inspect_file(path: Path, root: Path) -> IncompleteFile | None:
-    rel = path.relative_to(root).as_posix()
+def check_file(path: Path) -> dict | None:
+    """None — весь непорожній файл відповідає клавіатурі; dict — перша вада."""
     if path.is_symlink():
-        return IncompleteFile(rel, "символічне посилання")
+        return {"reason": "символьне посилання (вміст не перевірено)"}
     try:
-        # Читаємо байти без заміни або ігнорування пошкоджених символів.
-        # Це зберігає і CRLF, і точні Unicode-символи.
-        source = path.read_bytes().decode("utf-8", errors="strict")
-    except (UnicodeError, OSError):
-        return IncompleteFile(rel, "нечитабельний файл або некоректний UTF-8")
-    if not source.strip():
-        return IncompleteFile(rel, "порожній файл")
+        source = path.read_text(encoding="utf-8")
+    except (UnicodeError, OSError) as exc:
+        return {"reason": "неможливо прочитати UTF-8", "detail": type(exc).__name__}
 
-    for line, text_line in enumerate(source.splitlines(keepends=True), 1):
-        for column, char in enumerate(text_line, 1):
-            if char not in UKRAINIAN_KEYBOARD_OUTPUTS:
-                return IncompleteFile(
-                    rel, f"{line}:{column} недоступний символ U+{ord(char):04X}"
-                )
+    if not source.strip():
+        return {"reason": "порожній файл"}
+
+    for offset, ch in enumerate(source):
+        if ch not in UKRAINIAN_KEYBOARD_OUTPUTS:
+            last_newline = source.rfind("\n", 0, offset)
+            return {
+                "reason": "символ поза українською розкладкою",
+                "line": source.count("\n", 0, offset) + 1,
+                "column": offset - last_newline,
+                "character": ch,
+                "unicode": f"U+{ord(ch):04X}",
+            }
     return None
 
 
-def measure(root: Path) -> Progress:
+def measure(root: Path) -> dict:
+    """Один пофайловий показник з детермінованим списком невідповідностей."""
     root = root.resolve()
-    paths = iter_lisp_files(root)
-    pending = tuple(
-        finding
-        for path in paths
-        if (finding := inspect_file(path, root)) is not None
-    )
-    return Progress(
-        total_lisp_files=len(paths),
-        fully_ukrainian_files=len(paths) - len(pending),
-        pending=pending,
-    )
+    files = iter_lisp_files(root)
+    pending = []
+    for path in files:
+        issue = check_file(path)
+        if issue is not None:
+            pending.append({"path": path.relative_to(root).as_posix(), **issue})
+    total = len(files)
+    fully_ukrainian = total - len(pending)
+    return {
+        "files_total": total,
+        "files_fully_ukrainian": fully_ukrainian,
+        "files_remaining": len(pending),
+        "pct": round(100.0 * fully_ukrainian / total, 1) if total else 0.0,
+        "pending_files": pending,
+    }
 
 
-def render(progress: Progress) -> str:
-    return (
-        f"УКР-ПРОЄКЦІЯ: повністю українські файли .lisp — "
-        f"{progress.fully_ukrainian_files}/{progress.total_lisp_files} "
-        f"({progress.percent:.1f}%)"
-    )
+def render(report: dict) -> str:
+    return (f"ПОВНІСТЮ УКРАЇНСЬКІ .lisp: "
+            f"{report['files_fully_ukrainian']}/{report['files_total']} "
+            f"({report['pct']:.1f}%); "
+            f"залишилося {report['files_remaining']} файлів")
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--root", type=Path, default=ROOT, help="корінь дерева файлів")
-    ap.add_argument("--json", type=Path, help="записати лише підсумкову метрику")
-    ap.add_argument("--list", action="store_true",
-                    help="додатково перелічити файли, які ще не відповідають вимозі")
-    ap.add_argument("--top", type=int, default=0,
-                    help="обмеження --list; 0 означає всі")
-    # Старі запуски CI передають цей параметр; звіт тепер не створює анотацій.
-    ap.add_argument("--no-annotation", action="store_true",
-                    help=argparse.SUPPRESS)
-    args = ap.parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--root", default=str(ROOT), help="корінь репозиторію")
+    parser.add_argument("--json", metavar="PATH", help="зберегти цей самий звіт у JSON")
+    parser.add_argument("--list", action="store_true", help="перелічити файли, що не відповідають")
+    parser.add_argument("--top", type=int, default=0,
+                        help="показати перші N невідповідностей (0 = усі)")
+    parser.add_argument("--no-annotation", action="store_true",
+                        help="не створювати інформаційну анотацію GitHub Actions")
+    args = parser.parse_args(argv)
 
-    if args.top < 0 or not args.root.is_dir():
-        ap.error("неправильний --top або відсутній каталог --root")
+    root = Path(args.root)
+    if not root.is_dir() or args.top < 0:
+        print("::error::недійсний --root або --top", file=sys.stderr)
+        return 2
 
-    result = measure(args.root)
-    print(render(result))
+    result = measure(root)
+    line = render(result)
+    print(line)
+    if not args.no_annotation:
+        print(f"::notice::{line}")
 
     if args.list:
-        selected = result.pending[:args.top] if args.top else result.pending
-        for item in selected:
-            print(f"{item.path}: {item.reason}")
+        shown = result["pending_files"][:args.top] if args.top else result["pending_files"]
+        for item in shown:
+            location = (f":{item['line']}:{item['column']}"
+                        if "line" in item else "")
+            char = (f" {item['unicode']} {item['character']!r}"
+                    if "unicode" in item else "")
+            print(f"  {item['path']}{location}: {item['reason']}{char}")
+        if len(shown) < result["files_remaining"]:
+            print(f"  … ще {result['files_remaining'] - len(shown)}")
 
-    if args.json is not None:
-        args.json.write_text(
-            json.dumps(result.to_dict(), ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
+    if args.json:
+        try:
+            Path(args.json).write_text(
+                json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        except OSError as exc:
+            print(f"::error::не вдалося записати JSON: {exc}", file=sys.stderr)
+            return 2
     return 0
 
 
