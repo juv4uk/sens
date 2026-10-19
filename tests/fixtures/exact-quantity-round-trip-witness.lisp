@@ -6,69 +6,69 @@
 ; Expected semantic relations live here as Lisp data. Rust may only observe
 ; the named pass/fail envelope.
 
-(def exact-quantity-round-trip-rows
-  (lambda ()
-    (let* ((one-second
+(визначити exact-quantity-round-trip-rows
+  (функція ()
+    (нехай-послідовно ((one-second
              (make-quantity
                1
                (make-unit
-                 (list (make-dimension (quote second) 1)))))
+                 (список (make-dimension (як-є second) 1)))))
            (speed
              (scientific-constant-quantity si:defining-speed-of-light))
            (distance
              (quantity-product speed one-second))
            (recovered
              (quantity-quotient distance one-second)))
-      (list
-        (list
-          (quote distance-shape)
-          (equal?
+      (список
+        (список
+          (як-є distance-shape)
+          (однакові?
             distance
-            (quote
+            (як-є
               (quantity/1
                 299792458
                 (unit/1 (dimension/1 metre 1)))))
-          (quote (structural-relation same)))
-        (list
-          (quote recovered-speed-shape)
-          (equal?
+          (як-є (structural-relation same)))
+        (список
+          (як-є recovered-speed-shape)
+          (однакові?
             recovered
-            (quote
+            (як-є
               (quantity/1
                 299792458
                 (unit/1
                   (dimension/1 metre 1)
                   (dimension/1 second -1)))))
-          (quote (structural-relation same)))
-        (list
-          (quote quotient-inverse)
-          (equal? recovered speed)
-          (quote (structural-relation same)))))))
+          (як-є (structural-relation same)))
+        (список
+          (як-є quotient-inverse)
+          (однакові? recovered speed)
+          (як-є (structural-relation same)))))))
 
-(def exact-quantity-round-trip-check
-  (lambda (rows)
-    (cond
-      ((atom rows) (structural-kind empty-list)
-       (quote (exact-quantity-round-trip-witness (status pass))))
-      ((atom rows) (structural-kind atom)
-       (list
-         (quote exact-quantity-round-trip-witness)
-         (list (quote status) (quote fail))
-         (list (quote case) (quote malformed-row-tail))
-         (list (quote actual) rows)))
-      ((atom rows) (structural-kind pair)
-       (let ((row (car rows)))
-         (cond
-           ((equal? (second row) (third row)) (structural-relation same)
-            (exact-quantity-round-trip-check (cdr rows)))
-           ((equal? (second row) (third row)) (structural-relation distinct)
-            (list
-              (quote exact-quantity-round-trip-witness)
-              (list (quote status) (quote fail))
-              (list (quote case) (car row))
-              (list (quote actual) (second row))
-              (list (quote expected) (third row))))))))))
+(визначити exact-quantity-round-trip-check
+  (функція (rows)
+    (за-умовою
+      ((атом? rows) (structural-kind empty-list)
+       (як-є (exact-quantity-round-trip-witness (status pass))))
+      ((атом? rows) (structural-kind atom)
+       (список
+         (як-є exact-quantity-round-trip-witness)
+         (список (як-є status) (як-є fail))
+         (список (як-є case) (як-є malformed-row-tail))
+         (список (як-є actual) rows)))
+      ((атом? rows) (structural-kind pair)
+       (нехай ((row (перше rows)))
+         (за-умовою
+           ((однакові? (друге row) (третє row)) (structural-relation same)
+            (exact-quantity-round-trip-check (решта rows)))
+           ((однакові? (друге row) (третє row)) (structural-relation distinct)
+            (список
+              (як-є exact-quantity-round-trip-witness)
+              (список (як-є status) (як-є fail))
+              (список (як-є case) (перше row))
+              (список (як-є actual) (друге row))
+              (список (як-є expected) (третє row))))))))))
 
-(def exact-quantity-round-trip-witness
-  (lambda ()
+(визначити exact-quantity-round-trip-witness
+  (функція ()
     (exact-quantity-round-trip-check (exact-quantity-round-trip-rows))))
