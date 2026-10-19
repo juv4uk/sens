@@ -1,10 +1,10 @@
 //! Path-pinned witness for Lisp-owned filesystem adapter semantics.
 //! This narrows full store failures to package lookup or lambda binding.
-use sens::{eval_program, eval_pinned_legacy_core_source, eval_pinned_reasoning_source, Session};
+use sens::{eval_program, eval_core_library_source, eval_pinned_reasoning_source, Session};
 
 fn session() -> Session {
     let mut s = Session::default();
-    eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut s).unwrap();
+    eval_core_library_source(include_str!("../../../lib/core.lisp"), &mut s).unwrap();
     for (path, source) in [
         ("lib/unify.lisp", include_str!("../../../lib/unify.lisp")),
         ("lib/reason.lisp", include_str!("../../../lib/reason.lisp")),
