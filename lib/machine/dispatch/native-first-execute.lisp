@@ -91,10 +91,18 @@
     (за-умовою
       ((атом? result)
        (native-first-execution-completed (як-є native) result))
-      ((тотожне? (перше result) (як-є rejected))
-       (native-first-execution-rejected (як-є native) result))
+      ; Некоректний складений тег не можна подавати у D3 EQ.
+      ; Це помилка native-результату, а не дозвіл на evaluator-fallback.
+      ((атом? (перше result))
+       (за-умовою
+         ((тотожне? (перше result) (як-є rejected))
+          (native-first-execution-rejected (як-є native) result))
+         (так
+          (native-first-execution-completed (як-є native) result))))
       (так
-       (native-first-execution-completed (як-є native) result)))))
+       (native-first-execution-rejected
+         (як-є native)
+         (native-first-list-2 (як-є malformed-native-result) result))))))
 
 (визначити native-first-execute-native-plan
   (функція (plan)
