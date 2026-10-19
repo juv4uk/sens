@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """Звіт про українську проєкцію SENS: окремо словник і активні виклики.
 
-Основний показник прогресу — `executable_ukr.files_pct`: частка активних
+Перший показник — точна кількість файлів, УВЕСЬ вміст яких (разом із
+коментарями та рядками) складається із символів української клавіатури.
+Порожній файл не зараховується. Окремо рахується сама програмна поверхня
+поза коментарями й текстовими рядками, а також активні файли.
+
+Показник викличних голів — `executable_ukr.files_pct`: частка активних
 виконуваних .lisp-файлів, усі розпізнані викличні голови яких належать
 українській клавіатурі і, якщо це ім'я ратифікованого домену, повній
 колонці «укр». Незчитаний файл є незавершеним. Історичні тексти, цитовані
@@ -218,6 +223,9 @@ class FileReport:
     pairs_total: int
     pairs_same: int
     ukrainian_code: bool
+    keyboard_only: bool = False
+    code_keyboard_only: bool = False
+    first_illegal_keyboard_char: str | None = None
 
     @property
     def pending(self) -> int:
@@ -238,6 +246,10 @@ class Progress:
     active_latin_head_sites: int = 0
     active_encoded_head_sites: int = 0
     active_unreadable_files: int = 0
+    files_keyboard_only: int = 0
+    files_code_keyboard_only: int = 0
+    active_files_keyboard_only: int = 0
+    active_files_code_keyboard_only: int = 0
 
     @property
     def pairs_pct(self) -> float:
@@ -246,6 +258,24 @@ class Progress:
     @property
     def files_pct(self) -> float:
         return round(100.0 * self.files_ukrainian / self.lisp_files, 1) if self.lisp_files else 0.0
+
+    @property
+    def keyboard_files_pct(self) -> float:
+        return round(100.0 * self.files_keyboard_only / self.lisp_files, 1) if self.lisp_files else 0.0
+
+    @property
+    def code_keyboard_files_pct(self) -> float:
+        return round(100.0 * self.files_code_keyboard_only / self.lisp_files, 1) if self.lisp_files else 0.0
+
+    @property
+    def active_keyboard_files_pct(self) -> float:
+        return (round(100.0 * self.active_files_keyboard_only / self.active_executable_files, 1)
+                if self.active_executable_files else 0.0)
+
+    @property
+    def active_code_keyboard_files_pct(self) -> float:
+        return (round(100.0 * self.active_files_code_keyboard_only / self.active_executable_files, 1)
+                if self.active_executable_files else 0.0)
 
     @property
     def pairs_pending(self) -> int:
@@ -270,6 +300,10 @@ class Progress:
         d["pairs_pending"] = self.pairs_pending
         d["active_files_pct"] = self.active_files_pct
         d["active_heads_pct"] = self.active_heads_pct
+        d["keyboard_files_pct"] = self.keyboard_files_pct
+        d["code_keyboard_files_pct"] = self.code_keyboard_files_pct
+        d["active_keyboard_files_pct"] = self.active_keyboard_files_pct
+        d["active_code_keyboard_files_pct"] = self.active_code_keyboard_files_pct
         return d
 
 
@@ -296,16 +330,43 @@ def measure(root: Path) -> Progress:
     files: list[FileReport] = []
     audit = _callsite_audit()
     live_count = live_clean = live_ukr = live_latin = live_encoded = live_bad = 0
+    live_keyboard = live_code_keyboard = 0
     for path in iter_lisp_files(root):
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        pairs = [(a, b) for a, b in iter_pairs(text)]
+        # Do not silently ignore invalid UTF-8, nor follow symlinks outside the tree.
+        try:
+            if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
+                raise OSError("symlink/out-of-root source")
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeError, OSError):
+            text = None
+        source = text if text is not None else ""
+        pairs = [(a, b) for a, b in iter_pairs(source)]
         same = sum(1 for a, b in pairs if _norm(a) == _norm(b))
-        has_ukrainian = bool(CYRILLIC.search(strip_comments_and_strings(text)))
+        has_ukrainian = bool(CYRILLIC.search(strip_comments_and_strings(source)))
+        # Literal *whole file* means comments and quoted strings count too.
+        # Whitespace is typed using Space/Tab/Enter, rather than a letter key.
+        illegal = (next((ch for ch in source
+                         if ch not in UKRAINIAN_KEYBOARD_OUTPUTS
+                         and ch not in "\t\r\n"), None) if text is not None else None)
+        keyboard_only = text is not None and bool(source.strip()) and illegal is None
+        # The second metric measures all source tokens outside comments and
+        # string data. Reuse the existing lexer, including nested block comments.
+        try:
+            tokens = audit.tokenize(source) if text is not None else []
+            code_tokens = [token for token in tokens if token.kind != "string"]
+            code_keyboard_only = bool(code_tokens) and all(
+                ch in UKRAINIAN_KEYBOARD_OUTPUTS
+                for token in code_tokens for ch in token.text)
+        except (audit.SourceError, UnicodeError, RecursionError):
+            code_keyboard_only = False
         files.append(FileReport(
-            path=path.relative_to(root).as_posix() if root in path.parents or path.is_relative_to(root) else str(path),
+            path=path.relative_to(root).as_posix(),
             pairs_total=len(pairs),
             pairs_same=same,
             ukrainian_code=has_ukrainian,
+            keyboard_only=keyboard_only,
+            code_keyboard_only=code_keyboard_only,
+            first_illegal_keyboard_char=illegal,
         ))
         rel = path.relative_to(root)
         archival = (not rel.parts or rel.parts[0] not in audit.LIVE_SOURCE_DIRS
@@ -314,7 +375,9 @@ def measure(root: Path) -> Progress:
         if archival or audit.excluded_metadata(rel):
             continue
         live_count += 1
-        if path.is_symlink() or not path.resolve().is_relative_to(root):
+        live_keyboard += int(keyboard_only)
+        live_code_keyboard += int(code_keyboard_only)
+        if text is None or path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
             live_bad += 1
             continue
         try:
@@ -337,6 +400,10 @@ def measure(root: Path) -> Progress:
         pairs_total=sum(f.pairs_total for f in files),
         pairs_same=sum(f.pairs_same for f in files),
         files_ukrainian=sum(1 for f in files if f.ukrainian_code),
+        files_keyboard_only=sum(1 for f in files if f.keyboard_only),
+        files_code_keyboard_only=sum(1 for f in files if f.code_keyboard_only),
+        active_files_keyboard_only=live_keyboard,
+        active_files_code_keyboard_only=live_code_keyboard,
         files=files,
         active_executable_files=live_count,
         active_files_without_latin_heads=live_clean,
@@ -515,9 +582,18 @@ def render(p: Progress, executable_ukr: dict | None = None) -> str:
         f"сирих кодів={p.active_encoded_head_sites}, "
         f"непрочитаних={p.active_unreadable_files}"
     )
+    keyboard = (f"УКРАЇНСЬКА КЛАВІАТУРА .lisp: увесь файл "
+                f"{p.files_keyboard_only}/{p.lisp_files} "
+                f"({p.keyboard_files_pct}%); код без коментарів і рядків "
+                f"{p.files_code_keyboard_only}/{p.lisp_files} "
+                f"({p.code_keyboard_files_pct}%); активні повністю "
+                f"{p.active_files_keyboard_only}/{p.active_executable_files} "
+                f"({p.active_keyboard_files_pct}%); активний код "
+                f"{p.active_files_code_keyboard_only}/{p.active_executable_files} "
+                f"({p.active_code_keyboard_files_pct}%); ")
     if executable_ukr is None:
-        return legacy
-    return (f"УКР-ПРОГРЕС виконуваних .lisp: "
+        return keyboard + legacy
+    return keyboard + (f"УКР-ПРОГРЕС виконуваних .lisp: "
             f"{executable_ukr['full_ukr_files']}/{executable_ukr['eligible_files']} "
             f"({executable_ukr['files_pct']}%) повністю укр за викличними "
             f"головами; незчитаних={executable_ukr['unclassified_files']}; "
@@ -615,9 +691,11 @@ def main(argv: list[str] | None = None) -> int:
     executable_ukr = audit_executable_ukr_files(root)
     line = render(progress, executable_ukr)
     print(line)
-    print("ПОЯСНЕННЯ: 50% файлів з кирилицею НЕ означає 50% повної міграції; "
-          "ук та укр можуть законно відрізнятися. "
-          "Фактичний прогрес виконуваних голів див. у звіті УКР-ВИКЛИКИ.")
+    print("ПОЯСНЕННЯ: «увесь файл» перевіряє КОЖЕН символ, включно з "
+          "коментарями й рядками; «код» не враховує коментарі й текстові "
+          "рядки. Порожні/непрочитані файли не завершені. "
+          "Жодна з цих метрик не доводить правильності укр-голів або SENS eval; "
+          "ук і укр можуть законно відрізнятися.")
     if not args.no_annotation:
         print(f"::notice::{line}")
 
@@ -630,6 +708,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"::error file={issue['file']},line={issue['line']}::"
                   f"укр{key} {issue['reason']}")
     if args.list:
+        keyboard_pending = [f for f in progress.files if not f.keyboard_only]
+        print(f"\n.lisp НЕ повністю з української клавіатури: {len(keyboard_pending)}")
+        for f in (keyboard_pending[:args.top] if args.top > 0 else keyboard_pending):
+            reason = (f"знак U+{ord(f.first_illegal_keyboard_char):04X} "
+                      f"{f.first_illegal_keyboard_char!r}"
+                      if f.first_illegal_keyboard_char is not None
+                      else "порожній або непрочитаний")
+            print(f"  {f.path}: {reason}")
+        if args.top > 0 and len(keyboard_pending) > args.top:
+            print(f"  … ще {len(keyboard_pending) - args.top}")
+
         pending = [f for f in progress.files if f.pending]
         pending.sort(key=lambda f: (-f.pending, f.path))
         shown = pending[:args.top] if args.top > 0 else pending
@@ -653,6 +742,14 @@ def main(argv: list[str] | None = None) -> int:
         payload = progress.to_dict()
         payload["declared_ukr"] = declaration_audit
         payload["executable_ukr"] = executable_ukr
+        payload["keyboard_pending_files"] = [
+            {"path": f.path,
+             "first_illegal_char": (f"U+{ord(f.first_illegal_keyboard_char):04X}"
+                                    if f.first_illegal_keyboard_char is not None else None),
+             "reason": ("forbidden-character" if f.first_illegal_keyboard_char is not None
+                        else "empty-or-unreadable")}
+            for f in progress.files if not f.keyboard_only
+        ]
         payload["pending_files"] = [
             {"path": f.path, "pending": f.pending, "pairs_total": f.pairs_total}
             for f in sorted(progress.files, key=lambda f: f.path) if f.pending
