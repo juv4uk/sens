@@ -33,6 +33,64 @@ ALPHA_TO_HISTORY = {
 }
 
 
+
+# Receipt тільки для доведення походження ПОВНОГО ручного переписування.
+# Відновлення не є шляхом виконання і не повертає стару мову до SENS.
+PRE_REWRITE_BLOB = "72218257be75805125a7e0b21d39bb4e519408b3"
+PRE_REWRITE_HEADER = "; Experimental metacircular evaluator layer for contract 2.1 first-class builtins.\n; This is deliberately additive: lib/meta-eval.lisp remains the current witness/oracle pair.\n; The purpose here is to prove the next architectural step before merging it into my-eval:\n; primitive names live in the metacircular environment as values, so ordinary lexical\n; shadowing works for the evaluator written in Lisp too.\n;\n; Міграція: історичне ATOM(QUOTE EMPTY) як D1=YES → пряма точна проєкція #d1:1.\n; Two-field COND. Reuses existing project primitives as first-class values.\n; Width is identity; every bit of the domain address is valued.\n\n"
+CURRENT_REWRITE_HEADER = "; Першокласні функції: експериментальний метаобчислювач мовою SENS.\n; Точні викличні голови ядра — повна проєкція «укр» D1–D10.\n; Примітиви зберігаються у явному лексичному середовищі як значення.\n; Тому локальне зв'язування затінює початковий примітив без host-втручання.\n; Замикання зберігає параметри, тіло та середовище визначення.\n; Синтаксичні форми «як-є», «за-умовою», «функція» не є значеннями.\n; Невідомий примітив і невикличне значення повертають окрему помилкову форму.\n; Вихідні математичні операнди записуються людськими десятковими числами.\n; Жодних SID8/Sens8, закодованих викличних голів або шарів сумісності.\n\n"
+REWRITTEN_HELPERS = {
+    "my-fc-apply-primitive": "першокласне-застосувати-примітив",
+    "my-fc-compare-chain": "першокласне-порівняти-послідовність",
+    "my-fc-primitive?": "першокласний-примітив?",
+    "my-fc-primitive": "першокласний-примітив",
+    "my-fc-root-env": "першокласне-початкове-середовище",
+    "my-fc-env-lookup": "першокласне-знайти-в-середовищі",
+    "my-fc-closure?": "першокласне-замикання?",
+    "my-fc-bind-params": "першокласне-звязати-параметри",
+    "my-fc-eval-list": "першокласне-обчислити-список",
+    "my-fc-eval-body": "першокласне-обчислити-тіло",
+    "my-fc-eval-cond": "першокласне-обчислити-умови",
+    "my-fc-apply": "першокласне-застосувати",
+    "my-fc-eval": "першокласне-обчислити",
+    "my-eval-first-class": "обчислити-першокласні-функції",
+}
+REWRITTEN_QUOTED_DATA = {
+    "primitive": "примітив",
+    "closure": "замикання",
+    "atom": "атом?",
+    "eq": "тотожне?",
+    "car": "перше",
+    "cdr": "решта",
+    "cons": "сполучити",
+    "+": "додати",
+    "-": "відняти",
+    "*": "помножити",
+    "<": "менше?",
+    "=": "однакові?",
+    ">": "більше?",
+    "quote": "як-є",
+    "cond": "за-умовою",
+    "lambda": "функція",
+    "unknown-primitive": "невідомий-примітив",
+    "not-callable": "не-викликається",
+}
+
+
+def undo_full_rewrite(text: str) -> str:
+    """Точний зворотний receipt лише для історичної перевірки Git blob."""
+    if not text.startswith(CURRENT_REWRITE_HEADER):
+        raise AssertionError("неправильна/зсунута повна українська поверхня: заголовок")
+    text = PRE_REWRITE_HEADER + text[len(CURRENT_REWRITE_HEADER):]
+    for historical, current in REWRITTEN_QUOTED_DATA.items():
+        text = text.replace("(як-є " + current + ")", "(як-є " + historical + ")")
+    for historical, current in sorted(REWRITTEN_HELPERS.items(), key=lambda item: -len(item[1])):
+        text = text.replace(current, historical)
+    if git_blob_sha(text) != PRE_REWRITE_BLOB:
+        raise AssertionError("неправильна/зсунута повна українська поверхня: історичний blob")
+    return text
+
+
 def undo_alpha(text: str) -> str:
     """Інверсія тільки лексичних імен; цитати та рядки не змінюються."""
     token = re.compile(r';[^\n]*|"(?:\\.|[^"\\])*"|[()]|[^\s();"]+|\s+|.')
@@ -40,7 +98,7 @@ def undo_alpha(text: str) -> str:
 
 
 def reconstruct(text: str) -> str:
-    text = undo_alpha(text)
+    text = undo_alpha(undo_full_rewrite(text))
     for offset, bits, peer in reversed(EDIT_RECEIPT):
         new = "(" + peer
         if text[offset:offset + len(new)] != new:
@@ -76,22 +134,20 @@ class MetaFirstClassUkrRemaining(unittest.TestCase):
 
     def test_no_remaining_encoded_call_heads(self):
         # Цей source не містить інших двійкових головів у quoted data.
-        start = self.current.index("(визначити my-fc-primitive")
+        start = self.current.index("(визначити першокласний-примітив")
         self.assertEqual(re.findall(r"\([01]{3,9}(?=[\s(])", self.current[start:]), [])
         self.assertIn("(функція (вираз оточення)", self.current)
         self.assertNotIn("(функція (expr ctx)", self.current)
 
     def test_negative_wrong_peer_fails_closed(self):
-        offset, bits, peer = EDIT_RECEIPT[0]
-        pre_alpha = undo_alpha(self.current)
-        mutant = pre_alpha[:offset] + "(хибна-проєкція" + pre_alpha[offset + len(peer) + 1:]
+        mutant = self.current.replace("(як-є менше?)", "(як-є помилкова-назва?)", 1)
+        self.assertNotEqual(mutant, self.current)
         with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
             reconstruct(mutant)
 
     def test_negative_reintroduced_old_byte_fails_closed(self):
-        offset, bits, peer = EDIT_RECEIPT[-1]
-        pre_alpha = undo_alpha(self.current)
-        mutant = pre_alpha[:offset] + "(" + bits + pre_alpha[offset + len(peer) + 1:]
+        mutant = self.current.replace("(як-є менше?)", "(як-є 11010)", 1)
+        self.assertNotEqual(mutant, self.current)
         with self.assertRaisesRegex(AssertionError, "неправильна/зсунута"):
             reconstruct(mutant)
 
