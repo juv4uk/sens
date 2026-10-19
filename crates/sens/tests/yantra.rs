@@ -145,3 +145,77 @@ fn yantra_tool_call_encoding_uses_exact_d10_ukrainian_function() {
         .value.to_string();
     assert_eq!(actual, expected, "tool-call encoding must preserve all fields");
 }
+
+#[test]
+fn yantra_evidence_cannot_use_partial_tool_results() {
+    // Перевірка реальним SENS eval, а не текстовим сканером.
+    // Результати належать безпосередньо попередньому виклику помічника.
+    let mut session = agent_session();
+    for (source, expected) in [
+        (
+            r#"(завершується-власними-результатами?
+                (як-є (
+                  ((role . "assistant") (tool-calls . (((id . а)) ((id . б)))))
+                  ((role . "tool") (tool-call-id . а))
+                  ((role . "tool") (tool-call-id . б))
+                  ((role . "assistant") (content . "виконано"))
+                )))"#,
+            true,
+        ),
+        (
+            r#"(завершується-власними-результатами?
+                (як-є (
+                  ((role . "assistant") (tool-calls . (((id . а)) ((id . б)))))
+                  ((role . "tool") (tool-call-id . а))
+                  ((role . "assistant") (content . "виконано"))
+                )))"#,
+            false,
+        ),
+        (
+            r#"(завершується-власними-результатами?
+                (як-є (
+                  ((role . "assistant") (tool-calls . (((id . а))))))
+                  ((role . "tool") (tool-call-id . сторонній))
+                  ((role . "assistant") (content . "виконано"))
+                )))"#,
+            false,
+        ),
+        (
+            r#"(завершується-власними-результатами?
+                (як-є (
+                  ((role . "assistant") (tool-calls . (((id . а))))))
+                  ((role . "assistant") (content . "виконано"))
+                )))"#,
+            false,
+        ),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("Помилка SENS при перевірці власності: {error}"))
+            .value.as_predicate_bit();
+        assert_eq!(actual, Some(expected), "порушено закон доказу: {source}");
+    }
+}
+
+#[test]
+fn yantra_blocked_transport_is_not_a_completed_answer() {
+    let mut session = agent_session();
+    let result = eval_program(
+        r#"(result-status
+            (agent-loop
+              (функція (повідомлення) (як-є (blocked "відмова транспорту")))
+              (як-є ())
+              0))"#,
+        &mut session,
+    ).expect("справжній SENS має завершити цикл заблокованим статусом");
+    assert_eq!(result.value.to_string(), "blocked");
+}
+
+#[test]
+fn yantra_missing_json_key_is_safe_and_empty() {
+    let mut session = agent_session();
+    let actual = eval_program(
+        "(alist-ref (як-є відсутній) (як-є ((наявний . значення))))",
+        &mut session,
+    ).expect("відсутній ключ не повинен викликати помилку SENS");
+    assert_eq!(actual.value.to_string(), "()");
+}
