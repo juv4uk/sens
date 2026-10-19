@@ -7,9 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Кожне виконання перевіряє свій незмінний SHA; нові push не можуть
+# скасувати чи витіснити старий run з тієї самої branch-concurrency групи.
+# Один targeted workflow на коміт, без автоматичних дублювань.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
