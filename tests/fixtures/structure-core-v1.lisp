@@ -1,52 +1,51 @@
 ; #230 STRUCTURE-CORE-1 — Lisp-owned freeze witnesses.
-; These rows deliberately contain no predicate/control expectations. They freeze
-; only structural behavior so later #218/#217 truth migration cannot redefine
-; quote/cons/car/cdr by accident.
+; Заморожують лише структурну поведінку (як-є/сполучити/перше/решта),
+; щоб пізніша міграція істинності не перевизначила їх випадково.
 
-((expr . "(quote (alpha beta))")
+((expr . "(як-є (alpha beta))")
  (expected . "(alpha beta)")
  (structure-core . t)
  (semantic-id . 00000001)
- (note . "quote returns syntax as ordinary data"))
+ (note . "як-є повертає синтаксис як звичайні дані"))
 
-((expr . "(quote (alpha . beta))")
+((expr . "(як-є (alpha . beta))")
  (expected . "(alpha . beta)")
  (structure-core . t)
  (semantic-id . 00000001)
- (note . "quote preserves dotted structure without assigning truth meaning"))
+ (note . "як-є зберігає крапкову структуру без значення істинності"))
 
-((expr . "(cons (quote alpha) (quote beta))")
+((expr . "(сполучити (як-є alpha) (як-є beta))")
  (expected . "(alpha . beta)")
  (structure-core . t)
  (semantic-id . 00000100)
- (note . "cons constructs a dotted pair from arbitrary values"))
+ (note . "сполучити будує крапкову пару з довільних значень"))
 
-((expr . "(cons (quote alpha) (cons (quote beta) (quote ())))")
+((expr . "(сполучити (як-є alpha) (сполучити (як-є beta) (як-є ()))")
  (expected . "(alpha beta)")
  (structure-core . t)
  (semantic-id . 00000100)
- (note . "cons plus structural () constructs a proper list"))
+ (note . "сполучити з () будує правильний список"))
 
-((expr . "(car (cons (quote left) (quote right)))")
+((expr . "(перше (сполучити (як-є left) (як-є right)))")
  (expected . "left")
  (structure-core . t)
  (semantic-id . 00000101)
- (note . "car(cons x y) returns x independent of any truth convention"))
+ (note . "перше(сполучити x y) повертає x незалежно від істинності"))
 
-((expr . "(cdr (cons (quote left) (quote right)))")
+((expr . "(решта (сполучити (як-є left) (як-є right)))")
  (expected . "right")
  (structure-core . t)
  (semantic-id . 00000110)
- (note . "cdr(cons x y) returns y independent of any truth convention"))
+ (note . "решта(сполучити x y) повертає y незалежно від істинності"))
 
-((expr . "(car (cons (quote ()) (quote tail)))")
+((expr . "(перше (сполучити (як-є ()) (як-є tail)))")
  (expected . "()")
  (structure-core . t)
  (semantic-id . 00000101)
- (note . "car may return () as data; this result is not a logical NO"))
+ (note . "перше може повернути () як дані; це не логічне НІ"))
 
-((expr . "(cdr (cons (quote head) (quote ())))")
+((expr . "(решта (сполучити (як-є head) (як-є ())))")
  (expected . "()")
  (structure-core . t)
  (semantic-id . 00000110)
- (note . "cdr may return structural empty-list data without invoking truth semantics"))
+ (note . "решта може повернути порожній список без семантики істинності"))
