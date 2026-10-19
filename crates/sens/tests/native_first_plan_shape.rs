@@ -58,3 +58,23 @@ fn compound_tag_rejects_plan_without_executing_fallback() {
         "некоректний план має відхилятися в SENS, а не падати на D3 EQ: {actual}"
     );
 }
+
+#[test]
+fn malformed_native_result_tag_rejects_in_native_route() {
+    let actual = execute(
+        "(native-first-execute-native-plan-result (як-є (native-plan код дані)) (як-є ((пошкоджений-тег) дані)))",
+    );
+    assert_eq!(
+        actual,
+        "(execution-route native (status rejected) (detail (malformed-native-result ((пошкоджений-тег) дані))))",
+        "Складений native-тег не повинен спричинити D3 EQ помилку або evaluator fallback"
+    );
+
+    let rejected = execute(
+        "(native-first-execute-native-plan-result (як-є (native-plan код дані)) (як-є (rejected неприпустиме-кодування)))",
+    );
+    assert_eq!(
+        rejected,
+        "(execution-route native (status rejected) (detail (rejected неприпустиме-кодування)))",
+    );
+}
