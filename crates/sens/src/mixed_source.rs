@@ -2409,8 +2409,8 @@ mod tests {
             ), "{expected} is ordinary quoted source data until macro expansion");
         }
 
-        assert!(!MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
-        assert!(!MACRO_LIBRARY_SOURCE.contains("(як-є 0011)"));
+        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0010)"));
+        assert!(!crate::MACRO_LIBRARY_SOURCE.contains("(як-є 0011)"));
     }
 
     #[test]
