@@ -50,6 +50,10 @@ jobs:
 
       - uses: ./.github/actions/install-zig
 
+      - name: Локальний Windows-шлях до пінованого Zig — без послаблення версії
+        if: ${{ always() }}
+        run: python3 -m unittest tests/test_pinned_zig_windows_setup.py -v
+
       - name: Заборона закодованих літералів у Lisp
         shell: bash
         env:
