@@ -25,27 +25,6 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
     parse_mixed_source(source, false)
 }
 
-/// Parse ONLY the current metacircular source with its exact binary D9
-/// SYMBOL? head. All other mixed heads retain their existing exact-width
-/// admission rules; materializing D9 is not a grant of runtime callability.
-/// This is the same pinned nine-bit reader used by existing reasoning sources.
-pub fn parse_mixed_exact_domain_meta_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
-    if path != "lib/meta-eval.lisp" {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "meta exact-domain reader is restricted to lib/meta-eval.lisp",
-            Span::default(),
-        ));
-    }
-    parse_mixed_source(source, true)?
-        .into_iter()
-        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
-        .collect()
-}
-
 /// Parse a trusted `lib/machine/**` Lisp source file whose outer definition
 /// and lambda wrappers still use historical 8-bit syntax, but whose executable
 /// bodies contain current exact-width D3-D6 call heads.
@@ -599,25 +578,6 @@ pub fn parse_mixed_exact_domain_process_tcp_source(
 /// Parse only the language-owned time module with exact-width D3 call heads.
 /// Its W8 DEFINE/LAMBDA wrappers remain bootstrap syntax; no general source
 /// inference or W8-to-D8 promotion is authorized.
-/// Parse the generated meta semantic registry projection with the mixed
-/// exact-domain reader. The registry's `surface -> id` rows carry historical
-/// 8-bit SID data and its wrappers are legacy W8, so the ordinary reader would
-/// read a bare id (e.g. `00001011`) as a Number and break loading. Path-bound
-/// to the generated registry, mirroring the other owner-approved loaders.
-pub fn parse_mixed_exact_domain_registry_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
-    if path != "lib/generated/meta-semantic-registry.lisp" {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "registry exact-domain reader is restricted to lib/generated/meta-semantic-registry.lisp",
-            Span::default(),
-        ));
-    }
-    parse_mixed_source(source, true)
-}
-
 pub fn parse_mixed_exact_domain_time_source(
     path: &str,
     source: &str,
