@@ -632,9 +632,7 @@
 
 ; D8:11110111 EQUAL — ratified Ukrainian surface for SENS-owned structural equality.
 ; The identity is already admitted; this is a name projection, not a new opcode.
-(визначити equal?
-  (функція (перший-аргумент другий-аргумент)
-    (однакові? перший-аргумент другий-аргумент)))
+(визначити equal? однакові?)
 
 ; NOT is a strict PredicateBit combinator. Any non-D1 input is rejected by
 ; D3 COND instead of being coerced through retired host truthiness.
