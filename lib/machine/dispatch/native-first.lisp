@@ -26,7 +26,7 @@
     (за-умовою
       ((атом? (решта cons-expression))
        (native-first-fallback expression))
-      (#d1:1
+      (так
        (native-first-plan-car-cons-u64-rest-left
          expression
          (решта cons-expression))))))
@@ -36,7 +36,7 @@
     (за-умовою
       ((атом? (решта cons-arguments))
        (native-first-fallback expression))
-      (#d1:1
+      (так
        (native-first-plan-car-cons-u64-rest-right
          expression
          cons-arguments
@@ -55,11 +55,11 @@
                  (x86-u64-imm-value (x86-as-u64-imm (перше cons-arguments)))
                  (x86-u64-imm-value (x86-as-u64-imm (перше rest-after-left))))
                x86-pair-cell-bytes))
-            (#d1:1
+            (так
              (native-first-fallback expression))))
-         (#d1:1
+         (так
           (native-first-fallback expression))))
-      (#d1:1
+      (так
        (native-first-fallback expression)))))
 
 (визначити native-first-plan-car-argument
@@ -67,15 +67,15 @@
     (за-умовою
       ((атом? argument)
        (native-first-fallback expression))
-      (#d1:1
+      (так
        (за-умовою
          ((атом? (перше argument))
           (native-first-fallback expression))
-         (#d1:1
+         (так
           (за-умовою
             ((тотожне? (перше argument) (як-є 111))
              (native-first-plan-car-cons-u64 expression argument))
-            (#d1:1
+            (так
              (native-first-fallback expression)))))))))
 
 (визначити native-first-plan-car
@@ -83,11 +83,11 @@
     (за-умовою
       ((атом? (решта expression))
        (native-first-fallback expression))
-      (#d1:1
+      (так
        (за-умовою
          ((атом? (решта (решта expression)))
           (native-first-plan-car-argument expression (перше (решта expression))))
-         (#d1:1
+         (так
           (native-first-fallback expression)))))))
 
 (визначити native-first-plan
@@ -95,15 +95,15 @@
     (за-умовою
       ((атом? expression)
        (native-first-fallback expression))
-      (#d1:1
+      (так
        (за-умовою
          ((атом? (перше expression))
           (native-first-fallback expression))
-         (#d1:1
+         (так
           (за-умовою
             ((тотожне? (перше expression) (як-є 100))
              (native-first-plan-car expression))
-            (#d1:1
+            (так
              (native-first-fallback expression)))))))))
 
 ; #4081 — exact-domain native-first classifier.
@@ -129,13 +129,13 @@
   (функція (shape bit0 bit1 bit2)
     (за-умовою
       ((атом? shape)
-       #d1:0)
+       ні)
       ((тотожне? (перше shape) 3)
        (native-first-domain-key3-bits?
          (перше (решта shape))
          bit0 bit1 bit2))
-      (#d1:1
-       #d1:0))))
+      (так
+       ні))))
 
 (визначити native-first-domain-key3-bits?
   (функція (bits bit0 bit1 bit2)
@@ -146,26 +146,26 @@
           (тотожне?
             (перше (решта (решта bits)))
             bit2))
-         (#d1:1
-          #d1:0)))
-      (#d1:1
-       #d1:0))))
+         (так
+          ні)))
+      (так
+       ні))))
 
 (визначити native-first-domain-d3-car?
   (функція (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
-      #d1:1
-      #d1:0
-      #d1:0)))
+      так
+      ні
+      ні)))
 
 (визначити native-first-domain-d3-cons?
   (функція (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
-      #d1:1
-      #d1:1
-      #d1:1)))
+      так
+      так
+      так)))
 
 (визначити native-first-plan-domain-cons-argument
   (функція (shape-or-empty expression argument)
@@ -174,7 +174,7 @@
        (native-first-fallback expression))
       ((native-first-domain-d3-cons? shape-or-empty (перше argument))
        (native-first-plan-car-cons-u64 expression argument))
-      (#d1:1
+      (так
        (native-first-fallback expression)))))
 
 (визначити native-first-plan-domain-car
@@ -189,9 +189,9 @@
             shape-or-empty
             expression
             (перше (решта expression))))
-         (#d1:1
+         (так
           (native-first-fallback expression))))
-      (#d1:1
+      (так
        (native-first-fallback expression)))))
 
 (визначити native-first-plan-domain
@@ -201,5 +201,5 @@
        (native-first-fallback expression))
       ((native-first-domain-d3-car? shape-or-empty (перше expression))
        (native-first-plan-domain-car shape-or-empty expression))
-      (#d1:1
+      (так
        (native-first-fallback expression)))))
