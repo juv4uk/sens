@@ -123,10 +123,10 @@
       ((тотожне? width (перше (перше rows)))
        (за-умовою
          ((тотожне? bits (перше (решта (перше rows)))) (перше rows))
-         (#d1:1
+         ((атом? (як-є ()))
           (machine-capability-find-domain-row
             width bits (решта rows)))))
-      (#d1:1
+      ((атом? (як-є ()))
        (machine-capability-find-domain-row
          width bits (решта rows))))))
 
@@ -136,7 +136,7 @@
     (за-умовою
       ((атом? (machine-capability-find-domain-row
                 width bits machine-capability-axis-v3)) ())
-      (#d1:1
+      ((атом? (як-є ()))
        (перше (решта (решта
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3))))))))
@@ -146,7 +146,7 @@
     (за-умовою
       ((атом? rows) ())
       ((тотожне? key (перше (перше rows))) (перше rows))
-      (#d1:1
+      ((атом? (як-є ()))
        (machine-capability-find-row key (решта rows))))))
 
 (визначити machine-target-witness-status
@@ -154,7 +154,7 @@
     (за-умовою
       ((атом? (machine-capability-find-row
                 target machine-target-witness-status-v1)) (як-є absent))
-      (#d1:1
+      ((атом? (як-є ()))
        (перше (решта
          (machine-capability-find-row
            target machine-target-witness-status-v1)))))))
